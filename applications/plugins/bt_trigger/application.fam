@@ -10,7 +10,7 @@ App(
     stack_size=1 * 1024,
     order=90,
     fap_icon="bt_trigger_logo.png",
-    fap_category="Misc",
+    fap_category="Bluetooth",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="bt_trigger",
 )

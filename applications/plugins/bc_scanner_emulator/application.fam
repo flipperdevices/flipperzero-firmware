@@ -15,7 +15,7 @@ App(
     fap_author="Igor Danilov",
     fap_version=(0, 5),
     order=70,
-    fap_category="Tools",
+    fap_category="USB",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="bc_scanner",
 )

@@ -26,7 +26,7 @@ App(
     fap_version=(1,0),
     fap_libs=["nfc", "misc", "mbedtls", "st25rfal002", "gcc", "toolbox"],
     fap_icon="vb_migrate_10px.png",
-    fap_category="Tools",
+    fap_category="NFC",
     fap_description="Makes transferring characters with VB Lab less cumbersome",
     fap_author="cyanic",
     fap_weburl="https://github.com/GMMan/flipperzero-vb-migrate",

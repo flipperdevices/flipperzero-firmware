@@ -5,7 +5,7 @@ App(
     entry_point="key_generator_main",
     requires=["gui"],
     stack_size=1 * 1024,
-    fap_category="Tools",
+    fap_category="125khz",
     fap_icon_assets="images",
     fap_icon="icon.png",
     fap_icon_assets_symbol="key_generator",

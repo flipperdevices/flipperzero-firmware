@@ -8,6 +8,6 @@ App(
     stack_size=2 * 1024,
     order=90,
     fap_icon="namechanger_10px.png",
-    fap_category="Tools",
+    fap_category="Main",
 	fap_icon_assets="icons",
 )

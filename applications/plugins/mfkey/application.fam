@@ -9,7 +9,7 @@ App(
     ],
     stack_size=5 * 1024,
     fap_icon="mfkey.png",
-    fap_category="Tools",
+    fap_category="NFC",
     fap_author="noproto",
     fap_icon_assets="images",
     fap_icon_assets_symbol="mfkey32",

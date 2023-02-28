@@ -8,6 +8,6 @@ App(
     stack_size=2 * 1024,
     fap_icon="bpm_10px.png",
     fap_icon_assets="icons",
-    fap_category="Music",
+    fap_category="Media",
     order=35,
 )

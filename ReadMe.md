@@ -68,6 +68,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [EM4100 Key Generator (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - Removed: [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications) (It's Actually Just Removed From Compile Till It Can Work)
+- OFW: [BadUSB UI fixes #2439 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2439)
+- OFW: [Plugins: move to designated categories #2438 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2438)
+- Updated many FAP categories to their new designated folder (From OFW#2438), delete /ext/apps before doing the RM firmware update.
 
 <a name="release">
 

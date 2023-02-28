@@ -8,7 +8,7 @@ App(
         "gui",
         "dialogs",
     ],
-    fap_category="Tools",
+    fap_category="Infrared",
     fap_icon="ir_10px.png",
     fap_icon_assets="images",
 )

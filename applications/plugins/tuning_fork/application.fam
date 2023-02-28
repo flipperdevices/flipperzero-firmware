@@ -8,7 +8,7 @@ App(
         "gui",
     ],
     fap_icon="tuning_fork_icon.png",
-    fap_category="Music",
+    fap_category="Media",
     stack_size=2 * 1024,
     order=20,
 )

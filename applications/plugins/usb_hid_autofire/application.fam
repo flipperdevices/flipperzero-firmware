@@ -9,5 +9,5 @@ App(
     ],
     stack_size=1 * 1024,
     fap_icon="usb_hid_autofire.png",
-    fap_category="Misc",
+    fap_category="USB",
 )
