@@ -184,6 +184,7 @@ $ ./fbt dolphin_ext
 - Dolphin: Passport: Many thanks to Kuronons for the many passport backgrounds and profile images available and included.
 - Dolphin: Passport: Now has 9 selectable backgrounds options and 24 profile image options. (Changes By RogueMaster with thanks to ESurge)
 - Dolphin: Passport: Passport Settings app to configure dynamic icons in Passport FAP [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/527)
+- Dolphin: Passport: Rename Dolphin with Name Changer app under Applications=>Main [(By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488)
 - Dolphin: Passport: Show EXP [(By Dabolus)](https://github.com/Dabolus/flipperzero-firmware-rpg/)
 - Dolphin: Changed daily MAX to 198 on all 7 Deed Types. Random Deed Selection used for MAX +3 EXP daily gain.
 - Dolphin: Plugin Achivement +3 EXP for a total of up to 700 EXP daily. Plugin Achivements are:
@@ -242,7 +243,7 @@ $ ./fbt dolphin_ext
 - SubGHz: OFW PR [Decode RAW recordings #1667 (By qistoph)](https://github.com/flipperdevices/flipperzero-firmware/pull/1667)
 - SubGHz: [POCSAG protocol decoder for subghz #2055 (By Shuma)](https://github.com/flipperdevices/flipperzero-firmware/pull/2055)
 - SubGHz: Protocols An-Motors, BFT Mitto, Came Atomo, FAAC SLH (Spa), HCS101, Keeloq, Keeloq Common, Nice Flor S, SecPlus v1+v2 and Star Line updates from [Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware)
-- SubGHz: Region Locked -  To transmit to outside ranges (Unlock), use the Extend Range app under Applications=>Misc.
+- SubGHz: Region Locked -  To transmit to outside ranges (Unlock), use the Extend Range app under Applications=>Main.
 - SubGHz: Unlock from SD flag from [(cloudbreakdaniel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/97db0dc91ee3dff812b4dec0618e3f198de14405).  Update `subghz/assets/extend_range.txt` with [this file](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/subghz/assets/extend_range.txt) on SD.  **UPDATE IGNORE FLAG TO TRUE TO UNLEASH YOUR FLIPPER!!**
 - U2F: U2F.fap loader apps and available as Favorites [Thanks to ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/336)
 
