@@ -244,7 +244,7 @@ bool storage_file_exists(Storage* storage, const char* path) {
     FileInfo fileinfo;
     FS_Error error = storage_common_stat(storage, path, &fileinfo);
 
-    if(error == FSE_OK && !(fileinfo.flags & FSF_DIRECTORY)) {
+    if(error == FSE_OK && !file_info_is_dir(&fileinfo)) {
         exist = true;
     }
 
@@ -350,7 +350,7 @@ bool storage_dir_exists(Storage* storage, const char* path) {
     FileInfo fileinfo;
     FS_Error error = storage_common_stat(storage, path, &fileinfo);
 
-    if(error == FSE_OK && (fileinfo.flags & FSF_DIRECTORY)) {
+    if(error == FSE_OK && file_info_is_dir(&fileinfo)) {
         exist = true;
     }
 
@@ -444,7 +444,7 @@ static FS_Error
                 furi_string_right(path, strlen(old_path));
                 furi_string_printf(tmp_new_path, "%s%s", new_path, furi_string_get_cstr(path));
 
-                if(fileinfo.flags & FSF_DIRECTORY) {
+                if(file_info_is_dir(&fileinfo)) {
                     error = storage_common_mkdir(storage, furi_string_get_cstr(tmp_new_path));
                 } else {
                     error = storage_common_copy(
@@ -473,7 +473,7 @@ FS_Error storage_common_copy(Storage* storage, const char* old_path, const char*
     error = storage_common_stat(storage, old_path, &fileinfo);
 
     if(error == FSE_OK) {
-        if(fileinfo.flags & FSF_DIRECTORY) {
+        if(file_info_is_dir(&fileinfo)) {
             error = storage_copy_recursive(storage, old_path, new_path);
         } else {
             Stream* stream_from = file_stream_alloc(storage);
@@ -529,10 +529,10 @@ static FS_Error
                 path_extract_basename(furi_string_get_cstr(path), file_basename);
                 path_concat(new_path, furi_string_get_cstr(file_basename), tmp_new_path);
 
-                if(fileinfo.flags & FSF_DIRECTORY) {
+                if(file_info_is_dir(&fileinfo)) {
                     if(storage_common_stat(
                            storage, furi_string_get_cstr(tmp_new_path), &fileinfo) == FSE_OK) {
-                        if(fileinfo.flags & FSF_DIRECTORY) {
+                        if(file_info_is_dir(&fileinfo)) {
                             error =
                                 storage_common_mkdir(storage, furi_string_get_cstr(tmp_new_path));
                             if(error != FSE_OK) {
@@ -569,7 +569,7 @@ FS_Error storage_common_merge(Storage* storage, const char* old_path, const char
     error = storage_common_stat(storage, old_path, &fileinfo);
 
     if(error == FSE_OK) {
-        if(fileinfo.flags & FSF_DIRECTORY) {
+        if(file_info_is_dir(&fileinfo)) {
             error = storage_merge_recursive(storage, old_path, new_path);
         } else {
             error = storage_common_stat(storage, new_path, &fileinfo);
@@ -809,7 +809,7 @@ bool storage_simply_remove_recursive(Storage* storage, const char* path) {
         }
 
         while(storage_dir_read(dir, &fileinfo, name, MAX_NAME_LENGTH)) {
-            if(fileinfo.flags & FSF_DIRECTORY) {
+            if(file_info_is_dir(&fileinfo)) {
                 furi_string_cat_printf(cur_dir, "/%s", name);
                 go_deeper = true;
                 break;
