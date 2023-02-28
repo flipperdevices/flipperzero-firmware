@@ -1,6 +1,8 @@
 #include "../color_guess.h"
 #include "color_guess_icons.h"
 #include "../helpers/color_guess_colors.h"
+#include "../helpers/color_guess_haptic.h"
+#include "../helpers/color_guess_led.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
@@ -38,23 +40,14 @@ void color_guess_play_set_callback(
     instance->context = context;
 }
 
-void play_happy_bop(void* context, ColorGuessPlayModel* model) {
+void play_haptic(void* context, ColorGuessPlayModel* model) {
     ColorGuess* app = context;
     if(model->success == 1) {
-        for(int i = 0; i < 4; i++) {
-            notification_message(app->notification, &sequence_set_vibro_on);
-            furi_thread_flags_wait(0, FuriFlagWaitAny, 50);
-            notification_message(app->notification, &sequence_reset_vibro);
-            furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
-        }
+        play_long_bump(app);
     } else if(model->closeness > model->prev_closeness) {
-        notification_message(app->notification, &sequence_set_vibro_on);
-        furi_thread_flags_wait(0, FuriFlagWaitAny, 20);
-        notification_message(app->notification, &sequence_reset_vibro);
+        play_happy_bump(app);
     } else if(model->closeness < model->prev_closeness) {
-        notification_message(app->notification, &sequence_set_vibro_on);
-        furi_thread_flags_wait(0, FuriFlagWaitAny, 100);
-        notification_message(app->notification, &sequence_reset_vibro);
+        play_bad_bump(app);
     }
 }
 
@@ -69,14 +62,6 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
     model->closeness = 0;
     model->prev_closeness = 0;
 
-    //Set random color
-    NotificationMessage notification_led_message_1;
-    notification_led_message_1.type = NotificationMessageTypeLedRed;
-    NotificationMessage notification_led_message_2;
-    notification_led_message_2.type = NotificationMessageTypeLedGreen;
-    NotificationMessage notification_led_message_3;
-    notification_led_message_3.type = NotificationMessageTypeLedBlue;
-
     if(model->difficulty == 0) {
         model->color = colorsEasy[rand() % ARR_SIZE(colorsEasy)];
     } else if(model->difficulty == 1) {
@@ -85,20 +70,8 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
         model->color = colorsHard[rand() % ARR_SIZE(colorsHard)];
     }
 
-    notification_led_message_1.data.led.value = ((model->color >> 16) & 0xFF);
-    notification_led_message_2.data.led.value = ((model->color >> 8) & 0xFF);
-    notification_led_message_3.data.led.value = ((model->color) & 0xFF);
-
-    const NotificationSequence notification_sequence = {
-        &notification_led_message_1,
-        &notification_led_message_2,
-        &notification_led_message_3,
-        &message_do_not_reset,
-        NULL,
-    };
-    notification_message(app->notification, &notification_sequence);
-    furi_thread_flags_wait(
-        0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set
+    led_set_rgb(
+        app, ((model->color >> 16) & 0xFF), ((model->color >> 8) & 0xFF), ((model->color) & 0xFF));
 }
 
 void color_guess_play_calculate_closeness(void* context, ColorGuessPlayModel* model) {
@@ -189,7 +162,6 @@ void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
 
     char closeness_string[4];
 
-    //snprintf(timer_string, TIMER_LENGHT, TIMER_FORMAT, date_time.minute, date_time.second);
     parse_time_str(timer_string, time_elapsed);
     snprintf(closeness_string, CLOSENESS_LENGTH, CLOSENESS_FORMAT, model->closeness);
 
@@ -272,7 +244,7 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                         model->digit[model->cursorpos] = 0;
                     }
                     color_guess_play_calculate_closeness(instance, model);
-                    play_happy_bop(instance->context, model);
+                    play_haptic(instance->context, model);
                 },
                 true);
             break;
@@ -286,7 +258,7 @@ bool color_guess_play_input(InputEvent* event, void* context) {
                         model->digit[model->cursorpos] = 15;
                     }
                     color_guess_play_calculate_closeness(instance, model);
-                    play_happy_bop(instance->context, model);
+                    play_haptic(instance->context, model);
                 },
                 true);
             break;

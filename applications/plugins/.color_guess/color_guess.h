@@ -9,46 +9,50 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/variable_item_list.h>
+#include "helpers/color_guess_custom_event.h"
 #include "scenes/color_guess_scene.h"
 #include "views/color_guess_color_set.h"
 #include "views/color_guess_play.h"
-
-typedef enum {
-    EventTypeTick,
-    EventTypeKey,
-} EventType;
-
-typedef struct {
-    EventType type;
-    InputEvent input;
-} PluginEvent;
-
-typedef struct {
-    int scene;
-    int cursorpos;
-    int red;
-    int digit[6];
-    int green;
-    int blue;
-} PluginState;
+#include "views/color_guess_startscreen.h"
 
 typedef struct {
     Gui* gui;
     NotificationApp* notification;
-    FuriMessageQueue* event_queue;
-    PluginState* plugin_state;
     ViewPort* view_port;
-    ValueMutex state_mutex;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
+    VariableItemList* variable_item_list;
     SceneManager* scene_manager;
     ColorGuessColorSet* color_guess_color_set;
     ColorGuessPlay* color_guess_play;
+    ColorGuessStartscreen* color_guess_startscreen;
+    Submenu* color_guess_settings;
     bool error;
+    int haptic;
+    //int speaker;
+    int led;
 } ColorGuess;
 
 typedef enum {
+    ColorGuessViewIdStartscreen,
     ColorGuessViewIdMenu,
     ColorGuessViewIdPlay,
     ColorGuessViewIdColorSet,
+    ColorGuessViewIdSettings,
 } ColorGuessViewId;
+
+typedef enum {
+    ColorGuessHapticOff,
+    ColorGuessHapticOn,
+} ColorGuessHapticState;
+
+typedef enum {
+    ColorGuessSpeakerOff,
+    ColorGuessSpeakerOn,
+} ColorGuessSpeakerState;
+
+typedef enum {
+    ColorGuessLedOff,
+    ColorGuessLedOn,
+} ColorGuessLedState;

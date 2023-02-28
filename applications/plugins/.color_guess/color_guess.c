@@ -1,5 +1,5 @@
 #include "color_guess.h"
-#include "digits.h"
+#include "helpers/digits.h"
 
 bool color_guess_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -22,12 +22,11 @@ bool color_guess_navigation_event_callback(void* context) {
 
 ColorGuess* color_guess_app_alloc() {
     ColorGuess* app = malloc(sizeof(ColorGuess));
-    //app->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     app->gui = furi_record_open(RECORD_GUI);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
-    //app->plugin_state = malloc(sizeof(PluginState));
-    //app->view_port = view_port_alloc();
     app->error = false;
+    app->haptic = 1;
+    app->led = 1;
 
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notification, &sequence_display_backlight_on);
@@ -48,6 +47,16 @@ ColorGuess* color_guess_app_alloc() {
 
     view_dispatcher_add_view(
         app->view_dispatcher, ColorGuessViewIdMenu, submenu_get_view(app->submenu));
+    app->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        ColorGuessViewIdSettings,
+        variable_item_list_get_view(app->variable_item_list));
+    app->color_guess_startscreen = color_guess_startscreen_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        ColorGuessViewIdStartscreen,
+        color_guess_startscreen_get_view(app->color_guess_startscreen));
     app->color_guess_color_set = color_guess_color_set_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -79,13 +88,8 @@ void color_guess_app_free(ColorGuess* app) {
     // GUI
     furi_record_close(RECORD_GUI);
 
-    app->event_queue = NULL;
-    app->plugin_state = NULL;
-    // app->state_mutex = NULL;
     app->view_port = NULL;
-
     app->gui = NULL;
-    //furi_record_close(RECORD_NOTIFICATION);
     app->notification = NULL;
 
     //Remove whatever is left
@@ -106,7 +110,7 @@ int32_t color_guess_app(void* p) {
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
 
-    scene_manager_next_scene(app->scene_manager, ColorGuessSceneStart);
+    scene_manager_next_scene(app->scene_manager, ColorGuessSceneStartscreen);
 
     furi_hal_power_suppress_charge_enter();
 
