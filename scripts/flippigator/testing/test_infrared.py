@@ -22,3 +22,11 @@ class TestInfrared(BaseCase):
         ]
         assert menu == menu_ref, "Infrared menu list is wrong"
         nav.go_to_main_screen()
+
+    def test_read(self, nav):
+        nav.infrared.go_into()
+        nav.go_to("Learn New Remote")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "ReadingIR" in state, "IR Reading failed"
+        nav.go_to_main_screen()

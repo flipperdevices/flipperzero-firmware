@@ -21,3 +21,11 @@ class TestGpio(BaseCase):
         ]
         assert menu == menu_ref, "GPIO menu list is wrong"
         nav.go_to_main_screen()
+
+    def test_manual_control(self, nav):
+        nav.gpio.go_into()
+        nav.go_to("GPIO Manual Control")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "GPIO Output Mode Test" in state, "GPIO Manual Control failed"
+        nav.go_to_main_screen()

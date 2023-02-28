@@ -21,3 +21,11 @@ class TestGpio(BaseCase):
         ]
         assert menu == menu_ref, "iButton menu list is wrong"
         nav.go_to_main_screen()
+
+    def test_read(self, nav):
+        nav.ibutton.go_into()
+        nav.go_to("Read")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "ReadingiButton" in state, "iButton Reading failed"
+        nav.go_to_main_screen()

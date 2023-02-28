@@ -23,6 +23,14 @@ class TestRfid(BaseCase):
         assert menu == menu_ref, "RFID menu list is wrong"
         nav.go_to_main_screen()
 
+    def test_read(self, nav):
+        nav.rfid.go_into()
+        nav.go_to("Read")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "ReadingRFID" in state, "RFID Reading failed"
+        nav.go_to_main_screen()
+
     '''
     I think that it's time to del all handy test from this repo
     Let's make only smoke test without bench?

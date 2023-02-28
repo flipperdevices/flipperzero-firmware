@@ -17,6 +17,14 @@ class TestNfc(BaseCase):
         assert nav.nfc.check_menu() == 0, "NFC menu list differs from reference"
         nav.go_to_main_screen()
 
+    def test_read(self, nav):
+        nav.nfc.go_into()
+        nav.go_to("Read")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "ReadingNFC" in state, "NFC Reading failed"
+        nav.go_to_main_screen()
+
     '''
     I think that it's time to del all handy test from this repo
     Let's make only smoke test without bench?
