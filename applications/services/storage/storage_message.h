@@ -48,6 +48,7 @@ typedef struct {
 typedef struct {
     const char* path;
     uint32_t* timestamp;
+    FuriThreadId thread_id;
 } SADataCTimestamp;
 
 typedef struct {
@@ -60,6 +61,7 @@ typedef struct {
     const char* fs_path;
     uint64_t* total_space;
     uint64_t* free_space;
+    FuriThreadId thread_id;
 } SADataCFSInfo;
 
 typedef struct {

@@ -361,7 +361,12 @@ bool storage_dir_exists(Storage* storage, const char* path) {
 FS_Error storage_common_timestamp(Storage* storage, const char* path, uint32_t* timestamp) {
     S_API_PROLOGUE;
 
-    SAData data = {.ctimestamp = {.path = path, .timestamp = timestamp}};
+    SAData data = {
+        .ctimestamp = {
+            .path = path,
+            .timestamp = timestamp,
+            .thread_id = furi_thread_get_current_id(),
+        }};
 
     S_API_MESSAGE(StorageCommandCommonTimestamp);
     S_API_EPILOGUE;
@@ -647,6 +652,7 @@ FS_Error storage_common_fs_info(
             .fs_path = fs_path,
             .total_space = total_space,
             .free_space = free_space,
+            .thread_id = furi_thread_get_current_id(),
         }};
 
     S_API_MESSAGE(StorageCommandCommonFSInfo);
