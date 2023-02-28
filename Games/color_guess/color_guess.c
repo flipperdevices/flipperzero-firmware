@@ -65,6 +65,10 @@ void color_guess_app_free(ColorGuess* app) {
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, ColorGuessViewIdMenu);
+    view_dispatcher_remove_view(app->view_dispatcher, ColorGuessViewIdStartscreen);
+    view_dispatcher_remove_view(app->view_dispatcher, ColorGuessViewIdColorSet);
+    view_dispatcher_remove_view(app->view_dispatcher, ColorGuessViewIdPlay);
+    view_dispatcher_remove_view(app->view_dispatcher, ColorGuessViewIdSettings);
     submenu_free(app->submenu);
 
     view_dispatcher_free(app->view_dispatcher);
@@ -87,10 +91,11 @@ int32_t color_guess_app(void* p) {
         return 255;
     }
 
+    /* //This exits if run in RM FW
     if(!furi_hal_region_is_provisioned()) {
         color_guess_app_free(app);
         return 1;
-    }
+    }*/
     
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     

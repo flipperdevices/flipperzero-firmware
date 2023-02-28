@@ -63,7 +63,7 @@ static void color_guess_color_set_model_init(ColorGuessColorSetModel* const mode
 void color_guess_color_set_set_led(void* context, ColorGuessColorSetModel* model) {
     furi_assert(context);
     ColorGuess* app = context;
-    led_set_rgb(app, (model->digit[0] * 16) + model->digit[1], (model->digit[2] * 16) + model->digit[3], (model->digit[4] * 16) + model->digit[5]);
+    color_guess_led_set_rgb(app, (model->digit[0] * 16) + model->digit[1], (model->digit[2] * 16) + model->digit[3], (model->digit[4] * 16) + model->digit[5]);
 }
 
 bool color_guess_color_set_input(InputEvent* event, void* context) {
