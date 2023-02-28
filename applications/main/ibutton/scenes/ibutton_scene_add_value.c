@@ -30,14 +30,22 @@ void ibutton_scene_add_value_on_enter(void* context) {
 
 bool ibutton_scene_add_value_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
+    SceneManager* scene_manager = ibutton->scene_manager;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
         if(event.event == iButtonCustomEventByteEditResult) {
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveName);
+            scene_manager_next_scene(scene_manager, iButtonSceneSaveName);
         } else if(event.event == iButtonCustomEventByteEditChanged) {
             ibutton_protocols_apply_edits(ibutton->protocols, ibutton->key);
+        }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        if(scene_manager_has_previous_scene(scene_manager, iButtonSceneSavedKeyMenu)) {
+            if(!ibutton_load_key(ibutton)) {
+                consumed = scene_manager_search_and_switch_to_previous_scene(
+                    scene_manager, iButtonSceneStart);
+            }
         }
     }
 

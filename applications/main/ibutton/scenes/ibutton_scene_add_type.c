@@ -35,6 +35,7 @@ bool ibutton_scene_add_type_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         const iButtonProtocolId protocol_id = event.event;
 
+        ibutton_key_reset(key);
         ibutton_key_set_protocol_id(key, protocol_id);
         ibutton_protocols_apply_edits(ibutton->protocols, key);
 
