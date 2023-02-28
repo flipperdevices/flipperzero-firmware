@@ -10,5 +10,5 @@ App(
     stack_size=int(2 * 1024),
     icon="A_Infrared_14",
     order=41,
-	link="/ext/apps/Tools/IR_Remote.fap",
+	link="/ext/apps/Infrared/IR_Remote.fap",
 )
