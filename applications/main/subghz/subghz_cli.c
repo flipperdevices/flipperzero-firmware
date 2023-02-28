@@ -602,8 +602,7 @@ static void subghz_cli_command_encrypt_raw(Cli* cli, FuriString* args) {
     furi_string_free(source);
 }
 
-static void subghz_cli_command_chat(Cli* cli, FuriString* args, void* context) {
-    UNUSED(context);
+static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     uint32_t frequency = 433920000;
 
     if(furi_string_size(args)) {
@@ -792,7 +791,7 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
         }
 
         if(furi_string_cmp_str(cmd, "chat") == 0) {
-            subghz_cli_command_chat(cli, args, context);
+            subghz_cli_command_chat(cli, args);
             break;
         }
 
