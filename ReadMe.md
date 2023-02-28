@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Relocated SWD Probe Scripts Folder, Move folder into apps_data.
 - Relocated TAMA P1 ROM/SAVE Folder, Move folder into apps_data.
 - Relocated IFTTT Folder, Move folder into apps_data.
+- Relocated Picopass Folder, Move folder into apps_data.
 
 <a name="release">
 
