@@ -1,9 +1,10 @@
 Info: CO2 sensor mini
+Address: C8C8CF
 Rate: 1
 Ch: 121
 CRC: 2
 DPL: 0
-Address: C8C8CF
+RETR: 0x0F
 Resend: 3
 Delay_ms: 30
 
@@ -48,9 +49,6 @@ RBatch: Settings2: OSCCAL;OSCCAL_EMEM;RxAddr;Ch;nRF RETR;CO2 threshold;CO2 corre
 WBatch: Default Ch-121: RxAddr=0xCF;Ch=121;CO2 threshold=1000;CO2 correct=0;Send period=30;nRF RETR=0x17;FanLSB={0xC1,0};Reset
 WBatch: Default Ch-10: RxAddr=0xCF;Ch=10;CO2 threshold=1000;CO2 correct=0;Send period=31;FanLSB={0xC1,0xC2,0};Reset
 WBatch: CO2: CO2 threshold=1000;CO2 correct=1
-WBatch: Fan2: FanLSB={0xC2,0xC3,0};Reset
-WBatch: RETR 0x17: nRF RETR=0x17
-WBatch: RETR 0x2F: nRF RETR=0x2F
+WBatch: Fan2: FanLSB={0xC2,0xC3,0,0,0,0,0};Reset
 WBatch: RETR 0x0F: nRF RETR=0x0F
-WBatch: RETR 0x01: nRF RETR=0x01
 WBatch: Reset: Reset
