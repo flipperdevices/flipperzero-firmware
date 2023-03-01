@@ -13,6 +13,7 @@
  */
 
 #define TAG "SubGhzProtocolCAME"
+#define CAME_12_COUNT_BIT 12
 #define CAME_24_COUNT_BIT 24
 #define PRASTEL_COUNT_BIT 25
 #define PRASTEL_NAME "Prastel"
@@ -108,6 +109,7 @@ void subghz_protocol_encoder_came_free(void* context) {
  */
 static bool subghz_protocol_encoder_came_get_upload(SubGhzProtocolEncoderCame* instance) {
     furi_assert(instance);
+    uint32_t header_te = 0;
     size_t index = 0;
     size_t size_upload = (instance->generic.data_count_bit * 2) + 2;
     if(size_upload > instance->encoder.size_upload) {
@@ -117,13 +119,35 @@ static bool subghz_protocol_encoder_came_get_upload(SubGhzProtocolEncoderCame* i
         instance->encoder.size_upload = size_upload;
     }
     //Send header
-    instance->encoder.upload[index++] = level_duration_make(
-        false,
-        (((instance->generic.data_count_bit == CAME_24_COUNT_BIT) ||
-          (instance->generic.data_count_bit ==
-           subghz_protocol_came_const.min_count_bit_for_found)) ?
-             (uint32_t)subghz_protocol_came_const.te_short * 76 :
-             (uint32_t)subghz_protocol_came_const.te_short * 39));
+
+    switch(instance->generic.data_count_bit) {
+    case CAME_24_COUNT_BIT:
+        // CAME 24 Bit = 24320 us
+        header_te = 76;
+        break;
+    case CAME_12_COUNT_BIT:
+    case AIRFORCE_COUNT_BIT:
+        // CAME 12 Bit Original only! and Airforce protocol = 15040 us
+        header_te = 47;
+        break;
+    case PRASTEL_COUNT_BIT:
+        // PRASTEL = 11520 us
+        header_te = 36;
+        break;
+    default:
+        // Some wrong detected protocols, 5120 us
+        header_te = 16;
+        break;
+    }
+    instance->encoder.upload[index++] =
+        level_duration_make(false, (uint32_t)subghz_protocol_came_const.te_short * header_te);
+    // instance->encoder.upload[index++] = level_duration_make(
+    //     false,
+    //     (((instance->generic.data_count_bit == CAME_24_COUNT_BIT) ||
+    //       (instance->generic.data_count_bit ==
+    //        subghz_protocol_came_const.min_count_bit_for_found)) ?
+    //          (uint32_t)subghz_protocol_came_const.te_short * 76 :
+    //          (uint32_t)subghz_protocol_came_const.te_short * 39));
     //Send start bit
     instance->encoder.upload[index++] =
         level_duration_make(true, (uint32_t)subghz_protocol_came_const.te_short);
