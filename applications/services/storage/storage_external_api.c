@@ -664,12 +664,12 @@ void storage_common_resolve_path_and_ensure_app_directory(Storage* storage, Furi
     S_API_PROLOGUE;
 
     SAData data = {
-        .cprocessaliases = {
+        .cresolvepath = {
             .path = path,
             .thread_id = furi_thread_get_current_id(),
         }};
 
-    S_API_MESSAGE(StorageCommandCommonProcessAliases);
+    S_API_MESSAGE(StorageCommandCommonResolvePath);
     S_API_EPILOGUE;
 }
 

@@ -67,7 +67,7 @@ typedef struct {
 typedef struct {
     FuriString* path;
     FuriThreadId thread_id;
-} SADataCProcessAliases;
+} SADataCResolvePath;
 
 typedef struct {
     uint32_t id;
@@ -98,7 +98,7 @@ typedef union {
     SADataCTimestamp ctimestamp;
     SADataCStat cstat;
     SADataCFSInfo cfsinfo;
-    SADataCProcessAliases cprocessaliases;
+    SADataCResolvePath cresolvepath;
 
     SADataError error;
 
@@ -140,7 +140,7 @@ typedef enum {
     StorageCommandSDUnmount,
     StorageCommandSDInfo,
     StorageCommandSDStatus,
-    StorageCommandCommonProcessAliases,
+    StorageCommandCommonResolvePath,
 } StorageCommand;
 
 typedef struct {
