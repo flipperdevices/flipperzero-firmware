@@ -322,6 +322,7 @@ class ApplicationsCGenerator:
         return f"""
     {{.app = {app.entry_point},
      .name = "{app.name}",
+     .appid = "{app.appid}", 
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
      .link = "{f"{app.link}" if app.link else "NULL"}",
