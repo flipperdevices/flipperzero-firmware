@@ -15,7 +15,6 @@ void wifi_marauder_create_pcap_file(WifiMarauderApp* app) {
     char capture_file_path[100];
     wifi_marauder_get_prefix_from_cmd(prefix, app->selected_tx_string);
 
-    app->capture_file = storage_file_alloc(app->storage);
     int i=0;
     do{
         snprintf(capture_file_path, sizeof(capture_file_path), "%s/%s_%d.pcap", MARAUDER_APP_FOLDER, prefix, i);

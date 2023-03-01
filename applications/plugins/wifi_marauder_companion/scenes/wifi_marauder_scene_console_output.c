@@ -112,7 +112,6 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
     app->is_writing = false;
     if (app->capture_file && storage_file_is_open(app->capture_file)) {
         storage_file_close(app->capture_file);
-        storage_file_free(app->capture_file);
     }
 
 }

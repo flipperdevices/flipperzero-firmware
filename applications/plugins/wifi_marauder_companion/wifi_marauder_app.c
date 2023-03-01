@@ -27,6 +27,7 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
+    app->capture_file = storage_file_alloc(app->storage);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&wifi_marauder_scene_handlers, app);
@@ -87,6 +88,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
     text_input_free(app->text_input);
+    storage_file_free(app->capture_file);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
