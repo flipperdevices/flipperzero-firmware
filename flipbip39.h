@@ -55,6 +55,6 @@ typedef enum {
 } FlipBip39LedState;
 
 typedef enum {
-    FlipBip39Strength128 = 128,
-    FlipBip39Strength256 = 256,
+    FlipBip39Strength128,
+    FlipBip39Strength256,
 } FlipBip39StrengthState;

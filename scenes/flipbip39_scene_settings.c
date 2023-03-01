@@ -1,12 +1,12 @@
 #include "../flipbip39.h"
 #include <lib/toolbox/value_index.h>
 
-enum SettingsIndex {
-    SettingsIndexBip39Strength = 10,
-    SettingsIndexHaptic,
-    SettingsIndexValue1,
-    SettingsIndexValue2,
-};
+// enum SettingsIndex {
+//     SettingsIndexBip39Strength = 10,
+//     SettingsIndexHaptic,
+//     SettingsIndexValue1,
+//     SettingsIndexValue2,
+// };
 
 const char* const haptic_text[2] = {
     "OFF",
@@ -36,12 +36,12 @@ const uint32_t led_value[2] = {
 };
 
 const char* const bip39_strength_text[2] = {
-    "24",
     "12",
+    "24",
 };
 const uint32_t bip39_strength_value[2] = {
-    FlipBip39Strength256,
     FlipBip39Strength128,
+    FlipBip39Strength256,
 };
 
 static void flipbip39_scene_settings_set_haptic(VariableItem* item) {

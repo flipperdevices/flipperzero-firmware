@@ -4,12 +4,16 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
+#include "../helpers/flipbip39_haptic.h"
+#include "../helpers/flipbip39_speaker.h"
+#include "../helpers/flipbip39_led.h"
 
 #include <string.h>
-#include "../crypto/bip32.h"
+// #include "../crypto/bip32.h"
 #include "../crypto/bip39.h"
-#include "../crypto/ecdsa.h"
-#include "../crypto/curves.h"
+// #include "../crypto/ecdsa.h"
+// #include "../crypto/curves.h"
+#include "../crypto/memzero.h"
 
 struct FlipBip39Scene1 {
     View* view;
@@ -19,6 +23,7 @@ struct FlipBip39Scene1 {
 
 
 typedef struct {
+    int strength;
     const char* mnemonic1;
     const char* mnemonic2;
     const char* mnemonic3;
@@ -45,6 +50,7 @@ void flipbip39_scene_1_draw(Canvas* canvas, FlipBip39Scene1Model* model) {
     //canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1"); 
     
     canvas_set_font(canvas, FontSecondary);
+    //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->strength == 128 ? "128-bit" : "256-bit");
     canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->mnemonic1);
     canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->mnemonic2);
     canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->mnemonic3);
@@ -56,6 +62,7 @@ void flipbip39_scene_1_draw(Canvas* canvas, FlipBip39Scene1Model* model) {
 
 static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, const int strength) {
     // Generate a random mnemonic using trezor-crypto
+    model->strength = strength;
     const char* mnemonic = mnemonic_generate(strength);
 
     // Delineate 6 sections of the mnemonic
@@ -128,6 +135,23 @@ bool flipbip39_scene_1_input(InputEvent* event, void* context) {
 
 void flipbip39_scene_1_exit(void* context) {
     furi_assert(context);
+    FlipBip39Scene1* instance = (FlipBip39Scene1*)context;
+
+    with_view_model(
+        instance->view,
+        FlipBip39Scene1Model * model,
+        {
+            // Clear the mnemonic from memory
+            model->strength = 0;
+            memzero((void*)model->mnemonic1, strlen(model->mnemonic1));
+            memzero((void*)model->mnemonic2, strlen(model->mnemonic2));
+            memzero((void*)model->mnemonic3, strlen(model->mnemonic3));
+            memzero((void*)model->mnemonic4, strlen(model->mnemonic4));
+            memzero((void*)model->mnemonic5, strlen(model->mnemonic5));
+            memzero((void*)model->mnemonic6, strlen(model->mnemonic6));
+        },
+        true
+    );
 }
 
 void flipbip39_scene_1_enter(void* context) {
@@ -135,7 +159,12 @@ void flipbip39_scene_1_enter(void* context) {
     FlipBip39Scene1* instance = (FlipBip39Scene1*)context;
 
     FlipBip39* app = instance->context;
-    int strength = app->bip39_strength;
+    int strength_setting = app->bip39_strength;
+    int strength = 256;
+    if (strength_setting == 0) strength = 128;
+
+    flipbip39_play_happy_bump(app);
+    flipbip39_led_set_rgb(app, 255, 0, 0);
 
     with_view_model(
         instance->view,
@@ -157,8 +186,10 @@ FlipBip39Scene1* flipbip39_scene_1_alloc() {
     view_set_enter_callback(instance->view, flipbip39_scene_1_enter);
     view_set_exit_callback(instance->view, flipbip39_scene_1_exit);
 
-    // FlipBip39* app = instance->view->context;
-    // int strength = app->bip39_strength;
+    // FlipBip39* app = instance->context;
+    // int strength_setting = app->bip39_strength;
+    // int strength = 256;
+    // if (strength_setting == 0) strength = 128;
 
     // with_view_model(
     //     instance->view,
