@@ -310,6 +310,8 @@ int32_t music_player_app(void* p) {
             storage_common_migrate(storage, "/ext/music_player", STORAGE_APPS_DATA_PATH_PREFIX);
             furi_record_close(RECORD_STORAGE);
 
+            furi_string_set(file_path, STORAGE_APPS_DATA_PATH_PREFIX);
+
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(
                 &browser_options, MUSIC_PLAYER_APP_EXTENSION, &I_music_10px);

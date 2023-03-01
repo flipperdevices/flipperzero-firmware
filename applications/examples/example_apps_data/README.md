@@ -9,8 +9,10 @@ The **Apps Data** folder is a folder used to store data for external apps that a
 The path to the current application folder is related to the `appsid` of the app. The `appsid` is used to identify the app in the app store and is stored in the `application.fam` file. 
 The Apps Data folder is located only on the external storage, the SD card.
 
-For example, if the `appsid` of the app is `snake_game`, the path to the Apps Data folder will be `/ext/apps_data/snake_game`.
+For example, if the `appsid` of the app is `snake_game`, the path to the Apps Data folder will be `/ext/apps_data/snake_game`. But using raw paths is not recommended, because the path to the Apps Data folder can change in the future. Use the `/app` alias instead.
 
 ## How to get the path to the Apps Data folder?
 
-You can use `PathHelper` to get the path to the application data folder, or use the raw `Storage` call to get the path. All folders in the returned path will be created automatically.
+You can use `/app` alias to get the path to the current application data folder.
+
+For example, if you want to open a file `config.txt` in the Apps Data folder, you can use the next path: `/app/config.txt`.
