@@ -64,7 +64,8 @@ bool ibutton_scene_saved_key_menu_on_event(void* context, SceneManagerEvent even
         }
 
     } else if(event.type == SceneManagerEventTypeBack) {
-        scene_manager_set_scene_state(scene_manager, iButtonSceneSavedKeyMenu, SubmenuIndexEmulate);
+        scene_manager_set_scene_state(
+            scene_manager, iButtonSceneSavedKeyMenu, SubmenuIndexEmulate);
         // Event is not consumed
     }
 

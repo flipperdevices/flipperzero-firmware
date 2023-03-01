@@ -86,7 +86,8 @@ bool ibutton_scene_read_key_menu_on_event(void* context, SceneManagerEvent event
             scene_manager_next_scene(scene_manager, iButtonSceneWrite);
         }
     } else if(event.event == SceneManagerEventTypeBack) {
-        scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneReadKeyMenu, SubmenuIndexSave);
+        scene_manager_set_scene_state(
+            ibutton->scene_manager, iButtonSceneReadKeyMenu, SubmenuIndexSave);
         // Event is not consumed
     }
 
