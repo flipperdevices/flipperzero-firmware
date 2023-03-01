@@ -56,7 +56,7 @@ If you don't want to build this application, just simply copy **flipper_geiger.f
 
 ## Use cases
 
-Ambient radioactivity :
+Ambient radioactivity (descendants of radon gas are detected) :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper8.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper9.png" width=25% height=25%>
 
@@ -83,6 +83,9 @@ All previous measures in a row (the scale of the graph is automatically adjusted
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper7.png" width=25% height=25%>
 
 ## Changelog
+
+* 2023-03-01
+  * Usable/unusable sources have been added
 
 * 2023-02-26
   * More clarity about how to connect audio jack cable on A7 GPIO
