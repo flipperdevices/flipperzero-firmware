@@ -3,6 +3,8 @@
 #pragma GCC optimize ("unroll-loops")
 
 #include <furi.h>
+#include <furi_hal.h>
+#include "time.h"
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <input/input.h>
@@ -107,7 +109,7 @@ static inline uint8_t evenparity32(uint32_t x) {
     return (__builtin_parity(x) & 0xFF);
 }
 
-void update_contribution(int data[], int item, int mask1, int mask2) {
+static inline void update_contribution(int data[], int item, int mask1, int mask2) {
     int p = data[item] >> 25;
     p = p << 1 | evenparity32(data[item] & mask1);
     p = p << 1 | evenparity32(data[item] & mask2);
@@ -213,13 +215,14 @@ static inline int state_loop(int* temp_states_buffer, int xks, int m1, int m2) {
         for (int s = 0; s <= temp_states_tail; s++) {
             temp_states_buffer[s] <<= 1;
             int t = temp_states_buffer[s];
+            int ft = filter(t);
 
-            if ((filter(t) ^ filter(t | 1)) != 0) {
+            if ((ft ^ filter(t | 1)) != 0) {
                 temp_states_buffer[s] |= filter(t) ^ xks_bit;
                 if (extend_iter > 4) {
                     update_contribution(temp_states_buffer, s, m1, m2);
                 }
-            } else if (filter(t) == xks_bit) {
+            } else if (ft == xks_bit) {
                 // TODO: Refactor
                 if (extend_iter > 4) {
                     temp_states_buffer[++temp_states_tail] = temp_states_buffer[s + 1];
@@ -341,8 +344,11 @@ int recover(struct Crypto1Params *p, int ks2) {
     for (i = 30; i >= 0; i -= 2) {
         eks = eks << 1 | BEBIT(ks2, i);
     }
+    int bench_start = furi_hal_rtc_get_timestamp();
     for (int msb_iter = 0; msb_iter <= ((256/MSB_LIMIT)-1); msb_iter++) {
         if (calculate_msb_tables(oks, eks, msb_iter, p)) {
+            int bench_stop = furi_hal_rtc_get_timestamp();
+            FURI_LOG_I(TAG, "Cracked in %i seconds", bench_stop-bench_start);
             return 1;
         }
     }
