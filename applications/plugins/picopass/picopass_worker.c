@@ -7,6 +7,9 @@
 const uint8_t picopass_iclass_key[] = {0xaf, 0xa7, 0x85, 0xa7, 0xda, 0xb3, 0x33, 0x78};
 const uint8_t picopass_factory_credit_key[] = {0x76, 0x65, 0x54, 0x43, 0x32, 0x21, 0x10, 0x00};
 const uint8_t picopass_factory_debit_key[] = {0xf0, 0xe1, 0xd2, 0xc3, 0xb4, 0xa5, 0x96, 0x87};
+const uint8_t picopass_xice_key[] = {0x20, 0x20, 0x66, 0x66, 0x66, 0x66, 0x88, 0x88};
+const uint8_t picopass_xicl_key[] = {0x20, 0x20, 0x66, 0x66, 0x66, 0x66, 0x88, 0x88};
+const uint8_t picopass_xics_key[] = {0x66, 0x66, 0x20, 0x20, 0x66, 0x66, 0x88, 0x88};
 
 static void picopass_worker_enable_field() {
     furi_hal_nfc_ll_txrx_on();
@@ -524,8 +527,8 @@ int32_t picopass_worker_task(void* context) {
         picopass_worker_detect(picopass_worker);
     } else if(picopass_worker->state == PicopassWorkerStateWrite) {
         picopass_worker_write(picopass_worker);
-    } else if(picopass_worker->state == PicopassWorkerStateWriteStandardKey) {
-        picopass_worker_write_standard_key(picopass_worker);
+    } else if(picopass_worker->state == PicopassWorkerStateWriteKey) {
+        picopass_worker_write_key(picopass_worker);
     }
     picopass_worker_disable_field(ERR_NONE);
 
@@ -633,7 +636,7 @@ void picopass_worker_write(PicopassWorker* picopass_worker) {
     }
 }
 
-void picopass_worker_write_standard_key(PicopassWorker* picopass_worker) {
+void picopass_worker_write_key(PicopassWorker* picopass_worker) {
     PicopassDeviceData* dev_data = picopass_worker->dev_data;
     PicopassBlock* AA1 = dev_data->AA1;
     PicopassPacs* pacs = &dev_data->pacs;
@@ -646,7 +649,7 @@ void picopass_worker_write_standard_key(PicopassWorker* picopass_worker) {
     uint8_t* oldKey = AA1[PICOPASS_KD_BLOCK_INDEX].data;
 
     uint8_t newKey[PICOPASS_BLOCK_LEN] = {0};
-    loclass_diversifyKey(csn, picopass_iclass_key, newKey);
+    loclass_diversifyKey(csn, pacs->key, newKey);
 
     if((fuses & 0x80) == 0x80) {
         FURI_LOG_D(TAG, "Plain write for personalized mode key change");
@@ -658,7 +661,7 @@ void picopass_worker_write_standard_key(PicopassWorker* picopass_worker) {
         }
     }
 
-    while(picopass_worker->state == PicopassWorkerStateWriteStandardKey) {
+    while(picopass_worker->state == PicopassWorkerStateWriteKey) {
         if(picopass_detect_card(1000) == ERR_NONE) {
             err = picopass_write_block(pacs, PICOPASS_KD_BLOCK_INDEX, newKey);
             if(err != ERR_NONE) {
