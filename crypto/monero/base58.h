@@ -35,8 +35,8 @@
 #define __XMR_BASE58_H__
 
 #include <stdbool.h>
-#include "hasher.h"
-#include "options.h"
+#include "../hasher.h"
+#include "../options.h"
 
 int xmr_base58_addr_encode_check(uint64_t tag, const uint8_t *data,
                                  size_t binsz, char *b58, size_t b58sz);

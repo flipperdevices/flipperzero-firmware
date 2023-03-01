@@ -23,7 +23,7 @@
 #ifndef __HMAC_DRBG_H__
 #define __HMAC_DRBG_H__
 
-#include <sha2.h>
+#include "sha2.h"
 #include <stdint.h>
 
 // HMAC based Deterministic Random Bit Generator with SHA-256

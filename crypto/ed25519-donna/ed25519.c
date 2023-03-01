@@ -18,8 +18,8 @@
 #include "ed25519.h"
 
 #include "ed25519-hash-custom.h"
-#include "rand.h"
-#include "memzero.h"
+#include "../rand.h"
+#include "../memzero.h"
 
 /*
 	Generates a (extsk[0..31]) and aExt (extsk[32..63])

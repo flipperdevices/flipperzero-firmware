@@ -24,9 +24,9 @@ void ge25519_nielsadd2_p1p1(ge25519_p1p1 *r, const ge25519 *p, const ge25519_nie
 #endif
 
 /* computes [s1]p1 + [s2]p2 */
-#if USE_MONERO
+//#if USE_MONERO
 void ge25519_double_scalarmult_vartime2(ge25519 *r, const ge25519 *p1, const bignum256modm s1, const ge25519 *p2, const bignum256modm s2);
-#endif
+//#endif
 
 void ge25519_pnielsadd_p1p1(ge25519_p1p1 *r, const ge25519 *p, const ge25519_pniels *q, unsigned char signbit);
 

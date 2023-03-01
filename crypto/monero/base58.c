@@ -39,7 +39,7 @@
 #include "../base58.h"
 #include "../byte_order.h"
 #include "int-util.h"
-#include "sha2.h"
+#include "../sha2.h"
 
 const size_t alphabet_size = 58;  // sizeof(b58digits_ordered) - 1;
 const size_t full_encoded_block_size = 11;

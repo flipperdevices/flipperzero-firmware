@@ -5,7 +5,7 @@
 #include "xmr.h"
 #include "../byte_order.h"
 #include "int-util.h"
-#include "rand.h"
+#include "../rand.h"
 #include "serialize.h"
 
 const ge25519 ALIGN(16) xmr_h = {

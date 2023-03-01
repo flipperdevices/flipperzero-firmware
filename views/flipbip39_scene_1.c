@@ -5,10 +5,10 @@
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
 
-//#include "../crypto/bip32.h"
+#include "../crypto/bip32.h"
 #include "../crypto/bip39.h"
-//#include "../crypto/ecdsa.h"
-//#include "../crypto/curves.h"
+#include "../crypto/ecdsa.h"
+#include "../crypto/curves.h"
 
 struct FlipBip39Scene1 {
     View* view;

@@ -96,25 +96,25 @@ unsigned char res[3][32] =
     }
 };
 
-void cycles(volatile uint64_t *rtn)
-{
-#if defined( _MSCVER )
-    __asm   // read the Pentium Time Stamp Counter
-    {   cpuid
-        rdtsc
-        mov     ecx,rtn
-        mov     [ecx],eax
-        mov     [ecx+4],edx
-        cpuid
-    }
-#elif defined( __GNUC__ )
-#if defined(__aarch64__)
-    __asm__ __volatile__("mrs %0, cntvct_el0": "=r" (*rtn));
-#else
-    __asm__ __volatile__("rdtsc": "=A" (*rtn));
-#endif
-#endif
-}
+// void cycles(volatile uint64_t *rtn)
+// {
+// #if defined( _MSCVER )
+//     __asm   // read the Pentium Time Stamp Counter
+//     {   cpuid
+//         rdtsc
+//         mov     ecx,rtn
+//         mov     [ecx],eax
+//         mov     [ecx+4],edx
+//         cpuid
+//     }
+// #elif defined( __GNUC__ )
+// #if defined(__aarch64__)
+//     __asm__ __volatile__("mrs %0, cntvct_el0": "=r" (*rtn));
+// #else
+//     __asm__ __volatile__("rdtsc": "=A" (*rtn));
+// #endif
+// #endif
+// }
 
 int main(void)
 {   unsigned char   out[32], ret[32], err = 0;
