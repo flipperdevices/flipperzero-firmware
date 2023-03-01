@@ -21,7 +21,6 @@
 #define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
 #define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
 #define MF_CLASSIC_NONCE_PATH EXT_PATH("nfc/.mfkey32.log")
-// TODO: Create nfc/.cache/ if missing?
 #define TAG "Mfkey32"
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 
@@ -219,7 +218,7 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
     int msb_start = (MSB_LIMIT * msb_iter); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
     int msb_end = (MSB_LIMIT * (msb_iter+1));
     int xks = 0, m1 = 0, m2 = 0;
-    int x, y, i;
+    int y, i;
     FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
 
     // Odd
