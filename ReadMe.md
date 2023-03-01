@@ -37,6 +37,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Updated: SubGHz: Fixed timings for static CAME 12 bit and other types (fixed issue #280)
 - UL: Updated: Fix #370 and fix other protocol counter issues
 - Infrared Set To Internal. Archive Browser for Infrared & BadUSB Fixed.
+- OFW: [Getter for application data path #2181 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2181)
+- Moved music_player and wav_player SD folders into the apps_data folder. (Following OFW Example in #2181)
 
 <a name="release">
 
