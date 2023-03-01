@@ -535,7 +535,7 @@ static FS_Error
                         if(file_info_is_dir(&fileinfo)) {
                             error =
                                 storage_common_mkdir(storage, furi_string_get_cstr(tmp_new_path));
-                            if(error != FSE_OK) {
+                            if(error != FSE_OK && error != FSE_EXIST) {
                                 break;
                             }
                         }
