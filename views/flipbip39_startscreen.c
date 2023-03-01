@@ -30,10 +30,10 @@ void flipbip39_startscreen_draw(Canvas* canvas, FlipBip39StartscreenModel* model
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Start Screen"); 
+    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Flip-BIP39"); 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Explain your app"); 
-    canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, "on this screen");
+    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Crypto tools"); 
+    canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, "for Flipper");
     elements_button_center(canvas, "Start"); 
 }
 

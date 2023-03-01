@@ -2,7 +2,8 @@
 #include <lib/toolbox/value_index.h>
 
 enum SettingsIndex {
-    SettingsIndexHaptic = 10,
+    SettingsIndexBip39Strength = 10,
+    SettingsIndexHaptic,
     SettingsIndexValue1,
     SettingsIndexValue2,
 };
@@ -34,10 +35,18 @@ const uint32_t led_value[2] = {
     FlipBip39LedOn,
 };
 
+const char* const bip39_strength_text[2] = {
+    "24",
+    "12",
+};
+const uint32_t bip39_strength_value[2] = {
+    FlipBip39Strength256,
+    FlipBip39Strength128,
+};
+
 static void flipbip39_scene_settings_set_haptic(VariableItem* item) {
     FlipBip39* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
-
     variable_item_set_current_value_text(item, haptic_text[index]);
     app->haptic = haptic_value[index];
 }
@@ -56,6 +65,13 @@ static void flipbip39_scene_settings_set_led(VariableItem* item) {
     app->led = led_value[index];
 }
 
+static void flipbip39_scene_settings_set_bip39_strength(VariableItem* item) {
+    FlipBip39* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, bip39_strength_text[index]);
+    app->bip39_strength = bip39_strength_value[index];
+}
+
 void flipbip39_scene_settings_submenu_callback(void* context, uint32_t index) {
     FlipBip39* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -65,6 +81,17 @@ void flipbip39_scene_settings_on_enter(void* context) {
     FlipBip39* app = context;
     VariableItem* item;
     uint8_t value_index;
+
+    // BIP39 strength
+    item = variable_item_list_add(
+        app->variable_item_list,
+        "BIP39 Words:",
+        2,
+        flipbip39_scene_settings_set_bip39_strength,
+        app);
+    value_index = value_index_uint32(app->bip39_strength, bip39_strength_value, 2);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, bip39_strength_text[value_index]);
 
     // Vibro on/off
     item = variable_item_list_add(

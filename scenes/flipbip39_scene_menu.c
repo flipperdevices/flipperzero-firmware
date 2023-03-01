@@ -14,8 +14,8 @@ void flipbip39_scene_menu_submenu_callback(void* context, uint32_t index) {
 void flipbip39_scene_menu_on_enter(void* context) {
     FlipBip39* app = context;
 
-    submenu_add_item(app->submenu, "Scene 1", SubmenuIndexScene1, flipbip39_scene_menu_submenu_callback, app);
-    submenu_add_item(app->submenu, "Scene 2", SubmenuIndexScene2, flipbip39_scene_menu_submenu_callback, app);
+    submenu_add_item(app->submenu, "New BIP39 Mnemonic", SubmenuIndexScene1, flipbip39_scene_menu_submenu_callback, app);
+    //submenu_add_item(app->submenu, "Scene 2", SubmenuIndexScene2, flipbip39_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, flipbip39_scene_menu_submenu_callback, app);
 
     submenu_set_selected_item(app->submenu, scene_manager_get_scene_state(app->scene_manager, FlipBip39SceneMenu));

@@ -41,6 +41,7 @@ FlipBip39* flipbip39_app_alloc() {
     app->haptic = 1;
     app->speaker = 1;
     app->led = 1;
+    app->bip39_strength = 256;
 
     view_dispatcher_add_view(app->view_dispatcher, FlipBip39ViewIdMenu, submenu_get_view(app->submenu));
     app->flipbip39_startscreen = flipbip39_startscreen_alloc();

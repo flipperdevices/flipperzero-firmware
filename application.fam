@@ -3,7 +3,7 @@ App(
     name="Flip-BIP39",
     apptype=FlipperAppType.PLUGIN,
     entry_point="flipbip39_app",
-    cdefines=["APP_BOILERPLATE"],
+    cdefines=["APP_FLIPBIP39"],
     requires=[
         "gui",
     ],

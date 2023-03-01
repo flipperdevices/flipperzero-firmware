@@ -5,6 +5,7 @@
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
 
+#include <string.h>
 #include "../crypto/bip32.h"
 #include "../crypto/bip39.h"
 #include "../crypto/ecdsa.h"
@@ -18,7 +19,12 @@ struct FlipBip39Scene1 {
 
 
 typedef struct {
-    int some_value;
+    const char* mnemonic1;
+    const char* mnemonic2;
+    const char* mnemonic3;
+    const char* mnemonic4;
+    const char* mnemonic5;
+    const char* mnemonic6;
 } FlipBip39Scene1Model;
 
 void flipbip39_scene_1_set_callback(
@@ -32,18 +38,57 @@ void flipbip39_scene_1_set_callback(
 }
 
 void flipbip39_scene_1_draw(Canvas* canvas, FlipBip39Scene1Model* model) {
-    UNUSED(model);
+    //UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1"); 
+    //canvas_set_font(canvas, FontPrimary);
+    //canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1"); 
+    
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, mnemonic_generate(128)); 
-    //canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "used as flipbip39"); 
+    canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->mnemonic1);
+    canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->mnemonic2);
+    canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->mnemonic3);
+    canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->mnemonic4);
+    canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->mnemonic5);
+    canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->mnemonic6);
+
 }
 
-static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model) {
-    model->some_value = 1;
+static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, const int strength) {
+    // Generate a random mnemonic using trezor-crypto
+    const char* mnemonic = mnemonic_generate(strength);
+
+    // Delineate 6 sections of the mnemonic
+    char *str = malloc(strlen(mnemonic) + 1);
+    strcpy(str, mnemonic);
+    int word = 0;
+    for (size_t i = 0; i < strlen(str); i++) {
+        if (str[i] == ' ') {
+            word++;
+            if (word % 4 == 0) {
+                str[i] = ',';
+            }
+        } 
+    }
+
+    // Split the mnemonic into 6 parts
+    char *ptr = strtok (str, ",");
+    int partnum = 0;
+    while(ptr != NULL)
+    {
+        char *part = malloc(strlen(ptr) + 1);
+        strcpy(part, ptr);
+        partnum++;
+        
+        if (partnum == 1) model->mnemonic1 = part;
+        if (partnum == 2) model->mnemonic2 = part;
+        if (partnum == 3) model->mnemonic3 = part;
+        if (partnum == 4) model->mnemonic4 = part;
+        if (partnum == 5) model->mnemonic5 = part;
+        if (partnum == 6) model->mnemonic6 = part;
+
+        ptr = strtok(NULL, ",");
+    }
 }
 
 bool flipbip39_scene_1_input(InputEvent* event, void* context) {
@@ -88,11 +133,15 @@ void flipbip39_scene_1_exit(void* context) {
 void flipbip39_scene_1_enter(void* context) {
     furi_assert(context);
     FlipBip39Scene1* instance = (FlipBip39Scene1*)context;
+
+    FlipBip39* app = instance->context;
+    int strength = app->bip39_strength;
+
     with_view_model(
         instance->view,
         FlipBip39Scene1Model * model,
         {
-            flipbip39_scene_1_model_init(model);
+            flipbip39_scene_1_model_init(model, strength);
         },
         true
     );
@@ -108,14 +157,17 @@ FlipBip39Scene1* flipbip39_scene_1_alloc() {
     view_set_enter_callback(instance->view, flipbip39_scene_1_enter);
     view_set_exit_callback(instance->view, flipbip39_scene_1_exit);
 
-    with_view_model(
-        instance->view,
-        FlipBip39Scene1Model * model,
-        {
-            flipbip39_scene_1_model_init(model);
-        },
-        true
-    );
+    // FlipBip39* app = instance->view->context;
+    // int strength = app->bip39_strength;
+
+    // with_view_model(
+    //     instance->view,
+    //     FlipBip39Scene1Model * model,
+    //     {
+    //         flipbip39_scene_1_model_init(model, strength);
+    //     },
+    //     true
+    // );
     
     return instance;
 }
@@ -127,7 +179,13 @@ void flipbip39_scene_1_free(FlipBip39Scene1* instance) {
         instance->view,
         FlipBip39Scene1Model * model,
         {
-            UNUSED(model);
+            //UNUSED(model);
+            free((void*)model->mnemonic1);
+            free((void*)model->mnemonic2);
+            free((void*)model->mnemonic3);
+            free((void*)model->mnemonic4);
+            free((void*)model->mnemonic5);
+            free((void*)model->mnemonic6);
         },
         true);
     view_free(instance->view);

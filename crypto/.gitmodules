@@ -1,3 +1,0 @@
-[submodule "tests/wycheproof"]
-	path = tests/wycheproof
-	url = https://github.com/google/wycheproof

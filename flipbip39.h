@@ -28,6 +28,7 @@ typedef struct {
     int haptic; 
     int speaker;
     int led;
+    int bip39_strength;
 } FlipBip39;
 
 typedef enum {
@@ -52,3 +53,8 @@ typedef enum {
     FlipBip39LedOff,
     FlipBip39LedOn,
 } FlipBip39LedState;
+
+typedef enum {
+    FlipBip39Strength128 = 128,
+    FlipBip39Strength256 = 256,
+} FlipBip39StrengthState;
