@@ -24,7 +24,6 @@
 #define TAG "Mfkey32"
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 
-
 #define MSB_LIMIT 16
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
@@ -205,10 +204,45 @@ int check_state(struct Crypto1State *t, struct Crypto1Params *p) {
     return found;
 }
 
+static inline int state_loop(int* temp_states_buffer, int xks, int m1, int m2) {
+    int temp_states_tail = 0;
+
+    for (int extend_iter = 1; extend_iter <= 15; extend_iter++) {
+        int xks_bit = BIT(xks, extend_iter);
+
+        for (int s = 0; s <= temp_states_tail; s++) {
+            temp_states_buffer[s] <<= 1;
+            int t = temp_states_buffer[s];
+
+            if ((filter(t) ^ filter(t | 1)) != 0) {
+                temp_states_buffer[s] |= filter(t) ^ xks_bit;
+                if (extend_iter > 4) {
+                    update_contribution(temp_states_buffer, s, m1, m2);
+                }
+            } else if (filter(t) == xks_bit) {
+                // TODO: Refactor
+                if (extend_iter > 4) {
+                    temp_states_buffer[++temp_states_tail] = temp_states_buffer[s + 1];
+                    temp_states_buffer[s + 1] = temp_states_buffer[s] | 1;
+                    update_contribution(temp_states_buffer, s, m1, m2);
+                    s++;
+                    update_contribution(temp_states_buffer, s, m1, m2);
+                } else {
+                    temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
+                    temp_states_buffer[s] = temp_states_buffer[s - 1] | 1;
+                }
+            } else {
+                temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
+            }
+        }
+    }
+
+    return temp_states_tail;
+}
+
 int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p) {
     // TODO: Combine Odd and Even loops
     int found_key = 0;
-    const int iterations = 15;
     const int rows = MSB_LIMIT; // Process MSB_LIMIT MSB's at once
     const int columns = 512; // Up to 512 possible odd partial states per MSB
     int (*odd_arrays)[columns] = (int (*)[columns])malloc(rows * sizeof(*odd_arrays));
@@ -217,66 +251,32 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
     int even_tails[MSB_LIMIT] = {0};
     int msb_start = (MSB_LIMIT * msb_iter); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
     int msb_end = (MSB_LIMIT * (msb_iter+1));
-    int xks = 0, m1 = 0, m2 = 0;
-    int y, i;
-    int *temp_states_buffer = malloc(sizeof(int)*(2<<9));
+    int i = 0, y = 0, temp_states_tail = 0;
+    int *temp_states_buffer_odd = malloc(sizeof(int)*(2<<9));
+    int *temp_states_buffer_even = malloc(sizeof(int)*(2<<9));
     //FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
 
     // Odd
-    xks = oks;
-    m1 = CONST_M1_1;
-    m2 = CONST_M2_1;
     for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
         //if (main_iter % 2048 == 0) {
         //    FURI_LOG_I(TAG, "On main_iter %i", main_iter); // DEBUG
         //}
-        if (filter(main_iter) == (xks & 1)) {
-            int temp_states_tail = 0;
-
-            temp_states_buffer[0] = main_iter;
-
-            for (int extend_iter = 1; extend_iter <= iterations; extend_iter++) {
-                int xks_bit = BIT(xks, extend_iter);
-
-                for (int s = 0; s <= temp_states_tail; s++) {
-                    temp_states_buffer[s] <<= 1;
-                    int t = temp_states_buffer[s];
-
-                    if ((filter(t) ^ filter(t | 1)) != 0 ) {
-                        temp_states_buffer[s] |= filter(t) ^ xks_bit;
-                        if (extend_iter > 4) {
-                            update_contribution(temp_states_buffer, s, m1, m2);
-                        }
-                    } else if (filter(t) == xks_bit) {
-                        // TODO: Refactor
-                        if (extend_iter > 4) {
-                            temp_states_buffer[++temp_states_tail] = temp_states_buffer[s + 1];
-                            temp_states_buffer[s + 1] = temp_states_buffer[s] | 1;
-                            update_contribution(temp_states_buffer, s, m1, m2);
-                            s++;
-                            update_contribution(temp_states_buffer, s, m1, m2);
-                        } else {
-                            temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
-                            temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
-                        }
-                    } else {
-                        temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
-                    }
-                }
-            }
+        if (filter(main_iter) == (oks & 1)) {
+            temp_states_buffer_odd[0] = main_iter;
+            temp_states_tail = state_loop(temp_states_buffer_odd, oks, CONST_M1_1, CONST_M2_1);
 
             for (int s = 0; s <= temp_states_tail; s++) {
-                char s_msb = temp_states_buffer[s] >> 24;
+                char s_msb = temp_states_buffer_odd[s] >> 24;
                 if ((s_msb >= msb_start) && (s_msb < msb_end)) {
                     int found = 0;
                     for (i = 0; i < odd_tails[s_msb - msb_start]; i++) {
-                        if (odd_arrays[s_msb - msb_start][i] == temp_states_buffer[s]) {
+                        if (odd_arrays[s_msb - msb_start][i] == temp_states_buffer_odd[s]) {
                             found = 1;
                             break;
                         }
                     }
                     if (!found) {
-                        odd_arrays[s_msb - msb_start][odd_tails[s_msb - msb_start]++] = temp_states_buffer[s];
+                        odd_arrays[s_msb - msb_start][odd_tails[s_msb - msb_start]++] = temp_states_buffer_odd[s];
                     }
                 }
             }
@@ -286,51 +286,17 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
     //FURI_LOG_I(TAG, "MSB GE %i", msb_iter); // DEBUG
 
     // Even
-    xks = eks;
-    m1 = CONST_M1_2;
-    m2 = CONST_M2_2;
     for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
-        if (filter(main_iter) == (xks & 1)) {
-            int temp_states_tail = 0;
-
-            temp_states_buffer[0] = main_iter;
-
-            for (int extend_iter = 1; extend_iter <= iterations; extend_iter++) {
-                int xks_bit = BIT(xks, extend_iter);
-
-                for (int s = 0; s <= temp_states_tail; s++) {
-                    temp_states_buffer[s] <<= 1;
-                    int t = temp_states_buffer[s];
-
-                    if ((filter(t) ^ filter(t | 1)) != 0 ) {
-                        temp_states_buffer[s] |= filter(t) ^ xks_bit;
-                        if (extend_iter > 4) {
-                            update_contribution(temp_states_buffer, s, m1, m2);
-                        }
-                    } else if (filter(t) == xks_bit) {
-                        // TODO: Refactor
-                        if (extend_iter > 4) {
-                            temp_states_buffer[++temp_states_tail] = temp_states_buffer[s + 1];
-                            temp_states_buffer[s + 1] = temp_states_buffer[s] | 1;
-                            update_contribution(temp_states_buffer, s, m1, m2);
-                            s++;
-                            update_contribution(temp_states_buffer, s, m1, m2);
-                        } else {
-                            temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
-                            temp_states_buffer[s] = temp_states_buffer[ s - 1 ] | 1;
-                        }
-                    } else {
-                        temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
-                    }
-                }
-            }
+        if (filter(main_iter) == (eks & 1)) {
+            temp_states_buffer_even[0] = main_iter;
+            temp_states_tail = state_loop(temp_states_buffer_even, eks, CONST_M1_2, CONST_M2_2);
 
             for (int s = 0; s <= temp_states_tail; s++) {
-                char s_msb = temp_states_buffer[s] >> 24;
+                char s_msb = temp_states_buffer_even[s] >> 24;
                 if ((s_msb >= msb_start) && (s_msb < msb_end)) {
                     int found = 0;
                     for (i = 0; i < even_tails[s_msb - msb_start]; i++) {
-                        if (even_arrays[s_msb - msb_start][i] == temp_states_buffer[s]) {
+                        if (even_arrays[s_msb - msb_start][i] == temp_states_buffer_even[s]) {
                             found = 1;
                             break;
                         }
@@ -338,16 +304,17 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
                     if (found) {
                         continue;
                     }
-                    even_arrays[s_msb - msb_start][even_tails[s_msb - msb_start]++] = temp_states_buffer[s];
-                    temp_states_buffer[s] = (temp_states_buffer[s] << 1) ^ evenparity32(temp_states_buffer[s] & LF_POLY_EVEN);
+                    even_arrays[s_msb - msb_start][even_tails[s_msb - msb_start]++] = temp_states_buffer_even[s];
+                    temp_states_buffer_even[s] = (temp_states_buffer_even[s] << 1) ^ evenparity32(temp_states_buffer_even[s] & LF_POLY_EVEN);
                     // Check against all odd states for MSB
                     for (y = 0; y <= odd_tails[s_msb - msb_start]; ++y) {
                         struct Crypto1State temp = {0, 0};
                         temp.even = odd_arrays[s_msb - msb_start][y];
-                        temp.odd = temp_states_buffer[s] ^ evenparity32(odd_arrays[s_msb - msb_start][y] & LF_POLY_ODD);
+                        temp.odd = temp_states_buffer_even[s] ^ evenparity32(odd_arrays[s_msb - msb_start][y] & LF_POLY_ODD);
                         if (check_state(&temp, p)) {
                             found_key = 1;
-                            free(temp_states_buffer);
+                            free(temp_states_buffer_odd);
+                            free(temp_states_buffer_even);
                             free(odd_arrays);
                             free(even_arrays);
                             return found_key;
@@ -357,7 +324,9 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
             }
         }
     }
-    free(temp_states_buffer);
+
+    free(temp_states_buffer_odd);
+    free(temp_states_buffer_even);
     free(odd_arrays);
     free(even_arrays);
     return found_key;
@@ -664,7 +633,7 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(MfClassicDict* system_dic
                 i++;
                 ptr = strchr(ptr, ' ');
                 if (!ptr) {
-                    break; 
+                    break;
                 }
                 ptr++;
             }
