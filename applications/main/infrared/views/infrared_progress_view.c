@@ -11,7 +11,6 @@
 #include <furi_hal_resources.h>
 #include <core/check.h>
 #include <stdint.h>
-#include <assets_icons.h>
 
 struct InfraredProgressView {
     View* view;

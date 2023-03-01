@@ -10,7 +10,7 @@ App(
         "loader",
         "power",
 		"ibuttonsrv",
-		"infraredsrv",
+		# "infraredsrv",
 		"lfrfidsrv",
         "namechangersrv",
     ],
