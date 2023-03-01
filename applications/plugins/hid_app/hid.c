@@ -384,11 +384,7 @@ int32_t hid_ble_app(void* p) {
         EXT_PATH("apps/Tools/" HID_BT_KEYS_STORAGE_NAME),
         APPS_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
 
-    FuriString* bt_keys_storage_path =
-        furi_string_alloc_set(APPS_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
-    storage_common_process_aliases(storage, bt_keys_storage_path);
-    bt_keys_storage_set_storage_path(app->bt, furi_string_get_cstr(bt_keys_storage_path));
-    furi_string_free(bt_keys_storage_path);
+    bt_keys_storage_set_storage_path(app->bt, APPS_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
 
     furi_record_close(RECORD_STORAGE);
 

@@ -222,12 +222,17 @@ void picopass_device_free(PicopassDevice* picopass_dev) {
 bool picopass_file_select(PicopassDevice* dev) {
     furi_assert(dev);
 
+    FuriString* picopass_app_folder;
+    picopass_app_folder = furi_string_alloc_set(STORAGE_APPS_DATA_PATH_PREFIX);
+
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, PICOPASS_APP_EXTENSION, &I_Nfc_10px);
     browser_options.base_path = STORAGE_APPS_DATA_PATH_PREFIX;
 
-    bool res = dialog_file_browser_show(dev->dialogs, dev->load_path, NULL, &browser_options);
+    bool res = dialog_file_browser_show(
+        dev->dialogs, dev->load_path, picopass_app_folder, &browser_options);
 
+    furi_string_free(picopass_app_folder);
     if(res) {
         FuriString* filename;
         filename = furi_string_alloc();
