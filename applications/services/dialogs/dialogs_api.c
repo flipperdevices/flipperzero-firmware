@@ -14,7 +14,7 @@ bool dialog_file_browser_show(
     FuriApiLock lock = api_lock_alloc_locked();
     furi_check(lock != NULL);
 
-    Storage* storage = furi_record_open("storage");
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FuriString* base_path = furi_string_alloc();
 
     if(options && options->base_path) {
@@ -56,7 +56,7 @@ bool dialog_file_browser_show(
         furi_message_queue_put(context->message_queue, &message, FuriWaitForever) == FuriStatusOk);
     api_lock_wait_unlock_and_free(lock);
 
-    furi_record_close("storage");
+    furi_record_close(RECORD_STORAGE);
     furi_string_free(base_path);
 
     return return_data.bool_value;

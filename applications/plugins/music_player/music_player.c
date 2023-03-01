@@ -307,7 +307,8 @@ int32_t music_player_app(void* p) {
             furi_string_set(file_path, (const char*)p);
         } else {
             Storage* storage = furi_record_open(RECORD_STORAGE);
-            storage_common_migrate(storage, "/ext/music_player", STORAGE_APP_DATA_PATH_PREFIX);
+            storage_common_migrate(
+                storage, EXT_PATH("music_player"), STORAGE_APP_DATA_PATH_PREFIX);
             furi_record_close(RECORD_STORAGE);
 
             furi_string_set(file_path, STORAGE_APP_DATA_PATH_PREFIX);
