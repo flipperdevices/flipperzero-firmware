@@ -16,7 +16,7 @@ static bool spi_mem_back_event_callback(void* context) {
 }
 
 SPIMemApp* spi_mem_alloc(void) {
-    SPIMemApp* instance = malloc(sizeof(SPIMemApp));
+    SPIMemApp* instance = malloc(sizeof(SPIMemApp)); //-V799
 
     instance->file_path = furi_string_alloc_set(STORAGE_APPS_DATA_PATH_PREFIX);
     instance->gui = furi_record_open(RECORD_GUI);
@@ -71,7 +71,7 @@ SPIMemApp* spi_mem_alloc(void) {
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_external);
     scene_manager_next_scene(instance->scene_manager, SPIMemSceneStart);
     return instance;
-}
+} //-V773
 
 void spi_mem_free(SPIMemApp* instance) {
     view_dispatcher_remove_view(instance->view_dispatcher, SPIMemViewSubmenu);

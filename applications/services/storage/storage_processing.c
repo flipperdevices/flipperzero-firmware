@@ -4,11 +4,11 @@
 
 #define FS_CALL(_storage, _fn) ret = _storage->fs_api->_fn;
 
-static bool storage_type_is_not_valid(StorageType type) {
+static bool storage_type_is_valid(StorageType type) {
 #ifdef FURI_RAM_EXEC
-    return type != ST_EXT;
+    return type == ST_EXT;
 #else
-    return type >= ST_ERROR;
+    return type < ST_ERROR;
 #endif
 }
 
@@ -64,9 +64,7 @@ static void storage_path_change_to_real_storage(FuriString* path, StorageType re
 FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** storage) {
     StorageType type = storage_get_type_by_path(path);
 
-    if(storage_type_is_not_valid(type)) {
-        return FSE_INVALID_NAME;
-    } else {
+    if(storage_type_is_valid(type)) {
         if(type == ST_ANY) {
             type = ST_INT;
             if(storage_data_status(&app->storage[ST_EXT]) == StorageStatusOK) {
@@ -74,9 +72,13 @@ FS_Error storage_get_data(Storage* app, FuriString* path, StorageData** storage)
             }
             storage_path_change_to_real_storage(path, type);
         }
+
+        furi_assert(type == ST_EXT || type == ST_INT);
         *storage = &app->storage[type];
 
         return FSE_OK;
+    } else {
+        return FSE_INVALID_NAME;
     }
 }
 
@@ -100,10 +102,9 @@ bool storage_process_file_open(
                 storage_data_timestamp(storage);
             }
             storage_push_storage_file(file, path, storage);
-            FS_CALL(
-                storage,
-                file.open(
-                    storage, file, cstr_path_without_vfs_prefix(path), access_mode, open_mode));
+
+            const char* path_cstr_no_vfs = cstr_path_without_vfs_prefix(path);
+            FS_CALL(storage, file.open(storage, file, path_cstr_no_vfs, access_mode, open_mode));
         }
     }
 
@@ -605,7 +606,7 @@ void storage_process_message_internal(Storage* app, StorageMessage* message) {
         break;
     }
 
-    if(path != NULL) {
+    if(path != NULL) { //-V547
         furi_string_free(path);
     }
 
