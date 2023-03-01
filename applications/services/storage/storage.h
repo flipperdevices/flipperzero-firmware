@@ -265,7 +265,7 @@ FS_Error storage_common_fs_info(
  * @param path 
  * @return bool 
  */
-void storage_common_resolve_path(Storage* storage, FuriString* path);
+void storage_common_resolve_path_and_ensure_app_directory(Storage* storage, FuriString* path);
 
 /**
  * @brief Move content of one folder to another, with rename of all conflicting files. 

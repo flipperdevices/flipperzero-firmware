@@ -19,15 +19,15 @@ bool dialog_file_browser_show(
 
     if(options && options->base_path) {
         furi_string_set(base_path, options->base_path);
-        storage_common_resolve_path(storage, base_path);
+        storage_common_resolve_path_and_ensure_app_directory(storage, base_path);
     }
 
     if(result_path) {
-        storage_common_resolve_path(storage, result_path);
+        storage_common_resolve_path_and_ensure_app_directory(storage, result_path);
     }
 
     if(path) {
-        storage_common_resolve_path(storage, path);
+        storage_common_resolve_path_and_ensure_app_directory(storage, path);
     }
 
     DialogsAppData data = {

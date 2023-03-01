@@ -443,7 +443,7 @@ static FS_Error storage_process_sd_status(Storage* app) {
     return ret;
 }
 
-/******************** Alisas processing *******************/
+/******************** Aliases processing *******************/
 
 void storage_process_alias(Storage* app, FuriString* path, FuriThreadId thread_id) {
     if(furi_string_start_with(path, STORAGE_APP_DATA_PATH_PREFIX)) {
