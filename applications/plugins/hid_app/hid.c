@@ -382,9 +382,9 @@ int32_t hid_ble_app(void* p) {
     storage_common_migrate(
         storage,
         EXT_PATH("apps/Tools/" HID_BT_KEYS_STORAGE_NAME),
-        APPS_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+        APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
 
-    bt_keys_storage_set_storage_path(app->bt, APPS_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
+    bt_keys_storage_set_storage_path(app->bt, APP_DATA_PATH(HID_BT_KEYS_STORAGE_NAME));
 
     furi_record_close(RECORD_STORAGE);
 

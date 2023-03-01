@@ -18,7 +18,7 @@ static bool spi_mem_back_event_callback(void* context) {
 SPIMemApp* spi_mem_alloc(void) {
     SPIMemApp* instance = malloc(sizeof(SPIMemApp)); //-V799
 
-    instance->file_path = furi_string_alloc_set(STORAGE_APPS_DATA_PATH_PREFIX);
+    instance->file_path = furi_string_alloc_set(STORAGE_APP_DATA_PATH_PREFIX);
     instance->gui = furi_record_open(RECORD_GUI);
     instance->notifications = furi_record_open(RECORD_NOTIFICATION);
     instance->view_dispatcher = view_dispatcher_alloc();
@@ -38,7 +38,7 @@ SPIMemApp* spi_mem_alloc(void) {
     instance->mode = SPIMemModeUnknown;
 
     // Migrate data from old sd-card folder
-    storage_common_migrate(instance->storage, "/ext/spimem", STORAGE_APPS_DATA_PATH_PREFIX);
+    storage_common_migrate(instance->storage, "/ext/spimem", STORAGE_APP_DATA_PATH_PREFIX);
 
     view_dispatcher_enable_queue(instance->view_dispatcher);
     view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);

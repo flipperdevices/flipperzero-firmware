@@ -2,6 +2,10 @@
 #include <furi.h>
 #include <storage/storage.h>
 
+// DO NOT USE THIS IN PRODUCTION CODE
+// This is a hack to access internal storage functions and definitions
+#include <storage/storage_i.h>
+
 #define UNIT_TESTS_PATH(path) EXT_PATH("unit_tests/" path)
 
 #define STORAGE_LOCKED_FILE EXT_PATH("locked_file.test")
@@ -342,7 +346,7 @@ MU_TEST_SUITE(storage_rename) {
     furi_record_close(RECORD_STORAGE);
 }
 
-#define APPSDATA_APP_PATH(path) APPSDATA_PATH "/" path
+#define APPSDATA_APP_PATH(path) APPS_DATA_PATH "/" path
 
 static const char* storage_test_apps[] = {
     "-_twilight_-",
@@ -402,7 +406,7 @@ MU_TEST(test_storage_data_path) {
     storage_file_free(file);
 
     // check that appsdata folder exists
-    mu_check(storage_dir_exists(storage, APPSDATA_PATH));
+    mu_check(storage_dir_exists(storage, APPS_DATA_PATH));
 
     // check that cli folder exists
     mu_check(storage_dir_exists(storage, APPSDATA_APP_PATH("cli")));

@@ -10,15 +10,12 @@ extern "C" {
 #define STORAGE_INT_PATH_PREFIX "/int"
 #define STORAGE_EXT_PATH_PREFIX "/ext"
 #define STORAGE_ANY_PATH_PREFIX "/any"
-#define STORAGE_APPS_DATA_PATH_PREFIX "/app"
+#define STORAGE_APP_DATA_PATH_PREFIX "/app"
 
 #define INT_PATH(path) STORAGE_INT_PATH_PREFIX "/" path
 #define EXT_PATH(path) STORAGE_EXT_PATH_PREFIX "/" path
 #define ANY_PATH(path) STORAGE_ANY_PATH_PREFIX "/" path
-#define APPS_DATA_PATH(path) STORAGE_APPS_DATA_PATH_PREFIX "/" path
-
-#define APPSDATA_FOLDER "apps_data"
-#define APPSDATA_PATH EXT_PATH(APPSDATA_FOLDER)
+#define APP_DATA_PATH(path) STORAGE_APP_DATA_PATH_PREFIX "/" path
 
 #define RECORD_STORAGE "storage"
 
@@ -268,7 +265,7 @@ FS_Error storage_common_fs_info(
  * @param path 
  * @return bool 
  */
-void storage_common_process_aliases(Storage* storage, FuriString* path);
+void storage_common_resolve_path(Storage* storage, FuriString* path);
 
 /**
  * @brief Move content of one folder to another, with rename of all conflicting files. 

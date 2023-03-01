@@ -446,20 +446,20 @@ static FS_Error storage_process_sd_status(Storage* app) {
 /******************** Alisas processing *******************/
 
 void storage_process_alias(Storage* app, FuriString* path, FuriThreadId thread_id) {
-    if(furi_string_start_with(path, STORAGE_APPS_DATA_PATH_PREFIX)) {
-        FuriString* apps_data_path_with_appsid = furi_string_alloc_set(APPSDATA_PATH "/");
+    if(furi_string_start_with(path, STORAGE_APP_DATA_PATH_PREFIX)) {
+        FuriString* apps_data_path_with_appsid = furi_string_alloc_set(APPS_DATA_PATH "/");
         furi_string_cat(apps_data_path_with_appsid, furi_thread_get_appid(thread_id));
 
         // "/app" -> "/ext/apps_data/appsid"
         furi_string_replace_at(
             path,
             0,
-            strlen(STORAGE_APPS_DATA_PATH_PREFIX),
+            strlen(STORAGE_APP_DATA_PATH_PREFIX),
             furi_string_get_cstr(apps_data_path_with_appsid));
 
         // Create app data folder if not exists
         if(storage_process_common_stat(app, apps_data_path_with_appsid, NULL) != FSE_OK) {
-            furi_string_set(apps_data_path_with_appsid, APPSDATA_PATH);
+            furi_string_set(apps_data_path_with_appsid, APPS_DATA_PATH);
             storage_process_common_mkdir(app, apps_data_path_with_appsid);
             furi_string_cat(apps_data_path_with_appsid, "/");
             furi_string_cat(apps_data_path_with_appsid, furi_thread_get_appid(thread_id));

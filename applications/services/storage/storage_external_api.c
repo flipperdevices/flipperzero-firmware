@@ -660,7 +660,7 @@ FS_Error storage_common_fs_info(
     return S_RETURN_ERROR;
 }
 
-void storage_common_process_aliases(Storage* storage, FuriString* path) {
+void storage_common_resolve_path(Storage* storage, FuriString* path) {
     S_API_PROLOGUE;
 
     SAData data = {

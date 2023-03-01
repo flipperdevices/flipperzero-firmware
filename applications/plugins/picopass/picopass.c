@@ -173,7 +173,7 @@ void picopass_show_loading_popup(void* context, bool show) {
 
 static void picopass_migrate_from_old_folder() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_common_migrate(storage, "/ext/picopass", STORAGE_APPS_DATA_PATH_PREFIX);
+    storage_common_migrate(storage, "/ext/picopass", STORAGE_APP_DATA_PATH_PREFIX);
     furi_record_close(RECORD_STORAGE);
 }
 
