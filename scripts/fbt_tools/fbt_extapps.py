@@ -296,13 +296,14 @@ def resources_fap_dist_emitter(target, source, env):
         )
 
     for _, app_artifacts in env["EXT_LIBS"].items():
-        source.extend(app_artifacts.compact)
-        target.append(
-            resources_root.Dir("apps_data")
-            .Dir(app_artifacts.app.fap_category)
-            .Dir("extensions")
-            .File(app_artifacts.compact[0].name)
-        )
+        for parent_app_id in app_artifacts.app.requires:
+            source.extend(app_artifacts.compact)
+            target.append(
+                resources_root.Dir("apps_data")
+                .Dir(parent_app_id)
+                .Dir("extensions")
+                .File(app_artifacts.compact[0].name)
+            )
 
     return (target, source)
 
@@ -390,6 +391,10 @@ def generate(env, **kw):
                 suffix=".impsyms",
                 src_suffix=".fap",
             ),
+            # "LaunchApp": Builder(
+            #     action=Action(),
+            #     emitter=launch_app_emitter,
+            # ),
         }
     )
 
