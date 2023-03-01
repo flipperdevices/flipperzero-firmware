@@ -219,18 +219,18 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
     int msb_end = (MSB_LIMIT * (msb_iter+1));
     int xks = 0, m1 = 0, m2 = 0;
     int y, i;
-    FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
+    int *temp_states_buffer = malloc(sizeof(int)*(2<<9));
+    //FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
 
     // Odd
     xks = oks;
     m1 = CONST_M1_1;
     m2 = CONST_M2_1;
     for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
-        if (main_iter % 2048 == 0) {
-            FURI_LOG_I(TAG, "On main_iter %i", main_iter); // DEBUG
-        }
+        //if (main_iter % 2048 == 0) {
+        //    FURI_LOG_I(TAG, "On main_iter %i", main_iter); // DEBUG
+        //}
         if (filter(main_iter) == (xks & 1)) {
-            int *temp_states_buffer = malloc(sizeof(int)*(2<<9));
             int temp_states_tail = 0;
 
             temp_states_buffer[0] = main_iter;
@@ -280,12 +280,10 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
                     }
                 }
             }
-
-            free(temp_states_buffer);
         }
     }
 
-    FURI_LOG_I(TAG, "MSB GE %i", msb_iter); // DEBUG
+    //FURI_LOG_I(TAG, "MSB GE %i", msb_iter); // DEBUG
 
     // Even
     xks = eks;
@@ -293,7 +291,6 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
     m2 = CONST_M2_2;
     for (int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
         if (filter(main_iter) == (xks & 1)) {
-            int *temp_states_buffer = malloc(sizeof(int)*(2<<9));
             int temp_states_tail = 0;
 
             temp_states_buffer[0] = main_iter;
@@ -358,10 +355,9 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params *p
                     }
                 }
             }
-
-            free(temp_states_buffer);
         }
     }
+    free(temp_states_buffer);
     free(odd_arrays);
     free(even_arrays);
     return found_key;
