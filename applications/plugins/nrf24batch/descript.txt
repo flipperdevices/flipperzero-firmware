@@ -16,7 +16,7 @@ Write start: 0,0,0x8F       <- if exist in the file - packet before write a batc
 
 R: ID*=,ID                  <- Read cmd, '*' - means string like device ID, result in bytes = { 0, 0, 3, 0xC1 }
 R: OSCCAL=0x51,RAM          <- Read cmd, result in bytes = { 0x51, 0, 1, 0xC1 }
-R: OSCCAL_EMEM=0            <- Read cmd, result in bytes = { 0, 0, 0, 0xC1 }
+R: OSCCAL_EMEM=0#           <- Read cmd, result in bytes = { 0, 0, 0, 0xC1 }, in the end of line - '#', returned value in hexadecimal format
 R: CO2=0x67,RAM,0xC2        <- Read cmd, result in bytes = { 0x67, 0, 1, 0xC2 }
 
 R: CO2 threshold*2=5,,0xC2  <- Read cmd, '*2' - means received field with 2 bytes size (int16), result in bytes = { 5, 0, 0, 0xC2 }
