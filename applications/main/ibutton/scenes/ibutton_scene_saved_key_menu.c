@@ -33,31 +33,39 @@ void ibutton_scene_saved_key_menu_on_enter(void* context) {
     submenu_add_item(submenu, "Delete", SubmenuIndexDelete, ibutton_submenu_callback, ibutton);
     submenu_add_item(submenu, "Info", SubmenuIndexInfo, ibutton_submenu_callback, ibutton);
 
+    submenu_set_selected_item(
+        submenu, scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneSavedKeyMenu));
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewSubmenu);
 }
 
 bool ibutton_scene_saved_key_menu_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
+    SceneManager* scene_manager = ibutton->scene_manager;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_set_scene_state(scene_manager, iButtonSceneSavedKeyMenu, event.event);
         consumed = true;
         if(event.event == SubmenuIndexEmulate) {
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
+            scene_manager_next_scene(scene_manager, iButtonSceneEmulate);
             DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
         } else if(event.event == SubmenuIndexWriteBlank) {
             ibutton->write_mode = iButtonWriteModeBlank;
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
+            scene_manager_next_scene(scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexWriteCopy) {
             ibutton->write_mode = iButtonWriteModeCopy;
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
+            scene_manager_next_scene(scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexEdit) {
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneAddValue);
+            scene_manager_next_scene(scene_manager, iButtonSceneAddValue);
         } else if(event.event == SubmenuIndexDelete) {
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneDeleteConfirm);
+            scene_manager_next_scene(scene_manager, iButtonSceneDeleteConfirm);
         } else if(event.event == SubmenuIndexInfo) {
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneInfo);
+            scene_manager_next_scene(scene_manager, iButtonSceneInfo);
         }
+
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_set_scene_state(scene_manager, iButtonSceneSavedKeyMenu, SubmenuIndexEmulate);
+        // Event is not consumed
     }
 
     return consumed;

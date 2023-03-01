@@ -57,29 +57,37 @@ void ibutton_scene_read_key_menu_on_enter(void* context) {
             ibutton);
     }
 
+    submenu_set_selected_item(
+        submenu, scene_manager_get_scene_state(ibutton->scene_manager, iButtonSceneReadKeyMenu));
     view_dispatcher_switch_to_view(ibutton->view_dispatcher, iButtonViewSubmenu);
 }
 
 bool ibutton_scene_read_key_menu_on_event(void* context, SceneManagerEvent event) {
     iButton* ibutton = context;
+    SceneManager* scene_manager = ibutton->scene_manager;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
+        scene_manager_set_scene_state(scene_manager, iButtonSceneReadKeyMenu, event.event);
         consumed = true;
+
         if(event.event == SubmenuIndexSave) {
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneSaveName);
+            scene_manager_next_scene(scene_manager, iButtonSceneSaveName);
         } else if(event.event == SubmenuIndexEmulate) {
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneEmulate);
+            scene_manager_next_scene(scene_manager, iButtonSceneEmulate);
             DOLPHIN_DEED(DolphinDeedIbuttonEmulate);
         } else if(event.event == SubmenuIndexViewData) {
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneViewData);
+            scene_manager_next_scene(scene_manager, iButtonSceneViewData);
         } else if(event.event == SubmenuIndexWriteBlank) {
             ibutton->write_mode = iButtonWriteModeBlank;
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
+            scene_manager_next_scene(scene_manager, iButtonSceneWrite);
         } else if(event.event == SubmenuIndexWriteCopy) {
             ibutton->write_mode = iButtonWriteModeCopy;
-            scene_manager_next_scene(ibutton->scene_manager, iButtonSceneWrite);
+            scene_manager_next_scene(scene_manager, iButtonSceneWrite);
         }
+    } else if(event.event == SceneManagerEventTypeBack) {
+        scene_manager_set_scene_state(ibutton->scene_manager, iButtonSceneReadKeyMenu, SubmenuIndexSave);
+        // Event is not consumed
     }
 
     return consumed;
