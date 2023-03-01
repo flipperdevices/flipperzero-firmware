@@ -1,0 +1,21 @@
+# ignore bignum math operations and other hot crypto primitives
+
+fun:*sha256_Update*
+fun:*sha256_Raw*
+fun:*sha256_Transform*
+fun:*sha512_Transform*
+fun:*pbkdf2_hmac_sha512_Update*
+fun:*pbkdf2_*
+fun:*hmac_*
+fun:*sha256_*
+# TODO this is very broad
+fun:*bn_*
+fun:*bn_inverse*
+fun:*bn_multiply*
+fun:*bn_multiply_long*
+fun:*bn_multiply_reduce_step*
+fun:*bn_multiply_step*
+fun:*curve25519_mul*
+fun:*point_multiply*
+fun:*point_jacobian_add*
+fun:*scalar_multiply*

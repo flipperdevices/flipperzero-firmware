@@ -1,0 +1,9 @@
+*.d
+*.exe
+*.o
+*.os
+tests/aestst
+tests/libtrezor-crypto.so
+tests/test_check
+tests/test_openssl
+tests/test_speed

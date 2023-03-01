@@ -5,6 +5,11 @@
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
 
+//#include "../crypto/bip32.h"
+#include "../crypto/bip39.h"
+//#include "../crypto/ecdsa.h"
+//#include "../crypto/curves.h"
+
 struct FlipBip39Scene1 {
     View* view;
     FlipBip39Scene1Callback callback;
@@ -33,8 +38,8 @@ void flipbip39_scene_1_draw(Canvas* canvas, FlipBip39Scene1Model* model) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1"); 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, "An empty scene to be"); 
-    canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "used as flipbip39"); 
+    canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, mnemonic_generate(128)); 
+    //canvas_draw_str_aligned(canvas, 0, 32, AlignLeft, AlignTop, "used as flipbip39"); 
 }
 
 static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model) {

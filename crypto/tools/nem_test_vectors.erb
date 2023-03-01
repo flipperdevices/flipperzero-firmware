@@ -1,0 +1,18 @@
+// test vectors from <%= source_url %>
+START_TEST(<%= test_name %>)
+{
+	static const struct {
+<% fields.each do |(name, type)| -%>
+		<%= if type.nil? then 'const char *' else "#{type} " end %><%= name %>;
+<% end -%>
+	} tests[] = {
+<% data.each do |values| -%>
+		{ <% values.each do |value| %><%= value %>, <% end %>},
+<% end -%>
+	};
+
+	for (size_t i = 0; i < (sizeof(tests) / sizeof(*tests)); i++) {
+		// TODO: Implement test
+	}
+}
+END_TEST
