@@ -20,13 +20,13 @@ R: OSCCAL=0x51,RAM
 R: OSCCAL_EMEM=0
 R: CO2=0x67,RAM,0xC2
 
-R: RxAddr=1
+R: RxAddr=1#
 W: RxAddr=,1
 
 R: Ch=2
 W: Ch=,2
 
-R: nRF RETR=3
+R: nRF RETR=3#
 W: nRF RETR=,3
 
 R: Send period=4
@@ -38,7 +38,7 @@ W: CO2 threshold=,5,0x82
 R: CO2 correct*2=7,,0xC2
 W: CO2 correct=,7,0x82
 
-R: FanLSB[10]=i:9
+R: FanLSB[10]=i:9#
 W: FanLSB=,i:9
 
 W: Reset=,RESET,0xC1

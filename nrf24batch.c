@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG 		"nrf24batch"
-#define VERSION		"1.1"
+#define VERSION		"1.2"
 
 #define SCAN_APP_PATH_FOLDER "/ext/nrf24batch"
 #define LOG_FILENAME 		"log"
@@ -64,6 +64,7 @@ uint8_t send_status = sst_none;// sst_*
 bool cmd_array = false;
 uint8_t cmd_array_idx;
 uint8_t cmd_array_cnt = 0;
+bool cmd_array_hex;
 uint8_t save_settings = 0;
 uint16_t view_cmd[3] = {0, 0, 0}; // ReadBatch, Read, WriteBatch
 uint8_t view_x = 0;
@@ -257,16 +258,13 @@ static bool select_settings_file() {
 	FuriString* path;
 	path = furi_string_alloc();
 	furi_string_set(path, SCAN_APP_PATH_FOLDER);
-
 	DialogsFileBrowserOptions browser_options;
 	dialog_file_browser_set_basic_options(&browser_options, ".txt", NULL);
 	browser_options.hide_ext = false;
-
 	bool ret = dialog_file_browser_show(dialogs, path, path, &browser_options);
-
 	furi_record_close("dialogs");
 	if(ret) {
-		if(!file_stream_open(file_stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+		if(!file_stream_open(file_stream, furi_string_get_cstr(path), FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
 			FURI_LOG_D(TAG, "Cannot open file \"%s\"", furi_string_get_cstr(path));
 			file_stream_close(file_stream);
 		} else {
@@ -333,10 +331,13 @@ uint8_t nrf24_send_packet()
 
 uint8_t nrf24_resend_read_packet()
 {
-	if(Log_Total) {
+	if(Log_Total && !cmd_array) {
 		FuriString *str = Log[Log_Total - 1];
 		char *p = strstr(furi_string_get_cstr(str), ": ");
-		if(p) furi_string_left(str, p - furi_string_get_cstr(str) + 2);
+		if(p) {
+			if(strncmp(p + 2, "0x", 2) == 0) p += 2;
+			furi_string_left(str, p - furi_string_get_cstr(str) + 2);
+		}
 	}
 	return nrf24_send_packet();
 }
@@ -369,23 +370,23 @@ bool nrf24_read_newpacket() {
 			else if(size == 3) var = (*(uint32_t*)payload_receive) & 0xFFFFFF;
 			else var = *(int32_t*)payload_receive;
 			//FURI_LOG_D(TAG, "VAR(%d): %ld", size, var);
-			if(size == 0) furi_string_cat_printf(str, "%c", (char)var); 
+			if(size == 0) furi_string_cat_printf(str, "%c", (char)var);
 			else {
-				if(var >= 0 && var <= 9) furi_string_cat_printf(str, "%ld", var);
+				char hex[9];
+				snprintf(hex, sizeof(hex), "%lX", var);
+				if((cmd_array && cmd_array_hex) || furi_string_end_with_str(str, "0x")) furi_string_cat_str(str, hex);
 				else {
-					char hex[9];
-					snprintf(hex, sizeof(hex), "%lX", var);
-					furi_string_cat_printf(str, "%ld (%s)", var, hex + (var < 0 ? 8 - size * 2 : 0));
+					if(var >= 0 && var <= 9) furi_string_cat_printf(str, "%ld", var);
+					else furi_string_cat_printf(str, "%ld (%s)", var, hex + (var < 0 ? 8 - size * 2 : 0));
 				}
 			}
 			if(cmd_array) {
 				if(--cmd_array_cnt) {
 					furi_string_cat_str(str, ",");
-					payload[cmd_array_idx]++;
+					if(cmd_array_hex) furi_string_cat_str(str, "0x");
+					payload[cmd_array_idx]++;	// next array element
 					NRF_repeat = 0;
-					send_status = sst_sending;
-					furi_delay_ms(delay_between_pkt);
-					nrf24_send_packet();
+					send_status = sst_sending;	// Will be send after delay_between_pkt
 				} else send_status = sst_ok;
 			} else {
 				if(size == 0) { // string, until '\0'
@@ -448,6 +449,8 @@ bool fill_payload(char *p, uint8_t *idx_i, int32_t var_n)
 			}
 		} else if(end == p) {
 			idx += payload_struct[fld];
+		} else if(*p == '#') { // value in Hexadecimal, end string
+			break;
 		} else {
 			ERR = 2;
 			strcpy(ERR_STR, "char: ");
@@ -486,6 +489,8 @@ bool Run_Read_cmd(FuriString *cmd)
 	FuriString *fs = furi_string_alloc();
 	furi_string_set_strn(fs, (char*)furi_string_get_cstr(cmd), (*(p-2)=='*' ? p-2 : p) - (char*)furi_string_get_cstr(cmd)); // skip *n
 	furi_string_cat_str(fs, ": ");
+	bool hexval;
+	if((hexval = *(p + strlen(p) - 1) == '#')) furi_string_cat_str(fs, "0x"); // value in Hex format
 	Log[Log_Total++] = fs;
 	p++;
 	memset(payload, 0, sizeof(payload));
@@ -497,7 +502,10 @@ bool Run_Read_cmd(FuriString *cmd)
 		p = strchr(furi_string_get_cstr(cmd), '[');
 		if(p) {
 			cmd_array_cnt = str_to_int(p + 1);
-			if(cmd_array_cnt > 1) cmd_array = true; // array
+			if(cmd_array_cnt > 1) {
+				cmd_array_hex = hexval;
+				cmd_array = true; // array
+			}
 		}
 	}
 	prepare_nrf24();
@@ -778,7 +786,51 @@ static uint8_t load_settings_file() {
 
 static void save_batch(void)
 {
-// to do...
+	FURI_LOG_D(TAG, "Save Batch");
+	char *p, *p2;
+	stream_seek(file_stream, 0, StreamOffsetFromEnd); 
+    FuriHalRtcDateTime dt;
+    furi_hal_rtc_get_datetime(&dt);
+	stream_write_format(file_stream, "\n%s ", SettingsFld_WriteBatch);
+	p = (char*)furi_string_get_cstr(ReadBatch_cmd[view_cmd[rwt_read_batch]]);
+	p2 = strchr(p, ':');
+	if(p2 == NULL) p2 = p + strlen(p);
+	stream_write(file_stream, (uint8_t*)p, p2 - p);
+	stream_write_format(file_stream, " %02d.%02d.%02d %02d.%02d: ", dt.day, dt.month, dt.year % 100, dt.hour, dt.minute);
+	for(uint16_t i = 0; i < Log_Total; i++) {
+		p = (char*) furi_string_get_cstr(Log[i]);
+		p2 = strchr(p, ':');
+		if(p2 && *(p2-1) != '*') {	// skip string
+			if(*(p2-1) == ']') { // array
+				char *p3 = strchr(p, '[');
+				if(p3 == NULL) p3 = p2;
+				stream_write(file_stream, (uint8_t*)p, p3 - p);
+				stream_write_cstring(file_stream, "={");
+				p = (p2 += 2);
+				do {
+					while(is_digit(p2, true) || *p2 == 'x') p2++;
+					stream_write(file_stream, (uint8_t*)p, p2 - p);
+					char c = *p2;
+					if(c == '\0') break;
+					if(c != ',') {
+						p2 = strchr(p2, ',');
+						if(p2 == NULL) break;
+					}
+					stream_write_char(file_stream, ',');
+					p = ++p2;
+				} while(1);
+				stream_write_char(file_stream, '}');
+			} else {
+				stream_write(file_stream, (uint8_t*)p, p2 - p - (*(p2-2) == '*' ? 2 : 0));
+				stream_write_char(file_stream, '=');
+				p2 += 2;
+				p = strchr(p2, ' ');
+				if(p == NULL) p = p2 + strlen(p2);
+				stream_write(file_stream, (uint8_t*)p2, p - p2);
+			}
+			if(i < Log_Total - 1) stream_write_char(file_stream, ';');
+		}
+	}
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -787,6 +839,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 	furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
+#define FONT_5x7_SCREEN_WIDTH 25
 void render_display_list(Canvas* const canvas, FuriString ***fsa, char delim, uint16_t view_pos, uint16_t max_i)
 {
 	uint16_t page = view_pos & ~7;
@@ -799,8 +852,9 @@ void render_display_list(Canvas* const canvas, FuriString ***fsa, char delim, ui
 		if(end) {
 			if(*(end - 1) == '*') end--; // skip *
 			else if(*(end - 2) == '*') end -= 2; // skip *?
-			len = MIN((end - p), 30);
-			strncpy(screen_buf, p, len);
+			len = MIN(end - p, view_x);
+			len = MIN(end - p - len, FONT_5x7_SCREEN_WIDTH);
+			strncpy(screen_buf, p + view_x, len);
 			screen_buf[len] = '\0';
 			canvas_draw_str(canvas, 5, y, screen_buf);
 		}
@@ -811,7 +865,6 @@ void render_display_list(Canvas* const canvas, FuriString ***fsa, char delim, ui
 	}
 }
 
-#define FONT_5x7_SCREEN_WIDTH 25
 static void render_callback(Canvas* const canvas, void* ctx) {
 	const PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
 	if(plugin_state == NULL) return;
@@ -875,7 +928,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 				strcpy(screen_buf, rw_type == rwt_read_batch ? "Read Batch: " : what_doing == 1 ? "Write Batch: " : "Write: ");
 				if(rw_type == rwt_read_batch || send_status != sst_none) {
 					if(NRF_ERROR) strcat(screen_buf, "nRF24 ERROR!");
-					else if(ERR) snprintf(screen_buf + strlen(screen_buf), 16, "Error %d", ERR); 
+					else if(ERR) snprintf(screen_buf + strlen(screen_buf), FONT_5x7_SCREEN_WIDTH - 7, "Error %d", ERR); 
 					else if(send_status == sst_error) strcat(screen_buf, "NO ACK!");
 					else if(send_status == sst_timeout) strcat(screen_buf, "TIMEOUT!");
 					else if(send_status == sst_ok && ((rw_type == rwt_read_batch && (uint32_t)ReadBatch_cmd_curr == 0xFFFFFFFF) 
@@ -886,10 +939,19 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 					char *p = (char*)furi_string_get_cstr(WriteBatch_cmd[view_cmd[rwt_write_batch]]);
 					char *end = strchr(p, ':');
 					if(end) {
-						uint8_t len = MIN(end - p, 25);
-						end = screen_buf + strlen(screen_buf);
-						memcpy(end, p, len);
-						end[len] = '\0';
+						uint8_t len = end - p;
+						uint8_t lenb = strlen(screen_buf);
+						end = screen_buf + lenb;
+						lenb = FONT_5x7_SCREEN_WIDTH - lenb;
+						if(len > lenb) {
+							if(view_x < len) {
+								strncpy(end, p + view_x, len = MIN(lenb, len - view_x));
+								end[len] = '\0';
+							}
+						} else {
+							strncpy(end, p, len);
+							end[len] = '\0';
+						}
 					}
 				}
 			}
@@ -906,7 +968,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 						canvas_draw_str(canvas, 0, y, ">");
 						canvas_draw_str(canvas, -1, y, ">");
 						if(Edit) {
-							int n = Edit_pos - p - vx - (FONT_5x7_SCREEN_WIDTH - 3);
+							int n = Edit_pos - p - vx - (FONT_5x7_SCREEN_WIDTH - 4);
 							if(n > 0) vx += n;	// fix out of screen
 							int x = 6 + (Edit_pos - p - vx) * 5;
 							canvas_draw_line(canvas, x - 1, y, x - 1, y - 1);
@@ -932,7 +994,7 @@ void work_timer_callback(void* ctx)
 		if(rw_type == rwt_write_batch) {
 			if(send_status == sst_ok) {
 				if(ERR == 0 && WriteBatch_cmd_curr < Log_Total && furi_get_tick() - NRF_time >= delay_between_pkt) {
-					if(++WriteBatch_cmd_curr < Log_Total) Run_WriteBatch_cmd();
+					if(++WriteBatch_cmd_curr < Log_Total) Run_WriteBatch_cmd(); else Edited = false;
 				}
 			} else if(send_status == sst_sending) {
 				if(NRF_repeat++ < NRF_resend) nrf24_send_packet(); 
@@ -941,12 +1003,15 @@ void work_timer_callback(void* ctx)
 					send_status = sst_error; // error NO_ACK
 				}
 			}
+		// ReadBatch or ReadCmd
 		} else if(send_status == sst_sending) { // sending
-			if(!NRF_last_packet_send_st) { // No ACK on last attempt
+//			if(!NRF_last_packet_send_st) { // No ACK on last attempt
 				if(furi_get_tick() - NRF_time > delay_between_pkt) {
-					if(NRF_repeat++ < NRF_resend) nrf24_resend_read_packet(); else send_status = sst_error; // error NO_ACK
+					if(NRF_repeat++ < NRF_resend) {
+						if(cmd_array) nrf24_send_packet(); else nrf24_resend_read_packet();
+					} else send_status = sst_error; // error NO_ACK
 				}
-			}
+//			}
 		} else if(send_status == sst_receiving) { // receiving
 			for(uint8_t i = 0; i < 3; i++) {
 				bool new = nrf24_read_newpacket();
@@ -1057,16 +1122,14 @@ int32_t nrf24batch_app(void* p) {
 							ask_question_answer ^= 1;
 						} else if(what_doing == 0) {
 						} else if(what_doing == 1) {
-							if(--rw_type > rwt_write_batch) rw_type = rwt_write_batch;
+							if(event.input.type == InputTypeShort) {
+								if(--rw_type > rwt_write_batch) rw_type = rwt_write_batch;
+							} else if(view_x) view_x--;
 						} else if(what_doing == 2) {
 							if(Edit) {
 								if(is_digit(Edit_pos - 1, Edit_hex)) Edit_pos--;
-								else if(*(Edit_pos - 1) == ',' && is_digit(Edit_pos - 2, true)) {
-									Edit_pos -= 2;
-									// char *p = Edit_pos;
-									// while(is_digit(p, true)) p--;
-									// Edit_hex = *p == 'x';
-								}
+								else if(*(Edit_pos - 1) == 'x' && *(Edit_pos - 3) == ',') Edit_pos -= 4;
+								else if(*(Edit_pos - 1) == ',') Edit_pos -= 2;
 							} else if(view_x) view_x--;
 						}
 					}
@@ -1078,12 +1141,15 @@ int32_t nrf24batch_app(void* p) {
 						} else if(what_doing == 0) {
 							what_doing = 1;
 						} else if(what_doing == 1) {
-							if(++rw_type > rwt_write_batch) rw_type = rwt_read_batch;
+							if(event.input.type == InputTypeShort) {
+								if(++rw_type > rwt_write_batch) rw_type = rwt_read_batch;
+							} else view_x++;
 						} else if(what_doing == 2) {
 							if(Edit) {
 								if(is_digit(Edit_pos + 1, Edit_hex)) Edit_pos++;
-								else if(*(Edit_pos + 1) == ',' && is_digit(Edit_pos + 2, Edit_hex)) {
-									if((/*Edit_hex =*/ *(Edit_pos + 3) == 'x')) Edit_pos += 3; else Edit_pos += 2;
+								else if(*(Edit_pos + 1) == ',') {
+									Edit_pos += 2;
+									if(*(Edit_pos + 1) == 'x') Edit_pos += 2;
 								}
 							} else view_x++;
 						}
@@ -1106,6 +1172,7 @@ int32_t nrf24batch_app(void* p) {
 									if(what_doing == 2) {
 										ERR = 0;
 										send_status = sst_none;
+										Edited = false;
 										what_doing--;
 									}
 								}
@@ -1122,6 +1189,7 @@ int32_t nrf24batch_app(void* p) {
 								if(ReadBatch_cmd_Total) {
 									ERR = 0;
 									Run_ReadBatch_cmd(ReadBatch_cmd[view_cmd[rwt_read_batch]]);
+									view_x = 0;
 									view_Batch = 0;
 									what_doing = 2;
 								}
@@ -1130,13 +1198,15 @@ int32_t nrf24batch_app(void* p) {
 									ERR = 0;
 									free_Log();
 									Run_Read_cmd(Read_cmd[view_cmd[rwt_read_cmd]]);
+									view_x = 0;
 									what_doing = 2;
 								}
 							} else if(rw_type == rwt_write_batch) {
 								if(WriteBatch_cmd_Total) {
 									Prepare_Write_cmd(WriteBatch_cmd[view_cmd[rwt_write_batch]]);
-									Edited = false;
 									send_status = sst_none;
+									Edited = false;
+									view_x = 0;
 									view_Batch = 0;
 									what_doing = 2;
 								}
@@ -1195,11 +1265,10 @@ int32_t nrf24batch_app(void* p) {
 					break;
 				case InputKeyBack:
 					if(event.input.type == InputTypeLong) {
-						if(what_doing <= 1) processing = false;
-						else if(what_doing == 2 && (Edited || rw_type == rwt_read_batch)) {
+						if(what_doing == 2 && (Edited || rw_type == rwt_read_batch)) {
 							if(!ask_question) ask_question_answer = 1;
 							ask_question = ask_exit;
-						}
+						} else processing = false;
 					} else if(event.input.type == InputTypeShort) {
 						if(Edit) Edit = 0;
 						else if(ask_question) ask_question = 0;
