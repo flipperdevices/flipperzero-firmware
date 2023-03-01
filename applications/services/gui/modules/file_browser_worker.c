@@ -244,7 +244,7 @@ static bool browser_folder_load_chunked(
                     furi_string_printf(name_str, "%s/%s", furi_string_get_cstr(path), name_temp);
                     if(browser->list_item_cb) {
                         browser->list_item_cb(
-                            browser->cb_ctx, name_str, file_info_is_dir(&file_info), false);
+                            browser->cb_ctx, name_str, items_cnt, file_info_is_dir(&file_info), false);
                     }
                     items_cnt++;
                 }
