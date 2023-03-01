@@ -200,8 +200,6 @@ bool ibutton_select_and_load_key(iButton* ibutton) {
 
     if(furi_string_empty(ibutton->file_path)) {
         furi_string_set(ibutton->file_path, browser_options.base_path);
-    } else {
-        path_extract_dirname(furi_string_get_cstr(ibutton->file_path), ibutton->file_path);
     }
 
     return dialog_file_browser_show(
