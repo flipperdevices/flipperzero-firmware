@@ -104,10 +104,10 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     // WIP / TODO: Generate a seed from the mnemonic
     uint8_t seed[64];
     mnemonic_to_seed(mnemonic, "", seed, 0);
-    char *seedptr = malloc(64*2 + 1);
+    char *seedptr = malloc(64 * 2 + 1);
     
     for (size_t i = 0; i < 64; i++) {
-        sprintf(seedptr + (i * 2), "%.2x", seed[i]);
+        snprintf(seedptr + (i * 2), 2, "%.2x", seed[i]);
     }
     
     //strcpy(seedptr, (char*)seed);
