@@ -1,9 +1,9 @@
 App(
-    appid="flipbip39",
-    name="Flip-BIP39",
+    appid="FlipBIP",
+    name="BIP39 Tool",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipbip39_app",
-    cdefines=["APP_FLIPBIP39"],
+    cdefines=["APP_FLIPBIP"],
     requires=[
         "gui",
     ],

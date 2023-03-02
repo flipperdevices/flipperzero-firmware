@@ -97,6 +97,51 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
         ptr = strtok(NULL, ",");
     }
 
+    // WIP / TODO: Generate a BIP32 root key from the mnemonic
+
+    // //bool root_set = false;
+    // HDNode root;
+    // uint8_t seed[64];
+    // mnemonic_to_seed(mnemonic, "", seed, 0);
+    // hdnode_from_seed(seed, 64, SECP256K1_NAME, &root);
+    // //root_set = true;
+
+    // int arg1 = 1;
+    // // constants for Bitcoin
+    // const uint32_t version_public = 0x0488b21e;
+    // const uint32_t version_private = 0x0488ade4;
+    // const char addr_version = 0x00, wif_version = 0x80;
+    // const size_t buflen = 128;
+    // char buf[buflen + 1];
+    // HDNode node;
+    // uint32_t fingerprint;
+    // // external chain
+    // for (int chain = 0; chain < 2; chain++) {
+    //     //QTableWidget *list = chain == 0 ? ui->listAddress : ui->listChange;
+    //     node = root;
+    //     hdnode_private_ckd(&node, 44 | 0x80000000);
+    //     hdnode_private_ckd(&node, 0 | 0x80000000); // bitcoin
+    //     hdnode_private_ckd(&node, (arg1 - 1) | 0x80000000);
+    //     fingerprint = hdnode_fingerprint(&node);
+    //     hdnode_serialize_private(&node, fingerprint, version_private, buf, buflen); 
+    //     //QString xprv = QString(buf); ui->lineXprv->setText(xprv);
+    //     hdnode_serialize_public(&node, fingerprint, version_public, buf, buflen); 
+    //     //QString xpub = QString(buf); ui->lineXpub->setText(xpub);
+    //     hdnode_private_ckd(&node, chain); // external / internal
+    //     for (int i = 0; i < 10; i++) {
+    //         HDNode node2 = node;
+    //         hdnode_private_ckd(&node2, i);
+    //         hdnode_fill_public_key(&node2);
+    //         ecdsa_get_address(node2.public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
+    //         //QString address = QString(buf);
+    //         ecdsa_get_wif(node2.private_key, wif_version, HASHER_SHA2D, buf, buflen); 
+    //         //QString wif = QString(buf);
+    //         // list->setItem(i, 0, new QTableWidgetItem(address));
+    //         // list->setItem(i, 1, new QTableWidgetItem(wif));
+    //         // list->setItem(i, 2, new QTableWidgetItem("0.0"));
+    //     }
+    // }
+
     // Clear the mnemonic
     mnemonic_clear();
     bip39_cache_clear();
