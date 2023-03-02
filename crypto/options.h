@@ -25,7 +25,7 @@
 
 // use precomputed Curve Points (some scalar multiples of curve base point G)
 #ifndef USE_PRECOMPUTED_CP
-#define USE_PRECOMPUTED_CP 1
+#define USE_PRECOMPUTED_CP 0
 #endif
 
 // use fast inverse method
