@@ -281,10 +281,7 @@ def resources_fap_dist_emitter(target, source, env):
     target = []
     for _, app_artifacts in env["EXT_APPS"].items():
         # We don't deploy example apps & debug tools with SD card resources
-        if (
-            app_artifacts.app.apptype == FlipperAppType.DEBUG
-            or app_artifacts.app.fap_category == "Examples"
-        ):
+        if not app_artifacts.app.is_default_deployable:
             continue
 
         target_dir = resources_root.Dir("apps")
@@ -297,6 +294,10 @@ def resources_fap_dist_emitter(target, source, env):
 
     for _, app_artifacts in env["EXT_LIBS"].items():
         for parent_app_id in app_artifacts.app.requires:
+            if parent_app := app_artifacts.app._appmanager.get(parent_app_id):
+                if not parent_app.is_default_deployable:
+                    continue
+
             source.extend(app_artifacts.compact)
             target.append(
                 resources_root.Dir("apps_data")

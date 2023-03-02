@@ -68,12 +68,17 @@ class FlipperApplication:
     fap_extbuild: List[ExternallyBuiltFile] = field(default_factory=list)
     fap_private_libs: List[Library] = field(default_factory=list)
     # Internally used by fbt
+    _appmanager: Optional["AppManager"] = None
     _appdir: Optional[object] = None
     _apppath: Optional[str] = None
     _modules: List["FlipperApplication"] = field(default_factory=list)
 
     def supports_hardware_target(self, target: str):
         return target in self.targets or "all" in self.targets
+
+    @property
+    def is_default_deployable(self):
+        return self.apptype != FlipperAppType.DEBUG and self.fap_category != "Examples"
 
     def __post_init__(self):
         if self.apptype == FlipperAppType.PLUGIN:
@@ -98,6 +103,12 @@ class AppManager:
                 return app
         return None
 
+    def _validate_app_params(self, *args, **kw):
+        if kw.get("apptype") == FlipperAppType.PLUGIN and kw.get("stack_size"):
+            raise FlipperManifestException(
+                f"Plugin {kw.get('appid')} cannot have stack (did you mean FlipperAppType.EXTERNAL?)"
+            )
+
     def load_manifest(self, app_manifest_path: str, app_dir_node: object):
         if not os.path.exists(app_manifest_path):
             raise FlipperManifestException(
@@ -109,12 +120,14 @@ class AppManager:
 
         def App(*args, **kw):
             nonlocal app_manifests
+            self._validate_app_params(*args, **kw)
             app_manifests.append(
                 FlipperApplication(
                     *args,
                     **kw,
                     _appdir=app_dir_node,
                     _apppath=os.path.dirname(app_manifest_path),
+                    _appmanager=self,
                 ),
             )
 

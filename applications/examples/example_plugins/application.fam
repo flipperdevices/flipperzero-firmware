@@ -7,7 +7,6 @@ App(
     fap_category="Examples",
 )
 
-
 App(
     appid="example_plugins_multi",
     name="Example: App w/plugins",
