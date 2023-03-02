@@ -3,6 +3,7 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
+#include "flipbip39_icons.h"
 
 struct FlipBip39Startscreen {
     View* view;
@@ -29,12 +30,16 @@ void flipbip39_startscreen_draw(Canvas* canvas, FlipBip39StartscreenModel* model
     UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
+    
+    canvas_draw_icon(canvas, 1, 33, &I_Auth_62x31);
+
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Flip-BIP39"); 
+    canvas_draw_str(canvas, 74, 11, "Flip-BIP39");
+
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Crypto tools"); 
-    canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, "for Flipper");
-    elements_button_center(canvas, "Start"); 
+    canvas_draw_str(canvas, 30, 23, "Crypto tools for Flipper");
+    
+    elements_button_right(canvas, "Start"); 
 }
 
 static void flipbip39_startscreen_model_init(FlipBip39StartscreenModel* const model) {

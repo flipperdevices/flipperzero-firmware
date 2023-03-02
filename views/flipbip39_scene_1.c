@@ -96,6 +96,10 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
 
         ptr = strtok(NULL, ",");
     }
+
+    // Clear the mnemonic
+    mnemonic_clear();
+    bip39_cache_clear();
 }
 
 bool flipbip39_scene_1_input(InputEvent* event, void* context) {
