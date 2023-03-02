@@ -1,6 +1,6 @@
 # Placeholder
 App(
-    appid="example_apps",
-    name="Example apps bundle",
+    appid="external_apps",
+    name="External apps bundle",
     apptype=FlipperAppType.METAPACKAGE,
 )
