@@ -40,8 +40,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Getter for application data path #2181 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2181)
 - Moved music_player and wav_player SD folders into the apps_data folder. (Following OFW Example in #2181)
 - UL: Subghz protocol presets set to specific frequency
-- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
+- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">
 

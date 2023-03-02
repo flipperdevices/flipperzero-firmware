@@ -1,6 +1,5 @@
 // TODO: Update progress bar
-#pragma GCC push_options
-#pragma GCC optimize("unroll-loops")
+// To compile this FAP, add -O3 to CCFLAGS in site_scons/extapps.scons
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -169,36 +168,35 @@ uint32_t crypt_or_rollback_word(struct Crypto1State* s, uint32_t in, int x, int 
     return ret;
 }
 
-bool key_already_found_for_nonce(
+int key_already_found_for_nonce(
     uint64_t* keyarray,
-    size_t keyarray_size,
+    int keyarray_size,
     uint32_t uid_xor_nt1,
     uint32_t nr1_enc,
     uint32_t p64b,
     uint32_t ar1_enc) {
-    size_t k = 0;
-    bool found = false;
-    for(k = 0; k < keyarray_size; k++) {
+    for(int k = 0; k < keyarray_size; k++) {
         struct Crypto1State temp = {0, 0};
-        int i;
-        for(i = 0; i < 24; i++) {
+
+        for(int i = 0; i < 24; i++) {
             (&temp)->odd |= (BIT(keyarray[k], 2 * i + 1) << (i ^ 3));
             (&temp)->even |= (BIT(keyarray[k], 2 * i) << (i ^ 3));
         }
+
         crypt_or_rollback_word(&temp, uid_xor_nt1, 0, 1);
         crypt_or_rollback_word(&temp, nr1_enc, 1, 1);
+
         if(ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
-            found = true;
-            break;
+            return 1;
         }
     }
-    return found;
+    return 0;
 }
 
 int check_state(struct Crypto1State* t, struct Crypto1Params* p) {
     uint64_t key = 0;
-    int found = 0;
     struct Crypto1State temp = {0, 0};
+
     if(t->odd | t->even) {
         crypt_or_rollback_word(t, 0, 0, 0);
         crypt_or_rollback_word(t, p->nr0_enc, 1, 0);
@@ -210,87 +208,90 @@ int check_state(struct Crypto1State* t, struct Crypto1Params* p) {
         if(p->ar1_enc == (crypt_or_rollback_word(t, 0, 0, 1) ^ p->p64b)) {
             crypto1_get_lfsr(&temp, &key);
             p->key = key;
-            found = 1;
+            return 1;
         }
     }
-    return found;
+    return 0;
 }
 
-static inline int state_loop(int* temp_states_buffer, int xks, int m1, int m2) {
-    int temp_states_tail = 0;
+static inline int state_loop(int* states_buffer, int xks, int m1, int m2) {
+    int states_tail = 0;
+    int round = 0, s = 0, xks_bit = 0;
 
-    for(int extend_iter = 1; extend_iter <= 15; extend_iter++) {
-        int xks_bit = BIT(xks, extend_iter);
+    for(round = 1; round <= 15; round++) {
+        xks_bit = BIT(xks, round);
 
-        for(int s = 0; s <= temp_states_tail; s++) {
-            temp_states_buffer[s] <<= 1;
-            int t = temp_states_buffer[s];
-            int ft = filter(t);
+        for(s = 0; s <= states_tail; s++) {
+            states_buffer[s] <<= 1;
 
-            if((ft ^ filter(t | 1)) != 0) {
-                temp_states_buffer[s] |= filter(t) ^ xks_bit;
-                if(extend_iter > 4) {
-                    update_contribution(temp_states_buffer, s, m1, m2);
+            if((filter(states_buffer[s]) ^ filter(states_buffer[s] | 1)) != 0) {
+                states_buffer[s] |= filter(states_buffer[s]) ^ xks_bit;
+                if(round > 4) {
+                    update_contribution(states_buffer, s, m1, m2);
                 }
-            } else if(ft == xks_bit) {
+            } else if(filter(states_buffer[s]) == xks_bit) {
                 // TODO: Refactor
-                if(extend_iter > 4) {
-                    temp_states_buffer[++temp_states_tail] = temp_states_buffer[s + 1];
-                    temp_states_buffer[s + 1] = temp_states_buffer[s] | 1;
-                    update_contribution(temp_states_buffer, s, m1, m2);
+                if(round > 4) {
+                    states_buffer[++states_tail] = states_buffer[s + 1];
+                    states_buffer[s + 1] = states_buffer[s] | 1;
+                    update_contribution(states_buffer, s, m1, m2);
                     s++;
-                    update_contribution(temp_states_buffer, s, m1, m2);
+                    update_contribution(states_buffer, s, m1, m2);
                 } else {
-                    temp_states_buffer[++temp_states_tail] = temp_states_buffer[++s];
-                    temp_states_buffer[s] = temp_states_buffer[s - 1] | 1;
+                    states_buffer[++states_tail] = states_buffer[++s];
+                    states_buffer[s] = states_buffer[s - 1] | 1;
                 }
             } else {
-                temp_states_buffer[s--] = temp_states_buffer[temp_states_tail--];
+                states_buffer[s--] = states_buffer[states_tail--];
             }
         }
     }
 
-    return temp_states_tail;
+    return states_tail;
 }
 
-int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params* p) {
+struct Msb {
+    int tail;
+    int states[512];
+};
+
+int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params* p) {
     // TODO: Combine Odd and Even loops
-    int found_key = 0;
-    const int rows = MSB_LIMIT; // Process MSB_LIMIT MSB's at once
-    const int columns = 512; // Up to 512 possible odd partial states per MSB
-    int(*odd_arrays)[columns] = (int(*)[columns])malloc(rows * sizeof(*odd_arrays));
-    int(*even_arrays)[columns] = (int(*)[columns])malloc(rows * sizeof(*even_arrays));
-    int odd_tails[MSB_LIMIT] = {0};
-    int even_tails[MSB_LIMIT] = {0};
-    int msb_start = (MSB_LIMIT * msb_iter); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
-    int msb_end = (MSB_LIMIT * (msb_iter + 1));
-    int i = 0, y = 0, temp_states_tail = 0;
-    int* temp_states_buffer_odd = malloc(sizeof(int) * (2 << 9));
-    int* temp_states_buffer_even = malloc(sizeof(int) * (2 << 9));
+    int msb_head = (MSB_LIMIT * msb_round); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
+    int msb_tail = (MSB_LIMIT * (msb_round + 1));
+    int* states_buffer = malloc(sizeof(int) * (2 << 9));
+    int states_tail = 0;
+    int i = 0, j = 0, y = 0, semi_state = 0, tail = 0, msb = 0, found = 0;
+    struct Crypto1State temp = {0, 0};
+
     //FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
 
+    struct Msb* odd_msbs = malloc(MSB_LIMIT * sizeof(*odd_msbs));
+    struct Msb* even_msbs = malloc(MSB_LIMIT * sizeof(*even_msbs));
+
     // Odd
-    for(int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
+    for(semi_state = 1 << 20; semi_state >= 0; semi_state--) {
         //if (main_iter % 2048 == 0) {
         //    FURI_LOG_I(TAG, "On main_iter %i", main_iter); // DEBUG
         //}
-        if(filter(main_iter) == (oks & 1)) {
-            temp_states_buffer_odd[0] = main_iter;
-            temp_states_tail = state_loop(temp_states_buffer_odd, oks, CONST_M1_1, CONST_M2_1);
+        if(filter(semi_state) == (oks & 1)) {
+            states_buffer[0] = semi_state;
+            states_tail = state_loop(states_buffer, oks, CONST_M1_1, CONST_M2_1);
 
-            for(int s = 0; s <= temp_states_tail; s++) {
-                char s_msb = temp_states_buffer_odd[s] >> 24;
-                if((s_msb >= msb_start) && (s_msb < msb_end)) {
-                    int found = 0;
-                    for(i = 0; i < odd_tails[s_msb - msb_start]; i++) {
-                        if(odd_arrays[s_msb - msb_start][i] == temp_states_buffer_odd[s]) {
+            for(i = 0; i <= states_tail; i++) {
+                msb = states_buffer[i] >> 24;
+                if((msb >= msb_head) && (msb < msb_tail)) {
+                    found = 0;
+                    for(j = 0; j < odd_msbs[msb - msb_head].tail; j++) {
+                        if(odd_msbs[msb - msb_head].states[j] == states_buffer[i]) {
                             found = 1;
                             break;
                         }
                     }
+
                     if(!found) {
-                        odd_arrays[s_msb - msb_start][odd_tails[s_msb - msb_start]++] =
-                            temp_states_buffer_odd[s];
+                        tail = odd_msbs[msb - msb_head].tail++;
+                        odd_msbs[msb - msb_head].states[tail] = states_buffer[i];
                     }
                 }
             }
@@ -300,42 +301,39 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params* p
     //FURI_LOG_I(TAG, "MSB GE %i", msb_iter); // DEBUG
 
     // Even
-    for(int main_iter = 1 << 20; main_iter >= 0; --main_iter) {
-        if(filter(main_iter) == (eks & 1)) {
-            temp_states_buffer_even[0] = main_iter;
-            temp_states_tail = state_loop(temp_states_buffer_even, eks, CONST_M1_2, CONST_M2_2);
+    for(semi_state = 1 << 20; semi_state >= 0; semi_state--) {
+        if(filter(semi_state) == (eks & 1)) {
+            states_buffer[0] = semi_state;
+            states_tail = state_loop(states_buffer, eks, CONST_M1_2, CONST_M2_2);
 
-            for(int s = 0; s <= temp_states_tail; s++) {
-                char s_msb = temp_states_buffer_even[s] >> 24;
-                if((s_msb >= msb_start) && (s_msb < msb_end)) {
-                    int found = 0;
-                    for(i = 0; i < even_tails[s_msb - msb_start]; i++) {
-                        if(even_arrays[s_msb - msb_start][i] == temp_states_buffer_even[s]) {
+            for(i = 0; i <= states_tail; i++) {
+                msb = states_buffer[i] >> 24;
+                if((msb >= msb_head) && (msb < msb_tail)) {
+                    found = 0;
+
+                    for(j = 0; j < even_msbs[msb - msb_head].tail; j++) {
+                        if(even_msbs[msb - msb_head].states[j] == states_buffer[i]) {
                             found = 1;
                             break;
                         }
                     }
-                    if(found) {
-                        continue;
-                    }
-                    even_arrays[s_msb - msb_start][even_tails[s_msb - msb_start]++] =
-                        temp_states_buffer_even[s];
-                    temp_states_buffer_even[s] =
-                        (temp_states_buffer_even[s] << 1) ^
-                        evenparity32(temp_states_buffer_even[s] & LF_POLY_EVEN);
+
+                    if(found) continue;
+
+                    tail = even_msbs[msb - msb_head].tail++;
+                    even_msbs[msb - msb_head].states[tail] = states_buffer[i];
+                    states_buffer[i] = (states_buffer[i] << 1) ^
+                                       evenparity32(states_buffer[i] & LF_POLY_EVEN);
                     // Check against all odd states for MSB
-                    for(y = 0; y <= odd_tails[s_msb - msb_start]; ++y) {
-                        struct Crypto1State temp = {0, 0};
-                        temp.even = odd_arrays[s_msb - msb_start][y];
-                        temp.odd = temp_states_buffer_even[s] ^
-                                   evenparity32(odd_arrays[s_msb - msb_start][y] & LF_POLY_ODD);
+                    for(y = 0; y <= odd_msbs[msb - msb_head].tail; y++) {
+                        temp.even = odd_msbs[msb - msb_head].states[y];
+                        temp.odd = states_buffer[i] ^
+                                   evenparity32(odd_msbs[msb - msb_head].states[y] & LF_POLY_ODD);
                         if(check_state(&temp, p)) {
-                            found_key = 1;
-                            free(temp_states_buffer_odd);
-                            free(temp_states_buffer_even);
-                            free(odd_arrays);
-                            free(even_arrays);
-                            return found_key;
+                            free(states_buffer);
+                            free(odd_msbs);
+                            free(even_msbs);
+                            return 1;
                         }
                     }
                 }
@@ -343,16 +341,15 @@ int calculate_msb_tables(int oks, int eks, int msb_iter, struct Crypto1Params* p
         }
     }
 
-    free(temp_states_buffer_odd);
-    free(temp_states_buffer_even);
-    free(odd_arrays);
-    free(even_arrays);
-    return found_key;
+    free(states_buffer);
+    free(odd_msbs);
+    free(even_msbs);
+    return 0;
 }
 
 int recover(struct Crypto1Params* p, int ks2) {
-    int i;
     int oks = 0, eks = 0;
+    int i = 0, msb = 0;
     for(i = 31; i >= 0; i -= 2) {
         oks = oks << 1 | BEBIT(ks2, i);
     }
@@ -360,8 +357,8 @@ int recover(struct Crypto1Params* p, int ks2) {
         eks = eks << 1 | BEBIT(ks2, i);
     }
     int bench_start = furi_hal_rtc_get_timestamp();
-    for(int msb_iter = 0; msb_iter <= ((256 / MSB_LIMIT) - 1); msb_iter++) {
-        if(calculate_msb_tables(oks, eks, msb_iter, p)) {
+    for(msb = 0; msb <= ((256 / MSB_LIMIT) - 1); msb++) {
+        if(calculate_msb_tables(oks, eks, msb, p)) {
             int bench_stop = furi_hal_rtc_get_timestamp();
             FURI_LOG_I(TAG, "Cracked in %i seconds", bench_stop - bench_start);
             return 1;
