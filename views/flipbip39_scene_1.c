@@ -7,6 +7,7 @@
 #include "../helpers/flipbip39_haptic.h"
 #include "../helpers/flipbip39_speaker.h"
 #include "../helpers/flipbip39_led.h"
+#include "../helpers/flipbip39_string.h"
 
 #include <string.h>
 // #include "../crypto/bip32.h"
@@ -86,7 +87,7 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     }
 
     // Split the mnemonic into parts
-    char *ptr = strtok(str, ",");
+    char *ptr = flipbip39_strtok(str, ",");
     int partnum = 0;
     while(ptr != NULL)
     {
@@ -101,7 +102,7 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
         if (partnum == 5) model->mnemonic5 = part;
         if (partnum == 6) model->mnemonic6 = part;
 
-        ptr = strtok(NULL, ",");
+        ptr = flipbip39_strtok(NULL, ",");
     }
 
 
