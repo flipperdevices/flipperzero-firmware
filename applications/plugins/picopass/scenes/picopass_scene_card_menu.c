@@ -3,14 +3,8 @@
 enum SubmenuIndex {
     SubmenuIndexSave,
     SubmenuIndexSaveAsLF,
-    SubmenuIndexResetiCE,
-    SubmenuIndexResetiCL,
-    SubmenuIndexResetiCS,
+    SubmenuIndexChangeKey,
 };
-
-extern const uint8_t picopass_xice_key[];
-extern const uint8_t picopass_xicl_key[];
-extern const uint8_t picopass_xics_key[];
 
 void picopass_scene_card_menu_submenu_callback(void* context, uint32_t index) {
     Picopass* picopass = context;
@@ -32,9 +26,12 @@ void picopass_scene_card_menu_on_enter(void* context) {
             picopass_scene_card_menu_submenu_callback,
             picopass);
     }
-    submenu_add_item(submenu, "Reset iCE", SubmenuIndexResetiCE, picopass_scene_card_menu_submenu_callback, picopass);
-    submenu_add_item(submenu, "Reset iCL", SubmenuIndexResetiCL, picopass_scene_card_menu_submenu_callback, picopass);
-    submenu_add_item(submenu, "Reset iCS", SubmenuIndexResetiCS, picopass_scene_card_menu_submenu_callback, picopass);
+    submenu_add_item(
+        submenu,
+        "Change Key",
+        SubmenuIndexChangeKey,
+        picopass_scene_card_menu_submenu_callback,
+        picopass);
 
     submenu_set_selected_item(
         picopass->submenu,
@@ -60,20 +57,10 @@ bool picopass_scene_card_menu_on_event(void* context, SceneManagerEvent event) {
             picopass->dev->format = PicopassDeviceSaveFormatLF;
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneSaveName);
             consumed = true;
-        } else if(event.event == SubmenuIndexResetiCE) {
-            scene_manager_set_scene_state(picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexResetiCE);
-            memcpy(picopass->dev->dev_data.pacs.key, picopass_xice_key, PICOPASS_BLOCK_LEN);
-            scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteKey);
-            consumed = true;
-        } else if(event.event == SubmenuIndexResetiCL) {
-            scene_manager_set_scene_state(picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexResetiCE);
-            memcpy(picopass->dev->dev_data.pacs.key, picopass_xicl_key, PICOPASS_BLOCK_LEN);
-            scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteKey);
-            consumed = true;
-        } else if(event.event == SubmenuIndexResetiCS) {
-            scene_manager_set_scene_state(picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexResetiCE);
-            memcpy(picopass->dev->dev_data.pacs.key, picopass_xics_key, PICOPASS_BLOCK_LEN);
-            scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteKey);
+        } else if(event.event == SubmenuIndexChangeKey) {
+            scene_manager_set_scene_state(
+                picopass->scene_manager, PicopassSceneCardMenu, SubmenuIndexChangeKey);
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneKeyMenu);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
