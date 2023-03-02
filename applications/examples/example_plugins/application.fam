@@ -28,5 +28,5 @@ App(
     appid="example_plugin2",
     apptype=FlipperAppType.PLUGIN,
     entry_point="example_plugin2_ep",
-    requires=["example_plugins", "example_plugins_multi"],
+    requires=["example_plugins_multi"],
 )
