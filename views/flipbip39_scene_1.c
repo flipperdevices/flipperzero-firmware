@@ -25,8 +25,14 @@ struct FlipBip39Scene1 {
 
 
 typedef struct {
+    int page;
     int strength;
-    const char* seed;
+    const char* seed1;
+    const char* seed2;
+    const char* seed3;
+    const char* seed4;
+    const char* seed5;
+    const char* seed6;
     const char* mnemonic1;
     const char* mnemonic2;
     const char* mnemonic3;
@@ -55,16 +61,33 @@ void flipbip39_scene_1_draw(Canvas* canvas, FlipBip39Scene1Model* model) {
     canvas_set_font(canvas, FontSecondary);
     //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->strength == 128 ? "128-bit" : "256-bit");
     //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->seed);
-    canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->mnemonic1);
-    canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->mnemonic2);
-    canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->mnemonic3);
-    canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->mnemonic4);
-    canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->mnemonic5);
-    canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->mnemonic6);
+    
+    // Mnenomic
+    if (model->page == 0) {
+        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->mnemonic1);
+        canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->mnemonic2);
+        canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->mnemonic3);
+        canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->mnemonic4);
+        canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->mnemonic5);
+        canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->mnemonic6);
+    }
+    // Seed
+    else if (model->page == 1) {
+        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->seed1);
+        canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->seed2);
+        canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->seed3);
+        canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->seed4);
+        canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->seed5);
+        canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->seed6);
+    }
 
+    
 }
 
 static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, const int strength) {
+    
+    model->page = 0;
+
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
     const char* mnemonic = mnemonic_generate(model->strength);
@@ -101,29 +124,28 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
         mnemopart = flipbip39_strtok(NULL, ",");
     }
 
-    // WIP / TODO: Generate a seed from the mnemonic
-    uint8_t seed[64];
-    mnemonic_to_seed(mnemonic, "", seed, 0);
-    char *seedptr = malloc(64 * 2 + 1);
+    // Generate a BIP39 seed from the mnemonic
+    uint8_t seedbytes[64];
+    mnemonic_to_seed(mnemonic, "", seedbytes, 0);
+    char *seed = malloc(64 * 2 + 1);
     
+    // Convert the seed to a hex string
     for (size_t i = 0; i < 64; i++) {
-        snprintf(seedptr + (i * 2), 2, "%.2x", seed[i]);
+        sprintf(seed + (i * 2), "%.2x", seedbytes[i]);
     }
     
-    //strcpy(seedptr, (char*)seed);
-    model->seed = seedptr;
-    
-    // for (size_t i = 0; i < 6; i++) {
-    //     char *seedpartptr = malloc(22 + 1);
-    //     strncpy(seedpartptr, seedptr + (i * 22), 22);
-    //     //model->seed = seedpartptr;
-    //     if (i == 0) model->mnemonic1 = seedpartptr;
-    //     if (i == 1) model->mnemonic2 = seedpartptr;
-    //     if (i == 2) model->mnemonic3 = seedpartptr;
-    //     if (i == 3) model->mnemonic4 = seedpartptr;
-    //     if (i == 4) model->mnemonic5 = seedpartptr;
-    //     if (i == 5) model->mnemonic6 = seedpartptr;
-    // }
+    // Split the seed into parts
+    for (size_t seedpartnum = 1; seedpartnum <= 6; seedpartnum++) {
+        char *seedpartptr = malloc(22 + 1);
+        strncpy(seedpartptr, seed + ((seedpartnum - 1) * 22), 22);
+        
+        if (seedpartnum == 1) model->seed1 = seedpartptr;
+        if (seedpartnum == 2) model->seed2 = seedpartptr;
+        if (seedpartnum == 3) model->seed3 = seedpartptr;
+        if (seedpartnum == 4) model->seed4 = seedpartptr;
+        if (seedpartnum == 5) model->seed5 = seedpartptr;
+        if (seedpartnum == 6) model->seed6 = seedpartptr;
+    }
 
     // WIP / TODO: Generate a BIP32 root key from the mnemonic
 
@@ -169,9 +191,15 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     // }
 
     // Clear the mnemonic
+    mnemonic_clear();
     memzero(mnemo, strlen(mnemo));
     free(mnemo);
-    mnemonic_clear();
+
+    // Clear the seed
+    memzero(seed, sizeof(seed));
+    free(seed);
+
+    // Clear the BIP39 cache
     bip39_cache_clear();
 }
 
@@ -199,7 +227,8 @@ bool flipbip39_scene_1_input(InputEvent* event, void* context) {
                     instance->view,
                     FlipBip39Scene1Model* model,
                     {
-                        UNUSED(model);
+                        //UNUSED(model);
+                        model->page = (model->page + 1) % 2;
                     },
                     true);
                 break;
@@ -219,8 +248,14 @@ void flipbip39_scene_1_exit(void* context) {
         FlipBip39Scene1Model * model,
         {
             // Clear the mnemonic from memory
+            model->page = 0;
             model->strength = 0;
-            memzero((void*)model->seed, strlen(model->seed));
+            memzero((void*)model->seed1, strlen(model->seed1));
+            memzero((void*)model->seed2, strlen(model->seed2));
+            memzero((void*)model->seed3, strlen(model->seed3));
+            memzero((void*)model->seed4, strlen(model->seed4));
+            memzero((void*)model->seed5, strlen(model->seed5));
+            memzero((void*)model->seed6, strlen(model->seed6));
             memzero((void*)model->mnemonic1, strlen(model->mnemonic1));
             memzero((void*)model->mnemonic2, strlen(model->mnemonic2));
             memzero((void*)model->mnemonic3, strlen(model->mnemonic3));
@@ -291,7 +326,12 @@ void flipbip39_scene_1_free(FlipBip39Scene1* instance) {
         FlipBip39Scene1Model * model,
         {
             //UNUSED(model);
-            free((void*)model->seed);
+            free((void*)model->seed1);
+            free((void*)model->seed2);
+            free((void*)model->seed3);
+            free((void*)model->seed4);
+            free((void*)model->seed5);
+            free((void*)model->seed6);
             free((void*)model->mnemonic1);
             free((void*)model->mnemonic2);
             free((void*)model->mnemonic3);
