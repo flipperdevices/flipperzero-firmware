@@ -885,7 +885,7 @@ void display_remove_asterisk(char *fsp, uint8_t vx)
 	if(p2) { // remove '*' or '*n'
 		int pos = p2 - fsp;
 		if((pos -= vx) < 0) pos = 0;
-		memmove(screen_buf + pos, screen_buf + pos + (*(p2 + 1) == ':' ? 1 : 2), FONT_5x7_SCREEN_WIDTH + 1);
+		memmove(screen_buf + pos, screen_buf + pos + (*(p2 + 1) == ':' ? 1 : 2), FONT_5x7_SCREEN_WIDTH + 1 + 2);
 	}
 }
 
@@ -1002,8 +1002,8 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 							canvas_draw_line(canvas, n, y, n, y - 1);
 						}
 					}
-					strncpy(screen_buf, p + vx, FONT_5x7_SCREEN_WIDTH);
-					screen_buf[FONT_5x7_SCREEN_WIDTH] = '\0';
+					strncpy(screen_buf, p + vx, FONT_5x7_SCREEN_WIDTH + 2);
+					screen_buf[FONT_5x7_SCREEN_WIDTH + 2] = '\0';
 					display_remove_asterisk(p, vx);
 					canvas_draw_str(canvas, 6, y, screen_buf);
 				}
