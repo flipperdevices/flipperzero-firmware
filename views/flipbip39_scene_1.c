@@ -53,6 +53,7 @@ void flipbip39_scene_1_draw(Canvas* canvas, FlipBip39Scene1Model* model) {
     
     canvas_set_font(canvas, FontSecondary);
     //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->strength == 128 ? "128-bit" : "256-bit");
+    //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->seed);
     canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->mnemonic1);
     canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->mnemonic2);
     canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->mnemonic3);
@@ -66,45 +67,62 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
     const char* mnemonic = mnemonic_generate(model->strength);
-    
-    // Generate a seed from the mnemonic
-    uint8_t seed[64];
-    // WIP / TODO
-    //mnemonic_to_seed(mnemonic, "", seed, 0);
-    model->seed = (char *)seed;
 
     // Delineate sections of the mnemonic every 4 words
-    char *str = malloc(strlen(mnemonic) + 1);
-    strcpy(str, mnemonic);
+    char *mnemo = malloc(strlen(mnemonic) + 1);
+    strcpy(mnemo, mnemonic);
     int word = 0;
-    for (size_t i = 0; i < strlen(str); i++) {
-        if (str[i] == ' ') {
+    for (size_t i = 0; i < strlen(mnemo); i++) {
+        if (mnemo[i] == ' ') {
             word++;
             if (word % 4 == 0) {
-                str[i] = ',';
+                mnemo[i] = ',';
             }
         } 
     }
 
     // Split the mnemonic into parts
-    char *ptr = flipbip39_strtok(str, ",");
+    char *mnemopart = flipbip39_strtok(mnemo, ",");
     int partnum = 0;
-    while(ptr != NULL)
+    while(mnemopart != NULL)
     {
-        char *part = malloc(strlen(ptr) + 1);
-        strcpy(part, ptr);
+        char *partptr = malloc(strlen(mnemopart) + 1);
+        strcpy(partptr, mnemopart);
         partnum++;
         
-        if (partnum == 1) model->mnemonic1 = part;
-        if (partnum == 2) model->mnemonic2 = part;
-        if (partnum == 3) model->mnemonic3 = part;
-        if (partnum == 4) model->mnemonic4 = part;
-        if (partnum == 5) model->mnemonic5 = part;
-        if (partnum == 6) model->mnemonic6 = part;
+        if (partnum == 1) model->mnemonic1 = partptr;
+        if (partnum == 2) model->mnemonic2 = partptr;
+        if (partnum == 3) model->mnemonic3 = partptr;
+        if (partnum == 4) model->mnemonic4 = partptr;
+        if (partnum == 5) model->mnemonic5 = partptr;
+        if (partnum == 6) model->mnemonic6 = partptr;
 
-        ptr = flipbip39_strtok(NULL, ",");
+        mnemopart = flipbip39_strtok(NULL, ",");
     }
 
+    // WIP / TODO: Generate a seed from the mnemonic
+    uint8_t seed[64];
+    //mnemonic_to_seed(mnemonic, "", seed, 0);
+    char *seedptr = malloc(64 + 1);
+    
+    //for (size_t i = 0; i < 64; i++) {
+    //    seedptr += sprintf(seedptr, "%02X", seed[i]);
+    //}
+    
+    strcpy(seedptr, (char*)seed);
+    model->seed = seedptr;
+    
+    // for (size_t i = 0; i < 4; i++) {
+    //     char *seedpartptr = malloc(16 + 1);
+    //     strncpy(seedptr, seedptr + (i * 16), 16);
+    //     //model->seed = seedpartptr;
+    //     if (i == 0) model->mnemonic1 = seedptr;
+    //     if (i == 1) model->mnemonic2 = seedptr;
+    //     if (i == 2) model->mnemonic3 = seedptr;
+    //     if (i == 3) model->mnemonic4 = seedptr;
+    //     if (i == 4) model->mnemonic5 = seedptr;
+    //     if (i == 5) model->mnemonic6 = seedptr;
+    // }
 
     // WIP / TODO: Generate a BIP32 root key from the mnemonic
 
@@ -150,6 +168,8 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     // }
 
     // Clear the mnemonic
+    memzero(mnemo, strlen(mnemo));
+    free(mnemo);
     mnemonic_clear();
     bip39_cache_clear();
 }
@@ -270,6 +290,7 @@ void flipbip39_scene_1_free(FlipBip39Scene1* instance) {
         FlipBip39Scene1Model * model,
         {
             //UNUSED(model);
+            free((void*)model->seed);
             free((void*)model->mnemonic1);
             free((void*)model->mnemonic2);
             free((void*)model->mnemonic3);
