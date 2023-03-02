@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [iButton system and app refactoring #2388 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2388)
 - Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
+- Temporarily Removed: [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 
 <a name="release">
 
@@ -300,7 +301,6 @@ $ ./fbt dolphin_ext
 - [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
-- [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote)
