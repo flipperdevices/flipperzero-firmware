@@ -211,6 +211,7 @@ void flipbip39_scene_1_enter(void* context) {
     int strength_setting = app->bip39_strength;
     int strength = 256;
     if (strength_setting == 0) strength = 128;
+    else if (strength_setting == 1) strength = 192;
 
     flipbip39_play_happy_bump(app);
     flipbip39_led_set_rgb(app, 255, 0, 0);
@@ -239,6 +240,7 @@ FlipBip39Scene1* flipbip39_scene_1_alloc() {
     // int strength_setting = app->bip39_strength;
     // int strength = 256;
     // if (strength_setting == 0) strength = 128;
+    // else if (strength_setting == 1) strength = 192;
 
     // with_view_model(
     //     instance->view,

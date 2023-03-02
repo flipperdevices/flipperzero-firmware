@@ -35,12 +35,14 @@ const uint32_t led_value[2] = {
     FlipBip39LedOn,
 };
 
-const char* const bip39_strength_text[2] = {
+const char* const bip39_strength_text[3] = {
     "12",
+    "18",
     "24",
 };
-const uint32_t bip39_strength_value[2] = {
+const uint32_t bip39_strength_value[3] = {
     FlipBip39Strength128,
+    FlipBip39Strength192,
     FlipBip39Strength256,
 };
 
@@ -86,10 +88,10 @@ void flipbip39_scene_settings_on_enter(void* context) {
     item = variable_item_list_add(
         app->variable_item_list,
         "BIP39 Words:",
-        2,
+        3,
         flipbip39_scene_settings_set_bip39_strength,
         app);
-    value_index = value_index_uint32(app->bip39_strength, bip39_strength_value, 2);
+    value_index = value_index_uint32(app->bip39_strength, bip39_strength_value, 3);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, bip39_strength_text[value_index]);
 
