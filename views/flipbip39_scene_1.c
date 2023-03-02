@@ -24,6 +24,7 @@ struct FlipBip39Scene1 {
 
 typedef struct {
     int strength;
+    const char* seed;
     const char* mnemonic1;
     const char* mnemonic2;
     const char* mnemonic3;
@@ -63,7 +64,7 @@ void flipbip39_scene_1_draw(Canvas* canvas, FlipBip39Scene1Model* model) {
 static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, const int strength) {
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
-    const char* mnemonic = mnemonic_generate(strength);
+    const char* mnemonic = mnemonic_generate(model->strength);
 
     // Delineate 6 sections of the mnemonic
     char *str = malloc(strlen(mnemonic) + 1);
@@ -78,7 +79,12 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
         } 
     }
 
-    // Split the mnemonic into 6 parts
+    // Generate a seed from the mnemonic
+    uint8_t seed[64];
+    //mnemonic_to_seed(mnemonic, "", seed, 0);
+    model->seed = (char *)seed;
+
+    // Split the mnemonic into parts
     char *ptr = strtok (str, ",");
     int partnum = 0;
     while(ptr != NULL)
@@ -97,12 +103,11 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
         ptr = strtok(NULL, ",");
     }
 
+
     // WIP / TODO: Generate a BIP32 root key from the mnemonic
 
     // //bool root_set = false;
     // HDNode root;
-    // uint8_t seed[64];
-    // mnemonic_to_seed(mnemonic, "", seed, 0);
     // hdnode_from_seed(seed, 64, SECP256K1_NAME, &root);
     // //root_set = true;
 
@@ -192,6 +197,7 @@ void flipbip39_scene_1_exit(void* context) {
         {
             // Clear the mnemonic from memory
             model->strength = 0;
+            memzero((void*)model->seed, strlen(model->seed));
             memzero((void*)model->mnemonic1, strlen(model->mnemonic1));
             memzero((void*)model->mnemonic2, strlen(model->mnemonic2));
             memzero((void*)model->mnemonic3, strlen(model->mnemonic3));

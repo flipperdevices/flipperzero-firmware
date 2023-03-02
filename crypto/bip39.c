@@ -189,7 +189,8 @@ void mnemonic_to_seed(const char *mnemonic, const char *passphrase,
                       void (*progress_callback)(uint32_t current,
                                                 uint32_t total)) {
   int mnemoniclen = strlen(mnemonic);
-  int passphraselen = strnlen(passphrase, 256);
+  int passphraselen = strlen(passphrase);
+  if (passphraselen > 256) passphraselen = 256;
 #if USE_BIP39_CACHE
   // check cache
   if (mnemoniclen < 256 && passphraselen < 64) {
