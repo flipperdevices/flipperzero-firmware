@@ -9,19 +9,19 @@ You also need jumper wires to connect the board on the **Flipper Zero**.
 
 **Note 1 :** this board uses a **J305** geiger tube. According this [website](https://www.rhelectronics.store/j305-glassy-geiger-muller-tube-nuclear-radiation-sensor) gamma conversion factor is **0.0081** for this tube. This value has been declared in the header of the source file so you can change it easily if needed. Incorrect conversion factor will give false measurements when **μSv/h** / **mSv/y** is selected.
 
-**Note 2 :** **J305** geiger tube is sensible only to **beta** and **gamma** rays. **Alpha** rays cannot be detected. 
+**Note 2 :** **J305** geiger tube is only sensible to **beta** and **gamma** rays. **Alpha** rays cannot be detected. 
 
-Usable radioactive source : 
+Usable radioactive sources : 
 - natural uranium (alpha, beta, gamma)
 - natural thorium (alpha, beta, gamma)
 - radium-226 (alpha, beta, gamma)
 - cobalt-60 (beta, gamma)
 
-**Unusable** radioactive source : 
+**Unusable** radioactive sources : 
 - americium-241 (alpha)
 - polonium-210 (alpha)
 - tritium (very low beta)
-- metallic/depleted uranium (alpha)
+- high purity metallic uranium/thorium (alpha)
 
 The geiger counter board can be powered with +5V power pin of the **Flipper Zero**. This pin will automatically be enabled when the program is launched. 
 
@@ -50,7 +50,7 @@ The program will automatically be launched after compilation
 
 **A4** GPIO can be connected on **A7** GPIO to test this application without using a geiger tube. **A4** GPIO is generating a signal whose frequency changes every second.
 
-Press Ok button to clear the graph, press left/right to choose unit (cpm, μSv/h, mSv/y), press back button to quit
+Press **Ok** button to clear the graph, press **Left/Right** to choose unit (cpm, μSv/h, mSv/y), press **Back** button to quit
 
 If you don't want to build this application, just simply copy **flipper_geiger.fap** on your **Flipper Zero**
 
