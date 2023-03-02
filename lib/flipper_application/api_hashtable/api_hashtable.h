@@ -37,6 +37,7 @@ bool elf_resolve_from_hashtable(
 /**
  * @brief  HashtableApiInterface is an implementation of ElfApiInterface
  * that uses a hash table to resolve function addresses.
+ * table_cbegin and table_cend must point to a sorted array of sym_entry
  */
 struct HashtableApiInterface : public ElfApiInterface {
     const sym_entry *table_cbegin, *table_cend;

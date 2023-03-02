@@ -1,4 +1,4 @@
-#include "application_lib_manager.h"
+#include "plugin_manager.h"
 
 #include <loader/firmware_api/firmware_api.h>
 #include <storage/storage.h>
@@ -14,7 +14,7 @@
 ARRAY_DEF(FlipperApplicationList, FlipperApplication*, M_PTR_OPLIST)
 #define M_OPL_FlipperApplicationList_t() ARRAY_OPLIST(FlipperApplicationList, M_PTR_OPLIST)
 
-struct ApplicationLibManager {
+struct PluginManager {
     const char* application_id;
     uint32_t api_version;
     Storage* storage;
@@ -22,11 +22,11 @@ struct ApplicationLibManager {
     const ElfApiInterface* api_interface;
 };
 
-ApplicationLibManager* application_lib_manager_alloc(
+PluginManager* plugin_manager_alloc(
     const char* application_id,
     uint32_t api_version,
     const ElfApiInterface* api_interface) {
-    ApplicationLibManager* manager = malloc(sizeof(ApplicationLibManager));
+    PluginManager* manager = malloc(sizeof(PluginManager));
     manager->application_id = application_id;
     manager->api_version = api_version;
     manager->api_interface = api_interface ? api_interface : firmware_api_interface;
@@ -35,7 +35,7 @@ ApplicationLibManager* application_lib_manager_alloc(
     return manager;
 }
 
-void application_lib_manager_free(ApplicationLibManager* manager) {
+void plugin_manager_free(PluginManager* manager) {
     for
         M_EACH(loaded_lib, manager->libs, FlipperApplicationList_t) {
             flipper_application_free(*loaded_lib);
@@ -45,23 +45,22 @@ void application_lib_manager_free(ApplicationLibManager* manager) {
     free(manager);
 }
 
-ApplicationLibManagerError
-    application_lib_manager_load_single(ApplicationLibManager* manager, const char* path) {
+PluginManagerError plugin_manager_load_single(PluginManager* manager, const char* path) {
     FlipperApplication* lib = flipper_application_alloc(manager->storage, manager->api_interface);
 
-    ApplicationLibManagerError error = ApplicationLibManagerErrorNone;
+    PluginManagerError error = PluginManagerErrorNone;
     do {
         FlipperApplicationPreloadStatus preload_res = flipper_application_preload(lib, path);
 
         if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             FURI_LOG_E(TAG, "Failed to preload %s", path);
-            error = ApplicationLibManagerErrorLoaderError;
+            error = PluginManagerErrorLoaderError;
             break;
         }
 
-        if(!flipper_application_is_lib(lib)) {
-            FURI_LOG_E(TAG, "Not a library %s", path);
-            error = ApplicationLibManagerErrorLoaderError;
+        if(!flipper_application_is_plugin(lib)) {
+            FURI_LOG_E(TAG, "Not a plugin %s", path);
+            error = PluginManagerErrorLoaderError;
             break;
         }
 
@@ -71,39 +70,38 @@ ApplicationLibManagerError
             break;
         }
 
-        const FlipperApplicationLibraryDescriptor* app_descriptor =
-            flipper_application_lib_get(lib);
+        const FlipperAppPluginDescriptor* app_descriptor =
+            flipper_application_plugin_get_descriptor(lib);
 
         if(!app_descriptor) {
             FURI_LOG_E(TAG, "Failed to get descriptor %s", path);
-            error = ApplicationLibManagerErrorLoaderError;
+            error = PluginManagerErrorLoaderError;
             break;
         }
 
         if(strcmp(app_descriptor->appid, manager->application_id) != 0) {
             FURI_LOG_E(TAG, "Application id mismatch %s", path);
-            error = ApplicationLibManagerErrorApplicationIdMismatch;
+            error = PluginManagerErrorApplicationIdMismatch;
             break;
         }
 
         if(app_descriptor->ep_api_version != manager->api_version) {
             FURI_LOG_E(TAG, "API version mismatch %s", path);
-            error = ApplicationLibManagerErrorAPIVersionMismatch;
+            error = PluginManagerErrorAPIVersionMismatch;
             break;
         }
 
         FlipperApplicationList_push_back(manager->libs, lib);
     } while(false);
 
-    if(error != ApplicationLibManagerErrorNone) {
+    if(error != PluginManagerErrorNone) {
         flipper_application_free(lib);
     }
 
     return error;
 }
 
-ApplicationLibManagerError
-    application_lib_manager_load_all(ApplicationLibManager* manager, const char* path) {
+PluginManagerError plugin_manager_load_all(PluginManager* manager, const char* path) {
     File* directory = storage_file_alloc(manager->storage);
     char file_name_buffer[256];
     FuriString* file_name = furi_string_alloc();
@@ -124,10 +122,10 @@ ApplicationLibManagerError
 
             path_concat(path, file_name_buffer, file_name);
             FURI_LOG_D(TAG, "Loading %s", furi_string_get_cstr(file_name));
-            ApplicationLibManagerError error =
-                application_lib_manager_load_single(manager, furi_string_get_cstr(file_name));
+            PluginManagerError error =
+                plugin_manager_load_single(manager, furi_string_get_cstr(file_name));
 
-            if(error != ApplicationLibManagerErrorNone) {
+            if(error != PluginManagerErrorNone) {
                 FURI_LOG_E(TAG, "Failed to load %s", furi_string_get_cstr(file_name));
                 break;
             }
@@ -136,22 +134,20 @@ ApplicationLibManagerError
     storage_dir_close(directory);
     storage_file_free(directory);
     furi_string_free(file_name);
-    return ApplicationLibManagerErrorNone;
+    return PluginManagerErrorNone;
 }
 
-uint32_t application_lib_manager_get_count(ApplicationLibManager* manager) {
+uint32_t plugin_manager_get_count(PluginManager* manager) {
     return FlipperApplicationList_size(manager->libs);
 }
 
-const FlipperApplicationLibraryDescriptor*
-    application_lib_manager_get(ApplicationLibManager* manager, uint32_t index) {
+const FlipperAppPluginDescriptor* plugin_manager_get(PluginManager* manager, uint32_t index) {
     FlipperApplication* app = *FlipperApplicationList_get(manager->libs, index);
-    return flipper_application_lib_get(app);
+    return flipper_application_plugin_get_descriptor(app);
 }
 
-const void* application_lib_manager_get_ep(ApplicationLibManager* manager, uint32_t index) {
-    const FlipperApplicationLibraryDescriptor* lib_descr =
-        application_lib_manager_get(manager, index);
+const void* plugin_manager_get_ep(PluginManager* manager, uint32_t index) {
+    const FlipperAppPluginDescriptor* lib_descr = plugin_manager_get(manager, index);
     furi_check(lib_descr);
     return lib_descr->entry_point;
 }

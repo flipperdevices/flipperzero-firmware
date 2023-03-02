@@ -1,5 +1,9 @@
 #pragma once
 
+/* 
+ * This file contains an API that is internally implemented by the application
+ * It is also exposed to plugins to allow them to use the application's API.
+ */
 #include <stdint.h>
 
 #ifdef __cplusplus

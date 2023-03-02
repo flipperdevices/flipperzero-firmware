@@ -199,7 +199,7 @@ class AppBuilder:
 def BuildAppElf(env, app):
     app_builder = AppBuilder(env, app)
     app_artifacts = app_builder.build()
-    if app.apptype == FlipperAppType.EXTENSION:
+    if app.apptype == FlipperAppType.PLUGIN:
         env["EXT_LIBS"][app.appid] = app_artifacts
     else:
         env["EXT_APPS"][app.appid] = app_artifacts
@@ -301,7 +301,7 @@ def resources_fap_dist_emitter(target, source, env):
             target.append(
                 resources_root.Dir("apps_data")
                 .Dir(parent_app_id)
-                .Dir("extensions")
+                .Dir("plugins")
                 .File(app_artifacts.compact[0].name)
             )
 
@@ -324,7 +324,7 @@ def embed_app_metadata_emitter(target, source, env):
     #     f"app, {app} EMITTER: {list(t.name for t in target)} {list(t.name for t in source)}"
     # )
     # Hack: change extension for fap libs
-    if app.apptype == FlipperAppType.EXTENSION:
+    if app.apptype == FlipperAppType.PLUGIN:
         target[0].name = target[0].name.replace(".fap", ".fal")
     return (target, source)
 

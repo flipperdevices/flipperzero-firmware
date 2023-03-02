@@ -1,4 +1,6 @@
-#include "app_methods.h"
+#include "app_api.h"
+
+/* Actual implementation of app's API and its private state */
 
 static uint32_t accumulator = 0;
 

@@ -24,7 +24,7 @@ FlipperApplication*
     return app;
 }
 
-bool flipper_application_is_lib(FlipperApplication* app) {
+bool flipper_application_is_plugin(FlipperApplication* app) {
     return app->manifest.stack_size == 0;
 }
 
@@ -36,7 +36,7 @@ void flipper_application_free(FlipperApplication* app) {
         furi_thread_free(app->thread);
     }
 
-    if(!flipper_application_is_lib(app)) {
+    if(!flipper_application_is_plugin(app)) {
         last_loaded_app = NULL;
     }
 
@@ -93,7 +93,7 @@ const FlipperApplicationManifest* flipper_application_get_manifest(FlipperApplic
 }
 
 FlipperApplicationLoadStatus flipper_application_map_to_memory(FlipperApplication* app) {
-    if(!flipper_application_is_lib(app)) {
+    if(!flipper_application_is_plugin(app)) {
         last_loaded_app = app;
     }
     ELFFileLoadStatus status = elf_file_load_sections(app->elf);
@@ -135,7 +135,7 @@ static int32_t flipper_application_thread(void* context) {
 
 FuriThread* flipper_application_spawn(FlipperApplication* app, void* args) {
     furi_check(app->thread == NULL);
-    furi_check(!flipper_application_is_lib(app));
+    furi_check(!flipper_application_is_plugin(app));
     app->ep_thread_args = args;
 
     const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
@@ -175,8 +175,9 @@ const char* flipper_application_load_status_to_string(FlipperApplicationLoadStat
     return load_status_strings[status];
 }
 
-const FlipperApplicationLibraryDescriptor* flipper_application_lib_get(FlipperApplication* app) {
-    if(!flipper_application_is_lib(app)) {
+const FlipperAppPluginDescriptor*
+    flipper_application_plugin_get_descriptor(FlipperApplication* app) {
+    if(!flipper_application_is_plugin(app)) {
         return NULL;
     }
 
@@ -184,11 +185,11 @@ const FlipperApplicationLibraryDescriptor* flipper_application_lib_get(FlipperAp
         elf_file_call_init(app->elf);
     }
 
-    typedef const FlipperApplicationLibraryDescriptor* (*get_lib_descriptor_t)(void);
+    typedef const FlipperAppPluginDescriptor* (*get_lib_descriptor_t)(void);
     get_lib_descriptor_t lib_ep = elf_file_get_entry_point(app->elf);
     furi_check(lib_ep);
 
-    const FlipperApplicationLibraryDescriptor* lib_descriptor = lib_ep();
+    const FlipperAppPluginDescriptor* lib_descriptor = lib_ep();
 
     FURI_LOG_D(
         TAG,
