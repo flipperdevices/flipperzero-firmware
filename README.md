@@ -15,11 +15,11 @@ The goal of this project is to see how much crypto functionality can be brought 
 - Basic navigation and UI adapted from FAP Boilerplate app
 - BIP39 mnemonic generation supported!
   - 24, 18, or 12 words
+- BIP39 mnemonic to BIP39 seed generation
 
 ### Work in Progress
 
-- WIP: BIP39 mnemonic to seed generation
-  - `seed` seems to be blank using `mnemonic_to_seed` func
+- WIP: BIP39 seed passphrase support
 - WIP: BIP39 to BIP32 HDNode
   - possible memory issue
 
