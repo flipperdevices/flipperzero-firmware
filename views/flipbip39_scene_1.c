@@ -65,8 +65,14 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
     const char* mnemonic = mnemonic_generate(model->strength);
+    
+    // Generate a seed from the mnemonic
+    uint8_t seed[64];
+    // WIP / TODO
+    //mnemonic_to_seed(mnemonic, "", seed, 0);
+    model->seed = (char *)seed;
 
-    // Delineate 6 sections of the mnemonic
+    // Delineate sections of the mnemonic every 4 words
     char *str = malloc(strlen(mnemonic) + 1);
     strcpy(str, mnemonic);
     int word = 0;
@@ -79,13 +85,8 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
         } 
     }
 
-    // Generate a seed from the mnemonic
-    uint8_t seed[64];
-    //mnemonic_to_seed(mnemonic, "", seed, 0);
-    model->seed = (char *)seed;
-
     // Split the mnemonic into parts
-    char *ptr = strtok (str, ",");
+    char *ptr = strtok(str, ",");
     int partnum = 0;
     while(ptr != NULL)
     {
