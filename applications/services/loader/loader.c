@@ -29,6 +29,8 @@ static bool
     }
 
     furi_thread_set_name(loader_instance->application_thread, loader_instance->application->name);
+    furi_thread_set_appid(
+        loader_instance->application_thread, loader_instance->application->appid);
     furi_thread_set_stack_size(
         loader_instance->application_thread, loader_instance->application->stack_size);
     furi_thread_set_context(
@@ -412,7 +414,7 @@ static void loader_build_menu() {
     if(FLIPPER_PLUGINS_COUNT != 0) {
         menu_add_item(
             loader_instance->primary_menu,
-            "Plugins",
+            "Extra Apps",
             &A_Plugins_14,
             i++,
             loader_submenu_callback,

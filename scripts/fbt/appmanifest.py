@@ -12,14 +12,14 @@ class FlipperAppType(Enum):
     SERVICE = "Service"
     SYSTEM = "System"
     APP = "App"
-    PLUGIN = "Plugin"
+    BUILTIN_EXTERNAL = "BuiltInExternal"
     DEBUG = "Debug"
     ARCHIVE = "Archive"
     SETTINGS = "Settings"
     STARTUP = "StartupHook"
     EXTERNAL = "External"
     METAPACKAGE = "Package"
-    EXTENSION = "Extension"
+    PLUGIN = "Plugin"
 
 
 @dataclass
@@ -77,7 +77,7 @@ class FlipperApplication:
         return target in self.targets or "all" in self.targets
 
     def __post_init__(self):
-        if self.apptype == FlipperAppType.EXTENSION:
+        if self.apptype == FlipperAppType.PLUGIN:
             self.stack_size = 0
 
 
@@ -160,7 +160,7 @@ class AppBuildset:
         FlipperAppType.SERVICE,
         FlipperAppType.SYSTEM,
         FlipperAppType.APP,
-        FlipperAppType.PLUGIN,
+        FlipperAppType.BUILTIN_EXTERNAL,
         FlipperAppType.DEBUG,
         FlipperAppType.ARCHIVE,
         FlipperAppType.SETTINGS,
@@ -267,9 +267,7 @@ class AppBuildset:
             )
 
     def _group_modules(self):
-        known_extensions = self.get_apps_of_type(
-            FlipperAppType.EXTENSION, all_known=True
-        )
+        known_extensions = self.get_apps_of_type(FlipperAppType.PLUGIN, all_known=True)
         for extension_app in known_extensions:
             for parent_app_id in extension_app.requires:
                 try:
@@ -321,7 +319,7 @@ class ApplicationsCGenerator:
         FlipperAppType.SERVICE: ("FlipperApplication", "FLIPPER_SERVICES"),
         FlipperAppType.SYSTEM: ("FlipperApplication", "FLIPPER_SYSTEM_APPS"),
         FlipperAppType.APP: ("FlipperApplication", "FLIPPER_APPS"),
-        FlipperAppType.PLUGIN: ("FlipperApplication", "FLIPPER_PLUGINS"),
+        FlipperAppType.BUILTIN_EXTERNAL: ("FlipperApplication", "FLIPPER_PLUGINS"),
         FlipperAppType.DEBUG: ("FlipperApplication", "FLIPPER_DEBUG_APPS"),
         FlipperAppType.SETTINGS: ("FlipperApplication", "FLIPPER_SETTINGS_APPS"),
         FlipperAppType.STARTUP: ("FlipperOnStartHook", "FLIPPER_ON_SYSTEM_START"),
@@ -342,6 +340,7 @@ class ApplicationsCGenerator:
         return f"""
     {{.app = {app.entry_point},
      .name = "{app.name}",
+     .appid = "{app.appid}", 
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
      .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""

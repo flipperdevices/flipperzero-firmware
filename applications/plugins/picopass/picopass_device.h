@@ -22,8 +22,8 @@
 #define PICOPASS_KD_BLOCK_INDEX 3
 #define PICOPASS_KC_BLOCK_INDEX 4
 #define PICOPASS_AIA_BLOCK_INDEX 5
+#define PICOPASS_PACS_CFG_BLOCK_INDEX 6
 
-#define PICOPASS_APP_FOLDER ANY_PATH("picopass")
 #define PICOPASS_APP_EXTENSION ".picopass"
 #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
 
@@ -80,7 +80,6 @@ typedef struct {
     PicopassDeviceSaveFormat format;
     PicopassLoadingCallback loading_cb;
     void* loading_cb_ctx;
-
 } PicopassDevice;
 
 PicopassDevice* picopass_device_alloc();
