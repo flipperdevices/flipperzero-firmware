@@ -22,22 +22,24 @@ int32_t example_advanced_plugins_app(void* p) {
     PluginManager* manager = plugin_manager_alloc(
         PLUGIN_APP_ID, PLUGIN_API_VERSION, composite_api_resolver_get(resolver));
 
-    if(plugin_manager_load_all(manager, "/ext/apps_data/example_advanced_plugins/plugins") !=
-       PluginManagerErrorNone) {
-        FURI_LOG_E(TAG, "Failed to load all libs");
-        return 0;
-    }
+    do {
+        if(plugin_manager_load_all(manager, "/ext/apps_data/example_advanced_plugins/plugins") !=
+           PluginManagerErrorNone) {
+            FURI_LOG_E(TAG, "Failed to load all libs");
+            break;
+        }
 
-    uint32_t plugin_count = plugin_manager_get_count(manager);
-    FURI_LOG_I(TAG, "Loaded libs: %lu", plugin_count);
+        uint32_t plugin_count = plugin_manager_get_count(manager);
+        FURI_LOG_I(TAG, "Loaded libs: %lu", plugin_count);
 
-    for(uint32_t i = 0; i < plugin_count; i++) {
-        const AdvancedPlugin* plugin = plugin_manager_get_ep(manager, i);
-        FURI_LOG_I(TAG, "plugin name: %s. Calling methods", plugin->name);
-        plugin->method1(228);
-        plugin->method2();
-        FURI_LOG_I(TAG, "Accumulator: %lu", app_api_accumulator_get());
-    }
+        for(uint32_t i = 0; i < plugin_count; i++) {
+            const AdvancedPlugin* plugin = plugin_manager_get_ep(manager, i);
+            FURI_LOG_I(TAG, "plugin name: %s. Calling methods", plugin->name);
+            plugin->method1(228);
+            plugin->method2();
+            FURI_LOG_I(TAG, "Accumulator: %lu", app_api_accumulator_get());
+        }
+    } while(0);
 
     plugin_manager_free(manager);
     composite_api_resolver_free(resolver);
