@@ -12,7 +12,6 @@ class FlipperAppType(Enum):
     SERVICE = "Service"
     SYSTEM = "System"
     APP = "App"
-    BUILTIN_EXTERNAL = "BuiltInExternal"
     DEBUG = "Debug"
     ARCHIVE = "Archive"
     SETTINGS = "Settings"
@@ -160,7 +159,6 @@ class AppBuildset:
         FlipperAppType.SERVICE,
         FlipperAppType.SYSTEM,
         FlipperAppType.APP,
-        FlipperAppType.BUILTIN_EXTERNAL,
         FlipperAppType.DEBUG,
         FlipperAppType.ARCHIVE,
         FlipperAppType.SETTINGS,
@@ -319,7 +317,6 @@ class ApplicationsCGenerator:
         FlipperAppType.SERVICE: ("FlipperApplication", "FLIPPER_SERVICES"),
         FlipperAppType.SYSTEM: ("FlipperApplication", "FLIPPER_SYSTEM_APPS"),
         FlipperAppType.APP: ("FlipperApplication", "FLIPPER_APPS"),
-        FlipperAppType.BUILTIN_EXTERNAL: ("FlipperApplication", "FLIPPER_PLUGINS"),
         FlipperAppType.DEBUG: ("FlipperApplication", "FLIPPER_DEBUG_APPS"),
         FlipperAppType.SETTINGS: ("FlipperApplication", "FLIPPER_SETTINGS_APPS"),
         FlipperAppType.STARTUP: ("FlipperOnStartHook", "FLIPPER_ON_SYSTEM_START"),
