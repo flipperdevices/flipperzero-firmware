@@ -32,6 +32,8 @@ Feel free to reach out to me at CodeAllNight@outlook.com with any questions or l
 ### gpio-gpio-polling-demo
 [tutorial](./gpio/gpio_polling_demo/README.md) - This is a "hello world" demonstration of reading a GPIO pin using polling.
 
+### gpio-gpio-interrupt-demo
+[tutorial](./gpio/gpio_interrupt_demo/README.md) - This is a "hello world" demonstration of triggering a callback when a GPIO pin transitions from VCC to GND.
 
 
 
