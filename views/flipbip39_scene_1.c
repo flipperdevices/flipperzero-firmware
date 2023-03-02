@@ -10,6 +10,7 @@
 #include "../helpers/flipbip39_string.h"
 
 #include <string.h>
+#include "../helpers/printf.h"
 // #include "../crypto/bip32.h"
 #include "../crypto/bip39.h"
 // #include "../crypto/ecdsa.h"
@@ -102,26 +103,26 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
 
     // WIP / TODO: Generate a seed from the mnemonic
     uint8_t seed[64];
-    //mnemonic_to_seed(mnemonic, "", seed, 0);
-    char *seedptr = malloc(64 + 1);
+    mnemonic_to_seed(mnemonic, "", seed, 0);
+    char *seedptr = malloc(64*2 + 1);
     
-    //for (size_t i = 0; i < 64; i++) {
-    //    seedptr += sprintf(seedptr, "%02X", seed[i]);
-    //}
+    for (size_t i = 0; i < 64; i++) {
+        sprintf(seedptr + (i * 2), "%.2x", seed[i]);
+    }
     
-    strcpy(seedptr, (char*)seed);
+    //strcpy(seedptr, (char*)seed);
     model->seed = seedptr;
     
-    // for (size_t i = 0; i < 4; i++) {
-    //     char *seedpartptr = malloc(16 + 1);
-    //     strncpy(seedptr, seedptr + (i * 16), 16);
+    // for (size_t i = 0; i < 6; i++) {
+    //     char *seedpartptr = malloc(22 + 1);
+    //     strncpy(seedpartptr, seedptr + (i * 22), 22);
     //     //model->seed = seedpartptr;
-    //     if (i == 0) model->mnemonic1 = seedptr;
-    //     if (i == 1) model->mnemonic2 = seedptr;
-    //     if (i == 2) model->mnemonic3 = seedptr;
-    //     if (i == 3) model->mnemonic4 = seedptr;
-    //     if (i == 4) model->mnemonic5 = seedptr;
-    //     if (i == 5) model->mnemonic6 = seedptr;
+    //     if (i == 0) model->mnemonic1 = seedpartptr;
+    //     if (i == 1) model->mnemonic2 = seedpartptr;
+    //     if (i == 2) model->mnemonic3 = seedpartptr;
+    //     if (i == 3) model->mnemonic4 = seedpartptr;
+    //     if (i == 4) model->mnemonic5 = seedpartptr;
+    //     if (i == 5) model->mnemonic6 = seedpartptr;
     // }
 
     // WIP / TODO: Generate a BIP32 root key from the mnemonic
