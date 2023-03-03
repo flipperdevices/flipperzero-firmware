@@ -2,6 +2,8 @@
 // Created by Dusan Klinec on 10/05/2018.
 //
 
+#if USE_MONERO
+
 #ifndef TREZOR_CRYPTO_MONERO_H
 #define TREZOR_CRYPTO_MONERO_H
 
@@ -18,3 +20,5 @@
 #include "xmr.h"
 
 #endif  // TREZOR_CRYPTO_MONERO_H
+
+#endif  // USE_MONERO

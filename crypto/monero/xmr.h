@@ -2,6 +2,8 @@
 // Created by Dusan Klinec on 10/05/2018.
 //
 
+#if USE_MONERO
+
 #ifndef TREZOR_CRYPTO_XMR_H
 #define TREZOR_CRYPTO_XMR_H
 
@@ -74,3 +76,5 @@ void xmr_get_subaddress_secret_key(bignum256modm r, uint32_t major,
 void xmr_gen_c(ge25519 *r, const bignum256modm a, uint64_t amount);
 
 #endif  // TREZOR_CRYPTO_XMR_H
+
+#endif  // USE_MONERO

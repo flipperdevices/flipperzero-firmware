@@ -31,6 +31,8 @@
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote
 // developers
 
+#if USE_MONERO
+
 #ifndef __XMR_BASE58_H__
 #define __XMR_BASE58_H__
 
@@ -48,3 +50,5 @@ bool xmr_base58_decode(const char *b58, size_t b58sz, void *data,
                        size_t *binsz);
 
 #endif
+
+#endif // USE_MONERO

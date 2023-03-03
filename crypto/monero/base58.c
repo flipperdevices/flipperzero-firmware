@@ -31,6 +31,8 @@
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote
 // developers
 
+#if USE_MONERO
+
 #include "base58.h"
 #include <assert.h>
 #include <stdbool.h>
@@ -287,3 +289,5 @@ int xmr_base58_addr_decode_check(const char *addr, size_t sz, uint64_t *tag,
   memcpy(data, buf + 1, res_size);
   return (int)res_size;
 }
+
+#endif // USE_MONERO

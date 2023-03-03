@@ -2,6 +2,8 @@
 // Created by Dusan Klinec on 10/05/2018.
 //
 
+#if USE_MONERO
+
 #include "xmr.h"
 #include "../byte_order.h"
 #include "int-util.h"
@@ -148,3 +150,5 @@ void xmr_gen_c(ge25519 *r, const bignum256modm a, uint64_t amount) {
   set256_modm(b, amount);
   xmr_add_keys2(r, a, b, &xmr_h);
 }
+
+#endif // USE_MONERO

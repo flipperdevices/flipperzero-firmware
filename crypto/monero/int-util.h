@@ -31,6 +31,8 @@
 // Parts of this file are originally copyright (c) 2012-2013 The Cryptonote
 // developers
 
+#if USE_MONERO
+
 #pragma once
 
 #include <assert.h>
@@ -76,3 +78,5 @@ static inline uint64_t mul128(uint64_t multiplier, uint64_t multiplicand,
    (((uint64_t)(x)&0x0000ff0000000000) >> 24) | \
    (((uint64_t)(x)&0x00ff000000000000) >> 40) | \
    (((uint64_t)(x)&0xff00000000000000) >> 56))
+
+#endif // USE_MONERO

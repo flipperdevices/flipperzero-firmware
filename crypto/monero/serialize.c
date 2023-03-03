@@ -2,6 +2,8 @@
 // Created by Dusan Klinec on 02/05/2018.
 //
 
+#if USE_MONERO
+
 #include "serialize.h"
 
 int xmr_size_varint(uint64_t num) {
@@ -51,3 +53,5 @@ int xmr_read_varint(uint8_t *buff, size_t buff_size, uint64_t *val) {
   }
   return finished_ok ? (int)read + 1 : -2;
 }
+
+#endif // USE_MONERO
