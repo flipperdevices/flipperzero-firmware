@@ -90,7 +90,8 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
 
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
-    const char *mnemonic = mnemonic_generate(model->strength);
+    //const char *mnemonic = mnemonic_generate(model->strength);
+    const char *mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
 
     // Delineate sections of the mnemonic every 4 words
     char *mnemo = malloc(strlen(mnemonic) + 1);
@@ -126,13 +127,12 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
 
     // Generate a BIP39 seed from the mnemonic
     uint8_t seedbytes[64];
-    //mnemonic_to_seed(mnemonic, "", seedbytes, 0);
-    mnemonic_to_seed("wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple", "", seedbytes, 0);
+    mnemonic_to_seed(mnemonic, "", seedbytes, 0);
     char *seed = malloc(64 * 2 + 1);
     
     // Convert the seed to a hex string
     for (size_t i = 0; i < 64; i++) {
-        flipbip_itoa(seedbytes[i], seed + (i * 2), 2, 16);
+        flipbip_itoa(seedbytes[i], seed + (i * 2), 64 * 2 + 1, 16);
         //sprintf(seed + (i * 2), "%.2x", seedbytes[i]);
     }
     
@@ -165,7 +165,7 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // constants for Bitcoin
     const uint32_t version_public = 0x0488b21e;
     const uint32_t version_private = 0x0488ade4;
-    //const char addr_version = 0x00, wif_version = 0x80;
+    const char addr_version = 0x00, wif_version = 0x80;
     
     // buffer for key serialization
     const size_t buflen = 128;
@@ -181,15 +181,15 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     
     HDNode *node = root;
     
-    // purpose
+    // purpose m/44'
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd_prime(node, purpose); // purpose
     
-    // coin
+    // coin m/44'/0'
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd_prime(node, coin); // coin
     
-    // account
+    // account m/44'/0'/0'
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd_prime(node, account); // account
     
@@ -203,7 +203,7 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     strncpy(xpub_acc, buf, 22);
     model->seed4 = xpub_acc;
     
-    // external / internal (change)
+    // external / internal (change) m/44'/0'/0'/0
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd(node, change); // change
     
@@ -217,19 +217,26 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     strncpy(xpub_chg, buf, 22);
     model->seed6 = xpub_chg;
 
-    // hdnode_private_ckd(&node, chain); // external / internal
-    // for (int i = 0; i < 10; i++) {
-    //     HDNode node2 = node;
-    //     hdnode_private_ckd(&node2, i);
-    //     hdnode_fill_public_key(&node2);
-    //     ecdsa_get_address(node2.public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
-    //     //QString address = QString(buf);
-    //     ecdsa_get_wif(node2.private_key, wif_version, HASHER_SHA2D, buf, buflen); 
-    //     //QString wif = QString(buf);
-    //     // list->setItem(i, 0, new QTableWidgetItem(address));
-    //     // list->setItem(i, 1, new QTableWidgetItem(wif));
-    //     // list->setItem(i, 2, new QTableWidgetItem("0.0"));
-    // }
+    for (int i = 0; i < 5; i++) {
+        HDNode *addr_node = malloc(sizeof(HDNode));
+        memcpy(addr_node, node, sizeof(HDNode));
+
+        hdnode_private_ckd(addr_node, i);
+        hdnode_fill_public_key(addr_node);
+        ecdsa_get_address(addr_node->public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
+        char *address = malloc(22 + 1);
+        strncpy(address, buf, 22);
+        model->seed5 = address;
+        ecdsa_get_wif(addr_node->private_key, wif_version, HASHER_SHA2D, buf, buflen); 
+        char *wif = malloc(22 + 1);
+        strncpy(wif, buf, 22);
+        model->seed6 = wif;
+        // list->setItem(i, 0, new QTableWidgetItem(address));
+        // list->setItem(i, 1, new QTableWidgetItem(wif));
+        // list->setItem(i, 2, new QTableWidgetItem("0.0"));
+        memzero(addr_node, sizeof(HDNode));
+        free(addr_node);
+    }
 
     // Clear the root node
     memzero(root, sizeof(HDNode));
