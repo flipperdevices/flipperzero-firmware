@@ -108,9 +108,9 @@ uint8_t subghz_protocol_decoder_star_line_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderStarLine instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_star_line_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_star_line_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -119,9 +119,10 @@ bool subghz_protocol_decoder_star_line_serialize(
  * Deserialize data SubGhzProtocolDecoderStarLine.
  * @param context Pointer to a SubGhzProtocolDecoderStarLine instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_star_line_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_decoder_star_line_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.

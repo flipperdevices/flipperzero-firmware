@@ -422,7 +422,7 @@ uint8_t subghz_protocol_decoder_faac_slh_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_faac_slh_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_faac_slh_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -448,40 +448,14 @@ bool subghz_protocol_decoder_faac_slh_serialize(
     return res;
 }
 
-bool subghz_protocol_decoder_faac_slh_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_faac_slh_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderFaacSLH* instance = context;
-    bool res = false;
-    do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            FURI_LOG_E(TAG, "Deserialize error");
-            break;
-        }
-        if(instance->generic.data_count_bit !=
-           subghz_protocol_faac_slh_const.min_count_bit_for_found) {
-            FURI_LOG_E(TAG, "Wrong number of bits in key");
-            break;
-        }
-
-        uint8_t seed_data[sizeof(uint32_t)] = {0};
-        for(size_t i = 0; i < sizeof(uint32_t); i++) {
-            seed_data[sizeof(uint32_t) - i - 1] = (instance->generic.seed >> i * 8) & 0xFF;
-        }
-        if(!flipper_format_read_hex(flipper_format, "Seed", seed_data, sizeof(uint32_t))) {
-            FURI_LOG_E(TAG, "Missing Seed");
-            break;
-        }
-        instance->generic.seed = seed_data[0] << 24 | seed_data[1] << 16 | seed_data[2] << 8 |
-                                 seed_data[3];
-
-        if(!flipper_format_rewind(flipper_format)) {
-            FURI_LOG_E(TAG, "Rewind error");
-            break;
-        }
-        res = true;
-    } while(false);
-
-    return res;
+    return subghz_block_generic_deserialize_check_count_bit(
+        &instance->generic,
+        flipper_format,
+        subghz_protocol_faac_slh_const.min_count_bit_for_found);
 }
 
 void subghz_protocol_decoder_faac_slh_get_string(void* context, FuriString* output) {
