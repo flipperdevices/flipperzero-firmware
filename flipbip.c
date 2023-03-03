@@ -48,8 +48,8 @@ FlipBip* flipbip_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, FlipBipViewIdStartscreen, flipbip_startscreen_get_view(app->flipbip_startscreen));
     app->flipbip_scene_1 = flipbip_scene_1_alloc();
     view_dispatcher_add_view(app->view_dispatcher, FlipBipViewIdScene1, flipbip_scene_1_get_view(app->flipbip_scene_1));
-    app->flipbip_scene_2 = flipbip_scene_2_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, FlipBipViewIdScene2, flipbip_scene_2_get_view(app->flipbip_scene_2));
+    // app->flipbip_scene_2 = flipbip_scene_2_alloc();
+    // view_dispatcher_add_view(app->view_dispatcher, FlipBipViewIdScene2, flipbip_scene_2_get_view(app->flipbip_scene_2));
     app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, FlipBipViewIdSettings, variable_item_list_get_view(app->variable_item_list));
 
@@ -67,7 +67,7 @@ void flipbip_app_free(FlipBip* app) {
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdScene1);
-    view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdScene2);
+    // view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdScene2);
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdSettings);
     submenu_free(app->submenu);
 

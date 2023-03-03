@@ -2,7 +2,7 @@
 
 enum SubmenuIndex {
     SubmenuIndexScene1 = 10,
-    SubmenuIndexScene2,
+    // SubmenuIndexScene2,
     SubmenuIndexSettings,
 };
 
@@ -37,11 +37,11 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
-        } else if (event.event == SubmenuIndexScene2) {
-            scene_manager_set_scene_state(
-                app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene2);
-            scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_2);
-            return true;
+        // } else if (event.event == SubmenuIndexScene2) {
+        //     scene_manager_set_scene_state(
+        //         app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene2);
+        //     scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_2);
+        //     return true;
         } else if (event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexSettings);

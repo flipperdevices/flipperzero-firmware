@@ -5,7 +5,7 @@
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
 #include "../helpers/flipbip_haptic.h"
-#include "../helpers/flipbip_speaker.h"
+//#include "../helpers/flipbip_speaker.h"
 #include "../helpers/flipbip_led.h"
 #include "../helpers/flipbip_string.h"
 
@@ -164,8 +164,8 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // constants for Bitcoin
     const uint32_t version_public = 0x0488b21e;
     const uint32_t version_private = 0x0488ade4;
-    
     //const char addr_version = 0x00, wif_version = 0x80;
+    
     const size_t buflen = 128;
     char buf[buflen + 1];
     
