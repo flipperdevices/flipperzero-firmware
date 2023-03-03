@@ -154,7 +154,7 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     hdnode_from_seed(seedbytes, 64, SECP256K1_NAME, root);
     // //root_set = true;
 
-    int arg1 = 1;
+    int account = 0;
     // constants for Bitcoin
     const uint32_t version_public = 0x0488b21e;
     const uint32_t version_private = 0x0488ade4;
@@ -171,10 +171,12 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     for (int chain = 0; chain < 2; chain++) {
         //QTableWidget *list = chain == 0 ? ui->listAddress : ui->listChange;
         HDNode *node = root;
-        //hdnode_private_ckd_prime(node, 44);
-        //hdnode_private_ckd_prime(node, 0 | 0x80000000); // bitcoin
         fingerprint = hdnode_fingerprint(node);
-        hdnode_private_ckd_prime(node, (arg1 - 1));
+        hdnode_private_ckd_prime(node, 44); // purpose
+        fingerprint = hdnode_fingerprint(node);
+        hdnode_private_ckd_prime(node, 0); // coin (bitcoin)
+        fingerprint = hdnode_fingerprint(node);
+        hdnode_private_ckd_prime(node, account); // account
         hdnode_serialize_private(node, fingerprint, version_private, buf, buflen); 
         char *xprv = malloc(22 + 1);
         strncpy(xprv, buf, 22);
