@@ -56,7 +56,7 @@ uint8_t ws_protocol_decoder_tx_8300_get_hash_data(void* context);
  * @param context Pointer to a WSProtocolDecoderTX_8300 instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus ws_protocol_decoder_tx_8300_serialize(
     void* context,
@@ -67,7 +67,7 @@ SubGhzProtocolStatus ws_protocol_decoder_tx_8300_serialize(
  * Deserialize data WSProtocolDecoderTX_8300.
  * @param context Pointer to a WSProtocolDecoderTX_8300 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     ws_protocol_decoder_tx_8300_deserialize(void* context, FlipperFormat* flipper_format);

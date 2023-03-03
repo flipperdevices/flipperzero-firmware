@@ -56,7 +56,7 @@ uint8_t ws_protocol_decoder_oregon_v1_get_hash_data(void* context);
  * @param context Pointer to a WSProtocolDecoderOregon_V1 instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus ws_protocol_decoder_oregon_v1_serialize(
     void* context,
@@ -67,7 +67,7 @@ SubGhzProtocolStatus ws_protocol_decoder_oregon_v1_serialize(
  * Deserialize data WSProtocolDecoderOregon_V1.
  * @param context Pointer to a WSProtocolDecoderOregon_V1 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     ws_protocol_decoder_oregon_v1_deserialize(void* context, FlipperFormat* flipper_format);

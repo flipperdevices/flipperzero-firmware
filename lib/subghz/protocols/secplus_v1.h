@@ -27,7 +27,7 @@ void subghz_protocol_encoder_secplus_v1_free(void* context);
  * Deserialize and generating an upload to send.
  * @param context Pointer to a SubGhzProtocolEncoderSecPlus_v1 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     subghz_protocol_encoder_secplus_v1_deserialize(void* context, FlipperFormat* flipper_format);
@@ -84,7 +84,7 @@ uint8_t subghz_protocol_decoder_secplus_v1_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderSecPlus_v1 instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus subghz_protocol_decoder_secplus_v1_serialize(
     void* context,
@@ -95,7 +95,7 @@ SubGhzProtocolStatus subghz_protocol_decoder_secplus_v1_serialize(
  * Deserialize data SubGhzProtocolDecoderSecPlus_v1.
  * @param context Pointer to a SubGhzProtocolDecoderSecPlus_v1 instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     subghz_protocol_decoder_secplus_v1_deserialize(void* context, FlipperFormat* flipper_format);

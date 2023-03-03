@@ -48,7 +48,7 @@ void ws_block_generic_get_preset_name(const char* preset_name, FuriString* prese
  * @param instance Pointer to a WSBlockGeneric instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus ws_block_generic_serialize(
     WSBlockGeneric* instance,
@@ -59,7 +59,7 @@ SubGhzProtocolStatus ws_block_generic_serialize(
  * Deserialize data WSBlockGeneric.
  * @param instance Pointer to a WSBlockGeneric instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     ws_block_generic_deserialize(WSBlockGeneric* instance, FlipperFormat* flipper_format);
@@ -69,7 +69,7 @@ SubGhzProtocolStatus
  * @param instance Pointer to a WSBlockGeneric instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param count_bit Count bit protocol
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus ws_block_generic_deserialize_check_count_bit(
     WSBlockGeneric* instance,

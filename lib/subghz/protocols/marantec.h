@@ -28,7 +28,7 @@ void subghz_protocol_encoder_marantec_free(void* context);
  * Deserialize and generating an upload to send.
  * @param context Pointer to a SubGhzProtocolEncoderMarantec instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     subghz_protocol_encoder_marantec_deserialize(void* context, FlipperFormat* flipper_format);
@@ -85,7 +85,7 @@ uint8_t subghz_protocol_decoder_marantec_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderMarantec instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus subghz_protocol_decoder_marantec_serialize(
     void* context,
@@ -96,7 +96,7 @@ SubGhzProtocolStatus subghz_protocol_decoder_marantec_serialize(
  * Deserialize data SubGhzProtocolDecoderMarantec.
  * @param context Pointer to a SubGhzProtocolDecoderMarantec instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     subghz_protocol_decoder_marantec_deserialize(void* context, FlipperFormat* flipper_format);

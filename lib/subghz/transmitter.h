@@ -39,7 +39,7 @@ bool subghz_transmitter_stop(SubGhzTransmitter* instance);
  * Deserialize and generating an upload to send.
  * @param instance Pointer to a SubGhzTransmitter instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* flipper_format);

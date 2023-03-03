@@ -48,7 +48,7 @@ bool subghz_protocol_keeloq_create_data(
  * Deserialize and generating an upload to send.
  * @param context Pointer to a SubGhzProtocolEncoderKeeloq instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format);

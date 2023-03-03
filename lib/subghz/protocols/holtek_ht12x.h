@@ -28,7 +28,7 @@ void subghz_protocol_encoder_holtek_th12x_free(void* context);
  * Deserialize and generating an upload to send.
  * @param context Pointer to a SubGhzProtocolEncoderHoltek_HT12X instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     subghz_protocol_encoder_holtek_th12x_deserialize(void* context, FlipperFormat* flipper_format);
@@ -85,7 +85,7 @@ uint8_t subghz_protocol_decoder_holtek_th12x_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderHoltek_HT12X instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus subghz_protocol_decoder_holtek_th12x_serialize(
     void* context,
@@ -96,7 +96,7 @@ SubGhzProtocolStatus subghz_protocol_decoder_holtek_th12x_serialize(
  * Deserialize data SubGhzProtocolDecoderHoltek_HT12X.
  * @param context Pointer to a SubGhzProtocolDecoderHoltek_HT12X instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     subghz_protocol_decoder_holtek_th12x_deserialize(void* context, FlipperFormat* flipper_format);

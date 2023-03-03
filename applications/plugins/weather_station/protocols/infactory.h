@@ -56,7 +56,7 @@ uint8_t ws_protocol_decoder_infactory_get_hash_data(void* context);
  * @param context Pointer to a WSProtocolDecoderInfactory instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus ws_protocol_decoder_infactory_serialize(
     void* context,
@@ -67,7 +67,7 @@ SubGhzProtocolStatus ws_protocol_decoder_infactory_serialize(
  * Deserialize data WSProtocolDecoderInfactory.
  * @param context Pointer to a WSProtocolDecoderInfactory instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     ws_protocol_decoder_infactory_deserialize(void* context, FlipperFormat* flipper_format);

@@ -50,7 +50,7 @@ uint8_t subghz_protocol_decoder_kia_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderKIA instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus subghz_protocol_decoder_kia_serialize(
     void* context,
@@ -61,7 +61,7 @@ SubGhzProtocolStatus subghz_protocol_decoder_kia_serialize(
  * Deserialize data SubGhzProtocolDecoderKIA.
  * @param context Pointer to a SubGhzProtocolDecoderKIA instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return Status error
+ * @return status
  */
 SubGhzProtocolStatus
     subghz_protocol_decoder_kia_deserialize(void* context, FlipperFormat* flipper_format);
