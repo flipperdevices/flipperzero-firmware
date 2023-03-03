@@ -13,7 +13,6 @@
 // #include "../helpers/printf.h"
 #include "../crypto/bip32.h"
 #include "../crypto/bip39.h"
-// #include "../crypto/ecdsa.h"
 #include "../crypto/curves.h"
 #include "../crypto/memzero.h"
 
@@ -27,18 +26,30 @@ struct FlipBipScene1 {
 typedef struct {
     int page;
     int strength;
-    const char* seed1;
-    const char* seed2;
-    const char* seed3;
-    const char* seed4;
-    const char* seed5;
-    const char* seed6;
-    const char* mnemonic1;
-    const char* mnemonic2;
-    const char* mnemonic3;
-    const char* mnemonic4;
-    const char* mnemonic5;
-    const char* mnemonic6;
+
+    // for crypto
+    CONFIDENTIAL const char* mnemonic;
+    CONFIDENTIAL uint8_t seed[64];
+    CONFIDENTIAL const HDNode* node;
+    CONFIDENTIAL const char* xprv_root;
+    CONFIDENTIAL const char* xprv_account;
+    CONFIDENTIAL const char* xpub_account;
+    CONFIDENTIAL const char* xprv_extended;
+    CONFIDENTIAL const char* xpub_extended;
+
+    // for display
+    CONFIDENTIAL const char* seed1;
+    CONFIDENTIAL const char* seed2;
+    CONFIDENTIAL const char* seed3;
+    CONFIDENTIAL const char* seed4;
+    CONFIDENTIAL const char* seed5;
+    CONFIDENTIAL const char* seed6;
+    CONFIDENTIAL const char* mnemonic1;
+    CONFIDENTIAL const char* mnemonic2;
+    CONFIDENTIAL const char* mnemonic3;
+    CONFIDENTIAL const char* mnemonic4;
+    CONFIDENTIAL const char* mnemonic5;
+    CONFIDENTIAL const char* mnemonic6;
 } FlipBipScene1Model;
 
 void flipbip_scene_1_set_callback(
@@ -91,74 +102,90 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
     //const char *mnemonic = mnemonic_generate(model->strength);
-    const char *mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
+    model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
+
+    // START DRAW MNEMONIC
 
     // Delineate sections of the mnemonic every 4 words
-    char *mnemo = malloc(strlen(mnemonic) + 1);
-    strcpy(mnemo, mnemonic);
+    char *mnemonic_working = malloc(strlen(model->mnemonic) + 1);
+    strcpy(mnemonic_working, model->mnemonic);
     int word = 0;
-    for (size_t i = 0; i < strlen(mnemo); i++) {
-        if (mnemo[i] == ' ') {
+    for (size_t i = 0; i < strlen(mnemonic_working); i++) {
+        if (mnemonic_working[i] == ' ') {
             word++;
             if (word % 4 == 0) {
-                mnemo[i] = ',';
+                mnemonic_working[i] = ',';
             }
         } 
     }
 
     // Split the mnemonic into parts
-    char *mnemopart = flipbip_strtok(mnemo, ",");
-    int partnum = 0;
-    while(mnemopart != NULL)
+    char *mnemonic_part = flipbip_strtok(mnemonic_working, ",");
+    int mi = 0;
+    while(mnemonic_part != NULL)
     {
-        char *partptr = malloc(strlen(mnemopart) + 1);
-        strcpy(partptr, mnemopart);
-        partnum++;
+        char *ptr = malloc(strlen(mnemonic_part) + 1);
+        strcpy(ptr, mnemonic_part);
+        mi++;
         
-        if (partnum == 1) model->mnemonic1 = partptr;
-        if (partnum == 2) model->mnemonic2 = partptr;
-        if (partnum == 3) model->mnemonic3 = partptr;
-        if (partnum == 4) model->mnemonic4 = partptr;
-        if (partnum == 5) model->mnemonic5 = partptr;
-        if (partnum == 6) model->mnemonic6 = partptr;
+        if      (mi == 1) model->mnemonic1 = ptr;
+        else if (mi == 2) model->mnemonic2 = ptr;
+        else if (mi == 3) model->mnemonic3 = ptr;
+        else if (mi == 4) model->mnemonic4 = ptr;
+        else if (mi == 5) model->mnemonic5 = ptr;
+        else if (mi == 6) model->mnemonic6 = ptr;
 
-        mnemopart = flipbip_strtok(NULL, ",");
+        mnemonic_part = flipbip_strtok(NULL, ",");
     }
 
+    // Free the working mnemonic memory
+    memzero(mnemonic_working, strlen(mnemonic_working));
+    free(mnemonic_working);
+
+    // END DRAW MNEMONIC
+
     // Generate a BIP39 seed from the mnemonic
-    uint8_t seedbytes[64];
-    mnemonic_to_seed(mnemonic, "", seedbytes, 0);
-    char *seed = malloc(64 * 2 + 1);
+    //uint8_t seedbytes[64];
+    mnemonic_to_seed(model->mnemonic, "", model->seed, 0);
     
+    // BEGIN DRAW SEED
+
+    char *seed_working = malloc(64 * 2 + 1);
     // Convert the seed to a hex string
     for (size_t i = 0; i < 64; i++) {
-        flipbip_itoa(seedbytes[i], seed + (i * 2), 64 * 2 + 1, 16);
+        flipbip_itoa(model->seed[i], seed_working + (i * 2), 64 * 2 + 1, 16);
         //sprintf(seed + (i * 2), "%.2x", seedbytes[i]);
     }
     
     // Split the seed into parts
-    for (size_t seedpartnum = 1; seedpartnum <= 6; seedpartnum++) {
-        char *seedpartptr = malloc(22 + 1);
-        strncpy(seedpartptr, seed + ((seedpartnum - 1) * 22), 22);
+    for (size_t si = 1; si <= 6; si++) {
+        char *ptr = malloc(22 + 1);
+        strncpy(ptr, seed_working + ((si - 1) * 22), 22);
         
-        if (seedpartnum == 1) model->seed1 = seedpartptr;
-        if (seedpartnum == 2) model->seed2 = seedpartptr;
-        if (seedpartnum == 3) model->seed3 = seedpartptr;
-        if (seedpartnum == 4) model->seed4 = seedpartptr;
-        if (seedpartnum == 5) model->seed5 = seedpartptr;
-        if (seedpartnum == 6) model->seed6 = seedpartptr;
+        if      (si == 1) model->seed1 = ptr;
+        else if (si == 2) model->seed2 = ptr;
+        else if (si == 3) model->seed3 = ptr;
+        else if (si == 4) model->seed4 = ptr;
+        else if (si == 5) model->seed5 = ptr;
+        else if (si == 6) model->seed6 = ptr;
     }
+
+    // Free the working seed memory
+    memzero(seed_working, sizeof(seed_working));
+    free(seed_working);
+
+    // END DRAW SEED
 
     // WIP / TODO: Generate a BIP32 root key from the mnemonic
 
     // //bool root_set = false;
     HDNode *root = malloc(sizeof(HDNode));
-    hdnode_from_seed(seedbytes, 64, SECP256K1_NAME, root);
+    hdnode_from_seed(model->seed, 64, SECP256K1_NAME, root);
     // //root_set = true;
 
     // m/44'/0'/0'/0
     uint32_t purpose = 44;
-    uint32_t coin = 0;
+    uint32_t coin = 0; // Bitcoin
     uint32_t account = 0;
     uint32_t change = 0;
     
@@ -174,10 +201,9 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // root
     uint32_t fingerprint = 0;
     hdnode_serialize_private(root, fingerprint, version_private, buf, buflen); 
-    char *xprv_root = malloc(22 + 1);
-    strncpy(xprv_root, buf, 22);
-    model->seed2 = xprv_root;
-    
+    char *xprv_root = malloc(buflen + 1);
+    strncpy(xprv_root, buf, buflen);
+    model->xprv_root = xprv_root;
     
     HDNode *node = root;
     
@@ -194,62 +220,59 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     hdnode_private_ckd_prime(node, account); // account
     
     hdnode_serialize_private(node, fingerprint, version_private, buf, buflen); 
-    char *xprv_acc = malloc(22 + 1);
-    strncpy(xprv_acc, buf, 22);
-    model->seed3 = xprv_acc;
+    char *xprv_acc = malloc(buflen + 1);
+    strncpy(xprv_acc, buf, buflen);
+    model->xprv_account = xprv_acc;
     
     hdnode_serialize_public(node, fingerprint, version_public, buf, buflen); 
-    char *xpub_acc = malloc(22 + 1);
-    strncpy(xpub_acc, buf, 22);
-    model->seed4 = xpub_acc;
+    char *xpub_acc = malloc(buflen + 1);
+    strncpy(xpub_acc, buf, buflen);
+    model->xpub_account = xpub_acc;
     
-    // external / internal (change) m/44'/0'/0'/0
+    // external/internal (change) m/44'/0'/0'/0
     fingerprint = hdnode_fingerprint(node);
-    hdnode_private_ckd(node, change); // change
+    hdnode_private_ckd(node, change); // external/internal (change)
     
     hdnode_serialize_private(node, fingerprint, version_private, buf, buflen); 
-    char *xprv_chg = malloc(22 + 1);
-    strncpy(xprv_chg, buf, 22);
-    model->seed5 = xprv_chg;
+    char *xprv_ext = malloc(buflen + 1);
+    strncpy(xprv_ext, buf, buflen);
+    model->xprv_extended = xprv_ext;
     
     hdnode_serialize_public(node, fingerprint, version_public, buf, buflen); 
-    char *xpub_chg = malloc(22 + 1);
-    strncpy(xpub_chg, buf, 22);
-    model->seed6 = xpub_chg;
+    char *xpub_ext = malloc(buflen + 1);
+    strncpy(xpub_ext, buf, buflen);
+    model->xpub_extended = xpub_ext;
 
-    for (int i = 0; i < 5; i++) {
+    model->node = node;
+
+    // BEGIN DRAW ADDRESS
+
+    for (int i = 0; i < 3; i++) {
         HDNode *addr_node = malloc(sizeof(HDNode));
         memcpy(addr_node, node, sizeof(HDNode));
 
         hdnode_private_ckd(addr_node, i);
         hdnode_fill_public_key(addr_node);
         ecdsa_get_address(addr_node->public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
-        char *address = malloc(22 + 1);
-        strncpy(address, buf, 22);
+        char *address = malloc(buflen + 1);
+        strncpy(address, buf, buflen);
         model->seed5 = address;
         ecdsa_get_wif(addr_node->private_key, wif_version, HASHER_SHA2D, buf, buflen); 
-        char *wif = malloc(22 + 1);
-        strncpy(wif, buf, 22);
+        char *wif = malloc(buflen + 1);
+        strncpy(wif, buf, buflen);
         model->seed6 = wif;
-        // list->setItem(i, 0, new QTableWidgetItem(address));
-        // list->setItem(i, 1, new QTableWidgetItem(wif));
-        // list->setItem(i, 2, new QTableWidgetItem("0.0"));
         memzero(addr_node, sizeof(HDNode));
         free(addr_node);
     }
 
+    // END DRAW ADDRESS
+
     // Clear the root node
-    memzero(root, sizeof(HDNode));
-    free(root);
+    // memzero(root, sizeof(HDNode));
+    // free(root);
 
     // Clear the mnemonic
-    mnemonic_clear();
-    memzero(mnemo, strlen(mnemo));
-    free(mnemo);
-
-    // Clear the seed
-    memzero(seed, sizeof(seed));
-    free(seed);
+    //mnemonic_clear();
 
 #if USE_BIP39_CACHE
     // Clear the BIP39 cache
