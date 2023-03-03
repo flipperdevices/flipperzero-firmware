@@ -10,7 +10,7 @@
 #include "../helpers/flipbip_string.h"
 
 #include <string.h>
-#include "../helpers/printf.h"
+// #include "../helpers/printf.h"
 #include "../crypto/bip32.h"
 #include "../crypto/bip39.h"
 // #include "../crypto/ecdsa.h"
