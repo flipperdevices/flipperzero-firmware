@@ -292,7 +292,8 @@ SubGhzProtocolStatus subghz_protocol_decoder_pocsag_serialize(
         subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 
     msg_len = furi_string_size(instance->done_msg);
-    if(!flipper_format_write_uint32(flipper_format, "MsgLen", &msg_len, pocsag_const.min_count_bit_for_found)) {
+    if(!flipper_format_write_uint32(
+           flipper_format, "MsgLen", &msg_len, pocsag_const.min_count_bit_for_found)) {
         FURI_LOG_E(TAG, "Error adding MsgLen");
         ret = SubGhzProtocolStatusErrorValueBitCount;
     }
@@ -305,7 +306,8 @@ SubGhzProtocolStatus subghz_protocol_decoder_pocsag_serialize(
     return ret;
 }
 
-SubGhzProtocolStatus subghz_protocol_decoder_pocsag_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_pocsag_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderPocsag* instance = context;
     SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
@@ -313,14 +315,13 @@ SubGhzProtocolStatus subghz_protocol_decoder_pocsag_deserialize(void* context, F
     uint8_t* buf;
 
     do {
-        ret = subghz_block_generic_deserialize(
-            &instance->generic,
-            flipper_format);
+        ret = subghz_block_generic_deserialize(&instance->generic, flipper_format);
         if(ret != SubGhzProtocolStatusOk) {
             break;
         }
 
-        if(!flipper_format_read_uint32(flipper_format, "MsgLen", &msg_len, pocsag_const.min_count_bit_for_found)) {
+        if(!flipper_format_read_uint32(
+               flipper_format, "MsgLen", &msg_len, pocsag_const.min_count_bit_for_found)) {
             FURI_LOG_E(TAG, "Missing MsgLen");
             ret = SubGhzProtocolStatusErrorValueBitCount;
             break;

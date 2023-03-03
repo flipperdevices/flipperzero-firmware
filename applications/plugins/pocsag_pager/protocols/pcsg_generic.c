@@ -28,7 +28,7 @@ SubGhzProtocolStatus pcsg_block_generic_serialize(
     furi_assert(instance);
 
     SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
-		
+
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     do {
@@ -91,7 +91,8 @@ SubGhzProtocolStatus pcsg_block_generic_serialize(
     return ret;
 }
 
-SubGhzProtocolStatus pcsg_block_generic_deserialize(PCSGBlockGeneric* instance, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    pcsg_block_generic_deserialize(PCSGBlockGeneric* instance, FlipperFormat* flipper_format) {
     furi_assert(instance);
     SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     FuriString* temp_data = furi_string_alloc();

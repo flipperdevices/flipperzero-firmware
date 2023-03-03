@@ -46,7 +46,8 @@ SubGhzProtocolStatus pcsg_block_generic_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-SubGhzProtocolStatus pcsg_block_generic_deserialize(PCSGBlockGeneric* instance, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    pcsg_block_generic_deserialize(PCSGBlockGeneric* instance, FlipperFormat* flipper_format);
 
 float pcsg_block_generic_fahrenheit_to_celsius(float fahrenheit);
 
