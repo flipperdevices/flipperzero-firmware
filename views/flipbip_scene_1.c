@@ -132,7 +132,8 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     
     // Convert the seed to a hex string
     for (size_t i = 0; i < 64; i++) {
-        sprintf(seed + (i * 2), "%.2x", seedbytes[i]);
+        flipbip_itoa(seedbytes[i], seed + (i * 2), 2, 16);
+        //sprintf(seed + (i * 2), "%.2x", seedbytes[i]);
     }
     
     // Split the seed into parts
