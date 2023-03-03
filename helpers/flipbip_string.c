@@ -26,16 +26,16 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "flipbip39_string.h"
+#include "flipbip_string.h"
 #include <string.h>
 char *
-flipbip39_strtok(char *s, const char *delim)
+flipbip_strtok(char *s, const char *delim)
 {
 	static char *last;
-	return flipbip39_strtok_r(s, delim, &last);
+	return flipbip_strtok_r(s, delim, &last);
 }
 char *
-flipbip39_strtok_r(char *s, const char *delim, char **last)
+flipbip_strtok_r(char *s, const char *delim, char **last)
 {
 	char *spanp;
 	int c, sc;

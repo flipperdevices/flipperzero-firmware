@@ -1,22 +1,22 @@
-#include "../flipbip39.h"
+#include "../flipbip.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
-#include "../helpers/flipbip39_haptic.h"
-#include "../helpers/flipbip39_speaker.h"
-#include "../helpers/flipbip39_led.h"
+#include "../helpers/flipbip_haptic.h"
+#include "../helpers/flipbip_speaker.h"
+#include "../helpers/flipbip_led.h"
 
-struct FlipBip39Scene2 {
+struct FlipBipScene2 {
     View* view;
-    FlipBip39Scene2Callback callback;
+    FlipBipScene2Callback callback;
     void* context;
 };
 
 typedef struct {
     int screen_text;
-} FlipBip39Scene2Model;
+} FlipBipScene2Model;
 
 char buttonText[11][14] = {
     "",
@@ -32,9 +32,9 @@ char buttonText[11][14] = {
     "Release Ok",
 };
 
-void flipbip39_scene_2_set_callback(
-    FlipBip39Scene2* instance,
-    FlipBip39Scene2Callback callback,
+void flipbip_scene_2_set_callback(
+    FlipBipScene2* instance,
+    FlipBipScene2Callback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -42,7 +42,7 @@ void flipbip39_scene_2_set_callback(
     instance->context = context;
 }
 
-void flipbip39_scene_2_draw(Canvas* canvas, FlipBip39Scene2Model* model) {
+void flipbip_scene_2_draw(Canvas* canvas, FlipBipScene2Model* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
@@ -54,84 +54,84 @@ void flipbip39_scene_2_draw(Canvas* canvas, FlipBip39Scene2Model* model) {
     free(strInput);
 }
 
-static void flipbip39_scene_2_model_init(FlipBip39Scene2Model* const model) {
+static void flipbip_scene_2_model_init(FlipBipScene2Model* const model) {
     model->screen_text = 0;
 }
 
-bool flipbip39_scene_2_input(InputEvent* event, void* context) {
+bool flipbip_scene_2_input(InputEvent* event, void* context) {
     furi_assert(context);
-    FlipBip39Scene2* instance = context;
+    FlipBipScene2* instance = context;
     if (event->type == InputTypeRelease) {
         switch(event->key) {
             case InputKeyBack:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         UNUSED(model);
-                        flipbip39_stop_all_sound(instance->context);
-                        instance->callback(FlipBip39CustomEventScene2Back, instance->context);
-                        flipbip39_play_long_bump(instance->context);
+                        flipbip_stop_all_sound(instance->context);
+                        instance->callback(FlipBipCustomEventScene2Back, instance->context);
+                        flipbip_play_long_bump(instance->context);
                     },
                     true);
                 break;
             case InputKeyUp:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 6;
-                        flipbip39_play_bad_bump(instance->context);
-                        flipbip39_stop_all_sound(instance->context);
-                        flipbip39_led_set_rgb(instance->context, 255, 0, 255);
+                        flipbip_play_bad_bump(instance->context);
+                        flipbip_stop_all_sound(instance->context);
+                        flipbip_led_set_rgb(instance->context, 255, 0, 255);
                     },
                     true);
                 break;
             case InputKeyDown:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 7;
-                        flipbip39_play_bad_bump(instance->context);
-                        flipbip39_stop_all_sound(instance->context);
-                        flipbip39_led_set_rgb(instance->context, 255, 255, 0);
+                        flipbip_play_bad_bump(instance->context);
+                        flipbip_stop_all_sound(instance->context);
+                        flipbip_led_set_rgb(instance->context, 255, 255, 0);
                     },
                     true);
                 break;
             case InputKeyLeft:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 8;
-                        flipbip39_play_bad_bump(instance->context);
-                        flipbip39_stop_all_sound(instance->context);
-                        flipbip39_led_set_rgb(instance->context, 0, 255, 255);
+                        flipbip_play_bad_bump(instance->context);
+                        flipbip_stop_all_sound(instance->context);
+                        flipbip_led_set_rgb(instance->context, 0, 255, 255);
                     },
                     true);
                 break;
             case InputKeyRight:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 9;
-                        flipbip39_play_bad_bump(instance->context);
-                        flipbip39_stop_all_sound(instance->context);
-                        flipbip39_led_set_rgb(instance->context, 255, 0, 0);
+                        flipbip_play_bad_bump(instance->context);
+                        flipbip_stop_all_sound(instance->context);
+                        flipbip_led_set_rgb(instance->context, 255, 0, 0);
                     },
                     true);
                 break;
             case InputKeyOk:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 10;
-                        flipbip39_play_bad_bump(instance->context);
-                        flipbip39_stop_all_sound(instance->context);
-                        flipbip39_led_set_rgb(instance->context, 255, 255, 255);
+                        flipbip_play_bad_bump(instance->context);
+                        flipbip_stop_all_sound(instance->context);
+                        flipbip_led_set_rgb(instance->context, 255, 255, 255);
                     },
                     true);
                 break;
@@ -143,55 +143,55 @@ bool flipbip39_scene_2_input(InputEvent* event, void* context) {
             case InputKeyUp:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 1;
-                        flipbip39_play_happy_bump(instance->context);
-                        flipbip39_play_input_sound(instance->context);
+                        flipbip_play_happy_bump(instance->context);
+                        flipbip_play_input_sound(instance->context);
                     },
                     true);
                 break;
             case InputKeyDown:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 2;
-                        flipbip39_play_happy_bump(instance->context);
-                        flipbip39_play_input_sound(instance->context);
+                        flipbip_play_happy_bump(instance->context);
+                        flipbip_play_input_sound(instance->context);
                     },
                     true);
                 break;
             case InputKeyLeft:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 3;
-                        flipbip39_play_happy_bump(instance->context);
-                        flipbip39_play_input_sound(instance->context);
+                        flipbip_play_happy_bump(instance->context);
+                        flipbip_play_input_sound(instance->context);
                     },
                     true);
                 break;
             case InputKeyRight:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 4;
-                        flipbip39_play_happy_bump(instance->context);
-                        flipbip39_play_input_sound(instance->context);
+                        flipbip_play_happy_bump(instance->context);
+                        flipbip_play_input_sound(instance->context);
                     },
                     true);
                 break;
             case InputKeyOk:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene2Model * model,
+                    FlipBipScene2Model * model,
                     {
                         model->screen_text = 5;
-                        flipbip39_play_happy_bump(instance->context);
-                        flipbip39_play_input_sound(instance->context);
+                        flipbip_play_happy_bump(instance->context);
+                        flipbip_play_input_sound(instance->context);
                     },
                     true);
                 break;
@@ -204,40 +204,40 @@ bool flipbip39_scene_2_input(InputEvent* event, void* context) {
     return true;
 }
 
-void flipbip39_scene_2_exit(void* context) {
+void flipbip_scene_2_exit(void* context) {
     furi_assert(context);
-    FlipBip39* app = context;
-    flipbip39_stop_all_sound(app);
-    //flipbip39_led_reset(app);
+    FlipBip* app = context;
+    flipbip_stop_all_sound(app);
+    //flipbip_led_reset(app);
 }
 
-void flipbip39_scene_2_enter(void* context) {
+void flipbip_scene_2_enter(void* context) {
     furi_assert(context);
     DOLPHIN_DEED(DolphinDeedPluginStart);
 }
 
-FlipBip39Scene2* flipbip39_scene_2_alloc() {
-    FlipBip39Scene2* instance = malloc(sizeof(FlipBip39Scene2));
+FlipBipScene2* flipbip_scene_2_alloc() {
+    FlipBipScene2* instance = malloc(sizeof(FlipBipScene2));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(FlipBip39Scene2Model));
+    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(FlipBipScene2Model));
     view_set_context(instance->view, instance);
-    view_set_draw_callback(instance->view, (ViewDrawCallback)flipbip39_scene_2_draw);
-    view_set_input_callback(instance->view, flipbip39_scene_2_input);
-    //view_set_enter_callback(instance->view, flipbip39_scene_2_enter);
-    view_set_exit_callback(instance->view, flipbip39_scene_2_exit);
+    view_set_draw_callback(instance->view, (ViewDrawCallback)flipbip_scene_2_draw);
+    view_set_input_callback(instance->view, flipbip_scene_2_input);
+    //view_set_enter_callback(instance->view, flipbip_scene_2_enter);
+    view_set_exit_callback(instance->view, flipbip_scene_2_exit);
 
     with_view_model(
         instance->view,
-        FlipBip39Scene2Model * model,
+        FlipBipScene2Model * model,
         {
-            flipbip39_scene_2_model_init(model);
+            flipbip_scene_2_model_init(model);
         },
         true);
     
     return instance;
 }
 
-void flipbip39_scene_2_free(FlipBip39Scene2* instance) {
+void flipbip_scene_2_free(FlipBipScene2* instance) {
     furi_assert(instance);
 
 
@@ -245,7 +245,7 @@ void flipbip39_scene_2_free(FlipBip39Scene2* instance) {
     free(instance);
 }
 
-View* flipbip39_scene_2_get_view(FlipBip39Scene2* instance) {
+View* flipbip_scene_2_get_view(FlipBipScene2* instance) {
     furi_assert(instance);
 
 

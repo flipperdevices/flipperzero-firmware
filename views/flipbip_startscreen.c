@@ -1,24 +1,24 @@
-#include "../flipbip39.h"
+#include "../flipbip.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
 #include "FlipBIP_icons.h"
 
-struct FlipBip39Startscreen {
+struct FlipBipStartscreen {
     View* view;
-    FlipBip39StartscreenCallback callback;
+    FlipBipStartscreenCallback callback;
     void* context;
 };
 
 
 typedef struct {
     int some_value;
-} FlipBip39StartscreenModel;
+} FlipBipStartscreenModel;
 
-void flipbip39_startscreen_set_callback(
-    FlipBip39Startscreen* instance,
-    FlipBip39StartscreenCallback callback,
+void flipbip_startscreen_set_callback(
+    FlipBipStartscreen* instance,
+    FlipBipStartscreenCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -26,7 +26,7 @@ void flipbip39_startscreen_set_callback(
     instance->context = context;
 }
 
-void flipbip39_startscreen_draw(Canvas* canvas, FlipBip39StartscreenModel* model) {
+void flipbip_startscreen_draw(Canvas* canvas, FlipBipStartscreenModel* model) {
     UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -46,22 +46,22 @@ void flipbip39_startscreen_draw(Canvas* canvas, FlipBip39StartscreenModel* model
     elements_button_right(canvas, "Start"); 
 }
 
-static void flipbip39_startscreen_model_init(FlipBip39StartscreenModel* const model) {
+static void flipbip_startscreen_model_init(FlipBipStartscreenModel* const model) {
     model->some_value = 1;
 }
 
-bool flipbip39_startscreen_input(InputEvent* event, void* context) {
+bool flipbip_startscreen_input(InputEvent* event, void* context) {
     furi_assert(context); 
-    FlipBip39Startscreen* instance = context;
+    FlipBipStartscreen* instance = context;
     if (event->type == InputTypeRelease) {
         switch(event->key) {
             case InputKeyBack:
                 with_view_model(
                     instance->view,
-                    FlipBip39StartscreenModel * model,
+                    FlipBipStartscreenModel * model,
                     {
                         UNUSED(model);
-                        instance->callback(FlipBip39CustomEventStartscreenBack, instance->context);
+                        instance->callback(FlipBipCustomEventStartscreenBack, instance->context);
                     },
                     true);
                 break;
@@ -72,10 +72,10 @@ bool flipbip39_startscreen_input(InputEvent* event, void* context) {
             case InputKeyOk:
                 with_view_model(
                     instance->view,
-                    FlipBip39StartscreenModel* model,
+                    FlipBipStartscreenModel* model,
                     {
                         UNUSED(model);
-                        instance->callback(FlipBip39CustomEventStartscreenOk, instance->context);
+                        instance->callback(FlipBipCustomEventStartscreenOk, instance->context);
                     },
                     true);
                 break;
@@ -86,38 +86,38 @@ bool flipbip39_startscreen_input(InputEvent* event, void* context) {
     return true;
 }
 
-void flipbip39_startscreen_exit(void* context) {
+void flipbip_startscreen_exit(void* context) {
     furi_assert(context);
 }
 
-void flipbip39_startscreen_enter(void* context) {
+void flipbip_startscreen_enter(void* context) {
     furi_assert(context);
-    FlipBip39Startscreen* instance = (FlipBip39Startscreen*)context;
+    FlipBipStartscreen* instance = (FlipBipStartscreen*)context;
     with_view_model(
         instance->view,
-        FlipBip39StartscreenModel * model,
+        FlipBipStartscreenModel * model,
         {
-            flipbip39_startscreen_model_init(model);
+            flipbip_startscreen_model_init(model);
         },
         true
     );
 }
 
-FlipBip39Startscreen* flipbip39_startscreen_alloc() {
-    FlipBip39Startscreen* instance = malloc(sizeof(FlipBip39Startscreen));
+FlipBipStartscreen* flipbip_startscreen_alloc() {
+    FlipBipStartscreen* instance = malloc(sizeof(FlipBipStartscreen));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(FlipBip39StartscreenModel));
+    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(FlipBipStartscreenModel));
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
-    view_set_draw_callback(instance->view, (ViewDrawCallback)flipbip39_startscreen_draw);
-    view_set_input_callback(instance->view, flipbip39_startscreen_input);
-    //view_set_enter_callback(instance->view, flipbip39_startscreen_enter);
-    //view_set_exit_callback(instance->view, flipbip39_startscreen_exit);
+    view_set_draw_callback(instance->view, (ViewDrawCallback)flipbip_startscreen_draw);
+    view_set_input_callback(instance->view, flipbip_startscreen_input);
+    //view_set_enter_callback(instance->view, flipbip_startscreen_enter);
+    //view_set_exit_callback(instance->view, flipbip_startscreen_exit);
 
     with_view_model(
         instance->view,
-        FlipBip39StartscreenModel * model,
+        FlipBipStartscreenModel * model,
         {
-            flipbip39_startscreen_model_init(model);
+            flipbip_startscreen_model_init(model);
         },
         true
     );
@@ -125,12 +125,12 @@ FlipBip39Startscreen* flipbip39_startscreen_alloc() {
     return instance;
 }
 
-void flipbip39_startscreen_free(FlipBip39Startscreen* instance) {
+void flipbip_startscreen_free(FlipBipStartscreen* instance) {
     furi_assert(instance);
 
     with_view_model(
         instance->view,
-        FlipBip39StartscreenModel * model,
+        FlipBipStartscreenModel * model,
         {
             UNUSED(model);
         },
@@ -139,7 +139,7 @@ void flipbip39_startscreen_free(FlipBip39Startscreen* instance) {
     free(instance);
 }
 
-View* flipbip39_startscreen_get_view(FlipBip39Startscreen* instance) {
+View* flipbip_startscreen_get_view(FlipBipStartscreen* instance) {
     furi_assert(instance);
     return instance->view;
 }

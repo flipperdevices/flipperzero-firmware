@@ -1,10 +1,10 @@
-#include "flipbip39_led.h"
-#include "../flipbip39.h"
+#include "flipbip_led.h"
+#include "../flipbip.h"
 
 
 
-void flipbip39_led_set_rgb(void* context, int red, int green, int blue) {
-    FlipBip39* app = context;
+void flipbip_led_set_rgb(void* context, int red, int green, int blue) {
+    FlipBip* app = context;
     if (app->led != 1) {
         return;
     }
@@ -29,8 +29,8 @@ void flipbip39_led_set_rgb(void* context, int red, int green, int blue) {
     furi_thread_flags_wait(0, FuriFlagWaitAny, 10); //Delay, prevent removal from RAM before LED value set    
 }
 
-void flipbip39_led_reset(void* context) {
-    FlipBip39* app = context;
+void flipbip_led_reset(void* context) {
+    FlipBip* app = context;
     notification_message(app->notification, &sequence_reset_red);
     notification_message(app->notification, &sequence_reset_green);
     notification_message(app->notification, &sequence_reset_blue);

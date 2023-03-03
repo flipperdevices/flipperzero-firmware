@@ -1,13 +1,13 @@
-#include "../flipbip39.h"
+#include "../flipbip.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
-#include "../helpers/flipbip39_haptic.h"
-#include "../helpers/flipbip39_speaker.h"
-#include "../helpers/flipbip39_led.h"
-#include "../helpers/flipbip39_string.h"
+#include "../helpers/flipbip_haptic.h"
+#include "../helpers/flipbip_speaker.h"
+#include "../helpers/flipbip_led.h"
+#include "../helpers/flipbip_string.h"
 
 #include <string.h>
 #include "../helpers/printf.h"
@@ -17,9 +17,9 @@
 #include "../crypto/curves.h"
 #include "../crypto/memzero.h"
 
-struct FlipBip39Scene1 {
+struct FlipBipScene1 {
     View* view;
-    FlipBip39Scene1Callback callback;
+    FlipBipScene1Callback callback;
     void* context;
 };
 
@@ -39,11 +39,11 @@ typedef struct {
     const char* mnemonic4;
     const char* mnemonic5;
     const char* mnemonic6;
-} FlipBip39Scene1Model;
+} FlipBipScene1Model;
 
-void flipbip39_scene_1_set_callback(
-    FlipBip39Scene1* instance,
-    FlipBip39Scene1Callback callback,
+void flipbip_scene_1_set_callback(
+    FlipBipScene1* instance,
+    FlipBipScene1Callback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -51,7 +51,7 @@ void flipbip39_scene_1_set_callback(
     instance->context = context;
 }
 
-void flipbip39_scene_1_draw(Canvas* canvas, FlipBip39Scene1Model* model) {
+void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
     //UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
@@ -84,7 +84,7 @@ void flipbip39_scene_1_draw(Canvas* canvas, FlipBip39Scene1Model* model) {
     
 }
 
-static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, const int strength) {
+static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength) {
     
     model->page = 0;
 
@@ -106,7 +106,7 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     }
 
     // Split the mnemonic into parts
-    char *mnemopart = flipbip39_strtok(mnemo, ",");
+    char *mnemopart = flipbip_strtok(mnemo, ",");
     int partnum = 0;
     while(mnemopart != NULL)
     {
@@ -121,7 +121,7 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
         if (partnum == 5) model->mnemonic5 = partptr;
         if (partnum == 6) model->mnemonic6 = partptr;
 
-        mnemopart = flipbip39_strtok(NULL, ",");
+        mnemopart = flipbip_strtok(NULL, ",");
     }
 
     // Generate a BIP39 seed from the mnemonic
@@ -246,18 +246,18 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     bip39_cache_clear();
 }
 
-bool flipbip39_scene_1_input(InputEvent* event, void* context) {
+bool flipbip_scene_1_input(InputEvent* event, void* context) {
     furi_assert(context); 
-    FlipBip39Scene1* instance = context;
+    FlipBipScene1* instance = context;
     if (event->type == InputTypeRelease) {
         switch(event->key) {
             case InputKeyBack:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene1Model * model,
+                    FlipBipScene1Model * model,
                     {
                         UNUSED(model);
-                        instance->callback(FlipBip39CustomEventScene1Back, instance->context);
+                        instance->callback(FlipBipCustomEventScene1Back, instance->context);
                     },
                     true);
                 break;
@@ -268,7 +268,7 @@ bool flipbip39_scene_1_input(InputEvent* event, void* context) {
             case InputKeyOk:
                 with_view_model(
                     instance->view,
-                    FlipBip39Scene1Model* model,
+                    FlipBipScene1Model* model,
                     {
                         //UNUSED(model);
                         model->page = (model->page + 1) % 2;
@@ -282,13 +282,13 @@ bool flipbip39_scene_1_input(InputEvent* event, void* context) {
     return true;
 }
 
-void flipbip39_scene_1_exit(void* context) {
+void flipbip_scene_1_exit(void* context) {
     furi_assert(context);
-    FlipBip39Scene1* instance = (FlipBip39Scene1*)context;
+    FlipBipScene1* instance = (FlipBipScene1*)context;
 
     with_view_model(
         instance->view,
-        FlipBip39Scene1Model * model,
+        FlipBipScene1Model * model,
         {
             // Clear the mnemonic from memory
             model->page = 0;
@@ -310,40 +310,40 @@ void flipbip39_scene_1_exit(void* context) {
     );
 }
 
-void flipbip39_scene_1_enter(void* context) {
+void flipbip_scene_1_enter(void* context) {
     furi_assert(context);
-    FlipBip39Scene1* instance = (FlipBip39Scene1*)context;
+    FlipBipScene1* instance = (FlipBipScene1*)context;
 
-    FlipBip39* app = instance->context;
+    FlipBip* app = instance->context;
     int strength_setting = app->bip39_strength;
     int strength = 256;
     if (strength_setting == 0) strength = 128;
     else if (strength_setting == 1) strength = 192;
 
-    flipbip39_play_happy_bump(app);
-    flipbip39_led_set_rgb(app, 255, 0, 0);
+    flipbip_play_happy_bump(app);
+    flipbip_led_set_rgb(app, 255, 0, 0);
 
     with_view_model(
         instance->view,
-        FlipBip39Scene1Model * model,
+        FlipBipScene1Model * model,
         {
-            flipbip39_scene_1_model_init(model, strength);
+            flipbip_scene_1_model_init(model, strength);
         },
         true
     );
 }
 
-FlipBip39Scene1* flipbip39_scene_1_alloc() {
-    FlipBip39Scene1* instance = malloc(sizeof(FlipBip39Scene1));
+FlipBipScene1* flipbip_scene_1_alloc() {
+    FlipBipScene1* instance = malloc(sizeof(FlipBipScene1));
     instance->view = view_alloc();
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(FlipBip39Scene1Model));
+    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(FlipBipScene1Model));
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
-    view_set_draw_callback(instance->view, (ViewDrawCallback)flipbip39_scene_1_draw);
-    view_set_input_callback(instance->view, flipbip39_scene_1_input);
-    view_set_enter_callback(instance->view, flipbip39_scene_1_enter);
-    view_set_exit_callback(instance->view, flipbip39_scene_1_exit);
+    view_set_draw_callback(instance->view, (ViewDrawCallback)flipbip_scene_1_draw);
+    view_set_input_callback(instance->view, flipbip_scene_1_input);
+    view_set_enter_callback(instance->view, flipbip_scene_1_enter);
+    view_set_exit_callback(instance->view, flipbip_scene_1_exit);
 
-    // FlipBip39* app = instance->context;
+    // FlipBip* app = instance->context;
     // int strength_setting = app->bip39_strength;
     // int strength = 256;
     // if (strength_setting == 0) strength = 128;
@@ -351,9 +351,9 @@ FlipBip39Scene1* flipbip39_scene_1_alloc() {
 
     // with_view_model(
     //     instance->view,
-    //     FlipBip39Scene1Model * model,
+    //     FlipBipScene1Model * model,
     //     {
-    //         flipbip39_scene_1_model_init(model, strength);
+    //         flipbip_scene_1_model_init(model, strength);
     //     },
     //     true
     // );
@@ -361,12 +361,12 @@ FlipBip39Scene1* flipbip39_scene_1_alloc() {
     return instance;
 }
 
-void flipbip39_scene_1_free(FlipBip39Scene1* instance) {
+void flipbip_scene_1_free(FlipBipScene1* instance) {
     furi_assert(instance);
 
     with_view_model(
         instance->view,
-        FlipBip39Scene1Model * model,
+        FlipBipScene1Model * model,
         {
             //UNUSED(model);
             free((void*)model->seed1);
@@ -387,7 +387,7 @@ void flipbip39_scene_1_free(FlipBip39Scene1* instance) {
     free(instance);
 }
 
-View* flipbip39_scene_1_get_view(FlipBip39Scene1* instance) {
+View* flipbip_scene_1_get_view(FlipBipScene1* instance) {
     furi_assert(instance);
     return instance->view;
 }

@@ -1,9 +1,9 @@
-#include "flipbip39_haptic.h"
-#include "../flipbip39.h"
+#include "flipbip_haptic.h"
+#include "../flipbip.h"
 
 
-void flipbip39_play_happy_bump(void* context) {
-    FlipBip39* app = context;
+void flipbip_play_happy_bump(void* context) {
+    FlipBip* app = context;
     if (app->haptic != 1) {
         return;
     }
@@ -12,8 +12,8 @@ void flipbip39_play_happy_bump(void* context) {
     notification_message(app->notification, &sequence_reset_vibro);
 }
 
-void flipbip39_play_bad_bump(void* context) {
-    FlipBip39* app = context;
+void flipbip_play_bad_bump(void* context) {
+    FlipBip* app = context;
     if (app->haptic != 1) {
         return;
     }
@@ -22,8 +22,8 @@ void flipbip39_play_bad_bump(void* context) {
     notification_message(app->notification, &sequence_reset_vibro);
 }
 
-void flipbip39_play_long_bump(void* context) {
-    FlipBip39* app = context;
+void flipbip_play_long_bump(void* context) {
+    FlipBip* app = context;
     if (app->haptic != 1) {
         return;
     }

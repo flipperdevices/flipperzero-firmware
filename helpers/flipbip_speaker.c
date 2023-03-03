@@ -1,10 +1,10 @@
-#include "flipbip39_speaker.h"
-#include "../flipbip39.h"
+#include "flipbip_speaker.h"
+#include "../flipbip.h"
 
 #define NOTE_INPUT 587.33f
 
-void flipbip39_play_input_sound(void* context) {
-    FlipBip39* app = context;
+void flipbip_play_input_sound(void* context) {
+    FlipBip* app = context;
     if (app->speaker != 1) {
         return;
     }
@@ -15,8 +15,8 @@ void flipbip39_play_input_sound(void* context) {
     
 }
 
-void flipbip39_stop_all_sound(void* context) {
-    FlipBip39* app = context;
+void flipbip_stop_all_sound(void* context) {
+    FlipBip* app = context;
     if (app->speaker != 1) {
         return;
     }
