@@ -39,7 +39,7 @@ FlipBip* flipbip_app_alloc() {
     app->submenu = submenu_alloc();
 
     app->haptic = 1;
-    app->speaker = 1;
+    //app->speaker = 1;
     app->led = 1;
     app->bip39_strength = 2; // 256 bits (24 words)
 

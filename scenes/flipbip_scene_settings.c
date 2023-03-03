@@ -17,14 +17,14 @@ const uint32_t haptic_value[2] = {
     FlipBipHapticOn,
 };
 
-const char* const speaker_text[2] = {
-    "OFF",
-    "ON",
-};
-const uint32_t speaker_value[2] = {
-    FlipBipSpeakerOff,
-    FlipBipSpeakerOn,
-};
+// const char* const speaker_text[2] = {
+//     "OFF",
+//     "ON",
+// };
+// const uint32_t speaker_value[2] = {
+//     FlipBipSpeakerOff,
+//     FlipBipSpeakerOn,
+// };
 
 const char* const led_text[2] = {
     "OFF",
@@ -53,12 +53,12 @@ static void flipbip_scene_settings_set_haptic(VariableItem* item) {
     app->haptic = haptic_value[index];
 }
 
-static void flipbip_scene_settings_set_speaker(VariableItem* item) {
-    FlipBip* app = variable_item_get_context(item);
-    uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, speaker_text[index]);
-    app->speaker = speaker_value[index];
-}
+// static void flipbip_scene_settings_set_speaker(VariableItem* item) {
+//     FlipBip* app = variable_item_get_context(item);
+//     uint8_t index = variable_item_get_current_value_index(item);
+//     variable_item_set_current_value_text(item, speaker_text[index]);
+//     app->speaker = speaker_value[index];
+// }
 
 static void flipbip_scene_settings_set_led(VariableItem* item) {
     FlipBip* app = variable_item_get_context(item);
@@ -106,16 +106,16 @@ void flipbip_scene_settings_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, haptic_text[value_index]);
 
-    // Sound on/off
-    item = variable_item_list_add(
-        app->variable_item_list,
-        "Sound:",
-        2,
-        flipbip_scene_settings_set_speaker,
-        app);
-    value_index = value_index_uint32(app->speaker, speaker_value, 2);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, speaker_text[value_index]);
+    // // Sound on/off
+    // item = variable_item_list_add(
+    //     app->variable_item_list,
+    //     "Sound:",
+    //     2,
+    //     flipbip_scene_settings_set_speaker,
+    //     app);
+    // value_index = value_index_uint32(app->speaker, speaker_value, 2);
+    // variable_item_set_current_value_index(item, value_index);
+    // variable_item_set_current_value_text(item, speaker_text[value_index]);
 
     // LED Effects on/off
     item = variable_item_list_add(
