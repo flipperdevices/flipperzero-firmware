@@ -45,19 +45,19 @@
 
 // implement BIP32 caching
 #ifndef USE_BIP32_CACHE
-#define USE_BIP32_CACHE 1
+#define USE_BIP32_CACHE 0
 #define BIP32_CACHE_SIZE 10
 #define BIP32_CACHE_MAXDEPTH 8
 #endif
 
 // support constructing BIP32 nodes from ed25519 and curve25519 curves.
 #ifndef USE_BIP32_25519_CURVES
-#define USE_BIP32_25519_CURVES 1
+#define USE_BIP32_25519_CURVES 0
 #endif
 
 // implement BIP39 caching
 #ifndef USE_BIP39_CACHE
-#define USE_BIP39_CACHE 1
+#define USE_BIP39_CACHE 0
 #define BIP39_CACHE_SIZE 4
 #endif
 

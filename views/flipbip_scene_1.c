@@ -243,8 +243,10 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     memzero(seed, sizeof(seed));
     free(seed);
 
+#if USE_BIP39_CACHE
     // Clear the BIP39 cache
     bip39_cache_clear();
+#endif
 }
 
 bool flipbip_scene_1_input(InputEvent* event, void* context) {
