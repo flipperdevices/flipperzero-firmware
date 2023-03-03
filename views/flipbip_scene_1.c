@@ -166,8 +166,9 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     const uint32_t version_private = 0x0488ade4;
     //const char addr_version = 0x00, wif_version = 0x80;
     
+    // buffer for key serialization
     const size_t buflen = 128;
-    char buf[buflen + 1];
+    char buf[128 + 1];
     
     // root
     uint32_t fingerprint = 0;
