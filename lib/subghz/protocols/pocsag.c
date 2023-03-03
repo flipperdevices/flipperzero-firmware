@@ -292,9 +292,9 @@ SubGhzProtocolStatus subghz_protocol_decoder_pocsag_serialize(
         subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 
     msg_len = furi_string_size(instance->done_msg);
-    if(!flipper_format_write_uint32(flipper_format, "MsgLen", &msg_len, 1)) {
+    if(!flipper_format_write_uint32(flipper_format, "MsgLen", &msg_len, pocsag_const.min_count_bit_for_found)) {
         FURI_LOG_E(TAG, "Error adding MsgLen");
-        ret = SubGhzProtocolStatusErrorParserOthers;
+        ret = SubGhzProtocolStatusErrorValueBitCount;
     }
 
     uint8_t* s = (uint8_t*)furi_string_get_cstr(instance->done_msg);
