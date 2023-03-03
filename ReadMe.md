@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0302-1100-0.78.2-d782beb](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-03-03 07:38 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-03-03 07:38 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-03-03 15:19 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-03-03 15:19 EST`
 - Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - UL: Updated: SubGHz: Fixed timings for static CAME 12 bit and other types (fixed issue #280)
 - UL: Updated: Fix #370 and fix other protocol counter issues
@@ -48,6 +48,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Updated: Fix iButton app - add manually - duplicate names
 - Fix Music Beeper Location
 - Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
+- OFW: [Archive browser: update path on dir leave #2455 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2455)
+- OFW: [SubGhz: better and more verbose error handling in protocols, stricter CAME validation #2443 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2443)
+- POCSAG protocol fixed to use new error status
 
 <a name="release">
 
