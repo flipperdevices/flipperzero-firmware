@@ -30,7 +30,7 @@ void subghz_protocol_encoder_phoenix_v2_free(void* context);
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return Status error
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_phoenix_v2_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
@@ -87,7 +87,7 @@ uint8_t subghz_protocol_decoder_phoenix_v2_get_hash_data(void* context);
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
  * @return Status error
  */
-SubGhzProtocolError subghz_protocol_decoder_phoenix_v2_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_phoenix_v2_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -98,7 +98,7 @@ SubGhzProtocolError subghz_protocol_decoder_phoenix_v2_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return Status error
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_phoenix_v2_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**

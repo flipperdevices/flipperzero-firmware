@@ -30,7 +30,7 @@ void subghz_protocol_encoder_ansonic_free(void* context);
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_ansonic_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
@@ -87,7 +87,7 @@ uint8_t subghz_protocol_decoder_ansonic_get_hash_data(void* context);
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
  * @return true On success
  */
-SubGhzProtocolError subghz_protocol_decoder_ansonic_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_ansonic_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -98,7 +98,7 @@ SubGhzProtocolError subghz_protocol_decoder_ansonic_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_ansonic_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**

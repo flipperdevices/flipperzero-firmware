@@ -258,7 +258,7 @@ uint8_t ws_protocol_decoder_acurite_592txr_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError ws_protocol_decoder_acurite_592txr_serialize(
+SubGhzProtocolStatus ws_protocol_decoder_acurite_592txr_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -267,7 +267,7 @@ SubGhzProtocolError ws_protocol_decoder_acurite_592txr_serialize(
     return ws_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     ws_protocol_decoder_acurite_592txr_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     WSProtocolDecoderAcurite_592TXR* instance = context;

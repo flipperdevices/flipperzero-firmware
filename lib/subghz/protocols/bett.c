@@ -155,17 +155,17 @@ static bool subghz_protocol_encoder_bett_get_upload(SubGhzProtocolEncoderBETT* i
     return true;
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_bett_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderBETT* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize_check_count_bit(
             &instance->generic,
             flipper_format,
             subghz_protocol_bett_const.min_count_bit_for_found);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
@@ -174,7 +174,7 @@ SubGhzProtocolError
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_encoder_bett_get_upload(instance)) {
-            ret = SubGhzProtocolErrorEncoderGetUpload;
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
         instance->encoder.is_running = true;
@@ -296,7 +296,7 @@ uint8_t subghz_protocol_decoder_bett_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_bett_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_bett_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -305,7 +305,7 @@ SubGhzProtocolError subghz_protocol_decoder_bett_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_bett_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderBETT* instance = context;

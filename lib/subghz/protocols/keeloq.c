@@ -254,17 +254,17 @@ static bool
     return true;
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderKeeloq* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize_check_count_bit(
             &instance->generic,
             flipper_format,
             subghz_protocol_keeloq_const.min_count_bit_for_found);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         subghz_protocol_keeloq_check_remote_controller(
@@ -272,7 +272,7 @@ SubGhzProtocolError
 
         if(strcmp(instance->manufacture_name, "DoorHan") != 0) {
             FURI_LOG_E(TAG, "Wrong manufacturer name");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
 
@@ -281,12 +281,12 @@ SubGhzProtocolError
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_encoder_keeloq_get_upload(instance, instance->generic.btn)) {
-            ret = SubGhzProtocolErrorEncoderGetUpload;
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         uint8_t key_data[sizeof(uint64_t)] = {0};
@@ -295,7 +295,7 @@ SubGhzProtocolError
         }
         if(!flipper_format_update_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
             FURI_LOG_E(TAG, "Unable to add Key");
-            ret = SubGhzProtocolErrorKey;
+            ret = SubGhzProtocolStatusErrorParserKey;
             break;
         }
 
@@ -671,7 +671,7 @@ uint8_t subghz_protocol_decoder_keeloq_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_keeloq_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_keeloq_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -680,19 +680,19 @@ SubGhzProtocolError subghz_protocol_decoder_keeloq_serialize(
     subghz_protocol_keeloq_check_remote_controller(
         &instance->generic, instance->keystore, &instance->manufacture_name);
 
-    SubGhzProtocolError res =
+    SubGhzProtocolStatus res =
         subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 
-    if((res == SubGhzProtocolErrorNoError) &&
+    if((res == SubGhzProtocolStatusOk) &&
        !flipper_format_write_string_cstr(
            flipper_format, "Manufacture", instance->manufacture_name)) {
         FURI_LOG_E(TAG, "Unable to add manufacture name");
-        res = SubGhzProtocolErrorOthers;
+        res = SubGhzProtocolStatusErrorParserOthers;
     }
     return res;
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderKeeloq* instance = context;

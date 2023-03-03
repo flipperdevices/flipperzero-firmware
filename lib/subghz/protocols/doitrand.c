@@ -136,17 +136,17 @@ static bool subghz_protocol_encoder_doitrand_get_upload(SubGhzProtocolEncoderDoi
     return true;
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_doitrand_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderDoitrand* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize_check_count_bit(
             &instance->generic,
             flipper_format,
             subghz_protocol_doitrand_const.min_count_bit_for_found);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         //optional parameter parameter
@@ -154,7 +154,7 @@ SubGhzProtocolError
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_encoder_doitrand_get_upload(instance)) {
-            ret = SubGhzProtocolErrorEncoderGetUpload;
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
         instance->encoder.is_running = true;
@@ -310,7 +310,7 @@ uint8_t subghz_protocol_decoder_doitrand_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_doitrand_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_doitrand_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -319,7 +319,7 @@ SubGhzProtocolError subghz_protocol_decoder_doitrand_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_doitrand_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderDoitrand* instance = context;

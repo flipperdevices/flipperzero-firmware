@@ -385,44 +385,44 @@ uint8_t subghz_protocol_decoder_alutech_at_4n_get_hash_data(void* context) {
     return (uint8_t)instance->crc;
 }
 
-SubGhzProtocolError subghz_protocol_decoder_alutech_at_4n_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_alutech_at_4n_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderAlutech_at_4n* instance = context;
-    SubGhzProtocolError res =
+    SubGhzProtocolStatus res =
         subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
-    if((res == SubGhzProtocolErrorNoError) &&
+    if((res == SubGhzProtocolStatusOk) &&
        !flipper_format_write_uint32(flipper_format, "CRC", &instance->crc, 1)) {
         FURI_LOG_E(TAG, "Unable to add CRC");
-        res = SubGhzProtocolErrorOthers;
+        res = SubGhzProtocolStatusErrorParserOthers;
     }
     return res;
 }
 
-SubGhzProtocolError subghz_protocol_decoder_alutech_at_4n_deserialize(
+SubGhzProtocolStatus subghz_protocol_decoder_alutech_at_4n_deserialize(
     void* context,
     FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderAlutech_at_4n* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize_check_count_bit(
             &instance->generic,
             flipper_format,
             subghz_protocol_alutech_at_4n_const.min_count_bit_for_found);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         if(!flipper_format_read_uint32(flipper_format, "CRC", (uint32_t*)&instance->crc, 1)) {
             FURI_LOG_E(TAG, "Missing CRC");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
     } while(false);

@@ -260,13 +260,13 @@ uint8_t subghz_protocol_decoder_kinggates_stylo_4k_get_hash_data(void* context) 
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_kinggates_stylo_4k_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_kinggates_stylo_4k_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderKingGates_stylo_4k* instance = context;
-    SubGhzProtocolError ret =
+    SubGhzProtocolStatus ret =
         subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 
     uint8_t key_data[sizeof(uint64_t)] = {0};
@@ -274,37 +274,37 @@ SubGhzProtocolError subghz_protocol_decoder_kinggates_stylo_4k_serialize(
         key_data[sizeof(uint64_t) - i - 1] = (instance->data >> (i * 8)) & 0xFF;
     }
 
-    if((ret == SubGhzProtocolErrorNoError) &&
+    if((ret == SubGhzProtocolStatusOk) &&
        !flipper_format_write_hex(flipper_format, "Data", key_data, sizeof(uint64_t))) {
         FURI_LOG_E(TAG, "Unable to add Data");
-        ret = SubGhzProtocolErrorOthers;
+        ret = SubGhzProtocolStatusErrorParserOthers;
     }
     return ret;
 }
 
-SubGhzProtocolError subghz_protocol_decoder_kinggates_stylo_4k_deserialize(
+SubGhzProtocolStatus subghz_protocol_decoder_kinggates_stylo_4k_deserialize(
     void* context,
     FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderKingGates_stylo_4k* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize_check_count_bit(
             &instance->generic,
             flipper_format,
             subghz_protocol_kinggates_stylo_4k_const.min_count_bit_for_found);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         uint8_t key_data[sizeof(uint64_t)] = {0};
         if(!flipper_format_read_hex(flipper_format, "Data", key_data, sizeof(uint64_t))) {
             FURI_LOG_E(TAG, "Missing Data");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         for(uint8_t i = 0; i < sizeof(uint64_t); i++) {

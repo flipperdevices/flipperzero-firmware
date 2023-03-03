@@ -241,17 +241,17 @@ static void subghz_protocol_came_twee_remote_controller(SubGhzBlockGeneric* inst
     instance->cnt = data >> 6;
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_came_twee_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderCameTwee* instance = context;
-    SubGhzProtocolError res = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     do {
         res = subghz_block_generic_deserialize_check_count_bit(
             &instance->generic,
             flipper_format,
             subghz_protocol_came_twee_const.min_count_bit_for_found);
-        if(res != SubGhzProtocolErrorNoError) {
+        if(res != SubGhzProtocolStatusOk) {
             break;
         }
         //optional parameter parameter
@@ -416,7 +416,7 @@ uint8_t subghz_protocol_decoder_came_twee_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_came_twee_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_came_twee_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -425,7 +425,7 @@ SubGhzProtocolError subghz_protocol_decoder_came_twee_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_came_twee_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderCameTwee* instance = context;

@@ -302,19 +302,19 @@ uint8_t ws_protocol_decoder_oregon2_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError ws_protocol_decoder_oregon2_serialize(
+SubGhzProtocolStatus ws_protocol_decoder_oregon2_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
     WSProtocolDecoderOregon2* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     ret = ws_block_generic_serialize(&instance->generic, flipper_format, preset);
-    if(ret != SubGhzProtocolErrorNoError) return ret;
+    if(ret != SubGhzProtocolStatusOk) return ret;
     uint32_t temp = instance->var_bits;
     if(!flipper_format_write_uint32(flipper_format, "VarBits", &temp, 1)) {
         FURI_LOG_E(TAG, "Error adding VarBits");
-        return SubGhzProtocolErrorOthers;
+        return SubGhzProtocolStatusErrorParserOthers;
     }
     if(!flipper_format_write_hex(
            flipper_format,
@@ -322,25 +322,25 @@ SubGhzProtocolError ws_protocol_decoder_oregon2_serialize(
            (const uint8_t*)&instance->var_data,
            sizeof(instance->var_data))) {
         FURI_LOG_E(TAG, "Error adding VarData");
-        return SubGhzProtocolErrorOthers;
+        return SubGhzProtocolStatusErrorParserOthers;
     }
     return ret;
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     ws_protocol_decoder_oregon2_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     WSProtocolDecoderOregon2* instance = context;
     uint32_t temp_data;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = ws_block_generic_deserialize(&instance->generic, flipper_format);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if(!flipper_format_read_uint32(flipper_format, "VarBits", &temp_data, 1)) {
             FURI_LOG_E(TAG, "Missing VarLen");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         instance->var_bits = (uint8_t)temp_data;
@@ -350,12 +350,12 @@ SubGhzProtocolError
                (uint8_t*)&instance->var_data,
                sizeof(instance->var_data))) { //-V1051
             FURI_LOG_E(TAG, "Missing VarData");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         if(instance->generic.data_count_bit != ws_oregon2_const.min_count_bit_for_found) {
             FURI_LOG_E(TAG, "Wrong number of bits in key: %d", instance->generic.data_count_bit);
-            ret = SubGhzProtocolErrorCountBit;
+            ret = SubGhzProtocolStatusErrorValueBitCount;
             break;
         }
     } while(false);

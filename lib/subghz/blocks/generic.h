@@ -38,7 +38,7 @@ void subghz_block_generic_get_preset_name(const char* preset_name, FuriString* p
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
  * @return Status Error
  */
-SubGhzProtocolError subghz_block_generic_serialize(
+SubGhzProtocolStatus subghz_block_generic_serialize(
     SubGhzBlockGeneric* instance,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -49,7 +49,7 @@ SubGhzProtocolError subghz_block_generic_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return Status Error
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_block_generic_deserialize(SubGhzBlockGeneric* instance, FlipperFormat* flipper_format);
 
 /**
@@ -59,7 +59,7 @@ SubGhzProtocolError
  * @param count_bit Count bit protocol
  * @return Status Error
  */
-SubGhzProtocolError subghz_block_generic_deserialize_check_count_bit(
+SubGhzProtocolStatus subghz_block_generic_deserialize_check_count_bit(
     SubGhzBlockGeneric* instance,
     FlipperFormat* flipper_format,
     uint16_t count_bit);

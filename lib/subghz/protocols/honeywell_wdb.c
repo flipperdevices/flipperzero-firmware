@@ -142,18 +142,18 @@ static bool subghz_protocol_encoder_honeywell_wdb_get_upload(
     return true;
 }
 
-SubGhzProtocolError subghz_protocol_encoder_honeywell_wdb_deserialize(
+SubGhzProtocolStatus subghz_protocol_encoder_honeywell_wdb_deserialize(
     void* context,
     FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderHoneywell_WDB* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize_check_count_bit(
             &instance->generic,
             flipper_format,
             subghz_protocol_honeywell_wdb_const.min_count_bit_for_found);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         //optional parameter parameter
@@ -161,7 +161,7 @@ SubGhzProtocolError subghz_protocol_encoder_honeywell_wdb_deserialize(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_encoder_honeywell_wdb_get_upload(instance)) {
-            ret = SubGhzProtocolErrorEncoderGetUpload;
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
         instance->encoder.is_running = true;
@@ -344,7 +344,7 @@ uint8_t subghz_protocol_decoder_honeywell_wdb_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_honeywell_wdb_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_honeywell_wdb_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -353,7 +353,7 @@ SubGhzProtocolError subghz_protocol_decoder_honeywell_wdb_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_honeywell_wdb_deserialize(
+SubGhzProtocolStatus subghz_protocol_decoder_honeywell_wdb_deserialize(
     void* context,
     FlipperFormat* flipper_format) {
     furi_assert(context);

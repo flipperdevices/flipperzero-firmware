@@ -379,39 +379,39 @@ uint8_t subghz_protocol_decoder_somfy_keytis_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_somfy_keytis_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_somfy_keytis_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
-    SubGhzProtocolError ret =
+    SubGhzProtocolStatus ret =
         subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
-    if((ret == SubGhzProtocolErrorNoError) &&
+    if((ret == SubGhzProtocolStatusOk) &&
        !flipper_format_write_uint32(
            flipper_format, "Duration_Counter", &instance->press_duration_counter, 1)) {
         FURI_LOG_E(TAG, "Unable to add Duration_Counter");
-        ret = SubGhzProtocolErrorOthers;
+        ret = SubGhzProtocolStatusErrorParserOthers;
     }
     return ret;
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_somfy_keytis_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyKeytis* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize_check_count_bit(
             &instance->generic,
             flipper_format,
             subghz_protocol_somfy_keytis_const.min_count_bit_for_found);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         if(!flipper_format_read_uint32(
@@ -420,7 +420,7 @@ SubGhzProtocolError
                (uint32_t*)&instance->press_duration_counter,
                1)) {
             FURI_LOG_E(TAG, "Missing Duration_Counter");
-            ret = SubGhzProtocolErrorOthers;
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
     } while(false);

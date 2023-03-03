@@ -158,22 +158,22 @@ static bool subghz_protocol_encoder_intertechno_v3_get_upload(
     return true;
 }
 
-SubGhzProtocolError subghz_protocol_encoder_intertechno_v3_deserialize(
+SubGhzProtocolStatus subghz_protocol_encoder_intertechno_v3_deserialize(
     void* context,
     FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderIntertechno_V3* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize(&instance->generic, flipper_format);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if((instance->generic.data_count_bit !=
             subghz_protocol_intertechno_v3_const.min_count_bit_for_found) &&
            (instance->generic.data_count_bit != INTERTECHNO_V3_DIMMING_COUNT_BIT)) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
-            ret = SubGhzProtocolErrorCountBit;
+            ret = SubGhzProtocolStatusErrorValueBitCount;
             break;
         }
         //optional parameter parameter
@@ -181,7 +181,7 @@ SubGhzProtocolError subghz_protocol_encoder_intertechno_v3_deserialize(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_encoder_intertechno_v3_get_upload(instance)) {
-            ret = SubGhzProtocolErrorEncoderGetUpload;
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
         instance->encoder.is_running = true;
@@ -406,7 +406,7 @@ uint8_t subghz_protocol_decoder_intertechno_v3_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_intertechno_v3_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_intertechno_v3_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -415,22 +415,22 @@ SubGhzProtocolError subghz_protocol_decoder_intertechno_v3_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_intertechno_v3_deserialize(
+SubGhzProtocolStatus subghz_protocol_decoder_intertechno_v3_deserialize(
     void* context,
     FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderIntertechno_V3* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize(&instance->generic, flipper_format);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if((instance->generic.data_count_bit !=
             subghz_protocol_intertechno_v3_const.min_count_bit_for_found) &&
            (instance->generic.data_count_bit != INTERTECHNO_V3_DIMMING_COUNT_BIT)) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
-            ret = SubGhzProtocolErrorCountBit;
+            ret = SubGhzProtocolStatusErrorValueBitCount;
             break;
         }
     } while(false);

@@ -179,7 +179,7 @@ uint8_t subghz_protocol_decoder_ido_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_ido_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_ido_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -188,7 +188,7 @@ SubGhzProtocolError subghz_protocol_decoder_ido_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_ido_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderIDo* instance = context;

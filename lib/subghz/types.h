@@ -30,29 +30,35 @@ typedef struct {
 } SubGhzRadioPreset;
 
 typedef enum {
-    SubGhzProtocolErrorUnknown = 0,
-    SubGhzProtocolErrorNoError,
-    SubGhzProtocolErrorHeader,
-    SubGhzProtocolErrorFrequency,
-    SubGhzProtocolErrorPreset,
-    SubGhzProtocolErrorCustomPreset,
-    SubGhzProtocolErrorProtocolName,
-    SubGhzProtocolErrorBit,
-    SubGhzProtocolErrorCountBit,
-    SubGhzProtocolErrorKey,
-    SubGhzProtocolErrorTE,
-    SubGhzProtocolErrorEncoderGetUpload,
-    SubGhzProtocolErrorOthers,
-} SubGhzProtocolError;
+    SubGhzProtocolStatusOk = 0,
+    // Errors
+    SubGhzProtocolStatusError = (-1), ///< General unclassified error
+    // Serialize/De-serialize
+    SubGhzProtocolStatusErrorParserHeader = (-2), ///< Missing or invalid file header
+    SubGhzProtocolStatusErrorParserFrequency = (-3), ///< Missing `Frequency`
+    SubGhzProtocolStatusErrorParserPreset = (-4), ///< Missing `Preset`
+    SubGhzProtocolStatusErrorParserCustomPreset = (-5), ///< Missing `Custom_preset_module`
+    SubGhzProtocolStatusErrorParserProtocolName = (-6), ///< Missing `Protocol` name
+    SubGhzProtocolStatusErrorParserBitCount = (-7), ///< Missing `Bit`
+    SubGhzProtocolStatusErrorParserKey = (-8), ///< Missing `Key`
+    SubGhzProtocolStatusErrorParserTe = (-9), ///< Missing `Te`
+    SubGhzProtocolStatusErrorParserOthers = (-10), ///< Missing some other mandatory keys
+    // Invalid data
+    SubGhzProtocolStatusErrorValueBitCount = (-11), ///< Invalid bit count value
+    // Encoder issue
+    SubGhzProtocolStatusErrorEncoderGetUpload = (-12), ///< Payload encoder failure
+    // Special Values
+    SubGhzProtocolStatusReserved = 0x7FFFFFFF, ///< Prevents enum down-size compiler optimization.
+} SubGhzProtocolStatus;
 
 // Allocator and Deallocator
 typedef void* (*SubGhzAlloc)(SubGhzEnvironment* environment);
 typedef void (*SubGhzFree)(void* context);
 
 // Serialize and Deserialize
-typedef SubGhzProtocolError (
+typedef SubGhzProtocolStatus (
     *SubGhzSerialize)(void* context, FlipperFormat* flipper_format, SubGhzRadioPreset* preset);
-typedef SubGhzProtocolError (*SubGhzDeserialize)(void* context, FlipperFormat* flipper_format);
+typedef SubGhzProtocolStatus (*SubGhzDeserialize)(void* context, FlipperFormat* flipper_format);
 
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);

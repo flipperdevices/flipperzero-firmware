@@ -50,7 +50,7 @@ bool subghz_protocol_keeloq_create_data(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return Status error
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
@@ -105,9 +105,9 @@ uint8_t subghz_protocol_decoder_keeloq_get_hash_data(void* context);
  * @param context Pointer to a SubGhzProtocolDecoderKeeloq instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return SubGhzProtocolError
+ * @return SubGhzProtocolStatus
  */
-SubGhzProtocolError subghz_protocol_decoder_keeloq_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_keeloq_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -116,9 +116,9 @@ SubGhzProtocolError subghz_protocol_decoder_keeloq_serialize(
  * Deserialize data SubGhzProtocolDecoderKeeloq.
  * @param context Pointer to a SubGhzProtocolDecoderKeeloq instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return SubGhzProtocolError
+ * @return SubGhzProtocolStatus
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_keeloq_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**

@@ -36,7 +36,7 @@ bool subghz_scene_set_type_submenu_gen_data_protocol(
         stream_clean(fff_data_stream);
         if(subghz_protocol_decoder_base_serialize(
                subghz->txrx->decoder_result, subghz->txrx->fff_data, subghz->txrx->preset) !=
-           SubGhzProtocolErrorNoError) {
+           SubGhzProtocolStatusOk) {
             FURI_LOG_E(TAG, "Unable to serialize");
             break;
         }

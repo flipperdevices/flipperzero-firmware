@@ -163,19 +163,19 @@ static bool subghz_protocol_encoder_came_get_upload(SubGhzProtocolEncoderCame* i
     return true;
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_came_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderCame* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize(&instance->generic, flipper_format);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if((instance->generic.data_count_bit > PRASTEL_COUNT_BIT)) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
-            ret = SubGhzProtocolErrorCountBit;
+            ret = SubGhzProtocolStatusErrorValueBitCount;
             break;
         }
         //optional parameter parameter
@@ -183,7 +183,7 @@ SubGhzProtocolError
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_encoder_came_get_upload(instance)) {
-            ret = SubGhzProtocolErrorEncoderGetUpload;
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
         instance->encoder.is_running = true;
@@ -317,7 +317,7 @@ uint8_t subghz_protocol_decoder_came_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_came_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_came_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -326,19 +326,19 @@ SubGhzProtocolError subghz_protocol_decoder_came_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_came_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderCame* instance = context;
-    SubGhzProtocolError ret = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
         ret = subghz_block_generic_deserialize(&instance->generic, flipper_format);
-        if(ret != SubGhzProtocolErrorNoError) {
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if((instance->generic.data_count_bit > PRASTEL_COUNT_BIT)) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
-            ret = SubGhzProtocolErrorCountBit;
+            ret = SubGhzProtocolStatusErrorValueBitCount;
             break;
         }
     } while(false);

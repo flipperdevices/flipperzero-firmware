@@ -51,7 +51,7 @@ bool subghz_protocol_decoder_base_get_string(
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
  * @return Status Error
  */
-SubGhzProtocolError subghz_protocol_decoder_base_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_base_serialize(
     SubGhzProtocolDecoderBase* decoder_base,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -62,7 +62,7 @@ SubGhzProtocolError subghz_protocol_decoder_base_serialize(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return Status Error
  */
-SubGhzProtocolError subghz_protocol_decoder_base_deserialize(
+SubGhzProtocolStatus subghz_protocol_decoder_base_deserialize(
     SubGhzProtocolDecoderBase* decoder_base,
     FlipperFormat* flipper_format);
 

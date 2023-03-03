@@ -228,7 +228,7 @@ uint8_t ws_protocol_decoder_ambient_weather_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError ws_protocol_decoder_ambient_weather_serialize(
+SubGhzProtocolStatus ws_protocol_decoder_ambient_weather_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -237,7 +237,7 @@ SubGhzProtocolError ws_protocol_decoder_ambient_weather_serialize(
     return ws_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     ws_protocol_decoder_ambient_weather_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     WSProtocolDecoderAmbient_Weather* instance = context;

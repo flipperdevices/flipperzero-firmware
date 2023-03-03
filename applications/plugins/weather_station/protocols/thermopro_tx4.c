@@ -211,7 +211,7 @@ uint8_t ws_protocol_decoder_thermopro_tx4_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError ws_protocol_decoder_thermopro_tx4_serialize(
+SubGhzProtocolStatus ws_protocol_decoder_thermopro_tx4_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -220,7 +220,7 @@ SubGhzProtocolError ws_protocol_decoder_thermopro_tx4_serialize(
     return ws_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     ws_protocol_decoder_thermopro_tx4_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     WSProtocolDecoderThermoPRO_TX4* instance = context;

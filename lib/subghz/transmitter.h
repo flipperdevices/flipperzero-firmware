@@ -41,7 +41,7 @@ bool subghz_transmitter_stop(SubGhzTransmitter* instance);
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return Status error
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* flipper_format);
 
 /**

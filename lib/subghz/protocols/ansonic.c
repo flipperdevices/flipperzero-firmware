@@ -136,17 +136,17 @@ static bool subghz_protocol_encoder_ansonic_get_upload(SubGhzProtocolEncoderAnso
     return true;
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_ansonic_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderAnsonic* instance = context;
-    SubGhzProtocolError res = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     do {
         res = subghz_block_generic_deserialize_check_count_bit(
             &instance->generic,
             flipper_format,
             subghz_protocol_ansonic_const.min_count_bit_for_found);
-        if(res != SubGhzProtocolErrorNoError) {
+        if(res != SubGhzProtocolStatusOk) {
             FURI_LOG_E(TAG, "Deserialize error");
             break;
         }
@@ -155,7 +155,7 @@ SubGhzProtocolError
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_encoder_ansonic_get_upload(instance)) {
-            res = SubGhzProtocolErrorEncoderGetUpload;
+            res = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
         instance->encoder.is_running = true;
@@ -302,7 +302,7 @@ uint8_t subghz_protocol_decoder_ansonic_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError subghz_protocol_decoder_ansonic_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_ansonic_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -311,7 +311,7 @@ SubGhzProtocolError subghz_protocol_decoder_ansonic_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_ansonic_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderAnsonic* instance = context;

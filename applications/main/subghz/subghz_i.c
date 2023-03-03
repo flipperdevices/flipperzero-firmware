@@ -163,7 +163,7 @@ bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
 
         if(subghz->txrx->transmitter) {
             if(subghz_transmitter_deserialize(subghz->txrx->transmitter, flipper_format) ==
-               SubGhzProtocolErrorNoError) {
+               SubGhzProtocolStatusOk) {
                 if(strcmp(furi_string_get_cstr(subghz->txrx->preset->name), "") != 0) {
                     subghz_begin(
                         subghz,
@@ -338,9 +338,9 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
             subghz->txrx->receiver, furi_string_get_cstr(temp_str));
         if(subghz->txrx->decoder_result) {
-            SubGhzProtocolError status = subghz_protocol_decoder_base_deserialize(
+            SubGhzProtocolStatus status = subghz_protocol_decoder_base_deserialize(
                 subghz->txrx->decoder_result, subghz->txrx->fff_data);
-            if(status != SubGhzProtocolErrorNoError) {
+            if(status != SubGhzProtocolStatusOk) {
                 load_key_state = SubGhzLoadKeyStateProtocolDescriptionErr;
                 break;
             }

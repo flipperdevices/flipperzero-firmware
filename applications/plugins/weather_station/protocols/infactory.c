@@ -248,7 +248,7 @@ uint8_t ws_protocol_decoder_infactory_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-SubGhzProtocolError ws_protocol_decoder_infactory_serialize(
+SubGhzProtocolStatus ws_protocol_decoder_infactory_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -257,7 +257,7 @@ SubGhzProtocolError ws_protocol_decoder_infactory_serialize(
     return ws_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     ws_protocol_decoder_infactory_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     WSProtocolDecoderInfactory* instance = context;

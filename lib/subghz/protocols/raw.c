@@ -259,13 +259,13 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
     }
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     UNUSED(context);
     UNUSED(flipper_format);
     //ToDo stub, for backwards compatibility
-    return SubGhzProtocolErrorNoError;
+    return SubGhzProtocolStatusOk;
 }
 
 void subghz_protocol_decoder_raw_get_string(void* context, FuriString* output) {
@@ -343,32 +343,32 @@ void subghz_protocol_raw_gen_fff_data(FlipperFormat* flipper_format, const char*
     } while(false);
 }
 
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderRAW* instance = context;
-    SubGhzProtocolError res = SubGhzProtocolErrorUnknown;
+    SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     do {
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
-            res = SubGhzProtocolErrorOthers;
+            res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
 
         if(!flipper_format_read_string(flipper_format, "File_name", temp_str)) {
             FURI_LOG_E(TAG, "Missing File_name");
-            res = SubGhzProtocolErrorOthers;
+            res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         furi_string_set(instance->file_name, temp_str);
 
         if(!subghz_protocol_encoder_raw_worker_init(instance)) {
-            res = SubGhzProtocolErrorEncoderGetUpload;
+            res = SubGhzProtocolStatusErrorEncoderGetUpload;
             break;
         }
-        res = SubGhzProtocolErrorNoError;
+        res = SubGhzProtocolStatusOk;
     } while(false);
     furi_string_free(temp_str);
     return res;

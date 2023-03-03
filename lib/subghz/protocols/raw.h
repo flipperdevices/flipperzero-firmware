@@ -75,7 +75,7 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return Status error
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
@@ -135,7 +135,7 @@ void subghz_protocol_raw_gen_fff_data(FlipperFormat* flipper_format, const char*
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return Status error
  */
-SubGhzProtocolError
+SubGhzProtocolStatus
     subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
