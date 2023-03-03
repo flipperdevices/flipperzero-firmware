@@ -26,6 +26,7 @@ W: CO2 threshold=,5,0x82    <- Write cmd, send pkt = { <from WBatch first byte o
 R: FanLSB[10]=i:9           <- Read cmd, '[10]' - means array with 10 elements, 'i:9' - means array index field (9) that will be incemented after each send
                                result in bytes = 1 pkt: { 9, 0, 0, 0xC1 }, 2 pkt: { 10, 0, 0, 0xC1 }, 3 pkt: { 10, 0, 0, 0xC1 },... total 10 packets
 W: FanLSB=,i:9              <- Write cmd, 'i' - index field. Send packets: { n & 0xFF, n >> 8, 9, 0x81 }, { n & 0xFF, n >> 8, 10, 0x81 },...  
+R: Int16Array*2[10]=i:21    <- Read cmd, array with 10 elements of int16 (2 bytes)
 W: RxAddr=,1                <- Write cmd, payload = { n, 0, 1, 0x81 }
 W: Reset=,RESET,0xC1        <- Send payload = { 0, 0, 4, 0xC1 }
 

@@ -1,0 +1,95 @@
+Info: Kitchen Vent (FanControl)
+Address: C8C8C1
+Rate: 1
+Ch: 122
+CRC: 2
+DPL: 0
+RETR: 0x0F
+Resend: 3
+Delay_ms: 30
+
+Payload struct: 2,1,1
+EEPROM=0; RAM=1; PROGMEM=2; ID=3; RESET=4
+
+R default: ,EEPROM,0xC1
+W default: n,,0x81
+Write start: 0,0,0x8F
+
+R: ID*=,ID
+R: FanOn=0x77,RAM,0xC1
+S: FanSet=,,0x40
+R: FanSpeed=0x76,RAM,0xC1
+
+R: CO2 level 1*2=4,,0xC2
+W: CO2 level 1=,4,0x82
+R: CO2 level 2*2=6,,0xC2
+W: CO2 level 2=,6,0x82
+R: CO2 level 3*2=8,,0xC2
+W: CO2 level 3=,8,0x82
+
+R: FanSpeed_1=19
+W: FanSpeed_1=,19
+R: FanSpeed_2=20
+W: FanSpeed_2=,20
+R: FanSpeed_3=21
+W: FanSpeed_3=,21
+R: FanCookSpeed_1=22
+W: FanCookSpeed_1=,22
+R: FanCookSpeed_2=23
+W: FanCookSpeed_2=,23
+R: FanCookSpeed_3=24
+W: FanCookSpeed_3=,24
+
+R: FanStartupTime=10
+W: FanStartupTime=,10
+
+R: FanOffTime=11
+W: FanOffTime=,11
+
+R: FanCookStartupTime=12
+W: FanCookStartupTime=,12
+
+R: FanCookOffTime=13
+W: FanCookOffTime=,13
+
+R: FanSleep=14
+W: FanSleep=,14
+
+R: FanCookSleep=15
+W: FanCookSleep=,15
+
+R: FanSpeedInitIdx=16
+W: FanSpeedInitIdx=,16
+
+R: FanSpeedKey=17
+W: FanSpeedKey=,17
+
+R: IRRemotes=32
+W: IRRemotes=,32
+
+R: IRRemotesHash*2[80]=i:32#
+W: IRRemotesHash=,i:32
+
+R: OutPeriod=18
+W: OutPeriod=,18
+
+R: Flags=1#
+W: Flags=,1
+
+R: RxAddr=2#
+W: RxAddr=,2
+
+R: Ch=3
+W: Ch=,3
+
+R: OSCCAL=0x51,RAM
+R: OSCCAL_EMEM=0      				
+
+W: Reset=,RESET,0xC1
+
+RBatch: Work: ID;CO2 level 1;CO2 level 2;CO2 level 3;FanCookSpeed_1;FanCookSpeed_2;FanCookSpeed_3;FanCookStartupTime;FanCookOffTime;FanCookSleep;FanSpeed_1;FanSpeed_2;FanSpeed_3;FanStartupTime;FanOffTime;FanSleep
+RBatch: Hardware: ID;RxAddr;Ch;FanSpeedInitIdx;Flags;OutPeriod;IRRemotes;OSCCAL_EMEM
+RBatch: All: ID;CO2 level 1;CO2 level 2;CO2 level 3;FanCookSpeed_1;FanCookSpeed_2;FanCookSpeed_3;FanCookStartupTime;FanCookOffTime;FanCookSleep;FanSpeed_1;FanSpeed_2;FanSpeed_3;FanStartupTime;FanOffTime;FanSleep;RxAddr;Ch;FanSpeedInitIdx;Flags;OutPeriod;IRRemotes;IRRemotesHash
+
+WBatch: SetSpeed: FanSet=0
+WBatch: Reset: Reset

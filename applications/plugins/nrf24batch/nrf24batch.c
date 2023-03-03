@@ -17,10 +17,11 @@
 #define VERSION "1.2"
 
 #define SCAN_APP_PATH_FOLDER "/ext/apps_data/nrf24batch"
-#define LOG_FILENAME "log"
 #define LOG_FILEEXT ".txt"
 #define NRF_READ_TIMEOUT 300UL // ms
 #define WORK_PERIOD 2 // ms, Timer period
+#define MAX_CHANNEL 125
+#define FONT_5x7_SCREEN_WIDTH 25
 
 const char SettingsFld_Info[] = "Info:";
 const char SettingsFld_Ch[] = "Ch:";
@@ -35,15 +36,15 @@ const char SettingsFld_WriteStart[] = "Write start:";
 const char SettingsFld_Payload[] = "Payload struct:";
 const char SettingsFld_ReadDefault[] = "R default:";
 const char SettingsFld_WriteDefault[] = "W default:";
-const char SettingsFld_Read[] = "R:";
-const char SettingsFld_Write[] = "W:";
+const char SettingsFld_Read[] = "R:"; // Read cmd
+const char SettingsFld_Write[] = "W:"; // Write cmd
+const char SettingsFld_Set[] = "S:"; // Set cmd (like Write but without "Write start" packet)
 const char SettingsFld_ReadBatch[] = "RBatch:";
 const char SettingsFld_WriteBatch[] = "WBatch:";
 const char AskQuestion_Save[] = "SAVE BATCH?";
 #define Settings_i 'i'
 #define Settings_n 'n'
 #define VAR_EMPTY ((int32_t)0x80000000)
-#define FONT_5x7_SCREEN_WIDTH 25
 
 nRF24Batch* APP;
 uint8_t what_doing = 0; // 0 - setup, 1 - cmd list, 2 - view send cmd
@@ -59,7 +60,7 @@ uint8_t save_settings = 0;
 uint16_t view_cmd[3] = {0, 0, 0}; // ReadBatch, Read, WriteBatch
 uint8_t view_x = 0;
 char screen_buf[64];
-char Info[FONT_5x7_SCREEN_WIDTH] = "";
+char Info[35] = "";
 char file_name[FONT_5x7_SCREEN_WIDTH];
 char ERR_STR[FONT_5x7_SCREEN_WIDTH];
 uint8_t ERR = 0;
@@ -75,6 +76,7 @@ uint8_t NRF_last_packet_send_st = 0;
 uint8_t NRF_resend = 1; // number of transaction attempts
 uint8_t NRF_repeat = 0; // count number of repeated requests (until < NRF_resend)
 uint32_t NRF_time;
+uint32_t delay_between_pkt = 10; // ms
 
 uint8_t addr[5]; // nRF24 address, MSB first
 uint8_t addr_len; // 2..5
@@ -85,11 +87,12 @@ uint8_t payload_fields = 0;
 uint8_t payload_size = 0; // bytes
 uint16_t view_Batch = 0; // view pos in Batch or inside WriteBatch (Log[view_Batch])
 uint16_t view_WriteBatch = 0; // view pos of WriteBatch list
-uint32_t delay_between_pkt = 10; // ms
+uint8_t setup_cursor = 0; // cursor position on Setup scr
 uint8_t Edit = 0;
 char* Edit_pos;
+char* Edit_start;
 bool Edit_hex; // 0 - decimal, 1 - hex
-bool Edited = false;
+bool Edited = false; // list of cmds edited
 
 Stream* file_stream = NULL;
 FuriString* ReadDefault = NULL;
@@ -671,8 +674,12 @@ bool Run_WriteBatch_cmd() {
     stream_rewind(file_stream);
     while(stream_read_line(file_stream, str)) {
         w = (char*)furi_string_get_cstr(str);
-        if(strncmp(w, SettingsFld_Write, sizeof(SettingsFld_Write) - 1) != 0) continue;
-        w += sizeof(SettingsFld_Write);
+        if(strncmp(w, SettingsFld_Write, sizeof(SettingsFld_Write) - 1) == 0)
+            w += sizeof(SettingsFld_Write);
+        else if(strncmp(w, SettingsFld_Set, sizeof(SettingsFld_Set) - 1) == 0)
+            w += sizeof(SettingsFld_Set);
+        else
+            continue;
         delim_col = strchr(w, '=');
         if(delim_col == NULL || len != delim_col - w) continue;
         if(strncmp(p, w, len) != 0) continue;
@@ -964,15 +971,45 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     //canvas_draw_frame(canvas, 0, 0, 128, 64); // border around the edge of the screen
     if(what_doing == 0) {
         canvas_set_font(canvas, FontSecondary); // 8x10 font, 6 lines
-        snprintf(screen_buf, sizeof(screen_buf), "Open: %s", file_name);
-        canvas_draw_str(canvas, 10, 10, screen_buf);
+        snprintf(screen_buf, sizeof(screen_buf), "%s: %s", addr_len ? "File" : "Open", file_name);
+        canvas_draw_str(canvas, 8, 10, screen_buf);
         if(addr_len) {
-            canvas_draw_str(canvas, 10, 22, Info);
-            strcpy(screen_buf, "Address: ");
-            add_to_str_hex_bytes(screen_buf, addr, addr_len);
-            canvas_draw_str(canvas, 10, 32, screen_buf);
-            snprintf(screen_buf, sizeof(screen_buf), "Ch: %d, Rate: %d", NRF_channel, NRF_rate);
-            canvas_draw_str(canvas, 10, 42, screen_buf);
+            if(Edit) {
+                screen_buf[0] = *Edit_pos;
+                screen_buf[1] = '\0';
+                int n = canvas_string_width(canvas, screen_buf);
+                int len = Edit_pos - Edit_start;
+                memcpy(screen_buf, Edit_start, len);
+                screen_buf[len] = '\0';
+                int x = setup_cursor == 1 ? 45 : 55;
+                x += canvas_string_width(canvas, screen_buf);
+                int len2 = strlen(Edit_pos);
+                memcpy(screen_buf + len, Edit_pos, len2);
+                screen_buf[len + len2] = '\0';
+                int y = 10 + setup_cursor * 10;
+                if(setup_cursor == 1)
+                    canvas_draw_str(canvas, 45, 20, screen_buf);
+                else if(setup_cursor == 2)
+                    canvas_draw_str(canvas, 55, 30, screen_buf);
+                canvas_draw_line(
+                    canvas,
+                    x + (len ? 1 : 0),
+                    y + 1,
+                    x + n + (*Edit_pos == '1' && len ? 1 : 0),
+                    y + 1);
+            }
+            if(!Edit || setup_cursor != 1) {
+                screen_buf[0] = '\0';
+                add_to_str_hex_bytes(screen_buf, addr, addr_len);
+                canvas_draw_str(canvas, 45, 20, screen_buf);
+            }
+            if(!Edit || setup_cursor != 2) {
+                snprintf(screen_buf, sizeof(screen_buf), "%d", NRF_channel);
+                canvas_draw_str(canvas, 55, 30, screen_buf);
+            }
+            canvas_draw_str(canvas, 8, 20, "Address:");
+            snprintf(screen_buf, sizeof(screen_buf), "Rate: %d, Ch:", NRF_rate);
+            canvas_draw_str(canvas, 8, 30, screen_buf);
             snprintf(
                 screen_buf,
                 sizeof(screen_buf),
@@ -980,13 +1017,14 @@ static void render_callback(Canvas* const canvas, void* ctx) {
                 ReadBatch_cmd_Total,
                 Read_cmd_Total,
                 WriteBatch_cmd_Total);
-            canvas_draw_str(canvas, 10, 52, screen_buf);
-            //canvas_draw_str(canvas, 10, 60, screen_buf);
+            canvas_draw_str(canvas, 8, 40, screen_buf);
+            canvas_draw_str(canvas, 0, 64, Info);
+            canvas_draw_str(canvas, 0, 10 + setup_cursor * 10, ">");
         } else {
             snprintf(screen_buf, sizeof(screen_buf), "Ver. %s,  vad7", VERSION);
             canvas_draw_str(canvas, 10, 60, screen_buf);
+            canvas_draw_str(canvas, 0, 10, ">");
         }
-        canvas_draw_str(canvas, 0, 10, ">");
     } else if(what_doing == 1) {
         canvas_set_font(canvas, FontBatteryPercent); // 5x7 font, 9 lines, 25 cols
         if(rw_type == rwt_read_batch) {
@@ -1217,21 +1255,29 @@ int32_t nrf24batch_app(void* p) {
                 case InputKeyUp:
                     if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                         if(!ask_question) {
-                            if(what_doing == 0) {
+                            if(Edit) {
+                                if(*Edit_pos < '9')
+                                    (*Edit_pos)++;
+                                else if(Edit_hex) {
+                                    if(*Edit_pos == '9')
+                                        *Edit_pos = 'A';
+                                    else if((*Edit_pos & ~0x20) < 'F')
+                                        (*Edit_pos)++;
+                                } else if(Edit_pos > Edit_start && *(Edit_pos - 1) < '9') {
+                                    *Edit_pos = '0';
+                                    (*(Edit_pos - 1))++;
+                                }
+                            } else if(what_doing == 0) {
+                                if(addr_len) {
+                                    if(setup_cursor > 0)
+                                        setup_cursor--;
+                                    else
+                                        setup_cursor = 2;
+                                }
                             } else if(what_doing == 1) {
                                 if(view_cmd[rw_type]) view_cmd[rw_type]--;
                             } else if(what_doing == 2) {
-                                if(Edit) {
-                                    if(*Edit_pos < '9')
-                                        (*Edit_pos)++;
-                                    else if(Edit_hex) {
-                                        if(*Edit_pos == '9')
-                                            *Edit_pos = 'A';
-                                        else if((*Edit_pos & ~0x20) < 'F')
-                                            (*Edit_pos)++;
-                                    }
-                                } else if(view_Batch)
-                                    view_Batch--;
+                                if(view_Batch) view_Batch--;
                             }
                         }
                     }
@@ -1239,8 +1285,22 @@ int32_t nrf24batch_app(void* p) {
                 case InputKeyDown:
                     if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                         if(!ask_question) {
-                            if(what_doing == 0) {
-                                what_doing = 1;
+                            if(Edit) {
+                                if(Edit_hex && (*Edit_pos & ~0x20) == 'A')
+                                    (*Edit_pos) = '9';
+                                else if(*Edit_pos > '0')
+                                    (*Edit_pos)--;
+                                else if(!Edit_hex && Edit_pos > Edit_start && *(Edit_pos - 1) > '0') {
+                                    *Edit_pos = '9';
+                                    (*(Edit_pos - 1))--;
+                                }
+                            } else if(what_doing == 0) {
+                                if(addr_len) {
+                                    if(setup_cursor < 2)
+                                        setup_cursor++;
+                                    else
+                                        setup_cursor = 0;
+                                }
                             } else if(what_doing == 1) {
                                 if(view_cmd[rw_type] + 1 <
                                    (rw_type == rwt_read_batch ? ReadBatch_cmd_Total :
@@ -1248,13 +1308,7 @@ int32_t nrf24batch_app(void* p) {
                                                                 WriteBatch_cmd_Total))
                                     view_cmd[rw_type]++;
                             } else if(what_doing == 2) {
-                                if(Edit) {
-                                    if(Edit_hex && (*Edit_pos & ~0x20) == 'A')
-                                        (*Edit_pos) = '9';
-                                    else if(*Edit_pos > '0')
-                                        (*Edit_pos)--;
-                                } else if(view_Batch < Log_Total - 1)
-                                    view_Batch++;
+                                if(view_Batch < Log_Total - 1) view_Batch++;
                             }
                         }
                     }
@@ -1263,22 +1317,25 @@ int32_t nrf24batch_app(void* p) {
                     if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                         if(ask_question) {
                             if(event.input.type == InputTypeShort) ask_question_answer ^= 1;
-                        } else if(what_doing == 0) {
-                        } else if(what_doing == 1) {
-                            if(event.input.type == InputTypeShort) {
-                                if(--rw_type > rwt_write_batch) rw_type = rwt_write_batch;
-                            } else if(view_x)
-                                view_x--;
-                        } else if(what_doing == 2) {
-                            if(Edit) {
+                        } else if(Edit) {
+                            if(Edit_pos > Edit_start) {
                                 if(is_digit(Edit_pos - 1, Edit_hex))
                                     Edit_pos--;
                                 else if(*(Edit_pos - 1) == 'x' && *(Edit_pos - 3) == ',')
                                     Edit_pos -= 4;
                                 else if(*(Edit_pos - 1) == ',')
                                     Edit_pos -= 2;
+                            }
+                        } else if(what_doing == 0) {
+                            rw_type = rwt_write_batch;
+                            what_doing = 1;
+                        } else if(what_doing == 1) {
+                            if(event.input.type == InputTypeShort) {
+                                if(--rw_type > rwt_write_batch) rw_type = rwt_write_batch;
                             } else if(view_x)
                                 view_x--;
+                        } else if(what_doing == 2) {
+                            if(view_x) view_x--;
                         }
                     } else if(event.input.type == InputTypeLong) {
                         if(!ask_question && view_x == 0 && what_doing == 2 &&
@@ -1293,7 +1350,15 @@ int32_t nrf24batch_app(void* p) {
                     if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
                         if(ask_question) {
                             ask_question_answer ^= 1;
+                        } else if(Edit) {
+                            if(is_digit(Edit_pos + 1, Edit_hex))
+                                Edit_pos++;
+                            else if(*(Edit_pos + 1) == ',') {
+                                Edit_pos += 2;
+                                if(*(Edit_pos + 1) == 'x') Edit_pos += 2;
+                            }
                         } else if(what_doing == 0) {
+                            rw_type = rwt_read_batch;
                             what_doing = 1;
                         } else if(what_doing == 1) {
                             if(event.input.type == InputTypeShort) {
@@ -1301,15 +1366,7 @@ int32_t nrf24batch_app(void* p) {
                             } else
                                 view_x++;
                         } else if(what_doing == 2) {
-                            if(Edit) {
-                                if(is_digit(Edit_pos + 1, Edit_hex))
-                                    Edit_pos++;
-                                else if(*(Edit_pos + 1) == ',') {
-                                    Edit_pos += 2;
-                                    if(*(Edit_pos + 1) == 'x') Edit_pos += 2;
-                                }
-                            } else
-                                view_x++;
+                            view_x++;
                         }
                     }
                     break;
@@ -1348,12 +1405,51 @@ int32_t nrf24batch_app(void* p) {
                                 }
                             }
                             ask_question = 0;
+                        } else if(Edit) { // insert digit
+                            if(what_doing == 0) {
+                                if(strlen(Edit_start) < (setup_cursor == 1 ? 5 * 2 : 3)) {
+                                    memmove(Edit_pos + 1, Edit_pos, strlen(Edit_pos) + 1);
+                                    *Edit_pos = '0';
+                                }
+                            } else {
+                                FuriString* fs = Log[view_Batch];
+                                FuriString* ns = furi_string_alloc();
+                                if(ns) {
+                                    uint16_t len = Edit_pos - (char*)furi_string_get_cstr(fs);
+                                    furi_string_set_n(ns, fs, 0, len);
+                                    furi_string_cat_str(ns, "0");
+                                    furi_string_cat_str(ns, Edit_pos);
+                                    furi_string_free(fs);
+                                    Log[view_Batch] = ns;
+                                    Edit_pos = (char*)furi_string_get_cstr(ns) + len;
+                                }
+                            }
                         } else if(what_doing == 0) {
-                            file_stream_close(file_stream);
-                            if(select_settings_file()) {
-                                uint8_t err = load_settings_file();
-                                if(err)
-                                    snprintf(file_name, sizeof(file_name), "LOAD ERROR #%d", err);
+                            if(setup_cursor == 0) { // open file
+                                file_stream_close(file_stream);
+                                if(select_settings_file()) {
+                                    uint8_t err = load_settings_file();
+                                    if(err)
+                                        snprintf(
+                                            file_name, sizeof(file_name), "LOAD ERROR #%d", err);
+                                }
+                            } else if(setup_cursor == 1) { // change address
+                                char* ebuf = (char*)payload;
+                                ebuf[0] = '\0';
+                                add_to_str_hex_bytes(ebuf, addr, addr_len);
+                                Edit_hex = true;
+                                Edit_pos = ebuf + strlen(ebuf) - 1;
+                                Edit_start = ebuf;
+                                Edit = 1;
+                                NRF_INITED = false;
+                            } else if(setup_cursor == 2) { // change channel
+                                char* ebuf = (char*)payload;
+                                snprintf(ebuf, sizeof(payload), "%d", NRF_channel);
+                                Edit_hex = false;
+                                Edit_pos = ebuf + strlen(ebuf) - 1;
+                                Edit_start = ebuf;
+                                Edit = 1;
+                                NRF_INITED = false;
                             }
                         } else if(what_doing == 1) {
                             if(rw_type == rwt_read_batch) {
@@ -1388,20 +1484,7 @@ int32_t nrf24batch_app(void* p) {
                                     ask_question = ask_save_batch;
                                     ask_question_answer = 0;
                                 } else if(rw_type == rwt_write_batch) {
-                                    if(Edit) { // insert digit
-                                        FuriString* fs = Log[view_Batch];
-                                        FuriString* ns = furi_string_alloc();
-                                        if(ns) {
-                                            uint16_t len =
-                                                Edit_pos - (char*)furi_string_get_cstr(fs);
-                                            furi_string_set_n(ns, fs, 0, len);
-                                            furi_string_cat_str(ns, "0");
-                                            furi_string_cat_str(ns, Edit_pos);
-                                            furi_string_free(fs);
-                                            Log[view_Batch] = ns;
-                                            Edit_pos = (char*)furi_string_get_cstr(ns) + len;
-                                        }
-                                    } else {
+                                    if(!Edit) {
                                         Edit = 1;
                                         Edited = true;
                                         Edit_hex = 0;
@@ -1414,7 +1497,7 @@ int32_t nrf24batch_app(void* p) {
                                                 p += 2;
                                                 Edit_hex = 1; // hex
                                             }
-                                            Edit_pos = p;
+                                            Edit_start = Edit_pos = p;
                                         } else
                                             Edit = 0;
                                     }
@@ -1422,19 +1505,24 @@ int32_t nrf24batch_app(void* p) {
                             }
                         }
                     } else if(event.input.type == InputTypeLong) {
-                        if(what_doing == 2 && Log_Total) {
-                            if(rw_type == rwt_write_batch) {
-                                if(Edit) { // delete
-                                    FuriString* fs = Log[view_Batch];
-                                    if(is_digit(Edit_pos + 1, Edit_hex) ||
-                                       is_digit(Edit_pos - 1, Edit_hex)) {
-                                        memmove(Edit_pos, Edit_pos + 1, strlen(Edit_pos));
-                                        furi_string_left(fs, furi_string_size(fs) - 1);
-                                    }
-                                } else {
-                                    ask_question = ask_write_batch;
-                                    ask_question_answer = 0;
+                        if(Edit) { // delete
+                            if(what_doing == 0) {
+                                if(strlen(Edit_start) > 1) {
+                                    memmove(Edit_pos, Edit_pos + 1, strlen(Edit_pos) + 1);
+                                    if(*Edit_pos == '\0') Edit_pos--;
                                 }
+                            } else {
+                                FuriString* fs = Log[view_Batch];
+                                if(is_digit(Edit_pos + 1, Edit_hex) ||
+                                   (Edit_pos > Edit_start && is_digit(Edit_pos - 1, Edit_hex))) {
+                                    memmove(Edit_pos, Edit_pos + 1, strlen(Edit_pos));
+                                    furi_string_left(fs, furi_string_size(fs) - 1);
+                                }
+                            }
+                        } else if(what_doing == 2 && Log_Total) {
+                            if(rw_type == rwt_write_batch) {
+                                ask_question = ask_write_batch;
+                                ask_question_answer = 0;
                             } else if(rw_type == rwt_read_batch) {
                                 ask_question = ask_save_batch;
                                 ask_question_answer = 0;
@@ -1450,17 +1538,23 @@ int32_t nrf24batch_app(void* p) {
                         } else
                             processing = false;
                     } else if(event.input.type == InputTypeShort) {
-                        if(Edit)
-                            Edit = 0;
-                        else if(ask_question)
+                        if(ask_question)
                             ask_question = 0;
-                        else {
+                        else if(Edit) {
+                            if(what_doing == 0) {
+                                if(setup_cursor == 1) {
+                                    addr_len = ConvertHexToArray((char*)payload, addr, 5);
+                                } else if(setup_cursor == 2) {
+                                    NRF_channel = str_to_int((char*)payload);
+                                    if(NRF_channel > MAX_CHANNEL) NRF_channel = MAX_CHANNEL;
+                                }
+                            }
+                            Edit = 0;
+                        } else {
                             if(what_doing == 2 && Edited) {
                                 ask_question = ask_return;
                                 ask_question_answer = 1;
-                            } else if(what_doing == 0) {
-                                processing = false;
-                            } else {
+                            } else if(what_doing != 0) {
                                 if(what_doing) what_doing--;
                                 if(what_doing == 0) rw_type = rwt_read_batch;
                                 if(what_doing <= 1) view_x = 0;

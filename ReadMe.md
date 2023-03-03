@@ -44,10 +44,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [iButton system and app refactoring #2388 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2388)
 - Temporarily Removed: [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
-- Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - UL: Updated: [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - UL: Updated: Fix iButton app - add manually - duplicate names
 - Fix Music Beeper Location
+- Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 
 <a name="release">
 
