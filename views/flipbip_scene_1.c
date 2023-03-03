@@ -62,49 +62,7 @@ void flipbip_scene_1_set_callback(
     instance->context = context;
 }
 
-void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
-    //UNUSED(model);
-    canvas_clear(canvas);
-    canvas_set_color(canvas, ColorBlack);
-    //canvas_set_font(canvas, FontPrimary);
-    //canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1"); 
-    
-    canvas_set_font(canvas, FontSecondary);
-    //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->strength == 128 ? "128-bit" : "256-bit");
-    //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->seed);
-    
-    // Mnenomic
-    if (model->page == 0) {
-        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->mnemonic1);
-        canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->mnemonic2);
-        canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->mnemonic3);
-        canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->mnemonic4);
-        canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->mnemonic5);
-        canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->mnemonic6);
-    }
-    // Seed
-    else if (model->page == 1) {
-        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->seed1);
-        canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->seed2);
-        canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->seed3);
-        canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->seed4);
-        canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->seed5);
-        canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->seed6);
-    }
-
-    
-}
-
-static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength) {
-    
-    model->page = 0;
-
-    // Generate a random mnemonic using trezor-crypto
-    model->strength = strength;
-    //const char *mnemonic = mnemonic_generate(model->strength);
-    model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
-
-    // START DRAW MNEMONIC
+static void flipbip_scene_1_draw_mnemonic(FlipBipScene1Model* const model) {
 
     // Delineate sections of the mnemonic every 4 words
     char *mnemonic_working = malloc(strlen(model->mnemonic) + 1);
@@ -142,7 +100,51 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     memzero(mnemonic_working, strlen(mnemonic_working));
     free(mnemonic_working);
 
-    // END DRAW MNEMONIC
+}
+
+void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
+    //UNUSED(model);
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    //canvas_set_font(canvas, FontPrimary);
+    //canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1"); 
+    
+    canvas_set_font(canvas, FontSecondary);
+    //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->strength == 128 ? "128-bit" : "256-bit");
+    //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->seed);
+    
+    // Mnenomic
+    if (model->page == 0) {
+        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->mnemonic1);
+        canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->mnemonic2);
+        canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->mnemonic3);
+        canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->mnemonic4);
+        canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->mnemonic5);
+        canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->mnemonic6);
+    }
+    // Seed
+    else {
+        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->seed1);
+        canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->seed2);
+        canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->seed3);
+        canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->seed4);
+        canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->seed5);
+        canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->seed6);
+    }
+
+    
+}
+
+static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength) {
+    
+    model->page = 0;
+
+    // Generate a random mnemonic using trezor-crypto
+    model->strength = strength;
+    //const char *mnemonic = mnemonic_generate(model->strength);
+    model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
+
+    flipbip_scene_1_draw_mnemonic(model);
 
     // Generate a BIP39 seed from the mnemonic
     //uint8_t seedbytes[64];
@@ -176,7 +178,7 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
 
     // END DRAW SEED
 
-    // WIP / TODO: Generate a BIP32 root key from the mnemonic
+    // Generate a BIP32 root key from the mnemonic
 
     // //bool root_set = false;
     HDNode *root = malloc(sizeof(HDNode));
