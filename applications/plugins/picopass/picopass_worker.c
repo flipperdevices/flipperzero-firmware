@@ -441,7 +441,7 @@ ReturnCode picopass_write_card(PicopassBlock* AA1) {
     return ERR_NONE;
 }
 
-ReturnCode picopass_write_block(PicopassPacs* pacs, uint8_t blockNo, uint8_t* newBlock) {
+ReturnCode picopass_write_block(PicopassBlock* AA1, uint8_t blockNo, uint8_t* newBlock) {
     rfalPicoPassIdentifyRes idRes;
     rfalPicoPassSelectRes selRes;
     rfalPicoPassReadCheckRes rcRes;
@@ -449,7 +449,6 @@ ReturnCode picopass_write_block(PicopassPacs* pacs, uint8_t blockNo, uint8_t* ne
 
     ReturnCode err;
 
-    uint8_t div_key[8] = {0};
     uint8_t mac[4] = {0};
     uint8_t ccnr[12] = {0};
 
@@ -472,9 +471,12 @@ ReturnCode picopass_write_block(PicopassPacs* pacs, uint8_t blockNo, uint8_t* ne
     }
     memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
-    loclass_diversifyKey(selRes.CSN, pacs->key, div_key);
-    loclass_opt_doReaderMAC(ccnr, div_key, mac);
+    if(memcmp(selRes.CSN, AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN) != 0) {
+        FURI_LOG_E(TAG, "Wrong CSN for write");
+        return ERR_REQUEST;
+    }
 
+    loclass_opt_doReaderMAC(ccnr, AA1[PICOPASS_KD_BLOCK_INDEX].data, mac);
     err = rfalPicoPassPollerCheck(mac, &chkRes);
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerCheck error %d", err);
@@ -492,7 +494,7 @@ ReturnCode picopass_write_block(PicopassPacs* pacs, uint8_t blockNo, uint8_t* ne
         newBlock[5],
         newBlock[6],
         newBlock[7]};
-    loclass_doMAC_N(data, sizeof(data), div_key, mac);
+    loclass_doMAC_N(data, sizeof(data), AA1[PICOPASS_KD_BLOCK_INDEX].data, mac);
     FURI_LOG_D(
         TAG,
         "loclass_doMAC_N %d %02x%02x%02x%02x%02x%02x%02x%02x %02x%02x%02x%02x",
@@ -663,7 +665,7 @@ void picopass_worker_write_key(PicopassWorker* picopass_worker) {
 
     while(picopass_worker->state == PicopassWorkerStateWriteKey) {
         if(picopass_detect_card(1000) == ERR_NONE) {
-            err = picopass_write_block(pacs, PICOPASS_KD_BLOCK_INDEX, newKey);
+            err = picopass_write_block(AA1, PICOPASS_KD_BLOCK_INDEX, newKey);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_write_block error %d", err);
                 nextState = PicopassWorkerEventFail;
