@@ -29,7 +29,7 @@ void subghz_protocol_encoder_kinggates_stylo_4k_free(void* context);
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_encoder_kinggates_stylo_4k_deserialize(
+SubGhzProtocolStatus subghz_protocol_encoder_kinggates_stylo_4k_deserialize(
     void* context,
     FlipperFormat* flipper_format);
 

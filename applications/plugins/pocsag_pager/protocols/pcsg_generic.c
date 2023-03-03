@@ -26,9 +26,7 @@ SubGhzProtocolStatus pcsg_block_generic_serialize(
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
     furi_assert(instance);
-
     SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
-
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     do {

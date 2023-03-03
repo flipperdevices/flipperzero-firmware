@@ -38,7 +38,8 @@ void subghz_protocol_encoder_nice_flor_s_free(void* context);
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_encoder_nice_flor_s_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_encoder_nice_flor_s_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.

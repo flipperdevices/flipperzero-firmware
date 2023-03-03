@@ -55,9 +55,8 @@ bool subghz_protocol_alutech_at_4n_create_data(
  * @param flipper_format Pointer to a FlipperFormat instance
  * @return true On success
  */
-bool subghz_protocol_encoder_alutech_at_4n_deserialize(
-    void* context,
-    FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_encoder_alutech_at_4n_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Forced transmission stop.
