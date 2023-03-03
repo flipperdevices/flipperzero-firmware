@@ -36,8 +36,9 @@ const char SettingsFld_WriteStart[] = "Write start:";
 const char SettingsFld_Payload[] = "Payload struct:";
 const char SettingsFld_ReadDefault[] = "R default:";
 const char SettingsFld_WriteDefault[] = "W default:";
-const char SettingsFld_Read[] = "R:";
-const char SettingsFld_Write[] = "W:";
+const char SettingsFld_Read[] = "R:";	// Read cmd
+const char SettingsFld_Write[] = "W:";	// Write cmd
+const char SettingsFld_Set[] = "S:";	// Set cmd (like Write but without "Write start" packet)
 const char SettingsFld_ReadBatch[] = "RBatch:";
 const char SettingsFld_WriteBatch[] = "WBatch:";
 const char AskQuestion_Save[] = "SAVE BATCH?";
@@ -70,7 +71,7 @@ uint8_t save_settings = 0;
 uint16_t view_cmd[3] = {0, 0, 0}; // ReadBatch, Read, WriteBatch
 uint8_t view_x = 0;
 char screen_buf[64];
-char Info[FONT_5x7_SCREEN_WIDTH] = "";
+char Info[35] = "";
 char file_name[FONT_5x7_SCREEN_WIDTH];
 char ERR_STR[FONT_5x7_SCREEN_WIDTH];
 uint8_t ERR = 0;
@@ -636,8 +637,9 @@ bool Run_WriteBatch_cmd()
 	stream_rewind(file_stream);
 	while(stream_read_line(file_stream, str)) {
 		w = (char*)furi_string_get_cstr(str);
-		if(strncmp(w, SettingsFld_Write, sizeof(SettingsFld_Write)-1) != 0) continue;
-		w +=  sizeof(SettingsFld_Write);
+		if(strncmp(w, SettingsFld_Write, sizeof(SettingsFld_Write)-1) == 0) w +=  sizeof(SettingsFld_Write);
+		else if(strncmp(w, SettingsFld_Set, sizeof(SettingsFld_Set)-1) == 0) w +=  sizeof(SettingsFld_Set);
+		else continue;
 		delim_col = strchr(w, '=');
 		if(delim_col == NULL || len != delim_col - w) continue;
 		if(strncmp(p, w, len) != 0) continue;
