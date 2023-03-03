@@ -297,7 +297,7 @@ SubGhzProtocolStatus subghz_protocol_decoder_pocsag_serialize(
     SubGhzProtocolDecoderPocsag* instance = context;
     uint32_t msg_len;
     SubGhzProtocolStatus ret =
-        subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+        pcsg_block_generic_serialize(&instance->generic, flipper_format, preset);
 
     msg_len = furi_string_size(instance->done_msg);
     if(!flipper_format_write_uint32(flipper_format, "MsgLen", &msg_len, pocsag_const.min_count_bit_for_found)) {
