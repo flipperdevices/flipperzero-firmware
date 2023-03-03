@@ -35,6 +35,8 @@ Feel free to reach out to me at CodeAllNight@outlook.com with any questions or l
 ### gpio-gpio-interrupt-demo
 [tutorial](./gpio/gpio_interrupt_demo/README.md) - This is a "hello world" demonstration of triggering a callback when a GPIO pin transitions from VCC to GND.
 
+### gpio-memsic_2125
+[tutorial](./gpio/memsic_2125/README.md) - This is a demostration of using GPIO interrupts to interpret data from the Memsic 2125 (Mx2125) Dual-Axis Accelerometer.
 
 
 ## Subghz [folder](./subghz/README.md)
