@@ -126,7 +126,8 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
 
     // Generate a BIP39 seed from the mnemonic
     uint8_t seedbytes[64];
-    mnemonic_to_seed(mnemonic, "", seedbytes, 0);
+    //mnemonic_to_seed(mnemonic, "", seedbytes, 0);
+    mnemonic_to_seed("wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple", "", seedbytes, 0);
     char *seed = malloc(64 * 2 + 1);
     
     // Convert the seed to a hex string
@@ -154,55 +155,79 @@ static void flipbip39_scene_1_model_init(FlipBip39Scene1Model* const model, cons
     hdnode_from_seed(seedbytes, 64, SECP256K1_NAME, root);
     // //root_set = true;
 
-    int account = 0;
+    // m/44'/0'/0'/0
+    uint32_t purpose = 44;
+    uint32_t coin = 0;
+    uint32_t account = 0;
+    uint32_t change = 0;
+    
     // constants for Bitcoin
     const uint32_t version_public = 0x0488b21e;
     const uint32_t version_private = 0x0488ade4;
+    
     //const char addr_version = 0x00, wif_version = 0x80;
     const size_t buflen = 128;
     char buf[buflen + 1];
-    //HDNode node;
+    
+    // root
     uint32_t fingerprint = 0;
     hdnode_serialize_private(root, fingerprint, version_private, buf, buflen); 
-    char *xprvroot = malloc(22 + 1);
-    strncpy(xprvroot, buf, 22);
-    model->seed2 = xprvroot;
-    // external chain
-    for (int chain = 0; chain < 2; chain++) {
-        //QTableWidget *list = chain == 0 ? ui->listAddress : ui->listChange;
-        HDNode *node = root;
-        fingerprint = hdnode_fingerprint(node);
-        hdnode_private_ckd_prime(node, 44); // purpose
-        fingerprint = hdnode_fingerprint(node);
-        hdnode_private_ckd_prime(node, 0); // coin (bitcoin)
-        fingerprint = hdnode_fingerprint(node);
-        hdnode_private_ckd_prime(node, account); // account
-        hdnode_serialize_private(node, fingerprint, version_private, buf, buflen); 
-        char *xprv = malloc(22 + 1);
-        strncpy(xprv, buf, 22);
-        if (chain == 0) model->seed3 = xprv;
-        if (chain == 1) model->seed4 = xprv;
-        //QString xprv = QString(buf); ui->lineXprv->setText(xprv);
-        hdnode_serialize_public(node, fingerprint, version_public, buf, buflen); 
-        char *xpub = malloc(22 + 1);
-        strncpy(xpub, buf, 22);
-        if (chain == 0) model->seed5 = xpub;
-        if (chain == 1) model->seed6 = xpub;
-        //QString xpub = QString(buf); ui->lineXpub->setText(xpub);
-        // hdnode_private_ckd(&node, chain); // external / internal
-        // for (int i = 0; i < 10; i++) {
-        //     HDNode node2 = node;
-        //     hdnode_private_ckd(&node2, i);
-        //     hdnode_fill_public_key(&node2);
-        //     ecdsa_get_address(node2.public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
-        //     //QString address = QString(buf);
-        //     ecdsa_get_wif(node2.private_key, wif_version, HASHER_SHA2D, buf, buflen); 
-        //     //QString wif = QString(buf);
-        //     // list->setItem(i, 0, new QTableWidgetItem(address));
-        //     // list->setItem(i, 1, new QTableWidgetItem(wif));
-        //     // list->setItem(i, 2, new QTableWidgetItem("0.0"));
-        // }
-    }
+    char *xprv_root = malloc(22 + 1);
+    strncpy(xprv_root, buf, 22);
+    model->seed2 = xprv_root;
+    
+    
+    HDNode *node = root;
+    
+    // purpose
+    fingerprint = hdnode_fingerprint(node);
+    hdnode_private_ckd_prime(node, purpose); // purpose
+    
+    // coin
+    fingerprint = hdnode_fingerprint(node);
+    hdnode_private_ckd_prime(node, coin); // coin
+    
+    // account
+    fingerprint = hdnode_fingerprint(node);
+    hdnode_private_ckd_prime(node, account); // account
+    
+    hdnode_serialize_private(node, fingerprint, version_private, buf, buflen); 
+    char *xprv_acc = malloc(22 + 1);
+    strncpy(xprv_acc, buf, 22);
+    model->seed3 = xprv_acc;
+    
+    hdnode_serialize_public(node, fingerprint, version_public, buf, buflen); 
+    char *xpub_acc = malloc(22 + 1);
+    strncpy(xpub_acc, buf, 22);
+    model->seed4 = xpub_acc;
+    
+    // external / internal (change)
+    fingerprint = hdnode_fingerprint(node);
+    hdnode_private_ckd(node, change); // change
+    
+    hdnode_serialize_private(node, fingerprint, version_private, buf, buflen); 
+    char *xprv_chg = malloc(22 + 1);
+    strncpy(xprv_chg, buf, 22);
+    model->seed5 = xprv_chg;
+    
+    hdnode_serialize_public(node, fingerprint, version_public, buf, buflen); 
+    char *xpub_chg = malloc(22 + 1);
+    strncpy(xpub_chg, buf, 22);
+    model->seed6 = xpub_chg;
+
+    // hdnode_private_ckd(&node, chain); // external / internal
+    // for (int i = 0; i < 10; i++) {
+    //     HDNode node2 = node;
+    //     hdnode_private_ckd(&node2, i);
+    //     hdnode_fill_public_key(&node2);
+    //     ecdsa_get_address(node2.public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
+    //     //QString address = QString(buf);
+    //     ecdsa_get_wif(node2.private_key, wif_version, HASHER_SHA2D, buf, buflen); 
+    //     //QString wif = QString(buf);
+    //     // list->setItem(i, 0, new QTableWidgetItem(address));
+    //     // list->setItem(i, 1, new QTableWidgetItem(wif));
+    //     // list->setItem(i, 2, new QTableWidgetItem("0.0"));
+    // }
 
     // Clear the root node
     memzero(root, sizeof(HDNode));
