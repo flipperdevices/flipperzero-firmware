@@ -251,8 +251,7 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // Generate a BIP39 seed from the mnemonic
     mnemonic_to_seed(model->mnemonic, "", model->seed, 0);
 
-    // Generate a BIP32 root key from the mnemonic
-
+    // Generate a BIP32 root HD node from the mnemonic
     HDNode *root = malloc(sizeof(HDNode));
     hdnode_from_seed(model->seed, 64, SECP256K1_NAME, root);
 

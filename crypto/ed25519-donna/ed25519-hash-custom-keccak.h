@@ -9,6 +9,10 @@
 	void ed25519_hash(uint8_t *hash, const uint8_t *in, size_t inlen);
 */
 
+#include "../options.h"
+
+#if USE_KECCAK
+
 #ifndef ED25519_HASH_CUSTOM
 #define ED25519_HASH_CUSTOM
 
@@ -21,3 +25,5 @@
 #define ed25519_hash(hash, in, inlen) keccak_512((in), (inlen), (hash))
 
 #endif // ED25519_HASH_CUSTOM
+
+#endif // USE_KECCAK

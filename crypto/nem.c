@@ -20,6 +20,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "options.h"
+
+#if USE_NEM
+
 #include "nem.h"
 
 #include <string.h>
@@ -505,3 +509,5 @@ bool nem_transaction_create_importance_transfer(
 
   return true;
 }
+
+#endif // USE_NEM

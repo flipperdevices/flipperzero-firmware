@@ -83,7 +83,7 @@
 
 // support Keccak hashing
 #ifndef USE_KECCAK
-#define USE_KECCAK 1
+#define USE_KECCAK 0
 #endif
 
 // add way how to mark confidential data

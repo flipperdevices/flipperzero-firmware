@@ -20,6 +20,10 @@
  * OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include "../options.h"
+
+#if USE_NEM
+
 #ifndef __NEM_H__
 #define __NEM_H__
 
@@ -154,3 +158,5 @@ bool nem_transaction_create_importance_transfer(
     uint32_t mode, const ed25519_public_key remote);
 
 #endif
+
+#endif // USE_NEM
