@@ -820,18 +820,8 @@ int32_t rock_paper_scissors_app(void* p) {
     // For this game we hardcode to 433.92MHz.
     uint32_t frequency = 433920000;
 
-    // TODO: Have an ordered list of frequencies we try, instead of just 1 frequency.
-
-    // Since this game transmits RF, we see if it is allowed.
-    if(!furi_hal_subghz_is_tx_allowed(frequency)) {
-        FURI_LOG_E(TAG, "Transmit on frequency %ld not allowed", frequency);
-
-        // For this game we don't show a friendly error about not being
-        // allowed to broadcast on this frequency.  Instead the application
-        // just exits.
-        return 1;
-    }
-
+    // TODO: Figure out if frequency is allowed & try multiple frequencies.
+    
     // Configure our initial data.
     GameContext* game_context = malloc(sizeof(GameContext));
     game_context->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
