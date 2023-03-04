@@ -507,7 +507,9 @@ int hdnode_fill_public_key(HDNode *node) {
 #if USE_ETHEREUM
 int hdnode_get_ethereum_pubkeyhash(const HDNode *node, uint8_t *pubkeyhash) {
   uint8_t buf[65] = {0};
-  SHA3_CTX ctx = {0};
+  //SHA3_CTX ctx = {0};
+  SHA3_CTX *ctx = malloc(sizeof(SHA3_CTX));
+  memzero(ctx, sizeof(SHA3_CTX));
 
   /* get uncompressed public key */
   if (ecdsa_get_public_key65(node->curve->params, node->private_key, buf) !=
@@ -516,9 +518,12 @@ int hdnode_get_ethereum_pubkeyhash(const HDNode *node, uint8_t *pubkeyhash) {
   }
 
   /* compute sha3 of x and y coordinate without 04 prefix */
-  sha3_256_Init(&ctx);
-  sha3_Update(&ctx, buf + 1, 64);
-  keccak_Final(&ctx, buf);
+  sha3_256_Init(ctx);
+  sha3_Update(ctx, buf + 1, 64);
+  keccak_Final(ctx, buf);
+
+  memzero(ctx, sizeof(SHA3_CTX));
+  free(ctx);
 
   /* result are the least significant 160 bits */
   memcpy(pubkeyhash, buf + 12, 20);
