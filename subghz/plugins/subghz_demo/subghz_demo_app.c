@@ -376,16 +376,6 @@ int32_t subghz_demo_app(void* p) {
 
     // TODO: Have an ordered list of frequencies we try, instead of just 1 frequency.
 
-    // Since this demo transmits RF, we see if it is allowed.
-    if(!furi_hal_subghz_is_tx_allowed(frequency)) {
-        FURI_LOG_E(TAG, "Transmit on frequency %ld not allowed", frequency);
-
-        // For this demo we don't show a friendly error about not being
-        // allowed to broadcast on this frequency.  Instead the application
-        // just exits.
-        return 1;
-    }
-
     // Configure our initial data.
     DemoContext* demo_context = malloc(sizeof(DemoContext));
     demo_context->mutex = furi_mutex_alloc(FuriMutexTypeNormal);

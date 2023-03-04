@@ -97,11 +97,6 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
       uint32_t frequency = 433920000;
   ```
 
-  - Check to see if broadcasting is allowed on the frequency. 
-  ```
-      if (!furi_hal_subghz_is_tx_allowed(frequency)) { /* show error about TX not allowed! */ }
-  ```
-
   - Allocate the subghz TX/RX worker.
   ```
       demo_context->subghz_txrx = subghz_tx_rx_worker_alloc();
