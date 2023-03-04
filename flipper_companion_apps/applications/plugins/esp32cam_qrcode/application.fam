@@ -1,6 +1,6 @@
 App(
-    appid="ESP32CAM_QRcode",
-    name="[ESP32CAM] QR Code",
+    appid="MAYHEM_QRcode",
+    name="[MAYHEM] QR Code",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",
     cdefines=["APP_QRCODE"],

@@ -1,6 +1,6 @@
 App(
-    appid="ESP32CAM_Motion",
-    name="[ESP32CAM] Motion detection",
+    appid="MAYHEM_Motion",
+    name="[MAYHEM] Motion detection",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",
     cdefines=["APP_QRCODE"],
