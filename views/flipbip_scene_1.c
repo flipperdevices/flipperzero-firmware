@@ -133,7 +133,7 @@ static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
     free(seed_working);
 }
 
-static void flipbip_scene_1_draw_address(HDNode* const node, uint32_t addr_index) {
+static void flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_index) {
     // Constants for Bitcoin address generation
     const char addr_version = 0x00;
     //const char wif_version = 0x80;
@@ -177,6 +177,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     
+    flipbip_scene_1_clear_text();
     if (model->page == 1) {
         const char* info = "-Scroll pages with up/down-" 
                            "p1,2)    Mnemonic/Seed     "
@@ -242,7 +243,7 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
 
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
-    const char *mnemonic = mnemonic_generate(model->strength);
+    model->mnemonic = mnemonic_generate(model->strength);
     
     // test mnemonic
     //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
@@ -252,10 +253,8 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
 
     // Generate a BIP32 root key from the mnemonic
 
-    // //bool root_set = false;
     HDNode *root = malloc(sizeof(HDNode));
     hdnode_from_seed(model->seed, 64, SECP256K1_NAME, root);
-    // //root_set = true;
 
     // m/44'/0'/0'/0
     uint32_t purpose = 44;
@@ -266,7 +265,6 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // constants for Bitcoin
     const uint32_t version_public = 0x0488b21e;
     const uint32_t version_private = 0x0488ade4;
-    //const char addr_version = 0x00, wif_version = 0x80;
     
     // buffer for key serialization
     const size_t buflen = 128;
@@ -318,6 +316,7 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     model->xpub_extended = xpub_ext;
 
     model->node = node;
+
     model->page = 1;
 
 #if USE_BIP39_CACHE
