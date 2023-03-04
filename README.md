@@ -32,13 +32,14 @@ The application will be compiled and copied onto your device
 - BIP39 mnemonic to BIP39 seed generation
 - Hierarchical Deterministic (HD) wallet generation from seed
   - Generation of offline `m/44'/0'/0'/0` BTC wallet
+  - Generation of offline `m/44'/60'/0'/0` ETH wallet (coded from the $SPORK Castle of ETHDenver 2023!)
   - Similar features to: https://iancoleman.io/bip39/
 
 ### Work in Progress
 
 - Support for BIP39 passphrase
   - Currently blank
-- Support for custom BIP32 wallet paths
+- Support for more custom BIP32 wallet paths
   - Currently hardcoded to `m/44'/0'/0'/0`
 
 ### (FAR) Future

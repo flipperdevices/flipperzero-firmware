@@ -26,9 +26,9 @@ typedef struct {
     FlipBipScene1* flipbip_scene_1;
     // FlipBipScene2* flipbip_scene_2;
     int haptic; 
-    // int speaker;
     int led;
     int bip39_strength;
+    int bip44_coin;
 } FlipBip;
 
 typedef enum {
@@ -44,11 +44,6 @@ typedef enum {
     FlipBipHapticOn,
 } FlipBipHapticState;
 
-// typedef enum {
-//     FlipBipSpeakerOff,
-//     FlipBipSpeakerOn,
-// } FlipBipSpeakerState;
-
 typedef enum {
     FlipBipLedOff,
     FlipBipLedOn,
@@ -59,3 +54,8 @@ typedef enum {
     FlipBipStrength192,
     FlipBipStrength256,
 } FlipBipStrengthState;
+
+typedef enum {
+    FlipBipCoinBTC0,
+    FlipBipCoinETH60,
+} FlipBipCoinState;
