@@ -34,7 +34,7 @@ void flipbip_startscreen_draw(Canvas* canvas, FlipBipStartscreenModel* model) {
     canvas_draw_icon(canvas, 1, 33, &I_Auth_62x31);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 39, 11, "BIP32/39/44 Tool");
+    canvas_draw_str(canvas, 18, 11, "FlipBIP - BIP32/39/44");
 
     canvas_set_font(canvas, FontSecondary);
     //canvas_draw_str(canvas, 30, 23, "Crypto tools for Flipper");
