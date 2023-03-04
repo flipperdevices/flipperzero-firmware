@@ -235,7 +235,7 @@ def validate_app_imports(target, source, env):
     unresolved_syms = app_syms - sdk_cache.get_valid_names()
     if unresolved_syms:
         warning_msg = fg.brightyellow(
-            f"{source[0].path}: app won't run. Unresolved symbols: "
+            f"{source[0].path}: app may not run. Symbols not resolved using firmware's API: "
         ) + fg.brightmagenta(f"{unresolved_syms}")
         disabled_api_syms = unresolved_syms.intersection(sdk_cache.get_disabled_names())
         if disabled_api_syms:
@@ -334,6 +334,7 @@ def generate(env, **kw):
     env.SetDefault(
         EXT_APPS_WORK_DIR="${FBT_FAP_DEBUG_ELF_ROOT}",
         APP_RUN_SCRIPT="${FBT_SCRIPT_DIR}/runfap.py",
+        STORAGE_SCRIPT="${FBT_SCRIPT_DIR}/storage.py",
     )
     if not env["VERBOSE"]:
         env.SetDefault(
@@ -392,10 +393,6 @@ def generate(env, **kw):
                 suffix=".impsyms",
                 src_suffix=".fap",
             ),
-            # "LaunchApp": Builder(
-            #     action=Action(),
-            #     emitter=launch_app_emitter,
-            # ),
         }
     )
 

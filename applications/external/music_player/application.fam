@@ -3,7 +3,6 @@ App(
     name="Music Player",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="music_player_app",
-    cdefines=["APP_MUSIC_PLAYER"],
     requires=[
         "gui",
         "dialogs",
