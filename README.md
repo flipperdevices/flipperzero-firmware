@@ -40,7 +40,7 @@ The application will be compiled and copied onto your device
 - Support for BIP39 passphrase
   - Currently blank
 - Support for more custom BIP32 wallet paths
-  - Currently hardcoded to `m/44'/0'/0'/0`
+  - Currently hardcoded to `m/44'/0'/0'/0` or `m/44'/60'/0'/0`
 
 ### (FAR) Future
 
