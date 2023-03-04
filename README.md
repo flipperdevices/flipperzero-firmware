@@ -1,5 +1,7 @@
 # FlipBIP - BIP32/39/44 Tool
 Crypto toolkit for Flipper Zero
+- Built against `0.78.1` Flipper Zero firmware release
+- Using Trezor crypto libs from `core/v2.5.3` release
 
 ## Background
 
