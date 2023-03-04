@@ -5,6 +5,17 @@ Crypto toolkit for Flipper Zero
 
 The goal of this project is to see how much crypto functionality can be brought to the Flipper Zero.
 
+## How to install on Flipper Zero
+- If you do not have one, download a Flipper Zero firmware to get the `fbt` build tool.
+- Plug your Flipper Zero in via USB.
+- Copy the contents of this folder into the applications_user folder of your firmware.
+
+Then run the command: 
+ ```
+.\fbt COMPACT=1 DEBUG=0 launch_app APPSRC=applications_user/FlipBIP
+ ```
+The application will be compiled and copied onto your device.
+
 ## Status
 
 ### Complete
@@ -22,6 +33,8 @@ The goal of this project is to see how much crypto functionality can be brought 
 
 ### Work in Progress
 
+- Support for BIP39 passphrase
+  - Currently blank
 - Support for custom BIP32 wallet paths
   - Currently hardcoded to `m/44'/0'/0'/0`
 
