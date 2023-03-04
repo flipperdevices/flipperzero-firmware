@@ -3,11 +3,13 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
-#include <dolphin/dolphin.h>
+//#include <dolphin/dolphin.h>
+#include <storage/storage.h>
 #include "../helpers/flipbip_haptic.h"
 //#include "../helpers/flipbip_speaker.h"
 #include "../helpers/flipbip_led.h"
 #include "../helpers/flipbip_string.h"
+#include "../helpers/flipbip_file.h"
 
 #include <string.h>
 #include "../helpers/printf.h"
@@ -271,6 +273,9 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
     model->mnemonic = mnemonic_generate(model->strength);
+
+    flipbip_save_file(EXT_PATH("flipbip.dat"));
+    flipbip_load_file(EXT_PATH("flipbip.dat"));
     
     // test mnemonic
     //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
