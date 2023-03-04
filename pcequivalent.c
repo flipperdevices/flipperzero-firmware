@@ -127,7 +127,7 @@ int check_state(struct Crypto1State *t, struct Crypto1Params *p) {
 }
 
 
-static inline int state_loop(int* states_buffer, int xks, int m1, int m2) {
+static inline int state_loop(unsigned int* states_buffer, int xks, int m1, int m2) {
     int states_tail = 0;
     int round = 0, s = 0, xks_bit = 0;
 
@@ -172,15 +172,16 @@ int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *
     // TODO: Combine Odd and Even loops
     int msb_head = (MSB_LIMIT * msb_round); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
     int msb_tail = (MSB_LIMIT * (msb_round+1));
-    int *states_buffer = malloc(sizeof(int)*(2<<9));
+    unsigned int *states_buffer = malloc(sizeof(unsigned int)*(2<<9));
     int states_tail = 0;
-    int i = 0, j = 0, y = 0, semi_state = 0, tail = 0, msb = 0, found = 0;
+    int i = 0, j = 0, y = 0, semi_state = 0, tail = 0, found = 0;
+    unsigned int msb = 0;
     struct Crypto1State temp = {0, 0};
 
     //FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
 
-    struct Msb *odd_msbs  = malloc(MSB_LIMIT * sizeof(*odd_msbs));
-    struct Msb *even_msbs = malloc(MSB_LIMIT * sizeof(*even_msbs));
+    struct Msb *odd_msbs  = (struct Msb*)calloc(MSB_LIMIT, sizeof(struct Msb));
+    struct Msb *even_msbs = (struct Msb*)calloc(MSB_LIMIT, sizeof(struct Msb));
 
     // Odd
     for (semi_state = 1 << 20; semi_state >= 0; semi_state--) {
@@ -269,6 +270,7 @@ int recover(struct Crypto1Params *p, int ks2) {
         eks = eks << 1 | BEBIT(ks2, i);
     }
     for (msb = 0; msb <= ((256/MSB_LIMIT)-1); msb++) {
+        //printf("MSB: %i\n", msb);
         if (calculate_msb_tables(oks, eks, msb, p)) {
             return 1;
         }
