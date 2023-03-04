@@ -264,6 +264,12 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // constants for Bitcoin
     const uint32_t version_public = 0x0488b21e;
     const uint32_t version_private = 0x0488ade4;
+    // "xprv_magic": 76066276,
+    // "xpub_magic": 76067358,
+    // "xpub_magic_segwit_p2sh": 77429938,
+    // "xpub_magic_segwit_native": 78792518,
+    // "xpub_magic_multisig_segwit_p2sh": 43365439,
+    // "xpub_magic_multisig_segwit_native": 44728019,
     
     // buffer for key serialization
     const size_t buflen = 128;
