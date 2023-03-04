@@ -55,14 +55,14 @@ typedef enum {
 // Some data fields are only set for particular types.
 typedef struct {
     DemoEventType type; // The reason for this event.
-    
+
     // You can add additional data that is helpful for your events.
     InputEvent input;   // This data is specific to DemoEventTypeKey.
     unsigned int number; // This data is specific to DemoEventSendCounter/DemoEventReceivedCounter/DemoEventSendTone/DemoEventReceivedTone.
     FuriString* senderName; // This data is specific to DemoEventReceivedCounter/DemoEventReceivedTone.
 } DemoEvent;
 
-// This is the data for our application.  You might have a game board, 
+// This is the data for our application.  You might have a game board,
 // current player, etc.  For this demo we have two counters & a general purpose buffer.
 typedef struct {
     FuriString* buffer;
@@ -77,7 +77,7 @@ typedef struct {
     FuriMessageQueue* queue; // Message queue (DemoEvent items to process).
     FuriMutex* mutex; // Used to provide thread safe access to data.
     DemoData* data; // Data accessed by multiple threads (acquire the mutex before accessing!)
-    
+
     // Used for subghz communication
     SubGhzTxRxWorker* subghz_txrx;
 } DemoContext;
@@ -103,8 +103,8 @@ static void subghz_demo_receive_data(DemoContext* instance) {
     size_t game_name_len = strlen(SUBGHZ_GAME_NAME);
     if (len < (game_name_len + 2)) {
         FURI_LOG_D(TAG, "Message not long enough. >%s<", message);
-        
-        // Message wasn't big enough to have our game name + the reason code + version; so it must not be for us. 
+
+        // Message wasn't big enough to have our game name + the reason code + version; so it must not be for us.
         return;
     }
 
@@ -118,56 +118,56 @@ static void subghz_demo_receive_data(DemoContext* instance) {
 
         // Right now we don't care much about the version of the application, but in the future we might need to
         // respond differently based on the version of the application running on the other Flipper Zero.
-        // Important: Don't always trust what is sent, some people with Flipper Zero might send an 
+        // Important: Don't always trust what is sent, some people with Flipper Zero might send an
         // invalid version to trick your code into interpreting the payload in a special way.
 
-        // Null terminate the buffer at the end of message so we don't accidently overrun our buffer.        
+        // Null terminate the buffer at the end of message so we don't accidently overrun our buffer.
         message[MESSAGE_MAX_LEN - 1] = 0;
 
         unsigned int number;
         char senderName[9];
         switch (purpose) {
-            case DemoRfPurposeCounter:
-                // We expect this mesage to contain both the count and the sender name.
-                if (sscanf((const char*)message+game_name_len+2, "%04u:%8s", &number, senderName) == 2) {
-                    // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
-                    FuriString* name = furi_string_alloc();
-                    furi_string_set(name, senderName);
-                    // The counter is supposed to be a 4 digit number.
-                    if (number >= 10000U) {
-                        FURI_LOG_W(TAG, "Number was >= 10000U.  >%s<", message);
-                        number %= 10000U;
-                    }
-                    DemoEvent event = {.type = DemoEventReceivedCounter, .number = number, .senderName = name};
-                    furi_message_queue_put(instance->queue, &event, FuriWaitForever);
-                } else {
-                    FURI_LOG_W(TAG, "Failed to parse counter message. >%s<", message);
+        case DemoRfPurposeCounter:
+            // We expect this mesage to contain both the count and the sender name.
+            if (sscanf((const char*)message+game_name_len+2, "%04u:%8s", &number, senderName) == 2) {
+                // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
+                FuriString* name = furi_string_alloc();
+                furi_string_set(name, senderName);
+                // The counter is supposed to be a 4 digit number.
+                if (number >= 10000U) {
+                    FURI_LOG_W(TAG, "Number was >= 10000U.  >%s<", message);
+                    number %= 10000U;
                 }
+                DemoEvent event = {.type = DemoEventReceivedCounter, .number = number, .senderName = name};
+                furi_message_queue_put(instance->queue, &event, FuriWaitForever);
+            } else {
+                FURI_LOG_W(TAG, "Failed to parse counter message. >%s<", message);
+            }
             break;
 
-            case DemoRfPurposeTone:
-                // We expect this message to contain both the frequency and the sender name.
-                if (sscanf((const char*)message+game_name_len+2, "%u:%8s", &number, senderName) == 2) {
-                    // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
-                    FuriString* name = furi_string_alloc();
-                    furi_string_set(name, senderName);
-                    DemoEvent event = {.type = DemoEventReceivedTone, .number = number, .senderName = name};
-                    furi_message_queue_put(instance->queue, &event, FuriWaitForever);
-                } else {
-                    FURI_LOG_W(TAG, "Failed to parse tone message. >%s<", message);
-                }
+        case DemoRfPurposeTone:
+            // We expect this message to contain both the frequency and the sender name.
+            if (sscanf((const char*)message+game_name_len+2, "%u:%8s", &number, senderName) == 2) {
+                // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
+                FuriString* name = furi_string_alloc();
+                furi_string_set(name, senderName);
+                DemoEvent event = {.type = DemoEventReceivedTone, .number = number, .senderName = name};
+                furi_message_queue_put(instance->queue, &event, FuriWaitForever);
+            } else {
+                FURI_LOG_W(TAG, "Failed to parse tone message. >%s<", message);
+            }
             break;
 
             // Add parsing for other messages here.
 
-            default:
-                if (version <= MAJOR_VERSION) {
-                    // The version is same or less than ours, so we should know about the message purpose.
-                    FURI_LOG_W(TAG, "Message purpose not handled for known version. >%s<", message);
-                } else {
-                    // The version is newer, so it's not surprising we don't know about the purpose.
-                    FURI_LOG_T(TAG, "Message purpose not handled. >%s<", message);
-                }
+        default:
+            if (version <= MAJOR_VERSION) {
+                // The version is same or less than ours, so we should know about the message purpose.
+                FURI_LOG_W(TAG, "Message purpose not handled for known version. >%s<", message);
+            } else {
+                // The version is newer, so it's not surprising we don't know about the purpose.
+                FURI_LOG_T(TAG, "Message purpose not handled. >%s<", message);
+            }
             break;
         }
     } else {
@@ -175,7 +175,7 @@ static void subghz_demo_receive_data(DemoContext* instance) {
     }
 }
 
-// This gets invoked when input (button press) is detected.  
+// This gets invoked when input (button press) is detected.
 // We queue a DemoEventTypeKey message with the input event data.
 static void subghz_demo_input_callback(InputEvent* input_event, void* ctx_q) {
     furi_assert(ctx_q);
@@ -184,7 +184,7 @@ static void subghz_demo_input_callback(InputEvent* input_event, void* ctx_q) {
     furi_message_queue_put(queue, &event, FuriWaitForever);
 }
 
-// We register this callback to get invoked by the timer on every tick.  
+// We register this callback to get invoked by the timer on every tick.
 // We queue a DemoEventTypeTick message and then return to the caller.
 static void subghz_demo_tick_callback(void* ctx_q) {
     furi_assert(ctx_q);
@@ -211,13 +211,12 @@ static void subghz_demo_send_count(void* ctx) {
 static void subghz_demo_send_tone(void* ctx, unsigned int frequency) {
     furi_assert(ctx);
     DemoContext* demo_context = ctx;
-    DemoData* data = demo_context->data;
     FuriMessageQueue* queue = demo_context->queue;
     DemoEvent event = {.type = DemoEventSendTone, .number = frequency};
     furi_message_queue_put(queue, &event, FuriWaitForever);
 }
 
-// We register this callback to get invoked whenever we need to render the screen. 
+// We register this callback to get invoked whenever we need to render the screen.
 // We render the UI on this callback thread.
 static void subghz_demo_render_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
@@ -256,7 +255,7 @@ static void subghz_demo_render_callback(Canvas* canvas, void* ctx) {
 // We increment our counter (wrapping back to 0 if it exceeds a 4 digit number.)
 static void subghz_demo_update_local_counter(DemoContext* demo_context) {
     DemoData* data = demo_context->data;
-    
+
     // Increment the counter (which is supposed to be a 4 digit number for this app.)
     data->localCounter++;
     if (data->localCounter >= 10000U) {
@@ -280,8 +279,7 @@ static void subghz_demo_update_remote_counter(DemoContext* demo_context, DemoEve
 // Our DemoEventReceivedTone handler invokes this method.
 // We play a quick (100ms) tone of the desired frequency.
 static void subghz_demo_play_tone(DemoContext* demo_context, DemoEvent* event) {
-    DemoData* data = demo_context->data;
-
+    UNUSED(demo_context);
     unsigned int frequency = event->number;
     FURI_LOG_I(TAG, "Playing frequency %04u", frequency);
 
@@ -425,67 +423,67 @@ int32_t subghz_demo_app(void* p) {
     do {
         if (furi_message_queue_get(demo_context->queue, &event, FuriWaitForever) == FuriStatusOk) {
             switch (event.type) {
-                case DemoEventTypeKey:
-                    // Short press of OK button, queue DemoEventSendCounter event with the current count.
-                    if(event.input.type == InputTypeShort && event.input.key == InputKeyOk) {
-                        furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
-                        subghz_demo_send_count(demo_context);
-                        furi_mutex_release(demo_context->mutex);
-                    }
-                    // Short press of UP button, queue DemoEventSendTone event.
-                    else if(event.input.type == InputTypeShort && event.input.key == InputKeyUp) {
-                        furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
-                        subghz_demo_send_tone(demo_context, 440U);
-                        furi_mutex_release(demo_context->mutex);
-                    } 
-                    // Long press of UP button, queue DemoEventSendTone event.
-                    else if (event.input.type == InputTypeLong && event.input.key == InputKeyUp) {
-                        furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
-                        subghz_demo_send_tone(demo_context, 880U);
-                        furi_mutex_release(demo_context->mutex);
-                    }
-                    // Short press of back button exits the program.
-                    else if(event.input.type == InputTypeShort && event.input.key == InputKeyBack) {
-                        processing = false;
-                    }
-                    break;
-                case DemoEventTypeTick:
-                    // Every timer tick we update the counter. 
+            case DemoEventTypeKey:
+                // Short press of OK button, queue DemoEventSendCounter event with the current count.
+                if(event.input.type == InputTypeShort && event.input.key == InputKeyOk) {
                     furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
-                    subghz_demo_update_local_counter(demo_context);
+                    subghz_demo_send_count(demo_context);
                     furi_mutex_release(demo_context->mutex);
-                    break;
-                case DemoEventSendCounter:
-                    // Actually send the counter value to the other Flipper Zero.
-                    furi_mutex_acquire(demo_context->mutex, FuriWaitForever);   
-                    subghz_demo_broadcast_counter(demo_context, event.number);
+                }
+                // Short press of UP button, queue DemoEventSendTone event.
+                else if(event.input.type == InputTypeShort && event.input.key == InputKeyUp) {
+                    furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
+                    subghz_demo_send_tone(demo_context, 440U);
                     furi_mutex_release(demo_context->mutex);
-                    break;
-                case DemoEventSendTone:
-                    // Actually send the frequency value to the other Flipper Zero.
-                    furi_mutex_acquire(demo_context->mutex, FuriWaitForever);   
-                    subghz_demo_broadcast_tone(demo_context, event.number);
+                }
+                // Long press of UP button, queue DemoEventSendTone event.
+                else if (event.input.type == InputTypeLong && event.input.key == InputKeyUp) {
+                    furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
+                    subghz_demo_send_tone(demo_context, 880U);
                     furi_mutex_release(demo_context->mutex);
-                    break;
-                case DemoEventDataDetected:
-                    // Another Flipper sent us data!  Process it, potentially queuing an event.
-                    subghz_demo_receive_data(demo_context);
-                    break;
-                case DemoEventReceivedCounter:
-                    // Process the counter sent by the other Flipper Zero.
-                    furi_mutex_acquire(demo_context->mutex, FuriWaitForever);   
-                    subghz_demo_update_remote_counter(demo_context, &event);
-                    furi_mutex_release(demo_context->mutex);
-                    break;
-                case DemoEventReceivedTone:
-                    // Process the tone sent by the other Flipper Zero.
-                    furi_mutex_acquire(demo_context->mutex, FuriWaitForever);   
-                    subghz_demo_play_tone(demo_context, &event);
-                    furi_mutex_release(demo_context->mutex);
-                    break;
-                default:
-                    FURI_LOG_E(TAG, "Queue had unknown message type: %u", event.type);
-                    break;
+                }
+                // Short press of back button exits the program.
+                else if(event.input.type == InputTypeShort && event.input.key == InputKeyBack) {
+                    processing = false;
+                }
+                break;
+            case DemoEventTypeTick:
+                // Every timer tick we update the counter.
+                furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
+                subghz_demo_update_local_counter(demo_context);
+                furi_mutex_release(demo_context->mutex);
+                break;
+            case DemoEventSendCounter:
+                // Actually send the counter value to the other Flipper Zero.
+                furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
+                subghz_demo_broadcast_counter(demo_context, event.number);
+                furi_mutex_release(demo_context->mutex);
+                break;
+            case DemoEventSendTone:
+                // Actually send the frequency value to the other Flipper Zero.
+                furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
+                subghz_demo_broadcast_tone(demo_context, event.number);
+                furi_mutex_release(demo_context->mutex);
+                break;
+            case DemoEventDataDetected:
+                // Another Flipper sent us data!  Process it, potentially queuing an event.
+                subghz_demo_receive_data(demo_context);
+                break;
+            case DemoEventReceivedCounter:
+                // Process the counter sent by the other Flipper Zero.
+                furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
+                subghz_demo_update_remote_counter(demo_context, &event);
+                furi_mutex_release(demo_context->mutex);
+                break;
+            case DemoEventReceivedTone:
+                // Process the tone sent by the other Flipper Zero.
+                furi_mutex_acquire(demo_context->mutex, FuriWaitForever);
+                subghz_demo_play_tone(demo_context, &event);
+                furi_mutex_release(demo_context->mutex);
+                break;
+            default:
+                FURI_LOG_E(TAG, "Queue had unknown message type: %u", event.type);
+                break;
             }
 
             // If message contains a sender name furi_string, free it.
@@ -517,9 +515,9 @@ int32_t subghz_demo_app(void* p) {
     furi_string_free(demo_context->data->buffer);
     free(demo_context->data);
     free(demo_context);
-   
+
     // Reenable charging.
     furi_hal_power_suppress_charge_exit();
-    
+
     return 0;
 }
