@@ -182,8 +182,8 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         const char* info = "-Scroll pages with up/down-" 
                            "p1,2)    Mnemonic/Seed     "
                            "p3)       xprv Root Key    "
-                           "p4,5)  xprv/xpub account   "
-                           "p6,7)  xprv/xpub extended  "
+                           "p4,5)  xprv/xpub Accnt Keys"
+                           "p6,7)  xprv/xpub Extnd Keys"
                            "p8+)    Receive Addresses  ";
         flipbip_scene_1_draw_generic(info, 27);
     }
