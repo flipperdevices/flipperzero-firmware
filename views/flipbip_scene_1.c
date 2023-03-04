@@ -10,7 +10,7 @@
 #include "../helpers/flipbip_string.h"
 
 #include <string.h>
-// #include "../helpers/printf.h"
+#include "../helpers/printf.h"
 #include "../crypto/bip32.h"
 #include "../crypto/bip39.h"
 #include "../crypto/curves.h"
@@ -26,8 +26,6 @@ struct FlipBipScene1 {
 typedef struct {
     int page;
     int strength;
-
-    // for crypto
     CONFIDENTIAL const char* mnemonic;
     CONFIDENTIAL uint8_t seed[64];
     CONFIDENTIAL const HDNode* node;
@@ -36,21 +34,14 @@ typedef struct {
     CONFIDENTIAL const char* xpub_account;
     CONFIDENTIAL const char* xprv_extended;
     CONFIDENTIAL const char* xpub_extended;
-
-    // for display
-    CONFIDENTIAL const char* seed1;
-    CONFIDENTIAL const char* seed2;
-    CONFIDENTIAL const char* seed3;
-    CONFIDENTIAL const char* seed4;
-    CONFIDENTIAL const char* seed5;
-    CONFIDENTIAL const char* seed6;
-    CONFIDENTIAL const char* mnemonic1;
-    CONFIDENTIAL const char* mnemonic2;
-    CONFIDENTIAL const char* mnemonic3;
-    CONFIDENTIAL const char* mnemonic4;
-    CONFIDENTIAL const char* mnemonic5;
-    CONFIDENTIAL const char* mnemonic6;
 } FlipBipScene1Model;
+
+static CONFIDENTIAL char s_disp_text1[30 + 1];
+static CONFIDENTIAL char s_disp_text2[30 + 1];
+static CONFIDENTIAL char s_disp_text3[30 + 1];
+static CONFIDENTIAL char s_disp_text4[30 + 1];
+static CONFIDENTIAL char s_disp_text5[30 + 1];
+static CONFIDENTIAL char s_disp_text6[30 + 1];
 
 void flipbip_scene_1_set_callback(
     FlipBipScene1* instance,
@@ -62,11 +53,31 @@ void flipbip_scene_1_set_callback(
     instance->context = context;
 }
 
-static void flipbip_scene_1_draw_mnemonic(FlipBipScene1Model* const model) {
+static void flipbip_scene_1_draw_generic(const char* text, size_t line_len) {
+    // Split the text into parts
+    for (size_t si = 1; si <= 6; si++) {
+        char *ptr = NULL;
+        
+        if      (si == 1) ptr = s_disp_text1;
+        else if (si == 2) ptr = s_disp_text2;
+        else if (si == 3) ptr = s_disp_text3;
+        else if (si == 4) ptr = s_disp_text4;
+        else if (si == 5) ptr = s_disp_text5;
+        else if (si == 6) ptr = s_disp_text6;
+        
+        memzero(ptr, 30 + 1);
+        if (line_len > 30) {
+            strncpy(ptr, text + ((si - 1) * 30), 30);
+        } else {
+            strncpy(ptr, text + ((si - 1) * line_len), line_len);
+        }
+    }
+}
 
+static void flipbip_scene_1_draw_mnemonic(const char* mnemonic) {
     // Delineate sections of the mnemonic every 4 words
-    char *mnemonic_working = malloc(strlen(model->mnemonic) + 1);
-    strcpy(mnemonic_working, model->mnemonic);
+    char *mnemonic_working = malloc(strlen(mnemonic) + 1);
+    strcpy(mnemonic_working, mnemonic);
     int word = 0;
     for (size_t i = 0; i < strlen(mnemonic_working); i++) {
         if (mnemonic_working[i] == ' ') {
@@ -82,16 +93,22 @@ static void flipbip_scene_1_draw_mnemonic(FlipBipScene1Model* const model) {
     int mi = 0;
     while(mnemonic_part != NULL)
     {
-        char *ptr = malloc(strlen(mnemonic_part) + 1);
-        strcpy(ptr, mnemonic_part);
+        char *ptr = NULL;
         mi++;
         
-        if      (mi == 1) model->mnemonic1 = ptr;
-        else if (mi == 2) model->mnemonic2 = ptr;
-        else if (mi == 3) model->mnemonic3 = ptr;
-        else if (mi == 4) model->mnemonic4 = ptr;
-        else if (mi == 5) model->mnemonic5 = ptr;
-        else if (mi == 6) model->mnemonic6 = ptr;
+        if      (mi == 1) ptr = s_disp_text1;
+        else if (mi == 2) ptr = s_disp_text2;
+        else if (mi == 3) ptr = s_disp_text3;
+        else if (mi == 4) ptr = s_disp_text4;
+        else if (mi == 5) ptr = s_disp_text5;
+        else if (mi == 6) ptr = s_disp_text6;
+
+        memzero(ptr, 30 + 1);
+        if (strlen(mnemonic_part) > 30) {
+            strncpy(ptr, mnemonic_part, 30);
+        } else {
+            strncpy(ptr, mnemonic_part, strlen(mnemonic_part));
+        }
 
         mnemonic_part = flipbip_strtok(NULL, ",");
     }
@@ -99,37 +116,121 @@ static void flipbip_scene_1_draw_mnemonic(FlipBipScene1Model* const model) {
     // Free the working mnemonic memory
     memzero(mnemonic_working, strlen(mnemonic_working));
     free(mnemonic_working);
+}
 
+static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
+    char *seed_working = malloc(64 * 2 + 1);
+    // Convert the seed to a hex string
+    for (size_t i = 0; i < 64; i++) {
+        //flipbip_itoa(model->seed[i], seed_working + (i * 2), 64 * 2 + 1, 16);
+        sprintf(seed_working + (i * 2), "%02x", model->seed[i]);
+    }
+    
+    flipbip_scene_1_draw_generic(seed_working, 22);
+
+    // Free the working seed memory
+    memzero(seed_working, sizeof(seed_working));
+    free(seed_working);
+}
+
+static void flipbip_scene_1_draw_address(HDNode* const node, uint32_t addr_index) {
+    // Constants for Bitcoin address generation
+    const char addr_version = 0x00;
+    //const char wif_version = 0x80;
+
+    // buffer for key serialization
+    const size_t buflen = 128;
+    char buf[128 + 1];
+
+    HDNode *addr_node = malloc(sizeof(HDNode));
+    memcpy(addr_node, node, sizeof(HDNode));
+
+    hdnode_private_ckd(addr_node, addr_index);
+    hdnode_fill_public_key(addr_node);
+    ecdsa_get_address(addr_node->public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
+    
+    char *address = malloc(buflen + 1);
+    strncpy(address, buf, buflen);
+    flipbip_scene_1_draw_generic(address, 12);
+    memzero(address, buflen + 1);
+    free(address);
+
+    //ecdsa_get_wif(addr_node->private_key, wif_version, HASHER_SHA2D, buf, buflen); 
+    //char *wif = malloc(buflen + 1);
+    //strncpy(wif, buf, buflen);
+
+    memzero(addr_node, sizeof(HDNode));
+    free(addr_node);
+}
+
+static void flipbip_scene_1_clear_text() {
+    memzero((void*)s_disp_text1, 30 + 1);
+    memzero((void*)s_disp_text2, 30 + 1);
+    memzero((void*)s_disp_text3, 30 + 1);
+    memzero((void*)s_disp_text4, 30 + 1);
+    memzero((void*)s_disp_text5, 30 + 1);
+    memzero((void*)s_disp_text6, 30 + 1);
 }
 
 void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
     //UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    //canvas_set_font(canvas, FontPrimary);
-    //canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "This is Scene 1"); 
     
-    canvas_set_font(canvas, FontSecondary);
-    //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->strength == 128 ? "128-bit" : "256-bit");
-    //canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->seed);
-    
-    // Mnenomic
-    if (model->page == 0) {
-        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->mnemonic1);
-        canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->mnemonic2);
-        canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->mnemonic3);
-        canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->mnemonic4);
-        canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->mnemonic5);
-        canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->mnemonic6);
+    if (model->page == 1) {
+        const char* info = "-Scroll pages with up/down-" 
+                           "p1,2)    Mnemonic/Seed     "
+                           "p3)       xprv Root Key    "
+                           "p4,5)  xprv/xpub account   "
+                           "p6,7)  xprv/xpub extended  "
+                           "p8+)    Receive Addresses  ";
+        flipbip_scene_1_draw_generic(info, 27);
     }
-    // Seed
+    else if (model->page == 2) {
+        flipbip_scene_1_draw_mnemonic(model->mnemonic);
+    } 
+    else if (model->page == 3) {
+        flipbip_scene_1_draw_seed(model);
+    }
+    else if (model->page == 4) {
+        flipbip_scene_1_draw_generic(model->xprv_root, 20);
+    }
+    else if (model->page == 5) {
+        flipbip_scene_1_draw_generic(model->xprv_account, 20);
+    }
+    else if (model->page == 6) {
+        flipbip_scene_1_draw_generic(model->xpub_account, 20);
+    }
+    else if (model->page == 7) {
+        flipbip_scene_1_draw_generic(model->xprv_extended, 20);
+    }
+    else if (model->page == 8) {
+        flipbip_scene_1_draw_generic(model->xpub_extended, 20);
+    } 
+    else if (model->page >= 9 && model->page <= 13) {
+        flipbip_scene_1_draw_address(model->node, model->page - 9);
+    }
+
+    if (model->page == 0) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 1, 10, AlignLeft, AlignTop, "Generating...");
+        canvas_draw_str_aligned(canvas, 6, 24, AlignLeft, AlignTop, "m/44'/0'/0'/0");
+    } else if (model->page >= 9 && model->page <= 13) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 1, 10, "Receive address");
+
+        canvas_draw_str(canvas, 6, 30, s_disp_text1);
+        canvas_draw_str(canvas, 6, 42, s_disp_text2);
+        canvas_draw_str(canvas, 6, 54, s_disp_text3);
+    } 
     else {
-        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, model->seed1);
-        canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, model->seed2);
-        canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, model->seed3);
-        canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, model->seed4);
-        canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, model->seed5);
-        canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, model->seed6);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, s_disp_text1);
+        canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, s_disp_text2);
+        canvas_draw_str_aligned(canvas, 1, 22, AlignLeft, AlignTop, s_disp_text3);
+        canvas_draw_str_aligned(canvas, 1, 32, AlignLeft, AlignTop, s_disp_text4);
+        canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, s_disp_text5);
+        canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, s_disp_text6);
     }
 
     
@@ -141,42 +242,13 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
 
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
-    //const char *mnemonic = mnemonic_generate(model->strength);
-    model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
-
-    flipbip_scene_1_draw_mnemonic(model);
+    const char *mnemonic = mnemonic_generate(model->strength);
+    
+    // test mnemonic
+    //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
 
     // Generate a BIP39 seed from the mnemonic
-    //uint8_t seedbytes[64];
     mnemonic_to_seed(model->mnemonic, "", model->seed, 0);
-    
-    // BEGIN DRAW SEED
-
-    char *seed_working = malloc(64 * 2 + 1);
-    // Convert the seed to a hex string
-    for (size_t i = 0; i < 64; i++) {
-        flipbip_itoa(model->seed[i], seed_working + (i * 2), 64 * 2 + 1, 16);
-        //sprintf(seed + (i * 2), "%.2x", seedbytes[i]);
-    }
-    
-    // Split the seed into parts
-    for (size_t si = 1; si <= 6; si++) {
-        char *ptr = malloc(22 + 1);
-        strncpy(ptr, seed_working + ((si - 1) * 22), 22);
-        
-        if      (si == 1) model->seed1 = ptr;
-        else if (si == 2) model->seed2 = ptr;
-        else if (si == 3) model->seed3 = ptr;
-        else if (si == 4) model->seed4 = ptr;
-        else if (si == 5) model->seed5 = ptr;
-        else if (si == 6) model->seed6 = ptr;
-    }
-
-    // Free the working seed memory
-    memzero(seed_working, sizeof(seed_working));
-    free(seed_working);
-
-    // END DRAW SEED
 
     // Generate a BIP32 root key from the mnemonic
 
@@ -194,7 +266,7 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // constants for Bitcoin
     const uint32_t version_public = 0x0488b21e;
     const uint32_t version_private = 0x0488ade4;
-    const char addr_version = 0x00, wif_version = 0x80;
+    //const char addr_version = 0x00, wif_version = 0x80;
     
     // buffer for key serialization
     const size_t buflen = 128;
@@ -246,35 +318,7 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     model->xpub_extended = xpub_ext;
 
     model->node = node;
-
-    // BEGIN DRAW ADDRESS
-
-    for (int i = 0; i < 3; i++) {
-        HDNode *addr_node = malloc(sizeof(HDNode));
-        memcpy(addr_node, node, sizeof(HDNode));
-
-        hdnode_private_ckd(addr_node, i);
-        hdnode_fill_public_key(addr_node);
-        ecdsa_get_address(addr_node->public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
-        char *address = malloc(buflen + 1);
-        strncpy(address, buf, buflen);
-        model->seed5 = address;
-        ecdsa_get_wif(addr_node->private_key, wif_version, HASHER_SHA2D, buf, buflen); 
-        char *wif = malloc(buflen + 1);
-        strncpy(wif, buf, buflen);
-        model->seed6 = wif;
-        memzero(addr_node, sizeof(HDNode));
-        free(addr_node);
-    }
-
-    // END DRAW ADDRESS
-
-    // Clear the root node
-    // memzero(root, sizeof(HDNode));
-    // free(root);
-
-    // Clear the mnemonic
-    //mnemonic_clear();
+    model->page = 1;
 
 #if USE_BIP39_CACHE
     // Clear the BIP39 cache
@@ -297,9 +341,7 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                     },
                     true);
                 break;
-            case InputKeyLeft:
             case InputKeyRight:
-            case InputKeyUp:
             case InputKeyDown:
             case InputKeyOk:
                 with_view_model(
@@ -307,7 +349,24 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                     FlipBipScene1Model* model,
                     {
                         //UNUSED(model);
-                        model->page = (model->page + 1) % 2;
+                        model->page = (model->page + 1) % 14;
+                        if (model->page == 0) {
+                            model->page = 1;
+                        }
+                    },
+                    true);
+                break;
+            case InputKeyLeft:
+            case InputKeyUp:
+                with_view_model(
+                    instance->view,
+                    FlipBipScene1Model* model,
+                    {
+                        //UNUSED(model);
+                        model->page = (model->page - 1) % 14;
+                        if (model->page == 0) {
+                            model->page = 13;
+                        }
                     },
                     true);
                 break;
@@ -326,24 +385,29 @@ void flipbip_scene_1_exit(void* context) {
         instance->view,
         FlipBipScene1Model * model,
         {
-            // Clear the mnemonic from memory
             model->page = 0;
             model->strength = 0;
-            memzero((void*)model->seed1, strlen(model->seed1));
-            memzero((void*)model->seed2, strlen(model->seed2));
-            memzero((void*)model->seed3, strlen(model->seed3));
-            memzero((void*)model->seed4, strlen(model->seed4));
-            memzero((void*)model->seed5, strlen(model->seed5));
-            memzero((void*)model->seed6, strlen(model->seed6));
-            memzero((void*)model->mnemonic1, strlen(model->mnemonic1));
-            memzero((void*)model->mnemonic2, strlen(model->mnemonic2));
-            memzero((void*)model->mnemonic3, strlen(model->mnemonic3));
-            memzero((void*)model->mnemonic4, strlen(model->mnemonic4));
-            memzero((void*)model->mnemonic5, strlen(model->mnemonic5));
-            memzero((void*)model->mnemonic6, strlen(model->mnemonic6));
+            for (int i = 0; i < 64; i++) {
+                model->seed[i] = 0;
+            }
+            mnemonic_clear();
+            memzero((void*)model->node, sizeof(HDNode));
+            free((void*)model->node);
+            memzero((void*)model->xprv_root, strlen(model->xprv_root));
+            memzero((void*)model->xprv_account, strlen(model->xprv_account));
+            memzero((void*)model->xpub_account, strlen(model->xpub_account));
+            memzero((void*)model->xprv_extended, strlen(model->xprv_extended));
+            memzero((void*)model->xpub_extended, strlen(model->xpub_extended));
+            free((void*)model->xprv_root);
+            free((void*)model->xprv_account);
+            free((void*)model->xpub_account);
+            free((void*)model->xprv_extended);
+            free((void*)model->xpub_extended);
         },
         true
     );
+
+    flipbip_scene_1_clear_text();
 }
 
 void flipbip_scene_1_enter(void* context) {
@@ -404,21 +468,12 @@ void flipbip_scene_1_free(FlipBipScene1* instance) {
         instance->view,
         FlipBipScene1Model * model,
         {
-            //UNUSED(model);
-            free((void*)model->seed1);
-            free((void*)model->seed2);
-            free((void*)model->seed3);
-            free((void*)model->seed4);
-            free((void*)model->seed5);
-            free((void*)model->seed6);
-            free((void*)model->mnemonic1);
-            free((void*)model->mnemonic2);
-            free((void*)model->mnemonic3);
-            free((void*)model->mnemonic4);
-            free((void*)model->mnemonic5);
-            free((void*)model->mnemonic6);
+            UNUSED(model);
         },
         true);
+
+    flipbip_scene_1_clear_text();
+
     view_free(instance->view);
     free(instance);
 }

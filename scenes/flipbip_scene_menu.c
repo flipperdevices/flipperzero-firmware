@@ -14,7 +14,7 @@ void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
 void flipbip_scene_menu_on_enter(void* context) {
     FlipBip* app = context;
 
-    submenu_add_item(app->submenu, "New BIP39 Mnemonic", SubmenuIndexScene1, flipbip_scene_menu_submenu_callback, app);
+    submenu_add_item(app->submenu, "Generate wallet", SubmenuIndexScene1, flipbip_scene_menu_submenu_callback, app);
     //submenu_add_item(app->submenu, "Scene 2", SubmenuIndexScene2, flipbip_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, flipbip_scene_menu_submenu_callback, app);
 
