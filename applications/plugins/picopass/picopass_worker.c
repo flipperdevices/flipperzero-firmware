@@ -195,7 +195,7 @@ static ReturnCode picopass_auth_standard(uint8_t* csn, uint8_t* div_key) {
     }
     memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
-    loclass_diversifyKey(csn, picopass_iclass_key, div_key);
+    loclass_iclass_calc_div_key(csn, (uint8_t*)picopass_iclass_key, div_key, false);
     loclass_opt_doReaderMAC(ccnr, div_key, mac);
 
     return rfalPicoPassPollerCheck(mac, &chkRes);
@@ -217,7 +217,7 @@ static ReturnCode picopass_auth_factory(uint8_t* csn, uint8_t* div_key) {
     }
     memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
-    loclass_diversifyKey(csn, picopass_factory_debit_key, div_key);
+    loclass_iclass_calc_div_key(csn, (uint8_t*)picopass_factory_debit_key, div_key, false);
     loclass_opt_doReaderMAC(ccnr, div_key, mac);
 
     return rfalPicoPassPollerCheck(mac, &chkRes);
@@ -399,7 +399,7 @@ ReturnCode picopass_write_card(PicopassBlock* AA1) {
     }
     memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
-    loclass_diversifyKey(selRes.CSN, picopass_iclass_key, div_key);
+    loclass_iclass_calc_div_key(selRes.CSN, (uint8_t*)picopass_iclass_key, div_key, false);
     loclass_opt_doReaderMAC(ccnr, div_key, mac);
 
     err = rfalPicoPassPollerCheck(mac, &chkRes);
@@ -651,7 +651,7 @@ void picopass_worker_write_key(PicopassWorker* picopass_worker) {
     uint8_t* oldKey = AA1[PICOPASS_KD_BLOCK_INDEX].data;
 
     uint8_t newKey[PICOPASS_BLOCK_LEN] = {0};
-    loclass_diversifyKey(csn, pacs->key, newKey);
+    loclass_iclass_calc_div_key(csn, pacs->key, newKey, false);
 
     if((fuses & 0x80) == 0x80) {
         FURI_LOG_D(TAG, "Plain write for personalized mode key change");
