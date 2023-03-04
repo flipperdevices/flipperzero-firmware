@@ -38,10 +38,11 @@ FlipBip* flipbip_app_alloc() {
     view_dispatcher_set_custom_event_callback(app->view_dispatcher, flipbip_custom_event_callback);
     app->submenu = submenu_alloc();
 
+    // Settings
     app->haptic = 1;
-    //app->speaker = 1;
     app->led = 1;
     app->bip39_strength = 2; // 256 bits (24 words)
+    app->bip44_coin = 0; // 0 (BTC)
 
     view_dispatcher_add_view(app->view_dispatcher, FlipBipViewIdMenu, submenu_get_view(app->submenu));
     app->flipbip_startscreen = flipbip_startscreen_alloc();

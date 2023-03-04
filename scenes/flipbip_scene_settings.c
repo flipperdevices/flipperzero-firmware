@@ -3,9 +3,9 @@
 
 // enum SettingsIndex {
 //     SettingsIndexBip39Strength = 10,
+//     SettingsIndexBip44Coin,
 //     SettingsIndexHaptic,
 //     SettingsIndexValue1,
-//     SettingsIndexValue2,
 // };
 
 const char* const haptic_text[2] = {
@@ -16,15 +16,6 @@ const uint32_t haptic_value[2] = {
     FlipBipHapticOff,
     FlipBipHapticOn,
 };
-
-// const char* const speaker_text[2] = {
-//     "OFF",
-//     "ON",
-// };
-// const uint32_t speaker_value[2] = {
-//     FlipBipSpeakerOff,
-//     FlipBipSpeakerOn,
-// };
 
 const char* const led_text[2] = {
     "OFF",
@@ -46,19 +37,21 @@ const uint32_t bip39_strength_value[3] = {
     FlipBipStrength256,
 };
 
+const char* const bip44_coin_text[2] = {
+    "BTC",
+    "ETH",
+};
+const uint32_t bip44_coin_value[2] = {
+    FlipBipCoinBTC0,
+    FlipBipCoinETH60,
+};
+
 static void flipbip_scene_settings_set_haptic(VariableItem* item) {
     FlipBip* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, haptic_text[index]);
     app->haptic = haptic_value[index];
 }
-
-// static void flipbip_scene_settings_set_speaker(VariableItem* item) {
-//     FlipBip* app = variable_item_get_context(item);
-//     uint8_t index = variable_item_get_current_value_index(item);
-//     variable_item_set_current_value_text(item, speaker_text[index]);
-//     app->speaker = speaker_value[index];
-// }
 
 static void flipbip_scene_settings_set_led(VariableItem* item) {
     FlipBip* app = variable_item_get_context(item);
@@ -72,6 +65,13 @@ static void flipbip_scene_settings_set_bip39_strength(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, bip39_strength_text[index]);
     app->bip39_strength = bip39_strength_value[index];
+}
+
+static void flipbip_scene_settings_set_bip44_coin(VariableItem* item) {
+    FlipBip* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, bip44_coin_text[index]);
+    app->bip44_coin = bip44_coin_value[index];
 }
 
 void flipbip_scene_settings_submenu_callback(void* context, uint32_t index) {
@@ -95,6 +95,17 @@ void flipbip_scene_settings_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, bip39_strength_text[value_index]);
 
+    // BIP44 Coin
+    item = variable_item_list_add(
+        app->variable_item_list,
+        "BIP44 Coin:",
+        2,
+        flipbip_scene_settings_set_bip44_coin,
+        app);
+    value_index = value_index_uint32(app->bip44_coin, bip44_coin_value, 2);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, bip44_coin_text[value_index]);
+
     // Vibro on/off
     item = variable_item_list_add(
         app->variable_item_list,
@@ -105,17 +116,6 @@ void flipbip_scene_settings_on_enter(void* context) {
     value_index = value_index_uint32(app->haptic, haptic_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, haptic_text[value_index]);
-
-    // // Sound on/off
-    // item = variable_item_list_add(
-    //     app->variable_item_list,
-    //     "Sound:",
-    //     2,
-    //     flipbip_scene_settings_set_speaker,
-    //     app);
-    // value_index = value_index_uint32(app->speaker, speaker_value, 2);
-    // variable_item_set_current_value_index(item, value_index);
-    // variable_item_set_current_value_text(item, speaker_text[value_index]);
 
     // LED Effects on/off
     item = variable_item_list_add(

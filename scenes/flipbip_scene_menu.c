@@ -14,7 +14,12 @@ void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
 void flipbip_scene_menu_on_enter(void* context) {
     FlipBip* app = context;
 
-    submenu_add_item(app->submenu, "Generate wallet", SubmenuIndexScene1, flipbip_scene_menu_submenu_callback, app);
+    if (app->bip44_coin == FlipBipCoinBTC0) { // BTC
+        submenu_add_item(app->submenu, "Generate BTC wallet", SubmenuIndexScene1, flipbip_scene_menu_submenu_callback, app);
+    }
+    if (app->bip44_coin == FlipBipCoinETH60) { // ETH
+        submenu_add_item(app->submenu, "Generate ETH wallet", SubmenuIndexScene1, flipbip_scene_menu_submenu_callback, app);
+    }
     //submenu_add_item(app->submenu, "Scene 2", SubmenuIndexScene2, flipbip_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, flipbip_scene_menu_submenu_callback, app);
 

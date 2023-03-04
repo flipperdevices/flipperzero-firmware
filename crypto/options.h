@@ -63,7 +63,7 @@
 
 // support Ethereum operations
 #ifndef USE_ETHEREUM
-#define USE_ETHEREUM 0
+#define USE_ETHEREUM 1
 #endif
 
 // support NEM operations
@@ -83,7 +83,7 @@
 
 // support Keccak hashing
 #ifndef USE_KECCAK
-#define USE_KECCAK 0
+#define USE_KECCAK 1
 #endif
 
 // add way how to mark confidential data

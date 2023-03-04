@@ -26,6 +26,7 @@ struct FlipBipScene1 {
 typedef struct {
     int page;
     int strength;
+    uint32_t coin;
     CONFIDENTIAL const char* mnemonic;
     CONFIDENTIAL uint8_t seed[64];
     CONFIDENTIAL const HDNode* node;
@@ -133,11 +134,7 @@ static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
     free(seed_working);
 }
 
-static void flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_index) {
-    // Constants for Bitcoin address generation
-    const char addr_version = 0x00;
-    //const char wif_version = 0x80;
-
+static void flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_type, uint32_t addr_index) {
     // buffer for key serialization
     const size_t buflen = 128;
     char buf[128 + 1];
@@ -147,17 +144,36 @@ static void flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_index
 
     hdnode_private_ckd(addr_node, addr_index);
     hdnode_fill_public_key(addr_node);
-    ecdsa_get_address(addr_node->public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
-    
-    char *address = malloc(buflen + 1);
-    strncpy(address, buf, buflen);
-    flipbip_scene_1_draw_generic(address, 12);
-    memzero(address, buflen + 1);
-    free(address);
 
-    //ecdsa_get_wif(addr_node->private_key, wif_version, HASHER_SHA2D, buf, buflen); 
-    //char *wif = malloc(buflen + 1);
-    //strncpy(wif, buf, buflen);
+    if (addr_type == 0) { // BTC
+        // BTC style address
+        const char addr_version = 0x00;
+        //const char wif_version = 0x80;
+        ecdsa_get_address(addr_node->public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
+
+        char *address = malloc(buflen + 1);
+        strncpy(address, buf, buflen);
+        flipbip_scene_1_draw_generic(address, 12);
+        memzero(address, buflen + 1);
+        free(address);
+
+        //ecdsa_get_wif(addr_node->private_key, wif_version, HASHER_SHA2D, buf, buflen); 
+        //char *wif = malloc(buflen + 1);
+        //strncpy(wif, buf, buflen);
+    } else if (addr_type == 60) { // ETH
+        // ETH style address
+        hdnode_get_ethereum_pubkeyhash(addr_node, (uint8_t *)buf);
+        char *address = malloc(42 + 1);
+        memcpy(address, "0x", 2);
+        // Convert the hash to a hex string
+        for (size_t i = 0; i < 20; i++) {
+            //flipbip_itoa(buf[i], address + 2 + (i * 2), 42 + 1, 16);
+            sprintf(address + 2 + (i * 2), "%02x", buf[i]);
+        }
+        flipbip_scene_1_draw_generic(address, 12);
+        memzero(address, 42 + 1);
+        free(address);
+    }
 
     memzero(addr_node, sizeof(HDNode));
     free(addr_node);
@@ -209,20 +225,21 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         flipbip_scene_1_draw_generic(model->xpub_extended, 20);
     } 
     else if (model->page >= 9 && model->page <= 13) {
-        flipbip_scene_1_draw_address(model->node, model->page - 9);
+        flipbip_scene_1_draw_address(model->node, model->coin, model->page - 9);
     }
 
     if (model->page == 0) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 1, 10, "Generating...");
-        canvas_draw_str(canvas, 6, 30, "m/44'/0'/0'/0");
+        canvas_draw_str(canvas, 6, 30, "m/44'/C'/0'/0");
     } else if (model->page >= 9 && model->page <= 13) {
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, "Receive address:");
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 1, 10, "Receive address:");
-
-        canvas_draw_str(canvas, 6, 30, s_disp_text1);
-        canvas_draw_str(canvas, 6, 42, s_disp_text2);
-        canvas_draw_str(canvas, 6, 54, s_disp_text3);
+        canvas_draw_str(canvas, 6, 22, s_disp_text1);
+        canvas_draw_str(canvas, 6, 34, s_disp_text2);
+        canvas_draw_str(canvas, 6, 46, s_disp_text3);
+        canvas_draw_str(canvas, 6, 58, s_disp_text4);
     } 
     else {
         canvas_set_font(canvas, FontSecondary);
@@ -233,13 +250,13 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, s_disp_text5);
         canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, s_disp_text6);
     }
-
     
 }
 
-static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength) {
+static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength, const uint32_t coin) {
     
     model->page = 0;
+    model->coin = coin;
 
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
@@ -255,13 +272,14 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     HDNode *root = malloc(sizeof(HDNode));
     hdnode_from_seed(model->seed, 64, SECP256K1_NAME, root);
 
-    // m/44'/0'/0'/0
-    uint32_t purpose = 44;
-    uint32_t coin = 0; // Bitcoin
-    uint32_t account = 0;
-    uint32_t change = 0;
+    // m/44'/0'/0'/0 or m/44'/60'/0'/0
+    const uint32_t purpose = 44;
+    //const uint32_t coin = 0;  // BTC
+    //const uint32_t coin = 60; // ETH
+    const uint32_t account = 0;
+    const uint32_t change = 0;
     
-    // constants for Bitcoin
+    // constants for BTC / ETH
     const uint32_t version_public = 0x0488b21e;
     const uint32_t version_private = 0x0488ade4;
     // "xprv_magic": 76066276,
@@ -288,11 +306,11 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd_prime(node, purpose); // purpose
     
-    // coin m/44'/0'
+    // coin m/44'/0' or m/44'/60'
     fingerprint = hdnode_fingerprint(node);
-    hdnode_private_ckd_prime(node, coin); // coin
+    hdnode_private_ckd_prime(node, model->coin); // coin
     
-    // account m/44'/0'/0'
+    // account m/44'/0'/0' or m/44'/60'/0'
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd_prime(node, account); // account
     
@@ -306,7 +324,7 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     strncpy(xpub_acc, buf, buflen);
     model->xpub_account = xpub_acc;
     
-    // external/internal (change) m/44'/0'/0'/0
+    // external/internal (change) m/44'/0'/0'/0 or m/44'/60'/0'/0
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd(node, change); // external/internal (change)
     
@@ -391,6 +409,7 @@ void flipbip_scene_1_exit(void* context) {
         {
             model->page = 0;
             model->strength = 0;
+            model->coin = 0;
             for (int i = 0; i < 64; i++) {
                 model->seed[i] = 0;
             }
@@ -419,10 +438,17 @@ void flipbip_scene_1_enter(void* context) {
     FlipBipScene1* instance = (FlipBipScene1*)context;
 
     FlipBip* app = instance->context;
+    
+    // BIP39 Strength setting
     int strength_setting = app->bip39_strength;
-    int strength = 256;
-    if (strength_setting == 0) strength = 128;
-    else if (strength_setting == 1) strength = 192;
+    int strength = 256; // FlipBipStrength256                        // 24 words (256 bit)
+    if (strength_setting == FlipBipStrength128) strength = 128;      // 12 words (128 bit)
+    else if (strength_setting == FlipBipStrength192) strength = 192; // 18 words (192 bit)
+    
+    // BIP44 Coin setting
+    int coin_setting = app->bip44_coin;
+    uint32_t coin = 0; //FlipBipCoinBTC0             // BTC (0)
+    if (coin_setting == FlipBipCoinETH60) coin = 60; // ETH (60)
 
     flipbip_play_happy_bump(app);
     flipbip_led_set_rgb(app, 255, 0, 0);
@@ -431,7 +457,7 @@ void flipbip_scene_1_enter(void* context) {
         instance->view,
         FlipBipScene1Model * model,
         {
-            flipbip_scene_1_model_init(model, strength);
+            flipbip_scene_1_model_init(model, strength, coin);
         },
         true
     );
@@ -446,21 +472,6 @@ FlipBipScene1* flipbip_scene_1_alloc() {
     view_set_input_callback(instance->view, flipbip_scene_1_input);
     view_set_enter_callback(instance->view, flipbip_scene_1_enter);
     view_set_exit_callback(instance->view, flipbip_scene_1_exit);
-
-    // FlipBip* app = instance->context;
-    // int strength_setting = app->bip39_strength;
-    // int strength = 256;
-    // if (strength_setting == 0) strength = 128;
-    // else if (strength_setting == 1) strength = 192;
-
-    // with_view_model(
-    //     instance->view,
-    //     FlipBipScene1Model * model,
-    //     {
-    //         flipbip_scene_1_model_init(model, strength);
-    //     },
-    //     true
-    // );
     
     return instance;
 }
