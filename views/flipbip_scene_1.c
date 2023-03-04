@@ -214,11 +214,11 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
 
     if (model->page == 0) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 1, 10, AlignLeft, AlignTop, "Generating...");
-        canvas_draw_str_aligned(canvas, 6, 24, AlignLeft, AlignTop, "m/44'/0'/0'/0");
+        canvas_draw_str(canvas, 1, 10, "Generating...");
+        canvas_draw_str(canvas, 6, 30, "m/44'/0'/0'/0");
     } else if (model->page >= 9 && model->page <= 13) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 1, 10, "Receive address");
+        canvas_draw_str(canvas, 1, 10, "Receive address:");
 
         canvas_draw_str(canvas, 6, 30, s_disp_text1);
         canvas_draw_str(canvas, 6, 42, s_disp_text2);
