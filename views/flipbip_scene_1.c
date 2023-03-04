@@ -234,7 +234,17 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_draw_str(canvas, 6, 30, "m/44'/C'/0'/0");
     } else if (model->page >= 9 && model->page <= 13) {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, "Receive address:");
+        const char * receive_text;
+        if (model->coin == 0) { // BTC
+            receive_text = "BTC receive address:";
+        }
+        else if (model->coin == 60) { // ETH
+            receive_text = "ETH receive address:";
+        }
+        else {
+            receive_text = "Receive address:";
+        }
+        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, receive_text);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 6, 22, s_disp_text1);
         canvas_draw_str(canvas, 6, 34, s_disp_text2);
