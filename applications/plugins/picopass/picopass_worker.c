@@ -227,7 +227,8 @@ static ReturnCode picopass_auth_dict(
     uint8_t* csn,
     PicopassPacs* pacs,
     uint8_t* div_key,
-    IclassEliteDictType dict_type) {
+    IclassEliteDictType dict_type,
+    bool elite) {
     rfalPicoPassReadCheckRes rcRes;
     rfalPicoPassCheckRes chkRes;
 
@@ -272,7 +273,7 @@ static ReturnCode picopass_auth_dict(
         }
         memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
-        loclass_iclass_calc_div_key(csn, key, div_key, true);
+        loclass_iclass_calc_div_key(csn, key, div_key, elite);
         loclass_opt_doReaderMAC(ccnr, div_key, mac);
 
         err = rfalPicoPassPollerCheck(mac, &chkRes);
@@ -306,22 +307,35 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
         return ERR_NONE;
     }
 
-    FURI_LOG_I(TAG, "Starting user dictionary attack");
+    FURI_LOG_I(TAG, "Starting user dictionary attack [Elite KDF]");
     err = picopass_auth_dict(
         AA1[PICOPASS_CSN_BLOCK_INDEX].data,
         pacs,
         AA1[PICOPASS_KD_BLOCK_INDEX].data,
-        IclassEliteDictTypeUser);
+        IclassEliteDictTypeUser,
+        true);
     if(err == ERR_NONE) {
         return ERR_NONE;
     }
 
-    FURI_LOG_I(TAG, "Starting system dictionary attack");
+    FURI_LOG_I(TAG, "Starting system dictionary attack [Elite KDF]");
     err = picopass_auth_dict(
         AA1[PICOPASS_CSN_BLOCK_INDEX].data,
         pacs,
         AA1[PICOPASS_KD_BLOCK_INDEX].data,
-        IclassEliteDictTypeFlipper);
+        IclassEliteDictTypeFlipper,
+        true);
+    if(err == ERR_NONE) {
+        return ERR_NONE;
+    }
+
+    FURI_LOG_I(TAG, "Starting system dictionary attack [Standard KDF]");
+    err = picopass_auth_dict(
+        AA1[PICOPASS_CSN_BLOCK_INDEX].data,
+        pacs,
+        AA1[PICOPASS_KD_BLOCK_INDEX].data,
+        IclassEliteDictTypeFlipper,
+        false);
     if(err == ERR_NONE) {
         return ERR_NONE;
     }
