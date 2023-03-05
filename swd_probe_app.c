@@ -471,7 +471,10 @@ uint8_t swd_read_memory(AppFSM* const ctx, uint8_t ap, uint32_t address, uint32_
     ret |= swd_read_ap(ctx, ap, MEMAP_DRW, data);
 
     if(ret != 1) {
+        DBG("read from 0x%08lX failed", address);
         swd_abort(ctx);
+    } else {
+        DBG("read 0x%08lX from 0x%08lX", *data, address);
     }
     return ret;
 }
@@ -705,7 +708,9 @@ static void swd_script_log(ScriptContext* ctx, FuriLogLevel level, const char* f
         size_t pos = strlen(buffer);
         vsnprintf(&buffer[pos], sizeof(buffer) - pos - 2, format, argp);
         strcat(buffer, "\n");
-        usb_uart_tx_data(ctx->app->uart, (uint8_t*)buffer, strlen(buffer));
+        if(!usb_uart_tx_data(ctx->app->uart, (uint8_t*)buffer, strlen(buffer))) {
+            DBGS("Sending via USB failed");
+        }
     } else {
         LOG(buffer);
     }
@@ -1815,6 +1820,7 @@ static bool swd_scriptfunc_core_regs(ScriptContext* ctx) {
                     ctx->app, ctx->selected_ap, SCS_DCRSR, SCS_DCRSR_RD | cpu_regs[pos].regsel) ==
                 1;
             succ &= swd_read_memory(ctx->app, ctx->selected_ap, SCS_DCRDR, &core_data) == 1;
+
             if(!succ) {
                 swd_script_log(ctx, FuriLogLevelDefault, "%08s ----------", cpu_regs[pos].desc);
             } else {
@@ -2818,7 +2824,6 @@ static void swd_main_loop(AppFSM* ctx) {
     }
 
     case ModePageDPRegs:
-    case ModePageDPID:
     case ModePageAPID: {
         furi_mutex_acquire(ctx->swd_mutex, FuriWaitForever);
         /* set debug enable request */
@@ -2863,6 +2868,7 @@ static void swd_main_loop(AppFSM* ctx) {
         break;
     }
 
+    case ModePageDPID:
     case ModePageCoresight:
         furi_delay_ms(50);
         break;
