@@ -180,8 +180,10 @@ int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *
 
     //FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
 
-    struct Msb *odd_msbs  = (struct Msb*)calloc(MSB_LIMIT, sizeof(struct Msb));
-    struct Msb *even_msbs = (struct Msb*)calloc(MSB_LIMIT, sizeof(struct Msb));
+    struct Msb *odd_msbs  = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
+    struct Msb *even_msbs = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
+    memset(odd_msbs, 0, MSB_LIMIT * sizeof(struct Msb));
+    memset(even_msbs, 0, MSB_LIMIT * sizeof(struct Msb));
 
     // Odd
     for (semi_state = 1 << 20; semi_state >= 0; semi_state--) {
