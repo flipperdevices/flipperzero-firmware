@@ -48,6 +48,9 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
 
     // Set starting text - for "View Log", this will just be what was already in the text box store
     text_box_set_text(app->text_box, furi_string_get_cstr(app->text_box_store));
+    if(furi_string_empty(app->text_box_store)) {
+        text_box_set_text(app->text_box, "The log is empty! :(\nTry sending a command?");
+    }
 
     scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneConsoleOutput, 0);
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput);
