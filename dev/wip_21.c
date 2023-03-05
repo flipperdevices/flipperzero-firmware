@@ -163,18 +163,56 @@ static inline int state_loop(unsigned int* states_buffer, int xks, int m1, int m
     return states_tail;
 }
 
-static inline int state_loop_even(unsigned int* states_buffer, int xks, int m1, int m2, unsigned int* seen_last_21, int* seen_tail) {
+static inline int state_loop_even(unsigned int* states_buffer, int xks, int m1, int m2, unsigned int* seen_last_21) {
+    int seen_tail = 0;
     int states_tail = 0;
-    int round = 0, s = 0, xks_bit = 0;
+    int round = 0, s = 0, xks_bit = 0, found = 0;
 
     for (round = 1; round <= 15; round++) {
         xks_bit = BIT(xks, round);
+        seen_tail = 0;
 
         for (s = 0; s <= states_tail; s++) {
             states_buffer[s] <<= 1;
+            if (round == 8 || round == 12 || round == 15) {
+                found = 0;
+                int last_21 = states_buffer[s] & 0x1fffff;
+                for (int i=0; i <= (seen_tail); i++) {
+                    if (seen_last_21[i] != last_21) {
+                        continue;
+                    }
+                    found = 1;
+                    states_buffer[s--] = states_buffer[states_tail--];
+                    break;
+                }
+                if (found == 0) {
+                    seen_last_21[seen_tail++] = last_21;
+                    //printf("seen_tail is now %i\n", *seen_tail);
+                } else {
+                    continue;
+                }
+            }
 
             if ((filter(states_buffer[s]) ^ filter(states_buffer[s] | 1)) != 0) {
                 states_buffer[s] |= filter(states_buffer[s]) ^ xks_bit;
+                if (round == 8 || round == 12 || round == 15) {
+                    found = 0;
+                    int last_21 = states_buffer[s] & 0x1fffff;
+                    for (int i=0; i <= (seen_tail); i++) {
+                        if (seen_last_21[i] != last_21) {
+                            continue;
+                        }
+                        found = 1;
+                        states_buffer[s--] = states_buffer[states_tail--];
+                        break;
+                    }
+                    if (found == 0) {
+                       seen_last_21[seen_tail++] = last_21;
+                       //printf("seen_tail is now %i\n", *seen_tail);
+                    } else {
+                       continue;
+                    }
+                }
                 if (round > 4) {
                     update_contribution(states_buffer, s, m1, m2);
                 }
@@ -185,6 +223,24 @@ static inline int state_loop_even(unsigned int* states_buffer, int xks, int m1, 
                     states_buffer[s + 1] = states_buffer[s] | 1;
                     update_contribution(states_buffer, s, m1, m2);
                     s++;
+                    if (round == 8 || round == 12 || round == 15) {
+                        found = 0;
+                        int last_21 = states_buffer[s] & 0x1fffff;
+                        for (int i=0; i <= (seen_tail); i++) {
+                            if (seen_last_21[i] != last_21) {
+                                continue;
+                            }
+                            found = 1;
+                            states_buffer[s--] = states_buffer[states_tail--];
+                            break;
+                        }
+                        if (found == 0) {
+                            seen_last_21[seen_tail++] = last_21;
+                            //printf("seen_tail is now %i\n", *seen_tail);
+                        } else {
+                            continue;
+                        }
+                    }
                     update_contribution(states_buffer, s, m1, m2);
                 } else {
                     states_buffer[++states_tail] = states_buffer[++s];
@@ -192,24 +248,6 @@ static inline int state_loop_even(unsigned int* states_buffer, int xks, int m1, 
                 }
             } else {
                 states_buffer[s--] = states_buffer[states_tail--];
-            }
-        }
-        if (round == 7) {
-            for (s = 0; s <= states_tail; s++) {
-                int found = 0;
-                int last_21 = states_buffer[s] & 0x1fffff;
-                for (int i=0; i <= (*seen_tail); i++) {
-                    if (seen_last_21[i] != last_21) {
-                        continue;
-                    }
-                    found = 1;
-                    states_buffer[s--] = states_buffer[states_tail--];
-                    break;
-                }
-                if (found == 0) {
-                    seen_last_21[(*seen_tail)++] = last_21;
-                    //printf("seen_tail is now %i\n", *seen_tail);
-                }
             }
         }
     }
@@ -268,13 +306,12 @@ int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *
 
     //FURI_LOG_I(TAG, "MSB GE %i", msb_iter); // DEBUG
 
-    unsigned int *seen_last_21 = malloc(sizeof(unsigned int)*(2<<23));
-    int seen_tail = 0;
+    unsigned int *seen_last_21 = malloc(sizeof(unsigned int)*(2<<9));
     // Even
     for (semi_state = 1 << 20; semi_state >= 0; semi_state--) {
         if (filter(semi_state) == (eks & 1)) {
             states_buffer[0] = semi_state;
-            states_tail = state_loop_even(states_buffer, eks, CONST_M1_2, CONST_M2_2, seen_last_21, &seen_tail);
+            states_tail = state_loop_even(states_buffer, eks, CONST_M1_2, CONST_M2_2, seen_last_21);
             //states_tail = state_loop(states_buffer, eks, CONST_M1_2, CONST_M2_2);
 
             for (i = 0; i <= states_tail; i++) {
@@ -300,6 +337,7 @@ int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *
                         temp.even = odd_msbs[msb - msb_head].states[y];
                         temp.odd = states_buffer[i] ^ evenparity32(odd_msbs[msb - msb_head].states[y] & LF_POLY_ODD);
                         if (check_state(&temp, p)) {
+                            printf("Tail was %i\n", even_msbs[msb - msb_head].tail);
                             free(states_buffer);
                             free(odd_msbs);
                             free(even_msbs);
