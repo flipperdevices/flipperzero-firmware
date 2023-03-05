@@ -105,7 +105,31 @@ static inline int filter(uint32_t const x) {
 }
 
 static inline uint8_t evenparity32(uint32_t x) {
-    return (__builtin_parity(x) & 0xFF);
+    static const char table[256] = {
+        0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+        4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
+    };
+
+    int count = table[x & 0xff] +
+                table[(x >> 8) & 0xff] +
+                table[(x >> 16) & 0xff] +
+                table[x >> 24];
+
+    return (count % 2) & 0xFF;
 }
 
 static inline void update_contribution(int data[], int item, int mask1, int mask2) {
@@ -123,43 +147,48 @@ void crypto1_get_lfsr(struct Crypto1State *state, uint64_t *lfsr) {
     }
 }
 
-uint8_t crypt_or_rollback_bit(struct Crypto1State *s, uint32_t in, int x, int is_crypt) {
+uint8_t rollback_bit(struct Crypto1State *s, uint32_t in, int x) {
     uint8_t ret;
     uint32_t feedin, t;
-    if (is_crypt == 0) {
-        s->odd &= 0xffffff;
-        t = s->odd, s->odd = s->even, s->even = t;
-    }
+    s->odd &= 0xffffff;
+    t = s->odd, s->odd = s->even, s->even = t;
     ret = filter(s->odd);
     feedin = ret & (!!x);
-    if (is_crypt == 0) {
-        feedin ^= s->even & 1;
-        feedin ^= LF_POLY_EVEN & (s->even >>= 1);
-    } else {
-        feedin ^= LF_POLY_EVEN & s->even;
-    }
+    feedin ^= s->even & 1;
+    feedin ^= LF_POLY_EVEN & (s->even >>= 1);
     feedin ^= LF_POLY_ODD & s->odd;
     feedin ^= !!in;
-    if (is_crypt == 0) {
-        s->even |= (evenparity32(feedin)) << 23;
-    } else {
-        s->even = s->even << 1 | (evenparity32(feedin));
-        t = s->odd, s->odd = s->even, s->even = t;
+    s->even |= (evenparity32(feedin)) << 23;
+    return ret;
+}
+
+uint8_t crypt_bit(struct Crypto1State *s, uint32_t in, int x) {
+    uint8_t ret;
+    uint32_t feedin, t;
+    ret = filter(s->odd);
+    feedin = ret & (!!x);
+    feedin ^= LF_POLY_EVEN & s->even;
+    feedin ^= LF_POLY_ODD & s->odd;
+    feedin ^= !!in;
+    s->even = s->even << 1 | (evenparity32(feedin));
+    t = s->odd, s->odd = s->even, s->even = t;
+    return ret;
+}
+
+uint32_t crypt_word(struct Crypto1State *s, uint32_t in, int x) {
+    uint32_t ret = 0;
+    int i;
+    for (i = 0; i <= 31; i++) {
+        ret |= crypt_bit(s, BEBIT(in, i), x) << (24 ^ i);
     }
     return ret;
 }
 
-uint32_t crypt_or_rollback_word(struct Crypto1State *s, uint32_t in, int x, int is_crypt) {
+uint32_t rollback_word(struct Crypto1State *s, uint32_t in, int x) {
     uint32_t ret = 0;
     int i;
-    if (is_crypt == 0) {
-        for (i = 31; i >= 0; i--) {
-            ret |= crypt_or_rollback_bit(s, BEBIT(in, i), x, 0) << (24 ^ i);
-        }
-    } else {
-        for (i = 0; i <= 31; i++) {
-            ret |= crypt_or_rollback_bit(s, BEBIT(in, i), x, 1) << (24 ^ i);
-        }
+    for (i = 31; i >= 0; i--) {
+        ret |= rollback_bit(s, BEBIT(in, i), x) << (24 ^ i);
     }
     return ret;
 }
@@ -173,10 +202,10 @@ int key_already_found_for_nonce(uint64_t *keyarray, int keyarray_size, uint32_t 
             (&temp)->even |= (BIT(keyarray[k], 2*i) << (i ^ 3));
         }
 
-        crypt_or_rollback_word(&temp, uid_xor_nt1, 0, 1);
-        crypt_or_rollback_word(&temp, nr1_enc, 1, 1);
+        crypt_word(&temp, uid_xor_nt1, 0);
+        crypt_word(&temp, nr1_enc, 1);
 
-        if (ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
+        if (ar1_enc == (crypt_word(&temp, 0, 0) ^ p64b)) {
             return 1;
         }
     }
@@ -184,27 +213,23 @@ int key_already_found_for_nonce(uint64_t *keyarray, int keyarray_size, uint32_t 
 }
 
 int check_state(struct Crypto1State *t, struct Crypto1Params *p) {
-    uint64_t key = 0;
+    if (!(t->odd | t->even)) return 0;
+    rollback_word(t, 0, 0);
+    rollback_word(t, p->nr0_enc, 1);
+    rollback_word(t, p->uid_xor_nt0, 0);
     struct Crypto1State temp = {0, 0};
-
-    if (t->odd | t->even) {
-        crypt_or_rollback_word(t, 0, 0, 0);
-        crypt_or_rollback_word(t, p->nr0_enc, 1, 0);
-        crypt_or_rollback_word(t, p->uid_xor_nt0, 0, 0);
-        temp.odd = t->odd;
-        temp.even = t->even;
-        crypt_or_rollback_word(t, p->uid_xor_nt1, 0, 1);
-        crypt_or_rollback_word(t, p->nr1_enc, 1, 1);
-        if (p->ar1_enc == (crypt_or_rollback_word(t, 0, 0, 1) ^ p->p64b)) {
-            crypto1_get_lfsr(&temp, &key);
-            p->key = key;
-            return 1;
-        }
+    temp.odd = t->odd;
+    temp.even = t->even;
+    crypt_word(t, p->uid_xor_nt1, 0);
+    crypt_word(t, p->nr1_enc, 1);
+    if (p->ar1_enc == (crypt_word(t, 0, 0) ^ p->p64b)) {
+        crypto1_get_lfsr(&temp, &(p->key));
+        return 1;
     }
     return 0;
 }
 
-static inline int state_loop(int* states_buffer, int xks, int m1, int m2) {
+static inline int state_loop(unsigned int* states_buffer, int xks, int m1, int m2) {
     int states_tail = 0;
     int round = 0, s = 0, xks_bit = 0;
 
@@ -246,18 +271,20 @@ struct Msb {
 };
 
 int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *p) {
-    // TODO: Combine Odd and Even loops
     int msb_head = (MSB_LIMIT * msb_round); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
     int msb_tail = (MSB_LIMIT * (msb_round+1));
-    int *states_buffer = malloc(sizeof(int)*(2<<9));
+    unsigned int *states_buffer = malloc(sizeof(unsigned int)*(2<<9));
     int states_tail = 0;
-    int i = 0, j = 0, y = 0, semi_state = 0, tail = 0, msb = 0, found = 0;
+    int i = 0, j = 0, y = 0, semi_state = 0, tail = 0, found = 0;
+    unsigned int msb = 0;
     struct Crypto1State temp = {0, 0};
 
     //FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
 
-    struct Msb *odd_msbs  = malloc(MSB_LIMIT * sizeof(*odd_msbs));
-    struct Msb *even_msbs = malloc(MSB_LIMIT * sizeof(*even_msbs));
+    struct Msb *odd_msbs  = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
+    struct Msb *even_msbs = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
+    memset(odd_msbs, 0, MSB_LIMIT * sizeof(struct Msb));
+    memset(even_msbs, 0, MSB_LIMIT * sizeof(struct Msb));
 
     // Odd
     for (semi_state = 1 << 20; semi_state >= 0; semi_state--) {
