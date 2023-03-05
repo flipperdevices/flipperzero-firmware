@@ -1,6 +1,8 @@
 #include "view_port_i.h"
 
 #include <furi.h>
+#include <furi_hal.h>
+#include <furi_hal_rtc.h>
 
 #include "gui.h"
 #include "gui_i.h"
@@ -51,6 +53,26 @@ static const InputKey view_port_input_mapping[ViewPortOrientationMAX][InputKeyMA
 // Remaps directional pad buttons on Flipper based on ViewPort orientation
 static void view_port_map_input(InputEvent* event, ViewPortOrientation orientation) {
     furi_assert(orientation < ViewPortOrientationMAX && event->key < InputKeyMAX);
+    if(orientation == ViewPortOrientationHorizontal || orientation == ViewPortOrientationHorizontalFlip) {
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+            switch(event->key) {
+            case InputKeyUp:
+                event->key = InputKeyDown;
+                break;
+            case InputKeyDown:
+                event->key = InputKeyUp;
+                break;
+            case InputKeyLeft:
+                event->key = InputKeyRight;
+                break;
+            case InputKeyRight:
+                event->key = InputKeyLeft;
+                break;
+            default:
+                break;
+            }
+        }
+    }
     event->key = view_port_input_mapping[orientation][event->key];
 }
 
