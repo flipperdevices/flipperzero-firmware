@@ -249,7 +249,7 @@ def validate_app_imports(target, source, env):
     unresolved_syms = app_syms - sdk_cache.get_valid_names()
     if unresolved_syms:
         warning_msg = fg.brightyellow(
-            f"{source[0].path}: app may not run. Symbols not resolved using firmware's API: "
+            f"{source[0].path}: app may not be runnable. Symbols not resolved using firmware's API: "
         ) + fg.brightmagenta(f"{unresolved_syms}")
         disabled_api_syms = unresolved_syms.intersection(sdk_cache.get_disabled_names())
         if disabled_api_syms:
@@ -302,10 +302,10 @@ def resources_fap_dist_emitter(target, source, env):
 
 
 def resources_fap_dist_action(target, source, env):
-    # FIXME
-    target_dir = env.Dir("#/assets/resources/apps")
-
+    # FIXME: find a proper way to remove stale files
+    target_dir = env.Dir("${RESOURCES_ROOT}/apps")
     shutil.rmtree(target_dir.path, ignore_errors=True)
+
     for src, target in zip(source, target):
         os.makedirs(os.path.dirname(target.path), exist_ok=True)
         shutil.copy(src.path, target.path)
@@ -313,9 +313,6 @@ def resources_fap_dist_action(target, source, env):
 
 def embed_app_metadata_emitter(target, source, env):
     app = env["APP"]
-    # print(
-    #     f"app, {app} EMITTER: {list(t.name for t in target)} {list(t.name for t in source)}"
-    # )
     # Hack: change extension for fap libs
     if app.apptype == FlipperAppType.PLUGIN:
         target[0].name = target[0].name.replace(".fap", ".fal")

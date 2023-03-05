@@ -12,7 +12,8 @@ appenv = ENV["APPENV"] = ENV.Clone(
         "fbt_extapps",
         "fbt_assets",
         "fbt_sdk",
-    ]
+    ],
+    RESOURCES_ROOT=ENV.Dir("#/assets/resources"),
 )
 
 appenv.Replace(
@@ -57,7 +58,7 @@ appenv.AppendUnique(
 
 @dataclass
 class FlipperExtAppBuildArtifacts:
-    applications: dict = field(default_factory=dict)
+    application_map: dict = field(default_factory=dict)
     resources_dist: NodeList = field(default_factory=NodeList)
     sdk_tree: NodeList = field(default_factory=NodeList)
 
@@ -86,6 +87,9 @@ for app in known_extapps:
 
     appenv.BuildAppElf(app)
 
+extapps = FlipperExtAppBuildArtifacts()
+extapps.application_map = appenv["EXT_APPS"]
+
 if incompatible_apps:
     warn(
         WarningOnByDefault,
@@ -95,17 +99,16 @@ if incompatible_apps:
 
 if appenv["FORCE"]:
     appenv.AlwaysBuild(
-        list(app_artifact.compact for app_artifact in appenv["EXT_APPS"].values())
+        list(app_artifact.compact for app_artifact in extapps.application_map.values())
     )
 
 
 Alias(
-    "faps", list(app_artifact.validator for app_artifact in appenv["EXT_APPS"].values())
+    "faps",
+    list(app_artifact.validator for app_artifact in extapps.application_map.values()),
 )
 
-extapps = FlipperExtAppBuildArtifacts()
-extapps.applications = appenv["EXT_APPS"]
-extapps.resources_dist = appenv.FapDist(appenv.Dir("#/assets/resources"), [])
+extapps.resources_dist = appenv.FapDist(appenv["RESOURCES_ROOT"], [])
 
 if appsrc := appenv.subst("$APPSRC"):
     app_artifacts = appenv.GetExtAppFromPath(appsrc)
