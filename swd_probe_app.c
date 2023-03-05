@@ -1438,7 +1438,7 @@ static bool swd_scriptfunc_mem_read(ScriptContext* ctx) {
         furi_mutex_release(ctx->app->swd_mutex);
 
         if(!access_ok) {
-            swd_script_log(ctx, FuriLogLevelError, "Failed to read form %08lX", address);
+            swd_script_log(ctx, FuriLogLevelError, "Failed to read from %08lX", address);
             snprintf(
                 ctx->app->state_string,
                 sizeof(ctx->app->state_string),
