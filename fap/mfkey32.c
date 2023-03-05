@@ -132,7 +132,7 @@ static inline uint8_t evenparity32(uint32_t x) {
     return (count % 2) & 0xFF;
 }
 
-static inline void update_contribution(int data[], int item, int mask1, int mask2) {
+static inline void update_contribution(unsigned int data[], int item, int mask1, int mask2) {
     int p = data[item] >> 25;
     p = p << 1 | evenparity32(data[item] & mask1);
     p = p << 1 | evenparity32(data[item] & mask2);
@@ -193,6 +193,40 @@ uint32_t rollback_word(struct Crypto1State *s, uint32_t in, int x) {
     return ret;
 }
 
+void crypt_word_noret(struct Crypto1State *s, uint32_t in, int x) {
+    uint8_t ret;
+    uint32_t feedin, t, next_in;
+    for (int i = 0; i <= 31; i++) {
+        next_in = BEBIT(in, i);
+        ret = filter(s->odd);
+        feedin = ret & (!!x);
+        feedin ^= LF_POLY_EVEN & s->even;
+        feedin ^= LF_POLY_ODD & s->odd;
+        feedin ^= !!next_in;
+        s->even = s->even << 1 | (evenparity32(feedin));
+        t = s->odd, s->odd = s->even, s->even = t;
+    }
+    return;
+}
+void rollback_word_noret(struct Crypto1State *s, uint32_t in, int x) {
+    uint8_t ret;
+    uint32_t feedin, t, next_in;
+    for (int i = 31; i >= 0; i--) {
+        next_in = BEBIT(in, i);
+        s->odd &= 0xffffff;
+        t = s->odd, s->odd = s->even, s->even = t;
+        ret = filter(s->odd);
+        feedin = ret & (!!x);
+        feedin ^= s->even & 1;
+        feedin ^= LF_POLY_EVEN & (s->even >>= 1);
+        feedin ^= LF_POLY_ODD & s->odd;
+        feedin ^= !!next_in;
+        s->even |= (evenparity32(feedin)) << 23;
+
+    }
+    return;
+}
+
 int key_already_found_for_nonce(uint64_t *keyarray, int keyarray_size, uint32_t uid_xor_nt1, uint32_t nr1_enc, uint32_t p64b, uint32_t ar1_enc) {
     for(int k = 0; k < keyarray_size; k++) {
         struct Crypto1State temp = {0, 0};
@@ -202,8 +236,8 @@ int key_already_found_for_nonce(uint64_t *keyarray, int keyarray_size, uint32_t 
             (&temp)->even |= (BIT(keyarray[k], 2*i) << (i ^ 3));
         }
 
-        crypt_word(&temp, uid_xor_nt1, 0);
-        crypt_word(&temp, nr1_enc, 1);
+        crypt_word_noret(&temp, uid_xor_nt1, 0);
+        crypt_word_noret(&temp, nr1_enc, 1);
 
         if (ar1_enc == (crypt_word(&temp, 0, 0) ^ p64b)) {
             return 1;
@@ -214,14 +248,14 @@ int key_already_found_for_nonce(uint64_t *keyarray, int keyarray_size, uint32_t 
 
 int check_state(struct Crypto1State *t, struct Crypto1Params *p) {
     if (!(t->odd | t->even)) return 0;
-    rollback_word(t, 0, 0);
-    rollback_word(t, p->nr0_enc, 1);
-    rollback_word(t, p->uid_xor_nt0, 0);
+    rollback_word_noret(t, 0, 0);
+    rollback_word_noret(t, p->nr0_enc, 1);
+    rollback_word_noret(t, p->uid_xor_nt0, 0);
     struct Crypto1State temp = {0, 0};
     temp.odd = t->odd;
     temp.even = t->even;
-    crypt_word(t, p->uid_xor_nt1, 0);
-    crypt_word(t, p->nr1_enc, 1);
+    crypt_word_noret(t, p->uid_xor_nt1, 0);
+    crypt_word_noret(t, p->nr1_enc, 1);
     if (p->ar1_enc == (crypt_word(t, 0, 0) ^ p->p64b)) {
         crypto1_get_lfsr(&temp, &(p->key));
         return 1;
@@ -267,12 +301,12 @@ static inline int state_loop(unsigned int* states_buffer, int xks, int m1, int m
 
 struct Msb {
     int tail;
-    int states[512];
+    unsigned int states[512];
 };
 
 int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *p) {
-    int msb_head = (MSB_LIMIT * msb_round); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
-    int msb_tail = (MSB_LIMIT * (msb_round+1));
+    unsigned int msb_head = (MSB_LIMIT * msb_round); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
+    unsigned int msb_tail = (MSB_LIMIT * (msb_round+1));
     unsigned int *states_buffer = malloc(sizeof(unsigned int)*(2<<9));
     int states_tail = 0;
     int i = 0, j = 0, y = 0, semi_state = 0, tail = 0, found = 0;
@@ -283,8 +317,7 @@ int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *
 
     struct Msb *odd_msbs  = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
     struct Msb *even_msbs = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
-    memset(odd_msbs, 0, MSB_LIMIT * sizeof(struct Msb));
-    memset(even_msbs, 0, MSB_LIMIT * sizeof(struct Msb));
+    // TODO: memset 0 odd_msbs and even_msbs?
 
     // Odd
     for (semi_state = 1 << 20; semi_state >= 0; semi_state--) {
@@ -582,9 +615,9 @@ bool napi_key_already_found_for_nonce(MfClassicDict* dict, uint32_t uid_xor_nt1,
             (&temp)->odd |= (BIT(k, 2*i+1) << (i ^ 3));
             (&temp)->even |= (BIT(k, 2*i) << (i ^ 3));
         }
-        crypt_or_rollback_word(&temp, uid_xor_nt1, 0, 1);
-        crypt_or_rollback_word(&temp, nr1_enc, 1, 1);
-        if (ar1_enc == (crypt_or_rollback_word(&temp, 0, 0, 1) ^ p64b)) {
+        crypt_word(&temp, uid_xor_nt1, 0);
+        crypt_word(&temp, nr1_enc, 1);
+        if (ar1_enc == (crypt_word(&temp, 0, 0) ^ p64b)) {
             found = true;
             break;
         }
