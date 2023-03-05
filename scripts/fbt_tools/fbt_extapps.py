@@ -25,7 +25,8 @@ class FlipperExternalAppInfo:
     compact: NodeList = field(default_factory=NodeList)
     debug: NodeList = field(default_factory=NodeList)
     validator: NodeList = field(default_factory=NodeList)
-    installer: NodeList = field(default_factory=NodeList)
+    dist_paths: list[str] = field(default_factory=list)
+    resources_paths: list[str] = field(default_factory=list)
 
 
 class AppBuilder:
@@ -159,6 +160,23 @@ class AppBuilder:
 
         app_artifacts.validator = self.app_env.ValidateAppImports(app_artifacts.compact)
 
+        if self.app.apptype == FlipperAppType.PLUGIN:
+            for parent_app_id in self.app.requires:
+                fal_path = (
+                    f"apps_data/{parent_app_id}/plugins/{app_artifacts.compact[0].name}"
+                )
+                app_artifacts.dist_paths.append(fal_path)
+                # If it's a plugin for a non-deployable app, don't include it in the resources
+                if parent_app := self.app._appmanager.get(parent_app_id):
+                    if not parent_app.is_default_deployable:
+                        continue
+                app_artifacts.resources_paths.append(fal_path)
+        else:
+            fap_path = f"apps/{self.app.fap_category}/{app_artifacts.compact[0].name}"
+            app_artifacts.dist_paths.append(fap_path)
+            if self.app.is_default_deployable:
+                app_artifacts.resources_paths.append(fap_path)
+
         self._configure_deps_and_aliases(app_artifacts)
 
         return app_artifacts
@@ -198,11 +216,7 @@ class AppBuilder:
 
 def BuildAppElf(env, app):
     app_builder = AppBuilder(env, app)
-    app_artifacts = app_builder.build()
-    if app.apptype == FlipperAppType.PLUGIN:
-        env["EXT_LIBS"][app.appid] = app_artifacts
-    else:
-        env["EXT_APPS"][app.appid] = app_artifacts
+    env["EXT_APPS"][app.appid] = app_artifacts = app_builder.build()
     return app_artifacts
 
 
@@ -280,31 +294,9 @@ def resources_fap_dist_emitter(target, source, env):
 
     target = []
     for _, app_artifacts in env["EXT_APPS"].items():
-        # We don't deploy example apps & debug tools with SD card resources
-        if not app_artifacts.app.is_default_deployable:
-            continue
-
-        target_dir = resources_root.Dir("apps")
-        source.extend(app_artifacts.compact)
-        target.append(
-            target_dir.Dir(app_artifacts.app.fap_category).File(
-                app_artifacts.compact[0].name
-            )
-        )
-
-    for _, app_artifacts in env["EXT_LIBS"].items():
-        for parent_app_id in app_artifacts.app.requires:
-            if parent_app := app_artifacts.app._appmanager.get(parent_app_id):
-                if not parent_app.is_default_deployable:
-                    continue
-
+        for resources_path in app_artifacts.resources_paths:
             source.extend(app_artifacts.compact)
-            target.append(
-                resources_root.Dir("apps_data")
-                .Dir(parent_app_id)
-                .Dir("plugins")
-                .File(app_artifacts.compact[0].name)
-            )
+            target.append(resources_root.File(resources_path))
 
     return (target, source)
 
