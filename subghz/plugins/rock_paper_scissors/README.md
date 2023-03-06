@@ -17,22 +17,22 @@ Completed work:
 - Show games found & let user pick the game to join.
 - Config - Allow changing game number.
 - Config - Allow changing frequency.
+- Receiving a Join game does an ACK (to cause game on joiner to start).
 
 Remaining work (for subghz version):
 
-- Receiving a Join game should do an ACK (to cause game on joiner to start).
-- Log joined game into SD card.
-- Log game results into SD card.
+- Log game results & contact info onto SD card.
+- Config - Allow changing hard-coded CONTACT_INFO message.
 - Allow viewing past games/scores.
-- Config - Allow changing message on join.
+- A join ACK removes it from the list of available games.
 - Refactor the code, so it has less duplication.
 - Write tutorial.
 - Add game ending animations.
 
 Future ideas:
 
-- Uses Princeton signals for second player.
 - Create stand-alone hardware badges that can play the game too.
+- Uses Princeton signals for second player.
 - Instead of subghz, use IR.
 - Instead of subghz, use GPIO.
 

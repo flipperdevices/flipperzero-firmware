@@ -154,6 +154,7 @@ typedef enum {
 typedef enum {
     GameRfPurposeBeacon = 'B', // Beacon.
     GameRfPurposeJoin = 'J', // Join a game.
+    GameRfPurposeJoinAcknowledge = 'A', // Acknowledge a join request.
     GameRfPurposeMove = 'M', // Player move.
 } GameRfPurpose;
 
@@ -164,6 +165,7 @@ typedef enum {
     GameEventDataDetected,
     GameEventRemoteBeacon,
     GameEventRemoteJoined,
+    GameEventRemoteJoinAcknowledged,
     GameEventLocalMove,
     GameEventRemoteMove,
     GameEventSendMove,
@@ -324,8 +326,12 @@ static void rps_broadcast_beacon(GameContext* game_context);
 // Temporary - the KeyLeft button handler invokes this method.
 // We broadcast - "RPS:" + join"J" + version"A" + game"###" + "NYourNameHere" + " :" + "YourFlip" + "\r\n"
 // @param game_context pointer to a GameContext.
-// @param gameNumber the game to join (from previous beacon).
-static void rps_broadcast_join(GameContext* game_context, unsigned int gameNumber);
+static void rps_broadcast_join(GameContext* game_context);
+
+// Send message that acknowledges Flipper joining a specific game.
+// We broadcast - "RPS:" + joinAck"A" + version"A" + game"###" + " :" + "YourFlip" + "\r\n"
+// @param game_context pointer to a GameContext.
+static void rps_broadcast_join_acknowledge(GameContext* game_context);
 
 // Calculates the elapsed duration (in ticks) since a previous tick.
 // @param tick previous tick obtained from furi_get_tick().

@@ -231,6 +231,21 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
             }
             break;
 
+        case GameRfPurposeJoinAcknowledge:
+            if(sscanf(
+                   (const char*)message + game_name_len + 2,
+                   "%03u :%8s",
+                   &game_number,
+                   sender_name) == 2) {
+                FURI_LOG_T(TAG, "Join acknowledge for game %d.", game_number);
+                GameEvent event = {
+                    .type = GameEventRemoteJoinAcknowledged, .game_number = game_number};
+                furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
+            } else {
+                FURI_LOG_W(TAG, "Failed to parse join acknowledge message. >%s<", message);
+            }
+            break;
+
         default:
             if(version <= MAJOR_VERSION) {
                 // The version is same or less than ours, so we should know about the message purpose.
@@ -705,12 +720,12 @@ static void rps_broadcast_beacon(GameContext* game_context) {
     rps_broadcast(game_context, data->buffer);
 }
 
-// Temporary - the KeyLeft button handler invokes this method.
+// Send message that indicates Flipper is joining a specific game.
 // We broadcast - "RPS:" + join"J" + version"A" + game"###" + "NYourNameHere" + " :" + "YourFlip" + "\r\n"
 // @param game_context pointer to a GameContext.
-// @param gameNumber the game to join (from previous beacon).
-static void rps_broadcast_join(GameContext* game_context, unsigned int gameNumber) {
+static void rps_broadcast_join(GameContext* game_context) {
     GameData* data = game_context->data;
+    unsigned int gameNumber = data->game_number;
     FURI_LOG_I(TAG, "Joining game %d.", gameNumber);
 
     // The message for game 42 should look like...  "RPS:JA042NYourNameHere :YourFlip\r\n"
@@ -722,6 +737,26 @@ static void rps_broadcast_join(GameContext* game_context, unsigned int gameNumbe
         MAJOR_VERSION,
         data->game_number,
         CONTACT_INFO,
+        furi_hal_version_get_name_ptr());
+    rps_broadcast(game_context, data->buffer);
+}
+
+// Send message that acknowledges Flipper joining a specific game.
+// We broadcast - "RPS:" + joinAck"A" + version"A" + game"###" + " :" + "YourFlip" + "\r\n"
+// @param game_context pointer to a GameContext.
+static void rps_broadcast_join_acknowledge(GameContext* game_context) {
+    GameData* data = game_context->data;
+    unsigned int gameNumber = data->game_number;
+    FURI_LOG_I(TAG, "Acknowledge joining game %d.", gameNumber);
+
+    // The message for game 42 should look like...  "RPS:AA042 :YourFlip\r\n"
+    furi_string_printf(
+        data->buffer,
+        "%s%c%c%03u :%s\r\n",
+        RPS_GAME_NAME,
+        GameRfPurposeJoinAcknowledge,
+        MAJOR_VERSION,
+        data->game_number,
         furi_hal_version_get_name_ptr());
     rps_broadcast(game_context, data->buffer);
 }
@@ -1274,7 +1309,6 @@ int32_t rock_paper_scissors_app(void* p) {
                 } else if(
                     game_context->data->screen_state == ScreenJoinGame &&
                     event.input.type == InputTypeShort) {
-                    unsigned int joinGameNumber;
                     GameInfo* game;
                     GameEvent newEvent = {
                         .type = GameEventLocalMove, .tick = furi_get_tick(), .move = MoveUnknown};
@@ -1298,20 +1332,11 @@ int32_t rock_paper_scissors_app(void* p) {
                         if(update_frequency(game_context) && game) {
                             // We send "Join" when OK button clicked.
 
-                            joinGameNumber = game->game_number;
+                            game_context->data->game_number = game->game_number;
                             if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) ==
                                FuriStatusOk) {
                                 game_context->data->local_player = StateHostingLookingForPlayer;
-                                rps_broadcast_join(game_context, joinGameNumber);
-
-                                // TODO: This is a hack to get the game started. It would
-                                // be better to wait for the remote player to accept our join.
-                                game_context->data->remote_player = StateReady;
-                                game_context->data->remote_move_tick = furi_get_tick();
-                                game_context->data->local_player = StateReady;
-                                game_context->data->local_move_tick = furi_get_tick();
-                                game_context->data->screen_state = ScreenPlayingGame;
-
+                                rps_broadcast_join(game_context);
                                 furi_mutex_release(game_context->mutex);
                             } else {
                                 FURI_LOG_E(TAG, "Failed to aquire mutex.");
@@ -1493,10 +1518,31 @@ int32_t rock_paper_scissors_app(void* p) {
                 if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) == FuriStatusOk) {
                     if(event.game_number == game_context->data->game_number) {
                         rps_state_machine_remote_joined(game_context);
+                        rps_broadcast_join_acknowledge(game_context);
                     } else {
                         FURI_LOG_T(
                             TAG,
                             "Remote joining another Flipper on game %03u.",
+                            event.game_number);
+                    }
+                    furi_mutex_release(game_context->mutex);
+                } else {
+                    FURI_LOG_E(TAG, "Failed to aquire mutex.");
+                }
+                break;
+            case GameEventRemoteJoinAcknowledged:
+                if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) == FuriStatusOk) {
+                    if(event.game_number == game_context->data->game_number) {
+                        FURI_LOG_I(TAG, "Remote join acknowledged.");
+                        game_context->data->remote_player = StateReady;
+                        game_context->data->remote_move_tick = furi_get_tick();
+                        game_context->data->local_player = StateReady;
+                        game_context->data->local_move_tick = furi_get_tick();
+                        game_context->data->screen_state = ScreenPlayingGame;
+                    } else {
+                        FURI_LOG_T(
+                            TAG,
+                            "Remote join acknowledge another Flipper on game %03u.",
                             event.game_number);
                     }
                     furi_mutex_release(game_context->mutex);
