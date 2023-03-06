@@ -147,15 +147,14 @@ void crypto1_get_lfsr(struct Crypto1State *state, uint64_t *lfsr) {
     }
 }
 
-uint32_t crypt_word(struct Crypto1State *s) {   
+uint32_t crypt_word(struct Crypto1State *s) {
     // "in" and "x" are always 0 (last iteration)
     uint32_t res_ret = 0;
     uint8_t ret;
     uint32_t feedin, t;
     for (int i = 0; i <= 31; i++) {
         ret = filter(s->odd);
-        feedin = 0;
-        feedin ^= LF_POLY_EVEN & s->even;
+        feedin = LF_POLY_EVEN & s->even;
         feedin ^= LF_POLY_ODD & s->odd;
         s->even = s->even << 1 | (evenparity32(feedin));
         t = s->odd, s->odd = s->even, s->even = t;
