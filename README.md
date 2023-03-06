@@ -18,7 +18,8 @@ All cracked nonces are automatically added to the top of your user dictionary, a
 This was the only function of the Flipper Zero that was [thought to be impossible on the hardware](https://old.reddit.com/r/flipperzero/comments/is31re/comment/g72077x/). You can still use other methods if you prefer them.
 
 ## Builds
-TBA
+Published: TBA
+Manual: Refer to the build flags necessary in mfkey32.c
 
 ## Misc Stats
 1. RAM used: **90 KB**, RAM free: 50 KB (original was ~53,000 KB, 99.9% RAM usage eliminated)
@@ -33,7 +34,7 @@ TBA
 
 Writeup: Coming soon
 
-## Remaining TODO
+## TODO
 1. Use threads in FAP to update the screen with the cracking progress
 2. Add the cracked keys back to the (top of the) Flipper user dict
 
