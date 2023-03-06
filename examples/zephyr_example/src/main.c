@@ -75,7 +75,7 @@ void main(void)
 		flash_binary(bin.app.data,  bin.app.size,  bin.app.addr);
 	}
 
-	loader_port_change_baudrate(DEFAULT_BAUDRATE);
+	loader_port_change_transmission_rate(DEFAULT_BAUDRATE);
 
 	loader_port_reset_target();
 }

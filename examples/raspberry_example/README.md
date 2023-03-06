@@ -12,7 +12,7 @@ Following steps are performed in order to re-program target's memory:
 4. `esp_loader_flash_write()` function is called repeatedly until the whole binary image is transfered.
 5. At the end, `loader_port_reset_target()` is called to restart ESP32 and execute updated firmware.
 
-Note: In addition, to steps mentioned above, `esp_loader_change_baudrate`  is called after connection is established in order to increase flashing speed. Bootloader is also capable of detecting baud rate during connection phase, and can be changed before calling `esp_loader_connect`. However, it is recommended to start at lower speed and then use dedicated command to increase baud rate. This does not apply for ESP8266, as its bootloader does not support this command, therefore, baud rate can only be changed before connection phase in this case.
+Note: In addition, to steps mentioned above, `esp_loader_change_transmission_rate`  is called after connection is established in order to increase flashing speed. Bootloader is also capable of detecting baud rate during connection phase, and can be changed before calling `esp_loader_connect`. However, it is recommended to start at lower speed and then use dedicated command to increase baud rate. This does not apply for ESP8266, as its bootloader does not support this command, therefore, baud rate can only be changed before connection phase in this case.
 
 ## Hardware Required
 

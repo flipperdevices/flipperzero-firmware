@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "serial_io.h"
-#include "serial_comm.h"
+#include "esp_loader_io.h"
+#include "protocol.h"
 #include <pigpio.h>
 #include "raspberry_port.h"
 
@@ -169,7 +169,7 @@ static esp_loader_error_t change_baudrate(int file_desc, int baudrate)
 
     tcsetattr (file_desc, TCSANOW, &options);
 
-    return ESP_LOADER_SUCCESS; 
+    return ESP_LOADER_SUCCESS;
 }
 
 static void set_timeout(uint32_t timeout)
@@ -231,7 +231,7 @@ esp_loader_error_t loader_port_raspberry_init(const loader_raspberry_config_t *c
 }
 
 
-esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
     serial_debug_print(data, size, true);
 
@@ -247,7 +247,7 @@ esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, 
 }
 
 
-esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeout)
 {
     RETURN_ON_ERROR( read_data(data, size) );
 
@@ -299,7 +299,7 @@ void loader_port_debug_print(const char *str)
     printf("DEBUG: %s\n", str);
 }
 
-esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate)
+esp_loader_error_t loader_port_change_transmission_rate(uint32_t baudrate)
 {
     return change_baudrate(serial, baudrate);
 }

@@ -1,4 +1,4 @@
-/* Copyright 2018 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2018-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 #include <algorithm>
 #include <iostream>
 #include <stdio.h>
-#include "serial_io.h"
+#include "esp_loader_io.h"
 #include "serial_io_mock.h"
 
 using namespace std;
@@ -30,24 +30,24 @@ static uint32_t receive_delay = 0;
 static int32_t timer = 0;
 
 
-esp_loader_error_t loader_port_serial_init(const loader_serial_config_t *config)
+esp_loader_error_t loader_port_mock_init(const loader_serial_config_t *config)
 {
     return ESP_LOADER_SUCCESS;
 }
 
-void loader_port_serial_deinit()
+void loader_port_mock_deinit()
 {
 
 }
 
-esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
     copy(&data[0], &data[size], back_inserter(write_buffer));
 
     return ESP_LOADER_SUCCESS;
 }
 
-esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeout)
 {
     if (read_buffer.size() < size) {
         return ESP_LOADER_ERROR_TIMEOUT;
@@ -55,7 +55,7 @@ esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_
 
     if (receive_delay != 0 && timeout != 0) {
         if (receive_delay > timeout) {
-            receive_delay -= timeout;    
+            receive_delay -= timeout;
             return ESP_LOADER_ERROR_TIMEOUT;
         }
         receive_delay = 0;

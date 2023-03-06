@@ -1,4 +1,4 @@
-/* Copyright 2018 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2018-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 #define CATCH_CONFIG_RUNNER
 
 #include "catch.hpp"
-#include "serial_io.h"
+#include "esp_loader_io.h"
 #include "serial_io_mock.h"
 
 
 int main( int argc, char* argv[] ) {
-    
+
     const loader_serial_config_t dummy_config = { 0 };
 
     // global setup...
-    if( loader_port_serial_init(&dummy_config) != ESP_LOADER_SUCCESS ) {
+    if( loader_port_mock_init(&dummy_config) != ESP_LOADER_SUCCESS ) {
         std::cout << "Serial initialization failed";
         return 0;
     }
@@ -34,7 +34,7 @@ int main( int argc, char* argv[] ) {
     int result = Catch::Session().run( argc, argv );
 
     // global clean-up...
-    loader_port_serial_deinit();
+    loader_port_mock_deinit();
 
     return result;
 }

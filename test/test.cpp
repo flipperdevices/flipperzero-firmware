@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  */
 
 #include "catch.hpp"
-#include "serial_comm.h"
-#include "serial_comm_prv.h"
+#include "protocol.h"
 #include "serial_io_mock.h"
 #include "esp_loader.h"
-#include "serial_io.h"
+#include "esp_loader_io.h"
 #include <string.h>
 #include <stdio.h>
 #include <array>
@@ -361,18 +360,18 @@ TEST_CASE( "Serial read works correctly" )
     set_read_buffer(&reg_value, sizeof(reg_value));
 
     SECTION( "Read buffer can be read" ) {
-        loader_port_serial_read(readout, sizeof(readout), 0);
+        loader_port_read(readout, sizeof(readout), 0);
         REQUIRE( memcmp(readout, expected, sizeof(readout)) == 0 );
     }
 
     SECTION ( "Read buffer can be read in smaller chunks" ) {
-        loader_port_serial_read(&readout[0], 3, 0);
-        loader_port_serial_read(&readout[3], 3, 0);
+        loader_port_read(&readout[0], 3, 0);
+        loader_port_read(&readout[3], 3, 0);
         REQUIRE( memcmp(readout, expected, sizeof(readout)) == 0 );
     }
 
     SECTION ( "Timeout is returned when requested amount of data is not available" ) {
-        REQUIRE( loader_port_serial_read(readout, sizeof(readout) + 1, 0) == ESP_LOADER_ERROR_TIMEOUT);
+        REQUIRE( loader_port_read(readout, sizeof(readout) + 1, 0) == ESP_LOADER_ERROR_TIMEOUT);
     }
 
     SECTION ( "Read buffer is correctly SLIP encoded " ) {
@@ -384,7 +383,7 @@ TEST_CASE( "Serial read works correctly" )
 
         fill(encoded, &encoded[sizeof(encoded)], 0);
         set_read_buffer(data_to_encode, sizeof(data_to_encode));
-        loader_port_serial_read(encoded, sizeof(encoded), 0);
+        loader_port_read(encoded, sizeof(encoded), 0);
 
         REQUIRE( memcmp(expected, encoded, sizeof(expected)) == 0 );
     }

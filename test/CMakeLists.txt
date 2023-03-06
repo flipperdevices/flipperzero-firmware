@@ -3,10 +3,11 @@ project(serial_flasher_test)
 
 add_executable( ${PROJECT_NAME}
 	test_main.cpp
-	../src/serial_comm.c
 	../src/esp_loader.c
+	../src/esp_targets.c
 	../src/md5_hash.c
-	../src/esp_targets.c )
+	../src/protocol.c
+	../src/slip.c)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../include ../private_include ../test ../port)
 

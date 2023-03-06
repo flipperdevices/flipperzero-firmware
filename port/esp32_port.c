@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ void loader_port_esp32_deinit(void)
 }
 
 
-esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
     serial_debug_print(data, size, true);
 
@@ -132,7 +132,7 @@ esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, 
 }
 
 
-esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout)
+esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeout)
 {
     int read = uart_read_bytes(s_uart_port, data, size, pdMS_TO_TICKS(timeout));
 
@@ -191,7 +191,7 @@ void loader_port_debug_print(const char *str)
     printf("DEBUG: %s\n", str);
 }
 
-esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate)
+esp_loader_error_t loader_port_change_transmission_rate(uint32_t baudrate)
 {
     esp_err_t err = uart_set_baudrate(s_uart_port, baudrate);
     return (err == ESP_OK) ? ESP_LOADER_SUCCESS : ESP_LOADER_ERROR_FAIL;

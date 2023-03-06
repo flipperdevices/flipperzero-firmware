@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Used for backwards compatibility with the previous API */
+#define esp_loader_change_baudrate esp_loader_change_transmission_rate
 
 /**
  * Macro which can be used to check the error code,
@@ -108,7 +111,7 @@ esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args);
 /**
   * @brief   Returns attached target chip.
   *
-  * @warning This function can only be called after connection with target 
+  * @warning This function can only be called after connection with target
   *          has been successfully established by calling esp_loader_connect().
   *
   * @return  One of target_chip_t
@@ -245,7 +248,7 @@ esp_loader_error_t esp_loader_read_register(uint32_t address, uint32_t *reg_valu
   * @note  Baud rate has to be also adjusted accordingly on host MCU, as
   *        target's baud rate is changed upon return from this function.
   *
-  * @param baudrate[in]     new baud rate to be set.
+  * @param transmission_rate[in]     new baud rate to be set.
   *
   * @return
   *     - ESP_LOADER_SUCCESS Success
@@ -253,7 +256,7 @@ esp_loader_error_t esp_loader_read_register(uint32_t address, uint32_t *reg_valu
   *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
   *     - ESP_LOADER_ERROR_UNSUPPORTED_FUNC Unsupported on the target
   */
-esp_loader_error_t esp_loader_change_baudrate(uint32_t baudrate);
+esp_loader_error_t esp_loader_change_transmission_rate(uint32_t transmission_rate);
 
 /**
   * @brief Verify target's flash integrity by checking MD5.

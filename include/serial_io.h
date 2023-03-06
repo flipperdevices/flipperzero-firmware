@@ -1,4 +1,4 @@
-/* Copyright 2020 Espressif Systems (Shanghai) PTE LTD
+/* Copyright 2020-2023 Espressif Systems (Shanghai) CO LTD
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,93 +13,12 @@
  * limitations under the License.
  */
 
- #pragma once
+#warning Please replace serial_io.h with esp_loader_io.h and change the function names \
+         to match the new API
 
-#include <stdint.h>
-#include "esp_loader.h"
+/* Defines used to avoid breaking existing ports */
+#define loader_port_change_baudrate loader_port_change_transmission_rate
+#define loader_port_serial_write loader_port_write
+#define loader_port_serial_read loader_port_read
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/**
-  * @brief Changes baud rate of serial peripheral.
-  */
-esp_loader_error_t loader_port_change_baudrate(uint32_t baudrate);
-
-/**
-  * @brief Writes data to serial interface.
-  *
-  * @param data[in]     Buffer with data to be written.
-  * @param size[in]     Size of data in bytes.
-  * @param timeout[in]  Timeout in milliseconds.
-  *
-  * @return
-  *     - ESP_LOADER_SUCCESS Success
-  *     - ESP_LOADER_ERROR_TIMEOUT Timeout elapsed
-  */
-esp_loader_error_t loader_port_serial_write(const uint8_t *data, uint16_t size, uint32_t timeout);
-
-/**
-  * @brief Reads data from serial interface.
-  *
-  * @param data[out]    Buffer into which received data will be written.
-  * @param size[in]     Number of bytes to read.
-  * @param timeout[in]  Timeout in milliseconds.
-  *
-  * @return
-  *     - ESP_LOADER_SUCCESS Success
-  *     - ESP_LOADER_ERROR_TIMEOUT Timeout elapsed
-  */
-esp_loader_error_t loader_port_serial_read(uint8_t *data, uint16_t size, uint32_t timeout);
-
-/**
-  * @brief Delay in milliseconds.
-  *
-  * @param ms[in]   Number of milliseconds.
-  *
-  */
-void loader_port_delay_ms(uint32_t ms);
-
-/**
-  * @brief Starts timeout timer.
-  *
-  * @param ms[in]   Number of milliseconds.
-  *
-  */
-void loader_port_start_timer(uint32_t ms);
-
-/**
-  * @brief Returns remaining time since timer was started by calling esp_loader_start_timer.
-  *        0 if timer has elapsed.
-  *
-  * @return   Number of milliseconds.
-  *
-  */
-uint32_t loader_port_remaining_time(void);
-
-/**
-  * @brief Asserts bootstrap pins to enter boot mode and toggles reset pin.
-  *
-  * @note  Reset pin should stay asserted for at least 20 milliseconds.
-  */
-void loader_port_enter_bootloader(void);
-
-/**
-  * @brief Toggles reset pin.
-  *
-  * @note  Reset pin should stay asserted for at least 20 milliseconds.
-  */
-void loader_port_reset_target(void);
-
-/**
-  * @brief Function can be defined by user to print debug message.
-  *
-  * @note  Empty weak function is used, otherwise.
-  *
-  */
-void loader_port_debug_print(const char *str);
-
-#ifdef __cplusplus
-}
-#endif
+#include "esp_loader_io.h"
