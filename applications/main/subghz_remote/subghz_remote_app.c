@@ -23,7 +23,7 @@
 #include <lib/subghz/protocols/nice_flor_s.h>
 #include <lib/subghz/protocols/somfy_telis.h>
 
-#define SUBREMOTEMAP_FOLDER "/ext/subghz_remote"
+#define SUBREMOTEMAP_FOLDER "/ext/subghz/subghz_remote"
 #define SUBREMOTEMAP_EXTENSION ".txt"
 
 #define TAG "SubGHzRemote"
@@ -812,8 +812,11 @@ int32_t subghz_remote_app(void* p) {
     app->file_result = 3;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("subghz/unirf"), SUBREMOTEMAP_FOLDER);
+    if(!storage_simply_mkdir(storage, SUBREMOTEMAP_FOLDER)) {
+        FURI_LOG_E(TAG, "Could not create folder %s", SUBREMOTEMAP_FOLDER);
+    }
     storage_common_migrate(storage, EXT_PATH("unirf"), SUBREMOTEMAP_FOLDER);
-
     if(!storage_simply_mkdir(storage, SUBREMOTEMAP_FOLDER)) {
         FURI_LOG_E(TAG, "Could not create folder %s", SUBREMOTEMAP_FOLDER);
     }
