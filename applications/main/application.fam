@@ -23,7 +23,7 @@ App(
         "fap_loader",
         "archive",
         # "Clock",
-        "unirfremix",
+        "SubGHz_Remote",
         # "SubGHz_Remote_loader",
         # "Spectrum_Analyzer",
     ],

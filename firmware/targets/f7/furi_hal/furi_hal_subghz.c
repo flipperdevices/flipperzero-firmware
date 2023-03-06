@@ -23,6 +23,7 @@
 
 static uint32_t furi_hal_subghz_debug_gpio_buff[2];
 static bool last_OTG_state = false;
+static bool ext_power_is_enabled_already = false;
 
 /* DMA Channels definition */
 #define SUBGHZ_DMA DMA2
@@ -81,12 +82,16 @@ void furi_hal_subghz_init(void) {
 }
 
 void furi_hal_subghz_enable_ext_power(void) {
+    if(ext_power_is_enabled_already && furi_hal_power_is_otg_enabled()) return;
+    ext_power_is_enabled_already = true;
+    last_OTG_state = furi_hal_power_is_otg_enabled();
     if(furi_hal_subghz.radio_type != SubGhzRadioInternal && !furi_hal_power_is_otg_enabled()) {
         furi_hal_power_enable_otg();
     }
 }
 
 void furi_hal_subghz_disable_ext_power(void) {
+    ext_power_is_enabled_already = false;
     if(furi_hal_subghz.radio_type != SubGhzRadioInternal && !last_OTG_state) {
         furi_hal_power_disable_otg();
     }
@@ -98,6 +103,7 @@ bool furi_hal_subghz_check_radio(void) {
     furi_hal_subghz_enable_ext_power();
 
     furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
+
     uint8_t ver = cc1101_get_version(furi_hal_subghz.spi_bus_handle);
     furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);
 
@@ -105,9 +111,10 @@ bool furi_hal_subghz_check_radio(void) {
         FURI_LOG_D(TAG, "Radio check ok");
     } else {
         FURI_LOG_D(TAG, "Radio check failed");
-        furi_hal_subghz_disable_ext_power();
+
         result = false;
     }
+    furi_hal_subghz_disable_ext_power();
     return result;
 }
 
@@ -118,7 +125,6 @@ bool furi_hal_subghz_init_check(void) {
     furi_hal_subghz.state = SubGhzStateIdle;
     furi_hal_subghz.preset = FuriHalSubGhzPresetIDLE;
 
-    last_OTG_state = furi_hal_power_is_otg_enabled();
     furi_hal_subghz_enable_ext_power();
     furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
 
@@ -170,8 +176,8 @@ bool furi_hal_subghz_init_check(void) {
         FURI_LOG_I(TAG, "Init OK");
     } else {
         FURI_LOG_E(TAG, "Failed to initialization");
-        furi_hal_subghz_disable_ext_power();
     }
+    furi_hal_subghz_disable_ext_power();
     return result;
 }
 
@@ -347,6 +353,7 @@ void furi_hal_subghz_reset() {
 }
 
 void furi_hal_subghz_idle() {
+    furi_hal_subghz_enable_ext_power();
     furi_hal_spi_acquire(furi_hal_subghz.spi_bus_handle);
     cc1101_switch_to_idle(furi_hal_subghz.spi_bus_handle);
     furi_hal_spi_release(furi_hal_subghz.spi_bus_handle);

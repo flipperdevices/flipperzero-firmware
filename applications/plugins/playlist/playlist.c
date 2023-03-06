@@ -674,6 +674,9 @@ int32_t playlist_app(void* p) {
     Playlist* app = playlist_alloc(meta);
     meta->view_port = app->view_port;
 
+    // Enable power for External CC1101 if it is connected
+    furi_hal_subghz_enable_ext_power();
+
     furi_hal_power_suppress_charge_enter();
 
     // select playlist file
@@ -754,6 +757,8 @@ int32_t playlist_app(void* p) {
 exit_cleanup:
 
     furi_hal_power_suppress_charge_exit();
+    // Disable power for External CC1101 if it was enabled and module is connected
+    furi_hal_subghz_disable_ext_power();
 
     if(app->worker != NULL) {
         if(playlist_worker_running(app->worker)) {
