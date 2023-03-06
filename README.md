@@ -19,6 +19,7 @@ This was the only function of the Flipper Zero that was [thought to be impossibl
 
 ## Builds
 Published: TBA
+
 Manual: Refer to the build flags necessary in mfkey32.c
 
 ## Misc Stats
