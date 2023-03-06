@@ -1,8 +1,12 @@
 #include "application_assets.h"
 #include <toolbox/path.h>
+#include <storage/storage_i.h>
 
 #define FLIPPER_APPLICATION_ASSETS_MAGIC 0x4F4C5A44
 #define FLIPPER_APPLICATION_ASSETS_VERSION 0x00000001
+#define FLIPPER_APPLICATION_ASSETS_SIGNATURE_FILENAME ".assets.signature"
+
+#define BUFFER_SIZE 512
 
 #define TAG "fap_assets"
 
@@ -17,11 +21,248 @@ typedef struct {
 
 #pragma pack(pop)
 
+static bool flipper_application_assets_copy_data(File* source, File* destination, uint32_t size) {
+    uint8_t* buffer = malloc(BUFFER_SIZE);
+
+    while(size) {
+        uint32_t read_size = size > BUFFER_SIZE ? BUFFER_SIZE : size;
+        if(storage_file_read(source, buffer, read_size) != read_size) {
+            free(buffer);
+            return false;
+        }
+
+        if(storage_file_write(destination, buffer, read_size) != read_size) {
+            free(buffer);
+            return false;
+        }
+
+        size -= read_size;
+    }
+
+    free(buffer);
+    return true;
+}
+
+static uint8_t* flipper_application_assets_alloc_and_load_data(File* file, size_t* size) {
+    uint8_t* data = NULL;
+    uint32_t length = 0;
+
+    // read data length
+    if(storage_file_read(file, &length, sizeof(length)) != sizeof(length)) {
+        return NULL;
+    }
+
+    data = malloc(length);
+
+    // read data
+    if(storage_file_read(file, (void*)data, length) != length) {
+        free((void*)data);
+        return NULL;
+    }
+
+    if(size != NULL) {
+        *size = length;
+    }
+
+    return data;
+}
+
+static bool flipper_application_assets_process_files(
+    Storage* storage,
+    File* file,
+    FuriString* app_name,
+    uint32_t files_count) {
+    UNUSED(storage);
+
+    uint32_t length = 0;
+    char* path = NULL;
+    FuriString* file_path = furi_string_alloc();
+    File* destination = storage_file_alloc(storage);
+
+    FuriString* full_path = furi_string_alloc_set(APPS_ASSETS_PATH "/");
+    furi_string_cat(full_path, app_name);
+
+    for(uint32_t i = 0; i < files_count; i++) {
+        path = (char*)flipper_application_assets_alloc_and_load_data(file, NULL);
+
+        if(path == NULL) {
+            break;
+        }
+
+        // read file size
+        if(storage_file_read(file, &length, sizeof(length)) != sizeof(length)) {
+            break;
+        }
+
+        furi_string_set(file_path, full_path);
+        furi_string_cat(file_path, "/");
+        furi_string_cat(file_path, path);
+
+        if(!storage_file_open(
+               destination, furi_string_get_cstr(file_path), FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            FURI_LOG_E(TAG, "Can't create file: %s", furi_string_get_cstr(file_path));
+            break;
+        }
+
+        // copy data to file
+        if(!flipper_application_assets_copy_data(file, destination, length)) {
+            FURI_LOG_E(TAG, "Can't copy data to file: %s", furi_string_get_cstr(file_path));
+            break;
+        }
+
+        storage_file_close(destination);
+
+        free(path);
+        path = NULL;
+    }
+
+    if(path != NULL) {
+        free(path);
+    }
+
+    storage_file_free(destination);
+    furi_string_free(file_path);
+
+    return true;
+}
+
+static bool flipper_application_assets_process_dirs(
+    Storage* storage,
+    File* file,
+    FuriString* app_name,
+    uint32_t dirs_count) {
+    bool error = false;
+    FuriString* full_path = furi_string_alloc_set(APPS_ASSETS_PATH);
+
+    if(!storage_simply_mkdir(storage, furi_string_get_cstr(full_path))) {
+        error = true;
+    }
+
+    furi_string_cat(full_path, "/");
+    furi_string_cat(full_path, app_name);
+    if(!storage_simply_mkdir(storage, furi_string_get_cstr(full_path))) {
+        error = true;
+    }
+
+    if(!error) {
+        FuriString* dir_path = furi_string_alloc();
+        char* path = NULL;
+
+        for(uint32_t i = 0; i < dirs_count; i++) {
+            path = (char*)flipper_application_assets_alloc_and_load_data(file, NULL);
+
+            if(path == NULL) {
+                break;
+            }
+
+            furi_string_set(dir_path, full_path);
+            furi_string_cat(dir_path, "/");
+            furi_string_cat(dir_path, path);
+
+            if(!storage_simply_mkdir(storage, furi_string_get_cstr(dir_path))) {
+                FURI_LOG_E(TAG, "Can't create directory: %s", furi_string_get_cstr(dir_path));
+                error = true;
+                break;
+            }
+
+            free(path);
+            path = NULL;
+        }
+
+        if(path != NULL) {
+            free(path);
+        }
+
+        furi_string_free(dir_path);
+    }
+
+    furi_string_free(full_path);
+
+    return !error;
+}
+
+typedef enum {
+    AssetsSignatureResultEqual,
+    AssetsSignatureResultNotEqual,
+    AssetsSignatureResultError,
+} AssetsSignatureResult;
+
+static FuriString* flipper_application_assets_alloc_signature_file_path(FuriString* app_name) {
+    FuriString* signature_file_path = furi_string_alloc_set(APPS_ASSETS_PATH "/");
+    furi_string_cat(signature_file_path, app_name);
+    furi_string_cat(signature_file_path, "/" FLIPPER_APPLICATION_ASSETS_SIGNATURE_FILENAME);
+
+    return signature_file_path;
+}
+
+static AssetsSignatureResult flipper_application_assets_process_signature(
+    Storage* storage,
+    File* file,
+    FuriString* app_name,
+    uint8_t** signature_data,
+    size_t* signature_data_size) {
+    UNUSED(storage);
+    UNUSED(file);
+    FuriString* signature_file_path =
+        flipper_application_assets_alloc_signature_file_path(app_name);
+    AssetsSignatureResult result = AssetsSignatureResultError;
+
+    File* signature_file = storage_file_alloc(storage);
+    uint8_t* signature_file_data = NULL;
+
+    do {
+        // read signature
+        *signature_data =
+            flipper_application_assets_alloc_and_load_data(file, signature_data_size);
+
+        if(signature_data == NULL) {
+            result = AssetsSignatureResultError;
+            FURI_LOG_E(TAG, "Can't read signature");
+            break;
+        }
+
+        result = AssetsSignatureResultNotEqual;
+
+        if(!storage_file_open(
+               signature_file,
+               furi_string_get_cstr(signature_file_path),
+               FSAM_READ_WRITE,
+               FSOM_OPEN_EXISTING)) {
+            FURI_LOG_E(TAG, "Can't open signature file");
+            break;
+        }
+
+        size_t signature_size = storage_file_size(signature_file);
+        signature_file_data = malloc(signature_size);
+        if(storage_file_read(signature_file, signature_file_data, signature_size) !=
+           signature_size) {
+            FURI_LOG_E(TAG, "Can't read signature file");
+            break;
+        }
+
+        if(memcmp(*signature_data, signature_file_data, signature_size) == 0) {
+            FURI_LOG_I(TAG, "Assets signature is equal");
+            result = AssetsSignatureResultEqual;
+        }
+    } while(0);
+
+    storage_file_free(signature_file);
+    furi_string_free(signature_file_path);
+
+    if(signature_file_data != NULL) {
+        free(signature_file_data);
+    }
+
+    return result;
+}
+
 bool flipper_application_assets_load(File* file, const char* elf_path, size_t offset, size_t size) {
     UNUSED(size);
     FlipperApplicationAssetsHeader header;
     bool result = false;
-
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    uint8_t* signature_data = NULL;
+    size_t signature_data_size = 0;
     FuriString* app_name = furi_string_alloc();
     path_extract_filename_no_ext(elf_path, app_name);
 
@@ -45,67 +286,67 @@ bool flipper_application_assets_load(File* file, const char* elf_path, size_t of
             break;
         }
 
-        uint32_t length = 0;
-        char* path = NULL;
+        // process signature
+        AssetsSignatureResult signature_result = flipper_application_assets_process_signature(
+            storage, file, app_name, &signature_data, &signature_data_size);
 
-        FURI_LOG_I(TAG, "Creating %ld directories", header.dirs_count);
-        for(uint32_t i = 0; i < header.dirs_count; i++) {
-            // read path length
-            if(storage_file_read(file, &length, sizeof(length)) != sizeof(length)) {
-                break;
-            }
+        if(signature_result == AssetsSignatureResultError) {
+            FURI_LOG_E(TAG, "Assets signature error");
+            break;
+        } else if(signature_result == AssetsSignatureResultEqual) {
+            FURI_LOG_I(TAG, "Assets signature equal, skip loading");
+            result = true;
+            break;
+        } else {
+            FURI_LOG_I(TAG, "Assets signature not equal, loading");
 
-            path = malloc(length + 1);
+            // remove old assets
+            FuriString* full_path = furi_string_alloc_set(APPS_ASSETS_PATH);
+            furi_string_cat(full_path, "/");
+            furi_string_cat(full_path, app_name);
+            storage_simply_remove_recursive(storage, furi_string_get_cstr(full_path));
+            furi_string_free(full_path);
 
-            // read path
-            if(storage_file_read(file, path, length) != length) {
-                break;
-            }
-
-            path[length] = '\0';
-
-            FURI_LOG_I(TAG, "Creating directory: %s", path);
-
-            free(path);
-            path = NULL;
+            FURI_LOG_I(TAG, "Assets removed");
         }
 
-        FURI_LOG_I(TAG, "Creating %ld files", header.files_count);
-        for(uint32_t i = 0; i < header.files_count; i++) {
-            // read path length
-            if(storage_file_read(file, &length, sizeof(length)) != sizeof(length)) {
-                break;
-            }
-
-            path = malloc(length + 1);
-
-            // read path
-            if(storage_file_read(file, path, length) != length) {
-                break;
-            }
-
-            path[length] = '\0';
-
-            // read file size
-            if(storage_file_read(file, &length, sizeof(length)) != sizeof(length)) {
-                break;
-            }
-
-            // mock for reading file content
-            if(!storage_file_seek(file, length, false)) {
-                break;
-            }
-
-            FURI_LOG_I(TAG, "Creating file: %s, size: %ld", path, length);
-
-            free(path);
-            path = NULL;
+        // process directories
+        if(!flipper_application_assets_process_dirs(storage, file, app_name, header.dirs_count)) {
+            break;
         }
+
+        // process files
+        if(!flipper_application_assets_process_files(storage, file, app_name, header.files_count)) {
+            break;
+        }
+
+        // write signature
+        FuriString* signature_file_path =
+            flipper_application_assets_alloc_signature_file_path(app_name);
+        File* signature_file = storage_file_alloc(storage);
+
+        if(storage_file_open(
+               signature_file,
+               furi_string_get_cstr(signature_file_path),
+               FSAM_WRITE,
+               FSOM_CREATE_ALWAYS)) {
+            storage_file_write(signature_file, signature_data, signature_data_size);
+        }
+
+        storage_file_free(signature_file);
+        furi_string_free(signature_file_path);
 
         result = true;
     } while(false);
 
+    if(signature_data != NULL) {
+        free(signature_data);
+    }
+
+    furi_record_close(RECORD_STORAGE);
     furi_string_free(app_name);
+
+    FURI_LOG_I(TAG, "Assets loading %s", result ? "success" : "failed");
 
     return result;
 }
