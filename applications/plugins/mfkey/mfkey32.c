@@ -1,4 +1,6 @@
 // TODO: Update progress bar
+// TODO: Handle back button correctly
+// TODO: Add keys to top of dictionary
 // To compile this FAP, use the following compiler flags:
 // - Add -O3 and -funroll-all-loops to CCFLAGS in site_scons/extapps.scons
 // - Remove -g from site_scons/cc.scons
@@ -63,12 +65,24 @@ typedef enum {
     OutOfMemory,
 } MfkeyError;
 
+typedef enum {
+    Ready,
+    Initializing,
+    DictionaryAttack,
+    MfkeyAttack,
+    Complete,
+    Error,
+} MfkeyState;
+
 typedef struct {
-    bool running;
     MfkeyError err;
+    MfkeyState mfkey_state;
     int cracked;
     int total;
     int dict_count;
+    bool is_thread_running;
+    bool close_thread_please;
+    FuriThread* mfkeythread;
 } ProgramState;
 
 // TODO: Merge this with Crypto1Params?
@@ -737,7 +751,6 @@ void napi_mf_classic_nonce_array_free(MfClassicNonceArray* nonce_array) {
     free(nonce_array);
 }
 
-// TODO: Blocks main thread. Do we manually need to render here?
 void mfkey32(ProgramState* const program_state) {
     uint64_t found_key; // recovered key
     size_t keyarray_size = 0;
@@ -746,6 +759,7 @@ void mfkey32(ProgramState* const program_state) {
     // Check for nonces
     if(!napi_mf_classic_nonces_check_presence()) {
         program_state->err = MissingNonces;
+        program_state->mfkey_state = Error;
         return;
     }
     // Read dictionaries (optional)
@@ -763,6 +777,7 @@ void mfkey32(ProgramState* const program_state) {
         total_dict_keys += napi_mf_classic_dict_get_total_keys(user_dict);
     }
     program_state->dict_count = total_dict_keys;
+    program_state->mfkey_state = DictionaryAttack;
     // Read nonces
     MfClassicNonceArray* nonce_arr;
     nonce_arr = napi_mf_classic_nonce_array_alloc(
@@ -770,6 +785,7 @@ void mfkey32(ProgramState* const program_state) {
     if(nonce_arr->total_nonces == 0) {
         // Nothing to crack
         program_state->err = ZeroNonces;
+        program_state->mfkey_state = Error;
         napi_mf_classic_nonce_array_free(nonce_arr);
         if(system_dict_exists) {
             napi_mf_classic_dict_free(system_dict);
@@ -781,6 +797,7 @@ void mfkey32(ProgramState* const program_state) {
         return;
     }
     program_state->total = nonce_arr->total_nonces;
+    program_state->mfkey_state = MfkeyAttack;
     for(i = 0; i < nonce_arr->total_nonces; i++) {
         MfClassicNonce next_nonce = nonce_arr->remaining_nonce_array[i];
         uint32_t p64 = prng_successor(next_nonce.nt0, 64);
@@ -849,15 +866,15 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         return;
     }
     char draw_str[32] = {};
-    float dict_progress = (float)program_state->cracked / (float)program_state->total;
     canvas_clear(canvas);
     canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_draw_frame(canvas, 0, 15, 128, 64);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 5, 4, AlignLeft, AlignTop, "Mfkey32");
     canvas_draw_icon(canvas, 114, 4, &I_mfkey);
-    if(program_state->running) {
-        elements_progress_bar_with_text(canvas, 5, 18, 118, dict_progress, draw_str);
+    if(program_state->is_thread_running && program_state->mfkey_state == MfkeyAttack) {
+        float progress = (float)program_state->cracked / (float)program_state->total;
+        elements_progress_bar_with_text(canvas, 5, 18, 118, progress, draw_str);
         canvas_set_font(canvas, FontSecondary);
         snprintf(
             draw_str,
@@ -868,7 +885,14 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 26, 31, AlignLeft, AlignTop, draw_str);
         snprintf(draw_str, sizeof(draw_str), "Keys in dict: %d", program_state->dict_count);
         canvas_draw_str_aligned(canvas, 26, 41, AlignLeft, AlignTop, draw_str);
-        elements_button_center(canvas, "Stop");
+    } else if(program_state->is_thread_running && program_state->mfkey_state == DictionaryAttack) {
+        elements_progress_bar_with_text(canvas, 5, 18, 118, 0, draw_str);
+        canvas_set_font(canvas, FontSecondary);
+        // TODO: Show/track cracked keys here and above
+        snprintf(draw_str, sizeof(draw_str), "Loading nonces");
+        canvas_draw_str_aligned(canvas, 32, 31, AlignLeft, AlignTop, draw_str);
+        snprintf(draw_str, sizeof(draw_str), "Keys in dict: %d", program_state->dict_count);
+        canvas_draw_str_aligned(canvas, 26, 41, AlignLeft, AlignTop, draw_str);
     } else {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 50, 30, AlignLeft, AlignTop, "Ready");
@@ -885,10 +909,28 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void mfkey32_state_init(ProgramState* const program_state) {
-    program_state->running = false;
+    program_state->is_thread_running = false;
+    program_state->mfkey_state = Ready;
     program_state->cracked = 0;
     program_state->total = 0;
     program_state->dict_count = 0;
+}
+
+// Entrypoint for worker thread
+static int32_t mfkey32_worker_thread(void* ctx) {
+    ProgramState* program_state = ctx;
+    program_state->is_thread_running = true;
+    program_state->mfkey_state = Initializing;
+    //FURI_LOG_I(TAG, "Hello from the mfkey32 worker thread"); // DEBUG
+    mfkey32(program_state);
+    program_state->is_thread_running = false;
+    return 0;
+}
+
+void start_mfkey32_thread(ProgramState* program_state) {
+    if(!program_state->is_thread_running) {
+        furi_thread_start(program_state->mfkeythread);
+    }
 }
 
 int32_t mfkey32_main() {
@@ -914,6 +956,12 @@ int32_t mfkey32_main() {
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
+    program_state->mfkeythread = furi_thread_alloc();
+    furi_thread_set_name(program_state->mfkeythread, "Mfkey32 Worker");
+    furi_thread_set_stack_size(program_state->mfkeythread, 4096);
+    furi_thread_set_context(program_state->mfkeythread, program_state);
+    furi_thread_set_callback(program_state->mfkeythread, mfkey32_worker_thread);
+
     PluginEvent event;
     for(bool main_loop = true; main_loop;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
@@ -930,17 +978,25 @@ int32_t mfkey32_main() {
                     case InputKeyDown:
                         break;
                     case InputKeyRight:
+                        // TODO: Help
                         break;
                     case InputKeyLeft:
                         break;
                     case InputKeyOk:
-                        program_state->running = !program_state->running;
-                        if(program_state->running) {
-                            mfkey32(program_state);
+                        if(!program_state->is_thread_running) {
+                            start_mfkey32_thread(program_state);
+                            view_port_update(view_port);
                         }
                         break;
-                    default:
+                    case InputKeyBack:
+                        program_state->close_thread_please = true;
+                        if(program_state->is_thread_running && program_state->mfkeythread) {
+                            // Wait until thread is finished
+                            furi_thread_join(program_state->mfkeythread);
+                        }
+                        program_state->close_thread_please = false;
                         main_loop = false;
+                    default:
                         break;
                     }
                 }
@@ -954,12 +1010,14 @@ int32_t mfkey32_main() {
         release_mutex(&state_mutex, program_state);
     }
 
+    furi_thread_free(program_state->mfkeythread);
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close("gui");
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
     delete_mutex(&state_mutex);
+    free(program_state);
 
     return 0;
 }

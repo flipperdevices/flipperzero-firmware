@@ -33,7 +33,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-03-06 11:45 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-03-06 11:45 EST`
-- Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - UL: Updated: SubGHz: Fixed timings for static CAME 12 bit and other types (fixed issue #280)
 - UL: Updated: Fix #370 and fix other protocol counter issues
 - Infrared Set To Internal. Archive Browser for Infrared & BadUSB Fixed.
@@ -61,12 +60,14 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGHz Remote Fix unirf freeze (protocol deserialize status ok) (By Willy-JL)
 - UL: Blackjack game: fix bug counting more than one ace (By 403-Fruit)
 - UL: SubGHz: Fix 464Mhz and (390MHz for external module only) was showing up in Frequency analyzer all the time due to noise (By XMasterx)
-- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - UL: SubGHz: Fix issues with external module 5v power (now all works automatically, enabling +5v manually not required) (Only for modules that work with 5v->3.3v converter!!!!!) (By XMasterx)
 - UL: Some renames for SubGHz Remote (By XMasterx)
 - OFW: [Fix SD card CID parsing #2463 (By hramrach)](https://github.com/flipperdevices/flipperzero-firmware/pull/2463)
 - OFW: [Fixed picopass load save file overrun #2464 (By GuruSteve)](https://github.com/flipperdevices/flipperzero-firmware/pull/2464)
+- UL: Updated: [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
+- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
+- Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 
 <a name="release">
 
