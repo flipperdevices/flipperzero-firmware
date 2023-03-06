@@ -1,5 +1,5 @@
 
-<a href='https://www.patreon.com/RogueMaster/membership'><img src="patreon.png" width="40%"></a>
+<a href='https://www.patreon.com/RogueMaster/membership'><img src="https://rogue-master.net/img/rmlogo.png" width="40%"></a>
 
 # Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0228-1236-0.78.2-5eb5e99.tgz&channel=RM0228-1236-0.78.2-5eb5e99&version=0.77.2)
 
