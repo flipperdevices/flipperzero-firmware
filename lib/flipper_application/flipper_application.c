@@ -1,6 +1,7 @@
 #include "flipper_application.h"
 #include "elf/elf_file.h"
 #include <notification/notification_messages.h>
+#include "application_assets.h"
 
 #define TAG "fapp"
 
@@ -55,8 +56,11 @@ static FlipperApplicationPreloadStatus
     return FlipperApplicationPreloadStatusSuccess;
 }
 
-static bool
-    flipper_application_load_manifest(File* file, size_t offset, size_t size, void* context) {
+static bool flipper_application_process_manifest_section(
+    File* file,
+    size_t offset,
+    size_t size,
+    void* context) {
     FlipperApplicationManifest* manifest = context;
 
     if(size < sizeof(FlipperApplicationManifest)) {
@@ -71,15 +75,47 @@ static bool
            storage_file_read(file, manifest, size) == size;
 }
 
-/* Parse headers, load manifest */
-FlipperApplicationPreloadStatus
-    flipper_application_preload_manifest(FlipperApplication* app, const char* path) {
+// we can't use const char* as context because we will lose the const qualifier
+typedef struct {
+    const char* path;
+} FlipperApplicationPreloadAssetsContext;
+
+static bool flipper_application_process_assets_section(
+    File* file,
+    size_t offset,
+    size_t size,
+    void* context) {
+    FlipperApplicationPreloadAssetsContext* preload_context = context;
+    return flipper_application_assets_load(file, preload_context->path, offset, size);
+}
+
+static FlipperApplicationPreloadStatus
+    flipper_application_load(FlipperApplication* app, const char* path, bool load_full) {
     if(!elf_file_open(app->elf, path)) {
         return FlipperApplicationPreloadStatusInvalidFile;
     }
 
+    // if we are loading full file
+    if(load_full) {
+        // load section table
+        if(!elf_file_load_section_table(app->elf)) {
+            return FlipperApplicationPreloadStatusInvalidFile;
+        }
+
+        // load assets section
+        FlipperApplicationPreloadAssetsContext preload_context = {path};
+        if(elf_process_section(
+               app->elf,
+               ".fapfiles",
+               flipper_application_process_assets_section,
+               &preload_context) == ElfProcessSectionResultCannotProcess) {
+            return FlipperApplicationPreloadStatusInvalidFile;
+        }
+    }
+
+    // load manifest section
     if(elf_process_section(
-           app->elf, ".fapmeta", flipper_application_load_manifest, &app->manifest) !=
+           app->elf, ".fapmeta", flipper_application_process_manifest_section, &app->manifest) !=
        ElfProcessSectionResultSuccess) {
         return FlipperApplicationPreloadStatusInvalidFile;
     }
@@ -87,30 +123,16 @@ FlipperApplicationPreloadStatus
     return flipper_application_validate_manifest(app);
 }
 
+/* Parse headers, load manifest */
+FlipperApplicationPreloadStatus
+    flipper_application_preload_manifest(FlipperApplication* app, const char* path) {
+    return flipper_application_load(app, path, false);
+}
+
 /* Parse headers, load full file */
 FlipperApplicationPreloadStatus
     flipper_application_preload(FlipperApplication* app, const char* path) {
-    if(!elf_file_open(app->elf, path) || !elf_file_load_section_table(app->elf)) {
-        return FlipperApplicationPreloadStatusInvalidFile;
-    }
-
-    if(elf_process_section(
-           app->elf, ".fapmeta", flipper_application_load_manifest, &app->manifest) !=
-       ElfProcessSectionResultSuccess) {
-        return FlipperApplicationPreloadStatusInvalidFile;
-    }
-
-    // if(elf_process_section(app->elf, ".fapmeta", test_load_section, NULL) !=
-    //    ElfProcessSectionResultSuccess) {
-    //     FURI_LOG_E(TAG, "Failed to load .fapmeta section");
-    // }
-
-    // if(elf_process_section(app->elf, ".fapfiles", test_load_section, NULL) !=
-    //    ElfProcessSectionResultSuccess) {
-    //     FURI_LOG_E(TAG, "Failed to load .fapfiles section");
-    // }
-
-    return flipper_application_validate_manifest(app);
+    return flipper_application_load(app, path, true);
 }
 
 const FlipperApplicationManifest* flipper_application_get_manifest(FlipperApplication* app) {
