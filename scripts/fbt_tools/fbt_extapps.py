@@ -348,6 +348,8 @@ def prepare_app_files(target, source, env):
         # u32 version
         # u32 dirs_count
         # u32 files_count
+        # u32 signature_size
+        # u8[] signature
         # Dirs:
         #   u32 dir_name length
         #   u8[] dir_name
@@ -366,6 +368,14 @@ def prepare_app_files(target, source, env):
         # Write files count
         f.write(struct.pack("<I", len(file_list)))
 
+        md5_hash = hashlib.md5()
+        md5_hash_size = len(md5_hash.digest())
+
+        # write signature size and null signature, we'll fill it in later
+        f.write(struct.pack("<I", md5_hash_size))
+        signature_offset = f.tell()
+        f.write(b"\x00" * md5_hash_size)
+
         # Write dirs
         for dir in directory_list:
             f.write(struct.pack("<I", len(dir["path"]) + 1))
@@ -378,7 +388,13 @@ def prepare_app_files(target, source, env):
             f.write(struct.pack("<I", file["size"]))
 
             with open(file["content_path"], "rb") as content_file:
-                f.write(content_file.read())
+                content = content_file.read()
+                f.write(content)
+                md5_hash.update(content)
+
+        # Write signature
+        f.seek(signature_offset)
+        f.write(md5_hash.digest())
 
 
 def generate_embed_app_metadata_actions(source, target, env, for_signature):
