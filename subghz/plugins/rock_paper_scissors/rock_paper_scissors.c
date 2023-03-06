@@ -14,147 +14,7 @@ Down - Scissors
 
 */
 
-#include "rock_paper_scissors_icons.h"
-#include <furi.h>
-#include <furi_hal.h>
-#include <furi_hal_resources.h>
-#include <gui/gui.h>
-#include <gui/icon.h>
-#include <locale/locale.h>
-
-#include <notification/notification.h>
-#include <notification/notification_messages.h>
-
-#include <lib/subghz/subghz_tx_rx_worker.h>
-
-// This is sent at the beginning of all RF messages. NOTE: It must end with the ':' character.
-#define RPS_GAME_NAME "RPS:"
-#define TAG "rock_paper_scissors_app"
-
-// Name for "N", followed by your name without any spaces.
-#define CONTACT_INFO "NYourNameHere"
-
-// The message max length should be no larger than a value around 60 to 64.
-#define MESSAGE_MAX_LEN 60
-
-// How often to send a beacon.
-#define BEACON_DURATION 3
-
-// The major version must be a single character (it can be anything - like '1' or 'A' or 'a').
-#define MAJOR_VERSION 'A'
-
-typedef enum {
-    DolphinLocalLooking = 0,
-    DolphinLocalReady,
-    DolphinLocalCount,
-    DolphinLocalRock,
-    DolphinLocalPaper,
-    DolphinLocalScissors,
-    DolphinRemoteReady,
-    DolphinRemoteCount,
-    DolphinRemoteRock,
-    DolphinRemotePaper,
-    DolphinRemoteScissors,
-} DolphinImageIndex;
-
-const Icon* images[] = {
-    &I_Local_Looking,
-    &I_Local_Ready,
-    &I_Local_Count,
-    &I_Local_Rock,
-    &I_Local_Paper,
-    &I_Local_Scissors,
-    &I_Remote_Ready,
-    &I_Remote_Count,
-    &I_Remote_Rock,
-    &I_Remote_Paper,
-    &I_Remote_Scissors};
-
-// The various moves a player can make.
-// Some moves may be invalid depending on the current game state.
-typedef enum {
-    MoveUnknown = '-',
-    MoveCount = 'C',
-    MoveCount1 = '1',
-    MoveCount2 = '2',
-    MoveRock = 'R',
-    MovePaper = 'P',
-    MoveScissors = 'S',
-} Move;
-
-// The various states a player in the game can be in.
-typedef enum {
-    StateLookingForPlayer = '*',
-    StateReady = 'G',
-    StateCount1 = MoveCount1, // 1
-    StateCount2 = MoveCount2, // 2
-    StatePaper = MovePaper, // P
-    StateRock = MoveRock, // R
-    StateScissors = MoveScissors, // S
-    StateLostRock = 'L',
-    StateLostPaper = 'l',
-    StateLostScissors = '-',
-    StateTieRock = 'T',
-    StateTiePaper = 't',
-    StateTieScissors = 'x',
-    StateWonRock = 'W',
-    StateWonPaper = 'w',
-    StateWonScissors = '+',
-    StateErrorRemoteTimeout = '7', // Joined but didn't make any moves.
-    StateErrorRemoteFast = '8', // Remote user sent moves after than local user.
-    StateErrorLocalFast = '9', // Local user sent moves after than remote user.
-    StateError = 'E',
-} GameState;
-
-// When an RF message is sent, it includes a purpose so the receiving application
-// can decide if it should process the message.
-typedef enum {
-    GameRfPurposeBeacon = 'B', // Beacon.
-    GameRfPurposeJoin = 'J', // Join a game.
-    GameRfPurposeMove = 'M', // Player move.
-} GameRfPurpose;
-
-// Messages in our event queue are one of the following types.
-typedef enum {
-    GameEventTypeTimer,
-    GameEventTypeKey,
-    GameEventDataDetected,
-    GameEventRemoteBeacon,
-    GameEventRemoteJoined,
-    GameEventLocalMove,
-    GameEventRemoteMove,
-    GameEventSendMove,
-    GameEventPlaySong,
-} GameEventType;
-
-// An item in the event queue has both the type and its associated data.
-// Some fields may be null, they are only set for particular events.
-typedef struct {
-    GameEventType type; // The reason for this event.
-    InputEvent input; // Key-press input events.
-    Move move; // The move associated with the event.
-    uint32_t tick; // The time the event originated (furi_get_tick()).
-    unsigned int gameNumber; // The game number for the message.
-    FuriString* senderName; // If not null, be sure to release this string.
-} GameEvent;
-
-// This is the data for our application.
-typedef struct {
-    FuriString* buffer;
-    unsigned int gameNumber;
-    GameState localPlayer;
-    GameState remotePlayer;
-    uint32_t localMoveTick; // local & remote need to press buttons near the same time.
-    uint32_t remoteMoveTick;
-} GameData;
-
-// This is our application context.
-typedef struct {
-    FuriMessageQueue* queue; // Message queue (GameEvent items to process).
-    FuriMutex* mutex; // Used to provide thread safe access to data.
-    GameData* data; // Data accessed by multiple threads (acquire the mutex before accessing!)
-    SubGhzTxRxWorker* subghz_txrx;
-} GameContext;
+#include "rock_paper_scissors.h"
 
 // Checks if game state is winner.
 // @param state GameState to check.
@@ -175,6 +35,25 @@ static bool isLoss(GameState state) {
 // @returns true if game state is a tie.
 static bool isTie(GameState state) {
     return (StateTiePaper == state) || (StateTieRock == state) || (StateTieScissors == state);
+}
+
+// Checks if game state is result (win/loss/tie).
+// @param state GameState to check.
+// @returns true if game state is a win, loss or tie.
+static bool isResult(GameState state) {
+    return isWin(state) || isLoss(state) || isTie(state);
+}
+
+// Checks if game state is final move (rock/paper/scissors).
+// @param state GameState to check.
+// @returns true if game state is a rock, paper, scissors.
+static bool isFinalMove(GameState state) {
+    return (StateRock == state) || (StatePaper == state) || (StateScissors == state);
+}
+
+static bool isError(GameState state) {
+    return (StateError == state) || (StateErrorLocalFast == state) ||
+           (StateErrorRemoteFast == state) || (StateErrorRemoteTimeout == state);
 }
 
 // When user makes a move, we briefly pulse the vibro motor.
@@ -238,7 +117,6 @@ static void rps_worker_update_rx_event_callback(void* ctx) {
     furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
 }
 
-//
 // We register this callback to get invoked whenever the timer triggers.
 // Queue a GameEventTypeTimer message.
 // @param ctx pointer to a GameContext
@@ -277,9 +155,9 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
         // Null terminate buffer at the end of message so we can't overrun the buffer.
         message[MESSAGE_MAX_LEN - 1] = 0;
 
-        unsigned int gameNumber;
+        unsigned int game_number;
         char randomInfo[MESSAGE_MAX_LEN];
-        char senderName[9];
+        char sender_name[9];
         char tmp;
         Move move = MoveUnknown;
         switch(purpose) {
@@ -288,20 +166,20 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
             if(sscanf(
                    (const char*)message + game_name_len + 2,
                    "%03u%c:%8s",
-                   &gameNumber,
+                   &game_number,
                    &tmp,
-                   senderName) == 3) {
+                   sender_name) == 3) {
                 move = (Move)tmp;
                 // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
                 FuriString* name = furi_string_alloc();
-                furi_string_set(name, senderName);
+                furi_string_set(name, sender_name);
 
                 GameEvent event = {
                     .type = GameEventRemoteMove,
                     .move = move,
                     .tick = tick,
-                    .senderName = name,
-                    .gameNumber = gameNumber};
+                    .sender_name = name,
+                    .game_number = game_number};
                 furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
             } else {
                 FURI_LOG_W(TAG, "Failed to parse move message. >%s<", message);
@@ -311,14 +189,18 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
         case GameRfPurposeBeacon:
             // We expect this mesage to the game number, move and sender name.
             if(sscanf(
-                   (const char*)message + game_name_len + 2, "%03u:%8s", &gameNumber, senderName) ==
-               2) {
+                   (const char*)message + game_name_len + 2,
+                   "%03u:%8s",
+                   &game_number,
+                   sender_name) == 2) {
                 // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
                 FuriString* name = furi_string_alloc();
-                furi_string_set(name, senderName);
+                furi_string_set(name, sender_name);
 
                 GameEvent event = {
-                    .type = GameEventRemoteBeacon, .senderName = name, .gameNumber = gameNumber};
+                    .type = GameEventRemoteBeacon,
+                    .sender_name = name,
+                    .game_number = game_number};
                 furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
             } else {
                 FURI_LOG_W(TAG, "Failed to parse beacon message. >%s<", message);
@@ -330,17 +212,19 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
             if(sscanf(
                    (const char*)message + game_name_len + 2,
                    "%03u%s :%8s",
-                   &gameNumber,
+                   &game_number,
                    randomInfo,
-                   senderName) == 3) {
+                   sender_name) == 3) {
                 FURI_LOG_T(TAG, "Join had randomInfo of >%s<", randomInfo);
 
                 // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
                 FuriString* name = furi_string_alloc();
-                furi_string_set(name, senderName);
+                furi_string_set(name, sender_name);
 
                 GameEvent event = {
-                    .type = GameEventRemoteJoined, .senderName = name, .gameNumber = gameNumber};
+                    .type = GameEventRemoteJoined,
+                    .sender_name = name,
+                    .game_number = game_number};
                 furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
             } else {
                 FURI_LOG_W(TAG, "Failed to parse join message. >%s<", message);
@@ -373,11 +257,10 @@ static void rps_input_callback(InputEvent* input_event, void* ctx_q) {
     furi_message_queue_put(queue, &event, FuriWaitForever);
 }
 
-// We register this callback to get invoked whenever we need to render the screen.
-// We render the UI on this callback thread.
+// Render UI when we are hosting the game.
 // @param canvas rendering surface of the Flipper Zero.
 // @param ctx pointer to a GameContext.
-static void rps_render_callback(Canvas* canvas, void* ctx) {
+static void rps_render_host_game(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
     GameContext* game_context = ctx;
 
@@ -387,12 +270,140 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
     }
 
     GameData* data = game_context->data;
-    GameState localPlayer = data->localPlayer;
-    GameState remotePlayer = data->remotePlayer;
+    unsigned int gameNumber = data->game_number;
+
+    canvas_draw_icon(canvas, 0, 0, images[DolphinLocalLooking]);
+
+    canvas_set_font(canvas, FontPrimary);
+
+    if(data->local_player == StateHostingSetFrequency ||
+       data->local_player == StateHostingBadFrequency) {
+        canvas_draw_box(canvas, 48, 3, 128 - 50, 14);
+        canvas_invert_color(canvas);
+    }
+    uint32_t freq = frequency_list[game_context->data->frequency_index];
+    uint16_t freq_mhz = freq / 1000000;
+    uint16_t freq_mod = (freq % 1000000) / 10000;
+    furi_string_printf(data->buffer, "freq < %03d.%02d >", freq_mhz, freq_mod);
+    canvas_draw_str_aligned(
+        canvas, 50, 5, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
+    if(data->local_player == StateHostingSetFrequency ||
+       data->local_player == StateHostingBadFrequency) {
+        canvas_invert_color(canvas);
+    }
+
+    if(data->local_player == StateHostingSetGameNumber) {
+        canvas_draw_box(canvas, 48, 18, 128 - 50, 14);
+        canvas_invert_color(canvas);
+    }
+    furi_string_printf(data->buffer, "game < %03d  >", gameNumber);
+    canvas_draw_str_aligned(
+        canvas, 50, 20, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
+    if(data->local_player == StateHostingSetGameNumber) {
+        canvas_invert_color(canvas);
+    }
+
+    if(data->local_player == StateHostingLookingForPlayer) {
+        canvas_set_font(canvas, FontSecondary);
+        furi_string_printf(data->buffer, "Waiting for player, game %03d.", gameNumber);
+        canvas_draw_str_aligned(
+            canvas, 0, 53, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
+    } else if(data->local_player == StateHostingBadFrequency) {
+        canvas_draw_str_aligned(canvas, 0, 53, AlignLeft, AlignTop, "Frequency not avail.");
+    } else {
+        canvas_draw_str_aligned(canvas, 0, 53, AlignLeft, AlignTop, "Press OK to start game.");
+    }
+
+    furi_mutex_release(game_context->mutex);
+}
+
+// Render UI when we are joining a game.
+// @param canvas rendering surface of the Flipper Zero.
+// @param ctx pointer to a GameContext.
+static void rps_render_join_game(Canvas* canvas, void* ctx) {
+    furi_assert(ctx);
+    GameContext* game_context = ctx;
+
+    // Attempt to aquire context, so we can read the data.
+    if(furi_mutex_acquire(game_context->mutex, 200) != FuriStatusOk) {
+        return;
+    }
+
+    GameData* data = game_context->data;
+
+    canvas_draw_icon(canvas, 0, 0, images[DolphinLocalLooking]);
+
+    canvas_set_font(canvas, FontPrimary);
+
+    if(data->local_player == StateJoiningSetFrequency ||
+       data->local_player == StateJoiningBadFrequency) {
+        canvas_draw_box(canvas, 48, 3, 128 - 50, 14);
+        canvas_invert_color(canvas);
+    }
+    uint32_t freq = frequency_list[game_context->data->frequency_index];
+    uint16_t freq_mhz = freq / 1000000;
+    uint16_t freq_mod = (freq % 1000000) / 10000;
+    furi_string_printf(data->buffer, "freq < %03d.%02d >", freq_mhz, freq_mod);
+    canvas_draw_str_aligned(
+        canvas, 50, 5, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
+    if(data->local_player == StateJoiningSetFrequency ||
+       data->local_player == StateJoiningBadFrequency) {
+        canvas_invert_color(canvas);
+    }
+
+    if(data->local_player == StateJoiningSetGameNumber) {
+        canvas_draw_box(canvas, 48, 18, 128 - 50, 14);
+        canvas_invert_color(canvas);
+    }
+    GameInfo* game = remote_games_current(game_context);
+    if(game) {
+        char prev = remote_games_has_previous(game_context) ? '<' : ' ';
+        char next = remote_games_has_next(game_context) ? '>' : ' ';
+        furi_string_printf(data->buffer, "game %c %03d  %c", prev, game->game_number, next);
+    } else {
+        furi_string_printf(data->buffer, "game    none");
+    }
+    canvas_draw_str_aligned(
+        canvas, 50, 20, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
+    if(data->local_player == StateJoiningSetGameNumber) {
+        canvas_invert_color(canvas);
+    }
+
+    if(game && game->sender_name) {
+        canvas_draw_str_aligned(
+            canvas, 50, 35, AlignLeft, AlignTop, furi_string_get_cstr(game->sender_name));
+    }
+
+    if(data->local_player == StateJoiningBadFrequency) {
+        canvas_draw_str_aligned(canvas, 0, 53, AlignLeft, AlignTop, "Frequency not avail.");
+    } else if(game) {
+        canvas_draw_str_aligned(canvas, 0, 53, AlignLeft, AlignTop, "Press OK to join game.");
+    } else {
+        canvas_draw_str_aligned(canvas, 0, 53, AlignLeft, AlignTop, "No games available.");
+    }
+
+    furi_mutex_release(game_context->mutex);
+}
+
+// Render UI when we are playing the game.
+// @param canvas rendering surface of the Flipper Zero.
+// @param ctx pointer to a GameContext.
+static void rps_render_playing_game(Canvas* canvas, void* ctx) {
+    furi_assert(ctx);
+    GameContext* game_context = ctx;
+
+    // Attempt to aquire context, so we can read the data.
+    if(furi_mutex_acquire(game_context->mutex, 200) != FuriStatusOk) {
+        return;
+    }
+
+    GameData* data = game_context->data;
+    GameState local_player = data->local_player;
+    GameState remote_player = data->remote_player;
 
     canvas_set_font(canvas, FontSecondary);
 
-    switch(remotePlayer) {
+    switch(remote_player) {
     case StateReady:
         canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteReady]);
         break;
@@ -411,7 +422,7 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
     case StateTieRock:
     case StateWonRock:
     case StateLostRock:
-        if(StateCount2 != localPlayer) {
+        if(StateCount2 != local_player) {
             canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteRock]);
             canvas_draw_str_aligned(canvas, 70, 55, AlignLeft, AlignTop, "Rock");
         } else {
@@ -423,7 +434,7 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
     case StateTiePaper:
     case StateWonPaper:
     case StateLostPaper:
-        if(StateCount2 != localPlayer) {
+        if(StateCount2 != local_player) {
             canvas_draw_icon(canvas, 64, 0, images[DolphinRemotePaper]);
             canvas_draw_str_aligned(canvas, 70, 55, AlignLeft, AlignTop, "Paper");
         } else {
@@ -435,7 +446,7 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
     case StateTieScissors:
     case StateWonScissors:
     case StateLostScissors:
-        if(StateCount2 != localPlayer) {
+        if(StateCount2 != local_player) {
             canvas_draw_icon(canvas, 64, 0, images[DolphinRemoteScissors]);
             canvas_draw_str_aligned(canvas, 70, 55, AlignLeft, AlignTop, "Scissors");
         } else {
@@ -447,14 +458,7 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
         break;
     }
 
-    switch(localPlayer) {
-    case StateLookingForPlayer:
-        canvas_draw_icon(canvas, 0, 0, images[DolphinLocalLooking]);
-        furi_string_printf(data->buffer, "Waiting for player, game %03d.", data->gameNumber);
-        canvas_draw_str_aligned(
-            canvas, 0, 55, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
-        break;
-
+    switch(local_player) {
     case StateReady:
         canvas_draw_icon(canvas, 0, 0, images[DolphinLocalReady]);
         canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Press OK    for 1.");
@@ -536,6 +540,32 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 38, 5, AlignLeft, AlignTop, "You lost.");
         break;
 
+    default:
+        canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Unexpected. 2");
+        break;
+    }
+
+    furi_mutex_release(game_context->mutex);
+}
+
+// Render UI when we encounter an error in the game.
+// @param canvas rendering surface of the Flipper Zero.
+// @param ctx pointer to a GameContext.
+static void rps_render_error(Canvas* canvas, void* ctx) {
+    furi_assert(ctx);
+    GameContext* game_context = ctx;
+
+    // Attempt to aquire context, so we can read the data.
+    if(furi_mutex_acquire(game_context->mutex, 200) != FuriStatusOk) {
+        return;
+    }
+
+    GameData* data = game_context->data;
+    GameState local_player = data->local_player;
+
+    canvas_set_font(canvas, FontSecondary);
+
+    switch(local_player) {
     case StateError:
         canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Unknown error");
         break;
@@ -553,11 +583,58 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
         break;
 
     default:
-        canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Unexpected.");
+        canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Unexpected. 3");
         break;
     }
 
+    canvas_draw_str_aligned(canvas, 120, 55, AlignLeft, AlignTop, "E");
+
     furi_mutex_release(game_context->mutex);
+}
+
+// Render UI when we are hosting the game.
+// @param canvas rendering surface of the Flipper Zero.
+// @param ctx pointer to a GameContext.
+static void rps_render_main_menu(Canvas* canvas, void* ctx) {
+    GameContext* game_context = ctx;
+
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, 2, 0, AlignLeft, AlignTop, "ROCK PAPER SCISSORS");
+    canvas_draw_str_aligned(canvas, 30, 15, AlignLeft, AlignTop, "Host game");
+    canvas_draw_str_aligned(canvas, 30, 27, AlignLeft, AlignTop, "Join game");
+    canvas_draw_str_aligned(canvas, 30, 39, AlignLeft, AlignTop, "Past games");
+    canvas_draw_str_aligned(canvas, 30, 51, AlignLeft, AlignTop, "Edit Message");
+
+    if(game_context->data->local_player == StateMainMenuHost) {
+        canvas_draw_str_aligned(canvas, 20, 15, AlignLeft, AlignTop, ">");
+    } else if(game_context->data->local_player == StateMainMenuJoin) {
+        canvas_draw_str_aligned(canvas, 20, 27, AlignLeft, AlignTop, ">");
+    } else if(game_context->data->local_player == StateMainMenuPastGames) {
+        canvas_draw_str_aligned(canvas, 20, 39, AlignLeft, AlignTop, ">");
+    } else if(game_context->data->local_player == StateMainMenuMessage) {
+        canvas_draw_str_aligned(canvas, 20, 51, AlignLeft, AlignTop, ">");
+    }
+}
+
+// We register this callback to get invoked whenever we need to render the screen.
+// We render the UI on this callback thread.
+// @param canvas rendering surface of the Flipper Zero.
+// @param ctx pointer to a GameContext.
+static void rps_render_callback(Canvas* canvas, void* ctx) {
+    furi_assert(ctx);
+    GameContext* game_context = ctx;
+
+    if(game_context->data->screen_state == ScreenHostGame) {
+        rps_render_host_game(canvas, game_context);
+    } else if(game_context->data->screen_state == ScreenError) {
+        rps_render_error(canvas, game_context);
+    } else if(game_context->data->screen_state == ScreenPlayingGame) {
+        rps_render_playing_game(canvas, game_context);
+    } else if(game_context->data->screen_state == ScreenJoinGame) {
+        rps_render_join_game(canvas, game_context);
+    } else if(game_context->data->screen_state == ScreenMainMenu) {
+        rps_render_main_menu(canvas, game_context);
+    }
 }
 
 // This is a helper method that broadcasts a buffer.
@@ -603,7 +680,7 @@ static void rps_broadcast_move(GameContext* game_context, Move moveToSend) {
         RPS_GAME_NAME,
         GameRfPurposeMove,
         MAJOR_VERSION,
-        data->gameNumber,
+        data->game_number,
         moveToSend,
         furi_hal_version_get_name_ptr());
     rps_broadcast(game_context, data->buffer);
@@ -623,7 +700,7 @@ static void rps_broadcast_beacon(GameContext* game_context) {
         RPS_GAME_NAME,
         GameRfPurposeBeacon,
         MAJOR_VERSION,
-        data->gameNumber,
+        data->game_number,
         furi_hal_version_get_name_ptr());
     rps_broadcast(game_context, data->buffer);
 }
@@ -643,7 +720,7 @@ static void rps_broadcast_join(GameContext* game_context, unsigned int gameNumbe
         RPS_GAME_NAME,
         GameRfPurposeJoin,
         MAJOR_VERSION,
-        data->gameNumber,
+        data->game_number,
         CONTACT_INFO,
         furi_hal_version_get_name_ptr());
     rps_broadcast(game_context, data->buffer);
@@ -662,110 +739,95 @@ static uint32_t duration(uint32_t tick) {
     return current - tick;
 }
 
-// Checks if game state is result (win/loss/tie).
-// @param state GameState to check.
-// @returns true if game state is a win, loss or tie.
-static bool isResult(GameState state) {
-    return isWin(state) || isLoss(state) || isTie(state);
-}
-
-// Checks if game state is final move (rock/paper/scissors).
-// @param state GameState to check.
-// @returns true if game state is a rock, paper, scissors.
-static bool isFinalMove(GameState state) {
-    return (StateRock == state) || (StatePaper == state) || (StateScissors == state);
-}
-
-static bool isError(GameState state) {
-    return (StateError == state) || (StateErrorLocalFast == state) ||
-           (StateErrorRemoteFast == state) || (StateErrorRemoteTimeout == state);
-}
-
-// Temporary timings, since I don't have second Flipper & send commands via laptop.
-#define DURATION_NO_MOVE_DETECTED_ERROR 60000
-#define DURATION_SHOW_ERROR 3000
-#define DURATION_SHOW_MOVES 500
-#define DURATION_WIN_LOSS_TIE 10000
-
 // Updates the state machine, if needed.
 // @param game_context pointer to a GameContext.
 static void rps_state_machine_update(GameContext* game_context) {
     GameData* d = game_context->data;
-    FURI_LOG_I(TAG, "Validating game state. local:%c Remote:%c", d->localPlayer, d->remotePlayer);
+    if((d->screen_state != ScreenPlayingGame) && (d->screen_state != ScreenError)) {
+        FURI_LOG_T(TAG, "Not in playing game state.  screenState:%d", d->screen_state);
+        return;
+    }
+
+    FURI_LOG_I(
+        TAG, "Validating game state. local:%c Remote:%c", d->local_player, d->remote_player);
 
     // Did player leave after joining?
-    if((StateReady == d->remotePlayer) &&
-       (duration(d->remoteMoveTick) > DURATION_NO_MOVE_DETECTED_ERROR)) {
-        d->remotePlayer = StateLookingForPlayer;
-        d->remoteMoveTick = furi_get_tick();
-        d->localPlayer = StateErrorRemoteTimeout;
-        d->localMoveTick = furi_get_tick();
+    if((StateReady == d->remote_player) &&
+       (duration(d->remote_move_tick) > DURATION_NO_MOVE_DETECTED_ERROR)) {
+        d->remote_player = StateUnknown;
+        d->remote_move_tick = furi_get_tick();
+        d->local_player = StateErrorRemoteTimeout;
+        d->local_move_tick = furi_get_tick();
+        d->screen_state = ScreenError;
+
         // Should we tell other player we timed out?
         FURI_LOG_I(TAG, "Timed out after joining.");
         return;
     }
 
     // TEMP - After Error, we reset back to Looking for player.
-    if(isError(d->localPlayer) && (duration(d->localMoveTick) > DURATION_SHOW_ERROR)) {
-        d->remotePlayer = StateLookingForPlayer;
-        d->remoteMoveTick = furi_get_tick();
-        d->localPlayer = StateLookingForPlayer;
-        d->localMoveTick = furi_get_tick();
-        FURI_LOG_I(TAG, "Reset from Error to Looking for player.");
+    if(isError(d->local_player) && (duration(d->local_move_tick) > DURATION_SHOW_ERROR)) {
+        d->local_player = StateMainMenuHost;
+        d->remote_player = StateUnknown;
+        d->screen_state = ScreenMainMenu;
+
+        FURI_LOG_I(TAG, "Reset from Error.");
         return;
     }
 
     // TEMP - After Win, Loss, Tie -  we reset back to Ready.
-    if(isResult(d->localPlayer) && (duration(d->localMoveTick) > DURATION_WIN_LOSS_TIE)) {
-        d->remotePlayer = StateReady;
-        d->remoteMoveTick = furi_get_tick();
-        d->localPlayer = StateReady;
-        d->localMoveTick = furi_get_tick();
+    if(isResult(d->local_player) && (duration(d->local_move_tick) > DURATION_WIN_LOSS_TIE)) {
+        d->remote_player = StateReady;
+        d->remote_move_tick = furi_get_tick();
+        d->local_player = StateReady;
+        d->local_move_tick = furi_get_tick();
+        d->screen_state = ScreenPlayingGame;
+
         // Should we tell other player we are Ready?
         FURI_LOG_I(TAG, "Ready for next game.");
         return;
     }
 
     // Check for winner.
-    if(isFinalMove(d->localPlayer) && isFinalMove(d->remotePlayer) &&
-       (duration(d->localMoveTick) > DURATION_SHOW_MOVES)) {
-        d->localMoveTick = furi_get_tick();
-        d->remoteMoveTick = furi_get_tick();
-        if((d->localPlayer == StateRock) && (d->remotePlayer == StateScissors)) {
-            d->localPlayer = StateWonRock;
-            d->remotePlayer = StateLostScissors;
+    if(isFinalMove(d->local_player) && isFinalMove(d->remote_player) &&
+       (duration(d->local_move_tick) > DURATION_SHOW_MOVES)) {
+        d->local_move_tick = furi_get_tick();
+        d->remote_move_tick = furi_get_tick();
+        if((d->local_player == StateRock) && (d->remote_player == StateScissors)) {
+            d->local_player = StateWonRock;
+            d->remote_player = StateLostScissors;
             FURI_LOG_I(TAG, "Local won w/Rock.");
-        } else if((d->localPlayer == StateScissors) && (d->remotePlayer == StatePaper)) {
-            d->localPlayer = StateWonScissors;
-            d->remotePlayer = StateLostPaper;
+        } else if((d->local_player == StateScissors) && (d->remote_player == StatePaper)) {
+            d->local_player = StateWonScissors;
+            d->remote_player = StateLostPaper;
             FURI_LOG_I(TAG, "Local won w/Scissors.");
-        } else if((d->localPlayer == StatePaper) && (d->remotePlayer == StateRock)) {
-            d->localPlayer = StateWonPaper;
-            d->remotePlayer = StateLostRock;
+        } else if((d->local_player == StatePaper) && (d->remote_player == StateRock)) {
+            d->local_player = StateWonPaper;
+            d->remote_player = StateLostRock;
             FURI_LOG_I(TAG, "Local won w/Paper.");
-        } else if((d->localPlayer == StateRock) && (d->remotePlayer == StatePaper)) {
-            d->localPlayer = StateLostRock;
-            d->remotePlayer = StateWonPaper;
+        } else if((d->local_player == StateRock) && (d->remote_player == StatePaper)) {
+            d->local_player = StateLostRock;
+            d->remote_player = StateWonPaper;
             FURI_LOG_I(TAG, "Remote won w/Paper.");
-        } else if((d->localPlayer == StateScissors) && (d->remotePlayer == StateRock)) {
-            d->localPlayer = StateLostScissors;
-            d->remotePlayer = StateWonRock;
+        } else if((d->local_player == StateScissors) && (d->remote_player == StateRock)) {
+            d->local_player = StateLostScissors;
+            d->remote_player = StateWonRock;
             FURI_LOG_I(TAG, "Remote won w/Rock.");
-        } else if((d->localPlayer == StatePaper) && (d->remotePlayer == StateScissors)) {
-            d->localPlayer = StateLostPaper;
-            d->remotePlayer = StateWonScissors;
+        } else if((d->local_player == StatePaper) && (d->remote_player == StateScissors)) {
+            d->local_player = StateLostPaper;
+            d->remote_player = StateWonScissors;
             FURI_LOG_I(TAG, "Remote won w/Scissors.");
         } else {
             FURI_LOG_I(TAG, "Tie game.");
-            if(d->localPlayer == StateRock) {
-                d->localPlayer = StateTieRock;
-                d->remotePlayer = StateTieRock;
-            } else if(d->localPlayer == StatePaper) {
-                d->localPlayer = StateTiePaper;
-                d->remotePlayer = StateTiePaper;
+            if(d->local_player == StateRock) {
+                d->local_player = StateTieRock;
+                d->remote_player = StateTieRock;
+            } else if(d->local_player == StatePaper) {
+                d->local_player = StateTiePaper;
+                d->remote_player = StateTiePaper;
             } else {
-                d->localPlayer = StateTieScissors;
-                d->remotePlayer = StateTieScissors;
+                d->local_player = StateTieScissors;
+                d->remote_player = StateTieScissors;
             }
         }
 
@@ -777,15 +839,16 @@ static void rps_state_machine_update(GameContext* game_context) {
 // Update the state machine to reflect that a remote user joined the game.
 // @param game_context pointer to a GameContext.
 static void rps_state_machine_remote_joined(GameContext* game_context) {
-    if(StateLookingForPlayer == game_context->data->localPlayer) {
+    if(StateHostingLookingForPlayer == game_context->data->local_player) {
         FURI_LOG_I(TAG, "Remote player joined our game!");
-        game_context->data->remotePlayer = StateReady;
-        game_context->data->remoteMoveTick = furi_get_tick();
-        game_context->data->localPlayer = StateReady;
-        game_context->data->localMoveTick = furi_get_tick();
+        game_context->data->remote_player = StateReady;
+        game_context->data->remote_move_tick = furi_get_tick();
+        game_context->data->local_player = StateReady;
+        game_context->data->local_move_tick = furi_get_tick();
+        game_context->data->screen_state = ScreenPlayingGame;
     } else {
         FURI_LOG_I(
-            TAG, "Remote requested join, but we are state %c!", game_context->data->localPlayer);
+            TAG, "Remote requested join, but we are state %c!", game_context->data->local_player);
     }
 }
 
@@ -798,33 +861,35 @@ static bool rps_state_machine_local_moved(GameContext* game_context, Move move) 
     Move localMove = MoveUnknown;
     GameState localState = StateReady;
 
-    if(MoveCount == move && StateReady == game_context->data->localPlayer) {
+    if(MoveCount == move && StateReady == game_context->data->local_player) {
         localMove = MoveCount1;
         localState = StateCount1;
-    } else if(MoveCount == move && StateCount1 == game_context->data->localPlayer) {
-        if((StateCount1 == game_context->data->remotePlayer) ||
-           (StateCount2 == game_context->data->remotePlayer)) {
+    } else if(MoveCount == move && StateCount1 == game_context->data->local_player) {
+        if((StateCount1 == game_context->data->remote_player) ||
+           (StateCount2 == game_context->data->remote_player)) {
             localMove = MoveCount2;
             localState = StateCount2;
         } else {
             localState = StateErrorLocalFast;
             FURI_LOG_I(
-                TAG, "Local count sync error. remote is %c.", game_context->data->remotePlayer);
+                TAG, "Local count sync error. remote is %c.", game_context->data->remote_player);
         }
-    } else if(StateCount2 == game_context->data->localPlayer) {
+    } else if(StateCount2 == game_context->data->local_player) {
         if(MoveRock == move) {
-            if((StateCount2 == game_context->data->remotePlayer) ||
-               isFinalMove(game_context->data->remotePlayer)) {
+            if((StateCount2 == game_context->data->remote_player) ||
+               isFinalMove(game_context->data->remote_player)) {
                 localMove = MoveRock;
                 localState = StateRock;
             } else {
                 localState = StateErrorLocalFast;
                 FURI_LOG_I(
-                    TAG, "Local rock sync error. remote is %c.", game_context->data->remotePlayer);
+                    TAG,
+                    "Local rock sync error. remote is %c.",
+                    game_context->data->remote_player);
             }
         } else if(MovePaper == move) {
-            if((StateCount2 == game_context->data->remotePlayer) ||
-               isFinalMove(game_context->data->remotePlayer)) {
+            if((StateCount2 == game_context->data->remote_player) ||
+               isFinalMove(game_context->data->remote_player)) {
                 localMove = MovePaper;
                 localState = StatePaper;
             } else {
@@ -832,11 +897,11 @@ static bool rps_state_machine_local_moved(GameContext* game_context, Move move) 
                 FURI_LOG_I(
                     TAG,
                     "Local paper sync error. remote is %c.",
-                    game_context->data->remotePlayer);
+                    game_context->data->remote_player);
             }
         } else if(MoveScissors == move) {
-            if((StateCount2 == game_context->data->remotePlayer) ||
-               isFinalMove(game_context->data->remotePlayer)) {
+            if((StateCount2 == game_context->data->remote_player) ||
+               isFinalMove(game_context->data->remote_player)) {
                 localMove = MoveScissors;
                 localState = StateScissors;
             } else {
@@ -844,23 +909,23 @@ static bool rps_state_machine_local_moved(GameContext* game_context, Move move) 
                 FURI_LOG_I(
                     TAG,
                     "Local scissors sync error. remote is %c.",
-                    game_context->data->remotePlayer);
+                    game_context->data->remote_player);
             }
         } else {
             FURI_LOG_E(
                 TAG,
                 "Invalid Local move '%c' error. lState=%c. rState=%c.",
                 move,
-                game_context->data->localPlayer,
-                game_context->data->remotePlayer);
+                game_context->data->local_player,
+                game_context->data->remote_player);
         }
     } else {
         FURI_LOG_E(
             TAG,
             "Invalid Local move '%c' error. lState=%c. rState=%c.",
             move,
-            game_context->data->localPlayer,
-            game_context->data->remotePlayer);
+            game_context->data->local_player,
+            game_context->data->remote_player);
     }
 
     if(MoveUnknown != localMove) {
@@ -869,8 +934,11 @@ static bool rps_state_machine_local_moved(GameContext* game_context, Move move) 
     }
 
     if(StateReady != localState) {
-        game_context->data->localPlayer = localState;
-        game_context->data->localMoveTick = furi_get_tick();
+        game_context->data->local_player = localState;
+        game_context->data->local_move_tick = furi_get_tick();
+        if(isError(localState)) {
+            game_context->data->screen_state = ScreenError;
+        }
     }
 
     return StateReady != localState;
@@ -883,87 +951,81 @@ static bool rps_state_machine_remote_moved(GameContext* game_context, Move move)
     GameState remoteState = StateReady;
     FURI_LOG_I(TAG, "Remote move %c.", move);
 
-    if(MoveCount1 == move && StateReady == game_context->data->remotePlayer) {
+    if(MoveCount1 == move && StateReady == game_context->data->remote_player) {
         remoteState = StateCount1;
-    } else if(MoveCount2 == move && StateCount1 == game_context->data->remotePlayer) {
-        if((StateCount1 == game_context->data->localPlayer) ||
-           (StateCount2 == game_context->data->localPlayer)) {
+    } else if(MoveCount2 == move && StateCount1 == game_context->data->remote_player) {
+        if((StateCount1 == game_context->data->local_player) ||
+           (StateCount2 == game_context->data->local_player)) {
             remoteState = StateCount2;
         } else {
             remoteState = StateErrorRemoteFast;
             FURI_LOG_I(
-                TAG, "Remote count sync error. local is %c.", game_context->data->localPlayer);
+                TAG, "Remote count sync error. local is %c.", game_context->data->local_player);
         }
-    } else if(MoveRock == move && StateCount2 == game_context->data->remotePlayer) {
-        if((StateCount2 == game_context->data->localPlayer) ||
-           isFinalMove(game_context->data->localPlayer)) {
+    } else if(MoveRock == move && StateCount2 == game_context->data->remote_player) {
+        if((StateCount2 == game_context->data->local_player) ||
+           isFinalMove(game_context->data->local_player)) {
             remoteState = StateRock;
         } else {
             remoteState = StateErrorRemoteFast;
             FURI_LOG_I(
-                TAG, "Remote rock sync error. local is %c.", game_context->data->localPlayer);
+                TAG, "Remote rock sync error. local is %c.", game_context->data->local_player);
         }
-    } else if(MovePaper == move && StateCount2 == game_context->data->remotePlayer) {
-        if((StateCount2 == game_context->data->localPlayer) ||
-           isFinalMove(game_context->data->localPlayer)) {
+    } else if(MovePaper == move && StateCount2 == game_context->data->remote_player) {
+        if((StateCount2 == game_context->data->local_player) ||
+           isFinalMove(game_context->data->local_player)) {
             remoteState = StatePaper;
         } else {
             remoteState = StateErrorRemoteFast;
             FURI_LOG_I(
-                TAG, "Remote paper sync error. local is %c.", game_context->data->localPlayer);
+                TAG, "Remote paper sync error. local is %c.", game_context->data->local_player);
         }
-    } else if(MoveScissors == move && StateCount2 == game_context->data->remotePlayer) {
-        if((StateCount2 == game_context->data->localPlayer) ||
-           isFinalMove(game_context->data->localPlayer)) {
+    } else if(MoveScissors == move && StateCount2 == game_context->data->remote_player) {
+        if((StateCount2 == game_context->data->local_player) ||
+           isFinalMove(game_context->data->local_player)) {
             remoteState = StateScissors;
         } else {
             remoteState = StateErrorRemoteFast;
             FURI_LOG_I(
-                TAG, "Remote scissors sync error. local is %c.", game_context->data->localPlayer);
+                TAG, "Remote scissors sync error. local is %c.", game_context->data->local_player);
         }
     } else {
         FURI_LOG_E(
             TAG,
             "Remote move '%c' error. lState=%c. rState=%c.",
             move,
-            game_context->data->localPlayer,
-            game_context->data->remotePlayer);
+            game_context->data->local_player,
+            game_context->data->remote_player);
         remoteState = StateError;
     }
 
     if(StateReady != remoteState) {
-        game_context->data->remotePlayer = remoteState;
-        game_context->data->remoteMoveTick = furi_get_tick();
+        game_context->data->remote_player = remoteState;
+        game_context->data->remote_move_tick = furi_get_tick();
+        if(isError(remoteState)) {
+            game_context->data->local_player = remoteState;
+            game_context->data->screen_state = ScreenError;
+        }
     }
 
     return StateReady != remoteState;
 }
 
-// This is the entry point for our application, which should match the application.fam file.
-int32_t rock_paper_scissors_app(void* p) {
-    UNUSED(p);
+static bool update_frequency(GameContext* game_context) {
+    uint32_t frequency = frequency_list[game_context->data->frequency_index];
 
-    // For this game we hardcode to 433.92MHz.
-    uint32_t frequency = 433920000;
+    // Stop the TX/RX worker if it is running.
+    if(subghz_tx_rx_worker_is_running(game_context->subghz_txrx)) {
+        FURI_LOG_T(TAG, "Stopped existing tx_rx_worker.");
+        subghz_tx_rx_worker_stop(game_context->subghz_txrx);
+        subghz_tx_rx_worker_free(game_context->subghz_txrx);
+        game_context->subghz_txrx = subghz_tx_rx_worker_alloc();
+    }
 
-    // TODO: Figure out if frequency is allowed & try multiple frequencies.
-
-    // Configure our initial data.
-    GameContext* game_context = malloc(sizeof(GameContext));
-    game_context->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    game_context->data = malloc(sizeof(GameData));
-    game_context->data->buffer = furi_string_alloc();
-    game_context->data->gameNumber = 42;
-    game_context->data->localMoveTick = 0;
-    game_context->data->localPlayer = StateLookingForPlayer;
-    game_context->data->remoteMoveTick = 0;
-    game_context->data->remotePlayer = StateLookingForPlayer;
-
-    // Queue for events
-    game_context->queue = furi_message_queue_alloc(8, sizeof(GameEvent));
-
-    // Subghz worker.
-    game_context->subghz_txrx = subghz_tx_rx_worker_alloc();
+    if(!furi_hal_region_is_frequency_allowed(frequency)) {
+        FURI_LOG_I(TAG, "Frequency not allowed %ld.", frequency);
+        return false;
+    }
 
     // Try to start the TX/RX on the frequency and configure our callback
     // whenever new data is received.
@@ -973,20 +1035,138 @@ int32_t rock_paper_scissors_app(void* p) {
     } else {
         FURI_LOG_E(TAG, "Failed to start subghz_tx_rx_worker.");
 
-        // For this game we don't show a friendly error about not being
-        // allowed to broadcast on this frequency.  Instead the application
-        // just exits.
         if(subghz_tx_rx_worker_is_running(game_context->subghz_txrx)) {
             subghz_tx_rx_worker_stop(game_context->subghz_txrx);
         }
-        subghz_tx_rx_worker_free(game_context->subghz_txrx);
-        furi_message_queue_free(game_context->queue);
-        furi_mutex_free(game_context->mutex);
-        furi_string_free(game_context->data->buffer);
-        free(game_context->data);
-        free(game_context);
-        return 2;
+
+        return false;
     }
+
+    FURI_LOG_I(TAG, "Listening on frequency %ld.", frequency);
+    return true;
+}
+
+static void remote_games_clear(GameContext* game_context) {
+    game_context->data->remote_selected_game = NULL;
+    while(game_context->data->remote_games) {
+        GameInfo* game = game_context->data->remote_games;
+        game_context->data->remote_games = game->next_game;
+        free(game);
+    }
+}
+
+static GameInfo* remote_games_current(GameContext* game_context) {
+    return game_context->data->remote_selected_game;
+}
+
+static bool remote_games_has_next(GameContext* game_context) {
+    return game_context->data->remote_selected_game &&
+           game_context->data->remote_selected_game->next_game;
+}
+
+static void remote_games_next(GameContext* game_context) {
+    if(game_context->data->remote_selected_game &&
+       game_context->data->remote_selected_game->next_game) {
+        game_context->data->remote_selected_game =
+            game_context->data->remote_selected_game->next_game;
+    }
+}
+
+static bool remote_games_has_previous(GameContext* game_context) {
+    return game_context->data->remote_selected_game &&
+           game_context->data->remote_games != game_context->data->remote_selected_game;
+}
+
+static void remote_games_previous(GameContext* game_context) {
+    if(game_context->data->remote_selected_game) {
+        uint16_t game_number = game_context->data->remote_selected_game->game_number;
+        if(game_number > 0) {
+            GameInfo* prevGame = remote_games_find(game_context, game_number - 1);
+            if(prevGame) {
+                game_context->data->remote_selected_game = prevGame;
+            }
+        }
+    }
+}
+
+static GameInfo* remote_games_find(GameContext* game_context, uint16_t game_number) {
+    GameInfo* prevGame = NULL;
+    GameInfo* game = game_context->data->remote_games;
+    while(game) {
+        if(game->game_number >= game_number) {
+            return prevGame;
+        }
+        prevGame = game;
+        game = game->next_game;
+    }
+    return prevGame;
+}
+
+static void remote_games_add(GameContext* game_context, GameEvent* game_event) {
+    furi_assert(game_context);
+    furi_assert(game_event);
+
+    if(furi_mutex_acquire(game_context->mutex, 200) != FuriStatusOk) {
+        return;
+    }
+
+    // Add the game to the list, if not already in the list.
+    GameInfo* game = remote_games_find(game_context, game_event->game_number);
+    if(game == NULL &&
+       (game_context->data->remote_games == NULL ||
+        game_context->data->remote_games->game_number != game_event->game_number)) {
+        game = malloc(sizeof(GameInfo));
+        game->game_number = game_event->game_number;
+        game->sender_name = game_event->sender_name;
+        game_event->sender_name = NULL; // We are now responsible for freeing this string.
+        game->next_game = game_context->data->remote_games;
+
+        game_context->data->remote_games = game;
+        FURI_LOG_I(TAG, "Game number %d added to front of list.", game_event->game_number);
+        if(!game_context->data->remote_selected_game) {
+            game_context->data->remote_selected_game = game;
+            FURI_LOG_I(TAG, "Game number %d selected.", game->game_number);
+        }
+    } else if(game != NULL && (game->game_number != game_event->game_number)) {
+        // We have a new game, so add it to the list.
+        GameInfo* newGame = malloc(sizeof(GameInfo));
+        newGame->game_number = game_event->game_number;
+        newGame->sender_name = game_event->sender_name;
+        game_event->sender_name = NULL; // We are now responsible for freeing this string.
+        newGame->next_game = game->next_game;
+        game->next_game = newGame;
+        FURI_LOG_I(
+            TAG, "Game number %d added after %d.", game_event->game_number, game->game_number);
+    } else {
+        FURI_LOG_T(TAG, "Game number %d already in list.", game_event->game_number);
+    }
+
+    furi_mutex_release(game_context->mutex);
+}
+
+// This is the entry point for our application, which should match the application.fam file.
+int32_t rock_paper_scissors_app(void* p) {
+    UNUSED(p);
+
+    // Configure our initial data.
+    GameContext* game_context = malloc(sizeof(GameContext));
+    game_context->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    game_context->data = malloc(sizeof(GameData));
+    game_context->data->buffer = furi_string_alloc();
+    game_context->data->game_number = 42;
+    game_context->data->frequency_index = 10;
+    game_context->data->local_move_tick = 0;
+    game_context->data->remote_move_tick = 0;
+    game_context->data->local_player = StateMainMenuHost;
+    game_context->data->remote_player = StateUnknown;
+    game_context->data->screen_state = ScreenMainMenu;
+    game_context->data->remote_games = NULL;
+
+    // Queue for events
+    game_context->queue = furi_message_queue_alloc(8, sizeof(GameEvent));
+
+    // Subghz worker.
+    game_context->subghz_txrx = subghz_tx_rx_worker_alloc();
 
     // All the subghz CLI apps disable charging; so our game does it too.
     furi_hal_power_suppress_charge_enter();
@@ -1010,12 +1190,187 @@ int32_t rock_paper_scissors_app(void* p) {
     bool processing = true;
     do {
         if(furi_message_queue_get(game_context->queue, &event, FuriWaitForever) == FuriStatusOk) {
+            FURI_LOG_I(TAG, "Processing message of type %d", event.type);
             switch(event.type) {
             case GameEventTypeKey:
-                if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
+                if((event.input.type == InputTypeLong) && (event.input.key == InputKeyBack)) {
+                    // Long press back to exit.
                     processing = false;
-                } else if(event.input.type == InputTypeShort) {
+                } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
+                    // Short press back to go back to main menu.
+                    game_context->data->local_player = StateMainMenuHost;
+                    game_context->data->remote_player = StateUnknown;
+                    game_context->data->screen_state = ScreenMainMenu;
+                } else if(
+                    game_context->data->screen_state == ScreenHostGame &&
+                    event.input.type == InputTypeShort) {
+                    GameEvent newEvent = {
+                        .type = GameEventLocalMove, .tick = furi_get_tick(), .move = MoveUnknown};
+                    switch(event.input.key) {
+                    case InputKeyUp:
+                        game_context->data->local_player = StateHostingSetFrequency;
+                        break;
+                    case InputKeyDown:
+                        if(furi_hal_region_is_frequency_allowed(
+                               frequency_list[game_context->data->frequency_index])) {
+                            game_context->data->local_player = StateHostingSetGameNumber;
+                        }
+                        break;
+                    case InputKeyOk:
+                        if(update_frequency(game_context)) {
+                            game_context->data->local_player = StateHostingLookingForPlayer;
+                        } else {
+                            game_context->data->local_player = StateHostingBadFrequency;
+                        }
+                        break;
+                    case InputKeyRight:
+                        if(game_context->data->local_player == StateHostingSetGameNumber) {
+                            if(game_context->data->game_number < 999) {
+                                game_context->data->game_number++;
+                            }
+                        } else if(
+                            game_context->data->local_player == StateHostingSetFrequency ||
+                            game_context->data->local_player == StateHostingBadFrequency) {
+                            if((uint8_t)(game_context->data->frequency_index + 1) <
+                               sizeof(frequency_list) / sizeof(frequency_list[0])) {
+                                game_context->data->frequency_index++;
+                                if(furi_hal_region_is_frequency_allowed(
+                                       frequency_list[game_context->data->frequency_index])) {
+                                    game_context->data->local_player = StateHostingSetFrequency;
+                                } else {
+                                    game_context->data->local_player = StateHostingBadFrequency;
+                                }
+                            }
+                        }
+                        break;
+                    case InputKeyLeft:
+                        if(game_context->data->local_player == StateHostingSetGameNumber) {
+                            if(game_context->data->game_number > 0) {
+                                game_context->data->game_number--;
+                            }
+                        } else if(
+                            game_context->data->local_player == StateHostingSetFrequency ||
+                            game_context->data->local_player == StateHostingBadFrequency) {
+                            if(game_context->data->frequency_index > 0) {
+                                game_context->data->frequency_index--;
+                                if(furi_hal_region_is_frequency_allowed(
+                                       frequency_list[game_context->data->frequency_index])) {
+                                    game_context->data->local_player = StateHostingSetFrequency;
+                                } else {
+                                    game_context->data->local_player = StateHostingBadFrequency;
+                                }
+                            }
+                        }
+                        break;
+
+                    default:
+                        FURI_LOG_T(TAG, "No support for key %d", event.input.key);
+                        break;
+                    }
+
+                    if(newEvent.move != MoveUnknown) {
+                        furi_message_queue_put(game_context->queue, &newEvent, FuriWaitForever);
+                    }
+                } else if(
+                    game_context->data->screen_state == ScreenJoinGame &&
+                    event.input.type == InputTypeShort) {
                     unsigned int joinGameNumber;
+                    GameInfo* game;
+                    GameEvent newEvent = {
+                        .type = GameEventLocalMove, .tick = furi_get_tick(), .move = MoveUnknown};
+                    switch(event.input.key) {
+                    case InputKeyUp:
+                        if(furi_hal_region_is_frequency_allowed(
+                               frequency_list[game_context->data->frequency_index])) {
+                            game_context->data->local_player = StateJoiningSetFrequency;
+                        } else {
+                            game_context->data->local_player = StateJoiningBadFrequency;
+                        }
+                        break;
+                    case InputKeyDown:
+                        if(furi_hal_region_is_frequency_allowed(
+                               frequency_list[game_context->data->frequency_index])) {
+                            game_context->data->local_player = StateJoiningSetGameNumber;
+                        }
+                        break;
+                    case InputKeyOk:
+                        game = remote_games_current(game_context);
+                        if(update_frequency(game_context) && game) {
+                            // We send "Join" when OK button clicked.
+
+                            joinGameNumber = game->game_number;
+                            if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) ==
+                               FuriStatusOk) {
+                                game_context->data->local_player = StateHostingLookingForPlayer;
+                                rps_broadcast_join(game_context, joinGameNumber);
+
+                                // TODO: This is a hack to get the game started. It would
+                                // be better to wait for the remote player to accept our join.
+                                game_context->data->remote_player = StateReady;
+                                game_context->data->remote_move_tick = furi_get_tick();
+                                game_context->data->local_player = StateReady;
+                                game_context->data->local_move_tick = furi_get_tick();
+                                game_context->data->screen_state = ScreenPlayingGame;
+
+                                furi_mutex_release(game_context->mutex);
+                            } else {
+                                FURI_LOG_E(TAG, "Failed to aquire mutex.");
+                            }
+                        } else {
+                            game_context->data->local_player = StateJoiningBadFrequency;
+                        }
+                        break;
+                    case InputKeyRight:
+                        if(game_context->data->local_player == StateJoiningSetGameNumber) {
+                            remote_games_next(game_context);
+                        } else if(
+                            game_context->data->local_player == StateJoiningSetFrequency ||
+                            game_context->data->local_player == StateJoiningBadFrequency) {
+                            if((uint8_t)(game_context->data->frequency_index + 1) <
+                               sizeof(frequency_list) / sizeof(frequency_list[0])) {
+                                game_context->data->frequency_index++;
+                                if(furi_hal_region_is_frequency_allowed(
+                                       frequency_list[game_context->data->frequency_index])) {
+                                    game_context->data->local_player = StateJoiningSetFrequency;
+                                } else {
+                                    game_context->data->local_player = StateJoiningBadFrequency;
+                                }
+                                remote_games_clear(game_context);
+                                update_frequency(game_context);
+                            }
+                        }
+                        break;
+                    case InputKeyLeft:
+                        if(game_context->data->local_player == StateJoiningSetGameNumber) {
+                            remote_games_previous(game_context);
+                        } else if(
+                            game_context->data->local_player == StateJoiningSetFrequency ||
+                            game_context->data->local_player == StateJoiningBadFrequency) {
+                            if(game_context->data->frequency_index > 0) {
+                                game_context->data->frequency_index--;
+                                if(furi_hal_region_is_frequency_allowed(
+                                       frequency_list[game_context->data->frequency_index])) {
+                                    game_context->data->local_player = StateJoiningSetFrequency;
+                                } else {
+                                    game_context->data->local_player = StateJoiningBadFrequency;
+                                }
+                                remote_games_clear(game_context);
+                                update_frequency(game_context);
+                            }
+                        }
+                        break;
+
+                    default:
+                        FURI_LOG_T(TAG, "No support for key %d", event.input.key);
+                        break;
+                    }
+
+                    if(newEvent.move != MoveUnknown) {
+                        furi_message_queue_put(game_context->queue, &newEvent, FuriWaitForever);
+                    }
+                } else if(
+                    game_context->data->screen_state == ScreenPlayingGame &&
+                    event.input.type == InputTypeShort) {
                     GameEvent newEvent = {
                         .type = GameEventLocalMove, .tick = furi_get_tick(), .move = MoveUnknown};
                     switch(event.input.key) {
@@ -1031,20 +1386,6 @@ int32_t rock_paper_scissors_app(void* p) {
                     case InputKeyDown:
                         newEvent.move = MoveScissors;
                         break;
-
-                    case InputKeyLeft:
-                        // Temporary: For now, we send "Join" when left button clicked.
-                        joinGameNumber = game_context->data->gameNumber;
-                        if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) ==
-                           FuriStatusOk) {
-                            rps_broadcast_join(game_context, joinGameNumber);
-                            rps_state_machine_remote_joined(game_context);
-                            furi_mutex_release(game_context->mutex);
-                        } else {
-                            FURI_LOG_E(TAG, "Failed to aquire mutex.");
-                        }
-                        break;
-
                     default:
                         FURI_LOG_T(TAG, "No support for key %d", event.input.key);
                         break;
@@ -1053,17 +1394,87 @@ int32_t rock_paper_scissors_app(void* p) {
                     if(newEvent.move != MoveUnknown) {
                         furi_message_queue_put(game_context->queue, &newEvent, FuriWaitForever);
                     }
+                } else if(
+                    game_context->data->screen_state == ScreenError &&
+                    event.input.type == InputTypeShort) {
+                    switch(event.input.key) {
+                    case InputKeyOk:
+                        game_context->data->local_player = StateMainMenuHost;
+                        game_context->data->remote_player = StateUnknown;
+                        game_context->data->screen_state = ScreenMainMenu;
+                        break;
+                    default:
+                        FURI_LOG_T(TAG, "No support for key %d", event.input.key);
+                        break;
+                    }
+                } else if(
+                    game_context->data->screen_state == ScreenMainMenu &&
+                    event.input.type == InputTypeShort) {
+                    switch(event.input.key) {
+                    case InputKeyUp:
+                        if(game_context->data->local_player == StateMainMenuJoin) {
+                            game_context->data->local_player = StateMainMenuHost;
+                        } else if(game_context->data->local_player == StateMainMenuPastGames) {
+                            game_context->data->local_player = StateMainMenuJoin;
+                        } else if(game_context->data->local_player == StateMainMenuMessage) {
+                            game_context->data->local_player = StateMainMenuPastGames;
+                        }
+                        break;
+                    case InputKeyDown:
+                        if(game_context->data->local_player == StateMainMenuHost) {
+                            game_context->data->local_player = StateMainMenuJoin;
+                        } else if(game_context->data->local_player == StateMainMenuJoin) {
+                            game_context->data->local_player = StateMainMenuPastGames;
+                        } else if(game_context->data->local_player == StateMainMenuPastGames) {
+                            game_context->data->local_player = StateMainMenuMessage;
+                        }
+                        break;
+                    case InputKeyOk:
+                        if(game_context->data->local_player == StateMainMenuHost) {
+                            if(furi_hal_region_is_frequency_allowed(
+                                   frequency_list[game_context->data->frequency_index])) {
+                                game_context->data->local_player = StateHostingSetFrequency;
+                            } else {
+                                game_context->data->local_player = StateHostingBadFrequency;
+                            }
+                            game_context->data->remote_player = StateUnknown;
+                            game_context->data->local_move_tick = furi_get_tick();
+                            game_context->data->remote_move_tick = furi_get_tick();
+                            game_context->data->screen_state = ScreenHostGame;
+                        } else if(game_context->data->local_player == StateMainMenuJoin) {
+                            if(furi_hal_region_is_frequency_allowed(
+                                   frequency_list[game_context->data->frequency_index])) {
+                                game_context->data->local_player = StateJoiningSetFrequency;
+                                update_frequency(game_context);
+                            } else {
+                                game_context->data->local_player = StateJoiningBadFrequency;
+                            }
+                            remote_games_clear(game_context);
+                            game_context->data->remote_player = StateUnknown;
+                            game_context->data->local_move_tick = furi_get_tick();
+                            game_context->data->remote_move_tick = furi_get_tick();
+                            game_context->data->screen_state = ScreenJoinGame;
+                        } else if(game_context->data->local_player == StateMainMenuPastGames) {
+                            game_context->data->screen_state = ScreenPastGames;
+                        } else if(game_context->data->local_player == StateMainMenuMessage) {
+                            game_context->data->screen_state = ScreenEditMessage;
+                        }
+                        break;
+                    default:
+                        FURI_LOG_T(TAG, "No support for key %d", event.input.key);
+                        break;
+                    }
                 }
                 break;
             case GameEventPlaySong:
-                play_song(game_context->data->localPlayer);
+                play_song(game_context->data->local_player);
                 break;
             case GameEventDataDetected:
                 rps_receive_data(game_context, event.tick);
                 break;
             case GameEventTypeTimer:
                 if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) == FuriStatusOk) {
-                    if(StateLookingForPlayer == game_context->data->localPlayer &&
+                    if(StateHostingLookingForPlayer == game_context->data->local_player &&
                        ++beaconCounter >= BEACON_DURATION) {
                         rps_broadcast_beacon(game_context);
                         beaconCounter = 0;
@@ -1075,15 +1486,18 @@ int32_t rock_paper_scissors_app(void* p) {
                 }
                 break;
             case GameEventRemoteBeacon:
-                FURI_LOG_I(TAG, "Remote beacon detected. game number %03u", event.gameNumber);
+                FURI_LOG_I(TAG, "Remote beacon detected. game number %03u", event.game_number);
+                remote_games_add(game_context, &event);
                 break;
             case GameEventRemoteJoined:
                 if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) == FuriStatusOk) {
-                    if(event.gameNumber == game_context->data->gameNumber) {
+                    if(event.game_number == game_context->data->game_number) {
                         rps_state_machine_remote_joined(game_context);
                     } else {
                         FURI_LOG_T(
-                            TAG, "Remote joining another Flipper on game %03u.", event.gameNumber);
+                            TAG,
+                            "Remote joining another Flipper on game %03u.",
+                            event.game_number);
                     }
                     furi_mutex_release(game_context->mutex);
                 } else {
@@ -1112,8 +1526,8 @@ int32_t rock_paper_scissors_app(void* p) {
             }
 
             // If message contains a sender name furi_string, free it.
-            if(event.senderName) {
-                furi_string_free(event.senderName);
+            if(event.sender_name) {
+                furi_string_free(event.sender_name);
             }
 
             // Send signal to update the screen (callback will get invoked at some point later.)

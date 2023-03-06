@@ -6,21 +6,24 @@ This is game of Rock, Paper, Scissors. In version 1, we use the subghz radio to 
 
 ## Status
 
-This is currently a work in progress...
+This is currently a work in progress!
+
+Completed work:
 
 - Most of the game logic is complete (two flippers should be able to play against each other.)
 - UI to show Flipper images instead of just debug text.
 - Vibro on button press (valid move).
 - "Song" when win/loss/draw.
+- Show games found & let user pick the game to join.
+- Config - Allow changing game number.
+- Config - Allow changing frequency.
 
 Remaining work (for subghz version):
 
-- Show games found & let user pick the game to join.
+- Receiving a Join game should do an ACK (to cause game on joiner to start).
 - Log joined game into SD card.
 - Log game results into SD card.
 - Allow viewing past games/scores.
-- Config - Allow changing game number.
-- Config - Allow changing frequency.
 - Config - Allow changing message on join.
 - Refactor the code, so it has less duplication.
 - Write tutorial.
@@ -55,7 +58,15 @@ These directions assume you are starting at the flipper desktop. If not, please 
 
 - Do the same steps on your second Flipper.
 
-- On one of the flippers press Left arrow to join the game.
+- On Flipper 1, choose "Host game".
+  - select a valid frequency.  (like "433.92" in US region)
+  - choose a game number.
+  - click OK button to start game.
+
+- On Flipper 2, choose "Join game".
+  - select the same valid frequency as Flipper 1.
+  - "game   none" should change to show the game number from Flipper 1 & its name.
+  -click OK button to join game.
 
 - Once two players are joined:
 
@@ -68,7 +79,9 @@ These directions assume you are starting at the flipper desktop. If not, please 
     - Scissors beat Paper.
     - Two identical items tie.
 
-- Press the BACK button to exit.
+- Short press the BACK button for the main menu.
+
+- Long press the BACK button to exit.
 
 ## HackRF One
 
@@ -98,11 +111,11 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
   - specifies the entry point for our application.
   - specifies we use the GUI.
   - specifies our icon is the rock_paper_scissors.png file.
-  - specifies our application can be found in the "Misc" category.
+  - specifies our application can be found in the "Game" category.
 
 - rock_paper_scissors.png
 
-  - The icon for our application that shows up in the "Misc" folder.
+  - The icon for our application.
 
 - rock_paper_scissors.c
   - This is the game applcation.
