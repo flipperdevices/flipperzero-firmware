@@ -98,7 +98,7 @@ int32_t bigsad_app(void* p) {
             if(event.key == InputKeyOk && btnIndex == 2) {
                 bool result = saved_struct_save("/int/.dolphin.state", &stateLocal->data, sizeof(DolphinStoreData), 0xD0, 0x01);
                 if(result){
-                    furi_delay_ms(500);
+                    furi_delay_ms(100);
                     furi_hal_power_reset();
                     running = false;
                     return 0;
