@@ -1,5 +1,5 @@
 // TODO: Handle back button correctly
-// TODO: Add keys to top of dictionary
+// TODO: Add keys to top of the user dictionary, not the bottom
 // To compile this FAP, use the following compiler flags:
 // - Add -O3 and -funroll-all-loops to CCFLAGS in site_scons/extapps.scons
 // - Remove -g from site_scons/cc.scons
@@ -66,6 +66,7 @@ typedef enum {
     MfkeyAttack,
     Complete,
     Error,
+    Help,
 } MfkeyState;
 
 typedef struct {
@@ -485,6 +486,25 @@ MfClassicDict* napi_mf_classic_dict_alloc(MfClassicDictType dict_type) {
     return dict;
 }
 
+bool napi_mf_classic_dict_add_key_str(MfClassicDict* dict, FuriString* key) {
+    furi_assert(dict);
+    furi_assert(dict->stream);
+    FURI_LOG_I(TAG, "Saving key: %s", furi_string_get_cstr(key));
+
+    furi_string_cat_printf(key, "\n");
+
+    bool key_added = false;
+    do {
+        if(!stream_seek(dict->stream, 0, StreamOffsetFromEnd)) break;
+        if(!stream_insert_string(dict->stream, key)) break;
+        dict->total_keys++;
+        key_added = true;
+    } while(false);
+
+    furi_string_left(key, 12);
+    return key_added;
+}
+
 void napi_mf_classic_dict_free(MfClassicDict* dict) {
     furi_assert(dict);
     furi_assert(dict->stream);
@@ -751,6 +771,8 @@ void mfkey32(ProgramState* const program_state) {
     if (user_dict_exists) {
         user_dict = napi_mf_classic_dict_alloc(MfClassicDictTypeUser);
         total_dict_keys += napi_mf_classic_dict_get_total_keys(user_dict);
+    } else {
+        user_dict = napi_mf_classic_dict_alloc(MfClassicDictTypeUser);
     }
     program_state->dict_count = total_dict_keys;
     program_state->mfkey_state = DictionaryAttack;
@@ -805,11 +827,15 @@ void mfkey32(ProgramState* const program_state) {
         }
     }
     // TODO: Update display to show all keys were found
-    //FURI_LOG_I(TAG, "Unique keys found:");
-    //for(i = 0; i < keyarray_size; i++) {
-    //    FURI_LOG_I(TAG, "%012" PRIx64, keyarray[i]);
-    //}
     // TODO: Prepend found key(s) to user dictionary file
+    //FURI_LOG_I(TAG, "Unique keys found:");
+    for(i = 0; i < keyarray_size; i++) {
+        //FURI_LOG_I(TAG, "%012" PRIx64, keyarray[i]);
+        FuriString* temp_key = furi_string_alloc();
+        furi_string_cat_printf(temp_key, "%012" PRIX64, keyarray[i]);
+        napi_mf_classic_dict_add_key_str(user_dict, temp_key);
+        furi_string_free(temp_key);
+    }
     napi_mf_classic_nonce_array_free(nonce_arr);
     if (system_dict_exists) {
         napi_mf_classic_dict_free(system_dict);
@@ -864,10 +890,26 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 50, 30, AlignLeft, AlignTop, "Ready");
         elements_button_center(canvas, "Start");
-    } else if (program_state->mfkey_state == Error) {
+        elements_button_right(canvas, "Help");
+    } else if (program_state->mfkey_state == Help) {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 50, 30, AlignLeft, AlignTop, "Error");
-        // TODO: Display error using program_state->err (MfkeyError)
+        canvas_draw_str_aligned(canvas, 7, 20, AlignLeft, AlignTop, "Collect nonces using");
+        canvas_draw_str_aligned(canvas, 7, 30, AlignLeft, AlignTop, "Detect Reader.");
+        canvas_draw_str_aligned(canvas, 7, 40, AlignLeft, AlignTop, "Developers: noproto, AG");
+        canvas_draw_str_aligned(canvas, 7, 50, AlignLeft, AlignTop, "Thanks: bettse");
+    } else if (program_state->mfkey_state == Error) {
+        canvas_draw_str_aligned(canvas, 50, 25, AlignLeft, AlignTop, "Error");
+        canvas_set_font(canvas, FontSecondary);
+        if (program_state->err == MissingNonces) {
+            canvas_draw_str_aligned(canvas, 25, 36, AlignLeft, AlignTop, "No nonces found");
+        } else if (program_state->err == ZeroNonces) {
+            canvas_draw_str_aligned(canvas, 25, 36, AlignLeft, AlignTop, "No nonces to crack");
+        } else if (program_state->err == OutOfMemory) {
+            // TODO: Currently not handled
+            canvas_draw_str_aligned(canvas, 25, 36, AlignLeft, AlignTop, "Out of memory");
+        } else {
+            // Unhandled error
+        }
     } else {
         // Unhandled program state
     }
@@ -953,24 +995,33 @@ int32_t mfkey32_main() {
                     case InputKeyDown:
                         break;
                     case InputKeyRight:
-                        // TODO: Help
+                        if (!program_state->is_thread_running && program_state->mfkey_state == Ready) {
+                            program_state->mfkey_state = Help;
+                            view_port_update(view_port);
+                        }
                         break;
                     case InputKeyLeft:
                         break;
                     case InputKeyOk:
-                        if (!program_state->is_thread_running) {
+                        if (!program_state->is_thread_running && program_state->mfkey_state == Ready) {
                             start_mfkey32_thread(program_state);
                             view_port_update(view_port);
                         }
                         break;
                     case InputKeyBack:
-                        program_state->close_thread_please = true;
-                        if(program_state->is_thread_running && program_state->mfkeythread) {
-                            // Wait until thread is finished
-                            furi_thread_join(program_state->mfkeythread);
+                        if (!program_state->is_thread_running && program_state->mfkey_state == Help) {
+                            program_state->mfkey_state = Ready;
+                            view_port_update(view_port);
+                        } else {
+                            program_state->close_thread_please = true;
+                            if(program_state->is_thread_running && program_state->mfkeythread) {
+                                // Wait until thread is finished
+                                furi_thread_join(program_state->mfkeythread);
+                            }
+                            program_state->close_thread_please = false;
+                            main_loop = false;
                         }
-                        program_state->close_thread_please = false;
-                        main_loop = false;
+                        break;
                     default:
                         break;
                     }
