@@ -79,7 +79,7 @@ cont:
 
 
 void 
-flipbip_itox(uint8_t i, char *str)
+flipbip_btox(unsigned char i, char *str)
 {
     unsigned char n;
  

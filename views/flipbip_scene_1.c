@@ -122,7 +122,7 @@ static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
     char *seed_working = malloc(64 * 2 + 1);
     // Convert the seed to a hex string
     for (size_t i = 0; i < 64; i++) {
-        flipbip_itox(model->seed[i], seed_working + (i * 2));
+        flipbip_btox(model->seed[i], seed_working + (i * 2));
     }
     
     flipbip_scene_1_draw_generic(seed_working, 22);
@@ -165,7 +165,7 @@ static void flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_type,
         memcpy(address, "0x", 2);
         // Convert the hash to a hex string
         for (size_t i = 0; i < 20; i++) {
-            flipbip_itox(buf[i], address + 2 + (i * 2));
+            flipbip_btox(buf[i], address + 2 + (i * 2));
         }
         flipbip_scene_1_draw_generic(address, 12);
         memzero(address, 42 + 1);
