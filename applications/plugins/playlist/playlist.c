@@ -187,13 +187,13 @@ static int playlist_worker_process(
             status = 1;
             break;
         }
-        if (worker->ctl_request_skip){
+        if(worker->ctl_request_skip) {
             worker->ctl_request_skip = false;
             FURI_LOG_D(TAG, "    (TX) Requested to skip. Cancelling and resending...");
             status = 0;
             break;
         }
-        if (worker->ctl_request_prev){
+        if(worker->ctl_request_prev) {
             worker->ctl_request_prev = false;
             FURI_LOG_D(TAG, "    (TX) Requested to prev. Cancelling and resending...");
             status = 3;
@@ -243,7 +243,14 @@ void updatePlayListView(PlaylistWorker* worker, const char* str) {
     view_port_update(worker->meta->view_port);
 }
 
-static bool playlist_worker_play_playlist_once(PlaylistWorker* worker, Storage* storage, FlipperFormat* fff_head, FlipperFormat* fff_data, FuriString* data, FuriString* preset, FuriString* protocol) {
+static bool playlist_worker_play_playlist_once(
+    PlaylistWorker* worker,
+    Storage* storage,
+    FlipperFormat* fff_head,
+    FlipperFormat* fff_data,
+    FuriString* data,
+    FuriString* preset,
+    FuriString* protocol) {
     //
     if(!flipper_format_rewind(fff_head)) {
         FURI_LOG_E(TAG, "Failed to rewind file");
@@ -273,7 +280,8 @@ static bool playlist_worker_play_playlist_once(PlaylistWorker* worker, Storage* 
 
             FlipperFormat* fff_file = flipper_format_file_alloc(storage);
 
-            int status = playlist_worker_process(worker, fff_file, fff_data, str, preset, protocol);
+            int status =
+                playlist_worker_process(worker, fff_file, fff_data, str, preset, protocol);
 
             // if there was an error, fff_file is not already freed
             if(status < 0) {
@@ -289,12 +297,11 @@ static bool playlist_worker_play_playlist_once(PlaylistWorker* worker, Storage* 
                 // exited, exit loop
             } else if(status == 2) {
                 return false;
-            }
-            else if(status == 3){
+            } else if(status == 3) {
                 //aqui rebobinamos y avanzamos de nuevo el fichero n-1 veces
                 //decrementamos el contador de ficheros enviados
                 worker->meta->current_count--;
-                if (worker->meta->current_count > 0){
+                if(worker->meta->current_count > 0) {
                     worker->meta->current_count--;
                 }
                 //rebobinamos el fichero
@@ -303,8 +310,8 @@ static bool playlist_worker_play_playlist_once(PlaylistWorker* worker, Storage* 
                     return false;
                 }
                 //avanzamos el fichero n-1 veces
-                for(int j = 0; j < worker->meta->current_count; j++){
-                    flipper_format_read_string(fff_head, "sub", data);                    
+                for(int j = 0; j < worker->meta->current_count; j++) {
+                    flipper_format_read_string(fff_head, "sub", data);
                 }
                 break;
             }
@@ -356,7 +363,8 @@ static int32_t playlist_worker_thread(void* ctx) {
             worker->meta->current_playlist_repetition,
             worker->meta->playlist_repetitions);
 
-        if(!playlist_worker_play_playlist_once( worker, storage, fff_head, fff_data, data, preset, protocol)) {
+        if(!playlist_worker_play_playlist_once(
+               worker, storage, fff_head, fff_data, data, preset, protocol)) {
             break;
         }
     }

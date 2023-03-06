@@ -387,20 +387,20 @@ static void gui_input(Gui* gui, InputEvent* input_event) {
 
         if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
             switch(input_event->key) {
-                case InputKeyUp:
-                    input_event->key = InputKeyDown;
-                    break;
-                case InputKeyDown:
-                    input_event->key = InputKeyUp;
-                    break;
-                case InputKeyLeft:
-                    input_event->key = InputKeyRight;
-                    break;
-                case InputKeyRight:
-                    input_event->key = InputKeyLeft;
-                    break;
-                default:
-                    break;
+            case InputKeyUp:
+                input_event->key = InputKeyDown;
+                break;
+            case InputKeyDown:
+                input_event->key = InputKeyUp;
+                break;
+            case InputKeyLeft:
+                input_event->key = InputKeyRight;
+                break;
+            case InputKeyRight:
+                input_event->key = InputKeyLeft;
+                break;
+            default:
+                break;
             }
         }
 
