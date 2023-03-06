@@ -10,7 +10,7 @@ This Flipper application ("FAP") cracks Mifare Classic 1K keys on your Flipper Z
 2. Use the Mfkey32 app to crack the keys
 3. Scan the Mifare Classic card
 
-All cracked nonces are automatically added to the top of your user dictionary, allowing you to rapidly clone Mifare Classic 1K cards upon re-scanning them.
+All cracked nonces are automatically added to your user dictionary, allowing you to clone Mifare Classic 1K cards upon re-scanning them.
 
 ## Builds
 Published: https://github.com/noproto/FlipperMfkey/releases
