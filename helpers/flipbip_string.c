@@ -28,6 +28,12 @@
  */
 #include "flipbip_string.h"
 #include <ctype.h>
+#include <stdint.h>
+#include <string.h>
+
+#include "../crypto/memzero.h"
+#include "../crypto/rc4.h"
+
 char *
 flipbip_strtok(char *s, const char *delim)
 {
@@ -77,11 +83,11 @@ cont:
 	/* NOTREACHED */
 }
 
-
 void 
-flipbip_btox(unsigned char i, char *str)
+flipbip_btox(const unsigned char in, char *str)
 {
     unsigned char n;
+    unsigned char i = in;
  
     str += 2;
     *str = '\0';
@@ -90,4 +96,41 @@ flipbip_btox(unsigned char i, char *str)
         *--str = "0123456789abcdef"[i & 0x0F];
         i >>= 4;
     }
+}
+void 
+flipbip_xtob(const char *str, unsigned char *out, int out_len) 
+{
+    int len = strlen(str) / 2;
+    if (len > out_len) len = out_len;
+    for (int i = 0; i < len; i++) {
+        char c = 0;
+        if (str[i * 2] >= '0' && str[i * 2] <= '9') 
+            c += (str[i * 2] - '0') << 4;
+        if ((str[i * 2] & ~0x20) >= 'A' && (str[i * 2] & ~0x20) <= 'F')
+            c += (10 + (str[i * 2] & ~0x20) - 'A') << 4;
+        if (str[i * 2 + 1] >= '0' && str[i * 2 + 1] <= '9')
+            c += (str[i * 2 + 1] - '0');
+        if ((str[i * 2 + 1] & ~0x20) >= 'A' && (str[i * 2 + 1] & ~0x20) <= 'F')
+            c += (10 + (str[i * 2 + 1] & ~0x20) - 'A');
+        out[i] = c;
+    }
+}
+
+void 
+flipbip_cipher(const unsigned char* key_in, const char* in, char* out)
+{
+    RC4_CTX ctx;
+    uint8_t buf[256];
+
+    memzero(buf, 256);
+    flipbip_xtob(in, buf, 256);
+
+    rc4_init(&ctx, key_in, 64);
+    rc4_encrypt(&ctx, buf, 256);
+
+    for (size_t i = 0; i < 256; i++) {
+        flipbip_btox(buf[i], out + i * 2);
+    }
+
+    memzero(buf, 256);
 }

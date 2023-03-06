@@ -12,6 +12,7 @@
 #include "../helpers/flipbip_file.h"
 
 #include <string.h>
+#include "../crypto/rand.h"
 #include "../crypto/bip32.h"
 #include "../crypto/bip39.h"
 #include "../crypto/curves.h"
@@ -269,10 +270,15 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
 
     // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
-    model->mnemonic = mnemonic_generate(model->strength);
-
-    flipbip_save_settings("123456beep");
-    // flipbip_load_file(EXT_PATH("flipbip.dat"));
+    
+    const char* mnemonic = mnemonic_generate(strength);
+    if (!flipbip_save_settings_secure(mnemonic)) return;
+    
+    char* mnemonic2 = malloc(256+1);
+    memzero((void*)mnemonic2, 256+1);
+    if (!flipbip_load_settings_secure(mnemonic2)) return;
+    
+    model->mnemonic = mnemonic2;
     
     // test mnemonic
     //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";

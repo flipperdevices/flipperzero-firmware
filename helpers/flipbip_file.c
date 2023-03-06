@@ -1,7 +1,8 @@
 #include "flipbip_file.h"
-#include "../flipbip.h"
+#include "../helpers/flipbip_string.h"
 
 #include "../crypto/memzero.h"
+#include "../crypto/rand.h"
 
 #include <storage/storage.h>
 
@@ -22,8 +23,9 @@ bool flipbip_load_settings(char* settings) {
             i++;
         }
     } else {
-        memzero(settings, strlen(settings));
-        settings[0] = '\0';
+        strcpy(settings, "uhoh");
+        //memzero(settings, strlen(settings));
+        //settings[0] = '\0';
     }
     storage_file_close(settings_file);
     storage_file_free(settings_file);
@@ -49,11 +51,15 @@ bool flipbip_load_settings(char* settings) {
     return true;
 }
 
-bool flipbip_save_settings(const char* settings) {
+bool flipbip_save_settings(const char* settings, bool append) {
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
     File* settings_file = storage_file_alloc(fs_api);
     storage_common_mkdir(fs_api, FLIPBIP_APP_BASE_FOLDER);
-    if(storage_file_open(settings_file, FLIPBIP_SETTINGS_PATH, FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
+    int open_mode = FSOM_OPEN_ALWAYS;
+    if(append) {
+        open_mode = FSOM_OPEN_APPEND;
+    }
+    if(storage_file_open(settings_file, FLIPBIP_SETTINGS_PATH, FSAM_WRITE, open_mode)) {
         storage_file_write(
             settings_file,
             settings,
@@ -63,6 +69,76 @@ bool flipbip_save_settings(const char* settings) {
     storage_file_close(settings_file);
     storage_file_free(settings_file);
     furi_record_close(RECORD_STORAGE);
+
+    return true;
+}
+
+bool flipbip_load_settings_secure(char* settings) {
+    const size_t hlen = 4;
+    const size_t klen = 128;
+    const size_t slen = 512;
+    const size_t dlen = hlen + klen + slen;
+    
+    char *data = malloc(dlen+1);
+    memzero(data, dlen+1);
+
+    if (!flipbip_load_settings(data)) return false;
+
+    // if (strncmp(data, "fb01", hlen) != 0) {
+    //     memzero(data, dlen);
+    //     free(data);
+    //     return true;
+    // }
+    data += hlen;
+
+    uint8_t key[64];
+    flipbip_xtob(data, key, 64);
+    data += klen;
+
+    flipbip_cipher(key, data, data);
+    flipbip_xtob(data, (unsigned char*)settings, 256);
+
+    data = data - klen - hlen;
+    memzero(data, dlen);
+    free(data);
+
+    return true;
+}
+
+bool flipbip_save_settings_secure(const char* settings) {
+    const size_t hlen = 4;
+    const size_t klen = 128;
+    const size_t slen = 512;
+    const size_t dlen = hlen + klen + slen;
+
+    size_t len = strlen(settings);
+    if (len > 256) len = 256;
+    
+    char *data = malloc(dlen + 1);
+    memzero(data, dlen + 1);
+    
+    memcpy(data, "fb01", hlen);
+    data += hlen - 1;
+
+    uint8_t key[64];
+    random_buffer(key, 64);
+    for (size_t i = 0; i < 64; i++) {
+        flipbip_btox(key[i], data + (i * 2));
+    }
+    data += klen;
+
+    for (size_t i = 0; i < len; i++) {
+        flipbip_btox(settings[i], data + (i * 2));
+    }
+    flipbip_cipher(key, data, data);
+
+    data = data - klen - hlen;
+    data[dlen] = '\0';
+
+    flipbip_save_settings(data, false);
+
+    memzero(data, dlen);
+    free(data);
 
     return true;
 }
