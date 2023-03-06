@@ -43,7 +43,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [New pin reset splashscreen #2405 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2405)
 - OFW: [iButton system and app refactoring #2388 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2388)
 - Temporarily Removed: [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
-- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - UL: Updated: [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - UL: Updated: Fix iButton app - add manually - duplicate names
 - Fix Music Beeper Location
@@ -58,9 +57,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [(ESP32CAM) QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
 - UL: Updates to SubGHz Protocols with Error Handling
 - UL: Keeloq Default Layout For Non Standard Remotes
+- [Chess Updated Readme (By okalachev)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/540)
 - UL: SubGHz Remote Fix unirf freeze (protocol deserialize status ok) (By Willy-JL)
 - UL: Blackjack game: fix bug counting more than one ace (By 403-Fruit)
 - UL: SubGHz: Fix 464Mhz was showing up in Frequency analyzer all the time due to noise (By XMasterx)
+- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">
 
