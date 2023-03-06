@@ -199,26 +199,6 @@ void rollback_word_noret(struct Crypto1State *s, uint32_t in, int x) {
     return;
 }
 
-uint32_t rollback_word(struct Crypto1State *s, uint32_t in, int x) {
-    uint32_t res_ret = 0;
-    uint8_t ret;
-    uint32_t feedin, t, next_in;
-    for (int i = 31; i >= 0; i--) {
-        next_in = BEBIT(in, i);
-        s->odd &= 0xffffff;
-        t = s->odd, s->odd = s->even, s->even = t;
-        ret = filter(s->odd);
-        feedin = ret & (!!x);
-        feedin ^= s->even & 1;
-        feedin ^= LF_POLY_EVEN & (s->even >>= 1);
-        feedin ^= LF_POLY_ODD & s->odd;
-        feedin ^= !!next_in;
-        s->even |= (evenparity32(feedin)) << 23;
-        res_ret |= (ret << (24 ^ i));
-    }
-    return ret;
-}
-
 int key_already_found_for_nonce(uint64_t *keyarray, int keyarray_size, uint32_t uid_xor_nt1, uint32_t nr1_enc, uint32_t p64b, uint32_t ar1_enc) {
     for(int k = 0; k < keyarray_size; k++) {
         struct Crypto1State temp = {0, 0};
