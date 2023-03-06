@@ -271,8 +271,8 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     model->strength = strength;
     model->mnemonic = mnemonic_generate(model->strength);
 
-    flipbip_save_file(EXT_PATH("flipbip.dat"));
-    flipbip_load_file(EXT_PATH("flipbip.dat"));
+    flipbip_save_settings("123456beep");
+    // flipbip_load_file(EXT_PATH("flipbip.dat"));
     
     // test mnemonic
     //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
