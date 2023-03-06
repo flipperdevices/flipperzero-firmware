@@ -151,11 +151,11 @@ fap_dist = [
     ),
     *(
         distenv.Install(
-            dist_dir.File(dist_path).dir,
+            dist_dir.File(dist_entry[1]).dir,
             app_artifact.compact[0],
         )
         for app_artifact in external_app_list
-        for dist_path in app_artifact.dist_paths
+        for dist_entry in app_artifact.dist_entries
     ),
 ]
 Depends(
