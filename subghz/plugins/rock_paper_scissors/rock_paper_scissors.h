@@ -10,8 +10,16 @@
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+#include <storage/storage.h>
 
 #include <lib/subghz/subghz_tx_rx_worker.h>
+
+#define RPS_APPS_DATA_FOLDER EXT_PATH("apps_data")
+#define RPS_GAME_FOLDER      \
+    RPS_APPS_DATA_FOLDER "/" \
+                         "rock_paper_scissors"
+#define RPS_GAME_FILE_NAME "games.txt"
+#define RPS_GAME_PATH RPS_GAME_FOLDER "/" RPS_GAME_FILE_NAME
 
 // This is sent at the beginning of all RF messages. NOTE: It must end with the ':' character.
 #define RPS_GAME_NAME "RPS:"
@@ -19,6 +27,7 @@
 
 // Name for "N", followed by your name without any spaces.
 #define CONTACT_INFO "NYourNameHere"
+#define CONTACT_INFO_NONE "NNone"
 
 // The message max length should be no larger than a value around 60 to 64.
 #define MESSAGE_MAX_LEN 60
@@ -181,6 +190,7 @@ typedef struct {
     uint32_t tick; // The time the event originated (furi_get_tick()).
     uint16_t game_number; // The game number for the message.
     FuriString* sender_name; // If not null, be sure to release this string.
+    FuriString* sender_contact; // If not null, be sure to release this string.
 } GameEvent;
 
 typedef struct GameInfo {
@@ -201,6 +211,8 @@ typedef struct {
     uint32_t remote_move_tick;
     struct GameInfo* remote_games;
     struct GameInfo* remote_selected_game;
+    FuriString* remote_name;
+    FuriString* remote_contact;
 } GameData;
 
 // This is our application context.
@@ -343,7 +355,7 @@ static void rps_state_machine_update(GameContext* game_context);
 
 // Update the state machine to reflect that a remote user joined the game.
 // @param game_context pointer to a GameContext.
-static void rps_state_machine_remote_joined(GameContext* game_context);
+static bool rps_state_machine_remote_joined(GameContext* game_context);
 
 // Update the state machine to reflect the local user's move.
 // @param game_context pointer to a GameContext.
@@ -365,6 +377,8 @@ static bool remote_games_has_previous(GameContext* game_context);
 static void remote_games_next(GameContext* game_context);
 static void remote_games_previous(GameContext* game_context);
 static void remote_games_add(GameContext* game_context, GameEvent* game_event);
+
+static void save_result(GameContext* game_context);
 
 // This is the entry point for our application, which should match the application.fam file.
 int32_t rock_paper_scissors_app(void* p);

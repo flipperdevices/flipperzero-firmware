@@ -156,7 +156,7 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
         message[MESSAGE_MAX_LEN - 1] = 0;
 
         unsigned int game_number;
-        char randomInfo[MESSAGE_MAX_LEN];
+        char sender_contact[MESSAGE_MAX_LEN];
         char sender_name[9];
         char tmp;
         Move move = MoveUnknown;
@@ -213,17 +213,20 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
                    (const char*)message + game_name_len + 2,
                    "%03u%s :%8s",
                    &game_number,
-                   randomInfo,
+                   sender_contact,
                    sender_name) == 3) {
-                FURI_LOG_T(TAG, "Join had randomInfo of >%s<", randomInfo);
+                FURI_LOG_T(TAG, "Join had contact of >%s<", sender_contact);
 
                 // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
                 FuriString* name = furi_string_alloc();
                 furi_string_set(name, sender_name);
+                FuriString* contact = furi_string_alloc();
+                furi_string_set(contact, sender_contact);
 
                 GameEvent event = {
                     .type = GameEventRemoteJoined,
                     .sender_name = name,
+                    .sender_contact = contact,
                     .game_number = game_number};
                 furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
             } else {
@@ -234,12 +237,23 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
         case GameRfPurposeJoinAcknowledge:
             if(sscanf(
                    (const char*)message + game_name_len + 2,
-                   "%03u :%8s",
+                   "%03u%s :%8s",
                    &game_number,
-                   sender_name) == 2) {
+                   sender_contact,
+                   sender_name) == 3) {
                 FURI_LOG_T(TAG, "Join acknowledge for game %d.", game_number);
+                FURI_LOG_T(TAG, "Join ack had contact of >%s<", sender_contact);
+
+                FuriString* name = furi_string_alloc();
+                furi_string_set(name, sender_name);
+                FuriString* contact = furi_string_alloc();
+                furi_string_set(contact, sender_contact);
+
                 GameEvent event = {
-                    .type = GameEventRemoteJoinAcknowledged, .game_number = game_number};
+                    .type = GameEventRemoteJoinAcknowledged,
+                    .sender_name = name,
+                    .sender_contact = contact,
+                    .game_number = game_number};
                 furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
             } else {
                 FURI_LOG_W(TAG, "Failed to parse join acknowledge message. >%s<", message);
@@ -742,21 +756,22 @@ static void rps_broadcast_join(GameContext* game_context) {
 }
 
 // Send message that acknowledges Flipper joining a specific game.
-// We broadcast - "RPS:" + joinAck"A" + version"A" + game"###" + " :" + "YourFlip" + "\r\n"
+// We broadcast - "RPS:" + joinAck"A" + version"A" + game"###" + "NYourNameHere" +" :" + "YourFlip" + "\r\n"
 // @param game_context pointer to a GameContext.
 static void rps_broadcast_join_acknowledge(GameContext* game_context) {
     GameData* data = game_context->data;
     unsigned int gameNumber = data->game_number;
     FURI_LOG_I(TAG, "Acknowledge joining game %d.", gameNumber);
 
-    // The message for game 42 should look like...  "RPS:AA042 :YourFlip\r\n"
+    // The message for game 42 should look like...  "RPS:AA042NYourNameHere :YourFlip\r\n"
     furi_string_printf(
         data->buffer,
-        "%s%c%c%03u :%s\r\n",
+        "%s%c%c%03u%s :%s\r\n",
         RPS_GAME_NAME,
         GameRfPurposeJoinAcknowledge,
         MAJOR_VERSION,
         data->game_number,
+        CONTACT_INFO,
         furi_hal_version_get_name_ptr());
     rps_broadcast(game_context, data->buffer);
 }
@@ -873,7 +888,7 @@ static void rps_state_machine_update(GameContext* game_context) {
 
 // Update the state machine to reflect that a remote user joined the game.
 // @param game_context pointer to a GameContext.
-static void rps_state_machine_remote_joined(GameContext* game_context) {
+static bool rps_state_machine_remote_joined(GameContext* game_context) {
     if(StateHostingLookingForPlayer == game_context->data->local_player) {
         FURI_LOG_I(TAG, "Remote player joined our game!");
         game_context->data->remote_player = StateReady;
@@ -881,9 +896,11 @@ static void rps_state_machine_remote_joined(GameContext* game_context) {
         game_context->data->local_player = StateReady;
         game_context->data->local_move_tick = furi_get_tick();
         game_context->data->screen_state = ScreenPlayingGame;
+        return true;
     } else {
         FURI_LOG_I(
             TAG, "Remote requested join, but we are state %c!", game_context->data->local_player);
+        return false;
     }
 }
 
@@ -1178,6 +1195,75 @@ static void remote_games_add(GameContext* game_context, GameEvent* game_event) {
     } else {
         FURI_LOG_T(TAG, "Game number %d already in list.", game_event->game_number);
     }
+
+    furi_mutex_release(game_context->mutex);
+}
+
+// Saves a game result to the file system.
+// @param game_context pointer to a GameContext.
+static void save_result(GameContext* game_context) {
+    if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) != FuriStatusOk) {
+        return;
+    }
+
+    FuriHalRtcDateTime datetime;
+    furi_hal_rtc_get_datetime(&datetime);
+
+    furi_string_printf(
+        game_context->data->buffer,
+        "%c%c\t%04d-%02d-%02dT%02d:%02d:%02d\t%s\t%s",
+        game_context->data->local_player,
+        game_context->data->remote_player,
+        datetime.year,
+        datetime.month,
+        datetime.day,
+        datetime.hour,
+        datetime.minute,
+        datetime.second,
+        (game_context->data->remote_name) ? furi_string_get_cstr(game_context->data->remote_name) :
+                                            "Unknown",
+        (game_context->data->remote_contact) ?
+            furi_string_get_cstr(game_context->data->remote_contact) :
+            CONTACT_INFO_NONE);
+
+    FURI_LOG_I(TAG, "Saving result: %s", furi_string_get_cstr(game_context->data->buffer));
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* games_file = storage_file_alloc(storage);
+
+    // If apps_data directory doesn't exist, create it.
+    if(!storage_dir_exists(storage, RPS_APPS_DATA_FOLDER)) {
+        FURI_LOG_I(TAG, "Creating directory: %s", RPS_APPS_DATA_FOLDER);
+        storage_simply_mkdir(storage, RPS_APPS_DATA_FOLDER);
+    } else {
+        FURI_LOG_I(TAG, "Directory exists: %s", RPS_APPS_DATA_FOLDER);
+    }
+
+    // If rock_paper_scissors directory doesn't exist, create it.
+    if(!storage_dir_exists(storage, RPS_GAME_FOLDER)) {
+        FURI_LOG_I(TAG, "Creating directory: %s", RPS_GAME_FOLDER);
+        storage_simply_mkdir(storage, RPS_GAME_FOLDER);
+    } else {
+        FURI_LOG_I(TAG, "Directory exists: %s", RPS_GAME_FOLDER);
+    }
+
+    // Append contents to ending of games.txt (create if doesn't exist)
+    if(storage_file_open(games_file, RPS_GAME_PATH, FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        FURI_LOG_E(TAG, "Opened file: %s", RPS_GAME_PATH);
+        if(!storage_file_write(
+               games_file,
+               furi_string_get_cstr(game_context->data->buffer),
+               furi_string_size(game_context->data->buffer))) {
+            FURI_LOG_E(TAG, "Failed to write to file.");
+        }
+        storage_file_write(games_file, "\n", 1);
+    } else {
+        FURI_LOG_E(TAG, "Failed to open file: %s", RPS_GAME_PATH);
+    }
+
+    storage_file_close(games_file);
+    storage_file_free(games_file);
+    furi_record_close(RECORD_STORAGE);
 
     furi_mutex_release(game_context->mutex);
 }
@@ -1496,6 +1582,7 @@ int32_t rock_paper_scissors_app(void* p) {
                 break;
             case GameEventPlaySong:
                 play_song(game_context->data->local_player);
+                save_result(game_context);
                 break;
             case GameEventDataDetected:
                 rps_receive_data(game_context, event.tick);
@@ -1520,8 +1607,20 @@ int32_t rock_paper_scissors_app(void* p) {
             case GameEventRemoteJoined:
                 if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) == FuriStatusOk) {
                     if(event.game_number == game_context->data->game_number) {
-                        rps_state_machine_remote_joined(game_context);
-                        rps_broadcast_join_acknowledge(game_context);
+                        if(rps_state_machine_remote_joined(game_context)) {
+                            rps_broadcast_join_acknowledge(game_context);
+                            if(game_context->data->remote_name) {
+                                furi_string_free(game_context->data->remote_name);
+                            }
+                            game_context->data->remote_name = event.sender_name;
+                            if(game_context->data->remote_contact) {
+                                furi_string_free(game_context->data->remote_contact);
+                            }
+                            game_context->data->remote_contact = event.sender_contact;
+                            // Take ownership of the name and contact
+                            event.sender_name = NULL;
+                            event.sender_contact = NULL;
+                        }
                     } else {
                         FURI_LOG_T(
                             TAG,
@@ -1537,11 +1636,22 @@ int32_t rock_paper_scissors_app(void* p) {
                 if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) == FuriStatusOk) {
                     if(event.game_number == game_context->data->game_number) {
                         FURI_LOG_I(TAG, "Remote join acknowledged.");
+                        if(game_context->data->remote_name) {
+                            furi_string_free(game_context->data->remote_name);
+                        }
+                        game_context->data->remote_name = event.sender_name;
+                        if(game_context->data->remote_contact) {
+                            furi_string_free(game_context->data->remote_contact);
+                        }
+                        game_context->data->remote_contact = event.sender_contact;
                         game_context->data->remote_player = StateReady;
                         game_context->data->remote_move_tick = furi_get_tick();
                         game_context->data->local_player = StateReady;
                         game_context->data->local_move_tick = furi_get_tick();
                         game_context->data->screen_state = ScreenPlayingGame;
+                        // Take ownership of the name and contact
+                        event.sender_name = NULL;
+                        event.sender_contact = NULL;
                     } else {
                         FURI_LOG_T(
                             TAG,
@@ -1601,6 +1711,13 @@ int32_t rock_paper_scissors_app(void* p) {
     furi_message_queue_free(game_context->queue);
     furi_mutex_free(game_context->mutex);
     furi_string_free(game_context->data->buffer);
+    if(game_context->data->remote_name) {
+        furi_string_free(game_context->data->remote_name);
+    }
+    if(game_context->data->remote_contact) {
+        furi_string_free(game_context->data->remote_contact);
+    }
+    remote_games_clear(game_context);
     free(game_context->data);
     free(game_context);
 

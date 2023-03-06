@@ -18,10 +18,10 @@ Completed work:
 - Config - Allow changing game number.
 - Config - Allow changing frequency.
 - Receiving a Join game does an ACK (to cause game on joiner to start).
+- Log game results & contact info onto SD card.
 
 Remaining work (for subghz version):
 
-- Log game results & contact info onto SD card.
 - Config - Allow changing hard-coded CONTACT_INFO message.
 - Allow viewing past games/scores.
 - A join ACK removes it from the list of available games.
