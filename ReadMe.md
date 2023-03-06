@@ -69,6 +69,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - Updated: [Sub-GHz Remote (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) - Now moves files to correct folder (Thanks to XMasterx)
+- Updated: [Dab Timer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/main/clock) - Fix Time at 12PM
 
 <a name="release">
 
