@@ -10,12 +10,12 @@ The goal of this project is to see how much crypto functionality can be brought 
 ## How to install on Flipper Zero
 - If you do not have one, download a Flipper Zero firmware to get the `fbt` build tool
 - Plug your Flipper Zero in via USB
-- Copy the contents of this folder into the applications_user folder of your firmware
-- Modify the `site_scons/cc.scons` file in the Flipper Zero firmware to remove the `"-Wdouble-promotion"` warning and add the `"-Os"` flag
+- Copy the contents of this folder into the `applications_user` folder of your firmware
+- Modify the `site_scons/cc.scons` file in the Flipper Zero firmware to add the `"-Os"` flag
 
 Then run the command: 
  ```
-.\fbt COMPACT=1 DEBUG=0 launch_app APPSRC=applications_user/FlipBIP
+./fbt COMPACT=1 DEBUG=0 launch_app APPSRC=applications_user/FlipBIP
  ```
 The application will be compiled and copied onto your device
 
