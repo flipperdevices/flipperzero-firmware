@@ -72,6 +72,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Dab Timer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/main/clock) - Fix Time at 12PM
 - Added: [FlipBIP Crypto Tool (By xtruan)](https://github.com/xtruan/FlipBIP)
 - OFW PR: [Support reseting iCx cards #2451 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/2451)
+- OFW PR: [Dumb mode menu freeze fix #2456 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2456)
 
 <a name="release">
 
