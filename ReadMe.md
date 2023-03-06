@@ -66,7 +66,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fix SD card CID parsing #2463 (By hramrach)](https://github.com/flipperdevices/flipperzero-firmware/pull/2463)
 - OFW: [Fixed picopass load save file overrun #2464 (By GuruSteve)](https://github.com/flipperdevices/flipperzero-firmware/pull/2464)
 - UL: Updated: [Sub-GHz Bruteforcer v3.4 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
-- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - Updated: [Sub-GHz Remote (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) - Now moves files to correct folder (Thanks to XMasterx)
 - Updated: [Dab Timer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/main/clock) - Fix Time at 12PM
@@ -76,6 +75,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [NFC: Support reading Mifare Classic key B from sector trailer, reading sector with B key where A key can't read block, Nfc Magic app not using NFC folder by default (in file select) #2437 (By AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2437)
 - OFW PR: [Upside down / left handed orientation support #2462 (By hramrach)](https://github.com/flipperdevices/flipperzero-firmware/pull/2462)
 - OFW PR: [More UI fixes and improvements #2419 (By liamhays)](https://github.com/flipperdevices/flipperzero-firmware/pull/2419)
+- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">
 
