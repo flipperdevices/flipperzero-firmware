@@ -1,5 +1,8 @@
 #include "gui_i.h"
 #include <assets_icons.h>
+#include <furi.h>
+#include <furi_hal.h>
+#include <furi_hal_rtc.h>
 
 #define TAG "GuiSrv"
 
@@ -380,6 +383,25 @@ static void gui_input(Gui* gui, InputEvent* input_event) {
 
         if(!(gui->ongoing_input & ~key_bit) && input_event->type == InputTypePress) {
             gui->ongoing_input_view_port = view_port;
+        }
+
+        if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+            switch(input_event->key) {
+                case InputKeyUp:
+                    input_event->key = InputKeyDown;
+                    break;
+                case InputKeyDown:
+                    input_event->key = InputKeyUp;
+                    break;
+                case InputKeyLeft:
+                    input_event->key = InputKeyRight;
+                    break;
+                case InputKeyRight:
+                    input_event->key = InputKeyLeft;
+                    break;
+                default:
+                    break;
+            }
         }
 
         if(view_port && view_port == gui->ongoing_input_view_port) {

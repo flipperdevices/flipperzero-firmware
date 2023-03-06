@@ -4,6 +4,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_rtc.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
 
@@ -25,6 +26,8 @@ Canvas* canvas_init() {
     u8g2_InitDisplay(&canvas->fb);
     // Wake up display
     u8g2_SetPowerSave(&canvas->fb, 0);
+
+    canvas_set_orientation(canvas, CanvasOrientationHorizontal);
 
     // Clear buffer and send to device
     canvas_clear(canvas);
@@ -396,6 +399,13 @@ void canvas_set_bitmap_mode(Canvas* canvas, bool alpha) {
 
 void canvas_set_orientation(Canvas* canvas, CanvasOrientation orientation) {
     furi_assert(canvas);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+        if(orientation == CanvasOrientationHorizontal) {
+            orientation = CanvasOrientationHorizontalFlip;
+        } else if(orientation == CanvasOrientationHorizontalFlip) {
+            orientation = CanvasOrientationHorizontal;
+        }
+    }
     if(canvas->orientation != orientation) {
         switch(orientation) {
         case CanvasOrientationHorizontal:
