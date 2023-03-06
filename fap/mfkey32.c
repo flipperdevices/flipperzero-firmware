@@ -147,50 +147,22 @@ void crypto1_get_lfsr(struct Crypto1State *state, uint64_t *lfsr) {
     }
 }
 
-uint8_t rollback_bit(struct Crypto1State *s, uint32_t in, int x) {
-    uint8_t ret;
-    uint32_t feedin, t;
-    s->odd &= 0xffffff;
-    t = s->odd, s->odd = s->even, s->even = t;
-    ret = filter(s->odd);
-    feedin = ret & (!!x);
-    feedin ^= s->even & 1;
-    feedin ^= LF_POLY_EVEN & (s->even >>= 1);
-    feedin ^= LF_POLY_ODD & s->odd;
-    feedin ^= !!in;
-    s->even |= (evenparity32(feedin)) << 23;
-    return ret;
-}
-
-uint8_t crypt_bit(struct Crypto1State *s, uint32_t in, int x) {
-    uint8_t ret;
-    uint32_t feedin, t;
-    ret = filter(s->odd);
-    feedin = ret & (!!x);
-    feedin ^= LF_POLY_EVEN & s->even;
-    feedin ^= LF_POLY_ODD & s->odd;
-    feedin ^= !!in;
-    s->even = s->even << 1 | (evenparity32(feedin));
-    t = s->odd, s->odd = s->even, s->even = t;
-    return ret;
-}
-
 uint32_t crypt_word(struct Crypto1State *s, uint32_t in, int x) {
-    uint32_t ret = 0;
-    int i;
-    for (i = 0; i <= 31; i++) {
-        ret |= crypt_bit(s, BEBIT(in, i), x) << (24 ^ i);
+    uint32_t res_ret = 0;
+    uint8_t ret;
+    uint32_t feedin, t, next_in;
+    for (int i = 0; i <= 31; i++) {
+        next_in = BEBIT(in, i);
+        ret = filter(s->odd);
+        feedin = ret & (!!x);
+        feedin ^= LF_POLY_EVEN & s->even;
+        feedin ^= LF_POLY_ODD & s->odd;
+        feedin ^= !!next_in; // how does this work with the wrong in?
+        s->even = s->even << 1 | (evenparity32(feedin));
+        t = s->odd, s->odd = s->even, s->even = t;
+        res_ret |= (ret << (24 ^ i));
     }
-    return ret;
-}
-
-uint32_t rollback_word(struct Crypto1State *s, uint32_t in, int x) {
-    uint32_t ret = 0;
-    int i;
-    for (i = 31; i >= 0; i--) {
-        ret |= rollback_bit(s, BEBIT(in, i), x) << (24 ^ i);
-    }
-    return ret;
+    return res_ret;
 }
 
 void crypt_word_noret(struct Crypto1State *s, uint32_t in, int x) {
@@ -208,6 +180,7 @@ void crypt_word_noret(struct Crypto1State *s, uint32_t in, int x) {
     }
     return;
 }
+
 void rollback_word_noret(struct Crypto1State *s, uint32_t in, int x) {
     uint8_t ret;
     uint32_t feedin, t, next_in;
@@ -225,6 +198,26 @@ void rollback_word_noret(struct Crypto1State *s, uint32_t in, int x) {
 
     }
     return;
+}
+
+uint32_t rollback_word(struct Crypto1State *s, uint32_t in, int x) {
+    uint32_t res_ret = 0;
+    uint8_t ret;
+    uint32_t feedin, t, next_in;
+    for (int i = 31; i >= 0; i--) {
+        next_in = BEBIT(in, i);
+        s->odd &= 0xffffff;
+        t = s->odd, s->odd = s->even, s->even = t;
+        ret = filter(s->odd);
+        feedin = ret & (!!x);
+        feedin ^= s->even & 1;
+        feedin ^= LF_POLY_EVEN & (s->even >>= 1);
+        feedin ^= LF_POLY_ODD & s->odd;
+        feedin ^= !!next_in; // can this work with the wrong in?
+        s->even |= (evenparity32(feedin)) << 23;
+        res_ret |= (ret << (24 ^ i));
+    }
+    return ret;
 }
 
 int key_already_found_for_nonce(uint64_t *keyarray, int keyarray_size, uint32_t uid_xor_nt1, uint32_t nr1_enc, uint32_t p64b, uint32_t ar1_enc) {
