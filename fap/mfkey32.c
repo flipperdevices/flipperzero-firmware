@@ -147,17 +147,16 @@ void crypto1_get_lfsr(struct Crypto1State *state, uint64_t *lfsr) {
     }
 }
 
-uint32_t crypt_word(struct Crypto1State *s, uint32_t in, int x) {
+uint32_t crypt_word(struct Crypto1State *s) {   
+    // "in" and "x" are always 0 (last iteration)
     uint32_t res_ret = 0;
     uint8_t ret;
-    uint32_t feedin, t, next_in;
+    uint32_t feedin, t;
     for (int i = 0; i <= 31; i++) {
-        next_in = BEBIT(in, i);
         ret = filter(s->odd);
-        feedin = ret & (!!x);
+        feedin = 0;
         feedin ^= LF_POLY_EVEN & s->even;
         feedin ^= LF_POLY_ODD & s->odd;
-        feedin ^= !!next_in; // how does this work with the wrong in?
         s->even = s->even << 1 | (evenparity32(feedin));
         t = s->odd, s->odd = s->even, s->even = t;
         res_ret |= (ret << (24 ^ i));
@@ -213,7 +212,7 @@ uint32_t rollback_word(struct Crypto1State *s, uint32_t in, int x) {
         feedin ^= s->even & 1;
         feedin ^= LF_POLY_EVEN & (s->even >>= 1);
         feedin ^= LF_POLY_ODD & s->odd;
-        feedin ^= !!next_in; // can this work with the wrong in?
+        feedin ^= !!next_in;
         s->even |= (evenparity32(feedin)) << 23;
         res_ret |= (ret << (24 ^ i));
     }
@@ -232,7 +231,7 @@ int key_already_found_for_nonce(uint64_t *keyarray, int keyarray_size, uint32_t 
         crypt_word_noret(&temp, uid_xor_nt1, 0);
         crypt_word_noret(&temp, nr1_enc, 1);
 
-        if (ar1_enc == (crypt_word(&temp, 0, 0) ^ p64b)) {
+        if (ar1_enc == (crypt_word(&temp) ^ p64b)) {
             return 1;
         }
     }
@@ -249,7 +248,7 @@ int check_state(struct Crypto1State *t, struct Crypto1Params *p) {
     temp.even = t->even;
     crypt_word_noret(t, p->uid_xor_nt1, 0);
     crypt_word_noret(t, p->nr1_enc, 1);
-    if (p->ar1_enc == (crypt_word(t, 0, 0) ^ p->p64b)) {
+    if (p->ar1_enc == (crypt_word(t) ^ p->p64b)) {
         crypto1_get_lfsr(&temp, &(p->key));
         return 1;
     }
@@ -608,9 +607,9 @@ bool napi_key_already_found_for_nonce(MfClassicDict* dict, uint32_t uid_xor_nt1,
             (&temp)->odd |= (BIT(k, 2*i+1) << (i ^ 3));
             (&temp)->even |= (BIT(k, 2*i) << (i ^ 3));
         }
-        crypt_word(&temp, uid_xor_nt1, 0);
-        crypt_word(&temp, nr1_enc, 1);
-        if (ar1_enc == (crypt_word(&temp, 0, 0) ^ p64b)) {
+        crypt_word_noret(&temp, uid_xor_nt1, 0);
+        crypt_word_noret(&temp, nr1_enc, 1);
+        if (ar1_enc == (crypt_word(&temp) ^ p64b)) {
             found = true;
             break;
         }
