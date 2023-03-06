@@ -70,6 +70,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NRF24 Batch (By vad7)](https://github.com/vad7/nRF24-Batch)
 - Updated: [Sub-GHz Remote (By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) - Now moves files to correct folder (Thanks to XMasterx)
 - Updated: [Dab Timer (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/main/clock) - Fix Time at 12PM
+- Added: [FlipBIP Crypto Tool (By xtruan)](https://github.com/xtruan/FlipBIP)
 
 <a name="release">
 
@@ -323,6 +324,7 @@ $ ./fbt dolphin_ext
 - [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
+- [FlipBIP Crypto Tool (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - [GPIO Reader (biotinker) (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
