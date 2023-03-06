@@ -147,7 +147,7 @@ void crypto1_get_lfsr(struct Crypto1State *state, uint64_t *lfsr) {
     }
 }
 
-uint32_t crypt_word(struct Crypto1State *s) {
+static inline uint32_t crypt_word(struct Crypto1State *s) {
     // "in" and "x" are always 0 (last iteration)
     uint32_t res_ret = 0;
     uint8_t ret;
@@ -163,7 +163,7 @@ uint32_t crypt_word(struct Crypto1State *s) {
     return res_ret;
 }
 
-void crypt_word_noret(struct Crypto1State *s, uint32_t in, int x) {
+static inline void crypt_word_noret(struct Crypto1State *s, uint32_t in, int x) {
     uint8_t ret;
     uint32_t feedin, t, next_in;
     for (int i = 0; i <= 31; i++) {
@@ -179,7 +179,7 @@ void crypt_word_noret(struct Crypto1State *s, uint32_t in, int x) {
     return;
 }
 
-void rollback_word_noret(struct Crypto1State *s, uint32_t in, int x) {
+static inline void rollback_word_noret(struct Crypto1State *s, uint32_t in, int x) {
     uint8_t ret;
     uint32_t feedin, t, next_in;
     for (int i = 31; i >= 0; i--) {
