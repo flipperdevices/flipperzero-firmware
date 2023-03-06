@@ -768,12 +768,11 @@ void mfkey32(ProgramState* const program_state) {
         system_dict = napi_mf_classic_dict_alloc(MfClassicDictTypeSystem);
         total_dict_keys += napi_mf_classic_dict_get_total_keys(system_dict);
     }
+    user_dict = napi_mf_classic_dict_alloc(MfClassicDictTypeUser);
     if (user_dict_exists) {
-        user_dict = napi_mf_classic_dict_alloc(MfClassicDictTypeUser);
         total_dict_keys += napi_mf_classic_dict_get_total_keys(user_dict);
-    } else {
-        user_dict = napi_mf_classic_dict_alloc(MfClassicDictTypeUser);
     }
+    user_dict_exists = true;
     program_state->dict_count = total_dict_keys;
     program_state->mfkey_state = DictionaryAttack;
     // Read nonces
@@ -787,9 +786,7 @@ void mfkey32(ProgramState* const program_state) {
         if (system_dict_exists) {
             napi_mf_classic_dict_free(system_dict);
         }
-        if (user_dict_exists) {
-            napi_mf_classic_dict_free(user_dict);
-        }
+        napi_mf_classic_dict_free(user_dict);
         free(keyarray);
         return;
     }
