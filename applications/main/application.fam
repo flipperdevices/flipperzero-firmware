@@ -40,7 +40,7 @@ App(
         "lfrfid",
         "nfc",
         "subghz",
-        #"bad_usb",
+        "bad_usb",
         #"u2f",
         "fap_loader",
         "archive",
