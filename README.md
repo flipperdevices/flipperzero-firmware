@@ -1,6 +1,21 @@
+⚠️ **This project is still in development. Do not try to build it yet, ETC: ~6-12 hours.** ⚠️
+
 # Flipper Mfkey32
 
-This project is still in development. Do not try to build it yet, ETC: ~6-12 hours.
+![](https://thumb.tildacdn.com/tild3332-3839-4061-b663-363464303432/-/resize/214x/-/format/webp/noroot.png)
+
+## What
+This Flipper application ("FAP") cracks Mifare Classic 1K keys on your Flipper Zero. No companion app/desktop needed.
+
+## How
+1. Use the Detect Reader function to save nonces on your Flipper from the reader
+2. Use the Mfkey32 app to crack the keys
+3. Scan the Mifare Classic card
+
+All cracked nonces are automatically added to the top of your user dictionary, allowing you to rapidly clone Mifare Classic 1K cards upon re-scanning them.
+
+## Why
+This was the only function of the Flipper Zero that was [thought to be impossible on the hardware](https://old.reddit.com/r/flipperzero/comments/is31re/comment/g72077x/). You can still use other methods if you prefer them.
 
 ## Builds
 TBA
