@@ -75,8 +75,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [NFC: Support reading Mifare Classic key B from sector trailer, reading sector with B key where A key can't read block, Nfc Magic app not using NFC folder by default (in file select) #2437 (By AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2437)
 - OFW PR: [Upside down / left handed orientation support #2462 (By hramrach)](https://github.com/flipperdevices/flipperzero-firmware/pull/2462)
 - OFW PR: [More UI fixes and improvements #2419 (By liamhays)](https://github.com/flipperdevices/flipperzero-firmware/pull/2419)
-- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [Sub-GHz PlayList: Added the possibility to skip a file and play the previous one in #541 (By alvarotorijano}](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/541)
+- Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 <a name="release">
 
