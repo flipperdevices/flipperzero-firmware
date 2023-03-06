@@ -18,29 +18,29 @@ void flipbip_scene_scene_1_on_enter(void* context) {
 bool flipbip_scene_scene_1_on_event(void* context, SceneManagerEvent event) {
     FlipBip* app = context;
     bool consumed = false;
-    
+
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-            case FlipBipCustomEventScene1Left:
-            case FlipBipCustomEventScene1Right:
-                break;
-            case FlipBipCustomEventScene1Up:
-            case FlipBipCustomEventScene1Down:
-                break;
-            case FlipBipCustomEventScene1Back:
-                notification_message(app->notification, &sequence_reset_red);
-                notification_message(app->notification, &sequence_reset_green);
-                notification_message(app->notification, &sequence_reset_blue);
-                if(!scene_manager_search_and_switch_to_previous_scene(
-                    app->scene_manager, FlipBipSceneMenu)) {
-                        scene_manager_stop(app->scene_manager);
-                        view_dispatcher_stop(app->view_dispatcher);
-                    }
-                consumed = true;
-                break;
+        case FlipBipCustomEventScene1Left:
+        case FlipBipCustomEventScene1Right:
+            break;
+        case FlipBipCustomEventScene1Up:
+        case FlipBipCustomEventScene1Down:
+            break;
+        case FlipBipCustomEventScene1Back:
+            notification_message(app->notification, &sequence_reset_red);
+            notification_message(app->notification, &sequence_reset_green);
+            notification_message(app->notification, &sequence_reset_blue);
+            if(!scene_manager_search_and_switch_to_previous_scene(
+                   app->scene_manager, FlipBipSceneMenu)) {
+                scene_manager_stop(app->scene_manager);
+                view_dispatcher_stop(app->view_dispatcher);
+            }
+            consumed = true;
+            break;
         }
     }
-    
+
     return consumed;
 }
 

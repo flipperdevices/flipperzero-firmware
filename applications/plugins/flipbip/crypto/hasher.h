@@ -35,49 +35,51 @@
 #define HASHER_DIGEST_LENGTH 32
 
 typedef enum {
-  HASHER_SHA2,
-  HASHER_SHA2D,
-  HASHER_SHA2_RIPEMD,
-  HASHER_SHA2_TAPSIGHASH,
+    HASHER_SHA2,
+    HASHER_SHA2D,
+    HASHER_SHA2_RIPEMD,
+    HASHER_SHA2_TAPSIGHASH,
 
-  HASHER_SHA3,
+    HASHER_SHA3,
 #if USE_KECCAK
-  HASHER_SHA3K,
+    HASHER_SHA3K,
 #endif
 
-  HASHER_BLAKE,
-  HASHER_BLAKED,
-  HASHER_BLAKE_RIPEMD,
+    HASHER_BLAKE,
+    HASHER_BLAKED,
+    HASHER_BLAKE_RIPEMD,
 
-  HASHER_GROESTLD_TRUNC, /* Double Groestl512 hasher truncated to 256 bits */
+    HASHER_GROESTLD_TRUNC, /* Double Groestl512 hasher truncated to 256 bits */
 
-  HASHER_BLAKE2B,
-  HASHER_BLAKE2B_PERSONAL,
+    HASHER_BLAKE2B,
+    HASHER_BLAKE2B_PERSONAL,
 } HasherType;
 
 typedef struct {
-  HasherType type;
+    HasherType type;
 
-  union {
-    SHA256_CTX sha2;         // for HASHER_SHA2{,D}
-    SHA3_CTX sha3;           // for HASHER_SHA3{,K}
-    BLAKE256_CTX blake;      // for HASHER_BLAKE{,D}
-    GROESTL512_CTX groestl;  // for HASHER_GROESTLD_TRUNC
-    BLAKE2B_CTX blake2b;     // for HASHER_BLAKE2B{,_PERSONAL}
-  } ctx;
+    union {
+        SHA256_CTX sha2; // for HASHER_SHA2{,D}
+        SHA3_CTX sha3; // for HASHER_SHA3{,K}
+        BLAKE256_CTX blake; // for HASHER_BLAKE{,D}
+        GROESTL512_CTX groestl; // for HASHER_GROESTLD_TRUNC
+        BLAKE2B_CTX blake2b; // for HASHER_BLAKE2B{,_PERSONAL}
+    } ctx;
 
-  const void *param;
-  uint32_t param_size;
+    const void* param;
+    uint32_t param_size;
 } Hasher;
 
-void hasher_InitParam(Hasher *hasher, HasherType type, const void *param,
-                      uint32_t param_size);
-void hasher_Init(Hasher *hasher, HasherType type);
-void hasher_Reset(Hasher *hasher);
-void hasher_Update(Hasher *hasher, const uint8_t *data, size_t length);
-void hasher_Final(Hasher *hasher, uint8_t hash[HASHER_DIGEST_LENGTH]);
+void hasher_InitParam(Hasher* hasher, HasherType type, const void* param, uint32_t param_size);
+void hasher_Init(Hasher* hasher, HasherType type);
+void hasher_Reset(Hasher* hasher);
+void hasher_Update(Hasher* hasher, const uint8_t* data, size_t length);
+void hasher_Final(Hasher* hasher, uint8_t hash[HASHER_DIGEST_LENGTH]);
 
-void hasher_Raw(HasherType type, const uint8_t *data, size_t length,
-                uint8_t hash[HASHER_DIGEST_LENGTH]);
+void hasher_Raw(
+    HasherType type,
+    const uint8_t* data,
+    size_t length,
+    uint8_t hash[HASHER_DIGEST_LENGTH]);
 
 #endif

@@ -4,8 +4,8 @@
 
 #include <stddef.h>
 
-#include "ed25519-keccak.h"
-#include "ed25519-hash-custom-keccak.h"
+#include "ed25519_keccak.h"
+#include "ed25519_hash_custom_keccak.h"
 
 #define ED25519_SUFFIX _keccak
 

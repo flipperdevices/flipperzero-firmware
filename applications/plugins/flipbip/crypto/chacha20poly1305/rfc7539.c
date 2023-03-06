@@ -3,11 +3,11 @@
 
 #include <string.h>
 #include "rfc7539.h"
-#include "ecrypt-portable.h"
+#include "ecrypt_portable.h"
 
 // Initialize the ChaCha20 + Poly1305 context for encryption or decryption
 // using a 32 byte key and 12 byte nonce as in the RFC 7539 style.
-void rfc7539_init(chacha20poly1305_ctx *ctx, const uint8_t key[32], const uint8_t nonce[12]) {
+void rfc7539_init(chacha20poly1305_ctx* ctx, const uint8_t key[32], const uint8_t nonce[12]) {
     unsigned char block0[64] = {0};
 
     ECRYPT_keysetup(&ctx->chacha20, key, 256, 16);
@@ -25,23 +25,21 @@ void rfc7539_init(chacha20poly1305_ctx *ctx, const uint8_t key[32], const uint8_
 // Include authenticated data in the Poly1305 MAC using the RFC 7539
 // style with 16 byte padding. This must only be called once and prior
 // to encryption or decryption.
-void rfc7539_auth(chacha20poly1305_ctx *ctx, const uint8_t *in, size_t n) {
+void rfc7539_auth(chacha20poly1305_ctx* ctx, const uint8_t* in, size_t n) {
     uint8_t padding[16] = {0};
     poly1305_update(&ctx->poly1305, in, n);
-    if (n % 16 != 0)
-        poly1305_update(&ctx->poly1305, padding, 16 - n%16);
+    if(n % 16 != 0) poly1305_update(&ctx->poly1305, padding, 16 - n % 16);
 }
 
 // Compute RFC 7539-style Poly1305 MAC.
-void rfc7539_finish(chacha20poly1305_ctx *ctx, int64_t alen, int64_t plen, uint8_t mac[16]) {
+void rfc7539_finish(chacha20poly1305_ctx* ctx, int64_t alen, int64_t plen, uint8_t mac[16]) {
     uint8_t padding[16] = {0};
     uint8_t lengths[16] = {0};
 
     memcpy(lengths, &alen, sizeof(int64_t));
     memcpy(lengths + 8, &plen, sizeof(int64_t));
 
-    if (plen % 16 != 0)
-        poly1305_update(&ctx->poly1305, padding, 16 - plen%16);
+    if(plen % 16 != 0) poly1305_update(&ctx->poly1305, padding, 16 - plen % 16);
     poly1305_update(&ctx->poly1305, lengths, 16);
 
     poly1305_finish(&ctx->poly1305, mac);

@@ -25,7 +25,7 @@ typedef struct {
     FlipBipStartscreen* flipbip_startscreen;
     FlipBipScene1* flipbip_scene_1;
     // FlipBipScene2* flipbip_scene_2;
-    int haptic; 
+    int haptic;
     int led;
     int bip39_strength;
     int bip44_coin;

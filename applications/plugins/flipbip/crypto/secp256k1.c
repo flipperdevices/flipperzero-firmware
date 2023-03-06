@@ -24,25 +24,62 @@
 #include "secp256k1.h"
 
 const ecdsa_curve secp256k1 = {
-    /* .prime */ {/*.val =*/{0x1ffffc2f, 0x1ffffff7, 0x1fffffff, 0x1fffffff,
-                             0x1fffffff, 0x1fffffff, 0x1fffffff, 0x1fffffff,
-                             0xffffff}},
+    /* .prime */ {/*.val =*/{
+        0x1ffffc2f,
+        0x1ffffff7,
+        0x1fffffff,
+        0x1fffffff,
+        0x1fffffff,
+        0x1fffffff,
+        0x1fffffff,
+        0x1fffffff,
+        0xffffff}},
 
     /* G */
-    {/*.x =*/{/*.val =*/{0x16f81798, 0x0f940ad8, 0x138a3656, 0x17f9b65b,
-                         0x10b07029, 0x114ae743, 0x0eb15681, 0x0fdf3b97,
-                         0x79be66}},
-     /*.y =*/{/*.val =*/{0x1b10d4b8, 0x023e847f, 0x01550667, 0x0f68914d,
-                         0x108a8fd1, 0x1dfe0708, 0x11957693, 0x0ee4d478,
-                         0x483ada}}},
+    {/*.x =*/{/*.val =*/{
+         0x16f81798,
+         0x0f940ad8,
+         0x138a3656,
+         0x17f9b65b,
+         0x10b07029,
+         0x114ae743,
+         0x0eb15681,
+         0x0fdf3b97,
+         0x79be66}},
+     /*.y =*/{/*.val =*/{
+         0x1b10d4b8,
+         0x023e847f,
+         0x01550667,
+         0x0f68914d,
+         0x108a8fd1,
+         0x1dfe0708,
+         0x11957693,
+         0x0ee4d478,
+         0x483ada}}},
 
     /* order */
-    {/*.val =*/{0x10364141, 0x1e92f466, 0x12280eef, 0x1db9cd5e, 0x1fffebaa,
-                0x1fffffff, 0x1fffffff, 0x1fffffff, 0xffffff}},
+    {/*.val =*/{
+        0x10364141,
+        0x1e92f466,
+        0x12280eef,
+        0x1db9cd5e,
+        0x1fffebaa,
+        0x1fffffff,
+        0x1fffffff,
+        0x1fffffff,
+        0xffffff}},
 
     /* order_half */
-    {/*.val =*/{0x081b20a0, 0x1f497a33, 0x09140777, 0x0edce6af, 0x1ffff5d5,
-                0x1fffffff, 0x1fffffff, 0x1fffffff, 0x7fffff}},
+    {/*.val =*/{
+        0x081b20a0,
+        0x1f497a33,
+        0x09140777,
+        0x0edce6af,
+        0x1ffff5d5,
+        0x1fffffff,
+        0x1fffffff,
+        0x1fffffff,
+        0x7fffff}},
 
     /* a */ 0,
 

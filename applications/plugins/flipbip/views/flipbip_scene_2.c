@@ -46,11 +46,11 @@
 //     canvas_clear(canvas);
 //     canvas_set_color(canvas, ColorBlack);
 //     canvas_set_font(canvas, FontPrimary);
-//     canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "Scene 2: Input Examples"); 
+//     canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "Scene 2: Input Examples");
 //     canvas_set_font(canvas, FontSecondary);
 //     char *strInput = malloc(15);
 //     strcpy(strInput, buttonText[model->screen_text]);
-//     canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, strInput); 
+//     canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, strInput);
 //     free(strInput);
 // }
 
@@ -200,7 +200,7 @@
 //                 break;
 //         }
 //     }
-    
+
 //     return true;
 // }
 
@@ -233,13 +233,12 @@
 //             flipbip_scene_2_model_init(model);
 //         },
 //         true);
-    
+
 //     return instance;
 // }
 
 // void flipbip_scene_2_free(FlipBipScene2* instance) {
 //     furi_assert(instance);
-
 
 //     view_free(instance->view);
 //     free(instance);
@@ -248,7 +247,5 @@
 // View* flipbip_scene_2_get_view(FlipBipScene2* instance) {
 //     furi_assert(instance);
 
-
 //     return instance->view;
 // }
-

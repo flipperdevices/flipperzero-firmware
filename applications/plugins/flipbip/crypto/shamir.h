@@ -62,9 +62,12 @@
  * This function treats `shares_values`, `share_indices` and `result` as secret
  * values. `share_count` is treated as a public value (for performance reasons).
  */
-bool shamir_interpolate(uint8_t *result, uint8_t result_index,
-                        const uint8_t *share_indices,
-                        const uint8_t **share_values, uint8_t share_count,
-                        size_t len);
+bool shamir_interpolate(
+    uint8_t* result,
+    uint8_t result_index,
+    const uint8_t* share_indices,
+    const uint8_t** share_values,
+    uint8_t share_count,
+    size_t len);
 
 #endif /* __SHAMIR_H__ */

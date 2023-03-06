@@ -2,7 +2,6 @@
 	Public domain by Andrew M. <liquidsun@gmail.com>
 */
 
-
 /*
 	Arithmetic modulo the group order n = 2^252 +  27742317777372353535851937790883648493 = 7237005577332262213973186563042994240857116359379907606001950938285454250989
 
@@ -40,7 +39,7 @@ void sub256_modm(bignum256modm r, const bignum256modm x, const bignum256modm y);
 /* multiplication modulo m */
 void mul256_modm(bignum256modm r, const bignum256modm x, const bignum256modm y);
 
-void expand256_modm(bignum256modm out, const unsigned char *in, size_t len);
+void expand256_modm(bignum256modm out, const unsigned char* in, size_t len);
 
 void expand_raw256_modm(bignum256modm out, const unsigned char in[32]);
 
@@ -56,7 +55,7 @@ void contract256_slidingwindow_modm(signed char r[256], const bignum256modm s, i
 void set256_modm(bignum256modm r, uint64_t v);
 
 /* scalar value to 64bit uint */
-int get256_modm(uint64_t * v, const bignum256modm r);
+int get256_modm(uint64_t* v, const bignum256modm r);
 
 /* equality test on two reduced scalar values */
 int eq256_modm(const bignum256modm x, const bignum256modm y);
@@ -74,7 +73,15 @@ void copy256_modm(bignum256modm r, const bignum256modm x);
 int check256_modm(const bignum256modm x);
 
 /* (cc - aa * bb) % l */
-void mulsub256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c);
+void mulsub256_modm(
+    bignum256modm r,
+    const bignum256modm a,
+    const bignum256modm b,
+    const bignum256modm c);
 
 /* (cc + aa * bb) % l */
-void muladd256_modm(bignum256modm r, const bignum256modm a, const bignum256modm b, const bignum256modm c);
+void muladd256_modm(
+    bignum256modm r,
+    const bignum256modm a,
+    const bignum256modm b,
+    const bignum256modm c);
