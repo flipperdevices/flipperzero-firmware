@@ -33,9 +33,5 @@ Manual: Refer to the build flags necessary in mfkey32.c
 
 Writeup: Coming soon
 
-## TODO
-1. Use threads in FAP to update the screen with the cracking progress
-2. Add the cracked keys back to the (top of the) Flipper user dict
-
 ## Developers
 noproto, AG
