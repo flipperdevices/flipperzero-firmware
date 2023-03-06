@@ -178,9 +178,10 @@ int32_t subbrute_app(void* p) {
         instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(instance->scene_manager, SubBruteSceneStart);
 
-    furi_hal_power_suppress_charge_enter();
     // Enable power for External CC1101 if it is connected
     furi_hal_subghz_enable_ext_power();
+
+    furi_hal_power_suppress_charge_enter();
 
     notification_message(instance->notifications, &sequence_display_backlight_on);
     view_dispatcher_run(instance->view_dispatcher);
