@@ -1,5 +1,7 @@
 // TODO: Update progress bar
-// To compile this FAP, add -O3 to CCFLAGS in site_scons/extapps.scons
+// To compile this FAP, use the following compiler flags:
+// - Add -O3 and -funroll-all-loops to CCFLAGS in site_scons/extapps.scons
+// - Remove -g from site_scons/cc.scons
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -150,15 +152,13 @@ void crypto1_get_lfsr(struct Crypto1State *state, uint64_t *lfsr) {
 static inline uint32_t crypt_word(struct Crypto1State *s) {
     // "in" and "x" are always 0 (last iteration)
     uint32_t res_ret = 0;
-    uint8_t ret;
     uint32_t feedin, t;
     for (int i = 0; i <= 31; i++) {
-        ret = filter(s->odd);
+        res_ret |= (filter(s->odd) << (24 ^ i));
         feedin = LF_POLY_EVEN & s->even;
         feedin ^= LF_POLY_ODD & s->odd;
         s->even = s->even << 1 | (evenparity32(feedin));
         t = s->odd, s->odd = s->even, s->even = t;
-        res_ret |= (ret << (24 ^ i));
     }
     return res_ret;
 }
@@ -193,7 +193,6 @@ static inline void rollback_word_noret(struct Crypto1State *s, uint32_t in, int 
         feedin ^= LF_POLY_ODD & s->odd;
         feedin ^= !!next_in;
         s->even |= (evenparity32(feedin)) << 23;
-
     }
     return;
 }
@@ -222,9 +221,7 @@ int check_state(struct Crypto1State *t, struct Crypto1Params *p) {
     rollback_word_noret(t, 0, 0);
     rollback_word_noret(t, p->nr0_enc, 1);
     rollback_word_noret(t, p->uid_xor_nt0, 0);
-    struct Crypto1State temp = {0, 0};
-    temp.odd = t->odd;
-    temp.even = t->even;
+    struct Crypto1State temp = {t->odd, t->even};
     crypt_word_noret(t, p->uid_xor_nt1, 0);
     crypt_word_noret(t, p->nr1_enc, 1);
     if (p->ar1_enc == (crypt_word(t) ^ p->p64b)) {
