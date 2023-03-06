@@ -50,10 +50,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [SubGhz: better and more verbose error handling in protocols, stricter CAME validation #2443 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2443)
 - POCSAG protocol fixed to use new error status
 - Updated: [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) (Updated by RogueMaster to meet new FW Error Format)
-- Added: [(ESP32CAM) Camera (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
-- Added: [(ESP32CAM) Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- Added: [(ESP32CAM) Motion Detection (By eried)](https://github.com/eried/flipperzero-mayhem)
-- Added: [(ESP32CAM) QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
+- Added: [ESP32CAM Camera (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
+- Added: [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- Added: [ESP32CAM Motion Detection (By eried)](https://github.com/eried/flipperzero-mayhem)
+- Added: [ESP32CAM QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
 - UL: Updates to SubGHz Protocols with Error Handling
 - UL: Keeloq Default Layout For Non Standard Remotes
 - [Chess Updated Readme (By okalachev)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/540)
@@ -315,10 +315,10 @@ $ ./fbt dolphin_ext
 - [DSTIKE Deauther (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-Wifi-ESP8266-Deauther-Module/tree/FlipperZero-Module-v2/FlipperZeroModule/FlipperZero-ESP8266-Deauth-App) `Req: ESP8266`
 - [DTMF Dolphin (By litui)](https://github.com/litui/dtmf_dolphin)
 - [EM4100 Key Generator (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
-- [(ESP32CAM) Camera (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
-- [(ESP32CAM) Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- [(ESP32CAM) Motion Detection (By eried)](https://github.com/eried/flipperzero-mayhem)
-- [(ESP32CAM) QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Camera (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Motion Detection (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [Extend Range (By maede97)](https://github.com/maede97/flipperzero-extend-range) (Allows SubGHz Unlock!)
 - [EXTRA Demo (By Milk-Cool)](https://github.com/Milk-Cool/EXTRA-demo) (This app has VERY useful functions!)
 - [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
