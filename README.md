@@ -1,5 +1,3 @@
-⚠️ **This project is still in development. Do not try to build it yet, ETC: ~6-12 hours.** ⚠️
-
 # Flipper Mfkey32
 
 ![](https://thumb.tildacdn.com/tild3332-3839-4061-b663-363464303432/-/resize/214x/-/format/webp/noroot.png)
