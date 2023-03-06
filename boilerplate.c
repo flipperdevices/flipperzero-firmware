@@ -41,6 +41,7 @@ Boilerplate* boilerplate_app_alloc() {
     app->haptic = 1;
     app->speaker = 1;
     app->led = 1;
+    app->save_settings = 1;
 
     view_dispatcher_add_view(app->view_dispatcher, BoilerplateViewIdMenu, submenu_get_view(app->submenu));
     app->boilerplate_startscreen = boilerplate_startscreen_alloc();
@@ -84,12 +85,6 @@ int32_t boilerplate_app(void* p) {
     UNUSED(p);
     Boilerplate* app = boilerplate_app_alloc();
     
-    // Disabled because causes exit on customer firmwares such as RM
-    /*if(!furi_hal_region_is_provisioned()) {
-        boilerplate_app_free(app);
-        return 1;
-    }*/
-    
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     
     scene_manager_next_scene(app->scene_manager, BoilerplateSceneStartscreen); //Start with start screen
@@ -98,6 +93,8 @@ int32_t boilerplate_app(void* p) {
     furi_hal_power_suppress_charge_enter();
 
     view_dispatcher_run(app->view_dispatcher);
+
+    boilerplate_save_settings(app);
     
     furi_hal_power_suppress_charge_exit();
     boilerplate_app_free(app);

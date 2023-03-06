@@ -14,6 +14,9 @@
 #include "views/boilerplate_startscreen.h"
 #include "views/boilerplate_scene_1.h"
 #include "views/boilerplate_scene_2.h"
+#include "helpers/boilerplate_storage.h"
+
+#define TAG "Boilerplate"
 
 typedef struct {
     Gui* gui;
@@ -25,9 +28,10 @@ typedef struct {
     BoilerplateStartscreen* boilerplate_startscreen;
     BoilerplateScene1* boilerplate_scene_1;
     BoilerplateScene2* boilerplate_scene_2;
-    int haptic; 
-    int speaker;
-    int led;
+    uint32_t haptic; 
+    uint32_t speaker;
+    uint32_t led;
+    uint32_t save_settings;
 } Boilerplate;
 
 typedef enum {
@@ -52,3 +56,8 @@ typedef enum {
     BoilerplateLedOff,
     BoilerplateLedOn,
 } BoilerplateLedState;
+
+typedef enum {
+    BoilerplateSettingsOff,
+    BoilerplateSettingsOn,
+} BoilerplateSettingsStoreState;

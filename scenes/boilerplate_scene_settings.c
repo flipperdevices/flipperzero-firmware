@@ -34,6 +34,16 @@ const uint32_t led_value[2] = {
     BoilerplateLedOn,
 };
 
+const char* const settings_text[2] = {
+    "OFF",
+    "ON",
+};
+const uint32_t settings_value[2] = {
+    BoilerplateSettingsOff,
+    BoilerplateSettingsOn,
+};
+
+
 static void boilerplate_scene_settings_set_haptic(VariableItem* item) {
     Boilerplate* app = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
@@ -54,6 +64,13 @@ static void boilerplate_scene_settings_set_led(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     variable_item_set_current_value_text(item, led_text[index]);
     app->led = led_value[index];
+}
+
+static void boilerplate_scene_settings_set_save_settings(VariableItem* item) {
+    Boilerplate* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, settings_text[index]);
+    app->save_settings = settings_value[index];
 }
 
 void boilerplate_scene_settings_submenu_callback(void* context, uint32_t index) {
@@ -98,6 +115,16 @@ void boilerplate_scene_settings_on_enter(void* context) {
     value_index = value_index_uint32(app->led, led_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, led_text[value_index]);
+
+    // Save Settings to File
+    item = variable_item_list_add(
+        app->variable_item_list,
+        "Save Settings",
+        2,
+        boilerplate_scene_settings_set_save_settings,
+        app);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, settings_text[value_index]);
     
     view_dispatcher_switch_to_view(app->view_dispatcher, BoilerplateViewIdSettings);
 }
