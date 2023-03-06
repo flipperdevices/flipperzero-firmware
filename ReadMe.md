@@ -58,6 +58,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [(ESP32CAM) QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
 - UL: Updates to SubGHz Protocols with Error Handling
 - UL: Keeloq Default Layout For Non Standard Remotes
+- UL: SubGHz Remote Fix unirf freeze (protocol deserialize status ok) (By Willy-JL)
+- UL: Blackjack game: fix bug counting more than one ace (By 403-Fruit)
+- UL: SubGHz: Fix 464Mhz was showing up in Frequency analyzer all the time due to noise (By XMasterx)
 
 <a name="release">
 
