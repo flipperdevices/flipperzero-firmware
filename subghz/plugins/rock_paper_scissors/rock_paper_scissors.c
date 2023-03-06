@@ -1086,6 +1086,9 @@ static void remote_games_clear(GameContext* game_context) {
     while(game_context->data->remote_games) {
         GameInfo* game = game_context->data->remote_games;
         game_context->data->remote_games = game->next_game;
+        if(game->sender_name) {
+            furi_string_free(game->sender_name);
+        }
         free(game);
     }
 }
