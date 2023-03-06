@@ -12,13 +12,13 @@ This Flipper application ("FAP") cracks Mifare Classic 1K keys on your Flipper Z
 
 All cracked nonces are automatically added to the top of your user dictionary, allowing you to rapidly clone Mifare Classic 1K cards upon re-scanning them.
 
+## Builds
+Published: https://github.com/noproto/FlipperMfkey/releases
+
+Manual: :information_source: Refer to the build flags necessary in mfkey32.c
+
 ## Why
 This was the only function of the Flipper Zero that was [thought to be impossible on the hardware](https://old.reddit.com/r/flipperzero/comments/is31re/comment/g72077x/). You can still use other methods if you prefer them.
-
-## Builds
-Published: TBA
-
-Manual: Refer to the build flags necessary in mfkey32.c
 
 ## Misc Stats
 1. RAM used: **90 KB**, RAM free: 50 KB (original was ~53,000 KB, 99.9% RAM usage eliminated)
