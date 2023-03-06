@@ -789,6 +789,7 @@ static const struct dap_part_nums {
         "Denver PMU",
         "(Performance Monitor Unit)",
     },
+    /* https://github.com/stlink-org/stlink/blob/develop/doc/devices_boards.md */
     {0x20, 0x410, "STM32F10 (med)", "(ROM Table)"},
     {0x20, 0x411, "STM32F2", "(ROM Table)"},
     {0x20, 0x412, "STM32F10 (low)", "(ROM Table)"},

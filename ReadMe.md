@@ -62,6 +62,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Blackjack game: fix bug counting more than one ace (By 403-Fruit)
 - UL: SubGHz: Fix 464Mhz was showing up in Frequency analyzer all the time due to noise (By XMasterx)
 - Updated: [Mfkey32 WIP (By noproto)](https://github.com/noproto/FlipperMfkey)
+- Updated: [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 
 <a name="release">
 
