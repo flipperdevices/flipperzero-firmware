@@ -55,10 +55,32 @@ static FlipperApplicationPreloadStatus
     return FlipperApplicationPreloadStatusSuccess;
 }
 
+static bool
+    flipper_application_load_manifest(File* file, size_t offset, size_t size, void* context) {
+    FlipperApplicationManifest* manifest = context;
+
+    if(size < sizeof(FlipperApplicationManifest)) {
+        return false;
+    }
+
+    if(manifest == NULL) {
+        return true;
+    }
+
+    return storage_file_seek(file, offset, true) &&
+           storage_file_read(file, manifest, size) == size;
+}
+
 /* Parse headers, load manifest */
 FlipperApplicationPreloadStatus
     flipper_application_preload_manifest(FlipperApplication* app, const char* path) {
-    if(!elf_file_open(app->elf, path) || !elf_file_load_manifest(app->elf, &app->manifest)) {
+    if(!elf_file_open(app->elf, path)) {
+        return FlipperApplicationPreloadStatusInvalidFile;
+    }
+
+    if(elf_process_section(
+           app->elf, ".fapmeta", flipper_application_load_manifest, &app->manifest) !=
+       ElfProcessSectionResultSuccess) {
         return FlipperApplicationPreloadStatusInvalidFile;
     }
 
@@ -68,9 +90,25 @@ FlipperApplicationPreloadStatus
 /* Parse headers, load full file */
 FlipperApplicationPreloadStatus
     flipper_application_preload(FlipperApplication* app, const char* path) {
-    if(!elf_file_open(app->elf, path) || !elf_file_load_section_table(app->elf, &app->manifest)) {
+    if(!elf_file_open(app->elf, path) || !elf_file_load_section_table(app->elf)) {
         return FlipperApplicationPreloadStatusInvalidFile;
     }
+
+    if(elf_process_section(
+           app->elf, ".fapmeta", flipper_application_load_manifest, &app->manifest) !=
+       ElfProcessSectionResultSuccess) {
+        return FlipperApplicationPreloadStatusInvalidFile;
+    }
+
+    // if(elf_process_section(app->elf, ".fapmeta", test_load_section, NULL) !=
+    //    ElfProcessSectionResultSuccess) {
+    //     FURI_LOG_E(TAG, "Failed to load .fapmeta section");
+    // }
+
+    // if(elf_process_section(app->elf, ".fapfiles", test_load_section, NULL) !=
+    //    ElfProcessSectionResultSuccess) {
+    //     FURI_LOG_E(TAG, "Failed to load .fapfiles section");
+    // }
 
     return flipper_application_validate_manifest(app);
 }
