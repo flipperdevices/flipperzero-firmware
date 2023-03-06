@@ -1,3 +1,8 @@
+/*
+ * Chess app proof-of-concept for Flipper Zero
+ * Author: Oleg Kalachev <okalachev@gmail.com>
+ */
+
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
