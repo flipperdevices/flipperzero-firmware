@@ -1,5 +1,6 @@
 #include <stdbool.h>
 
+bool flipbip_has_settings(bool key_file);
 bool flipbip_load_settings(char* settings, bool key_file);
 bool flipbip_save_settings(const char* settings, bool key_file , bool append);
 

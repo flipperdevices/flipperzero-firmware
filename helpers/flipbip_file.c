@@ -26,14 +26,17 @@ const char* FILE_K1 = "fb0131d5cf688221c109163908ebe51debb46227c6cc8b37641910833
                       "baefe6d9ceb651842260e0d1e05e3b90d15e7d5ffaaabc0207bf200a117793a2";
 
 bool flipbip_load_settings(char* settings, bool key_file) {
-    Storage *fs_api = furi_record_open(RECORD_STORAGE);
-    File* settings_file = storage_file_alloc(fs_api);
+    bool ret = false;
     const char* path;
     if(key_file) {
         path = FLIPBIP_KEY_PATH;
     } else {
         path = FLIPBIP_DAT_PATH;
     }
+
+    Storage *fs_api = furi_record_open(RECORD_STORAGE);
+
+    File* settings_file = storage_file_alloc(fs_api);
     if(storage_file_open(settings_file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         char chr;
         int i = 0;
@@ -42,10 +45,11 @@ bool flipbip_load_settings(char* settings, bool key_file) {
             settings[i] = chr;
             i++;
         }
+        ret = true;
     } else {
         memzero(settings, strlen(settings));
         settings[0] = '\0';
-        return false;
+        ret = false;
     }
     storage_file_close(settings_file);
     storage_file_free(settings_file);
@@ -60,7 +64,7 @@ bool flipbip_load_settings(char* settings, bool key_file) {
         if(file_check_err != FSE_OK) {
             memzero(settings, strlen(settings));
             settings[0] = '\0';
-            return false;
+            ret = false;
         }
         // if(layout_file_info.size != 256) {
         //     memzero(settings, strlen(settings));
@@ -68,19 +72,29 @@ bool flipbip_load_settings(char* settings, bool key_file) {
         // }
     }
 
-    return true;
+    return ret;
+}
+
+bool flipbip_has_settings(bool key_file) {
+    bool ret = false;
+    const char* path;
+    if(key_file) {
+        path = FLIPBIP_KEY_PATH;
+    } else {
+        path = FLIPBIP_DAT_PATH;
+    }
+
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
+    if(storage_file_exists(fs_api, path)) {
+        ret = true;
+    }
+    furi_record_close(RECORD_STORAGE);
+
+    return ret;
 }
 
 bool flipbip_save_settings(const char* settings, bool key_file, bool append) {
-    Storage* fs_api = furi_record_open(RECORD_STORAGE);
-    
-    storage_common_mkdir(fs_api, FLIPBIP_APP_BASE_FOLDER);
-    int open_mode = FSOM_OPEN_ALWAYS;
-    if(append) {
-        open_mode = FSOM_OPEN_APPEND;
-    }
-
-    File* settings_file = storage_file_alloc(fs_api);
+    bool ret = false;
     const char* path;
     const char* path_bak;
     if(key_file) {
@@ -90,13 +104,29 @@ bool flipbip_save_settings(const char* settings, bool key_file, bool append) {
         path = FLIPBIP_DAT_PATH;
         path_bak = FLIPBIP_DAT_PATH_BAK;
     }
+    int open_mode = FSOM_OPEN_ALWAYS;
+    if(append) {
+        open_mode = FSOM_OPEN_APPEND;
+    }
 
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
+    // // if the key file exists, we don't want to overwrite it
+    // if (key_file && storage_file_exists(fs_api, path)) {
+    //     furi_record_close(RECORD_STORAGE);
+    //     ret = true;
+    //     return ret;
+    // }
+    // try to create the folder
+    storage_common_mkdir(fs_api, FLIPBIP_APP_BASE_FOLDER);
+
+    File* settings_file = storage_file_alloc(fs_api);
     if(storage_file_open(settings_file, path, FSAM_WRITE, open_mode)) {
         storage_file_write(
             settings_file,
             settings,
             strlen(settings));
         storage_file_write(settings_file, "\n", 1);
+        ret = true;
     }
     storage_file_close(settings_file);
     storage_file_free(settings_file);
@@ -114,7 +144,7 @@ bool flipbip_save_settings(const char* settings, bool key_file, bool append) {
 
     furi_record_close(RECORD_STORAGE);
 
-    return true;
+    return ret;
 }
 
 bool flipbip_load_settings_secure(char* settings) {

@@ -267,18 +267,25 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     
     model->page = 0;
     model->coin = coin;
-
-    // Generate a random mnemonic using trezor-crypto
     model->strength = strength;
     
-    const char* mnemonic = mnemonic_generate(strength);
-    if (!flipbip_save_settings_secure(mnemonic)) return;
+    // Allocate memory for mnemonic
+    char* mnemonic = malloc(256);
+    memzero(mnemonic, 256);
+
+    // Check if the mnemonic key & data is already saved in persistent storage
+    if (!flipbip_has_settings(true) && !flipbip_has_settings(false)) {
+        // Generate a random mnemonic using trezor-crypto
+        const char* mnemonic_gen = mnemonic_generate(strength);
+        // Save the mnemonic to persistent storage
+        if (!flipbip_save_settings_secure(mnemonic_gen)) return;
+        // Clear the mnemonic from memory
+        mnemonic_clear();
+    }
     
-    char* mnemonic2 = malloc(256);
-    memzero((void*)mnemonic2, 256);
-    if (!flipbip_load_settings_secure(mnemonic2)) return;
-    
-    model->mnemonic = mnemonic2;
+    // Load the mnemonic from persistent storage
+    if (!flipbip_load_settings_secure(mnemonic)) return;
+    model->mnemonic = mnemonic;
     
     // test mnemonic
     //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
@@ -431,7 +438,8 @@ void flipbip_scene_1_exit(void* context) {
             for (int i = 0; i < 64; i++) {
                 model->seed[i] = 0;
             }
-            mnemonic_clear();
+            memzero((void*)model->mnemonic, strlen(model->mnemonic));
+            free((void*)model->mnemonic);
             memzero((void*)model->node, sizeof(HDNode));
             free((void*)model->node);
             memzero((void*)model->xprv_root, strlen(model->xprv_root));
