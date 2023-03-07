@@ -9,17 +9,11 @@ RCWL-0516 is a doppler radar microwave motion sensor module
 ## Connection
 
 | rcwl-0516. | flipperzero |
-
 | --- | --- |
-
 | 3V3 | NC |
-
 | GND | Pin 3 (A6) |
-
 | OUT | Pin 2 (A7) |
-
 | VIN | Pin 1 (5V) |
-
 | CDS | NC |
 
 ## Installation
