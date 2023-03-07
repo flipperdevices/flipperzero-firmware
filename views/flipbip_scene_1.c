@@ -274,8 +274,8 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     const char* mnemonic = mnemonic_generate(strength);
     if (!flipbip_save_settings_secure(mnemonic)) return;
     
-    char* mnemonic2 = malloc(256+1);
-    memzero((void*)mnemonic2, 256+1);
+    char* mnemonic2 = malloc(256);
+    memzero((void*)mnemonic2, 256);
     if (!flipbip_load_settings_secure(mnemonic2)) return;
     
     model->mnemonic = mnemonic2;
