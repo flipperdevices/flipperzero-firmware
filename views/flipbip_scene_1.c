@@ -5,8 +5,8 @@
 #include <gui/elements.h>
 //#include <dolphin/dolphin.h>
 #include <storage/storage.h>
+#include "FlipBIP_icons.h"
 #include "../helpers/flipbip_haptic.h"
-//#include "../helpers/flipbip_speaker.h"
 #include "../helpers/flipbip_led.h"
 #include "../helpers/flipbip_string.h"
 #include "../helpers/flipbip_file.h"
@@ -243,6 +243,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 1, 10, "Loading...");
         canvas_draw_str(canvas, 6, 30, "m/44'/x'/0'/0");
+        canvas_draw_icon(canvas, 86, 25, &I_Keychain_39x36);
     } else if(model->page >= 9 && model->page <= 13) {
         canvas_set_font(canvas, FontSecondary);
         const char* receive_text;

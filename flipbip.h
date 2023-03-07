@@ -14,6 +14,8 @@
 #include "views/flipbip_startscreen.h"
 #include "views/flipbip_scene_1.h"
 
+#define FLIPBIP_VERSION "v0.0.4"
+
 typedef struct {
     Gui* gui;
     NotificationApp* notification;
