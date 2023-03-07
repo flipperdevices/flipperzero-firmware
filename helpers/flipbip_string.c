@@ -117,17 +117,17 @@ flipbip_xtob(const char *str, unsigned char *out, int out_len)
 }
 
 void 
-flipbip_cipher(const unsigned char* key_in, const char* in, char* out, const unsigned int io_len)
+flipbip_cipher(const unsigned char* key_in, const unsigned int key_len, const char* in, char* out, const unsigned int io_len)
 {
     if (io_len > 512) return;
 
     RC4_CTX ctx;
     uint8_t buf[256];
-
     memzero(buf, 256);
+    
     flipbip_xtob(in, buf, io_len / 2);
 
-    rc4_init(&ctx, key_in, 64);
+    rc4_init(&ctx, key_in, key_len);
     rc4_encrypt(&ctx, buf, 256);
 
     for (size_t i = 0; i < (io_len / 2); i++) {

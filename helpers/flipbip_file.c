@@ -14,7 +14,7 @@
 #define FLIPBIP_SETTINGS_PATH_BAK FLIPBIP_APP_BASE_FOLDER "/" FLIPBIP_SETTINGS_FILE_NAME_BAK
 
 const size_t FILE_HLEN = 4;
-const size_t FILE_KLEN = 128;
+const size_t FILE_KLEN = 256;
 const size_t FILE_SLEN = 512;
 const char* FILE_HSTR = "fb01";
 const char* FILE_K1 = "fb0131d5cf688221c109163908ebe51debb46227c6cc8b37641910833222772a"
@@ -113,15 +113,15 @@ bool flipbip_load_settings_secure(char* settings) {
     data += FILE_HLEN;
 
     // load k2 from file using k1
-    //uint8_t k1[64];
+    //uint8_t k1[16] = {0};
     //flipbip_xtob(FILE_K1, k1, 64);
-    uint8_t k2[64];
-    //flipbip_cipher(k1, data, data, FILE_KLEN);
-    flipbip_xtob(data, k2, 64);
+    uint8_t k2[128];
+    //flipbip_cipher(k1, 16, data, data, FILE_KLEN);
+    flipbip_xtob(data, k2, 128);
     data += FILE_KLEN;
 
     // load settings from file using k2
-    flipbip_cipher(k2, data, data, FILE_SLEN);
+    flipbip_cipher(k2, 128, data, data, FILE_SLEN);
     flipbip_xtob(data, (unsigned char*)settings, 256);
 
     data = data - FILE_KLEN - FILE_HLEN;
@@ -142,30 +142,30 @@ bool flipbip_save_settings_secure(const char* settings) {
     
     // allocate memory for data
     char *data = malloc(dlen + 1);
-    memzero(data, dlen + 1);
+    memzero(data, dlen);
     
     // write header
     strncpy(data, FILE_HSTR, FILE_HLEN);
     data += FILE_HLEN;
 
     // generate key
-    //uint8_t k1[64];
+    //uint8_t k1[16] = {0};
     //flipbip_xtob(FILE_K1, k1, 64);
-    uint8_t k2[64];
-    random_buffer(k2, 64);
+    uint8_t k2[128];
+    random_buffer(k2, 128);
 
     // write k2 to file (secured by k1)
-    for (size_t i = 0; i < 64; i++) {
+    for (size_t i = 0; i < 128; i++) {
         flipbip_btox(k2[i], data + (i * 2));
     }
-    //flipbip_cipher(k1, data, data, FILE_KLEN);
+    //flipbip_cipher(k1, 16, data, data, FILE_KLEN);
     data += FILE_KLEN;
 
     // write settings to file (secured by k2)
     for (size_t i = 0; i < len; i++) {
         flipbip_btox(settings[i], data + (i * 2));
     }
-    flipbip_cipher(k2, data, data, FILE_SLEN);
+    flipbip_cipher(k2, 128, data, data, FILE_SLEN);
 
     data = data - FILE_KLEN - FILE_HLEN;
 
