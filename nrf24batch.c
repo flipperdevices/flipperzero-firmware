@@ -118,6 +118,8 @@ uint8_t listen_addr_len = 0;
 char *ListenFields = NULL;			// ptr to string: field1,field2,... max 5 field now
 bool ListenNew;
 FuriHalRtcDateTime ListenLastTime = { 0 };
+uint32_t ListenPrev = 0;
+uint32_t ListenLast = 0;
 FuriString **Read_cmd = NULL;		// Names of read cmd
 uint16_t Read_cmd_Total = 0;
 FuriString **Log = NULL;			// Strings: var=n
@@ -209,12 +211,12 @@ static void add_to_str_hex_bytes(char *out, uint8_t *arr, int bytes)
 	} while(--bytes);
 }
 
-int32_t get_payload_receive_field(uint8_t size)
+int32_t get_payload_receive_field(uint8_t *var, uint8_t size)
 {
-	if(size <= 1) return *payload_receive;
-	else if(size == 2) return *(int16_t*)payload_receive;
-	else if(size == 3) return (*(uint32_t*)payload_receive) & 0xFFFFFF;
-	else return *(int32_t*)payload_receive;
+	if(size <= 1) return *var;
+	else if(size == 2) return *(int16_t*)var;
+	else if(size == 3) return (*(uint32_t*)var) & 0xFFFFFF;
+	else return *(int32_t*)var;
 }
 
 void free_Log()
@@ -404,7 +406,7 @@ bool nrf24_read_newpacket() {
 					if(size > 4) size = 0;
 				}
 			}
-			int32_t var = get_payload_receive_field(size);
+			int32_t var = get_payload_receive_field(payload_receive, size);
 			//FURI_LOG_D(TAG, "VAR(%d): %ld", size, var);
 			if(size == 0) furi_string_cat_printf(str, "%c", (char)var);
 			else {
@@ -1034,8 +1036,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 			canvas_set_font(canvas, FontSecondary); // 8x10 font, 6 lines
 			strcpy(screen_buf, "Listen: ");
 			if(NRF_ERROR) strcat(screen_buf, "nRF24 ERROR!");
-			else if(ListenNew) snprintf(screen_buf + strlen(screen_buf), 16, "%02d:%02d:%02d", ListenLastTime.hour, ListenLastTime.minute, ListenLastTime.second);
-			else strcat(screen_buf, "receiving");
+			else if(ListenNew) {
+				snprintf(screen_buf + strlen(screen_buf), 16, "%02d:%02d:%02d", ListenLastTime.hour, ListenLastTime.minute, ListenLastTime.second);
+				if(ListenPrev) snprintf(screen_buf + strlen(screen_buf), 16, " (%lu)", ListenLast - ListenPrev);
+			} else strcat(screen_buf, "receiving");
 			canvas_draw_str(canvas, 0, 10, screen_buf);
 			if(ListenFields) {
 				char *p2, *p = ListenFields;
@@ -1049,10 +1053,18 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 					strcpy(screen_buf + len, ": ");
 					if(ListenNew) {
 						len = payload_struct[i];
-						if(hex)	strcat(screen_buf, "0x");
-						else snprintf(screen_buf, strlen(screen_buf), "%ld (", get_payload_receive_field(len));
-						add_to_str_hex_bytes(screen_buf, pld, len);
-						if(!hex) strcat(screen_buf, ")");
+						int32_t n = get_payload_receive_field(pld, len);
+						if(hex)	{
+							strcat(screen_buf, "0x");
+							add_to_str_hex_bytes(screen_buf, pld, len);
+						} else {
+							snprintf(screen_buf + strlen(screen_buf), 20, "%ld", n);
+							if(n > 9) {
+								strcat(screen_buf, " (");
+								add_to_str_hex_bytes(screen_buf, pld, len);
+								strcat(screen_buf, ")");
+							}
+						}
 						pld += len;
 					}
 					canvas_draw_str(canvas, 0, 20 + i * 10, screen_buf);
@@ -1155,7 +1167,9 @@ void work_timer_callback(void* ctx)
 				bool new = nrf24_read_newpacket();
 				if(new) {
 					if(rw_type == rwt_listen) {
+						ListenPrev = ListenLast;
 						furi_hal_rtc_get_datetime(&ListenLastTime);
+						ListenLast = furi_hal_rtc_datetime_to_timestamp(&ListenLastTime);
 						ListenNew = true;
 					} else if(send_status != sst_receiving) break;
 				} else if(rw_type != rwt_listen && furi_get_tick() - NRF_time > NRF_READ_TIMEOUT) {
