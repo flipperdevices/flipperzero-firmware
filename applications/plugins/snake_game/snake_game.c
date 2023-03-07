@@ -50,6 +50,7 @@ typedef struct {
     Direction nextMovement; // if backward of currentMovement, ignore
     Point fruit;
     GameState state;
+    FuriMutex* mutex;
 } SnakeState;
 
 typedef enum {
@@ -92,7 +93,9 @@ const NotificationSequence sequence_eat = {
 };
 
 static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
-    const SnakeState* snake_state = acquire_mutex((ValueMutex*)ctx, 25);
+    const SnakeState* snake_state = ctx;
+    furi_mutex_acquire(snake_state->mutex, FuriWaitForever);
+
     if(snake_state == NULL) {
         return;
     }
@@ -134,7 +137,7 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignBottom, buffer);
     }
 
-    release_mutex((ValueMutex*)ctx, snake_state);
+    furi_mutex_release(snake_state->mutex);
 }
 
 static void snake_game_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -324,15 +327,16 @@ int32_t snake_game_app(void* p) {
     SnakeState* snake_state = malloc(sizeof(SnakeState));
     snake_game_init_game(snake_state);
 
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, snake_state, sizeof(SnakeState))) {
+    snake_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+
+    if(!snake_state->mutex) {
         FURI_LOG_E("SnakeGame", "cannot create mutex\r\n");
         free(snake_state);
         return 255;
     }
 
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, snake_game_render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, snake_game_render_callback, snake_state);
     view_port_input_callback_set(view_port, snake_game_input_callback, event_queue);
 
     FuriTimer* timer =
@@ -352,7 +356,7 @@ int32_t snake_game_app(void* p) {
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
-        SnakeState* snake_state = (SnakeState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(snake_state->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             // press events
@@ -391,7 +395,7 @@ int32_t snake_game_app(void* p) {
         }
 
         view_port_update(view_port);
-        release_mutex(&state_mutex, snake_state);
+        furi_mutex_release(snake_state->mutex);
     }
 
     // Return backlight to normal state
@@ -404,7 +408,7 @@ int32_t snake_game_app(void* p) {
     furi_record_close(RECORD_NOTIFICATION);
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(snake_state->mutex);
     free(snake_state);
 
     return 0;
