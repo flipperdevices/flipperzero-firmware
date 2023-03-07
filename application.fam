@@ -6,6 +6,7 @@ App(
     cdefines=["APP_BOILERPLATE"],
     requires=[
         "gui",
+        "storage",
     ],
     stack_size=2 * 1024,
     order=10,
