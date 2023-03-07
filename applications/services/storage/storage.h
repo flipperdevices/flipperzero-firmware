@@ -10,7 +10,7 @@ extern "C" {
 #define STORAGE_INT_PATH_PREFIX "/int"
 #define STORAGE_EXT_PATH_PREFIX "/ext"
 #define STORAGE_ANY_PATH_PREFIX "/any"
-#define STORAGE_APP_DATA_PATH_PREFIX "/app"
+#define STORAGE_APP_DATA_PATH_PREFIX "/data"
 #define STORAGE_APP_ASSETS_PATH_PREFIX "/assets"
 
 #define INT_PATH(path) STORAGE_INT_PATH_PREFIX "/" path

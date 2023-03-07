@@ -454,7 +454,7 @@ void storage_process_alias(
         FuriString* apps_data_path_with_appsid = furi_string_alloc_set(APPS_DATA_PATH "/");
         furi_string_cat(apps_data_path_with_appsid, furi_thread_get_appid(thread_id));
 
-        // "/app" -> "/ext/apps_data/appsid"
+        // "/data" -> "/ext/apps_data/appsid"
         furi_string_replace_at(
             path,
             0,
