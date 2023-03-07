@@ -65,7 +65,9 @@ Big board:<br>
 Gerber for full board (https://raw.githubusercontent.com/vad7/nrf24scan/master/Gerber_PCB_Flipper%20Zero%20nRF24%20board_v1_0.zip)<br>
 Easyeda source (https://oshwlab.com/vad7/flipper-zero-nrf24-board).
 <br><br>
-Mini board:
+Mini board:<br>
+<img src="https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Pics/NRF24_mini_3D.png">
+<br>
 <img src="https://raw.githubusercontent.com/vad7/nrf24scan/master/scheme2.png">
 <br>
 Gerber for mini board with 5V - 3.3V converter LM1117-3.3 (https://raw.githubusercontent.com/vad7/nrf24scan/master/Gerber_PCB_Flipper%20Zero%20nRF24%20board%20mini_v1_0.zip)<br>
