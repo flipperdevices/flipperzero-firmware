@@ -93,14 +93,10 @@ const NotificationSequence sequence_eat = {
 };
 
 static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
+    furi_assert(ctx);
     const SnakeState* snake_state = ctx;
+
     furi_mutex_acquire(snake_state->mutex, FuriWaitForever);
-
-    if(snake_state == NULL) {
-        return;
-    }
-
-    // Before the function is called, the state is set with the canvas_reset(canvas)
 
     // Frame
     canvas_draw_frame(canvas, 0, 0, 128, 64);
