@@ -29,6 +29,8 @@ typedef struct {
     int page;
     int strength;
     uint32_t coin;
+    bool overwrite;
+    bool mnemonic_only;
     CONFIDENTIAL const char* mnemonic;
     CONFIDENTIAL uint8_t seed[64];
     CONFIDENTIAL const HDNode* node;
@@ -45,6 +47,7 @@ static CONFIDENTIAL char s_disp_text3[30 + 1];
 static CONFIDENTIAL char s_disp_text4[30 + 1];
 static CONFIDENTIAL char s_disp_text5[30 + 1];
 static CONFIDENTIAL char s_disp_text6[30 + 1];
+static bool s_busy = false;
 
 void flipbip_scene_1_set_callback(
     FlipBipScene1* instance,
@@ -136,6 +139,8 @@ static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
 }
 
 static void flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_type, uint32_t addr_index) {
+    s_busy = true;
+    
     // buffer for key serialization
     const size_t buflen = 128;
     char buf[128 + 1];
@@ -177,6 +182,8 @@ static void flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_type,
 
     memzero(addr_node, sizeof(HDNode));
     free(addr_node);
+
+    s_busy = false;
 }
 
 static void flipbip_scene_1_clear_text() {
@@ -231,7 +238,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
     if (model->page == 0) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 1, 10, "Loading...");
-        canvas_draw_str(canvas, 6, 30, "m/44'/C'/0'/0");
+        canvas_draw_str(canvas, 6, 30, "m/44'/x'/0'/0");
     } else if (model->page >= 9 && model->page <= 13) {
         canvas_set_font(canvas, FontSecondary);
         const char * receive_text;
@@ -263,11 +270,13 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
     
 }
 
-static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength, const uint32_t coin, const bool overwrite) {
+static int flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength, const uint32_t coin, const bool overwrite) {
     
     model->page = 0;
-    model->coin = coin;
+    model->mnemonic_only = false;
     model->strength = strength;
+    model->coin = coin;
+    model->overwrite = overwrite;
     
     // Allocate memory for mnemonic
     char* mnemonic = malloc(256);
@@ -278,14 +287,22 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
         // Generate a random mnemonic using trezor-crypto
         const char* mnemonic_gen = mnemonic_generate(strength);
         // Save the mnemonic to persistent storage
-        if (!flipbip_save_settings_secure(mnemonic_gen)) return;
-        // Clear the mnemonic from memory
+        if (!flipbip_save_settings_secure(mnemonic_gen)) return 1; // 1 = save error
+        // Clear the generated mnemonic from memory
         mnemonic_clear();
+        model->mnemonic_only = true;
     }
     
     // Load the mnemonic from persistent storage
-    if (!flipbip_load_settings_secure(mnemonic)) return;
+    if (!flipbip_load_settings_secure(mnemonic)) return 2; // 2 = load error
     model->mnemonic = mnemonic;
+    // Check if the mnemonic is valid
+    if (mnemonic_check(model->mnemonic) == 0) return 3; // 3 = mnemonic check error
+
+    // if we are only generating the mnemonic, return
+    if (model->mnemonic_only) {
+        return -1; // -1 = mnemonic only, return from parent
+    }
     
     // test mnemonic
     //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
@@ -371,11 +388,20 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     // Clear the BIP39 cache
     bip39_cache_clear();
 #endif
+
+    // 0 = success
+    return 0;
 }
 
 bool flipbip_scene_1_input(InputEvent* event, void* context) {
     furi_assert(context); 
     FlipBipScene1* instance = context;
+
+    // Ignore input if busy
+    if (s_busy) {
+        return false;
+    }
+
     if (event->type == InputTypeRelease) {
         switch(event->key) {
             case InputKeyBack:
@@ -436,20 +462,23 @@ void flipbip_scene_1_exit(void* context) {
             model->strength = 0;
             model->coin = 0;
             memzero(model->seed, 64);
-            memzero((void*)model->mnemonic, strlen(model->mnemonic));
-            free((void*)model->mnemonic);
-            memzero((void*)model->node, sizeof(HDNode));
-            free((void*)model->node);
-            memzero((void*)model->xprv_root, strlen(model->xprv_root));
-            memzero((void*)model->xprv_account, strlen(model->xprv_account));
-            memzero((void*)model->xpub_account, strlen(model->xpub_account));
-            memzero((void*)model->xprv_extended, strlen(model->xprv_extended));
-            memzero((void*)model->xpub_extended, strlen(model->xpub_extended));
-            free((void*)model->xprv_root);
-            free((void*)model->xprv_account);
-            free((void*)model->xpub_account);
-            free((void*)model->xprv_extended);
-            free((void*)model->xpub_extended);
+            // if mnemonic_only is true, then we don't need to free the data here
+            if (!model->mnemonic_only) {
+                memzero((void*)model->mnemonic, strlen(model->mnemonic));
+                free((void*)model->mnemonic);
+                memzero((void*)model->node, sizeof(HDNode));
+                free((void*)model->node);
+                memzero((void*)model->xprv_root, strlen(model->xprv_root));
+                memzero((void*)model->xprv_account, strlen(model->xprv_account));
+                memzero((void*)model->xpub_account, strlen(model->xpub_account));
+                memzero((void*)model->xprv_extended, strlen(model->xprv_extended));
+                memzero((void*)model->xpub_extended, strlen(model->xpub_extended));
+                free((void*)model->xprv_root);
+                free((void*)model->xprv_account);
+                free((void*)model->xpub_account);
+                free((void*)model->xprv_extended);
+                free((void*)model->xpub_extended);
+            }
         },
         true
     );
@@ -484,10 +513,32 @@ void flipbip_scene_1_enter(void* context) {
         instance->view,
         FlipBipScene1Model * model,
         {
-            flipbip_scene_1_model_init(model, strength, coin, overwrite);
+            s_busy = true;
 
-            // if overwrite is set, return from scene immediately
-            if (overwrite) {
+            const int status = flipbip_scene_1_model_init(model, strength, coin, overwrite);
+
+            // nonzero status, free the mnemonic
+            if (status != 0) {
+                memzero((void*)model->mnemonic, strlen(model->mnemonic));
+                free((void*)model->mnemonic);
+            }
+
+            // if error, set the error message
+            if (status == 1) {
+                model->mnemonic = "ERROR:,Save error";
+                model->page = 2;
+            } else if (status == 2) {
+                model->mnemonic = "ERROR:,Load error";
+                model->page = 2;
+            } else if (status == 3) {
+                model->mnemonic = "ERROR:,Mnemonic check failed";
+                model->page = 2;
+            }
+
+            s_busy = false;
+
+            // if overwrite is set and mnemonic generated, return from scene immediately
+            if (status == -1) {
                 instance->callback(FlipBipCustomEventScene1Back, instance->context);
             }
         },
