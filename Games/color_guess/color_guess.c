@@ -25,8 +25,14 @@ ColorGuess* color_guess_app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
     app->error = false;
+
+    // Set Defaults if no config exists
     app->haptic = 1;
     app->led = 1;
+    app->save_settings = 1;
+
+    // Load configs
+    color_guess_read_settings(app);
     
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(notification, &sequence_display_backlight_on);
@@ -104,6 +110,8 @@ int32_t color_guess_app(void* p) {
     furi_hal_power_suppress_charge_enter();
 
     view_dispatcher_run(app->view_dispatcher);
+
+    color_guess_save_settings(app);
 
     furi_hal_power_suppress_charge_exit();
 
