@@ -13,7 +13,6 @@
 #include "scenes/flipbip_scene.h"
 #include "views/flipbip_startscreen.h"
 #include "views/flipbip_scene_1.h"
-// #include "views/flipbip_scene_2.h"
 
 typedef struct {
     Gui* gui;
@@ -24,7 +23,6 @@ typedef struct {
     VariableItemList* variable_item_list;
     FlipBipStartscreen* flipbip_startscreen;
     FlipBipScene1* flipbip_scene_1;
-    // FlipBipScene2* flipbip_scene_2;
     int haptic; 
     int led;
     int bip39_strength;

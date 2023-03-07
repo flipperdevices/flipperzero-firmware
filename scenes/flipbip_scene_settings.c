@@ -67,12 +67,12 @@ static void flipbip_scene_settings_set_bip39_strength(VariableItem* item) {
     app->bip39_strength = bip39_strength_value[index];
 }
 
-static void flipbip_scene_settings_set_bip44_coin(VariableItem* item) {
-    FlipBip* app = variable_item_get_context(item);
-    uint8_t index = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, bip44_coin_text[index]);
-    app->bip44_coin = bip44_coin_value[index];
-}
+// static void flipbip_scene_settings_set_bip44_coin(VariableItem* item) {
+//     FlipBip* app = variable_item_get_context(item);
+//     uint8_t index = variable_item_get_current_value_index(item);
+//     variable_item_set_current_value_text(item, bip44_coin_text[index]);
+//     app->bip44_coin = bip44_coin_value[index];
+// }
 
 void flipbip_scene_settings_submenu_callback(void* context, uint32_t index) {
     FlipBip* app = context;
@@ -95,16 +95,16 @@ void flipbip_scene_settings_on_enter(void* context) {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, bip39_strength_text[value_index]);
 
-    // BIP44 Coin
-    item = variable_item_list_add(
-        app->variable_item_list,
-        "BIP44 Coin:",
-        2,
-        flipbip_scene_settings_set_bip44_coin,
-        app);
-    value_index = value_index_uint32(app->bip44_coin, bip44_coin_value, 2);
-    variable_item_set_current_value_index(item, value_index);
-    variable_item_set_current_value_text(item, bip44_coin_text[value_index]);
+    // // BIP44 Coin
+    // item = variable_item_list_add(
+    //     app->variable_item_list,
+    //     "BIP44 Coin:",
+    //     2,
+    //     flipbip_scene_settings_set_bip44_coin,
+    //     app);
+    // value_index = value_index_uint32(app->bip44_coin, bip44_coin_value, 2);
+    // variable_item_set_current_value_index(item, value_index);
+    // variable_item_set_current_value_text(item, bip44_coin_text[value_index]);
 
     // Vibro on/off
     item = variable_item_list_add(
