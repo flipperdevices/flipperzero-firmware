@@ -7,11 +7,11 @@
 #include <storage/storage.h>
 
 #define FLIPBIP_APP_BASE_FOLDER EXT_PATH("apps_data/flipbip")
-// #define FLIPBIP_DAT_FILE_NAME ".flipbip.dat"
-#define FLIPBIP_DAT_FILE_NAME ".flipbip.dat.txt"
+#define FLIPBIP_DAT_FILE_NAME ".flipbip.dat"
+// #define FLIPBIP_DAT_FILE_NAME ".flipbip.dat.txt"
 #define FLIPBIP_DAT_FILE_NAME_BAK ".flipbip.dat.bak"
-// #define FLIPBIP_KEY_FILE_NAME ".flipbip.key"
-#define FLIPBIP_KEY_FILE_NAME ".flipbip.key.txt"
+#define FLIPBIP_KEY_FILE_NAME ".flipbip.key"
+// #define FLIPBIP_KEY_FILE_NAME ".flipbip.key.txt"
 #define FLIPBIP_KEY_FILE_NAME_BAK ".flipbip.key.bak"
 #define FLIPBIP_DAT_PATH FLIPBIP_APP_BASE_FOLDER "/" FLIPBIP_DAT_FILE_NAME
 #define FLIPBIP_DAT_PATH_BAK FLIPBIP_APP_BASE_FOLDER "/" FLIPBIP_DAT_FILE_NAME_BAK

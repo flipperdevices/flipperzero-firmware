@@ -34,16 +34,26 @@ The application will be compiled and copied onto your device
   - Generation of offline `m/44'/0'/0'/0` BTC wallet
   - Generation of offline `m/44'/60'/0'/0` ETH wallet (coded from the $SPORK Castle of ETHDenver 2023!)
   - Similar features to: https://iancoleman.io/bip39/
+- Saving wallets to SD card
+  - Wallets are saved to SD card upon creation in `apps_data/flipbip`
+      - NOTE: `apps_data` folder must already exist on SD card!
+  - Saved wallets can be viewed between app runs
+  - Wallets are encrypted with a randomly generated key, and that key is also encrypted
+      - `.flipbip.dat` and `.flipbip.key` files are both required to be in `apps_data/flipbip`
+      - Backups of both these files `.flipbip.dat.bak` and `.flipbip.key.bak` are also maintained
+      - If you want to externally back up your wallet, I recommend copying all these files, and storing the `key` and `dat` files seperately
+  - NOTE: The wallets should be decently tough to crack off of a Flipper, however any Flipper with the app installed can load a wallet in the `apps_data/flipbip` directory if both the `key` and `dat` file are present
 
 ### Work in Progress
 
-- Support for BIP39 passphrase
-  - Currently blank
-- Support for more custom BIP32 wallet paths
-  - Currently hardcoded to `m/44'/0'/0'/0`
+- More coin types
+  - Support for more custom BIP32 wallet paths
+  - Currently hardcoded to `m/44'/0'/0'/0` and `m/44'/60'/0'/0`
 
 ### (FAR) Future
 
-- More coin types
-- Saving wallets to disk
+- Custom wallet security
+  - User specified password
+- Support for BIP39 passphrase
+  - Currently blank
 - USB/Bluetooth wallet functionality
