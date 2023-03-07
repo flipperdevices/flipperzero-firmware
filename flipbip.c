@@ -43,6 +43,7 @@ FlipBip* flipbip_app_alloc() {
     app->led = 1;
     app->bip39_strength = 2; // 256 bits (24 words)
     app->bip44_coin = 0; // 0 (BTC)
+    app->overwrite_saved_seed = 0;
 
     view_dispatcher_add_view(app->view_dispatcher, FlipBipViewIdMenu, submenu_get_view(app->submenu));
     app->flipbip_startscreen = flipbip_startscreen_alloc();

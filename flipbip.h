@@ -27,6 +27,7 @@ typedef struct {
     int led;
     int bip39_strength;
     int bip44_coin;
+    int overwrite_saved_seed;
 } FlipBip;
 
 typedef enum {

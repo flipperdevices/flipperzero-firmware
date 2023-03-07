@@ -263,7 +263,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
     
 }
 
-static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength, const uint32_t coin) {
+static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength, const uint32_t coin, const bool overwrite) {
     
     model->page = 0;
     model->coin = coin;
@@ -273,8 +273,8 @@ static void flipbip_scene_1_model_init(FlipBipScene1Model* const model, const in
     char* mnemonic = malloc(256);
     memzero(mnemonic, 256);
 
-    // Check if the mnemonic key & data is already saved in persistent storage
-    if (!flipbip_has_settings(true) && !flipbip_has_settings(false)) {
+    // Check if the mnemonic key & data is already saved in persistent storage, or overwrite is true
+    if (overwrite || (!flipbip_has_settings(true) && !flipbip_has_settings(false))) {
         // Generate a random mnemonic using trezor-crypto
         const char* mnemonic_gen = mnemonic_generate(strength);
         // Save the mnemonic to persistent storage
@@ -476,6 +476,9 @@ void flipbip_scene_1_enter(void* context) {
     uint32_t coin = 0; //FlipBipCoinBTC0             // BTC (0)
     if (coin_setting == FlipBipCoinETH60) coin = 60; // ETH (60)
 
+    // Overwrite the saved seed with a new one setting
+    bool overwrite = app->overwrite_saved_seed != 0;
+
     flipbip_play_happy_bump(app);
     flipbip_led_set_rgb(app, 255, 0, 0);
 
@@ -483,7 +486,7 @@ void flipbip_scene_1_enter(void* context) {
         instance->view,
         FlipBipScene1Model * model,
         {
-            flipbip_scene_1_model_init(model, strength, coin);
+            flipbip_scene_1_model_init(model, strength, coin, overwrite);
         },
         true
     );
