@@ -1,7 +1,7 @@
 /*
 	Public domain by Andrew M. <liquidsun@gmail.com>
 
-	Ed25519 reference implementation using ed25519_donna
+	Ed25519 reference implementation using Ed25519-donna
 */
 
 /* define ED25519_SUFFIX to have it appended to the end of each public function */
