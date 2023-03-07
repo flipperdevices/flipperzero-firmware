@@ -419,6 +419,7 @@ static bool remote_games_has_previous(GameContext* game_context);
 static void remote_games_next(GameContext* game_context);
 static void remote_games_previous(GameContext* game_context);
 static void remote_games_add(GameContext* game_context, GameEvent* game_event);
+static void remote_games_remove(GameContext* game_context, GameEvent* game_event);
 
 // Saves a game result to the file system.
 // @param game_context pointer to a GameContext.

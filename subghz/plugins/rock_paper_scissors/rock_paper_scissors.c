@@ -1247,6 +1247,54 @@ static void remote_games_add(GameContext* game_context, GameEvent* game_event) {
     furi_mutex_release(game_context->mutex);
 }
 
+static void remote_games_remove(GameContext* game_context, GameEvent* game_event) {
+    furi_assert(game_context);
+    furi_assert(game_event);
+
+    FURI_LOG_I(TAG, "Removing game number %d.", game_event->game_number);
+
+    GameInfo* game = remote_games_find(game_context, game_event->game_number + 1);
+    if(game && game->game_number == game_event->game_number) {
+        // We found the game, so remove it from the list.
+        FURI_LOG_I(TAG, "Found game to remove.");
+
+        // Check to see if the currently selected game is this game.
+        if(game_context->data->remote_selected_game == game) {
+            if(game_context->data->remote_selected_game->next_game) {
+                // Move to next available game.
+                game_context->data->remote_selected_game =
+                    game_context->data->remote_selected_game->next_game;
+            } else {
+                // Move to first game.
+                game_context->data->remote_selected_game = game_context->data->remote_games;
+            }
+
+            if(game_context->data->remote_selected_game == game) {
+                game_context->data->remote_selected_game = NULL;
+                FURI_LOG_I(TAG, "Clearing remote_selected_game.");
+            }
+        }
+
+        // Remove the game from the list.
+        GameInfo* game_previous = remote_games_find(game_context, game->game_number);
+        if(!game_previous) {
+            game_context->data->remote_games = game->next_game;
+            if(game->sender_name) {
+                furi_string_free(game->sender_name);
+            }
+            free(game);
+        } else {
+            game_previous->next_game = game->next_game;
+            if(game->sender_name) {
+                furi_string_free(game->sender_name);
+            }
+            free(game);
+        }
+
+        FURI_LOG_I(TAG, "Done removing game.");
+    }
+}
+
 // Saves a game result to the file system.
 // @param game_context pointer to a GameContext.
 static void save_result(GameContext* game_context) {
@@ -1868,12 +1916,15 @@ int32_t rock_paper_scissors_app(void* p) {
                             // Take ownership of the name and contact
                             event.sender_name = NULL;
                             event.sender_contact = NULL;
+                        } else {
+                            remote_games_remove(game_context, &event);
                         }
                     } else {
                         FURI_LOG_T(
                             TAG,
                             "Remote joining another Flipper on game %03u.",
                             event.game_number);
+                        remote_games_remove(game_context, &event);
                     }
                     furi_mutex_release(game_context->mutex);
                 } else {

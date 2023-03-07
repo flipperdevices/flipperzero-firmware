@@ -20,10 +20,10 @@ Completed work:
 - Receiving a Join game does an ACK (to cause game on joiner to start).
 - Log game results & contact info onto SD card.
 - Allow viewing past games/scores.
+- A join ACK removes it from the list of available games.
 
 Remaining work (for subghz version):
 
-- A join ACK removes it from the list of available games.
 - Config - Allow changing hard-coded CONTACT_INFO message.
 - Refactor the code, so it has less duplication.
 - Write tutorial.
