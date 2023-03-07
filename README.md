@@ -1,4 +1,4 @@
-# Rcwl-0516
+# Rcwl-0516 Flippezero
 
 This fap plugin (app) for RCWL-0516 radar.
 
