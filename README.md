@@ -11,6 +11,7 @@ For the user it is as simple as a continuity tester - wire up your two test need
 Now it depends on your bisect capabilities finding all pad combinations, how long it will take this time.
 
 https://cdn.discordapp.com/attachments/954430078882816021/1071603366741938176/20230205_022641.mp4
+
 https://cdn.discordapp.com/attachments/1071712925171056690/1072306469057347594/qFlipper_2023-02-07_01-01-24.mp4 
 
 Discussion thread: https://discord.com/channels/740930220399525928/1071712925171056690
