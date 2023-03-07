@@ -70,6 +70,7 @@ uint8_t NRF_Payload = 32;// Payload len in bytes or Minimum payload in sniff mod
 uint8_t NRF_Payload_sniff_min = 0;
 uint8_t NRF_AA_OFF = 0;	// Disable Auto Acknowledgement
 bool NRF_ERROR = 0;
+bool NRF_BOARD_POWER_5V = false;
 
 struct ADDRS {
 	uint8_t addr_P0[5];		// MSB first
@@ -1128,6 +1129,11 @@ int32_t nrf24scan_app(void* p) {
 
 	memset((uint8_t*)&addrs, 0, sizeof(addrs));
 	memset((uint8_t*)&addrs_sniff, 0, sizeof(addrs_sniff));
+	if(!furi_hal_power_is_otg_enabled()) {
+		furi_hal_power_enable_otg();
+		NRF_BOARD_POWER_5V = true;
+		furi_delay_ms(100);
+	}
 	nrf24_init();
 
 	// Set system callbacks
@@ -1370,6 +1376,7 @@ int32_t nrf24scan_app(void* p) {
 		write_to_log_file(APP->storage, false);
 	}
 	nrf24_deinit();
+	if(NRF_BOARD_POWER_5V) furi_hal_power_disable_otg();
 
 	view_port_enabled_set(APP->view_port, false);
 	gui_remove_view_port(APP->gui, APP->view_port);
