@@ -186,6 +186,8 @@ bool flipbip_load_settings_secure(char* settings) {
     if (data[0] != FILE_HSTR[0] || data[1] != FILE_HSTR[1] || data[2] != FILE_HSTR[2] || data[3] != FILE_HSTR[3]) {
         memzero(data, dlen);
         free(data);
+        memzero(k1, strlen(FILE_K1) / 2);
+        memzero(k2, FILE_KLEN / 2);
         return false;
     }
     // seek --> header
@@ -204,6 +206,8 @@ bool flipbip_load_settings_secure(char* settings) {
     // clear memory
     memzero(data, dlen);
     free(data);
+    memzero(k1, strlen(FILE_K1) / 2);
+    memzero(k2, FILE_KLEN / 2);
 
     return true;
 }
@@ -261,6 +265,8 @@ bool flipbip_save_settings_secure(const char* settings) {
     // clear memory
     memzero(data, dlen);
     free(data);
+    memzero(k1, strlen(FILE_K1) / 2);
+    memzero(k2, FILE_KLEN / 2);
 
     return true;
 }

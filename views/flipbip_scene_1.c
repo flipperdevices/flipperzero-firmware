@@ -435,9 +435,7 @@ void flipbip_scene_1_exit(void* context) {
             model->page = 0;
             model->strength = 0;
             model->coin = 0;
-            for (int i = 0; i < 64; i++) {
-                model->seed[i] = 0;
-            }
+            memzero(model->seed, 64);
             memzero((void*)model->mnemonic, strlen(model->mnemonic));
             free((void*)model->mnemonic);
             memzero((void*)model->node, sizeof(HDNode));
