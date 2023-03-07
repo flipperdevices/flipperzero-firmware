@@ -123,6 +123,7 @@ void boilerplate_scene_settings_on_enter(void* context) {
         2,
         boilerplate_scene_settings_set_save_settings,
         app);
+    value_index = value_index_uint32(app->save_settings, settings_value, 2);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, settings_text[value_index]);
     

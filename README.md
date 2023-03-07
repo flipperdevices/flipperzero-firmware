@@ -17,7 +17,7 @@ Use this code as a foundation for developing Flipper Zero Applications, change t
 - Sound Effects
 - LED Effects
 - Dolphin Deeds (make dolphin happy)
-- Storage (tbd)
+- Storage (Saves settings)
 
 ## How to install on Flipper Zero
 - If you do not have one, download a firmware<br>

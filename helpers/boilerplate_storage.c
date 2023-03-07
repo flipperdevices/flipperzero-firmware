@@ -1,7 +1,5 @@
-#include <storage/storage.h>
 #include "boilerplate_storage.h"
-#include <flipper_format/flipper_format_i.h>
-#include "../boilerplate.h"
+
 
 static Storage* boilerplate_open_storage() {
     return furi_record_open(RECORD_STORAGE);
@@ -75,7 +73,48 @@ void boilerplate_save_settings(void* context) {
     boilerplate_close_config_file(fff_file);
     boilerplate_close_storage();
 }
-/*
-void boilerplate_read_settings(void* context) {
 
-}*/
+void boilerplate_read_settings(void* context) {
+    Boilerplate* app = context;
+    Storage* storage = boilerplate_open_storage();
+    FlipperFormat* fff_file = flipper_format_file_alloc(storage);
+
+    if(storage_common_stat(storage, BOILERPLATE_SETTINGS_SAVE_PATH, NULL) != FSE_OK) {
+        boilerplate_close_config_file(fff_file);
+        boilerplate_close_storage();
+        return;
+    }
+    uint32_t file_version;
+    FuriString* temp_str = furi_string_alloc();
+
+    if (!flipper_format_file_open_existing(fff_file, BOILERPLATE_SETTINGS_SAVE_PATH)) {
+        FURI_LOG_E(TAG, "Cannot open file %s", BOILERPLATE_SETTINGS_SAVE_PATH);
+        boilerplate_close_config_file(fff_file);
+        boilerplate_close_storage();
+        return;
+    }
+
+    if(!flipper_format_read_header(fff_file, temp_str, &file_version)) {
+        FURI_LOG_E(TAG, "Missing Header Data");
+        boilerplate_close_config_file(fff_file);
+        boilerplate_close_storage();
+        return;
+    }
+
+    if(file_version < BOILERPLATE_SETTINGS_FILE_VERSION) {
+        FURI_LOG_I(TAG, "old config version, will be removed.");
+        boilerplate_close_config_file(fff_file);
+        boilerplate_close_storage();
+        return;
+    }
+
+    flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
+    flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
+    flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_LED, &app->led, 1);
+    flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_SAVE_SETTINGS, &app->save_settings, 1);
+
+    flipper_format_rewind(fff_file);
+
+    boilerplate_close_config_file(fff_file);
+    boilerplate_close_storage();
+}
