@@ -56,4 +56,11 @@ The application will be compiled and copied onto your device
   - User specified password
 - Support for BIP39 passphrase
   - Currently blank
+- Support for more custom BIP32 wallet paths
+  - Currently hardcoded to `m/44'/0'/0'/0` or `m/44'/60'/0'/0`
+
+### (FAR) Future
+
+- More coin types
+- Saving wallets to disk
 - USB/Bluetooth wallet functionality
