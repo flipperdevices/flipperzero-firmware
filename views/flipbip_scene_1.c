@@ -24,7 +24,6 @@ struct FlipBipScene1 {
     void* context;
 };
 
-
 typedef struct {
     int page;
     int strength;
@@ -61,18 +60,24 @@ void flipbip_scene_1_set_callback(
 
 static void flipbip_scene_1_draw_generic(const char* text, size_t line_len) {
     // Split the text into parts
-    for (size_t si = 1; si <= 6; si++) {
-        char *ptr = NULL;
-        
-        if      (si == 1) ptr = s_disp_text1;
-        else if (si == 2) ptr = s_disp_text2;
-        else if (si == 3) ptr = s_disp_text3;
-        else if (si == 4) ptr = s_disp_text4;
-        else if (si == 5) ptr = s_disp_text5;
-        else if (si == 6) ptr = s_disp_text6;
-        
+    for(size_t si = 1; si <= 6; si++) {
+        char* ptr = NULL;
+
+        if(si == 1)
+            ptr = s_disp_text1;
+        else if(si == 2)
+            ptr = s_disp_text2;
+        else if(si == 3)
+            ptr = s_disp_text3;
+        else if(si == 4)
+            ptr = s_disp_text4;
+        else if(si == 5)
+            ptr = s_disp_text5;
+        else if(si == 6)
+            ptr = s_disp_text6;
+
         memzero(ptr, 30 + 1);
-        if (line_len > 30) {
+        if(line_len > 30) {
             strncpy(ptr, text + ((si - 1) * 30), 30);
         } else {
             strncpy(ptr, text + ((si - 1) * line_len), line_len);
@@ -82,35 +87,40 @@ static void flipbip_scene_1_draw_generic(const char* text, size_t line_len) {
 
 static void flipbip_scene_1_draw_mnemonic(const char* mnemonic) {
     // Delineate sections of the mnemonic every 4 words
-    char *mnemonic_working = malloc(strlen(mnemonic) + 1);
+    char* mnemonic_working = malloc(strlen(mnemonic) + 1);
     strcpy(mnemonic_working, mnemonic);
     int word = 0;
-    for (size_t i = 0; i < strlen(mnemonic_working); i++) {
-        if (mnemonic_working[i] == ' ') {
+    for(size_t i = 0; i < strlen(mnemonic_working); i++) {
+        if(mnemonic_working[i] == ' ') {
             word++;
-            if (word % 4 == 0) {
+            if(word % 4 == 0) {
                 mnemonic_working[i] = ',';
             }
-        } 
+        }
     }
 
     // Split the mnemonic into parts
-    char *mnemonic_part = flipbip_strtok(mnemonic_working, ",");
+    char* mnemonic_part = flipbip_strtok(mnemonic_working, ",");
     int mi = 0;
-    while(mnemonic_part != NULL)
-    {
-        char *ptr = NULL;
+    while(mnemonic_part != NULL) {
+        char* ptr = NULL;
         mi++;
-        
-        if      (mi == 1) ptr = s_disp_text1;
-        else if (mi == 2) ptr = s_disp_text2;
-        else if (mi == 3) ptr = s_disp_text3;
-        else if (mi == 4) ptr = s_disp_text4;
-        else if (mi == 5) ptr = s_disp_text5;
-        else if (mi == 6) ptr = s_disp_text6;
+
+        if(mi == 1)
+            ptr = s_disp_text1;
+        else if(mi == 2)
+            ptr = s_disp_text2;
+        else if(mi == 3)
+            ptr = s_disp_text3;
+        else if(mi == 4)
+            ptr = s_disp_text4;
+        else if(mi == 5)
+            ptr = s_disp_text5;
+        else if(mi == 6)
+            ptr = s_disp_text6;
 
         memzero(ptr, 30 + 1);
-        if (strlen(mnemonic_part) > 30) {
+        if(strlen(mnemonic_part) > 30) {
             strncpy(ptr, mnemonic_part, 30);
         } else {
             strncpy(ptr, mnemonic_part, strlen(mnemonic_part));
@@ -125,12 +135,12 @@ static void flipbip_scene_1_draw_mnemonic(const char* mnemonic) {
 }
 
 static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
-    char *seed_working = malloc(64 * 2 + 1);
+    char* seed_working = malloc(64 * 2 + 1);
     // Convert the seed to a hex string
-    for (size_t i = 0; i < 64; i++) {
+    for(size_t i = 0; i < 64; i++) {
         flipbip_btox(model->seed[i], seed_working + (i * 2));
     }
-    
+
     flipbip_scene_1_draw_generic(seed_working, 22);
 
     // Free the working seed memory
@@ -138,41 +148,43 @@ static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
     free(seed_working);
 }
 
-static void flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_type, uint32_t addr_index) {
+static void
+    flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_type, uint32_t addr_index) {
     s_busy = true;
-    
+
     // buffer for key serialization
     const size_t buflen = 128;
     char buf[128 + 1];
 
-    HDNode *addr_node = malloc(sizeof(HDNode));
+    HDNode* addr_node = malloc(sizeof(HDNode));
     memcpy(addr_node, node, sizeof(HDNode));
 
     hdnode_private_ckd(addr_node, addr_index);
     hdnode_fill_public_key(addr_node);
 
-    if (addr_type == 0) { // BTC
+    if(addr_type == 0) { // BTC
         // BTC style address
         const char addr_version = 0x00;
         //const char wif_version = 0x80;
-        ecdsa_get_address(addr_node->public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen); 
+        ecdsa_get_address(
+            addr_node->public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
 
-        char *address = malloc(buflen + 1);
+        char* address = malloc(buflen + 1);
         strncpy(address, buf, buflen);
         flipbip_scene_1_draw_generic(address, 12);
         memzero(address, buflen + 1);
         free(address);
 
-        //ecdsa_get_wif(addr_node->private_key, wif_version, HASHER_SHA2D, buf, buflen); 
+        //ecdsa_get_wif(addr_node->private_key, wif_version, HASHER_SHA2D, buf, buflen);
         //char *wif = malloc(buflen + 1);
         //strncpy(wif, buf, buflen);
-    } else if (addr_type == 60) { // ETH
+    } else if(addr_type == 60) { // ETH
         // ETH style address
-        hdnode_get_ethereum_pubkeyhash(addr_node, (uint8_t *)buf);
-        char *address = malloc(42 + 1);
+        hdnode_get_ethereum_pubkeyhash(addr_node, (uint8_t*)buf);
+        char* address = malloc(42 + 1);
         memcpy(address, "0x", 2);
         // Convert the hash to a hex string
-        for (size_t i = 0; i < 20; i++) {
+        for(size_t i = 0; i < 20; i++) {
             flipbip_btox(buf[i], address + 2 + (i * 2));
         }
         flipbip_scene_1_draw_generic(address, 12);
@@ -199,56 +211,46 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
     //UNUSED(model);
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    
+
     flipbip_scene_1_clear_text();
-    if (model->page == 1) {
-        const char* info = "-Scroll pages with up/down-" 
+    if(model->page == 1) {
+        const char* info = "-Scroll pages with up/down-"
                            "p1,2)    Mnemonic/Seed     "
                            "p3)       xprv Root Key    "
                            "p4,5)  xprv/xpub Accnt Keys"
                            "p6,7)  xprv/xpub Extnd Keys"
                            "p8+)    Receive Addresses  ";
         flipbip_scene_1_draw_generic(info, 27);
-    }
-    else if (model->page == 2) {
+    } else if(model->page == 2) {
         flipbip_scene_1_draw_mnemonic(model->mnemonic);
-    } 
-    else if (model->page == 3) {
+    } else if(model->page == 3) {
         flipbip_scene_1_draw_seed(model);
-    }
-    else if (model->page == 4) {
+    } else if(model->page == 4) {
         flipbip_scene_1_draw_generic(model->xprv_root, 20);
-    }
-    else if (model->page == 5) {
+    } else if(model->page == 5) {
         flipbip_scene_1_draw_generic(model->xprv_account, 20);
-    }
-    else if (model->page == 6) {
+    } else if(model->page == 6) {
         flipbip_scene_1_draw_generic(model->xpub_account, 20);
-    }
-    else if (model->page == 7) {
+    } else if(model->page == 7) {
         flipbip_scene_1_draw_generic(model->xprv_extended, 20);
-    }
-    else if (model->page == 8) {
+    } else if(model->page == 8) {
         flipbip_scene_1_draw_generic(model->xpub_extended, 20);
-    } 
-    else if (model->page >= 9 && model->page <= 13) {
+    } else if(model->page >= 9 && model->page <= 13) {
         flipbip_scene_1_draw_address(model->node, model->coin, model->page - 9);
     }
 
-    if (model->page == 0) {
+    if(model->page == 0) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 1, 10, "Loading...");
         canvas_draw_str(canvas, 6, 30, "m/44'/x'/0'/0");
-    } else if (model->page >= 9 && model->page <= 13) {
+    } else if(model->page >= 9 && model->page <= 13) {
         canvas_set_font(canvas, FontSecondary);
-        const char * receive_text;
-        if (model->coin == 0) { // BTC
+        const char* receive_text;
+        if(model->coin == 0) { // BTC
             receive_text = "BTC receive address:";
-        }
-        else if (model->coin == 60) { // ETH
+        } else if(model->coin == 60) { // ETH
             receive_text = "ETH receive address:";
-        }
-        else {
+        } else {
             receive_text = "Receive address:";
         }
         canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, receive_text);
@@ -257,8 +259,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_draw_str(canvas, 6, 34, s_disp_text2);
         canvas_draw_str(canvas, 6, 46, s_disp_text3);
         canvas_draw_str(canvas, 6, 58, s_disp_text4);
-    } 
-    else {
+    } else {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, s_disp_text1);
         canvas_draw_str_aligned(canvas, 1, 12, AlignLeft, AlignTop, s_disp_text2);
@@ -267,43 +268,45 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_draw_str_aligned(canvas, 1, 42, AlignLeft, AlignTop, s_disp_text5);
         canvas_draw_str_aligned(canvas, 1, 52, AlignLeft, AlignTop, s_disp_text6);
     }
-    
 }
 
-static int flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int strength, const uint32_t coin, const bool overwrite) {
-    
+static int flipbip_scene_1_model_init(
+    FlipBipScene1Model* const model,
+    const int strength,
+    const uint32_t coin,
+    const bool overwrite) {
     model->page = 0;
     model->mnemonic_only = false;
     model->strength = strength;
     model->coin = coin;
     model->overwrite = overwrite;
-    
+
     // Allocate memory for mnemonic
     char* mnemonic = malloc(256);
     memzero(mnemonic, 256);
 
     // Check if the mnemonic key & data is already saved in persistent storage, or overwrite is true
-    if (overwrite || (!flipbip_has_settings(true) && !flipbip_has_settings(false))) {
+    if(overwrite || (!flipbip_has_settings(true) && !flipbip_has_settings(false))) {
         // Generate a random mnemonic using trezor-crypto
         const char* mnemonic_gen = mnemonic_generate(strength);
         // Save the mnemonic to persistent storage
-        if (!flipbip_save_settings_secure(mnemonic_gen)) return 1; // 1 = save error
+        if(!flipbip_save_settings_secure(mnemonic_gen)) return 1; // 1 = save error
         // Clear the generated mnemonic from memory
         mnemonic_clear();
         model->mnemonic_only = true;
     }
-    
+
     // Load the mnemonic from persistent storage
-    if (!flipbip_load_settings_secure(mnemonic)) return 2; // 2 = load error
+    if(!flipbip_load_settings_secure(mnemonic)) return 2; // 2 = load error
     model->mnemonic = mnemonic;
     // Check if the mnemonic is valid
-    if (mnemonic_check(model->mnemonic) == 0) return 3; // 3 = mnemonic check error
+    if(mnemonic_check(model->mnemonic) == 0) return 3; // 3 = mnemonic check error
 
     // if we are only generating the mnemonic, return
-    if (model->mnemonic_only) {
+    if(model->mnemonic_only) {
         return -1; // -1 = mnemonic only, return from parent
     }
-    
+
     // test mnemonic
     //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
 
@@ -311,7 +314,7 @@ static int flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int
     mnemonic_to_seed(model->mnemonic, "", model->seed, 0);
 
     // Generate a BIP32 root HD node from the mnemonic
-    HDNode *root = malloc(sizeof(HDNode));
+    HDNode* root = malloc(sizeof(HDNode));
     hdnode_from_seed(model->seed, 64, SECP256K1_NAME, root);
 
     // m/44'/0'/0'/0 or m/44'/60'/0'/0
@@ -320,7 +323,7 @@ static int flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int
     //const uint32_t coin = 60; // ETH
     const uint32_t account = 0;
     const uint32_t change = 0;
-    
+
     // constants for BTC / ETH
     const uint32_t version_public = 0x0488b21e;
     const uint32_t version_private = 0x0488ade4;
@@ -330,53 +333,53 @@ static int flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int
     // "xpub_magic_segwit_native": 78792518,
     // "xpub_magic_multisig_segwit_p2sh": 43365439,
     // "xpub_magic_multisig_segwit_native": 44728019,
-    
+
     // buffer for key serialization
     const size_t buflen = 128;
     char buf[128 + 1];
-    
+
     // root
     uint32_t fingerprint = 0;
-    hdnode_serialize_private(root, fingerprint, version_private, buf, buflen); 
-    char *xprv_root = malloc(buflen + 1);
+    hdnode_serialize_private(root, fingerprint, version_private, buf, buflen);
+    char* xprv_root = malloc(buflen + 1);
     strncpy(xprv_root, buf, buflen);
     model->xprv_root = xprv_root;
-    
-    HDNode *node = root;
-    
+
+    HDNode* node = root;
+
     // purpose m/44'
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd_prime(node, purpose); // purpose
-    
+
     // coin m/44'/0' or m/44'/60'
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd_prime(node, model->coin); // coin
-    
+
     // account m/44'/0'/0' or m/44'/60'/0'
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd_prime(node, account); // account
-    
-    hdnode_serialize_private(node, fingerprint, version_private, buf, buflen); 
-    char *xprv_acc = malloc(buflen + 1);
+
+    hdnode_serialize_private(node, fingerprint, version_private, buf, buflen);
+    char* xprv_acc = malloc(buflen + 1);
     strncpy(xprv_acc, buf, buflen);
     model->xprv_account = xprv_acc;
-    
-    hdnode_serialize_public(node, fingerprint, version_public, buf, buflen); 
-    char *xpub_acc = malloc(buflen + 1);
+
+    hdnode_serialize_public(node, fingerprint, version_public, buf, buflen);
+    char* xpub_acc = malloc(buflen + 1);
     strncpy(xpub_acc, buf, buflen);
     model->xpub_account = xpub_acc;
-    
+
     // external/internal (change) m/44'/0'/0'/0 or m/44'/60'/0'/0
     fingerprint = hdnode_fingerprint(node);
     hdnode_private_ckd(node, change); // external/internal (change)
-    
-    hdnode_serialize_private(node, fingerprint, version_private, buf, buflen); 
-    char *xprv_ext = malloc(buflen + 1);
+
+    hdnode_serialize_private(node, fingerprint, version_private, buf, buflen);
+    char* xprv_ext = malloc(buflen + 1);
     strncpy(xprv_ext, buf, buflen);
     model->xprv_extended = xprv_ext;
-    
-    hdnode_serialize_public(node, fingerprint, version_public, buf, buflen); 
-    char *xpub_ext = malloc(buflen + 1);
+
+    hdnode_serialize_public(node, fingerprint, version_public, buf, buflen);
+    char* xpub_ext = malloc(buflen + 1);
     strncpy(xpub_ext, buf, buflen);
     model->xpub_extended = xpub_ext;
 
@@ -394,57 +397,57 @@ static int flipbip_scene_1_model_init(FlipBipScene1Model* const model, const int
 }
 
 bool flipbip_scene_1_input(InputEvent* event, void* context) {
-    furi_assert(context); 
+    furi_assert(context);
     FlipBipScene1* instance = context;
 
     // Ignore input if busy
-    if (s_busy) {
+    if(s_busy) {
         return false;
     }
 
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    FlipBipScene1Model * model,
-                    {
-                        UNUSED(model);
-                        instance->callback(FlipBipCustomEventScene1Back, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyRight:
-            case InputKeyDown:
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    FlipBipScene1Model* model,
-                    {
-                        //UNUSED(model);
-                        model->page = (model->page + 1) % 14;
-                        if (model->page == 0) {
-                            model->page = 1;
-                        }
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-            case InputKeyUp:
-                with_view_model(
-                    instance->view,
-                    FlipBipScene1Model* model,
-                    {
-                        //UNUSED(model);
-                        model->page = (model->page - 1) % 14;
-                        if (model->page == 0) {
-                            model->page = 13;
-                        }
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                FlipBipScene1Model * model,
+                {
+                    UNUSED(model);
+                    instance->callback(FlipBipCustomEventScene1Back, instance->context);
+                },
+                true);
+            break;
+        case InputKeyRight:
+        case InputKeyDown:
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                FlipBipScene1Model * model,
+                {
+                    //UNUSED(model);
+                    model->page = (model->page + 1) % 14;
+                    if(model->page == 0) {
+                        model->page = 1;
+                    }
+                },
+                true);
+            break;
+        case InputKeyLeft:
+        case InputKeyUp:
+            with_view_model(
+                instance->view,
+                FlipBipScene1Model * model,
+                {
+                    //UNUSED(model);
+                    model->page = (model->page - 1) % 14;
+                    if(model->page == 0) {
+                        model->page = 13;
+                    }
+                },
+                true);
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
     return true;
@@ -463,7 +466,7 @@ void flipbip_scene_1_exit(void* context) {
             model->coin = 0;
             memzero(model->seed, 64);
             // if mnemonic_only is true, then we don't need to free the data here
-            if (!model->mnemonic_only) {
+            if(!model->mnemonic_only) {
                 memzero((void*)model->mnemonic, strlen(model->mnemonic));
                 free((void*)model->mnemonic);
                 memzero((void*)model->node, sizeof(HDNode));
@@ -480,8 +483,7 @@ void flipbip_scene_1_exit(void* context) {
                 free((void*)model->xpub_extended);
             }
         },
-        true
-    );
+        true);
 
     flipbip_scene_1_clear_text();
 }
@@ -491,17 +493,19 @@ void flipbip_scene_1_enter(void* context) {
     FlipBipScene1* instance = (FlipBipScene1*)context;
 
     FlipBip* app = instance->context;
-    
+
     // BIP39 Strength setting
     int strength_setting = app->bip39_strength;
     int strength = 256; // FlipBipStrength256                        // 24 words (256 bit)
-    if (strength_setting == FlipBipStrength128) strength = 128;      // 12 words (128 bit)
-    else if (strength_setting == FlipBipStrength192) strength = 192; // 18 words (192 bit)
-    
+    if(strength_setting == FlipBipStrength128)
+        strength = 128; // 12 words (128 bit)
+    else if(strength_setting == FlipBipStrength192)
+        strength = 192; // 18 words (192 bit)
+
     // BIP44 Coin setting
     int coin_setting = app->bip44_coin;
     uint32_t coin = 0; //FlipBipCoinBTC0             // BTC (0)
-    if (coin_setting == FlipBipCoinETH60) coin = 60; // ETH (60)
+    if(coin_setting == FlipBipCoinETH60) coin = 60; // ETH (60)
 
     // Overwrite the saved seed with a new one setting
     bool overwrite = app->overwrite_saved_seed != 0;
@@ -518,19 +522,19 @@ void flipbip_scene_1_enter(void* context) {
             const int status = flipbip_scene_1_model_init(model, strength, coin, overwrite);
 
             // nonzero status, free the mnemonic
-            if (status != 0) {
+            if(status != 0) {
                 memzero((void*)model->mnemonic, strlen(model->mnemonic));
                 free((void*)model->mnemonic);
             }
 
             // if error, set the error message
-            if (status == 1) {
+            if(status == 1) {
                 model->mnemonic = "ERROR:,Save error";
                 model->page = 2;
-            } else if (status == 2) {
+            } else if(status == 2) {
                 model->mnemonic = "ERROR:,Load error";
                 model->page = 2;
-            } else if (status == 3) {
+            } else if(status == 3) {
                 model->mnemonic = "ERROR:,Mnemonic check failed";
                 model->page = 2;
             }
@@ -538,12 +542,11 @@ void flipbip_scene_1_enter(void* context) {
             s_busy = false;
 
             // if overwrite is set and mnemonic generated, return from scene immediately
-            if (status == -1) {
+            if(status == -1) {
                 instance->callback(FlipBipCustomEventScene1Back, instance->context);
             }
         },
-        true
-    );
+        true);
 }
 
 FlipBipScene1* flipbip_scene_1_alloc() {
@@ -555,7 +558,7 @@ FlipBipScene1* flipbip_scene_1_alloc() {
     view_set_input_callback(instance->view, flipbip_scene_1_input);
     view_set_enter_callback(instance->view, flipbip_scene_1_enter);
     view_set_exit_callback(instance->view, flipbip_scene_1_exit);
-    
+
     return instance;
 }
 
@@ -563,12 +566,7 @@ void flipbip_scene_1_free(FlipBipScene1* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        FlipBipScene1Model * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, FlipBipScene1Model * model, { UNUSED(model); }, true);
 
     flipbip_scene_1_clear_text();
 
@@ -580,4 +578,3 @@ View* flipbip_scene_1_get_view(FlipBipScene1* instance) {
     furi_assert(instance);
     return instance->view;
 }
-

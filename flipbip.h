@@ -23,7 +23,7 @@ typedef struct {
     VariableItemList* variable_item_list;
     FlipBipStartscreen* flipbip_startscreen;
     FlipBipScene1* flipbip_scene_1;
-    int haptic; 
+    int haptic;
     int led;
     int bip39_strength;
     int bip44_coin;

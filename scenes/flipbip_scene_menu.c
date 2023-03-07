@@ -17,14 +17,31 @@ void flipbip_scene_menu_on_enter(void* context) {
     FlipBip* app = context;
 
     if(flipbip_has_settings(true) && flipbip_has_settings(false)) {
-        submenu_add_item(app->submenu, "View saved BTC wallet", SubmenuIndexScene1BTC, flipbip_scene_menu_submenu_callback, app);
-        submenu_add_item(app->submenu, "View saved ETH wallet", SubmenuIndexScene1ETH, flipbip_scene_menu_submenu_callback, app);
+        submenu_add_item(
+            app->submenu,
+            "View saved BTC wallet",
+            SubmenuIndexScene1BTC,
+            flipbip_scene_menu_submenu_callback,
+            app);
+        submenu_add_item(
+            app->submenu,
+            "View saved ETH wallet",
+            SubmenuIndexScene1ETH,
+            flipbip_scene_menu_submenu_callback,
+            app);
     }
-    submenu_add_item(app->submenu, "Generate new wallet", SubmenuIndexScene1New, flipbip_scene_menu_submenu_callback, app);
-    
-    submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, flipbip_scene_menu_submenu_callback, app);
+    submenu_add_item(
+        app->submenu,
+        "Generate new wallet",
+        SubmenuIndexScene1New,
+        flipbip_scene_menu_submenu_callback,
+        app);
 
-    submenu_set_selected_item(app->submenu, scene_manager_get_scene_state(app->scene_manager, FlipBipSceneMenu));
+    submenu_add_item(
+        app->submenu, "Settings", SubmenuIndexSettings, flipbip_scene_menu_submenu_callback, app);
+
+    submenu_set_selected_item(
+        app->submenu, scene_manager_get_scene_state(app->scene_manager, FlipBipSceneMenu));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
 }
@@ -45,20 +62,20 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1BTC);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
-        } else if (event.event == SubmenuIndexScene1ETH) {
+        } else if(event.event == SubmenuIndexScene1ETH) {
             app->overwrite_saved_seed = 0;
             app->bip44_coin = FlipBipCoinETH60;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1ETH);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
-        } else if (event.event == SubmenuIndexScene1New) {
+        } else if(event.event == SubmenuIndexScene1New) {
             app->overwrite_saved_seed = 1;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1New);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
-        } else if (event.event == SubmenuIndexSettings) {
+        } else if(event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexSettings);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneSettings);

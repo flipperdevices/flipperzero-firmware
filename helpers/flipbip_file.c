@@ -34,7 +34,7 @@ bool flipbip_load_settings(char* settings, bool key_file) {
         path = FLIPBIP_DAT_PATH;
     }
 
-    Storage *fs_api = furi_record_open(RECORD_STORAGE);
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
 
     File* settings_file = storage_file_alloc(fs_api);
     if(storage_file_open(settings_file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -58,8 +58,7 @@ bool flipbip_load_settings(char* settings, bool key_file) {
     if(!strlen(settings) == 0) {
         Storage* fs_api = furi_record_open(RECORD_STORAGE);
         FileInfo layout_file_info;
-        FS_Error file_check_err = storage_common_stat(
-            fs_api, path, &layout_file_info);
+        FS_Error file_check_err = storage_common_stat(fs_api, path, &layout_file_info);
         furi_record_close(RECORD_STORAGE);
         if(file_check_err != FSE_OK) {
             memzero(settings, strlen(settings));
@@ -121,10 +120,7 @@ bool flipbip_save_settings(const char* settings, bool key_file, bool append) {
 
     File* settings_file = storage_file_alloc(fs_api);
     if(storage_file_open(settings_file, path, FSAM_WRITE, open_mode)) {
-        storage_file_write(
-            settings_file,
-            settings,
-            strlen(settings));
+        storage_file_write(settings_file, settings, strlen(settings));
         storage_file_write(settings_file, "\n", 1);
         ret = true;
     }
@@ -133,10 +129,7 @@ bool flipbip_save_settings(const char* settings, bool key_file, bool append) {
 
     File* settings_file_bak = storage_file_alloc(fs_api);
     if(storage_file_open(settings_file_bak, path_bak, FSAM_WRITE, open_mode)) {
-        storage_file_write(
-            settings_file_bak,
-            settings,
-            strlen(settings));
+        storage_file_write(settings_file_bak, settings, strlen(settings));
         storage_file_write(settings_file_bak, "\n", 1);
     }
     storage_file_close(settings_file_bak);
@@ -149,16 +142,17 @@ bool flipbip_save_settings(const char* settings, bool key_file, bool append) {
 
 bool flipbip_load_settings_secure(char* settings) {
     const size_t dlen = FILE_HLEN + FILE_SLEN + 1;
-    
+
     // allocate memory for key/data
-    char *data = malloc(dlen);
+    char* data = malloc(dlen);
     memzero(data, dlen);
 
     // load k2 from file
-    if (!flipbip_load_settings(data, true)) return false;
+    if(!flipbip_load_settings(data, true)) return false;
 
     // check header
-    if (data[0] != FILE_HSTR[0] || data[1] != FILE_HSTR[1] || data[2] != FILE_HSTR[2] || data[3] != FILE_HSTR[3]) {
+    if(data[0] != FILE_HSTR[0] || data[1] != FILE_HSTR[1] || data[2] != FILE_HSTR[2] ||
+       data[3] != FILE_HSTR[3]) {
         memzero(data, dlen);
         free(data);
         return false;
@@ -169,7 +163,7 @@ bool flipbip_load_settings_secure(char* settings) {
     // prepare k1
     uint8_t k1[64];
     flipbip_xtob(FILE_K1, k1, strlen(FILE_K1) / 2);
-    
+
     // load k2 from file buffer (secured by k1)
     flipbip_cipher(k1, strlen(FILE_K1) / 2, data, data, FILE_KLEN);
     uint8_t k2[128];
@@ -180,10 +174,11 @@ bool flipbip_load_settings_secure(char* settings) {
     data -= FILE_HLEN;
 
     // load data from file
-    if (!flipbip_load_settings(data, false)) return false;
+    if(!flipbip_load_settings(data, false)) return false;
 
     // check header
-    if (data[0] != FILE_HSTR[0] || data[1] != FILE_HSTR[1] || data[2] != FILE_HSTR[2] || data[3] != FILE_HSTR[3]) {
+    if(data[0] != FILE_HSTR[0] || data[1] != FILE_HSTR[1] || data[2] != FILE_HSTR[2] ||
+       data[3] != FILE_HSTR[3]) {
         memzero(data, dlen);
         free(data);
         memzero(k1, strlen(FILE_K1) / 2);
@@ -202,7 +197,7 @@ bool flipbip_load_settings_secure(char* settings) {
 
     // seek <-- header
     data -= FILE_HLEN;
-    
+
     // clear memory
     memzero(data, dlen);
     free(data);
@@ -217,12 +212,12 @@ bool flipbip_save_settings_secure(const char* settings) {
 
     // cap settings to 256 bytes
     size_t len = strlen(settings);
-    if (len > (FILE_SLEN / 2)) len = FILE_SLEN / 2;
-    
+    if(len > (FILE_SLEN / 2)) len = FILE_SLEN / 2;
+
     // allocate memory for key/data
-    char *data = malloc(dlen);
+    char* data = malloc(dlen);
     memzero(data, dlen);
-    
+
     // write header
     strncpy(data, FILE_HSTR, FILE_HLEN);
     // seek --> header
@@ -231,13 +226,13 @@ bool flipbip_save_settings_secure(const char* settings) {
     // prepare k1
     uint8_t k1[64];
     flipbip_xtob(FILE_K1, k1, strlen(FILE_K1) / 2);
-    
+
     // generate k2
     uint8_t k2[128];
     random_buffer(k2, FILE_KLEN / 2);
 
     // write k2 to file buffer (secured by k1)
-    for (size_t i = 0; i < (FILE_KLEN / 2); i++) {
+    for(size_t i = 0; i < (FILE_KLEN / 2); i++) {
         flipbip_btox(k2[i], data + (i * 2));
     }
     flipbip_cipher(k1, strlen(FILE_K1) / 2, data, data, FILE_KLEN);
@@ -252,7 +247,7 @@ bool flipbip_save_settings_secure(const char* settings) {
     memzero(data, FILE_KLEN);
 
     // write settings to file buffer (secured by k2)
-    for (size_t i = 0; i < len; i++) {
+    for(size_t i = 0; i < len; i++) {
         flipbip_btox((uint8_t)settings[i], data + (i * 2));
     }
     flipbip_cipher(k2, FILE_KLEN / 2, data, data, FILE_SLEN);

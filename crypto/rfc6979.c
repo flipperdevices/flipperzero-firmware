@@ -27,36 +27,39 @@
 #include "memzero.h"
 #include "rfc6979.h"
 
-void init_rfc6979(const uint8_t *priv_key, const uint8_t *hash,
-                  const ecdsa_curve *curve, rfc6979_state *state) {
-  if (curve) {
-    bignum256 hash_bn = {0};
-    bn_read_be(hash, &hash_bn);
+void init_rfc6979(
+    const uint8_t* priv_key,
+    const uint8_t* hash,
+    const ecdsa_curve* curve,
+    rfc6979_state* state) {
+    if(curve) {
+        bignum256 hash_bn = {0};
+        bn_read_be(hash, &hash_bn);
 
-    // Make sure hash is partly reduced modulo order
-    assert(bn_bitcount(&curve->order) >= 256);
-    bn_mod(&hash_bn, &curve->order);
+        // Make sure hash is partly reduced modulo order
+        assert(bn_bitcount(&curve->order) >= 256);
+        bn_mod(&hash_bn, &curve->order);
 
-    uint8_t hash_reduced[32] = {0};
-    bn_write_be(&hash_bn, hash_reduced);
-    memzero(&hash_bn, sizeof(hash_bn));
-    hmac_drbg_init(state, priv_key, 32, hash_reduced, 32);
-    memzero(hash_reduced, sizeof(hash_reduced));
-  } else {
-    hmac_drbg_init(state, priv_key, 32, hash, 32);
-  }
+        uint8_t hash_reduced[32] = {0};
+        bn_write_be(&hash_bn, hash_reduced);
+        memzero(&hash_bn, sizeof(hash_bn));
+        hmac_drbg_init(state, priv_key, 32, hash_reduced, 32);
+        memzero(hash_reduced, sizeof(hash_reduced));
+    } else {
+        hmac_drbg_init(state, priv_key, 32, hash, 32);
+    }
 }
 
 // generate next number from deterministic random number generator
-void generate_rfc6979(uint8_t rnd[32], rfc6979_state *state) {
-  hmac_drbg_generate(state, rnd, 32);
+void generate_rfc6979(uint8_t rnd[32], rfc6979_state* state) {
+    hmac_drbg_generate(state, rnd, 32);
 }
 
 // generate K in a deterministic way, according to RFC6979
 // http://tools.ietf.org/html/rfc6979
-void generate_k_rfc6979(bignum256 *k, rfc6979_state *state) {
-  uint8_t buf[32] = {0};
-  generate_rfc6979(buf, state);
-  bn_read_be(buf, k);
-  memzero(buf, sizeof(buf));
+void generate_k_rfc6979(bignum256* k, rfc6979_state* state) {
+    uint8_t buf[32] = {0};
+    generate_rfc6979(buf, state);
+    bn_read_be(buf, k);
+    memzero(buf, sizeof(buf));
 }

@@ -40,6 +40,6 @@ Distibuted under MIT License.
 - SHA1/SHA2: http://www.aarongifford.com/computers/sha.html
 - SHA3: https://github.com/rhash/RHash
 - Curve25519: https://github.com/agl/curve25519-donna
-- Ed25519: https://github.com/floodyberry/ed25519-donna
+- Ed25519: https://github.com/floodyberry/ed25519_donna
 - Chacha20: https://github.com/wg/c20p1305
 - Poly1305: https://github.com/floodyberry/poly1305-donna

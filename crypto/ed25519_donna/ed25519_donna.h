@@ -11,13 +11,13 @@
 #ifndef ED25519_DONNA_H
 #define ED25519_DONNA_H
 
-#include "ed25519-donna-portable.h"
+#include "ed25519_donna_portable.h"
 
-#include "curve25519-donna-32bit.h"
+#include "curve25519_donna_32bit.h"
 
-#include "curve25519-donna-helpers.h"
+#include "curve25519_donna_helpers.h"
 
-#include "modm-donna-32bit.h"
+#include "modm_donna_32bit.h"
 
 typedef unsigned char hash_512bits[64];
 
@@ -28,25 +28,25 @@ typedef unsigned char hash_512bits[64];
  */
 
 typedef struct ge25519_t {
-	bignum25519 x, y, z, t;
+    bignum25519 x, y, z, t;
 } ge25519;
 
 typedef struct ge25519_p1p1_t {
-	bignum25519 x, y, z, t;
+    bignum25519 x, y, z, t;
 } ge25519_p1p1;
 
 typedef struct ge25519_niels_t {
-	bignum25519 ysubx, xaddy, t2d;
+    bignum25519 ysubx, xaddy, t2d;
 } ge25519_niels;
 
 typedef struct ge25519_pniels_t {
-	bignum25519 ysubx, xaddy, z, t2d;
+    bignum25519 ysubx, xaddy, z, t2d;
 } ge25519_pniels;
 
-#include "ed25519-donna-basepoint-table.h"
+#include "ed25519_donna_basepoint_table.h"
 
-#include "ed25519-donna-32bit-tables.h"
+#include "ed25519_donna_32bit_tables.h"
 
-#include "ed25519-donna-impl-base.h"
+#include "ed25519_donna_impl_base.h"
 
 #endif

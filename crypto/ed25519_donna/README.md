@@ -27,12 +27,12 @@ are made.
 <table>
 <thead><tr><th>Implementation</th><th>Sign</th><th>gcc</th><th>icc</th><th>clang</th><th>Verify</th><th>gcc</th><th>icc</th><th>clang</th></tr></thead>
 <tbody>
-<tr><td>ed25519-donna 64bit     </td><td></td><td>100k</td><td>110k</td><td>137k</td><td></td><td>327k (144k) </td><td>342k (163k) </td><td>422k (194k) </td></tr>
+<tr><td>ed25519_donna 64bit     </td><td></td><td>100k</td><td>110k</td><td>137k</td><td></td><td>327k (144k) </td><td>342k (163k) </td><td>422k (194k) </td></tr>
 <tr><td>amd64-64-24k            </td><td></td><td>102k</td><td>    </td><td>    </td><td></td><td>355k (158k) </td><td>            </td><td>            </td></tr>
-<tr><td>ed25519-donna-sse2 64bit</td><td></td><td>108k</td><td>111k</td><td>116k</td><td></td><td>353k (155k) </td><td>345k (154k) </td><td>360k (161k) </td></tr>
+<tr><td>ed25519_donna-sse2 64bit</td><td></td><td>108k</td><td>111k</td><td>116k</td><td></td><td>353k (155k) </td><td>345k (154k) </td><td>360k (161k) </td></tr>
 <tr><td>amd64-51-32k            </td><td></td><td>116k</td><td>    </td><td>    </td><td></td><td>380k (175k) </td><td>            </td><td>            </td></tr>
-<tr><td>ed25519-donna-sse2 32bit</td><td></td><td>147k</td><td>147k</td><td>156k</td><td></td><td>380k (178k) </td><td>381k (173k) </td><td>430k (192k) </td></tr>
-<tr><td>ed25519-donna 32bit     </td><td></td><td>597k</td><td>335k</td><td>380k</td><td></td><td>1693k (720k)</td><td>1052k (453k)</td><td>1141k (493k)</td></tr>
+<tr><td>ed25519_donna-sse2 32bit</td><td></td><td>147k</td><td>147k</td><td>156k</td><td></td><td>380k (178k) </td><td>381k (173k) </td><td>430k (192k) </td></tr>
+<tr><td>ed25519_donna 32bit     </td><td></td><td>597k</td><td>335k</td><td>380k</td><td></td><td>1693k (720k)</td><td>1052k (453k)</td><td>1141k (493k)</td></tr>
 </tbody>
 </table>
 
@@ -42,11 +42,11 @@ are made.
 <thead><tr><th>Implementation</th><th>Sign</th><th>gcc</th><th>icc</th><th>clang</th><th>Verify</th><th>gcc</th><th>icc</th><th>clang</th></tr></thead>
 <tbody>
 <tr><td>amd64-64-24k            </td><td></td><td> 68k</td><td>    </td><td>    </td><td></td><td>225k (104k) </td><td>            </td><td>            </td></tr>
-<tr><td>ed25519-donna 64bit     </td><td></td><td> 71k</td><td> 75k</td><td> 90k</td><td></td><td>226k (105k) </td><td>226k (112k) </td><td>277k (125k) </td></tr>
+<tr><td>ed25519_donna 64bit     </td><td></td><td> 71k</td><td> 75k</td><td> 90k</td><td></td><td>226k (105k) </td><td>226k (112k) </td><td>277k (125k) </td></tr>
 <tr><td>amd64-51-32k            </td><td></td><td> 72k</td><td>    </td><td>    </td><td></td><td>218k (107k) </td><td>            </td><td>            </td></tr>
-<tr><td>ed25519-donna-sse2 64bit</td><td></td><td> 79k</td><td> 82k</td><td> 92k</td><td></td><td>252k (122k) </td><td>259k (124k) </td><td>282k (131k) </td></tr>
-<tr><td>ed25519-donna-sse2 32bit</td><td></td><td> 94k</td><td> 95k</td><td>103k</td><td></td><td>296k (146k) </td><td>294k (137k) </td><td>306k (147k) </td></tr>
-<tr><td>ed25519-donna 32bit     </td><td></td><td>525k</td><td>299k</td><td>316k</td><td></td><td>1502k (645k)</td><td>959k (418k) </td><td>954k (416k) </td></tr>
+<tr><td>ed25519_donna-sse2 64bit</td><td></td><td> 79k</td><td> 82k</td><td> 92k</td><td></td><td>252k (122k) </td><td>259k (124k) </td><td>282k (131k) </td></tr>
+<tr><td>ed25519_donna-sse2 32bit</td><td></td><td> 94k</td><td> 95k</td><td>103k</td><td></td><td>296k (146k) </td><td>294k (137k) </td><td>306k (147k) </td></tr>
+<tr><td>ed25519_donna 32bit     </td><td></td><td>525k</td><td>299k</td><td>316k</td><td></td><td>1502k (645k)</td><td>959k (418k) </td><td>954k (416k) </td></tr>
 </tbody>
 </table>
 
