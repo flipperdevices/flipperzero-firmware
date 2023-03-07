@@ -97,9 +97,9 @@ SRCS  += sha2.c
 SRCS  += sha3.c
 SRCS  += hasher.c
 SRCS  += aes/aescrypt.c aes/aeskey.c aes/aestab.c aes/aes_modes.c
-SRCS  += ed25519-donna/curve25519-donna-32bit.c ed25519-donna/curve25519-donna-helpers.c ed25519-donna/modm-donna-32bit.c
-SRCS  += ed25519-donna/ed25519-donna-basepoint-table.c ed25519-donna/ed25519-donna-32bit-tables.c ed25519-donna/ed25519-donna-impl-base.c
-SRCS  += ed25519-donna/ed25519.c ed25519-donna/curve25519-donna-scalarmult-base.c ed25519-donna/ed25519-sha3.c ed25519-donna/ed25519-keccak.c
+SRCS  += ed25519_donna/curve25519-donna-32bit.c ed25519_donna/curve25519-donna-helpers.c ed25519_donna/modm-donna-32bit.c
+SRCS  += ed25519_donna/ed25519_donna-basepoint-table.c ed25519_donna/ed25519_donna-32bit-tables.c ed25519_donna/ed25519_donna-impl-base.c
+SRCS  += ed25519_donna/ed25519.c ed25519_donna/curve25519-donna-scalarmult-base.c ed25519_donna/ed25519-sha3.c ed25519_donna/ed25519-keccak.c
 SRCS  += monero/base58.c
 SRCS  += monero/serialize.c
 SRCS  += monero/xmr.c
@@ -177,7 +177,7 @@ secp256k1-zkp.o:
 	$(CC) $(CFLAGS) -Wno-unused-function $(ZKP_CFLAGS) -fPIC -I$(ZKP_PATH) -I$(ZKP_PATH)/src -c $(ZKP_PATH)/src/secp256k1.c -o secp256k1-zkp.o
 
 clean:
-	rm -f *.o aes/*.o chacha20poly1305/*.o ed25519-donna/*.o monero/*.o
+	rm -f *.o aes/*.o chacha20poly1305/*.o ed25519_donna/*.o monero/*.o
 	rm -f tests/*.o tests/test_check tests/test_speed tests/test_openssl tests/libtrezor-crypto.so tests/aestst
 	rm -f tools/*.o tools/xpubaddrgen tools/mktable tools/bip39bruteforce
 	rm -f fuzzer/*.o fuzzer/fuzzer

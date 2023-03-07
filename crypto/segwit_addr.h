@@ -27,7 +27,6 @@
 // The maximum length of the Bech32 human-readable part according to BIP-173.
 #define BECH32_MAX_HRP_LEN 83
 
-
 /** Encode a SegWit address
  *
  *  Out: output:   Pointer to a buffer of size 73 + strlen(hrp) that will be
@@ -39,13 +38,7 @@
  *       prog_len: Number of data bytes in prog.
  *  Returns 1 if successful.
  */
-int segwit_addr_encode(
-    char *output,
-    const char *hrp,
-    int ver,
-    const uint8_t *prog,
-    size_t prog_len
-);
+int segwit_addr_encode(char* output, const char* hrp, int ver, const uint8_t* prog, size_t prog_len);
 
 /** Decode a SegWit address
  *
@@ -60,13 +53,7 @@ int segwit_addr_encode(
  *       addr:     Pointer to the null-terminated address.
  *  Returns 1 if successful.
  */
-int segwit_addr_decode(
-    int* ver,
-    uint8_t* prog,
-    size_t* prog_len,
-    const char* hrp,
-    const char* addr
-);
+int segwit_addr_decode(int* ver, uint8_t* prog, size_t* prog_len, const char* hrp, const char* addr);
 
 /** Supported encodings. */
 typedef enum {
@@ -86,12 +73,11 @@ typedef enum {
  *  Returns 1 if successful.
  */
 int bech32_encode(
-    char *output,
-    const char *hrp,
-    const uint8_t *data,
+    char* output,
+    const char* hrp,
+    const uint8_t* data,
     size_t data_len,
-    bech32_encoding enc
-);
+    bech32_encoding enc);
 
 /** Decode a Bech32 or Bech32m string
  *
@@ -106,11 +92,6 @@ int bech32_encode(
  *  with the specified encoding standard. BECH32_ENCODING_NONE is returned if
  *  decoding failed.
  */
-bech32_encoding bech32_decode(
-    char *hrp,
-    uint8_t *data,
-    size_t *data_len,
-    const char *input
-);
+bech32_encoding bech32_decode(char* hrp, uint8_t* data, size_t* data_len, const char* input);
 
 #endif

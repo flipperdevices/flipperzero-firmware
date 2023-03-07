@@ -32,7 +32,7 @@
 #include <stdint.h>
 
 #include "bip32.h"
-#include "ed25519-donna/ed25519.h"
+#include "ed25519_donna/ed25519.h"
 
 #define NEM_LEVY_PERCENTILE_DIVISOR 4
 #define NEM_MAX_DIVISIBILITY 6
@@ -56,106 +56,160 @@
 
 #define NEM_SALT_SIZE sizeof(ed25519_public_key)
 
-#define NEM_ENCRYPTED_SIZE(size) \
-  (((size) + AES_BLOCK_SIZE) / AES_BLOCK_SIZE * AES_BLOCK_SIZE)
+#define NEM_ENCRYPTED_SIZE(size) (((size) + AES_BLOCK_SIZE) / AES_BLOCK_SIZE * AES_BLOCK_SIZE)
 #define NEM_ENCRYPTED_PAYLOAD_SIZE(size) \
-  (AES_BLOCK_SIZE + NEM_SALT_SIZE + NEM_ENCRYPTED_SIZE(size))
+    (AES_BLOCK_SIZE + NEM_SALT_SIZE + NEM_ENCRYPTED_SIZE(size))
 
 #define _NEM_PADDING_SIZE(buffer, size) ((buffer)[(size)-1])
-#define NEM_PADDING_SIZE(buffer, size)               \
-  (_NEM_PADDING_SIZE(buffer, size) > (size) ? (size) \
-                                            : _NEM_PADDING_SIZE(buffer, size))
+#define NEM_PADDING_SIZE(buffer, size) \
+    (_NEM_PADDING_SIZE(buffer, size) > (size) ? (size) : _NEM_PADDING_SIZE(buffer, size))
 
 #define NEM_DECRYPTED_SIZE(buffer, size) ((size)-NEM_PADDING_SIZE(buffer, size))
 
 typedef struct {
-  ed25519_public_key public_key;
-  uint8_t *buffer;
-  size_t offset;
-  size_t size;
+    ed25519_public_key public_key;
+    uint8_t* buffer;
+    size_t offset;
+    size_t size;
 } nem_transaction_ctx;
 
-const char *nem_network_name(uint8_t network);
+const char* nem_network_name(uint8_t network);
 
-void nem_get_address_raw(const ed25519_public_key public_key, uint8_t version,
-                         uint8_t *address);
-bool nem_get_address(const ed25519_public_key public_key, uint8_t version,
-                     char *address);
+void nem_get_address_raw(const ed25519_public_key public_key, uint8_t version, uint8_t* address);
+bool nem_get_address(const ed25519_public_key public_key, uint8_t version, char* address);
 
-bool nem_validate_address_raw(const uint8_t *address, uint8_t network);
-bool nem_validate_address(const char *address, uint8_t network);
+bool nem_validate_address_raw(const uint8_t* address, uint8_t network);
+bool nem_validate_address(const char* address, uint8_t network);
 
-void nem_transaction_start(nem_transaction_ctx *ctx,
-                           const ed25519_public_key public_key, uint8_t *buffer,
-                           size_t size);
-size_t nem_transaction_end(nem_transaction_ctx *ctx,
-                           const ed25519_secret_key private_key,
-                           ed25519_signature signature);
+void nem_transaction_start(
+    nem_transaction_ctx* ctx,
+    const ed25519_public_key public_key,
+    uint8_t* buffer,
+    size_t size);
+size_t nem_transaction_end(
+    nem_transaction_ctx* ctx,
+    const ed25519_secret_key private_key,
+    ed25519_signature signature);
 
-bool nem_transaction_write_common(nem_transaction_ctx *context, uint32_t type,
-                                  uint32_t version, uint32_t timestamp,
-                                  const ed25519_public_key signer, uint64_t fee,
-                                  uint32_t deadline);
+bool nem_transaction_write_common(
+    nem_transaction_ctx* context,
+    uint32_t type,
+    uint32_t version,
+    uint32_t timestamp,
+    const ed25519_public_key signer,
+    uint64_t fee,
+    uint32_t deadline);
 
-bool nem_transaction_create_transfer(nem_transaction_ctx *context,
-                                     uint8_t network, uint32_t timestamp,
-                                     const ed25519_public_key signer,
-                                     uint64_t fee, uint32_t deadline,
-                                     const char *recipient, uint64_t amount,
-                                     const uint8_t *payload, uint32_t length,
-                                     bool encrypted, uint32_t mosaics);
+bool nem_transaction_create_transfer(
+    nem_transaction_ctx* context,
+    uint8_t network,
+    uint32_t timestamp,
+    const ed25519_public_key signer,
+    uint64_t fee,
+    uint32_t deadline,
+    const char* recipient,
+    uint64_t amount,
+    const uint8_t* payload,
+    uint32_t length,
+    bool encrypted,
+    uint32_t mosaics);
 
-bool nem_transaction_write_mosaic(nem_transaction_ctx *ctx,
-                                  const char *namespace, const char *mosaic,
-                                  uint64_t quantity);
+bool nem_transaction_write_mosaic(
+    nem_transaction_ctx* ctx,
+    const char* namespace,
+    const char* mosaic,
+    uint64_t quantity);
 
-bool nem_transaction_create_multisig(nem_transaction_ctx *ctx, uint8_t network,
-                                     uint32_t timestamp,
-                                     const ed25519_public_key signer,
-                                     uint64_t fee, uint32_t deadline,
-                                     const nem_transaction_ctx *inner);
+bool nem_transaction_create_multisig(
+    nem_transaction_ctx* ctx,
+    uint8_t network,
+    uint32_t timestamp,
+    const ed25519_public_key signer,
+    uint64_t fee,
+    uint32_t deadline,
+    const nem_transaction_ctx* inner);
 
 bool nem_transaction_create_multisig_signature(
-    nem_transaction_ctx *ctx, uint8_t network, uint32_t timestamp,
-    const ed25519_public_key signer, uint64_t fee, uint32_t deadline,
-    const nem_transaction_ctx *inner);
+    nem_transaction_ctx* ctx,
+    uint8_t network,
+    uint32_t timestamp,
+    const ed25519_public_key signer,
+    uint64_t fee,
+    uint32_t deadline,
+    const nem_transaction_ctx* inner);
 
 bool nem_transaction_create_provision_namespace(
-    nem_transaction_ctx *ctx, uint8_t network, uint32_t timestamp,
-    const ed25519_public_key signer, uint64_t fee, uint32_t deadline,
-    const char *namespace, const char *parent, const char *rental_sink,
+    nem_transaction_ctx* ctx,
+    uint8_t network,
+    uint32_t timestamp,
+    const ed25519_public_key signer,
+    uint64_t fee,
+    uint32_t deadline,
+    const char* namespace,
+    const char* parent,
+    const char* rental_sink,
     uint64_t rental_fee);
 
 bool nem_transaction_create_mosaic_creation(
-    nem_transaction_ctx *ctx, uint8_t network, uint32_t timestamp,
-    const ed25519_public_key signer, uint64_t fee, uint32_t deadline,
-    const char *namespace, const char *mosaic, const char *description,
-    uint32_t divisibility, uint64_t supply, bool mutable_supply,
-    bool transferable, uint32_t levy_type, uint64_t levy_fee,
-    const char *levy_address, const char *levy_namespace,
-    const char *levy_mosaic, const char *creation_sink, uint64_t creation_fee);
+    nem_transaction_ctx* ctx,
+    uint8_t network,
+    uint32_t timestamp,
+    const ed25519_public_key signer,
+    uint64_t fee,
+    uint32_t deadline,
+    const char* namespace,
+    const char* mosaic,
+    const char* description,
+    uint32_t divisibility,
+    uint64_t supply,
+    bool mutable_supply,
+    bool transferable,
+    uint32_t levy_type,
+    uint64_t levy_fee,
+    const char* levy_address,
+    const char* levy_namespace,
+    const char* levy_mosaic,
+    const char* creation_sink,
+    uint64_t creation_fee);
 
 bool nem_transaction_create_mosaic_supply_change(
-    nem_transaction_ctx *ctx, uint8_t network, uint32_t timestamp,
-    const ed25519_public_key signer, uint64_t fee, uint32_t deadline,
-    const char *namespace, const char *mosaic, uint32_t type, uint64_t delta);
+    nem_transaction_ctx* ctx,
+    uint8_t network,
+    uint32_t timestamp,
+    const ed25519_public_key signer,
+    uint64_t fee,
+    uint32_t deadline,
+    const char* namespace,
+    const char* mosaic,
+    uint32_t type,
+    uint64_t delta);
 
 bool nem_transaction_create_aggregate_modification(
-    nem_transaction_ctx *ctx, uint8_t network, uint32_t timestamp,
-    const ed25519_public_key signer, uint64_t fee, uint32_t deadline,
-    uint32_t modifications, bool relative_change);
+    nem_transaction_ctx* ctx,
+    uint8_t network,
+    uint32_t timestamp,
+    const ed25519_public_key signer,
+    uint64_t fee,
+    uint32_t deadline,
+    uint32_t modifications,
+    bool relative_change);
 
 bool nem_transaction_write_cosignatory_modification(
-    nem_transaction_ctx *ctx, uint32_t type,
+    nem_transaction_ctx* ctx,
+    uint32_t type,
     const ed25519_public_key cosignatory);
 
-bool nem_transaction_write_minimum_cosignatories(nem_transaction_ctx *ctx,
-                                                 int32_t relative_change);
+bool nem_transaction_write_minimum_cosignatories(nem_transaction_ctx* ctx, int32_t relative_change);
 
 bool nem_transaction_create_importance_transfer(
-    nem_transaction_ctx *ctx, uint8_t network, uint32_t timestamp,
-    const ed25519_public_key signer, uint64_t fee, uint32_t deadline,
-    uint32_t mode, const ed25519_public_key remote);
+    nem_transaction_ctx* ctx,
+    uint8_t network,
+    uint32_t timestamp,
+    const ed25519_public_key signer,
+    uint64_t fee,
+    uint32_t deadline,
+    uint32_t mode,
+    const ed25519_public_key remote);
 
 #endif
 

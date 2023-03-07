@@ -1,4 +1,12 @@
-char * flipbip_strtok(char *s, const char *delim);
-char * flipbip_strtok_r(char *s, const char *delim, char **last);
-// void flipbip_strrev(unsigned char *str);
-// int flipbip_itoa(int num, unsigned char* str, int len, int base);
+char* flipbip_strtok(char* s, const char* delim);
+char* flipbip_strtok_r(char* s, const char* delim, char** last);
+
+void flipbip_btox(const unsigned char i, char* str);
+void flipbip_xtob(const char* str, unsigned char* out, int out_len);
+
+void flipbip_cipher(
+    const unsigned char* key_in,
+    const unsigned int key_len,
+    const char* in,
+    char* out,
+    const unsigned int io_len);

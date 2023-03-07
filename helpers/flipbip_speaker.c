@@ -12,7 +12,7 @@
 //     if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
 //         furi_hal_speaker_start(NOTE_INPUT, volume);
 //     }
-    
+
 // }
 
 // void flipbip_stop_all_sound(void* context) {

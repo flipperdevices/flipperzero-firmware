@@ -13,6 +13,6 @@ App(
     fap_icon_assets="icons",
     fap_category="Misc",
     fap_description="Crypto toolkit for Flipper",
-    fap_author="Struan Clark",
+    fap_author="Struan Clark (xtruan)",
     fap_weburl="https://github.com/xtruan/FlipBIP",
 )

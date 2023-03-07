@@ -1,7 +1,5 @@
 # trezor-crypto
 
-[![Build Status](https://travis-ci.org/trezor/trezor-crypto.svg?branch=master)](https://travis-ci.org/trezor/trezor-crypto) [![gitter](https://badges.gitter.im/trezor/community.svg)](https://gitter.im/trezor/community)
-
 Heavily optimized cryptography algorithms for embedded devices.
 
 These include:
@@ -40,6 +38,17 @@ Distibuted under MIT License.
 - SHA1/SHA2: http://www.aarongifford.com/computers/sha.html
 - SHA3: https://github.com/rhash/RHash
 - Curve25519: https://github.com/agl/curve25519-donna
-- Ed25519: https://github.com/floodyberry/ed25519-donna
+- Ed25519: https://github.com/floodyberry/ed25519_donna
 - Chacha20: https://github.com/wg/c20p1305
 - Poly1305: https://github.com/floodyberry/poly1305-donna
+
+## Repo source:
+
+```
+remote = git+ssh://git@github.com/trezor/trezor-crypto
+branch = master
+commit = 915b3dbbbf58c262865647728a3463b8785fc965
+parent = 6ad3294f31a1e7484b43c104ff2880b965198cad
+method = rebase
+cmdver = 0.4.0
+```

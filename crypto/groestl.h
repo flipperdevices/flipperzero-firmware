@@ -49,13 +49,13 @@
  * <code>memcpy()</code>).
  */
 typedef struct {
-	unsigned char buf[128];    /* first field, for alignment */
-	size_t ptr;
-	union {
-		uint64_t wide[16];
-		uint32_t narrow[32];
-	} state;
-	uint64_t count;
+    unsigned char buf[128]; /* first field, for alignment */
+    size_t ptr;
+    union {
+        uint64_t wide[16];
+        uint32_t narrow[32];
+    } state;
+    uint64_t count;
 } sph_groestl_big_context;
 
 typedef sph_groestl_big_context GROESTL512_CTX;
@@ -66,7 +66,7 @@ typedef sph_groestl_big_context GROESTL512_CTX;
  * @param cc   the Groestl-512 context (pointer to a
  *             <code>GROESTL512_CTX</code>)
  */
-void groestl512_Init(void *cc);
+void groestl512_Init(void* cc);
 
 /**
  * Process some data bytes. It is acceptable that <code>len</code> is zero
@@ -76,7 +76,7 @@ void groestl512_Init(void *cc);
  * @param data   the input data
  * @param len    the input data length (in bytes)
  */
-void groestl512_Update(void *cc, const void *data, size_t len);
+void groestl512_Update(void* cc, const void* data, size_t len);
 
 /**
  * Terminate the current Groestl-512 computation and output the result into
@@ -87,9 +87,9 @@ void groestl512_Update(void *cc, const void *data, size_t len);
  * @param cc    the Groestl-512 context
  * @param dst   the destination buffer
  */
-void groestl512_Final(void *cc, void *dst);
+void groestl512_Final(void* cc, void* dst);
 
 /* Calculate double Groestl-512 hash and truncate it to 256-bits. */
-void groestl512_DoubleTrunc(void *cc, void *dst);
+void groestl512_DoubleTrunc(void* cc, void* dst);
 
 #endif

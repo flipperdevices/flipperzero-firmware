@@ -19,6 +19,6 @@
 #include "serialize.h"
 #include "xmr.h"
 
-#endif  // TREZOR_CRYPTO_MONERO_H
+#endif // TREZOR_CRYPTO_MONERO_H
 
-#endif  // USE_MONERO
+#endif // USE_MONERO

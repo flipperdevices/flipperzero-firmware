@@ -27,11 +27,11 @@
 #include <stdint.h>
 
 typedef struct {
-  uint8_t S[256];
-  uint8_t i, j;
+    uint8_t S[256];
+    uint8_t i, j;
 } RC4_CTX;
 
-void rc4_init(RC4_CTX *ctx, const uint8_t *key, size_t length);
-void rc4_encrypt(RC4_CTX *ctx, uint8_t *buffer, size_t length);
+void rc4_init(RC4_CTX* ctx, const uint8_t* key, size_t length);
+void rc4_encrypt(RC4_CTX* ctx, uint8_t* buffer, size_t length);
 
 #endif

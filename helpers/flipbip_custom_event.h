@@ -13,10 +13,4 @@ typedef enum {
     FlipBipCustomEventScene1Right,
     FlipBipCustomEventScene1Ok,
     FlipBipCustomEventScene1Back,
-    // FlipBipCustomEventScene2Up,
-    // FlipBipCustomEventScene2Down,
-    // FlipBipCustomEventScene2Left,
-    // FlipBipCustomEventScene2Right,
-    // FlipBipCustomEventScene2Ok,
-    // FlipBipCustomEventScene2Back,
 } FlipBipCustomEvent;

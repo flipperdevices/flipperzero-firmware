@@ -29,15 +29,23 @@
 // HMAC based Deterministic Random Bit Generator with SHA-256
 
 typedef struct _HMAC_DRBG_CTX {
-  uint32_t odig[SHA256_DIGEST_LENGTH / sizeof(uint32_t)];
-  uint32_t idig[SHA256_DIGEST_LENGTH / sizeof(uint32_t)];
-  uint32_t v[SHA256_BLOCK_LENGTH / sizeof(uint32_t)];
+    uint32_t odig[SHA256_DIGEST_LENGTH / sizeof(uint32_t)];
+    uint32_t idig[SHA256_DIGEST_LENGTH / sizeof(uint32_t)];
+    uint32_t v[SHA256_BLOCK_LENGTH / sizeof(uint32_t)];
 } HMAC_DRBG_CTX;
 
-void hmac_drbg_init(HMAC_DRBG_CTX *ctx, const uint8_t *buf, size_t len,
-                    const uint8_t *nonce, size_t nonce_len);
-void hmac_drbg_reseed(HMAC_DRBG_CTX *ctx, const uint8_t *buf, size_t len,
-                      const uint8_t *addin, size_t addin_len);
-void hmac_drbg_generate(HMAC_DRBG_CTX *ctx, uint8_t *buf, size_t len);
+void hmac_drbg_init(
+    HMAC_DRBG_CTX* ctx,
+    const uint8_t* buf,
+    size_t len,
+    const uint8_t* nonce,
+    size_t nonce_len);
+void hmac_drbg_reseed(
+    HMAC_DRBG_CTX* ctx,
+    const uint8_t* buf,
+    size_t len,
+    const uint8_t* addin,
+    size_t addin_len);
+void hmac_drbg_generate(HMAC_DRBG_CTX* ctx, uint8_t* buf, size_t len);
 
 #endif
