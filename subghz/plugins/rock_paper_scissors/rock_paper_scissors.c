@@ -645,6 +645,52 @@ static void rps_render_main_menu(Canvas* canvas, void* ctx) {
     }
 }
 
+// Render UI when we are showing previous games.
+// @param canvas rendering surface of the Flipper Zero.
+// @param ctx pointer to a GameContext.
+static void rps_render_past_games(Canvas* canvas, void* ctx) {
+    GameContext* game_context = ctx;
+
+    canvas_set_font(canvas, FontPrimary);
+
+    PlayerStats* stats = game_context->data->viewing_player_stats;
+    if(!stats) {
+        canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignTop, "NO GAMES PLAYED.");
+    } else {
+        canvas_draw_str_aligned(
+            canvas, 0, 0, AlignLeft, AlignTop, furi_string_get_cstr(stats->last_played));
+
+        furi_string_printf(
+            game_context->data->buffer,
+            "Win:%d  Lost:%d  Tied:%d",
+            stats->win_count,
+            stats->loss_count,
+            stats->tie_count);
+        canvas_draw_str_aligned(
+            canvas, 0, 12, AlignLeft, AlignTop, furi_string_get_cstr(game_context->data->buffer));
+
+        canvas_draw_str_aligned(
+            canvas, 0, 24, AlignLeft, AlignTop, furi_string_get_cstr(stats->flipper_name));
+
+        canvas_set_font(canvas, FontSecondary);
+        char ch = furi_string_get_char(stats->contact, 0);
+        for(unsigned int i = 0; i < sizeof(contact_list) / sizeof(contact_list[0]); i++) {
+            if(contact_list[i][0] == ch) {
+                canvas_draw_str_aligned(canvas, 64, 24, AlignLeft, AlignTop, contact_list[i] + 1);
+                ch = 0;
+                break;
+            }
+        }
+        if(ch) {
+            char id[2] = {ch, 0};
+            canvas_draw_str_aligned(canvas, 64, 24, AlignLeft, AlignTop, id);
+        }
+
+        canvas_draw_str_aligned(
+            canvas, 0, 36, AlignLeft, AlignTop, furi_string_get_cstr(stats->contact) + 1);
+    }
+}
+
 // We register this callback to get invoked whenever we need to render the screen.
 // We render the UI on this callback thread.
 // @param canvas rendering surface of the Flipper Zero.
@@ -663,6 +709,8 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
         rps_render_join_game(canvas, game_context);
     } else if(game_context->data->screen_state == ScreenMainMenu) {
         rps_render_main_menu(canvas, game_context);
+    } else if(game_context->data->screen_state == ScreenPastGames) {
+        rps_render_past_games(canvas, game_context);
     }
 }
 
@@ -750,7 +798,7 @@ static void rps_broadcast_join(GameContext* game_context) {
         GameRfPurposeJoin,
         MAJOR_VERSION,
         data->game_number,
-        CONTACT_INFO,
+        furi_string_get_cstr(data->local_contact),
         furi_hal_version_get_name_ptr());
     rps_broadcast(game_context, data->buffer);
 }
@@ -771,7 +819,7 @@ static void rps_broadcast_join_acknowledge(GameContext* game_context) {
         GameRfPurposeJoinAcknowledge,
         MAJOR_VERSION,
         data->game_number,
-        CONTACT_INFO,
+        furi_string_get_cstr(data->local_contact),
         furi_hal_version_get_name_ptr());
     rps_broadcast(game_context, data->buffer);
 }
@@ -1261,6 +1309,23 @@ static void save_result(GameContext* game_context) {
         FURI_LOG_E(TAG, "Failed to open file: %s", RPS_GAME_PATH);
     }
 
+    furi_string_printf(
+        game_context->data->buffer,
+        "%04d-%02d-%02dT%02d:%02d:%02d",
+        datetime.year,
+        datetime.month,
+        datetime.day,
+        datetime.hour,
+        datetime.minute,
+        datetime.second);
+
+    update_player_stats(
+        game_context,
+        game_context->data->remote_player,
+        furi_string_get_cstr(game_context->data->remote_name),
+        furi_string_get_cstr(game_context->data->remote_contact),
+        furi_string_get_cstr(game_context->data->buffer));
+
     storage_file_close(games_file);
     storage_file_free(games_file);
     furi_record_close(RECORD_STORAGE);
@@ -1268,9 +1333,148 @@ static void save_result(GameContext* game_context) {
     furi_mutex_release(game_context->mutex);
 }
 
+static void update_player_stats(
+    GameContext* game_context,
+    GameState remote_player,
+    const char* remote_name,
+    const char* remote_contact,
+    const char* datetime) {
+    PlayerStats* stat = game_context->data->player_stats;
+
+    FURI_LOG_I(TAG, "Searching for player: %s", remote_name);
+
+    while(stat) {
+        if(furi_string_cmp_str(stat->flipper_name, remote_name) == 0) {
+            break;
+        }
+        stat = stat->next;
+    }
+
+    if(!stat) {
+        FURI_LOG_I(TAG, "Not found player: %s", remote_name);
+        stat = malloc(sizeof(PlayerStats));
+        stat->loss_count += isLoss((GameState)remote_player) ? 1 : 0;
+        stat->win_count += isWin((GameState)remote_player) ? 1 : 0;
+        stat->tie_count += isTie((GameState)remote_player) ? 1 : 0;
+        stat->next = NULL;
+        stat->prev = NULL;
+        stat->flipper_name = furi_string_alloc();
+        furi_string_set_str(stat->flipper_name, remote_name);
+        stat->contact = furi_string_alloc();
+        furi_string_set_str(stat->contact, remote_contact);
+        stat->last_played = furi_string_alloc();
+        furi_string_set_str(stat->last_played, datetime);
+        furi_string_set_char(stat->last_played, 10, ' ');
+    } else {
+        FURI_LOG_I(TAG, "Found player: %s", remote_name);
+        stat->loss_count += isLoss((GameState)remote_player) ? 1 : 0;
+        stat->win_count += isWin((GameState)remote_player) ? 1 : 0;
+        stat->tie_count += isTie((GameState)remote_player) ? 1 : 0;
+        furi_string_set_str(stat->last_played, datetime);
+        furi_string_set_char(stat->last_played, 10, ' ');
+    }
+
+    // Remove the stat from the list, if it is connected.
+    if(game_context->data->player_stats && game_context->data->player_stats != stat) {
+        if(stat->prev) {
+            FURI_LOG_I(TAG, "Setting stat->prev->next.");
+            stat->prev->next = stat->next;
+        }
+        if(stat->next) {
+            FURI_LOG_I(TAG, "Setting stat->next->next.");
+            stat->next->prev = stat->prev;
+        }
+
+        FURI_LOG_I(TAG, "Setting player_stats->prev.");
+        stat->prev = NULL;
+        game_context->data->player_stats->prev = stat;
+        stat->next = game_context->data->player_stats;
+        game_context->data->player_stats = stat;
+    } else if(game_context->data->player_stats && game_context->data->player_stats == stat) {
+        // We are already at the start of the list.
+    } else {
+        // This is the first stat.
+        game_context->data->player_stats = stat;
+    }
+
+    FURI_LOG_I(
+        TAG,
+        "Added %s w:%d l:%d t:%d",
+        furi_string_get_cstr(stat->flipper_name),
+        stat->win_count,
+        stat->loss_count,
+        stat->tie_count);
+}
+
+static void load_player_stats(GameContext* game_context) {
+    game_context->data->player_stats = NULL;
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* games_file = storage_file_alloc(storage);
+
+    if(storage_file_open(games_file, RPS_GAME_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        FURI_LOG_E(TAG, "Opened file: %s", RPS_GAME_PATH);
+
+        while(!storage_file_eof(games_file)) {
+            char ch;
+            furi_string_reset(game_context->data->buffer);
+            while(storage_file_read(games_file, &ch, 1) && !storage_file_eof(games_file)) {
+                furi_string_push_back(game_context->data->buffer, ch);
+                if(ch == '\n') {
+                    break;
+                }
+            }
+
+            char local_player;
+            char remote_player;
+            char datetime[20];
+            char remote_name[32];
+            char remote_contact[64];
+            int parsed = sscanf(
+                furi_string_get_cstr(game_context->data->buffer),
+                "%c%c\t%s\t%s\t%s",
+                &local_player,
+                &remote_player,
+                datetime,
+                remote_name,
+                remote_contact);
+
+            if(parsed != 5) {
+                FURI_LOG_I(
+                    TAG,
+                    "Failed to parse entry: %s count was %d",
+                    furi_string_get_cstr(game_context->data->buffer),
+                    parsed);
+            } else {
+                FURI_LOG_I(
+                    TAG,
+                    "Parsed entry: %c %c\t%s\t%s\t%s",
+                    local_player,
+                    remote_player,
+                    datetime,
+                    remote_name,
+                    remote_contact);
+
+                update_player_stats(
+                    game_context, remote_player, remote_name, remote_contact, datetime);
+            }
+        }
+
+        FURI_LOG_I(TAG, "Finished parsing file.");
+    } else {
+        FURI_LOG_E(TAG, "Failed to open file: %s", RPS_GAME_PATH);
+    }
+
+    storage_file_close(games_file);
+    storage_file_free(games_file);
+    furi_record_close(RECORD_STORAGE);
+}
+
 // This is the entry point for our application, which should match the application.fam file.
 int32_t rock_paper_scissors_app(void* p) {
     UNUSED(p);
+
+    UNUSED(contact_list);
 
     // Configure our initial data.
     GameContext* game_context = malloc(sizeof(GameContext));
@@ -1285,6 +1489,10 @@ int32_t rock_paper_scissors_app(void* p) {
     game_context->data->remote_player = StateUnknown;
     game_context->data->screen_state = ScreenMainMenu;
     game_context->data->remote_games = NULL;
+    game_context->data->local_contact = furi_string_alloc();
+    furi_string_set(game_context->data->local_contact, CONTACT_INFO);
+
+    load_player_stats(game_context);
 
     // Queue for events
     game_context->queue = furi_message_queue_alloc(8, sizeof(GameEvent));
@@ -1569,9 +1777,49 @@ int32_t rock_paper_scissors_app(void* p) {
                             game_context->data->remote_move_tick = furi_get_tick();
                             game_context->data->screen_state = ScreenJoinGame;
                         } else if(game_context->data->local_player == StateMainMenuPastGames) {
+                            game_context->data->viewing_player_stats =
+                                game_context->data->player_stats;
                             game_context->data->screen_state = ScreenPastGames;
                         } else if(game_context->data->local_player == StateMainMenuMessage) {
                             game_context->data->screen_state = ScreenEditMessage;
+                        }
+                        break;
+                    default:
+                        FURI_LOG_T(TAG, "No support for key %d", event.input.key);
+                        break;
+                    }
+                } else if(
+                    game_context->data->screen_state == ScreenPastGames &&
+                    event.input.type == InputTypeShort) {
+                    switch(event.input.key) {
+                    case InputKeyLeft:
+                        if(game_context->data->viewing_player_stats) {
+                            if(game_context->data->viewing_player_stats->prev) {
+                                game_context->data->viewing_player_stats =
+                                    game_context->data->viewing_player_stats->prev;
+                                FURI_LOG_I(
+                                    TAG,
+                                    "Moved to item %s.",
+                                    furi_string_get_cstr(
+                                        game_context->data->viewing_player_stats->flipper_name));
+                            } else {
+                                FURI_LOG_I(TAG, "Viewing first item in list.");
+                            }
+                        }
+                        break;
+                    case InputKeyRight:
+                        if(game_context->data->viewing_player_stats) {
+                            if(game_context->data->viewing_player_stats->next) {
+                                game_context->data->viewing_player_stats =
+                                    game_context->data->viewing_player_stats->next;
+                                FURI_LOG_I(
+                                    TAG,
+                                    "Moved to item %s.",
+                                    furi_string_get_cstr(
+                                        game_context->data->viewing_player_stats->flipper_name));
+                            } else {
+                                FURI_LOG_I(TAG, "Viewing last item in list.");
+                            }
                         }
                         break;
                     default:
@@ -1711,6 +1959,7 @@ int32_t rock_paper_scissors_app(void* p) {
     furi_message_queue_free(game_context->queue);
     furi_mutex_free(game_context->mutex);
     furi_string_free(game_context->data->buffer);
+    furi_string_free(game_context->data->local_contact);
     if(game_context->data->remote_name) {
         furi_string_free(game_context->data->remote_name);
     }

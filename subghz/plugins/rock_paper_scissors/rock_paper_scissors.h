@@ -27,7 +27,7 @@
 
 // Name for "N", followed by your name without any spaces.
 #define CONTACT_INFO "NYourNameHere"
-#define CONTACT_INFO_NONE "NNone"
+#define CONTACT_INFO_NONE "E"
 
 // The message max length should be no larger than a value around 60 to 64.
 #define MESSAGE_MAX_LEN 60
@@ -181,6 +181,26 @@ typedef enum {
     GameEventPlaySong,
 } GameEventType;
 
+static const char* contact_list[] = {
+    "CBuy me a coffee",
+    "DDiscord",
+    "EEmpty",
+    "FFacebook",
+    "GGithub",
+    "HHandle",
+    "IInstagram",
+    "LLinkedin",
+    "MMobile",
+    "NName",
+    "PPinterest",
+    "RReddit",
+    "KTikTok",
+    "UTinyUrl.com",
+    "WTwitch",
+    "TTwitter",
+    "YYouTube",
+};
+
 // An item in the event queue has both the type and its associated data.
 // Some fields may be null, they are only set for particular events.
 typedef struct {
@@ -199,6 +219,25 @@ typedef struct GameInfo {
     struct GameInfo* next_game;
 } GameInfo;
 
+typedef struct PlayerStats {
+    // Line 1:
+    FuriString* last_played;
+
+    // Line 2:
+    uint16_t win_count;
+    uint16_t loss_count;
+    uint16_t tie_count;
+
+    // Line 3:
+    FuriString* flipper_name;
+
+    // Line 3+4:  contact type, contact
+    FuriString* contact;
+
+    struct PlayerStats* prev;
+    struct PlayerStats* next;
+} PlayerStats;
+
 // This is the data for our application.
 typedef struct {
     FuriString* buffer;
@@ -213,6 +252,9 @@ typedef struct {
     struct GameInfo* remote_selected_game;
     FuriString* remote_name;
     FuriString* remote_contact;
+    FuriString* local_contact;
+    struct PlayerStats* player_stats;
+    struct PlayerStats* viewing_player_stats;
 } GameData;
 
 // This is our application context.
@@ -378,7 +420,18 @@ static void remote_games_next(GameContext* game_context);
 static void remote_games_previous(GameContext* game_context);
 static void remote_games_add(GameContext* game_context, GameEvent* game_event);
 
+// Saves a game result to the file system.
+// @param game_context pointer to a GameContext.
 static void save_result(GameContext* game_context);
+
+static void update_player_stats(
+    GameContext* game_context,
+    GameState remote_player,
+    const char* remote_name,
+    const char* remote_contact,
+    const char* datetime);
+
+static void load_player_stats(GameContext* game_context);
 
 // This is the entry point for our application, which should match the application.fam file.
 int32_t rock_paper_scissors_app(void* p);
