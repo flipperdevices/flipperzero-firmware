@@ -45,6 +45,7 @@ bool flipbip_load_settings(char* settings, bool key_file) {
     } else {
         memzero(settings, strlen(settings));
         settings[0] = '\0';
+        return false;
     }
     storage_file_close(settings_file);
     storage_file_free(settings_file);
