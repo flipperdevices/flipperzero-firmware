@@ -230,7 +230,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
 
     if (model->page == 0) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 1, 10, "Generating...");
+        canvas_draw_str(canvas, 1, 10, "Loading...");
         canvas_draw_str(canvas, 6, 30, "m/44'/C'/0'/0");
     } else if (model->page >= 9 && model->page <= 13) {
         canvas_set_font(canvas, FontSecondary);
@@ -487,6 +487,11 @@ void flipbip_scene_1_enter(void* context) {
         FlipBipScene1Model * model,
         {
             flipbip_scene_1_model_init(model, strength, coin, overwrite);
+
+            // if overwrite is set, return from scene immediately
+            if (overwrite) {
+                instance->callback(FlipBipCustomEventScene1Back, instance->context);
+            }
         },
         true
     );
