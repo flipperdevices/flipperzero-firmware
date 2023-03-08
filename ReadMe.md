@@ -1,5 +1,5 @@
-# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and [OFW](https://github.com/flipperdevices/flipperzero-firmware) with API v15.x
-## Apps from this pack should be compatible with OFW with API v15.x (dev branch)
+# Flipper Application Files (FAPs) for [Unleashed](https://github.com/DarkFlippers/unleashed-firmware) and [OFW](https://github.com/flipperdevices/flipperzero-firmware) with API v18.x
+## Apps from this pack should be compatible with OFW with API v18.x (dev branch)
 
 ## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/unleashed-extra-pack/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `1 Mar 03:18 GMT +3`
+### Apps checked & updated at `8 Mar 22:21 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -67,15 +67,18 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [GPIO Reader (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 - [GPIO Reader 2 (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [Timelapse (zeitraffer) (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
-- [RGB LED Controller (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) - works with external module!
 - [Pwnagotchi->Flipper interface (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [ESP32->Flipper Camera (By Z4urce)](https://github.com/Z4urce/flipperzero-camera)
-- [SCD30 Reader (By heimskr)](https://github.com/heimskr/flipperzero-scd30)
 - [Bar code scanner emulator via COM port (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator)
 - [Oscilloscope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
 - [NRF24 Batch Read/Send (WIP) (By vad7)](https://github.com/vad7/nRF24-Batch)
+- [ESP32CAM Camera (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Motion Detection (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -104,6 +107,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [MagSpoof (WIP) (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - [EM4100 universal keys generator (for RFID Fuzzer) (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
+- [FlipBIP Crypto Tool (By xtruan)](https://github.com/xtruan/FlipBIP)
+- [Mfkey32 (WIP) (By noproto)](https://github.com/noproto/FlipperMfkey)
 
 --- 
 
