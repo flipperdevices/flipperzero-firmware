@@ -57,7 +57,7 @@ uint8_t nrf24_read_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data, 
 }
 
 uint8_t nrf24_read_register(FuriHalSpiBusHandle* handle, uint8_t reg) {
-    uint8_t buf[] = { R_REGISTER | (REGISTER_MASK & reg), 0xFF };
+    uint8_t buf[] = { R_REGISTER | (REGISTER_MASK & reg), 0 };
     nrf24_spi_trx(handle, buf, buf, 2);
     return buf[1];
 }
