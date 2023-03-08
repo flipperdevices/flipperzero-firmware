@@ -1,7 +1,12 @@
-# FlipBIP - BIP32/39/44 Tool
-Crypto toolkit for Flipper Zero
+# FlipBIP - BIP32/39/44
+## Crypto toolkit for Flipper Zero
 - Built against `0.78.1` Flipper Zero firmware release
 - Using Trezor crypto libs from `core/v2.5.3` release
+- Included in [RogueMaster Custom Firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins)
+
+### DONATE IF YOU FIND THE APP USEFUL
+  - ETH (or ERC-20): `xtruan.eth` or `0xa9Ad79502cdaf4F6881f3C2ef260713e5B771CE2`
+  - BTC: `16RP5Ui5QrWrVh2rR7NKAPwE5A4uFjCfbs`
 
 ## Background
 
