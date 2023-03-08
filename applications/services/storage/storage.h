@@ -148,6 +148,17 @@ bool storage_file_eof(File* file);
  */
 bool storage_file_exists(Storage* storage, const char* path);
 
+/**
+ * @brief Copy data from one opened file to another opened file
+ * Size bytes will be copied from current position of source file to current position of destination file
+ * 
+ * @param source source file
+ * @param destination destination file
+ * @param size size of data to copy
+ * @return bool success flag
+ */
+bool storage_file_copy_to_file(File* source, File* destination, uint32_t size);
+
 /******************* Dir Functions *******************/
 
 /** Opens a directory to get objects from it
