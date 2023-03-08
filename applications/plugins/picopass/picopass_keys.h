@@ -1,3 +1,4 @@
+#pragma once
 
 #include "picopass_device.h"
 
