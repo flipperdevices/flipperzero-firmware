@@ -9,7 +9,7 @@ Want to chat? Join my <a href='https://discord.gg/gF2bBUzAFe' target="_blank">Di
 - - Dice First Roll for d20+ = sides on dice (i.e. Nat 20 on d20)
 - - Dice First Roll for d20+ = sides on dice - 1 (+1 EXP) (i.e. 19 on d20)
 ## Including d59 + d69 (Lotto Dice)
-## Including 8BALL/DEVIL BALL/DRINK DICE/SEX/WAR/WEED
+## Including 8BALL/DEVIL BALL/DRINK/SEX/WAR/WEED DICE
 
 # If you want this app expanded to add a specific die or functionality, feel free to open a Pull Request with improvements. <br>All improvements are welcomed!
 
