@@ -7,6 +7,7 @@ DPL: 0
 RETR: 0x0F
 Resend: 3
 Delay_ms: 30
+Read repeat: 10
 
 Payload struct: 2,1,1
 EEPROM=0; RAM=1; PROGMEM=2; ID=3; RESET=4

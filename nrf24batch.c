@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG 		"nrf24batch"
-#define VERSION		"1.4"
+#define VERSION		"1.5"
 
 #define SCAN_APP_PATH_FOLDER 	"/ext/nrf24batch"
 #define LOG_FILEEXT	 			".txt"
@@ -42,6 +42,7 @@ const char SettingsFld_Set[] = "S:";	// Set cmd (like Write but without "Write s
 const char SettingsFld_ReadBatch[] = "RBatch:";
 const char SettingsFld_WriteBatch[] = "WBatch:";
 const char SettingsFld_Listen[] = "Listen:";
+const char SettingsFld_ReadRepeatPeriod[] = "Read repeat:";
 const char AskQuestion_Save[] = "SAVE BATCH?";
 #define Settings_i 'i'
 #define Settings_n 'n'
@@ -88,8 +89,10 @@ uint8_t NRF_INITED = 0;	// 0 - not, 1 - rw, rwt_listen - listen
 bool NRF_BOARD_POWER_5V = false;
 uint8_t NRF_last_packet_send_st = 0;
 uint8_t NRF_resend = 1; // number of transaction attempts 
-uint8_t NRF_repeat = 0; // count number of repeated requests (until < NRF_resend)
+int8_t  NRF_repeat = 0; // count number of repeated requests (until < NRF_resend)
 uint32_t NRF_time;
+uint16_t ReadRepeatPeriod = 10; // s
+bool ReadRepeat = false;
 uint32_t delay_between_pkt = 10;// ms
 
 uint8_t addr[5];				// nRF24 address, MSB first
@@ -423,7 +426,7 @@ bool nrf24_read_newpacket() {
 					furi_string_cat_str(str, ",");
 					if(cmd_array_hex) furi_string_cat_str(str, "0x");
 					payload[cmd_array_idx]++;	// next array element
-					NRF_repeat = 0;
+					NRF_repeat = -1;
 					send_status = sst_sending;	// Will be send after delay_between_pkt
 				} else send_status = sst_ok;
 			} else {
@@ -768,6 +771,8 @@ static uint8_t load_settings_file() {
 				NRF_resend = str_to_int(p + sizeof(SettingsFld_Resend));
 			} else if(strncmp(p, SettingsFld_Delay, sizeof(SettingsFld_Delay)-1) == 0) {
 				delay_between_pkt = str_to_int(p + sizeof(SettingsFld_Delay));
+			} else if(strncmp(p, SettingsFld_ReadRepeatPeriod, sizeof(SettingsFld_ReadRepeatPeriod)-1) == 0) {
+				ReadRepeatPeriod = str_to_int(p + sizeof(SettingsFld_ReadRepeatPeriod));
 			} else if(strncmp(p, SettingsFld_Payload, sizeof(SettingsFld_Payload)-1) == 0) {
 				p += sizeof(SettingsFld_Payload);
 				payload_fields = 0;
@@ -1013,7 +1018,10 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 	} else { // what_doing == 2
 		if(rw_type == rwt_read_cmd) {	// Read command
 			canvas_set_font(canvas, FontSecondary); // 8x10 font, 6 lines
-			if(!ask_fill_screen_buf()) strcpy(screen_buf, "Read cmd: ");
+			if(!ask_fill_screen_buf()) {
+				strcpy(screen_buf, "Read ");
+				strcat(screen_buf, ReadRepeat ? "rep: " : "cmd: ");
+			}
 			if(NRF_ERROR) strcat(screen_buf, "nRF24 ERROR!");
 			else if(ERR) {
 				snprintf(screen_buf + strlen(screen_buf), FONT_5x7_SCREEN_WIDTH, "ERROR %d", ERR);
@@ -1155,30 +1163,29 @@ void work_timer_callback(void* ctx)
 			}
 		// ReadBatch or ReadCmd
 		} else if(send_status == sst_sending) { // sending
-//			if(!NRF_last_packet_send_st) { // No ACK on last attempt
-				if(furi_get_tick() - NRF_time > delay_between_pkt) {
-					if(NRF_repeat++ < NRF_resend) {
-						if(cmd_array) nrf24_send_packet(); else nrf24_resend_read_packet();
-					} else send_status = sst_error; // error NO_ACK
-				}
-//			}
+			if(furi_get_tick() - NRF_time > delay_between_pkt) {
+				if(NRF_repeat++ < NRF_resend) {
+					nrf24_resend_read_packet();
+				} else send_status = sst_error; // error NO_ACK
+			}
 		} else if(send_status == sst_receiving) { // receiving
 			for(uint8_t i = 0; i < 3; i++) {
-				bool new = nrf24_read_newpacket();
-				if(new) {
+				if(nrf24_read_newpacket()) {
 					if(rw_type == rwt_listen) {
 						ListenPrev = ListenLast;
 						furi_hal_rtc_get_datetime(&ListenLastTime);
 						ListenLast = furi_hal_rtc_datetime_to_timestamp(&ListenLastTime);
 						ListenNew = true;
 					} else if(send_status != sst_receiving) break;
-				} else if(rw_type != rwt_listen && furi_get_tick() - NRF_time > NRF_READ_TIMEOUT) {
-					if(NRF_repeat++ < NRF_resend) {
-						send_status = sst_sending;
-						nrf24_resend_read_packet();
-					} else {
-						FURI_LOG_D(TAG, "TIMEOUT: %lu", furi_get_tick() - NRF_time);
-						send_status = sst_timeout;
+				} else {
+					if(rw_type != rwt_listen && furi_get_tick() - NRF_time > NRF_READ_TIMEOUT) {
+						if(NRF_repeat++ < NRF_resend) {
+							send_status = sst_sending;
+							nrf24_resend_read_packet();
+						} else {
+							FURI_LOG_D(TAG, "TIMEOUT: %lu", furi_get_tick() - NRF_time);
+							send_status = sst_timeout;
+						}
 					}
 					break;
 				}
@@ -1236,6 +1243,12 @@ int32_t nrf24batch_app(void* p) {
 		if(furi_log_get_level() != FuriLogLevel) {
 		 	FuriLogLevel = furi_log_get_level();
 		 	if(FuriLogLevel == FuriLogLevelDebug) furi_hal_uart_set_br(FuriHalUartIdUSART1, 1843200);
+		}
+		if(what_doing == 2 && rw_type == rwt_read_cmd && ReadRepeat && furi_get_tick() - NRF_time > (uint32_t)(ReadRepeatPeriod * 1000)) {
+			ERR = 0;
+			free_Log();
+			Run_Read_cmd(Read_cmd[view_cmd[rwt_read_cmd]]);
+			notification_message(APP->notification, &sequence_blink_blue_100);
 		}
 
 		if(event_status == FuriStatusOk) {
@@ -1449,7 +1462,11 @@ int32_t nrf24batch_app(void* p) {
 								what_doing = 2;
 							}
 						} else if(what_doing == 2) {		
-							if(Log_Total) {
+							if(rw_type == rwt_read_cmd) {
+								ERR = 0;
+								free_Log();
+								Run_Read_cmd(Read_cmd[view_cmd[rwt_read_cmd]]);
+							} else if(Log_Total) {
 								if(rw_type == rwt_read_batch) {
 									ask_question = ask_save_batch;
 									ask_question_answer = 0;
@@ -1503,13 +1520,17 @@ int32_t nrf24batch_app(void* p) {
 								Edit = 1;
 								NRF_INITED = false;
 							}
-						} else if(what_doing == 2 && Log_Total) {
-							if(rw_type == rwt_write_batch) {
-								ask_question = ask_write_batch;
-								ask_question_answer = 0;
-							} else if(rw_type == rwt_read_batch) {
-								ask_question = ask_save_batch;
-								ask_question_answer = 0;
+						} else if(what_doing == 2) {
+							if(rw_type == rwt_read_cmd) {
+								ReadRepeat = !ReadRepeat;
+							} else if(Log_Total) {
+								if(rw_type == rwt_write_batch) {
+									ask_question = ask_write_batch;
+									ask_question_answer = 0;
+								} else if(rw_type == rwt_read_batch) {
+									ask_question = ask_save_batch;
+									ask_question_answer = 0;
+								}
 							}
 						}
 					}
