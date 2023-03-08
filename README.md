@@ -12,3 +12,5 @@ Want to chat? Join my <a href='https://discord.gg/gF2bBUzAFe' target="_blank">Di
 ## Including 8BALL/DEVIL BALL/DRINK DICE/SEX/WAR/WEED
 
 # If you want this app expanded to add a specific die or functionality, feel free to open a Pull Request with improvements. <br>All improvements are welcomed!
+
+# Have a dice idea and don't know how to code?<br>Feel free to submit your suggestions as an issue.
