@@ -203,8 +203,7 @@ static void
     event.sequence_source = INPUT_SEQUENCE_SOURCE_SOFTWARE;
     if(event.type == InputTypePress) {
         rpc_gui->input_counter++;
-        if(rpc_gui->input_counter == RPC_GUI_INPUT_RESET)
-            rpc_gui->input_counter++;
+        if(rpc_gui->input_counter == RPC_GUI_INPUT_RESET) rpc_gui->input_counter++;
         rpc_gui->input_key_counter[event.key] = rpc_gui->input_counter;
     }
     if(rpc_gui->input_key_counter[event.key] == RPC_GUI_INPUT_RESET) {
