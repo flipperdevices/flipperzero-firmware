@@ -14,6 +14,7 @@ typedef enum {
     PicopassWorkerStateDetect,
     PicopassWorkerStateWrite,
     PicopassWorkerStateWriteKey,
+    PicopassWorkerStateEliteDictAttack,
     // Transition
     PicopassWorkerStateStop,
 } PicopassWorkerState;
@@ -29,6 +30,12 @@ typedef enum {
     PicopassWorkerEventSeEnabled,
 
     PicopassWorkerEventStartReading,
+    PicopassWorkerEventAborted,
+    PicopassWorkerEventCardDetected,
+    PicopassWorkerEventFoundKey,
+    PicopassWorkerEventNewDictKeyBatch,
+    PicopassWorkerEventKeyAttackStart,
+    PicopassWorkerEventKeyAttackStop,
 } PicopassWorkerEvent;
 
 typedef void (*PicopassWorkerCallback)(PicopassWorkerEvent event, void* context);
