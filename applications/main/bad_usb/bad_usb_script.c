@@ -180,7 +180,7 @@ static int32_t
     }
     FURI_LOG_D(WORKER_TAG, "line:%s", line_tmp);
     // Ducky Lang Functions
-    for(unsigned int i = 0; ducky_cmd_table[i]; i++) {
+    for(size_t i = 0; ducky_cmd_table[i]; i++) {
         if(strncmp(line_tmp, ducky_cmd_table[i], strlen(ducky_cmd_table[i])) == 0)
             return ((fnc_ptr[i])(bad_usb, line, line_tmp, error, error_len));
     }
