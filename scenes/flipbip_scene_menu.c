@@ -20,29 +20,36 @@ void flipbip_scene_menu_on_enter(void* context) {
     if(flipbip_has_settings(true) && flipbip_has_settings(false)) {
         submenu_add_item(
             app->submenu,
-            "View saved BTC wallet",
+            "View BTC wallet",
             SubmenuIndexScene1BTC,
             flipbip_scene_menu_submenu_callback,
             app);
         submenu_add_item(
             app->submenu,
-            "View saved ETH wallet",
+            "View ETH wallet",
             SubmenuIndexScene1ETH,
             flipbip_scene_menu_submenu_callback,
             app);
         submenu_add_item(
             app->submenu,
-            "View saved DOGE wallet",
+            "View DOGE wallet",
             SubmenuIndexScene1DOGE,
             flipbip_scene_menu_submenu_callback,
             app);
+        submenu_add_item(
+            app->submenu,
+            "Regenerate wallet",
+            SubmenuIndexScene1New,
+            flipbip_scene_menu_submenu_callback,
+            app);
+    } else {
+        submenu_add_item(
+            app->submenu,
+            "Generate new wallet",
+            SubmenuIndexScene1New,
+            flipbip_scene_menu_submenu_callback,
+            app);
     }
-    submenu_add_item(
-        app->submenu,
-        "Generate new wallet",
-        SubmenuIndexScene1New,
-        flipbip_scene_menu_submenu_callback,
-        app);
 
     submenu_add_item(
         app->submenu, "Settings", SubmenuIndexSettings, flipbip_scene_menu_submenu_callback, app);
