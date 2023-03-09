@@ -55,7 +55,6 @@ The application will be compiled and copied onto your device
   - Lots of typing required but you can now use the wallet with an existing mnemonic you have saved
   - Useful to convert paper backup to keys and receive addresses without relying on a laptop or phone
 
-
 ### Work in Progress
 
 - More coin types
