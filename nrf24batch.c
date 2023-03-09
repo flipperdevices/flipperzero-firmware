@@ -957,8 +957,10 @@ void display_edit_ttf_font(Canvas* const canvas, uint8_t start_x, uint8_t start_
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-	const PluginState* plugin_state = acquire_mutex((ValueMutex*)ctx, 25);
-	if(plugin_state == NULL) return;
+	if(ctx == NULL) return;
+	const PluginState* plugin_state = ctx;
+	if(furi_mutex_acquire(plugin_state->mutex, 25) != FuriStatusOk) return;
+
 	//canvas_draw_frame(canvas, 0, 0, 128, 64); // border around the edge of the screen
 	if(what_doing == 0) {
 		canvas_set_font(canvas, FontSecondary); // 8x10 font, 6 lines
@@ -1142,13 +1144,15 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 			}
 		}
 	}
-	release_mutex((ValueMutex*)ctx, plugin_state);
+	furi_mutex_release(plugin_state->mutex);
 } 
 
 void work_timer_callback(void* ctx)
 {
-	UNUSED(ctx);
+	if(ctx == NULL) return;
 	if(what_doing == 2) {
+		const PluginState* plugin_state = ctx;
+		if(furi_mutex_acquire(plugin_state->mutex, 0) != FuriStatusOk) return;
 		if(rw_type == rwt_write_batch) {
 			if(send_status == sst_ok) {
 				if(ERR == 0 && WriteBatch_cmd_curr < Log_Total && furi_get_tick() - NRF_time >= delay_between_pkt) {
@@ -1197,35 +1201,36 @@ void work_timer_callback(void* ctx)
 				}
 			}
 		}
+		furi_mutex_release(plugin_state->mutex);
 	}
 }
 
 int32_t nrf24batch_app(void* p) {
 	UNUSED(p);
 	APP = malloc(sizeof(nRF24Batch));
-	APP->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
-	APP->plugin_state = malloc(sizeof(PluginState));
-	ValueMutex state_mutex;
-	if(!init_mutex(&state_mutex, APP->plugin_state, sizeof(PluginState))) {
-		furi_message_queue_free(APP->event_queue);
+	FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
+	PluginState* plugin_state = malloc(sizeof(PluginState));
+	plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+	if(!plugin_state->mutex) {
+		furi_message_queue_free(event_queue);
 		FURI_LOG_E(TAG, "cannot create mutex");
-		free(APP->plugin_state);
+		free(plugin_state);
 		return 255;
 	}
 
 	// Set system callbacks
-	APP->view_port = view_port_alloc();
-	view_port_draw_callback_set(APP->view_port, render_callback, &state_mutex);
-	view_port_input_callback_set(APP->view_port, input_callback, APP->event_queue);
+	ViewPort* view_port = view_port_alloc();
+	view_port_draw_callback_set(view_port, render_callback, plugin_state);
+	view_port_input_callback_set(view_port, input_callback, event_queue);
 
 	// Open GUI and register view_port
 	APP->gui = furi_record_open(RECORD_GUI);
-	gui_add_view_port(APP->gui, APP->view_port, GuiLayerFullscreen);
+	gui_add_view_port(APP->gui, view_port, GuiLayerFullscreen);
 	APP->notification = furi_record_open(RECORD_NOTIFICATION);
 	APP->storage = furi_record_open(RECORD_STORAGE);
 	storage_common_mkdir(APP->storage, SCAN_APP_PATH_FOLDER);
 	file_stream = file_stream_alloc(APP->storage);
-	FuriTimer *work_timer = furi_timer_alloc(work_timer_callback, FuriTimerTypePeriodic, NULL);
+	FuriTimer *work_timer = furi_timer_alloc(work_timer_callback, FuriTimerTypePeriodic, plugin_state);
 	furi_timer_start(work_timer, WORK_PERIOD);
 	if(!furi_hal_power_is_otg_enabled()) {
 		furi_hal_power_enable_otg();
@@ -1236,8 +1241,8 @@ int32_t nrf24batch_app(void* p) {
 
 	PluginEvent event;
 	for(bool processing = true; processing;) {
-		FuriStatus event_status = furi_message_queue_get(APP->event_queue, &event, 200);
-		PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+		FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
+		furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
 		
 		static FuriLogLevel FuriLogLevel = FuriLogLevelDefault;
 		if(furi_log_get_level() != FuriLogLevel) {
@@ -1471,27 +1476,8 @@ int32_t nrf24batch_app(void* p) {
 									ask_question = ask_save_batch;
 									ask_question_answer = 0;
 								} else if(rw_type == rwt_write_batch) {
-									if(!Edit) {
-										Edit = 0;
-										Edit_hex = 0;
-										char *s = (char*)furi_string_get_cstr(Log[view_Batch]);
-										char *p = strchr(s, '=');
-										if(p) {
-											p++;
-											if(*p == '{') p++; // array
-											if(*(p + 1) == 'x') { 
-												p += 2;
-												Edit_hex = 1; // hex
-											}
-											if(is_digit(p, Edit_hex)) {
-												Edit_start = p;
-												while(is_digit(p, Edit_hex)) p++;
-												Edit_pos = p - 1;
-												Edited = true;
-												Edit = 1;
-											}
-										}
-									}
+									ask_question = ask_write_batch;
+									ask_question_answer = 0;
 								}
 							}
 						}
@@ -1525,8 +1511,27 @@ int32_t nrf24batch_app(void* p) {
 								ReadRepeat = !ReadRepeat;
 							} else if(Log_Total) {
 								if(rw_type == rwt_write_batch) {
-									ask_question = ask_write_batch;
-									ask_question_answer = 0;
+									if(!Edit) {
+										Edit = 0;
+										Edit_hex = 0;
+										char *s = (char*)furi_string_get_cstr(Log[view_Batch]);
+										char *p = strchr(s, '=');
+										if(p) {
+											p++;
+											if(*p == '{') p++; // array
+											if(*(p + 1) == 'x') { 
+												p += 2;
+												Edit_hex = 1; // hex
+											}
+											if(is_digit(p, Edit_hex)) {
+												Edit_start = p;
+												while(is_digit(p, Edit_hex)) p++;
+												Edit_pos = p - 1;
+												Edited = true;
+												Edit = 1;
+											}
+										}
+									}
 								} else if(rw_type == rwt_read_batch) {
 									ask_question = ask_save_batch;
 									ask_question_answer = 0;
@@ -1575,15 +1580,15 @@ int32_t nrf24batch_app(void* p) {
 			}
 		}
 
-		view_port_update(APP->view_port);
-		release_mutex(&state_mutex, plugin_state);
+		view_port_update(view_port);
+		furi_mutex_release(plugin_state->mutex);
 	}
 	nrf24_set_idle(nrf24_HANDLE);
 	nrf24_deinit();
 	if(NRF_BOARD_POWER_5V) furi_hal_power_disable_otg();
 
-	view_port_enabled_set(APP->view_port, false);
-	gui_remove_view_port(APP->gui, APP->view_port);
+	view_port_enabled_set(view_port, false);
+	gui_remove_view_port(APP->gui, view_port);
 	furi_record_close(RECORD_GUI);
 	furi_record_close(RECORD_NOTIFICATION);
 	furi_record_close(RECORD_STORAGE);
@@ -1591,12 +1596,13 @@ int32_t nrf24batch_app(void* p) {
 		file_stream_close(file_stream);
 		stream_free(file_stream);
 	}
-	view_port_free(APP->view_port);
-	furi_message_queue_free(APP->event_queue);
+	view_port_free(view_port);
+	furi_message_queue_free(event_queue);
 	free_store();
 	furi_timer_stop(work_timer);
 	furi_timer_free(work_timer);
-	free(APP->plugin_state);
+	furi_mutex_free(plugin_state->mutex);
+	free(plugin_state);
 	free(APP);
 	return 0;
 }
