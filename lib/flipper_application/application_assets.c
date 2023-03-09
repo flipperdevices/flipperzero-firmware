@@ -12,7 +12,7 @@
 #endif
 
 #define FLIPPER_APPLICATION_ASSETS_MAGIC 0x4F4C5A44
-#define FLIPPER_APPLICATION_ASSETS_VERSION 0x00000001
+#define FLIPPER_APPLICATION_ASSETS_VERSION 1
 #define FLIPPER_APPLICATION_ASSETS_SIGNATURE_FILENAME ".assets.signature"
 
 #define BUFFER_SIZE 512
@@ -37,12 +37,14 @@ typedef enum {
 } AssetsSignatureResult;
 
 static FuriString* flipper_application_assets_alloc_app_full_path(FuriString* app_name) {
+    furi_assert(app_name);
     FuriString* full_path = furi_string_alloc_set(APPS_ASSETS_PATH "/");
     furi_string_cat(full_path, app_name);
     return full_path;
 }
 
 static FuriString* flipper_application_assets_alloc_signature_file_path(FuriString* app_name) {
+    furi_assert(app_name);
     FuriString* signature_file_path = flipper_application_assets_alloc_app_full_path(app_name);
     furi_string_cat(signature_file_path, "/" FLIPPER_APPLICATION_ASSETS_SIGNATURE_FILENAME);
 
@@ -50,6 +52,8 @@ static FuriString* flipper_application_assets_alloc_signature_file_path(FuriStri
 }
 
 static uint8_t* flipper_application_assets_alloc_and_load_data(File* file, size_t* size) {
+    furi_assert(file);
+
     uint8_t* data = NULL;
     uint32_t length = 0;
 
@@ -78,6 +82,10 @@ static bool flipper_application_assets_process_files(
     File* file,
     FuriString* app_name,
     uint32_t files_count) {
+    furi_assert(storage);
+    furi_assert(file);
+    furi_assert(app_name);
+
     UNUSED(storage);
 
     uint32_t length = 0;
@@ -136,6 +144,10 @@ static bool flipper_application_assets_process_dirs(
     File* file,
     FuriString* app_name,
     uint32_t dirs_count) {
+    furi_assert(storage);
+    furi_assert(file);
+    furi_assert(app_name);
+
     bool error = false;
     FuriString* full_path = flipper_application_assets_alloc_app_full_path(app_name);
 
@@ -190,6 +202,12 @@ static AssetsSignatureResult flipper_application_assets_process_signature(
     FuriString* app_name,
     uint8_t** signature_data,
     size_t* signature_data_size) {
+    furi_assert(storage);
+    furi_assert(file);
+    furi_assert(app_name);
+    furi_assert(signature_data);
+    furi_assert(signature_data_size);
+
     AssetsSignatureResult result = AssetsSignatureResultError;
     File* signature_file = storage_file_alloc(storage);
     FuriString* signature_file_path =
@@ -242,6 +260,8 @@ static AssetsSignatureResult flipper_application_assets_process_signature(
 
 bool flipper_application_assets_load(File* file, const char* elf_path, size_t offset, size_t size) {
     UNUSED(size);
+    furi_assert(file);
+    furi_assert(elf_path);
     FlipperApplicationAssetsHeader header;
     bool result = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
