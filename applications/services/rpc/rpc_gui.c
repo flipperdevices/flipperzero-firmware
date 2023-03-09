@@ -12,6 +12,8 @@ typedef enum {
 
 #define RpcGuiWorkerFlagAny (RpcGuiWorkerFlagTransmit | RpcGuiWorkerFlagExit)
 
+#define RPC_GUI_INPUT_RESET (0u)
+
 typedef struct {
     RpcSession* session;
     Gui* gui;
@@ -201,15 +203,15 @@ static void
     event.sequence_source = INPUT_SEQUENCE_SOURCE_SOFTWARE;
     if(event.type == InputTypePress) {
         rpc_gui->input_counter++;
-        if(rpc_gui->input_counter == 0) rpc_gui->input_counter++; // we use 0 as magic value
+        if(rpc_gui->input_counter == RPC_GUI_INPUT_RESET) rpc_gui->input_counter++; // we use 0 as magic value
         rpc_gui->input_key_counter[event.key] = rpc_gui->input_counter;
     }
-    if(rpc_gui->input_key_counter[event.key] == 0) {
+    if(rpc_gui->input_key_counter[event.key] == RPC_GUI_INPUT_RESET) {
         FURI_LOG_W(TAG, "Out of sequence input event: key %d, type %d,", event.key, event.type);
     }
     event.sequence_counter = rpc_gui->input_key_counter[event.key];
     if(event.type == InputTypeRelease) {
-        rpc_gui->input_key_counter[event.key] = 0;
+        rpc_gui->input_key_counter[event.key] = RPC_GUI_INPUT_RESET;
     }
 
     // Submit event
