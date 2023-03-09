@@ -24,14 +24,20 @@ static void text_input_callback(void* context) {
     furi_assert(context);
     FlipBip* app = context;
 
-    if(app->passphrase == FlipBipPassphraseOn && strlen(app->input) > 0) {
-        strcpy(app->passphrase_text, app->input);
-    } else {
-        memzero(app->passphrase_text, TEXT_BUFFER_SIZE);
+    // check that there is text in the input
+    if(strlen(app->input_text) > 0) {
+        if(app->input_state == FlipBipTextInputPassphrase) {
+            if(app->passphrase == FlipBipPassphraseOn) {
+                strcpy(app->passphrase_text, app->input_text);
+            }
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdSettings);
+        }
     }
-    memzero(app->input, TEXT_BUFFER_SIZE);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdSettings);
+    // clear input text
+    memzero(app->input_text, TEXT_BUFFER_SIZE);
+    // reset input state
+    app->input_state = FlipBipTextInputDefault;
 }
 
 FlipBip* flipbip_app_alloc() {
@@ -62,6 +68,7 @@ FlipBip* flipbip_app_alloc() {
     app->bip39_strength = FlipBipStrength256; // 256 bits (24 words)
     app->bip44_coin = FlipBipCoinBTC0; // 0 (BTC)
     app->overwrite_saved_seed = 0;
+    app->input_state = FlipBipTextInputDefault;
 
     view_dispatcher_add_view(
         app->view_dispatcher, FlipBipViewIdMenu, submenu_get_view(app->submenu));
@@ -84,7 +91,7 @@ FlipBip* flipbip_app_alloc() {
         app->text_input,
         text_input_callback,
         (void*)app,
-        app->input,
+        app->input_text,
         TEXT_BUFFER_SIZE,
         //clear default text
         true);

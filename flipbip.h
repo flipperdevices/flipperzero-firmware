@@ -31,16 +31,17 @@ typedef struct {
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     TextInput* text_input;
-    char input[TEXT_BUFFER_SIZE];
     FlipBipStartscreen* flipbip_startscreen;
     FlipBipScene1* flipbip_scene_1;
     int haptic;
     int led;
     int passphrase;
-    char passphrase_text[TEXT_BUFFER_SIZE];
     int bip39_strength;
     int bip44_coin;
     int overwrite_saved_seed;
+    int input_state;
+    char passphrase_text[TEXT_BUFFER_SIZE];
+    char input_text[TEXT_BUFFER_SIZE];
 } FlipBip;
 
 typedef enum {
@@ -77,3 +78,9 @@ typedef enum {
     FlipBipCoinETH60,
     FlipBipCoinDOGE3,
 } FlipBipCoin;
+
+typedef enum {
+    FlipBipTextInputDefault,
+    FlipBipTextInputPassphrase,
+    FlipBipTextInputMnemonic
+} FlipBipTextInputState;

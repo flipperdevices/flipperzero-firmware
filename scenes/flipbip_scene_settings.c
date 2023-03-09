@@ -1,12 +1,6 @@
 #include "../flipbip.h"
+#include "../crypto/memzero.h"
 #include <lib/toolbox/value_index.h>
-
-// enum SettingsIndex {
-//     SettingsIndexBip39Strength = 10,
-//     SettingsIndexBip44Coin,
-//     SettingsIndexHaptic,
-//     SettingsIndexValue1,
-// };
 
 const char* const haptic_text[2] = {
     "OFF",
@@ -74,7 +68,10 @@ static void flipbip_scene_settings_set_passphrase(VariableItem* item) {
     app->passphrase = passphrase_value[index];
 
     if(app->passphrase == FlipBipPassphraseOn) {
+        app->input_state = FlipBipTextInputPassphrase;
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdTextInput);
+    } else {
+        memzero(app->passphrase_text, TEXT_BUFFER_SIZE);
     }
 }
 
