@@ -44,7 +44,7 @@ FlipBip* flipbip_app_alloc() {
     app->haptic = 1;
     app->led = 1;
     app->bip39_strength = 2; // 256 bits (24 words)
-    app->bip44_coin = COIN_BTC; // 0 (BTC)
+    app->bip44_coin = FlipBipCoinBTC0; // 0 (BTC)
     app->overwrite_saved_seed = 0;
 
     view_dispatcher_add_view(

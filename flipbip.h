@@ -63,4 +63,5 @@ typedef enum {
 typedef enum {
     FlipBipCoinBTC0,
     FlipBipCoinETH60,
-} FlipBipCoinState;
+    FlipBipCoinDOGE3,
+} FlipBipCoin;

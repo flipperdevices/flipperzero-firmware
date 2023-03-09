@@ -64,21 +64,21 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexScene1BTC) {
             app->overwrite_saved_seed = 0;
-            app->bip44_coin = COIN_BTC;
+            app->bip44_coin = FlipBipCoinBTC0;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1BTC);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
         } else if(event.event == SubmenuIndexScene1ETH) {
             app->overwrite_saved_seed = 0;
-            app->bip44_coin = COIN_ETH;
+            app->bip44_coin = FlipBipCoinETH60;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1ETH);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
         } else if(event.event == SubmenuIndexScene1DOGE) {
             app->overwrite_saved_seed = 0;
-            app->bip44_coin = COIN_DOGE;
+            app->bip44_coin = FlipBipCoinDOGE3;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1DOGE);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
