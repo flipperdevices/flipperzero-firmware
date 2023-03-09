@@ -758,6 +758,9 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     }
                     furi_hal_nfc_sleep();
                     deactivated = true;
+                } else {
+                    mf_classic_set_key_not_found(data, i, MfClassicKeyA);
+                    is_key_a_found = false;
                 }
                 if(!is_key_b_found) {
                     is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
@@ -769,6 +772,9 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                         nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx, i + 1);
                     }
                     deactivated = true;
+                } else {
+                    mf_classic_set_key_not_found(data, i, MfClassicKeyB);
+                    is_key_b_found = false;
                 }
                 if(is_key_a_found && is_key_b_found) break;
                 if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
