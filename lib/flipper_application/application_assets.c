@@ -88,6 +88,7 @@ static bool flipper_application_assets_process_files(
 
     UNUSED(storage);
 
+    bool success = false;
     uint32_t length = 0;
     char* path = NULL;
     FuriString* file_path = furi_string_alloc();
@@ -127,6 +128,10 @@ static bool flipper_application_assets_process_files(
 
         free(path);
         path = NULL;
+
+        if(i == files_count - 1) {
+            success = true;
+        }
     }
 
     if(path != NULL) {
@@ -136,7 +141,7 @@ static bool flipper_application_assets_process_files(
     storage_file_free(destination);
     furi_string_free(file_path);
 
-    return true;
+    return success;
 }
 
 static bool flipper_application_assets_process_dirs(
@@ -148,18 +153,18 @@ static bool flipper_application_assets_process_dirs(
     furi_assert(file);
     furi_assert(app_name);
 
-    bool error = false;
+    bool success = false;
     FuriString* full_path = flipper_application_assets_alloc_app_full_path(app_name);
 
-    if(!storage_simply_mkdir(storage, APPS_ASSETS_PATH)) {
-        error = true;
-    }
+    do {
+        if(!storage_simply_mkdir(storage, APPS_ASSETS_PATH)) {
+            break;
+        }
 
-    if(!storage_simply_mkdir(storage, furi_string_get_cstr(full_path))) {
-        error = true;
-    }
+        if(!storage_simply_mkdir(storage, furi_string_get_cstr(full_path))) {
+            break;
+        }
 
-    if(!error) {
         FuriString* dir_path = furi_string_alloc();
         char* path = NULL;
 
@@ -176,12 +181,15 @@ static bool flipper_application_assets_process_dirs(
 
             if(!storage_simply_mkdir(storage, furi_string_get_cstr(dir_path))) {
                 FURI_LOG_E(TAG, "Can't create directory: %s", furi_string_get_cstr(dir_path));
-                error = true;
                 break;
             }
 
             free(path);
             path = NULL;
+
+            if(i == dirs_count - 1) {
+                success = true;
+            }
         }
 
         if(path != NULL) {
@@ -189,11 +197,11 @@ static bool flipper_application_assets_process_dirs(
         }
 
         furi_string_free(dir_path);
-    }
+    } while(false);
 
     furi_string_free(full_path);
 
-    return !error;
+    return success;
 }
 
 static AssetsSignatureResult flipper_application_assets_process_signature(
