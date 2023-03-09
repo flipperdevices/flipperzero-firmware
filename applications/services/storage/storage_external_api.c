@@ -258,20 +258,18 @@ bool storage_file_copy_to_file(File* source, File* destination, uint32_t size) {
     while(size) {
         uint32_t read_size = size > FILE_BUFFER_SIZE ? FILE_BUFFER_SIZE : size;
         if(storage_file_read(source, buffer, read_size) != read_size) {
-            free(buffer);
-            return false;
+            break;
         }
 
         if(storage_file_write(destination, buffer, read_size) != read_size) {
-            free(buffer);
-            return false;
+            break;
         }
 
         size -= read_size;
     }
 
     free(buffer);
-    return true;
+    return size == 0;
 }
 
 /****************** DIR ******************/
