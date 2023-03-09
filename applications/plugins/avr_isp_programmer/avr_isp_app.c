@@ -1,0 +1,118 @@
+#include "avr_isp_app_i.h"
+
+#include <furi.h>
+#include <furi_hal.h>
+
+static bool avr_isp_app_custom_event_callback(void* context, uint32_t event) {
+    furi_assert(context);
+    AvrIspApp* app = context;
+    return scene_manager_handle_custom_event(app->scene_manager, event);
+}
+
+static bool avr_isp_app_back_event_callback(void* context) {
+    furi_assert(context);
+    AvrIspApp* app = context;
+    return scene_manager_handle_back_event(app->scene_manager);
+}
+
+static void avr_isp_app_tick_event_callback(void* context) {
+    furi_assert(context);
+    AvrIspApp* app = context;
+    scene_manager_handle_tick_event(app->scene_manager);
+}
+
+AvrIspApp* avr_isp_app_alloc() {
+    AvrIspApp* app = malloc(sizeof(AvrIspApp));
+
+    // GUI
+    app->gui = furi_record_open(RECORD_GUI);
+
+    // View Dispatcher
+    app->view_dispatcher = view_dispatcher_alloc();
+    app->scene_manager = scene_manager_alloc(&avr_isp_scene_handlers, app);
+    view_dispatcher_enable_queue(app->view_dispatcher);
+
+    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
+    view_dispatcher_set_custom_event_callback(
+        app->view_dispatcher, avr_isp_app_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        app->view_dispatcher, avr_isp_app_back_event_callback);
+    view_dispatcher_set_tick_event_callback(
+        app->view_dispatcher, avr_isp_app_tick_event_callback, 100);
+
+    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+
+    // Open Notification record
+    app->notifications = furi_record_open(RECORD_NOTIFICATION);
+
+    // // Variable Item List
+    // app->variable_item_list = variable_item_list_alloc();
+    // view_dispatcher_add_view(
+    //     app->view_dispatcher,
+    //     AvrIspViewVariableItemList,
+    //     variable_item_list_get_view(app->variable_item_list));
+
+    // SubMenu
+    app->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, AvrIspViewSubmenu, submenu_get_view(app->submenu));
+
+    // Widget
+    app->widget = widget_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, AvrIspViewWidget, widget_get_view(app->widget));
+
+    // Programmer view
+    app->avr_asp_programmer_view = avr_asp_programmer_view_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        AvrIspViewProgrammer,
+        avr_asp_programmer_view_get_view(app->avr_asp_programmer_view));
+
+    scene_manager_next_scene(app->scene_manager, AvrIspSceneStart);
+
+    return app;
+}
+
+void avr_isp_app_free(AvrIspApp* app) {
+    furi_assert(app);
+
+    // Submenu
+    view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewSubmenu);
+    submenu_free(app->submenu);
+
+    // // Variable Item List
+    // view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewVariableItemList);
+    // variable_item_list_free(app->variable_item_list);
+
+    //  Widget
+    view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewWidget);
+    widget_free(app->widget);
+
+    // Programmer view
+    view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewProgrammer);
+    avr_asp_programmer_view_free(app->avr_asp_programmer_view);
+
+    // View dispatcher
+    view_dispatcher_free(app->view_dispatcher);
+    scene_manager_free(app->scene_manager);
+
+    // Notifications
+    furi_record_close(RECORD_NOTIFICATION);
+    app->notifications = NULL;
+
+    // Close records
+    furi_record_close(RECORD_GUI);
+
+    free(app);
+}
+
+int32_t avr_isp_app(void* p) {
+    UNUSED(p);
+    AvrIspApp* avr_isp_app = avr_isp_app_alloc();
+
+    view_dispatcher_run(avr_isp_app->view_dispatcher);
+
+    avr_isp_app_free(avr_isp_app);
+
+    return 0;
+}
