@@ -314,22 +314,24 @@ static int flipbip_scene_1_model_init(
     if(overwrite || (!flipbip_has_settings(true) && !flipbip_has_settings(false))) {
         // Generate a random mnemonic using trezor-crypto
         const char* mnemonic_gen = mnemonic_generate(strength);
+        // Check if the mnemonic is valid
+        if(mnemonic_check(mnemonic_gen) == 0) return FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
         // Save the mnemonic to persistent storage
-        if(!flipbip_save_settings_secure(mnemonic_gen)) return 1; // 1 = save error
+        else if(!flipbip_save_settings_secure(mnemonic_gen)) return FlipBipStatusSaveError; // 12 = save error
         // Clear the generated mnemonic from memory
         mnemonic_clear();
         model->mnemonic_only = true;
     }
 
     // Load the mnemonic from persistent storage
-    if(!flipbip_load_settings_secure(mnemonic)) return 2; // 2 = load error
+    if(!flipbip_load_settings_secure(mnemonic)) return FlipBipStatusLoadError; // 11 = load error
     model->mnemonic = mnemonic;
     // Check if the mnemonic is valid
-    if(mnemonic_check(model->mnemonic) == 0) return 3; // 3 = mnemonic check error
+    if(mnemonic_check(model->mnemonic) == 0) return FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
 
     // if we are only generating the mnemonic, return
     if(model->mnemonic_only) {
-        return -1; // -1 = mnemonic only, return from parent
+        return FlipBipStatusReturn; // 10 = mnemonic only, return from parent
     }
 
     // test mnemonic
@@ -408,7 +410,7 @@ static int flipbip_scene_1_model_init(
 #endif
 
     // 0 = success
-    return 0;
+    return FlipBipStatusSuccess;
 }
 
 bool flipbip_scene_1_input(InputEvent* event, void* context) {
@@ -524,7 +526,7 @@ void flipbip_scene_1_enter(void* context) {
     }
 
     // BIP44 Coin setting
-    uint32_t coin = app->bip44_coin;
+    const uint32_t coin = app->bip44_coin;
     // coin_name, derivation_path
     s_derivation_text = COIN_TEXT_ARRAY[coin][1];
 
@@ -543,31 +545,38 @@ void flipbip_scene_1_enter(void* context) {
         {
             // s_busy = true;
 
-            const int status =
-                flipbip_scene_1_model_init(model, strength, coin, overwrite, passphrase_text);
+            const int status = flipbip_scene_1_model_init(
+                model,
+                strength,
+                coin,
+                overwrite,
+                passphrase_text);
 
             // nonzero status, free the mnemonic
-            if(status != 0) {
+            if(status != FlipBipStatusSuccess) {
                 memzero((void*)model->mnemonic, strlen(model->mnemonic));
                 free((void*)model->mnemonic);
             }
 
             // if error, set the error message
-            if(status == 1) {
+            if(status == FlipBipStatusSaveError) {
                 model->mnemonic = "ERROR:,Save error";
                 model->page = 2;
-            } else if(status == 2) {
+                flipbip_play_long_bump(app);
+            } else if(status == FlipBipStatusLoadError) {
                 model->mnemonic = "ERROR:,Load error";
                 model->page = 2;
-            } else if(status == 3) {
+                flipbip_play_long_bump(app);
+            } else if(status == FlipBipStatusMnemonicCheckError) {
                 model->mnemonic = "ERROR:,Mnemonic check failed";
                 model->page = 2;
+                flipbip_play_long_bump(app);
             }
 
             // s_busy = false;
 
             // if overwrite is set and mnemonic generated, return from scene immediately
-            if(status == -1) {
+            if(status == FlipBipStatusReturn) {
                 instance->callback(FlipBipCustomEventScene1Back, instance->context);
             }
         },

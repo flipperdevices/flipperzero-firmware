@@ -6,6 +6,7 @@ enum SubmenuIndex {
     SubmenuIndexScene1ETH,
     SubmenuIndexScene1DOGE,
     SubmenuIndexScene1New,
+    SubmenuIndexScene1Import,
     SubmenuIndexSettings,
 };
 
@@ -50,6 +51,12 @@ void flipbip_scene_menu_on_enter(void* context) {
             flipbip_scene_menu_submenu_callback,
             app);
     }
+    submenu_add_item(
+        app->submenu,
+        "Import from mnemonic",
+        SubmenuIndexScene1Import,
+        flipbip_scene_menu_submenu_callback,
+        app);
 
     submenu_add_item(
         app->submenu, "Settings", SubmenuIndexSettings, flipbip_scene_menu_submenu_callback, app);
@@ -71,6 +78,7 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexScene1BTC) {
             app->overwrite_saved_seed = 0;
+            app->import_from_mnemonic = 0;
             app->bip44_coin = FlipBipCoinBTC0;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1BTC);
@@ -78,6 +86,7 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
             return true;
         } else if(event.event == SubmenuIndexScene1ETH) {
             app->overwrite_saved_seed = 0;
+            app->import_from_mnemonic = 0;
             app->bip44_coin = FlipBipCoinETH60;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1ETH);
@@ -85,6 +94,7 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
             return true;
         } else if(event.event == SubmenuIndexScene1DOGE) {
             app->overwrite_saved_seed = 0;
+            app->import_from_mnemonic = 0;
             app->bip44_coin = FlipBipCoinDOGE3;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1DOGE);
@@ -92,9 +102,15 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
             return true;
         } else if(event.event == SubmenuIndexScene1New) {
             app->overwrite_saved_seed = 1;
+            app->import_from_mnemonic = 0;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1New);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
+            return true;
+        } else if(event.event == SubmenuIndexScene1Import) {
+            app->import_from_mnemonic = 1;
+            app->input_state = FlipBipTextInputMnemonic;
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdTextInput);
             return true;
         } else if(event.event == SubmenuIndexSettings) {
             scene_manager_set_scene_state(

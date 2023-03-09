@@ -33,14 +33,19 @@ typedef struct {
     TextInput* text_input;
     FlipBipStartscreen* flipbip_startscreen;
     FlipBipScene1* flipbip_scene_1;
+    // Settings options
     int haptic;
     int led;
-    int passphrase;
     int bip39_strength;
+    int passphrase;
+    // Main menu options
     int bip44_coin;
     int overwrite_saved_seed;
+    int import_from_mnemonic;
+    // Text input
     int input_state;
     char passphrase_text[TEXT_BUFFER_SIZE];
+    char import_mnemonic_text[TEXT_BUFFER_SIZE];
     char input_text[TEXT_BUFFER_SIZE];
 } FlipBip;
 
@@ -84,3 +89,11 @@ typedef enum {
     FlipBipTextInputPassphrase,
     FlipBipTextInputMnemonic
 } FlipBipTextInputState;
+
+typedef enum {
+    FlipBipStatusSuccess = 0,
+    FlipBipStatusReturn = 10,
+    FlipBipStatusLoadError = 11,
+    FlipBipStatusSaveError = 12,
+    FlipBipStatusMnemonicCheckError = 13,
+} FlipBipStatus;

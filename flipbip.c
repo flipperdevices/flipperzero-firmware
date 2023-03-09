@@ -1,5 +1,8 @@
 #include "flipbip.h"
 #include "crypto/memzero.h"
+#include "crypto/bip39.h"
+#include "helpers/flipbip_file.h"
+#include "helpers/flipbip_haptic.h"
 
 bool flipbip_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -23,6 +26,7 @@ bool flipbip_navigation_event_callback(void* context) {
 static void text_input_callback(void* context) {
     furi_assert(context);
     FlipBip* app = context;
+    bool handled = false;
 
     // check that there is text in the input
     if(strlen(app->input_text) > 0) {
@@ -30,14 +34,46 @@ static void text_input_callback(void* context) {
             if(app->passphrase == FlipBipPassphraseOn) {
                 strcpy(app->passphrase_text, app->input_text);
             }
+            // clear input text
+            memzero(app->input_text, TEXT_BUFFER_SIZE);
+            // reset input state
+            app->input_state = FlipBipTextInputDefault;
+            handled = true;
             view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdSettings);
+        } else if(app->input_state == FlipBipTextInputMnemonic) {
+            if(app->import_from_mnemonic == 1) {
+                strcpy(app->import_mnemonic_text, app->input_text);
+
+                int status = FlipBipStatusSuccess;
+                // Check if the mnemonic is valid
+                if(mnemonic_check(app->import_mnemonic_text) == 0) status = FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
+                // Save the mnemonic to persistent storage
+                else if(!flipbip_save_settings_secure(app->import_mnemonic_text)) status = FlipBipStatusSaveError; // 12 = save error
+                
+                if (status == FlipBipStatusSuccess) {
+                    flipbip_play_happy_bump(app);
+                } else {
+                    flipbip_play_long_bump(app);
+                }
+
+                memzero(app->import_mnemonic_text, TEXT_BUFFER_SIZE);
+            }
+            // clear input text
+            memzero(app->input_text, TEXT_BUFFER_SIZE);
+            // reset input state
+            app->input_state = FlipBipTextInputDefault;
+            handled = true;
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
         }
     }
 
-    // clear input text
-    memzero(app->input_text, TEXT_BUFFER_SIZE);
-    // reset input state
-    app->input_state = FlipBipTextInputDefault;
+    if(!handled) {
+        // clear input text
+        memzero(app->input_text, TEXT_BUFFER_SIZE);
+        // reset input state
+        app->input_state = FlipBipTextInputDefault;
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
+    }
 }
 
 FlipBip* flipbip_app_alloc() {
@@ -64,10 +100,15 @@ FlipBip* flipbip_app_alloc() {
     // Settings
     app->haptic = FlipBipHapticOn;
     app->led = FlipBipLedOn;
-    app->passphrase = FlipBipPassphraseOff;
     app->bip39_strength = FlipBipStrength256; // 256 bits (24 words)
+    app->passphrase = FlipBipPassphraseOff;
+
+    // Main menu
     app->bip44_coin = FlipBipCoinBTC0; // 0 (BTC)
     app->overwrite_saved_seed = 0;
+    app->import_from_mnemonic = 0;
+
+    // Text input
     app->input_state = FlipBipTextInputDefault;
 
     view_dispatcher_add_view(
