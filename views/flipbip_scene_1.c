@@ -22,6 +22,19 @@
 #define DERIV_ACCOUNT 0
 #define DERIV_CHANGE 0
 
+#define TEXT_LOADING "Loading..."
+#define TEXT_NEW_WALLET "New wallet"
+#define TEXT_DEFAULT_COIN "Coin"
+#define TEXT_RECEIVE_ADDRESS "receive address:"
+#define TEXT_DEFAULT_DERIV "m/44'/X'/0'/0"
+
+const char* TEXT_INFO = "-Scroll pages with up/down-"
+                        "p1,2)    Mnemonic/Seed     "
+                        "p3)       xprv Root Key    "
+                        "p4,5)  xprv/xpub Accnt Keys"
+                        "p6,7)  xprv/xpub Extnd Keys"
+                        "p8+)    Receive Addresses  ";
+
 // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
 const uint32_t COIN_INFO_ARRAY[3][6] = {
     {COIN_BTC, 0x0488ade4, 0x0488b21e, 0x00, 0x80, FlipBipCoinBTC0},
@@ -63,7 +76,7 @@ static CONFIDENTIAL char s_disp_text3[30 + 1];
 static CONFIDENTIAL char s_disp_text4[30 + 1];
 static CONFIDENTIAL char s_disp_text5[30 + 1];
 static CONFIDENTIAL char s_disp_text6[30 + 1];
-static const char* s_derivation_text = "m/44'/X'/0'/0";
+static const char* s_derivation_text = TEXT_DEFAULT_DERIV;
 //static bool s_busy = false;
 
 void flipbip_scene_1_set_callback(
@@ -234,13 +247,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
 
     flipbip_scene_1_clear_text();
     if(model->page == 1) {
-        const char* info = "-Scroll pages with up/down-"
-                           "p1,2)    Mnemonic/Seed     "
-                           "p3)       xprv Root Key    "
-                           "p4,5)  xprv/xpub Accnt Keys"
-                           "p6,7)  xprv/xpub Extnd Keys"
-                           "p8+)    Receive Addresses  ";
-        flipbip_scene_1_draw_generic(info, 27);
+        flipbip_scene_1_draw_generic(TEXT_INFO, 27);
     } else if(model->page == 2) {
         flipbip_scene_1_draw_mnemonic(model->mnemonic);
     } else if(model->page == 3) {
@@ -261,7 +268,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
 
     if(model->page == 0) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 1, 10, "Loading...");
+        canvas_draw_str(canvas, 1, 10, TEXT_LOADING);
         canvas_draw_str(canvas, 6, 30, s_derivation_text);
         canvas_draw_icon(canvas, 86, 25, &I_Keychain_39x36);
     } else if(model->page >= 9 && model->page <= 13) {
@@ -269,10 +276,11 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         // coin_name, derivation_path
         const char* receive_text = COIN_TEXT_ARRAY[model->coin][0];
         if (receive_text == NULL) {
-            receive_text = "Coin";
+            receive_text = TEXT_DEFAULT_COIN;
         }
+        const size_t receive_len = strlen(receive_text) * 7;
         canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, receive_text);
-        canvas_draw_str_aligned(canvas, strlen(receive_text) * 7, 2, AlignLeft, AlignTop, "receive address:");
+        canvas_draw_str_aligned(canvas, receive_len, 2, AlignLeft, AlignTop, TEXT_RECEIVE_ADDRESS);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 6, 22, s_disp_text1);
         canvas_draw_str(canvas, 6, 34, s_disp_text2);
@@ -519,6 +527,9 @@ void flipbip_scene_1_enter(void* context) {
 
     // Overwrite the saved seed with a new one setting
     bool overwrite = app->overwrite_saved_seed != 0;
+    if (overwrite) {
+        s_derivation_text = TEXT_NEW_WALLET;
+    }
 
     flipbip_play_happy_bump(app);
     flipbip_led_set_rgb(app, 255, 0, 0);
