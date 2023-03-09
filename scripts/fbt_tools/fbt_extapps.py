@@ -316,8 +316,8 @@ def prepare_app_files(target, source, env):
     directory_list: list[Dir] = []
 
     for root, dirs, files in os.walk(directory_path):
-        for file in files:
-            file_path = os.path.join(root, file)
+        for file_info in files:
+            file_path = os.path.join(root, file_info)
             file_size = os.path.getsize(file_path)
             file_list.append(
                 {
@@ -327,8 +327,8 @@ def prepare_app_files(target, source, env):
                 }
             )
 
-        for dir in dirs:
-            dir_path = os.path.join(root, dir)
+        for dir_info in dirs:
+            dir_path = os.path.join(root, dir_info)
             dir_size = sum(
                 os.path.getsize(os.path.join(dir_path, f)) for f in os.listdir(dir_path)
             )
@@ -377,17 +377,19 @@ def prepare_app_files(target, source, env):
         f.write(b"\x00" * md5_hash_size)
 
         # Write dirs
-        for dir in directory_list:
-            f.write(struct.pack("<I", len(dir["path"]) + 1))
-            f.write(dir["path"].encode("utf-8") + b"\x00")
+        for dir_info in directory_list:
+            f.write(struct.pack("<I", len(dir_info["path"]) + 1))
+            f.write(dir_info["path"].encode("ascii") + b"\x00")
+            md5_hash.update(dir_info["path"].encode("ascii") + b"\x00")
 
         # Write files
-        for file in file_list:
-            f.write(struct.pack("<I", len(file["path"]) + 1))
-            f.write(file["path"].encode("utf-8") + b"\x00")
-            f.write(struct.pack("<I", file["size"]))
+        for file_info in file_list:
+            f.write(struct.pack("<I", len(file_info["path"]) + 1))
+            f.write(file_info["path"].encode("ascii") + b"\x00")
+            f.write(struct.pack("<I", file_info["size"]))
+            md5_hash.update(file_info["path"].encode("ascii") + b"\x00")
 
-            with open(file["content_path"], "rb") as content_file:
+            with open(file_info["content_path"], "rb") as content_file:
                 content = content_file.read()
                 f.write(content)
                 md5_hash.update(content)
@@ -412,7 +414,7 @@ def generate_embed_app_metadata_actions(source, target, env, for_signature):
 
     if app.fap_file_assets:
         actions.append(Action(prepare_app_files, "$APPFILE_COMSTR"))
-        objcopy_str += "--add-section .fapfiles=${SOURCE}.files.section "
+        objcopy_str += "--add-section .fapassets=${SOURCE}.files.section "
 
     objcopy_str += (
         "--set-section-flags .fapmeta=contents,noload,readonly,data "

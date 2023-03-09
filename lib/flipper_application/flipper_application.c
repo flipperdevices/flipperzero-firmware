@@ -103,10 +103,10 @@ static FlipperApplicationPreloadStatus
         }
 
         // load assets section
-        FlipperApplicationPreloadAssetsContext preload_context = {path};
+        FlipperApplicationPreloadAssetsContext preload_context = {.path = path};
         if(elf_process_section(
                app->elf,
-               ".fapfiles",
+               ".fapassets",
                flipper_application_process_assets_section,
                &preload_context) == ElfProcessSectionResultCannotProcess) {
             return FlipperApplicationPreloadStatusInvalidFile;
