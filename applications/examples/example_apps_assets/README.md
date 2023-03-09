@@ -44,12 +44,11 @@ When app is launched, the `files` folder will be unpacked to the Apps Assets fol
 
 ```
 /assets
-└── snake_game
-    ├── .assets.signature
-    └── levels
-        ├── level1.txt
-        ├── level2.txt
-        └── level3.txt
+├── .assets.signature
+└── levels
+    ├── level1.txt
+    ├── level2.txt
+    └── level3.txt
 ```
 
 ## When will the data be unpacked?
