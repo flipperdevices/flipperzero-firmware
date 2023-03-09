@@ -14,7 +14,11 @@
 #include "views/flipbip_startscreen.h"
 #include "views/flipbip_scene_1.h"
 
-#define FLIPBIP_VERSION "v0.0.4"
+#define FLIPBIP_VERSION "v0.0.5"
+
+#define COIN_BTC 0
+#define COIN_DOGE 3
+#define COIN_ETH 60
 
 typedef struct {
     Gui* gui;

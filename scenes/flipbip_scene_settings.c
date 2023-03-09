@@ -37,14 +37,14 @@ const uint32_t bip39_strength_value[3] = {
     FlipBipStrength256,
 };
 
-const char* const bip44_coin_text[2] = {
-    "BTC",
-    "ETH",
-};
-const uint32_t bip44_coin_value[2] = {
-    FlipBipCoinBTC0,
-    FlipBipCoinETH60,
-};
+// const char* const bip44_coin_text[2] = {
+//     "BTC",
+//     "ETH",
+// };
+// const uint32_t bip44_coin_value[2] = {
+//     FlipBipCoinBTC0,
+//     FlipBipCoinETH60,
+// };
 
 static void flipbip_scene_settings_set_haptic(VariableItem* item) {
     FlipBip* app = variable_item_get_context(item);

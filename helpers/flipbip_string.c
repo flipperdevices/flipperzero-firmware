@@ -77,16 +77,18 @@ cont:
     /* NOTREACHED */
 }
 
-void flipbip_btox(const unsigned char in, char* str) {
-    unsigned char n;
-    unsigned char i = in;
+void flipbip_btox(const unsigned char* in, int in_len, char* str) {
+    for(int i = 0; i < in_len; i++) {
+        unsigned char n;
+        unsigned char x = in[i];
 
-    str += 2;
-    *str = '\0';
+        str += 2;
+        *(str + (i * 2)) = '\0';
 
-    for(n = 2; n != 0; --n) {
-        *--str = "0123456789abcdef"[i & 0x0F];
-        i >>= 4;
+        for(n = 2; n != 0; --n) {
+            *(--str + (i * 2)) = "0123456789abcdef"[x & 0x0F];
+            x >>= 4;
+        }
     }
 }
 void flipbip_xtob(const char* str, unsigned char* out, int out_len) {
@@ -121,9 +123,7 @@ void flipbip_cipher(
     rc4_init(&ctx, key_in, key_len);
     rc4_encrypt(&ctx, buf, 256);
 
-    for(size_t i = 0; i < (io_len / 2); i++) {
-        flipbip_btox(buf[i], out + i * 2);
-    }
+    flipbip_btox(buf, io_len / 2, out);
 
     memzero(buf, 256);
 }

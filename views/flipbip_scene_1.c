@@ -18,6 +18,20 @@
 #include "../crypto/curves.h"
 #include "../crypto/memzero.h"
 
+#define DERIV_PURPOSE 44
+#define DERIV_ACCOUNT 0
+#define DERIV_CHANGE 0
+
+#define VERSION_PRIVATE 0x0488ade4
+#define VERSION_PUBLIC 0x0488b21e
+#define ADDR_VERSION 0x00
+#define WIF_VERSION 0x80
+
+#define DOGE_VERSION_PRIVATE 0x02fac398
+#define DOGE_VERSION_PUBLIC 0x02facafd
+#define DOGE_ADDR_VERSION 0x1e
+#define DOGE_WIF_VERSION 0x9e
+
 struct FlipBipScene1 {
     View* view;
     FlipBipScene1Callback callback;
@@ -46,6 +60,7 @@ static CONFIDENTIAL char s_disp_text3[30 + 1];
 static CONFIDENTIAL char s_disp_text4[30 + 1];
 static CONFIDENTIAL char s_disp_text5[30 + 1];
 static CONFIDENTIAL char s_disp_text6[30 + 1];
+static char* s_derivation_text = "m/44'/x'/0'/0";
 static bool s_busy = false;
 
 void flipbip_scene_1_set_callback(
@@ -137,9 +152,7 @@ static void flipbip_scene_1_draw_mnemonic(const char* mnemonic) {
 static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
     char* seed_working = malloc(64 * 2 + 1);
     // Convert the seed to a hex string
-    for(size_t i = 0; i < 64; i++) {
-        flipbip_btox(model->seed[i], seed_working + (i * 2));
-    }
+    flipbip_btox(model->seed, 64, seed_working);
 
     flipbip_scene_1_draw_generic(seed_working, 22);
 
@@ -162,12 +175,16 @@ static void
     hdnode_private_ckd(addr_node, addr_index);
     hdnode_fill_public_key(addr_node);
 
-    if(addr_type == 0) { // BTC
-        // BTC style address
-        const char addr_version = 0x00;
-        //const char wif_version = 0x80;
-        ecdsa_get_address(
-            addr_node->public_key, addr_version, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
+    if(addr_type == COIN_BTC || addr_type == COIN_DOGE) { // BTC / DOGE
+        if (addr_type == COIN_BTC) {
+            // BTC style address
+            ecdsa_get_address(
+                addr_node->public_key, ADDR_VERSION, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
+        } else if (addr_type == COIN_DOGE) {
+            // DOGE style address
+            ecdsa_get_address(
+                addr_node->public_key, DOGE_ADDR_VERSION, HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
+        }
 
         char* address = malloc(buflen + 1);
         strncpy(address, buf, buflen);
@@ -175,18 +192,16 @@ static void
         memzero(address, buflen + 1);
         free(address);
 
-        //ecdsa_get_wif(addr_node->private_key, wif_version, HASHER_SHA2D, buf, buflen);
+        //ecdsa_get_wif(addr_node->private_key, WIF_VERSION, HASHER_SHA2D, buf, buflen);
         //char *wif = malloc(buflen + 1);
         //strncpy(wif, buf, buflen);
-    } else if(addr_type == 60) { // ETH
+    } else if(addr_type == COIN_ETH) { // ETH
         // ETH style address
         hdnode_get_ethereum_pubkeyhash(addr_node, (uint8_t*)buf);
         char* address = malloc(42 + 1);
         memcpy(address, "0x", 2);
         // Convert the hash to a hex string
-        for(size_t i = 0; i < 20; i++) {
-            flipbip_btox(buf[i], address + 2 + (i * 2));
-        }
+        flipbip_btox((uint8_t*)buf, 20, address + 2);
         flipbip_scene_1_draw_generic(address, 12);
         memzero(address, 42 + 1);
         free(address);
@@ -242,14 +257,16 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
     if(model->page == 0) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 1, 10, "Loading...");
-        canvas_draw_str(canvas, 6, 30, "m/44'/x'/0'/0");
+        canvas_draw_str(canvas, 6, 30, s_derivation_text);
         canvas_draw_icon(canvas, 86, 25, &I_Keychain_39x36);
     } else if(model->page >= 9 && model->page <= 13) {
         canvas_set_font(canvas, FontSecondary);
         const char* receive_text;
-        if(model->coin == 0) { // BTC
+        if(model->coin == COIN_BTC) { // BTC
             receive_text = "BTC receive address:";
-        } else if(model->coin == 60) { // ETH
+        } else if(model->coin == COIN_DOGE) { // DOGE
+            receive_text = "DOGE receive address:";
+        } else if(model->coin == COIN_ETH) { // ETH
             receive_text = "ETH receive address:";
         } else {
             receive_text = "Receive address:";
@@ -318,30 +335,17 @@ static int flipbip_scene_1_model_init(
     HDNode* root = malloc(sizeof(HDNode));
     hdnode_from_seed(model->seed, 64, SECP256K1_NAME, root);
 
-    // m/44'/0'/0'/0 or m/44'/60'/0'/0
-    const uint32_t purpose = 44;
-    //const uint32_t coin = 0;  // BTC
-    //const uint32_t coin = 60; // ETH
-    const uint32_t account = 0;
-    const uint32_t change = 0;
-
-    // constants for BTC / ETH
-    const uint32_t version_public = 0x0488b21e;
-    const uint32_t version_private = 0x0488ade4;
-    // "xprv_magic": 76066276,
-    // "xpub_magic": 76067358,
-    // "xpub_magic_segwit_p2sh": 77429938,
-    // "xpub_magic_segwit_native": 78792518,
-    // "xpub_magic_multisig_segwit_p2sh": 43365439,
-    // "xpub_magic_multisig_segwit_native": 44728019,
-
     // buffer for key serialization
     const size_t buflen = 128;
     char buf[128 + 1];
 
     // root
     uint32_t fingerprint = 0;
-    hdnode_serialize_private(root, fingerprint, version_private, buf, buflen);
+    if (model->coin == COIN_DOGE) {
+        hdnode_serialize_private(root, fingerprint, DOGE_VERSION_PRIVATE, buf, buflen);
+    } else {
+        hdnode_serialize_private(root, fingerprint, VERSION_PRIVATE, buf, buflen);
+    }
     char* xprv_root = malloc(buflen + 1);
     strncpy(xprv_root, buf, buflen);
     model->xprv_root = xprv_root;
@@ -350,7 +354,7 @@ static int flipbip_scene_1_model_init(
 
     // purpose m/44'
     fingerprint = hdnode_fingerprint(node);
-    hdnode_private_ckd_prime(node, purpose); // purpose
+    hdnode_private_ckd_prime(node, DERIV_PURPOSE); // purpose
 
     // coin m/44'/0' or m/44'/60'
     fingerprint = hdnode_fingerprint(node);
@@ -358,28 +362,44 @@ static int flipbip_scene_1_model_init(
 
     // account m/44'/0'/0' or m/44'/60'/0'
     fingerprint = hdnode_fingerprint(node);
-    hdnode_private_ckd_prime(node, account); // account
+    hdnode_private_ckd_prime(node, DERIV_ACCOUNT); // account
 
-    hdnode_serialize_private(node, fingerprint, version_private, buf, buflen);
+    if (model->coin == COIN_DOGE) {
+        hdnode_serialize_private(node, fingerprint, DOGE_VERSION_PRIVATE, buf, buflen);
+    } else {
+        hdnode_serialize_private(node, fingerprint, VERSION_PRIVATE, buf, buflen);
+    }
     char* xprv_acc = malloc(buflen + 1);
     strncpy(xprv_acc, buf, buflen);
     model->xprv_account = xprv_acc;
 
-    hdnode_serialize_public(node, fingerprint, version_public, buf, buflen);
+    if (model->coin == COIN_DOGE) {
+        hdnode_serialize_public(node, fingerprint, DOGE_VERSION_PUBLIC, buf, buflen);
+    } else {
+        hdnode_serialize_public(node, fingerprint, VERSION_PUBLIC, buf, buflen);
+    }
     char* xpub_acc = malloc(buflen + 1);
     strncpy(xpub_acc, buf, buflen);
     model->xpub_account = xpub_acc;
 
     // external/internal (change) m/44'/0'/0'/0 or m/44'/60'/0'/0
     fingerprint = hdnode_fingerprint(node);
-    hdnode_private_ckd(node, change); // external/internal (change)
+    hdnode_private_ckd(node, DERIV_CHANGE); // external/internal (change)
 
-    hdnode_serialize_private(node, fingerprint, version_private, buf, buflen);
+    if (model->coin == COIN_DOGE) {
+        hdnode_serialize_private(node, fingerprint, DOGE_VERSION_PRIVATE, buf, buflen);
+    } else {
+        hdnode_serialize_private(node, fingerprint, VERSION_PRIVATE, buf, buflen);
+    }
     char* xprv_ext = malloc(buflen + 1);
     strncpy(xprv_ext, buf, buflen);
     model->xprv_extended = xprv_ext;
 
-    hdnode_serialize_public(node, fingerprint, version_public, buf, buflen);
+    if (model->coin == COIN_DOGE) {
+        hdnode_serialize_public(node, fingerprint, DOGE_VERSION_PUBLIC, buf, buflen);
+    } else {
+        hdnode_serialize_public(node, fingerprint, VERSION_PUBLIC, buf, buflen);
+    }
     char* xpub_ext = malloc(buflen + 1);
     strncpy(xpub_ext, buf, buflen);
     model->xpub_extended = xpub_ext;
@@ -504,9 +524,14 @@ void flipbip_scene_1_enter(void* context) {
         strength = 192; // 18 words (192 bit)
 
     // BIP44 Coin setting
-    int coin_setting = app->bip44_coin;
-    uint32_t coin = 0; //FlipBipCoinBTC0             // BTC (0)
-    if(coin_setting == FlipBipCoinETH60) coin = 60; // ETH (60)
+    uint32_t coin = app->bip44_coin;
+    if (coin == COIN_BTC) {
+        s_derivation_text = "m/44'/0'/0'/0";
+    } else if (coin == COIN_DOGE) {
+        s_derivation_text = "m/44'/3'/0'/0";
+    } else if (coin == COIN_ETH) {
+        s_derivation_text = "m/44'/60'/0'/0";
+    }
 
     // Overwrite the saved seed with a new one setting
     bool overwrite = app->overwrite_saved_seed != 0;

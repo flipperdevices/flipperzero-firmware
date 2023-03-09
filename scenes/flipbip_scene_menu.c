@@ -4,6 +4,7 @@
 enum SubmenuIndex {
     SubmenuIndexScene1BTC = 10,
     SubmenuIndexScene1ETH,
+    SubmenuIndexScene1DOGE,
     SubmenuIndexScene1New,
     SubmenuIndexSettings,
 };
@@ -27,6 +28,12 @@ void flipbip_scene_menu_on_enter(void* context) {
             app->submenu,
             "View saved ETH wallet",
             SubmenuIndexScene1ETH,
+            flipbip_scene_menu_submenu_callback,
+            app);
+        submenu_add_item(
+            app->submenu,
+            "View saved DOGE wallet",
+            SubmenuIndexScene1DOGE,
             flipbip_scene_menu_submenu_callback,
             app);
     }
@@ -57,16 +64,23 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexScene1BTC) {
             app->overwrite_saved_seed = 0;
-            app->bip44_coin = FlipBipCoinBTC0;
+            app->bip44_coin = COIN_BTC;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1BTC);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
         } else if(event.event == SubmenuIndexScene1ETH) {
             app->overwrite_saved_seed = 0;
-            app->bip44_coin = FlipBipCoinETH60;
+            app->bip44_coin = COIN_ETH;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1ETH);
+            scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
+            return true;
+        } else if(event.event == SubmenuIndexScene1DOGE) {
+            app->overwrite_saved_seed = 0;
+            app->bip44_coin = COIN_DOGE;
+            scene_manager_set_scene_state(
+                app->scene_manager, FlipBipSceneMenu, SubmenuIndexScene1DOGE);
             scene_manager_next_scene(app->scene_manager, FlipBipSceneScene_1);
             return true;
         } else if(event.event == SubmenuIndexScene1New) {
