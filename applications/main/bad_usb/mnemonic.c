@@ -294,7 +294,7 @@ int32_t ducky_fnc_hold(
     const char* line_tmp,
     char* error,
     size_t error_len) {
-    (void) line;
+    (void)line;
     line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
     uint16_t key = ducky_get_keycode(bad_usb, line_tmp, true);
     if(key == HID_KEYBOARD_NONE) {
@@ -313,7 +313,7 @@ int32_t ducky_fnc_release(
     const char* line_tmp,
     char* error,
     size_t error_len) {
-    (void) line;
+    (void)line;
     line_tmp = &line_tmp[ducky_get_command_len(line_tmp) + 1];
     uint16_t key = ducky_get_keycode(bad_usb, line_tmp, true);
     if(key == HID_KEYBOARD_NONE) {
