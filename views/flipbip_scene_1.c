@@ -39,15 +39,13 @@ const char* TEXT_INFO = "-Scroll pages with up/down-"
 const uint32_t COIN_INFO_ARRAY[3][6] = {
     {COIN_BTC, 0x0488ade4, 0x0488b21e, 0x00, 0x80, FlipBipCoinBTC0},
     {COIN_ETH, 0x0488ade4, 0x0488b21e, 0x00, 0x80, FlipBipCoinETH60},
-    {COIN_DOGE, 0x02fac398, 0x02facafd, 0x1e, 0x9e, FlipBipCoinBTC0}
-};
+    {COIN_DOGE, 0x02fac398, 0x02facafd, 0x1e, 0x9e, FlipBipCoinBTC0}};
 
 // coin_name, derivation_path
 const char* COIN_TEXT_ARRAY[3][2] = {
     {"BTC", "m/44'/0'/0'/0"},
     {"ETH", "m/44'/60'/0'/0"},
-    {"DOGE", "m/44'/3'/0'/0"}
-};
+    {"DOGE", "m/44'/3'/0'/0"}};
 
 struct FlipBipScene1 {
     View* view;
@@ -179,7 +177,6 @@ static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
 
 static void
     flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_type, uint32_t addr_index) {
-    
     //s_busy = true;
 
     // buffer for key serialization
@@ -195,7 +192,7 @@ static void
     // coin info
     // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
     uint32_t coin_info[6] = {0};
-    for (size_t i = 0; i < 6; i++) {
+    for(size_t i = 0; i < 6; i++) {
         coin_info[i] = COIN_INFO_ARRAY[addr_type][i];
     }
 
@@ -275,7 +272,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_set_font(canvas, FontSecondary);
         // coin_name, derivation_path
         const char* receive_text = COIN_TEXT_ARRAY[model->coin][0];
-        if (receive_text == NULL) {
+        if(receive_text == NULL) {
             receive_text = TEXT_DEFAULT_COIN;
         }
         const size_t receive_len = strlen(receive_text) * 7;
@@ -302,7 +299,6 @@ static int flipbip_scene_1_model_init(
     const int strength,
     const uint32_t coin,
     const bool overwrite) {
-
     model->page = 0;
     model->mnemonic_only = false;
     model->strength = strength;
@@ -352,7 +348,7 @@ static int flipbip_scene_1_model_init(
     // coin info
     // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
     uint32_t coin_info[6] = {0};
-    for (size_t i = 0; i < 6; i++) {
+    for(size_t i = 0; i < 6; i++) {
         coin_info[i] = COIN_INFO_ARRAY[coin][i];
     }
 
@@ -527,7 +523,7 @@ void flipbip_scene_1_enter(void* context) {
 
     // Overwrite the saved seed with a new one setting
     bool overwrite = app->overwrite_saved_seed != 0;
-    if (overwrite) {
+    if(overwrite) {
         s_derivation_text = TEXT_NEW_WALLET;
     }
 
