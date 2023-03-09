@@ -1,4 +1,5 @@
 #include "flipbip.h"
+#include "crypto/memzero.h"
 
 bool flipbip_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -17,6 +18,20 @@ bool flipbip_navigation_event_callback(void* context) {
     furi_assert(context);
     FlipBip* app = context;
     return scene_manager_handle_back_event(app->scene_manager);
+}
+
+static void text_input_callback(void* context) {
+    furi_assert(context);
+    FlipBip* app = context;
+
+    if(app->passphrase == FlipBipPassphraseOn && strlen(app->input) > 0) {
+        strcpy(app->passphrase_text, app->input);
+    } else {
+        memzero(app->passphrase_text, TEXT_BUFFER_SIZE);
+    }
+    memzero(app->input, TEXT_BUFFER_SIZE);
+
+    view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdSettings);
 }
 
 FlipBip* flipbip_app_alloc() {
@@ -41,9 +56,10 @@ FlipBip* flipbip_app_alloc() {
     app->submenu = submenu_alloc();
 
     // Settings
-    app->haptic = 1;
-    app->led = 1;
-    app->bip39_strength = 2; // 256 bits (24 words)
+    app->haptic = FlipBipHapticOn;
+    app->led = FlipBipLedOn;
+    app->passphrase = FlipBipPassphraseOff;
+    app->bip39_strength = FlipBipStrength256; // 256 bits (24 words)
     app->bip44_coin = FlipBipCoinBTC0; // 0 (BTC)
     app->overwrite_saved_seed = 0;
 
@@ -63,6 +79,19 @@ FlipBip* flipbip_app_alloc() {
         FlipBipViewIdSettings,
         variable_item_list_get_view(app->variable_item_list));
 
+    app->text_input = text_input_alloc();
+    text_input_set_result_callback(
+        app->text_input,
+        text_input_callback,
+        (void*)app,
+        app->input,
+        TEXT_BUFFER_SIZE,
+        //clear default text
+        true);
+    text_input_set_header_text(app->text_input, "Input");
+    view_dispatcher_add_view(
+        app->view_dispatcher, FlipBipViewIdTextInput, text_input_get_view(app->text_input));
+
     //End Scene Additions
 
     return app;
@@ -74,11 +103,13 @@ void flipbip_app_free(FlipBip* app) {
     // Scene manager
     scene_manager_free(app->scene_manager);
 
+    text_input_free(app->text_input);
+
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdScene1);
-    // view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdScene2);
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdSettings);
+    view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdTextInput);
     submenu_free(app->submenu);
 
     view_dispatcher_free(app->view_dispatcher);
@@ -88,6 +119,7 @@ void flipbip_app_free(FlipBip* app) {
     app->notification = NULL;
 
     //Remove whatever is left
+    memzero(app, sizeof(FlipBip));
     free(app);
 }
 

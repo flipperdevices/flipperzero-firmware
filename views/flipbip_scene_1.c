@@ -298,7 +298,8 @@ static int flipbip_scene_1_model_init(
     FlipBipScene1Model* const model,
     const int strength,
     const uint32_t coin,
-    const bool overwrite) {
+    const bool overwrite,
+    const char* passphrase_text) {
     model->page = 0;
     model->mnemonic_only = false;
     model->strength = strength;
@@ -306,8 +307,8 @@ static int flipbip_scene_1_model_init(
     model->overwrite = overwrite;
 
     // Allocate memory for mnemonic
-    char* mnemonic = malloc(256);
-    memzero(mnemonic, 256);
+    char* mnemonic = malloc(TEXT_BUFFER_SIZE);
+    memzero(mnemonic, TEXT_BUFFER_SIZE);
 
     // Check if the mnemonic key & data is already saved in persistent storage, or overwrite is true
     if(overwrite || (!flipbip_has_settings(true) && !flipbip_has_settings(false))) {
@@ -335,7 +336,7 @@ static int flipbip_scene_1_model_init(
     //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
 
     // Generate a BIP39 seed from the mnemonic
-    mnemonic_to_seed(model->mnemonic, "", model->seed, 0);
+    mnemonic_to_seed(model->mnemonic, passphrase_text, model->seed, 0);
 
     // Generate a BIP32 root HD node from the mnemonic
     HDNode* root = malloc(sizeof(HDNode));
@@ -509,12 +510,18 @@ void flipbip_scene_1_enter(void* context) {
     FlipBip* app = instance->context;
 
     // BIP39 Strength setting
-    int strength_setting = app->bip39_strength;
-    int strength = 256; // FlipBipStrength256                        // 24 words (256 bit)
-    if(strength_setting == FlipBipStrength128)
+    int strength = 256; // FlipBipStrength256 // 24 words (256 bit)
+    if(app->bip39_strength == FlipBipStrength128) {
         strength = 128; // 12 words (128 bit)
-    else if(strength_setting == FlipBipStrength192)
+    } else if(app->bip39_strength == FlipBipStrength192) {
         strength = 192; // 18 words (192 bit)
+    }
+
+    // BIP39 Passphrase setting
+    const char* passphrase_text = "";
+    if(app->passphrase == FlipBipPassphraseOn && strlen(app->passphrase_text) > 0) {
+        passphrase_text = app->passphrase_text;
+    }
 
     // BIP44 Coin setting
     uint32_t coin = app->bip44_coin;
@@ -536,7 +543,8 @@ void flipbip_scene_1_enter(void* context) {
         {
             // s_busy = true;
 
-            const int status = flipbip_scene_1_model_init(model, strength, coin, overwrite);
+            const int status =
+                flipbip_scene_1_model_init(model, strength, coin, overwrite, passphrase_text);
 
             // nonzero status, free the mnemonic
             if(status != 0) {
