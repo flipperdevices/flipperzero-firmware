@@ -315,9 +315,11 @@ static int flipbip_scene_1_model_init(
         // Generate a random mnemonic using trezor-crypto
         const char* mnemonic_gen = mnemonic_generate(strength);
         // Check if the mnemonic is valid
-        if(mnemonic_check(mnemonic_gen) == 0) return FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
+        if(mnemonic_check(mnemonic_gen) == 0)
+            return FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
         // Save the mnemonic to persistent storage
-        else if(!flipbip_save_settings_secure(mnemonic_gen)) return FlipBipStatusSaveError; // 12 = save error
+        else if(!flipbip_save_settings_secure(mnemonic_gen))
+            return FlipBipStatusSaveError; // 12 = save error
         // Clear the generated mnemonic from memory
         mnemonic_clear();
         model->mnemonic_only = true;
@@ -327,7 +329,8 @@ static int flipbip_scene_1_model_init(
     if(!flipbip_load_settings_secure(mnemonic)) return FlipBipStatusLoadError; // 11 = load error
     model->mnemonic = mnemonic;
     // Check if the mnemonic is valid
-    if(mnemonic_check(model->mnemonic) == 0) return FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
+    if(mnemonic_check(model->mnemonic) == 0)
+        return FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
 
     // if we are only generating the mnemonic, return
     if(model->mnemonic_only) {
@@ -537,6 +540,7 @@ void flipbip_scene_1_enter(void* context) {
     }
 
     flipbip_play_happy_bump(app);
+    //notification_message(app->notification, &sequence_blink_cyan_100);
     flipbip_led_set_rgb(app, 255, 0, 0);
 
     with_view_model(
@@ -545,12 +549,8 @@ void flipbip_scene_1_enter(void* context) {
         {
             // s_busy = true;
 
-            const int status = flipbip_scene_1_model_init(
-                model,
-                strength,
-                coin,
-                overwrite,
-                passphrase_text);
+            const int status =
+                flipbip_scene_1_model_init(model, strength, coin, overwrite, passphrase_text);
 
             // nonzero status, free the mnemonic
             if(status != FlipBipStatusSuccess) {

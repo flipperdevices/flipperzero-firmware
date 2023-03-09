@@ -46,13 +46,17 @@ static void text_input_callback(void* context) {
 
                 int status = FlipBipStatusSuccess;
                 // Check if the mnemonic is valid
-                if(mnemonic_check(app->import_mnemonic_text) == 0) status = FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
+                if(mnemonic_check(app->import_mnemonic_text) == 0)
+                    status = FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
                 // Save the mnemonic to persistent storage
-                else if(!flipbip_save_settings_secure(app->import_mnemonic_text)) status = FlipBipStatusSaveError; // 12 = save error
-                
-                if (status == FlipBipStatusSuccess) {
+                else if(!flipbip_save_settings_secure(app->import_mnemonic_text))
+                    status = FlipBipStatusSaveError; // 12 = save error
+
+                if(status == FlipBipStatusSuccess) {
+                    //notification_message(app->notification, &sequence_blink_cyan_100);
                     flipbip_play_happy_bump(app);
                 } else {
+                    //notification_message(app->notification, &sequence_blink_red_100);
                     flipbip_play_long_bump(app);
                 }
 
