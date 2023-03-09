@@ -715,7 +715,7 @@ ElfProcessSectionResult elf_process_section(
         }
     }
 
-    if(result != ElfProcessSectionResultNotFound) {
+    if(result != ElfProcessSectionResultNotFound) { //-V547
         if(process_section(elf->fd, section_header.sh_offset, section_header.sh_size, context)) {
             result = ElfProcessSectionResultSuccess;
         } else {

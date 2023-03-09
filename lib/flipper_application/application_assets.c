@@ -219,7 +219,6 @@ static AssetsSignatureResult flipper_application_assets_process_signature(
             flipper_application_assets_alloc_and_load_data(file, signature_data_size);
 
         if(signature_data == NULL) {
-            result = AssetsSignatureResultError;
             FURI_LOG_E(TAG, "Can't read signature");
             break;
         }
