@@ -103,22 +103,14 @@ class Main(App):
     @WrapStorageOp
     def receive(self):
         with FlipperStorage(self._get_port()) as storage:
-            FlipperStorageOperations(storage).receive(
+            FlipperStorageOperations(storage).recursive_receive(
                 self.args.flipper_path, self.args.local_path
             )
 
     @WrapStorageOp
     def send(self):
         with FlipperStorage(self._get_port()) as storage:
-            FlipperStorageOperations(storage).send_to_storage(
-                self.args.flipper_path, self.args.local_path, self.args.force
-            )
-
-    # make directory with exist check
-    @WrapStorageOp
-    def send(self):
-        with FlipperStorage(self._get_port()) as storage:
-            FlipperStorageOperations(storage).send_to_storage(
+            FlipperStorageOperations(storage).recursive_send(
                 self.args.flipper_path, self.args.local_path, self.args.force
             )
 
