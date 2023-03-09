@@ -163,7 +163,7 @@ SystemSettings* system_settings_alloc() {
     app->var_item_list = variable_item_list_alloc();
 
     item = variable_item_list_add(
-        app->var_item_list, "Hand Orient", COUNT_OF(hand_mode),  hand_orient_changed, app);
+        app->var_item_list, "Hand Orient", COUNT_OF(hand_mode), hand_orient_changed, app);
     value_index = furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient) ? 1 : 0;
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, hand_mode[value_index]);
