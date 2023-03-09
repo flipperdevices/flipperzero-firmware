@@ -3,11 +3,11 @@
 #include <furi_hal.h>
 
 typedef enum {
-    AvrIspSpiSwSpeed1Mhz=0,
-    AvrIspSpiSwSpeed400Khz=1,
-    AvrIspSpiSwSpeed250Khz=2,
-    AvrIspSpiSwSpeed125Khz=4,
-    AvrIspSpiSwSpeed40Khz=12,
+    AvrIspSpiSwSpeed1Mhz = 0,
+    AvrIspSpiSwSpeed400Khz = 1,
+    AvrIspSpiSwSpeed250Khz = 2,
+    AvrIspSpiSwSpeed125Khz = 4,
+    AvrIspSpiSwSpeed40Khz = 12,
 } AvrIspSpiSwSpeed;
 
 typedef struct AvrIspSpiSw AvrIspSpiSw;
