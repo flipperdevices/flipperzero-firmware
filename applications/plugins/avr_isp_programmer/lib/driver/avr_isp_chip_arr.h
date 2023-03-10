@@ -30,3 +30,4 @@ struct AvrIspChipArr { // Value of -1 typically means unknown
 typedef struct AvrIspChipArr AvrIspChipArr;
 
 extern const AvrIspChipArr avr_isp_chip_arr[];
+extern const size_t avr_isp_chip_arr_size;

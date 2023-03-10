@@ -5,6 +5,8 @@
 
 typedef struct AvrIspWorker AvrIspWorker;
 
+typedef void (*AvrIspWorkerCallback)(void* context, const char* name);
+
 /** Allocate AvrIspWorker
  * 
  * @param context AvrIsp* context
@@ -18,16 +20,16 @@ AvrIspWorker* avr_isp_worker_alloc(void* context);
  */
 void avr_isp_worker_free(AvrIspWorker* instance);
 
-// /** Callback AvrIspWorker
-//  *
-//  * @param instance AvrIspWorker instance
-//  * @param callback AvrIspWorkerOverrunCallback callback
-//  * @param context
-//  */
-// void avr_isp_worker_set_pair_callback(
-//     AvrIspWorker* instance,
-//     AvrIspWorkerCallback callback,
-//     void* context);
+/** Callback AvrIspWorker
+ *
+ * @param instance AvrIspWorker instance
+ * @param callback AvrIspWorkerOverrunCallback callback
+ * @param context
+ */
+void avr_isp_worker_set_callback(
+    AvrIspWorker* instance,
+    AvrIspWorkerCallback callback,
+    void* context);
 
 /** Start AvrIspWorker
  * 
@@ -46,3 +48,5 @@ void avr_isp_worker_stop(AvrIspWorker* instance);
  * @return bool - true if running
  */
 bool avr_isp_worker_is_running(AvrIspWorker* instance);
+
+void avr_isp_worker_detect_chip(AvrIspWorker* instance);

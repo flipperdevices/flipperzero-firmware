@@ -382,3 +382,5 @@ const AvrIspChipArr avr_isp_chip_arr[] = {   // Value of -1 typically means unkn
   {"AVR128DA64",       370, F_AVR8X, {0x1E, 0x97, 0x07},       0, 0x20000, 0x200,  1,      0, 0x01400, 0x0200,  1, 0x4000, 0x4000, 16,  4,  64}, // atdf, avrdude
   {"AVR128DB64",       371, F_AVR8X, {0x1E, 0x97, 0x0B},       0, 0x20000, 0x200,  1,      0, 0x01400, 0x0200,  1, 0x4000, 0x4000, 16,  4,  65}, // atdf, avrdude
 };
+
+const size_t avr_isp_chip_arr_size = COUNT_OF(avr_isp_chip_arr);
