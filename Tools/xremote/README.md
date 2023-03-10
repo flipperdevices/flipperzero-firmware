@@ -21,6 +21,7 @@ Wouldn't it be nicer to simply click one button and let everything happen? This 
 - Select commands registered with the IR App (choose from the created remote buttons)<br>
 - Chain these commands using an easy UI<br>
 - Save chained commands to a file<br>
+- Add pauses, becaue target systems are not always fast enough for multiple commands<br>
 - Run file containing chained IR & SubGhz commands<br>
 
 ## How to install on Flipper Zero
