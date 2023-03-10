@@ -467,11 +467,12 @@ static void prepare_nrf24(bool fsend_packet)
 			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70); // Mask all interrupts
 			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0); // Automatic Retransmission
 			nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0); // Auto acknowledgement
-			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, 0);	// Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+															// EN_DYN_ACK(0x01)  for W_TX_PAYLOAD_NOACK cmd broke AA on some fake nRF24l01+ modules
 		} else if(setup_from_log) { // Scan
 			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
 			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, *rec & 0x7F);
-			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, *(rec + 2 + addr_size) >> 2 != 0x33 ? 4+1 : 1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, *(rec + 2 + addr_size) >> 2 != 0x33 ? 4 : 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
 			if(*(rec + 1) & 0b100) { // ESB
 				nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, 0x01); // Automatic Retransmission
 				nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, 0x3F); // Auto acknowledgement
@@ -483,7 +484,7 @@ static void prepare_nrf24(bool fsend_packet)
 			nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
 			nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x01 : 0); // Automatic Retransmission
 			nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_AA_OFF || !NRF_ESB ? 0 : 0x3F); // Auto acknowledgement
-			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, NRF_DPL ? 4+1 : 1); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
+			nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, NRF_DPL ? 4 : 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
 			nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
 			nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
 		}
@@ -793,7 +794,7 @@ bool nrf24_send_packet()
 		nrf24_set_maclen(nrf24_HANDLE, 2);
 		nrf24_set_mac(REG_RX_ADDR_P0, adr, 2);
 		nrf24_set_mac(REG_TX_ADDR, adr, 2);
-		last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2 + 2, 32 - 2, false);
+		last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2 + 2, 32 - 2, true);
 	} else {
 		nrf24_write_reg(nrf24_HANDLE, REG_SETUP_RETR, NRF_ESB ? 0x11 : 0); // Automatic Retransmission
 		nrf24_write_reg(nrf24_HANDLE, REG_EN_AA, NRF_AA_OFF || !NRF_ESB ? 0 : 0x3F); // Auto acknowledgement
@@ -814,7 +815,7 @@ bool nrf24_send_packet()
 		if(a == 0) a = 32;
 		nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
 		nrf24_write_reg(nrf24_HANDLE, REG_DYNPD, NRF_DPL ? 0x3F : 0); // Enable dynamic payload reg
-		last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2, a, false);
+		last_packet_send_st = nrf24_txpacket(nrf24_HANDLE, ptr + 2, a, true);
 	}
 	last_packet_send = view_log_arr_idx;
 	notification_message(APP->notification, last_packet_send_st ? &sequence_blink_blue_100 : &sequence_blink_red_100);
