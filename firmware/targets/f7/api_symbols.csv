@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,11.10,,
+Version,+,11.13,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -803,6 +803,7 @@ Function,-,fdopen,FILE*,"int, const char*"
 Function,-,felica_check_ic_type,_Bool,uint8_t*
 Function,-,felica_clear,void,FelicaData*
 Function,-,felica_define_normal_block,void,"FelicaService*, uint16_t, uint8_t*"
+Function,-,felica_estimate_timing_us,uint_least32_t,"uint_least8_t, uint_least8_t"
 Function,-,felica_get_ic_type,FelicaICType,uint8_t*
 Function,-,felica_get_service_name,FuriString*,FelicaService*
 Function,-,felica_get_system_name,FuriString*,FelicaSystem*

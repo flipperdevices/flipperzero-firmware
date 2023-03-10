@@ -8,13 +8,15 @@
 #define TAG "FeliCa"
 
 bool felica_check_ic_type(uint8_t* PMm) {
-    uint8_t ic_type = PMm[0];
-    uint8_t rom_type = PMm[1];
+    uint8_t rom_type = PMm[0];
+    uint8_t ic_type = PMm[1];
 
     bool is_valid_ic = false;
     if(ic_type == 0xff) { // RC-S967 in nfc-dep
         is_valid_ic = true;
-    } else if(ic_type == 0xf0 || ic_type == 0xf2) { // Lite(S)
+    } else if(ic_type == 0xf2) { // RC-S732?
+        is_valid_ic = true;
+    } else if(ic_type == 0xf0 || ic_type == 0xf1) { // Lite(S)
         is_valid_ic = true;
     } else if(ic_type == 0xe1) { // RC-S967 in plug mode
         is_valid_ic = true;

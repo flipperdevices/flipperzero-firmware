@@ -57,7 +57,6 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if((event.event == NfcWorkerEventReadUidNfcB) ||
-           (event.event == NfcWorkerEventReadUidNfcF) ||
            (event.event == NfcWorkerEventReadUidNfcV)) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
@@ -96,6 +95,11 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
             }
+            consumed = true;
+        } else if(event.event == NfcWorkerEventReadUidNfcF) {
+            notification_message(nfc->notifications, &sequence_success);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcfReadSuccess);
+            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadFelica) {
             notification_message(nfc->notifications, &sequence_success);

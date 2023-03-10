@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <inttypes.h>
 
 void nfc_scene_nfc_data_info_widget_callback(GuiButtonType result, InputType type, void* context) {
     Nfc* nfc = context;
@@ -11,6 +12,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     Nfc* nfc = context;
     Widget* widget = nfc->widget;
     FuriHalNfcDevData* nfc_data = &nfc->dev->dev_data.nfc_data;
+    FuriHalNfcType type = nfc_data->type;
     NfcDeviceData* dev_data = &nfc->dev->dev_data;
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
@@ -40,20 +42,80 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             temp_str, "\e#%s\n", nfc_mf_classic_type(dev_data->mf_classic_data.type));
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_cat_printf(temp_str, "\e#MIFARE DESfire\n");
+    } else if(protocol == NfcDeviceProtocolFelica) {
+        furi_string_cat_printf(temp_str, "\e#%s\n", nfc_felica_type(dev_data->felica_data.type));
     } else {
         furi_string_cat_printf(temp_str, "\e#Unknown ISO tag\n");
     }
 
-    // Set tag iso data
-    char iso_type = FURI_BIT(nfc_data->a_data.sak, 5) ? '4' : '3';
-    furi_string_cat_printf(temp_str, "ISO 14443-%c (NFC-A)\n", iso_type);
-    furi_string_cat_printf(temp_str, "UID:");
-    for(size_t i = 0; i < nfc_data->uid_len; i++) {
-        furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
+    // Set tag general data
+    if(type == FuriHalNfcTypeF) {
+        // Set NFC-F data
+        furi_string_cat_printf(temp_str, "ISO 18092 (NFC-F)\n");
+        furi_string_cat_printf(temp_str, "CIN:");
+        // NFC-F Card Identification Number (CIN) starts at "UID" byte 2.
+        for(size_t i = 2; i < nfc_data->uid_len; i++) {
+            furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
+        }
+        // The first 2 bytes of the "UID" are Manufacturer Code (MC)
+        furi_string_cat_printf(
+            temp_str,
+            "\nMC: %02X %02X  ROM: %02X  IC: %02X\n\n",
+            nfc_data->uid[0],
+            nfc_data->uid[1],
+            nfc_data->f_data.pmm[0],
+            nfc_data->f_data.pmm[1]);
+
+        furi_string_cat_printf(temp_str, "Timings (1 node/blk):\n");
+        furi_string_cat_printf(
+            temp_str,
+            "- ReqSvc: %" PRIuLEAST32 "us\n",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[2], 1));
+        furi_string_cat_printf(
+            temp_str,
+            "- Fixed: %" PRIuLEAST32 "us\n",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[3], 0));
+        furi_string_cat_printf(
+            temp_str,
+            "- Auth1: %" PRIuLEAST32 "us\n",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[4], 1));
+        furi_string_cat_printf(
+            temp_str,
+            "- Auth2: %" PRIuLEAST32 "us\n",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[4], 0));
+        furi_string_cat_printf(
+            temp_str,
+            "- Read: %" PRIuLEAST32 "us\n",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[5], 1));
+        furi_string_cat_printf(
+            temp_str,
+            "- Write: %" PRIuLEAST32 "us\n",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[6], 1));
+        furi_string_cat_printf(
+            temp_str,
+            "- Other: %" PRIuLEAST32 "us\n\n",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[7], 0));
+
+        furi_string_cat_printf(temp_str, "IDm:");
+        for(size_t i = 0; i < nfc_data->uid_len; i++) {
+            furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
+        }
+        furi_string_cat_printf(temp_str, "\nPMm:");
+        for(size_t i = 0; i < sizeof(nfc_data->f_data.pmm); i++) {
+            furi_string_cat_printf(temp_str, " %02X", nfc_data->f_data.pmm[i]);
+        }
+    } else { // FuriHalNfcTypeA
+        // Set tag iso data
+        char iso_type = FURI_BIT(nfc_data->a_data.sak, 5) ? '4' : '3';
+        furi_string_cat_printf(temp_str, "ISO 14443-%c (NFC-A)\n", iso_type);
+        furi_string_cat_printf(temp_str, "UID:");
+        for(size_t i = 0; i < nfc_data->uid_len; i++) {
+            furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
+        }
+        furi_string_cat_printf(
+            temp_str, "\nATQA: %02X %02X ", nfc_data->a_data.atqa[1], nfc_data->a_data.atqa[0]);
+        furi_string_cat_printf(temp_str, " SAK: %02X", nfc_data->a_data.sak);
     }
-    furi_string_cat_printf(
-        temp_str, "\nATQA: %02X %02X ", nfc_data->a_data.atqa[1], nfc_data->a_data.atqa[0]);
-    furi_string_cat_printf(temp_str, " SAK: %02X", nfc_data->a_data.sak);
 
     // Set application specific data
     if(protocol == NfcDeviceProtocolMifareDesfire) {
