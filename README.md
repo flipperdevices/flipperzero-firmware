@@ -2,4 +2,5 @@
 
 **Get started:** [wiki/First-steps](https://github.com/eried/flipperzero-mayhem/wiki/First-steps)
 
-![image](https://user-images.githubusercontent.com/1091420/219699372-189b8b39-74ec-4bdc-a0cd-042887992f68.png)
+![IMG_20230310_205705](https://user-images.githubusercontent.com/1091420/224445146-91255a49-c85f-4463-8a26-70887bbac381.jpg)
+
