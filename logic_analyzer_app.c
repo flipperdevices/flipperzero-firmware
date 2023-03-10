@@ -213,7 +213,6 @@ static int32_t capture_thread_worker(void* context) {
                     furi_message_queue_put(app->event_queue, &event, 100);
                 }
             }
-            //furi_delay_us(1);
         } else {
             prev_levels = app->current_levels;
             app->capture_pos = 0;
