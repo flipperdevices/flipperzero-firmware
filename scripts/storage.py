@@ -119,25 +119,18 @@ class Main(App):
         self.logger.debug(f'Reading "{self.args.flipper_path}"')
         with FlipperStorage(self._get_port()) as storage:
             data = storage.read_file(self.args.flipper_path)
-            if not data:
-                self.logger.error(f"Error: {storage.last_error}")
-            else:
-                try:
-                    print("Text data:")
-                    print(data.decode())
-                except:
-                    print("Binary hexadecimal data:")
-                    print(binascii.hexlify(data).decode())
+            try:
+                print("Text data:")
+                print(data.decode())
+            except:
+                print("Binary hexadecimal data:")
+                print(binascii.hexlify(data).decode())
 
     @WrapStorageOp
     def size(self):
         self.logger.debug(f'Getting size of "{self.args.flipper_path}"')
         with FlipperStorage(self._get_port()) as storage:
-            size = storage.size(self.args.flipper_path)
-            if size < 0:
-                self.logger.error(f"Error: {storage.last_error}")
-            else:
-                print(size)
+            print(storage.size(self.args.flipper_path))
 
     @WrapStorageOp
     def list(self):
