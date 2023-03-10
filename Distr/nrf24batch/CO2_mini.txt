@@ -44,6 +44,9 @@ W: CO2 correct=,7,0x82
 R: FanLSB[10]=i:9#
 W: FanLSB=,i:9
 
+R: Send pause=19
+W: Send pause=,19
+
 W: Reset=,RESET,0xC1
 
 RBatch: Settings: ID;RxAddr;Ch;Send period;CO2 threshold;CO2 correct;FanLSB;nRF RETR;OSCCAL
@@ -51,5 +54,6 @@ RBatch: Settings: ID;RxAddr;Ch;Send period;CO2 threshold;CO2 correct;FanLSB;nRF 
 WBatch: Default: RxAddr=0xCF;Ch=122;Send period=30;CO2 threshold=1000;CO2 correct=0;FanLSB={0xC1,0};nRF RETR=0x17;Reset
 WBatch: CO2: CO2 threshold=1000;CO2 correct=0
 WBatch: Fan2: FanLSB={0xC1,0,0,0,0,0,0};Reset
-WBatch: RETR: nRF RETR=0x0F;Reset
+WBatch: RETR: nRF RETR=0x2F;Reset
+WBatch: Send pause: Send pause=30
 WBatch: Reset: Reset

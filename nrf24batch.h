@@ -7,6 +7,8 @@
 #include <gui/modules/dialog_ex.h>
 #include <toolbox/stream/file_stream.h>
 #include <notification/notification_messages.h>
+#include <power/power_service/power.h>
+#include <power/power_service/power_i.h>
 
 typedef enum {
 	EventTypeTick,
@@ -19,16 +21,13 @@ typedef struct {
 } PluginEvent;
 
 typedef struct {
-	int x;
-	int y;
+	FuriMutex* mutex;
 } PluginState;
 
 typedef struct {
     Gui* gui;
-    FuriMessageQueue* event_queue;
-    PluginState* plugin_state;
-    ViewPort* view_port;
 	Storage* storage;
 	NotificationApp* notification;
+	PluginState* plugin_state;
 } nRF24Batch;
 

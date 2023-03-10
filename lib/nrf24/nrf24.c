@@ -215,9 +215,9 @@ uint8_t nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* re
         memcpy(packet, &buf[1], packet_size);
         nrf24_write_reg(handle, REG_STATUS, RX_DR); // clear RX_DR
     }
-    // if(status & (TX_DS | MAX_RT)) { // MAX_RT, TX_DS
-    //     nrf24_write_reg(handle, REG_STATUS, (TX_DS | MAX_RT)); // clear RX_DR, MAX_RT.
-    // }
+    if(status & (MAX_RT)) { // MAX_RT
+        nrf24_write_reg(handle, REG_STATUS, (MAX_RT)); // clear MAX_RT.
+    }
 
     *ret_packetsize = packet_size;
     return status;
