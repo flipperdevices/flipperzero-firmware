@@ -55,7 +55,6 @@ AvrIspProg* avr_isp_prog_init(AvrIspSpiSwSpeed spi_speed) {
 
 void avr_isp_prog_free(AvrIspProg* instance) {
     furi_assert(instance);
-
     furi_stream_buffer_free(instance->stream_tx);
     furi_stream_buffer_free(instance->stream_rx);
     free(instance->cfg);
@@ -88,6 +87,7 @@ size_t avr_isp_prog_tx(AvrIspProg* instance, uint8_t* data, size_t max_len) {
 }
 
 void avr_isp_prog_exit(AvrIspProg* instance) {
+    furi_assert(instance);
     instance->exit = true;
 }
 
@@ -99,7 +99,7 @@ static bool avr_isp_prog_tx_ch(AvrIspProg* instance, uint8_t data) {
 
 static uint8_t avr_isp_prog_getch(AvrIspProg* instance) {
     furi_assert(instance);
-    //ToDo !!!!!!!!!!!!!!!
+    //ToDo can be optimized
     while(!furi_stream_buffer_bytes_available(instance->stream_rx)) {
         furi_delay_ms(5);
         if(instance->exit) break;
@@ -124,13 +124,17 @@ static void avr_isp_prog_reset_target(AvrIspProg* instance, bool reset) {
                                                                                            false);
 }
 
-static uint8_t
-    avr_isp_prog_spi_transaction(AvrIspProg* instance, uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
+static uint8_t avr_isp_prog_spi_transaction(
+    AvrIspProg* instance,
+    uint8_t cmd,
+    uint8_t addr_hi,
+    uint8_t addr_lo,
+    uint8_t data) {
     furi_assert(instance);
-    avr_isp_spi_sw_txrx(instance->spi, a);
-    avr_isp_spi_sw_txrx(instance->spi, b);
-    avr_isp_spi_sw_txrx(instance->spi, c);
-    return avr_isp_spi_sw_txrx(instance->spi, d);
+    avr_isp_spi_sw_txrx(instance->spi, cmd);
+    avr_isp_spi_sw_txrx(instance->spi, addr_hi);
+    avr_isp_spi_sw_txrx(instance->spi, addr_lo);
+    return avr_isp_spi_sw_txrx(instance->spi, data);
 }
 
 static void avr_isp_prog_empty_reply(AvrIspProg* instance) {
@@ -168,7 +172,7 @@ static void avr_isp_prog_get_version(AvrIspProg* instance, uint8_t data) {
     case STK_SW_MINOR:
         avr_isp_prog_breply(instance, AVR_ISP_SWMIN);
         break;
-    case AVP_ISP_GET_CONNECT_TYPE:
+    case AVP_ISP_CONNECT_TYPE:
         avr_isp_prog_breply(instance, AVP_ISP_SERIAL_CONNECT_TYPE);
         break;
     default:
@@ -208,6 +212,16 @@ static bool
     avr_isp_spi_sw_txrx(instance->spi, d);
     return res == 0x53;
 }
+
+static void avr_isp_prog_end_pmode(AvrIspProg* instance) {
+    furi_assert(instance);
+    avr_isp_prog_reset_target(instance, false);
+    // We're about to take the target out of reset
+    // so configure SPI pins as input
+    if(instance->spi) avr_isp_spi_sw_free(instance->spi);
+    instance->pmode = false;
+}
+
 static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
     furi_assert(instance);
     // Reset target before driving PIN_SCK or PIN_MOSI
@@ -226,33 +240,26 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
     // Pulse RESET after PIN_SCK is low:
     avr_isp_spi_sw_sck_set(instance->spi, false);
 
-    furi_delay_ms(20); // discharge PIN_SCK, value arbitrally chosen
+    // discharge PIN_SCK, value arbitrally chosen
+    furi_delay_ms(20);
     avr_isp_prog_reset_target(instance, false);
 
     // Pulse must be minimum 2 target CPU speed cycles
     // so 100 usec is ok for CPU speeds above 20KHz
-    //furi_delay_us(100);
     furi_delay_ms(1);
 
     avr_isp_prog_reset_target(instance, true);
 
     // Send the enable programming command:
-    furi_delay_ms(50); // datasheet: must be > 20 msec
-     //if(avr_isp_prog_set_pmode(instance, 0xAC, 0x53, 0x00, 0x00)) {
+    // datasheet: must be > 20 msec
+    furi_delay_ms(50);
     if(avr_isp_prog_set_pmode(instance, AVR_ISP_SET_PMODE)) {
         instance->pmode = true;
         return true;
+    } else {
+        avr_isp_prog_end_pmode(instance);
     }
     return false;
-}
-
-static void avr_isp_prog_end_pmode(AvrIspProg* instance) {
-    furi_assert(instance);
-    avr_isp_prog_reset_target(instance, false);
-    // We're about to take the target out of reset
-    // so configure SPI pins as input
-    avr_isp_spi_sw_free(instance->spi);
-    instance->pmode = false;
 }
 
 static void avr_isp_prog_universal(AvrIspProg* instance) {
@@ -265,38 +272,38 @@ static void avr_isp_prog_universal(AvrIspProg* instance) {
     avr_isp_prog_breply(instance, data);
 }
 
-static void avr_isp_prog_flash(AvrIspProg* instance, uint8_t hilo, uint16_t addr, uint8_t data) {
-    avr_isp_prog_spi_transaction(instance, 0x40 + 8 * hilo, addr >> 8 & 0xFF, addr & 0xFF, data);
-}
-
 static void avr_isp_prog_commit(AvrIspProg* instance, uint16_t addr) {
-    // if(PROG_FLICKER) {
-    //     prog_lamp(0);
-    // }
-    avr_isp_prog_spi_transaction(instance, 0x4C, (addr >> 8) & 0xFF, addr & 0xFF, 0);
-    // if(PROG_FLICKER) {
-    //     delay(PTIME);
-    //     prog_lamp(1);
-    // }
+    furi_assert(instance);
+    avr_isp_prog_spi_transaction(instance, AVR_ISP_COMMIT(addr));
 }
 
 static uint16_t avr_isp_prog_current_page(AvrIspProg* instance) {
-    if(instance->cfg->pagesize == 32) {
-        return instance->addr & 0xFFFFFFF0;
+    furi_assert(instance);
+    uint16_t page = 0;
+    switch(instance->cfg->pagesize) {
+    case 32:
+        page = instance->addr & 0xFFFFFFF0;
+        break;
+    case 64:
+        page = instance->addr & 0xFFFFFFE0;
+        break;
+    case 128:
+        page = instance->addr & 0xFFFFFFC0;
+        break;
+    case 256:
+        page = instance->addr & 0xFFFFFF80;
+        break;
+
+    default:
+        page = instance->addr;
+        break;
     }
-    if(instance->cfg->pagesize == 64) {
-        return instance->addr & 0xFFFFFFE0;
-    }
-    if(instance->cfg->pagesize == 128) {
-        return instance->addr & 0xFFFFFFC0;
-    }
-    if(instance->cfg->pagesize == 256) {
-        return instance->addr & 0xFFFFFF80;
-    }
-    return instance->addr;
+
+    return page;
 }
 
 static uint8_t avr_isp_prog_write_flash_pages(AvrIspProg* instance, size_t length) {
+    furi_assert(instance);
     size_t x = 0;
     uint16_t page = avr_isp_prog_current_page(instance);
     while(x < length) {
@@ -304,8 +311,11 @@ static uint8_t avr_isp_prog_write_flash_pages(AvrIspProg* instance, size_t lengt
             avr_isp_prog_commit(instance, page);
             page = avr_isp_prog_current_page(instance);
         }
-        avr_isp_prog_flash(instance, 0, instance->addr, instance->buff[x++]);
-        avr_isp_prog_flash(instance, 1, instance->addr, instance->buff[x++]);
+        avr_isp_prog_spi_transaction(
+            instance, AVR_ISP_WRITE_FLASH_LO(instance->addr, instance->buff[x++]));
+
+        avr_isp_prog_spi_transaction(
+            instance, AVR_ISP_WRITE_FLASH_HI(instance->addr, instance->buff[x++]));
         instance->addr++;
     }
 
@@ -315,6 +325,7 @@ static uint8_t avr_isp_prog_write_flash_pages(AvrIspProg* instance, size_t lengt
 }
 
 static void avr_isp_prog_write_flash(AvrIspProg* instance, size_t length) {
+    furi_assert(instance);
     avr_isp_prog_fill(instance, length);
     if(avr_isp_prog_getch(instance) == CRC_EOP) {
         avr_isp_prog_tx_ch(instance, STK_INSYNC);
@@ -328,21 +339,20 @@ static void avr_isp_prog_write_flash(AvrIspProg* instance, size_t length) {
 // write (length) bytes, (start) is a byte address
 static uint8_t
     avr_isp_prog_write_eeprom_chunk(AvrIspProg* instance, uint16_t start, uint16_t length) {
+    furi_assert(instance);
     // this writes byte-by-byte,
     // page writing may be faster (4 bytes at a time)
     avr_isp_prog_fill(instance, length);
-    //prog_lamp(0);
     for(uint16_t x = 0; x < length; x++) {
         uint16_t addr = start + x;
-        avr_isp_prog_spi_transaction(
-            instance, 0xC0, (addr >> 8) & 0xFF, addr & 0xFF, instance->buff[x]);
+        avr_isp_prog_spi_transaction(instance, AVR_ISP_WRITE_EEROM(addr, instance->buff[x]));
         furi_delay_ms(45);
     }
-    //prog_lamp(1);
     return STK_OK;
 }
 
 static uint8_t avr_isp_prog_write_eeprom(AvrIspProg* instance, size_t length) {
+    furi_assert(instance);
     // here is a word address, get the byte address
     uint16_t start = instance->addr * 2;
     uint16_t remaining = length;
@@ -350,16 +360,17 @@ static uint8_t avr_isp_prog_write_eeprom(AvrIspProg* instance, size_t length) {
         instance->error++;
         return STK_FAILED;
     }
-    while(remaining > EECHUNK) {
-        avr_isp_prog_write_eeprom_chunk(instance, start, EECHUNK);
-        start += EECHUNK;
-        remaining -= EECHUNK;
+    while(remaining > AVR_ISP_EECHUNK) {
+        avr_isp_prog_write_eeprom_chunk(instance, start, AVR_ISP_EECHUNK);
+        start += AVR_ISP_EECHUNK;
+        remaining -= AVR_ISP_EECHUNK;
     }
     avr_isp_prog_write_eeprom_chunk(instance, start, remaining);
     return STK_OK;
 }
 
 static void avr_isp_prog_program_page(AvrIspProg* instance) {
+    furi_assert(instance);
     uint8_t result = STK_FAILED;
     uint16_t length = avr_isp_prog_getch(instance) << 8 | avr_isp_prog_getch(instance);
     uint8_t memtype = avr_isp_prog_getch(instance);
@@ -384,33 +395,34 @@ static void avr_isp_prog_program_page(AvrIspProg* instance) {
     return;
 }
 
-static uint8_t avr_isp_prog_flash_read(AvrIspProg* instance, uint8_t hilo, uint16_t addr) {
-    return avr_isp_prog_spi_transaction(
-        instance, 0x20 + hilo * 8, (addr >> 8) & 0xFF, addr & 0xFF, 0);
-}
-
 static uint8_t avr_isp_prog_flash_read_page(AvrIspProg* instance, uint16_t length) {
+    furi_assert(instance);
     for(uint16_t x = 0; x < length; x += 2) {
-        avr_isp_prog_tx_ch(instance, avr_isp_prog_flash_read(instance, 0, instance->addr));
-        avr_isp_prog_tx_ch(instance, avr_isp_prog_flash_read(instance, 1, instance->addr));
+        avr_isp_prog_tx_ch(
+            instance,
+            avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_FLASH_LO(instance->addr)));
+        avr_isp_prog_tx_ch(
+            instance,
+            avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_FLASH_HI(instance->addr)));
         instance->addr++;
     }
     return STK_OK;
 }
 
 static uint8_t avr_isp_prog_eeprom_read_page(AvrIspProg* instance, uint16_t length) {
+    furi_assert(instance);
     // here again we have a word address
     uint16_t start = instance->addr * 2;
     for(uint16_t x = 0; x < length; x++) {
         uint16_t addr = start + x;
         avr_isp_prog_tx_ch(
-            instance,
-            avr_isp_prog_spi_transaction(instance, 0xA0, (addr >> 8) & 0xFF, addr & 0xFF, 0xFF));
+            instance, avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_EEROM(addr)));
     }
     return STK_OK;
 }
 
 static void avr_isp_prog_read_page(AvrIspProg* instance) {
+    furi_assert(instance);
     uint8_t result = STK_FAILED;
     uint16_t length = avr_isp_prog_getch(instance) << 8 | avr_isp_prog_getch(instance);
     uint8_t memtype = avr_isp_prog_getch(instance);
@@ -426,6 +438,7 @@ static void avr_isp_prog_read_page(AvrIspProg* instance) {
 }
 
 static void avr_isp_prog_read_signature(AvrIspProg* instance) {
+    furi_assert(instance);
     if(avr_isp_prog_getch(instance) != CRC_EOP) {
         instance->error++;
         avr_isp_prog_tx_ch(instance, STK_NOSYNC);
@@ -433,14 +446,15 @@ static void avr_isp_prog_read_signature(AvrIspProg* instance) {
     }
     avr_isp_prog_tx_ch(instance, STK_INSYNC);
 
-    avr_isp_prog_tx_ch(instance, avr_isp_prog_spi_transaction(instance, 0x30, 0x00, 0x00, 0x00));
-    avr_isp_prog_tx_ch(instance, avr_isp_prog_spi_transaction(instance, 0x30, 0x00, 0x01, 0x00));
-    avr_isp_prog_tx_ch(instance, avr_isp_prog_spi_transaction(instance, 0x30, 0x00, 0x02, 0x00));
+    avr_isp_prog_tx_ch(instance, avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_VENDOR));
+    avr_isp_prog_tx_ch(instance, avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_PART_FAMILY));
+    avr_isp_prog_tx_ch(instance, avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_PART_NUMBER));
 
     avr_isp_prog_tx_ch(instance, STK_OK);
 }
 
 void avr_isp_prog_avrisp(AvrIspProg* instance) {
+    furi_assert(instance);
     uint8_t ch = avr_isp_prog_getch(instance);
     switch(ch) {
     case STK_GET_SYNC:
@@ -483,8 +497,6 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
         break;
     case STK_LOAD_ADDRESS:
         instance->addr = avr_isp_prog_getch(instance) | avr_isp_prog_getch(instance) << 8;
-        // instance->addr = avr_isp_prog_getch(instance);
-        // instance->addr += 256 * avr_isp_prog_getch(instance);
         avr_isp_prog_empty_reply(instance);
         break;
 

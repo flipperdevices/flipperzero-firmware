@@ -1,14 +1,32 @@
 #pragma once
 
-// https://www.microchip.com/content/dam/mchp/documents/OTH/ApplicationNotes/ApplicationNotes/doc2525.pdf
-
+// http://ww1.microchip.com/downloads/en/appnotes/atmel-0943-in-system-programming_applicationnote_avr910.pdf
+// AVR ISP Definitions
 #define AVR_ISP_HWVER 0X02
 #define AVR_ISP_SWMAJ 0X01
 #define AVR_ISP_SWMIN 0X12
 #define AVP_ISP_SERIAL_CONNECT_TYPE 0X53
-#define AVP_ISP_GET_CONNECT_TYPE 0x93
+#define AVP_ISP_CONNECT_TYPE 0x93
 #define AVR_ISP_RESP_0 0X00
 
+#define AVR_ISP_SET_PMODE 0xAC, 0x53, 0x00, 0x00
+#define AVR_ISP_READ_VENDOR 0x30, 0x00, 0x00, 0x00
+#define AVR_ISP_READ_PART_FAMILY 0x30, 0x00, 0x01, 0x00
+#define AVR_ISP_READ_PART_NUMBER 0x30, 0x00, 0x02, 0x00
+
+#define AVR_ISP_WRITE_FLASH_LO(add, data) 0x40, (add >> 8) & 0xFF, add & 0xFF, data
+#define AVR_ISP_WRITE_FLASH_HI(add, data) 0x48, (add >> 8) & 0xFF, add & 0xFF, data
+#define AVR_ISP_READ_FLASH_LO(add) 0x20, (add >> 8) & 0xFF, add & 0xFF, 0x00
+#define AVR_ISP_READ_FLASH_HI(add) 0x28, (add >> 8) & 0xFF, add & 0xFF, 0x00
+
+#define AVR_ISP_WRITE_EEROM(add, data) 0xC0, (add >> 8) & 0xFF, add & 0xFF, data
+#define AVR_ISP_READ_EEROM(add) 0xA0, (add >> 8) & 0xFF, add & 0xFF, 0xFF
+
+#define AVR_ISP_COMMIT(add) 0x4C, (add >> 8) & 0xFF, add & 0xFF, 0x00
+
+#define AVR_ISP_EECHUNK 0x20
+
+// https://www.microchip.com/content/dam/mchp/documents/OTH/ApplicationNotes/ApplicationNotes/doc2525.pdf
 // STK Definitions
 #define STK_OK 0x10
 #define STK_FAILED 0x11
@@ -60,7 +78,3 @@
 
 #define STK_SET_EEROM_TYPE 0X45
 #define STK_SET_FLASH_TYPE 0X46
-
-#define EECHUNK (32)
-
-#define AVR_ISP_SET_PMODE 0xAC, 0x53, 0x00, 0x00

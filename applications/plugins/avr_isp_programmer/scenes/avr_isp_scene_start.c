@@ -17,7 +17,7 @@ void avr_isp_scene_start_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Avr Isp Programmer",
+        "AVR ISP Programmer",
         SubmenuIndexAvrIspProgrammer,
         avr_isp_scene_start_submenu_callback,
         app);

@@ -11,4 +11,9 @@ App(
     fap_icon="avr_isp.png",
     fap_category="GPIO",
     fap_icon_assets="images",
+    fap_private_libs=[
+        Lib(
+            name="driver",
+        ),
+    ],
 )

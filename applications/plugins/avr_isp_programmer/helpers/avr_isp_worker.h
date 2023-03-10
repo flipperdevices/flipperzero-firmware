@@ -5,20 +5,6 @@
 
 typedef struct AvrIspWorker AvrIspWorker;
 
-typedef struct {
-    uint8_t vcp_ch;
-    // uint8_t uart_ch;
-    // uint8_t flow_pins;
-    // uint8_t baudrate_mode;
-    uint32_t baudrate;
-} AvrIspWorkerUsbConfig;
-
-// typedef void (*AvrIspWorkerCallback)(
-//     void* context,
-//     uint32_t frequency,
-//     float rssi,
-//     bool signal);
-
 /** Allocate AvrIspWorker
  * 
  * @param context AvrIsp* context

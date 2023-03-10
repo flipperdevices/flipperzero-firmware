@@ -20,7 +20,7 @@ void avr_isp_scene_about_on_enter(void* context) {
     furi_string_cat_printf(temp_str, "Github: %s\n\n", AVR_ISP_GITHUB);
 
     furi_string_cat_printf(temp_str, "\e#%s\n", "Description");
-    furi_string_cat_printf(temp_str, "Avr Isp Programmer\nBla Bla Bla\nbla bla bla\n\n");
+    furi_string_cat_printf(temp_str, "AVR ISP Programmer\nBla Bla Bla\nbla bla bla\n\n");
 
     furi_string_cat_printf(temp_str, "Supported protocols:\n");
 
@@ -42,7 +42,7 @@ void avr_isp_scene_about_on_enter(void* context) {
         14,
         AlignCenter,
         AlignBottom,
-        "\e#\e!     Avr Isp Programmer   \e!\n",
+        "\e#\e!      AVR ISP Programmer    \e!\n",
         false);
     widget_add_text_scroll_element(app->widget, 0, 16, 128, 50, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);
