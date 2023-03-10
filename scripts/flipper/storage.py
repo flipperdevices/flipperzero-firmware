@@ -307,7 +307,6 @@ class FlipperStorage:
                 )
             )
             return size
-
         raise FlipperStorageException("Not a file")
 
     def mkdir(self, path: str):
@@ -315,7 +314,6 @@ class FlipperStorage:
         self.send_and_wait_eol('storage mkdir "' + path + '"\r')
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
-
         self._check_no_error(response)
 
     def format_ext(self):
@@ -324,7 +322,6 @@ class FlipperStorage:
         self.send_and_wait_eol("y\r")
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
-
         self._check_no_error(response)
 
     def remove(self, path: str):
@@ -332,7 +329,6 @@ class FlipperStorage:
         self.send_and_wait_eol('storage remove "' + path + '"\r')
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
-
         self._check_no_error(response)
 
     def hash_local(self, filename: str):
@@ -348,13 +344,13 @@ class FlipperStorage:
         self.send_and_wait_eol('storage md5 "' + filename + '"\r')
         hash = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
-
         self._check_no_error(hash)
         return hash.decode("ascii")
 
 
 class FlipperStorageException(Exception):
-    pass
+    def __init__(self, message):
+        super().__init__(f"Storage error: {message}")
 
 
 class FlipperStorageOperations:

@@ -12,6 +12,7 @@ from SCons.Action import Action
 from SCons.Builder import Builder
 from SCons.Errors import UserError
 from SCons.Node import NodeList
+from SCons.Node.FS import File, Entry
 
 from fbt.appmanifest import FlipperApplication, FlipperAppType, FlipperManifestException
 from fbt.elfmanifest import assemble_manifest_data
@@ -23,9 +24,9 @@ from fbt.util import extract_abs_dir_path
 @dataclass
 class FlipperExternalAppInfo:
     app: FlipperApplication
-    compact: NodeList = field(default_factory=NodeList)
-    debug: NodeList = field(default_factory=NodeList)
-    validator: NodeList = field(default_factory=NodeList)
+    compact: Optional[File] = None
+    debug: Optional[File] = None
+    validator: Optional[Entry] = None
     # List of tuples (dist_to_sd, path)
     dist_entries: list[tuple[bool, str]] = field(default_factory=list)
 
@@ -151,20 +152,22 @@ class AppBuilder:
             os.path.join(self.ext_apps_work_dir, f"{self.app.appid}_d"),
             app_sources,
             APP_ENTRY=self.app.entry_point,
-        )
+        )[0]
 
         app_artifacts.compact = self.app_env.EmbedAppMetadata(
             os.path.join(self.ext_apps_work_dir, self.app.appid),
             app_artifacts.debug,
             APP=self.app,
-        )
+        )[0]
 
-        app_artifacts.validator = self.app_env.ValidateAppImports(app_artifacts.compact)
+        app_artifacts.validator = self.app_env.ValidateAppImports(
+            app_artifacts.compact
+        )[0]
 
         if self.app.apptype == FlipperAppType.PLUGIN:
             for parent_app_id in self.app.requires:
                 fal_path = (
-                    f"apps_data/{parent_app_id}/plugins/{app_artifacts.compact[0].name}"
+                    f"apps_data/{parent_app_id}/plugins/{app_artifacts.compact.name}"
                 )
                 deployable = True
                 # If it's a plugin for a non-deployable app, don't include it in the resources
@@ -173,13 +176,12 @@ class AppBuilder:
                         deployable = False
                 app_artifacts.dist_entries.append((deployable, fal_path))
         else:
-            fap_path = f"apps/{self.app.fap_category}/{app_artifacts.compact[0].name}"
+            fap_path = f"apps/{self.app.fap_category}/{app_artifacts.compact.name}"
             app_artifacts.dist_entries.append(
                 (self.app.is_default_deployable, fap_path)
             )
 
         self._configure_deps_and_aliases(app_artifacts)
-
         return app_artifacts
 
     def _configure_deps_and_aliases(self, app_artifacts: FlipperExternalAppInfo):
@@ -310,7 +312,7 @@ def resources_fap_dist_emitter(target, source, env):
         for _, dist_path in filter(
             lambda dist_entry: dist_entry[0], app_artifacts.dist_entries
         ):
-            source.extend(app_artifacts.compact)
+            source.append(app_artifacts.compact)
             target.append(resources_root.File(dist_path))
 
     return (target, source)
@@ -424,7 +426,7 @@ def generate(env, **kw):
                 generator=generate_embed_app_metadata_actions,
                 suffix=".fap",
                 src_suffix=".elf",
-                # emitter=embed_app_metadata_emitter,
+                emitter=embed_app_metadata_emitter,
             ),
             "ValidateAppImports": Builder(
                 action=[
