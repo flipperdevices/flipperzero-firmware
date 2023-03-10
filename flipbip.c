@@ -1,4 +1,8 @@
 #include "flipbip.h"
+#include "crypto/memzero.h"
+#include "crypto/bip39.h"
+#include "helpers/flipbip_file.h"
+#include "helpers/flipbip_haptic.h"
 
 bool flipbip_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -17,6 +21,63 @@ bool flipbip_navigation_event_callback(void* context) {
     furi_assert(context);
     FlipBip* app = context;
     return scene_manager_handle_back_event(app->scene_manager);
+}
+
+static void text_input_callback(void* context) {
+    furi_assert(context);
+    FlipBip* app = context;
+    bool handled = false;
+
+    // check that there is text in the input
+    if(strlen(app->input_text) > 0) {
+        if(app->input_state == FlipBipTextInputPassphrase) {
+            if(app->passphrase == FlipBipPassphraseOn) {
+                strcpy(app->passphrase_text, app->input_text);
+            }
+            // clear input text
+            memzero(app->input_text, TEXT_BUFFER_SIZE);
+            // reset input state
+            app->input_state = FlipBipTextInputDefault;
+            handled = true;
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdSettings);
+        } else if(app->input_state == FlipBipTextInputMnemonic) {
+            if(app->import_from_mnemonic == 1) {
+                strcpy(app->import_mnemonic_text, app->input_text);
+
+                int status = FlipBipStatusSuccess;
+                // Check if the mnemonic is valid
+                if(mnemonic_check(app->import_mnemonic_text) == 0)
+                    status = FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
+                // Save the mnemonic to persistent storage
+                else if(!flipbip_save_settings_secure(app->import_mnemonic_text))
+                    status = FlipBipStatusSaveError; // 12 = save error
+
+                if(status == FlipBipStatusSuccess) {
+                    //notification_message(app->notification, &sequence_blink_cyan_100);
+                    flipbip_play_happy_bump(app);
+                } else {
+                    //notification_message(app->notification, &sequence_blink_red_100);
+                    flipbip_play_long_bump(app);
+                }
+
+                memzero(app->import_mnemonic_text, TEXT_BUFFER_SIZE);
+            }
+            // clear input text
+            memzero(app->input_text, TEXT_BUFFER_SIZE);
+            // reset input state
+            app->input_state = FlipBipTextInputDefault;
+            handled = true;
+            view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
+        }
+    }
+
+    if(!handled) {
+        // clear input text
+        memzero(app->input_text, TEXT_BUFFER_SIZE);
+        // reset input state
+        app->input_state = FlipBipTextInputDefault;
+        view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdMenu);
+    }
 }
 
 FlipBip* flipbip_app_alloc() {
@@ -41,11 +102,18 @@ FlipBip* flipbip_app_alloc() {
     app->submenu = submenu_alloc();
 
     // Settings
-    app->haptic = 1;
-    app->led = 1;
-    app->bip39_strength = 2; // 256 bits (24 words)
-    app->bip44_coin = 0; // 0 (BTC)
+    app->haptic = FlipBipHapticOn;
+    app->led = FlipBipLedOn;
+    app->bip39_strength = FlipBipStrength256; // 256 bits (24 words)
+    app->passphrase = FlipBipPassphraseOff;
+
+    // Main menu
+    app->bip44_coin = FlipBipCoinBTC0; // 0 (BTC)
     app->overwrite_saved_seed = 0;
+    app->import_from_mnemonic = 0;
+
+    // Text input
+    app->input_state = FlipBipTextInputDefault;
 
     view_dispatcher_add_view(
         app->view_dispatcher, FlipBipViewIdMenu, submenu_get_view(app->submenu));
@@ -63,6 +131,19 @@ FlipBip* flipbip_app_alloc() {
         FlipBipViewIdSettings,
         variable_item_list_get_view(app->variable_item_list));
 
+    app->text_input = text_input_alloc();
+    text_input_set_result_callback(
+        app->text_input,
+        text_input_callback,
+        (void*)app,
+        app->input_text,
+        TEXT_BUFFER_SIZE,
+        //clear default text
+        true);
+    text_input_set_header_text(app->text_input, "Input");
+    view_dispatcher_add_view(
+        app->view_dispatcher, FlipBipViewIdTextInput, text_input_get_view(app->text_input));
+
     //End Scene Additions
 
     return app;
@@ -74,11 +155,13 @@ void flipbip_app_free(FlipBip* app) {
     // Scene manager
     scene_manager_free(app->scene_manager);
 
+    text_input_free(app->text_input);
+
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdScene1);
-    // view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdScene2);
     view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdSettings);
+    view_dispatcher_remove_view(app->view_dispatcher, FlipBipViewIdTextInput);
     submenu_free(app->submenu);
 
     view_dispatcher_free(app->view_dispatcher);
@@ -88,6 +171,7 @@ void flipbip_app_free(FlipBip* app) {
     app->notification = NULL;
 
     //Remove whatever is left
+    memzero(app, sizeof(FlipBip));
     free(app);
 }
 

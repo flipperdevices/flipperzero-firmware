@@ -232,9 +232,7 @@ bool flipbip_save_settings_secure(const char* settings) {
     random_buffer(k2, FILE_KLEN / 2);
 
     // write k2 to file buffer (secured by k1)
-    for(size_t i = 0; i < (FILE_KLEN / 2); i++) {
-        flipbip_btox(k2[i], data + (i * 2));
-    }
+    flipbip_btox(k2, FILE_KLEN / 2, data);
     flipbip_cipher(k1, strlen(FILE_K1) / 2, data, data, FILE_KLEN);
 
     // seek <-- header
@@ -247,9 +245,7 @@ bool flipbip_save_settings_secure(const char* settings) {
     memzero(data, FILE_KLEN);
 
     // write settings to file buffer (secured by k2)
-    for(size_t i = 0; i < len; i++) {
-        flipbip_btox((uint8_t)settings[i], data + (i * 2));
-    }
+    flipbip_btox((uint8_t*)settings, len, data);
     flipbip_cipher(k2, FILE_KLEN / 2, data, data, FILE_SLEN);
 
     // seek <-- header

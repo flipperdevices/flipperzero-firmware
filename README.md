@@ -33,11 +33,12 @@ The application will be compiled and copied onto your device
   - Imports and some C library functions modified for compatibility with FBT
 - Navigation and UI adapted from FAP Boilerplate app
 - BIP39 mnemonic generation
-  - 24, 18, or 12 words
+  - 24, 18, or 12 words configured in settings
 - BIP39 mnemonic to BIP39 seed generation
 - Hierarchical Deterministic (HD) wallet generation from seed
   - Generation of offline `m/44'/0'/0'/0` BTC wallet
   - Generation of offline `m/44'/60'/0'/0` ETH wallet (coded from the $SPORK Castle of ETHDenver 2023!)
+  - Generation of offline `m/44'/3'/0'/0` DOGE wallet
   - Similar features to: https://iancoleman.io/bip39/
 - Saving wallets to SD card
   - Wallets are saved to SD card upon creation in `apps_data/flipbip`
@@ -48,17 +49,19 @@ The application will be compiled and copied onto your device
       - Backups of both these files `.flipbip.dat.bak` and `.flipbip.key.bak` are also maintained
       - If you want to externally back up your wallet, I recommend copying all these files, and storing the `key` and `dat` files seperately
   - NOTE: The wallets should be decently tough to crack off of a Flipper, however any Flipper with the app installed can load a wallet in the `apps_data/flipbip` directory if both the `key` and `dat` file are present
+- BIP39 passphrase support
+  - Configured in settings, not persisted between runs for security
+- Import your own mnemonic
+  - Lots of typing required but you can now use the wallet with an existing mnemonic you have saved
+  - Useful to convert paper backup to keys and receive addresses without relying on a laptop or phone
 
 ### Work in Progress
 
 - More coin types
   - Support for more custom BIP32 wallet paths
-  - Currently hardcoded to `m/44'/0'/0'/0` and `m/44'/60'/0'/0`
 
 ### (FAR) Future
 
 - Custom wallet security
   - User specified password
-- Support for BIP39 passphrase
-  - Currently blank
 - USB/Bluetooth wallet functionality
