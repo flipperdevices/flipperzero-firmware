@@ -312,6 +312,8 @@ static int flipbip_scene_1_model_init(
 
     // Check if the mnemonic key & data is already saved in persistent storage, or overwrite is true
     if(overwrite || (!flipbip_has_settings(true) && !flipbip_has_settings(false))) {
+        // Set mnemonic only mode
+        model->mnemonic_only = true;
         // Generate a random mnemonic using trezor-crypto
         const char* mnemonic_gen = mnemonic_generate(strength);
         // Check if the mnemonic is valid
@@ -322,23 +324,30 @@ static int flipbip_scene_1_model_init(
             return FlipBipStatusSaveError; // 12 = save error
         // Clear the generated mnemonic from memory
         mnemonic_clear();
-        model->mnemonic_only = true;
     }
 
     // Load the mnemonic from persistent storage
-    if(!flipbip_load_settings_secure(mnemonic)) return FlipBipStatusLoadError; // 11 = load error
+    if(!flipbip_load_settings_secure(mnemonic)) {
+        // Set mnemonic only mode for this error for memory cleanup purposes
+        model->mnemonic_only = true;
+        return FlipBipStatusLoadError; // 11 = load error
+    }
     model->mnemonic = mnemonic;
     // Check if the mnemonic is valid
-    if(mnemonic_check(model->mnemonic) == 0)
+    if(mnemonic_check(model->mnemonic) == 0) {
+        // Set mnemonic only mode for this error for memory cleanup purposes
+        model->mnemonic_only = true;
         return FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
+    }
+
+    // test return values
+    //model->mnemonic_only = true;
+    //return FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
 
     // if we are only generating the mnemonic, return
     if(model->mnemonic_only) {
         return FlipBipStatusReturn; // 10 = mnemonic only, return from parent
     }
-
-    // test mnemonic
-    //model->mnemonic = "wealth budget salt video delay obey neutral tail sure soda hold rubber joy movie boat raccoon tornado noise off inmate payment patch group topple";
 
     // Generate a BIP39 seed from the mnemonic
     mnemonic_to_seed(model->mnemonic, passphrase_text, model->seed, 0);
@@ -568,7 +577,7 @@ void flipbip_scene_1_enter(void* context) {
                 model->page = 2;
                 flipbip_play_long_bump(app);
             } else if(status == FlipBipStatusMnemonicCheckError) {
-                model->mnemonic = "ERROR:,Mnemonic check failed";
+                model->mnemonic = "ERROR:,Mnemonic check error";
                 model->page = 2;
                 flipbip_play_long_bump(app);
             }
