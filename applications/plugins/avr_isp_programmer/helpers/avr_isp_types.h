@@ -13,4 +13,3 @@ typedef enum {
     AvrIspViewProgrammer,
     AvrIspViewWidget,
 } AvrIspView;
-
