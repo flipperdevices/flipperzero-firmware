@@ -80,15 +80,16 @@ typedef struct {
     CONFIDENTIAL const char* xpub_extended;
 } FlipBipScene1Model;
 
+// Node for the receive address
 static CONFIDENTIAL HDNode* s_addr_node = NULL;
-
+// Generic display text
 static CONFIDENTIAL char* s_disp_text1 = NULL;
 static CONFIDENTIAL char* s_disp_text2 = NULL;
 static CONFIDENTIAL char* s_disp_text3 = NULL;
 static CONFIDENTIAL char* s_disp_text4 = NULL;
 static CONFIDENTIAL char* s_disp_text5 = NULL;
 static CONFIDENTIAL char* s_disp_text6 = NULL;
-
+// Derivation path text
 static const char* s_derivation_text = TEXT_DEFAULT_DERIV;
 //static bool s_busy = false;
 
@@ -196,11 +197,11 @@ static void
     flipbip_scene_1_draw_address(const HDNode* node, uint32_t addr_type, uint32_t addr_index) {
     //s_busy = true;
 
-    // buffer for address serialization
+    // Buffer for address serialization
     const size_t buflen = 40;
     char buf[40 + 1] = {0};
 
-    // use static node for address generation
+    // Use static node for address generation
     memcpy(s_addr_node, node, sizeof(HDNode));
 
     hdnode_private_ckd(s_addr_node, addr_index);
@@ -232,6 +233,9 @@ static void
         flipbip_btox((uint8_t*)buf, 20, address + 2);
         flipbip_scene_1_draw_generic(address, 12);
     }
+
+    // Clear the address node
+    memzero(s_addr_node, sizeof(HDNode));
 
     //s_busy = false;
 }
