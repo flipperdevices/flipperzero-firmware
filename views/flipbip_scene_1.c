@@ -289,8 +289,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         canvas_draw_str_aligned(canvas, receive_len, 2, AlignLeft, AlignTop, TEXT_RECEIVE_ADDRESS);
 
         // draw address number
-        unsigned char addr_num[1];
-        addr_num[0] = (unsigned char)(model->page - PAGE_ADDR_BEGIN);
+        const unsigned char addr_num[1] = {(unsigned char)(model->page - PAGE_ADDR_BEGIN)};
         char addr_num_text[3];
         flipbip_btox(addr_num, 1, addr_num_text);
         addr_num_text[0] = '/';
@@ -622,10 +621,10 @@ FlipBipScene1* flipbip_scene_1_alloc() {
     view_set_input_callback(instance->view, flipbip_scene_1_input);
     view_set_enter_callback(instance->view, flipbip_scene_1_enter);
     view_set_exit_callback(instance->view, flipbip_scene_1_exit);
-    
+
     // allocate the address node
     s_addr_node = (HDNode*)malloc(sizeof(HDNode));
-    
+
     // allocate the display text
     s_disp_text1 = (char*)malloc(30 + 1);
     s_disp_text2 = (char*)malloc(30 + 1);
@@ -646,7 +645,7 @@ void flipbip_scene_1_free(FlipBipScene1* instance) {
     // free the address node
     memzero(s_addr_node, sizeof(HDNode));
     free(s_addr_node);
-    
+
     // free the display text
     flipbip_scene_1_clear_text();
     free(s_disp_text1);
