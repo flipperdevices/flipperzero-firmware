@@ -9,6 +9,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/button_menu.h>
 #include <gui/modules/variable_item_list.h>
 #include "scenes/xremote_scene.h"
 #include "views/xremote_infoscreen.h"
@@ -23,6 +24,7 @@ typedef struct {
     NotificationApp* notification;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
+    ButtonMenu* button_menu;
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     XRemoteInfoscreen* xremote_infoscreen;
