@@ -36,22 +36,39 @@ void avr_isp_worker_detect_chip(AvrIspWorker* instance) {
     for(uint8_t i = 0; i < 3; i++) {
         avr_isp_prog_avrisp(prog);
     }
-
     size_t len = avr_isp_prog_tx(prog, buf_data, sizeof(buf_data));
     UNUSED(len);
+
+    // for(uint8_t i = 0; i < len; i++) {
+    //     FURI_LOG_I(TAG, "<-- %X", buf_data[i]);
+    // }
+
     if(buf_data[2] == STK_INSYNC && buf_data[6] == STK_OK) {
-        for(ind = 0; ind < avr_isp_chip_arr_size; ind++) {
-            if(avr_isp_chip_arr[ind].sigs[1] == buf_data[4]) {
-                if(avr_isp_chip_arr[ind].sigs[2] == buf_data[5]) {
-                    FURI_LOG_D(TAG, "Detect AVR chip = \"%s\"", avr_isp_chip_arr[ind].name);
-                    break;
+        if(buf_data[3] == 0x00) {
+            ind = avr_isp_chip_arr_size + 1; //No detect chip
+        } else {
+            for(ind = 0; ind < avr_isp_chip_arr_size; ind++) {
+                if(avr_isp_chip_arr[ind].sigs[1] == buf_data[4]) {
+                    if(avr_isp_chip_arr[ind].sigs[2] == buf_data[5]) {
+                        FURI_LOG_D(TAG, "Detect AVR chip = \"%s\"", avr_isp_chip_arr[ind].name);
+                        break;
+                    }
                 }
             }
         }
     }
     avr_isp_prog_free(prog);
-
-    if(instance->callback) instance->callback(instance->context, avr_isp_chip_arr[ind].name);
+    if(instance->callback) {
+        if(ind > avr_isp_chip_arr_size) {
+            //ToDo add output ID chip
+            instance->callback(instance->context, "No detect");
+        } else if(ind < avr_isp_chip_arr_size) {
+            instance->callback(instance->context, avr_isp_chip_arr[ind].name);
+        } else {
+            //ToDo add output ID chip
+            instance->callback(instance->context, "unknown");
+        }
+    }
 }
 
 static int32_t avr_isp_worker_prog_thread(void* context) {

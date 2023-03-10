@@ -131,6 +131,7 @@ static uint8_t avr_isp_prog_spi_transaction(
     uint8_t addr_lo,
     uint8_t data) {
     furi_assert(instance);
+
     avr_isp_spi_sw_txrx(instance->spi, cmd);
     avr_isp_spi_sw_txrx(instance->spi, addr_hi);
     avr_isp_spi_sw_txrx(instance->spi, addr_lo);
@@ -256,8 +257,6 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
     if(avr_isp_prog_set_pmode(instance, AVR_ISP_SET_PMODE)) {
         instance->pmode = true;
         return true;
-    } else {
-        avr_isp_prog_end_pmode(instance);
     }
     return false;
 }

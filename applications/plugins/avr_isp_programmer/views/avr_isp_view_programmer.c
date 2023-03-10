@@ -67,7 +67,6 @@ bool avr_asp_programmer_view_input(InputEvent* event, void* context) {
 static void avr_asp_programmer_detect_chip_callback(void* context, const char* name) {
     furi_assert(context);
     AvrIspProgrammerView* instance = context;
-    FURI_LOG_D("ssss", "%s", name);
     with_view_model(
         instance->view,
         AvrIspProgrammerViewModel * model,
