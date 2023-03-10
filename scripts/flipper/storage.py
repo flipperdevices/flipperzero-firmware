@@ -277,7 +277,7 @@ class FlipperStorage:
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
 
-        return response.find(b"Directory") != -1 or response.find(b"Storage") != -1
+        return (response.find(b"Directory") != -1) or (response.find(b"Storage,") != -1)
 
     def exist_file(self, path: str):
         """Does file exist on Flipper"""

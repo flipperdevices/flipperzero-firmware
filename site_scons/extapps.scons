@@ -112,15 +112,16 @@ extapps.resources_dist = appenv.FapDist(appenv["RESOURCES_ROOT"], [])
 
 if appsrc := appenv.subst("$APPSRC"):
     app_artifacts = appenv.GetExtAppFromPath(appsrc)
-    print(app_artifacts)
+    ext_dist_args = ""
     if app_artifacts.app.apptype == FlipperAppType.PLUGIN:
-        print("PLUGIN!")
+        ext_dist_args = "--no-launch"
 
     appenv.PhonyTarget(
         "launch_app",
-        '${PYTHON3} "${APP_RUN_SCRIPT}" "${SOURCE}" --fap_dst_dir "/ext/${EXT_DIST_PATH}"',
+        '${PYTHON3} "${APP_RUN_SCRIPT}" ${EXT_DIST_ARGS} "${SOURCE}" --fap_dst_dir "/ext/${EXT_DIST_PATH}"',
         source=app_artifacts.compact,
         EXT_DIST_PATH=dirname(app_artifacts.dist_entries[0][1]),
+        EXT_DIST_ARGS=ext_dist_args,
     )
     appenv.Alias("launch_app", app_artifacts.validator)
 
