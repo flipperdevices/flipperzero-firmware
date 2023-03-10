@@ -1,0 +1,5 @@
+ADD_SCENE(xremote, infoscreen, Infoscreen)
+ADD_SCENE(xremote, menu, Menu)
+ADD_SCENE(xremote, scene_1, Scene_1)
+ADD_SCENE(xremote, scene_2, Scene_2)
+ADD_SCENE(xremote, settings, Settings)
