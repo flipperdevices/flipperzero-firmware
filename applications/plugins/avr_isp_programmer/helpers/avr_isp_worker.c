@@ -1,6 +1,7 @@
 #include "avr_isp_worker.h"
 #include "avr_isp_prog.h"
 #include "avr_isp_spi_sw.h"
+#include "avr_isp_chip_arr.h"
 
 #include <furi.h>
 #include "usb_cdc.h"
@@ -150,6 +151,15 @@ static int32_t avr_isp_worker_thread(void* context) {
     UNUSED(instance);
     uint8_t buf[AVR_ISP_VCP_UART_RX_BUF_SIZE];
 
+    // for(size_t i = 0; i < 372; i++) {
+    //     if(avr_isp_chip_arr[i].sigs[1] == 0x97) {
+    //         if(avr_isp_chip_arr[i].sigs[2] == 0x0B) {
+    //             FURI_LOG_I(TAG, "name %s", avr_isp_chip_arr[i].name);
+    //             break;
+    //         }
+    //     }
+    // }
+
     FuriThread* prog_thread =
         furi_thread_alloc_ex("AvrIspProgWorker", 1024, avr_isp_worker_prog_thread, prog);
     furi_thread_start(prog_thread);
@@ -162,18 +172,18 @@ static int32_t avr_isp_worker_thread(void* context) {
         while(len > 0) {
             avr_isp_prog_rx(prog, buf, len);
 
-            // for(uint8_t i = 0; i < len; i++) {
-            //     FURI_LOG_I(TAG, "--> %X", buf[i]);
-            // }
+            for(uint8_t i = 0; i < len; i++) {
+                FURI_LOG_I(TAG, "--> %X", buf[i]);
+            }
 
             len = furi_hal_cdc_receive(AVR_ISP_VCP_CDC_CH, buf, AVR_ISP_VCP_CDC_PKT_LEN);
         }
 
         len = avr_isp_prog_tx(prog, buf, AVR_ISP_VCP_CDC_PKT_LEN);
         while(len > 0) {
-            // for(uint8_t i = 0; i < len; i++) {
-            //     FURI_LOG_I(TAG, "<-- %X", buf[i]);
-            // }
+            for(uint8_t i = 0; i < len; i++) {
+                FURI_LOG_I(TAG, "<-- %X", buf[i]);
+            }
 
             furi_hal_cdc_send(AVR_ISP_VCP_CDC_CH, buf, len);
             furi_delay_ms(1);

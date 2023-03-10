@@ -15,23 +15,6 @@
 
 typedef struct AvrIspApp AvrIspApp;
 
-// struct AvrIspTxRx {
-//     SubGhzWorker* worker;
-
-//     SubGhzEnvironment* environment;
-//     SubGhzReceiver* receiver;
-//     SubGhzRadioPreset* preset;
-//     WSHistory* history;
-//     uint16_t idx_menu_chosen;
-//     WSTxRxState txrx_state;
-//     WSHopperState hopper_state;
-//     uint8_t hopper_timeout;
-//     uint8_t hopper_idx_frequency;
-//     WSRxKeyState rx_key_state;
-// };
-
-//typedef struct AvrIspTxRx AvrIspTxRx;
-
 struct AvrIspApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;

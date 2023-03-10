@@ -1,6 +1,6 @@
 App(
     appid="avr_isp",
-    name="Avr Isp Programmer",
+    name="AVR ISP Programmer",
     apptype=FlipperAppType.PLUGIN,
     targets=["f7"],
     entry_point="avr_isp_app",

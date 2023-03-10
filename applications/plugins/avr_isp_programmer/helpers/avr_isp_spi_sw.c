@@ -29,7 +29,6 @@ AvrIspSpiSw* avr_isp_spi_sw_init(AvrIspSpiSwSpeed speed) {
     furi_hal_gpio_init(instance->mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_write(instance->sck, false);
     furi_hal_gpio_init(instance->sck, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
-    //furi_hal_gpio_write(instance->res, true);
     furi_hal_gpio_init(instance->res, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
     return instance;
@@ -38,7 +37,6 @@ AvrIspSpiSw* avr_isp_spi_sw_init(AvrIspSpiSwSpeed speed) {
 void avr_isp_spi_sw_free(AvrIspSpiSw* instance) {
     furi_assert(instance);
 
-    //furi_hal_gpio_write(instance->res, true);
     furi_hal_gpio_init(instance->res, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_init(instance->miso, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_init(instance->mosi, GpioModeAnalog, GpioPullNo, GpioSpeedLow);

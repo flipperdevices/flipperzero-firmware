@@ -5,7 +5,7 @@
 
 #define AVR_ISP_PROG_TX_RX_BUF_SIZE 256
 
-struct AvrIspProgParam {
+struct AvrIspProgCfgDevice {
     uint8_t devicecode;
     uint8_t revision;
     uint8_t progtype;
@@ -21,16 +21,16 @@ struct AvrIspProgParam {
     uint32_t flashsize;
 };
 
-typedef struct AvrIspProgParam AvrIspProgParam;
+typedef struct AvrIspProgCfgDevice AvrIspProgCfgDevice;
 
 struct AvrIspProg {
     AvrIspSpiSw* spi;
-    AvrIspProgParam* param;
+    AvrIspProgCfgDevice* cfg;
     FuriStreamBuffer* stream_rx;
     FuriStreamBuffer* stream_tx;
 
     uint16_t error;
-    uint16_t addr; //here
+    uint16_t addr;
     bool pmode;
     bool tx_ok;
     bool exit;
@@ -41,7 +41,7 @@ struct AvrIspProg {
 
 AvrIspProg* avr_isp_prog_init(AvrIspSpiSwSpeed spi_speed) {
     AvrIspProg* instance = malloc(sizeof(AvrIspProg));
-    instance->param = malloc(sizeof(AvrIspProgParam));
+    instance->cfg = malloc(sizeof(AvrIspProgCfgDevice));
     instance->stream_rx =
         furi_stream_buffer_alloc(sizeof(int8_t) * AVR_ISP_PROG_TX_RX_BUF_SIZE, sizeof(int8_t));
     instance->stream_tx =
@@ -58,7 +58,7 @@ void avr_isp_prog_free(AvrIspProg* instance) {
 
     furi_stream_buffer_free(instance->stream_tx);
     furi_stream_buffer_free(instance->stream_rx);
-    free(instance->param);
+    free(instance->cfg);
     free(instance);
 }
 
@@ -135,7 +135,7 @@ static uint8_t
 
 static void avr_isp_prog_empty_reply(AvrIspProg* instance) {
     furi_assert(instance);
-    if(CRC_EOP == avr_isp_prog_getch(instance)) {
+    if(avr_isp_prog_getch(instance) == CRC_EOP) {
         avr_isp_prog_tx_ch(instance, STK_INSYNC);
         avr_isp_prog_tx_ch(instance, STK_OK);
     } else {
@@ -146,7 +146,7 @@ static void avr_isp_prog_empty_reply(AvrIspProg* instance) {
 
 static void avr_isp_prog_breply(AvrIspProg* instance, uint8_t data) {
     furi_assert(instance);
-    if(CRC_EOP == avr_isp_prog_getch(instance)) {
+    if(avr_isp_prog_getch(instance) == CRC_EOP) {
         avr_isp_prog_tx_ch(instance, STK_INSYNC);
         avr_isp_prog_tx_ch(instance, data);
         avr_isp_prog_tx_ch(instance, STK_OK);
@@ -159,52 +159,55 @@ static void avr_isp_prog_breply(AvrIspProg* instance, uint8_t data) {
 static void avr_isp_prog_get_version(AvrIspProg* instance, uint8_t data) {
     furi_assert(instance);
     switch(data) {
-    case 0x80:
-        avr_isp_prog_breply(instance, HWVER);
+    case STK_HW_VER:
+        avr_isp_prog_breply(instance, AVR_ISP_HWVER);
         break;
-    case 0x81:
-        avr_isp_prog_breply(instance, SWMAJ);
+    case STK_SW_MAJOR:
+        avr_isp_prog_breply(instance, AVR_ISP_SWMAJ);
         break;
-    case 0x82:
-        avr_isp_prog_breply(instance, SWMIN);
+    case STK_SW_MINOR:
+        avr_isp_prog_breply(instance, AVR_ISP_SWMIN);
         break;
-    case 0x93:
-        avr_isp_prog_breply(instance, 'S'); // serial programmer
+    case AVP_ISP_GET_CONNECT_TYPE:
+        avr_isp_prog_breply(instance, AVP_ISP_SERIAL_CONNECT_TYPE);
         break;
     default:
-        avr_isp_prog_breply(instance, 0);
+        avr_isp_prog_breply(instance, AVR_ISP_RESP_0);
     }
 }
 
-static void avr_isp_prog_set_parameters(AvrIspProg* instance) {
+static void avr_isp_prog_set_cfg(AvrIspProg* instance) {
     furi_assert(instance);
-    // call this after reading paramter packet into buff[]
-    instance->param->devicecode = instance->buff[0];
-    instance->param->revision = instance->buff[1];
-    instance->param->progtype = instance->buff[2];
-    instance->param->parmode = instance->buff[3];
-    instance->param->polling = instance->buff[4];
-    instance->param->selftimed = instance->buff[5];
-    instance->param->lockbytes = instance->buff[6];
-    instance->param->fusebytes = instance->buff[7];
-    instance->param->flashpoll = instance->buff[8];
-    // ignore instance->buff[9] (= instance->buff[8])
-    // following are 16 bits (big endian)
-    instance->param->eeprompoll = instance->buff[10] << 8 |
-                                  instance->buff[11]; // beget16(&buff[10]);
-    instance->param->pagesize = instance->buff[12] << 8 | instance->buff[13]; //beget16(&buff[12]);
-    instance->param->eepromsize = instance->buff[14] << 8 |
-                                  instance->buff[15]; //beget16(&buff[14]);
-
-    // 32 bits flashsize (big endian)
-    instance->param->flashsize = instance->buff[16] << 24 | instance->buff[17] << 16 |
-                                 instance->buff[18] << 8 | instance->buff[19];
-    //buff[16] * 0x01000000 + buff[17] * 0x00010000 + buff[18] * 0x00000100 + buff[19];
+    // call this after reading cfg packet into buff[]
+    instance->cfg->devicecode = instance->buff[0];
+    instance->cfg->revision = instance->buff[1];
+    instance->cfg->progtype = instance->buff[2];
+    instance->cfg->parmode = instance->buff[3];
+    instance->cfg->polling = instance->buff[4];
+    instance->cfg->selftimed = instance->buff[5];
+    instance->cfg->lockbytes = instance->buff[6];
+    instance->cfg->fusebytes = instance->buff[7];
+    instance->cfg->flashpoll = instance->buff[8];
+    // ignore (instance->buff[9] == instance->buff[8]) //FLASH polling value. Same as “flashpoll”
+    instance->cfg->eeprompoll = instance->buff[10] << 8 | instance->buff[11];
+    instance->cfg->pagesize = instance->buff[12] << 8 | instance->buff[13];
+    instance->cfg->eepromsize = instance->buff[14] << 8 | instance->buff[15];
+    instance->cfg->flashsize = instance->buff[16] << 24 | instance->buff[17] << 16 |
+                               instance->buff[18] << 8 | instance->buff[19];
 
     // avr devices have active low reset, at89sx are active high
-    instance->rst_active_high = (instance->param->devicecode >= 0xe0);
+    instance->rst_active_high = (instance->cfg->devicecode >= 0xe0);
 }
-
+static bool
+    avr_isp_prog_set_pmode(AvrIspProg* instance, uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
+    furi_assert(instance);
+    uint8_t res = 0;
+    avr_isp_spi_sw_txrx(instance->spi, a);
+    avr_isp_spi_sw_txrx(instance->spi, b);
+    res = avr_isp_spi_sw_txrx(instance->spi, c);
+    avr_isp_spi_sw_txrx(instance->spi, d);
+    return res == 0x53;
+}
 static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
     furi_assert(instance);
     // Reset target before driving PIN_SCK or PIN_MOSI
@@ -235,9 +238,12 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
 
     // Send the enable programming command:
     furi_delay_ms(50); // datasheet: must be > 20 msec
-    avr_isp_prog_spi_transaction(instance, 0xAC, 0x53, 0x00, 0x00);
-    instance->pmode = true;
-    return true;
+     //if(avr_isp_prog_set_pmode(instance, 0xAC, 0x53, 0x00, 0x00)) {
+    if(avr_isp_prog_set_pmode(instance, AVR_ISP_SET_PMODE)) {
+        instance->pmode = true;
+        return true;
+    }
+    return false;
 }
 
 static void avr_isp_prog_end_pmode(AvrIspProg* instance) {
@@ -275,16 +281,16 @@ static void avr_isp_prog_commit(AvrIspProg* instance, uint16_t addr) {
 }
 
 static uint16_t avr_isp_prog_current_page(AvrIspProg* instance) {
-    if(instance->param->pagesize == 32) {
+    if(instance->cfg->pagesize == 32) {
         return instance->addr & 0xFFFFFFF0;
     }
-    if(instance->param->pagesize == 64) {
+    if(instance->cfg->pagesize == 64) {
         return instance->addr & 0xFFFFFFE0;
     }
-    if(instance->param->pagesize == 128) {
+    if(instance->cfg->pagesize == 128) {
         return instance->addr & 0xFFFFFFC0;
     }
-    if(instance->param->pagesize == 256) {
+    if(instance->cfg->pagesize == 256) {
         return instance->addr & 0xFFFFFF80;
     }
     return instance->addr;
@@ -310,7 +316,7 @@ static uint8_t avr_isp_prog_write_flash_pages(AvrIspProg* instance, size_t lengt
 
 static void avr_isp_prog_write_flash(AvrIspProg* instance, size_t length) {
     avr_isp_prog_fill(instance, length);
-    if(CRC_EOP == avr_isp_prog_getch(instance)) {
+    if(avr_isp_prog_getch(instance) == CRC_EOP) {
         avr_isp_prog_tx_ch(instance, STK_INSYNC);
         avr_isp_prog_tx_ch(instance, avr_isp_prog_write_flash_pages(instance, length));
     } else {
@@ -340,7 +346,7 @@ static uint8_t avr_isp_prog_write_eeprom(AvrIspProg* instance, size_t length) {
     // here is a word address, get the byte address
     uint16_t start = instance->addr * 2;
     uint16_t remaining = length;
-    if(length > instance->param->eepromsize) {
+    if(length > instance->cfg->eepromsize) {
         instance->error++;
         return STK_FAILED;
     }
@@ -355,17 +361,16 @@ static uint8_t avr_isp_prog_write_eeprom(AvrIspProg* instance, size_t length) {
 
 static void avr_isp_prog_program_page(AvrIspProg* instance) {
     uint8_t result = STK_FAILED;
-    unsigned int length = 256 * avr_isp_prog_getch(instance);
-    length += avr_isp_prog_getch(instance);
+    uint16_t length = avr_isp_prog_getch(instance) << 8 | avr_isp_prog_getch(instance);
     uint8_t memtype = avr_isp_prog_getch(instance);
-    // flash memory @here, (length) bytes
-    if(memtype == 'F') { //0X46
+    // flash memory @addr, (length) bytes
+    if(memtype == STK_SET_FLASH_TYPE) {
         avr_isp_prog_write_flash(instance, length);
         return;
     }
-    if(memtype == 'E') { //0X45
+    if(memtype == STK_SET_EEROM_TYPE) {
         result = avr_isp_prog_write_eeprom(instance, length);
-        if(CRC_EOP == avr_isp_prog_getch(instance)) {
+        if(avr_isp_prog_getch(instance) == CRC_EOP) {
             avr_isp_prog_tx_ch(instance, STK_INSYNC);
             avr_isp_prog_tx_ch(instance, result);
 
@@ -406,23 +411,22 @@ static uint8_t avr_isp_prog_eeprom_read_page(AvrIspProg* instance, uint16_t leng
 }
 
 static void avr_isp_prog_read_page(AvrIspProg* instance) {
-    uint8_t result = (char)STK_FAILED;
-    int length = 256 * avr_isp_prog_getch(instance);
-    length += avr_isp_prog_getch(instance);
+    uint8_t result = STK_FAILED;
+    uint16_t length = avr_isp_prog_getch(instance) << 8 | avr_isp_prog_getch(instance);
     uint8_t memtype = avr_isp_prog_getch(instance);
-    if(CRC_EOP != avr_isp_prog_getch(instance)) {
+    if(avr_isp_prog_getch(instance) != CRC_EOP) {
         instance->error++;
         avr_isp_prog_tx_ch(instance, STK_NOSYNC);
         return;
     }
     avr_isp_prog_tx_ch(instance, STK_INSYNC);
-    if(memtype == 'F') result = avr_isp_prog_flash_read_page(instance, length);
-    if(memtype == 'E') result = avr_isp_prog_eeprom_read_page(instance, length);
+    if(memtype == STK_SET_FLASH_TYPE) result = avr_isp_prog_flash_read_page(instance, length);
+    if(memtype == STK_SET_EEROM_TYPE) result = avr_isp_prog_eeprom_read_page(instance, length);
     avr_isp_prog_tx_ch(instance, result);
 }
 
 static void avr_isp_prog_read_signature(AvrIspProg* instance) {
-    if(CRC_EOP != avr_isp_prog_getch(instance)) {
+    if(avr_isp_prog_getch(instance) != CRC_EOP) {
         instance->error++;
         avr_isp_prog_tx_ch(instance, STK_NOSYNC);
         return;
@@ -439,14 +443,14 @@ static void avr_isp_prog_read_signature(AvrIspProg* instance) {
 void avr_isp_prog_avrisp(AvrIspProg* instance) {
     uint8_t ch = avr_isp_prog_getch(instance);
     switch(ch) {
-    case '0': // signon //0x30
+    case STK_GET_SYNC:
         instance->error = 0;
         avr_isp_prog_empty_reply(instance);
         break;
-    case '1': //0x31
+    case STK_GET_SIGN_ON:
         if(avr_isp_prog_getch(instance) == CRC_EOP) {
             avr_isp_prog_tx_ch(instance, STK_INSYNC);
-            //SERIAL.print("AVR ISP");
+
             avr_isp_prog_tx_ch(instance, 'A');
             avr_isp_prog_tx_ch(instance, 'V');
             avr_isp_prog_tx_ch(instance, 'R');
@@ -461,56 +465,57 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
             avr_isp_prog_tx_ch(instance, STK_NOSYNC);
         }
         break;
-    case 'A': //0x41
+    case STK_GET_PARAMETER:
         avr_isp_prog_get_version(instance, avr_isp_prog_getch(instance));
         break;
-    case 'B': //0x42
+    case STK_SET_DEVICE:
         avr_isp_prog_fill(instance, 20);
-        avr_isp_prog_set_parameters(instance);
+        avr_isp_prog_set_cfg(instance);
         avr_isp_prog_empty_reply(instance);
         break;
-    case 'E': //0x45// extended parameters - ignore for now
+    case STK_SET_DEVICE_EXT: // ignore for now
         avr_isp_prog_fill(instance, 5);
         avr_isp_prog_empty_reply(instance);
         break;
-    case 'P': //0X50
+    case STK_ENTER_PROGMODE:
         if(!instance->pmode) avr_isp_prog_start_pmode(instance);
         avr_isp_prog_empty_reply(instance);
         break;
-    case 'U': //0X55 // set address (word)
-        instance->addr = avr_isp_prog_getch(instance);
-        instance->addr += 256 * avr_isp_prog_getch(instance);
+    case STK_LOAD_ADDRESS:
+        instance->addr = avr_isp_prog_getch(instance) | avr_isp_prog_getch(instance) << 8;
+        // instance->addr = avr_isp_prog_getch(instance);
+        // instance->addr += 256 * avr_isp_prog_getch(instance);
         avr_isp_prog_empty_reply(instance);
         break;
 
-    case 0x60: //STK_PROG_FLASH
-        avr_isp_prog_getch(instance); // low addr
-        avr_isp_prog_getch(instance); // high addr
+    case STK_PROG_FLASH: // ignore for now
+        avr_isp_prog_getch(instance);
+        avr_isp_prog_getch(instance);
         avr_isp_prog_empty_reply(instance);
         break;
-    case 0x61: //STK_PROG_DATA
-        avr_isp_prog_getch(instance); // data
+    case STK_PROG_DATA: // ignore for now
+        avr_isp_prog_getch(instance);
         avr_isp_prog_empty_reply(instance);
         break;
 
-    case 0x64: //STK_PROG_PAGE
+    case STK_PROG_PAGE:
         avr_isp_prog_program_page(instance);
         break;
 
-    case 0x74: //STK_READ_PAGE 't'
+    case STK_READ_PAGE:
         avr_isp_prog_read_page(instance);
         break;
 
-    case 'V': //0x56
+    case STK_UNIVERSAL:
         avr_isp_prog_universal(instance);
         break;
-    case 'Q': //0x51
+    case STK_LEAVE_PROGMODE:
         instance->error = 0;
-        avr_isp_prog_end_pmode(instance);
+        if(instance->pmode) avr_isp_prog_end_pmode(instance);
         avr_isp_prog_empty_reply(instance);
         break;
 
-    case 0x75: //STK_READ_SIGN 'U'
+    case STK_READ_SIGN:
         avr_isp_prog_read_signature(instance);
         break;
 
@@ -524,68 +529,10 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
     // anything else we will return STK_UNKNOWN
     default:
         instance->error++;
-        if(CRC_EOP == avr_isp_prog_getch(instance))
+        if(avr_isp_prog_getch(instance) == CRC_EOP)
             avr_isp_prog_tx_ch(instance, STK_UNKNOWN);
         else
             avr_isp_prog_tx_ch(instance, STK_NOSYNC);
     }
     instance->tx_ok = true;
 }
-
-// // this provides a heartbeat on pin 9, so you can tell the software is running.
-// uint8_t hbval = 128;
-// int8_t hbdelta = 8;
-// void heartbeat() {
-//   static unsigned long last_time = 0;
-//   unsigned long now = millis();
-//   if ((now - last_time) < 40)
-//     return;
-//   last_time = now;
-//   if (hbval > 192) hbdelta = -hbdelta;
-//   if (hbval < 32) hbdelta = -hbdelta;
-//   hbval += hbdelta;
-//   analogWrite(LED_HB, hbval);
-// }
-
-// static bool rst_active_high;
-
-// void reset_target(bool reset) {
-//   digitalWrite(RESET, ((reset && rst_active_high) || (!reset && !rst_active_high)) ? 1 : 0);
-// }
-
-// void loop(void) {
-//   // is pmode active?
-//   if (pmode) {
-//     digitalWrite(LED_PMODE, 1);
-//   } else {
-//     digitalWrite(LED_PMODE, 0);
-//   }
-//   // is there an error?
-//   if (error) {
-//     digitalWrite(LED_ERR, 1);
-//   } else {
-//     digitalWrite(LED_ERR, 0);
-//   }
-
-//   // light the heartbeat LED
-//   heartbeat();
-//   if (SERIAL.available()) {
-//     avrisp();
-//   }
-// }
-
-// #define PTIME 30
-// void pulse(int pin, int times) {
-//     do {
-//         digitalWrite(pin, 1);
-//         delay(PTIME);
-//         digitalWrite(pin, 0);
-//         delay(PTIME);
-//     } while(times--);
-// }
-
-// void prog_lamp(int state) {
-//     if(PROG_FLICKER) {
-//         digitalWrite(LED_PMODE, state);
-//     }
-// }
