@@ -526,6 +526,8 @@ int hdnode_get_ethereum_pubkeyhash(const HDNode* node, uint8_t* pubkeyhash) {
 
     /* get uncompressed public key */
     if(ecdsa_get_public_key65(node->curve->params, node->private_key, buf) != 0) {
+        memzero(ctx, sizeof(SHA3_CTX));
+        free(ctx);
         return 0;
     }
 

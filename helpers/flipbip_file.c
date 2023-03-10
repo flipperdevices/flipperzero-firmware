@@ -55,7 +55,7 @@ bool flipbip_load_settings(char* settings, bool key_file) {
     storage_file_free(settings_file);
     furi_record_close(RECORD_STORAGE);
 
-    if(!strlen(settings) == 0) {
+    if(strlen(settings) > 0) {
         Storage* fs_api = furi_record_open(RECORD_STORAGE);
         FileInfo layout_file_info;
         FS_Error file_check_err = storage_common_stat(fs_api, path, &layout_file_info);

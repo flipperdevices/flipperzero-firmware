@@ -179,7 +179,7 @@ int32_t flipbip_app(void* p) {
     UNUSED(p);
     FlipBip* app = flipbip_app_alloc();
 
-    // Disabled because causes exit on customer firmwares such as RM
+    // Disabled because causes exit on custom firmwares such as RM
     /*if(!furi_hal_region_is_provisioned()) {
         flipbip_app_free(app);
         return 1;
