@@ -116,7 +116,8 @@ static void flipbip_scene_1_draw_generic(const char* text, size_t line_len) {
 
 static void flipbip_scene_1_draw_mnemonic(const char* mnemonic) {
     // Delineate sections of the mnemonic every 4 words
-    char* mnemonic_working = malloc(strlen(mnemonic) + 1);
+    const size_t mnemonic_working_len = strlen(mnemonic) + 1;
+    char* mnemonic_working = malloc(mnemonic_working_len);
     strcpy(mnemonic_working, mnemonic);
     int word = 0;
     for(size_t i = 0; i < strlen(mnemonic_working); i++) {
@@ -159,19 +160,20 @@ static void flipbip_scene_1_draw_mnemonic(const char* mnemonic) {
     }
 
     // Free the working mnemonic memory
-    memzero(mnemonic_working, strlen(mnemonic_working));
+    memzero(mnemonic_working, mnemonic_working_len);
     free(mnemonic_working);
 }
 
 static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
-    char* seed_working = malloc(64 * 2 + 1);
+    const size_t seed_working_len = 64 * 2 + 1;
+    char* seed_working = malloc(seed_working_len);
     // Convert the seed to a hex string
     flipbip_btox(model->seed, 64, seed_working);
 
     flipbip_scene_1_draw_generic(seed_working, 22);
 
     // Free the working seed memory
-    memzero(seed_working, sizeof(seed_working));
+    memzero(seed_working, seed_working_len);
     free(seed_working);
 }
 
