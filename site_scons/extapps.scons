@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from SCons.Node import NodeList
 from SCons.Warnings import warn, WarningOnByDefault
-
+from os.path import dirname
 
 Import("ENV")
 
@@ -112,11 +112,15 @@ extapps.resources_dist = appenv.FapDist(appenv["RESOURCES_ROOT"], [])
 
 if appsrc := appenv.subst("$APPSRC"):
     app_artifacts = appenv.GetExtAppFromPath(appsrc)
+    print(app_artifacts)
+    if app_artifacts.app.apptype == FlipperAppType.PLUGIN:
+        print("PLUGIN!")
+
     appenv.PhonyTarget(
         "launch_app",
-        '${PYTHON3} "${APP_RUN_SCRIPT}" "${SOURCE}" --fap_dst_dir "/ext/apps/${FAP_CATEGORY}"',
+        '${PYTHON3} "${APP_RUN_SCRIPT}" "${SOURCE}" --fap_dst_dir "/ext/${EXT_DIST_PATH}"',
         source=app_artifacts.compact,
-        FAP_CATEGORY=app_artifacts.app.fap_category,
+        EXT_DIST_PATH=dirname(app_artifacts.dist_entries[0][1]),
     )
     appenv.Alias("launch_app", app_artifacts.validator)
 
