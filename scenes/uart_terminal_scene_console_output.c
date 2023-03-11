@@ -104,7 +104,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
 
         if(0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
             const char* help_msg =
-                "LoRA terminal for Flipper\n\nI'm in github: aafksab\n\nThis app is a modified\nUART Terminal,\nThanks cool4uma(github)\nfor great code and app.\n\n";
+                "LoRA terminal for Flipper\n\nI'm on github: aafksab\n\nThis app is a modified\nUART Terminal,\nThanks cool4uma(github)\nfor great code and app.\n\n";
             furi_string_cat_str(app->text_box_store, help_msg);
             app->text_box_store_strlen += strlen(help_msg);
         }
@@ -126,11 +126,10 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     uart_terminal_uart_set_handle_rx_data_cb(
         app->uart, uart_terminal_console_output_handle_rx_data_cb); // setup callback for rx thread
 
-    // Send command with newline '\r\n'
+    // Send command with CR+LF
     if(app->is_command && app->selected_tx_string) {
         char buffer[240];
-        char ending[] = "\r\n";
-        snprintf(buffer, 240, "%s%s", (app->selected_tx_string), ending);
+        snprintf(buffer, 240, "%s\r\n", (app->selected_tx_string));
         uart_terminal_uart_tx((unsigned char *)buffer, strlen(buffer));
     }
 }
