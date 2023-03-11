@@ -20,14 +20,15 @@ static const GpioPin* gpios[] = {
 // static const char* gpio_names[] = {"PC0", "PC1", "PC3", "PB2", "PB3", "PA4", "PA6", "PA7"};
 
 static void render_callback(Canvas* const canvas, void* cb_ctx) {
-    AppFSM* app = acquire_mutex((ValueMutex*)cb_ctx, 25);
+    AppFSM* app = cb_ctx;
+    furi_mutex_acquire(app->mutex, FuriWaitForever);
 
     if(app == NULL) {
         return;
     }
 
     if(!app->processing) {
-        release_mutex((ValueMutex*)cb_ctx, app);
+        furi_mutex_release(app->mutex);
         return;
     }
 
@@ -79,7 +80,7 @@ static void render_callback(Canvas* const canvas, void* cb_ctx) {
         }
     }
 
-    release_mutex((ValueMutex*)cb_ctx, app);
+    furi_mutex_release(app->mutex);
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -227,8 +228,9 @@ static int32_t capture_thread_worker(void* context) {
 
 static bool app_init(AppFSM* const app) {
     strcpy(app->state_string, "none");
+    app->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    if(!init_mutex(&app->state_mutex, app, sizeof(AppFSM))) {
+    if(!app->mutex) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(app);
         return false;
@@ -244,7 +246,7 @@ static bool app_init(AppFSM* const app) {
     app->view_port = view_port_alloc();
     app->event_queue = furi_message_queue_alloc(QUEUE_SIZE, sizeof(AppEvent));
 
-    view_port_draw_callback_set(app->view_port, render_callback, &app->state_mutex);
+    view_port_draw_callback_set(app->view_port, render_callback, app);
     view_port_input_callback_set(app->view_port, input_callback, app->event_queue);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
 
@@ -276,7 +278,7 @@ static void app_deinit(AppFSM* const app) {
     gui_remove_view_port(app->gui, app->view_port);
     view_port_free(app->view_port);
     furi_message_queue_free(app->event_queue);
-    delete_mutex(&app->state_mutex);
+    furi_mutex_free(app->mutex);
 
     furi_thread_join(app->capture_thread);
     furi_thread_free(app->capture_thread);
