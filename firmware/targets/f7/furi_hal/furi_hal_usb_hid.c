@@ -164,8 +164,8 @@ static const struct HidConfigDescriptor hid_cfg_desc = {
                     .bAlternateSetting = 0,
                     .bNumEndpoints = 2,
                     .bInterfaceClass = USB_CLASS_HID,
-                    .bInterfaceSubClass = USB_HID_SUBCLASS_NONBOOT,
-                    .bInterfaceProtocol = USB_HID_PROTO_NONBOOT,
+                    .bInterfaceSubClass = USB_HID_SUBCLASS_BOOT,
+                    .bInterfaceProtocol = USB_HID_PROTO_KEYBOARD,
                     .iInterface = NO_DESCRIPTOR,
                 },
             .hid_desc =
