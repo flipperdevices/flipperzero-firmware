@@ -106,6 +106,9 @@ void picopass_free(Picopass* picopass) {
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewWidget);
     widget_free(picopass->widget);
 
+    view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewDictAttack);
+    dict_attack_free(picopass->dict_attack);
+
     // Worker
     picopass_worker_stop(picopass->worker);
     picopass_worker_free(picopass->worker);

@@ -7,6 +7,7 @@ typedef enum {
     DictAttackStateIdle,
     DictAttackStateUserDictInProgress,
     DictAttackStateFlipperDictInProgress,
+    DictAttackStateStandardDictInProgress,
 } DictAttackState;
 
 void picopass_dict_attack_worker_callback(PicopassWorkerEvent event, void* context) {
@@ -37,9 +38,11 @@ static void picopass_scene_elite_dict_attack_prepare_view(Picopass* picopass, Di
         if(iclass_elite_dict_check_presence(IclassEliteDictTypeUser)) {
             state = DictAttackStateUserDictInProgress;
         } else {
-            state = DictAttackStateFlipperDictInProgress;
+            state = DictAttackStateStandardDictInProgress;
         }
     } else if(state == DictAttackStateUserDictInProgress) {
+        state = DictAttackStateStandardDictInProgress;
+    } else if(state == DictAttackStateStandardDictInProgress) {
         state = DictAttackStateFlipperDictInProgress;
     }
 
@@ -47,20 +50,33 @@ static void picopass_scene_elite_dict_attack_prepare_view(Picopass* picopass, Di
     if(state == DictAttackStateUserDictInProgress) {
         worker_state = PicopassWorkerStateEliteDictAttack;
         dict_attack_set_header(picopass->dict_attack, "Elite User Dictionary");
+        dict_attack_data->type = IclassEliteDictTypeUser;
         dict = iclass_elite_dict_alloc(IclassEliteDictTypeUser);
 
         // If failed to load user dictionary - try the system dictionary
         if(!dict) {
             FURI_LOG_E(TAG, "User dictionary not found");
+            state = DictAttackStateStandardDictInProgress;
+        }
+    }
+    if(state == DictAttackStateStandardDictInProgress) {
+        worker_state = PicopassWorkerStateEliteDictAttack;
+        dict_attack_set_header(picopass->dict_attack, "Standard System Dictionary");
+        dict_attack_data->type = IclassStandardDictTypeFlipper;
+        dict = iclass_elite_dict_alloc(IclassStandardDictTypeFlipper);
+
+        if(!dict) {
+            FURI_LOG_E(TAG, "Flipper standard dictionary not found");
             state = DictAttackStateFlipperDictInProgress;
         }
     }
     if(state == DictAttackStateFlipperDictInProgress) {
         worker_state = PicopassWorkerStateEliteDictAttack;
         dict_attack_set_header(picopass->dict_attack, "Elite System Dictionary");
+        dict_attack_data->type = IclassEliteDictTypeFlipper;
         dict = iclass_elite_dict_alloc(IclassEliteDictTypeFlipper);
         if(!dict) {
-            FURI_LOG_E(TAG, "Flipper dictionary not found");
+            FURI_LOG_E(TAG, "Flipper Elite dictionary not found");
             // Pass through to let the worker handle the failure
         }
     }

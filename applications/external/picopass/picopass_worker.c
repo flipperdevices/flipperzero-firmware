@@ -475,7 +475,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
     memset(pacs, 0, sizeof(PicopassPacs));
 
     IclassEliteDictAttackData* dict_attack_data = &picopass_worker->dev_data->iclass_elite_dict_attack_data;
-    bool elite = true;
+    bool elite = (dict_attack_data->type != IclassStandardDictTypeFlipper);
 
     rfalPicoPassReadCheckRes rcRes;
     rfalPicoPassCheckRes chkRes;

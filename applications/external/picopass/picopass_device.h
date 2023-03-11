@@ -33,6 +33,7 @@ typedef void (*PicopassLoadingCallback)(void* context, bool state);
 
 typedef struct {
     IclassEliteDict* dict;
+    IclassEliteDictType type;
     uint8_t current_sector;
 } IclassEliteDictAttackData;
 
