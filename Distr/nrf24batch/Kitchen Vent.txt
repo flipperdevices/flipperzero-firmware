@@ -18,6 +18,7 @@ Write start: 0,0,0x8F
 R: ID*=,ID
 R: FanOn=0x77,RAM,0xC1
 S: FanSet=,,0x40
+S: Lamp=,,0x20
 R: FanSpeed=0x76,RAM,0xC1
 
 R: CO2 level 1*2=4,,0xC2
@@ -92,4 +93,6 @@ RBatch: Hardware: ID;RxAddr;Ch;FanSpeedInitIdx;Flags;OutPeriod;IRRemotes;OSCCAL_
 RBatch: All: ID;CO2 level 1;CO2 level 2;CO2 level 3;FanCookSpeed_1;FanCookSpeed_2;FanCookSpeed_3;FanCookStartupTime;FanCookOffTime;FanCookSleep;FanSpeed_1;FanSpeed_2;FanSpeed_3;FanStartupTime;FanOffTime;FanSleep;RxAddr;Ch;FanSpeedInitIdx;Flags;OutPeriod;IRRemotes;IRRemotesHash
 
 WBatch: SetSpeed: FanSet=0
+WBatch: Lamp ON: Lamp=1
+WBatch: Lamp OFF: Lamp=0
 WBatch: Reset: Reset
