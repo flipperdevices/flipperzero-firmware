@@ -1,0 +1,16 @@
+App(
+    appid="video_player",
+    name="Video Player",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="video_player_app",
+    cdefines=["APP_VIDEO_PLAYER"],
+    stack_size=2 * 1024,
+    order=90,
+	fap_version=(0, 1),
+	fap_description="An app that plays video along with sound on Flipper Zero.",
+	fap_author="LTVA",
+    fap_weburl="https://github.com/LTVA1/flipper_video_player",
+	fap_icon="video_player.png",
+	fap_icon_assets="images",
+    fap_category="Media",
+)
