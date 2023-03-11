@@ -130,10 +130,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         char buffer[240];
         char ending[] = "\r\n";
         snprintf(buffer, 240, "%s%s", (app->selected_tx_string), ending);
-        uint8_t* buffer_ptr = (uint8_t*)&buffer[0];
-        FURI_LOG_I("app", "%s", buffer_ptr);
-        INFO("%s", buffer_ptr);
-        uart_terminal_uart_tx(buffer_ptr, strlen((char*)buffer_ptr));
+        uart_terminal_uart_tx((unsigned char *)buffer, strlen(buffer));
     }
 }
 
