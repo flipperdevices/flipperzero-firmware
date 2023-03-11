@@ -497,7 +497,6 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
     PicopassWorkerEvent nextState = PicopassWorkerEventSuccess;
 
     if(picopass_detect_card(1000) == ERR_NONE) {
-
         picopass_worker->callback(PicopassWorkerEventCardDetected, picopass_worker->context);
 
         // Process first found device
@@ -522,7 +521,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
 
     FURI_LOG_D(TAG, "Start Dictionary attack, Key Count %lu", iclass_elite_dict_get_total_keys(dict));
     while(iclass_elite_dict_get_next_key(dict, key)) {
-        FURI_LOG_D(TAG, "Key %d", index);
+        FURI_LOG_T(TAG, "Key %d", index);
         if(++index % PICOPASS_DICT_KEY_BATCH_SIZE == 0) {
             picopass_worker->callback(PicopassWorkerEventNewDictKeyBatch, picopass_worker->context);
         }
@@ -544,44 +543,41 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
         if(err == ERR_NONE) {
             FURI_LOG_I(TAG, "Found key");
             memcpy(pacs->key, key, PICOPASS_BLOCK_LEN);
+            if(nextState != PicopassWorkerEventFail) {
+                err = picopass_read_card(AA1);
+                if(err != ERR_NONE) {
+                    FURI_LOG_E(TAG, "picopass_read_card error %d", err);
+                    nextState = PicopassWorkerEventFail;
+                }
+            }
+
+            if(nextState != PicopassWorkerEventFail) {
+                err = picopass_device_parse_credential(AA1, pacs);
+                if(err != ERR_NONE) {
+                    FURI_LOG_E(TAG, "picopass_device_parse_credential error %d", err);
+                    nextState = PicopassWorkerEventFail;
+                }
+            }
+
+            if(nextState != PicopassWorkerEventFail) {
+                err = picopass_device_parse_wiegand(pacs->credential, &pacs->record);
+                if(err != ERR_NONE) {
+                    FURI_LOG_E(TAG, "picopass_device_parse_wiegand error %d", err);
+                    nextState = PicopassWorkerEventFail;
+                }
+            }
             picopass_worker->callback(PicopassWorkerEventFoundKey, picopass_worker->context);
             break;
         }
 
         if(picopass_worker->state != PicopassWorkerStateEliteDictAttack) break;
     }
-
-    FURI_LOG_I(TAG, "Stop attack");
-    picopass_worker->callback(PicopassWorkerEventKeyAttackStop, picopass_worker->context);
-
-    if (picopass_is_memset(pacs->key, 0, PICOPASS_BLOCK_LEN)) {
-        picopass_worker->callback(PicopassWorkerEventFail, picopass_worker->context);
-    } else {
-        if(nextState != PicopassWorkerEventFail) {
-            err = picopass_read_card(AA1);
-            if(err != ERR_NONE) {
-                FURI_LOG_E(TAG, "picopass_read_card error %d", err);
-                nextState = PicopassWorkerEventFail;
-            }
-        }
-
-        if(nextState != PicopassWorkerEventFail) {
-            err = picopass_device_parse_credential(AA1, pacs);
-            if(err != ERR_NONE) {
-                FURI_LOG_E(TAG, "picopass_device_parse_credential error %d", err);
-                nextState = PicopassWorkerEventFail;
-            }
-        }
-
-        if(nextState != PicopassWorkerEventFail) {
-            err = picopass_device_parse_wiegand(pacs->credential, &pacs->record);
-            if(err != ERR_NONE) {
-                FURI_LOG_E(TAG, "picopass_device_parse_wiegand error %d", err);
-                nextState = PicopassWorkerEventFail;
-            }
-        }
+    if(picopass_worker->state == PicopassWorkerStateEliteDictAttack) {
         picopass_worker->callback(PicopassWorkerEventSuccess, picopass_worker->context);
+    } else {
+        picopass_worker->callback(PicopassWorkerEventAborted, picopass_worker->context);
     }
+
 }
 
 int32_t picopass_worker_task(void* context) {
