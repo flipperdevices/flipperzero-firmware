@@ -173,6 +173,8 @@ GpsUart* gps_uart_enable()
 
   gps_uart->notifications = furi_record_open(RECORD_NOTIFICATION);
 
+  gps_uart->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+
   gps_uart->thread = furi_thread_alloc();
   furi_thread_set_name(gps_uart->thread, "GpsUartWorker");
   furi_thread_set_stack_size(gps_uart->thread, 1024);
