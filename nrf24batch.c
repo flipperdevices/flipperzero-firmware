@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG 		"nrf24batch"
-#define VERSION		"1.5"
+#define VERSION		"1.6"
 
 #define SCAN_APP_PATH_FOLDER 	"/ext/nrf24batch"
 #define LOG_FILEEXT	 			".txt"
@@ -133,7 +133,7 @@ char *ReadBatch_cmd_curr = NULL;	// =0xFFFFFFFF - finish
 FuriString **WriteBatch_cmd = NULL;	// Names of write batch cmd
 uint16_t WriteBatch_cmd_Total = 0;
 uint16_t WriteBatch_cmd_curr = 0;	// == _Total - finish
-#define POWER_READ_PERIOD	10		// ms
+#define POWER_READ_PERIOD	501		// ms
 uint16_t pwr_read_timer = 0;
 int Current = 0;
 int CurrentStart = 0;
@@ -294,9 +294,10 @@ void update_power(void)
 
 void check_en_power_5V(void)
 {
-	if(!furi_hal_power_is_otg_enabled()) {
+	if(!furi_hal_power_is_otg_enabled() && !furi_hal_power_is_charging()) {
 		FURI_LOG_D("PWR", "NO 5V, TURN ON");
-		furi_delay_ms(11);
+		notification_message(APP->notification, &sequence_blink_yellow_100);
+		furi_delay_ms(10);
 		update_power();
 		CurrentStart = Current;
 		furi_hal_power_enable_otg();
@@ -1484,14 +1485,16 @@ int32_t nrf24batch_app(void* p) {
 									what_doing = 2;
 								}
 							} else if(rw_type == rwt_listen) {
-								free_Log();
-								prepare_nrf24();
-								if(!NRF_ERROR) {
-									nrf24_set_rx_mode(nrf24_HANDLE);
-									ListenNew = false;
-									send_status = sst_receiving; // receiving
+								if(listen_addr_len) {
+									free_Log();
+									prepare_nrf24();
+									if(!NRF_ERROR) {
+										nrf24_set_rx_mode(nrf24_HANDLE);
+										ListenNew = false;
+										send_status = sst_receiving; // receiving
+									}
+									what_doing = 2;
 								}
-								what_doing = 2;
 							}
 						} else if(what_doing == 2) {		
 							if(rw_type == rwt_read_cmd) {
@@ -1524,14 +1527,16 @@ int32_t nrf24batch_app(void* p) {
 							}
 						} else if(what_doing == 1) {
 							if(rw_type == rwt_listen) {
-								char *ebuf = (char*)payload;
-								ebuf[0] = '\0';
-								add_to_str_hex_bytes(ebuf, listen_addr, listen_addr_len);
-								Edit_hex = true;
-								Edit_pos = ebuf + strlen(ebuf) - 1;
-								Edit_start = ebuf;
-								Edit = 1;
-								NRF_INITED = 0;
+								if(listen_addr_len) {
+									char *ebuf = (char*)payload;
+									ebuf[0] = '\0';
+									add_to_str_hex_bytes(ebuf, listen_addr, listen_addr_len);
+									Edit_hex = true;
+									Edit_pos = ebuf + strlen(ebuf) - 1;
+									Edit_start = ebuf;
+									Edit = 1;
+									NRF_INITED = 0;
+								}
 							}
 						} else if(what_doing == 2) {
 							if(rw_type == rwt_read_cmd) {

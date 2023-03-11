@@ -40,6 +40,7 @@ Flipper Zero application for nRF24L01 external board. Sends batch commands.
 <img src="https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Pics/Screenshot-2.png">
 <img src="https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Pics/Screenshot-3.png">
 <img src="https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Pics/Screenshot-4.png">
+<img src="https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Pics/Screenshot-5.png">
 <br>
 <br>
 Mini board for Flipper Zero to connect nRF24l01:<br><br>
