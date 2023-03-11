@@ -1,4 +1,5 @@
 #include "../uart_terminal_app_i.h"
+#include <string.h>
 
 // The FlipperZero Settings->System menu allows you to set the logging level at RUN-time
 // LOG_LEVEL lets you limit it at COMPILE-time
