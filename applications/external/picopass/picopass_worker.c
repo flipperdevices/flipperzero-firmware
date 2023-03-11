@@ -176,10 +176,10 @@ static ReturnCode picopass_auth_dict(
     uint8_t* csn,
     PicopassPacs* pacs,
     uint8_t* div_key,
-    IclassEliteDictType dict_type,
-    bool elite) {
+    IclassEliteDictType dict_type) {
     rfalPicoPassReadCheckRes rcRes;
     rfalPicoPassCheckRes chkRes;
+    bool elite = (dict_type != IclassStandardDictTypeFlipper);
 
     ReturnCode err = ERR_PARAM;
 
@@ -245,8 +245,7 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
         AA1[PICOPASS_CSN_BLOCK_INDEX].data,
         pacs,
         AA1[PICOPASS_KD_BLOCK_INDEX].data,
-        IclassEliteDictTypeFlipper,
-        false);
+        IclassStandardDictTypeFlipper);
     if(err == ERR_NONE) {
         return ERR_NONE;
     }
@@ -256,8 +255,7 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
         AA1[PICOPASS_CSN_BLOCK_INDEX].data,
         pacs,
         AA1[PICOPASS_KD_BLOCK_INDEX].data,
-        IclassEliteDictTypeUser,
-        true);
+        IclassEliteDictTypeUser);
     if(err == ERR_NONE) {
         return ERR_NONE;
     }
@@ -267,8 +265,7 @@ ReturnCode picopass_auth(PicopassBlock* AA1, PicopassPacs* pacs) {
         AA1[PICOPASS_CSN_BLOCK_INDEX].data,
         pacs,
         AA1[PICOPASS_KD_BLOCK_INDEX].data,
-        IclassEliteDictTypeFlipper,
-        true);
+        IclassEliteDictTypeFlipper);
     if(err == ERR_NONE) {
         return ERR_NONE;
     }
