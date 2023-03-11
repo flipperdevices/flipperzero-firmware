@@ -36,6 +36,7 @@ typedef enum {
     PicopassWorkerEventNewDictKeyBatch,
     PicopassWorkerEventKeyAttackStart,
     PicopassWorkerEventKeyAttackStop,
+    PicopassWorkerEventNoDictFound,
 } PicopassWorkerEvent;
 
 typedef void (*PicopassWorkerCallback)(PicopassWorkerEvent event, void* context);

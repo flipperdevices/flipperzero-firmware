@@ -5,6 +5,7 @@ enum SubmenuIndex {
     SubmenuIndexSaved,
     SubmenuIndexAddManually,
     SubmenuIndexDebug,
+    SubmenuIndexEliteDictAttack,
 };
 
 void picopass_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -15,6 +16,8 @@ void picopass_scene_start_on_enter(void* context) {
     Picopass* picopass = context;
 
     Submenu* submenu = picopass->submenu;
+    submenu_add_item(
+        submenu, "Dictionary Attack", SubmenuIndexEliteDictAttack, picopass_scene_start_submenu_callback, picopass);
     submenu_add_item(
         submenu, "Read Card", SubmenuIndexRead, picopass_scene_start_submenu_callback, picopass);
     submenu_add_item(
@@ -42,6 +45,11 @@ bool picopass_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 picopass->scene_manager, PicopassSceneStart, SubmenuIndexSaved);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneFileSelect);
+            consumed = true;
+        } else if(event.event == SubmenuIndexEliteDictAttack) {
+            scene_manager_set_scene_state(
+                picopass->scene_manager, PicopassSceneStart, SubmenuIndexEliteDictAttack);
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneEliteDictAttack);
             consumed = true;
         }
     }

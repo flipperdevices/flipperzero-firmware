@@ -161,13 +161,14 @@ void dict_attack_set_header(DictAttack* dict_attack, const char* header) {
 }
 
 void dict_attack_set_card_detected(DictAttack* dict_attack, MfClassicType type) {
+    UNUSED(type);
     furi_assert(dict_attack);
     with_view_model(
         dict_attack->view,
         DictAttackViewModel * model,
         {
             model->state = DictAttackStateRead;
-            model->sectors_total = mf_classic_get_total_sectors_num(type);
+            model->sectors_total = 0;
             model->keys_total = model->sectors_total * 2;
         },
         true);
