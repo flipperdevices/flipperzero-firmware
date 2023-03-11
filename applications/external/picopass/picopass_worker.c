@@ -535,7 +535,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
         memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
         uint8_t* csn = AA1[PICOPASS_CSN_BLOCK_INDEX].data;
-        uint8_t div_key[8] = {0};
+        uint8_t* div_key = AA1[PICOPASS_KD_BLOCK_INDEX].data;
 
         loclass_iclass_calc_div_key(csn, key, div_key, elite);
         loclass_opt_doReaderMAC(ccnr, div_key, mac);
