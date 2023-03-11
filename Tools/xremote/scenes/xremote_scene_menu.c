@@ -1,7 +1,7 @@
 #include "../xremote.h"
 
 enum SubmenuIndex {
-    SubmenuIndexScene1 = 10,
+    SubmenuIndexCreate = 10,
     SubmenuIndexScene2,
     SubmenuIndexSettings,
     SubmenuIndexInfoscreen,
@@ -15,7 +15,7 @@ void xremote_scene_menu_submenu_callback(void* context, uint32_t index) {
 void xremote_scene_menu_on_enter(void* context) {
     XRemote* app = context;
 
-    submenu_add_item(app->submenu, "New Command Chain", SubmenuIndexScene1, xremote_scene_menu_submenu_callback, app);
+    submenu_add_item(app->submenu, "New Command Chain", SubmenuIndexCreate, xremote_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Run Saved Command", SubmenuIndexScene2, xremote_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "Settings", SubmenuIndexSettings, xremote_scene_menu_submenu_callback, app);
     submenu_add_item(app->submenu, "App Info", SubmenuIndexInfoscreen, xremote_scene_menu_submenu_callback, app);
@@ -33,10 +33,10 @@ bool xremote_scene_menu_on_event(void* context, SceneManagerEvent event) {
         view_dispatcher_stop(app->view_dispatcher);
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexScene1) {
+        if(event.event == SubmenuIndexCreate) {
             scene_manager_set_scene_state(
-                app->scene_manager, XRemoteSceneMenu, SubmenuIndexScene1);
-            scene_manager_next_scene(app->scene_manager, XRemoteSceneScene_1);
+                app->scene_manager, XRemoteSceneMenu, SubmenuIndexCreate);
+            scene_manager_next_scene(app->scene_manager, XRemoteSceneCreate);
             return true;
         } else if (event.event == SubmenuIndexScene2) {
             scene_manager_set_scene_state(
