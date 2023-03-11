@@ -22,6 +22,7 @@
 #define WORK_PERIOD				2		// ms, Timer period
 #define MAX_CHANNEL				125
 #define FONT_5x7_SCREEN_WIDTH 	25
+#define NRF_EN_DYN_ACK			0		// does not work on some nrf24l01+ chips, (0/1)
 
 const char SettingsFld_Info[] = "Info:";
 const char SettingsFld_Ch[] = "Ch:";
@@ -385,7 +386,7 @@ static void prepare_nrf24(void)
 			return;
 		}
 		// EN_DYN_ACK(0x01) option for W_TX_PAYLOAD_NOACK cmd broke AA on some fake nRF24l01+, i.e. set it to 0
-		nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, (NRF_DPL ? 4 : 0)); // Dynamic Payload, Payload with ACK, W_TX_PAYLOAD_NOACK command
+		nrf24_write_reg(nrf24_HANDLE, REG_FEATURE, NRF_EN_DYN_ACK + (NRF_DPL ? 4 : 0)); // Dynamic Payload, Payload with ACK, W_TX_PAYLOAD_NOACK command
 		nrf24_write_reg(nrf24_HANDLE, REG_RF_CH, NRF_channel);
 		nrf24_write_reg(nrf24_HANDLE, REG_RF_SETUP, (NRF_rate == 0 ? 0b00100000 : NRF_rate == 1 ? 0 : 0b00001000) | 0b111); // +TX high power
 		nrf24_write_reg(nrf24_HANDLE, REG_CONFIG, 0x70 | ((NRF_CRC == 1 ? 0b1000 : NRF_CRC == 2 ? 0b1100 : 0))); // Mask all interrupts
