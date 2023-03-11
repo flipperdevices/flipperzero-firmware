@@ -54,7 +54,6 @@ class Main(App):
 
                 self.logger.info(f'Installing "{fap_local_path}" to {fap_dst_path}')
 
-                storage_ops.checked_mkdir(self.args.fap_dst_dir)
                 storage_ops.recursive_send(fap_dst_path, fap_local_path, False)
 
                 if self.args.launch_app:
@@ -71,6 +70,7 @@ class Main(App):
                 return 0
         except Exception as e:
             self.logger.error(f"Error: {e}")
+            # raise
             return 4
 
 

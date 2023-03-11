@@ -23,8 +23,7 @@ int32_t example_advanced_plugins_app(void* p) {
         PLUGIN_APP_ID, PLUGIN_API_VERSION, composite_api_resolver_get(resolver));
 
     do {
-        if(plugin_manager_load_all(manager, "/ext/apps_data/example_advanced_plugins/plugins") !=
-           PluginManagerErrorNone) {
+        if(plugin_manager_load_all(manager, APP_DATA_PATH("plugins")) != PluginManagerErrorNone) {
             FURI_LOG_E(TAG, "Failed to load all libs");
             break;
         }

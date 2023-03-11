@@ -21,8 +21,7 @@ int32_t example_plugins_multi_app(void* p) {
     PluginManager* manager =
         plugin_manager_alloc(PLUGIN_APP_ID, PLUGIN_API_VERSION, firmware_api_interface);
 
-    if(plugin_manager_load_all(manager, "/ext/apps_data/example_plugins_multi/plugins") !=
-       PluginManagerErrorNone) {
+    if(plugin_manager_load_all(manager, APP_DATA_PATH("plugins")) != PluginManagerErrorNone) {
         FURI_LOG_E(TAG, "Failed to load all libs");
         return 0;
     }

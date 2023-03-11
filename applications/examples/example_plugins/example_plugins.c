@@ -23,8 +23,8 @@ int32_t example_plugins_app(void* p) {
     FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
 
     do {
-        FlipperApplicationPreloadStatus preload_res = flipper_application_preload(
-            app, "/ext/apps_data/example_plugins/plugins/example_plugin1.fal");
+        FlipperApplicationPreloadStatus preload_res =
+            flipper_application_preload(app, APP_DATA_PATH("plugins/example_plugin1.fal"));
 
         if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             FURI_LOG_E(TAG, "Failed to preload plugin");

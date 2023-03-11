@@ -6,6 +6,7 @@ import hashlib
 import math
 import logging
 import posixpath
+import enum
 
 
 def timing(func):
@@ -25,6 +26,41 @@ def timing(func):
         return ret
 
     return wrapper
+
+
+class StorageErrorCode(enum.Enum):
+    OK = "OK"
+    NOT_READY = "filesystem not ready"
+    EXIST = "file/dir already exist"
+    NOT_EXIST = "file/dir not exist"
+    INVALID_PARAMETER = "invalid parameter"
+    DENIED = "access denied"
+    INVALID_NAME = "invalid name/path"
+    INTERNAL = "internal error"
+    NOT_IMPLEMENTED = "function not implemented"
+    ALREADY_OPEN = "file is already open"
+    UNKNOWN = "unknown error"
+
+    @property
+    def is_error(self):
+        return self != self.OK
+
+    @classmethod
+    def from_value(cls, s: str | bytes):
+        if isinstance(s, bytes):
+            s = s.decode("ascii")
+        for code in cls:
+            if code.value == s:
+                return code
+        return cls.UNKNOWN
+
+
+class FlipperStorageException(Exception):
+    def __init__(self, message):
+        super().__init__(f"Storage error: {message}")
+
+    def __init__(self, path: str, error_code: StorageErrorCode):
+        super().__init__(f"Storage error: path '{path}': {error_code.value}")
 
 
 class BufferedRead:
@@ -79,10 +115,10 @@ class FlipperStorage:
         # And read buffer until we get prompt
         self.read.until(self.CLI_PROMPT)
 
-    def stop(self):
+    def stop(self) -> None:
         self.port.close()
 
-    def send(self, line: str):
+    def send(self, line: str) -> None:
         self.port.write(line.encode("ascii"))
 
     def send_and_wait_eol(self, line: str):
@@ -93,20 +129,20 @@ class FlipperStorage:
         self.send(line)
         return self.read.until(self.CLI_PROMPT)
 
-    def has_error(self, data: bytes):
+    def has_error(self, data: bytes | str) -> bool:
         """Is data an error message"""
         return data.find(b"Storage error:") != -1
 
-    def get_error(self, data: bytes):
+    def get_error(self, data: bytes) -> StorageErrorCode:
         """Extract error text from data and print it"""
         _, error_text = data.decode("ascii").split(": ")
-        return error_text.strip()
+        return StorageErrorCode.from_value(error_text.strip())
 
     def list_tree(self, path: str = "/", level: int = 0):
         """List files and dirs on Flipper"""
         path = path.replace("//", "/")
 
-        self.send_and_wait_eol('storage list "' + path + '"\r')
+        self.send_and_wait_eol(f'storage list "{path}"\r')
 
         data = self.read.until(self.CLI_PROMPT)
         lines = data.split(b"\r\n")
@@ -211,7 +247,7 @@ class FlipperStorage:
                 if self.has_error(answer):
                     last_error = self.get_error(answer)
                     self.read.until(self.CLI_PROMPT)
-                    raise FlipperStorageException(last_error)
+                    raise FlipperStorageException(filename_to, last_error)
 
                 self.port.write(filedata)
                 self.read.until(self.CLI_PROMPT)
@@ -236,7 +272,7 @@ class FlipperStorage:
         if self.has_error(answer):
             last_error = self.get_error(answer)
             self.read.until(self.CLI_PROMPT)
-            raise FlipperStorageException(last_error)
+            raise FlipperStorageException(filename, last_error)
             # return filedata
         size = int(answer.split(b": ")[1])
         read_size = 0
@@ -265,7 +301,7 @@ class FlipperStorage:
 
     def exist(self, path: str):
         """Does file or dir exist on Flipper"""
-        self.send_and_wait_eol('storage stat "' + path + '"\r')
+        self.send_and_wait_eol(f'storage stat "{path}"\r')
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
 
@@ -273,31 +309,39 @@ class FlipperStorage:
 
     def exist_dir(self, path: str):
         """Does dir exist on Flipper"""
-        self.send_and_wait_eol('storage stat "' + path + '"\r')
+        self.send_and_wait_eol(f'storage stat "{path}"\r')
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
+        if self.has_error(response):
+            error_code = self.get_error(response)
+            if error_code in (
+                StorageErrorCode.NOT_EXIST,
+                StorageErrorCode.INVALID_NAME,
+            ):
+                return False
+            raise FlipperStorageException(path, error_code)
 
-        return (response.find(b"Directory") != -1) or (response.find(b"Storage,") != -1)
+        return True
 
     def exist_file(self, path: str):
         """Does file exist on Flipper"""
-        self.send_and_wait_eol('storage stat "' + path + '"\r')
+        self.send_and_wait_eol(f'storage stat "{path}"\r')
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
 
         return response.find(b"File, size:") != -1
 
-    def _check_no_error(self, response):
+    def _check_no_error(self, response, path=None):
         if self.has_error(response):
             raise FlipperStorageException(self.get_error(response))
 
     def size(self, path: str):
         """file size on Flipper"""
-        self.send_and_wait_eol('storage stat "' + path + '"\r')
+        self.send_and_wait_eol(f'storage stat "{path}"\r')
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
 
-        self._check_no_error(response)
+        self._check_no_error(response, path)
         if response.find(b"File, size:") != -1:
             size = int(
                 "".join(
@@ -311,10 +355,10 @@ class FlipperStorage:
 
     def mkdir(self, path: str):
         """Create a directory on Flipper"""
-        self.send_and_wait_eol('storage mkdir "' + path + '"\r')
+        self.send_and_wait_eol(f'storage mkdir "{path}"\r')
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
-        self._check_no_error(response)
+        self._check_no_error(response, path)
 
     def format_ext(self):
         """Create a directory on Flipper"""
@@ -322,14 +366,14 @@ class FlipperStorage:
         self.send_and_wait_eol("y\r")
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
-        self._check_no_error(response)
+        self._check_no_error(response, "/ext")
 
     def remove(self, path: str):
         """Remove file or directory on Flipper"""
-        self.send_and_wait_eol('storage remove "' + path + '"\r')
+        self.send_and_wait_eol(f'storage remove "{path}"\r')
         response = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
-        self._check_no_error(response)
+        self._check_no_error(response, path)
 
     def hash_local(self, filename: str):
         """Hash of local file"""
@@ -344,13 +388,8 @@ class FlipperStorage:
         self.send_and_wait_eol('storage md5 "' + filename + '"\r')
         hash = self.read.until(self.CLI_EOL)
         self.read.until(self.CLI_PROMPT)
-        self._check_no_error(hash)
+        self._check_no_error(hash, filename)
         return hash.decode("ascii")
-
-
-class FlipperStorageException(Exception):
-    def __init__(self, message):
-        super().__init__(f"Storage error: {message}")
 
 
 class FlipperStorageOperations:
@@ -378,16 +417,18 @@ class FlipperStorageOperations:
 
     # make directory with exist check
     def checked_mkdir(self, flipper_dir_path: str):
-        if not self.storage.exist_dir(flipper_dir_path):
-            self.logger.debug(f'"{flipper_dir_path}" does not exist, creating')
-            self.storage.mkdir(flipper_dir_path)
-        else:
-            self.logger.debug(f'"{flipper_dir_path}" already exists')
+        path_components, dirs_to_create = flipper_dir_path.split("/"), []
+        while not self.storage.exist_dir(dir_path := "/".join(path_components)):
+            self.logger.debug(f'"{dir_path}" does not exist, will create')
+            dirs_to_create.append(path_components.pop())
+        for dir_to_create in reversed(dirs_to_create):
+            path_components.append(dir_to_create)
+            self.storage.mkdir("/".join(path_components))
 
     # send file or folder recursively
     def recursive_send(self, flipper_path: str, local_path: str, force: bool = False):
         if not os.path.exists(local_path):
-            raise FlipperStorageException(f'Error: "{local_path}" is not exist')
+            raise FlipperStorageException(f'"{local_path}" does not exist')
 
         if os.path.isdir(local_path):
             # create parent dir
@@ -416,6 +457,7 @@ class FlipperStorageOperations:
                     local_file_path = os.path.normpath(os.path.join(dirpath, filename))
                     self.send_file_to_storage(flipper_file_path, local_file_path, force)
         else:
+            self.checked_mkdir(posixpath.dirname(flipper_path))
             self.send_file_to_storage(flipper_path, local_path, force)
 
     def recursive_receive(self, flipper_path: str, local_path: str):
