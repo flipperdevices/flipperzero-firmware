@@ -44,7 +44,7 @@ typedef struct {
     UsbUart* uart;
     Sump* sump;
 
-    ValueMutex state_mutex;
+    FuriMutex* mutex;
     bool triggered;
     bool processing;
 
