@@ -158,6 +158,14 @@ GpsUart* gps_uart_enable()
 {
   GpsUart* gps_uart = malloc(sizeof(GpsUart));
 
+  gps_uart->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+  if (!gps_uart->mutex)
+  {
+    FURI_LOG_E("GPS", "cannot create mutex\r\n");
+    free(gps_uart);
+    return NULL;
+  }
+
   gps_uart->status.valid = false;
   gps_uart->status.latitude = 0.0;
   gps_uart->status.longitude = 0.0;
@@ -172,8 +180,6 @@ GpsUart* gps_uart_enable()
   gps_uart->status.time_seconds = 0;
 
   gps_uart->notifications = furi_record_open(RECORD_NOTIFICATION);
-
-  gps_uart->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
   gps_uart->thread = furi_thread_alloc();
   furi_thread_set_name(gps_uart->thread, "GpsUartWorker");

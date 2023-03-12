@@ -18,7 +18,7 @@ typedef struct
 
 static void render_callback(Canvas* const canvas, void* context)
 {
-  const GpsUart* gps_uart = context;
+  const GpsUart* gps_uart = (GpsUart*)context;
   furi_mutex_acquire(gps_uart->mutex, FuriWaitForever);
 
   canvas_set_font(canvas, FontPrimary);
@@ -66,17 +66,14 @@ int32_t gps_app(void* p)
   FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
   GpsUart* gps_uart = gps_uart_enable();
-
-  if (!gps_uart->mutex)
+  if (gps_uart == NULL)
   {
-    FURI_LOG_E("GPS", "cannot create mutex\r\n");
-    free(gps_uart);
     return 255;
   }
 
   // set system callbacks
   ViewPort* view_port = view_port_alloc();
-  view_port_draw_callback_set(view_port, render_callback, &gps_uart);
+  view_port_draw_callback_set(view_port, render_callback, gps_uart);
   view_port_input_callback_set(view_port, input_callback, event_queue);
 
   // open GUI and register view_port
