@@ -572,12 +572,12 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
 
         if(picopass_worker->state != PicopassWorkerStateEliteDictAttack) break;
     }
+    FURI_LOG_D(TAG, "Dictionary complete");
     if(picopass_worker->state == PicopassWorkerStateEliteDictAttack) {
         picopass_worker->callback(PicopassWorkerEventSuccess, picopass_worker->context);
     } else {
         picopass_worker->callback(PicopassWorkerEventAborted, picopass_worker->context);
     }
-
 }
 
 int32_t picopass_worker_task(void* context) {

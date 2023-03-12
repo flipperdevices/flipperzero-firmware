@@ -36,13 +36,17 @@ static void picopass_scene_elite_dict_attack_prepare_view(Picopass* picopass, Di
     // Identify scene state
     if(state == DictAttackStateIdle) {
         if(iclass_elite_dict_check_presence(IclassEliteDictTypeUser)) {
+            FURI_LOG_D(TAG, "Starting with user dictionary");
             state = DictAttackStateUserDictInProgress;
         } else {
+            FURI_LOG_D(TAG, "Starting with standard dictionary");
             state = DictAttackStateStandardDictInProgress;
         }
     } else if(state == DictAttackStateUserDictInProgress) {
+        FURI_LOG_D(TAG, "Moving from user dictionary to standard dictionary");
         state = DictAttackStateStandardDictInProgress;
     } else if(state == DictAttackStateStandardDictInProgress) {
+        FURI_LOG_D(TAG, "Moving from standard dictionary to elite dictionary");
         state = DictAttackStateFlipperDictInProgress;
     }
 
