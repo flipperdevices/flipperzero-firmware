@@ -315,6 +315,7 @@ def resources_fap_dist_emitter(target, source, env):
             source.append(app_artifacts.compact)
             target.append(resources_root.File(dist_path))
 
+    assert len(target) == len(source)
     return (target, source)
 
 
