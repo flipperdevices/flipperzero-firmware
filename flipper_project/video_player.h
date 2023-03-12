@@ -50,6 +50,8 @@ typedef struct {
     uint8_t* audio_buffer;
     uint8_t* image_buffer;
 
+    uint8_t* buffer;
+
     uint32_t num_frames;
     uint16_t audio_chunk_size;
     uint16_t sample_rate;

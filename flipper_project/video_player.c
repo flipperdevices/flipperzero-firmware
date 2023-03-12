@@ -39,30 +39,7 @@ void draw_callback(Canvas* canvas, void* ctx) {
     PlayerViewModel* model = (PlayerViewModel*)ctx;
     VideoPlayerApp* player = (VideoPlayerApp*)(model->player);
 
-    /*char str[20];
-    snprintf(str, 20, "%ld", player->frames_played);
-    canvas_draw_str(canvas, 0, 10, str);
-    snprintf(str, 20, "%d %d", player->audio_chunk_size, player->sample_rate);
-    canvas_draw_str(canvas, 0, 20, str);
-    snprintf(str, 20, "%d %d", player->width, player->height);
-    canvas_draw_str(canvas, 0, 30, str);
-    snprintf(str, 20, "%d", player->image_buffer_length);
-    canvas_draw_str(canvas, 0, 40, str);*/
-
     canvas_draw_xbm(canvas, 0, 0, player->width, player->height, player->image_buffer);
-
-    /*for(uint8_t i = 0; i < player->height; i++)
-    {
-        for(uint8_t j = 0; j < player->width; j++)
-        {
-            if(!(player->image_buffer[(i * player->width + j) >> 3] & (1 << ((i * player->width + j) & 7))))
-            {
-                canvas_draw_dot(canvas, j, i);
-            }
-        }
-    }*/
-
-    UNUSED(player);
 }
 
 bool input_callback(InputEvent* input_event, void* ctx) {
@@ -121,11 +98,12 @@ int32_t video_player_app(void* p) {
     stream_read(player->stream, &player->height, sizeof(player->height));
     stream_read(player->stream, &player->width, sizeof(player->width));
 
-    player->audio_buffer = (uint8_t*)malloc(player->audio_chunk_size * 2);
-    memset(player->audio_buffer, 0, player->audio_chunk_size * 2);
-    player->image_buffer = (uint8_t*)malloc((uint32_t)player->height * (uint32_t)player->width / 8);
+    player->buffer = (uint8_t*)malloc(player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
+    memset(player->buffer, 0, player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
+
     player->image_buffer_length = (uint32_t)player->height * (uint32_t)player->width / 8;
-    memset(player->image_buffer, 0, player->image_buffer_length);
+    player->audio_buffer = (uint8_t*)&player->buffer[player->image_buffer_length];
+    player->image_buffer = player->buffer;
 
     player_init_hardware_and_play(player);
 
@@ -170,10 +148,12 @@ int32_t video_player_app(void* p) {
 
         if(event.type == EventType1stHalf)
         {
-            uint8_t* audio_buffer = player->audio_buffer;
+            //uint8_t* audio_buffer = player->audio_buffer;
         
-            stream_read(player->stream, player->image_buffer, player->image_buffer_length);
-            stream_read(player->stream, audio_buffer, player->audio_chunk_size);
+            //stream_read(player->stream, player->image_buffer, player->image_buffer_length);
+            //stream_read(player->stream, audio_buffer, player->audio_chunk_size);
+
+            stream_read(player->stream, player->image_buffer, player->image_buffer_length + player->audio_chunk_size);
 
             player->frames_played++;
         }
