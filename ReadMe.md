@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `9 Mar 02:24 GMT +3`
+### Apps checked & updated at `12 Mar 17:50 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -55,6 +55,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Music Beeper (By qqMajiKpp / Haseo)](https://github.com/qqmajikpp/)
 - [Text 2 SAM (By Round-Pi)](https://github.com/Round-Pi/flipperzero-text2sam)
 - [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
+- [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player) <- Follow link to donwload examples and learn how to convert vids
 
 ## GPIO
 - [IFTTT Virtual Button for ESP8266 (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button)
