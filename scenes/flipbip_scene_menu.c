@@ -18,7 +18,7 @@ void flipbip_scene_menu_submenu_callback(void* context, uint32_t index) {
 void flipbip_scene_menu_on_enter(void* context) {
     FlipBip* app = context;
 
-    if(flipbip_has_settings(true) && flipbip_has_settings(false)) {
+    if(flipbip_has_settings(FlipBipFileKey, NULL) && flipbip_has_settings(FlipBipFileDat, NULL)) {
         submenu_add_item(
             app->submenu,
             "View BTC wallet",

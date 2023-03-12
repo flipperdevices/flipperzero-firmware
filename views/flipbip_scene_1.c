@@ -34,18 +34,27 @@
 #define PAGE_ADDR_BEGIN 9
 #define PAGE_ADDR_END 14 //18
 
+#define MAX_ADDR_LEN 42 + 1 // 42 = max length of address + null terminator
+
 #define TEXT_LOADING "Loading..."
 #define TEXT_NEW_WALLET "New wallet"
 #define TEXT_DEFAULT_COIN "Coin"
 #define TEXT_RECEIVE_ADDRESS "receive address:"
 #define TEXT_DEFAULT_DERIV "m/44'/X'/0'/0"
-
-const char* TEXT_INFO = "-Scroll pages with up/down-"
+const char *TEXT_INFO = "-Scroll pages with up/down-"
                         "p1,2)    Mnemonic/Seed     "
                         "p3)       xprv Root Key    "
                         "p4,5)  xprv/xpub Accnt Keys"
                         "p6,7)  xprv/xpub Extnd Keys"
                         "p8+)    Receive Addresses  ";
+
+#define TEXT_SAVE_QR "Save QR"
+#define TEXT_QRFILE_EXT "address.qrcode"
+const char *TEXT_QRFILE = "Filetype: QRCode\n"
+                          "Version: 0\n"
+                          "Message: ";
+
+
 
 // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
 const uint32_t COIN_INFO_ARRAY[3][6] = {
@@ -54,10 +63,10 @@ const uint32_t COIN_INFO_ARRAY[3][6] = {
     {COIN_DOGE, 0x02fac398, 0x02facafd, 0x1e, 0x9e, FlipBipCoinBTC0}};
 
 // coin_name, derivation_path
-const char* COIN_TEXT_ARRAY[3][2] = {
-    {"BTC", "m/44'/0'/0'/0"},
-    {"ETH", "m/44'/60'/0'/0"},
-    {"DOGE", "m/44'/3'/0'/0"}};
+const char* COIN_TEXT_ARRAY[3][3] = {
+    {"BTC", "m/44'/0'/0'/0", "bitcoin:"},
+    {"ETH", "m/44'/60'/0'/0", "ethereum:"},
+    {"DOGE", "m/44'/3'/0'/0", "dogecoin:"}};
 
 struct FlipBipScene1 {
     View* view;
@@ -82,6 +91,7 @@ typedef struct {
 
 // Node for the receive address
 static CONFIDENTIAL HDNode* s_addr_node = NULL;
+static char* s_addr_text = NULL;
 // Generic display text
 static CONFIDENTIAL char* s_disp_text1 = NULL;
 static CONFIDENTIAL char* s_disp_text2 = NULL;
@@ -203,6 +213,7 @@ static void
 
     // Use static node for address generation
     memcpy(s_addr_node, node, sizeof(HDNode));
+    memzero(s_addr_text, MAX_ADDR_LEN);
 
     hdnode_private_ckd(s_addr_node, addr_index);
     hdnode_fill_public_key(s_addr_node);
@@ -219,19 +230,20 @@ static void
         ecdsa_get_address(
             s_addr_node->public_key, coin_info[3], HASHER_SHA2_RIPEMD, HASHER_SHA2D, buf, buflen);
 
-        flipbip_scene_1_draw_generic(buf, 12);
+        strcpy(s_addr_text, buf);
+        flipbip_scene_1_draw_generic(s_addr_text, 12);
 
         //ecdsa_get_wif(addr_node->private_key, WIF_VERSION, HASHER_SHA2D, buf, buflen);
 
     } else if(coin_info[5] == FlipBipCoinETH60) { // ETH
         // ETH style address
         hdnode_get_ethereum_pubkeyhash(s_addr_node, (uint8_t*)buf);
-        char address[42 + 1] = {0};
-        address[0] = '0';
-        address[1] = 'x';
+        s_addr_text[0] = '0';
+        s_addr_text[1] = 'x';
         // Convert the hash to a hex string
-        flipbip_btox((uint8_t*)buf, 20, address + 2);
-        flipbip_scene_1_draw_generic(address, 12);
+        flipbip_btox((uint8_t*)buf, 20, s_addr_text + 2);
+        
+        flipbip_scene_1_draw_generic(s_addr_text, 12);
     }
 
     // Clear the address node
@@ -273,6 +285,7 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         flipbip_scene_1_draw_generic(model->xpub_extended, 20);
     } else if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
         flipbip_scene_1_draw_address(model->node, model->coin, model->page - PAGE_ADDR_BEGIN);
+        elements_button_right(canvas, TEXT_SAVE_QR);
     }
 
     if(model->page == PAGE_LOADING) {
@@ -333,7 +346,8 @@ static int flipbip_scene_1_model_init(
     memzero(mnemonic, TEXT_BUFFER_SIZE);
 
     // Check if the mnemonic key & data is already saved in persistent storage, or overwrite is true
-    if(overwrite || (!flipbip_has_settings(true) && !flipbip_has_settings(false))) {
+    if(overwrite || (!flipbip_has_settings(FlipBipFileKey, NULL) &&
+                     !flipbip_has_settings(FlipBipFileDat, NULL))) {
         // Set mnemonic only mode
         model->mnemonic_only = true;
         // Generate a random mnemonic using trezor-crypto
@@ -468,9 +482,7 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
-        case InputKeyRight:
         case InputKeyDown:
-        case InputKeyOk:
             with_view_model(
                 instance->view,
                 FlipBipScene1Model * model,
@@ -496,6 +508,22 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                         page = PAGE_ADDR_END;
                     }
                     model->page = page;
+                },
+                true);
+            break;
+        case InputKeyRight:
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                FlipBipScene1Model * model,
+                {
+                    if (model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
+                        char qrbuf[90] = {0};
+                        strcpy(qrbuf, TEXT_QRFILE);
+                        strcpy(qrbuf + strlen(qrbuf), COIN_TEXT_ARRAY[model->coin][2]);
+                        strcpy(qrbuf + strlen(qrbuf), s_addr_text);
+                        flipbip_save_settings(qrbuf, FlipBipFileOther, TEXT_QRFILE_EXT, false);
+                    }
                 },
                 true);
             break;
@@ -628,6 +656,7 @@ FlipBipScene1* flipbip_scene_1_alloc() {
 
     // allocate the address node
     s_addr_node = (HDNode*)malloc(sizeof(HDNode));
+    s_addr_text = (char*)malloc(MAX_ADDR_LEN);
 
     // allocate the display text
     s_disp_text1 = (char*)malloc(30 + 1);
@@ -649,6 +678,8 @@ void flipbip_scene_1_free(FlipBipScene1* instance) {
     // free the address node
     memzero(s_addr_node, sizeof(HDNode));
     free(s_addr_node);
+    memzero(s_addr_text, MAX_ADDR_LEN);
+    free(s_addr_text);
 
     // free the display text
     flipbip_scene_1_clear_text();
