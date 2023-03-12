@@ -2,7 +2,7 @@
  An application for playing videos (with sound) on Flipper Zero.
 # How to use:
 
-First, place your video (`source.mp4`) in some empty folder, create "frames" folder there and run this (install ffmpeg if you don't have it) (change the 1280x720 resolution to match your source video resolution if necessary):
+First, place your video (`source.mp4`) in some empty folder, create "frames" folder there and run this (install ffmpeg if you don't have it) (change the 1280x720 resolution to match your source video resolution if necessary, change 86x64 resolution according to your video aspect ratio if necessary):
 
 ```
 ffmpeg -i source.mp4 -f lavfi -i color=gray:s=1280x720 -f lavfi -i color=black:s=1280x720 -f lavfi -i color=white:s=1280x720 -filter_complex "[0:v]scale=1280x720,threshold" -s 86x64 -pix_fmt rgb24 frames/frame%07d.bmp
