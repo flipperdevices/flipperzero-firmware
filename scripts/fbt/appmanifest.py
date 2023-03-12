@@ -106,10 +106,15 @@ class AppManager:
 
     def _validate_app_params(self, *args, **kw):
         apptype = kw.get("apptype")
-        if apptype == FlipperAppType.PLUGIN and kw.get("stack_size"):
-            raise FlipperManifestException(
-                f"Plugin {kw.get('appid')} cannot have stack (did you mean FlipperAppType.EXTERNAL?)"
-            )
+        if apptype == FlipperAppType.PLUGIN:
+            if kw.get("stack_size"):
+                raise FlipperManifestException(
+                    f"Plugin {kw.get('appid')} cannot have stack (did you mean FlipperAppType.EXTERNAL?)"
+                )
+            if not kw.get("requires"):
+                raise FlipperManifestException(
+                    f"Plugin {kw.get('appid')} must have 'requires' in manifest"
+                )
         # Harmless - cdefines for external apps are meaningless
         # if apptype == FlipperAppType.EXTERNAL and kw.get("cdefines"):
         #     raise FlipperManifestException(
