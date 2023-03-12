@@ -41,7 +41,7 @@
 #define TEXT_DEFAULT_COIN "Coin"
 #define TEXT_RECEIVE_ADDRESS "receive address:"
 #define TEXT_DEFAULT_DERIV "m/44'/X'/0'/0"
-const char *TEXT_INFO = "-Scroll pages with up/down-"
+const char* TEXT_INFO = "-Scroll pages with up/down-"
                         "p1,2)    Mnemonic/Seed     "
                         "p3)       xprv Root Key    "
                         "p4,5)  xprv/xpub Accnt Keys"
@@ -50,11 +50,9 @@ const char *TEXT_INFO = "-Scroll pages with up/down-"
 
 #define TEXT_SAVE_QR "Save QR"
 #define TEXT_QRFILE_EXT "address.qrcode"
-const char *TEXT_QRFILE = "Filetype: QRCode\n"
+const char* TEXT_QRFILE = "Filetype: QRCode\n"
                           "Version: 0\n"
                           "Message: ";
-
-
 
 // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
 const uint32_t COIN_INFO_ARRAY[3][6] = {
@@ -242,7 +240,7 @@ static void
         s_addr_text[1] = 'x';
         // Convert the hash to a hex string
         flipbip_btox((uint8_t*)buf, 20, s_addr_text + 2);
-        
+
         flipbip_scene_1_draw_generic(s_addr_text, 12);
     }
 
@@ -517,7 +515,7 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                 instance->view,
                 FlipBipScene1Model * model,
                 {
-                    if (model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
+                    if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
                         char qrbuf[90] = {0};
                         strcpy(qrbuf, TEXT_QRFILE);
                         strcpy(qrbuf + strlen(qrbuf), COIN_TEXT_ARRAY[model->coin][2]);
