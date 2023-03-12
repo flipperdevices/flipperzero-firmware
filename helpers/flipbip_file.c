@@ -19,6 +19,11 @@
 #define FLIPBIP_KEY_PATH FLIPBIP_APP_BASE_FOLDER_PATH(FLIPBIP_KEY_FILE_NAME)
 #define FLIPBIP_KEY_PATH_BAK FLIPBIP_APP_BASE_FOLDER_PATH(FLIPBIP_KEY_FILE_NAME_BAK)
 
+#define TEXT_QRFILE_EXT ".qrcode"
+const char* TEXT_QRFILE = "Filetype: QRCode\n"
+                          "Version: 0\n"
+                          "Message: ";
+
 const size_t FILE_HLEN = 4;
 const size_t FILE_KLEN = 256;
 const size_t FILE_SLEN = 512;
@@ -164,6 +169,17 @@ bool flipbip_save_settings(
     furi_record_close(RECORD_STORAGE);
 
     return ret;
+}
+
+bool flipbip_save_qrfile(
+    const char* qr_msg_prefix,
+    const char* qr_msg_content,
+    const char* file_name) {
+    char qr_buf[90] = {0};
+    strcpy(qr_buf, TEXT_QRFILE);
+    strcpy(qr_buf + strlen(qr_buf), qr_msg_prefix);
+    strcpy(qr_buf + strlen(qr_buf), qr_msg_content);
+    return flipbip_save_settings(qr_buf, FlipBipFileOther, file_name, false);
 }
 
 bool flipbip_load_settings_secure(char* settings) {

@@ -50,10 +50,6 @@ const char* TEXT_INFO = "-Scroll pages with up/down-"
                         "p8+)    Receive Addresses  ";
 
 #define TEXT_SAVE_QR "Save QR"
-#define TEXT_QRFILE_EXT "address.qrcode"
-const char* TEXT_QRFILE = "Filetype: QRCode\n"
-                          "Version: 0\n"
-                          "Message: ";
 
 // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
 const uint32_t COIN_INFO_ARRAY[3][6] = {
@@ -523,13 +519,6 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                 FlipBipScene1Model * model,
                 {
                     if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
-                        char qrbuf[90] = {0};
-                        strcpy(qrbuf, TEXT_QRFILE);
-                        strcpy(qrbuf + strlen(qrbuf), COIN_TEXT_ARRAY[model->coin][2]);
-                        strcpy(
-                            qrbuf + strlen(qrbuf),
-                            model->recv_addresses[model->page - PAGE_ADDR_BEGIN]);
-                        flipbip_save_settings(qrbuf, FlipBipFileOther, TEXT_QRFILE_EXT, false);
                     }
                 },
                 true);
