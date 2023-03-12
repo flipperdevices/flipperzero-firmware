@@ -10,14 +10,15 @@
 using namespace std;
 
 #define BUNDLE_SIGNATURE "BND!VID"
+#define VERSION 1
 
 // USER SETTINGS:
 
-#define FOLDER_PATH "C:/Users/Georg/Desktop/bad_apple_flipper"
+#define FOLDER_PATH "C:/Users/Georg/Desktop/bad_apple_flipper/laputa"
 #define SAMPLE_RATE 44100
-#define FPS 30
+#define FPS 24
 #define HEIGHT 64
-#define WIDTH 86 /*width of your video, determined by ffmpeg. Here it is for 4:3 aspect ratio*/
+#define WIDTH 128 /*width of your video, determined by ffmpeg. Here it is for 4:3 aspect ratio*/
 
 uint32_t count_files(const char* path)
 {
@@ -70,8 +71,10 @@ int main()
     uint16_t audio_chunk_size = SAMPLE_RATE / FPS;
 
     uint8_t* audio_chunk = (uint8_t*)malloc(audio_chunk_size);
+    uint8_t version = VERSION;
 
     fwrite(BUNDLE_SIGNATURE, sizeof(BUNDLE_SIGNATURE) - 1, 1, bundle);
+    fwrite(&version, sizeof(version), 1, bundle);
     fwrite(&num_frames, sizeof(num_frames), 1, bundle);
     fwrite(&audio_chunk_size, sizeof(audio_chunk_size), 1, bundle);
     uint16_t sample_rate = SAMPLE_RATE;
@@ -123,7 +126,7 @@ int main()
         {
             for (uint32_t k = 0; k < 8; k++)
             {
-                pixel_frame[j] |= (Data[(j * 8 + k) * 3]) ? (1 << (k)) : (0 << (k));
+                pixel_frame[j] |= (Data[(j * 8 + k) * 3]) ? (0 << (k)) : (1 << (k));
             }
         }
 

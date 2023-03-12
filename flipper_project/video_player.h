@@ -55,6 +55,7 @@ typedef struct {
     uint16_t sample_rate;
     uint8_t height;
     uint8_t width;
+    uint8_t version;
 
     uint8_t x_offset;
     uint16_t image_buffer_length;

@@ -49,9 +49,9 @@ void draw_callback(Canvas* canvas, void* ctx) {
     snprintf(str, 20, "%d", player->image_buffer_length);
     canvas_draw_str(canvas, 0, 40, str);*/
 
-    //canvas_draw_xbm(canvas, 0, 0, player->width, player->height, player->image_buffer);
+    canvas_draw_xbm(canvas, 0, 0, player->width, player->height, player->image_buffer);
 
-    for(uint8_t i = 0; i < player->height; i++)
+    /*for(uint8_t i = 0; i < player->height; i++)
     {
         for(uint8_t j = 0; j < player->width; j++)
         {
@@ -60,7 +60,7 @@ void draw_callback(Canvas* canvas, void* ctx) {
                 canvas_draw_dot(canvas, j, i);
             }
         }
-    }
+    }*/
 
     UNUSED(player);
 }
@@ -114,6 +114,7 @@ int32_t video_player_app(void* p) {
         goto end;
     }
 
+    stream_read(player->stream, (uint8_t*)&player->version, sizeof(player->version));
     stream_read(player->stream, (uint8_t*)&player->num_frames, sizeof(player->num_frames));
     stream_read(player->stream, (uint8_t*)&player->audio_chunk_size, sizeof(player->audio_chunk_size));
     stream_read(player->stream, (uint8_t*)&player->sample_rate, sizeof(player->sample_rate));
