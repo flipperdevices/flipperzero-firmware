@@ -5,18 +5,18 @@
 #include <gui/elements.h>
 //#include <dolphin/dolphin.h>
 #include <storage/storage.h>
+#include <string.h>
 #include "FlipBIP_icons.h"
 #include "../helpers/flipbip_haptic.h"
 #include "../helpers/flipbip_led.h"
 #include "../helpers/flipbip_string.h"
 #include "../helpers/flipbip_file.h"
-
-#include <string.h>
-#include "../crypto/rand.h"
-#include "../crypto/bip32.h"
-#include "../crypto/bip39.h"
-#include "../crypto/curves.h"
-#include "../crypto/memzero.h"
+// From: /lib/crypto
+#include <memzero.h>
+#include <rand.h>
+#include <curves.h>
+#include <bip32.h>
+#include <bip39.h>
 
 #define DERIV_PURPOSE 44
 #define DERIV_ACCOUNT 0

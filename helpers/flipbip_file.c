@@ -1,10 +1,9 @@
 #include "flipbip_file.h"
-#include "../helpers/flipbip_string.h"
-
-#include "../crypto/memzero.h"
-#include "../crypto/rand.h"
-
 #include <storage/storage.h>
+#include "../helpers/flipbip_string.h"
+// From: lib/crypto
+#include <memzero.h>
+#include <rand.h>
 
 #define FLIPBIP_APP_BASE_FOLDER EXT_PATH("apps_data/flipbip")
 #define FLIPBIP_DAT_FILE_NAME ".flipbip.dat"

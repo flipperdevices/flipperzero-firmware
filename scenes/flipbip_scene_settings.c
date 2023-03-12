@@ -1,6 +1,7 @@
 #include "../flipbip.h"
-#include "../crypto/memzero.h"
 #include <lib/toolbox/value_index.h>
+// From: lib/crypto
+#include <memzero.h>
 
 const char* const haptic_text[2] = {
     "OFF",
