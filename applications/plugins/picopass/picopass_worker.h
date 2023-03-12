@@ -1,6 +1,7 @@
 #pragma once
 
 #include "picopass_device.h"
+#include "picopass_keys.h"
 
 typedef struct PicopassWorker PicopassWorker;
 
@@ -12,6 +13,7 @@ typedef enum {
     // Main worker states
     PicopassWorkerStateDetect,
     PicopassWorkerStateWrite,
+    PicopassWorkerStateWriteKey,
     // Transition
     PicopassWorkerStateStop,
 } PicopassWorkerState;

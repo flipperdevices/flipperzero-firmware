@@ -1,5 +1,6 @@
 #include "../picopass_i.h"
 #include <dolphin/dolphin.h>
+#include "../picopass_keys.h"
 
 void picopass_read_card_worker_callback(PicopassWorkerEvent event, void* context) {
     UNUSED(event);
@@ -34,7 +35,14 @@ bool picopass_scene_read_card_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == PicopassCustomEventWorkerExit) {
-            scene_manager_next_scene(picopass->scene_manager, PicopassSceneReadCardSuccess);
+            if(memcmp(
+                   picopass->dev->dev_data.pacs.key,
+                   picopass_factory_debit_key,
+                   PICOPASS_BLOCK_LEN) == 0) {
+                scene_manager_next_scene(picopass->scene_manager, PicopassSceneReadFactorySuccess);
+            } else {
+                scene_manager_next_scene(picopass->scene_manager, PicopassSceneReadCardSuccess);
+            }
             consumed = true;
         }
     }
