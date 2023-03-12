@@ -1,0 +1,12 @@
+/deps
+/objs.*
+/bin.*
+/res
+*.dll
+*.exe
+zip/data/Default.kt
+zip
+.vscode/ipch/*
+themetemp
+/src/version_number.h
+/src/version.h
