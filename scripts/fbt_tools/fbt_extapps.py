@@ -274,7 +274,7 @@ def validate_app_imports(target, source, env):
         SCons.Warnings.warn(SCons.Warnings.LinkWarning, warning_msg),
 
 
-def GetExtAppFromPath(env, app_dir):
+def GetExtAppByIdOrPath(env, app_dir):
     if not app_dir:
         raise UserError("APPSRC= not set")
 
@@ -296,7 +296,7 @@ def GetExtAppFromPath(env, app_dir):
     app_artifacts = env["EXT_APPS"].get(app.appid, None)
     if not app_artifacts:
         raise UserError(
-            f"Application {app.appid} is not configured for building as external"
+            f"Application {app.appid} is not configured to be built as external"
         )
 
     return app_artifacts
@@ -412,7 +412,7 @@ def generate(env, **kw):
     )
 
     env.AddMethod(BuildAppElf)
-    env.AddMethod(GetExtAppFromPath)
+    env.AddMethod(GetExtAppByIdOrPath)
     env.Append(
         BUILDERS={
             "FapDist": Builder(

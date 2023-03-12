@@ -23,4 +23,5 @@ constexpr HashtableApiInterface applicaton_hashtable_api_interface{
 };
 
 /* Casting to generic resolver to use in Composite API resolver */
-const ElfApiInterface* application_api_interface = &applicaton_hashtable_api_interface;
+extern "C" const ElfApiInterface* const application_api_interface =
+    &applicaton_hashtable_api_interface;

@@ -72,7 +72,7 @@ class FlipperApplication:
     _appmanager: Optional["AppManager"] = None
     _appdir: Optional[object] = None
     _apppath: Optional[str] = None
-    _modules: List["FlipperApplication"] = field(default_factory=list)
+    _plugins: List["FlipperApplication"] = field(default_factory=list)
 
     def supports_hardware_target(self, target: str):
         return target in self.targets or "all" in self.targets
@@ -205,7 +205,7 @@ class AppBuildset:
         self._check_conflicts()
         self._check_unsatisfied()  # unneeded?
         self._check_target_match()
-        self._group_modules()
+        self._group_plugins()
         self.apps = sorted(
             list(map(self.appmgr.get, self.appnames)),
             key=lambda app: app.appid,
@@ -284,13 +284,13 @@ class AppBuildset:
                 f"Apps incompatible with target {self.hw_target}: {', '.join(incompatible)}"
             )
 
-    def _group_modules(self):
+    def _group_plugins(self):
         known_extensions = self.get_apps_of_type(FlipperAppType.PLUGIN, all_known=True)
         for extension_app in known_extensions:
             for parent_app_id in extension_app.requires:
                 try:
                     parent_app = self.appmgr.get(parent_app_id)
-                    parent_app._modules.append(extension_app)
+                    parent_app._plugins.append(extension_app)
                 except FlipperManifestException as e:
                     self._writer(
                         f"Module {extension_app.appid} has unknown parent {parent_app_id}"

@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <algorithm>
 
-#define TAG "fw_api"
+#define TAG "hashtable_api"
 
 bool elf_resolve_from_hashtable(
     const ElfApiInterface* interface,
@@ -22,7 +22,12 @@ bool elf_resolve_from_hashtable(
     auto find_res =
         std::lower_bound(hashtable_interface->table_cbegin, hashtable_interface->table_cend, key);
     if((find_res == hashtable_interface->table_cend || (find_res->hash != gnu_sym_hash))) {
-        FURI_LOG_W(TAG, "Can't find symbol '%s' (hash %lx)!", name, gnu_sym_hash);
+        FURI_LOG_W(
+            TAG,
+            "Can't find symbol '%s' (hash %lx) @ %p!",
+            name,
+            gnu_sym_hash,
+            hashtable_interface->table_cbegin);
         result = false;
     } else {
         result = true;

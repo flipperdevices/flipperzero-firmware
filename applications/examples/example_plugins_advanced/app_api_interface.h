@@ -6,4 +6,4 @@
  * Resolver interface with private application's symbols. 
  * Implementation is contained in app_api_table.c
  */
-extern const ElfApiInterface* application_api_interface;
+extern const ElfApiInterface* const application_api_interface;

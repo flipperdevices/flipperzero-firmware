@@ -18,4 +18,4 @@ constexpr HashtableApiInterface elf_api_interface{
     .table_cend = elf_api_table.cend(),
 };
 
-const ElfApiInterface* firmware_api_interface = &elf_api_interface;
+const ElfApiInterface* const firmware_api_interface = &elf_api_interface;
