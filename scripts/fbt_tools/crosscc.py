@@ -18,6 +18,7 @@ def prefix_commands(env, command_prefix, cmd_list):
         if command in env:
             env[command] = shutil.which(command_prefix + env[command])
 
+
 def _get_tool_version(env, tool):
     verstr = "version unknown"
     proc = _subproc(
