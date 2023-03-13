@@ -58,13 +58,12 @@ typedef struct {
   enum OutputMode output_mode;
   FuriTimer* timer;
   NotificationApp* notifications;
+  FuriMutex* mutex;
 } MetronomeState;
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-  const MetronomeState* metronome_state = acquire_mutex((ValueMutex*)ctx, 25);
-  if(metronome_state == NULL) {
-    return;
-  }
+  const MetronomeState* metronome_state = (MetronomeState*)ctx;
+  furi_mutex_acquire(metronome_state->mutex, FuriWaitForever);
 
   string_t tempStr;
   string_init(tempStr);
@@ -113,7 +112,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 
   // cleanup
   string_clear(tempStr);
-  release_mutex((ValueMutex*)ctx, metronome_state);
+  furi_mutex_release(metronome_state->mutex);
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -125,7 +124,8 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 
 static void timer_callback(void* ctx) {
   // this is where we go BEEP!
-  MetronomeState* metronome_state = acquire_mutex((ValueMutex*)ctx, 25);
+  MetronomeState* metronome_state = (MetronomeState*)ctx;
+  furi_mutex_acquire(metronome_state->mutex, FuriWaitForever);
   metronome_state->current_beat++;
   if (metronome_state->current_beat > metronome_state->beats_per_bar) {
     metronome_state->current_beat = 1;
@@ -186,7 +186,7 @@ static void timer_callback(void* ctx) {
   }
   notification_message(metronome_state->notifications, &sequence_reset_rgb);
 
-  release_mutex((ValueMutex*)ctx, metronome_state);
+  furi_mutex_release(metronome_state->mutex);
 }
 
 static uint32_t state_to_sleep_ticks(MetronomeState* metronome_state) {
@@ -254,6 +254,7 @@ static void metronome_state_init(MetronomeState* const metronome_state) {
   metronome_state->current_beat = 0;
   metronome_state->output_mode = Loud;
   metronome_state->notifications = furi_record_open(RECORD_NOTIFICATION);
+  metronome_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
 int32_t metronome_app() {
@@ -262,8 +263,7 @@ int32_t metronome_app() {
   MetronomeState* metronome_state = malloc(sizeof(MetronomeState));
   metronome_state_init(metronome_state);
 
-  ValueMutex state_mutex;
-  if(!init_mutex(&state_mutex, metronome_state, sizeof(MetronomeState))) {
+  if(!metronome_state->mutex) {
     FURI_LOG_E("Metronome", "cannot create mutex\r\n");
     free(metronome_state);
     return 255;
@@ -271,9 +271,9 @@ int32_t metronome_app() {
 
   // Set system callbacks
   ViewPort* view_port = view_port_alloc();
-  view_port_draw_callback_set(view_port, render_callback, &state_mutex);
+  view_port_draw_callback_set(view_port, render_callback, metronome_state);
   view_port_input_callback_set(view_port, input_callback, event_queue);
-  metronome_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, &state_mutex);
+  metronome_state->timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, metronome_state);
 
   // Open GUI and register view_port
   //
@@ -284,7 +284,7 @@ int32_t metronome_app() {
   for(bool processing = true; processing;) {
     FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
-    MetronomeState* metronome_state = (MetronomeState*)acquire_mutex_block(&state_mutex);
+    furi_mutex_acquire(metronome_state->mutex, FuriWaitForever);
 
     if(event_status == FuriStatusOk) {
       if(event.type == EventTypeKey) {
@@ -368,7 +368,7 @@ int32_t metronome_app() {
     }
 
     view_port_update(view_port);
-    release_mutex(&state_mutex, metronome_state);
+    furi_mutex_release(metronome_state->mutex);
   }
 
   view_port_enabled_set(view_port, false);
@@ -376,9 +376,9 @@ int32_t metronome_app() {
   furi_record_close("gui");
   view_port_free(view_port);
   furi_message_queue_free(event_queue);
-  delete_mutex(&state_mutex);
   furi_timer_free(metronome_state->timer);
   furi_record_close(RECORD_NOTIFICATION);
+  furi_mutex_free(metronome_state->mutex);
   free(metronome_state);
 
   return 0;
