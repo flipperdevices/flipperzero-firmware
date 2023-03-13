@@ -235,9 +235,11 @@ void Edit_insert_digit(char new)
 			furi_string_set_n(ns, fs, 0, len);
 			furi_string_cat_printf(ns, "%c", new);
 			furi_string_cat_str(ns, Edit_pos);
-			furi_string_free(fs);
 			Log[view_Batch] = ns;
-			Edit_pos = (char*)furi_string_get_cstr(ns) + len;
+			Edit_pos = (char*)furi_string_get_cstr(ns);
+			Edit_start = Edit_pos + (Edit_start - (char*)furi_string_get_cstr(fs));
+			Edit_pos += len;
+			furi_string_free(fs);
 		}
 	}
 }
@@ -1316,16 +1318,21 @@ int32_t nrf24batch_app(void* p) {
 					if(event.input.type == InputTypeShort || event.input.type == InputTypeRepeat) {
 						if(!ask_question) {
 							if(Edit) {
-								if(*Edit_pos != '-') {
-									if(*Edit_pos < '9') (*Edit_pos)++;
-									else if(Edit_hex) {
-										if(*Edit_pos == '9') *Edit_pos = 'A';
-										else if((*Edit_pos & ~0x20) < 'F') (*Edit_pos)++;
-									} else if(Edit_pos > Edit_start && *(Edit_pos - 1) < '9' && *(Edit_pos - 1) >= '0') {
-										*Edit_pos = '0';
-										(*(Edit_pos - 1))++;
+								char c = *Edit_pos;
+								if(Edit_hex) {
+									if(c == '9') *Edit_pos = 'A';
+									else if(c < 'F' || c < '9') *Edit_pos = c + 1;
+								} else {
+									if(c == '-') *Edit_pos = '0';
+									else if(c < '9') *Edit_pos = c + 1;
+									else {
+										c = *(Edit_pos - 1);
+										if(Edit_pos > Edit_start && c < '9' && c >= '0') {
+											*Edit_pos = '0';
+											(*(Edit_pos - 1)) = c + 1;
+										}
 									}
-								}
+								}	
 							} else if(what_doing == 0) {
 								if(addr_len) {
 									if(setup_cursor > 0) setup_cursor--; else setup_cursor = 2;
@@ -1343,17 +1350,15 @@ int32_t nrf24batch_app(void* p) {
 						if(!ask_question) {
 							if(Edit) {
 								if(*Edit_pos != '-') {
-									if(Edit_hex && (*Edit_pos & ~0x20) == 'A') (*Edit_pos) = '9';
+									if(Edit_hex && *Edit_pos == 'A') (*Edit_pos) = '9';
 									else if(*Edit_pos > '0') (*Edit_pos)--;
 									else if(!Edit_hex) {
 										if(Edit_pos > Edit_start) {
-											if(*(Edit_pos - 1) > '0') {
+											if(*(Edit_pos - 1) > '0' && *(Edit_pos - 1) <= '9') {
 												*Edit_pos = '9';
 												(*(Edit_pos - 1))--;
 											}
-										} else if(strlen(Edit_start) == 1) { // negative
-											Edit_insert_digit('-');
-										}
+										} else Edit_insert_digit('-'); // negative
 									}
 								}
 							} else if(what_doing == 0) {
