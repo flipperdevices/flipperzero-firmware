@@ -23,7 +23,6 @@ typedef struct {
 int intensity = 0;
 
 void led_test_draw_callback(Canvas* canvas, void* ctx) {
-    //UNUSED(ctx);
     furi_assert(ctx);
     PluginState* plugin_state = ctx;
 
@@ -95,14 +94,13 @@ int32_t ledpulser_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
-    NotificationMessage* dyn_notification_message = malloc(sizeof(NotificationMessage));
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, plugin_state, sizeof(PluginState))) {
-        FURI_LOG_E("LED Pulser", "cannot create mutex\r\n");
-        free(plugin_state);
-        free(dyn_notification_message);
+    FuriMutex* state_mutex;
+    state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!state_mutex) {
+        FURI_LOG_E("LED Pulser", "cannot create mutex");
         return 255;
     }
+    
     plugin_state->direction = 0;
     plugin_state->intensity = 0;
     DOLPHIN_DEED(DolphinDeedPluginStart);
@@ -123,7 +121,9 @@ int32_t ledpulser_app(void* p) {
     notification_message(notification, &sequence_display_backlight_on);
     while(processing) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-        PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+        //PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(state_mutex, FuriWaitForever);
+
         NotificationMessage notification_led_message;
         NotificationMessage notification_led_message_1;
         NotificationMessage notification_led_message_2;
@@ -244,7 +244,7 @@ int32_t ledpulser_app(void* p) {
                 }
             }
         }
-        release_mutex(&state_mutex, plugin_state);
+        furi_mutex_release(state_mutex);
     }
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
@@ -252,7 +252,7 @@ int32_t ledpulser_app(void* p) {
 
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(state_mutex);
 
     return 0;
 }
