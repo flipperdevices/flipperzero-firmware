@@ -50,6 +50,7 @@ const char* TEXT_INFO = "-Scroll pages with up/down-"
                         "p8+)    Receive Addresses  ";
 
 #define TEXT_SAVE_QR "Save QR"
+#define TEXT_QRFILE_EXT ".qrcode" // 7 chars + 1 null
 
 // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
 const uint32_t COIN_INFO_ARRAY[3][6] = {
@@ -445,10 +446,18 @@ static int flipbip_scene_1_model_init(
     model->node = node;
 
     // Initialize addresses
-    for(int a = 0; a < NUM_ADDRS; a++) {
+    for(uint8_t a = 0; a < NUM_ADDRS; a++) {
         model->recv_addresses[a] = malloc(MAX_ADDR_LEN);
         memzero(model->recv_addresses[a], MAX_ADDR_LEN);
         flipbip_scene_1_init_address(model->recv_addresses[a], node, coin_info[5], a);
+
+        // Save QR code file
+        char name[14] = {0};
+        strcpy(name, COIN_TEXT_ARRAY[coin][0]);
+        const unsigned char addr_num[1] = {a};
+        flipbip_btox(addr_num, 1, name + strlen(name));
+        strcpy(name + strlen(name), TEXT_QRFILE_EXT);
+        flipbip_save_qrfile(COIN_TEXT_ARRAY[coin][2], model->recv_addresses[a], name);
     }
 
     model->page = PAGE_INFO;
