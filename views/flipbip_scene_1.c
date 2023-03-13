@@ -49,7 +49,7 @@ const char* TEXT_INFO = "-Scroll pages with up/down-"
                         "p6,7)  xprv/xpub Extnd Keys"
                         "p8+)    Receive Addresses  ";
 
-#define TEXT_SAVE_QR "Save QR"
+// #define TEXT_SAVE_QR "Save QR"
 #define TEXT_QRFILE_EXT ".qrcode" // 7 chars + 1 null
 
 // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
