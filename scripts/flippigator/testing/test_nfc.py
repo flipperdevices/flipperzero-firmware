@@ -3,9 +3,8 @@ import time
 
 import allure
 import pytest
-from termcolor import colored
-
 from flippigator.case import BaseCase
+from termcolor import colored
 
 os.system("color")
 

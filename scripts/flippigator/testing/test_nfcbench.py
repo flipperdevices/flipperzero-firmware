@@ -3,9 +3,8 @@ import time
 
 import allure
 import pytest
-from termcolor import colored
-
 from flippigator.case import BaseCase
+from termcolor import colored
 
 os.system("color")
 
@@ -66,7 +65,7 @@ class TestNfcBench(BaseCase):
         nav.press_ok()
         nav.press_back()
 
-        '''
+        """
         nav.go_to("Save")
         nav.press_ok()
         nav.press_ok()
@@ -74,7 +73,7 @@ class TestNfcBench(BaseCase):
         nav.press_down()
         state = nav.get_current_state()
         assert "FileBrowserLevelUp" in state, "Can't save read NFC card"
-        '''
+        """
         nav.go_to_main_screen()
 
     def test_read_nfc_a_card(self, nav, gator):
@@ -99,9 +98,7 @@ class TestNfcBench(BaseCase):
                 print(colored("ReadingCardNFC", "yellow"))
                 state = nav.get_current_state()
         state = nav.get_current_state()
-        assert (
-            "card_NFC-A_bench" in state
-        ), "Result of reading reference card is fail"
+        assert "card_NFC-A_bench" in state, "Result of reading reference card is fail"
         nav.press_right()
         menu = nav.get_menu_list()
         menu_ref = [
@@ -112,7 +109,7 @@ class TestNfcBench(BaseCase):
         assert menu == menu_ref, "NFC card menu is wrong"
         nav.go_to_main_screen()
 
-    '''
+    """
     Disabled because of bug with Mifare cards 
     def test_read_mifare_classic_4k_card(self, nav, gator):
         with allure.step("Go to NFC"):
@@ -177,7 +174,7 @@ class TestNfcBench(BaseCase):
         assert "FileBrowserLevelUp" in state, "Can't save read NFC card"
 
         nav.go_to_main_screen()
-    '''
+    """
 
     def test_read_troika_card(self, nav, gator):
         with allure.step("Go to NFC"):
@@ -201,9 +198,7 @@ class TestNfcBench(BaseCase):
                 print(colored("ReadingCardNFC", "yellow"))
                 state = nav.get_current_state()
         state = nav.get_current_state()
-        assert (
-            "card_Troika_bench" in state
-        ), "Result of reading reference card is fail"
+        assert "card_Troika_bench" in state, "Result of reading reference card is fail"
         nav.press_right()
         menu = nav.get_menu_list()
         menu_ref = [
@@ -236,9 +231,7 @@ class TestNfcBench(BaseCase):
                 print(colored("ReadingCardNFC", "yellow"))
                 state = nav.get_current_state()
         state = nav.get_current_state()
-        assert (
-            "card_NTAG215_bench" in state
-        ), "Result of reading reference card is fail"
+        assert "card_NTAG215_bench" in state, "Result of reading reference card is fail"
         nav.press_right()
         menu = nav.get_menu_list()
         menu_ref = [
@@ -319,7 +312,8 @@ class TestNfcBench(BaseCase):
         ]
         assert menu == menu_ref, "NFC card menu is wrong"
         nav.go_to_main_screen()
-    '''
+
+    """
     This card removed because of bug
     def test_read_nfc_v_card(self, nav, gator):
         with allure.step("Go to NFC"):
@@ -347,7 +341,7 @@ class TestNfcBench(BaseCase):
             "card_NFC-V_bench" in state
         ), "Result of reading reference card is fail"
         nav.go_to_main_screen()
-    '''
+    """
 
     def test_read_all_in_one_card(self, nav, gator):
         with allure.step("Go to NFC"):

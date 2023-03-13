@@ -5,8 +5,6 @@ import time
 
 import cv2 as cv
 import numpy
-from termcolor import colored
-
 from flippigator.modules.applications import AppApplications
 from flippigator.modules.badusb import AppBadusb
 from flippigator.modules.gpio import AppGpio
@@ -17,6 +15,7 @@ from flippigator.modules.rfid import AppRfid
 from flippigator.modules.settings import AppSettings
 from flippigator.modules.subghz import AppSubGhz
 from flippigator.modules.u2f import AppU2f
+from termcolor import colored
 
 # APPLY_TEMPLATE_THRESHOLD = 0.99
 SCREEN_H = 128
@@ -130,7 +129,7 @@ class Navigator:
         cv.imshow(window_name, display_image)
         key = cv.waitKey(1)
 
-    def recog_ref(self, ref = []):
+    def recog_ref(self, ref=[]):
         # self.updateScreen()
         temp_pic_list = list()
         screen_image = self.get_raw_screen()
@@ -186,7 +185,7 @@ class Navigator:
 
         return found_ic
 
-    def get_current_state(self, timeout=3, ref = []):
+    def get_current_state(self, timeout=3, ref=[]):
         self.update_screen()
         state = self.recog_ref(ref)
         start_time = time.time()
@@ -307,9 +306,8 @@ class Gator:
             print(status)
             time.sleep(0.2)
 
-    def transform(self, x, y, speed = 3000):
-        return (-x-self._x_size, -y-self._y_size, speed)
-
+    def transform(self, x, y, speed=3000):
+        return (-x - self._x_size, -y - self._y_size, speed)
 
     def swim_to(self, x, y, speed=3000):
         self._serial.reset_output_buffer()
@@ -339,6 +337,7 @@ class Gator:
             print(status)
             time.sleep(0.2)
 
+
 class FlipperTextKeyboard:
     def __init__(self, nav) -> None:
         self.nav = nav
@@ -352,22 +351,22 @@ class FlipperTextKeyboard:
         row_index = -1
         for row in self.keeb:
             try:
-                row_index = row_index+1
+                row_index = row_index + 1
                 col_index = row.index(letter)
                 break
             except:
                 ValueError: None
 
-        if(col_index < 0):
+        if col_index < 0:
             return None
         else:
             return (col_index, row_index)
 
     def send(self, text):
-        current_x, current_y = self._coord('\n')
-        text = text + '\n'
+        current_x, current_y = self._coord("\n")
+        text = text + "\n"
         for letter in list(text):
-            if letter != '\b' and letter != '\n':
+            if letter != "\b" and letter != "\n":
                 keeb_letter = str.lower(letter)
             else:
                 keeb_letter = letter
@@ -384,22 +383,22 @@ class FlipperTextKeyboard:
                 if dir_up:
                     current_y -= 1
                     self.nav.press_up()
-                    if self.keeb[current_y][current_x] == '\0':
+                    if self.keeb[current_y][current_x] == "\0":
                         step_x += 1
                 else:
                     current_y += 1
                     self.nav.press_down()
-                    if self.keeb[current_y][current_x] == '\0':
+                    if self.keeb[current_y][current_x] == "\0":
                         step_x -= 1
 
             for _ in range(step_x):
                 if dir_left:
                     current_x -= 1
-                    if self.keeb[current_y][current_x] != '\0':
+                    if self.keeb[current_y][current_x] != "\0":
                         self.nav.press_left()
                 else:
                     current_x += 1
-                    if self.keeb[current_y][current_x] != '\0':
+                    if self.keeb[current_y][current_x] != "\0":
                         self.nav.press_right()
 
             if letter.isupper():
@@ -420,22 +419,22 @@ class FlipperHEXKeyboard:
         row_index = -1
         for row in self.keeb:
             try:
-                row_index = row_index+1
+                row_index = row_index + 1
                 col_index = row.index(letter)
                 break
             except:
                 ValueError: None
 
-        if(col_index < 0):
+        if col_index < 0:
             return None
         else:
             return (col_index, row_index)
 
     def send(self, text):
-        current_x, current_y = self._coord('0')
-        text = text + '\n'
+        current_x, current_y = self._coord("0")
+        text = text + "\n"
         for letter in list(text):
-            if letter != '\b' and letter != '\n':
+            if letter != "\b" and letter != "\n":
                 keeb_letter = str.lower(letter)
             else:
                 keeb_letter = letter
@@ -465,6 +464,7 @@ class FlipperHEXKeyboard:
                     self.nav.press_right()
 
             self.nav.press_ok()
+
 
 class FlippigatorException(Exception):
     pass

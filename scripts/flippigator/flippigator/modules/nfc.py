@@ -1,6 +1,5 @@
-from termcolor import colored
-
 from flippigator.app import App
+from termcolor import colored
 
 
 class AppNfc(App):

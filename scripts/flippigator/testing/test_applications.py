@@ -2,9 +2,8 @@ import os
 import time
 
 import pytest
-from termcolor import colored
-
 from flippigator.case import BaseCase
+from termcolor import colored
 
 os.system("color")
 
@@ -82,10 +81,7 @@ class TestApplications(BaseCase):
         nav.go_to("folder_Media")
         nav.press_ok()
         menu = nav.get_menu_list()
-        menu_ref = [
-            "FileBrowserLevelUp",
-            "app_Music Player"
-        ]
+        menu_ref = ["FileBrowserLevelUp", "app_Music Player"]
         for i in menu:
             if i in menu_ref:
                 menu_ref.remove(i)

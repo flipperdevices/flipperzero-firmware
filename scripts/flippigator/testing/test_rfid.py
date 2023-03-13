@@ -2,9 +2,8 @@ import os
 import time
 
 import pytest
-from termcolor import colored
-
 from flippigator.case import BaseCase
+from termcolor import colored
 
 os.system("color")
 
@@ -31,7 +30,7 @@ class TestRfid(BaseCase):
         assert "ReadingRFID" in state, "RFID Reading failed"
         nav.go_to_main_screen()
 
-    '''
+    """
     I think that it's time to del all handy test from this repo
     Let's make only smoke test without bench?
     def test_read_ref_card(self, nav):
@@ -91,7 +90,7 @@ class TestRfid(BaseCase):
         state = nav.get_current_state()
         assert "Saved!" in state, "Can't save read RFID card"
         nav.go_to_main_screen()
-    '''
+    """
 
     def test_saved(self, nav):
         nav.rfid.go_into()

@@ -1,7 +1,6 @@
 import os
 
 import pytest
-
 from flippigator.case import BaseCase
 
 os.system("color")

@@ -2,9 +2,8 @@ import os
 import time
 
 import pytest
-from termcolor import colored
-
 from flippigator.case import BaseCase
+from termcolor import colored
 
 os.system("color")
 
