@@ -1,8 +1,23 @@
 #include <stdbool.h>
 
-bool flipbip_has_settings(bool key_file);
-bool flipbip_load_settings(char* settings, bool key_file);
-bool flipbip_save_settings(const char* settings, bool key_file, bool append);
+typedef enum {
+    FlipBipFileDat,
+    FlipBipFileKey,
+    FlipBipFileOther,
+} FlipBipFile;
 
-bool flipbip_load_settings_secure(char* settings);
-bool flipbip_save_settings_secure(const char* settings);
+bool flipbip_has_file(const FlipBipFile file_type, const char* file_name, const bool remove);
+bool flipbip_load_file(char* settings, const FlipBipFile file_type, const char* file_name);
+bool flipbip_save_file(
+    const char* settings,
+    const FlipBipFile file_type,
+    const char* file_name,
+    const bool append);
+
+bool flipbip_save_qrfile(
+    const char* qr_msg_prefix,
+    const char* qr_msg_content,
+    const char* file_name);
+
+bool flipbip_load_file_secure(char* settings);
+bool flipbip_save_file_secure(const char* settings);

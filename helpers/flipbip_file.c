@@ -1,37 +1,50 @@
 #include "flipbip_file.h"
-#include "../helpers/flipbip_string.h"
-
-#include "../crypto/memzero.h"
-#include "../crypto/rand.h"
-
 #include <storage/storage.h>
+#include <applications.h>
+#include <loader/loader.h>
+#include "../helpers/flipbip_string.h"
+// From: lib/crypto
+#include <memzero.h>
+#include <rand.h>
 
+// #define FLIPBIP_APP_BASE_FOLDER APP_DATA_PATH("flipbip")
 #define FLIPBIP_APP_BASE_FOLDER EXT_PATH("apps_data/flipbip")
+#define FLIPBIP_APP_BASE_FOLDER_PATH(path) FLIPBIP_APP_BASE_FOLDER "/" path
 #define FLIPBIP_DAT_FILE_NAME ".flipbip.dat"
 // #define FLIPBIP_DAT_FILE_NAME ".flipbip.dat.txt"
 #define FLIPBIP_DAT_FILE_NAME_BAK ".flipbip.dat.bak"
 #define FLIPBIP_KEY_FILE_NAME ".flipbip.key"
 // #define FLIPBIP_KEY_FILE_NAME ".flipbip.key.txt"
 #define FLIPBIP_KEY_FILE_NAME_BAK ".flipbip.key.bak"
-#define FLIPBIP_DAT_PATH FLIPBIP_APP_BASE_FOLDER "/" FLIPBIP_DAT_FILE_NAME
-#define FLIPBIP_DAT_PATH_BAK FLIPBIP_APP_BASE_FOLDER "/" FLIPBIP_DAT_FILE_NAME_BAK
-#define FLIPBIP_KEY_PATH FLIPBIP_APP_BASE_FOLDER "/" FLIPBIP_KEY_FILE_NAME
-#define FLIPBIP_KEY_PATH_BAK FLIPBIP_APP_BASE_FOLDER "/" FLIPBIP_KEY_FILE_NAME_BAK
+#define FLIPBIP_DAT_PATH FLIPBIP_APP_BASE_FOLDER_PATH(FLIPBIP_DAT_FILE_NAME)
+#define FLIPBIP_DAT_PATH_BAK FLIPBIP_APP_BASE_FOLDER_PATH(FLIPBIP_DAT_FILE_NAME_BAK)
+#define FLIPBIP_KEY_PATH FLIPBIP_APP_BASE_FOLDER_PATH(FLIPBIP_KEY_FILE_NAME)
+#define FLIPBIP_KEY_PATH_BAK FLIPBIP_APP_BASE_FOLDER_PATH(FLIPBIP_KEY_FILE_NAME_BAK)
 
-const size_t FILE_HLEN = 4;
-const size_t FILE_KLEN = 256;
-const size_t FILE_SLEN = 512;
+const char* TEXT_QRFILE = "Filetype: QRCode\n"
+                          "Version: 0\n"
+                          "Message: "; // 37 chars + 1 null
+#define FILE_HLEN 4
+#define FILE_KLEN 256
+#define FILE_SLEN 512
+#define FILE_MAX_PATH_LEN 48
 const char* FILE_HSTR = "fb01";
 const char* FILE_K1 = "fb0131d5cf688221c109163908ebe51debb46227c6cc8b37641910833222772a"
                       "baefe6d9ceb651842260e0d1e05e3b90d15e7d5ffaaabc0207bf200a117793a2";
 
-bool flipbip_load_settings(char* settings, bool key_file) {
+bool flipbip_load_file(char* settings, const FlipBipFile file_type, const char* file_name) {
     bool ret = false;
     const char* path;
-    if(key_file) {
+    if(file_type == FlipBipFileKey) {
         path = FLIPBIP_KEY_PATH;
-    } else {
+    } else if(file_type == FlipBipFileDat) {
         path = FLIPBIP_DAT_PATH;
+    } else {
+        char path_buf[32] = {0};
+        strcpy(path_buf, FLIPBIP_APP_BASE_FOLDER);
+        strcpy(path_buf + strlen(path_buf), "/");
+        strcpy(path_buf + strlen(path_buf), file_name);
+        path = path_buf;
     }
 
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
@@ -74,34 +87,53 @@ bool flipbip_load_settings(char* settings, bool key_file) {
     return ret;
 }
 
-bool flipbip_has_settings(bool key_file) {
+bool flipbip_has_file(const FlipBipFile file_type, const char* file_name, const bool remove) {
     bool ret = false;
     const char* path;
-    if(key_file) {
+    if(file_type == FlipBipFileKey) {
         path = FLIPBIP_KEY_PATH;
-    } else {
+    } else if(file_type == FlipBipFileDat) {
         path = FLIPBIP_DAT_PATH;
+    } else {
+        char path_buf[32] = {0};
+        strcpy(path_buf, FLIPBIP_APP_BASE_FOLDER);
+        strcpy(path_buf + strlen(path_buf), "/");
+        strcpy(path_buf + strlen(path_buf), file_name);
+        path = path_buf;
     }
 
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
-    if(storage_file_exists(fs_api, path)) {
-        ret = true;
+    if(remove) {
+        ret = storage_simply_remove(fs_api, path);
+    } else {
+        ret = storage_file_exists(fs_api, path);
     }
     furi_record_close(RECORD_STORAGE);
 
     return ret;
 }
 
-bool flipbip_save_settings(const char* settings, bool key_file, bool append) {
+bool flipbip_save_file(
+    const char* settings,
+    const FlipBipFile file_type,
+    const char* file_name,
+    const bool append) {
     bool ret = false;
     const char* path;
     const char* path_bak;
-    if(key_file) {
+    if(file_type == FlipBipFileKey) {
         path = FLIPBIP_KEY_PATH;
         path_bak = FLIPBIP_KEY_PATH_BAK;
-    } else {
+    } else if(file_type == FlipBipFileDat) {
         path = FLIPBIP_DAT_PATH;
         path_bak = FLIPBIP_DAT_PATH_BAK;
+    } else {
+        char path_buf[FILE_MAX_PATH_LEN] = {0};
+        strcpy(path_buf, FLIPBIP_APP_BASE_FOLDER); // 22
+        strcpy(path_buf + strlen(path_buf), "/");
+        strcpy(path_buf + strlen(path_buf), file_name);
+        path = path_buf;
+        path_bak = NULL;
     }
     int open_mode = FSOM_OPEN_ALWAYS;
     if(append) {
@@ -116,7 +148,7 @@ bool flipbip_save_settings(const char* settings, bool key_file, bool append) {
     //     return ret;
     // }
     // try to create the folder
-    storage_common_mkdir(fs_api, FLIPBIP_APP_BASE_FOLDER);
+    storage_simply_mkdir(fs_api, FLIPBIP_APP_BASE_FOLDER);
 
     File* settings_file = storage_file_alloc(fs_api);
     if(storage_file_open(settings_file, path, FSAM_WRITE, open_mode)) {
@@ -127,20 +159,33 @@ bool flipbip_save_settings(const char* settings, bool key_file, bool append) {
     storage_file_close(settings_file);
     storage_file_free(settings_file);
 
-    File* settings_file_bak = storage_file_alloc(fs_api);
-    if(storage_file_open(settings_file_bak, path_bak, FSAM_WRITE, open_mode)) {
-        storage_file_write(settings_file_bak, settings, strlen(settings));
-        storage_file_write(settings_file_bak, "\n", 1);
+    if(path_bak != NULL) {
+        File* settings_file_bak = storage_file_alloc(fs_api);
+        if(storage_file_open(settings_file_bak, path_bak, FSAM_WRITE, open_mode)) {
+            storage_file_write(settings_file_bak, settings, strlen(settings));
+            storage_file_write(settings_file_bak, "\n", 1);
+        }
+        storage_file_close(settings_file_bak);
+        storage_file_free(settings_file_bak);
     }
-    storage_file_close(settings_file_bak);
-    storage_file_free(settings_file_bak);
 
     furi_record_close(RECORD_STORAGE);
 
     return ret;
 }
 
-bool flipbip_load_settings_secure(char* settings) {
+bool flipbip_save_qrfile(
+    const char* qr_msg_prefix,
+    const char* qr_msg_content,
+    const char* file_name) {
+    char qr_buf[90] = {0};
+    strcpy(qr_buf, TEXT_QRFILE);
+    strcpy(qr_buf + strlen(qr_buf), qr_msg_prefix);
+    strcpy(qr_buf + strlen(qr_buf), qr_msg_content);
+    return flipbip_save_file(qr_buf, FlipBipFileOther, file_name, false);
+}
+
+bool flipbip_load_file_secure(char* settings) {
     const size_t dlen = FILE_HLEN + FILE_SLEN + 1;
 
     // allocate memory for key/data
@@ -148,7 +193,7 @@ bool flipbip_load_settings_secure(char* settings) {
     memzero(data, dlen);
 
     // load k2 from file
-    if(!flipbip_load_settings(data, true)) return false;
+    if(!flipbip_load_file(data, FlipBipFileKey, NULL)) return false;
 
     // check header
     if(data[0] != FILE_HSTR[0] || data[1] != FILE_HSTR[1] || data[2] != FILE_HSTR[2] ||
@@ -174,7 +219,7 @@ bool flipbip_load_settings_secure(char* settings) {
     data -= FILE_HLEN;
 
     // load data from file
-    if(!flipbip_load_settings(data, false)) return false;
+    if(!flipbip_load_file(data, FlipBipFileDat, NULL)) return false;
 
     // check header
     if(data[0] != FILE_HSTR[0] || data[1] != FILE_HSTR[1] || data[2] != FILE_HSTR[2] ||
@@ -207,7 +252,7 @@ bool flipbip_load_settings_secure(char* settings) {
     return true;
 }
 
-bool flipbip_save_settings_secure(const char* settings) {
+bool flipbip_save_file_secure(const char* settings) {
     const size_t dlen = FILE_HLEN + FILE_SLEN + 1;
 
     // cap settings to 256 bytes
@@ -238,7 +283,7 @@ bool flipbip_save_settings_secure(const char* settings) {
     // seek <-- header
     data -= FILE_HLEN;
     // save k2 to file
-    flipbip_save_settings(data, true, false);
+    flipbip_save_file(data, FlipBipFileKey, NULL, false);
     // seek --> header
     data += FILE_HLEN;
     // zero k2 memory
@@ -251,7 +296,7 @@ bool flipbip_save_settings_secure(const char* settings) {
     // seek <-- header
     data -= FILE_HLEN;
     // save data to file
-    flipbip_save_settings(data, false, false);
+    flipbip_save_file(data, FlipBipFileDat, NULL, false);
 
     // clear memory
     memzero(data, dlen);

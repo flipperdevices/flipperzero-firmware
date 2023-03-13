@@ -1,8 +1,9 @@
 #include "flipbip.h"
-#include "crypto/memzero.h"
-#include "crypto/bip39.h"
 #include "helpers/flipbip_file.h"
 #include "helpers/flipbip_haptic.h"
+// From: lib/crypto
+#include <memzero.h>
+#include <bip39.h>
 
 bool flipbip_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -49,7 +50,7 @@ static void text_input_callback(void* context) {
                 if(mnemonic_check(app->import_mnemonic_text) == 0)
                     status = FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
                 // Save the mnemonic to persistent storage
-                else if(!flipbip_save_settings_secure(app->import_mnemonic_text))
+                else if(!flipbip_save_file_secure(app->import_mnemonic_text))
                     status = FlipBipStatusSaveError; // 12 = save error
 
                 if(status == FlipBipStatusSuccess) {

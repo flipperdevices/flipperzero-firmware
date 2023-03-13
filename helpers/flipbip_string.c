@@ -30,9 +30,9 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <string.h>
-
-#include "../crypto/memzero.h"
-#include "../crypto/rc4.h"
+// From: lib/crypto
+#include <memzero.h>
+#include <rc4.h>
 
 char* flipbip_strtok(char* s, const char* delim) {
     static char* last;

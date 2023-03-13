@@ -54,6 +54,13 @@ The application will be compiled and copied onto your device
 - Import your own mnemonic
   - Lots of typing required but you can now use the wallet with an existing mnemonic you have saved
   - Useful to convert paper backup to keys and receive addresses without relying on a laptop or phone
+- Improved receive address generation features
+  - Addresses are now generated at the same time as other pieces of wallet info
+    - This slows down initial wallet load, but makes UI much more responsive
+  - QR code files are now generated for each address and stored in the `apps_data/flipbip` directory
+    - This app is required to view the QR code files: https://github.com/bmatcuk/flipperzero-qrcode (included in RM firmware)
+    - NOTE: This happens during the `View Wallet` step; you must view a wallet after generating/importing a wallet in order to ensure the address QR files are correct
+- Broke out crypto functionality into its own library using `fap_private_libs` feature
 
 ### Work in Progress
 

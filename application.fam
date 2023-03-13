@@ -7,10 +7,15 @@ App(
     requires=[
         "gui",
     ],
-    stack_size=2 * 1024,
+    stack_size=3 * 1024,
     order=10,
     fap_icon="flipbip_10px.png",
     fap_icon_assets="icons",
+    fap_private_libs=[
+        Lib(
+            name="crypto",
+        ),
+    ],
     fap_category="Misc",
     fap_description="Crypto toolkit for Flipper",
     fap_author="Struan Clark (xtruan)",
