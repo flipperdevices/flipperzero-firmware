@@ -226,6 +226,11 @@ class Navigator:
         if self._debugFlag == 1:
             print(colored("Press OK", "cyan"))
 
+    def press_long_ok(self):
+        self.proto.rpc_gui_send_input("LONG OK")
+        if self._debugFlag == 1:
+            print(colored("Press LONG OK", "cyan"))
+
     def press_back(self):
         self.proto.rpc_gui_send_input("SHORT BACK")
         if self._debugFlag == 1:
@@ -334,6 +339,132 @@ class Gator:
             print(status)
             time.sleep(0.2)
 
+class FlipperTextKeyboard:
+    def __init__(self, nav) -> None:
+        self.nav = nav
+        self.keeb = []
+        self.keeb.append(list("qwertyuiop0123"))
+        self.keeb.append(list("asdfghjkl\0\b456"))
+        self.keeb.append(list("zxcvbnm_\0\0\n789"))
+
+    def _coord(self, letter):
+        col_index = -1
+        row_index = -1
+        for row in self.keeb:
+            try:
+                row_index = row_index+1
+                col_index = row.index(letter)
+                break
+            except:
+                ValueError: None
+
+        if(col_index < 0):
+            return None
+        else:
+            return (col_index, row_index)
+
+    def send(self, text):
+        current_x, current_y = self._coord('\n')
+        text = text + '\n'
+        for letter in list(text):
+            if letter != '\b' and letter != '\n':
+                keeb_letter = str.lower(letter)
+            else:
+                keeb_letter = letter
+
+            new_x, new_y = self._coord(keeb_letter)
+            step_x, step_y = new_x - current_x, new_y - current_y
+
+            dir_left = step_x < 0
+            dir_up = step_y < 0
+
+            step_x, step_y = abs(step_x), abs(step_y)
+
+            for _ in range(step_y):
+                if dir_up:
+                    current_y -= 1
+                    self.nav.press_up()
+                    if self.keeb[current_y][current_x] == '\0':
+                        step_x += 1
+                else:
+                    current_y += 1
+                    self.nav.press_down()
+                    if self.keeb[current_y][current_x] == '\0':
+                        step_x -= 1
+
+            for _ in range(step_x):
+                if dir_left:
+                    current_x -= 1
+                    if self.keeb[current_y][current_x] != '\0':
+                        self.nav.press_left()
+                else:
+                    current_x += 1
+                    if self.keeb[current_y][current_x] != '\0':
+                        self.nav.press_right()
+
+            if letter.isupper():
+                self.nav.press_long_ok()
+            else:
+                self.nav.press_ok()
+
+
+class FlipperHEXKeyboard:
+    def __init__(self, nav) -> None:
+        self.nav = nav
+        self.keeb = []
+        self.keeb.append(list("01234567\b"))
+        self.keeb.append(list("89abcdef\n"))
+
+    def _coord(self, letter):
+        col_index = -1
+        row_index = -1
+        for row in self.keeb:
+            try:
+                row_index = row_index+1
+                col_index = row.index(letter)
+                break
+            except:
+                ValueError: None
+
+        if(col_index < 0):
+            return None
+        else:
+            return (col_index, row_index)
+
+    def send(self, text):
+        current_x, current_y = self._coord('0')
+        text = text + '\n'
+        for letter in list(text):
+            if letter != '\b' and letter != '\n':
+                keeb_letter = str.lower(letter)
+            else:
+                keeb_letter = letter
+
+            new_x, new_y = self._coord(keeb_letter)
+            step_x, step_y = new_x - current_x, new_y - current_y
+
+            dir_left = step_x < 0
+            dir_up = step_y < 0
+
+            step_x, step_y = abs(step_x), abs(step_y)
+
+            for _ in range(step_y):
+                if dir_up:
+                    current_y -= 1
+                    self.nav.press_up()
+                else:
+                    current_y += 1
+                    self.nav.press_down()
+
+            for _ in range(step_x):
+                if dir_left:
+                    current_x -= 1
+                    self.nav.press_left()
+                else:
+                    current_x += 1
+                    self.nav.press_right()
+
+            self.nav.press_ok()
 
 class FlippigatorException(Exception):
     pass
