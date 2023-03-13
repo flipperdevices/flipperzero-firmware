@@ -24,6 +24,7 @@ typedef struct {
   GameState game;
   AppScreen screen;
   uint8_t selected_menu_item;
+  FuriMutex* mutex;
 } AppState;
 
 #define MENU_ITEMS_COUNT 2
@@ -41,7 +42,8 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 static void draw_callback(Canvas *const canvas, void *ctx) {
   furi_assert(ctx);
 
-  const AppState *app_state = acquire_mutex((ValueMutex *)ctx, 25);
+  const AppState *app_state = ctx;
+  furi_mutex_acquire(app_state->mutex, FuriWaitForever);
   if (app_state == NULL)
     return;
   const GameState *game_state = &app_state->game;
@@ -130,7 +132,7 @@ static void draw_callback(Canvas *const canvas, void *ctx) {
     draw_menu(canvas, app_state);
   }
 
-  release_mutex((ValueMutex *)ctx, app_state);
+  furi_mutex_release(app_state->mutex);
 }
 
 static void draw_menu(Canvas* const canvas, const AppState* app_state) {
@@ -293,15 +295,15 @@ int32_t game_reversi_app() {
     init_game(&app_state.game);
   }
 
-  ValueMutex state_mutex;
-  if (!init_mutex(&state_mutex, &app_state, sizeof(AppState))) {
+  app_state.mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+  if (!app_state.mutex) {
     return 255;
   }
   InputEvent input;
   FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
   ViewPort* view_port = view_port_alloc();
-  view_port_draw_callback_set(view_port, draw_callback, &state_mutex);
+  view_port_draw_callback_set(view_port, draw_callback, &app_state);
   view_port_input_callback_set(view_port, input_callback, event_queue);
 
   Gui* gui = furi_record_open(RECORD_GUI);
@@ -318,19 +320,19 @@ int32_t game_reversi_app() {
       // handle only press event, ignore repeat/release events
 
       if (input.type == InputTypeLong && input.key == InputKeyOk && app_state.screen == AppScreenGame) {
-        AppState *app_state = (AppState *)acquire_mutex_block(&state_mutex);
-        app_state->selected_menu_item = 0;
-        app_state->screen = AppScreenMenu;
+        furi_mutex_acquire(app_state.mutex, FuriWaitForever);
+        app_state.selected_menu_item = 0;
+        app_state.screen = AppScreenMenu;
         view_port_update(view_port);
-        release_mutex(&state_mutex, app_state);
+        furi_mutex_release(app_state.mutex);
         continue;
       }
       if (input.type != InputTypePress) continue;
 
-      AppState* app_state = (AppState*)acquire_mutex_block(&state_mutex);
-      is_finished = !handle_key(app_state, input.key);
+      furi_mutex_acquire(app_state.mutex, FuriWaitForever);
+      is_finished = !handle_key(&app_state, input.key);
       view_port_update(view_port);
-      release_mutex(&state_mutex, app_state);
+      furi_mutex_release(app_state.mutex);
     }
   }
 
@@ -341,7 +343,7 @@ int32_t game_reversi_app() {
 
   furi_message_queue_free(event_queue);
 
-  delete_mutex(&state_mutex);
+  furi_mutex_free(app_state.mutex);
 
   return 0;
 }
