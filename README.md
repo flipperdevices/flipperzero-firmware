@@ -7,10 +7,10 @@ First, place your video (`source.mp4`) in some empty folder, create "frames" fol
 YOUR HORIZONTAL RESOLUTION MUST BE A MULTIPLE OF 8!! 96 WORK AND 128 WORK BUT E.G. 86 DOES NOT!
 
 ```
-ffmpeg -i source.mp4 -f lavfi -i color=gray:s=1280x720 -f lavfi -i color=black:s=1280x720 -f lavfi -i color=white:s=1280x720 -filter_complex "[0:v]scale=1280x720,threshold" -s 96x64 -pix_fmt rgb24 frames/frame%07d.bmp
+ffmpeg -i source.mp4 -f lavfi -i color=gray:s=1280x720 -f lavfi -i color=black:s=1280x720 -f lavfi -i color=white:s=1280x720 -filter_complex "[0:v]scale=1280x720,threshold" -r 30 -s 96x64 -pix_fmt rgb24 frames/frame%07d.bmp
 ```
 
-The filter is needed to ensure that we are not getting any grayscale, black and white only.
+The filter is needed to ensure that we are not getting any grayscale, black and white only. `-r 30` is to ensure we have 30 FPS. Since audio sample rate is 44100 Hz, we need to have an integer number of samples in every audio chunk. 15 and 30 fps work, but with e.g. 24 FPS the audio would be slightly faster or slightly slower than video. If you want to have 24 fps, change the sample rate in the command below (replace `44100` with some number that gives you integer when divided by 24).
 
 After this, extract the audio:
 
