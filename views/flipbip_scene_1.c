@@ -457,7 +457,7 @@ static int flipbip_scene_1_model_init(
     for(uint8_t a = 0; a < NUM_ADDRS; a++) {
         model->recv_addresses[a] = malloc(MAX_ADDR_LEN);
         memzero(model->recv_addresses[a], MAX_ADDR_LEN);
-        flipbip_scene_1_init_address(model->recv_addresses[a], node, coin_info[5], a);
+        flipbip_scene_1_init_address(model->recv_addresses[a], node, coin, a);
 
         // Save QR code file
         memzero(buf, buflen);
