@@ -1,4 +1,4 @@
-name: 'Smoke testsmm'
+name: 'Smoke tests'
 
 on:
   pull_request:
@@ -45,7 +45,6 @@ jobs:
         if: success()
         run: |                               
           ./fbt flash OPENOCD_ADAPTER_SERIAL=49FF75065182575513201587 FORCE=1
-#        190E171B2415303030303032
 
       - name: 'Wait for flipper and format ext'
         id: format_ext
@@ -63,7 +62,6 @@ jobs:
         timeout-minutes: 5
         run: |
           source scripts/toolchain/fbtenv.sh
-#temporary, needs fixing in flippigator code for relative folders
           cd ./scripts/flippigator/
           pytest --port=${{steps.device.outputs.flipper}}
 
@@ -71,11 +69,15 @@ jobs:
         id: generate_allure_reports
         if: steps.run_smoke.outcome == 'success'
         timeout-minutes: 0.5
+        run: |
+          pwd
 
       - name: 'Upload allure reports'
         id: upload_allure_reports
         if: steps.generate_allure_reports.outcome == 'success'
         timeout-minutes: 0.5
+        run: |
+          pwd
 
       - name: 'Check GDB output'
         if: failure()
