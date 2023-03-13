@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#define MSB_LIMIT 16
-#define MSB_LIMIT 256
+#define MSB_LIMIT 16
+//#define MSB_LIMIT 256
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
 #define CONST_M1_1 (LF_POLY_EVEN << 1 | 1)
@@ -195,7 +195,7 @@ static inline int state_loop(unsigned int* states_buffer, int xks, int m1, int m
 
 struct Msb {
     int tail;
-    int states[5000000];
+    int states[4096];
 };
 
 int binsearch(int data[], int start, int stop) {
@@ -267,7 +267,7 @@ int old_recover(int odd[], int o_head, int o_tail, int oks, int even[], int e_he
                 temp.even = odd[o];
                 temp.odd = even[e] ^ evenparity32(odd[o] & LF_POLY_ODD);
                 if (check_state(&temp, p)) {
-                    return s;
+                    return -1;
                 }
             }
         }
@@ -309,9 +309,9 @@ int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *
     // TODO: Combine Odd and Even loops
     int msb_head = (MSB_LIMIT * msb_round); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
     int msb_tail = (MSB_LIMIT * (msb_round+1));
-    unsigned int *states_buffer = malloc(sizeof(unsigned int)*(2<<9));
-    int states_tail = 0;
-    int i = 0, j = 0, y = 0, semi_state = 0, tail = 0, found = 0;
+    unsigned int *states_buffer = malloc(sizeof(unsigned int)*(1<<20));
+    int states_tail = 0, tail = 0;
+    int i = 0, j = 0, y = 0, semi_state = 0, found = 0;
     unsigned int msb = 0;
     struct Crypto1State temp = {0, 0};
 
@@ -349,12 +349,7 @@ int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *
                 }
             }
         }
-    }
 
-    //FURI_LOG_I(TAG, "MSB GE %i", msb_iter); // DEBUG
-
-    // Even
-    for (semi_state = 1 << 20; semi_state >= 0; semi_state--) {
         if (filter(semi_state) == (eks & 1)) {
             states_buffer[0] = semi_state;
             states_tail = state_loop(states_buffer, eks, CONST_M1_2, CONST_M2_2);
@@ -380,10 +375,8 @@ int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *
         }
     }
 
-    for (int iter = 0; iter < 8; iter++) {
-        oks >>= 1;
-        eks >>= 1;
-    }
+    oks >>= 8;
+    eks >>= 8;
 
     for (i = 0; i < MSB_LIMIT; i++) {
         int res = old_recover(odd_msbs[i].states, 0, odd_msbs[i].tail, oks, even_msbs[i].states, 0, even_msbs[i].tail, eks, 7, 0, p, 1);
@@ -391,7 +384,7 @@ int calculate_msb_tables(int oks, int eks, int msb_round, struct Crypto1Params *
             free(states_buffer);
             free(odd_msbs);
             free(even_msbs);
-            return 0;
+            return 1;
         }
     }
 
@@ -432,7 +425,7 @@ int main(int argc, char *argv[]) {
     int i;
     char *rest;
     char *token;
-    size_t keyarray_size;
+    int keyarray_size;
     uint64_t *keyarray = malloc(sizeof(uint64_t)*1);
 
     keyarray_size = 0;
