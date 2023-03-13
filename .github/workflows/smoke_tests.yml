@@ -37,7 +37,7 @@ jobs:
         id: autotest_dependencies
         if: success()
         run: |
-          source scripts/toolchain/fbtenv.sh
+          source scripts/toolchain/fbtenv.sh --restore
           python3 -m pip install -r ./scripts/flippigator/requirements.txt
 
       - name: 'Flash unit tests firmware'
