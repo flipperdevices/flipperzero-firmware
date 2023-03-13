@@ -1,7 +1,7 @@
 **Video with some functionality** (previous v1.1 hardware): [https://youtu.be/KbBgIg76SMw](https://youtu.be/KbBgIg76SMw)
 
 
-**Buy one:** [Tindie Store](https://www.tindie.com/products/eried/flipper-zero-mayhem-hat-esp32btcamerasdnrf24/)
+**Buy one:** [Tindie Store](https://www.tindie.com/products/29150/)
 
 **Get started:** [wiki/First-steps](https://github.com/eried/flipperzero-mayhem/wiki/First-steps)
 
