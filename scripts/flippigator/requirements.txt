@@ -8,7 +8,7 @@ exceptiongroup==1.0.1
 iniconfig==1.1.1
 isort==5.10.1
 mypy-extensions==0.4.3
-numpy==1.21.5
+numpy==1.22.4
 opencv-python==4.5.4.60
 packaging==21.3
 pathspec==0.10.1
