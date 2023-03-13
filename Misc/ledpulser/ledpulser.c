@@ -18,13 +18,16 @@ typedef struct {
     int color;
     int intensity;
     int direction;
+    FuriMutex* mutex;
 } PluginState;
 
 int intensity = 0;
 
 void led_test_draw_callback(Canvas* canvas, void* ctx) {
+    //UNUSED(ctx);
     furi_assert(ctx);
     PluginState* plugin_state = ctx;
+    furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
 
     canvas_clear(canvas);
     canvas_set_font(canvas, FontSecondary);
@@ -64,6 +67,7 @@ void led_test_draw_callback(Canvas* canvas, void* ctx) {
         canvas_draw_str(canvas, 49, 35, "White");
         canvas_invert_color(canvas);
     }
+    furi_mutex_release(plugin_state->mutex);
 }
 
 void led_test_input_callback(InputEvent* input_event, void* ctx) {
@@ -94,13 +98,14 @@ int32_t ledpulser_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
-    FuriMutex* state_mutex;
-    state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(!state_mutex) {
-        FURI_LOG_E("LED Pulser", "cannot create mutex");
+    NotificationMessage* dyn_notification_message = malloc(sizeof(NotificationMessage));
+    plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!plugin_state->mutex) {
+        FURI_LOG_E("LED Pulser", "cannot create mutex\r\n");
+        free(plugin_state);
+        free(dyn_notification_message);
         return 255;
     }
-    
     plugin_state->direction = 0;
     plugin_state->intensity = 0;
     DOLPHIN_DEED(DolphinDeedPluginStart);
@@ -121,9 +126,7 @@ int32_t ledpulser_app(void* p) {
     notification_message(notification, &sequence_display_backlight_on);
     while(processing) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-        //PluginState* plugin_state = (PluginState*)acquire_mutex_block(&state_mutex);
-        furi_mutex_acquire(state_mutex, FuriWaitForever);
-
+        furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
         NotificationMessage notification_led_message;
         NotificationMessage notification_led_message_1;
         NotificationMessage notification_led_message_2;
@@ -244,15 +247,14 @@ int32_t ledpulser_app(void* p) {
                 }
             }
         }
-        furi_mutex_release(state_mutex);
+        furi_mutex_release(plugin_state->mutex);
     }
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
+    furi_mutex_free(plugin_state->mutex);
     furi_message_queue_free(event_queue);
-
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
-    furi_mutex_free(state_mutex);
-
+    free(plugin_state);
     return 0;
 }

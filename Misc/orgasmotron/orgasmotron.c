@@ -4,14 +4,16 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-#include <dolphin/dolphin.h>
 
 typedef struct {
     int mode;
+    FuriMutex* mutex;
 } PluginState;
 
 void vibro_test_draw_callback(Canvas* canvas, void* ctx) {
-    UNUSED(ctx);
+    furi_assert(ctx);
+    const PluginState* plugin_state = ctx;
+    furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
     canvas_clear(canvas);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "Vibro Modes");
@@ -23,6 +25,7 @@ void vibro_test_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 2, 46, "DOWN Pleasure combo");
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 58, "OK: Pause");
+    furi_mutex_release(plugin_state->mutex);
 }
 
 void vibro_test_input_callback(InputEvent* input_event, void* ctx) {
@@ -40,17 +43,16 @@ int32_t orgasmotron_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
-    FuriMutex* state_mutex;
-    state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-
-    if(!state_mutex) {
-        FURI_LOG_E("Orgasmatron", "cannot create mutex");
-        return 0;
+    plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!plugin_state->mutex) {
+        FURI_LOG_E("Orgasmatron", "cannot create mutex\r\n");
+        free(plugin_state);
+        return 255;
     }
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, vibro_test_draw_callback, NULL);
+    view_port_draw_callback_set(view_port, vibro_test_draw_callback, plugin_state);
     view_port_input_callback_set(view_port, vibro_test_input_callback, event_queue);
 
     // Register view port in GUI
@@ -58,15 +60,15 @@ int32_t orgasmotron_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
-    notification_message(notification, &sequence_display_backlight_on);
-    DOLPHIN_DEED(DolphinDeedPluginStart);
 
     InputEvent event;
+    //int mode = 0;
     bool processing = true;
-    while (processing) {
+    //while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
+    while(processing) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-        furi_mutex_acquire(state_mutex, FuriWaitForever);
-        if (event_status == FuriStatusOk) {
+        furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
+        if(event_status == FuriStatusOk) {
             if(event.key == InputKeyBack && event.type == InputTypeShort) {
                 //Exit Application
                 notification_message(notification, &sequence_reset_vibro);
@@ -75,53 +77,58 @@ int32_t orgasmotron_app(void* p) {
                 processing = false;
                 //break;
             }
-            if(event.key == InputKeyOk && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyOk &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 0;
             }
-            if(event.key == InputKeyLeft && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyLeft &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 1;
             }
-            if(event.key == InputKeyRight && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyRight &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 3;
             }
-            if(event.key == InputKeyUp && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyUp &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 2;
             }
-            if(event.key == InputKeyDown && (event.type == InputTypePress || event.type == InputTypeRelease)) {
+            if(event.key == InputKeyDown &&
+               (event.type == InputTypePress || event.type == InputTypeRelease)) {
                 plugin_state->mode = 4;
             }
         }
-        
-        if (plugin_state->mode == 0) {
+
+        if(plugin_state->mode == 0) {
             //Stop Vibration
             notification_message(notification, &sequence_reset_vibro);
             notification_message(notification, &sequence_reset_green);
-        } else if (plugin_state->mode == 1) {
+        } else if(plugin_state->mode == 1) {
             //Full power
             notification_message(notification, &sequence_set_vibro_on);
             notification_message(notification, &sequence_set_green_255);
-        } else if (plugin_state->mode == 2) {
+        } else if(plugin_state->mode == 2) {
             //Pulsed Vibration
             notification_message(notification, &sequence_set_vibro_on);
             notification_message(notification, &sequence_set_green_255);
             delay(100);
             notification_message(notification, &sequence_reset_vibro);
-        } else if (plugin_state->mode == 3) {
+        } else if(plugin_state->mode == 3) {
             //Soft power
             notification_message(notification, &sequence_set_vibro_on);
             notification_message(notification, &sequence_set_green_255);
             delay(50);
             notification_message(notification, &sequence_reset_vibro);
-        } else if (plugin_state->mode == 4) {
+        } else if(plugin_state->mode == 4) {
             //Special Sequence
-            for (int i = 0;i < 15;i++) {
+            for(int i = 0; i < 15; i++) {
                 notification_message(notification, &sequence_set_vibro_on);
                 notification_message(notification, &sequence_set_green_255);
                 delay(50);
                 notification_message(notification, &sequence_reset_vibro);
                 delay(50);
             }
-            for (int i = 0;i < 2;i++) {
+            for(int i = 0; i < 2; i++) {
                 notification_message(notification, &sequence_set_vibro_on);
                 notification_message(notification, &sequence_set_green_255);
                 delay(400);
@@ -129,15 +136,14 @@ int32_t orgasmotron_app(void* p) {
                 delay(50);
             }
         }
-        furi_mutex_release(state_mutex);
+        furi_mutex_release(plugin_state->mutex);
     }
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
+    furi_mutex_free(plugin_state->mutex);
     furi_message_queue_free(event_queue);
-
     furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_GUI);
-    furi_mutex_free(state_mutex);
-
+    free(plugin_state);
     return 0;
 }

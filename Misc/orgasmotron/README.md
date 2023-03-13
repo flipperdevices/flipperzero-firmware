@@ -25,6 +25,10 @@ Then run the command:
  ```
 The application will be compiled and copied onto your device. 
 
+## Credits
+- Original app by qqmajikpp
+- Updates for FW 0.79 by Roguemaster
+
 ## Licensing
 The source this was developed from is the Orgasmotron application delivered in RougeMaster Firmware as well as the Flipper-Xtreme Firmware
 All my changes are considered open-source and can be used for whatever purpose. <br>

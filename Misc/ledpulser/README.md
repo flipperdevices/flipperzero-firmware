@@ -29,6 +29,9 @@ Then run the command:
  ```
 The application will be compiled and copied onto your device. 
 
+## Credits
+- Updates for FW 0.79 by Roguemaster
+
 ## Licensing
 This code is open-source and may be used for whatever you want to do with it. 
 
