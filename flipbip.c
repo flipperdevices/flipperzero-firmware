@@ -50,7 +50,7 @@ static void text_input_callback(void* context) {
                 if(mnemonic_check(app->import_mnemonic_text) == 0)
                     status = FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
                 // Save the mnemonic to persistent storage
-                else if(!flipbip_save_settings_secure(app->import_mnemonic_text))
+                else if(!flipbip_save_file_secure(app->import_mnemonic_text))
                     status = FlipBipStatusSaveError; // 12 = save error
 
                 if(status == FlipBipStatusSuccess) {

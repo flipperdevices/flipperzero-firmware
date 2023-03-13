@@ -280,13 +280,12 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
         flipbip_scene_1_draw_generic(model->xpub_extended, 20);
     } else if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
         flipbip_scene_1_draw_generic(model->recv_addresses[model->page - PAGE_ADDR_BEGIN], 12);
-        elements_button_right(canvas, TEXT_SAVE_QR);
     }
 
     if(model->page == PAGE_LOADING) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 1, 10, TEXT_LOADING);
-        canvas_draw_str(canvas, 6, 30, s_derivation_text);
+        canvas_draw_str(canvas, 2, 10, TEXT_LOADING);
+        canvas_draw_str(canvas, 7, 30, s_derivation_text);
         canvas_draw_icon(canvas, 86, 25, &I_Keychain_39x36);
     } else if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
         // draw address header
@@ -297,22 +296,31 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
             receive_text = TEXT_DEFAULT_COIN;
         }
         const size_t receive_len = strlen(receive_text) * 7;
-        canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, receive_text);
-        canvas_draw_str_aligned(canvas, receive_len, 2, AlignLeft, AlignTop, TEXT_RECEIVE_ADDRESS);
+        canvas_draw_str_aligned(canvas, 2, 2, AlignLeft, AlignTop, receive_text);
+        canvas_draw_str_aligned(
+            canvas, receive_len + 1, 2, AlignLeft, AlignTop, TEXT_RECEIVE_ADDRESS);
 
         // draw address number
         const unsigned char addr_num[1] = {(unsigned char)(model->page - PAGE_ADDR_BEGIN)};
-        char addr_num_text[3];
+        char addr_num_text[3] = {0};
         flipbip_btox(addr_num, 1, addr_num_text);
         addr_num_text[0] = '/';
-        canvas_draw_str_aligned(canvas, 110, 2, AlignLeft, AlignTop, addr_num_text);
+        canvas_draw_str_aligned(canvas, 125, 2, AlignRight, AlignTop, addr_num_text);
+
+        // draw QR code file path
+        char addr_name_text[14] = {0};
+        strcpy(addr_name_text, COIN_TEXT_ARRAY[model->coin][0]);
+        flipbip_btox(addr_num, 1, addr_name_text + strlen(addr_name_text));
+        strcpy(addr_name_text + strlen(addr_name_text), TEXT_QRFILE_EXT);
+        //elements_button_right(canvas, addr_name_text);
+        canvas_draw_str_aligned(canvas, 125, 53, AlignRight, AlignTop, addr_name_text);
 
         // draw address
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 6, 22, s_disp_text1);
-        canvas_draw_str(canvas, 6, 34, s_disp_text2);
-        canvas_draw_str(canvas, 6, 46, s_disp_text3);
-        canvas_draw_str(canvas, 6, 58, s_disp_text4);
+        canvas_draw_str(canvas, 7, 22, s_disp_text1);
+        canvas_draw_str(canvas, 7, 34, s_disp_text2);
+        canvas_draw_str(canvas, 7, 46, s_disp_text3);
+        canvas_draw_str(canvas, 7, 58, s_disp_text4);
     } else {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 1, 2, AlignLeft, AlignTop, s_disp_text1);
@@ -341,8 +349,8 @@ static int flipbip_scene_1_model_init(
     memzero(mnemonic, TEXT_BUFFER_SIZE);
 
     // Check if the mnemonic key & data is already saved in persistent storage, or overwrite is true
-    if(overwrite || (!flipbip_has_settings(FlipBipFileKey, NULL) &&
-                     !flipbip_has_settings(FlipBipFileDat, NULL))) {
+    if(overwrite || (!flipbip_has_file(FlipBipFileKey, NULL, false) &&
+                     !flipbip_has_file(FlipBipFileDat, NULL, false))) {
         // Set mnemonic only mode
         model->mnemonic_only = true;
         // Generate a random mnemonic using trezor-crypto
@@ -351,14 +359,14 @@ static int flipbip_scene_1_model_init(
         if(mnemonic_check(mnemonic_gen) == 0)
             return FlipBipStatusMnemonicCheckError; // 13 = mnemonic check error
         // Save the mnemonic to persistent storage
-        else if(!flipbip_save_settings_secure(mnemonic_gen))
+        else if(!flipbip_save_file_secure(mnemonic_gen))
             return FlipBipStatusSaveError; // 12 = save error
         // Clear the generated mnemonic from memory
         mnemonic_clear();
     }
 
     // Load the mnemonic from persistent storage
-    if(!flipbip_load_settings_secure(mnemonic)) {
+    if(!flipbip_load_file_secure(mnemonic)) {
         // Set mnemonic only mode for this error for memory cleanup purposes
         model->mnemonic_only = true;
         return FlipBipStatusLoadError; // 11 = load error
@@ -507,7 +515,6 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
-        case InputKeyLeft:
         case InputKeyUp:
             with_view_model(
                 instance->view,
@@ -524,15 +531,17 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
             break;
         case InputKeyRight:
         case InputKeyOk:
-            with_view_model(
-                instance->view,
-                FlipBipScene1Model * model,
-                {
-                    if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
-                    }
-                },
-                true);
-            break;
+            // with_view_model(
+            //     instance->view,
+            //     FlipBipScene1Model * model,
+            //     {
+            //         if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
+
+            //         }
+            //     },
+            //     true);
+            // break;
+        case InputKeyLeft:
         case InputKeyMAX:
             break;
         }
