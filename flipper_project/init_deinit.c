@@ -12,12 +12,6 @@ PlayerView* player_view_alloc(VideoPlayerApp* player) {
     return player_view;
 }
 
-void player_view_free(PlayerView* player_view) {
-    furi_assert(player_view);
-    view_free(player_view->view);
-    free(player_view);
-}
-
 VideoPlayerApp* init_player() {
     VideoPlayerApp* player = malloc(sizeof(VideoPlayerApp));
     memset(player, 0, sizeof(VideoPlayerApp));
@@ -53,12 +47,12 @@ void deinit_player(VideoPlayerApp* player) {
     // Специальная очистка памяти, занимаемой очередью
     furi_message_queue_free(player->event_queue);
 
-    view_dispatcher_remove_view(player->view_dispatcher, VIEW_PLAYER);
+    /*view_dispatcher_remove_view(player->view_dispatcher, VIEW_PLAYER);
 
     view_dispatcher_free(player->view_dispatcher);
 
     player_view_free(player->player_view);
-    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_GUI);*/
 
     stream_free(player->stream);
     furi_record_close(RECORD_STORAGE);
@@ -67,6 +61,13 @@ void deinit_player(VideoPlayerApp* player) {
     {
         free(player->buffer);
     }
+
+    furi_pubsub_unsubscribe(player->input, player->input_subscription);
+
+    player->canvas = NULL;
+    gui_direct_draw_release(player->gui);
+    furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_INPUT_EVENTS);
 
     free(player);
 }

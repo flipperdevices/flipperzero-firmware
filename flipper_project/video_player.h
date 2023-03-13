@@ -14,6 +14,7 @@
 
 #define APPSDATA_FOLDER "/ext/apps_data"
 #define VIDEO_PLAYER_FOLDER "/ext/apps_data/video_player"
+//#define VIDEO_PLAYER_FOLDER STORAGE_APP_DATA_PATH_PREFIX
 #define FILE_NAME_LEN 64
 
 typedef enum {
@@ -46,6 +47,10 @@ typedef struct {
     Stream* stream;
     FuriString* filepath;
     DialogsApp* dialogs;
+
+    FuriPubSub* input;
+    FuriPubSubSubscription* input_subscription;
+    Canvas* canvas;
 
     uint8_t* audio_buffer;
     uint8_t* image_buffer;

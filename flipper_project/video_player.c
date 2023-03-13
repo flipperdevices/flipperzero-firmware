@@ -8,6 +8,68 @@
 #include <cli/cli.h>
 #include <gui/gui.h>
 
+void draw_callback(Canvas* canvas, void* ctx) {
+    PlayerViewModel* model = (PlayerViewModel*)ctx;
+    VideoPlayerApp* player = (VideoPlayerApp*)(model->player);
+
+    canvas_draw_xbm(canvas, 0, 0, player->width, player->height, player->image_buffer);
+}
+
+bool input_callback(InputEvent* input_event, void* ctx) {
+    // Проверяем, что контекст не нулевой
+    furi_assert(ctx);
+    PlayerView* player_view = (PlayerView*)ctx;
+    VideoPlayerApp* player = (VideoPlayerApp*)(player_view->context);
+
+    bool consumed = false;
+
+    VideoPlayerEvent event = {
+        .type = EventTypeInput, .input = *input_event};
+
+    furi_message_queue_put(player->event_queue, &event, FuriWaitForever);
+
+    consumed = true;
+    return consumed;
+}
+
+void direct_input_callback(const void* value, void* ctx) {
+    // Проверяем, что контекст не нулевой
+    furi_assert(ctx);
+    const InputEvent* input_event = value;
+    VideoPlayerApp* player = (VideoPlayerApp*)(ctx);
+
+    /*VideoPlayerEvent event = {
+        .type = EventTypeInput, .input = *input_event};
+
+    furi_message_queue_put(player->event_queue, &event, FuriWaitForever);*/
+
+    if(input_event->key == InputKeyBack)
+    {
+        player->quit = true;
+    }
+
+    if(input_event->key == InputKeyOk)
+    {
+        player->playing = !player->playing;
+    }
+
+    if(player->playing)
+    {
+        player_start();
+    }
+
+    else
+    {
+        player_stop();
+    }
+}
+
+void player_view_free(PlayerView* player_view) {
+    furi_assert(player_view);
+    view_free(player_view->view);
+    free(player_view);
+}
+
 bool open_file_stream(Stream* stream) 
 {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
@@ -33,30 +95,6 @@ bool open_file_stream(Stream* stream)
     }
     furi_string_free(path);
     return result;
-}
-
-void draw_callback(Canvas* canvas, void* ctx) {
-    PlayerViewModel* model = (PlayerViewModel*)ctx;
-    VideoPlayerApp* player = (VideoPlayerApp*)(model->player);
-
-    canvas_draw_xbm(canvas, 0, 0, player->width, player->height, player->image_buffer);
-}
-
-bool input_callback(InputEvent* input_event, void* ctx) {
-    // Проверяем, что контекст не нулевой
-    furi_assert(ctx);
-    PlayerView* player_view = (PlayerView*)ctx;
-    VideoPlayerApp* player = (VideoPlayerApp*)(player_view->context);
-
-    bool consumed = false;
-
-    VideoPlayerEvent event = {
-        .type = EventTypeInput, .input = *input_event};
-
-    furi_message_queue_put(player->event_queue, &event, FuriWaitForever);
-
-    consumed = true;
-    return consumed;
 }
 
 int32_t video_player_app(void* p) {
@@ -110,52 +148,45 @@ int32_t video_player_app(void* p) {
     // Текущее событие типа кастомного типа VideoPlayerEvent
     VideoPlayerEvent event;
 
-    view_dispatcher_switch_to_view(player->view_dispatcher, VIEW_PLAYER);
+    //view_dispatcher_switch_to_view(player->view_dispatcher, VIEW_PLAYER);
+
+    //switch from view dispatcher to direct draw
+    view_dispatcher_remove_view(player->view_dispatcher, VIEW_PLAYER);
+
+    view_dispatcher_free(player->view_dispatcher);
+
+    player_view_free(player->player_view);
+    furi_record_close(RECORD_GUI);
+
+    player->input = furi_record_open(RECORD_INPUT_EVENTS);
+    player->gui = furi_record_open(RECORD_GUI);
+    player->canvas = gui_direct_draw_acquire(player->gui);
+
+    player->input_subscription =
+        furi_pubsub_subscribe(player->input, direct_input_callback, player);
 
     end:;
 
     player->playing = true;
 
-    // Бесконечный цикл обработки очереди событий
-    while(!(player->quit)) {
-        // Выбираем событие из очереди в переменную event (ждём бесконечно долго, если очередь пуста)
-        // и проверяем, что у нас получилось это сделать
+    vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
+
+    do {
         furi_check(
             furi_message_queue_get(player->event_queue, &event, FuriWaitForever) == FuriStatusOk);
 
-        // Наше событие — это нажатие кнопки
-        if(event.type == EventTypeInput) {
-            if(event.input.key == InputKeyBack)
-            {
-                player->quit = true;
-            }
-
-            if(event.input.key == InputKeyOk)
-            {
-                player->playing = !player->playing;
-            }
-
-            if(player->playing)
-            {
-                player_start();
-            }
-
-            else
-            {
-                player_stop();
-            }
-        }
-
         if(event.type == EventType1stHalf)
         {
-            //uint8_t* audio_buffer = player->audio_buffer;
-        
-            //stream_read(player->stream, player->image_buffer, player->image_buffer_length);
-            //stream_read(player->stream, audio_buffer, player->audio_chunk_size);
-
+            //reading image+sound data in one pass since in this case image buffer and first part of audio buffer are continuous chunk of memory; should probably improve FPS
             stream_read(player->stream, player->image_buffer, player->image_buffer_length + player->audio_chunk_size);
 
             player->frames_played++;
+
+            canvas_reset(player->canvas);
+            
+            canvas_draw_xbm(player->canvas, 0, 0, player->width, player->height, player->image_buffer);
+
+            canvas_commit(player->canvas);
         }
 
         if(event.type == EventType2ndHalf)
@@ -166,13 +197,21 @@ int32_t video_player_app(void* p) {
             stream_read(player->stream, audio_buffer, player->audio_chunk_size);
 
             player->frames_played++;
+
+            canvas_reset(player->canvas);
+            
+            canvas_draw_xbm(player->canvas, 0, 0, player->width, player->height, player->image_buffer);
+
+            canvas_commit(player->canvas);
         }
 
         if(player->frames_played == player->num_frames)
         {
             player->quit = true;
         }
-    }
+
+        furi_thread_yield();
+    } while(!(player->quit));
 
     deinit_player(player);
     player_deinit_hardware();
