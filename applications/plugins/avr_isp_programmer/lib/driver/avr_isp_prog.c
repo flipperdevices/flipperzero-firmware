@@ -32,11 +32,13 @@ struct AvrIspProg {
     uint16_t error;
     uint16_t addr;
     bool pmode;
-    bool tx_ok;
     bool exit;
     bool rst_active_high;
     uint8_t buff[AVR_ISP_PROG_TX_RX_BUF_SIZE];
     AvrIspSpiSwSpeed spi_speed;
+
+    AvrIspProgCallback callback;
+    void* context;
 };
 
 AvrIspProg* avr_isp_prog_init(AvrIspSpiSwSpeed spi_speed) {
@@ -47,7 +49,6 @@ AvrIspProg* avr_isp_prog_init(AvrIspSpiSwSpeed spi_speed) {
     instance->stream_tx =
         furi_stream_buffer_alloc(sizeof(int8_t) * AVR_ISP_PROG_TX_RX_BUF_SIZE, sizeof(int8_t));
     instance->spi_speed = spi_speed;
-    instance->tx_ok = false;
     instance->rst_active_high = false;
     instance->exit = false;
     return instance;
@@ -65,25 +66,13 @@ bool avr_isp_prog_rx(AvrIspProg* instance, uint8_t* data, size_t len) {
     furi_assert(instance);
     furi_assert(data);
     furi_assert(len != 0);
-    size_t ret = furi_stream_buffer_send(instance->stream_rx, data, sizeof(uint8_t) * len, 100);
+    size_t ret = furi_stream_buffer_send(instance->stream_rx, data, sizeof(uint8_t) * len, 0);
     return ret == sizeof(uint8_t) * len;
 }
 
 size_t avr_isp_prog_tx(AvrIspProg* instance, uint8_t* data, size_t max_len) {
     furi_assert(instance);
-    if(!instance->tx_ok) return 0;
-    size_t len = 0;
-    if(furi_stream_buffer_bytes_available(instance->stream_tx) > max_len) {
-        len = furi_stream_buffer_receive(instance->stream_tx, data, sizeof(int8_t) * max_len, 100);
-    } else {
-        len = furi_stream_buffer_receive(
-            instance->stream_tx,
-            data,
-            sizeof(int8_t) * furi_stream_buffer_bytes_available(instance->stream_tx),
-            100);
-        instance->tx_ok = false;
-    }
-    return len;
+    return furi_stream_buffer_receive(instance->stream_tx, data, sizeof(int8_t) * max_len, 0);
 }
 
 void avr_isp_prog_exit(AvrIspProg* instance) {
@@ -91,21 +80,24 @@ void avr_isp_prog_exit(AvrIspProg* instance) {
     instance->exit = true;
 }
 
-static bool avr_isp_prog_tx_ch(AvrIspProg* instance, uint8_t data) {
+void avr_isp_prog_set_tx_callback(AvrIspProg* instance, AvrIspProgCallback callback, void* context) {
     furi_assert(instance);
-    size_t ret = furi_stream_buffer_send(instance->stream_tx, &data, sizeof(uint8_t), 10);
-    return ret == sizeof(uint8_t);
+    furi_assert(context);
+    instance->callback = callback;
+    instance->context = context;
+}
+
+static void avr_isp_prog_tx_ch(AvrIspProg* instance, uint8_t data) {
+    furi_assert(instance);
+    furi_stream_buffer_send(instance->stream_tx, &data, sizeof(uint8_t), FuriWaitForever);
 }
 
 static uint8_t avr_isp_prog_getch(AvrIspProg* instance) {
     furi_assert(instance);
-    //ToDo can be optimized
-    while(!furi_stream_buffer_bytes_available(instance->stream_rx)) {
-        furi_delay_ms(5);
-        if(instance->exit) break;
-    }
     uint8_t data[1] = {0};
-    furi_stream_buffer_receive(instance->stream_rx, &data, sizeof(int8_t), 10);
+    while(furi_stream_buffer_receive(instance->stream_rx, &data, sizeof(int8_t), 30) == 0) {
+        if(instance->exit) break;
+    };
     return data[0];
 }
 
@@ -246,7 +238,7 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
     avr_isp_prog_reset_target(instance, false);
 
     // Pulse must be minimum 2 target CPU speed cycles
-    // so 100 usec is ok for CPU speeds above 20KHz
+    // so 0 usec is ok for CPU speeds above 20KHz
     furi_delay_ms(1);
 
     avr_isp_prog_reset_target(instance, true);
@@ -273,7 +265,9 @@ static void avr_isp_prog_universal(AvrIspProg* instance) {
 
 static void avr_isp_prog_commit(AvrIspProg* instance, uint16_t addr) {
     furi_assert(instance);
+    furi_delay_ms(2);
     avr_isp_prog_spi_transaction(instance, AVR_ISP_COMMIT(addr));
+    furi_delay_ms(2);
 }
 
 static uint16_t avr_isp_prog_current_page(AvrIspProg* instance) {
@@ -319,7 +313,6 @@ static uint8_t avr_isp_prog_write_flash_pages(AvrIspProg* instance, size_t lengt
     }
 
     avr_isp_prog_commit(instance, page);
-
     return STK_OK;
 }
 
@@ -545,5 +538,11 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
         else
             avr_isp_prog_tx_ch(instance, STK_NOSYNC);
     }
-    instance->tx_ok = true;
+
+    // if(!instance->tx_ok) {
+    //     instance->tx_ok = true;
+    if(instance->callback) {
+        instance->callback(instance->context);
+    }
+    // }
 }

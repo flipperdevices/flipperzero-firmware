@@ -3,7 +3,7 @@
 #include "../lib/driver/avr_isp_prog_cmd.h"
 #include "../lib/driver/avr_isp_spi_sw.h"
 #include "../lib/driver/avr_isp_chip_arr.h"
-#include "../lib/driver/avr_isp_vcp_cdc.h"
+//#include "../lib/driver/avr_isp_vcp_cdc.h"
 
 #include <furi.h>
 
@@ -11,9 +11,15 @@
 
 typedef enum {
     AvrIspWorkerEvtStop = (1 << 0),
-} AvrIspWorkerEvt;
+    AvrIspWorkerEvtProgRun = (1 << 1),
 
-#define AVR_ISP_WORKER_PROG_ALL_EVENTS (AvrIspWorkerEvtStop)
+    AvrIspWorkerEvtRx = (1 << 2),
+    AvrIspWorkerEvtTxCoplete = (1 << 3),
+    AvrIspWorkerEvtTx = (1 << 4),
+
+    //AvrIspWorkerEvtCfg = (1 << 5),
+
+} AvrIspWorkerEvt;
 
 struct AvrIspWorker {
     FuriThread* thread;
@@ -22,6 +28,98 @@ struct AvrIspWorker {
     void* context;
 };
 
+#define AVR_ISP_WORKER_PROG_ALL_EVENTS (AvrIspWorkerEvtStop | AvrIspWorkerEvtProgRun)
+#define AVR_ISP_WORKER_ALL_EVENTS \
+    (AvrIspWorkerEvtTx | AvrIspWorkerEvtTxCoplete | AvrIspWorkerEvtRx | AvrIspWorkerEvtStop)
+
+//########################/* VCP CDC */#############################################
+#include "usb_cdc.h"
+#include <cli/cli_vcp.h>
+#include <cli/cli.h>
+#include <furi_hal_usb_cdc.h>
+
+#define AVR_ISP_VCP_CDC_CH 1
+#define AVR_ISP_VCP_CDC_PKT_LEN CDC_DATA_SZ
+#define AVR_ISP_VCP_UART_RX_BUF_SIZE (AVR_ISP_VCP_CDC_PKT_LEN * 5)
+
+static void vcp_on_cdc_tx_complete(void* context);
+static void vcp_on_cdc_rx(void* context);
+static void vcp_state_callback(void* context, uint8_t state);
+static void vcp_on_cdc_control_line(void* context, uint8_t state);
+static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config);
+
+static const CdcCallbacks cdc_cb = {
+    vcp_on_cdc_tx_complete,
+    vcp_on_cdc_rx,
+    vcp_state_callback,
+    vcp_on_cdc_control_line,
+    vcp_on_line_config,
+};
+
+/* VCP callbacks */
+
+static void vcp_on_cdc_tx_complete(void* context) {
+    furi_assert(context);
+    AvrIspWorker* instance = context;
+    furi_thread_flags_set(furi_thread_get_id(instance->thread), AvrIspWorkerEvtTxCoplete);
+}
+
+static void vcp_on_cdc_rx(void* context) {
+    furi_assert(context);
+    AvrIspWorker* instance = context;
+    furi_thread_flags_set(furi_thread_get_id(instance->thread), AvrIspWorkerEvtRx);
+}
+
+static void vcp_state_callback(void* context, uint8_t state) {
+    UNUSED(context);
+    UNUSED(state);
+}
+
+static void vcp_on_cdc_control_line(void* context, uint8_t state) {
+    UNUSED(state);
+    UNUSED(context);
+}
+
+static void vcp_on_line_config(void* context, struct usb_cdc_line_coding* config) {
+    UNUSED(config);
+    UNUSED(context);
+    //AvrIspWorker* instance = context;
+    //furi_thread_flags_set(furi_thread_get_id(instance->thread), AvrIspWorkerEvtCfg);
+}
+
+static void avr_isp_worker_vcp_cdc_init(void* context) {
+    furi_hal_usb_unlock();
+    Cli* cli = furi_record_open(RECORD_CLI);
+    //close cli
+    cli_session_close(cli);
+    //disable callbacks VCP_CDC=0
+    furi_hal_cdc_set_callbacks(0, NULL, NULL);
+    //set 2 cdc
+    furi_check(furi_hal_usb_set_config(&usb_cdc_dual, NULL) == true);
+    //open cli VCP_CDC=0
+    cli_session_open(cli, &cli_vcp);
+    furi_record_close(RECORD_CLI);
+
+    furi_hal_cdc_set_callbacks(AVR_ISP_VCP_CDC_CH, (CdcCallbacks*)&cdc_cb, context);
+}
+
+static void avr_isp_worker_vcp_cdc_deinit(void) {
+    //disable callbacks AVR_ISP_VCP_CDC_CH
+    furi_hal_cdc_set_callbacks(AVR_ISP_VCP_CDC_CH, NULL, NULL);
+
+    Cli* cli = furi_record_open(RECORD_CLI);
+    //close cli
+    cli_session_close(cli);
+    furi_hal_usb_unlock();
+    //set 1 cdc
+    furi_check(furi_hal_usb_set_config(&usb_cdc_single, NULL) == true);
+    //open cli VCP_CDC=0
+    cli_session_open(cli, &cli_vcp);
+    furi_record_close(RECORD_CLI);
+}
+
+//#################################################################################
+
 void avr_isp_worker_detect_chip(AvrIspWorker* instance) {
     uint8_t buf_cmd[] = {
         STK_ENTER_PROGMODE, CRC_EOP, STK_READ_SIGN, CRC_EOP, STK_LEAVE_PROGMODE, CRC_EOP};
@@ -29,7 +127,7 @@ void avr_isp_worker_detect_chip(AvrIspWorker* instance) {
     size_t ind = 0;
 
     FURI_LOG_D(TAG, "Detecting AVR chip");
-    AvrIspProg* prog = avr_isp_prog_init(AvrIspSpiSwSpeed400Khz);
+    AvrIspProg* prog = avr_isp_prog_init(AvrIspSpiSwSpeed1Mhz);
 
     avr_isp_prog_rx(prog, buf_cmd, sizeof(buf_cmd));
 
@@ -73,15 +171,25 @@ void avr_isp_worker_detect_chip(AvrIspWorker* instance) {
 
 static int32_t avr_isp_worker_prog_thread(void* context) {
     AvrIspProg* prog = context;
-    uint32_t events = 0;
     FURI_LOG_D(TAG, "AvrIspProgWorker Start");
     while(1) {
-        events = furi_thread_flags_get();
-        if(events & AvrIspWorkerEvtStop) break;
-        avr_isp_prog_avrisp(prog);
+        // uint32_t events = furi_thread_flags_wait(
+        //     AVR_ISP_WORKER_PROG_ALL_EVENTS, FuriFlagWaitAny, FuriWaitForever);
+
+        if(furi_thread_flags_get() & AvrIspWorkerEvtStop) break;
+        // if(events & AvrIspWorkerEvtProgRun) {
+        //     FURI_LOG_D(TAG, "events RUN");
+            avr_isp_prog_avrisp(prog);
+       // }
     }
     FURI_LOG_D(TAG, "AvrIspProgWorker Stop");
     return 0;
+}
+
+static void avr_isp_worker_prog_tx_data(void* context) {
+    furi_assert(context);
+    AvrIspWorker* instance = context;
+    furi_thread_flags_set(furi_thread_get_id(instance->thread), AvrIspWorkerEvtTx);
 }
 
 /** Worker thread
@@ -91,21 +199,13 @@ static int32_t avr_isp_worker_prog_thread(void* context) {
  */
 static int32_t avr_isp_worker_thread(void* context) {
     AvrIspWorker* instance = context;
-    avr_isp_vcp_cdc_init();
+    avr_isp_worker_vcp_cdc_init(instance);
 
-    AvrIspProg* prog = avr_isp_prog_init(AvrIspSpiSwSpeed400Khz);
+    AvrIspProg* prog = avr_isp_prog_init(AvrIspSpiSwSpeed1Mhz);
+    avr_isp_prog_set_tx_callback(prog, avr_isp_worker_prog_tx_data, instance);
 
-    UNUSED(instance);
     uint8_t buf[AVR_ISP_VCP_UART_RX_BUF_SIZE];
-
-    // for(size_t i = 0; i < avr_isp_chip_arr_size; i++) {
-    //     if(avr_isp_chip_arr[i].sigs[1] == 0x97) {
-    //         if(avr_isp_chip_arr[i].sigs[2] == 0x0B) {
-    //             FURI_LOG_I(TAG, "name %s", avr_isp_chip_arr[i].name);
-    //             break;
-    //         }
-    //     }
-    // }
+    size_t len = 0;
 
     FuriThread* prog_thread =
         furi_thread_alloc_ex("AvrIspProgWorker", 1024, avr_isp_worker_prog_thread, prog);
@@ -113,28 +213,30 @@ static int32_t avr_isp_worker_thread(void* context) {
 
     FURI_LOG_D(TAG, "Start");
     while(instance->worker_running) {
-        furi_delay_ms(1);
+        uint32_t events =
+            furi_thread_flags_wait(AVR_ISP_WORKER_ALL_EVENTS, FuriFlagWaitAny, FuriWaitForever);
 
-        size_t len = avr_isp_vcp_cdc_receive(AVR_ISP_VCP_CDC_CH, buf, AVR_ISP_VCP_CDC_PKT_LEN);
-        while(len > 0) {
+        if(events & AvrIspWorkerEvtRx) {
+            len = furi_hal_cdc_receive(AVR_ISP_VCP_CDC_CH, buf, AVR_ISP_VCP_CDC_PKT_LEN);
+            // for(uint8_t i = 0; i < len; i++) {
+            //     FURI_LOG_I(TAG, "--> %X", buf[i]);
+            // }
             avr_isp_prog_rx(prog, buf, len);
-
-            for(uint8_t i = 0; i < len; i++) {
-                FURI_LOG_I(TAG, "--> %X", buf[i]);
-            }
-
-            len = avr_isp_vcp_cdc_receive(AVR_ISP_VCP_CDC_CH, buf, AVR_ISP_VCP_CDC_PKT_LEN);
+            
         }
 
-        len = avr_isp_prog_tx(prog, buf, AVR_ISP_VCP_CDC_PKT_LEN);
-        while(len > 0) {
-            for(uint8_t i = 0; i < len; i++) {
-                FURI_LOG_I(TAG, "<-- %X", buf[i]);
-            }
-
-            avr_isp_vcp_cdc_send(AVR_ISP_VCP_CDC_CH, buf, len);
-            furi_delay_ms(1);
+        if((events & AvrIspWorkerEvtTxCoplete) || (events & AvrIspWorkerEvtTx)) {
             len = avr_isp_prog_tx(prog, buf, AVR_ISP_VCP_CDC_PKT_LEN);
+
+            // for(uint8_t i = 0; i < len; i++) {
+            //     FURI_LOG_I(TAG, "<-- %X", buf[i]);
+            // }
+
+            if(len > 0) furi_hal_cdc_send(AVR_ISP_VCP_CDC_CH, buf, len);
+        }
+
+        if(events & AvrIspWorkerEvtStop) {
+            break;
         }
     }
     FURI_LOG_D(TAG, "Stop");
@@ -145,7 +247,7 @@ static int32_t avr_isp_worker_thread(void* context) {
     furi_thread_free(prog_thread);
 
     avr_isp_prog_free(prog);
-    avr_isp_vcp_cdc_deinit();
+    avr_isp_worker_vcp_cdc_deinit();
     return 0;
 }
 
@@ -191,6 +293,7 @@ void avr_isp_worker_stop(AvrIspWorker* instance) {
     furi_assert(instance->worker_running);
 
     instance->worker_running = false;
+    furi_thread_flags_set(furi_thread_get_id(instance->thread), AvrIspWorkerEvtStop);
 
     furi_thread_join(instance->thread);
 }
