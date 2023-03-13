@@ -501,6 +501,7 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
+        case InputKeyRight:
         case InputKeyDown:
             with_view_model(
                 instance->view,
@@ -515,6 +516,7 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
+        case InputKeyLeft:
         case InputKeyUp:
             with_view_model(
                 instance->view,
@@ -529,7 +531,7 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
-        case InputKeyRight:
+        // case InputKeyRight:
         case InputKeyOk:
             // with_view_model(
             //     instance->view,
@@ -541,7 +543,7 @@ bool flipbip_scene_1_input(InputEvent* event, void* context) {
             //     },
             //     true);
             // break;
-        case InputKeyLeft:
+        // case InputKeyLeft:
         case InputKeyMAX:
             break;
         }
