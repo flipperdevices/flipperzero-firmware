@@ -389,7 +389,7 @@ static int flipbip_scene_1_model_init(
 
     // buffer for key serialization
     const size_t buflen = 128;
-    char buf[128 + 1];
+    char buf[128 + 1] = {0};
 
     // coin info
     // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
@@ -452,12 +452,13 @@ static int flipbip_scene_1_model_init(
         flipbip_scene_1_init_address(model->recv_addresses[a], node, coin_info[5], a);
 
         // Save QR code file
-        char name[14] = {0};
-        strcpy(name, COIN_TEXT_ARRAY[coin][0]);
+        memzero(buf, buflen);
+        strcpy(buf, COIN_TEXT_ARRAY[coin][0]);
         const unsigned char addr_num[1] = {a};
-        flipbip_btox(addr_num, 1, name + strlen(name));
-        strcpy(name + strlen(name), TEXT_QRFILE_EXT);
-        flipbip_save_qrfile(COIN_TEXT_ARRAY[coin][2], model->recv_addresses[a], name);
+        flipbip_btox(addr_num, 1, buf + strlen(buf));
+        strcpy(buf + strlen(buf), TEXT_QRFILE_EXT);
+        flipbip_save_qrfile(COIN_TEXT_ARRAY[coin][2], model->recv_addresses[a], buf);
+        memzero(buf, buflen);
     }
 
     model->page = PAGE_INFO;
