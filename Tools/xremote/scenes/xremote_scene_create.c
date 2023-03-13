@@ -62,7 +62,7 @@ bool xremote_scene_create_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(app->scene_manager, XRemoteSceneCreateAdd);
             }
         }
-        switch(event.event) {
+        /*switch(event.event) {
             case XRemoteCustomEventCreateLeft:
             case XRemoteCustomEventCreateRight:
                 break;
@@ -80,7 +80,7 @@ bool xremote_scene_create_on_event(void* context, SceneManagerEvent event) {
                     }
                 consumed = true;
                 break;
-        }
+        }*/
     }
     
     return consumed;

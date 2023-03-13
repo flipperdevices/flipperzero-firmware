@@ -59,6 +59,9 @@ XRemote* xremote_app_alloc() {
     app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdSettings, variable_item_list_get_view(app->variable_item_list));
 
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdWip, popup_get_view(app->popup));
+
     //End Scene Additions
 
     return app;
@@ -76,6 +79,8 @@ void xremote_app_free(XRemote* app) {
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdCreateAdd);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdScene2);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdSettings);
+    view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdWip);
+    popup_free(app->popup);
     submenu_free(app->submenu);
 
     view_dispatcher_free(app->view_dispatcher);
@@ -86,6 +91,13 @@ void xremote_app_free(XRemote* app) {
 
     //Remove whatever is left
     free(app);
+}
+
+void xremote_popup_closed_callback(void* context) {
+    furi_assert(context);
+    XRemote* app = context;
+    view_dispatcher_send_custom_event(
+        app->view_dispatcher, XRemoteCustomEventTypePopupClosed);
 }
 
 int32_t xremote_app(void* p) {

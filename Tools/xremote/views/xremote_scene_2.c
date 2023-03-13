@@ -46,8 +46,9 @@ void xremote_scene_2_draw(Canvas* canvas, XRemoteScene2Model* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "Scene 2: Input Examples"); 
+    canvas_draw_str_aligned(canvas, 0, 10, AlignLeft, AlignTop, "In Development"); 
     canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 0, 20, AlignLeft, AlignTop, "Please check back later"); 
     char *strInput = malloc(15);
     strcpy(strInput, buttonText[model->screen_text]);
     canvas_draw_str_aligned(canvas, 0, 22, AlignLeft, AlignTop, strInput); 

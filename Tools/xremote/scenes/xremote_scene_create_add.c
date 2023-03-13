@@ -2,16 +2,11 @@
 #include "../helpers/xremote_custom_event.h"
 
 typedef enum {
-    ButtonIndexIr = -2,
-    ButtonIndexSubghz = -1,
-    ButtonIndexPause = 0,
+    ButtonIndexIr = -3,
+    ButtonIndexSubghz = -2,
+    ButtonIndexPause = -1,
+    ButtonIndexNA = 0,
 } ButtonIndex;
-
-/*void xremote_create_callback(XRemoteCustomEvent event, void* context) {
-    furi_assert(context);
-    XRemote* app = context;
-    view_dispatcher_send_custom_event(app->view_dispatcher, event);
-}*/
 
 static void xremote_create_add_callback(void* context, int32_t index, InputType type) {
     XRemote* app = context;
@@ -19,7 +14,18 @@ static void xremote_create_add_callback(void* context, int32_t index, InputType 
     UNUSED(index);
     UNUSED(type);
 
-    //view_dispatcher_send_custom_event(app->view_dispatcher, ??);
+     uint16_t custom_type;
+    if(type == InputTypePress) {
+        custom_type = XRemoteCustomEventMenuSelected;
+    } else if(type == InputTypeRelease) {
+        custom_type = XRemoteCustomEventMenuSelected;
+    } else if(type == InputTypeShort) {
+        custom_type = XRemoteCustomEventMenuSelected;
+    } else {
+        furi_crash("Unexpected Input Type");
+    }
+
+    view_dispatcher_send_custom_event(app->view_dispatcher, xremote_custom_menu_event_pack(custom_type, index));
 }
 
 void xremote_scene_create_add_on_enter(void* context) {
@@ -57,7 +63,6 @@ void xremote_scene_create_add_on_enter(void* context) {
         (signed)scene_manager_get_scene_state(scene_manager, XRemoteViewIdCreateAdd);
     button_menu_set_selected_item(button_menu, button_index);
 
-    //xremote_create_set_callback(app->xremote_create, xremote_create_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, XRemoteViewIdCreateAdd);
 }
 
@@ -66,24 +71,21 @@ bool xremote_scene_create_add_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
     
     if(event.type == SceneManagerEventTypeCustom) {
-        switch(event.event) {
-            case XRemoteCustomEventCreateLeft:
-            case XRemoteCustomEventCreateRight:
-                break;
-            case XRemoteCustomEventCreateUp:
-            case XRemoteCustomEventCreateDown:
-                break;
-            case XRemoteCustomEventCreateBack:
-                notification_message(app->notification, &sequence_reset_red);
-                notification_message(app->notification, &sequence_reset_green);
-                notification_message(app->notification, &sequence_reset_blue);
-                if(!scene_manager_search_and_switch_to_previous_scene(
-                    app->scene_manager, XRemoteSceneCreate)) {
-                        scene_manager_stop(app->scene_manager);
-                        view_dispatcher_stop(app->view_dispatcher);
-                    }
-                consumed = true;
-                break;
+        const uint16_t custom_type = xremote_custom_menu_event_get_type(event.event);
+        const int16_t button_index = xremote_custom_menu_event_get_value(event.event);
+        if (custom_type == XRemoteCustomEventMenuSelected) {
+            furi_assert(button_index < 0);
+            scene_manager_set_scene_state(
+                app->scene_manager, XRemoteSceneCreate, (unsigned)button_index);
+            if(button_index == ButtonIndexIr) {
+                scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
+            }
+            if(button_index == ButtonIndexSubghz) {
+                scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
+            }
+            if(button_index == ButtonIndexPause) {
+                scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
+            }
         }
     }
     
