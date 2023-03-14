@@ -38,30 +38,10 @@ void direct_input_callback(const void* value, void* ctx) {
     const InputEvent* input_event = value;
     VideoPlayerApp* player = (VideoPlayerApp*)(ctx);
 
-    /*VideoPlayerEvent event = {
+    VideoPlayerEvent event = {
         .type = EventTypeInput, .input = *input_event};
 
-    furi_message_queue_put(player->event_queue, &event, FuriWaitForever);*/
-
-    if(input_event->key == InputKeyBack)
-    {
-        player->quit = true;
-    }
-
-    if(input_event->key == InputKeyOk)
-    {
-        player->playing = !player->playing;
-    }
-
-    if(player->playing)
-    {
-        player_start();
-    }
-
-    else
-    {
-        player_stop();
-    }
+    furi_message_queue_put(player->event_queue, &event, FuriWaitForever);
 }
 
 void player_view_free(PlayerView* player_view) {
@@ -116,34 +96,40 @@ int32_t video_player_app(void* p) {
     else
     {
         player->quit = true;
-        goto end;
+        //goto end;
     }
 
-    char header[8];
-    header[7] = '\0';
-    stream_read(player->stream, (uint8_t*)header, 7);
-
-    if(strcmp(header, "BND!VID") != 0)
+    if(!(player->quit))
     {
-        player->quit = true;
-        goto end;
+        char header[8];
+        header[7] = '\0';
+        stream_read(player->stream, (uint8_t*)header, 7);
+
+        if(strcmp(header, "BND!VID") != 0)
+        {
+            player->quit = true;
+            //goto end;
+        }
+
+        stream_read(player->stream, (uint8_t*)&player->version, sizeof(player->version));
+        stream_read(player->stream, (uint8_t*)&player->num_frames, sizeof(player->num_frames));
+        stream_read(player->stream, (uint8_t*)&player->audio_chunk_size, sizeof(player->audio_chunk_size));
+        stream_read(player->stream, (uint8_t*)&player->sample_rate, sizeof(player->sample_rate));
+        stream_read(player->stream, &player->height, sizeof(player->height));
+        stream_read(player->stream, &player->width, sizeof(player->width));
+
+        player->buffer = (uint8_t*)malloc(player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
+        memset(player->buffer, 0, player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
+
+        player->image_buffer_length = (uint32_t)player->height * (uint32_t)player->width / 8;
+        player->audio_buffer = (uint8_t*)&player->buffer[player->image_buffer_length];
+        player->image_buffer = player->buffer;
     }
 
-    stream_read(player->stream, (uint8_t*)&player->version, sizeof(player->version));
-    stream_read(player->stream, (uint8_t*)&player->num_frames, sizeof(player->num_frames));
-    stream_read(player->stream, (uint8_t*)&player->audio_chunk_size, sizeof(player->audio_chunk_size));
-    stream_read(player->stream, (uint8_t*)&player->sample_rate, sizeof(player->sample_rate));
-    stream_read(player->stream, &player->height, sizeof(player->height));
-    stream_read(player->stream, &player->width, sizeof(player->width));
-
-    player->buffer = (uint8_t*)malloc(player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
-    memset(player->buffer, 0, player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
-
-    player->image_buffer_length = (uint32_t)player->height * (uint32_t)player->width / 8;
-    player->audio_buffer = (uint8_t*)&player->buffer[player->image_buffer_length];
-    player->image_buffer = player->buffer;
-
-    player_init_hardware_and_play(player);
+    if(!(player->quit))
+    {
+        player_init_hardware_and_play(player);
+    }
 
     // Текущее событие типа кастомного типа VideoPlayerEvent
     VideoPlayerEvent event;
@@ -165,15 +151,44 @@ int32_t video_player_app(void* p) {
     player->input_subscription =
         furi_pubsub_subscribe(player->input, direct_input_callback, player);
 
-    end:;
+    if(player->quit)
+    {
+        deinit_player(player);
+        player_deinit_hardware();
+        return 0;
+    }
 
     player->playing = true;
 
-    vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
+    //vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
 
-    do {
+    while(!(player->quit))
+    {
         furi_check(
             furi_message_queue_get(player->event_queue, &event, FuriWaitForever) == FuriStatusOk);
+
+        if(event.type == EventTypeInput)
+        {
+            if(event.input.key == InputKeyBack)
+            {
+                player->quit = true;
+            }
+
+            if(event.input.key == InputKeyOk)
+            {
+                player->playing = !player->playing;
+            }
+
+            if(player->playing)
+            {
+                player_start();
+            }
+
+            else
+            {
+                player_stop();
+            }
+        }
 
         if(event.type == EventType1stHalf)
         {
@@ -210,8 +225,8 @@ int32_t video_player_app(void* p) {
             player->quit = true;
         }
 
-        furi_thread_yield();
-    } while(!(player->quit));
+        //furi_thread_yield();
+    }
 
     deinit_player(player);
     player_deinit_hardware();
