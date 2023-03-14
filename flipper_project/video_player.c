@@ -160,7 +160,7 @@ int32_t video_player_app(void* p) {
 
     player->playing = true;
 
-    //vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
+    vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
 
     while(!(player->quit))
     {
@@ -225,7 +225,7 @@ int32_t video_player_app(void* p) {
             player->quit = true;
         }
 
-        //furi_thread_yield();
+        furi_thread_yield();
     }
 
     deinit_player(player);
