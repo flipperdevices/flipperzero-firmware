@@ -33,14 +33,6 @@ jobs:
         run: |
           echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
 
-      - name: 'Installing additional python dependencies'
-        id: autotest_dependencies
-        if: success()
-        run: |
-          source scripts/toolchain/fbtenv.sh --restore
-          source scripts/toolchain/fbtenv.sh
-          python3 -m pip install -r ./scripts/flippigator/requirements.txt
-
       - name: 'Flash unit tests firmware'
         id: flashing
         if: success()
@@ -57,14 +49,23 @@ jobs:
           python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
+      - name: 'Installing additional python dependencies'
+        id: autotest_dependencies
+        if: success()
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 -m venv /opt/flippigator-venv
+          source /opt/flippigator-venv/bin/activate
+          python3 -m pip install -r ./scripts/flippigator/requirements.txt
+
       - name: 'Run smoke tests'
         id: run_smoke
         if: steps.format_ext.outcome == 'success'
         timeout-minutes: 5
         run: |
-          source scripts/toolchain/fbtenv.sh
           cd ./scripts/flippigator/
           pytest --port=${{steps.device.outputs.flipper}}
+          deactivate
 
       - name: 'Generate allure reports'
         id: generate_allure_reports

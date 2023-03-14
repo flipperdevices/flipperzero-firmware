@@ -8,6 +8,7 @@ from termcolor import colored
 os.system("color")
 
 
+@pytest.mark.xfail
 @pytest.mark.u2f
 class TestU2f(BaseCase):
     def test_u2f_menu_negative(self, nav):

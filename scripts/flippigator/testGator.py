@@ -21,7 +21,7 @@ def main():
     gator_serial.flushOutput()
     gator_serial.flushInput()
 
-    gator = Gator(gator_serial)
+    gator = Gator(gator_serial, 900, 900)
     gator.home()
 
 

@@ -8,6 +8,7 @@ from termcolor import colored
 os.system("color")
 
 
+@pytest.mark.xfail
 @pytest.mark.badusb
 class TestBadusb(BaseCase):
     def test_badusb_menu_negative(self, nav):

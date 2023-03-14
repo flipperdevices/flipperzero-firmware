@@ -15,7 +15,7 @@ from flippigator.flippigator import Gator, Navigator, FlipperTextKeyboard, Flipp
 
 def main():
     print("Let's go!")
-    port = "COM4"
+    port = serial.Serial(sys.argv[1], timeout=1)
 
     flipper = serial.Serial(port, timeout=1)
     flipper.baudrate = 2304000
