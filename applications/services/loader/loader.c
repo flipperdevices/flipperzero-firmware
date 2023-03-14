@@ -321,22 +321,6 @@ static Loader* loader_alloc() {
     view_set_previous_callback(menu_get_view(instance->primary_menu), loader_hide_menu);
     view_dispatcher_add_view(
         instance->view_dispatcher, LoaderMenuViewPrimary, menu_get_view(instance->primary_menu));
-    // Plugins menu
-    instance->plugins_menu = submenu_alloc();
-    view_set_context(submenu_get_view(instance->plugins_menu), instance->plugins_menu);
-    view_set_previous_callback(
-        submenu_get_view(instance->plugins_menu), loader_back_to_primary_menu);
-    view_dispatcher_add_view(
-        instance->view_dispatcher,
-        LoaderMenuViewPlugins,
-        submenu_get_view(instance->plugins_menu));
-    // Debug menu
-    instance->debug_menu = submenu_alloc();
-    view_set_context(submenu_get_view(instance->debug_menu), instance->debug_menu);
-    view_set_previous_callback(
-        submenu_get_view(instance->debug_menu), loader_back_to_primary_menu);
-    view_dispatcher_add_view(
-        instance->view_dispatcher, LoaderMenuViewDebug, submenu_get_view(instance->debug_menu));
     // Settings menu
     instance->settings_menu = submenu_alloc();
     view_set_context(submenu_get_view(instance->settings_menu), instance->settings_menu);
@@ -365,10 +349,6 @@ static void loader_free(Loader* instance) {
 
     menu_free(loader_instance->primary_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPrimary);
-    submenu_free(loader_instance->plugins_menu);
-    view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewPlugins);
-    submenu_free(loader_instance->debug_menu);
-    view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewDebug);
     submenu_free(loader_instance->settings_menu);
     view_dispatcher_remove_view(loader_instance->view_dispatcher, LoaderMenuViewSettings);
     view_dispatcher_free(loader_instance->view_dispatcher);
