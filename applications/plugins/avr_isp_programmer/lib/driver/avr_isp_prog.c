@@ -40,6 +40,8 @@ struct AvrIspProg {
     void* context;
 };
 
+static void avr_isp_prog_end_pmode(AvrIspProg* instance);
+
 AvrIspProg* avr_isp_prog_init(void) {
     AvrIspProg* instance = malloc(sizeof(AvrIspProg));
     instance->cfg = malloc(sizeof(AvrIspProgCfgDevice));
@@ -54,6 +56,7 @@ AvrIspProg* avr_isp_prog_init(void) {
 
 void avr_isp_prog_free(AvrIspProg* instance) {
     furi_assert(instance);
+    if(instance->pmode) avr_isp_prog_end_pmode(instance);
     furi_stream_buffer_free(instance->stream_tx);
     furi_stream_buffer_free(instance->stream_rx);
     free(instance->cfg);
@@ -255,6 +258,7 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance, AvrIspSpiSwSpeed spi_
         instance->pmode = true;
         return true;
     }
+    if(instance->spi) avr_isp_spi_sw_free(instance->spi);
     return false;
 }
 

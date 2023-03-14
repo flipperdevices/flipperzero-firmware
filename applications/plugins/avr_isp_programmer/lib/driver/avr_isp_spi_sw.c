@@ -5,7 +5,7 @@
 #define AVR_ISP_SPI_SW_MISO &gpio_ext_pa6
 #define AVR_ISP_SPI_SW_MOSI &gpio_ext_pa7
 #define AVR_ISP_SPI_SW_SCK &gpio_ext_pb3
-#define AVR_ISP_RESET &gpio_ext_pa4
+#define AVR_ISP_RESET &gpio_ext_pb2
 
 struct AvrIspSpiSw {
     AvrIspSpiSwSpeed speed_wait_time;
@@ -36,7 +36,6 @@ AvrIspSpiSw* avr_isp_spi_sw_init(AvrIspSpiSwSpeed speed) {
 
 void avr_isp_spi_sw_free(AvrIspSpiSw* instance) {
     furi_assert(instance);
-
     furi_hal_gpio_init(instance->res, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_init(instance->miso, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_gpio_init(instance->mosi, GpioModeAnalog, GpioPullNo, GpioSpeedLow);

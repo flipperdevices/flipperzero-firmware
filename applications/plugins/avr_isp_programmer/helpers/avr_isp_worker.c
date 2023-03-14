@@ -1,4 +1,5 @@
 #include "avr_isp_worker.h"
+#include <furi_hal_pwm.h>
 #include "../lib/driver/avr_isp_prog.h"
 #include "../lib/driver/avr_isp_prog_cmd.h"
 #include "../lib/driver/avr_isp_spi_sw.h"
@@ -128,14 +129,14 @@ void avr_isp_worker_detect_chip(AvrIspWorker* instance) {
     AvrIspProg* prog = avr_isp_prog_init();
     avr_isp_prog_rx(prog, buf_cmd, sizeof(buf_cmd));
 
-    for(uint8_t i = 0; i < 2; i++) {
+    for(uint8_t i = 0; i < 3; i++) {
         avr_isp_prog_avrisp(prog);
     }
     size_t len = avr_isp_prog_tx(prog, buf_data, sizeof(buf_data));
     UNUSED(len);
 
     if(buf_data[2] == STK_INSYNC && buf_data[6] == STK_OK) {
-        if(buf_data[3] == 0x00) {
+        if(buf_data[3] != 0x1E) {
             ind = avr_isp_chip_arr_size + 1; //No detect chip
         } else {
             for(ind = 0; ind < avr_isp_chip_arr_size; ind++) {
@@ -188,6 +189,9 @@ static int32_t avr_isp_worker_thread(void* context) {
     AvrIspWorker* instance = context;
     avr_isp_worker_vcp_cdc_init(instance);
 
+    /* start PWM on &gpio_ext_pa4 */
+    furi_hal_pwm_start(FuriHalPwmOutputIdLptim2PA4, 4000000, 50);
+
     AvrIspProg* prog = avr_isp_prog_init();
     avr_isp_prog_set_tx_callback(prog, avr_isp_worker_prog_tx_data, instance);
 
@@ -237,6 +241,7 @@ static int32_t avr_isp_worker_thread(void* context) {
     furi_thread_free(prog_thread);
 
     avr_isp_prog_free(prog);
+    furi_hal_pwm_stop(FuriHalPwmOutputIdLptim2PA4);
     avr_isp_worker_vcp_cdc_deinit();
     return 0;
 }
