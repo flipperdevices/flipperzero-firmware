@@ -1,7 +1,6 @@
 #pragma once
 
 #include <furi_hal.h>
-#include "../avr_isp_app_i.h"
 
 typedef struct AvrIspWorker AvrIspWorker;
 
@@ -49,4 +48,8 @@ void avr_isp_worker_stop(AvrIspWorker* instance);
  */
 bool avr_isp_worker_is_running(AvrIspWorker* instance);
 
+/** Detect chip
+ * 
+ * @param instance AvrIspWorker instance
+ */
 void avr_isp_worker_detect_chip(AvrIspWorker* instance);

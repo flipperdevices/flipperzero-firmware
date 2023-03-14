@@ -35,20 +35,18 @@ struct AvrIspProg {
     bool exit;
     bool rst_active_high;
     uint8_t buff[AVR_ISP_PROG_TX_RX_BUF_SIZE];
-    AvrIspSpiSwSpeed spi_speed;
 
     AvrIspProgCallback callback;
     void* context;
 };
 
-AvrIspProg* avr_isp_prog_init(AvrIspSpiSwSpeed spi_speed) {
+AvrIspProg* avr_isp_prog_init(void) {
     AvrIspProg* instance = malloc(sizeof(AvrIspProg));
     instance->cfg = malloc(sizeof(AvrIspProgCfgDevice));
     instance->stream_rx =
         furi_stream_buffer_alloc(sizeof(int8_t) * AVR_ISP_PROG_TX_RX_BUF_SIZE, sizeof(int8_t));
     instance->stream_tx =
         furi_stream_buffer_alloc(sizeof(int8_t) * AVR_ISP_PROG_TX_RX_BUF_SIZE, sizeof(int8_t));
-    instance->spi_speed = spi_speed;
     instance->rst_active_high = false;
     instance->exit = false;
     return instance;
@@ -60,6 +58,10 @@ void avr_isp_prog_free(AvrIspProg* instance) {
     furi_stream_buffer_free(instance->stream_rx);
     free(instance->cfg);
     free(instance);
+}
+
+size_t avr_isp_prog_spaces_rx(AvrIspProg* instance) {
+    return furi_stream_buffer_spaces_available(instance->stream_rx);
 }
 
 bool avr_isp_prog_rx(AvrIspProg* instance, uint8_t* data, size_t len) {
@@ -208,14 +210,17 @@ static bool
 
 static void avr_isp_prog_end_pmode(AvrIspProg* instance) {
     furi_assert(instance);
-    avr_isp_prog_reset_target(instance, false);
-    // We're about to take the target out of reset
-    // so configure SPI pins as input
-    if(instance->spi) avr_isp_spi_sw_free(instance->spi);
+    if(instance->pmode) {
+        avr_isp_prog_reset_target(instance, false);
+        // We're about to take the target out of reset
+        // so configure SPI pins as input
+        if(instance->spi) avr_isp_spi_sw_free(instance->spi);
+    }
+
     instance->pmode = false;
 }
 
-static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
+static bool avr_isp_prog_start_pmode(AvrIspProg* instance, AvrIspSpiSwSpeed spi_speed) {
     furi_assert(instance);
     // Reset target before driving PIN_SCK or PIN_MOSI
 
@@ -225,7 +230,7 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
     // which for many arduino's is not the SS pin.
     // So we have to configure RESET as output here,
     // (reset_target() first sets the correct level)
-    instance->spi = avr_isp_spi_sw_init(instance->spi_speed);
+    instance->spi = avr_isp_spi_sw_init(spi_speed);
     avr_isp_prog_reset_target(instance, true);
 
     // See avr datasheets, chapter "SERIAL_PRG Programming Algorithm":
@@ -249,6 +254,24 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
     if(avr_isp_prog_set_pmode(instance, AVR_ISP_SET_PMODE)) {
         instance->pmode = true;
         return true;
+    }
+    return false;
+}
+
+static bool avr_isp_prog_auto_set_spi_speed_start_pmode(AvrIspProg* instance) {
+    AvrIspSpiSwSpeed spi_speed[] = {
+        AvrIspSpiSwSpeed1Mhz,
+        AvrIspSpiSwSpeed400Khz,
+        AvrIspSpiSwSpeed250Khz,
+        AvrIspSpiSwSpeed125Khz,
+        AvrIspSpiSwSpeed40Khz,
+        AvrIspSpiSwSpeed20Khz,
+    };
+
+    for(uint8_t i = 0; i < COUNT_OF(spi_speed); i++) {
+        if(avr_isp_prog_start_pmode(instance, spi_speed[i])) {
+            return true;
+        }
     }
     return false;
 }
@@ -495,18 +518,13 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_ENTER_PROGMODE:
-        if(!instance->pmode) {
-            for(uint8_t i = 0; i < 16; i++) {
-                if(avr_isp_prog_start_pmode(instance)) break;
-            }
-        }
+        if(!instance->pmode) avr_isp_prog_auto_set_spi_speed_start_pmode(instance);
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_LOAD_ADDRESS:
         instance->addr = avr_isp_prog_getch(instance) | avr_isp_prog_getch(instance) << 8;
         avr_isp_prog_empty_reply(instance);
         break;
-
     case STK_PROG_FLASH: // ignore for now
         avr_isp_prog_getch(instance);
         avr_isp_prog_getch(instance);
@@ -516,15 +534,12 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
         avr_isp_prog_getch(instance);
         avr_isp_prog_empty_reply(instance);
         break;
-
     case STK_PROG_PAGE:
         avr_isp_prog_program_page(instance);
         break;
-
     case STK_READ_PAGE:
         avr_isp_prog_read_page(instance);
         break;
-
     case STK_UNIVERSAL:
         avr_isp_prog_universal(instance);
         break;
@@ -533,18 +548,15 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
         if(instance->pmode) avr_isp_prog_end_pmode(instance);
         avr_isp_prog_empty_reply(instance);
         break;
-
     case STK_READ_SIGN:
         avr_isp_prog_read_signature(instance);
         break;
-
     // expecting a command, not CRC_EOP
     // this is how we can get back in sync
     case CRC_EOP:
         instance->error++;
         avr_isp_prog_tx_ch(instance, STK_NOSYNC);
         break;
-
     // anything else we will return STK_UNKNOWN
     default:
         instance->error++;
