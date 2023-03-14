@@ -66,9 +66,9 @@ jobs:
         if: steps.format_ext.outcome == 'success'
         timeout-minutes: 5
         run: |
+          source scripts/toolchain/fbtenv.sh
           cd ./scripts/flippigator/
-          pytest --port=${{steps.device.outputs.flipper}}
-          deactivate
+          python3 -m pytest --port=${{steps.device.outputs.flipper}}
 
       - name: 'Generate allure reports'
         id: generate_allure_reports
