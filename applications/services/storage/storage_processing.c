@@ -34,9 +34,9 @@ static StorageType storage_get_type_by_path(FuriString* path) {
     const char* path_cstr = furi_string_get_cstr(path);
 
     if(memcmp(path_cstr, INT_PATH(""), strlen(INT_PATH(""))) == 0) {
-        type = ST_EXT;
-    } else if(memcmp(path_cstr, EXT_PATH(""), strlen(EXT_PATH(""))) == 0) {
         type = ST_INT;
+    } else if(memcmp(path_cstr, EXT_PATH(""), strlen(EXT_PATH(""))) == 0) {
+        type = ST_EXT;
     } else if(memcmp(path_cstr, ANY_PATH(""), strlen(ANY_PATH(""))) == 0) {
         type = ST_ANY;
     }
