@@ -53,7 +53,7 @@ uint8_t avr_isp_spi_sw_txrx(AvrIspSpiSw* instance, uint8_t data) {
         if(instance->speed_wait_time != AvrIspSpiSwSpeed1Mhz)
             furi_delay_us(instance->speed_wait_time - 1);
 
-        data = (data << 1) | furi_hal_gpio_read(instance->miso);
+        data = (data << 1) | furi_hal_gpio_read(instance->miso); //-V792
 
         furi_hal_gpio_write(instance->sck, false);
         if(instance->speed_wait_time != AvrIspSpiSwSpeed1Mhz)

@@ -115,10 +115,7 @@ static void avr_isp_prog_fill(AvrIspProg* instance, size_t len) {
 
 static void avr_isp_prog_reset_target(AvrIspProg* instance, bool reset) {
     furi_assert(instance);
-    avr_isp_spi_sw_res_set(
-        instance->spi,
-        ((reset && instance->rst_active_high) || (!reset && !instance->rst_active_high)) ? true :
-                                                                                           false);
+    avr_isp_spi_sw_res_set(instance->spi, (reset == instance->rst_active_high) ? true : false);
 }
 
 static uint8_t avr_isp_prog_spi_transaction(
