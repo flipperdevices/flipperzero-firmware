@@ -44,8 +44,8 @@ class Main(App):
         try:
             with FlipperStorage(port) as storage:
                 storage_ops = FlipperStorageOperations(storage)
-                storage_ops.checked_mkdir(update_root)
-                storage_ops.checked_mkdir(flipper_update_path)
+                storage_ops.mkpath(update_root)
+                storage_ops.mkpath(flipper_update_path)
                 storage_ops.recursive_send(
                     flipper_update_path, manifest_path.parents[0]
                 )

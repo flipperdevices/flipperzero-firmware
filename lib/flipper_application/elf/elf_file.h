@@ -89,16 +89,18 @@ ELFFileLoadStatus elf_file_load_sections(ELFFile* elf_file);
  */
 void elf_file_call_init(ELFFile* elf);
 
+/**
+ * @brief Check if ELF file pre-run stage was executed and its code is runnable
+ * @param elf 
+ */
 bool elf_file_is_init_complete(ELFFile* elf);
 
 /**
- * @brief Run ELF file - invoke entry point (load stage #4)
+ * @brief Get actual entry point for ELF file
  * @param elf_file 
  * @param args 
  * @return int32_t 
  */
-// int32_t elf_file_call_ep(ELFFile* elf_file, void* args);
-
 void* elf_file_get_entry_point(ELFFile* elf_file);
 
 /**

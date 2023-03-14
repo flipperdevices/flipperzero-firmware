@@ -361,7 +361,7 @@ class FlipperStorage:
         self._check_no_error(response, path)
 
     def format_ext(self):
-        """Create a directory on Flipper"""
+        """Format external storage on Flipper"""
         self.send_and_wait_eol("storage format /ext\r")
         self.send_and_wait_eol("y\r")
         response = self.read.until(self.CLI_EOL)
@@ -416,7 +416,7 @@ class FlipperStorageOperations:
             self.storage.send_file(local_file_path, flipper_file_path)
 
     # make directory with exist check
-    def checked_mkdir(self, flipper_dir_path: str):
+    def mkpath(self, flipper_dir_path: str):
         path_components, dirs_to_create = flipper_dir_path.split("/"), []
         while not self.storage.exist_dir(dir_path := "/".join(path_components)):
             self.logger.debug(f'"{dir_path}" does not exist, will create')
@@ -432,7 +432,7 @@ class FlipperStorageOperations:
 
         if os.path.isdir(local_path):
             # create parent dir
-            self.checked_mkdir(flipper_path)
+            self.mkpath(flipper_path)
 
             for dirpath, dirnames, filenames in os.walk(local_path):
                 self.logger.debug(f'Processing directory "{os.path.normpath(dirpath)}"')
@@ -446,7 +446,7 @@ class FlipperStorageOperations:
                     flipper_dir_path = os.path.normpath(flipper_dir_path).replace(
                         os.sep, "/"
                     )
-                    self.checked_mkdir(flipper_dir_path)
+                    self.mkpath(flipper_dir_path)
 
                 # send files
                 for filename in filenames:
@@ -457,7 +457,7 @@ class FlipperStorageOperations:
                     local_file_path = os.path.normpath(os.path.join(dirpath, filename))
                     self.send_file_to_storage(flipper_file_path, local_file_path, force)
         else:
-            self.checked_mkdir(posixpath.dirname(flipper_path))
+            self.mkpath(posixpath.dirname(flipper_path))
             self.send_file_to_storage(flipper_path, local_path, force)
 
     def recursive_receive(self, flipper_path: str, local_path: str):
