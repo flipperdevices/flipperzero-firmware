@@ -1,5 +1,8 @@
 # flipper-zero-video-player
  An application for playing videos (with sound) on Flipper Zero.
+
+# [Download extra video files](https://github.com/LTVA1/flipper-video-player-extra)
+
 # How to use:
 
 First, place your video (`source.mp4`) in some empty folder, create "frames" folder there and run this (install ffmpeg if you don't have it) (change the 1280x720 resolution to match your source video resolution if necessary, change 96x64 resolution according to your video aspect ratio if necessary):
