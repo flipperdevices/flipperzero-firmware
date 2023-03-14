@@ -238,7 +238,7 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance) {
     avr_isp_prog_reset_target(instance, false);
 
     // Pulse must be minimum 2 target CPU speed cycles
-    // so 0 usec is ok for CPU speeds above 20KHz
+    // so 100 usec is ok for CPU speeds above 20KHz
     furi_delay_ms(1);
 
     avr_isp_prog_reset_target(instance, true);
@@ -263,11 +263,21 @@ static void avr_isp_prog_universal(AvrIspProg* instance) {
     avr_isp_prog_breply(instance, data);
 }
 
-static void avr_isp_prog_commit(AvrIspProg* instance, uint16_t addr) {
+static void avr_isp_prog_commit(AvrIspProg* instance, uint16_t addr, uint8_t data) {
     furi_assert(instance);
-    furi_delay_ms(2);
     avr_isp_prog_spi_transaction(instance, AVR_ISP_COMMIT(addr));
-    furi_delay_ms(2);
+    /* polling flash */
+    if(data == 0xFF) {
+        furi_delay_ms(5);
+    } else {
+        /* polling flash */
+        uint32_t starttime = furi_get_tick();
+        while((furi_get_tick() - starttime) < 30) {
+            if(avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_FLASH_HI(addr)) != 0xFF) {
+                break;
+            };
+        }
+    }
 }
 
 static uint16_t avr_isp_prog_current_page(AvrIspProg* instance) {
@@ -301,7 +311,8 @@ static uint8_t avr_isp_prog_write_flash_pages(AvrIspProg* instance, size_t lengt
     uint16_t page = avr_isp_prog_current_page(instance);
     while(x < length) {
         if(page != avr_isp_prog_current_page(instance)) {
-            avr_isp_prog_commit(instance, page);
+            --x;
+            avr_isp_prog_commit(instance, page, instance->buff[x++]);
             page = avr_isp_prog_current_page(instance);
         }
         avr_isp_prog_spi_transaction(
@@ -312,7 +323,7 @@ static uint8_t avr_isp_prog_write_flash_pages(AvrIspProg* instance, size_t lengt
         instance->addr++;
     }
 
-    avr_isp_prog_commit(instance, page);
+    avr_isp_prog_commit(instance, page, instance->buff[--x]);
     return STK_OK;
 }
 
@@ -337,8 +348,8 @@ static uint8_t
     avr_isp_prog_fill(instance, length);
     for(uint16_t x = 0; x < length; x++) {
         uint16_t addr = start + x;
-        avr_isp_prog_spi_transaction(instance, AVR_ISP_WRITE_EEROM(addr, instance->buff[x]));
-        furi_delay_ms(45);
+        avr_isp_prog_spi_transaction(instance, AVR_ISP_WRITE_EEPROM(addr, instance->buff[x]));
+        furi_delay_ms(10);
     }
     return STK_OK;
 }
@@ -371,7 +382,7 @@ static void avr_isp_prog_program_page(AvrIspProg* instance) {
         avr_isp_prog_write_flash(instance, length);
         return;
     }
-    if(memtype == STK_SET_EEROM_TYPE) {
+    if(memtype == STK_SET_EEPROM_TYPE) {
         result = avr_isp_prog_write_eeprom(instance, length);
         if(avr_isp_prog_getch(instance) == CRC_EOP) {
             avr_isp_prog_tx_ch(instance, STK_INSYNC);
@@ -408,7 +419,7 @@ static uint8_t avr_isp_prog_eeprom_read_page(AvrIspProg* instance, uint16_t leng
     for(uint16_t x = 0; x < length; x++) {
         uint16_t addr = start + x;
         avr_isp_prog_tx_ch(
-            instance, avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_EEROM(addr)));
+            instance, avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_EEPROM(addr)));
     }
     return STK_OK;
 }
@@ -425,7 +436,7 @@ static void avr_isp_prog_read_page(AvrIspProg* instance) {
     }
     avr_isp_prog_tx_ch(instance, STK_INSYNC);
     if(memtype == STK_SET_FLASH_TYPE) result = avr_isp_prog_flash_read_page(instance, length);
-    if(memtype == STK_SET_EEROM_TYPE) result = avr_isp_prog_eeprom_read_page(instance, length);
+    if(memtype == STK_SET_EEPROM_TYPE) result = avr_isp_prog_eeprom_read_page(instance, length);
     avr_isp_prog_tx_ch(instance, result);
 }
 
@@ -484,7 +495,11 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_ENTER_PROGMODE:
-        if(!instance->pmode) avr_isp_prog_start_pmode(instance);
+        if(!instance->pmode) {
+            for(uint8_t i = 0; i < 16; i++) {
+                if(avr_isp_prog_start_pmode(instance)) break;
+            }
+        }
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_LOAD_ADDRESS:
@@ -539,10 +554,7 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
             avr_isp_prog_tx_ch(instance, STK_NOSYNC);
     }
 
-    // if(!instance->tx_ok) {
-    //     instance->tx_ok = true;
     if(instance->callback) {
         instance->callback(instance->context);
     }
-    // }
 }

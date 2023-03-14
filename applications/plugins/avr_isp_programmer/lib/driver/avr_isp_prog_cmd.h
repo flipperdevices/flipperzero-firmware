@@ -19,8 +19,8 @@
 #define AVR_ISP_READ_FLASH_LO(add) 0x20, (add >> 8) & 0xFF, add & 0xFF, 0x00
 #define AVR_ISP_READ_FLASH_HI(add) 0x28, (add >> 8) & 0xFF, add & 0xFF, 0x00
 
-#define AVR_ISP_WRITE_EEROM(add, data) 0xC0, (add >> 8) & 0xFF, add & 0xFF, data
-#define AVR_ISP_READ_EEROM(add) 0xA0, (add >> 8) & 0xFF, add & 0xFF, 0xFF
+#define AVR_ISP_WRITE_EEPROM(add, data) 0xC0, (add >> 8) & 0xFF, add & 0xFF, data
+#define AVR_ISP_READ_EEPROM(add) 0xA0, (add >> 8) & 0xFF, add & 0xFF, 0xFF
 
 #define AVR_ISP_COMMIT(add) 0x4C, (add >> 8) & 0xFF, add & 0xFF, 0x00
 
@@ -76,5 +76,5 @@
 #define STK_BUFSIZEH 0x91
 #define STK_STK500_TOPCARD_DETECT 0x98
 
-#define STK_SET_EEROM_TYPE 0X45
+#define STK_SET_EEPROM_TYPE 0X45
 #define STK_SET_FLASH_TYPE 0X46
