@@ -33,7 +33,12 @@ jobs:
         run: |
           echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
 
-      - name: 'Flash unit tests firmware'
+      - name: 'Temp for fixing fbt'
+        id: fixing_fbt
+        run: |
+          source scripts/toolchain/fbtenv.sh --restore
+
+      - name: 'Flash firmware'
         id: flashing
         if: success()
         run: |                               
@@ -55,6 +60,7 @@ jobs:
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 -m venv /opt/flippigator-venv
+          deactivate
           source /opt/flippigator-venv/bin/activate
           python3 -m pip install -r ./scripts/flippigator/requirements.txt
 
