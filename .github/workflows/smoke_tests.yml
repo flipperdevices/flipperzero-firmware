@@ -59,7 +59,7 @@ jobs:
         if: success()
         run: |
           source scripts/toolchain/fbtenv.sh
-          python3 -m pip install -r ./scripts/flippigator/requirements.txt
+          python3 -m pip install -r ./scripts/flippigator/requirements-headless.txt
 
       - name: 'Run smoke tests'
         id: run_smoke
