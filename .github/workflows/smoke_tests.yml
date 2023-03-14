@@ -68,7 +68,7 @@ jobs:
         run: |
           source scripts/toolchain/fbtenv.sh
           cd ./scripts/flippigator/
-          python3 -m pytest --port=${{steps.device.outputs.flipper}}
+          python3 -m pytest --gui=0 --port=${{steps.device.outputs.flipper}}
 
       - name: 'Generate allure reports'
         id: generate_allure_reports
