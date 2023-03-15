@@ -33,23 +33,16 @@ jobs:
 
       - name: 'Check Python code formatting'
         id: syntax_check_py
-        run: ./fbt lint_py
+        run: ./fbt lint_py || echo "errors=1" >> $GITHUB_OUTPUT
 
       - name: 'Check C++ code formatting'
         if: always()
         id: syntax_check_cpp
-        run: ./fbt lint
+        run: ./fbt lint || echo "errors=1" >> $GITHUB_OUTPUT
 
       - name: Report code formatting errors
         if: ( steps.syntax_check_py.outputs.errors || steps.syntax_check_cpp.outputs.errors ) && github.event.pull_request
-        uses: peter-evans/create-or-update-comment@v1
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          body: |
-            Please fix following code formatting errors:
-            ```
-            ${{ steps.syntax_check_py.outputs.errors }}
-
-            ${{ steps.syntax_check_cpp.outputs.errors }}
-            ```
-            You might want to run `./fbt format format_py` for an auto-fix.
+        run: |
+          echo "Code formatting errors found"
+          echo "Please run './fbt format' or './fbt format_py' to fix them"
+          exit 1
