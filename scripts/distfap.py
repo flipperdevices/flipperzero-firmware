@@ -8,14 +8,17 @@ import os
 import posixpath
 
 
+
 class Main(App):
     def init(self):
         self.parser.add_argument("-p", "--port", help="CDC Port", default="auto")
         self.parser.add_argument(
             "-n",
             "--no-launch",
+
             dest="launch_app",
             action="store_false",
+
             help="Don't launch app",
         )
 
