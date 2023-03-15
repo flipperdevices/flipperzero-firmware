@@ -64,7 +64,6 @@ jobs:
         if: failure()
         with:
           fetch-depth: 1
-          submodules: false
           ref: ${{ steps.release_tag.outputs.tag }}
 
       - name: 'Flash last release'
