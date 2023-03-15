@@ -91,6 +91,7 @@ typedef struct {
     uint8_t dice_count;
     int8_t result_pos;
     Dice dices[DICE_TYPES];
+    FuriMutex* mutex;
 } State;
 
 void init(State* const state) {
