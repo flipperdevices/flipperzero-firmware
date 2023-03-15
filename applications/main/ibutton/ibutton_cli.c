@@ -207,6 +207,8 @@ void ibutton_cli_emulate(Cli* cli, FuriString* args) {
 
     ibutton_worker_start_thread(worker);
 
+
+
     do {
         if(!ibutton_cli_parse_key(protocols, key, args)) {
             ibutton_cli_print_usage();

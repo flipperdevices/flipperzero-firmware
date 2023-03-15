@@ -33,12 +33,12 @@ jobs:
 
       - name: 'Check Python code formatting'
         id: syntax_check_py
-        run: ./fbt lint_py || echo "errors=1" >> $GITHUB_OUTPUT
+        run: ./fbt lint_py 2>&1 >/dev/null || echo "errors=1" >> $GITHUB_OUTPUT
 
       - name: 'Check C++ code formatting'
         if: always()
         id: syntax_check_cpp
-        run: ./fbt lint || echo "errors=1" >> $GITHUB_OUTPUT
+        run: ./fbt lint 2>&1 >/dev/null || echo "errors=1" >> $GITHUB_OUTPUT
 
       - name: Report code formatting errors
         if: ( steps.syntax_check_py.outputs.errors || steps.syntax_check_cpp.outputs.errors ) && github.event.pull_request
