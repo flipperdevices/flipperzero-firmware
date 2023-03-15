@@ -101,6 +101,58 @@ static inline void sd_cache_invalidate_all() {
     sector_cache_init();
 }
 
+static bool sd_device_read(uint32_t* buff, uint32_t sector, uint32_t count) {
+    bool result = false;
+
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
+
+    if(sd_read_blocks(buff, sector, count, SD_TIMEOUT_MS) == SdSpiStatusOK) {
+        FuriHalCortexTimer timer = furi_hal_cortex_timer_get(SD_TIMEOUT_MS * 1000);
+
+        /* wait until the read operation is finished */
+        result = true;
+        while(sd_get_card_state() != SdSpiStatusOK) {
+            if(furi_hal_cortex_timer_is_expired(timer)) {
+                result = false;
+                break;
+            }
+        }
+    }
+
+    furi_hal_sd_spi_handle = NULL;
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
+
+    return result;
+}
+
+static bool sd_device_write(uint32_t* buff, uint32_t sector, uint32_t count) {
+    bool result = false;
+
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
+    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
+
+    if(sd_write_blocks(buff, sector, count, SD_TIMEOUT_MS) == SdSpiStatusOK) {
+        FuriHalCortexTimer timer = furi_hal_cortex_timer_get(SD_TIMEOUT_MS * 1000);
+
+        /* wait until the Write operation is finished */
+        result = true;
+        while(sd_get_card_state() != SdSpiStatusOK) {
+            if(furi_hal_cortex_timer_is_expired(timer)) {
+                sd_cache_invalidate_all();
+
+                result = false;
+                break;
+            }
+        }
+    }
+
+    furi_hal_sd_spi_handle = NULL;
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
+
+    return result;
+}
+
 /**
   * @brief  Initializes a Drive
   * @param  pdrv: Physical drive number (0..)
@@ -144,8 +196,8 @@ DSTATUS USER_status(BYTE pdrv) {
 DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
     /* USER CODE BEGIN READ */
     UNUSED(pdrv);
-    DRESULT res = RES_ERROR;
 
+    bool result;
     bool single_sector = count == 1;
 
     if(single_sector) {
@@ -154,31 +206,33 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
         }
     }
 
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
-    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
+    result = sd_device_read((uint32_t*)buff, (uint32_t)(sector), count);
 
-    if(sd_read_blocks((uint32_t*)buff, (uint32_t)(sector), count, SD_TIMEOUT_MS) ==
-       SdSpiStatusOK) {
-        FuriHalCortexTimer timer = furi_hal_cortex_timer_get(SD_TIMEOUT_MS * 1000);
+    if(!result) {
+        uint8_t counter = sd_max_mount_retry_count();
 
-        /* wait until the read operation is finished */
-        res = RES_OK;
-        while(sd_get_card_state() != SdSpiStatusOK) {
-            if(furi_hal_cortex_timer_is_expired(timer)) {
-                res = RES_ERROR;
-                break;
+        while(result == false && counter > 0 && hal_sd_detect()) {
+            SdSpiStatus status;
+
+            if((counter % 2) == 0) {
+                // power reset sd card
+                status = sd_init(true);
+            } else {
+                status = sd_init(false);
             }
+
+            if(status == SdSpiStatusOK) {
+                result = sd_device_read((uint32_t*)buff, (uint32_t)(sector), count);
+            }
+            counter--;
         }
     }
 
-    furi_hal_sd_spi_handle = NULL;
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
-
-    if(single_sector && res == RES_OK) {
+    if(single_sector && result == true) {
         sd_cache_put(sector, (uint32_t*)buff);
     }
 
-    return res;
+    return result ? RES_OK : RES_ERROR;
     /* USER CODE END READ */
 }
 
@@ -192,37 +246,34 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
   */
 #if _USE_WRITE == 1
 DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
-    /* USER CODE BEGIN WRITE */
-    /* USER CODE HERE */
     UNUSED(pdrv);
-    DRESULT res = RES_ERROR;
+    bool result;
 
     sd_cache_invalidate_range(sector, sector + count);
 
-    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
-    furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
+    result = sd_device_write((uint32_t*)buff, (uint32_t)(sector), count);
 
-    if(sd_write_blocks((uint32_t*)buff, (uint32_t)(sector), count, SD_TIMEOUT_MS) ==
-       SdSpiStatusOK) {
-        FuriHalCortexTimer timer = furi_hal_cortex_timer_get(SD_TIMEOUT_MS * 1000);
+    if(!result) {
+        uint8_t counter = sd_max_mount_retry_count();
 
-        /* wait until the Write operation is finished */
-        res = RES_OK;
-        while(sd_get_card_state() != SdSpiStatusOK) {
-            if(furi_hal_cortex_timer_is_expired(timer)) {
-                sd_cache_invalidate_all();
+        while(result == false && counter > 0 && hal_sd_detect()) {
+            SdSpiStatus status;
 
-                res = RES_ERROR;
-                break;
+            if((counter % 2) == 0) {
+                // power reset sd card
+                status = sd_init(true);
+            } else {
+                status = sd_init(false);
             }
+
+            if(status == SdSpiStatusOK) {
+                result = sd_device_write((uint32_t*)buff, (uint32_t)(sector), count);
+            }
+            counter--;
         }
     }
 
-    furi_hal_sd_spi_handle = NULL;
-    furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
-
-    return res;
-    /* USER CODE END WRITE */
+    return result ? RES_OK : RES_ERROR;
 }
 #endif /* _USE_WRITE == 1 */
 
