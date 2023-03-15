@@ -15,7 +15,7 @@ env:
   SET_GH_OUTPUT: 1
 
 jobs:
-  lint_c_cpp:
+  lint_sources:
     runs-on: [self-hosted,FlipperZeroShell]
     steps:
       - name: 'Decontaminate previous build leftovers'
