@@ -18,8 +18,7 @@
 #define HID_VID_DEFAULT 0x046D
 #define HID_PID_DEFAULT 0xC529
 
-struct HidIadDescriptor {
-    struct usb_iad_descriptor hid_iad;
+struct HidIntfDescriptor {
     struct usb_interface_descriptor hid;
     struct usb_hid_descriptor hid_desc;
     struct usb_endpoint_descriptor hid_ep_in;
@@ -27,7 +26,7 @@ struct HidIadDescriptor {
 
 struct HidConfigDescriptor {
     struct usb_config_descriptor config;
-    struct HidIadDescriptor iad_0;
+    struct HidIntfDescriptor intf_0;
 } __attribute__((packed));
 
 enum HidReportId {
@@ -115,9 +114,9 @@ static struct usb_device_descriptor hid_device_desc = {
     .bLength = sizeof(struct usb_device_descriptor),
     .bDescriptorType = USB_DTYPE_DEVICE,
     .bcdUSB = VERSION_BCD(2, 0, 0),
-    .bDeviceClass = USB_CLASS_IAD,
-    .bDeviceSubClass = USB_SUBCLASS_IAD,
-    .bDeviceProtocol = USB_PROTO_IAD,
+    .bDeviceClass = USB_CLASS_PER_INTERFACE,
+    .bDeviceSubClass = USB_SUBCLASS_NONE,
+    .bDeviceProtocol = USB_PROTO_NONE,
     .bMaxPacketSize0 = USB_EP0_SIZE,
     .idVendor = HID_VID_DEFAULT,
     .idProduct = HID_PID_DEFAULT,
@@ -141,19 +140,8 @@ static const struct HidConfigDescriptor hid_cfg_desc = {
             .bmAttributes = USB_CFG_ATTR_RESERVED | USB_CFG_ATTR_SELFPOWERED,
             .bMaxPower = USB_CFG_POWER_MA(100),
         },
-    .iad_0 =
+    .intf_0 =
         {
-            .hid_iad =
-                {
-                    .bLength = sizeof(struct usb_iad_descriptor),
-                    .bDescriptorType = USB_DTYPE_INTERFASEASSOC,
-                    .bFirstInterface = 0,
-                    .bInterfaceCount = 1,
-                    .bFunctionClass = USB_CLASS_PER_INTERFACE,
-                    .bFunctionSubClass = USB_SUBCLASS_NONE,
-                    .bFunctionProtocol = USB_PROTO_NONE,
-                    .iFunction = NO_DESCRIPTOR,
-                },
             .hid =
                 {
                     .bLength = sizeof(struct usb_interface_descriptor),
@@ -493,8 +481,8 @@ static usbd_respond hid_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_cal
        req->wIndex == 0 && req->bRequest == USB_STD_GET_DESCRIPTOR) {
         switch(req->wValue >> 8) {
         case USB_DTYPE_HID:
-            dev->status.data_ptr = (uint8_t*)&(hid_cfg_desc.iad_0.hid_desc);
-            dev->status.data_count = sizeof(hid_cfg_desc.iad_0.hid_desc);
+            dev->status.data_ptr = (uint8_t*)&(hid_cfg_desc.intf_0.hid_desc);
+            dev->status.data_count = sizeof(hid_cfg_desc.intf_0.hid_desc);
             return usbd_ack;
         case USB_DTYPE_HID_REPORT:
             dev->status.data_ptr = (uint8_t*)hid_report_desc;
