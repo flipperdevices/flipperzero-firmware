@@ -8,18 +8,14 @@
 #define DS1971_FAMILY_CODE 0x14U
 #define DS1971_FAMILY_NAME "DS1971"
 
-#define DS1971_SRAM_DATA_SIZE 32U
+#define DS1971_EEPROM_DATA_SIZE 32U
 #define DS1971_SRAM_PAGE_SIZE 32U
-#define DS1971_COPY_SCRATCH_TIMEOUT_US 250U
+#define DS1971_COPY_SCRATCH_DELAY_US 250U
 
 #define DS1971_DATA_BYTE_COUNT 4U
 
-#define DS1971_SRAM_DATA_KEY "Sram Data"
+#define DS1971_EEPROM_DATA_KEY "Eeprom Data"
 
-#define DS1971_CMD_READ_MEMORY 0xF0
-#define DS1971_CMD_READ_SCRATCHPAD 0xAA
-#define DS1971_CMD_COPY_SCRATCHPAD 0x55
-#define DS1971_CMD_WRITE_SCRATCHPAD 0x0F
 #define DS1971_CMD_FINALIZATION 0xA5
 
 typedef struct {
@@ -29,7 +25,7 @@ typedef struct {
 
 typedef struct {
     DallasCommonRomData rom_data;
-    uint8_t sram_data[DS1971_SRAM_DATA_SIZE];
+    uint8_t eeprom_data[DS1971_EEPROM_DATA_SIZE];
     DS1971ProtocolState state;
 } DS1971ProtocolData;
 
@@ -71,7 +67,7 @@ const iButtonProtocolDallasBase ibutton_protocol_ds1971 = {
 bool dallas_ds1971_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1971ProtocolData* data = protocol_data;
     return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data) &&
-           dallas_ds1971_read_mem(host, 0, data->sram_data, DS1971_SRAM_DATA_SIZE);
+           dallas_ds1971_read_mem(host, 0, data->eeprom_data, DS1971_EEPROM_DATA_SIZE);
 }
 
 bool dallas_ds1971_write_copy(OneWireHost* host, iButtonProtocolData* protocol_data) {
@@ -80,37 +76,36 @@ bool dallas_ds1971_write_copy(OneWireHost* host, iButtonProtocolData* protocol_d
     onewire_host_reset(host);
     onewire_host_skip(host);
     // Starting writing from address 0x0000
-    onewire_host_write(host, DS1971_CMD_WRITE_SCRATCHPAD);
+    onewire_host_write(host, DALLAS_COMMON_CMD_WRITE_SCRATCH);
     onewire_host_write(host, 0x00);
     // Write data to scratchpad
-    onewire_host_write_bytes(host, data->sram_data, DS1971_SRAM_DATA_SIZE);
-    furi_delay_ms(250);
+    onewire_host_write_bytes(host, data->eeprom_data, DS1971_EEPROM_DATA_SIZE);
 
     // Read data from scratchpad and verify
     bool pad_valid = false;
     if(onewire_host_reset(host)) {
         pad_valid = true;
         onewire_host_skip(host);
-        onewire_host_write(host, DS1971_CMD_READ_SCRATCHPAD);
+        onewire_host_write(host, DALLAS_COMMON_CMD_READ_SCRATCH);
         onewire_host_write(host, 0x00);
 
-        for(size_t i = 0; i < DS1971_SRAM_DATA_SIZE; ++i) {
+        for(size_t i = 0; i < DS1971_EEPROM_DATA_SIZE; ++i) {
             uint8_t scratch = onewire_host_read(host);
-            if(data->sram_data[i] != scratch) {
+            if(data->eeprom_data[i] != scratch) {
                 pad_valid = false;
                 break;
             }
         }
     }
-    furi_delay_ms(250);
 
     // Copy scratchpad to memory and confirm
     if(pad_valid) {
         if(onewire_host_reset(host)) {
             onewire_host_skip(host);
-            onewire_host_write(host, DS1971_CMD_COPY_SCRATCHPAD);
+            onewire_host_write(host, DALLAS_COMMON_CMD_COPY_SCRATCH);
             onewire_host_write(host, DS1971_CMD_FINALIZATION);
-            furi_delay_ms(250);
+
+            furi_delay_us(DS1971_COPY_SCRATCH_DELAY_US);
         }
     }
 
@@ -136,7 +131,7 @@ static bool dallas_ds1971_command_callback(uint8_t command, void* context) {
 
         } else if(data->state.command_state == DallasCommonCommandStateRomCmd) {
             data->state.command_state = DallasCommonCommandStateMemCmd;
-            dallas_common_emulate_read_mem(bus, data->sram_data, DS1971_SRAM_DATA_SIZE);
+            dallas_common_emulate_read_mem(bus, data->eeprom_data, DS1971_EEPROM_DATA_SIZE);
             return false;
 
         } else {
@@ -183,7 +178,7 @@ bool dallas_ds1971_load(
         if(format_version < 2) break;
         if(!dallas_common_load_rom_data(ff, format_version, &data->rom_data)) break;
         if(!flipper_format_read_hex(
-               ff, DS1971_SRAM_DATA_KEY, data->sram_data, DS1971_SRAM_DATA_SIZE))
+               ff, DS1971_EEPROM_DATA_KEY, data->eeprom_data, DS1971_EEPROM_DATA_SIZE))
             break;
         success = true;
     } while(false);
@@ -198,7 +193,7 @@ bool dallas_ds1971_save(FlipperFormat* ff, const iButtonProtocolData* protocol_d
     do {
         if(!dallas_common_save_rom_data(ff, &data->rom_data)) break;
         if(!flipper_format_write_hex(
-               ff, DS1971_SRAM_DATA_KEY, data->sram_data, DS1971_SRAM_DATA_SIZE))
+               ff, DS1971_EEPROM_DATA_KEY, data->eeprom_data, DS1971_EEPROM_DATA_SIZE))
             break;
         success = true;
     } while(false);
@@ -212,14 +207,14 @@ void dallas_ds1971_render_data(FuriString* result, const iButtonProtocolData* pr
         result,
         DS1971_DATA_BYTE_COUNT,
         PRETTY_FORMAT_FONT_MONOSPACE,
-        data->sram_data,
-        DS1971_SRAM_DATA_SIZE);
+        data->eeprom_data,
+        DS1971_EEPROM_DATA_SIZE);
 }
 
 void dallas_ds1971_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DS1971ProtocolData* data = protocol_data;
     dallas_common_render_brief_data(
-        result, &data->rom_data, data->sram_data, DS1971_SRAM_DATA_SIZE);
+        result, &data->rom_data, data->eeprom_data, DS1971_EEPROM_DATA_SIZE);
 }
 
 void dallas_ds1971_render_error(FuriString* result, const iButtonProtocolData* protocol_data) {
@@ -249,7 +244,7 @@ void dallas_ds1971_apply_edits(iButtonProtocolData* protocol_data) {
 }
 
 bool dallas_ds1971_read_mem(OneWireHost* host, uint8_t address, uint8_t* data, size_t data_size) {
-    onewire_host_write(host, DS1971_CMD_READ_MEMORY);
+    onewire_host_write(host, DALLAS_COMMON_CMD_READ_MEM);
 
     onewire_host_write(host, address);
     onewire_host_read_bytes(host, data, (uint8_t)data_size);
