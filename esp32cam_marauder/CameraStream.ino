@@ -25,7 +25,7 @@ void cam_stream_setup() {
   config.pixel_format = PIXFORMAT_GRAYSCALE;
 
   // We don't need a big frame
-  config.frame_size = FRAMESIZE_QQVGA;
+  config.frame_size = FRAMESIZE_QCIF;
   config.fb_count = 1;
 
   esp_err_t err = esp_camera_init(&config);
@@ -40,6 +40,7 @@ void cam_stream_setup() {
 
 bool disable_dithering = false;
 bool invert = false;
+bool rotate90 = true;
 
 void cam_stream_loop() {
   bool stop_stream = false;
@@ -92,14 +93,17 @@ void cam_stream_loop() {
       */
 
       // Toggle cases
-      case '>':  // Toggle Mirror 
+      case '>':  // Toggle Mirror
         s->set_hmirror(s, !s->status.hmirror);
-        if (s->status.hmirror)
+        if (s->status.hmirror) {
           s->set_vflip(s, !s->status.vflip);
+          if (s->status.vflip)
+            rotate90 = !rotate90;
+        }
         break;
       case '<':
         invert = !invert;
-        if(invert)
+        if (invert)
           disable_dithering = !disable_dithering;
         break;
       default:
@@ -129,13 +133,10 @@ void cam_stream_loop() {
     Serial.print((char)flipper_y);
 
     size_t true_y = y * fb->width;
-    for (uint8_t x = 16; x < 144; x += 8) {
+    for (uint8_t x = (rotate90 ? 0 : 16); x < (rotate90 ? 128 : 144); x += 8) {
       char c = 0;
-      for (uint8_t j = 0; j < 8; ++j) {
-        if (IsDarkBit(fb->buf[true_y + x + (7 - j)])) {
-          c |= 1 << j;
-        }
-      }
+      for (uint8_t j = 0; j < 8; ++j)
+        c |= IsDarkBit(rotate90 ? fb->buf[(x + (7 - j)) * fb->width + y] : fb->buf[true_y + x + (7 - j)]) << j;
       Serial.print(c);
     }
 
