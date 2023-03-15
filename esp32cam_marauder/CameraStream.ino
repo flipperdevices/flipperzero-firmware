@@ -97,8 +97,8 @@ void cam_stream_loop() {
         s->set_hmirror(s, !s->status.hmirror);
         if (s->status.hmirror) {
           s->set_vflip(s, !s->status.vflip);
-          if (s->status.vflip)
-            rotate90 = !rotate90;
+          /*if (s->status.vflip)
+            rotate90 = !rotate90;*/
         }
         break;
       case '<':
