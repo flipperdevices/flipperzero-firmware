@@ -52,6 +52,11 @@ W: Flags=,20
 
 W: Reset=,RESET,0xC1
 
+S: LED=,0,0x40
+
+SBatch: LED On: LED=1
+SBatch: LED Off: LED=0
+
 RBatch: Settings: ID;RxAddr;Ch;Send period;CO2 threshold;CO2 correct;FanLSB;nRF RETR;Send pause;Flags
 
 WBatch: Default: RxAddr=0xCF;Ch=122;Send period=30;CO2 threshold=1000;CO2 correct=0;FanLSB={0xC1,0,0,0,0,0,0,0};nRF RETR=0x3;Send pause=1;Flags=0;Reset

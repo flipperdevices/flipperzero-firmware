@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG 		"nrf24batch"
-#define VERSION		"1.6"
+#define VERSION		"1.7"
 
 #define SCAN_APP_PATH_FOLDER 	"/ext/nrf24batch"
 #define LOG_FILEEXT	 			".txt"
@@ -1342,7 +1342,7 @@ void next_view_cmd(int8_t add)
 	uint16_t max = (rw_type == rwt_read_batch ? ReadBatch_cmd_Total : 
 					rw_type == rwt_read_cmd ? Read_cmd_Total : 
 					rw_type == rwt_set_batch ? SetBatch_cmd_Total : WriteBatch_cmd_Total);
-	if((view_cmd[rw_type] += add) > max) view_cmd[rw_type] = add > 0 ? 0 : max;
+	if((view_cmd[rw_type] += add) >= max) view_cmd[rw_type] = add > 0 ? 0 : max - 1;
 }
 
 int32_t nrf24batch_app(void* p) {
