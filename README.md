@@ -1,6 +1,6 @@
 # Flipper Zero DnD Dice
 
-<div style="text-align:center"><img src="sources/flipper-screen.png"/></div>
+<div style="text-align:center"><img src=".flipcorg/banner.png"/></div>
 <br />
 
 **DnD Dice** is a dice rolling application for your **Flipper Zero**.
@@ -9,9 +9,9 @@ Dice types: Coin, d4, d6, d8, d10, d12, d20, d100
 
 ## Screenshots
 
-<div style="text-align:center"><img src="sources/main-screen.png"/></div>
+<div style="text-align:center"><img src=".flipcorg/gallery/main-screen.png"/></div>
  <br />
-<div style="text-align:center"><img src="sources/roll-screen.png"/></div>
+<div style="text-align:center"><img src=".flipcorg/gallery/roll-screen.png"/></div>
 
 ## Compiling
 
