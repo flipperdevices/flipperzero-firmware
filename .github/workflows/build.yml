@@ -7,7 +7,7 @@ on:
       - develop
 
 env:
-  firmware_version: '0.78.1'
+  firmware_version: '0.79.1'
 
 jobs:
   build:
