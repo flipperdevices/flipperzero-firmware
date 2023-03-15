@@ -56,7 +56,7 @@ AvrIspProg* avr_isp_prog_init(void) {
 
 void avr_isp_prog_free(AvrIspProg* instance) {
     furi_assert(instance);
-    if(instance->pmode) avr_isp_prog_end_pmode(instance);
+    if(instance->spi) avr_isp_prog_end_pmode(instance);
     furi_stream_buffer_free(instance->stream_tx);
     furi_stream_buffer_free(instance->stream_rx);
     free(instance->cfg);
@@ -214,7 +214,9 @@ static void avr_isp_prog_end_pmode(AvrIspProg* instance) {
         avr_isp_prog_reset_target(instance, false);
         // We're about to take the target out of reset
         // so configure SPI pins as input
+
         if(instance->spi) avr_isp_spi_sw_free(instance->spi);
+        instance->spi = NULL;
     }
 
     instance->pmode = false;
@@ -230,9 +232,10 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance, AvrIspSpiSwSpeed spi_
     // which for many arduino's is not the SS pin.
     // So we have to configure RESET as output here,
     // (reset_target() first sets the correct level)
+    if(instance->spi) avr_isp_spi_sw_free(instance->spi);
     instance->spi = avr_isp_spi_sw_init(spi_speed);
-    avr_isp_prog_reset_target(instance, true);
 
+    avr_isp_prog_reset_target(instance, true);
     // See avr datasheets, chapter "SERIAL_PRG Programming Algorithm":
 
     // Pulse RESET after PIN_SCK is low:
@@ -255,7 +258,6 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance, AvrIspSpiSwSpeed spi_
         instance->pmode = true;
         return true;
     }
-    if(instance->spi) avr_isp_spi_sw_free(instance->spi);
     return false;
 }
 
@@ -268,7 +270,6 @@ static bool avr_isp_prog_auto_set_spi_speed_start_pmode(AvrIspProg* instance) {
         AvrIspSpiSwSpeed40Khz,
         AvrIspSpiSwSpeed20Khz,
     };
-
     for(uint8_t i = 0; i < COUNT_OF(spi_speed); i++) {
         if(avr_isp_prog_start_pmode(instance, spi_speed[i])) {
             return true;
@@ -483,6 +484,7 @@ static void avr_isp_prog_read_signature(AvrIspProg* instance) {
 void avr_isp_prog_avrisp(AvrIspProg* instance) {
     furi_assert(instance);
     uint8_t ch = avr_isp_prog_getch(instance);
+
     switch(ch) {
     case STK_GET_SYNC:
         instance->error = 0;
