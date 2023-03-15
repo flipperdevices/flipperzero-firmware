@@ -48,15 +48,21 @@ static int32_t ducky_fnc_strdelay(BadUsbScript* bad_usb, const char* line, int32
 
 static int32_t ducky_fnc_string(BadUsbScript* bad_usb, const char* line, int32_t param) {
     line = &line[ducky_get_command_len(line) + 1];
-    bool state = ducky_string(bad_usb, line);
-    if(!state) {
-        return ducky_error(bad_usb, "Invalid string %s", line);
-    }
+    furi_string_set_str(bad_usb->string_print, line);
     if(param == 1) {
-        furi_hal_hid_kb_press(HID_KEYBOARD_RETURN);
-        furi_hal_hid_kb_release(HID_KEYBOARD_RETURN);
+        furi_string_cat(bad_usb->string_print, "\n");
     }
-    return state;
+
+    if(bad_usb->stringdelay == 0) { // stringdelay not set - run command immidiately
+        bool state = ducky_string(bad_usb, furi_string_get_cstr(bad_usb->string_print));
+        if(!state) {
+            return ducky_error(bad_usb, "Invalid string %s", line);
+        }
+    } else { // stringdelay is set - run command in thread to keep handling external events
+        return SCRIPT_STATE_STRING_START;
+    }
+
+    return 0;
 }
 
 static int32_t ducky_fnc_repeat(BadUsbScript* bad_usb, const char* line, int32_t param) {
@@ -67,7 +73,7 @@ static int32_t ducky_fnc_repeat(BadUsbScript* bad_usb, const char* line, int32_t
     if((!state) || (bad_usb->repeat_cnt == 0)) {
         return ducky_error(bad_usb, "Invalid number %s", line);
     }
-    return state;
+    return 0;
 }
 
 static int32_t ducky_fnc_sysrq(BadUsbScript* bad_usb, const char* line, int32_t param) {
@@ -118,7 +124,7 @@ static int32_t ducky_fnc_hold(BadUsbScript* bad_usb, const char* line, int32_t p
         return ducky_error(bad_usb, "Too many keys are hold");
     }
     furi_hal_hid_kb_press(key);
-    return (0);
+    return 0;
 }
 
 static int32_t ducky_fnc_release(BadUsbScript* bad_usb, const char* line, int32_t param) {
@@ -134,7 +140,7 @@ static int32_t ducky_fnc_release(BadUsbScript* bad_usb, const char* line, int32_
     }
     bad_usb->key_hold_nb--;
     furi_hal_hid_kb_release(key);
-    return (0);
+    return 0;
 }
 
 static const DuckyCmd ducky_commands[] = {

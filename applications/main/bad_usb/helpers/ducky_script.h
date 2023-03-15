@@ -14,6 +14,7 @@ typedef enum {
     BadUsbStateWillRun,
     BadUsbStateRunning,
     BadUsbStateDelay,
+    BadUsbStateStringDelay,
     BadUsbStateDone,
     BadUsbStateScriptError,
     BadUsbStateFileError,

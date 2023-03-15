@@ -12,26 +12,32 @@ extern "C" {
 #define SCRIPT_STATE_END (-2)
 #define SCRIPT_STATE_NEXT_LINE (-3)
 #define SCRIPT_STATE_CMD_UNKNOWN (-4)
+#define SCRIPT_STATE_STRING_START (-5)
 
 #define FILE_BUFFER_LEN 16
 
 struct BadUsbScript {
     FuriHalUsbHidConfig hid_cfg;
-    BadUsbState st;
-    FuriString* file_path;
-    uint32_t defdelay;
-    uint16_t layout[128];
-    uint32_t stringdelay;
     FuriThread* thread;
+    BadUsbState st;
+
+    FuriString* file_path;
     uint8_t file_buf[FILE_BUFFER_LEN + 1];
     uint8_t buf_start;
     uint8_t buf_len;
     bool file_end;
-    FuriString* line;
 
+    uint32_t defdelay;
+    uint32_t stringdelay;
+    uint16_t layout[128];
+
+    FuriString* line;
     FuriString* line_prev;
     uint32_t repeat_cnt;
     uint8_t key_hold_nb;
+
+    FuriString* string_print;
+    size_t string_print_pos;
 };
 
 uint16_t ducky_get_keycode(BadUsbScript* bad_usb, const char* param, bool accept_chars);
