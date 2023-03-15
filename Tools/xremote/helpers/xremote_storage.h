@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <string.h>
-#include <storage/storage.h>
 #include <flipper_format/flipper_format_i.h>
 #include "../xremote.h"
 

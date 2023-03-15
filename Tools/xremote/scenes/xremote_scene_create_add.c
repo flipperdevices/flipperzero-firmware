@@ -78,7 +78,7 @@ bool xremote_scene_create_add_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 app->scene_manager, XRemoteSceneCreate, (unsigned)button_index);
             if(button_index == ButtonIndexIr) {
-                scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
+                scene_manager_next_scene(app->scene_manager, XRemoteSceneIrList);
             }
             if(button_index == ButtonIndexSubghz) {
                 scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);

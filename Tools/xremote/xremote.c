@@ -47,6 +47,9 @@ XRemote* xremote_app_alloc() {
     // Load configs
     xremote_read_settings(app);
 
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
+    app->file_path = furi_string_alloc();
+
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdMenu, submenu_get_view(app->submenu));
     app->xremote_infoscreen = xremote_infoscreen_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdInfoscreen, xremote_infoscreen_get_view(app->xremote_infoscreen));
