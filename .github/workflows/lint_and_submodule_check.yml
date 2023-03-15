@@ -1,4 +1,4 @@
-name: 'Lint C/C++ with clang-format'
+name: 'Lint sources & check submodule integrity'
 
 on:
   push:
