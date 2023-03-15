@@ -22,12 +22,12 @@ jobs:
       - name: 'Checkout code'
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Check protobuf branch'
         run: |
-          git submodule update --init
+          git submodule update --init --depth 1
           SUB_PATH="assets/protobuf";
           SUB_BRANCH="dev";
           SUB_COMMITS_MIN=40;
