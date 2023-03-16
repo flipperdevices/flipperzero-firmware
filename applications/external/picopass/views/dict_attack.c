@@ -160,8 +160,7 @@ void dict_attack_set_header(DictAttack* dict_attack, const char* header) {
         true);
 }
 
-void dict_attack_set_card_detected(DictAttack* dict_attack, MfClassicType type) {
-    UNUSED(type);
+void dict_attack_set_card_detected(DictAttack* dict_attack) {
     furi_assert(dict_attack);
     with_view_model(
         dict_attack->view,

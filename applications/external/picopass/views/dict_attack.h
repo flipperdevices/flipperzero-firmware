@@ -21,7 +21,7 @@ void dict_attack_set_callback(DictAttack* dict_attack, DictAttackCallback callba
 
 void dict_attack_set_header(DictAttack* dict_attack, const char* header);
 
-void dict_attack_set_card_detected(DictAttack* dict_attack, MfClassicType type);
+void dict_attack_set_card_detected(DictAttack* dict_attack);
 
 void dict_attack_set_card_removed(DictAttack* dict_attack);
 

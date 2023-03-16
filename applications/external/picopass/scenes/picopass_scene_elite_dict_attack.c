@@ -133,7 +133,7 @@ bool picopass_scene_elite_dict_attack_on_event(void* context, SceneManagerEvent 
                 consumed = true;
             }
         } else if(event.event == PicopassWorkerEventCardDetected) {
-            dict_attack_set_card_detected(picopass->dict_attack, MfClassicTypeMini);
+            dict_attack_set_card_detected(picopass->dict_attack);
             consumed = true;
         } else if(event.event == PicopassWorkerEventNoCardDetected) {
             dict_attack_set_card_removed(picopass->dict_attack);
