@@ -73,6 +73,7 @@ typedef enum {
 } MfkeyState;
 
 typedef struct {
+    FuriMutex* mutex;
     MfkeyError err;
     MfkeyState mfkey_state;
     int cracked;
@@ -999,11 +1000,9 @@ void mfkey32(ProgramState* const program_state) {
 
 // Screen is 128x64 px
 static void render_callback(Canvas* const canvas, void* ctx) {
-    UNUSED(ctx);
-    const ProgramState* program_state = acquire_mutex((ValueMutex*)ctx, 25);
-    if (program_state == NULL) {
-        return;
-    }
+    furi_assert(ctx);
+    const ProgramState* program_state = ctx;
+    furi_mutex_acquire(program_state->mutex, FuriWaitForever);
     char draw_str[32] = {};
     canvas_clear(canvas);
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -1060,7 +1059,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     } else {
         // Unhandled program state
     }
-    release_mutex((ValueMutex*)ctx, program_state);
+    furi_mutex_release(program_state->mutex);
 }
 
 static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -1103,8 +1102,8 @@ int32_t mfkey32_main() {
 
     mfkey32_state_init(program_state);
 
-    ValueMutex state_mutex;
-    if(!init_mutex(&state_mutex, program_state, sizeof(ProgramState))) {
+    program_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if(!program_state->mutex) {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         free(program_state);
         return 255;
@@ -1112,7 +1111,7 @@ int32_t mfkey32_main() {
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, render_callback, program_state);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     // Open GUI and register view_port
@@ -1130,7 +1129,7 @@ int32_t mfkey32_main() {
     for(bool main_loop = true; main_loop;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
-        ProgramState* program_state = (ProgramState*)acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(program_state->mutex, FuriWaitForever);
 
         if(event_status == FuriStatusOk) {
             // press events
@@ -1174,13 +1173,10 @@ int32_t mfkey32_main() {
                     }
                 }
             }
-        } else {
-            FURI_LOG_D(TAG, "FuriMessageQueue: event timeout");
-            // event timeout
         }
 
         view_port_update(view_port);
-        release_mutex(&state_mutex, program_state);
+        furi_mutex_release(program_state->mutex);
     }
 
     furi_thread_free(program_state->mfkeythread);
@@ -1189,7 +1185,7 @@ int32_t mfkey32_main() {
     furi_record_close("gui");
     view_port_free(view_port);
     furi_message_queue_free(event_queue);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(program_state->mutex);
     free(program_state);
 
     return 0;
