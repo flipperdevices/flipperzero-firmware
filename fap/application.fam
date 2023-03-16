@@ -7,7 +7,7 @@ App(
         "gui",
         "storage",
     ],
-    stack_size=5 * 1024,
+    stack_size=1 * 1024,
     fap_icon="mfkey.png",
     fap_category="Tools",
     fap_author="noproto",
