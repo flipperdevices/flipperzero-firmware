@@ -93,7 +93,7 @@ static int32_t ducky_fnc_altchar(BadUsbScript* bad_usb, const char* line, int32_
     line = &line[ducky_get_command_len(line) + 1];
     ducky_numlock_on();
     bool state = ducky_altchar(line);
-    if((!state) || (bad_usb->repeat_cnt == 0)) {
+    if(!state) {
         return ducky_error(bad_usb, "Invalid altchar %s", line);
     }
     return 0;
@@ -105,7 +105,7 @@ static int32_t ducky_fnc_altstring(BadUsbScript* bad_usb, const char* line, int3
     line = &line[ducky_get_command_len(line) + 1];
     ducky_numlock_on();
     bool state = ducky_altstring(line);
-    if((!state) || (bad_usb->repeat_cnt == 0)) {
+    if(!state) {
         return ducky_error(bad_usb, "Invalid altstring %s", line);
     }
     return 0;
