@@ -43,10 +43,10 @@
 #define TEXT_RECEIVE_ADDRESS "receive address:"
 #define TEXT_DEFAULT_DERIV "m/44'/X'/0'/0"
 const char* TEXT_INFO = "-Scroll pages with up/down-"
-                        "p1,2)    Mnemonic/Seed     "
-                        "p3)       xprv Root Key    "
-                        "p4,5)  xprv/xpub Accnt Keys"
-                        "p6,7)  xprv/xpub Extnd Keys"
+                        "p1,2)   BIP39 Mnemonic/Seed"
+                        "p3)       BIP32 Root Key   "
+                        "p4,5)  Prv/Pub Account Keys"
+                        "p6,7)  Prv/Pub BIP32 Keys  "
                         "p8+)    Receive Addresses  ";
 
 // #define TEXT_SAVE_QR "Save QR"
@@ -157,8 +157,13 @@ static void flipbip_scene_1_init_address(
     //s_busy = false;
 }
 
-static void flipbip_scene_1_draw_generic(const char* text, size_t line_len) {
+static void
+    flipbip_scene_1_draw_generic(const char* text, const size_t line_len, const bool chunk) {
     // Split the text into parts
+    size_t len = line_len;
+    if(len > 30) {
+        len = 30;
+    }
     for(size_t si = 1; si <= 6; si++) {
         char* ptr = NULL;
 
@@ -176,10 +181,17 @@ static void flipbip_scene_1_draw_generic(const char* text, size_t line_len) {
             ptr = s_disp_text6;
 
         memzero(ptr, 30 + 1);
-        if(line_len > 30) {
-            strncpy(ptr, text + ((si - 1) * 30), 30);
-        } else {
-            strncpy(ptr, text + ((si - 1) * line_len), line_len);
+        strncpy(ptr, text + ((si - 1) * len), len);
+        // add a space every 4 characters and shift the text
+        if(len < 23 && chunk) {
+            for(size_t i = 0; i < strlen(ptr); i++) {
+                if(i % 5 == 0) {
+                    for(size_t j = strlen(ptr); j > i; j--) {
+                        ptr[j] = ptr[j - 1];
+                    }
+                    ptr[i] = ' ';
+                }
+            }
         }
     }
 }
@@ -240,7 +252,7 @@ static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
     // Convert the seed to a hex string
     flipbip_btox(model->seed, 64, seed_working);
 
-    flipbip_scene_1_draw_generic(seed_working, 22);
+    flipbip_scene_1_draw_generic(seed_working, 22, false);
 
     // Free the working seed memory
     memzero(seed_working, seed_working_len);
@@ -263,27 +275,28 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
 
     flipbip_scene_1_clear_text();
     if(model->page == PAGE_INFO) {
-        flipbip_scene_1_draw_generic(TEXT_INFO, 27);
+        flipbip_scene_1_draw_generic(TEXT_INFO, 27, false);
     } else if(model->page == PAGE_MNEMONIC) {
         flipbip_scene_1_draw_mnemonic(model->mnemonic);
     } else if(model->page == PAGE_SEED) {
         flipbip_scene_1_draw_seed(model);
     } else if(model->page == PAGE_XPRV_ROOT) {
-        flipbip_scene_1_draw_generic(model->xprv_root, 20);
+        flipbip_scene_1_draw_generic(model->xprv_root, 20, false);
     } else if(model->page == PAGE_XPRV_ACCT) {
-        flipbip_scene_1_draw_generic(model->xprv_account, 20);
+        flipbip_scene_1_draw_generic(model->xprv_account, 20, false);
     } else if(model->page == PAGE_XPUB_ACCT) {
-        flipbip_scene_1_draw_generic(model->xpub_account, 20);
+        flipbip_scene_1_draw_generic(model->xpub_account, 20, false);
     } else if(model->page == PAGE_XPRV_EXTD) {
-        flipbip_scene_1_draw_generic(model->xprv_extended, 20);
+        flipbip_scene_1_draw_generic(model->xprv_extended, 20, false);
     } else if(model->page == PAGE_XPUB_EXTD) {
-        flipbip_scene_1_draw_generic(model->xpub_extended, 20);
+        flipbip_scene_1_draw_generic(model->xpub_extended, 20, false);
     } else if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
-        uint32_t line_len = 12;
+        size_t line_len = 12;
         if(model->coin == FlipBipCoinETH60) {
             line_len = 14;
         }
-        flipbip_scene_1_draw_generic(model->recv_addresses[model->page - PAGE_ADDR_BEGIN], line_len);
+        flipbip_scene_1_draw_generic(
+            model->recv_addresses[model->page - PAGE_ADDR_BEGIN], line_len, true);
     }
 
     if(model->page == PAGE_LOADING) {
