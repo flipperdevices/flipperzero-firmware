@@ -66,7 +66,7 @@ static int32_t rpc_system_gui_screen_stream_frame_transmit_thread(void* context)
             // Guaranteed bandwidth reserve
             uint32_t extra_delay = transmit_time / 20;
             if(extra_delay > 500) extra_delay = 500;
-            furi_delay_tick(extra_delay);
+            if(extra_delay) furi_delay_tick(extra_delay);
         }
 
         if(flags & RpcGuiWorkerFlagExit) {

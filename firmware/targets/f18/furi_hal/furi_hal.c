@@ -73,7 +73,6 @@ void furi_hal_init() {
     furi_hal_vibro_init();
 #endif
     furi_hal_bt_init();
-    furi_hal_compress_icon_init();
 
     // FatFS driver initialization
     MX_FATFS_Init();

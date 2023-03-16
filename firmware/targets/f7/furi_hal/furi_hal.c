@@ -70,7 +70,6 @@ void furi_hal_init() {
 
     furi_hal_bt_init();
     furi_hal_memory_init();
-    furi_hal_compress_icon_init();
 
 #ifndef FURI_RAM_EXEC
     // USB

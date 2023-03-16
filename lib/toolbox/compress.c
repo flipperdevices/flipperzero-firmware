@@ -1,105 +1,106 @@
-#include <furi_hal_compress.h>
+#include "compress.h"
 
 #include <furi.h>
 #include <lib/heatshrink/heatshrink_encoder.h>
 #include <lib/heatshrink/heatshrink_decoder.h>
 
-#define TAG "FuriHalCompress"
+#define COMPRESS_ICON_ENCODED_BUFF_SIZE (2 * 512)
+#define COMPRESS_ICON_DECODED_BUFF_SIZE (1024)
 
-#define FURI_HAL_COMPRESS_ICON_ENCODED_BUFF_SIZE (2 * 512)
-#define FURI_HAL_COMPRESS_ICON_DECODED_BUFF_SIZE (1024)
-
-#define FURI_HAL_COMPRESS_EXP_BUFF_SIZE (1 << FURI_HAL_COMPRESS_EXP_BUFF_SIZE_LOG)
+#define COMPRESS_EXP_BUFF_SIZE (1 << COMPRESS_EXP_BUFF_SIZE_LOG)
 
 typedef struct {
     uint8_t is_compressed;
     uint8_t reserved;
     uint16_t compressed_buff_size;
-} FuriHalCompressHeader;
+} CompressHeader;
 
-typedef struct {
+struct CompressIcon {
     heatshrink_decoder* decoder;
-    uint8_t
-        compress_buff[FURI_HAL_COMPRESS_EXP_BUFF_SIZE + FURI_HAL_COMPRESS_ICON_ENCODED_BUFF_SIZE];
-    uint8_t decoded_buff[FURI_HAL_COMPRESS_ICON_DECODED_BUFF_SIZE];
-} FuriHalCompressIcon;
-
-struct FuriHalCompress {
-    heatshrink_encoder* encoder;
-    heatshrink_decoder* decoder;
-    uint8_t* compress_buff;
-    uint16_t compress_buff_size;
+    uint8_t compress_buff[COMPRESS_EXP_BUFF_SIZE + COMPRESS_ICON_ENCODED_BUFF_SIZE];
+    uint8_t decoded_buff[COMPRESS_ICON_DECODED_BUFF_SIZE];
 };
 
-static FuriHalCompressIcon* icon_decoder;
+CompressIcon* compress_icon_alloc() {
+    CompressIcon* instance = malloc(sizeof(CompressIcon));
+    instance->decoder = heatshrink_decoder_alloc(
+        instance->compress_buff,
+        COMPRESS_ICON_ENCODED_BUFF_SIZE,
+        COMPRESS_EXP_BUFF_SIZE_LOG,
+        COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
+    heatshrink_decoder_reset(instance->decoder);
+    memset(instance->decoded_buff, 0, sizeof(instance->decoded_buff));
 
-static void furi_hal_compress_reset(FuriHalCompress* compress) {
-    furi_assert(compress);
-    heatshrink_encoder_reset(compress->encoder);
-    heatshrink_decoder_reset(compress->decoder);
-    memset(compress->compress_buff, 0, compress->compress_buff_size);
+    return instance;
 }
 
-void furi_hal_compress_icon_init() {
-    icon_decoder = malloc(sizeof(FuriHalCompressIcon));
-    icon_decoder->decoder = heatshrink_decoder_alloc(
-        icon_decoder->compress_buff,
-        FURI_HAL_COMPRESS_ICON_ENCODED_BUFF_SIZE,
-        FURI_HAL_COMPRESS_EXP_BUFF_SIZE_LOG,
-        FURI_HAL_COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
-    heatshrink_decoder_reset(icon_decoder->decoder);
-    memset(icon_decoder->decoded_buff, 0, sizeof(icon_decoder->decoded_buff));
-    FURI_LOG_I(TAG, "Init OK");
+void compress_icon_free(CompressIcon* instance) {
+    furi_assert(instance);
+    heatshrink_decoder_free(instance->decoder);
+    free(instance);
 }
 
-void furi_hal_compress_icon_decode(const uint8_t* icon_data, uint8_t** decoded_buff) {
+void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint8_t** decoded_buff) {
+    furi_assert(instance);
     furi_assert(icon_data);
     furi_assert(decoded_buff);
 
-    FuriHalCompressHeader* header = (FuriHalCompressHeader*)icon_data;
+    CompressHeader* header = (CompressHeader*)icon_data;
     if(header->is_compressed) {
         size_t data_processed = 0;
         heatshrink_decoder_sink(
-            icon_decoder->decoder,
+            instance->decoder,
             (uint8_t*)&icon_data[4],
             header->compressed_buff_size,
             &data_processed);
         while(1) {
             HSD_poll_res res = heatshrink_decoder_poll(
-                icon_decoder->decoder,
-                icon_decoder->decoded_buff,
-                sizeof(icon_decoder->decoded_buff),
+                instance->decoder,
+                instance->decoded_buff,
+                sizeof(instance->decoded_buff),
                 &data_processed);
             furi_assert((res == HSDR_POLL_EMPTY) || (res == HSDR_POLL_MORE));
             if(res != HSDR_POLL_MORE) {
                 break;
             }
         }
-        heatshrink_decoder_reset(icon_decoder->decoder);
-        memset(icon_decoder->compress_buff, 0, sizeof(icon_decoder->compress_buff));
-        *decoded_buff = icon_decoder->decoded_buff;
+        heatshrink_decoder_reset(instance->decoder);
+        memset(instance->compress_buff, 0, sizeof(instance->compress_buff));
+        *decoded_buff = instance->decoded_buff;
     } else {
         *decoded_buff = (uint8_t*)&icon_data[1];
     }
 }
 
-FuriHalCompress* furi_hal_compress_alloc(uint16_t compress_buff_size) {
-    FuriHalCompress* compress = malloc(sizeof(FuriHalCompress));
-    compress->compress_buff = malloc(compress_buff_size + FURI_HAL_COMPRESS_EXP_BUFF_SIZE);
+struct Compress {
+    heatshrink_encoder* encoder;
+    heatshrink_decoder* decoder;
+    uint8_t* compress_buff;
+    uint16_t compress_buff_size;
+};
+
+static void compress_reset(Compress* compress) {
+    furi_assert(compress);
+    heatshrink_encoder_reset(compress->encoder);
+    heatshrink_decoder_reset(compress->decoder);
+    memset(compress->compress_buff, 0, compress->compress_buff_size);
+}
+
+Compress* compress_alloc(uint16_t compress_buff_size) {
+    Compress* compress = malloc(sizeof(Compress));
+    compress->compress_buff = malloc(compress_buff_size + COMPRESS_EXP_BUFF_SIZE);
     compress->encoder = heatshrink_encoder_alloc(
-        compress->compress_buff,
-        FURI_HAL_COMPRESS_EXP_BUFF_SIZE_LOG,
-        FURI_HAL_COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
+        compress->compress_buff, COMPRESS_EXP_BUFF_SIZE_LOG, COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
     compress->decoder = heatshrink_decoder_alloc(
         compress->compress_buff,
         compress_buff_size,
-        FURI_HAL_COMPRESS_EXP_BUFF_SIZE_LOG,
-        FURI_HAL_COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
+        COMPRESS_EXP_BUFF_SIZE_LOG,
+        COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
 
     return compress;
 }
 
-void furi_hal_compress_free(FuriHalCompress* compress) {
+void compress_free(Compress* compress) {
     furi_assert(compress);
 
     heatshrink_encoder_free(compress->encoder);
@@ -108,8 +109,8 @@ void furi_hal_compress_free(FuriHalCompress* compress) {
     free(compress);
 }
 
-bool furi_hal_compress_encode(
-    FuriHalCompress* compress,
+bool compress_encode(
+    Compress* compress,
     uint8_t* data_in,
     size_t data_in_size,
     uint8_t* data_out,
@@ -126,7 +127,7 @@ bool furi_hal_compress_encode(
     HSE_finish_res finish_res;
     bool encode_failed = false;
     size_t sunk = 0;
-    size_t res_buff_size = sizeof(FuriHalCompressHeader);
+    size_t res_buff_size = sizeof(CompressHeader);
 
     // Sink data to encoding buffer
     while((sunk < data_in_size) && !encode_failed) {
@@ -174,7 +175,7 @@ bool furi_hal_compress_encode(
     bool result = true;
     // Write encoded data to output buffer if compression is efficient. Else - write header and original data
     if(!encode_failed && (res_buff_size < data_in_size + 1)) {
-        FuriHalCompressHeader header = {
+        CompressHeader header = {
             .is_compressed = 0x01, .reserved = 0x00, .compressed_buff_size = res_buff_size};
         memcpy(data_out, &header, sizeof(header));
         *data_res_size = res_buff_size;
@@ -186,13 +187,13 @@ bool furi_hal_compress_encode(
         *data_res_size = 0;
         result = false;
     }
-    furi_hal_compress_reset(compress);
+    compress_reset(compress);
 
     return result;
 }
 
-bool furi_hal_compress_decode(
-    FuriHalCompress* compress,
+bool compress_decode(
+    Compress* compress,
     uint8_t* data_in,
     size_t data_in_size,
     uint8_t* data_out,
@@ -212,11 +213,11 @@ bool furi_hal_compress_decode(
     size_t res_buff_size = 0;
     size_t poll_size = 0;
 
-    FuriHalCompressHeader* header = (FuriHalCompressHeader*)data_in;
+    CompressHeader* header = (CompressHeader*)data_in;
     if(header->is_compressed) {
         // Sink data to decoding buffer
         size_t compressed_size = header->compressed_buff_size;
-        size_t sunk = sizeof(FuriHalCompressHeader);
+        size_t sunk = sizeof(CompressHeader);
         while(sunk < compressed_size && !decode_failed) {
             sink_res = heatshrink_decoder_sink(
                 compress->decoder, &data_in[sunk], compressed_size - sunk, &sink_size);
@@ -258,7 +259,7 @@ bool furi_hal_compress_decode(
     } else {
         result = false;
     }
-    furi_hal_compress_reset(compress);
+    compress_reset(compress);
 
     return result;
 }
