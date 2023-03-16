@@ -7,6 +7,8 @@ typedef enum {
     iButtonProtocolDS1992,
     iButtonProtocolDS1996,
     iButtonProtocolDS1971,
+    iButtonProtocolDS2502,
+    iButtonProtocolDS2502Dell,
     /* Add new 1-Wire protocols here */
 
     /* Default catch-all 1-Wire protocol */
