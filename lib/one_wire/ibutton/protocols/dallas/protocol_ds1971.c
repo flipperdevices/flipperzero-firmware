@@ -15,6 +15,7 @@
 #define DS1971_DATA_BYTE_COUNT 4U
 
 #define DS1971_EEPROM_DATA_KEY "Eeprom Data"
+#define DS1971_MEMORY_TYPE "Eeprom"
 
 #define DS1971_CMD_FINALIZATION 0xA5
 
@@ -42,6 +43,7 @@ static void dallas_ds1971_get_editable_data(iButtonEditableData*, iButtonProtoco
 static void dallas_ds1971_apply_edits(iButtonProtocolData*);
 static bool
     dallas_ds1971_read_mem(OneWireHost* host, uint8_t address, uint8_t* data, size_t data_size);
+static bool ds1971_emulate_read_mem(OneWireSlave* bus, const uint8_t* data, size_t data_size);
 
 const iButtonProtocolDallasBase ibutton_protocol_ds1971 = {
     .family_code = DS1971_FAMILY_CODE,
@@ -131,7 +133,7 @@ static bool dallas_ds1971_command_callback(uint8_t command, void* context) {
 
         } else if(data->state.command_state == DallasCommonCommandStateRomCmd) {
             data->state.command_state = DallasCommonCommandStateMemCmd;
-            dallas_common_emulate_read_mem(bus, data->eeprom_data, DS1971_EEPROM_DATA_SIZE);
+            ds1971_emulate_read_mem(bus, data->eeprom_data, DS1971_EEPROM_DATA_SIZE);
             return false;
 
         } else {
@@ -214,7 +216,7 @@ void dallas_ds1971_render_data(FuriString* result, const iButtonProtocolData* pr
 void dallas_ds1971_render_brief_data(FuriString* result, const iButtonProtocolData* protocol_data) {
     const DS1971ProtocolData* data = protocol_data;
     dallas_common_render_brief_data(
-        result, &data->rom_data, data->eeprom_data, DS1971_EEPROM_DATA_SIZE);
+        result, &data->rom_data, data->eeprom_data, DS1971_EEPROM_DATA_SIZE, DS1971_MEMORY_TYPE);
 }
 
 void dallas_ds1971_render_error(FuriString* result, const iButtonProtocolData* protocol_data) {
@@ -250,4 +252,23 @@ bool dallas_ds1971_read_mem(OneWireHost* host, uint8_t address, uint8_t* data, s
     onewire_host_read_bytes(host, data, (uint8_t)data_size);
 
     return true;
+}
+
+bool ds1971_emulate_read_mem(OneWireSlave* bus, const uint8_t* data, size_t data_size) {
+    bool success = false;
+
+    union {
+        uint8_t bytes[sizeof(uint8_t)];
+        uint8_t word;
+    } address;
+
+    do {
+        if(!onewire_slave_receive(bus, address.bytes, sizeof(address))) break;
+        if(address.word >= data_size) break;
+        if(!onewire_slave_send(bus, data + address.word, data_size - address.word)) break;
+
+        success = true;
+    } while(false);
+
+    return success;
 }

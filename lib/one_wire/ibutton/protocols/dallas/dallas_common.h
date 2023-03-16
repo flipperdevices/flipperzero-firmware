@@ -100,7 +100,8 @@ void dallas_common_render_brief_data(
     FuriString* result,
     const DallasCommonRomData* rom_data,
     const uint8_t* sram_data,
-    size_t sram_data_size);
+    size_t sram_data_size,
+    char* sram_type);
 
 void dallas_common_render_crc_error(FuriString* result, const DallasCommonRomData* rom_data);
 
