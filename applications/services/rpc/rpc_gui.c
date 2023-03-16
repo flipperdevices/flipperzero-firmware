@@ -53,12 +53,22 @@ static int32_t rpc_system_gui_screen_stream_frame_transmit_thread(void* context)
 
     RpcGuiSystem* rpc_gui = (RpcGuiSystem*)context;
 
+    uint32_t transmit_time = 0;
     while(true) {
         uint32_t flags =
             furi_thread_flags_wait(RpcGuiWorkerFlagAny, FuriFlagWaitAny, FuriWaitForever);
+
         if(flags & RpcGuiWorkerFlagTransmit) {
+            transmit_time = furi_get_tick();
             rpc_send(rpc_gui->session, rpc_gui->transmit_frame);
+            transmit_time = furi_get_tick() - transmit_time;
+
+            // Guaranteed bandwidth reserve
+            uint32_t extra_delay = transmit_time / 20;
+            if(extra_delay > 500) extra_delay = 500;
+            furi_delay_tick(extra_delay);
         }
+
         if(flags & RpcGuiWorkerFlagExit) {
             break;
         }
