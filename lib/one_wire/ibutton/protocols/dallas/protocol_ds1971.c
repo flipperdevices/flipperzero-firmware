@@ -15,7 +15,7 @@
 #define DS1971_DATA_BYTE_COUNT 4U
 
 #define DS1971_EEPROM_DATA_KEY "Eeprom Data"
-#define DS1971_MEMORY_TYPE "Eeprom"
+#define DS1971_MEMORY_TYPE "EEPROM"
 
 #define DS1971_CMD_FINALIZATION 0xA5
 
@@ -257,15 +257,11 @@ bool dallas_ds1971_read_mem(OneWireHost* host, uint8_t address, uint8_t* data, s
 bool ds1971_emulate_read_mem(OneWireSlave* bus, const uint8_t* data, size_t data_size) {
     bool success = false;
 
-    union {
-        uint8_t bytes[sizeof(uint8_t)];
-        uint8_t word;
-    } address;
-
     do {
-        if(!onewire_slave_receive(bus, address.bytes, sizeof(address))) break;
-        if(address.word >= data_size) break;
-        if(!onewire_slave_send(bus, data + address.word, data_size - address.word)) break;
+        uint8_t address;
+        if(!onewire_slave_receive(bus, &address, sizeof(address))) break;
+        if(address >= data_size) break;
+        if(!onewire_slave_send(bus, data + address, data_size - address)) break;
 
         success = true;
     } while(false);

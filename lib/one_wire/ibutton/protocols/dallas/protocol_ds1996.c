@@ -15,7 +15,7 @@
 #define DS1996_DATA_BYTE_COUNT 4U
 
 #define DS1996_SRAM_DATA_KEY "Sram Data"
-#define DS1996_MEMORY_TYPE "Sram"
+#define DS1996_MEMORY_TYPE "SRAM"
 
 typedef struct {
     OneWireSlave* bus;
