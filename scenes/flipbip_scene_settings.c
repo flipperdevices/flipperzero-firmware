@@ -3,9 +3,12 @@
 // From: lib/crypto
 #include <memzero.h>
 
+#define TEXT_LABEL_ON "ON"
+#define TEXT_LABEL_OFF "OFF"
+
 const char* const haptic_text[2] = {
-    "OFF",
-    "ON",
+    TEXT_LABEL_OFF,
+    TEXT_LABEL_ON,
 };
 const uint32_t haptic_value[2] = {
     FlipBipHapticOff,
@@ -13,8 +16,8 @@ const uint32_t haptic_value[2] = {
 };
 
 const char* const led_text[2] = {
-    "OFF",
-    "ON",
+    TEXT_LABEL_OFF,
+    TEXT_LABEL_ON,
 };
 const uint32_t led_value[2] = {
     FlipBipLedOff,
@@ -33,8 +36,8 @@ const uint32_t bip39_strength_value[3] = {
 };
 
 const char* const passphrase_text[2] = {
-    "OFF",
-    "ON",
+    TEXT_LABEL_OFF,
+    TEXT_LABEL_ON,
 };
 const uint32_t passphrase_value[2] = {
     FlipBipPassphraseOff,
@@ -70,6 +73,7 @@ static void flipbip_scene_settings_set_passphrase(VariableItem* item) {
 
     if(app->passphrase == FlipBipPassphraseOn) {
         app->input_state = FlipBipTextInputPassphrase;
+        text_input_set_header_text(app->text_input, "Enter BIP39 passphrase");
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdTextInput);
     } else {
         memzero(app->passphrase_text, TEXT_BUFFER_SIZE);
