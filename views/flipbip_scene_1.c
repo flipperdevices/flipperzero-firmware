@@ -49,7 +49,7 @@ const char* TEXT_INFO = "-Scroll pages with up/down-"
                         "p6,7)  xprv/xpub Extnd Keys"
                         "p8+)    Receive Addresses  ";
 
-#define TEXT_SAVE_QR "Save QR"
+// #define TEXT_SAVE_QR "Save QR"
 #define TEXT_QRFILE_EXT ".qrcode" // 7 chars + 1 null
 
 // bip44_coin, xprv_version, xpub_version, addr_version, wif_version, addr_format
@@ -279,7 +279,11 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
     } else if(model->page == PAGE_XPUB_EXTD) {
         flipbip_scene_1_draw_generic(model->xpub_extended, 20);
     } else if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
-        flipbip_scene_1_draw_generic(model->recv_addresses[model->page - PAGE_ADDR_BEGIN], 12);
+        uint32_t line_len = 12;
+        if(model->coin == FlipBipCoinETH60) {
+            line_len = 14;
+        }
+        flipbip_scene_1_draw_generic(model->recv_addresses[model->page - PAGE_ADDR_BEGIN], line_len);
     }
 
     if(model->page == PAGE_LOADING) {

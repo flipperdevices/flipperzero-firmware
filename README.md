@@ -3,7 +3,7 @@
 [![Build](https://github.com/xtruan/FlipBIP/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xtruan/FlipBIP/actions/workflows/build.yml)
 
 ## Crypto toolkit for Flipper Zero
-- Built against `0.78.1` Flipper Zero firmware release
+- Built against `0.79.1` Flipper Zero firmware release
 - Using Trezor crypto libs from `core/v2.5.3` release
 - Included in [RogueMaster Custom Firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins)
 
