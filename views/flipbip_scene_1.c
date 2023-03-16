@@ -22,7 +22,9 @@
 #define DERIV_ACCOUNT 0
 #define DERIV_CHANGE 0
 
-#define MAX_ADDR_LEN 42 + 1 // 42 = max length of address + null terminator
+#define MAX_TEXT_LEN 30 // 30 = max length of text
+#define MAX_TEXT_BUF (MAX_TEXT_LEN + 1) // max length of text + null terminator
+#define MAX_ADDR_BUF (42 + 1) // 42 = max length of address + null terminator
 #define NUM_ADDRS 6
 
 #define PAGE_LOADING 0
@@ -43,10 +45,10 @@
 #define TEXT_RECEIVE_ADDRESS "receive address:"
 #define TEXT_DEFAULT_DERIV "m/44'/X'/0'/0"
 const char* TEXT_INFO = "-Scroll pages with up/down-"
-                        "p1,2)    Mnemonic/Seed     "
-                        "p3)       xprv Root Key    "
-                        "p4,5)  xprv/xpub Accnt Keys"
-                        "p6,7)  xprv/xpub Extnd Keys"
+                        "p1,2)   BIP39 Mnemonic/Seed"
+                        "p3)       BIP32 Root Key   "
+                        "p4,5)  Prv/Pub Account Keys"
+                        "p6,7)  Prv/Pub BIP32 Keys  "
                         "p8+)    Receive Addresses  ";
 
 // #define TEXT_SAVE_QR "Save QR"
@@ -116,13 +118,15 @@ static void flipbip_scene_1_init_address(
     uint32_t addr_index) {
     //s_busy = true;
 
-    // Buffer for address serialization
-    const size_t buflen = 40;
-    char buf[40 + 1] = {0};
+    // buffer for address serialization
+    // subtract 2 for "0x", 1 for null terminator
+    const size_t buflen = MAX_ADDR_BUF - (2 + 1);
+    // subtract 2 for "0x"
+    char buf[MAX_ADDR_BUF - 2] = {0};
 
     // Use static node for address generation
     memcpy(s_addr_node, node, sizeof(HDNode));
-    memzero(addr_text, MAX_ADDR_LEN);
+    memzero(addr_text, MAX_ADDR_BUF);
 
     hdnode_private_ckd(s_addr_node, addr_index);
     hdnode_fill_public_key(s_addr_node);
@@ -157,8 +161,13 @@ static void flipbip_scene_1_init_address(
     //s_busy = false;
 }
 
-static void flipbip_scene_1_draw_generic(const char* text, size_t line_len) {
+static void
+    flipbip_scene_1_draw_generic(const char* text, const size_t line_len, const bool chunk) {
     // Split the text into parts
+    size_t len = line_len;
+    if(len > MAX_TEXT_LEN) {
+        len = MAX_TEXT_LEN;
+    }
     for(size_t si = 1; si <= 6; si++) {
         char* ptr = NULL;
 
@@ -175,11 +184,18 @@ static void flipbip_scene_1_draw_generic(const char* text, size_t line_len) {
         else if(si == 6)
             ptr = s_disp_text6;
 
-        memzero(ptr, 30 + 1);
-        if(line_len > 30) {
-            strncpy(ptr, text + ((si - 1) * 30), 30);
-        } else {
-            strncpy(ptr, text + ((si - 1) * line_len), line_len);
+        memzero(ptr, MAX_TEXT_BUF);
+        strncpy(ptr, text + ((si - 1) * len), len);
+        // add a space every 4 characters and shift the text
+        if(len < 23 && chunk) {
+            for(size_t i = 0; i < strlen(ptr); i++) {
+                if(i % 5 == 0) {
+                    for(size_t j = strlen(ptr); j > i; j--) {
+                        ptr[j] = ptr[j - 1];
+                    }
+                    ptr[i] = ' ';
+                }
+            }
         }
     }
 }
@@ -219,9 +235,9 @@ static void flipbip_scene_1_draw_mnemonic(const char* mnemonic) {
         else if(mi == 6)
             ptr = s_disp_text6;
 
-        memzero(ptr, 30 + 1);
-        if(strlen(mnemonic_part) > 30) {
-            strncpy(ptr, mnemonic_part, 30);
+        memzero(ptr, MAX_TEXT_BUF);
+        if(strlen(mnemonic_part) > MAX_TEXT_LEN) {
+            strncpy(ptr, mnemonic_part, MAX_TEXT_LEN);
         } else {
             strncpy(ptr, mnemonic_part, strlen(mnemonic_part));
         }
@@ -240,7 +256,7 @@ static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
     // Convert the seed to a hex string
     flipbip_btox(model->seed, 64, seed_working);
 
-    flipbip_scene_1_draw_generic(seed_working, 22);
+    flipbip_scene_1_draw_generic(seed_working, 22, false);
 
     // Free the working seed memory
     memzero(seed_working, seed_working_len);
@@ -248,12 +264,12 @@ static void flipbip_scene_1_draw_seed(FlipBipScene1Model* const model) {
 }
 
 static void flipbip_scene_1_clear_text() {
-    memzero((void*)s_disp_text1, 30 + 1);
-    memzero((void*)s_disp_text2, 30 + 1);
-    memzero((void*)s_disp_text3, 30 + 1);
-    memzero((void*)s_disp_text4, 30 + 1);
-    memzero((void*)s_disp_text5, 30 + 1);
-    memzero((void*)s_disp_text6, 30 + 1);
+    memzero((void*)s_disp_text1, MAX_TEXT_BUF);
+    memzero((void*)s_disp_text2, MAX_TEXT_BUF);
+    memzero((void*)s_disp_text3, MAX_TEXT_BUF);
+    memzero((void*)s_disp_text4, MAX_TEXT_BUF);
+    memzero((void*)s_disp_text5, MAX_TEXT_BUF);
+    memzero((void*)s_disp_text6, MAX_TEXT_BUF);
 }
 
 void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
@@ -263,27 +279,28 @@ void flipbip_scene_1_draw(Canvas* canvas, FlipBipScene1Model* model) {
 
     flipbip_scene_1_clear_text();
     if(model->page == PAGE_INFO) {
-        flipbip_scene_1_draw_generic(TEXT_INFO, 27);
+        flipbip_scene_1_draw_generic(TEXT_INFO, 27, false);
     } else if(model->page == PAGE_MNEMONIC) {
         flipbip_scene_1_draw_mnemonic(model->mnemonic);
     } else if(model->page == PAGE_SEED) {
         flipbip_scene_1_draw_seed(model);
     } else if(model->page == PAGE_XPRV_ROOT) {
-        flipbip_scene_1_draw_generic(model->xprv_root, 20);
+        flipbip_scene_1_draw_generic(model->xprv_root, 20, false);
     } else if(model->page == PAGE_XPRV_ACCT) {
-        flipbip_scene_1_draw_generic(model->xprv_account, 20);
+        flipbip_scene_1_draw_generic(model->xprv_account, 20, false);
     } else if(model->page == PAGE_XPUB_ACCT) {
-        flipbip_scene_1_draw_generic(model->xpub_account, 20);
+        flipbip_scene_1_draw_generic(model->xpub_account, 20, false);
     } else if(model->page == PAGE_XPRV_EXTD) {
-        flipbip_scene_1_draw_generic(model->xprv_extended, 20);
+        flipbip_scene_1_draw_generic(model->xprv_extended, 20, false);
     } else if(model->page == PAGE_XPUB_EXTD) {
-        flipbip_scene_1_draw_generic(model->xpub_extended, 20);
+        flipbip_scene_1_draw_generic(model->xpub_extended, 20, false);
     } else if(model->page >= PAGE_ADDR_BEGIN && model->page <= PAGE_ADDR_END) {
-        uint32_t line_len = 12;
+        size_t line_len = 12;
         if(model->coin == FlipBipCoinETH60) {
             line_len = 14;
         }
-        flipbip_scene_1_draw_generic(model->recv_addresses[model->page - PAGE_ADDR_BEGIN], line_len);
+        flipbip_scene_1_draw_generic(
+            model->recv_addresses[model->page - PAGE_ADDR_BEGIN], line_len, true);
     }
 
     if(model->page == PAGE_LOADING) {
@@ -459,8 +476,8 @@ static int flipbip_scene_1_model_init(
 
     // Initialize addresses
     for(uint8_t a = 0; a < NUM_ADDRS; a++) {
-        model->recv_addresses[a] = malloc(MAX_ADDR_LEN);
-        memzero(model->recv_addresses[a], MAX_ADDR_LEN);
+        model->recv_addresses[a] = malloc(MAX_ADDR_BUF);
+        memzero(model->recv_addresses[a], MAX_ADDR_BUF);
         flipbip_scene_1_init_address(model->recv_addresses[a], node, coin, a);
 
         // Save QR code file
@@ -584,7 +601,7 @@ void flipbip_scene_1_exit(void* context) {
                 free((void*)model->xprv_extended);
                 free((void*)model->xpub_extended);
                 for(int a = 0; a < NUM_ADDRS; a++) {
-                    memzero((void*)model->recv_addresses[a], MAX_ADDR_LEN);
+                    memzero((void*)model->recv_addresses[a], MAX_ADDR_BUF);
                     free((void*)model->recv_addresses[a]);
                 }
             }
@@ -683,12 +700,12 @@ FlipBipScene1* flipbip_scene_1_alloc() {
     s_addr_node = (HDNode*)malloc(sizeof(HDNode));
 
     // allocate the display text
-    s_disp_text1 = (char*)malloc(30 + 1);
-    s_disp_text2 = (char*)malloc(30 + 1);
-    s_disp_text3 = (char*)malloc(30 + 1);
-    s_disp_text4 = (char*)malloc(30 + 1);
-    s_disp_text5 = (char*)malloc(30 + 1);
-    s_disp_text6 = (char*)malloc(30 + 1);
+    s_disp_text1 = (char*)malloc(MAX_TEXT_BUF);
+    s_disp_text2 = (char*)malloc(MAX_TEXT_BUF);
+    s_disp_text3 = (char*)malloc(MAX_TEXT_BUF);
+    s_disp_text4 = (char*)malloc(MAX_TEXT_BUF);
+    s_disp_text5 = (char*)malloc(MAX_TEXT_BUF);
+    s_disp_text6 = (char*)malloc(MAX_TEXT_BUF);
 
     return instance;
 }

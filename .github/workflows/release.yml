@@ -25,7 +25,9 @@ jobs:
           path: 'applications_user/FlipBIP'
       - name: Build FAPs
         run: ./fbt COMPACT=1 DEBUG=0 faps
-      - name: Get tag
+      - name: Check FlipBIP Built
+        run: test -f build/f7-firmware-C/.extapps/FlipBIP.fap
+      - name: Get Tag
         id: tag
         uses: dawidd6/action-get-tag@v1
         with:
