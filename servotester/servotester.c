@@ -14,15 +14,15 @@ uint16_t pWidth = 1500;
 int8_t dir = 1;
 
 enum Modes {
-    Manual,
     Center,
+    Manual,
     Auto,
 };
 
 const char* const modes_text[Auto + 1] = {
-    "Manual",
     "Center",
-    "Auto",
+    "Manual",
+    " Auto",
 };
 
 uint8_t mode = Manual;
@@ -37,7 +37,7 @@ typedef struct {
     InputEvent input;
 } ServoTesterEvent;
 
-static void draw_callback(Canvas* canvas, void* ctx) {
+static void servotester_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
 
     char temp_str[36];
@@ -51,16 +51,6 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 14, 30, 14, 20);
     canvas_draw_line(canvas, 114, 30, 114, 20);
 
-    /*
-        14-1000
-        104-2000
-
-
-
-        (pWidth-1000)/10+10 === 0-1
-        
-
-    */
     canvas_draw_frame(canvas, (pWidth - 1000) / 10.2 + 14, 20, 3, 10);
 
     snprintf(temp_str, sizeof(temp_str), "%i us", pWidth);
@@ -70,21 +60,21 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str(canvas, 50, 50, modes_text[mode]);
 }
 
-static void input_callback(InputEvent* input_event, void* ctx) {
+static void servotester_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
     ServoTesterEvent event = {.type = EventTypeInput, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void timer_callback(FuriMessageQueue* event_queue) {
+static void servotester_timer_callback(FuriMessageQueue* event_queue) {
     furi_assert(event_queue);
 
     ServoTesterEvent event = {.type = EventTypeTick};
     furi_message_queue_put(event_queue, &event, 0);
 }
 
-void setServoPWM(uint32_t freq, uint32_t compare) {
+void servotester_set_servo_pwm(uint32_t freq, uint32_t compare) {
     uint32_t freq_div = 64000000LU / freq;
     uint32_t prescaler = freq_div / 0x10000LU;
     uint32_t period = freq_div / (prescaler + 1);
@@ -94,8 +84,8 @@ void setServoPWM(uint32_t freq, uint32_t compare) {
     LL_TIM_OC_SetCompareCH1(TIM1, compare);
 }
 
-void updatePwm() {
-    setServoPWM(DEFAULT_FREQ, pWidth * 3.2);
+void servotester_update_pwm() {
+    servotester_set_servo_pwm(DEFAULT_FREQ, pWidth * 3.2);
 }
 
 int32_t servotester_app(void* p) {
@@ -108,52 +98,52 @@ int32_t servotester_app(void* p) {
     ViewPort* view_port = view_port_alloc();
 
     // callbacks init
-    view_port_draw_callback_set(view_port, draw_callback, NULL);
-    view_port_input_callback_set(view_port, input_callback, event_queue);
+    view_port_draw_callback_set(view_port, servotester_draw_callback, NULL);
+    view_port_input_callback_set(view_port, servotester_input_callback, event_queue);
 
     Gui* gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
-    FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, event_queue);
+    // Timer for automatic mode
+    FuriTimer* timer =
+        furi_timer_alloc(servotester_timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, 5);
 
     //GPIO init
-    furi_hal_power_enable_otg();
-    furi_hal_pwm_start(FuriHalPwmOutputIdTim1PA7, 50, 4);
-    setServoPWM(DEFAULT_FREQ, pWidth * 3.2);
+    furi_hal_power_enable_otg(); // Turn 5V
+    furi_hal_pwm_start(FuriHalPwmOutputIdTim1PA7, 50, 4); // Init Tim1
+    servotester_set_servo_pwm(DEFAULT_FREQ, pWidth * 3.2); // set our PWM
 
     while(1) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
         if(event.type == EventTypeInput) {
             if(event.input.key == InputKeyBack) {
-                furi_hal_power_disable_otg();
-                furi_hal_pwm_stop(FuriHalPwmOutputIdTim1PA7);
                 break;
             } else if(event.input.key == InputKeyOk) {
                 if(event.input.type == InputTypeRelease) {
                     if(mode == Auto) {
-                        mode = Manual;
+                        mode = Center;
                     } else {
                         mode++;
                     }
 
                     if(mode == Center) {
                         pWidth = 1500;
-                        updatePwm();
+                        servotester_update_pwm();
                     }
                 }
             } else if(event.input.key == InputKeyLeft) {
                 if(pWidth > 1000) pWidth--;
-                updatePwm();
+                servotester_update_pwm();
             } else if(event.input.key == InputKeyRight) {
                 if(pWidth < 2000) pWidth++;
-                updatePwm();
+                servotester_update_pwm();
             } else if(event.input.key == InputKeyDown) {
                 if(pWidth >= 1010) pWidth -= 10;
-                updatePwm();
+                servotester_update_pwm();
             } else if(event.input.key == InputKeyUp) {
                 if(pWidth <= 1990) pWidth += 10;
-                updatePwm();
+                servotester_update_pwm();
             }
         } else if(event.type == EventTypeTick) {
             if(mode == Auto) {
@@ -161,10 +151,13 @@ int32_t servotester_app(void* p) {
                 if(pWidth > 1990 || pWidth < 1010) {
                     dir = dir * -1;
                 }
-                updatePwm();
+                servotester_update_pwm();
             }
         }
     }
+
+    furi_hal_power_disable_otg();
+    furi_hal_pwm_stop(FuriHalPwmOutputIdTim1PA7);
 
     furi_timer_free(timer);
     furi_message_queue_free(event_queue);
