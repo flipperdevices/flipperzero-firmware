@@ -181,6 +181,7 @@ int32_t subbrute_app(void* p) {
     // Enable power for External CC1101 if it is connected
     furi_hal_subghz_enable_ext_power();
     // Auto switch to internal radio if external radio is not available
+    furi_delay_ms(15);
     if(!furi_hal_subghz_check_radio()) {
         furi_hal_subghz_set_radio_type(SubGhzRadioInternal);
     }
