@@ -21,15 +21,15 @@ Manual: :information_source: Refer to the build flags necessary in mfkey32.c
 This was the only function of the Flipper Zero that was [thought to be impossible on the hardware](https://old.reddit.com/r/flipperzero/comments/is31re/comment/g72077x/). You can still use other methods if you prefer them.
 
 ## Misc Stats
-1. RAM used: **90 KB**, RAM free: 50 KB (original was ~53,000 KB, 99.9% RAM usage eliminated)
+1. RAM used: **135 KB**, RAM free: 5 KB (original was ~53,000 KB, 99.75% RAM usage eliminated)
 2. Disk used: (None)
 3. Time per unsolved key:
 
 | Category | Time |
 | -------- | ---- |
-| Best (real world) | 62 seconds (43 nonces solved in ~1 minute) |
-| Average (expected) | 25 minutes |
-| Worst possible (expected) | 50 minutes |
+| Best (real world) | N/A |
+| Average | 255 seconds |
+| Worst possible (expected) | 510 seconds |
 
 Writeup: Coming soon
 
