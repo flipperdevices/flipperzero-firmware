@@ -11,5 +11,6 @@ typedef enum {
     //AvrIspViewVariableItemList,
     AvrIspViewSubmenu,
     AvrIspViewProgrammer,
+    AvrIspViewReader,
     AvrIspViewWidget,
 } AvrIspView;

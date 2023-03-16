@@ -12,6 +12,7 @@
 //#include <gui/modules/variable_item_list.h>
 
 #include "views/avr_isp_view_programmer.h"
+#include "views/avr_isp_view_reader.h"
 
 typedef struct AvrIspApp AvrIspApp;
 
@@ -24,4 +25,5 @@ struct AvrIspApp {
     Submenu* submenu;
     Widget* widget;
     AvrIspProgrammerView* avr_asp_programmer_view;
+    AvrIspReaderView* avr_asp_reader_view;
 };

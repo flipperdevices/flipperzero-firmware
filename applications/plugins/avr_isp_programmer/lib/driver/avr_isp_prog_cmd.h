@@ -13,16 +13,30 @@
 #define AVR_ISP_READ_VENDOR 0x30, 0x00, 0x00, 0x00
 #define AVR_ISP_READ_PART_FAMILY 0x30, 0x00, 0x01, 0x00
 #define AVR_ISP_READ_PART_NUMBER 0x30, 0x00, 0x02, 0x00
+#define AVR_ISP_ERASE_CHIP 0xAC, 0x80, 0x00, 0x00 //Erase Chip, Wait N ms, Release RESET to end the erase.
+//The only way to end a Chip Erase cycle is by temporarily releasing the Reset line
 
 #define AVR_ISP_WRITE_FLASH_LO(add, data) 0x40, (add >> 8) & 0xFF, add & 0xFF, data
 #define AVR_ISP_WRITE_FLASH_HI(add, data) 0x48, (add >> 8) & 0xFF, add & 0xFF, data
 #define AVR_ISP_READ_FLASH_LO(add) 0x20, (add >> 8) & 0xFF, add & 0xFF, 0x00
 #define AVR_ISP_READ_FLASH_HI(add) 0x28, (add >> 8) & 0xFF, add & 0xFF, 0x00
 
-#define AVR_ISP_WRITE_EEPROM(add, data) 0xC0, (add >> 8) & 0xFF, add & 0xFF, data
+#define AVR_ISP_WRITE_EEPROM(add, data) 0xC0, (add >> 8) & 0xFF, add & 0xFF, data //Send cmd, Wait N ms
 #define AVR_ISP_READ_EEPROM(add) 0xA0, (add >> 8) & 0xFF, add & 0xFF, 0xFF
 
-#define AVR_ISP_COMMIT(add) 0x4C, (add >> 8) & 0xFF, add & 0xFF, 0x00
+#define AVR_ISP_COMMIT(add) 0x4C, (add >> 8) & 0xFF, add & 0xFF, 0x00 //Send cmd, polling read last addr page
+
+#define AVR_ISP_OSCCAL(add) 0x38, 0x00, add, 0x00
+
+#define AVR_ISP_WRITE_LOCK_BYTE(data) 0xAC, 0xE0, 0x00, data //Send cmd, Wait N ms
+#define AVR_ISP_READ_LOCK_BYTE 0x58, 0x00, 0x00, 0x00
+#define AVR_ISP_WRITE_FUSE_LOW(data) 0xAC, 0xA0, 0x00, data //Send cmd, Wait N ms
+#define AVR_ISP_READ_FUSE_LOW 0x50, 0x00, 0x00, 0x00
+#define AVR_ISP_WRITE_FUSE_HIGH(data) 0xAC, 0xA8, 0x00, data //Send cmd, Wait N ms
+#define AVR_ISP_READ_FUSE_HIGH 0x58, 0x08, 0x00, 0x00 
+#define AVR_ISP_WRITE_FUSE_EXTENDED(data) 0xAC, 0xA4, 0x00, data  //Send cmd, Wait N ms (~write)
+#define AVR_ISP_READ_FUSE_EXTENDED 0x50, 0x08, 0x00, 0x00
+
 
 #define AVR_ISP_EECHUNK 0x20
 

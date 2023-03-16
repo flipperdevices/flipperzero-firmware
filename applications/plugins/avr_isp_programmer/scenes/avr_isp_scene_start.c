@@ -2,6 +2,7 @@
 
 typedef enum {
     SubmenuIndexAvrIspProgrammer,
+    SubmenuIndexAvrIspReader,
     SubmenuIndexAvrIspAbout,
 } SubmenuIndex;
 
@@ -19,6 +20,12 @@ void avr_isp_scene_start_on_enter(void* context) {
         submenu,
         "AVR ISP Programmer",
         SubmenuIndexAvrIspProgrammer,
+        avr_isp_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
+        submenu,
+        "AVR ISP Reader",
+        SubmenuIndexAvrIspReader,
         avr_isp_scene_start_submenu_callback,
         app);
     submenu_add_item(
@@ -40,6 +47,9 @@ bool avr_isp_scene_start_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexAvrIspProgrammer) {
             scene_manager_next_scene(app->scene_manager, AvrIspSceneProgrammer);
+            consumed = true;
+        }else if(event.event == SubmenuIndexAvrIspReader) {
+            scene_manager_next_scene(app->scene_manager, AvrIspSceneReader);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, AvrIspSceneStart, event.event);

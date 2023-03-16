@@ -3,7 +3,8 @@
 
 #include <furi.h>
 
-#define AVR_ISP_PROG_TX_RX_BUF_SIZE 256
+#define AVR_ISP_PROG_TX_RX_BUF_SIZE 320
+#define TAG "AvrIspProg"
 
 struct AvrIspProgCfgDevice {
     uint8_t devicecode;
@@ -487,10 +488,12 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
 
     switch(ch) {
     case STK_GET_SYNC:
+        FURI_LOG_D(TAG, "cmd STK_GET_SYNC");
         instance->error = 0;
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_GET_SIGN_ON:
+        FURI_LOG_D(TAG, "cmd STK_GET_SIGN_ON");
         if(avr_isp_prog_getch(instance) == CRC_EOP) {
             avr_isp_prog_tx_ch(instance, STK_INSYNC);
 
@@ -509,59 +512,73 @@ void avr_isp_prog_avrisp(AvrIspProg* instance) {
         }
         break;
     case STK_GET_PARAMETER:
+        FURI_LOG_D(TAG, "cmd STK_GET_PARAMETER");
         avr_isp_prog_get_version(instance, avr_isp_prog_getch(instance));
         break;
     case STK_SET_DEVICE:
+        FURI_LOG_D(TAG, "cmd STK_SET_DEVICE");
         avr_isp_prog_fill(instance, 20);
         avr_isp_prog_set_cfg(instance);
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_SET_DEVICE_EXT: // ignore for now
+        FURI_LOG_D(TAG, "cmd STK_SET_DEVICE_EXT");
         avr_isp_prog_fill(instance, 5);
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_ENTER_PROGMODE:
+        FURI_LOG_D(TAG, "cmd STK_ENTER_PROGMODE");
         if(!instance->pmode) avr_isp_prog_auto_set_spi_speed_start_pmode(instance);
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_LOAD_ADDRESS:
+        FURI_LOG_D(TAG, "cmd STK_LOAD_ADDRESS");
         instance->addr = avr_isp_prog_getch(instance) | avr_isp_prog_getch(instance) << 8;
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_PROG_FLASH: // ignore for now
+        FURI_LOG_D(TAG, "cmd STK_PROG_FLASH");
         avr_isp_prog_getch(instance);
         avr_isp_prog_getch(instance);
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_PROG_DATA: // ignore for now
+        FURI_LOG_D(TAG, "cmd STK_PROG_DATA");
         avr_isp_prog_getch(instance);
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_PROG_PAGE:
+        FURI_LOG_D(TAG, "cmd STK_PROG_PAGE");
         avr_isp_prog_program_page(instance);
         break;
     case STK_READ_PAGE:
+        FURI_LOG_D(TAG, "cmd STK_READ_PAGE");
         avr_isp_prog_read_page(instance);
         break;
     case STK_UNIVERSAL:
+        FURI_LOG_D(TAG, "cmd STK_UNIVERSAL");
         avr_isp_prog_universal(instance);
         break;
     case STK_LEAVE_PROGMODE:
+        FURI_LOG_D(TAG, "cmd STK_LEAVE_PROGMODE");
         instance->error = 0;
         if(instance->pmode) avr_isp_prog_end_pmode(instance);
         avr_isp_prog_empty_reply(instance);
         break;
     case STK_READ_SIGN:
+        FURI_LOG_D(TAG, "cmd STK_READ_SIGN");
         avr_isp_prog_read_signature(instance);
         break;
     // expecting a command, not CRC_EOP
     // this is how we can get back in sync
     case CRC_EOP:
+        FURI_LOG_D(TAG, "cmd CRC_EOP");
         instance->error++;
         avr_isp_prog_tx_ch(instance, STK_NOSYNC);
         break;
     // anything else we will return STK_UNKNOWN
     default:
+        FURI_LOG_D(TAG, "cmd STK_ERROR_CMD");
         instance->error++;
         if(avr_isp_prog_getch(instance) == CRC_EOP)
             avr_isp_prog_tx_ch(instance, STK_UNKNOWN);

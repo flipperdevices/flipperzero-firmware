@@ -1,0 +1,160 @@
+#include "avr_isp_view_reader.h"
+#include "../avr_isp_app_i.h"
+#include <avr_isp_icons.h>
+
+#include "../helpers/avr_isp_rw_worker.h"
+//#include <math.h>
+
+//#include <input/input.h>
+//#include <gui/elements.h>
+
+struct AvrIspReaderView {
+    View* view;
+    AvrIspRWWorker* worker;
+    AvrIspReaderViewCallback callback;
+    void* context;
+};
+
+typedef struct {
+    uint16_t idx;
+    IconAnimation* icon;
+    const char* name_chip;
+    bool detect_chip;
+} AvrIspReaderViewModel;
+
+void avr_asp_reader_view_set_callback(
+    AvrIspReaderView* instance,
+    AvrIspReaderViewCallback callback,
+    void* context) {
+    furi_assert(instance);
+    furi_assert(callback);
+    instance->callback = callback;
+    instance->context = context;
+}
+
+void avr_asp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
+    UNUSED(model);
+    canvas_clear(canvas);
+    // canvas_set_color(canvas, ColorBlack);
+    // canvas_set_font(canvas, FontSecondary);
+
+    // canvas_draw_icon(canvas, 0, 0, &I_AvrIspProg);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str(canvas, 20, 10, "AVRISPReader");
+    // canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, FontPrimary);
+    if(!model->detect_chip) {
+        canvas_draw_icon_animation(canvas, 0, 0, model->icon);
+        canvas_draw_str_aligned(canvas, 64, 26, AlignLeft, AlignCenter, "Detecting");
+        canvas_draw_str_aligned(canvas, 64, 36, AlignLeft, AlignCenter, "AVR chip...");
+    } else {
+        canvas_draw_str_aligned(canvas, 20, 26, AlignLeft, AlignCenter, "AVR chip");
+        canvas_draw_str_aligned(canvas, 20, 36, AlignLeft, AlignCenter, model->name_chip);
+    }
+}
+
+bool avr_asp_reader_view_input(InputEvent* event, void* context) {
+    furi_assert(context);
+    AvrIspReaderView* instance = context;
+    UNUSED(instance);
+    if(event->key == InputKeyBack || event->type != InputTypeShort) {
+        return false;
+    }
+
+    return true;
+}
+
+static void avr_asp_reader_detect_chip_callback(void* context, const char* name) {
+    furi_assert(context);
+    AvrIspReaderView* instance = context;
+    with_view_model(
+        instance->view,
+        AvrIspReaderViewModel * model,
+        {
+            model->name_chip = name;
+            model->detect_chip = true;
+            icon_animation_stop(model->icon);
+        },
+        true);
+}
+void avr_asp_reader_view_enter(void* context) {
+    furi_assert(context);
+    AvrIspReaderView* instance = context;
+
+    with_view_model(
+        instance->view,
+        AvrIspReaderViewModel * model,
+        {
+            icon_animation_start(model->icon);
+            model->detect_chip = false;
+        },
+        false);
+
+    //Start worker
+    instance->worker = avr_isp_rw_worker_alloc(instance->context);
+
+    avr_isp_rw_worker_set_callback(
+        instance->worker, avr_asp_reader_detect_chip_callback, instance);
+
+    avr_isp_rw_worker_detect_chip(instance->worker);
+
+    //avr_isp_rw_worker_start(instance->worker);
+}
+
+void avr_asp_reader_view_exit(void* context) {
+    furi_assert(context);
+    AvrIspReaderView* instance = context;
+    // //Stop worker
+    // if(avr_isp_worker_is_running(instance->worker)) {
+    //     avr_isp_worker_stop(instance->worker);
+    // }
+    avr_isp_rw_worker_free(instance->worker);
+
+    with_view_model(
+        instance->view,
+        AvrIspReaderViewModel * model,
+        { icon_animation_stop(model->icon); },
+        false);
+}
+
+AvrIspReaderView* avr_asp_reader_view_alloc() {
+    AvrIspReaderView* instance = malloc(sizeof(AvrIspReaderView));
+
+    // View allocation and configuration
+    instance->view = view_alloc();
+
+    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(AvrIspReaderViewModel));
+    view_set_context(instance->view, instance);
+    view_set_draw_callback(instance->view, (ViewDrawCallback)avr_asp_reader_view_draw);
+    view_set_input_callback(instance->view, avr_asp_reader_view_input);
+    view_set_enter_callback(instance->view, avr_asp_reader_view_enter);
+    view_set_exit_callback(instance->view, avr_asp_reader_view_exit);
+
+    with_view_model(
+        instance->view,
+        AvrIspReaderViewModel * model,
+        {
+            model->icon = icon_animation_alloc(&A_ChipLooking_64x64);
+            view_tie_icon_animation(instance->view, model->icon);
+            model->detect_chip = false;
+        },
+        false);
+    return instance;
+}
+
+void avr_asp_reader_view_free(AvrIspReaderView* instance) {
+    furi_assert(instance);
+
+    with_view_model(
+        instance->view,
+        AvrIspReaderViewModel * model,
+        { icon_animation_free(model->icon); },
+        false);
+    view_free(instance->view);
+    free(instance);
+}
+
+View* avr_asp_reader_view_get_view(AvrIspReaderView* instance) {
+    furi_assert(instance);
+    return instance->view;
+}

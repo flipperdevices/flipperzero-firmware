@@ -2,7 +2,6 @@
 #include <furi_hal_pwm.h>
 #include "../lib/driver/avr_isp_prog.h"
 #include "../lib/driver/avr_isp_prog_cmd.h"
-#include "../lib/driver/avr_isp_spi_sw.h"
 #include "../lib/driver/avr_isp_chip_arr.h"
 
 #include <furi.h>
@@ -22,7 +21,6 @@ typedef enum {
 
 struct AvrIspWorker {
     FuriThread* thread;
-    AvrIspSpiSwSpeed spi_speed;
     volatile bool worker_running;
     AvrIspWorkerCallback callback;
     void* context;
@@ -140,6 +138,7 @@ void avr_isp_worker_detect_chip(AvrIspWorker* instance) {
             ind = avr_isp_chip_arr_size + 1; //No detect chip
         } else {
             for(ind = 0; ind < avr_isp_chip_arr_size; ind++) {
+                if(avr_isp_chip_arr[ind].avrarch != F_AVR8) continue;
                 if(avr_isp_chip_arr[ind].sigs[1] == buf_data[4]) {
                     if(avr_isp_chip_arr[ind].sigs[2] == buf_data[5]) {
                         FURI_LOG_D(TAG, "Detect AVR chip = \"%s\"", avr_isp_chip_arr[ind].name);
