@@ -111,7 +111,7 @@ bool flipbip_scene_menu_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexScene1Import) {
             app->import_from_mnemonic = 1;
             app->input_state = FlipBipTextInputMnemonic;
-            text_input_set_header_text(app->text_input, "Import mnemonic phrase");
+            text_input_set_header_text(app->text_input, "Enter mnemonic phrase");
             view_dispatcher_switch_to_view(app->view_dispatcher, FlipBipViewIdTextInput);
             return true;
         } else if(event.event == SubmenuIndexSettings) {
