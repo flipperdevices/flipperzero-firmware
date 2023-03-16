@@ -124,7 +124,7 @@ void dict_attack_reset(DictAttack* dict_attack) {
         {
             model->state = DictAttackStateRead;
             model->type = MfClassicType1k;
-            model->sectors_total = 0;
+            model->sectors_total = 1;
             model->sectors_read = 0;
             model->sector_current = 0;
             model->keys_total = 0;
@@ -167,8 +167,8 @@ void dict_attack_set_card_detected(DictAttack* dict_attack) {
         DictAttackViewModel * model,
         {
             model->state = DictAttackStateRead;
-            model->sectors_total = 0;
-            model->keys_total = model->sectors_total * 2;
+            model->sectors_total = 1;
+            model->keys_total = model->sectors_total;
         },
         true);
 }

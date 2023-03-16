@@ -22,12 +22,6 @@ void picopass_dict_attack_result_callback(void* context) {
     view_dispatcher_send_custom_event(picopass->view_dispatcher, PicopassCustomEventDictAttackSkip);
 }
 
-static void picopass_scene_elite_dict_attack_update_view(Picopass* picopass) {
-    // Calculate found keys and read sectors
-    dict_attack_set_keys_found(picopass->dict_attack, 0);
-    dict_attack_set_sector_read(picopass->dict_attack, 0);
-}
-
 static void picopass_scene_elite_dict_attack_prepare_view(Picopass* picopass, DictAttackState state) {
     IclassEliteDictAttackData* dict_attack_data = &picopass->dev->dev_data.iclass_elite_dict_attack_data;
     PicopassWorkerState worker_state = PicopassWorkerStateReady;
@@ -91,8 +85,9 @@ static void picopass_scene_elite_dict_attack_prepare_view(Picopass* picopass, Di
     dict_attack_data->dict = dict;
     scene_manager_set_scene_state(picopass->scene_manager, PicopassSceneEliteDictAttack, state);
     dict_attack_set_callback(picopass->dict_attack, picopass_dict_attack_result_callback, picopass);
+    dict_attack_set_current_sector(picopass->dict_attack, 0);
+    dict_attack_set_card_detected(picopass->dict_attack);
     dict_attack_set_total_dict_keys(picopass->dict_attack, dict ? iclass_elite_dict_get_total_keys(dict) : 0);
-    picopass_scene_elite_dict_attack_update_view(picopass);
     picopass_worker_start(picopass->worker, worker_state, &picopass->dev->dev_data, picopass_dict_attack_worker_callback, picopass);
 }
 
@@ -142,13 +137,8 @@ bool picopass_scene_elite_dict_attack_on_event(void* context, SceneManagerEvent 
             dict_attack_inc_keys_found(picopass->dict_attack);
             consumed = true;
         } else if(event.event == PicopassWorkerEventNewDictKeyBatch) {
-            picopass_scene_elite_dict_attack_update_view(picopass);
             dict_attack_inc_current_dict_key(picopass->dict_attack, PICOPASS_DICT_KEY_BATCH_SIZE);
             consumed = true;
-        } else if(event.event == PicopassWorkerEventKeyAttackStart) {
-            dict_attack_set_key_attack(picopass->dict_attack, true, 0);
-        } else if(event.event == PicopassWorkerEventKeyAttackStop) {
-            dict_attack_set_key_attack(picopass->dict_attack, false, 0);
         }
     }
     return consumed;
