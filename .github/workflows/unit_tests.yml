@@ -10,7 +10,7 @@ env:
 
 jobs:
   run_units_on_bench:
-    runs-on: [self-hosted, FlipperZeroTest]
+    runs-on: [self-hosted, FlipperZeroUnitTest]
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
@@ -21,7 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Get flipper from device manager (mock)'

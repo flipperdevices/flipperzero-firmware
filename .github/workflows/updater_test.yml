@@ -10,7 +10,7 @@ env:
 
 jobs:
   test_updater_on_bench:
-    runs-on: [self-hosted, FlipperZeroTestMac1]
+    runs-on: [self-hosted, FlipperZeroUpdaterTest]
     steps:
       - name: 'Decontaminate previous build leftovers'
         run: |
@@ -21,13 +21,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
+          submodules: false          
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Get flipper from device manager (mock)'
         id: device
         run: |
-          echo "flipper=/dev/tty.usbmodemflip_Rekigyn1" >> $GITHUB_OUTPUT
+          echo "flipper=Rekigyn" >> $GITHUB_OUTPUT
           echo "stlink=0F020D026415303030303032" >> $GITHUB_OUTPUT
 
       - name: 'Flashing target firmware'
@@ -62,7 +63,7 @@ jobs:
         uses: actions/checkout@v3
         if: failure()
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ steps.release_tag.outputs.tag }}
 
       - name: 'Flash last release'
