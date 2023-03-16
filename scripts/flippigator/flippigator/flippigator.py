@@ -185,7 +185,7 @@ class Navigator:
 
         return found_ic
 
-    def get_current_state(self, timeout=3, ref=[]):
+    def get_current_state(self, timeout=5, ref=[]):
         self.update_screen()
         state = self.recog_ref(ref)
         start_time = time.time()
@@ -336,6 +336,50 @@ class Gator:
             status = self._serial.readline()
             print(status)
             time.sleep(0.2)
+
+
+class Reader:
+    def __init__(
+        self,
+        serial,
+        gator,
+        x_coord,
+        y_coord,
+        debug: bool = True,
+    ):
+        self._serial = serial
+        self._gator = gator
+        self._x_coord = x_coord
+        self._y_coord = y_coord
+        self._debugFlag = debug
+        self._recieved_data = 0
+
+    def __del__(self):
+        pass
+
+    def go_to_place(self) -> None:
+        self._gator.swim_to(self._x_coord, self._y_coord, 9000)
+
+    def is_available(self) -> bool:
+        if self._recieved_data:
+            return True
+        else:
+            return False
+
+    def update(self) -> bool:
+        line = self._serial.readline()
+        if len(line):
+            self._recieved_data = line.decode("utf-8")
+            return True
+        else:
+            return False
+
+    def clear(self) -> None:
+        self._serial.flushInput()
+        self._recieved_data = 0
+
+    def get(self) -> str:
+        return self._recieved_data
 
 
 class FlipperTextKeyboard:

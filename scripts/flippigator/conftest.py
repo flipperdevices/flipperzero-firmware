@@ -10,7 +10,7 @@ from flipperzero_protobuf_py.flipperzero_protobuf.flipper_base import \
     FlipperProtoException
 from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import \
     FlipperProto
-from flippigator.flippigator import FlippigatorException, Gator, Navigator
+from flippigator.flippigator import FlippigatorException, Gator, Navigator, Reader
 
 os.system("color")
 
@@ -22,7 +22,9 @@ def is_windows():
 
 def pytest_addoption(parser):
     # here you can pass any arguments you want
-    parser.addoption("--port", action="store", default=None, help="serial port")
+    parser.addoption("--port", action="store", default=None, help="flipper serial port")
+    parser.addoption("--bench_port", action="store", default=None, help="bench serial port")
+    parser.addoption("--reader_port", action="store", default=None, help="reader serial port")
     parser.addoption(
         "--path", action="store", default="./img/ref/", help="path to reference images"
     )
@@ -69,27 +71,22 @@ def pytest_runtest_makereport(item, call):
 
 
 @pytest.fixture(scope="session")
-def port(request):
+def flipper_serial(request):
     # taking port from config or returning OS based default
     port = request.config.getoption("--port")
     if port:
-        return port
-    if is_windows():
-        return "COM4"
+        pass
+    elif is_windows():
+        port = "COM4"
     else:
-        return "/dev/ttyACM0"
+        port = "/dev/ttyACM0"
 
-
-@pytest.fixture(scope="session")
-def nav(port, request):
     try:
-        flipper = serial.Serial(port, timeout=1)
-        flipper.baudrate = 2304000
-        flipper.flushOutput()
-        flipper.flushInput()
-        flipper.timeout = None
-
-        proto = FlipperProto(serial_port=flipper, debug=True)
+        flipper_serial = serial.Serial(port, timeout=1)
+        flipper_serial.baudrate = 2304000
+        flipper_serial.flushOutput()
+        flipper_serial.flushInput()
+        flipper_serial.timeout = None
     except serial.serialutil.SerialException:
         print("can not open serial port")
         sys.exit(0)
@@ -97,6 +94,54 @@ def nav(port, request):
         print("can not open flipper proto")
         sys.exit(0)
 
+    return flipper_serial
+
+@pytest.fixture(scope="session")
+def bench_serial(request):
+    # taking port from config or returning OS based default
+    port = request.config.getoption("--bench_port")
+    if port:
+        pass
+    if is_windows():
+        port = "COM5"
+    else:
+        port = "/dev/ttyUSB0"
+
+    bench_serial = serial.Serial(port, timeout=1)
+    bench_serial.baudrate = 115200
+
+    time.sleep(3)
+
+    bench_serial.flushOutput()
+    bench_serial.flushInput()
+
+    return bench_serial
+
+@pytest.fixture(scope="session")
+def reader_serial(request):
+    # taking port from config or returning OS based default
+    port = request.config.getoption("--reader_port")
+    if port:
+        pass
+    elif is_windows():
+        port = "COM6"
+    else:
+        port = "/dev/ttyACM1"
+
+    reader_serial = serial.Serial(port, timeout=1)  # Надо будет переделать!!!
+    reader_serial.baudrate = 115200
+
+    time.sleep(3)
+
+    reader_serial.flushOutput()
+    reader_serial.flushInput()
+
+    return reader_serial
+
+
+@pytest.fixture(scope="session")
+def nav(flipper_serial, request):
+    proto = FlipperProto(serial_port=flipper_serial, debug=True)
     print("Request RPC session")
     proto.start_rpc_session()
     print("RPC session started")
@@ -145,20 +190,22 @@ def nav(port, request):
 
 
 @pytest.fixture(scope="session", autouse=True)
-def gator(request) -> Gator:
+def gator(bench_serial, request) -> Gator:
     bench = request.config.getoption("--bench")
     if bench:
         print("Gator initialization")
-        gator_serial = serial.Serial("/dev/ttyUSB0", timeout=1)  # Надо будет переделать!!!
-        gator_serial.baudrate = 115200
 
-        time.sleep(3)
-
-        gator_serial.flushOutput()
-        gator_serial.flushInput()
-
-        gator = Gator(gator_serial, 900, 900)
+        gator = Gator(bench_serial, 900, 900)
         gator.home()
 
         return gator
 
+@pytest.fixture(scope="session", autouse=True)
+def reader_nfc(reader_serial, gator, request) -> Gator:
+    bench = request.config.getoption("--bench")
+    if bench:
+        print("Reader initialization")
+
+        reader = Reader(reader_serial, gator, -935.0, -890.0)
+
+        return reader

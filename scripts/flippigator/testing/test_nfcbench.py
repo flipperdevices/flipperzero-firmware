@@ -76,6 +76,62 @@ class TestNfcBench(BaseCase):
         """
         nav.go_to_main_screen()
 
+    def test_reader(self, nav, gator, reader_nfc): # JUST FOR TEST!!! REMOVE IT!!! DEMOLISH THIS!! ANIHILATE!!!
+
+        with allure.step("Go to NFC"):
+            nav.nfc.go_into()
+        with allure.step("Swim to NFC card"):
+            gator.swim_to(-10.0, -10.0, 9000)
+        with allure.step("Read a card"):
+            nav.go_to("Read")
+            nav.press_ok()
+            # key = cv.waitKey(550)
+            nav.update_screen()
+            state = nav.get_current_state()
+            state = state[0]
+            start_time = time.time()
+            while "ReadingNFC" in state:
+                print(colored("Reading", "yellow"))
+                state = nav.get_current_state()
+                if time.time() - start_time > 10:
+                    break
+            while "ReadingCardNFC" in state:
+                print(colored("ReadingCardNFC", "yellow"))
+                state = nav.get_current_state()
+        state = nav.get_current_state()
+        while "Mf Classic User Dict" in state:
+            state = nav.get_current_state()
+        state = nav.get_current_state()
+        while "Mf Classic Flipper Dict" in state:
+            nav.press_ok()
+            state = nav.get_current_state()
+        state = nav.get_current_state()
+        while "SkipOk" in state:
+            state = nav.get_current_state()
+        state = nav.get_current_state()
+        assert (
+            "card_Mifare Classic 1K_bench" in state
+        ), "Result of reading reference card is fail"
+        nav.press_right()
+        menu = nav.get_menu_list()
+        menu_ref = [
+            "Save",
+            "Emulate",
+            "Detect r(down)eader",
+            "Info",
+        ]
+        assert menu == menu_ref, "NFC card menu is wrong"
+        nav.go_to("Emulate")
+        nav.press_ok()
+
+        reader_nfc.clear()
+        reader_nfc.go_to_place()
+        reader_nfc.update()
+        string = reader_nfc.get()
+        print(string)
+
+        assert string == "0", "DELETE"
+
     def test_read_nfc_a_card(self, nav, gator):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
