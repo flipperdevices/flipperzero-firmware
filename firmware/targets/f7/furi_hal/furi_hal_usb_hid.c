@@ -462,7 +462,7 @@ static usbd_respond hid_ep_config(usbd_device* dev, uint8_t cfg) {
         usbd_ep_config(dev, HID_EP_IN, USB_EPTYPE_INTERRUPT, HID_EP_SZ);
         usbd_reg_endpoint(dev, HID_EP_IN, hid_txrx_ep_callback);
         usbd_ep_write(dev, HID_EP_IN, 0, 0);
-        boot_protocol = true; /* until OS queries descriptors */
+        boot_protocol = false; /* BIOS will SET_PROTOCOL if it wants this */
         return usbd_ack;
     default:
         return usbd_fail;
@@ -487,6 +487,14 @@ static usbd_respond hid_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_cal
                 dev->status.data_ptr = &hid_report;
                 dev->status.data_count = sizeof(hid_report);
             }
+            return usbd_ack;
+        case USB_HID_SETPROTOCOL:
+            if(req->wValue == 0)
+                boot_protocol = true;
+            else if(req->wValue == 1)
+                boot_protocol = false;
+            else
+                return usbd_fail;
             return usbd_ack;
         default:
             return usbd_fail;
