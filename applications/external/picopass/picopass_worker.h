@@ -28,14 +28,10 @@ typedef enum {
     PicopassWorkerEventFail,
     PicopassWorkerEventNoCardDetected,
     PicopassWorkerEventSeEnabled,
-
-    PicopassWorkerEventStartReading,
     PicopassWorkerEventAborted,
     PicopassWorkerEventCardDetected,
     PicopassWorkerEventFoundKey,
     PicopassWorkerEventNewDictKeyBatch,
-    PicopassWorkerEventKeyAttackStart,
-    PicopassWorkerEventKeyAttackStop,
     PicopassWorkerEventNoDictFound,
 } PicopassWorkerEvent;
 

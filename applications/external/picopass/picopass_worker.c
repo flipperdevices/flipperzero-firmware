@@ -23,7 +23,7 @@ PicopassWorker* picopass_worker_alloc() {
 
     // Worker thread attributes
     picopass_worker->thread =
-        furi_thread_alloc_ex("PicopassWorker", 8192, picopass_worker_task, picopass_worker);
+        furi_thread_alloc_ex("PicopassWorker", 8 * 1024, picopass_worker_task, picopass_worker);
 
     picopass_worker->callback = NULL;
     picopass_worker->context = NULL;
@@ -66,14 +66,16 @@ void picopass_worker_start(
 
 void picopass_worker_stop(PicopassWorker* picopass_worker) {
     furi_assert(picopass_worker);
-    if(picopass_worker->state == PicopassWorkerStateBroken ||
-       picopass_worker->state == PicopassWorkerStateReady) {
-        return;
-    }
-    picopass_worker_disable_field(ERR_NONE);
+    furi_assert(picopass_worker->thread);
 
-    picopass_worker_change_state(picopass_worker, PicopassWorkerStateStop);
-    furi_thread_join(picopass_worker->thread);
+    if(furi_thread_get_state(picopass_worker->thread) != FuriThreadStateStopped) {
+        FURI_LOG_D(TAG, "Stopping thread");
+        picopass_worker_change_state(picopass_worker, PicopassWorkerStateStop);
+        picopass_worker_disable_field(ERR_NONE);
+        furi_thread_join(picopass_worker->thread);
+    } else {
+        FURI_LOG_D(TAG, "Not Stopping thread");
+    }
 }
 
 void picopass_worker_change_state(PicopassWorker* picopass_worker, PicopassWorkerState state) {
@@ -586,10 +588,13 @@ int32_t picopass_worker_task(void* context) {
     picopass_worker_enable_field();
     if(picopass_worker->state == PicopassWorkerStateDetect) {
         picopass_worker_detect(picopass_worker);
+        picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
     } else if(picopass_worker->state == PicopassWorkerStateWrite) {
         picopass_worker_write(picopass_worker);
+        picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
     } else if(picopass_worker->state == PicopassWorkerStateWriteKey) {
         picopass_worker_write_key(picopass_worker);
+        picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
     } else if(picopass_worker->state == PicopassWorkerStateEliteDictAttack) {
         picopass_worker_elite_dict_attack(picopass_worker);
     } else {
@@ -597,8 +602,7 @@ int32_t picopass_worker_task(void* context) {
     }
     picopass_worker_disable_field(ERR_NONE);
 
-    picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
-
+    FURI_LOG_D(TAG, "picopass_worker_task complete");
     return 0;
 }
 
