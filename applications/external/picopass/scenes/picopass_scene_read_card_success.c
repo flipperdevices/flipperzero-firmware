@@ -20,6 +20,9 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     FuriString* wiegand_str = furi_string_alloc();
     FuriString* sio_str = furi_string_alloc();
 
+    // Send notification
+    notification_message(picopass->notifications, &sequence_success);
+
     // Setup view
     PicopassBlock* AA1 = picopass->dev->dev_data.AA1;
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
