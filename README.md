@@ -15,7 +15,7 @@ All cracked nonces are automatically added to your user dictionary, allowing you
 ## Builds
 Published: https://github.com/noproto/FlipperMfkey/releases
 
-Manual: :information_source: Refer to the build flags necessary in mfkey32.c
+Manual: Copy the fap/ directory to applications_user/mfkey32/ and build it with fbt
 
 ## Why
 This was the only function of the Flipper Zero that was [thought to be impossible on the hardware](https://old.reddit.com/r/flipperzero/comments/is31re/comment/g72077x/). You can still use other methods if you prefer them.
