@@ -29,7 +29,8 @@ Changelog:
 | Protocol    | string | Currently supported: DS1990, DS1992, DS1996, DS1997, DSGeneric*, Cyfral, Metakom |
 | Rom Data    | hex    | Read-only memory data (Dallas protocols only) |
 | Sram Data   | hex    | Static RAM data (DS1992 and DS1996 only)
-| Eeprom Data | hex    | EEPROM data (DS1971 only)
+| Eeprom Data | hex    | EEPROM data (DS1971 only) |
+| Otp Data    | hex    | OTP (One Time Programmable) data (DS2502 and its variants only) |
 | Data        | hex    | Key data (Cyfral & Metakom only)              |
 
 NOTE 1: DSGeneric is a catch-all protocol for all unknown 1-Wire devices. It reads only the ROM and does not perform any checks on the read data. 
