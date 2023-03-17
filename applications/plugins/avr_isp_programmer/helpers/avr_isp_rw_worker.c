@@ -4,7 +4,7 @@
 #include "../lib/driver/avr_isp_prog_cmd.h"
 #include "../lib/driver/avr_isp_chip_arr.h"
 
-#include "flipper_hex_file.h"
+#include "flipper_i32hex_file.h"
 #include <flipper_format/flipper_format.h>
 
 #include <furi.h>
@@ -243,8 +243,8 @@ bool avr_isp_rw_worker_rx(AvrIspRWWorker* instance) {
         FURI_LOG_D(TAG, "EEPROM");
 
         if(avr_isp_chip_arr[instance->chip_arr_ind].eepromsize > 0) {
-            FlipperHexFile* flipper_hex_eeprom =
-                flipper_hex_file_open("/any/avr_isp/eeprom.hex", 0);
+            FlipperI32HexFile* flipper_hex_eeprom =
+                flipper_i32hex_file_open_write("/any/avr_isp/eeprom.hex", 0);
             int32_t size_data = 32;
             if(size_data > avr_isp_chip_arr[instance->chip_arr_ind].eepromsize)
                 size_data = avr_isp_chip_arr[instance->chip_arr_ind].eepromsize;
@@ -253,34 +253,47 @@ bool avr_isp_rw_worker_rx(AvrIspRWWorker* instance) {
                 i += size_data) {
                 avr_isp_read_page(
                     instance->avr_isp, STK_SET_EEPROM_TYPE, i, size_data, data, sizeof(data));
-                flipper_hex_file_bin_to_hex_add_data(flipper_hex_eeprom, data, size_data);
-                printf("%s\r\n", flipper_hex_file_get_string(flipper_hex_eeprom));
+                flipper_i32hex_file_bin_to_i32hex_add_data(flipper_hex_eeprom, data, size_data);
+                printf("%s\r\n", flipper_i32hex_file_get_string(flipper_hex_eeprom));
             }
-            flipper_hex_file_bin_to_hex_add_end_line(flipper_hex_eeprom);
-            printf("%s\r\n", flipper_hex_file_get_string(flipper_hex_eeprom));
-            flipper_hex_file_close(flipper_hex_eeprom);
+            flipper_i32hex_file_bin_to_i32hex_add_end_line(flipper_hex_eeprom);
+            printf("%s\r\n", flipper_i32hex_file_get_string(flipper_hex_eeprom));
+            flipper_i32hex_file_close(flipper_hex_eeprom);
         }
 
-        FURI_LOG_D(TAG, "FLASH");
-        FlipperHexFile* flipper_hex_flash = flipper_hex_file_open("/any/avr_isp/flash.hex", 0);
-        for(uint16_t i = 0; i < avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2;
-            i += avr_isp_chip_arr[instance->chip_arr_ind].pagesize / 2) {
-            avr_isp_read_page(
-                instance->avr_isp,
-                STK_SET_FLASH_TYPE,
-                i,
-                avr_isp_chip_arr[instance->chip_arr_ind].pagesize,
-                data,
-                sizeof(data));
-            flipper_hex_file_bin_to_hex_add_data(
-                flipper_hex_flash, data, avr_isp_chip_arr[instance->chip_arr_ind].pagesize);
-            printf("%s\r\n", flipper_hex_file_get_string(flipper_hex_flash));
-        }
-        flipper_hex_file_bin_to_hex_add_end_line(flipper_hex_flash);
-        printf("%s\r\n", flipper_hex_file_get_string(flipper_hex_flash));
-        flipper_hex_file_close(flipper_hex_flash);
+        // FURI_LOG_D(TAG, "FLASH");
+        // FlipperI32HexFile* flipper_hex_flash =
+        //     flipper_i32hex_file_open_write("/any/avr_isp/flash.hex", 0);
+        // for(uint16_t i = 0; i < avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2;
+        //     i += avr_isp_chip_arr[instance->chip_arr_ind].pagesize / 2) {
+        //     avr_isp_read_page(
+        //         instance->avr_isp,
+        //         STK_SET_FLASH_TYPE,
+        //         i,
+        //         avr_isp_chip_arr[instance->chip_arr_ind].pagesize,
+        //         data,
+        //         sizeof(data));
+        //     flipper_i32hex_file_bin_to_i32hex_add_data(
+        //         flipper_hex_flash, data, avr_isp_chip_arr[instance->chip_arr_ind].pagesize);
+        //     printf("%s\r\n", flipper_i32hex_file_get_string(flipper_hex_flash));
+        // }
+        // flipper_i32hex_file_bin_to_i32hex_add_end_line(flipper_hex_flash);
+        // printf("%s\r\n", flipper_i32hex_file_get_string(flipper_hex_flash));
+        // flipper_i32hex_file_close(flipper_hex_flash);
 
         avr_isp_end_pmode(instance->avr_isp);
+
+        FURI_LOG_D(TAG, "EEPROM READ");
+        FlipperI32HexFile* flipper_hex_eeprom_read =
+            flipper_i32hex_file_open_read("/any/avr_isp/eeprom.hex");
+        FURI_LOG_D(TAG, "EEPROM READ1");
+        if(flipper_i32hex_file_check(flipper_hex_eeprom_read)){
+            FURI_LOG_D(TAG, "Check OK");
+        } else {
+            FURI_LOG_E(TAG, "Check ERROR");
+        }
+        flipper_i32hex_file_close(flipper_hex_eeprom_read);
+
     } while(0);
     flipper_format_free(flipper_format);
     furi_record_close(RECORD_STORAGE);
