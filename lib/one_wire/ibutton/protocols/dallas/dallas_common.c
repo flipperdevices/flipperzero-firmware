@@ -95,7 +95,7 @@ bool dallas_common_read_mem(
     uint8_t address_buf[2] = {address & 0xff, address >> BITS_IN_BYTE};
     onewire_host_write_bytes(host, address_buf, sizeof(address_buf));
 
-    // Some chips (namely DS2502) sends a leading checksum of the read command and address.
+    // Some devices (namely DS1982) sends a leading checksum of the read command and address.
     // Check it when needed and return false when the check fails.
     if(handle_leading_crc) {
         uint8_t crc_expected = onewire_host_read(host);
@@ -192,7 +192,7 @@ bool dallas_common_emulate_read_mem(
         if(!onewire_slave_receive(bus, address.bytes, sizeof(address))) break;
         if(address.word >= data_size) break;
 
-        // Some chips (namely DS2502) sends a leading checksum of the read command and address.
+        // Some devices (namely DS1982) sends a leading checksum of the read command and address.
         // Add it when needed.
         if(add_leading_crc) {
             uint8_t req_crc =

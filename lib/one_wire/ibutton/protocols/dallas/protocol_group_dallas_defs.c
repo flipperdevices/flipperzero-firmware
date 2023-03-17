@@ -4,7 +4,7 @@
 #include "protocol_ds1992.h"
 #include "protocol_ds1996.h"
 #include "protocol_ds1971.h"
-#include "protocol_ds2502.h"
+#include "protocol_ds1982.h"
 #include "protocol_ds_generic.h"
 
 const iButtonProtocolDallasBase* ibutton_protocols_dallas[] = {
@@ -12,8 +12,7 @@ const iButtonProtocolDallasBase* ibutton_protocols_dallas[] = {
     [iButtonProtocolDS1992] = &ibutton_protocol_ds1992,
     [iButtonProtocolDS1996] = &ibutton_protocol_ds1996,
     [iButtonProtocolDS1971] = &ibutton_protocol_ds1971,
-    [iButtonProtocolDS2502] = &ibutton_protocol_ds2502,
-    [iButtonProtocolDS2502Dell] = &ibutton_protocol_ds2502_dell,
+    [iButtonProtocolDS1982] = &ibutton_protocol_ds1982,
     /* Add new 1-Wire protocols here */
 
     /* Default catch-all 1-Wire protocol */
