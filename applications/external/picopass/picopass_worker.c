@@ -71,7 +71,7 @@ void picopass_worker_stop(PicopassWorker* picopass_worker) {
     if(furi_thread_get_state(picopass_worker->thread) != FuriThreadStateStopped) {
         FURI_LOG_D(TAG, "Stopping thread");
         picopass_worker_change_state(picopass_worker, PicopassWorkerStateStop);
-        picopass_worker_disable_field(ERR_NONE);
+        // picopass_worker_disable_field(ERR_NONE);
         furi_thread_join(picopass_worker->thread);
     } else {
         FURI_LOG_D(TAG, "Not Stopping thread");

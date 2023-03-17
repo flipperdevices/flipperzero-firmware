@@ -19,7 +19,6 @@ void picopass_dict_attack_worker_callback(PicopassWorkerEvent event, void* conte
 void picopass_dict_attack_result_callback(void* context) {
     furi_assert(context);
     Picopass* picopass = context;
-    FURI_LOG_D(TAG, "picopass_dict_attack_result_callback");
     view_dispatcher_send_custom_event(picopass->view_dispatcher, PicopassCustomEventDictAttackSkip);
 }
 
@@ -105,7 +104,6 @@ bool picopass_scene_elite_dict_attack_on_event(void* context, SceneManagerEvent 
     bool consumed = false;
 
     uint32_t state = scene_manager_get_scene_state(picopass->scene_manager, PicopassSceneEliteDictAttack);
-    FURI_LOG_D(TAG, "picopass_scene_elite_dict_attack_on_event type: %d, event: %ld, state: %ld", event.type, event.event, state);
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == PicopassWorkerEventSuccess || event.event == PicopassWorkerEventAborted) {
             if(state == DictAttackStateUserDictInProgress || state == DictAttackStateStandardDictInProgress) {
@@ -131,7 +129,6 @@ bool picopass_scene_elite_dict_attack_on_event(void* context, SceneManagerEvent 
             dict_attack_inc_current_dict_key(picopass->dict_attack, PICOPASS_DICT_KEY_BATCH_SIZE);
             consumed = true;
         } else if(event.event == PicopassCustomEventDictAttackSkip) {
-            FURI_LOG_D(TAG, "SKIP! %ld", state);
             if(state == DictAttackStateUserDictInProgress) {
                 picopass_worker_stop(picopass->worker);
                 consumed = true;
@@ -144,8 +141,7 @@ bool picopass_scene_elite_dict_attack_on_event(void* context, SceneManagerEvent 
             }
         }
     } else if(event.type == SceneManagerEventTypeBack) {
-        scene_manager_next_scene(picopass->scene_manager, PicopassSceneStart);
-        consumed = true;
+        consumed = scene_manager_previous_scene(picopass->scene_manager);
     }
     return consumed;
 }
