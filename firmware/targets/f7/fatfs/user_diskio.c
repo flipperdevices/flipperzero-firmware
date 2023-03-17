@@ -1,4 +1,3 @@
-/* USER CODE BEGIN Header */
 /**
  ******************************************************************************
  * @file    user_diskio.c
@@ -16,35 +15,14 @@
  *
  ******************************************************************************
  */
-/* USER CODE END Header */
 
-#ifdef USE_OBSOLETE_USER_CODE_SECTION_0
-/* 
- * Warning: the user section 0 is no more in use (starting from CubeMx version 4.16.0)
- * To be suppressed in the future. 
- * Kept to ensure backward compatibility with previous CubeMx versions when 
- * migrating projects. 
- * User code previously added there should be copied in the new user sections before 
- * the section contents can be deleted.
- */
-/* USER CODE BEGIN 0 */
-/* USER CODE END 0 */
-#endif
-
-/* USER CODE BEGIN DECL */
-
-/* Includes ------------------------------------------------------------------*/
 #include "user_diskio.h"
 #include <furi_hal.h>
 #include "sector_cache.h"
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
 
-/* Private variables ---------------------------------------------------------*/
-/* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;
 
-static DSTATUS User_CheckStatus(BYTE lun) {
+static DSTATUS driver_check_status(BYTE lun) {
     UNUSED(lun);
     Stat = STA_NOINIT;
     if(sd_get_card_state() == SdSpiStatusOK) {
@@ -54,32 +32,20 @@ static DSTATUS User_CheckStatus(BYTE lun) {
     return Stat;
 }
 
-/* USER CODE END DECL */
+static DSTATUS driver_initialize(BYTE pdrv);
+static DSTATUS driver_status(BYTE pdrv);
+static DRESULT driver_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count);
+static DRESULT driver_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count);
+static DRESULT driver_ioctl(BYTE pdrv, BYTE cmd, void* buff);
 
-/* Private function prototypes -----------------------------------------------*/
-DSTATUS USER_initialize(BYTE pdrv);
-DSTATUS USER_status(BYTE pdrv);
-DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count);
-#if _USE_WRITE == 1
-DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count);
-#endif /* _USE_WRITE == 1 */
-#if _USE_IOCTL == 1
-DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void* buff);
-#endif /* _USE_IOCTL == 1 */
-
-Diskio_drvTypeDef USER_Driver = {
-    USER_initialize,
-    USER_status,
-    USER_read,
-#if _USE_WRITE
-    USER_write,
-#endif /* _USE_WRITE == 1 */
-#if _USE_IOCTL == 1
-    USER_ioctl,
-#endif /* _USE_IOCTL == 1 */
+Diskio_drvTypeDef sd_fatfs_driver = {
+    driver_initialize,
+    driver_status,
+    driver_read,
+    driver_write,
+    driver_ioctl,
 };
 
-/* Private functions ---------------------------------------------------------*/
 static inline bool sd_cache_get(uint32_t address, uint32_t* data) {
     uint8_t* cached_data = sector_cache_get(address);
     if(cached_data) {
@@ -158,19 +124,16 @@ static bool sd_device_write(uint32_t* buff, uint32_t sector, uint32_t count) {
   * @param  pdrv: Physical drive number (0..)
   * @retval DSTATUS: Operation status
   */
-DSTATUS USER_initialize(BYTE pdrv) {
-    /* USER CODE BEGIN INIT */
-
+static DSTATUS driver_initialize(BYTE pdrv) {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_sd_fast);
     furi_hal_sd_spi_handle = &furi_hal_spi_bus_handle_sd_fast;
 
-    DSTATUS status = User_CheckStatus(pdrv);
+    DSTATUS status = driver_check_status(pdrv);
 
     furi_hal_sd_spi_handle = NULL;
     furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
 
     return status;
-    /* USER CODE END INIT */
 }
 
 /**
@@ -178,11 +141,9 @@ DSTATUS USER_initialize(BYTE pdrv) {
   * @param  pdrv: Physical drive number (0..)
   * @retval DSTATUS: Operation status
   */
-DSTATUS USER_status(BYTE pdrv) {
-    /* USER CODE BEGIN STATUS */
+static DSTATUS driver_status(BYTE pdrv) {
     UNUSED(pdrv);
     return Stat;
-    /* USER CODE END STATUS */
 }
 
 /**
@@ -193,8 +154,7 @@ DSTATUS USER_status(BYTE pdrv) {
   * @param  count: Number of sectors to read (1..128)
   * @retval DRESULT: Operation result
   */
-DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
-    /* USER CODE BEGIN READ */
+static DRESULT driver_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
     UNUSED(pdrv);
 
     bool result;
@@ -233,7 +193,6 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
     }
 
     return result ? RES_OK : RES_ERROR;
-    /* USER CODE END READ */
 }
 
 /**
@@ -244,8 +203,7 @@ DRESULT USER_read(BYTE pdrv, BYTE* buff, DWORD sector, UINT count) {
   * @param  count: Number of sectors to write (1..128)
   * @retval DRESULT: Operation result
   */
-#if _USE_WRITE == 1
-DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
+static DRESULT driver_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
     UNUSED(pdrv);
     bool result;
 
@@ -275,7 +233,6 @@ DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
 
     return result ? RES_OK : RES_ERROR;
 }
-#endif /* _USE_WRITE == 1 */
 
 /**
   * @brief  I/O control operation  
@@ -284,9 +241,7 @@ DRESULT USER_write(BYTE pdrv, const BYTE* buff, DWORD sector, UINT count) {
   * @param  *buff: Buffer to send/receive control data
   * @retval DRESULT: Operation result
   */
-#if _USE_IOCTL == 1
-DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
-    /* USER CODE BEGIN IOCTL */
+static DRESULT driver_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
     UNUSED(pdrv);
     DRESULT res = RES_ERROR;
     SD_CardInfo CardInfo;
@@ -331,8 +286,6 @@ DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void* buff) {
     furi_hal_spi_release(&furi_hal_spi_bus_handle_sd_fast);
 
     return res;
-    /* USER CODE END IOCTL */
 }
-#endif /* _USE_IOCTL == 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
