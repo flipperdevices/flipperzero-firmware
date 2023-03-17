@@ -27,9 +27,9 @@ This was the only function of the Flipper Zero that was [thought to be impossibl
 
 | Category | Time |
 | -------- | ---- |
-| Best (real world) | N/A |
-| Average | 255 seconds |
-| Worst possible (expected) | 510 seconds |
+| Best (real world) | 31 seconds |
+| Average | 8.85 min |
+| Worst possible (expected) | 14.14 min |
 
 Writeup: Coming soon
 
