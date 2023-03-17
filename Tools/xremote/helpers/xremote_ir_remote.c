@@ -51,3 +51,7 @@ bool xremote_ir_remote_load(InfraredRemote* remote, FuriString* path) {
     furi_record_close(RECORD_STORAGE);
     return success;
 }
+
+size_t xremote_ir_remote_get_button_count(InfraredRemote* remote) {
+    return InfraredButtonArray_size(remote->buttons);
+}

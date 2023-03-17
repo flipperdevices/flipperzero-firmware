@@ -12,6 +12,7 @@ void xremote_scene_ir_list_on_enter(void* context) {
 
     if(success) {
         //Load Remote into buffer
+        xremote_ir_remote_load(app->ir_remote_buffer, app->file_path);
     }
 
     if(success) {

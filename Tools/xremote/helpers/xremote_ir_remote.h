@@ -7,3 +7,5 @@ typedef struct InfraredRemote InfraredRemote;
 
 InfraredRemote* xremote_ir_remote_alloc();
 void xremote_ir_remote_free(InfraredRemote* remote);
+
+bool xremote_ir_remote_load(InfraredRemote* remote, FuriString* path);
