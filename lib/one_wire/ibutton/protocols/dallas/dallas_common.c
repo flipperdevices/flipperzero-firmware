@@ -23,6 +23,9 @@
 #define BITS_IN_KBIT 1024U
 #define BITS_IN_MBIT (BITS_IN_KBIT * 1024U)
 
+// Cached value of (pseudocode) maxim_crc8(&DALLAS_COMMON_CMD_READ_MEM, 1, MAXIM_CRC8_INIT)
+#define DALLAS_COMMON_CRC8_INIT_READ_MEM 0x74
+
 bool dallas_common_skip_rom(OneWireHost* host) {
     onewire_host_write(host, DALLAS_COMMON_CMD_SKIP_ROM);
     return true;
@@ -81,12 +84,25 @@ bool dallas_common_copy_scratchpad(
     return time_elapsed < timeout_us;
 }
 
-bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, size_t data_size) {
+bool dallas_common_read_mem(
+    OneWireHost* host,
+    uint16_t address,
+    uint8_t* data,
+    size_t data_size,
+    bool handle_leading_crc) {
     onewire_host_write(host, DALLAS_COMMON_CMD_READ_MEM);
+    uint8_t address_buf[2] = {address & 0xff, address >> BITS_IN_BYTE};
 
-    onewire_host_write(host, (uint8_t)address);
-    onewire_host_write(host, (uint8_t)(address > BITS_IN_BYTE));
+    onewire_host_write_bytes(host, address_buf, sizeof(address_buf));
 
+    // Some chips (namely DS2502) sends a leading checksum of the read command and address.
+    // Check it when needed and return false when the check fails.
+    if(handle_leading_crc) {
+        uint8_t crc_expected = onewire_host_read(host);
+        uint8_t crc_actual =
+            maxim_crc8(address_buf, sizeof(address_buf), DALLAS_COMMON_CRC8_INIT_READ_MEM);
+        if(crc_expected != crc_actual) return false;
+    }
     onewire_host_read_bytes(host, data, (uint16_t)data_size);
 
     return true;
@@ -160,7 +176,11 @@ bool dallas_common_emulate_read_rom(OneWireSlave* bus, const DallasCommonRomData
     return onewire_slave_send(bus, rom_data->bytes, sizeof(DallasCommonRomData));
 }
 
-bool dallas_common_emulate_read_mem(OneWireSlave* bus, const uint8_t* data, size_t data_size) {
+bool dallas_common_emulate_read_mem(
+    OneWireSlave* bus,
+    const uint8_t* data,
+    size_t data_size,
+    bool add_leading_crc) {
     bool success = false;
 
     union {
@@ -171,6 +191,15 @@ bool dallas_common_emulate_read_mem(OneWireSlave* bus, const uint8_t* data, size
     do {
         if(!onewire_slave_receive(bus, address.bytes, sizeof(address))) break;
         if(address.word >= data_size) break;
+
+        // Some chips (namely DS2502) sends a leading checksum of the read command and address.
+        // Add it when needed.
+        if(add_leading_crc) {
+            uint8_t req_crc =
+                maxim_crc8(address.bytes, sizeof(address.bytes), DALLAS_COMMON_CRC8_INIT_READ_MEM);
+            if(!onewire_slave_send(bus, &req_crc, sizeof(req_crc))) break;
+        }
+
         if(!onewire_slave_send(bus, data + address.word, data_size - address.word)) break;
 
         success = true;

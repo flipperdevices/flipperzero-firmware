@@ -64,7 +64,7 @@ const iButtonProtocolDallasBase ibutton_protocol_ds1996 = {
 bool dallas_ds1996_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1996ProtocolData* data = protocol_data;
     return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data) &&
-           dallas_common_read_mem(host, 0, data->sram_data, DS1996_SRAM_DATA_SIZE);
+           dallas_common_read_mem(host, 0, data->sram_data, DS1996_SRAM_DATA_SIZE, false);
 }
 
 bool dallas_ds1996_write_copy(OneWireHost* host, iButtonProtocolData* protocol_data) {
@@ -96,7 +96,7 @@ static bool dallas_ds1996_command_callback(uint8_t command, void* context) {
 
         } else if(data->state.command_state == DallasCommonCommandStateRomCmd) {
             data->state.command_state = DallasCommonCommandStateMemCmd;
-            dallas_common_emulate_read_mem(bus, data->sram_data, DS1996_SRAM_DATA_SIZE);
+            dallas_common_emulate_read_mem(bus, data->sram_data, DS1996_SRAM_DATA_SIZE, false);
             return false;
 
         } else {

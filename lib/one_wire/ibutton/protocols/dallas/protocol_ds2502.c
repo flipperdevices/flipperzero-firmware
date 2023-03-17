@@ -6,12 +6,14 @@
 #include "dallas_common.h"
 
 #define DS2502_FAMILY_CODE 0x09U
-#define DS2502_DELL_FAMILY_CODE 0x28U
 #define DS2502_FAMILY_NAME "DS2502"
 
+// Some Dell chargers reportedly use FC 0x28 but they seem to just be DS2502
+// https://github.com/orgua/OneWireHub#implemented-slaves
+#define DS2502_DELL_FAMILY_CODE 0x28U
+#define DS2502_DELL_FAMILY_NAME "Dell Charger"
+
 #define DS2502_OTP_DATA_SIZE 128U
-#define DS2502_OTP_PAGE_SIZE 4U
-#define DS2502_COPY_SCRATCH_TIMEOUT_US 100U
 
 #define DS2502_DATA_BYTE_COUNT 4U
 
@@ -39,6 +41,7 @@ static void dallas_ds2502_render_error(FuriString*, const iButtonProtocolData*);
 static bool dallas_ds2502_is_data_valid(const iButtonProtocolData*);
 static void dallas_ds2502_get_editable_data(iButtonEditableData*, iButtonProtocolData*);
 static void dallas_ds2502_apply_edits(iButtonProtocolData*);
+static void dallas_ds2502_dell_apply_edits(iButtonProtocolData*);
 
 const iButtonProtocolDallasBase ibutton_protocol_ds2502 = {
     .family_code = DS2502_FAMILY_CODE,
@@ -63,13 +66,11 @@ const iButtonProtocolDallasBase ibutton_protocol_ds2502 = {
 };
 
 const iButtonProtocolDallasBase ibutton_protocol_ds2502_dell = {
-    // Some Dell chargers reportedly use FC 0x28 but they seem to just be DS2502
-    // https://github.com/orgua/OneWireHub#implemented-slaves
     .family_code = DS2502_DELL_FAMILY_CODE,
     .features = iButtonProtocolFeatureExtData,
     .data_size = sizeof(DS2502ProtocolData),
     .manufacturer = DALLAS_COMMON_MANUFACTURER_NAME,
-    .name = DS2502_FAMILY_NAME,
+    .name = DS2502_DELL_FAMILY_NAME,
 
     .read = dallas_ds2502_read,
     // DS2502 is OTP and requires high voltage to program which Flipper doesn't support.
@@ -83,13 +84,13 @@ const iButtonProtocolDallasBase ibutton_protocol_ds2502_dell = {
     .render_error = dallas_ds2502_render_error,
     .is_valid = dallas_ds2502_is_data_valid,
     .get_editable_data = dallas_ds2502_get_editable_data,
-    .apply_edits = dallas_ds2502_apply_edits,
+    .apply_edits = dallas_ds2502_dell_apply_edits,
 };
 
 bool dallas_ds2502_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS2502ProtocolData* data = protocol_data;
     return onewire_host_reset(host) && dallas_common_read_rom(host, &data->rom_data) &&
-           dallas_common_read_mem(host, 0, data->otp_data, DS2502_OTP_DATA_SIZE);
+           dallas_common_read_mem(host, 0, data->otp_data, DS2502_OTP_DATA_SIZE, true);
 }
 
 static void dallas_ds2502_reset_callback(void* context) {
@@ -111,7 +112,7 @@ static bool dallas_ds2502_command_callback(uint8_t command, void* context) {
 
         } else if(data->state.command_state == DallasCommonCommandStateRomCmd) {
             data->state.command_state = DallasCommonCommandStateMemCmd;
-            dallas_common_emulate_read_mem(bus, data->otp_data, DS2502_OTP_DATA_SIZE);
+            dallas_common_emulate_read_mem(bus, data->otp_data, DS2502_OTP_DATA_SIZE, true);
             return false;
 
         } else {
@@ -219,4 +220,9 @@ void dallas_ds2502_get_editable_data(
 void dallas_ds2502_apply_edits(iButtonProtocolData* protocol_data) {
     DS2502ProtocolData* data = protocol_data;
     dallas_common_apply_edits(&data->rom_data, DS2502_FAMILY_CODE);
+}
+
+void dallas_ds2502_dell_apply_edits(iButtonProtocolData* protocol_data) {
+    DS2502ProtocolData* data = protocol_data;
+    dallas_common_apply_edits(&data->rom_data, DS2502_DELL_FAMILY_CODE);
 }

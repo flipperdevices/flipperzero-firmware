@@ -68,7 +68,12 @@ bool dallas_common_copy_scratchpad(
     const DallasCommonAddressRegs* regs,
     uint32_t timeout_us);
 
-bool dallas_common_read_mem(OneWireHost* host, uint16_t address, uint8_t* data, size_t data_size);
+bool dallas_common_read_mem(
+    OneWireHost* host,
+    uint16_t address,
+    uint8_t* data,
+    size_t data_size,
+    bool handle_leading_crc);
 
 /* Combined operations */
 bool dallas_common_write_mem(
@@ -83,7 +88,11 @@ bool dallas_common_emulate_search_rom(OneWireSlave* bus, const DallasCommonRomDa
 
 bool dallas_common_emulate_read_rom(OneWireSlave* bus, const DallasCommonRomData* rom_data);
 
-bool dallas_common_emulate_read_mem(OneWireSlave* bus, const uint8_t* data, size_t data_size);
+bool dallas_common_emulate_read_mem(
+    OneWireSlave* bus,
+    const uint8_t* data,
+    size_t data_size,
+    bool add_leading_crc);
 
 /* Save & Load */
 bool dallas_common_save_rom_data(FlipperFormat* ff, const DallasCommonRomData* rom_data);
