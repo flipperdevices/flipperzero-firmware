@@ -1,7 +1,7 @@
 #include "../picopass_i.h"
 enum SubmenuIndex {
-    SubmenuIndexEliteDictAttack,
     SubmenuIndexRead,
+    SubmenuIndexEliteDictAttack,
     SubmenuIndexSaved,
 };
 
@@ -14,13 +14,13 @@ void picopass_scene_start_on_enter(void* context) {
 
     Submenu* submenu = picopass->submenu;
     submenu_add_item(
+        submenu, "Read Card", SubmenuIndexRead, picopass_scene_start_submenu_callback, picopass);
+    submenu_add_item(
         submenu,
-        "Dictionary Attack",
+        "Elite Dict. Attack",
         SubmenuIndexEliteDictAttack,
         picopass_scene_start_submenu_callback,
         picopass);
-    submenu_add_item(
-        submenu, "Read Card", SubmenuIndexRead, picopass_scene_start_submenu_callback, picopass);
     submenu_add_item(
         submenu, "Saved", SubmenuIndexSaved, picopass_scene_start_submenu_callback, picopass);
 
