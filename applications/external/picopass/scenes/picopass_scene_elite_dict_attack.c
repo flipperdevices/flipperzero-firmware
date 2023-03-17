@@ -135,9 +135,6 @@ bool picopass_scene_elite_dict_attack_on_event(void* context, SceneManagerEvent 
         } else if(event.event == PicopassWorkerEventNoCardDetected) {
             dict_attack_set_card_removed(picopass->dict_attack);
             consumed = true;
-        } else if(event.event == PicopassWorkerEventFoundKey) {
-            dict_attack_inc_keys_found(picopass->dict_attack);
-            consumed = true;
         } else if(event.event == PicopassWorkerEventNewDictKeyBatch) {
             dict_attack_inc_current_dict_key(picopass->dict_attack, PICOPASS_DICT_KEY_BATCH_SIZE);
             consumed = true;

@@ -69,12 +69,8 @@ void picopass_worker_stop(PicopassWorker* picopass_worker) {
     furi_assert(picopass_worker->thread);
 
     if(furi_thread_get_state(picopass_worker->thread) != FuriThreadStateStopped) {
-        FURI_LOG_D(TAG, "Stopping thread");
         picopass_worker_change_state(picopass_worker, PicopassWorkerStateStop);
-        // picopass_worker_disable_field(ERR_NONE);
         furi_thread_join(picopass_worker->thread);
-    } else {
-        FURI_LOG_D(TAG, "Not Stopping thread");
     }
 }
 
@@ -571,7 +567,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
                     nextState = PicopassWorkerEventFail;
                 }
             }
-            picopass_worker->callback(PicopassWorkerEventFoundKey, picopass_worker->context);
+            picopass_worker->callback(PicopassWorkerEventSuccess, picopass_worker->context);
             break;
         }
 
@@ -591,21 +587,18 @@ int32_t picopass_worker_task(void* context) {
     picopass_worker_enable_field();
     if(picopass_worker->state == PicopassWorkerStateDetect) {
         picopass_worker_detect(picopass_worker);
-        picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
     } else if(picopass_worker->state == PicopassWorkerStateWrite) {
         picopass_worker_write(picopass_worker);
-        picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
     } else if(picopass_worker->state == PicopassWorkerStateWriteKey) {
         picopass_worker_write_key(picopass_worker);
-        picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
     } else if(picopass_worker->state == PicopassWorkerStateEliteDictAttack) {
         picopass_worker_elite_dict_attack(picopass_worker);
     } else {
         FURI_LOG_W(TAG, "Unknown state %d", picopass_worker->state);
     }
     picopass_worker_disable_field(ERR_NONE);
+    picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
 
-    FURI_LOG_D(TAG, "picopass_worker_task complete");
     return 0;
 }
 
