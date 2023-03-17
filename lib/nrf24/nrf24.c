@@ -189,18 +189,22 @@ uint8_t nrf24_set_packetlen(FuriHalSpiBusHandle* handle, uint8_t len) {
 }
 
 // packet_size: 0 - dyn payload (read from PL_WID), 1 - read from pipe size, >1 - override
+// Return STATUS reg + additional: RX_DR - new data available, 0x80 - NRF24 hardware error
 uint8_t nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* ret_packetsize, uint8_t packet_size) {
     uint8_t status = 0;
     uint8_t buf[33]; // 32 max payload size + 1 for command
 
     status = nrf24_status(handle);
     if(!(status & RX_DR)) {
-        if((nrf24_read_register(handle, REG_FIFO_STATUS) & 1) == 0) {
+        uint8_t st = nrf24_read_register(handle, REG_FIFO_STATUS);
+        if(st == 0xFF || st == 0) return 0x80; // hardware error
+        if((st & 1) == 0) {
             FURI_LOG_D("NRF", "FIFO PKT");
             status |= RX_DR; // packet in FIFO buffer
         }
     }
     if(status & RX_DR) {
+        if(status & 0x80) return 0x80; // hardware error
         if(packet_size == 1)
             packet_size = nrf24_get_packetlen(handle, (status >> 1) & 7);
         else if(packet_size == 0){

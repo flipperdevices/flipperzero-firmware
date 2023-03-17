@@ -504,6 +504,9 @@ bool nrf24_read_newpacket() {
 		}
 		//notification_message(APP->notification, &sequence_blink_white_100);
 		found = true;
+	} else if(st & 0x80) { // NRF24 hardware error
+		NRF_ERROR = 1;
+		NRF_INITED = 0;
 	}
 	return found;
 }
