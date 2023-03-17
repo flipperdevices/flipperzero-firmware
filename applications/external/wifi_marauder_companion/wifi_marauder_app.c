@@ -28,6 +28,8 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
     app->capture_file = storage_file_alloc(app->storage);
+    app->save_pcap_setting_file = storage_file_alloc(app->storage);
+    app->save_logs_setting_file = storage_file_alloc(app->storage);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&wifi_marauder_scene_handlers, app);
@@ -65,6 +67,15 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, WifiMarauderAppViewTextInput, text_input_get_view(app->text_input));
 
+    app->widget = widget_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, WifiMarauderAppViewWidget, widget_get_view(app->widget));
+
+    // if user hasn't confirmed whether to save pcaps and logs to sdcard, then prompt when scene starts
+    app->need_to_prompt_settings_init =
+        (!storage_file_exists(app->storage, SAVE_PCAP_SETTING_FILEPATH) ||
+         !storage_file_exists(app->storage, SAVE_LOGS_SETTING_FILEPATH));
+
     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneStart);
 
     return app;
@@ -73,7 +84,7 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
 void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
     furi_assert(app);
 
-    if (!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER)) {
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
     }
 }
@@ -85,10 +96,14 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewVarItemList);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewTextInput);
+    view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewWidget);
+    widget_free(app->widget);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
     text_input_free(app->text_input);
     storage_file_free(app->capture_file);
+    storage_file_free(app->save_pcap_setting_file);
+    storage_file_free(app->save_logs_setting_file);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

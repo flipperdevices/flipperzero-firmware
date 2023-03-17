@@ -14,16 +14,20 @@
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/widget.h>
 
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 
-#define NUM_MENU_ITEMS (16)
+#define NUM_MENU_ITEMS (17)
 
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
 
-#define MARAUDER_APP_FOLDER ANY_PATH("apps_data/marauder")
+#define MARAUDER_APP_FOLDER_USER "apps_data/marauder"
+#define MARAUDER_APP_FOLDER ANY_PATH(MARAUDER_APP_FOLDER_USER)
+#define SAVE_PCAP_SETTING_FILEPATH MARAUDER_APP_FOLDER "/save_pcaps_here.setting"
+#define SAVE_LOGS_SETTING_FILEPATH MARAUDER_APP_FOLDER "/save_logs_here.setting"
 
 struct WifiMarauderApp {
     Gui* gui;
@@ -37,9 +41,13 @@ struct WifiMarauderApp {
     TextInput* text_input;
     Storage* storage;
     File* capture_file;
+    File* save_pcap_setting_file;
+    File* save_logs_setting_file;
+    bool need_to_prompt_settings_init;
     DialogsApp* dialogs;
 
     VariableItemList* var_item_list;
+    Widget* widget;
 
     WifiMarauderUart* uart;
     WifiMarauderUart* lp_uart;
@@ -83,4 +91,5 @@ typedef enum {
     WifiMarauderAppViewVarItemList,
     WifiMarauderAppViewConsoleOutput,
     WifiMarauderAppViewTextInput,
+    WifiMarauderAppViewWidget,
 } WifiMarauderAppView;

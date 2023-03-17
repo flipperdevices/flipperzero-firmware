@@ -66,7 +66,8 @@ void wifi_marauder_lp_uart_tx(uint8_t* data, size_t len) {
     furi_hal_uart_tx(LP_UART_CH, data, len);
 }
 
-WifiMarauderUart* wifi_marauder_uart_init(WifiMarauderApp* app, FuriHalUartId channel, const char* thread_name) {
+WifiMarauderUart*
+    wifi_marauder_uart_init(WifiMarauderApp* app, FuriHalUartId channel, const char* thread_name) {
     WifiMarauderUart* uart = malloc(sizeof(WifiMarauderUart));
 
     uart->app = app;
@@ -90,11 +91,11 @@ WifiMarauderUart* wifi_marauder_uart_init(WifiMarauderApp* app, FuriHalUartId ch
 }
 
 WifiMarauderUart* wifi_marauder_usart_init(WifiMarauderApp* app) {
-    return wifi_marauder_uart_init(app, UART_CH,"WifiMarauderUartRxThread");
+    return wifi_marauder_uart_init(app, UART_CH, "WifiMarauderUartRxThread");
 }
 
 WifiMarauderUart* wifi_marauder_lp_uart_init(WifiMarauderApp* app) {
-    return wifi_marauder_uart_init(app, LP_UART_CH,"WifiMarauderLPUartRxThread");
+    return wifi_marauder_uart_init(app, LP_UART_CH, "WifiMarauderLPUartRxThread");
 }
 
 void wifi_marauder_uart_free(WifiMarauderUart* uart) {

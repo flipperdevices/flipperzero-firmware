@@ -26,7 +26,13 @@ typedef struct {
 // NUM_MENU_ITEMS defined in wifi_marauder_app_i.h - if you add an entry here, increment it!
 const WifiMarauderItem items[NUM_MENU_ITEMS] = {
     {"View Log from", {"start", "end"}, 2, {"", ""}, NO_ARGS, FOCUS_CONSOLE_TOGGLE, NO_TIP},
-    {"Scan", {"ap", "station"}, 2, {"scanap", "scansta"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP},
+    {"Scan",
+     {"ap", "station"},
+     2,
+     {"scanap", "scansta"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     SHOW_STOPSCAN_TIP},
     {"SSID",
      {"add rand", "add name", "remove"},
      3,
@@ -121,6 +127,13 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
     {"Update", {"ota", "sd"}, 2, {"update -w", "update -s"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
+    {"Save to flipper sdcard",
+     {""},
+     1,
+     {""},
+     NO_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP}, // keep at bottom or change logic below
 };
 
 static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uint32_t index) {
@@ -129,6 +142,13 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
 
     furi_assert(index < NUM_MENU_ITEMS);
     const WifiMarauderItem* item = &items[index];
+
+    if(index == NUM_MENU_ITEMS - 1) {
+        // "Save to flipper sdcard" special case - start SettingsInit widget
+        view_dispatcher_send_custom_event(
+            app->view_dispatcher, WifiMarauderEventStartSettingsInit);
+        return;
+    }
 
     const int selected_option_index = app->selected_option_index[index];
     furi_assert(selected_option_index < item->num_options_menu);
@@ -187,6 +207,11 @@ void wifi_marauder_scene_start_on_enter(void* context) {
         var_item_list, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneStart));
 
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewVarItemList);
+
+    // Wait, if the user hasn't initialized sdcard settings, let's prompt them once (then come back here)
+    if(app->need_to_prompt_settings_init) {
+        scene_manager_next_scene(app->scene_manager, WifiMarauderSceneSettingsInit);
+    }
 }
 
 bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) {
@@ -198,15 +223,23 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
         if(event.event == WifiMarauderEventStartKeyboard) {
             scene_manager_set_scene_state(
                 app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, WifiMarauderAppViewTextInput);
+            scene_manager_next_scene(app->scene_manager, WifiMarauderSceneTextInput);
         } else if(event.event == WifiMarauderEventStartConsole) {
             scene_manager_set_scene_state(
                 app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, WifiMarauderAppViewConsoleOutput);
+            scene_manager_next_scene(app->scene_manager, WifiMarauderSceneConsoleOutput);
+        } else if(event.event == WifiMarauderEventStartSettingsInit) {
+            scene_manager_set_scene_state(
+                app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
+            scene_manager_next_scene(app->scene_manager, WifiMarauderSceneSettingsInit);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
         app->selected_menu_index = variable_item_list_get_selected_item_index(app->var_item_list);
+        consumed = true;
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_stop(app->scene_manager);
+        view_dispatcher_stop(app->view_dispatcher);
         consumed = true;
     }
 
