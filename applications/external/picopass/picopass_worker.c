@@ -476,7 +476,8 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
     }
     memset(pacs, 0, sizeof(PicopassPacs));
 
-    IclassEliteDictAttackData* dict_attack_data = &picopass_worker->dev_data->iclass_elite_dict_attack_data;
+    IclassEliteDictAttackData* dict_attack_data =
+        &picopass_worker->dev_data->iclass_elite_dict_attack_data;
     bool elite = (dict_attack_data->type != IclassStandardDictTypeFlipper);
 
     rfalPicoPassReadCheckRes rcRes;
@@ -521,11 +522,13 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
         }
     }
 
-    FURI_LOG_D(TAG, "Start Dictionary attack, Key Count %lu", iclass_elite_dict_get_total_keys(dict));
+    FURI_LOG_D(
+        TAG, "Start Dictionary attack, Key Count %lu", iclass_elite_dict_get_total_keys(dict));
     while(iclass_elite_dict_get_next_key(dict, key)) {
         FURI_LOG_T(TAG, "Key %d", index);
         if(++index % PICOPASS_DICT_KEY_BATCH_SIZE == 0) {
-            picopass_worker->callback(PicopassWorkerEventNewDictKeyBatch, picopass_worker->context);
+            picopass_worker->callback(
+                PicopassWorkerEventNewDictKeyBatch, picopass_worker->context);
         }
 
         err = rfalPicoPassPollerReadCheck(&rcRes);

@@ -19,11 +19,14 @@ void picopass_dict_attack_worker_callback(PicopassWorkerEvent event, void* conte
 void picopass_dict_attack_result_callback(void* context) {
     furi_assert(context);
     Picopass* picopass = context;
-    view_dispatcher_send_custom_event(picopass->view_dispatcher, PicopassCustomEventDictAttackSkip);
+    view_dispatcher_send_custom_event(
+        picopass->view_dispatcher, PicopassCustomEventDictAttackSkip);
 }
 
-static void picopass_scene_elite_dict_attack_prepare_view(Picopass* picopass, DictAttackState state) {
-    IclassEliteDictAttackData* dict_attack_data = &picopass->dev->dev_data.iclass_elite_dict_attack_data;
+static void
+    picopass_scene_elite_dict_attack_prepare_view(Picopass* picopass, DictAttackState state) {
+    IclassEliteDictAttackData* dict_attack_data =
+        &picopass->dev->dev_data.iclass_elite_dict_attack_data;
     PicopassWorkerState worker_state = PicopassWorkerStateReady;
     IclassEliteDict* dict = NULL;
 
@@ -84,11 +87,18 @@ static void picopass_scene_elite_dict_attack_prepare_view(Picopass* picopass, Di
     }
     dict_attack_data->dict = dict;
     scene_manager_set_scene_state(picopass->scene_manager, PicopassSceneEliteDictAttack, state);
-    dict_attack_set_callback(picopass->dict_attack, picopass_dict_attack_result_callback, picopass);
+    dict_attack_set_callback(
+        picopass->dict_attack, picopass_dict_attack_result_callback, picopass);
     dict_attack_set_current_sector(picopass->dict_attack, 0);
     dict_attack_set_card_detected(picopass->dict_attack);
-    dict_attack_set_total_dict_keys(picopass->dict_attack, dict ? iclass_elite_dict_get_total_keys(dict) : 0);
-    picopass_worker_start(picopass->worker, worker_state, &picopass->dev->dev_data, picopass_dict_attack_worker_callback, picopass);
+    dict_attack_set_total_dict_keys(
+        picopass->dict_attack, dict ? iclass_elite_dict_get_total_keys(dict) : 0);
+    picopass_worker_start(
+        picopass->worker,
+        worker_state,
+        &picopass->dev->dev_data,
+        picopass_dict_attack_worker_callback,
+        picopass);
 }
 
 void picopass_scene_elite_dict_attack_on_enter(void* context) {
@@ -103,10 +113,13 @@ bool picopass_scene_elite_dict_attack_on_event(void* context, SceneManagerEvent 
     Picopass* picopass = context;
     bool consumed = false;
 
-    uint32_t state = scene_manager_get_scene_state(picopass->scene_manager, PicopassSceneEliteDictAttack);
+    uint32_t state =
+        scene_manager_get_scene_state(picopass->scene_manager, PicopassSceneEliteDictAttack);
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == PicopassWorkerEventSuccess || event.event == PicopassWorkerEventAborted) {
-            if(state == DictAttackStateUserDictInProgress || state == DictAttackStateStandardDictInProgress) {
+        if(event.event == PicopassWorkerEventSuccess ||
+           event.event == PicopassWorkerEventAborted) {
+            if(state == DictAttackStateUserDictInProgress ||
+               state == DictAttackStateStandardDictInProgress) {
                 picopass_worker_stop(picopass->worker);
                 picopass_scene_elite_dict_attack_prepare_view(picopass, state);
                 consumed = true;
@@ -148,7 +161,8 @@ bool picopass_scene_elite_dict_attack_on_event(void* context, SceneManagerEvent 
 
 void picopass_scene_elite_dict_attack_on_exit(void* context) {
     Picopass* picopass = context;
-    IclassEliteDictAttackData* dict_attack_data = &picopass->dev->dev_data.iclass_elite_dict_attack_data;
+    IclassEliteDictAttackData* dict_attack_data =
+        &picopass->dev->dev_data.iclass_elite_dict_attack_data;
     // Stop worker
     picopass_worker_stop(picopass->worker);
     if(dict_attack_data->dict) {
