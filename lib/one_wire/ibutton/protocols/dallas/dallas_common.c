@@ -91,8 +91,8 @@ bool dallas_common_read_mem(
     size_t data_size,
     bool handle_leading_crc) {
     onewire_host_write(host, DALLAS_COMMON_CMD_READ_MEM);
-    uint8_t address_buf[2] = {address & 0xff, address >> BITS_IN_BYTE};
 
+    uint8_t address_buf[2] = {address & 0xff, address >> BITS_IN_BYTE};
     onewire_host_write_bytes(host, address_buf, sizeof(address_buf));
 
     // Some chips (namely DS2502) sends a leading checksum of the read command and address.
