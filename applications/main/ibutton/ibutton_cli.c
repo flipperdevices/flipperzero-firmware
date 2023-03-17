@@ -6,9 +6,9 @@
 
 #include <one_wire/one_wire_host.h>
 
-#include <one_wire/ibutton/ibutton_key.h>
-#include <one_wire/ibutton/ibutton_worker.h>
-#include <one_wire/ibutton/ibutton_protocols.h>
+#include <ibutton/ibutton_key.h>
+#include <ibutton/ibutton_worker.h>
+#include <ibutton/ibutton_protocols.h>
 
 static void ibutton_cli(Cli* cli, FuriString* args, void* context);
 static void onewire_cli(Cli* cli, FuriString* args, void* context);
