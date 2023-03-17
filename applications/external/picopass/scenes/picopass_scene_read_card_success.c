@@ -1,4 +1,5 @@
 #include "../picopass_i.h"
+#include <dolphin/dolphin.h>
 
 void picopass_scene_read_card_success_widget_callback(
     GuiButtonType result,
@@ -19,6 +20,8 @@ void picopass_scene_read_card_success_on_enter(void* context) {
     FuriString* credential_str = furi_string_alloc();
     FuriString* wiegand_str = furi_string_alloc();
     FuriString* sio_str = furi_string_alloc();
+
+    DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
     // Send notification
     notification_message(picopass->notifications, &sequence_success);

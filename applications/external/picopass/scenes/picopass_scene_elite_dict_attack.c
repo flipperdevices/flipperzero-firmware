@@ -124,9 +124,7 @@ bool picopass_scene_elite_dict_attack_on_event(void* context, SceneManagerEvent 
                 picopass_scene_elite_dict_attack_prepare_view(picopass, state);
                 consumed = true;
             } else {
-                notification_message(picopass->notifications, &sequence_success);
                 scene_manager_next_scene(picopass->scene_manager, PicopassSceneReadCardSuccess);
-                DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
                 consumed = true;
             }
         } else if(event.event == PicopassWorkerEventCardDetected) {
