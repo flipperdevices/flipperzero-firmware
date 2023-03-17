@@ -23,6 +23,8 @@ static bool app_list_initialized = false;
 FlipperApplicationList_t loaded_elf_list = {0};
 
 static void add_app_to_list(FlipperApplication* app) {
+    furi_assert(app);
+
     if(!app_list_initialized) {
         FlipperApplicationList_init(loaded_elf_list);
         app_list_initialized = true;
@@ -31,6 +33,9 @@ static void add_app_to_list(FlipperApplication* app) {
 }
 
 static void remove_app_from_list(FlipperApplication* app) {
+    furi_assert(app_list_initialized);
+    furi_assert(app);
+
     FlipperApplicationList_it_t it;
     for(FlipperApplicationList_it(it, loaded_elf_list); !FlipperApplicationList_end_p(it);
         FlipperApplicationList_next(it)) {
