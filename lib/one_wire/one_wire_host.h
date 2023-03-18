@@ -124,6 +124,13 @@ void onewire_host_target_search(OneWireHost* host, uint8_t family_code);
  */
 uint8_t onewire_host_search(OneWireHost* host, uint8_t* new_addr, OneWireHostSearchMode mode);
 
+/**
+ * Enable overdrive mode
+ * @param host
+ * @param set
+ */
+void onewire_host_set_overdrive(OneWireHost* host, bool set);
+
 #ifdef __cplusplus
 }
 #endif

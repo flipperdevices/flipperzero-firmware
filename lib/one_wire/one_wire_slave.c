@@ -28,6 +28,20 @@ typedef struct {
     uint16_t th_timeout; /* Maximum time before general timeout */
 } OneWireSlaveTimings;
 
+struct OneWireSlave {
+    const GpioPin* gpio_pin;
+    const OneWireSlaveTimings* timings;
+    OneWireSlaveError error;
+
+    OneWireSlaveResetCallback reset_callback;
+    OneWireSlaveCommandCallback command_callback;
+    OneWireSlaveResultCallback result_callback;
+
+    void* reset_callback_context;
+    void* result_callback_context;
+    void* command_callback_context;
+};
+
 static const OneWireSlaveTimings onewire_slave_timings_normal = {
     .trstl_min = 270,
     .trstl_max = 1200,
@@ -60,20 +74,6 @@ static const OneWireSlaveTimings onewire_slave_timings_overdrive = {
     .trl_tmsr_max = 2,
 
     .th_timeout = 15000,
-};
-
-struct OneWireSlave {
-    const GpioPin* gpio_pin;
-    const OneWireSlaveTimings* timings;
-    OneWireSlaveError error;
-
-    OneWireSlaveResetCallback reset_callback;
-    OneWireSlaveCommandCallback command_callback;
-    OneWireSlaveResultCallback result_callback;
-
-    void* reset_callback_context;
-    void* result_callback_context;
-    void* command_callback_context;
 };
 
 /*********************** PRIVATE ***********************/
