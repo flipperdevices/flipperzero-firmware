@@ -12,7 +12,12 @@ void xremote_scene_ir_list_on_enter(void* context) {
 
     if(success) {
         //Load Remote into buffer
+        view_set_orientation(view_stack_get_view(app->view_stack), ViewOrientationVertical);
+        view_dispatcher_switch_to_view(app->view_dispatcher, XRemoteViewIdStack);
+
+        xremote_show_loading_popup(app, true);
         xremote_ir_remote_load(app->ir_remote_buffer, app->file_path);
+        xremote_show_loading_popup(app, false);
     }
 
     if(success) {
@@ -21,6 +26,7 @@ void xremote_scene_ir_list_on_enter(void* context) {
         //scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
         scene_manager_next_scene(app->scene_manager, XRemoteSceneIrRemote);
     } else {
+        //scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
         scene_manager_previous_scene(app->scene_manager);
     }
 }
@@ -28,7 +34,7 @@ void xremote_scene_ir_list_on_enter(void* context) {
 bool xremote_scene_ir_list_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
-    bool consumed = false;
+    bool consumed = true;
 
     return consumed;
 }

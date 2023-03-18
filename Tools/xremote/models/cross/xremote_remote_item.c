@@ -2,6 +2,7 @@
 
 struct CrossRemoteItem {
     FuriString* name;
+    
     int16_t type;
     int32_t time;
 };
@@ -11,6 +12,7 @@ CrossRemoteItem* xremote_remote_item_alloc() {
     item->name = furi_string_alloc();
     item->time = 0;
     item->type = 0;
+    
     return item;
 }
 

@@ -5,7 +5,10 @@
 
 enum XRemoteCustomEventType {
     // Reserve first 100 events for button types and indexes, starting from 0
+    XRemoteCustomEventMenuVoid,
     XRemoteCustomEventMenuSelected,
+    XRemoteCustomEventMenuAddSelected,
+    XRemoteCustomEventMenuAddIrSelected,
 };
 
 #pragma pack(push, 1)

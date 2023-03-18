@@ -51,14 +51,19 @@ XRemote* xremote_app_alloc() {
     app->file_path = furi_string_alloc();
 
     app->ir_remote_buffer = xremote_ir_remote_alloc();
+    app->cross_remote = cross_remote_alloc();
+    
+    app->loading = loading_alloc();
 
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdMenu, submenu_get_view(app->submenu));
     app->xremote_infoscreen = xremote_infoscreen_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdInfoscreen, xremote_infoscreen_get_view(app->xremote_infoscreen));
-    app->button_menu = button_menu_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdCreate, button_menu_get_view(app->button_menu));
-    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdCreateAdd, button_menu_get_view(app->button_menu));
-    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdIrRemote, button_menu_get_view(app->button_menu));
+    app->button_menu_create = button_menu_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdCreate, button_menu_get_view(app->button_menu_create));
+    app->button_menu_create_add = button_menu_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdCreateAdd, button_menu_get_view(app->button_menu_create_add));
+    app->button_menu_ir = button_menu_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdIrRemote, button_menu_get_view(app->button_menu_ir));
     app->xremote_scene_2 = xremote_scene_2_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdScene2, xremote_scene_2_get_view(app->xremote_scene_2));
     app->variable_item_list = variable_item_list_alloc();
@@ -66,10 +71,29 @@ XRemote* xremote_app_alloc() {
 
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdWip, popup_get_view(app->popup));
+    app->view_stack = view_stack_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, XRemoteViewIdStack, view_stack_get_view(app->view_stack));
 
     //End Scene Additions
 
     return app;
+}
+
+void xremote_show_loading_popup(XRemote* app, bool show) {
+    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
+    ViewStack* view_stack = app->view_stack;
+    Loading* loading = app->loading;
+
+    if(show) {
+        // Raise timer priority so that animations can play
+        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        view_stack_add_view(view_stack, loading_get_view(loading));
+    } else {
+        view_stack_remove_view(view_stack, loading_get_view(loading));
+        // Restore default timer priority
+        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+    }
 }
 
 void xremote_app_free(XRemote* app) {
@@ -85,6 +109,11 @@ void xremote_app_free(XRemote* app) {
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdScene2);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdSettings);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdWip);
+    view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdStack);
+    button_menu_free(app->button_menu_create);
+    button_menu_free(app->button_menu_create_add);
+    button_menu_free(app->button_menu_ir);
+    view_stack_free(app->view_stack);
     popup_free(app->popup);
     submenu_free(app->submenu);
 

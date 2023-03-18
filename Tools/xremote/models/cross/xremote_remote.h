@@ -18,3 +18,6 @@ typedef struct CrossRemote CrossRemote;
 CrossRemote* cross_remote_alloc();
 void cross_remote_free(CrossRemote* cross_remote);
 bool cross_remote_load(CrossRemote* cross_remote, FuriString* path);
+bool cross_remote_add_item(CrossRemote* remote, const char* name);
+size_t cross_remtoe_get_item_count(CrossRemote* remote);
+CrossRemoteItem* cross_remote_get_item(CrossRemote* remote, size_t index);

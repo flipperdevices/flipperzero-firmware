@@ -5,6 +5,7 @@
 #include <gui/gui.h>
 
 #include <assets_icons.h>
+#include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 
@@ -43,13 +44,18 @@ typedef struct {
     NotificationApp* notification;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
-    ButtonMenu* button_menu;
+    ButtonMenu* button_menu_create;
+    ButtonMenu* button_menu_create_add;
+    ButtonMenu* button_menu_ir;
     Popup* popup;
+    Loading* loading;
+    ViewStack* view_stack;
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     XRemoteInfoscreen* xremote_infoscreen;
     XRemoteScene2* xremote_scene_2;
     InfraredRemote* ir_remote_buffer;
+    CrossRemote* cross_remote;
     uint32_t haptic; 
     uint32_t speaker;
     uint32_t led;
@@ -71,6 +77,7 @@ typedef enum {
     XRemoteViewIdSettings,
     XRemoteViewIdWip,
     XRemoteViewIdIrRemote,
+    XRemoteViewIdStack,
 } XRemoteViewId;
 
 typedef enum {
@@ -94,3 +101,4 @@ typedef enum {
 } XRemoteSettingsStoreState;
 
 void xremote_popup_closed_callback(void* context);
+void xremote_show_loading_popup(XRemote* xremote, bool show);

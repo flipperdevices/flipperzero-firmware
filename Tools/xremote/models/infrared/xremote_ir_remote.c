@@ -33,6 +33,12 @@ void xremote_ir_remote_free(InfraredRemote* remote) {
     free(remote);
 }
 
+
+InfraredRemoteButton* xremote_ir_get_button(InfraredRemote* remote, size_t index) {
+    furi_assert(index < InfraredButtonArray_size(remote->buttons));
+    return *InfraredButtonArray_get(remote->buttons, index);
+}
+
 bool xremote_ir_remote_load(InfraredRemote* remote, FuriString* path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);

@@ -1,10 +1,10 @@
-#include "xremote_ir_signal.h"
-
 #include <stdlib.h>
 #include <string.h>
 #include <core/check.h>
 #include <infrared_worker.h>
 #include <infrared_transmit.h>
+
+#include "xremote_ir_signal.h"
 
 #define TAG "InfraredSignal"
 

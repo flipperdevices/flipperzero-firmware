@@ -10,17 +10,14 @@ typedef enum {
 
 static void xremote_create_add_callback(void* context, int32_t index, InputType type) {
     XRemote* app = context;
-    UNUSED(app);
-    UNUSED(index);
-    UNUSED(type);
-
-     uint16_t custom_type;
+    
+    uint16_t custom_type;
     if(type == InputTypePress) {
-        custom_type = XRemoteCustomEventMenuSelected;
+        custom_type = XRemoteCustomEventMenuVoid;
     } else if(type == InputTypeRelease) {
-        custom_type = XRemoteCustomEventMenuSelected;
+        custom_type = XRemoteCustomEventMenuAddSelected;
     } else if(type == InputTypeShort) {
-        custom_type = XRemoteCustomEventMenuSelected;
+        custom_type = XRemoteCustomEventMenuVoid;
     } else {
         furi_crash("Unexpected Input Type");
     }
@@ -31,7 +28,7 @@ static void xremote_create_add_callback(void* context, int32_t index, InputType 
 void xremote_scene_create_add_on_enter(void* context) {
     furi_assert(context);
     XRemote* app = context;
-    ButtonMenu* button_menu = app->button_menu;
+    ButtonMenu* button_menu = app->button_menu_create_add;
     SceneManager* scene_manager = app->scene_manager;
 
     button_menu_add_item(
@@ -73,7 +70,7 @@ bool xremote_scene_create_add_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         const uint16_t custom_type = xremote_custom_menu_event_get_type(event.event);
         const int16_t button_index = xremote_custom_menu_event_get_value(event.event);
-        if (custom_type == XRemoteCustomEventMenuSelected) {
+        if (custom_type == XRemoteCustomEventMenuAddSelected) {
             furi_assert(button_index < 0);
             scene_manager_set_scene_state(
                 app->scene_manager, XRemoteSceneCreate, (unsigned)button_index);
@@ -86,6 +83,7 @@ bool xremote_scene_create_add_on_event(void* context, SceneManagerEvent event) {
             if(button_index == ButtonIndexPause) {
                 scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
             }
+            consumed = true;
         }
     }
     
@@ -94,5 +92,5 @@ bool xremote_scene_create_add_on_event(void* context, SceneManagerEvent event) {
 
 void xremote_scene_create_add_on_exit(void* context) {
     XRemote* app = context;
-    button_menu_reset(app->button_menu);
+    button_menu_reset(app->button_menu_create_add);
 }

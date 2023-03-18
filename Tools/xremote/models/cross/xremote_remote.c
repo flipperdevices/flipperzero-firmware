@@ -35,6 +35,24 @@ void cross_remote_free(CrossRemote* remote) {
     free(remote);
 }
 
+bool cross_remote_add_item(CrossRemote* remote, const char* name) {
+    CrossRemoteItem* item = xremote_remote_item_alloc();
+    xremote_remote_item_set_name(item, name);
+    CrossRemoteItemArray_push_back(remote->items, item);
+    return true;
+    //return cross_remote_store(remote);
+}
+
+size_t cross_remtoe_get_item_count(CrossRemote* remote) {
+    return CrossRemoteItemArray_size(remote->items);
+}
+
+CrossRemoteItem* cross_remote_get_item(CrossRemote* remote, size_t index) {
+    furi_assert(index < CrossRemoteItemArray_size(remote->items));
+    return *CrossRemoteItemArray_get(remote->items, index);
+}
+
+
 bool cross_remote_load(CrossRemote* remote, FuriString* path) {
     UNUSED(remote);
     UNUSED(path);
