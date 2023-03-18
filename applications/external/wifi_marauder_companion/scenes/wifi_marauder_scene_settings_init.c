@@ -34,7 +34,7 @@ void wifi_marauder_scene_settings_init_setup_widget(WifiMarauderApp* app) {
             12,
             128,
             38,
-            "With compatible marauder\nfirmware, you can choose to\nsave captures (pcaps) to the\nflipper sd card here:\n/" MARAUDER_APP_FOLDER_USER
+            "With compatible marauder\nfirmware, you can choose to\nsave captures (pcaps) to the\nflipper sd card here:\n" MARAUDER_APP_FOLDER_USER_PCAPS
             "\n\nYou can change this setting in the app at any time. Would\nyou like to enable this feature now?");
     } else {
         widget_add_string_element(widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Save logs?");
@@ -44,7 +44,7 @@ void wifi_marauder_scene_settings_init_setup_widget(WifiMarauderApp* app) {
             12,
             128,
             38,
-            "This app supports saving text\nlogs of console output to the\nflipper sd card here:\n/" MARAUDER_APP_FOLDER_USER
+            "This app supports saving text\nlogs of console output to the\nflipper sd card here:\n" MARAUDER_APP_FOLDER_USER_LOGS
             "\n\nYou can change this setting in the app at any time. Would\nyou like to enable this feature now?");
     }
 }

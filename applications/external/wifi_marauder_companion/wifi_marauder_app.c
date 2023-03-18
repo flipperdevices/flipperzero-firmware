@@ -88,6 +88,14 @@ void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
     if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\napp folder");
     }
+
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_PCAPS)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\npcaps folder");
+    }
+
+    if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_LOGS)) {
+        dialog_message_show_storage_error(app->dialogs, "Cannot create\npcaps folder");
+    }
 }
 
 void wifi_marauder_load_settings(WifiMarauderApp* app) {

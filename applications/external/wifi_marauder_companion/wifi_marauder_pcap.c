@@ -28,7 +28,7 @@ void wifi_marauder_create_pcap_file(WifiMarauderApp* app) {
             capture_file_path,
             sizeof(capture_file_path),
             "%s/%s_%d.pcap",
-            MARAUDER_APP_FOLDER,
+            MARAUDER_APP_FOLDER_PCAPS,
             prefix,
             i);
         i++;
@@ -47,7 +47,12 @@ void wifi_marauder_create_log_file(WifiMarauderApp* app) {
     int i = 0;
     do {
         snprintf(
-            log_file_path, sizeof(log_file_path), "%s/%s_%d.log", MARAUDER_APP_FOLDER, prefix, i);
+            log_file_path,
+            sizeof(log_file_path),
+            "%s/%s_%d.log",
+            MARAUDER_APP_FOLDER_LOGS,
+            prefix,
+            i);
         i++;
     } while(storage_file_exists(app->storage, log_file_path));
 
