@@ -1,7 +1,18 @@
 #include <furi.h>
 
 #include "one_wire_host.h"
-#include "one_wire_host_timing.h"
+
+#define OWH_WRITE_1_DRIVE 9
+#define OWH_WRITE_1_RELEASE 64
+#define OWH_WRITE_0_DRIVE 64
+#define OWH_WRITE_0_RELEASE 14
+#define OWH_READ_DRIVE 3
+#define OWH_READ_RELEASE 9
+#define OWH_READ_DELAY_POST 55
+#define OWH_RESET_DELAY_PRE 0
+#define OWH_RESET_DRIVE 480
+#define OWH_RESET_RELEASE 70
+#define OWH_RESET_DELAY_POST 410
 
 struct OneWireHost {
     const GpioPin* gpio_pin;
