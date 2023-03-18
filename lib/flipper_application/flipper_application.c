@@ -15,7 +15,7 @@ struct FlipperApplication {
     void* ep_thread_args;
 };
 
-/*********************** Debugger access to loader state ***********************/
+/********************** Debugger access to loader state **********************/
 
 LIST_DEF(FlipperApplicationList, const FlipperApplication*, M_POD_OPLIST);
 
