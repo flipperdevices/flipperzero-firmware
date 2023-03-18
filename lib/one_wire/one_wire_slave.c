@@ -46,18 +46,18 @@ static const OneWireSlaveTimings onewire_slave_timings_normal = {
 };
 
 static const OneWireSlaveTimings onewire_slave_timings_overdrive = {
-    .trstl_min = 270,
-    .trstl_max = 1200,
+    .trstl_min = 48,
+    .trstl_max = 80,
 
-    .tpdh_typ = 20,
-    .tpdl_min = 100,
-    .tpdl_max = 480,
+    .tpdh_typ = 2,
+    .tpdl_min = 7,
+    .tpdl_max = 24,
 
-    .tslot_min = 60,
-    .tslot_max = 135,
+    .tslot_min = 6,
+    .tslot_max = 16,
 
-    .tw1l_max = 20,
-    .trl_tmsr_max = 30,
+    .tw1l_max = 1,
+    .trl_tmsr_max = 2,
 
     .th_timeout = 15000,
 };
