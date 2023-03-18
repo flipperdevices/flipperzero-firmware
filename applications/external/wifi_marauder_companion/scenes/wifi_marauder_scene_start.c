@@ -127,13 +127,13 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
     {"Update", {"ota", "sd"}, 2, {"update -w", "update -s"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
-    {"Save to flipper sdcard",
+    {"Save to flipper sdcard", // keep as last entry or change logic in callback below
      {""},
      1,
      {""},
      NO_ARGS,
      FOCUS_CONSOLE_START,
-     NO_TIP}, // keep at bottom or change logic below
+     NO_TIP},
 };
 
 static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uint32_t index) {

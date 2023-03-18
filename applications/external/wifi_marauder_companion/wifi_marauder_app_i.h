@@ -41,9 +41,13 @@ struct WifiMarauderApp {
     TextInput* text_input;
     Storage* storage;
     File* capture_file;
+    File* log_file;
     File* save_pcap_setting_file;
     File* save_logs_setting_file;
     bool need_to_prompt_settings_init;
+    int which_prompt;
+    bool ok_to_save_pcaps;
+    bool ok_to_save_logs;
     DialogsApp* dialogs;
 
     VariableItemList* var_item_list;
@@ -58,7 +62,8 @@ struct WifiMarauderApp {
     bool is_custom_tx_string;
     bool focus_console_start;
     bool show_stopscan_tip;
-    bool is_writing;
+    bool is_writing_pcap;
+    bool is_writing_log;
 
     // For input source and destination MAC in targeted deauth attack
     int special_case_input_step;

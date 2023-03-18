@@ -28,6 +28,7 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
     app->capture_file = storage_file_alloc(app->storage);
+    app->log_file = storage_file_alloc(app->storage);
     app->save_pcap_setting_file = storage_file_alloc(app->storage);
     app->save_logs_setting_file = storage_file_alloc(app->storage);
 
@@ -89,6 +90,30 @@ void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
     }
 }
 
+void wifi_marauder_load_settings(WifiMarauderApp* app) {
+    if(storage_file_open(
+           app->save_pcap_setting_file,
+           SAVE_PCAP_SETTING_FILEPATH,
+           FSAM_READ,
+           FSOM_OPEN_EXISTING)) {
+        char ok[1];
+        storage_file_read(app->save_pcap_setting_file, ok, sizeof(ok));
+        app->ok_to_save_pcaps = ok[0] == 'Y';
+    }
+    storage_file_close(app->save_pcap_setting_file);
+
+    if(storage_file_open(
+           app->save_logs_setting_file,
+           SAVE_LOGS_SETTING_FILEPATH,
+           FSAM_READ,
+           FSOM_OPEN_EXISTING)) {
+        char ok[1];
+        storage_file_read(app->save_logs_setting_file, ok, sizeof(ok));
+        app->ok_to_save_logs = ok[0] == 'Y';
+    }
+    storage_file_close(app->save_logs_setting_file);
+}
+
 void wifi_marauder_app_free(WifiMarauderApp* app) {
     furi_assert(app);
 
@@ -102,6 +127,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     furi_string_free(app->text_box_store);
     text_input_free(app->text_input);
     storage_file_free(app->capture_file);
+    storage_file_free(app->log_file);
     storage_file_free(app->save_pcap_setting_file);
     storage_file_free(app->save_logs_setting_file);
 
@@ -125,6 +151,7 @@ int32_t wifi_marauder_app(void* p) {
     WifiMarauderApp* wifi_marauder_app = wifi_marauder_app_alloc();
 
     wifi_marauder_make_app_folder(wifi_marauder_app);
+    wifi_marauder_load_settings(wifi_marauder_app);
 
     wifi_marauder_app->uart = wifi_marauder_usart_init(wifi_marauder_app);
     wifi_marauder_app->lp_uart = wifi_marauder_lp_uart_init(wifi_marauder_app);
