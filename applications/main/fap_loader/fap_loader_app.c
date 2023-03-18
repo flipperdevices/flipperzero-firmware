@@ -10,7 +10,7 @@
 #include <loader/firmware_api/firmware_api.h>
 #include "fap_loader_app.h"
 
-#define TAG "fap_loader_app"
+#define TAG "fap_loader"
 
 struct FapLoader {
     FlipperApplication* app;
@@ -22,7 +22,7 @@ struct FapLoader {
     Loading* loading;
 };
 
-volatile bool fap_loader_is_under_debug = false;
+volatile bool fap_loader_debug_active = false;
 
 bool fap_loader_load_name_and_icon(
     FuriString* path,
@@ -109,11 +109,11 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
 
         FuriThread* thread = flipper_application_spawn(loader->app, NULL);
 
-        if(fap_loader_is_under_debug) {
+        /* This flag is set by the debugger - to break on app start */
+        if(fap_loader_debug_active) {
             FURI_LOG_W(TAG, "Triggering BP for debugger");
-            // Wait for debugger to attach
-            // After hitting this, you can set breakpoints in your code
-            // Note that you have to toggle breakpoints that were set before
+            /* After hitting this, you can set breakpoints in your .fap's code
+             * Note that you have to toggle breakpoints that were set before */
             __asm volatile("bkpt 0");
         }
 

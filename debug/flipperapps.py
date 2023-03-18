@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from typing import Optional, Tuple, Dict, ClassVar
 import struct
 import posixpath
-import os
 import zlib
 
 import gdb
@@ -123,14 +122,14 @@ class SetFapDebugElfRoot(gdb.Command):
         try:
             global helper
             print(f"Set '{arg}' as debug info lookup path for Flipper external apps")
-            helper.attach_fw()
+            helper.attach_to_fw()
             gdb.events.stop.connect(helper.handle_stop)
             gdb.events.exited.connect(helper.handle_exit)
         except gdb.error as e:
             print(f"Support for Flipper external apps debug is not available: {e}")
 
 
-class FlipperLoadedAppsState:
+class FlipperAppStateHelper:
     def __init__(self):
         self.app_type_ptr = None
         self.app_list_ptr = None
@@ -182,9 +181,9 @@ class FlipperLoadedAppsState:
 
         # print("Loaded apps:", self._current_apps)
 
-    def attach_fw(self) -> None:
+    def attach_to_fw(self) -> None:
         print("Attaching to Flipper firmware")
-        self.app_list_ptr = gdb.lookup_global_symbol("loaded_elf_list")
+        self.app_list_ptr = gdb.lookup_global_symbol("loaded_flipper_apps")
         self.app_type_ptr = gdb.lookup_type("FlipperApplication").pointer()
         self.app_list_entry_type = gdb.lookup_type("struct FlipperApplicationList_s")
         self.set_debug_mode(True)
@@ -196,10 +195,10 @@ class FlipperLoadedAppsState:
         self.set_debug_mode(False)
 
     def set_debug_mode(self, mode: bool) -> None:
-        gdb.execute(f"set variable fap_loader_is_under_debug = {int(mode)}")
+        gdb.execute(f"set variable fap_loader_debug_active = {int(mode)}")
 
 
 # Init additional 'fap-set-debug-elf-root' command and set up hooks
 SetFapDebugElfRoot()
-helper = FlipperLoadedAppsState()
+helper = FlipperAppStateHelper()
 print("Support for Flipper external apps debug is loaded")
