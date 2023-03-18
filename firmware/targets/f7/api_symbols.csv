@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,18.2,,
+Version,+,18.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2080,6 +2080,7 @@ Function,+,onewire_slave_receive_bit,_Bool,OneWireSlave*
 Function,+,onewire_slave_send,_Bool,"OneWireSlave*, const uint8_t*, size_t"
 Function,+,onewire_slave_send_bit,_Bool,"OneWireSlave*, _Bool"
 Function,+,onewire_slave_set_command_callback,void,"OneWireSlave*, OneWireSlaveCommandCallback, void*"
+Function,+,onewire_slave_set_overdrive,void,"OneWireSlave*, _Bool"
 Function,+,onewire_slave_set_reset_callback,void,"OneWireSlave*, OneWireSlaveResetCallback, void*"
 Function,+,onewire_slave_set_result_callback,void,"OneWireSlave*, OneWireSlaveResultCallback, void*"
 Function,+,onewire_slave_start,void,OneWireSlave*
