@@ -3,21 +3,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#define ONEWIRE_TRSTL_MIN 270 /* Minimum Reset Low time */
-#define ONEWIRE_TRSTL_MAX 1200 /* Maximum Reset Low time */
-
-#define ONEWIRE_TPDH_TYP 20 /* Typical Presence Detect High time */
-#define ONEWIRE_TPDL_MIN 100 /* Minimum Presence Detect Low time */
-#define ONEWIRE_TPDL_MAX 480 /* Maximum Presence Detect Low time */
-
-#define ONEWIRE_TSLOT_MIN 60 /* Minimum Read/Write Slot time */
-#define ONEWIRE_TSLOT_MAX 135 /* Maximum Read/Write Slot time */
-
-#define ONEWIRE_TW1L_MAX 20 /* Maximum Master Write 1 time */
-#define ONEWIRE_TRL_TMSR_MAX 30 /* Maximum Master Read Low + Read Sample time */
-
-#define ONEWIRE_TH_TIMEOUT 15000 /* Maximum time before general timeout */
-
 typedef enum {
     OneWireSlaveErrorNone = 0,
     OneWireSlaveErrorResetInProgress,
@@ -26,8 +11,60 @@ typedef enum {
     OneWireSlaveErrorTimeout,
 } OneWireSlaveError;
 
+typedef struct {
+    uint16_t trstl_min; /* Minimum Reset Low time */
+    uint16_t trstl_max; /* Maximum Reset Low time */
+
+    uint16_t tpdh_typ; /* Typical Presence Detect High time */
+    uint16_t tpdl_min; /* Minimum Presence Detect Low time */
+    uint16_t tpdl_max; /* Maximum Presence Detect Low time */
+
+    uint16_t tslot_min; /* Minimum Read/Write Slot time */
+    uint16_t tslot_max; /* Maximum Read/Write Slot time */
+
+    uint16_t tw1l_max; /* Maximum Master Write 1 time */
+    uint16_t trl_tmsr_max; /* Maximum Master Read Low + Read Sample time */
+
+    uint16_t th_timeout; /* Maximum time before general timeout */
+} OneWireSlaveTimings;
+
+static const OneWireSlaveTimings onewire_slave_timings_normal = {
+    .trstl_min = 270,
+    .trstl_max = 1200,
+
+    .tpdh_typ = 20,
+    .tpdl_min = 100,
+    .tpdl_max = 480,
+
+    .tslot_min = 60,
+    .tslot_max = 135,
+
+    .tw1l_max = 20,
+    .trl_tmsr_max = 30,
+
+    .th_timeout = 15000,
+};
+
+static const OneWireSlaveTimings onewire_slave_timings_overdrive = {
+    .trstl_min = 270,
+    .trstl_max = 1200,
+
+    .tpdh_typ = 20,
+    .tpdl_min = 100,
+    .tpdl_max = 480,
+
+    .tslot_min = 60,
+    .tslot_max = 135,
+
+    .tw1l_max = 20,
+    .trl_tmsr_max = 30,
+
+    .th_timeout = 15000,
+};
+
 struct OneWireSlave {
     const GpioPin* gpio_pin;
+    const OneWireSlaveTimings* timings;
     OneWireSlaveError error;
 
     OneWireSlaveResetCallback reset_callback;
@@ -60,18 +97,19 @@ static uint32_t
 }
 
 static bool onewire_slave_show_presence(OneWireSlave* bus) {
+    const OneWireSlaveTimings* timings = bus->timings;
     // wait until the bus is high (might return immediately)
-    onewire_slave_wait_while_gpio_is(bus, ONEWIRE_TRSTL_MAX, false);
+    onewire_slave_wait_while_gpio_is(bus, timings->trstl_max, false);
     // wait while master delay presence check
-    furi_delay_us(ONEWIRE_TPDH_TYP);
+    furi_delay_us(timings->tpdh_typ);
 
     // show presence
     furi_hal_gpio_write(bus->gpio_pin, false);
-    furi_delay_us(ONEWIRE_TPDL_MIN);
+    furi_delay_us(timings->tpdl_min);
     furi_hal_gpio_write(bus->gpio_pin, true);
 
     // somebody also can show presence
-    const uint32_t wait_low_time = ONEWIRE_TPDL_MAX - ONEWIRE_TPDL_MIN;
+    const uint32_t wait_low_time = timings->tpdl_max - timings->tpdl_min;
 
     // so we will wait
     if(onewire_slave_wait_while_gpio_is(bus, wait_low_time, false) == 0) {
@@ -131,6 +169,7 @@ static inline bool onewire_slave_bus_start(OneWireSlave* bus) {
 
 static void onewire_slave_exti_callback(void* context) {
     OneWireSlave* bus = context;
+    const OneWireSlaveTimings* timings = bus->timings;
 
     const volatile bool input_state = furi_hal_gpio_read(bus->gpio_pin);
     static uint32_t pulse_start = 0;
@@ -139,7 +178,7 @@ static void onewire_slave_exti_callback(void* context) {
         const uint32_t pulse_length =
             (DWT->CYCCNT - pulse_start) / furi_hal_cortex_instructions_per_microsecond();
 
-        if((pulse_length >= ONEWIRE_TRSTL_MIN) && pulse_length <= (ONEWIRE_TRSTL_MAX)) {
+        if((pulse_length >= timings->trstl_min) && pulse_length <= (timings->trstl_max)) {
             const bool result = onewire_slave_bus_start(bus);
 
             if(result && bus->result_callback != NULL) {
@@ -158,6 +197,7 @@ OneWireSlave* onewire_slave_alloc(const GpioPin* gpio_pin) {
     OneWireSlave* bus = malloc(sizeof(OneWireSlave));
 
     bus->gpio_pin = gpio_pin;
+    bus->timings = &onewire_slave_timings_normal;
     bus->error = OneWireSlaveErrorNone;
 
     return bus;
@@ -205,8 +245,9 @@ void onewire_slave_set_result_callback(
 }
 
 bool onewire_slave_receive_bit(OneWireSlave* bus) {
+    const OneWireSlaveTimings* timings = bus->timings;
     // wait while bus is low
-    uint32_t time = ONEWIRE_TSLOT_MAX;
+    uint32_t time = timings->tslot_max;
     time = onewire_slave_wait_while_gpio_is(bus, time, false);
     if(time == 0) {
         bus->error = OneWireSlaveErrorResetInProgress;
@@ -214,7 +255,7 @@ bool onewire_slave_receive_bit(OneWireSlave* bus) {
     }
 
     // wait while bus is high
-    time = ONEWIRE_TH_TIMEOUT;
+    time = timings->th_timeout;
     time = onewire_slave_wait_while_gpio_is(bus, time, true);
     if(time == 0) {
         bus->error = OneWireSlaveErrorTimeout;
@@ -222,15 +263,16 @@ bool onewire_slave_receive_bit(OneWireSlave* bus) {
     }
 
     // wait a time of zero
-    time = ONEWIRE_TW1L_MAX;
+    time = timings->tw1l_max;
     time = onewire_slave_wait_while_gpio_is(bus, time, false);
 
     return (time > 0);
 }
 
 bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
+    const OneWireSlaveTimings* timings = bus->timings;
     // wait while bus is low
-    uint32_t time = ONEWIRE_TSLOT_MAX;
+    uint32_t time = timings->tslot_max;
     time = onewire_slave_wait_while_gpio_is(bus, time, false);
     if(time == 0) {
         bus->error = OneWireSlaveErrorResetInProgress;
@@ -238,7 +280,7 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
     }
 
     // wait while bus is high
-    time = ONEWIRE_TH_TIMEOUT;
+    time = timings->th_timeout;
     time = onewire_slave_wait_while_gpio_is(bus, time, true);
     if(time == 0) {
         bus->error = OneWireSlaveErrorTimeout;
@@ -248,9 +290,9 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
     // choose write time
     if(!value) {
         furi_hal_gpio_write(bus->gpio_pin, false);
-        time = ONEWIRE_TRL_TMSR_MAX;
+        time = timings->trl_tmsr_max;
     } else {
-        time = ONEWIRE_TSLOT_MIN;
+        time = timings->tslot_min;
     }
 
     // hold line for ZERO or ONE time
@@ -300,4 +342,8 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size) {
         data[bytes_received] = value;
     }
     return true;
+}
+
+void onewire_slave_set_overdrive(OneWireSlave* bus, bool set) {
+    bus->timings = set ? &onewire_slave_timings_overdrive : &onewire_slave_timings_normal;
 }

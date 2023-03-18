@@ -48,12 +48,16 @@ void onewire_slave_start(OneWireSlave* bus);
 void onewire_slave_stop(OneWireSlave* bus);
 
 /**
- * TODO: description comment
+ * Receive one bit
+ * @param bus
+ * @return received bit
  */
 bool onewire_slave_receive_bit(OneWireSlave* bus);
 
 /**
- * TODO: description comment
+ * Receive one bit
+ * @param bus
+ * @return true on success, false on failure
  */
 bool onewire_slave_send_bit(OneWireSlave* bus, bool value);
 
@@ -74,6 +78,13 @@ bool onewire_slave_send(OneWireSlave* bus, const uint8_t* data, size_t data_size
  * @return bool
  */
 bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size);
+
+/**
+ * Enable overdrive mode
+ * @param bus
+ * @param set
+ */
+void onewire_slave_set_overdrive(OneWireSlave* bus, bool set);
 
 /**
  * Set a callback to be called on each reset
