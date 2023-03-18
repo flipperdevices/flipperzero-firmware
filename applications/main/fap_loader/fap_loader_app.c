@@ -22,6 +22,8 @@ struct FapLoader {
     Loading* loading;
 };
 
+volatile bool fap_loader_is_under_debug = false;
+
 bool fap_loader_load_name_and_icon(
     FuriString* path,
     Storage* storage,
@@ -106,6 +108,14 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
         FURI_LOG_I(TAG, "FAP Loader is starting app");
 
         FuriThread* thread = flipper_application_spawn(loader->app, NULL);
+
+        if(fap_loader_is_under_debug) {
+            FURI_LOG_W(TAG, "Triggering BP for debugger");
+            // Wait for debugger to attach
+            // After hitting this, you can set breakpoints in your code
+            // Note that you have to toggle breakpoints that were set before
+            __asm volatile("bkpt 0");
+        }
 
         FuriString* app_name = furi_string_alloc();
         path_extract_filename_no_ext(furi_string_get_cstr(loader->fap_path), app_name);
