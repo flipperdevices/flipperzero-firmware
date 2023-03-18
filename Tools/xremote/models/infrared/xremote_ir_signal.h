@@ -18,3 +18,4 @@ typedef struct {
 
 InfraredSignal* xremote_ir_signal_alloc();
 void xremote_ir_signal_free(InfraredSignal* signal);
+bool xremote_ir_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString* name);

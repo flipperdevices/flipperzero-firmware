@@ -29,7 +29,8 @@
 #include "views/xremote_infoscreen.h"
 #include "views/xremote_scene_2.h"
 #include "helpers/xremote_storage.h"
-#include "helpers/xremote_ir_remote.h"
+#include "models/infrared/xremote_ir_remote.h"
+#include "models/cross/xremote_remote.h"
 
 #define TAG "XRemote"
 #define INFRARED_APP_EXTENSION ".ir"
@@ -55,6 +56,11 @@ typedef struct {
     uint32_t save_settings;
 } XRemote;
 
+typedef enum {
+    XRemoteRemoteItemTypeInfrared,
+    XRemoteRemoteItemTypeSubGhz,
+    XRemoteRemoteItemTypePause,
+} XRemoteRemoteItemType;
 
 typedef enum {
     XRemoteViewIdInfoscreen,
@@ -64,6 +70,7 @@ typedef enum {
     XRemoteViewIdScene2,
     XRemoteViewIdSettings,
     XRemoteViewIdWip,
+    XRemoteViewIdIrRemote,
 } XRemoteViewId;
 
 typedef enum {

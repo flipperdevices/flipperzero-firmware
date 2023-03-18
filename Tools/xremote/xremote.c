@@ -50,13 +50,15 @@ XRemote* xremote_app_alloc() {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->file_path = furi_string_alloc();
 
+    app->ir_remote_buffer = xremote_ir_remote_alloc();
+
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdMenu, submenu_get_view(app->submenu));
     app->xremote_infoscreen = xremote_infoscreen_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdInfoscreen, xremote_infoscreen_get_view(app->xremote_infoscreen));
     app->button_menu = button_menu_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdCreate, button_menu_get_view(app->button_menu));
-    //app->button_menu = button_menu_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdCreateAdd, button_menu_get_view(app->button_menu));
+    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdIrRemote, button_menu_get_view(app->button_menu));
     app->xremote_scene_2 = xremote_scene_2_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdScene2, xremote_scene_2_get_view(app->xremote_scene_2));
     app->variable_item_list = variable_item_list_alloc();
