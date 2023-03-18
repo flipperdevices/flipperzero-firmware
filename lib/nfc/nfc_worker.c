@@ -508,6 +508,10 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
                             break;
                         }
                     }
+                } else if(read_mode == NfcReadModeNFCF) {
+                    nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
+                    event = NfcWorkerEventReadUidNfcF;
+                    break;
                 }
             }
         } else {

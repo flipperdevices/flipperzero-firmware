@@ -66,35 +66,35 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             nfc_data->f_data.pmm[0],
             nfc_data->f_data.pmm[1]);
 
-        furi_string_cat_printf(temp_str, "Timings (1 node/blk):\n");
+        furi_string_cat_printf(temp_str, "MRT (1 node/blk):\n");
         furi_string_cat_printf(
             temp_str,
             "- ReqSvc: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[2], 1));
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_VARIABLE_MRT], 1));
         furi_string_cat_printf(
             temp_str,
             "- Fixed: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[3], 0));
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_FIXED_MRT], 0));
         furi_string_cat_printf(
             temp_str,
             "- Auth1: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[4], 1));
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_MUTUAL_AUTH_MRT], 1));
         furi_string_cat_printf(
             temp_str,
             "- Auth2: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[4], 0));
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_MUTUAL_AUTH_MRT], 0));
         furi_string_cat_printf(
             temp_str,
             "- Read: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[5], 1));
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_READ_MRT], 1));
         furi_string_cat_printf(
             temp_str,
             "- Write: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[6], 1));
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_WRITE_MRT], 1));
         furi_string_cat_printf(
             temp_str,
             "- Other: %" PRIuLEAST32 "us\n\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[7], 0));
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_OTHER_MRT], 0));
 
         furi_string_cat_printf(temp_str, "IDm:");
         for(size_t i = 0; i < nfc_data->uid_len; i++) {

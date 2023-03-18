@@ -3,6 +3,7 @@
 
 static const uint32_t TIME_CONSTANT_US = 302;
 
+// TODO move this to felica.c
 uint_least32_t felica_estimate_timing_us(uint_least8_t timing, uint_least8_t units) {
     uint_least32_t base_cost_factor = 1 + (timing & 0x7);
     uint_least32_t unit_cost_factor = 1 + ((timing >> 3) & 0x7);

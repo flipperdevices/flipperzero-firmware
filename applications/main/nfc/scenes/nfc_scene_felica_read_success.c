@@ -29,21 +29,19 @@ void nfc_scene_felica_read_success_on_enter(void* context) {
     } else {
         temp_str = furi_string_alloc_printf("\e#%s", nfc_felica_type(felica_data->type));
 
-        FelicaSystemList_it_t it;
-        for(FelicaSystemList_it(it, felica_data->systems); !FelicaSystemList_end_p(it);
-            FelicaSystemList_next(it)) {
-            FelicaSystem* current_system = *FelicaSystemList_ref(it);
-            furi_string_cat_printf(
-                temp_str, "\nSystem %04X (#%d):", current_system->code, current_system->number);
-            furi_string_cat_printf(temp_str, "\nIDm:\n    ");
-            for(size_t i = 0; i < 8; i++) {
-                furi_string_cat_printf(temp_str, "%02X", current_system->idm[i]);
+        for
+            M_EACH(current_system, felica_data->systems, FelicaSystemArray_t) {
+                furi_string_cat_printf(
+                    temp_str, "\nSystem %04X (#%d):", current_system->code, current_system->number);
+                furi_string_cat_printf(temp_str, "\nIDm:\n    ");
+                for(size_t i = 0; i < 8; i++) {
+                    furi_string_cat_printf(temp_str, "%02X", current_system->idm[i]);
+                }
+                furi_string_cat_printf(temp_str, "\nPMm:\n    ");
+                for(size_t i = 0; i < 8; i++) {
+                    furi_string_cat_printf(temp_str, "%02X", current_system->pmm[i]);
+                }
             }
-            furi_string_cat_printf(temp_str, "\nPMm:\n    ");
-            for(size_t i = 0; i < 8; i++) {
-                furi_string_cat_printf(temp_str, "%02X", current_system->pmm[i]);
-            }
-        }
     }
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));

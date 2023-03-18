@@ -19,24 +19,24 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
     uint8_t i = 1;
     if(state->selected_system == NULL || state->selected_system->code == LITE_SYSTEM_CODE) {
         submenu_set_header(submenu, "Systems");
-        FelicaSystemList_it_t it;
-        for(FelicaSystemList_it(it, data->systems); !FelicaSystemList_end_p(it);
-            FelicaSystemList_next(it)) {
-            FelicaSystem* current_system = *FelicaSystemList_ref(it);
-            FuriString* system_name = felica_get_system_name(current_system);
-            submenu_add_item(
-                submenu,
-                furi_string_get_cstr(system_name),
-                i++,
-                nfc_scene_felica_info_select_submenu_callback,
-                nfc);
-            furi_string_free(system_name);
-        }
+        for
+            M_EACH(current_system, data->systems, FelicaSystemArray_t) {
+                FuriString* system_name = felica_get_system_name(current_system);
+                submenu_add_item(
+                    submenu,
+                    furi_string_get_cstr(system_name),
+                    i++,
+                    nfc_scene_felica_info_select_submenu_callback,
+                    nfc);
+                furi_string_free(system_name);
+            }
     } else {
         FelicaSystem* system = state->selected_system;
         FuriString* header = furi_string_alloc_printf("%04X/", system->code);
 
-        FelicaArea* area = &system->root_area;
+        FelicaNode* root = &system->root;
+        furi_assert(root->type == FelicaNodeTypeArea);
+        FelicaArea* area = root->area;
         if(FelicaAreaPath_size(state->selected_areas) > 0) {
             FelicaAreaPath_it_t it;
             for(FelicaAreaPath_it(it, state->selected_areas); !FelicaAreaPath_end_p(it);
@@ -51,32 +51,30 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
         submenu_set_header(submenu, furi_string_get_cstr(header));
         furi_string_free(header);
 
-        FelicaNodeList_it_t it;
-        for(FelicaNodeList_it(it, area->nodes); !FelicaNodeList_end_p(it);
-            FelicaNodeList_next(it)) {
-            FelicaNode* node = *FelicaNodeList_ref(it);
-            FuriString* node_name = furi_string_alloc();
-            if(node->type == FelicaNodeTypeArea) {
-                furi_string_printf(node_name, "Area %d", node->area->number);
-                submenu_add_item(
-                    submenu,
-                    furi_string_get_cstr(node_name),
-                    i++,
-                    nfc_scene_felica_info_select_submenu_callback,
-                    nfc);
-            } else {
-                uint16_t service_code = node->service->number << 6;
-                furi_string_printf(node_name, "Service %04X", service_code);
-                submenu_add_item(
-                    submenu,
-                    furi_string_get_cstr(node_name),
-                    i++,
-                    nfc_scene_felica_info_select_submenu_callback,
-                    nfc);
-            }
+        for
+            M_EACH(node, area->nodes, FelicaNodeArray_t) {
+                FuriString* node_name = furi_string_alloc();
+                if(node->type == FelicaNodeTypeArea) {
+                    furi_string_printf(node_name, "Area %d", node->area->number);
+                    submenu_add_item(
+                        submenu,
+                        furi_string_get_cstr(node_name),
+                        i++,
+                        nfc_scene_felica_info_select_submenu_callback,
+                        nfc);
+                } else {
+                    uint16_t service_code = node->service->number << 6;
+                    furi_string_printf(node_name, "Service %04X", service_code);
+                    submenu_add_item(
+                        submenu,
+                        furi_string_get_cstr(node_name),
+                        i++,
+                        nfc_scene_felica_info_select_submenu_callback,
+                        nfc);
+                }
 
-            furi_string_free(node_name);
-        }
+                furi_string_free(node_name);
+            }
     }
 
     state->selected_service = NULL;
@@ -102,7 +100,7 @@ bool nfc_scene_felica_info_select_on_event(void* context, SceneManagerEvent even
 
         index -= 1;
         if(state->selected_system == NULL) {
-            state->selected_system = *FelicaSystemList_get(data->systems, index);
+            state->selected_system = FelicaSystemArray_get(data->systems, index);
             if(state->selected_system->code == LITE_SYSTEM_CODE) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaServiceData);
             } else {
@@ -111,12 +109,15 @@ bool nfc_scene_felica_info_select_on_event(void* context, SceneManagerEvent even
             consumed = true;
         } else {
             FelicaNode* selected_node = NULL;
+
+            FelicaNode* root = &(state->selected_system->root);
+            furi_assert(root->type == FelicaNodeTypeArea);
+
             if(FelicaAreaPath_size(state->selected_areas) == 0) {
-                selected_node =
-                    *FelicaNodeList_get(state->selected_system->root_area.nodes, index);
+                selected_node = FelicaNodeArray_get(root->area->nodes, index);
             } else {
                 FelicaArea* current_area = *FelicaAreaPath_back(state->selected_areas);
-                selected_node = *FelicaNodeList_get(current_area->nodes, index);
+                selected_node = FelicaNodeArray_get(current_area->nodes, index);
             }
 
             if(selected_node->type == FelicaNodeTypeArea) {
