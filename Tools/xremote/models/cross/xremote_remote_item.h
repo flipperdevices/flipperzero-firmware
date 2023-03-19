@@ -8,6 +8,7 @@
 #include <toolbox/path.h>
 #include <storage/storage.h>
 #include <core/common_defines.h>
+#include <infrared.h>
 
 typedef struct CrossRemoteItem CrossRemoteItem;
 
@@ -16,6 +17,8 @@ void xremote_remote_item_free(CrossRemoteItem* item);
 
 void xremote_remote_item_set_name(CrossRemoteItem* item, const char* name);
 const char* xremote_remote_item_get_name(CrossRemoteItem* item);
+
+void xremote_remote_item_set_ir_signal(CrossRemoteItem* item, InfraredSignal* signal);
 
 
 

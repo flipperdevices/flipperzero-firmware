@@ -33,7 +33,6 @@ void xremote_ir_remote_free(InfraredRemote* remote) {
     free(remote);
 }
 
-
 InfraredRemoteButton* xremote_ir_get_button(InfraredRemote* remote, size_t index) {
     furi_assert(index < InfraredButtonArray_size(remote->buttons));
     return *InfraredButtonArray_get(remote->buttons, index);

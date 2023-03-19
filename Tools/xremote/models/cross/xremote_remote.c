@@ -1,3 +1,4 @@
+#include "../infrared/xremote_ir_signal.h"
 #include "xremote_remote.h"
 
 #define TAG "XremoteCrossRemote"
@@ -35,9 +36,10 @@ void cross_remote_free(CrossRemote* remote) {
     free(remote);
 }
 
-bool cross_remote_add_item(CrossRemote* remote, const char* name) {
+bool cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSignal* signal) {
     CrossRemoteItem* item = xremote_remote_item_alloc();
     xremote_remote_item_set_name(item, name);
+    xremote_remote_item_set_ir_signal(item, signal);
     CrossRemoteItemArray_push_back(remote->items, item);
     return true;
     //return cross_remote_store(remote);
