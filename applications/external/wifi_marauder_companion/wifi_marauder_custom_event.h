@@ -6,5 +6,6 @@ typedef enum {
     WifiMarauderEventStartKeyboard,
     WifiMarauderEventSaveSourceMac,
     WifiMarauderEventSaveDestinationMac,
-    WifiMarauderEventStartSettingsInit
+    WifiMarauderEventStartSettingsInit,
+    WifiMarauderEventStartLogViewer
 } WifiMarauderCustomEvent;

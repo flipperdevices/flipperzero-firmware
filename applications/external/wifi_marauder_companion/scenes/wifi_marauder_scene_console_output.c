@@ -7,6 +7,7 @@ void wifi_marauder_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, vo
     if(app->ok_to_save_logs) {
         if(!app->is_writing_log) {
             app->is_writing_log = true;
+            app->has_saved_logs_this_session = true;
             if(!app->log_file || !storage_file_is_open(app->log_file)) {
                 wifi_marauder_create_log_file(app);
             }

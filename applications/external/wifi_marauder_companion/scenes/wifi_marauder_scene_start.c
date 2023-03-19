@@ -161,6 +161,12 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
                                    item->focus_console;
     app->show_stopscan_tip = item->show_stopscan_tip;
 
+    if(!app->is_command && selected_option_index == 0) {
+        // View Log from start
+        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartLogViewer);
+        return;
+    }
+
     bool needs_keyboard = (item->needs_keyboard == TOGGLE_ARGS) ? (selected_option_index != 0) :
                                                                   item->needs_keyboard;
     if(needs_keyboard) {
@@ -232,6 +238,10 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
             scene_manager_set_scene_state(
                 app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, WifiMarauderSceneSettingsInit);
+        } else if(event.event == WifiMarauderEventStartLogViewer) {
+            scene_manager_set_scene_state(
+                app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
+            scene_manager_next_scene(app->scene_manager, WifiMarauderSceneLogViewer);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {

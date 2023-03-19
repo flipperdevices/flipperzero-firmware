@@ -46,16 +46,20 @@ struct WifiMarauderApp {
     Storage* storage;
     File* capture_file;
     File* log_file;
+    char log_file_path[100];
     File* save_pcap_setting_file;
     File* save_logs_setting_file;
     bool need_to_prompt_settings_init;
     int which_prompt;
     bool ok_to_save_pcaps;
     bool ok_to_save_logs;
+    bool has_saved_logs_this_session;
     DialogsApp* dialogs;
 
     VariableItemList* var_item_list;
     Widget* widget;
+    int open_log_file_page;
+    int open_log_file_num_pages;
 
     WifiMarauderUart* uart;
     WifiMarauderUart* lp_uart;
