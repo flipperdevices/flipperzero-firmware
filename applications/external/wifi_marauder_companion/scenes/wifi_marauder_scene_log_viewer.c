@@ -16,10 +16,9 @@ static void _read_log_page_into_text_store(WifiMarauderApp* app) {
     storage_file_seek(
         app->log_file, WIFI_MARAUDER_TEXT_BOX_STORE_SIZE * (app->open_log_file_page - 1), true);
     furi_string_reset(app->text_box_store);
-    for (uint16_t i = 0; i < (WIFI_MARAUDER_TEXT_BOX_STORE_SIZE / (sizeof(temp) - 1)); i++)
-    {
-        uint16_t num_bytes = storage_file_read(app->log_file, temp, sizeof(temp)-1);
-        if (num_bytes == 0) {
+    for(uint16_t i = 0; i < (WIFI_MARAUDER_TEXT_BOX_STORE_SIZE / (sizeof(temp) - 1)); i++) {
+        uint16_t num_bytes = storage_file_read(app->log_file, temp, sizeof(temp) - 1);
+        if(num_bytes == 0) {
             break;
         }
         temp[num_bytes] = '\0';
@@ -61,8 +60,19 @@ void wifi_marauder_scene_log_viewer_setup_widget(WifiMarauderApp* app) {
     widget_add_text_scroll_element(
         widget, 0, 0, 128, 53, furi_string_get_cstr(app->text_box_store));
 
-    widget_add_button_element(
-        widget, GuiButtonTypeCenter, "Browse", wifi_marauder_scene_log_viewer_widget_callback, app);
+    if(1 < app->open_log_file_page && app->open_log_file_page < app->open_log_file_num_pages) {
+        // hide "Browse" text for middle pages
+        widget_add_button_element(
+            widget, GuiButtonTypeCenter, "", wifi_marauder_scene_log_viewer_widget_callback, app);
+    } else {
+        // only show "Browse" text on first and last page
+        widget_add_button_element(
+            widget,
+            GuiButtonTypeCenter,
+            "Browse",
+            wifi_marauder_scene_log_viewer_widget_callback,
+            app);
+    }
 
     char pagecounter[100];
     snprintf(
@@ -72,12 +82,18 @@ void wifi_marauder_scene_log_viewer_setup_widget(WifiMarauderApp* app) {
         app->open_log_file_page,
         app->open_log_file_num_pages);
     if(app->open_log_file_page > 1) {
-        widget_add_button_element(
-            widget,
-            GuiButtonTypeLeft,
-            pagecounter,
-            wifi_marauder_scene_log_viewer_widget_callback,
-            app);
+        if(app->open_log_file_page == app->open_log_file_num_pages) {
+            // only show left side page-count on last page
+            widget_add_button_element(
+                widget,
+                GuiButtonTypeLeft,
+                pagecounter,
+                wifi_marauder_scene_log_viewer_widget_callback,
+                app);
+        } else {
+            widget_add_button_element(
+                widget, GuiButtonTypeLeft, "", wifi_marauder_scene_log_viewer_widget_callback, app);
+        }
     }
     if(app->open_log_file_page < app->open_log_file_num_pages) {
         widget_add_button_element(
