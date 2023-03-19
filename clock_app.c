@@ -11,7 +11,7 @@
 #include "applications/settings/desktop_settings/desktop_settings_app.h"
 #include "Dab_Timer_icons.h"
 
-#define TAG "Clock"
+#define TAG "DabTimer"
 #define CLOCK_ISO_DATE_FORMAT "%.4d-%.2d-%.2d"
 #define CLOCK_RFC_DATE_FORMAT "%.2d-%.2d-%.4d"
 #define CLOCK_TIME_FORMAT "%.2d:%.2d:%.2d"
