@@ -72,6 +72,8 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, WifiMarauderAppViewWidget, widget_get_view(app->widget));
 
+    app->has_saved_logs_this_session = false;
+
     // if user hasn't confirmed whether to save pcaps and logs to sdcard, then prompt when scene starts
     app->need_to_prompt_settings_init =
         (!storage_file_exists(app->storage, SAVE_PCAP_SETTING_FILEPATH) ||

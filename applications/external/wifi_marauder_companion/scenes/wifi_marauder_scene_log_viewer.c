@@ -11,8 +11,7 @@ void wifi_marauder_scene_log_viewer_widget_callback(
 }
 
 static void _read_log_page_into_text_store(WifiMarauderApp* app) {
-    static char temp[257];
-    bzero(temp, sizeof(temp));
+    char temp[64 + 1];
     storage_file_seek(
         app->log_file, WIFI_MARAUDER_TEXT_BOX_STORE_SIZE * (app->open_log_file_page - 1), true);
     furi_string_reset(app->text_box_store);
@@ -28,15 +27,17 @@ static void _read_log_page_into_text_store(WifiMarauderApp* app) {
 
 void wifi_marauder_scene_log_viewer_setup_widget(WifiMarauderApp* app, bool called_from_browse) {
     Widget* widget = app->widget;
-
-    if(storage_file_is_open(app->log_file)) {
+    bool is_open = storage_file_is_open(app->log_file);
+    bool should_open_log = (app->has_saved_logs_this_session || called_from_browse);
+    if(is_open) {
         _read_log_page_into_text_store(app);
     } else if(
-        (app->has_saved_logs_this_session || called_from_browse) &&
+        should_open_log &&
         storage_file_open(app->log_file, app->log_file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        app->open_log_file_num_pages =
-            storage_file_size(app->log_file) / WIFI_MARAUDER_TEXT_BOX_STORE_SIZE +
-            (storage_file_size(app->log_file) % WIFI_MARAUDER_TEXT_BOX_STORE_SIZE != 0);
+        uint64_t filesize = storage_file_size(app->log_file);
+        app->open_log_file_num_pages = filesize / WIFI_MARAUDER_TEXT_BOX_STORE_SIZE;
+        int extra_page = (filesize % WIFI_MARAUDER_TEXT_BOX_STORE_SIZE != 0) ? 1 : 0;
+        app->open_log_file_num_pages = (filesize / WIFI_MARAUDER_TEXT_BOX_STORE_SIZE) + extra_page;
         app->open_log_file_page = 1;
         _read_log_page_into_text_store(app);
     } else {

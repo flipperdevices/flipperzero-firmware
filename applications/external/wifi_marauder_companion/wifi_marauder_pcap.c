@@ -59,6 +59,6 @@ void wifi_marauder_create_log_file(WifiMarauderApp* app) {
     if(!storage_file_open(app->log_file, log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
     } else {
-        strncpy(app->log_file_path, log_file_path, strlen(log_file_path));
+        strcpy(app->log_file_path, log_file_path);
     }
 }
