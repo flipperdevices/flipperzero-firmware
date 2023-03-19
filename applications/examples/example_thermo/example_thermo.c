@@ -22,6 +22,7 @@
 #define UPDATE_PERIOD_MS 1000UL
 #define TEXT_STORE_SIZE 64U
 
+#define DS18B20_CMD_SKIP_ROM 0xccU
 #define DS18B20_CMD_CONVERT 0x44U
 #define DS18B20_CMD_READ_SCRATCHPAD 0xbeU
 
@@ -92,7 +93,7 @@ static void example_thermo_request_temperature(ExampleThermoContext* context) {
         /* After the reset, a ROM operation must follow.
            If there is only one device connected, the "Skip ROM" command is most appropriate
            (it can also be used to address all of the connected devices in some cases).*/
-        onewire_host_skip(onewire);
+        onewire_host_write(onewire, DS18B20_CMD_SKIP_ROM);
         /* After the ROM operation, a device-specific command is issued.
            In this case, it's a request to start measuring the temperature. */
         onewire_host_write(onewire, DS18B20_CMD_CONVERT);
@@ -133,7 +134,7 @@ static void example_thermo_read_temperature(ExampleThermoContext* context) {
             /* After the reset, a ROM operation must follow.
             If there is only one device connected, the "Skip ROM" command is most appropriate
             (it can also be used to address all of the connected devices in some cases).*/
-            onewire_host_skip(onewire);
+            onewire_host_write(onewire, DS18B20_CMD_SKIP_ROM);
 
             /* After the ROM operation, a device-specific command is issued.
             This time, it will be the "Read Scratchpad" command which will
