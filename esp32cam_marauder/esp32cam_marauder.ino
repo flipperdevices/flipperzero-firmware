@@ -154,7 +154,12 @@ void setup()
           cam_stream_setup();
           for (;;)
             cam_stream_loop();
-        
+
+        case 'n':  // Nanny cam
+          nanny_cam_setup();
+          for (;;)
+            nanny_cam_loop();
+
         case 'w':  // Marauder
           goto continue_to_marauder;
       }
