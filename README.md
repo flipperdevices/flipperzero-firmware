@@ -1,5 +1,5 @@
-<a href='https://rogue-master.net'><img src="https://rogue-master.net/img/rmlogo.png" width="40%"></a><br>
-Want to chat? Join my <a href='https://discord.gg/gF2bBUzAFe' target="_blank">Discord</a>.
+<h1 align="center"><a href='https://rogue-master.net'><img src="https://rogue-master.net/img/rmlogo.png" width="40%"></a></h1>
+<h3 align="center">Want to chat? Join my <a href='https://discord.gg/gF2bBUzAFe' target="_blank">Discord</a>.</h3>
 
 # Dab Timer / Clock (By RogueMaster)
 - We were the first clock created for Flipper Zero
