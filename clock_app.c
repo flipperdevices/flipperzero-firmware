@@ -9,7 +9,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include "applications/settings/desktop_settings/desktop_settings_app.h"
-#include "Clock_icons.h"
+#include "Dab_Timer_icons.h"
 
 #define TAG "Clock"
 #define CLOCK_ISO_DATE_FORMAT "%.4d-%.2d-%.2d"
