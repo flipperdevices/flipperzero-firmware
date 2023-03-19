@@ -40,7 +40,7 @@ static const OneWireHostTimings onewire_host_timings_overdrive = {
     .d = 3,
     .e = 1,
     .f = 7,
-    .g = 2,
+    .g = 3,
     .h = 70,
     .i = 9,
     .j = 40,
@@ -173,10 +173,6 @@ void onewire_host_write_bytes(OneWireHost* host, const uint8_t* buffer, uint16_t
     }
 }
 
-void onewire_host_skip(OneWireHost* host) {
-    onewire_host_write(host, 0xCC);
-}
-
 void onewire_host_start(OneWireHost* host) {
     furi_hal_gpio_write(host->gpio_pin, true);
     furi_hal_gpio_init(host->gpio_pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
@@ -205,7 +201,7 @@ void onewire_host_target_search(OneWireHost* host, uint8_t family_code) {
     host->last_device_flag = false;
 }
 
-uint8_t onewire_host_search(OneWireHost* host, uint8_t* new_addr, OneWireHostSearchMode mode) {
+bool onewire_host_search(OneWireHost* host, uint8_t* new_addr, OneWireHostSearchMode mode) {
     uint8_t id_bit_number;
     uint8_t last_zero, rom_byte_number, search_result;
     uint8_t id_bit, cmp_id_bit;

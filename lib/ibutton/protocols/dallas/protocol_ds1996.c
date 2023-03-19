@@ -74,6 +74,8 @@ bool dallas_ds1996_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
         onewire_host_set_overdrive(host, true);
 
         if(!dallas_common_read_mem(host, 0, data->sram_data, DS1996_SRAM_DATA_SIZE)) break;
+        onewire_host_set_overdrive(host, false);
+
         success = true;
     } while(false);
 
@@ -125,14 +127,17 @@ static bool dallas_ds1996_command_callback(uint8_t command, void* context) {
         }
 
     case DALLAS_COMMON_CMD_SKIP_ROM:
+        if(data->state.command_state == DallasCommonCommandStateIdle) {
+            data->state.command_state = DallasCommonCommandStateRomCmd;
+            return true;
+        } else {
+            return false;
+        }
+
     case DALLAS_COMMON_CMD_OVERDRIVE_SKIP_ROM:
         if(data->state.command_state == DallasCommonCommandStateIdle) {
             data->state.command_state = DallasCommonCommandStateRomCmd;
-
-            if(command == DALLAS_COMMON_CMD_OVERDRIVE_SKIP_ROM) {
-                onewire_slave_set_overdrive(bus, true);
-            }
-
+            onewire_slave_set_overdrive(bus, true);
             return true;
         } else {
             return false;
