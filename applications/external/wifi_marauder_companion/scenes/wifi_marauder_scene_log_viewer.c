@@ -26,13 +26,13 @@ static void _read_log_page_into_text_store(WifiMarauderApp* app) {
     }
 }
 
-void wifi_marauder_scene_log_viewer_setup_widget(WifiMarauderApp* app) {
+void wifi_marauder_scene_log_viewer_setup_widget(WifiMarauderApp* app, bool called_from_browse) {
     Widget* widget = app->widget;
 
     if(storage_file_is_open(app->log_file)) {
         _read_log_page_into_text_store(app);
     } else if(
-        app->has_saved_logs_this_session &&
+        (app->has_saved_logs_this_session || called_from_browse) &&
         storage_file_open(app->log_file, app->log_file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         app->open_log_file_num_pages =
             storage_file_size(app->log_file) / WIFI_MARAUDER_TEXT_BOX_STORE_SIZE +
@@ -110,7 +110,7 @@ void wifi_marauder_scene_log_viewer_on_enter(void* context) {
 
     app->open_log_file_page = 0;
     app->open_log_file_num_pages = 0;
-    wifi_marauder_scene_log_viewer_setup_widget(app);
+    wifi_marauder_scene_log_viewer_setup_widget(app, false);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewWidget);
 }
@@ -126,7 +126,6 @@ bool wifi_marauder_scene_log_viewer_on_event(void* context, SceneManagerEvent ev
             FuriString* selected_filepath = furi_string_alloc();
             if(dialog_file_browser_show(
                    app->dialogs, selected_filepath, predefined_filepath, NULL)) {
-                app->has_saved_logs_this_session = true;
                 strncpy(
                     app->log_file_path,
                     furi_string_get_cstr(selected_filepath),
@@ -134,7 +133,7 @@ bool wifi_marauder_scene_log_viewer_on_event(void* context, SceneManagerEvent ev
                 if(storage_file_is_open(app->log_file)) {
                     storage_file_close(app->log_file);
                 }
-                wifi_marauder_scene_log_viewer_setup_widget(app);
+                wifi_marauder_scene_log_viewer_setup_widget(app, true);
             }
             furi_string_free(selected_filepath);
             furi_string_free(predefined_filepath);
@@ -142,11 +141,11 @@ bool wifi_marauder_scene_log_viewer_on_event(void* context, SceneManagerEvent ev
         } else if(event.event == GuiButtonTypeRight) {
             // Advance page
             ++app->open_log_file_page;
-            wifi_marauder_scene_log_viewer_setup_widget(app);
+            wifi_marauder_scene_log_viewer_setup_widget(app, false);
         } else if(event.event == GuiButtonTypeLeft) {
             // Previous page
             --app->open_log_file_page;
-            wifi_marauder_scene_log_viewer_setup_widget(app);
+            wifi_marauder_scene_log_viewer_setup_widget(app, false);
         }
     }
 
