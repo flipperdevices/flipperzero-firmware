@@ -1,4 +1,4 @@
-<a href='https://www.patreon.com/RogueMaster/membership'><img src="https://rogue-master.net/img/rmlogo.png" width="40%"></a><br>
+<a href='https://rogue-master.net'><img src="https://rogue-master.net/img/rmlogo.png" width="40%"></a><br>
 Want to chat? Join my <a href='https://discord.gg/gF2bBUzAFe' target="_blank">Discord</a>.
 
 # Dab Timer / Clock (By RogueMaster)
