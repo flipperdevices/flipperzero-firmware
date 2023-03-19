@@ -9,16 +9,7 @@
 
 struct AvrIsp {
     AvrIspSpiSw* spi;
-
-    uint16_t error;
-    uint16_t addr;
     bool pmode;
-    //uint8_t buff[AVR_ISP_PROG_TX_RX_BUF_SIZE];
-
-    uint16_t pagesize;
-    uint16_t eepromsize;
-    uint32_t flashsize;
-
     AvrIspCallback callback;
     void* context;
 };
@@ -134,160 +125,139 @@ bool avr_isp_auto_set_spi_speed_start_pmode(AvrIsp* instance) {
     return false;
 }
 
-// static void avr_isp_universal(AvrIsp* instance) {
-//     furi_assert(instance);
-//     uint8_t data;
+static void avr_isp_commit(AvrIsp* instance, uint16_t addr, uint8_t data) {
+    furi_assert(instance);
+    avr_isp_spi_transaction(instance, AVR_ISP_COMMIT(addr));
+    /* polling flash */
+    if(data == 0xFF) {
+        furi_delay_ms(5);
+    } else {
+        /* polling flash */
+        uint32_t starttime = furi_get_tick();
+        while((furi_get_tick() - starttime) < 30) {
+            if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FLASH_HI(addr)) != 0xFF) {
+                break;
+            };
+        }
+    }
+}
 
-//     avr_isp_fill(instance, 4);
-//     data = avr_isp_spi_transaction(
-//         instance, instance->buff[0], instance->buff[1], instance->buff[2], instance->buff[3]);
-//     avr_isp_breply(instance, data);
-// }
+static uint16_t avr_isp_current_page(AvrIsp* instance, uint32_t addr, uint16_t page_size) {
+    furi_assert(instance);
+    uint16_t page = 0;
+    switch(page_size) {
+    case 32:
+        page = addr & 0xFFFFFFF0;
+        break;
+    case 64:
+        page = addr & 0xFFFFFFE0;
+        break;
+    case 128:
+        page = addr & 0xFFFFFFC0;
+        break;
+    case 256:
+        page = addr & 0xFFFFFF80;
+        break;
 
-// static void avr_isp_commit(AvrIsp* instance, uint16_t addr, uint8_t data) {
-//     furi_assert(instance);
-//     avr_isp_spi_transaction(instance, AVR_ISP_COMMIT(addr));
-//     /* polling flash */
-//     if(data == 0xFF) {
-//         furi_delay_ms(5);
-//     } else {
-//         /* polling flash */
-//         uint32_t starttime = furi_get_tick();
-//         while((furi_get_tick() - starttime) < 30) {
-//             if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FLASH_HI(addr)) != 0xFF) {
-//                 break;
-//             };
-//         }
-//     }
-// }
+    default:
+        page = addr;
+        break;
+    }
 
-// static uint16_t avr_isp_current_page(AvrIsp* instance) {
-//     furi_assert(instance);
-//     uint16_t page = 0;
-//     switch(instance->cfg->pagesize) {
-//     case 32:
-//         page = instance->addr & 0xFFFFFFF0;
-//         break;
-//     case 64:
-//         page = instance->addr & 0xFFFFFFE0;
-//         break;
-//     case 128:
-//         page = instance->addr & 0xFFFFFFC0;
-//         break;
-//     case 256:
-//         page = instance->addr & 0xFFFFFF80;
-//         break;
+    return page;
+}
 
-//     default:
-//         page = instance->addr;
-//         break;
-//     }
+static bool avr_isp_flash_write_pages(
+    AvrIsp* instance,
+    uint16_t addr,
+    uint16_t page_size,
+    uint8_t* data,
+    uint32_t data_size) {
+    furi_assert(instance);
 
-//     return page;
-// }
+    size_t x = 0;
+    uint16_t page = avr_isp_current_page(instance, addr, page_size);
 
-// static uint8_t avr_isp_write_flash_pages(AvrIsp* instance, size_t length) {
-//     furi_assert(instance);
-//     size_t x = 0;
-//     uint16_t page = avr_isp_current_page(instance);
-//     while(x < length) {
-//         if(page != avr_isp_current_page(instance)) {
-//             --x;
-//             avr_isp_commit(instance, page, instance->buff[x++]);
-//             page = avr_isp_current_page(instance);
-//         }
-//         avr_isp_spi_transaction(
-//             instance, AVR_ISP_WRITE_FLASH_LO(instance->addr, instance->buff[x++]));
+    while(x < data_size) {
+        if(page != avr_isp_current_page(instance, addr, page_size)) {
+            avr_isp_commit(instance, page, data[x - 1]);
+            page = avr_isp_current_page(instance, addr, page_size);
+        }
+        avr_isp_spi_transaction(instance, AVR_ISP_WRITE_FLASH_LO(addr, data[x++]));
+        avr_isp_spi_transaction(instance, AVR_ISP_WRITE_FLASH_HI(addr, data[x++]));
+        addr++;
+    }
+    avr_isp_commit(instance, page, data[x - 1]);
+    return true;
+}
 
-//         avr_isp_spi_transaction(
-//             instance, AVR_ISP_WRITE_FLASH_HI(instance->addr, instance->buff[x++]));
-//         instance->addr++;
-//     }
+bool avr_isp_erase_chip(AvrIsp* instance) {
+    furi_assert(instance);
+    bool ret = false;
 
-//     avr_isp_commit(instance, page, instance->buff[--x]);
-//     return STK_OK;
-// }
+    if(!instance->pmode) avr_isp_auto_set_spi_speed_start_pmode(instance);
+    if(instance->pmode) {
+        avr_isp_spi_transaction(instance, AVR_ISP_ERASE_CHIP);
+        furi_delay_ms(100);
+        avr_isp_end_pmode(instance);
+        ret = true;
+    }
+    return ret;
+}
 
-// static void avr_isp_write_flash(AvrIsp* instance, size_t length) {
-//     furi_assert(instance);
-//     avr_isp_fill(instance, length);
-//     if(avr_isp_getch(instance) == CRC_EOP) {
-//         avr_isp_tx_ch(instance, STK_INSYNC);
-//         avr_isp_tx_ch(instance, avr_isp_write_flash_pages(instance, length));
-//     } else {
-//         instance->error++;
-//         avr_isp_tx_ch(instance, STK_NOSYNC);
-//     }
-// }
+static bool
+    avr_isp_eeprom_write(AvrIsp* instance, uint16_t addr, uint8_t* data, uint32_t data_size) {
+    furi_assert(instance);
 
-// // write (length) bytes, (start) is a byte address
-// static uint8_t
-//     avr_isp_write_eeprom_chunk(AvrIsp* instance, uint16_t start, uint16_t length) {
-//     furi_assert(instance);
-//     // this writes byte-by-byte,
-//     // page writing may be faster (4 bytes at a time)
-//     avr_isp_fill(instance, length);
-//     for(uint16_t x = 0; x < length; x++) {
-//         uint16_t addr = start + x;
-//         avr_isp_spi_transaction(instance, AVR_ISP_WRITE_EEPROM(addr, instance->buff[x]));
-//         furi_delay_ms(10);
-//     }
-//     return STK_OK;
-// }
+    for(uint16_t i = 0; i < data_size; i++) {
+        avr_isp_spi_transaction(instance, AVR_ISP_WRITE_EEPROM(addr, data[i]));
+        furi_delay_ms(10);
+        addr++;
+    }
+    return true;
+}
 
-// static uint8_t avr_isp_write_eeprom(AvrIsp* instance, size_t length) {
-//     furi_assert(instance);
-//     // here is a word address, get the byte address
-//     uint16_t start = instance->addr * 2;
-//     uint16_t remaining = length;
-//     if(length > instance->cfg->eepromsize) {
-//         instance->error++;
-//         return STK_FAILED;
-//     }
-//     while(remaining > AVR_ISP_EECHUNK) {
-//         avr_isp_write_eeprom_chunk(instance, start, AVR_ISP_EECHUNK);
-//         start += AVR_ISP_EECHUNK;
-//         remaining -= AVR_ISP_EECHUNK;
-//     }
-//     avr_isp_write_eeprom_chunk(instance, start, remaining);
-//     return STK_OK;
-// }
+bool avr_isp_write_page(
+    AvrIsp* instance,
+    uint32_t mem_type,
+    uint32_t mem_size,
+    uint16_t addr,
+    uint16_t page_size,
+    uint8_t* data,
+    uint32_t data_size) {
+    furi_assert(instance);
+    bool ret = false;
 
-// static void avr_isp_program_page(AvrIsp* instance) {
-//     furi_assert(instance);
-//     uint8_t result = STK_FAILED;
-//     uint16_t length = avr_isp_getch(instance) << 8 | avr_isp_getch(instance);
-//     uint8_t memtype = avr_isp_getch(instance);
-//     // flash memory @addr, (length) bytes
-//     if(memtype == STK_SET_FLASH_TYPE) {
-//         avr_isp_write_flash(instance, length);
-//         return;
-//     }
-//     if(memtype == STK_SET_EEPROM_TYPE) {
-//         result = avr_isp_write_eeprom(instance, length);
-//         if(avr_isp_getch(instance) == CRC_EOP) {
-//             avr_isp_tx_ch(instance, STK_INSYNC);
-//             avr_isp_tx_ch(instance, result);
+    switch(mem_type) {
+    case STK_SET_FLASH_TYPE:
+        if((addr + data_size / 2) <= mem_size) {
+            ret = avr_isp_flash_write_pages(instance, addr, page_size, data, data_size);
+        }
+        break;
 
-//         } else {
-//             instance->error++;
-//             avr_isp_tx_ch(instance, STK_NOSYNC);
-//         }
-//         return;
-//     }
-//     avr_isp_tx_ch(instance, STK_FAILED);
-//     return;
-// }
+    case STK_SET_EEPROM_TYPE:
+        if((addr + data_size) <= mem_size) {
+            ret = avr_isp_eeprom_write(instance, addr, data, data_size);
+        }
+        break;
+
+    default:
+        furi_crash(TAG " Incorrect mem type.");
+        break;
+    }
+
+    return ret;
+}
 
 static bool avr_isp_flash_read_page(
     AvrIsp* instance,
     uint16_t addr,
-    uint16_t size_page,
+    uint16_t page_size,
     uint8_t* data,
-    uint32_t size_data) {
+    uint32_t data_size) {
     furi_assert(instance);
-    if(size_page > size_data) return false;
-    for(uint16_t i = 0; i < size_page; i += 2) {
+    if(page_size > data_size) return false;
+    for(uint16_t i = 0; i < page_size; i += 2) {
         data[i] = avr_isp_spi_transaction(instance, AVR_ISP_READ_FLASH_LO(addr));
         data[i + 1] = avr_isp_spi_transaction(instance, AVR_ISP_READ_FLASH_HI(addr));
         addr++;
@@ -298,12 +268,12 @@ static bool avr_isp_flash_read_page(
 static bool avr_isp_eeprom_read_page(
     AvrIsp* instance,
     uint16_t addr,
-    uint16_t size_page,
+    uint16_t page_size,
     uint8_t* data,
-    uint32_t size_data) {
+    uint32_t data_size) {
     furi_assert(instance);
-    if(size_page > size_data) return false;
-    for(uint16_t i = 0; i < size_page; i++) {
+    if(page_size > data_size) return false;
+    for(uint16_t i = 0; i < page_size; i++) {
         data[i] = avr_isp_spi_transaction(instance, AVR_ISP_READ_EEPROM(addr));
         addr++;
     }
@@ -312,17 +282,17 @@ static bool avr_isp_eeprom_read_page(
 
 bool avr_isp_read_page(
     AvrIsp* instance,
-    uint32_t memtype,
+    uint32_t mem_type,
     uint16_t addr,
-    uint16_t size_page,
+    uint16_t page_size,
     uint8_t* data,
-    uint32_t size_data) {
+    uint32_t data_size) {
     furi_assert(instance);
     bool res = false;
-    if(memtype == STK_SET_FLASH_TYPE)
-        res = avr_isp_flash_read_page(instance, addr, size_page, data, size_data);
-    if(memtype == STK_SET_EEPROM_TYPE)
-        res = avr_isp_eeprom_read_page(instance, addr, size_page, data, size_data);
+    if(mem_type == STK_SET_FLASH_TYPE)
+        res = avr_isp_flash_read_page(instance, addr, page_size, data, data_size);
+    if(mem_type == STK_SET_EEPROM_TYPE)
+        res = avr_isp_eeprom_read_page(instance, addr, page_size, data, data_size);
 
     return res;
 }
@@ -334,111 +304,134 @@ void avr_isp_read_signature(AvrIsp* instance, uint8_t* data) {
     data[2] = avr_isp_spi_transaction(instance, AVR_ISP_READ_PART_NUMBER);
 }
 
-// void avr_isp_avrisp(AvrIsp* instance) {
-//     furi_assert(instance);
-//     uint8_t ch = avr_isp_getch(instance);
+uint8_t avr_isp_read_lock_byte(AvrIsp* instance) {
+    furi_assert(instance);
+    uint8_t data = 0;
+    uint32_t starttime = furi_get_tick();
+    while((furi_get_tick() - starttime) < 300) {
+        data = avr_isp_spi_transaction(instance, AVR_ISP_READ_LOCK_BYTE);
+        if(avr_isp_spi_transaction(instance, AVR_ISP_READ_LOCK_BYTE) == data) {
+            break;
+        };
+        data = 0x00;
+    }
+    return data;
+}
 
-//     switch(ch) {
-//     case STK_GET_SYNC:
-//         FURI_LOG_D(TAG, "cmd STK_GET_SYNC");
-//         instance->error = 0;
-//         avr_isp_empty_reply(instance);
-//         break;
-//     case STK_GET_SIGN_ON:
-//         FURI_LOG_D(TAG, "cmd STK_GET_SIGN_ON");
-//         if(avr_isp_getch(instance) == CRC_EOP) {
-//             avr_isp_tx_ch(instance, STK_INSYNC);
+bool avr_isp_write_lock_byte(AvrIsp* instance, uint8_t lock) {
+    furi_assert(instance);
+    bool ret = false;
+    if(avr_isp_read_lock_byte(instance) == lock) {
+        ret = true;
+    } else {
+        avr_isp_spi_transaction(instance, AVR_ISP_WRITE_LOCK_BYTE(lock));
+        /* polling lock byte */
+        uint32_t starttime = furi_get_tick();
+        while((furi_get_tick() - starttime) < 30) {
+            if(avr_isp_spi_transaction(instance, AVR_ISP_READ_LOCK_BYTE) == lock) {
+                ret = true;
+                break;
+            };
+        }
+    }
+    return ret;
+}
 
-//             avr_isp_tx_ch(instance, 'A');
-//             avr_isp_tx_ch(instance, 'V');
-//             avr_isp_tx_ch(instance, 'R');
-//             avr_isp_tx_ch(instance, ' ');
-//             avr_isp_tx_ch(instance, 'I');
-//             avr_isp_tx_ch(instance, 'S');
-//             avr_isp_tx_ch(instance, 'P');
+uint8_t avr_isp_read_fuse_low(AvrIsp* instance) {
+    furi_assert(instance);
+    uint8_t data = 0;
+    uint32_t starttime = furi_get_tick();
+    while((furi_get_tick() - starttime) < 300) {
+        data = avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_LOW);
+        if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_LOW) == data) {
+            break;
+        };
+        data = 0x00;
+    }
+    return data;
+}
 
-//             avr_isp_tx_ch(instance, STK_OK);
-//         } else {
-//             instance->error++;
-//             avr_isp_tx_ch(instance, STK_NOSYNC);
-//         }
-//         break;
-//     case STK_GET_PARAMETER:
-//         FURI_LOG_D(TAG, "cmd STK_GET_PARAMETER");
-//         avr_isp_get_version(instance, avr_isp_getch(instance));
-//         break;
-//     case STK_SET_DEVICE:
-//         FURI_LOG_D(TAG, "cmd STK_SET_DEVICE");
-//         avr_isp_fill(instance, 20);
-//         avr_isp_set_cfg(instance);
-//         avr_isp_empty_reply(instance);
-//         break;
-//     case STK_SET_DEVICE_EXT: // ignore for now
-//         FURI_LOG_D(TAG, "cmd STK_SET_DEVICE_EXT");
-//         avr_isp_fill(instance, 5);
-//         avr_isp_empty_reply(instance);
-//         break;
-//     case STK_ENTER_PROGMODE:
-//         FURI_LOG_D(TAG, "cmd STK_ENTER_PROGMODE");
-//         if(!instance->pmode) avr_isp_auto_set_spi_speed_start_pmode(instance);
-//         avr_isp_empty_reply(instance);
-//         break;
-//     case STK_LOAD_ADDRESS:
-//         FURI_LOG_D(TAG, "cmd STK_LOAD_ADDRESS");
-//         instance->addr = avr_isp_getch(instance) | avr_isp_getch(instance) << 8;
-//         avr_isp_empty_reply(instance);
-//         break;
-//     case STK_PROG_FLASH: // ignore for now
-//         FURI_LOG_D(TAG, "cmd STK_PROG_FLASH");
-//         avr_isp_getch(instance);
-//         avr_isp_getch(instance);
-//         avr_isp_empty_reply(instance);
-//         break;
-//     case STK_PROG_DATA: // ignore for now
-//         FURI_LOG_D(TAG, "cmd STK_PROG_DATA");
-//         avr_isp_getch(instance);
-//         avr_isp_empty_reply(instance);
-//         break;
-//     case STK_PROG_PAGE:
-//         FURI_LOG_D(TAG, "cmd STK_PROG_PAGE");
-//         avr_isp_program_page(instance);
-//         break;
-//     case STK_READ_PAGE:
-//         FURI_LOG_D(TAG, "cmd STK_READ_PAGE");
-//         avr_isp_read_page(instance);
-//         break;
-//     case STK_UNIVERSAL:
-//         FURI_LOG_D(TAG, "cmd STK_UNIVERSAL");
-//         avr_isp_universal(instance);
-//         break;
-//     case STK_LEAVE_PROGMODE:
-//         FURI_LOG_D(TAG, "cmd STK_LEAVE_PROGMODE");
-//         instance->error = 0;
-//         if(instance->pmode) avr_isp_end_pmode(instance);
-//         avr_isp_empty_reply(instance);
-//         break;
-//     case STK_READ_SIGN:
-//         FURI_LOG_D(TAG, "cmd STK_READ_SIGN");
-//         avr_isp_read_signature(instance);
-//         break;
-//     // expecting a command, not CRC_EOP
-//     // this is how we can get back in sync
-//     case CRC_EOP:
-//         FURI_LOG_D(TAG, "cmd CRC_EOP");
-//         instance->error++;
-//         avr_isp_tx_ch(instance, STK_NOSYNC);
-//         break;
-//     // anything else we will return STK_UNKNOWN
-//     default:
-//         FURI_LOG_D(TAG, "cmd STK_ERROR_CMD");
-//         instance->error++;
-//         if(avr_isp_getch(instance) == CRC_EOP)
-//             avr_isp_tx_ch(instance, STK_UNKNOWN);
-//         else
-//             avr_isp_tx_ch(instance, STK_NOSYNC);
-//     }
+bool avr_isp_write_fuse_low(AvrIsp* instance, uint8_t lfuse) {
+    furi_assert(instance);
+    bool ret = false;
+    if(avr_isp_read_fuse_low(instance) == lfuse) {
+        ret = true;
+    } else {
+        avr_isp_spi_transaction(instance, AVR_ISP_WRITE_FUSE_LOW(lfuse));
+        /* polling fuse */
+        uint32_t starttime = furi_get_tick();
+        while((furi_get_tick() - starttime) < 30) {
+            if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_LOW) == lfuse) {
+                ret = true;
+                break;
+            };
+        }
+    }
+    return ret;
+}
 
-//     if(instance->callback) {
-//         instance->callback(instance->context);
-//     }
-// }
+uint8_t avr_isp_read_fuse_high(AvrIsp* instance) {
+    furi_assert(instance);
+    uint8_t data = 0;
+    uint32_t starttime = furi_get_tick();
+    while((furi_get_tick() - starttime) < 300) {
+        data = avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_HIGH);
+        if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_HIGH) == data) {
+            break;
+        };
+        data = 0x00;
+    }
+    return data;
+}
+
+bool avr_isp_write_fuse_high(AvrIsp* instance, uint8_t hfuse) {
+    furi_assert(instance);
+    bool ret = false;
+    if(avr_isp_read_fuse_high(instance) == hfuse) {
+        ret = true;
+    } else {
+        avr_isp_spi_transaction(instance, AVR_ISP_WRITE_FUSE_HIGH(hfuse));
+        /* polling fuse */
+        uint32_t starttime = furi_get_tick();
+        while((furi_get_tick() - starttime) < 30) {
+            if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_HIGH) == hfuse) {
+                ret = true;
+                break;
+            };
+        }
+    }
+    return ret;
+}
+
+uint8_t avr_isp_read_fuse_extended(AvrIsp* instance) {
+    furi_assert(instance);
+    uint8_t data = 0;
+    uint32_t starttime = furi_get_tick();
+    while((furi_get_tick() - starttime) < 300) {
+        data = avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_EXTENDED);
+        if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_EXTENDED) == data) {
+            break;
+        };
+        data = 0x00;
+    }
+    return data;
+}
+
+bool avr_isp_write_fuse_extended(AvrIsp* instance, uint8_t efuse) {
+    furi_assert(instance);
+    bool ret = false;
+    if(avr_isp_read_fuse_extended(instance) == efuse) {
+        ret = true;
+    } else {
+        avr_isp_spi_transaction(instance, AVR_ISP_WRITE_FUSE_EXTENDED(efuse));
+        /* polling fuse */
+        uint32_t starttime = furi_get_tick();
+        while((furi_get_tick() - starttime) < 30) {
+            if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_EXTENDED) == efuse) {
+                ret = true;
+                break;
+            };
+        }
+    }
+    return ret;
+}

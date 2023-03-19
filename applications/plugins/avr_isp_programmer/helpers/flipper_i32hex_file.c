@@ -22,29 +22,8 @@ struct FlipperI32HexFile {
     Storage* storage;
     Stream* stream;
     FuriString* str_data;
-    bool file_open;
+    FlipperI32HexFileStatus file_open;
 };
-
-typedef enum {
-    FlipperI32HexFileStatusOK = 0,
-    FlipperI32HexFileStatusData = 2,
-    FlipperI32HexFileStatusUdateAddr = 3,
-    FlipperI32HexFileStatusEofFile = 4,
-
-    // Errors
-    FlipperI32HexFileStatusErrorCrc = (-1),
-    FlipperI32HexFileStatusErrorOverflow = (-2),
-    FlipperI32HexFileStatusErrorData = (-3),
-    FlipperI32HexFileStatusErrorUnsupportedCommand = (-4),
-
-    FlipperI32HexFileStatusReserved =
-        0x7FFFFFFF, ///< Prevents enum down-size compiler optimization.
-} FlipperI32HexFileStatus;
-
-typedef struct {
-    FlipperI32HexFileStatus status;
-    uint32_t data_size;
-} FlipperI32HexFileRet;
 
 FlipperI32HexFile* flipper_i32hex_file_open_write(const char* name, uint32_t start_addr) {
     furi_assert(name);
@@ -55,11 +34,11 @@ FlipperI32HexFile* flipper_i32hex_file_open_write(const char* name, uint32_t sta
     instance->storage = furi_record_open(RECORD_STORAGE);
     instance->stream = file_stream_alloc(instance->storage);
 
-    if(!file_stream_open(instance->stream, name, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-        FURI_LOG_E(TAG, "Failed to open file");
-        instance->file_open = false;
+    if(file_stream_open(instance->stream, name, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        instance->file_open = FlipperI32HexFileStatusOpenFileWrite;
     } else {
-        instance->file_open = true;
+        FURI_LOG_E(TAG, "Failed to open file");
+        instance->file_open = FlipperI32HexFileStatusErrorNoOpenFile;
     }
     instance->str_data = furi_string_alloc(instance->storage);
 
@@ -75,11 +54,11 @@ FlipperI32HexFile* flipper_i32hex_file_open_read(const char* name) {
     instance->storage = furi_record_open(RECORD_STORAGE);
     instance->stream = file_stream_alloc(instance->storage);
 
-    if(!file_stream_open(instance->stream, name, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        FURI_LOG_E(TAG, "Failed to open file");
-        instance->file_open = false;
+    if(file_stream_open(instance->stream, name, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        instance->file_open = FlipperI32HexFileStatusOpenFileRead;
     } else {
-        instance->file_open = true;
+        FURI_LOG_E(TAG, "Failed to open file");
+        instance->file_open = FlipperI32HexFileStatusErrorNoOpenFile;
     }
     instance->str_data = furi_string_alloc(instance->storage);
 
@@ -94,13 +73,17 @@ void flipper_i32hex_file_close(FlipperI32HexFile* instance) {
     furi_record_close(RECORD_STORAGE);
 }
 
-void flipper_i32hex_file_bin_to_i32hex_add_data(
+FlipperI32HexFileRet flipper_i32hex_file_bin_to_i32hex_set_data(
     FlipperI32HexFile* instance,
     uint8_t* data,
     uint32_t data_size) {
     furi_assert(instance);
     furi_assert(data);
 
+    FlipperI32HexFileRet ret = {.status = FlipperI32HexFileStatusOK, .data_size = 0};
+    if(instance->file_open != FlipperI32HexFileStatusOpenFileWrite) {
+        ret.status = FlipperI32HexFileStatusErrorFileWrite;
+    }
     uint8_t count_byte = 0;
     uint32_t ind = 0;
     uint8_t crc = 0;
@@ -137,14 +120,20 @@ void flipper_i32hex_file_bin_to_i32hex_add_data(
         instance->addr += count_byte;
     }
     if(instance->file_open) stream_write_string(instance->stream, instance->str_data);
+    return ret;
 }
 
-void flipper_i32hex_file_bin_to_i32hex_add_end_line(FlipperI32HexFile* instance) {
+FlipperI32HexFileRet flipper_i32hex_file_bin_to_i32hex_set_end_line(FlipperI32HexFile* instance) {
     furi_assert(instance);
+    FlipperI32HexFileRet ret = {.status = FlipperI32HexFileStatusOK, .data_size = 0};
+    if(instance->file_open != FlipperI32HexFileStatusOpenFileWrite) {
+        ret.status = FlipperI32HexFileStatusErrorFileWrite;
+    }
     furi_string_reset(instance->str_data);
     //I32HEX_TYPE_END_OF_FILE
     furi_string_cat_printf(instance->str_data, ":00000001FF\r\n");
     if(instance->file_open) stream_write_string(instance->stream, instance->str_data);
+    return ret;
 }
 
 void flipper_i32hex_file_bin_to_i32hex_set_addr(FlipperI32HexFile* instance, uint32_t addr) {
@@ -234,6 +223,7 @@ static FlipperI32HexFileRet flipper_i32hex_file_parse(
             if(flipper_i32hex_file_check_data(data, ret.data_size)) {
                 ret.data_size -= 5;
                 memcpy(data, data + 4, ret.data_size);
+                ret.status =FlipperI32HexFileStatusData;
             } else {
                 ret.status = FlipperI32HexFileStatusErrorCrc;
                 ret.data_size = 0;
@@ -280,27 +270,43 @@ static FlipperI32HexFileRet flipper_i32hex_file_parse(
 bool flipper_i32hex_file_check(FlipperI32HexFile* instance) {
     furi_assert(instance);
 
-    furi_delay_ms(100);
     uint32_t data_size = 280;
     uint8_t data[280] = {0};
-    FuriString* line = furi_string_alloc();
     bool ret = true;
 
-    if(!instance->file_open) {
+    if(instance->file_open != FlipperI32HexFileStatusOpenFileRead) {
         FURI_LOG_E(TAG, "File is not open");
+        ret = false;
     } else {
         stream_rewind(instance->stream);
 
-        while(stream_read_line(instance->stream, line)) {
-            FlipperI32HexFileRet parse_ret =
-                flipper_i32hex_file_parse(instance, furi_string_get_cstr(line), data, data_size);
+        while(stream_read_line(instance->stream, instance->str_data)) {
+            FlipperI32HexFileRet parse_ret = flipper_i32hex_file_parse(
+                instance, furi_string_get_cstr(instance->str_data), data, data_size);
 
             if(parse_ret.status < 0) {
                 ret = false;
             }
         }
+        stream_rewind(instance->stream);
+    }
+    return ret;
+}
+
+FlipperI32HexFileRet flipper_i32hex_file_i32hex_to_bin_get_data(
+    FlipperI32HexFile* instance,
+    uint8_t* data,
+    uint32_t data_size) {
+    furi_assert(instance);
+    furi_assert(data);
+    FlipperI32HexFileRet ret = {.status = FlipperI32HexFileStatusOK, .data_size = 0};
+    if(instance->file_open != FlipperI32HexFileStatusOpenFileRead) {
+        ret.status = FlipperI32HexFileStatusErrorFileRead;
+    } else {
+        stream_read_line(instance->stream, instance->str_data);
+        ret = flipper_i32hex_file_parse(
+            instance, furi_string_get_cstr(instance->str_data), data, data_size);
     }
 
-    furi_string_free(line);
     return ret;
 }

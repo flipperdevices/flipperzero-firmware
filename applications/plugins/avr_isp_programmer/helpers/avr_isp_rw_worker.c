@@ -196,10 +196,10 @@ bool avr_isp_rw_worker_rx(AvrIspRWWorker* instance) {
         }
         FURI_LOG_D(TAG, "ID = 0x%02X 0x%02X 0x%02X", data[0], data[1], data[2]);
 
-        data[0] = avr_isp_spi_transaction(instance->avr_isp, AVR_ISP_READ_FUSE_HIGH);
-        data[1] = avr_isp_spi_transaction(instance->avr_isp, AVR_ISP_READ_FUSE_LOW);
-        data[2] = avr_isp_spi_transaction(instance->avr_isp, AVR_ISP_READ_FUSE_EXTENDED);
-        data[3] = avr_isp_spi_transaction(instance->avr_isp, AVR_ISP_READ_LOCK_BYTE);
+        data[0] = avr_isp_read_fuse_high(instance->avr_isp);
+        data[1] = avr_isp_read_fuse_low(instance->avr_isp);
+        data[2] = avr_isp_read_fuse_extended(instance->avr_isp);
+        data[3] = avr_isp_read_lock_byte(instance->avr_isp);
 
         if(!flipper_format_write_hex(flipper_format, "Hfuse", data, 1)) {
             FURI_LOG_E(TAG, "Unable to add Hfuse");
@@ -243,8 +243,8 @@ bool avr_isp_rw_worker_rx(AvrIspRWWorker* instance) {
         FURI_LOG_D(TAG, "EEPROM");
 
         if(avr_isp_chip_arr[instance->chip_arr_ind].eepromsize > 0) {
-            FlipperI32HexFile* flipper_hex_eeprom =
-                flipper_i32hex_file_open_write("/any/avr_isp/eeprom.hex", 0);
+            FlipperI32HexFile* flipper_hex_eeprom = flipper_i32hex_file_open_write(
+                "/any/avr_isp/eeprom.hex", avr_isp_chip_arr[instance->chip_arr_ind].eepromoffset);
             int32_t size_data = 32;
             if(size_data > avr_isp_chip_arr[instance->chip_arr_ind].eepromsize)
                 size_data = avr_isp_chip_arr[instance->chip_arr_ind].eepromsize;
@@ -253,17 +253,17 @@ bool avr_isp_rw_worker_rx(AvrIspRWWorker* instance) {
                 i += size_data) {
                 avr_isp_read_page(
                     instance->avr_isp, STK_SET_EEPROM_TYPE, i, size_data, data, sizeof(data));
-                flipper_i32hex_file_bin_to_i32hex_add_data(flipper_hex_eeprom, data, size_data);
+                flipper_i32hex_file_bin_to_i32hex_set_data(flipper_hex_eeprom, data, size_data);
                 printf("%s\r\n", flipper_i32hex_file_get_string(flipper_hex_eeprom));
             }
-            flipper_i32hex_file_bin_to_i32hex_add_end_line(flipper_hex_eeprom);
+            flipper_i32hex_file_bin_to_i32hex_set_end_line(flipper_hex_eeprom);
             printf("%s\r\n", flipper_i32hex_file_get_string(flipper_hex_eeprom));
             flipper_i32hex_file_close(flipper_hex_eeprom);
         }
 
         // FURI_LOG_D(TAG, "FLASH");
         // FlipperI32HexFile* flipper_hex_flash =
-        //     flipper_i32hex_file_open_write("/any/avr_isp/flash.hex", 0);
+        //     flipper_i32hex_file_open_write("/any/avr_isp/flash.hex", avr_isp_chip_arr[instance->chip_arr_ind].flashoffset;);
         // for(uint16_t i = 0; i < avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2;
         //     i += avr_isp_chip_arr[instance->chip_arr_ind].pagesize / 2) {
         //     avr_isp_read_page(
@@ -283,17 +283,149 @@ bool avr_isp_rw_worker_rx(AvrIspRWWorker* instance) {
 
         avr_isp_end_pmode(instance->avr_isp);
 
-        FURI_LOG_D(TAG, "EEPROM READ");
-        FlipperI32HexFile* flipper_hex_eeprom_read =
-            flipper_i32hex_file_open_read("/any/avr_isp/eeprom.hex");
-        FURI_LOG_D(TAG, "EEPROM READ1");
-        if(flipper_i32hex_file_check(flipper_hex_eeprom_read)){
-            FURI_LOG_D(TAG, "Check OK");
-        } else {
-            FURI_LOG_E(TAG, "Check ERROR");
-        }
-        flipper_i32hex_file_close(flipper_hex_eeprom_read);
+        // // //################################################################
+        // FURI_LOG_D(TAG, "FUSE Write");
+        // if(!avr_isp_auto_set_spi_speed_start_pmode(instance->avr_isp)) {
+        //     FURI_LOG_E(TAG, "Well, I managed to enter the mod program");
+        //     break;
+        // }
+        // FURI_LOG_E(TAG, "fuse %d", avr_isp_write_fuse_low(instance->avr_isp, 0xFF));
+        // FURI_LOG_E(TAG, "fuse %d", avr_isp_write_fuse_extended(instance->avr_isp, 0xFD));
+        // FURI_LOG_E(TAG, "fuse %d", avr_isp_write_fuse_high(instance->avr_isp, 0xDA));
+        // FURI_LOG_E(TAG, "fuse %d", avr_isp_write_lock_byte(instance->avr_isp, 0xFF));
 
+
+        // avr_isp_end_pmode(instance->avr_isp);
+        // //##################################################################
+
+        // //################################################################
+        // FURI_LOG_D(TAG, "ERASE CHIP");
+        // avr_isp_erase_chip(instance->avr_isp);
+        // //##################################################################
+
+        // //##########################################################
+        // FURI_LOG_D(TAG, "FLASH WRITE");
+
+        // if(!avr_isp_auto_set_spi_speed_start_pmode(instance->avr_isp)) {
+        //     FURI_LOG_E(TAG, "Well, I managed to enter the mod program");
+        //     break;
+        // }
+        // avr_isp_read_signature(instance->avr_isp, data);
+
+        // FlipperI32HexFile* flipper_hex_flash =
+        //     flipper_i32hex_file_open_read("/any/avr_isp/flash.hex");
+
+        // uint32_t addr = avr_isp_chip_arr[instance->chip_arr_ind].flashoffset;
+        // FlipperI32HexFileRet flipper_hex_ret =
+        //     flipper_i32hex_file_i32hex_to_bin_get_data(flipper_hex_flash, data, sizeof(data));
+        // FURI_LOG_D(TAG, "FLASH WRITE Page   ---%ld", addr);
+        // while((flipper_hex_ret.status == FlipperI32HexFileStatusData) ||
+        //       (flipper_hex_ret.status == FlipperI32HexFileStatusUdateAddr)) {
+        //     // FURI_LOG_D(TAG, "EEPROM WRITE Page1");
+        //     // for(size_t i = 0; i < flipper_hex_ret.data_size; i++) {
+        //     //     printf("%02X ", data[i]);
+        //     // }
+        //     // printf("\r\n");
+
+        //     switch(flipper_hex_ret.status) {
+        //     case FlipperI32HexFileStatusData:
+        //         if(!avr_isp_write_page(
+        //                instance->avr_isp,
+        //                STK_SET_FLASH_TYPE,
+        //                avr_isp_chip_arr[instance->chip_arr_ind].flashsize,
+        //                addr,
+        //                avr_isp_chip_arr[instance->chip_arr_ind].pagesize,
+        //                data,
+        //                flipper_hex_ret.data_size)) {
+        //             break;
+        //         }
+        //         addr += flipper_hex_ret.data_size/2;
+        //         break;
+
+        //     case FlipperI32HexFileStatusUdateAddr:
+        //         addr = data[0] << 24 | data[1] << 16;
+        //         break;
+
+        //     default:
+        //         furi_crash(TAG " Incorrect status.");
+        //         break;
+        //     }
+
+        //     flipper_hex_ret =
+        //         flipper_i32hex_file_i32hex_to_bin_get_data(flipper_hex_flash, data, sizeof(data));
+        // }
+
+        // flipper_i32hex_file_close(flipper_hex_flash);
+        // avr_isp_end_pmode(instance->avr_isp);
+        //##########################################################
+
+        //     FURI_LOG_D(TAG, "CHECK HEX");
+        //     FlipperI32HexFile* flipper_hex_eeprom_read =
+        //         flipper_i32hex_file_open_read("/any/avr_isp/a.hex");
+        //     if(flipper_i32hex_file_check(flipper_hex_eeprom_read)) {
+        //         FURI_LOG_D(TAG, "Check OK");
+        //     } else {
+        //         FURI_LOG_E(TAG, "Check ERROR");
+        //     }
+        //    // flipper_i32hex_file_close(flipper_hex_eeprom_read);
+
+        //     //##########################################################
+        //     FURI_LOG_D(TAG, "EEPROM WRITE");
+
+        //     if(!avr_isp_auto_set_spi_speed_start_pmode(instance->avr_isp)) {
+        //         FURI_LOG_E(TAG, "Well, I managed to enter the mod program");
+        //         break;
+        //     }
+        //     avr_isp_read_signature(instance->avr_isp, data);
+        //     uint32_t addr = avr_isp_chip_arr[instance->chip_arr_ind].eepromoffset;
+        //     FlipperI32HexFileRet flipper_hex_ret = flipper_i32hex_file_i32hex_to_bin_get_data(
+        //         flipper_hex_eeprom_read, data, sizeof(data));
+
+        //     while((flipper_hex_ret.status == FlipperI32HexFileStatusData) ||
+        //           (flipper_hex_ret.status == FlipperI32HexFileStatusUdateAddr)) {
+        //         FURI_LOG_D(TAG, "EEPROM WRITE Page");
+        //         for(size_t i = 0; i < flipper_hex_ret.data_size; i++) {
+        //             printf("%02X ", data[i]);
+        //         }
+        //         printf("\r\n");
+
+        //         switch(flipper_hex_ret.status) {
+        //         case FlipperI32HexFileStatusData:
+        //             if(!avr_isp_write_page(
+        //                    instance->avr_isp,
+        //                    STK_SET_EEPROM_TYPE,
+        //                    avr_isp_chip_arr[instance->chip_arr_ind].eepromsize,
+        //                    addr,
+        //                    avr_isp_chip_arr[instance->chip_arr_ind].eeprompagesize,
+        //                    data,
+        //                    flipper_hex_ret.data_size)) {
+        //                 break;
+        //             }
+        //             addr += flipper_hex_ret.data_size;
+        //             break;
+
+        //         case FlipperI32HexFileStatusUdateAddr:
+        //             addr = data[0] << 24 | data[1] << 16;
+        //             break;
+
+        //         default:
+        //             furi_crash(TAG " Incorrect status.");
+        //             break;
+        //         }
+
+        //         flipper_hex_ret = flipper_i32hex_file_i32hex_to_bin_get_data(
+        //             flipper_hex_eeprom_read, data, sizeof(data));
+        //     }
+
+        //     flipper_i32hex_file_close(flipper_hex_eeprom_read);
+        //     avr_isp_end_pmode(instance->avr_isp);
+        //     //##########################################################
+
+        // //################################################################
+        // FURI_LOG_D(TAG, "ERASE CHIP");
+        // avr_isp_erase_chip(instance->avr_isp);
+        // //##################################################################
+        FURI_LOG_D(TAG, "___END___");
     } while(0);
     flipper_format_free(flipper_format);
     furi_record_close(RECORD_STORAGE);
