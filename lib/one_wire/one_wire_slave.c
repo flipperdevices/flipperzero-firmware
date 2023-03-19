@@ -345,5 +345,16 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size) {
 }
 
 void onewire_slave_set_overdrive(OneWireSlave* bus, bool set) {
-    bus->timings = set ? &onewire_slave_timings_overdrive : &onewire_slave_timings_normal;
+    if(set) {
+        // Prevent erroneous reset by waiting for the previous time slot to finish
+        const uint32_t time = onewire_slave_wait_while_gpio_is(bus, bus->timings->tslot_max, false);
+
+        if(time > 0) {
+            bus->timings = &onewire_slave_timings_overdrive;
+        } else {
+            bus->error = OneWireSlaveErrorResetInProgress;
+        }
+    } else {
+        bus->timings = &onewire_slave_timings_normal;
+    }
 }
