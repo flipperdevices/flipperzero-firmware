@@ -37,6 +37,12 @@
 #define INFRARED_APP_EXTENSION ".ir"
 #define INFRARED_APP_FOLDER ANY_PATH("infrared")
 
+#define XREMOTE_TEXT_STORE_NUM 2
+#define XREMOTE_TEXT_STORE_SIZE 128
+#define XREMOTE_APP_EXTENSION ".xr"
+#define XREMOTE_MAX_ITEM_NAME_LENGTH 22
+#define XREMOTE_MAX_REMOTE_NAME_LENGTH 22
+
 typedef struct {
     Gui* gui;
     DialogsApp* dialogs;
@@ -47,6 +53,7 @@ typedef struct {
     ButtonMenu* button_menu_create;
     ButtonMenu* button_menu_create_add;
     ButtonMenu* button_menu_ir;
+    TextInput* text_input;
     Popup* popup;
     Loading* loading;
     ViewStack* view_stack;
@@ -60,6 +67,7 @@ typedef struct {
     uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;
+    char text_store[XREMOTE_TEXT_STORE_NUM][XREMOTE_TEXT_STORE_SIZE + 1];
 } XRemote;
 
 typedef enum {
@@ -78,6 +86,7 @@ typedef enum {
     XRemoteViewIdWip,
     XRemoteViewIdIrRemote,
     XRemoteViewIdStack,
+    XRemoteViewIdTextInput,
 } XRemoteViewId;
 
 typedef enum {
@@ -101,4 +110,5 @@ typedef enum {
 } XRemoteSettingsStoreState;
 
 void xremote_popup_closed_callback(void* context);
+void xremote_text_input_callback(void* context);
 void xremote_show_loading_popup(XRemote* xremote, bool show);

@@ -3,7 +3,7 @@
 
 typedef enum {
     ButtonIndexPlus = -2,
-    ButtonIndexEdit = -1,
+    ButtonIndexSave = -1,
     ButtonIndexNA = 0,
 } ButtonIndex;
 
@@ -51,6 +51,14 @@ void xremote_scene_create_on_enter(void* context) {
         ButtonMenuItemTypeControl,
         context);
 
+    button_menu_add_item(
+        button_menu,
+        "Save",
+        ButtonIndexSave,
+        xremote_create_callback,
+        ButtonMenuItemTypeControl,
+        context);
+
     button_menu_set_header(button_menu, "Add Cmd");
     const int16_t button_index =
         (signed)scene_manager_get_scene_state(app->scene_manager, XRemoteViewIdCreate);
@@ -83,6 +91,8 @@ bool xremote_scene_create_on_event(void* context, SceneManagerEvent event) {
             if(button_index == ButtonIndexPlus) {
                 scene_manager_next_scene(app->scene_manager, XRemoteSceneCreateAdd);
                 consumed = true;
+            } else if(button_index == ButtonIndexSave) {
+                scene_manager_next_scene(app->scene_manager, XRemoteSceneSaveRemote);
             }
         }
         /*switch(event.event) {

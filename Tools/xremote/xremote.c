@@ -55,6 +55,9 @@ XRemote* xremote_app_alloc() {
     
     app->loading = loading_alloc();
 
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdTextInput, text_input_get_view(app->text_input));
+
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdMenu, submenu_get_view(app->submenu));
     app->xremote_infoscreen = xremote_infoscreen_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdInfoscreen, xremote_infoscreen_get_view(app->xremote_infoscreen));
@@ -110,6 +113,8 @@ void xremote_app_free(XRemote* app) {
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdSettings);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdWip);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdStack);
+    view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdTextInput);
+    text_input_free(app->text_input);
     button_menu_free(app->button_menu_create);
     button_menu_free(app->button_menu_create_add);
     button_menu_free(app->button_menu_ir);
@@ -132,6 +137,12 @@ void xremote_popup_closed_callback(void* context) {
     XRemote* app = context;
     view_dispatcher_send_custom_event(
         app->view_dispatcher, XRemoteCustomEventTypePopupClosed);
+}
+
+void xremote_text_input_callback(void* context) {
+    furi_assert(context);
+    XRemote* app = context;
+    view_dispatcher_send_custom_event(app->view_dispatcher, XRemoteCustomEventTextInput);
 }
 
 int32_t xremote_app(void* p) {
