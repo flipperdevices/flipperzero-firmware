@@ -6,14 +6,6 @@ AddOption(
     help="Comma-separated list of additional environment variables to pass to child SCons processes",
 )
 
-# AddOption(
-#     "--target",
-#     action="store",
-#     dest="sdk_target",
-#     default="",
-#     help="Hardware target to use for SDK",
-# )
-
 AddOption(
     "--channel",
     action="store",
