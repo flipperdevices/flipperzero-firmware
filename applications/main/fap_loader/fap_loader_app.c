@@ -11,7 +11,7 @@
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
 
-#define TAG "fap_loader"
+#define TAG "FapLoader"
 
 struct FapLoader {
     FlipperApplication* app;

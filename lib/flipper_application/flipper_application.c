@@ -5,7 +5,7 @@
 
 #include <m-list.h>
 
-#define TAG "fap"
+#define TAG "Fap"
 
 struct FlipperApplication {
     ELFDebugInfo state;
@@ -19,28 +19,29 @@ struct FlipperApplication {
 
 LIST_DEF(FlipperApplicationList, const FlipperApplication*, M_POD_OPLIST);
 
-FlipperApplicationList_t loaded_flipper_apps = {0};
-static bool loaded_app_list_initialized = false;
+FlipperApplicationList_t flipper_application_loaded_app_list = {0};
+static bool flipper_application_loaded_app_list_initialized = false;
 
 static void flipper_application_list_add_app(const FlipperApplication* app) {
     furi_assert(app);
 
-    if(!loaded_app_list_initialized) {
-        FlipperApplicationList_init(loaded_flipper_apps);
-        loaded_app_list_initialized = true;
+    if(!flipper_application_loaded_app_list_initialized) {
+        FlipperApplicationList_init(flipper_application_loaded_app_list);
+        flipper_application_loaded_app_list_initialized = true;
     }
-    FlipperApplicationList_push_back(loaded_flipper_apps, app);
+    FlipperApplicationList_push_back(flipper_application_loaded_app_list, app);
 }
 
 static void flipper_application_list_remove_app(const FlipperApplication* app) {
-    furi_assert(loaded_app_list_initialized);
+    furi_assert(flipper_application_loaded_app_list_initialized);
     furi_assert(app);
 
     FlipperApplicationList_it_t it;
-    for(FlipperApplicationList_it(it, loaded_flipper_apps); !FlipperApplicationList_end_p(it);
+    for(FlipperApplicationList_it(it, flipper_application_loaded_app_list);
+        !FlipperApplicationList_end_p(it);
         FlipperApplicationList_next(it)) {
         if(*FlipperApplicationList_ref(it) == app) {
-            FlipperApplicationList_remove(loaded_flipper_apps, it);
+            FlipperApplicationList_remove(flipper_application_loaded_app_list, it);
             break;
         }
     }

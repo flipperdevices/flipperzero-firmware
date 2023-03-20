@@ -179,11 +179,11 @@ class FlipperAppStateHelper:
                 else:
                     print(f"Failed to load debug info for {new_app_state}")
 
-        # print("Loaded apps:", self._current_apps)
-
     def attach_to_fw(self) -> None:
         print("Attaching to Flipper firmware")
-        self.app_list_ptr = gdb.lookup_global_symbol("loaded_flipper_apps")
+        self.app_list_ptr = gdb.lookup_global_symbol(
+            "flipper_application_loaded_app_list"
+        )
         self.app_type_ptr = gdb.lookup_type("FlipperApplication").pointer()
         self.app_list_entry_type = gdb.lookup_type("struct FlipperApplicationList_s")
         self.set_debug_mode(True)
