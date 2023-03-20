@@ -1,14 +1,15 @@
+#include "fap_loader_app.h"
+
 #include <furi.h>
-#include <gui/gui.h>
+
 #include <assets_icons.h>
+#include <gui/gui.h>
 #include <gui/view_dispatcher.h>
-#include <storage/storage.h>
 #include <gui/modules/loading.h>
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
-#include "fap_loader_app.h"
 
 #define TAG "fap_loader"
 
