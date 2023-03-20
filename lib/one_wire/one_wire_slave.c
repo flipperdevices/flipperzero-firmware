@@ -64,7 +64,7 @@ static const OneWireSlaveTimings onewire_slave_timings_overdrive = {
     .trstl_min = 48,
     .trstl_max = 80,
 
-    .tpdh_typ = 2,
+    .tpdh_typ = 0,
     .tpdl_min = 7,
     .tpdl_max = 24,
 
