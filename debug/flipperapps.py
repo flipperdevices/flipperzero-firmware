@@ -174,7 +174,7 @@ class FlipperAppStateHelper:
         for entry_point, app in loaded_apps.items():
             if entry_point not in set(app.entry_address for app in self._current_apps):
                 new_app_state = AppState.from_gdb(app)
-                print(f"New application loaded: {app.name}")
+                print(f"New application loaded. Adding debug info")
                 if self._exec_gdb_command(new_app_state.get_gdb_load_command()):
                     self._current_apps.append(new_app_state)
                 else:
