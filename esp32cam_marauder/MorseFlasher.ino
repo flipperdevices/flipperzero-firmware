@@ -1,15 +1,28 @@
-// Created by ChatGPT
+// Created by ChatGPT, and symbols added by Bing Chat
 const int LED = 4;
 const int dotDuration = 350;
 const int dashDuration = 3 * dotDuration;
 const int interLetterPause = 2 * dotDuration;
-const int interWordPause = 7 * dotDuration;
+const int interWordPause = 4 * dotDuration;
 const int bufferSize = 50;  // max length of the input buffer
 
-const char* morseAlphabet[] = {
-  ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..",
-  "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-",
-  "-.--", "--.."
+char* letters[] = {
+  ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", // A-I
+  ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", // J-R
+  "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.." // S-Z
+};
+
+//For Numbers
+char* numbers[] = {
+  "-----", ".----", "..---", "...--", "....-", ".....",
+  "-....", "--...", "---..", "----."
+};
+
+char* symbols[] = {
+  ".-.-.-", "--..--", "..--..", ".----.", "-.-.--", "-..-.", // . , ? , etc.
+  "-.--.", "-.--.-", ".-...", "---...", "-.-.-.", // ( ), :, etc.
+  "-...-", ".-.-.", "--...-", ".-..-.", ".--.-.", // = , + , / , @ , etc.
+  "..--.-", "-....-", // _ , -
 };
 
 char inputBuffer[bufferSize + 1]; // input buffer
@@ -23,7 +36,7 @@ void morse_setup() {
 void morse_loop() {
   if (Serial.available()) {
     bufferIndex = 0;
-    Serial.print("Received:");
+    Serial.print("Message: ");
 
     while (Serial.available()) {
       char input = Serial.read();
@@ -42,28 +55,34 @@ void morse_loop() {
 
   // repeat the last input forever
   for (int i = 0; i < bufferIndex; i++) {
+    if (Serial.available()) {
+      Serial.println();
+      break;
+    }
+
     char input = inputBuffer[i];
     if (input == ' ' || (input >= 'a' && input <= 'z') || (input >= '0' && input <= '9')) {
+      Serial.println();
       Serial.print(input);
-      if (input >= 'a' && input <= 'z') {
-        const char* pattern = morseAlphabet[input - 'a'];
+      Serial.print(": ");
+
+      const char* pattern;
+      if (input >= 'a' && input <= 'z')
+        pattern = letters[input - 'a'];
+      else if (input >= '0' && input <= '9')
+        pattern = numbers[input - '0'];
+      else
+        pattern = symbols[input - '.' + 6];
+
+      if (pattern) {
         for (int j = 0; pattern[j]; j++) {
-          if (pattern[j] == '.') {
-            dot();
-          } else if (pattern[j] == '-') {
-            dash();
-          }
-        }
-      } else if (input >= '0' && input <= '9') {
-        int num = input - '0';
-        for (int j = 0; j < num; j++) {
-          dot();
-          delay(dotDuration);
+          if (pattern[j] == '.') dot();
+          else if (pattern[j] == '-') dash();
         }
       } else {
         space();
-        //delay(interWordPause);
       }
+
       shortspace();
     }
   }
