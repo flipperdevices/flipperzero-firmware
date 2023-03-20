@@ -31,7 +31,7 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
      NO_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
-    {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
+    {"Help", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
 };
 
 static void uart_terminal_scene_start_var_list_enter_callback(void* context, uint32_t index) {
