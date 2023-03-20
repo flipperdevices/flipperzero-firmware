@@ -30,10 +30,6 @@
 #define TAG "Mfkey32"
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 
-#define eta_round_time 56
-#define eta_total_time 900
-// MSB_LIMIT: Chunk size (out of 256)
-#define MSB_LIMIT 16
 #define MIN_RAM 114500
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
@@ -45,6 +41,11 @@
 #define BEBIT(x, n) BIT(x, (n) ^ 24)
 #define SWAPENDIAN(x) (x = (x >> 8 & 0xff00ff) | (x & 0xff00ff) << 8, x = x >> 16 | x << 16)
 //#define SIZEOF(arr) sizeof(arr) / sizeof(*arr)
+
+static int eta_round_time = 56;
+static int eta_total_time = 900;
+// MSB_LIMIT: Chunk size (out of 256)
+static int MSB_LIMIT = 16;
 
 struct Crypto1State {
     uint32_t odd, even;
@@ -71,7 +72,6 @@ typedef struct {
 typedef enum {
     MissingNonces,
     ZeroNonces,
-    OutOfMemory,
 } MfkeyError;
 
 typedef enum {
@@ -579,6 +579,7 @@ bool recover(struct Crypto1Params* p, int ks2, ProgramState* const program_state
     for(msb = 0; msb <= ((256 / MSB_LIMIT) - 1); msb++) {
         program_state->search = msb;
         program_state->eta_round = eta_round_time;
+        program_state->eta_total = eta_total_time - (eta_round_time * msb);
         if(calculate_msb_tables(
                oks,
                eks,
@@ -958,14 +959,13 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
             nonce_array->total_nonces++;
         }
         furi_string_free(next_line);
-        stream_rewind(nonce_array->stream);
+        buffered_file_stream_close(nonce_array->stream);
 
         array_loaded = true;
         FURI_LOG_I(TAG, "Loaded %lu nonces", nonce_array->total_nonces);
     } while(false);
 
     if(!array_loaded) {
-        buffered_file_stream_close(nonce_array->stream);
         free(nonce_array);
         nonce_array = NULL;
     }
@@ -1039,13 +1039,10 @@ void mfkey32(ProgramState* const program_state) {
         return;
     }
     if(memmgr_get_free_heap() < MIN_RAM) {
-        // Insufficient RAM
-        program_state->err = OutOfMemory;
-        program_state->mfkey_state = Error;
-        napi_mf_classic_nonce_array_free(nonce_arr);
-        napi_mf_classic_dict_free(user_dict);
-        free(keyarray);
-        return;
+        // System has less than the guaranteed amount of RAM (140 KB) - adjust some parameters to run anyway at half speed
+        eta_round_time *= 2;
+        eta_total_time *= 2;
+        MSB_LIMIT /= 2;
     }
     program_state->mfkey_state = MfkeyAttack;
     // TODO: Work backwards on this array and free memory
@@ -1110,7 +1107,7 @@ void mfkey32(ProgramState* const program_state) {
         napi_mf_classic_dict_add_key_str(user_dict, temp_key);
         furi_string_free(temp_key);
     }
-    if (keyarray_size > 0) {
+    if(keyarray_size > 0) {
         // TODO: Should we use DolphinDeedNfcMfcAdd?
         DOLPHIN_DEED(DolphinDeedNfcMfcAdd);
     }
@@ -1144,11 +1141,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         float eta_round = (float)1 - ((float)program_state->eta_round / (float)eta_round_time);
         float eta_total = (float)1 - ((float)program_state->eta_total / (float)eta_total_time);
         float progress = (float)program_state->num_completed / (float)program_state->total;
-        if (eta_round < 0) {
+        if(eta_round < 0) {
             // Round ETA miscalculated
             eta_round = 0;
         }
-        if (eta_total < 0) {
+        if(eta_total < 0) {
             // Total ETA miscalculated
             eta_total = 0;
         }
@@ -1164,7 +1161,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             draw_str,
             sizeof(draw_str),
             "Round: %d/%d - ETA %02d Sec",
-            (program_state->search)+1, // Zero indexed
+            (program_state->search) + 1, // Zero indexed
             256 / MSB_LIMIT,
             program_state->eta_round);
         elements_progress_bar_with_text(canvas, 5, 31, 118, eta_round, draw_str);
@@ -1207,8 +1204,6 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             canvas_draw_str_aligned(canvas, 25, 36, AlignLeft, AlignTop, "No nonces found");
         } else if(program_state->err == ZeroNonces) {
             canvas_draw_str_aligned(canvas, 25, 36, AlignLeft, AlignTop, "No nonces to crack");
-        } else if(program_state->err == OutOfMemory) {
-            canvas_draw_str_aligned(canvas, 25, 36, AlignLeft, AlignTop, "Insufficient memory");
         } else {
             // Unhandled error
         }
