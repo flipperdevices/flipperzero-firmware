@@ -23,6 +23,7 @@
 #include <lib/toolbox/args.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <dolphin/dolphin.h>
+#include <notification/notification_messages.h>
 
 #define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
 #define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
@@ -30,7 +31,7 @@
 #define TAG "Mfkey32"
 #define NFC_MF_CLASSIC_KEY_LEN (13)
 
-#define MIN_RAM 114500
+#define MIN_RAM 115632
 #define LF_POLY_ODD (0x29CE5C)
 #define LF_POLY_EVEN (0x870804)
 #define CONST_M1_1 (LF_POLY_EVEN << 1 | 1)
@@ -439,7 +440,7 @@ int old_recover(
     return s;
 }
 
-static inline int sync_state(ProgramState* const program_state) {
+static inline int sync_state(ProgramState* program_state) {
     int ts = furi_hal_rtc_get_timestamp();
     program_state->eta_round = program_state->eta_round - (ts - program_state->eta_timestamp);
     program_state->eta_total = program_state->eta_total - (ts - program_state->eta_timestamp);
@@ -460,7 +461,7 @@ int calculate_msb_tables(
     struct Msb* even_msbs,
     unsigned int* temp_states_odd,
     unsigned int* temp_states_even,
-    ProgramState* const program_state) {
+    ProgramState* program_state) {
     //FURI_LOG_I(TAG, "MSB GO %i", msb_iter); // DEBUG
     unsigned int msb_head = (MSB_LIMIT * msb_round); // msb_iter ranges from 0 to (256/MSB_LIMIT)-1
     unsigned int msb_tail = (MSB_LIMIT * (msb_round + 1));
@@ -558,7 +559,7 @@ int calculate_msb_tables(
     return 0;
 }
 
-bool recover(struct Crypto1Params* p, int ks2, ProgramState* const program_state) {
+bool recover(struct Crypto1Params* p, int ks2, ProgramState* program_state) {
     bool found = false;
     unsigned int* states_buffer = malloc(sizeof(unsigned int) * (2 << 9));
     struct Msb* odd_msbs = (struct Msb*)malloc(MSB_LIMIT * sizeof(struct Msb));
@@ -856,7 +857,7 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
     bool system_dict_exists,
     MfClassicDict* user_dict,
     bool user_dict_exists,
-    ProgramState* const program_state) {
+    ProgramState* program_state) {
     MfClassicNonceArray* nonce_array = malloc(sizeof(MfClassicNonceArray));
     MfClassicNonce* remaining_nonce_array_init = malloc(sizeof(MfClassicNonce) * 1);
     nonce_array->remaining_nonce_array = remaining_nonce_array_init;
@@ -983,18 +984,14 @@ void napi_mf_classic_nonce_array_free(MfClassicNonceArray* nonce_array) {
 }
 
 static void finished_beep() {
-    // Beep to indicate completion if the speaker is available
-    if(furi_hal_speaker_acquire(1000)) { // Wait up to a second for the speaker
-        float freq = 3000;
-        float volume = 1.0f; // 100% volume
-        furi_hal_speaker_start(freq, volume);
-        furi_delay_ms(75);
-        furi_hal_speaker_stop();
-        furi_hal_speaker_release();
-    }
+    // Beep to indicate completion
+    NotificationApp* notification = furi_record_open("notification");
+    notification_message(notification, &sequence_audiovisual_alert);
+    notification_message(notification, &sequence_display_backlight_on);
+    furi_record_close("notification");
 }
 
-void mfkey32(ProgramState* const program_state) {
+void mfkey32(ProgramState* program_state) {
     uint64_t found_key; // recovered key
     size_t keyarray_size = 0;
     uint64_t* keyarray = malloc(sizeof(uint64_t) * 1);
@@ -1128,7 +1125,7 @@ void mfkey32(ProgramState* const program_state) {
 // Screen is 128x64 px
 static void render_callback(Canvas* const canvas, void* ctx) {
     furi_assert(ctx);
-    const ProgramState* program_state = ctx;
+    ProgramState* program_state = ctx;
     furi_mutex_acquire(program_state->mutex, FuriWaitForever);
     char draw_str[44] = {};
     canvas_clear(canvas);
@@ -1143,11 +1140,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         float progress = (float)program_state->num_completed / (float)program_state->total;
         if(eta_round < 0) {
             // Round ETA miscalculated
-            eta_round = 0;
+            eta_round = 1;
+            program_state->eta_round = 0;
         }
         if(eta_total < 0) {
             // Total ETA miscalculated
-            eta_total = 0;
+            eta_total = 1;
+            program_state->eta_total = 0;
         }
         canvas_set_font(canvas, FontSecondary);
         snprintf(
@@ -1220,7 +1219,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void mfkey32_state_init(ProgramState* const program_state) {
+static void mfkey32_state_init(ProgramState* program_state) {
     program_state->is_thread_running = false;
     program_state->mfkey_state = Ready;
     program_state->cracked = 0;
