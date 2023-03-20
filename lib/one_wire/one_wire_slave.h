@@ -25,38 +25,38 @@ typedef bool (*OneWireSlaveCommandCallback)(uint8_t command, void* context);
 /**
  * Allocate OneWireSlave instance
  * @param [in] gpio_pin connection pin
- * @return ponter to OneWireSlave instance
+ * @return pointer to OneWireSlave instance
  */
 OneWireSlave* onewire_slave_alloc(const GpioPin* gpio_pin);
 
 /**
  * Destroy OneWireSlave instance, free resources
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  */
 void onewire_slave_free(OneWireSlave* bus);
 
 /**
  * Start working with the bus
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  */
 void onewire_slave_start(OneWireSlave* bus);
 
 /**
  * Stop working with the bus
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  */
 void onewire_slave_stop(OneWireSlave* bus);
 
 /**
  * Receive one bit
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  * @return received bit value
  */
 bool onewire_slave_receive_bit(OneWireSlave* bus);
 
 /**
  * Send one bit
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  * @param [in] value bit value to send
  * @return true on success, false on failure
  */
@@ -64,7 +64,7 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value);
 
 /**
  * Send one or more bytes of data
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  * @param [in] data pointer to the data to send
  * @param [in] data_size size of the data to send
  * @return true on success, false on failure
@@ -73,7 +73,7 @@ bool onewire_slave_send(OneWireSlave* bus, const uint8_t* data, size_t data_size
 
 /**
  * Receive one or more bytes of data
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  * @param [out] data pointer to the receive buffer
  * @param [in] data_size number of bytes to receive
  * @return true on success, false on failure
@@ -82,14 +82,14 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size);
 
 /**
  * Enable overdrive mode
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  * @param [in] set true to turn overdrive on, false to turn it off
  */
 void onewire_slave_set_overdrive(OneWireSlave* bus, bool set);
 
 /**
  * Set a callback to be called on each reset
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  * @param [in] callback pointer to a callback function
  * @param [in] context additional parameter to be passed to the callback
  */
@@ -100,7 +100,7 @@ void onewire_slave_set_reset_callback(
 
 /**
  * Set a callback to be called on each command
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  * @param [in] callback pointer to a callback function
  * @param [in] context additional parameter to be passed to the callback
  */
@@ -111,7 +111,7 @@ void onewire_slave_set_command_callback(
 
 /**
  * Set a callback to report emulation success
- * @param [in] bus ponter to OneWireSlave instance
+ * @param [in] bus pointer to OneWireSlave instance
  * @param [in] result_cb pointer to a callback function
  * @param [in] context additional parameter to be passed to the callback
  */
