@@ -160,6 +160,11 @@ void setup()
           for (;;)
             nanny_cam_loop();
 
+        case '.':  // Morse flas
+          morse_setup();
+          for (;;)
+            morse_loop();
+
         case 'w':  // Marauder
           goto continue_to_marauder;
       }
