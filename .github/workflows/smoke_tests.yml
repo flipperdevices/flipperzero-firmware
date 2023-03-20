@@ -68,7 +68,7 @@ jobs:
         run: |
           cd scripts/flippigator
           docker buildx build -t pytest-runner .
-          docker run --rm -t -i  --device /dev/ttyACM0:/dev/ttyACM0 pytest-runner
+          docker run --rm --device /dev/ttyACM0:/dev/ttyACM0 pytest-runner
 
       - name: 'Generate allure reports'
         id: generate_allure_reports
