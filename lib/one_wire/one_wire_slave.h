@@ -18,7 +18,7 @@ extern "C" {
 typedef struct OneWireDevice OneWireDevice;
 typedef struct OneWireSlave OneWireSlave;
 
-typedef void (*OneWireSlaveResetCallback)(void* context);
+typedef bool (*OneWireSlaveResetCallback)(bool is_short, void* context);
 typedef void (*OneWireSlaveResultCallback)(void* context);
 typedef bool (*OneWireSlaveCommandCallback)(uint8_t command, void* context);
 

@@ -3,6 +3,8 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#define TH_TIMEOUT_MAX 15000 /* Maximum time before general timeout */
+
 typedef enum {
     OneWireSlaveErrorNone = 0,
     OneWireSlaveErrorResetInProgress,
@@ -24,14 +26,15 @@ typedef struct {
 
     uint16_t tw1l_max; /* Maximum Master Write 1 time */
     uint16_t trl_tmsr_max; /* Maximum Master Read Low + Read Sample time */
-
-    uint16_t th_timeout; /* Maximum time before general timeout */
 } OneWireSlaveTimings;
 
 struct OneWireSlave {
     const GpioPin* gpio_pin;
     const OneWireSlaveTimings* timings;
     OneWireSlaveError error;
+
+    bool is_first_reset;
+    bool is_short_reset;
 
     OneWireSlaveResetCallback reset_callback;
     OneWireSlaveCommandCallback command_callback;
@@ -55,8 +58,6 @@ static const OneWireSlaveTimings onewire_slave_timings_normal = {
 
     .tw1l_max = 20,
     .trl_tmsr_max = 30,
-
-    .th_timeout = 15000,
 };
 
 static const OneWireSlaveTimings onewire_slave_timings_overdrive = {
@@ -72,8 +73,6 @@ static const OneWireSlaveTimings onewire_slave_timings_overdrive = {
 
     .tw1l_max = 2,
     .trl_tmsr_max = 3,
-
-    .th_timeout = 15000,
 };
 
 /*********************** PRIVATE ***********************/
@@ -95,7 +94,7 @@ static bool
     return false;
 }
 
-static bool onewire_slave_show_presence(OneWireSlave* bus) {
+static inline bool onewire_slave_show_presence(OneWireSlave* bus) {
     const OneWireSlaveTimings* timings = bus->timings;
     // wait until the bus is high (might return immediately)
     onewire_slave_wait_while_gpio_is(bus, timings->trstl_max, false);
@@ -122,26 +121,35 @@ static bool onewire_slave_show_presence(OneWireSlave* bus) {
 static inline bool onewire_slave_receive_and_process_command(OneWireSlave* bus) {
     /* Reset condition detected, send a presence pulse and reset protocol state */
     if(bus->error == OneWireSlaveErrorResetInProgress) {
-        if(onewire_slave_show_presence(bus)) {
-            bus->error = OneWireSlaveErrorNone;
+        if(!bus->is_first_reset) {
+            /* Guess the reset type */
+            bus->is_short_reset = onewire_slave_wait_while_gpio_is(
+                bus,
+                onewire_slave_timings_overdrive.trstl_max -
+                    onewire_slave_timings_overdrive.tslot_max,
+                false);
+        } else {
+            bus->is_first_reset = false;
+        }
 
-            if(bus->reset_callback != NULL) {
-                bus->reset_callback(bus->reset_callback_context);
+        furi_assert(bus->reset_callback);
+
+        if(bus->reset_callback(bus->is_short_reset, bus->reset_callback_context)) {
+            if(onewire_slave_show_presence(bus)) {
+                bus->error = OneWireSlaveErrorNone;
+                return true;
             }
-
-            return true;
         }
 
     } else if(bus->error == OneWireSlaveErrorNone) {
         uint8_t command;
-        if(!onewire_slave_receive(bus, &command, 1)) {
+        if(!onewire_slave_receive(bus, &command, sizeof(command))) {
             /* Upon failure, request an additional iteration to
                choose the appropriate action by checking bus->error */
             return true;
-        } else if(bus->command_callback) {
-            return bus->command_callback(command, bus->command_callback_context);
         } else {
-            bus->error = OneWireSlaveErrorInvalidCommand;
+            furi_assert(bus->command_callback);
+            return bus->command_callback(command, bus->command_callback_context);
         }
     }
 
@@ -151,9 +159,6 @@ static inline bool onewire_slave_receive_and_process_command(OneWireSlave* bus) 
 static inline bool onewire_slave_bus_start(OneWireSlave* bus) {
     FURI_CRITICAL_ENTER();
     furi_hal_gpio_init(bus->gpio_pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
-
-    /* Start in Reset state in order to send a presence pulse immediately */
-    bus->error = OneWireSlaveErrorResetInProgress;
 
     while(onewire_slave_receive_and_process_command(bus))
         ;
@@ -168,7 +173,6 @@ static inline bool onewire_slave_bus_start(OneWireSlave* bus) {
 
 static void onewire_slave_exti_callback(void* context) {
     OneWireSlave* bus = context;
-    const OneWireSlaveTimings* timings = bus->timings;
 
     const volatile bool input_state = furi_hal_gpio_read(bus->gpio_pin);
     static uint32_t pulse_start = 0;
@@ -177,7 +181,15 @@ static void onewire_slave_exti_callback(void* context) {
         const uint32_t pulse_length =
             (DWT->CYCCNT - pulse_start) / furi_hal_cortex_instructions_per_microsecond();
 
-        if((pulse_length >= timings->trstl_min) && pulse_length <= (timings->trstl_max)) {
+        if((pulse_length >= onewire_slave_timings_overdrive.trstl_min) &&
+           (pulse_length <= onewire_slave_timings_normal.trstl_max)) {
+            /* Start in reset state in order to send a presence pulse immediately */
+            bus->error = OneWireSlaveErrorResetInProgress;
+            /* Determine reset type (chooses speed mode if supported by the emulated device) */
+            bus->is_short_reset = pulse_length <= onewire_slave_timings_overdrive.trstl_max;
+            /* Initial reset allows going directly into overdrive mode */
+            bus->is_first_reset = true;
+
             const bool result = onewire_slave_bus_start(bus);
 
             if(result && bus->result_callback != NULL) {
@@ -252,7 +264,7 @@ bool onewire_slave_receive_bit(OneWireSlave* bus) {
     }
 
     // wait while bus is high
-    if(!onewire_slave_wait_while_gpio_is(bus, timings->th_timeout, true)) {
+    if(!onewire_slave_wait_while_gpio_is(bus, TH_TIMEOUT_MAX, true)) {
         bus->error = OneWireSlaveErrorTimeout;
         return false;
     }
@@ -270,7 +282,7 @@ bool onewire_slave_send_bit(OneWireSlave* bus, bool value) {
     }
 
     // wait while bus is high
-    if(!onewire_slave_wait_while_gpio_is(bus, timings->th_timeout, true)) {
+    if(!onewire_slave_wait_while_gpio_is(bus, TH_TIMEOUT_MAX, true)) {
         bus->error = OneWireSlaveErrorTimeout;
         return false;
     }
@@ -335,14 +347,7 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size) {
 }
 
 void onewire_slave_set_overdrive(OneWireSlave* bus, bool set) {
-    if(set) {
-        // Prevent erroneous reset by waiting for the previous time slot to finish
-        if(onewire_slave_wait_while_gpio_is(bus, bus->timings->tslot_max, false)) {
-            bus->timings = &onewire_slave_timings_overdrive;
-        } else {
-            bus->error = OneWireSlaveErrorResetInProgress;
-        }
-    } else {
-        bus->timings = &onewire_slave_timings_normal;
-    }
+    /* Prevent erroneous reset by waiting for the previous time slot to finish */
+    onewire_slave_wait_while_gpio_is(bus, bus->timings->tslot_max, false);
+    bus->timings = set ? &onewire_slave_timings_overdrive : &onewire_slave_timings_normal;
 }

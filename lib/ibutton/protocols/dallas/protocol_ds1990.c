@@ -67,6 +67,11 @@ bool dallas_ds1990_write_blank(OneWireHost* host, iButtonProtocolData* protocol_
            tm2004_write(host, data->rom_data.bytes, sizeof(DallasCommonRomData));
 }
 
+static bool dallas_ds1990_reset_callback(bool is_short, void* context) {
+    UNUSED(context);
+    return !is_short;
+}
+
 static bool dallas_ds1990_command_callback(uint8_t command, void* context) {
     furi_assert(context);
     DS1990ProtocolData* data = context;
@@ -92,7 +97,7 @@ void dallas_ds1990_emulate(OneWireSlave* bus, iButtonProtocolData* protocol_data
     DS1990ProtocolData* data = protocol_data;
     data->state.bus = bus;
 
-    onewire_slave_set_reset_callback(bus, NULL, NULL);
+    onewire_slave_set_reset_callback(bus, dallas_ds1990_reset_callback, NULL);
     onewire_slave_set_command_callback(bus, dallas_ds1990_command_callback, protocol_data);
 }
 
