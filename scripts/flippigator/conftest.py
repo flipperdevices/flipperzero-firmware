@@ -189,7 +189,7 @@ def nav(flipper_serial, request):
     return nav
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session", autouse=False)
 def gator(bench_serial, request) -> Gator:
     bench = request.config.getoption("--bench")
     if bench:
@@ -200,7 +200,7 @@ def gator(bench_serial, request) -> Gator:
 
         return gator
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session", autouse=False)
 def reader_nfc(reader_serial, gator, request) -> Gator:
     bench = request.config.getoption("--bench")
     if bench:
