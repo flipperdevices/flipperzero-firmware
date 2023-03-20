@@ -40,7 +40,7 @@ void nanny_cam_loop() {
   // Wait for a client to connect
   WiFiClient client = nannyServer.available();
   if (client) {
-    Serial.println("New client connected");
+    //Serial.println("New client connected");
     handleStreamRequest();
   }
 }
@@ -120,5 +120,5 @@ void handleStreamRequest() {
 
   // Disconnect the client
   client.stop();
-  Serial.println("Client disconnected");
+  //Serial.println("Client disconnected");
 }
