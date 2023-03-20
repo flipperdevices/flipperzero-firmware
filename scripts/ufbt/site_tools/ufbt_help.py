@@ -28,9 +28,9 @@ Flashing & debugging:
 Other:
     cli:
         Open a Flipper CLI session over USB
-    *lint, *lint_py:
+    lint, lint_py:
         run linters
-    *format, *format_py:
+    format, format_py:
         run code formatters
 """
 
