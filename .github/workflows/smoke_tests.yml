@@ -66,6 +66,7 @@ jobs:
         if: steps.format_ext.outcome == 'success'
         timeout-minutes: 5
         run: |
+          cd scripts/flippigator
           docker buildx build .
           docker run --rm -t -i --privileged -v /dev/bus/usb:/dev/bus/usb --device {{steps.device.outputs.flipper}}:/dev/ttyACM0
           docker stop

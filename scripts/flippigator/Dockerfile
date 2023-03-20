@@ -6,5 +6,5 @@ FROM python:3.10 as builder
 ADD https://github.com/flipperdevices/flipperzero-firmware.git#doom/2991-e2e-runner /build
 
 WORKDIR /build/scripts/flippigator
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements-headless.txt
 CMD pytest --gui=0
