@@ -47,7 +47,7 @@ bool xremote_scene_save_remote_on_event(void* context, SceneManagerEvent event) 
     if(event.type == SceneManagerEventTypeCustom) {
         bool success = false;
 
-        success = cross_remote_save_new(remote);
+        success = cross_remote_save_new(remote, app->text_store[0]);
 
         if(success) {
             scene_manager_next_scene(scene_manager, XRemoteSceneMenu);

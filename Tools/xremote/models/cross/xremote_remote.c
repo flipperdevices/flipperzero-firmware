@@ -84,6 +84,7 @@ const char* cross_remote_get_name(CrossRemote* remote) {
 
 bool cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSignal* signal) {
     CrossRemoteItem* item = xremote_remote_item_alloc();
+    xremote_remote_item_set_type(item, XRemoteRemoteItemTypeInfrared);
     xremote_remote_item_set_name(item, name);
     xremote_remote_item_set_ir_signal(item, signal);
     CrossRemoteItemArray_push_back(remote->items, item);
@@ -115,11 +116,12 @@ void cross_remote_set_path(CrossRemote* remote, const char* path) {
     furi_string_set(remote->path, path);
 }
 
-bool cross_remote_save_new(CrossRemote* remote) {
+bool cross_remote_save_new(CrossRemote* remote, const char* name) {
     FuriString *new_name, *new_path;
-    new_name = furi_string_alloc_set(XREMOTE_DEFAULT_REMOTE_NAME);
+    //new_name = furi_string_alloc_set(XREMOTE_DEFAULT_REMOTE_NAME);
+    new_name = furi_string_alloc_set(name);
     new_path = furi_string_alloc_set(XREMOTE_APP_FOLDER);
-
+    
     cross_remote_find_vacant_remote_name(new_name, furi_string_get_cstr(new_path));
     furi_string_cat_printf(
         new_path, "/%s%s", furi_string_get_cstr(new_name), XREMOTE_APP_EXTENSION);
@@ -142,7 +144,24 @@ bool cross_remote_store(CrossRemote* remote) {
     bool success = flipper_format_file_open_always(ff, path) &&
                    flipper_format_write_header_cstr(ff, "Cross Remote File", 1);
 
-    //TODO save Items
+    // save Items
+    if(success) {
+        CrossRemoteItemArray_it_t it;
+        for(CrossRemoteItemArray_it(it, remote->items); !CrossRemoteItemArray_end_p(it);
+            CrossRemoteItemArray_next(it)) {
+            CrossRemoteItem* item = *CrossRemoteItemArray_cref(it);
+            success = false;
+            if (item->type == XRemoteRemoteItemTypeInfrared) {
+                success = xremote_ir_signal_save(
+                    xremote_remote_item_get_ir_signal(item),
+                    ff,
+                    xremote_remote_item_get_name(item));
+            }
+            if(!success) {
+                break;
+            }
+        }
+    }
 
     flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);

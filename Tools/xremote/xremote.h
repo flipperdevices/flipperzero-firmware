@@ -28,10 +28,10 @@
 
 #include "scenes/xremote_scene.h"
 #include "views/xremote_infoscreen.h"
-#include "views/xremote_scene_2.h"
 #include "helpers/xremote_storage.h"
 #include "models/infrared/xremote_ir_remote.h"
 #include "models/cross/xremote_remote.h"
+#include "xremote_i.h"
 
 #define TAG "XRemote"
 #define INFRARED_APP_EXTENSION ".ir"
@@ -60,7 +60,6 @@ typedef struct {
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     XRemoteInfoscreen* xremote_infoscreen;
-    XRemoteScene2* xremote_scene_2;
     InfraredRemote* ir_remote_buffer;
     CrossRemote* cross_remote;
     uint32_t haptic; 
@@ -71,17 +70,10 @@ typedef struct {
 } XRemote;
 
 typedef enum {
-    XRemoteRemoteItemTypeInfrared,
-    XRemoteRemoteItemTypeSubGhz,
-    XRemoteRemoteItemTypePause,
-} XRemoteRemoteItemType;
-
-typedef enum {
     XRemoteViewIdInfoscreen,
     XRemoteViewIdMenu,
     XRemoteViewIdCreate,
     XRemoteViewIdCreateAdd,
-    XRemoteViewIdScene2,
     XRemoteViewIdSettings,
     XRemoteViewIdWip,
     XRemoteViewIdIrRemote,

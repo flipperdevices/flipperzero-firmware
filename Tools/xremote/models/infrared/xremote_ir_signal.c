@@ -5,16 +5,9 @@
 #include <core/check.h>
 #include <infrared_worker.h>
 #include <infrared_transmit.h>
+#include "../../xremote_i.h"
 
 #define TAG "InfraredSignal"
-
-struct InfraredSignal {
-    bool is_raw;
-    union {
-        InfraredMessage message;
-        InfraredRawSignal raw;
-    } payload;
-};
 
 static void xremote_ir_signal_clear_timings(InfraredSignal* signal) {
     if(signal->is_raw) {

@@ -9,6 +9,7 @@
 #include <storage/storage.h>
 #include <core/common_defines.h>
 #include "xremote_remote_item.h"
+#include "../../xremote_i.h"
 
 #include <infrared.h>
 //#include <flipper_format/flipper_format.h>
@@ -30,5 +31,5 @@ CrossRemoteItem* cross_remote_get_item(CrossRemote* remote, size_t index);
 
 void cross_remote_set_name(CrossRemote* remote, const char* name);
 void cross_remote_set_path(CrossRemote* remote, const char* path);
-bool cross_remote_save_new(CrossRemote* remote);
+bool cross_remote_save_new(CrossRemote* remote, const char* name);
 bool cross_remote_store(CrossRemote* remote);
