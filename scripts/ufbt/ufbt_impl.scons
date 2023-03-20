@@ -49,6 +49,7 @@ core_env = Environment(
     ENV=forward_os_env,
     UFBT_WORK_DIR=ufbt_work_dir,
     UFBT_STATE_DIR=ufbt_state_dir,
+    toolpath=[ufbt_state_dir.Dir("scripts/ufbt/site_tools")],
     tools=[
         "ufbt_state",
         ("ufbt_help", {"vars": ufbt_variables}),
