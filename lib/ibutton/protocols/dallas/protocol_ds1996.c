@@ -74,11 +74,10 @@ bool dallas_ds1996_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
         onewire_host_set_overdrive(host, true);
 
         if(!dallas_common_read_mem(host, 0, data->sram_data, DS1996_SRAM_DATA_SIZE)) break;
-        onewire_host_set_overdrive(host, false);
-
         success = true;
     } while(false);
 
+    onewire_host_set_overdrive(host, false);
     return success;
 }
 
