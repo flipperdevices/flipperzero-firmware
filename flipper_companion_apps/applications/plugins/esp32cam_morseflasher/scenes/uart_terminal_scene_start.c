@@ -25,7 +25,7 @@ typedef struct {
 const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     {"New custom message", {""}, 1, {""}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Quick message",
-     {"SOS", "CQD", "VVV", "Eureka", "E.T...", "what hath...", "Mayhem", "Flipper..."},
+     {"SOS", "CQD", "VVV", "Eureka", "E.T ph...", "what h...", "Mayhem", "Flipper"},
      8,
      {"sos", "cqd", "vvv", "eureka", "e.t. phone home", "what hath god wrought!", "let the mayhem begin", "flipper zero in da housa"},
      NO_ARGS,
