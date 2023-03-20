@@ -9,10 +9,10 @@
 //#include <input/input.h>
 //#include <gui/elements.h>
 
-struct AvrIspReaderView {
+struct AvrIspWriterView {
     View* view;
     AvrIspRWWorker* worker;
-    AvrIspReaderViewCallback callback;
+    AvrIspWriterViewCallback callback;
     void* context;
 };
 
@@ -21,11 +21,11 @@ typedef struct {
     IconAnimation* icon;
     const char* name_chip;
     bool detect_chip;
-} AvrIspReaderViewModel;
+} AvrIspWriterViewModel;
 
-void avr_asp_reader_view_set_callback(
-    AvrIspReaderView* instance,
-    AvrIspReaderViewCallback callback,
+void avr_asp_writer_view_set_callback(
+    AvrIspWriterView* instance,
+    AvrIspWriterViewCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -33,7 +33,7 @@ void avr_asp_reader_view_set_callback(
     instance->context = context;
 }
 
-void avr_asp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
+void avr_asp_writer_view_draw(Canvas* canvas, AvrIspWriterViewModel* model) {
     UNUSED(model);
     canvas_clear(canvas);
     // canvas_set_color(canvas, ColorBlack);
@@ -42,7 +42,7 @@ void avr_asp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
     // canvas_draw_icon(canvas, 0, 0, &I_AvrIspProg);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 20, 10, "AVRISPReader");
+    canvas_draw_str(canvas, 20, 10, "AVRISPWriter");
     // canvas_set_font(canvas, FontSecondary);
     canvas_set_font(canvas, FontPrimary);
 
@@ -59,9 +59,9 @@ void avr_asp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
     }
 }
 
-bool avr_asp_reader_view_input(InputEvent* event, void* context) {
+bool avr_asp_writer_view_input(InputEvent* event, void* context) {
     furi_assert(context);
-    AvrIspReaderView* instance = context;
+    AvrIspWriterView* instance = context;
     UNUSED(instance);
     if(event->key == InputKeyBack || event->type != InputTypeShort) {
         return false;
@@ -74,12 +74,12 @@ bool avr_asp_reader_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-static void avr_asp_reader_detect_chip_callback(void* context, const char* name) {
+static void avr_asp_writer_detect_chip_callback(void* context, const char* name) {
     furi_assert(context);
-    AvrIspReaderView* instance = context;
+    AvrIspWriterView* instance = context;
     with_view_model(
         instance->view,
-        AvrIspReaderViewModel * model,
+        AvrIspWriterViewModel * model,
         {
             model->name_chip = name;
             model->detect_chip = true;
@@ -87,13 +87,13 @@ static void avr_asp_reader_detect_chip_callback(void* context, const char* name)
         },
         true);
 }
-void avr_asp_reader_view_enter(void* context) {
+void avr_asp_writer_view_enter(void* context) {
     furi_assert(context);
-    AvrIspReaderView* instance = context;
+    AvrIspWriterView* instance = context;
 
     with_view_model(
         instance->view,
-        AvrIspReaderViewModel * model,
+        AvrIspWriterViewModel * model,
         {
             icon_animation_start(model->icon);
             model->detect_chip = false;
@@ -104,16 +104,16 @@ void avr_asp_reader_view_enter(void* context) {
     instance->worker = avr_isp_rw_worker_alloc(instance->context);
 
     avr_isp_rw_worker_set_callback(
-        instance->worker, avr_asp_reader_detect_chip_callback, instance);
+        instance->worker, avr_asp_writer_detect_chip_callback, instance);
 
     avr_isp_rw_worker_detect_chip(instance->worker);
 
     //avr_isp_rw_worker_start(instance->worker);
 }
 
-void avr_asp_reader_view_exit(void* context) {
+void avr_asp_writer_view_exit(void* context) {
     furi_assert(context);
-    AvrIspReaderView* instance = context;
+    AvrIspWriterView* instance = context;
     // //Stop worker
     // if(avr_isp_worker_is_running(instance->worker)) {
     //     avr_isp_worker_stop(instance->worker);
@@ -122,27 +122,27 @@ void avr_asp_reader_view_exit(void* context) {
 
     with_view_model(
         instance->view,
-        AvrIspReaderViewModel * model,
+        AvrIspWriterViewModel * model,
         { icon_animation_stop(model->icon); },
         false);
 }
 
-AvrIspReaderView* avr_asp_reader_view_alloc() {
-    AvrIspReaderView* instance = malloc(sizeof(AvrIspReaderView));
+AvrIspWriterView* avr_asp_writer_view_alloc() {
+    AvrIspWriterView* instance = malloc(sizeof(AvrIspWriterView));
 
     // View allocation and configuration
     instance->view = view_alloc();
 
-    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(AvrIspReaderViewModel));
+    view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(AvrIspWriterViewModel));
     view_set_context(instance->view, instance);
-    view_set_draw_callback(instance->view, (ViewDrawCallback)avr_asp_reader_view_draw);
-    view_set_input_callback(instance->view, avr_asp_reader_view_input);
-    view_set_enter_callback(instance->view, avr_asp_reader_view_enter);
-    view_set_exit_callback(instance->view, avr_asp_reader_view_exit);
+    view_set_draw_callback(instance->view, (ViewDrawCallback)avr_asp_writer_view_draw);
+    view_set_input_callback(instance->view, avr_asp_writer_view_input);
+    view_set_enter_callback(instance->view, avr_asp_writer_view_enter);
+    view_set_exit_callback(instance->view, avr_asp_writer_view_exit);
 
     with_view_model(
         instance->view,
-        AvrIspReaderViewModel * model,
+        AvrIspWriterViewModel * model,
         {
             model->icon = icon_animation_alloc(&A_ChipLooking_64x64);
             view_tie_icon_animation(instance->view, model->icon);
@@ -152,19 +152,19 @@ AvrIspReaderView* avr_asp_reader_view_alloc() {
     return instance;
 }
 
-void avr_asp_reader_view_free(AvrIspReaderView* instance) {
+void avr_asp_writer_view_free(AvrIspWriterView* instance) {
     furi_assert(instance);
 
     with_view_model(
         instance->view,
-        AvrIspReaderViewModel * model,
+        AvrIspWriterViewModel * model,
         { icon_animation_free(model->icon); },
         false);
     view_free(instance->view);
     free(instance);
 }
 
-View* avr_asp_reader_view_get_view(AvrIspReaderView* instance) {
+View* avr_asp_writer_view_get_view(AvrIspWriterView* instance) {
     furi_assert(instance);
     return instance->view;
 }

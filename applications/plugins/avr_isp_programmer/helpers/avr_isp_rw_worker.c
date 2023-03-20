@@ -68,7 +68,7 @@ void avr_isp_rw_worker_detect_chip(AvrIspRWWorker* instance) {
             instance->chip_arr_ind = ind;
         }
     }
-    avr_isp_rw_worker_rx(instance);
+   // avr_isp_rw_worker_rx(instance);
 }
 
 /** Worker thread

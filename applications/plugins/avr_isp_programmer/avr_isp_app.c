@@ -24,6 +24,8 @@ static void avr_isp_app_tick_event_callback(void* context) {
 AvrIspApp* avr_isp_app_alloc() {
     AvrIspApp* app = malloc(sizeof(AvrIspApp));
 
+    app->file_path = furi_string_alloc();
+
     // GUI
     app->gui = furi_record_open(RECORD_GUI);
 
@@ -61,19 +63,34 @@ AvrIspApp* avr_isp_app_alloc() {
     app->widget = widget_alloc();
     view_dispatcher_add_view(app->view_dispatcher, AvrIspViewWidget, widget_get_view(app->widget));
 
+    // Text Input
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, AvrIspViewTextInput, text_input_get_view(app->text_input));
+
+    //Dialog
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
+
     // Programmer view
     app->avr_asp_programmer_view = avr_asp_programmer_view_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         AvrIspViewProgrammer,
         avr_asp_programmer_view_get_view(app->avr_asp_programmer_view));
-        
+
     // Reader view
     app->avr_asp_reader_view = avr_asp_reader_view_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         AvrIspViewReader,
         avr_asp_reader_view_get_view(app->avr_asp_reader_view));
+
+    // Reader view
+    app->avr_asp_writer_view = avr_asp_writer_view_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        AvrIspViewWriter,
+        avr_asp_writer_view_get_view(app->avr_asp_writer_view));
 
     scene_manager_next_scene(app->scene_manager, AvrIspSceneStart);
 
@@ -95,6 +112,13 @@ void avr_isp_app_free(AvrIspApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewWidget);
     widget_free(app->widget);
 
+    // TextInput
+    view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewTextInput);
+    text_input_free(app->text_input);
+
+    //Dialog
+    furi_record_close(RECORD_DIALOGS);
+
     // Programmer view
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewProgrammer);
     avr_asp_programmer_view_free(app->avr_asp_programmer_view);
@@ -102,6 +126,10 @@ void avr_isp_app_free(AvrIspApp* app) {
     // Reader view
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewReader);
     avr_asp_reader_view_free(app->avr_asp_reader_view);
+
+    // Reader view
+    view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewWriter);
+    avr_asp_writer_view_free(app->avr_asp_writer_view);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
@@ -113,6 +141,9 @@ void avr_isp_app_free(AvrIspApp* app) {
 
     // Close records
     furi_record_close(RECORD_GUI);
+
+    // Path strings
+    furi_string_free(app->file_path);
 
     free(app);
 }

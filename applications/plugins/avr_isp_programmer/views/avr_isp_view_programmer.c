@@ -38,7 +38,7 @@ void avr_asp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* mod
     // canvas_set_color(canvas, ColorBlack);
     // canvas_set_font(canvas, FontSecondary);
 
-    // canvas_draw_icon(canvas, 0, 0, &I_AvrIspProg);
+     //canvas_draw_icon(canvas, 0, 0, &I_AvrIspProg);
     // canvas_set_font(canvas, FontPrimary);
     // canvas_draw_str(canvas, 63, 46, "AVRISPProg");
     // canvas_set_font(canvas, FontSecondary);
