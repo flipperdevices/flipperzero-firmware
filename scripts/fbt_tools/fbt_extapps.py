@@ -351,10 +351,11 @@ def embed_app_metadata_emitter(target, source, env):
 
 
 def prepare_app_files(target, source, env):
-    files_section_node = next(filter(lambda t: t.name.endswith(_FAP_FILEASSETS_SECTION), target))
-    
+    files_section_node = next(
+        filter(lambda t: t.name.endswith(_FAP_FILEASSETS_SECTION), target)
+    )
+
     app = env["APP"]
-    print(app)
     directory = env.Dir(app._apppath).Dir(app.fap_file_assets)
     if not directory.exists():
         raise UserError(f"File asset directory {directory} does not exist")
