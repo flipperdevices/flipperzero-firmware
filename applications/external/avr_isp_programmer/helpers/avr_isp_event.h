@@ -8,8 +8,6 @@ typedef enum {
     SubmenuIndexAvrIsWiring,
     SubmenuIndexAvrIspAbout,
 
-    //AvrIspCustomEventStartId = 100,
-
     //AvrIspCustomEvent
     AvrIspCustomEventSceneChipDetectOk = 100,
     AvrIspCustomEventSceneInputName,

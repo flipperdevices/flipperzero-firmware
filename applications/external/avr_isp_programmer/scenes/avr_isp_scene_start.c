@@ -6,7 +6,6 @@ void avr_isp_scene_start_submenu_callback(void* context, uint32_t index) {
 }
 
 void avr_isp_scene_start_on_enter(void* context) {
-    UNUSED(context);
     AvrIspApp* app = context;
     Submenu* submenu = app->submenu;
 
@@ -48,17 +47,22 @@ bool avr_isp_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, AvrIspSceneAbout);
             consumed = true;
         } else if(event.event == SubmenuIndexAvrIspProgrammer) {
-            scene_manager_next_scene(app->scene_manager, AvrIspSceneProgrammer);
+            scene_manager_set_scene_state(
+                app->scene_manager, AvrIspSceneChipDetect, AvrIspViewProgrammer);
+            scene_manager_next_scene(app->scene_manager, AvrIspSceneChipDetect);
             consumed = true;
         } else if(event.event == SubmenuIndexAvrIspReader) {
-            scene_manager_next_scene(app->scene_manager, AvrIspSceneInputName);
+            scene_manager_set_scene_state(
+                app->scene_manager, AvrIspSceneChipDetect, AvrIspViewReader);
+            scene_manager_next_scene(app->scene_manager, AvrIspSceneChipDetect);
             consumed = true;
         } else if(event.event == SubmenuIndexAvrIspWriter) {
-            scene_manager_next_scene(app->scene_manager, AvrIspSceneLoad);
+            scene_manager_set_scene_state(
+                app->scene_manager, AvrIspSceneChipDetect, AvrIspViewWriter);
+            scene_manager_next_scene(app->scene_manager, AvrIspSceneChipDetect);
             consumed = true;
         } else if(event.event == SubmenuIndexAvrIsWiring) {
-            //scene_manager_next_scene(app->scene_manager, AvrIspSceneWiring);
-            scene_manager_next_scene(app->scene_manager, AvrIspSceneChipDetect);
+            scene_manager_next_scene(app->scene_manager, AvrIspSceneWiring);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, AvrIspSceneStart, event.event);

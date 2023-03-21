@@ -137,8 +137,6 @@ void avr_isp_rw_free(AvrIspRW* instance) {
 }
 
 void avr_isp_rw_set_callback(AvrIspRW* instance, AvrIspRWCallback callback, void* context) {
-    furi_assert(instance);
-    furi_assert(context);
     instance->callback = callback;
     instance->context = context;
 }

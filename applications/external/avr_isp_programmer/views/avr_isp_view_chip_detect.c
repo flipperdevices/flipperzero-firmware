@@ -8,8 +8,6 @@
 struct AvrIspChipDetectView {
     View* view;
     AvrIspRW* avr_isp_rw;
-    const char* file_path;
-    const char* file_name;
     AvrIspChipDetectViewCallback callback;
     void* context;
 };
@@ -29,15 +27,6 @@ void avr_isp_chip_detect_view_set_callback(
     furi_assert(callback);
     instance->callback = callback;
     instance->context = context;
-}
-
-void avr_isp_chip_detect_set_file_path(
-    AvrIspChipDetectView* instance,
-    const char* file_path,
-    const char* file_name) {
-    furi_assert(instance);
-    instance->file_path = file_path;
-    instance->file_name = file_name;
 }
 
 void avr_isp_chip_detect_set_status(
@@ -104,7 +93,17 @@ bool avr_isp_chip_detect_view_input(InputEvent* event, void* context) {
             false);
 
     } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
-        avr_isp_rw_detect_chip(instance->avr_isp_rw);
+        with_view_model(
+            instance->view,
+            AvrIspChipDetectViewModel * model,
+            {
+                if(model->status != AvrIspChipDetectViewStatusDetecting) {
+                    model->status = AvrIspChipDetectViewStatusDetecting;
+                    avr_isp_rw_detect_chip(instance->avr_isp_rw);
+                }
+            },
+            false);
+
     }
 
     return true;
@@ -117,7 +116,6 @@ static void avr_isp_chip_detect_detect_chip_callback(
     uint32_t flash_size) {
     furi_assert(context);
     AvrIspChipDetectView* instance = context;
-
     with_view_model(
         instance->view,
         AvrIspChipDetectViewModel * model,
@@ -135,13 +133,13 @@ static void avr_isp_chip_detect_detect_chip_callback(
 void avr_isp_chip_detect_view_enter(void* context) {
     furi_assert(context);
     AvrIspChipDetectView* instance = context;
-    FURI_LOG_E("FF","1");
+
     //Start avr_isp_rw
     instance->avr_isp_rw = avr_isp_rw_alloc(instance->context);
-FURI_LOG_E("FF","2");
+
     avr_isp_rw_set_callback(
         instance->avr_isp_rw, avr_isp_chip_detect_detect_chip_callback, instance);
-FURI_LOG_E("FF","3");
+
     with_view_model(
         instance->view,
         AvrIspChipDetectViewModel * model,
@@ -151,8 +149,6 @@ FURI_LOG_E("FF","3");
             }
         },
         false);
-        //avr_isp_rw_detect_chip(instance->avr_isp_rw);
-        FURI_LOG_E("FF","4");
 }
 
 void avr_isp_chip_detect_view_exit(void* context) {

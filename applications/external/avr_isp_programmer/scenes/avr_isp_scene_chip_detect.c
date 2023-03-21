@@ -10,8 +10,6 @@ void avr_isp_scene_chip_detect_callback(AvrIspCustomEvent event, void* context) 
 void avr_isp_scene_chip_detect_on_enter(void* context) {
     AvrIspApp* app = context;
 
-    // avr_isp_chip_detect_set_file_path(
-    //     app->avr_isp_chip_detect_view, furi_string_get_cstr(app->file_path), app->file_name_tmp);
     avr_isp_chip_detect_view_set_callback(
         app->avr_isp_chip_detect_view, avr_isp_scene_chip_detect_callback, app);
 
@@ -20,12 +18,25 @@ void avr_isp_scene_chip_detect_on_enter(void* context) {
 
 bool avr_isp_scene_chip_detect_on_event(void* context, SceneManagerEvent event) {
     AvrIspApp* app = context;
-    UNUSED(app);
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case AvrIspCustomEventSceneChipDetectOk:
-             FURI_LOG_E("FF","DETECL OK");
+            FURI_LOG_E("FF", "DETECL OK");
+
+            if(scene_manager_get_scene_state(app->scene_manager, AvrIspSceneChipDetect) ==
+               AvrIspViewProgrammer) {
+                scene_manager_next_scene(app->scene_manager, AvrIspSceneProgrammer);
+            } else if(
+                scene_manager_get_scene_state(app->scene_manager, AvrIspSceneChipDetect) ==
+                AvrIspViewReader) {
+                scene_manager_next_scene(app->scene_manager, AvrIspSceneInputName);
+            } else if(
+                scene_manager_get_scene_state(app->scene_manager, AvrIspSceneChipDetect) ==
+                AvrIspViewWriter) {
+                scene_manager_next_scene(app->scene_manager, AvrIspSceneLoad);
+            }
+
             consumed = true;
             break;
         default:

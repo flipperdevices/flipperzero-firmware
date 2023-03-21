@@ -10,15 +10,11 @@ typedef void (*AvrIspChipDetectViewCallback)(AvrIspCustomEvent event, void* cont
 
 typedef enum {
     AvrIspChipDetectViewStatusNoDetect,
+    AvrIspChipDetectViewStatusDetecting,
     AvrIspChipDetectViewStatusDetected,
     AvrIspChipDetectViewStatusErrorOccured,
     AvrIspChipDetectViewStatusErrorVerification,
 } AvrIspChipDetectViewStatus;
-
-void avr_isp_chip_detect_set_file_path(
-    AvrIspChipDetectView* instance,
-    const char* file_path,
-    const char* file_name);
 
 void avr_isp_chip_detect_view_set_callback(
     AvrIspChipDetectView* instance,
