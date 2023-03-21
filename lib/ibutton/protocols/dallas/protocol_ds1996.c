@@ -83,12 +83,26 @@ bool dallas_ds1996_read(OneWireHost* host, iButtonProtocolData* protocol_data) {
 
 bool dallas_ds1996_write_copy(OneWireHost* host, iButtonProtocolData* protocol_data) {
     DS1996ProtocolData* data = protocol_data;
-    return dallas_common_write_mem(
-        host,
-        DS1996_COPY_SCRATCH_TIMEOUT_US,
-        DS1996_SRAM_PAGE_SIZE,
-        data->sram_data,
-        DS1996_SRAM_DATA_SIZE);
+    bool success = false;
+
+    do {
+        if(!onewire_host_reset(host)) break;
+
+        onewire_host_write(host, DALLAS_COMMON_CMD_OVERDRIVE_SKIP_ROM);
+        onewire_host_set_overdrive(host, true);
+
+        if(!dallas_common_write_mem(
+               host,
+               DS1996_COPY_SCRATCH_TIMEOUT_US,
+               DS1996_SRAM_PAGE_SIZE,
+               data->sram_data,
+               DS1996_SRAM_DATA_SIZE))
+            break;
+        success = true;
+    } while(false);
+
+    onewire_host_set_overdrive(host, false);
+    return success;
 }
 
 static bool dallas_ds1996_reset_callback(bool is_short, void* context) {

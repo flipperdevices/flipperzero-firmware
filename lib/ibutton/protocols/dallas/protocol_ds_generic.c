@@ -62,7 +62,10 @@ bool ds_generic_write_blank(OneWireHost* host, iButtonProtocolData* protocol_dat
 }
 
 static bool ds_generic_reset_callback(bool is_short, void* context) {
-    UNUSED(context);
+    DallasGenericProtocolData* data = context;
+    if(!is_short) {
+        onewire_slave_set_overdrive(data->state.bus, is_short);
+    }
     return !is_short;
 }
 

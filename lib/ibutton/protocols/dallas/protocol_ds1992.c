@@ -93,6 +93,7 @@ static bool dallas_ds1992_reset_callback(bool is_short, void* context) {
 
     if(!is_short) {
         data->state.command_state = DallasCommonCommandStateIdle;
+        onewire_slave_set_overdrive(data->state.bus, is_short);
     }
 
     return !is_short;

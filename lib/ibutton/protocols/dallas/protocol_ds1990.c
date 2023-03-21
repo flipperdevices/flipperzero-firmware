@@ -68,7 +68,10 @@ bool dallas_ds1990_write_blank(OneWireHost* host, iButtonProtocolData* protocol_
 }
 
 static bool dallas_ds1990_reset_callback(bool is_short, void* context) {
-    UNUSED(context);
+    DS1990ProtocolData* data = context;
+    if(!is_short) {
+        onewire_slave_set_overdrive(data->state.bus, is_short);
+    }
     return !is_short;
 }
 
@@ -97,7 +100,7 @@ void dallas_ds1990_emulate(OneWireSlave* bus, iButtonProtocolData* protocol_data
     DS1990ProtocolData* data = protocol_data;
     data->state.bus = bus;
 
-    onewire_slave_set_reset_callback(bus, dallas_ds1990_reset_callback, NULL);
+    onewire_slave_set_reset_callback(bus, dallas_ds1990_reset_callback, protocol_data);
     onewire_slave_set_command_callback(bus, dallas_ds1990_command_callback, protocol_data);
 }
 
