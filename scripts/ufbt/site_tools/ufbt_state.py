@@ -69,6 +69,9 @@ def generate(env, **kw):
     if not sdk_state["meta"]["hw_target"].endswith(sdk_data["hardware"]):
         raise SConsEnvironmentError("SDK state file doesn't match hardware target")
 
+    scripts_dir = sdk_state_dir_node.Dir(sdk_components.get("scripts", ".")).Dir(
+        "scripts"
+    )
     env.SetDefault(
         # Paths
         SDK_DEFINITION=env.File(sdk_data["sdk_symbols"]),
@@ -77,9 +80,7 @@ def generate(env, **kw):
             .Dir("debug")
             .abspath
         ).as_posix(),
-        FBT_SCRIPT_DIR=sdk_state_dir_node.Dir(sdk_components.get("scripts", ".")).Dir(
-            "scripts"
-        ),
+        FBT_SCRIPT_DIR=scripts_dir,
         LIBPATH=sdk_state_dir_node.Dir(sdk_components.get("lib", "lib")),
         FW_ELF=sdk_state_dir_node.File(sdk_components.get("fwelf")),
         FW_BIN=sdk_state_dir_node.File(sdk_components.get("fwbin")),
@@ -98,6 +99,7 @@ def generate(env, **kw):
         UFBT_STATE_DIR=sdk_state_dir_node,
         UFBT_SDK_META=sdk_state["meta"],
         UFBT_BOOTSTRAP_SCRIPT=env.File("#/bootstrap.py"),
+        UFBT_SCRIPT_ROOT=scripts_dir.Dir("ufbt"),
     )
 
     sys.path.insert(0, env["FBT_SCRIPT_DIR"].abspath)

@@ -312,7 +312,8 @@ def _path_as_posix(path):
 
 
 vscode_dist = []
-for template_file in dist_env.Glob("#project_template/.vscode/*"):
+project_template_dir = dist_env["UFBT_SCRIPT_ROOT"].Dir("project_template")
+for template_file in project_template_dir.Dir(".vscode").glob("*"):
     vscode_dist.append(
         dist_env.Substfile(
             original_app_dir.Dir(".vscode").File(template_file.name),
@@ -354,7 +355,7 @@ dist_env.Alias("vscode_dist", vscode_dist)
 
 dist_env.SetDefault(FBT_APPID=appenv.subst("$APPID") or "template")
 app_template_dist = []
-for template_file in dist_env.Glob("#project_template/app_template/*"):
+for template_file in project_template_dir.Dir("app_template").glob("*"):
     dist_file_name = dist_env.subst(template_file.name)
     if template_file.name.endswith(".png"):
         app_template_dist.append(
