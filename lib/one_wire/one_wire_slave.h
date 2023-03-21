@@ -19,8 +19,8 @@ typedef struct OneWireDevice OneWireDevice;
 typedef struct OneWireSlave OneWireSlave;
 
 typedef bool (*OneWireSlaveResetCallback)(bool is_short, void* context);
-typedef void (*OneWireSlaveResultCallback)(void* context);
 typedef bool (*OneWireSlaveCommandCallback)(uint8_t command, void* context);
+typedef void (*OneWireSlaveResultCallback)(void* context);
 
 /**
  * Allocate OneWireSlave instance
@@ -88,7 +88,12 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size);
 void onewire_slave_set_overdrive(OneWireSlave* bus, bool set);
 
 /**
- * Set a callback to be called on each reset
+ * Set a callback function to be called on each reset.
+ * The return value of the callback determines whether the emulated device
+ * supports the short reset (passed as the is_short parameter).
+ * In most applications, it should also call onewire_slave_set_overdrive()
+ * to set the appropriate speed mode.
+ *
  * @param [in] bus pointer to OneWireSlave instance
  * @param [in] callback pointer to a callback function
  * @param [in] context additional parameter to be passed to the callback
@@ -99,7 +104,10 @@ void onewire_slave_set_reset_callback(
     void* context);
 
 /**
- * Set a callback to be called on each command
+ * Set a callback function to be called on each command.
+ * The return value of the callback determines whether further operation
+ * is possible. As a rule of thumb, return true unless a critical error happened.
+ *
  * @param [in] bus pointer to OneWireSlave instance
  * @param [in] callback pointer to a callback function
  * @param [in] context additional parameter to be passed to the callback
