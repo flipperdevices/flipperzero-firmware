@@ -219,7 +219,7 @@ appenv.PrepareApplicationsBuild()
 
 #######################
 
-extapps = appenv["EXT_APPS"]
+apps_artifacts = appenv["EXT_APPS"]
 
 apps_to_build_as_faps = [
     FlipperAppType.PLUGIN,
@@ -242,12 +242,12 @@ for app in known_extapps:
     ]
 
 if appenv["FORCE"]:
-    appenv.AlwaysBuild([extapp.compact for extapp in extapps.values()])
+    appenv.AlwaysBuild([extapp.compact for extapp in apps_artifacts.values()])
 
 # Final steps - target aliases
 
 install_and_check = [
-    (extapp.installer, extapp.validator) for extapp in extapps.values()
+    (extapp.installer, extapp.validator) for extapp in apps_artifacts.values()
 ]
 Alias(
     "faps",
@@ -264,27 +264,28 @@ fwcdb = appenv.CompilationDatabase(
 AlwaysBuild(fwcdb)
 Precious(fwcdb)
 NoClean(fwcdb)
-if len(extapps):
+if len(apps_artifacts):
     Default(fwcdb)
 
 
 # launch handler
 
-app_artifacts = None
-if len(extapps) == 1:
-    app_artifacts = list(extapps.values())[0]
-elif len(extapps) > 1:  # more than 1 app - try to find one with matching id
-    if appsrc := appenv.subst("$APPID"):
-        app_artifacts = appenv.GetExtAppFromPath(appsrc)
+print(apps_artifacts)
 
-if app_artifacts:
-    appenv.PhonyTarget(
-        "launch",
-        '${PYTHON3} "${APP_RUN_SCRIPT}" "${SOURCE}" --fap_dst_dir "/ext/apps/${FAP_CATEGORY}"',
-        source=app_artifacts.compact,
-        FAP_CATEGORY=app_artifacts.app.fap_category,
-    )
-    appenv.Alias("launch", app_artifacts.validator)
+runnable_apps = appenv["APPBUILD"].get_apps_of_type(FlipperAppType.EXTERNAL, True)
+# print(runnable_apps)
+# Exit(1)
+
+app_to_launch = None
+if len(runnable_apps) == 1:
+    app_to_launch = runnable_apps[0].appid
+elif len(runnable_apps) > 1:
+    # more than 1 app - try to find one with matching id
+    app_to_launch = appenv.subst("$APPID")
+
+
+if app_to_launch:
+    appenv.AddAppLaunchTarget(app_to_launch, "launch")
 
 # cli handler
 

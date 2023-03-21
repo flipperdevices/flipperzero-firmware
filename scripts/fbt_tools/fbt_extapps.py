@@ -391,6 +391,51 @@ def generate_embed_app_metadata_actions(source, target, env, for_signature):
     return Action(actions)
 
 
+def AddAppLaunchTarget(env, appname, launch_target_name):
+    deploy_sources, flipp_dist_paths, validators = [], [], []
+    run_script_extra_ars = ""
+
+    def _add_dist_targets(app_artifacts):
+        validators.append(app_artifacts.validator)
+        for _, ext_path in app_artifacts.dist_entries:
+            deploy_sources.append(app_artifacts.compact)
+            flipp_dist_paths.append(f"/ext/{ext_path}")
+        return app_artifacts
+
+    def _add_host_app_to_targets(host_app):
+        artifacts_app_to_run = env["EXT_APPS"].get(host_app.appid, None)
+        _add_dist_targets(artifacts_app_to_run)
+        for plugin in host_app._plugins:
+            _add_dist_targets(env["EXT_APPS"].get(plugin.appid, None))
+
+    artifacts_app_to_run = env.GetExtAppByIdOrPath(appname)
+    if artifacts_app_to_run.app.apptype == FlipperAppType.PLUGIN:
+        # We deploy host app instead
+        host_app = env["APPMGR"].get(artifacts_app_to_run.app.requires[0])
+
+        if host_app:
+            if host_app.apptype == FlipperAppType.EXTERNAL:
+                _add_host_app_to_targets(host_app)
+            else:
+                # host app is a built-in app
+                run_script_extra_ars = f"-a {host_app.name}"
+                _add_dist_targets(artifacts_app_to_run)
+        else:
+            raise UserError("Host app is unknown")
+    else:
+        _add_host_app_to_targets(artifacts_app_to_run.app)
+
+    # print(deploy_sources, flipp_dist_paths)
+    env.PhonyTarget(
+        launch_target_name,
+        '${PYTHON3} "${APP_RUN_SCRIPT}" ${EXTRA_ARGS} -s ${SOURCES} -t ${FLIPPER_FILE_TARGETS}',
+        source=deploy_sources,
+        FLIPPER_FILE_TARGETS=flipp_dist_paths,
+        EXTRA_ARGS=run_script_extra_ars,
+    )
+    env.Alias(launch_target_name, validators)
+
+
 def generate(env, **kw):
     env.SetDefault(
         EXT_APPS_WORK_DIR="${FBT_FAP_DEBUG_ELF_ROOT}",
@@ -414,6 +459,8 @@ def generate(env, **kw):
 
     env.AddMethod(BuildAppElf)
     env.AddMethod(GetExtAppByIdOrPath)
+    env.AddMethod(AddAppLaunchTarget)
+
     env.Append(
         BUILDERS={
             "FapDist": Builder(

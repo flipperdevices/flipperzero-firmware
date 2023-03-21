@@ -6,10 +6,12 @@ tail_help = """
 TASKS:
     (* - not supported yet)
 
+    launch:
+        Upload and start application over USB
     vscode_dist:
         Configure application in current directory for development in VSCode.
-    app_template:
-        Copy application template to current directory.
+    create:
+        Copy application template to current directory. Set APPID=myapp tp create an app with id 'myapp'.
 
 Building:
     faps:
