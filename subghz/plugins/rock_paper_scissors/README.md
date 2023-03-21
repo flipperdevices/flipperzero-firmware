@@ -119,3 +119,32 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
 
 - rock_paper_scissors.c
   - This is the game applcation.
+
+
+## Example data
+
+- Beacon for game 042:
+RPS:BA042:Lumyphut
+
+- Join game 042:
+RPS:JA042NYourNameHere :Lumyphut
+
+- Join-ack for game 042:
+RPS:AA042NYourNameHere :Lumyphut
+
+- Count 1 for game 042:
+RPS:MA0421:Lumyphut
+
+- Count 2 for game 042:
+RPS:MA0422:Lumyphut
+
+- Rock for game 042:
+RPS:MA042R:Lumyphut
+
+- Paper for game 042:
+RPS:MA042P:Lumyphut
+
+- Scissors for game 042:
+RPS:MA042S:Lumyphut
+
+
