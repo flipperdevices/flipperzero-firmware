@@ -1,5 +1,6 @@
 from SCons.Platform import TempFileMunge
 from SCons.Node import FS
+from SCons.Errors import UserError
 
 import os
 import multiprocessing
@@ -280,8 +281,13 @@ elif len(runnable_apps) > 1:
     app_to_launch = appenv.subst("$APPID")
 
 
+def ambiguous_app_call(**kw):
+    raise UserError(f"More than one app is runnable: {', '.join(app.appid for app in runnable_apps)}. Please specify an app with APPID=...")
+
 if app_to_launch:
     appenv.AddAppLaunchTarget(app_to_launch, "launch")
+else:
+    dist_env.PhonyTarget("launch", Action(ambiguous_app_call, None))
 
 # cli handler
 
