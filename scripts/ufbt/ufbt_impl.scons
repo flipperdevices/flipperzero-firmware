@@ -6,12 +6,15 @@ import os
 import multiprocessing
 import pathlib
 
+default_env = DefaultEnvironment(tools=[])
+
+EnsurePythonVersion(3, 8)
+
 SetOption("num_jobs", multiprocessing.cpu_count())
 SetOption("max_drift", 1)
 # SetOption("silent", False)
 
-ufbt_state_dir = None  # for refactoring to work
-Import("ufbt_state_dir")
+ufbt_state_dir = Dir(os.environ.get("UFBT_STATE_DIR", "#.ufbt"))
 
 ufbt_current_sdk_dir = ufbt_state_dir.Dir("current")
 
@@ -282,7 +285,10 @@ elif len(runnable_apps) > 1:
 
 
 def ambiguous_app_call(**kw):
-    raise UserError(f"More than one app is runnable: {', '.join(app.appid for app in runnable_apps)}. Please specify an app with APPID=...")
+    raise UserError(
+        f"More than one app is runnable: {', '.join(app.appid for app in runnable_apps)}. Please specify an app with APPID=..."
+    )
+
 
 if app_to_launch:
     appenv.AddAppLaunchTarget(app_to_launch, "launch")
