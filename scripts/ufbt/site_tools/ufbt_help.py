@@ -11,7 +11,7 @@ TASKS:
     vscode_dist:
         Configure application in current directory for development in VSCode.
     create:
-        Copy application template to current directory. Set APPID=myapp tp create an app with id 'myapp'.
+        Copy application template to current directory. Set APPID=myapp to create an app with id 'myapp'.
 
 Building:
     faps:
@@ -30,10 +30,16 @@ Flashing & debugging:
 Other:
     cli:
         Open a Flipper CLI session over USB
-    lint, lint_py:
-        run linters
-    format, format_py:
-        run code formatters
+    lint:
+        run linter for C code
+    format:
+        reformat C code
+
+How to create a new application:
+    1. Create a new directory for your application and cd into it.
+    2. Run `ufbt vscode_dist create APPID=myapp`
+    3. In VSCode, open the folder and start editing.
+    4. Run `ufbt launch` to build and upload your application.
 """
 
 
