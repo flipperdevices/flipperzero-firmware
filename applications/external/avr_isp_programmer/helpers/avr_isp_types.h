@@ -19,4 +19,5 @@ typedef enum {
     AvrIspViewWriter,
     AvrIspViewWidget,
     AvrIspViewTextInput,
+    AvrIspViewChipDetect,
 } AvrIspView;

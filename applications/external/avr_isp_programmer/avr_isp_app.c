@@ -85,12 +85,19 @@ AvrIspApp* avr_isp_app_alloc() {
         AvrIspViewReader,
         avr_isp_reader_view_get_view(app->avr_isp_reader_view));
 
-    // Reader view
+    // Writer view
     app->avr_isp_writer_view = avr_isp_writer_view_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         AvrIspViewWriter,
         avr_isp_writer_view_get_view(app->avr_isp_writer_view));
+    
+    // Chip detect view
+    app->avr_isp_chip_detect_view = avr_isp_chip_detect_view_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        AvrIspViewChipDetect,
+        avr_isp_chip_detect_view_get_view(app->avr_isp_chip_detect_view));
 
     scene_manager_next_scene(app->scene_manager, AvrIspSceneStart);
 
@@ -127,9 +134,13 @@ void avr_isp_app_free(AvrIspApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewReader);
     avr_isp_reader_view_free(app->avr_isp_reader_view);
 
-    // Reader view
+    // Writer view
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewWriter);
     avr_isp_writer_view_free(app->avr_isp_writer_view);
+
+    // Chip detect view
+    view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewChipDetect);
+    avr_isp_chip_detect_view_free(app->avr_isp_chip_detect_view);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

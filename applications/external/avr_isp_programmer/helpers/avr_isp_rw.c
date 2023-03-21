@@ -96,16 +96,17 @@ bool avr_isp_rw_detect_chip(AvrIspRW* instance) {
     if(instance->callback) {
         if(instance->chip_arr_ind > avr_isp_chip_arr_size) {
             //ToDo add output ID chip
-            instance->callback(instance->context, "No detect", instance->chip_detect);
+            instance->callback(instance->context, "No detect", instance->chip_detect, 0);
 
         } else if(instance->chip_arr_ind < avr_isp_chip_arr_size) {
             instance->callback(
                 instance->context,
                 avr_isp_chip_arr[instance->chip_arr_ind].name,
-                instance->chip_detect);
+                instance->chip_detect,
+                avr_isp_chip_arr[instance->chip_arr_ind].flashsize);
         } else {
             //ToDo add output ID chip
-            instance->callback(instance->context, "Unknown", instance->chip_detect);
+            instance->callback(instance->context, "Unknown", instance->chip_detect, 0);
         }
     }
 

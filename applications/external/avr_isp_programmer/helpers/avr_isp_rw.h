@@ -4,7 +4,7 @@
 
 typedef struct AvrIspRW AvrIspRW;
 
-typedef void (*AvrIspRWCallback)(void* context, const char* name, bool detect_chip);
+typedef void (*AvrIspRWCallback)(void* context, const char* name, bool detect_chip, uint32_t flash_size);
 
 /** Allocate AvrIspRW
  * 

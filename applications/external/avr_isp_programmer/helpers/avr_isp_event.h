@@ -1,6 +1,16 @@
 #pragma once
 
 typedef enum {
-    AvrIspCustomEventStartId = 100,
+    //SubmenuIndex
+    SubmenuIndexAvrIspProgrammer = 10,
+    SubmenuIndexAvrIspReader,
+    SubmenuIndexAvrIspWriter,
+    SubmenuIndexAvrIsWiring,
+    SubmenuIndexAvrIspAbout,
+
+    //AvrIspCustomEventStartId = 100,
+
+    //AvrIspCustomEvent
+    AvrIspCustomEventSceneChipDetectOk = 100,
     AvrIspCustomEventSceneInputName,
 } AvrIspCustomEvent;

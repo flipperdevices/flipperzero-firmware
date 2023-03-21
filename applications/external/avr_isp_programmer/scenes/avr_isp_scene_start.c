@@ -1,13 +1,5 @@
 #include "../avr_isp_app_i.h"
 
-typedef enum {
-    SubmenuIndexAvrIspProgrammer,
-    SubmenuIndexAvrIspReader,
-    SubmenuIndexAvrIspWriter,
-    SubmenuIndexAvrIsWiring,
-    SubmenuIndexAvrIspAbout,
-} SubmenuIndex;
-
 void avr_isp_scene_start_submenu_callback(void* context, uint32_t index) {
     AvrIspApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
@@ -65,7 +57,8 @@ bool avr_isp_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(app->scene_manager, AvrIspSceneLoad);
             consumed = true;
         } else if(event.event == SubmenuIndexAvrIsWiring) {
-            scene_manager_next_scene(app->scene_manager, AvrIspSceneWiring);
+            //scene_manager_next_scene(app->scene_manager, AvrIspSceneWiring);
+            scene_manager_next_scene(app->scene_manager, AvrIspSceneChipDetect);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, AvrIspSceneStart, event.event);

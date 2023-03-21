@@ -18,6 +18,7 @@
 #include "views/avr_isp_view_programmer.h"
 #include "views/avr_isp_view_reader.h"
 #include "views/avr_isp_view_writer.h"
+#include "views/avr_isp_view_chip_detect.h"
 
 #define AVR_ISP_MAX_LEN_NAME 64
 
@@ -37,6 +38,7 @@ typedef struct {
     AvrIspProgrammerView* avr_isp_programmer_view;
     AvrIspReaderView* avr_isp_reader_view;
     AvrIspWriterView* avr_isp_writer_view;
+    AvrIspChipDetectView* avr_isp_chip_detect_view;
 } AvrIspApp;
 
 bool avr_isp_load_from_file(AvrIspApp* app);

@@ -93,20 +93,20 @@ bool avr_isp_reader_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-static void
-    avr_isp_reader_detect_chip_callback(void* context, const char* name, bool detect_chip) {
-    furi_assert(context);
-    AvrIspReaderView* instance = context;
-    with_view_model(
-        instance->view,
-        AvrIspReaderViewModel * model,
-        {
-            model->name_chip = name;
-            model->detect_chip = detect_chip;
-            if(detect_chip) icon_animation_stop(model->icon);
-        },
-        true);
-}
+// static void
+//     avr_isp_reader_detect_chip_callback(void* context, const char* name, bool detect_chip) {
+//     furi_assert(context);
+//     AvrIspReaderView* instance = context;
+//     with_view_model(
+//         instance->view,
+//         AvrIspReaderViewModel * model,
+//         {
+//             model->name_chip = name;
+//             model->detect_chip = detect_chip;
+//             if(detect_chip) icon_animation_stop(model->icon);
+//         },
+//         true);
+// }
 void avr_isp_reader_view_enter(void* context) {
     furi_assert(context);
     AvrIspReaderView* instance = context;
@@ -123,7 +123,7 @@ void avr_isp_reader_view_enter(void* context) {
     //Start avr_isp_rw
     instance->avr_isp_rw = avr_isp_rw_alloc(instance->context);
 
-    avr_isp_rw_set_callback(instance->avr_isp_rw, avr_isp_reader_detect_chip_callback, instance);
+    //avr_isp_rw_set_callback(instance->avr_isp_rw, avr_isp_reader_detect_chip_callback, instance);
 
     avr_isp_rw_detect_chip(instance->avr_isp_rw);
 
