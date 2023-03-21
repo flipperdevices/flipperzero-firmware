@@ -2,7 +2,7 @@
 
 App(
     appid="@FBT_APPID@",  # Must be unique
-    name="App @FBT_APPID@",  # Displayed in UI
+    name="App @FBT_APPID@",  # Displayed in menus
     apptype=FlipperAppType.EXTERNAL,
     entry_point="@FBT_APPID@_app",
     stack_size=2 * 1024,
