@@ -111,6 +111,24 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 </details>
 
 <details>
+<summary><h3 style="display: inline">AutomationMethod</h3></summary>
+<p>
+
+**Type:** enum (available options are `0`, `1`, `2`, `3`)
+
+**Default value:** `1`
+
+**Description:** Which TOTP code input automation method is enabled for the user. Possible values are:
+
+* `0` - none
+* `1` - USB - application will represent itself as an USB keyboard and type current code (BadUSB)
+* `2` - Bluetooth - application will represent itself as an Bluetooth keyboard and type current code (BadBT)
+* `3` - USB and Bluetooth
+
+</p>
+</details>
+
+<details>
 <summary><h3 style="display: inline">TokenName</h3></summary>
 <p>
 

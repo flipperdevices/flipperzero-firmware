@@ -17,7 +17,7 @@ else {
 Write-Host "Using $firmware_name firmware to run FBT"
 
 $commandline_scons = "$firmware_path\site_scons\commandline.scons"
-((Get-Content -Path $commandline_scons -Raw) -replace 'applications_user','..') | Set-Content -Path $commandline_scons
+((Get-Content -Path $commandline_scons -Raw) -replace 'applications_user','..') | Set-Content -Path $commandline_scons -NoNewline
 
 $builtin_totp_path = "$firmware_path\applications\plugins\totp"
 if ((Test-Path -Path $builtin_totp_path) -eq $True) {
