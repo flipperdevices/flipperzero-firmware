@@ -6,15 +6,12 @@ import os
 import multiprocessing
 import pathlib
 
-default_env = DefaultEnvironment(tools=[])
-
-EnsurePythonVersion(3, 8)
-
 SetOption("num_jobs", multiprocessing.cpu_count())
 SetOption("max_drift", 1)
 # SetOption("silent", False)
 
 ufbt_state_dir = Dir(os.environ.get("UFBT_STATE_DIR", "#.ufbt"))
+ufbt_script_dir = Dir(os.environ.get("UFBT_SCRIPT_DIR"))
 
 ufbt_current_sdk_dir = ufbt_state_dir.Dir("current")
 
@@ -54,6 +51,7 @@ core_env = Environment(
     ENV=forward_os_env,
     UFBT_STATE_DIR=ufbt_state_dir,
     UFBT_CURRENT_SDK_DIR=ufbt_current_sdk_dir,
+    UFBT_SCRIPT_DIR=ufbt_script_dir,
     toolpath=[ufbt_current_sdk_dir.Dir("scripts/ufbt/site_tools")],
     tools=[
         "ufbt_state",
@@ -220,8 +218,6 @@ app_mount_point.addRepository(original_app_dir)
 appenv.LoadAppManifest(app_mount_point)
 appenv.PrepareApplicationsBuild()
 
-# print(appenv["APPMGR"].known_apps)
-
 #######################
 
 apps_artifacts = appenv["EXT_APPS"]
@@ -236,8 +232,6 @@ known_extapps = [
     for apptype in apps_to_build_as_faps
     for app in appenv["APPBUILD"].get_apps_of_type(apptype, True)
 ]
-# print(f"Known external apps: {known_extapps}")
-
 for app in known_extapps:
     app_artifacts = appenv.BuildAppElf(app)
     app_src_dir = extract_abs_dir(app_artifacts.app._appdir)

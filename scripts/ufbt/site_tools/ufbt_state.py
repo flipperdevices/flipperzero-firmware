@@ -98,7 +98,7 @@ def generate(env, **kw):
         # UFBT_STATE_DIR=ufbt_state_dir_node,
         # UFBT_CURRENT_SDK_DIR=sdk_current_sdk_dir_node,
         UFBT_SDK_META=sdk_state["meta"],
-        UFBT_BOOTSTRAP_SCRIPT=env.File("#/bootstrap.py"),
+        UFBT_BOOTSTRAP_SCRIPT="${UFBT_SCRIPT_DIR}/bootstrap.py",
         UFBT_SCRIPT_ROOT=scripts_dir.Dir("ufbt"),
     )
 
