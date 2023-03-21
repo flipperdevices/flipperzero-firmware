@@ -1,4 +1,6 @@
 import SCons.Warnings as Warnings
+from SCons.Errors import UserError
+
 
 # from SCons.Script.Main import find_deepest_user_frame
 
@@ -36,6 +38,10 @@ def fbt_warning(e):
 
 
 def generate(env):
+    if env.get("UFBT_WORK_DIR"):
+        raise UserError(
+            "You're using a new format SDK on a legacy ufbt version. Please update ufbt."
+        )
     Warnings._warningOut = fbt_warning
 
 
