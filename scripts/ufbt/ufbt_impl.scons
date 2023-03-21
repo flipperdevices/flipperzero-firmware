@@ -9,9 +9,10 @@ SetOption("num_jobs", multiprocessing.cpu_count())
 SetOption("max_drift", 1)
 # SetOption("silent", False)
 
-Import("ufbt_work_dir")
+ufbt_state_dir = None  # for refactoring to work
+Import("ufbt_state_dir")
 
-ufbt_state_dir = ufbt_work_dir.Dir("current")
+ufbt_current_sdk_dir = ufbt_state_dir.Dir("current")
 
 ufbt_variables = SConscript("commandline.scons")
 
@@ -47,9 +48,9 @@ for env_value_name in variables_to_forward:
 core_env = Environment(
     variables=ufbt_variables,
     ENV=forward_os_env,
-    UFBT_WORK_DIR=ufbt_work_dir,
     UFBT_STATE_DIR=ufbt_state_dir,
-    toolpath=[ufbt_state_dir.Dir("scripts/ufbt/site_tools")],
+    UFBT_CURRENT_SDK_DIR=ufbt_current_sdk_dir,
+    toolpath=[ufbt_current_sdk_dir.Dir("scripts/ufbt/site_tools")],
     tools=[
         "ufbt_state",
         ("ufbt_help", {"vars": ufbt_variables}),
@@ -63,7 +64,7 @@ if "update" in BUILD_TARGETS:
     )
 
 if "purge" in BUILD_TARGETS:
-    core_env.Execute(Delete(ufbt_work_dir))
+    core_env.Execute(Delete(ufbt_state_dir))
     print("uFBT state purged")
     Exit(0)
 
@@ -341,7 +342,7 @@ for template_file in project_template_dir.Dir(".vscode").glob("*"):
         )
     )
 
-for config_file in dist_env.Glob("#/project_template/.*"):
+for config_file in project_template_dir.glob(".*"):
     if isinstance(config_file, FS.Dir):
         continue
     vscode_dist.append(dist_env.Install(original_app_dir, config_file))

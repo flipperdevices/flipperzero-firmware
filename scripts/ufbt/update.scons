@@ -11,7 +11,7 @@ sdk_meta = update_env["UFBT_SDK_META"]
 
 update_args = [
     "--ufbt-dir",
-    f'"{update_env["UFBT_WORK_DIR"]}"',
+    f'"{update_env["UFBT_STATE_DIR"]}"',
 ]
 
 if branch_name := GetOption("sdk_branch"):
