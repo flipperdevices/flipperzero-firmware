@@ -269,12 +269,7 @@ if len(apps_artifacts):
 
 
 # launch handler
-
-print(apps_artifacts)
-
 runnable_apps = appenv["APPBUILD"].get_apps_of_type(FlipperAppType.EXTERNAL, True)
-# print(runnable_apps)
-# Exit(1)
 
 app_to_launch = None
 if len(runnable_apps) == 1:
