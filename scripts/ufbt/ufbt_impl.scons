@@ -103,7 +103,7 @@ env = core_env.Clone(
         "fbt_assets",
         ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
     ],
-    FBT_FAP_DEBUG_ELF_ROOT=Dir("#.ufbt/build"),
+    FBT_FAP_DEBUG_ELF_ROOT=ufbt_state_dir.Dir("build"),
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
