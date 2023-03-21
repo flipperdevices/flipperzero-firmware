@@ -112,8 +112,7 @@ static bool dallas_ds1996_command_callback(uint8_t command, void* context) {
 
         } else if(data->state.command_state == DallasCommonCommandStateRomCmd) {
             data->state.command_state = DallasCommonCommandStateMemCmd;
-            dallas_common_emulate_read_mem(bus, data->sram_data, DS1996_SRAM_DATA_SIZE);
-            return false;
+            return dallas_common_emulate_read_mem(bus, data->sram_data, DS1996_SRAM_DATA_SIZE);
 
         } else {
             return false;

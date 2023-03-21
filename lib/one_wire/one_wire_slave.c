@@ -65,7 +65,7 @@ static const OneWireSlaveTimings onewire_slave_timings_overdrive = {
     .trstl_max = 80,
 
     .tpdh_typ = 0,
-    .tpdl_min = 7,
+    .tpdl_min = 8,
     .tpdl_max = 24,
 
     .tslot_min = 6,
@@ -143,14 +143,14 @@ static inline bool onewire_slave_receive_and_process_command(OneWireSlave* bus) 
 
     } else if(bus->error == OneWireSlaveErrorNone) {
         uint8_t command;
-        if(!onewire_slave_receive(bus, &command, sizeof(command))) {
-            /* Upon failure, request an additional iteration to
-               choose the appropriate action by checking bus->error */
-            return true;
-        } else {
+        if(onewire_slave_receive(bus, &command, sizeof(command))) {
             furi_assert(bus->command_callback);
-            return bus->command_callback(command, bus->command_callback_context);
+            if(bus->command_callback(command, bus->command_callback_context)) {
+                return true;
+            }
         }
+
+        return (bus->error == OneWireSlaveErrorResetInProgress);
     }
 
     return false;
@@ -347,7 +347,11 @@ bool onewire_slave_receive(OneWireSlave* bus, uint8_t* data, size_t data_size) {
 }
 
 void onewire_slave_set_overdrive(OneWireSlave* bus, bool set) {
-    /* Prevent erroneous reset by waiting for the previous time slot to finish */
-    onewire_slave_wait_while_gpio_is(bus, bus->timings->tslot_max, false);
-    bus->timings = set ? &onewire_slave_timings_overdrive : &onewire_slave_timings_normal;
+    const OneWireSlaveTimings* new_timings = set ? &onewire_slave_timings_overdrive :
+                                                   &onewire_slave_timings_normal;
+    if(bus->timings != new_timings) {
+        /* Prevent erroneous reset by waiting for the previous time slot to finish */
+        onewire_slave_wait_while_gpio_is(bus, bus->timings->tslot_max, false);
+        bus->timings = new_timings;
+    }
 }
