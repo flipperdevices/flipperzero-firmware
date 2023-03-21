@@ -375,6 +375,7 @@ for template_file in dist_env.Glob("#project_template/app_template/*"):
                 },
             )
         )
+
 AddPostAction(
     app_template_dist[-1],
     Mkdir(original_app_dir.Dir("images")),

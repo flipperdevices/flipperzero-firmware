@@ -87,6 +87,7 @@ class SdkMeta:
 class SdkTreeBuilder:
     SDK_DIR_SUBST = "SDK_ROOT_DIR"
     SDK_APP_EP_SUBST = "SDK_APP_EP_SUBST"
+    HEADER_EXTENSIONS = [".h", ".hpp"]
 
     def __init__(self, env, target, source) -> None:
         self.env = env
@@ -111,7 +112,10 @@ class SdkTreeBuilder:
             lines = LogicalLines(deps_f).readlines()
             _, depends = lines[0].split(":", 1)
             self.header_depends = list(
-                filter(lambda fname: fname.endswith(".h"), depends.split()),
+                filter(
+                    lambda fname: any(map(fname.endswith, self.HEADER_EXTENSIONS)),
+                    depends.split(),
+                ),
             )
             self.header_depends.append(self.sdk_env.subst("${LINKER_SCRIPT_PATH}"))
             self.header_depends.append(self.sdk_env.subst("${SDK_DEFINITION}"))
