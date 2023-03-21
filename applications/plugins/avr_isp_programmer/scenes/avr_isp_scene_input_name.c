@@ -33,15 +33,15 @@ void avr_isp_scene_input_name_on_enter(void* context) {
     bool dev_name_empty = false;
 
     FuriString* file_name;
-    FuriString* dir_name;
+    //FuriString* dir_name;
     file_name = furi_string_alloc();
-    dir_name = furi_string_alloc();
+    //dir_name = furi_string_alloc();
 
     //if(!app_path_is_file(app->file_path)) {
     char file_name_buf[AVR_ISP_MAX_LEN_NAME] = {0};
     set_random_name(file_name_buf, AVR_ISP_MAX_LEN_NAME);
     furi_string_set(file_name, file_name_buf);
-    //furi_string_set(app->file_path, STORAGE_APP_DATA_PATH_PREFIX);
+    furi_string_set(app->file_path, STORAGE_APP_DATA_PATH_PREFIX);
     //highlighting the entire filename by default
     dev_name_empty = true;
     //}
@@ -75,7 +75,7 @@ void avr_isp_scene_input_name_on_enter(void* context) {
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     furi_string_free(file_name);
-    furi_string_free(dir_name);
+    //furi_string_free(dir_name);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, AvrIspViewTextInput);
 }

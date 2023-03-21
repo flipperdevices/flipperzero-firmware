@@ -10,8 +10,8 @@ void avr_isp_scene_programmer_callback(AvrIspCustomEvent event, void* context) {
 void avr_isp_scene_programmer_on_enter(void* context) {
     AvrIspApp* app = context;
 
-    avr_asp_programmer_view_set_callback(
-        app->avr_asp_programmer_view, avr_isp_scene_programmer_callback, app);
+    avr_isp_programmer_view_set_callback(
+        app->avr_isp_programmer_view, avr_isp_scene_programmer_callback, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, AvrIspViewProgrammer);
 }

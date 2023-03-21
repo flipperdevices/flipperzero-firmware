@@ -72,25 +72,25 @@ AvrIspApp* avr_isp_app_alloc() {
     app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     // Programmer view
-    app->avr_asp_programmer_view = avr_asp_programmer_view_alloc();
+    app->avr_isp_programmer_view = avr_isp_programmer_view_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         AvrIspViewProgrammer,
-        avr_asp_programmer_view_get_view(app->avr_asp_programmer_view));
+        avr_isp_programmer_view_get_view(app->avr_isp_programmer_view));
 
     // Reader view
-    app->avr_asp_reader_view = avr_asp_reader_view_alloc();
+    app->avr_isp_reader_view = avr_isp_reader_view_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         AvrIspViewReader,
-        avr_asp_reader_view_get_view(app->avr_asp_reader_view));
+        avr_isp_reader_view_get_view(app->avr_isp_reader_view));
 
     // Reader view
-    app->avr_asp_writer_view = avr_asp_writer_view_alloc();
+    app->avr_isp_writer_view = avr_isp_writer_view_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
         AvrIspViewWriter,
-        avr_asp_writer_view_get_view(app->avr_asp_writer_view));
+        avr_isp_writer_view_get_view(app->avr_isp_writer_view));
 
     scene_manager_next_scene(app->scene_manager, AvrIspSceneStart);
 
@@ -121,15 +121,15 @@ void avr_isp_app_free(AvrIspApp* app) {
 
     // Programmer view
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewProgrammer);
-    avr_asp_programmer_view_free(app->avr_asp_programmer_view);
+    avr_isp_programmer_view_free(app->avr_isp_programmer_view);
 
     // Reader view
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewReader);
-    avr_asp_reader_view_free(app->avr_asp_reader_view);
+    avr_isp_reader_view_free(app->avr_isp_reader_view);
 
     // Reader view
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewWriter);
-    avr_asp_writer_view_free(app->avr_asp_writer_view);
+    avr_isp_writer_view_free(app->avr_isp_writer_view);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

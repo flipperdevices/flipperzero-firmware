@@ -8,15 +8,15 @@ typedef struct AvrIspProgrammerView AvrIspProgrammerView;
 
 typedef void (*AvrIspProgrammerViewCallback)(AvrIspCustomEvent event, void* context);
 
-void avr_asp_programmer_view_set_callback(
+void avr_isp_programmer_view_set_callback(
     AvrIspProgrammerView* instance,
     AvrIspProgrammerViewCallback callback,
     void* context);
 
-AvrIspProgrammerView* avr_asp_programmer_view_alloc();
+AvrIspProgrammerView* avr_isp_programmer_view_alloc();
 
-void avr_asp_programmer_view_free(AvrIspProgrammerView* instance);
+void avr_isp_programmer_view_free(AvrIspProgrammerView* instance);
 
-View* avr_asp_programmer_view_get_view(AvrIspProgrammerView* instance);
+View* avr_isp_programmer_view_get_view(AvrIspProgrammerView* instance);
 
-void avr_asp_programmer_view_exit(void* context);
+void avr_isp_programmer_view_exit(void* context);

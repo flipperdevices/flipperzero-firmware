@@ -22,7 +22,7 @@ typedef struct {
     bool detect_chip;
 } AvrIspProgrammerViewModel;
 
-void avr_asp_programmer_view_set_callback(
+void avr_isp_programmer_view_set_callback(
     AvrIspProgrammerView* instance,
     AvrIspProgrammerViewCallback callback,
     void* context) {
@@ -32,7 +32,7 @@ void avr_asp_programmer_view_set_callback(
     instance->context = context;
 }
 
-void avr_asp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* model) {
+void avr_isp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* model) {
     UNUSED(model);
     canvas_clear(canvas);
     // canvas_set_color(canvas, ColorBlack);
@@ -53,7 +53,7 @@ void avr_asp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* mod
     }
 }
 
-bool avr_asp_programmer_view_input(InputEvent* event, void* context) {
+bool avr_isp_programmer_view_input(InputEvent* event, void* context) {
     furi_assert(context);
     AvrIspProgrammerView* instance = context;
     UNUSED(instance);
@@ -64,7 +64,7 @@ bool avr_asp_programmer_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-static void avr_asp_programmer_detect_chip_callback(void* context, const char* name) {
+static void avr_isp_programmer_detect_chip_callback(void* context, const char* name) {
     furi_assert(context);
     AvrIspProgrammerView* instance = context;
     with_view_model(
@@ -77,7 +77,7 @@ static void avr_asp_programmer_detect_chip_callback(void* context, const char* n
         },
         true);
 }
-void avr_asp_programmer_view_enter(void* context) {
+void avr_isp_programmer_view_enter(void* context) {
     furi_assert(context);
     AvrIspProgrammerView* instance = context;
 
@@ -94,14 +94,14 @@ void avr_asp_programmer_view_enter(void* context) {
     instance->worker = avr_isp_worker_alloc(instance->context);
 
     avr_isp_worker_set_callback(
-        instance->worker, avr_asp_programmer_detect_chip_callback, instance);
+        instance->worker, avr_isp_programmer_detect_chip_callback, instance);
 
     avr_isp_worker_detect_chip(instance->worker);
 
     avr_isp_worker_start(instance->worker);
 }
 
-void avr_asp_programmer_view_exit(void* context) {
+void avr_isp_programmer_view_exit(void* context) {
     furi_assert(context);
     AvrIspProgrammerView* instance = context;
     //Stop worker
@@ -117,7 +117,7 @@ void avr_asp_programmer_view_exit(void* context) {
         false);
 }
 
-AvrIspProgrammerView* avr_asp_programmer_view_alloc() {
+AvrIspProgrammerView* avr_isp_programmer_view_alloc() {
     AvrIspProgrammerView* instance = malloc(sizeof(AvrIspProgrammerView));
 
     // View allocation and configuration
@@ -125,10 +125,10 @@ AvrIspProgrammerView* avr_asp_programmer_view_alloc() {
 
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(AvrIspProgrammerViewModel));
     view_set_context(instance->view, instance);
-    view_set_draw_callback(instance->view, (ViewDrawCallback)avr_asp_programmer_view_draw);
-    view_set_input_callback(instance->view, avr_asp_programmer_view_input);
-    view_set_enter_callback(instance->view, avr_asp_programmer_view_enter);
-    view_set_exit_callback(instance->view, avr_asp_programmer_view_exit);
+    view_set_draw_callback(instance->view, (ViewDrawCallback)avr_isp_programmer_view_draw);
+    view_set_input_callback(instance->view, avr_isp_programmer_view_input);
+    view_set_enter_callback(instance->view, avr_isp_programmer_view_enter);
+    view_set_exit_callback(instance->view, avr_isp_programmer_view_exit);
 
     with_view_model(
         instance->view,
@@ -142,7 +142,7 @@ AvrIspProgrammerView* avr_asp_programmer_view_alloc() {
     return instance;
 }
 
-void avr_asp_programmer_view_free(AvrIspProgrammerView* instance) {
+void avr_isp_programmer_view_free(AvrIspProgrammerView* instance) {
     furi_assert(instance);
 
     with_view_model(
@@ -154,7 +154,7 @@ void avr_asp_programmer_view_free(AvrIspProgrammerView* instance) {
     free(instance);
 }
 
-View* avr_asp_programmer_view_get_view(AvrIspProgrammerView* instance) {
+View* avr_isp_programmer_view_get_view(AvrIspProgrammerView* instance) {
     furi_assert(instance);
     return instance->view;
 }

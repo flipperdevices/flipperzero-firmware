@@ -21,10 +21,7 @@
 
 #define AVR_ISP_MAX_LEN_NAME 64
 
-
-typedef struct AvrIspApp AvrIspApp;
-
-struct AvrIspApp {
+typedef struct {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
@@ -37,10 +34,9 @@ struct AvrIspApp {
     FuriString* file_path;
     //FuriString* file_name;
     char file_name_tmp[AVR_ISP_MAX_LEN_NAME];
-    AvrIspProgrammerView* avr_asp_programmer_view;
-    AvrIspReaderView* avr_asp_reader_view;
-    AvrIspWriterView* avr_asp_writer_view;
-};
-
+    AvrIspProgrammerView* avr_isp_programmer_view;
+    AvrIspReaderView* avr_isp_reader_view;
+    AvrIspWriterView* avr_isp_writer_view;
+} AvrIspApp;
 
 bool avr_isp_load_from_file(AvrIspApp* app);

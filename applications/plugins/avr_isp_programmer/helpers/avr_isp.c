@@ -297,11 +297,13 @@ bool avr_isp_read_page(
     return res;
 }
 
-void avr_isp_read_signature(AvrIsp* instance, uint8_t* data) {
+AvrIspSignature avr_isp_read_signature(AvrIsp* instance) {
     furi_assert(instance);
-    data[0] = avr_isp_spi_transaction(instance, AVR_ISP_READ_VENDOR);
-    data[1] = avr_isp_spi_transaction(instance, AVR_ISP_READ_PART_FAMILY);
-    data[2] = avr_isp_spi_transaction(instance, AVR_ISP_READ_PART_NUMBER);
+    AvrIspSignature signature;
+    signature.vendor = avr_isp_spi_transaction(instance, AVR_ISP_READ_VENDOR);
+    signature.part_family = avr_isp_spi_transaction(instance, AVR_ISP_READ_PART_FAMILY);
+    signature.part_number = avr_isp_spi_transaction(instance, AVR_ISP_READ_PART_NUMBER);
+    return signature;
 }
 
 uint8_t avr_isp_read_lock_byte(AvrIsp* instance) {
