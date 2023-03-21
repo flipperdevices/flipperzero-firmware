@@ -8,6 +8,7 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
+#include "features_config.h"
 #include "services/config/config.h"
 #include "types/plugin_state.h"
 #include "types/token_info.h"
@@ -25,7 +26,7 @@
 static void render_callback(Canvas* const canvas, void* ctx) {
     furi_assert(ctx);
     PluginState* plugin_state = ctx;
-    if (furi_mutex_acquire(plugin_state->mutex, 25) == FuriStatusOk) {
+    if(furi_mutex_acquire(plugin_state->mutex, 25) == FuriStatusOk) {
         totp_scene_director_render(canvas, plugin_state);
         furi_mutex_release(plugin_state->mutex);
     }
@@ -103,10 +104,18 @@ static bool totp_plugin_state_init(PluginState* const plugin_state) {
     }
 
     plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if (plugin_state->mutex == NULL) {
+    if(plugin_state->mutex == NULL) {
         FURI_LOG_E(LOGGING_TAG, "Cannot create mutex\r\n");
         return false;
     }
+
+#ifdef TOTP_BADBT_TYPE_ENABLED
+    if(plugin_state->automation_method & AutomationMethodBadBt) {
+        plugin_state->bt_type_code_worker_context = totp_bt_type_code_worker_init();
+    } else {
+        plugin_state->bt_type_code_worker_context = NULL;
+    }
+#endif
 
     return true;
 }
@@ -129,6 +138,13 @@ static void totp_plugin_state_free(PluginState* plugin_state) {
     if(plugin_state->crypto_verify_data != NULL) {
         free(plugin_state->crypto_verify_data);
     }
+
+#ifdef TOTP_BADBT_TYPE_ENABLED
+    if(plugin_state->bt_type_code_worker_context != NULL) {
+        totp_bt_type_code_worker_free(plugin_state->bt_type_code_worker_context);
+        plugin_state->bt_type_code_worker_context = NULL;
+    }
+#endif
 
     furi_mutex_free(plugin_state->mutex);
     free(plugin_state);
@@ -170,7 +186,7 @@ int32_t totp_app() {
     while(processing) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
 
-        if (furi_mutex_acquire(plugin_state->mutex, FuriWaitForever) == FuriStatusOk) {
+        if(furi_mutex_acquire(plugin_state->mutex, FuriWaitForever) == FuriStatusOk) {
             if(event_status == FuriStatusOk) {
                 if(event.type == EventTypeKey) {
                     last_user_interaction_time = furi_get_tick();
