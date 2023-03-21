@@ -6,7 +6,7 @@
 //#include <math.h>
 
 //#include <input/input.h>
-//#include <gui/elements.h>
+#include <gui/elements.h>
 
 struct AvrIspProgrammerView {
     View* view;
@@ -37,20 +37,21 @@ void avr_isp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* mod
     canvas_clear(canvas);
     // canvas_set_color(canvas, ColorBlack);
     // canvas_set_font(canvas, FontSecondary);
-
-     //canvas_draw_icon(canvas, 0, 0, &I_AvrIspProg);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_icon(canvas, 20, 8, &I_Link_waiting_77x56);
+    elements_multiline_text(canvas, 20, 10, "Waiting for software\nconnection");
     // canvas_set_font(canvas, FontPrimary);
     // canvas_draw_str(canvas, 63, 46, "AVRISPProg");
     // canvas_set_font(canvas, FontSecondary);
-    canvas_set_font(canvas, FontPrimary);
-    if(!model->detect_chip) {
-        canvas_draw_icon_animation(canvas, 0, 0, model->icon);
-        canvas_draw_str_aligned(canvas, 64, 26, AlignLeft, AlignCenter, "Detecting");
-        canvas_draw_str_aligned(canvas, 64, 36, AlignLeft, AlignCenter, "AVR chip...");
-    } else {
-        canvas_draw_str_aligned(canvas, 20, 26, AlignLeft, AlignCenter, "AVR chip");
-        canvas_draw_str_aligned(canvas, 20, 36, AlignLeft, AlignCenter, model->name_chip);
-    }
+    
+    // if(!model->detect_chip) {
+    //     canvas_draw_icon_animation(canvas, 0, 0, model->icon);
+    //     canvas_draw_str_aligned(canvas, 64, 26, AlignLeft, AlignCenter, "Detecting");
+    //     canvas_draw_str_aligned(canvas, 64, 36, AlignLeft, AlignCenter, "AVR chip...");
+    // } else {
+    //     canvas_draw_str_aligned(canvas, 20, 26, AlignLeft, AlignCenter, "AVR chip");
+    //     canvas_draw_str_aligned(canvas, 20, 36, AlignLeft, AlignCenter, model->name_chip);
+    // }
 }
 
 bool avr_isp_programmer_view_input(InputEvent* event, void* context) {

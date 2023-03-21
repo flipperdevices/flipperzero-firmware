@@ -5,3 +5,5 @@ ADD_SCENE(avr_isp, reader, Reader)
 ADD_SCENE(avr_isp, input_name, InputName)
 ADD_SCENE(avr_isp, load, Load)
 ADD_SCENE(avr_isp, writer, Writer)
+ADD_SCENE(avr_isp, wiring, Wiring)
+

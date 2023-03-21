@@ -4,6 +4,7 @@ typedef enum {
     SubmenuIndexAvrIspProgrammer,
     SubmenuIndexAvrIspReader,
     SubmenuIndexAvrIspWriter,
+    SubmenuIndexAvrIsWiring,
     SubmenuIndexAvrIspAbout,
 } SubmenuIndex;
 
@@ -36,6 +37,8 @@ void avr_isp_scene_start_on_enter(void* context) {
         avr_isp_scene_start_submenu_callback,
         app);
     submenu_add_item(
+        submenu, "Wiring", SubmenuIndexAvrIsWiring, avr_isp_scene_start_submenu_callback, app);
+    submenu_add_item(
         submenu, "About", SubmenuIndexAvrIspAbout, avr_isp_scene_start_submenu_callback, app);
 
     submenu_set_selected_item(
@@ -55,11 +58,14 @@ bool avr_isp_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexAvrIspProgrammer) {
             scene_manager_next_scene(app->scene_manager, AvrIspSceneProgrammer);
             consumed = true;
-        }else if(event.event == SubmenuIndexAvrIspReader) {
+        } else if(event.event == SubmenuIndexAvrIspReader) {
             scene_manager_next_scene(app->scene_manager, AvrIspSceneInputName);
             consumed = true;
-        }else if(event.event == SubmenuIndexAvrIspWriter) {
+        } else if(event.event == SubmenuIndexAvrIspWriter) {
             scene_manager_next_scene(app->scene_manager, AvrIspSceneLoad);
+            consumed = true;
+        } else if(event.event == SubmenuIndexAvrIsWiring) {
+            scene_manager_next_scene(app->scene_manager, AvrIspSceneWiring);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, AvrIspSceneStart, event.event);
