@@ -166,10 +166,10 @@ class TestNfc(BaseCase):
             "NTAG I2C Plus 1k",
             "NTAG I2C Plus 2k",
             "Mifare Mini",
-            "Mifare Classic 1k 4byte",
-            "Mifare Classic 1k 7byte",
-            "Mifare Classic 4k 4byte",
-            "Mifare Classic 4k 7byte",
+            "Mifare Classic 1k 4byte UID",
+            "Mifare Classic 1k 7byte UID",
+            "Mifare Classic 4k 4byte UID",
+            "Mifare Classic 4k 7byte UID",
         ]
         assert menu == menu_ref, "NFC Add manually option list is wrong"
         nav.go_to_main_screen()

@@ -358,7 +358,7 @@ class Reader:
         pass
 
     def go_to_place(self) -> None:
-        self._gator.swim_to(self._x_coord, self._y_coord, 9000)
+        self._gator.swim_to(self._x_coord, self._y_coord, 15000)
 
     def is_available(self) -> bool:
         if self._recieved_data:

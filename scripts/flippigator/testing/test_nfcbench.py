@@ -11,11 +11,11 @@ os.system("color")
 
 @pytest.mark.bench
 class TestNfcBench(BaseCase):
-    def test_read_mifare_classic_1k_card(self, nav, gator):
+    def test_read_mifare_classic_1k_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -10.0, 9000)
+            gator.swim_to(-10.0, -10.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -59,6 +59,13 @@ class TestNfcBench(BaseCase):
         nav.press_ok()
         state = nav.get_current_state()
         assert "Emulating MIFARE Classic" in state, "NFC Emulation fail"
+
+        reader_nfc.clear()
+        reader_nfc.go_to_place()
+        reader_nfc.update()
+        string = reader_nfc.get()
+        assert string == "W58W805C1332674D04", "Emulated NFC card reading failed"
+
         nav.press_back()
 
         nav.go_to("Info")
@@ -76,67 +83,11 @@ class TestNfcBench(BaseCase):
         """
         nav.go_to_main_screen()
 
-    def test_reader(self, nav, gator, reader_nfc): # JUST FOR TEST!!! REMOVE IT!!! DEMOLISH THIS!! ANIHILATE!!!
-
+    def test_read_nfc_a_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -10.0, 9000)
-        with allure.step("Read a card"):
-            nav.go_to("Read")
-            nav.press_ok()
-            # key = cv.waitKey(550)
-            nav.update_screen()
-            state = nav.get_current_state()
-            state = state[0]
-            start_time = time.time()
-            while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
-                state = nav.get_current_state()
-                if time.time() - start_time > 10:
-                    break
-            while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
-                state = nav.get_current_state()
-        state = nav.get_current_state()
-        while "Mf Classic User Dict" in state:
-            state = nav.get_current_state()
-        state = nav.get_current_state()
-        while "Mf Classic Flipper Dict" in state:
-            nav.press_ok()
-            state = nav.get_current_state()
-        state = nav.get_current_state()
-        while "SkipOk" in state:
-            state = nav.get_current_state()
-        state = nav.get_current_state()
-        assert (
-            "card_Mifare Classic 1K_bench" in state
-        ), "Result of reading reference card is fail"
-        nav.press_right()
-        menu = nav.get_menu_list()
-        menu_ref = [
-            "Save",
-            "Emulate",
-            "Detect r(down)eader",
-            "Info",
-        ]
-        assert menu == menu_ref, "NFC card menu is wrong"
-        nav.go_to("Emulate")
-        nav.press_ok()
-
-        reader_nfc.clear()
-        reader_nfc.go_to_place()
-        reader_nfc.update()
-        string = reader_nfc.get()
-        print(string)
-
-        assert string == "0", "DELETE"
-
-    def test_read_nfc_a_card(self, nav, gator):
-        with allure.step("Go to NFC"):
-            nav.nfc.go_into()
-        with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -90.0, 9000)
+            gator.swim_to(-10.0, -90.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -163,15 +114,29 @@ class TestNfcBench(BaseCase):
             "Info",
         ]
         assert menu == menu_ref, "NFC card menu is wrong"
+
+        nav.go_to("Emulate UID")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "Emulating UID" in state, "NFC Emulation fail"
+
+        reader_nfc.clear()
+        reader_nfc.go_to_place()
+        reader_nfc.update()
+        string = reader_nfc.get()
+        print(string)
+        assert string == "W58W00", "Emulated NFC card reading failed"
+
+        nav.press_back()
+
         nav.go_to_main_screen()
 
-    """
-    Disabled because of bug with Mifare cards 
-    def test_read_mifare_classic_4k_card(self, nav, gator):
+    '''
+    def test_read_mifare_classic_4k_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -170.0, 9000)
+            gator.swim_to(-10.0, -170.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -215,12 +180,21 @@ class TestNfcBench(BaseCase):
         nav.press_ok()
         state = nav.get_current_state()
         assert "Emulating MIFARE Classic" in state, "NFC Emulation fail"
+
+        reader_nfc.clear()
+        reader_nfc.go_to_place()
+        reader_nfc.update()
+        string = reader_nfc.get()
+        print(string)
+        assert string == "W58W9D7CD67A000000", "Emulated NFC card reading failed"
+
         nav.press_back()
 
         nav.go_to("Info")
         nav.press_ok()
         nav.press_back()
 
+        
         nav.go_to("Save")
         nav.press_ok()
         nav.press_ok()
@@ -228,15 +202,16 @@ class TestNfcBench(BaseCase):
         nav.press_down()
         state = nav.get_current_state()
         assert "FileBrowserLevelUp" in state, "Can't save read NFC card"
+        
 
         nav.go_to_main_screen()
-    """
+    '''
 
-    def test_read_troika_card(self, nav, gator):
+    def test_read_troika_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -250.0, 9000)
+            gator.swim_to(-10.0, -250.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -250,6 +225,7 @@ class TestNfcBench(BaseCase):
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
+            time.sleep(0.5)
             while "ReadingCardNFC" in state:
                 print(colored("ReadingCardNFC", "yellow"))
                 state = nav.get_current_state()
@@ -263,13 +239,28 @@ class TestNfcBench(BaseCase):
             "Info",
         ]
         assert menu == menu_ref, "NFC card menu is wrong"
+
+        nav.go_to("Emulate")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "Emulating MIFARE Classic" in state, "NFC Emulation fail"
+
+        reader_nfc.clear()
+        reader_nfc.go_to_place()
+        reader_nfc.update()
+        string = reader_nfc.get()
+        print(string)
+        assert string == "W58W60950399D1334", "Emulated NFC card reading failed"
+
+        nav.press_back()
+
         nav.go_to_main_screen()
 
-    def test_read_ntag215_card(self, nav, gator):
+    def test_read_ntag215_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -330.0, 9000)
+            gator.swim_to(-10.0, -330.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -297,13 +288,26 @@ class TestNfcBench(BaseCase):
             "Info",
         ]
         assert menu == menu_ref, "NFC card menu is wrong"
+
+        nav.go_to("Emulate")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "Emulating NTAG" in state, "NFC Emulation fail"
+        reader_nfc.clear()
+        reader_nfc.go_to_place()
+        reader_nfc.update()
+        string = reader_nfc.get()
+        print(string)
+        assert string == "W58WC007BA39427704", "Emulated NFC card reading failed"
+        nav.press_back()
+
         nav.go_to_main_screen()
 
-    def test_read_mifare_ultralight_card(self, nav, gator):
+    def test_read_mifare_ultralight_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -410.0, 9000)
+            gator.swim_to(-10.0, -410.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -332,13 +336,26 @@ class TestNfcBench(BaseCase):
             "Info",
         ]
         assert menu == menu_ref, "NFC card menu is wrong"
+
+        nav.go_to("Emulate")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "Emulating MIFARE Ultralight" in state, "NFC Emulation fail"
+        reader_nfc.clear()
+        reader_nfc.go_to_place()
+        reader_nfc.update()
+        string = reader_nfc.get()
+        print(string)
+        assert string == "W58W80485CBABD4004", "Emulated NFC card reading failed"
+        nav.press_back()
+
         nav.go_to_main_screen()
 
-    def test_read_mifare_desfire_card(self, nav, gator):
+    def test_read_mifare_desfire_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-120.0, -10.0, 9000)
+            gator.swim_to(-120.0, -10.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -367,6 +384,19 @@ class TestNfcBench(BaseCase):
             "Info",
         ]
         assert menu == menu_ref, "NFC card menu is wrong"
+
+        nav.go_to("Emulate UID")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "Emulating UID" in state, "NFC Emulation fail"
+        reader_nfc.clear()
+        reader_nfc.go_to_place()
+        reader_nfc.update()
+        string = reader_nfc.get()
+        print(string)
+        assert string == "W58W8055177A073904", "Emulated NFC card reading failed"
+        nav.press_back()
+
         nav.go_to_main_screen()
 
     """
@@ -375,7 +405,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-120.0, -90.0, 9000)
+            gator.swim_to(-120.0, -90.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -399,11 +429,11 @@ class TestNfcBench(BaseCase):
         nav.go_to_main_screen()
     """
 
-    def test_read_all_in_one_card(self, nav, gator):
+    def test_read_all_in_one_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-120.0, -170.0, 9000)
+            gator.swim_to(-120.0, -170.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -432,4 +462,17 @@ class TestNfcBench(BaseCase):
             "Info",
         ]
         assert menu == menu_ref, "NFC card menu is wrong"
+
+        nav.go_to("Emulate")
+        nav.press_ok()
+        state = nav.get_current_state()
+        assert "Emulating MIFARE Ultralight" in state, "NFC Emulation fail"
+        reader_nfc.clear()
+        reader_nfc.go_to_place()
+        reader_nfc.update()
+        string = reader_nfc.get()
+        print(string)
+        assert string == "W58W369CE7B10AC134", "Emulated NFC card reading failed"
+        nav.press_back()
+
         nav.go_to_main_screen()
