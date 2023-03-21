@@ -21,6 +21,10 @@ from fbt.sdk.cache import SdkCache
 from fbt.util import extract_abs_dir_path
 
 
+_FAP_META_SECTION = ".fapmeta"
+_FAP_FILEASSETS_SECTION = ".fapassets"
+
+
 @dataclass
 class FlipperExternalAppInfo:
     app: FlipperApplication
@@ -234,6 +238,8 @@ def BuildAppElf(env, app):
 
 
 def prepare_app_metadata(target, source, env):
+    metadata_node = next(filter(lambda t: t.name.endswith(_FAP_META_SECTION), target))
+
     sdk_cache = SdkCache(env["SDK_DEFINITION"].path, load_version_only=True)
 
     if not sdk_cache.is_buildable():
@@ -242,8 +248,7 @@ def prepare_app_metadata(target, source, env):
         )
 
     app = env["APP"]
-    meta_file_name = source[0].path + ".meta"
-    with open(meta_file_name, "wb") as f:
+    with open(metadata_node.abspath, "wb") as f:
         f.write(
             assemble_manifest_data(
                 app_manifest=app,
@@ -337,24 +342,25 @@ def embed_app_metadata_emitter(target, source, env):
     if app.apptype == FlipperAppType.PLUGIN:
         target[0].name = target[0].name.replace(".fap", ".fal")
 
-    meta_file_name = source[0].path + ".meta"
-    target.append("#" + meta_file_name)
+    target.append(env.File(source[0].abspath + _FAP_META_SECTION))
 
     if app.fap_file_assets:
-        files_section = source[0].path + ".files.section"
-        target.append("#" + files_section)
+        target.append(env.File(source[0].abspath + _FAP_FILEASSETS_SECTION))
 
     return (target, source)
 
 
 def prepare_app_files(target, source, env):
+    files_section_node = next(filter(lambda t: t.name.endswith(_FAP_FILEASSETS_SECTION), target))
+    
     app = env["APP"]
-    directory = app._appdir.Dir(app.fap_file_assets)
+    print(app)
+    directory = env.Dir(app._apppath).Dir(app.fap_file_assets)
     if not directory.exists():
         raise UserError(f"File asset directory {directory} does not exist")
 
     bundler = FileBundler(directory.abspath)
-    bundler.export(source[0].path + ".files.section")
+    bundler.export(files_section_node.abspath)
 
 
 def generate_embed_app_metadata_actions(source, target, env, for_signature):
@@ -367,15 +373,15 @@ def generate_embed_app_metadata_actions(source, target, env, for_signature):
     objcopy_str = (
         "${OBJCOPY} "
         "--remove-section .ARM.attributes "
-        "--add-section .fapmeta=${SOURCE}.meta "
+        "--add-section ${_FAP_META_SECTION}=${SOURCE}${_FAP_META_SECTION} "
     )
 
     if app.fap_file_assets:
         actions.append(Action(prepare_app_files, "$APPFILE_COMSTR"))
-        objcopy_str += "--add-section .fapassets=${SOURCE}.files.section "
+        objcopy_str += "--add-section ${_FAP_FILEASSETS_SECTION}=${SOURCE}${_FAP_FILEASSETS_SECTION} "
 
     objcopy_str += (
-        "--set-section-flags .fapmeta=contents,noload,readonly,data "
+        "--set-section-flags ${_FAP_META_SECTION}=contents,noload,readonly,data "
         "--strip-debug --strip-unneeded "
         "--add-gnu-debuglink=${SOURCE} "
         "${SOURCES} ${TARGET}"
@@ -455,6 +461,8 @@ def generate(env, **kw):
         EXT_APPS={},  # appid -> FlipperExternalAppInfo
         EXT_LIBS={},
         _APP_ICONS=[],
+        _FAP_META_SECTION=_FAP_META_SECTION,
+        _FAP_FILEASSETS_SECTION=_FAP_FILEASSETS_SECTION,
     )
 
     env.AddMethod(BuildAppElf)
