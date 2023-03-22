@@ -108,7 +108,7 @@ void  cbDraw (Canvas* const canvas,  void* ctx)
 	furi_assert(ctx);
 
 	// We will need access to the plugin state variables
-	const state_t*  state = ctx;  // state pointer
+	state_t*  state = ctx;  // state pointer
 
 	// Try to acquire the mutex for the plugin state variables, timeout = 25mS
 	// We (obviously) do not (yet) have access to the state variables,
