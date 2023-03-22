@@ -129,15 +129,17 @@ class Navigator:
         cv.imshow(window_name, display_image)
         key = cv.waitKey(1)
 
-    def recog_ref(self, ref=[], area=(0 , 128, 0, 64)):
+    def recog_ref(self, ref=[], area=(0, 128, 0, 64)):
         # self.updateScreen()
         temp_pic_list = list()
-        screen_image = self.get_raw_screen()[area[0]:area[1], area[2]:area[3]]
+        screen_image = self.get_raw_screen()[area[0] : area[1], area[2] : area[3]]
         if len(ref) == 0:
             ref = list(self.imRef.keys())
         for im in ref:
             template = cv.cvtColor(self.imRef.get(im), 0)
-            if (template.shape[0] < screen_image.shape[0]) and ((template.shape[1] < screen_image.shape[1])):
+            if (template.shape[0] < screen_image.shape[0]) and (
+                (template.shape[1] < screen_image.shape[1])
+            ):
                 res = cv.matchTemplate(screen_image, template, cv.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
                 if max_val > self._threshold:
@@ -195,7 +197,7 @@ class Navigator:
             state = self.recog_ref(ref, area)
             if time.time() - start_time > timeout:
                 cv.imwrite("img/recognitionFailPic.bmp", self.screen_image)
-                #raise FlippigatorException("Recognition timeout")
+                # raise FlippigatorException("Recognition timeout")
         return state
 
     def save_screen(self, filename: str):
@@ -258,11 +260,11 @@ class Navigator:
 
         return menus
 
-    def go_to(self, target, area = (0, 64, 0, 128)):
-        state = self.get_current_state(area = area)
+    def go_to(self, target, area=(0, 64, 0, 128)):
+        state = self.get_current_state(area=area)
         while not (target in state):
             self.press_down()
-            state = self.get_current_state(area = area)
+            state = self.get_current_state(area=area)
 
     def go_to_main_screen(self):
         self.press_back()
@@ -282,7 +284,7 @@ class Navigator:
 
         heads = list()
 
-        cur = self.get_current_state(area = (0, 15, 0, 128))
+        cur = self.get_current_state(area=(0, 15, 0, 128))
 
         while not (cur[0] in heads):
             if cur[0] == ("browser_head_" + module):
@@ -290,23 +292,23 @@ class Navigator:
             if not cur == []:
                 heads.append(cur[0])
             self.press_right()
-            cur = self.get_current_state(area = (0, 15, 0, 128))
+            cur = self.get_current_state(area=(0, 15, 0, 128))
             if cur[0] in heads:
                 return -1
 
         files = list()
-        state = self.get_current_state(area = (15, 64, 0, 128))
+        state = self.get_current_state(area=(15, 64, 0, 128))
         while not (state[0] in files):
             if state[0] == "browser_" + filename:
                 break
             if not (state == []):
                 files.append(state[0])
             self.press_down()
-            state = self.get_current_state(area = (15, 64, 0, 128))
+            state = self.get_current_state(area=(15, 64, 0, 128))
             if state[0] in files:
                 return -1
         self.press_ok()
-        self.go_to("browser_Run in app", area = (15, 64, 0, 128))
+        self.go_to("browser_Run in app", area=(15, 64, 0, 128))
         self.press_ok()
 
 

@@ -7,12 +7,12 @@ import sys
 import cv2 as cv
 import numpy
 import serial
-from termcolor import colored
-
 from flipperzero_protobuf_py.flipperzero_protobuf.cli_helpers import (
-    print_hex, print_screen)
-from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import \
-    FlipperProto
+    print_hex,
+    print_screen,
+)
+from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import FlipperProto
+from termcolor import colored
 
 # Lists to store the bounding box coordinates for crop
 top_left_corner = []
@@ -88,7 +88,6 @@ def select_roi(action, x, y, flags, *userdata):
 
 
 def he_print_screen(screen_bytes):
-
     global imgToCrop, imgToCropOrig, newTemplates
 
     data = screen_bytes

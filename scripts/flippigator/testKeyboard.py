@@ -5,12 +5,16 @@ import sys
 import time
 
 import serial
-
-from flipperzero_protobuf_py.flipperzero_protobuf.flipper_base import \
-    FlipperProtoException
-from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import \
-    FlipperProto
-from flippigator.flippigator import Gator, Navigator, FlipperTextKeyboard, FlipperHEXKeyboard
+from flipperzero_protobuf_py.flipperzero_protobuf.flipper_base import (
+    FlipperProtoException,
+)
+from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import FlipperProto
+from flippigator.flippigator import (
+    FlipperHEXKeyboard,
+    FlipperTextKeyboard,
+    Gator,
+    Navigator,
+)
 
 
 def main():
@@ -37,6 +41,7 @@ def main():
 
     key = FlipperTextKeyboard(nav)
     key.send("KeyboardTest")
+
 
 if __name__ == "__main__":
     main()

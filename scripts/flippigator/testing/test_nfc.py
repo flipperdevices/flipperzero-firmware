@@ -4,8 +4,9 @@ import time
 import allure
 import pytest
 from flippigator.case import BaseCase
+from flippigator.flippigator import FlipperHEXKeyboard, FlipperTextKeyboard
 from termcolor import colored
-from flippigator.flippigator import FlipperTextKeyboard, FlipperHEXKeyboard
+
 os.system("color")
 
 
@@ -23,6 +24,7 @@ class TestNfc(BaseCase):
         state = nav.get_current_state()
         assert "ReadingNFC" in state, "NFC Reading failed"
         nav.go_to_main_screen()
+
     '''
     def test_read_ref_card(self, nav):
         with allure.step("Go to NFC"):
@@ -81,6 +83,7 @@ class TestNfc(BaseCase):
         time.sleep(5)
         assert 0, "DELETE"
     '''
+
     def test_detect_reader(self, nav):
         nav.nfc.go_into()
         nav.go_to("Detect R(up)eader")
