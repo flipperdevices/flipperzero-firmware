@@ -528,7 +528,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
     FURI_LOG_D(
         TAG, "Start Dictionary attack, Key Count %lu", iclass_elite_dict_get_total_keys(dict));
     while(iclass_elite_dict_get_next_key(dict, key)) {
-        FURI_LOG_T(TAG, "Key %lu", index);
+        FURI_LOG_T(TAG, "Key %zu", index);
         if(++index % PICOPASS_DICT_KEY_BATCH_SIZE == 0) {
             picopass_worker->callback(
                 PicopassWorkerEventNewDictKeyBatch, picopass_worker->context);
