@@ -534,6 +534,9 @@ int calculate_msb_tables(
         if(sync_state(program_state) == 1) {
             return 0;
         }
+        // TODO: Why is this necessary?
+        memset(temp_states_even, 0, sizeof(unsigned int) * (1280));
+        memset(temp_states_odd, 0, sizeof(unsigned int) * (1280));
         memcpy(temp_states_odd, odd_msbs[i].states, odd_msbs[i].tail * sizeof(unsigned int));
         memcpy(temp_states_even, even_msbs[i].states, even_msbs[i].tail * sizeof(unsigned int));
         int res = old_recover(
@@ -856,7 +859,6 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
     MfClassicDict* system_dict,
     bool system_dict_exists,
     MfClassicDict* user_dict,
-    bool user_dict_exists,
     ProgramState* program_state) {
     MfClassicNonceArray* nonce_array = malloc(sizeof(MfClassicNonceArray));
     MfClassicNonce* remaining_nonce_array_init = malloc(sizeof(MfClassicNonce) * 1);
@@ -902,55 +904,42 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
             if(!furi_string_start_with_str(next_line, "Sec")) continue;
             const char* next_line_cstr = furi_string_get_cstr(next_line);
             MfClassicNonce res = {0};
-            char token[20];
-            int i = 0;
-            const char* ptr = next_line_cstr;
-            while(sscanf(ptr, "%s", token) == 1) {
-                switch(i) {
-                case 5:
-                    sscanf(token, "%lx", &res.uid);
-                    break;
-                case 7:
-                    sscanf(token, "%lx", &res.nt0);
-                    break;
-                case 9:
-                    sscanf(token, "%lx", &res.nr0_enc);
-                    break;
-                case 11:
-                    sscanf(token, "%lx", &res.ar0_enc);
-                    break;
-                case 13:
-                    sscanf(token, "%lx", &res.nt1);
-                    break;
-                case 15:
-                    sscanf(token, "%lx", &res.nr1_enc);
-                    break;
-                case 17:
-                    sscanf(token, "%lx", &res.ar1_enc);
-                    break;
-                default:
-                    break; // Do nothing
+            int i = 0;  
+            char* endptr;
+            for (i = 0; i <= 17; i++) {
+                if (i != 0) {
+                    next_line_cstr = strchr(next_line_cstr, ' ');
+                    if (next_line_cstr) {
+                        next_line_cstr++;
+                    } else {
+                        break;
+                    }
                 }
-                i++;
-                ptr = strchr(ptr, ' ');
-                if(!ptr) {
-                    break;
+                unsigned long value = strtoul(next_line_cstr, &endptr, 16);
+                switch(i){
+                    case 5: res.uid = value; break;
+                    case 7: res.nt0 = value; break;
+                    case 9: res.nr0_enc = value; break;
+                    case 11: res.ar0_enc = value; break;
+                    case 13: res.nt1 = value; break;
+                    case 15: res.nr1_enc = value; break;
+                    case 17: res.ar1_enc = value; break;
+                    default: break; // Do nothing
                 }
-                ptr++;
+                next_line_cstr = endptr;
             }
             (program_state->total)++;
             uint32_t p64b = prng_successor(res.nt1, 64);
             if((system_dict_exists &&
                 napi_key_already_found_for_nonce(
                     system_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc)) ||
-               (user_dict_exists &&
-                napi_key_already_found_for_nonce(
+               (napi_key_already_found_for_nonce(
                     user_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc))) {
                 (program_state->cracked)++;
                 (program_state->num_completed)++;
                 continue;
             }
-            FURI_LOG_I(TAG, "No key found for %lx %lx", res.uid, res.ar1_enc);
+            FURI_LOG_I(TAG, "No key found for %8lx %8lx", res.uid, res.ar1_enc);
             // TODO: Refactor
             nonce_array->remaining_nonce_array = realloc(
                 nonce_array->remaining_nonce_array,
@@ -1000,6 +989,7 @@ void mfkey32(ProgramState* program_state) {
     if(!napi_mf_classic_nonces_check_presence()) {
         program_state->err = MissingNonces;
         program_state->mfkey_state = Error;
+        free(keyarray);
         return;
     }
     // Read dictionaries (optional)
@@ -1022,7 +1012,7 @@ void mfkey32(ProgramState* program_state) {
     // Read nonces
     MfClassicNonceArray* nonce_arr;
     nonce_arr = napi_mf_classic_nonce_array_alloc(
-        system_dict, system_dict_exists, user_dict, user_dict_exists, program_state);
+        system_dict, system_dict_exists, user_dict, program_state);
     if(system_dict_exists) {
         napi_mf_classic_dict_free(system_dict);
     }
@@ -1059,7 +1049,7 @@ void mfkey32(ProgramState* program_state) {
             (program_state->num_completed)++;
             continue;
         }
-        FURI_LOG_I(TAG, "Cracking %lx %lx", next_nonce.uid, next_nonce.ar1_enc);
+        FURI_LOG_I(TAG, "Cracking %8lx %8lx", next_nonce.uid, next_nonce.ar1_enc);
         struct Crypto1Params p = {
             0,
             next_nonce.nr0_enc,
@@ -1109,9 +1099,7 @@ void mfkey32(ProgramState* program_state) {
         DOLPHIN_DEED(DolphinDeedNfcMfcAdd);
     }
     napi_mf_classic_nonce_array_free(nonce_arr);
-    if(user_dict_exists) {
-        napi_mf_classic_dict_free(user_dict);
-    }
+    napi_mf_classic_dict_free(user_dict);
     free(keyarray);
     //FURI_LOG_I(TAG, "mfkey32 function completed normally"); // DEBUG
     program_state->mfkey_state = Complete;
@@ -1202,7 +1190,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         if(program_state->err == MissingNonces) {
             canvas_draw_str_aligned(canvas, 25, 36, AlignLeft, AlignTop, "No nonces found");
         } else if(program_state->err == ZeroNonces) {
-            canvas_draw_str_aligned(canvas, 25, 36, AlignLeft, AlignTop, "No nonces to crack");
+            canvas_draw_str_aligned(canvas, 15, 36, AlignLeft, AlignTop, "Nonces already cracked");
         } else {
             // Unhandled error
         }
