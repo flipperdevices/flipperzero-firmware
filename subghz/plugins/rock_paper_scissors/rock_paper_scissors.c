@@ -632,7 +632,7 @@ static void rps_render_main_menu(Canvas* canvas, void* ctx) {
     canvas_draw_str_aligned(canvas, 30, 15, AlignLeft, AlignTop, "Host game");
     canvas_draw_str_aligned(canvas, 30, 27, AlignLeft, AlignTop, "Join game");
     canvas_draw_str_aligned(canvas, 30, 39, AlignLeft, AlignTop, "Past games");
-    canvas_draw_str_aligned(canvas, 30, 51, AlignLeft, AlignTop, "Edit Message");
+    canvas_draw_str_aligned(canvas, 30, 51, AlignLeft, AlignTop, "Edit contact info");
 
     if(game_context->data->local_player == StateMainMenuHost) {
         canvas_draw_str_aligned(canvas, 20, 15, AlignLeft, AlignTop, ">");
@@ -691,6 +691,107 @@ static void rps_render_past_games(Canvas* canvas, void* ctx) {
     }
 }
 
+static void rps_render_choose_social(Canvas* canvas, void* ctx) {
+    GameContext* game_context = ctx;
+    UNUSED(game_context);
+
+    int line = game_context->data->social_line;
+    int index = line - 2;
+    if(index < 0) {
+        index = 0;
+    }
+
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, 2, 0, AlignLeft, AlignTop, "Share your...");
+
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 15, 15, AlignLeft, AlignTop, contact_list[index++] + 1);
+    canvas_draw_str_aligned(canvas, 15, 27, AlignLeft, AlignTop, contact_list[index++] + 1);
+    canvas_draw_str_aligned(canvas, 15, 39, AlignLeft, AlignTop, contact_list[index++] + 1);
+    if(index < (int)COUNT_OF(contact_list)) {
+        canvas_draw_str_aligned(canvas, 15, 51, AlignLeft, AlignTop, contact_list[index++] + 1);
+    }
+
+    if(line == 0) {
+        canvas_draw_str_aligned(canvas, 5, 15, AlignLeft, AlignTop, ">");
+    } else if(line == 1) {
+        canvas_draw_str_aligned(canvas, 5, 27, AlignLeft, AlignTop, ">");
+    } else {
+        canvas_draw_str_aligned(canvas, 5, 39, AlignLeft, AlignTop, ">");
+    }
+}
+
+char keyboard[4][14] = {
+    {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '.', '_', 8},
+    {'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '!', '$', '*', '&'},
+    {'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', '=', '+', ':', '(', ')'},
+    {'Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', '@', '"', '#', '/', '\'', 13}};
+
+static char get_char(GameContext* game_context, bool long_press) {
+    int c_r = game_context->data->keyboard_row;
+    int c_c = game_context->data->keyboard_col;
+    char ch = keyboard[c_r][c_c];
+
+    if(!long_press && ch >= 'A' && ch <= 'Z') {
+        ch += 32;
+    }
+
+    return ch;
+}
+
+static void draw_arrow(Canvas* canvas, int x, int y, bool tail) {
+    canvas_draw_line(canvas, x, y + 2, x + 4, y + 2);
+    canvas_draw_line(canvas, x, y + 2, x + 2, y);
+    canvas_draw_line(canvas, x, y + 2, x + 2, y + 4);
+    if(tail) {
+        canvas_draw_line(canvas, x + 4, y + 2, x + 4, y);
+    }
+}
+
+static void rps_render_input_text(Canvas* canvas, void* ctx) {
+    GameContext* game_context = ctx;
+    UNUSED(game_context);
+
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontKeyboard);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_str(canvas, 0, 8, furi_string_get_cstr(game_context->data->keyboard_heading));
+
+    canvas_draw_rframe(canvas, 0, 10, 127, 14, 1);
+    int input_offset = furi_string_utf8_length(game_context->data->keyboard_data) - 20;
+    if(input_offset < 0) {
+        input_offset = 0;
+    }
+    canvas_draw_str(
+        canvas, 2, 20, furi_string_get_cstr(game_context->data->keyboard_data) + input_offset);
+
+    int c_r = game_context->data->keyboard_row;
+    int c_c = game_context->data->keyboard_col;
+
+    for(int row = 0; row < 4; row++) {
+        for(int col = 0; col < 14; col++) {
+            char ch = keyboard[row][col];
+            int x = col * 9 + 2;
+            int y = row * 10 + 33;
+
+            if(row == c_r && col == c_c) {
+                canvas_draw_box(canvas, x - 1, y - 8, 7, 9);
+                canvas_set_color(canvas, ColorWhite);
+            }
+
+            canvas_draw_glyph(canvas, x, y, ch);
+
+            if(ch == 8) {
+                draw_arrow(canvas, x, y - 5, false);
+            } else if(ch == 13) {
+                draw_arrow(canvas, x, y - 5, true);
+            }
+            canvas_set_color(canvas, ColorBlack);
+        }
+    }
+}
+
 // We register this callback to get invoked whenever we need to render the screen.
 // We render the UI on this callback thread.
 // @param canvas rendering surface of the Flipper Zero.
@@ -711,6 +812,10 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
         rps_render_main_menu(canvas, game_context);
     } else if(game_context->data->screen_state == ScreenPastGames) {
         rps_render_past_games(canvas, game_context);
+    } else if(game_context->data->screen_state == ScreenEditMessage) {
+        rps_render_input_text(canvas, game_context);
+    } else if(game_context->data->screen_state == ScreenChooseSocial) {
+        rps_render_choose_social(canvas, game_context);
     }
 }
 
@@ -1522,8 +1627,6 @@ static void load_player_stats(GameContext* game_context) {
 int32_t rock_paper_scissors_app(void* p) {
     UNUSED(p);
 
-    UNUSED(contact_list);
-
     // Configure our initial data.
     GameContext* game_context = malloc(sizeof(GameContext));
     game_context->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -1539,6 +1642,8 @@ int32_t rock_paper_scissors_app(void* p) {
     game_context->data->remote_games = NULL;
     game_context->data->local_contact = furi_string_alloc();
     furi_string_set(game_context->data->local_contact, CONTACT_INFO);
+    game_context->data->keyboard_heading = furi_string_alloc();
+    game_context->data->keyboard_data = furi_string_alloc();
 
     load_player_stats(game_context);
 
@@ -1778,6 +1883,137 @@ int32_t rock_paper_scissors_app(void* p) {
                         break;
                     }
                 } else if(
+                    game_context->data->screen_state == ScreenEditMessage &&
+                    event.input.type == InputTypeShort) {
+                    char ch;
+                    switch(event.input.key) {
+                    case InputKeyLeft:
+                        if(game_context->data->keyboard_col) {
+                            game_context->data->keyboard_col--;
+                        } else {
+                            game_context->data->keyboard_col = 13;
+                        }
+                        break;
+
+                    case InputKeyRight:
+                        if(game_context->data->keyboard_col < 13) {
+                            game_context->data->keyboard_col++;
+                        } else {
+                            game_context->data->keyboard_col = 0;
+                        }
+                        break;
+
+                    case InputKeyUp:
+                        if(game_context->data->keyboard_row) {
+                            game_context->data->keyboard_row--;
+                        } else {
+                            game_context->data->keyboard_row = 3;
+                        }
+                        break;
+
+                    case InputKeyDown:
+                        if(game_context->data->keyboard_row < 3) {
+                            game_context->data->keyboard_row++;
+                        } else {
+                            game_context->data->keyboard_row = 0;
+                        }
+                        break;
+
+                    case InputKeyOk:
+                        ch = get_char(game_context, true);
+                        if(ch >= ' ') {
+                            int len = furi_string_utf8_length(game_context->data->keyboard_data);
+                            if(len < KEYBOARD_MAX_LEN) {
+                                furi_string_push_back(game_context->data->keyboard_data, ch);
+                            } else {
+                                single_vibro();
+                            }
+                        } else if(ch == 8) {
+                            int len = furi_string_utf8_length(game_context->data->keyboard_data);
+                            if(len > 0) {
+                                furi_string_left(game_context->data->keyboard_data, len - 1);
+                            }
+                        } else if(ch == 13) {
+                            furi_string_printf(
+                                game_context->data->local_contact,
+                                "%c%s",
+                                contact_list[game_context->data->social_line][0],
+                                furi_string_get_cstr(game_context->data->keyboard_data));
+                            FURI_LOG_I(
+                                TAG,
+                                "Changed contact info to '%s'",
+                                furi_string_get_cstr(game_context->data->local_contact));
+                            game_context->data->screen_state = ScreenMainMenu;
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+
+                } else if(
+                    game_context->data->screen_state == ScreenEditMessage &&
+                    event.input.type == InputTypeLong) {
+                    char ch;
+                    switch(event.input.key) {
+                    case InputKeyOk:
+                        ch = get_char(game_context, false);
+                        if(ch >= ' ') {
+                            int len = furi_string_utf8_length(game_context->data->keyboard_data);
+                            if(len < KEYBOARD_MAX_LEN) {
+                                furi_string_push_back(game_context->data->keyboard_data, ch);
+                            } else {
+                                single_vibro();
+                            }
+                        } else if(ch == 8) {
+                            furi_string_left(game_context->data->keyboard_data, 0);
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+                } else if(
+                    game_context->data->screen_state == ScreenChooseSocial &&
+                    event.input.type == InputTypeShort) {
+                    switch(event.input.key) {
+                    case InputKeyUp:
+                        if(game_context->data->social_line) {
+                            game_context->data->social_line--;
+                        } else {
+                            single_vibro();
+                        }
+                        break;
+
+                    case InputKeyDown:
+                        if(++game_context->data->social_line >= (int)COUNT_OF(contact_list)) {
+                            game_context->data->social_line--;
+                            single_vibro();
+                        }
+                        break;
+
+                    case InputKeyOk:
+                        if(game_context->data->social_line == 0) {
+                            furi_string_set(game_context->data->local_contact, CONTACT_INFO_NONE);
+                            FURI_LOG_I(
+                                TAG,
+                                "Changed contact info to '%s'",
+                                furi_string_get_cstr(game_context->data->local_contact));
+                            game_context->data->screen_state = ScreenMainMenu;
+                        } else {
+                            furi_string_set(
+                                game_context->data->keyboard_heading,
+                                contact_list[game_context->data->social_line] + 1);
+                            game_context->data->keyboard_row = 0;
+                            game_context->data->keyboard_col = 13;
+                            game_context->data->screen_state = ScreenEditMessage;
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+                } else if(
                     game_context->data->screen_state == ScreenMainMenu &&
                     event.input.type == InputTypeShort) {
                     switch(event.input.key) {
@@ -1829,7 +2065,7 @@ int32_t rock_paper_scissors_app(void* p) {
                                 game_context->data->player_stats;
                             game_context->data->screen_state = ScreenPastGames;
                         } else if(game_context->data->local_player == StateMainMenuMessage) {
-                            game_context->data->screen_state = ScreenEditMessage;
+                            game_context->data->screen_state = ScreenChooseSocial;
                         }
                         break;
                     default:

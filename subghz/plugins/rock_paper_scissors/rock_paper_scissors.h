@@ -26,11 +26,14 @@
 #define TAG "rock_paper_scissors_app"
 
 // Name for "N", followed by your name without any spaces.
-#define CONTACT_INFO "NYourNameHere"
-#define CONTACT_INFO_NONE "E"
+#define CONTACT_INFO "_"
+#define CONTACT_INFO_NONE "_"
 
 // The message max length should be no larger than a value around 60 to 64.
 #define MESSAGE_MAX_LEN 60
+
+// The is the most characters you can enter at a keyboard prompt.
+#define KEYBOARD_MAX_LEN 40
 
 // How often to send a beacon.
 #define BEACON_DURATION 3
@@ -154,6 +157,7 @@ typedef enum {
     ScreenPlayingGame,
     ScreenError,
     ScreenJoinGame,
+    ScreenChooseSocial,
     ScreenEditMessage,
     ScreenPastGames,
 } ScreenState;
@@ -182,23 +186,25 @@ typedef enum {
 } GameEventType;
 
 static const char* contact_list[] = {
-    "CBuy me a coffee",
-    "DDiscord",
-    "EEmpty",
-    "FFacebook",
+    "_(Flipper name only)",
+    "AAlias",
+    "CBuyMeACoffee.com",
+    "DDiscord handle",
+    "EEtsy shop",
+    "FFacebook username",
     "GGithub",
-    "HHandle",
-    "IInstagram",
-    "LLinkedin",
-    "MMobile",
+    "IInstagram username",
+    "LLinkedin profile",
+    "MMobile number",
     "NName",
-    "PPinterest",
-    "RReddit",
-    "KTikTok",
+    "PPinterest username",
+    "RReddit username",
+    "KTikTok handle",
     "UTinyUrl.com",
-    "WTwitch",
-    "TTwitter",
-    "YYouTube",
+    "WTwitch id",
+    "TTwitter handle",
+    "VYouTube video",
+    "YYouTube channel",
 };
 
 // An item in the event queue has both the type and its associated data.
@@ -255,6 +261,11 @@ typedef struct {
     FuriString* local_contact;
     struct PlayerStats* player_stats;
     struct PlayerStats* viewing_player_stats;
+    FuriString* keyboard_data;
+    FuriString* keyboard_heading;
+    int keyboard_row;
+    int keyboard_col;
+    int social_line;
 } GameData;
 
 // This is our application context.

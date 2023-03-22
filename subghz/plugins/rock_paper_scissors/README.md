@@ -21,10 +21,11 @@ Completed work:
 - Log game results & contact info onto SD card.
 - Allow viewing past games/scores.
 - A join ACK removes it from the list of available games.
+- Config - Allow changing hard-coded CONTACT_INFO message.
 
 Remaining work (for subghz version):
 
-- Config - Allow changing hard-coded CONTACT_INFO message.
+- Config - Allow saving CONTACT_INFO message.
 - Refactor the code, so it has less duplication.
 - Write tutorial.
 - Add game ending animations.
@@ -59,14 +60,16 @@ These directions assume you are starting at the flipper desktop. If not, please 
 - Do the same steps on your second Flipper.
 
 - On Flipper 1, choose "Host game".
-  - select a valid frequency.  (like "433.92" in US region)
+
+  - select a valid frequency. (like "433.92" in US region)
   - choose a game number.
   - click OK button to start game.
 
 - On Flipper 2, choose "Join game".
+
   - select the same valid frequency as Flipper 1.
-  - "game   none" should change to show the game number from Flipper 1 & its name.
-  -click OK button to join game.
+  - "game none" should change to show the game number from Flipper 1 & its name.
+    -click OK button to join game.
 
 - Once two players are joined:
 
@@ -120,31 +123,32 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
 - rock_paper_scissors.c
   - This is the game applcation.
 
-
 ## Example data
 
 - Beacon for game 042:
-RPS:BA042:Lumyphut
+  RPS:BA042:Lumyphut
 
 - Join game 042:
-RPS:JA042NYourNameHere :Lumyphut
+  RPS:JA042NYourNameHere :Lumyphut
 
 - Join-ack for game 042:
-RPS:AA042NYourNameHere :Lumyphut
+  RPS:AA042NYourNameHere :Lumyphut
 
 - Count 1 for game 042:
-RPS:MA0421:Lumyphut
+  RPS:MA0421:Lumyphut
 
 - Count 2 for game 042:
-RPS:MA0422:Lumyphut
+  RPS:MA0422:Lumyphut
 
 - Rock for game 042:
-RPS:MA042R:Lumyphut
+  RPS:MA042R:Lumyphut
 
 - Paper for game 042:
-RPS:MA042P:Lumyphut
+  RPS:MA042P:Lumyphut
 
 - Scissors for game 042:
-RPS:MA042S:Lumyphut
+  RPS:MA042S:Lumyphut
 
-
+RPS:AA042NYourNameHere :Lumyphut
+123456789 0123456789 = 19bytes.  
+60-19 = 41 bytes is max length of name.
