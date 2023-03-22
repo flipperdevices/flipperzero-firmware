@@ -12,17 +12,8 @@ jobs:
   run_smoke_on_bench:
     runs-on: [self-hosted, FlipperZeroIntegrationTest]
     steps:
-      - name: 'Decontaminate previous build leftovers'
-        timeout-minutes: 0.5
-        run: |
-          if [ -d .git ]; then
-            git submodule status || (
-              git ls-files --stage | egrep '^160000' | awk '{print $4}' | while read submodule
-              do
-                git rm -rf --cached "$submodule"
-              done
-            )
-          fi
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: Checkout code
         timeout-minutes: 0.5
@@ -42,14 +33,6 @@ jobs:
         run: |
           echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
           echo "stlink=49FF75065182575513201587" >> $GITHUB_OUTPUT
-
-      - name: 'Reboot flipper to make sure all apps are closed'
-        timeout-minutes: 0.5
-        run: |
-          source scripts/toolchain/fbtenv.sh
-          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
-          python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
-          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
       - name: 'Flash firmware and upload all applications'
         id: flashing
@@ -106,17 +89,8 @@ jobs:
         run: |
           echo "tag=$(git tag -l --sort=-version:refname | grep -v "rc\|RC" | head -1)" >> $GITHUB_OUTPUT
 
-      - name: 'Decontaminate previous build leftovers'
-        if: steps.format_ext.outcome == 'failure'
-        run: |
-          if [ -d .git ]; then
-            git submodule status || (
-              git ls-files --stage | egrep '^160000' | awk '{print $4}' | while read submodule
-              do
-                git rm -rf --cached "$submodule"
-              done
-            )
-          fi
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout latest release'
         uses: actions/checkout@v3
