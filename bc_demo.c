@@ -168,8 +168,6 @@ static bool  move       (state_t*,  dir_t) ;
 // Event Handler : Tick
 // This (demo) just triggers an animation event
 //
-#define BEEP 0  // calls to speaker functions have started causing flipper to crash
-
 static
 void  evTick (state_t* state)
 {
@@ -177,19 +175,23 @@ void  evTick (state_t* state)
 	furi_assert(state);
 
 	if (animate(state)) {  // true if edge of screen tapped
-#if BEEP == 1
-		// https://pages.mtu.edu/~suits/notefreqs.html
-		int  penta[5] = {554, 622, 740, 831, 932};  // notes in c# pentatonic scale
-		furi_hal_speaker_start(penta[rand() %5], 0.5);  // start playing a random note (from the list)
-#endif
+		// Try to acquire the speaker
+		if (furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(25)) {
+			// https://pages.mtu.edu/~suits/notefreqs.html
+			int  penta[5] = {554, 622, 740, 831, 932};      // notes in c# pentatonic scale
+			furi_hal_speaker_start(penta[rand() %5], 0.5);  // start playing a random note (from the list)
+		}
 
 	} else {
-#if BEEP == 1
-		// The are 12 (state->fps) event ticks each second
-		// 1.000 / 12 = ~83mS  ...That's a good length of time for a beep
-		//   So we wil ljust turn the speaker OFF the tick after it starts
-		furi_hal_speaker_stop();
-#endif
+		// Make sure we (currently) 'own' the speaker
+		if (furi_hal_speaker_is_mine()) {
+			// The are 12 (state->fps) event ticks each second
+			// 1.000 / 12 = ~83mS  ...That's a good length of time for a beep
+			//   So we wil ljust turn the speaker OFF the tick after it starts
+			furi_hal_speaker_stop();
+			// Release the speaker for use by other threads
+			furi_hal_speaker_release();
+		}
 	}
 
 	LEAVE;
@@ -606,6 +608,9 @@ int32_t  bc_demo (void)
 		goto bail;
 	}
 
+	// 10. Initilaise the speaker
+//	furi_hal_speaker_init();  //! Not currently exported, nor (apparently) required
+
 	INFO("INITIALISED");
 
 	// ==================== Main event loop ====================
@@ -683,6 +688,9 @@ bail:
 	//   that way, the Setup & Teardown sequences keep themselves in synch
 	// However ...this is not "main()", and, as such, it does not "exit()"
 	//   ...and I am not implementing a "atPluginExit()" here
+
+	// 10. De-Initilaise the speaker
+//	furi_hal_speaker_deinit();  //! Not currently exported, nor (apparently) required
 
 	// 9. Stop the timer
 	if (state->timer) {
