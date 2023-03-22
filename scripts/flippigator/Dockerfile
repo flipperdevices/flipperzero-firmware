@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile-upstream:master-labs
 FROM python:3.10 as builder
 
-COPY ./* /build
+ADD ./* /build/
 
 WORKDIR /build
 
