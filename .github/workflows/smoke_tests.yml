@@ -15,8 +15,14 @@ jobs:
       - name: 'Decontaminate previous build leftovers'
         run: |
           if [ -d .git ]; then
-            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+            git submodule status || (
+              git ls-files --stage | egrep '^160000' | awk '{print $4}' | while read submodule
+              do
+                git rm -rf --cached "$submodule"
+              done
+            )
           fi
+
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -56,7 +62,8 @@ jobs:
         run: |
           cd scripts/flippigator
           docker buildx build -t pytest-runner .
-          docker run --rm --device ${{steps.device.outputs.flipper}}:/dev/ttyACM0 pytest-runner
+          echo ${{steps.device.outputs.flipper}}
+          docker run --rm --device /dev/ttyACM0:/dev/ttyACM0 pytest-runner
 
       - name: 'Generate allure reports'
         id: generate_allure_reports
