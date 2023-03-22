@@ -186,6 +186,19 @@ def nav(flipper_serial, request):
     else:
         raise FlippigatorException("Can not enable debug")
 
+    """
+    # Formating SD
+    nav.press_back()
+    nav.go_to("Storage")
+    nav.press_ok()
+    nav.go_to("Format SD Card")
+    nav.press_ok()
+    nav.press_right()
+    state = nav.get_current_state()
+    while not ("Format complete" in state):
+        state = nav.get_current_state()
+    nav.press_ok()
+    """
     return nav
 
 

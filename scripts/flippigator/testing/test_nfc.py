@@ -5,7 +5,7 @@ import allure
 import pytest
 from flippigator.case import BaseCase
 from termcolor import colored
-
+from flippigator.flippigator import FlipperTextKeyboard, FlipperHEXKeyboard
 os.system("color")
 
 
@@ -23,10 +23,7 @@ class TestNfc(BaseCase):
         state = nav.get_current_state()
         assert "ReadingNFC" in state, "NFC Reading failed"
         nav.go_to_main_screen()
-
     '''
-    I think that it's time to del all handy test from this repo
-    Let's make only smoke test without bench?
     def test_read_ref_card(self, nav):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
@@ -63,40 +60,27 @@ class TestNfc(BaseCase):
         while "SkipOk" in state:
             state = nav.get_current_state()
         state = nav.get_current_state()
-        assert (
-            "MfClassic1KTestCard" in state
-        ), "Result of reading reference card is fail"
         nav.press_right()
         menu = nav.get_menu_list()
         menu_ref = [
             "Save",
             "Emulate",
-            "Detect r(down)eader",
             "Info",
         ]
-        assert menu == menu_ref, "NFC card menu is wrong"
-        nav.go_to("Emulate")
-        nav.press_ok()
-        state = nav.get_current_state()
-        assert "Emulating MIFARE Classic" in state, "NFC Emulation fail"
-        nav.press_back()
-
-        nav.go_to("Info")
-        nav.press_ok()
-        state = nav.get_current_state()
-        assert "MfClassic1KTestCardInfo" in state, "Card full info wrong"
-        nav.press_back()
 
         nav.go_to("Save")
         nav.press_ok()
-        nav.press_ok()
-        nav.press_ok()
-        nav.press_down()
+        key = FlipperTextKeyboard(nav)
+        key.send("bench_nfc_0\n")
         state = nav.get_current_state()
-        assert "FileBrowserLevelUp" in state, "Can't save read NFC card"
+        while not ("browser_Bench_nfc_0" in state):
+            state = nav.get_current_state()
         nav.go_to_main_screen()
+        nav.open_file("NFC", "Bench_nfc_0")
+        nav.get_current_state()
+        time.sleep(5)
+        assert 0, "DELETE"
     '''
-
     def test_detect_reader(self, nav):
         nav.nfc.go_into()
         nav.go_to("Detect R(up)eader")
