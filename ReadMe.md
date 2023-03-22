@@ -56,7 +56,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Music Beeper (By qqMajiKpp / Haseo)](https://github.com/qqmajikpp/)
 - [Text 2 SAM (By Round-Pi)](https://github.com/Round-Pi/flipperzero-text2sam)
 - [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
-- [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player) <- Follow link to donwload examples and learn how to convert vids
+- [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player) <- Follow link to download examples and learn how to convert videos
 
 ## GPIO
 - [IFTTT Virtual Button for ESP8266 (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button)
