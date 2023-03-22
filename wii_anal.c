@@ -86,6 +86,8 @@ void  showVer (Canvas* const canvas)
 	show(canvas,  4,59, VER_MAJ,    SHOW_SET_BLK);
 	canvas_draw_frame(canvas, 8,62, 2,2);
 	show(canvas, 11,59, VER_MIN,   SHOW_SET_BLK);
+	canvas_draw_frame(canvas, 15,62, 2,2);
+	show(canvas, 18,59, VER_SUB,   SHOW_SET_BLK);
 }
 
 //+============================================================================
@@ -102,10 +104,10 @@ void  cbDraw (Canvas* const canvas,  void* ctx)
 	furi_assert(canvas);
 	furi_assert(ctx);
 
-	state_t*  state = NULL;
+	state_t*  state = ctx;
 
 	// Try to acquire the mutex for the plugin state variables, timeout = 25mS
-	if ( !(state = (state_t*)acquire_mutex((ValueMutex*)ctx, 25)) )  return ;
+	if (furi_mutex_acquire(state->mutex, 25) != FuriStatusOk)  return ;
 
 	switch (state->scene) {
 		//---------------------------------------------------------------------
@@ -190,7 +192,7 @@ void  cbDraw (Canvas* const canvas,  void* ctx)
 	}
 
 	// Release    the  mutex
-	release_mutex((ValueMutex*)ctx, state);
+	furi_mutex_release(state->mutex);
 
 	LEAVE;
 	return;
@@ -320,7 +322,6 @@ int32_t  wii_ec_anal (void)
 	Gui*               gui     = NULL;
 	ViewPort*          vpp     = NULL;
 	state_t*           state   = NULL;
-	ValueMutex         mutex   = {0};
 	FuriMessageQueue*  queue   = NULL;
 	const uint32_t     queueSz = 20;       // maximum messages in queue
 	uint32_t           tmo     = (3.5f *1000);  // timeout splash screen after N seconds
@@ -358,7 +359,7 @@ int32_t  wii_ec_anal (void)
 		goto bail;
 	}
 	// 5. Create a mutex for (reading/writing) the plugin state variables
-	if (!init_mutex(&mutex, state, sizeof(state))) {
+	if ( !(state->mutex = furi_mutex_alloc(FuriMutexTypeNormal)) ) {
 		ERROR(wii_errs[(error = ERR_NO_MUTEX)]);
 		goto bail;
 	}
@@ -372,7 +373,7 @@ int32_t  wii_ec_anal (void)
 	// 7a. Register a callback for input events
 	view_port_input_callback_set(vpp, cbInput, queue);
 	// 7b. Register a callback for draw events
-	view_port_draw_callback_set(vpp, cbDraw, &mutex);
+	view_port_draw_callback_set(vpp, cbDraw, state);
 
 	// ===== Start GUI Interface =====
 	// 8. Attach the viewport to the GUI
@@ -432,7 +433,7 @@ int32_t  wii_ec_anal (void)
 		// Read successful
 
 		// *** Try to lock the plugin state variables ***
-		if ( !(state = (state_t*)acquire_mutex_block(&mutex)) ) {
+		if (furi_mutex_acquire(state->mutex, FuriWaitForever) != FuriStatusOk) {
 			ERROR(wii_errs[(error = ERR_MUTEX_BLOCK)]);
 			goto bail;
 		}
@@ -473,7 +474,7 @@ int32_t  wii_ec_anal (void)
 		if (redraw)  view_port_update(vpp) ;
 
 		// *** Try to release the plugin state variables ***
-		if ( !release_mutex(&mutex, state) ) {
+		if (furi_mutex_release(state->mutex) != FuriStatusOk) {
 			ERROR(wii_errs[(error = ERR_MUTEX_RELEASE)]);
 			goto bail;
 		}
@@ -511,9 +512,9 @@ bail:
 	}
 
 	// 5. Free the mutex
-	if (mutex.mutex) {
-		delete_mutex(&mutex);
-		mutex.mutex = NULL;
+	if (state->mutex) {
+		furi_mutex_free(state->mutex);
+		state->mutex = NULL;
 	}
 
 	// 4. Free up state pointer(s)

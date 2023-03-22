@@ -63,6 +63,8 @@ eventMsg_t;
 //
 typedef 
 	struct state {
+		FuriMutex*        mutex;      // mutex for using this struct
+
 		bool              run;        // true : plugin is running
 
 		bool              timerEn;    // controller scanning enabled
