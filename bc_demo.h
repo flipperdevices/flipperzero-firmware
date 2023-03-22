@@ -61,6 +61,10 @@ eventMsg_t;
 //
 typedef 
 	struct state {
+		// The OS is threaded, so we will protect these state variables with a mutex
+		//   --> furi/core/mutex.*
+		FuriMutex*   mutex;
+
 		// Animation is a classic bouncing icon
 		bool         animate;  // true -> animation enabled
 		animID_t     animID;   // which logo

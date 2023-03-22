@@ -108,19 +108,15 @@ void  cbDraw (Canvas* const canvas,  void* ctx)
 	furi_assert(ctx);
 
 	// We will need access to the plugin state variables
-	state_t*  state;  // state pointer
+	const state_t*  state = ctx;  // state pointer
 
-	// Try to acquire the mutex for the plugin state variables, timeout = 25mS
+	// Acquire the mutex for the plugin state variables, timeout = 25mS
 	// We (obviously) do not (yet) have access to the state variables,
 	//   so the timeout value must be specified at compile-time
 	//
-	// On success we will receive a pointer to the plugin state variables
-	// ...On fail, we simply (have to) bail out
-	//
-	// acquire_mutex()  |  furi/core/valuemutex.*
-	//   -->  furi_mutex_acquire()  |  furi/core/mutex.*
+	// furi_mutex_acquire  |  furi/core/mutex.*
 	//   -->  xSemaphoreTake()  |  lib/FreeRTOS-Kernel/include/semphr.h
-	if ( !(state = (state_t*)acquire_mutex((ValueMutex*)ctx, 25)) )  return ;
+	furi_mutex_acquire(state->mutex, 25); //FuriWaitForever);
 
 	// Border around the edge of the screen
 	// top-left is {0,0}, [standard] screen is 128x64 {WxH}
@@ -148,7 +144,7 @@ void  cbDraw (Canvas* const canvas,  void* ctx)
 	}
 
 	// Release the mutex
-	release_mutex((ValueMutex*)ctx, state);
+	furi_mutex_release(state->mutex);
 
 	LEAVE;
 	return;
@@ -172,6 +168,8 @@ static bool  move       (state_t*,  dir_t) ;
 // Event Handler : Tick
 // This (demo) just triggers an animation event
 //
+#define BEEP 0  // calls to speaker functions have started causing flipper to crash
+
 static
 void  evTick (state_t* state)
 {
@@ -179,15 +177,19 @@ void  evTick (state_t* state)
 	furi_assert(state);
 
 	if (animate(state)) {  // true if edge of screen tapped
+#if BEEP == 1
 		// https://pages.mtu.edu/~suits/notefreqs.html
 		int  penta[5] = {554, 622, 740, 831, 932};  // notes in c# pentatonic scale
 		furi_hal_speaker_start(penta[rand() %5], 0.5);  // start playing a random note (from the list)
+#endif
 
 	} else {
+#if BEEP == 1
 		// The are 12 (state->fps) event ticks each second
 		// 1.000 / 12 = ~83mS  ...That's a good length of time for a beep
 		//   So we wil ljust turn the speaker OFF the tick after it starts
 		furi_hal_speaker_stop();
+#endif
 	}
 
 	LEAVE;
@@ -525,10 +527,6 @@ int32_t  bc_demo (void)
 	// --> local
 	state_t*           state   = NULL;  // PluginStatePointer
 
-	// The OS is threaded, so we will protect the state variables with a mutex
-	// --> furi/core/valuemutex.*
-	ValueMutex         mutex   = {0};
-
 	// This plugin will register two callbacks
 	// The key reading ("input") and timer ("tick") callback functions will put keystrokes in a local message queue
 	// --> furi/core/message_queue.h
@@ -576,7 +574,7 @@ int32_t  bc_demo (void)
 	}
 
 	// 5. Create a mutex for (reading/writing) the plugin state variables
-	if (!init_mutex(&mutex, state, sizeof(state))) {
+	if ( !(state->mutex = furi_mutex_alloc(FuriMutexTypeNormal)) ) {
 		ERROR(errs[(error = ERR_NO_MUTEX)]);
 		goto bail;
 	}
@@ -593,7 +591,7 @@ int32_t  bc_demo (void)
 	view_port_input_callback_set(vpp, cbInput, queue);
 
 	// 7b. Register a callback for draw events
-	view_port_draw_callback_set(vpp, cbDraw, &mutex);
+	view_port_draw_callback_set(vpp, cbDraw, state);
 
 	// ===== Start GUI Interface =====
 
@@ -624,7 +622,7 @@ int32_t  bc_demo (void)
 		// Read failed
 		if (status != FuriStatusOk) {
 			switch (status) {
-				case FuriStatusErrorTimeout:    DEBUG(errs[       DEBUG_QUEUE_TIMEOUT]);    break ;
+				case FuriStatusErrorTimeout:    DEBUG(errs[         DEBUG_QUEUE_TIMEOUT]);  break ;
 				case FuriStatusError:           ERROR(errs[(error = ERR_QUEUE_RTOS)]);      goto bail ;
 				case FuriStatusErrorResource:   ERROR(errs[(error = ERR_QUEUE_RESOURCE)]);  goto bail ;
 				case FuriStatusErrorParameter:  ERROR(errs[(error = ERR_QUEUE_BADPRM)]);    goto bail ;
@@ -636,7 +634,7 @@ int32_t  bc_demo (void)
 		// Read successful
 		} else {
 			// *** Try to lock the plugin state variables ***
-			if ( !(state = (state_t*)acquire_mutex_block(&mutex)) ) {
+			if (furi_mutex_acquire(state->mutex, FuriWaitForever) != FuriStatusOk) {
 				ERROR(errs[(error = ERR_MUTEX_BLOCK)]);
 				goto bail;
 			}
@@ -666,7 +664,7 @@ int32_t  bc_demo (void)
 			view_port_update(vpp);
 
 			// *** Try to release the plugin state variables ***
-			if ( !release_mutex(&mutex, state) ) {
+			if (furi_mutex_release(state->mutex) != FuriStatusOk) {
 				ERROR(errs[(error = ERR_MUTEX_RELEASE)]);
 				goto bail;
 			}
@@ -707,9 +705,9 @@ bail:
 	}
 
 	// 5. Free the mutex
-	if (mutex.mutex) {
-		delete_mutex(&mutex);
-		mutex.mutex = NULL;
+	if (state->mutex) {
+		furi_mutex_free(state->mutex);
+		state->mutex = NULL;
 	}
 
 	// 4. Free up state pointer(s)
