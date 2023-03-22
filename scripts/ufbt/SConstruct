@@ -15,6 +15,8 @@ ufbt_script_dir = Dir(os.environ.get("UFBT_SCRIPT_DIR"))
 
 ufbt_current_sdk_dir = ufbt_state_dir.Dir("current")
 
+SConsignFile(ufbt_state_dir.File(".sconsign.dblite"))
+
 ufbt_variables = SConscript("commandline.scons")
 
 forward_os_env = {
