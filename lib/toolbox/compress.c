@@ -4,6 +4,11 @@
 #include <lib/heatshrink/heatshrink_encoder.h>
 #include <lib/heatshrink/heatshrink_decoder.h>
 
+/** Defines encoder and decoder window size */
+#define COMPRESS_EXP_BUFF_SIZE_LOG (8)
+/** Defines encoder and decoder lookahead buffer size */
+#define COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG (4)
+
 #define COMPRESS_ICON_ENCODED_BUFF_SIZE (2 * 512)
 #define COMPRESS_ICON_DECODED_BUFF_SIZE (1024)
 
@@ -17,14 +22,13 @@ typedef struct {
 
 struct CompressIcon {
     heatshrink_decoder* decoder;
-    uint8_t compress_buff[COMPRESS_EXP_BUFF_SIZE + COMPRESS_ICON_ENCODED_BUFF_SIZE];
+    // uint8_t compress_buff[COMPRESS_EXP_BUFF_SIZE + COMPRESS_ICON_ENCODED_BUFF_SIZE];
     uint8_t decoded_buff[COMPRESS_ICON_DECODED_BUFF_SIZE];
 };
 
 CompressIcon* compress_icon_alloc() {
     CompressIcon* instance = malloc(sizeof(CompressIcon));
     instance->decoder = heatshrink_decoder_alloc(
-        instance->compress_buff,
         COMPRESS_ICON_ENCODED_BUFF_SIZE,
         COMPRESS_EXP_BUFF_SIZE_LOG,
         COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
@@ -65,7 +69,6 @@ void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint
             }
         }
         heatshrink_decoder_reset(instance->decoder);
-        memset(instance->compress_buff, 0, sizeof(instance->compress_buff));
         *decoded_buff = instance->decoded_buff;
     } else {
         *decoded_buff = (uint8_t*)&icon_data[1];
@@ -75,27 +78,20 @@ void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint
 struct Compress {
     heatshrink_encoder* encoder;
     heatshrink_decoder* decoder;
-    uint8_t* compress_buff;
-    uint16_t compress_buff_size;
 };
 
 static void compress_reset(Compress* compress) {
     furi_assert(compress);
     heatshrink_encoder_reset(compress->encoder);
     heatshrink_decoder_reset(compress->decoder);
-    memset(compress->compress_buff, 0, compress->compress_buff_size);
 }
 
 Compress* compress_alloc(uint16_t compress_buff_size) {
     Compress* compress = malloc(sizeof(Compress));
-    compress->compress_buff = malloc(compress_buff_size + COMPRESS_EXP_BUFF_SIZE);
-    compress->encoder = heatshrink_encoder_alloc(
-        compress->compress_buff, COMPRESS_EXP_BUFF_SIZE_LOG, COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
+    compress->encoder =
+        heatshrink_encoder_alloc(COMPRESS_EXP_BUFF_SIZE_LOG, COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
     compress->decoder = heatshrink_decoder_alloc(
-        compress->compress_buff,
-        compress_buff_size,
-        COMPRESS_EXP_BUFF_SIZE_LOG,
-        COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
+        compress_buff_size, COMPRESS_EXP_BUFF_SIZE_LOG, COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG);
 
     return compress;
 }
@@ -105,7 +101,6 @@ void compress_free(Compress* compress) {
 
     heatshrink_encoder_free(compress->encoder);
     heatshrink_decoder_free(compress->decoder);
-    free(compress->compress_buff);
     free(compress);
 }
 

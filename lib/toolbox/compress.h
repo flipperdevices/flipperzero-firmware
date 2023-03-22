@@ -12,12 +12,6 @@
 extern "C" {
 #endif
 
-/** Defines encoder and decoder window size */
-#define COMPRESS_EXP_BUFF_SIZE_LOG (8)
-
-/** Defines encoder and decoder lookahead buffer size */
-#define COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG (4)
-
 /** Compress Icon control structure */
 typedef struct CompressIcon CompressIcon;
 
