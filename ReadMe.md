@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `22 Mar 23:35 GMT +3`
+### Apps checked & updated at `23 Mar 00:56 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -80,6 +80,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM Motion Detection (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [ESP32CAM QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Morse Flasher (By eried)](https://github.com/eried/flipperzero-mayhem)
+- [ESP32CAM Nanny Cam (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Logic analyzer (By g3gg0)](https://github.com/g3gg0/flipper-logic_analyzer) -> [How to use](https://github.com/g3gg0/flipper-logic_analyzer#readme)
 - [ServoTester (By spin7ion)](https://github.com/spin7ion/flipper-servotester)
