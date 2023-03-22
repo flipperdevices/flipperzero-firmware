@@ -9,7 +9,7 @@ os.system("color")
 
 
 @pytest.mark.ibutton
-class TestGpio(BaseCase):
+class TestIbutton(BaseCase):
     def test_ibutton_menu_negative(self, nav):
         nav.ibutton.go_into()
         menu = nav.get_menu_list()
@@ -25,6 +25,7 @@ class TestGpio(BaseCase):
         nav.ibutton.go_into()
         nav.go_to("Read")
         nav.press_ok()
+        time.sleep(0.1)
         state = nav.get_current_state()
         assert "ReadingiButton" in state, "iButton Reading failed"
         nav.go_to_main_screen()
