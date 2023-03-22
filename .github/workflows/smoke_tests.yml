@@ -43,6 +43,14 @@ jobs:
           echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
           echo "stlink=49FF75065182575513201587" >> $GITHUB_OUTPUT
 
+      - name: 'Reboot flipper to make sure all apps are closed'
+        timeout-minutes: 0.5
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+          python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
+          python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
+
       - name: 'Flash firmware and upload all applications'
         id: flashing
         if: success()
