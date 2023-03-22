@@ -8,6 +8,14 @@ typedef struct AvrIspReaderView AvrIspReaderView;
 
 typedef void (*AvrIspReaderViewCallback)(AvrIspCustomEvent event, void* context);
 
+typedef enum {
+    AvrIspReaderViewStatusIDLE,
+    AvrIspReaderViewStatusReading,
+    AvrIspReaderViewStatusVerification,
+} AvrIspReaderViewStatus;
+
+void avr_isp_reader_update_progress(AvrIspReaderView* instance);
+
 void avr_isp_reader_set_file_path(
     AvrIspReaderView* instance,
     const char* file_path,

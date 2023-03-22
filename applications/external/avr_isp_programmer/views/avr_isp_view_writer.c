@@ -3,7 +3,7 @@
 #include <avr_isp_icons.h>
 #include <gui/elements.h>
 
-#include "../helpers/avr_isp_rw.h"
+#include "../helpers/avr_isp_worker_rw.h"
 //#include <math.h>
 
 //#include <input/input.h>
@@ -11,7 +11,7 @@
 
 struct AvrIspWriterView {
     View* view;
-    AvrIspRW* avr_isp_rw;
+    AvrIspWorkerRW* avr_isp_worker_rw;
     AvrIspWriterViewCallback callback;
     void* context;
 };
@@ -69,7 +69,7 @@ bool avr_isp_writer_view_input(InputEvent* event, void* context) {
     } else if(event->key == InputKeyOk && event->type == InputTypePress) {
     } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
         FURI_LOG_D("s", "--Detecting--");
-        avr_isp_rw_detect_chip(instance->avr_isp_rw);
+        avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
     }
 
     return true;
@@ -103,24 +103,24 @@ void avr_isp_writer_view_enter(void* context) {
         },
         false);
 
-    //Start avr_isp_rw
-    instance->avr_isp_rw = avr_isp_rw_alloc(instance->context);
+    //Start avr_isp_worker_rw
+    instance->avr_isp_worker_rw = avr_isp_worker_rw_alloc(instance->context);
 
-    //avr_isp_rw_set_callback(instance->avr_isp_rw, avr_isp_writer_detect_chip_callback, instance);
+    //avr_isp_worker_rw_set_callback(instance->avr_isp_worker_rw, avr_isp_writer_detect_chip_callback, instance);
 
-    avr_isp_rw_detect_chip(instance->avr_isp_rw);
+    avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
 
-    //avr_isp_rw_start(instance->avr_isp_rw);
+    //avr_isp_worker_rw_start(instance->avr_isp_worker_rw);
 }
 
 void avr_isp_writer_view_exit(void* context) {
     furi_assert(context);
     AvrIspWriterView* instance = context;
-    // //Stop avr_isp_rw
-    // if(avr_isp_avr_isp_rw_is_running(instance->avr_isp_rw)) {
-    //     avr_isp_avr_isp_rw_stop(instance->avr_isp_rw);
+    // //Stop avr_isp_worker_rw
+    // if(avr_isp_avr_isp_worker_rw_is_running(instance->avr_isp_worker_rw)) {
+    //     avr_isp_avr_isp_worker_rw_stop(instance->avr_isp_worker_rw);
     // }
-    avr_isp_rw_free(instance->avr_isp_rw);
+    avr_isp_worker_rw_free(instance->avr_isp_worker_rw);
 
     with_view_model(
         instance->view,

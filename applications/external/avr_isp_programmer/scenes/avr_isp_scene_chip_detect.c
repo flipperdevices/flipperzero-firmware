@@ -22,7 +22,6 @@ bool avr_isp_scene_chip_detect_on_event(void* context, SceneManagerEvent event) 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case AvrIspCustomEventSceneChipDetectOk:
-            FURI_LOG_E("FF", "DETECL OK");
 
             if(scene_manager_get_scene_state(app->scene_manager, AvrIspSceneChipDetect) ==
                AvrIspViewProgrammer) {

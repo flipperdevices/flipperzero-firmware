@@ -12,8 +12,7 @@ void avr_isp_scene_reader_on_enter(void* context) {
 
     avr_isp_reader_set_file_path(
         app->avr_isp_reader_view, furi_string_get_cstr(app->file_path), app->file_name_tmp);
-        avr_isp_reader_view_set_callback(
-            app->avr_isp_reader_view, avr_isp_scene_reader_callback, app);
+    avr_isp_reader_view_set_callback(app->avr_isp_reader_view, avr_isp_scene_reader_callback, app);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, AvrIspViewReader);
 }
@@ -24,13 +23,15 @@ bool avr_isp_scene_reader_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        // case WSCustomEventViewreaderBack:
-        //     consumed = true;
-        //     break;
+        case AvrIspCustomEventSceneReadingOk:
+            scene_manager_next_scene(app->scene_manager, AvrIspSceneSuccess);
+            consumed = true;
+            break;
         default:
             break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
+        avr_isp_reader_update_progress(app->avr_isp_reader_view);
     }
     return consumed;
 }

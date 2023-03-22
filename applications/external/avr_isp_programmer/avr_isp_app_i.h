@@ -13,6 +13,7 @@
 #include <gui/modules/text_input.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
+#include <gui/modules/popup.h>
 //#include <gui/modules/variable_item_list.h>
 
 #include "views/avr_isp_view_programmer.h"
@@ -28,6 +29,7 @@ typedef struct {
     SceneManager* scene_manager;
     NotificationApp* notifications;
     DialogsApp* dialogs;
+    Popup* popup;
     //VariableItemList* variable_item_list;
     Submenu* submenu;
     Widget* widget;

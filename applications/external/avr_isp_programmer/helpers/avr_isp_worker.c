@@ -267,7 +267,8 @@ AvrIspWorker* avr_isp_worker_alloc(void* context) {
 
 void avr_isp_worker_free(AvrIspWorker* instance) {
     furi_assert(instance);
-
+    
+    furi_check(!instance->worker_running);
     furi_thread_free(instance->thread);
     free(instance);
 }

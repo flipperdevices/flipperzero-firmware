@@ -36,6 +36,7 @@ FlipperI32HexFile* flipper_i32hex_file_open_write(const char* name, uint32_t sta
 
     if(file_stream_open(instance->stream, name, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
         instance->file_open = FlipperI32HexFileStatusOpenFileWrite;
+        FURI_LOG_D(TAG, "Open write file %s", name);
     } else {
         FURI_LOG_E(TAG, "Failed to open file %s", name);
         instance->file_open = FlipperI32HexFileStatusErrorNoOpenFile;
@@ -56,6 +57,7 @@ FlipperI32HexFile* flipper_i32hex_file_open_read(const char* name) {
 
     if(file_stream_open(instance->stream, name, FSAM_READ, FSOM_OPEN_EXISTING)) {
         instance->file_open = FlipperI32HexFileStatusOpenFileRead;
+        FURI_LOG_D(TAG, "Open read file %s", name);
     } else {
         FURI_LOG_E(TAG, "Failed to open file %s", name);
         instance->file_open = FlipperI32HexFileStatusErrorNoOpenFile;

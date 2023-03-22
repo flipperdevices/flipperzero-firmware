@@ -3,11 +3,11 @@
 #include <avr_isp_icons.h>
 #include <gui/elements.h>
 
-#include "../helpers/avr_isp_rw.h"
+#include "../helpers/avr_isp_worker_rw.h"
 
 struct AvrIspChipDetectView {
     View* view;
-    AvrIspRW* avr_isp_rw;
+    AvrIspWorkerRW* avr_isp_worker_rw;
     AvrIspChipDetectViewCallback callback;
     void* context;
 };
@@ -99,7 +99,7 @@ bool avr_isp_chip_detect_view_input(InputEvent* event, void* context) {
             {
                 if(model->status != AvrIspChipDetectViewStatusDetecting) {
                     model->status = AvrIspChipDetectViewStatusDetecting;
-                    avr_isp_rw_detect_chip(instance->avr_isp_rw);
+                    avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
                 }
             },
             false);
@@ -133,11 +133,11 @@ void avr_isp_chip_detect_view_enter(void* context) {
     furi_assert(context);
     AvrIspChipDetectView* instance = context;
 
-    //Start avr_isp_rw
-    instance->avr_isp_rw = avr_isp_rw_alloc(instance->context);
+    //Start avr_isp_worker_rw
+    instance->avr_isp_worker_rw = avr_isp_worker_rw_alloc(instance->context);
 
-    avr_isp_rw_set_callback(
-        instance->avr_isp_rw, avr_isp_chip_detect_detect_chip_callback, instance);
+    avr_isp_worker_rw_set_callback(
+        instance->avr_isp_worker_rw, avr_isp_chip_detect_detect_chip_callback, instance);
 
     with_view_model(
         instance->view,
@@ -145,7 +145,7 @@ void avr_isp_chip_detect_view_enter(void* context) {
         {
             if(model->status == AvrIspChipDetectViewStatusNoDetect ||
                model->status == AvrIspChipDetectViewStatusDetected) {
-                avr_isp_rw_detect_chip(instance->avr_isp_rw);
+                avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
             }
         },
         false);
@@ -155,8 +155,8 @@ void avr_isp_chip_detect_view_exit(void* context) {
     furi_assert(context);
     AvrIspChipDetectView* instance = context;
 
-    avr_isp_rw_set_callback(instance->avr_isp_rw, NULL, NULL);
-    avr_isp_rw_free(instance->avr_isp_rw);
+    avr_isp_worker_rw_set_callback(instance->avr_isp_worker_rw, NULL, NULL);
+    avr_isp_worker_rw_free(instance->avr_isp_worker_rw);
 }
 
 AvrIspChipDetectView* avr_isp_chip_detect_view_alloc() {

@@ -68,6 +68,10 @@ AvrIspApp* avr_isp_app_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, AvrIspViewTextInput, text_input_get_view(app->text_input));
 
+    // Popup
+    app->popup = popup_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, AvrIspViewPopup, popup_get_view(app->popup));
+
     //Dialog
     app->dialogs = furi_record_open(RECORD_DIALOGS);
 
@@ -91,7 +95,7 @@ AvrIspApp* avr_isp_app_alloc() {
         app->view_dispatcher,
         AvrIspViewWriter,
         avr_isp_writer_view_get_view(app->avr_isp_writer_view));
-    
+
     // Chip detect view
     app->avr_isp_chip_detect_view = avr_isp_chip_detect_view_alloc();
     view_dispatcher_add_view(
@@ -122,6 +126,10 @@ void avr_isp_app_free(AvrIspApp* app) {
     // TextInput
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewTextInput);
     text_input_free(app->text_input);
+
+    // Popup
+    view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewPopup);
+    popup_free(app->popup);
 
     //Dialog
     furi_record_close(RECORD_DIALOGS);
