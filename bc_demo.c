@@ -110,13 +110,13 @@ void  cbDraw (Canvas* const canvas,  void* ctx)
 	// We will need access to the plugin state variables
 	const state_t*  state = ctx;  // state pointer
 
-	// Acquire the mutex for the plugin state variables, timeout = 25mS
+	// Try to acquire the mutex for the plugin state variables, timeout = 25mS
 	// We (obviously) do not (yet) have access to the state variables,
 	//   so the timeout value must be specified at compile-time
 	//
 	// furi_mutex_acquire  |  furi/core/mutex.*
 	//   -->  xSemaphoreTake()  |  lib/FreeRTOS-Kernel/include/semphr.h
-	furi_mutex_acquire(state->mutex, 25); //FuriWaitForever);
+	if (furi_mutex_acquire(state->mutex, 25) != FuriStatusOk)  return ;
 
 	// Border around the edge of the screen
 	// top-left is {0,0}, [standard] screen is 128x64 {WxH}
