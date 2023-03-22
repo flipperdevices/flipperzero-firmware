@@ -5,14 +5,14 @@
 #include <lib/heatshrink/heatshrink_decoder.h>
 
 /** Defines encoder and decoder window size */
-#define COMPRESS_EXP_BUFF_SIZE_LOG (8)
+#define COMPRESS_EXP_BUFF_SIZE_LOG (8u)
+
 /** Defines encoder and decoder lookahead buffer size */
-#define COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG (4)
+#define COMPRESS_LOOKAHEAD_BUFF_SIZE_LOG (4u)
 
-#define COMPRESS_ICON_ENCODED_BUFF_SIZE (2 * 512)
-#define COMPRESS_ICON_DECODED_BUFF_SIZE (1024)
-
-#define COMPRESS_EXP_BUFF_SIZE (1 << COMPRESS_EXP_BUFF_SIZE_LOG)
+/** Buffer sizes for input and output data */
+#define COMPRESS_ICON_ENCODED_BUFF_SIZE (1024u)
+#define COMPRESS_ICON_DECODED_BUFF_SIZE (1024u)
 
 typedef struct {
     uint8_t is_compressed;
@@ -22,7 +22,6 @@ typedef struct {
 
 struct CompressIcon {
     heatshrink_decoder* decoder;
-    // uint8_t compress_buff[COMPRESS_EXP_BUFF_SIZE + COMPRESS_ICON_ENCODED_BUFF_SIZE];
     uint8_t decoded_buff[COMPRESS_ICON_DECODED_BUFF_SIZE];
 };
 
