@@ -75,4 +75,4 @@ jobs:
       - name: 'Check GDB output'
         if: failure()
         run: |
-          ./fbt gdb_trace_all OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
+          ./fbt gdb_trace_all OPENOCD_ADAPTER_SERIAL=49FF75065182575513201587 FIRMWARE_APP_SET=unit_tests FORCE=1
