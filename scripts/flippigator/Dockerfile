@@ -5,4 +5,6 @@ COPY . /build
 
 WORKDIR /build
 RUN pip3 install -r requirements-headless.txt
+CMD pwd
+CMD ls
 CMD pytest -v --gui=0 port=/dev/ttyACM0
