@@ -1,10 +1,8 @@
 # syntax=docker/dockerfile-upstream:master-labs
 FROM python:3.10 as builder
 
-# temporary, there will be obviously cp into docker container
-# COPY . /build
-ADD https://github.com/flipperdevices/flipperzero-firmware.git#doom/2991-e2e-runner /build
+COPY . /build
 
-WORKDIR /build/scripts/flippigator
+WORKDIR /build
 RUN pip3 install -r requirements-headless.txt
-CMD pytest --gui=0
+CMD pytest -v -r --gui=0 port=/dev/tty/ACM0

@@ -33,11 +33,6 @@ jobs:
         run: |
           echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
 
-      - name: 'Temp for fixing fbt'
-        id: fixing_fbt
-        run: |
-          source scripts/toolchain/fbtenv.sh --restore
-
       - name: 'Flash firmware'
         id: flashing
         if: success()
@@ -54,13 +49,6 @@ jobs:
           python3 scripts/power.py -p ${{steps.device.outputs.flipper}} reboot
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
 
-      - name: 'Installing additional python dependencies'
-        id: autotest_dependencies
-        if: success()
-        run: |
-          source scripts/toolchain/fbtenv.sh
-          python3 -m pip install -r ./scripts/flippigator/requirements-headless.txt
-
       - name: 'Run smoke tests'
         id: run_smoke
         if: steps.format_ext.outcome == 'success'
@@ -68,7 +56,7 @@ jobs:
         run: |
           cd scripts/flippigator
           docker buildx build -t pytest-runner .
-          docker run --rm --device /dev/ttyACM0:/dev/ttyACM0 pytest-runner
+          docker run --rm --device ${{steps.device.outputs.flipper}}:/dev/ttyACM0 pytest-runner
 
       - name: 'Generate allure reports'
         id: generate_allure_reports
