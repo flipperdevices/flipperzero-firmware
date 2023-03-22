@@ -8,6 +8,11 @@ typedef struct AvrIspProgrammerView AvrIspProgrammerView;
 
 typedef void (*AvrIspProgrammerViewCallback)(AvrIspCustomEvent event, void* context);
 
+typedef enum {
+    AvrIspProgrammerViewStatusNoUSBConnect,
+    AvrIspProgrammerViewStatusUSBConnect,
+} AvrIspProgrammerViewStatus;
+
 void avr_isp_programmer_view_set_callback(
     AvrIspProgrammerView* instance,
     AvrIspProgrammerViewCallback callback,

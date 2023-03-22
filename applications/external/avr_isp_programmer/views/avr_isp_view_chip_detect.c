@@ -103,7 +103,6 @@ bool avr_isp_chip_detect_view_input(InputEvent* event, void* context) {
                 }
             },
             false);
-
     }
 
     return true;
@@ -144,7 +143,8 @@ void avr_isp_chip_detect_view_enter(void* context) {
         instance->view,
         AvrIspChipDetectViewModel * model,
         {
-            if(model->status == AvrIspChipDetectViewStatusNoDetect) {
+            if(model->status == AvrIspChipDetectViewStatusNoDetect ||
+               model->status == AvrIspChipDetectViewStatusDetected) {
                 avr_isp_rw_detect_chip(instance->avr_isp_rw);
             }
         },

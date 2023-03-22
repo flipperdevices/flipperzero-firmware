@@ -4,7 +4,7 @@
 
 typedef struct AvrIspWorker AvrIspWorker;
 
-typedef void (*AvrIspWorkerCallback)(void* context, const char* name);
+typedef void (*AvrIspWorkerCallback)(void* context, bool connect_usb);
 
 /** Allocate AvrIspWorker
  * 
@@ -48,8 +48,8 @@ void avr_isp_worker_stop(AvrIspWorker* instance);
  */
 bool avr_isp_worker_is_running(AvrIspWorker* instance);
 
-/** Detect chip
- * 
- * @param instance AvrIspWorker instance
- */
-void avr_isp_worker_detect_chip(AvrIspWorker* instance);
+// /** Detect chip
+//  * 
+//  * @param instance AvrIspWorker instance
+//  */
+// void avr_isp_worker_detect_chip(AvrIspWorker* instance);

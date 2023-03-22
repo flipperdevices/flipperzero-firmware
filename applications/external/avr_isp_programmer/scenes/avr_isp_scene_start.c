@@ -8,23 +8,14 @@ void avr_isp_scene_start_submenu_callback(void* context, uint32_t index) {
 void avr_isp_scene_start_on_enter(void* context) {
     AvrIspApp* app = context;
     Submenu* submenu = app->submenu;
-
+    submenu_add_item(
+        submenu, "Dump AVR", SubmenuIndexAvrIspReader, avr_isp_scene_start_submenu_callback, app);
+    submenu_add_item(
+        submenu, "Flash AVR", SubmenuIndexAvrIspWriter, avr_isp_scene_start_submenu_callback, app);
     submenu_add_item(
         submenu,
-        "AVR ISP Programmer",
+        "ISP Programmer",
         SubmenuIndexAvrIspProgrammer,
-        avr_isp_scene_start_submenu_callback,
-        app);
-    submenu_add_item(
-        submenu,
-        "AVR ISP Reader",
-        SubmenuIndexAvrIspReader,
-        avr_isp_scene_start_submenu_callback,
-        app);
-    submenu_add_item(
-        submenu,
-        "AVR ISP Writer",
-        SubmenuIndexAvrIspWriter,
         avr_isp_scene_start_submenu_callback,
         app);
     submenu_add_item(

@@ -1,11 +1,7 @@
 #include "avr_isp_view_programmer.h"
 #include "../avr_isp_app_i.h"
-#include <avr_isp_icons.h>
 
 #include "../helpers/avr_isp_worker.h"
-//#include <math.h>
-
-//#include <input/input.h>
 #include <gui/elements.h>
 
 struct AvrIspProgrammerView {
@@ -16,10 +12,7 @@ struct AvrIspProgrammerView {
 };
 
 typedef struct {
-    uint16_t idx;
-    IconAnimation* icon;
-    const char* name_chip;
-    bool detect_chip;
+    AvrIspProgrammerViewStatus status;
 } AvrIspProgrammerViewModel;
 
 void avr_isp_programmer_view_set_callback(
@@ -33,25 +26,16 @@ void avr_isp_programmer_view_set_callback(
 }
 
 void avr_isp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* model) {
-    UNUSED(model);
     canvas_clear(canvas);
-    // canvas_set_color(canvas, ColorBlack);
-    // canvas_set_font(canvas, FontSecondary);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_icon(canvas, 20, 8, &I_Link_waiting_77x56);
-    elements_multiline_text(canvas, 20, 10, "Waiting for software\nconnection");
-    // canvas_set_font(canvas, FontPrimary);
-    // canvas_draw_str(canvas, 63, 46, "AVRISPProg");
-    // canvas_set_font(canvas, FontSecondary);
-    
-    // if(!model->detect_chip) {
-    //     canvas_draw_icon_animation(canvas, 0, 0, model->icon);
-    //     canvas_draw_str_aligned(canvas, 64, 26, AlignLeft, AlignCenter, "Detecting");
-    //     canvas_draw_str_aligned(canvas, 64, 36, AlignLeft, AlignCenter, "AVR chip...");
-    // } else {
-    //     canvas_draw_str_aligned(canvas, 20, 26, AlignLeft, AlignCenter, "AVR chip");
-    //     canvas_draw_str_aligned(canvas, 20, 36, AlignLeft, AlignCenter, model->name_chip);
-    // }
+    if(model->status == AvrIspProgrammerViewStatusUSBConnect) {
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_icon(canvas, 0, 0, &I_isp_active_128x64);
+        elements_multiline_text(canvas, 40, 10, "ISP mode active");
+    } else {
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_icon(canvas, 51, 6, &I_link_waiting_77x56);
+        elements_multiline_text(canvas, 0, 25, "Waiting for\nsoftware\nconnection");
+    }
 }
 
 bool avr_isp_programmer_view_input(InputEvent* event, void* context) {
@@ -65,19 +49,22 @@ bool avr_isp_programmer_view_input(InputEvent* event, void* context) {
     return true;
 }
 
-static void avr_isp_programmer_detect_chip_callback(void* context, const char* name) {
+static void avr_isp_programmer_usb_connect_callback(void* context, bool status_connect) {
     furi_assert(context);
     AvrIspProgrammerView* instance = context;
     with_view_model(
         instance->view,
         AvrIspProgrammerViewModel * model,
         {
-            model->name_chip = name;
-            model->detect_chip = true;
-            icon_animation_stop(model->icon);
+            if(status_connect) {
+                model->status = AvrIspProgrammerViewStatusUSBConnect;
+            } else {
+                model->status = AvrIspProgrammerViewStatusNoUSBConnect;
+            }
         },
         true);
 }
+
 void avr_isp_programmer_view_enter(void* context) {
     furi_assert(context);
     AvrIspProgrammerView* instance = context;
@@ -85,19 +72,14 @@ void avr_isp_programmer_view_enter(void* context) {
     with_view_model(
         instance->view,
         AvrIspProgrammerViewModel * model,
-        {
-            icon_animation_start(model->icon);
-            model->detect_chip = false;
-        },
-        false);
+        { model->status = AvrIspProgrammerViewStatusNoUSBConnect; },
+        true);
 
     //Start worker
     instance->worker = avr_isp_worker_alloc(instance->context);
 
     avr_isp_worker_set_callback(
-        instance->worker, avr_isp_programmer_detect_chip_callback, instance);
-
-    avr_isp_worker_detect_chip(instance->worker);
+        instance->worker, avr_isp_programmer_usb_connect_callback, instance);
 
     avr_isp_worker_start(instance->worker);
 }
@@ -109,13 +91,8 @@ void avr_isp_programmer_view_exit(void* context) {
     if(avr_isp_worker_is_running(instance->worker)) {
         avr_isp_worker_stop(instance->worker);
     }
+    avr_isp_worker_set_callback(instance->worker, NULL, NULL);
     avr_isp_worker_free(instance->worker);
-
-    with_view_model(
-        instance->view,
-        AvrIspProgrammerViewModel * model,
-        { icon_animation_stop(model->icon); },
-        false);
 }
 
 AvrIspProgrammerView* avr_isp_programmer_view_alloc() {
@@ -134,11 +111,7 @@ AvrIspProgrammerView* avr_isp_programmer_view_alloc() {
     with_view_model(
         instance->view,
         AvrIspProgrammerViewModel * model,
-        {
-            model->icon = icon_animation_alloc(&A_ChipLooking_64x64);
-            view_tie_icon_animation(instance->view, model->icon);
-            model->detect_chip = false;
-        },
+        { model->status = AvrIspProgrammerViewStatusNoUSBConnect; },
         false);
     return instance;
 }
@@ -146,11 +119,6 @@ AvrIspProgrammerView* avr_isp_programmer_view_alloc() {
 void avr_isp_programmer_view_free(AvrIspProgrammerView* instance) {
     furi_assert(instance);
 
-    with_view_model(
-        instance->view,
-        AvrIspProgrammerViewModel * model,
-        { icon_animation_free(model->icon); },
-        false);
     view_free(instance->view);
     free(instance);
 }
