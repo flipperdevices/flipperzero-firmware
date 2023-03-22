@@ -1,3 +1,8 @@
+[![GitHub release](https://img.shields.io/github/release/teeebor/flipper_solitaire?include_prereleases=&sort=semver&color=blue)](https://github.com/teeebor/flipper_solitaire/releases/)
+[![License](https://img.shields.io/badge/License-MIT-blue)](/LICENSE)
+[![issues - flipper-zero_authenticator](https://img.shields.io/github/issues/teeebor/flipper_solitaire)](https://github.com/teeebor/flipper_solitaire/issues)
+![maintained - yes](https://img.shields.io/badge/maintained-yes-blue)
+![contributions - welcome](https://img.shields.io/badge/contributions-welcome-blue)
 # Solitaire game for Flipper Zero
 
 ![Play screen](screenshots/solitaire.png)
