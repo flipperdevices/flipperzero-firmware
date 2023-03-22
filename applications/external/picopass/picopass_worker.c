@@ -495,28 +495,35 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
     }
     PicopassWorkerEvent nextState = PicopassWorkerEventSuccess;
 
-    if(picopass_detect_card(1000) == ERR_NONE) {
-        picopass_worker->callback(PicopassWorkerEventCardDetected, picopass_worker->context);
+    do {
+        if(picopass_detect_card(1000) == ERR_NONE) {
+            picopass_worker->callback(PicopassWorkerEventCardDetected, picopass_worker->context);
 
-        // Process first found device
-        err = picopass_read_preauth(AA1);
-        if(err != ERR_NONE) {
-            FURI_LOG_E(TAG, "picopass_read_preauth error %d", err);
-            nextState = PicopassWorkerEventFail;
-        }
+            // Process first found device
+            err = picopass_read_preauth(AA1);
+            if(err != ERR_NONE) {
+                FURI_LOG_E(TAG, "picopass_read_preauth error %d", err);
+                picopass_worker->callback(PicopassWorkerEventFail, picopass_worker->context);
+                return;
+            }
 
-        // Thank you proxmark!
-        pacs->legacy = picopass_is_memset(AA1[5].data, 0xFF, 8);
-        pacs->se_enabled = (memcmp(AA1[5].data, "\xff\xff\xff\x00\x06\xff\xff\xff", 8) == 0);
-        if(pacs->se_enabled) {
-            FURI_LOG_D(TAG, "SE enabled");
-            nextState = PicopassWorkerEventFail;
-        }
+            // Thank you proxmark!
+            pacs->legacy = picopass_is_memset(AA1[5].data, 0xFF, 8);
+            pacs->se_enabled = (memcmp(AA1[5].data, "\xff\xff\xff\x00\x06\xff\xff\xff", 8) == 0);
+            if(pacs->se_enabled) {
+                FURI_LOG_D(TAG, "SE enabled");
+                picopass_worker->callback(PicopassWorkerEventFail, picopass_worker->context);
+                return;
+            }
 
-        if(nextState != PicopassWorkerEventSuccess) {
-            picopass_worker->callback(nextState, picopass_worker->context);
+            break;
+        } else {
+            picopass_worker->callback(PicopassWorkerEventNoCardDetected, picopass_worker->context);
         }
-    }
+        if(picopass_worker->state != PicopassWorkerStateEliteDictAttack) break;
+
+        furi_delay_ms(100);
+    } while(true);
 
     FURI_LOG_D(
         TAG, "Start Dictionary attack, Key Count %lu", iclass_elite_dict_get_total_keys(dict));
