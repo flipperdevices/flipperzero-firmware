@@ -33,8 +33,15 @@ typedef struct {
     uint32_t input_counter;
 } RpcGuiSystem;
 
+static const PB_Gui_ScreenOrientation rpc_system_gui_screen_orientation_map[] = {
+    [CanvasOrientationHorizontal] = PB_Gui_ScreenOrientation_HORIZONTAL,
+    [CanvasOrientationHorizontalFlip] = PB_Gui_ScreenOrientation_HORIZONTAL_FLIP,
+    [CanvasOrientationVertical] = PB_Gui_ScreenOrientation_VERTICAL,
+    [CanvasOrientationVerticalFlip] = PB_Gui_ScreenOrientation_VERTICAL_FLIP,
+};
+
 static void
-    rpc_system_gui_screen_stream_frame_callback(uint8_t* data, size_t size, void* context) {
+    rpc_system_gui_screen_stream_frame_callback(uint8_t* data, size_t size, CanvasOrientation orientation, void* context) {
     furi_assert(data);
     furi_assert(context);
 
@@ -44,6 +51,7 @@ static void
     furi_assert(size == rpc_gui->transmit_frame->content.gui_screen_frame.data->size);
 
     memcpy(buffer, data, size);
+    rpc_gui->transmit_frame->content.gui_screen_frame.orientation = rpc_system_gui_screen_orientation_map[orientation];
 
     furi_thread_flags_set(furi_thread_get_id(rpc_gui->transmit_thread), RpcGuiWorkerFlagTransmit);
 }

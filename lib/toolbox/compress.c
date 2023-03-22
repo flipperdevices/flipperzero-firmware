@@ -20,6 +20,8 @@ typedef struct {
     uint16_t compressed_buff_size;
 } CompressHeader;
 
+_Static_assert(sizeof(CompressHeader) == 4, "Incorrect CompressHeader size");
+
 struct CompressIcon {
     heatshrink_decoder* decoder;
     uint8_t decoded_buff[COMPRESS_ICON_DECODED_BUFF_SIZE];
@@ -53,7 +55,7 @@ void compress_icon_decode(CompressIcon* instance, const uint8_t* icon_data, uint
         size_t data_processed = 0;
         heatshrink_decoder_sink(
             instance->decoder,
-            (uint8_t*)&icon_data[4],
+            (uint8_t*)&icon_data[sizeof(CompressHeader)],
             header->compressed_buff_size,
             &data_processed);
         while(1) {
