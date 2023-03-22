@@ -121,7 +121,8 @@ static void draw_animation(Canvas *const canvas, const GameState *game_state) {
 }
 
 static void render_callback(Canvas *const canvas, void *ctx) {
-    const GameState *game_state = acquire_mutex((ValueMutex *) ctx, 25);
+    const GameState *game_state = ctx;
+    furi_mutex_acquire(game_state->mutex, 25);
     if (game_state == NULL) {
         return;
     }
@@ -140,7 +141,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
             break;
     }
 
-    release_mutex((ValueMutex *) ctx, game_state);
+    furi_mutex_release(game_state->mutex);
 
 }
 
@@ -444,8 +445,8 @@ int32_t solitaire_app(void *p) {
     game_state->state = GameStateStart;
 
     game_state->processing = true;
-    ValueMutex state_mutex;
-    if (!init_mutex(&state_mutex, game_state, sizeof(GameState))) {
+    game_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    if (!game_state->mutex) {
         FURI_LOG_E(APP_NAME, "cannot create mutex\r\n");
         return_code = 255;
         goto free_and_exit;
@@ -455,7 +456,7 @@ int32_t solitaire_app(void *p) {
     notification_message_block(notification, &sequence_display_backlight_enforce_on);
 
     ViewPort *view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, render_callback, &state_mutex);
+    view_port_draw_callback_set(view_port, render_callback, game_state);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     FuriTimer *timer =
@@ -468,7 +469,7 @@ int32_t solitaire_app(void *p) {
     AppEvent event;
     for (bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 150);
-        GameState *localstate = (GameState *) acquire_mutex_block(&state_mutex);
+        furi_mutex_acquire(game_state->mutex, FuriWaitForever);
         bool hadChange = false;
         if (event_status == FuriStatusOk) {
             if (event.type == EventTypeKey) {
@@ -480,7 +481,7 @@ int32_t solitaire_app(void *p) {
                         case InputKeyRight:
                         case InputKeyLeft:
                         case InputKeyOk:
-                            localstate->input = event.input.key;
+                            game_state->input = event.input.key;
                             break;
                         case InputKeyBack:
                             processing = false;
@@ -496,13 +497,13 @@ int32_t solitaire_app(void *p) {
                         case InputKeyRight:
                         case InputKeyLeft:
                         case InputKeyOk:
-                            if (event.input.key == InputKeyOk && localstate->state == GameStateStart) {
-                                localstate->state = GameStatePlay;
+                            if (event.input.key == InputKeyOk && game_state->state == GameStateStart) {
+                                game_state->state = GameStatePlay;
                                 init(game_state);
                             }
                             else {
                                 hadChange = true;
-                                localstate->input = event.input.key;
+                                game_state->input = event.input.key;
                             }
                             break;
                         case InputKeyBack:
@@ -515,9 +516,9 @@ int32_t solitaire_app(void *p) {
                     }
                 }
             } else if (event.type == EventTypeTick) {
-                tick(localstate, notification);
-                processing = localstate->processing;
-                localstate->input = InputKeyMAX;
+                tick(game_state, notification);
+                processing = game_state->processing;
+                game_state->input = InputKeyMAX;
             }
         } else {
             FURI_LOG_W(APP_NAME, "osMessageQueue: event timeout");
@@ -525,7 +526,7 @@ int32_t solitaire_app(void *p) {
         }
         if (hadChange || game_state->state == GameStateAnimate)
             view_port_update(view_port);
-        release_mutex(&state_mutex, localstate);
+        furi_mutex_release(game_state->mutex);
     }
 
 
@@ -536,7 +537,7 @@ int32_t solitaire_app(void *p) {
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
     view_port_free(view_port);
-    delete_mutex(&state_mutex);
+    furi_mutex_free(game_state->mutex);
 
     free_and_exit:
     free(game_state->animation.buffer);
