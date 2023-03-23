@@ -1408,6 +1408,139 @@ static void remote_games_remove(GameContext* game_context, GameEvent* game_event
     }
 }
 
+// This is a helper method that creates the game directory if it does not exist.
+// @param storage pointer to a Storage.
+static void ensure_dir_exists(Storage* storage) {
+    // If apps_data directory doesn't exist, create it.
+    if(!storage_dir_exists(storage, RPS_APPS_DATA_FOLDER)) {
+        FURI_LOG_I(TAG, "Creating directory: %s", RPS_APPS_DATA_FOLDER);
+        storage_simply_mkdir(storage, RPS_APPS_DATA_FOLDER);
+    } else {
+        FURI_LOG_I(TAG, "Directory exists: %s", RPS_APPS_DATA_FOLDER);
+    }
+
+    // If rock_paper_scissors directory doesn't exist, create it.
+    if(!storage_dir_exists(storage, RPS_GAME_FOLDER)) {
+        FURI_LOG_I(TAG, "Creating directory: %s", RPS_GAME_FOLDER);
+        storage_simply_mkdir(storage, RPS_GAME_FOLDER);
+    } else {
+        FURI_LOG_I(TAG, "Directory exists: %s", RPS_GAME_FOLDER);
+    }
+}
+
+// Saves a local contact to the file system.
+// @param game_context pointer to a GameContext.
+static void save_local_contact(GameContext* game_context) {
+    if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) != FuriStatusOk) {
+        return;
+    }
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    ensure_dir_exists(storage);
+    FURI_LOG_I(TAG, "Saving social: %s", furi_string_get_cstr(game_context->data->local_contact));
+
+    File* social_file = storage_file_alloc(storage);
+    if(storage_file_open(social_file, RPS_SOCIAL_PATH, FSAM_WRITE, FSOM_OPEN_ALWAYS)) {
+        FURI_LOG_T(TAG, "Opened file: %s", RPS_SOCIAL_PATH);
+        int offset =
+            (KEYBOARD_MAX_LEN + 2) * furi_string_get_char(game_context->data->local_contact, 0);
+        if(offset < 0) {
+            offset = 0;
+        }
+
+        int file_size = storage_file_size(social_file);
+        if(file_size < offset) {
+            storage_file_seek(social_file, file_size, true);
+            for(int i = file_size; i < offset; i++) {
+                storage_file_write(social_file, "\0", 1);
+            }
+        }
+
+        storage_file_seek(social_file, offset, true);
+        if(!storage_file_write(
+               social_file,
+               furi_string_get_cstr(game_context->data->local_contact),
+               furi_string_size(game_context->data->local_contact))) {
+            FURI_LOG_E(TAG, "Failed to write to file.");
+        }
+        storage_file_write(social_file, "\n", 1);
+
+        storage_file_seek(social_file, 0, true);
+        storage_file_write(
+            social_file,
+            furi_string_get_cstr(game_context->data->local_contact),
+            furi_string_size(game_context->data->local_contact));
+        storage_file_write(social_file, "\n", 1);
+    } else {
+        FURI_LOG_E(TAG, "Failed to open file: %s", RPS_SOCIAL_PATH);
+    }
+
+    storage_file_close(social_file);
+    storage_file_free(social_file);
+    furi_record_close(RECORD_STORAGE);
+
+    furi_mutex_release(game_context->mutex);
+}
+
+// Loads a local contact from the file system.
+// @param index index of the contact to load.
+// @param skip_first_char true if the first character should be skipped.
+// @param buffer pointer to a FuriString.
+static void load_social_data(int index, bool skip_first_char, FuriString* buffer) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    File* social_file = storage_file_alloc(storage);
+    if(storage_file_open(social_file, RPS_SOCIAL_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+        char ch;
+        FURI_LOG_T(TAG, "Opened file: %s", RPS_SOCIAL_PATH);
+        int offset = (KEYBOARD_MAX_LEN + 2) * index;
+
+        if(skip_first_char) {
+            offset++; // Skip first character when filling keyboard buffer.
+        }
+
+        int file_size = storage_file_size(social_file);
+        if(file_size > offset) {
+            storage_file_seek(social_file, offset, true);
+            furi_string_reset(buffer);
+            while(storage_file_read(social_file, &ch, 1) && !storage_file_eof(social_file)) {
+                if(ch == '\n' || ch == '\0') {
+                    break;
+                }
+                furi_string_push_back(buffer, ch);
+            }
+        }
+    } else {
+        FURI_LOG_E(TAG, "Failed to open file: %s", RPS_SOCIAL_PATH);
+    }
+
+    storage_file_close(social_file);
+    storage_file_free(social_file);
+    furi_record_close(RECORD_STORAGE);
+}
+
+// Fills the keyboard data array with the previously saved social information.
+// @param game_context pointer to a GameContext.
+static void load_keyboard_data(GameContext* game_context) {
+    load_social_data(
+        contact_list[game_context->data->social_line][0], true, game_context->data->keyboard_data);
+}
+
+// Loads the initial local contact from the file system.
+// @param game_context pointer to a GameContext.
+static void load_local_contact(GameContext* game_context) {
+    load_social_data(0, false, game_context->data->local_contact);
+    if(furi_string_size(game_context->data->local_contact) > 0) {
+        char ch = furi_string_get_char(game_context->data->local_contact, 0);
+        for(int i = 0; i < (int)COUNT_OF(contact_list); i++) {
+            if(contact_list[i][0] == ch) {
+                game_context->data->social_line = i;
+                break;
+            }
+        }
+    }
+}
+
 // Saves a game result to the file system.
 // @param game_context pointer to a GameContext.
 static void save_result(GameContext* game_context) {
@@ -1438,27 +1571,13 @@ static void save_result(GameContext* game_context) {
     FURI_LOG_I(TAG, "Saving result: %s", furi_string_get_cstr(game_context->data->buffer));
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    ensure_dir_exists(storage);
+
     File* games_file = storage_file_alloc(storage);
-
-    // If apps_data directory doesn't exist, create it.
-    if(!storage_dir_exists(storage, RPS_APPS_DATA_FOLDER)) {
-        FURI_LOG_I(TAG, "Creating directory: %s", RPS_APPS_DATA_FOLDER);
-        storage_simply_mkdir(storage, RPS_APPS_DATA_FOLDER);
-    } else {
-        FURI_LOG_I(TAG, "Directory exists: %s", RPS_APPS_DATA_FOLDER);
-    }
-
-    // If rock_paper_scissors directory doesn't exist, create it.
-    if(!storage_dir_exists(storage, RPS_GAME_FOLDER)) {
-        FURI_LOG_I(TAG, "Creating directory: %s", RPS_GAME_FOLDER);
-        storage_simply_mkdir(storage, RPS_GAME_FOLDER);
-    } else {
-        FURI_LOG_I(TAG, "Directory exists: %s", RPS_GAME_FOLDER);
-    }
 
     // Append contents to ending of games.txt (create if doesn't exist)
     if(storage_file_open(games_file, RPS_GAME_PATH, FSAM_WRITE, FSOM_OPEN_APPEND)) {
-        FURI_LOG_E(TAG, "Opened file: %s", RPS_GAME_PATH);
+        FURI_LOG_T(TAG, "Opened file: %s", RPS_GAME_PATH);
         if(!storage_file_write(
                games_file,
                furi_string_get_cstr(game_context->data->buffer),
@@ -1654,6 +1773,7 @@ int32_t rock_paper_scissors_app(void* p) {
     game_context->data->keyboard_data = furi_string_alloc();
 
     load_player_stats(game_context);
+    load_local_contact(game_context);
 
     // Queue for events
     game_context->queue = furi_message_queue_alloc(8, sizeof(GameEvent));
@@ -1947,10 +2067,7 @@ int32_t rock_paper_scissors_app(void* p) {
                                 "%c%s",
                                 contact_list[game_context->data->social_line][0],
                                 furi_string_get_cstr(game_context->data->keyboard_data));
-                            FURI_LOG_I(
-                                TAG,
-                                "Changed contact info to '%s'",
-                                furi_string_get_cstr(game_context->data->local_contact));
+                            save_local_contact(game_context);
                             game_context->data->screen_state = ScreenMainMenu;
                         }
                         break;
@@ -2003,17 +2120,15 @@ int32_t rock_paper_scissors_app(void* p) {
                     case InputKeyOk:
                         if(game_context->data->social_line == 0) {
                             furi_string_set(game_context->data->local_contact, CONTACT_INFO_NONE);
-                            FURI_LOG_I(
-                                TAG,
-                                "Changed contact info to '%s'",
-                                furi_string_get_cstr(game_context->data->local_contact));
+                            save_local_contact(game_context);
                             game_context->data->screen_state = ScreenMainMenu;
                         } else {
                             furi_string_set(
                                 game_context->data->keyboard_heading,
                                 contact_list[game_context->data->social_line] + 1);
-                            game_context->data->keyboard_row = 0;
+                            game_context->data->keyboard_row = 3;
                             game_context->data->keyboard_col = 13;
+                            load_keyboard_data(game_context);
                             game_context->data->screen_state = ScreenEditMessage;
                         }
                         break;

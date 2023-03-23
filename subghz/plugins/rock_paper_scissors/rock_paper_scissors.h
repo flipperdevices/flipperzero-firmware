@@ -20,6 +20,8 @@
                          "rock_paper_scissors"
 #define RPS_GAME_FILE_NAME "games.txt"
 #define RPS_GAME_PATH RPS_GAME_FOLDER "/" RPS_GAME_FILE_NAME
+#define RPS_SOCIAL_FILE_NAME "social.me"
+#define RPS_SOCIAL_PATH RPS_GAME_FOLDER "/" RPS_SOCIAL_FILE_NAME
 
 // This is sent at the beginning of all RF messages. NOTE: It must end with the ':' character.
 #define RPS_GAME_NAME "RPS:"
@@ -458,6 +460,24 @@ static void remote_games_next(GameContext* game_context);
 static void remote_games_previous(GameContext* game_context);
 static void remote_games_add(GameContext* game_context, GameEvent* game_event);
 static void remote_games_remove(GameContext* game_context, GameEvent* game_event);
+
+// This is a helper method that creates the game directory if it does not exist.
+// @param storage pointer to a Storage.
+static void ensure_dir_exists(Storage* storage);
+
+// Saves a local contact to the file system.
+// @param game_context pointer to a GameContext.
+static void save_local_contact(GameContext* game_context);
+
+// Loads a local contact from the file system.
+// @param index index of the contact to load.
+// @param skip_first_char true if the first character should be skipped.
+// @param buffer pointer to a FuriString.
+static void load_social_data(int index, bool skip_first_char, FuriString* buffer);
+
+// Fills the keyboard data array with the previously saved social information.
+// @param game_context pointer to a GameContext.
+static void load_keyboard_data(GameContext* game_context);
 
 // Saves a game result to the file system.
 // @param game_context pointer to a GameContext.
