@@ -21,10 +21,30 @@ bool avr_isp_scene_reader_on_event(void* context, SceneManagerEvent event) {
     AvrIspApp* app = context;
     UNUSED(app);
     bool consumed = false;
-    if(event.type == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeBack) {
+        //do not handle exit on "Back"
+        consumed = true;
+    } else if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case AvrIspCustomEventSceneReadingOk:
             scene_manager_next_scene(app->scene_manager, AvrIspSceneSuccess);
+            consumed = true;
+            break;
+        case AvrIspCustomEventSceneExit:
+            scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, AvrIspSceneChipDetect);
+            consumed = true;
+            break;
+        case AvrIspCustomEventSceneErrorVerification:
+            app->error = AvrIspErrorVerification;
+            scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, AvrIspSceneChipDetect);
+            consumed = true;
+            break;
+        case AvrIspCustomEventSceneErrorReading:
+            app->error = AvrIspErrorReading;
+            scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, AvrIspSceneChipDetect);
             consumed = true;
             break;
         default:

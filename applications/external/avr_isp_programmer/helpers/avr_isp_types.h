@@ -22,3 +22,10 @@ typedef enum {
     AvrIspViewTextInput,
     AvrIspViewChipDetect,
 } AvrIspView;
+
+typedef enum {
+    AvrIspErrorNoError,
+    AvrIspErrorReading,
+    AvrIspErrorWriting,
+    AvrIspErrorVerification,
+} AvrIspError;

@@ -87,12 +87,14 @@ bool avr_isp_reader_view_input(InputEvent* event, void* context) {
     AvrIspReaderView* instance = context;
     bool ret = true;
 
-    if(event->key == InputKeyBack || event->type != InputTypeShort) {
+    if(event->key == InputKeyBack && event->type == InputTypeShort) {
         with_view_model(
             instance->view,
             AvrIspReaderViewModel * model,
             {
                 if(model->status == AvrIspReaderViewStatusIDLE) {
+                    if(instance->callback)
+                        instance->callback(AvrIspCustomEventSceneExit, instance->context);
                     ret = false;
                 }
             },

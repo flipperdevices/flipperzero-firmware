@@ -17,4 +17,6 @@ typedef enum {
     AvrIspCustomEventSceneErrorWriting,
     AvrIspCustomEventSceneInputName,
     AvrIspCustomEventSceneSuccess,
+    AvrIspCustomEventSceneExit,
+    AvrIspCustomEventSceneExitStartMenu,
 } AvrIspCustomEvent;

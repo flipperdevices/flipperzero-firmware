@@ -1003,23 +1003,43 @@ bool avr_isp_worker_rw_write_dump(
 
             //write fuse and lock
             FURI_LOG_D(TAG, "Write fuse");
+            ret = true;
             if(avr_isp_chip_arr[instance->chip_arr_ind].nfuses > 0) {
-                if(instance->lfuse != lfuse) avr_isp_write_fuse_low(instance->avr_isp, lfuse);
+                if(instance->lfuse != lfuse) {
+                    if(!avr_isp_write_fuse_low(instance->avr_isp, lfuse)) {
+                        FURI_LOG_E(TAG, "Write Lfuse: error");
+                        ret = false;
+                    }
+                }
             }
             if(avr_isp_chip_arr[instance->chip_arr_ind].nfuses > 1) {
-                if(instance->hfuse != hfuse) avr_isp_write_fuse_high(instance->avr_isp, hfuse);
+                if(instance->hfuse != hfuse) {
+                    if(!avr_isp_write_fuse_high(instance->avr_isp, hfuse)) {
+                        FURI_LOG_E(TAG, "Write Hfuse: error");
+                        ret = false;
+                    }
+                }
             }
             if(avr_isp_chip_arr[instance->chip_arr_ind].nfuses > 2) {
-                if(instance->efuse != efuse) avr_isp_write_fuse_extended(instance->avr_isp, efuse);
+                if(instance->efuse != efuse) {
+                    if(!avr_isp_write_fuse_extended(instance->avr_isp, efuse)) {
+                        FURI_LOG_E(TAG, "Write Efuse: error");
+                        ret = false;
+                    }
+                }
             }
 
             if(avr_isp_chip_arr[instance->chip_arr_ind].nlocks == 1) {
                 FURI_LOG_D(TAG, "Write lock byte");
-                if(instance->lock != lock) avr_isp_write_lock_byte(instance->avr_isp, lock);
+                if(instance->lock != lock) {
+                    if(!avr_isp_write_lock_byte(instance->avr_isp, lock)) {
+                        FURI_LOG_E(TAG, "Write Lock byte: error");
+                        ret = false;
+                    }
+                }
             }
 
             avr_isp_end_pmode(instance->avr_isp);
-            ret = true;
         } while(false);
     }
 

@@ -18,9 +18,11 @@ bool avr_isp_load_from_file(AvrIspApp* app) {
     // Input events and views are managed by file_select
     bool res = dialog_file_browser_show(app->dialogs, file_path, app->file_path, &browser_options);
 
-    path_extract_dirname(furi_string_get_cstr(file_path), app->file_path);
-    path_extract_filename(file_path, file_name, true);
-    strncpy(app->file_name_tmp, furi_string_get_cstr(file_name), AVR_ISP_MAX_LEN_NAME);
+    if(res) {
+        path_extract_dirname(furi_string_get_cstr(file_path), app->file_path);
+        path_extract_filename(file_path, file_name, true);
+        strncpy(app->file_name_tmp, furi_string_get_cstr(file_name), AVR_ISP_MAX_LEN_NAME);
+    }
 
     furi_string_free(file_name);
     furi_string_free(file_path);

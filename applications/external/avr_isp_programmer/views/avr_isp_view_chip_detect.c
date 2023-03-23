@@ -57,11 +57,17 @@ void avr_isp_chip_detect_view_draw(Canvas* canvas, AvrIspChipDetectViewModel* mo
         canvas_draw_str_aligned(
             canvas, 64, 5, AlignCenter, AlignCenter, "Error occured, try again!");
         canvas_draw_icon(canvas, 29, 14, &I_chip_error_70x22);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(
+            canvas, 64, 45, AlignCenter, AlignCenter, "Check the wiring and retry");
         break;
     case AvrIspChipDetectViewStatusErrorVerification:
         canvas_draw_str_aligned(
             canvas, 64, 5, AlignCenter, AlignCenter, "Data verification failed");
         canvas_draw_icon(canvas, 29, 14, &I_chip_error_70x22);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(
+            canvas, 64, 45, AlignCenter, AlignCenter, "Try to restart the process");
         break;
 
     default:

@@ -29,8 +29,8 @@ void avr_isp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* mod
     canvas_clear(canvas);
     if(model->status == AvrIspProgrammerViewStatusUSBConnect) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_icon(canvas, 0, 11, &I_isp_active_128x53);
-        elements_multiline_text(canvas, 40, 10, "ISP mode active");
+        canvas_draw_icon(canvas, 0, 0, &I_isp_active_128x53);
+        elements_multiline_text(canvas, 45, 10, "ISP mode active");
     } else {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_icon(canvas, 51, 6, &I_link_waiting_77x56);

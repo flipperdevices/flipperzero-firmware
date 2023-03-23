@@ -68,6 +68,11 @@ void avr_isp_writer_view_draw(Canvas* canvas, AvrIspWriterViewModel* model) {
     case AvrIspWriterViewStatusVerification:
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifyng dump");
         break;
+    case AvrIspWriterViewStatusVerificationOk:
+        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Done!");
+        elements_button_center(canvas, "Reflash");
+        elements_button_right(canvas, "Exit");
+        break;
 
     default:
         break;
@@ -87,27 +92,42 @@ bool avr_isp_writer_view_input(InputEvent* event, void* context) {
     AvrIspWriterView* instance = context;
     bool ret = true;
 
-    if(event->key == InputKeyBack || event->type != InputTypeShort) {
+    if(event->key == InputKeyBack && event->type == InputTypeShort) {
         with_view_model(
             instance->view,
             AvrIspWriterViewModel * model,
             {
-                if(model->status == AvrIspWriterViewStatusIDLE) {
+                if((model->status == AvrIspWriterViewStatusIDLE) ||
+                   (model->status == AvrIspWriterViewStatusVerificationOk)) {
+                    if(instance->callback)
+                        instance->callback(AvrIspCustomEventSceneExit, instance->context);
                     ret = false;
                 }
             },
             false);
     } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        FURI_LOG_E("WRITE", "Start %s %s", instance->file_path, instance->file_name);
-
         with_view_model(
             instance->view,
             AvrIspWriterViewModel * model,
             {
-                if(model->status == AvrIspWriterViewStatusIDLE) {
+                if((model->status == AvrIspWriterViewStatusIDLE) ||
+                   (model->status == AvrIspWriterViewStatusVerificationOk)) {
                     model->status = AvrIspWriterViewStatusWriting;
                     avr_isp_worker_rw_write_dump_start(
                         instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
+                }
+            },
+            false);
+    } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
+        with_view_model(
+            instance->view,
+            AvrIspWriterViewModel * model,
+            {
+                if((model->status == AvrIspWriterViewStatusIDLE) ||
+                   (model->status == AvrIspWriterViewStatusVerificationOk)) {
+                    if(instance->callback)
+                        instance->callback(AvrIspCustomEventSceneExitStartMenu, instance->context);
+                    ret = false;
                 }
             },
             false);
@@ -129,8 +149,9 @@ static void avr_isp_writer_callback_status(void* context, AvrIspWorkerRWStatus s
                     instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
                 break;
             case AvrIspWorkerRWStatusEndVerification:
-                if(instance->callback)
-                    instance->callback(AvrIspCustomEventSceneWritingOk, instance->context);
+                // if(instance->callback)
+                //     instance->callback(AvrIspCustomEventSceneWritingOk, instance->context);
+                model->status = AvrIspWriterViewStatusVerificationOk;
                 break;
             case AvrIspWorkerRWStatusErrorVerification:
                 if(instance->callback)
