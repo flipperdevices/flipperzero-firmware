@@ -137,7 +137,7 @@ class Navigator:
             ref = list(self.imRef.keys())
         for im in ref:
             template = cv.cvtColor(self.imRef.get(im), 0)
-            if (template.shape[0] < screen_image.shape[0]) and ((template.shape[1] < screen_image.shape[1])):
+            if (template.shape[0] <= screen_image.shape[0]) and ((template.shape[1] <= screen_image.shape[1])):
                 res = cv.matchTemplate(screen_image, template, cv.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
                 if max_val > self._threshold:
@@ -196,6 +196,7 @@ class Navigator:
             if time.time() - start_time > timeout:
                 cv.imwrite("img/recognitionFailPic.bmp", self.screen_image)
                 #raise FlippigatorException("Recognition timeout")
+                break
         return state
 
     def save_screen(self, filename: str):
@@ -281,33 +282,64 @@ class Navigator:
         self.press_down()
 
         heads = list()
-
-        cur = self.get_current_state(area = (0, 15, 0, 128))
-
-        while not (cur[0] in heads):
-            if cur[0] == ("browser_head_" + module):
-                break
+        start_time = time.time()
+        while start_time + 60 > time.time():
+            cur = self.get_current_state(area = (0, 16, 0, 128))
             if not cur == []:
+                if cur[0] == ("browser_head_" + module):
+                    break
+                if cur[0] in heads:
+                    return -1
                 heads.append(cur[0])
-            self.press_right()
-            cur = self.get_current_state(area = (0, 15, 0, 128))
-            if cur[0] in heads:
-                return -1
+                self.press_right()
 
         files = list()
-        state = self.get_current_state(area = (15, 64, 0, 128))
-        while not (state[0] in files):
-            if state[0] == "browser_" + filename:
-                break
+        start_time = time.time()
+        while start_time + 60 > time.time():
+            state = self.get_current_state(timeout = 0.5, area = (15, 64, 0, 128))
             if not (state == []):
+                if state[0] in files:
+                    return -1
+                if state[0] == "browser_" + filename:
+                    break
                 files.append(state[0])
             self.press_down()
-            state = self.get_current_state(area = (15, 64, 0, 128))
-            if state[0] in files:
-                return -1
         self.press_ok()
         self.go_to("browser_Run in app", area = (15, 64, 0, 128))
         self.press_ok()
+
+    def delete_file(self, module, filename):
+        self.go_to_main_screen()
+        self.press_down()
+
+        heads = list()
+        start_time = time.time()
+        while start_time + 60 > time.time():
+            cur = self.get_current_state(area = (0, 16, 0, 128))
+            if not cur == []:
+                if cur[0] == ("browser_head_" + module):
+                    break
+                if cur[0] in heads:
+                    return -1
+                heads.append(cur[0])
+                self.press_right()
+
+        files = list()
+        start_time = time.time()
+        while start_time + 60 > time.time():
+            state = self.get_current_state(timeout = 0.5, area = (15, 64, 0, 128))
+            if not (state == []):
+                if state[0] in files:
+                    return -1
+                if state[0] == "browser_" + filename:
+                    break
+                files.append(state[0])
+            self.press_down()
+        self.press_ok()
+        self.go_to("browser_Delete", area = (15, 64, 0, 128))
+        self.press_ok()
+        self.press_right()
+        self.go_to_main_screen()
 
 
 class Gator:
