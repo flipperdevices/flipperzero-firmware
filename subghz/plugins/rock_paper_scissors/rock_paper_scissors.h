@@ -157,6 +157,7 @@ typedef enum {
     ScreenMainMenu,
     ScreenHostGame,
     ScreenPlayingGame,
+    ScreenFinishedGame,
     ScreenError,
     ScreenJoinGame,
     ScreenChooseSocial,
@@ -187,6 +188,7 @@ typedef enum {
     GameEventRemoteMove,
     GameEventSendMove,
     GameEventPlaySong,
+    GameEventSongEnded,
 } GameEventType;
 
 static const char* contact_list[] = {
@@ -328,7 +330,7 @@ static void
     play_note(float frequency, float volume, uint32_t durationPlay, uint32_t durationPause);
 
 // Play a song
-static void play_song(GameState state);
+static void play_song(GameContext* game_context);
 
 // We register this callback to get invoked whenever new subghz data is received.
 // Queue a GameEventDataDetected message.

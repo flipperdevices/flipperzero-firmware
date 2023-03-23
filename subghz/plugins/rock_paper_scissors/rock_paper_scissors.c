@@ -83,8 +83,9 @@ static void
 }
 
 // Play a song
-static void play_song(GameState state) {
+static void play_song(GameContext* game_context) {
     if(furi_hal_speaker_acquire(1000)) {
+        GameState state = game_context->data->local_player;
         const float volume = 1.0f;
         const uint32_t playQtr = 500;
         const uint32_t delayQtr = 100;
@@ -104,6 +105,9 @@ static void play_song(GameState state) {
 
         furi_hal_speaker_stop();
         furi_hal_speaker_release();
+
+        GameEvent event = {.type = GameEventSongEnded, .tick = furi_get_tick()};
+        furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
     }
 }
 
@@ -853,6 +857,63 @@ static void rps_render_input_text(Canvas* canvas, void* ctx) {
     }
 }
 
+static void rps_render_game_result(Canvas* canvas, void* ctx) {
+    GameContext* game_context = ctx;
+    UNUSED(game_context);
+
+    canvas_clear(canvas);
+    canvas_set_font(canvas, FontKeyboard);
+    canvas_set_color(canvas, ColorBlack);
+
+    canvas_set_font(canvas, FontPrimary);
+
+    char* message;
+    if(isWin(game_context->data->local_player)) {
+        message = "YOU WIN!!!";
+    } else if(isLoss(game_context->data->local_player)) {
+        message = "YOU LOST.";
+    } else {
+        message = "DRAW!";
+    }
+    canvas_draw_str_aligned(canvas, 40, 0, AlignLeft, AlignTop, message);
+
+    canvas_draw_str_aligned(
+        canvas, 0, 12, AlignLeft, AlignTop, furi_string_get_cstr(game_context->data->remote_name));
+
+    canvas_set_font(canvas, FontSecondary);
+    char ch = furi_string_get_char(game_context->data->remote_contact, 0);
+    for(unsigned int i = 0; i < sizeof(contact_list) / sizeof(contact_list[0]); i++) {
+        if(contact_list[i][0] == ch) {
+            canvas_draw_str_aligned(canvas, 0, 26, AlignLeft, AlignTop, contact_list[i] + 1);
+            ch = 0;
+            break;
+        }
+    }
+    if(ch) {
+        char id[2] = {ch, 0};
+        canvas_draw_str_aligned(canvas, 0, 26, AlignLeft, AlignTop, id);
+    }
+
+    canvas_draw_str_aligned(
+        canvas,
+        0,
+        38,
+        AlignLeft,
+        AlignTop,
+        furi_string_get_cstr(game_context->data->remote_contact) + 1);
+
+    canvas_draw_str_aligned(canvas, 18, 53, AlignLeft, AlignTop, "Play Again?");
+
+    canvas_draw_box(canvas, 70, 53, 30, 9);
+    canvas_set_color(canvas, ColorWhite);
+    if(game_context->data->keyboard_col == 0) {
+        canvas_draw_str_aligned(canvas, 73, 54, AlignLeft, AlignTop, " Yes >");
+    } else {
+        canvas_draw_str_aligned(canvas, 73, 54, AlignLeft, AlignTop, "< No");
+    }
+    canvas_set_color(canvas, ColorBlack);
+}
+
 // We register this callback to get invoked whenever we need to render the screen.
 // We render the UI on this callback thread.
 // @param canvas rendering surface of the Flipper Zero.
@@ -877,6 +938,8 @@ static void rps_render_callback(Canvas* canvas, void* ctx) {
         rps_render_input_text(canvas, game_context);
     } else if(game_context->data->screen_state == ScreenChooseSocial) {
         rps_render_choose_social(canvas, game_context);
+    } else if(game_context->data->screen_state == ScreenFinishedGame) {
+        rps_render_game_result(canvas, game_context);
     }
 }
 
@@ -1055,19 +1118,6 @@ static void rps_state_machine_update(GameContext* game_context) {
         d->screen_state = ScreenMainMenu;
 
         FURI_LOG_I(TAG, "Reset from Error.");
-        return;
-    }
-
-    // TEMP - After Win, Loss, Tie -  we reset back to Ready.
-    if(isResult(d->local_player) && (duration(d->local_move_tick) > DURATION_WIN_LOSS_TIE)) {
-        d->remote_player = StateReady;
-        d->remote_move_tick = furi_get_tick();
-        d->local_player = StateReady;
-        d->local_move_tick = furi_get_tick();
-        d->screen_state = ScreenPlayingGame;
-
-        // Should we tell other player we are Ready?
-        FURI_LOG_I(TAG, "Ready for next game.");
         return;
     }
 
@@ -2279,6 +2329,32 @@ int32_t rock_paper_scissors_app(void* p) {
                         break;
                     }
                 } else if(
+                    game_context->data->screen_state == ScreenFinishedGame &&
+                    event.input.type == InputTypeShort) {
+                    switch(event.input.key) {
+                    case InputKeyLeft:
+                        game_context->data->keyboard_col = 0; // YES
+                        break;
+                    case InputKeyRight:
+                        game_context->data->keyboard_col = 1; // NO
+                        break;
+                    case InputKeyOk:
+                        if(game_context->data->keyboard_col == 1) {
+                            game_context->data->local_player = StateMainMenuHost;
+                            game_context->data->remote_player = StateUnknown;
+                            game_context->data->screen_state = ScreenMainMenu;
+                        } else {
+                            game_context->data->remote_player = StateReady;
+                            game_context->data->remote_move_tick = furi_get_tick();
+                            game_context->data->local_player = StateReady;
+                            game_context->data->local_move_tick = furi_get_tick();
+                            game_context->data->screen_state = ScreenPlayingGame;
+                        }
+                        break;
+                    default:
+                        break;
+                    }
+                } else if(
                     game_context->data->screen_state == ScreenPastGames &&
                     event.input.type == InputTypeShort) {
                     switch(event.input.key) {
@@ -2320,7 +2396,12 @@ int32_t rock_paper_scissors_app(void* p) {
                 break;
             case GameEventPlaySong:
                 save_result(game_context);
-                play_song(game_context->data->local_player);
+                play_song(game_context);
+                break;
+            case GameEventSongEnded:
+                if(isResult(game_context->data->local_player)) {
+                    game_context->data->screen_state = ScreenFinishedGame;
+                }
                 break;
             case GameEventDataDetected:
                 rps_receive_data(game_context, event.tick);
