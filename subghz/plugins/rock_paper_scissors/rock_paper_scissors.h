@@ -23,8 +23,8 @@
 #define RPS_SOCIAL_FILE_NAME "social.me"
 #define RPS_SOCIAL_PATH RPS_GAME_FOLDER "/" RPS_SOCIAL_FILE_NAME
 
-// This is sent at the beginning of all RF messages. NOTE: It must end with the ':' character.
-#define RPS_GAME_NAME "RPS:"
+// This is sent at the beginning of all RF messages (after the flipper name).
+#define RPS_GAME_NAME "RPS"
 #define TAG "rock_paper_scissors_app"
 
 // Name for "N", followed by your name without any spaces.
@@ -35,13 +35,13 @@
 #define MESSAGE_MAX_LEN 60
 
 // The is the most characters you can enter at a keyboard prompt.
-#define KEYBOARD_MAX_LEN 40
+#define KEYBOARD_MAX_LEN 32
 
 // How often to send a beacon.
 #define BEACON_DURATION 3
 
 // The major version must be a single character (it can be anything - like '1' or 'A' or 'a').
-#define MAJOR_VERSION 'A'
+#define MAJOR_VERSION 'B'
 
 // Temporary timings, since I don't have second Flipper & send commands via laptop.
 #define DURATION_NO_MOVE_DETECTED_ERROR 60000

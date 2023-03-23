@@ -133,166 +133,183 @@ static void rps_timer_callback(void* ctx) {
 // @param game_context pointer to a GameContext
 // @param time (furi_get_tick) when event was initially made
 static void rps_receive_data(GameContext* game_context, uint32_t tick) {
+    char sender_name[MESSAGE_MAX_LEN] = {0};
+    GameRfPurpose purpose;
+    uint8_t version;
+    unsigned int game_number;
+    Move move = MoveUnknown;
+    char* sender_contact;
+
+    int index = 0;
+
     uint8_t message[MESSAGE_MAX_LEN] = {0};
     memset(message, 0x00, MESSAGE_MAX_LEN);
-    size_t len = subghz_tx_rx_worker_read(game_context->subghz_txrx, message, MESSAGE_MAX_LEN);
-    size_t game_name_len = strlen(RPS_GAME_NAME);
-    if(len < (game_name_len + 2)) {
-        FURI_LOG_D(TAG, "Message not long enough. >%s<", message);
+    int len = (int)subghz_tx_rx_worker_read(game_context->subghz_txrx, message, MESSAGE_MAX_LEN);
+    // Null terminate buffer at the end of message so we can't overrun the buffer.
+    message[MESSAGE_MAX_LEN - 1] = 0;
+
+    // Sender's Flipper Zero name.
+    while(index < len && message[index] != ':') {
+        sender_name[index] = message[index];
+        index++;
+    }
+    if(index >= len) {
+        FURI_LOG_T(TAG, "Message too long, ignoring. >%s<", message);
+        return;
+    } else if(message[index] != ':') {
+        FURI_LOG_T(TAG, "Message missing ':' character, ignoring. >%s<", message);
         return;
     }
+    sender_name[index] = 0;
 
-    // The message for a move (M) (like 'R' for Rock) using version (A) should be "RPS:" + "M" + "A" + game"###" + move"R" + ":" + "YourFlip" + "\r\n"
-    if(strcmp(RPS_GAME_NAME, (const char*)message)) {
-        FURI_LOG_D(TAG, "Got message >%s<", message);
-
-        // The purpose immediately follows the game name.
-        GameRfPurpose purpose = message[game_name_len];
-        // The version follows the purpose.
-        uint8_t version = message[game_name_len + 1];
-        FURI_LOG_T(TAG, "Purpose is %c and version is %c", purpose, version);
-
-        // Null terminate buffer at the end of message so we can't overrun the buffer.
-        message[MESSAGE_MAX_LEN - 1] = 0;
-
-        unsigned int game_number;
-        char sender_contact[MESSAGE_MAX_LEN];
-        char sender_name[9];
-        char tmp;
-        Move move = MoveUnknown;
-        switch(purpose) {
-        case GameRfPurposeMove:
-            // We expect this mesage to the game number, move and sender name.
-            if(sscanf(
-                   (const char*)message + game_name_len + 2,
-                   "%03u%c:%8s",
-                   &game_number,
-                   &tmp,
-                   sender_name) == 3) {
-                move = (Move)tmp;
-                // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
-                FuriString* name = furi_string_alloc();
-                furi_string_set(name, sender_name);
-
-                GameEvent event = {
-                    .type = GameEventRemoteMove,
-                    .move = move,
-                    .tick = tick,
-                    .sender_name = name,
-                    .game_number = game_number};
-                furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
-            } else {
-                FURI_LOG_W(TAG, "Failed to parse move message. >%s<", message);
-            }
-            break;
-
-        case GameRfPurposeBeacon:
-            // We expect this mesage to the game number and sender name.
-            if(sscanf(
-                   (const char*)message + game_name_len + 2,
-                   "%03u:%8s",
-                   &game_number,
-                   sender_name) == 2) {
-                // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
-                FuriString* name = furi_string_alloc();
-                furi_string_set(name, sender_name);
-
-                GameEvent event = {
-                    .type = GameEventRemoteBeacon,
-                    .sender_name = name,
-                    .game_number = game_number};
-                furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
-            } else {
-                FURI_LOG_W(TAG, "Failed to parse beacon message. >%s<", message);
-            }
-            break;
-
-        case GameRfPurposeNotBeacon:
-            // We expect this mesage to the game number and sender name.
-            if(sscanf(
-                   (const char*)message + game_name_len + 2,
-                   "%03u:%8s",
-                   &game_number,
-                   sender_name) == 2) {
-                // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
-                FuriString* name = furi_string_alloc();
-                furi_string_set(name, sender_name);
-
-                GameEvent event = {
-                    .type = GameEventRemoteNotBeacon,
-                    .sender_name = name,
-                    .game_number = game_number};
-                furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
-            } else {
-                FURI_LOG_W(TAG, "Failed to parse not beacon message. >%s<", message);
-            }
-            break;
-
-        case GameRfPurposeJoin:
-            // We expect this mesage to the game number, move and sender name.
-            if(sscanf(
-                   (const char*)message + game_name_len + 2,
-                   "%03u%s :%8s",
-                   &game_number,
-                   sender_contact,
-                   sender_name) == 3) {
-                FURI_LOG_T(TAG, "Join had contact of >%s<", sender_contact);
-
-                // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
-                FuriString* name = furi_string_alloc();
-                furi_string_set(name, sender_name);
-                FuriString* contact = furi_string_alloc();
-                furi_string_set(contact, sender_contact);
-
-                GameEvent event = {
-                    .type = GameEventRemoteJoined,
-                    .sender_name = name,
-                    .sender_contact = contact,
-                    .game_number = game_number};
-                furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
-            } else {
-                FURI_LOG_W(TAG, "Failed to parse join message. >%s<", message);
-            }
-            break;
-
-        case GameRfPurposeJoinAcknowledge:
-            if(sscanf(
-                   (const char*)message + game_name_len + 2,
-                   "%03u%s :%8s",
-                   &game_number,
-                   sender_contact,
-                   sender_name) == 3) {
-                FURI_LOG_T(TAG, "Join acknowledge for game %d.", game_number);
-                FURI_LOG_T(TAG, "Join ack had contact of >%s<", sender_contact);
-
-                FuriString* name = furi_string_alloc();
-                furi_string_set(name, sender_name);
-                FuriString* contact = furi_string_alloc();
-                furi_string_set(contact, sender_contact);
-
-                GameEvent event = {
-                    .type = GameEventRemoteJoinAcknowledged,
-                    .sender_name = name,
-                    .sender_contact = contact,
-                    .game_number = game_number};
-                furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
-            } else {
-                FURI_LOG_W(TAG, "Failed to parse join acknowledge message. >%s<", message);
-            }
-            break;
-
-        default:
-            if(version <= MAJOR_VERSION) {
-                // The version is same or less than ours, so we should know about the message purpose.
-                FURI_LOG_E(TAG, "Message purpose not handled for known version. >%s<", message);
-            } else {
-                // The version is newer, so it's not surprising we don't know about the purpose.
-                FURI_LOG_T(TAG, "Message purpose not handled. >%s<", message);
-            }
-            break;
+    // Skip the ':' character & check for a space.
+    if(++index < len) {
+        if(message[index++] != ' ') {
+            FURI_LOG_T(TAG, "Message missing ' ' after name, ignoring. >%s<", message);
+            return;
         }
-    } else {
-        FURI_LOG_D(TAG, "Message not for our application. >%s<", message);
+    }
+
+    // Check for the game name.
+    int game_name_len = (int)strlen(RPS_GAME_NAME);
+    for(int i = 0; i < game_name_len; i++) {
+        if((index >= len) || (message[index++] != RPS_GAME_NAME[i])) {
+            FURI_LOG_T(
+                TAG, "Message missing game name '%s', ignoring. >%s<", RPS_GAME_NAME, message);
+            return;
+        }
+    }
+    if(index < len) {
+        if(message[index++] != ':') {
+            FURI_LOG_T(TAG, "Message missing ':' after game name, ignoring. >%s<", message);
+            return;
+        }
+    }
+
+    FURI_LOG_D(TAG, "Got message >%s<", message);
+
+    // The purpose immediately follows the game name.
+    if(index >= len) {
+        FURI_LOG_W(TAG, "Message missing purpose, ignoring. >%s<", message);
+        return;
+    }
+    purpose = message[index++];
+
+    // The version follows the purpose.
+    if(index >= len) {
+        FURI_LOG_W(TAG, "Message missing version, ignoring. >%s<", message);
+        return;
+    }
+    version = message[index++];
+    FURI_LOG_T(TAG, "Purpose is %c and version is %c", purpose, version);
+
+    // Game number is 3 digits.
+    if(sscanf((const char*)message + index, "%03u", &game_number) != 1) {
+        FURI_LOG_W(TAG, "Message missing game number, ignoring. >%s<", message);
+        return;
+    }
+    index += 3;
+
+    switch(purpose) {
+    case GameRfPurposeMove:
+        // We expect this mesage to the game number, move and sender name.
+        if(index >= len) {
+            FURI_LOG_W(TAG, "Failed to parse move message. >%s<", message);
+            return;
+        } else {
+            move = (Move)message[index];
+            // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
+            FuriString* name = furi_string_alloc();
+            furi_string_set(name, sender_name);
+
+            GameEvent event = {
+                .type = GameEventRemoteMove,
+                .move = move,
+                .tick = tick,
+                .sender_name = name,
+                .game_number = game_number};
+            furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
+        }
+        break;
+
+    case GameRfPurposeBeacon: {
+        // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
+        FuriString* name = furi_string_alloc();
+        furi_string_set(name, sender_name);
+
+        GameEvent event = {
+            .type = GameEventRemoteBeacon, .sender_name = name, .game_number = game_number};
+        furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
+        break;
+    }
+
+    case GameRfPurposeNotBeacon: {
+        // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
+        FuriString* name = furi_string_alloc();
+        furi_string_set(name, sender_name);
+
+        GameEvent event = {
+            .type = GameEventRemoteNotBeacon, .sender_name = name, .game_number = game_number};
+        furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
+        break;
+    }
+
+    case GameRfPurposeJoin:
+        if(index >= len) {
+            FURI_LOG_W(TAG, "Failed to parse join message. >%s<", message);
+            return;
+        } else {
+            sender_contact = (char*)message + index;
+            FURI_LOG_T(TAG, "Join had contact of >%s<", sender_contact);
+
+            // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
+            FuriString* name = furi_string_alloc();
+            furi_string_set(name, sender_name);
+            FuriString* contact = furi_string_alloc();
+            furi_string_set(contact, sender_contact);
+
+            GameEvent event = {
+                .type = GameEventRemoteJoined,
+                .sender_name = name,
+                .sender_contact = contact,
+                .game_number = game_number};
+            furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
+        }
+        break;
+
+    case GameRfPurposeJoinAcknowledge:
+        if(index >= len) {
+            FURI_LOG_W(TAG, "Failed to parse join acknowledge message. >%s<", message);
+            return;
+        } else {
+            sender_contact = (char*)message + index;
+
+            FURI_LOG_T(TAG, "Join acknowledge for game %d.", game_number);
+            FURI_LOG_T(TAG, "Join ack had contact of >%s<", sender_contact);
+
+            FuriString* name = furi_string_alloc();
+            furi_string_set(name, sender_name);
+            FuriString* contact = furi_string_alloc();
+            furi_string_set(contact, sender_contact);
+
+            GameEvent event = {
+                .type = GameEventRemoteJoinAcknowledged,
+                .sender_name = name,
+                .sender_contact = contact,
+                .game_number = game_number};
+            furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
+        }
+        break;
+
+    default:
+        if(version <= MAJOR_VERSION) {
+            // The version is same or less than ours, so we should know about the message purpose.
+            FURI_LOG_E(TAG, "Message purpose not handled for known version. >%s<", message);
+        } else {
+            // The version is newer, so it's not surprising we don't know about the purpose.
+            FURI_LOG_T(TAG, "Message purpose not handled. >%s<", message);
+        }
+        break;
     }
 }
 
@@ -877,103 +894,103 @@ static void rps_broadcast(GameContext* game_context, FuriString* buffer) {
 }
 
 // Our GameEventSendCounter handler invokes this method.
-// We broadcast - "RPS:" + move"M" + version"A" + game"###" + move"R" + ":" + "YourFlip" + "\r\n"
+// We broadcast - "YourFlip: " + "RPS:" + move"M" + version"A" + game"###" + move"R" + "\r\n"
 // @param game_context pointer to a GameContext.
 // @param moveToSend the move to send to the remote player.
 static void rps_broadcast_move(GameContext* game_context, Move moveToSend) {
     GameData* data = game_context->data;
     FURI_LOG_I(TAG, "Sending move %c", moveToSend);
 
-    // The message for game 42 with a move with value Rock should look like...  "RPS:MA042R:YourFlip\r\n"
+    // The message for game 42 with a move with value Rock should look like...  "YourFlip: RPS:MA042R\r\n"
     furi_string_printf(
         data->buffer,
-        "%s%c%c%03u%c:%s\r\n",
+        "%s: %s:%c%c%03u%c\r\n",
+        furi_hal_version_get_name_ptr(),
         RPS_GAME_NAME,
         GameRfPurposeMove,
         MAJOR_VERSION,
         data->game_number,
-        moveToSend,
-        furi_hal_version_get_name_ptr());
+        moveToSend);
     rps_broadcast(game_context, data->buffer);
 }
 
 // Our GameEventTypeTimer handler invokes this method.
-// We broadcast - "RPS:" + beacon"B" + version"A" + game"###" + ":" + "YourFlip" + "\r\n"
+// We broadcast - "YourFlip: " + "RPS:" + beacon"B" + version"A" + game"###" + "\r\n"
 // @param game_context pointer to a GameContext.
 static void rps_broadcast_beacon(GameContext* game_context) {
     GameData* data = game_context->data;
     FURI_LOG_I(TAG, "Sending beacon");
 
-    // The message for game 42 should look like...  "RPS:BA042:YourFlip\r\n"
+    // The message for game 42 should look like...  "YourFlip: RPS:BA042\r\n"
     furi_string_printf(
         data->buffer,
-        "%s%c%c%03u:%s\r\n",
+        "%s: %s:%c%c%03u\r\n",
+        furi_hal_version_get_name_ptr(),
         RPS_GAME_NAME,
         GameRfPurposeBeacon,
         MAJOR_VERSION,
-        data->game_number,
-        furi_hal_version_get_name_ptr());
+        data->game_number);
     rps_broadcast(game_context, data->buffer);
 }
 
 // Our GameEventTypeTimer handler invokes this method.
-// We broadcast - "RPS:" + notbeacon"N" + version"A" + game"###" + ":" + "YourFlip" + "\r\n"
+// We broadcast - "YourFlip: " + "RPS:" + notbeacon"N" + version"A" + game"###" + "\r\n"
 // @param game_context pointer to a GameContext.
 static void rps_broadcast_not_beacon(GameContext* game_context) {
     GameData* data = game_context->data;
     FURI_LOG_I(TAG, "Sending not beacon");
 
-    // The message for game 42 should look like...  "RPS:NA042:YourFlip\r\n"
+    // The message for game 42 should look like...  "YourFlip: RPS:NA042\r\n"
     furi_string_printf(
         data->buffer,
-        "%s%c%c%03u:%s\r\n",
+        "%s: %s:%c%c%03u\r\n",
+        furi_hal_version_get_name_ptr(),
         RPS_GAME_NAME,
         GameRfPurposeNotBeacon,
         MAJOR_VERSION,
-        data->game_number,
-        furi_hal_version_get_name_ptr());
+        data->game_number);
     rps_broadcast(game_context, data->buffer);
 }
 
 // Send message that indicates Flipper is joining a specific game.
-// We broadcast - "RPS:" + join"J" + version"A" + game"###" + "NYourNameHere" + " :" + "YourFlip" + "\r\n"
+// We broadcast - "YourFlip: " + "RPS:" + join"J" + version"A" + game"###" + "NYourNameHere" + "\r\n"
 // @param game_context pointer to a GameContext.
 static void rps_broadcast_join(GameContext* game_context) {
     GameData* data = game_context->data;
     unsigned int gameNumber = data->game_number;
     FURI_LOG_I(TAG, "Joining game %d.", gameNumber);
 
-    // The message for game 42 should look like...  "RPS:JA042NYourNameHere :YourFlip\r\n"
+    // The message for game 42 should look like...  "YourFlip: RPS:JA042NYourNameHere\r\n"
     furi_string_printf(
         data->buffer,
-        "%s%c%c%03u%s :%s\r\n",
+        "%s: %s:%c%c%03u%s\r\n",
+        furi_hal_version_get_name_ptr(),
         RPS_GAME_NAME,
         GameRfPurposeJoin,
         MAJOR_VERSION,
         data->game_number,
-        furi_string_get_cstr(data->local_contact),
-        furi_hal_version_get_name_ptr());
+        furi_string_get_cstr(data->local_contact));
     rps_broadcast(game_context, data->buffer);
 }
 
 // Send message that acknowledges Flipper joining a specific game.
-// We broadcast - "RPS:" + joinAck"A" + version"A" + game"###" + "NYourNameHere" +" :" + "YourFlip" + "\r\n"
+// We broadcast -  "YourFlip: " + "RPS:" + joinAck"A" + version"A" + game"###" + "NYourNameHere" + "\r\n"
 // @param game_context pointer to a GameContext.
 static void rps_broadcast_join_acknowledge(GameContext* game_context) {
     GameData* data = game_context->data;
     unsigned int gameNumber = data->game_number;
     FURI_LOG_I(TAG, "Acknowledge joining game %d.", gameNumber);
 
-    // The message for game 42 should look like...  "RPS:AA042NYourNameHere :YourFlip\r\n"
+    // The message for game 42 should look like...  "YourFlip: RPS:AA042NYourNameHere\r\n"
     furi_string_printf(
         data->buffer,
-        "%s%c%c%03u%s :%s\r\n",
+        "%s: %s:%c%c%03u%s\r\n",
+        furi_hal_version_get_name_ptr(),
         RPS_GAME_NAME,
         GameRfPurposeJoinAcknowledge,
         MAJOR_VERSION,
         data->game_number,
-        furi_string_get_cstr(data->local_contact),
-        furi_hal_version_get_name_ptr());
+        furi_string_get_cstr(data->local_contact));
     rps_broadcast(game_context, data->buffer);
 }
 

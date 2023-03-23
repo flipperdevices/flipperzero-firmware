@@ -126,29 +126,28 @@ sudo hackrf_transfer -r flipper-chat.rf -f 433920000 -s 8000000 -x 47
 ## Example data
 
 - Beacon for game 042:
-  RPS:BA042:Lumyphut
+  Lumyphut: RPS:BA042
+
+- Not Beacon for game 042:
+  Lumyphut: RPS:NA042
 
 - Join game 042:
-  RPS:JA042NYourNameHere :Lumyphut
+  Lumyphut: RPS:JA042NYourNameHere
 
 - Join-ack for game 042:
-  RPS:AA042NYourNameHere :Lumyphut
+  Lumyphut: RPS:AA042NYourNameHere
 
 - Count 1 for game 042:
-  RPS:MA0421:Lumyphut
+  Lumyphut: RPS:MA0421
 
 - Count 2 for game 042:
-  RPS:MA0422:Lumyphut
+  Lumyphut: RPS:MA0422
 
 - Rock for game 042:
-  RPS:MA042R:Lumyphut
+  Lumyphut: RPS:MA042R
 
 - Paper for game 042:
-  RPS:MA042P:Lumyphut
+  Lumyphut: RPS:MA042P
 
 - Scissors for game 042:
-  RPS:MA042S:Lumyphut
-
-RPS:AA042NYourNameHere :Lumyphut
-123456789 0123456789 = 19bytes.  
-60-19 = 41 bytes is max length of name.
+  Lumyphut: RPS:MA042S
