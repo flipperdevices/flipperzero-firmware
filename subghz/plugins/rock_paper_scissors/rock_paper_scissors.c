@@ -187,7 +187,7 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
             break;
 
         case GameRfPurposeBeacon:
-            // We expect this mesage to the game number, move and sender name.
+            // We expect this mesage to the game number and sender name.
             if(sscanf(
                    (const char*)message + game_name_len + 2,
                    "%03u:%8s",
@@ -204,6 +204,27 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
                 furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
             } else {
                 FURI_LOG_W(TAG, "Failed to parse beacon message. >%s<", message);
+            }
+            break;
+
+        case GameRfPurposeNotBeacon:
+            // We expect this mesage to the game number and sender name.
+            if(sscanf(
+                   (const char*)message + game_name_len + 2,
+                   "%03u:%8s",
+                   &game_number,
+                   sender_name) == 2) {
+                // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
+                FuriString* name = furi_string_alloc();
+                furi_string_set(name, sender_name);
+
+                GameEvent event = {
+                    .type = GameEventRemoteNotBeacon,
+                    .sender_name = name,
+                    .game_number = game_number};
+                furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
+            } else {
+                FURI_LOG_W(TAG, "Failed to parse not beacon message. >%s<", message);
             }
             break;
 
@@ -889,6 +910,25 @@ static void rps_broadcast_beacon(GameContext* game_context) {
         "%s%c%c%03u:%s\r\n",
         RPS_GAME_NAME,
         GameRfPurposeBeacon,
+        MAJOR_VERSION,
+        data->game_number,
+        furi_hal_version_get_name_ptr());
+    rps_broadcast(game_context, data->buffer);
+}
+
+// Our GameEventTypeTimer handler invokes this method.
+// We broadcast - "RPS:" + notbeacon"N" + version"A" + game"###" + ":" + "YourFlip" + "\r\n"
+// @param game_context pointer to a GameContext.
+static void rps_broadcast_not_beacon(GameContext* game_context) {
+    GameData* data = game_context->data;
+    FURI_LOG_I(TAG, "Sending not beacon");
+
+    // The message for game 42 should look like...  "RPS:NA042:YourFlip\r\n"
+    furi_string_printf(
+        data->buffer,
+        "%s%c%c%03u:%s\r\n",
+        RPS_GAME_NAME,
+        GameRfPurposeNotBeacon,
         MAJOR_VERSION,
         data->game_number,
         furi_hal_version_get_name_ptr());
@@ -1810,6 +1850,10 @@ int32_t rock_paper_scissors_app(void* p) {
                     // Long press back to exit.
                     processing = false;
                 } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
+                    if(game_context->data->local_player == StateHostingLookingForPlayer) {
+                        rps_broadcast_not_beacon(game_context);
+                    }
+
                     // Short press back to go back to main menu.
                     game_context->data->local_player = StateMainMenuHost;
                     game_context->data->remote_player = StateUnknown;
@@ -1821,11 +1865,17 @@ int32_t rock_paper_scissors_app(void* p) {
                         .type = GameEventLocalMove, .tick = furi_get_tick(), .move = MoveUnknown};
                     switch(event.input.key) {
                     case InputKeyUp:
+                        if(game_context->data->local_player == StateHostingLookingForPlayer) {
+                            rps_broadcast_not_beacon(game_context);
+                        }
                         game_context->data->local_player = StateHostingSetFrequency;
                         break;
                     case InputKeyDown:
                         if(furi_hal_region_is_frequency_allowed(
                                frequency_list[game_context->data->frequency_index])) {
+                            if(game_context->data->local_player == StateHostingLookingForPlayer) {
+                                rps_broadcast_not_beacon(game_context);
+                            }
                             game_context->data->local_player = StateHostingSetGameNumber;
                         }
                         break;
@@ -2258,6 +2308,10 @@ int32_t rock_paper_scissors_app(void* p) {
             case GameEventRemoteBeacon:
                 FURI_LOG_I(TAG, "Remote beacon detected. game number %03u", event.game_number);
                 remote_games_add(game_context, &event);
+                break;
+            case GameEventRemoteNotBeacon:
+                FURI_LOG_I(TAG, "Remote not beacon detected. game number %03u", event.game_number);
+                remote_games_remove(game_context, &event);
                 break;
             case GameEventRemoteJoined:
                 if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) == FuriStatusOk) {

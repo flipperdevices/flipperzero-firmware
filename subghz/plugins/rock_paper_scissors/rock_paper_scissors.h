@@ -167,7 +167,8 @@ typedef enum {
 // When an RF message is sent, it includes a purpose so the receiving application
 // can decide if it should process the message.
 typedef enum {
-    GameRfPurposeBeacon = 'B', // Beacon.
+    GameRfPurposeBeacon = 'B', // Beacon (hosting a game).
+    GameRfPurposeNotBeacon = 'N', // Not a Beacon (no longer hosting a game).
     GameRfPurposeJoin = 'J', // Join a game.
     GameRfPurposeJoinAcknowledge = 'A', // Acknowledge a join request.
     GameRfPurposeMove = 'M', // Player move.
@@ -179,6 +180,7 @@ typedef enum {
     GameEventTypeKey,
     GameEventDataDetected,
     GameEventRemoteBeacon,
+    GameEventRemoteNotBeacon,
     GameEventRemoteJoined,
     GameEventRemoteJoinAcknowledged,
     GameEventLocalMove,
