@@ -492,7 +492,7 @@ bool nrf24_read_newpacket() {
 				if(--cmd_array_cnt) {
 					furi_string_cat_str(str, ",");
 					if(cmd_array_hex) furi_string_cat_str(str, "0x");
-					payload[cmd_array_idx]++;	// next array element
+					payload[cmd_array_idx] += size;	// next array element
 					NRF_repeat = -1;
 					send_status = sst_sending;	// Will be send after delay_between_pkt
 				} else send_status = sst_ok;
@@ -744,7 +744,7 @@ bool Run_WriteBatch_cmd()
 		}
 	}
 	FURI_LOG_D(TAG, "%cBatch: =%d, (%d)%s", rw_type == rwt_write_batch ? 'W' : 'S', (int)new, len, p);
-	char *w, *delim_col, i;
+	char *w, *delim_col, i, size;
 	FuriString* str = furi_string_alloc();
 	stream_rewind(file_stream);
 	while(stream_read_line(file_stream, str)) {
@@ -753,7 +753,12 @@ bool Run_WriteBatch_cmd()
 		else if(strncmp(w, SettingsFld_Set, sizeof(SettingsFld_Set)-1) == 0) w +=  sizeof(SettingsFld_Set);
 		else continue;
 		delim_col = strchr(w, '=');
-		if(delim_col == NULL || len != delim_col - w) continue;
+		if(delim_col == NULL) continue;
+		size = 1;
+		if(*(delim_col - 2) == '*') {
+			if(len != delim_col - w - 2) continue;
+			size = *(delim_col - 1) - '0';
+		} else if(len != delim_col - w) continue;
 		if(strncmp(p, w, len) != 0) continue;
 		delim_col++;
 		str_rtrim(delim_col);
@@ -790,7 +795,7 @@ bool Run_WriteBatch_cmd()
 					}
 					arr++;
 					new = str_to_int(arr);
-					cmd_array_cnt = payload[cmd_array_idx] + 1;
+					cmd_array_cnt = payload[cmd_array_idx] + size;
 					//furi_delay_ms(delay_between_pkt); // do it fast
 					continue; // send next array element
 				} else send_status = sst_ok; 
