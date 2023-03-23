@@ -1972,7 +1972,7 @@ int32_t rock_paper_scissors_app(void* p) {
                         break;
                     case InputKeyOk:
                         game = remote_games_current(game_context);
-                        if(update_frequency(game_context) && game) {
+                        if(game && update_frequency(game_context)) {
                             // We send "Join" when OK button clicked.
 
                             game_context->data->game_number = game->game_number;
@@ -1984,7 +1984,7 @@ int32_t rock_paper_scissors_app(void* p) {
                             } else {
                                 FURI_LOG_E(TAG, "Failed to aquire mutex.");
                             }
-                        } else {
+                        } else if(game) {
                             game_context->data->local_player = StateJoiningBadFrequency;
                         }
                         break;
