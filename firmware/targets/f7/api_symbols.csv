@@ -58,6 +58,7 @@ Header,+,firmware/targets/f7/furi_hal/furi_hal_target_hw.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_uart.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_usb_cdc.h,,
 Header,+,firmware/targets/f7/platform_specific/intrinsic_export.h,,
+Header,+,firmware/targets/furi_hal_include/f_hal_nfc.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_bt.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_bt_hid.h,,
@@ -168,6 +169,9 @@ Header,+,lib/mlib/m-list.h,,
 Header,+,lib/mlib/m-rbtree.h,,
 Header,+,lib/mlib/m-tuple.h,,
 Header,+,lib/mlib/m-variant.h,,
+Header,+,lib/nanopb/pb.h,,
+Header,+,lib/nanopb/pb_decode.h,,
+Header,+,lib/nanopb/pb_encode.h,,
 Header,+,lib/nfc/nfc_device.h,,
 Header,+,lib/one_wire/maxim_crc.h,,
 Header,+,lib/one_wire/one_wire_host.h,,
@@ -811,6 +815,27 @@ Function,-,explicit_bzero,void,"void*, size_t"
 Function,-,expm1,double,double
 Function,-,expm1f,float,float
 Function,-,expm1l,long double,long double
+Function,-,f_hal_nfc_init,FHalNfcError,
+Function,-,f_hal_nfc_listen_start,FHalNfcError,
+Function,-,f_hal_nfc_low_power_mode_start,FHalNfcError,
+Function,-,f_hal_nfc_low_power_mode_stop,FHalNfcError,
+Function,-,f_hal_nfc_poller_field_on,FHalNfcError,
+Function,-,f_hal_nfc_poller_rx,FHalNfcError,"uint8_t*, uint16_t, uint16_t*"
+Function,-,f_hal_nfc_poller_tx,FHalNfcError,"uint8_t*, uint16_t"
+Function,-,f_hal_nfc_set_callback,void,"FHalNfcCallback, void*"
+Function,-,f_hal_nfc_set_mask_receive_timer,void,uint32_t
+Function,-,f_hal_nfc_set_mode,FHalNfcError,"FHalNfcMode, FHalNfcBitrate"
+Function,-,f_hal_nfc_timer_block_tx_is_running,_Bool,
+Function,-,f_hal_nfc_timer_block_tx_start,void,uint32_t
+Function,-,f_hal_nfc_timer_block_tx_start_us,void,uint32_t
+Function,-,f_hal_nfc_timer_block_tx_stop,void,
+Function,-,f_hal_nfc_timer_fwt_start,void,uint32_t
+Function,-,f_hal_nfc_timer_fwt_stop,void,
+Function,-,f_hal_nfc_trx_reset,FHalNfcError,
+Function,-,f_hal_nfc_wait_event,FHalNfcEvent,uint32_t
+Function,-,f_hal_nfca_receive_sdd_frame,FHalNfcError,"uint8_t*, uint16_t, uint16_t*"
+Function,-,f_hal_nfca_send_sdd_frame,FHalNfcError,"uint8_t*, uint16_t"
+Function,-,f_hal_nfca_send_short_frame,FHalNfcError,FHalNfcaShortFrame
 Function,-,fabs,double,double
 Function,-,fabsf,float,float
 Function,-,fabsl,long double,long double
@@ -1206,6 +1231,7 @@ Function,+,furi_hal_nfc_stop,void,
 Function,+,furi_hal_nfc_stop_cmd,void,
 Function,+,furi_hal_nfc_tx_rx,_Bool,"FuriHalNfcTxRxContext*, uint16_t"
 Function,+,furi_hal_nfc_tx_rx_full,_Bool,FuriHalNfcTxRxContext*
+Function,-,furi_hal_nfca_set_col_res_data,FHalNfcError,"uint8_t*, uint8_t, uint8_t*, uint8_t"
 Function,-,furi_hal_os_init,void,
 Function,+,furi_hal_os_tick,void,
 Function,+,furi_hal_power_check_otg_status,void,
@@ -2083,6 +2109,35 @@ Function,+,path_extract_dirname,void,"const char*, FuriString*"
 Function,+,path_extract_extension,void,"FuriString*, char*, size_t"
 Function,+,path_extract_filename,void,"FuriString*, FuriString*, _Bool"
 Function,+,path_extract_filename_no_ext,void,"const char*, FuriString*"
+Function,+,pb_close_string_substream,_Bool,"pb_istream_t*, pb_istream_t*"
+Function,+,pb_decode,_Bool,"pb_istream_t*, const pb_msgdesc_t*, void*"
+Function,+,pb_decode_bool,_Bool,"pb_istream_t*, _Bool*"
+Function,+,pb_decode_ex,_Bool,"pb_istream_t*, const pb_msgdesc_t*, void*, unsigned int"
+Function,+,pb_decode_fixed32,_Bool,"pb_istream_t*, void*"
+Function,+,pb_decode_fixed64,_Bool,"pb_istream_t*, void*"
+Function,+,pb_decode_svarint,_Bool,"pb_istream_t*, int64_t*"
+Function,+,pb_decode_tag,_Bool,"pb_istream_t*, pb_wire_type_t*, uint32_t*, _Bool*"
+Function,+,pb_decode_varint,_Bool,"pb_istream_t*, uint64_t*"
+Function,+,pb_decode_varint32,_Bool,"pb_istream_t*, uint32_t*"
+Function,+,pb_default_field_callback,_Bool,"pb_istream_t*, pb_ostream_t*, const pb_field_t*"
+Function,+,pb_encode,_Bool,"pb_ostream_t*, const pb_msgdesc_t*, const void*"
+Function,+,pb_encode_ex,_Bool,"pb_ostream_t*, const pb_msgdesc_t*, const void*, unsigned int"
+Function,+,pb_encode_fixed32,_Bool,"pb_ostream_t*, const void*"
+Function,+,pb_encode_fixed64,_Bool,"pb_ostream_t*, const void*"
+Function,+,pb_encode_string,_Bool,"pb_ostream_t*, const pb_byte_t*, size_t"
+Function,+,pb_encode_submessage,_Bool,"pb_ostream_t*, const pb_msgdesc_t*, const void*"
+Function,+,pb_encode_svarint,_Bool,"pb_ostream_t*, int64_t"
+Function,+,pb_encode_tag,_Bool,"pb_ostream_t*, pb_wire_type_t, uint32_t"
+Function,+,pb_encode_tag_for_field,_Bool,"pb_ostream_t*, const pb_field_iter_t*"
+Function,+,pb_encode_varint,_Bool,"pb_ostream_t*, uint64_t"
+Function,+,pb_get_encoded_size,_Bool,"size_t*, const pb_msgdesc_t*, const void*"
+Function,+,pb_istream_from_buffer,pb_istream_t,"const pb_byte_t*, size_t"
+Function,+,pb_make_string_substream,_Bool,"pb_istream_t*, pb_istream_t*"
+Function,+,pb_ostream_from_buffer,pb_ostream_t,"pb_byte_t*, size_t"
+Function,+,pb_read,_Bool,"pb_istream_t*, pb_byte_t*, size_t"
+Function,+,pb_release,void,"const pb_msgdesc_t*, void*"
+Function,+,pb_skip_field,_Bool,"pb_istream_t*, pb_wire_type_t"
+Function,+,pb_write,_Bool,"pb_ostream_t*, const pb_byte_t*, size_t"
 Function,-,pcTaskGetName,char*,TaskHandle_t
 Function,-,pcTimerGetName,const char*,TimerHandle_t
 Function,-,pclose,int,FILE*

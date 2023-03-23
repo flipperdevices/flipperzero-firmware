@@ -1,6 +1,6 @@
 #include <limits.h>
-#include <furi_hal_nfc.h>
-#include <st25r3916.h>
+#include "furi_hal_nfc.h"
+#include <lib/ST25RFAL002/source/st25r3916/st25r3916.h>
 #include <st25r3916_irq.h>
 #include <rfal_rf.h>
 #include <furi.h>
