@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 #define TAG "NfcSceneMfDesfireApp"
 
@@ -10,11 +10,11 @@ enum SubmenuIndex {
 void nfc_scene_mf_desfire_popup_callback(void* context) {
     furi_assert(context);
 
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
-MifareDesfireApplication* nfc_scene_mf_desfire_app_get_app(Nfc* nfc) {
+MifareDesfireApplication* nfc_scene_mf_desfire_app_get_app(NfcApp* nfc) {
     uint32_t app_idx = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireApp) >>
                        1;
     MifareDesfireApplication* app = nfc->dev->dev_data.mf_df_data.app_head;
@@ -25,13 +25,13 @@ MifareDesfireApplication* nfc_scene_mf_desfire_app_get_app(Nfc* nfc) {
 }
 
 void nfc_scene_mf_desfire_app_submenu_callback(void* context, uint32_t index) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
 void nfc_scene_mf_desfire_app_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     MifareDesfireApplication* app = nfc_scene_mf_desfire_app_get_app(nfc);
     if(!app) {
         popup_set_icon(nfc->popup, 5, 5, &I_WarningDolphin_45x42);
@@ -69,7 +69,7 @@ void nfc_scene_mf_desfire_app_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_desfire_app_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireApp);
 
@@ -110,7 +110,7 @@ bool nfc_scene_mf_desfire_app_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_mf_desfire_app_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clear views
     popup_reset(nfc->popup);

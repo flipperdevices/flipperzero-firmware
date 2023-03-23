@@ -1,15 +1,15 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include "../helpers/nfc_emv_parser.h"
 
 void nfc_scene_device_info_widget_callback(GuiButtonType result, InputType type, void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
     }
 }
 
 void nfc_scene_device_info_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     NfcDeviceData* dev_data = &nfc->dev->dev_data;
 
     FuriString* temp_str;
@@ -66,7 +66,7 @@ void nfc_scene_device_info_on_enter(void* context) {
 }
 
 bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -79,7 +79,7 @@ bool nfc_scene_device_info_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_device_info_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clear views
     widget_reset(nfc->widget);

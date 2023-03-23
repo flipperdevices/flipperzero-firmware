@@ -1,22 +1,22 @@
-#include "nfc_i.h"
+#include "nfc_app_i.h"
 #include <furi_hal_nfc.h>
 #include <dolphin/dolphin.h>
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     return scene_manager_handle_custom_event(nfc->scene_manager, event);
 }
 
 bool nfc_back_event_callback(void* context) {
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     return scene_manager_handle_back_event(nfc->scene_manager);
 }
 
 static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     furi_assert(nfc->rpc_ctx);
 
@@ -33,8 +33,8 @@ static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
     }
 }
 
-Nfc* nfc_alloc() {
-    Nfc* nfc = malloc(sizeof(Nfc));
+NfcApp* nfc_app_alloc() {
+    NfcApp* nfc = malloc(sizeof(NfcApp));
 
     nfc->worker = nfc_worker_alloc();
     nfc->view_dispatcher = view_dispatcher_alloc();
@@ -107,7 +107,7 @@ Nfc* nfc_alloc() {
     return nfc;
 }
 
-void nfc_free(Nfc* nfc) {
+void nfc_app_free(NfcApp* nfc) {
     furi_assert(nfc);
 
     if(nfc->rpc_state == NfcRpcStateEmulating) {
@@ -192,7 +192,7 @@ void nfc_free(Nfc* nfc) {
     free(nfc);
 }
 
-void nfc_text_store_set(Nfc* nfc, const char* text, ...) {
+void nfc_text_store_set(NfcApp* nfc, const char* text, ...) {
     va_list args;
     va_start(args, text);
 
@@ -201,27 +201,27 @@ void nfc_text_store_set(Nfc* nfc, const char* text, ...) {
     va_end(args);
 }
 
-void nfc_text_store_clear(Nfc* nfc) {
+void nfc_text_store_clear(NfcApp* nfc) {
     memset(nfc->text_store, 0, sizeof(nfc->text_store));
 }
 
-void nfc_blink_read_start(Nfc* nfc) {
+void nfc_blink_read_start(NfcApp* nfc) {
     notification_message(nfc->notifications, &sequence_blink_start_cyan);
 }
 
-void nfc_blink_emulate_start(Nfc* nfc) {
+void nfc_blink_emulate_start(NfcApp* nfc) {
     notification_message(nfc->notifications, &sequence_blink_start_magenta);
 }
 
-void nfc_blink_detect_start(Nfc* nfc) {
+void nfc_blink_detect_start(NfcApp* nfc) {
     notification_message(nfc->notifications, &sequence_blink_start_yellow);
 }
 
-void nfc_blink_stop(Nfc* nfc) {
+void nfc_blink_stop(NfcApp* nfc) {
     notification_message(nfc->notifications, &sequence_blink_stop);
 }
 
-bool nfc_save_file(Nfc* nfc) {
+bool nfc_save_file(NfcApp* nfc) {
     furi_string_printf(
         nfc->dev->load_path, "%s/%s%s", NFC_APP_FOLDER, nfc->dev->dev_name, NFC_APP_EXTENSION);
     bool file_saved = nfc_device_save(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
@@ -229,7 +229,7 @@ bool nfc_save_file(Nfc* nfc) {
 }
 
 void nfc_show_loading_popup(void* context, bool show) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
 
     if(show) {
@@ -266,7 +266,7 @@ static bool nfc_is_hal_ready() {
 int32_t nfc_app(void* p) {
     if(!nfc_is_hal_ready()) return 0;
 
-    Nfc* nfc = nfc_alloc();
+    NfcApp* nfc = nfc_app_alloc();
     char* args = p;
 
     // Check argument and run corresponding scene
@@ -310,7 +310,7 @@ int32_t nfc_app(void* p) {
 
     view_dispatcher_run(nfc->view_dispatcher);
 
-    nfc_free(nfc);
+    nfc_app_free(nfc);
 
     return 0;
 }

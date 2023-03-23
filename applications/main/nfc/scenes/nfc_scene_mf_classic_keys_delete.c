@@ -1,17 +1,17 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 void nfc_scene_mf_classic_keys_delete_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
     }
 }
 
 void nfc_scene_mf_classic_keys_delete_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
     uint32_t key_index =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfClassicKeysDelete);
@@ -51,7 +51,7 @@ void nfc_scene_mf_classic_keys_delete_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_keys_delete_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
     uint32_t key_index =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfClassicKeysDelete);
@@ -77,7 +77,7 @@ bool nfc_scene_mf_classic_keys_delete_on_event(void* context, SceneManagerEvent 
 }
 
 void nfc_scene_mf_classic_keys_delete_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     widget_reset(nfc->widget);
 }

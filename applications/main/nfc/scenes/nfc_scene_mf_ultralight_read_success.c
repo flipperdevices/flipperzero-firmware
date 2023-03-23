@@ -1,10 +1,10 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 void nfc_scene_mf_ultralight_read_success_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
@@ -12,7 +12,7 @@ void nfc_scene_mf_ultralight_read_success_widget_callback(
 }
 
 void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Setup widget view
     FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
@@ -55,7 +55,7 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_ultralight_read_success_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -75,7 +75,7 @@ bool nfc_scene_mf_ultralight_read_success_on_event(void* context, SceneManagerEv
 }
 
 void nfc_scene_mf_ultralight_read_success_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     notification_message_block(nfc->notifications, &sequence_reset_green);
 

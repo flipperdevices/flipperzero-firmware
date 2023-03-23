@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 enum SubmenuIndex {
     SubmenuIndexMfUlUnlockMenuAuto,
@@ -8,13 +8,13 @@ enum SubmenuIndex {
 };
 
 void nfc_scene_mf_ultralight_unlock_menu_submenu_callback(void* context, uint32_t index) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
 void nfc_scene_mf_ultralight_unlock_menu_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
 
     uint32_t state =
@@ -50,7 +50,7 @@ void nfc_scene_mf_ultralight_unlock_menu_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_ultralight_unlock_menu_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -77,7 +77,7 @@ bool nfc_scene_mf_ultralight_unlock_menu_on_event(void* context, SceneManagerEve
 }
 
 void nfc_scene_mf_ultralight_unlock_menu_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     submenu_reset(nfc->submenu);
 }

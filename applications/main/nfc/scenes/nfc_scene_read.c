@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include <dolphin/dolphin.h>
 
 typedef enum {
@@ -8,7 +8,7 @@ typedef enum {
 } NfcSceneReadState;
 
 bool nfc_scene_read_worker_callback(NfcWorkerEvent event, void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
     if(event == NfcWorkerEventReadMfClassicLoadKeyCache) {
         consumed = nfc_device_load_key_cache(nfc->dev);
@@ -19,7 +19,7 @@ bool nfc_scene_read_worker_callback(NfcWorkerEvent event, void* context) {
     return consumed;
 }
 
-void nfc_scene_read_set_state(Nfc* nfc, NfcSceneReadState state) {
+void nfc_scene_read_set_state(NfcApp* nfc, NfcSceneReadState state) {
     uint32_t curr_state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneRead);
     if(curr_state != state) {
         if(state == NfcSceneReadStateDetecting) {
@@ -38,7 +38,7 @@ void nfc_scene_read_set_state(Nfc* nfc, NfcSceneReadState state) {
 }
 
 void nfc_scene_read_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     nfc_device_clear(nfc->dev);
     // Setup view
@@ -52,7 +52,7 @@ void nfc_scene_read_on_enter(void* context) {
 }
 
 bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -111,7 +111,7 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_read_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Stop worker
     nfc_worker_stop(nfc->worker);

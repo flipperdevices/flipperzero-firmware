@@ -1,22 +1,22 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 #define NFC_SCENE_MF_CLASSIC_KEYS_LIST_MAX (100)
 
 void nfc_scene_mf_classic_keys_list_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
 
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
 void nfc_scene_mf_classic_keys_list_popup_callback(void* context) {
     furi_assert(context);
 
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
-void nfc_scene_mf_classic_keys_list_prepare(Nfc* nfc, MfClassicDict* dict) {
+void nfc_scene_mf_classic_keys_list_prepare(NfcApp* nfc, MfClassicDict* dict) {
     Submenu* submenu = nfc->submenu;
     uint32_t index = 0;
     FuriString* temp_key;
@@ -35,7 +35,7 @@ void nfc_scene_mf_classic_keys_list_prepare(Nfc* nfc, MfClassicDict* dict) {
 }
 
 void nfc_scene_mf_classic_keys_list_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     MfClassicDict* dict = mf_classic_dict_alloc(MfClassicDictTypeUser);
     MfClassicUserKeys_init(nfc->mfc_key_strs);
     if(dict) {
@@ -71,7 +71,7 @@ void nfc_scene_mf_classic_keys_list_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventViewExit) {
@@ -87,7 +87,7 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
 }
 
 void nfc_scene_mf_classic_keys_list_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     MfClassicUserKeys_it_t it;
     for(MfClassicUserKeys_it(it, nfc->mfc_key_strs); !MfClassicUserKeys_end_p(it);

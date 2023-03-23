@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include <dolphin/dolphin.h>
 
 enum SubmenuIndex {
@@ -9,13 +9,13 @@ enum SubmenuIndex {
 };
 
 void nfc_scene_mf_ultralight_menu_submenu_callback(void* context, uint32_t index) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
 void nfc_scene_mf_ultralight_menu_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
     MfUltralightData* data = &nfc->dev->dev_data.mf_ul_data;
 
@@ -45,7 +45,7 @@ void nfc_scene_mf_ultralight_menu_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_ultralight_menu_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -80,7 +80,7 @@ bool nfc_scene_mf_ultralight_menu_on_event(void* context, SceneManagerEvent even
 }
 
 void nfc_scene_mf_ultralight_menu_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clear view
     submenu_reset(nfc->submenu);

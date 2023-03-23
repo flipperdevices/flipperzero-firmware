@@ -1,14 +1,14 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include "lib/nfc/helpers/nfc_generators.h"
 
 void nfc_scene_generate_info_dialog_callback(DialogExResult result, void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
 }
 
 void nfc_scene_generate_info_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Setup dialog view
     FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
@@ -34,7 +34,7 @@ void nfc_scene_generate_info_on_enter(void* context) {
 }
 
 bool nfc_scene_generate_info_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -53,7 +53,7 @@ bool nfc_scene_generate_info_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_generate_info_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clean views
     dialog_ex_reset(nfc->dialog_ex);

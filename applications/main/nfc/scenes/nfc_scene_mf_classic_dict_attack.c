@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include <dolphin/dolphin.h>
 
 #define TAG "NfcMfClassicDictAttack"
@@ -11,18 +11,18 @@ typedef enum {
 
 bool nfc_dict_attack_worker_callback(NfcWorkerEvent event, void* context) {
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
     return true;
 }
 
 void nfc_dict_attack_dict_attack_result_callback(void* context) {
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventDictAttackSkip);
 }
 
-static void nfc_scene_mf_classic_dict_attack_update_view(Nfc* nfc) {
+static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* nfc) {
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
     uint8_t sectors_read = 0;
     uint8_t keys_found = 0;
@@ -33,7 +33,7 @@ static void nfc_scene_mf_classic_dict_attack_update_view(Nfc* nfc) {
     dict_attack_set_sector_read(nfc->dict_attack, sectors_read);
 }
 
-static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackState state) {
+static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* nfc, DictAttackState state) {
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
     NfcMfClassicDictAttackData* dict_attack_data = &nfc->dev->dev_data.mf_classic_dict_attack_data;
     NfcWorkerState worker_state = NfcWorkerStateReady;
@@ -88,7 +88,7 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackSt
 }
 
 void nfc_scene_mf_classic_dict_attack_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     nfc_scene_mf_classic_dict_attack_prepare_view(nfc, DictAttackStateIdle);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewDictAttack);
     nfc_blink_read_start(nfc);
@@ -96,7 +96,7 @@ void nfc_scene_mf_classic_dict_attack_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
     bool consumed = false;
 
@@ -172,7 +172,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
 }
 
 void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     NfcMfClassicDictAttackData* dict_attack_data = &nfc->dev->dev_data.mf_classic_dict_attack_data;
     // Stop worker
     nfc_worker_stop(nfc->worker);

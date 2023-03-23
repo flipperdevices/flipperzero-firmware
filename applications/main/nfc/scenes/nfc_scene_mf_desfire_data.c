@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 #define TAG "NfcSceneMfDesfireData"
 
@@ -13,13 +13,13 @@ enum SubmenuIndex {
 };
 
 void nfc_scene_mf_desfire_data_submenu_callback(void* context, uint32_t index) {
-    Nfc* nfc = (Nfc*)context;
+    NfcApp* nfc = (NfcApp*)context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
 void nfc_scene_mf_desfire_data_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireData);
     MifareDesfireData* data = &nfc->dev->dev_data.mf_df_data;
@@ -57,7 +57,7 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_desfire_data_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireData);
     MifareDesfireData* data = &nfc->dev->dev_data.mf_df_data;
@@ -95,7 +95,7 @@ bool nfc_scene_mf_desfire_data_on_event(void* context, SceneManagerEvent event) 
 }
 
 void nfc_scene_mf_desfire_data_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clear views
     text_box_reset(nfc->text_box);

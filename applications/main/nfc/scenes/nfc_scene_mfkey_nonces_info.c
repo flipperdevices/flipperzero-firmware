@@ -1,15 +1,15 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include <lib/nfc/helpers/mfkey32.h>
 
 void nfc_scene_mfkey_nonces_info_callback(GuiButtonType result, InputType type, void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
     }
 }
 
 void nfc_scene_mfkey_nonces_info_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     FuriString* temp_str;
     temp_str = furi_string_alloc();
@@ -31,7 +31,7 @@ void nfc_scene_mfkey_nonces_info_on_enter(void* context) {
 }
 
 bool nfc_scene_mfkey_nonces_info_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -48,7 +48,7 @@ bool nfc_scene_mfkey_nonces_info_on_event(void* context, SceneManagerEvent event
 }
 
 void nfc_scene_mfkey_nonces_info_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clear view
     widget_reset(nfc->widget);

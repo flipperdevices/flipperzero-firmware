@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nfc.h"
+#include "nfc_app.h"
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -52,7 +52,7 @@ typedef enum {
     NfcRpcStateEmulated,
 } NfcRpcState;
 
-struct Nfc {
+struct NfcApp {
     NfcWorker* worker;
     ViewDispatcher* view_dispatcher;
     Gui* gui;
@@ -97,22 +97,22 @@ typedef enum {
     NfcViewDetectReader,
 } NfcView;
 
-Nfc* nfc_alloc();
+NfcApp* nfc_alloc();
 
 int32_t nfc_task(void* p);
 
-void nfc_text_store_set(Nfc* nfc, const char* text, ...);
+void nfc_text_store_set(NfcApp* nfc, const char* text, ...);
 
-void nfc_text_store_clear(Nfc* nfc);
+void nfc_text_store_clear(NfcApp* nfc);
 
-void nfc_blink_read_start(Nfc* nfc);
+void nfc_blink_read_start(NfcApp* nfc);
 
-void nfc_blink_emulate_start(Nfc* nfc);
+void nfc_blink_emulate_start(NfcApp* nfc);
 
-void nfc_blink_detect_start(Nfc* nfc);
+void nfc_blink_detect_start(NfcApp* nfc);
 
-void nfc_blink_stop(Nfc* nfc);
+void nfc_blink_stop(NfcApp* nfc);
 
-bool nfc_save_file(Nfc* nfc);
+bool nfc_save_file(NfcApp* nfc);
 
 void nfc_show_loading_popup(void* context, bool show);

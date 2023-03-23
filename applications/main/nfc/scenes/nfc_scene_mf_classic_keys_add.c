@@ -1,14 +1,14 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include <dolphin/dolphin.h>
 
 void nfc_scene_mf_classic_keys_add_byte_input_callback(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventByteInputDone);
 }
 
 void nfc_scene_mf_classic_keys_add_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Setup view
     ByteInput* byte_input = nfc->byte_input;
@@ -24,7 +24,7 @@ void nfc_scene_mf_classic_keys_add_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_keys_add_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -52,7 +52,7 @@ bool nfc_scene_mf_classic_keys_add_on_event(void* context, SceneManagerEvent eve
 }
 
 void nfc_scene_mf_classic_keys_add_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clear view
     byte_input_set_result_callback(nfc->byte_input, NULL, NULL, NULL, NULL, 0);

@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include <dolphin/dolphin.h>
 
 enum SubmenuIndex {
@@ -16,13 +16,13 @@ enum SubmenuIndex {
 };
 
 void nfc_scene_saved_menu_submenu_callback(void* context, uint32_t index) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
 void nfc_scene_saved_menu_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
 
     if(nfc->dev->format == NfcDeviceSaveFormatUid ||
@@ -105,7 +105,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
 }
 
 bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     NfcDeviceData* dev_data = &nfc->dev->dev_data;
     bool consumed = false;
 
@@ -174,7 +174,7 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_saved_menu_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     submenu_reset(nfc->submenu);
 }

@@ -1,7 +1,7 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 void nfc_scene_mf_classic_data_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     MfClassicType type = nfc->dev->dev_data.mf_classic_data.type;
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
     TextBox* text_box = nfc->text_box;
@@ -98,7 +98,7 @@ bool nfc_scene_mf_classic_data_on_event(void* context, SceneManagerEvent event) 
 }
 
 void nfc_scene_mf_classic_data_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clean view
     text_box_reset(nfc->text_box);

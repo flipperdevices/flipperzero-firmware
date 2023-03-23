@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include "lib/nfc/helpers/nfc_generators.h"
 
 enum SubmenuIndex {
@@ -8,13 +8,13 @@ enum SubmenuIndex {
 };
 
 void nfc_scene_set_type_submenu_callback(void* context, uint32_t index) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
 void nfc_scene_set_type_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
     // Clear device name
     nfc_device_set_name(nfc->dev, "");
@@ -35,7 +35,7 @@ void nfc_scene_set_type_on_enter(void* context) {
 }
 
 bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -62,7 +62,7 @@ bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_set_type_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     submenu_reset(nfc->submenu);
 }

@@ -1,8 +1,8 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include <core/common_defines.h>
 
 void nfc_scene_emulate_apdu_sequence_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Setup view
     Popup* popup = nfc->popup;
@@ -23,7 +23,7 @@ bool nfc_scene_emulate_apdu_sequence_on_event(void* context, SceneManagerEvent e
 }
 
 void nfc_scene_emulate_apdu_sequence_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Stop worker
     nfc_worker_stop(nfc->worker);

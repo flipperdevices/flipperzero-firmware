@@ -1,12 +1,12 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 void nfc_scene_dict_not_found_popup_callback(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
 void nfc_scene_dict_not_found_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Setup view
     Popup* popup = nfc->popup;
@@ -26,7 +26,7 @@ void nfc_scene_dict_not_found_on_enter(void* context) {
 }
 
 bool nfc_scene_dict_not_found_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -47,6 +47,6 @@ bool nfc_scene_dict_not_found_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_dict_not_found_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     popup_reset(nfc->popup);
 }

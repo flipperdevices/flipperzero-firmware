@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 #define NFC_SCENE_EMULATE_UID_LOG_SIZE_MAX (200)
 
@@ -10,14 +10,14 @@ enum {
 bool nfc_emulate_uid_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerExit);
     return true;
 }
 
 void nfc_scene_emulate_uid_widget_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
     }
@@ -25,12 +25,12 @@ void nfc_scene_emulate_uid_widget_callback(GuiButtonType result, InputType type,
 
 void nfc_emulate_uid_textbox_callback(void* context) {
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
 // Add widget with device name or inform that data received
-static void nfc_scene_emulate_uid_widget_config(Nfc* nfc, bool data_received) {
+static void nfc_scene_emulate_uid_widget_config(NfcApp* nfc, bool data_received) {
     FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
     Widget* widget = nfc->widget;
     widget_reset(widget);
@@ -57,7 +57,7 @@ static void nfc_scene_emulate_uid_widget_config(Nfc* nfc, bool data_received) {
 }
 
 void nfc_scene_emulate_uid_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Setup Widget
     nfc_scene_emulate_uid_widget_config(nfc, false);
@@ -84,7 +84,7 @@ void nfc_scene_emulate_uid_on_enter(void* context) {
 }
 
 bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     NfcReaderRequestData* reader_data = &nfc->dev->dev_data.reader_data;
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneEmulateUid);
     bool consumed = false;
@@ -130,7 +130,7 @@ bool nfc_scene_emulate_uid_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_emulate_uid_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Stop worker
     nfc_worker_stop(nfc->worker);

@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 #define NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX (10U)
 
@@ -12,19 +12,19 @@ static const NotificationSequence sequence_detect_reader = {
 bool nfc_detect_reader_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
     return true;
 }
 
 void nfc_scene_detect_reader_callback(void* context) {
     furi_assert(context);
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
 void nfc_scene_detect_reader_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     detect_reader_set_callback(nfc->detect_reader, nfc_scene_detect_reader_callback, nfc);
     detect_reader_set_nonces_max(nfc->detect_reader, NFC_SCENE_DETECT_READER_PAIR_NONCES_MAX);
@@ -48,7 +48,7 @@ void nfc_scene_detect_reader_on_enter(void* context) {
 }
 
 bool nfc_scene_detect_reader_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
     uint32_t nonces_collected =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneDetectReader);
@@ -89,7 +89,7 @@ bool nfc_scene_detect_reader_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_detect_reader_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Stop worker
     nfc_worker_stop(nfc->worker);

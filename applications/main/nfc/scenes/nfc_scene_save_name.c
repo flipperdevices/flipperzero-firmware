@@ -1,17 +1,17 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include <lib/toolbox/random_name.h>
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>
 #include <dolphin/dolphin.h>
 
 void nfc_scene_save_name_text_input_callback(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventTextInputDone);
 }
 
 void nfc_scene_save_name_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Setup view
     TextInput* text_input = nfc->text_input;
@@ -50,7 +50,7 @@ void nfc_scene_save_name_on_enter(void* context) {
 }
 
 bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -82,7 +82,7 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_save_name_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clear view
     void* validator_context = text_input_get_validator_callback_context(nfc->text_input);

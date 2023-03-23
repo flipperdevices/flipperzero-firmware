@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 #include <dolphin/dolphin.h>
 
 enum {
@@ -9,13 +9,13 @@ enum {
 bool nfc_mf_classic_update_worker_callback(NfcWorkerEvent event, void* context) {
     furi_assert(context);
 
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
 
     return true;
 }
 
-static void nfc_scene_mf_classic_update_setup_view(Nfc* nfc) {
+static void nfc_scene_mf_classic_update_setup_view(NfcApp* nfc) {
     Popup* popup = nfc->popup;
     popup_reset(popup);
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfClassicUpdate);
@@ -33,7 +33,7 @@ static void nfc_scene_mf_classic_update_setup_view(Nfc* nfc) {
 }
 
 void nfc_scene_mf_classic_update_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     DOLPHIN_DEED(DolphinDeedNfcEmulate);
 
     scene_manager_set_scene_state(
@@ -51,7 +51,7 @@ void nfc_scene_mf_classic_update_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_update_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -87,7 +87,7 @@ bool nfc_scene_mf_classic_update_on_event(void* context, SceneManagerEvent event
 }
 
 void nfc_scene_mf_classic_update_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     nfc_worker_stop(nfc->worker);
     scene_manager_set_scene_state(
         nfc->scene_manager, NfcSceneMfClassicUpdate, NfcSceneMfClassicUpdateStateCardSearch);

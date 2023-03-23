@@ -1,13 +1,13 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 void nfc_scene_restore_original_confirm_dialog_callback(DialogExResult result, void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
 }
 
 void nfc_scene_restore_original_confirm_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     DialogEx* dialog_ex = nfc->dialog_ex;
 
     dialog_ex_set_header(dialog_ex, "Restore Card Data?", 64, 0, AlignCenter, AlignTop);
@@ -23,7 +23,7 @@ void nfc_scene_restore_original_confirm_on_enter(void* context) {
 }
 
 bool nfc_scene_restore_original_confirm_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -46,7 +46,7 @@ bool nfc_scene_restore_original_confirm_on_event(void* context, SceneManagerEven
 }
 
 void nfc_scene_restore_original_confirm_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Clean view
     dialog_ex_reset(nfc->dialog_ex);

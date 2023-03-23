@@ -1,4 +1,4 @@
-#include "../nfc_i.h"
+#include "../nfc_app_i.h"
 
 typedef enum {
     NfcSceneMfUlReadStateIdle,
@@ -8,7 +8,7 @@ typedef enum {
 } NfcSceneMfUlReadState;
 
 bool nfc_scene_mf_ultralight_read_auth_worker_callback(NfcWorkerEvent event, void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     if(event == NfcWorkerEventMfUltralightPassKey) {
         memcpy(nfc->dev->dev_data.mf_ul_data.auth_key, nfc->byte_input_store, 4);
@@ -18,7 +18,7 @@ bool nfc_scene_mf_ultralight_read_auth_worker_callback(NfcWorkerEvent event, voi
     return true;
 }
 
-void nfc_scene_mf_ultralight_read_auth_set_state(Nfc* nfc, NfcSceneMfUlReadState state) {
+void nfc_scene_mf_ultralight_read_auth_set_state(NfcApp* nfc, NfcSceneMfUlReadState state) {
     uint32_t curr_state =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightReadAuth);
     if(curr_state != state) {
@@ -53,7 +53,7 @@ void nfc_scene_mf_ultralight_read_auth_set_state(Nfc* nfc, NfcSceneMfUlReadState
 }
 
 void nfc_scene_mf_ultralight_read_auth_on_enter(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     nfc_device_clear(nfc->dev);
     // Setup view
@@ -69,7 +69,7 @@ void nfc_scene_mf_ultralight_read_auth_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_ultralight_read_auth_on_event(void* context, SceneManagerEvent event) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -104,7 +104,7 @@ bool nfc_scene_mf_ultralight_read_auth_on_event(void* context, SceneManagerEvent
 }
 
 void nfc_scene_mf_ultralight_read_auth_on_exit(void* context) {
-    Nfc* nfc = context;
+    NfcApp* nfc = context;
 
     // Stop worker
     nfc_worker_stop(nfc->worker);
