@@ -162,6 +162,21 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
     }
     sender_name[index] = 0;
 
+    // subghz chat sends escape message.  Ignore it.
+    if(index > 10 && message[0] == 0x1B && message[1] == '[' && message[3] == ';' &&
+       message[6] == 'm') {
+        index = 7;
+        while(index < len && message[index] != ':' && message[index] != 0x1B) {
+            sender_name[index] = message[index];
+            index++;
+        }
+        if(index < len && message[index] == 0x1B) {
+            // Skip over the "ESC [ 0 m", which is the reset color code.
+            // We should be at the ':' character.
+            index += 4;
+        }
+    }
+
     // Skip the ':' character & check for a space.
     if(++index < len) {
         if(message[index++] != ' ') {
