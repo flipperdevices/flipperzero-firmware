@@ -1281,8 +1281,7 @@ static bool remote_games_has_next(GameContext* game_context) {
 }
 
 static void remote_games_next(GameContext* game_context) {
-    if(game_context->data->remote_selected_game &&
-       game_context->data->remote_selected_game->next_game) {
+    if(remote_games_has_next(game_context)) {
         game_context->data->remote_selected_game =
             game_context->data->remote_selected_game->next_game;
     }
@@ -1297,7 +1296,7 @@ static void remote_games_previous(GameContext* game_context) {
     if(game_context->data->remote_selected_game) {
         uint16_t game_number = game_context->data->remote_selected_game->game_number;
         if(game_number > 0) {
-            GameInfo* prevGame = remote_games_find(game_context, game_number - 1);
+            GameInfo* prevGame = remote_games_find(game_context, game_number);
             if(prevGame) {
                 game_context->data->remote_selected_game = prevGame;
             }
@@ -1343,7 +1342,9 @@ static void remote_games_add(GameContext* game_context, GameEvent* game_event) {
             game_context->data->remote_selected_game = game;
             FURI_LOG_I(TAG, "Game number %d selected.", game->game_number);
         }
-    } else if(game != NULL && (game->game_number != game_event->game_number)) {
+    } else if(
+        game != NULL &&
+        (game->next_game == NULL || (game->next_game->game_number != game_event->game_number))) {
         // We have a new game, so add it to the list.
         GameInfo* newGame = malloc(sizeof(GameInfo));
         newGame->game_number = game_event->game_number;
