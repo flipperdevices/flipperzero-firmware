@@ -1,4 +1,3 @@
-#include "gui/canvas.h"
 #include "gui_i.h"
 #include <assets_icons.h>
 
@@ -51,7 +50,13 @@ static void gui_redraw_status_bar(Gui* gui, bool need_attention) {
     uint8_t left_used = 0;
     uint8_t right_used = 0;
     uint8_t width;
-    canvas_set_orientation(gui->canvas, CanvasOrientationHorizontal);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient)) {
+        canvas_set_orientation(gui->canvas, CanvasOrientationHorizontalFlip);
+    } else {
+        canvas_set_orientation(gui->canvas, CanvasOrientationHorizontal);
+    }
+
     canvas_frame_set(
         gui->canvas, GUI_STATUS_BAR_X, GUI_STATUS_BAR_Y, GUI_DISPLAY_WIDTH, GUI_STATUS_BAR_HEIGHT);
 
@@ -245,6 +250,7 @@ static void gui_redraw(Gui* gui) {
                 p->callback(
                     canvas_get_buffer(gui->canvas),
                     canvas_get_buffer_size(gui->canvas),
+                    canvas_get_orientation(gui->canvas),
                     p->context);
             }
     } while(false);
@@ -468,7 +474,7 @@ void gui_remove_framebuffer_callback(Gui* gui, GuiCanvasCommitCallback callback,
     gui_unlock(gui);
 }
 
-size_t gui_get_framebuffer_size(Gui* gui) {
+size_t gui_get_framebuffer_size(const Gui* gui) {
     furi_assert(gui);
     return canvas_get_buffer_size(gui->canvas);
 }

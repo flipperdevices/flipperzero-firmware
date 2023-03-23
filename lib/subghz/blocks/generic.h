@@ -5,8 +5,8 @@
 #include <stddef.h>
 
 #include <lib/flipper_format/flipper_format.h>
-#include "furi.h"
-#include "furi_hal.h"
+#include <furi.h>
+#include <furi_hal.h>
 #include "../types.h"
 
 #ifdef __cplusplus
@@ -19,7 +19,7 @@ struct SubGhzBlockGeneric {
     const char* protocol_name;
     uint64_t data;
     uint32_t serial;
-    uint8_t data_count_bit;
+    uint16_t data_count_bit;
     uint8_t btn;
     uint32_t cnt;
 };
@@ -36,9 +36,9 @@ void subghz_block_generic_get_preset_name(const char* preset_name, FuriString* p
  * @param instance Pointer to a SubGhzBlockGeneric instance
  * @param flipper_format Pointer to a FlipperFormat instance
  * @param preset The modulation on which the signal was received, SubGhzRadioPreset
- * @return true On success
+ * @return Status Error
  */
-bool subghz_block_generic_serialize(
+SubGhzProtocolStatus subghz_block_generic_serialize(
     SubGhzBlockGeneric* instance,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset);
@@ -47,9 +47,22 @@ bool subghz_block_generic_serialize(
  * Deserialize data SubGhzBlockGeneric.
  * @param instance Pointer to a SubGhzBlockGeneric instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return Status Error
  */
-bool subghz_block_generic_deserialize(SubGhzBlockGeneric* instance, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_block_generic_deserialize(SubGhzBlockGeneric* instance, FlipperFormat* flipper_format);
+
+/**
+ * Deserialize data SubGhzBlockGeneric.
+ * @param instance Pointer to a SubGhzBlockGeneric instance
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param count_bit Count bit protocol
+ * @return Status Error
+ */
+SubGhzProtocolStatus subghz_block_generic_deserialize_check_count_bit(
+    SubGhzBlockGeneric* instance,
+    FlipperFormat* flipper_format,
+    uint16_t count_bit);
 
 #ifdef __cplusplus
 }

@@ -1,4 +1,6 @@
+*~
 *.swp
+*.swo
 *.gdb_history
 
 

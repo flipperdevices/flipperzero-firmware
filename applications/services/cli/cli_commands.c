@@ -12,26 +12,48 @@
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
 
-void cli_command_device_info_callback(const char* key, const char* value, bool last, void* context) {
-    UNUSED(context);
+void cli_command_info_callback(const char* key, const char* value, bool last, void* context) {
     UNUSED(last);
+    UNUSED(context);
     printf("%-30s: %s\r\n", key, value);
 }
 
-/* 
- * Device Info Command
+/** Info Command
+ *
  * This command is intended to be used by humans
+ *
+ * Arguments:
+ * - device - print device info
+ * - power - print power info
+ * - power_debug - print power debug info
+ *
+ * @param      cli      The cli instance
+ * @param      args     The arguments
+ * @param      context  The context
  */
-void cli_command_device_info(Cli* cli, FuriString* args, void* context) {
+void cli_command_info(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
-    UNUSED(args);
-    furi_hal_info_get(cli_command_device_info_callback, '_', context);
+
+    if(context) {
+        furi_hal_info_get(cli_command_info_callback, '_', NULL);
+        return;
+    }
+
+    if(!furi_string_cmp(args, "device")) {
+        furi_hal_info_get(cli_command_info_callback, '.', NULL);
+    } else if(!furi_string_cmp(args, "power")) {
+        furi_hal_power_info_get(cli_command_info_callback, '.', NULL);
+    } else if(!furi_string_cmp(args, "power_debug")) {
+        furi_hal_power_debug_get(cli_command_info_callback, NULL);
+    } else {
+        cli_print_usage("info", "<device|power|power_debug>", furi_string_get_cstr(args));
+    }
 }
 
 void cli_command_help(Cli* cli, FuriString* args, void* context) {
     UNUSED(args);
     UNUSED(context);
-    printf("Commands we have:");
+    printf("Commands available:");
 
     // Command count
     const size_t commands_count = CliCommandTree_size(cli->commands);
@@ -61,9 +83,9 @@ void cli_command_help(Cli* cli, FuriString* args, void* context) {
 
     if(furi_string_size(args) > 0) {
         cli_nl();
-        printf("Also I have no clue what '");
+        printf("`");
         printf("%s", furi_string_get_cstr(args));
-        printf("' is.");
+        printf("` command not found");
     }
 }
 
@@ -350,11 +372,18 @@ void cli_command_ps(Cli* cli, FuriString* args, void* context) {
     FuriThreadId threads_ids[threads_num_max];
     uint8_t thread_num = furi_thread_enumerate(threads_ids, threads_num_max);
     printf(
-        "%-20s %-14s %-8s %-8s %s\r\n", "Name", "Stack start", "Heap", "Stack", "Stack min free");
+        "%-20s %-20s %-14s %-8s %-8s %s\r\n",
+        "AppID",
+        "Name",
+        "Stack start",
+        "Heap",
+        "Stack",
+        "Stack min free");
     for(uint8_t i = 0; i < thread_num; i++) {
         TaskControlBlock* tcb = (TaskControlBlock*)threads_ids[i];
         printf(
-            "%-20s 0x%-12lx %-8zu %-8lu %-8lu\r\n",
+            "%-20s %-20s 0x%-12lx %-8zu %-8lu %-8lu\r\n",
+            furi_thread_get_appid(threads_ids[i]),
             furi_thread_get_name(threads_ids[i]),
             (uint32_t)tcb->pxStack,
             memmgr_heap_get_thread_memory(threads_ids[i]),
@@ -410,8 +439,9 @@ void cli_command_i2c(Cli* cli, FuriString* args, void* context) {
 }
 
 void cli_commands_init(Cli* cli) {
-    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
-    cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
+    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
+    cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
+    cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
 
     cli_add_command(cli, "?", CliCommandFlagParallelSafe, cli_command_help, NULL);
     cli_add_command(cli, "help", CliCommandFlagParallelSafe, cli_command_help, NULL);
