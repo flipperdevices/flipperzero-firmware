@@ -1,13 +1,8 @@
 #include "avr_isp_view_reader.h"
 #include "../avr_isp_app_i.h"
-//#include <avr_isp_icons.h>
 #include <gui/elements.h>
 
 #include "../helpers/avr_isp_worker_rw.h"
-//#include <math.h>
-
-//#include <input/input.h>
-//#include <gui/elements.h>
 
 struct AvrIspReaderView {
     View* view;
@@ -22,9 +17,6 @@ typedef struct {
     AvrIspReaderViewStatus status;
     float progress_flash;
     float progress_eeprom;
-    // IconAnimation* icon;
-    // const char* name_chip;
-    // bool detect_chip;
 } AvrIspReaderViewModel;
 
 void avr_isp_reader_update_progress(AvrIspReaderView* instance) {
@@ -60,18 +52,8 @@ void avr_isp_reader_set_file_path(
 }
 
 void avr_isp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
-    UNUSED(model);
     canvas_clear(canvas);
-    // canvas_set_color(canvas, ColorBlack);
-    // canvas_set_font(canvas, FontSecondary);
-
-    // canvas_draw_icon(canvas, 0, 0, &I_AvrIspProg);
-
-    canvas_set_font(canvas, FontPrimary);
-    canvas_set_font(canvas, FontSecondary);
-    //canvas_draw_str(canvas, 20, 10, "Reding dump");
-    canvas_set_font(canvas, FontSecondary);
-    //canvas_set_font(canvas, FontPrimary);
+    char str_buf[64] = {0};
 
     canvas_set_font(canvas, FontPrimary);
     switch(model->status) {
@@ -82,19 +64,14 @@ void avr_isp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
         break;
     case AvrIspReaderViewStatusReading:
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Reding dump");
-        //elements_button_left(canvas, "Cancel");
         break;
     case AvrIspReaderViewStatusVerification:
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifyng dump");
-        canvas_set_font(canvas, FontSecondary);
-        //elements_button_left(canvas, "Cancel");
         break;
 
     default:
         break;
     }
-
-    char str_buf[64] = {0};
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 0, 27, "Flash");
@@ -108,51 +85,34 @@ void avr_isp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
 bool avr_isp_reader_view_input(InputEvent* event, void* context) {
     furi_assert(context);
     AvrIspReaderView* instance = context;
-    UNUSED(instance);
+    bool ret = true;
+
     if(event->key == InputKeyBack || event->type != InputTypeShort) {
-        return false;
+        with_view_model(
+            instance->view,
+            AvrIspReaderViewModel * model,
+            {
+                if(model->status == AvrIspReaderViewStatusIDLE) {
+                    ret = false;
+                }
+            },
+            false);
     } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
+        FURI_LOG_E("Read", "Start %s %s", instance->file_path, instance->file_name);
         with_view_model(
             instance->view,
             AvrIspReaderViewModel * model,
             {
                 if(model->status == AvrIspReaderViewStatusIDLE) {
                     model->status = AvrIspReaderViewStatusReading;
-                    avr_isp_worker_rw_get_dump_start(
+                    avr_isp_worker_rw_read_dump_start(
                         instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
                 }
             },
             false);
     }
-    // else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
-    //     // with_view_model(
-    //     //     instance->view,
-    //     //     AvrIspReaderViewModel * model,
-    //     //     {
-    //     //         icon_animation_start(model->icon);
-    //     //         model->detect_chip = false;
-    //     //     },
-    //     //     false);
-    //     // avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
-    // }
-
-    return true;
+    return ret;
 }
-
-// static void
-//     avr_isp_reader_detect_chip_callback(void* context, const char* name, bool detect_chip) {
-//     furi_assert(context);
-//     AvrIspReaderView* instance = context;
-//     with_view_model(
-//         instance->view,
-//         AvrIspReaderViewModel * model,
-//         {
-//             model->name_chip = name;
-//             model->detect_chip = detect_chip;
-//             if(detect_chip) icon_animation_stop(model->icon);
-//         },
-//         true);
-// }
 
 static void avr_isp_reader_callback_status(void* context, AvrIspWorkerRWStatus status) {
     furi_assert(context);
@@ -219,12 +179,6 @@ void avr_isp_reader_view_exit(void* context) {
     }
 
     avr_isp_worker_rw_free(instance->avr_isp_worker_rw);
-
-    // with_view_model(
-    //     instance->view,
-    //     AvrIspReaderViewModel * model,
-    //     { icon_animation_stop(model->icon); },
-    //     false);
 }
 
 AvrIspReaderView* avr_isp_reader_view_alloc() {
@@ -240,26 +194,12 @@ AvrIspReaderView* avr_isp_reader_view_alloc() {
     view_set_enter_callback(instance->view, avr_isp_reader_view_enter);
     view_set_exit_callback(instance->view, avr_isp_reader_view_exit);
 
-    // with_view_model(
-    //     instance->view,
-    //     AvrIspReaderViewModel * model,
-    //     {
-    //         model->icon = icon_animation_alloc(&A_ChipLooking_64x64);
-    //         view_tie_icon_animation(instance->view, model->icon);
-    //         model->detect_chip = false;
-    //     },
-    //     false);
     return instance;
 }
 
 void avr_isp_reader_view_free(AvrIspReaderView* instance) {
     furi_assert(instance);
 
-    // with_view_model(
-    //     instance->view,
-    //     AvrIspReaderViewModel * model,
-    //     { icon_animation_free(model->icon); },
-    //     false);
     view_free(instance->view);
     free(instance);
 }

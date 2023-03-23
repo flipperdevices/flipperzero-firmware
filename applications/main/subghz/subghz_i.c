@@ -483,7 +483,7 @@ bool subghz_load_protocol_from_file(SubGhz* subghz) {
     }
 
     furi_string_free(file_path);
-
+path_extract_filename
     return res;
 }
 

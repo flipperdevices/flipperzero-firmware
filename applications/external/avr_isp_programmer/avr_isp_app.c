@@ -25,6 +25,7 @@ AvrIspApp* avr_isp_app_alloc() {
     AvrIspApp* app = malloc(sizeof(AvrIspApp));
 
     app->file_path = furi_string_alloc();
+    furi_string_set(app->file_path, STORAGE_APP_DATA_PATH_PREFIX);
 
     // GUI
     app->gui = furi_record_open(RECORD_GUI);
