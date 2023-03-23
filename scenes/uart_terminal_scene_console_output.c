@@ -1,7 +1,7 @@
 #include "applications/external/lora_terminal/uart_terminal_app_i.h"
-#include <loader/firmware_api/firmware_api.h>
 #include <string.h>
-#define appName "loraTerm"
+#include <furi.h>
+#define appName "lora_terminal"
 
 void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
@@ -28,13 +28,10 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     TextBox* text_box = app->text_box;
     text_box_reset(app->text_box);
     text_box_set_font(text_box, TextBoxFontText);
-    FURI_LOG_I(appName, "before if block");
     if(app->focus_console_start) {
         text_box_set_focus(text_box, TextBoxFocusStart);
-        FURI_LOG_I(appName, "in if block");
     } else {
         text_box_set_focus(text_box, TextBoxFocusEnd);
-        FURI_LOG_I(appName, "in else block");
     }
 
     //Change baudrate ///////////////////////////////////////////////////////////////////////////
@@ -118,7 +115,6 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         app->uart, uart_terminal_console_output_handle_rx_data_cb); // setup callback for rx thread
 
     // Send command with CR+LF
-    FURI_LOG_I(appName, "before if block");
     if(app->is_command && app->selected_tx_string) {
         char buffer[240];
         snprintf(buffer, 240, "%s\r\n", (app->selected_tx_string));

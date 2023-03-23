@@ -42,7 +42,7 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
       "AT+NETWORKID?",
       "AT+CRFOP?",
       "AT+SEND=0,24,HELLO_WORLD",
-      "+RCV=0, 24, HELLO_WORLD, -99, 40",
+      "+RCV",
       "AT+FACTORY"},
      INPUT_ARGS,
      FOCUS_CONSOLE_END,

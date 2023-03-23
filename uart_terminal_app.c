@@ -2,13 +2,11 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#define appName "loraTerm"
 
 static bool uart_terminal_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     UART_TerminalApp* app = context;
     return scene_manager_handle_custom_event(app->scene_manager, event);
-    FURI_LOG_I(appName, "uart_terminal_app_custom_event_callback");
 }
 
 static bool uart_terminal_app_back_event_callback(void* context) {
@@ -24,7 +22,6 @@ static void uart_terminal_app_tick_event_callback(void* context) {
 }
 
 UART_TerminalApp* uart_terminal_app_alloc() {
-    FURI_LOG_I(appName, "uart_terminal_app_alloc start");
     UART_TerminalApp* app = malloc(sizeof(UART_TerminalApp));
 
     app->gui = furi_record_open(RECORD_GUI);
@@ -66,7 +63,7 @@ UART_TerminalApp* uart_terminal_app_alloc() {
         uart_text_input_get_view(app->text_input));
 
     scene_manager_next_scene(app->scene_manager, UART_TerminalSceneStart);
-    FURI_LOG_I(appName, "uart_terminal_app_alloc end");
+
     return app;
 }
 
@@ -102,6 +99,6 @@ int32_t uart_terminal_app(void* p) {
     view_dispatcher_run(uart_terminal_app->view_dispatcher);
 
     uart_terminal_app_free(uart_terminal_app);
-    FURI_LOG_I(appName, "uart_terminal_app");
+
     return 0;
 }

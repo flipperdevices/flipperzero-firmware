@@ -3,7 +3,6 @@
 #include "lora_terminal_icons.h"
 #include <furi.h>
 
-
 struct UART_TextInput {
     View* view;
     FuriTimer* timer;
