@@ -1,14 +1,13 @@
 #include "../infrared/xremote_ir_signal.h"
 #include "xremote_remote.h"
 
-#define TAG "XremoteCrossRemote"
-
 ARRAY_DEF(CrossRemoteItemArray, CrossRemoteItem*, M_PTR_OPLIST);
 
 struct CrossRemote {
     FuriString* name;
     FuriString* path;
     CrossRemoteItemArray_t items;
+    int transmitting;
 };
 
 static void cross_remote_clear_items(CrossRemote* remote) {
@@ -67,7 +66,16 @@ CrossRemote* cross_remote_alloc() {
     CrossRemoteItemArray_init(remote->items);
     remote->name = furi_string_alloc();
     remote->path = furi_string_alloc();
+    remote->transmitting = 0;
     return remote;
+}
+
+void cross_remote_set_transmitting(CrossRemote* remote, int status) {
+    remote->transmitting = status;
+}
+
+int cross_remote_get_transmitting(CrossRemote* remote) {
+    return remote->transmitting;
 }
 
 void cross_remote_free(CrossRemote* remote) {
@@ -103,9 +111,45 @@ CrossRemoteItem* cross_remote_get_item(CrossRemote* remote, size_t index) {
 
 
 bool cross_remote_load(CrossRemote* remote, FuriString* path) {
-    UNUSED(remote);
-    UNUSED(path);
-    return true;
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
+    FuriString* buf;
+    buf = furi_string_alloc();
+
+    FURI_LOG_I(TAG, "loading file: \'%s\'", furi_string_get_cstr(path));
+    bool success = false;
+    do {
+        // File not foudn
+        if(!flipper_format_buffered_file_open_existing(ff, furi_string_get_cstr(path))) break;
+        uint32_t version;
+        // Read Version & Type
+        if(!flipper_format_read_header(ff, buf, &version)) break;
+        if(!furi_string_equal(buf, XREMOTE_FILE_TYPE) || (version != XREMOTE_FILE_VERSION)) break;
+
+        // Init Remote
+        path_extract_filename(path, buf, true);
+        cross_remote_clear_items(remote);
+        cross_remote_set_name(remote, furi_string_get_cstr(buf));
+        cross_remote_set_path(remote, furi_string_get_cstr(path));
+        
+        // Load Items
+        for(bool can_read = true; can_read;) {
+            CrossRemoteItem* item = xremote_remote_item_alloc();
+            can_read = xremote_remote_item_read(item, ff);
+            if(can_read) {
+                CrossRemoteItemArray_push_back(remote->items, item);
+            } else {
+                xremote_remote_item_free(item);
+            }
+        }
+
+        success = true;
+    } while(false);
+
+    furi_string_free(buf);
+    flipper_format_free(ff);
+    furi_record_close(RECORD_STORAGE);
+    return success;
 }
 
 void cross_remote_set_name(CrossRemote* remote, const char* name) {
@@ -142,7 +186,7 @@ bool cross_remote_store(CrossRemote* remote) {
     FURI_LOG_I(TAG, "Storing file: \'%s\'", path);
 
     bool success = flipper_format_file_open_always(ff, path) &&
-                   flipper_format_write_header_cstr(ff, "Cross Remote File", 1);
+                   flipper_format_write_header_cstr(ff, XREMOTE_FILE_TYPE, XREMOTE_FILE_VERSION);
 
     // save Items
     if(success) {

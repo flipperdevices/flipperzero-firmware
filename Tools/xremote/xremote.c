@@ -51,6 +51,7 @@ XRemote* xremote_app_alloc() {
     app->file_path = furi_string_alloc();
 
     app->ir_remote_buffer = xremote_ir_remote_alloc();
+    app->ir_worker = infrared_worker_alloc();
     app->cross_remote = cross_remote_alloc();
     
     app->loading = loading_alloc();
@@ -61,6 +62,8 @@ XRemote* xremote_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdMenu, submenu_get_view(app->submenu));
     app->xremote_infoscreen = xremote_infoscreen_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdInfoscreen, xremote_infoscreen_get_view(app->xremote_infoscreen));
+    app->xremote_transmit = xremote_transmit_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdTransmit, xremote_transmit_get_view(app->xremote_transmit));
     app->button_menu_create = button_menu_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdCreate, button_menu_get_view(app->button_menu_create));
     app->button_menu_create_add = button_menu_alloc();
@@ -69,7 +72,7 @@ XRemote* xremote_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdIrRemote, button_menu_get_view(app->button_menu_ir));
     app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdSettings, variable_item_list_get_view(app->variable_item_list));
-
+    
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdWip, popup_get_view(app->popup));
     app->view_stack = view_stack_alloc();
@@ -103,6 +106,8 @@ void xremote_app_free(XRemote* app) {
     // Scene manager
     scene_manager_free(app->scene_manager);
 
+    infrared_worker_free(app->ir_worker);
+
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdMenu);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdCreate);
@@ -111,6 +116,7 @@ void xremote_app_free(XRemote* app) {
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdWip);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdStack);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdTextInput);
+    view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdTransmit);
     text_input_free(app->text_input);
     button_menu_free(app->button_menu_create);
     button_menu_free(app->button_menu_create_add);

@@ -18,12 +18,13 @@ void xremote_scene_xr_list_on_enter(void* context) {
 
     if(success) {
         //Load Remote into buffer
+        success = cross_remote_load(app->cross_remote, app->file_path);
     }
 
     if(success) {
         //Load Remote Button View
-        //scene_manager_next_scene(app->scene_manager, XRemoteSceneCreateAdd);
-        scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
+        //scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
+        scene_manager_next_scene(app->scene_manager, XRemoteSceneTransmit);
     } else {
         //scene_manager_next_scene(app->scene_manager, XRemoteSceneWip);
         scene_manager_previous_scene(app->scene_manager);
