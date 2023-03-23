@@ -1723,6 +1723,7 @@ static void update_player_stats(
         stat->loss_count += isLoss((GameState)remote_player) ? 1 : 0;
         stat->win_count += isWin((GameState)remote_player) ? 1 : 0;
         stat->tie_count += isTie((GameState)remote_player) ? 1 : 0;
+        furi_string_set_str(stat->contact, remote_contact);
         furi_string_set_str(stat->last_played, datetime);
         furi_string_set_char(stat->last_played, 10, ' ');
     }
@@ -2318,8 +2319,8 @@ int32_t rock_paper_scissors_app(void* p) {
                 }
                 break;
             case GameEventPlaySong:
-                play_song(game_context->data->local_player);
                 save_result(game_context);
+                play_song(game_context->data->local_player);
                 break;
             case GameEventDataDetected:
                 rps_receive_data(game_context, event.tick);
