@@ -1,4 +1,4 @@
-Ultrasound measurments with Parallax sensor PING))) (3 wires)
+Ultrasound measurments with PING))) Parallax sensor SKU 28015 (3 wires)
 
 inspired by
 https://github.com/esphome/esphome/blob/ac0d921413c3884752193fe568fa82853f0f99e9/esphome/components/ultrasonic/ultrasonic_sensor.cpp
@@ -6,4 +6,5 @@ https://github.com/esphome/esphome/blob/ac0d921413c3884752193fe568fa82853f0f99e9
 Ported and modified by @xMasterX for FlipperZero
 
 Modified by privet971 using PING))) sensor from Parallax 3/23/2023
-use only gpio 13 for TX & RX to SIG pin
+
+Use only gpio 13 for TX & RX wired to SIG pin
