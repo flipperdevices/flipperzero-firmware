@@ -790,9 +790,9 @@ static void rps_render_input_text(Canvas* canvas, void* ctx) {
 
             canvas_draw_glyph(canvas, x, y, ch);
 
-            if(ch == 8) {
+            if(ch == KEYBOARD_BACKSPACE) {
                 draw_arrow(canvas, x, y - 5, false);
-            } else if(ch == 13) {
+            } else if(ch == KEYBOARD_ENTER) {
                 draw_arrow(canvas, x, y - 5, true);
             }
             canvas_set_color(canvas, ColorBlack);
@@ -2048,19 +2048,19 @@ int32_t rock_paper_scissors_app(void* p) {
 
                     case InputKeyOk:
                         ch = get_char(game_context, true);
-                        if(ch >= ' ') {
+                        if(ch >= ' ' && ch <= '~') {
                             int len = furi_string_utf8_length(game_context->data->keyboard_data);
                             if(len < KEYBOARD_MAX_LEN) {
                                 furi_string_push_back(game_context->data->keyboard_data, ch);
                             } else {
                                 single_vibro();
                             }
-                        } else if(ch == 8) {
+                        } else if(ch == KEYBOARD_BACKSPACE) {
                             int len = furi_string_utf8_length(game_context->data->keyboard_data);
                             if(len > 0) {
                                 furi_string_left(game_context->data->keyboard_data, len - 1);
                             }
-                        } else if(ch == 13) {
+                        } else if(ch == KEYBOARD_ENTER) {
                             furi_string_printf(
                                 game_context->data->local_contact,
                                 "%c%s",
@@ -2082,14 +2082,14 @@ int32_t rock_paper_scissors_app(void* p) {
                     switch(event.input.key) {
                     case InputKeyOk:
                         ch = get_char(game_context, false);
-                        if(ch >= ' ') {
+                        if(ch >= ' ' && ch <= '~') {
                             int len = furi_string_utf8_length(game_context->data->keyboard_data);
                             if(len < KEYBOARD_MAX_LEN) {
                                 furi_string_push_back(game_context->data->keyboard_data, ch);
                             } else {
                                 single_vibro();
                             }
-                        } else if(ch == 8) {
+                        } else if(ch == KEYBOARD_BACKSPACE) {
                             furi_string_left(game_context->data->keyboard_data, 0);
                         }
                         break;

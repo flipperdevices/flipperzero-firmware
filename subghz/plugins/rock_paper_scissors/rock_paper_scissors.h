@@ -278,11 +278,14 @@ typedef struct {
     SubGhzTxRxWorker* subghz_txrx;
 } GameContext;
 
+#define KEYBOARD_BACKSPACE 0xAB
+#define KEYBOARD_ENTER 0xBB
+
 char keyboard[4][14] = {
-    {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '.', '_', 8},
+    {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '.', '_', KEYBOARD_BACKSPACE},
     {'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '!', '$', '*', '&'},
     {'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', '=', '+', ':', '(', ')'},
-    {'Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', '@', '"', '#', '/', '\'', 13}};
+    {'Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', '@', '"', '#', '/', '\'', KEYBOARD_ENTER}};
 
 // Checks if game state is winner.
 // @param state GameState to check.
