@@ -629,18 +629,18 @@ static void rps_render_main_menu(Canvas* canvas, void* ctx) {
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 2, 0, AlignLeft, AlignTop, "ROCK PAPER SCISSORS");
-    canvas_draw_str_aligned(canvas, 30, 15, AlignLeft, AlignTop, "Host game");
-    canvas_draw_str_aligned(canvas, 30, 27, AlignLeft, AlignTop, "Join game");
-    canvas_draw_str_aligned(canvas, 30, 39, AlignLeft, AlignTop, "Past games");
-    canvas_draw_str_aligned(canvas, 30, 51, AlignLeft, AlignTop, "Edit contact info");
+    canvas_draw_str_aligned(canvas, 30, 15, AlignLeft, AlignTop, "Edit contact info");
+    canvas_draw_str_aligned(canvas, 30, 27, AlignLeft, AlignTop, "Host game");
+    canvas_draw_str_aligned(canvas, 30, 39, AlignLeft, AlignTop, "Join game");
+    canvas_draw_str_aligned(canvas, 30, 51, AlignLeft, AlignTop, "Past games");
 
-    if(game_context->data->local_player == StateMainMenuHost) {
+    if(game_context->data->local_player == StateMainMenuMessage) {
         canvas_draw_str_aligned(canvas, 20, 15, AlignLeft, AlignTop, ">");
-    } else if(game_context->data->local_player == StateMainMenuJoin) {
+    } else if(game_context->data->local_player == StateMainMenuHost) {
         canvas_draw_str_aligned(canvas, 20, 27, AlignLeft, AlignTop, ">");
-    } else if(game_context->data->local_player == StateMainMenuPastGames) {
+    } else if(game_context->data->local_player == StateMainMenuJoin) {
         canvas_draw_str_aligned(canvas, 20, 39, AlignLeft, AlignTop, ">");
-    } else if(game_context->data->local_player == StateMainMenuMessage) {
+    } else if(game_context->data->local_player == StateMainMenuPastGames) {
         canvas_draw_str_aligned(canvas, 20, 51, AlignLeft, AlignTop, ">");
     }
 }
@@ -1763,7 +1763,7 @@ int32_t rock_paper_scissors_app(void* p) {
     game_context->data->frequency_index = 10;
     game_context->data->local_move_tick = 0;
     game_context->data->remote_move_tick = 0;
-    game_context->data->local_player = StateMainMenuHost;
+    game_context->data->local_player = StateMainMenuMessage;
     game_context->data->remote_player = StateUnknown;
     game_context->data->screen_state = ScreenMainMenu;
     game_context->data->remote_games = NULL;
@@ -1803,7 +1803,6 @@ int32_t rock_paper_scissors_app(void* p) {
     bool processing = true;
     do {
         if(furi_message_queue_get(game_context->queue, &event, FuriWaitForever) == FuriStatusOk) {
-            FURI_LOG_I(TAG, "Processing message of type %d", event.type);
             switch(event.type) {
             case GameEventTypeKey:
                 if((event.input.type == InputTypeLong) && (event.input.key == InputKeyBack)) {
@@ -2145,8 +2144,8 @@ int32_t rock_paper_scissors_app(void* p) {
                             game_context->data->local_player = StateMainMenuHost;
                         } else if(game_context->data->local_player == StateMainMenuPastGames) {
                             game_context->data->local_player = StateMainMenuJoin;
-                        } else if(game_context->data->local_player == StateMainMenuMessage) {
-                            game_context->data->local_player = StateMainMenuPastGames;
+                        } else if(game_context->data->local_player == StateMainMenuHost) {
+                            game_context->data->local_player = StateMainMenuMessage;
                         }
                         break;
                     case InputKeyDown:
@@ -2154,8 +2153,8 @@ int32_t rock_paper_scissors_app(void* p) {
                             game_context->data->local_player = StateMainMenuJoin;
                         } else if(game_context->data->local_player == StateMainMenuJoin) {
                             game_context->data->local_player = StateMainMenuPastGames;
-                        } else if(game_context->data->local_player == StateMainMenuPastGames) {
-                            game_context->data->local_player = StateMainMenuMessage;
+                        } else if(game_context->data->local_player == StateMainMenuMessage) {
+                            game_context->data->local_player = StateMainMenuHost;
                         }
                         break;
                     case InputKeyOk:
