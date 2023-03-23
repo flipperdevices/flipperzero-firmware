@@ -1200,52 +1200,20 @@ static bool rps_state_machine_local_moved(GameContext* game_context, Move move) 
         localMove = MoveCount1;
         localState = StateCount1;
     } else if(MoveCount == move && StateCount1 == game_context->data->local_player) {
-        if((StateCount1 == game_context->data->remote_player) ||
-           (StateCount2 == game_context->data->remote_player)) {
-            localMove = MoveCount2;
-            localState = StateCount2;
-        } else {
-            localState = StateErrorLocalFast;
-            FURI_LOG_I(
-                TAG, "Local count sync error. remote is %c.", game_context->data->remote_player);
-        }
+        localMove = MoveCount2;
+        localState = StateCount2;
     } else if(StateCount2 == game_context->data->local_player) {
         if(MoveRock == move) {
-            if((StateCount2 == game_context->data->remote_player) ||
-               isFinalMove(game_context->data->remote_player)) {
-                localMove = MoveRock;
-                localState = StateRock;
-            } else {
-                localState = StateErrorLocalFast;
-                FURI_LOG_I(
-                    TAG,
-                    "Local rock sync error. remote is %c.",
-                    game_context->data->remote_player);
-            }
+            localMove = MoveRock;
+            localState = StateRock;
         } else if(MovePaper == move) {
-            if((StateCount2 == game_context->data->remote_player) ||
-               isFinalMove(game_context->data->remote_player)) {
-                localMove = MovePaper;
-                localState = StatePaper;
-            } else {
-                localState = StateErrorLocalFast;
-                FURI_LOG_I(
-                    TAG,
-                    "Local paper sync error. remote is %c.",
-                    game_context->data->remote_player);
-            }
+            localMove = MovePaper;
+            localState = StatePaper;
         } else if(MoveScissors == move) {
-            if((StateCount2 == game_context->data->remote_player) ||
-               isFinalMove(game_context->data->remote_player)) {
-                localMove = MoveScissors;
-                localState = StateScissors;
-            } else {
-                localState = StateErrorLocalFast;
-                FURI_LOG_I(
-                    TAG,
-                    "Local scissors sync error. remote is %c.",
-                    game_context->data->remote_player);
-            }
+            localMove = MoveScissors;
+            localState = StateScissors;
+        } else if(MoveCount == move) {
+            // Ignore. We are already at count #2.
         } else {
             FURI_LOG_E(
                 TAG,
@@ -1271,9 +1239,6 @@ static bool rps_state_machine_local_moved(GameContext* game_context, Move move) 
     if(StateReady != localState) {
         game_context->data->local_player = localState;
         game_context->data->local_move_tick = furi_get_tick();
-        if(isError(localState)) {
-            game_context->data->screen_state = ScreenError;
-        }
     }
 
     return StateReady != localState;
@@ -1289,41 +1254,13 @@ static bool rps_state_machine_remote_moved(GameContext* game_context, Move move)
     if(MoveCount1 == move && StateReady == game_context->data->remote_player) {
         remoteState = StateCount1;
     } else if(MoveCount2 == move && StateCount1 == game_context->data->remote_player) {
-        if((StateCount1 == game_context->data->local_player) ||
-           (StateCount2 == game_context->data->local_player)) {
-            remoteState = StateCount2;
-        } else {
-            remoteState = StateErrorRemoteFast;
-            FURI_LOG_I(
-                TAG, "Remote count sync error. local is %c.", game_context->data->local_player);
-        }
+        remoteState = StateCount2;
     } else if(MoveRock == move && StateCount2 == game_context->data->remote_player) {
-        if((StateCount2 == game_context->data->local_player) ||
-           isFinalMove(game_context->data->local_player)) {
-            remoteState = StateRock;
-        } else {
-            remoteState = StateErrorRemoteFast;
-            FURI_LOG_I(
-                TAG, "Remote rock sync error. local is %c.", game_context->data->local_player);
-        }
+        remoteState = StateRock;
     } else if(MovePaper == move && StateCount2 == game_context->data->remote_player) {
-        if((StateCount2 == game_context->data->local_player) ||
-           isFinalMove(game_context->data->local_player)) {
-            remoteState = StatePaper;
-        } else {
-            remoteState = StateErrorRemoteFast;
-            FURI_LOG_I(
-                TAG, "Remote paper sync error. local is %c.", game_context->data->local_player);
-        }
+        remoteState = StatePaper;
     } else if(MoveScissors == move && StateCount2 == game_context->data->remote_player) {
-        if((StateCount2 == game_context->data->local_player) ||
-           isFinalMove(game_context->data->local_player)) {
-            remoteState = StateScissors;
-        } else {
-            remoteState = StateErrorRemoteFast;
-            FURI_LOG_I(
-                TAG, "Remote scissors sync error. local is %c.", game_context->data->local_player);
-        }
+        remoteState = StateScissors;
     } else {
         FURI_LOG_E(
             TAG,
@@ -1331,16 +1268,11 @@ static bool rps_state_machine_remote_moved(GameContext* game_context, Move move)
             move,
             game_context->data->local_player,
             game_context->data->remote_player);
-        remoteState = StateError;
     }
 
     if(StateReady != remoteState) {
         game_context->data->remote_player = remoteState;
         game_context->data->remote_move_tick = furi_get_tick();
-        if(isError(remoteState)) {
-            game_context->data->local_player = remoteState;
-            game_context->data->screen_state = ScreenError;
-        }
     }
 
     return StateReady != remoteState;
@@ -2400,6 +2332,7 @@ int32_t rock_paper_scissors_app(void* p) {
                 break;
             case GameEventSongEnded:
                 if(isResult(game_context->data->local_player)) {
+                    game_context->data->keyboard_col = 0; // YES
                     game_context->data->screen_state = ScreenFinishedGame;
                 }
                 break;
