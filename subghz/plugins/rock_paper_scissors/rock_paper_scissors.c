@@ -676,18 +676,18 @@ static void rps_render_past_games(Canvas* canvas, void* ctx) {
         char ch = furi_string_get_char(stats->contact, 0);
         for(unsigned int i = 0; i < sizeof(contact_list) / sizeof(contact_list[0]); i++) {
             if(contact_list[i][0] == ch) {
-                canvas_draw_str_aligned(canvas, 64, 24, AlignLeft, AlignTop, contact_list[i] + 1);
+                canvas_draw_str_aligned(canvas, 0, 36, AlignLeft, AlignTop, contact_list[i] + 1);
                 ch = 0;
                 break;
             }
         }
         if(ch) {
             char id[2] = {ch, 0};
-            canvas_draw_str_aligned(canvas, 64, 24, AlignLeft, AlignTop, id);
+            canvas_draw_str_aligned(canvas, 0, 36, AlignLeft, AlignTop, id);
         }
 
         canvas_draw_str_aligned(
-            canvas, 0, 36, AlignLeft, AlignTop, furi_string_get_cstr(stats->contact) + 1);
+            canvas, 0, 48, AlignLeft, AlignTop, furi_string_get_cstr(stats->contact) + 1);
     }
 }
 
