@@ -691,6 +691,9 @@ static void rps_render_past_games(Canvas* canvas, void* ctx) {
     }
 }
 
+// Render UI when we are choosing a social identity to share.
+// @param canvas rendering surface of the Flipper Zero.
+// @param ctx pointer to a GameContext.
 static void rps_render_choose_social(Canvas* canvas, void* ctx) {
     GameContext* game_context = ctx;
     UNUSED(game_context);
@@ -722,12 +725,9 @@ static void rps_render_choose_social(Canvas* canvas, void* ctx) {
     }
 }
 
-char keyboard[4][14] = {
-    {'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '.', '_', 8},
-    {'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '!', '$', '*', '&'},
-    {'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', '=', '+', ':', '(', ')'},
-    {'Z', 'X', 'C', 'V', 'B', 'N', 'M', ' ', '@', '"', '#', '/', '\'', 13}};
-
+// Return the character at the current keyboard cursor position.
+// @param game_context pointer to a GameContext.
+// @param long_press true if the key was held down for a long time.
 static char get_char(GameContext* game_context, bool long_press) {
     int c_r = game_context->data->keyboard_row;
     int c_c = game_context->data->keyboard_col;
@@ -740,6 +740,11 @@ static char get_char(GameContext* game_context, bool long_press) {
     return ch;
 }
 
+// Render an arrow, for enter and backspace.
+// @param canvas rendering surface of the Flipper Zero.
+// @param x x coordinate of the arrow.
+// @param y y coordinate of the arrow.
+// @param tail true for enter, false for backspace.
 static void draw_arrow(Canvas* canvas, int x, int y, bool tail) {
     canvas_draw_line(canvas, x, y + 2, x + 4, y + 2);
     canvas_draw_line(canvas, x, y + 2, x + 2, y);
@@ -749,6 +754,9 @@ static void draw_arrow(Canvas* canvas, int x, int y, bool tail) {
     }
 }
 
+// Render UI when we are inputting text.
+// @param canvas rendering surface of the Flipper Zero.
+// @param ctx pointer to a GameContext.
 static void rps_render_input_text(Canvas* canvas, void* ctx) {
     GameContext* game_context = ctx;
     UNUSED(game_context);
