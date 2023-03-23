@@ -1,19 +1,7 @@
-#include "../uart_terminal_app_i.h"
+#include "applications/external/lora_terminal/uart_terminal_app_i.h"
+#include <loader/firmware_api/firmware_api.h>
 #include <string.h>
-
-// The FlipperZero Settings->System menu allows you to set the logging level at RUN-time
-// LOG_LEVEL lets you limit it at COMPILE-time
-//    1.  None
-//    2.  Errors      : ERROR -> FURI_LOG_E
-//    3.  Warnings    : WARN  -> FURI_LOG_W
-//    4.  Information : INFO  -> FURI_LOG_I
-//    5.  Debug       : DEBUG -> FURI_LOG_D
-//    6.  Trace       : TRACE -> FURI_LOG_T
-// Also provides ENTER and LEAVE -> TRACE
-
-#include  "../logging.h"
-#include  "../err.h"   // Error numbers & messages
-#define   LOG_LEVEL  6
+#define appName "loraTerm"
 
 void uart_terminal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     furi_assert(context);
@@ -40,10 +28,13 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     TextBox* text_box = app->text_box;
     text_box_reset(app->text_box);
     text_box_set_font(text_box, TextBoxFontText);
+    FURI_LOG_I(appName, "before if block");
     if(app->focus_console_start) {
         text_box_set_focus(text_box, TextBoxFocusStart);
+        FURI_LOG_I(appName, "in if block");
     } else {
         text_box_set_focus(text_box, TextBoxFocusEnd);
+        FURI_LOG_I(appName, "in else block");
     }
 
     //Change baudrate ///////////////////////////////////////////////////////////////////////////
@@ -127,11 +118,13 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         app->uart, uart_terminal_console_output_handle_rx_data_cb); // setup callback for rx thread
 
     // Send command with CR+LF
+    FURI_LOG_I(appName, "before if block");
     if(app->is_command && app->selected_tx_string) {
         char buffer[240];
         snprintf(buffer, 240, "%s\r\n", (app->selected_tx_string));
-        FURI_LOG_E("Lora-Terminal",buffer);
-        uart_terminal_uart_tx((unsigned char *)buffer, strlen(buffer));
+        FURI_LOG_E(appName, "Command: %s", buffer);
+        FURI_LOG_I(appName, "Command: %s", buffer);
+        uart_terminal_uart_tx((unsigned char*)buffer, strlen(buffer));
     }
 }
 

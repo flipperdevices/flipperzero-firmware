@@ -1,4 +1,5 @@
-#include "../uart_terminal_app_i.h"
+#include "applications/external/lora_terminal/uart_terminal_app_i.h"
+#include <furi.h>
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -41,7 +42,7 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
       "AT+NETWORKID?",
       "AT+CRFOP?",
       "AT+SEND=0,24,HELLO_WORLD",
-      "+RCV",
+      "+RCV=0, 24, HELLO_WORLD, -99, 40",
       "AT+FACTORY"},
      INPUT_ARGS,
      FOCUS_CONSOLE_END,

@@ -1,4 +1,4 @@
-#include "../uart_terminal_app_i.h"
+#include "applications/external/lora_terminal/uart_terminal_app_i.h"
 
 void uart_terminal_scene_text_input_callback(void* context) {
     UART_TerminalApp* app = context;

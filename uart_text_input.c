@@ -3,18 +3,6 @@
 #include "lora_terminal_icons.h"
 #include <furi.h>
 
-// The FlipperZero Settings->System menu allows you to set the logging level at RUN-time
-// LOG_LEVEL lets you limit it at COMPILE-time
-//    1.  None
-//    2.  Errors      : ERROR -> FURI_LOG_E
-//    3.  Warnings    : WARN  -> FURI_LOG_W
-//    4.  Information : INFO  -> FURI_LOG_I
-//    5.  Debug       : DEBUG -> FURI_LOG_D
-//    6.  Trace       : TRACE -> FURI_LOG_T
-// Also provides ENTER and LEAVE -> TRACE
-#define  LOG_LEVEL  6
-#include  "logging.h"
-#include  "err.h"      // Error numbers & messages
 
 struct UART_TextInput {
     View* view;
