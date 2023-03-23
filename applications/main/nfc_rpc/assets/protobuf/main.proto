@@ -1,0 +1,39 @@
+syntax = "proto3";
+import "nfca.proto";
+import "mf_ultralight.proto";
+
+package Nfc;
+option java_package = "com.flipperdevices.nfc.protobuf";
+
+enum CommandStatus {
+  OK = 0;
+
+  ERROR = 1;                 /**< Unknown error */
+  ERROR_NOT_IMPLEMENTED = 3; /**< Command succesfully decoded, but not
+              implemented (deprecated or not yet implemented) */
+  ERROR_BUSY =
+      4; /**< Somebody took global lock, so not all commands are available */
+}
+
+message Empty {}
+
+message Main {
+  CommandStatus command_status = 1;
+  oneof content {
+    Empty empty = 2;
+    .PB_Nfca.ReadRequest nfca_read_req = 3;
+    .PB_Nfca.ReadResponse nfca_read_resp = 4;
+    .PB_MfUltralight.ReadPageRequest mf_ultralight_read_page_req = 5;
+    .PB_MfUltralight.ReadPageResponse mf_ultralight_read_page_resp = 6;
+    .PB_MfUltralight.ReadVersionRequest mf_ultralight_read_version_req = 7;
+    .PB_MfUltralight.ReadVersionResponse mf_ultralight_read_version_resp = 8;
+    .PB_MfUltralight.WritePageRequest mf_ultralight_write_page_req = 9;
+    .PB_MfUltralight.WritePageResponse mf_ultralight_write_page_resp = 10;
+    .PB_MfUltralight.ReadSignatureRequest mf_ultralight_read_signature_req = 11;
+    .PB_MfUltralight.ReadSignatureResponse mf_ultralight_read_signature_resp = 12;
+    .PB_MfUltralight.ReadCounterRequest mf_ultralight_read_counter_req = 13;
+    .PB_MfUltralight.ReadCounterResponse mf_ultralight_read_counter_resp = 14;
+    .PB_MfUltralight.ReadTearingFlagRequest mf_ultralight_read_tearing_flag_req = 15;
+    .PB_MfUltralight.ReadTearingFlagResponse mf_ultralight_read_tearing_flag_resp = 16;
+  }
+}
