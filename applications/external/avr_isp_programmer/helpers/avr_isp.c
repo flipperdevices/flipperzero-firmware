@@ -21,6 +21,7 @@ AvrIsp* avr_isp_alloc(void) {
 
 void avr_isp_free(AvrIsp* instance) {
     furi_assert(instance);
+
     if(instance->spi) avr_isp_end_pmode(instance);
     free(instance);
 }
@@ -28,6 +29,7 @@ void avr_isp_free(AvrIsp* instance) {
 void avr_isp_set_tx_callback(AvrIsp* instance, AvrIspCallback callback, void* context) {
     furi_assert(instance);
     furi_assert(context);
+
     instance->callback = callback;
     instance->context = context;
 }
@@ -48,6 +50,7 @@ uint8_t avr_isp_spi_transaction(
 
 static bool avr_isp_set_pmode(AvrIsp* instance, uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
     furi_assert(instance);
+
     uint8_t res = 0;
     avr_isp_spi_sw_txrx(instance->spi, a);
     avr_isp_spi_sw_txrx(instance->spi, b);
@@ -58,6 +61,7 @@ static bool avr_isp_set_pmode(AvrIsp* instance, uint8_t a, uint8_t b, uint8_t c,
 
 void avr_isp_end_pmode(AvrIsp* instance) {
     furi_assert(instance);
+
     if(instance->pmode) {
         avr_isp_spi_sw_res_set(instance->spi, true);
         // We're about to take the target out of reset
@@ -71,6 +75,7 @@ void avr_isp_end_pmode(AvrIsp* instance) {
 
 static bool avr_isp_start_pmode(AvrIsp* instance, AvrIspSpiSwSpeed spi_speed) {
     furi_assert(instance);
+
     // Reset target before driving PIN_SCK or PIN_MOSI
 
     // SPI.begin() will configure SS as output,
@@ -109,6 +114,8 @@ static bool avr_isp_start_pmode(AvrIsp* instance, AvrIspSpiSwSpeed spi_speed) {
 }
 
 bool avr_isp_auto_set_spi_speed_start_pmode(AvrIsp* instance) {
+    furi_assert(instance);
+
     AvrIspSpiSwSpeed spi_speed[] = {
         AvrIspSpiSwSpeed1Mhz,
         AvrIspSpiSwSpeed400Khz,
@@ -127,6 +134,7 @@ bool avr_isp_auto_set_spi_speed_start_pmode(AvrIsp* instance) {
 
 static void avr_isp_commit(AvrIsp* instance, uint16_t addr, uint8_t data) {
     furi_assert(instance);
+
     avr_isp_spi_transaction(instance, AVR_ISP_COMMIT(addr));
     /* polling flash */
     if(data == 0xFF) {
@@ -144,6 +152,7 @@ static void avr_isp_commit(AvrIsp* instance, uint16_t addr, uint8_t data) {
 
 static uint16_t avr_isp_current_page(AvrIsp* instance, uint32_t addr, uint16_t page_size) {
     furi_assert(instance);
+
     uint16_t page = 0;
     switch(page_size) {
     case 32:
@@ -193,8 +202,8 @@ static bool avr_isp_flash_write_pages(
 
 bool avr_isp_erase_chip(AvrIsp* instance) {
     furi_assert(instance);
-    bool ret = false;
 
+    bool ret = false;
     if(!instance->pmode) avr_isp_auto_set_spi_speed_start_pmode(instance);
     if(instance->pmode) {
         avr_isp_spi_transaction(instance, AVR_ISP_ERASE_CHIP);
@@ -226,8 +235,8 @@ bool avr_isp_write_page(
     uint8_t* data,
     uint32_t data_size) {
     furi_assert(instance);
-    bool ret = false;
 
+    bool ret = false;
     switch(mem_type) {
     case STK_SET_FLASH_TYPE:
         if((addr + data_size / 2) <= mem_size) {
@@ -256,6 +265,7 @@ static bool avr_isp_flash_read_page(
     uint8_t* data,
     uint32_t data_size) {
     furi_assert(instance);
+
     if(page_size > data_size) return false;
     for(uint16_t i = 0; i < page_size; i += 2) {
         data[i] = avr_isp_spi_transaction(instance, AVR_ISP_READ_FLASH_LO(addr));
@@ -272,6 +282,7 @@ static bool avr_isp_eeprom_read_page(
     uint8_t* data,
     uint32_t data_size) {
     furi_assert(instance);
+
     if(page_size > data_size) return false;
     for(uint16_t i = 0; i < page_size; i++) {
         data[i] = avr_isp_spi_transaction(instance, AVR_ISP_READ_EEPROM(addr));
@@ -288,6 +299,7 @@ bool avr_isp_read_page(
     uint8_t* data,
     uint32_t data_size) {
     furi_assert(instance);
+
     bool res = false;
     if(mem_type == STK_SET_FLASH_TYPE)
         res = avr_isp_flash_read_page(instance, addr, page_size, data, data_size);
@@ -299,6 +311,7 @@ bool avr_isp_read_page(
 
 AvrIspSignature avr_isp_read_signature(AvrIsp* instance) {
     furi_assert(instance);
+
     AvrIspSignature signature;
     signature.vendor = avr_isp_spi_transaction(instance, AVR_ISP_READ_VENDOR);
     signature.part_family = avr_isp_spi_transaction(instance, AVR_ISP_READ_PART_FAMILY);
@@ -308,6 +321,7 @@ AvrIspSignature avr_isp_read_signature(AvrIsp* instance) {
 
 uint8_t avr_isp_read_lock_byte(AvrIsp* instance) {
     furi_assert(instance);
+
     uint8_t data = 0;
     uint32_t starttime = furi_get_tick();
     while((furi_get_tick() - starttime) < 300) {
@@ -322,6 +336,7 @@ uint8_t avr_isp_read_lock_byte(AvrIsp* instance) {
 
 bool avr_isp_write_lock_byte(AvrIsp* instance, uint8_t lock) {
     furi_assert(instance);
+
     bool ret = false;
     if(avr_isp_read_lock_byte(instance) == lock) {
         ret = true;
@@ -341,6 +356,7 @@ bool avr_isp_write_lock_byte(AvrIsp* instance, uint8_t lock) {
 
 uint8_t avr_isp_read_fuse_low(AvrIsp* instance) {
     furi_assert(instance);
+
     uint8_t data = 0;
     uint32_t starttime = furi_get_tick();
     while((furi_get_tick() - starttime) < 300) {
@@ -355,6 +371,7 @@ uint8_t avr_isp_read_fuse_low(AvrIsp* instance) {
 
 bool avr_isp_write_fuse_low(AvrIsp* instance, uint8_t lfuse) {
     furi_assert(instance);
+
     bool ret = false;
     if(avr_isp_read_fuse_low(instance) == lfuse) {
         ret = true;
@@ -374,6 +391,7 @@ bool avr_isp_write_fuse_low(AvrIsp* instance, uint8_t lfuse) {
 
 uint8_t avr_isp_read_fuse_high(AvrIsp* instance) {
     furi_assert(instance);
+
     uint8_t data = 0;
     uint32_t starttime = furi_get_tick();
     while((furi_get_tick() - starttime) < 300) {
@@ -388,6 +406,7 @@ uint8_t avr_isp_read_fuse_high(AvrIsp* instance) {
 
 bool avr_isp_write_fuse_high(AvrIsp* instance, uint8_t hfuse) {
     furi_assert(instance);
+
     bool ret = false;
     if(avr_isp_read_fuse_high(instance) == hfuse) {
         ret = true;
@@ -407,6 +426,7 @@ bool avr_isp_write_fuse_high(AvrIsp* instance, uint8_t hfuse) {
 
 uint8_t avr_isp_read_fuse_extended(AvrIsp* instance) {
     furi_assert(instance);
+
     uint8_t data = 0;
     uint32_t starttime = furi_get_tick();
     while((furi_get_tick() - starttime) < 300) {
@@ -421,6 +441,7 @@ uint8_t avr_isp_read_fuse_extended(AvrIsp* instance) {
 
 bool avr_isp_write_fuse_extended(AvrIsp* instance, uint8_t efuse) {
     furi_assert(instance);
+
     bool ret = false;
     if(avr_isp_read_fuse_extended(instance) == efuse) {
         ret = true;

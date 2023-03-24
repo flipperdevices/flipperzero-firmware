@@ -1,5 +1,4 @@
 #include "avr_isp_view_chip_detect.h"
-#include "../avr_isp_app_i.h"
 #include <avr_isp_icons.h>
 #include <gui/elements.h>
 
@@ -16,7 +15,7 @@ typedef struct {
     uint16_t idx;
     const char* name_chip;
     uint32_t flash_size;
-    AvrIspChipDetectViewStatus status;
+    AvrIspChipDetectViewState state;
 } AvrIspChipDetectViewModel;
 
 void avr_isp_chip_detect_view_set_callback(
@@ -25,26 +24,26 @@ void avr_isp_chip_detect_view_set_callback(
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
+
     instance->callback = callback;
     instance->context = context;
 }
 
-void avr_isp_chip_detect_set_status(
-    AvrIspChipDetectView* instance,
-    AvrIspChipDetectViewStatus status) {
+void avr_isp_chip_detect_set_state(AvrIspChipDetectView* instance, AvrIspChipDetectViewState state) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view, AvrIspChipDetectViewModel * model, { model->status = status; }, true);
+        instance->view, AvrIspChipDetectViewModel * model, { model->state = state; }, true);
 }
 
 void avr_isp_chip_detect_view_draw(Canvas* canvas, AvrIspChipDetectViewModel* model) {
     canvas_clear(canvas);
+
     char str_buf[64] = {0};
     canvas_set_font(canvas, FontPrimary);
 
-    switch(model->status) {
-    case AvrIspChipDetectViewStatusDetected:
+    switch(model->state) {
+    case AvrIspChipDetectViewStateDetected:
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "AVR chip detected!");
         canvas_draw_icon(canvas, 29, 14, &I_chip_long_70x22);
         canvas_set_font(canvas, FontSecondary);
@@ -53,7 +52,7 @@ void avr_isp_chip_detect_view_draw(Canvas* canvas, AvrIspChipDetectViewModel* mo
         canvas_draw_str_aligned(canvas, 64, 45, AlignCenter, AlignCenter, model->name_chip);
         elements_button_right(canvas, "Next");
         break;
-    case AvrIspChipDetectViewStatusErrorOccured:
+    case AvrIspChipDetectViewStateErrorOccured:
         canvas_draw_str_aligned(
             canvas, 64, 5, AlignCenter, AlignCenter, "Error occured, try again!");
         canvas_draw_icon(canvas, 29, 14, &I_chip_error_70x22);
@@ -61,7 +60,7 @@ void avr_isp_chip_detect_view_draw(Canvas* canvas, AvrIspChipDetectViewModel* mo
         canvas_draw_str_aligned(
             canvas, 64, 45, AlignCenter, AlignCenter, "Check the wiring and retry");
         break;
-    case AvrIspChipDetectViewStatusErrorVerification:
+    case AvrIspChipDetectViewStateErrorVerification:
         canvas_draw_str_aligned(
             canvas, 64, 5, AlignCenter, AlignCenter, "Data verification failed");
         canvas_draw_icon(canvas, 29, 14, &I_chip_error_70x22);
@@ -71,7 +70,7 @@ void avr_isp_chip_detect_view_draw(Canvas* canvas, AvrIspChipDetectViewModel* mo
         break;
 
     default:
-        //AvrIspChipDetectViewStatusNoDetect
+        //AvrIspChipDetectViewStateNoDetect
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "AVR chip not found!");
         canvas_draw_icon(canvas, 29, 12, &I_chif_not_found_83x37);
 
@@ -83,6 +82,7 @@ void avr_isp_chip_detect_view_draw(Canvas* canvas, AvrIspChipDetectViewModel* mo
 
 bool avr_isp_chip_detect_view_input(InputEvent* event, void* context) {
     furi_assert(context);
+
     AvrIspChipDetectView* instance = context;
     if(event->key == InputKeyBack || event->type != InputTypeShort) {
         return false;
@@ -91,7 +91,7 @@ bool avr_isp_chip_detect_view_input(InputEvent* event, void* context) {
             instance->view,
             AvrIspChipDetectViewModel * model,
             {
-                if(model->status == AvrIspChipDetectViewStatusDetected) {
+                if(model->state == AvrIspChipDetectViewStateDetected) {
                     if(instance->callback)
                         instance->callback(AvrIspCustomEventSceneChipDetectOk, instance->context);
                 }
@@ -103,8 +103,8 @@ bool avr_isp_chip_detect_view_input(InputEvent* event, void* context) {
             instance->view,
             AvrIspChipDetectViewModel * model,
             {
-                if(model->status != AvrIspChipDetectViewStatusDetecting) {
-                    model->status = AvrIspChipDetectViewStatusDetecting;
+                if(model->state != AvrIspChipDetectViewStateDetecting) {
+                    model->state = AvrIspChipDetectViewStateDetecting;
                     avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
                 }
             },
@@ -120,6 +120,7 @@ static void avr_isp_chip_detect_detect_chip_callback(
     bool detect_chip,
     uint32_t flash_size) {
     furi_assert(context);
+
     AvrIspChipDetectView* instance = context;
     with_view_model(
         instance->view,
@@ -128,15 +129,16 @@ static void avr_isp_chip_detect_detect_chip_callback(
             model->name_chip = name;
             model->flash_size = flash_size;
             if(detect_chip) {
-                model->status = AvrIspChipDetectViewStatusDetected;
+                model->state = AvrIspChipDetectViewStateDetected;
             } else {
-                model->status = AvrIspChipDetectViewStatusNoDetect;
+                model->state = AvrIspChipDetectViewStateNoDetect;
             }
         },
         true);
 }
 void avr_isp_chip_detect_view_enter(void* context) {
     furi_assert(context);
+
     AvrIspChipDetectView* instance = context;
 
     //Start avr_isp_worker_rw
@@ -149,8 +151,8 @@ void avr_isp_chip_detect_view_enter(void* context) {
         instance->view,
         AvrIspChipDetectViewModel * model,
         {
-            if(model->status == AvrIspChipDetectViewStatusNoDetect ||
-               model->status == AvrIspChipDetectViewStatusDetected) {
+            if(model->state == AvrIspChipDetectViewStateNoDetect ||
+               model->state == AvrIspChipDetectViewStateDetected) {
                 avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
             }
         },
@@ -159,6 +161,7 @@ void avr_isp_chip_detect_view_enter(void* context) {
 
 void avr_isp_chip_detect_view_exit(void* context) {
     furi_assert(context);
+
     AvrIspChipDetectView* instance = context;
 
     avr_isp_worker_rw_set_callback(instance->avr_isp_worker_rw, NULL, NULL);
@@ -181,7 +184,7 @@ AvrIspChipDetectView* avr_isp_chip_detect_view_alloc() {
     with_view_model(
         instance->view,
         AvrIspChipDetectViewModel * model,
-        { model->status = AvrIspChipDetectViewStatusNoDetect; },
+        { model->state = AvrIspChipDetectViewStateNoDetect; },
         false);
     return instance;
 }
@@ -195,5 +198,6 @@ void avr_isp_chip_detect_view_free(AvrIspChipDetectView* instance) {
 
 View* avr_isp_chip_detect_view_get_view(AvrIspChipDetectView* instance) {
     furi_assert(instance);
+
     return instance->view;
 }

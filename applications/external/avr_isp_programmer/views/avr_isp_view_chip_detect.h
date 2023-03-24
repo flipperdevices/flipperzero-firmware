@@ -9,21 +9,19 @@ typedef struct AvrIspChipDetectView AvrIspChipDetectView;
 typedef void (*AvrIspChipDetectViewCallback)(AvrIspCustomEvent event, void* context);
 
 typedef enum {
-    AvrIspChipDetectViewStatusNoDetect,
-    AvrIspChipDetectViewStatusDetecting,
-    AvrIspChipDetectViewStatusDetected,
-    AvrIspChipDetectViewStatusErrorOccured,
-    AvrIspChipDetectViewStatusErrorVerification,
-} AvrIspChipDetectViewStatus;
+    AvrIspChipDetectViewStateNoDetect,
+    AvrIspChipDetectViewStateDetecting,
+    AvrIspChipDetectViewStateDetected,
+    AvrIspChipDetectViewStateErrorOccured,
+    AvrIspChipDetectViewStateErrorVerification,
+} AvrIspChipDetectViewState;
 
 void avr_isp_chip_detect_view_set_callback(
     AvrIspChipDetectView* instance,
     AvrIspChipDetectViewCallback callback,
     void* context);
 
-void avr_isp_chip_detect_set_status(
-    AvrIspChipDetectView* instance,
-    AvrIspChipDetectViewStatus status);
+void avr_isp_chip_detect_set_state(AvrIspChipDetectView* instance, AvrIspChipDetectViewState state);
 
 AvrIspChipDetectView* avr_isp_chip_detect_view_alloc();
 

@@ -1,5 +1,4 @@
 #include "avr_isp_view_reader.h"
-#include "../avr_isp_app_i.h"
 #include <gui/elements.h>
 
 #include "../helpers/avr_isp_worker_rw.h"
@@ -38,6 +37,7 @@ void avr_isp_reader_view_set_callback(
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
+
     instance->callback = callback;
     instance->context = context;
 }
@@ -47,6 +47,7 @@ void avr_isp_reader_set_file_path(
     const char* file_path,
     const char* file_name) {
     furi_assert(instance);
+
     instance->file_path = file_path;
     instance->file_name = file_name;
 }
@@ -85,8 +86,8 @@ void avr_isp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
 bool avr_isp_reader_view_input(InputEvent* event, void* context) {
     furi_assert(context);
     AvrIspReaderView* instance = context;
-    bool ret = true;
 
+    bool ret = true;
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
         with_view_model(
             instance->view,
@@ -100,7 +101,6 @@ bool avr_isp_reader_view_input(InputEvent* event, void* context) {
             },
             false);
     } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        FURI_LOG_E("Read", "Start %s %s", instance->file_path, instance->file_name);
         with_view_model(
             instance->view,
             AvrIspReaderViewModel * model,
@@ -119,6 +119,7 @@ bool avr_isp_reader_view_input(InputEvent* event, void* context) {
 static void avr_isp_reader_callback_status(void* context, AvrIspWorkerRWStatus status) {
     furi_assert(context);
     AvrIspReaderView* instance = context;
+
     with_view_model(
         instance->view,
         AvrIspReaderViewModel * model,
@@ -173,9 +174,9 @@ void avr_isp_reader_view_enter(void* context) {
 
 void avr_isp_reader_view_exit(void* context) {
     furi_assert(context);
+
     AvrIspReaderView* instance = context;
-    UNUSED(instance);
-    // //Stop avr_isp_worker_rw
+    //Stop avr_isp_worker_rw
     if(avr_isp_worker_rw_is_running(instance->avr_isp_worker_rw)) {
         avr_isp_worker_rw_stop(instance->avr_isp_worker_rw);
     }
@@ -208,5 +209,6 @@ void avr_isp_reader_view_free(AvrIspReaderView* instance) {
 
 View* avr_isp_reader_view_get_view(AvrIspReaderView* instance) {
     furi_assert(instance);
+
     return instance->view;
 }

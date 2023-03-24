@@ -1,29 +1,30 @@
 #include "../avr_isp_app_i.h"
-#include "../views/avr_isp_view_chip_detect.h"
 
 void avr_isp_scene_chip_detect_callback(AvrIspCustomEvent event, void* context) {
     furi_assert(context);
+
     AvrIspApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, event);
 }
 
 void avr_isp_scene_chip_detect_on_enter(void* context) {
-    AvrIspApp* app = context;
+    furi_assert(context);
 
+    AvrIspApp* app = context;
     switch(app->error) {
     case AvrIspErrorReading:
     case AvrIspErrorWriting:
-        avr_isp_chip_detect_set_status(
-            app->avr_isp_chip_detect_view, AvrIspChipDetectViewStatusErrorOccured);
+        avr_isp_chip_detect_set_state(
+            app->avr_isp_chip_detect_view, AvrIspChipDetectViewStateErrorOccured);
         break;
     case AvrIspErrorVerification:
-        avr_isp_chip_detect_set_status(
-            app->avr_isp_chip_detect_view, AvrIspChipDetectViewStatusErrorVerification);
+        avr_isp_chip_detect_set_state(
+            app->avr_isp_chip_detect_view, AvrIspChipDetectViewStateErrorVerification);
         break;
 
     default:
-    avr_isp_chip_detect_set_status(
-            app->avr_isp_chip_detect_view, AvrIspChipDetectViewStatusNoDetect);
+    avr_isp_chip_detect_set_state(
+            app->avr_isp_chip_detect_view, AvrIspChipDetectViewStateNoDetect);
         break;
     }
     app->error = AvrIspErrorNoError;
@@ -34,6 +35,8 @@ void avr_isp_scene_chip_detect_on_enter(void* context) {
 }
 
 bool avr_isp_scene_chip_detect_on_event(void* context, SceneManagerEvent event) {
+    furi_assert(context);
+    
     AvrIspApp* app = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {

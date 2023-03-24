@@ -25,17 +25,8 @@ typedef enum {
 
 typedef void (*AvrIspWorkerRWStatusCallback)(void* context, AvrIspWorkerRWStatus status);
 
-/** Allocate AvrIspWorkerRW
- * 
- * @param context AvrIsp* context
- * @return AvrIspWorkerRW* 
- */
 AvrIspWorkerRW* avr_isp_worker_rw_alloc(void* context);
 
-/** Free AvrIspWorkerRW
- * 
- * @param instance AvrIspWorkerRW instance
- */
 void avr_isp_worker_rw_free(AvrIspWorkerRW* instance);
 
 void avr_isp_worker_rw_start(AvrIspWorkerRW* instance);
@@ -44,12 +35,6 @@ void avr_isp_worker_rw_stop(AvrIspWorkerRW* instance);
 
 bool avr_isp_worker_rw_is_running(AvrIspWorkerRW* instance);
 
-/** Callback AvrIspWorkerRW
- *
- * @param instance AvrIspWorkerRW instance
- * @param callback AvrIspWorkerRWOverrunCallback callback
- * @param context
- */
 void avr_isp_worker_rw_set_callback(
     AvrIspWorkerRW* instance,
     AvrIspWorkerRWCallback callback,
@@ -60,11 +45,6 @@ void avr_isp_worker_rw_set_callback_status(
     AvrIspWorkerRWStatusCallback callback_status,
     void* context_status);
 
-/** Detect chip
- * 
- * @param instance AvrIspWorkerRW instance
- * @return bool 
- */
 bool avr_isp_worker_rw_detect_chip(AvrIspWorkerRW* instance);
 
 float avr_isp_worker_rw_get_progress_flash(AvrIspWorkerRW* instance);

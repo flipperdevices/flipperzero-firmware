@@ -52,13 +52,17 @@ bool avr_isp_write_page(
     uint32_t data_size);
 
 uint8_t avr_isp_read_lock_byte(AvrIsp* instance);
+
 bool avr_isp_write_lock_byte(AvrIsp* instance, uint8_t lock);
 
 uint8_t avr_isp_read_fuse_low(AvrIsp* instance);
+
 bool avr_isp_write_fuse_low(AvrIsp* instance, uint8_t lfuse);
 
 uint8_t avr_isp_read_fuse_high(AvrIsp* instance);
+
 bool avr_isp_write_fuse_high(AvrIsp* instance, uint8_t hfuse);
 
 uint8_t avr_isp_read_fuse_extended(AvrIsp* instance);
+
 bool avr_isp_write_fuse_extended(AvrIsp* instance, uint8_t efuse);

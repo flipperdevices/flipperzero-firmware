@@ -47,9 +47,3 @@ void avr_isp_worker_stop(AvrIspWorker* instance);
  * @return bool - true if running
  */
 bool avr_isp_worker_is_running(AvrIspWorker* instance);
-
-// /** Detect chip
-//  * 
-//  * @param instance AvrIspWorker instance
-//  */
-// void avr_isp_worker_detect_chip(AvrIspWorker* instance);

@@ -69,6 +69,7 @@ FlipperI32HexFile* flipper_i32hex_file_open_read(const char* name) {
 
 void flipper_i32hex_file_close(FlipperI32HexFile* instance) {
     furi_assert(instance);
+
     furi_string_free(instance->str_data);
     file_stream_close(instance->stream);
     stream_free(instance->stream);
@@ -127,6 +128,7 @@ FlipperI32HexFileRet flipper_i32hex_file_bin_to_i32hex_set_data(
 
 FlipperI32HexFileRet flipper_i32hex_file_bin_to_i32hex_set_end_line(FlipperI32HexFile* instance) {
     furi_assert(instance);
+
     FlipperI32HexFileRet ret = {.status = FlipperI32HexFileStatusOK, .data_size = 0};
     if(instance->file_open != FlipperI32HexFileStatusOpenFileWrite) {
         ret.status = FlipperI32HexFileStatusErrorFileWrite;
@@ -140,11 +142,13 @@ FlipperI32HexFileRet flipper_i32hex_file_bin_to_i32hex_set_end_line(FlipperI32He
 
 void flipper_i32hex_file_bin_to_i32hex_set_addr(FlipperI32HexFile* instance, uint32_t addr) {
     furi_assert(instance);
+
     instance->addr = addr;
 }
 
 const char* flipper_i32hex_file_get_string(FlipperI32HexFile* instance) {
     furi_assert(instance);
+
     return furi_string_get_cstr(instance->str_data);
 }
 
@@ -200,6 +204,7 @@ static FlipperI32HexFileRet flipper_i32hex_file_parse_line(
 
 static bool flipper_i32hex_file_check_data(uint8_t* data, uint32_t data_size) {
     furi_assert(data);
+
     uint8_t crc = 0;
     uint32_t data_read_ind = 0;
     if(data[0] > data_size) return false;
@@ -301,6 +306,7 @@ FlipperI32HexFileRet flipper_i32hex_file_i32hex_to_bin_get_data(
     uint32_t data_size) {
     furi_assert(instance);
     furi_assert(data);
+
     FlipperI32HexFileRet ret = {.status = FlipperI32HexFileStatusOK, .data_size = 0};
     if(instance->file_open != FlipperI32HexFileStatusOpenFileRead) {
         ret.status = FlipperI32HexFileStatusErrorFileRead;

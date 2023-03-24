@@ -14,7 +14,6 @@
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
 #include <gui/modules/popup.h>
-//#include <gui/modules/variable_item_list.h>
 
 #include "views/avr_isp_view_programmer.h"
 #include "views/avr_isp_view_reader.h"
@@ -30,12 +29,10 @@ typedef struct {
     NotificationApp* notifications;
     DialogsApp* dialogs;
     Popup* popup;
-    //VariableItemList* variable_item_list;
     Submenu* submenu;
     Widget* widget;
     TextInput* text_input;
     FuriString* file_path;
-    //FuriString* file_name;
     char file_name_tmp[AVR_ISP_MAX_LEN_NAME];
     AvrIspProgrammerView* avr_isp_programmer_view;
     AvrIspReaderView* avr_isp_reader_view;

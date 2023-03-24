@@ -1,5 +1,5 @@
 #include "avr_isp_view_programmer.h"
-#include "../avr_isp_app_i.h"
+#include <avr_isp_icons.h>
 
 #include "../helpers/avr_isp_worker.h"
 #include <gui/elements.h>
@@ -21,12 +21,14 @@ void avr_isp_programmer_view_set_callback(
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
+
     instance->callback = callback;
     instance->context = context;
 }
 
 void avr_isp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* model) {
     canvas_clear(canvas);
+
     if(model->status == AvrIspProgrammerViewStatusUSBConnect) {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_icon(canvas, 0, 0, &I_isp_active_128x53);
@@ -40,8 +42,8 @@ void avr_isp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* mod
 
 bool avr_isp_programmer_view_input(InputEvent* event, void* context) {
     furi_assert(context);
-    AvrIspProgrammerView* instance = context;
-    UNUSED(instance);
+    UNUSED(context);
+
     if(event->key == InputKeyBack || event->type != InputTypeShort) {
         return false;
     }
@@ -52,6 +54,7 @@ bool avr_isp_programmer_view_input(InputEvent* event, void* context) {
 static void avr_isp_programmer_usb_connect_callback(void* context, bool status_connect) {
     furi_assert(context);
     AvrIspProgrammerView* instance = context;
+
     with_view_model(
         instance->view,
         AvrIspProgrammerViewModel * model,
@@ -67,8 +70,8 @@ static void avr_isp_programmer_usb_connect_callback(void* context, bool status_c
 
 void avr_isp_programmer_view_enter(void* context) {
     furi_assert(context);
-    AvrIspProgrammerView* instance = context;
 
+    AvrIspProgrammerView* instance = context;
     with_view_model(
         instance->view,
         AvrIspProgrammerViewModel * model,
@@ -86,6 +89,7 @@ void avr_isp_programmer_view_enter(void* context) {
 
 void avr_isp_programmer_view_exit(void* context) {
     furi_assert(context);
+
     AvrIspProgrammerView* instance = context;
     //Stop worker
     if(avr_isp_worker_is_running(instance->worker)) {
@@ -125,5 +129,6 @@ void avr_isp_programmer_view_free(AvrIspProgrammerView* instance) {
 
 View* avr_isp_programmer_view_get_view(AvrIspProgrammerView* instance) {
     furi_assert(instance);
+
     return instance->view;
 }

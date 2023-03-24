@@ -62,6 +62,7 @@ static int32_t avr_isp_worker_rw_thread(void* context) {
     furi_hal_pwm_start(FuriHalPwmOutputIdLptim2PA4, 4000000, 50);
 
     FURI_LOG_D(TAG, "Start");
+
     while(1) {
         uint32_t events =
             furi_thread_flags_wait(AVR_ISP_WORKER_ALL_EVENTS, FuriFlagWaitAny, FuriWaitForever);
@@ -115,7 +116,9 @@ static int32_t avr_isp_worker_rw_thread(void* context) {
 
 bool avr_isp_worker_rw_detect_chip(AvrIspWorkerRW* instance) {
     furi_assert(instance);
+
     FURI_LOG_D(TAG, "Detecting AVR chip");
+
     instance->chip_detect = false;
     instance->chip_arr_ind = avr_isp_chip_arr_size + 1;
 
@@ -187,9 +190,7 @@ bool avr_isp_worker_rw_detect_chip(AvrIspWorkerRW* instance) {
     } while(0);
     if(instance->callback) {
         if(instance->chip_arr_ind > avr_isp_chip_arr_size) {
-            //ToDo add output ID chip
             instance->callback(instance->context, "No detect", instance->chip_detect, 0);
-
         } else if(instance->chip_arr_ind < avr_isp_chip_arr_size) {
             instance->callback(
                 instance->context,
@@ -197,7 +198,6 @@ bool avr_isp_worker_rw_detect_chip(AvrIspWorkerRW* instance) {
                 instance->chip_detect,
                 avr_isp_chip_arr[instance->chip_arr_ind].flashsize);
         } else {
-            //ToDo add output ID chip
             instance->callback(instance->context, "Unknown", instance->chip_detect, 0);
         }
     }
@@ -208,6 +208,7 @@ bool avr_isp_worker_rw_detect_chip(AvrIspWorkerRW* instance) {
 AvrIspWorkerRW* avr_isp_worker_rw_alloc(void* context) {
     furi_assert(context);
     UNUSED(context);
+
     AvrIspWorkerRW* instance = malloc(sizeof(AvrIspWorkerRW));
     instance->avr_isp = avr_isp_alloc();
 
@@ -257,6 +258,7 @@ void avr_isp_worker_rw_stop(AvrIspWorkerRW* instance) {
 
 bool avr_isp_worker_rw_is_running(AvrIspWorkerRW* instance) {
     furi_assert(instance);
+
     return instance->worker_running;
 }
 
@@ -265,6 +267,7 @@ void avr_isp_worker_rw_set_callback(
     AvrIspWorkerRWCallback callback,
     void* context) {
     furi_assert(instance);
+
     instance->callback = callback;
     instance->context = context;
 }
@@ -274,21 +277,24 @@ void avr_isp_worker_rw_set_callback_status(
     AvrIspWorkerRWStatusCallback callback_status,
     void* context_status) {
     furi_assert(instance);
+
     instance->callback_status = callback_status;
     instance->context_status = context_status;
 }
 
 float avr_isp_worker_rw_get_progress_flash(AvrIspWorkerRW* instance) {
     furi_assert(instance);
+
     return instance->progress_flash;
 }
 
 float avr_isp_worker_rw_get_progress_eeprom(AvrIspWorkerRW* instance) {
     furi_assert(instance);
+
     return instance->progress_eeprom;
 }
 
-void avr_isp_worker_rw_get_dump_flash(AvrIspWorkerRW* instance, const char* file_path) {
+static void avr_isp_worker_rw_get_dump_flash(AvrIspWorkerRW* instance, const char* file_path) {
     furi_assert(instance);
     furi_check(instance->avr_isp);
 
@@ -320,7 +326,7 @@ void avr_isp_worker_rw_get_dump_flash(AvrIspWorkerRW* instance, const char* file
     instance->progress_flash = 1.0f;
 }
 
-void avr_isp_worker_rw_get_dump_eeprom(AvrIspWorkerRW* instance, const char* file_path) {
+static void avr_isp_worker_rw_get_dump_eeprom(AvrIspWorkerRW* instance, const char* file_path) {
     furi_assert(instance);
     furi_check(instance->avr_isp);
 
@@ -357,6 +363,7 @@ bool avr_isp_worker_rw_read_dump(
     furi_assert(file_name);
 
     FURI_LOG_D(TAG, "Read dump chip");
+
     instance->progress_flash = 0.0f;
     instance->progress_eeprom = 0.0f;
     bool ret = false;
@@ -468,16 +475,18 @@ void avr_isp_worker_rw_read_dump_start(
     const char* file_path,
     const char* file_name) {
     furi_assert(instance);
+
     instance->file_path = file_path;
     instance->file_name = file_name;
     furi_thread_flags_set(furi_thread_get_id(instance->thread), AvrIspWorkerRWEvtReading);
 }
 
-bool avr_isp_worker_rw_verification_flash(AvrIspWorkerRW* instance, const char* file_path) {
+static bool avr_isp_worker_rw_verification_flash(AvrIspWorkerRW* instance, const char* file_path) {
     furi_assert(instance);
     furi_assert(file_path);
 
     FURI_LOG_D(TAG, "Verification flash %s", file_path);
+
     instance->progress_flash = 0.0;
     bool ret = true;
 
@@ -494,11 +503,6 @@ bool avr_isp_worker_rw_verification_flash(AvrIspWorkerRW* instance, const char* 
     while(((flipper_hex_ret.status == FlipperI32HexFileStatusData) ||
            (flipper_hex_ret.status == FlipperI32HexFileStatusUdateAddr)) &&
           ret) {
-        // for(size_t i = 0; i < flipper_hex_ret.data_size; i++) {
-        //     printf("%02X ", data_read_hex[i]);
-        // }
-        // printf("\r\n");
-
         switch(flipper_hex_ret.status) {
         case FlipperI32HexFileStatusData:
             avr_isp_read_page(
@@ -508,11 +512,6 @@ bool avr_isp_worker_rw_verification_flash(AvrIspWorkerRW* instance, const char* 
                 flipper_hex_ret.data_size,
                 data_read_flash,
                 sizeof(data_read_flash));
-
-            // for(size_t i = 0; i < flipper_hex_ret.data_size; i++) {
-            //     printf("%02X ", data_read_flash[i]);
-            // }
-            // printf("\r\n");
 
             if(memcmp(data_read_hex, data_read_flash, flipper_hex_ret.data_size) != 0) {
                 ret = false;
@@ -543,11 +542,13 @@ bool avr_isp_worker_rw_verification_flash(AvrIspWorkerRW* instance, const char* 
     return ret;
 }
 
-bool avr_isp_worker_rw_verification_eeprom(AvrIspWorkerRW* instance, const char* file_path) {
+static bool
+    avr_isp_worker_rw_verification_eeprom(AvrIspWorkerRW* instance, const char* file_path) {
     furi_assert(instance);
     furi_assert(file_path);
 
     FURI_LOG_D(TAG, "Verification eeprom %s", file_path);
+
     instance->progress_eeprom = 0.0;
     bool ret = true;
 
@@ -564,11 +565,6 @@ bool avr_isp_worker_rw_verification_eeprom(AvrIspWorkerRW* instance, const char*
     while(((flipper_hex_ret.status == FlipperI32HexFileStatusData) ||
            (flipper_hex_ret.status == FlipperI32HexFileStatusUdateAddr)) &&
           ret) {
-        // for(size_t i = 0; i < flipper_hex_ret.data_size; i++) {
-        //     printf("%02X ", data_read_hex[i]);
-        // }
-        // printf("\r\n");
-
         switch(flipper_hex_ret.status) {
         case FlipperI32HexFileStatusData:
             avr_isp_read_page(
@@ -578,11 +574,6 @@ bool avr_isp_worker_rw_verification_eeprom(AvrIspWorkerRW* instance, const char*
                 flipper_hex_ret.data_size,
                 data_read_eeprom,
                 sizeof(data_read_eeprom));
-
-            // for(size_t i = 0; i < flipper_hex_ret.data_size; i++) {
-            //     printf("%02X ", data_read_eeprom[i]);
-            // }
-            // printf("\r\n");
 
             if(memcmp(data_read_hex, data_read_eeprom, flipper_hex_ret.data_size) != 0) {
                 ret = false;
@@ -656,67 +647,20 @@ void avr_isp_worker_rw_verification_start(
     const char* file_path,
     const char* file_name) {
     furi_assert(instance);
+
     instance->file_path = file_path;
     instance->file_name = file_name;
     furi_thread_flags_set(furi_thread_get_id(instance->thread), AvrIspWorkerRWEvtVerification);
 }
 
-// bool avr_isp_worker_rw_check_hex(
-//     AvrIspWorkerRW* instance,
-//     const char* file_path,
-//     const char* file_name) {
-//     furi_assert(instance);
-//     furi_assert(file_path);
-//     furi_assert(file_name);
-
-//     FuriString* file_path_name = furi_string_alloc();
-//     bool ret = false;
-//     bool check_flash = true;
-//     bool check_eeprom = true;
-
-//     do {
-//         furi_string_printf(
-//             file_path_name, "%s/%s_%s", file_path, file_name, NAME_PATERN_FLASH_FILE);
-
-//         FURI_LOG_D(TAG, "Check flash file");
-//         FlipperI32HexFile* flipper_hex_flash_read =
-//             flipper_i32hex_file_open_read(furi_string_get_cstr(file_path_name));
-//         if(flipper_i32hex_file_check(flipper_hex_flash_read)) {
-//             FURI_LOG_D(TAG, "Check flash file: OK");
-//         } else {
-//             FURI_LOG_D(TAG, "Check flash file: Error");
-//             check_flash = false;
-//         }
-//         flipper_i32hex_file_close(flipper_hex_flash_read);
-
-//         if(avr_isp_chip_arr[instance->chip_arr_ind].eepromsize > 0) {
-//             furi_string_printf(
-//                 file_path_name, "%s/%s_%s", file_path, file_name, NAME_PATERN_EEPROM_FILE);
-
-//             FURI_LOG_D(TAG, "Check eeprom file");
-//             FlipperI32HexFile* flipper_hex_eeprom_read =
-//                 flipper_i32hex_file_open_read(furi_string_get_cstr(file_path_name));
-//             if(flipper_i32hex_file_check(flipper_hex_eeprom_read)) {
-//                 FURI_LOG_D(TAG, "Check eeprom file: OK");
-//             } else {
-//                 FURI_LOG_D(TAG, "Check eeprom file: Error");
-//                 check_eeprom = false;
-//             }
-//             flipper_i32hex_file_close(flipper_hex_eeprom_read);
-//         }
-
-//         if(check_flash && check_eeprom) ret = true;
-//     } while(false);
-//     furi_string_free(file_path_name);
-//     return ret;
-// }
-
-void avr_isp_worker_rw_write_flash(AvrIspWorkerRW* instance, const char* file_path) {
+static void avr_isp_worker_rw_write_flash(AvrIspWorkerRW* instance, const char* file_path) {
     furi_assert(instance);
     furi_check(instance->avr_isp);
+
     instance->progress_flash = 0.0;
 
     FURI_LOG_D(TAG, "Write Flash %s", file_path);
+
     uint8_t data[288] = {0};
 
     FlipperI32HexFile* flipper_hex_flash = flipper_i32hex_file_open_read(file_path);
@@ -727,12 +671,6 @@ void avr_isp_worker_rw_write_flash(AvrIspWorkerRW* instance, const char* file_pa
 
     while((flipper_hex_ret.status == FlipperI32HexFileStatusData) ||
           (flipper_hex_ret.status == FlipperI32HexFileStatusUdateAddr)) {
-        // FURI_LOG_D(TAG, "EEPROM WRITE Page1");
-        // for(size_t i = 0; i < flipper_hex_ret.data_size; i++) {
-        //     printf("%02X ", data[i]);
-        // }
-        // printf("\r\n");
-
         switch(flipper_hex_ret.status) {
         case FlipperI32HexFileStatusData:
             if(!avr_isp_write_page(
@@ -767,11 +705,13 @@ void avr_isp_worker_rw_write_flash(AvrIspWorkerRW* instance, const char* file_pa
     instance->progress_flash = 1.0f;
 }
 
-void avr_isp_worker_rw_write_eeprom(AvrIspWorkerRW* instance, const char* file_path) {
+static void avr_isp_worker_rw_write_eeprom(AvrIspWorkerRW* instance, const char* file_path) {
     furi_assert(instance);
     furi_check(instance->avr_isp);
+
     instance->progress_eeprom = 0.0;
     uint8_t data[288] = {0};
+
     FURI_LOG_D(TAG, "Write EEPROM %s", file_path);
 
     FlipperI32HexFile* flipper_hex_eeprom_read = flipper_i32hex_file_open_read(file_path);
@@ -782,12 +722,6 @@ void avr_isp_worker_rw_write_eeprom(AvrIspWorkerRW* instance, const char* file_p
 
     while((flipper_hex_ret.status == FlipperI32HexFileStatusData) ||
           (flipper_hex_ret.status == FlipperI32HexFileStatusUdateAddr)) {
-        // FURI_LOG_D(TAG, "EEPROM WRITE Page");
-        // for(size_t i = 0; i < flipper_hex_ret.data_size; i++) {
-        //     printf("%02X ", data[i]);
-        // }
-        // printf("\r\n");
-
         switch(flipper_hex_ret.status) {
         case FlipperI32HexFileStatusData:
             if(!avr_isp_write_page(
@@ -832,6 +766,7 @@ bool avr_isp_worker_rw_write_dump(
     furi_assert(file_name);
 
     FURI_LOG_D(TAG, "Write dump chip");
+
     instance->progress_flash = 0.0f;
     instance->progress_eeprom = 0.0f;
     bool ret = false;
@@ -872,12 +807,6 @@ bool avr_isp_worker_rw_write_dump(
                 FURI_LOG_E(TAG, "Type or version mismatch");
                 break;
             }
-
-            //             if(!flipper_format_write_string_cstr(
-            //        flipper_format, "Chip name", avr_isp_chip_arr[instance->chip_arr_ind].name)) {
-            //     FURI_LOG_E(TAG, "Chip name");
-            //     break;
-            // }
 
             AvrIspSignature sig_read = {0};
 
@@ -1055,6 +984,7 @@ void avr_isp_worker_rw_write_dump_start(
     const char* file_path,
     const char* file_name) {
     furi_assert(instance);
+
     instance->file_path = file_path;
     instance->file_name = file_name;
     furi_thread_flags_set(furi_thread_get_id(instance->thread), AvrIspWorkerRWEvtWriting);

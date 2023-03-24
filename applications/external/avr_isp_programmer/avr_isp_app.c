@@ -1,8 +1,5 @@
 #include "avr_isp_app_i.h"
 
-#include <furi.h>
-#include <furi_hal.h>
-
 static bool avr_isp_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     AvrIspApp* app = context;
@@ -48,13 +45,6 @@ AvrIspApp* avr_isp_app_alloc() {
 
     // Open Notification record
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
-
-    // // Variable Item List
-    // app->variable_item_list = variable_item_list_alloc();
-    // view_dispatcher_add_view(
-    //     app->view_dispatcher,
-    //     AvrIspViewVariableItemList,
-    //     variable_item_list_get_view(app->variable_item_list));
 
     // SubMenu
     app->submenu = submenu_alloc();
@@ -116,10 +106,6 @@ void avr_isp_app_free(AvrIspApp* app) {
     // Submenu
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewSubmenu);
     submenu_free(app->submenu);
-
-    // // Variable Item List
-    // view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewVariableItemList);
-    // variable_item_list_free(app->variable_item_list);
 
     //  Widget
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewWidget);

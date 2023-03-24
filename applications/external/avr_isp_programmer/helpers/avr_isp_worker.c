@@ -122,52 +122,6 @@ static void avr_isp_worker_vcp_cdc_deinit(void) {
 
 //#################################################################################
 
-// void avr_isp_worker_detect_chip(AvrIspWorker* instance) {
-//     uint8_t buf_cmd[] = {
-//         STK_ENTER_PROGMODE, CRC_EOP, STK_READ_SIGN, CRC_EOP, STK_LEAVE_PROGMODE, CRC_EOP};
-
-//     uint8_t buf_data[64] = {0};
-//     size_t ind = 0;
-
-//     FURI_LOG_D(TAG, "Detecting AVR chip");
-//     AvrIspProg* prog = avr_isp_prog_init();
-//     avr_isp_prog_rx(prog, buf_cmd, sizeof(buf_cmd));
-
-//     for(uint8_t i = 0; i < 3; i++) {
-//         avr_isp_prog_avrisp(prog);
-//     }
-//     size_t len = avr_isp_prog_tx(prog, buf_data, sizeof(buf_data));
-//     UNUSED(len);
-
-//     if(buf_data[2] == STK_INSYNC && buf_data[6] == STK_OK) {
-//         if(buf_data[3] != 0x1E) {
-//             ind = avr_isp_chip_arr_size + 1; //No detect chip
-//         } else {
-//             for(ind = 0; ind < avr_isp_chip_arr_size; ind++) {
-//                 if(avr_isp_chip_arr[ind].avrarch != F_AVR8) continue;
-//                 if(avr_isp_chip_arr[ind].sigs[1] == buf_data[4]) {
-//                     if(avr_isp_chip_arr[ind].sigs[2] == buf_data[5]) {
-//                         FURI_LOG_D(TAG, "Detect AVR chip = \"%s\"", avr_isp_chip_arr[ind].name);
-//                         break;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-//     avr_isp_prog_free(prog);
-//     if(instance->callback) {
-//         if(ind > avr_isp_chip_arr_size) {
-//             //ToDo add output ID chip
-//             instance->callback(instance->context, "No detect");
-//         } else if(ind < avr_isp_chip_arr_size) {
-//             instance->callback(instance->context, avr_isp_chip_arr[ind].name);
-//         } else {
-//             //ToDo add output ID chip
-//             instance->callback(instance->context, "Unknown");
-//         }
-//     }
-// }
-
 static int32_t avr_isp_worker_prog_thread(void* context) {
     AvrIspProg* prog = context;
     FURI_LOG_D(TAG, "AvrIspProgWorker Start");
@@ -208,6 +162,7 @@ static int32_t avr_isp_worker_thread(void* context) {
     furi_thread_start(prog_thread);
 
     FURI_LOG_D(TAG, "Start");
+
     while(instance->worker_running) {
         uint32_t events =
             furi_thread_flags_wait(AVR_ISP_WORKER_ALL_EVENTS, FuriFlagWaitAny, FuriWaitForever);
@@ -243,7 +198,9 @@ static int32_t avr_isp_worker_thread(void* context) {
                 instance->callback(instance->context, (bool)instance->connect_usb);
         }
     }
+
     FURI_LOG_D(TAG, "Stop");
+
     furi_thread_flags_set(furi_thread_get_id(prog_thread), AvrIspWorkerEvtStop);
     avr_isp_prog_exit(prog);
     furi_delay_ms(10);
@@ -278,6 +235,7 @@ void avr_isp_worker_set_callback(
     AvrIspWorkerCallback callback,
     void* context) {
     furi_assert(instance);
+
     instance->callback = callback;
     instance->context = context;
 }
@@ -303,5 +261,6 @@ void avr_isp_worker_stop(AvrIspWorker* instance) {
 
 bool avr_isp_worker_is_running(AvrIspWorker* instance) {
     furi_assert(instance);
+
     return instance->worker_running;
 }
