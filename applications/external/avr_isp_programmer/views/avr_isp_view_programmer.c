@@ -35,7 +35,7 @@ void avr_isp_programmer_view_draw(Canvas* canvas, AvrIspProgrammerViewModel* mod
         elements_multiline_text(canvas, 45, 10, "ISP mode active");
     } else {
         canvas_set_font(canvas, FontSecondary);
-        canvas_draw_icon(canvas, 51, 6, &I_Link_waiting_77x56);
+        canvas_draw_icon(canvas, 51, 6, &I_link_waiting_77x56);
         elements_multiline_text(canvas, 0, 25, "Waiting for\nsoftware\nconnection");
     }
 }

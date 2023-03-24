@@ -12,7 +12,7 @@ void avr_isp_scene_success_on_enter(void* context) {
 
     AvrIspApp* app = context;
     Popup* popup = app->popup;
-    popup_set_icon(popup, 32, 5, &I_DolphinNice_96x59);
+    popup_set_icon(popup, 32, 5, &I_dolphin_nice_96x59);
     popup_set_header(popup, "Success!", 8, 22, AlignLeft, AlignBottom);
     popup_set_timeout(popup, 1500);
     popup_set_context(popup, app);
