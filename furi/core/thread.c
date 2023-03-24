@@ -107,14 +107,8 @@ static void furi_thread_body(void* context) {
     // flush stdout
     __furi_thread_stdout_flush(thread);
 
-    // from here we can't use thread pointer
     furi_thread_set_state(thread, FuriThreadStateStopped);
 
-    // clear thread local storage
-    furi_assert(pvTaskGetThreadLocalStoragePointer(NULL, 0) != NULL);
-    vTaskSetThreadLocalStoragePointer(NULL, 0, NULL);
-
-    thread->task_handle = NULL;
     vTaskDelete(NULL);
     furi_thread_catch();
 }
@@ -271,6 +265,16 @@ void furi_thread_start(FuriThread* thread) {
     }
 
     furi_check(thread->task_handle);
+}
+
+void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
+    FuriThread* thread = pvTaskGetThreadLocalStoragePointer(task, 0);
+    if(thread) {
+        // clear thread local storage
+        vTaskSetThreadLocalStoragePointer(task, 0, NULL);
+
+        thread->task_handle = NULL;
+    }
 }
 
 bool furi_thread_join(FuriThread* thread) {
