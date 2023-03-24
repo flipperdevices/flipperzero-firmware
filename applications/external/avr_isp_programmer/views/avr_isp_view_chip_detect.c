@@ -140,6 +140,17 @@ void avr_isp_chip_detect_view_enter(void* context) {
     furi_assert(context);
 
     AvrIspChipDetectView* instance = context;
+    bool detect_chip = false;
+    with_view_model(
+        instance->view,
+        AvrIspChipDetectViewModel * model,
+        {
+            if(model->state == AvrIspChipDetectViewStateNoDetect ||
+               model->state == AvrIspChipDetectViewStateDetected) {
+                detect_chip = true;
+            }
+        },
+        false);
 
     //Start avr_isp_worker_rw
     instance->avr_isp_worker_rw = avr_isp_worker_rw_alloc(instance->context);
@@ -147,16 +158,7 @@ void avr_isp_chip_detect_view_enter(void* context) {
     avr_isp_worker_rw_set_callback(
         instance->avr_isp_worker_rw, avr_isp_chip_detect_detect_chip_callback, instance);
 
-    with_view_model(
-        instance->view,
-        AvrIspChipDetectViewModel * model,
-        {
-            if(model->state == AvrIspChipDetectViewStateNoDetect ||
-               model->state == AvrIspChipDetectViewStateDetected) {
-                avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
-            }
-        },
-        false);
+    if(detect_chip) avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
 }
 
 void avr_isp_chip_detect_view_exit(void* context) {
