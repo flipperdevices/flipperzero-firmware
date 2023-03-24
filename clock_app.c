@@ -359,7 +359,6 @@ static void clock_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 8, AlignCenter, AlignCenter, time_string); // DRAW TIME
         if(state->w_test && timer_start_timestamp != 0) {
             int32_t elapsed_secs_img = (elapsed_secs % 60) % 5;
-            int32_t elapsed_secs_img2 = (elapsed_secs % 60) % 4;
             static const Icon* const count_anim[5] = {
                 &I_HappyFlipper_128x64, &I_G0ku, &I_g0ku_1, &I_g0ku_2, &I_g0ku_3};
             canvas_draw_icon(canvas, -5, 15, count_anim[elapsed_secs_img]);
