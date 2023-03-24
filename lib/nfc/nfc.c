@@ -207,7 +207,7 @@ static NfcError nfc_poller_prepare_trx(Nfc* instance) {
             error = f_hal_nfc_poller_field_on();
             if(error != FHalNfcErrorNone) break;
             instance->state = NfcStateFieldOn;
-            if(instance->fdt_poll_poll_us) {
+            if(instance->guard_time_us) {
                 f_hal_nfc_timer_block_tx_start_us(instance->guard_time_us);
                 instance->comm_state = NfcCommStateWaitBlockTxTimer;
                 event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
