@@ -5,11 +5,10 @@ import time
 import allure
 import pytest
 import serial
-
-from flipperzero_protobuf_py.flipperzero_protobuf.flipper_base import \
-    FlipperProtoException
-from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import \
-    FlipperProto
+from flipperzero_protobuf_py.flipperzero_protobuf.flipper_base import (
+    FlipperProtoException,
+)
+from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import FlipperProto
 from flippigator.flippigator import FlippigatorException, Gator, Navigator, Reader
 
 os.system("color")
@@ -23,8 +22,12 @@ def is_windows():
 def pytest_addoption(parser):
     # here you can pass any arguments you want
     parser.addoption("--port", action="store", default=None, help="flipper serial port")
-    parser.addoption("--bench_port", action="store", default=None, help="bench serial port")
-    parser.addoption("--reader_port", action="store", default=None, help="reader serial port")
+    parser.addoption(
+        "--bench_port", action="store", default=None, help="bench serial port"
+    )
+    parser.addoption(
+        "--reader_port", action="store", default=None, help="reader serial port"
+    )
     parser.addoption(
         "--path", action="store", default="./img/ref/", help="path to reference images"
     )
@@ -32,7 +35,12 @@ def pytest_addoption(parser):
     parser.addoption("--gui", action="store", default=True, help="gui flag")
     parser.addoption("--scale", action="store", default=12, help="scale factor")
     parser.addoption("--threshold", action="store", default=0.99, help="threshold")
-    parser.addoption("--bench", action="store_true", default=False, help="use this flag for E2E bench tests")
+    parser.addoption(
+        "--bench",
+        action="store_true",
+        default=False,
+        help="use this flag for E2E bench tests",
+    )
 
 
 def pytest_configure(config):
@@ -43,6 +51,7 @@ def pytest_configure(config):
 def pytest_unconfigure(config):
     # here you can add teardown after session!
     pass
+
 
 def pytest_collection_modifyitems(config, items):
     if config.getoption("--bench"):
@@ -96,6 +105,7 @@ def flipper_serial(request):
 
     return flipper_serial
 
+
 @pytest.fixture(scope="session")
 def bench_serial(request):
     # taking port from config or returning OS based default
@@ -116,6 +126,7 @@ def bench_serial(request):
     bench_serial.flushInput()
 
     return bench_serial
+
 
 @pytest.fixture(scope="session")
 def reader_serial(request):
@@ -212,6 +223,7 @@ def gator(bench_serial, request) -> Gator:
         gator.home()
 
         return gator
+
 
 @pytest.fixture(scope="session", autouse=False)
 def reader_nfc(reader_serial, gator, request) -> Gator:

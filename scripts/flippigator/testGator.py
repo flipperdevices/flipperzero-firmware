@@ -5,9 +5,8 @@ import sys
 import time
 
 import serial
-from termcolor import colored
-
 from flippigator.flippigator import Gator, Navigator
+from termcolor import colored
 
 
 def main():

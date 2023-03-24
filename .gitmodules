@@ -34,3 +34,6 @@
 [submodule "scripts/flippigator/flipperzero_protobuf_py"]
 	path = scripts/flippigator/flipperzero_protobuf_py
 	url = https://github.com/flipperdevices/flipperzero_protobuf_py.git
+[submodule "lib/heatshrink"]
+	path = lib/heatshrink
+	url = https://github.com/flipperdevices/heatshrink.git

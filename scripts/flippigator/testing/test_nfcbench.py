@@ -126,7 +126,7 @@ class TestNfcBench(BaseCase):
             state = nav.get_current_state()
         nav.go_to_main_screen()
 
-    '''
+    """
     def test_read_mifare_classic_4k_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
@@ -200,7 +200,7 @@ class TestNfcBench(BaseCase):
         
 
         nav.go_to_main_screen()
-    '''
+    """
 
     def test_read_troika_card(self, nav, gator, reader_nfc):
         with allure.step("Go to NFC"):
