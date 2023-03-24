@@ -17,6 +17,8 @@
 
 constexpr static int FPS = 2;
 
+std::unique_ptr<State> state;
+
 static void input_cb(InputEvent *event, FuriMessageQueue *queue) {
 	furi_assert(event);
 	furi_assert(queue);
@@ -26,14 +28,13 @@ static void input_cb(InputEvent *event, FuriMessageQueue *queue) {
 }
 
 static void draw_cb(Canvas *canvas, void *ctx) {
-	auto *mutex = reinterpret_cast<ValueMutex *>(ctx);
-	State *state = nullptr;
+	auto *mutex = reinterpret_cast<FuriMutex *>(ctx);
 
-	if (!(state = reinterpret_cast<State *>(acquire_mutex_block(mutex)))) {
+	if (furi_mutex_acquire(mutex, 0) != FuriStatusOk) {
 		ERROR(errs[(ERR_MUTEX_BLOCK)]);
 		goto bail;
 	}
-	
+
 	canvas_clear(canvas);
 	canvas_set_color(canvas, ColorBlack);
 	canvas_set_font(canvas, FontPrimary);
@@ -68,7 +69,7 @@ bail:
 	canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "Couldn't acquire state.");
 
 release:
-	if (!release_mutex(mutex, state)) {
+	if (furi_mutex_release(mutex) != FuriStatusOk) {
 		canvas_clear(canvas);
 		canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "Couldn't release mutex.");
 	}
@@ -84,9 +85,8 @@ static void timer_cb(FuriMessageQueue *queue) {
 extern "C" int32_t scd30_main() {
 	err_t error = static_cast<err_t>(0);
 	Gui *gui = nullptr;
-	std::unique_ptr<State> state;
 	ViewPort *viewport = nullptr;
-	ValueMutex mutex {0};
+	FuriMutex *mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 	FuriMessageQueue *queue = nullptr;
 	constexpr uint32_t  queue_size = 8;
 	EventMessage message;
@@ -107,7 +107,7 @@ extern "C" int32_t scd30_main() {
 		goto bail;
 	}
 
-	if (!init_mutex(&mutex, state.get(), sizeof(*state))) {
+	if (mutex == nullptr) {
 		ERROR(errs[(error = ERR_NO_MUTEX)]);
 		goto bail;
 	}
@@ -158,7 +158,7 @@ extern "C" int32_t scd30_main() {
 				default:                        ERROR(errs[(error = ERR_QUEUE_UNK)]);       goto bail;
 			}
 		} else {
-			if (!acquire_mutex_block(&mutex)) {
+			if (!furi_mutex_acquire(mutex, 0)) {
 				ERROR(errs[(error = ERR_MUTEX_BLOCK)]);
 				goto bail;
 			}
@@ -173,14 +173,14 @@ extern "C" int32_t scd30_main() {
 
 			view_port_update(viewport);
 
-			if (!release_mutex(&mutex, state.get())) {
+			if (!furi_mutex_release(mutex)) {
 				ERROR(errs[(error = ERR_MUTEX_RELEASE)]);
 				goto bail;
 			}
 		}
 	}
-	
-	
+
+
 bail:
 	if (state->timer) {
 		furi_timer_stop(state->timer);
@@ -196,14 +196,10 @@ bail:
 		viewport = nullptr;
 	}
 
-	if (mutex.mutex) {
-		delete_mutex(&mutex);
-		mutex.mutex = nullptr;
-	}
-
 	state.reset();
 
 	furi_record_close("gui");
+	furi_mutex_free(mutex);
 
 	if (queue) {
 		furi_message_queue_free(queue);
