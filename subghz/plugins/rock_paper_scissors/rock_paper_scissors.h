@@ -141,10 +141,7 @@ typedef enum {
     StateWonPaper = 'w',
     StateWonScissors = '+',
     // ScreenError states:
-    StateError = 'E',
     StateErrorRemoteTimeout = '7', // Joined but didn't make any moves.
-    StateErrorRemoteFast = '8', // Remote user sent moves after than local user.
-    StateErrorLocalFast = '9', // Local user sent moves after than remote user.
     // ScrenMainMenu states:
     StateUnknown = '?',
     StateMainMenuHost,
@@ -315,8 +312,6 @@ static bool isResult(GameState state);
 // @param state GameState to check.
 // @returns true if game state is a rock, paper, scissors.
 static bool isFinalMove(GameState state);
-
-static bool isError(GameState state);
 
 // When user makes a move, we briefly pulse the vibro motor.
 static void single_vibro();

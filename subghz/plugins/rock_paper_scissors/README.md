@@ -22,16 +22,21 @@ Completed work:
 - Allow viewing past games/scores.
 - A join ACK removes it from the list of available games.
 - Config - Allow changing hard-coded CONTACT_INFO message.
+- Config - Allow saving CONTACT_INFO message.
+- Relaxed timing, so Count 1/Count 2/RPS no longer have to be timed tightly.
+- Play again screen.
 
 Remaining work (for subghz version):
 
-- Config - Allow saving CONTACT_INFO message.
+- Play again from one Flipper Zero auto-starts/exit other Flipper Zero.
+- Wrap user content to two lines on Past Games screen.
+- Allow for replacement keyboard.
 - Refactor the code, so it has less duplication.
 - Write tutorial.
-- Add game ending animations.
 
 Future ideas:
 
+- Add game ending animations.
 - Create stand-alone hardware badges that can play the game too.
 - Uses Princeton signals for second player.
 - Instead of subghz, use IR.

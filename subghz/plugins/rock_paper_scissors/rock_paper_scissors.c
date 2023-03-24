@@ -51,11 +51,6 @@ static bool isFinalMove(GameState state) {
     return (StateRock == state) || (StatePaper == state) || (StateScissors == state);
 }
 
-static bool isError(GameState state) {
-    return (StateError == state) || (StateErrorLocalFast == state) ||
-           (StateErrorRemoteFast == state) || (StateErrorRemoteTimeout == state);
-}
-
 // When user makes a move, we briefly pulse the vibro motor.
 static void single_vibro() {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
@@ -649,31 +644,21 @@ static void rps_render_error(Canvas* canvas, void* ctx) {
     GameData* data = game_context->data;
     GameState local_player = data->local_player;
 
-    canvas_set_font(canvas, FontSecondary);
+    canvas_set_font(canvas, FontPrimary);
 
     switch(local_player) {
-    case StateError:
-        canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Unknown error");
-        break;
-
-    case StateErrorLocalFast:
-        canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Too fast!");
-        break;
-
-    case StateErrorRemoteFast:
-        canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Remote too fast!");
-        break;
-
     case StateErrorRemoteTimeout:
-        canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Remote timeout.");
+        canvas_draw_str_aligned(canvas, 15, 5, AlignLeft, AlignTop, "Remote timeout.");
+
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "It appears the remote");
+        canvas_draw_str_aligned(canvas, 5, 30, AlignLeft, AlignTop, "user has left the game?");
         break;
 
     default:
         canvas_draw_str_aligned(canvas, 5, 55, AlignLeft, AlignTop, "Unexpected. 3");
         break;
     }
-
-    canvas_draw_str_aligned(canvas, 120, 55, AlignLeft, AlignTop, "E");
 
     furi_mutex_release(game_context->mutex);
 }
@@ -1108,16 +1093,6 @@ static void rps_state_machine_update(GameContext* game_context) {
 
         // Should we tell other player we timed out?
         FURI_LOG_I(TAG, "Timed out after joining.");
-        return;
-    }
-
-    // TEMP - After Error, we reset back to Looking for player.
-    if(isError(d->local_player) && (duration(d->local_move_tick) > DURATION_SHOW_ERROR)) {
-        d->local_player = StateMainMenuHost;
-        d->remote_player = StateUnknown;
-        d->screen_state = ScreenMainMenu;
-
-        FURI_LOG_I(TAG, "Reset from Error.");
         return;
     }
 
