@@ -129,7 +129,7 @@ class Navigator:
         cv.imshow(window_name, display_image)
         key = cv.waitKey(1)
 
-    def recog_ref(self, ref=[], area=(0 , 128, 0, 64)):
+    def recog_ref(self, ref=[], area=(0 , 64, 0, 128)):
         # self.updateScreen()
         temp_pic_list = list()
         screen_image = self.get_raw_screen()[area[0]:area[1], area[2]:area[3]]
@@ -143,7 +143,7 @@ class Navigator:
                 if max_val > self._threshold:
                     h, w, ch = template.shape
                     temp_pic_list.append(
-                        (str(im), max_loc, (max_loc[0] + w, max_loc[1] + h))
+                        (str(im), (max_loc[0] + area[2], max_loc[1] + area[0]), (max_loc[0] + w + area[2], max_loc[1] + h + area[0]))
                     )
 
         found_ic = list()
@@ -283,7 +283,7 @@ class Navigator:
 
         heads = list()
         start_time = time.time()
-        while start_time + 60 > time.time():
+        while start_time + 10 > time.time():
             cur = self.get_current_state(area = (0, 16, 0, 128))
             if not cur == []:
                 if cur[0] == ("browser_head_" + module):
@@ -292,10 +292,12 @@ class Navigator:
                     return -1
                 heads.append(cur[0])
                 self.press_right()
+        if start_time + 10 <= time.time():
+            return -1
 
         files = list()
         start_time = time.time()
-        while start_time + 60 > time.time():
+        while start_time + 10 > time.time():
             state = self.get_current_state(timeout = 0.5, area = (15, 64, 0, 128))
             if not (state == []):
                 if state[0] in files:
@@ -304,6 +306,8 @@ class Navigator:
                     break
                 files.append(state[0])
             self.press_down()
+        if start_time + 10 <= time.time():
+            return -1
         self.press_ok()
         self.go_to("browser_Run in app", area = (15, 64, 0, 128))
         self.press_ok()
@@ -314,7 +318,7 @@ class Navigator:
 
         heads = list()
         start_time = time.time()
-        while start_time + 60 > time.time():
+        while start_time + 10 > time.time():
             cur = self.get_current_state(area = (0, 16, 0, 128))
             if not cur == []:
                 if cur[0] == ("browser_head_" + module):
@@ -323,10 +327,12 @@ class Navigator:
                     return -1
                 heads.append(cur[0])
                 self.press_right()
+        if start_time + 10 <= time.time():
+            return -1
 
         files = list()
         start_time = time.time()
-        while start_time + 60 > time.time():
+        while start_time + 10 > time.time():
             state = self.get_current_state(timeout = 0.5, area = (15, 64, 0, 128))
             if not (state == []):
                 if state[0] in files:
@@ -335,6 +341,9 @@ class Navigator:
                     break
                 files.append(state[0])
             self.press_down()
+        if start_time + 10 <= time.time():
+            return -1
+
         self.press_ok()
         self.go_to("browser_Delete", area = (15, 64, 0, 128))
         self.press_ok()

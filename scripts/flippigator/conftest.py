@@ -229,8 +229,28 @@ def gator(bench_serial, request) -> Gator:
 def reader_nfc(reader_serial, gator, request) -> Gator:
     bench = request.config.getoption("--bench")
     if bench:
-        print("Reader initialization")
+        print("Reader NFC initialization")
 
         reader = Reader(reader_serial, gator, -935.0, -890.0)
+
+        return reader
+
+@pytest.fixture(scope="session", autouse=False)
+def reader_em_hid(reader_serial, gator, request) -> Gator:
+    bench = request.config.getoption("--bench")
+    if bench:
+        print("Reader RFID Indala initialization")
+
+        reader = Reader(reader_serial, gator, -675.0, -875.0)
+
+        return reader
+
+@pytest.fixture(scope="session", autouse=False)
+def reader_indala(reader_serial, gator, request) -> Gator:
+    bench = request.config.getoption("--bench")
+    if bench:
+        print("Reader RFID Indala initialization")
+
+        reader = Reader(reader_serial, gator, -935.0, -635.0)
 
         return reader

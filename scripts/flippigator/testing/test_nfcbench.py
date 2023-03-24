@@ -14,7 +14,7 @@ os.system("color")
 class TestNfcBench(BaseCase):
     def test_read_mifare_classic_1k_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
-            nav.delete_file("NFC", "Bench_nfc_0")
+            nav.delete_file("NFC", "BN0")
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
@@ -73,13 +73,15 @@ class TestNfcBench(BaseCase):
         nav.go_to("Save")
         nav.press_ok()
         key = FlipperTextKeyboard(nav)
-        key.send("bench_nfc_0\n")
+        key.send("bN0\n")
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
 
     def test_read_nfc_a_card(self, nav, gator, reader_nfc):
+        with allure.step("Delete previous card, if possible"):
+            nav.delete_file("NFC", "BN1")
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
@@ -120,7 +122,7 @@ class TestNfcBench(BaseCase):
         nav.go_to("Save UID")
         nav.press_ok()
         key = FlipperTextKeyboard(nav)
-        key.send("bench_nfc_1\n")
+        key.send("bN1\n")
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
@@ -203,6 +205,8 @@ class TestNfcBench(BaseCase):
     """
 
     def test_read_troika_card(self, nav, gator, reader_nfc):
+        with allure.step("Delete previous card, if possible"):
+            nav.delete_file("NFC", "BN2")
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
@@ -244,13 +248,15 @@ class TestNfcBench(BaseCase):
         nav.go_to("Save")
         nav.press_ok()
         key = FlipperTextKeyboard(nav)
-        key.send("bench_nfc_2\n")
+        key.send("bN2\n")
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
 
     def test_read_ntag215_card(self, nav, gator, reader_nfc):
+        with allure.step("Delete previous card, if possible"):
+            nav.delete_file("NFC", "BN3")
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
@@ -292,13 +298,15 @@ class TestNfcBench(BaseCase):
         nav.go_to("Save")
         nav.press_ok()
         key = FlipperTextKeyboard(nav)
-        key.send("bench_nfc_3\n")
+        key.send("bN3\n")
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
 
     def test_read_mifare_ultralight_card(self, nav, gator, reader_nfc):
+        with allure.step("Delete previous card, if possible"):
+            nav.delete_file("NFC", "BN4")
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
@@ -341,13 +349,15 @@ class TestNfcBench(BaseCase):
         nav.go_to("Save")
         nav.press_ok()
         key = FlipperTextKeyboard(nav)
-        key.send("bench_nfc_4\n")
+        key.send("bN4\n")
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
         nav.go_to_main_screen()
 
     def test_read_mifare_desfire_card(self, nav, gator, reader_nfc):
+        with allure.step("Delete previous card, if possible"):
+            nav.delete_file("NFC", "BN5")
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
@@ -390,7 +400,7 @@ class TestNfcBench(BaseCase):
         nav.go_to("Save")
         nav.press_ok()
         key = FlipperTextKeyboard(nav)
-        key.send("bench_nfc_5\n")
+        key.send("bN5\n")
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
@@ -427,6 +437,8 @@ class TestNfcBench(BaseCase):
     """
 
     def test_read_all_in_one_card(self, nav, gator, reader_nfc):
+        with allure.step("Delete previous card, if possible"):
+            nav.delete_file("NFC", "BN6")
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
@@ -469,7 +481,7 @@ class TestNfcBench(BaseCase):
         nav.go_to("Save")
         nav.press_ok()
         key = FlipperTextKeyboard(nav)
-        key.send("bench_nfc_6\n")
+        key.send("bN6\n")
         state = nav.get_current_state()
         while "Saved!" in state:
             state = nav.get_current_state()
@@ -480,7 +492,7 @@ class TestNfcBench(BaseCase):
         reader_nfc.go_to_place()
         reader_nfc.clear()
 
-        if nav.open_file("NFC", "Bench_nfc_0") == -1:
+        if nav.open_file("NFC", "BN0") == -1:
             assert 0, "File not found"
         nav.get_current_state()
 
@@ -501,7 +513,7 @@ class TestNfcBench(BaseCase):
         reader_nfc.go_to_place()
         reader_nfc.clear()
 
-        if nav.open_file("NFC", "Bench_nfc_1") == -1:
+        if nav.open_file("NFC", "BN1") == -1:
             assert 0, "File not found"
         nav.get_current_state()
 
@@ -522,7 +534,7 @@ class TestNfcBench(BaseCase):
         reader_nfc.go_to_place()
         reader_nfc.clear()
 
-        if nav.open_file("NFC", "Bench_nfc_2") == -1:
+        if nav.open_file("NFC", "BN2") == -1:
             assert 0, "File not found"
         nav.get_current_state()
 
@@ -543,7 +555,7 @@ class TestNfcBench(BaseCase):
         reader_nfc.go_to_place()
         reader_nfc.clear()
 
-        if nav.open_file("NFC", "Bench_nfc_3") == -1:
+        if nav.open_file("NFC", "BN3") == -1:
             assert 0, "File not found"
         nav.get_current_state()
 
@@ -564,7 +576,7 @@ class TestNfcBench(BaseCase):
         reader_nfc.go_to_place()
         reader_nfc.clear()
 
-        if nav.open_file("NFC", "Bench_nfc_4") == -1:
+        if nav.open_file("NFC", "BN4") == -1:
             assert 0, "File not found"
         nav.get_current_state()
 
@@ -585,7 +597,7 @@ class TestNfcBench(BaseCase):
         reader_nfc.go_to_place()
         reader_nfc.clear()
 
-        if nav.open_file("NFC", "Bench_nfc_5") == -1:
+        if nav.open_file("NFC", "BN5") == -1:
             assert 0, "File not found"
         nav.get_current_state()
 
@@ -606,7 +618,7 @@ class TestNfcBench(BaseCase):
         reader_nfc.go_to_place()
         reader_nfc.clear()
 
-        if nav.open_file("NFC", "Bench_nfc_6") == -1:
+        if nav.open_file("NFC", "BN6") == -1:
             assert 0, "File not found"
         nav.get_current_state()
 
