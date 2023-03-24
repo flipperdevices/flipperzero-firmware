@@ -904,27 +904,42 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
             if(!furi_string_start_with_str(next_line, "Sec")) continue;
             const char* next_line_cstr = furi_string_get_cstr(next_line);
             MfClassicNonce res = {0};
-            int i = 0;  
+            int i = 0;
             char* endptr;
-            for (i = 0; i <= 17; i++) {
-                if (i != 0) {
+            for(i = 0; i <= 17; i++) {
+                if(i != 0) {
                     next_line_cstr = strchr(next_line_cstr, ' ');
-                    if (next_line_cstr) {
+                    if(next_line_cstr) {
                         next_line_cstr++;
                     } else {
                         break;
                     }
                 }
                 unsigned long value = strtoul(next_line_cstr, &endptr, 16);
-                switch(i){
-                    case 5: res.uid = value; break;
-                    case 7: res.nt0 = value; break;
-                    case 9: res.nr0_enc = value; break;
-                    case 11: res.ar0_enc = value; break;
-                    case 13: res.nt1 = value; break;
-                    case 15: res.nr1_enc = value; break;
-                    case 17: res.ar1_enc = value; break;
-                    default: break; // Do nothing
+                switch(i) {
+                case 5:
+                    res.uid = value;
+                    break;
+                case 7:
+                    res.nt0 = value;
+                    break;
+                case 9:
+                    res.nr0_enc = value;
+                    break;
+                case 11:
+                    res.ar0_enc = value;
+                    break;
+                case 13:
+                    res.nt1 = value;
+                    break;
+                case 15:
+                    res.nr1_enc = value;
+                    break;
+                case 17:
+                    res.ar1_enc = value;
+                    break;
+                default:
+                    break; // Do nothing
                 }
                 next_line_cstr = endptr;
             }
@@ -934,7 +949,7 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
                 napi_key_already_found_for_nonce(
                     system_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc)) ||
                (napi_key_already_found_for_nonce(
-                    user_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc))) {
+                   user_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc))) {
                 (program_state->cracked)++;
                 (program_state->num_completed)++;
                 continue;
