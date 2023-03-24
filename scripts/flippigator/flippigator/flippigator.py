@@ -129,15 +129,17 @@ class Navigator:
         cv.imshow(window_name, display_image)
         key = cv.waitKey(1)
 
-    def recog_ref(self, ref=[], area=(0 , 128, 0, 64)):
+    def recog_ref(self, ref=[], area=(0, 128, 0, 64)):
         # self.updateScreen()
         temp_pic_list = list()
-        screen_image = self.get_raw_screen()[area[0]:area[1], area[2]:area[3]]
+        screen_image = self.get_raw_screen()[area[0] : area[1], area[2] : area[3]]
         if len(ref) == 0:
             ref = list(self.imRef.keys())
         for im in ref:
             template = cv.cvtColor(self.imRef.get(im), 0)
-            if (template.shape[0] <= screen_image.shape[0]) and ((template.shape[1] <= screen_image.shape[1])):
+            if (template.shape[0] <= screen_image.shape[0]) and (
+                (template.shape[1] <= screen_image.shape[1])
+            ):
                 res = cv.matchTemplate(screen_image, template, cv.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
                 if max_val > self._threshold:
@@ -195,7 +197,7 @@ class Navigator:
             state = self.recog_ref(ref, area)
             if time.time() - start_time > timeout:
                 cv.imwrite("img/recognitionFailPic.bmp", self.screen_image)
-                #raise FlippigatorException("Recognition timeout")
+                # raise FlippigatorException("Recognition timeout")
                 break
         return state
 
@@ -259,11 +261,11 @@ class Navigator:
 
         return menus
 
-    def go_to(self, target, area = (0, 64, 0, 128)):
-        state = self.get_current_state(area = area)
+    def go_to(self, target, area=(0, 64, 0, 128)):
+        state = self.get_current_state(area=area)
         while not (target in state):
             self.press_down()
-            state = self.get_current_state(area = area)
+            state = self.get_current_state(area=area)
 
     def go_to_main_screen(self):
         self.press_back()
@@ -284,7 +286,7 @@ class Navigator:
         heads = list()
         start_time = time.time()
         while start_time + 60 > time.time():
-            cur = self.get_current_state(area = (0, 16, 0, 128))
+            cur = self.get_current_state(area=(0, 16, 0, 128))
             if not cur == []:
                 if cur[0] == ("browser_head_" + module):
                     break
@@ -296,7 +298,7 @@ class Navigator:
         files = list()
         start_time = time.time()
         while start_time + 60 > time.time():
-            state = self.get_current_state(timeout = 0.5, area = (15, 64, 0, 128))
+            state = self.get_current_state(timeout=0.5, area=(15, 64, 0, 128))
             if not (state == []):
                 if state[0] in files:
                     return -1
@@ -305,7 +307,7 @@ class Navigator:
                 files.append(state[0])
             self.press_down()
         self.press_ok()
-        self.go_to("browser_Run in app", area = (15, 64, 0, 128))
+        self.go_to("browser_Run in app", area=(15, 64, 0, 128))
         self.press_ok()
 
     def delete_file(self, module, filename):
@@ -315,7 +317,7 @@ class Navigator:
         heads = list()
         start_time = time.time()
         while start_time + 60 > time.time():
-            cur = self.get_current_state(area = (0, 16, 0, 128))
+            cur = self.get_current_state(area=(0, 16, 0, 128))
             if not cur == []:
                 if cur[0] == ("browser_head_" + module):
                     break
@@ -327,7 +329,7 @@ class Navigator:
         files = list()
         start_time = time.time()
         while start_time + 60 > time.time():
-            state = self.get_current_state(timeout = 0.5, area = (15, 64, 0, 128))
+            state = self.get_current_state(timeout=0.5, area=(15, 64, 0, 128))
             if not (state == []):
                 if state[0] in files:
                     return -1
@@ -336,7 +338,7 @@ class Navigator:
                 files.append(state[0])
             self.press_down()
         self.press_ok()
-        self.go_to("browser_Delete", area = (15, 64, 0, 128))
+        self.go_to("browser_Delete", area=(15, 64, 0, 128))
         self.press_ok()
         self.press_right()
         self.go_to_main_screen()

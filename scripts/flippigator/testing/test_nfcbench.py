@@ -488,7 +488,9 @@ class TestNfcBench(BaseCase):
         while start_time + 5 > time.time():
             if reader_nfc.update():
                 string = reader_nfc.get()
-                assert string == "W58W805C1332674D04", "Emulated NFC card reading failed"
+                assert (
+                    string == "W58W805C1332674D04"
+                ), "Emulated NFC card reading failed"
                 break
 
         if start_time + 5 < time.time():
@@ -551,7 +553,9 @@ class TestNfcBench(BaseCase):
         while start_time + 5 > time.time():
             if reader_nfc.update():
                 string = reader_nfc.get()
-                assert string == "W58WC007BA39427704", "Emulated NFC card reading failed"
+                assert (
+                    string == "W58WC007BA39427704"
+                ), "Emulated NFC card reading failed"
                 break
 
         if start_time + 5 < time.time():
@@ -572,7 +576,9 @@ class TestNfcBench(BaseCase):
         while start_time + 5 > time.time():
             if reader_nfc.update():
                 string = reader_nfc.get()
-                assert string == "W58W80485CBABD4004", "Emulated NFC card reading failed"
+                assert (
+                    string == "W58W80485CBABD4004"
+                ), "Emulated NFC card reading failed"
                 break
 
         if start_time + 5 < time.time():
@@ -593,7 +599,9 @@ class TestNfcBench(BaseCase):
         while start_time + 5 > time.time():
             if reader_nfc.update():
                 string = reader_nfc.get()
-                assert string == "W58W8055177A073904", "Emulated NFC card reading failed"
+                assert (
+                    string == "W58W8055177A073904"
+                ), "Emulated NFC card reading failed"
                 break
 
         if start_time + 5 < time.time():
@@ -614,7 +622,9 @@ class TestNfcBench(BaseCase):
         while start_time + 5 > time.time():
             if reader_nfc.update():
                 string = reader_nfc.get()
-                assert string == "W58W369CE7B10AC134", "Emulated NFC card reading failed"
+                assert (
+                    string == "W58W369CE7B10AC134"
+                ), "Emulated NFC card reading failed"
                 break
 
         if start_time + 5 < time.time():
