@@ -9,16 +9,16 @@ Resend: 3
 Delay_ms: 30
 
 Payload struct: 2,1,1
-EEPROM=0; RAM=1; PROGMEM=2; ID=3; RESET=4, WRAM=0x89
+EEPROM=0; RAM=1; PROGMEM=2; ID=3; RESET=4; WRAM=0x89; R1=0xC1; R2=0xC2; W1=0x81; W2=0x82
 
-R default: ,EEPROM,0xC1
-W default: n,,0x81
+R default: ,EEPROM,R1
+W default: n,,W1
 Write start: 0,0,0x8F
 
 R: ID*=,ID
 
-R: CO2 level*2[3]=i:4,,0xC2
-W: CO2 level*2=,i:4,0x82
+R: CO2 level*2[3]=i:4,,R2
+W: CO2 level*2=,i:4,W2
 
 R: FanSpeed[3]=i:19
 W: FanSpeed=,i:19
@@ -52,8 +52,8 @@ W: SpeedKeyIdx=,17
 R: IRRemotes=32
 W: IRRemotes=,32
 
-R: IRRemotesHash*2[80]=i:32#
-W: IRRemotesHash*2=,i:32
+R: IRRemotesHash*2[80]=i:32#,,R2
+W: IRRemotesHash*2=,i:32,W2
 
 R: OutPeriod=18
 W: OutPeriod=,18
@@ -67,23 +67,24 @@ W: RxAddr=,2
 R: Ch=3
 W: Ch=,3
 
-R: OSCCAL#=0x51,RAM
-W: OSCCAL#=,0x51,WRAM
+R: _OSCCAL=0x51,RAM
+W: _OSCCAL=,0x51,WRAM
 R: OSCCAL_EMEM=0      				
 
-R: PORTA#=0x39,RAM
-W: PORTA#=,0x3B,WRAM
-R: PORTB#=0x36,RAM
-W: PORTB#=,0x38,WRAM
+R: _PORTA=0x39,RAM
+W: _PORTA=,0x3B,WRAM
+R: _PORTB=0x36,RAM
+W: _PORTB=,0x38,WRAM
 
-R: LED Warning#=0x6C,RAM
-W: LED Warning#=,0x6C,WRAM
+R: _LED Warning=0x6B,RAM
+W: _LED Warning=,0x6B,WRAM
 
-R: FanOn=0x76,RAM
-R: FanOnNext=0x74,RAM
-R: FanOnNextCnt=0x72,RAM
-R: FanOnLast=0x73,RAM
-R: Fanspeed=0x75,RAM
+R: _FanOn=0x75,RAM
+R: _FanOnNext=0x73,RAM
+R: _FanOnNextCnt=0x71,RAM
+R: _FanOnLast=0x72,RAM
+R: _Fanspeed=0x74,RAM
+R: _IRHashLast*2=0x79,RAM,R2
 
 W: Reset=,RESET,0xC1
 
@@ -91,24 +92,28 @@ S: Lamp=,0,0x40
 S: Fan=,1,0x40
 S: FanSpdUp=,2,0x40
 S: FanSpdDn=,3,0x40
-S: SetupIR=,4,0x40
+S: FanSpdSave=,4,0x40
+S: SetupIR=,5,0x40
 
-SBatch: Fan Off: Fan=0
-SBatch: Fan On: Fan=3
 SBatch: Fan Cooker On: Fan=6
-SBatch: Fan Up: FanSpdUp=0
-SBatch: Fan Down: FanSpdDn=0
+SBatch: Fan On: Fan=3
+SBatch: Fan Off: Fan=0
 SBatch: Lamp On: Lamp=1
 SBatch: Lamp Off: Lamp=0
+SBatch: Fan Up: FanSpdUp=0
+SBatch: Fan Down: FanSpdDn=0
+SBatch: Fan SAVE: FanSpdSave=0;
+SBatch: Add new IR: SetupIR=1
 
 RBatch: Work: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep
 RBatch: Hardware: ID;RxAddr;Ch;SpeedInitIdx;Flags;OutPeriod;IRRemotes;OSCCAL_EMEM
 RBatch: All: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep;RxAddr;Ch;SpeedInitIdx;Flags;OutPeriod;IRRemotes;IRRemotesHash
 
 WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={700,850,1000};FanSpeed={3,5,6};FanCookSpeed={3,6,12};FanSleep=20;FanCookSleep=6;FanOnTime=150;FanCookOnTime=2;FanOffTime=100;FanCookOffTime=0;SpeedInitIdx=0;SpeedKeyIdx=6;Flags=0x49;OutPeriod=6;IRRemotes=0
-WBatch: LED Warning: LED Warning#=0x10
-WBatch: PORTA: PORTA#=0x0C
-WBatch: PORTB: PORTB#=0xC
-WBatch: OSCCAL: OSCCAL#=128
+WBatch: IRRemotes: IRRemotes=0
+WBatch: LED Warning: _LED Warning=0x10
+WBatch: PORTA: _PORTA=0x0C
+WBatch: PORTB: _PORTB=0xC
+WBatch: OSCCAL: _OSCCAL=128
 WBatch: CO2 Level+Fan speed: CO2 level={700,850,1000};FanSpeed={3,5,6}
 WBatch: Reset: Reset

@@ -44,7 +44,7 @@ const char SettingsFld_ReadBatch[] = "RBatch:";
 const char SettingsFld_WriteBatch[] = "WBatch:";
 const char SettingsFld_SetBatch[] = "SBatch:";
 const char SettingsFld_Listen[] = "Listen:";
-const char SettingsFld_ReadRepeatPeriod[] = "Read repeat:";
+const char SettingsFld_ListenRepeatPeriod[] = "Listen repeat:";
 const char AskQuestion_Save[] = "SAVE BATCH?";
 #define Settings_i 'i'
 #define Settings_n 'n'
@@ -95,7 +95,7 @@ uint8_t NRF_last_packet_send_st = 0;
 uint8_t NRF_resend = 1; // number of transaction attempts 
 int8_t  NRF_repeat = 0; // count number of repeated requests (until < NRF_resend)
 uint32_t NRF_time;
-uint16_t ReadRepeatPeriod = 10; // s
+uint16_t ListenRepeatPeriod = 10; // s
 bool ReadRepeat = false;
 uint32_t delay_between_pkt = 10;// ms
 
@@ -854,8 +854,8 @@ static uint8_t load_settings_file() {
 				NRF_resend = str_to_int(p + sizeof(SettingsFld_Resend));
 			} else if(strncmp(p, SettingsFld_Delay, sizeof(SettingsFld_Delay)-1) == 0) {
 				delay_between_pkt = str_to_int(p + sizeof(SettingsFld_Delay));
-			} else if(strncmp(p, SettingsFld_ReadRepeatPeriod, sizeof(SettingsFld_ReadRepeatPeriod)-1) == 0) {
-				ReadRepeatPeriod = str_to_int(p + sizeof(SettingsFld_ReadRepeatPeriod));
+			} else if(strncmp(p, SettingsFld_ListenRepeatPeriod, sizeof(SettingsFld_ListenRepeatPeriod)-1) == 0) {
+				ListenRepeatPeriod = str_to_int(p + sizeof(SettingsFld_ListenRepeatPeriod));
 			} else if(strncmp(p, SettingsFld_Payload, sizeof(SettingsFld_Payload)-1) == 0) {
 				p += sizeof(SettingsFld_Payload);
 				payload_fields = 0;
@@ -1000,6 +1000,18 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 	furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
+void display_remove_asterisk(char *fsp, uint8_t vx)
+{
+	char *p2 = strchr(fsp, '*');
+	if(p2) { // remove '*' or '*n'
+		int pos = p2 - fsp;
+		if((pos -= vx) < 0) pos = 0;
+		char c = *(p2 + 1);
+		if(*(screen_buf + pos))
+			memmove(screen_buf + pos, screen_buf + pos + (c == ':' || c == '=' ? 1 : 2), FONT_5x7_SCREEN_WIDTH + 1 + 2 - pos);
+	}
+}
+
 void render_display_list(Canvas* const canvas, FuriString ***fsa, char delim, uint16_t view_pos, uint16_t max_i)
 {
 	uint16_t page = view_pos & ~7;
@@ -1010,28 +1022,17 @@ void render_display_list(Canvas* const canvas, FuriString ***fsa, char delim, ui
 		p = (char*) furi_string_get_cstr((*fsa)[page + i]);
 		end = strchr(p, delim);
 		if(end) {
-			if(*(end - 1) == '*') end--; // skip *
-			else if(*(end - 2) == '*') end -= 2; // skip *?
 			len = MIN(end - p, view_x);
 			len = MIN(end - p - len, FONT_5x7_SCREEN_WIDTH);
 			strncpy(screen_buf, p + view_x, len);
 			screen_buf[len] = '\0';
+			display_remove_asterisk(p, MIN(end - p, view_x));
 			canvas_draw_str(canvas, 5, y, screen_buf);
 		}
 		if((view_pos & 7) == i) {
 			canvas_draw_str(canvas, 0, y, ">");
 			canvas_draw_str(canvas, -1, y, ">");
 		}
-	}
-}
-
-void display_remove_asterisk(char *fsp, uint8_t vx)
-{
-	char *p2 = strchr(fsp, '*');
-	if(p2) { // remove '*' or '*n'
-		int pos = p2 - fsp;
-		if((pos -= vx) < 0) pos = 0;
-		memmove(screen_buf + pos, screen_buf + pos + (*(p2 + 1) == ':' ? 1 : 2), FONT_5x7_SCREEN_WIDTH + 1 + 2);
 	}
 }
 
@@ -1392,7 +1393,7 @@ int32_t nrf24batch_app(void* p) {
 		 	FuriLogLevel = furi_log_get_level();
 		 	if(FuriLogLevel == FuriLogLevelDebug) furi_hal_uart_set_br(FuriHalUartIdUSART1, 1843200);
 		}
-		if(what_doing == 2 && rw_type == rwt_read_cmd && ReadRepeat && furi_get_tick() - NRF_time > (uint32_t)(ReadRepeatPeriod * 1000)) {
+		if(what_doing == 2 && rw_type == rwt_read_cmd && ReadRepeat && furi_get_tick() - NRF_time > (uint32_t)(ListenRepeatPeriod * 1000)) {
 			ERR = 0;
 			free_Log();
 			Run_Read_cmd(Read_cmd[view_cmd[rwt_read_cmd]]);
