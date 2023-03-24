@@ -84,33 +84,39 @@ bool avr_isp_chip_detect_view_input(InputEvent* event, void* context) {
     furi_assert(context);
 
     AvrIspChipDetectView* instance = context;
-    if(event->key == InputKeyBack || event->type != InputTypeShort) {
-        return false;
-    } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
-        with_view_model(
-            instance->view,
-            AvrIspChipDetectViewModel * model,
-            {
-                if(model->state == AvrIspChipDetectViewStateDetected) {
-                    if(instance->callback)
-                        instance->callback(AvrIspCustomEventSceneChipDetectOk, instance->context);
-                }
-            },
-            false);
 
-    } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
-        bool detect_chip = false;
-        with_view_model(
-            instance->view,
-            AvrIspChipDetectViewModel * model,
-            {
-                if(model->state != AvrIspChipDetectViewStateDetecting) {
-                    model->state = AvrIspChipDetectViewStateDetecting;
-                    detect_chip = true;
-                }
-            },
-            false);
-        if(detect_chip) avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
+    if(event->type == InputTypeShort) {
+        if(event->key == InputKeyBack) {
+            return false;
+        } else if(event->key == InputKeyRight) {
+            with_view_model(
+                instance->view,
+                AvrIspChipDetectViewModel * model,
+                {
+                    if(model->state == AvrIspChipDetectViewStateDetected) {
+                        if(instance->callback)
+                            instance->callback(
+                                AvrIspCustomEventSceneChipDetectOk, instance->context);
+                    }
+                },
+                false);
+
+        } else if(event->key == InputKeyLeft) {
+            bool detect_chip = false;
+            with_view_model(
+                instance->view,
+                AvrIspChipDetectViewModel * model,
+                {
+                    if(model->state != AvrIspChipDetectViewStateDetecting) {
+                        model->state = AvrIspChipDetectViewStateDetecting;
+                        detect_chip = true;
+                    }
+                },
+                false);
+            if(detect_chip) avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
+        }
+    } else {
+        return false;
     }
 
     return true;

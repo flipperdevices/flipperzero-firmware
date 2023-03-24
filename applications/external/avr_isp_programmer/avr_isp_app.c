@@ -98,7 +98,7 @@ AvrIspApp* avr_isp_app_alloc() {
     scene_manager_next_scene(app->scene_manager, AvrIspSceneStart);
 
     return app;
-}
+} //-V773
 
 void avr_isp_app_free(AvrIspApp* app) {
     furi_assert(app);
