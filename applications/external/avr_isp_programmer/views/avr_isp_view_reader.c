@@ -59,7 +59,7 @@ void avr_isp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
     canvas_set_font(canvas, FontPrimary);
     switch(model->status) {
     case AvrIspReaderViewStatusIDLE:
-        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Reding dump");
+        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Press start to dump");
         canvas_set_font(canvas, FontSecondary);
         elements_button_center(canvas, "Start");
         break;

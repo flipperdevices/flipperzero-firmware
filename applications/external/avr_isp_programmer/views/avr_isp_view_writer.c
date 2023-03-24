@@ -59,7 +59,7 @@ void avr_isp_writer_view_draw(Canvas* canvas, AvrIspWriterViewModel* model) {
     canvas_set_font(canvas, FontPrimary);
     switch(model->status) {
     case AvrIspWriterViewStatusIDLE:
-        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Writing dump");
+        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Press start to write");
         canvas_set_font(canvas, FontSecondary);
         elements_button_center(canvas, "Start");
         break;
@@ -67,10 +67,11 @@ void avr_isp_writer_view_draw(Canvas* canvas, AvrIspWriterViewModel* model) {
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Writing dump");
         break;
     case AvrIspWriterViewStatusVerification:
-        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifyng dump");
+        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifying dump");
         break;
     case AvrIspWriterViewStatusVerificationOk:
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Done!");
+        canvas_set_font(canvas, FontSecondary);
         elements_button_center(canvas, "Reflash");
         elements_button_right(canvas, "Exit");
         break;
