@@ -1,19 +1,65 @@
 #include <furi.h>
-#include <furi_hal.h>
+
+/**
+ * Timings based on Application Note 126:
+ * https://www.analog.com/media/en/technical-documentation/tech-articles/1wire-communication-through-software--maxim-integrated.pdf
+ */
+
 #include "one_wire_host.h"
-#include "one_wire_host_timing.h"
+
+typedef struct {
+    uint16_t a;
+    uint16_t b;
+    uint16_t c;
+    uint16_t d;
+    uint16_t e;
+    uint16_t f;
+    uint16_t g;
+    uint16_t h;
+    uint16_t i;
+    uint16_t j;
+} OneWireHostTimings;
+
+static const OneWireHostTimings onewire_host_timings_normal = {
+    .a = 9,
+    .b = 64,
+    .c = 64,
+    .d = 14,
+    .e = 9,
+    .f = 55,
+    .g = 0,
+    .h = 480,
+    .i = 70,
+    .j = 410,
+};
+
+static const OneWireHostTimings onewire_host_timings_overdrive = {
+    .a = 1,
+    .b = 8,
+    .c = 8,
+    .d = 3,
+    .e = 1,
+    .f = 7,
+    .g = 3,
+    .h = 70,
+    .i = 9,
+    .j = 40,
+};
 
 struct OneWireHost {
-    // global search state
-    unsigned char saved_rom[8];
+    const GpioPin* gpio_pin;
+    const OneWireHostTimings* timings;
+    unsigned char saved_rom[8]; /** < global search state */
     uint8_t last_discrepancy;
     uint8_t last_family_discrepancy;
     bool last_device_flag;
 };
 
-OneWireHost* onewire_host_alloc() {
+OneWireHost* onewire_host_alloc(const GpioPin* gpio_pin) {
     OneWireHost* host = malloc(sizeof(OneWireHost));
+    host->gpio_pin = gpio_pin;
     onewire_host_reset_search(host);
+    onewire_host_set_overdrive(host, false);
     return host;
 }
 
@@ -23,50 +69,52 @@ void onewire_host_free(OneWireHost* host) {
 }
 
 bool onewire_host_reset(OneWireHost* host) {
-    UNUSED(host);
     uint8_t r;
     uint8_t retries = 125;
 
+    const OneWireHostTimings* timings = host->timings;
+
     // wait until the gpio is high
-    furi_hal_ibutton_pin_high();
+    furi_hal_gpio_write(host->gpio_pin, true);
     do {
         if(--retries == 0) return 0;
         furi_delay_us(2);
-    } while(!furi_hal_ibutton_pin_get_level());
+    } while(!furi_hal_gpio_read(host->gpio_pin));
 
     // pre delay
-    furi_delay_us(OWH_RESET_DELAY_PRE);
+    furi_delay_us(timings->g);
 
     // drive low
-    furi_hal_ibutton_pin_low();
-    furi_delay_us(OWH_RESET_DRIVE);
+    furi_hal_gpio_write(host->gpio_pin, false);
+    furi_delay_us(timings->h);
 
     // release
-    furi_hal_ibutton_pin_high();
-    furi_delay_us(OWH_RESET_RELEASE);
+    furi_hal_gpio_write(host->gpio_pin, true);
+    furi_delay_us(timings->i);
 
     // read and post delay
-    r = !furi_hal_ibutton_pin_get_level();
-    furi_delay_us(OWH_RESET_DELAY_POST);
+    r = !furi_hal_gpio_read(host->gpio_pin);
+    furi_delay_us(timings->j);
 
     return r;
 }
 
 bool onewire_host_read_bit(OneWireHost* host) {
-    UNUSED(host);
     bool result;
 
+    const OneWireHostTimings* timings = host->timings;
+
     // drive low
-    furi_hal_ibutton_pin_low();
-    furi_delay_us(OWH_READ_DRIVE);
+    furi_hal_gpio_write(host->gpio_pin, false);
+    furi_delay_us(timings->a);
 
     // release
-    furi_hal_ibutton_pin_high();
-    furi_delay_us(OWH_READ_RELEASE);
+    furi_hal_gpio_write(host->gpio_pin, true);
+    furi_delay_us(timings->e);
 
     // read and post delay
-    result = furi_hal_ibutton_pin_get_level();
-    furi_delay_us(OWH_READ_DELAY_POST);
+    result = furi_hal_gpio_read(host->gpio_pin);
+    furi_delay_us(timings->f);
 
     return result;
 }
@@ -90,23 +138,24 @@ void onewire_host_read_bytes(OneWireHost* host, uint8_t* buffer, uint16_t count)
 }
 
 void onewire_host_write_bit(OneWireHost* host, bool value) {
-    UNUSED(host);
+    const OneWireHostTimings* timings = host->timings;
+
     if(value) {
         // drive low
-        furi_hal_ibutton_pin_low();
-        furi_delay_us(OWH_WRITE_1_DRIVE);
+        furi_hal_gpio_write(host->gpio_pin, false);
+        furi_delay_us(timings->a);
 
         // release
-        furi_hal_ibutton_pin_high();
-        furi_delay_us(OWH_WRITE_1_RELEASE);
+        furi_hal_gpio_write(host->gpio_pin, true);
+        furi_delay_us(timings->b);
     } else {
         // drive low
-        furi_hal_ibutton_pin_low();
-        furi_delay_us(OWH_WRITE_0_DRIVE);
+        furi_hal_gpio_write(host->gpio_pin, false);
+        furi_delay_us(timings->c);
 
         // release
-        furi_hal_ibutton_pin_high();
-        furi_delay_us(OWH_WRITE_0_RELEASE);
+        furi_hal_gpio_write(host->gpio_pin, true);
+        furi_delay_us(timings->d);
     }
 }
 
@@ -118,18 +167,20 @@ void onewire_host_write(OneWireHost* host, uint8_t value) {
     }
 }
 
-void onewire_host_skip(OneWireHost* host) {
-    onewire_host_write(host, 0xCC);
+void onewire_host_write_bytes(OneWireHost* host, const uint8_t* buffer, uint16_t count) {
+    for(uint16_t i = 0; i < count; ++i) {
+        onewire_host_write(host, buffer[i]);
+    }
 }
 
 void onewire_host_start(OneWireHost* host) {
-    UNUSED(host);
-    furi_hal_ibutton_start_drive();
+    furi_hal_gpio_write(host->gpio_pin, true);
+    furi_hal_gpio_init(host->gpio_pin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
 }
 
 void onewire_host_stop(OneWireHost* host) {
-    UNUSED(host);
-    furi_hal_ibutton_stop();
+    furi_hal_gpio_write(host->gpio_pin, true);
+    furi_hal_gpio_init(host->gpio_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
 void onewire_host_reset_search(OneWireHost* host) {
@@ -150,7 +201,7 @@ void onewire_host_target_search(OneWireHost* host, uint8_t family_code) {
     host->last_device_flag = false;
 }
 
-uint8_t onewire_host_search(OneWireHost* host, uint8_t* newAddr, OneWireHostSearchMode mode) {
+bool onewire_host_search(OneWireHost* host, uint8_t* new_addr, OneWireHostSearchMode mode) {
     uint8_t id_bit_number;
     uint8_t last_zero, rom_byte_number, search_result;
     uint8_t id_bit, cmp_id_bit;
@@ -177,10 +228,10 @@ uint8_t onewire_host_search(OneWireHost* host, uint8_t* newAddr, OneWireHostSear
 
         // issue the search command
         switch(mode) {
-        case CONDITIONAL_SEARCH:
+        case OneWireHostSearchModeConditional:
             onewire_host_write(host, 0xEC);
             break;
-        case NORMAL_SEARCH:
+        case OneWireHostSearchModeNormal:
             onewire_host_write(host, 0xF0);
             break;
         }
@@ -259,8 +310,12 @@ uint8_t onewire_host_search(OneWireHost* host, uint8_t* newAddr, OneWireHostSear
         host->last_family_discrepancy = 0;
         search_result = false;
     } else {
-        for(int i = 0; i < 8; i++) newAddr[i] = host->saved_rom[i];
+        for(int i = 0; i < 8; i++) new_addr[i] = host->saved_rom[i];
     }
 
     return search_result;
+}
+
+void onewire_host_set_overdrive(OneWireHost* host, bool set) {
+    host->timings = set ? &onewire_host_timings_overdrive : &onewire_host_timings_normal;
 }

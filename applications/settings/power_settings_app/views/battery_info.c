@@ -2,6 +2,7 @@
 #include <furi.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
+#include <locale/locale.h>
 
 #define LOW_CHARGE_THRESHOLD 10
 #define HIGH_DRAIN_CURRENT_THRESHOLD 100
@@ -68,7 +69,7 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
             drain_current > HIGH_DRAIN_CURRENT_THRESHOLD ? "mA!" : "mA");
     } else if(drain_current != 0) {
         snprintf(header, 20, "...");
-    } else if(data->charging_voltage < 4.2) {
+    } else if(data->charge_voltage_limit < 4.2) {
         // Non-default battery charging limit, mention it
         snprintf(emote, sizeof(emote), "Charged!");
         snprintf(header, sizeof(header), "Limited to");
@@ -76,8 +77,8 @@ static void draw_battery(Canvas* canvas, BatteryInfoModel* data, int x, int y) {
             value,
             sizeof(value),
             "%lu.%luV",
-            (uint32_t)(data->charging_voltage),
-            (uint32_t)(data->charging_voltage * 10) % 10);
+            (uint32_t)(data->charge_voltage_limit),
+            (uint32_t)(data->charge_voltage_limit * 10) % 10);
     } else {
         snprintf(header, sizeof(header), "Charged!");
     }
@@ -101,7 +102,15 @@ static void battery_info_draw_callback(Canvas* canvas, void* context) {
     char health[10];
 
     snprintf(batt_level, sizeof(batt_level), "%lu%%", (uint32_t)model->charge);
-    snprintf(temperature, sizeof(temperature), "%lu C", (uint32_t)model->gauge_temperature);
+    if(locale_get_measurement_unit() == LocaleMeasurementUnitsMetric) {
+        snprintf(temperature, sizeof(temperature), "%lu C", (uint32_t)model->gauge_temperature);
+    } else {
+        snprintf(
+            temperature,
+            sizeof(temperature),
+            "%lu F",
+            (uint32_t)locale_celsius_to_fahrenheit(model->gauge_temperature));
+    }
     snprintf(
         voltage,
         sizeof(voltage),

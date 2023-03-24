@@ -159,6 +159,7 @@ bool subghz_protocol_raw_save_to_file_init(
         instance->upload_raw = malloc(SUBGHZ_DOWNLOAD_MAX_SIZE * sizeof(int32_t));
         instance->file_is_open = RAWFileIsOpenWrite;
         instance->sample_write = 0;
+        instance->last_level = false;
         instance->pause = false;
         init = true;
     } while(0);
@@ -258,12 +259,13 @@ void subghz_protocol_decoder_raw_feed(void* context, bool level, uint32_t durati
     }
 }
 
-bool subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     UNUSED(context);
     UNUSED(flipper_format);
     //ToDo stub, for backwards compatibility
-    return true;
+    return SubGhzProtocolStatusOk;
 }
 
 void subghz_protocol_decoder_raw_get_string(void* context, FuriString* output) {
@@ -341,25 +343,32 @@ void subghz_protocol_raw_gen_fff_data(FlipperFormat* flipper_format, const char*
     } while(false);
 }
 
-bool subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_encoder_raw_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderRAW* instance = context;
-    bool res = false;
+    SubGhzProtocolStatus res = SubGhzProtocolStatusError;
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     do {
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
+            res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
 
         if(!flipper_format_read_string(flipper_format, "File_name", temp_str)) {
             FURI_LOG_E(TAG, "Missing File_name");
+            res = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         furi_string_set(instance->file_name, temp_str);
 
-        res = subghz_protocol_encoder_raw_worker_init(instance);
+        if(!subghz_protocol_encoder_raw_worker_init(instance)) {
+            res = SubGhzProtocolStatusErrorEncoderGetUpload;
+            break;
+        }
+        res = SubGhzProtocolStatusOk;
     } while(false);
     furi_string_free(temp_str);
     return res;

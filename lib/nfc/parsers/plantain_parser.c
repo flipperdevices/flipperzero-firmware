@@ -3,7 +3,7 @@
 #include <gui/modules/widget.h>
 #include <nfc_worker_i.h>
 
-#include "furi_hal.h"
+#include <furi_hal.h>
 
 static const MfClassicAuthContext plantain_keys[] = {
     {.sector = 0, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
@@ -91,7 +91,7 @@ bool plantain_parser_parse(NfcDeviceData* dev_data) {
     }
 
     furi_string_printf(
-        dev_data->parsed_data, "\e#Plantain\nN:%llu-\nBalance:%ld\n", card_number, balance);
+        dev_data->parsed_data, "\e#Plantain\nN:%llu-\nBalance:%lu\n", card_number, balance);
 
     return true;
 }
