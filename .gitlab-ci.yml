@@ -35,14 +35,6 @@ variables:
     - idf.py build -DMD5_ENABLED=1
     - idf.py build -DMD5_ENABLED=0
 
-build_idf_v3.3:
-  extends: .build_idf_template
-  image: espressif/idf:release-v3.3
-
-build_idf_v4.1:
-  extends: .build_idf_template
-  image: espressif/idf:release-v4.1
-
 build_idf_v4.2:
   extends: .build_idf_template
   image: espressif/idf:release-v4.2
@@ -54,6 +46,14 @@ build_idf_v4.3:
 build_idf_v4.4:
   extends: .build_idf_template
   image: espressif/idf:release-v4.4
+
+build_idf_v5.0:
+  extends: .build_idf_template
+  image: espressif/idf:release-v5.0
+
+build_idf_v5.1:
+  extends: .build_idf_template
+  image: espressif/idf:release-v5.1
 
 build_idf_master:
   extends: .build_idf_template
