@@ -228,6 +228,6 @@ void avr_isp_writer_view_free(AvrIspWriterView* instance) {
 
 View* avr_isp_writer_view_get_view(AvrIspWriterView* instance) {
     furi_assert(instance);
-    
+
     return instance->view;
 }
