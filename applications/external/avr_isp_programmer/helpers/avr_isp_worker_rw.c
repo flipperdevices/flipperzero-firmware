@@ -79,7 +79,7 @@ static int32_t avr_isp_worker_rw_thread(void* context) {
             } else {
                 if(instance->callback_status)
                     instance->callback_status(
-                        instance->context_status, AvrIspWorkerRWStatusEndWriting);
+                        instance->context_status, AvrIspWorkerRWStatusErrorWriting);
             }
         }
 
@@ -318,7 +318,7 @@ static void avr_isp_worker_rw_get_dump_flash(AvrIspWorkerRW* instance, const cha
             flipper_hex_flash, data, avr_isp_chip_arr[instance->chip_arr_ind].pagesize);
         FURI_LOG_D(TAG, "%s", flipper_i32hex_file_get_string(flipper_hex_flash));
         instance->progress_flash =
-            (float)i / (avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2);
+            (float)(i) / (avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2);
     }
     flipper_i32hex_file_bin_to_i32hex_set_end_line(flipper_hex_flash);
     FURI_LOG_D(TAG, "%s", flipper_i32hex_file_get_string(flipper_hex_flash));
@@ -346,7 +346,8 @@ static void avr_isp_worker_rw_get_dump_eeprom(AvrIspWorkerRW* instance, const ch
             instance->avr_isp, STK_SET_EEPROM_TYPE, i, size_data, data, sizeof(data));
         flipper_i32hex_file_bin_to_i32hex_set_data(flipper_hex_eeprom, data, size_data);
         FURI_LOG_D(TAG, "%s", flipper_i32hex_file_get_string(flipper_hex_eeprom));
-        instance->progress_eeprom = (float)i / avr_isp_chip_arr[instance->chip_arr_ind].eepromsize;
+        instance->progress_eeprom =
+            (float)(i) / avr_isp_chip_arr[instance->chip_arr_ind].eepromsize;
     }
     flipper_i32hex_file_bin_to_i32hex_set_end_line(flipper_hex_eeprom);
     FURI_LOG_D(TAG, "%s", flipper_i32hex_file_get_string(flipper_hex_eeprom));
@@ -520,7 +521,7 @@ static bool avr_isp_worker_rw_verification_flash(AvrIspWorkerRW* instance, const
 
             addr += flipper_hex_ret.data_size / 2;
             instance->progress_flash =
-                (float)addr / (avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2);
+                (float)(addr) / (avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2);
             break;
 
         case FlipperI32HexFileStatusUdateAddr:
@@ -582,7 +583,7 @@ static bool
 
             addr += flipper_hex_ret.data_size;
             instance->progress_eeprom =
-                (float)addr / (avr_isp_chip_arr[instance->chip_arr_ind].eepromsize);
+                (float)(addr) / (avr_isp_chip_arr[instance->chip_arr_ind].eepromsize);
             break;
 
         case FlipperI32HexFileStatusUdateAddr:
@@ -685,7 +686,7 @@ static void avr_isp_worker_rw_write_flash(AvrIspWorkerRW* instance, const char* 
             }
             addr += flipper_hex_ret.data_size / 2;
             instance->progress_flash =
-                (float)addr / (avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2);
+                (float)(addr) / (avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2);
             break;
 
         case FlipperI32HexFileStatusUdateAddr:
@@ -736,8 +737,7 @@ static void avr_isp_worker_rw_write_eeprom(AvrIspWorkerRW* instance, const char*
             }
             addr += flipper_hex_ret.data_size;
             instance->progress_eeprom =
-                (float)addr / (avr_isp_chip_arr[instance->chip_arr_ind].eepromsize);
-            break;
+                (float)(addr) / (avr_isp_chip_arr[instance->chip_arr_ind].eepromsize);
             break;
 
         case FlipperI32HexFileStatusUdateAddr:
