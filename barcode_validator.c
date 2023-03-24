@@ -130,7 +130,6 @@ void code_39_loader(BarcodeData* barcode_data) {
     int barcode_length = furi_string_size(barcode_data->raw_data);
 
     int min_digits = barcode_data->type_obj->min_digits;
-    int max_digit = barcode_data->type_obj->max_digits;
 
     //check the length of the barcode, must contain atleast a character,
     //this can have as many characters as it wants, it might not fit on the screen
@@ -215,7 +214,6 @@ void code_128_loader(BarcodeData* barcode_data) {
     const char* stop_code_bits = "1100011101011";
 
     int min_digits = barcode_data->type_obj->min_digits;
-    int max_digit = barcode_data->type_obj->max_digits;
 
     /**
      * A sum of all of the characters values

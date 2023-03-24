@@ -5,6 +5,7 @@
 A barcode generator for the Flipper Zero that supports **UPC-A**, **EAN-8**, **EAN-13**, **Code-39**, and **Code-128**[1]
 </p>
 
+Note: Barcode save locations have been moved from `/barcodes` to `/apps_data/barcodes`
 
 ## Table of Contents
 - [Table of Contents](#table-of-contents)

@@ -53,20 +53,9 @@ MessageView* message_view_allocate(BarcodeApp* barcode_app) {
     return message_view_object;
 }
 
-void message_view_free_model(MessageView* message_view_object) {
-    with_view_model(
-        message_view_object->view,
-        MessageViewModel * model,
-        {
-
-        },
-        true);
-}
-
 void message_view_free(MessageView* message_view_object) {
     furi_assert(message_view_object);
 
-    message_view_free_model(message_view_object);
     view_free(message_view_object->view);
     free(message_view_object);
 }

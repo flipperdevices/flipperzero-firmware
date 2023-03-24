@@ -81,7 +81,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     int startY = 0;
 
     //the menu items index that is/would be in view
-    int current_last_menu_item = selected_menu_item + 3;
+    //int current_last_menu_item = selected_menu_item + 3;
     if(selected_menu_item > 1) {
         int offset = 2;
         if(selected_menu_item + offset > total_menu_items) {

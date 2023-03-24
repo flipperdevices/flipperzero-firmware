@@ -15,7 +15,7 @@
 #include "barcode_utils.h"
 
 #define TAG "BARCODE"
-#define VERSION "1.0"
+#define VERSION "1.1"
 #define FILE_VERSION "1"
 
 #define TEXT_BUFFER_SIZE 128
@@ -23,10 +23,8 @@
 #define BARCODE_HEIGHT 50
 #define BARCODE_Y_START 3
 
-#define APPS_DATA EXT_PATH("apps_data")
-
 //the folder where the encodings are located
-#define BARCODE_DATA_FILE_DIR_PATH APPS_DATA "/barcode_data"
+#define BARCODE_DATA_FILE_DIR_PATH EXT_PATH("apps_data/barcode_data")
 
 //the folder where the code 39 encoding table is located
 #define CODE39_DICT_FILE_PATH BARCODE_DATA_FILE_DIR_PATH "/code39_encodings.txt"
@@ -35,11 +33,11 @@
 #define CODE128_DICT_FILE_PATH BARCODE_DATA_FILE_DIR_PATH "/code128_encodings.txt"
 
 //the folder where the user stores their barcodes
-#define DEFAULT_USER_BARCODES EXT_PATH("barcodes")
+#define DEFAULT_USER_BARCODES EXT_PATH("apps_data/barcodes")
 
 //The extension barcode files use
-#define BARCODE_EXTENSION ".barcode"
-#define BARCODE_EXTENSION_LENGTH 8
+#define BARCODE_EXTENSION ".txt"
+#define BARCODE_EXTENSION_LENGTH 4
 
 #include "views/barcode_view.h"
 #include "views/create_view.h"
