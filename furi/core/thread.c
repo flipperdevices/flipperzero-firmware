@@ -24,7 +24,6 @@ struct FuriThreadStdout {
 };
 
 struct FuriThread {
-    bool is_service;
     FuriThreadState state;
     int32_t ret;
 
@@ -37,14 +36,19 @@ struct FuriThread {
     char* name;
     char* appid;
 
-    configSTACK_DEPTH_TYPE stack_size;
     FuriThreadPriority priority;
 
     TaskHandle_t task_handle;
-    bool heap_trace_enabled;
     size_t heap_size;
 
     FuriThreadStdout output;
+
+    // Keep all non-alignable byte types in one place,
+    // this ensures that the size of this structure is minimal
+    bool is_service;
+    bool heap_trace_enabled;
+
+    configSTACK_DEPTH_TYPE stack_size;
 };
 
 static size_t __furi_thread_stdout_write(FuriThread* thread, const char* data, size_t size);
@@ -243,11 +247,11 @@ void furi_thread_start(FuriThread* thread) {
     furi_assert(thread);
     furi_assert(thread->callback);
     furi_assert(thread->state == FuriThreadStateStopped);
-    furi_assert(thread->stack_size > 0 && thread->stack_size < 0xFFFF * 4);
+    furi_assert(thread->stack_size > 0 && thread->stack_size < (UINT16_MAX * sizeof(StackType_t)));
 
     furi_thread_set_state(thread, FuriThreadStateStarting);
 
-    uint32_t stack = thread->stack_size / 4;
+    uint32_t stack = thread->stack_size / sizeof(StackType_t);
     UBaseType_t priority = thread->priority ? thread->priority : FuriThreadPriorityNormal;
     if(thread->is_service) {
         thread->task_handle = xTaskCreateStatic(
