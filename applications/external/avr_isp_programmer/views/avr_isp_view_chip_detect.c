@@ -99,16 +99,18 @@ bool avr_isp_chip_detect_view_input(InputEvent* event, void* context) {
             false);
 
     } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
+        bool detect_chip = false;
         with_view_model(
             instance->view,
             AvrIspChipDetectViewModel * model,
             {
                 if(model->state != AvrIspChipDetectViewStateDetecting) {
                     model->state = AvrIspChipDetectViewStateDetecting;
-                    avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
+                    detect_chip = true;
                 }
             },
             false);
+        if(detect_chip) avr_isp_worker_rw_detect_chip(instance->avr_isp_worker_rw);
     }
 
     return true;
