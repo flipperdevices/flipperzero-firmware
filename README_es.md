@@ -3,11 +3,11 @@
 <p align="center">
 <a target="_blank" href="https://youtube.com/shorts/44rBn0jeGRk&feature=github.com">
   <img align="center" alt="Flipper Zero - Pokemon Trading Game Boy" src="./docs/images/youtube.png" />
-  </a>
   <br />
 </p>
 
 [![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main)
+
 ## Introduction
 
 This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generación I)](https://bulbapedia.bulbagarden.net/wiki/Generation_I). Flipper Zero emulates a "Slave" Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.
@@ -142,22 +142,22 @@ The Game Boy link protocol is synchronous and requires the slave device to respo
 <img src="./docs/images/gb_spi.png" width="400" /><br />
 </p>
 
-_An example GB SPI transfer. Here, the master sends 0xD9 (217) and the slave sends 0x45 (69)._
+_Una transferencia de ejemplo de GB SPI. Aquí, el maestro envía 0xD9 (217) y el esclavo envía 0x45 (69)._
 
 <br />
 
-You can learn more about it in the following video. [**Analyzing the Different Versions of the Link Cable**](https://youtu.be/h1KKkCfzOws?t=151).
+Se puede conocer mas al respecto en el siguiente Video [**Analyzing the Different Versions of the Link Cable**](https://youtu.be/h1KKkCfzOws?t=151).
 
-## Board for Flipper Zero.
+## Placa para Flipper Zero
 
-For the Flipper Zero board, a [PortData EXT Link](https://es.aliexpress.com/item/1005004116983895.html) and a 2x8  [prototype board](https://es.aliexpress.com/item/32478242317.html) were used.
+Para la placa del Fipper Zero se utilizó un [PortData EXT Link](https://es.aliexpress.com/item/1005004116983895.html) y una [place de prototipo](https://es.aliexpress.com/item/32478242317.html) de 2x8.
 
 <p align='center'>
 <br />
 <img src="./docs/images/EXT-Link.png" width="400" /><br />
 </p>
 
-_PortData EXT Link for Game Boy Color, Game Boy Pocket, GBC, GBP, GBL._
+_PortData EXT Link para Game Boy Color, Game Boy Pocket, GBC, GBP, GBL._
 
 <p align='center'>
 <br />
@@ -168,9 +168,9 @@ _PortData EXT Link for Game Boy Color, Game Boy Pocket, GBC, GBP, GBL._
 <img src="./docs/images/flipper-zero-pcb.png" width="400" /><br />
 </p>
 
-## Connection: Flipper Zero GPIO - Game Boy
+## Conexión: Flipper Zero GPIO - Game Boy
 
-The pins should be connected as follows:
+Se deben conectar los Pines de la siguiente manera
 
 <p align='center'>
 <br />
@@ -194,16 +194,17 @@ The pins should be connected as follows:
 
 ## GUI
 
-To generate the graphical interface, the [**FUI-Editor**](https://ilin.pt/stuff/fui-editor/) tool was used. Additionally, the original sprites from the game Pokemon Yellow, which are found in the [**Disassembly of Pokemon Yellow**](https://github.com/pret/pokeyellow/tree/master/gfx/pokemon/front) repository, were used.
+Para generar la Interfaz gráfica se utilizó la herramienta [**FUI-Editor**](https://ilin.pt/stuff/fui-editor/).
+Además se utilizaron los sprites originales del juego _Pokemon Yellow_ que se encuentran en el repositorio [**Disassembly of Pokemon Yellow**](https://github.com/pret/pokeyellow/tree/master/gfx/pokemon/front).
 
-For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero would render it correctly. To do this, a batch process was used in [Photopea](https://www.photopea.com/), the online image editor.
-
+De cada imagen se transformó el color `#aaa` a `#fff` para que Flipper Zero la renderizara bien. Para eso se utilizó un **Batch** para [Photopea](https://www.photopea.com/), el editor de imagenes online.
 
 ## TODO
-[ ] Refactor the code
-[ ] The OK button stops working when exiting the app, so it needs to be restarted 🤔
-[ ] Set each Pokemon's characteristics, attacks, and default levels
-[ ] Improve animations
+
+- [ ] Refactorizar el código
+- [ ] Al salir de la app el botón `OK` deja de funcionar por lo que hay que reiniciarlo 🤔
+- [ ] Setear a cada pokemon sus características, ataques, niveles por defecto
+- [ ] Mejorar animaciones
 
 ## Links
 
@@ -219,5 +220,5 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 <p align='center'>
 <br />
 <br />
-From Talcahuano 🇨🇱 with ❤ 
+Desde Talcahuano 🇨🇱 con ❤ 
 </p>
