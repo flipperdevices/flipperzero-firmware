@@ -333,7 +333,7 @@ distenv.PhonyTarget(
 )
 
 # Prepare vscode environment
-VSCODE_LANG_SERVER = distenv["VSCODE_LANG_SERVER"]
+VSCODE_LANG_SERVER = cmd_environment["LANG_SERVER"]
 vscode_dist = distenv.Install(
     "#.vscode",
     [

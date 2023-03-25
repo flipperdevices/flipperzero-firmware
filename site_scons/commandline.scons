@@ -232,6 +232,15 @@ vars.AddVariables(
         help="Don't open browser after generating error repots",
         default=False,
     ),
+    EnumVariable(
+        "LANG_SERVER",
+        help="Language server type for vscode_dist.",
+        default="cpptools",
+        allowed_values=[
+            "cpptools",
+            "clangd",
+        ],
+    ),
 )
 
 Return("vars")
