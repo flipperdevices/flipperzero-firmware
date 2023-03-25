@@ -211,7 +211,7 @@ De cada imagen se transformó el color `#aaa` a `#fff` para que Flipper Zero la 
 - [Flipper Zero firmware source code](https://github.com/flipperdevices/flipperzero-firmware)
 - Adan Scotney's pokemon [trade protocol specification](http://www.adanscotney.com/2014/01/spoofing-pokemon-trades-with-stellaris.html) and implementation
 - Derek Jamison - [Youtube Channel](https://www.youtube.com/@MrDerekJamison)
-- Matt Penny - [GBPlay Blog](hhttps://blog.gbplay.io/)
+- Matt Penny - [GBPlay Blog](https://blog.gbplay.io/)
 - [Pokémon data structure (Generation I)](<https://bulbapedia.bulbagarden.net/wiki/Pok%C3%A9mon_data_structure_(Generation_I)>)
 - [Disassembly of Pokemon Yellow](https://github.com/pret/pokeyellow)
 - [Arduino-Spoofing-Gameboy-Pokemon-Trades](https://github.com/EstebanFuentealba/Arduino-Spoofing-Gameboy-Pokemon-Trades)
