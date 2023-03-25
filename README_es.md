@@ -8,31 +8,31 @@
 
 [![FlipC.org](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/badge?branch=main)](https://flipc.org/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading?branch=main)
 
-## Introduction
+## Introducción
 
-This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generación I)](https://bulbapedia.bulbagarden.net/wiki/Generation_I). Flipper Zero emulates a "Slave" Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.
+Esta es una aplicación de intercambio de Pokemon's desde de Flipper Zero a Game Boy [(Generación I)](https://bulbapedia.bulbagarden.net/wiki/Generation_I). Flipper Zero emula un Game Boy "Esclavo" conectado a **Cable Game Link** para poder intercambiar cualquier Pokemon de la Primera Generación (Red, Blue, Yellow) a un Game Boy Real.
 
-It is a Proof of Concept (POC) for using views, GPIO, and FURI (Flipper Universal Registry Implementation).
+Es una Prueba de concepto (POC) para utilizar vistas, GPIO y FURI (Flipper Universal Registry Implementation).
 
 ## Instrucciones de instalación
 
-This project is intended to be overlayed on top of an existing firmware repo,  in my case the **Release 0.79.1** version.
+Este proyecto está destinado a ser superpuesto encima de un repositorio de firmware existente, en mi caso la versión **Release 0.79.1**.
 
-- Clone the [Flipper Zero firmware repository](https://github.com/flipperdevices/flipperzero-firmware). Refer to [this tutorial](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/firmware/updating/README.md) for updating the firmware.
-- Copy the "pokemon" folder into the `/applications_user/pokemon` folder in your firmware.
-- Run the command `fbt launch_app` to run it on your Flipper Zero.
+- Clona el [Repositorio del firmware de Flipper Zero](https://github.com/flipperdevices/flipperzero-firmware). Consulta este [tutorial](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/firmware/updating/README.md) para actualizar el firmware.
+- Copia la [carpeta "pokemon"](..) en la carpeta `/applications_user/pokemon` del firmware que clonaste.
+- Corre el comando `fbt launch_app` para correr en tu Flipper Zero.
 
 ```bash
 ./fbt launch_app APPSRC=pokemon
 ```
 
-- NOTE: If you only want to generate the fap file, you must run the following command.
+- NOTA: Si sólo quieres generar el archivo `fap` debes correr el siguiente comando.
 
 ```bash
 ./fbt fap_pokemon
 ```
 
-And use [**qFlipper**](https://flipperzero.one/update) to copy the generated **pokemon.fap** file to the `SD Card/apps/Game Boy` folder.
+y usa [**qFlipper**](https://flipperzero.one/update) para copiar el archivo **pokemon.fap** generado a la carpeta `SD Card/apps/Game Boy`.
 
 <p align='center'>
 <img src="./docs/images/qFlipper.png" width="400" /><br />
@@ -40,13 +40,13 @@ And use [**qFlipper**](https://flipperzero.one/update) to copy the generated **p
 
 ## Instrucciones de Uso
 
-These instructions assume that you are starting at the Flipper Zero desktop. Otherwise, press the Back button until you are at the desktop.
+Estas instrucciones asumen que está comenzando en el escritorio de Flipper Zero. De lo contrario, presione el botón Atrás hasta que esté en el escritorio.
 
-- Press the `OK` button on the Flipper to open the main menu.
-- Choose `Aplicaciones` from the menu.
-- Choose `Game Boy` from the submenu.
-- Choose `Pokemon Trading`
-- The Flipper Zero should show the selection of Pokemon that you want to trade, and by default, it appears as bulbasaur.
+- Presione el botón `OK` en el flipper para abrir el menú principal.
+- Elija `Aplicaciones` en el menú.
+- Elija `Game Boy` en el submenú.
+- Elija `Pokemon Trading`
+- El Flipper Zero debe mostrar la selección de Pokemon que se desea intercambiar y por defecto parece bulbasaur.
 
     <p align='center'>
         <br />
@@ -54,88 +54,85 @@ These instructions assume that you are starting at the Flipper Zero desktop. Oth
         <br />
     </p>
 
-- Press the `LEFT`/`RIGHT` buttons to paginate the selection of Pokemon by 1.
-- Press the `UP`/`DOWN` buttons to paginate the selection of Pokemon by 10.
-- Press the `OK` button to select the Pokemon to trade.
+- Pulse los botones `IZQUIERDA`/`DERECHA` para paginar de 1 en 1 la selección de Pokemon.
+- Pulse los botones `ARRIBA`/`ABAJO` para paginar de 10 en 10 la selección de Pokemon.
+- Pulse el botón `OK` para seleccionar el Pokemon a Intercambiar.
     <p align='center'>
          <br />
         <img src="./docs/images/flipper-zero-flat-2.png" width="400" /><br />
     </p>
-- The Flipper Zero will display the view to connect the Game Boy.
+- En el Flipper Zero se muestra la vista para conectar el Game Boy.
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-3.png" width="400" /><br />
     </p>
-- On your Game Boy, you should connect the  **Game Link Cable** to the Game Boy and in the game, go to the nearest  **Pokemon Center**.
+- En tu Game Boy debes conectar el **Cable Game Link** al Game Boy, en el juego dirigirte a un **Centro Pokémon** que tengas más cercano.
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_pokemon_center.png" width="400" /><br />
     </p>
-- Talk to the girl at the counter on the right. The girl will tell us that we have to save the game before playing, we will answer **YES** by pressing the **A** button.
-
-.
+- Habla con la chica que está en el mostrador de la derecha. La chica nos dirá que para poder jugar antes tendremos que salvar el juego, le contestaremos que _SI_ pulsando el botón _A_.
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_save.png" width="400" /><br />
     </p>
-- The Flipper Zero will show that we are connected.
+- El Flipper Zero nos mostrará que estámos conectados.
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-4.png" width="400" /><br />
     </p>
-- On the Game Boy, we will be asked which option we want, and we select **TRADE CENTER**.
+- En el Game Boy nos preguntará que opción queremos y Seleccionamos **CENT. CAMBIO**.
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_save_trade.png" width="400" /><br />
     </p>
-- You will enter the Trade Center where you must press the A button on the Game Boy on your side of the table.
+- Entrarás a la sala de Intercambio donde debes presionar el botón A del Game Boy en el lado de tu mesa.
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_trade_room_2.png" width="400" /><br />
     </p>
-- Flipper Zero will remain on a waiting screen with the Pokemon you selected.
+- Flipper Zero quedará en una pantalla de espera con el Pokemon que seleccionaste.
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-5.png" width="400" /><br />
     </p>
-- You will see your Pokemon and the Pokemon you selected on the Flipper Zero, in this case, `Mew`. You must select the Pokemon you want to trade and press **TRADE**.
+- Se te mostrarán tus Pokemon y el Pokemon que seleccionaste en el Flipper Zero, en este Caso **Mew**. Debes seleccionar el pokemon que quieres intercambiar y presionar **TRATO**.
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_trade_list_select_trade.png" width="400" /><br />
     </p>
-- You must confirm the selected trade by selecting **TRADE**.
+- Debes confirmar el intercambio seleccionado **TRATO**.
     <p align='center'>
         <br />
         <img src="./docs/images/game_boy_trade_list_select_trade_confirm.png" width="400" /><br />
     </p>
-- Flipper Zero will remain on a waiting screen with the Pokemon you selected.
+- Flipper Zero quedará en una pantalla de espera con el Pokemon que seleccionaste.
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-6.png" width="400" /><br />
     </p>
-- Finally, the Pokemon exchange will start from **Flipper Zero** to the **Game Boy**.
+- Finalmente comenzará el intercambio de Pokemon desde **Flipper Zero** al **Game Boy**.
     <p align='center'>
         <br />
         <img src="./docs/images/flipper-zero-flat-7.png" width="400" /><br />
     </p>
-
-    If the Flipper Zero gets stuck at the end of the exchange, you must reboot it by pressing the <img src="./docs/images/left.png" /> LEFT + <img src="./docs/images/back.png" /> BACK key combination.
+- **NOTA**: Si al final del Intercambio se te bloquea el Flipper Zero debes Rebootear presionando la combinación de teclas <img src="./docs/images/left.png" /> IZQUIERDA + <img src="./docs/images/back.png" /> ATRAS
     <p align='center'>
         <br />
         <img src="./docs/images/reboot.png" width="400" /><br />
     </p>
 
-## How does it work?
+## ¿Cómo trabaja?
 
-The method used to communicate 2 Game Boys is based on the SPI protocol, which is a very simple serial communication protocol in which a master device communicates with one or more slave devices. The protocol is bidirectional and synchronous, and uses three basic signals:
+El método utilizado para comunicar 2 Game Boy se basa en el protocolo SPI, que es un protocolo de comunicación serial muy simple en el que un dispositivo maestro se comunica con uno o más dispositivos esclavos. El protocolo es bidireccional y sincrónico, y utiliza tres señales básicas:
 
-- A clock signal (CLK).
-- An output signal (Serial Out or SO).
-- An input signal (Serial In or SI).
+- Una señal de reloj (CLK).
+- Una señal de salida (Serial Out o SO).
+- Una señal de entrada (Serial In o SI).
 
-In the Game Boy, games store data in an internal shift register that is used to send and receive information. The SPI protocol used by the Game Boy uses the clock signal to indicate when data is being transferred.
+En el Game Boy, los juegos almacenan los datos en un registro de cambio interno que se utiliza para enviar y recibir información. El protocolo SPI utilizado por el Game Boy utiliza la señal de reloj para indicar cuándo se transfieren los datos.
 
-The Game Boy link protocol is synchronous and requires the slave device to respond at the same rate as the master device. The master device supplies an 8KHz clock (data transfer rate of 1KB/s). The time window for responding is only **~120μs**. However, the slave device has no restrictions and can respond when it receives data. The clock can vary and there is no lower limit.
+El protocolo de enlace de Game Boy es síncrono y requiere que el dispositivo esclavo responda al mismo ritmo que el dispositivo maestro. El dispositivo maestro suministra un reloj de 8KHz (velocidad de transferencia de datos de 1KB/s). La ventana de tiempo para responder es de solo **~120μs**. Sin embargo, el dispositivo esclavo no tiene restricciones y puede responder cuando recibe los datos. El reloj puede variar y no hay un límite inferior.
 
 <p align='center'>
 <br />
