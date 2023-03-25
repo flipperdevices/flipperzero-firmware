@@ -11,8 +11,8 @@ Watch on [YouTube](https://youtu.be/eGOv6Gbar7I).
 ## Quick install directions for Flipper Zero running Official Firmware!
 
 - Download the latest FAP file matching your firmware version.
-  - [Release 0.79.1](./prebuilt/v1.0/official-firmware/release-0.79.1/Rock_Paper_Scissors.fap)
-  - [RC 0.80.0](./prebuilt/v1.0/official-firmware/rc-0.80.0/Rock_Paper_Scissors.fap)
+  - [Release 0.79.1](https://github.com/jamisonderek/flipper-zero-tutorials/raw/main/subghz/plugins/rock_paper_scissors/prebuilt/v1.0/official-firmware/release-0.79.1/Rock_Paper_Scissors.fap)
+  - [RC 0.80.0](https://github.com/jamisonderek/flipper-zero-tutorials/raw/main/subghz/plugins/rock_paper_scissors/prebuilt/v1.0/official-firmware/rc-0.80.0/Rock_Paper_Scissors.fap)
 - Copy the downloaded FAP file to the SD Card/apps/Games folder (using qFlipper or by ejecting the SD Card and inserting it into your PC).
 
 - If you have a different firmware, see the [installation directions](#installation-directions) below.
