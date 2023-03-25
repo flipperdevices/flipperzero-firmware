@@ -14,7 +14,7 @@ This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generaci√
 
 It is a Proof of Concept (POC) for using views, GPIO, and FURI (Flipper Universal Registry Implementation).
 
-## Instrucciones de instalaci√≥n
+## Installation Directions
 
 This project is intended to be overlayed on top of an existing firmware repo,  in my case the **Release 0.79.1** version.
 
@@ -38,7 +38,7 @@ And use [**qFlipper**](https://flipperzero.one/update) to copy the generated **p
 <img src="./docs/images/qFlipper.png" width="400" /><br />
 </p>
 
-## Instrucciones de Uso
+## Instructions for use.
 
 These instructions assume that you are starting at the Flipper Zero desktop. Otherwise, press the Back button until you are at the desktop.
 
