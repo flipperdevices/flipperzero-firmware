@@ -215,6 +215,10 @@ Además se utilizaron los sprites originales del juego _Pokemon Yellow_ que se e
 
 De cada imagen se transformó el color `#aaa` a `#fff` para que Flipper Zero la renderizara bien. Para eso se utilizó un **Batch** para [Photopea](https://www.photopea.com/), el editor de imagenes online.
 
+##  Implementado en
+- Game Boy Color (GBC)
+- Game Boy Advance (GBA)
+
 ## TODO
 
 - [ ] Refactorizar el código

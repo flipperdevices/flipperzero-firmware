@@ -218,6 +218,9 @@ To generate the graphical interface, the [**FUI-Editor**](https://ilin.pt/stuff/
 
 For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero would render it correctly. To do this, a batch process was used in [Photopea](https://www.photopea.com/), the online image editor.
 
+##  Tested In
+- Game Boy Color (GBC)
+- Game Boy Advance (GBA)
 
 ## TODO
 - [ ] Refactor the code
