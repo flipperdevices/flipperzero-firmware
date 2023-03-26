@@ -202,6 +202,10 @@ Pudes cortar un cable directamente sin usar el socket pero debes tener en cuenta
 
 *"Cable Game Link" cortado y conectado directamente a los pines de Flipper Zero.*
 
+
+**NOTA**: No guiarse por los colores porque dependiendo del fabricante estos pueden cambiar, con un multímetro medir continuidad e identificar que cable es de que pin
+
+
 ## GUI
 
 Para generar la Interfaz gráfica se utilizó la herramienta [**FUI-Editor**](https://ilin.pt/stuff/fui-editor/).

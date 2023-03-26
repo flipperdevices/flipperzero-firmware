@@ -205,6 +205,8 @@ It's possible to cut a cable directly without using a socket, but it's important
 
 *"Cable Game Link" cut and directly connected to the Flipper Zero pins.*
 
+**NOTE**: Don't rely on the cable colors as they may vary depending on the manufacturer. Use a multimeter to measure continuity and identify which cable corresponds to each pin.
+
 
 
 ## GUI
