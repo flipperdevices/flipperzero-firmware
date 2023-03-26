@@ -23,6 +23,7 @@
     "299999755...348000000 or 386999938...464000000 or 778999847...928000000"
 
 #define SUBGHZ_REGION_FILENAME "/int/.region_data"
+#define SUBGHZ_CALIBRATION_FILENAME "/int/.subghz.calibration"
 
 void subghz_cli_command_tx_carrier(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
@@ -907,6 +908,7 @@ void subghz_on_system_start() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
     FileInfo fileinfo = {0};
+
     PB_Region pb_region = {0};
     pb_region.bands.funcs.decode = subghz_on_system_start_istream_decode_band;
 
@@ -945,6 +947,30 @@ void subghz_on_system_start() {
     } while(0);
 
     pb_release(PB_Region_fields, &pb_region);
+    if(storage_file_is_open(file)) storage_file_close(file);
+
+    do {
+        int8_t xtal_offset = 0;
+
+        if(storage_common_stat(storage, SUBGHZ_CALIBRATION_FILENAME, &fileinfo) != FSE_OK ||
+           fileinfo.size != sizeof(xtal_offset)) {
+            FURI_LOG_W("SubGhzOnStart", "Crystal calibration data is missing or corrupted");
+            break;
+        }
+
+        if(!storage_file_open(file, SUBGHZ_CALIBRATION_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING)) {
+            FURI_LOG_E("SubGhzOnStart", "Unable to open crystal calibration data");
+            break;
+        }
+
+        if(storage_file_read(file, &xtal_offset, sizeof(xtal_offset)) != sizeof(xtal_offset)) {
+            FURI_LOG_E("SubGhzOnStart", "Invalid crystal calibration data");
+            break;
+        }
+
+        furi_hal_subghz_calibrate_crystal(xtal_offset);
+    } while(0);
+
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
 #else

@@ -178,6 +178,12 @@ float furi_hal_subghz_get_rssi();
  */
 uint8_t furi_hal_subghz_get_lqi();
 
+/** Calibrate frequency
+ *
+ * @param      value  crystal frequency offset in ppm
+ */
+void furi_hal_subghz_calibrate_crystal(int8_t value);
+
 /** Check if frequency is in valid range
  *
  * @param      value  frequency in Hz

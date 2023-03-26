@@ -31,6 +31,7 @@ typedef struct {
     volatile SubGhzRegulation regulation;
     volatile FuriHalSubGhzPreset preset;
     const GpioPin* async_mirror_pin;
+    volatile int8_t calibration;
 } FuriHalSubGhz;
 
 volatile FuriHalSubGhz furi_hal_subghz = {
@@ -38,6 +39,7 @@ volatile FuriHalSubGhz furi_hal_subghz = {
     .regulation = SubGhzRegulationTxRx,
     .preset = FuriHalSubGhzPresetIDLE,
     .async_mirror_pin = NULL,
+    .calibration = 0,
 };
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
@@ -310,6 +312,10 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value) {
     return true;
 }
 
+void furi_hal_subghz_calibrate_crystal(int8_t value) {
+    furi_hal_subghz.calibration = value;
+}
+
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value) {
     value = furi_hal_subghz_set_frequency(value);
     if(value >= 299999755 && value <= 348000335) {
@@ -331,8 +337,11 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
         furi_hal_subghz.regulation = SubGhzRegulationOnlyRx;
     }
 
+    uint32_t corrected_frequency = value * (1000000LL + furi_hal_subghz.calibration) / 1000000;
+
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_subghz);
-    uint32_t real_frequency = cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, value);
+    uint32_t real_frequency =
+        cc1101_set_frequency(&furi_hal_spi_bus_handle_subghz, corrected_frequency);
     cc1101_calibrate(&furi_hal_spi_bus_handle_subghz);
 
     while(true) {
@@ -341,7 +350,8 @@ uint32_t furi_hal_subghz_set_frequency(uint32_t value) {
     }
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_subghz);
-    return real_frequency;
+
+    return real_frequency * 1000000LL / (1000000 + furi_hal_subghz.calibration);
 }
 
 void furi_hal_subghz_set_path(FuriHalSubGhzPath path) {
