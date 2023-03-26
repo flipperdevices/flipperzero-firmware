@@ -222,6 +222,9 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 - Game Boy Color (GBC)
 - Game Boy Advance (GBA)
 
+## Implemented by
+<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/issues?q=is%3Aissue+label%3AImplemented+is%3Aclosed+is%3Aopen+" target="_blank"><img src="./docs/images/implemented.svg" /></a>
+
 ## TODO
 - [ ] Refactor the code
 - [ ] The OK button stops working when exiting the app, so it needs to be restarted 🤔

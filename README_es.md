@@ -219,6 +219,9 @@ De cada imagen se transformó el color `#aaa` a `#fff` para que Flipper Zero la 
 - Game Boy Color (GBC)
 - Game Boy Advance (GBA)
 
+## Implementado por
+<a href="https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Pokemon-Trading/issues?q=is%3Aissue+label%3AImplemented+is%3Aclosed+is%3Aopen+" target="_blank"><img src="./docs/images/implemented.svg" /></a>
+
 ## TODO
 
 - [ ] Refactorizar el código
