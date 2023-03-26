@@ -55,17 +55,28 @@ void subghz_test_static_draw(Canvas* canvas, SubGhzTestStaticModel* model) {
     canvas_draw_str(canvas, 0, 8, "CC1101 Static");
 
     canvas_set_font(canvas, FontSecondary);
-    // Frequency
+    // Requested frequency
+    uint32_t frequency = subghz_frequencies_testing[model->frequency];
     snprintf(
         buffer,
         sizeof(buffer),
         "Freq: %03ld.%03ld.%03ld Hz",
+        frequency / 1000000 % 1000,
+        frequency / 1000 % 1000,
+        frequency % 1000);
+    canvas_draw_str(canvas, 0, 20, buffer);
+    // Real frequency
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "Real: %03ld.%03ld.%03ld Hz",
         model->real_frequency / 1000000 % 1000,
         model->real_frequency / 1000 % 1000,
         model->real_frequency % 1000);
-    canvas_draw_str(canvas, 0, 20, buffer);
-    snprintf(buffer, sizeof(buffer), "Key: %d", model->button);
     canvas_draw_str(canvas, 0, 31, buffer);
+    // Key
+    snprintf(buffer, sizeof(buffer), "Key: %d", model->button);
+    canvas_draw_str(canvas, 0, 42, buffer);
 }
 
 bool subghz_test_static_input(InputEvent* event, void* context) {

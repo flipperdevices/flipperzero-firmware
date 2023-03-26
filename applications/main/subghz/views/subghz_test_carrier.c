@@ -45,15 +45,25 @@ void subghz_test_carrier_draw(Canvas* canvas, SubGhzTestCarrierModel* model) {
     canvas_draw_str(canvas, 0, 8, "CC1101 Basic Test");
 
     canvas_set_font(canvas, FontSecondary);
-    // Frequency
+    // Requested frequency
+    uint32_t frequency = subghz_frequencies_testing[model->frequency];
     snprintf(
         buffer,
         sizeof(buffer),
         "Freq: %03ld.%03ld.%03ld Hz",
+        frequency / 1000000 % 1000,
+        frequency / 1000 % 1000,
+        frequency % 1000);
+    canvas_draw_str(canvas, 0, 20, buffer);
+    // Real frequency
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "Real: %03ld.%03ld.%03ld Hz",
         model->real_frequency / 1000000 % 1000,
         model->real_frequency / 1000 % 1000,
         model->real_frequency % 1000);
-    canvas_draw_str(canvas, 0, 20, buffer);
+    canvas_draw_str(canvas, 0, 31, buffer);
     // Path
     char* path_name = "Unknown";
     if(model->path == FuriHalSubGhzPathIsolate) {
@@ -66,7 +76,7 @@ void subghz_test_carrier_draw(Canvas* canvas, SubGhzTestCarrierModel* model) {
         path_name = "868MHz";
     }
     snprintf(buffer, sizeof(buffer), "Path: %d - %s", model->path, path_name);
-    canvas_draw_str(canvas, 0, 31, buffer);
+    canvas_draw_str(canvas, 0, 42, buffer);
     if(model->status == SubGhzTestCarrierModelStatusRx) {
         snprintf(
             buffer,
@@ -74,9 +84,9 @@ void subghz_test_carrier_draw(Canvas* canvas, SubGhzTestCarrierModel* model) {
             "RSSI: %ld.%ld dBm",
             (int32_t)(model->rssi),
             (int32_t)fabs(model->rssi * 10) % 10);
-        canvas_draw_str(canvas, 0, 42, buffer);
+        canvas_draw_str(canvas, 0, 53, buffer);
     } else {
-        canvas_draw_str(canvas, 0, 42, "TX");
+        canvas_draw_str(canvas, 0, 53, "TX");
     }
 }
 
