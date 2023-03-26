@@ -520,6 +520,7 @@ static void subghz_cli_command_print_usage() {
         printf("  debug cmd:\r\n");
         printf("\ttx_carrier <frequency:in Hz>\t - Transmit carrier\r\n");
         printf("\trx_carrier <frequency:in Hz>\t - Receive carrier\r\n");
+        printf("\tcalibrate <frequency offset:in ppm>\t - Calibrate crystal\n");
         printf(
             "\tencrypt_keeloq <path_decrypted_file> <path_encrypted_file> <IV:16 bytes in hex>\t - Encrypt keeloq manufacture keys\r\n");
         printf(
@@ -789,6 +790,76 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     printf("\r\nExit chat\r\n");
 }
 
+void subghz_cli_command_calibrate(Cli* cli, FuriString* args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
+    int8_t xtal_offset = 0;
+
+    if(furi_string_size(args)) {
+        int32_t xtal_offset_long = 0;
+        int ret = sscanf(furi_string_get_cstr(args), "%ld", &xtal_offset_long);
+        if(ret != 1) {
+            printf("sscanf returned %d, offset: %lu\r\n", ret, xtal_offset_long);
+            cli_print_usage(
+                "subghz calibrate", "<frequency offset: in ppm>", furi_string_get_cstr(args));
+            return;
+        }
+        if(xtal_offset_long < -128 || xtal_offset_long > 127) {
+            printf("Frequency offset must be in -128..127 range, not %ld\r\n", xtal_offset_long);
+            return;
+        }
+        xtal_offset = (int8_t)xtal_offset_long;
+
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        File* file = storage_file_alloc(storage);
+
+        do {
+            if(!storage_file_open(
+                   file, SUBGHZ_CALIBRATION_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                printf(
+                    "subghz calibrate \033[0;31mError open file\033[0m %s\r\n",
+                    SUBGHZ_CALIBRATION_FILENAME);
+                break;
+            }
+
+            if(storage_file_write(file, &xtal_offset, sizeof(xtal_offset)) !=
+               sizeof(xtal_offset)) {
+                printf("subghz calibrate \033[0;31mError write data\033[0m\r\n");
+            }
+        } while(0);
+
+        storage_file_free(file);
+        furi_record_close(RECORD_STORAGE);
+
+        furi_hal_subghz_calibrate_crystal(xtal_offset);
+
+        printf("Set crystal calibration to %+d ppm offset\r\n", xtal_offset);
+    } else {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        File* file = storage_file_alloc(storage);
+
+        do {
+            if(!storage_file_open(
+                   file, SUBGHZ_CALIBRATION_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING)) {
+                printf(
+                    "subghz calibrate \033[0;31mError open file\033[0m %s\r\n",
+                    SUBGHZ_CALIBRATION_FILENAME);
+                break;
+            }
+
+            if(storage_file_read(file, &xtal_offset, sizeof(xtal_offset)) != sizeof(xtal_offset)) {
+                printf("subghz calibrate \033[0;31mError read data\033[0m\r\n");
+                break;
+            }
+
+            printf("Crystal is calibrated to %+d ppm offset\r\n", xtal_offset);
+        } while(0);
+
+        storage_file_free(file);
+        furi_record_close(RECORD_STORAGE);
+    }
+}
+
 static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     FuriString* cmd;
     cmd = furi_string_alloc();
@@ -842,6 +913,11 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
 
             if(furi_string_cmp_str(cmd, "rx_carrier") == 0) {
                 subghz_cli_command_rx_carrier(cli, args, context);
+                break;
+            }
+
+            if(furi_string_cmp_str(cmd, "calibrate") == 0) {
+                subghz_cli_command_calibrate(cli, args, context);
                 break;
             }
         }
