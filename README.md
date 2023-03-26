@@ -167,6 +167,8 @@ _PortData EXT Link for Game Boy Color, Game Boy Pocket, GBC, GBP, GBL._
 <br />
 <img src="./docs/images/flipper-zero-pcb.png" width="400" /><br />
 </p>
+I used 33kΩ resistor on CLK, but it's optional, it can be connected directly.
+
 
 ## Connection: Flipper Zero GPIO - Game Boy
 
@@ -191,6 +193,16 @@ The pins should be connected as follows:
 | 5 (CLK)                  | 7 (C3)            |
 | 3 (SI)                   | 6 (B2)            |
 | 2 (SO)                   | 5 (B3)            |
+
+**NOTA**: It's possible to cut a cable directly without using a socket, but it's important to note that the cable is a crossover cable.
+
+<p align='center'>
+<br />
+<img src="./docs/images/cut-cable.png" width="400" /><br />
+</p>
+_"Cable Game Link" cut and directly connected to the Flipper Zero pins._
+
+
 
 ## GUI
 
