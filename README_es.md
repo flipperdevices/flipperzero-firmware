@@ -1,7 +1,7 @@
 # 🐬 Flipper Zero - Pokemon Trading in Game Boy
 
 <p align="center">
-<a target="_blank" href="https://youtube.com/shorts/44rBn0jeGRk&feature=github.com">
+<a target="_blank" href="https://www.reddit.com/r/flipperzero/comments/121ncot/flipper_zero_game_boy_pokemon_trading/">
   <img align="center" alt="Flipper Zero - Pokemon Trading Game Boy" src="./docs/images/youtube.png" />
   <br />
 </p>
