@@ -148,7 +148,7 @@ _An example GB SPI transfer. Here, the master sends 0xD9 (217) and the slave sen
 
 You can learn more about it in the following video. [**Analyzing the Different Versions of the Link Cable**](https://youtu.be/h1KKkCfzOws?t=151).
 
-## Board for Flipper Zero.
+## Board for Flipper Zero with PortData EXT Link.
 
 For the Flipper Zero board, a [PortData EXT Link](https://es.aliexpress.com/item/1005004116983895.html) and a 2x8  [prototype board](https://es.aliexpress.com/item/32478242317.html) were used.
 
@@ -194,13 +194,16 @@ The pins should be connected as follows:
 | 3 (SI)                   | 6 (B2)            |
 | 2 (SO)                   | 5 (B3)            |
 
-**NOTA**: It's possible to cut a cable directly without using a socket, but it's important to note that the cable is a crossover cable.
+## Connect to Flipper Zero without Socket PortData EXT Link
+
+It's possible to cut a cable directly without using a socket, but it's important to note that the cable is a crossover cable SI-SO.
 
 <p align='center'>
 <br />
 <img src="./docs/images/cut-cable.png" width="400" /><br />
 </p>
-_"Cable Game Link" cut and directly connected to the Flipper Zero pins._
+
+*"Cable Game Link" cut and directly connected to the Flipper Zero pins.*
 
 
 

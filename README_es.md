@@ -145,7 +145,7 @@ _Una transferencia de ejemplo de GB SPI. Aquí, el maestro envía 0xD9 (217) y e
 
 Se puede conocer mas al respecto en el siguiente Video [**Analyzing the Different Versions of the Link Cable**](https://youtu.be/h1KKkCfzOws?t=151).
 
-## Placa para Flipper Zero
+## Placa para Flipper Zero con Socket PortData EXT Link
 
 Para la placa del Fipper Zero se utilizó un [PortData EXT Link](https://es.aliexpress.com/item/1005004116983895.html) y una [place de prototipo](https://es.aliexpress.com/item/32478242317.html) de 2x8.
 
@@ -190,13 +190,17 @@ Se deben conectar los Pines de la siguiente manera
 | 3 (SI)                   | 6 (B2)            |
 | 2 (SO)                   | 5 (B3)            |
 
-**NOTA**: Pudes cortar un cable directamente sin usar el socket pero debes tener en cuenta que el es un cable cruzado.
+
+## Conectar a Flipper Zero sin Socket PortData EXT Link
+
+Pudes cortar un cable directamente sin usar el socket pero debes tener en cuenta que el es un cable cruzado SI-SO.
 
 <p align='center'>
 <br />
 <img src="./docs/images/cut-cable.png" width="400" /><br />
 </p>
-_"Cable Game Link" cortado y conectado directamente a los pines de Flipper Zero._
+
+*"Cable Game Link" cortado y conectado directamente a los pines de Flipper Zero.*
 
 ## GUI
 
