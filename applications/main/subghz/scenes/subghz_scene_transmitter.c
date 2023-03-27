@@ -75,7 +75,7 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
                 } else {
                     subghz->state_notifications = SubGhzNotificationStateTx;
                     subghz_scene_transmitter_update_data_show(subghz);
-                    DOLPHIN_DEED(DolphinDeedSubGhzSend);
+                    dolphin_deed(DolphinDeedSubGhzSend);
                 }
             }
             return true;

@@ -236,7 +236,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                                subghz->scene_manager, SubGhzSceneSaved) ||
                            !scene_manager_has_previous_scene(
                                subghz->scene_manager, SubGhzSceneStart)) {
-                            DOLPHIN_DEED(DolphinDeedSubGhzSend);
+                            dolphin_deed(DolphinDeedSubGhzSend);
                         }
                         // set callback end tx
                         subghz_protocol_raw_file_encoder_worker_set_callback_end(
@@ -309,7 +309,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                        (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result,
                        RAW_FILE_NAME,
                        subghz->txrx->preset)) {
-                    DOLPHIN_DEED(DolphinDeedSubGhzRawRec);
+                    dolphin_deed(DolphinDeedSubGhzRawRec);
                     if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
                        (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
                         subghz_begin(
