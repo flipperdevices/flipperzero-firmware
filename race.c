@@ -31,6 +31,7 @@ typedef struct Point {
 typedef struct {
     bool playField[FIELD_HEIGHT][FIELD_WIDTH];
     uint16_t score;
+    int8_t roadStart;
     Point headPosition;
     uint16_t motionSpeed;
     GameState gameState;
@@ -95,6 +96,25 @@ static void race_game_draw_border(Canvas* canvas) {
     canvas_draw_line(canvas, 61, 125, 61, 0);
 }
 
+static void race_game_init_road( RaceState* race_state) {
+    int leftRoad = race_state->roadStart;
+    int rightRoad = race_state->roadStart+1;
+    if (rightRoad == 4) rightRoad=0;    
+    for (int y = 0; y < FIELD_HEIGHT; y++) {
+        leftRoad++;
+        rightRoad++;
+        if (leftRoad<4) {
+            race_state->playField[y][0] = true;
+        }
+        if (rightRoad<4) {
+            race_state->playField[y][10] = true;
+        }
+        if (rightRoad==4)
+            rightRoad=0;
+        if (leftRoad==4)
+            leftRoad=0;
+    }
+}
 
 static void draw_callback(Canvas* canvas, void* ctx) {
     // const RaceState* race_state = furi_mutex_acquire((FuriMutex*)ctx, 25);
@@ -106,10 +126,12 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_clear(canvas);
     race_game_draw_border(canvas);
+    race_game_init_road(race_state);
     race_game_draw_playfield(canvas, race_state);
     // canvas_set_font(canvas, FontPrimary);
     // canvas_draw_str(canvas, 0, 10, "Hello World!");
 }
+
 
 
 static void input_callback(InputEvent* input_event, void* ctx) {
@@ -128,9 +150,10 @@ static void timer_callback(FuriMessageQueue* event_queue) {
 }
 
 static void race_game_init_state(RaceState* race_state) {
-    Point p = {24,5};
+    Point p = {20,5};
     race_state->gameState = GameStatePlaying;
     race_state->score = 0;
+    race_state->roadStart=0;
     race_state->motionSpeed = 500;
     race_state->headPosition = p;
     memset(race_state->playField, 0, sizeof(race_state->playField));
@@ -149,14 +172,16 @@ static void race_game_process_step(RaceState* race_state) {
             race_state->playField[y][x] = false;
         }
     }
-    
+    race_state->roadStart++;
+    if (race_state->roadStart == 4)
+        race_state->roadStart = 0;
     race_state->playField[race_state->headPosition.y][race_state->headPosition.x] = true;
-    race_state->playField[race_state->headPosition.y-1][race_state->headPosition.x] = true;
-    race_state->playField[race_state->headPosition.y-1][race_state->headPosition.x-1] = true;
-    race_state->playField[race_state->headPosition.y-1][race_state->headPosition.x+1] = true;
-    race_state->playField[race_state->headPosition.y-2][race_state->headPosition.x] = true;
-    race_state->playField[race_state->headPosition.y-3][race_state->headPosition.x-1] = true;
-    race_state->playField[race_state->headPosition.y-3][race_state->headPosition.x+1] = true;
+    race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x] = true;
+    race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x-1] = true;
+    race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x+1] = true;
+    race_state->playField[race_state->headPosition.y+2][race_state->headPosition.x] = true;
+    race_state->playField[race_state->headPosition.y+3][race_state->headPosition.x-1] = true;
+    race_state->playField[race_state->headPosition.y+3][race_state->headPosition.x+1] = true;
     
 }
 
