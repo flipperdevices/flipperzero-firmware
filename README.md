@@ -3,9 +3,6 @@
 
 https://user-images.githubusercontent.com/8887221/228034391-aa9df44c-dcf7-4999-9d22-590cc7ac0392.mp4
 
-
-!app video here.
-
 The aim of this app is to replicate the behavior from this tester:
 
 ![](assets/original-servo-tester.jpeg)
