@@ -33,17 +33,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        firmware: [unlshd, official]
+        firmware: [unlshd]
         include:
           - firmware: unlshd
             url: ${{ vars.REPO_UNLEASHED }}
             version: ${{ vars.FIRMWARE_VERSION }}
             src-included: 1
-          - firmware: official
-            url: ${{ vars.REPO_OFFICIAL }}
-            version: "official"
-        exclude:
-          - os: official
     steps:
       - name: Set version
         env:
@@ -122,17 +117,6 @@ jobs:
             Write-Output ('::notice title=Git output::{0}' -f $Output)
           }
 
-      #    - name: Restore FBT
-      #      id: cache-restore
-      #      if: ${{ success() }}
-      #      uses: actions/cache/restore@v3
-      #      with:
-      #        path: |
-      #          build/**
-      #          debug/**
-      #        # An explicit key for restoring and saving the cache
-      #        key: 'fbt=${{ env.FIRMWARE_VERSION }}'
-      #
       - name: Build Firmware
         shell: bash
         if: ${{ success() }}
@@ -142,17 +126,6 @@ jobs:
           WORKFLOW_BRANCH_OR_TAG: release-cfw
         run: |
           ./fbt COMPACT=1 DEBUG=0 fap_dist
-
-      #    - name: Save FBT
-      #      id: cache-save
-      #      if: ${{ success() }}
-      #      uses: actions/cache/save@v3
-      #      with:
-      #        path: |
-      #          build/**
-      #          debug/**
-      #        # An explicit key for restoring and saving the cache
-      #        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
       - name: Create assets
         if: ${{ success() }}
