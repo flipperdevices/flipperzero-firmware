@@ -65,7 +65,7 @@ static void race_game_draw_playfield(Canvas* const canvas, RaceState* race_state
                     BLOCK_HEIGHT,
                     1
                 );
-/*                canvas_draw_dot(
+                canvas_draw_dot(
                     canvas, 
                     BORDER_OFFSET + MARGIN_OFFSET + xOffset + 2,
                     BORDER_OFFSET + MARGIN_OFFSET + yOffset + 1
@@ -79,7 +79,7 @@ static void race_game_draw_playfield(Canvas* const canvas, RaceState* race_state
                     canvas, 
                     BORDER_OFFSET + MARGIN_OFFSET + xOffset + 2,
                     BORDER_OFFSET + MARGIN_OFFSET + yOffset + 2
-                ); */
+                ); 
             }
         }
     }
