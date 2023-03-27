@@ -43,7 +43,7 @@ jobs:
             url: ${{ vars.REPO_OFFICIAL }}
             version: "official"
         exclude:
-          - os: official
+          - firmware: official
     steps:
       - name: Set version
         env:
