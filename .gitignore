@@ -1,0 +1,5 @@
+.vscode/
+assets/original/
+assets/*
+!assets/icon.*
+!assets/original-servo-tester.jpeg

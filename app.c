@@ -53,8 +53,8 @@ uint32_t angle_to_compare(uint8_t angle)
         7%:   freq_div: 1280000, prescaler: 19, period: 64000, compare: 4480
         10%:  freq_div: 1280000, prescaler: 19, period: 64000, compare: 6400
         13%:  freq_div: 1280000, prescaler: 19, period: 64000, compare: 8320
+        15%:  freq_div: 1280000, prescaler: 19, period: 64000, compare: 9600
         20%:  freq_div: 1280000, prescaler: 19, period: 64000, compare: 12800
-
     */
 
     uint32_t min_compare = 1920;
@@ -221,13 +221,6 @@ void custom_pwm_set_params(uint32_t freq, uint32_t compare)
     uint32_t prescaler = freq_div / 0x10000LU;
     uint32_t period = freq_div / (prescaler + 1);
     // uint32_t compare = period * duty / 100;
-    /*
-        5:   freq_div: 1280000, prescaler: 19, period: 64000, compare: 3200
-        7.5: freq_div: 1280000, prescaler: 19, period: 64000, compare: 4800
-        7:   freq_div: 1280000, prescaler: 19, period: 64000, compare: 4480
-        10:  freq_div: 1280000, prescaler: 19, period: 64000, compare: 6400
-        13:  freq_div: 1280000, prescaler: 19, period: 64000, compare: 8320
-    */
 
     LL_TIM_SetPrescaler(TIM1, prescaler);
     LL_TIM_SetAutoReload(TIM1, period - 1);
