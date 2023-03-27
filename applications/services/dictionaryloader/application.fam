@@ -1,0 +1,8 @@
+
+App(
+    appid="dictionary_loader",
+    apptype=FlipperAppType.STARTUP,
+    entry_point="dictionary_loader",
+    requires=["storage"],
+    order=130,
+)
