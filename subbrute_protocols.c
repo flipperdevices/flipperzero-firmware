@@ -264,7 +264,7 @@ const SubBruteProtocol subbrute_protocol_unilarm_24bit_330 = {
     .frequency = 330000000,
     .bits = 25,
     .te = 209,
-    .repeat = 5,
+    .repeat = 4,
     .preset = FuriHalSubGhzPresetOok650Async,
     .file = UNILARMFileProtocol};
 
@@ -275,7 +275,7 @@ const SubBruteProtocol subbrute_protocol_unilarm_24bit_433 = {
     .frequency = 433920000,
     .bits = 25,
     .te = 209,
-    .repeat = 5,
+    .repeat = 4,
     .preset = FuriHalSubGhzPresetOok650Async,
     .file = UNILARMFileProtocol};
 
@@ -286,7 +286,7 @@ const SubBruteProtocol subbrute_protocol_smc5326_24bit_330 = {
     .frequency = 330000000,
     .bits = 25,
     .te = 320,
-    .repeat = 5,
+    .repeat = 4,
     .preset = FuriHalSubGhzPresetOok650Async,
     .file = SMC5326FileProtocol};
 
@@ -297,7 +297,7 @@ const SubBruteProtocol subbrute_protocol_smc5326_24bit_433 = {
     .frequency = 433920000,
     .bits = 25,
     .te = 320,
-    .repeat = 5,
+    .repeat = 4,
     .preset = FuriHalSubGhzPresetOok650Async,
     .file = SMC5326FileProtocol};
 
@@ -308,7 +308,7 @@ const SubBruteProtocol subbrute_protocol_pt2260_24bit_315 = {
     .frequency = 315000000,
     .bits = 24,
     .te = 286,
-    .repeat = 5,
+    .repeat = 4,
     .preset = FuriHalSubGhzPresetOok650Async,
     .file = PT2260FileProtocol};
 
@@ -319,7 +319,7 @@ const SubBruteProtocol subbrute_protocol_pt2260_24bit_330 = {
     .frequency = 330000000,
     .bits = 24,
     .te = 286,
-    .repeat = 5,
+    .repeat = 4,
     .preset = FuriHalSubGhzPresetOok650Async,
     .file = PT2260FileProtocol};
 
@@ -330,7 +330,7 @@ const SubBruteProtocol subbrute_protocol_pt2260_24bit_390 = {
     .frequency = 390000000,
     .bits = 24,
     .te = 286,
-    .repeat = 5,
+    .repeat = 4,
     .preset = FuriHalSubGhzPresetOok650Async,
     .file = PT2260FileProtocol};
 
@@ -341,7 +341,7 @@ const SubBruteProtocol subbrute_protocol_pt2260_24bit_433 = {
     .frequency = 433920000,
     .bits = 24,
     .te = 286,
-    .repeat = 5,
+    .repeat = 4,
     .preset = FuriHalSubGhzPresetOok650Async,
     .file = PT2260FileProtocol};
 
@@ -354,6 +354,50 @@ const SubBruteProtocol subbrute_protocol_holtek_12bit_433 = {
     .te = 204,
     .repeat = 4,
     .preset = FuriHalSubGhzPreset2FSKDev476Async,
+    .file = HoltekFileProtocol};
+
+/**
+ * Holtek AM 12bit 433MHz
+ */
+const SubBruteProtocol subbrute_protocol_holtek_12bit_am_433 = {
+    .frequency = 433920000,
+    .bits = 12,
+    .te = 433,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = HoltekFileProtocol};
+
+/**
+ * Holtek AM 12bit 315MHz
+ */
+const SubBruteProtocol subbrute_protocol_holtek_12bit_am_315 = {
+    .frequency = 315000000,
+    .bits = 12,
+    .te = 433,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = HoltekFileProtocol};
+
+/**
+ * Holtek AM 12bit 868MHz
+ */
+const SubBruteProtocol subbrute_protocol_holtek_12bit_am_868 = {
+    .frequency = 868350000,
+    .bits = 12,
+    .te = 433,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
+    .file = HoltekFileProtocol};
+
+/**
+ * Holtek AM 12bit 915MHz
+ */
+const SubBruteProtocol subbrute_protocol_holtek_12bit_am_915 = {
+    .frequency = 915000000,
+    .bits = 12,
+    .te = 433,
+    .repeat = 3,
+    .preset = FuriHalSubGhzPresetOok650Async,
     .file = HoltekFileProtocol};
 
 /**
@@ -373,7 +417,11 @@ static const char* subbrute_protocol_names[] = {
     [SubBruteAttackAnsonic12bit433075] = "Ansonic 12bit 433.07MHz",
     [SubBruteAttackAnsonic12bit433] = "Ansonic 12bit 433.92MHz",
     [SubBruteAttackAnsonic12bit434] = "Ansonic 12bit 434.07MHz",
-    [SubBruteAttackHoltek12bit433] = "Holtek FM 12bit 433MHz",
+    [SubBruteAttackHoltek12bitFM433] = "Holtek FM 12bit 433MHz",
+    [SubBruteAttackHoltek12bitAM433] = "Holtek AM 12bit 433MHz",
+    [SubBruteAttackHoltek12bitAM315] = "Holtek AM 12bit 315MHz",
+    [SubBruteAttackHoltek12bitAM868] = "Holtek AM 12bit 868MHz",
+    [SubBruteAttackHoltek12bitAM915] = "Holtek AM 12bit 915MHz",
     [SubBruteAttackChamberlain9bit300] = "Chamberlain 9bit 300MHz",
     [SubBruteAttackChamberlain9bit315] = "Chamberlain 9bit 315MHz",
     [SubBruteAttackChamberlain9bit390] = "Chamberlain 9bit 390MHz",
@@ -420,7 +468,11 @@ const SubBruteProtocol* subbrute_protocol_registry[] = {
     [SubBruteAttackAnsonic12bit433075] = &subbrute_protocol_ansonic_12bit_433075,
     [SubBruteAttackAnsonic12bit433] = &subbrute_protocol_ansonic_12bit_433,
     [SubBruteAttackAnsonic12bit434] = &subbrute_protocol_ansonic_12bit_434,
-    [SubBruteAttackHoltek12bit433] = &subbrute_protocol_holtek_12bit_433,
+    [SubBruteAttackHoltek12bitFM433] = &subbrute_protocol_holtek_12bit_433,
+    [SubBruteAttackHoltek12bitAM433] = &subbrute_protocol_holtek_12bit_am_433,
+    [SubBruteAttackHoltek12bitAM315] = &subbrute_protocol_holtek_12bit_am_315,
+    [SubBruteAttackHoltek12bitAM868] = &subbrute_protocol_holtek_12bit_am_868,
+    [SubBruteAttackHoltek12bitAM915] = &subbrute_protocol_holtek_12bit_am_915,
     [SubBruteAttackChamberlain9bit300] = &subbrute_protocol_chamberlain_9bit_300,
     [SubBruteAttackChamberlain9bit315] = &subbrute_protocol_chamberlain_9bit_315,
     [SubBruteAttackChamberlain9bit390] = &subbrute_protocol_chamberlain_9bit_390,

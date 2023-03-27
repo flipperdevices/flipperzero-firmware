@@ -30,8 +30,11 @@ We do not condone illegal activity and strongly encourage keeping transmissions 
 
 #### Holtek
 
-- Holtek HT12X 12bit 433.920MHz
-
+- Holtek HT12X 12bit FM 433.920MHz (TE: 204us)
+- Holtek HT12X 12bit AM 433.920MHz (TE: 433us)
+- Holtek HT12X 12bit AM 315MHz (TE: 433us)
+- Holtek HT12X 12bit AM 868MHz (TE: 433us)
+- Holtek HT12X 12bit AM 915MHz (TE: 433us)
 #### Chamberlain
 
 - Chamberlain 9bit 300MHz
@@ -53,20 +56,20 @@ We do not condone illegal activity and strongly encourage keeping transmissions 
 
 #### UNILARM
 
-- UNILARM 25bit 330MHz
-- UNILARM 25bit 433MHz
+- UNILARM 25bit 330MHz (TE: 209us) (only dip switch combinations, not full 25bit bruteforce)
+- UNILARM 25bit 433MHz (TE: 209us) (only dip switch combinations, not full 25bit bruteforce)
 
 #### SMC5326
 
-- SMC5326 25bit 330MHz
-- SMC5326 25bit 433MHz
+- SMC5326 25bit 330MHz (TE: 320us) (only dip switch combinations, not full 25bit bruteforce)
+- SMC5326 25bit 433MHz (TE: 320us) (only dip switch combinations, not full 25bit bruteforce)
 
 #### PT2260
 
-- PT2260 24bit 315MHz
-- PT2260 24bit 330MHz
-- PT2260 24bit 390MHz
-- PT2260 24bit 433MHz
+- PT2260 24bit 315MHz (TE: 286us) (only for 8 dip switch remote, not full 24bit bruteforce)
+- PT2260 24bit 330MHz (TE: 286us) (only for 8 dip switch remote, not full 24bit bruteforce)
+- PT2260 24bit 390MHz (TE: 286us) (only for 8 dip switch remote, not full 24bit bruteforce)
+- PT2260 24bit 433MHz (TE: 286us) (only for 8 dip switch remote, not full 24bit bruteforce)
 
 #### Additional
 
