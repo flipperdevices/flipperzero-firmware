@@ -4,8 +4,8 @@ import time
 import allure
 import pytest
 from flippigator.case import BaseCase
+from flippigator.flippigator import FlipperHEXKeyboard, FlipperTextKeyboard
 from termcolor import colored
-from flippigator.flippigator import FlipperTextKeyboard, FlipperHEXKeyboard
 
 os.system("color")
 

@@ -8,9 +8,10 @@ from termcolor import colored
 os.system("color")
 
 
+@pytest.mark.smoke
 @pytest.mark.gpio
 class TestGpio(BaseCase):
-    def test_gpio_menu_negative(self, nav):
+    def test_gpio_menu(self, nav):
         nav.gpio.go_into()
         menu = nav.get_menu_list()
         menu_ref = [

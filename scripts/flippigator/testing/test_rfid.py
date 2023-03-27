@@ -10,7 +10,8 @@ os.system("color")
 
 @pytest.mark.rfid
 class TestRfid(BaseCase):
-    def test_nfc_menu_negative(self, nav):
+    @pytest.mark.smoke
+    def test_nfc_menu(self, nav):
         nav.rfid.go_into()
         menu = nav.get_menu_list()
         menu_ref = [
@@ -19,15 +20,20 @@ class TestRfid(BaseCase):
             "Add Manually",
             "Extra Actions",
         ]
+
         assert menu == menu_ref, "RFID menu list is wrong"
+
         nav.go_to_main_screen()
 
+    @pytest.mark.smoke
     def test_read(self, nav):
         nav.rfid.go_into()
         nav.go_to("Read")
         nav.press_ok()
         state = nav.get_current_state()
+
         assert "ReadingRFID" in state, "RFID Reading failed"
+
         nav.go_to_main_screen()
 
     """
@@ -92,12 +98,15 @@ class TestRfid(BaseCase):
         nav.go_to_main_screen()
     """
 
+    @pytest.mark.smoke
     def test_saved(self, nav):
         nav.rfid.go_into()
         nav.go_to("Saved")
         nav.press_ok()
         state = nav.get_current_state()
+
         assert "FileBrowserLevelUp" in state, "File browser in 'Saved' was not opened"
+
         nav.go_to_main_screen()
 
     def test_add_manually(self, nav):
@@ -124,9 +133,45 @@ class TestRfid(BaseCase):
             "Keri",
             "Gallagher",
         ]
+
         assert menu == menu_ref, "RFID Add manually option list is wrong"
+
         nav.go_to_main_screen()
 
+    @pytest.mark.smoke
+    def test_add_manually_smoke(self, nav):
+        nav.rfid.go_into()
+        nav.go_to("Add Manually")
+        nav.press_ok()
+        menu = nav.get_first_item(browser=True)
+        menu_ref = [
+            "EM-Micro EM4100",
+            "HID H10301",
+            "IDTECK Idteck",
+            "Motorola Indala26",
+            "Kantech IoProxXSF",
+            "AWID",
+            "FECAVA FDX-A",
+            "ISO FDX-A",
+            "Generic HIDProx",
+            "Generic HIDExt",
+            "Farpointe Pyramid",
+            "Viking",
+            "Jablotron",
+            "Paradox",
+            "NA PACStanley",
+            "Keri",
+            "Gallagher",
+        ]
+
+        assert menu, "RFID Add manually option list is empty"
+        assert all([item in menu_ref for item in menu]) and bool(
+            menu
+        ), "RFID Add manually option list is wrong"
+
+        nav.go_to_main_screen()
+
+    @pytest.mark.smoke
     def test_extra_options(self, nav):
         nav.rfid.go_into()
         nav.go_to("Extra Actions")
@@ -137,5 +182,7 @@ class TestRfid(BaseCase):
             "Read PSK",
             "Read RAW RFID",
         ]
+
         assert menu == menu_ref, "RFID Add manually option list is wrong"
+
         nav.go_to_main_screen()

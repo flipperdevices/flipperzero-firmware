@@ -2,6 +2,7 @@
 import logging
 import os
 import time
+from typing import Optional
 
 import cv2 as cv
 import numpy
@@ -188,7 +189,7 @@ class Navigator:
 
         return found_ic
 
-    def get_current_state(self, timeout=5, ref=[], area=(0, 64, 0, 128)):
+    def get_current_state(self, timeout: float = 5, ref=[], area=(0, 64, 0, 128)):
         self.update_screen()
         state = self.recog_ref(ref, area)
         start_time = time.time()
@@ -258,6 +259,23 @@ class Navigator:
                 menus.append(cur[0])
             self.press_down()
             cur = self.get_current_state()
+
+        return menus
+
+    def get_first_item(self, browser: Optional[bool] = False):
+        """
+        Get first item in menu
+        browser: if True, will skip first item (folder UP icon"
+        """
+        time.sleep(0.2)
+        menus = list()
+        cur = self.get_current_state()
+
+        if browser:
+            if not (cur == []):
+                self.press_down()
+                cur = self.get_current_state()
+                menus.append(cur[0])
 
         return menus
 

@@ -1,5 +1,4 @@
 import os
-import time
 
 import allure
 import pytest
@@ -11,7 +10,10 @@ os.system("color")
 
 @pytest.mark.applications
 class TestApplications(BaseCase):
-    def test_applications_menu_negative(self, nav):
+    def test_applications_menu(self, nav):
+        """
+        Verifying applications folder list
+        """
         nav.applications.go_into()
         menu = nav.get_menu_list()
         menu_ref = [
@@ -32,10 +34,15 @@ class TestApplications(BaseCase):
         if len(menu_ref):
             if "folder_Debug" in menu_ref:
                 menu_ref.remove("folder_Debug")
+
         assert len(menu_ref) == 0, "Applications menu list is wrong"
         nav.go_to_main_screen()
 
-    def test_aplications_subfolders(self, nav):
+    @pytest.mark.smoke
+    def test_applications_subfolders(self, nav):
+        """
+        Verifying that applications are in correct folders
+        """
         nav.applications.go_into()
 
         with allure.step("Bluetooth apps"):
@@ -47,7 +54,8 @@ class TestApplications(BaseCase):
                 "app_BtRemote",
             ]
 
-            assert any(
+            assert menu, "Bluetooth folder is empty"
+            assert all(
                 [item in menu for item in menu_ref]
             ), "Some of Bluetooth apps are missed"
             nav.press_back()
@@ -63,7 +71,8 @@ class TestApplications(BaseCase):
                 "app_SPI Mem Manager",
             ]
 
-            assert any(
+            assert menu, "GPIO folder is empty"
+            assert all(
                 [item in menu for item in menu_ref]
             ), "Some of GPIO apps are missed"
             nav.press_back()
@@ -77,7 +86,8 @@ class TestApplications(BaseCase):
                 "app_Snake Game",
             ]
 
-            assert any(
+            assert menu, "Game folder is empty"
+            assert all(
                 [item in menu for item in menu_ref]
             ), "Some of Games apps are missed"
             nav.press_back()
@@ -88,7 +98,8 @@ class TestApplications(BaseCase):
             menu = nav.get_menu_list()
             menu_ref = ["FileBrowserLevelUp", "app_Music Player"]
 
-            assert any(
+            assert menu, "Media folder is empty"
+            assert all(
                 [item in menu for item in menu_ref]
             ), "Some of Media apps are missed"
             nav.press_back()
@@ -103,7 +114,8 @@ class TestApplications(BaseCase):
                 "app_PicoPass",
             ]
 
-            assert any(
+            assert menu, "NFC folder is empty"
+            assert all(
                 [item in menu for item in menu_ref]
             ), "Some of NFC apps are missed"
             nav.press_back()
@@ -117,7 +129,8 @@ class TestApplications(BaseCase):
                 "app_Weather Station",
             ]
 
-            assert any(
+            assert menu, "Sub-GHz folder is empty"
+            assert all(
                 [item in menu for item in menu_ref]
             ), "Some of Sub-GHz apps are missed"
             nav.press_back()
@@ -131,7 +144,8 @@ class TestApplications(BaseCase):
                 "app_Clock",
             ]
 
-            assert any(
+            assert menu, "Tool folder is empty"
+            assert all(
                 [item in menu for item in menu_ref]
             ), "Some of Tools apps are missed"
             nav.press_back()
@@ -145,7 +159,8 @@ class TestApplications(BaseCase):
                 "app_UsbRemote",
             ]
 
-            assert any(
+            assert menu, "USB folder is empty"
+            assert all(
                 [item in menu for item in menu_ref]
             ), "Some of USB apps are missed"
             nav.press_back()

@@ -11,7 +11,7 @@ os.system("color")
 @pytest.mark.xfail
 @pytest.mark.badusb
 class TestBadusb(BaseCase):
-    def test_badusb_menu_negative(self, nav):
+    def test_badusb_menu(self, nav):
         nav.badusb.go_into()
         menu = nav.get_menu_list()
         menu_ref = [

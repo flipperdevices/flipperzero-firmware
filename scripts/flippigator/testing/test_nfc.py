@@ -12,11 +12,13 @@ os.system("color")
 
 @pytest.mark.nfc
 class TestNfc(BaseCase):
-    def test_nfc_menu_negative(self, nav):
+    @pytest.mark.smoke
+    def test_nfc_menu(self, nav):
         nav.nfc.go_into()
         assert nav.nfc.check_menu() == 0, "NFC menu list differs from reference"
         nav.go_to_main_screen()
 
+    @pytest.mark.smoke
     def test_read(self, nav):
         nav.nfc.go_into()
         nav.go_to("Read")
@@ -84,6 +86,7 @@ class TestNfc(BaseCase):
         assert 0, "DELETE"
     '''
 
+    @pytest.mark.smoke
     def test_detect_reader(self, nav):
         nav.nfc.go_into()
         nav.go_to("Detect R(up)eader")
@@ -92,6 +95,7 @@ class TestNfc(BaseCase):
         assert "EmulatingDetectReader" in state, "Reader detection error"
         nav.go_to_main_screen()
 
+    @pytest.mark.smoke
     def test_saved(self, nav):
         nav.nfc.go_into()
         nav.go_to("Saved")
@@ -100,35 +104,42 @@ class TestNfc(BaseCase):
         assert "FileBrowserLevelUp" in state, "File browser in 'Saved' was not opened"
         nav.go_to_main_screen()
 
+    @pytest.mark.smoke
     def test_extra_actions(self, nav):
         nav.nfc.go_into()
-        nav.go_to("Extra Actions")
-        nav.press_ok()
-        menu = nav.get_menu_list()
-        menu_ref = [
-            "Read Specific Card Type",
-            "Mifare Classic Keys",
-            "Unlock NTAG",
-        ]
-        assert menu == menu_ref, "NFC Extra Actions list is wrong"
-        nav.go_to("Mifare Classic Keys")
-        nav.press_ok()
-        state = nav.get_current_state()
-        assert (
-            "Mifare Classic Keys Pict" in state
-        ), "Can't find Mifare Classic Keys dict"
-        nav.press_back()
 
-        nav.go_to("Unlock NTAG")
-        nav.press_ok()
-        menu = nav.get_menu_list()
-        menu_ref = [
-            "Auth As Ameebo",
-            "Auth As Xiaomi",
-            "Enter Password Manual",
-        ]
-        assert menu == menu_ref, "NFC Extra Actions list is wrong"
-        nav.press_back()
+        with allure.step("Check Extra Actions"):
+            nav.go_to("Extra Actions")
+            nav.press_ok()
+            menu = nav.get_menu_list()
+            menu_ref = [
+                "Read Specific Card Type",
+                "Mifare Classic Keys",
+                "Unlock NTAG",
+            ]
+            assert menu == menu_ref, "NFC Extra Actions list is wrong"
+
+        with allure.step("Mifare Classic Keys"):
+            nav.go_to("Mifare Classic Keys")
+            nav.press_ok()
+            state = nav.get_current_state()
+            assert (
+                "Mifare Classic Keys Pict" in state
+            ), "Can't find Mifare Classic Keys dict"
+            nav.press_back()
+
+        with allure.step("Unlock NTAG"):
+            nav.go_to("Unlock NTAG")
+            nav.press_ok()
+            menu = nav.get_menu_list()
+            menu_ref = [
+                "Auth As Ameebo",
+                "Auth As Xiaomi",
+                "Enter Password Manual",
+            ]
+            assert menu == menu_ref, "NFC Extra Actions list is wrong"
+            nav.press_back()
+
         nav.go_to_main_screen()
 
     def test_add_manually(self, nav):
@@ -159,6 +170,41 @@ class TestNfc(BaseCase):
             "Mifare Classic 4k 7byte UID",
         ]
         assert menu == menu_ref, "NFC Add manually option list is wrong"
+        nav.go_to_main_screen()
+
+    @pytest.mark.smoke
+    def test_add_manually_smoke(self, nav):
+        nav.nfc.go_into()
+        nav.go_to("Add Manually")
+        nav.press_ok()
+        menu = nav.get_first_item(browser=True)
+        menu_ref = [
+            "NFC-A 7-bytes UID",
+            "NFC-A 4-bytes UID",
+            "Mifare Ultralight",
+            "Mifare Ultralight EV1 11",
+            "Mifare Ultralight EV1 H11",
+            "Mifare Ultralight EV1 21",
+            "Mifare Ultralight EV1 H21",
+            "NTAG203",
+            "NTAG213",
+            "NTAG215",
+            "NTAG216",
+            "NTAG I2C 1k",
+            "NTAG I2C 2k",
+            "NTAG I2C Plus 1k",
+            "NTAG I2C Plus 2k",
+            "Mifare Mini",
+            "Mifare Classic 1k 4byte UID",
+            "Mifare Classic 1k 7byte UID",
+            "Mifare Classic 4k 4byte UID",
+            "Mifare Classic 4k 7byte UID",
+        ]
+
+        assert menu, "NFC Add manually option list is empty"
+        assert all(
+            [item in menu_ref for item in menu]
+        ), "NFC Add manually option list is wrong"
         nav.go_to_main_screen()
 
     def test_debug(self, nav):

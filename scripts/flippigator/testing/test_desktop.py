@@ -6,13 +6,14 @@ from flippigator.case import BaseCase
 os.system("color")
 
 
+@pytest.mark.smoke
 @pytest.mark.menu
 class TestMain(BaseCase):
     """
     Here lies the test cases for the menu
     """
 
-    def test_main_screen_negative(self, nav):  # can have multiple fixtures and args
+    def test_main_screen(self, nav):  # can have multiple fixtures and args
         """ "
         Negative test case for main screen
         """
@@ -20,7 +21,7 @@ class TestMain(BaseCase):
         state = nav.get_current_state()
         assert "SDcardIcon" in state and "BTIcon" in state, "Can't reach main screen"
 
-    def test_menu_option_list_negative(self, nav):
+    def test_menu_option_list(self, nav):
         """
         Check that all menu options are present
         """

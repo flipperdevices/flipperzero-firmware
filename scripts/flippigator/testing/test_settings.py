@@ -10,7 +10,8 @@ os.system("color")
 
 @pytest.mark.settings
 class TestSettings(BaseCase):
-    def test_settings_menu_negative(self, nav):
+    @pytest.mark.smoke
+    def test_settings_menu(self, nav):
         nav.settings.go_into()
         menu = nav.get_menu_list()
         menu_ref = [

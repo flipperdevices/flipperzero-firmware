@@ -8,9 +8,10 @@ from termcolor import colored
 os.system("color")
 
 
+@pytest.mark.smoke
 @pytest.mark.ibutton
 class TestIbutton(BaseCase):
-    def test_ibutton_menu_negative(self, nav):
+    def test_ibutton_menu(self, nav):
         nav.ibutton.go_into()
         menu = nav.get_menu_list()
         menu_ref = [

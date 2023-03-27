@@ -10,7 +10,8 @@ os.system("color")
 
 @pytest.mark.subghz
 class TestSubGhz(BaseCase):
-    def test_subghz_menu_negative(self, nav):
+    @pytest.mark.smoke
+    def test_subghz_menu(self, nav):
         nav.subghz.go_into()
         menu = nav.get_menu_list()
         menu_ref = [
@@ -25,6 +26,7 @@ class TestSubGhz(BaseCase):
         assert menu == menu_ref, "Sub-GHz menu list is wrong"
         nav.go_to_main_screen()
 
+    @pytest.mark.smoke
     def test_subghz_read(self, nav):
         nav.subghz.go_into()
         nav.go_to("Read")

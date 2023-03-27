@@ -92,7 +92,7 @@ def flipper_serial(request):
 
     try:
         flipper_serial = serial.Serial(port, timeout=1)
-        flipper_serial.baudrate = 2304000
+        flipper_serial.baudrate = 230400
         flipper_serial.flushOutput()
         flipper_serial.flushInput()
         flipper_serial.timeout = None

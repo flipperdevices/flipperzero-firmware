@@ -8,9 +8,10 @@ from termcolor import colored
 os.system("color")
 
 
+@pytest.mark.smoke
 @pytest.mark.infrared
 class TestInfrared(BaseCase):
-    def test_infrared_menu_negative(self, nav):
+    def test_infrared_menu(self, nav):
         nav.infrared.go_into()
         menu = nav.get_menu_list()
         menu_ref = [

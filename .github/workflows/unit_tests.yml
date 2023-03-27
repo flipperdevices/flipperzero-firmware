@@ -1,6 +1,12 @@
 name: 'Unit tests'
 
 on:
+  push:
+    branches:
+      - dev
+      - "release*"
+    tags:
+      - '*'
   pull_request:
 
 env:
