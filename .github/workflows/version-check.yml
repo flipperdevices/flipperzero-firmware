@@ -38,7 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $Output = (./.github/check-version.ps1)
+          $Output = (.github/check-version.ps1)
           Write-Output("RELEASE_VERSION=$Output.ReleaseVersion") >> $env:GITHUB_ENV
           Write-Output("CURRENT_TAG=$Output.CurrentTag") >> $env:GITHUB_ENV
           Write-Output("REMOTE_TAG_INFO=$Output.RemoteTagInfo") >> $env:GITHUB_ENV

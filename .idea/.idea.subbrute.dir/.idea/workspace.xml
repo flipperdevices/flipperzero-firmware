@@ -76,7 +76,7 @@
       <updated>1680001542466</updated>
       <workItem from="1680001545311" duration="156000" />
       <workItem from="1680001723598" duration="121000" />
-      <workItem from="1680001863890" duration="1869000" />
+      <workItem from="1680001863890" duration="2084000" />
     </task>
     <task id="LOCAL-00001" summary="feat: moved to pwsh scripts from yaml and fix invalid new version number">
       <created>1680003671452</created>
@@ -85,7 +85,21 @@
       <option name="project" value="LOCAL" />
       <updated>1680003671452</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="feat: moved to pwsh scripts from yaml and fix invalid new version number">
+      <created>1680003783246</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1680003783246</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feat: moved to pwsh scripts from yaml and fix invalid new version number">
+      <created>1680003893089</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1680003893089</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
