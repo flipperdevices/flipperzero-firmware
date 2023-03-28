@@ -201,7 +201,7 @@ Pudes cortar un cable directamente sin usar el socket pero debes tener en cuenta
 
 <p align='center'>
 <br />
-<img src="./docs/images/cut-cable-v2.png" width="400" /><br />
+<img src="./docs/images/cut-cable-v3.png" width="400" /><br />
 </p>
 
 *"Cable Game Link" cortado y conectado directamente a los pines de Flipper Zero.*

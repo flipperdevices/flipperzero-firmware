@@ -206,7 +206,7 @@ It's possible to cut a cable directly without using a socket, but it's important
 
 <p align='center'>
 <br />
-<img src="./docs/images/cut-cable-v2.png" width="400" /><br />
+<img src="./docs/images/cut-cable-v3.png" width="400" /><br />
 </p>
 
 *"Cable Game Link" cut and directly connected to the Flipper Zero pins.*
