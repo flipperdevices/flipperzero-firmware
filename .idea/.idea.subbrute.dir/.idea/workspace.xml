@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f38797aa-9c11-4a19-ac8e-09aa81c5b2ac" name="Changes" comment="feat: moved to pwsh scripts from yaml and fix invalid new version number">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/version-check.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/version-check.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.subbrute.dir/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.subbrute.dir/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.subbrute.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.subbrute.dir/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="f38797aa-9c11-4a19-ac8e-09aa81c5b2ac" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -59,7 +55,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "settings.editor.selected.configurable": "com.dsoftware.ghmanager.ui.settings.GhActionsManagerConfigurable"
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   },
   "keyToStringList": {
     "rider.external.source.directories": [
@@ -84,7 +80,7 @@
       <updated>1680001542466</updated>
       <workItem from="1680001545311" duration="156000" />
       <workItem from="1680001723598" duration="121000" />
-      <workItem from="1680001863890" duration="2406000" />
+      <workItem from="1680001863890" duration="2445000" />
     </task>
     <task id="LOCAL-00001" summary="feat: moved to pwsh scripts from yaml and fix invalid new version number">
       <created>1680003671452</created>
@@ -114,7 +110,14 @@
       <option name="project" value="LOCAL" />
       <updated>1680004121686</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="feat: moved to pwsh scripts from yaml and fix invalid new version number">
+      <created>1680004315497</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1680004315497</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
