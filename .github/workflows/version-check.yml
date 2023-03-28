@@ -38,8 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          Write-Output(Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue)
-          $Output = .github/check-version.ps1
+          $Output = (& $env:GITHUB_ACTION_PATH/.github/check-version.ps1)
           Write-Output("RELEASE_VERSION=$Output.ReleaseVersion") >> $env:GITHUB_ENV
           Write-Output("CURRENT_TAG=$Output.CurrentTag") >> $env:GITHUB_ENV
           Write-Output("REMOTE_TAG_INFO=$Output.RemoteTagInfo") >> $env:GITHUB_ENV
