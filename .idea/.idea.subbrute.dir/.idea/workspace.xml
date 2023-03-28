@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f38797aa-9c11-4a19-ac8e-09aa81c5b2ac" name="Changes" comment="">
+    <list default="true" id="f38797aa-9c11-4a19-ac8e-09aa81c5b2ac" name="Changes" comment="feat: moved to pwsh scripts from yaml and fix invalid new version number">
       <change beforePath="$PROJECT_DIR$/.github/workflows/version-check.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/version-check.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -11,7 +11,37 @@
   </component>
   <component name="Git.Settings">
     <option name="PREVIEW_PUSH_ON_COMMIT_AND_PUSH" value="false" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="feat/ci" />
+                    <option name="lastUsedInstant" value="1680003560" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="master" />
+                    <option name="lastUsedInstant" value="1680003559" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -46,8 +76,16 @@
       <updated>1680001542466</updated>
       <workItem from="1680001545311" duration="156000" />
       <workItem from="1680001723598" duration="121000" />
-      <workItem from="1680001863890" duration="1582000" />
+      <workItem from="1680001863890" duration="1869000" />
     </task>
+    <task id="LOCAL-00001" summary="feat: moved to pwsh scripts from yaml and fix invalid new version number">
+      <created>1680003671452</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1680003671452</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -56,5 +94,7 @@
   <component name="VcsManagerConfiguration">
     <option name="CHECK_NEW_TODO" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+    <MESSAGE value="feat: moved to pwsh scripts from yaml and fix invalid new version number" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: moved to pwsh scripts from yaml and fix invalid new version number" />
   </component>
 </project>
