@@ -295,7 +295,7 @@ static bool avr_isp_prog_auto_set_spi_speed_start_pmode(AvrIspProg* instance) {
     for(uint8_t i = 0; i < COUNT_OF(spi_speed); i++) {
         if(avr_isp_prog_start_pmode(instance, spi_speed[i])) {
             AvrIspProgSignature sig = avr_isp_prog_check_signature(instance);
-            AvrIspProgSignature sig_examination = avr_isp_prog_check_signature(instance); //-V654
+            AvrIspProgSignature sig_examination = avr_isp_prog_check_signature(instance); //-V656
             uint8_t y = 0;
             while(y < 8) {
                 if(memcmp(
@@ -307,7 +307,7 @@ static bool avr_isp_prog_auto_set_spi_speed_start_pmode(AvrIspProg* instance) {
             }
             if(y == 8) {
                 if(spi_speed[i] > AvrIspSpiSwSpeed1Mhz) {
-                    if(i < COUNT_OF(spi_speed)) {
+                    if(i < (COUNT_OF(spi_speed) - 1)) {
                         avr_isp_prog_end_pmode(instance);
                         i++;
                         return avr_isp_prog_start_pmode(instance, spi_speed[i]);

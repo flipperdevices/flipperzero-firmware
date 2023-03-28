@@ -64,7 +64,7 @@ void avr_isp_reader_view_draw(Canvas* canvas, AvrIspReaderViewModel* model) {
         elements_button_center(canvas, "Start");
         break;
     case AvrIspReaderViewStatusReading:
-        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Reding dump");
+        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Reading dump");
         break;
     case AvrIspReaderViewStatusVerification:
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifyng dump");
