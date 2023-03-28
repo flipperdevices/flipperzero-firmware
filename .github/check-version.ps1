@@ -7,6 +7,7 @@ $ErrorActionPreference = "Stop"        #
 [string]$ReleaseVersion = $args[1]
 [string]$RepoSelf = $args[2]
 [string]$RepoUnleashed = $args[3]
+[bool]$ForGithubActions = $true
 
 ################################################################################################################################
 function CleanInput
@@ -125,4 +126,15 @@ else
 }
 
 $Output.CurrentTag = $LatestTag
-$Output
+
+if($ForGithubActions) {
+    $Plain = New-Object -TypeName "System.Text.StringBuilder";
+    $Output.GetEnumerator() | ForEach-Object {
+        [void]$Plain.Append($_.Key)
+        [void]$Plain.Append('=')
+        [void]$Plain.AppendLine($_.Value)
+    }
+    Write-Output $Plain.ToString()
+} else {
+    $Output
+}
