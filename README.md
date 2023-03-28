@@ -196,8 +196,8 @@ The pins should be connected as follows:
 | Cable Game Link (Socket) | Flipper Zero GPIO |
 | ------------------------ | ----------------- |
 | 6 (GND)                  | 8 (GND)           |
-| 5 (CLK)                  | 7 (C3)            |
-| 3 (SI)                   | 6 (B2)            |
+| 5 (CLK)                  | 6 (B2)            |
+| 3 (SI)                   | 7 (C3)            |
 | 2 (SO)                   | 5 (B3)            |
 
 ## Connect to Flipper Zero without Socket PortData EXT Link

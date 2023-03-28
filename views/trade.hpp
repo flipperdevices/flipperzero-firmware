@@ -9,8 +9,8 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 
-#define GAME_BOY_CLK gpio_ext_pc3
-#define GAME_BOY_SI gpio_ext_pb2
+#define GAME_BOY_CLK gpio_ext_pb2
+#define GAME_BOY_SI gpio_ext_pc3
 #define GAME_BOY_SO gpio_ext_pb3
 
 #define DELAY_MICROSECONDS 15
