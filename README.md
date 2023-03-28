@@ -230,7 +230,7 @@ For each image, the color `#aaa` was transformed to `#fff` so that Flipper Zero 
 
 ## TODO
 - [ ] Refactor the code
-- [ ] The OK button stops working when exiting the app, so it needs to be restarted 🤔
+- [x] The OK button stops working when exiting the app, so it needs to be restarted 🤔
 - [ ] Set each Pokemon's characteristics, attacks, and default levels
 - [ ] Improve animations
 
