@@ -23,11 +23,15 @@ uint32_t st25r3916_get_irq(FuriHalSpiBusHandle* handle) {
 
     uint8_t irq_regs[4] = {};
     uint32_t irq = 0;
+    st25r3916_read_burst_regs(handle, ST25R3916_REG_IRQ_MASK_MAIN, irq_regs, 4);
+    // FURI_LOG_I(
+    //     "Mask Irq", "%02X %02X %02X %02X", irq_regs[0], irq_regs[1], irq_regs[2], irq_regs[3]);
     st25r3916_read_burst_regs(handle, ST25R3916_REG_IRQ_MAIN, irq_regs, 4);
     irq = (uint32_t)irq_regs[0];
     irq |= (uint32_t)irq_regs[1] << 8;
     irq |= (uint32_t)irq_regs[2] << 16;
     irq |= (uint32_t)irq_regs[3] << 24;
+    // FURI_LOG_I("iRQ", "%02X %02X %02X %02X", irq_regs[0], irq_regs[1], irq_regs[2], irq_regs[3]);
 
     return irq;
 }

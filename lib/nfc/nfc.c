@@ -381,30 +381,29 @@ NfcError nfc_listener_rx(
     do {
         FHalNfcEvent event = f_hal_nfc_wait_event(timeout);
         if(event & FHalNfcEventFieldOn) {
-            FURI_LOG_D(TAG, "FieldOn");
+            // FURI_LOG_D(TAG, "FieldOn");
         }
         if(event & FHalNfcEventListenerActive) {
-            FURI_LOG_D(TAG, "Activated");
-            f_hal_nfc_listen_start();
+            // FURI_LOG_D(TAG, "Activated");
         }
         if(event & FHalNfcEventRxEnd) {
-            FURI_LOG_D(TAG, "Received data");
+            // FURI_LOG_D(TAG, "Received data");
             f_hal_nfc_poller_rx(rx_data, rx_data_size, rx_bits);
             break;
         }
         if(event & FHalNfcEventFieldOff) {
-            FURI_LOG_D(TAG, "Field off");
+            // FURI_LOG_D(TAG, "Field off");
             ret = NfcErrorLinkLoss;
             break;
         }
         if(event & FHalNfcEventTimeout) {
             ret = NfcErrorTimeout;
-            FURI_LOG_D(TAG, "Timeout");
+            // FURI_LOG_D(TAG, "Timeout");
             break;
         }
         if(event & FHalNfcEventAbortRequest) {
             ret = NfcErrorAbortRequest;
-            FURI_LOG_D(TAG, "Abirt request");
+            // FURI_LOG_D(TAG, "Abirt request");
             break;
         }
 
@@ -436,7 +435,13 @@ NfcError nfc_listener_rx(
 NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits) {
     furi_assert(instance);
     furi_assert(tx_data);
-    UNUSED(tx_bits);
 
-    return NfcErrorNone;
+    NfcError ret = NfcErrorNone;
+    FHalNfcError error = f_hal_nfc_poller_tx(tx_data, tx_bits);
+    if(error != FHalNfcErrorNone) {
+        FURI_LOG_E(TAG, "Failed in listener TX");
+        ret = nfc_process_hal_error(error);
+    }
+
+    return ret;
 }

@@ -45,15 +45,17 @@ static void nfc_cli_check(Cli* cli, FuriString* args) {
     NfcaError error = NfcaErrorNone;
     uint8_t rx_data[100] = {};
     uint16_t rx_bits = 0;
+    uint8_t nt[4] = {0x01, 0x02, 0x03, 0x04};
 
     while(true) {
         error = nfca_listener_rx(instance, rx_data, sizeof(rx_data), &rx_bits, 10000);
         if(error == NfcaErrorNone) {
-            printf("Received %d bits\r\n", rx_bits);
-            for(size_t i = 0; i < rx_bits / 8; i++) {
-                printf("%02X ", rx_data[i]);
-            }
-            printf("\r\n");
+            // printf("Received %d bits\r\n", rx_bits);
+            // for(size_t i = 0; i < rx_bits / 8; i++) {
+            //     printf("%02X ", rx_data[i]);
+            // }
+            // printf("\r\n");
+            nfca_listener_tx(instance, nt, sizeof(nt) * 8);
         }
         if(cli_cmd_interrupt_received(cli)) break;
     }
