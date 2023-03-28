@@ -17,6 +17,7 @@
 
 #define FIELD_WIDTH 11
 #define FIELD_HEIGHT 24
+#define PARALLEL_OBSTACLES 3
 
 typedef enum {
     GameStatePlaying,
@@ -28,9 +29,20 @@ typedef struct Point {
     int8_t x, y;
 } Point;
 
+typedef enum {
+    CarObstacle
+} ObstacleType;
+
+typedef struct Obstacle {
+    ObstacleType type;
+    Point position;
+    bool isAlive;
+} Obstacle;
+
 typedef struct {
     bool playField[FIELD_HEIGHT][FIELD_WIDTH];
     uint16_t score;
+    Obstacle obstacles[PARALLEL_OBSTACLES];
     int8_t roadStart;
     Point headPosition;    
     uint16_t motionSpeed;
@@ -126,17 +138,27 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
 
     canvas_clear(canvas);
+    
+
     race_game_draw_border(canvas);    
     race_game_draw_playfield(canvas, race_state);
-    canvas_set_font(canvas, FontPrimary);
-    char str[10];
+    if(race_state->gameState == GameStateGameOver) {
+        // 128 x 64
+        canvas_set_color(canvas, ColorWhite);
+        canvas_draw_box(canvas, 1, 52, 62, 24);
 
+        canvas_set_color(canvas, ColorBlack);
+        canvas_draw_frame(canvas, 1, 52, 62, 24);
 
-    itoa(race_state->headPosition.y, str, 10);
-    canvas_draw_str(canvas, 24, 10, str);
-    canvas_draw_str(canvas, 24, 15, ",");
-    itoa(race_state->headPosition.x, str, 10);    
-    canvas_draw_str(canvas, 24, 20, str);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, 4, 63, "Game Over");
+
+        char buffer[13];
+        snprintf(buffer, sizeof(buffer), "Score: %u", race_state->score);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 32, 73, AlignCenter, AlignBottom, buffer);
+    }
+
 }
 
 
@@ -162,7 +184,11 @@ static void race_game_init_state(RaceState* race_state) {
     race_state->roadStart=0;
     race_state->motionSpeed = 500;
     Point p = {.x = 5, .y = 20};
-    race_state->headPosition = p;
+    race_state->headPosition = p;    
+    for (int i=0; i<PARALLEL_OBSTACLES; i++) {
+        Obstacle obstacle = {.type = CarObstacle, .isAlive = false, .position = {.x=0, .y=0}};
+        race_state->obstacles[i] = obstacle;
+    }
     memset(race_state->playField, 0, sizeof(race_state->playField));
   //  memset(tetris_state->playField, 0, sizeof(tetris_state->playField));
 
@@ -172,18 +198,61 @@ static void race_game_init_state(RaceState* race_state) {
 }
 
 static void race_game_draw_car(RaceState* race_state,Point p) {
-    race_state->playField[p.y][p.x] = true;
-    race_state->playField[p.y+1][p.x] = true;
-    race_state->playField[p.y+1][p.x-1] = true;
-    race_state->playField[p.y+1][p.x+1] = true;
-    race_state->playField[p.y+2][p.x] = true;
-    race_state->playField[p.y+3][p.x-1] = true;
-    race_state->playField[p.y+3][p.x+1] = true;
+    if (p.y>-1) {
+        race_state->playField[p.y][p.x] = true;
+    }
+    if (p.y>-2) {
+        race_state->playField[p.y+1][p.x] = true;
+        race_state->playField[p.y+1][p.x-1] = true;
+        race_state->playField[p.y+1][p.x+1] = true;
+    }
+    if (p.y>-3) {
+        race_state->playField[p.y+2][p.x] = true;
+    }
+    if (p.y>-4) {
+        race_state->playField[p.y+3][p.x-1] = true;
+        race_state->playField[p.y+3][p.x+1] = true;
+    }
+}
+static void race_game_move_obstacles(RaceState* race_state) {
+    
+    for (int i=0; i<PARALLEL_OBSTACLES; i++) {
+        if (race_state->obstacles[i].isAlive) {
+            race_state->obstacles[i].position.y++;
+            if (race_state->obstacles[i].position.y>(FIELD_HEIGHT-1))
+                race_state->obstacles[i].isAlive = false;
+        }            
+    }
+        
+}
+static void race_game_spawn_obstacles(RaceState* race_state) {
+    if (race_state->score % 90 == 0) {
+        int aliveObjects = 0;
+
+        for (int i=0; i<PARALLEL_OBSTACLES; i++) {
+            if (race_state->obstacles[i].isAlive) {
+                aliveObjects++;
+            }            
+        }
+        if (aliveObjects<PARALLEL_OBSTACLES) {
+            for (int i=0; i<PARALLEL_OBSTACLES; i++) {
+                if (!race_state->obstacles[i].isAlive) {
+                    race_state->obstacles[i].isAlive = true;
+                    race_state->obstacles[i].position.y = -4;
+                    race_state->obstacles[i].position.x = (rand() % 3)*3 + 2;
+                    break;
+                }            
+            }   
+        }
+    }
 }
 static void race_game_process_step(RaceState* race_state, bool moveRoad) {
     if(race_state->gameState == GameStateGameOver)
         return;
 
+
+    race_state->score += 10;
+    
     // calculate field boundaries
     if (race_state->headPosition.x < 2) race_state->headPosition.x=2;
     if (race_state->headPosition.x > (FIELD_WIDTH-3)) race_state->headPosition.x=(FIELD_WIDTH-3);
@@ -207,12 +276,20 @@ static void race_game_process_step(RaceState* race_state, bool moveRoad) {
     if (moveRoad) {
         race_state->roadStart++;
         if (race_state->roadStart == 4)
-            race_state->roadStart = 0;        
+            race_state->roadStart = 0;      
+        race_game_spawn_obstacles(race_state);
+        race_game_move_obstacles(race_state);
     }
-    Point p = {.x = 5, .y = 10};
+    // Point p = {.x = 5, .y = 10};
 
     race_game_draw_car(race_state, race_state->headPosition);
-    race_game_draw_car(race_state, p);
+
+    for (int i=0; i<PARALLEL_OBSTACLES; i++) {
+         if (race_state->obstacles[i].isAlive) {
+             race_game_draw_car(race_state, race_state->obstacles[i].position);
+        }            
+    }
+    // race_game_draw_car(race_state, p);
     race_game_init_road(race_state);
 }
 
@@ -225,7 +302,7 @@ int32_t race_app(void* p) {
     RaceGameEvent event;
 
     RaceState* race_state = malloc(sizeof(RaceState));
-    FuriMutex* state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);;
+    FuriMutex* state_mutex = furi_mutex_alloc(FuriMutexTypeRecursive);
     
     // Queue on 8 events
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(RaceGameEvent));
@@ -273,6 +350,11 @@ int32_t race_app(void* p) {
                 case InputKeyBack:
                     processing = false;
                     break;
+                case InputKeyOk:
+                    if(race_state->gameState == GameStateGameOver) {
+                        race_game_init_state(race_state);
+                    }
+                    break;
                 case InputKeyUp:
                     race_state->headPosition.y -= 1;
                     break;
@@ -288,12 +370,9 @@ int32_t race_app(void* p) {
                 default:
                     break;
             }
-            if(event.input.key == InputKeyBack) {
-                processing = false;
-            }
             // Наше событие — это сработавший таймер
         } else if(event.type == EventTypeTick) {
-            // Сделаем что-то по таймеру
+            //Move road and obstacles with timer ticks
             moveRoad = true;
         }
         race_game_process_step(race_state, moveRoad);
