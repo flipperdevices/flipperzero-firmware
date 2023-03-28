@@ -117,10 +117,10 @@ bool avr_isp_auto_set_spi_speed_start_pmode(AvrIsp* instance) {
     furi_assert(instance);
 
     AvrIspSpiSwSpeed spi_speed[] = {
-        //AvrIspSpiSwSpeed1Mhz,
-       // AvrIspSpiSwSpeed400Khz,
-       // AvrIspSpiSwSpeed250Khz,
-       // AvrIspSpiSwSpeed125Khz,
+        AvrIspSpiSwSpeed1Mhz,
+        AvrIspSpiSwSpeed400Khz,
+        AvrIspSpiSwSpeed250Khz,
+        AvrIspSpiSwSpeed125Khz,
         AvrIspSpiSwSpeed40Khz,
         AvrIspSpiSwSpeed20Khz,
     };
@@ -467,4 +467,11 @@ bool avr_isp_write_fuse_extended(AvrIsp* instance, uint8_t efuse) {
         }
     }
     return ret;
+}
+
+void avr_isp_write_extended_addr(AvrIsp* instance, uint8_t extended_addr) {
+    furi_assert(instance);
+
+    avr_isp_spi_transaction(instance, AVR_ISP_EXTENDED_ADDR(extended_addr));
+    furi_delay_ms(10);
 }

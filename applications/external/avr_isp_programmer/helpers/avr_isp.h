@@ -66,3 +66,5 @@ bool avr_isp_write_fuse_high(AvrIsp* instance, uint8_t hfuse);
 uint8_t avr_isp_read_fuse_extended(AvrIsp* instance);
 
 bool avr_isp_write_fuse_extended(AvrIsp* instance, uint8_t efuse);
+
+void avr_isp_write_extended_addr(AvrIsp* instance, uint8_t extended_addr);

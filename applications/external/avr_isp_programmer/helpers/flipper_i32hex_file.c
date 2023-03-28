@@ -93,11 +93,12 @@ FlipperI32HexFileRet flipper_i32hex_file_bin_to_i32hex_set_data(
 
     furi_string_reset(instance->str_data);
 
-    if((instance->addr_last & 0xFF0000) > (instance->addr & 0xFF0000)) {
+    if((instance->addr_last & 0xFF0000) < (instance->addr & 0xFF0000)) {
         crc = 0x02 + 0x04 + ((instance->addr >> 24) & 0xFF) + ((instance->addr >> 16) & 0xFF);
         crc = 0x01 + ~crc;
         //I32HEX_TYPE_EXT_LINEAR_ADDR
-        furi_string_cat_printf(instance->str_data, ":02000004%04lX\r\n", (instance->addr >> 16));
+        furi_string_cat_printf(
+            instance->str_data, ":02000004%04lX%02X\r\n", (instance->addr >> 16), crc);
         instance->addr_last = instance->addr;
     }
 
@@ -247,8 +248,8 @@ static FlipperI32HexFileRet flipper_i32hex_file_parse(
             break;
         case I32HEX_TYPE_EXT_LINEAR_ADDR:
             if(flipper_i32hex_file_check_data(data, ret.data_size)) {
-                data[0] = data[1];
-                data[1] = data[2];
+                data[0] = data[4];
+                data[1] = data[5];
                 data[3] = 0;
                 data[4] = 0;
                 ret.status = FlipperI32HexFileStatusUdateAddr;

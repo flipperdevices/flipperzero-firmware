@@ -317,24 +317,33 @@ static void avr_isp_worker_rw_get_dump_flash(AvrIspWorkerRW* instance, const cha
         file_path, avr_isp_chip_arr[instance->chip_arr_ind].flashoffset);
 
     uint8_t data[272] = {0};
+    bool send_extended_addr = ((avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2) > 0x10000);
+    uint8_t extended_addr = 0;
 
-    for(uint16_t i = 0; i < avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2;
+    for(int32_t i = avr_isp_chip_arr[instance->chip_arr_ind].flashoffset;
+        i < avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2;
         i += avr_isp_chip_arr[instance->chip_arr_ind].pagesize / 2) {
+        if(send_extended_addr) {
+            if(extended_addr == ((i >> 16) & 0xFF)) {
+                avr_isp_write_extended_addr(instance->avr_isp, extended_addr);
+                extended_addr = ((i >> 16) & 0xFF) + 1;
+            }
+        }
         avr_isp_read_page(
             instance->avr_isp,
             STK_SET_FLASH_TYPE,
-            i,
+            (uint16_t)i,
             avr_isp_chip_arr[instance->chip_arr_ind].pagesize,
             data,
             sizeof(data));
         flipper_i32hex_file_bin_to_i32hex_set_data(
             flipper_hex_flash, data, avr_isp_chip_arr[instance->chip_arr_ind].pagesize);
-        FURI_LOG_D(TAG, "%s", flipper_i32hex_file_get_string(flipper_hex_flash));
+        //FURI_LOG_D(TAG, "%s", flipper_i32hex_file_get_string(flipper_hex_flash));
         instance->progress_flash =
             (float)(i) / ((float)avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2.0f);
     }
     flipper_i32hex_file_bin_to_i32hex_set_end_line(flipper_hex_flash);
-    FURI_LOG_D(TAG, "%s", flipper_i32hex_file_get_string(flipper_hex_flash));
+    //FURI_LOG_D(TAG, "%s", flipper_i32hex_file_get_string(flipper_hex_flash));
     flipper_i32hex_file_close(flipper_hex_flash);
     instance->progress_flash = 1.0f;
 }
@@ -354,9 +363,11 @@ static void avr_isp_worker_rw_get_dump_eeprom(AvrIspWorkerRW* instance, const ch
     if(size_data > avr_isp_chip_arr[instance->chip_arr_ind].eepromsize)
         size_data = avr_isp_chip_arr[instance->chip_arr_ind].eepromsize;
 
-    for(uint16_t i = 0; i < avr_isp_chip_arr[instance->chip_arr_ind].eepromsize; i += size_data) {
+    for(int32_t i = avr_isp_chip_arr[instance->chip_arr_ind].eepromoffset;
+        i < avr_isp_chip_arr[instance->chip_arr_ind].eepromsize;
+        i += size_data) {
         avr_isp_read_page(
-            instance->avr_isp, STK_SET_EEPROM_TYPE, i, size_data, data, sizeof(data));
+            instance->avr_isp, STK_SET_EEPROM_TYPE, (uint16_t)i, size_data, data, sizeof(data));
         flipper_i32hex_file_bin_to_i32hex_set_data(flipper_hex_eeprom, data, size_data);
         FURI_LOG_D(TAG, "%s", flipper_i32hex_file_get_string(flipper_hex_eeprom));
         instance->progress_eeprom =
@@ -510,6 +521,8 @@ static bool avr_isp_worker_rw_verification_flash(AvrIspWorkerRW* instance, const
     uint8_t data_read_hex[272] = {0};
 
     uint32_t addr = avr_isp_chip_arr[instance->chip_arr_ind].flashoffset;
+    bool send_extended_addr = ((avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2) > 0x10000);
+    uint8_t extended_addr = 0;
 
     FlipperI32HexFileRet flipper_hex_ret = flipper_i32hex_file_i32hex_to_bin_get_data(
         flipper_hex_flash, data_read_hex, sizeof(data_read_hex));
@@ -519,17 +532,35 @@ static bool avr_isp_worker_rw_verification_flash(AvrIspWorkerRW* instance, const
           ret) {
         switch(flipper_hex_ret.status) {
         case FlipperI32HexFileStatusData:
+
+            if(send_extended_addr) {
+                if(extended_addr == ((addr >> 16) & 0xFF)) {
+                    avr_isp_write_extended_addr(instance->avr_isp, extended_addr);
+                    extended_addr = ((addr >> 16) & 0xFF) + 1;
+                }
+            }
+
             avr_isp_read_page(
                 instance->avr_isp,
                 STK_SET_FLASH_TYPE,
-                addr,
+                (uint16_t)addr,
                 flipper_hex_ret.data_size,
                 data_read_flash,
                 sizeof(data_read_flash));
 
             if(memcmp(data_read_hex, data_read_flash, flipper_hex_ret.data_size) != 0) {
                 ret = false;
+
                 FURI_LOG_E(TAG, "Verification flash error");
+                FURI_LOG_E(TAG, "Addr: 0x%04lX", addr);
+                for(uint32_t i = 0; i < flipper_hex_ret.data_size; i++) {
+                    FURI_LOG_RAW_E("%02X ", data_read_hex[i]);
+                }
+                FURI_LOG_RAW_E("\r\n");
+                for(uint32_t i = 0; i < flipper_hex_ret.data_size; i++) {
+                    FURI_LOG_RAW_E("%02X ", data_read_flash[i]);
+                }
+                FURI_LOG_RAW_E("\r\n");
             }
 
             addr += flipper_hex_ret.data_size / 2;
@@ -584,7 +615,7 @@ static bool
             avr_isp_read_page(
                 instance->avr_isp,
                 STK_SET_EEPROM_TYPE,
-                addr,
+                (uint16_t)addr,
                 flipper_hex_ret.data_size,
                 data_read_eeprom,
                 sizeof(data_read_eeprom));
@@ -592,6 +623,15 @@ static bool
             if(memcmp(data_read_hex, data_read_eeprom, flipper_hex_ret.data_size) != 0) {
                 ret = false;
                 FURI_LOG_E(TAG, "Verification eeprom error");
+                FURI_LOG_E(TAG, "Addr: 0x%04lX", addr);
+                for(uint32_t i = 0; i < flipper_hex_ret.data_size; i++) {
+                    FURI_LOG_RAW_E("%02X ", data_read_hex[i]);
+                }
+                FURI_LOG_RAW_E("\r\n");
+                for(uint32_t i = 0; i < flipper_hex_ret.data_size; i++) {
+                    FURI_LOG_RAW_E("%02X ", data_read_eeprom[i]);
+                }
+                FURI_LOG_RAW_E("\r\n");
             }
 
             addr += flipper_hex_ret.data_size;
@@ -682,6 +722,9 @@ static void avr_isp_worker_rw_write_flash(AvrIspWorkerRW* instance, const char* 
     FlipperI32HexFile* flipper_hex_flash = flipper_i32hex_file_open_read(file_path);
 
     uint32_t addr = avr_isp_chip_arr[instance->chip_arr_ind].flashoffset;
+    bool send_extended_addr = ((avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2) > 0x10000);
+    uint8_t extended_addr = 0;
+
     FlipperI32HexFileRet flipper_hex_ret =
         flipper_i32hex_file_i32hex_to_bin_get_data(flipper_hex_flash, data, sizeof(data));
 
@@ -689,11 +732,19 @@ static void avr_isp_worker_rw_write_flash(AvrIspWorkerRW* instance, const char* 
           (flipper_hex_ret.status == FlipperI32HexFileStatusUdateAddr)) {
         switch(flipper_hex_ret.status) {
         case FlipperI32HexFileStatusData:
+
+            if(send_extended_addr) {
+                if(extended_addr == ((addr >> 16) & 0xFF)) {
+                    avr_isp_write_extended_addr(instance->avr_isp, extended_addr);
+                    extended_addr = ((addr >> 16) & 0xFF) + 1;
+                }
+            }
+
             if(!avr_isp_write_page(
                    instance->avr_isp,
                    STK_SET_FLASH_TYPE,
                    avr_isp_chip_arr[instance->chip_arr_ind].flashsize,
-                   addr,
+                   (uint16_t)addr,
                    avr_isp_chip_arr[instance->chip_arr_ind].pagesize,
                    data,
                    flipper_hex_ret.data_size)) {
@@ -744,7 +795,7 @@ static void avr_isp_worker_rw_write_eeprom(AvrIspWorkerRW* instance, const char*
                    instance->avr_isp,
                    STK_SET_EEPROM_TYPE,
                    avr_isp_chip_arr[instance->chip_arr_ind].eepromsize,
-                   addr,
+                   (uint16_t)addr,
                    avr_isp_chip_arr[instance->chip_arr_ind].eeprompagesize,
                    data,
                    flipper_hex_ret.data_size)) {
@@ -915,7 +966,7 @@ bool avr_isp_worker_rw_write_dump(
                     file_path_name, "%s/%s", file_path, furi_string_get_cstr(temp_str_2));
                 avr_isp_worker_rw_write_eeprom(instance, furi_string_get_cstr(file_path_name));
             }
-            ret = true;  
+            ret = true;
             avr_isp_end_pmode(instance->avr_isp);
         } while(false);
     }
