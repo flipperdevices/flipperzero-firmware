@@ -1,5 +1,4 @@
 #include "xremote_speaker.h"
-#include "../xremote.h"
 
 #define NOTE_INPUT 587.33f
 

@@ -1,10 +1,4 @@
 #include "xremote_ir_signal.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <core/check.h>
-#include <infrared_worker.h>
-#include <infrared_transmit.h>
 #include "../../xremote_i.h"
 
 static void xremote_ir_signal_clear_timings(InfraredSignal* signal) {
@@ -170,7 +164,10 @@ void xremote_ir_signal_set_raw_signal(
     signal->payload.raw.timings = malloc(timings_size * sizeof(uint32_t));
     memcpy(signal->payload.raw.timings, timings, timings_size * sizeof(uint32_t));
 }
-
+InfraredRawSignal* xremote_ir_signal_get_raw_signal(InfraredSignal* signal) {
+    furi_assert(signal->is_raw);
+    return &signal->payload.raw;
+}
 
 static bool xremote_ir_signal_read_body(InfraredSignal* signal, FlipperFormat* ff) {
     FuriString* tmp = furi_string_alloc();
@@ -213,4 +210,9 @@ void xremote_ir_signal_set_message(InfraredSignal* signal, const InfraredMessage
 
     signal->is_raw = false;
     signal->payload.message = *message;
+}
+
+InfraredMessage* xremote_ir_signal_get_message(InfraredSignal* signal) {
+    furi_assert(!signal->is_raw);
+    return &signal->payload.message;
 }

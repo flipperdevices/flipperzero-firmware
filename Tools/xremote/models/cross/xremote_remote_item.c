@@ -1,8 +1,4 @@
-#include "../infrared/xremote_ir_signal.h"
 #include "xremote_remote_item.h"
-#include <infrared_worker.h>
-#include <infrared_transmit.h>
-#include "../../xremote_i.h"
 
 
 CrossRemoteItem* xremote_remote_item_alloc() {

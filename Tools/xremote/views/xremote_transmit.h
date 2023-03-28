@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gui/view.h>
+#include "../xremote.h"
 #include "../helpers/xremote_custom_event.h"
 
 typedef struct XRemoteTransmit XRemoteTransmit;

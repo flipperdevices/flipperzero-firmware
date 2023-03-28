@@ -33,5 +33,6 @@ void xremote_ir_signal_set_raw_signal(
 InfraredRawSignal* xremote_ir_signal_get_raw_signal(InfraredSignal* signal);
 
 void xremote_ir_signal_set_message(InfraredSignal* signal, const InfraredMessage* message);
+InfraredMessage* xremote_ir_signal_get_message(InfraredSignal* signal);
 
 bool xremote_ir_signal_read(InfraredSignal* signal, FlipperFormat* ff, FuriString* name);

@@ -1,5 +1,6 @@
 #pragma once
 
+//#include "../xremote.h"
 #include <gui/view.h>
 #include "../helpers/xremote_custom_event.h"
 
@@ -12,8 +13,8 @@ void xremote_infoscreen_set_callback(
     XRemoteInfoscreenCallback callback,
     void* context);
 
-View* xremote_infoscreen_get_view(XRemoteInfoscreen* xremote_static);
+View* xremote_infoscreen_get_view(XRemoteInfoscreen* instance);
 
 XRemoteInfoscreen* xremote_infoscreen_alloc();
 
-void xremote_infoscreen_free(XRemoteInfoscreen* xremote_static);
+void xremote_infoscreen_free(XRemoteInfoscreen* instance);

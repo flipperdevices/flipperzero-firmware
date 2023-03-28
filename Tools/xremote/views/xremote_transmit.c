@@ -1,8 +1,4 @@
-#include "../xremote.h"
-#include <furi.h>
-#include <furi_hal.h>
-#include <input/input.h>
-#include <gui/elements.h>
+#include "xremote_transmit.h"
 
 struct XRemoteTransmit {
     View* view;

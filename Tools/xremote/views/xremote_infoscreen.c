@@ -1,8 +1,5 @@
+#include "xremote_infoscreen.h"
 #include "../xremote.h"
-#include <furi.h>
-#include <furi_hal.h>
-#include <input/input.h>
-#include <gui/elements.h>
 
 struct XRemoteInfoscreen {
     View* view;

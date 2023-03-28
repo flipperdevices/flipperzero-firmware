@@ -43,6 +43,7 @@ XRemote* xremote_app_alloc() {
     app->speaker = 1;
     app->led = 1;
     app->save_settings = 1;
+    app->transmitting = 0;
 
     // Load configs
     xremote_read_settings(app);

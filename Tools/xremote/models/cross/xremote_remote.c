@@ -1,4 +1,3 @@
-#include "../infrared/xremote_ir_signal.h"
 #include "xremote_remote.h"
 
 ARRAY_DEF(CrossRemoteItemArray, CrossRemoteItem*, M_PTR_OPLIST);

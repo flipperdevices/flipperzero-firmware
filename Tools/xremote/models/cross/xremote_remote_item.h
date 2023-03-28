@@ -1,17 +1,8 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdlib.h>
-#include <m-array.h>
-#include <toolbox/path.h>
-#include <storage/storage.h>
-#include <core/common_defines.h>
-#include <infrared.h>
-#include <flipper_format/flipper_format.h>
+#include "../infrared/xremote_ir_signal.h"
+#include "../../xremote_i.h"
 
-typedef struct CrossRemoteItem CrossRemoteItem;
 
 bool xremote_remote_item_read(CrossRemoteItem* item, FlipperFormat* ff);
 bool xremote_remote_item_read_ir(CrossRemoteItem* item, FlipperFormat* ff);

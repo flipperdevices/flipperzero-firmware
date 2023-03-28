@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
-#include <flipper_format/flipper_format_i.h>
 #include "../xremote.h"
 
 #define XREMOTE_SETTINGS_FILE_VERSION 1

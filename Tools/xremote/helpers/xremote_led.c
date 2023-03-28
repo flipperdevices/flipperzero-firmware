@@ -1,7 +1,4 @@
 #include "xremote_led.h"
-#include "../xremote.h"
-
-
 
 void xremote_led_set_rgb(void* context, int red, int green, int blue) {
     XRemote* app = context;

@@ -33,6 +33,7 @@ typedef struct {
     uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;
+    bool transmitting;
     char text_store[XREMOTE_TEXT_STORE_NUM][XREMOTE_TEXT_STORE_SIZE + 1];
 } XRemote;
 
