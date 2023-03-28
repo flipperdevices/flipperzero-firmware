@@ -28,4 +28,5 @@ typedef enum {
     AvrIspErrorReading,
     AvrIspErrorWriting,
     AvrIspErrorVerification,
+    AvrIspErrorWritingFuse,
 } AvrIspError;

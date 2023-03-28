@@ -6,6 +6,14 @@
 #define AVR_ISP_PROG_TX_RX_BUF_SIZE 320
 #define TAG "AvrIspProg"
 
+struct AvrIspProgSignature {
+    uint8_t vendor;
+    uint8_t part_family;
+    uint8_t part_number;
+};
+
+typedef struct AvrIspProgSignature AvrIspProgSignature;
+
 struct AvrIspProgCfgDevice {
     uint8_t devicecode;
     uint8_t revision;
@@ -262,6 +270,15 @@ static bool avr_isp_prog_start_pmode(AvrIspProg* instance, AvrIspSpiSwSpeed spi_
     return false;
 }
 
+static AvrIspProgSignature avr_isp_prog_check_signature(AvrIspProg* instance) {
+    furi_assert(instance);
+    AvrIspProgSignature signature;
+    signature.vendor = avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_VENDOR);
+    signature.part_family = avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_PART_FAMILY);
+    signature.part_number = avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_PART_NUMBER);
+    return signature;
+}
+
 static bool avr_isp_prog_auto_set_spi_speed_start_pmode(AvrIspProg* instance) {
     AvrIspSpiSwSpeed spi_speed[] = {
         AvrIspSpiSwSpeed1Mhz,
@@ -273,7 +290,18 @@ static bool avr_isp_prog_auto_set_spi_speed_start_pmode(AvrIspProg* instance) {
     };
     for(uint8_t i = 0; i < COUNT_OF(spi_speed); i++) {
         if(avr_isp_prog_start_pmode(instance, spi_speed[i])) {
-            return true;
+            AvrIspProgSignature sig = avr_isp_prog_check_signature(instance);
+            AvrIspProgSignature sig_examination = avr_isp_prog_check_signature(instance);
+            uint8_t y = 0;
+            while(y < 16) {
+                if(memcmp(
+                       (uint8_t*)&sig, (uint8_t*)&sig_examination, sizeof(AvrIspProgSignature)) !=
+                   0)
+                    break;
+                sig_examination = avr_isp_prog_check_signature(instance);    
+                y++;
+            }
+            if(y == 16) return true;
         }
     }
     return false;

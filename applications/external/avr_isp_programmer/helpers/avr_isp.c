@@ -117,16 +117,26 @@ bool avr_isp_auto_set_spi_speed_start_pmode(AvrIsp* instance) {
     furi_assert(instance);
 
     AvrIspSpiSwSpeed spi_speed[] = {
-        AvrIspSpiSwSpeed1Mhz,
-        AvrIspSpiSwSpeed400Khz,
-        AvrIspSpiSwSpeed250Khz,
-        AvrIspSpiSwSpeed125Khz,
+        //AvrIspSpiSwSpeed1Mhz,
+       // AvrIspSpiSwSpeed400Khz,
+       // AvrIspSpiSwSpeed250Khz,
+       // AvrIspSpiSwSpeed125Khz,
         AvrIspSpiSwSpeed40Khz,
         AvrIspSpiSwSpeed20Khz,
     };
     for(uint8_t i = 0; i < COUNT_OF(spi_speed); i++) {
         if(avr_isp_start_pmode(instance, spi_speed[i])) {
-            return true;
+            AvrIspSignature sig = avr_isp_read_signature(instance);
+            AvrIspSignature sig_examination = avr_isp_read_signature(instance);
+            uint8_t y = 0;
+            while(y < 16) {
+                if(memcmp((uint8_t*)&sig, (uint8_t*)&sig_examination, sizeof(AvrIspSignature)) !=
+                   0)
+                    break;
+                sig_examination = avr_isp_read_signature(instance);
+                y++;
+            }
+            if(y == 16) return true;
         }
     }
     return false;

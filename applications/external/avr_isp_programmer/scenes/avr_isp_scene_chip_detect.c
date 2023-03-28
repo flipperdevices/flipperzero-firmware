@@ -14,6 +14,7 @@ void avr_isp_scene_chip_detect_on_enter(void* context) {
     switch(app->error) {
     case AvrIspErrorReading:
     case AvrIspErrorWriting:
+    case AvrIspErrorWritingFuse:
         avr_isp_chip_detect_set_state(
             app->avr_isp_chip_detect_view, AvrIspChipDetectViewStateErrorOccured);
         break;
@@ -36,7 +37,7 @@ void avr_isp_scene_chip_detect_on_enter(void* context) {
 
 bool avr_isp_scene_chip_detect_on_event(void* context, SceneManagerEvent event) {
     furi_assert(context);
-    
+
     AvrIspApp* app = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {

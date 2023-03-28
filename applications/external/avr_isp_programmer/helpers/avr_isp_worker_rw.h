@@ -15,10 +15,12 @@ typedef enum {
     AvrIspWorkerRWStatusEndReading = 1,
     AvrIspWorkerRWStatusEndVerification = 2,
     AvrIspWorkerRWStatusEndWriting = 3,
+    AvrIspWorkerRWStatusEndWritingFuse = 4,
 
     AvrIspWorkerRWStatusErrorReading = (-1),
     AvrIspWorkerRWStatusErrorVerification = (-2),
     AvrIspWorkerRWStatusErrorWriting = (-3),
+    AvrIspWorkerRWStatusErrorWritingFuse = (-4),
 
     AvrIspWorkerRWStatusReserved = 0x7FFFFFFF, ///< Prevents enum down-size compiler optimization.
 } AvrIspWorkerRWStatus;
@@ -82,6 +84,16 @@ bool avr_isp_worker_rw_write_dump(
     const char* file_name);
 
 void avr_isp_worker_rw_write_dump_start(
+    AvrIspWorkerRW* instance,
+    const char* file_path,
+    const char* file_name);
+
+bool avr_isp_worker_rw_write_fuse(
+    AvrIspWorkerRW* instance,
+    const char* file_path,
+    const char* file_name);
+
+void avr_isp_worker_rw_write_fuse_start(
     AvrIspWorkerRW* instance,
     const char* file_path,
     const char* file_name);

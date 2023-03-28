@@ -69,7 +69,10 @@ void avr_isp_writer_view_draw(Canvas* canvas, AvrIspWriterViewModel* model) {
     case AvrIspWriterViewStatusVerification:
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifying dump");
         break;
-    case AvrIspWriterViewStatusVerificationOk:
+    case AvrIspWriterViewStatusWritingFuse:
+        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifying dump");
+        break;
+    case AvrIspWriterViewStatusWritingFuseOk:
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Done!");
         canvas_set_font(canvas, FontSecondary);
         elements_button_center(canvas, "Reflash");
@@ -100,7 +103,7 @@ bool avr_isp_writer_view_input(InputEvent* event, void* context) {
             AvrIspWriterViewModel * model,
             {
                 if((model->status == AvrIspWriterViewStatusIDLE) ||
-                   (model->status == AvrIspWriterViewStatusVerificationOk)) {
+                   (model->status == AvrIspWriterViewStatusWritingFuseOk)) {
                     if(instance->callback)
                         instance->callback(AvrIspCustomEventSceneExit, instance->context);
                     ret = false;
@@ -113,8 +116,9 @@ bool avr_isp_writer_view_input(InputEvent* event, void* context) {
             AvrIspWriterViewModel * model,
             {
                 if((model->status == AvrIspWriterViewStatusIDLE) ||
-                   (model->status == AvrIspWriterViewStatusVerificationOk)) {
+                   (model->status == AvrIspWriterViewStatusWritingFuseOk)) {
                     model->status = AvrIspWriterViewStatusWriting;
+                    
                     avr_isp_worker_rw_write_dump_start(
                         instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
                 }
@@ -126,7 +130,7 @@ bool avr_isp_writer_view_input(InputEvent* event, void* context) {
             AvrIspWriterViewModel * model,
             {
                 if((model->status == AvrIspWriterViewStatusIDLE) ||
-                   (model->status == AvrIspWriterViewStatusVerificationOk)) {
+                   (model->status == AvrIspWriterViewStatusWritingFuseOk)) {
                     if(instance->callback)
                         instance->callback(AvrIspCustomEventSceneExitStartMenu, instance->context);
                     ret = false;
@@ -150,13 +154,22 @@ static void avr_isp_writer_callback_status(void* context, AvrIspWorkerRWStatus s
                 model->status = AvrIspWriterViewStatusVerification;
                 avr_isp_worker_rw_verification_start(
                     instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
-                break;
-            case AvrIspWorkerRWStatusEndVerification:
-                model->status = AvrIspWriterViewStatusVerificationOk;
-                break;
+                break; 
             case AvrIspWorkerRWStatusErrorVerification:
                 if(instance->callback)
                     instance->callback(AvrIspCustomEventSceneErrorVerification, instance->context);
+                break;
+            case AvrIspWorkerRWStatusEndVerification:
+                avr_isp_worker_rw_write_fuse_start(
+                    instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
+                model->status = AvrIspWriterViewStatusVerification;    
+                break;
+            case AvrIspWorkerRWStatusErrorWritingFuse:
+                if(instance->callback)
+                    instance->callback(AvrIspCustomEventSceneErrorWritingFuse, instance->context);
+                break;
+            case AvrIspWorkerRWStatusEndWritingFuse:
+                model->status = AvrIspWriterViewStatusWritingFuseOk;
                 break;
 
             default:

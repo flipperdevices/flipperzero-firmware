@@ -19,7 +19,7 @@ void avr_isp_scene_writer_on_enter(void* context) {
 
 bool avr_isp_scene_writer_on_event(void* context, SceneManagerEvent event) {
     furi_assert(context);
-    
+
     AvrIspApp* app = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeBack) {
@@ -45,6 +45,12 @@ bool avr_isp_scene_writer_on_event(void* context, SceneManagerEvent event) {
             break;
         case AvrIspCustomEventSceneErrorWriting:
             app->error = AvrIspErrorWriting;
+            scene_manager_search_and_switch_to_previous_scene(
+                app->scene_manager, AvrIspSceneChipDetect);
+            consumed = true;
+            break;
+        case AvrIspCustomEventSceneErrorWritingFuse:
+            app->error = AvrIspErrorWritingFuse;
             scene_manager_search_and_switch_to_previous_scene(
                 app->scene_manager, AvrIspSceneChipDetect);
             consumed = true;

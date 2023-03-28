@@ -12,7 +12,8 @@ typedef enum {
     AvrIspWriterViewStatusIDLE,
     AvrIspWriterViewStatusWriting,
     AvrIspWriterViewStatusVerification,
-    AvrIspWriterViewStatusVerificationOk,
+    AvrIspWriterViewStatusWritingFuse,
+    AvrIspWriterViewStatusWritingFuseOk,
 } AvrIspWriterViewStatus;
 
 void avr_isp_writer_update_progress(AvrIspWriterView* instance);
