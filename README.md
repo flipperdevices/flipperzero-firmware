@@ -186,11 +186,11 @@ The pins should be connected as follows:
 </p>
 
 <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./docs/images/GPIO-GBPIN_light.png">
-    <source media="(prefers-color-scheme: light)" srcset="./docs/images/GPIO-GBPIN.png">
+    <source media="(prefers-color-scheme: dark)" srcset="./docs/images/GPIO-GBPIN_light-v2.png">
+    <source media="(prefers-color-scheme: light)" srcset="./docs/images/GPIO-GBPIN-v2.png">
     <img
         alt="Connect Flipper Zero GPIO to Game Boy Pins"
-        src="./docs/images/GPIO-GBPIN.png">
+        src="./docs/images/GPIO-GBPIN-v2.png">
 </picture>
 
 | Cable Game Link (Socket) | Flipper Zero GPIO |
@@ -206,7 +206,7 @@ It's possible to cut a cable directly without using a socket, but it's important
 
 <p align='center'>
 <br />
-<img src="./docs/images/cut-cable.png" width="400" /><br />
+<img src="./docs/images/cut-cable-v2.png.png" width="400" /><br />
 </p>
 
 *"Cable Game Link" cut and directly connected to the Flipper Zero pins.*
