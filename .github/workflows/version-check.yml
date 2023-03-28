@@ -38,103 +38,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          function CleanInput
-          {
-              param(
-                  [string]
-                  $DurtyString
-              )
-              return $DurtyString -replace ('[^a-zA-Z\d_\-\,\.\t\n\r\:\;]', '')
-          }
-
-          $Release = @(`
-                      (CleanInput `
-                            (gh release list -L 1 --repo '${{ env.REPO_UNLEASHED }}')`
-                      ) -split "`t")
-
-          $FirmwareVersionNumber = 0
-          $StoredFirmwareVersionNumber = 0
-          if ($Release[2] -match '\-(\d+)$')
-          {
-              $FirmwareVersionNumber = [int]($Matches[1])
-          }
-          else
-          {
-              Write-Error ('::error title=Invalid firmware number::Error during execution this tags {0}' -f $FirmwareVersionNumber)
-              exit 1
-          }
-          if ('${{ env.FIRMWARE_VERSION }}' -match '\-(\d+)$')
-          {
-              $StoredFirmwareVersionNumber = [int]($Matches[1])
-          }
-          else
-          {
-              Write-Error ('::error title=Invalid STORED firmware number::Error during execution this version {0}' -f '${{ env.FIRMWARE_VERSION }}')
-              exit 1
-          }
-
-          $LatestFirmware = CleanInput ((CleanInput (gh release list -L 1 --repo '${{ env.REPO_SELF }}') -replace '\t', ';') | `
-              ConvertFrom-Csv -Delimiter ';' -Header name, flag, tag).tag
-
-          $Delta = ( [DateTime]::Now - [DateTime]::Parse($Release[3]) )
-          $NewVersionFw = $false
-          Write-Host ('Latest firmware {0}' -f $LatestFirmware) -ForegroundColor Gray -BackgroundColor Magenta
-          Write-Debug ('::debug LatestFirmware {0}' -f $LatestFirmware)
-
-          Write-Output ('REMOTE_TAG_INFO=[{0}]({1}/releases/tag/{2})' -f $LatestFirmware, '${{ env.REPO_UNLEASHED }}', $LatestFirmware) >> $env:GITHUB_ENV
-          if (($FirmwareVersionNumber -gt $StoredFirmwareVersionNumber) -and ( $Delta -gt [TimeSpan]::FromMinutes(10)))
-          {
-              Write-Debug ('::debug LatestFirmware {0}' -f $LatestFirmware)
-              Write-Output ('FIRMWARE_VERSION={0}' -f $LatestFirmware) >> $env:GITHUB_ENV
-              $NewVersionFw = $true
-          }
-          elseif ($FirmwareVersionNumber -lt $StoredFirmwareVersionNumber)
-          {
-              Write-Error ('::error title=Invalid check of stored::Version in repo: {0}, but we think it is {1}' -f  $FirmwareVersionNumber, $StoredFirmwareVersionNumber)
-              exit 1
-          }
-
-          $LastPublished = (gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" '/repos/${{ vars.REPO_SELF }}/releases?per_page=1' | ConvertFrom-Json).published_at
-          $Delta = ([DateTime]::Now - $LastPublished)
-
-          $Release = (gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" '/repos/${{ vars.REPO_SELF }}/tags?per_page=1' | ConvertFrom-Json).name
-          Write-Host ('Release {0}' -f $Release) -ForegroundColor Gray -BackgroundColor Magenta
-          $LatestTag = $Release.Substring(1)
-
-          $CurrentVersion = [version]::Parse('${{ env.RELEASE_VERSION }}')
-          $ParsedRepoVersion = [version]::Parse($LatestTag)
-          Write-Host ('Current tag:Repos tag {0}, {1}' -f $CurrentVersion, $ParsedRepoVersion) -ForegroundColor Gray -BackgroundColor Magenta
-          Write-Debug ('::debug Current tag:Repos tag {0}, {1}' -f $CurrentVersion, $ParsedRepoVersion)
-          if (($CurrentVersion -lt $ParsedRepoVersion) -and ( $Delta -gt [TimeSpan]::FromMinutes(10)))
-          {
-              $Tag = ('{0}.{1}.{2}' -f $ParsedRepoVersion.Major, $ParsedRepoVersion.Minor, $ParsedRepoVersion.Build)
-
-              Write-Output ('RELEASE_VERSION={0}' -f $Tag) >> $env:GITHUB_ENV
-              Write-Output ('RELEASE_TYPE=2' -f $Tag) >> $env:GITHUB_ENV
-
-              Write-Output ('::warning title=New release!::Release {0}' -f $Tag)
-          }
-          elseif ( $NewVersionFw )
-          {
-              $Tag = ('{0}.{1}.{2}' -f $CurrentVersion.Major, $CurrentVersion.Minor, ($CurrentVersion.Build + 1))
-
-              Write-Output ('RELEASE_VERSION={0}' -f $Tag) >> $env:GITHUB_ENV
-              Write-Output ('RELEASE_TYPE=1' -f $Tag) >> $env:GITHUB_ENV
-
-              Write-Output ('::warning title=Firmware was changed!::New version is {0}, creating release {1}' -f $LatestFirmware, $Tag)
-          }
-          elseif ( ($Delta -gt [TimeSpan]::FromMinutes(10)) -and ($CurrentVersion -gt $ParsedRepoVersion)) 
-          {
-              Write-Output ('::warning title=Invalid version!::Version in settings: {0}, but repo version is {1}. Going to change variable' -f $CurrentVersion, $ParsedRepoVersion)
-              Write-Output ('RELEASE_VERSION={0}' -f $ParsedRepoVersion) >> $env:GITHUB_ENV
-              Write-Output ('RELEASE_TYPE=3' -f $Tag) >> $env:GITHUB_ENV
-          }
-          else
-          {
-              # none to release
-              Write-Host 'No new versions, sorry'
-          }
-          Write-Output ('CURRENT_TAG={0}' -f $LatestTag) >> $env:GITHUB_ENV
+          $Output = ('& $env:GITHUB_ACTION_PATH/.github/check-version.ps1')
+          Write-Output("RELEASE_VERSION=$($Output.ReleaseVersion)") >> $env:GITHUB_ENV
+          Write-Output("CURRENT_TAG=$($Output.CurrentTag)") >> $env:GITHUB_ENV
+          Write-Output("REMOTE_TAG_INFO=$($Output.RemoteTagInfo)") >> $env:GITHUB_ENV
+          Write-Output("RELEASE_TYPE=$($Output.ReleaseType)") >> $env:GITHUB_ENV
 
       - name: Update Firmware variable and create UPDATE release if necessary
         if: ${{ success() && env.RELEASE_TYPE == 1 }}
