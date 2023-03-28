@@ -32,7 +32,7 @@ typedef struct {
     bool playField[FIELD_HEIGHT][FIELD_WIDTH];
     uint16_t score;
     int8_t roadStart;
-    Point headPosition;
+    Point headPosition;    
     uint16_t motionSpeed;
     GameState gameState;
     FuriTimer* timer;
@@ -124,11 +124,19 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         return;
     }
 
+
     canvas_clear(canvas);
     race_game_draw_border(canvas);    
     race_game_draw_playfield(canvas, race_state);
-    // canvas_set_font(canvas, FontPrimary);
-    // canvas_draw_str(canvas, 0, 10, "Hello World!");
+    canvas_set_font(canvas, FontPrimary);
+    char str[10];
+
+
+    itoa(race_state->headPosition.y, str, 10);
+    canvas_draw_str(canvas, 24, 10, str);
+    canvas_draw_str(canvas, 24, 15, ",");
+    itoa(race_state->headPosition.x, str, 10);    
+    canvas_draw_str(canvas, 24, 20, str);
 }
 
 
@@ -163,15 +171,31 @@ static void race_game_init_state(RaceState* race_state) {
     furi_timer_start(race_state->timer, race_state->motionSpeed);
 }
 
+static void race_game_draw_car(RaceState* race_state,Point p) {
+    race_state->playField[p.y][p.x] = true;
+    race_state->playField[p.y+1][p.x] = true;
+    race_state->playField[p.y+1][p.x-1] = true;
+    race_state->playField[p.y+1][p.x+1] = true;
+    race_state->playField[p.y+2][p.x] = true;
+    race_state->playField[p.y+3][p.x-1] = true;
+    race_state->playField[p.y+3][p.x+1] = true;
+}
 static void race_game_process_step(RaceState* race_state, bool moveRoad) {
     if(race_state->gameState == GameStateGameOver)
         return;
+
+    // calculate field boundaries
+    if (race_state->headPosition.x < 2) race_state->headPosition.x=2;
+    if (race_state->headPosition.x > (FIELD_WIDTH-3)) race_state->headPosition.x=(FIELD_WIDTH-3);
+    if (race_state->headPosition.y < 0) race_state->headPosition.y=0;
+    if (race_state->headPosition.y > (FIELD_HEIGHT-4)) race_state->headPosition.y=(FIELD_HEIGHT-4);
     for (int y = 0; y < FIELD_HEIGHT; y++) {
         for (int x = 0; x < FIELD_WIDTH; x++) {
             race_state->playField[y][x] = false;
         }
     }
-    
+    /*
+    // 2, 5, 8
     race_state->playField[race_state->headPosition.y][race_state->headPosition.x] = true;
     race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x] = true;
     race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x-1] = true;
@@ -179,12 +203,16 @@ static void race_game_process_step(RaceState* race_state, bool moveRoad) {
     race_state->playField[race_state->headPosition.y+2][race_state->headPosition.x] = true;
     race_state->playField[race_state->headPosition.y+3][race_state->headPosition.x-1] = true;
     race_state->playField[race_state->headPosition.y+3][race_state->headPosition.x+1] = true;
-    
+    */
     if (moveRoad) {
         race_state->roadStart++;
         if (race_state->roadStart == 4)
             race_state->roadStart = 0;        
     }
+    Point p = {.x = 5, .y = 10};
+
+    race_game_draw_car(race_state, race_state->headPosition);
+    race_game_draw_car(race_state, p);
     race_game_init_road(race_state);
 }
 
@@ -197,7 +225,7 @@ int32_t race_app(void* p) {
     RaceGameEvent event;
 
     RaceState* race_state = malloc(sizeof(RaceState));
-    // FuriMutex* state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);;
+    FuriMutex* state_mutex = furi_mutex_alloc(FuriMutexTypeNormal);;
     
     // Queue on 8 events
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(RaceGameEvent));
@@ -232,6 +260,7 @@ int32_t race_app(void* p) {
     // Бесконечный цикл обработки очереди событий
     for(bool processing = true; processing;) {
 
+        furi_mutex_acquire(state_mutex, 1000);
 //         RaceState* race_state = (RaceState*)furi_mutex_block(&state_mutex, 1000);
 
         // Выбираем событие из очереди в переменную event (ждем бесконечно долго, если очередь пуста)
@@ -269,7 +298,7 @@ int32_t race_app(void* p) {
         }
         race_game_process_step(race_state, moveRoad);
         view_port_update(view_port);
-        // furi_mutex_release(&state_mutex, race_state);
+        furi_mutex_release(state_mutex);
 
     }
     // clearing everything on game exit
@@ -279,8 +308,6 @@ int32_t race_app(void* p) {
 
     // clear message queue
     furi_message_queue_free(event_queue);
-
-//    vTaskPrioritySet(timer_task, origTimerPrio);
 
     // clearing ui
     gui_remove_view_port(gui, view_port);
