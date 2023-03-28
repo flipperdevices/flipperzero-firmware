@@ -20,6 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO_UNLEASHED: ${{ vars.REPO_UNLEASHED }}
+      CURRENT_TAG: ${{ vars.FIRMWARE_VERSION }}
+      REMOTE_TAG_INFO: ''
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
       FIRMWARE_VERSION: ${{ vars.FIRMWARE_VERSION }}
       REPO_SELF: ${{ vars.REPO_SELF }}
@@ -29,7 +31,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: "${{ env.REPO_SELF }}"
-          path: "${{ env.CHECKOUT_DIR }}"
           clean: "true"
           submodules: "true"
           token: ${{ secrets.FLIPPER_TOKEN }}
@@ -38,15 +39,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $Cmd = "$env:GITHUB_ACTION_PATH/.github/check-version.ps1"
-          $Params = @("${{ env.FIRMWARE_VERSION }}" "${{ env.RELEASE_VERSION }}" "${{ env.REPO_SELF }}" "${{ env.REPO_UNLEASHED }}");
-          & $cmd $params
-          #& $Cmd $Params | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+          ./.github/check-version.ps1 '${{ env.FIRMWARE_VERSION }}' '${{ env.RELEASE_VERSION }}' '${{ env.REPO_SELF }}' '${{ env.REPO_UNLEASHED }}' | %{ Write-Output($_) >> $Env:GITHUB_ENV }
+          #Write-Output("CURRENT_TAG=$($Output.CurrentTag)") >> $env:GITHUB_ENV
+          #| Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+#          New-Alias -Name sc -Value ".\.github/check-version.ps1"
+#          $Params = @("${{ env.FIRMWARE_VERSION }}", "${{ env.RELEASE_VERSION }}", "${{ env.REPO_SELF }}", "${{ env.REPO_UNLEASHED }}")
+#          sc $Params
+#          #& $Cmd $Params | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 #         $Output = ('& $env:GITHUB_ACTION_PATH/.github/check-version.ps1 "${{ env.FIRMWARE_VERSION }}" "${{ env.RELEASE_VERSION }}" "${{ env.REPO_SELF }}" "${{ env.REPO_UNLEASHED }}"')
 #         Write-Output("RELEASE_VERSION=$($Output.ReleaseVersion)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 #         Write-Output("CURRENT_TAG=$($Output.CurrentTag)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
 #         Write-Output("REMOTE_TAG_INFO=$($Output.RemoteTagInfo)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-#         Write-Output("RELEASE_TYPE=$($Output.ReleaseType)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+#        Write-Output("RELEASE_TYPE=$($Output.ReleaseType)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Print env values
+        run: env
+          
       - name: Update Firmware variable and create UPDATE release if necessary
         if: ${{ success() && env.RELEASE_TYPE == 1 }}
         env:
