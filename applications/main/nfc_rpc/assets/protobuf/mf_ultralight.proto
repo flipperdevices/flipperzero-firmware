@@ -65,3 +65,11 @@ message ReadTearingFlagResponse {
   uint32 flag_num = 2;
   bytes data = 3;
 }
+
+message EmulateStartRequest { bytes data = 1; }
+
+message EmulateStartResponse { Error error = 1; }
+
+message EmulationStopRequest {}
+
+message EmulationStopResponse { Error error = 1; }

@@ -23,3 +23,16 @@ message ReadResponse {
   bytes sak = 4;
   bytes atqa = 5;
 }
+
+message EmulateStartRequest {
+  uint32 uid_len = 1;
+  bytes uid = 2;
+  bytes sak = 3;
+  bytes atqa = 4;
+}
+
+message EmulateStartResponse { Error error = 1; }
+
+message EmulateStopRequest {}
+
+message EmulateStopResponse { Error error = 1; }

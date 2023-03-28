@@ -67,9 +67,56 @@ static void nfc_rpc_nfca_read(Nfc_Main* cmd, void* context) {
     nfca_poller_free(nfca_poller);
 }
 
+static void nfc_rpc_nfca_emulate_start(Nfc_Main* cmd, void* context) {
+    furi_assert(cmd);
+    furi_assert(context);
+
+    NfcRpc* instance = context;
+    PB_Nfca_EmulateStartResponse pb_nfca_emulate_start_resp =
+        PB_Nfca_EmulateStartResponse_init_default;
+    cmd->command_status = Nfc_CommandStatus_OK;
+    cmd->which_content = Nfc_Main_nfca_emulate_start_resp_tag;
+    if(instance->nfca_listener == NULL) {
+        NfcaData nfca_data = {};
+        nfca_data.uid_len = cmd->content.nfca_emulate_start_req.uid_len;
+        memcpy(nfca_data.uid, cmd->content.nfca_emulate_start_req.uid.bytes, nfca_data.uid_len);
+        memcpy(nfca_data.atqa, cmd->content.nfca_emulate_start_req.atqa.bytes, 2);
+        memcpy(&nfca_data.sak, cmd->content.nfca_emulate_start_req.sak.bytes, 1);
+
+        instance->nfca_listener = nfca_listener_alloc(&nfca_data);
+        pb_nfca_emulate_start_resp.error = PB_Nfca_Error_None;
+    } else {
+        // TODO add Busy error
+        pb_nfca_emulate_start_resp.error = PB_Nfca_Error_NotPresent;
+    }
+    cmd->content.nfca_emulate_start_resp = pb_nfca_emulate_start_resp;
+}
+
+static void nfc_rpc_nfca_emulate_stop(Nfc_Main* cmd, void* context) {
+    furi_assert(cmd);
+    furi_assert(context);
+
+    NfcRpc* instance = context;
+    PB_Nfca_EmulateStopResponse pb_nfca_emulate_stop_resp =
+        PB_Nfca_EmulateStopResponse_init_default;
+    cmd->command_status = Nfc_CommandStatus_OK;
+    cmd->which_content = Nfc_Main_nfca_emulate_stop_resp_tag;
+    if(instance->nfca_listener) {
+        nfca_listener_free(instance->nfca_listener);
+        instance->nfca_listener = NULL;
+        pb_nfca_emulate_stop_resp.error = PB_Nfca_Error_None;
+    } else {
+        // TODO add Busy error
+        pb_nfca_emulate_stop_resp.error = PB_Nfca_Error_NotPresent;
+    }
+    cmd->content.nfca_emulate_stop_resp = pb_nfca_emulate_stop_resp;
+}
+
 void nfc_rpc_nfca_alloc(void* context) {
     furi_assert(context);
 
     NfcRpc* instance = context;
     nfc_rpc_add_handler(instance, Nfc_Main_nfca_read_req_tag, nfc_rpc_nfca_read);
+    nfc_rpc_add_handler(instance, Nfc_Main_nfca_emulate_start_req_tag, nfc_rpc_nfca_emulate_start);
+    nfc_rpc_add_handler(instance, Nfc_Main_nfca_emulate_stop_req_tag, nfc_rpc_nfca_emulate_stop);
 }

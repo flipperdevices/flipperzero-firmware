@@ -42,5 +42,17 @@ PB_BIND(PB_MfUltralight_ReadTearingFlagRequest, PB_MfUltralight_ReadTearingFlagR
 PB_BIND(PB_MfUltralight_ReadTearingFlagResponse, PB_MfUltralight_ReadTearingFlagResponse, AUTO)
 
 
+PB_BIND(PB_MfUltralight_EmulateStartRequest, PB_MfUltralight_EmulateStartRequest, 2)
+
+
+PB_BIND(PB_MfUltralight_EmulateStartResponse, PB_MfUltralight_EmulateStartResponse, AUTO)
+
+
+PB_BIND(PB_MfUltralight_EmulationStopRequest, PB_MfUltralight_EmulationStopRequest, AUTO)
+
+
+PB_BIND(PB_MfUltralight_EmulationStopResponse, PB_MfUltralight_EmulationStopResponse, AUTO)
+
+
 
 

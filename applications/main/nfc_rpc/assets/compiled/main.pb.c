@@ -9,7 +9,7 @@
 PB_BIND(Nfc_Empty, Nfc_Empty, AUTO)
 
 
-PB_BIND(Nfc_Main, Nfc_Main, AUTO)
+PB_BIND(Nfc_Main, Nfc_Main, 2)
 
 
 

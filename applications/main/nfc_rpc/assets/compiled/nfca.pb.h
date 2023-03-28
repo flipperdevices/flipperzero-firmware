@@ -37,6 +37,28 @@ typedef struct _PB_Nfca_ReadResponse {
     PB_Nfca_ReadResponse_atqa_t atqa;
 } PB_Nfca_ReadResponse;
 
+typedef PB_BYTES_ARRAY_T(10) PB_Nfca_EmulateStartRequest_uid_t;
+typedef PB_BYTES_ARRAY_T(1) PB_Nfca_EmulateStartRequest_sak_t;
+typedef PB_BYTES_ARRAY_T(2) PB_Nfca_EmulateStartRequest_atqa_t;
+typedef struct _PB_Nfca_EmulateStartRequest {
+    uint32_t uid_len;
+    PB_Nfca_EmulateStartRequest_uid_t uid;
+    PB_Nfca_EmulateStartRequest_sak_t sak;
+    PB_Nfca_EmulateStartRequest_atqa_t atqa;
+} PB_Nfca_EmulateStartRequest;
+
+typedef struct _PB_Nfca_EmulateStartResponse {
+    PB_Nfca_Error error;
+} PB_Nfca_EmulateStartResponse;
+
+typedef struct _PB_Nfca_EmulateStopRequest {
+    char dummy_field;
+} PB_Nfca_EmulateStopRequest;
+
+typedef struct _PB_Nfca_EmulateStopResponse {
+    PB_Nfca_Error error;
+} PB_Nfca_EmulateStopResponse;
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -51,11 +73,25 @@ extern "C" {
 #define PB_Nfca_ReadResponse_error_ENUMTYPE PB_Nfca_Error
 
 
+#define PB_Nfca_EmulateStartResponse_error_ENUMTYPE PB_Nfca_Error
+
+
+#define PB_Nfca_EmulateStopResponse_error_ENUMTYPE PB_Nfca_Error
+
+
 /* Initializer values for message structs */
 #define PB_Nfca_ReadRequest_init_default         {0}
 #define PB_Nfca_ReadResponse_init_default        {_PB_Nfca_Error_MIN, 0, {0, {0}}, {0, {0}}, {0, {0}}}
+#define PB_Nfca_EmulateStartRequest_init_default {0, {0, {0}}, {0, {0}}, {0, {0}}}
+#define PB_Nfca_EmulateStartResponse_init_default {_PB_Nfca_Error_MIN}
+#define PB_Nfca_EmulateStopRequest_init_default  {0}
+#define PB_Nfca_EmulateStopResponse_init_default {_PB_Nfca_Error_MIN}
 #define PB_Nfca_ReadRequest_init_zero            {0}
 #define PB_Nfca_ReadResponse_init_zero           {_PB_Nfca_Error_MIN, 0, {0, {0}}, {0, {0}}, {0, {0}}}
+#define PB_Nfca_EmulateStartRequest_init_zero    {0, {0, {0}}, {0, {0}}, {0, {0}}}
+#define PB_Nfca_EmulateStartResponse_init_zero   {_PB_Nfca_Error_MIN}
+#define PB_Nfca_EmulateStopRequest_init_zero     {0}
+#define PB_Nfca_EmulateStopResponse_init_zero    {_PB_Nfca_Error_MIN}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define PB_Nfca_ReadResponse_error_tag           1
@@ -63,6 +99,12 @@ extern "C" {
 #define PB_Nfca_ReadResponse_uid_tag             3
 #define PB_Nfca_ReadResponse_sak_tag             4
 #define PB_Nfca_ReadResponse_atqa_tag            5
+#define PB_Nfca_EmulateStartRequest_uid_len_tag  1
+#define PB_Nfca_EmulateStartRequest_uid_tag      2
+#define PB_Nfca_EmulateStartRequest_sak_tag      3
+#define PB_Nfca_EmulateStartRequest_atqa_tag     4
+#define PB_Nfca_EmulateStartResponse_error_tag   1
+#define PB_Nfca_EmulateStopResponse_error_tag    1
 
 /* Struct field encoding specification for nanopb */
 #define PB_Nfca_ReadRequest_FIELDLIST(X, a) \
@@ -79,14 +121,49 @@ X(a, STATIC,   SINGULAR, BYTES,    atqa,              5)
 #define PB_Nfca_ReadResponse_CALLBACK NULL
 #define PB_Nfca_ReadResponse_DEFAULT NULL
 
+#define PB_Nfca_EmulateStartRequest_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UINT32,   uid_len,           1) \
+X(a, STATIC,   SINGULAR, BYTES,    uid,               2) \
+X(a, STATIC,   SINGULAR, BYTES,    sak,               3) \
+X(a, STATIC,   SINGULAR, BYTES,    atqa,              4)
+#define PB_Nfca_EmulateStartRequest_CALLBACK NULL
+#define PB_Nfca_EmulateStartRequest_DEFAULT NULL
+
+#define PB_Nfca_EmulateStartResponse_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UENUM,    error,             1)
+#define PB_Nfca_EmulateStartResponse_CALLBACK NULL
+#define PB_Nfca_EmulateStartResponse_DEFAULT NULL
+
+#define PB_Nfca_EmulateStopRequest_FIELDLIST(X, a) \
+
+#define PB_Nfca_EmulateStopRequest_CALLBACK NULL
+#define PB_Nfca_EmulateStopRequest_DEFAULT NULL
+
+#define PB_Nfca_EmulateStopResponse_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UENUM,    error,             1)
+#define PB_Nfca_EmulateStopResponse_CALLBACK NULL
+#define PB_Nfca_EmulateStopResponse_DEFAULT NULL
+
 extern const pb_msgdesc_t PB_Nfca_ReadRequest_msg;
 extern const pb_msgdesc_t PB_Nfca_ReadResponse_msg;
+extern const pb_msgdesc_t PB_Nfca_EmulateStartRequest_msg;
+extern const pb_msgdesc_t PB_Nfca_EmulateStartResponse_msg;
+extern const pb_msgdesc_t PB_Nfca_EmulateStopRequest_msg;
+extern const pb_msgdesc_t PB_Nfca_EmulateStopResponse_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
 #define PB_Nfca_ReadRequest_fields &PB_Nfca_ReadRequest_msg
 #define PB_Nfca_ReadResponse_fields &PB_Nfca_ReadResponse_msg
+#define PB_Nfca_EmulateStartRequest_fields &PB_Nfca_EmulateStartRequest_msg
+#define PB_Nfca_EmulateStartResponse_fields &PB_Nfca_EmulateStartResponse_msg
+#define PB_Nfca_EmulateStopRequest_fields &PB_Nfca_EmulateStopRequest_msg
+#define PB_Nfca_EmulateStopResponse_fields &PB_Nfca_EmulateStopResponse_msg
 
 /* Maximum encoded size of messages (where known) */
+#define PB_Nfca_EmulateStartRequest_size         25
+#define PB_Nfca_EmulateStartResponse_size        2
+#define PB_Nfca_EmulateStopRequest_size          0
+#define PB_Nfca_EmulateStopResponse_size         2
 #define PB_Nfca_ReadRequest_size                 0
 #define PB_Nfca_ReadResponse_size                27
 
