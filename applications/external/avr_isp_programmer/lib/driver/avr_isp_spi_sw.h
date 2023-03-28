@@ -7,8 +7,12 @@ typedef enum {
     AvrIspSpiSwSpeed400Khz = 1,
     AvrIspSpiSwSpeed250Khz = 2,
     AvrIspSpiSwSpeed125Khz = 4,
+    AvrIspSpiSwSpeed60Khz = 8,
     AvrIspSpiSwSpeed40Khz = 12,
     AvrIspSpiSwSpeed20Khz = 24,
+    AvrIspSpiSwSpeed10Khz = 48,
+    AvrIspSpiSwSpeed5Khz = 96,
+    AvrIspSpiSwSpeed1Khz = 480,
 } AvrIspSpiSwSpeed;
 
 typedef struct AvrIspSpiSw AvrIspSpiSw;

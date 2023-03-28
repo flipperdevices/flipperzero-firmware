@@ -285,23 +285,36 @@ static bool avr_isp_prog_auto_set_spi_speed_start_pmode(AvrIspProg* instance) {
         AvrIspSpiSwSpeed400Khz,
         AvrIspSpiSwSpeed250Khz,
         AvrIspSpiSwSpeed125Khz,
+        AvrIspSpiSwSpeed60Khz,
         AvrIspSpiSwSpeed40Khz,
         AvrIspSpiSwSpeed20Khz,
+        AvrIspSpiSwSpeed10Khz,
+        AvrIspSpiSwSpeed5Khz,
+        AvrIspSpiSwSpeed1Khz,
     };
     for(uint8_t i = 0; i < COUNT_OF(spi_speed); i++) {
         if(avr_isp_prog_start_pmode(instance, spi_speed[i])) {
             AvrIspProgSignature sig = avr_isp_prog_check_signature(instance);
             AvrIspProgSignature sig_examination = avr_isp_prog_check_signature(instance); //-V654
             uint8_t y = 0;
-            while(y < 16) {
+            while(y < 8) {
                 if(memcmp(
                        (uint8_t*)&sig, (uint8_t*)&sig_examination, sizeof(AvrIspProgSignature)) !=
                    0)
                     break;
-                sig_examination = avr_isp_prog_check_signature(instance);    
+                sig_examination = avr_isp_prog_check_signature(instance);
                 y++;
             }
-            if(y == 16) return true;
+            if(y == 8) {
+                if(spi_speed[i] > AvrIspSpiSwSpeed1Mhz) {
+                    if(i < COUNT_OF(spi_speed)) {
+                        avr_isp_prog_end_pmode(instance);
+                        i++;
+                        return avr_isp_prog_start_pmode(instance, spi_speed[i]);
+                    }
+                }
+                return true;
+            }
         }
     }
     return false;

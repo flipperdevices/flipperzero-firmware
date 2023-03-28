@@ -324,7 +324,7 @@ static void avr_isp_worker_rw_get_dump_flash(AvrIspWorkerRW* instance, const cha
         i < avr_isp_chip_arr[instance->chip_arr_ind].flashsize / 2;
         i += avr_isp_chip_arr[instance->chip_arr_ind].pagesize / 2) {
         if(send_extended_addr) {
-            if(extended_addr == ((i >> 16) & 0xFF)) {
+            if(extended_addr <= ((i >> 16) & 0xFF)) {
                 avr_isp_write_extended_addr(instance->avr_isp, extended_addr);
                 extended_addr = ((i >> 16) & 0xFF) + 1;
             }
@@ -534,7 +534,7 @@ static bool avr_isp_worker_rw_verification_flash(AvrIspWorkerRW* instance, const
         case FlipperI32HexFileStatusData:
 
             if(send_extended_addr) {
-                if(extended_addr == ((addr >> 16) & 0xFF)) {
+                if(extended_addr <= ((addr >> 16) & 0xFF)) {
                     avr_isp_write_extended_addr(instance->avr_isp, extended_addr);
                     extended_addr = ((addr >> 16) & 0xFF) + 1;
                 }
@@ -734,7 +734,7 @@ static void avr_isp_worker_rw_write_flash(AvrIspWorkerRW* instance, const char* 
         case FlipperI32HexFileStatusData:
 
             if(send_extended_addr) {
-                if(extended_addr == ((addr >> 16) & 0xFF)) {
+                if(extended_addr <= ((addr >> 16) & 0xFF)) {
                     avr_isp_write_extended_addr(instance->avr_isp, extended_addr);
                     extended_addr = ((addr >> 16) & 0xFF) + 1;
                 }
