@@ -125,8 +125,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     }
 
     canvas_clear(canvas);
-    race_game_draw_border(canvas);
-    race_game_init_road(race_state);
+    race_game_draw_border(canvas);    
     race_game_draw_playfield(canvas, race_state);
     // canvas_set_font(canvas, FontPrimary);
     // canvas_draw_str(canvas, 0, 10, "Hello World!");
@@ -150,11 +149,11 @@ static void timer_callback(FuriMessageQueue* event_queue) {
 }
 
 static void race_game_init_state(RaceState* race_state) {
-    Point p = {20,5};
     race_state->gameState = GameStatePlaying;
     race_state->score = 0;
     race_state->roadStart=0;
     race_state->motionSpeed = 500;
+    Point p = {.x = 5, .y = 20};
     race_state->headPosition = p;
     memset(race_state->playField, 0, sizeof(race_state->playField));
   //  memset(tetris_state->playField, 0, sizeof(tetris_state->playField));
@@ -164,7 +163,7 @@ static void race_game_init_state(RaceState* race_state) {
     furi_timer_start(race_state->timer, race_state->motionSpeed);
 }
 
-static void race_game_process_step(RaceState* race_state) {
+static void race_game_process_step(RaceState* race_state, bool moveRoad) {
     if(race_state->gameState == GameStateGameOver)
         return;
     for (int y = 0; y < FIELD_HEIGHT; y++) {
@@ -172,9 +171,7 @@ static void race_game_process_step(RaceState* race_state) {
             race_state->playField[y][x] = false;
         }
     }
-    race_state->roadStart++;
-    if (race_state->roadStart == 4)
-        race_state->roadStart = 0;
+    
     race_state->playField[race_state->headPosition.y][race_state->headPosition.x] = true;
     race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x] = true;
     race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x-1] = true;
@@ -183,6 +180,12 @@ static void race_game_process_step(RaceState* race_state) {
     race_state->playField[race_state->headPosition.y+3][race_state->headPosition.x-1] = true;
     race_state->playField[race_state->headPosition.y+3][race_state->headPosition.x+1] = true;
     
+    if (moveRoad) {
+        race_state->roadStart++;
+        if (race_state->roadStart == 4)
+            race_state->roadStart = 0;        
+    }
+    race_game_init_road(race_state);
 }
 
 int32_t race_app(void* p) {
@@ -234,12 +237,18 @@ int32_t race_app(void* p) {
         // Выбираем событие из очереди в переменную event (ждем бесконечно долго, если очередь пуста)
         // и проверяем, что у нас получилось это сделать
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
-
+        bool moveRoad = false;
         if(event.type == EventTypeKey) {
             // Если нажата кнопка "назад", то выходим из цикла, а следовательно и из приложения
             switch(event.input.key) {
                 case InputKeyBack:
                     processing = false;
+                    break;
+                case InputKeyUp:
+                    race_state->headPosition.y -= 1;
+                    break;
+                case InputKeyDown:    
+                    race_state->headPosition.y += 1;
                     break;
                 case InputKeyRight:
                     race_state->headPosition.x += 1;
@@ -256,8 +265,9 @@ int32_t race_app(void* p) {
             // Наше событие — это сработавший таймер
         } else if(event.type == EventTypeTick) {
             // Сделаем что-то по таймеру
+            moveRoad = true;
         }
-        race_game_process_step(race_state);
+        race_game_process_step(race_state, moveRoad);
         view_port_update(view_port);
         // furi_mutex_release(&state_mutex, race_state);
 
