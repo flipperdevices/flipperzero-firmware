@@ -241,7 +241,6 @@ static void race_game_process_step(RaceState* race_state, bool moveRoad) {
         return;
 
 
-    race_state->score += 10;
     
     // calculate field boundaries
     if (race_state->headPosition.x < 2) race_state->headPosition.x=2;
@@ -255,6 +254,7 @@ static void race_game_process_step(RaceState* race_state, bool moveRoad) {
     }
     
     if (moveRoad) {
+        race_state->score += 10;
         race_state->roadStart++;
         if (race_state->roadStart == 4)
             race_state->roadStart = 0;      
