@@ -129,10 +129,9 @@ static void race_game_init_road( RaceState* race_state) {
 }
 
 static void draw_callback(Canvas* canvas, void* ctx) {
-    // const RaceState* race_state = furi_mutex_acquire((FuriMutex*)ctx, 25);
     RaceState* race_state = ctx;
     if(race_state == NULL) {
-        FURI_LOG_E("RaceGame", "it null");
+        FURI_LOG_E("RaceGame", "state is null");
         return;
     }
 
@@ -171,9 +170,7 @@ static void input_callback(InputEvent* input_event, void* ctx) {
 }
 
 static void timer_callback(FuriMessageQueue* event_queue) {
-    // Проверяем, что контекст не нулевой
     furi_assert(event_queue);
-
     RaceGameEvent event = {.type = EventTypeTick};
     furi_message_queue_put(event_queue, &event, 0);
 }
@@ -190,29 +187,22 @@ static void race_game_init_state(RaceState* race_state) {
         race_state->obstacles[i] = obstacle;
     }
     memset(race_state->playField, 0, sizeof(race_state->playField));
-  //  memset(tetris_state->playField, 0, sizeof(tetris_state->playField));
-
-  //  memcpy(&tetris_state->currPiece, &shapes[rand() % 7], sizeof(tetris_state->currPiece));
-
     furi_timer_start(race_state->timer, race_state->motionSpeed);
 }
 
-static void race_game_draw_car(RaceState* race_state,Point p) {
-    if (p.y>-1) {
-        race_state->playField[p.y][p.x] = true;
-    }
-    if (p.y>-2) {
-        race_state->playField[p.y+1][p.x] = true;
-        race_state->playField[p.y+1][p.x-1] = true;
-        race_state->playField[p.y+1][p.x+1] = true;
-    }
-    if (p.y>-3) {
-        race_state->playField[p.y+2][p.x] = true;
-    }
-    if (p.y>-4) {
-        race_state->playField[p.y+3][p.x-1] = true;
-        race_state->playField[p.y+3][p.x+1] = true;
-    }
+static void race_game_draw_car(RaceState* race_state,Point p, bool changeState) {
+    static Point pointsToCheck[] = {
+        {0, 0}, {0,1}, {-1,1}, {1,1},
+        {0, 2}, {-1, 3}, {1, 3}
+    };
+    for (int i = 0; i<7; i++) {
+        if (p.x+pointsToCheck[i].x>-1 && p.y+pointsToCheck[i].y>-1 && p.x+pointsToCheck[i].x<FIELD_WIDTH && p.y+pointsToCheck[i].y<FIELD_HEIGHT) {
+            if (changeState && race_state->playField[p.y+pointsToCheck[i].y][p.x+pointsToCheck[i].x] ) {
+                race_state->gameState = GameStateGameOver;
+            }
+            race_state->playField[p.y+pointsToCheck[i].y][p.x+pointsToCheck[i].x] = true;
+        }
+    }    
 }
 static void race_game_move_obstacles(RaceState* race_state) {
     
@@ -239,7 +229,7 @@ static void race_game_spawn_obstacles(RaceState* race_state) {
                 if (!race_state->obstacles[i].isAlive) {
                     race_state->obstacles[i].isAlive = true;
                     race_state->obstacles[i].position.y = -4;
-                    race_state->obstacles[i].position.x = (rand() % 3)*3 + 2;
+                    race_state->obstacles[i].position.x = (rand() % 3) * 3 + 2;
                     break;
                 }            
             }   
@@ -263,33 +253,22 @@ static void race_game_process_step(RaceState* race_state, bool moveRoad) {
             race_state->playField[y][x] = false;
         }
     }
-    /*
-    // 2, 5, 8
-    race_state->playField[race_state->headPosition.y][race_state->headPosition.x] = true;
-    race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x] = true;
-    race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x-1] = true;
-    race_state->playField[race_state->headPosition.y+1][race_state->headPosition.x+1] = true;
-    race_state->playField[race_state->headPosition.y+2][race_state->headPosition.x] = true;
-    race_state->playField[race_state->headPosition.y+3][race_state->headPosition.x-1] = true;
-    race_state->playField[race_state->headPosition.y+3][race_state->headPosition.x+1] = true;
-    */
+    
     if (moveRoad) {
         race_state->roadStart++;
         if (race_state->roadStart == 4)
             race_state->roadStart = 0;      
         race_game_spawn_obstacles(race_state);
         race_game_move_obstacles(race_state);
-    }
-    // Point p = {.x = 5, .y = 10};
 
-    race_game_draw_car(race_state, race_state->headPosition);
+    }
 
     for (int i=0; i<PARALLEL_OBSTACLES; i++) {
          if (race_state->obstacles[i].isAlive) {
-             race_game_draw_car(race_state, race_state->obstacles[i].position);
+             race_game_draw_car(race_state, race_state->obstacles[i].position, false);
         }            
     }
-    // race_game_draw_car(race_state, p);
+    race_game_draw_car(race_state, race_state->headPosition, true);
     race_game_init_road(race_state);
 }
 
