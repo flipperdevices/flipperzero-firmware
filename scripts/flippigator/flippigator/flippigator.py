@@ -267,6 +267,8 @@ class Navigator:
 
     def go_to_main_screen(self):
         self.press_back()
+        self.press_back()
+        self.press_back()
         state = self.get_current_state()
         while not ("SDcardIcon" in state):
             state = self.get_current_state()
