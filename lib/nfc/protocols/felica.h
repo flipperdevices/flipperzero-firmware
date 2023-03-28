@@ -10,12 +10,21 @@
 #define MRT_T_SIG_x16 4833038.24 //ns, MRT_T_SIG * (4 ** 2)
 #define MRT_T_SIG_x64 19332152.96 //ns, MRT_T_SIG * (4 ** 2)
 
+#define FELICA_PMM_MRT_BASE 2
+
 #define FELICA_VARIABLE_MRT 0
 #define FELICA_FIXED_MRT 1
 #define FELICA_MUTUAL_AUTH_MRT 2
 #define FELICA_READ_MRT 3
 #define FELICA_WRITE_MRT 4
 #define FELICA_OTHER_MRT 5
+
+#define FELICA_PMM_VARIABLE_MRT (FELICA_PMM_MRT_BASE + FELICA_VARIABLE_MRT)
+#define FELICA_PMM_FIXED_MRT (FELICA_PMM_MRT_BASE + FELICA_FIXED_MRT)
+#define FELICA_PMM_MUTUAL_AUTH_MRT (FELICA_PMM_MRT_BASE + FELICA_MUTUAL_AUTH_MRT)
+#define FELICA_PMM_READ_MRT (FELICA_PMM_MRT_BASE + FELICA_READ_MRT)
+#define FELICA_PMM_WRITE_MRT (FELICA_PMM_MRT_BASE + FELICA_WRITE_MRT)
+#define FELICA_PMM_OTHER_MRT (FELICA_PMM_MRT_BASE + FELICA_OTHER_MRT)
 
 #define FELICA_BLOCK_SIZE 16
 
@@ -55,9 +64,13 @@
 
 #define FELICA_UNENCRYPTED_READ_CMD 0x06
 #define FELICA_UNENCRYPTED_WRITE_CMD 0x08
+#define FELICA_SEARCH_SERVICE_CODE_CMD 0x0a
+#define FELICA_REQUEST_SYSTEM_CODE_CMD 0x0c
 
 #define FELICA_UNENCRYPTED_READ_RES 0x07
 #define FELICA_UNENCRYPTED_WRITE_RES 0x09
+#define FELICA_SEARCH_SERVICE_CODE_RES 0x0b
+#define FELICA_REQUEST_SYSTEM_CODE_RES 0x0d
 
 typedef enum {
     FelicaICTypeRC_SA24_10K, // RC-SA24/1x
@@ -88,13 +101,6 @@ typedef enum {
     FelicaICTypeSuica, // https://www.tuv-nederland.nl/assets/files/cerfiticaten/2019/07/cr-nscib-cc-10-30076-cr.pdf
 } FelicaICType;
 
-typedef struct {
-    uint8_t exponent : 2;
-    // Incremented at read
-    uint8_t real_a : 4;
-    uint8_t real_b : 4;
-} FelicaMRTParts;
-
 typedef enum {
     FelicaServiceTypeRandom = (0b0010 << 2),
     FelicaServiceTypeCyclic = (0b0011 << 2),
@@ -121,20 +127,20 @@ DICT_SET_DEF(
     FelicaServiceAttribute,
     M_ENUM_OPLIST(FelicaServiceAttribute, FelicaServiceAttributeAuthRW))
 
-typedef FelicaMRTParts FelicaMRTParameters[6];
-
 typedef struct {
     uint8_t data[FELICA_BLOCK_SIZE];
 } FelicaBlock;
 
-ARRAY_DEF(FelicaBlockList, FelicaBlock*, M_PTR_OPLIST)
+ARRAY_DEF(FelicaBlockArray, FelicaBlock, M_POD_OPLIST)
+#define M_OPL_FelicaBlockArray_t() ARRAY_OPLIST(FelicaBlockArray, M_POD_OPLIST)
 
 typedef struct {
     uint16_t number;
     FelicaServiceAttributeList_t access_control_list; // accounts for overlap services
-    bool is_extended_overlap;
+    bool is_extended_overlap; // We don't know much about this currently. will always be false
     union {
-        FelicaBlockList_t blocks;
+        // TODO change this to use FelicaBlockArray_t
+        FelicaBlockArray_t blocks;
         struct {
             uint16_t overlap_target;
             uint8_t block_start;
@@ -149,23 +155,44 @@ typedef enum {
 } FelicaNodeType;
 
 struct _FelicaArea_t;
-typedef struct {
+typedef struct _FelicaArea_t FelicaArea;
+
+struct _FelicaNode_s;
+typedef struct _FelicaNode_s FelicaNode;
+
+struct _FelicaNode_s {
+    /** Node type. */
     FelicaNodeType type;
+    /** Borrowed pointer to its parent node. */
+    FelicaNode* parent;
     union {
-        struct _FelicaArea_t* area;
+        /** (Area/dir type only) The area struct. */
+        FelicaArea* area;
+        /** (Service/file type only) The service struct. */
         FelicaService* service;
     };
-} FelicaNode;
+};
 
-ARRAY_DEF(FelicaNodeList, FelicaNode*, M_PTR_OPLIST)
+// TODO properly remove this
+//ARRAY_DEF(FelicaNodeList, FelicaNode*, M_PTR_OPLIST)
+ARRAY_DEF(FelicaNodeArray, FelicaNode, M_POD_OPLIST)
+#define M_OPL_FelicaNodeArray_t() ARRAY_OPLIST(FelicaNodeArray, M_POD_OPLIST)
 
-typedef struct _FelicaArea_t {
+ARRAY_DEF(FelicaNodeRefArray, FelicaNode*, M_PTR_OPLIST)
+#define M_OPL_FelicaNodeRefArray_t() ARRAY_OPLIST(FelicaNodeRefArray, M_PTR_OPLIST)
+
+// { service_number: service_ptr_in_tree }
+DICT_DEF2(FelicaPublicServiceDict, uint16_t, M_DEFAULT_OPLIST, FelicaService*, M_PTR_OPLIST)
+#define M_OPL_FelicaPublicServiceDict_t() \
+    DICT_OPLIST(FelicaPublicServiceDict, M_DEFAULT_OPLIST, M_PTR_OPLIST)
+
+struct _FelicaArea_t {
     uint16_t number;
     bool can_create_subareas;
     uint16_t end_service_code;
 
-    FelicaNodeList_t nodes;
-} FelicaArea;
+    FelicaNodeArray_t nodes;
+};
 
 typedef struct {
     uint8_t* S_PAD[14];
@@ -186,24 +213,39 @@ typedef struct {
 } FelicaLiteInfo;
 
 typedef struct _FelicaSystem_t {
+    /** FeliCa system index. */
     uint8_t number;
+    /** If the system belongs to a FeliCa Lite (and be its only system). */
+    bool is_lite;
+    /** FeliCa system code. */
     uint16_t code;
+    /** System IDm with system index bitfield properly set. */
     uint8_t idm[8];
+    /** Cached card PMm. */
     uint8_t pmm[8];
-    FelicaMRTParameters maximum_response_times;
 
     union {
+        /** (For FeliCa Lite only) Card content. */
         FelicaLiteInfo lite_info;
-        FelicaArea root_area;
+        struct {
+            /** (For FeliCa Standard only) The root of the raw filesystem tree. */
+            FelicaNode root;
+            /** (For FeliCa Standard only) Shortcut for all publicly accessible services for quick
+             *  access by card parsers. */
+            FelicaPublicServiceDict_t public_services;
+        };
     };
 } FelicaSystem;
 
-ARRAY_DEF(FelicaSystemList, FelicaSystem*, M_PTR_OPLIST)
+// TODO properly remove this
+//ARRAY_DEF(FelicaSystemList, FelicaSystem*, M_PTR_OPLIST)
+ARRAY_DEF(FelicaSystemArray, FelicaSystem, M_POD_OPLIST)
+#define M_OPL_FelicaSystemArray_t() ARRAY_OPLIST(FelicaSystemArray, M_POD_OPLIST)
 
 typedef struct {
     FelicaICType type;
     uint8_t subtype;
-    FelicaSystemList_t systems;
+    FelicaSystemArray_t systems;
 } FelicaData;
 
 typedef struct {
@@ -255,8 +297,17 @@ bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* rea
 bool felica_lite_can_read_without_mac(uint8_t* mc_r_restr, uint8_t block_number);
 
 void felica_define_normal_block(FelicaService* service, uint16_t number, uint8_t* data);
+void felica_push_normal_block(FelicaService* service, uint8_t* data);
 
-bool felica_read_lite_system(
+/** Dump a FeliCa Lite or Lite-S tag.
+ *
+ * @param tx_rx NFC context.
+ * @param reader FeliCa reader context.
+ * @param data Output data object.
+ * @param system FeliCa system description.
+ * @return true if successful.
+ */
+bool felica_lite_dump_data(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaReader* reader,
     FelicaData* data,

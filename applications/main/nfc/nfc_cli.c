@@ -46,7 +46,7 @@ static void nfc_cli_detect(Cli* cli, FuriString* args) {
                 for(size_t i = 0; i < 8; i++) {
                     printf("%02X", dev_data.uid[i]);
                 }
-                printf("\r\nPMm:");
+                printf(", PMm:");
                 for(size_t i = 0; i < 8; i++) {
                     printf("%02X", dev_data.f_data.pmm[i]);
                 }

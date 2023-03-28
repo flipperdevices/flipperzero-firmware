@@ -8,13 +8,15 @@
 #define TAG "FeliCa"
 
 bool felica_check_ic_type(uint8_t* PMm) {
-    uint8_t ic_type = PMm[0];
-    uint8_t rom_type = PMm[1];
+    uint8_t rom_type = PMm[0];
+    uint8_t ic_type = PMm[1];
 
     bool is_valid_ic = false;
     if(ic_type == 0xff) { // RC-S967 in nfc-dep
         is_valid_ic = true;
-    } else if(ic_type == 0xf0 || ic_type == 0xf2) { // Lite(S)
+    } else if(ic_type == 0xf2) { // RC-S732?
+        is_valid_ic = true;
+    } else if(ic_type == 0xf0 || ic_type == 0xf1) { // Lite(S)
         is_valid_ic = true;
     } else if(ic_type == 0xe1) { // RC-S967 in plug mode
         is_valid_ic = true;
@@ -149,6 +151,55 @@ FelicaICType felica_get_ic_type(uint8_t* PMm) {
     return FelicaICType2K;
 }
 
+/** Parse common FeliCa response headers.
+ *
+ * This parses and validates the most commonly occurring response header types.
+ *
+ * The header needs to match the (length, res, idm) format, and also (sf1, sf2) when always_succeed
+ * is set to false.
+ *
+ * @param buf RX buffer.
+ * @param len RX buffer length.
+ * @param reader The FeliCa reader context.
+ * @param expected_resp Expected response code. Must be an odd number.
+ * @param always_succeed When set to true, skip status flags (sf1 and sf2) parsing.
+ * @return The number of bytes parsed, or 0 when response is invalid or status flags are set.
+ */
+static uint8_t felica_consume_header(
+    uint8_t* buf,
+    uint8_t len,
+    FelicaReader* reader,
+    uint8_t expected_resp,
+    bool always_succeed) {
+    furi_assert(expected_resp & 1);
+    furi_assert(buf != NULL);
+    furi_assert(reader != NULL);
+
+    uint8_t header_size = always_succeed ? 10 : 12;
+    if(len < header_size) {
+        FURI_LOG_E(TAG, "Malformed header: too short.");
+        return 0;
+    }
+    if(buf[1] != expected_resp) {
+        FURI_LOG_E(TAG, "Expecting %u, got %u.", expected_resp, buf[1]);
+        return 0;
+    }
+    if(memcmp(&buf[2], reader->current_idm, 8) != 0) {
+        FURI_LOG_E(TAG, "IDm mismatch.");
+        return 0;
+    }
+    if(always_succeed) {
+        reader->status_flags[0] = buf[10];
+        reader->status_flags[1] = buf[11];
+        if(reader->status_flags[0] != 0 || reader->status_flags[1] != 0) {
+            FURI_LOG_W(
+                TAG, "SF1: %02X SF2: %02X", reader->status_flags[0], reader->status_flags[1]);
+            return 0;
+        }
+    }
+    return header_size;
+}
+
 uint8_t felica_prepare_unencrypted_read(
     uint8_t* dest,
     const FelicaReader* reader,
@@ -210,32 +261,12 @@ uint16_t felica_parse_unencrypted_read(
     FelicaReader* reader,
     uint8_t* out,
     uint16_t out_len) {
-    if(len < 12) {
-        return false;
-    }
-    len--;
-    buf++;
-
-    if(*buf != FELICA_UNENCRYPTED_READ_RES) {
-        return false;
-    }
-    len--;
-    buf++;
-
-    if(memcmp(buf, reader->current_idm, 8) != 0) {
-        return false;
-    }
-    len -= 8;
-    buf += 8;
-
-    reader->status_flags[0] = buf[0];
-    reader->status_flags[1] = buf[1];
-    len -= 2;
-    buf += 2;
-    if(reader->status_flags[0] != 0) {
-        FURI_LOG_W(TAG, "SF1: %02X SF2: %02X", reader->status_flags[0], reader->status_flags[1]);
+    uint8_t consumed = felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_READ_RES, false);
+    if(!consumed) {
         return 0;
     }
+    len -= consumed;
+    buf += consumed;
 
     if(len < 1) {
         return 0;
@@ -313,48 +344,77 @@ uint8_t felica_lite_prepare_unencrypted_write(
 }
 
 bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* reader) {
-    if(len < 12) {
+    uint8_t consumed =
+        felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_WRITE_RES, false);
+    if(!consumed) {
         return false;
     }
+    return true;
+}
+
+uint8_t felica_prepare_request_system_code(uint8_t* dest, FelicaReader* reader) {
+    dest[0] = FELICA_REQUEST_SYSTEM_CODE_CMD;
+    memcpy(&dest[1], reader->current_idm, 8);
+    return 9;
+}
+
+bool felica_parse_request_system_code(
+    uint8_t* buf,
+    uint8_t len,
+    FelicaReader* reader,
+    FelicaSystemArray_t* systems) {
+    uint8_t consumed =
+        felica_consume_header(buf, len, reader, FELICA_REQUEST_SYSTEM_CODE_RES, true);
+    if(consumed == 0) {
+        return false;
+    }
+    len -= consumed;
+    buf += consumed;
+
+    uint8_t entries = *buf;
     len--;
     buf++;
 
-    if(*buf != FELICA_UNENCRYPTED_WRITE_RES) {
+    if(len < 2 * entries) {
+        FURI_LOG_E(TAG, "FELICA_REQUEST_SYSTEM_CODE_RES: Response too short");
         return false;
     }
-    len--;
-    buf++;
 
-    if(memcmp(buf, reader->current_idm, 8) != 0) {
-        return false;
-    }
-    len -= 8;
-    buf += 8;
+    for(uint8_t idx = 0; idx < entries; idx++) {
+        FelicaSystem* system = FelicaSystemArray_push_new(*systems);
+        furi_assert(system != NULL);
 
-    reader->status_flags[0] = buf[0];
-    reader->status_flags[1] = buf[1];
-    len -= 2;
-    buf += 2;
-    if(reader->status_flags[0] != 0) {
-        FURI_LOG_W(TAG, "SF1: %02X SF2: %02X", reader->status_flags[0], reader->status_flags[1]);
-        return 0;
+        // Set system code
+        system->number = idx;
+        system->code = buf[2 * idx] | (buf[2 * idx + 1] << 8);
+
+        FURI_LOG_D(TAG, "Found system code %04X", system->code);
+
+        // Fill in IDm and PMm
+        memcpy(system->idm, reader->current_idm, 8);
+        memcpy(system->pmm, reader->current_pmm, 8);
+
+        // Set system index field in IDm
+        system->idm[0] &= 0x0f;
+        system->idm[0] |= ((idx & 0xf) << 4);
     }
 
     return true;
 }
 
-void felica_parse_system_info(FelicaSystem* system, uint8_t* IDm, uint8_t* PMm) {
-    memcpy(system->idm, IDm, 8);
-    memcpy(system->pmm, PMm, 8);
-    for(int i = 0; i < 6; i++) {
-        char MRT_byte = PMm[2 + i];
-        FelicaMRTParts* mrt_data = &system->maximum_response_times[i];
-        mrt_data->real_a = (MRT_byte & 7) + 1;
-        MRT_byte >>= 3;
-        mrt_data->real_b = (MRT_byte & 7) + 1;
-        MRT_byte >>= 3;
-        mrt_data->exponent = (MRT_byte & 3);
-    }
+static FelicaSystem* felica_gen_monolithic_system_code(
+    FelicaReader* reader,
+    FelicaSystemArray_t* systems,
+    uint16_t system_code) {
+    FelicaSystem* system = FelicaSystemArray_push_new(*systems);
+    furi_assert(reader != NULL);
+    furi_assert(system != NULL);
+
+    memcpy(system->idm, reader->current_idm, 8);
+    memcpy(system->pmm, reader->current_pmm, 8);
+    system->code = system_code;
+
+    return system;
 }
 
 bool felica_lite_can_read_without_mac(uint8_t* mc_r_restr, uint8_t block_number) {
@@ -366,12 +426,16 @@ bool felica_lite_can_read_without_mac(uint8_t* mc_r_restr, uint8_t block_number)
 }
 
 void felica_define_normal_block(FelicaService* service, uint16_t number, uint8_t* data) {
-    FelicaBlock* block = malloc(sizeof(FelicaBlock));
+    FelicaBlock* block = FelicaBlockArray_safe_get(service->blocks, number);
     memcpy(block->data, data, FELICA_BLOCK_SIZE);
-    FelicaBlockList_set_at(service->blocks, number, block);
 }
 
-bool felica_read_lite_system(
+void felica_push_normal_block(FelicaService* service, uint8_t* data) {
+    FelicaBlock* block = FelicaBlockArray_push_new(service->blocks);
+    memcpy(block->data, data, FELICA_BLOCK_SIZE);
+}
+
+bool felica_lite_dump_data(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaReader* reader,
     FelicaData* data,
@@ -422,8 +486,6 @@ bool felica_read_lite_system(
         FURI_LOG_W(TAG, "Mismatching values for D_ID");
         return false;
     }
-
-    system->code = LITE_SYSTEM_CODE;
 
     FelicaLiteInfo* lite_info = &system->lite_info;
     lite_info->card_key_1 = NULL;
@@ -566,6 +628,22 @@ bool felica_read_lite_system(
     return true;
 }
 
+bool felica_std_request_system_code(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaSystemArray_t* systems) {
+    tx_rx->tx_bits = 8 * felica_prepare_request_system_code(tx_rx->tx_data, reader);
+    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+        FURI_LOG_E(TAG, "Bad exchange requesting system code");
+        return false;
+    }
+    if(!felica_parse_request_system_code(tx_rx->rx_data, tx_rx->rx_bits / 8, reader, systems)) {
+        FURI_LOG_E(TAG, "Bad response to Request System Code command");
+        return false;
+    }
+    return true;
+}
+
 bool felica_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaData* data,
@@ -581,31 +659,24 @@ bool felica_read_card(
         memcpy(reader.current_idm, polled_idm, 8);
         memcpy(reader.current_pmm, polled_pmm, 8);
 
-        FelicaSystem* current_system = malloc(sizeof(FelicaSystem));
-        FelicaSystemList_init(data->systems);
-        FelicaSystemList_push_back(data->systems, current_system);
-
-        felica_parse_system_info(current_system, polled_idm, polled_pmm);
+        FelicaSystemArray_init(data->systems);
 
         if(data->type == FelicaICTypeLite || data->type == FelicaICTypeLiteS) {
             FURI_LOG_I(TAG, "Reading Felica Lite system");
-            felica_read_lite_system(tx_rx, &reader, data, current_system);
+            FelicaSystem* lite_system =
+                felica_gen_monolithic_system_code(&reader, &(data->systems), LITE_SYSTEM_CODE);
+            felica_lite_dump_data(tx_rx, &reader, data, lite_system);
             card_read = true;
             break;
         }
+        FURI_LOG_I(TAG, "Reading Felica Standard system");
     } while(false);
 
     return card_read;
 }
 
 void felica_service_clear(FelicaService* service) {
-    FelicaBlockList_it_t it;
-    for(FelicaBlockList_it(it, service->blocks); !FelicaBlockList_end_p(it);
-        FelicaBlockList_next(it)) {
-        FelicaBlock* block = *FelicaBlockList_ref(it);
-        free(block);
-    }
-    FelicaBlockList_clear(service->blocks);
+    FelicaBlockArray_clear(service->blocks);
 }
 
 void felica_lite_clear(FelicaLiteInfo* lite_info) {
@@ -628,31 +699,33 @@ void felica_lite_clear(FelicaLiteInfo* lite_info) {
     }
 }
 
+void felica_node_clear(FelicaNode* node);
+
 void felica_area_clear(FelicaArea* area) {
-    FelicaNodeList_it_t it;
-    for(FelicaNodeList_it(it, area->nodes); !FelicaNodeList_end_p(it); FelicaNodeList_next(it)) {
-        FelicaNode* node = *FelicaNodeList_ref(it);
-        if(node->type == FelicaNodeTypeArea) {
-            felica_area_clear(node->area);
-        } else if(node->type == FelicaNodeTypeService) {
-            felica_service_clear(node->service);
+    for
+        M_EACH(node, area->nodes, FelicaNodeArray_t) {
+            felica_node_clear(node);
         }
-        free(node);
+    FelicaNodeArray_clear(area->nodes);
+}
+
+void felica_node_clear(FelicaNode* node) {
+    if(node->type == FelicaNodeTypeArea) {
+        felica_area_clear(node->area);
+    } else if(node->type == FelicaNodeTypeService) {
+        felica_service_clear(node->service);
     }
-    FelicaNodeList_clear(area->nodes);
 }
 
 void felica_clear(FelicaData* data) {
-    FelicaSystemList_it_t it;
-    for(FelicaSystemList_it(it, data->systems); !FelicaSystemList_end_p(it);
-        FelicaSystemList_next(it)) {
-        FelicaSystem* system = *FelicaSystemList_ref(it);
-        if(system->code == LITE_SYSTEM_CODE) {
-            felica_lite_clear(&system->lite_info);
-            ;
-        } else {
-            felica_area_clear(&system->root_area);
+    for
+        M_EACH(system, data->systems, FelicaSystemArray_t) {
+            if(system->code == LITE_SYSTEM_CODE) {
+                felica_lite_clear(&system->lite_info);
+            } else {
+                felica_node_clear(&system->root);
+                FelicaPublicServiceDict_clear(system->public_services);
+            }
         }
-    }
-    FelicaSystemList_clear(data->systems);
+    FelicaSystemArray_clear(data->systems);
 }

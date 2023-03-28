@@ -8,6 +8,7 @@ enum SubmenuIndex {
     SubmenuIndexReadEMV,
     SubmenuIndexReadNFCA,
     SubmenuIndexReadFelica,
+    SubmenuIndexReadNFCF,
 };
 
 void nfc_scene_read_card_type_submenu_callback(void* context, uint32_t index) {
@@ -56,6 +57,12 @@ void nfc_scene_read_card_type_on_enter(void* context) {
         SubmenuIndexReadFelica,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
+    submenu_add_item(
+        submenu,
+        "Read NFC-F data",
+        SubmenuIndexReadNFCF,
+        nfc_scene_read_card_type_submenu_callback,
+        nfc);
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadCardType);
     submenu_set_selected_item(submenu, state);
 
@@ -94,6 +101,11 @@ bool nfc_scene_read_card_type_on_event(void* context, SceneManagerEvent event) {
         }
         if(event.event == SubmenuIndexReadFelica) {
             nfc->dev->dev_data.read_mode = NfcReadModeFelica;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            consumed = true;
+        }
+        if(event.event == SubmenuIndexReadNFCF) {
+            nfc->dev->dev_data.read_mode = NfcReadModeNFCF;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             consumed = true;
         }
