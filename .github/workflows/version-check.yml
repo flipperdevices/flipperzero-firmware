@@ -38,12 +38,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $Output = ('& $env:GITHUB_ACTION_PATH/.github/check-version.ps1')
-          Write-Output("RELEASE_VERSION=$($Output.ReleaseVersion)") >> $env:GITHUB_ENV
-          Write-Output("CURRENT_TAG=$($Output.CurrentTag)") >> $env:GITHUB_ENV
-          Write-Output("REMOTE_TAG_INFO=$($Output.RemoteTagInfo)") >> $env:GITHUB_ENV
-          Write-Output("RELEASE_TYPE=$($Output.ReleaseType)") >> $env:GITHUB_ENV
-
+          '& $env:GITHUB_ACTION_PATH/.github/check-version.ps1 "${{ env.FIRMWARE_VERSION }}" "${{ env.RELEASE_VERSION }}" "${{ env.REPO_SELF }}" "${{ env.REPO_UNLEASHED }}"' `
+            | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+#          $Output = ('& $env:GITHUB_ACTION_PATH/.github/check-version.ps1 "${{ env.FIRMWARE_VERSION }}" "${{ env.RELEASE_VERSION }}" "${{ env.REPO_SELF }}" "${{ env.REPO_UNLEASHED }}"')
+#          Write-Output("RELEASE_VERSION=$($Output.ReleaseVersion)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+#          Write-Output("CURRENT_TAG=$($Output.CurrentTag)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+#          Write-Output("REMOTE_TAG_INFO=$($Output.RemoteTagInfo)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+#          Write-Output("RELEASE_TYPE=$($Output.ReleaseType)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
       - name: Update Firmware variable and create UPDATE release if necessary
         if: ${{ success() && env.RELEASE_TYPE == 1 }}
         env:
