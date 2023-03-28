@@ -33,17 +33,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        firmware: [unlshd, official]
+        firmware: [unlshd]
         include:
           - firmware: unlshd
             url: ${{ vars.REPO_UNLEASHED }}
             version: ${{ vars.FIRMWARE_VERSION }}
             src-included: 1
-          - firmware: official
-            url: ${{ vars.REPO_OFFICIAL }}
-            version: "official"
-        exclude:
-          - os: official
+          #- firmware: official
+          #  url: ${{ vars.REPO_OFFICIAL }}
+          #  version: "official"
     steps:
       - name: Set version
         env:
