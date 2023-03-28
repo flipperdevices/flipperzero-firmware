@@ -286,7 +286,10 @@ bool furi_thread_join(FuriThread* thread) {
 
     furi_check(furi_thread_get_current() != thread);
 
-    // Wait for thread to stop
+    // !!! IMPORTANT NOTICE !!!
+    //
+    // If your thread exited, but your app stuck here: some other thread uses
+    // all cpu time, which delays kernel from releasing task handle
     while(thread->task_handle) {
         furi_delay_ms(10);
     }
