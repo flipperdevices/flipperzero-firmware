@@ -9,7 +9,7 @@
 typedef enum {
     BasicScenesMainMenuScene,
     BasicScenesLotteryScene,
-    BasicScenesGreetingNameScene,
+    BasicScenesGreetingInputScene,
     BasicScenesGreetingMessageScene,
     BasicScenesSceneCount,
 } BasicScenesScene;
@@ -41,8 +41,8 @@ typedef enum {
 } BasicScenesMainMenuEvent;
 
 typedef enum {
-    BasicScenesGreetingNameSceneSaveEvent,
-} BasicScenesGreetingNameEvent;
+    BasicScenesGreetingInputSceneSaveEvent,
+} BasicScenesGreetingInputEvent;
 
 void basic_scenes_menu_callback(void* context, uint32_t index) {
     App* app = context;
@@ -87,7 +87,7 @@ bool basic_scenes_main_menu_scene_on_event(void* context, SceneManagerEvent even
             consumed = true;
             break;
         case BasicScenesMainMenuSceneGreetingEvent:
-            scene_manager_next_scene(app->scene_manager, BasicScenesGreetingNameScene);
+            scene_manager_next_scene(app->scene_manager, BasicScenesGreetingInputScene);
             consumed = true;
             break;
         }
@@ -123,10 +123,10 @@ void basic_scenes_lottery_scene_on_exit(void* context) {
 
 void basic_scenes_text_input_callback(void* context) {
     App* app = context;
-    scene_manager_handle_custom_event(app->scene_manager, BasicScenesGreetingNameSceneSaveEvent);
+    scene_manager_handle_custom_event(app->scene_manager, BasicScenesGreetingInputSceneSaveEvent);
 }
 
-void basic_scenes_greeting_name_scene_on_enter(void* context) {
+void basic_scenes_greeting_input_scene_on_enter(void* context) {
     App* app = context;
     bool clear_text = true;
     text_input_reset(app->text_input);
@@ -140,18 +140,18 @@ void basic_scenes_greeting_name_scene_on_enter(void* context) {
         clear_text);
     view_dispatcher_switch_to_view(app->view_dispatcher, BasicScenesTextInputView);
 }
-bool basic_scenes_greeting_name_scene_on_event(void* context, SceneManagerEvent event) {
+bool basic_scenes_greeting_input_scene_on_event(void* context, SceneManagerEvent event) {
     App* app = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == BasicScenesGreetingNameSceneSaveEvent) {
+        if(event.event == BasicScenesGreetingInputSceneSaveEvent) {
             scene_manager_next_scene(app->scene_manager, BasicScenesGreetingMessageScene);
             consumed = true;
         }
     }
     return consumed;
 }
-void basic_scenes_greeting_name_scene_on_exit(void* context) {
+void basic_scenes_greeting_input_scene_on_exit(void* context) {
     UNUSED(context);
 }
 
@@ -162,7 +162,7 @@ void basic_scenes_greeting_message_scene_on_enter(void* context) {
     furi_string_printf(message, "Hello,\n%s!", app->user_name);
     widget_add_string_multiline_element(
         app->widget, 5, 15, AlignLeft, AlignCenter, FontPrimary, furi_string_get_cstr(message));
-    //furi_string_free(message);
+    furi_string_free(message);
     view_dispatcher_switch_to_view(app->view_dispatcher, BasicScenesWidgetView);
 }
 bool basic_scenes_greeting_message_scene_on_event(void* context, SceneManagerEvent event) {
@@ -178,21 +178,21 @@ void basic_scenes_greeting_message_scene_on_exit(void* context) {
 void (*const basic_scenes_scene_on_enter_handlers[])(void*) = {
     basic_scenes_main_menu_scene_on_enter,
     basic_scenes_lottery_scene_on_enter,
-    basic_scenes_greeting_name_scene_on_enter,
+    basic_scenes_greeting_input_scene_on_enter,
     basic_scenes_greeting_message_scene_on_enter,
 };
 
 bool (*const basic_scenes_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     basic_scenes_main_menu_scene_on_event,
     basic_scenes_lottery_scene_on_event,
-    basic_scenes_greeting_name_scene_on_event,
+    basic_scenes_greeting_input_scene_on_event,
     basic_scenes_greeting_message_scene_on_event,
 };
 
 void (*const basic_scenes_scene_on_exit_handlers[])(void*) = {
     basic_scenes_main_menu_scene_on_exit,
     basic_scenes_lottery_scene_on_exit,
-    basic_scenes_greeting_name_scene_on_exit,
+    basic_scenes_greeting_input_scene_on_exit,
     basic_scenes_greeting_message_scene_on_exit,
 };
 

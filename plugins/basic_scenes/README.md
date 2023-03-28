@@ -1,6 +1,6 @@
 # Scenes Demo Application Tutorial
 
-In this tutorial, we create an application using the Flipper Scene manager.
+In this tutorial, we create an application using the Flipper Zero's scene manager.
 
 ## Demo Application Overview
 
@@ -20,19 +20,19 @@ a button to go back to the main menu).
 
 ## Scenes
 
-A scene will use a module to display the user interface on the Flipper Zero. The module for the scene will also handle the user input. The scene manager will
+A scene uses a module to display the user interface on the Flipper Zero. The module for the scene also handles the user input. The scene manager will
 display the scene and handle the transition between scenes. The scene manager
-will call the scene's on_enter function when the scene is displayed. The scene
+will call the scene's on_enter function when the scene is displayed. The scene manager will call the scene's on_event function when a custom event is
+invoked. The scene
 manager will call the scene's on_exit function when the scene is no longer displayed.
-The scene manager will call the scene's on_event function when a custom event is
-invoked.
+
 
 Our application will have the following scenes:
 
-- BasicScenesMainMenuScene - The main menu scene
-- BasicScenesLotteryScene - The lottery number generator scene
-- BasicScenesGreetingNameScene - The greeting name scene
-- BasicScenesGreetingMessageScene - The greeting message scene
+- BasicScenesMainMenuScene - The main menu scene.
+- BasicScenesLotteryScene - The lottery number generator scene.
+- BasicScenesGreetingInputScene - The greeting name input scene.
+- BasicScenesGreetingMessageScene - The greeting message scene.
 
 ## Modules / Views
 
@@ -46,9 +46,9 @@ Our application will use the following modules:
 
 We will refer to the above module's view using the following:
 
-- BasicScenesSubmenuView - The submenu's view
-- BasicScenesWidgetView - The widget's view
-- BasicScenesTextInputView - The text_input's view
+- BasicScenesSubmenuView - The submenu's view.
+- BasicScenesWidgetView - The widget's view.
+- BasicScenesTextInputView - The text_input's view.
 
 ## Step 1. Install Git and VS Code.
 
@@ -98,7 +98,7 @@ Create a **basic_scenes.png** file. This is the icon that will be displayed when
 
 ## Step 6. Create an application.fam file.
 
-Create a file named application.fam with the following content:
+Create a file named **application.fam** with the following content:
 
 ```
 App(
@@ -124,7 +124,7 @@ App(
 
 ## Step 7. Create a basic_scenes.c file with our program entry point.
 
-Create a file named basic_scenes.c with the following content:
+Create a file named **basic_scenes.c** with the following content:
 
 ```c
 #include <furi.h>
@@ -168,10 +168,10 @@ Troubleshooting:
 
 Remember that we are creating a basic scenes application with four scenes:
 
-- BasicScenesMainMenuScene - The main menu scene
-- BasicScenesLotteryScene - The lottery number generator scene
-- BasicScenesGreetingNameScene - The greeting name scene
-- BasicScenesGreetingMessageScene - The greeting message scene
+- BasicScenesMainMenuScene - The main menu scene.
+- BasicScenesLotteryScene - The lottery number generator scene.
+- BasicScenesGreetingInputScene - The greeting name input scene.
+- BasicScenesGreetingMessageScene - The greeting message scene.
 
 Add the following lines below the #include statements in the basic_scenes.c file:
 
@@ -179,7 +179,7 @@ Add the following lines below the #include statements in the basic_scenes.c file
 typedef enum {
     BasicScenesMainMenuScene,
     BasicScenesLotteryScene,
-    BasicScenesGreetingNameScene,
+    BasicScenesGreetingInputScene,
     BasicScenesGreetingMessageScene,
     BasicScenesSceneCount,
 } BasicScenesScene;
@@ -191,9 +191,9 @@ The values of the enum are the scene numbers, starting with 0. The BasicScenesSc
 
 Remember that we have three module's views:
 
-- BasicScenesSubmenuView - The submenu's view
-- BasicScenesWidgetView - The widget's view
-- BasicScenesTextInputView - The text_input's view
+- BasicScenesSubmenuView - The submenu's view.
+- BasicScenesWidgetView - The widget's view.
+- BasicScenesTextInputView - The text_input's view.
 
 Add the following lines after the BasicScenesScene in the basic_scenes.c file:
 
@@ -241,10 +241,10 @@ This creates an App object that will hold the scene manager, view dispatcher, an
 
 Remember that we are creating a basic scenes application with four scenes:
 
-- BasicScenesMainMenuScene - The main menu scene
-- BasicScenesLotteryScene - The lottery number generator scene
-- BasicScenesGreetingNameScene - The greeting name scene
-- BasicScenesGreetingMessageScene - The greeting message scene
+- BasicScenesMainMenuScene - The main menu scene.
+- BasicScenesLotteryScene - The lottery number generator scene.
+- BasicScenesGreetingInputScene - The greeting name input scene.
+- BasicScenesGreetingMessageScene - The greeting message scene.
 
 Each scene will have an on_enter, on_event and on_exit function. We will create stub functions for each of these functions. Later in the tutorial we will add code to these functions.
 
@@ -275,15 +275,15 @@ void basic_scenes_lottery_scene_on_exit(void* context) {
   UNUSED(context);
 }
 
-void basic_scenes_greeting_name_scene_on_enter(void* context) {
+void basic_scenes_greeting_input_scene_on_enter(void* context) {
   UNUSED(context);
 }
-bool basic_scenes_greeting_name_scene_on_event(void* context, SceneManagerEvent event) {
+bool basic_scenes_greeting_input_scene_on_event(void* context, SceneManagerEvent event) {
   UNUSED(context);
   UNUSED(event);
   return false; // event not handled.
 }
-void basic_scenes_greeting_name_scene_on_exit(void* context) {
+void basic_scenes_greeting_input_scene_on_exit(void* context) {
   UNUSED(context);
 }
 
@@ -302,7 +302,7 @@ void basic_scenes_greeting_message_scene_on_exit(void* context) {
 
 ## Step 14. Create an array of our on_enter handlers.
 
-Create an array of our on_enter handlers. The order of the scenes should be the same order as defined in the BasicScenesScene enum.
+Create an array of our on_enter handlers. The order of the scenes should be the same order as defined in the BasicScenesScene enum (main menu, lottery, greeting input, greeting message).
 
 Add the following lines after the stub functions in the basic_scenes.c file:
 
@@ -310,7 +310,7 @@ Add the following lines after the stub functions in the basic_scenes.c file:
 void (*const basic_scenes_scene_on_enter_handlers[])(void*) = {
     basic_scenes_main_menu_scene_on_enter,
     basic_scenes_lottery_scene_on_enter,
-    basic_scenes_greeting_name_scene_on_enter,
+    basic_scenes_greeting_input_scene_on_enter,
     basic_scenes_greeting_message_scene_on_enter,
 };
 ```
@@ -325,7 +325,7 @@ Add the following lines after the scene_on_enter_handlers array in the basic_sce
 bool (*const basic_scenes_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
     basic_scenes_main_menu_scene_on_event,
     basic_scenes_lottery_scene_on_event,
-    basic_scenes_greeting_name_scene_on_event,
+    basic_scenes_greeting_input_scene_on_event,
     basic_scenes_greeting_message_scene_on_event,
 };
 ```
@@ -340,14 +340,14 @@ Add the following lines after the scene_on_event_handlers array in the basic_sce
 void (*const basic_scenes_scene_on_exit_handlers[])(void*) = {
     basic_scenes_main_menu_scene_on_exit,
     basic_scenes_lottery_scene_on_exit,
-    basic_scenes_greeting_name_scene_on_exit,
+    basic_scenes_greeting_input_scene_on_exit,
     basic_scenes_greeting_message_scene_on_exit,
 };
 ```
 
 ## Step 17. Create a scene manager handlers object.
 
-Create a scene manager handlers object. This object will be used to initialize the scene manager. The scene_num field should be set to the number of scenes in our application, which is defined by the BasicScenesSceneCount enum.
+Create a scene manager handlers object. This object will be used to initialize the scene manager. The scene_num field should be set to the number of scenes in our application, which is defined as 4 by the BasicScenesSceneCount enum.
 
 Add the following lines after the scene_on_exit_handlers array in the basic_scenes.c file:
 
@@ -442,7 +442,7 @@ The app_alloc function does the following:
 - Add the text input view to the view dispatcher.
 - Return the app object.
 
-In the future, you can add more views to the view dispatcher and allocate memory for them in the app_alloc function.
+In the future, you can add more views to the view dispatcher and allocate memory for their modules in the app_alloc function.
 
 ## Step 21. Create an app_free function.
 
@@ -486,9 +486,19 @@ int32_t basic_scenes_app(void* p) {
 }
 ```
 
+This code does the following:
+
+- Allocate memory for the app object.
+- Give us a copy of the GUI object.
+- Attach the view dispatcher to the GUI.
+- Navigate to the main menu scene.
+- Run the view dispatcher (which won't return until the user presses BACK enough times to exit the application).
+- Free memory allocated for the app object.
+- Return 0 to indicate successful exit.
+
 ## Step 23. Create a stub menu callback function.
 
-We will create a stub menu callback function. This function will be called when a menu item is selected. We will use this function to fire a custom event to navigate to the next scene.
+We will create a stub menu callback function. This function will be called when a menu item is selected. In the future, we will update this function to fire a custom event to navigate to the next scene.
 
 Add the following lines before the basic_scenes_main_menu_scene_on_enter function in the basic_scenes.c file:
 
@@ -539,7 +549,7 @@ Congratulations, your Flipper Zero application now has a menu!
 
 ## Step 26. Create an enum with menu item indexes.
 
-We will create an enum with menu item indexes. This will allow us to reference menu items by their enum values instead of using magic numbers.
+We will create an enum with menu item indexes. This will allow us to reference menu items by their enum values instead of using magic numbers (using "BasicScenesMainMenuSceneGreeting" instead of "1" in our code makes it easier to understand).
 
 Add the following lines before the basic_scenes_menu_callback function in the basic_scenes.c file:
 
@@ -574,6 +584,13 @@ void basic_scenes_main_menu_scene_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, BasicScenesSubmenuView);
 }
 ```
+
+The code does the following:
+
+- Reset the submenu.
+- Set the header of the submenu to "Basic Scenes Demo".
+- Add a menu item with the text "Lotto Numbers" and the index BasicScenesMainMenuSceneLottoNumbers (value 0).
+- Add a menu item with the text "Greeting" and the index BasicScenesMainMenuSceneGreeting (value 1).
 
 ## Step 28. Create an enum with custom events from the main menu.
 
@@ -634,7 +651,7 @@ bool basic_scenes_main_menu_scene_on_event(void* context, SceneManagerEvent even
             consumed = true;
             break;
         case BasicScenesMainMenuSceneGreetingEvent:
-            scene_manager_next_scene(app->scene_manager, BasicScenesGreetingNameScene);
+            scene_manager_next_scene(app->scene_manager, BasicScenesGreetingInputScene);
             consumed = true;
             break;
         }
@@ -649,7 +666,7 @@ bool basic_scenes_main_menu_scene_on_event(void* context, SceneManagerEvent even
 The code does the following:
 
 - When the BasicScenesMainMenuSceneLottoNumbersEvent custom event is received, the function navigates to the BasicScenesLotteryScene scene.
-- When the BasicScenesMainMenuSceneGreetingEvent custom event is received, the function navigates to the BasicScenesGreetingNameScene scene.
+- When the BasicScenesMainMenuSceneGreetingEvent custom event is received, the function navigates to the BasicScenesGreetingInputScene scene.
 - The function returns true if the event was consumed, otherwise it returns false.
 
 ## Step 31. Update the basic_scenes_main_menu_scene_on_exit function.
@@ -709,7 +726,7 @@ Congratulations, your Flipper Zero application can display a lottery number gues
 
 In the next five steps, we are going to create the code to prompt the user for their name and store their response in a buffer. The order of the steps is somewhat backwards, so that future steps can reference the code from previous steps.
 
-Add a buffer to the App struct. The buffer will be used to store the user's name. We will also add a variable to indicate the maximum size of the buffer. Update the App struct in the basic_scenes.h file:
+Add a buffer (user_name) to the App struct. The buffer will be used to store the user's name. We will also add a variable (user_name_size) to indicate the maximum size of the buffer. Update the App struct in the basic_scenes.h file:
 
 ```c
 typedef struct App {
@@ -734,34 +751,34 @@ static App* app_alloc() {
     app->user_name = malloc(app->user_name_size);
 ```
 
-## Step 36. Create an enum for the greeting name scene's custom event.
+## Step 36. Create an enum for the greeting input scene's custom event.
 
-Create an enum for the greeting name scene's custom event. We will trigger this event when the user has completed entering their name. The enum should be defined after BasicScenesMainMenuEvent in the basic_scenes.h file:
+Create an enum for the greeting input scene's custom event. We will trigger this event when the user has completed entering their name. The enum should be defined after BasicScenesMainMenuEvent in the basic_scenes.h file:
 
 ```c
 typedef enum {
-    BasicScenesGreetingNameSceneSaveEvent,
-} BasicScenesGreetingNameEvent;
+    BasicScenesGreetingInputSceneSaveEvent,
+} BasicScenesGreetingInputEvent;
 ```
 
 ## Step 37. Create a text_input_callback function.
 
-Create a text_input_callback function. This function will be called when the user has finished entering their name. The function can be added before basic_scenes_greeting_name_scene_on_enter and should look like this:
+Create a text_input_callback function. This function will be called when the user has finished entering their name. The function can be added before basic_scenes_greeting_input_scene_on_enter and should look like this:
 
 ```c
 void basic_scenes_text_input_callback(void* context) {
     App* app = context;
     scene_manager_handle_custom_event(app->scene_manager,
-       BasicScenesGreetingNameSceneSaveEvent);
+       BasicScenesGreetingInputSceneSaveEvent);
 }
 ```
 
-## Step 38. Update the basic_scenes_greeting_name_scene_on_enter function.
+## Step 38. Update the basic_scenes_greeting_input_scene_on_enter function.
 
-Update the basic_scenes_greeting_name_scene_on_enter function to use a text input to get the user's name. The function should look like this:
+Update the basic_scenes_greeting_input_scene_on_enter function to use a text input to get the user's name. The function should look like this:
 
 ```c
-void basic_scenes_greeting_name_scene_on_enter(void* context) {
+void basic_scenes_greeting_input_scene_on_enter(void* context) {
     App* app = context;
     bool clear_text = true;
     text_input_reset(app->text_input);
@@ -787,16 +804,16 @@ The code does the following:
 - Clears the input buffer if the user has already entered text.
 - Switches to the text input view.
 
-## Step 39. Update the basic_scenes_greeting_name_scene_on_event function.
+## Step 39. Update the basic_scenes_greeting_input_scene_on_event function.
 
-Update the basic_scenes_greeting_name_scene_on_event function to handle the custom event we created in the previous step. The function should look like this:
+Update the basic_scenes_greeting_input_scene_on_event function to handle the custom event we created in the previous step. The function should look like this:
 
 ```c
-bool basic_scenes_greeting_name_scene_on_event(void* context, SceneManagerEvent event) {
+bool basic_scenes_greeting_input_scene_on_event(void* context, SceneManagerEvent event) {
     App* app = context;
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == BasicScenesGreetingNameSceneSaveEvent) {
+        if(event.event == BasicScenesGreetingInputSceneSaveEvent) {
             scene_manager_next_scene(app->scene_manager, BasicScenesGreetingMessageScene);
             consumed = true;
         }
@@ -808,7 +825,7 @@ bool basic_scenes_greeting_name_scene_on_event(void* context, SceneManagerEvent 
 The code does the following:
 
 - Checks if the event is a custom event.
-- Checks if the event is BasicScenesGreetingNameSceneSaveEvent.
+- Checks if the event is BasicScenesGreetingInputSceneSaveEvent.
 - Switches to the greeting message scene.
 
 ## Step 40. Update the basic_scenes_greeting_message_scene_on_enter function.
@@ -828,6 +845,14 @@ void basic_scenes_greeting_message_scene_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, BasicScenesWidgetView);
 }
 ```
+
+The code does the following:
+- Resets the widget.
+- Creates a new FuriString.
+- Formats the string with a greeting and the user's name.
+- Adds the string to the widget.
+- Frees the FuriString.
+- Switches to the widget view.
 
 ## Step 41. Update the basic_scenes_greeting_message_scene_on_exit function.
 
@@ -852,7 +877,7 @@ cd official-firmware
 ```
 
 The application should launch the main menu, with options for Lotto Numbers and Greeting. Select the 'Greeting' menu item and click the OK button on the Flipper Zero. The application should prompt for your name:
-![Greeting name screen](./docs/app-greeting-name.png)
+![Greeting input screen](./docs/app-greeting-input.png)
 
 Enter your name and then select the **save** keyboard option. The application should display a greeting message with your name:
 
