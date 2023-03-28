@@ -70,7 +70,7 @@ void avr_isp_writer_view_draw(Canvas* canvas, AvrIspWriterViewModel* model) {
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifying dump");
         break;
     case AvrIspWriterViewStatusWritingFuse:
-        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifying dump");
+        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Writing fuse");
         break;
     case AvrIspWriterViewStatusWritingFuseOk:
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Done!");
@@ -118,7 +118,7 @@ bool avr_isp_writer_view_input(InputEvent* event, void* context) {
                 if((model->status == AvrIspWriterViewStatusIDLE) ||
                    (model->status == AvrIspWriterViewStatusWritingFuseOk)) {
                     model->status = AvrIspWriterViewStatusWriting;
-                    
+
                     avr_isp_worker_rw_write_dump_start(
                         instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
                 }
@@ -154,7 +154,8 @@ static void avr_isp_writer_callback_status(void* context, AvrIspWorkerRWStatus s
                 model->status = AvrIspWriterViewStatusVerification;
                 avr_isp_worker_rw_verification_start(
                     instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
-                break; 
+                model->status = AvrIspWriterViewStatusVerification;
+                break;
             case AvrIspWorkerRWStatusErrorVerification:
                 if(instance->callback)
                     instance->callback(AvrIspCustomEventSceneErrorVerification, instance->context);
@@ -162,7 +163,7 @@ static void avr_isp_writer_callback_status(void* context, AvrIspWorkerRWStatus s
             case AvrIspWorkerRWStatusEndVerification:
                 avr_isp_worker_rw_write_fuse_start(
                     instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
-                model->status = AvrIspWriterViewStatusVerification;    
+                model->status = AvrIspWriterViewStatusWritingFuse;
                 break;
             case AvrIspWorkerRWStatusErrorWritingFuse:
                 if(instance->callback)

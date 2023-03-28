@@ -129,6 +129,7 @@ static void avr_isp_reader_callback_status(void* context, AvrIspWorkerRWStatus s
                 model->status = AvrIspReaderViewStatusVerification;
                 avr_isp_worker_rw_verification_start(
                     instance->avr_isp_worker_rw, instance->file_path, instance->file_name);
+                model->status = AvrIspReaderViewStatusVerification;
                 break;
             case AvrIspWorkerRWStatusEndVerification:
                 if(instance->callback)

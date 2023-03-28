@@ -785,10 +785,6 @@ bool avr_isp_worker_rw_write_dump(
     instance->progress_flash = 0.0f;
     instance->progress_eeprom = 0.0f;
     bool ret = false;
-    // uint8_t lfuse;
-    // uint8_t hfuse;
-    // uint8_t efuse;
-    // uint8_t lock;
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* flipper_format = flipper_format_file_alloc(storage);
@@ -845,31 +841,6 @@ bool avr_isp_worker_rw_write_dump(
                     sig_read.part_number);
                 break;
             }
-
-            // if(avr_isp_chip_arr[instance->chip_arr_ind].nfuses > 0) {
-            //     if(!flipper_format_read_hex(flipper_format, "Lfuse", &lfuse, 1)) {
-            //         FURI_LOG_E(TAG, "Missing Lfuse");
-            //         break;
-            //     }
-            // }
-            // if(avr_isp_chip_arr[instance->chip_arr_ind].nfuses > 1) {
-            //     if(!flipper_format_read_hex(flipper_format, "Hfuse", &hfuse, 1)) {
-            //         FURI_LOG_E(TAG, "Missing Hfuse");
-            //         break;
-            //     }
-            // }
-            // if(avr_isp_chip_arr[instance->chip_arr_ind].nfuses > 2) {
-            //     if(!flipper_format_read_hex(flipper_format, "Efuse", &efuse, 1)) {
-            //         FURI_LOG_E(TAG, "Missing Efuse");
-            //         break;
-            //     }
-            // }
-            // if(avr_isp_chip_arr[instance->chip_arr_ind].nlocks == 1) {
-            //     if(!flipper_format_read_hex(flipper_format, "Lock", &lock, 1)) {
-            //         FURI_LOG_E(TAG, "Missing Lock");
-            //         break;
-            //     }
-            // }
 
             if(!flipper_format_read_string(flipper_format, "Dump_flash", temp_str_1)) {
                 FURI_LOG_E(TAG, "Missing Dump_flash");
@@ -944,45 +915,7 @@ bool avr_isp_worker_rw_write_dump(
                     file_path_name, "%s/%s", file_path, furi_string_get_cstr(temp_str_2));
                 avr_isp_worker_rw_write_eeprom(instance, furi_string_get_cstr(file_path_name));
             }
-            ret = true;
-            // //write fuse and lock
-            // FURI_LOG_D(TAG, "Write fuse");
-            // ret = true;
-            // if(avr_isp_chip_arr[instance->chip_arr_ind].nfuses > 0) {
-            //     if(instance->lfuse != lfuse) {
-            //         if(!avr_isp_write_fuse_low(instance->avr_isp, lfuse)) {
-            //             FURI_LOG_E(TAG, "Write Lfuse: error");
-            //             ret = false;
-            //         }
-            //     }
-            // }
-            // if(avr_isp_chip_arr[instance->chip_arr_ind].nfuses > 1) {
-            //     if(instance->hfuse != hfuse) {
-            //         if(!avr_isp_write_fuse_high(instance->avr_isp, hfuse)) {
-            //             FURI_LOG_E(TAG, "Write Hfuse: error");
-            //             ret = false;
-            //         }
-            //     }
-            // }
-            // if(avr_isp_chip_arr[instance->chip_arr_ind].nfuses > 2) {
-            //     if(instance->efuse != efuse) {
-            //         if(!avr_isp_write_fuse_extended(instance->avr_isp, efuse)) {
-            //             FURI_LOG_E(TAG, "Write Efuse: error");
-            //             ret = false;
-            //         }
-            //     }
-            // }
-
-            // if(avr_isp_chip_arr[instance->chip_arr_ind].nlocks == 1) {
-            //     FURI_LOG_D(TAG, "Write lock byte");
-            //     if(instance->lock != lock) {
-            //         if(!avr_isp_write_lock_byte(instance->avr_isp, lock)) {
-            //             FURI_LOG_E(TAG, "Write Lock byte: error");
-            //             ret = false;
-            //         }
-            //     }
-            // }
-
+            ret = true;  
             avr_isp_end_pmode(instance->avr_isp);
         } while(false);
     }
