@@ -81,7 +81,8 @@ void SDInterface::addPacket(uint8_t* buf, uint32_t len) {
 
 void SDInterface::openCapture(String file_name) {
   if (this->supported)
-    buffer_obj.open(&SD_MMC, file_name);
+    buffer_obj.createPcapFile(&SD_MMC, file_name);
+    buffer_obj.open();
 }
 
 void SDInterface::runUpdate() {
@@ -153,7 +154,7 @@ void SDInterface::runUpdate() {
   }
 }
 
-void SDInterface::performUpdate(Stream& updateSource, size_t updateSize) {
+void SDInterface::performUpdate(Stream &updateSource, size_t updateSize) {
   if (Update.begin(updateSize)) {   
     #ifdef HAS_SCREEN
       display_obj.tft.println(text_table2[5] + String(updateSize));

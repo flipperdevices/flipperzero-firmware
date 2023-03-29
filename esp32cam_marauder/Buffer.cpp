@@ -6,7 +6,7 @@ Buffer::Buffer(){
   bufB = (uint8_t*)malloc(BUF_SIZE);
 }
 
-void Buffer::open(fs::FS* fs, String fn){
+void Buffer::createPcapFile(fs::FS* fs, String fn){
   int i=0;
   do{
     fileName = "/"+fn+"_"+(String)i+".pcap";
@@ -17,12 +17,15 @@ void Buffer::open(fs::FS* fs, String fn){
   
   file = fs->open(fileName, FILE_WRITE);
   file.close();
+}
 
+void Buffer::open(){
   bufSizeA = 0;
   bufSizeB = 0;
-  
+
+  bufSizeB = 0;  
   writing = true;
-  
+
   write(uint32_t(0xa1b2c3d4)); // magic number
   write(uint16_t(2)); // major version number
   write(uint16_t(4)); // minor version number
@@ -30,8 +33,6 @@ void Buffer::open(fs::FS* fs, String fn){
   write(uint32_t(0)); // accuracy of timestamps
   write(uint32_t(SNAP_LEN)); // max length of captured packets, in octets
   write(uint32_t(105)); // data link type
-
-  //useSD = true;
 }
 
 void Buffer::close(fs::FS* fs){
@@ -197,6 +198,37 @@ void Buffer::forceSave(fs::FS* fs){
   file.close();
 
   //Serial.printf("saved %u bytes\n",len);
+
+  saving = false;
+  writing = true;
+}
+
+void Buffer::forceSaveSerial() {
+  uint32_t len = bufSizeA + bufSizeB;
+  if(len == 0) return;
+
+  saving = true;
+  writing = false;
+
+  if(useA){
+    if(bufSizeB > 0){
+      Serial1.write(bufB, bufSizeB);
+      bufSizeB = 0;
+    }
+    if(bufSizeA > 0){
+      Serial1.write(bufA, bufSizeA);
+      bufSizeA = 0;
+    }
+  } else {
+    if(bufSizeA > 0){
+      Serial1.write(bufA, bufSizeA);
+      bufSizeA = 0;
+    }
+    if(bufSizeB > 0){
+      Serial1.write(bufB, bufSizeB);
+      bufSizeB = 0;
+    }
+  }
 
   saving = false;
   writing = true;

@@ -198,6 +198,10 @@ void setup()
   delay(10);*/
   
   //Serial.begin(115200);
+  #ifdef WRITE_PACKETS_SERIAL
+    // Starts a second serial channel to stream the captured packets
+    Serial1.begin(115200);
+  #endif
 
   //Serial.println("\n\nHello, World!\n");
 
@@ -272,21 +276,23 @@ void setup()
     display_obj.tft.println(F(text_table0[2]));
   #endif
 
-  // Do some SD stuff
-  if(sd_obj.initSD()) {
-    //Serial.println(F("SD Card supported"));
-    #ifdef HAS_SCREEN
-      display_obj.tft.println(F(text_table0[3]));
-    #endif
-  }
-  else {
-    Serial.println(F("SD Card NOT Supported"));
-    #ifdef HAS_SCREEN
-      display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
-      display_obj.tft.println(F(text_table0[4]));
-      display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
-    #endif
-  }
+  #ifdef WRITE_PACKETS_SERIAL
+    buffer_obj = Buffer();
+  #else
+    // Do some SD stuff
+    if(sd_obj.initSD()) {
+      #ifdef HAS_SCREEN
+        display_obj.tft.println(F(text_table0[3]));
+      #endif
+    } else {
+      Serial.println(F("SD Card NOT Supported"));
+      #ifdef HAS_SCREEN
+        display_obj.tft.setTextColor(TFT_RED, TFT_BLACK);
+        display_obj.tft.println(F(text_table0[4]));
+        display_obj.tft.setTextColor(TFT_CYAN, TFT_BLACK);
+      #endif
+    }
+  #endif
 
   battery_obj.RunSetup();
 
@@ -370,7 +376,13 @@ void loop()
       display_obj.main(wifi_scan_obj.currentScanMode);
     #endif
     wifi_scan_obj.main(currentTime);
-    sd_obj.main();
+
+    #ifdef WRITE_PACKETS_SERIAL
+      buffer_obj.forceSaveSerial();
+    #else
+      sd_obj.main();
+    #endif
+
     #ifndef MARAUDER_FLIPPER
       battery_obj.main(currentTime);
       temp_obj.main(currentTime);

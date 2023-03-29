@@ -16,11 +16,13 @@ extern Settings settings_obj;
 class Buffer {
   public:
     Buffer();
-    void open(fs::FS* fs, String fn = "");
+    void createPcapFile(fs::FS* fs, String fn = "");
+    void open();
     void close(fs::FS* fs);
     void addPacket(uint8_t* buf, uint32_t len);
     void save(fs::FS* fs);
     void forceSave(fs::FS* fs);
+    void forceSaveSerial();
   private:
     void write(int32_t n);
     void write(uint32_t n);

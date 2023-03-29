@@ -132,27 +132,29 @@ MenuFunctions::MenuFunctions()
     lv_textarea_set_text(ta1, "");
     lv_textarea_set_placeholder_text(ta1, "Ducky script");
   
-    if (sd_obj.supported) {
-      // Create load button
-      lv_obj_t * label;
-      lv_obj_t * load_btn = lv_btn_create(lv_scr_act(), NULL);
-      lv_obj_set_event_cb(load_btn, load_btn_cb);
-      lv_obj_set_height(load_btn, 35);
-      lv_obj_set_width(load_btn, LV_HOR_RES / 3);
-      lv_obj_align(load_btn, ta1, LV_ALIGN_IN_TOP_RIGHT, NULL, (LV_VER_RES / 2) - 35); // align to text area
-      label = lv_label_create(load_btn, NULL);
-      lv_label_set_text(label, text05);
-    
-      // Create Save As button
-      lv_obj_t * label2;
-      lv_obj_t * save_as_btn = lv_btn_create(lv_scr_act(), NULL);
-      lv_obj_set_event_cb(save_as_btn, load_btn_cb);
-      lv_obj_set_height(save_as_btn, 35);
-      lv_obj_set_width(save_as_btn, LV_HOR_RES / 3);
-      lv_obj_align(save_as_btn, ta1, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35); // align to text area
-      label2 = lv_label_create(save_as_btn, NULL);
-      lv_label_set_text(label2, text06);
-    }
+    #ifndef WRITE_PACKETS_SERIAL
+      if (sd_obj.supported) {
+        // Create load button
+        lv_obj_t * label;
+        lv_obj_t * load_btn = lv_btn_create(lv_scr_act(), NULL);
+        lv_obj_set_event_cb(load_btn, load_btn_cb);
+        lv_obj_set_height(load_btn, 35);
+        lv_obj_set_width(load_btn, LV_HOR_RES / 3);
+        lv_obj_align(load_btn, ta1, LV_ALIGN_IN_TOP_RIGHT, NULL, (LV_VER_RES / 2) - 35); // align to text area
+        label = lv_label_create(load_btn, NULL);
+        lv_label_set_text(label, text05);
+      
+        // Create Save As button
+        lv_obj_t * label2;
+        lv_obj_t * save_as_btn = lv_btn_create(lv_scr_act(), NULL);
+        lv_obj_set_event_cb(save_as_btn, load_btn_cb);
+        lv_obj_set_height(save_as_btn, 35);
+        lv_obj_set_width(save_as_btn, LV_HOR_RES / 3);
+        lv_obj_align(save_as_btn, ta1, LV_ALIGN_IN_TOP_MID, NULL, (LV_VER_RES / 2) - 35); // align to text area
+        label2 = lv_label_create(save_as_btn, NULL);
+        lv_label_set_text(label2, text06);
+      }
+    #endif
     
     // Focus it on one of the text areas to start
     lv_keyboard_set_textarea(kb, ta1);
@@ -1274,10 +1276,14 @@ void MenuFunctions::updateStatusBar()
   MenuFunctions::battery(false);
 
   // Draw SD info
-  if (sd_obj.supported)
-    the_color = TFT_GREEN;
-  else
+  #ifndef WRITE_PACKETS_SERIAL
+    if (sd_obj.supported)
+      the_color = TFT_GREEN;
+    else
+      the_color = TFT_RED;
+  #else
     the_color = TFT_RED;
+  #endif
 
   #ifndef MARAUDER_MINI
     display_obj.tft.drawXBitmap(170,
@@ -1360,10 +1366,14 @@ void MenuFunctions::drawStatusBar()
   MenuFunctions::battery2(true);
 
   // Draw SD info
-  if (sd_obj.supported)
-    the_color = TFT_GREEN;
-  else
+  #ifndef WRITE_PACKETS_SERIAL
+    if (sd_obj.supported)
+      the_color = TFT_GREEN;
+    else
+      the_color = TFT_RED;
+  #else
     the_color = TFT_RED;
+  #endif
 
   #ifndef MARAUDER_MINI
     display_obj.tft.drawXBitmap(170,
@@ -1943,10 +1953,12 @@ void MenuFunctions::RunSetup()
     changeMenu(&updateMenu);
     web_obj.setupOTAupdate();
   });
-  if (sd_obj.supported) addNodes(&whichUpdateMenu, text_table1[40], TFT_MAGENTA, NULL, SD_UPDATE, [this]() {
-    wifi_scan_obj.currentScanMode = OTA_UPDATE;
-    changeMenu(&confirmMenu);
-  });
+  #ifndef WRITE_PACKETS_SERIAL
+    if (sd_obj.supported) addNodes(&whichUpdateMenu, text_table1[40], TFT_MAGENTA, NULL, SD_UPDATE, [this]() {
+      wifi_scan_obj.currentScanMode = OTA_UPDATE;
+      changeMenu(&confirmMenu);
+    });
+  #endif
   addNodes(&whichUpdateMenu, text_table1[41], TFT_RED, NULL, ESP_UPDATE_ICO, [this]() {
     wifi_scan_obj.currentScanMode = ESP_UPDATE;
     changeMenu(&espUpdateMenu);
