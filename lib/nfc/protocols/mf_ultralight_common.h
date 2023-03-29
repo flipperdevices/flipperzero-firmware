@@ -30,6 +30,27 @@ typedef enum {
     MfUltralightErrorTimeout,
 } MfUltralightError;
 
+typedef enum {
+    MfUltralightTypeUnknown,
+    MfUltralightTypeNTAG203,
+    // Below have config pages and GET_VERSION support
+    MfUltralightTypeUL11,
+    MfUltralightTypeUL21,
+    MfUltralightTypeNTAG213,
+    MfUltralightTypeNTAG215,
+    MfUltralightTypeNTAG216,
+    // Below also have sector select
+    // NTAG I2C's *does not* have regular config pages, so it's a bit of an odd duck
+    MfUltralightTypeNTAGI2C1K,
+    MfUltralightTypeNTAGI2C2K,
+    // NTAG I2C Plus has stucture expected from NTAG21x
+    MfUltralightTypeNTAGI2CPlus1K,
+    MfUltralightTypeNTAGI2CPlus2K,
+
+    // Keep last for number of types calculation
+    MfUltralightTypeNum,
+} MfUltralightType;
+
 typedef struct {
     uint8_t data[MF_ULTRALIGHT_PAGE_SIZE];
 } MfUltralightPage;

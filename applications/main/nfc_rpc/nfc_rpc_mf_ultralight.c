@@ -186,7 +186,6 @@ void nfc_rpc_mf_ultralight_emulate_start(Nfc_Main* cmd, void* context) {
     furi_assert(cmd);
     furi_assert(context);
 
-    FURI_LOG_I(TAG, "Mf Ultralight Emulation Started");
     NfcRpc* instance = context;
     PB_MfUltralight_EmulateStartResponse pb_mf_ultralight_emulate_start_resp =
         PB_MfUltralight_EmulateStartResponse_init_default;

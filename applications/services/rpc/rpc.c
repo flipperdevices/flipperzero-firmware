@@ -244,7 +244,7 @@ static int32_t rpc_session_worker(void* context) {
             .callback = rpc_pb_stream_read,
             .state = session,
             .errmsg = NULL,
-            .bytes_left = RPC_MAX_MESSAGE_SIZE, /* max incoming message size */
+            .bytes_left = SIZE_MAX, /* max incoming message size */
         };
 
         bool message_decode_failed = false;
