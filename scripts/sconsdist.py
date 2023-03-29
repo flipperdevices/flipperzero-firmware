@@ -190,7 +190,9 @@ class Main(App):
 
                 if component_key.endswith(".dir"):
                     dir_dest = component_key.split(".")[0]
-                    for root, _, files in walk(component_path):
+                    for root, dirnames, files in walk(component_path):
+                        if "__pycache__" in dirnames:
+                            dirnames.remove("__pycache__")
                         for file in files:
                             zf.write(
                                 join(root, file),
