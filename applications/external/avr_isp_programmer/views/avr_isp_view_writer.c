@@ -2,6 +2,7 @@
 #include <gui/elements.h>
 
 #include "../helpers/avr_isp_worker_rw.h"
+#include <float_tools.h>
 
 struct AvrIspWriterView {
     View* view;
@@ -68,7 +69,7 @@ void avr_isp_writer_view_draw(Canvas* canvas, AvrIspWriterViewModel* model) {
         snprintf(str_eeprom, sizeof(str_eeprom), "%d%%", (uint8_t)(model->progress_eeprom * 100));
         break;
     case AvrIspWriterViewStatusWriting:
-        if(model->progress_flash == 0.0f) {
+        if(float_is_equal(model->progress_flash, 0.f)) {
             canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "Verifying firmware");
             snprintf(str_flash, sizeof(str_flash), "***");
             snprintf(str_eeprom, sizeof(str_eeprom), "***");
