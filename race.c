@@ -44,6 +44,7 @@ typedef struct {
     uint16_t score;
     Obstacle obstacles[PARALLEL_OBSTACLES];
     int8_t roadStart;
+    int8_t level;
     Point headPosition;    
     uint16_t motionSpeed;
     GameState gameState;
@@ -141,6 +142,14 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     race_game_draw_border(canvas);    
     race_game_draw_playfield(canvas, race_state);
+    /*
+    // output player score, looks not good
+    if(race_state->gameState == GameStatePlaying) {
+        char buffer2[6];
+        snprintf(buffer2, sizeof(buffer2), "%u", race_state->score);
+        canvas_draw_str_aligned(canvas, 48, 10, AlignRight, AlignBottom, buffer2);
+    }
+    else  */
     if(race_state->gameState == GameStateGameOver) {
         // 128 x 64
         canvas_set_color(canvas, ColorWhite);
@@ -178,6 +187,7 @@ static void timer_callback(FuriMessageQueue* event_queue) {
 static void race_game_init_state(RaceState* race_state) {
     race_state->gameState = GameStatePlaying;
     race_state->score = 0;
+    race_state->level = 0;
     race_state->roadStart=0;
     race_state->motionSpeed = 500;
     Point p = {.x = 5, .y = 20};
@@ -259,8 +269,15 @@ static void race_game_process_step(RaceState* race_state, bool moveRoad) {
         if (race_state->roadStart == 4)
             race_state->roadStart = 0;      
         race_game_spawn_obstacles(race_state);
-        race_game_move_obstacles(race_state);
-
+        race_game_move_obstacles(race_state);        
+        if (race_state->score % 500 == 0) {
+            if (race_state->level<9) {
+                race_state->level++;
+                race_state->motionSpeed=race_state->motionSpeed-50;
+                furi_timer_stop(race_state->timer);
+                furi_timer_start(race_state->timer, race_state->motionSpeed);
+            }
+        }
     }
 
     for (int i=0; i<PARALLEL_OBSTACLES; i++) {
