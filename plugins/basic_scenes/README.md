@@ -1,6 +1,6 @@
 # Scenes Demo Application Tutorial
 
-In this tutorial, we create an application using the Flipper Zero's SceneManager and ViewDispatcher.
+In this tutorial, we create an application using the Flipper Zero's SceneManager and ViewDispatcher.  My [YouTube series](https://youtu.be/YbskaB6caqk) also covers using the SceneManager.
 
 The [Flipper Zero](https://flipperzero.one) supports three ways to develop UI (user interface) applications. ViewPort, ViewDispatcher, and SceneManager. This tutorial will focus on using the SceneManager and ViewDispatcher. If you are interested in learning more about ViewPort, please see the [ViewPort Tutorial](../basic/README.md).
 
