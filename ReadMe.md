@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `28 Mar 04:43 GMT +3`
+### Apps checked & updated at `30 Mar 02:41 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -45,6 +45,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Reaction test Game (By Milk-Cool)](https://github.com/Milk-Cool/fz-reaction-game)
 - [SUPER-CHIP (Chip8) Emulator (By Milk-Cool)](https://github.com/Milk-Cool/fz-schip) <- WIP, please report found issues [here](https://github.com/Milk-Cool/fz-schip/issues)
+- [Race (By zyuhel)](https://github.com/zyuhel/flipperzero-racegame)
 
 ## Media
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
