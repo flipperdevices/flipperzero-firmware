@@ -57,14 +57,13 @@ def _load_state_file(state_dir_node, filename: str) -> dict:
 
 
 def generate(env, **kw):
-    ufbt_state_dir_node = env["UFBT_STATE_DIR"]
     sdk_current_sdk_dir_node = env["UFBT_CURRENT_SDK_DIR"]
 
     sdk_components_filename = kw.get("SDK_COMPONENTS", "components.json")
     ufbt_state_filename = kw.get("UFBT_STATE", "ufbt_state.json")
 
     sdk_state = _load_state_file(sdk_current_sdk_dir_node, sdk_components_filename)
-    ufbt_state = _load_state_file(ufbt_state_dir_node, ufbt_state_filename)
+    ufbt_state = _load_state_file(sdk_current_sdk_dir_node, ufbt_state_filename)
 
     if not (sdk_components := sdk_state.get("components", {})):
         raise SConsEnvironmentError("SDK state file doesn't contain components data")
