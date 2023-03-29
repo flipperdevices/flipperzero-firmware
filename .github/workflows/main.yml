@@ -1,0 +1,4 @@
+- name: Build Flipper Application Package
+  uses: oleksiikutuzov/flipperzero-ufbt-action@v1.4.0
+  with:
+    channel: dev
