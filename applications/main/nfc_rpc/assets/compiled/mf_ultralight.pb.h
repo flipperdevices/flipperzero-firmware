@@ -98,13 +98,13 @@ typedef struct _PB_MfUltralight_EmulateStartResponse {
     PB_MfUltralight_Error error;
 } PB_MfUltralight_EmulateStartResponse;
 
-typedef struct _PB_MfUltralight_EmulationStopRequest {
+typedef struct _PB_MfUltralight_EmulateStopRequest {
     char dummy_field;
-} PB_MfUltralight_EmulationStopRequest;
+} PB_MfUltralight_EmulateStopRequest;
 
-typedef struct _PB_MfUltralight_EmulationStopResponse {
+typedef struct _PB_MfUltralight_EmulateStopResponse {
     PB_MfUltralight_Error error;
-} PB_MfUltralight_EmulationStopResponse;
+} PB_MfUltralight_EmulateStopResponse;
 
 
 #ifdef __cplusplus
@@ -138,7 +138,7 @@ extern "C" {
 #define PB_MfUltralight_EmulateStartResponse_error_ENUMTYPE PB_MfUltralight_Error
 
 
-#define PB_MfUltralight_EmulationStopResponse_error_ENUMTYPE PB_MfUltralight_Error
+#define PB_MfUltralight_EmulateStopResponse_error_ENUMTYPE PB_MfUltralight_Error
 
 
 /* Initializer values for message structs */
@@ -156,8 +156,8 @@ extern "C" {
 #define PB_MfUltralight_ReadTearingFlagResponse_init_default {_PB_MfUltralight_Error_MIN, 0, {0, {0}}}
 #define PB_MfUltralight_EmulateStartRequest_init_default {{0, {0}}}
 #define PB_MfUltralight_EmulateStartResponse_init_default {_PB_MfUltralight_Error_MIN}
-#define PB_MfUltralight_EmulationStopRequest_init_default {0}
-#define PB_MfUltralight_EmulationStopResponse_init_default {_PB_MfUltralight_Error_MIN}
+#define PB_MfUltralight_EmulateStopRequest_init_default {0}
+#define PB_MfUltralight_EmulateStopResponse_init_default {_PB_MfUltralight_Error_MIN}
 #define PB_MfUltralight_ReadPageRequest_init_zero {0}
 #define PB_MfUltralight_ReadPageResponse_init_zero {_PB_MfUltralight_Error_MIN, 0, {0, {0}}}
 #define PB_MfUltralight_ReadVersionRequest_init_zero {0}
@@ -172,8 +172,8 @@ extern "C" {
 #define PB_MfUltralight_ReadTearingFlagResponse_init_zero {_PB_MfUltralight_Error_MIN, 0, {0, {0}}}
 #define PB_MfUltralight_EmulateStartRequest_init_zero {{0, {0}}}
 #define PB_MfUltralight_EmulateStartResponse_init_zero {_PB_MfUltralight_Error_MIN}
-#define PB_MfUltralight_EmulationStopRequest_init_zero {0}
-#define PB_MfUltralight_EmulationStopResponse_init_zero {_PB_MfUltralight_Error_MIN}
+#define PB_MfUltralight_EmulateStopRequest_init_zero {0}
+#define PB_MfUltralight_EmulateStopResponse_init_zero {_PB_MfUltralight_Error_MIN}
 
 /* Field tags (for use in manual encoding/decoding) */
 #define PB_MfUltralight_ReadPageRequest_page_tag 1
@@ -205,7 +205,7 @@ extern "C" {
 #define PB_MfUltralight_ReadTearingFlagResponse_data_tag 3
 #define PB_MfUltralight_EmulateStartRequest_data_tag 1
 #define PB_MfUltralight_EmulateStartResponse_error_tag 1
-#define PB_MfUltralight_EmulationStopResponse_error_tag 1
+#define PB_MfUltralight_EmulateStopResponse_error_tag 1
 
 /* Struct field encoding specification for nanopb */
 #define PB_MfUltralight_ReadPageRequest_FIELDLIST(X, a) \
@@ -295,15 +295,15 @@ X(a, STATIC,   SINGULAR, UENUM,    error,             1)
 #define PB_MfUltralight_EmulateStartResponse_CALLBACK NULL
 #define PB_MfUltralight_EmulateStartResponse_DEFAULT NULL
 
-#define PB_MfUltralight_EmulationStopRequest_FIELDLIST(X, a) \
+#define PB_MfUltralight_EmulateStopRequest_FIELDLIST(X, a) \
 
-#define PB_MfUltralight_EmulationStopRequest_CALLBACK NULL
-#define PB_MfUltralight_EmulationStopRequest_DEFAULT NULL
+#define PB_MfUltralight_EmulateStopRequest_CALLBACK NULL
+#define PB_MfUltralight_EmulateStopRequest_DEFAULT NULL
 
-#define PB_MfUltralight_EmulationStopResponse_FIELDLIST(X, a) \
+#define PB_MfUltralight_EmulateStopResponse_FIELDLIST(X, a) \
 X(a, STATIC,   SINGULAR, UENUM,    error,             1)
-#define PB_MfUltralight_EmulationStopResponse_CALLBACK NULL
-#define PB_MfUltralight_EmulationStopResponse_DEFAULT NULL
+#define PB_MfUltralight_EmulateStopResponse_CALLBACK NULL
+#define PB_MfUltralight_EmulateStopResponse_DEFAULT NULL
 
 extern const pb_msgdesc_t PB_MfUltralight_ReadPageRequest_msg;
 extern const pb_msgdesc_t PB_MfUltralight_ReadPageResponse_msg;
@@ -319,8 +319,8 @@ extern const pb_msgdesc_t PB_MfUltralight_ReadTearingFlagRequest_msg;
 extern const pb_msgdesc_t PB_MfUltralight_ReadTearingFlagResponse_msg;
 extern const pb_msgdesc_t PB_MfUltralight_EmulateStartRequest_msg;
 extern const pb_msgdesc_t PB_MfUltralight_EmulateStartResponse_msg;
-extern const pb_msgdesc_t PB_MfUltralight_EmulationStopRequest_msg;
-extern const pb_msgdesc_t PB_MfUltralight_EmulationStopResponse_msg;
+extern const pb_msgdesc_t PB_MfUltralight_EmulateStopRequest_msg;
+extern const pb_msgdesc_t PB_MfUltralight_EmulateStopResponse_msg;
 
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
 #define PB_MfUltralight_ReadPageRequest_fields &PB_MfUltralight_ReadPageRequest_msg
@@ -337,14 +337,14 @@ extern const pb_msgdesc_t PB_MfUltralight_EmulationStopResponse_msg;
 #define PB_MfUltralight_ReadTearingFlagResponse_fields &PB_MfUltralight_ReadTearingFlagResponse_msg
 #define PB_MfUltralight_EmulateStartRequest_fields &PB_MfUltralight_EmulateStartRequest_msg
 #define PB_MfUltralight_EmulateStartResponse_fields &PB_MfUltralight_EmulateStartResponse_msg
-#define PB_MfUltralight_EmulationStopRequest_fields &PB_MfUltralight_EmulationStopRequest_msg
-#define PB_MfUltralight_EmulationStopResponse_fields &PB_MfUltralight_EmulationStopResponse_msg
+#define PB_MfUltralight_EmulateStopRequest_fields &PB_MfUltralight_EmulateStopRequest_msg
+#define PB_MfUltralight_EmulateStopResponse_fields &PB_MfUltralight_EmulateStopResponse_msg
 
 /* Maximum encoded size of messages (where known) */
 #define PB_MfUltralight_EmulateStartRequest_size 2051
 #define PB_MfUltralight_EmulateStartResponse_size 2
-#define PB_MfUltralight_EmulationStopRequest_size 0
-#define PB_MfUltralight_EmulationStopResponse_size 2
+#define PB_MfUltralight_EmulateStopRequest_size  0
+#define PB_MfUltralight_EmulateStopResponse_size 2
 #define PB_MfUltralight_ReadCounterRequest_size  6
 #define PB_MfUltralight_ReadCounterResponse_size 13
 #define PB_MfUltralight_ReadPageRequest_size     4

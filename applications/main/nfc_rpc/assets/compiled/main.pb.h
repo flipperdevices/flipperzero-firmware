@@ -51,8 +51,8 @@ typedef struct _Nfc_Main {
         PB_MfUltralight_ReadTearingFlagResponse mf_ultralight_read_tearing_flag_resp;
         PB_MfUltralight_EmulateStartRequest mf_ultralight_emulate_start_req;
         PB_MfUltralight_EmulateStartResponse mf_ultralight_emulate_start_resp;
-        PB_MfUltralight_EmulationStopRequest mf_ultralight_emulate_stop_req;
-        PB_MfUltralight_EmulationStopResponse mf_ultralight_emulate_stop_resp;
+        PB_MfUltralight_EmulateStopRequest mf_ultralight_emulate_stop_req;
+        PB_MfUltralight_EmulateStopResponse mf_ultralight_emulate_stop_resp;
     } content;
 } Nfc_Main;
 
@@ -156,8 +156,8 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_stop_resp,cont
 #define Nfc_Main_content_mf_ultralight_read_tearing_flag_resp_MSGTYPE PB_MfUltralight_ReadTearingFlagResponse
 #define Nfc_Main_content_mf_ultralight_emulate_start_req_MSGTYPE PB_MfUltralight_EmulateStartRequest
 #define Nfc_Main_content_mf_ultralight_emulate_start_resp_MSGTYPE PB_MfUltralight_EmulateStartResponse
-#define Nfc_Main_content_mf_ultralight_emulate_stop_req_MSGTYPE PB_MfUltralight_EmulationStopRequest
-#define Nfc_Main_content_mf_ultralight_emulate_stop_resp_MSGTYPE PB_MfUltralight_EmulationStopResponse
+#define Nfc_Main_content_mf_ultralight_emulate_stop_req_MSGTYPE PB_MfUltralight_EmulateStopRequest
+#define Nfc_Main_content_mf_ultralight_emulate_stop_resp_MSGTYPE PB_MfUltralight_EmulateStopResponse
 
 extern const pb_msgdesc_t Nfc_Empty_msg;
 extern const pb_msgdesc_t Nfc_Main_msg;

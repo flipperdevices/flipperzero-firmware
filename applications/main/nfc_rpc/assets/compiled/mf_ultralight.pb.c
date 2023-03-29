@@ -48,10 +48,10 @@ PB_BIND(PB_MfUltralight_EmulateStartRequest, PB_MfUltralight_EmulateStartRequest
 PB_BIND(PB_MfUltralight_EmulateStartResponse, PB_MfUltralight_EmulateStartResponse, AUTO)
 
 
-PB_BIND(PB_MfUltralight_EmulationStopRequest, PB_MfUltralight_EmulationStopRequest, AUTO)
+PB_BIND(PB_MfUltralight_EmulateStopRequest, PB_MfUltralight_EmulateStopRequest, AUTO)
 
 
-PB_BIND(PB_MfUltralight_EmulationStopResponse, PB_MfUltralight_EmulationStopResponse, AUTO)
+PB_BIND(PB_MfUltralight_EmulateStopResponse, PB_MfUltralight_EmulateStopResponse, AUTO)
 
 
 

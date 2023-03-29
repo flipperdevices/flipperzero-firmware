@@ -70,6 +70,6 @@ message EmulateStartRequest { bytes data = 1; }
 
 message EmulateStartResponse { Error error = 1; }
 
-message EmulationStopRequest {}
+message EmulateStopRequest {}
 
-message EmulationStopResponse { Error error = 1; }
+message EmulateStopResponse { Error error = 1; }

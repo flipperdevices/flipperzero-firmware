@@ -17,6 +17,8 @@
 
 #include <lib/nfc/protocols/nfca_poller.h>
 #include <lib/nfc/protocols/nfca_listener.h>
+#include <lib/nfc/protocols/mf_ultralight_poller.h>
+#include <lib/nfc/protocols/mf_ultralight_listener.h>
 
 typedef void (*NfcRpcHandler)(Nfc_Main* cmd, void* context);
 
@@ -50,6 +52,7 @@ struct NfcRpc {
     ViewDispatcher* view_dispatcher;
     View* view;
     NfcaListener* nfca_listener;
+    MfUltralightListener* mf_ul_listener;
 
     NfcRpcHandlerDict_t handlers;
 };

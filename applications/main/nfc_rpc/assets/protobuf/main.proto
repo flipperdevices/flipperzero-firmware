@@ -45,7 +45,7 @@ message Main {
         mf_ultralight_read_tearing_flag_resp = 20;
     .PB_MfUltralight.EmulateStartRequest mf_ultralight_emulate_start_req = 21;
     .PB_MfUltralight.EmulateStartResponse mf_ultralight_emulate_start_resp = 22;
-    .PB_MfUltralight.EmulationStopRequest mf_ultralight_emulate_stop_req = 23;
-    .PB_MfUltralight.EmulationStopResponse mf_ultralight_emulate_stop_resp = 24;
+    .PB_MfUltralight.EmulateStopRequest mf_ultralight_emulate_stop_req = 23;
+    .PB_MfUltralight.EmulateStopResponse mf_ultralight_emulate_stop_resp = 24;
   }
 }

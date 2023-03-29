@@ -177,12 +177,51 @@ static void nfc_rpc_mf_ultralight_read_tearing_flag(Nfc_Main* cmd, void* context
     }
     cmd->content.mf_ultralight_read_tearing_flag_resp = pb_mf_ul_read_tearing_flag_resp;
     FURI_LOG_D(
-        TAG,
-        "Tearing flag %ld: %02X",
-        pb_mf_ul_read_tearing_flag_resp.flag_num,
-        data.data[0]);
+        TAG, "Tearing flag %ld: %02X", pb_mf_ul_read_tearing_flag_resp.flag_num, data.data[0]);
 
     mf_ultralight_poller_free(poller);
+}
+
+void nfc_rpc_mf_ultralight_emulate_start(Nfc_Main* cmd, void* context) {
+    furi_assert(cmd);
+    furi_assert(context);
+
+    FURI_LOG_I(TAG, "Mf Ultralight Emulation Started");
+    NfcRpc* instance = context;
+    PB_MfUltralight_EmulateStartResponse pb_mf_ultralight_emulate_start_resp =
+        PB_MfUltralight_EmulateStartResponse_init_default;
+    cmd->command_status = Nfc_CommandStatus_OK;
+    cmd->which_content = Nfc_Main_mf_ultralight_emulate_start_resp_tag;
+    if(instance->mf_ul_listener == NULL) {
+        MfUltralightData mf_ul_data = {};
+        instance->mf_ul_listener = mf_ultralight_listener_alloc(&mf_ul_data);
+        pb_mf_ultralight_emulate_start_resp.error = PB_MfUltralight_Error_None;
+    } else {
+        // TODO add Busy error
+        pb_mf_ultralight_emulate_start_resp.error = PB_MfUltralight_Error_NotPresent;
+    }
+    cmd->content.mf_ultralight_emulate_start_resp = pb_mf_ultralight_emulate_start_resp;
+}
+
+void nfc_rpc_mf_ultralight_emulate_stop(Nfc_Main* cmd, void* context) {
+    furi_assert(cmd);
+    furi_assert(context);
+
+    NfcRpc* instance = context;
+    PB_MfUltralight_EmulateStopResponse pb_mf_ultralight_emulate_stop_resp =
+        PB_MfUltralight_EmulateStopResponse_init_default;
+    cmd->command_status = Nfc_CommandStatus_OK;
+    cmd->which_content = Nfc_Main_mf_ultralight_emulate_stop_resp_tag;
+    if(instance->mf_ul_listener) {
+        // Stop before free
+        mf_ultralight_listener_free(instance->mf_ul_listener);
+        instance->mf_ul_listener = NULL;
+        pb_mf_ultralight_emulate_stop_resp.error = PB_MfUltralight_Error_None;
+    } else {
+        // TODO emulation not started error
+        pb_mf_ultralight_emulate_stop_resp.error = PB_MfUltralight_Error_NotPresent;
+    }
+    cmd->content.mf_ultralight_emulate_stop_resp = pb_mf_ultralight_emulate_stop_resp;
 }
 
 void nfc_rpc_mf_ultralight_alloc(void* context) {
@@ -205,4 +244,10 @@ void nfc_rpc_mf_ultralight_alloc(void* context) {
         instance,
         Nfc_Main_mf_ultralight_read_tearing_flag_req_tag,
         nfc_rpc_mf_ultralight_read_tearing_flag);
+    nfc_rpc_add_handler(
+        instance,
+        Nfc_Main_mf_ultralight_emulate_start_req_tag,
+        nfc_rpc_mf_ultralight_emulate_start);
+    nfc_rpc_add_handler(
+        instance, Nfc_Main_mf_ultralight_emulate_stop_req_tag, nfc_rpc_mf_ultralight_emulate_stop);
 }
