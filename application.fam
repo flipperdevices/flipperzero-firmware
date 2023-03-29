@@ -1,5 +1,5 @@
 App(
-    appid="zyuhel_race",
+    appid="racegame",
     name="Race",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="race_app",
