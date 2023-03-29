@@ -50,7 +50,7 @@ def generate(env, **kw):
     ufbt_state_dir_node = env["UFBT_STATE_DIR"]
     sdk_current_sdk_dir_node = env["UFBT_CURRENT_SDK_DIR"]
 
-    sdk_meta_filename = kw.get("SDK_META", "sdk_state.json")
+    sdk_meta_filename = kw.get("SDK_META", "components.json")
 
     sdk_meta_path = os.path.join(sdk_current_sdk_dir_node.abspath, sdk_meta_filename)
     if not os.path.exists(sdk_meta_path):
@@ -62,29 +62,24 @@ def generate(env, **kw):
     if not (sdk_components := sdk_state.get("components", {})):
         raise SConsEnvironmentError("SDK state file doesn't contain components data")
 
-    sdk_options_path = os.path.join(
-        sdk_current_sdk_dir_node.abspath, sdk_components.get("sdk", "sdk")
-    )
-    sdk_data = _load_sdk_data(sdk_options_path)
     if not sdk_state["meta"]["hw_target"].endswith(sdk_data["hardware"]):
         raise SConsEnvironmentError("SDK state file doesn't match hardware target")
 
-    scripts_dir = sdk_current_sdk_dir_node.Dir(sdk_components.get("scripts", ".")).Dir(
-        "scripts"
+    sdk_data = _load_sdk_data(
+        sdk_current_sdk_dir_node.Dir(sdk_components["sdk_headers.dir"]).abspath
     )
+    scripts_dir = sdk_current_sdk_dir_node.Dir(sdk_components["scripts.dir"])
     env.SetDefault(
         # Paths
         SDK_DEFINITION=env.File(sdk_data["sdk_symbols"]),
         FBT_DEBUG_DIR=pathlib.Path(
-            sdk_current_sdk_dir_node.Dir(sdk_components.get("scripts", "."))
-            .Dir("debug")
-            .abspath
+            sdk_current_sdk_dir_node.Dir(sdk_components["debug.dir"]).abspath
         ).as_posix(),
         FBT_SCRIPT_DIR=scripts_dir,
-        LIBPATH=sdk_current_sdk_dir_node.Dir(sdk_components.get("lib", "lib")),
-        FW_ELF=sdk_current_sdk_dir_node.File(sdk_components.get("fwelf")),
-        FW_BIN=sdk_current_sdk_dir_node.File(sdk_components.get("fwbin")),
-        UPDATE_BUNDLE_DIR=sdk_current_sdk_dir_node.Dir(sdk_components.get("fwbundle")),
+        LIBPATH=sdk_current_sdk_dir_node.Dir(sdk_components["lib.dir"]),
+        FW_ELF=sdk_current_sdk_dir_node.File(sdk_components["firmware.elf"]),
+        FW_BIN=sdk_current_sdk_dir_node.File(sdk_components["full.bin"]),
+        UPDATE_BUNDLE_DIR=sdk_current_sdk_dir_node.Dir(sdk_components["update.dir"]),
         SVD_FILE="${FBT_DEBUG_DIR}/STM32WB55_CM4.svd",
         # Build variables
         ROOT_DIR=env.Dir("#"),

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+import json
 import shutil
 import tarfile
 import zipfile
 from os import makedirs, walk
-from os.path import exists, join, relpath
+from os.path import exists, join, relpath, basename, split
 
 from ansi.color import fg
 from flipper.app import App
@@ -81,7 +82,7 @@ class Main(App):
                 )
         for foldertype in ("sdk_headers", "lib"):
             if exists(sdk_folder := join(obj_directory, foldertype)):
-                self.package_zip(foldertype, sdk_folder)
+                self.note_dist_component(foldertype, "dir", sdk_folder)
 
     def package_zip(self, foldertype, sdk_folder):
         with zipfile.ZipFile(
@@ -135,6 +136,10 @@ class Main(App):
             self.logger.debug(f"Creating output directory {self.output_dir_path}")
             makedirs(self.output_dir_path)
 
+        for folder in ("debug", "scripts"):
+            if exists(folder):
+                self.note_dist_component(folder, "dir", folder)
+
         for project in self.projects.values():
             self.logger.debug(f"Copying {project.project} for {project.target}")
             self.copy_single_project(project)
@@ -158,19 +163,61 @@ class Main(App):
         ):
             self.bundle_sdk()
 
-        print(self._dist_components)
         return 0
 
     def bundle_sdk(self):
-        sdk_src_files = map(self._dist_components.get, ("full.bin", "firmware.elf"))
         self.logger.info("Bundling SDK")
+        components_paths = dict()
+
+        sdk_components_keys = (
+            "full.bin",
+            "firmware.elf",
+            "update.dir",
+            "sdk_headers.dir",
+            "lib.dir",
+            "debug.dir",
+            "scripts.dir",
+        )
+
         with zipfile.ZipFile(
             self.get_dist_path(self.get_dist_file_name("sdk", "zip")),
             "w",
             zipfile.ZIP_DEFLATED,
         ) as zf:
-            for src_file in sdk_src_files:
-                zf.write(src_file, relpath(src_file, self.output_dir_path))
+            for component_key in sdk_components_keys:
+                component_path = self._dist_components.get(component_key)
+                components_paths[component_key] = basename(component_path)
+
+                if component_key.endswith(".dir"):
+                    dir_dest = component_key.split(".")[0]
+                    for root, _, files in walk(component_path):
+                        for file in files:
+                            zf.write(
+                                join(root, file),
+                                join(
+                                    dir_dest,
+                                    relpath(
+                                        join(root, file),
+                                        component_path,
+                                    ),
+                                ),
+                            )
+                else:
+                    zf.write(component_path, basename(component_path))
+
+            zf.writestr(
+                "components.json",
+                json.dumps(
+                    {
+                        "meta": {
+                            "hw_target": self.target,
+                            "flavor": self.flavor,
+                            "version": self.args.version,
+                        },
+                        "components": components_paths,
+                    }
+                ),
+            )
 
     def bundle_update_package(self):
         self.logger.debug(
