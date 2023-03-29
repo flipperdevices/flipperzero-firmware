@@ -1,6 +1,10 @@
 # Scenes Demo Application Tutorial
 
-In this tutorial, we create an application using the Flipper Zero's scene manager.
+In this tutorial, we create an application using the Flipper Zero's SceneManager and ViewDispatcher.
+
+The [Flipper Zero](https://flipperzero.one) supports three ways to develop UI (user interface) applications. ViewPort, ViewDispatcher, and SceneManager. This tutorial will focus on using the SceneManager and ViewDispatcher. If you are interested in learning more about ViewPort, please see the [ViewPort Tutorial](../basic/README.md).
+
+If you have more than two pages in your application, you may want to consider using a SceneManager and ViewDispatcher. You can think of a scene as a UI screen with some purpose. Each scene typically uses one module, but multiple scenes may reuse the same module. For example in a sound application, a "volume scene" and a "frequency scene" may both use the same knob module to let the user select the value (but one scene is setting the volume value while the other is setting the frequency). The SceneManager will handle the transition between scenes and uses the ViewDispatcher to handle the transition between views. The Scene Manager is a good way to develop UI applications, where you want to navigate between scenes. Using a Scene Manager helps you to reuse code, handle the transition between scenes, and keeps the logic for each scene separate.
 
 ## Demo Application Overview
 
@@ -25,7 +29,6 @@ display the scene and handle the transition between scenes. The scene manager
 will call the scene's on_enter function when the scene is displayed. The scene manager will call the scene's on_event function when a custom event is
 invoked. The scene
 manager will call the scene's on_exit function when the scene is no longer displayed.
-
 
 Our application will have the following scenes:
 
@@ -135,6 +138,8 @@ int32_t basic_scenes_app(void* p) {
     return 0;
 }
 ```
+
+furi.h contains the definions for FURI (Flipper Universal Registry Implementation). furi_delay_ms is a function that will delay the application for the specified number of milliseconds. FuriString is a string type that is used by the Flipper Zero firmware.
 
 The basic_scenes_app function will be called when the application is started. We configured this in our application.fam file entry_point parameter in the previous step. The function returns 0 when the application exits.
 
@@ -347,7 +352,7 @@ void (*const basic_scenes_scene_on_exit_handlers[])(void*) = {
 
 ## Step 17. Create a scene manager handlers object.
 
-Create a scene manager handlers object. This object will be used to initialize the scene manager. The scene_num field should be set to the number of scenes in our application, which is defined as 4 by the BasicScenesSceneCount enum.
+The scene manager handlers object will be used to initialize the scene manager. The scene_num field should be set to the number of scenes in our application, which is defined as 4 by the BasicScenesSceneCount enum.
 
 Add the following lines after the scene_on_exit_handlers array in the basic_scenes.c file:
 
@@ -362,7 +367,7 @@ static const SceneManagerHandlers basic_scenes_scene_manager_handlers = {
 
 ## Step 18. Create a basic_scene_custom_callback function.
 
-We will create a basic_scene_custom_callback function to handle the custom event. This function will be called when the custom event is received. We will delegate our custom event handling to the scene manager's handle custom event routine.
+We will create a basic_scene_custom_callback function to handle the custom event. This function will be called when the custom event is received. Custom events can be invoked for various reasons, such as a timer, voltage changes on Flipper Zero pins, new data, or if a view decides to invoke a custom event (perhaps due to keypress or invalid data being entered). We will delegate our custom event handling to the scene manager's handle custom event routine. We will see examples of custom events in steps 28 & 36.
 
 Add the following lines after the basic_scenes_scene_manager_handlers object in the basic_scenes.c file:
 
@@ -376,7 +381,7 @@ static bool basic_scene_custom_callback(void* context, uint32_t custom_event) {
 
 ## Step 19. Create a scene_back_event_callback function.
 
-We will create a scene_back_event_callback function to handle the back event. This function will be called when the back event is received. We will delegate our back event handling to the scene manager's handle back event routine.
+We will create a scene_back_event_callback function to handle the back event. This function will be called when the back event is received due to the user clicking the BACK button. We will delegate our back event handling to the scene manager's handle back event routine.
 
 Add the following lines after the basic_scene_custom_callback function in the basic_scenes.c file:
 
@@ -390,7 +395,7 @@ bool basic_scene_back_event_callback(void* context) {
 
 ## Step 20. Create an app_alloc function.
 
-We will create an app_alloc function to allocate memory for our application. This function will allocate memory for the scene manager, view dispatcher, submenu, widget and text input. The scene manager will be initialized with the scene manager handlers object we created in the previous step. We also add the views for the submenu, widget and text input to the view dispatcher, so they can be referenced by their enum values.
+We will create an app_alloc function to allocate memory for our application. This function will allocate memory for the scene manager, view dispatcher, submenu, widget and text input. The scene manager will be initialized with the scene manager handlers object we created in step 17. We also add the views for the submenu, widget and text input to the view dispatcher, so they can be referenced by their enum values.
 
 Add the following lines after the scene_manager_handlers object in the basic_scenes.c file:
 
@@ -749,11 +754,13 @@ static App* app_alloc() {
     App* app = malloc(sizeof(App));
     app->user_name_size = 16;
     app->user_name = malloc(app->user_name_size);
+    app->scene_manager = scene_manager_alloc(
+        &basic_scenes_scene_manager_handlers, app);
 ```
 
 ## Step 36. Create an enum for the greeting input scene's custom event.
 
-Create an enum for the greeting input scene's custom event. We will trigger this event when the user has completed entering their name. The enum should be defined after BasicScenesMainMenuEvent in the basic_scenes.h file:
+We will trigger the custom event when the user has completed entering their name. The BasicScenesGreetingInputEvent enum should be defined after BasicScenesMainMenuEvent in the basic_scenes.h file:
 
 ```c
 typedef enum {
@@ -763,7 +770,7 @@ typedef enum {
 
 ## Step 37. Create a text_input_callback function.
 
-Create a text_input_callback function. This function will be called when the user has finished entering their name. The function can be added before basic_scenes_greeting_input_scene_on_enter and should look like this:
+The text_input_callback function will be called when the user has finished entering their name. The function can be added before basic_scenes_greeting_input_scene_on_enter and should look like this:
 
 ```c
 void basic_scenes_text_input_callback(void* context) {
@@ -847,6 +854,7 @@ void basic_scenes_greeting_message_scene_on_enter(void* context) {
 ```
 
 The code does the following:
+
 - Resets the widget.
 - Creates a new FuriString.
 - Formats the string with a greeting and the user's name.
