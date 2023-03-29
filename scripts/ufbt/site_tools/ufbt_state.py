@@ -1,4 +1,5 @@
 from SCons.Errors import SConsEnvironmentError
+from SCons.Warnings import warn, WarningOnByDefault
 
 import json
 import os
@@ -46,28 +47,41 @@ def _load_sdk_data(sdk_root):
     return sdk_data
 
 
+def _load_state_file(state_dir_node, filename: str) -> dict:
+    state_path = os.path.join(state_dir_node.abspath, filename)
+    if not os.path.exists(state_path):
+        raise SConsEnvironmentError(f"State file {state_path} not found")
+
+    with open(state_path, "r") as f:
+        return json.load(f)
+
+
 def generate(env, **kw):
     ufbt_state_dir_node = env["UFBT_STATE_DIR"]
     sdk_current_sdk_dir_node = env["UFBT_CURRENT_SDK_DIR"]
 
-    sdk_meta_filename = kw.get("SDK_META", "components.json")
+    sdk_components_filename = kw.get("SDK_COMPONENTS", "components.json")
+    ufbt_state_filename = kw.get("UFBT_STATE", "ufbt_state.json")
 
-    sdk_meta_path = os.path.join(sdk_current_sdk_dir_node.abspath, sdk_meta_filename)
-    if not os.path.exists(sdk_meta_path):
-        raise SConsEnvironmentError(f"SDK state file {sdk_meta_path} not found")
-
-    with open(sdk_meta_path, "r") as f:
-        sdk_state = json.load(f)
+    sdk_state = _load_state_file(sdk_current_sdk_dir_node, sdk_components_filename)
+    ufbt_state = _load_state_file(ufbt_state_dir_node, ufbt_state_filename)
 
     if not (sdk_components := sdk_state.get("components", {})):
         raise SConsEnvironmentError("SDK state file doesn't contain components data")
 
-    if not sdk_state["meta"]["hw_target"].endswith(sdk_data["hardware"]):
-        raise SConsEnvironmentError("SDK state file doesn't match hardware target")
-
     sdk_data = _load_sdk_data(
         sdk_current_sdk_dir_node.Dir(sdk_components["sdk_headers.dir"]).abspath
     )
+
+    if not sdk_state["meta"]["hw_target"].endswith(sdk_data["hardware"]):
+        raise SConsEnvironmentError("SDK state file doesn't match hardware target")
+
+    if sdk_state["meta"]["version"] != ufbt_state["version"]:
+        warn(
+            WarningOnByDefault,
+            f"Version mismatch: SDK state vs uFBT: {sdk_state['meta']['version']} vs {ufbt_state['meta']['version']}",
+        )
+
     scripts_dir = sdk_current_sdk_dir_node.Dir(sdk_components["scripts.dir"])
     env.SetDefault(
         # Paths
@@ -92,7 +106,7 @@ def generate(env, **kw):
         # ufbt state
         # UFBT_STATE_DIR=ufbt_state_dir_node,
         # UFBT_CURRENT_SDK_DIR=sdk_current_sdk_dir_node,
-        UFBT_SDK_META=sdk_state["meta"],
+        UFBT_STATE=ufbt_state,
         UFBT_BOOTSTRAP_SCRIPT="${UFBT_SCRIPT_DIR}/bootstrap.py",
         UFBT_SCRIPT_ROOT=scripts_dir.Dir("ufbt"),
     )

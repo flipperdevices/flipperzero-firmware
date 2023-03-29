@@ -7,7 +7,7 @@ update_env = core_env.Clone(
     tools=["python3"],
 )
 print("Updating SDK...")
-sdk_meta = update_env["UFBT_SDK_META"]
+ufbt_state = update_env["UFBT_STATE"]
 
 update_args = [
     "--ufbt-dir",
@@ -18,9 +18,9 @@ if branch_name := GetOption("sdk_branch"):
     update_args.extend(["--branch", branch_name])
 elif channel_name := GetOption("sdk_channel"):
     update_args.extend(["--channel", channel_name])
-elif branch_name := sdk_meta.get("branch", None):
+elif branch_name := ufbt_state.get("branch", None):
     update_args.extend(["--branch", branch_name])
-elif channel_name := sdk_meta.get("channel", None):
+elif channel_name := ufbt_state.get("channel", None):
     update_args.extend(["--channel", channel_name])
 else:
     raise SConsEnvironmentError("No branch or channel specified for SDK update")
@@ -28,7 +28,7 @@ else:
 if hw_target := GetOption("sdk_target"):
     update_args.extend(["--hw-target", hw_target])
 else:
-    update_args.extend(["--hw-target", sdk_meta["hw_target"]])
+    update_args.extend(["--hw-target", ufbt_state["hw_target"]])
 
 update_env.Replace(UPDATE_ARGS=update_args)
 result = update_env.Execute(
