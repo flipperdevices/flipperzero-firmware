@@ -1,4 +1,4 @@
-from SCons.Errors import SConsEnvironmentError
+from SCons.Errors import StopError
 from SCons.Warnings import warn, WarningOnByDefault
 
 import json
@@ -50,7 +50,7 @@ def _load_sdk_data(sdk_root):
 def _load_state_file(state_dir_node, filename: str) -> dict:
     state_path = os.path.join(state_dir_node.abspath, filename)
     if not os.path.exists(state_path):
-        raise SConsEnvironmentError(f"State file {state_path} not found")
+        raise StopError(f"State file {state_path} not found")
 
     with open(state_path, "r") as f:
         return json.load(f)
@@ -66,14 +66,14 @@ def generate(env, **kw):
     ufbt_state = _load_state_file(sdk_current_sdk_dir_node, ufbt_state_filename)
 
     if not (sdk_components := sdk_state.get("components", {})):
-        raise SConsEnvironmentError("SDK state file doesn't contain components data")
+        raise StopError("SDK state file doesn't contain components data")
 
     sdk_data = _load_sdk_data(
         sdk_current_sdk_dir_node.Dir(sdk_components["sdk_headers.dir"]).abspath
     )
 
     if not sdk_state["meta"]["hw_target"].endswith(sdk_data["hardware"]):
-        raise SConsEnvironmentError("SDK state file doesn't match hardware target")
+        raise StopError("SDK state file doesn't match hardware target")
 
     if sdk_state["meta"]["version"] != ufbt_state["version"]:
         warn(

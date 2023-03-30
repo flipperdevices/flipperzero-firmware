@@ -1,4 +1,4 @@
-from SCons.Errors import SConsEnvironmentError
+from SCons.Errors import StopError
 
 Import("core_env")
 
@@ -23,7 +23,7 @@ elif branch_name := ufbt_state.get("branch", None):
 elif channel_name := ufbt_state.get("channel", None):
     update_args.extend(["--channel", channel_name])
 else:
-    raise SConsEnvironmentError("No branch or channel specified for SDK update")
+    raise StopError("No branch or channel specified for SDK update")
 
 if hw_target := GetOption("sdk_target"):
     update_args.extend(["--hw-target", hw_target])
