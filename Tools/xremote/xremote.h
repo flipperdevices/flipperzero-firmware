@@ -3,6 +3,7 @@
 #include "scenes/xremote_scene.h"
 #include "views/xremote_infoscreen.h"
 #include "views/xremote_transmit.h"
+#include "views/xremote_pause_set.h"
 #include "helpers/xremote_storage.h"
 #include "models/infrared/xremote_ir_remote.h"
 #include "models/cross/xremote_remote.h"
@@ -26,6 +27,7 @@ typedef struct {
     VariableItemList* variable_item_list;
     XRemoteInfoscreen* xremote_infoscreen;
     XRemoteTransmit* xremote_transmit;
+    XRemotePauseSet* xremote_pause_set;
     InfraredRemote* ir_remote_buffer;
     InfraredWorker* ir_worker;
     CrossRemote* cross_remote;
@@ -48,6 +50,7 @@ typedef enum {
     XRemoteViewIdStack,
     XRemoteViewIdTextInput,
     XRemoteViewIdTransmit,
+    XRemoteViewIdPauseSet,
 } XRemoteViewId;
 
 typedef enum {

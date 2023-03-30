@@ -65,6 +65,8 @@ XRemote* xremote_app_alloc() {
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdInfoscreen, xremote_infoscreen_get_view(app->xremote_infoscreen));
     app->xremote_transmit = xremote_transmit_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdTransmit, xremote_transmit_get_view(app->xremote_transmit));
+    app->xremote_pause_set = xremote_pause_set_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdPauseSet, xremote_pause_set_get_view(app->xremote_pause_set));
     app->button_menu_create = button_menu_alloc();
     view_dispatcher_add_view(app->view_dispatcher, XRemoteViewIdCreate, button_menu_get_view(app->button_menu_create));
     app->button_menu_create_add = button_menu_alloc();
