@@ -12,6 +12,8 @@ typedef enum {
     NfcStateChipActive,
     NfcStateFieldOn,
     NfcStateFieldOff,
+
+    NfcStateListenStarted,
 } NfcState;
 
 typedef enum {
@@ -34,6 +36,8 @@ struct Nfc {
     uint32_t guard_time_us;
     NfcEventCallback callback;
     void* context;
+
+    FuriThread* worker_thread;
 };
 
 static NfcError nfc_process_hal_error(FHalNfcError error) {
@@ -48,39 +52,73 @@ static NfcError nfc_process_hal_error(FHalNfcError error) {
     return err;
 }
 
-static void nfc_hal_event_handler(FHalNfcEvent event, void* context) {
+static int32_t nfc_worker(void* context) {
     furi_assert(context);
     Nfc* instance = context;
+    uint8_t rx_data[256];
+    uint16_t rx_bits = 0;
 
-    if(instance->callback) {
-        if(event == FHalNfcEventFieldOn) {
-            instance->callback(NfcEventFieldOn, instance->context);
-        } else if(event == FHalNfcEventTxStart) {
-            instance->callback(NfcEventTxStart, instance->context);
-        } else if(event == FHalNfcEventTxEnd) {
-            instance->callback(NfcEventTxEnd, instance->context);
-        } else if(event == FHalNfcEventRxStart) {
-            instance->callback(NfcEventRxStart, instance->context);
-        } else if(event == FHalNfcEventRxEnd) {
-            instance->callback(NfcEventRxEnd, instance->context);
+    f_hal_nfc_listen_start();
+    NfcEvent nfc_event = {};
+    while(true) {
+        FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
+        if(event & FHalNfcEventAbortRequest) {
+            FURI_LOG_D(TAG, "Abort request received");
+            nfc_event.type = NfcEventTypeUserAbort;
+            instance->callback(nfc_event, instance->context);
+            break;
+        }
+        if(event & FHalNfcEventFieldOn) {
+            nfc_event.type = NfcEventTypeFieldOn;
+            instance->callback(nfc_event, instance->context);
+        }
+        if(event & FHalNfcEventFieldOff) {
+            FURI_LOG_D(TAG, "Field off");
+            nfc_event.type = NfcEventTypeFieldOff;
+            instance->callback(nfc_event, instance->context);
+            f_hal_nfc_listener_sleep();
+        }
+        if(event & FHalNfcEventListenerActive) {
+            nfc_event.type = NfcEventTypeListenerActivated;
+            instance->callback(nfc_event, instance->context);
+        }
+        if(event & FHalNfcEventRxEnd) {
+            nfc_event.type = NfcEventTypeRxEnd;
+            f_hal_nfc_poller_rx(rx_data, sizeof(rx_data), &rx_bits);
+            nfc_event.data.rx_data = rx_data;
+            nfc_event.data.rx_bits = rx_bits;
+            // TODO start block TX timer
+            instance->callback(nfc_event, instance->context);
         }
     }
+
+    return 0;
 }
 
 Nfc* nfc_alloc() {
     Nfc* instance = malloc(sizeof(Nfc));
     instance->state = NfcStateIdle;
-    f_hal_nfc_set_callback(nfc_hal_event_handler, instance);
     f_hal_nfc_low_power_mode_stop();
     instance->state = NfcStateChipActive;
+
+    instance->worker_thread = furi_thread_alloc();
+    furi_thread_set_name(instance->worker_thread, "NfcWorker");
+    furi_thread_set_callback(instance->worker_thread, nfc_worker);
+    furi_thread_set_context(instance->worker_thread, instance);
+    furi_thread_set_priority(instance->worker_thread, FuriThreadPriorityHighest);
+    furi_thread_set_stack_size(instance->worker_thread, 2048);
 
     return instance;
 }
 
 void nfc_free(Nfc* instance) {
     furi_assert(instance);
+    if(instance->state == NfcStateListenStarted) {
+        f_hal_nfc_abort();
+        furi_thread_join(instance->worker_thread);
+    }
+    furi_thread_free(instance->worker_thread);
     f_hal_nfc_low_power_mode_start();
-    f_hal_nfc_set_callback(NULL, NULL);
 
     free(instance);
 }
@@ -360,6 +398,28 @@ NfcError nfc_iso13444a_sdd_frame(
     } while(false);
 
     return ret;
+}
+
+void nfc_listener_start(Nfc* instance, NfcEventCallback callback, void* context) {
+    furi_assert(instance);
+    furi_assert(instance->state == NfcStateConfigured);
+    furi_assert(instance->worker_thread);
+    furi_assert(callback);
+
+    instance->callback = callback;
+    instance->context = context;
+    furi_thread_start(instance->worker_thread);
+    instance->state = NfcStateListenStarted;
+    instance->comm_state = NfcCommStateIdle;
+}
+
+NfcError nfc_listener_sleep(Nfc* instance) {
+    furi_assert(instance);
+    furi_assert(instance->state == NfcStateListenStarted);
+
+    f_hal_nfc_listener_sleep();
+
+    return NfcErrorNone;
 }
 
 NfcError nfc_listener_rx(

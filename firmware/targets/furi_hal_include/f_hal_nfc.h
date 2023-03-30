@@ -28,8 +28,6 @@ typedef enum {
     FHalNfcEventAbortRequest = (1U << 13),
 } FHalNfcEvent;
 
-typedef void (*FHalNfcCallback)(FHalNfcEvent event, void* context);
-
 typedef enum {
     FHalNfcErrorNone,
     FHalNfcErrorChipCommunication,
@@ -60,14 +58,6 @@ typedef enum {
  * @return FHalNfcError 
  */
 FHalNfcError f_hal_nfc_init();
-
-/**
- * @brief Set Nfc HAL event callback
- * 
- * @param callback 
- * @param context 
- */
-void f_hal_nfc_set_callback(FHalNfcCallback callback, void* context);
 
 /**
  * @brief Start Nfc hardware low power mode
@@ -109,6 +99,10 @@ FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, uint16_t rx_data_size, uint16
 FHalNfcError f_hal_nfc_trx_reset();
 
 FHalNfcError f_hal_nfc_listen_start();
+
+FHalNfcError f_hal_nfc_listener_sleep();
+
+FHalNfcError f_hal_nfc_abort();
 
 FHalNfcEvent f_hal_nfc_wait_event(uint32_t timeout_ms);
 

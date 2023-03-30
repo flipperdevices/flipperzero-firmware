@@ -1,5 +1,5 @@
 #include "mifare_classic.h"
-#include "nfca.h"
+#include "nfca_utils.h"
 #include "nfc_util.h"
 #include <furi_hal_rtc.h>
 

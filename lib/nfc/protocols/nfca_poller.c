@@ -1,12 +1,11 @@
 #include "nfca_poller.h"
-#include "nfca_common.h"
+#include "nfca.h"
 
 #include <lib/nfc/nfc.h>
 #include <furi.h>
 
 #define TAG "NFCA"
 
-#define NFCA_CRC_INIT (0x6363)
 #define NFCA_POLLER_MAX_TX_BUFFER_SIZE (512U)
 
 #define NFCA_POLLER_SEL_CMD(cascade_lvl) (0x93 + 2 * (cascade_lvl))
@@ -57,27 +56,6 @@ static NfcaError nfca_poller_process_error(NfcError error) {
     return ret;
 }
 
-static uint16_t nfca_poller_get_crc16(uint8_t* buff, uint16_t len) {
-    uint16_t crc = NFCA_CRC_INIT;
-    uint8_t byte = 0;
-
-    for(uint8_t i = 0; i < len; i++) {
-        byte = buff[i];
-        byte ^= (uint8_t)(crc & 0xff);
-        byte ^= byte << 4;
-        crc = (crc >> 8) ^ (((uint16_t)byte) << 8) ^ (((uint16_t)byte) << 3) ^
-              (((uint16_t)byte) >> 4);
-    }
-
-    return crc;
-}
-
-static void nfca_poller_append_crc16(uint8_t* buff, uint16_t len) {
-    uint16_t crc = nfca_poller_get_crc16(buff, len);
-    buff[len] = (uint8_t)crc;
-    buff[len + 1] = (uint8_t)(crc >> 8);
-}
-
 static NfcaError nfca_poller_standart_frame_exchange(
     NfcaPoller* instance,
     uint8_t* tx_data,
@@ -99,7 +77,7 @@ static NfcaError nfca_poller_standart_frame_exchange(
     uint8_t tx_buff[NFCA_POLLER_MAX_TX_BUFFER_SIZE] = {};
 
     memcpy(tx_buff, tx_data, tx_bytes);
-    nfca_poller_append_crc16(tx_buff, tx_bytes);
+    nfca_append_crc(tx_buff, tx_bytes);
     NfcaError ret = NfcaErrorNone;
 
     do {
@@ -126,10 +104,7 @@ static NfcaError nfca_poller_standart_frame_exchange(
                 ret = NfcaErrorBufferOverflow;
                 break;
             }
-            uint16_t crc_calc = nfca_poller_get_crc16(rx_buff, rx_bytes - 2);
-            uint16_t crc_received = (rx_buff[rx_bytes - 1] << 8) | rx_buff[rx_bytes - 2];
-            if(crc_calc != crc_received) {
-                FURI_LOG_W(TAG, "CRC error: received %04X, expected %04X", crc_received, crc_calc);
+            if(!nfca_check_crc(rx_buff, rx_bytes)) {
                 ret = NfcaErrorWrongCrc;
                 break;
             }

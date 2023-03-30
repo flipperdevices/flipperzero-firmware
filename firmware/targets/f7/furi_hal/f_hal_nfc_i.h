@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 typedef enum {
-    FHalNfcEventInternalAbort = (1U << 0),
+    FHalNfcEventInternalTypeAbort = (1U << 0),
     FHalNfcEventInternalTypeIrq = (1U << 1),
     FHalNfcEventInternalTypeTimerFwtExpired = (1U << 2),
     FHalNfcEventInternalTypeTimerBlockTxExpired = (1U << 3),
@@ -19,15 +19,12 @@ typedef enum {
 
 typedef struct {
     FuriThreadId thread;
-    FHalNfcCallback callback;
     void* context;
 } FHalNfcEventInternal;
 
 extern FHalNfcEventInternal* f_hal_nfc;
 
 void f_hal_nfc_event_init();
-
-void f_hal_nfc_event_set_callback(FHalNfcCallback callback, void* context);
 
 void f_hal_nfc_set_event(FHalNfcEventInternalType event);
 

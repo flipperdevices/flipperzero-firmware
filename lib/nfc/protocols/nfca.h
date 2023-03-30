@@ -3,26 +3,68 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <lib/digital_signal/digital_signal.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define NFCA_MAX_UID_SIZE (10U)
+
+#define NFCA_GUARD_TIME_US (5000)
+#define NFCA_FDT_POLL_FC (1620)
+#define NFCA_FDT_LISTEN_FC (1172)
+#define NFCA_POLLER_MASK_RX_FS ((NFCA_FDT_LISTEN_FC) / 2)
+#define NFCA_POLL_POLL_MIN_US (1100)
+
+typedef enum {
+    NfcaErrorNone,
+    NfcaErrorNotPresent,
+    NfcaErrorColResFailed,
+    NfcaErrorBufferOverflow,
+    NfcaErrorCommunication,
+    NfcaErrorFieldOff,
+    NfcaErrorWrongCrc,
+    NfcaErrorTimeout,
+} NfcaError;
 
 typedef struct {
-    DigitalSignal* one;
-    DigitalSignal* zero;
-    DigitalSignal* tx_signal;
-} NfcaSignal;
+    uint8_t sens_resp[2];
+} NfcaSensResp;
 
-uint16_t nfca_get_crc16(uint8_t* buff, uint16_t len);
+typedef struct {
+    uint8_t sel_cmd;
+    uint8_t sel_par;
+    uint8_t data[4]; // max data bit is 32
+} NfcaSddReq;
 
-void nfca_append_crc16(uint8_t* buff, uint16_t len);
+typedef struct {
+    uint8_t nfcid[4];
+    uint8_t bss;
+} NfcaSddResp;
 
-bool nfca_emulation_handler(
-    uint8_t* buff_rx,
-    uint16_t buff_rx_len,
-    uint8_t* buff_tx,
-    uint16_t* buff_tx_len);
+typedef struct {
+    uint8_t sel_cmd;
+    uint8_t sel_par;
+    uint8_t nfcid[4];
+    uint8_t bcc;
+} NfcaSelReq;
 
-NfcaSignal* nfca_signal_alloc();
+typedef struct {
+    uint8_t sak;
+} NfcaSelResp;
 
-void nfca_signal_free(NfcaSignal* nfca_signal);
+typedef struct {
+    uint8_t uid[NFCA_MAX_UID_SIZE];
+    uint8_t uid_len;
+    uint8_t atqa[2];
+    uint8_t sak;
+} NfcaData;
 
-void nfca_signal_encode(NfcaSignal* nfca_signal, uint8_t* data, uint16_t bits, uint8_t* parity);
+uint16_t nfca_get_crc(uint8_t* buff, uint16_t len);
+
+void nfca_append_crc(uint8_t* buff, uint16_t len);
+
+bool nfca_check_crc(uint8_t* buff, uint16_t len);
+
+#ifdef __cplusplus
+}
+#endif

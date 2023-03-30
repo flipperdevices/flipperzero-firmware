@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nfca_common.h"
+#include "nfca.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,9 +8,37 @@ extern "C" {
 
 typedef struct NfcaListener NfcaListener;
 
+typedef enum {
+    NfcaListenerEventTypeAbort,
+    NfcaListenerEventTypeFieldOn,
+    NfcaListenerEventTypeFieldOff,
+    NfcaListenerEventTypeHalted,
+    NfcaListenerEventTypeReceivedStandartFrame,
+    NfcaListenerEventTypeReceivedData,
+} NfcaListenerEventType;
+
+typedef struct {
+    uint8_t* rx_data;
+    uint16_t rx_bits;
+} NfcaListenerEventData;
+
+typedef struct {
+    NfcaListenerEventType type;
+    NfcaListenerEventData data;
+} NfcaListenerEvent;
+
+typedef void (*NfcaListenerCallback)(NfcaListenerEvent event, void* context);
+
 NfcaListener* nfca_listener_alloc(NfcaData* data);
 
 void nfca_listener_free(NfcaListener* instance);
+
+NfcaError nfca_listener_set_callback(
+    NfcaListener* instance,
+    NfcaListenerCallback callback,
+    void* context);
+
+NfcaError nfca_listener_sleep(NfcaListener* instance);
 
 NfcaError nfca_listener_rx(
     NfcaListener* instance,

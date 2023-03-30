@@ -9,12 +9,25 @@ extern "C" {
 typedef struct Nfc Nfc;
 
 typedef enum {
-    NfcEventFieldOn,
-    NfcEventTxStart,
-    NfcEventTxEnd,
-    NfcEventRxStart,
-    NfcEventRxEnd,
-    NfcEventRxTimeout,
+    NfcEventTypeUserAbort,
+    NfcEventTypeFieldOn,
+    NfcEventTypeFieldOff,
+    NfcEventTypeTxStart,
+    NfcEventTypeTxEnd,
+    NfcEventTypeRxStart,
+    NfcEventTypeRxEnd,
+
+    NfcEventTypeListenerActivated,
+} NfcEventType;
+
+typedef struct {
+    uint8_t* rx_data;
+    uint16_t rx_bits;
+} NfcEventData;
+
+typedef struct {
+    NfcEventType type;
+    NfcEventData data;
 } NfcEvent;
 
 typedef void (*NfcEventCallback)(NfcEvent event, void* context);
@@ -63,6 +76,10 @@ NfcError nfc_listener_set_col_res_data(
     uint8_t uid_len,
     uint8_t* atqa,
     uint8_t sak);
+
+void nfc_listener_start(Nfc* instance, NfcEventCallback callback, void* context);
+
+NfcError nfc_listener_sleep(Nfc* instance);
 
 NfcError nfc_listener_rx(
     Nfc* instance,

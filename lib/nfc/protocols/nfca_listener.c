@@ -7,7 +7,6 @@
 
 typedef enum {
     NfcaListenerStateIdle,
-    NfcaListenerStateColResInProgress,
     NfcaListenerStateActive,
 } NfcaListenerState;
 
@@ -15,6 +14,8 @@ struct NfcaListener {
     Nfc* nfc;
     NfcaData data;
     NfcaListenerState state;
+    NfcaListenerCallback callback;
+    void* context;
 };
 
 static NfcaError nfca_listener_process_nfc_error(NfcError error) {
@@ -31,6 +32,50 @@ static NfcaError nfca_listener_process_nfc_error(NfcError error) {
     return ret;
 }
 
+static bool nfca_listener_halt_received(uint8_t* rx_data, uint16_t rx_bits) {
+    bool halt_cmd_received = false;
+
+    do {
+        if(rx_bits != 4 * 8) break;
+        uint16_t rx_bytes = rx_bits / 8;
+        if(!nfca_check_crc(rx_data, rx_bytes)) break;
+        if(!((rx_data[0] == 0x50) && (rx_data[1] == 0x00))) break;
+        halt_cmd_received = true;
+    } while(false);
+
+    return halt_cmd_received;
+}
+
+static void nfca_listener_event_handler(NfcEvent event, void* context) {
+    furi_assert(context);
+
+    NfcaListener* instance = context;
+    NfcEventType event_type = event.type;
+    NfcaListenerEvent nfca_listener_event = {};
+    if(event_type == NfcEventTypeListenerActivated) {
+        instance->state = NfcaListenerStateActive;
+    } else if(event_type == NfcEventTypeRxEnd) {
+        if(nfca_listener_halt_received(event.data.rx_data, event.data.rx_bits)) {
+            nfca_listener_sleep(instance);
+            instance->state = NfcaListenerStateIdle;
+            if(instance->callback) {
+                nfca_listener_event.type = NfcaListenerEventTypeHalted;
+                instance->callback(nfca_listener_event, instance->context);
+            }
+        } else if(instance->callback) {
+            nfca_listener_event.data.rx_data = event.data.rx_data;
+            if(nfca_check_crc(event.data.rx_data, event.data.rx_bits / 8)) {
+                nfca_listener_event.type = NfcaListenerEventTypeReceivedStandartFrame;
+                nfca_listener_event.data.rx_bits = event.data.rx_bits - 16;
+            } else {
+                nfca_listener_event.type = NfcaListenerEventTypeReceivedData;
+                nfca_listener_event.data.rx_bits = event.data.rx_bits;
+            }
+            instance->callback(nfca_listener_event, instance->context);
+        }
+    }
+}
+
 NfcaListener* nfca_listener_alloc(NfcaData* data) {
     NfcaListener* instance = malloc(sizeof(NfcaListener));
     instance->data = *data;
@@ -43,6 +88,7 @@ NfcaListener* nfca_listener_alloc(NfcaData* data) {
         instance->data.uid_len,
         instance->data.atqa,
         instance->data.sak);
+    nfc_listener_start(instance->nfc, nfca_listener_event_handler, instance);
 
     return instance;
 }
@@ -51,6 +97,27 @@ void nfca_listener_free(NfcaListener* instance) {
     furi_assert(instance);
     nfc_free(instance->nfc);
     free(instance);
+}
+
+NfcaError nfca_listener_set_callback(
+    NfcaListener* instance,
+    NfcaListenerCallback callback,
+    void* context) {
+    furi_assert(instance);
+    furi_assert(callback);
+
+    instance->callback = callback;
+    instance->context = context;
+
+    return NfcaErrorNone;
+}
+
+NfcaError nfca_listener_sleep(NfcaListener* instance) {
+    furi_assert(instance);
+
+    NfcError error = nfc_listener_sleep(instance->nfc);
+
+    return nfca_listener_process_nfc_error(error);
 }
 
 NfcaError nfca_listener_rx(

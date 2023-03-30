@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nfca_common.h"
+#include "nfca.h"
 
 #include <stdbool.h>
 

@@ -6,19 +6,16 @@ void f_hal_nfc_event_init() {
     f_hal_nfc_event = malloc(sizeof(FHalNfcEventInternal));
 }
 
-void f_hal_nfc_event_set_callback(FHalNfcCallback callback, void* context) {
-    furi_assert(f_hal_nfc_event);
-    furi_assert(callback);
-
-    f_hal_nfc_event->callback = callback;
-    f_hal_nfc_event->context = context;
-}
-
 void f_hal_nfc_set_event(FHalNfcEventInternalType event) {
     furi_assert(f_hal_nfc_event);
     furi_assert(f_hal_nfc_event->thread);
 
     furi_thread_flags_set(f_hal_nfc_event->thread, event);
+}
+
+FHalNfcError f_hal_nfc_abort() {
+    f_hal_nfc_set_event(FHalNfcEventInternalTypeAbort);
+    return FHalNfcErrorNone;
 }
 
 FHalNfcEvent f_hal_nfc_wait_event(uint32_t timeout_ms) {
@@ -35,7 +32,7 @@ FHalNfcEvent f_hal_nfc_wait_event(uint32_t timeout_ms) {
     uint32_t event_timeout = timeout_ms == F_HAL_NFC_EVENT_WAIT_FOREVER ? FuriWaitForever :
                                                                           timeout_ms;
     uint32_t event_flag = furi_thread_flags_wait(
-        FHalNfcEventInternalAbort | FHalNfcEventInternalTypeIrq |
+        FHalNfcEventInternalTypeAbort | FHalNfcEventInternalTypeIrq |
             FHalNfcEventInternalTypeTimerFwtExpired | FHalNfcEventInternalTypeTimerBlockTxExpired,
         FuriFlagWaitAny,
         event_timeout);
@@ -74,7 +71,7 @@ FHalNfcEvent f_hal_nfc_wait_event(uint32_t timeout_ms) {
             if(irq & ST25R3916_IRQ_MASK_WU_A_X) {
                 event |= FHalNfcEventListenerActiveA;
             }
-                }
+        }
         if(event_flag & FHalNfcEventInternalTypeTimerFwtExpired) {
             event |= FHalNfcEventTimerFwtExpired;
             furi_thread_flags_clear(FHalNfcEventInternalTypeTimerFwtExpired);
@@ -83,9 +80,9 @@ FHalNfcEvent f_hal_nfc_wait_event(uint32_t timeout_ms) {
             event |= FHalNfcEventTimerBlockTxExpired;
             furi_thread_flags_clear(FHalNfcEventInternalTypeTimerBlockTxExpired);
         }
-        if(event_flag & FHalNfcEventInternalAbort) {
+        if(event_flag & FHalNfcEventInternalTypeAbort) {
             event |= FHalNfcEventAbortRequest;
-            furi_thread_flags_clear(FHalNfcEventInternalAbort);
+            furi_thread_flags_clear(FHalNfcEventInternalTypeAbort);
         }
     } else {
         event = FHalNfcEventTimeout;
