@@ -34,9 +34,7 @@ def get_commit_json(event):
     with urllib.request.urlopen(
         event["pull_request"]["_links"]["commits"]["href"], context=context
     ) as commit_file:
-        json_content = commit_file.read().decode("utf-8")
-        print(json_content)
-        commit_json = json.loads(json_content)
+        commit_json = json.loads(commit_file.read().decode("utf-8"))
     return commit_json
 
 
