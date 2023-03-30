@@ -32,17 +32,15 @@ void picopass_scene_device_info_on_enter(void* context) {
         furi_string_cat_printf(csn_str, "%02X ", csn[i]);
     }
 
-    bool has_key = !picopass_is_memset(pacs->key, 0x00, PICOPASS_BLOCK_LEN);
-
     if(pacs->record.bitLength == 0 || pacs->record.bitLength == 255) {
         // Neither of these are valid.  Indicates the block was all 0x00 or all 0xff
         furi_string_cat_printf(wiegand_str, "Invalid PACS");
-
-        if(pacs->se_enabled) {
-            furi_string_cat_printf(credential_str, "SE enabled");
-        }
     } else {
-        size_t bytesLength = 1 + pacs->record.bitLength / 8;
+        size_t bytesLength = pacs->record.bitLength / 8;
+        if (pacs->record.bitLength % 8 > 0) {
+            // Add extra byte if there are bits remaining
+            bytesLength++;
+        }
         furi_string_set(credential_str, "");
         for(uint8_t i = PICOPASS_BLOCK_LEN - bytesLength; i < PICOPASS_BLOCK_LEN; i++) {
             furi_string_cat_printf(credential_str, " %02X", pacs->credential[i]);
@@ -57,19 +55,6 @@ void picopass_scene_device_info_on_enter(void* context) {
 
         if(pacs->sio) {
             furi_string_cat_printf(sio_str, "+SIO");
-        }
-
-        if(has_key) {
-            if(pacs->sio) {
-                furi_string_cat_printf(sio_str, " ");
-            }
-            furi_string_cat_printf(sio_str, "Key: ");
-
-            uint8_t key[PICOPASS_BLOCK_LEN];
-            memcpy(key, &pacs->key, PICOPASS_BLOCK_LEN);
-            for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
-                furi_string_cat_printf(sio_str, "%02X", key[i]);
-            }
         }
     }
 
