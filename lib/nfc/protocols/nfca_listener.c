@@ -116,6 +116,7 @@ NfcaError nfca_listener_sleep(NfcaListener* instance) {
     furi_assert(instance);
 
     NfcError error = nfc_listener_sleep(instance->nfc);
+    instance->state = NfcaListenerStateIdle;
 
     return nfca_listener_process_nfc_error(error);
 }
@@ -150,5 +151,34 @@ NfcaError nfca_listener_tx(NfcaListener* instance, uint8_t* tx_data, uint16_t tx
         FURI_LOG_W(TAG, "Tx error: %d", error);
         ret = nfca_listener_process_nfc_error(error);
     }
+    return ret;
+}
+
+NfcaError
+    nfca_listener_send_standart_frame(NfcaListener* instance, uint8_t* tx_data, uint16_t tx_bits) {
+    furi_assert(instance);
+    furi_assert(tx_data);
+
+    NfcaError ret = NfcaErrorNone;
+    // TODO another buffer ...
+    uint8_t tx_buff[64];
+    uint16_t tx_bytes = tx_bits / 8;
+
+    do {
+        if(tx_bytes > sizeof(tx_buff) - 2) {
+            ret = NfcaErrorBufferOverflow;
+            break;
+        }
+        memcpy(tx_buff, tx_data, tx_bytes);
+        nfca_append_crc(tx_buff, tx_bytes);
+
+        NfcError error = nfc_listener_tx(instance->nfc, tx_buff, tx_bits + 16);
+        if(error != NfcErrorNone) {
+            FURI_LOG_W(TAG, "Tx error: %d", error);
+            ret = nfca_listener_process_nfc_error(error);
+            break;
+        }
+    } while(false);
+
     return ret;
 }

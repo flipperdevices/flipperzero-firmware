@@ -80,6 +80,7 @@ typedef struct {
 
 typedef struct {
     NfcaData nfca_data;
+    MfUltralightType type;
     MfUltralightVersion version;
     MfUltralightSignature signature;
     MfUltralightCounter counter[MF_ULTRALIGHT_COUNTER_NUM];

@@ -49,6 +49,9 @@ NfcaError nfca_listener_rx(
 
 NfcaError nfca_listener_tx(NfcaListener* instance, uint8_t* tx_data, uint16_t tx_bits);
 
+NfcaError
+    nfca_listener_send_standart_frame(NfcaListener* instance, uint8_t* tx_data, uint16_t tx_bits);
+
 #ifdef __cplusplus
 }
 #endif

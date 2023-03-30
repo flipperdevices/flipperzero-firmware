@@ -182,6 +182,29 @@ static void nfc_rpc_mf_ultralight_read_tearing_flag(Nfc_Main* cmd, void* context
     mf_ultralight_poller_free(poller);
 }
 
+// TODO DELETE!
+static void init_mf_ul_data(MfUltralightData* data) {
+    NfcaData* nfca_data = &data->nfca_data;
+    uint8_t uid[7] = {0x44, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
+    uint8_t atqa[2] = {0x44, 0x00};
+    nfca_data->uid_len = sizeof(uid);
+    memcpy(nfca_data->uid, uid, sizeof(uid));
+    memcpy(nfca_data->atqa, atqa, sizeof(atqa));
+    nfca_data->sak = 0x00;
+
+    data->type = MfUltralightTypeUnknown;
+    MfUltralightVersion version = {
+        .header = 1,
+        .protocol_type = 228,
+    };
+    data->version = version;
+    MfUltralightSignature sig = {.data = {0x01, 0x02, 0x03}};
+    data->signature = sig;
+    for(size_t i = 0; i < 16; i++) {
+        data->page[i].data[0] = i;
+    }
+}
+
 void nfc_rpc_mf_ultralight_emulate_start(Nfc_Main* cmd, void* context) {
     furi_assert(cmd);
     furi_assert(context);
@@ -193,6 +216,8 @@ void nfc_rpc_mf_ultralight_emulate_start(Nfc_Main* cmd, void* context) {
     cmd->which_content = Nfc_Main_mf_ultralight_emulate_start_resp_tag;
     if(instance->mf_ul_listener == NULL) {
         MfUltralightData mf_ul_data = {};
+        // TODO initialize data from rpc message
+        init_mf_ul_data(&mf_ul_data);
         instance->mf_ul_listener = mf_ultralight_listener_alloc(&mf_ul_data);
         pb_mf_ultralight_emulate_start_resp.error = PB_MfUltralight_Error_None;
     } else {

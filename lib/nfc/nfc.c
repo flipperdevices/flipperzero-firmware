@@ -497,7 +497,7 @@ NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits) {
     furi_assert(tx_data);
 
     NfcError ret = NfcErrorNone;
-    FHalNfcError error = f_hal_nfc_poller_tx(tx_data, tx_bits);
+    FHalNfcError error = f_hal_nfc_listener_tx(tx_data, tx_bits);
     if(error != FHalNfcErrorNone) {
         FURI_LOG_E(TAG, "Failed in listener TX");
         ret = nfc_process_hal_error(error);
