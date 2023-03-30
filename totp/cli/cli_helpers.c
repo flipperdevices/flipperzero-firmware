@@ -1,5 +1,6 @@
 #include "cli_helpers.h"
 #include <cli/cli.h>
+#include <lib/toolbox/args.h>
 #include "../types/plugin_event.h"
 
 bool totp_cli_ensure_authenticated(const PluginState* plugin_state, Cli* cli) {
@@ -59,4 +60,22 @@ bool totp_cli_read_line(Cli* cli, FuriString* out_str, bool mask_user_input) {
     }
 
     return true;
+}
+
+bool args_read_uint8_and_trim(FuriString* args, uint8_t* value) {
+    int int_value;
+    if(!args_read_int_and_trim(args, &int_value) || int_value < 0 || int_value > UINT8_MAX) {
+        return false;
+    }
+
+    *value = (uint8_t)int_value;
+    return true;
+}
+
+void furi_string_secure_free(FuriString* str) {
+    for(long i = furi_string_size(str) - 1; i >= 0; i--) {
+        furi_string_set_char(str, i, '\0');
+    }
+
+    furi_string_free(str);
 }

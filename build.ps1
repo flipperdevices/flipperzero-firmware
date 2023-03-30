@@ -85,17 +85,17 @@ function Build-Run {
 }
 
 Write-Information 'Building with all the features enables'
-Features-Configure -enable TOTP_BADBT_TYPE_ENABLED,TOTP_BADBT_TYPE_ICON_ENABLED
+Features-Configure -enable TOTP_BADBT_TYPE_ENABLED,TOTP_AUTOMATION_ICONS_ENABLED
 Build-Run -FeaturesSuffix ''
 
 Write-Information 'Building with BadBT but without BadBT icon'
-Features-Configure -disable TOTP_BADBT_TYPE_ICON_ENABLED
+Features-Configure -disable TOTP_AUTOMATION_ICONS_ENABLED
 Build-Run -FeaturesSuffix '_badbt-wo-icon'
 
 Write-Information 'Building without BadBT'
-Features-Configure -disable TOTP_BADBT_TYPE_ENABLED,TOTP_BADBT_TYPE_ICON_ENABLED
+Features-Configure -disable TOTP_BADBT_TYPE_ENABLED,TOTP_AUTOMATION_ICONS_ENABLED
 Build-Run -FeaturesSuffix '_no-badbt'
 
-Features-Configure -enable TOTP_BADBT_TYPE_ENABLED,TOTP_BADBT_TYPE_ICON_ENABLED
+Features-Configure -enable TOTP_BADBT_TYPE_ENABLED,TOTP_AUTOMATION_ICONS_ENABLED
 
 Pop-Location
