@@ -37,7 +37,6 @@ jobs:
           else
             TYPE="other"
           fi
-          cat "${{ github.event_path }}"
           python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE"
           echo random_hash=$(openssl rand -base64 40 | shasum -a 256 | awk '{print $1}') >> $GITHUB_OUTPUT
           echo "event_type=$TYPE" >> $GITHUB_OUTPUT
