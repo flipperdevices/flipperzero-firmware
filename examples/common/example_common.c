@@ -60,6 +60,13 @@ extern const uint32_t ESP32_H4_hello_world_bin_size;
 extern const uint8_t  ESP32_H4_partition_table_bin[];
 extern const uint32_t ESP32_H4_partition_table_bin_size;
 
+extern const uint8_t  ESP32_H2_bootloader_bin[];
+extern const uint32_t ESP32_H2_bootloader_bin_size;
+extern const uint8_t  ESP32_H2_hello_world_bin[];
+extern const uint32_t ESP32_H2_hello_world_bin_size;
+extern const uint8_t  ESP32_H2_partition_table_bin[];
+extern const uint32_t ESP32_H2_partition_table_bin_size;
+
 void get_example_binaries(target_chip_t target, example_binaries_t *bins)
 {
     if (target == ESP8266_CHIP) {
@@ -102,7 +109,17 @@ void get_example_binaries(target_chip_t target, example_binaries_t *bins)
         bins->app.data  = ESP32_H4_hello_world_bin;
         bins->app.size  = ESP32_H4_hello_world_bin_size;
         bins->app.addr  = APPLICATION_ADDRESS;
-    } else {
+    } else if (target == ESP32H2_CHIP){
+        bins->boot.data = ESP32_H2_bootloader_bin;
+        bins->boot.size = ESP32_H2_bootloader_bin_size;
+        bins->boot.addr = BOOTLOADER_ADDRESS_V1;
+        bins->part.data = ESP32_H2_partition_table_bin;
+        bins->part.size = ESP32_H2_partition_table_bin_size;
+        bins->part.addr = PARTITION_ADDRESS;
+        bins->app.data  = ESP32_H2_hello_world_bin;
+        bins->app.size  = ESP32_H2_hello_world_bin_size;
+        bins->app.addr  = APPLICATION_ADDRESS;
+    }else {
         abort();
     }
 }
@@ -110,13 +127,19 @@ void get_example_binaries(target_chip_t target, example_binaries_t *bins)
 
 extern const uint8_t  ESP32_H4_app_bin[];
 extern const uint32_t ESP32_H4_app_bin_size;
-
+extern const uint8_t  ESP32_H2_app_bin[];
+extern const uint32_t ESP32_H2_app_bin_size;
 void get_example_ram_app_binary(target_chip_t target, example_ram_app_binary_t *bin)
 {
     if (target == ESP32H4_CHIP){
         bin->ram_app.data = ESP32_H4_app_bin;
         bin->ram_app.size = ESP32_H4_app_bin_size;
-    } else {
+    } 
+    else if(target == ESP32H2_CHIP){
+        bin->ram_app.data = ESP32_H2_app_bin;
+        bin->ram_app.size = ESP32_H2_app_bin_size;
+    }
+    else {
         abort();
     }
 }
