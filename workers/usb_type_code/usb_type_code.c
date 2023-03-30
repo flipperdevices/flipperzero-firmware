@@ -1,5 +1,6 @@
 #include "usb_type_code.h"
 #include "../../services/convert/convert.h"
+#include "../../types/token_info.h"
 #include "../constants.h"
 
 static void totp_type_code_worker_restore_usb_mode(TotpUsbTypeCodeWorkerContext* context) {
@@ -13,7 +14,14 @@ static inline bool totp_type_code_worker_stop_requested() {
     return furi_thread_flags_get() & TotpUsbTypeCodeWorkerEventStop;
 }
 
+static void totp_type_code_worker_press_key(uint8_t key) {
+    furi_hal_hid_kb_press(key);
+    furi_delay_ms(30);
+    furi_hal_hid_kb_release(key);
+}
+
 static void totp_type_code_worker_type_code(TotpUsbTypeCodeWorkerContext* context) {
+    TokenAutomationFeature features = context->flags;
     context->usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
     furi_check(furi_hal_usb_set_config(&usb_hid, NULL) == true);
@@ -31,10 +39,13 @@ static void totp_type_code_worker_type_code(TotpUsbTypeCodeWorkerContext* contex
             uint8_t digit = CONVERT_CHAR_TO_DIGIT(context->string[i]);
             if(digit > 9) break;
             uint8_t hid_kb_key = hid_number_keys[digit];
-            furi_hal_hid_kb_press(hid_kb_key);
-            furi_delay_ms(30);
-            furi_hal_hid_kb_release(hid_kb_key);
+            totp_type_code_worker_press_key(hid_kb_key);
             i++;
+        }
+
+        if(features & TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END) {
+            furi_delay_ms(30);
+            totp_type_code_worker_press_key(hid_enter_key);
         }
 
         furi_mutex_release(context->string_sync);
@@ -104,7 +115,9 @@ void totp_usb_type_code_worker_stop(TotpUsbTypeCodeWorkerContext* context) {
 
 void totp_usb_type_code_worker_notify(
     TotpUsbTypeCodeWorkerContext* context,
-    TotpUsbTypeCodeWorkerEvent event) {
+    TotpUsbTypeCodeWorkerEvent event,
+    uint8_t flags) {
     furi_assert(context != NULL);
+    context->flags = flags;
     furi_thread_flags_set(furi_thread_get_id(context->thread), event);
 }

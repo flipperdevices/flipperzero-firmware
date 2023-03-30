@@ -1,11 +1,22 @@
 #pragma once
 
 #include <inttypes.h>
+#include <stdbool.h>
+#include <furi/furi.h>
 
 #define TOTP_TOKEN_DURATION_DEFAULT 30
 
+#define TOTP_TOKEN_ALGO_SHA1_NAME "sha1"
+#define TOTP_TOKEN_ALGO_SHA256_NAME "sha256"
+#define TOTP_TOKEN_ALGO_SHA512_NAME "sha512"
+#define TOTP_TOKEN_MAX_LENGTH 255
+
+#define TOTP_TOKEN_AUTOMATION_FEATURE_NONE_NAME "none"
+#define TOTP_TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END_NAME "enter"
+
 typedef uint8_t TokenHashAlgo;
 typedef uint8_t TokenDigitsCount;
+typedef uint8_t TokenAutomationFeature;
 
 /**
  * @brief Hashing algorithm to be used to generate token
@@ -40,6 +51,21 @@ enum TokenDigitsCounts {
      * @brief 8 digits
      */
     TOTP_8_DIGITS = 8
+};
+
+/**
+ * @brief Token automation features.
+ */
+enum TokenAutomationFeatures {
+    /**
+     * @brief No features enabled
+     */
+    TOKEN_AUTOMATION_FEATURE_NONE = 0b00,
+
+    /**
+     * @brief Press "Enter" key at the end as a part of token input automation
+     */
+    TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END = 0b01
 };
 
 #define TOTP_TOKEN_DIGITS_MAX_COUNT 8
@@ -77,6 +103,11 @@ typedef struct {
      * @brief Desired TOTP token duration in seconds
      */
     uint8_t duration;
+
+    /**
+     * @brief Token input automation features
+     */
+    TokenAutomationFeature automation_features;
 } TokenInfo;
 
 /**
@@ -120,3 +151,33 @@ bool token_info_set_digits_from_int(TokenInfo* token_info, uint8_t digits);
  * @return \c true if token duration has been updated; \c false otherwise
  */
 bool token_info_set_duration_from_int(TokenInfo* token_info, uint8_t duration);
+
+/**
+ * @brief Sets token hashing algorithm from \c str value
+ * @param token_info instance whichs token hashing algorithm should be updated
+ * @param str desired token algorithm
+ * @return \c true if token hahsing algorithm has been updated; \c false otherwise
+ */
+bool token_info_set_algo_from_str(TokenInfo* token_info, const FuriString* str);
+
+/**
+ * @brief Gets token hahsing algorithm name as C-string
+ * @param token_info instance which token hahsing algorithm name should be returned
+ * @return token hashing algorithm name as C-string
+ */
+char* token_info_get_algo_as_cstr(const TokenInfo* token_info);
+
+/**
+ * @brief Sets token automation feature from \c str value
+ * @param token_info instance whichs token automation feature should be updated
+ * @param str desired token automation feature
+ * @return \c true if token automation feature has been set; \c false otherwise
+ */
+bool token_info_set_automation_feature_from_str(TokenInfo* token_info, const FuriString* str);
+
+/**
+ * @brief Clones \c TokenInfo instance
+ * @param src instance to clone
+ * @return cloned instance
+ */
+TokenInfo* token_info_clone(const TokenInfo* src);
