@@ -78,5 +78,5 @@ uint32_t storage_timestamp_get_by_hash(StorageTimestamp* instance, uint32_t hash
 
 void storage_timestamp_erase(StorageTimestamp* instance, uint32_t hash) {
     furi_assert(instance);
-    TimestampDict_erase(instance->store, hash);
+    (void)TimestampDict_erase(instance->store, hash);
 }
