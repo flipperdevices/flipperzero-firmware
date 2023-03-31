@@ -60,6 +60,8 @@ void totp_cli_command_add_docopt_options() {
                     " - Type <Enter> key at the end of token input automation\r\n");
     TOTP_CLI_PRINTF("                 # " TOTP_TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END_NAME
                     " - Type <Tab> key at the end of token input automation\r\n");
+    TOTP_CLI_PRINTF("                 # " TOTP_TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER_NAME
+                    " - Type slower\r\n");
 }
 
 void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {

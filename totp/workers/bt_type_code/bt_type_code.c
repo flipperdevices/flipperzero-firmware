@@ -11,12 +11,6 @@ static inline bool totp_type_code_worker_stop_requested() {
     return furi_thread_flags_get() & TotpBtTypeCodeWorkerEventStop;
 }
 
-static void totp_type_code_worker_press_key(uint8_t key) {
-    furi_hal_bt_hid_kb_press(key);
-    furi_delay_ms(30);
-    furi_hal_bt_hid_kb_release(key);
-}
-
 static void totp_type_code_worker_type_code(TotpBtTypeCodeWorkerContext* context) {
     uint8_t i = 0;
     do {
@@ -26,7 +20,8 @@ static void totp_type_code_worker_type_code(TotpBtTypeCodeWorkerContext* context
 
     if(context->is_connected && furi_mutex_acquire(context->string_sync, 500) == FuriStatusOk) {
         totp_type_code_worker_execute_automation(
-            &totp_type_code_worker_press_key,
+            &furi_hal_bt_hid_kb_press,
+            &furi_hal_bt_hid_kb_release,
             context->string,
             context->string_length,
             context->flags);

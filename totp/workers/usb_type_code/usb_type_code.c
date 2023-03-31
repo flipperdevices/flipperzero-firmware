@@ -14,12 +14,6 @@ static inline bool totp_type_code_worker_stop_requested() {
     return furi_thread_flags_get() & TotpUsbTypeCodeWorkerEventStop;
 }
 
-static void totp_type_code_worker_press_key(uint8_t key) {
-    furi_hal_hid_kb_press(key);
-    furi_delay_ms(30);
-    furi_hal_hid_kb_release(key);
-}
-
 static void totp_type_code_worker_type_code(TotpUsbTypeCodeWorkerContext* context) {
     context->usb_mode_prev = furi_hal_usb_get_config();
     furi_hal_usb_unlock();
@@ -33,7 +27,8 @@ static void totp_type_code_worker_type_code(TotpUsbTypeCodeWorkerContext* contex
     if(furi_hal_hid_is_connected() &&
        furi_mutex_acquire(context->string_sync, 500) == FuriStatusOk) {
         totp_type_code_worker_execute_automation(
-            &totp_type_code_worker_press_key,
+            &furi_hal_hid_kb_press,
+            &furi_hal_hid_kb_release,
             context->string,
             context->string_length,
             context->flags);

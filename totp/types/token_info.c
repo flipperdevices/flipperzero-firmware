@@ -118,6 +118,11 @@ bool token_info_set_automation_feature_from_str(TokenInfo* token_info, const Fur
         return true;
     }
 
+    if(furi_string_cmpi_str(str, TOTP_TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER_NAME) == 0) {
+        token_info->automation_features |= TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER;
+        return true;
+    }
+
     if(furi_string_cmpi_str(str, TOTP_TOKEN_AUTOMATION_FEATURE_NONE_NAME) == 0) {
         token_info->automation_features = TOKEN_AUTOMATION_FEATURE_NONE;
         return true;
