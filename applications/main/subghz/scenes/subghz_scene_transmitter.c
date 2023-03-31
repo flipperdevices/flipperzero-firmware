@@ -65,26 +65,18 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventViewTransmitterSendStart) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
-                subghz_rx_end(subghz);
-            }
-            if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
-               (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
-                if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
-                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
-                } else {
-                    subghz->state_notifications = SubGhzNotificationStateTx;
-                    subghz_scene_transmitter_update_data_show(subghz);
-                    DOLPHIN_DEED(DolphinDeedSubGhzSend);
-                }
+            subghz_txrx_stop(subghz);
+            if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
+                scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
+            } else {
+                subghz->state_notifications = SubGhzNotificationStateTx;
+                subghz_scene_transmitter_update_data_show(subghz);
+                DOLPHIN_DEED(DolphinDeedSubGhzSend);
             }
             return true;
         } else if(event.event == SubGhzCustomEventViewTransmitterSendStop) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-                subghz_tx_stop(subghz);
-                subghz_sleep(subghz);
-            }
+            subghz_txrx_stop(subghz);
             return true;
         } else if(event.event == SubGhzCustomEventViewTransmitterBack) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;

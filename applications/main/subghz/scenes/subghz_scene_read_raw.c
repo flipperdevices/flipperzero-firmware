@@ -4,7 +4,6 @@
 #include <lib/subghz/protocols/raw.h>
 #include <lib/toolbox/path.h>
 
-
 #define RAW_FILE_NAME "Raw_signal_"
 #define TAG "SubGhzSceneReadRAW"
 
@@ -127,16 +126,8 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
         case SubGhzCustomEventViewReadRAWBack:
-            //Stop TX
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-                subghz_tx_stop(subghz);
-                subghz_sleep(subghz);
-            }
-            //Stop RX
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
-                subghz_rx_end(subghz);
-                subghz_sleep(subghz);
-            };
+
+            subghz_txrx_stop(subghz);
             //Stop save file
             subghz_protocol_raw_save_to_file_stop(
                 (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
@@ -167,16 +158,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case SubGhzCustomEventViewReadRAWTXRXStop:
-            //Stop TX
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-                subghz_tx_stop(subghz);
-                subghz_sleep(subghz);
-            }
-            //Stop RX
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
-                subghz_rx_end(subghz);
-                subghz_sleep(subghz);
-            };
+            subghz_txrx_stop(subghz);
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             consumed = true;
             break;
@@ -225,29 +207,23 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz_file_available(subghz) && subghz_scene_read_raw_update_filename(subghz)) {
                 //start send
                 subghz->state_notifications = SubGhzNotificationStateIDLE;
-                if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
-                    subghz_rx_end(subghz);
-                }
-                if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
-                   (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
-                    if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
-                        subghz->txrx->rx_key_state = SubGhzRxKeyStateBack;
-                        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
-                    } else {
-                        if(scene_manager_has_previous_scene(
-                               subghz->scene_manager, SubGhzSceneSaved) ||
-                           !scene_manager_has_previous_scene(
-                               subghz->scene_manager, SubGhzSceneStart)) {
-                            DOLPHIN_DEED(DolphinDeedSubGhzSend);
-                        }
-                        // set callback end tx
-                        subghz_protocol_raw_file_encoder_worker_set_callback_end(
-                            (SubGhzProtocolEncoderRAW*)subghz_transmitter_get_protocol_instance(
-                                subghz->txrx->transmitter),
-                            subghz_scene_read_raw_callback_end_tx,
-                            subghz);
-                        subghz->state_notifications = SubGhzNotificationStateTx;
+ 
+                subghz_txrx_stop(subghz);
+                if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
+                    subghz->txrx->rx_key_state = SubGhzRxKeyStateBack;
+                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
+                } else {
+                    if(scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneSaved) ||
+                       !scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneStart)) {
+                        DOLPHIN_DEED(DolphinDeedSubGhzSend);
                     }
+                    // set callback end tx
+                    subghz_protocol_raw_file_encoder_worker_set_callback_end(
+                        (SubGhzProtocolEncoderRAW*)subghz_transmitter_get_protocol_instance(
+                            subghz->txrx->transmitter),
+                        subghz_scene_read_raw_callback_end_tx,
+                        subghz);
+                    subghz->state_notifications = SubGhzNotificationStateTx;
                 }
             } else {
                 if(!scene_manager_search_and_switch_to_previous_scene(
@@ -261,21 +237,13 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
 
         case SubGhzCustomEventViewReadRAWSendStop:
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
-                subghz_speaker_unmute(subghz);
-                subghz_tx_stop(subghz);
-                subghz_sleep(subghz);
-            }
+            subghz_txrx_stop(subghz);
             subghz_read_raw_stop_send(subghz->subghz_read_raw);
             consumed = true;
             break;
 
         case SubGhzCustomEventViewReadRAWIDLE:
-            if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
-                subghz_rx_end(subghz);
-                subghz_sleep(subghz);
-            };
-
+            subghz_txrx_stop(subghz);
             size_t spl_count = subghz_protocol_raw_get_sample_write(
                 (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
 
@@ -311,8 +279,8 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                        RAW_FILE_NAME,
                        subghz->txrx->preset)) {
                     DOLPHIN_DEED(DolphinDeedSubGhzRawRec);
-                    if((subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) ||
-                       (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
+                    if((subghz_txrx_get_state(subghz) == SubGhzTxRxStateIDLE) ||
+                       (subghz_txrx_get_state(subghz) == SubGhzTxRxStateSleep)) {
                         subghz_begin(
                             subghz,
                             subghz_setting_get_preset_data_by_name(
@@ -381,10 +349,7 @@ void subghz_scene_read_raw_on_exit(void* context) {
     SubGhz* subghz = context;
 
     //Stop CC1101
-    if(subghz->txrx->txrx_state == SubGhzTxRxStateRx) {
-        subghz_rx_end(subghz);
-        subghz_sleep(subghz);
-    };
+    subghz_txrx_stop(subghz);
     subghz->state_notifications = SubGhzNotificationStateIDLE;
     notification_message(subghz->notifications, &sequence_reset_rgb);
 

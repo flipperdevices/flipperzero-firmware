@@ -54,11 +54,13 @@ struct SubGhzTxRx {
     SubGhzRadioPreset* preset;
     SubGhzHistory* history;
     uint16_t idx_menu_chosen;
+
     uint8_t hopper_timeout;
     uint8_t hopper_idx_frequency;
-    
-    SubGhzTxRxState txrx_state;
     SubGhzHopperState hopper_state;
+
+    SubGhzTxRxState txrx_state;
+    
     SubGhzSpeakerState speaker_state;
     
     SubGhzRxKeyState rx_key_state;
@@ -142,3 +144,7 @@ void subghz_speaker_on(SubGhz* subghz);
 void subghz_speaker_off(SubGhz* subghz);
 void subghz_speaker_mute(SubGhz* subghz);
 void subghz_speaker_unmute(SubGhz* subghz);
+
+void subghz_txrx_stop(SubGhz* subghz);
+SubGhzTxRxState subghz_txrx_get_state(SubGhz* subghz);
+
