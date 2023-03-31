@@ -20,16 +20,18 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO_UNLEASHED: ${{ vars.REPO_UNLEASHED }}
+      CURRENT_TAG: ${{ vars.FIRMWARE_VERSION }}
+      REMOTE_TAG_INFO: ''
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
       FIRMWARE_VERSION: ${{ vars.FIRMWARE_VERSION }}
       REPO_SELF: ${{ vars.REPO_SELF }}
       CHECKOUT_DIR: "firmware"
+      RELEASE_TYPE: 0
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@v3
         with:
           repository: "${{ env.REPO_SELF }}"
-          path: "${{ env.CHECKOUT_DIR }}"
           clean: "true"
           submodules: "true"
           token: ${{ secrets.FLIPPER_TOKEN }}
@@ -38,35 +40,22 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          '& $env:GITHUB_ACTION_PATH/.github/check-version.ps1 "${{ env.FIRMWARE_VERSION }}" "${{ env.RELEASE_VERSION }}" "${{ env.REPO_SELF }}" "${{ env.REPO_UNLEASHED }}"' `
-            | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-#          $Output = ('& $env:GITHUB_ACTION_PATH/.github/check-version.ps1 "${{ env.FIRMWARE_VERSION }}" "${{ env.RELEASE_VERSION }}" "${{ env.REPO_SELF }}" "${{ env.REPO_UNLEASHED }}"')
-#          Write-Output("RELEASE_VERSION=$($Output.ReleaseVersion)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-#          Write-Output("CURRENT_TAG=$($Output.CurrentTag)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-#          Write-Output("REMOTE_TAG_INFO=$($Output.RemoteTagInfo)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-#          Write-Output("RELEASE_TYPE=$($Output.ReleaseType)") | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
-      - name: Update Firmware variable and create UPDATE release if necessary
-        if: ${{ success() && env.RELEASE_TYPE == 1 }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
-          OWNER: ${{ github.repository_owner }}
-        run: |
-          gh release create 'v${{ env.RELEASE_VERSION }}' --latest --draft \
-            --notes 'Rebuild with new version of firmware.\n\nSee: [CHANGELOG](${{ env.FIRMWARE_VERSION }}/blob/dev/CHANGELOG.md)\n${{ env.REMOTE_TAG_INFO}}' \
-            --title 'Minor update v${{ env.RELEASE_VERSION }}' --verify-tag -R '${{ env.REPO_SELF }}'
-          gh variable set FIRMWARE_VERSION -b '${{ env.FIRMWARE_VERSION }}' -R '${{ env.REPO_SELF }}'
-          gh variable set RELEASE_VERSION -b '${{ env.RELEASE_VERSION }}' -R '${{ env.REPO_SELF }}'
-      - name: Update release variable and create NEW release if necessary
-        if: ${{ success() && env.RELEASE_TYPE == 2 }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
-          OWNER: ${{ github.repository_owner }}
-        run: |
-          gh release create 'v${{ env.RELEASE_VERSION }}' --notes-start-tag 'v${{ env.CURRENT_TAG }}' --generate-notes --draft --latest \
-            --notes 'New version is rolling out!' --verify-tag --title 'Release v${{ env.RELEASE_VERSION }}'  -R '${{ env.REPO_SELF }}'
+          ./.github/check-version.ps1 '${{ env.FIRMWARE_VERSION }}' '${{ env.RELEASE_VERSION }}' '${{ env.REPO_SELF }}' '${{ env.REPO_UNLEASHED }}' | %{ Write-Output($_) >> $Env:GITHUB_ENV }
+      - name: Print env values
+        run: env
+      - name: Create release if necessary
+        if: ${{ success() && (env.RELEASE_TYPE == 2  || env.RELEASE_TYPE == 1 )}}
+        uses: ./.github/actions/make-release
+        with:
+          gh_token: ${{ secrets.FLIPPER_TOKEN }}
+          release_type: ${{ env.RELEASE_TYPE }}
+          release_version: ${{ env.RELEASE_VERSION }}
+          firmware_version: ${{ env.FIRMWARE_VERSION }}
+          repo_self: ${{ env.REPO_SELF }}
+          owner: ${{ github.repository_owner }}
+          current_tag: ${{ env.CURRENT_TAG }}
+          remote_tag_info: ${{ env.REMOTE_TAG_INFO }}
 
-          gh variable set FIRMWARE_VERSION -b '${{ env.FIRMWARE_VERSION }}' -R '${{ env.REPO_SELF }}'
-          gh variable set RELEASE_VERSION -b '${{ env.RELEASE_VERSION }}' -R '${{ env.REPO_SELF }}'
       - name: Current settings in repo invalid. Changing
         if: ${{ success() && env.RELEASE_TYPE > 2 }}
         env:

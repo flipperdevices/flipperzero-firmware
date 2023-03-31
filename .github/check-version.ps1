@@ -22,10 +22,10 @@ function CleanInput
 ################################################################################################################################
 
 $Output = @{
-    ReleaseVersion = ''
-    CurrentTag = ''
-    RemoteTagInfo = ''
-    ReleaseType = ''
+    RELEASE_VERSION = ''
+    CURRENT_TAG = ''
+    REMOTE_TAG_INFO = ''
+    RELEASE_TYPE = ''
 }
 
 $Release = @(`
@@ -61,11 +61,11 @@ Write-Host "FirmwareVersionNumber: $FirmwareVersionNumber, Delta: $Delta"
 $NewVersionFw = $false
 Write-Host ('Latest firmware {0}' -f $FirmwareVersionNumber)
 
-$Output.RemoteTagInfo = Write-Host ('[{0}]({1}/releases/tag/{2})' `
+$Output.REMOTE_TAG_INFO = Write-Host ('[{0}]({1}/releases/tag/{2})' `
         -f $LatestFirmware, $RepoUnleashed, $LatestFirmware)
 if (($FirmwareVersionNumber -gt $StoredFirmwareVersionNumber) -and ( $Delta -gt [TimeSpan]::FromMinutes(10)))
 {
-    $Output.RemoteTagInfo = $LatestFirmware
+    $Output.REMOTE_TAG_INFO = $LatestFirmware
     $NewVersionFw = $true
 }
 elseif ($FirmwareVersionNumber -lt $StoredFirmwareVersionNumber)
@@ -97,8 +97,8 @@ if (($CurrentVersion -lt $ParsedRepoVersion) -and ( $Delta -gt [TimeSpan]::FromM
 {
     $Tag = ('{0}.{1}.{2}' -f $ParsedRepoVersion.Major, $ParsedRepoVersion.Minor, $ParsedRepoVersion.Build)
 
-    $Output.ReleaseVersion = $Tag
-    $Output.ReleaseType = 2
+    $Output.RELEASE_VERSION = $Tag
+    $Output.RELEASE_TYPE = 2
 
     Write-Host ('::warning title=New release!::Release {0}' -f $Tag)
 }
@@ -106,8 +106,8 @@ elseif ( $NewVersionFw )
 {
     $Tag = ('{0}.{1}.{2}' -f $CurrentVersion.Major, $CurrentVersion.Minor, ($CurrentVersion.Build + 1))
 
-    $Output.ReleaseVersion = $Tag
-    $Output.ReleaseType = 1
+    $Output.RELEASE_VERSION = $Tag
+    $Output.RELEASE_TYPE = 1
 
     Write-Host ('::warning title=Firmware was changed!::New version is {0}, need to create release {1}' -f $LatestFirmware, $Tag)
 }
@@ -116,8 +116,8 @@ elseif ( ($Delta -gt [TimeSpan]::FromMinutes(10)) -and ($CurrentVersion -gt $Par
     Write-Host ('::warning title=Invalid version!::Version in settings: {0}, but repo version is {1}. Going to change variable' `
         -f $CurrentVersion, $ParsedRepoVersion)
 
-    $Output.ReleaseVersion = $ParsedRepoVersion
-    $Output.ReleaseType = 3
+    $Output.RELEASE_VERSION = $ParsedRepoVersion
+    $Output.RELEASE_TYPE = 3
 }
 else
 {
@@ -125,7 +125,7 @@ else
     Write-Host 'No new versions, sorry'
 }
 
-$Output.CurrentTag = $LatestTag
+$Output.CURRENT_TAG = $LatestTag
 
 if($ForGithubActions) {
     $Plain = New-Object -TypeName "System.Text.StringBuilder";
