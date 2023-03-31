@@ -55,6 +55,7 @@ void totp_cli_command_help_handle() {
     TOTP_CLI_PRINTF("Arguments:\r\n");
     totp_cli_command_add_docopt_arguments();
     totp_cli_command_delete_docopt_arguments();
+    totp_cli_command_move_docopt_arguments();
     totp_cli_command_timezone_docopt_arguments();
     totp_cli_command_notification_docopt_arguments();
     totp_cli_command_automation_docopt_arguments();
@@ -63,5 +64,4 @@ void totp_cli_command_help_handle() {
     totp_cli_command_add_docopt_options();
     totp_cli_command_update_docopt_options();
     totp_cli_command_delete_docopt_options();
-    totp_cli_command_move_docopt_options();
 }
