@@ -171,7 +171,7 @@ SubGhz* subghz_alloc() {
     subghz->threshold_rssi = subghz_threshold_rssi_alloc();
 
     //init Worker & Protocol & History & KeyBoard
-    subghz->lock = SubGhzLockOff;
+    subghz_unlock(subghz);
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
     subghz->txrx->preset = malloc(sizeof(SubGhzRadioPreset));
     subghz->txrx->preset->name = furi_string_alloc();
@@ -179,7 +179,7 @@ SubGhz* subghz_alloc() {
         subghz, "AM650", subghz_setting_get_default_frequency(subghz->setting), NULL, 0);
 
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
-    subghz->txrx->hopper_state = SubGhzHopperStateOFF;
+    subghz_hopper_set_state(subghz, SubGhzHopperStateOFF);
     subghz->txrx->speaker_state = SubGhzSpeakerStateDisable;
     subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
     subghz->txrx->history = subghz_history_alloc();

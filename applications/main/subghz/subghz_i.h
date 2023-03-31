@@ -149,3 +149,7 @@ SubGhzHopperState subghz_hopper_get_state(SubGhz* subghz);
 void subghz_hopper_set_state(SubGhz* subghz, SubGhzHopperState state);
 void subghz_hopper_remove_pause(SubGhz* subghz);
 void subghz_subghz_hopper_set_pause(SubGhz* subghz);
+
+void subghz_lock(SubGhz* subghz);
+void subghz_unlock(SubGhz* subghz);
+bool subghz_is_locked(SubGhz* subghz);
