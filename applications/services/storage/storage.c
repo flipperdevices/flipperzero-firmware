@@ -39,7 +39,6 @@ Storage* storage_app_alloc() {
 
     for(uint8_t i = 0; i < STORAGE_COUNT; i++) {
         storage_data_init(&app->storage[i]);
-        storage_data_timestamp(&app->storage[i]);
     }
 
 #ifndef FURI_RAM_EXEC

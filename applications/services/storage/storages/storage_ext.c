@@ -88,7 +88,7 @@ static bool sd_mount_card(StorageData* storage, bool notify) {
         }
     }
 
-    storage_data_timestamp(storage);
+    storage_timestamp_reset(storage->timestamp);
 
     return result;
 }

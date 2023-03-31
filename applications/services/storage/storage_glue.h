@@ -3,6 +3,7 @@
 #include <furi.h>
 #include "filesystem_api_internal.h"
 #include <m-list.h>
+#include "storage_timestamp.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,8 +40,6 @@ void storage_file_clear(StorageFile* obj);
 void storage_data_init(StorageData* storage);
 StorageStatus storage_data_status(StorageData* storage);
 const char* storage_data_status_text(StorageData* storage);
-void storage_data_timestamp(StorageData* storage);
-uint32_t storage_data_get_timestamp(StorageData* storage);
 
 LIST_DEF(
     StorageFileList,
@@ -56,7 +55,7 @@ struct StorageData {
     void* data;
     StorageStatus status;
     StorageFileList_t files;
-    uint32_t timestamp;
+    StorageTimestamp* timestamp;
 };
 
 bool storage_has_file(const File* file, StorageData* storage_data);

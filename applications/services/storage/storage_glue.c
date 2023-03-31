@@ -30,6 +30,7 @@ void storage_file_clear(StorageFile* obj) {
 void storage_data_init(StorageData* storage) {
     storage->data = NULL;
     storage->status = StorageStatusNotReady;
+    storage->timestamp = storage_timestamp_alloc();
     StorageFileList_init(storage->files);
 }
 
@@ -61,14 +62,6 @@ const char* storage_data_status_text(StorageData* storage) {
     }
 
     return result;
-}
-
-void storage_data_timestamp(StorageData* storage) {
-    storage->timestamp = furi_hal_rtc_get_timestamp();
-}
-
-uint32_t storage_data_get_timestamp(StorageData* storage) {
-    return storage->timestamp;
 }
 
 /****************** storage glue ******************/

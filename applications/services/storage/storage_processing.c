@@ -114,8 +114,9 @@ bool storage_process_file_open(
         if(storage_path_already_open(path, storage)) {
             file->error_id = FSE_ALREADY_OPEN;
         } else {
+            file->timestamp_hash = storage_timestamp_hash(furi_string_get_cstr(path));
             if(access_mode & FSAM_WRITE) {
-                storage_data_timestamp(storage);
+                storage_timestamp_set_by_hash(storage->timestamp, file->timestamp_hash);
             }
             storage_push_storage_file(file, path, storage);
 
@@ -169,7 +170,7 @@ static uint16_t storage_process_file_write(
     if(storage == NULL) {
         file->error_id = FSE_INVALID_PARAMETER;
     } else {
-        storage_data_timestamp(storage);
+        storage_timestamp_set_by_hash(storage->timestamp, file->timestamp_hash);
         FS_CALL(storage, file.write(storage, file, buff, bytes_to_write));
     }
 
@@ -213,7 +214,7 @@ static bool storage_process_file_truncate(Storage* app, File* file) {
     if(storage == NULL) {
         file->error_id = FSE_INVALID_PARAMETER;
     } else {
-        storage_data_timestamp(storage);
+        storage_timestamp_set_by_hash(storage->timestamp, file->timestamp_hash);
         FS_CALL(storage, file.truncate(storage, file));
     }
 
@@ -227,7 +228,7 @@ static bool storage_process_file_sync(Storage* app, File* file) {
     if(storage == NULL) {
         file->error_id = FSE_INVALID_PARAMETER;
     } else {
-        storage_data_timestamp(storage);
+        storage_timestamp_set_by_hash(storage->timestamp, file->timestamp_hash);
         FS_CALL(storage, file.sync(storage, file));
     }
 
@@ -335,7 +336,7 @@ static FS_Error
     FS_Error ret = storage_get_data(app, path, &storage);
 
     if(ret == FSE_OK) {
-        *timestamp = storage_data_get_timestamp(storage);
+        *timestamp = storage_timestamp_get_by_path(storage->timestamp, furi_string_get_cstr(path));
     }
 
     return ret;
@@ -362,7 +363,7 @@ static FS_Error storage_process_common_remove(Storage* app, FuriString* path) {
             break;
         }
 
-        storage_data_timestamp(storage);
+        storage_timestamp_set_by_path(storage->timestamp, furi_string_get_cstr(path));
         FS_CALL(storage, common.remove(storage, cstr_path_without_vfs_prefix(path)));
     } while(false);
 
@@ -374,7 +375,7 @@ static FS_Error storage_process_common_mkdir(Storage* app, FuriString* path) {
     FS_Error ret = storage_get_data(app, path, &storage);
 
     if(ret == FSE_OK) {
-        storage_data_timestamp(storage);
+        storage_timestamp_set_by_path(storage->timestamp, furi_string_get_cstr(path));
         FS_CALL(storage, common.mkdir(storage, cstr_path_without_vfs_prefix(path)));
     }
 
@@ -409,7 +410,7 @@ static FS_Error storage_process_sd_format(Storage* app) {
         ret = FSE_NOT_READY;
     } else {
         ret = sd_format_card(&app->storage[ST_EXT]);
-        storage_data_timestamp(&app->storage[ST_EXT]);
+        storage_timestamp_reset(app->storage[ST_EXT].timestamp);
     }
 
     return ret;
@@ -422,7 +423,7 @@ static FS_Error storage_process_sd_unmount(Storage* app) {
         ret = FSE_NOT_READY;
     } else {
         sd_unmount_card(&app->storage[ST_EXT]);
-        storage_data_timestamp(&app->storage[ST_EXT]);
+        storage_timestamp_reset(app->storage[ST_EXT].timestamp);
     }
 
     return ret;
