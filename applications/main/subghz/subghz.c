@@ -169,7 +169,7 @@ SubGhz* subghz_alloc() {
 
     //init threshold rssi
     subghz->threshold_rssi = subghz_threshold_rssi_alloc();
-    
+
     //init Worker & Protocol & History & KeyBoard
     subghz->lock = SubGhzLockOff;
     subghz->txrx = malloc(sizeof(SubGhzTxRx));

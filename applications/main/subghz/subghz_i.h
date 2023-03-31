@@ -60,12 +60,10 @@ struct SubGhzTxRx {
     SubGhzHopperState hopper_state;
 
     SubGhzTxRxState txrx_state;
-    
-    SubGhzSpeakerState speaker_state;
-    
-    SubGhzRxKeyState rx_key_state;
 
-    
+    SubGhzSpeakerState speaker_state;
+
+    SubGhzRxKeyState rx_key_state;
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;
@@ -147,4 +145,3 @@ void subghz_speaker_unmute(SubGhz* subghz);
 
 void subghz_txrx_stop(SubGhz* subghz);
 SubGhzTxRxState subghz_txrx_get_state(SubGhz* subghz);
-

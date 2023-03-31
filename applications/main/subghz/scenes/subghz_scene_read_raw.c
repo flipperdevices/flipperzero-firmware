@@ -207,7 +207,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz_file_available(subghz) && subghz_scene_read_raw_update_filename(subghz)) {
                 //start send
                 subghz->state_notifications = SubGhzNotificationStateIDLE;
- 
+
                 subghz_txrx_stop(subghz);
                 if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
                     subghz->txrx->rx_key_state = SubGhzRxKeyStateBack;

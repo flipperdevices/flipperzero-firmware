@@ -245,7 +245,7 @@ void subghz_txrx_stop(SubGhz* subghz) {
     }
 }
 
-SubGhzTxRxState subghz_txrx_get_state(SubGhz* subghz){
+SubGhzTxRxState subghz_txrx_get_state(SubGhz* subghz) {
     furi_assert(subghz);
     return subghz->txrx->txrx_state;
 }
