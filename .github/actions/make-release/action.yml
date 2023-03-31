@@ -29,13 +29,13 @@ inputs:
     description: 'remote_tag_info'
     required: true
 
-outputs:
-  make-minor-release:
-    description: "make-minor-release"
-    value: ${{ steps.make-minor-release.outputs }}
-  make-major-release:
-    description: "make-minor-release"
-    value: ${{ steps.make-major-release.outputs }}
+# outputs:
+#   make-minor-release:
+#     description: "make-minor-release"
+#     value: ${{ steps.make-minor-release.outputs }}
+#   make-major-release:
+#     description: "make-minor-release"
+#     value: ${{ steps.make-major-release.outputs }}
 
 runs:
   using: "composite"
