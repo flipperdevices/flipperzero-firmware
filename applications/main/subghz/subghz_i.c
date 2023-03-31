@@ -626,6 +626,30 @@ void subghz_hopper_update(SubGhz* subghz) {
     }
 }
 
+SubGhzHopperState subghz_hopper_get_state(SubGhz* subghz) {
+    furi_assert(subghz);
+    return subghz->txrx->hopper_state;
+}
+
+void subghz_hopper_set_state(SubGhz* subghz, SubGhzHopperState state) {
+    furi_assert(subghz);
+    subghz->txrx->hopper_state = state;
+}
+
+void subghz_hopper_remove_pause(SubGhz* subghz) {
+    furi_assert(subghz);
+    if(subghz->txrx->hopper_state == SubGhzHopperStatePause) {
+        subghz->txrx->hopper_state = SubGhzHopperStateRunnig;
+    }
+}
+
+void subghz_subghz_hopper_set_pause(SubGhz* subghz) {
+    furi_assert(subghz);
+    if(subghz->txrx->hopper_state == SubGhzHopperStateOFF) {
+        subghz->txrx->hopper_state = SubGhzHopperStatePause;
+    }
+}
+
 void subghz_speaker_on(SubGhz* subghz) {
     if(subghz->txrx->speaker_state == SubGhzSpeakerStateEnable) {
         if(furi_hal_speaker_acquire(30)) {
