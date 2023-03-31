@@ -94,9 +94,6 @@ bool shapshup_main_view_input(InputEvent* event, void* context) {
                 instance->raw_file->total_len, instance->raw_file->min_len, instance->scale) :
             0;
     if(event->key == InputKeyOk) {
-#ifdef FURI_DEBUG
-        FURI_LOG_D(TAG, "InputKeyOk");
-#endif
         instance->callback(ShapShupCustomEventTypeLoadFile, instance->context);
     } else if(event->key == InputKeyLeft && instance->offset > 0) {
         instance->offset = instance->offset < offset_per_page ? 0 :
