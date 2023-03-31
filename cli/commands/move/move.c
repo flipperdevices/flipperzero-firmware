@@ -54,28 +54,18 @@ void totp_cli_command_move_handle(PluginState* plugin_state, FuriString* args, C
         activate_generate_token_scene = true;
     }
 
-    bool token_updated = false;
     TokenInfo* token_info = NULL;
-    if(new_token_index > 0) {
-        plugin_state->tokens_list =
-            list_remove_at(plugin_state->tokens_list, token_index - 1, (void**)&token_info);
-        furi_check(token_info != NULL);
-        plugin_state->tokens_list =
-            list_insert_at(plugin_state->tokens_list, new_token_index - 1, token_info);
-        token_updated = true;
-    } else {
-        token_info = list_element_at(plugin_state->tokens_list, token_index - 1)->data;
-    }
+    plugin_state->tokens_list =
+        list_remove_at(plugin_state->tokens_list, token_index - 1, (void**)&token_info);
+    furi_check(token_info != NULL);
+    plugin_state->tokens_list =
+        list_insert_at(plugin_state->tokens_list, new_token_index - 1, token_info);
 
-    if(token_updated) {
-        if(totp_full_save_config_file(plugin_state) == TotpConfigFileUpdateSuccess) {
-            TOTP_CLI_PRINTF_SUCCESS(
-                "Token \"%s\" has been successfully updated\r\n", token_info->name);
-        } else {
-            TOTP_CLI_PRINT_ERROR_UPDATING_CONFIG_FILE();
-        }
+    if(totp_full_save_config_file(plugin_state) == TotpConfigFileUpdateSuccess) {
+        TOTP_CLI_PRINTF_SUCCESS(
+            "Token \"%s\" has been successfully updated\r\n", token_info->name);
     } else {
-        TOTP_CLI_PRINT_INVALID_ARGUMENTS();
+        TOTP_CLI_PRINT_ERROR_UPDATING_CONFIG_FILE();
     }
 
     if(activate_generate_token_scene) {

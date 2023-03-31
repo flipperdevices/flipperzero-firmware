@@ -13,6 +13,7 @@
 
 #define TOTP_TOKEN_AUTOMATION_FEATURE_NONE_NAME "none"
 #define TOTP_TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END_NAME "enter"
+#define TOTP_TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END_NAME "tab"
 
 typedef uint8_t TokenHashAlgo;
 typedef uint8_t TokenDigitsCount;
@@ -65,7 +66,12 @@ enum TokenAutomationFeatures {
     /**
      * @brief Press "Enter" key at the end as a part of token input automation
      */
-    TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END = 0b01
+    TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END = 0b01,
+
+    /**
+     * @brief Press "Tab" key at the end as a part of token input automation
+     */
+    TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END = 0b10
 };
 
 #define TOTP_TOKEN_DIGITS_MAX_COUNT 8

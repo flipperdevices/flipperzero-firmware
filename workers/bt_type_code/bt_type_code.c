@@ -3,8 +3,7 @@
 #include <storage/storage.h>
 #include "../../types/common.h"
 #include "../../types/token_info.h"
-#include "../../services/convert/convert.h"
-#include "../constants.h"
+#include "../common.h"
 
 #define HID_BT_KEYS_STORAGE_PATH EXT_PATH("authenticator/.bt_hid.keys")
 
@@ -19,7 +18,6 @@ static void totp_type_code_worker_press_key(uint8_t key) {
 }
 
 static void totp_type_code_worker_type_code(TotpBtTypeCodeWorkerContext* context) {
-    TokenAutomationFeature features = context->flags;
     uint8_t i = 0;
     do {
         furi_delay_ms(500);
@@ -27,21 +25,11 @@ static void totp_type_code_worker_type_code(TotpBtTypeCodeWorkerContext* context
     } while(!context->is_connected && i < 100 && !totp_type_code_worker_stop_requested());
 
     if(context->is_connected && furi_mutex_acquire(context->string_sync, 500) == FuriStatusOk) {
-        furi_delay_ms(500);
-        i = 0;
-        while(i < context->string_length && context->string[i] != 0) {
-            uint8_t digit = CONVERT_CHAR_TO_DIGIT(context->string[i]);
-            if(digit > 9) break;
-            uint8_t hid_kb_key = hid_number_keys[digit];
-            totp_type_code_worker_press_key(hid_kb_key);
-            i++;
-        }
-
-        if(features & TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END) {
-            furi_delay_ms(30);
-            totp_type_code_worker_press_key(hid_enter_key);
-        }
-
+        totp_type_code_worker_execute_automation(
+            &totp_type_code_worker_press_key,
+            context->string,
+            context->string_length,
+            context->flags);
         furi_mutex_release(context->string_sync);
     }
 }

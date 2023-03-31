@@ -51,12 +51,15 @@ void totp_cli_command_add_docopt_options() {
         DOCOPT_ARGUMENT(
             TOTP_CLI_COMMAND_ARG_AUTOMATION_FEATURE)) "   Token automation features to be enabled. Must be one of: " TOTP_TOKEN_AUTOMATION_FEATURE_NONE_NAME
                                                       ", " TOTP_TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END_NAME
+                                                      ", " TOTP_TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END_NAME
                                                       " " DOCOPT_DEFAULT(
                                                           TOTP_TOKEN_AUTOMATION_FEATURE_NONE_NAME) "\r\n");
     TOTP_CLI_PRINTF("                 # " TOTP_TOKEN_AUTOMATION_FEATURE_NONE_NAME
                     " - No features\r\n");
     TOTP_CLI_PRINTF("                 # " TOTP_TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END_NAME
                     " - Type <Enter> key at the end of token input automation\r\n");
+    TOTP_CLI_PRINTF("                 # " TOTP_TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END_NAME
+                    " - Type <Tab> key at the end of token input automation\r\n");
 }
 
 void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cli* cli) {
