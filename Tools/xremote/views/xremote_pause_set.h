@@ -4,6 +4,9 @@
 //#include <gui/view.h>
 #include "../helpers/xremote_custom_event.h"
 
+#define SECONDS_LENGHT 3
+#define SECONDS_FORMAT "%ds"
+
 typedef struct XRemotePauseSet XRemotePauseSet;
 
 typedef void (*XRemotePauseSetCallback)(XRemoteCustomEvent event, void* context);
