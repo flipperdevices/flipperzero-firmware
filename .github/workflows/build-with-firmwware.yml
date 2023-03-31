@@ -9,7 +9,7 @@ on:
         required: false
         type: string
   release:
-    types: [unpublished]
+    types: [created]
   push:
     paths:
       - .github/workflows/build-with-firmware.yml
