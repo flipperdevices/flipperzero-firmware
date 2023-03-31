@@ -37,6 +37,8 @@
 
 #include "rpc/rpc_app.h"
 
+#include "helpers/subghz_threshold_rssi.h"
+
 #define SUBGHZ_MAX_LEN_NAME 64
 
 struct SubGhzTxRx {
@@ -52,15 +54,16 @@ struct SubGhzTxRx {
     SubGhzRadioPreset* preset;
     SubGhzHistory* history;
     uint16_t idx_menu_chosen;
+    uint8_t hopper_timeout;
+    uint8_t hopper_idx_frequency;
+    
     SubGhzTxRxState txrx_state;
     SubGhzHopperState hopper_state;
     SubGhzSpeakerState speaker_state;
-    uint8_t hopper_timeout;
-    uint8_t hopper_idx_frequency;
+    
     SubGhzRxKeyState rx_key_state;
 
-    float raw_threshold_rssi;
-    uint8_t raw_threshold_rssi_low_count;
+    
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;
@@ -96,6 +99,8 @@ struct SubGhz {
     FuriString* error_str;
     SubGhzSetting* setting;
     SubGhzLock lock;
+
+    SubGhzThresholdRssi* threshold_rssi;
 
     void* rpc_ctx;
 };

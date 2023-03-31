@@ -210,7 +210,7 @@ static void subghz_scene_receiver_config_set_raw_threshold_rssi(VariableItem* it
     uint8_t index = variable_item_get_current_value_index(item);
 
     variable_item_set_current_value_text(item, raw_theshold_rssi_text[index]);
-    subghz->txrx->raw_threshold_rssi = raw_theshold_rssi_value[index];
+    subghz_threshold_rssi_set(subghz->threshold_rssi, raw_theshold_rssi_value[index]);
 }
 
 static void subghz_scene_receiver_config_var_list_enter_callback(void* context, uint32_t index) {
@@ -313,7 +313,9 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz_scene_receiver_config_set_raw_threshold_rssi,
             subghz);
         value_index = value_index_float(
-            subghz->txrx->raw_threshold_rssi, raw_theshold_rssi_value, RAW_THRESHOLD_RSSI_COUNT);
+            subghz_threshold_rssi_get(subghz->threshold_rssi),
+            raw_theshold_rssi_value,
+            RAW_THRESHOLD_RSSI_COUNT);
         variable_item_set_current_value_index(item, value_index);
         variable_item_set_current_value_text(item, raw_theshold_rssi_text[value_index]);
     }
