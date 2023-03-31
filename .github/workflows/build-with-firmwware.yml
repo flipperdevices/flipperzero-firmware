@@ -30,6 +30,7 @@ jobs:
       IGNORED_PATH: "applications_user/subbrute"
       RELATIVE_PATH: "applications/external/subbrute"
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
     strategy:
       fail-fast: false
       matrix:
