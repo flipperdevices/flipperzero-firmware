@@ -49,6 +49,7 @@ void storage_timestamp_free(StorageTimestamp* instance) {
 
 void storage_timestamp_reset(StorageTimestamp* instance) {
     furi_assert(instance);
+    TimestampDict_reset(instance->store);
     storage_timestamp_set_by_hash(instance, 0);
 }
 
@@ -58,12 +59,11 @@ void storage_timestamp_set_by_path(StorageTimestamp* instance, const char* path)
 
 void storage_timestamp_set_by_hash(StorageTimestamp* instance, uint32_t hash) {
     furi_assert(instance);
-    if(!hash) {
-        TimestampDict_reset(instance->store);
-    }
     uint32_t timestamp = furi_hal_rtc_get_timestamp();
+    if(hash) {
+        TimestampDict_set_at(instance->store, hash, timestamp);
+    }
     TimestampDict_set_at(instance->store, 0, timestamp);
-    TimestampDict_set_at(instance->store, hash, timestamp);
 }
 
 uint32_t storage_timestamp_get_by_path(StorageTimestamp* instance, const char* path) {
