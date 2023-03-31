@@ -22,10 +22,10 @@ function CleanInput
 ################################################################################################################################
 
 $Output = @{
-    RELEASE_VERSION = ''
-    CURRENT_TAG = ''
-    REMOTE_TAG_INFO = ''
-    RELEASE_TYPE = ''
+    RELEASE_VERSION = $ReleaseVersion
+    CURRENT_TAG     = $FirmwareVersion
+    REMOTE_TAG_INFO = $FirmwareVersion
+    RELEASE_TYPE = 0
 }
 
 $Release = @(`
@@ -75,9 +75,10 @@ elseif ($FirmwareVersionNumber -lt $StoredFirmwareVersionNumber)
     exit 1
 }
 
-$LastPublished = (gh api -H "Accept: application/vnd.github+json" `
+$PublishDates = (gh api -H "Accept: application/vnd.github+json" `
         -H "X-GitHub-Api-Version: 2022-11-28" "/repos/$( $RepoSelf )/releases?per_page=1" `
-    | ConvertFrom-Json).published_at
+    | ConvertFrom-Json | Select-Object published_at, created_at)
+$LastPublished = ($null -eq $PublishDates.published_at ? $PublishDates.created_at : $PublishDates.published_at)
 $Delta = ([DateTime]::Now - $LastPublished)
 
 $Release = (gh api -H "Accept: application/vnd.github+json" `

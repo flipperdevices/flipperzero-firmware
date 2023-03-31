@@ -9,7 +9,7 @@ on:
         required: false
         type: string
   release:
-    types: [unpublished]
+    types: [created]
   push:
     paths:
       - .github/workflows/build-with-firmware.yml
@@ -30,6 +30,7 @@ jobs:
       IGNORED_PATH: "applications_user/subbrute"
       RELATIVE_PATH: "applications/external/subbrute"
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
     strategy:
       fail-fast: false
       matrix:
