@@ -281,7 +281,7 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat() {
 }
 
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
-    furi_assert(!FURI_IS_IRQ_MODE());
+    furi_check(!FURI_IS_IRQ_MODE());
     furi_assert(datetime);
 
     FURI_CRITICAL_ENTER();
@@ -325,7 +325,7 @@ void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
 }
 
 void furi_hal_rtc_get_datetime(FuriHalRtcDateTime* datetime) {
-    furi_assert(!FURI_IS_IRQ_MODE());
+    furi_check(!FURI_IS_IRQ_MODE());
     furi_assert(datetime);
 
     FURI_CRITICAL_ENTER();
