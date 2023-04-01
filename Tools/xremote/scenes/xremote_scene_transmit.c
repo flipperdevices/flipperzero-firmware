@@ -22,7 +22,9 @@ void xremote_transmit_callback(XRemoteCustomEvent event, void* context) {
 }
 
 void xremote_scene_ir_notification_message(XRemote* app, uint32_t message) {
-    notification_message(app->notification, xremote_notification_sequences[message]);
+    if (app->led == 1) {
+        notification_message(app->notification, xremote_notification_sequences[message]);
+    }
 }
 
 bool xremote_scene_ir_signal_is_raw(InfraredSignal* signal) {
