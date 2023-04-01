@@ -38,6 +38,11 @@ bool xremote_scene_pause_set_on_event(void* context, SceneManagerEvent event) {
                     }
                 consumed = true;
                 break;
+            case XRemoteCustomEventPauseSetOk:
+                //cross_remote_add_pause(app->cross_remote, time);
+                scene_manager_search_and_switch_to_previous_scene(app->scene_manager, XRemoteSceneCreate);
+                consumed = true;
+                break;
         }
     }
     return consumed;

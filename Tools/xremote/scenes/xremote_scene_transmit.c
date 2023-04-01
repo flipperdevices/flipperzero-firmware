@@ -11,6 +11,8 @@ static const NotificationSequence* xremote_notification_sequences[] = {
     &sequence_blink_start_cyan,
     &sequence_blink_start_magenta,
     &sequence_blink_stop,
+    &sequence_blink_start_yellow,
+    &sequence_blink_stop,
 };
 
 void xremote_transmit_callback(XRemoteCustomEvent event, void* context) {
@@ -59,19 +61,29 @@ void xremote_scene_transmit_send_ir_signal(XRemote* app, CrossRemoteItem* item) 
     xremote_scene_transmit_stop_ir_signal(app);
 }
 
+void xremote_scene_transmit_send_pause(XRemote* app, CrossRemoteItem* item) {
+    app->transmitting = true;
+    xremote_scene_ir_notification_message(app, PauseNotificationMessageBlinkStartSend);
+    furi_thread_flags_wait(0, FuriFlagWaitAny, item->time * 1000);
+    app->transmitting = false;
+    xremote_scene_ir_notification_message(app, PauseNotificationMessageBlinkStop);
+}
+
 void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
     furi_assert(context);
     XRemote* app = context;
     CrossRemote* remote = app->cross_remote;
 
-    if (app->transmitting) {
+    if(app->transmitting) {
         return;
     }
     
     xremote_transmit_model_set_name(app->xremote_transmit, xremote_remote_item_get_name(item));
     xremote_transmit_model_set_type(app->xremote_transmit, item->type);
-    if (item->type == XRemoteRemoteItemTypeInfrared) {
+    if(item->type == XRemoteRemoteItemTypeInfrared) {
         xremote_scene_transmit_send_ir_signal(app, item);
+    } else if(item->type == XRemoteRemoteItemTypePause) { 
+        xremote_scene_transmit_send_pause(app, item);
     }
 
     //xremote_item_transmit(item);
@@ -86,7 +98,7 @@ void xremote_scene_transmit_run_remote(void* context) {
     XRemote* app = context;
     CrossRemote* remote = app->cross_remote;
 
-    size_t item_count = cross_remtoe_get_item_count(remote);
+    size_t item_count = cross_remote_get_item_count(remote);
     for(size_t i = 0; i < item_count;) {
         if (cross_remote_get_transmitting(remote) == XRemoteTransmittingIdle) {
             cross_remote_set_transmitting(remote, XRemoteTransmittingStart);

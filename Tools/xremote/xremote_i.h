@@ -72,6 +72,8 @@ typedef enum {
     InfraredNotificationMessageBlinkStartRead,
     InfraredNotificationMessageBlinkStartSend,
     InfraredNotificationMessageBlinkStop,
+    PauseNotificationMessageBlinkStartSend,
+    PauseNotificationMessageBlinkStop,
 } XRemoteNotificationMessage;
 
 typedef enum {

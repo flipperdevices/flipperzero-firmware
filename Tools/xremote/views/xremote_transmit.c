@@ -27,6 +27,7 @@ void xremote_transmit_model_set_name(XRemoteTransmit* instance, const char* name
 void xremote_transmit_model_set_type(XRemoteTransmit* instance, int type) {
     furi_assert(instance);
     XRemoteTransmitModel* model = view_get_model(instance->view);
+    model->time = 1;
     model->type = type;
     view_commit_model(instance->view, false);
 }
@@ -57,9 +58,27 @@ void xremote_transmit_draw_ir(Canvas* canvas, XRemoteTransmitModel* model) {
     canvas_draw_str_aligned(canvas, 74, 40, AlignLeft, AlignTop, temp_str);
 }
 
+void xremote_transmit_draw_pause(Canvas* canvas, XRemoteTransmitModel* model) {
+    model->time++;
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_icon(canvas, 0, 0, &I_pause_128x64);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, 74, 5, AlignLeft, AlignTop, "Waiting"); 
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 74, 20, AlignLeft, AlignTop, "Sequence"); 
+    canvas_draw_str_aligned(canvas, 74, 30, AlignLeft, AlignTop, model->name);
+    
+    char temp_str[18];
+    snprintf(temp_str, 18, "%u", model->time);
+    canvas_draw_str_aligned(canvas, 74, 40, AlignLeft, AlignTop, temp_str);
+}
+
 void xremote_transmit_draw(Canvas* canvas, XRemoteTransmitModel* model) {
     if(model->type == XRemoteRemoteItemTypeInfrared) {
         xremote_transmit_draw_ir(canvas, model);
+    } else if(model->type == XRemoteRemoteItemTypePause) {
+        xremote_transmit_draw_pause(canvas, model);
     }
 }
 

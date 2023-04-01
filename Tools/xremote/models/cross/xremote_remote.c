@@ -96,10 +96,20 @@ bool cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSig
     xremote_remote_item_set_ir_signal(item, signal);
     CrossRemoteItemArray_push_back(remote->items, item);
     return true;
-    //return cross_remote_store(remote);
 }
 
-size_t cross_remtoe_get_item_count(CrossRemote* remote) {
+bool cross_remote_add_pause(CrossRemote* remote, int time) {
+    CrossRemoteItem* item = xremote_remote_item_alloc();
+    xremote_remote_item_set_type(item, XRemoteRemoteItemTypePause);
+    char name[9];
+    snprintf(name, 9, CROSS_REMOTE_PAUSE_NAME, time);
+    xremote_remote_item_set_name(item, name);
+    xremote_remote_item_set_time(item, time);
+    CrossRemoteItemArray_push_back(remote->items, item);
+    return true;
+}
+
+size_t cross_remote_get_item_count(CrossRemote* remote) {
     return CrossRemoteItemArray_size(remote->items);
 }
 
@@ -118,7 +128,7 @@ bool cross_remote_load(CrossRemote* remote, FuriString* path) {
     FURI_LOG_I(TAG, "loading file: \'%s\'", furi_string_get_cstr(path));
     bool success = false;
     do {
-        // File not foudn
+        // File not found
         if(!flipper_format_buffered_file_open_existing(ff, furi_string_get_cstr(path))) break;
         uint32_t version;
         // Read Version & Type
@@ -161,7 +171,6 @@ void cross_remote_set_path(CrossRemote* remote, const char* path) {
 
 bool cross_remote_save_new(CrossRemote* remote, const char* name) {
     FuriString *new_name, *new_path;
-    //new_name = furi_string_alloc_set(XREMOTE_DEFAULT_REMOTE_NAME);
     new_name = furi_string_alloc_set(name);
     new_path = furi_string_alloc_set(XREMOTE_APP_FOLDER);
     
@@ -198,6 +207,10 @@ bool cross_remote_store(CrossRemote* remote) {
                 success = xremote_ir_signal_save(
                     xremote_remote_item_get_ir_signal(item),
                     ff,
+                    xremote_remote_item_get_name(item));
+            } else if(item->type == XRemoteRemoteItemTypePause) {
+                success = xremote_pause_save(ff, 
+                    item->time,
                     xremote_remote_item_get_name(item));
             }
             if(!success) {

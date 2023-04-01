@@ -120,6 +120,7 @@ void xremote_app_free(XRemote* app) {
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdStack);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdTextInput);
     view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdTransmit);
+    view_dispatcher_remove_view(app->view_dispatcher, XRemoteViewIdPauseSet);
     text_input_free(app->text_input);
     button_menu_free(app->button_menu_create);
     button_menu_free(app->button_menu_create_add);

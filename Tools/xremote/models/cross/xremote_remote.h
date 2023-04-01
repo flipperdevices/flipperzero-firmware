@@ -3,6 +3,8 @@
 #include "xremote_remote_item.h"
 #include "../../xremote_i.h"
 
+#define CROSS_REMOTE_PAUSE_NAME "Pause %ds"
+
 CrossRemote* cross_remote_alloc();
 
 void cross_remote_free(CrossRemote* cross_remote);
@@ -10,8 +12,9 @@ bool cross_remote_load(CrossRemote* cross_remote, FuriString* path);
 const char* cross_remote_get_name(CrossRemote* remote);
 void cross_remote_set_transmitting(CrossRemote* remote, int status);
 int cross_remote_get_transmitting(CrossRemote* remote);
+bool cross_remote_add_pause(CrossRemote* remote, int time);
 bool cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSignal* signal);
-size_t cross_remtoe_get_item_count(CrossRemote* remote);
+size_t cross_remote_get_item_count(CrossRemote* remote);
 CrossRemoteItem* cross_remote_get_item(CrossRemote* remote, size_t index);
 
 void cross_remote_set_name(CrossRemote* remote, const char* name);

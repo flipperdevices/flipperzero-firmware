@@ -67,6 +67,8 @@ bool xremote_remote_item_read(CrossRemoteItem* item, FlipperFormat* ff) {
         if(!flipper_format_read_string(ff, "remote_type", type)) break;
         if(furi_string_equal(type, "IR")) {
             success = xremote_remote_item_read_ir(item, ff);
+        } else if(furi_string_equal(type, "PAUSE")) {
+            success = xremote_remote_item_read_pause(item, ff);
         } else {
             break;
         }
@@ -94,7 +96,20 @@ bool xremote_remote_item_read_ir(CrossRemoteItem* item, FlipperFormat* ff) {
         }
         success = true;
     } while(false);
+    furi_string_free(buf);
 
+    return success;
+}
+
+bool xremote_remote_item_read_pause(CrossRemoteItem* item, FlipperFormat* ff) {
+    bool success = false;
+    item->type = XRemoteRemoteItemTypePause;
+
+    do {
+        if(!flipper_format_read_string(ff, "name", item->name)) break;
+        if(!flipper_format_read_int32(ff, "time", &item->time, 1)) break;
+        success = true;
+    } while(false);
 
     return success;
 }
@@ -158,6 +173,10 @@ void xremote_remote_item_set_name(CrossRemoteItem* item, const char* name) {
     furi_string_set(item->name, name);
 }
 
+void xremote_remote_item_set_time(CrossRemoteItem* item, int32_t time) {
+    item->time = time;
+}
+
 void xremote_remote_item_set_ir_signal(CrossRemoteItem* item, InfraredSignal* signal) {
     xremote_ir_signal_set_signal(item->ir_signal, signal);
 }
@@ -182,3 +201,12 @@ bool xremote_ir_signal_save(InfraredSignal* signal, FlipperFormat* ff, const cha
     }
 }
 
+bool xremote_pause_save(FlipperFormat* ff, int32_t time, const char* name) {
+    if(!flipper_format_write_comment_cstr(ff, "") ||
+       !flipper_format_write_string_cstr(ff, "remote_type", "PAUSE") ||
+       !flipper_format_write_string_cstr(ff, "name", name) || 
+       !flipper_format_write_int32(ff, "time", &time, 1)) {
+       return false;
+    }
+    return true;
+}
