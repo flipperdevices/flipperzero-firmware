@@ -13,6 +13,8 @@ static const NotificationSequence* xremote_notification_sequences[] = {
     &sequence_blink_stop,
     &sequence_blink_start_yellow,
     &sequence_blink_stop,
+    &sequence_blink_start_blue,
+    &sequence_blink_stop,
 };
 
 void xremote_transmit_callback(XRemoteCustomEvent event, void* context) {
@@ -71,6 +73,16 @@ void xremote_scene_transmit_send_pause(XRemote* app, CrossRemoteItem* item) {
     xremote_scene_ir_notification_message(app, PauseNotificationMessageBlinkStop);
 }
 
+void xremote_scene_transmit_send_subghz(XRemote* app, CrossRemoteItem* item) {
+    UNUSED(item);
+    app->transmitting = true;
+    xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStartSend);
+    // ADD SEND METHOD HERE 
+    furi_thread_flags_wait(0, FuriFlagWaitAny, 2000); //Remove later
+    app->transmitting = false;
+    xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
+}
+
 void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
     furi_assert(context);
     XRemote* app = context;
@@ -86,13 +98,11 @@ void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
         xremote_scene_transmit_send_ir_signal(app, item);
     } else if(item->type == XRemoteRemoteItemTypePause) { 
         xremote_scene_transmit_send_pause(app, item);
+    } else if(item->type == XRemoteRemoteItemTypeSubGhz) {
+        xremote_scene_transmit_send_subghz(app, item);
     }
 
-    //xremote_item_transmit(item);
-    
     cross_remote_set_transmitting(remote, XRemoteTransmittingStop);
-
-    //xremote_scene_ir_notification_message(app, InfraredNotificationMessageBlinkStop);
 }
 
 void xremote_scene_transmit_run_remote(void* context) {

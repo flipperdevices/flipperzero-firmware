@@ -55,6 +55,9 @@
 #define INFRARED_APP_EXTENSION ".ir"
 #define INFRARED_APP_FOLDER ANY_PATH("infrared")
 
+#define SUBGHZ_APP_EXTENSION ".sub"
+#define SUBGHZ_APP_FOLDER ANY_PATH("subghz")
+
 #define TAG "XRemote"
 
 typedef enum {
@@ -74,6 +77,8 @@ typedef enum {
     InfraredNotificationMessageBlinkStop,
     PauseNotificationMessageBlinkStartSend,
     PauseNotificationMessageBlinkStop,
+    SubGhzNotificationMessageBlinkStartSend,
+    SubGhzNotificationMessageBlinkStop,
 } XRemoteNotificationMessage;
 
 typedef enum {

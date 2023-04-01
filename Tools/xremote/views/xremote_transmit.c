@@ -74,6 +74,22 @@ void xremote_transmit_draw_pause(Canvas* canvas, XRemoteTransmitModel* model) {
     canvas_draw_str_aligned(canvas, 74, 40, AlignLeft, AlignTop, temp_str);
 }
 
+void xremote_transmit_draw_subghz(Canvas* canvas, XRemoteTransmitModel* model) {
+    model->time++;
+    canvas_clear(canvas);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_icon(canvas, 0, 0, &I_sg_transmit_128x64);
+    canvas_set_font(canvas, FontPrimary);
+    canvas_draw_str_aligned(canvas, 74, 5, AlignLeft, AlignTop, "Sending"); 
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 74, 20, AlignLeft, AlignTop, "SubGhz"); 
+    canvas_draw_str_aligned(canvas, 74, 30, AlignLeft, AlignTop, model->name);
+    
+    char temp_str[18];
+    snprintf(temp_str, 18, "%u", model->time);
+    canvas_draw_str_aligned(canvas, 74, 40, AlignLeft, AlignTop, temp_str);
+}
+
 void xremote_transmit_draw(Canvas* canvas, XRemoteTransmitModel* model) {
     if(model->type == XRemoteRemoteItemTypeInfrared) {
         xremote_transmit_draw_ir(canvas, model);
