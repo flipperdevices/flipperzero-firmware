@@ -6,6 +6,7 @@
 
 ## Tools
 - Cross Remote: An app to chain Infrared and SubGhz commands and run them with on click<br>
+(in Development)
 
 ## Games
 - Color Guess: For designers/webworkers. Guess the HEX value of the color shown on the LED light<br>

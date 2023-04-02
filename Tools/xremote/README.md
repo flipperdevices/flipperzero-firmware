@@ -1,5 +1,11 @@
 # Flipper Zero Cross Remote
 
+## Current State
+- Infrared working
+- Pause working
+- SubGhz in Development
+- Edit/Rename/Delete features in development
+
 ## What this is?
 This app combines commands used in IR and SubGhz into playlists that can be run with one click
 <br><br>
