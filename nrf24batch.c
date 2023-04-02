@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG 		"nrf24batch"
-#define VERSION		"1.7"
+#define VERSION		"1.8"
 
 #define SCAN_APP_PATH_FOLDER 	"/ext/nrf24batch"
 #define LOG_FILEEXT	 			".txt"
@@ -44,7 +44,7 @@ const char SettingsFld_ReadBatch[] = "RBatch:";
 const char SettingsFld_WriteBatch[] = "WBatch:";
 const char SettingsFld_SetBatch[] = "SBatch:";
 const char SettingsFld_Listen[] = "Listen:";
-const char SettingsFld_ListenRepeatPeriod[] = "Listen repeat:";
+const char SettingsFld_ReadCmdRepeatPeriod[] = "ReadCmd repeat:";
 const char AskQuestion_Save[] = "SAVE BATCH?";
 #define Settings_i 'i'
 #define Settings_n 'n'
@@ -95,7 +95,7 @@ uint8_t NRF_last_packet_send_st = 0;
 uint8_t NRF_resend = 1; // number of transaction attempts 
 int8_t  NRF_repeat = 0; // count number of repeated requests (until < NRF_resend)
 uint32_t NRF_time;
-uint16_t ListenRepeatPeriod = 10; // s
+uint16_t ReadCmdRepeatPeriod = 10; // s
 bool ReadRepeat = false;
 uint32_t delay_between_pkt = 10;// ms
 
@@ -550,7 +550,13 @@ bool fill_payload(char *p, uint8_t *idx_i, int32_t var_n)
 		} else if(*p == 'n' && *(p + 1) < '0') { // var_n
 			if(var_n != VAR_EMPTY) b = var_n;
 		} else if(*p >= 'A') { // constant found
-			b = subs_constant(p, end ? (uint8_t)(end - p) : strlen(p));
+			uint8_t len;
+			if(end) len =  end - p;
+			else {
+				len = strlen(p);
+				if(*(p + len - 1) == '#') len--;
+			}
+			b = subs_constant(p, len);
 			if(b == VAR_EMPTY) {
 				ERR = 1;
 				memset(ERR_STR, 0, sizeof(ERR_STR));
@@ -854,8 +860,8 @@ static uint8_t load_settings_file() {
 				NRF_resend = str_to_int(p + sizeof(SettingsFld_Resend));
 			} else if(strncmp(p, SettingsFld_Delay, sizeof(SettingsFld_Delay)-1) == 0) {
 				delay_between_pkt = str_to_int(p + sizeof(SettingsFld_Delay));
-			} else if(strncmp(p, SettingsFld_ListenRepeatPeriod, sizeof(SettingsFld_ListenRepeatPeriod)-1) == 0) {
-				ListenRepeatPeriod = str_to_int(p + sizeof(SettingsFld_ListenRepeatPeriod));
+			} else if(strncmp(p, SettingsFld_ReadCmdRepeatPeriod, sizeof(SettingsFld_ReadCmdRepeatPeriod)-1) == 0) {
+				ReadCmdRepeatPeriod = str_to_int(p + sizeof(SettingsFld_ReadCmdRepeatPeriod));
 			} else if(strncmp(p, SettingsFld_Payload, sizeof(SettingsFld_Payload)-1) == 0) {
 				p += sizeof(SettingsFld_Payload);
 				payload_fields = 0;
@@ -1073,7 +1079,7 @@ void display_add_status(void)
 static void render_callback(Canvas* const canvas, void* ctx) {
 	if(ctx == NULL) return;
 	const PluginState* plugin_state = ctx;
-	if(furi_mutex_acquire(plugin_state->mutex, 25) != FuriStatusOk) return;
+	if(furi_mutex_acquire(plugin_state->mutex, 5) != FuriStatusOk) return;
 
 	//canvas_draw_frame(canvas, 0, 0, 128, 64); // border around the edge of the screen
 	if(what_doing == 0) {
@@ -1348,6 +1354,7 @@ void next_rw_type(int8_t add)
 
 void next_view_cmd(int8_t add)
 {
+	if(rw_type == rwt_listen) return;
 	uint16_t max = (rw_type == rwt_read_batch ? ReadBatch_cmd_Total : 
 					rw_type == rwt_read_cmd ? Read_cmd_Total : 
 					rw_type == rwt_set_batch ? SetBatch_cmd_Total : WriteBatch_cmd_Total);
@@ -1393,7 +1400,7 @@ int32_t nrf24batch_app(void* p) {
 		 	FuriLogLevel = furi_log_get_level();
 		 	if(FuriLogLevel == FuriLogLevelDebug) furi_hal_uart_set_br(FuriHalUartIdUSART1, 1843200);
 		}
-		if(what_doing == 2 && rw_type == rwt_read_cmd && ReadRepeat && furi_get_tick() - NRF_time > (uint32_t)(ListenRepeatPeriod * 1000)) {
+		if(what_doing == 2 && rw_type == rwt_read_cmd && ReadRepeat && furi_get_tick() - NRF_time > (uint32_t)(ReadCmdRepeatPeriod * 1000)) {
 			ERR = 0;
 			free_Log();
 			Run_Read_cmd(Read_cmd[view_cmd[rwt_read_cmd]]);
@@ -1468,8 +1475,10 @@ int32_t nrf24batch_app(void* p) {
 								else if(*(Edit_pos - 1) == ',') Edit_pos -= 2;
 							}
 						} else if(what_doing == 0) {
-							rw_type = rwt_listen;
-							what_doing = 1;
+							if(addr_len) {
+								rw_type = rwt_listen;
+								what_doing = 1;
+							}
 						} else if(what_doing == 1) {
 							if(event.input.type == InputTypeShort) next_rw_type(-1); else if(view_x) view_x--;
 						} else if(what_doing == 2) if(view_x) view_x--;
@@ -1492,8 +1501,10 @@ int32_t nrf24batch_app(void* p) {
 								if(*(Edit_pos + 1) == 'x') Edit_pos += 2;
 							}
 						} else if(what_doing == 0) {
-							rw_type = rwt_set_batch;
-							what_doing = 1;
+							if(addr_len) {
+								rw_type = rwt_set_batch;
+								what_doing = 1;
+							}
 						} else if(what_doing == 1) {
 							if(event.input.type == InputTypeShort) next_rw_type(+1); else view_x++;
 						} else if(what_doing == 2) view_x++;

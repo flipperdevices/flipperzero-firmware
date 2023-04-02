@@ -7,6 +7,7 @@ DPL: 0            <- nRF24 dynamic payload en/dis
 RETR: 0x0F        <- nRF24 SETUP_RETR register (address 04)
 Resend: 3         <- resend attempts on error
 Delay_ms: 30      <- delay between cmd and resend
+ReadCmd repeat: 3 <- seconds (long press "Ok" in ReadCmd mode turn on repeating)
 
 Payload struct: 2,1,1   <- field sizes of send packet in bytes, received packet consists of 1 field with default size 1 byte (int8)
 EEPROM=0; RAM=1; PROGMEM=2; ID=3; RESET=4   <- Constants
@@ -34,3 +35,7 @@ RBatch: Settings: ID;OSCCAL;RxAddr;Ch;nRF RETR;CO2 threshold;CO2 correct;FanLSB 
 
 WBatch: Default: RxAddr=0xCF;CO2 threshold=1000;Reset  <- Write Batch, Send: { 0,0,0,0x8F }, { 0xCF, 0, 1, 0x81 }, { 0xE8, 0x03, 5, 0x82 }, { 0, 0, 4, 0xC1 }
 WBatch: Fans: FanLSB={0xC2,0xC3,0}                     <- Write Batch, Send: { 0,0,0,0x8F }, { 0xC2, 0, 9, 0x81 }, { 0xC3, 0, 10, 0x81 }
+
+S: Lamp=,0,0x40             <- Set cmd
+SBatch: Lamp On: Lamp=1     <- Set batch
+SBatch: Lamp Off: Lamp=0    <- Set batch
