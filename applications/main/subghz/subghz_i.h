@@ -64,6 +64,7 @@ struct SubGhzTxRx {
     SubGhzSpeakerState speaker_state;
 
     SubGhzRxKeyState rx_key_state;
+    SubGhzLoadTypeFile load_type_file;
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;
@@ -153,3 +154,5 @@ void subghz_subghz_hopper_set_pause(SubGhz* subghz);
 void subghz_lock(SubGhz* subghz);
 void subghz_unlock(SubGhz* subghz);
 bool subghz_is_locked(SubGhz* subghz);
+
+SubGhzLoadTypeFile subghz_get_load_type_file(SubGhz* subghz);
