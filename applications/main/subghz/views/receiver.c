@@ -82,8 +82,9 @@ void subghz_receiver_rssi(SubGhzViewReceiver* instance, float rssi) {
 void subghz_view_receiver_set_lock(SubGhzViewReceiver* subghz_receiver, bool lock) {
     furi_assert(subghz_receiver);
     subghz_receiver->lock_count = 0;
+
     if(lock == true) {
-        subghz_receiver->lock = lock;
+        subghz_receiver->lock = true;
         with_view_model(
             subghz_receiver->view,
             SubGhzViewReceiverModel * model,

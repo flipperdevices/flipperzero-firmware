@@ -265,7 +265,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             }
 
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-                subghz_rx_key_state_set(subghz,SubGhzRxKeyStateAddKey);
+            subghz_rx_key_state_set(subghz, SubGhzRxKeyStateAddKey);
 
             consumed = true;
             break;
