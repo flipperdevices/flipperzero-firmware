@@ -2,6 +2,19 @@
 
  <div style="text-align:center"><img src="Misc/ledpulser/assets/flipper_logo_orange.png"/></div>
 
+## What Apps do I have here 
+
+## Tools
+- Cross Remote: An app to chain Infrared and SubGhz commands and run them with on click<br>
+(in Development)
+
+## Games
+- Color Guess: For designers/webworkers. Guess the HEX value of the color shown on the LED light<br>
+
+## Misc (Stuff I did to learn from)
+- Orgamotron: Added new vibro modes to the app orginally developed by qqmajikpp<br>
+- Ledpulser: Runs pulse animations on the LED light<br>
+
 ## How to install on Flipper Zero
 - If you do not have one, download a firmware<br>
 - Plug your Flipper Zero in via USB. <br>
