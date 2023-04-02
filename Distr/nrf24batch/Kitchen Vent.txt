@@ -116,12 +116,13 @@ RBatch: Work: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSlee
 RBatch: Hardware: ID;RxAddr;Ch;SpeedInitIdx;Flags;OutPeriod;IRRemotes;OSCCAL_EMEM
 RBatch: All: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep;RxAddr;Ch;SpeedInitIdx;Flags;OutPeriod;IRRemotes;IRRemotesHash
 
-WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={950,1050,1200};Fan speeds=1;FanSpeed={2,2,2};FanCook speeds=2;FanCookSpeed={2,4,4};FanSleep=20;FanCookSleep=6;FanOnTime=150;FanCookOnTime=0;FanOffTime=100;FanCookOffTime=0;SpeedInitIdx=0;SpeedKeyIdx=6;Flags=0x0D;OutPeriod=2;IRRemotes=0
-WBatch: IRRemotes: IRRemotes=0
+WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={950,1050,1200};Fan speeds=1;FanSpeed={1,1,1};FanCook speeds=2;FanCookSpeed={1,1,2};FanSleep=20;FanCookSleep=6;FanOnTime=150;FanCookOnTime=0;FanOffTime=100;FanCookOffTime=0;SpeedInitIdx=0;SpeedKeyIdx=6;Flags=0x0D;OutPeriod=1
+WBatch: IRRemotes clear: IRRemotes=0
+WBatch: IRRemotes 1 kitchen: IRRemotes=1;IRRemotesHash={0x6DA5,0xFCA5,0x7CA5,0xB425,0x3425,0x1625,0x8525}
 WBatch: LED Warning: _LED Warning=0x10
 WBatch: PORTA: _PORTA=0x0C
 WBatch: PORTB: _PORTB=0xC
-WBatch: OutPeriod: _OutPeriod=2
-WBatch: OSCCAL: _OSCCAL=128
+WBatch: OutPeriod: _OutPeriod=1
+WBatch: OSCCAL: _OSCCAL=146
 WBatch: CO2 Level: CO2 level={750,850,1000}
 WBatch: Reset: Reset
