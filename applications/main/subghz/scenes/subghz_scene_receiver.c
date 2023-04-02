@@ -94,7 +94,7 @@ static void subghz_scene_add_to_history_callback(
     }
     subghz_receiver_reset(receiver);
     furi_string_free(str_buff);
-    subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
+    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateAddKey);
 }
 
 void subghz_scene_receiver_on_enter(void* context) {
@@ -103,11 +103,11 @@ void subghz_scene_receiver_on_enter(void* context) {
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
-    if(subghz->txrx->rx_key_state == SubGhzRxKeyStateIDLE) {
+    if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateIDLE) {
         subghz_preset_init(
             subghz, "AM650", subghz_setting_get_default_frequency(subghz->setting), NULL, 0);
         subghz_history_reset(subghz->txrx->history);
-        subghz->txrx->rx_key_state = SubGhzRxKeyStateStart;
+        subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
     }
 
     subghz_view_receiver_set_lock(subghz->subghz_receiver, subghz_is_locked(subghz));
@@ -121,7 +121,7 @@ void subghz_scene_receiver_on_enter(void* context) {
             subghz->subghz_receiver,
             furi_string_get_cstr(str_buff),
             subghz_history_get_type_protocol(subghz->txrx->history, i));
-        subghz->txrx->rx_key_state = SubGhzRxKeyStateAddKey;
+        subghz_rx_key_state_set(subghz, SubGhzRxKeyStateAddKey);
     }
     furi_string_free(str_buff);
     subghz_scene_receiver_update_statusbar(subghz);
@@ -160,11 +160,11 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
 
-            if(subghz->txrx->rx_key_state == SubGhzRxKeyStateAddKey) {
-                subghz->txrx->rx_key_state = SubGhzRxKeyStateExit;
+            if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) {
+                subghz_rx_key_state_set(subghz, SubGhzRxKeyStateExit);
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
-                subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
+                subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
                 subghz_preset_init(
                     subghz,
                     "AM650",
