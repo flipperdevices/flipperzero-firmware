@@ -180,7 +180,7 @@ SubGhz* subghz_alloc() {
 
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
     subghz_hopper_set_state(subghz, SubGhzHopperStateOFF);
-    subghz->txrx->speaker_state = SubGhzSpeakerStateDisable;
+    subghz_speaker_set_state(subghz, SubGhzSpeakerStateDisable);
     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
     subghz->txrx->history = subghz_history_alloc();
     subghz->txrx->worker = subghz_worker_alloc();

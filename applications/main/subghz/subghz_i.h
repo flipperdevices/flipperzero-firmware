@@ -96,10 +96,11 @@ struct SubGhz {
     SubGhzTestStatic* subghz_test_static;
     SubGhzTestCarrier* subghz_test_carrier;
     SubGhzTestPacket* subghz_test_packet;
-    FuriString* error_str;
-    SubGhzSetting* setting;
-    SubGhzLock lock;
 
+    SubGhzSetting* setting;
+
+    FuriString* error_str;
+    SubGhzLock lock;
     SubGhzThresholdRssi* threshold_rssi;
     SubGhzRxKeyState rx_key_state;
 
@@ -143,6 +144,8 @@ void subghz_speaker_on(SubGhz* subghz);
 void subghz_speaker_off(SubGhz* subghz);
 void subghz_speaker_mute(SubGhz* subghz);
 void subghz_speaker_unmute(SubGhz* subghz);
+void subghz_speaker_set_state(SubGhz* subghz, SubGhzSpeakerState state);
+SubGhzSpeakerState subghz_speaker_get_state(SubGhz* subghz);
 
 void subghz_txrx_stop(SubGhz* subghz);
 SubGhzTxRxState subghz_txrx_get_state(SubGhz* subghz);
