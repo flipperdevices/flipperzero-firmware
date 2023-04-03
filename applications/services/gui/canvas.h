@@ -249,7 +249,6 @@ void canvas_draw_icon_ex(
     const Icon* icon,
     IconRotation rotation);
 
-
 /** Draw animation at position defined by x,y.
  *
  * @param      canvas          Canvas instance

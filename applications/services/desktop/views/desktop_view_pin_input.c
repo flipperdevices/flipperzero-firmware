@@ -115,13 +115,15 @@ static void desktop_view_pin_input_draw_cells(Canvas* canvas, DesktopViewPinInpu
             } else {
                 switch(model->pin.data[i]) {
                 case InputKeyDown:
-                    canvas_draw_icon_ex(canvas, x + 3, y + 2, &I_Pin_arrow_up_7x9, IconRotation180);
+                    canvas_draw_icon_ex(
+                        canvas, x + 3, y + 2, &I_Pin_arrow_up_7x9, IconRotation180);
                     break;
                 case InputKeyUp:
                     canvas_draw_icon(canvas, x + 3, y + 2, &I_Pin_arrow_up_7x9);
                     break;
                 case InputKeyLeft:
-                    canvas_draw_icon_ex(canvas, x + 2, y + 3, &I_Pin_arrow_up_7x9, IconRotation270);
+                    canvas_draw_icon_ex(
+                        canvas, x + 2, y + 3, &I_Pin_arrow_up_7x9, IconRotation270);
                     break;
                 case InputKeyRight:
                     canvas_draw_icon_ex(canvas, x + 2, y + 3, &I_Pin_arrow_up_7x9, IconRotation90);
