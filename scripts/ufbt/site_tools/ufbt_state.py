@@ -78,7 +78,7 @@ def generate(env, **kw):
     if sdk_state["meta"]["version"] != ufbt_state["version"]:
         warn(
             WarningOnByDefault,
-            f"Version mismatch: SDK state vs uFBT: {sdk_state['meta']['version']} vs {ufbt_state['meta']['version']}",
+            f"Version mismatch: SDK state vs uFBT: {sdk_state['meta']['version']} vs {ufbt_state['version']}",
         )
 
     scripts_dir = sdk_current_sdk_dir_node.Dir(sdk_components["scripts.dir"])
