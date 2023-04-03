@@ -294,9 +294,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
             ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
                 ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
         st25r3916_write_reg(
-            handle,
-            ST25R3916_REG_MODE,
-            ST25R3916_REG_MODE_targ_targ | ST25R3916_REG_MODE_om3 | ST25R3916_REG_MODE_om0);
+            handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ_targ | ST25R3916_REG_MODE_om0);
         st25r3916_write_reg(
             handle,
             ST25R3916_REG_PASSIVE_TARGET,
@@ -379,7 +377,6 @@ FHalNfcError f_hal_nfc_listener_tx(uint8_t* tx_data, uint16_t tx_bits) {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
     furi_hal_spi_acquire(handle);
 
-    // Prepare tx
     st25r3916_direct_cmd(handle, ST25R3916_CMD_CLEAR_FIFO);
 
     st25r3916_write_fifo(handle, tx_data, tx_bits);
@@ -431,8 +428,10 @@ FHalNfcError f_hal_nfc_listen_start() {
     st25r3916_get_irq(handle);
     // Enable interrupts
     st25r3916_mask_irq(handle, interrupts);
+    // Enable auto collision resolution
+    st25r3916_clear_reg_bits(
+        handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
     st25r3916_direct_cmd(handle, ST25R3916_CMD_GOTO_SENSE);
-    // st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 
     furi_hal_spi_release(handle);
     return FHalNfcErrorNone;
@@ -442,7 +441,22 @@ FHalNfcError f_hal_nfc_listener_sleep() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
     furi_hal_spi_acquire(handle);
 
+    // Enable auto collision resolution
+    st25r3916_clear_reg_bits(
+        handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
     st25r3916_direct_cmd(handle, ST25R3916_CMD_GOTO_SLEEP);
+
+    furi_hal_spi_release(handle);
+    return FHalNfcErrorNone;
+}
+
+FHalNfcError f_hal_nfc_listener_disable_auto_col_res() {
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    furi_hal_spi_acquire(handle);
+
+    st25r3916_set_reg_bits(
+        handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
 
     furi_hal_spi_release(handle);
     return FHalNfcErrorNone;

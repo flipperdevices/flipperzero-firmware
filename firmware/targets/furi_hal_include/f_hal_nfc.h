@@ -104,6 +104,8 @@ FHalNfcError f_hal_nfc_listen_start();
 
 FHalNfcError f_hal_nfc_listener_sleep();
 
+FHalNfcError f_hal_nfc_listener_disable_auto_col_res();
+
 FHalNfcError f_hal_nfc_abort();
 
 FHalNfcEvent f_hal_nfc_wait_event(uint32_t timeout_ms);

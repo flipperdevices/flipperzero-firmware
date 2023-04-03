@@ -73,12 +73,13 @@ static int32_t nfc_worker(void* context) {
             instance->callback(nfc_event, instance->context);
         }
         if(event & FHalNfcEventFieldOff) {
-            FURI_LOG_D(TAG, "Field off");
+            FURI_LOG_T(TAG, "Field off");
             nfc_event.type = NfcEventTypeFieldOff;
             instance->callback(nfc_event, instance->context);
             f_hal_nfc_listener_sleep();
         }
         if(event & FHalNfcEventListenerActive) {
+            f_hal_nfc_listener_disable_auto_col_res();
             nfc_event.type = NfcEventTypeListenerActivated;
             instance->callback(nfc_event, instance->context);
         }

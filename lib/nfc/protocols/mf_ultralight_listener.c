@@ -42,7 +42,7 @@ static void mf_ultralight_listener_event_handler(NfcaListenerEvent event, void* 
                 FURI_LOG_T(TAG, "Read page cmd: %d", start_page);
                 instance->state = MfUltraligthListenerStateIdle;
                 tx_data[0] = 0x00;
-                tx_bits = 8;
+                tx_bits = 4;
                 nfca_listener_tx(instance->nfca_listener, tx_data, tx_bits);
             } else {
                 memcpy(tx_data, instance->data.page[start_page].data, 16);
