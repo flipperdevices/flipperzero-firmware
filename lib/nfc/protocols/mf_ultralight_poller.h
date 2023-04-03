@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mf_ultralight_common.h"
+#include "mf_ultralight.h"
 
 #ifdef __cplusplus
 extern "C" {
