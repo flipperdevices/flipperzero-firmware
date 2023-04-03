@@ -247,7 +247,6 @@ void canvas_draw_icon_ex(
     uint8_t x,
     uint8_t y,
     const Icon* icon,
-    IconFlip flip,
     IconRotation rotation);
 
 

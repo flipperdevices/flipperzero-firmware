@@ -315,6 +315,8 @@ void canvas_draw_u8g2_bitmap_rotated(
         canvas_draw_u8g2_bitmap(u8g2, x, y, w, h, bitmap);
         break;
     case IconRotation90:
+        // X has to be set to the right side of the icon (it is set to the left by default)
+        x += w + 1;
         while(h > 0) {
             const uint8_t* b = bitmap;
             uint16_t len = w;
@@ -343,11 +345,14 @@ void canvas_draw_u8g2_bitmap_rotated(
             }
             u8g2->draw_color = color;
             bitmap += blen;
-            x++;
+            x--;
             h--;
         }
         break;
     case IconRotation180:
+        // X and Y have to be set to the bottom right corner of the icon (they are set to the top left by default)
+        x += w - 1;
+        y += h - 1;
         while(h > 0) {
             const uint8_t* b = bitmap;
             uint16_t len = w;
@@ -381,6 +386,8 @@ void canvas_draw_u8g2_bitmap_rotated(
         }
         break;
     case IconRotation270:
+        // Y has to be set to the bottom of the icon (it is set to the top by default)
+        y += h - 3;
         while(h > 0) {
             const uint8_t* b = bitmap;
             uint16_t len = w;
@@ -409,7 +416,7 @@ void canvas_draw_u8g2_bitmap_rotated(
             }
             u8g2->draw_color = color;
             bitmap += blen;
-            x--;
+            x++;
             h--;
         }
         break;
@@ -423,11 +430,9 @@ void canvas_draw_icon_ex(
     uint8_t x,
     uint8_t y,
     const Icon* icon,
-    IconFlip flip,
     IconRotation rotation) {
     furi_assert(canvas);
     furi_assert(icon);
-    UNUSED(flip);
 
     x += canvas->offset_x;
     y += canvas->offset_y;
