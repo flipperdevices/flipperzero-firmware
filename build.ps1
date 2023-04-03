@@ -11,13 +11,22 @@ $build_commands = @(
         Name = "Official Dev \ Unleashed";
         FbtSwitch = "od";
         FirmwarePath = "flipperzero-firmware_official_dev";
-        ArtifactName = "totp_official-dev_unleashed_fw{FEATURES_SUFFIX}.fap"
+        ArtifactName = "totp_official-dev_unleashed_fw{FEATURES_SUFFIX}.fap";
+        FW_CDEF = "TOTP_FIRMWARE_OFFICIAL_DEV"
     }
     [PSCustomObject]@{
         Name = "Official Stable";
         FbtSwitch = "os";
         FirmwarePath = "flipperzero-firmware_official_stable";
-        ArtifactName = "totp_official-stable_fw{FEATURES_SUFFIX}.fap"
+        ArtifactName = "totp_official-stable_fw{FEATURES_SUFFIX}.fap";
+        FW_CDEF = "TOTP_FIRMWARE_OFFICIAL_STABLE"
+    }
+    [PSCustomObject]@{
+        Name = "Xtreme";
+        FbtSwitch = "x";
+        FirmwarePath = "flipperzero-firmware_xtreme";
+        ArtifactName = "totp_xtreme_fw{FEATURES_SUFFIX}.fap";
+        FW_CDEF = "TOTP_FIRMWARE_XTREME"
     }
 )
 
@@ -32,7 +41,8 @@ if (!(Test-Path -PathType Container "build")) {
 function Features-Configure {
     param (
         [string[]]$enable,
-        [string[]]$disable
+        [string[]]$disable,
+        [string]$set
     )
 
     $featuresConfigContent = Get-Content "totp/features_config.h" -Raw
@@ -58,6 +68,14 @@ function Features-Configure {
         })
     }
 
+    if ($set) {
+        $keyValue = $set -split '='
+        $key = $keyValue[0]
+        $value = $keyValue[1]
+
+        $featuresConfigContent = $featuresConfigContent -replace "(#define +)($key)( +.+)(( |$)+)", "`$1`$2 $value`$4"
+    }
+
     Set-Content -Path "totp/features_config.h" -NoNewline -Value $featuresConfigContent
     Set-Content -Path "totp/application.fam" -NoNewline -Value $appManifestContent
 }
@@ -73,6 +91,8 @@ function Build-Run {
         if (Test-Path -PathType Container $build_path) {
             Remove-Item "$build_path\*" -Recurse -Force
         }
+
+        Features-Configure -set "TOTP_TARGET_FIRMWARE=$($build_command.FW_CDEF)"
 
         ./fbt $build_command.FbtSwitch COMPACT=1 DEBUG=0 VERBOSE=0 fap_totp
 
@@ -96,6 +116,6 @@ Write-Information 'Building without BadBT'
 Features-Configure -disable TOTP_BADBT_TYPE_ENABLED,TOTP_AUTOMATION_ICONS_ENABLED
 Build-Run -FeaturesSuffix '_no-badbt'
 
-Features-Configure -enable TOTP_BADBT_TYPE_ENABLED,TOTP_AUTOMATION_ICONS_ENABLED
+Features-Configure -enable TOTP_BADBT_TYPE_ENABLED,TOTP_AUTOMATION_ICONS_ENABLED -set TOTP_TARGET_FIRMWARE=TOTP_FIRMWARE_XTREME
 
 Pop-Location

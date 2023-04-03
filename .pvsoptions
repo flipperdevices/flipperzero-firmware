@@ -1,1 +1,1 @@
---rules-config .pvsconfig -e flipperzero-firmware_official_dev -e flipperzero-firmware_official_stable
+--rules-config .pvsconfig -e flipperzero-firmware_official_dev -e flipperzero-firmware_official_stable -e flipperzero-firmware_xtreme

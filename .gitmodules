@@ -8,3 +8,8 @@
 	url = https://github.com/flipperdevices/flipperzero-firmware.git
 	branch = release
 	ignore = dirty
+[submodule "flipperzero-firmware_xtreme"]
+	path = flipperzero-firmware_xtreme
+	url = https://github.com/ClaraCrazy/Flipper-Xtreme
+	branch = main
+	ignore = dirty
