@@ -37,7 +37,7 @@ void picopass_scene_device_info_on_enter(void* context) {
         furi_string_cat_printf(wiegand_str, "Invalid PACS");
     } else {
         size_t bytesLength = pacs->record.bitLength / 8;
-        if (pacs->record.bitLength % 8 > 0) {
+        if(pacs->record.bitLength % 8 > 0) {
             // Add extra byte if there are bits remaining
             bytesLength++;
         }
