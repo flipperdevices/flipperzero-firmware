@@ -246,53 +246,6 @@ void canvas_draw_icon_animation(
         icon_data);
 }
 
-void canvas_draw_u8g2_bitmap(
-    u8g2_t* u8g2,
-    u8g2_uint_t x,
-    u8g2_uint_t y,
-    u8g2_uint_t w,
-    u8g2_uint_t h,
-    const uint8_t* bitmap) {
-    u8g2_uint_t blen;
-    blen = w;
-    blen += 7;
-    blen >>= 3;
-#ifdef U8G2_WITH_INTERSECTION
-    if(u8g2_IsIntersection(u8g2, x, y, x + w, y + h) == 0) return;
-#endif /* U8G2_WITH_INTERSECTION */
-
-    while(h > 0) {
-        const uint8_t* b = bitmap;
-        uint16_t len = w;
-        uint16_t x0 = x;
-        uint16_t y0 = y;
-        uint8_t mask;
-        uint8_t color = u8g2->draw_color;
-        uint8_t ncolor = (color == 0 ? 1 : 0);
-        mask = 1;
-        while(len > 0) {
-            if(u8x8_pgm_read(b) & mask) {
-                u8g2->draw_color = color;
-                u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
-            } else if(u8g2->bitmap_transparency == 0) {
-                u8g2->draw_color = ncolor;
-                u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
-            }
-
-            x0++;
-            mask <<= 1;
-            if(mask == 0) {
-                mask = 1;
-                b++;
-            }
-            len--;
-        }
-        u8g2->draw_color = color;
-        bitmap += blen;
-        y++;
-        h--;
-    }
-}
 
 void canvas_draw_u8g2_bitmap_int(
     u8g2_t* u8g2,
@@ -334,9 +287,9 @@ void canvas_draw_u8g2_bitmap_int(
             }
 
             if(rotation) {
-                y0++; // Good
+                y0++;
             } else {
-                x0++; // Good
+                x0++;
             }
 
             mask <<= 1;
@@ -350,22 +303,22 @@ void canvas_draw_u8g2_bitmap_int(
         bitmap += blen;
         if(mirror) {
             if(rotation) {
-                x++; // Good
+                x++;
             } else {
-                y--; // Good
+                y--;
             }
         } else {
             if(rotation) {
-                x--; // Good
+                x--;
             } else {
-                y++; // Good
+                y++;
             }
         }
         h--;
     }
 }
 
-void canvas_draw_u8g2_bitmap_rotated(
+void canvas_draw_u8g2_bitmap(
     u8g2_t* u8g2,
     u8g2_uint_t x,
     u8g2_uint_t y,
@@ -412,7 +365,7 @@ void canvas_draw_icon_ex(
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
     compress_icon_decode(canvas->compress_icon, icon_get_data(icon), &icon_data);
-    canvas_draw_u8g2_bitmap_rotated(
+    canvas_draw_u8g2_bitmap(
         &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, rotation);
 }
 
@@ -425,7 +378,7 @@ void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
     uint8_t* icon_data = NULL;
     compress_icon_decode(canvas->compress_icon, icon_get_data(icon), &icon_data);
     canvas_draw_u8g2_bitmap(
-        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data);
+        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, IconRotation0);
 }
 
 void canvas_draw_dot(Canvas* canvas, uint8_t x, uint8_t y) {
