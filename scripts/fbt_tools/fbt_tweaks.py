@@ -40,7 +40,8 @@ def fbt_warning(e):
 def generate(env):
     if env.get("UFBT_WORK_DIR"):
         raise UserError(
-            "You're using a new format SDK on a legacy ufbt version. Please update ufbt."
+            "You're trying to use a new format SDK on a legacy ufbt version. "
+            "Please update ufbt to a version from PyPI: https://pypi.org/project/ufbt/"
         )
     Warnings._warningOut = fbt_warning
 
