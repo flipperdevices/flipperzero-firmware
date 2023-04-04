@@ -383,8 +383,10 @@ for template_file in project_template_dir.Dir("app_template").glob("*"):
 
 AddPostAction(
     app_template_dist[-1],
-    Mkdir(original_app_dir.Dir("images")),
-    Touch(original_app_dir.Dir("images").File(".gitkeep")),
+    [
+        Mkdir(original_app_dir.Dir("images")),
+        Touch(original_app_dir.Dir("images").File(".gitkeep")),
+    ],
 )
 dist_env.Precious(app_template_dist)
 dist_env.NoClean(app_template_dist)
