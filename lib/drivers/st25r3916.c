@@ -41,7 +41,7 @@ void st25r3916_write_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t b
     furi_assert(buff);
 
     uint16_t bytes = (bits + 7) / 8;
-    
+
     st25r3916_write_reg(handle, ST25R3916_REG_NUM_TX_BYTES2, (uint8_t)(bits & 0xFFU));
     st25r3916_write_reg(handle, ST25R3916_REG_NUM_TX_BYTES1, (uint8_t)((bits >> 8) & 0xFFU));
 

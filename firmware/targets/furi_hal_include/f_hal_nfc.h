@@ -16,7 +16,7 @@ typedef enum {
     FHalNfcEventFieldOn = (1U << 1),
     FHalNfcEventFieldOff = (1U << 2),
     FHalNfcEventListenerActive = (1U << 3),
-    FHalNfcEventListenerActiveA = (1U << 4),    
+    FHalNfcEventListenerActiveA = (1U << 4),
     FHalNfcEventTxStart = (1U << 5),
     FHalNfcEventTxEnd = (1U << 6),
     FHalNfcEventRxStart = (1U << 7),
