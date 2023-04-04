@@ -294,6 +294,77 @@ void canvas_draw_u8g2_bitmap(
     }
 }
 
+void canvas_draw_u8g2_bitmap_int(
+    u8g2_t* u8g2,
+    u8g2_uint_t x,
+    u8g2_uint_t y,
+    u8g2_uint_t w,
+    u8g2_uint_t h,
+    bool mirror,
+    bool rotation,
+    const uint8_t* bitmap) {
+    u8g2_uint_t blen;
+    blen = w;
+    blen += 7;
+    blen >>= 3;
+
+
+    if(rotation && !mirror) {
+        x += w + 1;
+    } else if(mirror && !rotation) {
+        y += h - 1;
+    }
+
+    while(h > 0) {
+        const uint8_t* b = bitmap;
+        uint16_t len = w;
+        uint16_t x0 = x;
+        uint16_t y0 = y;
+        uint8_t mask;
+        uint8_t color = u8g2->draw_color;
+        uint8_t ncolor = (color == 0 ? 1 : 0);
+        mask = 1;
+        while(len > 0) {
+            if(u8x8_pgm_read(b) & mask) {
+                u8g2->draw_color = color;
+                u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
+            } else if(u8g2->bitmap_transparency == 0) {
+                u8g2->draw_color = ncolor;
+                u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
+            }
+
+            if(rotation) {
+                y0++; // Good
+            } else {
+                x0++; // Good
+            }
+
+            mask <<= 1;
+            if(mask == 0) {
+                mask = 1;
+                b++;
+            }
+            len--;
+        }
+        u8g2->draw_color = color;
+        bitmap += blen;
+        if(mirror) {
+            if(rotation) {
+                x++; // Good
+            } else {
+                y--; // Good
+            }
+        } else {
+            if(rotation) {
+                x--; // Good
+            } else {
+                y++; // Good
+            }
+        }
+        h--;
+    }
+}
+
 void canvas_draw_u8g2_bitmap_rotated(
     u8g2_t* u8g2,
     u8g2_uint_t x,
@@ -312,113 +383,16 @@ void canvas_draw_u8g2_bitmap_rotated(
 
     switch(rotation) {
     case IconRotation0:
-        canvas_draw_u8g2_bitmap(u8g2, x, y, w, h, bitmap);
+        canvas_draw_u8g2_bitmap_int(u8g2, x, y, w, h, 0, 0, bitmap);
         break;
     case IconRotation90:
-        // X has to be set to the right side of the icon (it is set to the left by default)
-        x += w + 1;
-        while(h > 0) {
-            const uint8_t* b = bitmap;
-            uint16_t len = w;
-            uint16_t x0 = x;
-            uint16_t y0 = y;
-            uint8_t mask;
-            uint8_t color = u8g2->draw_color;
-            uint8_t ncolor = (color == 0 ? 1 : 0);
-            mask = 1;
-            while(len > 0) {
-                if(u8x8_pgm_read(b) & mask) {
-                    u8g2->draw_color = color;
-                    u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
-                } else if(u8g2->bitmap_transparency == 0) {
-                    u8g2->draw_color = ncolor;
-                    u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
-                }
-
-                y0++;
-                mask <<= 1;
-                if(mask == 0) {
-                    mask = 1;
-                    b++;
-                }
-                len--;
-            }
-            u8g2->draw_color = color;
-            bitmap += blen;
-            x--;
-            h--;
-        }
+        canvas_draw_u8g2_bitmap_int(u8g2, x, y, w, h, 0, 1, bitmap);
         break;
     case IconRotation180:
-        // X and Y have to be set to the bottom right corner of the icon (they are set to the top left by default)
-        x += w - 1;
-        y += h - 1;
-        while(h > 0) {
-            const uint8_t* b = bitmap;
-            uint16_t len = w;
-            uint16_t x0 = x;
-            uint16_t y0 = y;
-            uint8_t mask;
-            uint8_t color = u8g2->draw_color;
-            uint8_t ncolor = (color == 0 ? 1 : 0);
-            mask = 1;
-            while(len > 0) {
-                if(u8x8_pgm_read(b) & mask) {
-                    u8g2->draw_color = color;
-                    u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
-                } else if(u8g2->bitmap_transparency == 0) {
-                    u8g2->draw_color = ncolor;
-                    u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
-                }
-
-                x0--;
-                mask <<= 1;
-                if(mask == 0) {
-                    mask = 1;
-                    b++;
-                }
-                len--;
-            }
-            u8g2->draw_color = color;
-            bitmap += blen;
-            y--;
-            h--;
-        }
+        canvas_draw_u8g2_bitmap_int(u8g2, x, y, w, h, 1, 0, bitmap);
         break;
     case IconRotation270:
-        // Y has to be set to the bottom of the icon (it is set to the top by default)
-        y += h - 3;
-        while(h > 0) {
-            const uint8_t* b = bitmap;
-            uint16_t len = w;
-            uint16_t x0 = x;
-            uint16_t y0 = y;
-            uint8_t mask;
-            uint8_t color = u8g2->draw_color;
-            uint8_t ncolor = (color == 0 ? 1 : 0);
-            mask = 1;
-            while(len > 0) {
-                if(u8x8_pgm_read(b) & mask) {
-                    u8g2->draw_color = color;
-                    u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
-                } else if(u8g2->bitmap_transparency == 0) {
-                    u8g2->draw_color = ncolor;
-                    u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
-                }
-
-                y0--;
-                mask <<= 1;
-                if(mask == 0) {
-                    mask = 1;
-                    b++;
-                }
-                len--;
-            }
-            u8g2->draw_color = color;
-            bitmap += blen;
-            x++;
-            h--;
-        }
+        canvas_draw_u8g2_bitmap_int(u8g2, x, y, w, h, 1, 1, bitmap);
         break;
     default:
         break;
