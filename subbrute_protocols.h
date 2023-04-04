@@ -110,8 +110,7 @@ void subbrute_protocol_default_generate_file(
     SubBruteFileProtocol file,
     uint64_t step,
     uint8_t bits,
-    uint32_t te,
-    uint8_t repeat);
+    uint32_t te);
 void subbrute_protocol_file_generate_file(
     Stream* stream,
     uint32_t frequency,
@@ -120,7 +119,6 @@ void subbrute_protocol_file_generate_file(
     uint64_t step,
     uint8_t bits,
     uint32_t te,
-    uint8_t repeat,
     uint8_t bit_index,
     uint64_t file_key,
     bool two_bytes);

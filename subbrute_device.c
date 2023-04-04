@@ -104,7 +104,6 @@ bool subbrute_device_save_file(SubBruteDevice* instance, const char* dev_file_na
                 instance->current_step,
                 instance->file_protocol_info->bits,
                 instance->file_protocol_info->te,
-                instance->file_protocol_info->repeat,
                 instance->bit_index,
                 instance->key_from_file,
                 instance->two_bytes);
@@ -116,8 +115,7 @@ bool subbrute_device_save_file(SubBruteDevice* instance, const char* dev_file_na
                 instance->protocol_info->file,
                 instance->current_step,
                 instance->protocol_info->bits,
-                instance->protocol_info->te,
-                instance->protocol_info->repeat);
+                instance->protocol_info->te);
         }
 
         result = true;

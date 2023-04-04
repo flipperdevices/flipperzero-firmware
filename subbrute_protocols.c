@@ -771,8 +771,7 @@ void subbrute_protocol_default_generate_file(
     SubBruteFileProtocol file,
     uint64_t step,
     uint8_t bits,
-    uint32_t te,
-    uint8_t repeat) {
+    uint32_t te) {
     FuriString* candidate = furi_string_alloc();
     subbrute_protocol_create_candidate_for_default(candidate, file, step);
 
@@ -790,8 +789,7 @@ void subbrute_protocol_default_generate_file(
             subbrute_protocol_file(file),
             bits,
             furi_string_get_cstr(candidate),
-            te,
-            repeat);
+            te);
     } else {
         stream_write_format(
             stream,
@@ -800,8 +798,7 @@ void subbrute_protocol_default_generate_file(
             subbrute_protocol_preset(preset),
             subbrute_protocol_file(file),
             bits,
-            furi_string_get_cstr(candidate),
-            repeat);
+            furi_string_get_cstr(candidate));
     }
 
     furi_string_free(candidate);
@@ -815,7 +812,6 @@ void subbrute_protocol_file_generate_file(
     uint64_t step,
     uint8_t bits,
     uint32_t te,
-    uint8_t repeat,
     uint8_t bit_index,
     uint64_t file_key,
     bool two_bytes) {
@@ -826,6 +822,7 @@ void subbrute_protocol_file_generate_file(
         candidate, step, bit_index, file_key, two_bytes);
 
     stream_clean(stream);
+
     if(te) {
         stream_write_format(
             stream,
@@ -835,8 +832,7 @@ void subbrute_protocol_file_generate_file(
             subbrute_protocol_file(file),
             bits,
             furi_string_get_cstr(candidate),
-            te,
-            repeat);
+            te);
     } else {
         stream_write_format(
             stream,
@@ -845,8 +841,7 @@ void subbrute_protocol_file_generate_file(
             subbrute_protocol_preset(preset),
             subbrute_protocol_file(file),
             bits,
-            furi_string_get_cstr(candidate),
-            repeat);
+            furi_string_get_cstr(candidate));
     }
 
     furi_string_free(candidate);
