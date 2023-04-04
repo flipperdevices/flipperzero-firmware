@@ -481,11 +481,12 @@ bool nrf24_read_newpacket() {
 			if(size == 0) furi_string_cat_printf(str, "%c", (char)var);
 			else {
 				char hex[9];
-				snprintf(hex, sizeof(hex), "%lX", var);
+				hex[0] = '\0';
+				add_to_str_hex_bytes(hex, (uint8_t*)&var, size);
 				if((cmd_array && cmd_array_hex) || furi_string_end_with_str(str, "0x")) furi_string_cat_str(str, hex);
 				else {
 					if(var >= 0 && var <= 9) furi_string_cat_printf(str, "%ld", var);
-					else furi_string_cat_printf(str, "%ld (%s)", var, hex + (var < 0 ? 8 - size * 2 : 0));
+					else furi_string_cat_printf(str, "%ld (%s)", var, hex);
 				}
 			}
 			if(cmd_array) {
@@ -970,23 +971,24 @@ static void save_batch(void)
 		if(p2 && *(p2-1) != '*') {	// skip string
 			if(*(p2-1) == ']') { // array
 				char *p3 = strchr(p, '[');
-				if(p3 == NULL) p3 = p2;
-				stream_write(file_stream, (uint8_t*)p, p3 - p);
-				stream_write_cstring(file_stream, "={");
-				p = (p2 += 2);
-				do {
-					while(is_digit(p2, true) || *p2 == 'x') p2++;
-					stream_write(file_stream, (uint8_t*)p, p2 - p);
-					char c = *p2;
-					if(c == '\0') break;
-					if(c != ',') {
-						p2 = strchr(p2, ',');
-						if(p2 == NULL) break;
-					}
-					stream_write_char(file_stream, ',');
-					p = ++p2;
-				} while(1);
-				stream_write_char(file_stream, '}');
+				if(p3) {
+					stream_write(file_stream, (uint8_t*)p, p3 - p - (*(p3-2) == '*' ? 2 : 0));
+					stream_write_cstring(file_stream, "={");
+					p = (p2 += 2);
+					do {
+						while(is_digit(p2, true) || *p2 == 'x') p2++;
+						stream_write(file_stream, (uint8_t*)p, p2 - p);
+						char c = *p2;
+						if(c == '\0') break;
+						if(c != ',') {
+							p2 = strchr(p2, ',');
+							if(p2 == NULL) break;
+						}
+						stream_write_char(file_stream, ',');
+						p = ++p2;
+					} while(1);
+					stream_write_char(file_stream, '}');
+				}
 			} else {
 				stream_write(file_stream, (uint8_t*)p, p2 - p - (*(p2-2) == '*' ? 2 : 0));
 				stream_write_char(file_stream, '=');
