@@ -246,7 +246,6 @@ void canvas_draw_icon_animation(
         icon_data);
 }
 
-
 void canvas_draw_u8g2_bitmap_int(
     u8g2_t* u8g2,
     u8g2_uint_t x,
@@ -260,7 +259,6 @@ void canvas_draw_u8g2_bitmap_int(
     blen = w;
     blen += 7;
     blen >>= 3;
-
 
     if(rotation && !mirror) {
         x += w + 1;
@@ -277,6 +275,7 @@ void canvas_draw_u8g2_bitmap_int(
         uint8_t color = u8g2->draw_color;
         uint8_t ncolor = (color == 0 ? 1 : 0);
         mask = 1;
+
         while(len > 0) {
             if(u8x8_pgm_read(b) & mask) {
                 u8g2->draw_color = color;
@@ -299,8 +298,10 @@ void canvas_draw_u8g2_bitmap_int(
             }
             len--;
         }
+
         u8g2->draw_color = color;
         bitmap += blen;
+
         if(mirror) {
             if(rotation) {
                 x++;
