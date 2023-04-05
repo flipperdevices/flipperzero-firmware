@@ -40,13 +40,6 @@ NfcaError nfca_listener_set_callback(
 
 NfcaError nfca_listener_sleep(NfcaListener* instance);
 
-NfcaError nfca_listener_rx(
-    NfcaListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_data_size,
-    uint16_t* rx_bits,
-    uint32_t timeout_ms);
-
 NfcaError nfca_listener_tx(NfcaListener* instance, uint8_t* tx_data, uint16_t tx_bits);
 
 NfcaError

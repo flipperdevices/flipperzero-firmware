@@ -31,36 +31,7 @@ static void nfc_cli_print_usage() {
 
 static void nfc_cli_check(Cli* cli, FuriString* args) {
     UNUSED(args);
-
-    uint8_t uid[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07};
-    uint8_t atqa[2] = {0x44, 0x00};
-    uint8_t sak = 0x08;
-    NfcaData data = {};
-    data.uid_len = sizeof(uid);
-    memcpy(data.uid, uid, data.uid_len);
-    memcpy(data.atqa, atqa, sizeof(atqa));
-    data.sak = sak;
-
-    NfcaListener* instance = nfca_listener_alloc(&data);
-    NfcaError error = NfcaErrorNone;
-    uint8_t rx_data[100] = {};
-    uint16_t rx_bits = 0;
-    uint8_t nt[4] = {0x01, 0x02, 0x03, 0x04};
-
-    while(true) {
-        error = nfca_listener_rx(instance, rx_data, sizeof(rx_data), &rx_bits, 10000);
-        if(error == NfcaErrorNone) {
-            // printf("Received %d bits\r\n", rx_bits);
-            // for(size_t i = 0; i < rx_bits / 8; i++) {
-            //     printf("%02X ", rx_data[i]);
-            // }
-            // printf("\r\n");
-            nfca_listener_tx(instance, nt, sizeof(nt) * 8);
-        }
-        if(cli_cmd_interrupt_received(cli)) break;
-    }
-
-    nfca_listener_free(instance);
+    UNUSED(cli);
 }
 
 static void nfc_cli_detect(Cli* cli, FuriString* args) {

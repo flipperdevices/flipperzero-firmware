@@ -81,13 +81,6 @@ void nfc_listener_start(Nfc* instance, NfcEventCallback callback, void* context)
 
 NfcError nfc_listener_sleep(Nfc* instance);
 
-NfcError nfc_listener_rx(
-    Nfc* instance,
-    uint8_t* rx_data,
-    uint16_t rx_data_size,
-    uint16_t* rx_bits,
-    uint32_t timeout);
-
 NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits);
 
 NfcError nfc_trx(

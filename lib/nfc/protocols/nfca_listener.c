@@ -121,26 +121,6 @@ NfcaError nfca_listener_sleep(NfcaListener* instance) {
     return nfca_listener_process_nfc_error(error);
 }
 
-NfcaError nfca_listener_rx(
-    NfcaListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_data_size,
-    uint16_t* rx_bits,
-    uint32_t timeout_ms) {
-    furi_assert(instance);
-    furi_assert(instance->nfc);
-    furi_assert(rx_data);
-    furi_assert(rx_bits);
-
-    NfcaError ret = NfcaErrorNone;
-    NfcError error = nfc_listener_rx(instance->nfc, rx_data, rx_data_size, rx_bits, timeout_ms);
-    if(error != NfcErrorNone) {
-        FURI_LOG_W(TAG, "Rx error: %d", error);
-        ret = nfca_listener_process_nfc_error(error);
-    }
-    return ret;
-}
-
 NfcaError nfca_listener_tx(NfcaListener* instance, uint8_t* tx_data, uint16_t tx_bits) {
     furi_assert(instance);
     furi_assert(tx_data);
