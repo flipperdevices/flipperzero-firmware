@@ -12,7 +12,7 @@
 #include "../../../types/nullable.h"
 #include "../generate_token/totp_scene_generate_token.h"
 
-char* TOKEN_ALGO_LIST[] = {"SHA1", "SHA256", "SHA512"};
+char* TOKEN_ALGO_LIST[] = {"SHA1", "SHA256", "SHA512", "Steam"};
 char* TOKEN_DIGITS_TEXT_LIST[] = {"5 digits", "6 digits", "8 digits"};
 TokenDigitsCount TOKEN_DIGITS_VALUE_LIST[] = {TOTP_5_DIGITS, TOTP_6_DIGITS, TOTP_8_DIGITS};
 
@@ -218,7 +218,7 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
         break;
     case InputKeyRight:
         if(scene_state->selected_control == TokenAlgoSelect) {
-            totp_roll_value_uint8_t(&scene_state->algo, 1, SHA1, SHA512, RollOverflowBehaviorRoll);
+            totp_roll_value_uint8_t(&scene_state->algo, 1, SHA1, STEAM, RollOverflowBehaviorRoll);
         } else if(scene_state->selected_control == TokenLengthSelect) {
             totp_roll_value_uint8_t(
                 &scene_state->digits_count_index, 1, 0, 2, RollOverflowBehaviorRoll);
@@ -230,7 +230,7 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
     case InputKeyLeft:
         if(scene_state->selected_control == TokenAlgoSelect) {
             totp_roll_value_uint8_t(
-                &scene_state->algo, -1, SHA1, SHA512, RollOverflowBehaviorRoll);
+                &scene_state->algo, -1, SHA1, STEAM, RollOverflowBehaviorRoll);
         } else if(scene_state->selected_control == TokenLengthSelect) {
             totp_roll_value_uint8_t(
                 &scene_state->digits_count_index, -1, 0, 2, RollOverflowBehaviorRoll);
