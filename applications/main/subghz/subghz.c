@@ -175,7 +175,7 @@ SubGhz* subghz_alloc() {
 
     subghz->txrx->preset = malloc(sizeof(SubGhzRadioPreset));
     subghz->txrx->preset->name = furi_string_alloc();
-    subghz_preset_init(
+    subghz_set_preset(
         subghz->txrx,
         "AM650",
         subghz_setting_get_default_frequency(subghz->txrx->setting),
@@ -186,7 +186,9 @@ SubGhz* subghz_alloc() {
     subghz_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
     subghz_speaker_set_state(subghz->txrx, SubGhzSpeakerStateDisable);
     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
-    subghz->txrx->history = subghz_history_alloc();
+
+    subghz->history = subghz_history_alloc();
+
     subghz->txrx->worker = subghz_worker_alloc();
     subghz->txrx->fff_data = flipper_format_string_alloc();
 
@@ -228,6 +230,9 @@ void subghz_free(SubGhz* subghz) {
     }
 
     subghz_speaker_off(subghz->txrx);
+    subghz_txrx_stop(subghz->txrx);
+    subghz_sleep(subghz->txrx);
+
 
     // Packet Test
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTestPacket);
@@ -301,7 +306,7 @@ void subghz_free(SubGhz* subghz) {
     subghz_environment_free(subghz->txrx->environment);
     subghz_worker_free(subghz->txrx->worker);
     flipper_format_free(subghz->txrx->fff_data);
-    subghz_history_free(subghz->txrx->history);
+    subghz_history_free(subghz->history);
     furi_string_free(subghz->txrx->preset->name);
     free(subghz->txrx->preset);
     free(subghz->txrx);

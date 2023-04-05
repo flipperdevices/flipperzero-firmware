@@ -37,7 +37,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
     FuriString* history_stat_str;
     history_stat_str = furi_string_alloc();
-    if(!subghz_history_get_text_space_left(subghz->txrx->history, history_stat_str)) {
+    if(!subghz_history_get_text_space_left(subghz->history, history_stat_str)) {
         FuriString* frequency_str;
         FuriString* modulation_str;
 
@@ -76,19 +76,20 @@ static void subghz_scene_add_to_history_callback(
     SubGhz* subghz = context;
     FuriString* str_buff;
     str_buff = furi_string_alloc();
-
-    if(subghz_history_add_to_history(subghz->txrx->history, decoder_base, subghz->txrx->preset)) {
+    
+    SubGhzRadioPreset preset = subghz_get_preset(subghz->txrx);
+    if(subghz_history_add_to_history(subghz->history, decoder_base, &preset)) {
         furi_string_reset(str_buff);
 
         subghz->state_notifications = SubGhzNotificationStateRxDone;
 
         subghz_history_get_text_item_menu(
-            subghz->txrx->history, str_buff, subghz_history_get_item(subghz->txrx->history) - 1);
+            subghz->history, str_buff, subghz_history_get_item(subghz->history) - 1);
         subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
             furi_string_get_cstr(str_buff),
             subghz_history_get_type_protocol(
-                subghz->txrx->history, subghz_history_get_item(subghz->txrx->history) - 1));
+                subghz->history, subghz_history_get_item(subghz->history) - 1));
 
         subghz_scene_receiver_update_statusbar(subghz);
     }
@@ -104,9 +105,9 @@ void subghz_scene_receiver_on_enter(void* context) {
     str_buff = furi_string_alloc();
 
     if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateIDLE) {
-        subghz_preset_init(
-            subghz->txrx, "AM650", subghz_setting_get_default_frequency(subghz->txrx->setting), NULL, 0);
-        subghz_history_reset(subghz->txrx->history);
+        subghz_set_preset(
+            subghz->txrx, "AM650", subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)), NULL, 0);
+        subghz_history_reset(subghz->history);
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
     }
 
@@ -114,13 +115,13 @@ void subghz_scene_receiver_on_enter(void* context) {
 
     //Load history to receiver
     subghz_view_receiver_exit(subghz->subghz_receiver);
-    for(uint8_t i = 0; i < subghz_history_get_item(subghz->txrx->history); i++) {
+    for(uint8_t i = 0; i < subghz_history_get_item(subghz->history); i++) {
         furi_string_reset(str_buff);
-        subghz_history_get_text_item_menu(subghz->txrx->history, str_buff, i);
+        subghz_history_get_text_item_menu(subghz->history, str_buff, i);
         subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
             furi_string_get_cstr(str_buff),
-            subghz_history_get_type_protocol(subghz->txrx->history, i));
+            subghz_history_get_type_protocol(subghz->history, i));
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateAddKey);
     }
     furi_string_free(str_buff);
@@ -131,12 +132,7 @@ void subghz_scene_receiver_on_enter(void* context) {
         subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
 
     subghz->state_notifications = SubGhzNotificationStateRx;
-    subghz_txrx_stop(subghz->txrx);
-    subghz_begin(
-        subghz->txrx,
-        subghz_setting_get_preset_data_by_name(
-            subghz->txrx->setting, furi_string_get_cstr(subghz->txrx->preset->name)));
-    subghz_rx(subghz->txrx, subghz->txrx->preset->frequency);
+    subghz_rx_start(subghz->txrx);
     subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->idx_menu_chosen);
 
     //to use a universal decoder, we are looking for a link to it
@@ -163,10 +159,10 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
-                subghz_preset_init(
+                subghz_set_preset(
                     subghz->txrx,
                     "AM650",
-                    subghz_setting_get_default_frequency(subghz->txrx->setting),
+                    subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),
                     NULL,
                     0);
                 scene_manager_search_and_switch_to_previous_scene(

@@ -138,10 +138,10 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
-                subghz_preset_init(
+                subghz_set_preset(
                     subghz->txrx,
                     "AM650",
-                    subghz_setting_get_default_frequency(subghz->txrx->setting),
+                    subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),
                     NULL,
                     0);
                 if(!scene_manager_search_and_switch_to_previous_scene(
@@ -207,7 +207,6 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 //start send
                 subghz->state_notifications = SubGhzNotificationStateIDLE;
 
-                subghz_txrx_stop(subghz->txrx);
                 if(!subghz_tx_start(subghz->txrx, subghz_txtx_get_fff_data(subghz->txrx))) {
                     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateBack);
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
@@ -273,20 +272,13 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz_rx_key_state_get(subghz) != SubGhzRxKeyStateIDLE) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
+                SubGhzRadioPreset preset = subghz_get_preset(subghz->txrx);
                 if(subghz_protocol_raw_save_to_file_init(
                        (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx),
                        RAW_FILE_NAME,
-                       subghz->txrx->preset)) {
+                       &preset)) {
                     DOLPHIN_DEED(DolphinDeedSubGhzRawRec);
-                    if((subghz_txrx_get_state(subghz->txrx) == SubGhzTxRxStateIDLE) ||
-                       (subghz_txrx_get_state(subghz->txrx) == SubGhzTxRxStateSleep)) {
-                        subghz_begin(
-                            subghz->txrx,
-                            subghz_setting_get_preset_data_by_name(
-                                subghz->txrx->setting,
-                                furi_string_get_cstr(subghz->txrx->preset->name)));
-                        subghz_rx(subghz->txrx, subghz->txrx->preset->frequency);
-                    }
+                    subghz_rx_start(subghz->txrx);
                     subghz->state_notifications = SubGhzNotificationStateRx;
                     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateAddKey);
                 } else {
@@ -331,7 +323,8 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_read_raw_add_data_rssi(
                 subghz->subghz_read_raw, ret_rssi.current_rssi, ret_rssi.threshol_level);
             subghz_protocol_raw_save_to_file_pause(
-                (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx), !ret_rssi.threshol_level);
+                (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx),
+                !ret_rssi.threshol_level);
             break;
         case SubGhzNotificationStateTx:
             notification_message(subghz->notifications, &sequence_blink_magenta_10);

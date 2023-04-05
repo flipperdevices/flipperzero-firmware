@@ -89,7 +89,8 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
             break;
         }
 
-        furi_string_set_str(temp_str, subghz_set_preset(subghz->txrx, furi_string_get_cstr(temp_str)));
+        furi_string_set_str(
+            temp_str, subghz_get_name_preset(subghz->txrx, furi_string_get_cstr(temp_str)));
         if(temp_str == NULL) {
             break;
         }
@@ -110,12 +111,13 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         }
         size_t preset_index = subghz_setting_get_inx_preset_by_name(
             subghz_txrx_get_setting(subghz->txrx), furi_string_get_cstr(temp_str));
-        subghz_preset_init(
+        subghz_set_preset(
             subghz->txrx,
             furi_string_get_cstr(temp_str),
             temp_data32,
             subghz_setting_get_preset_data(subghz_txrx_get_setting(subghz->txrx), preset_index),
-            subghz_setting_get_preset_data_size(subghz_txrx_get_setting(subghz->txrx), preset_index));
+            subghz_setting_get_preset_data_size(
+                subghz_txrx_get_setting(subghz->txrx), preset_index));
 
         //Load protocol
         if(!flipper_format_read_string(fff_data_file, "Protocol", temp_str)) {
@@ -136,7 +138,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         if(subghz_txrx_load_decoder_by_name_protocol(
                subghz->txrx, furi_string_get_cstr(temp_str))) {
             SubGhzProtocolStatus status = subghz_protocol_decoder_base_deserialize(
-                subghz_txrx_get_decoder(subghz->txrx), subghz->txrx->fff_data);
+                subghz_txrx_get_decoder(subghz->txrx), subghz_txtx_get_fff_data(subghz->txrx));
             if(status != SubGhzProtocolStatusOk) {
                 load_key_state = SubGhzLoadKeyStateProtocolDescriptionErr;
                 break;
