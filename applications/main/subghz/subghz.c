@@ -163,24 +163,28 @@ SubGhz* subghz_alloc() {
         SubGhzViewIdStatic,
         subghz_test_static_get_view(subghz->subghz_test_static));
 
-    //init setting
-    subghz->setting = subghz_setting_alloc();
-    subghz_setting_load(subghz->setting, EXT_PATH("subghz/assets/setting_user"));
-
     //init threshold rssi
     subghz->threshold_rssi = subghz_threshold_rssi_alloc();
 
-    //init Worker & Protocol & History & KeyBoard
+    //init & Setting Worker & Protocol & History & KeyBoard
     subghz_unlock(subghz);
     subghz->txrx = malloc(sizeof(SubGhzTxRx));
+
+    subghz->txrx->setting = subghz_setting_alloc();
+    subghz_setting_load(subghz->txrx->setting, EXT_PATH("subghz/assets/setting_user"));
+
     subghz->txrx->preset = malloc(sizeof(SubGhzRadioPreset));
     subghz->txrx->preset->name = furi_string_alloc();
     subghz_preset_init(
-        subghz, "AM650", subghz_setting_get_default_frequency(subghz->setting), NULL, 0);
+        subghz->txrx,
+        "AM650",
+        subghz_setting_get_default_frequency(subghz->txrx->setting),
+        NULL,
+        0);
 
     subghz->txrx->txrx_state = SubGhzTxRxStateSleep;
-    subghz_hopper_set_state(subghz, SubGhzHopperStateOFF);
-    subghz_speaker_set_state(subghz, SubGhzSpeakerStateDisable);
+    subghz_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
+    subghz_speaker_set_state(subghz->txrx, SubGhzSpeakerStateDisable);
     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
     subghz->txrx->history = subghz_history_alloc();
     subghz->txrx->worker = subghz_worker_alloc();
@@ -205,6 +209,8 @@ SubGhz* subghz_alloc() {
         subghz->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
     subghz_worker_set_context(subghz->txrx->worker, subghz->txrx->receiver);
 
+    subghz_txrx_need_save_callback_set(subghz->txrx, subghz_save_to_file, subghz);
+
     //Init Error_str
     subghz->error_str = furi_string_alloc();
 
@@ -221,7 +227,7 @@ void subghz_free(SubGhz* subghz) {
         subghz->rpc_ctx = NULL;
     }
 
-    subghz_speaker_off(subghz);
+    subghz_speaker_off(subghz->txrx);
 
     // Packet Test
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTestPacket);
@@ -285,7 +291,7 @@ void subghz_free(SubGhz* subghz) {
     subghz->gui = NULL;
 
     // setting
-    subghz_setting_free(subghz->setting);
+    subghz_setting_free(subghz->txrx->setting);
 
     // threshold rssi
     subghz_threshold_rssi_free(subghz->threshold_rssi);

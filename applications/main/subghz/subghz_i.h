@@ -39,34 +39,9 @@
 
 #include "helpers/subghz_threshold_rssi.h"
 
+#include "subghz_radio.h"
+
 #define SUBGHZ_MAX_LEN_NAME 64
-
-struct SubGhzTxRx {
-    SubGhzWorker* worker;
-
-    SubGhzEnvironment* environment;
-    SubGhzReceiver* receiver;
-    SubGhzTransmitter* transmitter;
-    SubGhzProtocolFlag filter;
-    SubGhzProtocolDecoderBase* decoder_result;
-    FlipperFormat* fff_data;
-
-    SubGhzRadioPreset* preset;
-    SubGhzHistory* history;
-    uint16_t idx_menu_chosen;
-
-    uint8_t hopper_timeout;
-    uint8_t hopper_idx_frequency;
-    SubGhzHopperState hopper_state;
-
-    SubGhzTxRxState txrx_state;
-
-    SubGhzSpeakerState speaker_state;
-
-    SubGhzLoadTypeFile load_type_file;
-};
-
-typedef struct SubGhzTxRx SubGhzTxRx;
 
 struct SubGhz {
     Gui* gui;
@@ -97,34 +72,21 @@ struct SubGhz {
     SubGhzTestCarrier* subghz_test_carrier;
     SubGhzTestPacket* subghz_test_packet;
 
-    SubGhzSetting* setting;
-
     FuriString* error_str;
     SubGhzLock lock;
     SubGhzThresholdRssi* threshold_rssi;
     SubGhzRxKeyState rx_key_state;
-
+    uint16_t idx_menu_chosen;
+    SubGhzLoadTypeFile load_type_file;
+    
     void* rpc_ctx;
 };
 
-void subghz_preset_init(
-    void* context,
-    const char* preset_name,
-    uint32_t frequency,
-    uint8_t* preset_data,
-    size_t preset_data_size);
-bool subghz_set_preset(SubGhz* subghz, const char* preset);
 void subghz_get_frequency_modulation(SubGhz* subghz, FuriString* frequency, FuriString* modulation);
-void subghz_begin(SubGhz* subghz, uint8_t* preset_data);
-uint32_t subghz_rx(SubGhz* subghz, uint32_t frequency);
-void subghz_rx_end(SubGhz* subghz);
-void subghz_sleep(SubGhz* subghz);
 
 void subghz_blink_start(SubGhz* instance);
 void subghz_blink_stop(SubGhz* instance);
 
-bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format);
-void subghz_tx_stop(SubGhz* subghz);
 void subghz_dialog_message_show_only_rx(SubGhz* subghz);
 bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog);
 bool subghz_get_next_name_file(SubGhz* subghz, uint8_t max_len);
@@ -132,27 +94,15 @@ bool subghz_save_protocol_to_file(
     SubGhz* subghz,
     FlipperFormat* flipper_format,
     const char* dev_file_name);
+
+void subghz_save_to_file(void* context);
+
 bool subghz_load_protocol_from_file(SubGhz* subghz);
 bool subghz_rename_file(SubGhz* subghz);
 bool subghz_file_available(SubGhz* subghz);
 bool subghz_delete_file(SubGhz* subghz);
 void subghz_file_name_clear(SubGhz* subghz);
 bool subghz_path_is_file(FuriString* path);
-uint32_t subghz_random_serial(void);
-void subghz_hopper_update(SubGhz* subghz);
-void subghz_speaker_on(SubGhz* subghz);
-void subghz_speaker_off(SubGhz* subghz);
-void subghz_speaker_mute(SubGhz* subghz);
-void subghz_speaker_unmute(SubGhz* subghz);
-void subghz_speaker_set_state(SubGhz* subghz, SubGhzSpeakerState state);
-SubGhzSpeakerState subghz_speaker_get_state(SubGhz* subghz);
-
-void subghz_txrx_stop(SubGhz* subghz);
-SubGhzTxRxState subghz_txrx_get_state(SubGhz* subghz);
-SubGhzHopperState subghz_hopper_get_state(SubGhz* subghz);
-void subghz_hopper_set_state(SubGhz* subghz, SubGhzHopperState state);
-void subghz_hopper_remove_pause(SubGhz* subghz);
-void subghz_subghz_hopper_set_pause(SubGhz* subghz);
 
 void subghz_lock(SubGhz* subghz);
 void subghz_unlock(SubGhz* subghz);
@@ -162,39 +112,3 @@ SubGhzLoadTypeFile subghz_get_load_type_file(SubGhz* subghz);
 
 void subghz_rx_key_state_set(SubGhz* subghz, SubGhzRxKeyState state);
 SubGhzRxKeyState subghz_rx_key_state_get(SubGhz* subghz);
-
-bool subghz_gen_data_protocol(
-    void* context,
-    const char* preset_name,
-    uint32_t frequency,
-    const char* protocol_name,
-    uint64_t key,
-    uint32_t bit);
-
-bool subghz_gen_data_protocol_and_te(
-    SubGhz* subghz,
-    const char* preset_name,
-    uint32_t frequency,
-    const char* protocol_name,
-    uint64_t key,
-    uint32_t bit,
-    uint32_t te);
-
-bool subghz_gen_keelog_protocol(
-    SubGhz* subghz,
-    const char* name_preset,
-    uint32_t frequency,
-    const char* name_sysmem,
-    uint32_t serial,
-    uint8_t btn,
-    uint16_t cnt);
-
-bool subghz_gen_secplus_v2_protocol(
-    SubGhz* subghz,
-    const char* name_preset,
-    uint32_t frequency,
-    uint32_t serial,
-    uint8_t btn,
-    uint32_t cnt);
-
-bool subghz_gen_secplus_v1_protocol(SubGhz* subghz, const char* name_preset, uint32_t frequency);

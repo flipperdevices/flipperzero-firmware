@@ -105,7 +105,7 @@ void subghz_scene_receiver_on_enter(void* context) {
 
     if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateIDLE) {
         subghz_preset_init(
-            subghz, "AM650", subghz_setting_get_default_frequency(subghz->setting), NULL, 0);
+            subghz->txrx, "AM650", subghz_setting_get_default_frequency(subghz->txrx->setting), NULL, 0);
         subghz_history_reset(subghz->txrx->history);
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
     }
@@ -131,13 +131,13 @@ void subghz_scene_receiver_on_enter(void* context) {
         subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
 
     subghz->state_notifications = SubGhzNotificationStateRx;
-    subghz_txrx_stop(subghz);
+    subghz_txrx_stop(subghz->txrx);
     subghz_begin(
-        subghz,
+        subghz->txrx,
         subghz_setting_get_preset_data_by_name(
-            subghz->setting, furi_string_get_cstr(subghz->txrx->preset->name)));
-    subghz_rx(subghz, subghz->txrx->preset->frequency);
-    subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->txrx->idx_menu_chosen);
+            subghz->txrx->setting, furi_string_get_cstr(subghz->txrx->preset->name)));
+    subghz_rx(subghz->txrx, subghz->txrx->preset->frequency);
+    subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->idx_menu_chosen);
 
     //to use a universal decoder, we are looking for a link to it
     subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
@@ -155,9 +155,9 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
         case SubGhzCustomEventViewReceiverBack:
             // Stop CC1101 Rx
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            subghz_txrx_stop(subghz);
-            subghz_hopper_set_state(subghz, SubGhzHopperStateOFF);
-            subghz->txrx->idx_menu_chosen = 0;
+            subghz_txrx_stop(subghz->txrx);
+            subghz_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
+            subghz->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
 
             if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) {
@@ -166,9 +166,9 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             } else {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
                 subghz_preset_init(
-                    subghz,
+                    subghz->txrx,
                     "AM650",
-                    subghz_setting_get_default_frequency(subghz->setting),
+                    subghz_setting_get_default_frequency(subghz->txrx->setting),
                     NULL,
                     0);
                 scene_manager_search_and_switch_to_previous_scene(
@@ -177,7 +177,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOK:
-            subghz->txrx->idx_menu_chosen =
+            subghz->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
             DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
@@ -185,7 +185,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             break;
         case SubGhzCustomEventViewReceiverConfig:
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            subghz->txrx->idx_menu_chosen =
+            subghz->idx_menu_chosen =
                 subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             consumed = true;
@@ -202,8 +202,8 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             break;
         }
     } else if(event.type == SceneManagerEventTypeTick) {
-        if(subghz_hopper_get_state(subghz) != SubGhzHopperStateOFF) {
-            subghz_hopper_update(subghz);
+        if(subghz_hopper_get_state(subghz->txrx) != SubGhzHopperStateOFF) {
+            subghz_hopper_update(subghz->txrx);
             subghz_scene_receiver_update_statusbar(subghz);
         }
 

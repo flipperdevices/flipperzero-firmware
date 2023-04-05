@@ -22,7 +22,7 @@ bool subghz_scene_transmitter_update_data_show(void* context) {
         uint8_t show_button = 0;
 
         if(subghz_protocol_decoder_base_deserialize(
-               subghz->txrx->decoder_result, subghz->txrx->fff_data) == SubGhzProtocolStatusOk) {
+               subghz->txrx->decoder_result, subghz_txtx_get_fff_data(subghz->txrx)) == SubGhzProtocolStatusOk) {
             subghz_protocol_decoder_base_get_string(subghz->txrx->decoder_result, key_str);
 
             if((subghz->txrx->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==
@@ -65,8 +65,8 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventViewTransmitterSendStart) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            subghz_txrx_stop(subghz);
-            if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
+            subghz_txrx_stop(subghz->txrx);
+            if(!subghz_tx_start(subghz->txrx, subghz_txtx_get_fff_data(subghz->txrx))) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
             } else {
                 subghz->state_notifications = SubGhzNotificationStateTx;
@@ -76,7 +76,7 @@ bool subghz_scene_transmitter_on_event(void* context, SceneManagerEvent event) {
             return true;
         } else if(event.event == SubGhzCustomEventViewTransmitterSendStop) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            subghz_txrx_stop(subghz);
+            subghz_txrx_stop(subghz->txrx);
             return true;
         } else if(event.event == SubGhzCustomEventViewTransmitterBack) {
             subghz->state_notifications = SubGhzNotificationStateIDLE;
