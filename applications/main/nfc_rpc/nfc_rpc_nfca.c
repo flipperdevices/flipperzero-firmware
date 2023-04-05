@@ -48,7 +48,7 @@ static void nfc_rpc_nfca_read(Nfc_Main* cmd, void* context) {
 
     NfcaData nfca_data = {};
     NfcaPoller* nfca_poller = nfca_poller_alloc();
-    NfcaError error = nfca_poller_activate(nfca_poller, &nfca_data);
+    NfcaError error = nfca_poller_activate_sync(nfca_poller, &nfca_data);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_read_resp_tag;

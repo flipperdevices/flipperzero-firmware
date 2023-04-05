@@ -88,7 +88,7 @@ NfcaListener* nfca_listener_alloc(NfcaData* data) {
         instance->data.uid_len,
         instance->data.atqa,
         instance->data.sak);
-    nfc_listener_start(instance->nfc, nfca_listener_event_handler, instance);
+    nfc_start_worker(instance->nfc, nfca_listener_event_handler, instance);
 
     return instance;
 }

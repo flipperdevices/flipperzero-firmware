@@ -42,6 +42,8 @@ struct NfcaPoller {
     NfcaPollerState state;
     NfcaPollerColRes col_res;
     NfcaData data;
+    NfcaPollerEventCallback callback;
+    void* context;
 };
 
 static NfcaError nfca_poller_process_error(NfcError error) {
@@ -141,8 +143,57 @@ void nfca_poller_free(NfcaPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
+    nfc_poller_stop(instance->nfc);
     nfc_free(instance->nfc);
     free(instance);
+}
+
+static void nfca_poller_event_callback(NfcEvent event, void* context) {
+    furi_assert(context);
+
+    NfcaPoller* instance = context;
+    furi_assert(instance->callback);
+
+    NfcaPollerEvent nfca_poller_event = {};
+    if(event.type == NfcEventTypePollerReady) {
+        if(instance->state != NfcaPollerActivated) {
+            FURI_LOG_I(TAG, "nfca_poller_event_callback, NfcEventTypePollerReady event");
+            NfcaData data = {};
+            NfcaError error = nfca_poller_activate(instance, &data);
+            if(error == NfcaErrorNone) {
+                nfca_poller_event.type = NfcaPollerEventTypeActivated;
+            } else {
+                nfca_poller_event.type = NfcaPollerEventTypeError;
+            }
+            nfca_poller_event.data.error = error;
+            instance->callback(nfca_poller_event, instance->context);
+        } else {
+            nfca_poller_event.type = NfcaPollerEventTypeReady;
+            nfca_poller_event.data.error = NfcaErrorNone;
+            instance->callback(nfca_poller_event, instance->context);
+        }
+    }
+}
+
+NfcaError
+    nfca_poller_start(NfcaPoller* instance, NfcaPollerEventCallback callback, void* context) {
+    furi_assert(instance);
+    furi_assert(callback);
+
+    instance->callback = callback;
+    instance->context = context;
+    nfc_start_worker(instance->nfc, nfca_poller_event_callback, instance);
+
+    return NfcaErrorNone;
+}
+
+NfcaError nfca_poller_get_data(NfcaPoller* instance, NfcaData* data) {
+    furi_assert(instance);
+    furi_assert(data);
+
+    *data = instance->data;
+
+    return NfcaErrorNone;
 }
 
 NfcaError nfca_poller_check_presence(NfcaPoller* instance) {
@@ -316,6 +367,31 @@ NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
     }
 
     return ret;
+}
+
+typedef struct {
+    FuriThreadId thread_id;
+    NfcaError error;
+} NfcaPollerContext;
+
+static void nfca_poller_activate_sync_callback(NfcaPollerEvent event, void* context) {
+    FURI_LOG_W(TAG, "nfca_poller_activate_sync_callback: %d event", event.type);
+    NfcaPollerContext* nfca_poller_context = context;
+    nfca_poller_context->error = event.data.error;
+    furi_thread_flags_set(nfca_poller_context->thread_id, 1);
+}
+
+NfcaError nfca_poller_activate_sync(NfcaPoller* instance, NfcaData* nfca_data) {
+    furi_assert(instance);
+    NfcaPollerContext context = {};
+    context.thread_id = furi_thread_get_current_id();
+    nfca_poller_start(instance, nfca_poller_activate_sync_callback, &context);
+    furi_thread_flags_wait(1, FuriFlagWaitAny, FuriWaitForever);
+    furi_thread_flags_clear(1);
+    if(context.error == NfcaErrorNone) {
+        *nfca_data = instance->data;
+    }
+    return context.error;
 }
 
 NfcaError nfca_poller_txrx(

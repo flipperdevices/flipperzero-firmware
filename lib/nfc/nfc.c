@@ -14,6 +14,9 @@ typedef enum {
     NfcStateFieldOff,
 
     NfcStateListenStarted,
+    NfcStatePollerReady,
+    NfcStateStopRequested,
+    NfcStateStopped,
 } NfcState;
 
 typedef enum {
@@ -26,7 +29,13 @@ typedef enum {
     NfcCommStateFailed,
 } NfcCommState;
 
+typedef enum {
+    NfcGenericModePoller,
+    NfcGenericModeListener,
+} NfcGenericMode;
+
 struct Nfc {
+    NfcGenericMode mode;
     NfcState state;
     NfcCommState comm_state;
     uint32_t fdt_listen_fc;
@@ -52,8 +61,9 @@ static NfcError nfc_process_hal_error(FHalNfcError error) {
     return err;
 }
 
-static int32_t nfc_worker(void* context) {
+static int32_t nfc_worker_listener(void* context) {
     furi_assert(context);
+
     Nfc* instance = context;
     uint8_t rx_data[256];
     uint16_t rx_bits = 0;
@@ -96,6 +106,31 @@ static int32_t nfc_worker(void* context) {
     return 0;
 }
 
+static int32_t nfc_worker_poller(void* context) {
+    furi_assert(context);
+
+    Nfc* instance = context;
+    furi_assert(instance->state == NfcStateConfigured);
+    furi_assert(instance->callback);
+
+    f_hal_nfc_poller_field_on();
+    if(instance->guard_time_us) {
+        f_hal_nfc_timer_block_tx_start_us(instance->guard_time_us);
+        FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
+        furi_assert(event & FHalNfcEventTimerBlockTxExpired);
+    }
+
+    instance->state = NfcStatePollerReady;
+    
+    while(instance->state == NfcStatePollerReady) {
+        NfcEvent event = {.type = NfcEventTypePollerReady};
+        instance->callback(event, instance->context);
+        furi_delay_ms(1);
+    }
+
+    return 0;
+}
+
 Nfc* nfc_alloc() {
     Nfc* instance = malloc(sizeof(Nfc));
     instance->state = NfcStateIdle;
@@ -104,7 +139,6 @@ Nfc* nfc_alloc() {
 
     instance->worker_thread = furi_thread_alloc();
     furi_thread_set_name(instance->worker_thread, "NfcWorker");
-    furi_thread_set_callback(instance->worker_thread, nfc_worker);
     furi_thread_set_context(instance->worker_thread, instance);
     furi_thread_set_priority(instance->worker_thread, FuriThreadPriorityHighest);
     furi_thread_set_stack_size(instance->worker_thread, 2048);
@@ -114,9 +148,12 @@ Nfc* nfc_alloc() {
 
 void nfc_free(Nfc* instance) {
     furi_assert(instance);
+    // TODO REWORK!!!
     if(instance->state == NfcStateListenStarted) {
         f_hal_nfc_abort();
         furi_thread_join(instance->worker_thread);
+    } else if(instance->state == NfcStatePollerReady) {
+        nfc_poller_stop(instance);
     }
     furi_thread_free(instance->worker_thread);
     f_hal_nfc_low_power_mode_start();
@@ -124,20 +161,14 @@ void nfc_free(Nfc* instance) {
     free(instance);
 }
 
-void nfc_set_event_callback(Nfc* instance, NfcEventCallback callback, void* context) {
-    furi_assert(instance);
-    furi_assert(callback);
-
-    instance->callback = callback;
-    instance->context = context;
-}
-
 void nfc_config(Nfc* instance, NfcMode mode) {
     furi_assert(instance);
     if(mode == NfcModeNfcaPoller) {
         f_hal_nfc_set_mode(FHalNfcModeNfcaPoller, FHalNfcBitrate106);
+        instance->mode = NfcGenericModePoller;
         instance->state = NfcStateConfigured;
     } else if(mode == NfcModeNfcaListener) {
+        instance->mode = NfcGenericModeListener;
         f_hal_nfc_set_mode(FHalNfcModeNfcaListener, FHalNfcBitrate106);
         instance->state = NfcStateConfigured;
     }
@@ -180,6 +211,54 @@ void nfc_set_guard_time_us(Nfc* instance, uint32_t guard_time_us) {
 void nfc_set_mask_receive_time_fc(Nfc* instance, uint32_t mask_rx_time_fc) {
     furi_assert(instance);
     instance->mask_rx_time_fc = mask_rx_time_fc;
+}
+
+void nfc_start_worker(Nfc* instance, NfcEventCallback callback, void* context) {
+    furi_assert(instance);
+    furi_assert(instance->state == NfcStateConfigured);
+    furi_assert(instance->worker_thread);
+    furi_assert(callback);
+
+    instance->callback = callback;
+    instance->context = context;
+    if(instance->mode == NfcGenericModePoller) {
+        furi_thread_set_callback(instance->worker_thread, nfc_worker_poller);
+    } else {
+        furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
+    }
+    furi_thread_start(instance->worker_thread);
+    instance->state = NfcStateListenStarted;
+    instance->comm_state = NfcCommStateIdle;
+}
+
+void nfc_poller_stop(Nfc* instance) {
+    furi_assert(instance);
+    // TODO add Mutex for nfc state
+    instance->state = NfcStateStopRequested;
+    furi_thread_join(instance->worker_thread);    
+}
+
+NfcError nfc_listener_sleep(Nfc* instance) {
+    furi_assert(instance);
+    furi_assert(instance->state == NfcStateListenStarted);
+
+    f_hal_nfc_listener_sleep();
+
+    return NfcErrorNone;
+}
+
+NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits) {
+    furi_assert(instance);
+    furi_assert(tx_data);
+
+    NfcError ret = NfcErrorNone;
+    FHalNfcError error = f_hal_nfc_listener_tx(tx_data, tx_bits);
+    if(error != FHalNfcErrorNone) {
+        FURI_LOG_E(TAG, "Failed in listener TX");
+        ret = nfc_process_hal_error(error);
+    }
+
+    return ret;
 }
 
 static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
@@ -397,42 +476,6 @@ NfcError nfc_iso13444a_sdd_frame(
             break;
         }
     } while(false);
-
-    return ret;
-}
-
-void nfc_listener_start(Nfc* instance, NfcEventCallback callback, void* context) {
-    furi_assert(instance);
-    furi_assert(instance->state == NfcStateConfigured);
-    furi_assert(instance->worker_thread);
-    furi_assert(callback);
-
-    instance->callback = callback;
-    instance->context = context;
-    furi_thread_start(instance->worker_thread);
-    instance->state = NfcStateListenStarted;
-    instance->comm_state = NfcCommStateIdle;
-}
-
-NfcError nfc_listener_sleep(Nfc* instance) {
-    furi_assert(instance);
-    furi_assert(instance->state == NfcStateListenStarted);
-
-    f_hal_nfc_listener_sleep();
-
-    return NfcErrorNone;
-}
-
-NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits) {
-    furi_assert(instance);
-    furi_assert(tx_data);
-
-    NfcError ret = NfcErrorNone;
-    FHalNfcError error = f_hal_nfc_listener_tx(tx_data, tx_bits);
-    if(error != FHalNfcErrorNone) {
-        FURI_LOG_E(TAG, "Failed in listener TX");
-        ret = nfc_process_hal_error(error);
-    }
 
     return ret;
 }

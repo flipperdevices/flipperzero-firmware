@@ -10,13 +10,39 @@ extern "C" {
 
 typedef struct NfcaPoller NfcaPoller;
 
+typedef enum {
+    NfcaPollerEventTypeError,
+    NfcaPollerEventTypeActivated,
+    NfcaPollerEventTypeReady,
+} NfcaPollerEventType;
+
+typedef struct {
+    NfcaError error;
+} NfcaPollerEventData;
+
+typedef struct {
+    NfcaPollerEventType type;
+    NfcaPollerEventData data;
+} NfcaPollerEvent;
+
+typedef void (*NfcaPollerEventCallback)(NfcaPollerEvent event, void* context);
+
 NfcaPoller* nfca_poller_alloc();
 
 void nfca_poller_free(NfcaPoller* instance);
 
+NfcaError
+    nfca_poller_start(NfcaPoller* instance, NfcaPollerEventCallback callback, void* context);
+
+NfcaError nfca_poller_get_data(NfcaPoller* instance, NfcaData* data);
+
+// Syncronous API
+
 NfcaError nfca_poller_check_presence(NfcaPoller* instance);
 
 NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data);
+
+NfcaError nfca_poller_activate_sync(NfcaPoller* instance, NfcaData* nfca_data);
 
 NfcaError nfca_poller_halt(NfcaPoller* instance);
 
