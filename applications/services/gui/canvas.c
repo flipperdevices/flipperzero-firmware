@@ -246,7 +246,7 @@ void canvas_draw_icon_animation(
         icon_data);
 }
 
-void canvas_draw_u8g2_bitmap_int(
+static void canvas_draw_u8g2_bitmap_int(
     u8g2_t* u8g2,
     u8g2_uint_t x,
     u8g2_uint_t y,
