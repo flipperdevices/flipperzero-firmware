@@ -4,9 +4,9 @@
 
 static DSTATUS driver_check_status(BYTE lun) {
     UNUSED(lun);
-    DSTATUS status = STA_NOINIT;
-    if(sd_get_card_state() == SdSpiStatusOK) {
-        status &= ~STA_NOINIT;
+    DSTATUS status = 0;
+    if(sd_get_card_state() != SdSpiStatusOK) {
+        status = STA_NOINIT;
     }
 
     return status;
