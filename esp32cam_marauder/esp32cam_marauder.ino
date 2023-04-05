@@ -130,6 +130,10 @@ void backlightOff() {
 
 void setup()
 {
+  // Start with the flashlight off
+  pinMode(4, OUTPUT);
+  digitalWrite(4, LOW);
+
   WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0); //disable brownout detector
 
   Serial.begin(230400);
