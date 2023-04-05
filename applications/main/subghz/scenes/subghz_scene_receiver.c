@@ -44,7 +44,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
         frequency_str = furi_string_alloc();
         modulation_str = furi_string_alloc();
 
-        subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
+        subghz_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
 
         subghz_view_receiver_add_data_statusbar(
             subghz->subghz_receiver,
@@ -140,9 +140,7 @@ void subghz_scene_receiver_on_enter(void* context) {
     subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->idx_menu_chosen);
 
     //to use a universal decoder, we are looking for a link to it
-    subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
-        subghz->txrx->receiver, SUBGHZ_PROTOCOL_BIN_RAW_NAME);
-    furi_assert(subghz->txrx->decoder_result);
+    furi_check(subghz_txrx_load_decoder_by_name_protocol(subghz->txrx, SUBGHZ_PROTOCOL_BIN_RAW_NAME));
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
 }
@@ -212,7 +210,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
 
         subghz_receiver_rssi(subghz->subghz_receiver, ret_rssi.current_rssi);
         subghz_protocol_decoder_bin_raw_data_input_rssi(
-            (SubGhzProtocolDecoderBinRAW*)subghz->txrx->decoder_result, ret_rssi.current_rssi);
+            (SubGhzProtocolDecoderBinRAW*)subghz_txrx_get_decoder(subghz->txrx), ret_rssi.current_rssi);
 
         switch(subghz->state_notifications) {
         case SubGhzNotificationStateRx:

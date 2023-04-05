@@ -18,7 +18,8 @@ bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
             break;
         }
 
-        if(!flipper_format_read_string(subghz_txtx_get_fff_data(subghz->txrx), "File_name", temp_str)) {
+        if(!flipper_format_read_string(
+               subghz_txtx_get_fff_data(subghz->txrx), "File_name", temp_str)) {
             FURI_LOG_E(TAG, "Missing File_name");
             break;
         }
@@ -42,7 +43,7 @@ static void subghz_scene_read_raw_update_statusbar(void* context) {
     frequency_str = furi_string_alloc();
     modulation_str = furi_string_alloc();
 
-    subghz_get_frequency_modulation(subghz, frequency_str, modulation_str);
+    subghz_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
     subghz_read_raw_add_data_statusbar(
         subghz->subghz_read_raw,
         furi_string_get_cstr(frequency_str),
@@ -111,9 +112,7 @@ void subghz_scene_read_raw_on_enter(void* context) {
     //set callback view raw
     subghz_read_raw_set_callback(subghz->subghz_read_raw, subghz_scene_read_raw_callback, subghz);
 
-    subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
-        subghz->txrx->receiver, SUBGHZ_PROTOCOL_RAW_NAME);
-    furi_assert(subghz->txrx->decoder_result);
+    furi_check(subghz_txrx_load_decoder_by_name_protocol(subghz->txrx, SUBGHZ_PROTOCOL_RAW_NAME));
 
     //set filter RAW feed
     subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_RAW);
@@ -130,7 +129,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_txrx_stop(subghz->txrx);
             //Stop save file
             subghz_protocol_raw_save_to_file_stop(
-                (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
+                (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx));
             subghz->state_notifications = SubGhzNotificationStateIDLE;
             //needed save?
             if((subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) ||
@@ -245,10 +244,10 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
         case SubGhzCustomEventViewReadRAWIDLE:
             subghz_txrx_stop(subghz->txrx);
             size_t spl_count = subghz_protocol_raw_get_sample_write(
-                (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
+                (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx));
 
             subghz_protocol_raw_save_to_file_stop(
-                (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result);
+                (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx));
 
             FuriString* temp_str;
             temp_str = furi_string_alloc();
@@ -275,7 +274,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 if(subghz_protocol_raw_save_to_file_init(
-                       (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result,
+                       (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx),
                        RAW_FILE_NAME,
                        subghz->txrx->preset)) {
                     DOLPHIN_DEED(DolphinDeedSubGhzRawRec);
@@ -325,14 +324,14 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_read_raw_update_sample_write(
                 subghz->subghz_read_raw,
                 subghz_protocol_raw_get_sample_write(
-                    (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result));
+                    (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx)));
 
             SubGhzThresholdRssiRet ret_rssi =
                 subghz_threshold_rssi_check_threshold(subghz->threshold_rssi);
             subghz_read_raw_add_data_rssi(
                 subghz->subghz_read_raw, ret_rssi.current_rssi, ret_rssi.threshol_level);
             subghz_protocol_raw_save_to_file_pause(
-                (SubGhzProtocolDecoderRAW*)subghz->txrx->decoder_result, !ret_rssi.threshol_level);
+                (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx), !ret_rssi.threshol_level);
             break;
         case SubGhzNotificationStateTx:
             notification_message(subghz->notifications, &sequence_blink_magenta_10);

@@ -15,22 +15,40 @@ void subghz_preset_init(
     txrx->preset->data_size = preset_data_size;
 }
 
-bool subghz_set_preset(SubGhzTxRx* txrx, const char* preset) {
+const char* subghz_set_preset(SubGhzTxRx* txrx, const char* preset) {
+    UNUSED(txrx);
+    const char* preset_name = NULL;
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
-        furi_string_set(txrx->preset->name, "AM270");
+        preset_name = "AM270";
     } else if(!strcmp(preset, "FuriHalSubGhzPresetOok650Async")) {
-        furi_string_set(txrx->preset->name, "AM650");
+        preset_name = "AM650";
     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev238Async")) {
-        furi_string_set(txrx->preset->name, "FM238");
+        preset_name = "FM238";
     } else if(!strcmp(preset, "FuriHalSubGhzPreset2FSKDev476Async")) {
-        furi_string_set(txrx->preset->name, "FM476");
+        preset_name = "FM476";
     } else if(!strcmp(preset, "FuriHalSubGhzPresetCustom")) {
-        furi_string_set(txrx->preset->name, "CUSTOM");
+        preset_name = "CUSTOM";
     } else {
         FURI_LOG_E(TAG, "Unknown preset");
-        return false;
     }
-    return true;
+    return preset_name;
+}
+
+void subghz_get_frequency_modulation(
+    SubGhzTxRx* txrx,
+    FuriString* frequency,
+    FuriString* modulation) {
+    furi_assert(txrx);
+    if(frequency != NULL) {
+        furi_string_printf(
+            frequency,
+            "%03ld.%02ld",
+            txrx->preset->frequency / 1000000 % 1000,
+            txrx->preset->frequency / 10000 % 100);
+    }
+    if(modulation != NULL) {
+        furi_string_printf(modulation, "%.2s", furi_string_get_cstr(txrx->preset->name));
+    }
 }
 
 void subghz_begin(SubGhzTxRx* txrx, uint8_t* preset_data) {
@@ -203,7 +221,7 @@ static void subghz_tx_stop(SubGhzTxRx* txrx) {
     // notification_message(notifications, &sequence_reset_red);
 }
 
-FlipperFormat*  subghz_txtx_get_fff_data(SubGhzTxRx* txrx) {
+FlipperFormat* subghz_txtx_get_fff_data(SubGhzTxRx* txrx) {
     furi_assert(txrx);
     return txrx->fff_data;
 }
@@ -233,13 +251,10 @@ void subghz_txrx_stop(SubGhzTxRx* txrx) {
     }
 }
 
-
 SubGhzTxRxState subghz_txrx_get_state(SubGhzTxRx* txrx) {
     furi_assert(txrx);
     return txrx->txrx_state;
 }
-
-
 
 void subghz_hopper_update(SubGhzTxRx* txrx) {
     furi_assert(txrx);
@@ -269,11 +284,10 @@ void subghz_hopper_update(SubGhzTxRx* txrx) {
             return;
         }
     } else {
-       txrx->hopper_state = SubGhzHopperStateRunnig;
+        txrx->hopper_state = SubGhzHopperStateRunnig;
     }
     // Select next frequency
-    if(txrx->hopper_idx_frequency <
-       subghz_setting_get_hopper_frequency_count(txrx->setting) - 1) {
+    if(txrx->hopper_idx_frequency < subghz_setting_get_hopper_frequency_count(txrx->setting) - 1) {
         txrx->hopper_idx_frequency++;
     } else {
         txrx->hopper_idx_frequency = 0;
@@ -284,8 +298,8 @@ void subghz_hopper_update(SubGhzTxRx* txrx) {
     };
     if(txrx->txrx_state == SubGhzTxRxStateIDLE) {
         subghz_receiver_reset(txrx->receiver);
-        txrx->preset->frequency = subghz_setting_get_hopper_frequency(
-            txrx->setting, txrx->hopper_idx_frequency);
+        txrx->preset->frequency =
+            subghz_setting_get_hopper_frequency(txrx->setting, txrx->hopper_idx_frequency);
         subghz_rx(txrx, txrx->preset->frequency);
     }
 }
@@ -313,7 +327,6 @@ void subghz_subghz_hopper_set_pause(SubGhzTxRx* txrx) {
         txrx->hopper_state = SubGhzHopperStatePause;
     }
 }
-
 
 void subghz_speaker_on(SubGhzTxRx* txrx) {
     furi_assert(txrx);
@@ -366,7 +379,23 @@ SubGhzSpeakerState subghz_speaker_get_state(SubGhzTxRx* txrx) {
     return txrx->speaker_state;
 }
 
+bool subghz_txrx_load_decoder_by_name_protocol(SubGhzTxRx* txrx, const char* name_protocol) {
+    furi_assert(txrx);
+    furi_assert(name_protocol);
+    bool res = false;
+    txrx->decoder_result = NULL;
+    txrx->decoder_result =
+        subghz_receiver_search_decoder_base_by_name(txrx->receiver, name_protocol);
+    if(txrx->decoder_result) {
+        res = true;
+    }
+    return res;
+}
 
+SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* txrx) {
+    furi_assert(txrx);
+    return txrx->decoder_result;
+}
 
 //#############Create  new Key##############
 #include <lib/subghz/protocols/protocol_items.h>
@@ -405,8 +434,7 @@ bool subghz_gen_data_protocol(
         Stream* fff_data_stream = flipper_format_get_raw_stream(txrx->fff_data);
         stream_clean(fff_data_stream);
         if(subghz_protocol_decoder_base_serialize(
-               txrx->decoder_result, txrx->fff_data, txrx->preset) !=
-           SubGhzProtocolStatusOk) {
+               txrx->decoder_result, txrx->fff_data, txrx->preset) != SubGhzProtocolStatusOk) {
             FURI_LOG_E(TAG, "Unable to serialize");
             break;
         }

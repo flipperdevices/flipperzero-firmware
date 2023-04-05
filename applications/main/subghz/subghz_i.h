@@ -78,11 +78,8 @@ struct SubGhz {
     SubGhzRxKeyState rx_key_state;
     uint16_t idx_menu_chosen;
     SubGhzLoadTypeFile load_type_file;
-    
     void* rpc_ctx;
 };
-
-void subghz_get_frequency_modulation(SubGhz* subghz, FuriString* frequency, FuriString* modulation);
 
 void subghz_blink_start(SubGhz* instance);
 void subghz_blink_stop(SubGhz* instance);
