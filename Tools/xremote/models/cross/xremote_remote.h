@@ -14,6 +14,7 @@ void cross_remote_set_transmitting(CrossRemote* remote, int status);
 int cross_remote_get_transmitting(CrossRemote* remote);
 bool cross_remote_add_pause(CrossRemote* remote, int time);
 bool cross_remote_add_ir_item(CrossRemote* remote, const char* name, InfraredSignal* signal);
+bool cross_remote_add_subghz(CrossRemote* remote, SubGhzRemote* subghz);
 size_t cross_remote_get_item_count(CrossRemote* remote);
 CrossRemoteItem* cross_remote_get_item(CrossRemote* remote, size_t index);
 

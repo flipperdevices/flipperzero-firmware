@@ -30,6 +30,7 @@ typedef struct {
     XRemotePauseSet* xremote_pause_set;
     InfraredRemote* ir_remote_buffer;
     InfraredWorker* ir_worker;
+    SubGhzRemote* sg_remote_buffer;
     CrossRemote* cross_remote;
     uint32_t haptic; 
     uint32_t speaker;

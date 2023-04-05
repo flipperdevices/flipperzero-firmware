@@ -54,6 +54,8 @@ XRemote* xremote_app_alloc() {
     app->ir_remote_buffer = xremote_ir_remote_alloc();
     app->ir_worker = infrared_worker_alloc();
     app->cross_remote = cross_remote_alloc();
+
+    app->sg_remote_buffer = xremote_sg_remote_alloc();
     
     app->loading = loading_alloc();
 

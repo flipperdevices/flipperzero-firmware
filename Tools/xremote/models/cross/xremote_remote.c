@@ -109,6 +109,16 @@ bool cross_remote_add_pause(CrossRemote* remote, int time) {
     return true;
 }
 
+bool cross_remote_add_subghz(CrossRemote* remote, SubGhzRemote* subghz) {
+    UNUSED(subghz);
+    CrossRemoteItem* item = xremote_remote_item_alloc();
+    xremote_remote_item_set_type(item, XRemoteRemoteItemTypeSubGhz);
+    xremote_remote_item_set_name(item, xremote_sg_remote_get_name(subghz));
+
+    CrossRemoteItemArray_push_back(remote->items, item);
+    return true;
+}
+
 size_t cross_remote_get_item_count(CrossRemote* remote) {
     return CrossRemoteItemArray_size(remote->items);
 }

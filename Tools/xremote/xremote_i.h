@@ -41,6 +41,7 @@
 #include <infrared_transmit.h>
 #include <flipper_format/flipper_format.h>
 #include "xremote_icons.h"
+#include "models/subghz/xremote_sg_remote.h"
 
 #define XREMOTE_APP_FOLDER EXT_PATH("apps_data/xremote")
 #define XREMOTE_DEFAULT_REMOTE_NAME "remote"
@@ -98,6 +99,7 @@ struct InfraredSignal {
 struct CrossRemoteItem {
     FuriString* name;
     InfraredSignal* ir_signal;
+    SubGhzRemote* sg_signal;
     int16_t type;
     int32_t time;
 };

@@ -7,6 +7,7 @@ CrossRemoteItem* xremote_remote_item_alloc() {
     item->time = 0;
     item->type = 0;
     item->ir_signal = xremote_ir_signal_alloc();
+    item->sg_signal = xremote_sg_remote_alloc();
     
     return item;
 }

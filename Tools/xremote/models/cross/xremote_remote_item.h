@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../infrared/xremote_ir_signal.h"
+#include "../subghz/subghz_i.h"
 #include "../../xremote_i.h"
 
 
