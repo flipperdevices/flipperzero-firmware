@@ -221,7 +221,7 @@ void canvas_draw_bitmap(
     y += canvas->offset_y;
     uint8_t* bitmap_data = NULL;
     compress_icon_decode(canvas->compress_icon, compressed_bitmap_data, &bitmap_data);
-    u8g2_DrawXBM(&canvas->fb, x, y, width, height, bitmap_data);
+    canvas_draw_u8g2_bitmap(&canvas->fb, x, y, width, height, bitmap_data, IconRotation0);
 }
 
 void canvas_draw_icon_animation(
@@ -237,13 +237,14 @@ void canvas_draw_icon_animation(
     uint8_t* icon_data = NULL;
     compress_icon_decode(
         canvas->compress_icon, icon_animation_get_data(icon_animation), &icon_data);
-    u8g2_DrawXBM(
+    canvas_draw_u8g2_bitmap(
         &canvas->fb,
         x,
         y,
         icon_animation_get_width(icon_animation),
         icon_animation_get_height(icon_animation),
-        icon_data);
+        icon_data,
+        IconRotation0);
 }
 
 static void canvas_draw_u8g2_bitmap_int(
@@ -489,7 +490,7 @@ void canvas_draw_xbm(
     furi_assert(canvas);
     x += canvas->offset_x;
     y += canvas->offset_y;
-    u8g2_DrawXBM(&canvas->fb, x, y, w, h, bitmap);
+    canvas_draw_u8g2_bitmap(&canvas->fb, x, y, w, h, bitmap, IconRotation0);
 }
 
 void canvas_draw_glyph(Canvas* canvas, uint8_t x, uint8_t y, uint16_t ch) {
