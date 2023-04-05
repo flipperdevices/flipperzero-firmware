@@ -189,7 +189,6 @@ class Main(App):
                 components_paths[component_key] = basename(component_path)
 
                 if component_key.endswith(".dir"):
-                    dir_dest = component_key.split(".")[0]
                     for root, dirnames, files in walk(component_path):
                         if "__pycache__" in dirnames:
                             dirnames.remove("__pycache__")
@@ -197,7 +196,7 @@ class Main(App):
                             zf.write(
                                 join(root, file),
                                 join(
-                                    dir_dest,
+                                    components_paths[component_key],
                                     relpath(
                                         join(root, file),
                                         component_path,
