@@ -72,6 +72,7 @@ struct SubGhz {
     SubGhzTestCarrier* subghz_test_carrier;
     SubGhzTestPacket* subghz_test_packet;
 
+    SubGhzProtocolFlag filter;
     FuriString* error_str;
     SubGhzLock lock;
     SubGhzThresholdRssi* threshold_rssi;
