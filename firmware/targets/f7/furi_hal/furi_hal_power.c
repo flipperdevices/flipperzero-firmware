@@ -4,6 +4,7 @@
 #include <furi_hal_vibro.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_uart.h>
+#include <furi_hal_rtc.h>
 
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_pwr.h>
@@ -220,6 +221,7 @@ void furi_hal_power_deep_sleep() {
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
     furi_hal_power_resume_aux_periphs();
+    furi_hal_rtc_sync_shadow();
 }
 
 void furi_hal_power_sleep() {
