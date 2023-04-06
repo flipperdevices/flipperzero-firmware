@@ -60,6 +60,7 @@ openocd.log
 # PVS Studio temporary files
 .PVS-Studio/
 PVS-Studio.log
+*.PVS-Studio.*
 
 # Test framework
 flipperzero-firmware/scripts/flippigator/flipperzero_protobuf_py
