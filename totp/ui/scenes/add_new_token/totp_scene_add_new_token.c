@@ -229,8 +229,7 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
         break;
     case InputKeyLeft:
         if(scene_state->selected_control == TokenAlgoSelect) {
-            totp_roll_value_uint8_t(
-                &scene_state->algo, -1, SHA1, STEAM, RollOverflowBehaviorRoll);
+            totp_roll_value_uint8_t(&scene_state->algo, -1, SHA1, STEAM, RollOverflowBehaviorRoll);
         } else if(scene_state->selected_control == TokenLengthSelect) {
             totp_roll_value_uint8_t(
                 &scene_state->digits_count_index, -1, 0, 2, RollOverflowBehaviorRoll);
