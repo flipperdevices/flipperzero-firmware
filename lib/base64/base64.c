@@ -28,8 +28,8 @@ static uint8_t get_dtable_value(uint8_t index) {
 }
 
 uint8_t* base64_decode(const uint8_t* src, size_t len, size_t* out_len, size_t* out_size) {
-    uint8_t *out;
-    uint8_t *pos;
+    uint8_t* out;
+    uint8_t* pos;
     uint8_t in[4];
     uint8_t block[4];
     uint8_t tmp;
