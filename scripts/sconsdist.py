@@ -85,8 +85,7 @@ class Main(App):
                 self.note_dist_component(foldertype, "dir", sdk_folder)
 
         # TODO: remove this after everyone migrates to new uFBT
-        for foldertype in ("sdk", "lib"):
-            self.create_zip_stub(foldertype)
+        self.create_zip_stub("lib")
 
     def create_zip_stub(self, foldertype):
         with zipfile.ZipFile(
