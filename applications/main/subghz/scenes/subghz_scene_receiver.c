@@ -76,7 +76,7 @@ static void subghz_scene_add_to_history_callback(
     SubGhz* subghz = context;
     FuriString* str_buff;
     str_buff = furi_string_alloc();
-    
+
     SubGhzRadioPreset preset = subghz_get_preset(subghz->txrx);
     if(subghz_history_add_to_history(subghz->history, decoder_base, &preset)) {
         furi_string_reset(str_buff);
@@ -106,7 +106,11 @@ void subghz_scene_receiver_on_enter(void* context) {
 
     if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateIDLE) {
         subghz_set_preset(
-            subghz->txrx, "AM650", subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)), NULL, 0);
+            subghz->txrx,
+            "AM650",
+            subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),
+            NULL,
+            0);
         subghz_history_reset(subghz->history);
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
     }
@@ -128,15 +132,16 @@ void subghz_scene_receiver_on_enter(void* context) {
     subghz_scene_receiver_update_statusbar(subghz);
     subghz_view_receiver_set_callback(
         subghz->subghz_receiver, subghz_scene_receiver_callback, subghz);
-    subghz_receiver_set_rx_callback(
-        subghz->txrx->receiver, subghz_scene_add_to_history_callback, subghz);
+    subghz_txrx_set_rx_calback(
+        subghz->txrx, subghz_scene_add_to_history_callback, subghz);
 
     subghz->state_notifications = SubGhzNotificationStateRx;
     subghz_rx_start(subghz->txrx);
     subghz_view_receiver_set_idx_menu(subghz->subghz_receiver, subghz->idx_menu_chosen);
 
     //to use a universal decoder, we are looking for a link to it
-    furi_check(subghz_txrx_load_decoder_by_name_protocol(subghz->txrx, SUBGHZ_PROTOCOL_BIN_RAW_NAME));
+    furi_check(
+        subghz_txrx_load_decoder_by_name_protocol(subghz->txrx, SUBGHZ_PROTOCOL_BIN_RAW_NAME));
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
 }
@@ -152,7 +157,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             subghz_txrx_stop(subghz->txrx);
             subghz_hopper_set_state(subghz->txrx, SubGhzHopperStateOFF);
             subghz->idx_menu_chosen = 0;
-            subghz_receiver_set_rx_callback(subghz->txrx->receiver, NULL, subghz);
+            subghz_txrx_set_rx_calback(subghz->txrx, NULL, subghz);
 
             if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateAddKey) {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateExit);
@@ -171,16 +176,14 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverOK:
-            subghz->idx_menu_chosen =
-                subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+            subghz->idx_menu_chosen = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverInfo);
             DOLPHIN_DEED(DolphinDeedSubGhzReceiverInfo);
             consumed = true;
             break;
         case SubGhzCustomEventViewReceiverConfig:
             subghz->state_notifications = SubGhzNotificationStateIDLE;
-            subghz->idx_menu_chosen =
-                subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
+            subghz->idx_menu_chosen = subghz_view_receiver_get_idx_menu(subghz->subghz_receiver);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReceiverConfig);
             consumed = true;
             break;
@@ -206,7 +209,8 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
 
         subghz_receiver_rssi(subghz->subghz_receiver, ret_rssi.current_rssi);
         subghz_protocol_decoder_bin_raw_data_input_rssi(
-            (SubGhzProtocolDecoderBinRAW*)subghz_txrx_get_decoder(subghz->txrx), ret_rssi.current_rssi);
+            (SubGhzProtocolDecoderBinRAW*)subghz_txrx_get_decoder(subghz->txrx),
+            ret_rssi.current_rssi);
 
         switch(subghz->state_notifications) {
         case SubGhzNotificationStateRx:
