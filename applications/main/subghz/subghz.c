@@ -168,7 +168,7 @@ SubGhz* subghz_alloc() {
     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
     subghz->history = subghz_history_alloc();
     subghz->filter = SubGhzProtocolFlag_Decodable;
-    
+
     subghz->txrx = subghz_txrx_alloc();
 
     subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
@@ -194,7 +194,6 @@ void subghz_free(SubGhz* subghz) {
     subghz_txrx_speaker_off(subghz->txrx);
     subghz_txrx_stop(subghz->txrx);
     subghz_txrx_sleep(subghz->txrx);
-
 
     // Packet Test
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTestPacket);
