@@ -43,7 +43,7 @@ static void subghz_scene_read_raw_update_statusbar(void* context) {
     frequency_str = furi_string_alloc();
     modulation_str = furi_string_alloc();
 
-    subghz_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
+    subghz_txrx_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
     subghz_read_raw_add_data_statusbar(
         subghz->subghz_read_raw,
         furi_string_get_cstr(frequency_str),
@@ -138,7 +138,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
-                subghz_set_preset(
+                subghz_txrx_set_preset(
                     subghz->txrx,
                     "AM650",
                     subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),
@@ -207,7 +207,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 //start send
                 subghz->state_notifications = SubGhzNotificationStateIDLE;
 
-                if(!subghz_tx_start(subghz->txrx, subghz_txtx_get_fff_data(subghz->txrx))) {
+                if(!subghz_txrx_tx_start(subghz->txrx, subghz_txtx_get_fff_data(subghz->txrx))) {
                     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateBack);
                     scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
                 } else {
@@ -269,13 +269,13 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz_rx_key_state_get(subghz) != SubGhzRxKeyStateIDLE) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
-                SubGhzRadioPreset preset = subghz_get_preset(subghz->txrx);
+                SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
                 if(subghz_protocol_raw_save_to_file_init(
                        (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx),
                        RAW_FILE_NAME,
                        &preset)) {
                     DOLPHIN_DEED(DolphinDeedSubGhzRawRec);
-                    subghz_rx_start(subghz->txrx);
+                    subghz_txrx_rx_start(subghz->txrx);
                     subghz->state_notifications = SubGhzNotificationStateRx;
                     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateAddKey);
                 } else {

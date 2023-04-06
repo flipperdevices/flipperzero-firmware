@@ -48,7 +48,7 @@ bool subghz_scene_need_saving_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubGhzCustomEventSceneExit) {
             if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateExit) {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
-                subghz_set_preset(
+                subghz_txrx_set_preset(
                     subghz->txrx,
                     "AM650",
                     subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),

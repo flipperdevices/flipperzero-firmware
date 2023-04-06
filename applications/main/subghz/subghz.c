@@ -1,8 +1,6 @@
 /* Abandon hope, all ye who enter here. */
 
-#include "subghz/types.h"
 #include "subghz_i.h"
-#include <lib/toolbox/path.h>
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -48,14 +46,14 @@ static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) 
     }
 }
 
-void subghz_blink_start(SubGhz* instance) {
-    furi_assert(instance);
-    notification_message(instance->notifications, &sequence_blink_start_magenta);
+void subghz_blink_start(SubGhz* subghz) {
+    furi_assert(subghz);
+    notification_message(subghz->notifications, &sequence_blink_start_magenta);
 }
 
-void subghz_blink_stop(SubGhz* instance) {
-    furi_assert(instance);
-    notification_message(instance->notifications, &sequence_blink_stop);
+void subghz_blink_stop(SubGhz* subghz) {
+    furi_assert(subghz);
+    notification_message(subghz->notifications, &sequence_blink_stop);
 }
 
 SubGhz* subghz_alloc() {
@@ -193,9 +191,9 @@ void subghz_free(SubGhz* subghz) {
         subghz->rpc_ctx = NULL;
     }
 
-    subghz_speaker_off(subghz->txrx);
+    subghz_txrx_speaker_off(subghz->txrx);
     subghz_txrx_stop(subghz->txrx);
-    subghz_sleep(subghz->txrx);
+    subghz_txrx_sleep(subghz->txrx);
 
 
     // Packet Test
