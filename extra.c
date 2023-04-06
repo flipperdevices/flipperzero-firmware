@@ -11,7 +11,6 @@
 #include <cli/cli_i.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <bad_usb/bad_usb_script.h>
 
 #define MAX_SCRIPT_LINES 256
 #define READ_CHUNK_SIZE 256
