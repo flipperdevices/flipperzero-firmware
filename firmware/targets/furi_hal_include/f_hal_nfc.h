@@ -59,6 +59,8 @@ typedef enum {
  */
 FHalNfcError f_hal_nfc_init();
 
+FHalNfcError f_hal_nfc_is_hal_ready();
+
 /**
  * @brief Start Nfc hardware low power mode
  * 

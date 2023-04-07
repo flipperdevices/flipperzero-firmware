@@ -2,11 +2,11 @@
 #include "nfc_worker_i.h"
 
 enum SubmenuIndex {
+    SubmenuIndexReadNFCA,
+    SubmenuIndexReadMfUltralight,
     SubmenuIndexReadMifareClassic,
     SubmenuIndexReadMifareDesfire,
-    SubmenuIndexReadMfUltralight,
     SubmenuIndexReadEMV,
-    SubmenuIndexReadNFCA,
 };
 
 void nfc_scene_read_card_type_submenu_callback(void* context, uint32_t index) {
@@ -21,6 +21,18 @@ void nfc_scene_read_card_type_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
+        "Read NFC-A data",
+        SubmenuIndexReadNFCA,
+        nfc_scene_read_card_type_submenu_callback,
+        nfc);
+    submenu_add_item(
+        submenu,
+        "Read NTAG/Ultralight",
+        SubmenuIndexReadMfUltralight,
+        nfc_scene_read_card_type_submenu_callback,
+        nfc);
+    submenu_add_item(
+        submenu,
         "Read Mifare Classic",
         SubmenuIndexReadMifareClassic,
         nfc_scene_read_card_type_submenu_callback,
@@ -33,20 +45,8 @@ void nfc_scene_read_card_type_on_enter(void* context) {
         nfc);
     submenu_add_item(
         submenu,
-        "Read NTAG/Ultralight",
-        SubmenuIndexReadMfUltralight,
-        nfc_scene_read_card_type_submenu_callback,
-        nfc);
-    submenu_add_item(
-        submenu,
         "Read EMV card",
         SubmenuIndexReadEMV,
-        nfc_scene_read_card_type_submenu_callback,
-        nfc);
-    submenu_add_item(
-        submenu,
-        "Read NFC-A data",
-        SubmenuIndexReadNFCA,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneReadCardType);
@@ -62,12 +62,12 @@ bool nfc_scene_read_card_type_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexReadMifareClassic) {
             nfc->dev->dev_data.read_mode = NfcReadModeMfClassic;
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadMifareDesfire) {
             nfc->dev->dev_data.read_mode = NfcReadModeMfDesfire;
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadMfUltralight) {
@@ -77,7 +77,7 @@ bool nfc_scene_read_card_type_on_event(void* context, SceneManagerEvent event) {
         }
         if(event.event == SubmenuIndexReadEMV) {
             nfc->dev->dev_data.read_mode = NfcReadModeEMV;
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadNFCA) {

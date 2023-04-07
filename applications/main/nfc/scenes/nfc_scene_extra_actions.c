@@ -46,13 +46,13 @@ bool nfc_scene_extra_actions_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexMfClassicKeys) {
             if(mf_classic_dict_check_presence(MfClassicDictTypeSystem)) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicKeys);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             }
             consumed = true;
         } else if(event.event == SubmenuIndexMfUltralightUnlock) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuIndexReadCardType) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneReadCardType, 0);

@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,20.3,,
+Version,+,20.4,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -817,6 +817,7 @@ Function,-,expm1f,float,float
 Function,-,expm1l,long double,long double
 Function,-,f_hal_nfc_abort,FHalNfcError,
 Function,-,f_hal_nfc_init,FHalNfcError,
+Function,-,f_hal_nfc_is_hal_ready,FHalNfcError,
 Function,-,f_hal_nfc_listen_start,FHalNfcError,
 Function,-,f_hal_nfc_listener_disable_auto_col_res,FHalNfcError,
 Function,-,f_hal_nfc_listener_sleep,FHalNfcError,

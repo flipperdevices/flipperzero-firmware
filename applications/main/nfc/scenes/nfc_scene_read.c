@@ -44,9 +44,7 @@ void nfc_scene_read_on_enter(void* context) {
     // Setup view
     nfc_scene_read_set_state(nfc, NfcSceneReadStateDetecting);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
-    // Start worker
-    nfc_worker_start(
-        nfc->worker, NfcWorkerStateRead, &nfc->dev->dev_data, nfc_scene_read_worker_callback, nfc);
+    
 
     nfc_blink_read_start(nfc);
 }

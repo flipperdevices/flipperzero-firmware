@@ -1,5 +1,5 @@
 #include "nfc_app_i.h"
-#include <furi_hal_nfc.h>
+#include <f_hal_nfc.h>
 #include <dolphin/dolphin.h>
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
@@ -36,7 +36,6 @@ static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
 NfcApp* nfc_app_alloc() {
     NfcApp* nfc = malloc(sizeof(NfcApp));
 
-    nfc->worker = nfc_worker_alloc();
     nfc->view_dispatcher = view_dispatcher_alloc();
     nfc->scene_manager = scene_manager_alloc(&nfc_scene_handlers, nfc);
     view_dispatcher_enable_queue(nfc->view_dispatcher);
@@ -110,17 +109,17 @@ NfcApp* nfc_app_alloc() {
 void nfc_app_free(NfcApp* nfc) {
     furi_assert(nfc);
 
-    if(nfc->rpc_state == NfcRpcStateEmulating) {
-        // Stop worker
-        nfc_worker_stop(nfc->worker);
-    } else if(nfc->rpc_state == NfcRpcStateEmulated) {
-        // Stop worker
-        nfc_worker_stop(nfc->worker);
-        // Save data in shadow file
-        if(furi_string_size(nfc->dev->load_path)) {
-            nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
-        }
-    }
+    // if(nfc->rpc_state == NfcRpcStateEmulating) {
+    //     // Stop worker
+    //     nfc_worker_stop(nfc->worker);
+    // } else if(nfc->rpc_state == NfcRpcStateEmulated) {
+    //     // Stop worker
+    //     nfc_worker_stop(nfc->worker);
+    //     // Save data in shadow file
+    //     if(furi_string_size(nfc->dev->load_path)) {
+    //         nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
+    //     }
+    // }
     if(nfc->rpc_ctx) {
         rpc_system_app_send_exited(nfc->rpc_ctx);
         rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
@@ -170,10 +169,6 @@ void nfc_app_free(NfcApp* nfc) {
     // Detect Reader
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewDetectReader);
     detect_reader_free(nfc->detect_reader);
-
-    // Worker
-    nfc_worker_stop(nfc->worker);
-    nfc_worker_free(nfc->worker);
 
     // View Dispatcher
     view_dispatcher_free(nfc->view_dispatcher);
@@ -243,7 +238,7 @@ void nfc_show_loading_popup(void* context, bool show) {
 }
 
 static bool nfc_is_hal_ready() {
-    if(!furi_hal_nfc_is_init()) {
+    if(f_hal_nfc_is_hal_ready() != FHalNfcErrorNone) {
         // No connection to the chip, show an error screen
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
@@ -305,7 +300,7 @@ int32_t nfc_app(void* p) {
     } else {
         view_dispatcher_attach_to_gui(
             nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
-        scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardType);
     }
 
     view_dispatcher_run(nfc->view_dispatcher);

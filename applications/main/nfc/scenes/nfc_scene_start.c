@@ -50,7 +50,7 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexRead) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, SubmenuIndexRead);
             nfc->dev->dev_data.read_mode = NfcReadModeAuto;
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             DOLPHIN_DEED(DolphinDeedNfcRead);
             consumed = true;
         } else if(event.event == SubmenuIndexDetectReader) {
@@ -59,7 +59,7 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
             bool sd_exist = storage_sd_status(nfc->dev->storage) == FSE_OK;
             if(sd_exist) {
                 nfc_device_data_clear(&nfc->dev->dev_data);
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneDetectReader);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
                 DOLPHIN_DEED(DolphinDeedNfcDetectReader);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
@@ -70,7 +70,7 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
             // if the user cancels loading a file, the Saved menu item
             // is properly reselected.
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, SubmenuIndexSaved);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneFileSelect);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuIndexExtraAction) {
             scene_manager_set_scene_state(
@@ -79,12 +79,13 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexAddManually) {
             scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneStart, SubmenuIndexAddManually);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetType);
+                nfc->scene_manager, NfcSceneStart, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuIndexDebug) {
-            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, SubmenuIndexDebug);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneDebug);
+            scene_manager_set_scene_state(
+                nfc->scene_manager, NfcSceneStart, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         }
     }

@@ -34,6 +34,23 @@ static FHalNfcError f_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
     return error;
 }
 
+FHalNfcError f_hal_nfc_is_hal_ready() {
+    FHalNfcError error = FHalNfcErrorNone;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    furi_hal_spi_acquire(handle);
+
+    uint8_t chip_id = 0;
+    st25r3916_read_reg(handle, ST25R3916_REG_IC_IDENTITY, &chip_id);
+    if((chip_id & ST25R3916_REG_IC_IDENTITY_ic_type_mask) !=
+       ST25R3916_REG_IC_IDENTITY_ic_type_st25r3916) {
+        FURI_LOG_E(TAG, "Wrong chip id");
+        error = FHalNfcErrorCommunication;
+    }
+    furi_hal_spi_release(handle);
+
+    return error;
+}
+
 FHalNfcError f_hal_nfc_init() {
     FHalNfcError error = FHalNfcErrorNone;
     f_hal_nfc_event_init();
