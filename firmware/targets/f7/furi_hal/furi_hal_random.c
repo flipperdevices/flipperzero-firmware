@@ -10,7 +10,8 @@
 #define TAG "FuriHalRandom"
 
 static uint32_t furi_hal_random_read_rng() {
-    while(LL_RNG_IsActiveFlag_CECS(RNG) && LL_RNG_IsActiveFlag_SECS(RNG) && !LL_RNG_IsActiveFlag_DRDY(RNG)) {
+    while(LL_RNG_IsActiveFlag_CECS(RNG) && LL_RNG_IsActiveFlag_SECS(RNG) &&
+          !LL_RNG_IsActiveFlag_DRDY(RNG)) {
         /* Error handling as described in RM0434, pg. 582-583 */
         if(LL_RNG_IsActiveFlag_CECS(RNG)) {
             /* Clock error occurred */
