@@ -20,6 +20,8 @@
 
 #define TAG "FuriHalPower"
 
+#define FURI_HAL_POWER_DEEP_SLEEP_ENABLED
+
 #ifdef FURI_HAL_POWER_DEEP_SLEEP_ENABLED
 #define FURI_HAL_POWER_DEEP_INSOMNIA 0
 #else
@@ -82,6 +84,8 @@ const ParamCEDV cedv = {
 void furi_hal_power_init() {
     LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
     LL_PWR_SMPS_SetMode(LL_PWR_SMPS_STEP_DOWN);
+    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
+    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
     bq27220_init(&furi_hal_i2c_handle_power, &cedv);
@@ -188,8 +192,6 @@ void furi_hal_power_deep_sleep() {
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
     // Prepare deep sleep
-    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
     LL_LPM_EnableDeepSleep();
 
 #if defined(__CC_ARM)
@@ -200,13 +202,6 @@ void furi_hal_power_deep_sleep() {
     __WFI();
 
     LL_LPM_EnableSleep();
-
-    // Make sure that values differ to prevent disaster on wfi
-    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP0);
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
-
-    LL_PWR_ClearFlag_C1STOP_C1STB();
-    LL_PWR_ClearFlag_C2STOP_C2STB();
 
     /* Release ENTRY_STOP_MODE semaphore */
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
