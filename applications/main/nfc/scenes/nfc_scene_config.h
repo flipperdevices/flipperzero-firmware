@@ -63,4 +63,6 @@ ADD_SCENE(nfc, mfkey_nonces_info, MfkeyNoncesInfo)
 ADD_SCENE(nfc, mfkey_complete, MfkeyComplete)
 ADD_SCENE(nfc, nfc_data_info, NfcDataInfo)
 ADD_SCENE(nfc, read_card_type, ReadCardType)
+
 ADD_SCENE(nfc, not_implemented, NotImplemented)
+ADD_SCENE(nfc, read_nfca, ReadNfca)

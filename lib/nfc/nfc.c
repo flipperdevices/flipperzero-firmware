@@ -125,7 +125,6 @@ static int32_t nfc_worker_poller(void* context) {
     while(instance->state == NfcStatePollerReady) {
         NfcEvent event = {.type = NfcEventTypePollerReady};
         instance->callback(event, instance->context);
-        furi_delay_ms(1);
     }
 
     return 0;
@@ -153,7 +152,7 @@ void nfc_free(Nfc* instance) {
         f_hal_nfc_abort();
         furi_thread_join(instance->worker_thread);
     } else if(instance->state == NfcStatePollerReady) {
-        nfc_poller_stop(instance);
+        nfc_poller_abort(instance);
     }
     furi_thread_free(instance->worker_thread);
     f_hal_nfc_low_power_mode_start();
@@ -231,11 +230,16 @@ void nfc_start_worker(Nfc* instance, NfcEventCallback callback, void* context) {
     instance->comm_state = NfcCommStateIdle;
 }
 
-void nfc_poller_stop(Nfc* instance) {
+void nfc_poller_abort(Nfc* instance) {
     furi_assert(instance);
     // TODO add Mutex for nfc state
     instance->state = NfcStateStopRequested;
     furi_thread_join(instance->worker_thread);    
+}
+
+void nfc_poller_stop(Nfc* instance) {
+    furi_assert(instance);
+    instance->state = NfcStateStopRequested;
 }
 
 NfcError nfc_listener_sleep(Nfc* instance) {

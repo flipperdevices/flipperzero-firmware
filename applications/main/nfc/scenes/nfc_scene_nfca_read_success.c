@@ -16,7 +16,7 @@ void nfc_scene_nfca_read_success_on_enter(void* context) {
     NfcApp* nfc = context;
 
     // Setup view
-    FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
+    NfcaData* data = &nfc->nfca_data;
     Widget* widget = nfc->widget;
 
     FuriString* temp_str;

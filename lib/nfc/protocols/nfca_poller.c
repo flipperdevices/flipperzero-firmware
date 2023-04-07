@@ -143,7 +143,7 @@ void nfca_poller_free(NfcaPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
-    nfc_poller_stop(instance->nfc);
+    nfc_poller_abort(instance->nfc);
     nfc_free(instance->nfc);
     free(instance);
 }
@@ -369,7 +369,17 @@ NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
     return ret;
 }
 
+NfcaError nfca_poller_stop(NfcaPoller* instance) {
+    furi_assert(instance);
+    furi_assert(instance->nfc);
+
+    nfc_poller_stop(instance->nfc);
+
+    return NfcaErrorNone;
+}
+
 typedef struct {
+    NfcaPoller* instance;
     FuriThreadId thread_id;
     NfcaError error;
 } NfcaPollerContext;
@@ -377,6 +387,7 @@ typedef struct {
 static void nfca_poller_activate_sync_callback(NfcaPollerEvent event, void* context) {
     FURI_LOG_W(TAG, "nfca_poller_activate_sync_callback: %d event", event.type);
     NfcaPollerContext* nfca_poller_context = context;
+    nfca_poller_stop(nfca_poller_context->instance);
     nfca_poller_context->error = event.data.error;
     furi_thread_flags_set(nfca_poller_context->thread_id, 1);
 }
@@ -384,6 +395,7 @@ static void nfca_poller_activate_sync_callback(NfcaPollerEvent event, void* cont
 NfcaError nfca_poller_activate_sync(NfcaPoller* instance, NfcaData* nfca_data) {
     furi_assert(instance);
     NfcaPollerContext context = {};
+    context.instance = instance;
     context.thread_id = furi_thread_get_current_id();
     nfca_poller_start(instance, nfca_poller_activate_sync_callback, &context);
     furi_thread_flags_wait(1, FuriFlagWaitAny, FuriWaitForever);

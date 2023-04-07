@@ -70,6 +70,7 @@ typedef struct {
         MfUltralightAuth mf_ul_auth;
     };
     union {
+        NfcaData nfca_data;
         EmvData emv_data;
         MfUltralightData mf_ul_data;
         MfClassicData mf_classic_data;
