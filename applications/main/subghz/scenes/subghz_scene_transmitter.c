@@ -12,13 +12,9 @@ bool subghz_scene_transmitter_update_data_show(void* context) {
     SubGhz* subghz = context;
     bool ret = false;
     if(subghz_txrx_get_decoder(subghz->txrx)) {
-        FuriString* key_str;
-        FuriString* frequency_str;
-        FuriString* modulation_str;
-
-        key_str = furi_string_alloc();
-        frequency_str = furi_string_alloc();
-        modulation_str = furi_string_alloc();
+        FuriString* key_str = furi_string_alloc();
+        FuriString* frequency_str = furi_string_alloc();
+        FuriString* modulation_str = furi_string_alloc();
 
         if(subghz_protocol_decoder_base_deserialize(
                subghz_txrx_get_decoder(subghz->txrx), subghz_txtx_get_fff_data(subghz->txrx)) ==

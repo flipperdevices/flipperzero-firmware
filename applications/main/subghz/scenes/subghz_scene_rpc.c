@@ -38,8 +38,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             view_dispatcher_stop(subghz->view_dispatcher);
         } else if(event.event == SubGhzCustomEventSceneRpcButtonPress) {
             bool result = false;
-            if((subghz_txrx_get_state(subghz->txrx) == SubGhzTxRxStateSleep) &&
-               (state == SubGhzRpcStateLoaded)) {
+            if((state == SubGhzRpcStateLoaded)) {
                 result =
                     subghz_txrx_tx_start(subghz->txrx, subghz_txtx_get_fff_data(subghz->txrx));
                 if(result) subghz_blink_start(subghz);
@@ -94,7 +93,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
 void subghz_scene_rpc_on_exit(void* context) {
     SubGhz* subghz = context;
 
-    if(subghz_txrx_get_state(subghz->txrx) == SubGhzTxRxStateTx) {
+    if(subghz_txrx_get_state(subghz->txrx) != SubGhzTxRxStateIDLE) {
         subghz_txrx_stop(subghz->txrx);
         subghz_blink_stop(subghz);
     }

@@ -37,11 +37,8 @@ static void subghz_scene_read_raw_update_statusbar(void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
 
-    FuriString* frequency_str;
-    FuriString* modulation_str;
-
-    frequency_str = furi_string_alloc();
-    modulation_str = furi_string_alloc();
+    FuriString* frequency_str = furi_string_alloc();
+    FuriString* modulation_str = furi_string_alloc();
 
     subghz_txrx_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
     subghz_read_raw_add_data_statusbar(
@@ -68,8 +65,7 @@ void subghz_scene_read_raw_callback_end_tx(void* context) {
 
 void subghz_scene_read_raw_on_enter(void* context) {
     SubGhz* subghz = context;
-    FuriString* file_name;
-    file_name = furi_string_alloc();
+    FuriString* file_name = furi_string_alloc();
 
     switch(subghz_rx_key_state_get(subghz)) {
     case SubGhzRxKeyStateBack:
@@ -138,12 +134,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
-                subghz_txrx_set_preset(
-                    subghz->txrx,
-                    "AM650",
-                    subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),
-                    NULL,
-                    0);
+                subghz_set_defalut_preset(subghz);
                 if(!scene_manager_search_and_switch_to_previous_scene(
                        subghz->scene_manager, SubGhzSceneSaved)) {
                     if(!scene_manager_search_and_switch_to_previous_scene(
@@ -245,8 +236,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_protocol_raw_save_to_file_stop(
                 (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx));
 
-            FuriString* temp_str;
-            temp_str = furi_string_alloc();
+            FuriString* temp_str = furi_string_alloc();
             furi_string_printf(
                 temp_str, "%s/%s%s", SUBGHZ_RAW_FOLDER, RAW_FILE_NAME, SUBGHZ_APP_EXTENSION);
             subghz_protocol_raw_gen_fff_data(
@@ -318,10 +308,10 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             SubGhzThresholdRssiRet ret_rssi =
                 subghz_threshold_rssi_check_threshold(subghz->threshold_rssi);
             subghz_read_raw_add_data_rssi(
-                subghz->subghz_read_raw, ret_rssi.current_rssi, ret_rssi.threshol_level);
+                subghz->subghz_read_raw, ret_rssi.current_rssi, ret_rssi.threshold_level);
             subghz_protocol_raw_save_to_file_pause(
                 (SubGhzProtocolDecoderRAW*)subghz_txrx_get_decoder(subghz->txrx),
-                !ret_rssi.threshol_level);
+                !ret_rssi.threshold_level);
             break;
         case SubGhzNotificationStateTx:
             notification_message(subghz->notifications, &sequence_blink_magenta_10);

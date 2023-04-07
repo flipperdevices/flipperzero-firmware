@@ -35,14 +35,10 @@ static const NotificationSequence subghs_sequence_rx_locked = {
 
 static void subghz_scene_receiver_update_statusbar(void* context) {
     SubGhz* subghz = context;
-    FuriString* history_stat_str;
-    history_stat_str = furi_string_alloc();
+    FuriString* history_stat_str = furi_string_alloc();
     if(!subghz_history_get_text_space_left(subghz->history, history_stat_str)) {
-        FuriString* frequency_str;
-        FuriString* modulation_str;
-
-        frequency_str = furi_string_alloc();
-        modulation_str = furi_string_alloc();
+        FuriString* frequency_str = furi_string_alloc();
+        FuriString* modulation_str = furi_string_alloc();
 
         subghz_txrx_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
 
@@ -74,8 +70,7 @@ static void subghz_scene_add_to_history_callback(
     void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
-    FuriString* str_buff;
-    str_buff = furi_string_alloc();
+    FuriString* str_buff = furi_string_alloc();
 
     SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
     if(subghz_history_add_to_history(subghz->history, decoder_base, &preset)) {
@@ -105,12 +100,7 @@ void subghz_scene_receiver_on_enter(void* context) {
     str_buff = furi_string_alloc();
 
     if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateIDLE) {
-        subghz_txrx_set_preset(
-            subghz->txrx,
-            "AM650",
-            subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),
-            NULL,
-            0);
+        subghz_set_defalut_preset(subghz);
         subghz_history_reset(subghz->history);
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
     }
@@ -163,12 +153,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
-                subghz_txrx_set_preset(
-                    subghz->txrx,
-                    "AM650",
-                    subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),
-                    NULL,
-                    0);
+                subghz_set_defalut_preset(subghz);
                 scene_manager_search_and_switch_to_previous_scene(
                     subghz->scene_manager, SubGhzSceneStart);
             }

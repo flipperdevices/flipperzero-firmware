@@ -46,13 +46,9 @@ void subghz_scene_receiver_info_on_enter(void* context) {
     SubGhz* subghz = context;
 
     if(subghz_scene_receiver_info_update_parser(subghz)) {
-        FuriString* frequency_str;
-        FuriString* modulation_str;
-        FuriString* text;
-
-        frequency_str = furi_string_alloc();
-        modulation_str = furi_string_alloc();
-        text = furi_string_alloc();
+        FuriString* frequency_str = furi_string_alloc();
+        FuriString* modulation_str = furi_string_alloc();
+        FuriString* text = furi_string_alloc();
 
         subghz_txrx_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
         widget_add_string_element(
@@ -109,13 +105,11 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventSceneReceiverInfoTxStart) {
-            //CC1101 Stop RX -> Start TX
-            subghz_txrx_hopper_set_pause(subghz->txrx);
-
             if(!subghz_scene_receiver_info_update_parser(subghz)) {
                 return false;
             }
-
+            //CC1101 Stop RX -> Start TX
+            subghz_txrx_hopper_pause(subghz->txrx);
             if(!subghz_txrx_tx_start(
                    subghz->txrx,
                    subghz_history_get_raw_data(subghz->history, subghz->idx_menu_chosen))) {

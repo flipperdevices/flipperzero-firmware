@@ -220,8 +220,7 @@ bool subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat* flipper_format) {
     subghz_txrx_stop(instance);
 
     bool ret = false;
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
+    FuriString* temp_str = furi_string_alloc();
     uint32_t repeat = 200;
     do {
         if(!flipper_format_rewind(flipper_format)) {
@@ -344,12 +343,10 @@ void subghz_txrx_stop(SubGhzTxRx* instance) {
     case SubGhzTxRxStateTx:
         subghz_txrx_tx_stop(instance);
         subghz_txrx_speaker_unmute(instance);
-        //subghz_sleep(subghz);
         break;
     case SubGhzTxRxStateRx:
         subghz_txrx_rx_end(instance);
         subghz_txrx_speaker_mute(instance);
-        //subghz_sleep(subghz);
         break;
 
     default:
@@ -428,7 +425,7 @@ void subghz_txrx_hopper_remove_pause(SubGhzTxRx* instance) {
     }
 }
 
-void subghz_txrx_hopper_set_pause(SubGhzTxRx* instance) {
+void subghz_txrx_hopper_pause(SubGhzTxRx* instance) {
     furi_assert(instance);
     if(instance->hopper_state == SubGhzHopperStateRunnig) {
         instance->hopper_state = SubGhzHopperStatePause;
@@ -490,7 +487,6 @@ bool subghz_txrx_load_decoder_by_name_protocol(SubGhzTxRx* instance, const char*
     furi_assert(instance);
     furi_assert(name_protocol);
     bool res = false;
-    instance->decoder_result = NULL;
     instance->decoder_result =
         subghz_receiver_search_decoder_base_by_name(instance->receiver, name_protocol);
     if(instance->decoder_result) {

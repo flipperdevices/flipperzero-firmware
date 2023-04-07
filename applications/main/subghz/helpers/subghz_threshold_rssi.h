@@ -3,7 +3,7 @@
 
 typedef struct {
     float current_rssi;
-    bool threshol_level;
+    bool threshold_level;
 } SubGhzThresholdRssiRet;
 
 typedef struct SubGhzThresholdRssi SubGhzThresholdRssi;
