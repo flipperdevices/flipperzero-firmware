@@ -21,9 +21,9 @@
 #endif
 #include "../../fonts/mode-nine/mode-nine.h"
 
+#define PROGRESS_BAR_MARGIN (3)
+#define PROGRESS_BAR_HEIGHT (4)
 static const char* STEAM_ALGO_ALPHABET = "23456789BCDFGHJKMNPQRTVWXY";
-static const uint8_t PROGRESS_BAR_MARGIN = 3;
-static const uint8_t PROGRESS_BAR_HEIGHT = 4;
 
 typedef struct {
     uint16_t current_token_index;
@@ -177,6 +177,7 @@ static void draw_totp_code(Canvas* const canvas, const SceneState* const scene_s
     uint8_t char_width = modeNine_15ptFontInfo.charInfo[0].width;
     uint8_t total_length = code_length * (char_width + modeNine_15ptFontInfo.spacePixels);
     uint8_t offset_x = (SCREEN_WIDTH - total_length) >> 1;
+    uint8_t offset_x_inc = char_width + modeNine_15ptFontInfo.spacePixels;
     uint8_t offset_y = SCREEN_HEIGHT_CENTER - (modeNine_15ptFontInfo.height >> 1);
     for(uint8_t i = 0; i < code_length; i++) {
         char ch = scene_state->last_code[i];
@@ -189,12 +190,8 @@ static void draw_totp_code(Canvas* const canvas, const SceneState* const scene_s
             modeNine_15ptFontInfo.height,
             &modeNine_15ptFontInfo.data[modeNine_15ptFontInfo.charInfo[char_index].offset]);
 
-        offset_x += char_width + modeNine_15ptFontInfo.spacePixels;
+        offset_x += offset_x_inc;
     }
-}
-
-void totp_scene_generate_token_init(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
 }
 
 void totp_scene_generate_token_activate(
@@ -517,8 +514,4 @@ void totp_scene_generate_token_deactivate(PluginState* plugin_state) {
 
     free(scene_state);
     plugin_state->current_scene_state = NULL;
-}
-
-void totp_scene_generate_token_free(const PluginState* plugin_state) {
-    UNUSED(plugin_state);
 }
