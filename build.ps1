@@ -73,7 +73,7 @@ function Features-Configure {
         $key = $keyValue[0]
         $value = $keyValue[1]
 
-        $featuresConfigContent = $featuresConfigContent -replace "(#define +)($key)( +.+)(( |$)+)", "`$1`$2 $value`$4"
+        $featuresConfigContent = $featuresConfigContent -replace "(#define +)($key)( +.+)(($|\r?\n?)+)", "`$1`$2 $value`$4"
     }
 
     Set-Content -Path "totp/features_config.h" -NoNewline -Value $featuresConfigContent
