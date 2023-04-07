@@ -61,6 +61,12 @@ enum TotpConfigFileUpdateResults {
 };
 
 /**
+ * @brief Tries to take a config file backup
+ * @return backup path if backup successfully taken; \c NULL otherwise
+ */
+char* totp_config_file_backup();
+
+/**
  * @brief Saves all the settings and tokens to an application config file
  * @param plugin_state application state
  * @return Config file update result
