@@ -2,7 +2,8 @@
 
 #include "tullave_co.h"
 #include "worker/tullave_worker.h"
-#include "lib/tullave_nfc_drv.h"
+
+#include "drv/tullave_drv/tullave_drv.h"
 
 #include <furi.h>
 
@@ -16,8 +17,6 @@
 #include <gui/modules/popup.h>
 
 #include <assets_icons.h>
-
-#include <nfc/nfc.h>
 
 #include "scenes/tullave_co_scene.h"
 

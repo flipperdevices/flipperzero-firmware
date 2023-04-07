@@ -1,6 +1,7 @@
 #pragma once
 
-#include <lib/nfc/nfc_device.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 typedef struct TuLlaveWorker TuLlaveWorker;
 

@@ -3,8 +3,8 @@
 #define LOG_TAG "TuLlaveCO"
 
 static const NotificationSequence tullave_seq_blink_start = {
-    &message_blink_start_100,
-    &message_blink_set_color_green,
+    &message_blink_start_10,
+    &message_blink_set_color_blue,
     &message_do_not_reset,
     NULL,
 };

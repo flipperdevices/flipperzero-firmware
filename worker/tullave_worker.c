@@ -1,5 +1,5 @@
 #include "tullave_worker_i.h"
-#include "../lib/tullave_nfc_drv.h"
+#include "../drv/tullave_drv/tullave_drv.h"
 
 #define LOG_TAG "TuLlaveCOWorker"
 #define THREAD_NAME LOG_TAG
@@ -12,6 +12,8 @@ static void tullave_worker_change_state(TuLlaveWorker* worker, TuLlaveWorkerStat
 }
 
 TuLlaveWorker* tullave_worker_alloc() {
+    FURI_LOG_D(LOG_TAG, "Starting allocation for TuLlaveWorker");
+
     TuLlaveWorker* t_worker = malloc(sizeof(TuLlaveWorker));
 
     t_worker->thread =
@@ -22,6 +24,7 @@ TuLlaveWorker* tullave_worker_alloc() {
 
     tullave_worker_change_state(t_worker, TuLlaveWorkerStateReady);
 
+    FURI_LOG_D(LOG_TAG, "End allocation");
     return t_worker;
 }
 
@@ -43,11 +46,15 @@ void tullave_worker_start(TuLlaveWorker* t_worker, TuLlaveWorkerCallback callbac
     furi_assert(t_worker);
     furi_assert(context);
 
+    FURI_LOG_D(LOG_TAG, "Starting TuLlaveWorker");
+
     t_worker->callback = callback;
     t_worker->context = context;
 
     tullave_worker_change_state(t_worker, TuLlaveWorkerStateCheck);
     furi_thread_start(t_worker->thread);
+
+    FURI_LOG_D(LOG_TAG, "TuLlaveWorker Thread Started");
 }
 
 int32_t tullave_worker_task(void* context) {
@@ -60,12 +67,12 @@ int32_t tullave_worker_task(void* context) {
 
 void tullave_worker_check(TuLlaveWorker* t_worker) {
     while(t_worker->state == TuLlaveWorkerStateCheck) {
-        /*if(detect_tullave_card()) {
+        if(tullave_drv_detect_tullave_card()) {
             t_worker->callback(TuLlaveWorkerEventCardDetected, t_worker->context);
+            break;
         } else {
             t_worker->callback(TuLLaveWorkerEventNoCardDetected, t_worker->context);
-        }*/
+        }
         furi_delay_ms(WORKER_DELAY_MS);
     }
-    end_tullave_nfc();
 }

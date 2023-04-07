@@ -60,6 +60,9 @@ void tullave_co_scene_check_on_exit(void* context) {
     // Clear view
     popup_reset(t_llave->popup);
 
+    // Stop worker
+    tullave_worker_stop(t_llave->worker);
+
     // Stop notification
     tullave_blink_stop(t_llave);
 }

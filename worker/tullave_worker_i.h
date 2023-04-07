@@ -6,7 +6,6 @@
 
 struct TuLlaveWorker {
     FuriThread* thread;
-    NfcDeviceData* dev_data;
     TuLlaveWorkerCallback callback;
     void* context;
     TuLlaveWorkerState state;
