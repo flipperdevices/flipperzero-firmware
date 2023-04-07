@@ -2,6 +2,15 @@
 
 enum { TuLlaveStateCardSearch, TuLlaveStateCardFound };
 
+bool tullave_check_worker_callback(TuLlaveWorkerEvent event, void* context) {
+    furi_assert(context);
+
+    TuLlave* t_llave = context;
+    view_dispatcher_send_custom_event(t_llave->view_dispatcher, event);
+
+    return true;
+}
+
 static void tullave_co_scene_check_setup_view(TuLlave* t_llave) {
     Popup* popup = t_llave->popup;
     popup_reset(popup);
@@ -36,16 +45,10 @@ void tullave_co_scene_check_on_enter(void* context) {
         t_llave->scene_manager, TuLlaveSceneCheck, TuLlaveStateCardSearch);
     tullave_co_scene_check_setup_view(t_llave);
 
-    // Setup and start worker
-    /*
-    nfc_magic_worker_start(
-        t_llave->worker,
-        NfcMagicWorkerStateCheck,
-        &t_llave->nfc_dev->dev_data,
-        nfc_magic_check_worker_callback,
-        t_llave);
-    nfc_magic_blink_start(nfc_magic);
-    */
+    tullave_worker_start(t_llave->worker, tullave_check_worker_callback, context);
+
+    // Start blink notification
+    tullave_blink_start(t_llave);
 }
 
 void tullave_co_scene_check_on_exit(void* context) {
@@ -57,5 +60,6 @@ void tullave_co_scene_check_on_exit(void* context) {
     // Clear view
     popup_reset(t_llave->popup);
 
-    //nfc_magic_blink_stop(nfc_magic);
+    // Stop notification
+    tullave_blink_stop(t_llave);
 }

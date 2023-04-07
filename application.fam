@@ -4,7 +4,10 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tullave_co_main",
     targets=["f7"],
-    requires=["gui", "nfc"],
+    requires=[
+        "gui",
+        "nfc"
+    ],
     stack_size=4 * 1024,
     fap_icon="assets/tullave_logo_10px.png",
     fap_category="NFC",
