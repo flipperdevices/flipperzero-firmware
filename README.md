@@ -20,6 +20,9 @@ Feel free to reach out to me at CodeAllNight@outlook.com with any questions or l
 
 
 ## GPIO
+### wiegand
+[project](./gpio/wiegand/README.md) - This is a tool for reading and writing Wiegand data. Wiegand is typically used by NFC, RFID and keypads.  This tool can be used to read a Wiegand signal, save and display the data on the Flipper Zero's screen.  It can also play the signal back.
+
 ### gpio-pins
 [tool](./gpio/pins/README.md) - This is a set of files you can copy to your Flipper Zero so that you can easily lookup the meaning of a pin.
 
