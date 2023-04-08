@@ -20,17 +20,8 @@
 
 #define TAG "FuriHalPower"
 
-#define FURI_HAL_POWER_DEEP_SLEEP_ENABLED
-
-#ifdef FURI_HAL_POWER_DEEP_SLEEP_ENABLED
-#define FURI_HAL_POWER_DEEP_INSOMNIA 0
-#else
-#define FURI_HAL_POWER_DEEP_INSOMNIA 1
-#endif
-
 typedef struct {
     volatile uint8_t insomnia;
-    volatile uint8_t deep_insomnia;
     volatile uint8_t suppress_charge;
 
     uint8_t gauge_initialized;
@@ -39,7 +30,6 @@ typedef struct {
 
 static volatile FuriHalPower furi_hal_power = {
     .insomnia = 0,
-    .deep_insomnia = FURI_HAL_POWER_DEEP_INSOMNIA,
     .suppress_charge = 0,
 };
 
@@ -92,11 +82,6 @@ void furi_hal_power_init() {
     bq25896_init(&furi_hal_i2c_handle_power);
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 
-#ifdef FURI_HAL_OS_DEBUG
-    furi_hal_gpio_init_simple(&gpio_ext_pb2, GpioModeOutputPushPull);
-    furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
-#endif
-
     FURI_LOG_I(TAG, "Init OK");
 }
 
@@ -146,7 +131,7 @@ bool furi_hal_power_sleep_available() {
 }
 
 bool furi_hal_power_deep_sleep_available() {
-    return furi_hal_bt_is_alive() && furi_hal_power.deep_insomnia == 0;
+    return furi_hal_bt_is_alive();
 }
 
 void furi_hal_power_light_sleep() {
@@ -221,25 +206,9 @@ void furi_hal_power_deep_sleep() {
 
 void furi_hal_power_sleep() {
     if(furi_hal_power_deep_sleep_available()) {
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_gpio_write(&gpio_ext_pc3, 1);
-#endif
-
         furi_hal_power_deep_sleep();
-
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_gpio_write(&gpio_ext_pc3, 0);
-#endif
     } else {
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_gpio_write(&gpio_ext_pb2, 1);
-#endif
-
         furi_hal_power_light_sleep();
-
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_gpio_write(&gpio_ext_pb2, 0);
-#endif
     }
 }
 
