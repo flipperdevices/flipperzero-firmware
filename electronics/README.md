@@ -25,6 +25,8 @@ If you are just starting out, I'd recommend ordering this starter kit...
 - [Amazon link](https://amzn.to/3lTbfOd) These are the jumper wires (Dupont Wire) I ordered.  They have male/male, male/female, female/female.  You can never have too many of these cables --  I also bought [link](https://amzn.to/3YXlob8) and [link](https://amzn.to/41cpJZL); all of which are very similar.  
 - [Amazon link](https://amzn.to/3xBuUVw) I also ordered these jumper wires, which came with some rotary encoders.  (In a future video, I'll use the encoders.)
 - [Amazon link](https://amzn.to/3KjRF8c) These are the aligator clips I bought to clip on to various connections.
+- [Amazon link](https://amzn.to/3zEQmu2) Quick splice wires are very useful for making connections without cutting the wires.  I used these in my Wiegand video.
+
 
 ### Resistors
 - [Amazon link](https://amzn.to/3Igs0uB) A good assortment of resistors that I bought in the past.  They are 1% tolerance (which is really good).  
@@ -35,6 +37,9 @@ If you are just starting out, I'd recommend ordering this starter kit...
 ### LEDs
 - [Amazon link](https://amzn.to/3XNYLER) This is one of my main assortment of LEDs.
 - [Amazon search result](https://amzn.to/3Ij0rkg) 7-Segment displays are available with "common cathode" and "common anode".  I bought mine from Vetco Electronics in Bellevue, WA, USA -- so I don't have an Amazon link to recommend.  For "common cathode" one pin goes to GND and the Flipper Zero GPIO output pins need to drive output to 3.3volts.  For "common anode" one pin goes to 3.3volts or 5.0volts and the Flipper Zero GPIO output pins need to drive output to GND.  Both configurations are possible; so either will work fine.  Most people like "common cathode" because then you write a GPIO 'true' to turn the LED on (instead of 'true' to turn it off.)
+
+### Misc
+-[Amazon link](https://amzn.to/3ZMzzQk) This is a 125KHz RFID reader with keypad.  The output is 4-bit Wiegand for the keypad and 26/34-bit Wiegand for the RFID reader.  I bought this to use in my Wiegand video. 
 
 ## Disclaimer
 When you purchase through links on this page, I may earn an
