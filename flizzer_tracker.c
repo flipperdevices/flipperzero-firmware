@@ -15,12 +15,12 @@ void draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_set_color(canvas, ColorXOR);
 
-    if(tracker->is_loading) {
+    if(tracker->is_loading || tracker->is_loading_instrument) {
         canvas_draw_str(canvas, 10, 10, "Loading...");
         return;
     }
 
-    if(tracker->is_saving) {
+    if(tracker->is_saving || tracker->is_saving_instrument) {
         canvas_draw_str(canvas, 10, 10, "Saving...");
         return;
     }
@@ -95,6 +95,7 @@ int32_t flizzer_tracker_app(void* p) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool st = storage_simply_mkdir(storage, APPSDATA_FOLDER);
     st = storage_simply_mkdir(storage, FLIZZER_TRACKER_FOLDER);
+    st = storage_simply_mkdir(storage, FLIZZER_TRACKER_INSTRUMENTS_FOLDER);
     UNUSED(st);
     furi_record_close(RECORD_STORAGE);
 
@@ -119,6 +120,10 @@ int32_t flizzer_tracker_app(void* p) {
 
         if(event.type == EventTypeSaveSong) {
             save_song(tracker, tracker->filepath);
+        }
+
+        if(event.type == EventTypeSaveInstrument) {
+            save_instrument(tracker, tracker->filepath);
         }
 
         if(event.type == EventTypeLoadSong) {
@@ -148,6 +153,39 @@ int32_t flizzer_tracker_app(void* p) {
 
             if(ret && strcmp(&cpath[strlen(cpath) - 4], SONG_FILE_EXT) == 0) {
                 bool result = load_song_util(tracker, path);
+                UNUSED(result);
+            }
+
+            else {
+                furi_string_free(path);
+                tracker->is_loading = false;
+            }
+        }
+
+        if(event.type == EventTypeLoadInstrument) {
+            stop_song(tracker);
+
+            tracker->dialogs = furi_record_open(RECORD_DIALOGS);
+            tracker->is_loading_instrument = true;
+
+            FuriString* path;
+            path = furi_string_alloc();
+            furi_string_set(path, FLIZZER_TRACKER_INSTRUMENTS_FOLDER);
+
+            DialogsFileBrowserOptions browser_options;
+            dialog_file_browser_set_basic_options(
+                &browser_options, INST_FILE_EXT, &I_flizzer_tracker_instrument);
+            browser_options.base_path = FLIZZER_TRACKER_FOLDER;
+            browser_options.hide_ext = false;
+
+            bool ret = dialog_file_browser_show(tracker->dialogs, path, path, &browser_options);
+
+            furi_record_close(RECORD_DIALOGS);
+
+            const char* cpath = furi_string_get_cstr(path);
+
+            if(ret && strcmp(&cpath[strlen(cpath) - 4], INST_FILE_EXT) == 0) {
+                bool result = load_instrument_util(tracker, path);
                 UNUSED(result);
             }
 

@@ -64,6 +64,32 @@ void save_instrument_inner(Stream* stream, Instrument* inst) {
     UNUSED(rwops);
 }
 
+bool save_instrument(FlizzerTrackerApp* tracker, FuriString* filepath)
+{
+    bool file_removed =
+        storage_simply_remove(tracker->storage, furi_string_get_cstr(filepath)); // just in case
+    bool open_file = file_stream_open(
+        tracker->stream, furi_string_get_cstr(filepath), FSAM_WRITE, FSOM_OPEN_ALWAYS);
+
+    uint8_t version = TRACKER_ENGINE_VERSION;
+    size_t rwops =
+        stream_write(tracker->stream, (uint8_t*)INST_FILE_SIG, sizeof(INST_FILE_SIG) - 1);
+    rwops = stream_write(tracker->stream, (uint8_t*)&version, sizeof(uint8_t));
+
+    Instrument* inst = tracker->song.instrument[tracker->current_instrument];
+
+    save_instrument_inner(tracker->stream, inst);
+
+    file_stream_close(tracker->stream);
+    tracker->is_saving_instrument = false;
+    furi_string_free(filepath);
+
+    UNUSED(file_removed);
+    UNUSED(open_file);
+    UNUSED(rwops);
+    return false;
+}
+
 bool save_song(FlizzerTrackerApp* tracker, FuriString* filepath) {
     bool file_removed =
         storage_simply_remove(tracker->storage, furi_string_get_cstr(filepath)); // just in case
@@ -135,6 +161,40 @@ bool load_song_util(FlizzerTrackerApp* tracker, FuriString* filepath) {
     bool result = load_song(&tracker->song, tracker->stream);
 
     tracker->is_loading = false;
+    file_stream_close(tracker->stream);
+    furi_string_free(filepath);
+    UNUSED(open_file);
+    return result;
+}
+
+bool load_instrument_disk(TrackerSong* song, uint8_t inst, Stream* stream) {
+    char header[sizeof(INST_FILE_SIG) + 2] = {0};
+    size_t rwops = stream_read(stream, (uint8_t*)&header, sizeof(INST_FILE_SIG) - 1);
+    header[sizeof(INST_FILE_SIG)] = '\0';
+
+    uint8_t version = 0;
+
+    if(strcmp(header, INST_FILE_SIG) == 0) {
+        rwops = stream_read(stream, (uint8_t*)&version, sizeof(version));
+
+        if(version <= TRACKER_ENGINE_VERSION)
+        {
+            load_instrument_inner(stream, song->instrument[inst], version);
+        }
+    }
+
+    UNUSED(rwops);
+    return false;
+}
+
+bool load_instrument_util(FlizzerTrackerApp* tracker, FuriString* filepath)
+{
+    bool open_file = file_stream_open(
+        tracker->stream, furi_string_get_cstr(filepath), FSAM_READ, FSOM_OPEN_ALWAYS);
+
+    bool result = load_instrument_disk(&tracker->song, tracker->current_instrument, tracker->stream);
+
+    tracker->is_loading_instrument = false;
     file_stream_close(tracker->stream);
     furi_string_free(filepath);
     UNUSED(open_file);

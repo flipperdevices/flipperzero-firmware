@@ -7,7 +7,7 @@
 void return_from_keyboard_callback(void* ctx) {
     FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
 
-    if(!tracker->is_loading && !tracker->is_saving) {
+    if(!tracker->is_loading && !tracker->is_saving && !tracker->is_loading_instrument && !tracker->is_saving_instrument) {
         uint8_t string_length = 0;
         char* string = NULL;
 
@@ -65,6 +65,24 @@ void return_from_keyboard_callback(void* ctx) {
             furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
         }
     }
+
+    if(tracker->is_saving_instrument) {
+        stop_song(tracker);
+
+        tracker->filepath = furi_string_alloc();
+        furi_string_cat_printf(
+            tracker->filepath, "%s/%s%s", FLIZZER_TRACKER_INSTRUMENTS_FOLDER, tracker->filename, INST_FILE_EXT);
+
+        if(storage_file_exists(tracker->storage, furi_string_get_cstr(tracker->filepath))) {
+            view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_INSTRUMENT_FILE_OVERWRITE);
+            return;
+        }
+
+        else {
+            FlizzerTrackerEvent event = {.type = EventTypeSaveInstrument, .input = {{0}}, .period = 0};
+            furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+        }
+    }
 }
 
 void overwrite_file_widget_yes_input_callback(GuiButtonType result, InputType type, void* ctx) {
@@ -88,6 +106,32 @@ void overwrite_file_widget_no_input_callback(GuiButtonType result, InputType typ
 
     if(type == InputTypeShort) {
         tracker->is_saving = false;
+        furi_string_free(tracker->filepath);
+        view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+    }
+}
+
+void overwrite_instrument_file_widget_yes_input_callback(GuiButtonType result, InputType type, void* ctx) {
+    UNUSED(result);
+
+    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
+
+    if(type == InputTypeShort) {
+        tracker->is_saving_instrument = true;
+        view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+        // save_song(tracker, tracker->filepath);
+        static FlizzerTrackerEvent event = {.type = EventTypeSaveInstrument, .input = {{0}}, .period = 0};
+        furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+    }
+}
+
+void overwrite_instrument_file_widget_no_input_callback(GuiButtonType result, InputType type, void* ctx) {
+    UNUSED(result);
+
+    FlizzerTrackerApp* tracker = (FlizzerTrackerApp*)ctx;
+
+    if(type == InputTypeShort) {
+        tracker->is_saving_instrument = false;
         furi_string_free(tracker->filepath);
         view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
     }
@@ -176,6 +220,30 @@ void submenu_callback(void* context, uint32_t index) {
                 .input = inevent,
                 .period =
                     0}; // making an event so tracker does not wait for next keypress and exits immediately
+            furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
+            view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
+            break;
+        }
+
+        case SUBMENU_INSTRUMENT_SAVE: {
+            text_input_set_header_text(tracker->text_input, "Instrument filename:");
+            memset(&tracker->filename, 0, FILE_NAME_LEN);
+            text_input_set_result_callback(
+                tracker->text_input,
+                return_from_keyboard_callback,
+                tracker,
+                (char*)&tracker->filename,
+                FILE_NAME_LEN,
+                true);
+
+            tracker->is_saving_instrument = true;
+
+            view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_KEYBOARD);
+            break;
+        }
+
+        case SUBMENU_INSTRUMENT_LOAD: {
+            FlizzerTrackerEvent event = {.type = EventTypeLoadInstrument, .input = {{0}}, .period = 0};
             furi_message_queue_put(tracker->event_queue, &event, FuriWaitForever);
             view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_TRACKER);
             break;
@@ -305,7 +373,7 @@ void process_input_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event)
         }
 
         case INST_EDITOR_VIEW: {
-            submenu_set_selected_item(tracker->instrument_submenu, SUBMENU_INSTRUMENT_EXIT);
+            submenu_set_selected_item(tracker->instrument_submenu, SUBMENU_INSTRUMENT_LOAD);
             view_dispatcher_switch_to_view(tracker->view_dispatcher, VIEW_SUBMENU_INSTRUMENT);
             break;
         }

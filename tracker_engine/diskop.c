@@ -1,6 +1,8 @@
 #include "diskop.h"
 
-void load_instrument_inner(Stream* stream, Instrument* inst) {
+void load_instrument_inner(Stream* stream, Instrument* inst, uint8_t version) {
+    UNUSED(version);
+
     size_t rwops = stream_read(stream, (uint8_t*)inst->name, sizeof(inst->name));
     rwops = stream_read(stream, (uint8_t*)&inst->waveform, sizeof(inst->waveform));
     rwops = stream_read(stream, (uint8_t*)&inst->flags, sizeof(inst->flags));
@@ -103,7 +105,7 @@ bool load_song_inner(TrackerSong* song, Stream* stream) {
     for(uint16_t i = 0; i < song->num_instruments; i++) {
         song->instrument[i] = (Instrument*)malloc(sizeof(Instrument));
         set_default_instrument(song->instrument[i]);
-        load_instrument_inner(stream, song->instrument[i]);
+        load_instrument_inner(stream, song->instrument[i], version);
     }
 
     UNUSED(rwops);

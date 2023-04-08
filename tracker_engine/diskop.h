@@ -8,3 +8,5 @@
 #include <toolbox/stream/file_stream.h>
 
 bool load_song(TrackerSong* song, Stream* stream);
+bool load_instrument(Instrument* inst, Stream* stream);
+void load_instrument_inner(Stream* stream, Instrument* inst, uint8_t version);

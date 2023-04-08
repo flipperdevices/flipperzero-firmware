@@ -25,6 +25,8 @@
 
 #define SONG_FILE_SIG "FZT!SONG"
 #define SONG_FILE_EXT ".fzt"
+#define INST_FILE_SIG "FZT!INST"
+#define INST_FILE_EXT ".fzi"
 
 #define TRACKER_ENGINE_VERSION 1
 

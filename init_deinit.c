@@ -108,6 +108,10 @@ FlizzerTrackerApp* init_tracker(
         tracker->pattern_submenu, "Exit", SUBMENU_PATTERN_EXIT, submenu_callback, tracker);
 
     submenu_add_item(
+        tracker->instrument_submenu, "Load instrument", SUBMENU_INSTRUMENT_LOAD, submenu_callback, tracker);
+    submenu_add_item(
+        tracker->instrument_submenu, "Save instrument", SUBMENU_INSTRUMENT_SAVE, submenu_callback, tracker);
+    submenu_add_item(
         tracker->instrument_submenu, "Exit", SUBMENU_INSTRUMENT_EXIT, submenu_callback, tracker);
 
     view_dispatcher_add_view(
@@ -169,6 +173,34 @@ FlizzerTrackerApp* init_tracker(
         VIEW_FILE_OVERWRITE,
         widget_get_view(tracker->overwrite_file_widget));
 
+    tracker->overwrite_instrument_file_widget = widget_alloc();
+
+    widget_add_button_element(
+        tracker->overwrite_instrument_file_widget,
+        GuiButtonTypeLeft,
+        "No",
+        (ButtonCallback)overwrite_instrument_file_widget_no_input_callback,
+        tracker);
+    widget_add_button_element(
+        tracker->overwrite_instrument_file_widget,
+        GuiButtonTypeRight,
+        "Yes",
+        (ButtonCallback)overwrite_instrument_file_widget_yes_input_callback,
+        tracker);
+
+    widget_add_text_scroll_element(
+        tracker->overwrite_instrument_file_widget,
+        0,
+        0,
+        128,
+        64,
+        "This instrument file already\nexists, do you want to\noverwrite it?");
+
+    view_dispatcher_add_view(
+        tracker->view_dispatcher,
+        VIEW_INSTRUMENT_FILE_OVERWRITE,
+        widget_get_view(tracker->overwrite_instrument_file_widget));
+
     tracker->notification = furi_record_open(RECORD_NOTIFICATION);
     notification_message(tracker->notification, &sequence_display_backlight_enforce_on);
 
@@ -199,6 +231,7 @@ void deinit_tracker(FlizzerTrackerApp* tracker) {
     submenu_free(tracker->instrument_submenu);
 
     widget_free(tracker->overwrite_file_widget);
+    widget_free(tracker->overwrite_instrument_file_widget);
 
     view_dispatcher_free(tracker->view_dispatcher);
 

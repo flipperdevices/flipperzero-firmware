@@ -24,12 +24,15 @@
 
 #define APPSDATA_FOLDER "/ext/apps_data"
 #define FLIZZER_TRACKER_FOLDER "/ext/apps_data/flizzer_tracker"
+#define FLIZZER_TRACKER_INSTRUMENTS_FOLDER "/ext/apps_data/flizzer_tracker/instruments"
 #define FILE_NAME_LEN 64
 
 typedef enum {
     EventTypeInput,
     EventTypeSaveSong,
     EventTypeLoadSong,
+    EventTypeLoadInstrument,
+    EventTypeSaveInstrument,
     EventTypeSetAudioMode,
 } EventType;
 
@@ -132,6 +135,7 @@ typedef enum {
     VIEW_SUBMENU_PATTERN,
     VIEW_SUBMENU_INSTRUMENT,
     VIEW_FILE_OVERWRITE,
+    VIEW_INSTRUMENT_FILE_OVERWRITE,
     VIEW_SETTINGS,
 } FlizzerTrackerViews;
 
@@ -144,6 +148,8 @@ typedef enum {
 } PatternSubmenuParams;
 
 typedef enum {
+    SUBMENU_INSTRUMENT_LOAD,
+    SUBMENU_INSTRUMENT_SAVE,
     SUBMENU_INSTRUMENT_EXIT,
 } InstrumentSubmenuParams;
 
@@ -162,6 +168,7 @@ typedef struct {
     Submenu* instrument_submenu;
     VariableItemList* settings_list;
     Widget* overwrite_file_widget;
+    Widget* overwrite_instrument_file_widget;
     char filename[FILE_NAME_LEN + 1];
     bool was_it_back_keypress;
     uint32_t current_time;
@@ -187,6 +194,8 @@ typedef struct {
 
     bool is_loading;
     bool is_saving;
+    bool is_loading_instrument;
+    bool is_saving_instrument;
     bool showing_help;
 
     bool quit;
