@@ -1,7 +1,7 @@
 App(
     appid="space_impact_app", 
     name="Space Impact",
-    apptype=FlipperAppType.PLUGIN,
+    apptype=FlipperAppType.EXTERNAL,
     entry_point="impact_game_main",
     cdefines=["APP_SPACE_IMPACT"],
     requires=["gui"],
