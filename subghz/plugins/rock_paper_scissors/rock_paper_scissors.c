@@ -268,12 +268,41 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
         break;
     }
 
+    case GameRfPurposePlayAgain: {
+        // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
+        FuriString* name = furi_string_alloc();
+        furi_string_set(name, sender_name);
+
+        GameEvent event = {
+            .type = GameEventRemotePlayAgain, .sender_name = name, .game_number = game_number};
+        furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
+        break;
+    }
+
+    case GameRfPurposeQuit: {
+        // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
+        FuriString* name = furi_string_alloc();
+        furi_string_set(name, sender_name);
+
+        GameEvent event = {
+            .type = GameEventRemoteQuit, .sender_name = name, .game_number = game_number};
+        furi_message_queue_put(game_context->queue, &event, FuriWaitForever);
+        break;
+    }
+
     case GameRfPurposeJoin:
         if(index >= len) {
             FURI_LOG_W(TAG, "Failed to parse join message. >%s<", message);
             return;
         } else {
             sender_contact = (char*)message + index;
+            while(index < len) {
+                if(message[index] == '\n' || message[index] == '\r') {
+                    message[index] = 0;
+                    break;
+                }
+                index++;
+            }
             FURI_LOG_T(TAG, "Join had contact of >%s<", sender_contact);
 
             // IMPORTANT: The code processing the event needs to furi_string_free the senderName!
@@ -297,6 +326,13 @@ static void rps_receive_data(GameContext* game_context, uint32_t tick) {
             return;
         } else {
             sender_contact = (char*)message + index;
+            while(index < len) {
+                if(message[index] == '\n' || message[index] == '\r') {
+                    message[index] = 0;
+                    break;
+                }
+                index++;
+            }
 
             FURI_LOG_T(TAG, "Join acknowledge for game %d.", game_number);
             FURI_LOG_T(TAG, "Join ack had contact of >%s<", sender_contact);
@@ -1010,6 +1046,38 @@ static void rps_broadcast_not_beacon(GameContext* game_context) {
         furi_hal_version_get_name_ptr(),
         RPS_GAME_NAME,
         GameRfPurposeNotBeacon,
+        MAJOR_VERSION,
+        data->game_number);
+    rps_broadcast(game_context, data->buffer);
+}
+
+static void rps_broadcast_play_again(GameContext* game_context) {
+    GameData* data = game_context->data;
+    FURI_LOG_I(TAG, "Sending play again");
+
+    // The message for game 42 should look like...  "YourFlip: RPS:PA042\r\n"
+    furi_string_printf(
+        data->buffer,
+        "%s: %s:%c%c%03u\r\n",
+        furi_hal_version_get_name_ptr(),
+        RPS_GAME_NAME,
+        GameRfPurposePlayAgain,
+        MAJOR_VERSION,
+        data->game_number);
+    rps_broadcast(game_context, data->buffer);
+}
+
+static void rps_broadcast_quit(GameContext* game_context) {
+    GameData* data = game_context->data;
+    FURI_LOG_I(TAG, "Sending quit");
+
+    // The message for game 42 should look like...  "YourFlip: RPS:QA042\r\n"
+    furi_string_printf(
+        data->buffer,
+        "%s: %s:%c%c%03u\r\n",
+        furi_hal_version_get_name_ptr(),
+        RPS_GAME_NAME,
+        GameRfPurposeQuit,
         MAJOR_VERSION,
         data->game_number);
     rps_broadcast(game_context, data->buffer);
@@ -2240,17 +2308,19 @@ int32_t rock_paper_scissors_app(void* p) {
                     event.input.type == InputTypeShort) {
                     switch(event.input.key) {
                     case InputKeyLeft:
-                        game_context->data->keyboard_col = 0; // YES
+                        game_context->data->keyboard_col = 0; // YES - Play again
                         break;
                     case InputKeyRight:
-                        game_context->data->keyboard_col = 1; // NO
+                        game_context->data->keyboard_col = 1; // NO - Back to main menu
                         break;
                     case InputKeyOk:
                         if(game_context->data->keyboard_col == 1) {
+                            rps_broadcast_quit(game_context);
                             game_context->data->local_player = StateMainMenuHost;
                             game_context->data->remote_player = StateUnknown;
                             game_context->data->screen_state = ScreenMainMenu;
                         } else {
+                            rps_broadcast_play_again(game_context);
                             game_context->data->remote_player = StateReady;
                             game_context->data->remote_move_tick = furi_get_tick();
                             game_context->data->local_player = StateReady;
@@ -2334,6 +2404,18 @@ int32_t rock_paper_scissors_app(void* p) {
             case GameEventRemoteNotBeacon:
                 FURI_LOG_I(TAG, "Remote not beacon detected. game number %03u", event.game_number);
                 remote_games_remove(game_context, &event);
+                break;
+            case GameEventRemotePlayAgain:
+                game_context->data->remote_player = StateReady;
+                game_context->data->remote_move_tick = furi_get_tick();
+                game_context->data->local_player = StateReady;
+                game_context->data->local_move_tick = furi_get_tick();
+                game_context->data->screen_state = ScreenPlayingGame;
+                break;
+            case GameEventRemoteQuit:
+                game_context->data->local_player = StateMainMenuHost;
+                game_context->data->remote_player = StateUnknown;
+                game_context->data->screen_state = ScreenMainMenu;
                 break;
             case GameEventRemoteJoined:
                 if(furi_mutex_acquire(game_context->mutex, FuriWaitForever) == FuriStatusOk) {

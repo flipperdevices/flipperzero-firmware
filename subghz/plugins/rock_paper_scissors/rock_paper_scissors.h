@@ -170,6 +170,8 @@ typedef enum {
     GameRfPurposeJoin = 'J', // Join a game.
     GameRfPurposeJoinAcknowledge = 'A', // Acknowledge a join request.
     GameRfPurposeMove = 'M', // Player move.
+    GameRfPurposePlayAgain = 'P', // Play another game.
+    GameRfPurposeQuit = 'Q', // Quit, don't play another game.
 } GameRfPurpose;
 
 // Messages in our event queue are one of the following types.
@@ -182,6 +184,8 @@ typedef enum {
     GameEventRemoteJoined,
     GameEventRemoteJoinAcknowledged,
     GameEventLocalMove,
+    GameEventRemotePlayAgain,
+    GameEventRemoteQuit,
     GameEventRemoteMove,
     GameEventSendMove,
     GameEventPlaySong,
