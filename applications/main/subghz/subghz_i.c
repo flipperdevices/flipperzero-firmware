@@ -39,6 +39,23 @@ void subghz_blink_stop(SubGhz* subghz) {
     notification_message(subghz->notifications, &sequence_blink_stop);
 }
 
+bool subghz_tx_start(SubGhz* subghz, FlipperFormat* flipper_format) {
+    switch(subghz_txrx_tx_start(subghz->txrx, flipper_format)) {
+    case SubGhzTxRxStartTxStateErrorParserOthers:
+        dialog_message_show_storage_error(
+            subghz->dialogs, "Error in protocol\nparameters\ndescription");
+        break;
+    case SubGhzTxRxStartTxStateErrorOnlyRx:
+        subghz_dialog_message_show_only_rx(subghz);
+        break;
+
+    default:
+        return true;
+        break;
+    }
+    return false;
+}
+
 void subghz_dialog_message_show_only_rx(SubGhz* subghz) {
     DialogsApp* dialogs = subghz->dialogs;
     DialogMessage* message = dialog_message_alloc();
@@ -111,7 +128,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
 
         furi_string_set_str(
             temp_str, subghz_txrx_get_name_preset(subghz->txrx, furi_string_get_cstr(temp_str)));
-        if(temp_str == NULL) {
+        if(!strcmp(furi_string_get_cstr(temp_str), "")) {
             break;
         }
 

@@ -40,7 +40,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
             bool result = false;
             if((state == SubGhzRpcStateLoaded)) {
                 result =
-                    subghz_txrx_tx_start(subghz->txrx, subghz_txtx_get_fff_data(subghz->txrx));
+                    subghz_tx_start(subghz, subghz_txtx_get_fff_data(subghz->txrx));
                 if(result) subghz_blink_start(subghz);
             }
             if(!result) {
