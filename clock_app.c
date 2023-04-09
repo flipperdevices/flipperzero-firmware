@@ -797,7 +797,10 @@ int32_t clock_app(void* p) {
                         plugin_state->curEmotiveFace = plugin_state->curEmotiveFace + 1;
                         if(plugin_state->curEmotiveFace == 25) plugin_state->curEmotiveFace = 0;
                     }
-                    if(plugin_state->timerSecs % 60 == 0 && plugin_state->timerSecs != 0) {
+                    if(plugin_state->timerSecs % 60 == 0 && plugin_state->timerSecs != 0 &&
+                       plugin_state->songSelect != 0 &&
+                       (plugin_state->timerSecs < plugin_state->alert_time ||
+                        plugin_state->songSelect == 3)) {
                         notification_message(notification, &clock_alert_perMin);
                     }
                     if(plugin_state->songSelect == 1) {
@@ -851,6 +854,8 @@ int32_t clock_app(void* p) {
                                 DOLPHIN_DEED(DolphinDeedPluginGameWin);
                             }
                             notification_message(notification, &clock_alert_silent);
+                            notification_message(notification, &sequence_rainbow);
+                            notification_message(notification, &sequence_rainbow);
                         }
                     }
                 }
