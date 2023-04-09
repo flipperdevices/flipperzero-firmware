@@ -4,10 +4,13 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-void tullave_drv_send_apdu_command(
-    uint8_t* req_buffer,
-    size_t req_size,
-    uint8_t* resp_buffer,
-    size_t resp_size);
+struct TuLlaveInfo {
+    uint32_t balance;
+    uint8_t* card_number;
+};
 
-bool tullave_drv_detect_tullave_card();
+typedef struct TuLlaveInfo TuLlaveInfo;
+
+void tullave_drv_exit_sleep();
+void tullave_drv_start_sleep();
+bool tullave_drv_req_card_info(TuLlaveInfo* card_info);

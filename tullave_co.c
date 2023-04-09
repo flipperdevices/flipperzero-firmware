@@ -99,7 +99,7 @@ void tullave_free(TuLlave* t_llave) {
     view_dispatcher_remove_view(t_llave->view_dispatcher, TuLlaveViewPopup);
     popup_free(t_llave->popup);
 
-    // Notifications
+    // Notifications7
     furi_record_close(RECORD_NOTIFICATION);
     t_llave->notifications = NULL;
 

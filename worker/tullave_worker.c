@@ -19,6 +19,7 @@ TuLlaveWorker* tullave_worker_alloc() {
     t_worker->thread =
         furi_thread_alloc_ex(THREAD_NAME, THREAD_STACK_SIZE, tullave_worker_task, t_worker);
 
+    t_worker->card_info = malloc(sizeof(TuLlaveInfo));
     t_worker->callback = NULL;
     t_worker->context = NULL;
 
@@ -31,6 +32,7 @@ TuLlaveWorker* tullave_worker_alloc() {
 void tullave_worker_free(TuLlaveWorker* t_worker) {
     furi_assert(t_worker);
 
+    free(t_worker->card_info);
     furi_thread_free(t_worker->thread);
     free(t_worker);
 }
@@ -38,6 +40,7 @@ void tullave_worker_free(TuLlaveWorker* t_worker) {
 void tullave_worker_stop(TuLlaveWorker* t_worker) {
     furi_assert(t_worker);
 
+    tullave_drv_exit_sleep();
     tullave_worker_change_state(t_worker, TuLlaveWorkerStop);
     furi_thread_join(t_worker->thread);
 }
@@ -51,6 +54,7 @@ void tullave_worker_start(TuLlaveWorker* t_worker, TuLlaveWorkerCallback callbac
     t_worker->callback = callback;
     t_worker->context = context;
 
+    tullave_drv_start_sleep();
     tullave_worker_change_state(t_worker, TuLlaveWorkerStateCheck);
     furi_thread_start(t_worker->thread);
 
@@ -67,7 +71,7 @@ int32_t tullave_worker_task(void* context) {
 
 void tullave_worker_check(TuLlaveWorker* t_worker) {
     while(t_worker->state == TuLlaveWorkerStateCheck) {
-        if(tullave_drv_detect_tullave_card()) {
+        if(tullave_drv_req_card_info(t_worker->card_info)) {
             t_worker->callback(TuLlaveWorkerEventCardDetected, t_worker->context);
             break;
         } else {

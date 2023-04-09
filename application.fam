@@ -1,6 +1,6 @@
 App(
     appid="tullave_co",
-    name="TuLlave CO Reader",
+    name="TuLlave",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tullave_co_main",
     targets=["f7"],
