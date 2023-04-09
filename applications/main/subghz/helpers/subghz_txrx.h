@@ -10,7 +10,6 @@ typedef void (*SubGhzTxRxNeedSaveCallback)(void* context);
 
 typedef struct SubGhzTxRx SubGhzTxRx;
 
-
 typedef enum {
     SubGhzTxRxStartTxStateOk,
     SubGhzTxRxStartTxStateErrorOnlyRx,
