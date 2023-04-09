@@ -35,6 +35,7 @@ typedef struct {
 } PlayerState;
 
 typedef struct {
+    FuriMutex* mutex;
     PlayerState player;
     Level level;
     bool fire;
