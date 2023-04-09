@@ -28,6 +28,9 @@
 
 #define FELICA_BLOCK_SIZE 16
 
+#define FELICA_NODE_CODE_MAX 0xfffe
+#define FELICA_NODE_CODE_INVALID 0xffff
+
 #define CYBERNET_SYSTEM_CODE 0x0003
 #define NDEF_SYSTEM_CODE 0x12fc
 #define HCE_F_SYSTEM_CODE 0x4000
@@ -138,10 +141,10 @@ ARRAY_DEF(FelicaBlockArray, FelicaBlock, M_POD_OPLIST)
 
 typedef struct {
     uint16_t number;
+    FelicaServiceType type;
     FelicaServiceAttributeList_t access_control_list; // accounts for overlap services
     bool is_extended_overlap; // We don't know much about this currently. will always be false
     union {
-        // TODO change this to use FelicaBlockArray_t
         FelicaBlockArray_t blocks;
         struct {
             uint16_t overlap_target;
@@ -183,7 +186,7 @@ ARRAY_DEF(FelicaNodeArray, FelicaNode, M_POD_OPLIST)
 ARRAY_DEF(FelicaNodeRefArray, FelicaNode*, M_PTR_OPLIST)
 #define M_OPL_FelicaNodeRefArray_t() ARRAY_OPLIST(FelicaNodeRefArray, M_PTR_OPLIST)
 
-// { service_number: service_ptr_in_tree }
+// { service_code: service_ptr_in_tree }
 DICT_DEF2(FelicaPublicServiceDict, uint16_t, M_DEFAULT_OPLIST, FelicaService*, M_PTR_OPLIST)
 #define M_OPL_FelicaPublicServiceDict_t() \
     DICT_OPLIST(FelicaPublicServiceDict, M_DEFAULT_OPLIST, M_PTR_OPLIST)
@@ -257,6 +260,32 @@ typedef struct {
     uint8_t status_flags[2];
 } FelicaReader;
 
+/** Parsed response for Search Service command */
+typedef struct {
+    /** Whether the cursor points to a valid node. */
+    bool is_valid;
+    /** Whether or not the node is an area. */
+    bool is_area;
+    /** Raw node code. Used to check if the node is within area boundary. */
+    uint16_t code;
+    /** Parsed node number. */
+    uint16_t number;
+    union {
+        struct {
+            /** (Service only) Service type. */
+            FelicaServiceType service_type;
+            /** (Service only) Service attribute. */
+            FelicaServiceAttribute service_attrib;
+        };
+        struct {
+            /** (Area only) The end node code of area (inclusive). */
+            uint16_t area_end;
+            /** (Area only) Whether or not this area can have subareas. */
+            bool can_create_subareas;
+        };
+    };
+} FelicaSearchServiceCodeResult;
+
 bool felica_check_ic_type(uint8_t* PMm);
 FelicaICType felica_get_ic_type(uint8_t* PMm);
 
@@ -296,6 +325,13 @@ uint8_t felica_lite_prepare_unencrypted_write(
     const uint8_t* block_data);
 bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* reader);
 
+uint8_t felica_prepare_search_service_code(uint8_t* dest, FelicaReader* reader, uint16_t cursor);
+bool felica_parse_search_service_code(
+    uint8_t* buf,
+    uint8_t len,
+    FelicaReader* reader,
+    FelicaSearchServiceCodeResult* result);
+
 bool felica_lite_can_read_without_mac(uint8_t* mc_r_restr, uint8_t block_number);
 
 void felica_define_normal_block(FelicaService* service, uint16_t number, uint8_t* data);
@@ -315,9 +351,49 @@ bool felica_lite_dump_data(
     FelicaData* data,
     FelicaSystem* system);
 
+/** Request available systems on a FeliCa Standard tag and populate the system array.
+ *
+ * @param tx_rx NFC context.
+ * @param reader FeliCa reader context.
+ * @param systems Output system array. Must be empty.
+ * @return true if successful.
+ */
+bool felica_std_request_system_code(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaSystemArray_t* systems);
+/** Traverse the filesystem tree of a system and populate the system object.
+ *
+ * @param tx_rx NFC context.
+ * @param reader FeliCa reader context.
+ * @param system System object. Must have an uninitialized root.
+ * @return true if successful.
+ */
+bool felica_std_traverse_system(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaSystem* system);
+
 bool felica_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaData* data,
     uint8_t* polled_idm,
     uint8_t* polled_pmm);
+void felica_clear(FelicaData* data);
+
+void felica_service_clear(FelicaService* service);
+void felica_lite_clear(FelicaLiteInfo* lite_info);
+void felica_node_init_as_area(
+    FelicaNode* node,
+    FelicaNode* parent,
+    uint16_t area_number,
+    bool can_create_subareas,
+    uint16_t end_service_code);
+void felica_node_init_as_service(
+    FelicaNode* node,
+    FelicaNode* parent,
+    uint16_t service_number,
+    FelicaServiceType service_type);
+void felica_area_clear(FelicaArea* area);
+void felica_node_clear(FelicaNode* node);
 void felica_clear(FelicaData* data);

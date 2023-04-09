@@ -151,6 +151,20 @@ FelicaICType felica_get_ic_type(uint8_t* PMm) {
     return FelicaICType2K;
 }
 
+static void felica_parse_service_attrib(
+    uint16_t node_attrib,
+    FelicaServiceType* result_type,
+    FelicaServiceAttribute* result_attrib) {
+    FelicaServiceType type = node_attrib & 0b111100;
+    if((type & 0b111000) == FelicaServiceTypePurse) {
+        *result_type = FelicaServiceTypePurse;
+        *result_attrib = node_attrib & 0b111;
+        return;
+    }
+    *result_type = type;
+    *result_attrib = node_attrib & 0b11;
+}
+
 /** Parse common FeliCa response headers.
  *
  * This parses and validates the most commonly occurring response header types.
@@ -402,6 +416,74 @@ bool felica_parse_request_system_code(
     return true;
 }
 
+uint8_t felica_prepare_search_service_code(uint8_t* dest, FelicaReader* reader, uint16_t cursor) {
+    dest[0] = FELICA_SEARCH_SERVICE_CODE_CMD;
+    memcpy(&dest[1], reader->current_idm, 8);
+    dest[9] = cursor & 0xff;
+    dest[10] = (cursor >> 8) & 0xff;
+    return 11;
+}
+
+bool felica_parse_search_service_code(
+    uint8_t* buf,
+    uint8_t len,
+    FelicaReader* reader,
+    FelicaSearchServiceCodeResult* result) {
+    uint8_t consumed =
+        felica_consume_header(buf, len, reader, FELICA_SEARCH_SERVICE_CODE_RES, true);
+    if(consumed == 0) {
+        return false;
+    }
+    len -= consumed;
+    buf += consumed;
+
+    if(len != 2 && len != 4) {
+        FURI_LOG_E(TAG, "Invalid response length for Search Service Code command");
+        return false;
+    }
+
+    uint16_t node_code = buf[0] | (buf[1] << 8);
+
+    if(node_code == FELICA_NODE_CODE_INVALID) {
+        result->is_valid = false;
+        return true;
+    }
+
+    bool is_area = (len == 4);
+    uint16_t node_number = node_code >> 6;
+    uint16_t node_attrib = node_code & 0b111111;
+    uint16_t node_end = 0;
+
+    if(is_area) {
+        node_end = buf[2] | (buf[3] << 8);
+    }
+
+    FURI_LOG_D(
+        TAG,
+        "Found node %#x (%s #%d, attrib %#x)",
+        node_code,
+        is_area ? "area" : "svc",
+        node_number,
+        node_attrib);
+    if(is_area) {
+        FURI_LOG_D(TAG, "Area ends at %#x", node_end);
+    }
+
+    result->is_valid = true;
+    result->is_area = is_area;
+    result->code = node_code;
+    result->number = node_number;
+    if(is_area) {
+        result->can_create_subareas = !(node_attrib & 1);
+        result->area_end = node_end;
+    } else {
+        felica_parse_service_attrib(
+            node_attrib, &(result->service_type), &(result->service_attrib));
+    }
+
+    return true;
+}
+
 static FelicaSystem* felica_gen_monolithic_system_code(
     FelicaReader* reader,
     FelicaSystemArray_t* systems,
@@ -644,6 +726,125 @@ bool felica_std_request_system_code(
     return true;
 }
 
+bool felica_std_traverse_system(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaSystem* system) {
+    FelicaSearchServiceCodeResult search_result = {0};
+    FelicaNodeRefArray_t search_stack;
+    bool result = false;
+
+    if(system->is_lite) {
+        return false;
+    }
+
+    // Format the root area
+    felica_node_init_as_area(&(system->root), NULL, 0, true, FELICA_NODE_CODE_MAX);
+
+    FelicaNodeRefArray_init(search_stack);
+    FelicaNodeRefArray_push_back(search_stack, &(system->root));
+
+    // Traverse all areas and services, populate filesystem tree and update public_services table.
+    // Do NOT early return in this loop. There will be leaks.
+    // Instead use break without setting result to true.
+    for(uint_least32_t cursor = 0; cursor < 0x10000; cursor++) {
+        // Execute transaction
+        tx_rx->tx_bits =
+            8 * felica_prepare_search_service_code(tx_rx->tx_data, reader, cursor & 0xffff);
+        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+            FURI_LOG_E(TAG, "Bad exchange when searching node");
+            break;
+        }
+        if(!felica_parse_search_service_code(
+               tx_rx->rx_data, tx_rx->rx_bits / 8, reader, &search_result)) {
+            break;
+        }
+
+        // End search when reaching end of the node list
+        if(!search_result.is_valid) {
+            FURI_LOG_D(TAG, "Ending service search");
+            result = true;
+            break;
+        }
+
+        // Validate and skip root area
+        if(search_result.is_area && search_result.number == 0 &&
+           search_result.can_create_subareas) {
+            if(search_result.area_end != FELICA_NODE_CODE_MAX) {
+                FURI_LOG_E(TAG, "Invalid root area");
+                break;
+            }
+            continue;
+        }
+
+        FelicaNode** curr_working_anode_ref = NULL;
+        FelicaNode* curr_working_anode = NULL;
+
+        // Find the area the newly discovered node belongs to
+        while(true) {
+            curr_working_anode_ref = FelicaNodeRefArray_back(search_stack);
+            furi_assert(curr_working_anode_ref != NULL);
+            curr_working_anode = *curr_working_anode_ref;
+            furi_assert(curr_working_anode != NULL);
+            furi_assert(curr_working_anode->type == FelicaNodeTypeArea);
+            // If current code is out of range, cd .. and check again
+            if(search_result.code > curr_working_anode->area->end_service_code) {
+                FelicaNodeRefArray_pop_back(NULL, search_stack);
+            } else {
+                break;
+            }
+        }
+
+        // New area discovered
+        if(search_result.is_area) {
+            FelicaNode* new_anode = FelicaNodeArray_push_new(curr_working_anode->area->nodes);
+            furi_assert(new_anode != NULL);
+            felica_node_init_as_area(
+                new_anode,
+                curr_working_anode,
+                search_result.number,
+                search_result.can_create_subareas,
+                search_result.area_end);
+            continue;
+        }
+
+        // Fetch or create the service node of the correct number and type
+        FelicaNode* curr_open_snode = FelicaNodeArray_back(curr_working_anode->area->nodes);
+        if(curr_open_snode == NULL || curr_open_snode->service->number != search_result.number ||
+           curr_open_snode->service->type != search_result.service_type) {
+            curr_open_snode = FelicaNodeArray_push_new(curr_working_anode->area->nodes);
+            felica_node_init_as_service(
+                curr_open_snode,
+                curr_working_anode,
+                search_result.number,
+                search_result.service_type);
+        }
+
+        // Add current access condition to the set
+        FelicaServiceAttributeList_push(
+            curr_open_snode->service->access_control_list, search_result.service_attrib);
+
+        // Also add to public service dict if the service is publicly readable
+        // (Purse/value block increment/decrement should be considered write-only so they will be
+        //  excluded even when auth is not required)
+        if(search_result.service_attrib == FelicaServiceAttributeUnauthRO ||
+           search_result.service_attrib == FelicaServiceAttributeUnauthRW ||
+           search_result.service_attrib == FelicaServiceAttributeUnauthDirectAccess ||
+           search_result.service_attrib == FelicaServiceAttributeUnauthPurseRO) {
+            FelicaPublicServiceDict_set_at(
+                system->public_services, search_result.code, curr_open_snode->service);
+        }
+    }
+
+    // Cleanup
+    FelicaNodeRefArray_clear(search_stack);
+    if(!result) {
+        FURI_LOG_D(TAG, "Rolling back system on failure.");
+        felica_node_clear(&(system->root));
+    }
+    return result;
+}
+
 bool felica_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaData* data,
@@ -697,6 +898,40 @@ void felica_lite_clear(FelicaLiteInfo* lite_info) {
     if(lite_info->card_key_2 != NULL) {
         free(lite_info->card_key_2);
     }
+}
+
+void felica_node_init_as_area(
+    FelicaNode* node,
+    FelicaNode* parent,
+    uint16_t area_number,
+    bool can_create_subareas,
+    uint16_t end_service_code) {
+    node->parent = parent;
+    node->type = FelicaNodeTypeArea;
+    node->area = calloc(1, sizeof(*(node->area)));
+    furi_assert(node->area != NULL);
+    node->area->number = area_number;
+    node->area->can_create_subareas = can_create_subareas;
+    node->area->end_service_code = end_service_code;
+    FelicaNodeArray_init(node->area->nodes);
+}
+
+void felica_node_init_as_service(
+    FelicaNode* node,
+    FelicaNode* parent,
+    uint16_t service_number,
+    FelicaServiceType service_type) {
+    node->parent = parent;
+    node->type = FelicaNodeTypeService;
+    node->service = calloc(1, sizeof(*(node->area)));
+    furi_assert(node->service != NULL);
+
+    node->service->number = service_number;
+    node->service->type = service_type;
+    node->service->is_extended_overlap = false;
+
+    FelicaServiceAttributeList_init(node->service->access_control_list);
+    FelicaBlockArray_init(node->service->blocks);
 }
 
 void felica_node_clear(FelicaNode* node);
