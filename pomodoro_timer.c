@@ -2,8 +2,8 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/elements.h>
-#include <assets_icons.h>
 #include <notification/notification_messages.h>
+#include "pomodoro_icons.h"
 
 const NotificationSequence sequence_finish = {
     &message_display_backlight_on,
