@@ -75,10 +75,10 @@ def generate(env, **kw):
     if not sdk_state["meta"]["hw_target"].endswith(sdk_data["hardware"]):
         raise StopError("SDK state file doesn't match hardware target")
 
-    if sdk_state["meta"]["version"] != ufbt_state["version"]:
+    if ufbt_state["version"] not in sdk_state["meta"].get("version", ""):
         warn(
             WarningOnByDefault,
-            f"Version mismatch: SDK state vs uFBT: {sdk_state['meta']['version']} vs {ufbt_state['version']}",
+            f"Version mismatch: SDK state vs uFBT: {sdk_state['meta'].get('version', '')} vs {ufbt_state['version']}",
         )
 
     scripts_dir = sdk_current_sdk_dir_node.Dir(sdk_components["scripts.dir"])
