@@ -117,6 +117,7 @@ void subghz_idle(SubGhz* subghz) {
     furi_assert(subghz);
     furi_assert(subghz->txrx->txrx_state != SubGhzTxRxStateSleep);
     furi_hal_subghz_idle();
+    subghz_speaker_off(subghz);
     subghz->txrx->txrx_state = SubGhzTxRxStateIDLE;
 }
 
