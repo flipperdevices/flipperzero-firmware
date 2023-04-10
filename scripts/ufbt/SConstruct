@@ -391,3 +391,13 @@ AddPostAction(
 dist_env.Precious(app_template_dist)
 dist_env.NoClean(app_template_dist)
 dist_env.Alias("create", app_template_dist)
+
+dist_env.PhonyTarget(
+    "get_blackmagic",
+    "@echo $( ${BLACKMAGIC_ADDR} $)",
+)
+
+dist_env.PhonyTarget(
+    "get_apiversion",
+    "@echo $( ${UFBT_API_VERSION} $)",
+)
