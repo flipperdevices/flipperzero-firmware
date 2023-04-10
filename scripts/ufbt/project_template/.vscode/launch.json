@@ -7,12 +7,9 @@
             "type": "command",
             "command": "shellCommand.execute",
             "args": {
-                "useSingleResult": true,
-                "env": {
-                    "PATH": "${workspaceFolder};${env:PATH}"
-                },
-                "command": "ufbt -s get_blackmagic",
                 "description": "Get Blackmagic device",
+                "useSingleResult": true,
+                "command": "ufbt -s get_blackmagic",
             }
         },
     ],

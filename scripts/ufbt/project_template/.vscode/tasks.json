@@ -21,6 +21,12 @@
             "command": "ufbt"
         },
         {
+            "label": "Clean",
+            "group": "build",
+            "type": "shell",
+            "command": "ufbt -c"
+        },
+        {
             "label": "Flash FW (ST-Link)",
             "group": "build",
             "type": "shell",
