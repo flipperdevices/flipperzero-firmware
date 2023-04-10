@@ -18,6 +18,8 @@ Press the 'ok' button (button in the centre of joypad) to pause/unpause the wave
 
 [Demo](https://www.youtube.com/watch?v=tu2X1WwADF4) showing three different waveform types from a signal generator.
 
+Also see [Derek Jamison's demonstration](https://www.youtube.com/watch?v=iC5fBGwCPHw&t=374s) of this app as well as other interesting projects.
+
 ## Measurements
 
 * Measures frequency of waveform in hertz
