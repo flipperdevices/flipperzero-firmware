@@ -5,6 +5,7 @@
 #include <furi_hal_resources.h>
 #include <furi_hal_uart.h>
 #include <furi_hal_rtc.h>
+#include <furi_hal_debug.h>
 
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_pwr.h>
@@ -19,6 +20,9 @@
 #include <furi.h>
 
 #define TAG "FuriHalPower"
+
+#define FURI_HAL_POWER_DEBUG_WFI_GPIO (&gpio_ext_pb2)
+#define FURI_HAL_POWER_DEBUG_STOP_GPIO (&gpio_ext_pc3)
 
 typedef struct {
     volatile uint8_t insomnia;
@@ -72,6 +76,13 @@ const ParamCEDV cedv = {
 };
 
 void furi_hal_power_init() {
+#ifdef FURI_HAL_POWER_DEBUG
+    furi_hal_gpio_init_simple(FURI_HAL_POWER_DEBUG_WFI_GPIO, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(FURI_HAL_POWER_DEBUG_STOP_GPIO, GpioModeOutputPushPull);
+    furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_WFI_GPIO, 0);
+    furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_STOP_GPIO, 0);
+#endif
+
     LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
     LL_PWR_SMPS_SetMode(LL_PWR_SMPS_STEP_DOWN);
     LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
@@ -131,7 +142,8 @@ bool furi_hal_power_sleep_available() {
 }
 
 static inline bool furi_hal_power_deep_sleep_available() {
-    return furi_hal_bt_is_alive() && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep);
+    return furi_hal_bt_is_alive() && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep) &&
+           !furi_hal_debug_is_gdb_session_active();
 }
 
 static inline void furi_hal_power_light_sleep() {
@@ -204,9 +216,21 @@ static inline void furi_hal_power_deep_sleep() {
 
 void furi_hal_power_sleep() {
     if(furi_hal_power_deep_sleep_available()) {
+#ifdef FURI_HAL_POWER_DEBUG
+        furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_STOP_GPIO, 1);
+#endif
         furi_hal_power_deep_sleep();
+#ifdef FURI_HAL_POWER_DEBUG
+        furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_STOP_GPIO, 0);
+#endif
     } else {
+#ifdef FURI_HAL_POWER_DEBUG
+        furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_WFI_GPIO, 1);
+#endif
         furi_hal_power_light_sleep();
+#ifdef FURI_HAL_POWER_DEBUG
+        furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_WFI_GPIO, 0);
+#endif
     }
 }
 

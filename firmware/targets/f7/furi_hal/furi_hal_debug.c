@@ -6,6 +6,8 @@
 #include <furi_hal_gpio.h>
 #include <furi_hal_resources.h>
 
+volatile bool furi_hal_debug_gdb_session_active = false;
+
 void furi_hal_debug_enable() {
     // Low power mode debug
     LL_DBGMCU_EnableDBGSleepMode();
@@ -32,4 +34,8 @@ void furi_hal_debug_disable() {
     // SWD GPIO
     furi_hal_gpio_init_simple(&gpio_swdio, GpioModeAnalog);
     furi_hal_gpio_init_simple(&gpio_swclk, GpioModeAnalog);
+}
+
+bool furi_hal_debug_is_gdb_session_active() {
+    return furi_hal_debug_gdb_session_active;
 }
