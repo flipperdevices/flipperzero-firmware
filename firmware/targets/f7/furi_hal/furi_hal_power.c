@@ -131,7 +131,7 @@ bool furi_hal_power_sleep_available() {
 }
 
 bool furi_hal_power_deep_sleep_available() {
-    return furi_hal_bt_is_alive();
+    return furi_hal_bt_is_alive() && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep);
 }
 
 void furi_hal_power_light_sleep() {
