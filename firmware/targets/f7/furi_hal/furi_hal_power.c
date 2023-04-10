@@ -130,11 +130,11 @@ bool furi_hal_power_sleep_available() {
     return furi_hal_power.insomnia == 0;
 }
 
-bool furi_hal_power_deep_sleep_available() {
+static inline bool furi_hal_power_deep_sleep_available() {
     return furi_hal_bt_is_alive() && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep);
 }
 
-void furi_hal_power_light_sleep() {
+static inline void furi_hal_power_light_sleep() {
     __WFI();
 }
 
@@ -142,17 +142,15 @@ static inline void furi_hal_power_suspend_aux_periphs() {
     // Disable USART
     furi_hal_uart_suspend(FuriHalUartIdUSART1);
     furi_hal_uart_suspend(FuriHalUartIdLPUART1);
-    // TODO: Disable USB
 }
 
 static inline void furi_hal_power_resume_aux_periphs() {
     // Re-enable USART
     furi_hal_uart_resume(FuriHalUartIdUSART1);
     furi_hal_uart_resume(FuriHalUartIdLPUART1);
-    // TODO: Re-enable USB
 }
 
-void furi_hal_power_deep_sleep() {
+static inline void furi_hal_power_deep_sleep() {
     furi_hal_power_suspend_aux_periphs();
 
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
