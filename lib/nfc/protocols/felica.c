@@ -206,9 +206,8 @@ static uint8_t felica_consume_header(
         reader->status_flags[0] = buf[10];
         reader->status_flags[1] = buf[11];
         if(reader->status_flags[0] != 0 || reader->status_flags[1] != 0) {
-            FURI_LOG_W(
+            FURI_LOG_D(
                 TAG, "SF1: %02X SF2: %02X", reader->status_flags[0], reader->status_flags[1]);
-            return 0;
         }
     }
     return header_size;
@@ -219,7 +218,7 @@ uint8_t felica_prepare_unencrypted_read(
     const FelicaReader* reader,
     const uint16_t* service_code_list,
     uint8_t service_count,
-    const uint32_t* block_list,
+    const FelicaRWRequestBlockDescriptor* block_list,
     uint8_t block_count) {
     dest[0] = FELICA_UNENCRYPTED_READ_CMD;
     memcpy(&dest[1], reader->current_idm, 8);
@@ -234,9 +233,20 @@ uint8_t felica_prepare_unencrypted_read(
 
     dest[msg_len++] = block_count;
     for(int i = 0; i < block_count; i++) {
-        uint16_t block_num = block_list[i];
-        dest[msg_len++] = block_num & 0xFF;
-        dest[msg_len++] = block_num >> 8;
+        FelicaRWRequestBlockDescriptor block_desc = block_list[i];
+
+        uint8_t flags = 0x0;
+        if(block_desc.block_number < 0x100) {
+            flags |= 0x80;
+        }
+        flags |= block_desc.access_mode << 4;
+        flags |= block_desc.service_index & 0xf;
+
+        dest[msg_len++] = flags;
+        dest[msg_len++] = block_desc.block_number & 0xFF;
+        if(block_desc.block_number >= 0x100) {
+            dest[msg_len++] = block_desc.block_number >> 8;
+        }
     }
 
     return msg_len;
@@ -276,7 +286,7 @@ uint16_t felica_parse_unencrypted_read(
     uint8_t* out,
     uint16_t out_len) {
     uint8_t consumed = felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_READ_RES, false);
-    if(!consumed) {
+    if(!consumed || reader->status_flags[0] != 0 || reader->status_flags[1] != 0) {
         return 0;
     }
     len -= consumed;
@@ -360,7 +370,7 @@ uint8_t felica_lite_prepare_unencrypted_write(
 bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* reader) {
     uint8_t consumed =
         felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_WRITE_RES, false);
-    if(!consumed) {
+    if(!consumed || reader->status_flags[0] != 0 || reader->status_flags[1] != 0) {
         return false;
     }
     return true;
@@ -845,6 +855,88 @@ bool felica_std_traverse_system(
     return result;
 }
 
+bool felica_std_dump_public_service(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaService* service,
+    uint16_t service_code) {
+    uint16_t service_codes[1] = {service_code};
+    bool result = false;
+
+    if(service->is_extended_overlap) {
+        return false;
+    }
+
+    for(uint_least32_t cursor = 0; cursor < 0x10000; cursor++) {
+        FelicaBlock* new_block = FelicaBlockArray_push_new(service->blocks);
+        furi_assert(new_block != NULL);
+
+        FelicaRWRequestBlockDescriptor blocks[1] = {{
+            .access_mode = FelicaBlockAccessModeDefault,
+            .block_number = cursor & 0xffff,
+            .service_index = 0,
+        }};
+        tx_rx->tx_bits = 8 * felica_prepare_unencrypted_read(
+                                 tx_rx->tx_data,
+                                 reader,
+                                 service_codes,
+                                 sizeof(service_codes) / sizeof(service_codes[0]),
+                                 blocks,
+                                 1);
+        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+            FURI_LOG_E(TAG, "Bad exchange when reading service");
+            break;
+        }
+
+        // Hitting an invalid block address (usually means end of service)
+        if(reader->status_flags[0] == 0xff && reader->status_flags[1] == 0xa8) {
+            FURI_LOG_D(TAG, "End of service reached");
+            result = true;
+            break;
+        }
+
+        if(!felica_parse_unencrypted_read(
+               tx_rx->rx_data,
+               tx_rx->rx_bits / 8,
+               reader,
+               new_block->data,
+               sizeof(new_block->data))) {
+            FURI_LOG_E(TAG, "Bad response to Read without Encryption (block %d)", cursor);
+            break;
+        }
+    }
+
+    // Delete all blocks we currently have if dump has failed
+    if(!result) {
+        FelicaBlockArray_reset(service->blocks);
+    }
+    return result;
+}
+
+bool felica_std_dump_data(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader, FelicaData* data) {
+    for
+        M_EACH(system, data->systems, FelicaSystemArray_t) {
+            // TODO select the system
+            // if(!felica_std_select_system(tx_rx, reader, system->number)) {
+            //     return false;
+            // }
+            if(!felica_std_traverse_system(tx_rx, reader, system)) {
+                return false;
+            }
+            for
+                M_EACH(service_kv, system->public_services, FelicaPublicServiceDict_t) {
+                    uint16_t service_code = service_kv->key;
+                    FelicaService* service = service_kv->value;
+                    furi_assert(service != NULL);
+                    if(!felica_std_dump_public_service(tx_rx, reader, service, service_code)) {
+                        return false;
+                    }
+                }
+        }
+
+    return true;
+}
+
 bool felica_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaData* data,
@@ -870,7 +962,17 @@ bool felica_read_card(
             card_read = true;
             break;
         }
+        // TODO what about 12fc systems?
         FURI_LOG_I(TAG, "Reading Felica Standard system");
+        if(felica_std_request_system_code(tx_rx, &reader, &(data->systems))) {
+            felica_clear(data);
+            break;
+        }
+        if(!felica_std_dump_data(tx_rx, &reader, data)) {
+            felica_clear(data);
+            break;
+        }
+        card_read = true;
     } while(false);
 
     return card_read;

@@ -178,6 +178,17 @@ struct _FelicaNode_s {
     };
 };
 
+typedef enum {
+    FelicaBlockAccessModeDefault = 0b000,
+    FelicaBlockAccessModeCashback = 0b001,
+} FelicaBlockAccessMode;
+
+typedef struct {
+    FelicaBlockAccessMode access_mode;
+    uint16_t block_number;
+    uint8_t service_index;
+} FelicaRWRequestBlockDescriptor;
+
 // TODO properly remove this
 //ARRAY_DEF(FelicaNodeList, FelicaNode*, M_PTR_OPLIST)
 ARRAY_DEF(FelicaNodeArray, FelicaNode, M_POD_OPLIST)
@@ -294,7 +305,7 @@ uint8_t felica_prepare_unencrypted_read(
     const FelicaReader* reader,
     const uint16_t* service_code_list,
     uint8_t service_count,
-    const uint32_t* block_list,
+    const FelicaRWRequestBlockDescriptor* block_list,
     uint8_t block_count);
 uint8_t felica_lite_prepare_unencrypted_read(
     uint8_t* dest,
@@ -373,6 +384,29 @@ bool felica_std_traverse_system(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaReader* reader,
     FelicaSystem* system);
+
+/** Dump all data of a publicly accessible service.
+ *
+ * @param tx_rx NFC context.
+ * @param reader FeliCa reader context.
+ * @param service Service object. Must not be extended overlap or has data inside.
+ * @param service_code Service code of the corresponding service (the keys of FelicaSystem::public_services).
+ * @return true if successful.
+ */
+bool felica_std_dump_public_service(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaService* service,
+    uint16_t service_code);
+
+/** Dump a publicly accessible service.
+ *
+ * @param tx_rx NFC context.
+ * @param reader FeliCa reader context.
+ * @param data FelicaData populated with available systems but without all the blocks read.
+ * @return true if successful.
+ */
+bool felica_std_dump_data(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader, FelicaData* data);
 
 bool felica_read_card(
     FuriHalNfcTxRxContext* tx_rx,
