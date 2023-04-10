@@ -38,11 +38,11 @@ NfcaError nfca_poller_get_data(NfcaPoller* instance, NfcaData* data);
 
 NfcaError nfca_poller_stop(NfcaPoller* instance);
 
-// Syncronous API
-
 NfcaError nfca_poller_check_presence(NfcaPoller* instance);
 
 NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data);
+
+// Syncronous API
 
 NfcaError nfca_poller_activate_sync(NfcaPoller* instance, NfcaData* nfca_data);
 

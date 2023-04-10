@@ -1,5 +1,4 @@
 #include "../nfc_app_i.h"
-#include "nfc_worker_i.h"
 #include <dolphin/dolphin.h>
 
 enum SubmenuIndex {
@@ -38,7 +37,6 @@ void nfc_scene_start_on_enter(void* context) {
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneStart));
 
-    nfc_device_clear(nfc->dev);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
@@ -49,21 +47,13 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexRead) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, SubmenuIndexRead);
-            nfc->dev->dev_data.read_mode = NfcReadModeAuto;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             DOLPHIN_DEED(DolphinDeedNfcRead);
             consumed = true;
         } else if(event.event == SubmenuIndexDetectReader) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneStart, SubmenuIndexDetectReader);
-            bool sd_exist = storage_sd_status(nfc->dev->storage) == FSE_OK;
-            if(sd_exist) {
-                nfc_device_data_clear(&nfc->dev->dev_data);
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
-                DOLPHIN_DEED(DolphinDeedNfcDetectReader);
-            } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneDictNotFound);
-            }
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuIndexSaved) {
             // Save the scene state explicitly in each branch, so that

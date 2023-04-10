@@ -1,5 +1,5 @@
 #include "nfc_app_i.h"
-#include <f_hal_nfc.h>
+
 #include <dolphin/dolphin.h>
 
 bool nfc_custom_event_callback(void* context, uint32_t event) {
@@ -44,8 +44,7 @@ NfcApp* nfc_app_alloc() {
     view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
 
     // Nfc device
-    nfc->dev = nfc_device_alloc();
-    furi_string_set(nfc->dev->folder, NFC_APP_FOLDER);
+    nfc->nfc_dev = nfc_dev_alloc();
 
     // Open GUI record
     nfc->gui = furi_record_open(RECORD_GUI);
@@ -90,19 +89,6 @@ NfcApp* nfc_app_alloc() {
     nfc->widget = widget_alloc();
     view_dispatcher_add_view(nfc->view_dispatcher, NfcViewWidget, widget_get_view(nfc->widget));
 
-    // Mifare Classic Dict Attack
-    nfc->dict_attack = dict_attack_alloc();
-    view_dispatcher_add_view(
-        nfc->view_dispatcher, NfcViewDictAttack, dict_attack_get_view(nfc->dict_attack));
-
-    // Detect Reader
-    nfc->detect_reader = detect_reader_alloc();
-    view_dispatcher_add_view(
-        nfc->view_dispatcher, NfcViewDetectReader, detect_reader_get_view(nfc->detect_reader));
-
-    // Generator
-    nfc->generator = NULL;
-
     return nfc;
 }
 
@@ -127,7 +113,7 @@ void nfc_app_free(NfcApp* nfc) {
     }
 
     // Nfc device
-    nfc_device_free(nfc->dev);
+    nfc_dev_free(nfc->nfc_dev);
 
     // Submenu
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewMenu);
@@ -161,14 +147,6 @@ void nfc_app_free(NfcApp* nfc) {
     // Custom Widget
     view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewWidget);
     widget_free(nfc->widget);
-
-    // Mifare Classic Dict Attack
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewDictAttack);
-    dict_attack_free(nfc->dict_attack);
-
-    // Detect Reader
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewDetectReader);
-    detect_reader_free(nfc->detect_reader);
 
     // View Dispatcher
     view_dispatcher_free(nfc->view_dispatcher);
@@ -217,10 +195,8 @@ void nfc_blink_stop(NfcApp* nfc) {
 }
 
 bool nfc_save_file(NfcApp* nfc) {
-    furi_string_printf(
-        nfc->dev->load_path, "%s/%s%s", NFC_APP_FOLDER, nfc->dev->dev_name, NFC_APP_EXTENSION);
-    bool file_saved = nfc_device_save(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
-    return file_saved;
+    furi_assert(nfc);
+    return true;
 }
 
 void nfc_show_loading_popup(void* context, bool show) {
@@ -266,7 +242,7 @@ int32_t nfc_app(void* p) {
 
     // Check argument and run corresponding scene
     if(args && strlen(args)) {
-        nfc_device_set_loading_callback(nfc->dev, nfc_show_loading_popup, nfc);
+        // nfc_device_set_loading_callback(nfc->dev, nfc_show_loading_popup, nfc);
         uint32_t rpc_ctx = 0;
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
             nfc->rpc_ctx = (void*)rpc_ctx;
@@ -274,33 +250,33 @@ int32_t nfc_app(void* p) {
             rpc_system_app_send_started(nfc->rpc_ctx);
             view_dispatcher_attach_to_gui(
                 nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeDesktop);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRpc);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
         } else {
             view_dispatcher_attach_to_gui(
                 nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
-            if(nfc_device_load(nfc->dev, p, true)) {
-                if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-                    scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
-                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
-                } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
-                    scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
-                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
-                } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
-                    scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
-                } else {
-                    scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
-                }
-            } else {
-                // Exit app
-                view_dispatcher_stop(nfc->view_dispatcher);
-            }
+            // if(nfc_device_load(nfc->dev, p, true)) {
+            //     if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
+            //         scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
+            //         DOLPHIN_DEED(DolphinDeedNfcEmulate);
+            //     } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
+            //         scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
+            //         DOLPHIN_DEED(DolphinDeedNfcEmulate);
+            //     } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
+            //         scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
+            //     } else {
+            //         scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
+            //         DOLPHIN_DEED(DolphinDeedNfcEmulate);
+            //     }
+            // } else {
+            //     // Exit app
+            //     view_dispatcher_stop(nfc->view_dispatcher);
+            // }
         }
-        nfc_device_set_loading_callback(nfc->dev, NULL, nfc);
+        // nfc_device_set_loading_callback(nfc->dev, NULL, nfc);
     } else {
         view_dispatcher_attach_to_gui(
             nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
-        scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardType);
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
     }
 
     view_dispatcher_run(nfc->view_dispatcher);

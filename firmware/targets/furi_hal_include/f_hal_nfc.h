@@ -41,6 +41,15 @@ typedef enum {
 typedef enum {
     FHalNfcModeNfcaPoller,
     FHalNfcModeNfcaListener,
+
+    FHalNfcModeNfcbPoller,
+    FHalNfcModeNfcbListener,
+
+    FHalNfcModeNfcfPoller,
+    FHalNfcModeNfcfListener,
+
+    FHalNfcModeNfcvPoller,
+    FHalNfcModeNfcvListener,
 } FHalNfcMode;
 
 typedef enum {

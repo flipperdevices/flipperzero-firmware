@@ -1,6 +1,10 @@
 #include "../nfc_app_i.h"
 #include <dolphin/dolphin.h>
 
+enum {
+    NfcWorkerEventReadUidNfcA,
+};
+
 void nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, void* context) {
     NfcApp* nfc = context;
 
@@ -14,7 +18,6 @@ void nfc_scene_nfca_read_on_enter(void* context) {
     NfcApp* nfc = context;
 
     // Setup view
-    nfc_scene_nfca_read_set_state(nfc, NfcSceneReadStateDetecting);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
     
     nfc->nfca_poller = nfca_poller_alloc();
@@ -30,7 +33,7 @@ bool nfc_scene_nfca_read_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcWorkerEventReadUidNfcA) {
             notification_message(nfc->notifications, &sequence_success);
-            nfca_poller_get_data(nfc->nfca_poller, &nfc->nfca_data);
+            nfca_poller_get_data(nfc->nfca_poller, &nfc->nfc_dev_data.nfca_data);
             nfca_poller_free(nfc->nfca_poller);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaReadSuccess);
             DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
@@ -45,7 +48,6 @@ void nfc_scene_nfca_read_on_exit(void* context) {
 
     // Clear view
     popup_reset(nfc->popup);
-    scene_manager_set_scene_state(nfc->scene_manager, NfcSceneRead, NfcSceneReadStateIdle);
 
     nfc_blink_stop(nfc);
 }

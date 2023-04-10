@@ -23,7 +23,6 @@ void nfc_scene_debug_on_enter(void* context) {
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneDebug));
 
-    nfc_device_clear(nfc->dev);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
@@ -35,12 +34,12 @@ bool nfc_scene_debug_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuDebugIndexField) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneDebug, SubmenuDebugIndexField);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneField);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuDebugIndexApdu) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneDebug, SubmenuDebugIndexApdu);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateApduSequence);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         }
     }

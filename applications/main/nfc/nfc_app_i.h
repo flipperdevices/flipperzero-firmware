@@ -22,16 +22,6 @@
 #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
 
-#include <lib/nfc/nfc_types.h>
-#include <lib/nfc/nfc_worker.h>
-#include <lib/nfc/nfc_device.h>
-#include <lib/nfc/helpers/mf_classic_dict.h>
-#include <lib/nfc/parsers/nfc_supported_card.h>
-#include <lib/nfc/helpers/nfc_generators.h>
-
-#include "views/dict_attack.h"
-#include "views/detect_reader.h"
-
 #include <nfc/scenes/nfc_scene.h>
 #include <nfc/helpers/nfc_custom_event.h>
 
@@ -42,8 +32,7 @@
 #include <m-array.h>
 
 #include <lib/nfc/protocols/nfca_poller.h>
-
-ARRAY_DEF(MfClassicUserKeys, char*, M_PTR_OPLIST);
+#include <lib/nfc/nfc_dev.h>
 
 #define NFC_TEXT_STORE_SIZE 128
 #define NFC_APP_FOLDER ANY_PATH("nfc")
@@ -55,18 +44,14 @@ typedef enum {
 } NfcRpcState;
 
 struct NfcApp {
-    NfcWorker* worker;
     ViewDispatcher* view_dispatcher;
     Gui* gui;
     NotificationApp* notifications;
     SceneManager* scene_manager;
-    NfcDevice* dev;
-    FuriHalNfcDevData dev_edit_data;
 
     char text_store[NFC_TEXT_STORE_SIZE + 1];
     FuriString* text_box_store;
     uint8_t byte_input_store[6];
-    MfClassicUserKeys_t mfc_key_strs; // Used in MFC key listing
 
     void* rpc_ctx;
     NfcRpcState rpc_state;
@@ -80,12 +65,11 @@ struct NfcApp {
     ByteInput* byte_input;
     TextBox* text_box;
     Widget* widget;
-    DictAttack* dict_attack;
-    DetectReader* detect_reader;
-
-    const NfcGenerator* generator;
 
     NfcaPoller* nfca_poller;
+
+    NfcDev* nfc_dev;
+    NfcDevData nfc_dev_data;
 };
 
 typedef enum {

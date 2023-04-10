@@ -35,21 +35,18 @@ bool nfc_scene_nfca_menu_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexSaveUid) {
-            nfc->dev->format = NfcDeviceSaveFormatUid;
-            // Clear device name
-            nfc_device_set_name(nfc->dev, "");
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuIndexEmulateUid) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-            if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetType)) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneNotImplemented)) {
                 DOLPHIN_DEED(DolphinDeedNfcAddEmulate);
             } else {
                 DOLPHIN_DEED(DolphinDeedNfcEmulate);
             }
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneNfcaMenu, event.event);
