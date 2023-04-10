@@ -73,8 +73,7 @@ const FuriHalRegion furi_hal_region_jp = {
 static const FuriHalRegion* furi_hal_region = NULL;
 
 void furi_hal_region_init() {
-    FuriHalVersionRegion region = FuriHalVersionRegionJp;
-    //= furi_hal_version_get_hw_region();
+    FuriHalVersionRegion region = furi_hal_version_get_hw_region();
 
     if(region == FuriHalVersionRegionUnknown) {
         furi_hal_region = &furi_hal_region_zero;
