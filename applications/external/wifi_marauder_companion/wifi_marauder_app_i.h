@@ -7,6 +7,8 @@
 #include "wifi_marauder_custom_event.h"
 #include "wifi_marauder_uart.h"
 #include "wifi_marauder_pcap.h"
+#include "script/wifi_marauder_script.h"
+#include "script/wifi_marauder_script_worker.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -19,7 +21,7 @@
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
 
-#define NUM_MENU_ITEMS (17)
+#define NUM_MENU_ITEMS (18)
 
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
@@ -28,6 +30,8 @@
 #define MARAUDER_APP_FOLDER ANY_PATH(MARAUDER_APP_FOLDER_USER)
 #define MARAUDER_APP_FOLDER_PCAPS MARAUDER_APP_FOLDER "/pcaps"
 #define MARAUDER_APP_FOLDER_LOGS MARAUDER_APP_FOLDER "/logs"
+#define MARAUDER_APP_FOLDER_SCRIPTS MARAUDER_APP_FOLDER "/scripts"
+#define MARAUDER_APP_SCRIPT_PATH(file_name) MARAUDER_APP_FOLDER "/scripts/" file_name
 #define MARAUDER_APP_FOLDER_USER_PCAPS MARAUDER_APP_FOLDER_USER "/pcaps"
 #define MARAUDER_APP_FOLDER_USER_LOGS MARAUDER_APP_FOLDER_USER "/logs"
 #define SAVE_PCAP_SETTING_FILEPATH MARAUDER_APP_FOLDER "/save_pcaps_here.setting"
@@ -55,6 +59,9 @@ struct WifiMarauderApp {
     bool ok_to_save_logs;
     bool has_saved_logs_this_session;
     DialogsApp* dialogs;
+
+    WifiMarauderScript* script;
+    WifiMarauderScriptWorker* script_worker;
 
     VariableItemList* var_item_list;
     Widget* widget;

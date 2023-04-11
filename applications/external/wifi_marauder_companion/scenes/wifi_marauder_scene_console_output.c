@@ -31,6 +31,40 @@ void wifi_marauder_console_output_handle_rx_packets_cb(uint8_t* buf, size_t len,
     }
 }
 
+void _wifi_marauder_script_delay(WifiMarauderScriptWorker* worker, uint32_t delay_secs) {
+    for (uint32_t i=0; i<delay_secs && worker->is_running; i++)
+        furi_delay_ms(1000);
+}
+
+void wifi_marauder_script_callback(WifiMarauderScriptStage* stage, void *context) {
+    furi_assert(context);
+    WifiMarauderScriptWorker* worker = context;
+    void *stage_data;
+    char command[100];
+    const char stop_command[] = "stopscan\n";
+
+    switch (stage->type) {
+    case WifiMarauderScriptStageTypeBeaconList:
+        stage_data = stage->stage;
+        WifiMarauderScriptStageBeaconList *beacon_list = (WifiMarauderScriptStageBeaconList *)stage_data;
+        char *ssid;
+        for (int i = 0; i < beacon_list->ssid_count; i++) {
+            ssid = beacon_list->ssids[i];
+            snprintf(command, sizeof(command), "ssid -a -n \"%s\"", ssid);
+            wifi_marauder_uart_tx((uint8_t*)(command), strlen(command));
+            wifi_marauder_uart_tx((uint8_t*)("\n"), 1);
+        }
+        const char attack_command[] = "attack -t beacon -l\n";
+        wifi_marauder_uart_tx((uint8_t*)(attack_command), strlen(attack_command));
+        // Wait for the timeout in seconds to stop the attack
+        _wifi_marauder_script_delay(worker, beacon_list->timeout);
+        wifi_marauder_uart_tx((uint8_t*)(stop_command), strlen(stop_command));
+        break;
+    default:
+        break;
+    }
+}
+
 void wifi_marauder_scene_console_output_on_enter(void* context) {
     WifiMarauderApp* app = context;
 
@@ -71,6 +105,12 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
     wifi_marauder_uart_set_handle_rx_data_cb(
         app->lp_uart,
         wifi_marauder_console_output_handle_rx_packets_cb); // setup callback for packets rx thread
+    
+    // Run the script if the file with the script has been opened
+    if(app->script != NULL) {
+        app->script_worker = wifi_marauder_script_worker_alloc();
+        wifi_marauder_script_worker_start(app->script_worker, app->script, wifi_marauder_script_callback, app->script_worker);
+    }
 
     // Get ready to send command
     if(app->is_command && app->selected_tx_string) {
@@ -116,6 +156,14 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
     wifi_marauder_uart_set_handle_rx_data_cb(app->uart, NULL);
     wifi_marauder_uart_set_handle_rx_data_cb(app->lp_uart, NULL);
 
+    if (app->script_worker) {
+        wifi_marauder_script_worker_free(app->script_worker);
+    }
+
+    if (app->script) {
+        wifi_marauder_script_free(app->script);
+    }
+
     // Automatically stop the scan when exiting view
     if(app->is_command) {
         wifi_marauder_uart_tx((uint8_t*)("stopscan\n"), strlen("stopscan\n"));
@@ -130,4 +178,5 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
     if(app->log_file && storage_file_is_open(app->log_file)) {
         storage_file_close(app->log_file);
     }
+
 }

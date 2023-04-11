@@ -127,6 +127,7 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
     {"Update", {"ota", "sd"}, 2, {"update -w", "update -s"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
+    {"Run script", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Save to flipper sdcard", // keep as last entry or change logic in callback below
      {""},
      1,
@@ -142,6 +143,15 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
 
     furi_assert(index < NUM_MENU_ITEMS);
     const WifiMarauderItem* item = &items[index];
+
+    // Try to open the automation script
+    // TODO: Improve file selection, use a file explorer
+    if(index == NUM_MENU_ITEMS - 2) {
+        app->script = wifi_marauder_script_parse_file(MARAUDER_APP_SCRIPT_PATH("script.json"), app->storage);
+        if (!app->script) {
+            return;
+        }
+    }
 
     if(index == NUM_MENU_ITEMS - 1) {
         // "Save to flipper sdcard" special case - start SettingsInit widget
