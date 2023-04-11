@@ -64,11 +64,11 @@ Ambient radioactivity (descendants of radon gas are detected, not radon itself) 
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper8.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper9.png" width=25% height=25%>
 
-**Note :** measures in **Sv** or **Rad** are not precise
-
 Measure of uranium ore piece inside a lead container :
 
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper3.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper12.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper13.png" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper3.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper12.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper13.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper14.png" width=25% height=25%>
+
+**Note :** measures in **Sv** or **Rad** are not precise
 
 Measure of uranium ore piece (the most radioactive part) in contact with the geiger tube :
 
