@@ -9,6 +9,7 @@
 #include "wifi_marauder_pcap.h"
 #include "script/wifi_marauder_script.h"
 #include "script/wifi_marauder_script_worker.h"
+#include "script/wifi_marauder_script_executor.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>

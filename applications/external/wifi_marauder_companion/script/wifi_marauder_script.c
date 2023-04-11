@@ -1,6 +1,9 @@
 #include "../wifi_marauder_app_i.h"
 #include "wifi_marauder_script.h"
 
+#define WIFI_MARAUDER_DEFAULT_TIMEOUT_SCAN 15
+#define WIFI_MARAUDER_DEFAULT_TIMEOUT_BEACON 60
+
 WifiMarauderScript *wifi_marauder_script_alloc() {
     WifiMarauderScript *script = (WifiMarauderScript *) malloc(sizeof(WifiMarauderScript));
     if (script == NULL) {
@@ -30,7 +33,35 @@ void _wifi_marauder_script_load_meta(WifiMarauderScript *script, cJSON *meta_sec
     }
 }
 
-WifiMarauderScriptStageBeaconList *_wifi_marauder_script_get_stage_beacon_list(cJSON *stages) {
+WifiMarauderScriptStageScan *_wifi_marauder_script_get_stage_scan(cJSON *stages) {
+    cJSON* stage_scan = cJSON_GetObjectItem(stages, "scan");
+    if (stage_scan == NULL) {
+        return NULL;
+    }
+    cJSON* type = cJSON_GetObjectItem(stage_scan, "type");
+    if (type == NULL) {
+        return NULL;
+    }
+    WifiMarauderScriptScanType scan_type;
+    if (strcmp(type->valuestring, "ap") == 0) {
+        scan_type = WifiMarauderScriptScanTypeAp;
+    } else if (strcmp(type->valuestring, "station") == 0) {
+        scan_type = WifiMarauderScriptScanTypeStation;
+    } else {
+        return NULL;
+    }
+    cJSON* timeout = cJSON_GetObjectItem(stage_scan, "timeout");
+    int scan_timeout = timeout != NULL ? (int)cJSON_GetNumberValue(timeout) : WIFI_MARAUDER_DEFAULT_TIMEOUT_SCAN;
+
+    WifiMarauderScriptStageScan *scan_stage = (WifiMarauderScriptStageScan*) malloc(sizeof(WifiMarauderScriptStageScan));
+    scan_stage->type = scan_type;
+    scan_stage->timeout = scan_timeout;
+
+    return scan_stage;
+}
+
+
+WifiMarauderScriptStageBeaconList* _wifi_marauder_script_get_stage_beacon_list(cJSON *stages) {
     cJSON* stage_beaconlist = cJSON_GetObjectItem(stages, "beaconlist");
     if (stage_beaconlist == NULL) {
         return NULL;
@@ -68,23 +99,44 @@ WifiMarauderScriptStageBeaconList *_wifi_marauder_script_get_stage_beacon_list(c
     }
     // Timeout
     cJSON* timeout = cJSON_GetObjectItem(stage_beaconlist, "timeout");
-    beaconlist_stage->timeout = timeout != NULL ? (int)cJSON_GetNumberValue(timeout) : 60;
+    beaconlist_stage->timeout = timeout != NULL ? (int)cJSON_GetNumberValue(timeout) : WIFI_MARAUDER_DEFAULT_TIMEOUT_BEACON;
     
     return beaconlist_stage;
 }
 
+WifiMarauderScriptStage* _wifi_marauder_script_create_stage(WifiMarauderScriptStageType type, void* stage_data) {
+    WifiMarauderScriptStage* stage = (WifiMarauderScriptStage*) malloc(sizeof(WifiMarauderScriptStage));
+    stage->type = type;
+    stage->stage = stage_data;
+    stage->next_stage = NULL;
+    return stage;
+}
+
+void _wifi_marauder_script_add_stage(WifiMarauderScript *script, WifiMarauderScriptStage *stage, WifiMarauderScriptStage **prev_stage) {
+    if (*prev_stage != NULL) {
+        (*prev_stage)->next_stage = stage;
+    } else {
+        script->first_stage = stage;
+    }
+    *prev_stage = stage;
+}
+
 void _wifi_marauder_script_load_stages(WifiMarauderScript *script, cJSON *stages) {
+    WifiMarauderScriptStage *prev_stage = NULL;
+
+    // Scan stage
+    WifiMarauderScriptStageScan *stage_scan = _wifi_marauder_script_get_stage_scan(stages);
+    if (stage_scan != NULL) {
+        WifiMarauderScriptStage *stage = _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeScan, stage_scan);
+        _wifi_marauder_script_add_stage(script, stage, &prev_stage);
+    }
+
     // Beacon List stage
     WifiMarauderScriptStageBeaconList *stage_beacon_list = _wifi_marauder_script_get_stage_beacon_list(stages);
     if (stage_beacon_list != NULL) {
-        WifiMarauderScriptStage *stage = (WifiMarauderScriptStage*) malloc(sizeof(WifiMarauderScriptStage));
-        stage->type = WifiMarauderScriptStageTypeBeaconList;
-        stage->stage = stage_beacon_list;
-        stage->next_stage = NULL;
-        script->first_stage = stage;
+        WifiMarauderScriptStage *stage = _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeBeaconList, stage_beacon_list);
+        _wifi_marauder_script_add_stage(script, stage, &prev_stage);
     }
-
-    // TODO: load stages
 }
 
 WifiMarauderScript *wifi_marauder_script_parse_raw(const char* json_raw) {
