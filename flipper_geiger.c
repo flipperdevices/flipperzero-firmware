@@ -47,7 +47,11 @@ static void draw_callback(Canvas* canvas, void* ctx)
     char buffer[32];
     if (displayStruct.data == 0) snprintf(buffer, sizeof(buffer), "%ld cps - %ld cpm", displayStruct.cps, displayStruct.cpm);
     else if (displayStruct.data == 1) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f uSv/h", displayStruct.cps, ((double)displayStruct.cpm*(double)CONVERSION_FACTOR));
-    else snprintf(buffer, sizeof(buffer), "%ld cps - %.2f mSv/y", displayStruct.cps, (((double)displayStruct.cpm*(double)CONVERSION_FACTOR))*(double)8.76);
+    else if (displayStruct.data == 2) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f mSv/y", displayStruct.cps, (((double)displayStruct.cpm*(double)CONVERSION_FACTOR))*(double)8.76);
+    else if (displayStruct.data == 3) snprintf(buffer, sizeof(buffer), "%ld cps - %.4f Rad/h", displayStruct.cps, ((double)displayStruct.cpm*(double)CONVERSION_FACTOR)/(double)10000);
+    else if (displayStruct.data == 4) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f mR/h", displayStruct.cps, ((double)displayStruct.cpm*(double)CONVERSION_FACTOR)/(double)10);
+    else snprintf(buffer, sizeof(buffer), "%ld cps - %.2f uR/h", displayStruct.cps, ((double)displayStruct.cpm*(double)CONVERSION_FACTOR)*(double)100);
+
 
     for (int i=0;i<SCREEN_SIZE_X;i+=2)
     {
@@ -156,7 +160,7 @@ int32_t flipper_geiger_app()
                     mutexStruct* geigerMutex = (mutexStruct*)acquire_mutex_block(&state_mutex);
 
                     if (geigerMutex->data != 0) geigerMutex->data--;
-                    else geigerMutex->data = 2;
+                    else geigerMutex->data = 5;
 
                     screenRefresh = 1;
                     release_mutex(&state_mutex, geigerMutex);
@@ -165,7 +169,7 @@ int32_t flipper_geiger_app()
                 {
                     mutexStruct* geigerMutex = (mutexStruct*)acquire_mutex_block(&state_mutex);
 
-                    if (geigerMutex->data != 2) geigerMutex->data++;
+                    if (geigerMutex->data != 5) geigerMutex->data++;
                     else geigerMutex->data = 0;
 
                     screenRefresh = 1;
