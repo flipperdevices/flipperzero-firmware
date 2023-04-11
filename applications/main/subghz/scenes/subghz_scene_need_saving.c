@@ -46,13 +46,14 @@ bool subghz_scene_need_saving_on_event(void* context, SceneManagerEvent event) {
             scene_manager_previous_scene(subghz->scene_manager);
             return true;
         } else if(event.event == SubGhzCustomEventSceneExit) {
-            if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateExit) {
-                subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
+            SubGhzRxKeyState state = subghz_rx_key_state_get(subghz);
+            subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
+
+            if(state == SubGhzRxKeyStateExit) {
                 subghz_set_default_preset(subghz);
                 scene_manager_search_and_switch_to_previous_scene(
                     subghz->scene_manager, SubGhzSceneStart);
             } else {
-                subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
                 scene_manager_previous_scene(subghz->scene_manager);
             }
 

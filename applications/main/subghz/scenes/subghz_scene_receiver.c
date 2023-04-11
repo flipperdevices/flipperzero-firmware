@@ -70,21 +70,21 @@ static void subghz_scene_add_to_history_callback(
     void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
+    SubGhzHistory* history = subghz->history;
     FuriString* str_buff = furi_string_alloc();
 
     SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
-    if(subghz_history_add_to_history(subghz->history, decoder_base, &preset)) {
+
+    if(subghz_history_add_to_history(history, decoder_base, &preset)) {
         furi_string_reset(str_buff);
 
         subghz->state_notifications = SubGhzNotificationStateRxDone;
-
-        subghz_history_get_text_item_menu(
-            subghz->history, str_buff, subghz_history_get_item(subghz->history) - 1);
+        uint16_t item_history = subghz_history_get_item(history);
+        subghz_history_get_text_item_menu(history, str_buff, item_history - 1);
         subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
             furi_string_get_cstr(str_buff),
-            subghz_history_get_type_protocol(
-                subghz->history, subghz_history_get_item(subghz->history) - 1));
+            subghz_history_get_type_protocol(history, item_history - 1));
 
         subghz_scene_receiver_update_statusbar(subghz);
     }
@@ -95,13 +95,14 @@ static void subghz_scene_add_to_history_callback(
 
 void subghz_scene_receiver_on_enter(void* context) {
     SubGhz* subghz = context;
+    SubGhzHistory* history = subghz->history;
 
     FuriString* str_buff;
     str_buff = furi_string_alloc();
 
     if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateIDLE) {
         subghz_set_default_preset(subghz);
-        subghz_history_reset(subghz->history);
+        subghz_history_reset(history);
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
     }
 
@@ -109,13 +110,13 @@ void subghz_scene_receiver_on_enter(void* context) {
 
     //Load history to receiver
     subghz_view_receiver_exit(subghz->subghz_receiver);
-    for(uint8_t i = 0; i < subghz_history_get_item(subghz->history); i++) {
+    for(uint8_t i = 0; i < subghz_history_get_item(history); i++) {
         furi_string_reset(str_buff);
-        subghz_history_get_text_item_menu(subghz->history, str_buff, i);
+        subghz_history_get_text_item_menu(history, str_buff, i);
         subghz_view_receiver_add_item_to_menu(
             subghz->subghz_receiver,
             furi_string_get_cstr(str_buff),
-            subghz_history_get_type_protocol(subghz->history, i));
+            subghz_history_get_type_protocol(history, i));
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateAddKey);
     }
     furi_string_free(str_buff);

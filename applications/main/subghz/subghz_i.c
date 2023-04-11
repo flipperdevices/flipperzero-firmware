@@ -131,32 +131,30 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         if(!strcmp(furi_string_get_cstr(temp_str), "")) {
             break;
         }
+        SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
 
         if(!strcmp(furi_string_get_cstr(temp_str), "CUSTOM")) {
             //Todo add Custom_preset_module
             //delete preset if it already exists
-            subghz_setting_delete_custom_preset(
-                subghz_txrx_get_setting(subghz->txrx), furi_string_get_cstr(temp_str));
+            subghz_setting_delete_custom_preset(setting, furi_string_get_cstr(temp_str));
             //load custom preset from file
             if(!subghz_setting_load_custom_preset(
-                   subghz_txrx_get_setting(subghz->txrx),
-                   furi_string_get_cstr(temp_str),
-                   fff_data_file)) {
+                   setting, furi_string_get_cstr(temp_str), fff_data_file)) {
                 FURI_LOG_E(TAG, "Missing Custom preset");
                 break;
             }
         }
-        size_t preset_index = subghz_setting_get_inx_preset_by_name(
-            subghz_txrx_get_setting(subghz->txrx), furi_string_get_cstr(temp_str));
+        size_t preset_index =
+            subghz_setting_get_inx_preset_by_name(setting, furi_string_get_cstr(temp_str));
         subghz_txrx_set_preset(
             subghz->txrx,
             furi_string_get_cstr(temp_str),
             temp_data32,
-            subghz_setting_get_preset_data(subghz_txrx_get_setting(subghz->txrx), preset_index),
-            subghz_setting_get_preset_data_size(
-                subghz_txrx_get_setting(subghz->txrx), preset_index));
+            subghz_setting_get_preset_data(setting, preset_index),
+            subghz_setting_get_preset_data_size(setting, preset_index));
 
         //Load protocol
+        FlipperFormat* fff_data = subghz_txtx_get_fff_data(subghz->txrx);
         if(!flipper_format_read_string(fff_data_file, "Protocol", temp_str)) {
             FURI_LOG_E(TAG, "Missing Protocol");
             break;
@@ -164,18 +162,18 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) {
             //if RAW
             subghz->load_type_file = SubGhzLoadTypeFileRaw;
-            subghz_protocol_raw_gen_fff_data(subghz_txtx_get_fff_data(subghz->txrx), file_path);
+            subghz_protocol_raw_gen_fff_data(fff_data, file_path);
         } else {
             subghz->load_type_file = SubGhzLoadTypeFileKey;
             stream_copy_full(
                 flipper_format_get_raw_stream(fff_data_file),
-                flipper_format_get_raw_stream(subghz_txtx_get_fff_data(subghz->txrx)));
+                flipper_format_get_raw_stream(fff_data));
         }
 
         if(subghz_txrx_load_decoder_by_name_protocol(
                subghz->txrx, furi_string_get_cstr(temp_str))) {
             SubGhzProtocolStatus status = subghz_protocol_decoder_base_deserialize(
-                subghz_txrx_get_decoder(subghz->txrx), subghz_txtx_get_fff_data(subghz->txrx));
+                subghz_txrx_get_decoder(subghz->txrx), fff_data);
             if(status != SubGhzProtocolStatusOk) {
                 load_key_state = SubGhzLoadKeyStateProtocolDescriptionErr;
                 break;

@@ -1,4 +1,5 @@
 #include "../subghz_i.h"
+#include "../helpers/subghz_txrx_create_potocol_key.h"
 #include <lib/subghz/blocks/math.h>
 #include <lib/subghz/protocols/protocol_items.h>
 

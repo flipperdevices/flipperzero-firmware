@@ -1,31 +1,8 @@
+#include "subghz_txrx_i.h"
 #include "subghz_txrx.h"
 #include <lib/subghz/protocols/protocol_items.h>
 
 #define TAG "SubGhz"
-
-struct SubGhzTxRx {
-    SubGhzWorker* worker;
-
-    SubGhzEnvironment* environment;
-    SubGhzReceiver* receiver;
-    SubGhzTransmitter* transmitter;
-    SubGhzProtocolDecoderBase* decoder_result;
-    FlipperFormat* fff_data;
-
-    SubGhzRadioPreset* preset;
-    SubGhzSetting* setting;
-
-    uint8_t hopper_timeout;
-    uint8_t hopper_idx_frequency;
-    bool load_database;
-    SubGhzHopperState hopper_state;
-
-    SubGhzTxRxState txrx_state;
-    SubGhzSpeakerState speaker_state;
-
-    SubGhzTxRxNeedSaveCallback need_save_callback;
-    void* need_save_context;
-};
 
 SubGhzTxRx* subghz_txrx_alloc() {
     SubGhzTxRx* instance = malloc(sizeof(SubGhzTxRx));
@@ -95,9 +72,10 @@ void subghz_txrx_set_preset(
     size_t preset_data_size) {
     furi_assert(instance);
     furi_string_set(instance->preset->name, preset_name);
-    instance->preset->frequency = frequency;
-    instance->preset->data = preset_data;
-    instance->preset->data_size = preset_data_size;
+    SubGhzRadioPreset* preset = instance->preset;
+    preset->frequency = frequency;
+    preset->data = preset_data;
+    preset->data_size = preset_data_size;
 }
 
 const char* subghz_txrx_get_name_preset(SubGhzTxRx* instance, const char* preset) {
@@ -129,15 +107,16 @@ void subghz_txrx_get_frequency_modulation(
     FuriString* frequency,
     FuriString* modulation) {
     furi_assert(instance);
+    SubGhzRadioPreset* preset = instance->preset;
     if(frequency != NULL) {
         furi_string_printf(
             frequency,
             "%03ld.%02ld",
-            instance->preset->frequency / 1000000 % 1000,
-            instance->preset->frequency / 10000 % 100);
+            preset->frequency / 1000000 % 1000,
+            preset->frequency / 10000 % 100);
     }
     if(modulation != NULL) {
-        furi_string_printf(modulation, "%.2s", furi_string_get_cstr(instance->preset->name));
+        furi_string_printf(modulation, "%.2s", furi_string_get_cstr(preset->name));
     }
 }
 
@@ -236,19 +215,21 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
             break;
         }
         ret = SubGhzTxRxStartTxStateOk;
+
+        SubGhzRadioPreset* preset = instance->preset;
         instance->transmitter =
             subghz_transmitter_alloc_init(instance->environment, furi_string_get_cstr(temp_str));
 
         if(instance->transmitter) {
             if(subghz_transmitter_deserialize(instance->transmitter, flipper_format) ==
                SubGhzProtocolStatusOk) {
-                if(strcmp(furi_string_get_cstr(instance->preset->name), "") != 0) {
+                if(strcmp(furi_string_get_cstr(preset->name), "") != 0) {
                     subghz_txrx_begin(
                         instance,
                         subghz_setting_get_preset_data_by_name(
-                            instance->setting, furi_string_get_cstr(instance->preset->name)));
-                    if(instance->preset->frequency) {
-                        if(!subghz_txrx_tx(instance, instance->preset->frequency)) {
+                            instance->setting, furi_string_get_cstr(preset->name)));
+                    if(preset->frequency) {
+                        if(!subghz_txrx_tx(instance, preset->frequency)) {
                             FURI_LOG_E(TAG, "Only Rx");
                             ret = SubGhzTxRxStartTxStateErrorOnlyRx;
                         }
@@ -258,9 +239,7 @@ SubGhzTxRxStartTxState subghz_txrx_tx_start(SubGhzTxRx* instance, FlipperFormat*
 
                 } else {
                     FURI_LOG_E(
-                        TAG,
-                        "Unknown name preset \" %s \"",
-                        furi_string_get_cstr(instance->preset->name));
+                        TAG, "Unknown name preset \" %s \"", furi_string_get_cstr(preset->name));
                     ret = SubGhzTxRxStartTxStateErrorParserOthers;
                 }
 
@@ -504,17 +483,15 @@ bool subghz_txrx_protocol_is_preserved(SubGhzTxRx* instance) {
 
 bool subghz_txrx_protocol_is_send(SubGhzTxRx* instance, bool check_type) {
     furi_assert(instance);
+    const SubGhzProtocol* protocol = instance->decoder_result->protocol;
     if(check_type) {
         return (
-            ((instance->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==
-             SubGhzProtocolFlag_Send) &&
-            instance->decoder_result->protocol->encoder->deserialize &&
-            instance->decoder_result->protocol->type == SubGhzProtocolTypeStatic);
+            ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
+            protocol->encoder->deserialize && protocol->type == SubGhzProtocolTypeStatic);
     }
     return (
-        ((instance->decoder_result->protocol->flag & SubGhzProtocolFlag_Send) ==
-         SubGhzProtocolFlag_Send) &&
-        instance->decoder_result->protocol->encoder->deserialize);
+        ((protocol->flag & SubGhzProtocolFlag_Send) == SubGhzProtocolFlag_Send) &&
+        protocol->encoder->deserialize);
 }
 
 void subghz_txrx_receiver_set_filter(SubGhzTxRx* instance, SubGhzProtocolFlag filter) {
@@ -537,164 +514,4 @@ void subghz_txrx_set_raw_file_encoder_worker_set_callback_end(
         (SubGhzProtocolEncoderRAW*)subghz_transmitter_get_protocol_instance(instance->transmitter),
         callback,
         context);
-}
-
-//#############Create  new Key##############
-#include <lib/subghz/protocols/protocol_items.h>
-#include <lib/subghz/protocols/keeloq.h>
-#include <lib/subghz/protocols/secplus_v1.h>
-#include <lib/subghz/protocols/secplus_v2.h>
-
-#include <flipper_format/flipper_format_i.h>
-#include <lib/toolbox/stream/stream.h>
-#include <lib/subghz/protocols/raw.h>
-
-bool subghz_txrx_gen_data_protocol(
-    void* context,
-    const char* preset_name,
-    uint32_t frequency,
-    const char* protocol_name,
-    uint64_t key,
-    uint32_t bit) {
-    furi_assert(context);
-    SubGhzTxRx* instance = context;
-
-    bool res = false;
-
-    subghz_txrx_set_preset(instance, preset_name, frequency, NULL, 0);
-    instance->decoder_result =
-        subghz_receiver_search_decoder_base_by_name(instance->receiver, protocol_name);
-
-    if(instance->decoder_result == NULL) {
-        //TODO: Error
-        // furi_string_set(error_str, "Protocol not\nfound!");
-        // scene_manager_next_scene(scene_manager, SubGhzSceneShowErrorSub);
-        FURI_LOG_E(TAG, "Protocol not found!");
-        return false;
-    }
-
-    do {
-        Stream* fff_data_stream = flipper_format_get_raw_stream(instance->fff_data);
-        stream_clean(fff_data_stream);
-        if(subghz_protocol_decoder_base_serialize(
-               instance->decoder_result, instance->fff_data, instance->preset) !=
-           SubGhzProtocolStatusOk) {
-            FURI_LOG_E(TAG, "Unable to serialize");
-            break;
-        }
-        if(!flipper_format_update_uint32(instance->fff_data, "Bit", &bit, 1)) {
-            FURI_LOG_E(TAG, "Unable to update Bit");
-            break;
-        }
-
-        uint8_t key_data[sizeof(uint64_t)] = {0};
-        for(size_t i = 0; i < sizeof(uint64_t); i++) {
-            key_data[sizeof(uint64_t) - i - 1] = (key >> (i * 8)) & 0xFF;
-        }
-        if(!flipper_format_update_hex(instance->fff_data, "Key", key_data, sizeof(uint64_t))) {
-            FURI_LOG_E(TAG, "Unable to update Key");
-            break;
-        }
-        res = true;
-    } while(false);
-    return res;
-}
-
-bool subghz_txrx_gen_data_protocol_and_te(
-    SubGhzTxRx* instance,
-    const char* preset_name,
-    uint32_t frequency,
-    const char* protocol_name,
-    uint64_t key,
-    uint32_t bit,
-    uint32_t te) {
-    furi_assert(instance);
-    bool ret = false;
-    if(subghz_txrx_gen_data_protocol(instance, preset_name, frequency, protocol_name, key, bit)) {
-        if(!flipper_format_update_uint32(instance->fff_data, "TE", (uint32_t*)&te, 1)) {
-            FURI_LOG_E(TAG, "Unable to update Te");
-        } else {
-            ret = true;
-        }
-    }
-    return ret;
-}
-
-bool subghz_txrx_gen_keelog_protocol(
-    SubGhzTxRx* instance,
-    const char* name_preset,
-    uint32_t frequency,
-    const char* name_sysmem,
-    uint32_t serial,
-    uint8_t btn,
-    uint16_t cnt) {
-    furi_assert(instance);
-
-    bool ret = false;
-    serial &= 0x0FFFFFFF;
-    instance->transmitter =
-        subghz_transmitter_alloc_init(instance->environment, SUBGHZ_PROTOCOL_KEELOQ_NAME);
-    subghz_txrx_set_preset(instance, name_preset, frequency, NULL, 0);
-    if(instance->transmitter) {
-        subghz_protocol_keeloq_create_data(
-            subghz_transmitter_get_protocol_instance(instance->transmitter),
-            instance->fff_data,
-            serial,
-            btn,
-            cnt,
-            name_sysmem,
-            instance->preset);
-        ret = true;
-    }
-    subghz_transmitter_free(instance->transmitter);
-    return ret;
-}
-
-bool subghz_txrx_gen_secplus_v2_protocol(
-    SubGhzTxRx* instance,
-    const char* name_preset,
-    uint32_t frequency,
-    uint32_t serial,
-    uint8_t btn,
-    uint32_t cnt) {
-    furi_assert(instance);
-
-    bool ret = false;
-    instance->transmitter =
-        subghz_transmitter_alloc_init(instance->environment, SUBGHZ_PROTOCOL_SECPLUS_V2_NAME);
-    subghz_txrx_set_preset(instance, name_preset, frequency, NULL, 0);
-    if(instance->transmitter) {
-        subghz_protocol_secplus_v2_create_data(
-            subghz_transmitter_get_protocol_instance(instance->transmitter),
-            instance->fff_data,
-            serial,
-            btn,
-            cnt,
-            instance->preset);
-        ret = true;
-    }
-    return ret;
-}
-
-bool subghz_txrx_gen_secplus_v1_protocol(
-    SubGhzTxRx* instance,
-    const char* name_preset,
-    uint32_t frequency) {
-    furi_assert(instance);
-
-    bool ret = false;
-    uint32_t serial = (uint32_t)rand();
-    while(!subghz_protocol_secplus_v1_check_fixed(serial)) {
-        serial = (uint32_t)rand();
-    }
-    if(subghz_txrx_gen_data_protocol(
-           instance,
-           name_preset,
-           frequency,
-           SUBGHZ_PROTOCOL_SECPLUS_V1_NAME,
-           (uint64_t)serial << 32 | 0xE6000000,
-           42)) {
-        ret = true;
-    }
-    return ret;
 }
