@@ -11,17 +11,21 @@ You also need jumper wires to connect the board on the **Flipper Zero**.
 
 **Note 2 :** **J305** geiger tube is only sensible to **beta** and **gamma** rays. **Alpha** rays cannot be detected. 
 
-Usable radioactive sources : 
+**Usable** radioactive sources : 
 - natural uranium (alpha, beta, gamma)
 - natural thorium (alpha, beta, gamma)
 - radium-226 (alpha, beta, gamma)
-- cobalt-60 (beta, gamma)
+- cobalt-60 (beta & gamma)
 
-**Unusable** radioactive sources : 
-- americium-241 (alpha)
-- polonium-210 (alpha)
+**Not really usable** radioactive sources : 
+- americium-241 (alpha & low gamma, some strong beta/gamma rays are emitted during radioactive cascade)
+- high purity metallic uranium/thorium (same as am241)
+
+
+**Totaly unusable** radioactive sources : 
+- polonium-210 (pure alpha)
 - tritium (very low beta)
-- high purity metallic uranium/thorium (alpha)
+
 
 The geiger counter board can be powered with +5V power pin of the **Flipper Zero**. This pin will automatically be enabled when the program is launched. 
 
@@ -56,7 +60,7 @@ If you don't want to build this application, just simply copy **flipper_geiger.f
 
 ## Use cases
 
-Ambient radioactivity (descendants of radon gas are detected) :
+Ambient radioactivity (descendants of radon gas are detected, not radon itself) :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper8.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper9.png" width=25% height=25%>
 
@@ -77,6 +81,14 @@ Measure of radium dial pointers in contact with the geiger tube :
 All previous measures in a row (the scale of the graph is automatically adjusted) :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper6.png" width=25% height=25%>
+
+Measure of uranium orange pottery :
+
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper10.png" width=25% height=25%>
+
+Measure of americium 241 button from a smoke detector :
+
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper11.png" width=25% height=25%>
 
 **A4** GPIO on **A7** GPIO :
 
