@@ -192,6 +192,18 @@ void furi_hal_rtc_set_locale_dateformat(FuriHalRtcLocaleDateFormat value);
  */
 FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat();
 
+/** Set the Stealth Mode state
+ *
+ * @param[in]  value  The state to set
+ */
+void furi_hal_rtc_set_stealth_mode(bool value);
+
+/** Get the Stealth Mode state
+ *
+ * @return     The Stealth Mode state
+ */
+bool furi_hal_rtc_get_stealth_mode();
+
 /** Set RTC Date Time
  *
  * @param      datetime  The date time to set

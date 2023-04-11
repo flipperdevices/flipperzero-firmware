@@ -34,7 +34,8 @@ typedef struct {
     FuriHalRtcLocaleUnits locale_units : 1;
     FuriHalRtcLocaleTimeFormat locale_timeformat : 1;
     FuriHalRtcLocaleDateFormat locale_dateformat : 2;
-    uint8_t reserved : 6;
+    bool stealth_mode : 1;
+    uint8_t reserved : 5;
 } SystemReg;
 
 _Static_assert(sizeof(SystemReg) == 4, "SystemReg size mismatch");
@@ -278,6 +279,19 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat() {
     uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
     SystemReg* data = (SystemReg*)&data_reg;
     return data->locale_dateformat;
+}
+
+void furi_hal_rtc_set_stealth_mode(bool value) {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    data->stealth_mode = value;
+    furi_hal_rtc_set_register(FuriHalRtcRegisterSystem, data_reg);
+}
+
+bool furi_hal_rtc_get_stealth_mode() {
+    uint32_t data_reg = furi_hal_rtc_get_register(FuriHalRtcRegisterSystem);
+    SystemReg* data = (SystemReg*)&data_reg;
+    return data->stealth_mode;
 }
 
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {

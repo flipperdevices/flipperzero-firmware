@@ -55,4 +55,5 @@ typedef struct {
     uint8_t is_locked;
     uint32_t auto_lock_delay_ms;
     uint8_t dummy_mode;
+    uint8_t stealth_mode;
 } DesktopSettings;

@@ -79,3 +79,4 @@ void desktop_free(Desktop* desktop);
 void desktop_lock(Desktop* desktop);
 void desktop_unlock(Desktop* desktop);
 void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled);
+void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled);
