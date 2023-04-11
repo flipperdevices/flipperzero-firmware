@@ -1,3 +1,20 @@
+/*
+ * Steps to add a new stage:
+ * 
+ * wifi_marauder_script.h
+ * - Complement WifiMarauderScriptStageType enum with new stage
+ * - Create struct WifiMarauderScriptStage???? for the new stage
+ * 
+ * wifi_marauder_script.c
+ * - Create function "WifiMarauderScriptStage????* _wifi_marauder_script_get_stage_????(cJSON *stages)"
+ * - Change _wifi_marauder_script_load_stages() to load new stage
+ * - Add case to free memory in wifi_marauder_script_free()
+ * 
+ * wifi_marauder_script_executor.c
+ * - Create function "void _wifi_marauder_script_execute_????(WifiMarauderScriptStage????* stage)"
+ * - Add case in wifi_marauder_script_execute_stage()
+ */
+
 #pragma once
 
 #include <storage/storage.h>
@@ -21,17 +38,6 @@ typedef enum {
     WifiMarauderScriptSelectTypeSsid
 } WifiMarauderScriptSelectType;
 
-// Filters
-typedef enum {
-    WifiMarauderScriptFilterTypeContains,
-    WifiMarauderScriptFilterTypeEqual,
-} WifiMarauderScriptFilterType;
-
-typedef struct WifiMarauderScriptSelectFilter {
-    WifiMarauderScriptFilterType type;
-    char* filter_string;
-} WifiMarauderScriptSelectFilter;
-
 // Stages
 typedef struct WifiMarauderScriptStage {
     WifiMarauderScriptStageType type;
@@ -46,8 +52,8 @@ typedef struct WifiMarauderScriptStageScan {
 
 typedef struct WifiMarauderScriptStageSelect {
     WifiMarauderScriptSelectType type;
-    WifiMarauderScriptSelectFilter *filters;
-    int filter_count;
+    char* filter;
+    // TODO: Implement a feature to not select the same items in the next iteration of the script
     bool allow_repeat;
 } WifiMarauderScriptStageSelect;
 

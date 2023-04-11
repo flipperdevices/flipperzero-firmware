@@ -17,7 +17,7 @@ int32_t _wifi_marauder_script_worker_task(void* worker) {
     WifiMarauderScript *script = script_worker->script;
     if (script != NULL) {
         WifiMarauderScriptStage *current_stage = script->first_stage;
-        while (current_stage != NULL) {
+        while (current_stage != NULL && script_worker->is_running) {
             script_worker->callback(current_stage, script_worker->context);
             current_stage = current_stage->next_stage;
         }
@@ -32,11 +32,11 @@ bool wifi_marauder_script_worker_start(WifiMarauderScriptWorker* instance, WifiM
     instance->callback = callback;
     instance->script = script;
     instance->context = context;
+    instance->is_running = true;
     instance->worker_thread = furi_thread_alloc_ex("WifiMarauderScriptWorker", 1024, _wifi_marauder_script_worker_task, instance);
     if (!instance->worker_thread) {
         return false;
     }
-    instance->is_running = true;
     furi_thread_start(instance->worker_thread);
     return true;
 }

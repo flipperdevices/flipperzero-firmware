@@ -18,13 +18,25 @@ void _send_line_break() {
 void _wifi_marauder_script_execute_scan(WifiMarauderScriptStageScan* stage, WifiMarauderScriptWorker* worker) {
     char command[10];
     if (stage->type == WifiMarauderScriptScanTypeAp) {
-        snprintf(command, sizeof(command), "scanap");
+        snprintf(command, sizeof(command), "scanap\n");
     } else {
-        snprintf(command, sizeof(command), "scansta");
+        snprintf(command, sizeof(command), "scansta\n");
     }
     wifi_marauder_uart_tx((uint8_t*)(command), strlen(command));
     _wifi_marauder_script_delay(worker, stage->timeout);
     _send_stop();
+}
+
+void _wifi_marauder_script_execute_select(WifiMarauderScriptStageSelect* stage) {
+    char command[256];
+    if (stage->type == WifiMarauderScriptSelectTypeAp) {
+        snprintf(command, sizeof(command), "select -a {%s}\n", stage->filter);
+    } else if (stage->type == WifiMarauderScriptSelectTypeStation) {
+        snprintf(command, sizeof(command), "select -c {%s}\n", stage->filter);
+    } else if (stage->type == WifiMarauderScriptSelectTypeSsid) {
+        snprintf(command, sizeof(command), "select -s {%s}\n", stage->filter);
+    }
+    wifi_marauder_uart_tx((uint8_t*)(command), strlen(command));
 }
 
 void _wifi_marauder_script_execute_beacon_list(WifiMarauderScriptStageBeaconList* stage, WifiMarauderScriptWorker* worker) {
@@ -50,6 +62,9 @@ void wifi_marauder_script_execute_stage(WifiMarauderScriptStage* stage, void *co
     switch (stage->type) {
         case WifiMarauderScriptStageTypeScan:
             _wifi_marauder_script_execute_scan((WifiMarauderScriptStageScan*)stage_data, worker);
+            break;
+        case WifiMarauderScriptStageTypeSelect:
+            _wifi_marauder_script_execute_select((WifiMarauderScriptStageSelect*)stage_data);
             break;
         case WifiMarauderScriptStageTypeBeaconList:
             _wifi_marauder_script_execute_beacon_list((WifiMarauderScriptStageBeaconList*)stage_data, worker);

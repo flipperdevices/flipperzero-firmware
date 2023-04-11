@@ -33,7 +33,7 @@ void _wifi_marauder_script_load_meta(WifiMarauderScript *script, cJSON *meta_sec
     }
 }
 
-WifiMarauderScriptStageScan *_wifi_marauder_script_get_stage_scan(cJSON *stages) {
+WifiMarauderScriptStageScan* _wifi_marauder_script_get_stage_scan(cJSON *stages) {
     cJSON* stage_scan = cJSON_GetObjectItem(stages, "scan");
     if (stage_scan == NULL) {
         return NULL;
@@ -60,6 +60,40 @@ WifiMarauderScriptStageScan *_wifi_marauder_script_get_stage_scan(cJSON *stages)
     return scan_stage;
 }
 
+WifiMarauderScriptStageSelect* _wifi_marauder_script_get_stage_select(cJSON *stages) {
+    cJSON *select_stage_json = cJSON_GetObjectItemCaseSensitive(stages, "select");
+    if (select_stage_json == NULL) {
+        return NULL;
+    }
+
+    cJSON *type_json = cJSON_GetObjectItemCaseSensitive(select_stage_json, "type");
+    cJSON *filter_json = cJSON_GetObjectItemCaseSensitive(select_stage_json, "filter");
+    cJSON *allow_repeat_json = cJSON_GetObjectItemCaseSensitive(select_stage_json, "allow_repeat");
+
+    if (!cJSON_IsString(type_json) || !cJSON_IsString(filter_json)) {
+        return NULL;
+    }
+
+    WifiMarauderScriptSelectType select_type;
+    if (strcmp(type_json->valuestring, "ap") == 0) {
+        select_type = WifiMarauderScriptSelectTypeAp;
+    } else if (strcmp(type_json->valuestring, "station") == 0) {
+        select_type = WifiMarauderScriptSelectTypeStation;
+    } else if (strcmp(type_json->valuestring, "ssid") == 0) {
+        select_type = WifiMarauderScriptSelectTypeSsid;
+    } else {
+        return NULL;
+    }
+
+    char *filter_str = strdup(filter_json->valuestring);
+
+    WifiMarauderScriptStageSelect *stage_select = (WifiMarauderScriptStageSelect*) malloc(sizeof(WifiMarauderScriptStageSelect));
+    stage_select->type = select_type;
+    stage_select->filter = filter_str;
+    stage_select->allow_repeat = cJSON_IsBool(allow_repeat_json) ? allow_repeat_json->valueint : true;
+
+    return stage_select;
+}
 
 WifiMarauderScriptStageBeaconList* _wifi_marauder_script_get_stage_beacon_list(cJSON *stages) {
     cJSON* stage_beaconlist = cJSON_GetObjectItem(stages, "beaconlist");
@@ -127,15 +161,31 @@ void _wifi_marauder_script_load_stages(WifiMarauderScript *script, cJSON *stages
     // Scan stage
     WifiMarauderScriptStageScan *stage_scan = _wifi_marauder_script_get_stage_scan(stages);
     if (stage_scan != NULL) {
-        WifiMarauderScriptStage *stage = _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeScan, stage_scan);
-        _wifi_marauder_script_add_stage(script, stage, &prev_stage);
+        _wifi_marauder_script_add_stage(
+            script,
+            _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeScan, stage_scan),
+            &prev_stage
+        );
+    }
+
+    // Select stage
+    WifiMarauderScriptStageSelect *stage_select = _wifi_marauder_script_get_stage_select(stages);
+    if (stage_select != NULL) {
+        _wifi_marauder_script_add_stage(
+            script,
+            _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeSelect, stage_select),
+            &prev_stage
+        );
     }
 
     // Beacon List stage
     WifiMarauderScriptStageBeaconList *stage_beacon_list = _wifi_marauder_script_get_stage_beacon_list(stages);
     if (stage_beacon_list != NULL) {
-        WifiMarauderScriptStage *stage = _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeBeaconList, stage_beacon_list);
-        _wifi_marauder_script_add_stage(script, stage, &prev_stage);
+        _wifi_marauder_script_add_stage(
+            script,
+            _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeBeaconList, stage_beacon_list),
+            &prev_stage
+        );
     }
 }
 
@@ -186,10 +236,7 @@ void wifi_marauder_script_free(WifiMarauderScript *script) {
                 free(current_stage->stage);
                 break;
             case WifiMarauderScriptStageTypeSelect:
-                for (int i = 0; i < ((WifiMarauderScriptStageSelect *) current_stage->stage)->filter_count; i++) {
-                    free(((WifiMarauderScriptStageSelect *) current_stage->stage)->filters[i].filter_string);
-                }
-                free(((WifiMarauderScriptStageSelect *) current_stage->stage)->filters);
+                free(((WifiMarauderScriptStageSelect *) current_stage->stage)->filter);
                 free(current_stage->stage);
                 break;
             case WifiMarauderScriptStageTypeSniffPmkid:
