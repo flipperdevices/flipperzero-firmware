@@ -99,6 +99,7 @@ Measure of americium-241 button from a smoke detector :
 * 2023-04-11
   * More usable/unusable sources
   * Rad unit has been added
+  * Code refactoring by replacing old mutex call by new method
 
 * 2023-03-01
   * Usable/unusable sources have been added
