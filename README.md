@@ -86,7 +86,7 @@ Measure of uranium orange pottery :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper10.png" width=25% height=25%>
 
-Measure of americium 241 button from a smoke detector :
+Measure of americium-241 button from a smoke detector :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper11.png" width=25% height=25%>
 
