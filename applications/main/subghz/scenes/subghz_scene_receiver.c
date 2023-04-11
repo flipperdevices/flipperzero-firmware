@@ -100,7 +100,7 @@ void subghz_scene_receiver_on_enter(void* context) {
     str_buff = furi_string_alloc();
 
     if(subghz_rx_key_state_get(subghz) == SubGhzRxKeyStateIDLE) {
-        subghz_set_defalut_preset(subghz);
+        subghz_set_default_preset(subghz);
         subghz_history_reset(subghz->history);
         subghz_rx_key_state_set(subghz, SubGhzRxKeyStateStart);
     }
@@ -153,7 +153,7 @@ bool subghz_scene_receiver_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
-                subghz_set_defalut_preset(subghz);
+                subghz_set_default_preset(subghz);
                 scene_manager_search_and_switch_to_previous_scene(
                     subghz->scene_manager, SubGhzSceneStart);
             }

@@ -72,16 +72,15 @@ const uint32_t bin_raw_value[BIN_RAW_COUNT] = {
 uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
+    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
+
     uint8_t index = 0;
-    for(uint8_t i = 0;
-        i < subghz_setting_get_frequency_count(subghz_txrx_get_setting(subghz->txrx));
-        i++) {
-        if(value == subghz_setting_get_frequency(subghz_txrx_get_setting(subghz->txrx), i)) {
+    for(uint8_t i = 0; i < subghz_setting_get_frequency_count(setting); i++) {
+        if(value == subghz_setting_get_frequency(setting, i)) {
             index = i;
             break;
         } else {
-            index =
-                subghz_setting_get_frequency_default_index(subghz_txrx_get_setting(subghz->txrx));
+            index = subghz_setting_get_frequency_default_index(setting);
         }
     }
     return index;
@@ -90,12 +89,11 @@ uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* 
 uint8_t subghz_scene_receiver_config_next_preset(const char* preset_name, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
+    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
+
     uint8_t index = 0;
-    for(uint8_t i = 0; i < subghz_setting_get_preset_count(subghz_txrx_get_setting(subghz->txrx));
-        i++) {
-        if(!strcmp(
-               subghz_setting_get_preset_name(subghz_txrx_get_setting(subghz->txrx), i),
-               preset_name)) {
+    for(uint8_t i = 0; i < subghz_setting_get_preset_count(setting); i++) {
+        if(!strcmp(subghz_setting_get_preset_name(setting, i), preset_name)) {
             index = i;
             break;
         } else {
@@ -128,29 +126,30 @@ uint8_t subghz_scene_receiver_config_hopper_value_index(
 static void subghz_scene_receiver_config_set_frequency(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
+    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
 
     if(subghz_txrx_hopper_get_state(subghz->txrx) == SubGhzHopperStateOFF) {
         char text_buf[10] = {0};
+        uint32_t frequency =
+            subghz_setting_get_frequency(subghz_txrx_get_setting(subghz->txrx), index);
+        SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
+
         snprintf(
             text_buf,
             sizeof(text_buf),
             "%lu.%02lu",
-            subghz_setting_get_frequency(subghz_txrx_get_setting(subghz->txrx), index) / 1000000,
-            (subghz_setting_get_frequency(subghz_txrx_get_setting(subghz->txrx), index) %
-             1000000) /
-                10000);
+            frequency / 1000000,
+            (frequency % 1000000) / 10000);
         variable_item_set_current_value_text(item, text_buf);
-        SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
         subghz_txrx_set_preset(
             subghz->txrx,
             furi_string_get_cstr(preset.name),
-            subghz_setting_get_frequency(subghz_txrx_get_setting(subghz->txrx), index),
+            frequency,
             preset.data,
             preset.data_size);
     } else {
         variable_item_set_current_value_index(
-            item,
-            subghz_setting_get_frequency_default_index(subghz_txrx_get_setting(subghz->txrx)));
+            item, subghz_setting_get_frequency_default_index(setting));
     }
 }
 
@@ -172,42 +171,34 @@ static void subghz_scene_receiver_config_set_preset(VariableItem* item) {
 static void subghz_scene_receiver_config_set_hopping_running(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
+    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
+    VariableItem* frequency_item = (VariableItem*)scene_manager_get_scene_state(
+        subghz->scene_manager, SubGhzSceneReceiverConfig);
 
     variable_item_set_current_value_text(item, hopping_text[index]);
     if(hopping_value[index] == SubGhzHopperStateOFF) {
         char text_buf[10] = {0};
+        uint32_t frequency = subghz_setting_get_default_frequency(setting);
         snprintf(
             text_buf,
             sizeof(text_buf),
             "%lu.%02lu",
-            subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)) / 1000000,
-            (subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)) %
-             1000000) /
-                10000);
-        variable_item_set_current_value_text(
-            (VariableItem*)scene_manager_get_scene_state(
-                subghz->scene_manager, SubGhzSceneReceiverConfig),
-            text_buf);
+            frequency / 1000000,
+            (frequency % 1000000) / 10000);
+        variable_item_set_current_value_text(frequency_item, text_buf);
         SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
         subghz_txrx_set_preset(
             subghz->txrx,
             furi_string_get_cstr(preset.name),
-            subghz_setting_get_default_frequency(subghz_txrx_get_setting(subghz->txrx)),
+            frequency,
             preset.data,
             preset.data_size);
         variable_item_set_current_value_index(
-            (VariableItem*)scene_manager_get_scene_state(
-                subghz->scene_manager, SubGhzSceneReceiverConfig),
-            subghz_setting_get_frequency_default_index(subghz_txrx_get_setting(subghz->txrx)));
+            frequency_item, subghz_setting_get_frequency_default_index(setting));
     } else {
-        variable_item_set_current_value_text(
-            (VariableItem*)scene_manager_get_scene_state(
-                subghz->scene_manager, SubGhzSceneReceiverConfig),
-            " -----");
+        variable_item_set_current_value_text(frequency_item, " -----");
         variable_item_set_current_value_index(
-            (VariableItem*)scene_manager_get_scene_state(
-                subghz->scene_manager, SubGhzSceneReceiverConfig),
-            subghz_setting_get_frequency_default_index(subghz_txrx_get_setting(subghz->txrx)));
+            frequency_item, subghz_setting_get_frequency_default_index(setting));
     }
 
     subghz_txrx_hopper_set_state(subghz->txrx, hopping_value[index]);
