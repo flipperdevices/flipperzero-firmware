@@ -19,7 +19,38 @@
  * IMPLEMENTED STAGES (In order of execution):
  * - Scan
  * - Select
+ * - Deauth
  * - Beacon List
+ * ----------------------------------------------------------------------------------------------------
+ * SCRIPT SYNTAX:
+ * {
+ *     "meta": {
+ *         "description": "My script",
+ *         "repeat": times the script will repeat
+ *     },
+ *     "stages": {
+ *         "scan": {
+ *             "type": "ap" | "station",
+ *             "timeout": seconds,
+ *             "channel": 1-11
+ *         },
+ *         "select": {
+ *             "type": "ap" | "station" | "ssid",
+ *             "filter": "all" | "contains \"{SSID fragment}\" or equals \"{SSID}\" or ..."
+ *         },
+ *         "deauth": {
+ *             "timeout": seconds
+ *         },
+ *         "beaconlist": {
+ *             "ssids": [
+ *                 "SSID 1",
+ *                 "SSID 2",
+ *                 "SSID 3"
+ *             ],
+ *             "timeout": seconds
+ *         }
+ *     }
+ * }
  * ----------------------------------------------------------------------------------------------------
  */
 
@@ -31,6 +62,7 @@
 typedef enum {
     WifiMarauderScriptStageTypeScan,
     WifiMarauderScriptStageTypeSelect,
+    WifiMarauderScriptStageTypeDeauth,
     WifiMarauderScriptStageTypeSniffPmkid,
     WifiMarauderScriptStageTypeBeaconList,
 } WifiMarauderScriptStageType;
@@ -55,6 +87,7 @@ typedef struct WifiMarauderScriptStage {
 
 typedef struct WifiMarauderScriptStageScan {
     WifiMarauderScriptScanType type;
+    int channel;
     int timeout;
 } WifiMarauderScriptStageScan;
 
@@ -64,6 +97,10 @@ typedef struct WifiMarauderScriptStageSelect {
     // TODO: Implement a feature to not select the same items in the next iteration of the script
     bool allow_repeat;
 } WifiMarauderScriptStageSelect;
+
+typedef struct WifiMarauderScriptStageDeauth {
+    int timeout;
+} WifiMarauderScriptStageDeauth;
 
 typedef struct WifiMarauderScriptStageSniffPmkid {
     bool force_deauth;
