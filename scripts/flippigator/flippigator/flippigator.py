@@ -30,8 +30,9 @@ class Navigator:
         path: str = "./img/ref/",
         debug: bool = True,
         gui: bool = True,
-        scale: int = 12,
+        scale: int = 8,
         threshold: float = 0.99,
+        window_name = "Default window name",
     ):
         self.imRef = dict()
         self.proto = proto
@@ -39,6 +40,7 @@ class Navigator:
         self._guiFlag = gui
         self._scale = scale
         self._threshold = threshold
+        self._window_name = window_name
         self.screen_image = numpy.zeros((SCREEN_H, SCREEN_W))
 
         self.logger = logging.getLogger("Navigator")
@@ -116,7 +118,7 @@ class Navigator:
 
         return display_image.copy()
 
-    def draw_screen(self, window_name="Flipper screen"):
+    def draw_screen(self):
         display_image = self.get_screen()
         mask = cv.inRange(display_image, (255, 255, 255, 0), (255, 255, 255, 0))
         display_image[mask > 0] = (1, 145, 251, 0)
@@ -126,7 +128,7 @@ class Navigator:
             interpolation=cv.INTER_NEAREST,
         )
 
-        cv.imshow(window_name, display_image)
+        cv.imshow(self._window_name, display_image)
         key = cv.waitKey(1)
 
     def recog_ref(self, ref=[], area=(0 , 64, 0, 128)):
@@ -457,6 +459,41 @@ class Reader:
 
     def get(self) -> str:
         return self._recieved_data
+
+
+
+class Relay:
+    def __init__(
+        self,
+        serial,
+        debug: bool = True,
+    ):
+        self._serial = serial
+        self._debugFlag = debug
+        self._recieved_data = 0
+        self._curent_reader = 0
+        self._curent_key = 0
+        self._serial.reset_output_buffer()
+        self._serial.write(
+            ("R0K0\n").encode(
+                "ASCII"
+            )
+        )
+
+    def __del__(self):
+        pass
+
+    def set_reader(self, reader = 0):
+        pass
+
+    def set_key(self, key = 0):
+        pass
+
+    def get_reader(self) -> int:
+        pass
+
+    def get_key(self) -> int:
+        pass
 
 
 class FlipperTextKeyboard:
