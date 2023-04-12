@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <inttypes.h>
 #include <mbedtls/sha1.h>
 #include "felica.h"
 #include "nfc_util.h"
@@ -184,7 +185,8 @@ static uint8_t felica_consume_header(
     uint8_t len,
     FelicaReader* reader,
     uint8_t expected_resp,
-    bool always_succeed) {
+    bool always_succeed,
+    bool update_idm) {
     furi_assert(expected_resp & 1);
     furi_assert(buf != NULL);
     furi_assert(reader != NULL);
@@ -198,11 +200,13 @@ static uint8_t felica_consume_header(
         FURI_LOG_E(TAG, "Expecting %u, got %u.", expected_resp, buf[1]);
         return 0;
     }
-    if(memcmp(&buf[2], reader->current_idm, 8) != 0) {
+    if(!update_idm && memcmp(&buf[2], reader->current_idm, sizeof(reader->current_idm)) != 0) {
         FURI_LOG_E(TAG, "IDm mismatch.");
         return 0;
+    } else {
+        memcpy(reader->current_idm, &buf[2], sizeof(reader->current_idm));
     }
-    if(always_succeed) {
+    if(!always_succeed) {
         reader->status_flags[0] = buf[10];
         reader->status_flags[1] = buf[11];
         if(reader->status_flags[0] != 0 || reader->status_flags[1] != 0) {
@@ -285,7 +289,8 @@ uint16_t felica_parse_unencrypted_read(
     FelicaReader* reader,
     uint8_t* out,
     uint16_t out_len) {
-    uint8_t consumed = felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_READ_RES, false);
+    uint8_t consumed =
+        felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_READ_RES, false, false);
     if(!consumed || reader->status_flags[0] != 0 || reader->status_flags[1] != 0) {
         return 0;
     }
@@ -369,7 +374,7 @@ uint8_t felica_lite_prepare_unencrypted_write(
 
 bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* reader) {
     uint8_t consumed =
-        felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_WRITE_RES, false);
+        felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_WRITE_RES, false, false);
     if(!consumed || reader->status_flags[0] != 0 || reader->status_flags[1] != 0) {
         return false;
     }
@@ -388,7 +393,7 @@ bool felica_parse_request_system_code(
     FelicaReader* reader,
     FelicaSystemArray_t* systems) {
     uint8_t consumed =
-        felica_consume_header(buf, len, reader, FELICA_REQUEST_SYSTEM_CODE_RES, true);
+        felica_consume_header(buf, len, reader, FELICA_REQUEST_SYSTEM_CODE_RES, true, false);
     if(consumed == 0) {
         return false;
     }
@@ -410,7 +415,7 @@ bool felica_parse_request_system_code(
 
         // Set system code
         system->number = idx;
-        system->code = buf[2 * idx] | (buf[2 * idx + 1] << 8);
+        system->code = (buf[2 * idx] << 8) | buf[2 * idx + 1];
 
         FURI_LOG_D(TAG, "Found system code %04X", system->code);
 
@@ -421,6 +426,10 @@ bool felica_parse_request_system_code(
         // Set system index field in IDm
         system->idm[0] &= 0x0f;
         system->idm[0] |= ((idx & 0xf) << 4);
+
+        // Format the root area
+        felica_node_init_as_area(&(system->root), NULL, 0, true, FELICA_NODE_CODE_MAX);
+        FelicaPublicServiceDict_init(system->public_services);
     }
 
     return true;
@@ -440,7 +449,7 @@ bool felica_parse_search_service_code(
     FelicaReader* reader,
     FelicaSearchServiceCodeResult* result) {
     uint8_t consumed =
-        felica_consume_header(buf, len, reader, FELICA_SEARCH_SERVICE_CODE_RES, true);
+        felica_consume_header(buf, len, reader, FELICA_SEARCH_SERVICE_CODE_RES, true, false);
     if(consumed == 0) {
         return false;
     }
@@ -489,6 +498,49 @@ bool felica_parse_search_service_code(
     } else {
         felica_parse_service_attrib(
             node_attrib, &(result->service_type), &(result->service_attrib));
+    }
+
+    return true;
+}
+
+uint8_t felica_prepare_polling(uint8_t* dest, uint16_t system, uint8_t request, uint8_t timeslot) {
+    dest[0] = 0x00;
+    dest[1] = system >> 8;
+    dest[2] = system & 0xff;
+    dest[3] = request;
+    dest[4] = timeslot;
+    return 5;
+}
+
+bool felica_parse_polling(
+    uint8_t* buf,
+    uint8_t len,
+    FelicaReader* reader,
+    uint16_t* request_response) {
+    uint8_t consumed = felica_consume_header(buf, len, reader, 0x01, true, true);
+    if(consumed == 0) {
+        return false;
+    }
+    len -= consumed;
+    buf += consumed;
+
+    if(len < sizeof(reader->current_pmm) || len > sizeof(reader->current_pmm) + 2) {
+        FURI_LOG_E(TAG, "Invalid response length for Polling command");
+        return false;
+    }
+
+    if(len >= sizeof(reader->current_pmm)) {
+        memcpy(reader->current_pmm, buf, sizeof(reader->current_pmm));
+    }
+
+    len += sizeof(reader->current_pmm);
+    buf += sizeof(reader->current_pmm);
+
+    if(len >= 2) {
+        FURI_LOG_D(TAG, "Polling response: %02X %02X", buf[0], buf[1]);
+        if(request_response != NULL) {
+            *request_response = (buf[0] << 8) | buf[1];
+        }
     }
 
     return true;
@@ -720,6 +772,24 @@ bool felica_lite_dump_data(
     return true;
 }
 
+bool felica_std_select_system(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    uint16_t system_code) {
+    FURI_LOG_D(TAG, "Selecting system %04X", system_code);
+
+    tx_rx->tx_bits = 8 * felica_prepare_polling(tx_rx->tx_data, system_code, 0x0, 0);
+    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+        FURI_LOG_E(TAG, "Bad exchange when selecting system with Polling command");
+        return false;
+    }
+    if(!felica_parse_polling(tx_rx->rx_data, tx_rx->rx_bits / 8, reader, NULL)) {
+        FURI_LOG_E(TAG, "Bad response to Polling command");
+        return false;
+    }
+    return true;
+}
+
 bool felica_std_request_system_code(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaReader* reader,
@@ -743,13 +813,12 @@ bool felica_std_traverse_system(
     FelicaSearchServiceCodeResult search_result = {0};
     FelicaNodeRefArray_t search_stack;
     bool result = false;
+    int_least32_t last_node_code = -1;
+    FelicaNode* curr_open_snode = NULL;
 
     if(system->is_lite) {
         return false;
     }
-
-    // Format the root area
-    felica_node_init_as_area(&(system->root), NULL, 0, true, FELICA_NODE_CODE_MAX);
 
     FelicaNodeRefArray_init(search_stack);
     FelicaNodeRefArray_push_back(search_stack, &(system->root));
@@ -777,6 +846,15 @@ bool felica_std_traverse_system(
             break;
         }
 
+        // Reject non-incremental node code
+        int_least32_t curr_node_code = search_result.code;
+        if(curr_node_code <= last_node_code) {
+            FURI_LOG_E(
+                TAG, "Node code returned by Search Service Code must be strictly incrementing");
+            break;
+        }
+        last_node_code = curr_node_code;
+
         // Validate and skip root area
         if(search_result.is_area && search_result.number == 0 &&
            search_result.can_create_subareas) {
@@ -800,6 +878,8 @@ bool felica_std_traverse_system(
             // If current code is out of range, cd .. and check again
             if(search_result.code > curr_working_anode->area->end_service_code) {
                 FelicaNodeRefArray_pop_back(NULL, search_stack);
+                // Close service on area switching
+                curr_open_snode = NULL;
             } else {
                 break;
             }
@@ -815,14 +895,19 @@ bool felica_std_traverse_system(
                 search_result.number,
                 search_result.can_create_subareas,
                 search_result.area_end);
+            // Since this is a new area node, the previously opened service should be closed.
+            curr_open_snode = NULL;
+            FelicaNodeRefArray_push_back(search_stack, new_anode);
             continue;
         }
 
         // Fetch or create the service node of the correct number and type
-        FelicaNode* curr_open_snode = FelicaNodeArray_back(curr_working_anode->area->nodes);
+        // This takes advantage on the nature of service code structure to cut down unnecessary
+        // searches
         if(curr_open_snode == NULL || curr_open_snode->service->number != search_result.number ||
            curr_open_snode->service->type != search_result.service_type) {
             curr_open_snode = FelicaNodeArray_push_new(curr_working_anode->area->nodes);
+            furi_assert(curr_open_snode != NULL);
             felica_node_init_as_service(
                 curr_open_snode,
                 curr_working_anode,
@@ -848,10 +933,6 @@ bool felica_std_traverse_system(
 
     // Cleanup
     FelicaNodeRefArray_clear(search_stack);
-    if(!result) {
-        FURI_LOG_D(TAG, "Rolling back system on failure.");
-        felica_node_clear(&(system->root));
-    }
     return result;
 }
 
@@ -860,6 +941,8 @@ bool felica_std_dump_public_service(
     FelicaReader* reader,
     FelicaService* service,
     uint16_t service_code) {
+    FURI_LOG_D(TAG, "Dumping service %04X", service_code);
+
     uint16_t service_codes[1] = {service_code};
     bool result = false;
 
@@ -867,7 +950,7 @@ bool felica_std_dump_public_service(
         return false;
     }
 
-    for(uint_least32_t cursor = 0; cursor < 0x10000; cursor++) {
+    for(int_least32_t cursor = 0; cursor < 0x10000; cursor++) {
         FelicaBlock* new_block = FelicaBlockArray_push_new(service->blocks);
         furi_assert(new_block != NULL);
 
@@ -888,20 +971,21 @@ bool felica_std_dump_public_service(
             break;
         }
 
-        // Hitting an invalid block address (usually means end of service)
-        if(reader->status_flags[0] == 0xff && reader->status_flags[1] == 0xa8) {
-            FURI_LOG_D(TAG, "End of service reached");
-            result = true;
-            break;
-        }
-
         if(!felica_parse_unencrypted_read(
                tx_rx->rx_data,
                tx_rx->rx_bits / 8,
                reader,
                new_block->data,
                sizeof(new_block->data))) {
-            FURI_LOG_E(TAG, "Bad response to Read without Encryption (block %d)", cursor);
+            // Hitting an invalid block address (usually means end of service)
+            if(reader->status_flags[0] != 0x00 && reader->status_flags[1] == 0xa8) {
+                FURI_LOG_D(TAG, "End of service reached");
+                result = true;
+                break;
+            }
+            // Otherwise there's an error. Ending the read
+            FURI_LOG_E(
+                TAG, "Bad response to Read without Encryption (block %" PRIdLEAST32 ")", cursor);
             break;
         }
     }
@@ -916,10 +1000,10 @@ bool felica_std_dump_public_service(
 bool felica_std_dump_data(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader, FelicaData* data) {
     for
         M_EACH(system, data->systems, FelicaSystemArray_t) {
-            // TODO select the system
-            // if(!felica_std_select_system(tx_rx, reader, system->number)) {
-            //     return false;
-            // }
+            // select and traverse the system
+            if(!felica_std_select_system(tx_rx, reader, system->code)) {
+                return false;
+            }
             if(!felica_std_traverse_system(tx_rx, reader, system)) {
                 return false;
             }
@@ -964,12 +1048,10 @@ bool felica_read_card(
         }
         // TODO what about 12fc systems?
         FURI_LOG_I(TAG, "Reading Felica Standard system");
-        if(felica_std_request_system_code(tx_rx, &reader, &(data->systems))) {
-            felica_clear(data);
+        if(!felica_std_request_system_code(tx_rx, &reader, &(data->systems))) {
             break;
         }
         if(!felica_std_dump_data(tx_rx, &reader, data)) {
-            felica_clear(data);
             break;
         }
         card_read = true;
@@ -980,6 +1062,7 @@ bool felica_read_card(
 
 void felica_service_clear(FelicaService* service) {
     FelicaBlockArray_clear(service->blocks);
+    FelicaServiceAttributeList_init(service->access_control_list);
 }
 
 void felica_lite_clear(FelicaLiteInfo* lite_info) {
@@ -1025,7 +1108,7 @@ void felica_node_init_as_service(
     FelicaServiceType service_type) {
     node->parent = parent;
     node->type = FelicaNodeTypeService;
-    node->service = calloc(1, sizeof(*(node->area)));
+    node->service = calloc(1, sizeof(*(node->service)));
     furi_assert(node->service != NULL);
 
     node->service->number = service_number;
@@ -1049,8 +1132,10 @@ void felica_area_clear(FelicaArea* area) {
 void felica_node_clear(FelicaNode* node) {
     if(node->type == FelicaNodeTypeArea) {
         felica_area_clear(node->area);
+        free(node->area);
     } else if(node->type == FelicaNodeTypeService) {
         felica_service_clear(node->service);
+        free(node->service);
     }
 }
 

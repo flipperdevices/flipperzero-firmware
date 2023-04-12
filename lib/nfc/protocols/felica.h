@@ -362,6 +362,16 @@ bool felica_lite_dump_data(
     FelicaData* data,
     FelicaSystem* system);
 
+/** Select a system.
+ * @param tx_rx NFC context.
+ * @param reader FeliCa reader context.
+ * @param system_code System code.
+ * @return true if successful.
+ */
+bool felica_std_select_system(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    uint16_t system_code);
 /** Request available systems on a FeliCa Standard tag and populate the system array.
  *
  * @param tx_rx NFC context.
