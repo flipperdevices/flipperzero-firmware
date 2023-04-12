@@ -207,3 +207,14 @@ jobs:
           cd testapp
           ufbt create APPID=testapp
           ufbt
+      
+      - name: Build example & external apps with uFBT
+        run: |
+          for appdir in 'applications/external' 'applications/examples'; do
+            for app in $(ls $appdir); do
+              echo "Building $appdir/$app"
+              cd $appdir/$app
+              ufbt
+              cd -
+            done
+          done
