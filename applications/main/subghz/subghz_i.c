@@ -154,11 +154,12 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
             subghz_setting_get_preset_data_size(setting, preset_index));
 
         //Load protocol
-        FlipperFormat* fff_data = subghz_txtx_get_fff_data(subghz->txrx);
         if(!flipper_format_read_string(fff_data_file, "Protocol", temp_str)) {
             FURI_LOG_E(TAG, "Missing Protocol");
             break;
         }
+
+        FlipperFormat* fff_data = subghz_txtx_get_fff_data(subghz->txrx);
         if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) {
             //if RAW
             subghz->load_type_file = SubGhzLoadTypeFileRaw;
