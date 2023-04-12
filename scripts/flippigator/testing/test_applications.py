@@ -55,6 +55,7 @@ class TestApplications(BaseCase):
         menu = nav.get_menu_list()
         menu_ref = [
             "FileBrowserLevelUp",
+            "app_AVR Flasher",
             "app_DAP Link",
             "app_Signal Generator",
             "app_SPI Mem Manager",

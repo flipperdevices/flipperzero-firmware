@@ -10,7 +10,7 @@ from flippigator.flippigator import FlipperTextKeyboard, FlipperHEXKeyboard
 os.system("color")
 
 
-@pytest.mark.bench
+@pytest.mark.bench_nfc_rfid
 class TestNfcBench(BaseCase):
     def test_read_mifare_classic_1k_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):

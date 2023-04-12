@@ -10,7 +10,7 @@ from flippigator.flippigator import FlipperTextKeyboard, FlipperHEXKeyboard
 os.system("color")
 
 
-@pytest.mark.bench
+@pytest.mark.bench_nfc_rfid
 class TestRfidBench(BaseCase):
     def test_read_indala_card(self, nav, gator, reader_indala):
         with allure.step("Delete previous card, if possible"):

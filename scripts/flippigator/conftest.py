@@ -29,6 +29,15 @@ def pytest_addoption(parser):
         "--reader_port", action="store", default=None, help="reader serial port"
     )
     parser.addoption(
+        "--relay_port", action="store", default=None, help="relay controller serial port"
+    )
+    parser.addoption(
+        "--flipper_a_port", action="store", default=None, help="flipper ibutton reader and IR serial port"
+    )
+    parser.addoption(
+        "--flipper_b_port", action="store", default=None, help="flipper ibutton key and IR serial port"
+    )
+    parser.addoption(
         "--path", action="store", default="./img/ref/", help="path to reference images"
     )
     parser.addoption("--debugger", action="store", default=True, help="debug flag")
@@ -36,10 +45,16 @@ def pytest_addoption(parser):
     parser.addoption("--scale", action="store", default=12, help="scale factor")
     parser.addoption("--threshold", action="store", default=0.99, help="threshold")
     parser.addoption(
-        "--bench",
+        "--bench_nfc_rfid",
         action="store_true",
         default=False,
-        help="use this flag for E2E bench tests",
+        help="use this flag for E2E rfid and nfc bench tests",
+    )
+    parser.addoption(
+        "--bench_ibutton_ir",
+        action="store_true",
+        default=False,
+        help="use this flag for E2E ibutton and ir bench tests",
     )
 
 
@@ -54,11 +69,11 @@ def pytest_unconfigure(config):
 
 
 def pytest_collection_modifyitems(config, items):
-    if config.getoption("--bench"):
+    if config.getoption("--bench_nfc_rfid"):
         return
-    skip_bench = pytest.mark.skip(reason="need --bench option to run")
+    skip_bench = pytest.mark.skip(reason="need --bench_nfc_rfid option to run")
     for item in items:
-        if "bench" in item.keywords:
+        if "bench_nfc_rfid" in item.keywords:
             item.add_marker(skip_bench)
 
 
