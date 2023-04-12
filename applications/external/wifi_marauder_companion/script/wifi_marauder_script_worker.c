@@ -15,11 +15,18 @@ WifiMarauderScriptWorker* wifi_marauder_script_worker_alloc() {
 int32_t _wifi_marauder_script_worker_task(void* worker) {
     WifiMarauderScriptWorker* script_worker = worker;
     WifiMarauderScript *script = script_worker->script;
-    if (script != NULL) {
+    if (script == NULL) {
+        return 0;    
+    }
+
+    for (int i = 0; i < script->repeat; i++) {
         WifiMarauderScriptStage *current_stage = script->first_stage;
         while (current_stage != NULL && script_worker->is_running) {
             script_worker->callback(current_stage, script_worker->context);
             current_stage = current_stage->next_stage;
+        }
+        if (!script_worker->is_running) {
+            break;
         }
     }
     return 0;

@@ -78,7 +78,7 @@ typedef struct WifiMarauderScriptStageBeaconList {
 
 // Script
 typedef struct WifiMarauderScript {
-    char* name;
+    char* description;
     WifiMarauderScriptStage *first_stage;
     int repeat;
 } WifiMarauderScript;

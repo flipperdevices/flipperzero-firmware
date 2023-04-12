@@ -9,7 +9,7 @@ WifiMarauderScript *wifi_marauder_script_alloc() {
     if (script == NULL) {
         return NULL;
     }
-    script->name = NULL;
+    script->description = NULL;
     script->first_stage = NULL;
     script->repeat = 1;
     return script;
@@ -17,10 +17,10 @@ WifiMarauderScript *wifi_marauder_script_alloc() {
 
 void _wifi_marauder_script_load_meta(WifiMarauderScript *script, cJSON *meta_section) {
     if (meta_section != NULL) {
-        // Script name
-        cJSON* name = cJSON_GetObjectItem(meta_section, "name");
-        if (name != NULL) {
-            script->name = strdup(name->valuestring);
+        // Script description
+        cJSON* description = cJSON_GetObjectItem(meta_section, "description");
+        if (description != NULL) {
+            script->description = strdup(description->valuestring);
         }
         // Times the script will be repeated
         cJSON* repeat = cJSON_GetObjectItem(meta_section, "repeat");
@@ -28,8 +28,8 @@ void _wifi_marauder_script_load_meta(WifiMarauderScript *script, cJSON *meta_sec
             script->repeat = repeat->valueint;
         }
     }
-    if (script->name == NULL) {
-        script->name = "New script";
+    if (script->description == NULL) {
+        script->description = "My script";
     }
 }
 
@@ -253,6 +253,6 @@ void wifi_marauder_script_free(WifiMarauderScript *script) {
         free(current_stage);
         current_stage = next_stage;
     }
-    free(script->name);
+    free(script->description);
     free(script);
 }
