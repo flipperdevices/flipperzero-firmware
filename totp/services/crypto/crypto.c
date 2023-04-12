@@ -1,6 +1,7 @@
 #include "crypto.h"
-#include <furi.h>
-#include <furi_hal.h>
+#include <furi_hal_crypto.h>
+#include <furi_hal_random.h>
+#include <furi_hal_version.h>
 #include "../config/config.h"
 #include "../../types/common.h"
 #include "memset_s.h"

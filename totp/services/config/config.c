@@ -57,7 +57,7 @@ static char* totp_config_file_backup_i(Storage* storage) {
     }
 
     if(backup_file_exists ||
-       !storage_common_copy(storage, CONFIG_FILE_PATH, backup_path) == FSE_OK) {
+       storage_common_copy(storage, CONFIG_FILE_PATH, backup_path) != FSE_OK) {
         FURI_LOG_E(LOGGING_TAG, "Unable to take a backup");
         free(backup_path);
         return NULL;

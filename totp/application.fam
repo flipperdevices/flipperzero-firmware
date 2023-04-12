@@ -11,9 +11,7 @@ App(
         "storage",
         "input", 
         "notification",
-#ifdef TOTP_BADBT_TYPE_ENABLED
         "bt"
-#endif
     ],
     stack_size=2 * 1024,
     order=20,
