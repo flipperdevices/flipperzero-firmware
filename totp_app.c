@@ -1,10 +1,7 @@
-#include <furi.h>
-#include <furi_hal.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dialogs/dialogs.h>
 #include <stdlib.h>
-#include <flipper_format/flipper_format.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <dolphin/dolphin.h>
@@ -105,10 +102,6 @@ static bool totp_plugin_state_init(PluginState* const plugin_state) {
     }
 
     plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(plugin_state->mutex == NULL) {
-        FURI_LOG_E(LOGGING_TAG, "Cannot create mutex\r\n");
-        return false;
-    }
 
 #ifdef TOTP_BADBT_TYPE_ENABLED
     if(plugin_state->automation_method & AutomationMethodBadBt) {

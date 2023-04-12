@@ -2,7 +2,7 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include <furi/furi.h>
+#include <furi/core/string.h>
 
 #define TOTP_TOKEN_DURATION_DEFAULT (30)
 

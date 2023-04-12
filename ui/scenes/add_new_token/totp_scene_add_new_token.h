@@ -1,8 +1,6 @@
 #pragma once
 
 #include <gui/gui.h>
-#include <furi.h>
-#include <furi_hal.h>
 #include "../../../types/plugin_state.h"
 #include "../../../types/plugin_event.h"
 

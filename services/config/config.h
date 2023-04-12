@@ -1,7 +1,6 @@
 #pragma once
 
 #include <flipper_format/flipper_format.h>
-#include <furi.h>
 #include "../../types/plugin_state.h"
 #include "../../types/token_info.h"
 #include "constants.h"
