@@ -140,6 +140,8 @@ static int32_t nfc_worker_poller(void* context) {
 }
 
 Nfc* nfc_alloc() {
+    furi_assert(f_hal_nfc_acquire() == FHalNfcErrorNone);
+
     Nfc* instance = malloc(sizeof(Nfc));
     instance->state = NfcStateIdle;
     f_hal_nfc_low_power_mode_stop();
@@ -167,6 +169,7 @@ void nfc_free(Nfc* instance) {
     f_hal_nfc_low_power_mode_start();
 
     free(instance);
+    f_hal_nfc_release();
 }
 
 void nfc_config(Nfc* instance, NfcMode mode) {

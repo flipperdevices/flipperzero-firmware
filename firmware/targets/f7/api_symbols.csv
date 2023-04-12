@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,20.4,,
+Version,+,20.5,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -816,6 +816,7 @@ Function,-,expm1,double,double
 Function,-,expm1f,float,float
 Function,-,expm1l,long double,long double
 Function,-,f_hal_nfc_abort,FHalNfcError,
+Function,-,f_hal_nfc_acquire,FHalNfcError,
 Function,-,f_hal_nfc_init,FHalNfcError,
 Function,-,f_hal_nfc_is_hal_ready,FHalNfcError,
 Function,-,f_hal_nfc_listen_start,FHalNfcError,
@@ -827,6 +828,7 @@ Function,-,f_hal_nfc_low_power_mode_stop,FHalNfcError,
 Function,-,f_hal_nfc_poller_field_on,FHalNfcError,
 Function,-,f_hal_nfc_poller_rx,FHalNfcError,"uint8_t*, uint16_t, uint16_t*"
 Function,-,f_hal_nfc_poller_tx,FHalNfcError,"uint8_t*, uint16_t"
+Function,-,f_hal_nfc_release,FHalNfcError,
 Function,-,f_hal_nfc_set_mask_receive_timer,void,uint32_t
 Function,-,f_hal_nfc_set_mode,FHalNfcError,"FHalNfcMode, FHalNfcBitrate"
 Function,-,f_hal_nfc_timer_block_tx_is_running,_Bool,

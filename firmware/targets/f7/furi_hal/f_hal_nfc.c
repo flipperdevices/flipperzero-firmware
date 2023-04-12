@@ -7,6 +7,8 @@
 
 #define TAG "FHalNfc"
 
+static FuriMutex* f_hal_nfc_mutex = NULL;
+
 static FHalNfcError f_hal_nfc_turn_on_osc(FuriHalSpiBusHandle* handle) {
     FHalNfcError error = FHalNfcErrorNone;
 
@@ -52,6 +54,8 @@ FHalNfcError f_hal_nfc_is_hal_ready() {
 }
 
 FHalNfcError f_hal_nfc_init() {
+    furi_assert(f_hal_nfc_mutex == NULL);
+    f_hal_nfc_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     FHalNfcError error = FHalNfcErrorNone;
     f_hal_nfc_event_init();
 
@@ -219,6 +223,29 @@ FHalNfcError f_hal_nfc_init() {
     f_hal_nfc_low_power_mode_start();
 
     return error;
+}
+
+static bool f_hal_nfc_is_mine() {
+    return (furi_mutex_get_owner(f_hal_nfc_mutex) == furi_thread_get_current_id());
+}
+
+FHalNfcError f_hal_nfc_acquire() {
+    furi_check(f_hal_nfc_mutex);
+
+    FHalNfcError error = FHalNfcErrorNone;
+    if(furi_mutex_acquire(f_hal_nfc_mutex, 100) != FuriStatusOk) {
+        error = FHalNfcErrorBusy;
+    }
+
+    return error;
+}
+
+FHalNfcError f_hal_nfc_release() {
+    furi_check(f_hal_nfc_mutex);
+    furi_check(f_hal_nfc_is_mine());
+    furi_check(furi_mutex_release(f_hal_nfc_mutex) == FuriStatusOk);
+
+    return FHalNfcErrorNone;
 }
 
 FHalNfcError f_hal_nfc_low_power_mode_start() {

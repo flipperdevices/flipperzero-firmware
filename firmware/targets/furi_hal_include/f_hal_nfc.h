@@ -30,6 +30,7 @@ typedef enum {
 
 typedef enum {
     FHalNfcErrorNone,
+    FHalNfcErrorBusy,
     FHalNfcErrorChipCommunication,
     FHalNfcErrorCommunication,
     FHalNfcErrorOscillator,
@@ -102,6 +103,10 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate);
  * @return FHalNfcError 
  */
 FHalNfcError f_hal_nfc_poller_field_on();
+
+FHalNfcError f_hal_nfc_acquire();
+
+FHalNfcError f_hal_nfc_release();
 
 FHalNfcError f_hal_nfc_poller_tx(uint8_t* tx_data, uint16_t tx_bits);
 
