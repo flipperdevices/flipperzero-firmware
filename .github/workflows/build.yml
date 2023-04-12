@@ -212,6 +212,11 @@ jobs:
         run: |
           for appdir in 'applications/external' 'applications/examples'; do
             for app in $(find "$appdir" -maxdepth 1 -mindepth 1 -type d); do
+              TARGETS_FAM=$(grep "targets" application.fam || echo "${{ matrix.target }}")
+              if ! grep -q "${{ matrix.target }}" <<< $TARGETS_FAM ; then
+                  echo Skipping unsupported app: $appdir
+                  continue
+              fi
               echo "Building $app"
               pushd $app
               ufbt
