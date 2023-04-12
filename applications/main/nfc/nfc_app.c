@@ -43,6 +43,11 @@ NfcApp* nfc_app_alloc() {
     view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
 
+    // instance->nfc = nfc_alloc();
+    // instance->nfca_poller = nfca_poller_alloc(instance->nfc);
+    // instance->mf_ul_poller = 
+
+
     // Nfc device
     nfc->nfc_dev = nfc_dev_alloc();
 

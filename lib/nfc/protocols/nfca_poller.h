@@ -12,6 +12,7 @@ typedef struct NfcaPoller NfcaPoller;
 
 typedef enum {
     NfcaPollerEventTypeError,
+    NfcaPollerEventDetected,
     NfcaPollerEventTypeActivated,
     NfcaPollerEventTypeReady,
 } NfcaPollerEventType;
@@ -42,10 +43,6 @@ NfcaError nfca_poller_check_presence(NfcaPoller* instance);
 
 NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data);
 
-// Syncronous API
-
-NfcaError nfca_poller_activate_sync(NfcaPoller* instance, NfcaData* nfca_data);
-
 NfcaError nfca_poller_halt(NfcaPoller* instance);
 
 NfcaError nfca_poller_txrx(
@@ -65,6 +62,11 @@ NfcaError nfca_poller_send_standart_frame(
     uint16_t rx_data_size,
     uint16_t* rx_bits,
     uint32_t fwt);
+
+// Syncronous API
+NfcaError nfca_poller_activate_sync(NfcaPoller* instance, NfcaData* nfca_data);
+
+NfcaError nfca_poller_check_presence_sync(NfcaPoller* instance);
 
 #ifdef __cplusplus
 }

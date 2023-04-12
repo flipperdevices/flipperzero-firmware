@@ -70,6 +70,7 @@ static int32_t nfc_worker_listener(void* context) {
     uint16_t rx_bits = 0;
 
     f_hal_nfc_listen_start();
+    instance->state = NfcStateListenStarted;
     NfcEvent nfc_event = {};
     while(true) {
         FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
@@ -111,7 +112,7 @@ static int32_t nfc_worker_poller(void* context) {
     furi_assert(context);
 
     Nfc* instance = context;
-    if(instance->state) furi_assert(instance->state == NfcStateConfigured);
+    furi_assert(instance->state == NfcStateConfigured);
     furi_assert(instance->callback);
 
     while(true) {
@@ -234,7 +235,6 @@ void nfc_start_worker(Nfc* instance, NfcEventCallback callback, void* context) {
         furi_thread_set_callback(instance->worker_thread, nfc_worker_listener);
     }
     furi_thread_start(instance->worker_thread);
-    instance->state = NfcStateListenStarted;
     instance->comm_state = NfcCommStateIdle;
 }
 

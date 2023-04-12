@@ -6,6 +6,7 @@ enum NfcCustomEvent {
 
     NfcCustomEventViewExit,
     NfcCustomEventWorkerExit,
+    NfcCustomEventWorkerUpdate,
     NfcCustomEventByteInputDone,
     NfcCustomEventTextInputDone,
     NfcCustomEventDictAttackDone,

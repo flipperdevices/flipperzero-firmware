@@ -87,6 +87,7 @@ typedef struct {
     MfUltralightCounter counter[MF_ULTRALIGHT_COUNTER_NUM];
     MfUltralightTearingFlag tearing_flag[MF_ULTRALIGHT_TEARING_FLAG_NUM];
     MfUltralightPage page[MF_ULTRALIGHT_MAX_PAGE_NUM];
+    uint32_t paged_read;
 } MfUltralightData;
 
 #ifdef __cplusplus

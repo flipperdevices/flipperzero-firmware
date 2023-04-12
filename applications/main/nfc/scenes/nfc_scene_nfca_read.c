@@ -11,6 +11,8 @@ void nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, void* context) {
     if(event.type == NfcaPollerEventTypeActivated) {
         nfca_poller_stop(nfc->nfca_poller);
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcWorkerEventReadUidNfcA);
+    } else {
+        furi_delay_ms(100);
     }
 }
 

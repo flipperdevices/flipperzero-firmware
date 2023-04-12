@@ -54,7 +54,7 @@ static void nfca_listener_event_handler(NfcEvent event, void* context) {
     NfcaListenerEvent nfca_listener_event = {};
     if(event_type == NfcEventTypeListenerActivated) {
         instance->state = NfcaListenerStateActive;
-    } else if(event_type == NfcEventTypeRxEnd) {
+    } else if((event_type == NfcEventTypeRxEnd) && (instance->state == NfcaListenerStateActive)) {
         if(nfca_listener_halt_received(event.data.rx_data, event.data.rx_bits)) {
             nfca_listener_sleep(instance);
             instance->state = NfcaListenerStateIdle;

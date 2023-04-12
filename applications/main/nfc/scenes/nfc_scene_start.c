@@ -47,7 +47,15 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexRead) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, SubmenuIndexRead);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            // TEST
+            uint8_t uid[7] = {0x44, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
+            uint8_t atqa[2] = {0x44, 0x00};
+            nfc->nfc_dev_data.nfca_data.sak = 0x00;
+            nfc->nfc_dev_data.nfca_data.uid_len = 7;
+            memcpy(nfc->nfc_dev_data.nfca_data.uid, uid, 7);
+            memcpy(nfc->nfc_dev_data.nfca_data.atqa, atqa, 2);
+
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaEmulate);
             DOLPHIN_DEED(DolphinDeedNfcRead);
             consumed = true;
         } else if(event.event == SubmenuIndexDetectReader) {

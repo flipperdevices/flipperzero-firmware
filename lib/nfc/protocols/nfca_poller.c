@@ -6,6 +6,8 @@
 
 #define TAG "NFCA"
 
+#define NFCA_POLLER_FLAG_COMMAND_COMPLETE (1UL << 0)
+
 #define NFCA_POLLER_MAX_TX_BUFFER_SIZE (512U)
 
 #define NFCA_POLLER_SEL_CMD(cascade_lvl) (0x93 + 2 * (cascade_lvl))
@@ -45,6 +47,12 @@ struct NfcaPoller {
     NfcaPollerEventCallback callback;
     void* context;
 };
+
+typedef struct {
+    NfcaPoller* instance;
+    FuriThreadId thread_id;
+    NfcaError error;
+} NfcaPollerContext;
 
 static NfcaError nfca_poller_process_error(NfcError error) {
     NfcaError ret = NfcaErrorNone;
@@ -157,11 +165,11 @@ static void nfca_poller_event_callback(NfcEvent event, void* context) {
     NfcaPollerEvent nfca_poller_event = {};
     if(event.type == NfcEventTypePollerReady) {
         if(instance->state != NfcaPollerActivated) {
-            FURI_LOG_I(TAG, "nfca_poller_event_callback, NfcEventTypePollerReady event");
             NfcaData data = {};
             NfcaError error = nfca_poller_activate(instance, &data);
             if(error == NfcaErrorNone) {
                 nfca_poller_event.type = NfcaPollerEventTypeActivated;
+                instance->state = NfcaPollerActivated;
             } else {
                 nfca_poller_event.type = NfcaPollerEventTypeError;
             }
@@ -202,7 +210,7 @@ NfcaError nfca_poller_check_presence(NfcaPoller* instance) {
 
     uint16_t rx_bits = 0;
     NfcError error = NfcErrorNone;
-    NfcaError ret = 0;
+    NfcaError ret = NfcaErrorNone;
     do {
         error = nfc_iso13444a_short_frame(
             instance->nfc,
@@ -213,6 +221,7 @@ NfcaError nfca_poller_check_presence(NfcaPoller* instance) {
             NFCA_FDT_LISTEN_FC);
         if(error != NfcErrorNone) {
             ret = nfca_poller_process_error(error);
+            break;
         }
         if(rx_bits != 8 * sizeof(instance->col_res.sens_resp)) {
             ret = NfcaErrorCommunication;
@@ -378,34 +387,6 @@ NfcaError nfca_poller_stop(NfcaPoller* instance) {
     return NfcaErrorNone;
 }
 
-typedef struct {
-    NfcaPoller* instance;
-    FuriThreadId thread_id;
-    NfcaError error;
-} NfcaPollerContext;
-
-static void nfca_poller_activate_sync_callback(NfcaPollerEvent event, void* context) {
-    FURI_LOG_W(TAG, "nfca_poller_activate_sync_callback: %d event", event.type);
-    NfcaPollerContext* nfca_poller_context = context;
-    nfca_poller_stop(nfca_poller_context->instance);
-    nfca_poller_context->error = event.data.error;
-    furi_thread_flags_set(nfca_poller_context->thread_id, 1);
-}
-
-NfcaError nfca_poller_activate_sync(NfcaPoller* instance, NfcaData* nfca_data) {
-    furi_assert(instance);
-    NfcaPollerContext context = {};
-    context.instance = instance;
-    context.thread_id = furi_thread_get_current_id();
-    nfca_poller_start(instance, nfca_poller_activate_sync_callback, &context);
-    furi_thread_flags_wait(1, FuriFlagWaitAny, FuriWaitForever);
-    furi_thread_flags_clear(1);
-    if(context.error == NfcaErrorNone) {
-        *nfca_data = instance->data;
-    }
-    return context.error;
-}
-
 NfcaError nfca_poller_txrx(
     NfcaPoller* instance,
     uint8_t* tx_buff,
@@ -462,4 +443,27 @@ NfcaError nfca_poller_send_standart_frame(
     } while(false);
 
     return ret;
+}
+
+static void nfca_poller_sync_callback(NfcaPollerEvent event, void* context) {
+    NfcaPollerContext* nfca_poller_context = context;
+    nfca_poller_stop(nfca_poller_context->instance);
+    nfca_poller_context->error = event.data.error;
+    furi_thread_flags_set(nfca_poller_context->thread_id, NFCA_POLLER_FLAG_COMMAND_COMPLETE);
+}
+
+NfcaError nfca_poller_activate_sync(NfcaPoller* instance, NfcaData* nfca_data) {
+    furi_assert(instance);
+
+    NfcaPollerContext context = {};
+    context.instance = instance;
+    context.thread_id = furi_thread_get_current_id();
+    nfca_poller_start(instance, nfca_poller_sync_callback, &context);
+    furi_thread_flags_wait(NFCA_POLLER_FLAG_COMMAND_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
+    furi_thread_flags_clear(NFCA_POLLER_FLAG_COMMAND_COMPLETE);
+    if(context.error == NfcaErrorNone) {
+        *nfca_data = instance->data;
+    }
+
+    return context.error;
 }

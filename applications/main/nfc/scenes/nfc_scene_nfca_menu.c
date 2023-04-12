@@ -38,7 +38,7 @@ bool nfc_scene_nfca_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuIndexEmulateUid) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaEmulate);
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneNotImplemented)) {
                 DOLPHIN_DEED(DolphinDeedNfcAddEmulate);
             } else {

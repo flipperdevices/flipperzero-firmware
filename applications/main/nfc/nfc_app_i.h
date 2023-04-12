@@ -32,6 +32,10 @@
 #include <m-array.h>
 
 #include <lib/nfc/protocols/nfca_poller.h>
+#include <lib/nfc/protocols/nfca_listener.h>
+#include <lib/nfc/protocols/mf_ultralight_poller.h>
+#include <lib/nfc/protocols/mf_ultralight_listener.h>
+
 #include <lib/nfc/nfc_dev.h>
 
 #define NFC_TEXT_STORE_SIZE 128
@@ -67,6 +71,9 @@ struct NfcApp {
     Widget* widget;
 
     NfcaPoller* nfca_poller;
+    NfcaListener* nfca_listener;
+    MfUltralightPoller* mf_ul_poller;
+    MfUltralightListener* mf_ul_listener;
 
     NfcDev* nfc_dev;
     NfcDevData nfc_dev_data;

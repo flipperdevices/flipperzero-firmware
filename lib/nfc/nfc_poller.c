@@ -23,6 +23,7 @@ struct NfcPoller {
 
 NfcPoller* nfc_poller_alloc() {
     NfcPoller* instance = malloc(sizeof(NfcPoller));
+    
     return instance;
 }
 
