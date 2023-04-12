@@ -16,7 +16,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     NfcDeviceData* dev_data = &nfc->dev->dev_data;
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
-    if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl)) {
+    if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl) ||
+       (protocol == NfcDeviceProtocolFelica)) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_data_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -51,8 +52,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     // Set tag general data
     if(type == FuriHalNfcTypeF) {
         // Set NFC-F data
-        furi_string_cat_printf(temp_str, "ISO 18092 (NFC-F)\n");
-        furi_string_cat_printf(temp_str, "CIN:");
+        furi_string_cat(temp_str, "ISO 18092 (NFC-F)");
+        furi_string_cat(temp_str, "\nCIN:");
         // NFC-F Card Identification Number (CIN) starts at "UID" byte 2.
         for(size_t i = 2; i < nfc_data->uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
@@ -60,50 +61,53 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         // The first 2 bytes of the "UID" are Manufacturer Code (MC)
         furi_string_cat_printf(
             temp_str,
-            "\nMC: %02X %02X  ROM: %02X  IC: %02X\n\n",
+            "\nMC: %02X %02X  ROM: %02X  IC: %02X\n",
             nfc_data->uid[0],
             nfc_data->uid[1],
             nfc_data->f_data.pmm[0],
             nfc_data->f_data.pmm[1]);
 
-        furi_string_cat_printf(temp_str, "MRT (1 node/blk):\n");
-        furi_string_cat_printf(
-            temp_str,
-            "- ReqSvc: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_VARIABLE_MRT], 1));
-        furi_string_cat_printf(
-            temp_str,
-            "- Fixed: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_FIXED_MRT], 0));
-        furi_string_cat_printf(
-            temp_str,
-            "- Auth1: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_MUTUAL_AUTH_MRT], 1));
-        furi_string_cat_printf(
-            temp_str,
-            "- Auth2: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_MUTUAL_AUTH_MRT], 0));
-        furi_string_cat_printf(
-            temp_str,
-            "- Read: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_READ_MRT], 1));
-        furi_string_cat_printf(
-            temp_str,
-            "- Write: %" PRIuLEAST32 "us\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_WRITE_MRT], 1));
-        furi_string_cat_printf(
-            temp_str,
-            "- Other: %" PRIuLEAST32 "us\n\n",
-            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_OTHER_MRT], 0));
-
-        furi_string_cat_printf(temp_str, "IDm:");
+        furi_string_cat(temp_str, "\nIDm:");
         for(size_t i = 0; i < nfc_data->uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
         }
-        furi_string_cat_printf(temp_str, "\nPMm:");
+        furi_string_cat(temp_str, "\nPMm:");
         for(size_t i = 0; i < sizeof(nfc_data->f_data.pmm); i++) {
             furi_string_cat_printf(temp_str, " %02X", nfc_data->f_data.pmm[i]);
         }
+
+        furi_string_cat(temp_str, "\n");
+        furi_string_cat(temp_str, "\nMRT (1 node/blk):");
+        furi_string_cat_printf(
+            temp_str,
+            "\n- ReqSvc: %" PRIuLEAST32 "us",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_VARIABLE_MRT], 1));
+        furi_string_cat_printf(
+            temp_str,
+            "\n- Fixed: %" PRIuLEAST32 "us",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_FIXED_MRT], 0));
+        furi_string_cat_printf(
+            temp_str,
+            "\n- Auth1: %" PRIuLEAST32 "us",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_MUTUAL_AUTH_MRT], 1));
+        furi_string_cat_printf(
+            temp_str,
+            "\n- Auth2: %" PRIuLEAST32 "us",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_MUTUAL_AUTH_MRT], 0));
+        furi_string_cat_printf(
+            temp_str,
+            "\n- Read: %" PRIuLEAST32 "us",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_READ_MRT], 1));
+        furi_string_cat_printf(
+            temp_str,
+            "\n- Write: %" PRIuLEAST32 "us",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_WRITE_MRT], 1));
+        furi_string_cat_printf(
+            temp_str,
+            "\n- Other: %" PRIuLEAST32 "us",
+            felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_OTHER_MRT], 0));
+        furi_string_cat(temp_str, "\n");
+
     } else { // FuriHalNfcTypeA
         // Set tag iso data
         char iso_type = FURI_BIT(nfc_data->a_data.sak, 5) ? '4' : '3';
@@ -176,6 +180,13 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
         furi_string_cat_printf(temp_str, "\nKeys Found %d/%d", keys_found, keys_total);
         furi_string_cat_printf(temp_str, "\nSectors Read %d/%d", sectors_read, sectors_total);
+    } else if(protocol == NfcDeviceProtocolFelica) {
+        FelicaData* data = &dev_data->felica_data;
+        size_t num_systems = FelicaSystemArray_size(data->systems);
+        furi_string_cat_printf(temp_str, "\n%zd system", num_systems);
+        if(num_systems != 1) {
+            furi_string_cat_printf(temp_str, "s");
+        }
     }
 
     // Add text scroll widget
@@ -198,6 +209,9 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
                 consumed = true;
             } else if(protocol == NfcDeviceProtocolMifareUl) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightData);
+                consumed = true;
+            } else if(protocol == NfcDeviceProtocolFelica) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaData);
                 consumed = true;
             }
         }

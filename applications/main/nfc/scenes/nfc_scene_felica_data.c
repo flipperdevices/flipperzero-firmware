@@ -1,13 +1,13 @@
 #include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
-void nfc_scene_felica_info_select_submenu_callback(void* context, uint32_t index) {
+void nfc_scene_felica_data_submenu_callback(void* context, uint32_t index) {
     Nfc* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
-void nfc_scene_felica_info_select_on_enter(void* context) {
+void nfc_scene_felica_data_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
     FelicaData* data = &nfc->dev->dev_data.felica_data;
@@ -15,7 +15,7 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
 
     FelicaAreaPath_init(nfc->felica_select.selected_areas);
 
-    submenu_add_item(submenu, "[Actions]", 0, nfc_scene_felica_info_select_submenu_callback, nfc);
+    submenu_add_item(submenu, "[Actions]", 0, nfc_scene_felica_data_submenu_callback, nfc);
     uint8_t i = 1;
     if(state->selected_system == NULL || state->selected_system->code == LITE_SYSTEM_CODE) {
         submenu_set_header(submenu, "Systems");
@@ -26,7 +26,7 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
                     submenu,
                     furi_string_get_cstr(system_name),
                     i++,
-                    nfc_scene_felica_info_select_submenu_callback,
+                    nfc_scene_felica_data_submenu_callback,
                     nfc);
                 furi_string_free(system_name);
             }
@@ -60,7 +60,7 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
                         submenu,
                         furi_string_get_cstr(node_name),
                         i++,
-                        nfc_scene_felica_info_select_submenu_callback,
+                        nfc_scene_felica_data_submenu_callback,
                         nfc);
                 } else {
                     uint16_t service_code = node->service->number << 6;
@@ -69,7 +69,7 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
                         submenu,
                         furi_string_get_cstr(node_name),
                         i++,
-                        nfc_scene_felica_info_select_submenu_callback,
+                        nfc_scene_felica_data_submenu_callback,
                         nfc);
                 }
 
@@ -79,12 +79,12 @@ void nfc_scene_felica_info_select_on_enter(void* context) {
 
     state->selected_service = NULL;
     submenu_set_selected_item(
-        nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaInfoSelect));
+        nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaData));
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
-bool nfc_scene_felica_info_select_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_felica_data_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     FelicaData* data = &nfc->dev->dev_data.felica_data;
     FelicaSelectState* state = &nfc->felica_select;
@@ -104,7 +104,7 @@ bool nfc_scene_felica_info_select_on_event(void* context, SceneManagerEvent even
             if(state->selected_system->code == LITE_SYSTEM_CODE) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaServiceData);
             } else {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaInfoSelect);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaData);
             }
             consumed = true;
         } else {
@@ -122,7 +122,7 @@ bool nfc_scene_felica_info_select_on_event(void* context, SceneManagerEvent even
 
             if(selected_node->type == FelicaNodeTypeArea) {
                 FelicaAreaPath_push_back(state->selected_areas, selected_node->area);
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaInfoSelect);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaData);
                 consumed = true;
             } else if(selected_node->type == FelicaNodeTypeService) {
                 state->selected_service = selected_node->service;
@@ -143,7 +143,7 @@ bool nfc_scene_felica_info_select_on_event(void* context, SceneManagerEvent even
     return consumed;
 }
 
-void nfc_scene_felica_info_select_on_exit(void* context) {
+void nfc_scene_felica_data_on_exit(void* context) {
     Nfc* nfc = context;
 
     // Clear view

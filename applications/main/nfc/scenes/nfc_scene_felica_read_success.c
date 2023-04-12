@@ -29,19 +29,16 @@ void nfc_scene_felica_read_success_on_enter(void* context) {
     } else {
         temp_str = furi_string_alloc_printf("\e#%s", nfc_felica_type(felica_data->type));
 
-        for
-            M_EACH(current_system, felica_data->systems, FelicaSystemArray_t) {
-                furi_string_cat_printf(
-                    temp_str, "\nSystem %04X (#%d):", current_system->code, current_system->number);
-                furi_string_cat_printf(temp_str, "\nIDm:\n    ");
-                for(size_t i = 0; i < 8; i++) {
-                    furi_string_cat_printf(temp_str, "%02X", current_system->idm[i]);
-                }
-                furi_string_cat_printf(temp_str, "\nPMm:\n    ");
-                for(size_t i = 0; i < 8; i++) {
-                    furi_string_cat_printf(temp_str, "%02X", current_system->pmm[i]);
-                }
-            }
+        furi_string_cat_printf(temp_str, "\nCIN:");
+        for(size_t i = 2; i < nfc->dev->dev_data.nfc_data.uid_len; i++) {
+            furi_string_cat_printf(temp_str, " %02X", nfc->dev->dev_data.nfc_data.uid[i]);
+        }
+
+        size_t num_systems = FelicaSystemArray_size(felica_data->systems);
+        furi_string_cat_printf(temp_str, "\n%zd system", num_systems);
+        if(num_systems != 1) {
+            furi_string_cat_printf(temp_str, "s");
+        }
     }
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
