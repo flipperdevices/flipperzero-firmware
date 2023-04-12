@@ -28,15 +28,30 @@ void _wifi_marauder_script_execute_scan(WifiMarauderScriptStageScan* stage, Wifi
 }
 
 void _wifi_marauder_script_execute_select(WifiMarauderScriptStageSelect* stage) {
-    char command[256];
-    if (stage->type == WifiMarauderScriptSelectTypeAp) {
-        snprintf(command, sizeof(command), "select -a {%s}\n", stage->filter);
-    } else if (stage->type == WifiMarauderScriptSelectTypeStation) {
-        snprintf(command, sizeof(command), "select -c {%s}\n", stage->filter);
-    } else if (stage->type == WifiMarauderScriptSelectTypeSsid) {
-        snprintf(command, sizeof(command), "select -s {%s}\n", stage->filter);
+    const char* select_type = NULL;
+    switch (stage->type) {
+        case WifiMarauderScriptSelectTypeAp:
+            select_type = "-a";
+            break;
+        case WifiMarauderScriptSelectTypeStation:
+            select_type = "-c";
+            break;
+        case WifiMarauderScriptSelectTypeSsid:
+            select_type = "-s";
+            break;
+        default:
+            return;  // invalid stage
     }
-    wifi_marauder_uart_tx((uint8_t*)(command), strlen(command));
+
+    char command[256];
+    if (strcmp(stage->filter, "all") == 0) {
+        snprintf(command, sizeof(command), "select %s all\n", select_type);
+    } else {
+        snprintf(command, sizeof(command), "select %s {%s}\n", select_type, stage->filter);
+    }
+
+    const size_t command_length = strlen(command);
+    wifi_marauder_uart_tx((uint8_t*)command, command_length);
 }
 
 void _wifi_marauder_script_execute_beacon_list(WifiMarauderScriptStageBeaconList* stage, WifiMarauderScriptWorker* worker) {

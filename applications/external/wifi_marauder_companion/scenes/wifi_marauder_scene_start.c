@@ -144,13 +144,10 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
     furi_assert(index < NUM_MENU_ITEMS);
     const WifiMarauderItem* item = &items[index];
 
-    // Try to open the automation script
-    // TODO: Improve file selection, use a file explorer
+    // Select automation script
     if(index == NUM_MENU_ITEMS - 2) {
-        app->script = wifi_marauder_script_parse_file(MARAUDER_APP_SCRIPT_PATH("script.json"), app->storage);
-        if (!app->script) {
-            return;
-        }
+        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartScriptSelect);
+        return;
     }
 
     if(index == NUM_MENU_ITEMS - 1) {
@@ -252,6 +249,10 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
             scene_manager_set_scene_state(
                 app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, WifiMarauderSceneLogViewer);
+        } else if(event.event == WifiMarauderEventStartScriptSelect) {
+            scene_manager_set_scene_state(
+                app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
+            scene_manager_next_scene(app->scene_manager, WifiMarauderSceneScriptSelect);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {

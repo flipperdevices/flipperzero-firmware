@@ -1,5 +1,6 @@
 /*
- * Steps to add a new stage:
+ * ----------------------------------------------------------------------------------------------------
+ * STEPS TO ADD A NEW STAGE:
  * 
  * wifi_marauder_script.h
  * - Complement WifiMarauderScriptStageType enum with new stage
@@ -13,6 +14,13 @@
  * wifi_marauder_script_executor.c
  * - Create function "void _wifi_marauder_script_execute_????(WifiMarauderScriptStage????* stage)"
  * - Add case in wifi_marauder_script_execute_stage()
+ * 
+ * ----------------------------------------------------------------------------------------------------
+ * IMPLEMENTED STAGES (In order of execution):
+ * - Scan
+ * - Select
+ * - Beacon List
+ * ----------------------------------------------------------------------------------------------------
  */
 
 #pragma once

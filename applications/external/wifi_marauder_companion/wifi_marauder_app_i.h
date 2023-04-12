@@ -20,6 +20,7 @@
 #include <gui/modules/widget.h>
 
 #include <storage/storage.h>
+#include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>
 
 #define NUM_MENU_ITEMS (18)
@@ -32,7 +33,6 @@
 #define MARAUDER_APP_FOLDER_PCAPS MARAUDER_APP_FOLDER "/pcaps"
 #define MARAUDER_APP_FOLDER_LOGS MARAUDER_APP_FOLDER "/logs"
 #define MARAUDER_APP_FOLDER_SCRIPTS MARAUDER_APP_FOLDER "/scripts"
-#define MARAUDER_APP_SCRIPT_PATH(file_name) MARAUDER_APP_FOLDER "/scripts/" file_name
 #define MARAUDER_APP_FOLDER_USER_PCAPS MARAUDER_APP_FOLDER_USER "/pcaps"
 #define MARAUDER_APP_FOLDER_USER_LOGS MARAUDER_APP_FOLDER_USER "/logs"
 #define SAVE_PCAP_SETTING_FILEPATH MARAUDER_APP_FOLDER "/save_pcaps_here.setting"
@@ -61,9 +61,6 @@ struct WifiMarauderApp {
     bool has_saved_logs_this_session;
     DialogsApp* dialogs;
 
-    WifiMarauderScript* script;
-    WifiMarauderScriptWorker* script_worker;
-
     VariableItemList* var_item_list;
     Widget* widget;
     int open_log_file_page;
@@ -80,6 +77,14 @@ struct WifiMarauderApp {
     bool show_stopscan_tip;
     bool is_writing_pcap;
     bool is_writing_log;
+
+    // Automation script
+    WifiMarauderScript* script;
+    WifiMarauderScriptWorker* script_worker;
+    VariableItemList* script_var_item_list;
+    FuriString** script_list;
+    int script_list_count;
+    int selected_script_index;
 
     // For input source and destination MAC in targeted deauth attack
     int special_case_input_step;
@@ -113,4 +118,5 @@ typedef enum {
     WifiMarauderAppViewConsoleOutput,
     WifiMarauderAppViewTextInput,
     WifiMarauderAppViewWidget,
+    WifiMarauderAppViewScriptSelect,
 } WifiMarauderAppView;

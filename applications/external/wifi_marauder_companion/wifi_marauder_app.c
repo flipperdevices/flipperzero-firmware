@@ -79,6 +79,13 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
         (!storage_file_exists(app->storage, SAVE_PCAP_SETTING_FILEPATH) ||
          !storage_file_exists(app->storage, SAVE_LOGS_SETTING_FILEPATH));
 
+    // Script select
+    app->script_var_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        WifiMarauderAppViewScriptSelect,
+        variable_item_list_get_view(app->script_var_item_list));
+
     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneStart);
 
     return app;
@@ -136,6 +143,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewTextInput);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewWidget);
+    view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewScriptSelect);
     widget_free(app->widget);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
