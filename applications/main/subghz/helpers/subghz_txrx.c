@@ -154,6 +154,7 @@ static void subghz_txrx_idle(SubGhzTxRx* instance) {
     furi_assert(instance);
     furi_assert(instance->txrx_state != SubGhzTxRxStateSleep);
     furi_hal_subghz_idle();
+    subghz_txrx_speaker_off(instance);
     instance->txrx_state = SubGhzTxRxStateIDLE;
 }
 
@@ -186,9 +187,12 @@ static bool subghz_txrx_tx(SubGhzTxRx* instance, uint32_t frequency) {
     furi_hal_subghz_set_frequency_and_path(frequency);
     furi_hal_gpio_write(&gpio_cc1101_g0, false);
     furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    subghz_txrx_speaker_on(instance);
     bool ret = furi_hal_subghz_tx();
-    instance->txrx_state = SubGhzTxRxStateTx;
+    if(ret) {
+        subghz_txrx_speaker_on(instance);
+        instance->txrx_state = SubGhzTxRxStateTx;
+    }
+
     return ret;
 }
 
