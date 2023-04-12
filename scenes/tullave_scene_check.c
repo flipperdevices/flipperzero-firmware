@@ -1,4 +1,4 @@
-#include "../tullave_co_i.h"
+#include "../tullave_i.h"
 
 enum { TuLlaveStateCardSearch, TuLlaveStateCardFound };
 
@@ -11,7 +11,7 @@ bool tullave_check_worker_callback(TuLlaveWorkerEvent event, void* context) {
     return true;
 }
 
-static void tullave_co_scene_check_setup_view(TuLlave* t_llave) {
+static void tullave_scene_check_setup_view(TuLlave* t_llave) {
     Popup* popup = t_llave->popup;
     popup_reset(popup);
     uint32_t state = scene_manager_get_scene_state(t_llave->scene_manager, TuLlaveSceneCheck);
@@ -25,33 +25,35 @@ static void tullave_co_scene_check_setup_view(TuLlave* t_llave) {
     view_dispatcher_switch_to_view(t_llave->view_dispatcher, TuLlaveViewPopup);
 }
 
-bool tullave_co_scene_check_on_event(void* context, SceneManagerEvent event) {
+bool tullave_scene_check_on_event(void* context, SceneManagerEvent event) {
     TuLlave* t_llave = context;
     bool consumed = false;
 
-    //TODO: Consume event.
-
-    UNUSED(t_llave);
-    UNUSED(context);
-    UNUSED(event);
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == TuLlaveWorkerEventCardDetected) {
+            notification_message(t_llave->notifications, &seq_tullave_found);
+            scene_manager_next_scene(t_llave->scene_manager, TuLlaveSceneReadSuccess);
+            consumed = true;
+        }
+    }
 
     return consumed;
 }
 
-void tullave_co_scene_check_on_enter(void* context) {
+void tullave_scene_check_on_enter(void* context) {
     TuLlave* t_llave = context;
 
     scene_manager_set_scene_state(
         t_llave->scene_manager, TuLlaveSceneCheck, TuLlaveStateCardSearch);
-    tullave_co_scene_check_setup_view(t_llave);
+    tullave_scene_check_setup_view(t_llave);
 
     tullave_worker_start(t_llave->worker, tullave_check_worker_callback, context);
 
     // Start blink notification
-    tullave_blink_start(t_llave);
+    notification_message(t_llave->notifications, &seq_search_tullave_blink);
 }
 
-void tullave_co_scene_check_on_exit(void* context) {
+void tullave_scene_check_on_exit(void* context) {
     TuLlave* t_llave = context;
 
     //nfc_magic_worker_stop(nfc_magic->worker);
@@ -64,5 +66,5 @@ void tullave_co_scene_check_on_exit(void* context) {
     tullave_worker_stop(t_llave->worker);
 
     // Stop notification
-    tullave_blink_stop(t_llave);
+    notification_message_block(t_llave->notifications, &sequence_reset_blue);
 }

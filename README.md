@@ -21,3 +21,13 @@ This repository contains a simple personal project to add the capability of read
 ./fbt vscode_dist
 ```
 * Open the vscode application and locate in the file: "tullave_co.c", then press Ctrl+Shift+B and run "Launch App on Flipper" task. Ensure first your Flipper Device is properly connected through USB or Serial.
+
+## TODO
+
+* Read Blance and Card Info from TuLlave.
+* Implement Reading state, and loading screen when communicating with TuLlave card. 
+* Read History of transactions.
+
+## Bugs
+
+* Flipper Zero freezes after second back on detect tullave.

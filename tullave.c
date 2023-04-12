@@ -1,42 +1,23 @@
-#include "tullave_co_i.h"
+#include "tullave_i.h"
 
-#define LOG_TAG "TuLlaveCO"
+#define LOG_TAG "TuLlave"
 
-static const NotificationSequence tullave_seq_blink_start = {
-    &message_blink_start_10,
-    &message_blink_set_color_blue,
-    &message_do_not_reset,
-    NULL,
-};
-
-static const NotificationSequence tullave_seq_blink_stop = {
-    &message_blink_stop,
-    NULL,
-};
-
-void tullave_blink_start(TuLlave* t_llave) {
-    notification_message(t_llave->notifications, &tullave_seq_blink_start);
-}
-
-void tullave_blink_stop(TuLlave* t_llave) {
-    notification_message(t_llave->notifications, &tullave_seq_blink_stop);
-}
-
-bool tullave_co_custom_event_callback(void* context, uint32_t event) {
+bool tullave_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
     TuLlave* t_llave = context;
     return scene_manager_handle_custom_event(t_llave->scene_manager, event);
 }
 
-bool tullave_co_back_event_callback(void* context) {
+bool tullave_back_event_callback(void* context) {
     furi_assert(context);
     TuLlave* t_llave = context;
     return scene_manager_handle_back_event(t_llave->scene_manager);
 }
 
-void tullave_co_tick_event_callback(void* context) {
+void tullave_tick_event_callback(void* context) {
     furi_assert(context);
     TuLlave* t_llave = context;
+    
     scene_manager_handle_tick_event(t_llave->scene_manager);
 }
 
@@ -49,7 +30,7 @@ TuLlave* tullave_alloc() {
 
     // Allocate space for view dispatcher and scene manager
     t_llave->view_dispatcher = view_dispatcher_alloc();
-    t_llave->scene_manager = scene_manager_alloc(&tullave_co_scene_handlers, t_llave);
+    t_llave->scene_manager = scene_manager_alloc(&tullave_scene_handlers, t_llave);
 
     view_dispatcher_enable_queue(t_llave->view_dispatcher);
 
@@ -57,11 +38,11 @@ TuLlave* tullave_alloc() {
     view_dispatcher_set_event_callback_context(t_llave->view_dispatcher, t_llave);
 
     view_dispatcher_set_custom_event_callback(
-        t_llave->view_dispatcher, tullave_co_custom_event_callback);
+        t_llave->view_dispatcher, tullave_custom_event_callback);
     view_dispatcher_set_navigation_event_callback(
-        t_llave->view_dispatcher, tullave_co_back_event_callback);
+        t_llave->view_dispatcher, tullave_back_event_callback);
     view_dispatcher_set_tick_event_callback(
-        t_llave->view_dispatcher, tullave_co_tick_event_callback, 100);
+        t_llave->view_dispatcher, tullave_tick_event_callback, 100);
 
     // Open GUI record
     t_llave->gui = furi_record_open(RECORD_GUI);
@@ -81,6 +62,11 @@ TuLlave* tullave_alloc() {
     view_dispatcher_add_view(
         t_llave->view_dispatcher, TuLlaveViewPopup, popup_get_view(t_llave->popup));
 
+    // Custom widget
+    t_llave->widget = widget_alloc();
+    view_dispatcher_add_view(
+        t_llave->view_dispatcher, TuLlaveViewWidget, widget_get_view(t_llave->widget));
+
     FURI_LOG_D(LOG_TAG, "Main Allocation Finished");
 
     return t_llave;
@@ -99,7 +85,11 @@ void tullave_free(TuLlave* t_llave) {
     view_dispatcher_remove_view(t_llave->view_dispatcher, TuLlaveViewPopup);
     popup_free(t_llave->popup);
 
-    // Notifications7
+    // Widget
+    view_dispatcher_remove_view(t_llave->view_dispatcher, TuLlaveViewWidget);
+    widget_free(t_llave->widget);
+
+    // Notifications
     furi_record_close(RECORD_NOTIFICATION);
     t_llave->notifications = NULL;
 
@@ -119,7 +109,7 @@ void tullave_free(TuLlave* t_llave) {
     free(t_llave);
 }
 
-int32_t tullave_co_main(void* p) {
+int32_t tullave_main(void* p) {
     UNUSED(p);
 
     FURI_LOG_D(LOG_TAG, "Initializing TuLlave CO User Application");

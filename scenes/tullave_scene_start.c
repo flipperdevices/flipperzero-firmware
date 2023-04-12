@@ -1,29 +1,27 @@
-#include "../tullave_co_i.h"
+#include "../tullave_i.h"
 
 enum SubmenuIndex { SubmenuIndexCheck };
 
-void tullave_co_scene_start_submenu_callback(void* context, uint32_t index) {
+void tullave_scene_start_submenu_callback(void* context, uint32_t index) {
     TuLlave* t_llave = context;
     view_dispatcher_send_custom_event(t_llave->view_dispatcher, index);
 }
 
-void tullave_co_scene_start_on_enter(void* context) {
+void tullave_scene_start_on_enter(void* context) {
     TuLlave* t_llave = context;
 
     Submenu* submenu = t_llave->submenu;
     submenu_add_item(
-        submenu,
-        "Check TuLlave",
-        SubmenuIndexCheck,
-        tullave_co_scene_start_submenu_callback,
-        t_llave);
+        submenu, "Read Info", SubmenuIndexCheck, tullave_scene_start_submenu_callback, t_llave);
+
+    //notification_message_block(t_llave->notifications, &sequence_reset_blue);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(t_llave->scene_manager, TuLlaveSceneStart));
     view_dispatcher_switch_to_view(t_llave->view_dispatcher, TuLlaveViewMenu);
 }
 
-bool tullave_co_scene_start_on_event(void* context, SceneManagerEvent event) {
+bool tullave_scene_start_on_event(void* context, SceneManagerEvent event) {
     TuLlave* t_llave = context;
     bool consumed = false;
 
@@ -40,7 +38,7 @@ bool tullave_co_scene_start_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void tullave_co_scene_start_on_exit(void* context) {
+void tullave_scene_start_on_exit(void* context) {
     TuLlave* t_llave = context;
     submenu_reset(t_llave->submenu);
 }

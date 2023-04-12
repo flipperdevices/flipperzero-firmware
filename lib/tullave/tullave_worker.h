@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdint.h>
 #include <stdbool.h>
 
 typedef struct TuLlaveWorker TuLlaveWorker;
@@ -27,7 +26,3 @@ void tullave_worker_free(TuLlaveWorker* t_worker);
 void tullave_worker_stop(TuLlaveWorker* t_worker);
 
 void tullave_worker_start(TuLlaveWorker* t_worker, TuLlaveWorkerCallback callback, void* context);
-
-void tullave_worker_check(TuLlaveWorker* t_worker);
-
-int32_t tullave_worker_task(void* context);
