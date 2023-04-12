@@ -215,7 +215,8 @@ jobs:
               pushd $app
               TARGETS_FAM=$(grep "targets" application.fam || echo "${{ matrix.target }}")
               if ! grep -q "${{ matrix.target }}" <<< $TARGETS_FAM ; then
-                  echo Skipping unsupported app: $appdir
+                  echo Skipping unsupported app: $app
+                  popd
                   continue
               fi
               echo Building $app
