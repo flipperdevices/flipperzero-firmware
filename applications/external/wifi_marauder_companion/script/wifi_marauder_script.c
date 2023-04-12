@@ -3,6 +3,7 @@
 
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_SCAN 15
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_DEAUTH 30
+#define WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF_PMKID 60
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_BEACON 60
 
 WifiMarauderScript *wifi_marauder_script_alloc() {
@@ -114,6 +115,27 @@ WifiMarauderScriptStageDeauth* _wifi_marauder_script_get_stage_deauth(cJSON *sta
     return deauth_stage;
 }
 
+WifiMarauderScriptStageSniffPmkid* _wifi_marauder_script_get_stage_sniff_pmkid(cJSON *stages) {
+    cJSON* sniffpmkid_stage_json = cJSON_GetObjectItem(stages, "sniffpmkid");
+    if (sniffpmkid_stage_json == NULL) {
+        return NULL;
+    }
+
+    cJSON* channel_json = cJSON_GetObjectItem(sniffpmkid_stage_json, "channel");
+    int channel = channel_json != NULL ? (int)cJSON_GetNumberValue(channel_json) : 0;
+    cJSON* timeout_json = cJSON_GetObjectItem(sniffpmkid_stage_json, "timeout");
+    int timeout = timeout_json != NULL ? (int)cJSON_GetNumberValue(timeout_json) : WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF_PMKID;
+    cJSON* force_deauth_json = cJSON_GetObjectItemCaseSensitive(sniffpmkid_stage_json, "forceDeauth");
+    bool force_deauth = cJSON_IsBool(force_deauth_json) ? force_deauth_json->valueint : true;
+
+    WifiMarauderScriptStageSniffPmkid *sniff_pmkid_stage = (WifiMarauderScriptStageSniffPmkid*) malloc(sizeof(WifiMarauderScriptStageSniffPmkid));
+    sniff_pmkid_stage->channel = channel;
+    sniff_pmkid_stage->timeout = timeout;
+    sniff_pmkid_stage->force_deauth = force_deauth;
+
+    return sniff_pmkid_stage;
+}
+
 WifiMarauderScriptStageBeaconList* _wifi_marauder_script_get_stage_beacon_list(cJSON *stages) {
     cJSON* stage_beaconlist = cJSON_GetObjectItem(stages, "beaconlist");
     if (stage_beaconlist == NULL) {
@@ -203,6 +225,16 @@ void _wifi_marauder_script_load_stages(WifiMarauderScript *script, cJSON *stages
         _wifi_marauder_script_add_stage(
             script,
             _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeDeauth, stage_deauth),
+            &prev_stage
+        );
+    }
+
+    // Sniff PMKID stage
+    WifiMarauderScriptStageSniffPmkid *sniff_pmkid = _wifi_marauder_script_get_stage_sniff_pmkid(stages);
+    if (sniff_pmkid != NULL) {
+        _wifi_marauder_script_add_stage(
+            script,
+            _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeSniffPmkid, sniff_pmkid),
             &prev_stage
         );
     }

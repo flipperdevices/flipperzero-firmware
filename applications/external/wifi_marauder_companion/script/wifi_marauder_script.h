@@ -20,6 +20,7 @@
  * - Scan
  * - Select
  * - Deauth
+ * - Sniff PMKID
  * - Beacon List
  * ----------------------------------------------------------------------------------------------------
  * SCRIPT SYNTAX:
@@ -39,6 +40,11 @@
  *             "filter": "all" | "contains \"{SSID fragment}\" or equals \"{SSID}\" or ..."
  *         },
  *         "deauth": {
+ *             "timeout": seconds
+ *         },
+ *         "sniffPmkid": {
+ *             "forceDeauth": true | false,
+ *             "channel": 1-11,
  *             "timeout": seconds
  *         },
  *         "beaconlist": {
@@ -104,6 +110,7 @@ typedef struct WifiMarauderScriptStageDeauth {
 
 typedef struct WifiMarauderScriptStageSniffPmkid {
     bool force_deauth;
+    int channel;
     int timeout;
 } WifiMarauderScriptStageSniffPmkid;
 
@@ -123,5 +130,4 @@ typedef struct WifiMarauderScript {
 WifiMarauderScript *wifi_marauder_script_alloc();
 WifiMarauderScript *wifi_marauder_script_parse_raw(const char* script_raw);
 WifiMarauderScript *wifi_marauder_script_parse_file(const char* file_path, Storage* storage);
-//void* wifi_marauder_script_get_stage(WifiMarauderScript *script, WifiMarauderScriptStageType stage);
 void wifi_marauder_script_free(WifiMarauderScript *script);
