@@ -211,7 +211,7 @@ jobs:
       - name: Build example & external apps with uFBT
         run: |
           for appdir in 'applications/external' 'applications/examples'; do
-            for app in $(find "$appdir" -maxdepth 1 -type d ! -path .); do
+            for app in $(find "$appdir" -maxdepth 1 -mindepth 1 -type d); do
               echo "Building $app"
               pushd $app
               ufbt
