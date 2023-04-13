@@ -20,12 +20,14 @@ If you have not already installed Git and VS Code, you will need to do so. The f
 
 Clone the Flipper Zero firmware from GitHub. The following command will clone the firmware into a folder named official-firmware. (The below commands may wrap on your screen. You can copy and paste the entire command; there should only be two lines.)
 
+Open a command window (in windows, press the Windows key+R, type: cmd, then press enter)
 ```console
+md <your working directory>
 cd <your working directory>
 git clone --recursive https://github.com/flipperdevices/flipperzero-firmware.git official-firmware
 ```
 
-Replace _&lt;your working directory&gt;_ with the directory where you want to clone the firmware.
+Replace _&lt;your working directory&gt;_ with the directory where you want to clone the firmware (like \flipper).
 
 ## Step 3. Run FBT to build the firmware and configure VS Code.
 

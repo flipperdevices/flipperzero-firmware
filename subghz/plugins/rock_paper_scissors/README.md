@@ -12,8 +12,9 @@ Watch on [YouTube](https://youtu.be/eGOv6Gbar7I).
 
 - Download the latest FAP file matching your firmware version.  Copy the downloaded FAP file to the SD Card/apps/Games folder (using qFlipper or by ejecting the SD Card and inserting it into your PC).
 
-  - Official Firmware [Release 0.79.1](https://github.com/jamisonderek/flipper-zero-tutorials/raw/main/subghz/plugins/rock_paper_scissors/prebuilt/v1.0/official-firmware/release-0.79.1/Rock_Paper_Scissors.fap)
+  - Official Firmware [Release 0.80.1](https://github.com/jamisonderek/flipper-zero-tutorials/raw/main/subghz/plugins/rock_paper_scissors/prebuilt/v1.0/official-firmware/release-0.80.1/Rock_Paper_Scissors.fap)
   - Official Firmware [RC 0.80.0](https://github.com/jamisonderek/flipper-zero-tutorials/raw/main/subghz/plugins/rock_paper_scissors/prebuilt/v1.0/official-firmware/rc-0.80.0/Rock_Paper_Scissors.fap)
+  - Official Firmware [Release 0.79.1](https://github.com/jamisonderek/flipper-zero-tutorials/raw/main/subghz/plugins/rock_paper_scissors/prebuilt/v1.0/official-firmware/release-0.79.1/Rock_Paper_Scissors.fap)
   - [Archived releases](./prebuilt/v1.0/official-firmware)   _(games may not have latest fixes & features)_
 
 - If you have a different firmware, see the [installation directions](#installation-directions) below.
