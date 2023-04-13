@@ -6,7 +6,8 @@ WifiMarauderScriptWorker* wifi_marauder_script_worker_alloc() {
     if (worker == NULL) {
         return NULL;
     }
-    worker->callback = NULL;
+    worker->callback_start = NULL;
+    worker->callback_stage = NULL;
     worker->worker_thread = NULL;
     worker->is_running = false;
     return worker;
@@ -16,29 +17,39 @@ int32_t _wifi_marauder_script_worker_task(void* worker) {
     WifiMarauderScriptWorker* script_worker = worker;
     WifiMarauderScript *script = script_worker->script;
     if (script == NULL) {
-        return 0;    
+        return WifiMarauderScriptWorkerStatusInvalidScript;
     }
 
+    // Setup
+    script_worker->callback_start(script_worker->context);
+    if (!script_worker->is_running) {
+        return WifiMarauderScriptWorkerStatusForceExit;
+    }
+
+    // Stages
     for (int i = 0; i < script->repeat; i++) {
         WifiMarauderScriptStage *current_stage = script->first_stage;
         while (current_stage != NULL && script_worker->is_running) {
-            script_worker->callback(current_stage, script_worker->context);
+            script_worker->callback_stage(current_stage, script_worker->context);
             current_stage = current_stage->next_stage;
         }
         if (!script_worker->is_running) {
-            break;
+            return WifiMarauderScriptWorkerStatusForceExit;
         }
     }
-    return 0;
+
+    script_worker->is_running = false;
+    return WifiMarauderScriptWorkerStatusSuccess;
 }
 
-bool wifi_marauder_script_worker_start(WifiMarauderScriptWorker* instance, WifiMarauderScript* script, void (*callback)(WifiMarauderScriptStage*, void*), void* context) {
+bool wifi_marauder_script_worker_start(WifiMarauderScriptWorker* instance, WifiMarauderScript* script) {
     if (!instance || !script) {
         return false;
     }
-    instance->callback = callback;
+    instance->callback_start = wifi_marauder_script_execute_start;
+    instance->callback_stage = wifi_marauder_script_execute_stage;
     instance->script = script;
-    instance->context = context;
+    instance->context = instance;
     instance->is_running = true;
     instance->worker_thread = furi_thread_alloc_ex("WifiMarauderScriptWorker", 1024, _wifi_marauder_script_worker_task, instance);
     if (!instance->worker_thread) {

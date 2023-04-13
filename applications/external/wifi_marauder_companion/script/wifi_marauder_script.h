@@ -29,6 +29,8 @@
  *     "meta": {
  *         "description": "My script",
  *         "repeat": times the script will repeat (default 1),
+ *         "enableLed": true (default) | false,
+ *         "savePcap": true (default) | false
  *     },
  *     "stages": {
  *         "scan": {
@@ -134,6 +136,9 @@ typedef struct WifiMarauderScript {
     char* name;
     char* description;
     WifiMarauderScriptStage *first_stage;
+    // TODO: Think of a way to not change the settings if they are not informed in the JSON
+    bool enable_led;
+    bool save_pcap;
     int repeat;
 } WifiMarauderScript;
 

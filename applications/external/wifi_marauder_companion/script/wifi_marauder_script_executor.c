@@ -118,6 +118,24 @@ void _wifi_marauder_script_execute_beacon_list(WifiMarauderScriptStageBeaconList
     _send_stop();
 }
 
+void wifi_marauder_script_execute_start(void *context) {
+    furi_assert(context);
+    WifiMarauderScriptWorker* worker = context;
+    WifiMarauderScript* script = worker->script;
+    char command[100];
+
+    // Enables or disables the LED according to script settings
+    snprintf(command, sizeof(command), "settings -s EnableLED %s", script->enable_led ? "enable" : "disable");
+    wifi_marauder_uart_tx((uint8_t*)command, strlen(command));
+    _send_line_break();
+
+    // Enables or disables PCAP saving according to script settings
+    snprintf(command, sizeof(command), "settings -s SavePCAP %s", script->save_pcap ? "enable" : "disable");
+    wifi_marauder_uart_tx((uint8_t*)command, strlen(command));
+    _send_line_break();
+}
+
+
 void wifi_marauder_script_execute_stage(WifiMarauderScriptStage* stage, void *context) {
     furi_assert(context);
     WifiMarauderScriptWorker* worker = context;

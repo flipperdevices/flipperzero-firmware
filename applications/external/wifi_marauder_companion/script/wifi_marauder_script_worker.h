@@ -2,10 +2,17 @@
 
 #include "wifi_marauder_script.h"
 
+typedef enum {
+    WifiMarauderScriptWorkerStatusSuccess = 0,
+    WifiMarauderScriptWorkerStatusInvalidScript = 1,
+    WifiMarauderScriptWorkerStatusForceExit = 2
+} WifiMarauderScriptWorkerStatus;
+
 typedef struct WifiMarauderScriptWorker {
     WifiMarauderScript *script;
     FuriThread *worker_thread;
-    void (*callback)(WifiMarauderScriptStage*, void*);
+    void (*callback_start)(void*);
+    void (*callback_stage)(WifiMarauderScriptStage*, void*);
     void *context;
     bool is_running;
 } WifiMarauderScriptWorker;
@@ -22,11 +29,9 @@ WifiMarauderScriptWorker* wifi_marauder_script_worker_alloc();
  *
  * @param instance A pointer to the instance of WifiMarauderScriptWorker to start.
  * @param script Script to be executed
- * @param callback A pointer to the callback function to be called after each stage is executed.
- * The callback function should receive a parameter of type WifiMarauderScriptStage* and return nothing.
  * @return True if the worker was successfully started, false otherwise.
  */
-bool wifi_marauder_script_worker_start(WifiMarauderScriptWorker* instance, WifiMarauderScript* script, void (*callback)(WifiMarauderScriptStage*, void*), void* context);
+bool wifi_marauder_script_worker_start(WifiMarauderScriptWorker* instance, WifiMarauderScript* script);
 
 /**
  * @brief Frees the memory used by the instance of WifiMarauderScriptWorker.

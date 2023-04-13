@@ -6,6 +6,8 @@
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF_PMKID 60
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF_BEACON 60
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_BEACON 60
+#define WIFI_MARAUDER_DEFAULT_ENABLE_LED true
+#define WIFI_MARAUDER_DEFAULT_SAVE_PCAP true
 
 WifiMarauderScript *wifi_marauder_script_alloc() {
     WifiMarauderScript *script = (WifiMarauderScript *) malloc(sizeof(WifiMarauderScript));
@@ -15,6 +17,8 @@ WifiMarauderScript *wifi_marauder_script_alloc() {
     script->name = NULL;
     script->description = NULL;
     script->first_stage = NULL;
+    script->enable_led = WIFI_MARAUDER_DEFAULT_ENABLE_LED;
+    script->save_pcap = WIFI_MARAUDER_DEFAULT_SAVE_PCAP;
     script->repeat = 1;
     return script;
 }
@@ -25,6 +29,16 @@ void _wifi_marauder_script_load_meta(WifiMarauderScript *script, cJSON *meta_sec
         cJSON* description = cJSON_GetObjectItem(meta_section, "description");
         if (description != NULL) {
             script->description = strdup(description->valuestring);
+        }
+        // Enable LED
+        cJSON* enable_led_json = cJSON_GetObjectItemCaseSensitive(meta_section, "enableLed");
+        if (cJSON_IsBool(enable_led_json)) {
+            script->enable_led = enable_led_json->valueint;
+        }
+        // Save PCAP
+        cJSON* save_pcap_json = cJSON_GetObjectItemCaseSensitive(meta_section, "savePcap");
+        if (cJSON_IsBool(save_pcap_json)) {
+            script->save_pcap = save_pcap_json->valueint;
         }
         // Times the script will be repeated
         cJSON* repeat = cJSON_GetObjectItem(meta_section, "repeat");

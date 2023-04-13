@@ -139,7 +139,7 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         // Run the script if the file with the script has been opened
         if(app->script) {
             app->script_worker = wifi_marauder_script_worker_alloc();
-            wifi_marauder_script_worker_start(app->script_worker, app->script, wifi_marauder_script_execute_stage, app->script_worker);
+            wifi_marauder_script_worker_start(app->script_worker, app->script);
         }
     }
 }
