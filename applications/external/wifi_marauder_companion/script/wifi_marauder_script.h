@@ -20,6 +20,7 @@
  * - Scan
  * - Select
  * - Deauth
+ * - Sniff beacon
  * - Sniff PMKID
  * - Beacon List
  * ----------------------------------------------------------------------------------------------------
@@ -40,6 +41,9 @@
  *             "filter": "all" | "contains \"{SSID fragment}\" or equals \"{SSID}\" or ..." (Not implemented yet on Marauder firmware)
  *         },
  *         "deauth": {
+ *             "timeout": seconds
+ *         },
+ *         "sniffBeacon": {
  *             "timeout": seconds
  *         },
  *         "sniffPmkid": {
@@ -69,6 +73,7 @@ typedef enum {
     WifiMarauderScriptStageTypeScan,
     WifiMarauderScriptStageTypeSelect,
     WifiMarauderScriptStageTypeDeauth,
+    WifiMarauderScriptStageTypeSniffBeacon,
     WifiMarauderScriptStageTypeSniffPmkid,
     WifiMarauderScriptStageTypeBeaconList,
 } WifiMarauderScriptStageType;
@@ -107,6 +112,10 @@ typedef struct WifiMarauderScriptStageSelect {
 typedef struct WifiMarauderScriptStageDeauth {
     int timeout;
 } WifiMarauderScriptStageDeauth;
+
+typedef struct WifiMarauderScriptStageSniffBeacon {
+    int timeout;
+} WifiMarauderScriptStageSniffBeacon;
 
 typedef struct WifiMarauderScriptStageSniffPmkid {
     bool force_deauth;

@@ -15,7 +15,8 @@ bool _wifi_marauder_is_save_pcaps_enabled(WifiMarauderApp* app) {
     // If it is a script that contains a sniff function
     if (app->script != NULL) {
         WifiMarauderScriptStage* sniff_pmkid_stage = wifi_marauder_script_get_stage(app->script, WifiMarauderScriptStageTypeSniffPmkid);
-        if (sniff_pmkid_stage != NULL) {
+        WifiMarauderScriptStage* sniff_beacon_stage = wifi_marauder_script_get_stage(app->script, WifiMarauderScriptStageTypeSniffBeacon);
+        if (sniff_pmkid_stage != NULL || sniff_beacon_stage != NULL) {
             return true;
         }
     }
@@ -50,7 +51,7 @@ void wifi_marauder_console_output_handle_rx_packets_cb(uint8_t* buf, size_t len,
     WifiMarauderApp* app = context;
 
     if(app->is_writing_pcap) {
-        sequential_file_write(app->capture_file, buf, len);
+        storage_file_write(app->capture_file, buf, len);
     }
 }
 
@@ -107,21 +108,23 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         // Create files *before* sending command
         // (it takes time to iterate through the directory)
         if(app->ok_to_save_logs) {
-            app->is_writing_log = true;
-            app->sequential_log_file = sequential_file_create(app->storage, MARAUDER_APP_FOLDER_LOGS, prefix, "log");
-            if (app->sequential_log_file) {
-                app->log_file = app->sequential_log_file->file;
-                strcpy(app->log_file_path, app->sequential_log_file->path);
+            strcpy(app->log_file_path, sequential_file_resolve_path(app->storage, MARAUDER_APP_FOLDER_LOGS, prefix, "log"));
+            if (app->log_file_path != NULL) {
+                if (storage_file_open(app->log_file, app->log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+                    app->is_writing_log = true;
+                } else {
+                    dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
+                }
             } else {
-                dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
+                dialog_message_show_storage_error(app->dialogs, "Cannot resolve log path");
             }
         }
 
         // If it is a sniff function or script, open the pcap file for recording
         if (_wifi_marauder_is_save_pcaps_enabled(app)) {
-            app->is_writing_pcap = true;
-            app->capture_file = sequential_file_create(app->storage, MARAUDER_APP_FOLDER_PCAPS, prefix, "pcap");
-            if (app->capture_file == NULL) {
+            if (sequential_file_open(app->storage, app->capture_file, MARAUDER_APP_FOLDER_PCAPS, prefix, "pcap")) {
+                app->is_writing_pcap = true;
+            } else {
                 dialog_message_show_storage_error(app->dialogs, "Cannot open pcap file");
             }
         }
@@ -173,8 +176,12 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
     wifi_marauder_script_free(app->script);
 
     app->is_writing_pcap = false;
-    sequential_file_free_destroy_file(app->capture_file);
+    if(app->capture_file && storage_file_is_open(app->capture_file)) {
+        storage_file_close(app->capture_file);
+    }
 
     app->is_writing_log = false;
-    sequential_file_free_close_file(app->sequential_log_file);
+    if(app->log_file && storage_file_is_open(app->log_file)) {
+        storage_file_close(app->log_file);
+    }
 }

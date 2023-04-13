@@ -73,6 +73,13 @@ void _wifi_marauder_script_execute_deauth(WifiMarauderScriptStageDeauth* stage, 
     _send_stop();
 }
 
+void _wifi_marauder_script_execute_sniff_beacon(WifiMarauderScriptStageSniffBeacon* stage, WifiMarauderScriptWorker* worker) {
+    const char sniff_command[] = "sniffbeacon\n";
+    wifi_marauder_uart_tx((uint8_t*)sniff_command, strlen(sniff_command));
+    _wifi_marauder_script_delay(worker, stage->timeout);
+    _send_stop();
+}
+
 void _wifi_marauder_script_execute_sniff_pmkid(WifiMarauderScriptStageSniffPmkid* stage, WifiMarauderScriptWorker* worker) {
     char attack_command[50] = "sniffpmkid";
     int len = strlen(attack_command);
@@ -125,6 +132,9 @@ void wifi_marauder_script_execute_stage(WifiMarauderScriptStage* stage, void *co
             break;
         case WifiMarauderScriptStageTypeDeauth:
             _wifi_marauder_script_execute_deauth((WifiMarauderScriptStageDeauth*)stage_data, worker);
+            break;
+        case WifiMarauderScriptStageTypeSniffBeacon:
+            _wifi_marauder_script_execute_sniff_beacon((WifiMarauderScriptStageSniffBeacon*)stage_data, worker);
             break;
         case WifiMarauderScriptStageTypeSniffPmkid:
             _wifi_marauder_script_execute_sniff_pmkid((WifiMarauderScriptStageSniffPmkid*)stage_data, worker);

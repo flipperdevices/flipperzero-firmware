@@ -49,8 +49,7 @@ struct WifiMarauderApp {
     TextBox* text_box;
     TextInput* text_input;
     Storage* storage;
-    SequentialFile* capture_file;
-    SequentialFile* sequential_log_file;
+    File* capture_file;
     File* log_file;
     char log_file_path[100];
     File* save_pcap_setting_file;

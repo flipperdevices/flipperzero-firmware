@@ -4,6 +4,7 @@
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_SCAN 15
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_DEAUTH 30
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF_PMKID 60
+#define WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF_BEACON 60
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_BEACON 60
 
 WifiMarauderScript *wifi_marauder_script_alloc() {
@@ -114,6 +115,21 @@ WifiMarauderScriptStageDeauth* _wifi_marauder_script_get_stage_deauth(cJSON *sta
     deauth_stage->timeout = deauth_timeout;
 
     return deauth_stage;
+}
+
+WifiMarauderScriptStageSniffBeacon* _wifi_marauder_script_get_stage_sniff_beacon(cJSON *stages) {
+    cJSON* sniffbeacon_stage_json = cJSON_GetObjectItem(stages, "sniffbeacon");
+    if (sniffbeacon_stage_json == NULL) {
+        return NULL;
+    }
+
+    cJSON* timeout_json = cJSON_GetObjectItem(sniffbeacon_stage_json, "timeout");
+    int timeout = timeout_json != NULL ? (int)cJSON_GetNumberValue(timeout_json) : WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF_BEACON;
+
+    WifiMarauderScriptStageSniffBeacon *sniff_beacon_stage = (WifiMarauderScriptStageSniffBeacon*) malloc(sizeof(WifiMarauderScriptStageSniffBeacon));
+    sniff_beacon_stage->timeout = timeout;
+
+    return sniff_beacon_stage;
 }
 
 WifiMarauderScriptStageSniffPmkid* _wifi_marauder_script_get_stage_sniff_pmkid(cJSON *stages) {
@@ -230,6 +246,16 @@ void _wifi_marauder_script_load_stages(WifiMarauderScript *script, cJSON *stages
         );
     }
 
+    // Sniff beacon stage
+    WifiMarauderScriptStageSniffBeacon *sniff_beacon = _wifi_marauder_script_get_stage_sniff_beacon(stages);
+    if (sniff_beacon != NULL) {
+        _wifi_marauder_script_add_stage(
+            script,
+            _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeSniffBeacon, sniff_beacon),
+            &prev_stage
+        );
+    }
+
     // Sniff PMKID stage
     WifiMarauderScriptStageSniffPmkid *sniff_pmkid = _wifi_marauder_script_get_stage_sniff_pmkid(stages);
     if (sniff_pmkid != NULL) {
@@ -326,6 +352,9 @@ void wifi_marauder_script_free(WifiMarauderScript *script) {
                 free(current_stage->stage);
                 break;
             case WifiMarauderScriptStageTypeSniffPmkid:
+                free(current_stage->stage);
+                break;
+            case WifiMarauderScriptStageTypeSniffBeacon:
                 free(current_stage->stage);
                 break;
             case WifiMarauderScriptStageTypeBeaconList:
