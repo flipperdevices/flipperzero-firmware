@@ -11,6 +11,7 @@ WifiMarauderScript *wifi_marauder_script_alloc() {
     if (script == NULL) {
         return NULL;
     }
+    script->name = NULL;
     script->description = NULL;
     script->first_stage = NULL;
     script->repeat = 1;
@@ -278,11 +279,32 @@ WifiMarauderScript *wifi_marauder_script_parse_file(const char* file_path, Stora
         json_buffer[bytes_read] = '\0';
         
         script = wifi_marauder_script_parse_raw(json_buffer);
+        if (script != NULL) {
+            // Set script name
+            FuriString* script_name = furi_string_alloc();
+            path_extract_filename_no_ext(file_path, script_name);
+            script->name = strdup(furi_string_get_cstr(script_name));
+            furi_string_free(script_name);
+        }
         storage_file_close(script_file);
     }
 
     storage_file_free(script_file);
     return script;
+}
+
+WifiMarauderScriptStage* wifi_marauder_script_get_stage(WifiMarauderScript* script, WifiMarauderScriptStageType stage_type) {
+    if (script == NULL) {
+        return NULL;
+    }
+    WifiMarauderScriptStage* current_stage = script->first_stage;
+    while (current_stage != NULL) {
+        if (current_stage->type == stage_type) {
+            return current_stage;
+        }
+        current_stage = current_stage->next_stage;
+    }
+    return NULL;
 }
 
 void wifi_marauder_script_free(WifiMarauderScript *script) {
@@ -317,6 +339,7 @@ void wifi_marauder_script_free(WifiMarauderScript *script) {
         free(current_stage);
         current_stage = next_stage;
     }
+    free(script->name);
     free(script->description);
     free(script);
 }

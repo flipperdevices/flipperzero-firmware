@@ -6,7 +6,7 @@
 #include "scenes/wifi_marauder_scene.h"
 #include "wifi_marauder_custom_event.h"
 #include "wifi_marauder_uart.h"
-#include "wifi_marauder_pcap.h"
+#include "file/sequential_file.h"
 #include "script/wifi_marauder_script.h"
 #include "script/wifi_marauder_script_worker.h"
 #include "script/wifi_marauder_script_executor.h"
@@ -49,7 +49,8 @@ struct WifiMarauderApp {
     TextBox* text_box;
     TextInput* text_input;
     Storage* storage;
-    File* capture_file;
+    SequentialFile* capture_file;
+    SequentialFile* sequential_log_file;
     File* log_file;
     char log_file_path[100];
     File* save_pcap_setting_file;
