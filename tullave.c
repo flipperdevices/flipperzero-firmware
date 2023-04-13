@@ -17,7 +17,7 @@ bool tullave_back_event_callback(void* context) {
 void tullave_tick_event_callback(void* context) {
     furi_assert(context);
     TuLlave* t_llave = context;
-    
+
     scene_manager_handle_tick_event(t_llave->scene_manager);
 }
 

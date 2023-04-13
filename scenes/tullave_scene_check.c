@@ -56,7 +56,6 @@ void tullave_scene_check_on_enter(void* context) {
 void tullave_scene_check_on_exit(void* context) {
     TuLlave* t_llave = context;
 
-    //nfc_magic_worker_stop(nfc_magic->worker);
     scene_manager_set_scene_state(
         t_llave->scene_manager, TuLlaveSceneCheck, TuLlaveStateCardSearch);
     // Clear view

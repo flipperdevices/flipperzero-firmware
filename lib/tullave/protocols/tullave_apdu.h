@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <float.h>
 #include "../tullave_worker_i.h"
 
 //Debug command: nfc adpu 00a4040007d4100000030001

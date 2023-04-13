@@ -45,9 +45,9 @@ void tullave_worker_free(TuLlaveWorker* t_worker) {
 void tullave_worker_stop(TuLlaveWorker* t_worker) {
     furi_assert(t_worker);
 
-    tullave_worker_change_state(t_worker, TuLlaveWorkerStop);
     if(furi_thread_get_state(t_worker->thread) != FuriThreadStateStopped) {
-        tullave_apdu_nfc_stop();
+        furi_hal_nfc_stop();
+        tullave_worker_change_state(t_worker, TuLlaveWorkerStateStop);
         furi_thread_join(t_worker->thread);
     }
 }
@@ -82,10 +82,11 @@ void tullave_worker_check(TuLlaveWorker* t_worker) {
 
 int32_t tullave_worker_task(void* context) {
     TuLlaveWorker* t_worker = context;
-    tullave_apdu_nfc_exit_sleep();
+    furi_hal_nfc_exit_sleep();
     if(t_worker->state == TuLlaveWorkerStateCheck) {
         tullave_worker_check(t_worker);
     }
-    tullave_apdu_nfc_start_sleep();
+    furi_hal_nfc_sleep();
+    tullave_worker_change_state(t_worker, TuLlaveWorkerStateReady);
     return 0;
 }

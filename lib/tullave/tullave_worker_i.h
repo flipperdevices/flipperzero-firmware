@@ -3,10 +3,13 @@
 #include "tullave_worker.h"
 
 #include <furi.h>
+#include <furi_hal_nfc.h>
+#include <float.h>
+
 #include <core/string.h>
 
 struct TuLlaveInfo {
-    uint32_t balance;
+    double balance;
     FuriString* card_number;
 };
 

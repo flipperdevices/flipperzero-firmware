@@ -7,7 +7,7 @@ typedef struct TuLlaveWorker TuLlaveWorker;
 typedef enum {
     TuLlaveWorkerStateReady,
     TuLlaveWorkerStateCheck,
-    TuLlaveWorkerStop,
+    TuLlaveWorkerStateStop,
 } TuLlaveWorkerState;
 
 typedef enum {

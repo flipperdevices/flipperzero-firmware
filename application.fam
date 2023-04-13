@@ -5,8 +5,12 @@ App(
     entry_point="tullave_main",
     targets=["f7"],
     requires=[
-        "toolbox",
         "gui",
+    ],
+    fap_icon="app_assets/tullave_logo_10px.png",
+    fap_libs=[
+        "toolbox",
+        "assets",
     ],
     fap_private_libs=[
         Lib(
@@ -14,6 +18,5 @@ App(
         ),
     ],
     stack_size=4 * 1024,
-    fap_icon="assets/tullave_logo_10px.png",
     fap_category="NFC",
 )

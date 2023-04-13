@@ -1,9 +1,5 @@
 #include "tullave_apdu.h"
 
-#include <lib/toolbox/hex.h>
-#include <furi.h>
-#include <furi_hal_nfc.h>
-
 #define LOG_TAG "TuLlaveAPDU"
 #define TULLAVE_NFC_DELAY_START 10
 #define TULLAVE_NFC_TIMEOUT 300
@@ -13,33 +9,24 @@
 #define TULLAVE_CARD_BALANCE_LEN 6
 #define TULLAVE_NUM_CARD_OFFSET 8
 
+void uint8_to_hex_chars(const uint8_t* src, uint8_t* target, int length) {
+    const char chars[] = "0123456789ABCDEF";
+    while(--length >= 0)
+        target[length] = chars[(src[length >> 1] >> ((1 - (length & 1)) << 2)) & 0xF];
+}
+
 void uint8_to_furi_string(const uint8_t* src, FuriString* target, size_t length) {
     for(size_t i = 0; i < length; i++) {
         furi_string_cat_printf(target, "%c", src[i]);
     }
 }
 
-uint32_t uint8_to_integer_big_endian(const uint8_t* src, size_t length) {
-    uint32_t result = 0;
+uint64_t uint8_to_integer_big_endian(const uint8_t* src, size_t length) {
+    uint64_t result = 0;
     for(size_t i = 0; i < length; i++) {
-        result |= ((uint32_t)src[i]) << (8 * i);
+        result |= ((uint64_t)src[i]) << (8 * (length - i - 1));
     }
     return result;
-}
-
-void tullave_apdu_nfc_exit_sleep() {
-    while(furi_hal_nfc_is_busy()) {
-        furi_delay_ms(TULLAVE_NFC_DELAY_START);
-    }
-    furi_hal_nfc_exit_sleep();
-}
-
-void tullave_apdu_nfc_start_sleep() {
-    furi_hal_nfc_start_sleep();
-}
-
-void tullave_apdu_nfc_stop() {
-    furi_hal_nfc_stop();
 }
 
 size_t
@@ -129,12 +116,12 @@ bool tullave_apdu_read(TuLlaveInfo* card_info) {
         //Check the balance
         tullave_apdu_send_command(bal_req, sizeof(bal_req), &response);
 
-        memcpy(c_bal, response, 4);
-        memcpy(c_bal, &response[5], 3);
+        memcpy(c_bal, &response[5], 2);
+        memcpy(&c_bal[2], response, 4);
 
-        card_info->balance = uint8_to_integer_big_endian(c_bal, TULLAVE_CARD_BALANCE_LEN);
+        card_info->balance = (uint8_to_integer_big_endian(c_bal, TULLAVE_CARD_BALANCE_LEN) / 100);
 
-        FURI_LOG_D(LOG_TAG, "Card Balance: %li", card_info->balance);
+        FURI_LOG_D(LOG_TAG, "Card Balance: %.2f", card_info->balance);
 
         free(response);
 
