@@ -47,7 +47,7 @@ void _wifi_marauder_script_load_meta(WifiMarauderScript *script, cJSON *meta_sec
         }
     }
     if (script->description == NULL) {
-        script->description = "My script";
+        script->description = strdup("My script");
     }
 }
 

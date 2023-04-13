@@ -142,7 +142,7 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         }
 
         // Run the script if the file with the script has been opened
-        if(app->script) {
+        if(app->script != NULL) {
             app->script_worker = wifi_marauder_script_worker_alloc();
             wifi_marauder_script_worker_start(app->script_worker, app->script);
         }
@@ -178,7 +178,9 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
     wifi_marauder_uart_set_handle_rx_data_cb(app->lp_uart, NULL);
 
     wifi_marauder_script_worker_free(app->script_worker);
+    app->script_worker = NULL;
     wifi_marauder_script_free(app->script);
+    app->script = NULL;
 
     app->is_writing_pcap = false;
     if(app->capture_file && storage_file_is_open(app->capture_file)) {
