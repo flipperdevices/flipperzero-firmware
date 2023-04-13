@@ -1,4 +1,4 @@
-#include "..\wiegand.h"
+#include "../wiegand.h"
 
 /*
 Triggers a custom event that is handled in the main menu on_scene handler.

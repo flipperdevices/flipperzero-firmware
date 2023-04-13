@@ -1,4 +1,4 @@
-#include "..\wiegand.h"
+#include "../wiegand.h"
 
 void wiegand_add_info_4bit_8bit(FuriString* buffer) {
     if(bit_count == 8) {

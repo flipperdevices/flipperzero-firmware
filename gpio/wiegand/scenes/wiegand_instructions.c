@@ -1,4 +1,4 @@
-#include "..\wiegand.h"
+#include "../wiegand.h"
 
 void wiegand_instructions_scene_on_enter(void* context) {
     App* app = context;

@@ -1,4 +1,4 @@
-#include "..\wiegand.h"
+#include "../wiegand.h"
 
 void wiegand_isr_d0(void* context) {
     UNUSED(context);

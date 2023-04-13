@@ -1,4 +1,4 @@
-#include "..\wiegand.h"
+#include "../wiegand.h"
 
 void wiegand_data_scene_save_name_text_input_callback(void* context) {
     App* app = context;

@@ -1,4 +1,4 @@
-#include "..\wiegand.h"
+#include "../wiegand.h"
 
 void single_vibro() {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
