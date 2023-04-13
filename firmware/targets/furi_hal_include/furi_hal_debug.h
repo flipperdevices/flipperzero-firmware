@@ -13,10 +13,10 @@ extern "C" {
 #endif
 
 /** Enable MCU debug */
-void furi_hal_debug_enable();
+void furi_hal_debug_enable( );
 
 /** Disable MCU debug */
-void furi_hal_debug_disable();
+void furi_hal_debug_disable( );
 
 #ifdef __cplusplus
 }
