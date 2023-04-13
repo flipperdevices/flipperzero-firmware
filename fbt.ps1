@@ -38,6 +38,12 @@ while ($i -lt $args.Count) {
             $cpp_defines += "`"$($define[0])`""
         }
         $i = $i + 2
+    } elseif ($args[$i] -eq '--clean') {
+        $build_path = "$firmware_path\build"
+        if (Test-Path -PathType Container $build_path) {
+            Remove-Item "$build_path\*" -Recurse -Force
+        }
+        $i = $i + 1
     } else {
         $args_ls += $args[$i]
         $i = $i + 1

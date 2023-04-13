@@ -44,11 +44,8 @@ function Build-Run {
     foreach ($build_command in $build_commands) {
         Write-Host "Building $($build_command.Name)"
         $build_path = Join-Path -Path $build_command.FirmwarePath -ChildPath "build"
-        if (Test-Path -PathType Container $build_path) {
-            Remove-Item "$build_path\*" -Recurse -Force
-        }
 
-        $fbt_args = @($build_command.FbtSwitch, "COMPACT=1", "DEBUG=0", "VERBOSE=0", "fap_totp")
+        $fbt_args = @($build_command.FbtSwitch, "COMPACT=1", "DEBUG=0", "VERBOSE=0", "fap_totp", "--clean")
         if ($CppDefine.Length -gt 0) {
             $CppDefine | ForEach-Object {
                 $fbt_args += '-D'
