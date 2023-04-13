@@ -24,6 +24,7 @@ def _load_sdk_data(sdk_root):
         replacements = {
             sdk_json_data["app_ep_subst"]: "${APP_ENTRY}",
             sdk_json_data["sdk_path_subst"]: sdk_root.replace("\\", "/"),
+            
             sdk_json_data["map_file_subst"]: "${TARGET}",
         }
 

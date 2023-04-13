@@ -210,11 +210,8 @@ jobs:
       
       - name: Build example & external apps with uFBT
         run: |
-          echo "1: Now in `pwd`"
           for appdir in 'applications/external' 'applications/examples'; do
-            echo "2: Now in `pwd`; appdir=$appdir"
             for app in $(find "$appdir" -maxdepth 1 -mindepth 1 -type d); do
-              echo "3: Now in `pwd`, app=$app"
               pushd $app
               TARGETS_FAM=$(grep "targets" application.fam || echo "${{ matrix.target }}")
               if ! grep -q "${{ matrix.target }}" <<< $TARGETS_FAM ; then
