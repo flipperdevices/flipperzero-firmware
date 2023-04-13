@@ -28,11 +28,17 @@
 // Arbitrary (but small) number for better tick consistency
 #define FURI_HAL_OS_EXTRA_CNT 3
 
+#ifndef FURI_HAL_OS_DEBUG_AWAKE_GPIO
 #define FURI_HAL_OS_DEBUG_AWAKE_GPIO (&gpio_ext_pa7)
-#define FURI_HAL_OS_DEBUG_TICK_GPIO (&gpio_ext_pa6)
-#define FURI_HAL_OS_DEBUG_SECOND_GPIO (&gpio_ext_pa4)
+#endif
 
-// #define FURI_HAL_OS_DEBUG
+#ifndef FURI_HAL_OS_DEBUG_TICK_GPIO
+#define FURI_HAL_OS_DEBUG_TICK_GPIO (&gpio_ext_pa6)
+#endif
+
+#ifndef FURI_HAL_OS_DEBUG_SECOND_GPIO
+#define FURI_HAL_OS_DEBUG_SECOND_GPIO (&gpio_ext_pa4)
+#endif
 
 #ifdef FURI_HAL_OS_DEBUG
 #include <stm32wbxx_ll_gpio.h>

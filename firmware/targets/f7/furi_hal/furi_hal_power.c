@@ -21,8 +21,13 @@
 
 #define TAG "FuriHalPower"
 
+#ifndef FURI_HAL_POWER_DEBUG_WFI_GPIO
 #define FURI_HAL_POWER_DEBUG_WFI_GPIO (&gpio_ext_pb2)
+#endif
+
+#ifndef FURI_HAL_POWER_DEBUG_STOP_GPIO
 #define FURI_HAL_POWER_DEBUG_STOP_GPIO (&gpio_ext_pc3)
+#endif
 
 typedef struct {
     volatile uint8_t insomnia;
