@@ -2,7 +2,7 @@
 
 #include <lib/nfc/nfc_device.h>
 
-#define NESTED_FOLDER EXT_PATH("nfc/nested")
+#define NESTED_FOLDER EXT_PATH("nfc/.nested")
 
 typedef struct MifareNestedWorker MifareNestedWorker;
 

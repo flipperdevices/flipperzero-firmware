@@ -34,7 +34,7 @@ A: Probably you can't. The only way is to forward serial port to Termux and run 
 
 Q: Where are collected nonces/found keys located?
 
-A: App/desktop script write files in /ext/nfc/nested/ folder. "Check found keys" adds keys directly to your user dictionary.
+A: App/desktop script write files in /ext/nfc/.nested/ folder. "Check found keys" adds keys directly to your user dictionary.
 
 Q: I recovered keys via script, but still no new keys found when I try to scan tag?
 

@@ -1125,7 +1125,10 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
            file_stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         FURI_LOG_E(TAG, "Can't open %s", furi_string_get_cstr(path));
 
+        buffered_file_stream_close(file_stream);
+
         mifare_nested_worker_get_nonces_file_path(&data, path);
+
         if(!buffered_file_stream_open(
                file_stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             mifare_nested_worker->callback(
@@ -1135,9 +1138,14 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
                 MifareNestedWorkerEventNeedKeyRecovery, mifare_nested_worker->context);
         }
 
+        buffered_file_stream_close(file_stream);
+
+        free(file_stream);
         furi_string_free(path);
         furi_string_free(next_line);
-        buffered_file_stream_close(file_stream);
+        furi_record_close(RECORD_STORAGE);
+
+        return;
     };
 
     while(true) {
@@ -1236,7 +1244,6 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
         }
     }
 
-    furi_string_free(path);
     furi_string_free(next_line);
     buffered_file_stream_close(file_stream);
     free(file_stream);
@@ -1283,7 +1290,12 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
         furi_string_free(key_string);
     }
 
+    if(!storage_simply_remove(storage, furi_string_get_cstr(path))) {
+        FURI_LOG_E(TAG, "Failed to remove key cache file");
+    };
+
     furi_record_close(RECORD_STORAGE);
+    furi_string_free(path);
 
     mifare_nested_worker->callback(
         MifareNestedWorkerEventKeysFound, mifare_nested_worker->context);
