@@ -119,7 +119,8 @@ void furi_hal_resources_init_early() {
 
     // SD Card stepdown control
     furi_hal_gpio_write(&gpio_periph_power, 1);
-    furi_hal_gpio_init(&gpio_periph_power, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(&gpio_periph_power, GpioModeOutputOpenDrain, GpioPullNo, 
+        GpioSpeedLow);
 
     // Display pins
     furi_hal_gpio_write(&gpio_display_rst_n, 1);
