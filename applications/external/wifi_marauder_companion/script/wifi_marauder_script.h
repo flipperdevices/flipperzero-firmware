@@ -28,6 +28,8 @@
  * - Sniff PMKID
  * - Sniff Pwnagotchi
  * - Beacon List
+ * - Beacon Random
+ * - Beacon Ap
  * ----------------------------------------------------------------------------------------------------
  * SCRIPT SYNTAX:
  * {
@@ -73,12 +75,16 @@
  *         "sniffPwn": {
  *             "timeout": seconds
  *         },
- *         "beaconlist": {
+ *         "beaconList": {
  *             "ssids": [
  *                 "SSID 1",
  *                 "SSID 2",
  *                 "SSID 3"
  *             ],
+ *             "generate": number of random SSIDs that will be generated,
+ *             "timeout": seconds
+ *         }
+ *         "beaconAp": {
  *             "timeout": seconds
  *         }
  *     }
@@ -103,6 +109,7 @@ typedef enum {
     WifiMarauderScriptStageTypeSniffPmkid,
     WifiMarauderScriptStageTypeSniffPwn,
     WifiMarauderScriptStageTypeBeaconList,
+    WifiMarauderScriptStageTypeBeaconAp,
 } WifiMarauderScriptStageType;
 
 typedef enum {
@@ -173,8 +180,13 @@ typedef struct WifiMarauderScriptStageSniffPwn {
 typedef struct WifiMarauderScriptStageBeaconList {
     char **ssids;
     int ssid_count;
+    int random_ssids;
     int timeout;
 } WifiMarauderScriptStageBeaconList;
+
+typedef struct WifiMarauderScriptStageBeaconAp {
+    int timeout;
+} WifiMarauderScriptStageBeaconAp;
 
 // Script
 typedef struct WifiMarauderScript {

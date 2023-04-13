@@ -147,8 +147,20 @@ void _wifi_marauder_script_execute_beacon_list(WifiMarauderScriptStageBeaconList
         wifi_marauder_uart_tx((uint8_t*)(command), strlen(command));
         _send_line_break();
     }
+    if (stage->random_ssids > 0) {
+        char add_random_command[50];
+        snprintf(add_random_command, sizeof(add_random_command), "ssid -a -r -g %d\n", stage->random_ssids);
+        wifi_marauder_uart_tx((uint8_t*)add_random_command, strlen(add_random_command));
+    }
     const char attack_command[] = "attack -t beacon -l\n";
     wifi_marauder_uart_tx((uint8_t*)(attack_command), strlen(attack_command));
+    _wifi_marauder_script_delay(worker, stage->timeout);
+    _send_stop();
+}
+
+void _wifi_marauder_script_execute_beacon_ap(WifiMarauderScriptStageBeaconAp* stage, WifiMarauderScriptWorker* worker) {
+    const char command[] = "attack -t beacon -a\n";
+    wifi_marauder_uart_tx((uint8_t*)command, strlen(command));
     _wifi_marauder_script_delay(worker, stage->timeout);
     _send_stop();
 }
@@ -209,6 +221,9 @@ void wifi_marauder_script_execute_stage(WifiMarauderScriptStage* stage, void *co
             break;
         case WifiMarauderScriptStageTypeBeaconList:
             _wifi_marauder_script_execute_beacon_list((WifiMarauderScriptStageBeaconList*)stage_data, worker);
+            break;
+        case WifiMarauderScriptStageTypeBeaconAp:
+            _wifi_marauder_script_execute_beacon_ap((WifiMarauderScriptStageBeaconAp*)stage_data, worker);
             break;
         default:
             break;
