@@ -22,6 +22,15 @@
 #define PROGRESS_BAR_HEIGHT (4)
 
 typedef struct {
+    uint8_t progress_bar_x;
+    uint8_t progress_bar_width;
+    uint8_t code_total_length;
+    uint8_t code_offset_x;
+    uint8_t code_offset_x_inc;
+    uint8_t code_offset_y;
+} UiPrecalculatedDimensions;
+
+typedef struct {
     uint16_t current_token_index;
     char last_code[TOTP_TOKEN_DIGITS_MAX_COUNT + 1];
     TokenInfo* current_token;
@@ -30,8 +39,7 @@ typedef struct {
     NotificationMessage const** notification_sequence_automation;
     FuriMutex* last_code_update_sync;
     TotpGenerateCodeWorkerContext* generate_code_worker_context;
-    uint8_t progress_bar_x;
-    uint8_t progress_bar_width;
+    UiPrecalculatedDimensions ui_precalculated_dimensions;
 } SceneState;
 
 static const NotificationSequence*
@@ -133,29 +141,40 @@ static void update_totp_params(PluginState* const plugin_state) {
 
 static void draw_totp_code(Canvas* const canvas, const SceneState* const scene_state) {
     uint8_t code_length = scene_state->current_token->digits;
+    uint8_t offset_x = scene_state->ui_precalculated_dimensions.code_offset_x;
     uint8_t char_width = modeNine_15ptFontInfo.charInfo[0].width;
-    uint8_t total_length = code_length * (char_width + modeNine_15ptFontInfo.spacePixels);
-    uint8_t offset_x = (SCREEN_WIDTH - total_length) >> 1;
-    uint8_t offset_x_inc = char_width + modeNine_15ptFontInfo.spacePixels;
-    uint8_t offset_y = SCREEN_HEIGHT_CENTER - (modeNine_15ptFontInfo.height >> 1);
+    uint8_t offset_x_inc = scene_state->ui_precalculated_dimensions.code_offset_x_inc;
     for(uint8_t i = 0; i < code_length; i++) {
         char ch = scene_state->last_code[i];
-        uint8_t char_index = ch - modeNine_15ptFontInfo.startChar;
-        canvas_draw_xbm(
-            canvas,
-            offset_x,
-            offset_y,
-            char_width,
-            modeNine_15ptFontInfo.height,
-            &modeNine_15ptFontInfo.data[modeNine_15ptFontInfo.charInfo[char_index].offset]);
+        if(ch >= modeNine_15ptFontInfo.startChar && ch <= modeNine_15ptFontInfo.endChar) {
+            uint8_t char_index = ch - modeNine_15ptFontInfo.startChar;
+            canvas_draw_xbm(
+                canvas,
+                offset_x,
+                scene_state->ui_precalculated_dimensions.code_offset_y,
+                char_width,
+                modeNine_15ptFontInfo.height,
+                &modeNine_15ptFontInfo.data[modeNine_15ptFontInfo.charInfo[char_index].offset]);
+        }
 
         offset_x += offset_x_inc;
     }
 }
 
 static void on_new_token_code_generated(bool time_left, void* context) {
+    const PluginState* plugin_state = context;
+    SceneState* scene_state = plugin_state->current_scene_state;
+    uint8_t char_width = modeNine_15ptFontInfo.charInfo[0].width;
+    scene_state->ui_precalculated_dimensions.code_total_length =
+        scene_state->current_token->digits * (char_width + modeNine_15ptFontInfo.spacePixels);
+    scene_state->ui_precalculated_dimensions.code_offset_x =
+        (SCREEN_WIDTH - scene_state->ui_precalculated_dimensions.code_total_length) >> 1;
+    scene_state->ui_precalculated_dimensions.code_offset_x_inc =
+        char_width + modeNine_15ptFontInfo.spacePixels;
+    scene_state->ui_precalculated_dimensions.code_offset_y =
+        SCREEN_HEIGHT_CENTER - (modeNine_15ptFontInfo.height >> 1);
+
     if(time_left) {
-        PluginState* plugin_state = context;
         notification_message(
             plugin_state->notification_app,
             get_notification_sequence_new_token(plugin_state, plugin_state->current_scene_state));
@@ -164,10 +183,12 @@ static void on_new_token_code_generated(bool time_left, void* context) {
 
 static void on_code_lifetime_updated_generated(float code_lifetime_percent, void* context) {
     SceneState* scene_state = context;
-    scene_state->progress_bar_width =
+    scene_state->ui_precalculated_dimensions.progress_bar_width =
         (uint8_t)((float)(SCREEN_WIDTH - (PROGRESS_BAR_MARGIN << 1)) * code_lifetime_percent);
-    scene_state->progress_bar_x =
-        ((SCREEN_WIDTH - (PROGRESS_BAR_MARGIN << 1) - scene_state->progress_bar_width) >> 1) +
+    scene_state->ui_precalculated_dimensions.progress_bar_x =
+        ((SCREEN_WIDTH - (PROGRESS_BAR_MARGIN << 1) -
+          scene_state->ui_precalculated_dimensions.progress_bar_width) >>
+         1) +
         PROGRESS_BAR_MARGIN;
 }
 
@@ -301,9 +322,9 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
 
     canvas_draw_box(
         canvas,
-        scene_state->progress_bar_x,
+        scene_state->ui_precalculated_dimensions.progress_bar_x,
         SCREEN_HEIGHT - PROGRESS_BAR_MARGIN - PROGRESS_BAR_HEIGHT,
-        scene_state->progress_bar_width,
+        scene_state->ui_precalculated_dimensions.progress_bar_width,
         PROGRESS_BAR_HEIGHT);
 
     if(plugin_state->tokens_count > 1) {
