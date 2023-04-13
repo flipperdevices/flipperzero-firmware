@@ -53,28 +53,35 @@ jobs:
         id: syntax_check_py
         run: |
           set +e
-          LINT_MESSAGES="$(./fbt -s lint_py 2>&1 | tee /dev/stderr)"
-          if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+          ./fbt -s lint_py 2>&1 | tee lint-py.log
+          STATUS=${PIPESTATUS[0]}
+          LINT_MESSAGES="$(cat lint-py.log)"
+          if [ "$STATUS" -ne 0 ]; then
             # Save multiline output
             printf "Python Lint errors:\n\`\`\`\n" >> $GITHUB_STEP_SUMMARY
             echo "$LINT_MESSAGES" >> $GITHUB_STEP_SUMMARY
             printf "\n\`\`\`\n" >> $GITHUB_STEP_SUMMARY
             echo "errors=1" >> $GITHUB_OUTPUT
+            exit 1
           else
             echo "Python Lint: all good" >> $GITHUB_STEP_SUMMARY
           fi
   
       - name: 'Check C++ code formatting'
         id: syntax_check_cpp
+        if: always()
         run: |
           set +e
-          LINT_MESSAGES="$(./fbt -s lint 2>&1 | tee /dev/stderr)"
-          if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+          ./fbt -s lint 2>&1 | tee lint-cpp.log
+          STATUS=${PIPESTATUS[0]}
+          LINT_MESSAGES="$(cat lint-cpp.log)"
+          if [ "$STATUS" -ne 0 ]; then
             # Save multiline output
             printf "C Lint errors:\n\`\`\`\n" >> $GITHUB_STEP_SUMMARY
             echo "$LINT_MESSAGES" >> $GITHUB_STEP_SUMMARY
             printf "\n\`\`\`\n" >> $GITHUB_STEP_SUMMARY
             echo "errors=1" >> $GITHUB_OUTPUT
+            exit 1
           else
             echo "C Lint: all good" >> $GITHUB_STEP_SUMMARY
           fi
