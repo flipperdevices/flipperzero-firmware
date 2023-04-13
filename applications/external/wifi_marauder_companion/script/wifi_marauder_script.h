@@ -21,8 +21,12 @@
  * - Select
  * - Deauth
  * - Probe
+ * - Sniff raw
  * - Sniff beacon
+ * - Sniff deauth
+ * - Sniff Espressif
  * - Sniff PMKID
+ * - Sniff Pwnagotchi
  * - Beacon List
  * ----------------------------------------------------------------------------------------------------
  * SCRIPT SYNTAX:
@@ -49,12 +53,24 @@
  *         "probe": {
  *             "timeout": seconds
  *         },
+ *         "sniffRaw": {
+ *             "timeout": seconds
+ *         },
  *         "sniffBeacon": {
+ *             "timeout": seconds
+ *         },
+ *         "sniffDeauth": {
+ *             "timeout": seconds
+ *         },
+ *         "sniffEsp": {
  *             "timeout": seconds
  *         },
  *         "sniffPmkid": {
  *             "forceDeauth": true (default) | false,
  *             "channel": 1-11,
+ *             "timeout": seconds
+ *         },
+ *         "sniffPwn": {
  *             "timeout": seconds
  *         },
  *         "beaconlist": {
@@ -80,8 +96,12 @@ typedef enum {
     WifiMarauderScriptStageTypeSelect,
     WifiMarauderScriptStageTypeDeauth,
     WifiMarauderScriptStageTypeProbe,
+    WifiMarauderScriptStageTypeSniffRaw,
     WifiMarauderScriptStageTypeSniffBeacon,
+    WifiMarauderScriptStageTypeSniffDeauth,
+    WifiMarauderScriptStageTypeSniffEsp,
     WifiMarauderScriptStageTypeSniffPmkid,
+    WifiMarauderScriptStageTypeSniffPwn,
     WifiMarauderScriptStageTypeBeaconList,
 } WifiMarauderScriptStageType;
 
@@ -124,15 +144,31 @@ typedef struct WifiMarauderScriptStageProbe {
     int timeout;
 } WifiMarauderScriptStageProbe;
 
+typedef struct WifiMarauderScriptStageSniffRaw {
+    int timeout;
+} WifiMarauderScriptStageSniffRaw;
+
 typedef struct WifiMarauderScriptStageSniffBeacon {
     int timeout;
 } WifiMarauderScriptStageSniffBeacon;
+
+typedef struct WifiMarauderScriptStageSniffDeauth {
+    int timeout;
+} WifiMarauderScriptStageSniffDeauth;
+
+typedef struct WifiMarauderScriptStageSniffEsp {
+    int timeout;
+} WifiMarauderScriptStageSniffEsp;
 
 typedef struct WifiMarauderScriptStageSniffPmkid {
     bool force_deauth;
     int channel;
     int timeout;
 } WifiMarauderScriptStageSniffPmkid;
+
+typedef struct WifiMarauderScriptStageSniffPwn {
+    int timeout;
+} WifiMarauderScriptStageSniffPwn;
 
 typedef struct WifiMarauderScriptStageBeaconList {
     char **ssids;
