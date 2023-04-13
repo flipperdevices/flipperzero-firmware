@@ -142,7 +142,7 @@ uint32_t notification_settings_display_off_delay_ticks(NotificationApp* app) {
 
 // generics
 void notification_vibro_on() {
-    if(!furi_hal_rtc_get_stealth_mode()) {
+    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode)) {
         furi_hal_vibro_on(true);
     }
 }
@@ -152,7 +152,7 @@ void notification_vibro_off() {
 }
 
 void notification_sound_on(float freq, float volume) {
-    if(!furi_hal_rtc_get_stealth_mode()) {
+    if(!furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode)) {
         if(furi_hal_speaker_is_mine() || furi_hal_speaker_acquire(30)) {
             furi_hal_speaker_start(freq, volume);
         }

@@ -30,6 +30,7 @@ typedef enum {
     FuriHalRtcFlagLock = (1 << 2),
     FuriHalRtcFlagC2Update = (1 << 3),
     FuriHalRtcFlagHandOrient = (1 << 4),
+    FuriHalRtcFlagStealthMode = (1 << 5),
 } FuriHalRtcFlag;
 
 typedef enum {
@@ -191,18 +192,6 @@ void furi_hal_rtc_set_locale_dateformat(FuriHalRtcLocaleDateFormat value);
  * @return     The RTC Locale Date Format
  */
 FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat();
-
-/** Set the Stealth Mode state
- *
- * @param[in]  value  The state to set
- */
-void furi_hal_rtc_set_stealth_mode(bool value);
-
-/** Get the Stealth Mode state
- *
- * @return     The Stealth Mode state
- */
-bool furi_hal_rtc_get_stealth_mode();
 
 /** Set RTC Date Time
  *

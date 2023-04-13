@@ -27,7 +27,8 @@ void desktop_scene_lock_menu_on_enter(void* context) {
     desktop_lock_menu_set_callback(desktop->lock_menu, desktop_scene_lock_menu_callback, desktop);
     desktop_lock_menu_set_pin_state(desktop->lock_menu, desktop->settings.pin_code.length > 0);
     desktop_lock_menu_set_dummy_mode_state(desktop->lock_menu, desktop->settings.dummy_mode);
-    desktop_lock_menu_set_stealth_mode_state(desktop->lock_menu, desktop->settings.stealth_mode);
+    desktop_lock_menu_set_stealth_mode_state(
+        desktop->lock_menu, furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
     desktop_lock_menu_set_idx(desktop->lock_menu, 0);
 
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdLockMenu);

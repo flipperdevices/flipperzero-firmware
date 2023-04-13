@@ -157,7 +157,7 @@ static NotificationAppSettings* alloc_settings() {
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, backlight_text[value_index]);
 
-    if(furi_hal_rtc_get_stealth_mode()) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode)) {
         item = variable_item_list_add(app->variable_item_list, "Volume", 1, NULL, app);
         value_index = 0;
         variable_item_set_current_value_index(item, value_index);
@@ -171,7 +171,7 @@ static NotificationAppSettings* alloc_settings() {
         variable_item_set_current_value_text(item, volume_text[value_index]);
     }
 
-    if(furi_hal_rtc_get_stealth_mode()) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode)) {
         item = variable_item_list_add(app->variable_item_list, "Vibro", 1, NULL, app);
         value_index = 0;
         variable_item_set_current_value_index(item, value_index);

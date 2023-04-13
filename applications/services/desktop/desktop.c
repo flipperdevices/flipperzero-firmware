@@ -161,10 +161,12 @@ void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
 
 void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled) {
     desktop->in_transition = true;
-    furi_hal_rtc_set_stealth_mode(enabled);
-    desktop->settings.stealth_mode = enabled;
+    if(enabled) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagStealthMode);
+    } else {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagStealthMode);
+    }
     view_port_enabled_set(desktop->stealth_mode_icon_viewport, enabled);
-    DESKTOP_SETTINGS_SAVE(&desktop->settings);
     desktop->in_transition = false;
 }
 
@@ -366,8 +368,6 @@ int32_t desktop_srv(void* p) {
     desktop_main_set_dummy_mode_state(desktop->main_view, desktop->settings.dummy_mode);
     animation_manager_set_dummy_mode_state(
         desktop->animation_manager, desktop->settings.dummy_mode);
-
-    desktop->settings.stealth_mode = furi_hal_rtc_get_stealth_mode();
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
