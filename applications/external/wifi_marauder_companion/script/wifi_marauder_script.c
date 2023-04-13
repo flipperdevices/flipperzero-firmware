@@ -3,6 +3,7 @@
 
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_SCAN 15
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_DEAUTH 30
+#define WIFI_MARAUDER_DEFAULT_TIMEOUT_PROBE 60
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF_PMKID 60
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF_BEACON 60
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_BEACON 60
@@ -129,6 +130,21 @@ WifiMarauderScriptStageDeauth* _wifi_marauder_script_get_stage_deauth(cJSON *sta
     deauth_stage->timeout = deauth_timeout;
 
     return deauth_stage;
+}
+
+WifiMarauderScriptStageProbe* _wifi_marauder_script_get_stage_probe(cJSON *stages) {
+    cJSON *probe_stage_json = cJSON_GetObjectItemCaseSensitive(stages, "probe");
+    if (probe_stage_json == NULL) {
+        return NULL;
+    }
+
+    cJSON* timeout = cJSON_GetObjectItem(probe_stage_json, "timeout");
+    int probe_timeout = timeout != NULL ? (int)cJSON_GetNumberValue(timeout) : WIFI_MARAUDER_DEFAULT_TIMEOUT_PROBE;
+
+    WifiMarauderScriptStageProbe *probe_stage = (WifiMarauderScriptStageProbe*) malloc(sizeof(WifiMarauderScriptStageProbe));
+    probe_stage->timeout = probe_timeout;
+
+    return probe_stage;
 }
 
 WifiMarauderScriptStageSniffBeacon* _wifi_marauder_script_get_stage_sniff_beacon(cJSON *stages) {
@@ -260,6 +276,16 @@ void _wifi_marauder_script_load_stages(WifiMarauderScript *script, cJSON *stages
         );
     }
 
+    // Probe stage
+    WifiMarauderScriptStageProbe *stage_probe = _wifi_marauder_script_get_stage_probe(stages);
+    if (stage_probe != NULL) {
+        _wifi_marauder_script_add_stage(
+            script,
+            _wifi_marauder_script_create_stage(WifiMarauderScriptStageTypeProbe, stage_probe),
+            &prev_stage
+        );
+    }
+
     // Sniff beacon stage
     WifiMarauderScriptStageSniffBeacon *sniff_beacon = _wifi_marauder_script_get_stage_sniff_beacon(stages);
     if (sniff_beacon != NULL) {
@@ -363,6 +389,9 @@ void wifi_marauder_script_free(WifiMarauderScript *script) {
                 free(current_stage->stage);
                 break;
             case WifiMarauderScriptStageTypeDeauth:
+                free(current_stage->stage);
+                break;
+            case WifiMarauderScriptStageTypeProbe:
                 free(current_stage->stage);
                 break;
             case WifiMarauderScriptStageTypeSniffPmkid:
