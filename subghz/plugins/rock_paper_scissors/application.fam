@@ -7,5 +7,6 @@ App(
     stack_size=2 * 1024,
     fap_icon="rock_paper_scissors.png",
     fap_icon_assets="images",
+    fap_icon_assets_symbol="rock_paper_scissors",
     fap_category="Games",
 )
