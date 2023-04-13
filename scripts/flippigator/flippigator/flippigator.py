@@ -180,7 +180,7 @@ class Navigator:
         # display_image = self.screen_image
 
         if self._guiFlag == 1:
-            cv.imshow("Debug recog screen", display_image)
+            cv.imshow(self._window_name, display_image)
             key = cv.waitKey(1)
 
         if self._debugFlag == 1:
@@ -200,6 +200,14 @@ class Navigator:
                 #raise FlippigatorException("Recognition timeout")
                 break
         return state
+
+    def wait_for_state(self, state, timeout = 5) -> int:
+        start_time = time.time()
+        while start_time + timeout > time.time():
+            cur_state = self.get_current_state()
+            if state in cur_state:
+                return 0
+        return -1
 
     def save_screen(self, filename: str):
         cv.imwrite(f"img/{filename}", self.screen_image)
@@ -280,10 +288,13 @@ class Navigator:
                 self.press_back()
             if self._debugFlag == 1:
                 print(colored("Going back to main screen", "cyan"))
+        time.sleep(1) #wait for some time, because of missing key pressing
 
     def open_file(self, module, filename):
         self.go_to_main_screen()
+        time.sleep(1)
         self.press_down()
+        time.sleep(0.4) #some waste "heads" going at the opening of browser   
 
         heads = list()
         start_time = time.time()
@@ -318,7 +329,9 @@ class Navigator:
 
     def delete_file(self, module, filename):
         self.go_to_main_screen()
+        time.sleep(1)
         self.press_down()
+        time.sleep(0.4)
 
         heads = list()
         start_time = time.time()
@@ -331,8 +344,8 @@ class Navigator:
                     return -1
                 heads.append(cur[0])
                 self.press_right()
-        if start_time + 10 <= time.time():
-            return -1
+            if start_time + 10 <= time.time():
+                return -1
 
         files = list()
         start_time = time.time()
@@ -483,17 +496,36 @@ class Relay:
     def __del__(self):
         pass
 
-    def set_reader(self, reader = 0):
-        pass
+    def set_reader(self, reader):
+        self._serial.write(
+            ("R"+str(reader)+"K"+str(self._curent_key)+"\n").encode(
+                "ASCII"
+            )
+        )
+        self._curent_reader = reader
 
-    def set_key(self, key = 0):
-        pass
+    def set_key(self, key):
+        self._serial.write(
+            ("R"+str(self._curent_reader)+"K"+str(key)+"\n").encode(
+                "ASCII"
+            )
+        )
+        self._curent_key = key
 
     def get_reader(self) -> int:
-        pass
+        return self._curent_reader
 
     def get_key(self) -> int:
-        pass
+        return self._curent_key
+
+    def reset(self):
+        self._serial.write(
+            ("R0K0\n").encode(
+                "ASCII"
+            )
+        )
+        self._curent_reader = 0
+        self._curent_key = 0
 
 
 class FlipperTextKeyboard:

@@ -9,7 +9,7 @@ from flipperzero_protobuf_py.flipperzero_protobuf.flipper_base import (
     FlipperProtoException,
 )
 from flipperzero_protobuf_py.flipperzero_protobuf.flipper_proto import FlipperProto
-from flippigator.flippigator import FlippigatorException, Gator, Navigator, Reader
+from flippigator.flippigator import FlippigatorException, Gator, Navigator, Reader, Relay
 
 os.system("color")
 
@@ -21,6 +21,11 @@ def is_windows():
 
 def pytest_addoption(parser):
     # here you can pass any arguments you want
+    '''
+    You can add static name for usb devices by adding rules to /etc/udev/rules.d/99-usb-serial.rules
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="%your_device_VID%", ATTRS{idProduct}=="%your_device_PID%", ATTRS{serial}=="%your_device_serial%", SYMLINK+="name"
+    pytest -v --scale=8 --bench_nfc_rfid --bench_ibutton_ir --port=/dev/bench_flipper --reader_port=/dev/reader_arduino --flipper_r_port=/dev/ireader_flipper --flipper_k_port=/dev/ikey_flipper --relay_port=/dev/relay_arduino
+    '''
     parser.addoption("--port", action="store", default=None, help="flipper serial port")
     parser.addoption(
         "--bench_port", action="store", default=None, help="bench serial port"
@@ -216,7 +221,7 @@ def flipper_key_serial(request):
 @pytest.fixture(scope="session")
 def relay_serial(request):
     # taking port from config or returning OS based default
-    port = request.config.getoption("--flipper_k_port")
+    port = request.config.getoption("--relay_port")
     if port:
         pass
     elif is_windows():
@@ -424,11 +429,11 @@ def reader_indala(reader_serial, gator, request) -> Gator:
         return reader
 
 @pytest.fixture(scope="session", autouse=False)
-def relay(reader_serial, gator, request) -> Gator:
+def relay(relay_serial, gator, request) -> Gator:
     bench = request.config.getoption("--bench_ibutton_ir")
     if bench:
         print("Relay module initialization")
 
-        relay = Relay(reader_serial)
+        relay = Relay(relay_serial)
 
         return relay
