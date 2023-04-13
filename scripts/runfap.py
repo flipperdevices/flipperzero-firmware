@@ -29,7 +29,6 @@ class Main(App):
             default=[],
             help="File destinations (must be same length as -s)",
         )
-
         self.parser.add_argument(
             "--host-app",
             "-a",
@@ -44,7 +43,6 @@ class Main(App):
 
     def install(self):
         self.args.sources = self.flatten(self.args.sources)
-
         self.args.targets = self.flatten(self.args.targets)
 
         if len(self.args.sources) != len(self.args.targets):
