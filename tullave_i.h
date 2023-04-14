@@ -35,29 +35,6 @@ struct TuLlave {
     Popup* popup;
 };
 
-static const NotificationSequence seq_tullave_found = {
-    &message_display_backlight_on,
-    &message_blue_255,
-    &message_vibro_on,
-    &message_note_c5,
-    &message_delay_100,
-    &message_note_cs5,
-    &message_delay_100,
-    &message_note_d5,
-    &message_delay_100,
-    &message_note_ds5,
-    &message_delay_250,
-    &message_sound_off,
-    NULL,
-};
-
-static const NotificationSequence seq_search_tullave_blink = {
-    &message_blink_start_10,
-    &message_blink_set_color_blue,
-    &message_do_not_reset,
-    NULL,
-};
-
 TuLlave* tullave_alloc();
 
 void tullave_free(TuLlave* t_llave);

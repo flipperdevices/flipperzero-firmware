@@ -1,6 +1,6 @@
 #include "../tullave_i.h"
 
-enum SubmenuIndex { SubmenuIndexCheck };
+enum SubmenuIndex { SubmenuIndexRead };
 
 void tullave_scene_start_submenu_callback(void* context, uint32_t index) {
     TuLlave* t_llave = context;
@@ -12,7 +12,7 @@ void tullave_scene_start_on_enter(void* context) {
 
     Submenu* submenu = t_llave->submenu;
     submenu_add_item(
-        submenu, "Read Info", SubmenuIndexCheck, tullave_scene_start_submenu_callback, t_llave);
+        submenu, "Read Info", SubmenuIndexRead, tullave_scene_start_submenu_callback, t_llave);
 
     //notification_message_block(t_llave->notifications, &sequence_reset_blue);
 
@@ -26,10 +26,10 @@ bool tullave_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexCheck) {
+        if(event.event == SubmenuIndexRead) {
             scene_manager_set_scene_state(
-                t_llave->scene_manager, TuLlaveSceneStart, SubmenuIndexCheck);
-            scene_manager_next_scene(t_llave->scene_manager, TuLlaveSceneCheck);
+                t_llave->scene_manager, TuLlaveSceneStart, SubmenuIndexRead);
+            scene_manager_next_scene(t_llave->scene_manager, TuLlaveSceneRead);
             consumed = true;
         }
         // TODO: Here add other options for submenu

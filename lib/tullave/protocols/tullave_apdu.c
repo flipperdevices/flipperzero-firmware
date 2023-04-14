@@ -9,15 +9,12 @@
 #define TULLAVE_CARD_BALANCE_LEN 6
 #define TULLAVE_NUM_CARD_OFFSET 8
 
-void uint8_to_hex_chars(const uint8_t* src, uint8_t* target, int length) {
+void uint8_to_hex_chars(const uint8_t* src, FuriString* target, int length) {
     const char chars[] = "0123456789ABCDEF";
-    while(--length >= 0)
-        target[length] = chars[(src[length >> 1] >> ((1 - (length & 1)) << 2)) & 0xF];
-}
-
-void uint8_to_furi_string(const uint8_t* src, FuriString* target, size_t length) {
-    for(size_t i = 0; i < length; i++) {
-        furi_string_cat_printf(target, "%c", src[i]);
+    furi_string_reserve(target, length);
+    while(--length >= 0) {
+        furi_string_set_char(
+            target, length, chars[(src[length >> 1] >> ((1 - (length & 1)) << 2)) & 0xF]);
     }
 }
 
@@ -37,15 +34,14 @@ size_t
 
     FuriHalNfcTxRxContext tx_rx = {};
 
-    uint8_t* req_buffer_hex_debug = malloc(req_size * 2);
-    uint8_t* resp_buffer_hex_debug = NULL;
+    FuriString* req_buffer_hex_debug = furi_string_alloc();
+    FuriString* resp_buffer_hex_debug = NULL;
 
     do {
         FURI_LOG_D(LOG_TAG, "Send APDU command called");
 
         uint8_to_hex_chars(req_buffer, req_buffer_hex_debug, req_size * 2);
-        req_buffer_hex_debug[req_size * 2] = 0x00; // Null Delimited string
-        FURI_LOG_D(LOG_TAG, "Command: %s", req_buffer_hex_debug);
+        FURI_LOG_D(LOG_TAG, "Command: %s", furi_string_get_cstr(req_buffer_hex_debug));
 
         memcpy(tx_rx.tx_data, req_buffer, req_size);
         tx_rx.tx_bits = req_size * 8;
@@ -58,18 +54,15 @@ size_t
 
         resp_buffer_size = tx_rx.rx_bits / 8;
         *resp_buffer = malloc(resp_buffer_size);
-        resp_buffer_hex_debug = malloc(resp_buffer_size * 2);
+        resp_buffer_hex_debug = furi_string_alloc();
 
         uint8_to_hex_chars(tx_rx.rx_data, resp_buffer_hex_debug, resp_buffer_size * 2);
-        resp_buffer_hex_debug[resp_buffer_size * 2] = 0x00; // Null Delimited string
-        FURI_LOG_D(LOG_TAG, "Response: %s", resp_buffer_hex_debug);
+        FURI_LOG_D(LOG_TAG, "Response: %s", furi_string_get_cstr(resp_buffer_hex_debug));
 
         memcpy(*resp_buffer, tx_rx.rx_data, resp_buffer_size);
 
-        free(resp_buffer_hex_debug);
-        free(req_buffer_hex_debug);
-        resp_buffer_hex_debug = NULL;
-        req_buffer_hex_debug = NULL;
+        furi_string_free(req_buffer_hex_debug);
+        furi_string_free(resp_buffer_hex_debug);
 
     } while(false);
     return resp_buffer_size;
@@ -77,7 +70,6 @@ size_t
 
 bool tullave_apdu_read(TuLlaveInfo* card_info) {
     uint8_t* response = NULL;
-    uint8_t c_info[TULLAVE_CARD_NUM_LEN] = {0X00};
     uint8_t c_bal[TULLAVE_CARD_BALANCE_LEN] = {0x00};
 
     uint8_t resp_size = 0;
@@ -102,12 +94,11 @@ bool tullave_apdu_read(TuLlaveInfo* card_info) {
         }
         FURI_LOG_D(LOG_TAG, "TuLlave was authenticated");
 
-        uint8_to_hex_chars(&response[TULLAVE_NUM_CARD_OFFSET], c_info, TULLAVE_CARD_NUM_LEN);
-        c_info[TULLAVE_CARD_NUM_LEN] = 0x00;
-
-        //Set first the card number to empty string.
+        //First set the card number to empty string.
         furi_string_set_str(card_info->card_number, "");
-        uint8_to_furi_string(c_info, card_info->card_number, sizeof(c_info));
+        uint8_to_hex_chars(
+            &response[TULLAVE_NUM_CARD_OFFSET], card_info->card_number, TULLAVE_CARD_NUM_LEN);
+
         FURI_LOG_D(LOG_TAG, "Card Number: %s", furi_string_get_cstr(card_info->card_number));
 
         free(response);
@@ -119,9 +110,10 @@ bool tullave_apdu_read(TuLlaveInfo* card_info) {
         memcpy(c_bal, &response[5], 2);
         memcpy(&c_bal[2], response, 4);
 
-        card_info->balance = (uint8_to_integer_big_endian(c_bal, TULLAVE_CARD_BALANCE_LEN) / 100);
+        card_info->balance = uint8_to_integer_big_endian(c_bal, TULLAVE_CARD_BALANCE_LEN);
 
-        FURI_LOG_D(LOG_TAG, "Card Balance: %.2f", card_info->balance);
+        FURI_LOG_D(
+            LOG_TAG, "Card Balance: %lld.%02lld", card_info->balance, (card_info->balance % 100));
 
         free(response);
 

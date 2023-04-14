@@ -4,7 +4,7 @@
 #define LOG_TAG "TuLlaveWorker"
 #define THREAD_NAME LOG_TAG
 #define THREAD_STACK_SIZE 4 * 1024
-#define WORKER_DELAY_MS 300
+#define WORKER_DELAY_MS 100
 
 static void tullave_worker_change_state(TuLlaveWorker* worker, TuLlaveWorkerState state) {
     furi_assert(worker);
@@ -72,7 +72,7 @@ void tullave_worker_check(TuLlaveWorker* t_worker) {
     while(t_worker->state == TuLlaveWorkerStateCheck) {
         if(tullave_apdu_read(t_worker->card_info)) {
             t_worker->callback(TuLlaveWorkerEventCardDetected, t_worker->context);
-            break;
+            tullave_worker_change_state(t_worker, TuLlaveWorkerStateReady);
         } else {
             t_worker->callback(TuLLaveWorkerEventNoCardDetected, t_worker->context);
         }
@@ -83,10 +83,9 @@ void tullave_worker_check(TuLlaveWorker* t_worker) {
 int32_t tullave_worker_task(void* context) {
     TuLlaveWorker* t_worker = context;
     furi_hal_nfc_exit_sleep();
-    if(t_worker->state == TuLlaveWorkerStateCheck) {
-        tullave_worker_check(t_worker);
-    }
+
+    tullave_worker_check(t_worker);
+
     furi_hal_nfc_sleep();
-    tullave_worker_change_state(t_worker, TuLlaveWorkerStateReady);
     return 0;
 }

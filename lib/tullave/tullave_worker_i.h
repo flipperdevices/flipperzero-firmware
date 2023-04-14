@@ -4,12 +4,11 @@
 
 #include <furi.h>
 #include <furi_hal_nfc.h>
-#include <float.h>
 
 #include <core/string.h>
 
 struct TuLlaveInfo {
-    double balance;
+    uint64_t balance;
     FuriString* card_number;
 };
 
