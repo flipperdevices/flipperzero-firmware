@@ -266,7 +266,11 @@ Desktop* desktop_alloc() {
     view_port_set_width(desktop->stealth_mode_icon_viewport, icon_get_width(&I_Muted_8x8));
     view_port_draw_callback_set(
         desktop->stealth_mode_icon_viewport, desktop_stealth_mode_icon_draw_callback, desktop);
-    view_port_enabled_set(desktop->stealth_mode_icon_viewport, false);
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode)) {
+        view_port_enabled_set(desktop->stealth_mode_icon_viewport, true);
+    } else {
+        view_port_enabled_set(desktop->stealth_mode_icon_viewport, false);
+    }
     gui_add_view_port(desktop->gui, desktop->stealth_mode_icon_viewport, GuiLayerStatusBarLeft);
 
     // Special case: autostart application is already running
