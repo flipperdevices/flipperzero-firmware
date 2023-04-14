@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mf_ultralight.h"
+#include "nfca_poller.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,9 +9,53 @@ extern "C" {
 
 typedef struct MfUltralightPoller MfUltralightPoller;
 
-MfUltralightPoller* mf_ultralight_poller_alloc();
+typedef enum {
+    MfUltralightPollerEventTypeReadVersion,
+    MfUltralightPollerEventTypeReadSignature,
+    MfUltralightPollerEventTypeReadCounters,
+    MfUltralightPollerEventTypeReadTearingFlags,
+    MfUltralightPollerEventTypeAuthRequest,
+    MfUltralightPollerEventTypeAuthSuccess,
+    MfUltralightPollerEventTypeAuthFailed,
+    MfUltralightPollerEventTypeReadPages,
+    MfUltralightPollerEventTypeReadComplete,
+} MfUltralightPollerEventType;
+
+typedef struct {
+    bool skip_auth;
+    MfUltralightAuthPassword password;
+} MfUltralightPollerAuthContext;
+
+typedef struct {
+    union {
+        MfUltralightPollerAuthContext auth_context;
+        MfUltralightAuthPack pack;
+    };
+} MfUltralightPollerEventData;
+
+typedef struct {
+    MfUltralightPollerEventType type;
+    MfUltralightPollerEventData data;
+} MfUltralightPollerEvent;
+
+typedef void (*MfUltralightPollerCallback)(MfUltralightPollerEvent event, void* context);
+
+MfUltralightPoller* mf_ultralight_poller_alloc(NfcaPoller* nfca_poller);
 
 void mf_ultralight_poller_free(MfUltralightPoller* instance);
+
+MfUltralightError mf_ultralight_poller_start(
+    MfUltralightPoller* instance,
+    MfUltralightPollerCallback callback,
+    void* context);
+
+MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance);
+
+// Called from NfcWorker thread
+
+MfUltralightError mf_ultralight_poller_stop(MfUltralightPoller* instance);
+
+// Sync API
 
 MfUltralightError mf_ultralight_poller_read_page(
     MfUltralightPoller* instance,

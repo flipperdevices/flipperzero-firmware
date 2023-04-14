@@ -44,11 +44,12 @@ static PB_Nfca_Error nfc_rpc_nfca_process_error(NfcaError error) {
 static void nfc_rpc_nfca_read(Nfc_Main* cmd, void* context) {
     furi_assert(cmd);
     furi_assert(context);
+
+    NfcRpc* instance = context;
     PB_Nfca_ReadResponse pb_nfca_read_resp = PB_Nfca_ReadResponse_init_default;
 
     NfcaData nfca_data = {};
-    NfcaPoller* nfca_poller = nfca_poller_alloc();
-    NfcaError error = nfca_poller_activate_sync(nfca_poller, &nfca_data);
+    NfcaError error = nfca_poller_activate_sync(instance->nfca_poller, &nfca_data);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_read_resp_tag;
@@ -64,7 +65,7 @@ static void nfc_rpc_nfca_read(Nfc_Main* cmd, void* context) {
     }
     cmd->content.nfca_read_resp = pb_nfca_read_resp;
 
-    nfca_poller_free(nfca_poller);
+    nfca_poller_reset(instance->nfca_poller);
 }
 
 static void nfc_rpc_nfca_emulate_start(Nfc_Main* cmd, void* context) {
@@ -83,7 +84,7 @@ static void nfc_rpc_nfca_emulate_start(Nfc_Main* cmd, void* context) {
         memcpy(nfca_data.atqa, cmd->content.nfca_emulate_start_req.atqa.bytes, 2);
         memcpy(&nfca_data.sak, cmd->content.nfca_emulate_start_req.sak.bytes, 1);
 
-        instance->nfca_listener = nfca_listener_alloc(&nfca_data);
+        nfca_listener_start(instance->nfca_listener, &nfca_data, NULL, NULL);
         pb_nfca_emulate_start_resp.error = PB_Nfca_Error_None;
     } else {
         // TODO add Busy error
@@ -102,7 +103,7 @@ static void nfc_rpc_nfca_emulate_stop(Nfc_Main* cmd, void* context) {
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_emulate_stop_resp_tag;
     if(instance->nfca_listener) {
-        nfca_listener_free(instance->nfca_listener);
+        nfca_listener_reset(instance->nfca_listener);
         instance->nfca_listener = NULL;
         pb_nfca_emulate_stop_resp.error = PB_Nfca_Error_None;
     } else {

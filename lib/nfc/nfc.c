@@ -248,6 +248,12 @@ void nfc_poller_abort(Nfc* instance) {
     furi_thread_join(instance->worker_thread);
 }
 
+void nfc_listener_abort(Nfc* instance) {
+    furi_assert(instance);
+    f_hal_nfc_abort();
+    furi_thread_join(instance->worker_thread);
+}
+
 void nfc_poller_stop(Nfc* instance) {
     furi_assert(instance);
     instance->state = NfcStateStopRequested;

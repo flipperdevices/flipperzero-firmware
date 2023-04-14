@@ -34,140 +34,148 @@ static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
 }
 
 NfcApp* nfc_app_alloc() {
-    NfcApp* nfc = malloc(sizeof(NfcApp));
+    NfcApp* instance = malloc(sizeof(NfcApp));
 
-    nfc->view_dispatcher = view_dispatcher_alloc();
-    nfc->scene_manager = scene_manager_alloc(&nfc_scene_handlers, nfc);
-    view_dispatcher_enable_queue(nfc->view_dispatcher);
-    view_dispatcher_set_event_callback_context(nfc->view_dispatcher, nfc);
-    view_dispatcher_set_custom_event_callback(nfc->view_dispatcher, nfc_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(nfc->view_dispatcher, nfc_back_event_callback);
+    instance->view_dispatcher = view_dispatcher_alloc();
+    instance->scene_manager = scene_manager_alloc(&nfc_scene_handlers, instance);
+    view_dispatcher_enable_queue(instance->view_dispatcher);
+    view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);
+    view_dispatcher_set_custom_event_callback(instance->view_dispatcher, nfc_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(instance->view_dispatcher, nfc_back_event_callback);
 
-    // instance->nfc = nfc_alloc();
-    // instance->nfca_poller = nfca_poller_alloc(instance->nfc);
-    // instance->mf_ul_poller = 
+    instance->nfc = nfc_alloc();
+    instance->nfca_poller = nfca_poller_alloc(instance->nfc);
+    instance->mf_ul_poller = mf_ultralight_poller_alloc(instance->nfca_poller);
+    instance->nfca_listener = nfca_listener_alloc(instance->nfc);
+    instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->nfca_listener);
 
 
     // Nfc device
-    nfc->nfc_dev = nfc_dev_alloc();
+    instance->nfc_dev = nfc_dev_alloc();
 
     // Open GUI record
-    nfc->gui = furi_record_open(RECORD_GUI);
+    instance->gui = furi_record_open(RECORD_GUI);
 
     // Open Notification record
-    nfc->notifications = furi_record_open(RECORD_NOTIFICATION);
+    instance->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     // Submenu
-    nfc->submenu = submenu_alloc();
-    view_dispatcher_add_view(nfc->view_dispatcher, NfcViewMenu, submenu_get_view(nfc->submenu));
+    instance->submenu = submenu_alloc();
+    view_dispatcher_add_view(instance->view_dispatcher, NfcViewMenu, submenu_get_view(instance->submenu));
 
     // Dialog
-    nfc->dialog_ex = dialog_ex_alloc();
+    instance->dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
-        nfc->view_dispatcher, NfcViewDialogEx, dialog_ex_get_view(nfc->dialog_ex));
+        instance->view_dispatcher, NfcViewDialogEx, dialog_ex_get_view(instance->dialog_ex));
 
     // Popup
-    nfc->popup = popup_alloc();
-    view_dispatcher_add_view(nfc->view_dispatcher, NfcViewPopup, popup_get_view(nfc->popup));
+    instance->popup = popup_alloc();
+    view_dispatcher_add_view(instance->view_dispatcher, NfcViewPopup, popup_get_view(instance->popup));
 
     // Loading
-    nfc->loading = loading_alloc();
-    view_dispatcher_add_view(nfc->view_dispatcher, NfcViewLoading, loading_get_view(nfc->loading));
+    instance->loading = loading_alloc();
+    view_dispatcher_add_view(instance->view_dispatcher, NfcViewLoading, loading_get_view(instance->loading));
 
     // Text Input
-    nfc->text_input = text_input_alloc();
+    instance->text_input = text_input_alloc();
     view_dispatcher_add_view(
-        nfc->view_dispatcher, NfcViewTextInput, text_input_get_view(nfc->text_input));
+        instance->view_dispatcher, NfcViewTextInput, text_input_get_view(instance->text_input));
 
     // Byte Input
-    nfc->byte_input = byte_input_alloc();
+    instance->byte_input = byte_input_alloc();
     view_dispatcher_add_view(
-        nfc->view_dispatcher, NfcViewByteInput, byte_input_get_view(nfc->byte_input));
+        instance->view_dispatcher, NfcViewByteInput, byte_input_get_view(instance->byte_input));
 
     // TextBox
-    nfc->text_box = text_box_alloc();
+    instance->text_box = text_box_alloc();
     view_dispatcher_add_view(
-        nfc->view_dispatcher, NfcViewTextBox, text_box_get_view(nfc->text_box));
-    nfc->text_box_store = furi_string_alloc();
+        instance->view_dispatcher, NfcViewTextBox, text_box_get_view(instance->text_box));
+    instance->text_box_store = furi_string_alloc();
 
     // Custom Widget
-    nfc->widget = widget_alloc();
-    view_dispatcher_add_view(nfc->view_dispatcher, NfcViewWidget, widget_get_view(nfc->widget));
+    instance->widget = widget_alloc();
+    view_dispatcher_add_view(instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
 
-    return nfc;
+    return instance;
 }
 
-void nfc_app_free(NfcApp* nfc) {
-    furi_assert(nfc);
+void nfc_app_free(NfcApp* instance) {
+    furi_assert(instance);
 
-    // if(nfc->rpc_state == NfcRpcStateEmulating) {
+    // if(instance->rpc_state == NfcRpcStateEmulating) {
     //     // Stop worker
-    //     nfc_worker_stop(nfc->worker);
-    // } else if(nfc->rpc_state == NfcRpcStateEmulated) {
+    //     nfc_worker_stop(instance->worker);
+    // } else if(instance->rpc_state == NfcRpcStateEmulated) {
     //     // Stop worker
-    //     nfc_worker_stop(nfc->worker);
+    //     nfc_worker_stop(instance->worker);
     //     // Save data in shadow file
-    //     if(furi_string_size(nfc->dev->load_path)) {
-    //         nfc_device_save_shadow(nfc->dev, furi_string_get_cstr(nfc->dev->load_path));
+    //     if(furi_string_size(instance->dev->load_path)) {
+    //         nfc_device_save_shadow(instance->dev, furi_string_get_cstr(instance->dev->load_path));
     //     }
     // }
-    if(nfc->rpc_ctx) {
-        rpc_system_app_send_exited(nfc->rpc_ctx);
-        rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
-        nfc->rpc_ctx = NULL;
+    if(instance->rpc_ctx) {
+        rpc_system_app_send_exited(instance->rpc_ctx);
+        rpc_system_app_set_callback(instance->rpc_ctx, NULL, NULL);
+        instance->rpc_ctx = NULL;
     }
 
+    mf_ultralight_listener_free(instance->mf_ul_listener);
+    mf_ultralight_poller_free(instance->mf_ul_poller);
+    nfca_listener_free(instance->nfca_listener);
+    nfca_poller_free(instance->nfca_poller);
+    nfc_free(instance->nfc);
+
     // Nfc device
-    nfc_dev_free(nfc->nfc_dev);
+    nfc_dev_free(instance->nfc_dev);
 
     // Submenu
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewMenu);
-    submenu_free(nfc->submenu);
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewMenu);
+    submenu_free(instance->submenu);
 
     // DialogEx
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewDialogEx);
-    dialog_ex_free(nfc->dialog_ex);
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewDialogEx);
+    dialog_ex_free(instance->dialog_ex);
 
     // Popup
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewPopup);
-    popup_free(nfc->popup);
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewPopup);
+    popup_free(instance->popup);
 
     // Loading
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewLoading);
-    loading_free(nfc->loading);
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewLoading);
+    loading_free(instance->loading);
 
     // TextInput
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewTextInput);
-    text_input_free(nfc->text_input);
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewTextInput);
+    text_input_free(instance->text_input);
 
     // ByteInput
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewByteInput);
-    byte_input_free(nfc->byte_input);
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewByteInput);
+    byte_input_free(instance->byte_input);
 
     // TextBox
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewTextBox);
-    text_box_free(nfc->text_box);
-    furi_string_free(nfc->text_box_store);
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewTextBox);
+    text_box_free(instance->text_box);
+    furi_string_free(instance->text_box_store);
 
     // Custom Widget
-    view_dispatcher_remove_view(nfc->view_dispatcher, NfcViewWidget);
-    widget_free(nfc->widget);
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewWidget);
+    widget_free(instance->widget);
 
     // View Dispatcher
-    view_dispatcher_free(nfc->view_dispatcher);
+    view_dispatcher_free(instance->view_dispatcher);
 
     // Scene Manager
-    scene_manager_free(nfc->scene_manager);
+    scene_manager_free(instance->scene_manager);
 
     // GUI
     furi_record_close(RECORD_GUI);
-    nfc->gui = NULL;
+    instance->gui = NULL;
 
     // Notifications
     furi_record_close(RECORD_NOTIFICATION);
-    nfc->notifications = NULL;
+    instance->notifications = NULL;
 
-    free(nfc);
+    free(instance);
 }
 
 void nfc_text_store_set(NfcApp* nfc, const char* text, ...) {

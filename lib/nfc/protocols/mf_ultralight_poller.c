@@ -2,32 +2,26 @@
 
 #include <furi.h>
 #include "nfca_poller.h"
+#include <nfc/helpers/nfc_poller_buffer.h>
 
 #define TAG "MfUltralightPoller"
 
-#define MF_ULTRALIGHT_MAX_BUFF_SIZE (128)
+#define MF_ULTRALIGHT_MAX_BUFF_SIZE (64)
 
 #define MF_ULTRALIGHT_POLLER_STANDART_FWT_FC (12000)
 
+typedef enum {
+    MfUltralightPollerStateIdle,
+} MfUltralightPollerState;
+
 struct MfUltralightPoller {
     NfcaPoller* nfca_poller;
-    NfcaData nfca_data;
+    MfUltralightPollerState state;
+    NfcPollerBuffer* buffer;
+    MfUltralightData* data;
+    MfUltralightPollerCallback callback;
+    void* context;
 };
-
-MfUltralightPoller* mf_ultralight_poller_alloc() {
-    MfUltralightPoller* instance = malloc(sizeof(MfUltralightPoller));
-    instance->nfca_poller = nfca_poller_alloc();
-
-    return instance;
-}
-
-void mf_ultralight_poller_free(MfUltralightPoller* instance) {
-    furi_assert(instance);
-    furi_assert(instance->nfca_poller);
-
-    nfca_poller_free(instance->nfca_poller);
-    free(instance);
-}
 
 static MfUltralightError mf_ultralight_process_error(NfcaError error) {
     MfUltralightError ret = MfUltralightErrorNone;
@@ -53,6 +47,101 @@ static MfUltralightError mf_ultralight_process_error(NfcaError error) {
     }
 
     return ret;
+}
+
+MfUltralightPoller* mf_ultralight_poller_alloc(NfcaPoller* nfca_poller) {
+    MfUltralightPoller* instance = malloc(sizeof(MfUltralightPoller));
+    instance->nfca_poller = nfca_poller;
+
+    return instance;
+}
+
+void mf_ultralight_poller_free(MfUltralightPoller* instance) {
+    furi_assert(instance);
+
+    free(instance);
+}
+
+static void mf_ultralight_nfca_poller_event_callback(NfcaPollerEvent event, void* context) {
+    furi_assert(context);
+
+    MfUltralightPoller* instance = context;
+    MfUltralightPollerEvent mf_ul_poller_event = {};
+    NfcaError error = NfcaErrorNone;
+
+    if(event.type == NfcaPollerEventTypeReady) {
+        // Test: read 0 page
+        NfcPollerBuffer* buff = instance->buffer;
+        nfc_poller_buffer_reset(buff);
+        buff->tx_data[0] = MF_ULTRALIGHT_CMD_READ_PAGE;
+        buff->tx_data[1] = 0;
+        buff->tx_bits = 16;
+        error = nfca_poller_send_standart_frame(
+            instance->nfca_poller,
+            buff->tx_data,
+            buff->tx_bits,
+            buff->rx_data,
+            buff->rx_data_size,
+            &buff->rx_bits,
+            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+        if(error == NfcaErrorNone) {
+            FURI_LOG_T(TAG, "Read page 0 success");
+            memcpy(&instance->data->page[0], buff->rx_data, buff->rx_bits / 8);
+        } else {
+            FURI_LOG_E(TAG, "Error reading 0 page");
+        }
+        mf_ul_poller_event.type = MfUltralightPollerEventTypeReadComplete;
+        instance->callback(mf_ul_poller_event, instance->context);
+    }
+}
+
+MfUltralightError mf_ultralight_poller_start(
+    MfUltralightPoller* instance,
+    MfUltralightPollerCallback callback,
+    void* context) {
+    furi_assert(instance);
+    furi_assert(instance->state == MfUltralightPollerStateIdle);
+    furi_assert(instance->nfca_poller);
+    furi_assert(callback);
+
+    instance->data = malloc(sizeof(MfUltralightData));
+    instance->buffer =
+        nfc_poller_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE, MF_ULTRALIGHT_MAX_BUFF_SIZE);
+
+    instance->callback = callback;
+    instance->context = context;
+
+    nfca_poller_start(instance->nfca_poller, mf_ultralight_nfca_poller_event_callback, instance);
+
+    return MfUltralightErrorNone;
+}
+
+MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance) {
+    furi_assert(instance);
+    furi_assert(instance->data);
+    furi_assert(instance->buffer);
+    furi_assert(instance->nfca_poller);
+
+    NfcaError error = nfca_poller_reset(instance->nfca_poller);
+
+    nfc_poller_buffer_free(instance->buffer);
+    instance->callback = NULL;
+    instance->context = NULL;
+    free(instance->data);
+    instance->state = MfUltralightPollerStateIdle;
+
+    return mf_ultralight_process_error(error);
+}
+
+// Called from NfcWorker thread
+
+MfUltralightError mf_ultralight_poller_stop(MfUltralightPoller* instance) {
+    furi_assert(instance);
+    furi_assert(instance->nfca_poller);
+
+    nfca_poller_stop(instance->nfca_poller);
+
+    return MfUltralightErrorNone;
 }
 
 MfUltralightError mf_ultralight_poller_read_page(

@@ -88,6 +88,8 @@ NfcError nfc_listener_sleep(Nfc* instance);
 
 void nfc_poller_abort(Nfc* instance);
 
+void nfc_listener_abort(Nfc* instance);
+
 // Called from worker thread
 
 void nfc_poller_stop(Nfc* instance);

@@ -76,7 +76,7 @@ bool nfc_scene_read_card_type_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         }
         if(event.event == SubmenuIndexReadNFCA) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaRead);
             consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneReadCardType, event.event);

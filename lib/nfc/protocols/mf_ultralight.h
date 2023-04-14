@@ -22,6 +22,8 @@ extern "C" {
 #define MF_ULTRALIGHT_COUNTER_NUM (3)
 #define MF_ULTRALIGHT_TEARING_FLAG_SIZE (1)
 #define MF_ULTRALIGHT_TEARING_FLAG_NUM (3)
+#define MF_ULTRALIGHT_AUTH_PASSWORD_SIZE (4)
+#define MF_ULTRALIGHT_AUTH_PACK_SIZE (2)
 
 typedef enum {
     MfUltralightErrorNone,
@@ -78,6 +80,14 @@ typedef struct {
 typedef struct {
     uint8_t data[MF_ULTRALIGHT_TEARING_FLAG_SIZE];
 } MfUltralightTearingFlag;
+
+typedef struct {
+    uint8_t data[MF_ULTRALIGHT_AUTH_PASSWORD_SIZE];
+} MfUltralightAuthPassword;
+
+typedef struct {
+    uint8_t data[MF_ULTRALIGHT_AUTH_PACK_SIZE];
+} MfUltralightAuthPack;
 
 typedef struct {
     NfcaData nfca_data;

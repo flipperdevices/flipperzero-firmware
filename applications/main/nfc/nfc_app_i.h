@@ -31,6 +31,7 @@
 
 #include <m-array.h>
 
+#include <lib/nfc/nfc.h>
 #include <lib/nfc/protocols/nfca_poller.h>
 #include <lib/nfc/protocols/nfca_listener.h>
 #include <lib/nfc/protocols/mf_ultralight_poller.h>
@@ -70,6 +71,7 @@ struct NfcApp {
     TextBox* text_box;
     Widget* widget;
 
+    Nfc* nfc;
     NfcaPoller* nfca_poller;
     NfcaListener* nfca_listener;
     MfUltralightPoller* mf_ul_poller;
@@ -91,8 +93,6 @@ typedef enum {
     NfcViewDictAttack,
     NfcViewDetectReader,
 } NfcView;
-
-NfcApp* nfc_alloc();
 
 int32_t nfc_task(void* p);
 

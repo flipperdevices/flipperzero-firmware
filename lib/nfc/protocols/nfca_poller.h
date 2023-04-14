@@ -1,8 +1,7 @@
 #pragma once
 
 #include "nfca.h"
-
-#include <stdbool.h>
+#include "nfc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +27,7 @@ typedef struct {
 
 typedef void (*NfcaPollerEventCallback)(NfcaPollerEvent event, void* context);
 
-NfcaPoller* nfca_poller_alloc();
+NfcaPoller* nfca_poller_alloc(Nfc* nfc);
 
 void nfca_poller_free(NfcaPoller* instance);
 
@@ -36,6 +35,10 @@ NfcaError
     nfca_poller_start(NfcaPoller* instance, NfcaPollerEventCallback callback, void* context);
 
 NfcaError nfca_poller_get_data(NfcaPoller* instance, NfcaData* data);
+
+NfcaError nfca_poller_reset(NfcaPoller* instance);
+
+// Called from NfcWorker thread
 
 NfcaError nfca_poller_stop(NfcaPoller* instance);
 

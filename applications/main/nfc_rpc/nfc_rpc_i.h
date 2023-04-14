@@ -15,6 +15,7 @@
 #include "assets/compiled/main.pb.h"
 #include <m-dict.h>
 
+#include <lib/nfc/nfc.h>
 #include <lib/nfc/protocols/nfca_poller.h>
 #include <lib/nfc/protocols/nfca_listener.h>
 #include <lib/nfc/protocols/mf_ultralight_poller.h>
@@ -51,10 +52,13 @@ struct NfcRpc {
     FuriMessageQueue* queue;
     ViewDispatcher* view_dispatcher;
     View* view;
-    NfcaListener* nfca_listener;
-    MfUltralightListener* mf_ul_listener;
-
     NfcRpcHandlerDict_t handlers;
+
+    Nfc* nfc;
+    NfcaPoller* nfca_poller;
+    NfcaListener* nfca_listener;
+    MfUltralightPoller* mf_ul_poller;
+    MfUltralightListener* mf_ul_listener;
 };
 
 typedef struct {

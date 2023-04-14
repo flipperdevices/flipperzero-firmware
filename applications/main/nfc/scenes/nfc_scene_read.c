@@ -23,7 +23,6 @@ void nfc_scene_read_on_enter(void* context) {
     popup_set_icon(nfc->popup, 0, 8, &I_NFC_manual_60x50);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 
-    nfc->nfca_poller = nfca_poller_alloc();
     nfca_poller_start(nfc->nfca_poller, nfc_scene_read_worker_callback, nfc);
 
     nfc_blink_read_start(nfc);
@@ -37,7 +36,6 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
         if(event.event == NfcWorkerEventReadUidNfcA) {
             notification_message(nfc->notifications, &sequence_success);
             nfca_poller_get_data(nfc->nfca_poller, &nfc->nfc_dev_data.nfca_data);
-            nfca_poller_free(nfc->nfca_poller);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaReadSuccess);
             DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
@@ -49,6 +47,7 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_read_on_exit(void* context) {
     NfcApp* nfc = context;
 
+    nfca_poller_reset(nfc->nfca_poller);
     // Clear view
     popup_reset(nfc->popup);
 

@@ -132,6 +132,12 @@ bool nfc_rpc_custom_event_callback(void* context, uint32_t event) {
 static NfcRpc* nfc_rpc_app_alloc() {
     NfcRpc* instance = malloc(sizeof(NfcRpc));
 
+    instance->nfc = nfc_alloc();
+    instance->nfca_poller = nfca_poller_alloc(instance->nfc);
+    instance->mf_ul_poller = mf_ultralight_poller_alloc(instance->nfca_poller);
+    instance->nfca_listener = nfca_listener_alloc(instance->nfc);
+    instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->nfca_listener);
+
     NfcRpcHandlerDict_init(instance->handlers);
     for(size_t i = 0; i < COUNT_OF(nfc_rpc_callbacks); i++) {
         if(nfc_rpc_callbacks[i].alloc) {
@@ -164,6 +170,12 @@ static NfcRpc* nfc_rpc_app_alloc() {
 
 void nfc_rpc_app_free(NfcRpc* instance) {
     furi_assert(instance);
+
+    mf_ultralight_listener_free(instance->mf_ul_listener);
+    mf_ultralight_poller_free(instance->mf_ul_poller);
+    nfca_listener_free(instance->nfca_listener);
+    nfca_poller_free(instance->nfca_poller);
+    nfc_free(instance->nfc);
 
     for(size_t i = 0; i < COUNT_OF(nfc_rpc_callbacks); i++) {
         if(nfc_rpc_callbacks[i].free) {

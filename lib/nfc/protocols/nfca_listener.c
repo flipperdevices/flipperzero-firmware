@@ -12,9 +12,9 @@ typedef enum {
 
 struct NfcaListener {
     Nfc* nfc;
-    NfcaData data;
+    NfcaData* data;
     NfcaListenerState state;
-    NfcaListenerCallback callback;
+    NfcaListenerEventCallback callback;
     void* context;
 };
 
@@ -71,43 +71,73 @@ static void nfca_listener_event_handler(NfcEvent event, void* context) {
                 nfca_listener_event.type = NfcaListenerEventTypeReceivedData;
                 nfca_listener_event.data.rx_bits = event.data.rx_bits;
             }
-            instance->callback(nfca_listener_event, instance->context);
+            if(instance->callback) {
+                instance->callback(nfca_listener_event, instance->context);
+            }
         }
     }
 }
 
-NfcaListener* nfca_listener_alloc(NfcaData* data) {
+NfcaListener* nfca_listener_alloc(Nfc* nfc) {
+    furi_assert(nfc);
+
     NfcaListener* instance = malloc(sizeof(NfcaListener));
-    instance->data = *data;
-    instance->nfc = nfc_alloc();
-    nfc_set_fdt_listen_fc(instance->nfc, NFCA_FDT_LISTEN_FC);
-    nfc_config(instance->nfc, NfcModeNfcaListener);
-    nfc_listener_set_col_res_data(
-        instance->nfc,
-        instance->data.uid,
-        instance->data.uid_len,
-        instance->data.atqa,
-        instance->data.sak);
-    nfc_start_worker(instance->nfc, nfca_listener_event_handler, instance);
+    instance->nfc = nfc;
 
     return instance;
 }
 
 void nfca_listener_free(NfcaListener* instance) {
     furi_assert(instance);
-    nfc_free(instance->nfc);
     free(instance);
 }
 
-NfcaError nfca_listener_set_callback(
+NfcaError nfca_listener_start(
     NfcaListener* instance,
-    NfcaListenerCallback callback,
+    NfcaData* data,
+    NfcaListenerEventCallback callback,
     void* context) {
     furi_assert(instance);
-    furi_assert(callback);
 
     instance->callback = callback;
     instance->context = context;
+
+    instance->data = malloc(sizeof(NfcaData));
+    *instance->data = *data;
+
+    nfc_set_fdt_listen_fc(instance->nfc, NFCA_FDT_LISTEN_FC);
+    nfc_config(instance->nfc, NfcModeNfcaListener);
+    nfc_listener_set_col_res_data(
+        instance->nfc,
+        instance->data->uid,
+        instance->data->uid_len,
+        instance->data->atqa,
+        instance->data->sak);
+    nfc_start_worker(instance->nfc, nfca_listener_event_handler, instance);
+
+    return NfcaErrorNone;
+}
+
+NfcaError nfca_listener_reset(NfcaListener* instance) {
+    furi_assert(instance);
+    furi_assert(instance->nfc);
+    furi_assert(instance->data);
+
+    nfc_listener_abort(instance->nfc);
+    free(instance->data);
+    instance->callback = NULL;
+    instance->context = NULL;
+    instance->state = NfcaListenerStateIdle;
+
+    return NfcaErrorNone;
+}
+
+NfcaError nfca_listener_get_data(NfcaListener* instance, NfcaData* data) {
+    furi_assert(instance);
+    furi_assert(data);
+    furi_assert(instance->data);
+
+    *data = *instance->data;
 
     return NfcaErrorNone;
 }

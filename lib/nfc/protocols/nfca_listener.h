@@ -1,6 +1,7 @@
 #pragma once
 
 #include "nfca.h"
+#include <nfc/nfc.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,16 +28,23 @@ typedef struct {
     NfcaListenerEventData data;
 } NfcaListenerEvent;
 
-typedef void (*NfcaListenerCallback)(NfcaListenerEvent event, void* context);
+typedef void (*NfcaListenerEventCallback)(NfcaListenerEvent event, void* context);
 
-NfcaListener* nfca_listener_alloc(NfcaData* data);
+NfcaListener* nfca_listener_alloc(Nfc* nfc);
 
 void nfca_listener_free(NfcaListener* instance);
 
-NfcaError nfca_listener_set_callback(
+NfcaError nfca_listener_start(
     NfcaListener* instance,
-    NfcaListenerCallback callback,
+    NfcaData* data,
+    NfcaListenerEventCallback callback,
     void* context);
+
+NfcaError nfca_listener_get_data(NfcaListener* instance, NfcaData* data);
+
+NfcaError nfca_listener_reset(NfcaListener* instance);
+
+// Called from NfcWorker thread
 
 NfcaError nfca_listener_sleep(NfcaListener* instance);
 

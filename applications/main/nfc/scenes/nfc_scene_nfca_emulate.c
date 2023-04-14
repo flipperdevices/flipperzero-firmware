@@ -69,8 +69,11 @@ void nfc_scene_nfca_emulate_on_enter(void* context) {
     text_box_set_focus(text_box, TextBoxFocusEnd);
     furi_string_reset(nfc->text_box_store);
 
-    nfc->nfca_listener = nfca_listener_alloc(&nfc->nfc_dev_data.nfca_data);
-    nfca_listener_set_callback(nfc->nfca_listener, nfc_scene_nfca_emulate_worker_callback, nfc);
+    nfca_listener_start(
+        nfc->nfca_listener,
+        &nfc->nfc_dev_data.nfca_data,
+        nfc_scene_nfca_emulate_worker_callback,
+        nfc);
 
     // Set Widget state and view
     scene_manager_set_scene_state(
@@ -120,7 +123,7 @@ bool nfc_scene_nfca_emulate_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_nfca_emulate_on_exit(void* context) {
     NfcApp* nfc = context;
 
-    nfca_listener_free(nfc->nfca_listener);
+    nfca_listener_reset(nfc->nfca_listener);
 
     // Clear view
     widget_reset(nfc->widget);

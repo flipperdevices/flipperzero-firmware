@@ -43,7 +43,7 @@ struct NfcaPoller {
     Nfc* nfc;
     NfcaPollerState state;
     NfcaPollerColRes col_res;
-    NfcaData data;
+    NfcaData* data;
     NfcaPollerEventCallback callback;
     void* context;
 };
@@ -136,13 +136,11 @@ static NfcaError nfca_poller_prepare_trx(NfcaPoller* instance) {
     return ret;
 }
 
-NfcaPoller* nfca_poller_alloc() {
+NfcaPoller* nfca_poller_alloc(Nfc* nfc) {
+    furi_assert(nfc);
+
     NfcaPoller* instance = malloc(sizeof(NfcaPoller));
-    instance->nfc = nfc_alloc();
-    nfc_config(instance->nfc, NfcModeNfcaPoller);
-    nfc_set_guard_time_us(instance->nfc, NFCA_GUARD_TIME_US);
-    nfc_set_fdt_poll_fc(instance->nfc, NFCA_FDT_POLL_FC);
-    nfc_set_fdt_poll_poll_us(instance->nfc, NFCA_POLL_POLL_MIN_US);
+    instance->nfc = nfc;
 
     return instance;
 }
@@ -152,7 +150,6 @@ void nfca_poller_free(NfcaPoller* instance) {
     furi_assert(instance->nfc);
 
     nfc_poller_abort(instance->nfc);
-    nfc_free(instance->nfc);
     free(instance);
 }
 
@@ -187,9 +184,17 @@ NfcaError
     nfca_poller_start(NfcaPoller* instance, NfcaPollerEventCallback callback, void* context) {
     furi_assert(instance);
     furi_assert(callback);
+    furi_assert(instance->nfc);
 
     instance->callback = callback;
     instance->context = context;
+
+    instance->data = malloc(sizeof(NfcaData));
+    nfc_config(instance->nfc, NfcModeNfcaPoller);
+    nfc_set_guard_time_us(instance->nfc, NFCA_GUARD_TIME_US);
+    nfc_set_fdt_poll_fc(instance->nfc, NFCA_FDT_POLL_FC);
+    nfc_set_fdt_poll_poll_us(instance->nfc, NFCA_POLL_POLL_MIN_US);
+
     nfc_start_worker(instance->nfc, nfca_poller_event_callback, instance);
 
     return NfcaErrorNone;
@@ -197,12 +202,30 @@ NfcaError
 
 NfcaError nfca_poller_get_data(NfcaPoller* instance, NfcaData* data) {
     furi_assert(instance);
+    furi_assert(instance->data);
     furi_assert(data);
 
-    *data = instance->data;
+    *data = *instance->data;
 
     return NfcaErrorNone;
 }
+
+NfcaError nfca_poller_reset(NfcaPoller* instance) {
+    furi_assert(instance);
+    furi_assert(instance->data);
+
+    nfc_poller_abort(instance->nfc);
+
+    instance->callback = NULL;
+    instance->context = NULL;
+    memset(&instance->col_res, 0, sizeof(NfcaPollerColRes));
+    instance->state = NfcaPollerStateIdle;
+    free(instance->data);
+    instance->data = NULL;
+
+    return NfcaErrorNone;
+}
+
 
 NfcaError nfca_poller_check_presence(NfcaPoller* instance) {
     furi_assert(instance);
@@ -248,7 +271,7 @@ NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
 
     // Reset Nfca poller state
     memset(&instance->col_res, 0, sizeof(instance->col_res));
-    memset(&instance->data, 0, sizeof(instance->data));
+    memset(instance->data, 0, sizeof(NfcaData));
 
     // Halt if necessary
     if(instance->state != NfcaPollerStateIdle) {
@@ -280,7 +303,7 @@ NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
             break;
         }
         memcpy(
-            instance->data.atqa, &instance->col_res.sens_resp, sizeof(instance->col_res.sel_resp));
+            instance->data->atqa, &instance->col_res.sens_resp, sizeof(instance->col_res.sel_resp));
 
         instance->state = NfcaPollerColResInProgress;
         instance->col_res.cascade_level = 0;
@@ -349,20 +372,20 @@ NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
                 if(instance->col_res.sel_req.nfcid[0] == NFCA_POLLER_SDD_CL) {
                     // Copy part of UID
                     memcpy(
-                        &instance->data.uid[instance->data.uid_len],
+                        &instance->data->uid[instance->data->uid_len],
                         &instance->col_res.sel_req.nfcid[1],
                         3);
-                    instance->data.uid_len += 3;
+                    instance->data->uid_len += 3;
                     instance->col_res.cascade_level++;
                     instance->col_res.state = NfcaPollerColResStateStateNewCascade;
                 } else {
                     FURI_LOG_T(TAG, "Col resolution complete");
-                    instance->data.sak = instance->col_res.sel_resp.sak;
+                    instance->data->sak = instance->col_res.sel_resp.sak;
                     memcpy(
-                        &instance->data.uid[instance->data.uid_len],
+                        &instance->data->uid[instance->data->uid_len],
                         &instance->col_res.sel_req.nfcid[0],
                         4);
-                    instance->data.uid_len += 4;
+                    instance->data->uid_len += 4;
                     instance->col_res.state = NfcaPollerColResStateStateSuccess;
                     instance->state = NfcaPollerActivated;
                 }
@@ -372,7 +395,7 @@ NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
     } while(false);
 
     if(activated && nfca_data) {
-        *nfca_data = instance->data;
+        *nfca_data = *instance->data;
     }
 
     return ret;
@@ -383,7 +406,6 @@ NfcaError nfca_poller_stop(NfcaPoller* instance) {
     furi_assert(instance->nfc);
 
     nfc_poller_stop(instance->nfc);
-
     return NfcaErrorNone;
 }
 
@@ -462,7 +484,7 @@ NfcaError nfca_poller_activate_sync(NfcaPoller* instance, NfcaData* nfca_data) {
     furi_thread_flags_wait(NFCA_POLLER_FLAG_COMMAND_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
     furi_thread_flags_clear(NFCA_POLLER_FLAG_COMMAND_COMPLETE);
     if(context.error == NfcaErrorNone) {
-        *nfca_data = instance->data;
+        *nfca_data = *instance->data;
     }
 
     return context.error;
