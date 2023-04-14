@@ -145,14 +145,14 @@ void hci_notify_asynch_evt(void* pdata) {
 
 void hci_cmd_resp_release(uint32_t flag) {
     UNUSED(flag);
-    FURI_LOG_D(TAG, "hci_cmd_resp_release(flag:%lu), app: %p", flag, ble_app);
+    // FURI_LOG_D(TAG, "hci_cmd_resp_release(flag:%lu), app: %p", flag, ble_app);
     furi_check(ble_app);
     furi_semaphore_release(ble_app->hci_sem);
 }
 
 void hci_cmd_resp_wait(uint32_t timeout) {
     UNUSED(timeout);
-    FURI_LOG_D(TAG, "hci_cmd_resp_wait(timeout:%lu), app: %p", timeout, ble_app);
+    // FURI_LOG_D(TAG, "hci_cmd_resp_wait(timeout:%lu), app: %p", timeout, ble_app);
     furi_check(ble_app);
     furi_semaphore_acquire(ble_app->hci_sem, FuriWaitForever);
 }
