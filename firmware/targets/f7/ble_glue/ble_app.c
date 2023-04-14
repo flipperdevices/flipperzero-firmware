@@ -40,7 +40,7 @@ bool ble_app_init() {
     ble_app->hci_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
     ble_app->hci_sem = furi_semaphore_alloc(1, 0);
     // HCI transport layer thread to handle user asynch events
-    ble_app->thread = furi_thread_alloc_ex("BleHciDriver", 1024, ble_app_hci_thread, ble_app);
+    ble_app->thread = furi_thread_alloc_ex("BleHciDriver", 2048, ble_app_hci_thread, ble_app);
     furi_thread_start(ble_app->thread);
 
     // Initialize Ble Transport Layer
