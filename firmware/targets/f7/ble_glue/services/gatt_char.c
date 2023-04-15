@@ -10,7 +10,7 @@ bool flipper_gatt_characteristic_props_const_char(
     uint16_t* data_len) {
     const char* str = (const char*)context;
     *data = (const uint8_t*)str;
-    *data_len = strlen(str);
+    *data_len = (uint16_t)strlen(str);
     return false;
 }
 
@@ -39,9 +39,9 @@ void flipper_gatt_characteristic_init(
         char_descriptor->uuid_type,
         &char_descriptor->uuid,
         char_data_size,
-        char_descriptor->properties,
-        char_descriptor->permissions,
-        char_descriptor->evt_mask,
+        char_descriptor->char_properties,
+        char_descriptor->security_permissions,
+        char_descriptor->gatt_evt_mask,
         10,
         char_descriptor->is_variable,
         &char_instance->handle);
@@ -69,7 +69,7 @@ void flipper_gatt_characteristic_init(
             char_data,
             char_data_descriptor->security_permissions,
             char_data_descriptor->access_permissions,
-            char_data_descriptor->evt_mask,
+            char_data_descriptor->gatt_evt_mask,
             7,
             char_data_descriptor->is_variable,
             &char_instance->descriptor_handle);
@@ -82,7 +82,7 @@ void flipper_gatt_characteristic_init(
     }
 }
 
-void flipper_gatt_characteristic_deinit(
+void flipper_gatt_characteristic_delete(
     uint16_t svc_handle,
     FlipperGattCharacteristicInstance* char_instance) {
     tBleStatus status = aci_gatt_del_char(svc_handle, char_instance->handle);

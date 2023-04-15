@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <ble/ble.h>
 
@@ -22,22 +23,21 @@ typedef enum {
 
 typedef struct {
     Char_Desc_Uuid_t uuid;
-    uint8_t uuid_type;
-    uint8_t max_length;
     struct {
         FlipperGattCharacteristicPropsCallback fn;
         const void* context;
     } value_callback;
+    uint8_t uuid_type;
+    uint8_t max_length;
     uint8_t security_permissions;
     uint8_t access_permissions;
-    uint8_t evt_mask;
+    uint8_t gatt_evt_mask;
     uint8_t is_variable;
 } FlipperGattCharacteristicDescriptorParams;
 
 typedef struct {
     const char* name;
     FlipperGattCharacteristicDescriptorParams* descriptor_params;
-    FlipperGattCharacteristicDataType data_prop_type;
     union {
         struct {
             const uint8_t* ptr;
@@ -49,12 +49,18 @@ typedef struct {
         } callback;
     } data_prop;
     Char_UUID_t uuid;
-    uint8_t uuid_type;
-    uint8_t properties;
-    uint8_t permissions;
-    uint8_t evt_mask;
-    uint8_t is_variable;
+    // Some packed bitfields to save space
+    FlipperGattCharacteristicDataType data_prop_type : 1;
+    uint8_t is_variable : 1;
+    uint8_t uuid_type : 2;
+    uint8_t char_properties;
+    uint8_t security_permissions;
+    uint8_t gatt_evt_mask;
 } FlipperGattCharacteristicParams;
+
+_Static_assert(
+    sizeof(FlipperGattCharacteristicParams) == 36,
+    "FlipperGattCharacteristicParams size must be 36 bytes");
 
 typedef struct {
     const FlipperGattCharacteristicParams* characteristic;
@@ -72,7 +78,7 @@ void flipper_gatt_characteristic_init(
     const FlipperGattCharacteristicParams* char_descriptor,
     FlipperGattCharacteristicInstance* char_instance);
 
-void flipper_gatt_characteristic_deinit(
+void flipper_gatt_characteristic_delete(
     uint16_t svc_handle,
     FlipperGattCharacteristicInstance* char_instance);
 

@@ -53,9 +53,9 @@ static const FlipperGattCharacteristicParams battery_svc_chars[BatterySvcGattCha
           .data_prop.fixed.length = 1,
           .uuid.Char_UUID_16 = BATTERY_LEVEL_CHAR_UUID,
           .uuid_type = UUID_TYPE_16,
-          .properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
-          .permissions = ATTR_PERMISSION_AUTHEN_READ,
-          .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+          .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
           .is_variable = CHAR_VALUE_LEN_CONSTANT},
      [BatterySvcGattCharacteristicPowerState] = {
          .name = "Power State",
@@ -63,9 +63,9 @@ static const FlipperGattCharacteristicParams battery_svc_chars[BatterySvcGattCha
          .data_prop.fixed.length = 1,
          .uuid.Char_UUID_16 = BATTERY_POWER_STATE,
          .uuid_type = UUID_TYPE_16,
-         .properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
-         .permissions = ATTR_PERMISSION_AUTHEN_READ,
-         .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+         .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+         .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
          .is_variable = CHAR_VALUE_LEN_CONSTANT}};
 
 typedef struct {
@@ -97,7 +97,7 @@ void battery_svc_stop() {
     tBleStatus status;
     if(battery_svc) {
         for(size_t i = 0; i < BatterySvcGattCharacteristicCount; i++) {
-            flipper_gatt_characteristic_deinit(battery_svc->svc_handle, &battery_svc->chars[i]);
+            flipper_gatt_characteristic_delete(battery_svc->svc_handle, &battery_svc->chars[i]);
         }
         // Delete Battery service
         status = aci_gatt_del_service(battery_svc->svc_handle);

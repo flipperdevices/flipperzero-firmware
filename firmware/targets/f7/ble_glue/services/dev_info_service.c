@@ -59,9 +59,9 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
           .data_prop.callback.fn = flipper_gatt_characteristic_props_const_char,
           .uuid.Char_UUID_16 = MANUFACTURER_NAME_UUID,
           .uuid_type = UUID_TYPE_16,
-          .properties = CHAR_PROP_READ,
-          .permissions = ATTR_PERMISSION_AUTHEN_READ,
-          .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+          .char_properties = CHAR_PROP_READ,
+          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
           .is_variable = CHAR_VALUE_LEN_CONSTANT},
      [DevInfoSvcGattCharacteristicSerial] =
          {.name = "Serial Number",
@@ -70,9 +70,9 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
           .data_prop.callback.fn = flipper_gatt_characteristic_props_const_char,
           .uuid.Char_UUID_16 = SERIAL_NUMBER_UUID,
           .uuid_type = UUID_TYPE_16,
-          .properties = CHAR_PROP_READ,
-          .permissions = ATTR_PERMISSION_AUTHEN_READ,
-          .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+          .char_properties = CHAR_PROP_READ,
+          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
           .is_variable = CHAR_VALUE_LEN_CONSTANT},
      [DevInfoSvcGattCharacteristicFirmwareRev] =
          {.name = "Firmware Revision",
@@ -81,9 +81,9 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
           .data_prop.callback.fn = dev_info_char_firmware_rev_callback,
           .uuid.Char_UUID_16 = FIRMWARE_REVISION_UUID,
           .uuid_type = UUID_TYPE_16,
-          .properties = CHAR_PROP_READ,
-          .permissions = ATTR_PERMISSION_AUTHEN_READ,
-          .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+          .char_properties = CHAR_PROP_READ,
+          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
           .is_variable = CHAR_VALUE_LEN_CONSTANT},
      [DevInfoSvcGattCharacteristicSoftwareRev] =
          {.name = "Software Revision",
@@ -92,9 +92,9 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
           .data_prop.callback.fn = dev_info_char_software_rev_callback,
           .uuid.Char_UUID_16 = SOFTWARE_REVISION_UUID,
           .uuid_type = UUID_TYPE_16,
-          .properties = CHAR_PROP_READ,
-          .permissions = ATTR_PERMISSION_AUTHEN_READ,
-          .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+          .char_properties = CHAR_PROP_READ,
+          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+          .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
           .is_variable = CHAR_VALUE_LEN_CONSTANT},
      [DevInfoSvcGattCharacteristicRpcVersion] = {
          .name = "RPC Version",
@@ -119,9 +119,9 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
               0xf6,
               0x03},
          .uuid_type = UUID_TYPE_128,
-         .properties = CHAR_PROP_READ,
-         .permissions = ATTR_PERMISSION_AUTHEN_READ,
-         .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+         .char_properties = CHAR_PROP_READ,
+         .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
          .is_variable = CHAR_VALUE_LEN_CONSTANT}};
 
 void dev_info_svc_start() {
@@ -167,7 +167,7 @@ void dev_info_svc_stop() {
         furi_string_free(dev_info_svc->version_string);
         // Delete service characteristics
         for(size_t i = 0; i < DevInfoSvcGattCharacteristicCount; i++) {
-            flipper_gatt_characteristic_deinit(
+            flipper_gatt_characteristic_delete(
                 dev_info_svc->service_handle, &dev_info_svc->characteristics[i]);
         }
         // Delete service

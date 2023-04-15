@@ -38,9 +38,9 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
               0xed,
               0x19},
          .uuid_type = UUID_TYPE_128,
-         .properties = CHAR_PROP_READ | CHAR_PROP_INDICATE,
-         .permissions = ATTR_PERMISSION_AUTHEN_READ,
-         .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+         .char_properties = CHAR_PROP_READ | CHAR_PROP_INDICATE,
+         .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
          .is_variable = CHAR_VALUE_LEN_VARIABLE},
     [SerialSvcGattCharacteristicRx] =
         {.name = "RX",
@@ -64,9 +64,9 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
               0xed,
               0x19},
          .uuid_type = UUID_TYPE_128,
-         .properties = CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE | CHAR_PROP_READ,
-         .permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
-         .evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
+         .char_properties = CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE | CHAR_PROP_READ,
+         .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
+         .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
          .is_variable = CHAR_VALUE_LEN_VARIABLE},
     [SerialSvcGattCharacteristicFlowCtrl] =
         {.name = "Flow control",
@@ -90,9 +90,9 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
               0xed,
               0x19},
          .uuid_type = UUID_TYPE_128,
-         .properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
-         .permissions = ATTR_PERMISSION_AUTHEN_READ,
-         .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+         .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+         .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
+         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
          .is_variable = CHAR_VALUE_LEN_CONSTANT},
     [SerialSvcGattCharacteristicStatus] = {
         .name = "RPC status",
@@ -116,9 +116,9 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
              0xed,
              0x19},
         .uuid_type = UUID_TYPE_128,
-        .properties = CHAR_PROP_READ | CHAR_PROP_WRITE | CHAR_PROP_NOTIFY,
-        .permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
-        .evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
+        .char_properties = CHAR_PROP_READ | CHAR_PROP_WRITE | CHAR_PROP_NOTIFY,
+        .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
+        .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
         .is_variable = CHAR_VALUE_LEN_CONSTANT}};
 
 typedef struct {
@@ -274,7 +274,7 @@ void serial_svc_stop() {
     tBleStatus status;
     if(serial_svc) {
         for(uint8_t i = 0; i < SerialSvcGattCharacteristicCount; i++) {
-            flipper_gatt_characteristic_deinit(serial_svc->svc_handle, &serial_svc->chars[i]);
+            flipper_gatt_characteristic_delete(serial_svc->svc_handle, &serial_svc->chars[i]);
         }
         // Delete service
         status = aci_gatt_del_service(serial_svc->svc_handle);

@@ -36,9 +36,9 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .data_prop.fixed.length = 1,
          .uuid.Char_UUID_16 = PROTOCOL_MODE_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
-         .properties = CHAR_PROP_READ | CHAR_PROP_WRITE_WITHOUT_RESP,
-         .permissions = ATTR_PERMISSION_NONE,
-         .evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
+         .char_properties = CHAR_PROP_READ | CHAR_PROP_WRITE_WITHOUT_RESP,
+         .security_permissions = ATTR_PERMISSION_NONE,
+         .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
          .is_variable = CHAR_VALUE_LEN_CONSTANT},
     [HidSvcGattCharacteristicReportMap] =
         {.name = "Report Map",
@@ -46,9 +46,9 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .data_prop.fixed.length = HID_SVC_REPORT_MAP_MAX_LEN,
          .uuid.Char_UUID_16 = REPORT_MAP_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
-         .properties = CHAR_PROP_READ,
-         .permissions = ATTR_PERMISSION_NONE,
-         .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+         .char_properties = CHAR_PROP_READ,
+         .security_permissions = ATTR_PERMISSION_NONE,
+         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
          .is_variable = CHAR_VALUE_LEN_VARIABLE},
     [HidSvcGattCharacteristicInfo] =
         {.name = "HID Information",
@@ -56,9 +56,9 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .data_prop.fixed.length = HID_SVC_INFO_LEN,
          .uuid.Char_UUID_16 = HID_INFORMATION_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
-         .properties = CHAR_PROP_READ,
-         .permissions = ATTR_PERMISSION_NONE,
-         .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+         .char_properties = CHAR_PROP_READ,
+         .security_permissions = ATTR_PERMISSION_NONE,
+         .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
          .is_variable = CHAR_VALUE_LEN_CONSTANT},
     [HidSvcGattCharacteristicCtrlPoint] =
         {.name = "HID Control Point",
@@ -66,9 +66,9 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .data_prop.fixed.length = HID_SVC_CONTROL_POINT_LEN,
          .uuid.Char_UUID_16 = HID_CONTROL_POINT_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
-         .properties = CHAR_PROP_WRITE_WITHOUT_RESP,
-         .permissions = ATTR_PERMISSION_NONE,
-         .evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
+         .char_properties = CHAR_PROP_WRITE_WITHOUT_RESP,
+         .security_permissions = ATTR_PERMISSION_NONE,
+         .gatt_evt_mask = GATT_NOTIFY_ATTRIBUTE_WRITE,
          .is_variable = CHAR_VALUE_LEN_CONSTANT},
 };
 
@@ -79,7 +79,7 @@ static const FlipperGattCharacteristicDescriptorParams hid_svc_char_descr_templa
     .value_callback.fn = hid_svc_char_desc_data_callback,
     .security_permissions = ATTR_PERMISSION_NONE,
     .access_permissions = ATTR_ACCESS_READ_WRITE,
-    .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+    .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
     .is_variable = CHAR_VALUE_LEN_CONSTANT,
 };
 
@@ -88,9 +88,9 @@ static const FlipperGattCharacteristicParams hid_svc_report_template = {
     .data_prop.fixed.length = HID_SVC_REPORT_MAX_LEN,
     .uuid.Char_UUID_16 = REPORT_CHAR_UUID,
     .uuid_type = UUID_TYPE_16,
-    .properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
-    .permissions = ATTR_PERMISSION_NONE,
-    .evt_mask = GATT_DONT_NOTIFY_EVENTS,
+    .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
+    .security_permissions = ATTR_PERMISSION_NONE,
+    .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
     .is_variable = CHAR_VALUE_LEN_VARIABLE,
 };
 
@@ -242,7 +242,7 @@ void hid_svc_stop() {
     if(hid_svc) {
         // Delete characteristics
         for(size_t i = 0; i < HidSvcGattCharacteristicCount; i++) {
-            flipper_gatt_characteristic_deinit(hid_svc->svc_handle, &hid_svc->chars[i]);
+            flipper_gatt_characteristic_delete(hid_svc->svc_handle, &hid_svc->chars[i]);
         }
 
         typedef struct {
@@ -258,7 +258,7 @@ void hid_svc_stop() {
 
         for(size_t i = 0; i < COUNT_OF(hid_report_chars); i++) {
             for(size_t j = 0; j < hid_report_chars[i].report_count; j++) {
-                flipper_gatt_characteristic_deinit(
+                flipper_gatt_characteristic_delete(
                     hid_svc->svc_handle, &hid_report_chars[i].chars[j]);
             }
         }
