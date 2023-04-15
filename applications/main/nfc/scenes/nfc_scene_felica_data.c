@@ -34,7 +34,8 @@ void nfc_scene_felica_data_on_enter(void* context) {
         FelicaSystem* system = state->selected_system;
         FuriString* header = furi_string_alloc_printf("%04X/", system->code);
 
-        FelicaNode* root = &system->root;
+        FelicaNode* root = felica_std_get_root_node(system);
+        furi_assert(root != NULL);
         furi_assert(root->type == FelicaNodeTypeArea);
         FelicaArea* area = root->area;
         if(FelicaAreaPath_size(state->selected_areas) > 0) {
@@ -52,8 +53,10 @@ void nfc_scene_felica_data_on_enter(void* context) {
         furi_string_free(header);
 
         for
-            M_EACH(node, area->nodes, FelicaNodeArray_t) {
+            M_EACH(inode, area->nodes, FelicaINodeArray_t) {
                 FuriString* node_name = furi_string_alloc();
+                FelicaNode* node = felica_std_inode_lookup(system, *inode);
+                furi_assert(node != NULL);
                 if(node->type == FelicaNodeTypeArea) {
                     furi_string_printf(node_name, "Area %d", node->area->number);
                     submenu_add_item(
@@ -110,14 +113,17 @@ bool nfc_scene_felica_data_on_event(void* context, SceneManagerEvent event) {
         } else {
             FelicaNode* selected_node = NULL;
 
-            FelicaNode* root = &(state->selected_system->root);
+            FelicaNode* root = felica_std_get_root_node(state->selected_system);
+            furi_assert(root != NULL);
             furi_assert(root->type == FelicaNodeTypeArea);
 
             if(FelicaAreaPath_size(state->selected_areas) == 0) {
-                selected_node = FelicaNodeArray_get(root->area->nodes, index);
+                selected_node = felica_std_inode_lookup(
+                    state->selected_system, *FelicaINodeArray_get(root->area->nodes, index));
             } else {
                 FelicaArea* current_area = *FelicaAreaPath_back(state->selected_areas);
-                selected_node = FelicaNodeArray_get(current_area->nodes, index);
+                selected_node = felica_std_inode_lookup(
+                    state->selected_system, *FelicaINodeArray_get(current_area->nodes, index));
             }
 
             if(selected_node->type == FelicaNodeTypeArea) {

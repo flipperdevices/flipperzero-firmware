@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,11.15,,
+Version,+,11.18,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -804,6 +804,7 @@ Function,-,felica_area_clear,void,FelicaArea*
 Function,-,felica_check_ic_type,_Bool,uint8_t*
 Function,-,felica_clear,void,FelicaData*
 Function,-,felica_define_normal_block,void,"FelicaService*, uint16_t, uint8_t*"
+Function,-,felica_describe_node,FuriString*,FelicaNode*
 Function,-,felica_estimate_timing_us,uint_least32_t,"uint_least8_t, uint_least8_t"
 Function,-,felica_get_ic_type,FelicaICType,uint8_t*
 Function,-,felica_get_service_name,FuriString*,FelicaService*
@@ -814,8 +815,8 @@ Function,-,felica_lite_dump_data,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, F
 Function,-,felica_lite_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, _Bool, const uint8_t*, uint8_t"
 Function,-,felica_lite_prepare_unencrypted_write,uint8_t,"uint8_t*, const FelicaReader*, const uint8_t*, uint8_t, const uint8_t*"
 Function,-,felica_node_clear,void,FelicaNode*
-Function,-,felica_node_init_as_area,void,"FelicaNode*, FelicaNode*, uint16_t, _Bool, uint16_t"
-Function,-,felica_node_init_as_service,void,"FelicaNode*, FelicaNode*, uint16_t, FelicaServiceType"
+Function,-,felica_node_init_as_area,void,"FelicaNode*, FelicaINode, uint16_t, _Bool, uint16_t"
+Function,-,felica_node_init_as_service,void,"FelicaNode*, FelicaINode, uint16_t, FelicaServiceType"
 Function,-,felica_parse_search_service_code,_Bool,"uint8_t*, uint8_t, FelicaReader*, FelicaSearchServiceCodeResult*"
 Function,-,felica_parse_unencrypted_read,uint16_t,"uint8_t*, uint8_t, FelicaReader*, uint8_t*, uint16_t"
 Function,-,felica_parse_unencrypted_write,_Bool,"uint8_t*, uint8_t, FelicaReader*"
@@ -827,9 +828,13 @@ Function,-,felica_read_card,_Bool,"FuriHalNfcTxRxContext*, FelicaData*, uint8_t*
 Function,-,felica_service_clear,void,FelicaService*
 Function,-,felica_std_dump_data,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, FelicaData*"
 Function,-,felica_std_dump_public_service,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, FelicaService*, uint16_t"
+Function,-,felica_std_get_root_node,FelicaNode*,FelicaSystem*
+Function,-,felica_std_inode_lookup,FelicaNode*,"FelicaSystem*, FelicaINode"
 Function,-,felica_std_request_system_code,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, FelicaSystemArray_t*"
 Function,-,felica_std_select_system,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, uint16_t"
+Function,-,felica_std_system_init,void,"FelicaSystem*, uint8_t, uint16_t"
 Function,-,felica_std_traverse_system,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, FelicaSystem*"
+Function,-,felica_system_init,void,"FelicaSystem*, uint8_t, uint16_t"
 Function,-,feof,int,FILE*
 Function,-,feof_unlocked,int,FILE*
 Function,-,ferror,int,FILE*

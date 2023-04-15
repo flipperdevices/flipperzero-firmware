@@ -75,6 +75,12 @@
 #define FELICA_SEARCH_SERVICE_CODE_RES 0x0b
 #define FELICA_REQUEST_SYSTEM_CODE_RES 0x0d
 
+#define FELICA_INODE_INVALID -1
+#define FELICA_INODE_MAX 0xffff
+#define FELICA_INODE_MASK 0xffff
+
+typedef ssize_t FelicaINode;
+
 typedef enum {
     FelicaICTypeRC_SA24_10K, // RC-SA24/1x
     FelicaICTypeRC_SA24_6K, // RC-SA24/1x1
@@ -168,8 +174,8 @@ typedef struct _FelicaNode_s FelicaNode;
 struct _FelicaNode_s {
     /** Node type. */
     FelicaNodeType type;
-    /** Borrowed pointer to its parent node. */
-    FelicaNode* parent;
+    /** inode number of the parent node. */
+    FelicaINode parent;
     union {
         /** (Area/dir type only) The area struct. */
         FelicaArea* area;
@@ -189,25 +195,26 @@ typedef struct {
     uint8_t service_index;
 } FelicaRWRequestBlockDescriptor;
 
-// TODO properly remove this
-//ARRAY_DEF(FelicaNodeList, FelicaNode*, M_PTR_OPLIST)
 ARRAY_DEF(FelicaNodeArray, FelicaNode, M_POD_OPLIST)
 #define M_OPL_FelicaNodeArray_t() ARRAY_OPLIST(FelicaNodeArray, M_POD_OPLIST)
+
+ARRAY_DEF(FelicaINodeArray, FelicaINode)
+#define M_OPL_FelicaINodeArray_t() ARRAY_OPLIST(FelicaINodeArray)
 
 ARRAY_DEF(FelicaNodeRefArray, FelicaNode*, M_PTR_OPLIST)
 #define M_OPL_FelicaNodeRefArray_t() ARRAY_OPLIST(FelicaNodeRefArray, M_PTR_OPLIST)
 
-// { service_code: service_ptr_in_tree }
-DICT_DEF2(FelicaPublicServiceDict, uint16_t, M_DEFAULT_OPLIST, FelicaService*, M_PTR_OPLIST)
+// { service_code: service_inode }
+DICT_DEF2(FelicaPublicServiceDict, uint16_t, M_DEFAULT_OPLIST, FelicaINode, M_POD_OPLIST)
 #define M_OPL_FelicaPublicServiceDict_t() \
-    DICT_OPLIST(FelicaPublicServiceDict, M_DEFAULT_OPLIST, M_PTR_OPLIST)
+    DICT_OPLIST(FelicaPublicServiceDict, M_DEFAULT_OPLIST, M_POD_OPLIST)
 
 struct _FelicaArea_t {
     uint16_t number;
     bool can_create_subareas;
     uint16_t end_service_code;
 
-    FelicaNodeArray_t nodes;
+    FelicaINodeArray_t nodes;
 };
 
 typedef struct {
@@ -235,17 +242,13 @@ typedef struct _FelicaSystem_t {
     bool is_lite;
     /** FeliCa system code. */
     uint16_t code;
-    /** System IDm with system index bitfield properly set. */
-    uint8_t idm[8];
-    /** Cached card PMm. */
-    uint8_t pmm[8];
 
     union {
         /** (For FeliCa Lite only) Card content. */
         FelicaLiteInfo lite_info;
         struct {
-            /** (For FeliCa Standard only) The root of the raw filesystem tree. */
-            FelicaNode root;
+            /** (For FeliCa Standard only) Nodes. */
+            FelicaNodeArray_t nodes;
             /** (For FeliCa Standard only) Shortcut for all publicly accessible services for quick
              *  access by card parsers. */
             FelicaPublicServiceDict_t public_services;
@@ -362,6 +365,19 @@ bool felica_lite_dump_data(
     FelicaData* data,
     FelicaSystem* system);
 
+/** Find a node by inode number.
+ *
+ * @param system Felica Standard system object.
+ * @param inode inode number. Must be positive.
+ * @return The node, or NULL when it doesn't exist.
+ */
+FelicaNode* felica_std_inode_lookup(FelicaSystem* system, FelicaINode inode);
+/** Get the root area node (inode 0).
+ *
+ * @param system Felica Standard system object.
+ * @return The node, or NULL when it doesn't exist.
+ */
+FelicaNode* felica_std_get_root_node(FelicaSystem* system);
 /** Select a system.
  * @param tx_rx NFC context.
  * @param reader FeliCa reader context.
@@ -427,15 +443,17 @@ void felica_clear(FelicaData* data);
 
 void felica_service_clear(FelicaService* service);
 void felica_lite_clear(FelicaLiteInfo* lite_info);
+void felica_system_init(FelicaSystem* system, uint8_t number, uint16_t code);
+void felica_std_system_init(FelicaSystem* system, uint8_t number, uint16_t code);
 void felica_node_init_as_area(
     FelicaNode* node,
-    FelicaNode* parent,
+    FelicaINode parent,
     uint16_t area_number,
     bool can_create_subareas,
     uint16_t end_service_code);
 void felica_node_init_as_service(
     FelicaNode* node,
-    FelicaNode* parent,
+    FelicaINode parent,
     uint16_t service_number,
     FelicaServiceType service_type);
 void felica_area_clear(FelicaArea* area);

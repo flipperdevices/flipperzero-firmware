@@ -413,23 +413,9 @@ bool felica_parse_request_system_code(
         FelicaSystem* system = FelicaSystemArray_push_new(*systems);
         furi_assert(system != NULL);
 
-        // Set system code
-        system->number = idx;
-        system->code = (buf[2 * idx] << 8) | buf[2 * idx + 1];
+        felica_std_system_init(system, idx, (buf[2 * idx] << 8) | buf[2 * idx + 1]);
 
         FURI_LOG_D(TAG, "Found system code %04X", system->code);
-
-        // Fill in IDm and PMm
-        memcpy(system->idm, reader->current_idm, 8);
-        memcpy(system->pmm, reader->current_pmm, 8);
-
-        // Set system index field in IDm
-        system->idm[0] &= 0x0f;
-        system->idm[0] |= ((idx & 0xf) << 4);
-
-        // Format the root area
-        felica_node_init_as_area(&(system->root), NULL, 0, true, FELICA_NODE_CODE_MAX);
-        FelicaPublicServiceDict_init(system->public_services);
     }
 
     return true;
@@ -554,8 +540,8 @@ static FelicaSystem* felica_gen_monolithic_system_code(
     furi_assert(reader != NULL);
     furi_assert(system != NULL);
 
-    memcpy(system->idm, reader->current_idm, 8);
-    memcpy(system->pmm, reader->current_pmm, 8);
+    //memcpy(system->idm, reader->current_idm, 8);
+    //memcpy(system->pmm, reader->current_pmm, 8);
     system->code = system_code;
 
     return system;
@@ -626,7 +612,8 @@ bool felica_lite_dump_data(
         FURI_LOG_W(TAG, "Bad response to Read without Encryption (D_ID)");
         return false;
     }
-    if(memcmp(system->idm, block_data, 8) != 0 || memcmp(system->pmm, block_data + 8, 8) != 0) {
+    if(memcmp(reader->current_idm, block_data, 8) != 0 ||
+       memcmp(reader->current_pmm, block_data + 8, 8) != 0) {
         FURI_LOG_W(TAG, "Mismatching values for D_ID");
         return false;
     }
@@ -772,6 +759,18 @@ bool felica_lite_dump_data(
     return true;
 }
 
+FelicaNode* felica_std_inode_lookup(FelicaSystem* system, FelicaINode inode) {
+    furi_assert(system != NULL);
+    if(inode <= FELICA_INODE_INVALID) {
+        return NULL;
+    }
+    return FelicaNodeArray_get(system->nodes, inode);
+}
+
+FelicaNode* felica_std_get_root_node(FelicaSystem* system) {
+    return felica_std_inode_lookup(system, 0);
+}
+
 bool felica_std_select_system(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaReader* reader,
@@ -811,17 +810,16 @@ bool felica_std_traverse_system(
     FelicaReader* reader,
     FelicaSystem* system) {
     FelicaSearchServiceCodeResult search_result = {0};
-    FelicaNodeRefArray_t search_stack;
     bool result = false;
     int_least32_t last_node_code = -1;
     FelicaNode* curr_open_snode = NULL;
+    FelicaNode* curr_working_anode = NULL;
+    // FELICA_INODE_INVALID is also used here to mark root node (no parent)
+    FelicaINode curr_inode = FELICA_INODE_INVALID, curr_working_inode = FELICA_INODE_INVALID;
 
     if(system->is_lite) {
         return false;
     }
-
-    FelicaNodeRefArray_init(search_stack);
-    FelicaNodeRefArray_push_back(search_stack, &(system->root));
 
     // Traverse all areas and services, populate filesystem tree and update public_services table.
     // Do NOT early return in this loop. There will be leaks.
@@ -855,29 +853,18 @@ bool felica_std_traverse_system(
         }
         last_node_code = curr_node_code;
 
-        // Validate and skip root area
-        if(search_result.is_area && search_result.number == 0 &&
-           search_result.can_create_subareas) {
-            if(search_result.area_end != FELICA_NODE_CODE_MAX) {
-                FURI_LOG_E(TAG, "Invalid root area");
-                break;
-            }
-            continue;
-        }
-
-        FelicaNode** curr_working_anode_ref = NULL;
-        FelicaNode* curr_working_anode = NULL;
-
         // Find the area the newly discovered node belongs to
         while(true) {
-            curr_working_anode_ref = FelicaNodeRefArray_back(search_stack);
-            furi_assert(curr_working_anode_ref != NULL);
-            curr_working_anode = *curr_working_anode_ref;
-            furi_assert(curr_working_anode != NULL);
-            furi_assert(curr_working_anode->type == FelicaNodeTypeArea);
+            if(curr_working_anode == NULL) {
+                break;
+            }
             // If current code is out of range, cd .. and check again
             if(search_result.code > curr_working_anode->area->end_service_code) {
-                FelicaNodeRefArray_pop_back(NULL, search_stack);
+                FelicaINode parent_inode = curr_working_anode->parent;
+                curr_working_anode = felica_std_inode_lookup(system, parent_inode);
+                curr_working_inode = parent_inode;
+                furi_assert(curr_working_anode != NULL);
+                furi_assert(curr_working_anode->type == FelicaNodeTypeArea);
                 // Close service on area switching
                 curr_open_snode = NULL;
             } else {
@@ -887,18 +874,26 @@ bool felica_std_traverse_system(
 
         // New area discovered
         if(search_result.is_area) {
-            FelicaNode* new_anode = FelicaNodeArray_push_new(curr_working_anode->area->nodes);
-            furi_assert(new_anode != NULL);
+            FelicaNode* new_anode = FelicaNodeArray_push_new(system->nodes);
             felica_node_init_as_area(
                 new_anode,
-                curr_working_anode,
+                curr_working_inode,
                 search_result.number,
                 search_result.can_create_subareas,
                 search_result.area_end);
+
+            // Record new inode and cache the node object
+            curr_working_inode = ++curr_inode;
+            curr_working_anode = new_anode;
+
             // Since this is a new area node, the previously opened service should be closed.
             curr_open_snode = NULL;
-            FelicaNodeRefArray_push_back(search_stack, new_anode);
             continue;
+        }
+
+        if(curr_working_anode == NULL || curr_inode <= FELICA_INODE_INVALID) {
+            FURI_LOG_E(TAG, "Bad card format: Root area does not exist");
+            break;
         }
 
         // Fetch or create the service node of the correct number and type
@@ -906,13 +901,13 @@ bool felica_std_traverse_system(
         // searches
         if(curr_open_snode == NULL || curr_open_snode->service->number != search_result.number ||
            curr_open_snode->service->type != search_result.service_type) {
-            curr_open_snode = FelicaNodeArray_push_new(curr_working_anode->area->nodes);
-            furi_assert(curr_open_snode != NULL);
+            curr_open_snode = FelicaNodeArray_push_new(system->nodes);
             felica_node_init_as_service(
                 curr_open_snode,
-                curr_working_anode,
+                curr_working_inode,
                 search_result.number,
                 search_result.service_type);
+            FelicaINodeArray_push_back(curr_working_anode->area->nodes, ++curr_inode);
         }
 
         // Add current access condition to the set
@@ -927,12 +922,44 @@ bool felica_std_traverse_system(
            search_result.service_attrib == FelicaServiceAttributeUnauthDirectAccess ||
            search_result.service_attrib == FelicaServiceAttributeUnauthPurseRO) {
             FelicaPublicServiceDict_set_at(
-                system->public_services, search_result.code, curr_open_snode->service);
+                system->public_services, search_result.code, curr_inode);
         }
     }
 
-    // Cleanup
-    FelicaNodeRefArray_clear(search_stack);
+    FURI_LOG_D(
+        TAG, "%d nodes found under system %04X", FelicaNodeArray_size(system->nodes), system->code);
+
+    // TODO remove this on prod
+    FelicaINode in = 0;
+    for
+        M_EACH(n, system->nodes, FelicaNodeArray_t) {
+            switch(n->type) {
+            case FelicaNodeTypeArea: {
+                furi_assert(n->area != NULL);
+                FURI_LOG_D(
+                    TAG,
+                    "%d @ %d: Area #%d (noterm %d, ends at %04X, parent)",
+                    in,
+                    n->parent,
+                    n->area->number,
+                    n->area->can_create_subareas,
+                    n->area->end_service_code);
+                break;
+            }
+            case FelicaNodeTypeService: {
+                furi_assert(n->service != NULL);
+                FURI_LOG_D(
+                    TAG,
+                    "%d @ %d: Service #%d (type %#X)",
+                    in,
+                    n->parent,
+                    n->service->number,
+                    n->service->type);
+                break;
+            }
+            }
+            in++;
+        }
     return result;
 }
 
@@ -980,6 +1007,7 @@ bool felica_std_dump_public_service(
             // Hitting an invalid block address (usually means end of service)
             if(reader->status_flags[0] != 0x00 && reader->status_flags[1] == 0xa8) {
                 FURI_LOG_D(TAG, "End of service reached");
+                FelicaBlockArray_pop_back(NULL, service->blocks);
                 result = true;
                 break;
             }
@@ -994,6 +1022,8 @@ bool felica_std_dump_public_service(
     if(!result) {
         FelicaBlockArray_reset(service->blocks);
     }
+
+    FURI_LOG_D(TAG, "%d blocks dumped", FelicaBlockArray_size(service->blocks));
     return result;
 }
 
@@ -1010,9 +1040,12 @@ bool felica_std_dump_data(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader, Fe
             for
                 M_EACH(service_kv, system->public_services, FelicaPublicServiceDict_t) {
                     uint16_t service_code = service_kv->key;
-                    FelicaService* service = service_kv->value;
-                    furi_assert(service != NULL);
-                    if(!felica_std_dump_public_service(tx_rx, reader, service, service_code)) {
+                    FelicaNode* node = felica_std_inode_lookup(system, service_kv->value);
+                    furi_assert(node != NULL);
+                    furi_assert(node->type == FelicaNodeTypeService);
+                    furi_assert(node->service != NULL);
+                    if(!felica_std_dump_public_service(
+                           tx_rx, reader, node->service, service_code)) {
                         return false;
                     }
                 }
@@ -1061,11 +1094,13 @@ bool felica_read_card(
 }
 
 void felica_service_clear(FelicaService* service) {
+    furi_assert(service != NULL);
     FelicaBlockArray_clear(service->blocks);
     FelicaServiceAttributeList_init(service->access_control_list);
 }
 
 void felica_lite_clear(FelicaLiteInfo* lite_info) {
+    furi_assert(lite_info != NULL);
     for(int i = 0; i < REG_LITE_BLOCK; i++) {
         uint8_t* block = lite_info->S_PAD[i];
         if(block != NULL) {
@@ -1085,12 +1120,26 @@ void felica_lite_clear(FelicaLiteInfo* lite_info) {
     }
 }
 
+void felica_system_init(FelicaSystem* system, uint8_t number, uint16_t code) {
+    furi_assert(system != NULL);
+    system->number = number;
+    system->code = code;
+}
+
+void felica_std_system_init(FelicaSystem* system, uint8_t number, uint16_t code) {
+    felica_system_init(system, number, code);
+    system->is_lite = false;
+    FelicaNodeArray_init(system->nodes);
+    FelicaPublicServiceDict_init(system->public_services);
+}
+
 void felica_node_init_as_area(
     FelicaNode* node,
-    FelicaNode* parent,
+    FelicaINode parent,
     uint16_t area_number,
     bool can_create_subareas,
     uint16_t end_service_code) {
+    furi_assert(node != NULL);
     node->parent = parent;
     node->type = FelicaNodeTypeArea;
     node->area = calloc(1, sizeof(*(node->area)));
@@ -1098,14 +1147,15 @@ void felica_node_init_as_area(
     node->area->number = area_number;
     node->area->can_create_subareas = can_create_subareas;
     node->area->end_service_code = end_service_code;
-    FelicaNodeArray_init(node->area->nodes);
+    FelicaINodeArray_init(node->area->nodes);
 }
 
 void felica_node_init_as_service(
     FelicaNode* node,
-    FelicaNode* parent,
+    FelicaINode parent,
     uint16_t service_number,
     FelicaServiceType service_type) {
+    furi_assert(node != NULL);
     node->parent = parent;
     node->type = FelicaNodeTypeService;
     node->service = calloc(1, sizeof(*(node->service)));
@@ -1122,14 +1172,12 @@ void felica_node_init_as_service(
 void felica_node_clear(FelicaNode* node);
 
 void felica_area_clear(FelicaArea* area) {
-    for
-        M_EACH(node, area->nodes, FelicaNodeArray_t) {
-            felica_node_clear(node);
-        }
-    FelicaNodeArray_clear(area->nodes);
+    furi_assert(area != NULL);
+    FelicaINodeArray_clear(area->nodes);
 }
 
 void felica_node_clear(FelicaNode* node) {
+    furi_assert(node != NULL);
     if(node->type == FelicaNodeTypeArea) {
         felica_area_clear(node->area);
         free(node->area);
@@ -1140,12 +1188,17 @@ void felica_node_clear(FelicaNode* node) {
 }
 
 void felica_clear(FelicaData* data) {
+    furi_assert(data != NULL);
     for
         M_EACH(system, data->systems, FelicaSystemArray_t) {
             if(system->code == LITE_SYSTEM_CODE) {
                 felica_lite_clear(&system->lite_info);
             } else {
-                felica_node_clear(&system->root);
+                // TODO refactor FelicaNodeArray_t to use mlib objects instead of POD?
+                for
+                    M_EACH(node, system->nodes, FelicaNodeArray_t) {
+                        felica_node_clear(node);
+                    }
                 FelicaPublicServiceDict_clear(system->public_services);
             }
         }

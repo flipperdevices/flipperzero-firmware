@@ -1,4 +1,5 @@
 #include "./felica.h"
+#include "core/string.h"
 #include <furi.h>
 
 static const uint32_t TIME_CONSTANT_US = 302;
@@ -15,7 +16,7 @@ FuriString* felica_get_system_name(FelicaSystem* system) {
     uint16_t code = system->code;
 
     const char* prefix;
-    if(code == SUICA_SYSTEM_CODE) {
+    if(code == SUICA_SYSTEM_CODE || code == 0x0003) {
         prefix = "SuiCa";
     } else if(code == NDEF_SYSTEM_CODE) {
         prefix = "NDEF";
@@ -50,4 +51,37 @@ FuriString* felica_get_system_name(FelicaSystem* system) {
     }
 
     return furi_string_alloc_printf("%s (%04X)", prefix, code);
+}
+
+FuriString* felica_describe_node(FelicaNode* node) {
+    FuriString* result = furi_string_alloc();
+    switch(node->type) {
+    case FelicaNodeTypeArea: {
+        furi_assert(node->area != NULL);
+        if(node->area->can_create_subareas) {
+            furi_string_cat(result, "Area ");
+        } else {
+            furi_string_cat(result, "Leaf ");
+        }
+        furi_string_cat_printf(result, "%d", node->area->number);
+        break;
+    }
+    case FelicaNodeTypeService: {
+        furi_assert(node->service != NULL);
+        switch(node->service->type) {
+        case FelicaServiceTypeRandom:
+            furi_string_cat(result, "Random ");
+            break;
+        case FelicaServiceTypeCyclic:
+            furi_string_cat(result, "Cyclic ");
+            break;
+        case FelicaServiceTypePurse:
+            furi_string_cat(result, "Purse ");
+            break;
+        }
+        furi_string_cat_printf(result, "%d", node->service->number);
+    }
+    }
+
+    return result;
 }
