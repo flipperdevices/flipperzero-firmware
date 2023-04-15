@@ -55,14 +55,14 @@ Expand the **assets** folder in VS Code.
 Copy the **Like_def_11x9.png** file to **Cookie_def_11x9.png**.
 Edit the file to have a cookie image.
 
-![11x9 cookie](./final_files/assets/cookie_def_11x9.png)
+![11x9 cookie](https://www.github.com/jamisonderek/flipper-zero-tutorials/blob/main/hid/hid_app/final_files/assets/Cookie_def_11x9.png?raw=true)
 
 ## Step 7. Create a Cookie_pressed_17x17.png.
 
 Copy the **Like_pressed_17x17.png** file to **Cookie_pressed_17x17.png**.
 Edit the file to have a cookie image.
 
-![17x17 cookie](./final_files/assets/cookie_pressed_17x17.png)
+![17x17 cookie](https://www.github.com/jamisonderek/flipper-zero-tutorials/blob/main/hid/hid_app/final_files/assets/Cookie_pressed_17x17.png?raw=true)
 
 ## Step 8. Expand the views folder.
 
@@ -89,7 +89,7 @@ Edit the **hid_cc.c** file to have the following changes:
 
 - Case-sensitive! Replace all TikTok with CC
 - Case-sensitive! Replace all \_tiktok with \_cc
-- Case-sensitive! Replace all I_LIKE\_ with I_COOKIE\_
+- Case-sensitive! Replace all I_Like\_ with I_Cookie\_
 
 ## Step 13. Edit the views.h file.
 
@@ -365,7 +365,7 @@ WITH:
 } else if(event->key == InputKeyUp) {
   // Reduce duration to 95% of value + update_timer.
   if (model->timer_duration>0) {
-    model->timer_duration \*= 0.95f;
+    model->timer_duration *= 0.95f;
     hid_cc_update_timer(hid_cc, model);
   }
   consumed = true;
@@ -393,7 +393,7 @@ WITH:
 ```c
 } else if(event->key == InputKeyDown) {
   // Increase duration to 105% of value + update_timer
-  model->timer_duration \*= 1.05f;
+  model->timer_duration *= 1.05f;
   hid_cc_update_timer(hid_cc, model);
   consumed = true;
 ```
