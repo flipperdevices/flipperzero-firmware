@@ -3,5 +3,4 @@ typedef enum {
     BtHidViewInstructions,
     BtHidViewClicker,
     BtHidViewCredits,
-    HidViewExitConfirm,
 } HidView;
