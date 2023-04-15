@@ -133,6 +133,7 @@ typedef enum {
     VIEW_TRACKER,
     VIEW_KEYBOARD,
     VIEW_SUBMENU_PATTERN,
+    VIEW_SUBMENU_PATTERN_COPYPASTE,
     VIEW_SUBMENU_INSTRUMENT,
     VIEW_FILE_OVERWRITE,
     VIEW_INSTRUMENT_FILE_OVERWRITE,
@@ -146,6 +147,13 @@ typedef enum {
     SUBMENU_PATTERN_HELP,
     SUBMENU_PATTERN_EXIT,
 } PatternSubmenuParams;
+
+typedef enum {
+    SUBMENU_PATTERN_COPYPASTE_COPY,
+    SUBMENU_PATTERN_COPYPASTE_PASTE,
+    SUBMENU_PATTERN_COPYPASTE_CUT,
+    SUBMENU_PATTERN_COPYPASTE_CLEAR,
+} PatternCopypasteSubmenuParams;
 
 typedef enum {
     SUBMENU_INSTRUMENT_LOAD,
@@ -165,6 +173,7 @@ typedef struct {
     FuriString* filepath;
     DialogsApp* dialogs;
     Submenu* pattern_submenu;
+    Submenu* pattern_copypaste_submenu;
     Submenu* instrument_submenu;
     VariableItemList* settings_list;
     Widget* overwrite_file_widget;
@@ -189,6 +198,8 @@ typedef struct {
 
     uint8_t inst_editor_shift;
 
+    int16_t source_pattern_index;
+
     bool editing;
     bool was_editing;
 
@@ -197,6 +208,8 @@ typedef struct {
     bool is_loading_instrument;
     bool is_saving_instrument;
     bool showing_help;
+
+    bool cut_pattern; //if we need to clear the pattern we pasted from
 
     bool quit;
 

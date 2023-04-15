@@ -82,9 +82,12 @@ FlizzerTrackerApp* init_tracker(
         tracker->view_dispatcher, VIEW_KEYBOARD, text_input_get_view(tracker->text_input));
 
     tracker->pattern_submenu = submenu_alloc();
+    tracker->pattern_copypaste_submenu = submenu_alloc();
     tracker->instrument_submenu = submenu_alloc();
 
     view_set_previous_callback(submenu_get_view(tracker->pattern_submenu), submenu_exit_callback);
+    view_set_previous_callback(
+        submenu_get_view(tracker->pattern_copypaste_submenu), submenu_exit_callback);
     view_set_previous_callback(
         submenu_get_view(tracker->instrument_submenu), submenu_exit_callback);
 
@@ -108,16 +111,53 @@ FlizzerTrackerApp* init_tracker(
         tracker->pattern_submenu, "Exit", SUBMENU_PATTERN_EXIT, submenu_callback, tracker);
 
     submenu_add_item(
-        tracker->instrument_submenu, "Load instrument", SUBMENU_INSTRUMENT_LOAD, submenu_callback, tracker);
+        tracker->instrument_submenu,
+        "Load instrument",
+        SUBMENU_INSTRUMENT_LOAD,
+        submenu_callback,
+        tracker);
     submenu_add_item(
-        tracker->instrument_submenu, "Save instrument", SUBMENU_INSTRUMENT_SAVE, submenu_callback, tracker);
+        tracker->instrument_submenu,
+        "Save instrument",
+        SUBMENU_INSTRUMENT_SAVE,
+        submenu_callback,
+        tracker);
     submenu_add_item(
         tracker->instrument_submenu, "Exit", SUBMENU_INSTRUMENT_EXIT, submenu_callback, tracker);
+
+    submenu_add_item(
+        tracker->pattern_copypaste_submenu,
+        "Copy",
+        SUBMENU_PATTERN_COPYPASTE_COPY,
+        submenu_copypaste_callback,
+        tracker);
+    submenu_add_item(
+        tracker->pattern_copypaste_submenu,
+        "Paste",
+        SUBMENU_PATTERN_COPYPASTE_PASTE,
+        submenu_copypaste_callback,
+        tracker);
+    submenu_add_item(
+        tracker->pattern_copypaste_submenu,
+        "Cut",
+        SUBMENU_PATTERN_COPYPASTE_CUT,
+        submenu_copypaste_callback,
+        tracker);
+    submenu_add_item(
+        tracker->pattern_copypaste_submenu,
+        "Clear",
+        SUBMENU_PATTERN_COPYPASTE_CLEAR,
+        submenu_copypaste_callback,
+        tracker);
 
     view_dispatcher_add_view(
         tracker->view_dispatcher,
         VIEW_SUBMENU_PATTERN,
         submenu_get_view(tracker->pattern_submenu));
+    view_dispatcher_add_view(
+        tracker->view_dispatcher,
+        VIEW_SUBMENU_PATTERN_COPYPASTE,
+        submenu_get_view(tracker->pattern_copypaste_submenu));
     view_dispatcher_add_view(
         tracker->view_dispatcher,
         VIEW_SUBMENU_INSTRUMENT,
@@ -206,6 +246,9 @@ FlizzerTrackerApp* init_tracker(
 
     set_default_song(tracker);
 
+    tracker->focus = EDIT_SONGINFO;
+    tracker->source_pattern_index = -1;
+
     return tracker;
 }
 
@@ -219,6 +262,7 @@ void deinit_tracker(FlizzerTrackerApp* tracker) {
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SETTINGS);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_FILE_OVERWRITE);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SUBMENU_INSTRUMENT);
+    view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SUBMENU_PATTERN_COPYPASTE);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SUBMENU_PATTERN);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_KEYBOARD);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_TRACKER);
@@ -228,6 +272,7 @@ void deinit_tracker(FlizzerTrackerApp* tracker) {
     variable_item_list_free(tracker->settings_list);
 
     submenu_free(tracker->pattern_submenu);
+    submenu_free(tracker->pattern_copypaste_submenu);
     submenu_free(tracker->instrument_submenu);
 
     widget_free(tracker->overwrite_file_widget);

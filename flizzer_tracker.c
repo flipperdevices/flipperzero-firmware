@@ -39,8 +39,14 @@ void draw_callback(Canvas* canvas, void* ctx) {
             tracker_engine_set_song(&tracker->tracker_engine, &tracker->song);
         }
 
-        draw_songinfo_view(canvas, tracker);
-        draw_sequence_view(canvas, tracker);
+        if(tracker->focus != EDIT_PATTERN) {
+            draw_songinfo_view(canvas, tracker);
+        }
+
+        if(tracker->focus != EDIT_PATTERN) {
+            draw_sequence_view(canvas, tracker);
+        }
+
         draw_pattern_view(canvas, tracker);
         break;
     }

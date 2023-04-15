@@ -75,6 +75,28 @@ void sequence_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event)
         tracker->editing = !tracker->editing;
     }
 
+    if(event->input.key == InputKeyOk && event->input.type == InputTypeLong) {
+        if(!(tracker->editing)) {
+            if(tracker->tracker_engine.playing) {
+                stop_song(tracker);
+            }
+
+            else {
+                if(tracker->tracker_engine.pattern_position == tracker->song.pattern_length - 1 &&
+                   tracker->tracker_engine.sequence_position ==
+                       tracker->song.num_sequence_steps -
+                           1) // if we are at the very end of the song
+                {
+                    stop_song(tracker);
+                }
+
+                else {
+                    play_song(tracker, true);
+                }
+            }
+        }
+    }
+
     if(event->input.key == InputKeyRight && event->input.type == InputTypeShort) {
         tracker->current_digit++;
 

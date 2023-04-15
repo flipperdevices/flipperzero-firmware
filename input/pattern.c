@@ -259,7 +259,7 @@ void pattern_edit_event(FlizzerTrackerApp* tracker, FlizzerTrackerEvent* event) 
     if(event->input.key == InputKeyDown && event->input.type == InputTypeLong &&
        !(tracker->editing)) {
         tracker->tracker_engine.pattern_position =
-            tracker->tracker_engine.song->pattern_length - 1; // return to pattern 1st row
+            tracker->tracker_engine.song->pattern_length - 1; // go to pattern last row
         return;
     }
 

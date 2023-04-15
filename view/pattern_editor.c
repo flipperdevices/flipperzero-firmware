@@ -3,7 +3,7 @@
 
 #include <flizzer_tracker_icons.h>
 
-#define PATTERN_EDITOR_Y (64 - (6 * 5) - 1)
+#define PATTERN_EDITOR_Y ((tracker->focus == EDIT_PATTERN) ? 4 : (64 - (6 * 5) - 1))
 
 static const char* notenames[] = {
     "C-",
@@ -73,15 +73,18 @@ void draw_pattern_view(Canvas* canvas, FlizzerTrackerApp* tracker) {
 
         TrackerSongPattern* pattern = &tracker->tracker_engine.song->pattern[current_pattern];
 
-        for(uint8_t pos = 0; pos < 5; ++pos) {
+        for(uint8_t pos = 0; pos < ((tracker->focus == EDIT_PATTERN) ? 9 : 5); ++pos) {
             TrackerSongPatternStep* step = NULL;
 
-            if(pattern_step - 2 + pos >= 0 && pattern_step - 2 + pos < pattern_length) {
-                step = &pattern->step[pattern_step + pos - 2];
+            if(pattern_step - ((tracker->focus == EDIT_PATTERN) ? 4 : 2) + pos >= 0 &&
+               pattern_step - ((tracker->focus == EDIT_PATTERN) ? 4 : 2) + pos < pattern_length) {
+                step =
+                    &pattern->step[pattern_step + pos - ((tracker->focus == EDIT_PATTERN) ? 4 : 2)];
             }
 
             uint8_t string_x = i * 32;
-            uint8_t string_y = PATTERN_EDITOR_Y + 6 * pos + 6 + 1;
+            uint8_t string_y =
+                PATTERN_EDITOR_Y + 6 * pos + 6 + ((tracker->focus == EDIT_PATTERN) ? 3 : 1);
 
             if(step) {
                 uint8_t note = tracker_engine_get_note(step);
@@ -135,7 +138,8 @@ void draw_pattern_view(Canvas* canvas, FlizzerTrackerApp* tracker) {
     if(tracker->editing && tracker->focus == EDIT_PATTERN) {
         uint16_t x = tracker->current_channel * 32 + tracker->patternx * 4 +
                      (tracker->patternx > 0 ? 4 : 0) - 1;
-        uint16_t y = PATTERN_EDITOR_Y + 6 * 2 + 1;
+        uint16_t y = PATTERN_EDITOR_Y + 6 * ((tracker->focus == EDIT_PATTERN) ? 4 : 2) +
+                     ((tracker->focus == EDIT_PATTERN) ? 3 : 1);
 
         canvas_draw_box(canvas, x, y, (tracker->patternx > 0 ? 5 : 9), 7);
     }
@@ -143,7 +147,8 @@ void draw_pattern_view(Canvas* canvas, FlizzerTrackerApp* tracker) {
     if(!(tracker->editing) && tracker->focus == EDIT_PATTERN) {
         uint16_t x = tracker->current_channel * 32 + tracker->patternx * 4 +
                      (tracker->patternx > 0 ? 4 : 0) - 1;
-        uint16_t y = PATTERN_EDITOR_Y + 6 * 2 + 1;
+        uint16_t y = PATTERN_EDITOR_Y + 6 * ((tracker->focus == EDIT_PATTERN) ? 4 : 2) +
+                     ((tracker->focus == EDIT_PATTERN) ? 3 : 1);
 
         canvas_draw_frame(canvas, x, y, (tracker->patternx > 0 ? 5 : 9), 7);
     }
