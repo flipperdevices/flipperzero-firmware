@@ -16,8 +16,8 @@ All cracked nonces are automatically added to your user dictionary, allowing you
 OFW pull request (will be soon provided by official channels): https://github.com/flipperdevices/flipperzero-firmware/pull/2517
 
 Published:
-* Unleashed repository: https://github.com/xMasterX/all-the-plugins/tree/main/apps/Tools_Extra
-* FlipC.org: https://flipc.org/noproto/FlipperMfkey?branch=master&root=fap
+* [Unleashed repository](https://github.com/xMasterX/all-the-plugins/tree/main/apps/Tools_Extra)
+* (FlipC.org)[https://flipc.org/noproto/FlipperMfkey?branch=master&root=fap]
 * https://github.com/noproto/FlipperMfkey/releases (out of date)
 
 Manual: Copy the fap/ directory to applications_user/mfkey32/ and build it with fbt
