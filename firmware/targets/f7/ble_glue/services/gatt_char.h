@@ -50,8 +50,8 @@ typedef struct {
     } data_prop;
     Char_UUID_t uuid;
     // Some packed bitfields to save space
-    FlipperGattCharacteristicDataType data_prop_type : 1;
-    uint8_t is_variable : 1;
+    FlipperGattCharacteristicDataType data_prop_type : 2;
+    uint8_t is_variable : 2;
     uint8_t uuid_type : 2;
     uint8_t char_properties;
     uint8_t security_permissions;

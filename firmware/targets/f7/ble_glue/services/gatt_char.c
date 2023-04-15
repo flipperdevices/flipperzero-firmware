@@ -10,7 +10,7 @@ bool flipper_gatt_characteristic_props_const_char(
     uint16_t* data_len) {
     const char* str = (const char*)context;
     *data = (const uint8_t*)str;
-    *data_len = (uint16_t)strlen(str);
+    *data_len = (uint16_t)strlen(str); //-V:static_cast:1029
     return false;
 }
 
