@@ -1,0 +1,13 @@
+App(
+    appid="nfc_relay",
+    name="NFC Relay",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="nfc_relay_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=4 * 1024,
+    order=30,
+    fap_icon_assets="assets",
+)
