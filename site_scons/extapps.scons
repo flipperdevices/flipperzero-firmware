@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 
 from SCons.Node import NodeList
 from SCons.Warnings import warn, WarningOnByDefault
-from SCons.Errors import UserError
 
 Import("ENV")
 

@@ -1,11 +1,11 @@
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_usb_hid.h>
-#include "usb_hid.h"
-#include "dev_info_service.h"
-#include "battery_service.h"
-#include "hid_service.h"
+#include <services/dev_info_service.h>
+#include <services/battery_service.h>
+#include <services/hid_service.h>
 
 #include <furi.h>
+#include <usb_hid.h>
 
 #define FURI_HAL_BT_INFO_BASE_USB_SPECIFICATION (0x0101)
 #define FURI_HAL_BT_INFO_COUNTRY_CODE (0x00)

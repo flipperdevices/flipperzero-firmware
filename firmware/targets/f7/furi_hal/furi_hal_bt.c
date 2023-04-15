@@ -7,7 +7,7 @@
 #include <furi_hal_version.h>
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_bt_serial.h>
-#include "battery_service.h"
+#include <services/battery_service.h>
 
 #include <furi.h>
 
