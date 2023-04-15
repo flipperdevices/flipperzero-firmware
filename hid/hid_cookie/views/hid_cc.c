@@ -120,6 +120,7 @@ static void hid_cc_reset_cursor(HidCC* hid_cc) {
 }
 
 static void hid_cc_process_press(HidCC* hid_cc, HidCCModel* model, InputEvent* event) {
+    UNUSED(hid_cc);
     if(event->key == InputKeyUp) {
         model->up_pressed = true;
     } else if(event->key == InputKeyDown) {
@@ -130,6 +131,7 @@ static void hid_cc_process_press(HidCC* hid_cc, HidCCModel* model, InputEvent* e
 }
 
 static void hid_cc_process_release(HidCC* hid_cc, HidCCModel* model, InputEvent* event) {
+    UNUSED(hid_cc);
     if(event->key == InputKeyUp) {
         model->up_pressed = false;
     } else if(event->key == InputKeyDown) {
