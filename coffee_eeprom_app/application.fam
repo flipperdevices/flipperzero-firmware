@@ -2,7 +2,7 @@ App(
     appid="coffee_eeprom",
     name="Coffee EEPROM",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="coffee_eeprom_app",
+    entry_point="coffee_eeprom_main",
     cdefines=["APP_COFFEE_EEPROM"],
     requires=[
         "gui",

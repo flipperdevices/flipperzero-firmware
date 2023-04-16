@@ -27,11 +27,12 @@ bool write_buffer(uint8_t *buffer, size_t buffer_size, uint8_t start_address){
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
 	bool result = false;
 	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000)){
+		FURI_LOG_E("COFFEE", "WRITE READY");
 		for (size_t i = 0; i < buffer_size; i++){	
 			result = false;
 			while(!result){
 				result = furi_hal_i2c_write_reg_8(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, start_address + i, buffer[i], (uint32_t) 2000);
-            	FURI_LOG_D("COFFEE", "Write %.2X, byte %d/%d at address %.2X, result %d", buffer[i], i + 1, buffer_size, start_address + i, result);
+            	FURI_LOG_E("COFFEE", "Write %.2X, byte %d/%d at address %.2X, result %d", buffer[i], i + 1, buffer_size, start_address + i, result);
 			}
 		}
 	}
@@ -41,7 +42,7 @@ bool write_buffer(uint8_t *buffer, size_t buffer_size, uint8_t start_address){
 	furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 	return result;
 }
-void virgin(){     
+void virgin(){    
 	write_buffer(virgin_buffer, sizeof(virgin_buffer), 0x00);
 }
 
