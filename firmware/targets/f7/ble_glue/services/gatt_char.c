@@ -11,17 +11,20 @@ void flipper_gatt_characteristic_init(
     furi_assert(char_descriptor);
     furi_assert(char_instance);
 
-    char_instance->characteristic = char_descriptor;
+    // Copy the descriptor to the instance, since it may point to stack memory
+    // TODO: only copy if really comes from stack
+    char_instance->characteristic = malloc(sizeof(FlipperGattCharacteristicParams));
+    memcpy(
+        (void*)char_instance->characteristic,
+        char_descriptor,
+        sizeof(FlipperGattCharacteristicParams));
 
-    uint8_t const* char_data = NULL;
     uint16_t char_data_size = 0;
-    bool release_data = false;
     if(char_descriptor->data_prop_type == FlipperGattCharacteristicDataFixed) {
-        char_data = char_descriptor->data.fixed.ptr;
         char_data_size = char_descriptor->data.fixed.length;
     } else if(char_descriptor->data_prop_type == FlipperGattCharacteristicDataCallback) {
-        release_data = char_descriptor->data.callback.fn(
-            char_descriptor->data.callback.context, &char_data, &char_data_size);
+        char_descriptor->data.callback.fn(
+            char_descriptor->data.callback.context, NULL, &char_data_size);
     }
 
     tBleStatus status = aci_gatt_add_char(
@@ -38,15 +41,13 @@ void flipper_gatt_characteristic_init(
     if(status) {
         FURI_LOG_E(TAG, "Failed to add %s char: %d", char_descriptor->name, status);
     }
-    if(release_data) {
-        free((void*)char_data);
-    }
 
     char_instance->descriptor_handle = 0;
     if((status == 0) && char_descriptor->descriptor_params) {
+        uint8_t const* char_data = NULL;
         const FlipperGattCharacteristicDescriptorParams* char_data_descriptor =
             char_descriptor->descriptor_params;
-        release_data = char_data_descriptor->data_callback.fn(
+        bool release_data = char_data_descriptor->data_callback.fn(
             char_data_descriptor->data_callback.context, &char_data, &char_data_size);
 
         status = aci_gatt_add_char_desc(
@@ -80,6 +81,7 @@ void flipper_gatt_characteristic_delete(
         FURI_LOG_E(
             TAG, "Failed to delete %s char: %d", char_instance->characteristic->name, status);
     }
+    free((void*)char_instance->characteristic);
 }
 
 bool flipper_gatt_characteristic_update(

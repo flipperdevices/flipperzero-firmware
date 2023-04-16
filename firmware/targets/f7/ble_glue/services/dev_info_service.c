@@ -18,11 +18,12 @@ typedef enum {
     DevInfoSvcGattCharacteristicCount,
 } DevInfoSvcGattCharacteristicId;
 
+#define DEVICE_INFO_HARDWARE_REV_SIZE 4
 typedef struct {
     uint16_t service_handle;
     FlipperGattCharacteristicInstance characteristics[DevInfoSvcGattCharacteristicCount];
     FuriString* version_string;
-    char hardware_revision[4];
+    char hardware_revision[DEVICE_INFO_HARDWARE_REV_SIZE];
 } DevInfoSvc;
 
 static DevInfoSvc* dev_info_svc = NULL;
@@ -36,8 +37,10 @@ static bool dev_info_char_firmware_rev_callback(
     const uint8_t** data,
     uint16_t* data_len) {
     const DevInfoSvc* dev_info_svc = *(DevInfoSvc**)context;
-    *data = (const uint8_t*)&dev_info_svc->hardware_revision;
     *data_len = sizeof(dev_info_svc->hardware_revision);
+    if(data) {
+        *data = (const uint8_t*)&dev_info_svc->hardware_revision;
+    }
     return false;
 }
 
@@ -46,8 +49,10 @@ static bool dev_info_char_software_rev_callback(
     const uint8_t** data,
     uint16_t* data_len) {
     const DevInfoSvc* dev_info_svc = *(DevInfoSvc**)context;
-    *data = (const uint8_t*)furi_string_get_cstr(dev_info_svc->version_string);
     *data_len = furi_string_size(dev_info_svc->version_string);
+    if(data) {
+        *data = (const uint8_t*)furi_string_get_cstr(dev_info_svc->version_string);
+    }
     return false;
 }
 

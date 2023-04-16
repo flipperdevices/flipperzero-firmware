@@ -22,10 +22,45 @@ typedef struct {
 
 static_assert(sizeof(HidSvcReportId) == sizeof(uint16_t), "HidSvcReportId must be 2 bytes");
 
-bool hid_svc_char_desc_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
+static bool
+    hid_svc_char_desc_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
     const HidSvcReportId* report_id = context;
-    *data = (const uint8_t*)report_id;
     *data_len = sizeof(HidSvcReportId);
+    if(data) {
+        *data = (const uint8_t*)report_id;
+    }
+    return false;
+}
+
+typedef struct {
+    const void* data_ptr;
+    uint16_t data_len;
+} HidSvcDataWrapper;
+
+static bool hid_svc_report_map_data_callback(
+    const void* context,
+    const uint8_t** data,
+    uint16_t* data_len) {
+    const HidSvcDataWrapper* report_data = context;
+    if(data) {
+        *data = report_data->data_ptr;
+        *data_len = report_data->data_len;
+    } else {
+        *data_len = HID_SVC_REPORT_MAP_MAX_LEN;
+    }
+    return false;
+}
+
+static bool
+    hid_svc_hid_info_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
+    const HidSvcDataWrapper* report_data = context;
+    if(data) {
+        furi_check(report_data->data_len == HID_SVC_INFO_LEN);
+        *data = report_data->data_ptr;
+        *data_len = report_data->data_len;
+    } else {
+        *data_len = HID_SVC_INFO_LEN;
+    }
     return false;
 }
 
@@ -42,8 +77,9 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .is_variable = CHAR_VALUE_LEN_CONSTANT},
     [HidSvcGattCharacteristicReportMap] =
         {.name = "Report Map",
-         .data_prop_type = FlipperGattCharacteristicDataFixed,
-         .data.fixed.length = HID_SVC_REPORT_MAP_MAX_LEN,
+         .data_prop_type = FlipperGattCharacteristicDataCallback,
+         .data.callback.fn = hid_svc_report_map_data_callback,
+         .data.callback.context = NULL,
          .uuid.Char_UUID_16 = REPORT_MAP_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
          .char_properties = CHAR_PROP_READ,
@@ -52,8 +88,9 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .is_variable = CHAR_VALUE_LEN_VARIABLE},
     [HidSvcGattCharacteristicInfo] =
         {.name = "HID Information",
-         .data_prop_type = FlipperGattCharacteristicDataFixed,
-         .data.fixed.length = HID_SVC_INFO_LEN,
+         .data_prop_type = FlipperGattCharacteristicDataCallback,
+         .data.callback.fn = hid_svc_hid_info_data_callback,
+         .data.callback.context = NULL,
          .uuid.Char_UUID_16 = HID_INFORMATION_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
          .char_properties = CHAR_PROP_READ,
@@ -83,9 +120,23 @@ static const FlipperGattCharacteristicDescriptorParams hid_svc_char_descr_templa
     .is_variable = CHAR_VALUE_LEN_CONSTANT,
 };
 
+static bool
+    hid_svc_report_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
+    const HidSvcDataWrapper* report_data = context;
+    if(data) {
+        *data = report_data->data_ptr;
+        *data_len = report_data->data_len;
+    } else {
+        *data_len = HID_SVC_REPORT_MAX_LEN;
+    }
+    return false;
+}
+
 static const FlipperGattCharacteristicParams hid_svc_report_template = {
-    .data_prop_type = FlipperGattCharacteristicDataFixed,
-    .data.fixed.length = HID_SVC_REPORT_MAX_LEN,
+    .name = "Report",
+    .data_prop_type = FlipperGattCharacteristicDataCallback,
+    .data.callback.fn = hid_svc_report_data_callback,
+    .data.callback.context = NULL,
     .uuid.Char_UUID_16 = REPORT_CHAR_UUID,
     .uuid_type = UUID_TYPE_16,
     .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
@@ -193,44 +244,37 @@ bool hid_svc_update_report_map(const uint8_t* data, uint16_t len) {
     furi_assert(data);
     furi_assert(hid_svc);
 
-    tBleStatus status = aci_gatt_update_char_value(
-        hid_svc->svc_handle,
-        hid_svc->chars[HidSvcGattCharacteristicReportMap].handle,
-        0,
-        len,
-        data);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed updating report map characteristic: %d", status);
-        return false;
-    }
-    return true;
+    HidSvcDataWrapper report_data = {
+        .data_ptr = data,
+        .data_len = len,
+    };
+    return flipper_gatt_characteristic_update(
+        hid_svc->svc_handle, &hid_svc->chars[HidSvcGattCharacteristicReportMap], &report_data);
 }
 
 bool hid_svc_update_input_report(uint8_t input_report_num, uint8_t* data, uint16_t len) {
     furi_assert(data);
     furi_assert(hid_svc);
-    furi_check(input_report_num < HID_SVC_INPUT_REPORT_COUNT);
+    furi_assert(input_report_num < HID_SVC_INPUT_REPORT_COUNT);
 
-    tBleStatus status = aci_gatt_update_char_value(
-        hid_svc->svc_handle, hid_svc->input_report_chars[input_report_num].handle, 0, len, data);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed updating report characteristic: %d", status);
-        return false;
-    }
-    return true;
+    HidSvcDataWrapper report_data = {
+        .data_ptr = data,
+        .data_len = len,
+    };
+    return flipper_gatt_characteristic_update(
+        hid_svc->svc_handle, &hid_svc->input_report_chars[input_report_num], &report_data);
 }
 
 bool hid_svc_update_info(uint8_t* data, uint16_t len) {
     furi_assert(data);
     furi_assert(hid_svc);
 
-    tBleStatus status = aci_gatt_update_char_value(
-        hid_svc->svc_handle, hid_svc->chars[HidSvcGattCharacteristicInfo].handle, 0, len, data);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed updating info characteristic: %d", status);
-        return false;
-    }
-    return true;
+    HidSvcDataWrapper report_data = {
+        .data_ptr = data,
+        .data_len = len,
+    };
+    return flipper_gatt_characteristic_update(
+        hid_svc->svc_handle, &hid_svc->chars[HidSvcGattCharacteristicInfo], &report_data);
 }
 
 bool hid_svc_is_started() {
