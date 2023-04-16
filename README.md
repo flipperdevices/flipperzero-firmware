@@ -3,7 +3,7 @@
 ![](https://thumb.tildacdn.com/tild3332-3839-4061-b663-363464303432/-/resize/214x/-/format/webp/noroot.png)
 
 ## What
-This Flipper application ("FAP") cracks Mifare Classic 1K keys on your Flipper Zero. No companion app/desktop needed.
+This Flipper application ("FAP") cracks Mifare Classic 1K/4K keys on your Flipper Zero. No companion app/desktop needed.
 
 ## How
 1. Use the Detect Reader function to save nonces on your Flipper from the reader
