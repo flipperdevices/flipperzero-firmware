@@ -19,7 +19,7 @@
 #include <lib/nfc/nfc_device.h>
 #include "mifare_nested_icons.h"
 
-#define NESTED_VERSION_APP "1.1.0"
+#define NESTED_VERSION_APP "1.1.1"
 #define NESTED_GITHUB_LINK "https://github.com/AloneLiberty/FlipperNested"
 #define NESTED_RECOVER_KEYS_GITHUB_LINK "https://github.com/AloneLiberty/FlipperNestedRecovery"
 #define NESTED_NONCE_FORMAT_VERSION "2"

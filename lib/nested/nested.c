@@ -297,16 +297,21 @@ uint32_t nested_calibrate_distance(
     uint32_t nt1, nt2, i = 0, davg = 0, dmin = 0, dmax = 0, rtr = 0, unsuccessful_tries = 0;
     uint32_t max_prng_value = full ? 65565 : 1200;
     uint32_t rounds = full ? 5 : 17; // full does not require precision
+    uint32_t collected = 0;
 
     for(rtr = 0; rtr < rounds; rtr++) {
         nfc_activate();
         if(!furi_hal_nfc_activate_nfca(200, &cuid)) break;
 
-        mifare_classic_authex(crypto, tx_rx, cuid, blockNo, keyType, ui64Key, false, &nt1);
+        if(!mifare_classic_authex(crypto, tx_rx, cuid, blockNo, keyType, ui64Key, false, &nt1)) {
+            continue;
+        }
 
         furi_delay_us(delay);
 
-        mifare_classic_authex(crypto, tx_rx, cuid, blockNo, keyType, ui64Key, true, &nt2);
+        if(!mifare_classic_authex(crypto, tx_rx, cuid, blockNo, keyType, ui64Key, true, &nt2)) {
+            continue;
+        }
 
         // NXP Mifare is typical around 840, but for some unlicensed/compatible mifare tag this can be 160
         uint32_t nttmp = prng_successor(nt1, 100);
@@ -321,9 +326,12 @@ uint32_t nested_calibrate_distance(
                 davg += i;
                 dmin = MIN(dmin, i);
                 dmax = MAX(dmax, i);
+            } else {
+                dmin = dmax = i;
             }
 
             FURI_LOG_D(TAG, "Calibrating: ntdist=%lu", i);
+            collected++;
         } else {
             unsuccessful_tries++;
             if(unsuccessful_tries > 12) {
@@ -335,10 +343,18 @@ uint32_t nested_calibrate_distance(
         }
     }
 
-    if(rtr > 1) davg = (davg + (rtr - 1) / 2) / (rtr - 1);
+    if(collected > 1) davg = (davg + (collected - 1) / 2) / (collected - 1);
+
+    davg = MIN(MAX(dmin, davg), dmax);
 
     FURI_LOG_I(
-        TAG, "Calibration completed: rtr=%lu min=%lu max=%lu avg=%lu", rtr, dmin, dmax, davg);
+        TAG,
+        "Calibration completed: rtr=%lu min=%lu max=%lu avg=%lu collected=%lu",
+        rtr,
+        dmin,
+        dmax,
+        davg,
+        collected);
 
     nfc_deactivate();
 

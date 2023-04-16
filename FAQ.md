@@ -46,7 +46,7 @@ A: By nonces I mean authorization attempts on the tag. Because we can predict PR
 
 Q: How I can ask for help?
 
-A: Create issue **with label "Question"** or use [discussions](https://github.com/AloneLiberty/FlipperNested/discussions). If you can't share private info in issue you can contact me in [Telegram](https://t.me/liberydev). 
+A: Create issue **with label "Question"** or use [discussions](https://github.com/AloneLiberty/FlipperNested/discussions). If you can't share private info in issue you can contact me in [Telegram](https://t.me/libertydev). 
 
 Q: What is being done at the moment and what are the plans?
 
