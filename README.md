@@ -15,10 +15,14 @@ All cracked nonces are automatically added to your user dictionary, allowing you
 ## Builds
 OFW pull request (will be soon provided by official channels): https://github.com/flipperdevices/flipperzero-firmware/pull/2517
 
-Published:
+Published (options):
 * [Unleashed repository](https://github.com/xMasterX/all-the-plugins/tree/main/apps/Tools_Extra)
 * [FlipC.org](https://flipc.org/noproto/FlipperMfkey?branch=master&root=fap)
-* https://github.com/noproto/FlipperMfkey/releases (out of date)
+  * Download the FAP at one of the above links then copy the FAP to your Flipper Zero device (using qFlipper or manually copying it to the SD)
+* [Unleashed firmware](https://github.com/DarkFlippers/unleashed-firmware/releases/latest)
+  * Use qFlipper to install the build that ends in "e"
+* [RogueMaster firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/releases/latest)
+  * Built in to every release, you're good to go!
 
 Manual: Copy the fap/ directory to applications_user/mfkey32/ and build it with fbt
 
