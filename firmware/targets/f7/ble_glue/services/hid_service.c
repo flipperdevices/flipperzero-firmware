@@ -216,12 +216,16 @@ void hid_svc_start() {
         {0x03, HID_SVC_FEATURE_REPORT_COUNT, hid_svc->feature_report_chars},
     };
 
-    for(size_t i = 0; i < COUNT_OF(hid_report_chars); i++) {
-        report_id.report_type = hid_report_chars[i].report_type;
-        for(size_t j = 0; j < hid_report_chars[i].report_count; j++) {
-            report_id.report_idx = j + 1;
+    for(size_t report_type_idx = 0; report_type_idx < COUNT_OF(hid_report_chars);
+        report_type_idx++) {
+        report_id.report_type = hid_report_chars[report_type_idx].report_type;
+        for(size_t report_idx = 0; report_idx < hid_report_chars[report_type_idx].report_count;
+            report_idx++) {
+            report_id.report_idx = report_idx + 1;
             flipper_gatt_characteristic_init(
-                hid_svc->svc_handle, &report_char, &hid_report_chars[i].chars[j]);
+                hid_svc->svc_handle,
+                &report_char,
+                &hid_report_chars[report_type_idx].chars[report_idx]);
         }
     }
 }
@@ -286,10 +290,12 @@ void hid_svc_stop() {
             {HID_SVC_FEATURE_REPORT_COUNT, hid_svc->feature_report_chars},
         };
 
-        for(size_t i = 0; i < COUNT_OF(hid_report_chars); i++) {
-            for(size_t j = 0; j < hid_report_chars[i].report_count; j++) {
+        for(size_t report_type_idx = 0; report_type_idx < COUNT_OF(hid_report_chars);
+            report_type_idx++) {
+            for(size_t report_idx = 0; report_idx < hid_report_chars[report_type_idx].report_count;
+                report_idx++) {
                 flipper_gatt_characteristic_delete(
-                    hid_svc->svc_handle, &hid_report_chars[i].chars[j]);
+                    hid_svc->svc_handle, &hid_report_chars[report_type_idx].chars[report_idx]);
             }
         }
 
