@@ -55,7 +55,7 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
     {[DevInfoSvcGattCharacteristicMfgName] =
          {.name = "Manufacturer Name",
           .data_prop_type = FlipperGattCharacteristicDataFixed,
-          .data.fixed.length = sizeof(dev_info_man_name),
+          .data.fixed.length = sizeof(dev_info_man_name) - 1,
           .data.fixed.ptr = (const uint8_t*)&dev_info_man_name,
           .uuid.Char_UUID_16 = MANUFACTURER_NAME_UUID,
           .uuid_type = UUID_TYPE_16,
@@ -66,7 +66,7 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
      [DevInfoSvcGattCharacteristicSerial] =
          {.name = "Serial Number",
           .data_prop_type = FlipperGattCharacteristicDataFixed,
-          .data.fixed.length = sizeof(dev_info_serial_num),
+          .data.fixed.length = sizeof(dev_info_serial_num) - 1,
           .data.fixed.ptr = (const uint8_t*)&dev_info_serial_num,
           .uuid.Char_UUID_16 = SERIAL_NUMBER_UUID,
           .uuid_type = UUID_TYPE_16,
@@ -99,7 +99,7 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
      [DevInfoSvcGattCharacteristicRpcVersion] = {
          .name = "RPC Version",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
-         .data.fixed.length = sizeof(dev_info_rpc_version),
+         .data.fixed.length = sizeof(dev_info_rpc_version) - 1,
          .data.fixed.ptr = (const uint8_t*)&dev_info_rpc_version,
          .uuid.Char_UUID_128 =
              {0x33,
