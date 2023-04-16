@@ -373,7 +373,11 @@ void* rpc_system_gui_alloc(RpcSession* session) {
     view_port_set_width(rpc_gui->rpc_session_active_viewport, icon_get_width(&I_Rpc_active_7x8));
     view_port_draw_callback_set(
         rpc_gui->rpc_session_active_viewport, rpc_active_session_icon_draw_callback, session);
-    view_port_enabled_set(rpc_gui->rpc_session_active_viewport, true);
+    if(rpc_session_get_owner(rpc_gui->session) != RpcOwnerBle) {
+        view_port_enabled_set(rpc_gui->rpc_session_active_viewport, true);
+    } else {
+        view_port_enabled_set(rpc_gui->rpc_session_active_viewport, false);
+    }
     gui_add_view_port(rpc_gui->gui, rpc_gui->rpc_session_active_viewport, GuiLayerStatusBarLeft);
 
     RpcHandler rpc_handler = {
