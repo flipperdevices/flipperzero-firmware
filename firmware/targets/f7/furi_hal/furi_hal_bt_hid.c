@@ -153,7 +153,7 @@ void furi_hal_bt_hid_start() {
         FURI_HAL_BT_HID_INFO_FLAG_REMOTE_WAKE_MSK |
             FURI_HAL_BT_HID_INFO_FLAG_NORMALLY_CONNECTABLE_MSK,
     };
-    hid_svc_update_info(hid_info_val, sizeof(hid_info_val));
+    hid_svc_update_info(hid_info_val);
 }
 
 void furi_hal_bt_hid_stop() {

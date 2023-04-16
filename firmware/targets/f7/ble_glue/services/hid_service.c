@@ -49,19 +49,6 @@ static bool
     return false;
 }
 
-static bool
-    hid_svc_hid_info_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
-    const HidSvcDataWrapper* report_data = context;
-    if(data) {
-        furi_check(report_data->data_len == HID_SVC_INFO_LEN);
-        *data = report_data->data_ptr;
-        *data_len = report_data->data_len;
-    } else {
-        *data_len = HID_SVC_INFO_LEN;
-    }
-    return false;
-}
-
 static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteristicCount] = {
     [HidSvcGattCharacteristicProtocolMode] =
         {.name = "Protocol Mode",
@@ -87,8 +74,8 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
     [HidSvcGattCharacteristicInfo] =
         {.name = "HID Information",
          .data_prop_type = FlipperGattCharacteristicDataCallback,
-         .data.callback.fn = hid_svc_hid_info_data_callback,
-         .data.callback.context = NULL,
+         .data.fixed.length = HID_SVC_INFO_LEN,
+         .data.fixed.ptr = NULL,
          .uuid.Char_UUID_16 = HID_INFORMATION_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
          .char_properties = CHAR_PROP_READ,
@@ -255,16 +242,12 @@ bool hid_svc_update_input_report(uint8_t input_report_num, uint8_t* data, uint16
         hid_svc->svc_handle, &hid_svc->input_report_chars[input_report_num], &report_data);
 }
 
-bool hid_svc_update_info(uint8_t* data, uint16_t len) {
+bool hid_svc_update_info(uint8_t* data) {
     furi_assert(data);
     furi_assert(hid_svc);
 
-    HidSvcDataWrapper report_data = {
-        .data_ptr = data,
-        .data_len = len,
-    };
     return flipper_gatt_characteristic_update(
-        hid_svc->svc_handle, &hid_svc->chars[HidSvcGattCharacteristicInfo], &report_data);
+        hid_svc->svc_handle, &hid_svc->chars[HidSvcGattCharacteristicInfo], &data);
 }
 
 bool hid_svc_is_started() {
