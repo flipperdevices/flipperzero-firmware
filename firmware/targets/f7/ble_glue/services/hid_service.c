@@ -37,10 +37,8 @@ typedef struct {
     uint16_t data_len;
 } HidSvcDataWrapper;
 
-static bool hid_svc_report_map_data_callback(
-    const void* context,
-    const uint8_t** data,
-    uint16_t* data_len) {
+static bool
+    hid_svc_report_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
     const HidSvcDataWrapper* report_data = context;
     if(data) {
         *data = report_data->data_ptr;
@@ -78,7 +76,7 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
     [HidSvcGattCharacteristicReportMap] =
         {.name = "Report Map",
          .data_prop_type = FlipperGattCharacteristicDataCallback,
-         .data.callback.fn = hid_svc_report_map_data_callback,
+         .data.callback.fn = hid_svc_report_data_callback,
          .data.callback.context = NULL,
          .uuid.Char_UUID_16 = REPORT_MAP_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
@@ -119,18 +117,6 @@ static const FlipperGattCharacteristicDescriptorParams hid_svc_char_descr_templa
     .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
     .is_variable = CHAR_VALUE_LEN_CONSTANT,
 };
-
-static bool
-    hid_svc_report_data_callback(const void* context, const uint8_t** data, uint16_t* data_len) {
-    const HidSvcDataWrapper* report_data = context;
-    if(data) {
-        *data = report_data->data_ptr;
-        *data_len = report_data->data_len;
-    } else {
-        *data_len = HID_SVC_REPORT_MAX_LEN;
-    }
-    return false;
-}
 
 static const FlipperGattCharacteristicParams hid_svc_report_template = {
     .name = "Report",
