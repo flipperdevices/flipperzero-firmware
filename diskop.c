@@ -167,6 +167,8 @@ bool load_song_util(FlizzerTrackerApp* tracker, FuriString* filepath) {
 }
 
 bool load_instrument_disk(TrackerSong* song, uint8_t inst, Stream* stream) {
+    set_default_instrument(song->instrument[inst]);
+
     char header[sizeof(INST_FILE_SIG) + 2] = {0};
     size_t rwops = stream_read(stream, (uint8_t*)&header, sizeof(INST_FILE_SIG) - 1);
     header[sizeof(INST_FILE_SIG)] = '\0';
