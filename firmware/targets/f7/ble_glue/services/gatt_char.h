@@ -11,22 +11,22 @@ extern "C" {
 #endif
 
 // returns true if *data ownership is transferred to the caller
-typedef bool (*FlipperGattCharacteristicPropsCallback)(
+typedef bool (*cbFlipperGattCharacteristicData)(
     const void* context,
     const uint8_t** data,
     uint16_t* data_len);
 
 typedef enum {
-    FlipperGattCharacteristicDataPropsFixed,
-    FlipperGattCharacteristicDataPropsCallback,
+    FlipperGattCharacteristicDataFixed,
+    FlipperGattCharacteristicDataCallback,
 } FlipperGattCharacteristicDataType;
 
 typedef struct {
     Char_Desc_Uuid_t uuid;
     struct {
-        FlipperGattCharacteristicPropsCallback fn;
+        cbFlipperGattCharacteristicData fn;
         const void* context;
-    } value_callback;
+    } data_callback;
     uint8_t uuid_type;
     uint8_t max_length;
     uint8_t security_permissions;
@@ -44,10 +44,10 @@ typedef struct {
             uint16_t length;
         } fixed;
         struct {
-            FlipperGattCharacteristicPropsCallback fn;
+            cbFlipperGattCharacteristicData fn;
             const void* context;
         } callback;
-    } data_prop;
+    } data;
     Char_UUID_t uuid;
     // Some packed bitfields to save space
     FlipperGattCharacteristicDataType data_prop_type : 2;

@@ -49,8 +49,8 @@ typedef enum {
 static const FlipperGattCharacteristicParams battery_svc_chars[BatterySvcGattCharacteristicCount] =
     {[BatterySvcGattCharacteristicBatteryLevel] =
          {.name = "Battery Level",
-          .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-          .data_prop.fixed.length = 1,
+          .data_prop_type = FlipperGattCharacteristicDataFixed,
+          .data.fixed.length = 1,
           .uuid.Char_UUID_16 = BATTERY_LEVEL_CHAR_UUID,
           .uuid_type = UUID_TYPE_16,
           .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
@@ -59,8 +59,8 @@ static const FlipperGattCharacteristicParams battery_svc_chars[BatterySvcGattCha
           .is_variable = CHAR_VALUE_LEN_CONSTANT},
      [BatterySvcGattCharacteristicPowerState] = {
          .name = "Power State",
-         .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-         .data_prop.fixed.length = 1,
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
+         .data.fixed.length = 1,
          .uuid.Char_UUID_16 = BATTERY_POWER_STATE,
          .uuid_type = UUID_TYPE_16,
          .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,

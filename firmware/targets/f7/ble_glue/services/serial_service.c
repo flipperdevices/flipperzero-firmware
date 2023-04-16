@@ -18,8 +18,8 @@ typedef enum {
 static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattCharacteristicCount] = {
     [SerialSvcGattCharacteristicTx] =
         {.name = "TX",
-         .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-         .data_prop.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
+         .data.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
          .uuid.Char_UUID_128 =
              {0x00,
               0x00,
@@ -44,8 +44,8 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
          .is_variable = CHAR_VALUE_LEN_VARIABLE},
     [SerialSvcGattCharacteristicRx] =
         {.name = "RX",
-         .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-         .data_prop.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
+         .data.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
          .uuid.Char_UUID_128 =
              {0x00,
               0x00,
@@ -70,8 +70,8 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
          .is_variable = CHAR_VALUE_LEN_VARIABLE},
     [SerialSvcGattCharacteristicFlowCtrl] =
         {.name = "Flow control",
-         .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-         .data_prop.fixed.length = sizeof(uint32_t),
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
+         .data.fixed.length = sizeof(uint32_t),
          .uuid.Char_UUID_128 =
              {0x00,
               0x00,
@@ -96,8 +96,8 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
          .is_variable = CHAR_VALUE_LEN_CONSTANT},
     [SerialSvcGattCharacteristicStatus] = {
         .name = "RPC status",
-        .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-        .data_prop.fixed.length = sizeof(SerialServiceRpcStatus),
+        .data_prop_type = FlipperGattCharacteristicDataFixed,
+        .data.fixed.length = sizeof(SerialServiceRpcStatus),
         .uuid.Char_UUID_128 =
             {0x00,
              0x00,

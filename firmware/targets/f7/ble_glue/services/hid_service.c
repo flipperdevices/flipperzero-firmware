@@ -32,8 +32,8 @@ bool hid_svc_char_desc_data_callback(const void* context, const uint8_t** data, 
 static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteristicCount] = {
     [HidSvcGattCharacteristicProtocolMode] =
         {.name = "Protocol Mode",
-         .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-         .data_prop.fixed.length = 1,
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
+         .data.fixed.length = 1,
          .uuid.Char_UUID_16 = PROTOCOL_MODE_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
          .char_properties = CHAR_PROP_READ | CHAR_PROP_WRITE_WITHOUT_RESP,
@@ -42,8 +42,8 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .is_variable = CHAR_VALUE_LEN_CONSTANT},
     [HidSvcGattCharacteristicReportMap] =
         {.name = "Report Map",
-         .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-         .data_prop.fixed.length = HID_SVC_REPORT_MAP_MAX_LEN,
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
+         .data.fixed.length = HID_SVC_REPORT_MAP_MAX_LEN,
          .uuid.Char_UUID_16 = REPORT_MAP_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
          .char_properties = CHAR_PROP_READ,
@@ -52,8 +52,8 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .is_variable = CHAR_VALUE_LEN_VARIABLE},
     [HidSvcGattCharacteristicInfo] =
         {.name = "HID Information",
-         .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-         .data_prop.fixed.length = HID_SVC_INFO_LEN,
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
+         .data.fixed.length = HID_SVC_INFO_LEN,
          .uuid.Char_UUID_16 = HID_INFORMATION_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
          .char_properties = CHAR_PROP_READ,
@@ -62,8 +62,8 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .is_variable = CHAR_VALUE_LEN_CONSTANT},
     [HidSvcGattCharacteristicCtrlPoint] =
         {.name = "HID Control Point",
-         .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-         .data_prop.fixed.length = HID_SVC_CONTROL_POINT_LEN,
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
+         .data.fixed.length = HID_SVC_CONTROL_POINT_LEN,
          .uuid.Char_UUID_16 = HID_CONTROL_POINT_CHAR_UUID,
          .uuid_type = UUID_TYPE_16,
          .char_properties = CHAR_PROP_WRITE_WITHOUT_RESP,
@@ -76,7 +76,7 @@ static const FlipperGattCharacteristicDescriptorParams hid_svc_char_descr_templa
     .uuid_type = UUID_TYPE_16,
     .uuid.Char_UUID_16 = REPORT_REFERENCE_DESCRIPTOR_UUID,
     .max_length = HID_SVC_REPORT_REF_LEN,
-    .value_callback.fn = hid_svc_char_desc_data_callback,
+    .data_callback.fn = hid_svc_char_desc_data_callback,
     .security_permissions = ATTR_PERMISSION_NONE,
     .access_permissions = ATTR_ACCESS_READ_WRITE,
     .gatt_evt_mask = GATT_DONT_NOTIFY_EVENTS,
@@ -84,8 +84,8 @@ static const FlipperGattCharacteristicDescriptorParams hid_svc_char_descr_templa
 };
 
 static const FlipperGattCharacteristicParams hid_svc_report_template = {
-    .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
-    .data_prop.fixed.length = HID_SVC_REPORT_MAX_LEN,
+    .data_prop_type = FlipperGattCharacteristicDataFixed,
+    .data.fixed.length = HID_SVC_REPORT_MAX_LEN,
     .uuid.Char_UUID_16 = REPORT_CHAR_UUID,
     .uuid_type = UUID_TYPE_16,
     .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
@@ -164,7 +164,7 @@ void hid_svc_start() {
     memcpy(&hid_svc_char_descr, &hid_svc_char_descr_template, sizeof(hid_svc_char_descr));
     memcpy(&report_char, &hid_svc_report_template, sizeof(report_char));
 
-    hid_svc_char_descr.value_callback.context = &report_id;
+    hid_svc_char_descr.data_callback.context = &report_id;
     report_char.descriptor_params = &hid_svc_char_descr;
 
     typedef struct {
