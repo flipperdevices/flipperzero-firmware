@@ -54,9 +54,9 @@ static bool dev_info_char_software_rev_callback(
 static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCharacteristicCount] =
     {[DevInfoSvcGattCharacteristicMfgName] =
          {.name = "Manufacturer Name",
-          .data_prop_type = FlipperGattCharacteristicDataPropsCallback,
-          .data_prop.callback.context = dev_info_man_name,
-          .data_prop.callback.fn = flipper_gatt_characteristic_props_const_char,
+          .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
+          .data_prop.fixed.length = sizeof(dev_info_man_name),
+          .data_prop.fixed.ptr = (const uint8_t*)&dev_info_man_name,
           .uuid.Char_UUID_16 = MANUFACTURER_NAME_UUID,
           .uuid_type = UUID_TYPE_16,
           .char_properties = CHAR_PROP_READ,
@@ -65,9 +65,9 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
           .is_variable = CHAR_VALUE_LEN_CONSTANT},
      [DevInfoSvcGattCharacteristicSerial] =
          {.name = "Serial Number",
-          .data_prop_type = FlipperGattCharacteristicDataPropsCallback,
-          .data_prop.callback.context = dev_info_serial_num,
-          .data_prop.callback.fn = flipper_gatt_characteristic_props_const_char,
+          .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
+          .data_prop.fixed.length = sizeof(dev_info_serial_num),
+          .data_prop.fixed.ptr = (const uint8_t*)&dev_info_serial_num,
           .uuid.Char_UUID_16 = SERIAL_NUMBER_UUID,
           .uuid_type = UUID_TYPE_16,
           .char_properties = CHAR_PROP_READ,
@@ -98,9 +98,9 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
           .is_variable = CHAR_VALUE_LEN_CONSTANT},
      [DevInfoSvcGattCharacteristicRpcVersion] = {
          .name = "RPC Version",
-         .data_prop_type = FlipperGattCharacteristicDataPropsCallback,
-         .data_prop.callback.context = dev_info_rpc_version,
-         .data_prop.callback.fn = flipper_gatt_characteristic_props_const_char,
+         .data_prop_type = FlipperGattCharacteristicDataPropsFixed,
+         .data_prop.fixed.length = sizeof(dev_info_rpc_version),
+         .data_prop.fixed.ptr = (const uint8_t*)&dev_info_rpc_version,
          .uuid.Char_UUID_128 =
              {0x33,
               0xa9,
