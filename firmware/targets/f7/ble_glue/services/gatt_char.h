@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-// returns true if you own the data pointer now and must free() it
+// returns true if *data ownership is transferred to the caller
 typedef bool (*FlipperGattCharacteristicPropsCallback)(
     const void* context,
     const uint8_t** data,
@@ -67,11 +67,6 @@ typedef struct {
     uint16_t handle;
     uint16_t descriptor_handle;
 } FlipperGattCharacteristicInstance;
-
-bool flipper_gatt_characteristic_props_const_char(
-    const void* context,
-    const uint8_t** data,
-    uint16_t* data_len);
 
 void flipper_gatt_characteristic_init(
     uint16_t svc_handle,

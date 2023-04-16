@@ -2,17 +2,7 @@
 
 #include <furi.h>
 
-#define TAG "BLE_CHAR"
-
-bool flipper_gatt_characteristic_props_const_char(
-    const void* context,
-    const uint8_t** data,
-    uint16_t* data_len) {
-    const char* str = (const char*)context;
-    *data = (const uint8_t*)str;
-    *data_len = (uint16_t)strlen(str); //-V::1029
-    return false;
-}
+#define TAG "GattChar"
 
 void flipper_gatt_characteristic_init(
     uint16_t svc_handle,
