@@ -73,7 +73,7 @@ static const FlipperGattCharacteristicParams hid_svc_chars[HidSvcGattCharacteris
          .is_variable = CHAR_VALUE_LEN_VARIABLE},
     [HidSvcGattCharacteristicInfo] =
         {.name = "HID Information",
-         .data_prop_type = FlipperGattCharacteristicDataCallback,
+         .data_prop_type = FlipperGattCharacteristicDataFixed,
          .data.fixed.length = HID_SVC_INFO_LEN,
          .data.fixed.ptr = NULL,
          .uuid.Char_UUID_16 = HID_INFORMATION_CHAR_UUID,

@@ -4,6 +4,8 @@
 
 #define TAG "GattChar"
 
+#define GATT_MIN_READ_KEY_SIZE (10)
+
 void flipper_gatt_characteristic_init(
     uint16_t svc_handle,
     const FlipperGattCharacteristicParams* char_descriptor,
@@ -35,7 +37,7 @@ void flipper_gatt_characteristic_init(
         char_descriptor->char_properties,
         char_descriptor->security_permissions,
         char_descriptor->gatt_evt_mask,
-        10,
+        GATT_MIN_READ_KEY_SIZE,
         char_descriptor->is_variable,
         &char_instance->handle);
     if(status) {
@@ -61,7 +63,7 @@ void flipper_gatt_characteristic_init(
             char_data_descriptor->security_permissions,
             char_data_descriptor->access_permissions,
             char_data_descriptor->gatt_evt_mask,
-            7,
+            GATT_MIN_READ_KEY_SIZE,
             char_data_descriptor->is_variable,
             &char_instance->descriptor_handle);
         if(status) {
