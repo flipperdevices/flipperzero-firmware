@@ -6,8 +6,8 @@ This is a basic demonstration of reading/writing I2C protocol.
 For this demo, we connect a I2C device to pins:
  - 3V3 (3V3, pin 9)  = VCC
  - GND (GND, pin 18) = GND
- - SCL (C0, pin 15)  = SCL
- - SDA (C1, pin 16)  = SDA
+ - SCL (C0, pin 16)  = SCL
+ - SDA (C1, pin 15)  = SDA
 */
 
 #include <furi.h>

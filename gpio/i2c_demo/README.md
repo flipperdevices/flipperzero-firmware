@@ -4,8 +4,8 @@ This is a basic demonstration of reading/writing I2C protocol.
 For this demo, we connect a I2C device to pins:
  - 3V3 (3V3, pin 9)  = VCC
  - GND (GND, pin 18) = GND
- - SCL (C0, pin 15)  = SCL
- - SDA (C1, pin 16)  = SDA
+ - SCL (C0, pin 16)  = SCL
+ - SDA (C1, pin 15)  = SDA
 
 
 ## Installation Directions
@@ -28,7 +28,7 @@ These directions assume you are starting at the flipper desktop.  If not, please
 
 - NOTE: If your I2C device already has pull-up resistors, then you do not need to add them to your SCL and SDA lines.
 
-- Connect an I2C device (like a BH1750) to pins 9 (3V3), 15 (SCL), 16 (SDA), 18 (GND).
+- Connect an I2C device (like a BH1750) to pins 9 (3V3), 16 (SCL), 15 (SDA), 18 (GND).
 - The message should change to "FOUND I2C DEVICE"
 - The next line should have the address of the I2C device.
 - If the device is a BH1750 then you should also see "WRITE/READ SUCCESS" and a value that changes with the brightness on the sensor.
