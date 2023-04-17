@@ -481,7 +481,7 @@ cJSON* _wifi_marauder_script_create_json_select(WifiMarauderScriptStageSelect* s
             cJSON_AddItemToObject(select_json, "indexes", indexes_json);
         }
     }
-    return select_json;
+    return stage_json;
 }
 
 cJSON* _wifi_marauder_script_create_json_deauth(WifiMarauderScriptStageDeauth* deauth_stage) {
