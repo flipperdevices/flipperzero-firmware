@@ -14,6 +14,7 @@ struct LoaderMenu {
     ViewDispatcher* view_dispatcher;
     Menu* primary_menu;
     Submenu* settings_menu;
+    
     void (*closed_callback)(void*);
     void* closed_callback_context;
 
@@ -45,10 +46,10 @@ void loader_menu_free(LoaderMenu* loader_menu) {
     // check if thread is running
     furi_assert(!loader_menu->thread);
 
-    furi_record_close(RECORD_GUI);
-    view_dispatcher_free(loader_menu->view_dispatcher);
-    menu_free(loader_menu->primary_menu);
     submenu_free(loader_menu->settings_menu);
+    menu_free(loader_menu->primary_menu);
+    view_dispatcher_free(loader_menu->view_dispatcher);
+    furi_record_close(RECORD_GUI);
     free(loader_menu);
 }
 
@@ -86,7 +87,7 @@ void loader_menu_set_click_callback(
 
 static void loader_menu_callback(void* context, uint32_t index) {
     LoaderMenu* loader_menu = context;
-    const char* name = FLIPPER_APPS[index].appid;
+    const char* name = FLIPPER_APPS[index].name;
     if(loader_menu->click_callback) {
         loader_menu->click_callback(name, loader_menu->click_callback_context);
     }
@@ -94,7 +95,7 @@ static void loader_menu_callback(void* context, uint32_t index) {
 
 static void loader_menu_settings_menu_callback(void* context, uint32_t index) {
     LoaderMenu* loader_menu = context;
-    const char* name = FLIPPER_SETTINGS_APPS[index].appid;
+    const char* name = FLIPPER_SETTINGS_APPS[index].name;
     if(loader_menu->click_callback) {
         loader_menu->click_callback(name, loader_menu->click_callback_context);
     }

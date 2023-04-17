@@ -4,13 +4,18 @@
 #include "loader.h"
 #include "loader_menu.h"
 
+typedef struct {
+    char* args;
+    char* name;
+    FuriThread* thread;
+    bool insomniac;
+} LoaderAppData;
+
 struct Loader {
     FuriPubSub* pubsub;
     FuriMessageQueue* queue;
     LoaderMenu* loader_menu;
-    char* app_args;
-    FuriThread* app_thread;
-    bool app_is_insomniac;
+    LoaderAppData app;
 };
 
 typedef enum {

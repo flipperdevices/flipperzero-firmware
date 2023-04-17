@@ -58,25 +58,31 @@ FuriPubSub* loader_get_pubsub(Loader* loader) {
     return loader->pubsub;
 }
 
-static const FlipperApplication* loader_get_application_by_appid(const char* appid) {
-    const FlipperApplication* app = NULL;
-    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        if(strcmp(appid, FLIPPER_APPS[i].appid) == 0) {
-            app = &FLIPPER_APPS[i];
-            break;
+static FlipperApplication const* loader_find_application_by_name_in_list(
+    const char* name,
+    const FlipperApplication* list,
+    const uint32_t n_apps) {
+    for(size_t i = 0; i < n_apps; i++) {
+        if(strcmp(name, list[i].name) == 0) {
+            return &list[i];
         }
     }
+    return NULL;
+}
 
-    if(!app) {
-        for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
-            if(strcmp(appid, FLIPPER_SETTINGS_APPS[i].appid) == 0) {
-                app = &FLIPPER_SETTINGS_APPS[i];
-                break;
-            }
-        }
+static const FlipperApplication* loader_find_application_by_name(const char* name) {
+    const FlipperApplication* application = NULL;
+    application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
+    if(!application) {
+        application = loader_find_application_by_name_in_list(
+            name, FLIPPER_SETTINGS_APPS, FLIPPER_SETTINGS_APPS_COUNT);
+    }
+    if(!application) {
+        application = loader_find_application_by_name_in_list(
+            name, FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT);
     }
 
-    return app;
+    return application;
 }
 
 static void loader_menu_closed_callback(void* context) {
@@ -91,12 +97,6 @@ static void loader_menu_click_callback(const char* name, void* context) {
     loader_start(loader, name, NULL);
 }
 
-static void loader_app_closed_callback(Loader* loader) {
-    LoaderMessage message;
-    message.type = LoaderMessageTypeAppClosed;
-    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
-}
-
 static void loader_thread_state_callback(FuriThreadState thread_state, void* context) {
     furi_assert(context);
 
@@ -107,7 +107,10 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
         event.type = LoaderEventTypeApplicationStarted;
         furi_pubsub_publish(loader->pubsub, &event);
     } else if(thread_state == FuriThreadStateStopped) {
-        loader_app_closed_callback(loader);
+        LoaderMessage message;
+        message.type = LoaderMessageTypeAppClosed;
+        furi_message_queue_put(loader->queue, &message, FuriWaitForever);
+
         event.type = LoaderEventTypeApplicationStopped;
         furi_pubsub_publish(loader->pubsub, &event);
     }
@@ -120,8 +123,10 @@ static Loader* loader_alloc() {
     loader->pubsub = furi_pubsub_alloc();
     loader->queue = furi_message_queue_alloc(1, sizeof(LoaderMessage));
     loader->loader_menu = NULL;
-    loader->app_args = NULL;
-    loader->app_thread = NULL;
+    loader->app.args = NULL;
+    loader->app.name = NULL;
+    loader->app.thread = NULL;
+    loader->app.insomniac = false;
     return loader;
 }
 
@@ -129,40 +134,46 @@ static void
     loader_start_internal_app(Loader* loader, const FlipperApplication* app, const char* args) {
     FURI_LOG_I(TAG, "Starting %s", app->name);
 
-    // duplicate args
-    furi_assert(loader->app_args == NULL);
+    // store args
+    furi_assert(loader->app.args == NULL);
     if(args && strlen(args) > 0) {
-        loader->app_args = strdup(args);
+        loader->app.args = strdup(args);
     }
 
+    // store name
+    furi_assert(loader->app.name == NULL);
+    loader->app.name = strdup(app->name);
+
     // setup app thread
-    loader->app_thread =
-        furi_thread_alloc_ex(app->name, app->stack_size, app->app, loader->app_args);
-    furi_thread_set_appid(loader->app_thread, app->appid);
+    loader->app.thread =
+        furi_thread_alloc_ex(app->name, app->stack_size, app->app, loader->app.args);
+    furi_thread_set_appid(loader->app.thread, app->appid);
 
     // setup heap trace
     FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
     if(mode > FuriHalRtcHeapTrackModeNone) {
-        furi_thread_enable_heap_trace(loader->app_thread);
+        furi_thread_enable_heap_trace(loader->app.thread);
     } else {
-        furi_thread_disable_heap_trace(loader->app_thread);
+        furi_thread_disable_heap_trace(loader->app.thread);
     }
 
     // setup insomnia
     if(!(app->flags & FlipperApplicationFlagInsomniaSafe)) {
         furi_hal_power_insomnia_enter();
-        loader->app_is_insomniac = true;
+        loader->app.insomniac = true;
     } else {
-        loader->app_is_insomniac = false;
+        loader->app.insomniac = false;
     }
 
     // setup app thread callbacks
-    furi_thread_set_state_context(loader->app_thread, loader);
-    furi_thread_set_state_callback(loader->app_thread, loader_thread_state_callback);
+    furi_thread_set_state_context(loader->app.thread, loader);
+    furi_thread_set_state_callback(loader->app.thread, loader_thread_state_callback);
 
     // start app thread
-    furi_thread_start(loader->app_thread);
+    furi_thread_start(loader->app.thread);
 }
+
+// process messages
 
 static void loader_do_menu_show(Loader* loader) {
     if(!loader->loader_menu) {
@@ -182,11 +193,11 @@ static void loader_do_menu_closed(Loader* loader) {
 }
 
 static LoaderStatus loader_do_start_by_name(Loader* loader, const char* name, const char* args) {
-    if(loader->app_thread) {
+    if(loader->app.thread) {
         return LoaderStatusErrorAppStarted;
     }
 
-    const FlipperApplication* app = loader_get_application_by_appid(name);
+    const FlipperApplication* app = loader_find_application_by_name(name);
 
     if(!app) {
         return LoaderStatusErrorUnknownApp;
@@ -197,23 +208,26 @@ static LoaderStatus loader_do_start_by_name(Loader* loader, const char* name, co
 }
 
 static bool loader_do_is_locked(Loader* loader) {
-    return loader->app_thread != NULL;
+    return loader->app.thread != NULL;
 }
 
 static void loader_do_app_closed(Loader* loader) {
-    furi_assert(loader->app_thread);
+    furi_assert(loader->app.thread);
     FURI_LOG_I(TAG, "Application stopped. Free heap: %zu", memmgr_get_free_heap());
-    if(loader->app_args) {
-        free(loader->app_args);
-        loader->app_args = NULL;
+    if(loader->app.args) {
+        free(loader->app.args);
+        loader->app.args = NULL;
     }
 
-    if(loader->app_is_insomniac) {
+    if(loader->app.insomniac) {
         furi_hal_power_insomnia_exit();
     }
 
-    furi_thread_free(loader->app_thread);
-    loader->app_thread = NULL;
+    free(loader->app.name);
+    loader->app.name = NULL;
+
+    furi_thread_free(loader->app.thread);
+    loader->app.thread = NULL;
 }
 
 // app
@@ -222,6 +236,13 @@ int32_t loader_srv(void* p) {
     UNUSED(p);
     Loader* loader = loader_alloc();
     furi_record_create(RECORD_LOADER, loader);
+
+    FURI_LOG_I(TAG, "Executing system start hooks");
+    for(size_t i = 0; i < FLIPPER_ON_SYSTEM_START_COUNT; i++) {
+        FLIPPER_ON_SYSTEM_START[i]();
+    }
+
+    // TODO: autorun
 
     LoaderMessage message;
     while(true) {
