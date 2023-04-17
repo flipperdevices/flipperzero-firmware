@@ -1,0 +1,253 @@
+#include "loader.h"
+#include "loader_i.h"
+#include "loader_menu.h"
+#include <applications.h>
+#include <furi_hal.h>
+
+#define TAG "Loader"
+
+// api
+
+LoaderStatus loader_start(Loader* loader, const char* name, const char* args) {
+    LoaderMessage message;
+    LoaderMessageStartResult result;
+
+    message.type = LoaderMessageTypeStartByName;
+    message.start.name = name;
+    message.start.args = args;
+    message.api_lock = api_lock_alloc_locked();
+    message.start_result = &result;
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
+    api_lock_wait_unlock_and_free(message.api_lock);
+    return result.status_value;
+}
+
+bool loader_lock(Loader* loader) {
+    UNUSED(loader);
+    furi_crash("Not implemented");
+    return false;
+}
+
+void loader_unlock(Loader* loader) {
+    UNUSED(loader);
+    furi_crash("Not implemented");
+}
+
+bool loader_is_locked(Loader* loader) {
+    LoaderMessage message;
+    LoaderMessageStartIsLockedResult result;
+    message.type = LoaderMessageTypeIsLocked;
+    message.api_lock = api_lock_alloc_locked();
+    message.is_locked_result = &result;
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
+    api_lock_wait_unlock_and_free(message.api_lock);
+    return result.bool_value;
+}
+
+void loader_show_menu(Loader* loader) {
+    LoaderMessage message;
+    message.type = LoaderMessageTypeShowMenu;
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
+}
+
+FuriPubSub* loader_get_pubsub(Loader* loader) {
+    furi_assert(loader);
+    // it's safe to return pubsub without locking
+    // because it's never freed and loader is never exited
+    // also the loader instance cannot be obtained until the pubsub is created
+    return loader->pubsub;
+}
+
+static const FlipperApplication* loader_get_application_by_appid(const char* appid) {
+    const FlipperApplication* app = NULL;
+    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+        if(strcmp(appid, FLIPPER_APPS[i].appid) == 0) {
+            app = &FLIPPER_APPS[i];
+            break;
+        }
+    }
+
+    if(!app) {
+        for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
+            if(strcmp(appid, FLIPPER_SETTINGS_APPS[i].appid) == 0) {
+                app = &FLIPPER_SETTINGS_APPS[i];
+                break;
+            }
+        }
+    }
+
+    return app;
+}
+
+static void loader_menu_closed_callback(void* context) {
+    Loader* loader = context;
+    LoaderMessage message;
+    message.type = LoaderMessageTypeMenuClosed;
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
+}
+
+static void loader_menu_click_callback(const char* name, void* context) {
+    Loader* loader = context;
+    loader_start(loader, name, NULL);
+}
+
+static void loader_app_closed_callback(Loader* loader) {
+    LoaderMessage message;
+    message.type = LoaderMessageTypeAppClosed;
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
+}
+
+static void loader_thread_state_callback(FuriThreadState thread_state, void* context) {
+    furi_assert(context);
+
+    Loader* loader = context;
+    LoaderEvent event;
+
+    if(thread_state == FuriThreadStateRunning) {
+        event.type = LoaderEventTypeApplicationStarted;
+        furi_pubsub_publish(loader->pubsub, &event);
+    } else if(thread_state == FuriThreadStateStopped) {
+        loader_app_closed_callback(loader);
+        event.type = LoaderEventTypeApplicationStopped;
+        furi_pubsub_publish(loader->pubsub, &event);
+    }
+}
+
+// implementation
+
+static Loader* loader_alloc() {
+    Loader* loader = malloc(sizeof(Loader));
+    loader->pubsub = furi_pubsub_alloc();
+    loader->queue = furi_message_queue_alloc(1, sizeof(LoaderMessage));
+    loader->loader_menu = NULL;
+    loader->app_args = NULL;
+    loader->app_thread = NULL;
+    return loader;
+}
+
+static void
+    loader_start_internal_app(Loader* loader, const FlipperApplication* app, const char* args) {
+    FURI_LOG_I(TAG, "Starting %s", app->name);
+
+    // duplicate args
+    furi_assert(loader->app_args == NULL);
+    if(args && strlen(args) > 0) {
+        loader->app_args = strdup(args);
+    }
+
+    // setup app thread
+    loader->app_thread =
+        furi_thread_alloc_ex(app->name, app->stack_size, app->app, loader->app_args);
+    furi_thread_set_appid(loader->app_thread, app->appid);
+
+    // setup heap trace
+    FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
+    if(mode > FuriHalRtcHeapTrackModeNone) {
+        furi_thread_enable_heap_trace(loader->app_thread);
+    } else {
+        furi_thread_disable_heap_trace(loader->app_thread);
+    }
+
+    // setup insomnia
+    if(!(app->flags & FlipperApplicationFlagInsomniaSafe)) {
+        furi_hal_power_insomnia_enter();
+        loader->app_is_insomniac = true;
+    } else {
+        loader->app_is_insomniac = false;
+    }
+
+    // setup app thread callbacks
+    furi_thread_set_state_context(loader->app_thread, loader);
+    furi_thread_set_state_callback(loader->app_thread, loader_thread_state_callback);
+
+    // start app thread
+    furi_thread_start(loader->app_thread);
+}
+
+static void loader_do_menu_show(Loader* loader) {
+    if(!loader->loader_menu) {
+        loader->loader_menu = loader_menu_alloc();
+        loader_menu_set_closed_callback(loader->loader_menu, loader_menu_closed_callback, loader);
+        loader_menu_set_click_callback(loader->loader_menu, loader_menu_click_callback, loader);
+        loader_menu_start(loader->loader_menu);
+    }
+}
+
+static void loader_do_menu_closed(Loader* loader) {
+    if(loader->loader_menu) {
+        loader_menu_stop(loader->loader_menu);
+        loader_menu_free(loader->loader_menu);
+        loader->loader_menu = NULL;
+    }
+}
+
+static LoaderStatus loader_do_start_by_name(Loader* loader, const char* name, const char* args) {
+    if(loader->app_thread) {
+        return LoaderStatusErrorAppStarted;
+    }
+
+    const FlipperApplication* app = loader_get_application_by_appid(name);
+
+    if(!app) {
+        return LoaderStatusErrorUnknownApp;
+    }
+
+    loader_start_internal_app(loader, app, args);
+    return LoaderStatusOk;
+}
+
+static bool loader_do_is_locked(Loader* loader) {
+    return loader->app_thread != NULL;
+}
+
+static void loader_do_app_closed(Loader* loader) {
+    furi_assert(loader->app_thread);
+    FURI_LOG_I(TAG, "Application stopped. Free heap: %zu", memmgr_get_free_heap());
+    if(loader->app_args) {
+        free(loader->app_args);
+        loader->app_args = NULL;
+    }
+
+    if(loader->app_is_insomniac) {
+        furi_hal_power_insomnia_exit();
+    }
+
+    furi_thread_free(loader->app_thread);
+    loader->app_thread = NULL;
+}
+
+// app
+
+int32_t loader_srv(void* p) {
+    UNUSED(p);
+    Loader* loader = loader_alloc();
+    furi_record_create(RECORD_LOADER, loader);
+
+    LoaderMessage message;
+    while(true) {
+        if(furi_message_queue_get(loader->queue, &message, FuriWaitForever) == FuriStatusOk) {
+            switch(message.type) {
+            case LoaderMessageTypeStartByName:
+                message.start_result->status_value =
+                    loader_do_start_by_name(loader, message.start.name, message.start.args);
+                api_lock_unlock(message.api_lock);
+                break;
+            case LoaderMessageTypeShowMenu:
+                loader_do_menu_show(loader);
+                break;
+            case LoaderMessageTypeMenuClosed:
+                loader_do_menu_closed(loader);
+                break;
+            case LoaderMessageTypeIsLocked:
+                message.is_locked_result->bool_value = loader_do_is_locked(loader);
+                api_lock_unlock(message.api_lock);
+                break;
+            case LoaderMessageTypeAppClosed:
+                loader_do_app_closed(loader);
+                break;
+            }
+        }
+    }
+
+    return 0;
+}

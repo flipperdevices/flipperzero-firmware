@@ -8,7 +8,9 @@ struct Loader {
     FuriPubSub* pubsub;
     FuriMessageQueue* queue;
     LoaderMenu* loader_menu;
-    bool is_locked;
+    char* app_args;
+    FuriThread* app_thread;
+    bool app_is_insomniac;
 };
 
 typedef enum {
