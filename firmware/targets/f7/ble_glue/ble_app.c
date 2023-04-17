@@ -40,7 +40,7 @@ bool ble_app_init() {
     ble_app->hci_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
     ble_app->hci_sem = furi_semaphore_alloc(1, 0);
     // HCI transport layer thread to handle user asynch events
-    ble_app->thread = furi_thread_alloc_ex("BleHciDriver", 2048, ble_app_hci_thread, ble_app);
+    ble_app->thread = furi_thread_alloc_ex("BleHciDriver", 1024, ble_app_hci_thread, ble_app);
     furi_thread_start(ble_app->thread);
 
     // Initialize Ble Transport Layer
@@ -145,16 +145,13 @@ void hci_notify_asynch_evt(void* pdata) {
 
 void hci_cmd_resp_release(uint32_t flag) {
     UNUSED(flag);
-    // FURI_LOG_D(TAG, "hci_cmd_resp_release(flag:%lu), app: %p", flag, ble_app);
     furi_check(ble_app);
-    furi_semaphore_release(ble_app->hci_sem);
+    furi_check(furi_semaphore_release(ble_app->hci_sem) == FuriStatusOk);
 }
 
 void hci_cmd_resp_wait(uint32_t timeout) {
-    UNUSED(timeout);
-    // FURI_LOG_D(TAG, "hci_cmd_resp_wait(timeout:%lu), app: %p", timeout, ble_app);
     furi_check(ble_app);
-    furi_semaphore_acquire(ble_app->hci_sem, FuriWaitForever);
+    furi_check(furi_semaphore_acquire(ble_app->hci_sem, timeout) == FuriStatusOk);
 }
 
 static void ble_app_hci_event_handler(void* pPayload) {

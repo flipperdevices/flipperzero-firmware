@@ -12,7 +12,7 @@ App(
         "bt_start",
         "bt_settings",
     ],
-    stack_size=2 * 1024,
+    stack_size=1 * 1024,
     order=20,
     sdk_headers=["bt_service/bt.h"],
 )
