@@ -89,6 +89,8 @@ WifiMarauderScriptStageSelect* _wifi_marauder_script_get_stage_select(cJSON *sta
 
     cJSON *type_json = cJSON_GetObjectItemCaseSensitive(select_stage_json, "type");
     cJSON *filter_json = cJSON_GetObjectItemCaseSensitive(select_stage_json, "filter");
+    cJSON *indexes_json = cJSON_GetObjectItemCaseSensitive(select_stage_json, "indexes");
+    cJSON *index_json = cJSON_GetObjectItemCaseSensitive(select_stage_json, "index");
     cJSON *allow_repeat_json = cJSON_GetObjectItemCaseSensitive(select_stage_json, "allow_repeat");
 
     if (!cJSON_IsString(type_json) || !cJSON_IsString(filter_json)) {
@@ -112,6 +114,24 @@ WifiMarauderScriptStageSelect* _wifi_marauder_script_get_stage_select(cJSON *sta
     stage_select->type = select_type;
     stage_select->filter = filter_str;
     stage_select->allow_repeat = cJSON_IsBool(allow_repeat_json) ? allow_repeat_json->valueint : true;
+
+    if (cJSON_IsNumber(index_json)) {
+        int* indexes = (int*) malloc(sizeof(int));
+        indexes[0] = index_json->valueint;
+        stage_select->indexes = indexes;
+    } else if (cJSON_IsArray(indexes_json)) {
+        int indexes_size = cJSON_GetArraySize(indexes_json);
+        int* indexes = (int*) malloc(indexes_size * sizeof(int));
+        for (int i = 0; i < indexes_size; i++) {
+            cJSON *index_item = cJSON_GetArrayItem(indexes_json, i);
+            if (cJSON_IsNumber(index_item)) {
+                indexes[i] = index_item->valueint;
+            }
+        }
+        stage_select->indexes = indexes;
+    } else {
+        stage_select->indexes = NULL;
+    }
 
     return stage_select;
 }
@@ -512,7 +532,12 @@ void wifi_marauder_script_free(WifiMarauderScript *script) {
                 free(current_stage->stage);
                 break;
             case WifiMarauderScriptStageTypeSelect:
-                free(((WifiMarauderScriptStageSelect *) current_stage->stage)->filter);
+                if (((WifiMarauderScriptStageSelect *) current_stage->stage)->filter != NULL) {
+                    free(((WifiMarauderScriptStageSelect *) current_stage->stage)->filter);
+                }
+                if (((WifiMarauderScriptStageSelect *) current_stage->stage)->indexes != NULL) {
+                    free(((WifiMarauderScriptStageSelect *) current_stage->stage)->indexes);
+                }
                 free(current_stage->stage);
                 break;
             case WifiMarauderScriptStageTypeDeauth:

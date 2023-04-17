@@ -47,7 +47,9 @@
  *         },
  *         "select": {
  *             "type": "ap" | "station" | "ssid",
- *             "filter": "all" | "contains \"{SSID fragment}\" or equals \"{SSID}\" or ..." (Not implemented yet on Marauder firmware)
+ *             "filter": "all" | "contains -f '{SSID fragment}' or equals '{SSID}' or ...",
+ *             "index": index number,
+ *             "indexes": [0, 1, 2, 3...],
  *         },
  *         "deauth": {
  *             "timeout": seconds
@@ -139,6 +141,7 @@ typedef struct WifiMarauderScriptStageScan {
 typedef struct WifiMarauderScriptStageSelect {
     WifiMarauderScriptSelectType type;
     char* filter;
+    int* indexes;
     // TODO: Implement a feature to not select the same items in the next iteration of the script
     bool allow_repeat;
 } WifiMarauderScriptStageSelect;
