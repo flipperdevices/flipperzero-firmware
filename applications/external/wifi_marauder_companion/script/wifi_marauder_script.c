@@ -6,8 +6,6 @@
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_PROBE 60
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_SNIFF 60
 #define WIFI_MARAUDER_DEFAULT_TIMEOUT_BEACON 60
-#define WIFI_MARAUDER_DEFAULT_ENABLE_LED true
-#define WIFI_MARAUDER_DEFAULT_SAVE_PCAP true
 
 WifiMarauderScript *wifi_marauder_script_alloc() {
     WifiMarauderScript *script = (WifiMarauderScript *) malloc(sizeof(WifiMarauderScript));
@@ -17,8 +15,8 @@ WifiMarauderScript *wifi_marauder_script_alloc() {
     script->name = NULL;
     script->description = NULL;
     script->first_stage = NULL;
-    script->enable_led = WIFI_MARAUDER_DEFAULT_ENABLE_LED;
-    script->save_pcap = WIFI_MARAUDER_DEFAULT_SAVE_PCAP;
+    script->enable_led = WifiMarauderScriptBooleanUndefined;
+    script->save_pcap = WifiMarauderScriptBooleanUndefined;
     script->repeat = 1;
     return script;
 }

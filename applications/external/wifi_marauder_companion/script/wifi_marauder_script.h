@@ -100,6 +100,12 @@
 #include "cJSON.h"
 
 typedef enum {
+    WifiMarauderScriptBooleanFalse = 0,
+    WifiMarauderScriptBooleanTrue = 1,
+    WifiMarauderScriptBooleanUndefined = 2
+} WifiMarauderScriptBoolean;
+
+typedef enum {
     WifiMarauderScriptStageTypeScan,
     WifiMarauderScriptStageTypeSelect,
     WifiMarauderScriptStageTypeDeauth,
@@ -196,9 +202,8 @@ typedef struct WifiMarauderScript {
     char* name;
     char* description;
     WifiMarauderScriptStage *first_stage;
-    // TODO: Think of a way to not change the settings if they are not informed in the JSON
-    bool enable_led;
-    bool save_pcap;
+    WifiMarauderScriptBoolean enable_led;
+    WifiMarauderScriptBoolean save_pcap;
     int repeat;
 } WifiMarauderScript;
 

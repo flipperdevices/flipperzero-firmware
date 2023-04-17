@@ -185,14 +185,18 @@ void wifi_marauder_script_execute_start(void *context) {
     char command[100];
 
     // Enables or disables the LED according to script settings
-    snprintf(command, sizeof(command), "settings -s EnableLED %s", script->enable_led ? "enable" : "disable");
-    wifi_marauder_uart_tx((uint8_t*)command, strlen(command));
-    _send_line_break();
+    if (script->enable_led != WifiMarauderScriptBooleanUndefined) {
+        snprintf(command, sizeof(command), "settings -s EnableLED %s", script->enable_led ? "enable" : "disable");
+        wifi_marauder_uart_tx((uint8_t*)command, strlen(command));
+        _send_line_break();
+    }
 
     // Enables or disables PCAP saving according to script settings
-    snprintf(command, sizeof(command), "settings -s SavePCAP %s", script->save_pcap ? "enable" : "disable");
-    wifi_marauder_uart_tx((uint8_t*)command, strlen(command));
-    _send_line_break();
+    if (script->save_pcap != WifiMarauderScriptBooleanUndefined) {
+        snprintf(command, sizeof(command), "settings -s SavePCAP %s", script->save_pcap ? "enable" : "disable");
+        wifi_marauder_uart_tx((uint8_t*)command, strlen(command));
+        _send_line_break();
+    }
 }
 
 
