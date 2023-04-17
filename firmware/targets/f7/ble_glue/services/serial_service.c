@@ -5,6 +5,8 @@
 
 #include <furi.h>
 
+#include "serial_service_uuid.inc"
+
 #define TAG "BtSerialSvc"
 
 typedef enum {
@@ -20,23 +22,7 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
         {.name = "TX",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
          .data.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
-         .uuid.Char_UUID_128 =
-             {0x00,
-              0x00,
-              0xfe,
-              0x61,
-              0x8e,
-              0x22,
-              0x45,
-              0x41,
-              0x9d,
-              0x4c,
-              0x21,
-              0xed,
-              0xae,
-              0x82,
-              0xed,
-              0x19},
+         .uuid.Char_UUID_128 = SERIAL_SVC_TX_CHAR_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_READ | CHAR_PROP_INDICATE,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
@@ -46,23 +32,7 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
         {.name = "RX",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
          .data.fixed.length = SERIAL_SVC_DATA_LEN_MAX,
-         .uuid.Char_UUID_128 =
-             {0x00,
-              0x00,
-              0xfe,
-              0x62,
-              0x8e,
-              0x22,
-              0x45,
-              0x41,
-              0x9d,
-              0x4c,
-              0x21,
-              0xed,
-              0xae,
-              0x82,
-              0xed,
-              0x19},
+         .uuid.Char_UUID_128 = SERIAL_SVC_RX_CHAR_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_WRITE_WITHOUT_RESP | CHAR_PROP_WRITE | CHAR_PROP_READ,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
@@ -72,23 +42,7 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
         {.name = "Flow control",
          .data_prop_type = FlipperGattCharacteristicDataFixed,
          .data.fixed.length = sizeof(uint32_t),
-         .uuid.Char_UUID_128 =
-             {0x00,
-              0x00,
-              0xfe,
-              0x63,
-              0x8e,
-              0x22,
-              0x45,
-              0x41,
-              0x9d,
-              0x4c,
-              0x21,
-              0xed,
-              0xae,
-              0x82,
-              0xed,
-              0x19},
+         .uuid.Char_UUID_128 = SERIAL_SVC_FLOW_CONTROL_UUID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_READ | CHAR_PROP_NOTIFY,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
@@ -98,23 +52,7 @@ static const FlipperGattCharacteristicParams serial_svc_chars[SerialSvcGattChara
         .name = "RPC status",
         .data_prop_type = FlipperGattCharacteristicDataFixed,
         .data.fixed.length = sizeof(SerialServiceRpcStatus),
-        .uuid.Char_UUID_128 =
-            {0x00,
-             0x00,
-             0xfe,
-             0x64,
-             0x8e,
-             0x22,
-             0x45,
-             0x41,
-             0x9d,
-             0x4c,
-             0x21,
-             0xed,
-             0xae,
-             0x82,
-             0xed,
-             0x19},
+        .uuid.Char_UUID_128 = SERIAL_SVC_RPC_STATUS_UUID,
         .uuid_type = UUID_TYPE_128,
         .char_properties = CHAR_PROP_READ | CHAR_PROP_WRITE | CHAR_PROP_NOTIFY,
         .security_permissions = ATTR_PERMISSION_AUTHEN_READ | ATTR_PERMISSION_AUTHEN_WRITE,
@@ -130,9 +68,6 @@ typedef struct {
     SerialServiceEventCallback callback;
     void* context;
 } SerialSvc;
-
-static const uint8_t service_uuid[] =
-    {0x00, 0x00, 0xfe, 0x60, 0xcc, 0x7a, 0x48, 0x2a, 0x98, 0x4a, 0x7f, 0x2e, 0xd5, 0xb3, 0xe5, 0x8f};
 
 static SerialSvc* serial_svc = NULL;
 
@@ -219,7 +154,7 @@ void serial_svc_start() {
 
     // Add service
     status = aci_gatt_add_service(
-        UUID_TYPE_128, (Service_UUID_t*)service_uuid, PRIMARY_SERVICE, 12, &serial_svc->svc_handle);
+        UUID_TYPE_128, &service_uuid, PRIMARY_SERVICE, 12, &serial_svc->svc_handle);
     if(status) {
         FURI_LOG_E(TAG, "Failed to add Serial service: %d", status);
     }

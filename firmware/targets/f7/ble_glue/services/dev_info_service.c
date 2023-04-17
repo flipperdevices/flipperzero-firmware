@@ -7,6 +7,8 @@
 #include <protobuf_version.h>
 #include <lib/toolbox/version.h>
 
+#include "dev_info_service_uuid.inc"
+
 #define TAG "BtDevInfoSvc"
 
 typedef enum {
@@ -106,23 +108,7 @@ static const FlipperGattCharacteristicParams dev_info_svc_chars[DevInfoSvcGattCh
          .data_prop_type = FlipperGattCharacteristicDataFixed,
          .data.fixed.length = sizeof(dev_info_rpc_version) - 1,
          .data.fixed.ptr = (const uint8_t*)&dev_info_rpc_version,
-         .uuid.Char_UUID_128 =
-             {0x33,
-              0xa9,
-              0xb5,
-              0x3e,
-              0x87,
-              0x5d,
-              0x1a,
-              0x8e,
-              0xc8,
-              0x47,
-              0x5e,
-              0xae,
-              0x6d,
-              0x66,
-              0xf6,
-              0x03},
+         .uuid.Char_UUID_128 = DEV_INVO_RPC_VERSION_UID,
          .uuid_type = UUID_TYPE_128,
          .char_properties = CHAR_PROP_READ,
          .security_permissions = ATTR_PERMISSION_AUTHEN_READ,
