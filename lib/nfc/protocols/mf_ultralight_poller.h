@@ -49,6 +49,8 @@ MfUltralightError mf_ultralight_poller_start(
     MfUltralightPollerCallback callback,
     void* context);
 
+MfUltralightError mf_ultralight_poller_get_data(MfUltralightPoller* instance, MfUltralightData* data);
+
 MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance);
 
 // Called from NfcWorker thread

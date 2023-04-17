@@ -116,6 +116,16 @@ MfUltralightError mf_ultralight_poller_start(
     return MfUltralightErrorNone;
 }
 
+MfUltralightError mf_ultralight_poller_get_data(MfUltralightPoller* instance, MfUltralightData* data) {
+    furi_assert(instance);
+    furi_assert(instance->data);
+    furi_assert(data);
+
+    *data = *instance->data;
+
+    return MfUltralightErrorNone;
+}
+
 MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);

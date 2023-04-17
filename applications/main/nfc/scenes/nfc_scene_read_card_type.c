@@ -68,7 +68,7 @@ bool nfc_scene_read_card_type_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         }
         if(event.event == SubmenuIndexReadMfUltralight) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightRead);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadEMV) {
