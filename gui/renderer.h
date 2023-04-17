@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <gui/canvas.h>
+#include "space_impact_app_icons.h"
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -44,5 +45,21 @@ static void draw_ui_asset(uint8_t x, uint8_t y, uint8_t* const asset) {
             }
             index++;
         }
+    }
+}
+
+static void level_draw_bg(Canvas* const canvas, uint8_t index, bool isInverted) {
+    canvas_set_color(canvas, isInverted ? ColorWhite : ColorBlack);
+    switch(index) {
+    case 0:
+        canvas_draw_icon(canvas, 0, 46, &I_level_bg_1);
+        break;
+    case 1:
+        canvas_draw_icon(canvas, 0, 46, &I_level_bg_1);
+        break;
+
+    /* no background */
+    default:
+        break;
     }
 }

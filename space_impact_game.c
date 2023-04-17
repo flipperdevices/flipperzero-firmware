@@ -3,10 +3,14 @@
 #include <input/input.h>
 #include "gui/font.h"
 #include "gui/assets.h"
-#include "gui/enemies.h"
-#include "weapon.h"
+#include "data/enemies.h"
+#include "data/weapon.h"
+
+#define FRAMES 25 //12
 
 static void game_update(GameState* game_state) {
+    game_state->level_time++;
+
     // update position
     if(game_state->up && game_state->player.position.y > HERO_MIN_Y) {
         game_state->player.position.y--;
@@ -16,6 +20,21 @@ static void game_update(GameState* game_state) {
 
     // update bullets positions
     weapon_update(game_state);
+
+    // try spawn enemy
+    if(game_state->enemies.current_spawned < ENEMY_PULL) {
+        if(game_state->level.enemySpawDelay[game_state->enemies.current_spawned + 1] >=
+           game_state->level_time / FRAMES) {
+            FURI_LOG_E(TAG, "spawned %d\r\n", game_state->level_time);
+
+            game_state->enemies.current_spawned++;
+            game_state->enemies.spawned[game_state->enemies.current_spawned].points = 1;
+            game_state->enemies.spawned[game_state->enemies.current_spawned].life = 1;
+            game_state->enemies.spawned[game_state->enemies.current_spawned].position.x =
+                50 + game_state->enemies.current_spawned * 10;
+            game_state->enemies.spawned[game_state->enemies.current_spawned].position.y = 35;
+        }
+    }
 
     if(game_state->fire) {
         weapon_try_fire_bullet(game_state);
@@ -46,7 +65,8 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     draw_ui_asset(50, 1, ui_rocket);
     draw_number(58, 1, game_state->player.rockets, 2);
     // score
-    draw_number(90, 1, game_state->player.score, 5);
+    //draw_number(90, 1, game_state->player.score, 5);
+    draw_number(90, 1, game_state->level_time / FRAMES, 5);
     // player
     draw_ui_asset(game_state->player.position.x, game_state->player.position.y, ui_hero);
     // bullets
@@ -57,7 +77,14 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     }
 
     // enemies
-    draw_ui_asset(90, 30, enemy_1);
+    if(game_state->enemies.current_spawned >= 0) {
+        for(int i = 0; i <= game_state->enemies.current_spawned; i++) {
+            draw_ui_asset(
+                game_state->enemies.spawned[i].position.x,
+                game_state->enemies.spawned[i].position.y,
+                enemies[game_state->level.enemySpawType[i]]);
+        }
+    }
 
     render_draw(canvas);
 
@@ -101,7 +128,7 @@ int32_t impact_game_main() {
 
     // Set timer
     FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, event_queue);
-    furi_timer_start(timer, furi_kernel_get_tick_frequency() / 30); //12
+    furi_timer_start(timer, furi_kernel_get_tick_frequency() / FRAMES);
 
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
