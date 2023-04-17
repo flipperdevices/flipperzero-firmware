@@ -812,8 +812,8 @@ bool felica_std_traverse_system(
     FelicaSearchServiceCodeResult search_result = {0};
     bool result = false;
     int_least32_t last_node_code = -1;
+    // Cache currently opened service node. Must be updated every time the array is mutated.
     FelicaNode* curr_open_snode = NULL;
-    FelicaNode* curr_working_anode = NULL;
     // FELICA_INODE_INVALID is also used here to mark root node (no parent)
     FelicaINode curr_inode = FELICA_INODE_INVALID, curr_working_inode = FELICA_INODE_INVALID;
 
@@ -855,16 +855,19 @@ bool felica_std_traverse_system(
 
         // Find the area the newly discovered node belongs to
         while(true) {
-            if(curr_working_anode == NULL) {
+            if(curr_working_inode <= FELICA_INODE_INVALID) {
                 break;
             }
+
+            FelicaNode* curr_working_anode = felica_std_inode_lookup(system, curr_working_inode);
+            furi_assert(curr_working_anode != NULL);
+            furi_assert(curr_working_anode->type == FelicaNodeTypeArea);
+            furi_assert(curr_working_anode->area != NULL);
+
             // If current code is out of range, cd .. and check again
             if(search_result.code > curr_working_anode->area->end_service_code) {
                 FelicaINode parent_inode = curr_working_anode->parent;
-                curr_working_anode = felica_std_inode_lookup(system, parent_inode);
                 curr_working_inode = parent_inode;
-                furi_assert(curr_working_anode != NULL);
-                furi_assert(curr_working_anode->type == FelicaNodeTypeArea);
                 // Close service on area switching
                 curr_open_snode = NULL;
             } else {
@@ -883,15 +886,24 @@ bool felica_std_traverse_system(
                 search_result.area_end);
 
             // Record new inode and cache the node object
-            curr_working_inode = ++curr_inode;
-            curr_working_anode = new_anode;
+            FelicaINode new_inode = ++curr_inode;
+            if(new_inode > 0) {
+                FelicaNode* curr_working_anode =
+                    felica_std_inode_lookup(system, curr_working_inode);
+                furi_assert(curr_working_anode != NULL);
+                furi_assert(curr_working_anode->type == FelicaNodeTypeArea);
+                furi_assert(curr_working_anode->area != NULL);
+                FelicaINodeArray_push_back(curr_working_anode->area->nodes, new_inode);
+            }
+
+            curr_working_inode = new_inode;
 
             // Since this is a new area node, the previously opened service should be closed.
             curr_open_snode = NULL;
             continue;
         }
 
-        if(curr_working_anode == NULL || curr_inode <= FELICA_INODE_INVALID) {
+        if(curr_working_inode <= FELICA_INODE_INVALID || curr_inode <= FELICA_INODE_INVALID) {
             FURI_LOG_E(TAG, "Bad card format: Root area does not exist");
             break;
         }
@@ -907,6 +919,10 @@ bool felica_std_traverse_system(
                 curr_working_inode,
                 search_result.number,
                 search_result.service_type);
+            FelicaNode* curr_working_anode = felica_std_inode_lookup(system, curr_working_inode);
+            furi_assert(curr_working_anode != NULL);
+            furi_assert(curr_working_anode->type == FelicaNodeTypeArea);
+            furi_assert(curr_working_anode->area != NULL);
             FelicaINodeArray_push_back(curr_working_anode->area->nodes, ++curr_inode);
         }
 
