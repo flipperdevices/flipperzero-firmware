@@ -14,7 +14,7 @@ struct LoaderMenu {
     ViewDispatcher* view_dispatcher;
     Menu* primary_menu;
     Submenu* settings_menu;
-    
+
     void (*closed_callback)(void*);
     void* closed_callback_context;
 
