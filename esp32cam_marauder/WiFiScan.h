@@ -88,6 +88,7 @@ esp_err_t esp_wifi_80211_tx(wifi_interface_t ifx, const void *buffer, int len, b
 
 struct ssid {
   String essid;
+  int channel;
   int bssid[6];
   bool selected;
 };

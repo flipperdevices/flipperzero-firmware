@@ -176,7 +176,7 @@ int WiFiScan::clearSSIDs() {
 }
 
 bool WiFiScan::addSSID(String essid) {
-  ssid s = {essid, {random(256), random(256), random(256), random(256), random(256), random(256)}, false};
+  ssid s = {essid, random(1, 12), {random(256), random(256), random(256), random(256), random(256), random(256)}, false};
   ssids->add(s);
   Serial.println(ssids->get(ssids->size() - 1).essid);
 
@@ -191,7 +191,7 @@ int WiFiScan::generateSSIDs(int count) {
     for (uint8_t i = 0; i < 6; i++)
       essid.concat(alfa[random(65)]);
 
-    ssid s = {essid, {random(256), random(256), random(256), random(256), random(256), random(256)}, false};
+    ssid s = {essid, random(1, 12), {random(256), random(256), random(256), random(256), random(256), random(256)}, false};
     ssids->add(s);
     Serial.println(ssids->get(ssids->size() - 1).essid);
   }
@@ -2437,7 +2437,7 @@ void WiFiScan::broadcastCustomBeacon(uint32_t current_time, AccessPoint custom_s
 }
 
 void WiFiScan::broadcastCustomBeacon(uint32_t current_time, ssid custom_ssid) {
-  set_channel = random(1,12); 
+  set_channel = custom_ssid.channel;
   esp_wifi_set_channel(set_channel, WIFI_SECOND_CHAN_NONE);
   delay(1);  
 
@@ -3623,12 +3623,12 @@ void WiFiScan::main(uint32_t currentTime)
     // which makes beacon spam less effective
     for (int i = 0; i < access_points->size(); i++) {
       if (access_points->get(i).selected)
-        this->broadcastCustomBeacon(currentTime, ssid{access_points->get(i).essid, {random(256), 
-                                                                                    random(256), 
-                                                                                    random(256), 
-                                                                                    random(256), 
-                                                                                    random(256), 
-                                                                                    random(256)}});
+        this->broadcastCustomBeacon(currentTime, ssid{access_points->get(i).essid, random(1, 12), {random(256), 
+                                                                                                   random(256),
+                                                                                                   random(256),
+                                                                                                   random(256),
+                                                                                                   random(256),
+                                                                                                   random(256)}});
     }
       
 
