@@ -12,6 +12,10 @@
 
 typedef enum {
     MfUltralightPollerStateIdle,
+    MfUltralightPollerStateReadVersion,
+    MfUltralightPollerStateDetectNtag203,
+    MfUltralightPollerStateReadSignature,
+    MfUltralightPollerStateRead
 } MfUltralightPollerState;
 
 struct MfUltralightPoller {
@@ -62,6 +66,24 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance) {
     free(instance);
 }
 
+static void mf_ultralight_poller_get_version(MfUltralightPoller* instance) {
+    NfcPollerBuffer* buff = instance->buffer;
+    buff->tx_data[0] = MF_ULTRALIGHT_CMD_GET_VERSION;
+    buff->rx_bits = 8;
+    NfcaError error = nfca_poller_send_standart_frame(
+        instance->nfca_poller,
+        buff->tx_data,
+        buff->tx_bits,
+        buff->rx_data,
+        buff->rx_data_size,
+        &buff->rx_bits,
+        MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+    if(error == NfcaErrorNone) {
+        memcpy(&instance->data->version, buff->rx_data, sizeof(MfUltralightVersion));
+        instance->data->type = mf_ultralight_get_type_by_version(&instance->data->version);
+    }
+}
+
 static void mf_ultralight_nfca_poller_event_callback(NfcaPollerEvent event, void* context) {
     furi_assert(context);
 
@@ -70,9 +92,13 @@ static void mf_ultralight_nfca_poller_event_callback(NfcaPollerEvent event, void
     NfcaError error = NfcaErrorNone;
 
     if(event.type == NfcaPollerEventTypeReady) {
-        // Test: read 0 page
         NfcPollerBuffer* buff = instance->buffer;
         nfc_poller_buffer_reset(buff);
+
+        if(instance->state == MfUltralightPollerStateReadVersion) {
+            mf_ultralight_poller_get_version(instance);
+        }
+        // Test: read 0 page
         buff->tx_data[0] = MF_ULTRALIGHT_CMD_READ_PAGE;
         buff->tx_data[1] = 0;
         buff->tx_bits = 16;
@@ -116,7 +142,8 @@ MfUltralightError mf_ultralight_poller_start(
     return MfUltralightErrorNone;
 }
 
-MfUltralightError mf_ultralight_poller_get_data(MfUltralightPoller* instance, MfUltralightData* data) {
+MfUltralightError
+    mf_ultralight_poller_get_data(MfUltralightPoller* instance, MfUltralightData* data) {
     furi_assert(instance);
     furi_assert(instance->data);
     furi_assert(data);

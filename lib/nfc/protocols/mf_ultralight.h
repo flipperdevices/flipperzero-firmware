@@ -100,6 +100,8 @@ typedef struct {
     uint32_t paged_read;
 } MfUltralightData;
 
+MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version);
+
 #ifdef __cplusplus
 }
 #endif
