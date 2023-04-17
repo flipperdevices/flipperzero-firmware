@@ -1,5 +1,10 @@
 # Cookie Clicker Tutorial
 
+I recommend the [hid_cookie](../hid_cookie/readme.md) tutorial instead.
+
+```
+```
+
 This tutorial modifies the Flipper Zero firmware to add a Cookie Clicker controller option to the hid_app (known as "Remote" under Applications/Bluetooth). This Cookie clicker will automatically click the mouse and allow you to set the speed of the clicks.
 
 The "Remote" application is a Bluetooth HID (Human Interface Device) application. It allows you to connect to a Bluetooth HID device and send keystrokes and mouse clicks. The Flipper Zero firmware has a TikTok controller built in. This tutorial will show you how to modify the firmware to add a Cookie Clicker controller, starting with the code from the TikTok controller.
@@ -8,6 +13,11 @@ Make sure you have a working Flipper Zero before you start this tutorial & that
 you have enabled Bluetooth on the Flipper Zero (under Settings). You will need to pair the Flipper Zero with your phone before you can use the Cookie Clicker controller (the Flipper Zero device should display in your phone's Bluetooth settings while the "Remote" application is running).
 
 If you are unclear of a step, the [final_files](./final_files/) folder contains the modified files you should have after you have completed the tutorial. Please let me know which step was unclear and I will try to clarify it for future users.
+
+## Step 0. Another tutorial can be found at hid_cookie
+I recommend the [hid_cookie](../hid_cookie/readme.md) tutorial instead.
+
+
 
 ## Step 1. Install Git and VS Code.
 
