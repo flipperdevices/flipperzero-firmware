@@ -79,8 +79,8 @@ typedef struct {
 
     void* view_dispatcher;
     void* primary_menu;
-    void* plugins_menu;
-    void* debug_menu;
+    // void* plugins_menu;
+    // void* debug_menu;
     void* settings_menu;
 
     volatile uint8_t lock_count;
