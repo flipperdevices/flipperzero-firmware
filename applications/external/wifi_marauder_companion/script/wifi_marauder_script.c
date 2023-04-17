@@ -339,7 +339,7 @@ void _wifi_marauder_script_add_stage(WifiMarauderScript *script, WifiMarauderScr
 }
 
 void _wifi_marauder_script_load_stages(WifiMarauderScript *script, cJSON *stages) {
-    WifiMarauderScriptStage *prev_stage = NULL;
+    WifiMarauderScriptStage *prev_stage = wifi_marauder_script_get_last_stage(script);
 
     // Scan stage
     WifiMarauderScriptStageScan *stage_scan = _wifi_marauder_script_get_stage_scan(stages);
@@ -473,8 +473,16 @@ WifiMarauderScript *wifi_marauder_script_parse_raw(const char* json_raw) {
     }
     cJSON* meta = cJSON_GetObjectItem(json, "meta");
     _wifi_marauder_script_load_meta(script, meta);
+
     cJSON* stages = cJSON_GetObjectItem(json, "stages");
-    _wifi_marauder_script_load_stages(script, stages);
+    if (cJSON_IsArray(stages)) {
+        cJSON* stage_item = NULL;
+        cJSON_ArrayForEach(stage_item, stages) {
+            _wifi_marauder_script_load_stages(script, stage_item);
+        }
+    } else {
+        _wifi_marauder_script_load_stages(script, stages);
+    }
 
     return script;
 }
@@ -516,6 +524,17 @@ WifiMarauderScriptStage* wifi_marauder_script_get_stage(WifiMarauderScript* scri
         current_stage = current_stage->next_stage;
     }
     return NULL;
+}
+
+WifiMarauderScriptStage* wifi_marauder_script_get_last_stage(WifiMarauderScript* script) {
+    if (script == NULL || script->first_stage == NULL) {
+        return NULL;
+    }
+    WifiMarauderScriptStage* current_stage = script->first_stage;
+    while (current_stage->next_stage != NULL) {
+        current_stage = current_stage->next_stage;
+    }
+    return current_stage;
 }
 
 void wifi_marauder_script_free(WifiMarauderScript *script) {

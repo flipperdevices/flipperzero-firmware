@@ -91,6 +91,16 @@
  *         }
  *     }
  * }
+ * 
+ * Note: It is possible to inform "stages" as an array, allowing ordering and repetition of stages of the same type:
+ *     "stages": [
+ *       {
+ *         "beaconList": { "ssids": ["SSID 1", "SSID 2"] }
+ *       },
+ *       {
+ *         "beaconList": { "generate": 4 }
+ *       },
+ *     ]
  * ----------------------------------------------------------------------------------------------------
  */
 
@@ -211,4 +221,5 @@ WifiMarauderScript* wifi_marauder_script_alloc();
 WifiMarauderScript* wifi_marauder_script_parse_raw(const char* script_raw);
 WifiMarauderScript* wifi_marauder_script_parse_file(const char* file_path, Storage* storage);
 WifiMarauderScriptStage* wifi_marauder_script_get_stage(WifiMarauderScript* script, WifiMarauderScriptStageType stage_type);
+WifiMarauderScriptStage* wifi_marauder_script_get_last_stage(WifiMarauderScript* script);
 void wifi_marauder_script_free(WifiMarauderScript *script);
