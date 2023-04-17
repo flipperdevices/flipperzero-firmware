@@ -7,8 +7,8 @@
  * - Create struct WifiMarauderScriptStage???? for the new stage
  * 
  * wifi_marauder_script.c
- * - Create function "WifiMarauderScriptStage????* _wifi_marauder_script_get_stage_????(cJSON *stages)"
  * - Change _wifi_marauder_script_load_stages() to load new stage
+ * - Change wifi_marauder_script_save_json() to support the new stage
  * - Add case to free memory in wifi_marauder_script_free()
  * 
  * wifi_marauder_script_executor.c
@@ -212,14 +212,17 @@ typedef struct WifiMarauderScript {
     char* name;
     char* description;
     WifiMarauderScriptStage *first_stage;
+    WifiMarauderScriptStage *last_stage;
     WifiMarauderScriptBoolean enable_led;
     WifiMarauderScriptBoolean save_pcap;
     int repeat;
 } WifiMarauderScript;
 
 WifiMarauderScript* wifi_marauder_script_alloc();
+WifiMarauderScript* wifi_marauder_script_create(const char* script_name);
 WifiMarauderScript* wifi_marauder_script_parse_raw(const char* script_raw);
-WifiMarauderScript* wifi_marauder_script_parse_file(const char* file_path, Storage* storage);
-WifiMarauderScriptStage* wifi_marauder_script_get_stage(WifiMarauderScript* script, WifiMarauderScriptStageType stage_type);
-WifiMarauderScriptStage* wifi_marauder_script_get_last_stage(WifiMarauderScript* script);
+WifiMarauderScript* wifi_marauder_script_parse_json(Storage* storage, const char* file_path);
+void wifi_marauder_script_save_json(Storage* storage, const char* file_path, WifiMarauderScript* script);
+void wifi_marauder_script_add_stage(WifiMarauderScript* script, WifiMarauderScriptStageType stage_type, void* stage_data);
+bool wifi_marauder_script_has_stage(WifiMarauderScript* script, WifiMarauderScriptStageType stage_type);
 void wifi_marauder_script_free(WifiMarauderScript *script);

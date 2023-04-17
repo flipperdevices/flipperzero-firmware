@@ -14,16 +14,12 @@ bool _wifi_marauder_is_save_pcaps_enabled(WifiMarauderApp* app) {
     }
     // If it is a script that contains a sniff function
     if (app->script != NULL) {
-        WifiMarauderScriptStage* sniff_raw_stage = wifi_marauder_script_get_stage(app->script, WifiMarauderScriptStageTypeSniffRaw);
-        WifiMarauderScriptStage* sniff_beacon_stage = wifi_marauder_script_get_stage(app->script, WifiMarauderScriptStageTypeSniffBeacon);
-        WifiMarauderScriptStage* sniff_deauth_stage = wifi_marauder_script_get_stage(app->script, WifiMarauderScriptStageTypeSniffDeauth);
-        WifiMarauderScriptStage* sniff_esp_stage = wifi_marauder_script_get_stage(app->script, WifiMarauderScriptStageTypeSniffEsp);
-        WifiMarauderScriptStage* sniff_pmkid_stage = wifi_marauder_script_get_stage(app->script, WifiMarauderScriptStageTypeSniffPmkid);
-        WifiMarauderScriptStage* sniff_pwn_stage = wifi_marauder_script_get_stage(app->script, WifiMarauderScriptStageTypeSniffPwn);
-        if (sniff_raw_stage != NULL || sniff_beacon_stage != NULL || sniff_deauth_stage != NULL ||
-            sniff_esp_stage != NULL || sniff_pmkid_stage != NULL || sniff_pwn_stage != NULL) {
-            return true;
-        }
+        return wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffRaw) ||
+               wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffBeacon) ||
+               wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffDeauth) ||
+               wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffEsp) ||
+               wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffPmkid) ||
+               wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffPwn);
     }
     // If it is a sniff function
     return app->is_command && app->selected_tx_string && strncmp("sniff", app->selected_tx_string, strlen("sniff")) == 0;

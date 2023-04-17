@@ -10,7 +10,7 @@ static void wifi_marauder_scene_script_select_script_list_enter_callback(void* c
     char script_path[256];
     snprintf(script_path, sizeof(script_path), "%s/%s.json", MARAUDER_APP_FOLDER_SCRIPTS, furi_string_get_cstr(app->script_list[index]));
 
-    app->script = wifi_marauder_script_parse_file(script_path, app->storage);
+    app->script = wifi_marauder_script_parse_json(app->storage, script_path);
     if (app->script) {
         scene_manager_next_scene(app->scene_manager, WifiMarauderSceneConsoleOutput);
     }
