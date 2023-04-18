@@ -27,8 +27,7 @@
  * - Sniff Espressif
  * - Sniff PMKID
  * - Sniff Pwnagotchi
- * - Beacon List
- * - Beacon Random
+ * - Beacon List/Random
  * - Beacon Ap
  * ----------------------------------------------------------------------------------------------------
  * SCRIPT SYNTAX:
