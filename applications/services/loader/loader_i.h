@@ -20,10 +20,12 @@ struct Loader {
 
 typedef enum {
     LoaderMessageTypeStartByName,
+    LoaderMessageTypeAppClosed,
     LoaderMessageTypeShowMenu,
     LoaderMessageTypeMenuClosed,
+    LoaderMessageTypeLock,
+    LoaderMessageTypeUnlock,
     LoaderMessageTypeIsLocked,
-    LoaderMessageTypeAppClosed,
 } LoaderMessageType;
 
 typedef struct {
@@ -32,12 +34,12 @@ typedef struct {
 } LoaderMessageStartByName;
 
 typedef struct {
-    LoaderStatus status_value;
-} LoaderMessageStartResult;
+    LoaderStatus value;
+} LoaderMessageLoaderStatusResult;
 
 typedef struct {
-    bool bool_value;
-} LoaderMessageStartIsLockedResult;
+    bool value;
+} LoaderMessageBoolResult;
 
 typedef struct {
     FuriApiLock api_lock;
@@ -48,7 +50,7 @@ typedef struct {
     };
 
     union {
-        LoaderMessageStartResult* start_result;
-        LoaderMessageStartIsLockedResult* is_locked_result;
+        LoaderMessageLoaderStatusResult* status_value;
+        LoaderMessageBoolResult* bool_value;
     };
 } LoaderMessage;

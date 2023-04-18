@@ -5,43 +5,49 @@
 #include <furi_hal.h>
 
 #define TAG "Loader"
-
+#define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
 // api
 
 LoaderStatus loader_start(Loader* loader, const char* name, const char* args) {
     LoaderMessage message;
-    LoaderMessageStartResult result;
+    LoaderMessageLoaderStatusResult result;
 
     message.type = LoaderMessageTypeStartByName;
     message.start.name = name;
     message.start.args = args;
     message.api_lock = api_lock_alloc_locked();
-    message.start_result = &result;
+    message.status_value = &result;
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
     api_lock_wait_unlock_and_free(message.api_lock);
-    return result.status_value;
+    return result.value;
 }
 
 bool loader_lock(Loader* loader) {
-    UNUSED(loader);
-    furi_crash("Not implemented");
-    return false;
+    LoaderMessage message;
+    LoaderMessageBoolResult result;
+    message.type = LoaderMessageTypeLock;
+    message.api_lock = api_lock_alloc_locked();
+    message.bool_value = &result;
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
+    api_lock_wait_unlock_and_free(message.api_lock);
+    return result.value;
 }
 
 void loader_unlock(Loader* loader) {
-    UNUSED(loader);
-    furi_crash("Not implemented");
+    LoaderMessage message;
+    message.type = LoaderMessageTypeUnlock;
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
 }
 
 bool loader_is_locked(Loader* loader) {
     LoaderMessage message;
-    LoaderMessageStartIsLockedResult result;
+    LoaderMessageBoolResult result;
     message.type = LoaderMessageTypeIsLocked;
     message.api_lock = api_lock_alloc_locked();
-    message.is_locked_result = &result;
+    message.bool_value = &result;
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
     api_lock_wait_unlock_and_free(message.api_lock);
-    return result.bool_value;
+    return result.value;
 }
 
 void loader_show_menu(Loader* loader) {
@@ -207,6 +213,20 @@ static LoaderStatus loader_do_start_by_name(Loader* loader, const char* name, co
     return LoaderStatusOk;
 }
 
+static bool loader_do_lock(Loader* loader) {
+    if(loader->app.thread) {
+        return false;
+    }
+
+    loader->app.thread = (FuriThread*)LOADER_MAGIC_THREAD_VALUE;
+    return true;
+}
+
+static void loader_do_unlock(Loader* loader) {
+    furi_assert(loader->app.thread == (FuriThread*)LOADER_MAGIC_THREAD_VALUE);
+    loader->app.thread = NULL;
+}
+
 static bool loader_do_is_locked(Loader* loader) {
     return loader->app.thread != NULL;
 }
@@ -251,7 +271,7 @@ int32_t loader_srv(void* p) {
         if(furi_message_queue_get(loader->queue, &message, FuriWaitForever) == FuriStatusOk) {
             switch(message.type) {
             case LoaderMessageTypeStartByName:
-                message.start_result->status_value =
+                message.status_value->value =
                     loader_do_start_by_name(loader, message.start.name, message.start.args);
                 api_lock_unlock(message.api_lock);
                 break;
@@ -262,12 +282,18 @@ int32_t loader_srv(void* p) {
                 loader_do_menu_closed(loader);
                 break;
             case LoaderMessageTypeIsLocked:
-                message.is_locked_result->bool_value = loader_do_is_locked(loader);
+                message.bool_value->value = loader_do_is_locked(loader);
                 api_lock_unlock(message.api_lock);
                 break;
             case LoaderMessageTypeAppClosed:
                 loader_do_app_closed(loader);
                 break;
+            case LoaderMessageTypeLock:
+                message.bool_value->value = loader_do_lock(loader);
+                api_lock_unlock(message.api_lock);
+                break;
+            case LoaderMessageTypeUnlock:
+                loader_do_unlock(loader);
             }
         }
     }
