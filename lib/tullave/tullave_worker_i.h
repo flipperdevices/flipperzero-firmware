@@ -4,7 +4,6 @@
 
 #include <furi.h>
 #include <furi_hal_nfc.h>
-
 #include <core/string.h>
 
 struct TuLlaveInfo {

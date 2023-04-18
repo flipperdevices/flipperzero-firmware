@@ -9,7 +9,6 @@ App(
     ],
     fap_icon="app_assets/tullave_logo_10px.png",
     fap_libs=[
-        "toolbox",
         "assets",
     ],
     fap_private_libs=[

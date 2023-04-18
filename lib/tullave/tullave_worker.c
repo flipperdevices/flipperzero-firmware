@@ -70,7 +70,7 @@ void tullave_worker_start(TuLlaveWorker* t_worker, TuLlaveWorkerCallback callbac
 
 void tullave_worker_check(TuLlaveWorker* t_worker) {
     while(t_worker->state == TuLlaveWorkerStateCheck) {
-        if(tullave_apdu_read(t_worker->card_info)) {
+        if(tullave_read_info(t_worker->card_info)) {
             t_worker->callback(TuLlaveWorkerEventCardDetected, t_worker->context);
             tullave_worker_change_state(t_worker, TuLlaveWorkerStateReady);
         } else {

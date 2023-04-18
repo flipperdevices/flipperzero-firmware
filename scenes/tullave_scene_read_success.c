@@ -20,6 +20,8 @@ static void tullave_scene_read_success_setup_view(TuLlave* t_llave) {
         t_llave);
 
     FuriString* widget_text;
+
+    notification_message(t_llave->notifications, &sequence_set_green_255);
     TuLlaveInfo* card_info = t_llave->worker->card_info;
     widget_text = furi_string_alloc_printf("\e#%s\n\n", "TuLlave Info");
 

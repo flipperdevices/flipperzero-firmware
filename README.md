@@ -24,10 +24,9 @@ This repository contains a simple personal project to add the capability of read
 
 ## TODO
 
-* Read Blance and Card Info from TuLlave.
-* Implement Reading state, and loading screen when communicating with TuLlave card. 
-* Read History of transactions.
+* Read Blance and Card Info from TuLlave (**Done**).
+* Implement TuLlave_Analyzer to read the Transaction History.
 
 ## Bugs
 
-* Flipper Zero freezes after second back on detect tullave.
+* Limit readings only for TuLlave. Other NFC-A Tags are read showing garbage in the main window.
