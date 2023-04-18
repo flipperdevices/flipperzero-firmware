@@ -242,7 +242,9 @@ int32_t loader_srv(void* p) {
         FLIPPER_ON_SYSTEM_START[i]();
     }
 
-    // TODO: autorun
+    if(FLIPPER_AUTORUN_APP_NAME && strlen(FLIPPER_AUTORUN_APP_NAME)) {
+        loader_do_start_by_name(loader, FLIPPER_AUTORUN_APP_NAME, NULL);
+    }
 
     LoaderMessage message;
     while(true) {
