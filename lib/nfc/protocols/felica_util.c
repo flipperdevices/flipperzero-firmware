@@ -53,8 +53,44 @@ FuriString* felica_get_system_name(FelicaSystem* system) {
     return furi_string_alloc_printf("%s (%04X)", prefix, code);
 }
 
-FuriString* felica_describe_node(FelicaNode* node) {
-    FuriString* result = furi_string_alloc();
+const char* felica_get_service_type_name(FelicaServiceType type) {
+    switch(type) {
+    case FelicaServiceTypeRandom:
+        return "Random";
+    case FelicaServiceTypeCyclic:
+        return "Cyclic";
+    case FelicaServiceTypePurse:
+        return "Purse";
+    default:
+        return "???";
+    }
+}
+
+const char* felica_get_service_attrib_name(FelicaServiceAttribute attrib, FelicaServiceType type) {
+    bool is_purse = (type == FelicaServiceTypePurse);
+    switch(attrib) {
+    case FelicaServiceAttributeAuthRW:
+        return "auth rw";
+    case FelicaServiceAttributeUnauthRW:
+        return "rw";
+    case FelicaServiceAttributeAuthRO: // also FelicaServiceAttributeAuthCashbackDecrement
+        return is_purse ? "auth inc" : "auth ro";
+    case FelicaServiceAttributeUnauthRO: // also FelicaServiceAttributeUnauthCashbackDecrement
+        return is_purse ? "inc" : "ro";
+    case FelicaServiceAttributeAuthDecrement:
+        return "auth dec";
+    case FelicaServiceAttributeUnauthDecrement:
+        return "dec";
+    case FelicaServiceAttributeAuthPurseRO:
+        return "auth ro";
+    case FelicaServiceAttributeUnauthPurseRO:
+        return "ro";
+    default:
+        return "???";
+    }
+}
+
+void felica_std_describe_node(FelicaNode* node, FuriString* result) {
     switch(node->type) {
     case FelicaNodeTypeArea: {
         furi_assert(node->area != NULL);
@@ -68,20 +104,69 @@ FuriString* felica_describe_node(FelicaNode* node) {
     }
     case FelicaNodeTypeService: {
         furi_assert(node->service != NULL);
-        switch(node->service->type) {
-        case FelicaServiceTypeRandom:
-            furi_string_cat(result, "Random ");
-            break;
-        case FelicaServiceTypeCyclic:
-            furi_string_cat(result, "Cyclic ");
-            break;
-        case FelicaServiceTypePurse:
-            furi_string_cat(result, "Purse ");
-            break;
-        }
-        furi_string_cat_printf(result, "%d", node->service->number);
+        const char* type_name = felica_get_service_type_name(node->service->type);
+        furi_string_cat_printf(result, "%s %d", type_name, node->service->number);
     }
+    }
+}
+
+void felica_std_cat_service(FelicaService* service, FuriString* out) {
+    furi_assert(service != NULL);
+    furi_assert(out != NULL);
+
+    furi_string_cat(out, "access (code):");
+    for
+        M_EACH(acl_p, service->access_control_list, FelicaServiceAttributeList_t) {
+            furi_assert(acl_p != NULL);
+            FelicaServiceAttribute acl = *acl_p;
+            furi_string_cat_printf(
+                out,
+                "\n- %s (%04X)",
+                felica_get_service_attrib_name(acl, service->type),
+                (service->number << 6) | (service->type) | acl);
+        };
+
+    furi_string_push_back(out, '\n');
+
+    size_t block_count = FelicaBlockArray_size(service->blocks);
+    if(block_count > 0) {
+        furi_string_cat_printf(
+            out, "\nsize %zd (%zdbytes)", block_count, block_count * FELICA_BLOCK_SIZE);
     }
 
-    return result;
+    furi_string_push_back(out, '\n');
+    for
+        M_EACH(block, service->blocks, FelicaBlockArray_t) {
+            for(size_t block_offset = 0; block_offset < sizeof(block->data); block_offset += 2) {
+                if(block_offset % 8 == 0) {
+                    furi_string_push_back(out, '\n');
+                }
+                furi_string_cat_printf(
+                    out, "%02X%02X ", block->data[block_offset], block->data[block_offset + 1]);
+            }
+        }
+}
+
+void felica_std_describe_node_detailed(FelicaNode* node, FuriString* out) {
+    furi_assert(node != NULL);
+    felica_std_describe_node(node, out);
+    switch(node->type) {
+    case FelicaNodeTypeArea: {
+        furi_assert(node->area != NULL);
+        furi_string_cat_printf(out, "\nsize %zd", FelicaINodeArray_size(node->area->nodes));
+        furi_string_cat_printf(
+            out,
+            "\nrange %04X-%04X",
+            (node->area->number << 6) |
+                (!node->area->can_create_subareas), // TODO make this its own function
+            node->area->end_service_code);
+        break;
+    }
+    case FelicaNodeTypeService: {
+        furi_assert(node->service != NULL);
+        furi_string_push_back(out, '\n');
+        felica_std_cat_service(node->service, out);
+        break;
+    }
+    }
 }

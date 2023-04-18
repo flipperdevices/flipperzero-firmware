@@ -135,6 +135,10 @@ DICT_SET_DEF(
     FelicaServiceAttributeList,
     FelicaServiceAttribute,
     M_ENUM_OPLIST(FelicaServiceAttribute, FelicaServiceAttributeAuthRW))
+#define M_OPL_FelicaServiceAttributeList_t() \
+    ARRAY_OPLIST(                            \
+        FelicaServiceAttributeList,          \
+        M_ENUM_OPLIST(FelicaServiceAttribute, FelicaServiceAttributeAuthRW))
 
 typedef struct {
     uint8_t data[FELICA_BLOCK_SIZE];
