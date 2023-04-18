@@ -64,32 +64,7 @@ FuriPubSub* loader_get_pubsub(Loader* loader) {
     return loader->pubsub;
 }
 
-static FlipperApplication const* loader_find_application_by_name_in_list(
-    const char* name,
-    const FlipperApplication* list,
-    const uint32_t n_apps) {
-    for(size_t i = 0; i < n_apps; i++) {
-        if(strcmp(name, list[i].name) == 0) {
-            return &list[i];
-        }
-    }
-    return NULL;
-}
-
-static const FlipperApplication* loader_find_application_by_name(const char* name) {
-    const FlipperApplication* application = NULL;
-    application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
-    if(!application) {
-        application = loader_find_application_by_name_in_list(
-            name, FLIPPER_SETTINGS_APPS, FLIPPER_SETTINGS_APPS_COUNT);
-    }
-    if(!application) {
-        application = loader_find_application_by_name_in_list(
-            name, FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT);
-    }
-
-    return application;
-}
+// callbacks
 
 static void loader_menu_closed_callback(void* context) {
     Loader* loader = context;
@@ -134,6 +109,33 @@ static Loader* loader_alloc() {
     loader->app.thread = NULL;
     loader->app.insomniac = false;
     return loader;
+}
+
+static FlipperApplication const* loader_find_application_by_name_in_list(
+    const char* name,
+    const FlipperApplication* list,
+    const uint32_t n_apps) {
+    for(size_t i = 0; i < n_apps; i++) {
+        if(strcmp(name, list[i].name) == 0) {
+            return &list[i];
+        }
+    }
+    return NULL;
+}
+
+static const FlipperApplication* loader_find_application_by_name(const char* name) {
+    const FlipperApplication* application = NULL;
+    application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
+    if(!application) {
+        application = loader_find_application_by_name_in_list(
+            name, FLIPPER_SETTINGS_APPS, FLIPPER_SETTINGS_APPS_COUNT);
+    }
+    if(!application) {
+        application = loader_find_application_by_name_in_list(
+            name, FLIPPER_SYSTEM_APPS, FLIPPER_SYSTEM_APPS_COUNT);
+    }
+
+    return application;
 }
 
 static void
@@ -198,8 +200,12 @@ static void loader_do_menu_closed(Loader* loader) {
     }
 }
 
+static bool loader_do_is_locked(Loader* loader) {
+    return loader->app.thread != NULL;
+}
+
 static LoaderStatus loader_do_start_by_name(Loader* loader, const char* name, const char* args) {
-    if(loader->app.thread) {
+    if(loader_do_is_locked(loader)) {
         return LoaderStatusErrorAppStarted;
     }
 
@@ -225,10 +231,6 @@ static bool loader_do_lock(Loader* loader) {
 static void loader_do_unlock(Loader* loader) {
     furi_assert(loader->app.thread == (FuriThread*)LOADER_MAGIC_THREAD_VALUE);
     loader->app.thread = NULL;
-}
-
-static bool loader_do_is_locked(Loader* loader) {
-    return loader->app.thread != NULL;
 }
 
 static void loader_do_app_closed(Loader* loader) {
