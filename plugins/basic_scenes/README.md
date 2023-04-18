@@ -451,13 +451,16 @@ In the future, you can add more views to the view dispatcher and allocate memory
 
 ## Step 21. Create an app_free function.
 
-We will create an app_free function to free memory allocated for our application. This function will free memory allocated for the scene manager, view dispatcher, submenu, widget and text input.
+We will create an app_free function to free memory allocated for our application. This function will remove all of the views from the view dispatcher, and then free the memory allocated for the scene manager, view dispatcher, submenu, widget and text input.
 
 Add the following lines after the app_alloc function in the basic_scenes.c file:
 
 ```c
 static void app_free(App* app) {
     furi_assert(app);
+    view_dispatcher_remove_view(app->view_dispatcher, BasicScenesSubmenuView);
+    view_dispatcher_remove_view(app->view_dispatcher, BasicScenesWidgetView);
+    view_dispatcher_remove_view(app->view_dispatcher, BasicScenesTextInputView);
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
     submenu_free(app->submenu);
