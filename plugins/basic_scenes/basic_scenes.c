@@ -240,6 +240,9 @@ static App* app_alloc() {
 
 static void app_free(App* app) {
     furi_assert(app);
+    view_dispatcher_remove_view(app->view_dispatcher, BasicScenesSubmenuView);
+    view_dispatcher_remove_view(app->view_dispatcher, BasicScenesWidgetView);
+    view_dispatcher_remove_view(app->view_dispatcher, BasicScenesTextInputView);
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
     submenu_free(app->submenu);
