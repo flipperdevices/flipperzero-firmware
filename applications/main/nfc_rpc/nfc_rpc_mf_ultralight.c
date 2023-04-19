@@ -104,8 +104,6 @@ static void nfc_rpc_mf_ultralight_read_version(Nfc_Main* cmd, void* context) {
         pb_mf_ul_version.vendor_id = data.vendor_id;
     }
     cmd->content.mf_ultralight_read_version_resp = pb_mf_ul_version;
-
-    mf_ultralight_poller_reset(instance->mf_ul_poller);
 }
 
 static void nfc_rpc_mf_ultralight_read_signature(Nfc_Main* cmd, void* context) {

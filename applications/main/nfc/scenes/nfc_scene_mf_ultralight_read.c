@@ -23,7 +23,7 @@ void nfc_scene_mf_ultralight_read_on_enter(void* context) {
     // Setup view
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 
-    mf_ultralight_poller_start(
+    mf_ultralight_poller_read(
         nfc->mf_ul_poller, nfc_scene_mf_ultralight_read_worker_callback, nfc);
 
     nfc_blink_read_start(nfc);

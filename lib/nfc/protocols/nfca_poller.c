@@ -165,7 +165,7 @@ static void nfca_poller_event_callback(NfcEvent event, void* context) {
             NfcaData data = {};
             NfcaError error = nfca_poller_activate(instance, &data);
             if(error == NfcaErrorNone) {
-                nfca_poller_event.type = NfcaPollerEventTypeActivated;
+                nfca_poller_event.type = NfcaPollerEventTypeReady;
                 instance->state = NfcaPollerActivated;
             } else {
                 nfca_poller_event.type = NfcaPollerEventTypeError;
@@ -259,8 +259,12 @@ NfcaError nfca_poller_halt(NfcaPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
-    // Halt
-    // Set Idle state
+    uint8_t tx_data[2] = {0x50, 0x00};
+    uint16_t tx_bits = 16;
+    // Rework
+    uint8_t rx_data[2] = {};
+    uint16_t rx_bits = 0;
+    nfca_poller_standart_frame_exchange(instance, tx_data, tx_bits, rx_data, 2, &rx_bits, 1000);
     instance->state = NfcaPollerStateIdle;
     return NfcaErrorNone;
 }

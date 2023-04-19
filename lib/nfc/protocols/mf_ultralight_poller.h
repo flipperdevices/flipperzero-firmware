@@ -46,6 +46,11 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance);
 
 MfUltralightError mf_ultralight_poller_start(
     MfUltralightPoller* instance,
+    NfcaPollerEventCallback callback,
+    void* context);
+
+MfUltralightError mf_ultralight_poller_read(
+    MfUltralightPoller* instance,
     MfUltralightPollerCallback callback,
     void* context);
 

@@ -8,7 +8,7 @@ enum {
 void nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, void* context) {
     NfcApp* nfc = context;
 
-    if(event.type == NfcaPollerEventTypeActivated) {
+    if(event.type == NfcaPollerEventTypeReady) {
         nfca_poller_stop(nfc->nfca_poller);
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcWorkerEventReadUidNfcA);
     } else {

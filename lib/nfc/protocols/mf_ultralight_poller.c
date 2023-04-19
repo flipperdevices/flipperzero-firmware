@@ -10,6 +10,14 @@
 
 #define MF_ULTRALIGHT_POLLER_STANDART_FWT_FC (12000)
 
+#define MF_ULTRALIGHT_POLLER_COMPLETE_EVENT (1UL << 0)
+
+typedef struct {
+    MfUltralightPoller* instance;
+    FuriThreadId thread_id;
+    MfUltralightError error;
+} MfUltralightPollerContext;
+
 typedef enum {
     MfUltralightPollerStateIdle,
     MfUltralightPollerStateReadVersion,
@@ -66,22 +74,34 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance) {
     free(instance);
 }
 
-static void mf_ultralight_poller_get_version(MfUltralightPoller* instance) {
+static MfUltralightError mf_ultralight_poller_get_version(MfUltralightPoller* instance) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGHT_CMD_GET_VERSION;
-    buff->rx_bits = 8;
-    NfcaError error = nfca_poller_send_standart_frame(
-        instance->nfca_poller,
-        buff->tx_data,
-        buff->tx_bits,
-        buff->rx_data,
-        buff->rx_data_size,
-        &buff->rx_bits,
-        MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-    if(error == NfcaErrorNone) {
+    buff->tx_bits = 8;
+
+    MfUltralightError ret = MfUltralightErrorNone;
+    NfcaError error = NfcaErrorNone;
+    do {
+        error = nfca_poller_send_standart_frame(
+            instance->nfca_poller,
+            buff->tx_data,
+            buff->tx_bits,
+            buff->rx_data,
+            buff->rx_data_size,
+            &buff->rx_bits,
+            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+        if(error != NfcaErrorNone) {
+            ret = mf_ultralight_process_error(error);
+            break;
+        }
+        if(buff->rx_bits != 8 * 8) {
+            ret = MfUltralightErrorProtocol;
+            break;
+        }
         memcpy(&instance->data->version, buff->rx_data, sizeof(MfUltralightVersion));
-        instance->data->type = mf_ultralight_get_type_by_version(&instance->data->version);
-    }
+    } while(false);
+
+    return ret;
 }
 
 static void mf_ultralight_nfca_poller_event_callback(NfcaPollerEvent event, void* context) {
@@ -123,7 +143,7 @@ static void mf_ultralight_nfca_poller_event_callback(NfcaPollerEvent event, void
 
 MfUltralightError mf_ultralight_poller_start(
     MfUltralightPoller* instance,
-    MfUltralightPollerCallback callback,
+    NfcaPollerEventCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(instance->state == MfUltralightPollerStateIdle);
@@ -134,12 +154,25 @@ MfUltralightError mf_ultralight_poller_start(
     instance->buffer =
         nfc_poller_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE, MF_ULTRALIGHT_MAX_BUFF_SIZE);
 
+    nfca_poller_start(instance->nfca_poller, callback, context);
+
+    return MfUltralightErrorNone;
+}
+
+MfUltralightError mf_ultralight_poller_read(
+    MfUltralightPoller* instance,
+    MfUltralightPollerCallback callback,
+    void* context) {
+    furi_assert(instance);
+    furi_assert(instance->state == MfUltralightPollerStateIdle);
+    furi_assert(instance->nfca_poller);
+    furi_assert(callback);
+
     instance->callback = callback;
     instance->context = context;
 
-    nfca_poller_start(instance->nfca_poller, mf_ultralight_nfca_poller_event_callback, instance);
-
-    return MfUltralightErrorNone;
+    return mf_ultralight_poller_start(
+        instance, mf_ultralight_nfca_poller_event_callback, instance);
 }
 
 MfUltralightError
@@ -263,40 +296,34 @@ MfUltralightError mf_ultralight_poller_write_page(
     return ret;
 }
 
+static void mf_ultraight_read_version_callback(NfcaPollerEvent event, void* context) {
+    furi_assert(context);
+
+    MfUltralightPollerContext* poller_context = context;
+    if(event.type == NfcaPollerEventTypeReady) {
+        poller_context->error = mf_ultralight_poller_get_version(poller_context->instance);
+        nfca_poller_halt(poller_context->instance->nfca_poller);
+    } else if(event.type == NfcaPollerEventTypeError) {
+        poller_context->error = mf_ultralight_process_error(event.data.error);
+    }
+    mf_ultralight_poller_stop(poller_context->instance);
+    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
+}
+
 MfUltralightError
     mf_ultralight_poller_read_version(MfUltralightPoller* instance, MfUltralightVersion* data) {
     furi_assert(instance);
     furi_assert(data);
+    MfUltralightPollerContext poller_context = {};
+    poller_context.instance = instance;
+    poller_context.thread_id = furi_thread_get_current_id();
 
-    uint8_t tx_data[] = {MF_ULTRALIGHT_CMD_GET_VERSION};
-    uint16_t tx_bits = sizeof(tx_data) * 8;
-    uint8_t rx_data[MF_ULTRALIGHT_MAX_BUFF_SIZE] = {};
-    uint16_t rx_bits = 0;
-    NfcaError error = NfcaErrorNone;
-    MfUltralightError ret = MfUltralightErrorNone;
+    mf_ultralight_poller_start(instance, mf_ultraight_read_version_callback, &poller_context);
+    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    *data = instance->data->version;
+    mf_ultralight_poller_reset(instance);
 
-    do {
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
-            tx_data,
-            tx_bits,
-            rx_data,
-            sizeof(rx_data),
-            &rx_bits,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
-            ret = mf_ultralight_process_error(error);
-            break;
-        }
-        if(rx_bits != 8 * 8) {
-            ret = MfUltralightErrorProtocol;
-            FURI_LOG_E(TAG, "Received %d bits. Expected %d bits", rx_bits, 8 * 8);
-            break;
-        }
-        memcpy(data, rx_data, sizeof(MfUltralightVersion));
-    } while(false);
-
-    return ret;
+    return poller_context.error;
 }
 
 MfUltralightError
