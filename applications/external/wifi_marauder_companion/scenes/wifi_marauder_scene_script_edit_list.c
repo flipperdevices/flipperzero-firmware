@@ -47,14 +47,16 @@ static void wifi_marauder_scene_script_stage_edit_list_save_strings(WifiMarauder
 
     // Reallocate the array of strings if necessary
     if (*app->script_stage_edit_string_count_reference < array_size) {
-        *app->script_stage_edit_strings_reference = realloc(*app->script_stage_edit_strings_reference, array_size);
+        *app->script_stage_edit_strings_reference = realloc(*app->script_stage_edit_strings_reference, array_size * sizeof(char*));
     }
 
     // Fills the array of strings
     current_item = app->script_stage_edit_first_item;
     int i = 0;
     while (current_item != NULL) {
-        strncpy((*app->script_stage_edit_strings_reference)[i], current_item->value, strlen(current_item->value) + 1);
+        char* current_str = malloc(strlen(current_item->value) + 1);
+        strncpy(current_str, current_item->value, strlen(current_item->value) + 1);
+        (*app->script_stage_edit_strings_reference)[i] = current_str;
         current_item = current_item->next_item;
         i++;
     }
