@@ -1,10 +1,21 @@
 # https://www.github.com/jamisonderek/flipper-zero-tutorials
 #
-# Pass short secret messages using SSIDs.
-# This script will scan for SSIDs that match the pattern of the encoded message.
-# The message is encoded using a simple cypher that uses the SSID as the key.
-#
+# Pass short 'secret' messages using SSIDs! Tell people your burner phone number while grabbing a coffee.
 # Who you gonna call? "5552368" is: AL6fvOPr, BOI5O5Ag, CRU3Cjn7 or DUgPtAbN 
+# To reach Jenny      "8675309" is: AOJCghRA, BRVAUlxa, CUhWcF9e or DXtUQJfy
+# See the comment near the bottom of this file (line 131) for directions on calculating your own SSID values.
+#
+# This script will scan for SSIDs that match the pattern of an encoded message & display them in GREEN.
+#
+# In Marauder:
+#  - Clear List, SSID.
+#  - SSID, add name.
+#  - Enter the SSID name after the "ssid -a -n " prompt.  (For example:  AL6fvOPr)
+#  - do List, SSID.  It should show you the SSID that you added.
+#  - Beacon Spam, SSID List.
+#
+# On the PC, Open a PowerShell window and run ./scan.ps1
+#
 
 # This is the list of allowed characters in the message.
 $dict = "0123456789ABCDEF-"
@@ -113,12 +124,18 @@ Function Get-SSIDS {
 #   }
 # }
 
+# UNCOMMENT THIS LINE TO SEE THE SSID YOU SHOULD USE.
+# You can change Message from "5552326" to the desired value using 0-9, 0-F and hyphens.
+# The value for Prefix can also be 0-9, A-F.  (So that you can have different SSIDs generated)
+#
+#   Get-Encoded-SSID -Message "5552368" -Prefix "1"   ## Returns a result of 'BOI5O5Ag'
+
 while ($true) {
   Show-Available-Networks-UI
-  For( $i = 0; $i -le 6; ++$i ) {
+  For( $i = 0; $i -le 12; ++$i ) {
     Get-SSIDS
     Write-Host "Sleeping..." -ForegroundColor Yellow -NoNewline
-    Start-Sleep 4
+    Start-Sleep 9
     Write-Host "`b`b`b`b`b`b`b`b`b`b`b" -NoNewline
     Write-Host "           " -NoNewline
     Write-Host "`b`b`b`b`b`b`b`b`b`b`b" -NoNewline
