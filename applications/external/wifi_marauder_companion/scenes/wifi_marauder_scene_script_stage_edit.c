@@ -266,8 +266,30 @@ static void wifi_marauder_select_stage_type_change_callback(VariableItem* item) 
 static void wifi_marauder_select_stage_filter_setup_callback(VariableItem* item) {
     WifiMarauderApp* app = variable_item_get_context(item);
     WifiMarauderScriptStageSelect* stage = app->script_edit_selected_stage->stage;
+
+    if (stage->filter != NULL) {
+        variable_item_set_current_value_index(item, 0);
+        variable_item_set_current_value_text(item, stage->filter);
+    } else {
+        variable_item_set_current_value_index(item, 1);
+    }
+}
+
+static void wifi_marauder_select_stage_filter_change_callback(VariableItem* item) {
+    WifiMarauderApp* app = variable_item_get_context(item);
+    WifiMarauderScriptStageSelect* stage = app->script_edit_selected_stage->stage;
+
+    // Clears the filter if you change the option. Flipper input box does not accept blank text
+    if (variable_item_get_current_value_index(item) == 1) {
+        stage->filter = NULL;
+        variable_item_set_current_value_index(item, 0);
+        variable_item_set_values_count(item, 1);
+    }
+
     if (stage->filter != NULL) {
         variable_item_set_current_value_text(item, stage->filter);
+    } else {
+        variable_item_set_current_value_text(item, "");
     }
 }
 
@@ -291,8 +313,8 @@ WifiMarauderScriptEditItem select_items[] = {
         wifi_marauder_select_stage_type_setup_callback, wifi_marauder_select_stage_type_change_callback, NULL
     },
     {
-        "Filter", WifiMarauderScriptEditItemTypeString, 1, {NULL},
-        wifi_marauder_select_stage_filter_setup_callback, NULL, wifi_marauder_select_stage_filter_select_callback
+        "Filter", WifiMarauderScriptEditItemTypeString, 2, {NULL, NULL},
+        wifi_marauder_select_stage_filter_setup_callback, wifi_marauder_select_stage_filter_change_callback, wifi_marauder_select_stage_filter_select_callback
     },
     {
         "Indexes", WifiMarauderScriptEditItemTypeListNumber, 1, {NULL},
