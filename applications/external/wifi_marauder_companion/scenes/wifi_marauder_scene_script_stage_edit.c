@@ -264,7 +264,9 @@ static void wifi_marauder_select_stage_type_change_callback(VariableItem* item) 
 static void wifi_marauder_select_stage_filter_setup_callback(VariableItem* item) {
     WifiMarauderApp* app = variable_item_get_context(item);
     WifiMarauderScriptStageSelect* stage = app->script_edit_selected_stage->stage;
-    variable_item_set_current_value_text(item, stage->filter);
+    if (stage->filter != NULL) {
+        variable_item_set_current_value_text(item, stage->filter);
+    }
 }
 
 static void wifi_marauder_select_stage_filter_select_callback(WifiMarauderApp* app) {
@@ -589,6 +591,51 @@ WifiMarauderScriptEditItem beaconap_items[] = {
     }
 };
 
+// Exec stage =============================================================================================================================
+static void wifi_marauder_exec_stage_filter_setup_callback(VariableItem* item) {
+    WifiMarauderApp* app = variable_item_get_context(item);
+    WifiMarauderScriptStageExec* stage = app->script_edit_selected_stage->stage;
+    if (stage->command != NULL) {
+        variable_item_set_current_value_text(item, stage->command);
+    }
+}
+
+static void wifi_marauder_exec_stage_filter_select_callback(WifiMarauderApp* app) {
+    WifiMarauderScriptStageExec* stage_select = app->script_edit_selected_stage->stage;
+    if (stage_select->command == NULL) {
+        stage_select->command = malloc(128);
+    }
+    app->user_input_string_reference = &stage_select->command;
+}
+
+WifiMarauderScriptEditItem exec_items[] = {
+    {
+        "Command", WifiMarauderScriptEditItemTypeString, 1, {NULL},
+        wifi_marauder_exec_stage_filter_setup_callback, NULL, wifi_marauder_exec_stage_filter_select_callback
+    }
+};
+
+// Delay stage ============================================================================================================================
+static void wifi_marauder_delay_stage_timeout_setup_callback(VariableItem* item) {
+    WifiMarauderApp* app = variable_item_get_context(item);
+    WifiMarauderScriptStageDelay* stage = app->script_edit_selected_stage->stage;
+    char timeout_str[32];
+    snprintf(timeout_str, sizeof(timeout_str), "%d", stage->timeout);
+    variable_item_set_current_value_text(item, timeout_str);
+}
+
+static void wifi_marauder_delay_stage_timeout_select_callback(WifiMarauderApp* app) {
+    WifiMarauderScriptStageDelay* stage_delay = app->script_edit_selected_stage->stage;
+    app->user_input_number_reference = &stage_delay->timeout;
+}
+
+WifiMarauderScriptEditItem delay_items[] = {
+    {
+        "Timeout", WifiMarauderScriptEditItemTypeNumber, 1, {NULL},
+        wifi_marauder_delay_stage_timeout_setup_callback, NULL, wifi_marauder_delay_stage_timeout_select_callback
+    }
+};
+
 // ========================================================================================================================================
 void wifi_marauder_scene_script_stage_edit_setup(WifiMarauderApp* app) {
     switch (app->script_edit_selected_stage->type) {
@@ -640,7 +687,13 @@ void wifi_marauder_scene_script_stage_edit_setup(WifiMarauderApp* app) {
             stage_items = beaconap_items;
             num_stage_items = 1;
             break;
-        default:
+        case WifiMarauderScriptStageTypeExec:
+            stage_items = exec_items;
+            num_stage_items = 1;
+            break;
+        case WifiMarauderScriptStageTypeDelay:
+            stage_items = delay_items;
+            num_stage_items = 1;
             break;
     }
 }

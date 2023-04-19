@@ -151,6 +151,30 @@ static void wifi_marauder_scene_script_stage_add_beaconap_callback(void* context
     scene_manager_previous_scene(app->scene_manager);
 }
 
+// Exec
+static void wifi_marauder_scene_script_stage_add_exec_callback(void* context, uint32_t index) {
+    UNUSED(index);
+    WifiMarauderApp* app = context;
+
+    WifiMarauderScriptStageExec* stage = (WifiMarauderScriptStageExec*) malloc(sizeof(WifiMarauderScriptStageExec));
+    stage->command = NULL;
+
+    wifi_marauder_script_add_stage(app->script, WifiMarauderScriptStageTypeExec, stage);
+    scene_manager_previous_scene(app->scene_manager);
+}
+
+// Delay
+static void wifi_marauder_scene_script_stage_add_delay_callback(void* context, uint32_t index) {
+    UNUSED(index);
+    WifiMarauderApp* app = context;
+
+    WifiMarauderScriptStageDelay* stage = (WifiMarauderScriptStageDelay*) malloc(sizeof(WifiMarauderScriptStageDelay));
+    stage->timeout = 0;
+
+    wifi_marauder_script_add_stage(app->script, WifiMarauderScriptStageTypeDelay, stage);
+    scene_manager_previous_scene(app->scene_manager);
+}
+
 void wifi_marauder_scene_script_stage_add_on_enter(void* context) {
     WifiMarauderApp* app = context;
     Submenu* script_stage_add_submenu = app->script_stage_add_submenu;
@@ -169,6 +193,8 @@ void wifi_marauder_scene_script_stage_add_on_enter(void* context) {
     submenu_add_item(script_stage_add_submenu, "Sniff Pwnagotchi", menu_index++, wifi_marauder_scene_script_stage_add_sniffpwn_callback, app);
     submenu_add_item(script_stage_add_submenu, "Beacon List", menu_index++, wifi_marauder_scene_script_stage_add_beaconlist_callback, app);
     submenu_add_item(script_stage_add_submenu, "Beacon AP", menu_index++, wifi_marauder_scene_script_stage_add_beaconap_callback, app);
+    submenu_add_item(script_stage_add_submenu, "Custom command", menu_index++, wifi_marauder_scene_script_stage_add_exec_callback, app);
+    submenu_add_item(script_stage_add_submenu, "Delay", menu_index++, wifi_marauder_scene_script_stage_add_delay_callback, app);
 
     submenu_set_selected_item(script_stage_add_submenu, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptEdit));
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewScriptStageAdd);

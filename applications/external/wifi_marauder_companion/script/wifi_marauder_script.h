@@ -84,6 +84,12 @@
  *         "beaconAp": {
  *             "timeout": seconds
  *         }
+ *         "exec": {
+ *             "command": Command (eg: "clearlist -a")
+ *         }
+ *         "delay": {
+ *             "timeout": seconds
+ *         }
  *     }
  * }
  * 
@@ -129,6 +135,8 @@ typedef enum {
     WifiMarauderScriptStageTypeSniffPwn,
     WifiMarauderScriptStageTypeBeaconList,
     WifiMarauderScriptStageTypeBeaconAp,
+    WifiMarauderScriptStageTypeExec,
+    WifiMarauderScriptStageTypeDelay,
 } WifiMarauderScriptStageType;
 
 typedef enum {
@@ -208,6 +216,14 @@ typedef struct WifiMarauderScriptStageBeaconList {
 typedef struct WifiMarauderScriptStageBeaconAp {
     int timeout;
 } WifiMarauderScriptStageBeaconAp;
+
+typedef struct WifiMarauderScriptStageExec {
+    char* command;
+} WifiMarauderScriptStageExec;
+
+typedef struct WifiMarauderScriptStageDelay {
+    int timeout;
+} WifiMarauderScriptStageDelay;
 
 // Script
 typedef struct WifiMarauderScript {

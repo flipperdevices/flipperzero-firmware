@@ -178,6 +178,16 @@ void _wifi_marauder_script_execute_beacon_ap(WifiMarauderScriptStageBeaconAp* st
     _send_stop();
 }
 
+void _wifi_marauder_script_execute_exec(WifiMarauderScriptStageExec* stage) {
+    if (stage->command != NULL) {
+        wifi_marauder_uart_tx((uint8_t*)stage->command, strlen(stage->command));
+    }
+}
+
+void _wifi_marauder_script_execute_delay(WifiMarauderScriptStageDelay* stage, WifiMarauderScriptWorker* worker) {
+    _wifi_marauder_script_delay(worker, stage->timeout);
+}
+
 void wifi_marauder_script_execute_start(void *context) {
     furi_assert(context);
     WifiMarauderScriptWorker* worker = context;
@@ -242,7 +252,11 @@ void wifi_marauder_script_execute_stage(WifiMarauderScriptStage* stage, void *co
         case WifiMarauderScriptStageTypeBeaconAp:
             _wifi_marauder_script_execute_beacon_ap((WifiMarauderScriptStageBeaconAp*)stage_data, worker);
             break;
-        default:
+        case WifiMarauderScriptStageTypeExec:
+            _wifi_marauder_script_execute_exec((WifiMarauderScriptStageExec*)stage_data);
+            break;
+        case WifiMarauderScriptStageTypeDelay:
+            _wifi_marauder_script_execute_delay((WifiMarauderScriptStageDelay*)stage_data, worker);
             break;
     }
 }

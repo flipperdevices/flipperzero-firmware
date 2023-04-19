@@ -85,8 +85,11 @@ void wifi_marauder_scene_script_edit_on_enter(void* context) {
             case WifiMarauderScriptStageTypeBeaconAp:
                 submenu_add_item(script_edit_submenu, "Beacon AP", stage_index, wifi_marauder_scene_script_edit_callback, app);
                 break;
-            default:
-                submenu_add_item(script_edit_submenu, "Unknown", stage_index, wifi_marauder_scene_script_edit_callback, app);
+            case WifiMarauderScriptStageTypeExec:
+                submenu_add_item(script_edit_submenu, "Custom command", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeDelay:
+                submenu_add_item(script_edit_submenu, "Delay", stage_index, wifi_marauder_scene_script_edit_callback, app);
                 break;
         }
         current_stage = current_stage->next_stage;
