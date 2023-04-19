@@ -54,8 +54,6 @@ static void nfc_rpc_mf_ultralight_read_page(Nfc_Main* cmd, void* context) {
         pb_mf_ul_read_page_resp.data.size = sizeof(MfUltralightPage);
     }
     cmd->content.mf_ultralight_read_page_resp = pb_mf_ul_read_page_resp;
-
-    mf_ultralight_poller_reset(instance->mf_ul_poller);
 }
 
 static void nfc_rpc_mf_ultralight_write_page(Nfc_Main* cmd, void* context) {
@@ -125,8 +123,6 @@ static void nfc_rpc_mf_ultralight_read_signature(Nfc_Main* cmd, void* context) {
         pb_mf_ul_signature.data.size = sizeof(MfUltralightSignature);
     }
     cmd->content.mf_ultralight_read_signature_resp = pb_mf_ul_signature;
-
-    mf_ultralight_poller_reset(instance->mf_ul_poller);
 }
 
 static void nfc_rpc_mf_ultralight_read_counter(Nfc_Main* cmd, void* context) {

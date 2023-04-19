@@ -8,14 +8,27 @@
 
 #define MF_ULTRALIGHT_MAX_BUFF_SIZE (64)
 
-#define MF_ULTRALIGHT_POLLER_STANDART_FWT_FC (12000)
+#define MF_ULTRALIGHT_POLLER_STANDART_FWT_FC (120000)
 
 #define MF_ULTRALIGHT_POLLER_COMPLETE_EVENT (1UL << 0)
+
+typedef struct {
+    MfUltralightPage page;
+    uint8_t page_to_write;
+} MfUltralightPollerWritePageCommand;
+
+typedef union {
+    uint8_t page_to_read;
+    uint8_t counter_to_read;
+    uint8_t tearing_flag_to_read;
+    MfUltralightPollerWritePageCommand write_cmd;
+} MfUltralightPollerContextData;
 
 typedef struct {
     MfUltralightPoller* instance;
     FuriThreadId thread_id;
     MfUltralightError error;
+    MfUltralightPollerContextData data;
 } MfUltralightPollerContext;
 
 typedef enum {
@@ -74,7 +87,75 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance) {
     free(instance);
 }
 
-static MfUltralightError mf_ultralight_poller_get_version(MfUltralightPoller* instance) {
+static MfUltralightError
+    mf_ultralight_poller_async_read_page(MfUltralightPoller* instance, uint8_t page) {
+    NfcPollerBuffer* buff = instance->buffer;
+    buff->tx_data[0] = MF_ULTRALIGHT_CMD_READ_PAGE;
+    buff->tx_data[1] = page;
+    buff->tx_bits = 16;
+
+    MfUltralightError ret = MfUltralightErrorNone;
+    NfcaError error = NfcaErrorNone;
+    do {
+        error = nfca_poller_send_standart_frame(
+            instance->nfca_poller,
+            buff->tx_data,
+            buff->tx_bits,
+            buff->rx_data,
+            buff->rx_data_size,
+            &buff->rx_bits,
+            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+        if(error != NfcaErrorNone) {
+            ret = mf_ultralight_process_error(error);
+            break;
+        }
+        if(buff->rx_bits != (MF_ULTRALIGHT_PAGE_SIZE * 4) * 8) {
+            ret = MfUltralightErrorProtocol;
+            break;
+        }
+        memcpy(&instance->data->page[page], buff->rx_data, MF_ULTRALIGHT_PAGE_SIZE);
+    } while(false);
+
+    return ret;
+}
+
+static MfUltralightError mf_ultralight_poller_async_write_page(
+    MfUltralightPoller* instance,
+    uint8_t page,
+    MfUltralightPage* data) {
+    NfcPollerBuffer* buff = instance->buffer;
+    buff->tx_data[0] = MF_ULTRALIGHT_CMD_WRITE_PAGE;
+    buff->tx_data[1] = page;
+    memcpy(&buff->tx_data[2], data, MF_ULTRALIGHT_PAGE_SIZE);
+    buff->tx_bits = (2 + MF_ULTRALIGHT_PAGE_SIZE) * 8;
+
+    MfUltralightError ret = MfUltralightErrorNone;
+    NfcaError error = NfcaErrorNone;
+    do {
+        error = nfca_poller_send_standart_frame(
+            instance->nfca_poller,
+            buff->tx_data,
+            buff->tx_bits,
+            buff->rx_data,
+            buff->rx_data_size,
+            &buff->rx_bits,
+            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+        FURI_LOG_I(TAG, "Rx bits: %d", buff->rx_bits);
+        if(error != NfcaErrorNone) {
+            ret = mf_ultralight_process_error(error);
+            break;
+        }
+        if(buff->rx_bits != 4) {
+            ret = MfUltralightErrorProtocol;
+            break;
+        }
+        memcpy(&instance->data->page[page], buff->rx_data, MF_ULTRALIGHT_PAGE_SIZE);
+    } while(false);
+
+    return ret;
+}
+
+static MfUltralightError mf_ultralight_poller_async_read_version(MfUltralightPoller* instance) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGHT_CMD_GET_VERSION;
     buff->tx_bits = 8;
@@ -104,6 +185,105 @@ static MfUltralightError mf_ultralight_poller_get_version(MfUltralightPoller* in
     return ret;
 }
 
+static MfUltralightError mf_ultralight_poller_async_read_signature(MfUltralightPoller* instance) {
+    NfcPollerBuffer* buff = instance->buffer;
+    buff->tx_data[0] = MF_ULTRALIGTH_CMD_READ_SIG;
+    buff->rx_data[1] = 0x00;
+    buff->tx_bits = 16;
+
+    MfUltralightError ret = MfUltralightErrorNone;
+    NfcaError error = NfcaErrorNone;
+    do {
+        error = nfca_poller_send_standart_frame(
+            instance->nfca_poller,
+            buff->tx_data,
+            buff->tx_bits,
+            buff->rx_data,
+            buff->rx_data_size,
+            &buff->rx_bits,
+            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+        if(error != NfcaErrorNone) {
+            ret = mf_ultralight_process_error(error);
+            break;
+        }
+        if(buff->rx_bits != 32 * 8) {
+            ret = MfUltralightErrorProtocol;
+            break;
+        }
+        memcpy(&instance->data->signature, buff->rx_data, sizeof(MfUltralightSignature));
+    } while(false);
+
+    return ret;
+}
+
+static MfUltralightError
+    mf_ultralight_poller_async_read_counter(MfUltralightPoller* instance, uint8_t counter_num) {
+    NfcPollerBuffer* buff = instance->buffer;
+    buff->tx_data[0] = MF_ULTRALIGHT_CMD_READ_CNT;
+    buff->tx_data[1] = counter_num;
+    buff->tx_bits = 2 * 8;
+
+    MfUltralightError ret = MfUltralightErrorNone;
+    NfcaError error = NfcaErrorNone;
+    do {
+        error = nfca_poller_send_standart_frame(
+            instance->nfca_poller,
+            buff->tx_data,
+            buff->tx_bits,
+            buff->rx_data,
+            buff->rx_data_size,
+            &buff->rx_bits,
+            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+        if(error != NfcaErrorNone) {
+            ret = mf_ultralight_process_error(error);
+            break;
+        }
+        if(buff->rx_bits != 3 * 8) {
+            ret = MfUltralightErrorProtocol;
+            break;
+        }
+        memcpy(&instance->data->counter[counter_num], buff->rx_data, MF_ULTRALIGHT_COUNTER_SIZE);
+    } while(false);
+
+    return ret;
+}
+
+static MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
+    MfUltralightPoller* instance,
+    uint8_t tearing_falg_num) {
+    NfcPollerBuffer* buff = instance->buffer;
+    buff->tx_data[0] = MF_ULTRALIGHT_CMD_CHECK_TEARING;
+    buff->tx_data[1] = tearing_falg_num;
+    buff->tx_bits = 2 * 8;
+
+    MfUltralightError ret = MfUltralightErrorNone;
+    NfcaError error = NfcaErrorNone;
+    do {
+        error = nfca_poller_send_standart_frame(
+            instance->nfca_poller,
+            buff->tx_data,
+            buff->tx_bits,
+            buff->rx_data,
+            buff->rx_data_size,
+            &buff->rx_bits,
+            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
+        if(error != NfcaErrorNone) {
+            ret = mf_ultralight_process_error(error);
+            break;
+        }
+        if(buff->rx_bits != 8) {
+            ret = MfUltralightErrorProtocol;
+            break;
+        }
+        memcpy(
+            &instance->data->tearing_flag[tearing_falg_num],
+            buff->rx_data,
+            MF_ULTRALIGHT_TEARING_FLAG_SIZE);
+    } while(false);
+
+    return ret;
+}
+
 static void mf_ultralight_nfca_poller_event_callback(NfcaPollerEvent event, void* context) {
     furi_assert(context);
 
@@ -116,7 +296,7 @@ static void mf_ultralight_nfca_poller_event_callback(NfcaPollerEvent event, void
         nfc_poller_buffer_reset(buff);
 
         if(instance->state == MfUltralightPollerStateReadVersion) {
-            mf_ultralight_poller_get_version(instance);
+            mf_ultralight_poller_async_read_version(instance);
         }
         // Test: read 0 page
         buff->tx_data[0] = MF_ULTRALIGHT_CMD_READ_PAGE;
@@ -214,6 +394,21 @@ MfUltralightError mf_ultralight_poller_stop(MfUltralightPoller* instance) {
     return MfUltralightErrorNone;
 }
 
+static void mf_ultraight_read_page_callback(NfcaPollerEvent event, void* context) {
+    furi_assert(context);
+
+    MfUltralightPollerContext* poller_context = context;
+    if(event.type == NfcaPollerEventTypeReady) {
+        poller_context->error = mf_ultralight_poller_async_read_page(
+            poller_context->instance, poller_context->data.page_to_read);
+        nfca_poller_halt(poller_context->instance->nfca_poller);
+    } else if(event.type == NfcaPollerEventTypeError) {
+        poller_context->error = mf_ultralight_process_error(event.data.error);
+    }
+    mf_ultralight_poller_stop(poller_context->instance);
+    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
+}
+
 MfUltralightError mf_ultralight_poller_read_page(
     MfUltralightPoller* instance,
     uint16_t page,
@@ -221,36 +416,34 @@ MfUltralightError mf_ultralight_poller_read_page(
     furi_assert(instance);
     furi_assert(data);
 
-    uint8_t tx_data[] = {MF_ULTRALIGHT_CMD_READ_PAGE, page};
-    uint16_t tx_bits = sizeof(tx_data) * 8;
-    uint8_t rx_data[MF_ULTRALIGHT_MAX_BUFF_SIZE] = {};
-    uint16_t rx_bits = 0;
-    MfUltralightError ret = MfUltralightErrorNone;
-    NfcaError error = NfcaErrorNone;
+    MfUltralightPollerContext poller_context = {};
+    poller_context.data.page_to_read = page;
+    poller_context.instance = instance;
+    poller_context.thread_id = furi_thread_get_current_id();
 
-    do {
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
-            tx_data,
-            tx_bits,
-            rx_data,
-            sizeof(rx_data),
-            &rx_bits,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
-            ret = mf_ultralight_process_error(error);
-            break;
-        }
-        if(rx_bits != (MF_ULTRALIGHT_PAGE_SIZE * 4) * 8) {
-            FURI_LOG_E(
-                TAG, "Received %d bits. Expected %d bits", rx_bits, (MF_ULTRALIGHT_PAGE_SIZE)*8);
-            ret = MfUltralightErrorProtocol;
-            break;
-        }
-        memcpy(data, rx_data, MF_ULTRALIGHT_PAGE_SIZE);
-    } while(false);
+    mf_ultralight_poller_start(instance, mf_ultraight_read_page_callback, &poller_context);
+    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    *data = instance->data->page[page];
+    mf_ultralight_poller_reset(instance);
 
-    return ret;
+    return poller_context.error;
+}
+
+static void mf_ultraight_write_page_callback(NfcaPollerEvent event, void* context) {
+    furi_assert(context);
+
+    MfUltralightPollerContext* poller_context = context;
+    if(event.type == NfcaPollerEventTypeReady) {
+        poller_context->error = mf_ultralight_poller_async_write_page(
+            poller_context->instance,
+            poller_context->data.write_cmd.page_to_write,
+            &poller_context->data.write_cmd.page);
+        nfca_poller_halt(poller_context->instance->nfca_poller);
+    } else if(event.type == NfcaPollerEventTypeError) {
+        poller_context->error = mf_ultralight_process_error(event.data.error);
+    }
+    mf_ultralight_poller_stop(poller_context->instance);
+    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
 }
 
 MfUltralightError mf_ultralight_poller_write_page(
@@ -260,40 +453,17 @@ MfUltralightError mf_ultralight_poller_write_page(
     furi_assert(instance);
     furi_assert(data);
 
-    uint8_t tx_data[MF_ULTRALIGHT_PAGE_SIZE + 2] = {MF_ULTRALIGHT_CMD_WRITE_PAGE, page};
-    memcpy(&tx_data[2], data, MF_ULTRALIGHT_PAGE_SIZE);
-    uint16_t tx_bits = (MF_ULTRALIGHT_PAGE_SIZE + 2) * 8;
-    uint8_t rx_data[MF_ULTRALIGHT_MAX_BUFF_SIZE] = {};
-    uint16_t rx_bits = 0;
-    NfcaError error = NfcaErrorNone;
-    MfUltralightError ret = MfUltralightErrorNone;
+    MfUltralightPollerContext poller_context = {};
+    poller_context.data.write_cmd.page_to_write = page;
+    poller_context.data.write_cmd.page = *data;
+    poller_context.instance = instance;
+    poller_context.thread_id = furi_thread_get_current_id();
 
-    do {
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
-            tx_data,
-            tx_bits,
-            rx_data,
-            sizeof(rx_data),
-            &rx_bits,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(!(error == NfcaErrorNone || error == NfcaErrorWrongCrc)) {
-            ret = mf_ultralight_process_error(error);
-            break;
-        }
-        if(rx_bits != 4) {
-            ret = MfUltralightErrorProtocol;
-            FURI_LOG_E(TAG, "Received %d bits. Expected %d bits", rx_bits, 4);
-            break;
-        }
-        if(rx_data[0] != MF_ULTRALIGHT_CMD_ACK) {
-            ret = MfUltralightErrorProtocol;
-            FURI_LOG_E(TAG, "Nack received");
-            break;
-        }
-    } while(false);
+    mf_ultralight_poller_start(instance, mf_ultraight_write_page_callback, &poller_context);
+    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    mf_ultralight_poller_reset(instance);
 
-    return ret;
+    return poller_context.error;
 }
 
 static void mf_ultraight_read_version_callback(NfcaPollerEvent event, void* context) {
@@ -301,7 +471,7 @@ static void mf_ultraight_read_version_callback(NfcaPollerEvent event, void* cont
 
     MfUltralightPollerContext* poller_context = context;
     if(event.type == NfcaPollerEventTypeReady) {
-        poller_context->error = mf_ultralight_poller_get_version(poller_context->instance);
+        poller_context->error = mf_ultralight_poller_async_read_version(poller_context->instance);
         nfca_poller_halt(poller_context->instance->nfca_poller);
     } else if(event.type == NfcaPollerEventTypeError) {
         poller_context->error = mf_ultralight_process_error(event.data.error);
@@ -326,40 +496,51 @@ MfUltralightError
     return poller_context.error;
 }
 
+static void mf_ultraight_read_signature_callback(NfcaPollerEvent event, void* context) {
+    furi_assert(context);
+
+    MfUltralightPollerContext* poller_context = context;
+    if(event.type == NfcaPollerEventTypeReady) {
+        poller_context->error =
+            mf_ultralight_poller_async_read_signature(poller_context->instance);
+        nfca_poller_halt(poller_context->instance->nfca_poller);
+    } else if(event.type == NfcaPollerEventTypeError) {
+        poller_context->error = mf_ultralight_process_error(event.data.error);
+    }
+    mf_ultralight_poller_stop(poller_context->instance);
+    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
+}
+
 MfUltralightError
     mf_ultralight_poller_read_signature(MfUltralightPoller* instance, MfUltralightSignature* data) {
     furi_assert(instance);
     furi_assert(data);
 
-    uint8_t tx_data[] = {MF_ULTRALIGTH_CMD_READ_SIG, 0x00};
-    uint16_t tx_bits = sizeof(tx_data) * 8;
-    uint8_t rx_data[MF_ULTRALIGHT_MAX_BUFF_SIZE] = {};
-    uint16_t rx_bits = 0;
-    NfcaError error = NfcaErrorNone;
-    MfUltralightError ret = MfUltralightErrorNone;
+    MfUltralightPollerContext poller_context = {};
+    poller_context.instance = instance;
+    poller_context.thread_id = furi_thread_get_current_id();
 
-    do {
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
-            tx_data,
-            tx_bits,
-            rx_data,
-            sizeof(rx_data),
-            &rx_bits,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
-            ret = mf_ultralight_process_error(error);
-            break;
-        }
-        if(rx_bits != 32 * 8) {
-            ret = MfUltralightErrorProtocol;
-            FURI_LOG_E(TAG, "Received %d bits. Expected %d bits", rx_bits, 32 * 8);
-            break;
-        }
-        memcpy(data, rx_data, sizeof(MfUltralightSignature));
-    } while(false);
+    mf_ultralight_poller_start(instance, mf_ultraight_read_signature_callback, &poller_context);
+    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    *data = instance->data->signature;
+    mf_ultralight_poller_reset(instance);
 
-    return ret;
+    return poller_context.error;
+}
+
+static void mf_ultraight_read_counter_callback(NfcaPollerEvent event, void* context) {
+    furi_assert(context);
+
+    MfUltralightPollerContext* poller_context = context;
+    if(event.type == NfcaPollerEventTypeReady) {
+        poller_context->error = mf_ultralight_poller_async_read_counter(
+            poller_context->instance, poller_context->data.counter_to_read);
+        nfca_poller_halt(poller_context->instance->nfca_poller);
+    } else if(event.type == NfcaPollerEventTypeError) {
+        poller_context->error = mf_ultralight_process_error(event.data.error);
+    }
+    mf_ultralight_poller_stop(poller_context->instance);
+    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
 }
 
 MfUltralightError mf_ultralight_poller_read_counter(
@@ -369,35 +550,32 @@ MfUltralightError mf_ultralight_poller_read_counter(
     furi_assert(instance);
     furi_assert(data);
 
-    uint8_t tx_data[] = {MF_ULTRALIGHT_CMD_READ_CNT, counter_num};
-    uint16_t tx_bits = sizeof(tx_data) * 8;
-    uint8_t rx_data[MF_ULTRALIGHT_MAX_BUFF_SIZE] = {};
-    uint16_t rx_bits = 0;
-    NfcaError error = NfcaErrorNone;
-    MfUltralightError ret = MfUltralightErrorNone;
+    MfUltralightPollerContext poller_context = {};
+    poller_context.data.counter_to_read = counter_num;
+    poller_context.instance = instance;
+    poller_context.thread_id = furi_thread_get_current_id();
 
-    do {
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
-            tx_data,
-            tx_bits,
-            rx_data,
-            sizeof(rx_data),
-            &rx_bits,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
-            ret = mf_ultralight_process_error(error);
-            break;
-        }
-        if(rx_bits != 3 * 8) {
-            ret = MfUltralightErrorProtocol;
-            FURI_LOG_E(TAG, "Received %d bits. Expected %d bits", rx_bits, 32 * 8);
-            break;
-        }
-        memcpy(data, rx_data, sizeof(MfUltralightCounter));
-    } while(false);
+    mf_ultralight_poller_start(instance, mf_ultraight_read_counter_callback, &poller_context);
+    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    *data = instance->data->counter[counter_num];
+    mf_ultralight_poller_reset(instance);
 
-    return ret;
+    return poller_context.error;
+}
+
+static void mf_ultraight_read_tering_flag_callback(NfcaPollerEvent event, void* context) {
+    furi_assert(context);
+
+    MfUltralightPollerContext* poller_context = context;
+    if(event.type == NfcaPollerEventTypeReady) {
+        poller_context->error = mf_ultralight_poller_async_read_tearing_flag(
+            poller_context->instance, poller_context->data.tearing_flag_to_read);
+        nfca_poller_halt(poller_context->instance->nfca_poller);
+    } else if(event.type == NfcaPollerEventTypeError) {
+        poller_context->error = mf_ultralight_process_error(event.data.error);
+    }
+    mf_ultralight_poller_stop(poller_context->instance);
+    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
 }
 
 MfUltralightError mf_ultralight_poller_read_tearing_flag(
@@ -407,33 +585,15 @@ MfUltralightError mf_ultralight_poller_read_tearing_flag(
     furi_assert(instance);
     furi_assert(data);
 
-    uint8_t tx_data[] = {MF_ULTRALIGHT_CMD_CHECK_TEARING, flag_num};
-    uint16_t tx_bits = sizeof(tx_data) * 8;
-    uint8_t rx_data[MF_ULTRALIGHT_MAX_BUFF_SIZE] = {};
-    uint16_t rx_bits = 0;
-    NfcaError error = NfcaErrorNone;
-    MfUltralightError ret = MfUltralightErrorNone;
+    MfUltralightPollerContext poller_context = {};
+    poller_context.data.tearing_flag_to_read = flag_num;
+    poller_context.instance = instance;
+    poller_context.thread_id = furi_thread_get_current_id();
 
-    do {
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
-            tx_data,
-            tx_bits,
-            rx_data,
-            sizeof(rx_data),
-            &rx_bits,
-            MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
-            ret = mf_ultralight_process_error(error);
-            break;
-        }
-        if(rx_bits != 8) {
-            ret = MfUltralightErrorProtocol;
-            FURI_LOG_E(TAG, "Received %d bits. Expected %d bits", rx_bits, 8);
-            break;
-        }
-        memcpy(data, rx_data, sizeof(MfUltralightTearingFlag));
-    } while(false);
+    mf_ultralight_poller_start(instance, mf_ultraight_read_tering_flag_callback, &poller_context);
+    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    *data = instance->data->tearing_flag[flag_num];
+    mf_ultralight_poller_reset(instance);
 
-    return ret;
+    return poller_context.error;
 }
