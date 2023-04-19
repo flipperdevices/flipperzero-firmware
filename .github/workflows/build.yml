@@ -6,9 +6,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: Dev channel
+          - name: Official Dev channel
             sdk-channel: dev
-          - name: Release channel
+          - name: Official Release channel
             sdk-channel: release
           - name: Unleashed Dev
             sdk-index-url: https://up.unleashedflip.com/directory.json
