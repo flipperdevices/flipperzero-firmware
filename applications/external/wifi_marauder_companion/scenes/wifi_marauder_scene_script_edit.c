@@ -1,0 +1,112 @@
+#include "../wifi_marauder_app_i.h"
+
+static void wifi_marauder_scene_script_edit_callback(void* context, uint32_t index) {
+    WifiMarauderApp* app = context;
+    WifiMarauderScriptStage* current_stage = app->script->first_stage;
+    uint32_t stage_index = 0;
+
+    while (current_stage != NULL && stage_index < index) {
+        current_stage = current_stage->next_stage;
+        stage_index++;
+    }
+    app->script_edit_selected_stage = current_stage;
+
+    if (app->script_edit_selected_stage != NULL) {
+        scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneScriptEdit, index);
+        scene_manager_next_scene(app->scene_manager, WifiMarauderSceneScriptStageEdit);
+    }
+}
+
+static void wifi_marauder_scene_script_edit_add_callback(void* context, uint32_t index) {
+    WifiMarauderApp* app = context;
+    scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneScriptEdit, index);
+    scene_manager_next_scene(app->scene_manager, WifiMarauderSceneScriptStageAdd);
+}
+
+static void wifi_marauder_scene_script_edit_save_callback(void* context, uint32_t index) {
+    UNUSED(index);
+    WifiMarauderApp* app = context;
+    
+    char script_path[256];
+    snprintf(script_path, sizeof(script_path), "%s/%s.json", MARAUDER_APP_FOLDER_SCRIPTS, app->script->name);
+    wifi_marauder_script_save_json(app->storage, script_path, app->script);
+
+    DialogMessage* message = dialog_message_alloc();
+    dialog_message_set_text(message, "Saved!", 88, 32, AlignCenter, AlignCenter);
+    dialog_message_set_icon(message, &I_DolphinCommon_56x48, 5, 6);
+    dialog_message_set_buttons(message, NULL, "Ok", NULL);
+    dialog_message_show(app->dialogs, message);
+    dialog_message_free(message);
+}
+
+void wifi_marauder_scene_script_edit_on_enter(void* context) {
+    WifiMarauderApp* app = context;
+    Submenu* script_edit_submenu = app->script_edit_submenu;
+    WifiMarauderScript* script = app->script;
+    submenu_set_header(script_edit_submenu, script->name);
+
+    WifiMarauderScriptStage* current_stage = script->first_stage;
+    int stage_index = 0;
+    while (current_stage != NULL) {
+        switch (current_stage->type) {
+            case WifiMarauderScriptStageTypeScan:
+                submenu_add_item(script_edit_submenu, "Scan", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeSelect:
+                submenu_add_item(script_edit_submenu, "Select", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeDeauth:
+                submenu_add_item(script_edit_submenu, "Deauth", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeProbe:
+                submenu_add_item(script_edit_submenu, "Probe", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeSniffRaw:
+                submenu_add_item(script_edit_submenu, "Sniff raw", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeSniffBeacon:
+                submenu_add_item(script_edit_submenu, "Sniff beacon", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeSniffDeauth:
+                submenu_add_item(script_edit_submenu, "Sniff deauth", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeSniffEsp:
+                submenu_add_item(script_edit_submenu, "Sniff esp", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeSniffPmkid:
+                submenu_add_item(script_edit_submenu, "Sniff PMKID", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeSniffPwn:
+                submenu_add_item(script_edit_submenu, "Sniff pwn", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeBeaconList:
+                submenu_add_item(script_edit_submenu, "Beacon list", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            case WifiMarauderScriptStageTypeBeaconAp:
+                submenu_add_item(script_edit_submenu, "Beacon AP", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+            default:
+                submenu_add_item(script_edit_submenu, "Unknown", stage_index, wifi_marauder_scene_script_edit_callback, app);
+                break;
+        }
+        current_stage = current_stage->next_stage;
+        stage_index++;
+    }
+
+    submenu_add_item(script_edit_submenu, "[+] ADD STAGE", stage_index++, wifi_marauder_scene_script_edit_add_callback, app);
+    submenu_add_item(script_edit_submenu, "[*] SAVE", stage_index, wifi_marauder_scene_script_edit_save_callback, app);
+
+    submenu_set_selected_item(script_edit_submenu, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptEdit));
+    view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewScriptEdit);
+}
+
+bool wifi_marauder_scene_script_edit_on_event(void* context, SceneManagerEvent event) {
+    UNUSED(context);
+    UNUSED(event);
+    return false;
+}
+
+void wifi_marauder_scene_script_edit_on_exit(void* context) {
+    WifiMarauderApp* app = context;
+    submenu_reset(app->script_edit_submenu);
+}

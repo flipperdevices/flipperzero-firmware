@@ -16,9 +16,11 @@
 #include <gui/scene_manager.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
 
+#include <assets_icons.h>
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>
@@ -27,6 +29,7 @@
 
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
+#define WIFI_MARAUDER_USER_INPUT_STORE_SIZE (64)
 
 #define MARAUDER_APP_FOLDER_USER "apps_data/marauder"
 #define MARAUDER_APP_FOLDER ANY_PATH(MARAUDER_APP_FOLDER_USER)
@@ -38,6 +41,13 @@
 #define MARAUDER_APP_SCRIPT_PATH(file_name) MARAUDER_APP_FOLDER_SCRIPTS "/" file_name ".json"
 #define SAVE_PCAP_SETTING_FILEPATH MARAUDER_APP_FOLDER "/save_pcaps_here.setting"
 #define SAVE_LOGS_SETTING_FILEPATH MARAUDER_APP_FOLDER "/save_logs_here.setting"
+
+// TODO: Pass user input to a file of its own
+typedef enum WifiMarauderUserInputType {
+    WifiMarauderUserInputTypeString,
+    WifiMarauderUserInputTypeNumber,
+    WifiMarauderUserInputTypeFileName
+} WifiMarauderUserInputType;
 
 struct WifiMarauderApp {
     Gui* gui;
@@ -79,13 +89,33 @@ struct WifiMarauderApp {
     bool is_writing_pcap;
     bool is_writing_log;
 
+    // User input
+    TextInput* user_input;
+    char user_input_store[WIFI_MARAUDER_USER_INPUT_STORE_SIZE + 1];
+    WifiMarauderUserInputType user_input_type;
+    char** user_input_string_reference;
+    int* user_input_number_reference;
+    char* user_input_file_dir;
+    char* user_input_file_extension;
+
     // Automation script
     WifiMarauderScript* script;
     WifiMarauderScriptWorker* script_worker;
-    VariableItemList* script_var_item_list;
     FuriString** script_list;
     int script_list_count;
-    int selected_script_index;
+    Submenu* script_select_submenu;
+    Submenu* script_options_submenu;
+    Submenu* script_edit_submenu;
+    Submenu* script_stage_add_submenu;
+    Submenu* script_stage_edit_list_submenu;
+    Widget* script_confirm_delete_widget;
+    WifiMarauderScriptStage* script_edit_selected_stage;
+    VariableItemList* script_stage_edit_list;
+    WifiMarauderScriptStageListItem* script_stage_edit_first_item;
+    char*** script_stage_edit_strings_reference;
+    int* script_stage_edit_string_count_reference;
+    int** script_stage_edit_numbers_reference;
+    int* script_stage_edit_number_count_reference;
 
     // For input source and destination MAC in targeted deauth attack
     int special_case_input_step;
@@ -119,5 +149,12 @@ typedef enum {
     WifiMarauderAppViewConsoleOutput,
     WifiMarauderAppViewTextInput,
     WifiMarauderAppViewWidget,
+    WifiMarauderAppViewUserInput,
     WifiMarauderAppViewScriptSelect,
+    WifiMarauderAppViewScriptOptions,
+    WifiMarauderAppViewScriptEdit,
+    WifiMarauderAppViewScriptConfirmDelete,
+    WifiMarauderAppViewScriptStageAdd,
+    WifiMarauderAppViewScriptStageEdit,
+    WifiMarauderAppViewScriptStageEditList,
 } WifiMarauderAppView;
