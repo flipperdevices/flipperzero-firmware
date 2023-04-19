@@ -34,7 +34,7 @@ typedef struct {
     FuriHalRtcLocaleUnits locale_units : 1;
     FuriHalRtcLocaleTimeFormat locale_timeformat : 1;
     FuriHalRtcLocaleDateFormat locale_dateformat : 2;
-    uint8_t reserved : 5;
+    uint8_t reserved : 6;
 } SystemReg;
 
 _Static_assert(sizeof(SystemReg) == 4, "SystemReg size mismatch");
