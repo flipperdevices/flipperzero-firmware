@@ -170,3 +170,69 @@ void felica_std_describe_node_detailed(FelicaNode* node, FuriString* out) {
     }
     }
 }
+
+void felica_print_card_stat(FelicaData* data, FuriString* out) {
+    furi_assert(data != NULL);
+    furi_assert(data->systems != NULL);
+    furi_assert(out != NULL);
+
+    switch(data->type) {
+    // Lite
+    case FelicaICTypeLiteS:
+    case FelicaICTypeLite: {
+        FelicaSystem* lite_system = FelicaSystemArray_get(data->systems, 0);
+        furi_assert(lite_system != NULL);
+        furi_assert(lite_system->is_lite);
+        size_t read = 0;
+        const size_t total_blocks =
+            sizeof(lite_system->lite_info.S_PAD) / sizeof(lite_system->lite_info.S_PAD[0]);
+        for(size_t i = 0; i < total_blocks; i++) {
+            if(lite_system->lite_info.S_PAD[i] != NULL) {
+                read++;
+            }
+        }
+
+        furi_string_cat_printf(out, "%zd/%zd blocks read", read, total_blocks);
+        break;
+    }
+    // TODO: 12fc
+    // Standard
+    default: {
+        size_t num_systems = FelicaSystemArray_size(data->systems);
+        size_t num_areas = 0, num_services = 0;
+        for
+            M_EACH(system, data->systems, FelicaSystemArray_t) {
+                furi_assert(system != NULL);
+                if(system->is_lite) {
+                    continue;
+                }
+            for
+                M_EACH(node, system->nodes, FelicaNodeArray_t) {
+                    furi_assert(node != NULL);
+                    if(node->type == FelicaNodeTypeArea) {
+                        num_areas++;
+                    } else if(node->type == FelicaNodeTypeService) {
+                        furi_assert(node->service != NULL);
+                        furi_assert(node->service->access_control_list != NULL);
+                        num_services +=
+                            FelicaServiceAttributeList_size(node->service->access_control_list);
+                    }
+                }
+            }
+
+        furi_string_cat_printf(out, "%zd system", num_systems);
+        if(num_systems > 1) {
+            furi_string_push_back(out, 's');
+        }
+        furi_string_cat_printf(out, ", %zd area", num_areas);
+        if(num_areas > 1) {
+            furi_string_push_back(out, 's');
+        }
+        furi_string_cat_printf(out, ", %zd service", num_services);
+        if(num_services > 1) {
+            furi_string_push_back(out, 's');
+        }
+        break;
+    }
+    }
+}

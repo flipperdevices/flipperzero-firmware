@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include "core/string.h"
 #include <inttypes.h>
 
 void nfc_scene_nfc_data_info_widget_callback(GuiButtonType result, InputType type, void* context) {
@@ -53,24 +54,13 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     if(type == FuriHalNfcTypeF) {
         // Set NFC-F data
         furi_string_cat(temp_str, "ISO 18092 (NFC-F)");
-        furi_string_cat(temp_str, "\nCIN:");
-        // NFC-F Card Identification Number (CIN) starts at "UID" byte 2.
-        for(size_t i = 2; i < nfc_data->uid_len; i++) {
-            furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
-        }
-        // The first 2 bytes of the "UID" are Manufacturer Code (MC)
-        furi_string_cat_printf(
-            temp_str,
-            "\nMC: %02X %02X  ROM: %02X  IC: %02X\n",
-            nfc_data->uid[0],
-            nfc_data->uid[1],
-            nfc_data->f_data.pmm[0],
-            nfc_data->f_data.pmm[1]);
-
-        furi_string_cat(temp_str, "\nIDm:");
+        furi_string_cat(temp_str, "\nID:");
         for(size_t i = 0; i < nfc_data->uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", nfc_data->uid[i]);
         }
+        furi_string_cat_printf(
+            temp_str, "\nROM: %02X  IC: %02X\n", nfc_data->f_data.pmm[0], nfc_data->f_data.pmm[1]);
+
         furi_string_cat(temp_str, "\nPMm:");
         for(size_t i = 0; i < sizeof(nfc_data->f_data.pmm); i++) {
             furi_string_cat_printf(temp_str, " %02X", nfc_data->f_data.pmm[i]);
@@ -182,11 +172,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         furi_string_cat_printf(temp_str, "\nSectors Read %d/%d", sectors_read, sectors_total);
     } else if(protocol == NfcDeviceProtocolFelica) {
         FelicaData* data = &dev_data->felica_data;
-        size_t num_systems = FelicaSystemArray_size(data->systems);
-        furi_string_cat_printf(temp_str, "\n%zd system", num_systems);
-        if(num_systems != 1) {
-            furi_string_cat_printf(temp_str, "s");
-        }
+        furi_string_push_back(temp_str, '\n');
+        felica_print_card_stat(data, temp_str);
     }
 
     // Add text scroll widget

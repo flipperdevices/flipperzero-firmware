@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include "core/string.h"
 
 void nfc_scene_felica_read_success_widget_callback(
     GuiButtonType result,
@@ -29,16 +30,13 @@ void nfc_scene_felica_read_success_on_enter(void* context) {
     } else {
         temp_str = furi_string_alloc_printf("\e#%s", nfc_felica_type(felica_data->type));
 
-        furi_string_cat_printf(temp_str, "\nCIN:");
-        for(size_t i = 2; i < nfc->dev->dev_data.nfc_data.uid_len; i++) {
+        furi_string_cat_printf(temp_str, "\nID:");
+        for(size_t i = 0; i < nfc->dev->dev_data.nfc_data.uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", nfc->dev->dev_data.nfc_data.uid[i]);
         }
 
-        size_t num_systems = FelicaSystemArray_size(felica_data->systems);
-        furi_string_cat_printf(temp_str, "\n%zd system", num_systems);
-        if(num_systems != 1) {
-            furi_string_cat_printf(temp_str, "s");
-        }
+        furi_string_push_back(temp_str, '\n');
+        felica_print_card_stat(felica_data, temp_str);
     }
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));

@@ -106,6 +106,7 @@ typedef enum {
     FelicaICTypeLite, // RC-S965
     FelicaICTypeLiteS, // RC-S966
     FelicaICTypeLink, // RC-S967,
+    FelicaICTypeLinkNDEF, // Monolithic NDEF tag that's not standard
     FelicaICTypePlug, // RC-S926
     FelicaICTypeSuica, // https://www.tuv-nederland.nl/assets/files/cerfiticaten/2019/07/cr-nscib-cc-10-30076-cr.pdf
 } FelicaICType;

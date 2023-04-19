@@ -78,7 +78,7 @@ FelicaICType felica_get_ic_type(uint8_t* PMm) {
     UNUSED(rom_type);
     switch(ic_type) {
     case 0xff:
-        return FelicaICTypeLink;
+        return FelicaICTypeLinkNDEF;
     case 0xf2:
         return FelicaICTypeLink;
     case 0xf1:
@@ -945,37 +945,6 @@ bool felica_std_traverse_system(
     FURI_LOG_D(
         TAG, "%d nodes found under system %04X", FelicaNodeArray_size(system->nodes), system->code);
 
-    // TODO remove this on prod
-    FelicaINode in = 0;
-    for
-        M_EACH(n, system->nodes, FelicaNodeArray_t) {
-            switch(n->type) {
-            case FelicaNodeTypeArea: {
-                furi_assert(n->area != NULL);
-                FURI_LOG_D(
-                    TAG,
-                    "%d @ %d: Area #%d (noterm %d, ends at %04X, parent)",
-                    in,
-                    n->parent,
-                    n->area->number,
-                    n->area->can_create_subareas,
-                    n->area->end_service_code);
-                break;
-            }
-            case FelicaNodeTypeService: {
-                furi_assert(n->service != NULL);
-                FURI_LOG_D(
-                    TAG,
-                    "%d @ %d: Service #%d (type %#X)",
-                    in,
-                    n->parent,
-                    n->service->number,
-                    n->service->type);
-                break;
-            }
-            }
-            in++;
-        }
     return result;
 }
 

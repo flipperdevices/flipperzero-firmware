@@ -36,20 +36,13 @@ void nfc_scene_nfcf_read_success_on_enter(void* context) {
 
     furi_string_cat_printf(temp_str, "\nISO 18092 (NFC-F)");
 
-    furi_string_cat_printf(temp_str, "\nCIN:");
-    // NFC-F Card Identification Number (CIN) starts at "UID" byte 2.
-    for(size_t i = 2; i < data->uid_len; i++) {
+    furi_string_cat_printf(temp_str, "\nID:");
+    for(size_t i = 0; i < data->uid_len; i++) {
         furi_string_cat_printf(temp_str, " %02X", data->uid[i]);
     }
 
-    // The first 2 bytes of the "UID" are Manufacturer Code (MC)
     furi_string_cat_printf(
-        temp_str,
-        "\nMC: %02X %02X  ROM: %02X  IC: %02X",
-        data->uid[0],
-        data->uid[1],
-        data->f_data.pmm[0],
-        data->f_data.pmm[1]);
+        temp_str, "\nROM: %02X  IC: %02X", data->f_data.pmm[0], data->f_data.pmm[1]);
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);

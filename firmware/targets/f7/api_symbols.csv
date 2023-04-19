@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,11.19,,
+Version,+,11.20,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -824,6 +824,7 @@ Function,-,felica_parse_unencrypted_write,_Bool,"uint8_t*, uint8_t, FelicaReader
 Function,-,felica_prepare_search_service_code,uint8_t,"uint8_t*, FelicaReader*, uint16_t"
 Function,-,felica_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, const uint16_t*, uint8_t, const FelicaRWRequestBlockDescriptor*, uint8_t"
 Function,-,felica_prepare_unencrypted_write,uint8_t,"uint8_t*, FelicaReader*, const uint16_t*, uint8_t, const uint32_t*, uint8_t, const uint8_t*"
+Function,-,felica_print_card_stat,void,"FelicaData*, FuriString*"
 Function,-,felica_push_normal_block,void,"FelicaService*, uint8_t*"
 Function,-,felica_read_card,_Bool,"FuriHalNfcTxRxContext*, FelicaData*, uint8_t*, uint8_t*"
 Function,-,felica_service_clear,void,FelicaService*
