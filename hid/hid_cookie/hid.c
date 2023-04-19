@@ -153,10 +153,14 @@ void hid_free(Hid* app) {
     notification_internal_message(app->notifications, &sequence_reset_blue);
 
     // Free views
-    view_dispatcher_remove_view(app->view_dispatcher, HidViewSubmenu);
-    submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewClicker);
     hid_cc_free(app->hid_cc);
+    view_dispatcher_remove_view(app->view_dispatcher, BtHidViewCredits);
+    widget_free(app->widget_credits);
+    view_dispatcher_remove_view(app->view_dispatcher, BtHidViewInstructions);
+    widget_free(app->widget_instructions);
+    view_dispatcher_remove_view(app->view_dispatcher, HidViewSubmenu);
+    submenu_free(app->submenu);
     view_dispatcher_free(app->view_dispatcher);
 
     // Close records

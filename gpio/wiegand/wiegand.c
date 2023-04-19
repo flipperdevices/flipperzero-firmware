@@ -90,11 +90,16 @@ App* app_alloc() {
 void app_free(void* context) {
     App* app = context;
     furi_assert(app);
+
+    view_dispatcher_remove_view(app->view_dispatcher, WiegandTextInputView);
+    text_input_free(app->text_input);
+    view_dispatcher_remove_view(app->view_dispatcher, WiegandWidgetView);
+    widget_free(app->widget);
+    view_dispatcher_remove_view(app->view_dispatcher, WiegandSubmenuView);
+    submenu_free(app->submenu);
+
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
-    submenu_free(app->submenu);
-    widget_free(app->widget);
-    text_input_free(app->text_input);
     furi_timer_free(app->timer);
     furi_record_close(RECORD_DIALOGS);
     free(app);
