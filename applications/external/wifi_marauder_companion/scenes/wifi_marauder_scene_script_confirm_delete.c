@@ -42,6 +42,13 @@ bool wifi_marauder_scene_script_confirm_delete_on_event(void* context, SceneMana
                 storage_simply_remove(app->storage, script_path);
                 wifi_marauder_script_free(app->script);
                 app->script = NULL;
+
+                DialogMessage* message = dialog_message_alloc();
+                dialog_message_set_text(message, "Deleted!", 88, 32, AlignCenter, AlignCenter);
+                dialog_message_set_icon(message, &I_DolphinCommon_56x48, 5, 6);
+                dialog_message_set_buttons(message, NULL, "Ok", NULL);
+                dialog_message_show(app->dialogs, message);
+                dialog_message_free(message);
             }
         }
         scene_manager_previous_scene(app->scene_manager);

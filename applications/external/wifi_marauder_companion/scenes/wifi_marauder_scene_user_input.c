@@ -1,6 +1,26 @@
 #include "../wifi_marauder_app_i.h"
 
-void wifi_marauder_scene_user_input_callback(void* context) {
+bool wifi_marauder_scene_user_input_validator_number_callback(const char* text, FuriString* error, void* context) {
+    UNUSED(context);
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (text[i] < '0' || text[i] > '9') {
+            furi_string_printf(error, "This is not\na valid\nnumber!");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool wifi_marauder_scene_user_input_validator_file_callback(const char* text, FuriString* error, void* context) {
+    UNUSED(context);
+    if (strlen(text) == 0) {
+        furi_string_printf(error, "File name\ncannot be\nblank!");
+        return false;
+    }
+    return true;
+}
+
+void wifi_marauder_scene_user_input_ok_callback(void* context) {
     WifiMarauderApp* app = context;
 
     File* file = NULL;
@@ -62,6 +82,7 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
         // Loads the string value of the reference
         case WifiMarauderUserInputTypeString:
             text_input_set_header_text(app->user_input, "Enter value:");
+            text_input_set_validator(app->user_input, NULL, app);
             if (app->user_input_string_reference != NULL) {
                 strncpy(app->user_input_store, *app->user_input_string_reference, strlen(*app->user_input_string_reference) + 1);
             }
@@ -69,6 +90,7 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
         // Loads the numerical value of the reference
         case WifiMarauderUserInputTypeNumber:
             text_input_set_header_text(app->user_input, "Enter a valid number:");
+            text_input_set_validator(app->user_input, wifi_marauder_scene_user_input_validator_number_callback, app);
             if (app->user_input_number_reference != NULL) {
                 char number_str[32];
                 snprintf(number_str, sizeof(number_str), "%d", *app->user_input_number_reference);
@@ -78,6 +100,7 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
         // File name
         case WifiMarauderUserInputTypeFileName:
             text_input_set_header_text(app->user_input, "Enter file name:");
+            text_input_set_validator(app->user_input, wifi_marauder_scene_user_input_validator_file_callback, app);
             break;
         default:
             scene_manager_previous_scene(app->scene_manager);
@@ -86,7 +109,7 @@ void wifi_marauder_scene_user_input_on_enter(void* context) {
 
     text_input_set_result_callback(
         app->user_input,
-        wifi_marauder_scene_user_input_callback,
+        wifi_marauder_scene_user_input_ok_callback,
         app,
         app->user_input_store,
         WIFI_MARAUDER_USER_INPUT_STORE_SIZE,

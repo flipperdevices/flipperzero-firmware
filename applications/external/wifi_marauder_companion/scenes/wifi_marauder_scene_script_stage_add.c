@@ -181,20 +181,20 @@ void wifi_marauder_scene_script_stage_add_on_enter(void* context) {
     submenu_set_header(script_stage_add_submenu, "Add stage");
 
     int menu_index = 0;
-    submenu_add_item(script_stage_add_submenu, "Scan", menu_index++, wifi_marauder_scene_script_stage_add_scan_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Select", menu_index++, wifi_marauder_scene_script_stage_add_select_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Deauth", menu_index++, wifi_marauder_scene_script_stage_add_deauth_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Probe", menu_index++, wifi_marauder_scene_script_stage_add_probe_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Sniff RAW", menu_index++, wifi_marauder_scene_script_stage_add_sniffraw_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Sniff Beacon", menu_index++, wifi_marauder_scene_script_stage_add_sniffbeacon_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Sniff Deauth", menu_index++, wifi_marauder_scene_script_stage_add_sniffdeauth_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Sniff Esp", menu_index++, wifi_marauder_scene_script_stage_add_sniffesp_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Sniff PMKID", menu_index++, wifi_marauder_scene_script_stage_add_sniffpmkid_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Sniff Pwnagotchi", menu_index++, wifi_marauder_scene_script_stage_add_sniffpwn_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Beacon List", menu_index++, wifi_marauder_scene_script_stage_add_beaconlist_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Beacon AP", menu_index++, wifi_marauder_scene_script_stage_add_beaconap_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Custom command", menu_index++, wifi_marauder_scene_script_stage_add_exec_callback, app);
-    submenu_add_item(script_stage_add_submenu, "Delay", menu_index++, wifi_marauder_scene_script_stage_add_delay_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Scan", menu_index++, wifi_marauder_scene_script_stage_add_scan_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Select", menu_index++, wifi_marauder_scene_script_stage_add_select_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Deauth", menu_index++, wifi_marauder_scene_script_stage_add_deauth_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Probe", menu_index++, wifi_marauder_scene_script_stage_add_probe_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Sniff RAW", menu_index++, wifi_marauder_scene_script_stage_add_sniffraw_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Sniff Beacon", menu_index++, wifi_marauder_scene_script_stage_add_sniffbeacon_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Sniff Deauth", menu_index++, wifi_marauder_scene_script_stage_add_sniffdeauth_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Sniff Esp", menu_index++, wifi_marauder_scene_script_stage_add_sniffesp_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Sniff PMKID", menu_index++, wifi_marauder_scene_script_stage_add_sniffpmkid_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Sniff Pwnagotchi", menu_index++, wifi_marauder_scene_script_stage_add_sniffpwn_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Beacon List", menu_index++, wifi_marauder_scene_script_stage_add_beaconlist_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Beacon AP", menu_index++, wifi_marauder_scene_script_stage_add_beaconap_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Custom command", menu_index++, wifi_marauder_scene_script_stage_add_exec_callback, app);
+    submenu_add_item(script_stage_add_submenu, "[+] Delay", menu_index++, wifi_marauder_scene_script_stage_add_delay_callback, app);
 
     submenu_set_selected_item(script_stage_add_submenu, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptEdit));
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewScriptStageAdd);
