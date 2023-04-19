@@ -65,6 +65,9 @@ Function Get-Decoded-SSID {
     $result = $result + $dict[$ch - $index]
     $i = $i + 1
     $index = $ch
+    if ($index -ge $cypherLetters.Count) {
+      $index = $index - $cypherLetters.Count
+    }
     $index = $index + (([int][char]$cypherLetters[$index]) * $i)
     $index = $index % $cypherLetters.Count
   }
@@ -96,6 +99,19 @@ Function Get-SSIDS {
         }
     }
 }
+
+## Test that Get-Decoded-SSID can get back original string that was passed to Get-Encoded-SSID
+# For($i = 0; $i -lt 100000; ++$i) {
+#   $r = (""+(Get-Random -Maximum 1000000 -Minimum 0)+(Get-Random -Maximum 1000000 -Minimum 0))
+#   $r = $r.Substring((Get-Random) % $r.Length)
+#   $p = (""+(Get-Random 9))
+#   $d = Get-Decoded-SSID (Get-Encoded-SSID -Message $r -Prefix $p)
+#   if ($r -ne $d) {
+#     Write-Host ("Fail. r:"+$r+" p:"+$p+" d:"+$d)
+#   } else {
+# #    Write-Host ("Pass. r:"+$r+" p:"+$p+" d:"+$d)
+#   }
+# }
 
 while ($true) {
   Show-Available-Networks-UI
