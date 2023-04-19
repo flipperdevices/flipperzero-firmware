@@ -22,7 +22,9 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
     subghz->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
         subghz->txrx->receiver,
         subghz_history_get_protocol_name(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
+
     if(subghz->txrx->decoder_result) {
+        //todo we are trying to deserialize without checking for errors, since it is assumed that we just received this chignal
         subghz_protocol_decoder_base_deserialize(
             subghz->txrx->decoder_result,
             subghz_history_get_raw_data(subghz->txrx->history, subghz->txrx->idx_menu_chosen));
@@ -128,7 +130,21 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                        subghz,
                        subghz_history_get_raw_data(
                            subghz->txrx->history, subghz->txrx->idx_menu_chosen))) {
-                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
+                    if(subghz->txrx->txrx_state == SubGhzTxRxStateTx) {
+                        subghz_tx_stop(subghz);
+                    }
+                    if(subghz->txrx->txrx_state == SubGhzTxRxStateIDLE) {
+                        subghz_begin(
+                            subghz,
+                            subghz_setting_get_preset_data_by_name(
+                                subghz->setting,
+                                furi_string_get_cstr(subghz->txrx->preset->name)));
+                        subghz_rx(subghz, subghz->txrx->preset->frequency);
+                    }
+                    if(subghz->txrx->hopper_state == SubGhzHopperStatePause) {
+                        subghz->txrx->hopper_state = SubGhzHopperStateRunnig;
+                    }
+                    subghz->state_notifications = SubGhzNotificationStateRx;
                 } else {
                     subghz->state_notifications = SubGhzNotificationStateTx;
                 }

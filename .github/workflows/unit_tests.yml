@@ -10,18 +10,15 @@ env:
 
 jobs:
   run_units_on_bench:
-    runs-on: [self-hosted, FlipperZeroTest]
+    runs-on: [self-hosted, FlipperZeroUnitTest]
     steps:
-      - name: 'Decontaminate previous build leftovers'
-        run: |
-          if [ -d .git ]; then
-            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
-          fi
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \; 
 
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: 'Get flipper from device manager (mock)'
@@ -32,7 +29,7 @@ jobs:
       - name: 'Flash unit tests firmware'
         id: flashing
         if: success()
-        run: |                               
+        run: |
           ./fbt flash OPENOCD_ADAPTER_SERIAL=2A0906016415303030303032 FIRMWARE_APP_SET=unit_tests FORCE=1
 
       - name: 'Wait for flipper and format ext'

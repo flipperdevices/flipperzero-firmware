@@ -4,6 +4,8 @@
 #include <furi_hal_vibro.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_uart.h>
+#include <furi_hal_rtc.h>
+#include <furi_hal_debug.h>
 
 #include <stm32wbxx_ll_rcc.h>
 #include <stm32wbxx_ll_pwr.h>
@@ -19,15 +21,16 @@
 
 #define TAG "FuriHalPower"
 
-#ifdef FURI_HAL_POWER_DEEP_SLEEP_ENABLED
-#define FURI_HAL_POWER_DEEP_INSOMNIA 0
-#else
-#define FURI_HAL_POWER_DEEP_INSOMNIA 1
+#ifndef FURI_HAL_POWER_DEBUG_WFI_GPIO
+#define FURI_HAL_POWER_DEBUG_WFI_GPIO (&gpio_ext_pb2)
+#endif
+
+#ifndef FURI_HAL_POWER_DEBUG_STOP_GPIO
+#define FURI_HAL_POWER_DEBUG_STOP_GPIO (&gpio_ext_pc3)
 #endif
 
 typedef struct {
     volatile uint8_t insomnia;
-    volatile uint8_t deep_insomnia;
     volatile uint8_t suppress_charge;
 
     uint8_t gauge_initialized;
@@ -36,7 +39,6 @@ typedef struct {
 
 static volatile FuriHalPower furi_hal_power = {
     .insomnia = 0,
-    .deep_insomnia = FURI_HAL_POWER_DEEP_INSOMNIA,
     .suppress_charge = 0,
 };
 
@@ -79,18 +81,22 @@ const ParamCEDV cedv = {
 };
 
 void furi_hal_power_init() {
+#ifdef FURI_HAL_POWER_DEBUG
+    furi_hal_gpio_init_simple(FURI_HAL_POWER_DEBUG_WFI_GPIO, GpioModeOutputPushPull);
+    furi_hal_gpio_init_simple(FURI_HAL_POWER_DEBUG_STOP_GPIO, GpioModeOutputPushPull);
+    furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_WFI_GPIO, 0);
+    furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_STOP_GPIO, 0);
+#endif
+
     LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
     LL_PWR_SMPS_SetMode(LL_PWR_SMPS_STEP_DOWN);
+    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
+    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
     bq27220_init(&furi_hal_i2c_handle_power, &cedv);
     bq25896_init(&furi_hal_i2c_handle_power);
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
-
-#ifdef FURI_HAL_OS_DEBUG
-    furi_hal_gpio_init_simple(&gpio_ext_pb2, GpioModeOutputPushPull);
-    furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
-#endif
 
     FURI_LOG_I(TAG, "Init OK");
 }
@@ -140,11 +146,12 @@ bool furi_hal_power_sleep_available() {
     return furi_hal_power.insomnia == 0;
 }
 
-bool furi_hal_power_deep_sleep_available() {
-    return furi_hal_bt_is_alive() && furi_hal_power.deep_insomnia == 0;
+static inline bool furi_hal_power_deep_sleep_available() {
+    return furi_hal_bt_is_alive() && !furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep) &&
+           !furi_hal_debug_is_gdb_session_active();
 }
 
-void furi_hal_power_light_sleep() {
+static inline void furi_hal_power_light_sleep() {
     __WFI();
 }
 
@@ -152,17 +159,15 @@ static inline void furi_hal_power_suspend_aux_periphs() {
     // Disable USART
     furi_hal_uart_suspend(FuriHalUartIdUSART1);
     furi_hal_uart_suspend(FuriHalUartIdLPUART1);
-    // TODO: Disable USB
 }
 
 static inline void furi_hal_power_resume_aux_periphs() {
     // Re-enable USART
     furi_hal_uart_resume(FuriHalUartIdUSART1);
     furi_hal_uart_resume(FuriHalUartIdLPUART1);
-    // TODO: Re-enable USB
 }
 
-void furi_hal_power_deep_sleep() {
+static inline void furi_hal_power_deep_sleep() {
     furi_hal_power_suspend_aux_periphs();
 
     while(LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID))
@@ -187,8 +192,6 @@ void furi_hal_power_deep_sleep() {
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
     // Prepare deep sleep
-    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
     LL_LPM_EnableDeepSleep();
 
 #if defined(__CC_ARM)
@@ -199,13 +202,6 @@ void furi_hal_power_deep_sleep() {
     __WFI();
 
     LL_LPM_EnableSleep();
-
-    // Make sure that values differ to prevent disaster on wfi
-    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP0);
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
-
-    LL_PWR_ClearFlag_C1STOP_C1STB();
-    LL_PWR_ClearFlag_C2STOP_C2STB();
 
     /* Release ENTRY_STOP_MODE semaphore */
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_ENTRY_STOP_MODE_SEMID, 0);
@@ -220,28 +216,25 @@ void furi_hal_power_deep_sleep() {
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, 0);
 
     furi_hal_power_resume_aux_periphs();
+    furi_hal_rtc_sync_shadow();
 }
 
 void furi_hal_power_sleep() {
     if(furi_hal_power_deep_sleep_available()) {
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_gpio_write(&gpio_ext_pc3, 1);
+#ifdef FURI_HAL_POWER_DEBUG
+        furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_STOP_GPIO, 1);
 #endif
-
         furi_hal_power_deep_sleep();
-
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_gpio_write(&gpio_ext_pc3, 0);
+#ifdef FURI_HAL_POWER_DEBUG
+        furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_STOP_GPIO, 0);
 #endif
     } else {
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_gpio_write(&gpio_ext_pb2, 1);
+#ifdef FURI_HAL_POWER_DEBUG
+        furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_WFI_GPIO, 1);
 #endif
-
         furi_hal_power_light_sleep();
-
-#ifdef FURI_HAL_OS_DEBUG
-        furi_hal_gpio_write(&gpio_ext_pb2, 0);
+#ifdef FURI_HAL_POWER_DEBUG
+        furi_hal_gpio_write(FURI_HAL_POWER_DEBUG_WFI_GPIO, 0);
 #endif
     }
 }
@@ -341,14 +334,14 @@ bool furi_hal_power_is_otg_enabled() {
     return ret;
 }
 
-float furi_hal_power_get_battery_charging_voltage() {
+float furi_hal_power_get_battery_charge_voltage_limit() {
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
     float ret = (float)bq25896_get_vreg_voltage(&furi_hal_i2c_handle_power) / 1000.0f;
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
     return ret;
 }
 
-void furi_hal_power_set_battery_charging_voltage(float voltage) {
+void furi_hal_power_set_battery_charge_voltage_limit(float voltage) {
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
     // Adding 0.0005 is necessary because 4.016f is 4.015999794000, which gets truncated
     bq25896_set_vreg_voltage(&furi_hal_i2c_handle_power, (uint16_t)(voltage * 1000.0f + 0.0005f));
@@ -440,11 +433,11 @@ float furi_hal_power_get_usb_voltage() {
 }
 
 void furi_hal_power_enable_external_3_3v() {
-    furi_hal_gpio_write(&periph_power, 1);
+    furi_hal_gpio_write(&gpio_periph_power, 1);
 }
 
 void furi_hal_power_disable_external_3_3v() {
-    furi_hal_gpio_write(&periph_power, 0);
+    furi_hal_gpio_write(&gpio_periph_power, 0);
 }
 
 void furi_hal_power_suppress_charge_enter() {
@@ -486,7 +479,7 @@ void furi_hal_power_info_get(PropertyValueCallback out, char sep, void* context)
         property_value_out(&property_context, NULL, 2, "format", "major", "2");
         property_value_out(&property_context, NULL, 2, "format", "minor", "1");
     } else {
-        property_value_out(&property_context, NULL, 3, "power", "info", "major", "1");
+        property_value_out(&property_context, NULL, 3, "power", "info", "major", "2");
         property_value_out(&property_context, NULL, 3, "power", "info", "minor", "1");
     }
 
@@ -505,8 +498,10 @@ void furi_hal_power_info_get(PropertyValueCallback out, char sep, void* context)
     }
 
     property_value_out(&property_context, NULL, 2, "charge", "state", charge_state);
-    uint16_t charge_voltage = (uint16_t)(furi_hal_power_get_battery_charging_voltage() * 1000.f);
-    property_value_out(&property_context, "%u", 2, "charge", "voltage", charge_voltage);
+    uint16_t charge_voltage_limit =
+        (uint16_t)(furi_hal_power_get_battery_charge_voltage_limit() * 1000.f);
+    property_value_out(
+        &property_context, "%u", 3, "charge", "voltage", "limit", charge_voltage_limit);
     uint16_t voltage =
         (uint16_t)(furi_hal_power_get_battery_voltage(FuriHalPowerICFuelGauge) * 1000.f);
     property_value_out(&property_context, "%u", 2, "battery", "voltage", voltage);

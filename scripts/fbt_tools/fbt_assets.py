@@ -1,6 +1,6 @@
 from SCons.Builder import Builder
 from SCons.Action import Action
-from SCons.Errors import SConsEnvironmentError
+from SCons.Errors import StopError
 
 import os
 import subprocess
@@ -27,9 +27,7 @@ def proto_emitter(target, source, env):
 def dolphin_emitter(target, source, env):
     res_root_dir = source[0].Dir(env["DOLPHIN_RES_TYPE"])
     source = [res_root_dir]
-    source.extend(
-        env.GlobRecursive("*.*", res_root_dir.srcnode()),
-    )
+    source.extend(env.GlobRecursive("*.*", res_root_dir.srcnode()))
 
     target_base_dir = target[0]
     env.Replace(_DOLPHIN_OUT_DIR=target[0])
@@ -92,7 +90,7 @@ def proto_ver_generator(target, source, env):
             source_dir=src_dir,
         )
     except (subprocess.CalledProcessError, EnvironmentError) as e:
-        raise SConsEnvironmentError("Git: describe failed")
+        raise StopError("Git: describe failed")
 
     git_major, git_minor = git_describe.split(".")
     version_file_data = (

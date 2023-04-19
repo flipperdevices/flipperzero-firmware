@@ -58,12 +58,6 @@ void furi_hal_power_insomnia_exit();
  */
 bool furi_hal_power_sleep_available();
 
-/** Check if deep sleep availble
- *
- * @return     true if available
- */
-bool furi_hal_power_deep_sleep_available();
-
 /** Go to sleep
  */
 void furi_hal_power_sleep();
@@ -121,21 +115,21 @@ void furi_hal_power_check_otg_status();
  */
 bool furi_hal_power_is_otg_enabled();
 
-/** Get battery charging voltage in V
+/** Get battery charge voltage limit in V
  *
  * @return     voltage in V
  */
-float furi_hal_power_get_battery_charging_voltage();
+float furi_hal_power_get_battery_charge_voltage_limit();
 
-/** Set battery charging voltage in V
+/** Set battery charge voltage limit in V
  *
- * Invalid values will be clamped to the nearest valid value.
+ * Invalid values will be clamped downward to the nearest valid value.
  *
  * @param      voltage[in]  voltage in V
  *
  * @return     voltage in V
  */
-void furi_hal_power_set_battery_charging_voltage(float voltage);
+void furi_hal_power_set_battery_charge_voltage_limit(float voltage);
 
 /** Get remaining battery battery capacity in mAh
  *
