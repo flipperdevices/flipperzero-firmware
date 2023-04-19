@@ -116,12 +116,14 @@ static void wifi_marauder_scene_script_stage_edit_list_enter_callback(void* cont
                     previous_stage->next_stage = current_stage->next_stage;
                 } else {
                     previous_stage->next_stage = NULL;
+                    app->script->last_stage = previous_stage;
                 }
             } else {
                 if (current_stage->next_stage != NULL) {
                     app->script->first_stage = current_stage->next_stage;
                 } else {
                     app->script->first_stage = NULL;
+                    app->script->last_stage = NULL;
                 }
             }
         }
