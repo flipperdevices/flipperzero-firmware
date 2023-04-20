@@ -3,9 +3,8 @@
 bool configESPCamera_initialized = false;
 
 void configESPCamera() {
-  /*if(configESPCamera_initialized)
+  if(configESPCamera_initialized)
     esp_camera_deinit();
-  configESPCamera_initialized = true;*/
 
   // Object to store the camera configuration parameters
   camera_config_t config;
@@ -43,9 +42,6 @@ void configESPCamera() {
   }
 
   // Initialize the Camera
-  if(configESPCamera_initialized)
-      esp_camera_deinit();
-
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
     Serial.printf("Camera init failed with error 0x%x", err);
