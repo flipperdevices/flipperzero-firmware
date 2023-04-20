@@ -1,6 +1,8 @@
 #include "nfca_poller.h"
 #include "nfca.h"
 
+#include <lib/nfc/helpers/nfc_poller_buffer.h>
+
 #include <lib/nfc/nfc.h>
 #include <furi.h>
 
@@ -8,7 +10,7 @@
 
 #define NFCA_POLLER_FLAG_COMMAND_COMPLETE (1UL << 0)
 
-#define NFCA_POLLER_MAX_TX_BUFFER_SIZE (512U)
+#define NFCA_POLLER_MAX_BUFFER_SIZE (512U)
 
 #define NFCA_POLLER_SEL_CMD(cascade_lvl) (0x93 + 2 * (cascade_lvl))
 #define NFCA_POLLER_SEL_PAR(bytes, bits) (((bytes) << 4 & 0xf0U) | ((bits)&0x0fU))
@@ -44,6 +46,7 @@ struct NfcaPoller {
     NfcaPollerState state;
     NfcaPollerColRes col_res;
     NfcaData* data;
+    NfcPollerBuffer* buff;
     NfcaPollerEventCallback callback;
     void* context;
 };
@@ -79,46 +82,51 @@ static NfcaError nfca_poller_standart_frame_exchange(
     furi_assert(rx_data);
     furi_assert(rx_bits);
     furi_assert(tx_bits >= 8);
+    furi_assert(instance->buff);
 
+    NfcPollerBuffer* buff = instance->buff;
     uint16_t tx_bytes = tx_bits / 8;
-    furi_assert(tx_bytes <= NFCA_POLLER_MAX_TX_BUFFER_SIZE - 2);
-    uint16_t rx_buff_bits = 0;
-    uint8_t rx_buff[NFCA_POLLER_MAX_TX_BUFFER_SIZE] = {};
-    uint8_t tx_buff[NFCA_POLLER_MAX_TX_BUFFER_SIZE] = {};
+    furi_assert(tx_bytes <= buff->tx_data_size - 2);
 
-    memcpy(tx_buff, tx_data, tx_bytes);
-    nfca_append_crc(tx_buff, tx_bytes);
+    memcpy(buff->tx_data, tx_data, tx_bytes);
+    nfca_append_crc(buff->tx_data, tx_bytes);
     NfcaError ret = NfcaErrorNone;
 
     do {
         NfcError error = nfc_trx(
-            instance->nfc, tx_buff, tx_bits + 16, rx_buff, sizeof(rx_buff), &rx_buff_bits, fwt);
+            instance->nfc,
+            buff->tx_data,
+            tx_bits + 16,
+            buff->rx_data,
+            buff->rx_data_size,
+            &buff->rx_bits,
+            fwt);
         if(error != NfcErrorNone) {
             ret = nfca_poller_process_error(error);
             break;
         }
-        if(rx_buff_bits < 8) {
-            rx_data[0] = rx_buff[0];
-            *rx_bits = rx_buff_bits;
+        if(buff->rx_bits < 8) {
+            rx_data[0] = buff->rx_data[0];
+            *rx_bits = buff->rx_bits;
             ret = NfcaErrorWrongCrc;
             break;
-        } else if(rx_buff_bits < 3 * 8) {
-            uint16_t rx_bytes = rx_buff_bits / 8;
-            memcpy(rx_data, rx_buff, rx_bytes);
-            *rx_bits = rx_buff_bits;
+        } else if(buff->rx_bits < 3 * 8) {
+            uint16_t rx_bytes = buff->rx_bits / 8;
+            memcpy(rx_data, buff->rx_data, rx_bytes);
+            *rx_bits = buff->rx_bits;
             ret = NfcaErrorWrongCrc;
             break;
         } else {
-            uint16_t rx_bytes = rx_buff_bits / 8;
+            uint16_t rx_bytes = buff->rx_bits / 8;
             if(rx_bytes - 2 > rx_data_size) {
                 ret = NfcaErrorBufferOverflow;
                 break;
             }
-            if(!nfca_check_crc(rx_buff, rx_bytes)) {
+            if(!nfca_check_crc(buff->rx_data, rx_bytes)) {
                 ret = NfcaErrorWrongCrc;
                 break;
             }
-            memcpy(rx_data, rx_buff, rx_bytes - 2);
+            memcpy(rx_data, buff->rx_data, rx_bytes - 2);
             *rx_bits = (rx_bytes - 2) * 8;
         }
     } while(false);
@@ -190,6 +198,8 @@ NfcaError
     instance->context = context;
 
     instance->data = malloc(sizeof(NfcaData));
+    instance->buff =
+        nfc_poller_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE, NFCA_POLLER_MAX_BUFFER_SIZE);
     nfc_config(instance->nfc, NfcModeNfcaPoller);
     nfc_set_guard_time_us(instance->nfc, NFCA_GUARD_TIME_US);
     nfc_set_fdt_poll_fc(instance->nfc, NFCA_FDT_POLL_FC);
@@ -222,10 +232,11 @@ NfcaError nfca_poller_reset(NfcaPoller* instance) {
     instance->state = NfcaPollerStateIdle;
     free(instance->data);
     instance->data = NULL;
+    free(instance->buff);
+    instance->buff = NULL;
 
     return NfcaErrorNone;
 }
-
 
 NfcaError nfca_poller_check_presence(NfcaPoller* instance) {
     furi_assert(instance);
@@ -258,13 +269,21 @@ NfcaError nfca_poller_check_presence(NfcaPoller* instance) {
 NfcaError nfca_poller_halt(NfcaPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->nfc);
+    furi_assert(instance->buff);
 
-    uint8_t tx_data[2] = {0x50, 0x00};
-    uint16_t tx_bits = 16;
-    // Rework
-    uint8_t rx_data[2] = {};
-    uint16_t rx_bits = 0;
-    nfca_poller_standart_frame_exchange(instance, tx_data, tx_bits, rx_data, 2, &rx_bits, 1000);
+    NfcPollerBuffer* buff = instance->buff;
+    buff->tx_data[0] = 0x50;
+    buff->tx_data[1] = 0x00;
+    buff->tx_bits = 16;
+
+    nfca_poller_standart_frame_exchange(
+        instance,
+        buff->tx_data,
+        buff->tx_bits,
+        buff->rx_data,
+        buff->rx_data_size,
+        &buff->rx_bits,
+        NFCA_FDT_LISTEN_FC);
     instance->state = NfcaPollerStateIdle;
     return NfcaErrorNone;
 }
@@ -307,7 +326,9 @@ NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
             break;
         }
         memcpy(
-            instance->data->atqa, &instance->col_res.sens_resp, sizeof(instance->col_res.sel_resp));
+            instance->data->atqa,
+            &instance->col_res.sens_resp,
+            sizeof(instance->col_res.sel_resp));
 
         instance->state = NfcaPollerColResInProgress;
         instance->col_res.cascade_level = 0;
