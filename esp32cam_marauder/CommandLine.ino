@@ -3,9 +3,9 @@
 bool configESPCamera_initialized = false;
 
 void configESPCamera() {
-  if(configESPCamera_initialized)
-    return;
-  configESPCamera_initialized = true;
+  /*if(configESPCamera_initialized)
+    esp_camera_deinit();
+  configESPCamera_initialized = true;*/
 
   // Object to store the camera configuration parameters
   camera_config_t config;
@@ -43,11 +43,15 @@ void configESPCamera() {
   }
 
   // Initialize the Camera
+  if(configESPCamera_initialized)
+      esp_camera_deinit();
+
   esp_err_t err = esp_camera_init(&config);
   if (err != ESP_OK) {
     Serial.printf("Camera init failed with error 0x%x", err);
     return;
   }
+  configESPCamera_initialized = true;
 
   // Camera quality adjustments
   sensor_t * s = esp_camera_sensor_get();
@@ -119,7 +123,7 @@ void takeNewPhoto(String path, bool flash) {
   {
     pinMode(4, OUTPUT);
     digitalWrite(4, HIGH);
-    delay(200);
+    delay(400);
   }
   esp_camera_fb_get();
   delay(100);
@@ -344,7 +348,7 @@ void CommandLine::runCommand(String input) {
 
     // Initialize the MicroSD
     Serial.print("Initializing the MicroSD card module... ");
-    initMicroSDCard();
+    //initMicroSDCard();
 
     int i = 0;
     while (true)
@@ -358,6 +362,7 @@ void CommandLine::runCommand(String input) {
     }
     Serial.println("Camera capture finish");
   }
+  
   // Clear APs
   else if (cmd_args.get(0) == CLEARAP_CMD) {
     int ap_sw = this->argSearch(&cmd_args, "-a"); // APs
