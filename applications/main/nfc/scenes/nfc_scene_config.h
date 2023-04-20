@@ -11,5 +11,8 @@ ADD_SCENE(nfc, retry_confirm, RetryConfirm)
 ADD_SCENE(nfc, exit_confirm, ExitConfirm)
 ADD_SCENE(nfc, mf_ultralight_read, MfUltralightRead)
 ADD_SCENE(nfc, mf_ultralight_read_success, MfUltralightReadSuccess)
+ADD_SCENE(nfc, mf_ultralight_unlock_menu, MfUltralightUnlockMenu)
+ADD_SCENE(nfc, mf_ultralight_unlock_warn, MfUltralightUnlockWarn)
+
 
 ADD_SCENE(nfc, not_implemented, NotImplemented)
