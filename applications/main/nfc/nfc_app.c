@@ -40,8 +40,10 @@ NfcApp* nfc_app_alloc() {
     instance->scene_manager = scene_manager_alloc(&nfc_scene_handlers, instance);
     view_dispatcher_enable_queue(instance->view_dispatcher);
     view_dispatcher_set_event_callback_context(instance->view_dispatcher, instance);
-    view_dispatcher_set_custom_event_callback(instance->view_dispatcher, nfc_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(instance->view_dispatcher, nfc_back_event_callback);
+    view_dispatcher_set_custom_event_callback(
+        instance->view_dispatcher, nfc_custom_event_callback);
+    view_dispatcher_set_navigation_event_callback(
+        instance->view_dispatcher, nfc_back_event_callback);
 
     instance->nfc = nfc_alloc();
     instance->nfca_poller = nfca_poller_alloc(instance->nfc);
@@ -49,6 +51,7 @@ NfcApp* nfc_app_alloc() {
     instance->nfca_listener = nfca_listener_alloc(instance->nfc);
     instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->nfca_listener);
 
+    instance->mf_ul_auth = mf_ultralight_auth_alloc();
 
     // Nfc device
     instance->nfc_dev = nfc_dev_alloc();
@@ -61,7 +64,8 @@ NfcApp* nfc_app_alloc() {
 
     // Submenu
     instance->submenu = submenu_alloc();
-    view_dispatcher_add_view(instance->view_dispatcher, NfcViewMenu, submenu_get_view(instance->submenu));
+    view_dispatcher_add_view(
+        instance->view_dispatcher, NfcViewMenu, submenu_get_view(instance->submenu));
 
     // Dialog
     instance->dialog_ex = dialog_ex_alloc();
@@ -70,11 +74,13 @@ NfcApp* nfc_app_alloc() {
 
     // Popup
     instance->popup = popup_alloc();
-    view_dispatcher_add_view(instance->view_dispatcher, NfcViewPopup, popup_get_view(instance->popup));
+    view_dispatcher_add_view(
+        instance->view_dispatcher, NfcViewPopup, popup_get_view(instance->popup));
 
     // Loading
     instance->loading = loading_alloc();
-    view_dispatcher_add_view(instance->view_dispatcher, NfcViewLoading, loading_get_view(instance->loading));
+    view_dispatcher_add_view(
+        instance->view_dispatcher, NfcViewLoading, loading_get_view(instance->loading));
 
     // Text Input
     instance->text_input = text_input_alloc();
@@ -94,7 +100,8 @@ NfcApp* nfc_app_alloc() {
 
     // Custom Widget
     instance->widget = widget_alloc();
-    view_dispatcher_add_view(instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
+    view_dispatcher_add_view(
+        instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
 
     return instance;
 }
@@ -124,6 +131,8 @@ void nfc_app_free(NfcApp* instance) {
     nfca_listener_free(instance->nfca_listener);
     nfca_poller_free(instance->nfca_poller);
     nfc_free(instance->nfc);
+
+    mf_ultralight_auth_free(instance->mf_ul_auth);
 
     // Nfc device
     nfc_dev_free(instance->nfc_dev);

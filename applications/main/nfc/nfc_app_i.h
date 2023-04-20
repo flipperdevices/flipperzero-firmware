@@ -24,6 +24,7 @@
 
 #include <nfc/scenes/nfc_scene.h>
 #include <nfc/helpers/nfc_custom_event.h>
+#include "helpers/mf_ultralight_auth.h"
 
 #include <dialogs/dialogs.h>
 
@@ -76,6 +77,8 @@ struct NfcApp {
     NfcaListener* nfca_listener;
     MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
+
+    MfUltralightAuth* mf_ul_auth;
 
     NfcDev* nfc_dev;
     NfcDevData nfc_dev_data;
