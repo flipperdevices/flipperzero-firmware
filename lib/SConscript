@@ -1,0 +1,103 @@
+Import("env")
+
+env.Append(
+    LINT_SOURCES=[
+        Dir("app-scened-template"),
+        Dir("digital_signal"),
+        Dir("drivers"),
+        Dir("flipper_format"),
+        Dir("infrared"),
+        Dir("nfc"),
+        Dir("ST25RFAL002"),
+        Dir("subghz"),
+        Dir("toolbox"),
+        Dir("u8g2"),
+        Dir("update_util"),
+        Dir("print"),
+    ],
+)
+
+
+env.Append(
+    CPPPATH=[
+        "#/",
+        "#/lib",  # TODO: remove!
+        "#/lib/mlib",
+        # Ugly hack
+        Dir("../assets/compiled"),
+    ],
+    SDK_HEADERS=[
+        *(
+            File(f"#/lib/mlib/m-{name}.h")
+            for name in (
+                "algo",
+                "array",
+                "bptree",
+                "core",
+                "deque",
+                "dict",
+                "list",
+                "rbtree",
+                "tuple",
+                "variant",
+            )
+        ),
+    ],
+    CPPDEFINES=[
+        '"M_MEMORY_FULL(x)=abort()"',
+    ],
+)
+
+
+# drivers
+# fatfs
+# flipper_format
+# infrared
+# littlefs
+# subghz
+# toolbox
+# one_wire
+# micro-ecc
+# misc
+#    digital_signal
+#    fnv1a_hash
+#    microtar
+#    nfc
+#    qrcode
+#    u8g2
+#    update_util
+#    heatshrink
+#    nanopb
+# apps
+#    app-scened-template
+#    callback-connector
+#    app-template
+
+
+libs = env.BuildModules(
+    [
+        "STM32CubeWB",
+        "freertos",
+        "print",
+        "microtar",
+        "toolbox",
+        "ST25RFAL002",
+        "libusb_stm32",
+        "drivers",
+        "fatfs",
+        "flipper_format",
+        "one_wire",
+        "ibutton",
+        "infrared",
+        "littlefs",
+        "mbedtls",
+        "subghz",
+        "nfc",
+        "appframe",
+        "misc",
+        "lfrfid",
+        "flipper_application",
+    ],
+)
+
+Return("libs")

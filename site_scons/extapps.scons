@@ -1,0 +1,158 @@
+from dataclasses import dataclass, field
+
+from SCons.Node import NodeList
+from SCons.Warnings import warn, WarningOnByDefault
+from SCons.Errors import UserError
+
+Import("ENV")
+
+from fbt.appmanifest import FlipperAppType
+
+appenv = ENV["APPENV"] = ENV.Clone(
+    tools=[
+        "fbt_extapps",
+        "fbt_assets",
+        "fbt_sdk",
+    ],
+    RESOURCES_ROOT=ENV.Dir("#/assets/resources"),
+)
+
+appenv.Replace(
+    LINKER_SCRIPT_PATH=appenv["APP_LINKER_SCRIPT_PATH"],
+)
+
+appenv.AppendUnique(
+    CCFLAGS=[
+        "-ggdb3",
+        "-mword-relocations",
+        "-mlong-calls",
+        "-fno-common",
+        "-nostdlib",
+        "-fvisibility=hidden",
+    ],
+    LINKFLAGS=[
+        "-Ur",
+        "-Wl,-Ur",
+        # "-Wl,--orphan-handling=error",
+        "-Bsymbolic",
+        "-nostartfiles",
+        "-mlong-calls",
+        "-fno-common",
+        "-nostdlib",
+        "-Wl,--gc-sections",
+        "-Wl,--no-export-dynamic",
+        "-fvisibility=hidden",
+        "-Wl,-e${APP_ENTRY}",
+        "-Xlinker",
+        "-Map=${TARGET}.map",
+        "-specs=nano.specs",
+        "-specs=nosys.specs",
+    ],
+    LIBS=[
+        "m",
+        "gcc",
+        "stdc++",
+        "supc++",
+    ],
+)
+
+
+@dataclass
+class FlipperExtAppBuildArtifacts:
+    application_map: dict = field(default_factory=dict)
+    resources_dist: NodeList = field(default_factory=NodeList)
+    sdk_tree: NodeList = field(default_factory=NodeList)
+
+
+apps_to_build_as_faps = [
+    FlipperAppType.PLUGIN,
+    FlipperAppType.EXTERNAL,
+    FlipperAppType.DEBUG,
+]
+
+known_extapps = [
+    app
+    for apptype in apps_to_build_as_faps
+    for app in appenv["APPBUILD"].get_apps_of_type(apptype, True)
+]
+
+# Ugly access to global option
+if extra_app_list := GetOption("extra_ext_apps"):
+    known_extapps.extend(map(appenv["APPMGR"].get, extra_app_list.split(",")))
+
+incompatible_apps = []
+for app in known_extapps:
+    if not app.supports_hardware_target(appenv.subst("f${TARGET_HW}")):
+        incompatible_apps.append(app)
+        continue
+
+    appenv.BuildAppElf(app)
+
+extapps = FlipperExtAppBuildArtifacts()
+extapps.application_map = appenv["EXT_APPS"]
+
+if incompatible_apps:
+    warn(
+        WarningOnByDefault,
+        f"Skipping build of {len(incompatible_apps)} incompatible app(s): "
+        + ", ".join(f"'{app.name}' (id '{app.appid}')" for app in incompatible_apps),
+    )
+
+if appenv["FORCE"]:
+    appenv.AlwaysBuild(
+        list(app_artifact.compact for app_artifact in extapps.application_map.values())
+    )
+
+
+Alias(
+    "faps",
+    list(app_artifact.validator for app_artifact in extapps.application_map.values()),
+)
+
+extapps.resources_dist = appenv.FapDist(appenv["RESOURCES_ROOT"], [])
+
+
+if appsrc := appenv.subst("$APPSRC"):
+    appenv.AddAppLaunchTarget(appsrc, "launch_app")
+
+
+# SDK management
+
+amalgamated_api = "${BUILD_DIR}/sdk_origin"
+sdk_source = appenv.ApiAmalgamator(
+    amalgamated_api,
+    # Deps on root SDK headers and generated files
+    (appenv["SDK_HEADERS"], appenv["FW_ASSETS_HEADERS"]),
+)
+# Extra deps on headers included in deeper levels
+# Available on second and subsequent builds
+Depends(sdk_source, appenv.ProcessSdkDepends(f"{amalgamated_api}.d"))
+
+appenv["SDK_DIR"] = appenv.Dir("${BUILD_DIR}/sdk_headers")
+sdk_header_tree = appenv.SDKHeaderTreeExtractor(appenv["SDK_DIR"], amalgamated_api)
+Depends(sdk_header_tree, appenv["SDK_DEFINITION"])
+# AlwaysBuild(sdk_tree)
+Alias("sdk_tree", sdk_header_tree)
+extapps.sdk_tree = sdk_header_tree
+
+api_check = appenv.ApiTableValidator(appenv["SDK_DEFINITION"], amalgamated_api)
+Precious(api_check)
+NoClean(api_check)
+AlwaysBuild(api_check)
+Alias("api_check", api_check)
+
+firmware_apitable = appenv.ApiSymbolTable(
+    "${BUILD_DIR}/assets/compiled/firmware_api_table.h", appenv["SDK_DEFINITION"]
+)
+Alias("api_table", firmware_apitable)
+ENV.Replace(
+    FW_API_TABLE=firmware_apitable,
+    _APP_ICONS=appenv["_APP_ICONS"],
+)
+
+
+if appenv["FORCE"]:
+    appenv.AlwaysBuild(sdk_source, sdk_header_tree, api_check, firmware_apitable)
+
+
+Return("extapps")
