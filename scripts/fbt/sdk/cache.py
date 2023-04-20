@@ -1,7 +1,6 @@
 import operator
 import os
 import csv
-import operator
 
 from enum import Enum, auto
 from typing import Set, ClassVar, Any
@@ -137,7 +136,7 @@ class SdkCache:
                     f"API version is still WIP: {self.version}. Review the changes and re-run command."
                 )
             )
-            print(f"CSV file entries to mark up:")
+            print("CSV file entries to mark up:")
             print(
                 fg.yellow(
                     "\n".join(

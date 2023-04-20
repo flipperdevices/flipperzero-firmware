@@ -3,7 +3,7 @@ import os
 import pathlib
 import shutil
 from dataclasses import dataclass, field
-from typing import Optional, TypedDict
+from typing import Optional
 
 from ansi.color import fg
 
@@ -11,7 +11,6 @@ import SCons.Warnings
 from SCons.Action import Action
 from SCons.Builder import Builder
 from SCons.Errors import UserError
-from SCons.Node import NodeList
 from SCons.Node.FS import File, Entry
 
 from fbt.appmanifest import FlipperApplication, FlipperAppType, FlipperManifestException
@@ -289,7 +288,7 @@ def GetExtAppByIdOrPath(env, app_dir):
     try:
         # Maybe user passed an appid?
         app = appmgr.get(app_dir)
-    except FlipperManifestException as _:
+    except FlipperManifestException:
         # Look up path components in known app dirs
         for dir_part in reversed(pathlib.Path(app_dir).parts):
             if app := appmgr.find_by_appdir(dir_part):

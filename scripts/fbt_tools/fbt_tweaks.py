@@ -4,7 +4,7 @@ from SCons.Errors import UserError
 
 # from SCons.Script.Main import find_deepest_user_frame
 
-from ansi.color import fg, bg, fx
+from ansi.color import fg
 
 import traceback
 import sys

@@ -122,7 +122,7 @@ class Main(App):
             try:
                 print("Text data:")
                 print(data.decode())
-            except:
+            except Exception:
                 print("Binary hexadecimal data:")
                 print(binascii.hexlify(data).decode())
 

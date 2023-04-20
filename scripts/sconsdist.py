@@ -5,7 +5,7 @@ import shutil
 import tarfile
 import zipfile
 from os import makedirs, walk
-from os.path import exists, join, relpath, basename, split
+from os.path import exists, join, relpath, basename
 
 from ansi.color import fg
 from flipper.app import App
