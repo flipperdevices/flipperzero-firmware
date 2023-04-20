@@ -12,6 +12,8 @@ extern "C" {
 #define MF_ULTRALIGTH_CMD_READ_SIG (0x3C)
 #define MF_ULTRALIGHT_CMD_READ_CNT (0x39)
 #define MF_ULTRALIGHT_CMD_CHECK_TEARING (0x3E)
+#define MF_ULTRALIGHT_CMD_AUTH (0x1B)
+
 #define MF_ULTRALIGHT_CMD_ACK (0x0A)
 #define MF_ULTRALIGHT_CMD_NACK (0x00)
 
@@ -36,23 +38,35 @@ typedef enum {
 typedef enum {
     MfUltralightTypeUnknown,
     MfUltralightTypeNTAG203,
-    // Below have config pages and GET_VERSION support
     MfUltralightTypeUL11,
     MfUltralightTypeUL21,
     MfUltralightTypeNTAG213,
     MfUltralightTypeNTAG215,
     MfUltralightTypeNTAG216,
-    // Below also have sector select
-    // NTAG I2C's *does not* have regular config pages, so it's a bit of an odd duck
     MfUltralightTypeNTAGI2C1K,
     MfUltralightTypeNTAGI2C2K,
-    // NTAG I2C Plus has stucture expected from NTAG21x
     MfUltralightTypeNTAGI2CPlus1K,
     MfUltralightTypeNTAGI2CPlus2K,
 
-    // Keep last for number of types calculation
     MfUltralightTypeNum,
 } MfUltralightType;
+
+typedef enum {
+    MfUltralightFeatureSupportReadVersion = (1U << 0),
+    MfUltralightFeatureSupportReadSignature = (1U << 1),
+    MfUltralightFeatureSupportReadCounter = (1U << 2),
+    MfUltralightFeatureSupportCheckTearingFlag = (1U << 3),
+    MfUltralightFeatureSupportFastRead = (1U << 4),
+    MfUltralightFeatureSupportIncCounter = (1U << 5),
+    MfUltralightFeatureSupportFastWrite = (1U << 6),
+    MfUltralightFeatureSupportCompatibleWrite = (1U << 7),
+    MfUltralightFeatureSupportAuthentication = (1U << 8),
+    MfUltralightFeatureSupportVcsl = (1U << 9),
+    MfUltralightFeatureSupportSectorSelect = (1U << 10),
+    MfUltralightFeatureSupportSingleCounter = (1U << 11),
+    MfUltralightFeatureSupportAsciiMirror = (1U << 12),
+    MfUltralightFeatureSupportCounterInMemory = (1U << 13),
+} MfUltralightFeatureSupport;
 
 typedef struct {
     uint8_t data[MF_ULTRALIGHT_PAGE_SIZE];
@@ -97,10 +111,17 @@ typedef struct {
     MfUltralightCounter counter[MF_ULTRALIGHT_COUNTER_NUM];
     MfUltralightTearingFlag tearing_flag[MF_ULTRALIGHT_TEARING_FLAG_NUM];
     MfUltralightPage page[MF_ULTRALIGHT_MAX_PAGE_NUM];
-    uint32_t paged_read;
+    uint16_t pages_read;
+    uint16_t pages_total;
 } MfUltralightData;
 
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version);
+
+uint16_t mf_ultralight_get_pages_total(MfUltralightType type);
+
+uint32_t mf_ultralight_get_feature_support_set(MfUltralightType type);
+
+const char* mf_ultralight_get_name(MfUltralightType type, bool full_name);
 
 #ifdef __cplusplus
 }

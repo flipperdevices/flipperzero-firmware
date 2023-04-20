@@ -20,18 +20,20 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
     Widget* widget = nfc->widget;
 
     FuriString* temp_str;
-    temp_str = furi_string_alloc_set("\e#Mf Ultralight\n");
 
-    notification_message_block(nfc->notifications, &sequence_set_green_255);
+    temp_str = furi_string_alloc_printf("\e#%s\n", mf_ultralight_get_name(data->type, true));
+    furi_string_cat_printf(temp_str, "UID:");
+    for(size_t i = 0; i < data->nfca_data.uid_len; i++) {
+        furi_string_cat_printf(temp_str, " %02X", data->nfca_data.uid[i]);
+    }
+    furi_string_cat_printf(
+        temp_str, "\nPages Read: %d/%d", data->pages_read, data->pages_total);
+    if(data->pages_read != data->pages_total) {
+        furi_string_cat_printf(temp_str, "\nPassword-protected pages!");
+    }
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);
-
-    FURI_LOG_I("MfUlReadSuccess", "Read success");
-    for(size_t i = 0; i < 4; i++) {
-        printf("%02X ", data->page->data[i]);
-    }
-    printf("\r\n");
 
     widget_add_button_element(
         widget,
@@ -46,6 +48,7 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
         nfc_scene_mf_ultralight_read_success_widget_callback,
         nfc);
 
+    notification_message_block(nfc->notifications, &sequence_set_green_255);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 

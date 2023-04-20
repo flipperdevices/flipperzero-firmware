@@ -12,13 +12,6 @@ typedef enum {
     MfUltraligthListenerStateAuthSuccess,
 } MfUltraligthListenerState;
 
-typedef enum {
-    MfUltralightListenerFeatureSupportReadVersion = (1U << 0),
-    MfUltralightListenerFeatureSupportReadSignature = (1U << 1),
-    MfUltralightListenerFeatureSupportReadCounter = (1U << 2),
-    MfUltralightListenerFeatureSupportCheckTearingFlag = (1U << 3),
-} MfUltralightListenerFeatureSupport;
-
 struct MfUltralightListener {
     NfcaListener* nfca_listener;
     MfUltraligthListenerState state;
@@ -26,7 +19,7 @@ struct MfUltralightListener {
     uint8_t tx_data[MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE];
     uint16_t tx_bits;
     uint16_t pages_total;
-    MfUltralightListenerFeatureSupport features;
+    MfUltralightFeatureSupport features;
     MfUltralightListenerEventcallback callback;
     void* context;
 };
@@ -100,7 +93,7 @@ static bool mf_ultralight_listener_read_version_handler(
     UNUSED(rx_bits);
     UNUSED(rx_data);
     bool command_processed = false;
-    if((instance->features & MfUltralightListenerFeatureSupportReadVersion)) {
+    if((instance->features & MfUltralightFeatureSupportReadVersion)) {
         memcpy(instance->tx_data, &instance->data->version, sizeof(instance->data->version));
         instance->tx_bits = sizeof(instance->data->version) * 8;
         nfca_listener_send_standart_frame(
@@ -121,7 +114,7 @@ static bool mf_ultralight_listener_read_signature_handler(
     UNUSED(rx_bits);
     UNUSED(rx_data);
     bool command_processed = false;
-    if((instance->features & MfUltralightListenerFeatureSupportReadSignature)) {
+    if((instance->features & MfUltralightFeatureSupportReadSignature)) {
         memcpy(instance->tx_data, &instance->data->signature, sizeof(instance->data->signature));
         instance->tx_bits = sizeof(instance->data->signature) * 8;
         nfca_listener_send_standart_frame(
@@ -176,8 +169,8 @@ static void mf_ultralight_listener_event_handler(NfcaListenerEvent event, void* 
 static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* instance) {
     MfUltralightData* data = instance->data;
     if(data->type == MfUltralightTypeUnknown) {
-        instance->features = MfUltralightListenerFeatureSupportReadVersion |
-                             MfUltralightListenerFeatureSupportReadSignature;
+        instance->features = MfUltralightFeatureSupportReadVersion |
+                             MfUltralightFeatureSupportReadSignature;
         instance->pages_total = 16;
     }
 }

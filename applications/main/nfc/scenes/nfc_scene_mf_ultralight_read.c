@@ -8,8 +8,8 @@ enum {
 void nfc_scene_mf_ultralight_read_worker_callback(MfUltralightPollerEvent event, void* context) {
     NfcApp* nfc = context;
 
-    if(event.type == MfUltralightPollerEventTypeReadComplete) {
-        nfca_poller_stop(nfc->nfca_poller);
+    if(event.type == MfUltralightPollerEventTypeReadSuccess) {
+        mf_ultralight_poller_stop(nfc->mf_ul_poller);
         view_dispatcher_send_custom_event(
             nfc->view_dispatcher, NfcWorkerEventMfUltralightReadSuccess);
     } else {

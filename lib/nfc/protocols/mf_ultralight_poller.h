@@ -10,15 +10,11 @@ extern "C" {
 typedef struct MfUltralightPoller MfUltralightPoller;
 
 typedef enum {
-    MfUltralightPollerEventTypeReadVersion,
-    MfUltralightPollerEventTypeReadSignature,
-    MfUltralightPollerEventTypeReadCounters,
-    MfUltralightPollerEventTypeReadTearingFlags,
     MfUltralightPollerEventTypeAuthRequest,
     MfUltralightPollerEventTypeAuthSuccess,
     MfUltralightPollerEventTypeAuthFailed,
-    MfUltralightPollerEventTypeReadPages,
-    MfUltralightPollerEventTypeReadComplete,
+    MfUltralightPollerEventTypeReadSuccess,
+    MfUltralightPollerEventTypeReadFailed,
 } MfUltralightPollerEventType;
 
 typedef struct {
