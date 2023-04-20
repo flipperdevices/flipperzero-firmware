@@ -1,18 +1,13 @@
 # https://www.github.com/jamisonderek/flipper-zero-tutorials
 #
-# Pass short 'secret' messages using SSIDs! Tell people your burner phone number while grabbing a coffee.
-# Who you gonna call? "5552368" is: AL6fvOPr, BOI5O5Ag, CRU3Cjn7 or DUgPtAbN 
-# To reach Jenny      "8675309" is: AOJCghRA, BRVAUlxa, CUhWcF9e or DXtUQJfy
-# See the comment near the bottom of this file (line 131) for directions on calculating your own SSID values.
+# Pass short 'secret' messages using only SSID names! 
+# For example, burner phone number or YouTube link.
 #
-# This script will scan for SSIDs that match the pattern of an encoded message & display them in GREEN.
+# This script will scan the network for SSIDs.  If any
+# SSIDs are encoded message, they will be displayed
+# in GREEN.  Non-matching are shown in RED.
 #
-# In Marauder:
-#  - Clear List, SSID.
-#  - SSID, add name.
-#  - Enter the SSID name after the "ssid -a -n " prompt.  (For example:  AL6fvOPr)
-#  - do List, SSID.  It should show you the SSID that you added.
-#  - Beacon Spam, SSID List.
+# For creating SSIDs, please see encode.ps1
 #
 # On the PC, Open a PowerShell window and run ./scan.ps1
 #
@@ -25,35 +20,6 @@ $cypherLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789
 
 # This is the list of SSIDs that were found, so we only display them once.
 $ssids = [System.Collections.Generic.List[string]]::new()
-
-Function Get-Encoded-SSID {
-  Param(
-    [Parameter(Mandatory=$true)]
-    [String]$Message,
-    [Parameter(Mandatory=$false)]
-    [String]$Prefix="0"
-  )
-  $letters = ($Prefix + $Message).ToCharArray()
-  $index = 0
-  $i = 1
-  $result = ""
-  foreach($letter in $letters) {
-    $ch = $dict.IndexOf($letter)
-    if ($ch -eq -1) {
-      Write-Host "Invalid character: $letter"
-      return
-    }
-    $index = $index + $ch
-    if ($index -ge $cypherLetters.Count) {
-      $index = $index - $cypherLetters.Count
-    }
-    $result = $result + $cypherLetters[$index]
-    $i = $i + 1
-    $index = $index + (([int][char]$cypherLetters[$index]) * $i)
-    $index = $index % $cypherLetters.Count
-  }
-  return $result
-}
 
 Function Get-Decoded-SSID {
   Param(
@@ -90,6 +56,17 @@ Function Show-Available-Networks-UI {
   Start-Sleep 3
 }
 
+Function Get-Text-From-Hex {
+  Param(
+    [Parameter(Mandatory=$true)]
+    [String]$hex
+  )
+  if ($hex -cmatch "[^0-9A-F]") {
+    return
+  }
+  return [System.Text.Encoding]::ASCII.GetString(($hex -split '(..)' | Where-Object { $_.Length -eq 2 } | ForEach-Object { [Convert]::ToByte($_, 16) }))
+}
+
 Function Get-SSIDS {
     $networks = (netsh wlan show networks)
     foreach($network in $networks) {
@@ -99,9 +76,10 @@ Function Get-SSIDS {
               if ($ssids.Contains($ssid)) {
                 continue
               }
-              $decoded = (Get-Decoded-SSID $ssid)
-              if ($decoded.Length -gt 0) {               
-                Write-Host ($ssid + ":                 " + $decoded) -ForegroundColor Green
+              $decodedHex = (Get-Decoded-SSID $ssid)
+              if ($decodedHex.Length -gt 0) {                
+                $decodedText = Get-Text-From-Hex($decodedHex)
+                Write-Host ($ssid + ":                 " + $decodedHex + "   " + $decodedText) -ForegroundColor Green
               } else {
                 Write-Host ($ssid + "-         NO MATCH") -ForegroundColor Red
               }
@@ -110,25 +88,6 @@ Function Get-SSIDS {
         }
     }
 }
-
-## Test that Get-Decoded-SSID can get back original string that was passed to Get-Encoded-SSID
-# For($i = 0; $i -lt 100000; ++$i) {
-#   $r = (""+(Get-Random -Maximum 1000000 -Minimum 0)+(Get-Random -Maximum 1000000 -Minimum 0))
-#   $r = $r.Substring((Get-Random) % $r.Length)
-#   $p = (""+(Get-Random 9))
-#   $d = Get-Decoded-SSID (Get-Encoded-SSID -Message $r -Prefix $p)
-#   if ($r -ne $d) {
-#     Write-Host ("Fail. r:"+$r+" p:"+$p+" d:"+$d)
-#   } else {
-# #    Write-Host ("Pass. r:"+$r+" p:"+$p+" d:"+$d)
-#   }
-# }
-
-# UNCOMMENT THIS LINE TO SEE THE SSID YOU SHOULD USE.
-# You can change Message from "5552326" to the desired value using 0-9, 0-F and hyphens.
-# The value for Prefix can also be 0-9, A-F.  (So that you can have different SSIDs generated)
-#
-#   Get-Encoded-SSID -Message "5552368" -Prefix "1"   ## Returns a result of 'BOI5O5Ag'
 
 while ($true) {
   Show-Available-Networks-UI
