@@ -30,12 +30,12 @@ void _wifi_marauder_script_load_meta(WifiMarauderScript *script, cJSON *meta_sec
             script->description = strdup(description->valuestring);
         }
         // Enable LED
-        cJSON* enable_led_json = cJSON_GetObjectItemCaseSensitive(meta_section, "enableLed");
+        cJSON* enable_led_json = cJSON_GetObjectItem(meta_section, "enableLed");
         if (cJSON_IsBool(enable_led_json)) {
             script->enable_led = enable_led_json->valueint;
         }
         // Save PCAP
-        cJSON* save_pcap_json = cJSON_GetObjectItemCaseSensitive(meta_section, "savePcap");
+        cJSON* save_pcap_json = cJSON_GetObjectItem(meta_section, "savePcap");
         if (cJSON_IsBool(save_pcap_json)) {
             script->save_pcap = save_pcap_json->valueint;
         }
@@ -457,10 +457,10 @@ cJSON* _wifi_marauder_script_create_json_meta(WifiMarauderScript *script) {
         cJSON_AddStringToObject(meta_json, "description", "My Script");
     }
     if (script->enable_led != WifiMarauderScriptBooleanUndefined) {
-        cJSON_AddBoolToObject(meta_json, "enable_led", (script->enable_led == WifiMarauderScriptBooleanTrue));
+        cJSON_AddBoolToObject(meta_json, "enableLed", (script->enable_led == WifiMarauderScriptBooleanTrue));
     }
     if (script->save_pcap != WifiMarauderScriptBooleanUndefined) {
-        cJSON_AddBoolToObject(meta_json, "save_pcap", (script->save_pcap == WifiMarauderScriptBooleanTrue));
+        cJSON_AddBoolToObject(meta_json, "savePcap", (script->save_pcap == WifiMarauderScriptBooleanTrue));
     }
     cJSON_AddNumberToObject(meta_json, "repeat", script->repeat);
     return meta_json;

@@ -23,22 +23,6 @@ static void wifi_marauder_scene_script_edit_add_callback(void* context, uint32_t
     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneScriptStageAdd);
 }
 
-static void wifi_marauder_scene_script_edit_save_callback(void* context, uint32_t index) {
-    UNUSED(index);
-    WifiMarauderApp* app = context;
-    
-    char script_path[256];
-    snprintf(script_path, sizeof(script_path), "%s/%s.json", MARAUDER_APP_FOLDER_SCRIPTS, app->script->name);
-    wifi_marauder_script_save_json(app->storage, script_path, app->script);
-
-    DialogMessage* message = dialog_message_alloc();
-    dialog_message_set_text(message, "Saved!", 88, 32, AlignCenter, AlignCenter);
-    dialog_message_set_icon(message, &I_DolphinCommon_56x48, 5, 6);
-    dialog_message_set_buttons(message, NULL, "Ok", NULL);
-    dialog_message_show(app->dialogs, message);
-    dialog_message_free(message);
-}
-
 void wifi_marauder_scene_script_edit_on_enter(void* context) {
     WifiMarauderApp* app = context;
     Submenu* script_edit_submenu = app->script_edit_submenu;
@@ -97,8 +81,6 @@ void wifi_marauder_scene_script_edit_on_enter(void* context) {
     }
 
     submenu_add_item(script_edit_submenu, "[+] ADD STAGE", stage_index++, wifi_marauder_scene_script_edit_add_callback, app);
-    submenu_add_item(script_edit_submenu, "[*] SAVE", stage_index, wifi_marauder_scene_script_edit_save_callback, app);
-
     submenu_set_selected_item(script_edit_submenu, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptEdit));
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewScriptEdit);
 }

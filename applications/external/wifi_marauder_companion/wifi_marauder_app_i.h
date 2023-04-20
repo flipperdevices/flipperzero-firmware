@@ -110,6 +110,7 @@ struct WifiMarauderApp {
     Submenu* script_stage_edit_list_submenu;
     Widget* script_confirm_delete_widget;
     WifiMarauderScriptStage* script_edit_selected_stage;
+    VariableItemList* script_settings_list;
     VariableItemList* script_stage_edit_list;
     WifiMarauderScriptStageListItem* script_stage_edit_first_item;
     char*** script_stage_edit_strings_reference;
@@ -153,6 +154,7 @@ typedef enum {
     WifiMarauderAppViewScriptSelect,
     WifiMarauderAppViewScriptOptions,
     WifiMarauderAppViewScriptEdit,
+    WifiMarauderAppViewScriptSettings,
     WifiMarauderAppViewScriptConfirmDelete,
     WifiMarauderAppViewScriptStageAdd,
     WifiMarauderAppViewScriptStageEdit,

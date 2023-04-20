@@ -103,6 +103,10 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->script_edit_submenu = submenu_alloc();
     view_dispatcher_add_view(app->view_dispatcher, WifiMarauderAppViewScriptEdit, submenu_get_view(app->script_edit_submenu));
 
+    // Script stage edit
+    app->script_settings_list = variable_item_list_alloc();
+    view_dispatcher_add_view(app->view_dispatcher, WifiMarauderAppViewScriptSettings, variable_item_list_get_view(app->script_settings_list));
+
     // Script stage edit list submenu
     app->script_stage_edit_list_submenu = submenu_alloc();
     view_dispatcher_add_view(app->view_dispatcher, WifiMarauderAppViewScriptStageEditList, submenu_get_view(app->script_stage_edit_list_submenu));
@@ -229,6 +233,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewScriptSelect);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewScriptOptions);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewScriptEdit);
+    view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewScriptSettings);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewScriptStageEdit);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewScriptStageEditList);
     view_dispatcher_remove_view(app->view_dispatcher, WifiMarauderAppViewUserInput);
@@ -243,6 +248,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     submenu_free(app->script_stage_add_submenu);
     submenu_free(app->script_edit_submenu);
     submenu_free(app->script_stage_edit_list_submenu);
+    variable_item_list_free(app->script_settings_list);
     variable_item_list_free(app->script_stage_edit_list);
     storage_file_free(app->capture_file);
     storage_file_free(app->log_file);
