@@ -137,7 +137,7 @@ int wincheck(){
     {
         for (size_t x = 0; x < 7; x++)
         {
-            if (matrix[y][x] != 0){
+            if (matrix[y][x] == 0){
                 tf = false;
             }
         }
@@ -159,24 +159,24 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     if(wincheck()!=-1){
 
         canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 34, 20, 72, 24);
+        canvas_draw_box(canvas, 34, 20, 62, 24);
 
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, 34, 20, 72, 24);
+        canvas_draw_frame(canvas, 34, 20, 62, 24);
 
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str(canvas, 37, 31, "Game Over");
 
+        if (wincheck()==0){
+            canvas_draw_str(canvas, 37, 41, "Draw! O_o");
+        }
         if (wincheck()==1){
             canvas_draw_str(canvas, 37, 41, "Player X win!");
             }
-        if (wincheck()==1){
-            canvas_draw_str(canvas, 37, 41, "Player X win!");
-        }
         if (wincheck()==2){
-            canvas_draw_str(canvas, 37, 41, "Draw! O_o");
+            canvas_draw_str(canvas, 37, 41, "Player O win!");
         }
-            furi_mutex_release(mutex); 
+
+        furi_mutex_release(mutex); 
 
         return;
     }
