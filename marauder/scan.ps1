@@ -26,6 +26,11 @@ Function Get-Decoded-SSID {
     [Parameter(Mandatory=$true)]
     [String]$SSID
   )
+  # If the SSID starts with "ATT" skip that part of the SSID.  :)
+  if ($SSID.StartsWith("ATT")) {
+    $SSID = $SSID.Substring(3)
+  }
+
   $letters = $SSID.ToCharArray()
   $index = 0
   $i = 1
