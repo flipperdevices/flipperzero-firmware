@@ -41,14 +41,20 @@ Function Get-Encoded-SSID {
       Write-Host "Invalid character: $letter"
       return
     }
+Write-Host "ch is $ch"
     $index = $index + $ch
+Write-Host "index is $index"
     if ($index -ge $cypherLetters.Count) {
       $index = $index - $cypherLetters.Count
     }
     $result = $result + $cypherLetters[$index]
+Write-Host "Result is $result"
     $i = $i + 1
+Write-Host "i is $i with index at $index"
     $index = $index + (([int][char]$cypherLetters[$index]) * $i)
+Write-Host "index is $index"
     $index = $index % $cypherLetters.Count
+Write-Host "index is $index"
   }
   return $result
 }
