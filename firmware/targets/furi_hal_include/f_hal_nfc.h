@@ -95,7 +95,7 @@ FHalNfcError f_hal_nfc_low_power_mode_stop();
  */
 FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate);
 
-// FHalNfcError f_hal_nfc_poller_configure
+FHalNfcError f_hal_nfc_reset_mode();
 
 /**
  * @brief Turn on field in poller mode

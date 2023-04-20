@@ -17,6 +17,8 @@ typedef enum {
     NfcEventTypeRxStart,
     NfcEventTypeRxEnd,
 
+    NfcEventTypeConfigureRequest,
+
     NfcEventTypeListenerActivated,
     NfcEventTypePollerReady,
 } NfcEventType;
@@ -34,6 +36,7 @@ typedef struct {
 typedef void (*NfcEventCallback)(NfcEvent event, void* context);
 
 typedef enum {
+    NfcModeIdle,
     NfcModeNfcaPoller,
     NfcModeNfcaListener,
     NfcModeNfcbPoller,
@@ -93,6 +96,8 @@ void nfc_listener_abort(Nfc* instance);
 // Called from worker thread
 
 void nfc_poller_stop(Nfc* instance);
+
+void nfc_poller_reset(Nfc* instance);
 
 NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits);
 

@@ -363,6 +363,18 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
     return error;
 }
 
+FHalNfcError f_hal_nfc_reset_mode() {
+    FHalNfcError error = FHalNfcErrorNone;
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    furi_hal_spi_acquire(handle);
+
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_STOP);
+
+    furi_hal_spi_release(handle);
+
+    return error;
+}
+
 FHalNfcError f_hal_nfc_poller_field_on() {
     FHalNfcError error = FHalNfcErrorNone;
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
