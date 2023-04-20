@@ -161,13 +161,13 @@ static void draw_callback(Canvas* canvas, void* ctx) {
         canvas_set_font(canvas, FontPrimary);
 
         if (wincheck()==0){
-            canvas_draw_str(canvas, 37, 41, "Draw! O_o");
+            canvas_draw_str(canvas, 30, 35, "Draw! O_o");
         }
         if (wincheck()==1){
-            canvas_draw_str(canvas, 37, 41, "Player X win!");
+            canvas_draw_str(canvas, 30, 35, "Player X win!");
             }
         if (wincheck()==2){
-            canvas_draw_str(canvas, 37, 41, "Player O win!");
+            canvas_draw_str(canvas, 30, 35, "Player O win!");
         }
 
         furi_mutex_release(mutex); 
