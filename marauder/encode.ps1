@@ -1,20 +1,22 @@
 # https://www.github.com/jamisonderek/flipper-zero-tutorials
 #
-# Pass short 'secret' messages using SSIDs! Tell people your burner phone number while grabbing a coffee.
-# Who you gonna call? "5552368" is: AL6fvOPr, BOI5O5Ag, CRU3Cjn7 or DUgPtAbN 
-# To reach Jenny      "8675309" is: AOJCghRA, BRVAUlxa, CUhWcF9e or DXtUQJfy
+# Pass short 'secret' messages using SSIDs!
+# For example, burner phone number or YouTube link.
 #
-# In PowerShell script, run the encode.ps1.
+# Who you gonna call? "5552368" is: AL6fvOPr, BOI5O5Ag, CRU3Cjn7 or DUgPtAbN 
+#
+# In PowerShell script, run the ./encode.ps1.
 # - Enter the message to encode
 # - It will display 8 different SSID values that you can use.
 #
-# In Marauder:
+# On your Flipper Zero, start Marauder:
 #  - Clear List, SSID.
 #  - SSID, add name.
 #  - Enter the SSID name after the "ssid -a -n " prompt.  (For example:  AL6fvOPr)
 #  - do List, SSID.  It should show you the SSID that you added.
 #  - Beacon Spam, SSID List.
 #
+# On the PC, Open a PowerShell window and run ./scan.ps1
 
 # This is the list of allowed characters in the message.
 $dict = "0123456789ABCDEF-"
