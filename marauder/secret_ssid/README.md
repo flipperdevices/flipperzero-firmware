@@ -124,3 +124,6 @@ BNH135GWLhO
 
 
 Decoding is a similar process.  If the encoding bar is over the encoding strip and the SSID has a letter not there, we know the SSID is not a secret message.  For example if the SSID was "BNT..." we know it's not valid, since the third character needs to have the encoding bar over it.  We can see from the previous step, the only valid 3rd character for an SSID starting with "BN" are (9 and A-P).
+
+## Security
+Using these scripts to encode data is probably similar security to using a [Master Lock(R) lock](https://www.youtube.com/@lockpickinglawyer/videos) to secure a door.  Data encoded with a [Ceasar cipher](https://en.wikipedia.org/wiki/Caesar_cipher) can be decrypted by someone that wants to.
