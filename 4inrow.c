@@ -158,12 +158,6 @@ static void draw_callback(Canvas* canvas, void* ctx) {
 
     if(wincheck()!=-1){
 
-        canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 34, 20, 62, 24);
-
-        canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, 34, 20, 62, 24);
-
         canvas_set_font(canvas, FontPrimary);
 
         if (wincheck()==0){
