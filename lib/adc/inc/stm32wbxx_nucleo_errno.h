@@ -1,0 +1,1 @@
+../../../../../lib/STM32CubeWB/Drivers/BSP/P-NUCLEO-WB55.Nucleo/stm32wbxx_nucleo_errno.h
