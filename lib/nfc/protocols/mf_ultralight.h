@@ -123,6 +123,8 @@ uint32_t mf_ultralight_get_feature_support_set(MfUltralightType type);
 
 const char* mf_ultralight_get_name(MfUltralightType type, bool full_name);
 
+bool mf_ultralight_is_all_data_read(MfUltralightData* data);
+
 #ifdef __cplusplus
 }
 #endif

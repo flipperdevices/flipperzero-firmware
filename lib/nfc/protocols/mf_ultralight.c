@@ -130,3 +130,9 @@ const char* mf_ultralight_get_name(MfUltralightType type, bool full_name) {
         return "Mifare Ultralight";
     }
 }
+
+bool mf_ultralight_is_all_data_read(MfUltralightData* data) {
+    furi_assert(data);
+    // TODO add logic
+    return false;
+}

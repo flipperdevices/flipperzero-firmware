@@ -16,6 +16,7 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
     NfcApp* nfc = context;
 
     // Setup view
+    nfc->nfc_dev_data.protocol = NfcDevProtocolMfUltralight;
     MfUltralightData* data = &nfc->nfc_dev_data.mf_ul_data;
     Widget* widget = nfc->widget;
 
@@ -61,7 +62,7 @@ bool nfc_scene_mf_ultralight_read_success_on_event(void* context, SceneManagerEv
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
             consumed = true;
         } else if(event.event == GuiButtonTypeRight) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaMenu);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightMenu);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
