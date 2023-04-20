@@ -110,10 +110,21 @@ void felica_std_describe_node(FelicaNode* node, FuriString* result) {
     }
 }
 
+void felica_std_hexdump_blocks(FelicaBlockArray_t blocks, FuriString* out) {
+    for
+        M_EACH(block, blocks, FelicaBlockArray_t) {
+            for(size_t block_offset = 0; block_offset < sizeof(block->data); block_offset += 2) {
+                furi_string_cat_printf(
+                    out, "%02X%02X ", block->data[block_offset], block->data[block_offset + 1]);
+            }
+        }
+}
+
 void felica_std_cat_service(FelicaService* service, FuriString* out) {
     furi_assert(service != NULL);
     furi_assert(out != NULL);
 
+    // Print access conditions
     furi_string_cat(out, "access (code):");
     for
         M_EACH(acl_p, service->access_control_list, FelicaServiceAttributeList_t) {
@@ -128,23 +139,18 @@ void felica_std_cat_service(FelicaService* service, FuriString* out) {
 
     furi_string_push_back(out, '\n');
 
+    // If no block to dump, skip the hex dump section entirely
     size_t block_count = FelicaBlockArray_size(service->blocks);
-    if(block_count > 0) {
-        furi_string_cat_printf(
-            out, "\nsize %zd (%zdbytes)", block_count, block_count * FELICA_BLOCK_SIZE);
+    if(block_count == 0) {
+        return;
     }
 
-    furi_string_push_back(out, '\n');
-    for
-        M_EACH(block, service->blocks, FelicaBlockArray_t) {
-            for(size_t block_offset = 0; block_offset < sizeof(block->data); block_offset += 2) {
-                if(block_offset % 8 == 0) {
-                    furi_string_push_back(out, '\n');
-                }
-                furi_string_cat_printf(
-                    out, "%02X%02X ", block->data[block_offset], block->data[block_offset + 1]);
-            }
-        }
+    // Print size and do a hexdump
+    furi_string_cat_printf(
+        out, "\nsize %zd (%zdbytes)", block_count, block_count * FELICA_BLOCK_SIZE);
+
+    furi_string_cat(out, "\n\n");
+    felica_std_hexdump_blocks(service->blocks, out);
 }
 
 void felica_std_describe_node_detailed(FelicaNode* node, FuriString* out) {
@@ -177,12 +183,15 @@ void felica_print_card_stat(FelicaData* data, FuriString* out) {
     furi_assert(out != NULL);
 
     switch(data->type) {
-    // Lite
+    // Monolithic Lite
     case FelicaICTypeLiteS:
     case FelicaICTypeLite: {
         FelicaSystem* lite_system = FelicaSystemArray_get(data->systems, 0);
+
         furi_assert(lite_system != NULL);
         furi_assert(lite_system->is_lite);
+        furi_assert(!lite_system->is_monolithic_ndef);
+
         size_t read = 0;
         const size_t total_blocks =
             sizeof(lite_system->lite_info.S_PAD) / sizeof(lite_system->lite_info.S_PAD[0]);
@@ -195,15 +204,29 @@ void felica_print_card_stat(FelicaData* data, FuriString* out) {
         furi_string_cat_printf(out, "%zd/%zd blocks read", read, total_blocks);
         break;
     }
-    // TODO: 12fc
-    // Standard
+    // Monolithic NDEF aka 12fc
+    case FelicaICTypeLinkNDEF: {
+        FelicaSystem* ndef_system = FelicaSystemArray_get(data->systems, 0);
+
+        furi_assert(ndef_system != NULL);
+        furi_assert(!ndef_system->is_lite);
+        furi_assert(ndef_system->is_monolithic_ndef);
+        furi_assert(ndef_system->ndef_node.service != NULL);
+
+        size_t blocks = FelicaBlockArray_size(ndef_system->ndef_node.service->blocks);
+
+        furi_string_cat_printf(out, "%zd blocks read", blocks);
+        break;
+    }
+    // Standard/Hybrid
     default: {
         size_t num_systems = FelicaSystemArray_size(data->systems);
         size_t num_areas = 0, num_services = 0;
         for
             M_EACH(system, data->systems, FelicaSystemArray_t) {
                 furi_assert(system != NULL);
-                if(system->is_lite) {
+                // Don't count Lite or monolithic NDEF systems as they are completely different.
+                if(system->is_lite || system->is_monolithic_ndef) {
                     continue;
                 }
             for

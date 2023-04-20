@@ -1,3 +1,4 @@
+#include <inttypes.h>
 #include "../nfc_i.h"
 #include "core/string.h"
 #include "gui/modules/submenu.h"
@@ -151,6 +152,96 @@ static void nfc_scene_felica_system_load_node(
     }
 }
 
+static void nfc_scene_felica_system_load_lite_info(Nfc* nfc, FelicaLiteInfo* lite_info) {
+    furi_assert(nfc != NULL);
+    furi_assert(lite_info != NULL);
+
+    TextBox* text_box = nfc->text_box;
+    FuriString* text_box_store = nfc->text_box_store;
+    furi_string_reset(text_box_store);
+
+    uint8_t* data;
+    furi_string_cat(text_box_store, "S_PAD:\n");
+    for(int i = 0; i < REG_LITE_BLOCK; i++) {
+        data = lite_info->S_PAD[i];
+        for(uint16_t i = 0; i < FELICA_BLOCK_SIZE; i += 2) {
+            if(!(i % 8) && i) {
+                furi_string_push_back(text_box_store, '\n');
+            }
+            if(data != NULL) {
+                furi_string_cat_printf(text_box_store, "%02X%02X ", data[i], data[i + 1]);
+            } else {
+                furi_string_cat(text_box_store, "???? ");
+            }
+        }
+    }
+
+    furi_string_cat(text_box_store, "REG:\n");
+    data = lite_info->REG;
+    for(uint16_t i = 0; i < FELICA_BLOCK_SIZE; i += 2) {
+        if(!(i % 8) && i) {
+            furi_string_push_back(text_box_store, '\n');
+        }
+        if(data != NULL) {
+            furi_string_cat_printf(text_box_store, "%02X%02X ", data[i], data[i + 1]);
+        } else {
+            furi_string_cat(text_box_store, "???? ");
+        }
+    }
+
+    furi_string_cat(text_box_store, "MAC:\n");
+    data = lite_info->MAC;
+    for(uint16_t i = 0; i < 8; i += 2) {
+        if(!(i % 8) && i) {
+            furi_string_push_back(text_box_store, '\n');
+        }
+        furi_string_cat_printf(text_box_store, "%02X%02X ", data[i], data[i + 1]);
+    }
+
+    furi_string_cat_printf(text_box_store, "DFC: %04X\n", lite_info->data_format_code);
+
+    furi_string_cat(text_box_store, "ID data:\n");
+    data = lite_info->ID_value;
+    for(uint16_t i = 0; i < 6; i += 2) {
+        furi_string_cat_printf(text_box_store, "%02X%02X ", data[i], data[i + 1]);
+    }
+    furi_string_cat(text_box_store, "\n");
+
+    furi_string_cat_printf(text_box_store, "CKV: %04X\n", lite_info->card_key_version);
+
+    furi_string_cat(text_box_store, "MC:\n");
+    data = lite_info->memory_config;
+    for(uint16_t i = 0; i < FELICA_BLOCK_SIZE; i += 2) {
+        if(!(i % 8) && i) {
+            furi_string_push_back(text_box_store, '\n');
+        }
+        furi_string_cat_printf(text_box_store, "%02X%02X ", data[i], data[i + 1]);
+    }
+
+    furi_string_cat_printf(text_box_store, "WCNT: %06" PRIX32 "\n", lite_info->write_count);
+
+    furi_string_cat(text_box_store, "MAC_A:\n");
+    data = lite_info->MAC_A;
+    for(uint16_t i = 0; i < 8; i += 2) {
+        if(!(i % 8) && i) {
+            furi_string_push_back(text_box_store, '\n');
+        }
+        furi_string_cat_printf(text_box_store, "%02X%02X ", data[i], data[i + 1]);
+    }
+    text_box_set_text(text_box, furi_string_get_cstr(text_box_store));
+}
+
+static void nfc_scene_felica_system_load_service_hexdump(Nfc* nfc, FelicaService* service) {
+    furi_assert(service != NULL);
+    furi_assert(service->blocks != NULL);
+    TextBox* text_box = nfc->text_box;
+    FuriString* text_box_store = nfc->text_box_store;
+    furi_string_reset(text_box_store);
+
+    felica_std_hexdump_blocks(service->blocks, text_box_store);
+    text_box_set_text(text_box, furi_string_get_cstr(text_box_store));
+}
+
 void nfc_scene_felica_system_on_enter(void* context) {
     Nfc* nfc = context;
     uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSystem);
@@ -160,7 +251,25 @@ void nfc_scene_felica_system_on_enter(void* context) {
     FelicaSystem* curr_system =
         FelicaSystemArray_get(nfc->dev->dev_data.felica_data.systems, curr_system_index);
     furi_assert(curr_system != NULL);
-    // TODO monolithic system handling here
+
+    if(curr_system->is_lite) {
+        furi_assert(curr_system->code == LITE_SYSTEM_CODE);
+        nfc_scene_felica_system_load_lite_info(nfc, &curr_system->lite_info);
+        text_box_set_font(nfc->text_box, TextBoxFontHex);
+        view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
+        return;
+    }
+
+    if(curr_system->is_monolithic_ndef) {
+        FelicaNode* ndef_node = &curr_system->ndef_node;
+        furi_assert(ndef_node->type == FelicaNodeTypeService);
+        furi_assert(ndef_node->service != NULL);
+        nfc_scene_felica_system_load_service_hexdump(nfc, ndef_node->service);
+        text_box_set_font(nfc->text_box, TextBoxFontHex);
+        view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
+        return;
+    }
+
     FelicaNode* curr_node = felica_std_inode_lookup(curr_system, curr_inode);
     furi_assert(curr_node != NULL);
 
@@ -185,6 +294,14 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
     FelicaSystem* curr_system =
         FelicaSystemArray_get(nfc->dev->dev_data.felica_data.systems, curr_system_index);
     furi_assert(curr_system != NULL);
+
+    // Lite and monolithic NDEF connects to the previous scene directly and does not need navigation.
+    // Let parent handler handle the events.
+    if(curr_system->is_lite || curr_system->is_monolithic_ndef) {
+        return false;
+    }
+
+    // Load node info for Standard systems
     FelicaNode* curr_node = felica_std_inode_lookup(curr_system, curr_inode);
     furi_assert(curr_node != NULL);
 

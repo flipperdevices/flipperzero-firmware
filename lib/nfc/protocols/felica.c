@@ -391,7 +391,7 @@ bool felica_parse_request_system_code(
     uint8_t* buf,
     uint8_t len,
     FelicaReader* reader,
-    FelicaSystemArray_t* systems) {
+    FelicaSystemArray_t systems) {
     uint8_t consumed =
         felica_consume_header(buf, len, reader, FELICA_REQUEST_SYSTEM_CODE_RES, true, false);
     if(consumed == 0) {
@@ -410,7 +410,7 @@ bool felica_parse_request_system_code(
     }
 
     for(uint8_t idx = 0; idx < entries; idx++) {
-        FelicaSystem* system = FelicaSystemArray_push_new(*systems);
+        FelicaSystem* system = FelicaSystemArray_push_new(systems);
         furi_assert(system != NULL);
 
         felica_std_system_init(system, idx, (buf[2 * idx] << 8) | buf[2 * idx + 1]);
@@ -534,14 +534,12 @@ bool felica_parse_polling(
 
 static FelicaSystem* felica_gen_monolithic_system_code(
     FelicaReader* reader,
-    FelicaSystemArray_t* systems,
+    FelicaSystemArray_t systems,
     uint16_t system_code) {
-    FelicaSystem* system = FelicaSystemArray_push_new(*systems);
+    FelicaSystem* system = FelicaSystemArray_push_new(systems);
     furi_assert(reader != NULL);
     furi_assert(system != NULL);
 
-    //memcpy(system->idm, reader->current_idm, 8);
-    //memcpy(system->pmm, reader->current_pmm, 8);
     system->code = system_code;
 
     return system;
@@ -570,6 +568,8 @@ bool felica_lite_dump_data(
     FelicaReader* reader,
     FelicaData* data,
     FelicaSystem* system) {
+    system->is_lite = true;
+    system->is_monolithic_ndef = false;
     const uint8_t fixed_blocks[] = {
         SYS_CODE_LITE_BLOCK,
         DEVICE_ID_LITE_BLOCK,
@@ -759,6 +759,25 @@ bool felica_lite_dump_data(
     return true;
 }
 
+bool felica_ndef_dump_data(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaData* data,
+    FelicaSystem* system) {
+    UNUSED(data);
+    system->is_monolithic_ndef = true;
+    system->is_lite = false;
+    felica_node_init_as_service(
+        &system->ndef_node, FELICA_INODE_INVALID, 0, FelicaServiceTypeRandom);
+    FelicaServiceAttributeList_push(
+        system->ndef_node.service->access_control_list, FelicaServiceAttributeUnauthRO);
+    return felica_std_dump_public_service(
+        tx_rx,
+        reader,
+        system->ndef_node.service,
+        FelicaServiceTypeRandom | FelicaServiceAttributeUnauthRO);
+}
+
 FelicaNode* felica_std_inode_lookup(FelicaSystem* system, FelicaINode inode) {
     furi_assert(system != NULL);
     if(inode <= FELICA_INODE_INVALID) {
@@ -792,7 +811,7 @@ bool felica_std_select_system(
 bool felica_std_request_system_code(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaReader* reader,
-    FelicaSystemArray_t* systems) {
+    FelicaSystemArray_t systems) {
     tx_rx->tx_bits = 8 * felica_prepare_request_system_code(tx_rx->tx_data, reader);
     if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
         FURI_LOG_E(TAG, "Bad exchange requesting system code");
@@ -817,7 +836,7 @@ bool felica_std_traverse_system(
     // FELICA_INODE_INVALID is also used here to mark root node (no parent)
     FelicaINode curr_inode = FELICA_INODE_INVALID, curr_working_inode = FELICA_INODE_INVALID;
 
-    if(system->is_lite) {
+    if(system->is_lite || system->is_monolithic_ndef) {
         return false;
     }
 
@@ -990,7 +1009,9 @@ bool felica_std_dump_public_service(
                new_block->data,
                sizeof(new_block->data))) {
             // Hitting an invalid block address (usually means end of service)
-            if(reader->status_flags[0] != 0x00 && reader->status_flags[1] == 0xa8) {
+            // Some tags (namely 12fc) also uses access denied to signal end of tag
+            if(reader->status_flags[0] != 0x00 &&
+               (reader->status_flags[1] == 0xa8 || reader->status_flags[1] == 0xa5)) {
                 FURI_LOG_D(TAG, "End of service reached");
                 FelicaBlockArray_pop_back(NULL, service->blocks);
                 result = true;
@@ -1059,14 +1080,20 @@ bool felica_read_card(
         if(data->type == FelicaICTypeLite || data->type == FelicaICTypeLiteS) {
             FURI_LOG_I(TAG, "Reading Felica Lite system");
             FelicaSystem* lite_system =
-                felica_gen_monolithic_system_code(&reader, &(data->systems), LITE_SYSTEM_CODE);
+                felica_gen_monolithic_system_code(&reader, data->systems, LITE_SYSTEM_CODE);
             felica_lite_dump_data(tx_rx, &reader, data, lite_system);
             card_read = true;
             break;
         }
-        // TODO what about 12fc systems?
+        if(data->type == FelicaICTypeLinkNDEF) {
+            FURI_LOG_I(TAG, "Reading Felica NDEF system");
+            FelicaSystem* ndef_system =
+                felica_gen_monolithic_system_code(&reader, data->systems, NDEF_SYSTEM_CODE);
+            card_read = felica_ndef_dump_data(tx_rx, &reader, data, ndef_system);
+            break;
+        }
         FURI_LOG_I(TAG, "Reading Felica Standard system");
-        if(!felica_std_request_system_code(tx_rx, &reader, &(data->systems))) {
+        if(!felica_std_request_system_code(tx_rx, &reader, data->systems)) {
             break;
         }
         if(!felica_std_dump_data(tx_rx, &reader, data)) {
@@ -1114,6 +1141,7 @@ void felica_system_init(FelicaSystem* system, uint8_t number, uint16_t code) {
 void felica_std_system_init(FelicaSystem* system, uint8_t number, uint16_t code) {
     felica_system_init(system, number, code);
     system->is_lite = false;
+    system->is_monolithic_ndef = false;
     FelicaNodeArray_init(system->nodes);
     FelicaPublicServiceDict_init(system->public_services);
 }
@@ -1176,8 +1204,10 @@ void felica_clear(FelicaData* data) {
     furi_assert(data != NULL);
     for
         M_EACH(system, data->systems, FelicaSystemArray_t) {
-            if(system->code == LITE_SYSTEM_CODE) {
+            if(system->is_lite) {
                 felica_lite_clear(&system->lite_info);
+            } else if(system->is_monolithic_ndef) {
+                felica_node_clear(&system->ndef_node);
             } else {
                 // TODO refactor FelicaNodeArray_t to use mlib objects instead of POD?
                 for

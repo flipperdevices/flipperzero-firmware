@@ -245,6 +245,8 @@ typedef struct _FelicaSystem_t {
     uint8_t number;
     /** If the system belongs to a FeliCa Lite (and be its only system). */
     bool is_lite;
+    /** If the system belongs to a FeliCa NDEF tag (and be its only system). */
+    bool is_monolithic_ndef;
     /** FeliCa system code. */
     uint16_t code;
 
@@ -258,6 +260,8 @@ typedef struct _FelicaSystem_t {
              *  access by card parsers. */
             FelicaPublicServiceDict_t public_services;
         };
+        /** (For FeliCa NDEF only) Card content. */
+        FelicaNode ndef_node;
     };
 } FelicaSystem;
 
@@ -403,7 +407,7 @@ bool felica_std_select_system(
 bool felica_std_request_system_code(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaReader* reader,
-    FelicaSystemArray_t* systems);
+    FelicaSystemArray_t systems);
 /** Traverse the filesystem tree of a system and populate the system object.
  *
  * @param tx_rx NFC context.
