@@ -120,62 +120,6 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     return app;
 }
 
-void wifi_marauder_create_demo_scripts(WifiMarauderApp* app) {
-    // Beaconlist
-    const char* script_beaconlist_file = MARAUDER_APP_SCRIPT_PATH("demo_beaconlist");
-    if(!storage_file_exists(app->storage, script_beaconlist_file)) {
-        WifiMarauderScript* script_beaconlist = wifi_marauder_script_create("demo_deauth");
-        script_beaconlist->description = strdup("Beacon spam list");
-
-        WifiMarauderScriptStageBeaconList* stage_beaconlist_1 = (WifiMarauderScriptStageBeaconList*) malloc(sizeof(WifiMarauderScriptStageBeaconList));
-        stage_beaconlist_1->ssid_count = 5;
-        stage_beaconlist_1->ssids = malloc(sizeof(char*) * stage_beaconlist_1->ssid_count);
-        stage_beaconlist_1->ssids[0] = strdup("01 APERTURE SCIENCE");
-        stage_beaconlist_1->ssids[1] = strdup("02 WE DO WHAT WE MUST");
-        stage_beaconlist_1->ssids[2] = strdup("03 BECAUSE WE CAN");
-        stage_beaconlist_1->ssids[3] = strdup("04 FOR THE GOOD");
-        stage_beaconlist_1->ssids[4] = strdup("05 OF ALL OF US");
-        stage_beaconlist_1->timeout = 60;
-        wifi_marauder_script_add_stage(script_beaconlist, WifiMarauderScriptStageTypeBeaconList, stage_beaconlist_1);
-
-        WifiMarauderScriptStageBeaconList* stage_beaconlist_2 = (WifiMarauderScriptStageBeaconList*) malloc(sizeof(WifiMarauderScriptStageBeaconList));
-        stage_beaconlist_2->ssid_count = 1;
-        stage_beaconlist_2->ssids = malloc(sizeof(char*) * stage_beaconlist_2->ssid_count);
-        stage_beaconlist_2->ssids[0] = strdup("FIXED SSID");
-        stage_beaconlist_2->random_ssids = 2;
-        stage_beaconlist_2->timeout = 30;
-        wifi_marauder_script_add_stage(script_beaconlist, WifiMarauderScriptStageTypeBeaconList, stage_beaconlist_2);
-
-        wifi_marauder_script_save_json(app->storage, script_beaconlist_file, script_beaconlist);
-        wifi_marauder_script_free(script_beaconlist);
-    }
-
-    // Deauth
-    const char* script_deauth_file = MARAUDER_APP_SCRIPT_PATH("demo_deauth");
-    if(!storage_file_exists(app->storage, script_deauth_file)) {
-        WifiMarauderScript* script_deauth = wifi_marauder_script_create("demo_deauth");
-        script_deauth->description = strdup("Deauth all clients that fit the filter on channel 10 for 30 seconds");
-
-        WifiMarauderScriptStageScan* stage_scan = (WifiMarauderScriptStageScan*) malloc(sizeof(WifiMarauderScriptStageScan));
-        stage_scan->type = WifiMarauderScriptScanTypeAp;
-        stage_scan->channel = 10;
-        stage_scan->timeout = 30;
-        wifi_marauder_script_add_stage(script_deauth, WifiMarauderScriptStageTypeScan, stage_scan);
-
-        WifiMarauderScriptStageSelect* stage_select = (WifiMarauderScriptStageSelect*) malloc(sizeof(WifiMarauderScriptStageSelect));
-        stage_select->type = WifiMarauderScriptSelectTypeAp;
-        stage_select->filter = strdup("all");
-        wifi_marauder_script_add_stage(script_deauth, WifiMarauderScriptStageTypeSelect, stage_select);
-
-        WifiMarauderScriptStageDeauth *stage_deauth = (WifiMarauderScriptStageDeauth*) malloc(sizeof(WifiMarauderScriptStageDeauth));
-        stage_deauth->timeout = 30;
-        wifi_marauder_script_add_stage(script_deauth, WifiMarauderScriptStageTypeDeauth, stage_deauth);
-
-        wifi_marauder_script_save_json(app->storage, MARAUDER_APP_SCRIPT_PATH("demo_deauth"), script_deauth);
-        wifi_marauder_script_free(script_deauth);
-    }
-}
-
 void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
     furi_assert(app);
 
@@ -193,8 +137,6 @@ void wifi_marauder_make_app_folder(WifiMarauderApp* app) {
 
     if(!storage_simply_mkdir(app->storage, MARAUDER_APP_FOLDER_SCRIPTS)) {
         dialog_message_show_storage_error(app->dialogs, "Cannot create\nscripts folder");
-    } else {
-        wifi_marauder_create_demo_scripts(app);
     }
 }
 
