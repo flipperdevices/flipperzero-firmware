@@ -58,10 +58,10 @@ void _wifi_marauder_script_execute_select(WifiMarauderScriptStageSelect* stage) 
     char command[256];
     size_t command_length = 0;
 
-    if (stage->indexes != NULL) {
+    if (stage->indexes != NULL && stage->index_count > 0) {
         command_length = snprintf(command, sizeof(command), "select %s ", select_type);
 
-        for (int i = 0; stage->indexes[i] != -1; i++) {
+        for (int i = 0; i < stage->index_count; i++) {
             int index = stage->indexes[i];
             command_length += snprintf(command + command_length, sizeof(command) - command_length, "%d, ", index);
         }
