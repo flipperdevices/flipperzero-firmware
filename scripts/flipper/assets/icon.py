@@ -33,7 +33,6 @@ class ImageTools:
     @staticmethod
     def is_processing_slow():
         try:
-
             return False
         except ImportError:
             return True

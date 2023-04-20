@@ -1,5 +1,3 @@
-
-
 def generate(env):
     env.SetDefault(
         GDB="gdb",

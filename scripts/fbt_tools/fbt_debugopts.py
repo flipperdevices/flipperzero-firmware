@@ -1,4 +1,3 @@
-
 from SCons.Errors import UserError
 
 
