@@ -55,15 +55,19 @@ bool nfc_scene_mf_ultralight_unlock_menu_on_event(void* context, SceneManagerEve
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexMfUlUnlockMenuManual) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            nfc->mf_ul_auth->type = MfUltralightAuthTypeManual;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightKeyInput);
             consumed = true;
         } else if(event.event == SubmenuIndexMfUlUnlockMenuAmeebo) {
+            nfc->mf_ul_auth->type = MfUltralightAuthTypeAmiibo;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockWarn);
             consumed = true;
         } else if(event.event == SubmenuIndexMfUlUnlockMenuXiaomi) {
+            nfc->mf_ul_auth->type = MfUltralightAuthTypeXiaomii;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockWarn);
             consumed = true;
         } else if(event.event == SubmenuIndexMfUlUnlockMenuReader) {
+            nfc->mf_ul_auth->type = MfUltralightAuthTypeReader;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         }

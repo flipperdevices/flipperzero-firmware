@@ -26,6 +26,10 @@ void mf_ultralight_auth_free(MfUltralightAuth* instance);
 
 void mf_ultralight_auth_reset(MfUltralightAuth* instance);
 
+bool mf_ultralight_generate_amiibo_pass(MfUltralightAuth* instance, uint8_t* uid, uint16_t uid_len);
+
+bool mf_ultralight_generate_xiaomi_pass(MfUltralightAuth* instance, uint8_t* uid, uint16_t uid_len);
+
 #ifdef __cplusplus
 }
 #endif

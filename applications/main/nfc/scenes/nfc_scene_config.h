@@ -14,6 +14,7 @@ ADD_SCENE(nfc, mf_ultralight_read_success, MfUltralightReadSuccess)
 ADD_SCENE(nfc, mf_ultralight_menu, MfUltralightMenu)
 ADD_SCENE(nfc, mf_ultralight_unlock_menu, MfUltralightUnlockMenu)
 ADD_SCENE(nfc, mf_ultralight_unlock_warn, MfUltralightUnlockWarn)
+ADD_SCENE(nfc, mf_ultralight_key_input, MfUltralightKeyInput)
 
 
 ADD_SCENE(nfc, not_implemented, NotImplemented)

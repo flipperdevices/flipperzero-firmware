@@ -12,6 +12,27 @@ void nfc_scene_mf_ultralight_read_worker_callback(MfUltralightPollerEvent event,
         mf_ultralight_poller_stop(nfc->mf_ul_poller);
         view_dispatcher_send_custom_event(
             nfc->view_dispatcher, NfcWorkerEventMfUltralightReadSuccess);
+    } else if(event.type == MfUltralightPollerEventTypeAuthRequest) {
+        MfUltralightData* data = &nfc->nfc_dev_data.mf_ul_data;
+        mf_ultralight_poller_get_data(nfc->mf_ul_poller, data);
+        if(nfc->mf_ul_auth->type == MfUltralightAuthTypeXiaomii) {
+            if(mf_ultralight_generate_xiaomi_pass(
+                   nfc->mf_ul_auth, data->nfca_data.uid, data->nfca_data.uid_len)) {
+                event.data->auth_context.skip_auth = false;
+            }
+        } else if(nfc->mf_ul_auth->type == MfUltralightAuthTypeAmiibo) {
+            if(mf_ultralight_generate_amiibo_pass(
+                   nfc->mf_ul_auth, data->nfca_data.uid, data->nfca_data.uid_len)) {
+                event.data->auth_context.skip_auth = false;
+            }
+        } else if(nfc->mf_ul_auth->type == MfUltralightAuthTypeManual) {
+            event.data->auth_context.skip_auth = false;
+        }
+        if(!event.data->auth_context.skip_auth) {
+            event.data->auth_context.password = nfc->mf_ul_auth->password;
+        }
+    } else if(event.type == MfUltralightPollerEventTypeAuthSuccess) {
+        nfc->mf_ul_auth->pack = event.data->pack;
     } else {
         furi_delay_ms(100);
     }

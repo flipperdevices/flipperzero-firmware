@@ -31,7 +31,7 @@ typedef struct {
 
 typedef struct {
     MfUltralightPollerEventType type;
-    MfUltralightPollerEventData data;
+    MfUltralightPollerEventData* data;
 } MfUltralightPollerEvent;
 
 typedef void (*MfUltralightPollerCallback)(MfUltralightPollerEvent event, void* context);

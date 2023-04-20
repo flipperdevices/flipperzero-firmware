@@ -3,6 +3,7 @@
 #include <furi.h>
 #include "nfca_poller.h"
 #include <nfc/helpers/nfc_poller_buffer.h>
+#include "nfc_util.h"
 
 #define TAG "MfUltralightPoller"
 
@@ -101,7 +102,8 @@ static MfUltralightError
     mf_ultralight_poller_async_auth(MfUltralightPoller* instance, MfUltralightAuthPassword* data) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGHT_CMD_AUTH;
-    memcpy(&buff->rx_data[1], data, MF_ULTRALIGHT_AUTH_PASSWORD_SIZE);
+    // fill password in lsb
+    nfc_util_num2bytes(data->pass, MF_ULTRALIGHT_AUTH_PASSWORD_SIZE, &buff->tx_data[1]);
     buff->tx_bits = (MF_ULTRALIGHT_AUTH_PASSWORD_SIZE + 1) * 8;
 
     MfUltralightError ret = MfUltralightErrorNone;
@@ -339,12 +341,14 @@ static void mf_ultralight_poller_read_callback(NfcaPollerEvent event, void* cont
     furi_assert(context);
 
     MfUltralightPoller* instance = context;
-    MfUltralightPollerEvent mf_ul_poller_event = {};
+    MfUltralightPollerEventData event_data = {};
+    MfUltralightPollerEvent mf_ul_poller_event = {.data = &event_data};
     MfUltralightError error = MfUltralightErrorNone;
 
     if(event.type == NfcaPollerEventTypeReady) {
         NfcPollerBuffer* buff = instance->buffer;
         nfc_poller_buffer_reset(buff);
+        nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
 
         if(instance->state == MfUltralightPollerStateReadVersion) {
             error = mf_ultralight_poller_async_read_version(instance);
@@ -382,9 +386,9 @@ static void mf_ultralight_poller_read_callback(NfcaPollerEvent event, void* cont
             if((instance->callback) &&
                (instance->feature_set & MfUltralightFeatureSupportAuthentication)) {
                 mf_ul_poller_event.type = MfUltralightPollerEventTypeAuthRequest;
-                instance->callback(mf_ul_poller_event, instance->callback);
-                if(!mf_ul_poller_event.data.auth_context.skip_auth) {
-                    instance->auth_password = mf_ul_poller_event.data.auth_context.password;
+                instance->callback(mf_ul_poller_event, instance->context);
+                if(!mf_ul_poller_event.data->auth_context.skip_auth) {
+                    instance->auth_password = mf_ul_poller_event.data->auth_context.password;
                     instance->state = MfUltralightPollerStateAuth;
                 } else {
                     instance->state = MfUltralightPollerStateReadPages;
@@ -395,15 +399,17 @@ static void mf_ultralight_poller_read_callback(NfcaPollerEvent event, void* cont
         } else if(instance->state == MfUltralightPollerStateAuth) {
             error = mf_ultralight_poller_async_auth(instance, &instance->auth_password);
             if(error == MfUltralightErrorNone) {
+                FURI_LOG_I(TAG, "Auth success");
                 if(instance->callback) {
                     mf_ul_poller_event.type = MfUltralightPollerEventTypeAuthSuccess;
                     memcpy(
-                        &mf_ul_poller_event.data.pack,
+                        &mf_ul_poller_event.data->pack,
                         &instance->data->page[instance->data->pages_read - 1],
                         MF_ULTRALIGHT_AUTH_PACK_SIZE);
                     instance->callback(mf_ul_poller_event, instance->context);
                 }
             } else {
+                FURI_LOG_W(TAG, "Auth failed");
                 if(instance->callback) {
                     mf_ul_poller_event.type = MfUltralightPollerEventTypeAuthFailed;
                     instance->callback(mf_ul_poller_event, instance->context);
@@ -441,7 +447,6 @@ static void mf_ultralight_poller_read_callback(NfcaPollerEvent event, void* cont
             }
         } else if(instance->state == MfUltralightPollerStateReadCounters) {
         } else if(instance->state == MfUltralightPollerStateReadSuccess) {
-            nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
             if(instance->callback) {
                 mf_ul_poller_event.type = MfUltralightPollerEventTypeReadSuccess;
                 instance->callback(mf_ul_poller_event, instance->context);
