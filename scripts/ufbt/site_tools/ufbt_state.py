@@ -1,5 +1,4 @@
 from SCons.Errors import StopError
-from SCons.Warnings import warn, WarningOnByDefault
 
 import json
 import os

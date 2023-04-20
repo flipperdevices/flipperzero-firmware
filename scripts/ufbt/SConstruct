@@ -1,7 +1,6 @@
 from SCons.Platform import TempFileMunge
 from SCons.Node import FS
 from SCons.Errors import UserError
-from SCons.Warnings import warn, WarningOnByDefault
 
 
 import os
