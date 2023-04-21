@@ -125,22 +125,54 @@ void get_example_binaries(target_chip_t target, example_binaries_t *bins)
 }
 
 
-extern const uint8_t  ESP32_H4_app_bin[];
-extern const uint32_t ESP32_H4_app_bin_size;
+extern const uint8_t  ESP32_app_bin[];
+extern const uint32_t ESP32_app_bin_size;
+extern const uint8_t  ESP32_C2_app_bin[];
+extern const uint32_t ESP32_C2_app_bin_size;
+extern const uint8_t  ESP32_C3_app_bin[];
+extern const uint32_t ESP32_C3_app_bin_size;
 extern const uint8_t  ESP32_H2_app_bin[];
 extern const uint32_t ESP32_H2_app_bin_size;
+extern const uint8_t  ESP32_H4_app_bin[];
+extern const uint32_t ESP32_H4_app_bin_size;
+extern const uint8_t  ESP32_S3_app_bin[];
+extern const uint32_t ESP32_S3_app_bin_size;
 void get_example_ram_app_binary(target_chip_t target, example_ram_app_binary_t *bin)
 {
-    if (target == ESP32H4_CHIP){
-        bin->ram_app.data = ESP32_H4_app_bin;
-        bin->ram_app.size = ESP32_H4_app_bin_size;
-    } 
-    else if(target == ESP32H2_CHIP){
-        bin->ram_app.data = ESP32_H2_app_bin;
-        bin->ram_app.size = ESP32_H2_app_bin_size;
-    }
-    else {
-        abort();
+    switch (target) {
+        case ESP32_CHIP: {
+            bin->ram_app.data = ESP32_app_bin;
+            bin->ram_app.size = ESP32_app_bin_size;
+            break;
+        }
+        case ESP32C2_CHIP: {
+            bin->ram_app.data = ESP32_C2_app_bin;
+            bin->ram_app.size = ESP32_C2_app_bin_size;
+            break;
+        }
+        case ESP32C3_CHIP: {
+            bin->ram_app.data = ESP32_C3_app_bin;
+            bin->ram_app.size = ESP32_C3_app_bin_size;
+            break;
+        }
+        case ESP32H2_CHIP: {
+            bin->ram_app.data = ESP32_H2_app_bin;
+            bin->ram_app.size = ESP32_H2_app_bin_size;
+            break;
+        }
+        case ESP32H4_CHIP: {
+            bin->ram_app.data = ESP32_H4_app_bin;
+            bin->ram_app.size = ESP32_H4_app_bin_size;
+            break;
+        }
+        case ESP32S3_CHIP: {
+            bin->ram_app.data = ESP32_S3_app_bin;
+            bin->ram_app.size = ESP32_S3_app_bin_size;
+            break;
+        }
+        default: {
+            abort();
+        }
     }
 }
 
