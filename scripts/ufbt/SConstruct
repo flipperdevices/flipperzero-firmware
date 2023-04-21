@@ -419,13 +419,22 @@ dist_env.PhonyTarget(
 
 # Dolphin animation builder. Expects "external" directory in current dir
 # with animation sources & manifests. Builds & uploads them to connected Flipper
-dolphin_external = dist_env.DolphinExtBuilder(
-    ufbt_build_dir.Dir("dolphin"),
-    original_app_dir,
-    DOLPHIN_RES_TYPE="external",
-)
-dist_env.PhonyTarget(
-    "dolphin_ext",
-    '${PYTHON3} ${FBT_SCRIPT_DIR}/storage.py send "${SOURCE}" /ext/dolphin',
-    source=ufbt_build_dir.Dir("dolphin"),
-)
+dolphin_src_dir = original_app_dir.Dir("external")
+if dolphin_src_dir.exists():
+    dolphin_dir = ufbt_build_dir.Dir("dolphin")
+    dolphin_external = dist_env.DolphinExtBuilder(
+        ufbt_build_dir.Dir("dolphin"),
+        original_app_dir,
+        DOLPHIN_RES_TYPE="external",
+    )
+    dist_env.PhonyTarget(
+        "dolphin_ext",
+        '${PYTHON3} ${FBT_SCRIPT_DIR}/storage.py send "${SOURCE}" /ext/dolphin',
+        source=ufbt_build_dir.Dir("dolphin"),
+    )
+else:
+
+    def missing_dolphin_folder(**kw):
+        raise UserError(f"Dolphin folder not found: {dolphin_src_dir}")
+
+    dist_env.PhonyTarget("dolphin_ext", Action(missing_dolphin_folder, None))
