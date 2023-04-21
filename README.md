@@ -1,7 +1,7 @@
 
 # zeitraffer
 
-[![Build FAP](https://github.com/theageoflove/flipperzero-zeitraffer/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/theageoflove/flipperzero-zeitraffer/actions/workflows/build.yml)
+[![Build FAP](https://github.com/theageoflove/flipperzero-zeitraffer/actions/workflows/build.yml/badge.svg?branch=main)](https://nightly.link/theageoflove/flipperzero-zeitraffer/workflows/build/main)
 
 [![FlipC.org](https://flipc.org/theageoflove/flipperzero-zeitraffer/badge)](https://flipc.org/theageoflove/flipperzero-zeitraffer)
 
