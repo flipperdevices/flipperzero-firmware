@@ -36,6 +36,8 @@ NfcbError nfcb_poller_get_data(NfcbPoller* instance, NfcbData* data);
 
 NfcbError nfcb_poller_reset(NfcbPoller* instance);
 
+NfcbError nfcb_poller_config(NfcbPoller* instance);
+
 NfcbError nfcb_poller_activate(NfcbPoller* instance, NfcbData* data);
 
 #ifdef __cplusplus

@@ -40,10 +40,7 @@ static void nfcb_poller_event_callback(NfcEvent event, void* context) {
     NfcbPoller* instance = context;
     furi_assert(instance->callback);
     if(event.type == NfcEventTypeConfigureRequest) {
-        nfc_config(instance->nfc, NfcModeNfcbPoller);
-        nfc_set_guard_time_us(instance->nfc, NFCB_GUARD_TIME_US);
-        nfc_set_fdt_poll_fc(instance->nfc, NFCB_FDT_POLL_FC);
-        nfc_set_fdt_poll_poll_us(instance->nfc, NFCB_POLL_POLL_MIN_US);
+        nfcb_poller_config(instance);
     }
 }
 
@@ -83,6 +80,17 @@ NfcbError nfcb_poller_reset(NfcbPoller* instance) {
     instance->data = NULL;
     nfc_poller_buffer_free(instance->buff);
     instance->buff = NULL;
+
+    return NfcbErrorNone;
+}
+
+NfcbError nfcb_poller_config(NfcbPoller* instance) {
+    furi_assert(instance);
+
+    nfc_config(instance->nfc, NfcModeNfcbPoller);
+    nfc_set_guard_time_us(instance->nfc, NFCB_GUARD_TIME_US);
+    nfc_set_fdt_poll_fc(instance->nfc, NFCB_FDT_POLL_FC);
+    nfc_set_fdt_poll_poll_us(instance->nfc, NFCB_POLL_POLL_MIN_US);
 
     return NfcbErrorNone;
 }

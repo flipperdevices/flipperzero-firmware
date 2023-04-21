@@ -131,6 +131,15 @@ const char* mf_ultralight_get_name(MfUltralightType type, bool full_name) {
     }
 }
 
+bool mf_ultralight_detect_protocol(NfcaData* nfca_data) {
+    furi_assert(nfca_data);
+
+    bool mfu_detected = (nfca_data->atqa[0] == 0x44) && (nfca_data->atqa[1] == 0x00) &&
+                        (nfca_data->sak == 0x00);
+
+    return mfu_detected;
+}
+
 bool mf_ultralight_is_all_data_read(MfUltralightData* data) {
     furi_assert(data);
     // TODO add logic

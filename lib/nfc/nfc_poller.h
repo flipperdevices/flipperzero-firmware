@@ -13,6 +13,7 @@ typedef struct NfcPoller NfcPoller;
 typedef struct {
     Nfc* nfc;
     NfcaPoller* nfca_poller;
+    NfcbPoller* nfcb_poller;
 } NfcPollerCollection;
 
 typedef enum {
@@ -26,11 +27,13 @@ typedef enum {
 
 typedef void (*NfcPollerEventCallback)(NfcPollerEvent event, void* context);
 
-NfcPoller* nfc_poller_alloc();
+NfcPoller* nfc_poller_alloc(NfcPollerCollection* pollers);
 
 void nfc_poller_free(NfcPoller* instance);
 
 void nfc_poller_start(NfcPoller* instance, NfcPollerEventCallback callback, void* context);
+
+void nfc_poller_reset(NfcPoller* instance);
 
 #ifdef __cplusplus
 }

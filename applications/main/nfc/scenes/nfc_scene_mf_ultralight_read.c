@@ -27,6 +27,8 @@ void nfc_scene_mf_ultralight_read_worker_callback(MfUltralightPollerEvent event,
             }
         } else if(nfc->mf_ul_auth->type == MfUltralightAuthTypeManual) {
             event.data->auth_context.skip_auth = false;
+        } else {
+            event.data->auth_context.skip_auth = true;
         }
         if(!event.data->auth_context.skip_auth) {
             event.data->auth_context.password = nfc->mf_ul_auth->password;

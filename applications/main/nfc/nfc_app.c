@@ -50,6 +50,14 @@ NfcApp* nfc_app_alloc() {
     instance->mf_ul_poller = mf_ultralight_poller_alloc(instance->nfca_poller);
     instance->nfca_listener = nfca_listener_alloc(instance->nfc);
     instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->nfca_listener);
+    instance->nfcb_poller = nfcb_poller_alloc(instance->nfc);
+
+    NfcPollerCollection collection = {
+        .nfc = instance->nfc,
+        .nfca_poller = instance->nfca_poller,
+        .nfcb_poller = instance->nfcb_poller,
+    };
+    instance->nfc_poller = nfc_poller_alloc(&collection);
 
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
 
@@ -130,6 +138,8 @@ void nfc_app_free(NfcApp* instance) {
     mf_ultralight_poller_free(instance->mf_ul_poller);
     nfca_listener_free(instance->nfca_listener);
     nfca_poller_free(instance->nfca_poller);
+    nfcb_poller_free(instance->nfcb_poller);
+    nfc_poller_free(instance->nfc_poller);
     nfc_free(instance->nfc);
 
     mf_ultralight_auth_free(instance->mf_ul_auth);

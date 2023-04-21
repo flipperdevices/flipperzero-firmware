@@ -43,6 +43,8 @@ NfcaError nfca_poller_stop(NfcaPoller* instance);
 
 NfcaError nfca_poller_check_presence(NfcaPoller* instance);
 
+NfcaError nfca_poller_config(NfcaPoller* instance);
+
 NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data);
 
 NfcaError nfca_poller_halt(NfcaPoller* instance);

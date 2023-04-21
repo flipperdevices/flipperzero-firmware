@@ -169,10 +169,7 @@ static void nfca_poller_event_callback(NfcEvent event, void* context) {
 
     NfcaPollerEvent nfca_poller_event = {};
     if(event.type == NfcEventTypeConfigureRequest) {
-        nfc_config(instance->nfc, NfcModeNfcaPoller);
-        nfc_set_guard_time_us(instance->nfc, NFCA_GUARD_TIME_US);
-        nfc_set_fdt_poll_fc(instance->nfc, NFCA_FDT_POLL_FC);
-        nfc_set_fdt_poll_poll_us(instance->nfc, NFCA_POLL_POLL_MIN_US);
+        nfca_poller_config(instance);
     } else if(event.type == NfcEventTypePollerReady) {
         if(instance->state != NfcaPollerActivated) {
             NfcaData data = {};
@@ -202,10 +199,6 @@ NfcaError
     instance->callback = callback;
     instance->context = context;
 
-    instance->data = malloc(sizeof(NfcaData));
-    instance->buff =
-        nfc_poller_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE, NFCA_POLLER_MAX_BUFFER_SIZE);
-
     nfc_start_worker(instance->nfc, nfca_poller_event_callback, instance);
 
     return NfcaErrorNone;
@@ -217,6 +210,21 @@ NfcaError nfca_poller_get_data(NfcaPoller* instance, NfcaData* data) {
     furi_assert(data);
 
     *data = *instance->data;
+
+    return NfcaErrorNone;
+}
+
+NfcaError nfca_poller_config(NfcaPoller* instance) {
+    furi_assert(instance);
+
+    instance->data = malloc(sizeof(NfcaData));
+    instance->buff =
+        nfc_poller_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE, NFCA_POLLER_MAX_BUFFER_SIZE);
+
+    nfc_config(instance->nfc, NfcModeNfcaPoller);
+    nfc_set_guard_time_us(instance->nfc, NFCA_GUARD_TIME_US);
+    nfc_set_fdt_poll_fc(instance->nfc, NFCA_FDT_POLL_FC);
+    nfc_set_fdt_poll_poll_us(instance->nfc, NFCA_POLL_POLL_MIN_US);
 
     return NfcaErrorNone;
 }

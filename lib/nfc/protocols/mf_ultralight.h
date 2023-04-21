@@ -127,6 +127,8 @@ const char* mf_ultralight_get_name(MfUltralightType type, bool full_name);
 
 bool mf_ultralight_is_all_data_read(MfUltralightData* data);
 
+bool mf_ultralight_detect_protocol(NfcaData* nfca_data);
+
 #ifdef __cplusplus
 }
 #endif

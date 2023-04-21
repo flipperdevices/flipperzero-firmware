@@ -97,7 +97,7 @@ void nfc_listener_abort(Nfc* instance);
 
 void nfc_poller_stop(Nfc* instance);
 
-void nfc_poller_reset(Nfc* instance);
+void nfc_reset(Nfc* instance);
 
 NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits);
 

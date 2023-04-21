@@ -33,7 +33,9 @@
 #include <m-array.h>
 
 #include <lib/nfc/nfc.h>
+#include <lib/nfc/nfc_poller.h>
 #include <lib/nfc/protocols/nfca_poller.h>
+#include <lib/nfc/protocols/nfcb_poller.h>
 #include <lib/nfc/protocols/nfca_listener.h>
 #include <lib/nfc/protocols/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight_listener.h>
@@ -77,6 +79,8 @@ struct NfcApp {
     NfcaListener* nfca_listener;
     MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
+    NfcbPoller* nfcb_poller;
+    NfcPoller* nfc_poller;
 
     MfUltralightAuth* mf_ul_auth;
 

@@ -2,7 +2,7 @@
 #include <dolphin/dolphin.h>
 
 enum {
-    NfcWorkerEventReadUidNfcA,
+    NfcWorkerEventReadUidNfcA = 100,
 };
 
 void nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, void* context) {

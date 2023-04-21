@@ -2,15 +2,21 @@
 #include <dolphin/dolphin.h>
 
 enum {
-    NfcWorkerEventReadUidNfcA,
+    NfcSceneReadEventNfcaDetected = 100,
+    NfcSceneReadEventNfcbDetected,
+    NfcSceneReadEventMfUltralightDetected,
 };
 
-void nfc_scene_read_worker_callback(NfcaPollerEvent event, void* context) {
+void nfc_scene_read_worker_callback(NfcPollerEvent event, void* context) {
     NfcApp* nfc = context;
 
-    if(event.type == NfcaPollerEventTypeReady) {
-        nfca_poller_stop(nfc->nfca_poller);
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcWorkerEventReadUidNfcA);
+    if(event == NfcPollerEventNfcaDetected) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcSceneReadEventNfcaDetected);
+    } else if(event == NfcPollerEventNfcbDetected) {
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcSceneReadEventNfcbDetected);
+    } else if(event == NfcPollerEventMfUltralightDetected) {
+        view_dispatcher_send_custom_event(
+            nfc->view_dispatcher, NfcSceneReadEventMfUltralightDetected);
     }
 }
 
@@ -23,7 +29,7 @@ void nfc_scene_read_on_enter(void* context) {
     popup_set_icon(nfc->popup, 0, 8, &I_NFC_manual_60x50);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 
-    nfca_poller_start(nfc->nfca_poller, nfc_scene_read_worker_callback, nfc);
+    nfc_poller_start(nfc->nfc_poller, nfc_scene_read_worker_callback, nfc);
 
     nfc_blink_read_start(nfc);
 }
@@ -33,11 +39,15 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcWorkerEventReadUidNfcA) {
-            notification_message(nfc->notifications, &sequence_success);
-            nfca_poller_get_data(nfc->nfca_poller, &nfc->nfc_dev_data.nfca_data);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+        if(event.event == NfcSceneReadEventNfcaDetected) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaRead);
+            consumed = true;
+        } else if(event.event == NfcSceneReadEventNfcbDetected) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            consumed = true;
+        } else if(event.event == NfcSceneReadEventMfUltralightDetected) {
+            mf_ultralight_auth_reset(nfc->mf_ul_auth);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightRead);
             consumed = true;
         }
     }
@@ -47,7 +57,7 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_read_on_exit(void* context) {
     NfcApp* nfc = context;
 
-    nfca_poller_reset(nfc->nfca_poller);
+    nfc_poller_reset(nfc->nfc_poller);
     // Clear view
     popup_reset(nfc->popup);
 

@@ -268,7 +268,7 @@ void nfc_poller_stop(Nfc* instance) {
     instance->state = NfcStateStopRequested;
 }
 
-void nfc_poller_reset(Nfc* instance) {
+void nfc_reset(Nfc* instance) {
     furi_assert(instance);
     instance->state = NfcStatePollerReset;
 }
