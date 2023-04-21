@@ -27,35 +27,11 @@ UPD: Chameleon Ultra devs [faced same issue](https://youtu.be/_wfikmXNQzE?t=202)
 
 ## How to use it?
 
-This guide assumes that you have already installed the app.
-
-To recover keys from card you first need to collect nonces.
-
-That's what this app was created for. App can't recover keys on Flipper Zero (yet). You need to use external device (PC) to recover keys. You can't use Mfkey32 on your phone with this app.
-
-1. Save tag after scanning (you must have found at least one key). This action will create key cache that app will use for authorization on tag.
-
-2. Run "Nested attack" from app menu
-
-3. Wait until calibration complete
-
-If the calibration passed and nonce collection began, you are very lucky and the tag is vulnerable. If not, you cannot use this app to recover keys from this tag.
-
-Calibration can take a lot of time. If the calibration takes longer than 10 minutes, it is better to see the logs. Some static encrypted nonce tags may lead to inifnity calibration loop.
-
-4. Wait until "Nonces collected!"
-
-5. Recover keys via [desktop script](https://github.com/AloneLiberty/FlipperNestedRecovery)
-
-6. Run "Check found keys" in app menu
-
-When all keys are checked, they will be added to your user key dictonary. You can rescan your tag now. 
-
-If not all keys found - run Nested attack again.
+Detailed guide: [EN](https://github.com/AloneLiberty/FlipperNested/wiki/Usage-guide) [RU](https://github.com/AloneLiberty/FlipperNested/wiki/%D0%93%D0%B0%D0%B9%D0%B4-%D0%BF%D0%BE-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8E).
 
 ## FAQ
 
-For frequently asked questions, please refer to the [FAQ.md](./FAQ.md) file.
+For frequently asked questions, please refer to the FAQ: [EN](https://github.com/AloneLiberty/FlipperNested/wiki/FAQ) [RU](https://github.com/AloneLiberty/FlipperNested/wiki/%D0%A7%D0%90%D0%92%D0%9E).
 
 ## Contacts
 
