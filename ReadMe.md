@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `19 Apr 17:14 GMT +3`
+### Apps checked & updated at `21 Apr 14:02 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -47,6 +47,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [SUPER-CHIP (Chip8) Emulator (By Milk-Cool)](https://github.com/Milk-Cool/fz-schip) <- WIP, please report found issues [here](https://github.com/Milk-Cool/fz-schip/issues)
 - [Race (By zyuhel)](https://github.com/zyuhel/flipperzero-racegame)
 - [Nu Pogodi! (Ну, погоди!) (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
+- [4 in row (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-4inrow)
 
 ## Media
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
