@@ -8,6 +8,8 @@ enum SubmenuIndex {
     SubmenuIndexReadEMV,
     SubmenuIndexReadNFCA,
     SubmenuIndexReadFelica,
+    SubmenuIndexReadFelicaLite,
+    SubmenuIndexReadFelicaNDEF,
     SubmenuIndexReadNFCF,
 };
 
@@ -53,8 +55,20 @@ void nfc_scene_read_card_type_on_enter(void* context) {
         nfc);
     submenu_add_item(
         submenu,
-        "Read FeliCa",
+        "Read FeliCa Standard",
         SubmenuIndexReadFelica,
+        nfc_scene_read_card_type_submenu_callback,
+        nfc);
+    submenu_add_item(
+        submenu,
+        "Read FeliCa Lite(-S)",
+        SubmenuIndexReadFelicaLite,
+        nfc_scene_read_card_type_submenu_callback,
+        nfc);
+    submenu_add_item(
+        submenu,
+        "Read FeliCa NDEF",
+        SubmenuIndexReadFelicaNDEF,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
     submenu_add_item(
@@ -101,6 +115,16 @@ bool nfc_scene_read_card_type_on_event(void* context, SceneManagerEvent event) {
         }
         if(event.event == SubmenuIndexReadFelica) {
             nfc->dev->dev_data.read_mode = NfcReadModeFelica;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            consumed = true;
+        }
+        if(event.event == SubmenuIndexReadFelicaLite) {
+            nfc->dev->dev_data.read_mode = NfcReadModeFelicaLite;
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            consumed = true;
+        }
+        if(event.event == SubmenuIndexReadFelicaNDEF) {
+            nfc->dev->dev_data.read_mode = NfcReadModeFelicaNDEF;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
             consumed = true;
         }

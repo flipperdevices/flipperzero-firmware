@@ -82,6 +82,22 @@
 typedef ssize_t FelicaINode;
 
 typedef enum {
+    FelicaReadResultSuccess,
+    FelicaReadResultTypeMismatch,
+    FelicaReadResultTagLost,
+} FelicaReadResult;
+
+/** Protocol/general type of the tag */
+typedef enum {
+    /** Unknown or error when trying to determine protocol. */
+    FelicaProtocolUnknown,
+    /** Standard protocol. Has a filesystem tree present on tag. */
+    FelicaProtocolStandard,
+    /** Monolithic protocol. Has no filesystem tree and only 1 selectable system (either Lite or NDEF). */
+    FelicaProtocolMonolithic,
+} FelicaProtocol;
+
+typedef enum {
     FelicaICTypeRC_SA24_10K, // RC-SA24/1x
     FelicaICTypeRC_SA24_6K, // RC-SA24/1x1
     FelicaICTypeSD2_6K, // RC-SA21/2x1
@@ -443,7 +459,19 @@ bool felica_std_dump_public_service(
  */
 bool felica_std_dump_data(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader, FelicaData* data);
 
-bool felica_read_card(
+FelicaReadResult felica_lite_detect_and_read(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaData* data,
+    FelicaReader* reader);
+FelicaReadResult felica_std_detect_and_read(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaData* data,
+    FelicaReader* reader);
+FelicaReadResult felica_ndef_detect_and_read(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaData* data,
+    FelicaReader* reader);
+FelicaProtocol felica_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaData* data,
     uint8_t* polled_idm,
@@ -452,6 +480,8 @@ void felica_clear(FelicaData* data);
 
 void felica_service_clear(FelicaService* service);
 void felica_lite_clear(FelicaLiteInfo* lite_info);
+void felica_init(FelicaData* data, FelicaICType ic_type);
+void felica_reader_init(FelicaReader* reader, uint8_t* idm, uint8_t* pmm);
 void felica_system_init(FelicaSystem* system, uint8_t number, uint16_t code);
 void felica_std_system_init(FelicaSystem* system, uint8_t number, uint16_t code);
 void felica_node_init_as_area(
@@ -467,4 +497,5 @@ void felica_node_init_as_service(
     FelicaServiceType service_type);
 void felica_area_clear(FelicaArea* area);
 void felica_node_clear(FelicaNode* node);
+void felica_reset(FelicaData* data);
 void felica_clear(FelicaData* data);

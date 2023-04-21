@@ -18,7 +18,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
     if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl) ||
-       (protocol == NfcDeviceProtocolFelica)) {
+       (protocol == NfcDeviceProtocolFelica) || (protocol == NfcDeviceProtocolFelicaMonolithic)) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_data_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -44,7 +44,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
             temp_str, "\e#%s\n", nfc_mf_classic_type(dev_data->mf_classic_data.type));
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_cat_printf(temp_str, "\e#MIFARE DESfire\n");
-    } else if(protocol == NfcDeviceProtocolFelica) {
+    } else if(protocol == NfcDeviceProtocolFelica || protocol == NfcDeviceProtocolFelicaMonolithic) {
         furi_string_cat_printf(temp_str, "\e#%s\n", nfc_felica_type(dev_data->felica_data.type));
     } else {
         furi_string_cat_printf(temp_str, "\e#Unknown ISO tag\n");
@@ -170,7 +170,7 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
         furi_string_cat_printf(temp_str, "\nKeys Found %d/%d", keys_found, keys_total);
         furi_string_cat_printf(temp_str, "\nSectors Read %d/%d", sectors_read, sectors_total);
-    } else if(protocol == NfcDeviceProtocolFelica) {
+    } else if(protocol == NfcDeviceProtocolFelica || protocol == NfcDeviceProtocolFelicaMonolithic) {
         FelicaData* data = &dev_data->felica_data;
         furi_string_push_back(temp_str, '\n');
         felica_print_card_stat(data, temp_str);
@@ -199,6 +199,10 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
                 consumed = true;
             } else if(protocol == NfcDeviceProtocolFelica) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaData);
+                consumed = true;
+            } else if(protocol == NfcDeviceProtocolFelicaMonolithic) {
+                scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaSystem, 0);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaSystem);
                 consumed = true;
             }
         }

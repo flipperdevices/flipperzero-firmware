@@ -329,10 +329,12 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     return card_read;
 }
 
-static bool nfc_worker_read_felica(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+static bool nfc_worker_read_nfcf(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     bool read_success = false;
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    FelicaData* data = &nfc_worker->dev_data->felica_data;
+    FuriHalNfcFDevData* f_data = &nfc_data->f_data;
+
+    furi_hal_nfc_sleep();
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
@@ -341,8 +343,21 @@ static bool nfc_worker_read_felica(NfcWorker* nfc_worker, FuriHalNfcTxRxContext*
 
     do {
         if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
-        if(!felica_read_card(tx_rx, data, nfc_data->uid, nfc_data->f_data.pmm)) break;
-        read_success = true;
+        FelicaProtocol detected_protocol = felica_read_card(
+            tx_rx, &nfc_worker->dev_data->felica_data, nfc_data->uid, f_data->pmm);
+        switch(detected_protocol) {
+        case FelicaProtocolStandard:
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolFelica;
+            break;
+        case FelicaProtocolMonolithic:
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolFelicaMonolithic;
+            break;
+        case FelicaProtocolUnknown:
+        default:
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
+            break;
+        }
+        read_success = nfc_worker->dev_data->protocol != NfcDeviceProtocolUnknown;
     } while(false);
 
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
@@ -352,21 +367,121 @@ static bool nfc_worker_read_felica(NfcWorker* nfc_worker, FuriHalNfcTxRxContext*
     return read_success;
 }
 
-static bool nfc_worker_read_nfcf(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    FuriHalNfcFDevData* f_data = &nfc_data->f_data;
+static bool nfc_worker_read_felica_std(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    furi_assert(tx_rx != NULL);
+    furi_assert(nfc_worker != NULL);
 
-    bool card_read = false;
-    furi_hal_nfc_sleep();
-    if(felica_check_ic_type(f_data->pmm)) {
-        FURI_LOG_I(TAG, "FeliCa detected");
-        nfc_worker->dev_data->protocol = NfcDeviceProtocolFelica;
-        nfc_worker->dev_data->felica_data.type = felica_get_ic_type(f_data->pmm);
-        card_read = nfc_worker_read_felica(nfc_worker, tx_rx);
-    } else {
-        nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;
+    bool read_success = false;
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    FelicaData* data = &nfc_worker->dev_data->felica_data;
+
+    uint8_t* polled_idm = nfc_data->uid;
+    uint8_t* polled_pmm = nfc_data->f_data.pmm;
+
+    furi_assert(polled_idm != NULL);
+    furi_assert(polled_pmm != NULL);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
     }
-    return card_read;
+    do {
+        FelicaReader reader;
+        felica_reader_init(&reader, polled_idm, polled_pmm);
+        felica_init(data, felica_get_ic_type(polled_pmm));
+
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
+        FelicaReadResult result = felica_std_detect_and_read(tx_rx, data, &reader);
+        if(result == FelicaReadResultTagLost) {
+            FURI_LOG_W(TAG, "Tag lost");
+        }
+        // Return true when we identified the tag
+        read_success = result != FelicaReadResultTypeMismatch;
+    } while(false);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
+
+    return read_success;
+}
+
+static bool nfc_worker_read_felica_lite(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    furi_assert(tx_rx != NULL);
+    furi_assert(nfc_worker != NULL);
+
+    bool read_success = false;
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    FelicaData* data = &nfc_worker->dev_data->felica_data;
+
+    uint8_t* polled_idm = nfc_data->uid;
+    uint8_t* polled_pmm = nfc_data->f_data.pmm;
+
+    furi_assert(polled_idm != NULL);
+    furi_assert(polled_pmm != NULL);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+    do {
+        FelicaReader reader;
+        felica_reader_init(&reader, polled_idm, polled_pmm);
+        felica_init(data, felica_get_ic_type(polled_pmm));
+
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
+        FelicaReadResult result = felica_lite_detect_and_read(tx_rx, data, &reader);
+        if(result == FelicaReadResultTagLost) {
+            FURI_LOG_W(TAG, "Tag lost");
+        }
+        // Return true when we identified the tag
+        read_success = result != FelicaReadResultTypeMismatch;
+    } while(false);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
+
+    return read_success;
+}
+
+static bool nfc_worker_read_felica_ndef(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    furi_assert(tx_rx != NULL);
+    furi_assert(nfc_worker != NULL);
+
+    bool read_success = false;
+    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
+    FelicaData* data = &nfc_worker->dev_data->felica_data;
+
+    uint8_t* polled_idm = nfc_data->uid;
+    uint8_t* polled_pmm = nfc_data->f_data.pmm;
+
+    furi_assert(polled_idm != NULL);
+    furi_assert(polled_pmm != NULL);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_prepare_tx_rx(nfc_worker->reader_analyzer, tx_rx, false);
+        reader_analyzer_start(nfc_worker->reader_analyzer, ReaderAnalyzerModeDebugLog);
+    }
+    do {
+        FelicaReader reader;
+        felica_reader_init(&reader, polled_idm, polled_pmm);
+        felica_init(data, felica_get_ic_type(polled_pmm));
+
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
+        FelicaReadResult result = felica_ndef_detect_and_read(tx_rx, data, &reader);
+        if(result == FelicaReadResultTagLost) {
+            FURI_LOG_W(TAG, "Tag lost");
+        }
+        // Return true when we identified the tag
+        read_success = result != FelicaReadResultTypeMismatch;
+    } while(false);
+
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
+        reader_analyzer_stop(nfc_worker->reader_analyzer);
+    }
+
+    return read_success;
 }
 
 void nfc_worker_read(NfcWorker* nfc_worker) {
@@ -499,14 +614,25 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
                     break;
                 }
             } else if(nfc_data->type == FuriHalNfcTypeF) {
+                // TODO this is not enough to force a type. We need to refactor furi_hal_nfc_detect
+                // to be able to force select another type.
                 if(read_mode == NfcReadModeFelica) {
                     nfc_worker->dev_data->protocol = NfcDeviceProtocolFelica;
-                    if(nfc_worker_read_felica(nfc_worker, &tx_rx)) {
-                        nfc_worker->dev_data->protocol = NfcDeviceProtocolFelica;
-                        if(nfc_worker_read_felica(nfc_worker, &tx_rx)) {
-                            event = NfcWorkerEventReadFelica;
-                            break;
-                        }
+                    if(nfc_worker_read_felica_std(nfc_worker, &tx_rx)) {
+                        event = NfcWorkerEventReadFelica;
+                        break;
+                    }
+                } else if(read_mode == NfcReadModeFelicaLite) {
+                    nfc_worker->dev_data->protocol = NfcDeviceProtocolFelicaMonolithic;
+                    if(nfc_worker_read_felica_lite(nfc_worker, &tx_rx)) {
+                        event = NfcWorkerEventReadFelica;
+                        break;
+                    }
+                } else if(read_mode == NfcReadModeFelicaNDEF) {
+                    nfc_worker->dev_data->protocol = NfcDeviceProtocolFelicaMonolithic;
+                    if(nfc_worker_read_felica_ndef(nfc_worker, &tx_rx)) {
+                        event = NfcWorkerEventReadFelica;
+                        break;
                     }
                 } else if(read_mode == NfcReadModeNFCF) {
                     nfc_worker->dev_data->protocol = NfcDeviceProtocolUnknown;

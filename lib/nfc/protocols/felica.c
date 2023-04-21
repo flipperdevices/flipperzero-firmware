@@ -1060,49 +1060,130 @@ bool felica_std_dump_data(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader, Fe
     return true;
 }
 
-bool felica_read_card(
+void felica_init(FelicaData* data, FelicaICType ic_type) {
+    furi_assert(data != NULL);
+    FelicaSystemArray_init(data->systems);
+    data->type = ic_type;
+}
+
+void felica_reader_init(FelicaReader* reader, uint8_t* idm, uint8_t* pmm) {
+    furi_assert(reader != NULL && idm != NULL && pmm != NULL);
+    memset(reader, 0, sizeof(*reader));
+    memcpy(reader->current_idm, idm, 8);
+    memcpy(reader->current_pmm, pmm, 8);
+}
+
+FelicaReadResult felica_lite_detect_and_read(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaData* data,
+    FelicaReader* reader) {
+    furi_assert(tx_rx != NULL);
+    furi_assert(data != NULL);
+    furi_assert(reader != NULL);
+
+    if(data->type != FelicaICTypeLite && data->type != FelicaICTypeLiteS &&
+       !felica_std_select_system(tx_rx, reader, LITE_SYSTEM_CODE)) {
+        return FelicaReadResultTypeMismatch;
+    }
+
+    FURI_LOG_I(TAG, "Reading Felica Lite system");
+    FelicaSystem* lite_system =
+        felica_gen_monolithic_system_code(reader, data->systems, LITE_SYSTEM_CODE);
+    if(!felica_lite_dump_data(tx_rx, reader, data, lite_system)) {
+        return FelicaReadResultTagLost;
+    }
+    return FelicaReadResultSuccess;
+}
+
+FelicaReadResult felica_std_detect_and_read(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaData* data,
+    FelicaReader* reader) {
+    furi_assert(tx_rx != NULL);
+    furi_assert(data != NULL);
+    furi_assert(reader != NULL);
+
+    if(!felica_std_request_system_code(tx_rx, reader, data->systems)) {
+        return FelicaReadResultTypeMismatch;
+    }
+
+    FURI_LOG_I(TAG, "Reading Felica Standard system");
+
+    if(!felica_std_dump_data(tx_rx, reader, data)) {
+        return FelicaReadResultTagLost;
+    }
+
+    return FelicaReadResultSuccess;
+}
+
+FelicaReadResult felica_ndef_detect_and_read(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaData* data,
+    FelicaReader* reader) {
+    furi_assert(tx_rx != NULL);
+    furi_assert(data != NULL);
+    furi_assert(reader != NULL);
+
+    if(!felica_std_select_system(tx_rx, reader, NDEF_SYSTEM_CODE)) {
+        return FelicaReadResultTypeMismatch;
+    }
+
+    FURI_LOG_I(TAG, "Reading Felica NDEF system");
+    FelicaSystem* ndef_system =
+        felica_gen_monolithic_system_code(reader, data->systems, NDEF_SYSTEM_CODE);
+    if(!felica_ndef_dump_data(tx_rx, reader, data, ndef_system)) {
+        return FelicaReadResultTagLost;
+    }
+    return FelicaReadResultSuccess;
+}
+
+// TODO move this to nfc_worker?
+FelicaProtocol felica_read_card(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaData* data,
     uint8_t* polled_idm,
     uint8_t* polled_pmm) {
     furi_assert(tx_rx);
+    furi_assert(data);
     furi_assert(polled_idm);
     furi_assert(polled_pmm);
 
-    bool card_read = false;
+    FelicaReadResult result = FelicaReadResultTypeMismatch;
+    FelicaProtocol protocol = FelicaProtocolUnknown;
+
     do {
         FelicaReader reader;
-        memcpy(reader.current_idm, polled_idm, 8);
-        memcpy(reader.current_pmm, polled_pmm, 8);
+        felica_reader_init(&reader, polled_idm, polled_pmm);
+        felica_init(data, felica_get_ic_type(polled_pmm));
 
-        FelicaSystemArray_init(data->systems);
+        result = felica_std_detect_and_read(tx_rx, data, &reader);
+        if(result != FelicaReadResultTypeMismatch) {
+            protocol = FelicaProtocolStandard;
+            break;
+        }
 
-        if(data->type == FelicaICTypeLite || data->type == FelicaICTypeLiteS) {
-            FURI_LOG_I(TAG, "Reading Felica Lite system");
-            FelicaSystem* lite_system =
-                felica_gen_monolithic_system_code(&reader, data->systems, LITE_SYSTEM_CODE);
-            felica_lite_dump_data(tx_rx, &reader, data, lite_system);
-            card_read = true;
+        felica_reset(data);
+        result = felica_lite_detect_and_read(tx_rx, data, &reader);
+        if(result != FelicaReadResultTypeMismatch) {
+            protocol = FelicaProtocolMonolithic;
             break;
         }
-        if(data->type == FelicaICTypeLinkNDEF) {
-            FURI_LOG_I(TAG, "Reading Felica NDEF system");
-            FelicaSystem* ndef_system =
-                felica_gen_monolithic_system_code(&reader, data->systems, NDEF_SYSTEM_CODE);
-            card_read = felica_ndef_dump_data(tx_rx, &reader, data, ndef_system);
+
+        felica_reset(data);
+        result = felica_ndef_detect_and_read(tx_rx, data, &reader);
+        if(result != FelicaReadResultTypeMismatch) {
+            protocol = FelicaProtocolMonolithic;
             break;
         }
-        FURI_LOG_I(TAG, "Reading Felica Standard system");
-        if(!felica_std_request_system_code(tx_rx, &reader, data->systems)) {
-            break;
-        }
-        if(!felica_std_dump_data(tx_rx, &reader, data)) {
-            break;
-        }
-        card_read = true;
     } while(false);
 
-    return card_read;
+    if(result == FelicaReadResultTagLost) {
+        FURI_LOG_W(TAG, "Tag lost");
+    } else if(result == FelicaReadResultTypeMismatch) {
+        felica_clear(data);
+    }
+
+    return protocol;
 }
 
 void felica_service_clear(FelicaService* service) {
@@ -1200,7 +1281,7 @@ void felica_node_clear(FelicaNode* node) {
     }
 }
 
-void felica_clear(FelicaData* data) {
+void felica_reset(FelicaData* data) {
     furi_assert(data != NULL);
     for
         M_EACH(system, data->systems, FelicaSystemArray_t) {
@@ -1217,5 +1298,9 @@ void felica_clear(FelicaData* data) {
                 FelicaPublicServiceDict_clear(system->public_services);
             }
         }
+}
+
+void felica_clear(FelicaData* data) {
+    felica_reset(data);
     FelicaSystemArray_clear(data->systems);
 }

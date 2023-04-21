@@ -34,6 +34,7 @@ typedef enum {
     NfcDeviceProtocolMifareClassic,
     NfcDeviceProtocolMifareDesfire,
     NfcDeviceProtocolFelica,
+    NfcDeviceProtocolFelicaMonolithic,
 } NfcProtocol;
 
 typedef enum {
@@ -63,6 +64,8 @@ typedef enum {
     NfcReadModeEMV,
     NfcReadModeNFCA,
     NfcReadModeFelica,
+    NfcReadModeFelicaLite,
+    NfcReadModeFelicaNDEF,
     NfcReadModeNFCF,
 } NfcReadMode;
 

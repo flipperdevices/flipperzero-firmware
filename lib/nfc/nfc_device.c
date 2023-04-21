@@ -1272,7 +1272,9 @@ void nfc_device_data_clear(NfcDeviceData* dev_data) {
         mf_ul_reset(&dev_data->mf_ul_data);
     } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
         memset(&dev_data->emv_data, 0, sizeof(EmvData));
-    } else if(dev_data->protocol == NfcDeviceProtocolFelica) {
+    } else if(
+        dev_data->protocol == NfcDeviceProtocolFelica ||
+        dev_data->protocol == NfcDeviceProtocolFelicaMonolithic) {
         felica_clear(&dev_data->felica_data);
     }
     memset(&dev_data->nfc_data, 0, sizeof(FuriHalNfcDevData));
