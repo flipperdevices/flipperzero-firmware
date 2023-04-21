@@ -37,4 +37,5 @@ void nfc_poller_start(NfcPoller* instance, NfcPollerEventCallback callback, void
 
     instance->callback = callback;
     instance->context = context;
+    
 }

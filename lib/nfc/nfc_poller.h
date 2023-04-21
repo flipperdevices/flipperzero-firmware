@@ -4,13 +4,24 @@
 extern "C" {
 #endif
 
+#include "protocols/nfca_poller.h"
+#include "protocols/nfcb_poller.h"
+#include "protocols/mf_ultralight.h"
+
 typedef struct NfcPoller NfcPoller;
+
+typedef struct {
+    Nfc* nfc;
+    NfcaPoller* nfca_poller;
+} NfcPollerCollection;
 
 typedef enum {
     NfcPollerEventNfcaDetected,
     NfcPollerEventNfcbDetected,
     NfcPollerEventNfcfDetected,
     NfcPollerEventNfcvDetected,
+    NfcPollerEventMfUltralightDetected,
+    NfcPollerEventMfClassicDetected,
 } NfcPollerEvent;
 
 typedef void (*NfcPollerEventCallback)(NfcPollerEvent event, void* context);
