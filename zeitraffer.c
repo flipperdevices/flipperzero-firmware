@@ -247,7 +247,10 @@ int32_t zeitraffer_app(void* p) {
 					
 						if (WorkTime == 0) 
 							WorkTime = Delay;
-					
+						
+						if (Count == 1)
+							WorkTime = Time;  
+						
 						if (Count == 0) {
 							InfiniteShot = true; 
 							WorkCount = 1;

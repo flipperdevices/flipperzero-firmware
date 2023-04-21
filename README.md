@@ -26,13 +26,13 @@ TG: [t.me/scuko_bled](https://t.me/scuko_bled)
 
  - **вверх-вниз** - время.
  - **влево-вправо** - количество кадров
- 
- 0 кадров - бесконечный режим, -1 кадров - BULB
  - **зажатие стрелок** - ±10 кадров/секунд
  - **ОК** - пуск/пауза
  - Длинное нажатие **ОК** - включить/выключить подсветку
  - **назад** - сброс
  - длинное нажатие **назад** - выход
+
+Особые режимы: 0 кадров - бесконечная съёмка, -1 кадров - BULB, 1 кадр - простой одиночный таймер.
 
 При работающем таймере блокируются все кнопки кроме ОК.
 
@@ -67,6 +67,8 @@ based on https://github.com/zmactep/flipperzero-hello-world
  - Long press OK - turn on/off the backlight 
  - Back - reset 
  - Long press back - exit
+
+1 frame - simple timer, 0 frames - infinite mode, -1 frames - BULB mode
 
 When the timer is running, all buttons are blocked except OK.
 
