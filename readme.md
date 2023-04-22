@@ -25,7 +25,7 @@ Alternatively, [NARD flipper add-on](https://github.com/killergeek/nard) works.
 ## Development
 
  * Install git version of [asnc1](https://github.com/vlm/asn1c) (`brew install asn1c --head` on macos)
- * Run `make` in in root to generate asn1c files
+ * Run `asn1c -D ./lib/asn1 -no-gen-example -pdu=all seader.asn` in in root to generate asn1c files
  * Checkout or symlink to flipper-firmware's applications_user folder
  * `./fbt fap_seader` to build
  * `./fbt launch_app APPSRC=seader` to build/launch
