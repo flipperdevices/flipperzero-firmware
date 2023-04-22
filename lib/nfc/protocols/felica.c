@@ -196,6 +196,7 @@ static void felica_parse_service_attrib(
  * @param reader The FeliCa reader context.
  * @param expected_resp Expected response code. Must be an odd number.
  * @param always_succeed When set to true, skip status flags (sf1 and sf2) parsing.
+ * @param update_idm Set to true to update IDm stored in reader context instead of checking it.
  * @return The number of bytes parsed, or 0 when response is invalid or status flags are set.
  */
 static uint8_t felica_consume_header(

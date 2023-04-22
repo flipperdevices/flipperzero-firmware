@@ -1,11 +1,5 @@
 #include <inttypes.h>
 #include "../nfc_i.h"
-#include "core/string.h"
-#include "gui/modules/submenu.h"
-#include "gui/modules/text_box.h"
-#include "gui/scene_manager.h"
-#include "gui/view_dispatcher.h"
-#include "protocols/felica.h"
 #include <dolphin/dolphin.h>
 
 // State bit format: 0000000000ddssssnnnnnnnnnnnnnnnn
@@ -281,6 +275,9 @@ void nfc_scene_felica_system_on_enter(void* context) {
 
 bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
+    FuriHalNfcDevData* nfc_data = &nfc->dev->dev_data.nfc_data;
+    FelicaData* felica_data = &nfc->dev->dev_data.felica_data;
+
     SceneManager* scene_manager = nfc->scene_manager;
     ViewDispatcher* view_dispatcher = nfc->view_dispatcher;
     TextBox* text_box = nfc->text_box;
@@ -291,8 +288,7 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
 
     FelicaINode curr_inode = nfc_scene_felica_system_get_inode(state);
     uint8_t curr_system_index = nfc_scene_felica_system_get_sys_index(state);
-    FelicaSystem* curr_system =
-        FelicaSystemArray_get(nfc->dev->dev_data.felica_data.systems, curr_system_index);
+    FelicaSystem* curr_system = FelicaSystemArray_get(felica_data->systems, curr_system_index);
     furi_assert(curr_system != NULL);
 
     // Lite and monolithic NDEF connects to the previous scene directly and does not need navigation.
@@ -309,11 +305,29 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
     case SceneManagerEventTypeCustom: {
         switch(event.event) {
         case SubmenuIndexSystemInfo: {
-            // TODO show system info
+            // show system info
+            furi_string_reset(text_box_store);
+
+            // system IDm
+            uint8_t system_idm_first_byte = nfc_data->uid[0];
+            system_idm_first_byte |= curr_system_index << 4;
+
+            furi_string_cat_printf(text_box_store, "system IDm %02X", system_idm_first_byte);
+            for(size_t i = 1; i < 8; i++) {
+                furi_string_cat_printf(text_box_store, ":%02X", nfc_data->uid[i]);
+            }
+
+            text_box_set_text(text_box, furi_string_get_cstr(text_box_store));
+
+            uint32_t new_state = nfc_scene_felica_system_set_dump_mode(state, DumpModeSystemInfo);
+            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSystem, new_state);
+
+            text_box_set_font(text_box, TextBoxFontHex);
+            view_dispatcher_switch_to_view(view_dispatcher, NfcViewTextBox);
             break;
         }
         case SubmenuIndexAreaInfo: {
-            // TODO show area info
+            // show area info
             furi_string_reset(text_box_store);
 
             felica_std_describe_node_detailed(curr_node, text_box_store);
@@ -327,6 +341,7 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
             break;
         }
         default: {
+            // list area or show service
             size_t selected_index = event.event - SubmenuIndexDynamic;
             FelicaINode* selected_inode_p =
                 FelicaINodeArray_get(curr_node->area->nodes, selected_index);
