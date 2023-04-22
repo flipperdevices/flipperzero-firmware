@@ -26,6 +26,7 @@ typedef struct NFCSend {
 	OCTET_STRING_t	 data;
 	Protocol_t	 protocol;
 	long	 timeOut;
+	OCTET_STRING_t	*format	/* OPTIONAL */;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;
@@ -34,7 +35,7 @@ typedef struct NFCSend {
 /* Implementation */
 extern asn_TYPE_descriptor_t asn_DEF_NFCSend;
 extern asn_SEQUENCE_specifics_t asn_SPC_NFCSend_specs_1;
-extern asn_TYPE_member_t asn_MBR_NFCSend_1[3];
+extern asn_TYPE_member_t asn_MBR_NFCSend_1[4];
 
 #ifdef __cplusplus
 }

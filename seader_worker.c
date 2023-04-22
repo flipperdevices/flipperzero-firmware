@@ -6,6 +6,7 @@
 
 #define APDU_HEADER_LEN 5
 #define ASN1_PREFIX 6
+#define ASN1_DEBUG true
 
 #define RFAL_PICOPASS_TXRX_FLAGS                                                    \
     (FURI_HAL_NFC_LL_TXRX_FLAGS_CRC_TX_MANUAL | FURI_HAL_NFC_LL_TXRX_FLAGS_AGC_ON | \
@@ -159,12 +160,27 @@ bool mf_df_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
     return ATQA0 == 0x44 && ATQA1 == 0x03 && SAK == 0x20;
 }
 
+bool mf_classic_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+    UNUSED(ATQA1);
+    if((ATQA0 == 0x44 || ATQA0 == 0x04) && (SAK == 0x08 || SAK == 0x88 || SAK == 0x09)) {
+        return true;
+    } else if((ATQA0 == 0x01) && (ATQA1 == 0x0F) && (SAK == 0x01)) {
+        //skylanders support
+        return true;
+    } else if((ATQA0 == 0x42 || ATQA0 == 0x02) && (SAK == 0x18)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool read_nfc(SeaderUartBridge* seader_uart) {
     FuriHalNfcDevData nfc_data = {};
     bool rtn = false;
     if(furi_hal_nfc_detect(&nfc_data, 300)) {
         // Process first found device
         if(nfc_data.type == FuriHalNfcTypeA) {
+            FURI_LOG_D(TAG, "NFC-A detected");
             CardDetails_t* cardDetails = 0;
             cardDetails = calloc(1, sizeof *cardDetails);
             assert(cardDetails);
@@ -182,6 +198,12 @@ bool read_nfc(SeaderUartBridge* seader_uart) {
             if(mf_df_check_card_type(nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak)) {
                 FURI_LOG_D(TAG, "Desfire");
                 OCTET_STRING_t atqa = {.buf = fake_desfire_ats, .size = sizeof(fake_desfire_ats)};
+                cardDetails->atqa = &atqa;
+                sendCardDetected(seader_uart, cardDetails);
+                rtn = true;
+            } else if(mf_classic_check_card_type(nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak)) {
+                FURI_LOG_D(TAG, "MFC");
+                OCTET_STRING_t atqa = {.buf = nfc_data.atqa, .size = sizeof(nfc_data.atqa)};
                 cardDetails->atqa = &atqa;
                 sendCardDetected(seader_uart, cardDetails);
                 rtn = true;
@@ -419,7 +441,8 @@ void sendNFCRx(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t len) {
     ASN_STRUCT_FREE(asn_DEF_Response, response);
 }
 
-bool iso14443aTransmit(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t len) {
+bool iso14443aTransmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) {
+    SeaderUartBridge* seader_uart = seader_worker->uart;
     FuriHalNfcTxRxContext tx_rx = {.tx_rx_type = FuriHalNfcTxRxTypeDefault};
     memcpy(&tx_rx.tx_data, buffer, len);
     tx_rx.tx_bits = len * 8;
@@ -435,6 +458,9 @@ bool iso14443aTransmit(SeaderUartBridge* seader_uart, uint8_t* buffer, size_t le
         sendNFCRx(seader_uart, tx_rx.rx_data, length);
     } else {
         FURI_LOG_W(TAG, "Bad exchange");
+        if(seader_worker->callback) {
+            seader_worker->callback(SeaderWorkerEventFail, seader_worker->context);
+        }
     }
 
     return false;
@@ -481,7 +507,6 @@ bool iso15693Transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) 
 }
 
 bool parseNfcCommandTransmit(SeaderWorker* seader_worker, NFCSend_t* nfcSend) {
-    SeaderUartBridge* seader_uart = seader_worker->uart;
     long timeOut = nfcSend->timeOut;
     Protocol_t protocol = nfcSend->protocol;
     FrameProtocol_t frameProtocol = protocol.buf[1];
@@ -510,7 +535,7 @@ bool parseNfcCommandTransmit(SeaderWorker* seader_worker, NFCSend_t* nfcSend) {
     if(frameProtocol == FrameProtocol_iclass) {
         return iso15693Transmit(seader_worker, nfcSend->data.buf, nfcSend->data.size);
     } else if(frameProtocol == FrameProtocol_nfc) {
-        return iso14443aTransmit(seader_uart, nfcSend->data.buf, nfcSend->data.size);
+        return iso14443aTransmit(seader_worker, nfcSend->data.buf, nfcSend->data.size);
     }
     return false;
 }

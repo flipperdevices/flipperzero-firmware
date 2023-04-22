@@ -59,7 +59,8 @@ NFCCommand ::= CHOICE {
 NFCSend ::= SEQUENCE {
   data [0] IMPLICIT OCTET STRING,
   protocol [1] IMPLICIT Protocol,
-  timeOut [2] IMPLICIT INTEGER
+  timeOut [2] IMPLICIT INTEGER,
+  format [5] IMPLICIT OCTET STRING OPTIONAL
 }
 
 -- omnikey_5326_dfr_softwaredeveloperguide 4.2
