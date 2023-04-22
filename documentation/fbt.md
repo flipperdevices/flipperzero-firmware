@@ -3,6 +3,8 @@
 FBT is the entry point for firmware-related commands and utilities.
 It is invoked by `./fbt` in the firmware project root directory. Internally, it is a wrapper around [scons](https://scons.org/) build system.
 
+If you don't need all features of `fbt` - like building the whole firmware - and only want to build and debug a single application, you can use [ufbt](https://pypi.org/project/ufbt/).
+
 ## Environment
 
 To use `fbt`, you only need `git` installed in your system.
@@ -72,7 +74,7 @@ To run cleanup (think of `make clean`) for specified targets, add the `-c` optio
 - `get_stlink` - output serial numbers for attached STLink probes. Used for specifying an adapter with `OPENOCD_ADAPTER_SERIAL=...`.
 - `lint`, `format` - run clang-format on the C source code to check and reformat it according to the `.clang-format` specs.
 - `lint_py`, `format_py` - run [black](https://black.readthedocs.io/en/stable/index.html) on the Python source code, build system files & application manifests.
-- `firmware_pvs` - generate a PVS Studio report for the firmware. Requires PVS Studio to be availabe on your system's `PATH`.
+- `firmware_pvs` - generate a PVS Studio report for the firmware. Requires PVS Studio to be available on your system's `PATH`.
 - `cli` - start a Flipper CLI session over USB.
 
 ### Firmware targets
@@ -103,6 +105,7 @@ To run cleanup (think of `make clean`) for specified targets, add the `-c` optio
 - `--options optionfile.py` (default value `fbt_options.py`) - load a file with multiple configuration values
 - `--extra-int-apps=app1,app2,appN` - force listed apps to be built as internal with the `firmware` target
 - `--extra-ext-apps=app1,app2,appN` - force listed apps to be built as external with the `firmware_extapps` target
+- `--extra-define=A --extra-define=B=C ` - extra global defines that will be passed to the C/C++ compiler, can be specified multiple times
 - `--proxy-env=VAR1,VAR2` - additional environment variables to expose to subprocesses spawned by `fbt`. By default, `fbt` sanitizes the execution environment and doesn't forward all inherited environment variables. You can find the list of variables that are always forwarded in the `environ.scons` file.
 
 ## Configuration
