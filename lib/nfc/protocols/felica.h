@@ -336,7 +336,7 @@ uint32_t felica_estimate_timing_us(uint8_t timing, uint8_t units);
  * @param units Number of units (blocks, services, etc.) to operate on.
  * @return Estimated timeout in milliseconds, or FELICA_MRT_MIN_ALLOWED_MS if less than that.
  */
-uint32_t felica_estimate_timing_furi(uint8_t timing, uint8_t units);
+uint16_t felica_estimate_timing_furi(uint8_t timing, uint8_t units);
 
 bool felica_check_ic_type(uint8_t* PMm);
 FelicaICType felica_get_ic_type(uint8_t* PMm);

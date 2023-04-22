@@ -15,9 +15,9 @@ uint32_t felica_estimate_timing_us(uint8_t timing, uint8_t units) {
     return FELICA_MRT_TIME_CONSTANT_US * scale * (base_cost_factor + unit_cost_factor * units);
 }
 
-uint32_t felica_estimate_timing_furi(uint8_t timing, uint8_t units) {
+uint16_t felica_estimate_timing_furi(uint8_t timing, uint8_t units) {
     uint32_t us = felica_estimate_timing_us(timing, units);
-    uint32_t ms = us / 1000;
+    uint16_t ms = us / 1000;
     if(ms < FELICA_MRT_MIN_ALLOWED_MS) {
         ms = FELICA_MRT_MIN_ALLOWED_MS;
     } else if(us % 1000 != 0) {
@@ -599,11 +599,18 @@ bool felica_lite_dump_data(
         MEM_CONFIG_LITE_BLOCK,
     };
 
+    uint16_t read_timeout =
+        felica_estimate_timing_furi(reader->current_pmm[FELICA_PMM_READ_MRT], 1);
+    uint16_t write_timeout =
+        felica_estimate_timing_furi(reader->current_pmm[FELICA_PMM_WRITE_MRT], 1);
+    uint16_t read_timeout_double =
+        felica_estimate_timing_furi(reader->current_pmm[FELICA_PMM_READ_MRT], 2);
+
     uint8_t block_data[FELICA_BLOCK_SIZE * 4];
 
     tx_rx->tx_bits =
         8 * felica_lite_prepare_unencrypted_read(tx_rx->tx_data, reader, true, fixed_blocks, 1);
-    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+    if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout)) {
         FURI_LOG_W(TAG, "Bad exchange verifying Lite system code");
         return false;
     }
@@ -620,7 +627,7 @@ bool felica_lite_dump_data(
 
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
                              tx_rx->tx_data, reader, true, &fixed_blocks[1], 1);
-    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+    if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout)) {
         FURI_LOG_W(TAG, "Bad exchange reading D_ID");
         return false;
     }
@@ -642,7 +649,7 @@ bool felica_lite_dump_data(
 
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
                              tx_rx->tx_data, reader, true, &fixed_blocks[2], 1);
-    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+    if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout)) {
         FURI_LOG_W(TAG, "Bad exchange reading ID");
         return false;
     }
@@ -662,7 +669,7 @@ bool felica_lite_dump_data(
     memset(block_data, 0, FELICA_BLOCK_SIZE);
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_write(
                              tx_rx->tx_data, reader, &fixed_blocks[3], 1, block_data);
-    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+    if(!furi_hal_nfc_tx_rx(tx_rx, write_timeout)) {
         FURI_LOG_W(TAG, "Bad exchange writing random challenge");
         return false;
     }
@@ -673,7 +680,7 @@ bool felica_lite_dump_data(
 
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
                              tx_rx->tx_data, reader, true, &fixed_blocks[4], 2);
-    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+    if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout_double)) {
         FURI_LOG_W(TAG, "Bad exchange reading CK and MAC");
         return false;
     }
@@ -691,7 +698,7 @@ bool felica_lite_dump_data(
 
     tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
                              tx_rx->tx_data, reader, true, &fixed_blocks[6], 2);
-    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+    if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout_double)) {
         FURI_LOG_W(TAG, "Bad exchange reading CKV and MC");
         return false;
     }
@@ -718,7 +725,7 @@ bool felica_lite_dump_data(
 
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
                                  tx_rx->tx_data, reader, true, &block_number, 1);
-        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+        if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout)) {
             FURI_LOG_W(TAG, "Bad exchange reading blocks");
             return false;
         }
@@ -746,7 +753,7 @@ bool felica_lite_dump_data(
 
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
                                  tx_rx->tx_data, reader, true, fixed_s_blocks, 2);
-        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+        if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout_double)) {
             FURI_LOG_W(TAG, "Bad exchange reading ID with MAC_A");
             return false;
         }
@@ -760,7 +767,7 @@ bool felica_lite_dump_data(
 
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
                                  tx_rx->tx_data, reader, true, &fixed_s_blocks[2], 2);
-        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+        if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout_double)) {
             FURI_LOG_W(TAG, "Bad exchange reading ID with MAC_A");
             return false;
         }
@@ -815,7 +822,7 @@ bool felica_std_select_system(
     FURI_LOG_D(TAG, "Selecting system %04X", system_code);
 
     tx_rx->tx_bits = 8 * felica_prepare_polling(tx_rx->tx_data, system_code, 0x0, 0);
-    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+    if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
         FURI_LOG_E(TAG, "Bad exchange when selecting system with Polling command");
         return false;
     }
@@ -830,8 +837,9 @@ bool felica_std_request_system_code(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaReader* reader,
     FelicaSystemArray_t systems) {
+    uint16_t timeout = felica_estimate_timing_furi(reader->current_pmm[FELICA_PMM_FIXED_MRT], 0);
     tx_rx->tx_bits = 8 * felica_prepare_request_system_code(tx_rx->tx_data, reader);
-    if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+    if(!furi_hal_nfc_tx_rx(tx_rx, timeout)) {
         FURI_LOG_E(TAG, "Bad exchange requesting system code");
         return false;
     }
@@ -858,6 +866,8 @@ bool felica_std_traverse_system(
         return false;
     }
 
+    uint16_t timeout = felica_estimate_timing_furi(reader->current_pmm[FELICA_PMM_FIXED_MRT], 0);
+
     // Traverse all areas and services, populate filesystem tree and update public_services table.
     // Do NOT early return in this loop. There will be leaks.
     // Instead use break without setting result to true.
@@ -865,7 +875,7 @@ bool felica_std_traverse_system(
         // Execute transaction
         tx_rx->tx_bits =
             8 * felica_prepare_search_service_code(tx_rx->tx_data, reader, cursor & 0xffff);
-        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+        if(!furi_hal_nfc_tx_rx(tx_rx, timeout)) {
             FURI_LOG_E(TAG, "Bad exchange when searching node");
             break;
         }
@@ -999,6 +1009,8 @@ bool felica_std_dump_public_service(
         return false;
     }
 
+    uint16_t timeout = felica_estimate_timing_furi(reader->current_pmm[FELICA_PMM_READ_MRT], 1);
+
     for(int_least32_t cursor = 0; cursor < 0x10000; cursor++) {
         FelicaBlock* new_block = FelicaBlockArray_push_new(service->blocks);
         furi_assert(new_block != NULL);
@@ -1015,7 +1027,7 @@ bool felica_std_dump_public_service(
                                  sizeof(service_codes) / sizeof(service_codes[0]),
                                  blocks,
                                  1);
-        if(!furi_hal_nfc_tx_rx_full(tx_rx)) {
+        if(!furi_hal_nfc_tx_rx(tx_rx, timeout)) {
             FURI_LOG_E(TAG, "Bad exchange when reading service");
             break;
         }
