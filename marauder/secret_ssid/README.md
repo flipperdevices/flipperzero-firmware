@@ -4,7 +4,7 @@
 *secret_ssid* allows you to pass short *secret messages* using SSIDs.  For example, you can tell someone nearby your burner phone number or YouTube link.
 
 ## Typical usage
-Let's says you needed to tell a friend the A-Team's mobile phone number is "5556162".  Rather than write it on a napkin at a hotdog stand, you can walk into the coffee shop and use Marauder on your Flipper zero to do a *Beacon spam* with any of the following SSIDs: AL6fvOPr, BOI5O5Ag, CRU3Cjn7 or DUgPtAbN.  If you think someone is carefully watching the SSIDs, can you use an expanded ssid format like "ATTCRU3Cjn7", so it looks just like an AT&T router. 
+Let's say you needed to tell a friend the A-Team's mobile phone number is "5556162".  Rather than write it on a napkin at a hotdog stand, you can walk into the coffee shop and use Marauder on your Flipper zero to do a *Beacon spam* with any of the following SSIDs: AL6fvOPr, BOI5O5Ag, CRU3Cjn7 or DUgPtAbN.  If you think someone is carefully watching the SSIDs, can you use an expanded ssid format like "ATTCRU3Cjn7", so it looks just like an AT&T router. 
 
 Your friend just needs to run the PowerShell script on their laptop to get your message.  They don't even need to buy a Flipper -- which might help them save enough to _hire the A-Team_.
 
