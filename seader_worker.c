@@ -511,13 +511,13 @@ bool parseNfcCommandTransmit(SeaderWorker* seader_worker, NFCSend_t* nfcSend) {
     Protocol_t protocol = nfcSend->protocol;
     FrameProtocol_t frameProtocol = protocol.buf[1];
 
+#ifdef ASN1_DEBUG
     char display[SEADER_UART_RX_BUF_SIZE * 2 + 1] = {0};
     for(uint8_t i = 0; i < nfcSend->data.size; i++) {
         snprintf(display + (i * 2), sizeof(display), "%02x", nfcSend->data.buf[i]);
     }
 
-#ifdef ASN1_DEBUG
-    char protocolName[32] = {0};
+    char protocolName[8] = {0};
     (&asn_DEF_FrameProtocol)
         ->op->print_struct(&asn_DEF_FrameProtocol, &frameProtocol, 1, toString, protocolName);
 
