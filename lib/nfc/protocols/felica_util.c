@@ -2,16 +2,6 @@
 #include "core/string.h"
 #include <furi.h>
 
-static const uint32_t TIME_CONSTANT_US = 302;
-
-// TODO move this to felica.c
-uint_least32_t felica_estimate_timing_us(uint_least8_t timing, uint_least8_t units) {
-    uint_least32_t base_cost_factor = 1 + (timing & 0x7);
-    uint_least32_t unit_cost_factor = 1 + ((timing >> 3) & 0x7);
-    uint_least32_t scale = 1 << ((timing >> 6) * 2);
-    return TIME_CONSTANT_US * scale * (base_cost_factor + unit_cost_factor * units);
-}
-
 FuriString* felica_get_system_name(FelicaSystem* system) {
     uint16_t code = system->code;
 
@@ -127,7 +117,7 @@ void felica_std_cat_service(FelicaService* service, FuriString* out) {
     // Print access conditions
     furi_string_cat(out, "access (code):");
     for
-        M_EACH(acl_p, service->access_control_list, FelicaServiceAttributeList_t) {
+        M_EACH(acl_p, service->access_control_list, FelicaServiceAttributeSet_t) {
             furi_assert(acl_p != NULL);
             FelicaServiceAttribute acl = *acl_p;
             furi_string_cat_printf(
@@ -182,80 +172,76 @@ void felica_print_card_stat(FelicaData* data, FuriString* out) {
     furi_assert(data->systems != NULL);
     furi_assert(out != NULL);
 
-    switch(data->type) {
-    // Monolithic Lite
-    case FelicaICTypeLiteS:
-    case FelicaICTypeLite: {
-        FelicaSystem* lite_system = FelicaSystemArray_get(data->systems, 0);
+    // Monolithic systems
+    if(data->is_monolithic) {
+        FelicaSystem* system = FelicaSystemArray_get(data->systems, 0);
+        furi_assert(system != NULL);
+        // Lite
+        if(system->is_lite) {
+            furi_assert(!system->is_monolithic_ndef);
 
-        furi_assert(lite_system != NULL);
-        furi_assert(lite_system->is_lite);
-        furi_assert(!lite_system->is_monolithic_ndef);
-
-        size_t read = 0;
-        const size_t total_blocks =
-            sizeof(lite_system->lite_info.S_PAD) / sizeof(lite_system->lite_info.S_PAD[0]);
-        for(size_t i = 0; i < total_blocks; i++) {
-            if(lite_system->lite_info.S_PAD[i] != NULL) {
-                read++;
+            size_t read = 0;
+            const size_t total_blocks =
+                sizeof(system->lite_info.S_PAD) / sizeof(system->lite_info.S_PAD[0]);
+            for(size_t i = 0; i < total_blocks; i++) {
+                if(system->lite_info.S_PAD[i] != NULL) {
+                    read++;
+                }
             }
+
+            furi_string_cat_printf(out, "%zd/%zd blocks read", read, total_blocks);
+            return;
         }
 
-        furi_string_cat_printf(out, "%zd/%zd blocks read", read, total_blocks);
-        break;
+        // NDEF aka 12fc
+        if(system->is_monolithic_ndef) {
+            furi_assert(!system->is_lite);
+            furi_assert(system->ndef_node.service != NULL);
+
+            size_t blocks = FelicaBlockArray_size(system->ndef_node.service->blocks);
+
+            furi_string_cat_printf(out, "%zd blocks read", blocks);
+            return;
+        }
+
+        // Should never reach here
+        furi_assert(false);
     }
-    // Monolithic NDEF aka 12fc
-    case FelicaICTypeLinkNDEF: {
-        FelicaSystem* ndef_system = FelicaSystemArray_get(data->systems, 0);
 
-        furi_assert(ndef_system != NULL);
-        furi_assert(!ndef_system->is_lite);
-        furi_assert(ndef_system->is_monolithic_ndef);
-        furi_assert(ndef_system->ndef_node.service != NULL);
-
-        size_t blocks = FelicaBlockArray_size(ndef_system->ndef_node.service->blocks);
-
-        furi_string_cat_printf(out, "%zd blocks read", blocks);
-        break;
-    }
     // Standard/Hybrid
-    default: {
-        size_t num_systems = FelicaSystemArray_size(data->systems);
-        size_t num_areas = 0, num_services = 0;
+    size_t num_systems = FelicaSystemArray_size(data->systems);
+    size_t num_areas = 0, num_services = 0;
+    for
+        M_EACH(system, data->systems, FelicaSystemArray_t) {
+            furi_assert(system != NULL);
+            // Don't count Lite or monolithic NDEF systems as they are completely different.
+            if(system->is_lite || system->is_monolithic_ndef) {
+                continue;
+            }
         for
-            M_EACH(system, data->systems, FelicaSystemArray_t) {
-                furi_assert(system != NULL);
-                // Don't count Lite or monolithic NDEF systems as they are completely different.
-                if(system->is_lite || system->is_monolithic_ndef) {
-                    continue;
-                }
-            for
-                M_EACH(node, system->nodes, FelicaNodeArray_t) {
-                    furi_assert(node != NULL);
-                    if(node->type == FelicaNodeTypeArea) {
-                        num_areas++;
-                    } else if(node->type == FelicaNodeTypeService) {
-                        furi_assert(node->service != NULL);
-                        furi_assert(node->service->access_control_list != NULL);
-                        num_services +=
-                            FelicaServiceAttributeList_size(node->service->access_control_list);
-                    }
+            M_EACH(node, system->nodes, FelicaNodeArray_t) {
+                furi_assert(node != NULL);
+                if(node->type == FelicaNodeTypeArea) {
+                    num_areas++;
+                } else if(node->type == FelicaNodeTypeService) {
+                    furi_assert(node->service != NULL);
+                    furi_assert(node->service->access_control_list != NULL);
+                    num_services +=
+                        FelicaServiceAttributeSet_size(node->service->access_control_list);
                 }
             }
+        }
 
-        furi_string_cat_printf(out, "%zd system", num_systems);
-        if(num_systems > 1) {
-            furi_string_push_back(out, 's');
-        }
-        furi_string_cat_printf(out, ", %zd area", num_areas);
-        if(num_areas > 1) {
-            furi_string_push_back(out, 's');
-        }
-        furi_string_cat_printf(out, ", %zd service", num_services);
-        if(num_services > 1) {
-            furi_string_push_back(out, 's');
-        }
-        break;
+    furi_string_cat_printf(out, "%zd system", num_systems);
+    if(num_systems > 1) {
+        furi_string_push_back(out, 's');
     }
+    furi_string_cat_printf(out, ", %zd area", num_areas);
+    if(num_areas > 1) {
+        furi_string_push_back(out, 's');
+    }
+    furi_string_cat_printf(out, ", %zd service", num_services);
+    if(num_services > 1) {
+        furi_string_push_back(out, 's');
     }
 }

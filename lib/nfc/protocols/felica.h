@@ -4,11 +4,8 @@
 #include <m-array.h>
 #include <m-dict.h>
 
-#define NFCF_F_SIG (13560000.0)
-#define MRT_T_SIG 302064.89 //ns, 256 * 16 / NFC_F_SIG * 1e9
-#define MRT_T_SIG_x4 1208259.56 //ns, MRT_T_SIG * (4 ** 1)
-#define MRT_T_SIG_x16 4833038.24 //ns, MRT_T_SIG * (4 ** 2)
-#define MRT_T_SIG_x64 19332152.96 //ns, MRT_T_SIG * (4 ** 2)
+#define FELICA_MRT_TIME_CONSTANT_US 302
+#define FELICA_MRT_MIN_ALLOWED_MS 10
 
 #define FELICA_PMM_MRT_BASE 2
 
@@ -149,27 +146,25 @@ typedef enum {
 } FelicaServiceAttribute;
 
 DICT_SET_DEF(
-    FelicaServiceAttributeList,
+    FelicaServiceAttributeSet,
     FelicaServiceAttribute,
     M_ENUM_OPLIST(FelicaServiceAttribute, FelicaServiceAttributeAuthRW))
-#define M_OPL_FelicaServiceAttributeList_t() \
-    ARRAY_OPLIST(                            \
-        FelicaServiceAttributeList,          \
+#define M_OPL_FelicaServiceAttributeSet_t() \
+    ARRAY_OPLIST(                           \
+        FelicaServiceAttributeSet,          \
         M_ENUM_OPLIST(FelicaServiceAttribute, FelicaServiceAttributeAuthRW))
 
 typedef struct {
     uint8_t data[FELICA_BLOCK_SIZE];
 } FelicaBlock;
 
-// TODO properly remove this
-//ARRAY_DEF(FelicaBlockList, FelicaBlock*, M_PTR_OPLIST)
 ARRAY_DEF(FelicaBlockArray, FelicaBlock, M_POD_OPLIST)
 #define M_OPL_FelicaBlockArray_t() ARRAY_OPLIST(FelicaBlockArray, M_POD_OPLIST)
 
 typedef struct {
     uint16_t number;
     FelicaServiceType type;
-    FelicaServiceAttributeList_t access_control_list; // accounts for overlap services
+    FelicaServiceAttributeSet_t access_control_list; // accounts for overlap services
     bool is_extended_overlap; // We don't know much about this currently. will always be false
     union {
         FelicaBlockArray_t blocks;
@@ -281,14 +276,19 @@ typedef struct _FelicaSystem_t {
     };
 } FelicaSystem;
 
-// TODO properly remove this
-//ARRAY_DEF(FelicaSystemList, FelicaSystem*, M_PTR_OPLIST)
 ARRAY_DEF(FelicaSystemArray, FelicaSystem, M_POD_OPLIST)
 #define M_OPL_FelicaSystemArray_t() ARRAY_OPLIST(FelicaSystemArray, M_POD_OPLIST)
 
+/** Represents data dumped from a FeliCa tag */
 typedef struct {
+    /** IC type as encoded in the PMm. */
     FelicaICType type;
-    uint8_t subtype;
+    /**
+     * True if the system is a monolithic system (only system on card with no support for
+     * Request System Code command). Used to distinguish between e.g. Lite and SD2 w/ Lite partition.
+     */
+    bool is_monolithic;
+    /** Array of available systems. */
     FelicaSystemArray_t systems;
 } FelicaData;
 
@@ -324,6 +324,19 @@ typedef struct {
         };
     };
 } FelicaSearchServiceCodeResult;
+
+/** Generate microsecond timeout value from MRT entries in PMm.
+ * @param timing Raw MRT value.
+ * @param units Number of units (blocks, services, etc.) to operate on.
+ * @return Estimated timeout in microseconds.
+ */
+uint32_t felica_estimate_timing_us(uint8_t timing, uint8_t units);
+/** Generate millisecond timeout value from MRT entries in PMm for use with furi_nfc.
+ * @param timing Raw MRT value.
+ * @param units Number of units (blocks, services, etc.) to operate on.
+ * @return Estimated timeout in milliseconds, or FELICA_MRT_MIN_ALLOWED_MS if less than that.
+ */
+uint32_t felica_estimate_timing_furi(uint8_t timing, uint8_t units);
 
 bool felica_check_ic_type(uint8_t* PMm);
 FelicaICType felica_get_ic_type(uint8_t* PMm);
@@ -471,11 +484,6 @@ FelicaReadResult felica_ndef_detect_and_read(
     FuriHalNfcTxRxContext* tx_rx,
     FelicaData* data,
     FelicaReader* reader);
-FelicaProtocol felica_read_card(
-    FuriHalNfcTxRxContext* tx_rx,
-    FelicaData* data,
-    uint8_t* polled_idm,
-    uint8_t* polled_pmm);
 void felica_clear(FelicaData* data);
 
 void felica_service_clear(FelicaService* service);

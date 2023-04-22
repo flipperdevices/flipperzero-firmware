@@ -70,31 +70,31 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         furi_string_cat(temp_str, "\nMRT (1 node/blk):");
         furi_string_cat_printf(
             temp_str,
-            "\n- ReqSvc: %" PRIuLEAST32 "us",
+            "\n- ReqSvc: %" PRIu32 "us",
             felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_VARIABLE_MRT], 1));
         furi_string_cat_printf(
             temp_str,
-            "\n- Fixed: %" PRIuLEAST32 "us",
+            "\n- Fixed: %" PRIu32 "us",
             felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_FIXED_MRT], 0));
         furi_string_cat_printf(
             temp_str,
-            "\n- Auth1: %" PRIuLEAST32 "us",
+            "\n- Auth1: %" PRIu32 "us",
             felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_MUTUAL_AUTH_MRT], 1));
         furi_string_cat_printf(
             temp_str,
-            "\n- Auth2: %" PRIuLEAST32 "us",
+            "\n- Auth2: %" PRIu32 "us",
             felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_MUTUAL_AUTH_MRT], 0));
         furi_string_cat_printf(
             temp_str,
-            "\n- Read: %" PRIuLEAST32 "us",
+            "\n- Read: %" PRIu32 "us",
             felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_READ_MRT], 1));
         furi_string_cat_printf(
             temp_str,
-            "\n- Write: %" PRIuLEAST32 "us",
+            "\n- Write: %" PRIu32 "us",
             felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_WRITE_MRT], 1));
         furi_string_cat_printf(
             temp_str,
-            "\n- Other: %" PRIuLEAST32 "us",
+            "\n- Other: %" PRIu32 "us",
             felica_estimate_timing_us(nfc_data->f_data.pmm[FELICA_PMM_OTHER_MRT], 0));
         furi_string_cat(temp_str, "\n");
 
