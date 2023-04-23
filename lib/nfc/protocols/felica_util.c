@@ -1,4 +1,5 @@
 #include "./felica.h"
+#include "./felica_util.h"
 #include "core/string.h"
 #include <furi.h>
 
@@ -6,8 +7,10 @@ FuriString* felica_get_system_name(FelicaSystem* system) {
     uint16_t code = system->code;
 
     const char* prefix;
-    if(code == SUICA_SYSTEM_CODE || code == 0x0003) {
+    if(code == SUICA_SYSTEM_CODE) {
         prefix = "SuiCa";
+    } else if(code == CYBERNET_SYSTEM_CODE) {
+        prefix = "CJRC Ticketing";
     } else if(code == NDEF_SYSTEM_CODE) {
         prefix = "NDEF";
     } else if(code == HCE_F_SYSTEM_CODE) {
@@ -243,5 +246,46 @@ void felica_print_card_stat(FelicaData* data, FuriString* out) {
     furi_string_cat_printf(out, ", %zd service", num_services);
     if(num_services > 1) {
         furi_string_push_back(out, 's');
+    }
+}
+
+#define SPEC_TRIPLET(sp) felica_spec_major(sp), felica_spec_minor(sp), felica_spec_patch(sp)
+
+void felica_print_card_spec(FelicaSpec* spec, FuriString* out) {
+    furi_assert(spec != NULL);
+    furi_assert(out != NULL);
+    bool has_options = false;
+
+    if(!felica_spec_valid(spec->basic_version)) {
+        furi_string_cat(out, "version unknown");
+        return;
+    }
+    furi_string_cat_printf(out, "version %d.%d.%d", SPEC_TRIPLET(spec->basic_version));
+
+    furi_string_cat(out, "\noptions:");
+
+    if(felica_spec_valid(spec->des_version)) {
+        furi_string_cat_printf(out, "\n- des %d.%d.%d", SPEC_TRIPLET(spec->des_version));
+        has_options = true;
+    }
+
+    if(felica_spec_valid(spec->ext_overlap_version)) {
+        furi_string_cat_printf(
+            out, "\n- xoverlap %d.%d.%d", SPEC_TRIPLET(spec->ext_overlap_version));
+        has_options = true;
+    }
+
+    if(felica_spec_valid(spec->value_limited_purse_version)) {
+        furi_string_cat_printf(out, "\n- vlp %d.%d.%d", SPEC_TRIPLET(spec->des_version));
+        has_options = true;
+    }
+
+    if(felica_spec_valid(spec->comm_with_mac_version)) {
+        furi_string_cat_printf(out, "\n- cwmac %d.%d.%d", SPEC_TRIPLET(spec->des_version));
+        has_options = true;
+    }
+
+    if(!has_options) {
+        furi_string_cat(out, "\n- none");
     }
 }

@@ -9,3 +9,4 @@ void felica_std_hexdump_blocks(FelicaBlockArray_t blocks, FuriString* out);
 void felica_std_cat_service(FelicaService* service, FuriString* out);
 void felica_std_describe_node_detailed(FelicaNode* node, FuriString* out);
 void felica_print_card_stat(FelicaData* data, FuriString* out);
+void felica_print_card_spec(FelicaSpec* spec, FuriString* out);

@@ -508,6 +508,65 @@ bool felica_parse_search_service_code(
     return true;
 }
 
+uint8_t felica_prepare_request_spec_version(uint8_t* dest, FelicaReader* reader) {
+    dest[0] = FELICA_REQUEST_SPEC_VERSION_CMD;
+    memcpy(&dest[1], reader->current_idm, 8);
+    dest[9] = 0x00;
+    dest[10] = 0x00;
+    return 11;
+}
+
+bool felica_parse_request_spec_version(
+    uint8_t* buf,
+    uint8_t len,
+    FelicaReader* reader,
+    FelicaSpec* out) {
+    furi_assert(reader != NULL);
+    furi_assert(buf != NULL);
+    furi_assert(out != NULL);
+
+    // Set all entries to invalid
+    memset(out, 0, sizeof(*out));
+
+    uint8_t consumed =
+        felica_consume_header(buf, len, reader, FELICA_REQUEST_SPEC_VERSION_RES, false, false);
+    if(consumed == 0) {
+        return false;
+    }
+
+    len -= consumed;
+    buf += consumed;
+
+    if(len < 4) {
+        FURI_LOG_E(TAG, "Invalid response length for Request Specification Version command");
+        return false;
+    }
+
+    uint8_t format_version = buf[0];
+    if(format_version != 0x00) {
+        FURI_LOG_E(TAG, "Unexpected specification list version");
+        return false;
+    }
+
+    out->basic_version = (buf[2] << 8) | buf[1];
+
+    uint8_t options = buf[3];
+
+    len -= 4;
+    buf += 4;
+
+    if(len < 2 * options) {
+        FURI_LOG_E(TAG, "Invalid response length for Request Specification Version command");
+        return false;
+    }
+
+    for(uint8_t option = 0; option < options; option++) {
+        out->option_versions[option] = (buf[option * 2 + 1] << 8) | buf[option * 2];
+    }
+
+    return true;
+}
+
 uint8_t felica_prepare_polling(uint8_t* dest, uint16_t system, uint8_t request, uint8_t timeslot) {
     dest[0] = 0x00;
     dest[1] = system >> 8;
@@ -1091,11 +1150,29 @@ bool felica_std_dump_data(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader, Fe
     return true;
 }
 
+bool felica_std_get_spec_versions(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaSpec* spec) {
+    uint16_t timeout = felica_estimate_timing_furi(reader->current_pmm[FELICA_PMM_FIXED_MRT], 0);
+    tx_rx->tx_bits = 8 * felica_prepare_request_spec_version(tx_rx->tx_data, reader);
+    if(!furi_hal_nfc_tx_rx(tx_rx, timeout)) {
+        FURI_LOG_E(TAG, "Bad exchange requesting specification version");
+        return false;
+    }
+    if(!felica_parse_request_spec_version(tx_rx->rx_data, tx_rx->rx_bits / 8, reader, spec)) {
+        FURI_LOG_E(TAG, "Bad response to Request Specification Version command");
+        return false;
+    }
+    return true;
+}
+
 void felica_init(FelicaData* data, FelicaICType ic_type) {
     furi_assert(data != NULL);
     FelicaSystemArray_init(data->systems);
     data->type = ic_type;
     data->is_monolithic = false;
+    memset(&data->spec, 0, sizeof(data->spec));
 }
 
 void felica_reader_init(FelicaReader* reader, uint8_t* idm, uint8_t* pmm) {
@@ -1142,6 +1219,9 @@ FelicaReadResult felica_std_detect_and_read(
 
     FURI_LOG_I(TAG, "Reading Felica Standard system");
     data->is_monolithic = false;
+
+    // Intentionally not checking for errors due to this being non-fatal
+    felica_std_get_spec_versions(tx_rx, reader, &data->spec);
 
     if(!felica_std_dump_data(tx_rx, reader, data)) {
         return FelicaReadResultTagLost;

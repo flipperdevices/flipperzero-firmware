@@ -28,6 +28,16 @@
 #define FELICA_NODE_CODE_MAX 0xfffe
 #define FELICA_NODE_CODE_INVALID 0xffff
 
+#define FELICA_INODE_INVALID -1
+#define FELICA_INODE_MAX 0xffff
+#define FELICA_INODE_MASK 0xffff
+
+#define FELICA_SPEC_VERSION_VALID_MASK 0x8000
+#define FELICA_SPEC_VERSION_VALID_SHIFTS 15
+#define FELICA_SPEC_VERSION_MASK 0xf
+#define FELICA_SPEC_VERSION_MAJOR_SHIFTS 8
+#define FELICA_SPEC_VERSION_MINOR_SHIFTS 4
+
 #define CYBERNET_SYSTEM_CODE 0x0003
 #define NDEF_SYSTEM_CODE 0x12fc
 #define HCE_F_SYSTEM_CODE 0x4000
@@ -66,15 +76,13 @@
 #define FELICA_UNENCRYPTED_WRITE_CMD 0x08
 #define FELICA_SEARCH_SERVICE_CODE_CMD 0x0a
 #define FELICA_REQUEST_SYSTEM_CODE_CMD 0x0c
+#define FELICA_REQUEST_SPEC_VERSION_CMD 0x3c
 
 #define FELICA_UNENCRYPTED_READ_RES 0x07
 #define FELICA_UNENCRYPTED_WRITE_RES 0x09
 #define FELICA_SEARCH_SERVICE_CODE_RES 0x0b
 #define FELICA_REQUEST_SYSTEM_CODE_RES 0x0d
-
-#define FELICA_INODE_INVALID -1
-#define FELICA_INODE_MAX 0xffff
-#define FELICA_INODE_MASK 0xffff
+#define FELICA_REQUEST_SPEC_VERSION_RES 0x3d
 
 typedef ssize_t FelicaINode;
 
@@ -153,6 +161,28 @@ DICT_SET_DEF(
     ARRAY_OPLIST(                           \
         FelicaServiceAttributeSet,          \
         M_ENUM_OPLIST(FelicaServiceAttribute, FelicaServiceAttributeAuthRW))
+
+typedef struct {
+    uint16_t basic_version;
+    union {
+        uint16_t option_versions[5];
+        struct {
+            uint16_t des_version;
+            uint16_t rfu;
+            uint16_t ext_overlap_version;
+            uint16_t value_limited_purse_version;
+            uint16_t comm_with_mac_version;
+        };
+    };
+} FelicaSpec;
+
+#define felica_spec_valid(spec) \
+    ((spec & FELICA_SPEC_VERSION_VALID_MASK) == FELICA_SPEC_VERSION_VALID_MASK)
+#define felica_spec_major(spec) \
+    ((spec >> FELICA_SPEC_VERSION_MAJOR_SHIFTS) & FELICA_SPEC_VERSION_MASK)
+#define felica_spec_minor(spec) \
+    ((spec >> FELICA_SPEC_VERSION_MINOR_SHIFTS) & FELICA_SPEC_VERSION_MASK)
+#define felica_spec_patch(spec) (spec & FELICA_SPEC_VERSION_MASK)
 
 typedef struct {
     uint8_t data[FELICA_BLOCK_SIZE];
@@ -288,6 +318,8 @@ typedef struct {
      * Request System Code command). Used to distinguish between e.g. Lite and SD2 w/ Lite partition.
      */
     bool is_monolithic;
+    /** Spec versions. */
+    FelicaSpec spec;
     /** Array of available systems. */
     FelicaSystemArray_t systems;
 } FelicaData;
@@ -384,6 +416,13 @@ bool felica_parse_search_service_code(
     FelicaReader* reader,
     FelicaSearchServiceCodeResult* result);
 
+uint8_t felica_prepare_request_spec_version(uint8_t* dest, FelicaReader* reader);
+bool felica_parse_request_spec_version(
+    uint8_t* buf,
+    uint8_t len,
+    FelicaReader* reader,
+    FelicaSpec* out);
+
 bool felica_lite_can_read_without_mac(uint8_t* mc_r_restr, uint8_t block_number);
 
 void felica_define_normal_block(FelicaService* service, uint16_t number, uint8_t* data);
@@ -463,7 +502,7 @@ bool felica_std_dump_public_service(
     FelicaService* service,
     uint16_t service_code);
 
-/** Dump a publicly accessible service.
+/** Dump all publicly accessible services.
  *
  * @param tx_rx NFC context.
  * @param reader FeliCa reader context.
@@ -471,6 +510,18 @@ bool felica_std_dump_public_service(
  * @return true if successful.
  */
 bool felica_std_dump_data(FuriHalNfcTxRxContext* tx_rx, FelicaReader* reader, FelicaData* data);
+
+/** Get spec version from tag.
+ *
+ * @param tx_rx NFC context.
+ * @param reader FeliCa reader context.
+ * @param spec Spec returned by tag.
+ * @return true if successful.
+ */
+bool felica_std_get_spec_versions(
+    FuriHalNfcTxRxContext* tx_rx,
+    FelicaReader* reader,
+    FelicaSpec* spec);
 
 FelicaReadResult felica_lite_detect_and_read(
     FuriHalNfcTxRxContext* tx_rx,
