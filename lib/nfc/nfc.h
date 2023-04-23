@@ -33,6 +33,11 @@ typedef struct {
     NfcEventData data;
 } NfcEvent;
 
+typedef enum {
+    NfcCommandContinue,
+    NfcCommandAbort,
+} NfcCommand;
+
 typedef void (*NfcEventCallback)(NfcEvent event, void* context);
 
 typedef enum {

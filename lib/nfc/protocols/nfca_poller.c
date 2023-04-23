@@ -177,11 +177,14 @@ static void nfca_poller_event_callback(NfcEvent event, void* context) {
             if(error == NfcaErrorNone) {
                 nfca_poller_event.type = NfcaPollerEventTypeReady;
                 instance->state = NfcaPollerActivated;
+                nfca_poller_event.data.error = error;
+                instance->callback(nfca_poller_event, instance->context);
             } else {
                 nfca_poller_event.type = NfcaPollerEventTypeError;
+                nfca_poller_event.data.error = error;
+                instance->callback(nfca_poller_event, instance->context);
+                furi_delay_ms(100);
             }
-            nfca_poller_event.data.error = error;
-            instance->callback(nfca_poller_event, instance->context);
         } else {
             nfca_poller_event.type = NfcaPollerEventTypeReady;
             nfca_poller_event.data.error = NfcaErrorNone;
