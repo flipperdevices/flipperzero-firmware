@@ -92,16 +92,6 @@ typedef enum {
     FelicaReadResultTagLost,
 } FelicaReadResult;
 
-/** Protocol/general type of the tag */
-typedef enum {
-    /** Unknown or error when trying to determine protocol. */
-    FelicaProtocolUnknown,
-    /** Standard protocol. Has a filesystem tree present on tag. */
-    FelicaProtocolStandard,
-    /** Monolithic protocol. Has no filesystem tree and only 1 selectable system (either Lite or NDEF). */
-    FelicaProtocolMonolithic,
-} FelicaProtocol;
-
 typedef enum {
     FelicaICTypeRC_SA24_10K, // RC-SA24/1x
     FelicaICTypeRC_SA24_6K, // RC-SA24/1x1
@@ -126,10 +116,12 @@ typedef enum {
     FelicaICTypeMobileIC_V1,
     FelicaICTypeLite, // RC-S965
     FelicaICTypeLiteS, // RC-S966
-    FelicaICTypeLink, // RC-S967,
-    FelicaICTypeLinkNDEF, // Monolithic NDEF tag that's not standard
+    FelicaICTypeLinkLiteS, // Link series in Lite-S emulation/HT mode
+    FelicaICTypeLinkPlug, // Link series in Plug mode
+    FelicaICTypeLinkNfcDep, // Link series in NFC-DEP mode
     FelicaICTypePlug, // RC-S926
-    FelicaICTypeSuica, // https://www.tuv-nederland.nl/assets/files/cerfiticaten/2019/07/cr-nscib-cc-10-30076-cr.pdf
+    FelicaICTypeSuica,
+    FelicaICTypeJREMTicket, // https://www.tuv-nederland.nl/assets/files/cerfiticaten/2019/07/cr-nscib-cc-10-30076-cr.pdf
 } FelicaICType;
 
 typedef enum {

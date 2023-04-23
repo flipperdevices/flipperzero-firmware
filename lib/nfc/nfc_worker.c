@@ -357,7 +357,7 @@ static bool nfc_worker_read_nfcf(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
 
         // Quick monolithic system check based on IC code
         if(data->type == FelicaICTypeLite || data->type == FelicaICTypeLiteS ||
-           data->type == FelicaICTypeLink) {
+           data->type == FelicaICTypeLinkLiteS) {
             felica_reset(data);
             result = felica_lite_detect_and_read(tx_rx, data, &reader);
             if(result != FelicaReadResultTypeMismatch) {
@@ -367,7 +367,7 @@ static bool nfc_worker_read_nfcf(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
             }
             skip_lite = true;
 
-        } else if(data->type == FelicaICTypeLinkNDEF) {
+        } else if(data->type == FelicaICTypeLinkNfcDep) {
             felica_reset(data);
             result = felica_ndef_detect_and_read(tx_rx, data, &reader);
             if(result != FelicaReadResultTypeMismatch) {

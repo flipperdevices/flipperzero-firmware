@@ -3,13 +3,18 @@
 #include "core/string.h"
 #include <furi.h>
 
-FuriString* felica_get_system_name(FelicaSystem* system) {
+void felica_describe_system(FelicaSystem* system, FuriString* out) {
     uint16_t code = system->code;
 
     const char* prefix;
     if(code == SUICA_SYSTEM_CODE) {
+        // OG SuiCa only
         prefix = "SuiCa";
     } else if(code == CYBERNET_SYSTEM_CODE) {
+        // https://web.archive.org/web/20180507210145/http://www.wdic.org/w/RAIL/%E3%82%B5%E3%82%A4%E3%83%90%E3%83%8D%E8%A6%8F%E6%A0%BC%20(IC%E3%82%AB%E3%83%BC%E3%83%89)
+        // CJRC == Congress of Japan Railway Cybernetics, also nicknamed Cybernet. Now part of JREA
+        // JREA == Japan Railway Engineers' Association
+        // Relation to JREM: JREM integrates the hardware/software, JREA/CJRC makes the standard.
         prefix = "CJRC Ticketing";
     } else if(code == NDEF_SYSTEM_CODE) {
         prefix = "NDEF";
@@ -40,10 +45,11 @@ FuriString* felica_get_system_name(FelicaSystem* system) {
     } else if(code == PLUG_SYSTEM_CODE) {
         prefix = "FeliCa Plug";
     } else {
-        return furi_string_alloc_printf("System %04X", code);
+        furi_string_cat_printf(out, "System %04X", code);
+        return;
     }
 
-    return furi_string_alloc_printf("%s (%04X)", prefix, code);
+    furi_string_cat_printf(out, "%s (%04X)", prefix, code);
 }
 
 const char* felica_get_service_type_name(FelicaServiceType type) {

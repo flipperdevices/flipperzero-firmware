@@ -1,7 +1,6 @@
 #include "./felica.h"
 
-FuriString* felica_get_system_name(FelicaSystem* system);
-FuriString* felica_get_service_name(FelicaService* service);
+void felica_describe_system(FelicaSystem* system, FuriString* out);
 const char* felica_get_service_type_name(FelicaServiceType type);
 const char* felica_get_service_attrib_name(FelicaServiceAttribute attrib, FelicaServiceType type);
 void felica_std_describe_node(FelicaNode* node, FuriString* result);

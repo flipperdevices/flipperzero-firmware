@@ -31,9 +31,9 @@ bool felica_check_ic_type(uint8_t* PMm) {
     uint8_t ic_type = PMm[1];
 
     bool is_valid_ic = false;
-    if(ic_type == 0xff) { // RC-S967 in nfc-dep
+    if(ic_type == 0xff) { // Link in nfc-dep
         is_valid_ic = true;
-    } else if(ic_type == 0xf2) { // RC-S732?
+    } else if(ic_type == 0xf2) { // Link in Lite-S emulation/HT mode
         is_valid_ic = true;
     } else if(ic_type == 0xf0 || ic_type == 0xf1) { // Lite(S)
         is_valid_ic = true;
@@ -90,21 +90,22 @@ bool felica_check_ic_type(uint8_t* PMm) {
 }
 
 FelicaICType felica_get_ic_type(uint8_t* PMm) {
+    // Link IC type allocation: https://www.sony.net/Products/felica/business/tech-support/data/flink_usmnl_1.02.pdf
     uint8_t rom_type = PMm[0];
     uint8_t ic_type = PMm[1];
 
     UNUSED(rom_type);
     switch(ic_type) {
     case 0xff:
-        return FelicaICTypeLinkNDEF;
+        return FelicaICTypeLinkNfcDep;
     case 0xf2:
-        return FelicaICTypeLink;
+        return FelicaICTypeLinkLiteS;
     case 0xf1:
         return FelicaICTypeLiteS;
     case 0xf0:
         return FelicaICTypeLite;
     case 0xe1:
-        return FelicaICTypeLink;
+        return FelicaICTypeLinkPlug;
     case 0xe0:
         return FelicaICTypePlug;
     case 0x48:
@@ -123,7 +124,7 @@ FelicaICType felica_get_ic_type(uint8_t* PMm) {
     case 0x32:
         return FelicaICTypeSD1WithDES;
     case 0x31:
-        return FelicaICTypeSuica;
+        return FelicaICTypeJREMTicket;
     case 0x20:
         return FelicaICTypeFRAM_4K;
     case 0x1f:

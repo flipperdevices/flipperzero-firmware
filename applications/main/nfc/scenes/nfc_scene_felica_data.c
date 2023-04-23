@@ -1,8 +1,4 @@
 #include "../nfc_i.h"
-#include "gui/modules/submenu.h"
-#include "gui/modules/text_box.h"
-#include "gui/scene_manager.h"
-#include "gui/view_dispatcher.h"
 #include <dolphin/dolphin.h>
 
 enum SubmenuIndex {
@@ -20,21 +16,24 @@ void nfc_scene_felica_data_on_enter(void* context) {
     Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
     FelicaData* data = &nfc->dev->dev_data.felica_data;
+    FuriString* system_name = furi_string_alloc();
 
     submenu_add_item(
         submenu, "Card Info", SubmenuIndexCardInfo, nfc_scene_felica_data_submenu_callback, nfc);
     uint8_t i = SubmenuIndexDynamic;
     for
         M_EACH(current_system, data->systems, FelicaSystemArray_t) {
-            FuriString* system_name = felica_get_system_name(current_system);
+            felica_describe_system(current_system, system_name);
             submenu_add_item(
                 submenu,
                 furi_string_get_cstr(system_name),
                 i++,
                 nfc_scene_felica_data_submenu_callback,
                 nfc);
-            furi_string_free(system_name);
+            furi_string_reset(system_name);
         }
+
+    furi_string_free(system_name);
 
     submenu_set_selected_item(
         nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaData) >> 1);
@@ -68,8 +67,9 @@ bool nfc_scene_felica_data_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else {
             uint8_t system_index = (index - SubmenuIndexDynamic) & 0xf;
-            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSystem, system_index << 16);
-            scene_manager_next_scene(scene_manager, NfcSceneFelicaSystem);
+            scene_manager_set_scene_state(
+                scene_manager, NfcSceneFelicaSysData, system_index << 16);
+            scene_manager_next_scene(scene_manager, NfcSceneFelicaSysData);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {

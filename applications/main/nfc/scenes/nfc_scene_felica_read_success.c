@@ -1,5 +1,4 @@
 #include "../nfc_i.h"
-#include "core/string.h"
 
 void nfc_scene_felica_read_success_widget_callback(
     GuiButtonType result,

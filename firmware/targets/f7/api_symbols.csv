@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,11.25,,
+Version,+,11.26,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -804,13 +804,12 @@ Function,-,felica_area_clear,void,FelicaArea*
 Function,-,felica_check_ic_type,_Bool,uint8_t*
 Function,-,felica_clear,void,FelicaData*
 Function,-,felica_define_normal_block,void,"FelicaService*, uint16_t, uint8_t*"
+Function,-,felica_describe_system,void,"FelicaSystem*, FuriString*"
 Function,-,felica_estimate_timing_furi,uint16_t,"uint8_t, uint8_t"
 Function,-,felica_estimate_timing_us,uint32_t,"uint8_t, uint8_t"
 Function,-,felica_get_ic_type,FelicaICType,uint8_t*
 Function,-,felica_get_service_attrib_name,const char*,"FelicaServiceAttribute, FelicaServiceType"
-Function,-,felica_get_service_name,FuriString*,FelicaService*
 Function,-,felica_get_service_type_name,const char*,FelicaServiceType
-Function,-,felica_get_system_name,FuriString*,FelicaSystem*
 Function,-,felica_init,void,"FelicaData*, FelicaICType"
 Function,-,felica_lite_can_read_without_mac,_Bool,"uint8_t*, uint8_t"
 Function,-,felica_lite_clear,void,FelicaLiteInfo*

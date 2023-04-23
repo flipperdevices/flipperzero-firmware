@@ -1,6 +1,5 @@
 #include <inttypes.h>
 #include "../nfc_i.h"
-#include <dolphin/dolphin.h>
 
 // State bit format: 0000000000ddssssnnnnnnnnnnnnnnnn
 // s: system index
@@ -28,35 +27,35 @@ enum DumpMode {
     DumpModeSystemInfo,
 };
 
-void nfc_scene_felica_system_submenu_callback(void* context, uint32_t index) {
+void nfc_scene_felica_sys_data_submenu_callback(void* context, uint32_t index) {
     Nfc* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
-static inline uint8_t nfc_scene_felica_system_get_sys_index(uint32_t state) {
+static inline uint8_t nfc_scene_felica_sys_data_get_sys_index(uint32_t state) {
     return (state >> STATE_SYS_INDEX_SHIFTS) & STATE_SYS_INDEX_MASK;
 }
 
-static inline uint8_t nfc_scene_felica_system_get_dump_mode(uint32_t state) {
+static inline uint8_t nfc_scene_felica_sys_data_get_dump_mode(uint32_t state) {
     return (state >> STATE_DUMP_MODE_SHIFTS) & STATE_DUMP_MODE_MASK;
 }
 
-static inline FelicaINode nfc_scene_felica_system_get_inode(uint32_t state) {
+static inline FelicaINode nfc_scene_felica_sys_data_get_inode(uint32_t state) {
     return state & STATE_INODE_MASK;
 }
 
-static inline uint32_t nfc_scene_felica_system_set_inode(uint32_t state, FelicaINode inode) {
+static inline uint32_t nfc_scene_felica_sys_data_set_inode(uint32_t state, FelicaINode inode) {
     furi_assert(inode > FELICA_INODE_INVALID && inode <= FELICA_INODE_MAX);
     return (state & (~STATE_INODE_MASK)) | (inode & FELICA_INODE_MASK);
 }
 
-static inline uint32_t nfc_scene_felica_system_set_dump_mode(uint32_t state, uint8_t mode) {
+static inline uint32_t nfc_scene_felica_sys_data_set_dump_mode(uint32_t state, uint8_t mode) {
     return (state & (~(STATE_DUMP_MODE_MASK << STATE_DUMP_MODE_SHIFTS))) |
            ((mode & STATE_DUMP_MODE_MASK) << STATE_DUMP_MODE_SHIFTS);
 }
 
-static void nfc_scene_felica_system_load_node(
+static void nfc_scene_felica_sys_data_load_node(
     Nfc* nfc,
     FelicaSystem* system,
     FelicaNode* node,
@@ -77,7 +76,7 @@ static void nfc_scene_felica_system_load_node(
                 submenu,
                 "System Info",
                 SubmenuIndexSystemInfo,
-                nfc_scene_felica_system_submenu_callback,
+                nfc_scene_felica_sys_data_submenu_callback,
                 nfc);
         }
 
@@ -85,7 +84,7 @@ static void nfc_scene_felica_system_load_node(
             submenu,
             "Area Info",
             SubmenuIndexAreaInfo,
-            nfc_scene_felica_system_submenu_callback,
+            nfc_scene_felica_sys_data_submenu_callback,
             nfc);
 
         FuriString* subnode_desc = furi_string_alloc();
@@ -117,7 +116,7 @@ static void nfc_scene_felica_system_load_node(
                     submenu,
                     furi_string_get_cstr(subnode_desc),
                     i,
-                    nfc_scene_felica_system_submenu_callback,
+                    nfc_scene_felica_sys_data_submenu_callback,
                     nfc);
                 i++;
                 if(i > NfcCustomEventReserved) {
@@ -146,7 +145,7 @@ static void nfc_scene_felica_system_load_node(
     }
 }
 
-static void nfc_scene_felica_system_load_lite_info(Nfc* nfc, FelicaLiteInfo* lite_info) {
+static void nfc_scene_felica_sys_data_load_lite_info(Nfc* nfc, FelicaLiteInfo* lite_info) {
     furi_assert(nfc != NULL);
     furi_assert(lite_info != NULL);
 
@@ -225,7 +224,7 @@ static void nfc_scene_felica_system_load_lite_info(Nfc* nfc, FelicaLiteInfo* lit
     text_box_set_text(text_box, furi_string_get_cstr(text_box_store));
 }
 
-static void nfc_scene_felica_system_load_service_hexdump(Nfc* nfc, FelicaService* service) {
+static void nfc_scene_felica_sys_data_load_service_hexdump(Nfc* nfc, FelicaService* service) {
     furi_assert(service != NULL);
     furi_assert(service->blocks != NULL);
     TextBox* text_box = nfc->text_box;
@@ -236,19 +235,19 @@ static void nfc_scene_felica_system_load_service_hexdump(Nfc* nfc, FelicaService
     text_box_set_text(text_box, furi_string_get_cstr(text_box_store));
 }
 
-void nfc_scene_felica_system_on_enter(void* context) {
+void nfc_scene_felica_sys_data_on_enter(void* context) {
     Nfc* nfc = context;
-    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSystem);
+    uint32_t state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneFelicaSysData);
 
-    FelicaINode curr_inode = nfc_scene_felica_system_get_inode(state);
-    uint8_t curr_system_index = nfc_scene_felica_system_get_sys_index(state);
+    FelicaINode curr_inode = nfc_scene_felica_sys_data_get_inode(state);
+    uint8_t curr_system_index = nfc_scene_felica_sys_data_get_sys_index(state);
     FelicaSystem* curr_system =
         FelicaSystemArray_get(nfc->dev->dev_data.felica_data.systems, curr_system_index);
     furi_assert(curr_system != NULL);
 
     if(curr_system->is_lite) {
         furi_assert(curr_system->code == LITE_SYSTEM_CODE);
-        nfc_scene_felica_system_load_lite_info(nfc, &curr_system->lite_info);
+        nfc_scene_felica_sys_data_load_lite_info(nfc, &curr_system->lite_info);
         text_box_set_font(nfc->text_box, TextBoxFontHex);
         view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
         return;
@@ -258,7 +257,7 @@ void nfc_scene_felica_system_on_enter(void* context) {
         FelicaNode* ndef_node = &curr_system->ndef_node;
         furi_assert(ndef_node->type == FelicaNodeTypeService);
         furi_assert(ndef_node->service != NULL);
-        nfc_scene_felica_system_load_service_hexdump(nfc, ndef_node->service);
+        nfc_scene_felica_sys_data_load_service_hexdump(nfc, ndef_node->service);
         text_box_set_font(nfc->text_box, TextBoxFontHex);
         view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
         return;
@@ -267,13 +266,13 @@ void nfc_scene_felica_system_on_enter(void* context) {
     FelicaNode* curr_node = felica_std_inode_lookup(curr_system, curr_inode);
     furi_assert(curr_node != NULL);
 
-    nfc_scene_felica_system_load_node(
+    nfc_scene_felica_sys_data_load_node(
         nfc, curr_system, curr_node, FELICA_INODE_INVALID, DumpModeNodeContent);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
     return;
 }
 
-bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
+bool nfc_scene_felica_sys_data_on_event(void* context, SceneManagerEvent event) {
     Nfc* nfc = context;
     FuriHalNfcDevData* nfc_data = &nfc->dev->dev_data.nfc_data;
     FelicaData* felica_data = &nfc->dev->dev_data.felica_data;
@@ -284,10 +283,10 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
     FuriString* text_box_store = nfc->text_box_store;
 
     bool consumed = false;
-    uint32_t state = scene_manager_get_scene_state(scene_manager, NfcSceneFelicaSystem);
+    uint32_t state = scene_manager_get_scene_state(scene_manager, NfcSceneFelicaSysData);
 
-    FelicaINode curr_inode = nfc_scene_felica_system_get_inode(state);
-    uint8_t curr_system_index = nfc_scene_felica_system_get_sys_index(state);
+    FelicaINode curr_inode = nfc_scene_felica_sys_data_get_inode(state);
+    uint8_t curr_system_index = nfc_scene_felica_sys_data_get_sys_index(state);
     FelicaSystem* curr_system = FelicaSystemArray_get(felica_data->systems, curr_system_index);
     furi_assert(curr_system != NULL);
 
@@ -319,8 +318,9 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
 
             text_box_set_text(text_box, furi_string_get_cstr(text_box_store));
 
-            uint32_t new_state = nfc_scene_felica_system_set_dump_mode(state, DumpModeSystemInfo);
-            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSystem, new_state);
+            uint32_t new_state =
+                nfc_scene_felica_sys_data_set_dump_mode(state, DumpModeSystemInfo);
+            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSysData, new_state);
 
             text_box_set_font(text_box, TextBoxFontHex);
             view_dispatcher_switch_to_view(view_dispatcher, NfcViewTextBox);
@@ -333,8 +333,8 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
             felica_std_describe_node_detailed(curr_node, text_box_store);
             text_box_set_text(text_box, furi_string_get_cstr(text_box_store));
 
-            uint32_t new_state = nfc_scene_felica_system_set_dump_mode(state, DumpModeAreaInfo);
-            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSystem, new_state);
+            uint32_t new_state = nfc_scene_felica_sys_data_set_dump_mode(state, DumpModeAreaInfo);
+            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSysData, new_state);
 
             text_box_set_font(text_box, TextBoxFontHex);
             view_dispatcher_switch_to_view(view_dispatcher, NfcViewTextBox);
@@ -349,9 +349,9 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
             FelicaINode selected_inode = *selected_inode_p;
             FelicaNode* next_node = felica_std_inode_lookup(curr_system, selected_inode);
             furi_assert(next_node != NULL);
-            uint32_t new_state = nfc_scene_felica_system_set_inode(state, selected_inode);
-            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSystem, new_state);
-            nfc_scene_felica_system_load_node(
+            uint32_t new_state = nfc_scene_felica_sys_data_set_inode(state, selected_inode);
+            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSysData, new_state);
+            nfc_scene_felica_sys_data_load_node(
                 nfc, curr_system, next_node, FELICA_INODE_INVALID, DumpModeNodeContent);
             if(next_node->type == FelicaNodeTypeService) {
                 text_box_set_font(text_box, TextBoxFontHex);
@@ -363,14 +363,13 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
         break;
     }
     case SceneManagerEventTypeBack: {
-        uint8_t prev_dump_mode = nfc_scene_felica_system_get_dump_mode(state);
+        uint8_t prev_dump_mode = nfc_scene_felica_sys_data_get_dump_mode(state);
         switch(prev_dump_mode) {
         case DumpModeAreaInfo:
         case DumpModeSystemInfo: {
-            uint32_t new_state = nfc_scene_felica_system_set_dump_mode(state, DumpModeNodeContent);
-            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSystem, new_state);
-            nfc_scene_felica_system_load_node(
-                nfc, curr_system, curr_node, FELICA_INODE_INVALID, prev_dump_mode);
+            uint32_t new_state =
+                nfc_scene_felica_sys_data_set_dump_mode(state, DumpModeNodeContent);
+            scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSysData, new_state);
             view_dispatcher_switch_to_view(view_dispatcher, NfcViewMenu);
             consumed = true;
             break;
@@ -381,9 +380,9 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
             if(parent_inode != FELICA_INODE_INVALID) {
                 FelicaNode* next_node = felica_std_inode_lookup(curr_system, parent_inode);
                 furi_assert(next_node != NULL);
-                uint32_t new_state = nfc_scene_felica_system_set_inode(state, parent_inode);
-                scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSystem, new_state);
-                nfc_scene_felica_system_load_node(
+                uint32_t new_state = nfc_scene_felica_sys_data_set_inode(state, parent_inode);
+                scene_manager_set_scene_state(scene_manager, NfcSceneFelicaSysData, new_state);
+                nfc_scene_felica_sys_data_load_node(
                     nfc, curr_system, next_node, curr_inode, DumpModeNodeContent);
                 // Returning from a service to area
                 if(curr_node->type == FelicaNodeTypeService) {
@@ -404,7 +403,7 @@ bool nfc_scene_felica_system_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void nfc_scene_felica_system_on_exit(void* context) {
+void nfc_scene_felica_sys_data_on_exit(void* context) {
     Nfc* nfc = context;
     submenu_reset(nfc->submenu);
     text_box_reset(nfc->text_box);
