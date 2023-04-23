@@ -448,7 +448,7 @@ void save_barcode(CreateView* create_view_object) {
 
         flipper_format_write_string_cstr(ff, "Version", FILE_VERSION);
 
-        flipper_format_write_comment_cstr(ff, "Types - UPC-A, EAN-8, EAN-13, CODE-39, CODE-128");
+        flipper_format_write_comment_cstr(ff, "Types - UPC-A, EAN-8, EAN-13, CODE-39, CODE-128, Codabar");
 
         flipper_format_write_string_cstr(ff, "Type", barcode_type->name);
 

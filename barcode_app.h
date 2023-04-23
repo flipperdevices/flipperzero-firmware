@@ -26,6 +26,9 @@
 //the folder where the encodings are located
 #define BARCODE_DATA_FILE_DIR_PATH EXT_PATH("apps_data/barcode_data")
 
+//the folder where the codabar encoding table is located
+#define CODABAR_DICT_FILE_PATH BARCODE_DATA_FILE_DIR_PATH "/codabar_encodings.txt"
+
 //the folder where the code 39 encoding table is located
 #define CODE39_DICT_FILE_PATH BARCODE_DATA_FILE_DIR_PATH "/code39_encodings.txt"
 

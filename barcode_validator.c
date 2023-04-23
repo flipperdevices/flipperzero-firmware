@@ -13,6 +13,9 @@ void barcode_loader(BarcodeData* barcode_data) {
     case CODE128:
         code_128_loader(barcode_data);
         break;
+    case CODABAR:
+        codabar_loader(barcode_data);
+        break;
     case UNKNOWN:
         barcode_data->reason = UnsupportedType;
         barcode_data->valid = false;
@@ -36,6 +39,7 @@ int calculate_check_digit(BarcodeData* barcode_data) {
         break;
     case CODE39:
     case CODE128:
+    case CODABAR:
     case UNKNOWN:
     default:
         break;
@@ -332,6 +336,63 @@ void code_128_loader(BarcodeData* barcode_data) {
 
     //add the stop code
     furi_string_cat(barcode_bits, stop_code_bits);
+
+    //Close Storage
+    flipper_format_free(ff);
+    furi_record_close(RECORD_STORAGE);
+
+    furi_string_cat(barcode_data->correct_data, barcode_bits);
+    furi_string_free(barcode_bits);
+}
+
+void codabar_loader(BarcodeData* barcode_data){
+    int barcode_length = furi_string_size(barcode_data->raw_data);
+
+    int min_digits = barcode_data->type_obj->min_digits;
+
+    //check the length of the barcode, must contain atleast a character,
+    //this can have as many characters as it wants, it might not fit on the screen
+    if(barcode_length < min_digits) {
+        barcode_data->reason = WrongNumberOfDigits;
+        barcode_data->valid = false;
+        return;
+    }
+
+    FuriString* barcode_bits = furi_string_alloc();
+
+    barcode_length = furi_string_size(barcode_data->raw_data);
+
+    //Open Storage
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_file_alloc(storage);
+
+    if(!flipper_format_file_open_existing(ff, CODABAR_DICT_FILE_PATH)) {
+        FURI_LOG_E(TAG, "Could not open file %s", CODABAR_DICT_FILE_PATH);
+        barcode_data->reason = MissingEncodingTable;
+        barcode_data->valid = false;
+    } else {
+        FuriString* char_bits = furi_string_alloc();
+        for(int i = 0; i < barcode_length; i++) {
+            char barcode_char = toupper(furi_string_get_char(barcode_data->raw_data, i));
+
+            //convert a char into a string so it used in flipper_format_read_string
+            char current_character[2];
+            snprintf(current_character, 2, "%c", barcode_char);
+
+            if(!flipper_format_read_string(ff, current_character, char_bits)) {
+                FURI_LOG_E(TAG, "Could not read \"%c\" string", barcode_char);
+                barcode_data->reason = InvalidCharacters;
+                barcode_data->valid = false;
+                break;
+            } else {
+                FURI_LOG_I(
+                    TAG, "\"%c\" string: %s", barcode_char, furi_string_get_cstr(char_bits));
+                furi_string_cat(barcode_bits, char_bits);
+            }
+            flipper_format_rewind(ff);
+        }
+        furi_string_free(char_bits);
+    }
 
     //Close Storage
     flipper_format_free(ff);

@@ -322,6 +322,68 @@ static void draw_code_128(Canvas* canvas, BarcodeData* barcode_data) {
         canvas, 62, y + height + 8, AlignCenter, AlignBottom, furi_string_get_cstr(raw_data));
 }
 
+static void draw_codabar(Canvas* canvas, BarcodeData* barcode_data){
+    FuriString* raw_data = barcode_data->raw_data;
+    FuriString* barcode_digits = barcode_data->correct_data;
+    //BarcodeTypeObj* type_obj = barcode_data->type_obj;
+
+    int barcode_length = furi_string_size(barcode_digits);
+    int total_pixels = 0;
+
+    for(int i = 0; i < barcode_length; i++) {
+        //1 for wide, 0 for narrow
+        char wide_or_narrow = furi_string_get_char(barcode_digits, i);
+        int wn_digit = wide_or_narrow - '0'; //wide(1) or narrow(0) digit
+
+        if(wn_digit == 1) {
+            total_pixels += 3;
+        } else {
+            total_pixels += 1;
+        }
+        if((i + 1) % 7 == 0) {
+            total_pixels += 1;
+        }
+    }
+
+    int x = (128 - total_pixels) / 2;
+    int y = BARCODE_Y_START;
+    int width = 1;
+    int height = BARCODE_HEIGHT;
+    bool filled_in = true;
+
+    //set the canvas color to black to print the digit
+    canvas_set_color(canvas, ColorBlack);
+    // canvas_draw_str_aligned(canvas, 62, 30, AlignCenter, AlignCenter, error);
+    canvas_draw_str_aligned(
+        canvas, 62, y + height + 8, AlignCenter, AlignBottom, furi_string_get_cstr(raw_data));
+
+    for(int i = 0; i < barcode_length; i++) {
+        //1 for wide, 0 for narrow
+        char wide_or_narrow = furi_string_get_char(barcode_digits, i);
+        int wn_digit = wide_or_narrow - '0'; //wide(1) or narrow(0) digit
+
+        if(filled_in) {
+            if(wn_digit == 1) {
+                x = draw_bits(canvas, "111", x, y, width, height);
+            } else {
+                x = draw_bits(canvas, "1", x, y, width, height);
+            }
+            filled_in = false;
+        } else {
+            if(wn_digit == 1) {
+                x = draw_bits(canvas, "000", x, y, width, height);
+            } else {
+                x = draw_bits(canvas, "0", x, y, width, height);
+            }
+            filled_in = true;
+        }
+        if((i + 1) % 7 == 0) {
+            x = draw_bits(canvas, "0", x, y, width, height);
+            filled_in = true;
+        }
+    }
+}
+
 static void barcode_draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
     BarcodeModel* barcode_model = ctx;
@@ -345,6 +407,9 @@ static void barcode_draw_callback(Canvas* canvas, void* ctx) {
             break;
         case CODE128:
             draw_code_128(canvas, data);
+            break;
+        case CODABAR:
+            draw_codabar(canvas, data);
             break;
         case UNKNOWN:
         default:

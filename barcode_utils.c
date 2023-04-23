@@ -43,6 +43,14 @@ void init_types() {
     code_128->start_pos = 0;
     barcode_type_objs[CODE128] = code_128;
 
+    BarcodeTypeObj* codabar = malloc(sizeof(BarcodeTypeObj));
+    codabar->name = "Codabar";
+    codabar->type = CODABAR;
+    codabar->min_digits = 1;
+    codabar->max_digits = -1;
+    codabar->start_pos = 0;
+    barcode_type_objs[CODABAR] = codabar;
+
     BarcodeTypeObj* unknown = malloc(sizeof(BarcodeTypeObj));
     unknown->name = "Unknown";
     unknown->type = UNKNOWN;
@@ -74,6 +82,10 @@ BarcodeTypeObj* get_type(FuriString* type_string) {
     if(furi_string_cmp_str(type_string, "CODE-128") == 0) {
         return barcode_type_objs[CODE128];
     }
+    if(furi_string_cmp_str(type_string, "Codabar") == 0) {
+        return barcode_type_objs[CODABAR];
+    }
+
 
     return barcode_type_objs[UNKNOWN];
 }
