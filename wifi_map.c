@@ -16,6 +16,7 @@
 
 #define LINES_ON_SCREEN 6
 #define COLUMNS_ON_SCREEN 21
+#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
 typedef struct UartDumpModel UartDumpModel;
 
@@ -48,8 +49,6 @@ typedef enum {
     WorkerEventRx = (1 << 2),
 } WorkerEventFlags;
 
-#define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
-
 const NotificationSequence sequence_notification = {
     &message_display_backlight_on,
     &message_green_255,
@@ -73,6 +72,7 @@ int32_t write_to_file(char data_line, File *file) {
     if(!storage_file_write(file, data, (uint16_t)strlen(data))) {
         FURI_LOG_E(TAG, "Failed to write to file");
     }
+    free(data);
     return 0;
 }
 
