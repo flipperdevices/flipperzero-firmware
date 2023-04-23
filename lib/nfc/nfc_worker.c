@@ -345,7 +345,7 @@ static bool nfc_worker_read_nfcf(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     FelicaReadResult result = FelicaReadResultTypeMismatch;
     do {
         FelicaReader reader;
-        bool skip_lite = false, skip_ndef = false;
+        bool skip_lite = false;
         uint8_t* idm = nfc_data->uid;
         uint8_t* pmm = f_data->pmm;
 
@@ -366,16 +366,6 @@ static bool nfc_worker_read_nfcf(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
                 break;
             }
             skip_lite = true;
-
-        } else if(data->type == FelicaICTypeLinkNfcDep) {
-            felica_reset(data);
-            result = felica_ndef_detect_and_read(tx_rx, data, &reader);
-            if(result != FelicaReadResultTypeMismatch) {
-                nfc_worker->dev_data->protocol = NfcDeviceProtocolFelicaMonolithic;
-                read_success = true;
-                break;
-            }
-            skip_ndef = true;
         }
 
         // If quick check fails, try in the order of Standard, Lite and NDEF, excluding the ones
@@ -398,14 +388,12 @@ static bool nfc_worker_read_nfcf(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
             }
         }
 
-        if(!skip_ndef) {
-            felica_reset(data);
-            result = felica_ndef_detect_and_read(tx_rx, data, &reader);
-            if(result != FelicaReadResultTypeMismatch) {
-                nfc_worker->dev_data->protocol = NfcDeviceProtocolFelicaMonolithic;
-                read_success = true;
-                break;
-            }
+        felica_reset(data);
+        result = felica_ndef_detect_and_read(tx_rx, data, &reader);
+        if(result != FelicaReadResultTypeMismatch) {
+            nfc_worker->dev_data->protocol = NfcDeviceProtocolFelicaMonolithic;
+            read_success = true;
+            break;
         }
     } while(false);
 
