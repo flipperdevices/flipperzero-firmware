@@ -1,6 +1,7 @@
 #include <furi.h>
 
 #include <gui/gui.h>
+#include <gui/icon_i.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/widget.h>
@@ -14,45 +15,51 @@
 typedef enum { ResistorsMainMenuScene, ResistorsSceneCount } ResistorsScene;
 
 /** The current view */
-typedef enum { ResistorsSubmenuView } ResistorsView;
+typedef enum { ResistorsSubmenuView, ResistorsEditView } ResistorsView;
 
 /** The app structure - contains a SceneManager, ViewDispatcher, menu */
 typedef struct App {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
-    // Widget* widget;
-    // TextInput* text_input;
+    Widget* widget;
 } App;
+
+typedef struct AppState {
+    uint8_t edit_selection;
+} AppState;
+
+AppState* app_state;
 
 /* main menu scene */
 
 /** main menu options enum */
 typedef enum {
-    ResistorsMainMenuScene3BarResistor,
     ResistorsMainMenuScene4BarResistor,
+    ResistorsMainMenuScene5BarResistor,
 } ResistorsMainMenuSceneIndex;
 
 /** main menu events */
 typedef enum {
-    ResistorsMainMenuScene3BarSelectionEvent,
     ResistorsMainMenuScene4BarSelectionEvent,
+    ResistorsMainMenuScene5BarSelectionEvent,
 } ResistorsMainMenuEvent;
 
 /** main menu callback - sends custom events to the scene manager based on the selection */
 void resistors_menu_callback(void* context, uint32_t index) {
     App* app = context;
     switch(index) {
-    case ResistorsMainMenuScene3BarResistor:
-        scene_manager_handle_custom_event(
-            app->scene_manager, ResistorsMainMenuScene3BarSelectionEvent);
-        break;
     case ResistorsMainMenuScene4BarResistor:
         scene_manager_handle_custom_event(
             app->scene_manager, ResistorsMainMenuScene4BarSelectionEvent);
         break;
+    case ResistorsMainMenuScene5BarResistor:
+        scene_manager_handle_custom_event(
+            app->scene_manager, ResistorsMainMenuScene5BarSelectionEvent);
+        break;
     }
 }
+
 /** main menu scene - resets the submenu, and gives it content, callbacks and selection enums */
 void resistors_main_menu_scene_on_enter(void* context) {
     App* app = context;
@@ -60,18 +67,20 @@ void resistors_main_menu_scene_on_enter(void* context) {
     submenu_set_header(app->submenu, "Resistors");
     submenu_add_item(
         app->submenu,
-        "3-bar resistor",
-        ResistorsMainMenuScene3BarResistor,
-        resistors_menu_callback,
-        app);
-    submenu_add_item(
-        app->submenu,
         "4-bar resistor",
         ResistorsMainMenuScene4BarResistor,
         resistors_menu_callback,
         app);
+    submenu_add_item(
+        app->submenu,
+        "5-bar resistor",
+        ResistorsMainMenuScene5BarResistor,
+        resistors_menu_callback,
+        app);
     view_dispatcher_switch_to_view(app->view_dispatcher, ResistorsSubmenuView);
 }
+
+/* edit view scene */
 
 /** main menu event handler - switches scene based on the event */
 bool resistors_main_menu_scene_on_event(void* context, SceneManagerEvent event) {
@@ -80,14 +89,14 @@ bool resistors_main_menu_scene_on_event(void* context, SceneManagerEvent event) 
     switch(event.type) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
-        case ResistorsMainMenuScene3BarSelectionEvent:
-            scene_manager_next_scene(
-                app->scene_manager, ResistorsMainMenuScene); // TODO: pick a different scene
+        case ResistorsMainMenuScene4BarSelectionEvent:
+            // TODO: config to 4-bar
+            scene_manager_next_scene(app->scene_manager, ResistorsEditView);
             consumed = true;
             break;
-        case ResistorsMainMenuScene4BarSelectionEvent:
-            scene_manager_next_scene(
-                app->scene_manager, ResistorsMainMenuScene); // TODO: pick a different scene
+        case ResistorsMainMenuScene5BarSelectionEvent:
+            // TODO: config to 5-bar
+            scene_manager_next_scene(app->scene_manager, ResistorsEditView);
             consumed = true;
             break;
         }
@@ -103,25 +112,96 @@ void resistors_main_menu_scene_on_exit(void* context) {
     submenu_reset(app->submenu);
 }
 
+/* edit view scene */
+
+void resistors_edit_view_redraw_widget(App* app) {
+    widget_reset(app->widget);
+    widget_add_icon_element(app->widget, 10, 23, &I_resistor);
+    widget_add_icon_element(app->widget, 46 + (app_state->edit_selection * 15), 13, &I_arrow);
+
+    widget_add_text_box_element(
+        app->widget, 5, 2, 123, 10, AlignCenter, AlignCenter, "uncalculated", true);
+    widget_add_text_box_element(
+        app->widget, 5, 50, 123, 16, AlignCenter, AlignBottom, "X - X X X X", true);
+
+    // widget_add_button_element(app->widget, GuiButtonTypeCenter, buttonText, callback, app);
+}
+
+/** main menu events */
+//typedef enum { ResistorsEditViewUpdateEvent } ResistorsEditViewEvent;
+
+static bool widget_input_callback(InputEvent* input_event, void* context) {
+    App* app = context;
+    UNUSED(app);
+    bool consumed = false;
+    if(input_event->type == InputTypeShort) {
+        switch(input_event->key) {
+        case InputKeyRight:
+            app_state->edit_selection += 1;
+            //resistors_edit_view_redraw_widget(app);
+            // scene_manager_set_scene_state(
+            //     app->scene_manager,
+            //     ResistorsEditView,
+            //     scene_manager_get_scene_state(app->scene_manager, ResistorsEditView));
+            //view_dispatcher_switch_to_view(app->view_dispatcher, ResistorsEditView);
+            consumed = true;
+            break;
+        default:
+            consumed = false;
+            break;
+        }
+    }
+    return consumed;
+}
+
+/** edit view scene - resets the widget, and gives it content, callbacks and selection enums */
+void resistors_edit_view_scene_on_enter(void* context) {
+    App* app = context;
+    resistors_edit_view_redraw_widget(app);
+    view_set_input_callback(widget_get_view(app->widget), widget_input_callback);
+    view_dispatcher_switch_to_view(app->view_dispatcher, ResistorsEditView);
+}
+
+/** edit view event handler - switches scene based on the event */
+bool resistors_edit_view_scene_on_event(void* context, SceneManagerEvent event) {
+    App* app = context;
+    bool consumed = false;
+    UNUSED(app);
+    UNUSED(event);
+    // if(event.type == SceneManagerEventTypeCustom && event.event == ResistorsEditViewUpdateEvent) {
+    //     ...
+    //     consumed = true;
+    // }
+    return consumed;
+}
+
+void resistors_edit_view_scene_on_exit(void* context) {
+    App* app = context;
+    widget_reset(app->widget);
+}
+
 // TODO: stub out all other scenes
 
 /* handlers */
 
 /** collection of all scene on_enter handlers */
 void (*const resistors_scene_on_enter_handlers[])(void*) = {
-    resistors_main_menu_scene_on_enter
+    resistors_main_menu_scene_on_enter,
+    resistors_edit_view_scene_on_enter
     // TODO: add on enter handlers
 };
 
 /** collection of all scene on event handlers */
 bool (*const resistors_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
-    resistors_main_menu_scene_on_event
+    resistors_main_menu_scene_on_event,
+    resistors_edit_view_scene_on_event
     // TODO: add other on event handlers
 };
 
 /** collection of all scene on exit handlers */
 void (*const resistors_scene_on_exit_handlers[])(void*) = {
-    resistors_main_menu_scene_on_exit
+    resistors_main_menu_scene_on_exit,
+    resistors_edit_view_scene_on_exit
     // TODO: add other event handlers
 };
 
@@ -161,24 +241,39 @@ static App* app_alloc() {
     view_dispatcher_set_custom_event_callback(app->view_dispatcher, resistors_custom_callback);
     view_dispatcher_set_navigation_event_callback(
         app->view_dispatcher, resistors_back_event_callback);
+
     app->submenu = submenu_alloc();
+    app->widget = widget_alloc();
 
     view_dispatcher_add_view(
         app->view_dispatcher, ResistorsSubmenuView, submenu_get_view(app->submenu));
-    // app->widget = widget_alloc();
-    // TODO: add other views
+    view_dispatcher_add_view(
+        app->view_dispatcher, ResistorsEditView, widget_get_view(app->widget));
+
+    // allocate other views here
+
     return app;
+}
+
+static AppState* app_state_alloc() {
+    AppState* state = malloc(sizeof(AppState));
+    state->edit_selection = 0;
+    return state;
 }
 
 static void app_free(App* app) {
     furi_assert(app);
+
     view_dispatcher_remove_view(app->view_dispatcher, ResistorsSubmenuView);
+    view_dispatcher_remove_view(app->view_dispatcher, ResistorsEditView);
     // TODO: remove other views
+
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
+
     submenu_free(app->submenu);
-    // widget_free(app->widget);
-    // text_input_free(app->text_input);
+    widget_free(app->widget);
+
     free(app);
 }
 
@@ -188,6 +283,7 @@ int32_t resistors_app(void* p) {
     UNUSED(p);
     FURI_LOG_I("TEST", "resistors app launched");
     App* app = app_alloc();
+    app_state = app_state_alloc();
 
     Gui* gui = furi_record_open(RECORD_GUI);
     view_dispatcher_attach_to_gui(app->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
@@ -195,5 +291,6 @@ int32_t resistors_app(void* p) {
     view_dispatcher_run(app->view_dispatcher);
 
     app_free(app);
+    free(app_state);
     return 0;
 }
