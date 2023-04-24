@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-#define F_HAL_NFC_TIMER_OFFSET_FC (800)
+#define F_HAL_NFC_TIMER_OFFSET_FC (500)
 
 #define F_HAL_NFC_EVENT_WAIT_FOREVER (0xFFFFFFFFU)
 

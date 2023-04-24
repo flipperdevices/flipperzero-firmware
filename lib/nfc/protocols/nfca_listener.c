@@ -46,16 +46,19 @@ static bool nfca_listener_halt_received(uint8_t* rx_data, uint16_t rx_bits) {
     return halt_cmd_received;
 }
 
-static void nfca_listener_event_handler(NfcEvent event, void* context) {
+static NfcCommand nfca_listener_event_handler(NfcEvent event, void* context) {
     furi_assert(context);
 
     NfcaListener* instance = context;
     NfcEventType event_type = event.type;
     NfcaListenerEvent nfca_listener_event = {};
+    NfcCommand command = NfcCommandContinue;
+
     if(event_type == NfcEventTypeListenerActivated) {
         instance->state = NfcaListenerStateActive;
     } else if((event_type == NfcEventTypeRxEnd) && (instance->state == NfcaListenerStateActive)) {
         if(nfca_listener_halt_received(event.data.rx_data, event.data.rx_bits)) {
+            // TODO rework with commands
             nfca_listener_sleep(instance);
             instance->state = NfcaListenerStateIdle;
             if(instance->callback) {
@@ -76,6 +79,8 @@ static void nfca_listener_event_handler(NfcEvent event, void* context) {
             }
         }
     }
+
+    return command;
 }
 
 NfcaListener* nfca_listener_alloc(Nfc* nfc) {

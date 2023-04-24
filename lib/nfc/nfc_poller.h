@@ -33,7 +33,7 @@ void nfc_poller_free(NfcPoller* instance);
 
 void nfc_poller_start(NfcPoller* instance, NfcPollerEventCallback callback, void* context);
 
-void nfc_poller_reset(NfcPoller* instance);
+void nfc_poller_stop(NfcPoller* instance);
 
 #ifdef __cplusplus
 }

@@ -24,7 +24,13 @@ typedef struct {
     NfcbPollerEventData data;
 } NfcbPollerEvent;
 
-typedef void (*NfcbPollerEventCallback)(NfcbPollerEvent* event, void* context);
+typedef enum {
+    NfcbPollerCommandContinue = NfcCommandContinue,
+    NfcbPollerCommandReset = NfcCommandReset,
+    NfcbPollerCommandStop = NfcCommandStop,
+} NfcbPollerCommand;
+
+typedef NfcbPollerCommand (*NfcbPollerEventCallback)(NfcbPollerEvent* event, void* context);
 
 NfcbPoller* nfcb_poller_alloc(Nfc* nfc);
 

@@ -34,7 +34,7 @@ void nfcb_poller_free(NfcbPoller* instance) {
     free(instance);
 }
 
-static void nfcb_poller_event_callback(NfcEvent event, void* context) {
+static NfcCommand nfcb_poller_event_callback(NfcEvent event, void* context) {
     furi_assert(context);
 
     NfcbPoller* instance = context;
@@ -42,6 +42,8 @@ static void nfcb_poller_event_callback(NfcEvent event, void* context) {
     if(event.type == NfcEventTypeConfigureRequest) {
         nfcb_poller_config(instance);
     }
+
+    return NfcCommandContinue;
 }
 
 NfcbError
@@ -50,10 +52,6 @@ NfcbError
 
     instance->callback = callback;
     instance->context = context;
-
-    instance->data = malloc(sizeof(NfcbData));
-    instance->buff =
-        nfc_poller_buffer_alloc(NFCB_POLLER_BUFER_MAX_SIZE, NFCB_POLLER_BUFER_MAX_SIZE);
 
     nfc_start_worker(instance->nfc, nfcb_poller_event_callback, instance);
     return NfcbErrorNone;
@@ -72,7 +70,7 @@ NfcbError nfcb_poller_reset(NfcbPoller* instance) {
     furi_assert(instance->nfc);
     furi_assert(instance->data);
 
-    nfc_poller_abort(instance->nfc);
+    nfc_stop(instance->nfc);
 
     instance->callback = NULL;
     instance->context = NULL;
@@ -86,6 +84,10 @@ NfcbError nfcb_poller_reset(NfcbPoller* instance) {
 
 NfcbError nfcb_poller_config(NfcbPoller* instance) {
     furi_assert(instance);
+
+    instance->data = malloc(sizeof(NfcbData));
+    instance->buff =
+        nfc_poller_buffer_alloc(NFCB_POLLER_BUFER_MAX_SIZE, NFCB_POLLER_BUFER_MAX_SIZE);
 
     nfc_config(instance->nfc, NfcModeNfcbPoller);
     nfc_set_guard_time_us(instance->nfc, NFCB_GUARD_TIME_US);

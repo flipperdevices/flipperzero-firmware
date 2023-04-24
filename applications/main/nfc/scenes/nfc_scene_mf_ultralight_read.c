@@ -5,13 +5,16 @@ enum {
     NfcWorkerEventMfUltralightReadSuccess,
 };
 
-void nfc_scene_mf_ultralight_read_worker_callback(MfUltralightPollerEvent event, void* context) {
+MfUltralightPollerCommand
+    nfc_scene_mf_ultralight_read_worker_callback(MfUltralightPollerEvent event, void* context) {
     NfcApp* nfc = context;
 
+    MfUltralightPollerCommand command = MfUltralightPollerCommandContinue;
+
     if(event.type == MfUltralightPollerEventTypeReadSuccess) {
-        mf_ultralight_poller_stop(nfc->mf_ul_poller);
         view_dispatcher_send_custom_event(
             nfc->view_dispatcher, NfcWorkerEventMfUltralightReadSuccess);
+        command = MfUltralightPollerCommandStop;
     } else if(event.type == MfUltralightPollerEventTypeAuthRequest) {
         MfUltralightData* data = &nfc->nfc_dev_data.mf_ul_data;
         mf_ultralight_poller_get_data(nfc->mf_ul_poller, data);
@@ -35,9 +38,9 @@ void nfc_scene_mf_ultralight_read_worker_callback(MfUltralightPollerEvent event,
         }
     } else if(event.type == MfUltralightPollerEventTypeAuthSuccess) {
         nfc->mf_ul_auth->pack = event.data->pack;
-    } else {
-        furi_delay_ms(100);
     }
+
+    return command;
 }
 
 void nfc_scene_mf_ultralight_read_on_enter(void* context) {
@@ -71,7 +74,7 @@ bool nfc_scene_mf_ultralight_read_on_event(void* context, SceneManagerEvent even
 void nfc_scene_mf_ultralight_read_on_exit(void* context) {
     NfcApp* nfc = context;
 
-    mf_ultralight_poller_reset(nfc->mf_ul_poller);
+    mf_ultralight_poller_stop(nfc->mf_ul_poller);
     // Clear view
     popup_reset(nfc->popup);
 

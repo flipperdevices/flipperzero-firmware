@@ -57,7 +57,7 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_read_on_exit(void* context) {
     NfcApp* nfc = context;
 
-    nfc_poller_reset(nfc->nfc_poller);
+    nfc_poller_stop(nfc->nfc_poller);
     // Clear view
     popup_reset(nfc->popup);
 

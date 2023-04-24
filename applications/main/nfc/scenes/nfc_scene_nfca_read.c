@@ -5,15 +5,17 @@ enum {
     NfcWorkerEventReadUidNfcA = 100,
 };
 
-void nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, void* context) {
+NfcaPollerCommand nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, void* context) {
     NfcApp* nfc = context;
 
+    NfcaPollerCommand command = NfcaPollerCommandContinue;
+
     if(event.type == NfcaPollerEventTypeReady) {
-        nfca_poller_stop(nfc->nfca_poller);
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcWorkerEventReadUidNfcA);
-    } else {
-        furi_delay_ms(100);
+        command = NfcaPollerCommandStop;
     }
+
+    return command;
 }
 
 void nfc_scene_nfca_read_on_enter(void* context) {
@@ -21,7 +23,7 @@ void nfc_scene_nfca_read_on_enter(void* context) {
 
     // Setup view
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
-    
+
     nfca_poller_start(nfc->nfca_poller, nfc_scene_nfca_read_worker_callback, nfc);
 
     nfc_blink_read_start(nfc);
@@ -46,7 +48,7 @@ bool nfc_scene_nfca_read_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_nfca_read_on_exit(void* context) {
     NfcApp* nfc = context;
 
-    nfca_poller_reset(nfc->nfca_poller);
+    nfca_poller_stop(nfc->nfca_poller);
     // Clear view
     popup_reset(nfc->popup);
 

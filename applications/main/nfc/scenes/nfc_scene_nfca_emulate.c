@@ -7,7 +7,7 @@ enum {
     NfcSceneNfcaEmulateStateTextBox,
 };
 
-void nfc_scene_nfca_emulate_worker_callback(NfcaListenerEvent event, void* context) {
+NfcaListenerCommand nfc_scene_nfca_emulate_worker_callback(NfcaListenerEvent event, void* context) {
     furi_assert(context);
 
     NfcApp* nfc = context;
@@ -19,6 +19,8 @@ void nfc_scene_nfca_emulate_worker_callback(NfcaListenerEvent event, void* conte
         furi_string_cat_printf(nfc->text_box_store, "\n");
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerUpdate);
     }
+
+    return NfcaListenerCommandContinue;
 }
 
 void nfc_scene_nfca_emulate_widget_callback(GuiButtonType result, InputType type, void* context) {

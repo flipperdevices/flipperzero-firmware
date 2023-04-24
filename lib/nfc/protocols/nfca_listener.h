@@ -28,7 +28,12 @@ typedef struct {
     NfcaListenerEventData data;
 } NfcaListenerEvent;
 
-typedef void (*NfcaListenerEventCallback)(NfcaListenerEvent event, void* context);
+typedef enum {
+    NfcaListenerCommandContinue = NfcCommandContinue,
+    NfcaListenerCommandReset = NfcCommandReset,
+} NfcaListenerCommand;
+
+typedef NfcaListenerCommand (*NfcaListenerEventCallback)(NfcaListenerEvent event, void* context);
 
 NfcaListener* nfca_listener_alloc(Nfc* nfc);
 

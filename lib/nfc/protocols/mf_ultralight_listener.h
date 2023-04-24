@@ -24,7 +24,13 @@ typedef struct {
     MfUltralightListenerEventData data;
 } MfUltralightListenerEvent;
 
-typedef void (*MfUltralightListenerEventcallback)(MfUltralightListenerEvent event, void* context);
+typedef enum {
+    MfUltralightListenerCommandContinue = NfcaListenerCommandContinue,
+    MfUltralightListenerCommandReset = NfcaListenerCommandReset,
+} MfUltralightListenerCommand;
+
+typedef MfUltralightListenerCommand (
+    *MfUltralightListenerEventCallback)(MfUltralightListenerEvent event, void* context);
 
 MfUltralightListener* mf_ultralight_listener_alloc(NfcaListener* nfca_listener);
 
@@ -33,7 +39,7 @@ void mf_ultralight_listener_free(MfUltralightListener* instance);
 MfUltralightError mf_ultralight_listener_start(
     MfUltralightListener* instance,
     MfUltralightData* data,
-    MfUltralightListenerEventcallback callback,
+    MfUltralightListenerEventCallback callback,
     void* context);
 
 MfUltralightError mf_ultralight_listener_reset(MfUltralightListener* instance);

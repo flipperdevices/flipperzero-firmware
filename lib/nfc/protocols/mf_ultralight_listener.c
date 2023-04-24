@@ -20,7 +20,7 @@ struct MfUltralightListener {
     uint16_t tx_bits;
     uint16_t pages_total;
     MfUltralightFeatureSupport features;
-    MfUltralightListenerEventcallback callback;
+    MfUltralightListenerEventCallback callback;
     void* context;
 };
 
@@ -33,7 +33,7 @@ typedef struct {
     uint8_t cmd;
     uint16_t cmd_len_bits;
     MfUltralightListenerCommandCallback callback;
-} MfUltralightListenerCommand;
+} MfUltralightListenerCmdHandler;
 
 static MfUltralightError mf_ultralight_process_error(NfcaError error) {
     MfUltralightError ret = MfUltralightErrorNone;
@@ -128,7 +128,7 @@ static bool mf_ultralight_listener_read_signature_handler(
     return command_processed;
 }
 
-static const MfUltralightListenerCommand mf_ultralight_command[] = {
+static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
     {
         .cmd = MF_ULTRALIGHT_CMD_READ_PAGE,
         .cmd_len_bits = 16,
@@ -146,12 +146,14 @@ static const MfUltralightListenerCommand mf_ultralight_command[] = {
     },
 };
 
-static void mf_ultralight_listener_event_handler(NfcaListenerEvent event, void* context) {
+static NfcaListenerCommand mf_ultralight_listener_event_handler(NfcaListenerEvent event, void* context) {
     furi_assert(context);
 
     MfUltralightListener* instance = context;
     uint8_t* rx_data = event.data.rx_data;
     uint16_t rx_bits = event.data.rx_bits;
+
+    NfcaListenerCommand command = NfcaListenerCommandContinue;
     if(event.type == NfcaListenerEventTypeReceivedStandartFrame) {
         bool cmd_processed = false;
         for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
@@ -164,6 +166,8 @@ static void mf_ultralight_listener_event_handler(NfcaListenerEvent event, void* 
             mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
         }
     }
+
+    return command;
 }
 
 static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* instance) {
@@ -186,7 +190,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(NfcaListener* nfca_listener) 
 MfUltralightError mf_ultralight_listener_start(
     MfUltralightListener* instance,
     MfUltralightData* data,
-    MfUltralightListenerEventcallback callback,
+    MfUltralightListenerEventCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(data);

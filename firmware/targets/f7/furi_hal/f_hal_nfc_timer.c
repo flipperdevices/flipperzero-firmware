@@ -15,7 +15,7 @@ typedef enum {
 
 typedef struct {
     TIM_TypeDef* timer;
-    uint32_t timer_div;
+    uint32_t prescaler;
     uint32_t freq_khz;
     FHalNfcEventInternalType event;
     FuriHalInterruptId irq_id;
@@ -29,8 +29,8 @@ static FHalNfcTimerConfig f_hal_nfc_timers[FHalNfcTimerCount] = {
         {
             .pin = &gpio_ext_pa7,
             .timer = TIM1,
-            .timer_div = LL_TIM_CLOCKDIVISION_DIV2,
-            .freq_khz = 32000U,
+            .prescaler = 7,
+            .freq_khz = 8000U,
             .event = FHalNfcEventInternalTypeTimerFwtExpired,
             .irq_id = FuriHalInterruptIdTim1UpTim16,
             .irq_type = TIM1_UP_TIM16_IRQn,
@@ -40,7 +40,7 @@ static FHalNfcTimerConfig f_hal_nfc_timers[FHalNfcTimerCount] = {
         {
             .pin = &gpio_ext_pa6,
             .timer = TIM2,
-            .timer_div = LL_TIM_CLOCKDIVISION_DIV1,
+            .prescaler = 0,
             .freq_khz = 64000U,
             .event = FHalNfcEventInternalTypeTimerBlockTxExpired,
             .irq_id = FuriHalInterruptIdTIM2,
@@ -63,7 +63,7 @@ static void f_hal_nfc_timer_init(FHalNfcTimer timer) {
     LL_TIM_EnableUpdateEvent(f_hal_nfc_timers[timer].timer);
     LL_TIM_SetOnePulseMode(f_hal_nfc_timers[timer].timer, LL_TIM_ONEPULSEMODE_SINGLE);
     LL_TIM_SetCounterMode(f_hal_nfc_timers[timer].timer, LL_TIM_COUNTERMODE_UP);
-    LL_TIM_SetClockDivision(f_hal_nfc_timers[timer].timer, f_hal_nfc_timers[timer].timer_div);
+    LL_TIM_SetPrescaler(f_hal_nfc_timers[timer].timer, f_hal_nfc_timers[timer].prescaler);
     LL_TIM_SetClockSource(f_hal_nfc_timers[timer].timer, LL_TIM_CLOCKSOURCE_INTERNAL);
     LL_TIM_EnableIT_UPDATE(f_hal_nfc_timers[timer].timer);
 

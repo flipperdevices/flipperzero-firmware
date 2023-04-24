@@ -34,7 +34,14 @@ typedef struct {
     MfUltralightPollerEventData* data;
 } MfUltralightPollerEvent;
 
-typedef void (*MfUltralightPollerCallback)(MfUltralightPollerEvent event, void* context);
+typedef enum {
+    MfUltralightPollerCommandContinue = NfcaPollerCommandContinue,
+    MfUltralightPollerCommandReset = NfcaPollerCommandReset,
+    MfUltralightPollerCommandStop = NfcaPollerCommandStop,
+} MfUltralightPollerCommand;
+
+typedef MfUltralightPollerCommand (
+    *MfUltralightPollerCallback)(MfUltralightPollerEvent event, void* context);
 
 MfUltralightPoller* mf_ultralight_poller_alloc(NfcaPoller* nfca_poller);
 
@@ -50,7 +57,8 @@ MfUltralightError mf_ultralight_poller_read(
     MfUltralightPollerCallback callback,
     void* context);
 
-MfUltralightError mf_ultralight_poller_get_data(MfUltralightPoller* instance, MfUltralightData* data);
+MfUltralightError
+    mf_ultralight_poller_get_data(MfUltralightPoller* instance, MfUltralightData* data);
 
 MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance);
 
