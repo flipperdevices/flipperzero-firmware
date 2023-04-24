@@ -12,7 +12,7 @@
 #include <resistors_icons.h>
 
 /** The current scene */
-typedef enum { ResistorsMainMenuScene, ResistorsSceneCount } ResistorsScene;
+typedef enum { ResistorsMainMenuScene, ResistorsEditScene, ResistorsSceneCount } ResistorsScene;
 
 /** The current view */
 typedef enum { ResistorsSubmenuView, ResistorsEditView } ResistorsView;
@@ -91,12 +91,12 @@ bool resistors_main_menu_scene_on_event(void* context, SceneManagerEvent event) 
         switch(event.event) {
         case ResistorsMainMenuScene4BarSelectionEvent:
             // TODO: config to 4-bar
-            scene_manager_next_scene(app->scene_manager, ResistorsEditView);
+            scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
             consumed = true;
             break;
         case ResistorsMainMenuScene5BarSelectionEvent:
             // TODO: config to 5-bar
-            scene_manager_next_scene(app->scene_manager, ResistorsEditView);
+            scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
             consumed = true;
             break;
         }
