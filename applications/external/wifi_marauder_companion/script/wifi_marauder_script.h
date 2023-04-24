@@ -21,10 +21,8 @@
  * wifi_marauder_scene_script_stage_add.c
  * - Create stage creation function and add in wifi_marauder_scene_script_stage_add_on_enter()
  * 
- * wifi_marauder_scene_script_stage_edit.c
- * - Create a list of WifiMarauderScriptEditItem[] items with the attributes on the stage
- * - Implement the callbacks
- * - Add case in wifi_marauder_scene_script_stage_edit_setup()
+ * wifi_marauder_script_stage_menu_config.h
+ * - Add the new stage and implement its functions in a new file
  * 
  * ----------------------------------------------------------------------------------------------------
  * SCRIPT SYNTAX (In order of execution):

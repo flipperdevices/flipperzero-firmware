@@ -10,6 +10,7 @@
 #include "script/wifi_marauder_script.h"
 #include "script/wifi_marauder_script_worker.h"
 #include "script/wifi_marauder_script_executor.h"
+#include "script/menu/wifi_marauder_script_stage_menu.h"
 
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -42,7 +43,6 @@
 #define SAVE_PCAP_SETTING_FILEPATH MARAUDER_APP_FOLDER "/save_pcaps_here.setting"
 #define SAVE_LOGS_SETTING_FILEPATH MARAUDER_APP_FOLDER "/save_logs_here.setting"
 
-// TODO: Pass user input to a file of its own
 typedef enum WifiMarauderUserInputType {
     WifiMarauderUserInputTypeString,
     WifiMarauderUserInputTypeNumber,
@@ -112,6 +112,7 @@ struct WifiMarauderApp {
     WifiMarauderScriptStage* script_edit_selected_stage;
     VariableItemList* script_settings_list;
     VariableItemList* script_stage_edit_list;
+    WifiMarauderScriptStageMenu* script_stage_menu;
     WifiMarauderScriptStageListItem* script_stage_edit_first_item;
     char*** script_stage_edit_strings_reference;
     int* script_stage_edit_string_count_reference;
