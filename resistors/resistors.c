@@ -165,7 +165,7 @@ static App* app_alloc() {
 
     view_dispatcher_add_view(
         app->view_dispatcher, ResistorsSubmenuView, submenu_get_view(app->submenu));
-    app->widget = widget_alloc();
+    // app->widget = widget_alloc();
     // TODO: add other views
     return app;
 }
@@ -177,8 +177,8 @@ static void app_free(App* app) {
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
     submenu_free(app->submenu);
-    widget_free(app->widget);
-    text_input_free(app->text_input);
+    // widget_free(app->widget);
+    // text_input_free(app->text_input);
     free(app);
 }
 
