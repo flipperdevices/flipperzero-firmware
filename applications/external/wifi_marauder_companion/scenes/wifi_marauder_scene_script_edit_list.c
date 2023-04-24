@@ -113,29 +113,27 @@ static void wifi_marauder_scene_script_stage_edit_list_clear_callback(void* cont
 
     wifi_marauder_scene_script_stage_edit_list_deallocate_items(app);
 
-    submenu_reset(app->script_stage_edit_list_submenu);
-    submenu_add_item(app->script_stage_edit_list_submenu, "[+] ADD ITEM", 99, wifi_marauder_scene_script_stage_edit_list_add_callback, app);
-    submenu_add_item(app->script_stage_edit_list_submenu, "[*] SAVE ITEMS", 99, wifi_marauder_scene_script_stage_edit_list_save_callback, app);
-    submenu_add_item(app->script_stage_edit_list_submenu, "[-] CLEAR LIST", 99, wifi_marauder_scene_script_stage_edit_list_clear_callback, app);
+    submenu_reset(app->submenu);
+    submenu_add_item(app->submenu, "[+] ADD ITEM", 99, wifi_marauder_scene_script_stage_edit_list_add_callback, app);
+    submenu_add_item(app->submenu, "[*] SAVE ITEMS", 99, wifi_marauder_scene_script_stage_edit_list_save_callback, app);
+    submenu_add_item(app->submenu, "[-] CLEAR LIST", 99, wifi_marauder_scene_script_stage_edit_list_clear_callback, app);
 }
 
 void wifi_marauder_scene_script_stage_edit_list_on_enter(void* context) {
     WifiMarauderApp* app = context;
-    Submenu* script_stage_edit_list_submenu = app->script_stage_edit_list_submenu;
-
     int item_index = 0;
     WifiMarauderScriptStageListItem* current_item = app->script_stage_edit_first_item;
 
     while (current_item != NULL) {
-        submenu_add_item(script_stage_edit_list_submenu, current_item->value, item_index++, NULL, app);
+        submenu_add_item(app->submenu, current_item->value, item_index++, NULL, app);
         current_item = current_item->next_item;
     }
-    submenu_add_item(app->script_stage_edit_list_submenu, "[+] ADD ITEM", 99, wifi_marauder_scene_script_stage_edit_list_add_callback, app);
-    submenu_add_item(app->script_stage_edit_list_submenu, "[*] SAVE ITEMS", 99, wifi_marauder_scene_script_stage_edit_list_save_callback, app);
-    submenu_add_item(app->script_stage_edit_list_submenu, "[-] CLEAR LIST", 99, wifi_marauder_scene_script_stage_edit_list_clear_callback, app);
+    submenu_add_item(app->submenu, "[+] ADD ITEM", 99, wifi_marauder_scene_script_stage_edit_list_add_callback, app);
+    submenu_add_item(app->submenu, "[*] SAVE ITEMS", 99, wifi_marauder_scene_script_stage_edit_list_save_callback, app);
+    submenu_add_item(app->submenu, "[-] CLEAR LIST", 99, wifi_marauder_scene_script_stage_edit_list_clear_callback, app);
 
-    submenu_set_selected_item(script_stage_edit_list_submenu, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptStageEditList));
-    view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewScriptStageEditList);
+    submenu_set_selected_item(app->submenu, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptStageEditList));
+    view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewSubmenu);
 }
 
 bool wifi_marauder_scene_script_stage_edit_list_on_event(void* context, SceneManagerEvent event) {
@@ -146,5 +144,5 @@ bool wifi_marauder_scene_script_stage_edit_list_on_event(void* context, SceneMan
 
 void wifi_marauder_scene_script_stage_edit_list_on_exit(void* context) {
     WifiMarauderApp* app = context;
-    submenu_reset(app->script_stage_edit_list_submenu);
+    submenu_reset(app->submenu);
 }

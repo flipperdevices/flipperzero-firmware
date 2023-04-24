@@ -10,7 +10,7 @@ void wifi_marauder_select_stage_type_change_callback(VariableItem* item) {
     WifiMarauderApp* app = variable_item_get_context(item);
 
     // Get menu item
-    uint8_t current_stage_index = variable_item_list_get_selected_item_index(app->script_stage_edit_list);
+    uint8_t current_stage_index = variable_item_list_get_selected_item_index(app->var_item_list);
     const WifiMarauderScriptMenuItem* menu_item = &app->script_stage_menu->items[current_stage_index];
 
     // Defines the text of the selected option

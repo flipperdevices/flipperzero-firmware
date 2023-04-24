@@ -137,9 +137,9 @@ static void wifi_marauder_scene_script_stage_edit_list_enter_callback(void* cont
 
 void wifi_marauder_scene_script_stage_edit_on_enter(void* context) {
     WifiMarauderApp* app = context;
-    VariableItemList* script_stage_edit_list = app->script_stage_edit_list;
+    VariableItemList* var_item_list = app->var_item_list;
 
-    variable_item_list_set_enter_callback(app->script_stage_edit_list, wifi_marauder_scene_script_stage_edit_list_enter_callback, app);
+    variable_item_list_set_enter_callback(app->var_item_list, wifi_marauder_scene_script_stage_edit_list_enter_callback, app);
     app->script_stage_menu = wifi_marauder_script_stage_menu_create(app->script_edit_selected_stage->type);
 
     if (app->script_stage_menu->items != NULL) {
@@ -147,9 +147,9 @@ void wifi_marauder_scene_script_stage_edit_on_enter(void* context) {
             WifiMarauderScriptMenuItem* stage_item = &app->script_stage_menu->items[i];
 
             // Changes the list item to handle it in callbacks
-            VariableItem* list_item = variable_item_list_add(app->script_stage_edit_list, stage_item->name, stage_item->num_options, stage_item->change_callback, app);
+            VariableItem* list_item = variable_item_list_add(app->var_item_list, stage_item->name, stage_item->num_options, stage_item->change_callback, app);
 
-            variable_item_list_set_selected_item(app->script_stage_edit_list, i);
+            variable_item_list_set_selected_item(app->var_item_list, i);
             if (stage_item->setup_callback != NULL) {
                 stage_item->setup_callback(list_item);
             }
@@ -159,10 +159,10 @@ void wifi_marauder_scene_script_stage_edit_on_enter(void* context) {
         }
     }
 
-    variable_item_list_add(app->script_stage_edit_list, "[-] DELETE STAGE", 0, NULL, app);
+    variable_item_list_add(app->var_item_list, "[-] DELETE STAGE", 0, NULL, app);
 
-    variable_item_list_set_selected_item(script_stage_edit_list, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptStageEdit));
-    view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewScriptStageEdit);
+    variable_item_list_set_selected_item(var_item_list, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptStageEdit));
+    view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewVarItemList);
 }
 
 bool wifi_marauder_scene_script_stage_edit_on_event(void* context, SceneManagerEvent event) {
@@ -175,5 +175,5 @@ void wifi_marauder_scene_script_stage_edit_on_exit(void* context) {
     WifiMarauderApp* app = context;
     wifi_marauder_script_stage_menu_free(app->script_stage_menu);
     app->script_stage_menu = NULL;
-    variable_item_list_reset(app->script_stage_edit_list);
+    variable_item_list_reset(app->var_item_list);
 }

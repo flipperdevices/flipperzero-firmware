@@ -30,7 +30,6 @@
 
 #define WIFI_MARAUDER_TEXT_BOX_STORE_SIZE (4096)
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
-#define WIFI_MARAUDER_USER_INPUT_STORE_SIZE (64)
 
 #define MARAUDER_APP_FOLDER_USER "apps_data/marauder"
 #define MARAUDER_APP_FOLDER ANY_PATH(MARAUDER_APP_FOLDER_USER)
@@ -74,6 +73,7 @@ struct WifiMarauderApp {
 
     VariableItemList* var_item_list;
     Widget* widget;
+    Submenu* submenu;
     int open_log_file_page;
     int open_log_file_num_pages;
 
@@ -90,8 +90,6 @@ struct WifiMarauderApp {
     bool is_writing_log;
 
     // User input
-    TextInput* user_input;
-    char user_input_store[WIFI_MARAUDER_USER_INPUT_STORE_SIZE + 1];
     WifiMarauderUserInputType user_input_type;
     char** user_input_string_reference;
     int* user_input_number_reference;
@@ -103,15 +101,7 @@ struct WifiMarauderApp {
     WifiMarauderScriptWorker* script_worker;
     FuriString** script_list;
     int script_list_count;
-    Submenu* script_select_submenu;
-    Submenu* script_options_submenu;
-    Submenu* script_edit_submenu;
-    Submenu* script_stage_add_submenu;
-    Submenu* script_stage_edit_list_submenu;
-    Widget* script_confirm_delete_widget;
     WifiMarauderScriptStage* script_edit_selected_stage;
-    VariableItemList* script_settings_list;
-    VariableItemList* script_stage_edit_list;
     WifiMarauderScriptStageMenu* script_stage_menu;
     WifiMarauderScriptStageListItem* script_stage_edit_first_item;
     char*** script_stage_edit_strings_reference;
@@ -151,13 +141,5 @@ typedef enum {
     WifiMarauderAppViewConsoleOutput,
     WifiMarauderAppViewTextInput,
     WifiMarauderAppViewWidget,
-    WifiMarauderAppViewUserInput,
-    WifiMarauderAppViewScriptSelect,
-    WifiMarauderAppViewScriptOptions,
-    WifiMarauderAppViewScriptEdit,
-    WifiMarauderAppViewScriptSettings,
-    WifiMarauderAppViewScriptConfirmDelete,
-    WifiMarauderAppViewScriptStageAdd,
-    WifiMarauderAppViewScriptStageEdit,
-    WifiMarauderAppViewScriptStageEditList,
+    WifiMarauderAppViewSubmenu,
 } WifiMarauderAppView;

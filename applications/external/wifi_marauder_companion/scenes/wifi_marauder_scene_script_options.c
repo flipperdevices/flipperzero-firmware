@@ -56,17 +56,17 @@ void wifi_marauder_scene_script_options_on_enter(void* context) {
         return;
     }
 
-    Submenu* script_options_submenu = app->script_options_submenu;
+    Submenu* submenu = app->submenu;
 
-    submenu_set_header(script_options_submenu, app->script->name);
-    submenu_add_item(script_options_submenu, "[>] RUN", SubmenuIndexRun, wifi_marauder_scene_script_options_callback, app);
-    submenu_add_item(script_options_submenu, "[S] SETTINGS", SubmenuIndexSettings, wifi_marauder_scene_script_options_callback, app);
-    submenu_add_item(script_options_submenu, "[+] EDIT STAGES", SubmenuIndexEditStages, wifi_marauder_scene_script_options_callback, app);
-    submenu_add_item(script_options_submenu, "[*] SAVE", SubmenuIndexSave, wifi_marauder_scene_script_options_callback, app);
-    submenu_add_item(script_options_submenu, "[X] DELETE", SubmenuIndexDelete, wifi_marauder_scene_script_options_callback, app);
+    submenu_set_header(submenu, app->script->name);
+    submenu_add_item(submenu, "[>] RUN", SubmenuIndexRun, wifi_marauder_scene_script_options_callback, app);
+    submenu_add_item(submenu, "[S] SETTINGS", SubmenuIndexSettings, wifi_marauder_scene_script_options_callback, app);
+    submenu_add_item(submenu, "[+] EDIT STAGES", SubmenuIndexEditStages, wifi_marauder_scene_script_options_callback, app);
+    submenu_add_item(submenu, "[*] SAVE", SubmenuIndexSave, wifi_marauder_scene_script_options_callback, app);
+    submenu_add_item(submenu, "[X] DELETE", SubmenuIndexDelete, wifi_marauder_scene_script_options_callback, app);
 
-    submenu_set_selected_item(script_options_submenu, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptOptions));
-    view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewScriptOptions);
+    submenu_set_selected_item(submenu, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneScriptOptions));
+    view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewSubmenu);
 }
 
 bool wifi_marauder_scene_script_options_on_event(void* context, SceneManagerEvent event) {
@@ -83,5 +83,5 @@ bool wifi_marauder_scene_script_options_on_event(void* context, SceneManagerEven
 
 void wifi_marauder_scene_script_options_on_exit(void* context) {
     WifiMarauderApp* app = context;
-    submenu_reset(app->script_options_submenu);
+    submenu_reset(app->submenu);
 }
