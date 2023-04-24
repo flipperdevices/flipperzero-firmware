@@ -19,7 +19,7 @@ void wifi_marauder_script_stage_menu_deauth_load(WifiMarauderScriptStageMenu* st
     stage_menu->items = malloc(1 * sizeof(WifiMarauderScriptMenuItem));
 
     stage_menu->items[0] = (WifiMarauderScriptMenuItem) {
-        .name = "Timeout",
+        .name = strdup("Timeout"),
         .type = WifiMarauderScriptMenuItemTypeNumber,
         .num_options = 1,
         .setup_callback = wifi_marauder_deauth_stage_timeout_setup_callback,

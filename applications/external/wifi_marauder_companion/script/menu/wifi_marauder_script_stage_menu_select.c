@@ -73,7 +73,7 @@ void wifi_marauder_script_stage_menu_select_load(WifiMarauderScriptStageMenu* st
     stage_menu->items = malloc(3 * sizeof(WifiMarauderScriptMenuItem));
 
     stage_menu->items[0] = (WifiMarauderScriptMenuItem) {
-        .name = "Type",
+        .name = strdup("Type"),
         .type = WifiMarauderScriptMenuItemTypeOptionsString,
         .num_options = 2,
         .options = {"ap", "station"},
@@ -81,7 +81,7 @@ void wifi_marauder_script_stage_menu_select_load(WifiMarauderScriptStageMenu* st
         .change_callback = wifi_marauder_select_stage_type_change_callback
     };
     stage_menu->items[1] = (WifiMarauderScriptMenuItem) {
-        .name = "Filter",
+        .name = strdup("Filter"),
         .type = WifiMarauderScriptMenuItemTypeString,
         .num_options = 2,
         .setup_callback = wifi_marauder_select_stage_filter_setup_callback,
@@ -89,7 +89,7 @@ void wifi_marauder_script_stage_menu_select_load(WifiMarauderScriptStageMenu* st
         .select_callback = wifi_marauder_select_stage_filter_select_callback
     };
     stage_menu->items[2] = (WifiMarauderScriptMenuItem) {
-        .name = "Indexes",
+        .name = strdup("Indexes"),
         .type = WifiMarauderScriptMenuItemTypeListNumber,
         .num_options = 1,
         .select_callback = wifi_marauder_select_stage_indexes_select_callback

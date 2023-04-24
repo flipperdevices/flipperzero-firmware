@@ -15,17 +15,17 @@ WifiMarauderScriptStageMenu* wifi_marauder_script_stage_menu_create(WifiMarauder
     return script_stage_menu;
 }
 
-void wifi_marauder_script_stage_menu_free(WifiMarauderScriptStageMenu* list) {
-    if (list == NULL) {
+void wifi_marauder_script_stage_menu_free(WifiMarauderScriptStageMenu* stage_menu) {
+    if (stage_menu == NULL) {
         return;
     }
-    for (uint32_t i = 0; i < list->num_items; i++) {
-        WifiMarauderScriptMenuItem* item = &(list->items[i]);
+    for (uint32_t i = 0; i < stage_menu->num_items; i++) {
+        WifiMarauderScriptMenuItem* item = &(stage_menu->items[i]);
         for (int j = 0; j < item->num_options; j++) {
             free(item->options[j]);
         }
         free(item->name);
     }
-    free(list->items);
-    free(list);
+    free(stage_menu->items);
+    free(stage_menu);
 }

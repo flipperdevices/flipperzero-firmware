@@ -22,7 +22,7 @@ void wifi_marauder_script_stage_menu_exec_load(WifiMarauderScriptStageMenu* stag
     stage_menu->items = malloc(1 * sizeof(WifiMarauderScriptMenuItem));
 
     stage_menu->items[0] = (WifiMarauderScriptMenuItem) {
-        .name = "Command",
+        .name = strdup("Command"),
         .type = WifiMarauderScriptMenuItemTypeString,
         .num_options = 1,
         .setup_callback = wifi_marauder_exec_stage_filter_setup_callback,
