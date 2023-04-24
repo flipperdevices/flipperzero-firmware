@@ -4,8 +4,7 @@ env.Append(
     CPPPATH=[
         "#/lib/stm32wb_cmsis/Include",
         "#/lib/stm32wb_copro/cmsis_core",
-        "#/lib/stm32wb_hal_driver/Inc",
-        "#/lib/stm32wb_copro/cmsis_core",
+        "#/lib/stm32wb_hal/Inc",
         "#/lib/stm32wb_copro/wpan",
     ],
     CPPDEFINES=[
@@ -16,7 +15,7 @@ env.Append(
     ],
     SDK_HEADERS=env.GlobRecursive(
         "*_ll_*.h",
-        Dir("stm32wb_hal_driver/Inc"),
+        Dir("stm32wb_hal/Inc"),
         exclude="*usb.h",
     ),
 )
@@ -29,7 +28,7 @@ if env["RAM_EXEC"]:
     )
 
 
-libenv = env.Clone(FW_LIB_NAME="stm32cubewb")
+libenv = env.Clone(FW_LIB_NAME="stm32wb")
 libenv.Append(
     CPPPATH=[
         "#/lib/stm32wb_copro/wpan/ble",
@@ -42,7 +41,7 @@ libenv.Append(
 )
 libenv.ApplyLibFlags()
 
-sources = libenv.GlobRecursive("*_ll_*.c", "stm32wb_hal_driver/Src/", exclude="*usb.c")
+sources = libenv.GlobRecursive("*_ll_*.c", "stm32wb_hal/Src/", exclude="*usb.c")
 sources += Glob(
     "stm32wb_copro/wpan/interface/patterns/ble_thread/shci/*.c",
     source=True,

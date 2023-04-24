@@ -35,7 +35,7 @@
 	path = lib/stm32wb_cmsis
 	url = https://github.com/STMicroelectronics/cmsis_device_wb
 [submodule "lib/stm32wbxx_hal_driver"]
-	path = lib/stm32wb_hal_driver
+	path = lib/stm32wb_hal
 	url = https://github.com/STMicroelectronics/stm32wbxx_hal_driver
 [submodule "lib/stm32wb_copro"]
 	path = lib/stm32wb_copro
