@@ -2,10 +2,11 @@ Import("env")
 
 env.Append(
     CPPPATH=[
-        "#/lib/STM32CubeWB/Drivers/CMSIS/Device/ST/STM32WBxx/Include",
-        "#/lib/STM32CubeWB/Drivers/CMSIS/Include",
-        "#/lib/STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc",
-        "#/lib/STM32CubeWB/Middlewares/ST/STM32_WPAN",
+        "#/lib/stm32wb_cmsis/Include",
+        "#/lib/stm32wb_copro/cmsis_core",
+        "#/lib/stm32wb_hal_driver/Inc",
+        "#/lib/stm32wb_copro/cmsis_core",
+        "#/lib/stm32wb_copro/wpan",
     ],
     CPPDEFINES=[
         "STM32WB",
@@ -15,7 +16,7 @@ env.Append(
     ],
     SDK_HEADERS=env.GlobRecursive(
         "*_ll_*.h",
-        Dir("STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Inc/"),
+        Dir("stm32wb_hal_driver/Inc"),
         exclude="*usb.h",
     ),
 )
@@ -31,39 +32,37 @@ if env["RAM_EXEC"]:
 libenv = env.Clone(FW_LIB_NAME="stm32cubewb")
 libenv.Append(
     CPPPATH=[
-        "#/lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble",
-        "#/lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core",
-        "#/lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread",
-        "#/lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/shci",
-        "#/lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl",
-        "#/lib/STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities",
+        "#/lib/stm32wb_copro/wpan/ble",
+        "#/lib/stm32wb_copro/wpan/ble/core",
+        "#/lib/stm32wb_copro/wpan/interface/patterns/ble_thread",
+        "#/lib/stm32wb_copro/wpan/interface/patterns/ble_thread/shci",
+        "#/lib/stm32wb_copro/wpan/interface/patterns/ble_thread/tl",
+        "#/lib/stm32wb_copro/wpan/utilities",
     ]
 )
 libenv.ApplyLibFlags()
 
-sources = libenv.GlobRecursive(
-    "*_ll_*.c", "STM32CubeWB/Drivers/STM32WBxx_HAL_Driver/Src/", exclude="*usb.c"
-)
+sources = libenv.GlobRecursive("*_ll_*.c", "stm32wb_hal_driver/Src/", exclude="*usb.c")
 sources += Glob(
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/shci/*.c",
+    "stm32wb_copro/wpan/interface/patterns/ble_thread/shci/*.c",
     source=True,
 )
 sources += Glob(
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl/*_tl*.c",
+    "stm32wb_copro/wpan/interface/patterns/ble_thread/tl/*_tl*.c",
     source=True,
 )
 sources += [
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/interface/patterns/ble_thread/tl/tl_mbox.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/svc/Src/svc_ctl.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_gap_aci.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_gatt_aci.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_hal_aci.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_hci_le.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/auto/ble_l2cap_aci.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/ble/core/template/osal.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities/dbg_trace.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities/otp.c",
-    "STM32CubeWB/Middlewares/ST/STM32_WPAN/utilities/stm_list.c",
+    "stm32wb_copro/wpan/interface/patterns/ble_thread/tl/tl_mbox.c",
+    "stm32wb_copro/wpan/ble/svc/Src/svc_ctl.c",
+    "stm32wb_copro/wpan/ble/core/auto/ble_gap_aci.c",
+    "stm32wb_copro/wpan/ble/core/auto/ble_gatt_aci.c",
+    "stm32wb_copro/wpan/ble/core/auto/ble_hal_aci.c",
+    "stm32wb_copro/wpan/ble/core/auto/ble_hci_le.c",
+    "stm32wb_copro/wpan/ble/core/auto/ble_l2cap_aci.c",
+    "stm32wb_copro/wpan/ble/core/template/osal.c",
+    "stm32wb_copro/wpan/utilities/dbg_trace.c",
+    "stm32wb_copro/wpan/utilities/otp.c",
+    "stm32wb_copro/wpan/utilities/stm_list.c",
 ]
 
 
