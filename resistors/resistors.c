@@ -137,6 +137,7 @@ static const SceneManagerHandlers resistors_scene_manager_handlers = {
 
 /* callbacks */
 
+/** custom event handler */
 static bool resistors_custom_callback(void* context, uint32_t custom_event) {
     furi_assert(context);
     App* app = context;
