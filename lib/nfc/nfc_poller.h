@@ -4,9 +4,9 @@
 extern "C" {
 #endif
 
-#include "protocols/nfca_poller.h"
-#include "protocols/nfcb_poller.h"
-#include "protocols/mf_ultralight.h"
+#include <lib/nfc/protocols/nfca/nfca_poller.h>
+#include <lib/nfc/protocols/nfcb/nfcb_poller.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 
 typedef struct NfcPoller NfcPoller;
 

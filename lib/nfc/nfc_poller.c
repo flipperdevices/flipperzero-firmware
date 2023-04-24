@@ -3,8 +3,8 @@
 #include <furi.h>
 
 #include "nfc.h"
-#include "protocols/nfca_poller.h"
-#include "protocols/mf_ultralight.h"
+#include <lib/nfc/protocols/nfca/nfca_poller_i.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 
 typedef enum {
     NfcPollerStateIdle,

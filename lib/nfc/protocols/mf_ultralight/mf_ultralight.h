@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nfca.h"
+#include <lib/nfc/protocols/nfca/nfca.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mf_ultralight.h"
-#include "nfca_listener.h"
+#include <lib/nfc/protocols/nfca/nfca_listener.h>
 
 #ifdef __cplusplus
 extern "C" {

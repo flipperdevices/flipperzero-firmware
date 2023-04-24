@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/nfc/protocols/mf_ultralight.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight.h>
 
 #ifdef __cplusplus
 extern "C" {

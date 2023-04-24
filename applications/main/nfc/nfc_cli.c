@@ -7,16 +7,6 @@
 #include <lib/nfc/nfc_types.h>
 #include <lib/nfc/nfc_device.h>
 
-#include <lib/nfc/protocols/nfca_poller.h>
-#include <lib/drivers/st25r3916_reg.h>
-
-#include <lib/nfc/protocols/nfca.h>
-
-#include <lib/nfc/nfc.h>
-#include <lib/nfc/protocols/nfca_listener.h>
-#include <furi_hal_gpio.h>
-#include <furi_hal_resources.h>
-
 static void nfc_cli_print_usage() {
     printf("Usage:\r\n");
     printf("nfc <cmd>\r\n");

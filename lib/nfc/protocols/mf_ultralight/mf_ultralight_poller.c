@@ -1,9 +1,10 @@
 #include "mf_ultralight_poller.h"
 
+#include <lib/nfc/protocols/nfca/nfca_poller_i.h>
+
 #include <furi.h>
-#include "nfca_poller.h"
 #include <nfc/helpers/nfc_poller_buffer.h>
-#include "nfc_util.h"
+#include <lib/nfc/protocols/nfc_util.h>
 
 #define TAG "MfUltralightPoller"
 

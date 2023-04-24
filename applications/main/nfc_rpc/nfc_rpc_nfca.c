@@ -1,7 +1,7 @@
 #include "nfc_rpc_i.h"
 
 #include "assets/compiled/nfca.pb.h"
-#include <lib/nfc/protocols/nfca_poller.h>
+#include <lib/nfc/protocols/nfca/nfca_poller.h>
 
 #define TAG "NfcRpcNfca"
 
@@ -65,7 +65,7 @@ static void nfc_rpc_nfca_read(Nfc_Main* cmd, void* context) {
     }
     cmd->content.nfca_read_resp = pb_nfca_read_resp;
 
-    nfca_poller_reset(instance->nfca_poller);
+    nfca_poller_stop(instance->nfca_poller);
 }
 
 static void nfc_rpc_nfca_emulate_start(Nfc_Main* cmd, void* context) {

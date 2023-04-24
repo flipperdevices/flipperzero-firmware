@@ -34,11 +34,11 @@
 
 #include <lib/nfc/nfc.h>
 #include <lib/nfc/nfc_poller.h>
-#include <lib/nfc/protocols/nfca_poller.h>
-#include <lib/nfc/protocols/nfcb_poller.h>
-#include <lib/nfc/protocols/nfca_listener.h>
-#include <lib/nfc/protocols/mf_ultralight_poller.h>
-#include <lib/nfc/protocols/mf_ultralight_listener.h>
+#include <lib/nfc/protocols/nfca/nfca_poller.h>
+#include <lib/nfc/protocols/nfca/nfca_listener.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
+#include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 
 #include <lib/nfc/nfc_dev.h>
 
