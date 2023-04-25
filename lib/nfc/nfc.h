@@ -97,9 +97,9 @@ NfcError nfc_listener_sleep(Nfc* instance);
 
 void nfc_listener_abort(Nfc* instance);
 
-// Called from worker thread
-
 void nfc_stop(Nfc* instance);
+
+// Called from worker thread
 
 NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits);
 
