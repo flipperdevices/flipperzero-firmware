@@ -279,6 +279,7 @@ class Navigator:
         self.press_back()
         self.press_back()
         self.press_back()
+        time.sleep(0.1) #try to fix freeze while emilating Mfc1K
         state = self.get_current_state()
         while not ("SDcardIcon" in state):
             state = self.get_current_state()

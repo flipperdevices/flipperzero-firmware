@@ -61,6 +61,12 @@ def pytest_addoption(parser):
         default=False,
         help="use this flag for E2E ibutton and ir bench tests",
     )
+    parser.addoption(
+        "--no_init",
+        action="store_true",
+        default=False,
+        help="use this flag for skip setup cycle",
+    )
 
 
 def pytest_configure(config):
@@ -256,35 +262,36 @@ def nav(flipper_serial, request):
         proto, debug=debug, gui=gui, scale=int(scale), threshold=threshold, path=path, window_name = "Main flipper"
     )
     nav.update_screen()
+    port = request.config.getoption("--flipper_k_port")
+    if not(request.config.getoption("--no_init")):
+        # Enabling of bluetooth
+        nav.go_to_main_screen()
+        nav.press_ok()
+        nav.go_to("Settings")
+        nav.press_ok()
+        nav.go_to("Bluetooth")
+        nav.press_ok()
+        nav.update_screen()
+        menu = nav.get_menu_list()
+        if "BluetoothIsON" in menu:
+            pass
+        elif "BluetoothIsOFF" in menu:
+            nav.press_right()
+        else:
+            raise FlippigatorException("Can not enable bluetooth")
 
-    # Enabling of bluetooth
-    nav.go_to_main_screen()
-    nav.press_ok()
-    nav.go_to("Settings")
-    nav.press_ok()
-    nav.go_to("Bluetooth")
-    nav.press_ok()
-    nav.update_screen()
-    menu = nav.get_menu_list()
-    if "BluetoothIsON" in menu:
-        pass
-    elif "BluetoothIsOFF" in menu:
-        nav.press_right()
-    else:
-        raise FlippigatorException("Can not enable bluetooth")
-
-    # Enabling Debug
-    nav.press_back()
-    nav.go_to("System")
-    nav.press_ok()
-    menu = nav.get_menu_list()
-    if "DebugIsON" in menu:
-        pass
-    elif "DebugIsOFF" in menu:
-        nav.go_to("DebugIsOFF")
-        nav.press_right()
-    else:
-        raise FlippigatorException("Can not enable debug")
+        # Enabling Debug
+        nav.press_back()
+        nav.go_to("System")
+        nav.press_ok()
+        menu = nav.get_menu_list()
+        if "DebugIsON" in menu:
+            pass
+        elif "DebugIsOFF" in menu:
+            nav.go_to("DebugIsOFF")
+            nav.press_right()
+        else:
+            raise FlippigatorException("Can not enable debug")
 
     return nav
 
@@ -305,35 +312,35 @@ def nav_reader(flipper_reader_serial, request):
         proto, debug=debug, gui=gui, scale=int(scale), threshold=threshold, path=path, window_name = "Reader flipper"
     )
     nav_reader.update_screen()
+    if not(request.config.getoption("--no_init")):
+        # Enabling of bluetooth
+        nav_reader.go_to_main_screen()
+        nav_reader.press_ok()
+        nav_reader.go_to("Settings")
+        nav_reader.press_ok()
+        nav_reader.go_to("Bluetooth")
+        nav_reader.press_ok()
+        nav_reader.update_screen()
+        menu = nav_reader.get_menu_list()
+        if "BluetoothIsON" in menu:
+            pass
+        elif "BluetoothIsOFF" in menu:
+            nav_reader.press_right()
+        else:
+            raise FlippigatorException("Can not enable bluetooth")
 
-    # Enabling of bluetooth
-    nav_reader.go_to_main_screen()
-    nav_reader.press_ok()
-    nav_reader.go_to("Settings")
-    nav_reader.press_ok()
-    nav_reader.go_to("Bluetooth")
-    nav_reader.press_ok()
-    nav_reader.update_screen()
-    menu = nav_reader.get_menu_list()
-    if "BluetoothIsON" in menu:
-        pass
-    elif "BluetoothIsOFF" in menu:
-        nav_reader.press_right()
-    else:
-        raise FlippigatorException("Can not enable bluetooth")
-
-    # Enabling Debug
-    nav_reader.press_back()
-    nav_reader.go_to("System")
-    nav_reader.press_ok()
-    menu = nav_reader.get_menu_list()
-    if "DebugIsON" in menu:
-        pass
-    elif "DebugIsOFF" in menu:
-        nav_reader.go_to("DebugIsOFF")
-        nav_reader.press_right()
-    else:
-        raise FlippigatorException("Can not enable debug")
+        # Enabling Debug
+        nav_reader.press_back()
+        nav_reader.go_to("System")
+        nav_reader.press_ok()
+        menu = nav_reader.get_menu_list()
+        if "DebugIsON" in menu:
+            pass
+        elif "DebugIsOFF" in menu:
+            nav_reader.go_to("DebugIsOFF")
+            nav_reader.press_right()
+        else:
+            raise FlippigatorException("Can not enable debug")
 
     return nav_reader
 
@@ -354,35 +361,35 @@ def nav_key(flipper_key_serial, request):
         proto, debug=debug, gui=gui, scale=int(scale), threshold=threshold, path=path, window_name = "Key flipper"
     )
     nav_key.update_screen()
+    if not(request.config.getoption("--no_init")):
+        # Enabling of bluetooth
+        nav_key.go_to_main_screen()
+        nav_key.press_ok()
+        nav_key.go_to("Settings")
+        nav_key.press_ok()
+        nav_key.go_to("Bluetooth")
+        nav_key.press_ok()
+        nav_key.update_screen()
+        menu = nav_key.get_menu_list()
+        if "BluetoothIsON" in menu:
+            pass
+        elif "BluetoothIsOFF" in menu:
+            nav_key.press_right()
+        else:
+            raise FlippigatorException("Can not enable bluetooth")
 
-    # Enabling of bluetooth
-    nav_key.go_to_main_screen()
-    nav_key.press_ok()
-    nav_key.go_to("Settings")
-    nav_key.press_ok()
-    nav_key.go_to("Bluetooth")
-    nav_key.press_ok()
-    nav_key.update_screen()
-    menu = nav_key.get_menu_list()
-    if "BluetoothIsON" in menu:
-        pass
-    elif "BluetoothIsOFF" in menu:
-        nav_key.press_right()
-    else:
-        raise FlippigatorException("Can not enable bluetooth")
-
-    # Enabling Debug
-    nav_key.press_back()
-    nav_key.go_to("System")
-    nav_key.press_ok()
-    menu = nav_key.get_menu_list()
-    if "DebugIsON" in menu:
-        pass
-    elif "DebugIsOFF" in menu:
-        nav_key.go_to("DebugIsOFF")
-        nav_key.press_right()
-    else:
-        raise FlippigatorException("Can not enable debug")
+        # Enabling Debug
+        nav_key.press_back()
+        nav_key.go_to("System")
+        nav_key.press_ok()
+        menu = nav_key.get_menu_list()
+        if "DebugIsON" in menu:
+            pass
+        elif "DebugIsOFF" in menu:
+            nav_key.go_to("DebugIsOFF")
+            nav_key.press_right()
+        else:
+            raise FlippigatorException("Can not enable debug")
 
     return nav_key
 
@@ -404,7 +411,7 @@ def reader_nfc(reader_serial, gator, request) -> Gator:
     if bench:
         print("Reader NFC initialization")
 
-        reader = Reader(reader_serial, gator, -935.0, -890.0)
+        reader = Reader(reader_serial, gator, -925.0, -890.0)
 
         return reader
 
@@ -414,7 +421,7 @@ def reader_em_hid(reader_serial, gator, request) -> Gator:
     if bench:
         print("Reader RFID Indala initialization")
 
-        reader = Reader(reader_serial, gator, -675.0, -875.0)
+        reader = Reader(reader_serial, gator, -665.0, -875.0)
 
         return reader
 
@@ -424,7 +431,7 @@ def reader_indala(reader_serial, gator, request) -> Gator:
     if bench:
         print("Reader RFID Indala initialization")
 
-        reader = Reader(reader_serial, gator, -935.0, -635.0)
+        reader = Reader(reader_serial, gator, -925.0, -635.0)
 
         return reader
 

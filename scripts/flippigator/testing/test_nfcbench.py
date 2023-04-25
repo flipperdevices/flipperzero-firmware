@@ -18,7 +18,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -10.0, 15000)
+            gator.swim_to(0.0, -10.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -85,7 +85,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -90.0, 15000)
+            gator.swim_to(0.0, -90.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -210,7 +210,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -250.0, 15000)
+            gator.swim_to(0.0, -250.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -260,7 +260,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -330.0, 15000)
+            gator.swim_to(0.0, -330.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -310,7 +310,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-10.0, -410.0, 15000)
+            gator.swim_to(0.0, -410.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -361,7 +361,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-120.0, -10.0, 15000)
+            gator.swim_to(-110.0, -10.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -442,7 +442,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(-120.0, -170.0, 15000)
+            gator.swim_to(-110.0, -170.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
