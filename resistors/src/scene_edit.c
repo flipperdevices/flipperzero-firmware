@@ -5,15 +5,15 @@
 
 /* edit view scene */
 
-const int spacing_R4[] = {0, 13, 24, 36};
-const int left_R4 = 46;
+const int left_R4 = 41;
+const int positions_R4[] = {0, 13, 24, 36};
 
 void resistors_edit_view_redraw_widget(App* app) {
     widget_reset(app->widget);
-    widget_add_icon_element(app->widget, 10, 23, &I_resistor);
-    if(app->state->edit_selection < COUNT_OF(spacing_R4)) {
+    widget_add_icon_element(app->widget, 5, 23, &I_resistor);
+    if(app->state->edit_selection < COUNT_OF(positions_R4)) {
         widget_add_icon_element(
-            app->widget, left_R4 + spacing_R4[app->state->edit_selection], 13, &I_arrow);
+            app->widget, left_R4 + positions_R4[app->state->edit_selection], 13, &I_arrow);
     }
 
     widget_add_text_box_element(
