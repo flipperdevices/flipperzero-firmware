@@ -614,7 +614,8 @@ NestedCheckKeyResult nested_check_key(
     nfc_activate();
     if(!furi_hal_nfc_activate_nfca(200, &cuid)) return NestedCheckKeyNoTag;
 
-    FURI_LOG_D(TAG, "Checking %c key %06llX for block %u", !keyType ? 'A' : 'B', ui64Key, blockNo);
+    FURI_LOG_D(
+        TAG, "Checking %c key %012llX for block %u", !keyType ? 'A' : 'B', ui64Key, blockNo);
 
     bool success =
         mifare_classic_authex(crypto, tx_rx, cuid, blockNo, keyType, ui64Key, false, &nt);

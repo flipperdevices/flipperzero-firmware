@@ -315,7 +315,7 @@ uint32_t mifare_nested_worker_predict_delay(
     uint32_t nt1, nt2, i = 0, previous = 0, prng_delay = 0, zero_prng_value = 65565, repeat = 0;
 
     if(tries > 10) {
-        return 2; // To many tries, fallback to hardnested
+        return 2; // Too many tries, fallback to hardnested
     }
 
     // This part of attack is my attempt to implement it on Flipper.
@@ -618,13 +618,9 @@ bool mifare_nested_worker_check_initial_keys(
                 }
             }
         }
-
-        if(sector == sector_count - 1 && key_block == 0) {
-            return false;
-        }
     }
 
-    return true;
+    return *key_block;
 }
 
 void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_nested_worker) {
@@ -686,7 +682,7 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
     }
 
     FURI_LOG_I(
-        TAG, "Using %c key for block %lu: %06llX", !found_key_type ? 'A' : 'B', key_block, key);
+        TAG, "Using %c key for block %lu: %012llX", !found_key_type ? 'A' : 'B', key_block, key);
 
     nonces->tries = 1;
 
@@ -783,6 +779,8 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
     uint32_t found_key_type = 0;
     uint32_t key_block = 0;
     uint32_t sector_count = 0;
+    uint32_t cuid = 0;
+    furi_hal_nfc_activate_nfca(200, &cuid);
 
     FURI_LOG_I(TAG, "Running hardnested attack");
     FuriString* tag_info = furi_string_alloc_printf("Tag UID: ");
@@ -829,7 +827,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
     }
 
     FURI_LOG_I(
-        TAG, "Using %c key for block %lu: %06llX", !found_key_type ? 'A' : 'B', key_block, key);
+        TAG, "Using %c key for block %lu: %012llX", !found_key_type ? 'A' : 'B', key_block, key);
 
     FuriHalNfcTxRxContext tx_rx = {};
     nonces->tries = 1;
@@ -880,17 +878,16 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
                 FSAM_READ_WRITE,
                 FSOM_CREATE_ALWAYS);
 
-            FuriString* cuid = furi_string_alloc_printf("CUID: ");
-            mifare_nested_worker_write_uid_string(&data, cuid);
             FuriString* header = furi_string_alloc_printf(
-                "Filetype: Flipper Nested Nonces File\nVersion: %s\nNote: you will need desktop app to recover keys: %s\n%s\n",
+                "Filetype: Flipper Nested Nonces File\nVersion: %s\nNote: you will need desktop app to recover keys: %s\nKey %c cuid 0x%08lx sec %u\n",
                 NESTED_NONCE_FORMAT_VERSION,
                 NESTED_RECOVER_KEYS_GITHUB_LINK,
-                furi_string_get_cstr(cuid));
+                !key_type ? 'A' : 'B',
+                cuid,
+                sector);
 
             stream_write_string(file_stream, header);
             furi_string_free(header);
-            furi_string_free(cuid);
 
             while(!info->collected &&
                   mifare_nested_worker->state == MifareNestedWorkerStateCollecting) {
@@ -1037,7 +1034,7 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
     }
 
     FURI_LOG_I(
-        TAG, "Using %c key for block %lu: %06llX", !found_key_type ? 'A' : 'B', key_block, key);
+        TAG, "Using %c key for block %lu: %012llX", !found_key_type ? 'A' : 'B', key_block, key);
 
     while(mifare_nested_worker->state == MifareNestedWorkerStateCollecting) {
         FuriHalNfcTxRxContext tx_rx = {};
@@ -1278,7 +1275,7 @@ bool* mifare_nested_worker_check_keys_exists(
 
     for(uint32_t i = 0; i < key_count; i++) {
         old_keys[i] = false;
-        key_strings[i] = furi_string_alloc_printf("%06llX\n", keys[i]);
+        key_strings[i] = furi_string_alloc_printf("%012llX\n", keys[i]);
     }
 
     while(mifare_nested_worker->state == MifareNestedWorkerStateValidating) {
@@ -1467,7 +1464,8 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
             }
 
             if(result == NestedCheckKeyValid) {
-                FURI_LOG_I(TAG, "Found valid %c key for sector %u: %06llX", key_type, sector, key);
+                FURI_LOG_I(
+                    TAG, "Found valid %c key for sector %u: %012llX", key_type, sector, key);
                 bool exists = false;
 
                 for(uint8_t i = 0; i < keys_count; i++) {
@@ -1525,7 +1523,7 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
     for(uint8_t i = 0; i < keys_count; i++) {
         if(keys[i] == (uint64_t)-1) continue;
 
-        FuriString* key_string = furi_string_alloc_printf("%06llX\n", keys[i]);
+        FuriString* key_string = furi_string_alloc_printf("%012llX\n", keys[i]);
 
         mifare_nested_worker_write_key(storage, key_string);
         FURI_LOG_I(TAG, "Added new key: %s", furi_string_get_cstr(key_string));
