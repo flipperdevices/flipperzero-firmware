@@ -887,6 +887,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
 
             stream_write_string(file_stream, header);
             furi_string_free(header);
+            furi_string_free(hardnested_file);
 
             while(!info->collected &&
                   mifare_nested_worker->state == MifareNestedWorkerStateCollecting) {
