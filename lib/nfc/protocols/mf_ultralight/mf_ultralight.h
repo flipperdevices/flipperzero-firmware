@@ -105,6 +105,43 @@ typedef union {
     uint16_t pack;
 } MfUltralightAuthPack;
 
+typedef struct __attribute__((packed)) {
+    union {
+        uint8_t value;
+        struct {
+            uint8_t rfui1 : 2;
+            bool strg_mod_en : 1;
+            bool rfui2 : 1;
+            uint8_t mirror_byte : 2;
+            MfUltralightMirrorConf mirror_conf : 2;
+        };
+    } mirror;
+    uint8_t rfui1;
+    uint8_t mirror_page;
+    uint8_t auth0;
+    union {
+        uint8_t value;
+        struct {
+            uint8_t authlim : 3;
+            bool nfc_cnt_pwd_prot : 1;
+            bool nfc_cnt_en : 1;
+            bool nfc_dis_sec1 : 1; // NTAG I2C Plus only
+            bool cfglck : 1;
+            bool prot : 1;
+        };
+    } access;
+    uint8_t vctid;
+    uint8_t rfui2[2];
+    MfUltralightAuthPassword password;
+    MfUltralightAuthPack pack;
+    uint8_t rfui3[2];
+} MfUltralightConfigPages;
+
+
+typedef struct {
+
+} MfUltralightConfigPages;
+
 typedef struct {
     NfcaData nfca_data;
     MfUltralightType type;
