@@ -5,6 +5,8 @@
 
 # How to use:
 
+# [Experimental makefile-compiled crossplatform project](https://github.com/LTVA1/flipper-zero-video-player/tree/main/makefile_project_converter)
+
 First, place your video (`source.mp4`) in some empty folder, create "frames" folder there and run this (install ffmpeg if you don't have it) (change the 1280x720 resolution to match your source video resolution if necessary, change 96x64 resolution according to your video aspect ratio if necessary):
 
 YOUR HORIZONTAL RESOLUTION MUST BE A MULTIPLE OF 8!! 96 WORK AND 128 WORK BUT E.G. 86 DOES NOT!
