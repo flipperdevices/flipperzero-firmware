@@ -407,5 +407,6 @@ void nfc_scene_felica_sys_data_on_exit(void* context) {
     Nfc* nfc = context;
     submenu_reset(nfc->submenu);
     text_box_reset(nfc->text_box);
+    furi_string_reset(nfc->text_box_store);
     return;
 }
