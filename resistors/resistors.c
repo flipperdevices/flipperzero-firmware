@@ -114,10 +114,14 @@ void resistors_main_menu_scene_on_exit(void* context) {
 
 /* edit view scene */
 
+const int spacing_R4[] = {0, 13, 24, 36};
 void resistors_edit_view_redraw_widget(App* app) {
     widget_reset(app->widget);
     widget_add_icon_element(app->widget, 10, 23, &I_resistor);
-    widget_add_icon_element(app->widget, 46 + (app_state->edit_selection * 15), 13, &I_arrow);
+    if(app_state->edit_selection < COUNT_OF(spacing_R4)) {
+        widget_add_icon_element(
+            app->widget, 46 + spacing_R4[app_state->edit_selection], 13, &I_arrow);
+    }
 
     widget_add_text_box_element(
         app->widget, 5, 2, 123, 10, AlignCenter, AlignCenter, "uncalculated", true);
@@ -132,18 +136,21 @@ void resistors_edit_view_redraw_widget(App* app) {
 
 static bool widget_input_callback(InputEvent* input_event, void* context) {
     App* app = context;
-    UNUSED(app);
     bool consumed = false;
     if(input_event->type == InputTypeShort) {
         switch(input_event->key) {
         case InputKeyRight:
-            app_state->edit_selection += 1;
-            //resistors_edit_view_redraw_widget(app);
-            // scene_manager_set_scene_state(
-            //     app->scene_manager,
-            //     ResistorsEditView,
-            //     scene_manager_get_scene_state(app->scene_manager, ResistorsEditView));
-            //view_dispatcher_switch_to_view(app->view_dispatcher, ResistorsEditView);
+            if(app_state->edit_selection < 3) {
+                app_state->edit_selection += 1;
+            }
+            resistors_edit_view_redraw_widget(app);
+            consumed = true;
+            break;
+        case InputKeyLeft:
+            if(app_state->edit_selection > 0) {
+                app_state->edit_selection -= 1;
+            }
+            resistors_edit_view_redraw_widget(app);
             consumed = true;
             break;
         default:
@@ -158,6 +165,7 @@ static bool widget_input_callback(InputEvent* input_event, void* context) {
 void resistors_edit_view_scene_on_enter(void* context) {
     App* app = context;
     resistors_edit_view_redraw_widget(app);
+    view_set_context(widget_get_view(app->widget), app);
     view_set_input_callback(widget_get_view(app->widget), widget_input_callback);
     view_dispatcher_switch_to_view(app->view_dispatcher, ResistorsEditView);
 }
