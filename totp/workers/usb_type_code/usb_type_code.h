@@ -1,22 +1,12 @@
 #pragma once
 
-#include <stdlib.h>
-#include <furi/core/thread.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <furi/core/mutex.h>
-#include <furi/core/kernel.h>
-#include <furi/core/check.h>
-#include <furi_hal_usb.h>
 
 typedef uint8_t TotpUsbTypeCodeWorkerEvent;
 
-typedef struct {
-    char* code_buffer;
-    uint8_t code_buffer_size;
-    uint8_t flags;
-    FuriThread* thread;
-    FuriMutex* code_buffer_sync;
-    FuriHalUsbInterface* usb_mode_prev;
-} TotpUsbTypeCodeWorkerContext;
+typedef struct TotpUsbTypeCodeWorkerContext TotpUsbTypeCodeWorkerContext;
 
 enum TotpUsbTypeCodeWorkerEvents {
     TotpUsbTypeCodeWorkerEventReserved = 0b00,
