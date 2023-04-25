@@ -69,7 +69,7 @@ static void __furi_put_uint32_as_hex(uint32_t data) {
     furi_hal_console_puts(tmp_str);
 }
 
-static void __furi_print_stack_and_register_info() {
+static void __furi_print_register_info() {
     // Print registers
     for(uint8_t i = 0; i < 12; i++) {
         furi_hal_console_puts("\r\n\tr");
@@ -80,6 +80,9 @@ static void __furi_print_stack_and_register_info() {
 
     furi_hal_console_puts("\r\n\tlr : ");
     __furi_put_uint32_as_hex(__furi_check_registers[12]);
+}
+
+static void __furi_print_stack_info() {
     furi_hal_console_puts("\r\n\tstack watermark: ");
     __furi_put_uint32_as_text(uxTaskGetStackHighWaterMark(NULL) * 4);
 }
@@ -118,14 +121,19 @@ FURI_NORETURN void __furi_crash() {
 
     if(__furi_check_message == NULL) {
         __furi_check_message = "Fatal Error";
+    } else if(__furi_check_message == (void*)__furi_assert_message_flag) {
+        __furi_check_message = "furi_assert failed";
+    } else if(__furi_check_message == (void*)__furi_check_message_flag) {
+        __furi_check_message = "furi_check failed";
     }
 
     furi_hal_console_puts("\r\n\033[0;31m[CRASH]");
     __furi_print_name(isr);
     furi_hal_console_puts(__furi_check_message);
 
+    __furi_print_register_info();
     if(!isr) {
-        __furi_print_stack_and_register_info();
+        __furi_print_stack_info();
     }
     __furi_print_heap_info();
 

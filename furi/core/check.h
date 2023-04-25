@@ -21,6 +21,9 @@ extern "C" {
 #define FURI_NORETURN noreturn
 #endif
 
+#define __furi_assert_message_flag 1
+#define __furi_check_message_flag 2
+
 /** Crash system */
 FURI_NORETURN void __furi_crash();
 
@@ -44,20 +47,20 @@ FURI_NORETURN void __furi_halt();
     } while(0)
 
 /** Check condition and crash if check failed */
-#define furi_check(__e)                          \
-    do {                                         \
-        if(!(__e)) {                             \
-            furi_crash("furi_check failed\r\n"); \
-        }                                        \
+#define furi_check(__e)                             \
+    do {                                            \
+        if(!(__e)) {                                \
+            furi_crash(__furi_assert_message_flag); \
+        }                                           \
     } while(0)
 
 /** Only in debug build: Assert condition and crash if assert failed  */
 #ifdef FURI_DEBUG
-#define furi_assert(__e)                          \
-    do {                                          \
-        if(!(__e)) {                              \
-            furi_crash("furi_assert failed\r\n"); \
-        }                                         \
+#define furi_assert(__e)                           \
+    do {                                           \
+        if(!(__e)) {                               \
+            furi_crash(__furi_check_message_flag); \
+        }                                          \
     } while(0)
 #else
 #define furi_assert(__e) \
