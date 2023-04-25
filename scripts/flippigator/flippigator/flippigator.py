@@ -6,16 +6,16 @@ from typing import Optional
 
 import cv2 as cv
 import numpy
-from modules.applications import AppApplications
-from modules.badusb import AppBadusb
-from modules.gpio import AppGpio
-from modules.ibutton import AppIbutton
-from modules.infrared import AppInfrared
-from modules.nfc import AppNfc
-from modules.rfid import AppRfid
-from modules.settings import AppSettings
-from modules.subghz import AppSubGhz
-from modules.u2f import AppU2f
+from flippigator.modules.applications import AppApplications
+from flippigator.modules.badusb import AppBadusb
+from flippigator.modules.gpio import AppGpio
+from flippigator.modules.ibutton import AppIbutton
+from flippigator.modules.infrared import AppInfrared
+from flippigator.modules.nfc import AppNfc
+from flippigator.modules.rfid import AppRfid
+from flippigator.modules.settings import AppSettings
+from flippigator.modules.subghz import AppSubGhz
+from flippigator.modules.u2f import AppU2f
 from termcolor import colored
 
 # APPLY_TEMPLATE_THRESHOLD = 0.99

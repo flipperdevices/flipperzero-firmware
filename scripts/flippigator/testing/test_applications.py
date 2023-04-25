@@ -54,29 +54,11 @@ class TestApplications(BaseCase):
                 "app_BtRemote",
             ]
 
-<<<<<<< HEAD
             assert menu, "Bluetooth folder is empty"
             assert all(
                 [item in menu for item in menu_ref]
             ), "Some of Bluetooth apps are missed"
             nav.press_back()
-=======
-        nav.go_to("folder_GPIO")
-        nav.press_ok()
-        menu = nav.get_menu_list()
-        menu_ref = [
-            "FileBrowserLevelUp",
-            "app_AVR Flasher",
-            "app_DAP Link",
-            "app_Signal Generator",
-            "app_SPI Mem Manager",
-        ]
-        for i in menu:
-            if i in menu_ref:
-                menu_ref.remove(i)
-        assert len(menu_ref) == 0, "Some of GPIO apps are missed"
-        nav.press_back()
->>>>>>> hellitron/e2e-bench
 
         with allure.step("GPIO apps"):
             nav.go_to("folder_GPIO")
