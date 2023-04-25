@@ -6,7 +6,7 @@
 
 #include <storage/storage.h>
 #include <stream/stream.h>
-#include <stream/buffered_file_stream.h>
+#include <stream/file_stream.h>
 #include "string.h"
 #include <furi.h>
 #include <furi_hal.h>
@@ -471,11 +471,10 @@ void mifare_nested_worker_write_nonces(
     uint32_t delay,
     uint32_t distance) {
     FuriString* path = furi_string_alloc();
-    Stream* file_stream = buffered_file_stream_alloc(storage);
+    Stream* file_stream = file_stream_alloc(storage);
     mifare_nested_worker_get_nonces_file_path(data, path);
 
-    buffered_file_stream_open(
-        file_stream, furi_string_get_cstr(path), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS);
+    file_stream_open(file_stream, furi_string_get_cstr(path), FSAM_READ_WRITE, FSOM_CREATE_ALWAYS);
 
     FuriString* header = furi_string_alloc_printf(
         "Filetype: Flipper Nested Nonce Manifest File\nVersion: %s\nNote: you will need desktop app to recover keys: %s\n",
@@ -544,7 +543,7 @@ void mifare_nested_worker_write_nonces(
 
     free(nonces);
     furi_string_free(path);
-    buffered_file_stream_close(file_stream);
+    file_stream_close(file_stream);
     free(file_stream);
     furi_record_close(RECORD_STORAGE);
 }
@@ -867,12 +866,12 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
                 continue;
             }
 
-            Stream* file_stream = buffered_file_stream_alloc(storage);
+            Stream* file_stream = file_stream_alloc(storage);
             FuriString* hardnested_file = furi_string_alloc();
             mifare_nested_worker_get_hardnested_file_path(
                 &data, hardnested_file, sector, key_type);
 
-            buffered_file_stream_open(
+            file_stream_open(
                 file_stream,
                 furi_string_get_cstr(hardnested_file),
                 FSAM_READ_WRITE,
@@ -909,7 +908,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
 
                     if(result.static_encrypted) {
                         // TODO: Delete file?
-                        buffered_file_stream_close(file_stream);
+                        file_stream_close(file_stream);
                         free(found);
                         free(mf_data);
                         nfc_deactivate();
@@ -958,7 +957,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
                 free(found);
             }
 
-            buffered_file_stream_close(file_stream);
+            file_stream_close(file_stream);
         }
     }
 
@@ -1269,8 +1268,8 @@ bool* mifare_nested_worker_check_keys_exists(
     uint32_t key_count,
     MifareNestedWorker* mifare_nested_worker) {
     bool* old_keys = malloc(sizeof(bool) * key_count);
-    Stream* file_stream = buffered_file_stream_alloc(storage);
-    buffered_file_stream_open(file_stream, path, FSAM_READ, FSOM_OPEN_ALWAYS);
+    Stream* file_stream = file_stream_alloc(storage);
+    file_stream_open(file_stream, path, FSAM_READ, FSOM_OPEN_ALWAYS);
     FuriString* key_strings[key_count];
 
     for(uint32_t i = 0; i < key_count; i++) {
@@ -1300,15 +1299,15 @@ bool* mifare_nested_worker_check_keys_exists(
         furi_string_free(key_strings[i]);
     }
 
-    buffered_file_stream_close(file_stream);
+    file_stream_close(file_stream);
     free(file_stream);
 
     return old_keys;
 }
 
 void mifare_nested_worker_write_key(Storage* storage, FuriString* key) {
-    Stream* file_stream = buffered_file_stream_alloc(storage);
-    buffered_file_stream_open(
+    Stream* file_stream = file_stream_alloc(storage);
+    file_stream_open(
         file_stream,
         EXT_PATH("nfc/assets/mf_classic_dict_user.nfc"),
         FSAM_READ_WRITE,
@@ -1316,13 +1315,13 @@ void mifare_nested_worker_write_key(Storage* storage, FuriString* key) {
 
     stream_write_string(file_stream, key);
 
-    buffered_file_stream_close(file_stream);
+    file_stream_close(file_stream);
 }
 
 void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
     KeyInfo_t* key_info = mifare_nested_worker->context->keys;
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    Stream* file_stream = buffered_file_stream_alloc(storage);
+    Stream* file_stream = file_stream_alloc(storage);
     FuriString* next_line = furi_string_alloc();
     FuriString* path = furi_string_alloc();
     FuriHalNfcDevData data = {};
@@ -1363,15 +1362,14 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
 
     mifare_nested_worker_get_found_keys_file_path(&data, path);
 
-    if(!buffered_file_stream_open(
-           file_stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
+    if(!file_stream_open(file_stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         FURI_LOG_E(TAG, "Can't open %s", furi_string_get_cstr(path));
 
-        buffered_file_stream_close(file_stream);
+        file_stream_close(file_stream);
 
         mifare_nested_worker_get_nonces_file_path(&data, path);
 
-        if(!buffered_file_stream_open(
+        if(!file_stream_open(
                file_stream, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             mifare_nested_worker->callback(
                 MifareNestedWorkerEventNeedCollection, mifare_nested_worker->context);
@@ -1380,7 +1378,7 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
                 MifareNestedWorkerEventNeedKeyRecovery, mifare_nested_worker->context);
         }
 
-        buffered_file_stream_close(file_stream);
+        file_stream_close(file_stream);
 
         free(file_stream);
         furi_string_free(path);
@@ -1488,7 +1486,7 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
     }
 
     furi_string_free(next_line);
-    buffered_file_stream_close(file_stream);
+    file_stream_close(file_stream);
     free(file_stream);
 
     mifare_nested_worker->callback(
