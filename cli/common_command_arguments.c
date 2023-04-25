@@ -1,11 +1,11 @@
 #include "common_command_arguments.h"
 #include <lib/toolbox/args.h>
 
-inline void totp_cli_printf_missed_argument_value(char* arg) {
+void totp_cli_printf_missed_argument_value(char* arg) {
     TOTP_CLI_PRINTF_ERROR("Missed or incorrect value for argument \"%s\"\r\n", arg);
 }
 
-inline void totp_cli_printf_unknown_argument(const FuriString* arg) {
+void totp_cli_printf_unknown_argument(const FuriString* arg) {
     TOTP_CLI_PRINTF("Unknown argument \"%s\"\r\n", furi_string_get_cstr(arg));
 }
 

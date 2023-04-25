@@ -20,6 +20,8 @@
 #define TOTP_TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END_NAME "tab"
 #define TOTP_TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER_NAME "slower"
 
+#define TOTP_TOKEN_DIGITS_MAX_COUNT (8)
+
 typedef uint8_t TokenHashAlgo;
 typedef uint8_t TokenDigitsCount;
 typedef uint8_t TokenAutomationFeature;
@@ -111,8 +113,6 @@ enum PlainTokenSecretEncodings {
     PLAIN_TOKEN_ENCODING_BASE64 = 1
 };
 
-#define TOTP_TOKEN_DIGITS_MAX_COUNT (8)
-
 /**
  * @brief TOTP token information
  */
@@ -130,7 +130,7 @@ typedef struct {
     /**
      * @brief User-friendly token name 
      */
-    char* name;
+    FuriString* name;
 
     /**
      * @brief Hashing algorithm
@@ -226,3 +226,9 @@ bool token_info_set_automation_feature_from_str(TokenInfo* token_info, const Fur
  * @return cloned instance
  */
 TokenInfo* token_info_clone(const TokenInfo* src);
+
+/**
+ * @brief Sets default values to all the properties of \c token_info
+ * @param token_info instance to set defaults to
+ */
+void token_info_set_defaults(TokenInfo* token_info);
