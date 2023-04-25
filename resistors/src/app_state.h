@@ -5,9 +5,25 @@
 
 typedef enum { Resistor4Band = 4, Resistor5Band = 5 } ResistorType;
 
+typedef enum {
+    BandBlack = 0,
+    BandBrown = 1,
+    BandRed = 2,
+    BandOrange = 3,
+    BandYellow = 4,
+    BandGreen = 5,
+    BandBlue = 6,
+    BandPurple = 7,
+    BandGray = 8,
+    BandWhite = 9,
+    BandGold,
+    BandSilver
+} ResistorBand;
+
 typedef struct AppState {
     uint8_t edit_selection;
     ResistorType resistor_type;
+    int resistor_bands[5];
 } AppState;
 
 typedef struct App {
@@ -21,5 +37,6 @@ typedef struct App {
 App* app_alloc();
 AppState* app_state_alloc();
 void app_free(App* app);
+void app_init_resistor(App* app, ResistorType rtype);
 
 #endif

@@ -48,12 +48,12 @@ bool resistors_main_menu_scene_on_event(void* context, SceneManagerEvent event) 
     case SceneManagerEventTypeCustom:
         switch(event.event) {
         case ResistorsMainMenuScene4BarSelectionEvent:
-            app->state->resistor_type = Resistor4Band;
+            app_init_resistor(app, Resistor4Band);
             scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
             consumed = true;
             break;
         case ResistorsMainMenuScene5BarSelectionEvent:
-            app->state->resistor_type = Resistor5Band;
+            app_init_resistor(app, Resistor5Band);
             scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
             consumed = true;
             break;

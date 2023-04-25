@@ -1,4 +1,5 @@
 #include "flipper.h"
+#include "resistors_app.h"
 #include "app_state.h"
 #include "scenes.h"
 
@@ -25,9 +26,30 @@ App* app_alloc() {
 
 AppState* app_state_alloc() {
     AppState* state = malloc(sizeof(AppState));
-    state->edit_selection = 0;
-    state->resistor_type = Resistor4Band;
     return state;
+}
+
+void app_init_resistor(App* app, ResistorType rtype) {
+    app->state->resistor_type = rtype;
+    app->state->edit_selection = 0;
+    switch(rtype) {
+    case Resistor4Band:
+        app->state->resistor_bands[0] = BandRed;
+        app->state->resistor_bands[1] = BandOrange;
+        app->state->resistor_bands[2] = BandYellow;
+        app->state->resistor_bands[3] = BandGreen;
+        break;
+    case Resistor5Band:
+        app->state->resistor_bands[0] = BandRed;
+        app->state->resistor_bands[1] = BandOrange;
+        app->state->resistor_bands[2] = BandYellow;
+        app->state->resistor_bands[3] = BandGreen;
+        app->state->resistor_bands[4] = BandBlue;
+        break;
+    default:
+        FURI_LOG_E(TAG, "Unknown resistor type in app_init_resistor");
+        break;
+    }
 }
 
 void app_free(App* app) {
