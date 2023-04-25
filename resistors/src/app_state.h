@@ -3,8 +3,11 @@
 
 #include "flipper.h"
 
+typedef enum { Resistor4Band = 4, Resistor5Band = 5 } ResistorType;
+
 typedef struct AppState {
     uint8_t edit_selection;
+    ResistorType resistor_type;
 } AppState;
 
 typedef struct App {

@@ -1,22 +1,66 @@
 #include "flipper.h"
+#include "resistors_app.h"
 #include "app_state.h"
 #include "scenes.h"
 #include "scene_edit.h"
 
 /* edit view scene */
 
-const int left_R4 = 41;
-const int positions_R4[] = {0, 13, 24, 36};
+const int resistor_image_top = 23;
+const int resistor_image_le = 23;
 
-const int left_R5 = 48;
-const int positions_R5[] = {0, 7, 15, 25, 32};
+const int resistor_image_left_R4 = 5;
+const int resistor_image_top_R4 = 23;
+const int resistor_arrow_left_R4 = 41;
+const int resistor_arrow_top_R4 = 13;
+const int arrow_positions_R4[] = {0, 13, 24, 36};
+
+const int resistor_image_left_R5 = 5;
+const int resistor_image_top_R5 = 23;
+const int resistor_arrow_left_R5 = 48;
+const int resistor_arrow_top_R5 = 13;
+const int arrow_positions_R5[] = {0, 7, 15, 25, 32};
 
 void resistors_edit_view_redraw_widget(App* app) {
     widget_reset(app->widget);
-    widget_add_icon_element(app->widget, 5, 23, &I_resistor_5);
-    if(app->state->edit_selection < COUNT_OF(positions_R5)) {
+
+    int* arrow_positions;
+    int arrow_left;
+    int arrow_top;
+    int image_left;
+    int image_top;
+    Icon* icon;
+
+    switch(app->state->resistor_type) {
+    case Resistor4Band:
+        arrow_left = resistor_arrow_left_R4;
+        arrow_top = resistor_arrow_top_R4;
+        arrow_positions = (int*)arrow_positions_R4;
+        image_left = resistor_image_left_R4;
+        image_top = resistor_image_top_R4;
+        icon = (Icon*)&I_resistor_4;
+        break;
+    case Resistor5Band:
+        arrow_left = resistor_arrow_left_R5;
+        arrow_top = resistor_arrow_top_R5;
+        arrow_positions = (int*)arrow_positions_R5;
+        image_left = resistor_image_left_R5;
+        image_top = resistor_image_top_R5;
+        icon = (Icon*)&I_resistor_5;
+        break;
+    default:
+        FURI_LOG_E(TAG, "Unrecognised resistor type in resistors_edit_view_redraw_widget");
+        scene_manager_stop(app->scene_manager);
+        return;
+    }
+
+    widget_add_icon_element(app->widget, image_left, image_top, icon);
+    if(app->state->edit_selection < app->state->resistor_type) {
         widget_add_icon_element(
-            app->widget, left_R5 + positions_R5[app->state->edit_selection], 13, &I_arrow);
+            app->widget,
+            arrow_left + *(arrow_positions + app->state->edit_selection),
+            arrow_top,
+            &I_arrow);
     }
 
     widget_add_text_box_element(
@@ -35,7 +79,7 @@ static bool widget_input_callback(InputEvent* input_event, void* context) {
     if(input_event->type == InputTypeShort) {
         switch(input_event->key) {
         case InputKeyRight:
-            if(app->state->edit_selection < COUNT_OF(positions_R5) - 1) {
+            if(app->state->edit_selection < app->state->resistor_type - 1) {
                 app->state->edit_selection += 1;
             }
             resistors_edit_view_redraw_widget(app);

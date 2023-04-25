@@ -26,6 +26,7 @@ App* app_alloc() {
 AppState* app_state_alloc() {
     AppState* state = malloc(sizeof(AppState));
     state->edit_selection = 0;
+    state->resistor_type = Resistor4Band;
     return state;
 }
 
