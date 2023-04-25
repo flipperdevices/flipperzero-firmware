@@ -4,7 +4,7 @@
 #include <gui/modules/widget.h>
 #include <nfc_worker_i.h>
 
-#include "furi_hal.h"
+#include <furi_hal.h>
 
 static const MfClassicAuthContext two_cities_keys_4k[] = {
     {.sector = 0, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
@@ -136,7 +136,7 @@ bool two_cities_parser_parse(NfcDeviceData* dev_data) {
 
     furi_string_printf(
         dev_data->parsed_data,
-        "\e#Troika+Plantain\nPN: %llu-\nPB: %ld rur.\nTN: %ld\nTB: %d rur.\n",
+        "\e#Troika+Plantain\nPN: %llu-\nPB: %lu rur.\nTN: %lu\nTB: %u rur.\n",
         card_number,
         balance,
         troika_number,

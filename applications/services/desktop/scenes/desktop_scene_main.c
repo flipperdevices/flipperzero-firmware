@@ -12,7 +12,7 @@
 
 #define TAG "DesktopSrv"
 
-#define MUSIC_PLAYER_APP EXT_PATH("/apps/Misc/music_player.fap")
+#define MUSIC_PLAYER_APP EXT_PATH("/apps/Media/music_player.fap")
 #define SNAKE_GAME_APP EXT_PATH("/apps/Games/snake_game.fap")
 #define CLOCK_APP EXT_PATH("/apps/Tools/clock.fap")
 
@@ -79,6 +79,7 @@ static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char*
 
 void desktop_scene_main_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
+    if(desktop->in_transition) return;
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
 }
 

@@ -18,7 +18,8 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
     NfcProtocol protocol = dev_data->protocol;
     uint8_t text_scroll_height = 0;
     if((protocol == NfcDeviceProtocolMifareDesfire) || (protocol == NfcDeviceProtocolMifareUl) ||
-       (protocol == NfcDeviceProtocolFelica) || (protocol == NfcDeviceProtocolFelicaMonolithic)) {
+       (protocol == NfcDeviceProtocolMifareClassic) || (protocol == NfcDeviceProtocolFelica) ||
+       (protocol == NfcDeviceProtocolFelicaMonolithic)) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_data_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -197,6 +198,9 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
             } else if(protocol == NfcDeviceProtocolMifareUl) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightData);
                 consumed = true;
+            } else if(protocol == NfcDeviceProtocolMifareClassic) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicData);
+                consumed = true;
             } else if(protocol == NfcDeviceProtocolFelica) {
                 scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaData, 0);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaData);
@@ -204,7 +208,6 @@ bool nfc_scene_nfc_data_info_on_event(void* context, SceneManagerEvent event) {
             } else if(protocol == NfcDeviceProtocolFelicaMonolithic) {
                 scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaSysData, 0);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaSysData);
-                consumed = true;
             }
         }
     }

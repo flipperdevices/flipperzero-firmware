@@ -230,7 +230,11 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                    (subghz->txrx->txrx_state == SubGhzTxRxStateSleep)) {
                     if(!subghz_tx_start(subghz, subghz->txrx->fff_data)) {
                         subghz->txrx->rx_key_state = SubGhzRxKeyStateBack;
-                        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneShowOnlyRx);
+                        subghz_read_raw_set_status(
+                            subghz->subghz_read_raw,
+                            SubGhzReadRAWStatusIDLE,
+                            "",
+                            subghz->txrx->raw_threshold_rssi);
                     } else {
                         if(scene_manager_has_previous_scene(
                                subghz->scene_manager, SubGhzSceneSaved) ||
@@ -411,5 +415,5 @@ void subghz_scene_read_raw_on_exit(void* context) {
     notification_message(subghz->notifications, &sequence_reset_rgb);
 
     //filter restoration
-    subghz_receiver_set_filter(subghz->txrx->receiver, SubGhzProtocolFlag_Decodable);
+    subghz_receiver_set_filter(subghz->txrx->receiver, subghz->txrx->filter);
 }

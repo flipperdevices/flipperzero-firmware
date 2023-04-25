@@ -20,7 +20,7 @@ DIST_SUFFIX = "local"
 COPRO_OB_DATA = "scripts/ob.data"
 
 # Must match lib/STM32CubeWB version
-COPRO_CUBE_VERSION = "1.13.3"
+COPRO_CUBE_VERSION = "1.15.0"
 
 COPRO_CUBE_DIR = "lib/STM32CubeWB"
 
@@ -71,11 +71,6 @@ FIRMWARE_APPS = {
         "system_apps",
         # Settings
         "settings_apps",
-        # Stock plugins - no longer built into fw, now they're .faps
-        # Yet you can still build them as a part of fw
-        # "basic_plugins",
-        # Debug
-        # "debug_apps",
     ],
     "unit_tests": [
         "basic_services",

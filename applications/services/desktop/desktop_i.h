@@ -59,6 +59,7 @@ struct Desktop {
 
     ViewPort* lock_icon_viewport;
     ViewPort* dummy_mode_icon_viewport;
+    ViewPort* stealth_mode_icon_viewport;
 
     AnimationManager* animation_manager;
 
@@ -69,6 +70,8 @@ struct Desktop {
     FuriPubSub* input_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;
     FuriTimer* auto_lock_timer;
+
+    bool in_transition;
 };
 
 Desktop* desktop_alloc();
@@ -77,3 +80,4 @@ void desktop_free(Desktop* desktop);
 void desktop_lock(Desktop* desktop);
 void desktop_unlock(Desktop* desktop);
 void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled);
+void desktop_set_stealth_mode_state(Desktop* desktop, bool enabled);

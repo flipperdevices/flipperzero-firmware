@@ -10,10 +10,14 @@ extern "C" {
 #define STORAGE_INT_PATH_PREFIX "/int"
 #define STORAGE_EXT_PATH_PREFIX "/ext"
 #define STORAGE_ANY_PATH_PREFIX "/any"
+#define STORAGE_APP_DATA_PATH_PREFIX "/data"
+#define STORAGE_APP_ASSETS_PATH_PREFIX "/assets"
 
 #define INT_PATH(path) STORAGE_INT_PATH_PREFIX "/" path
 #define EXT_PATH(path) STORAGE_EXT_PATH_PREFIX "/" path
 #define ANY_PATH(path) STORAGE_ANY_PATH_PREFIX "/" path
+#define APP_DATA_PATH(path) STORAGE_APP_DATA_PATH_PREFIX "/" path
+#define APP_ASSETS_PATH(path) STORAGE_APP_ASSETS_PATH_PREFIX "/" path
 
 #define RECORD_STORAGE "storage"
 
@@ -144,6 +148,17 @@ bool storage_file_eof(File* file);
  */
 bool storage_file_exists(Storage* storage, const char* path);
 
+/**
+ * @brief Copy data from one opened file to another opened file
+ * Size bytes will be copied from current position of source file to current position of destination file
+ * 
+ * @param source source file
+ * @param destination destination file
+ * @param size size of data to copy
+ * @return bool success flag
+ */
+bool storage_file_copy_to_file(File* source, File* destination, uint32_t size);
+
 /******************* Dir Functions *******************/
 
 /** Opens a directory to get objects from it
@@ -174,6 +189,15 @@ bool storage_dir_read(File* file, FileInfo* fileinfo, char* name, uint16_t name_
  * @return bool success flag
  */
 bool storage_dir_rewind(File* file);
+
+/**
+ * @brief Check that dir exists
+ * 
+ * @param storage 
+ * @param path 
+ * @return bool 
+ */
+bool storage_dir_exists(Storage* storage, const char* path);
 
 /******************* Common Functions *******************/
 
@@ -245,6 +269,36 @@ FS_Error storage_common_fs_info(
     const char* fs_path,
     uint64_t* total_space,
     uint64_t* free_space);
+
+/**
+ * @brief Parse aliases in path and replace them with real path
+ * Also will create special folders if they are not exist
+ * 
+ * @param storage 
+ * @param path 
+ * @return bool 
+ */
+void storage_common_resolve_path_and_ensure_app_directory(Storage* storage, FuriString* path);
+
+/**
+ * @brief Move content of one folder to another, with rename of all conflicting files. 
+ * Source folder will be deleted if the migration is successful.
+ * 
+ * @param storage 
+ * @param source 
+ * @param dest 
+ * @return FS_Error 
+ */
+FS_Error storage_common_migrate(Storage* storage, const char* source, const char* dest);
+
+/**
+ * @brief Check that file or dir exists
+ * 
+ * @param storage 
+ * @param path 
+ * @return bool 
+ */
+bool storage_common_exists(Storage* storage, const char* path);
 
 /******************* Error Functions *******************/
 

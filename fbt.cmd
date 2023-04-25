@@ -5,12 +5,17 @@ set SCONS_EP=python -m SCons
 
 if [%FBT_NO_SYNC%] == [] (
     if exist ".git" (
-        git submodule update --init
+        git submodule update --init --depth 1
     ) else (
-        echo Not in a git repo, please clone with git clone --recursive
+        echo Not in a git repo, please clone with "git clone"
         exit /b 1
     )
 )
 
-set "SCONS_DEFAULT_FLAGS=-Q --warn=target-not-built"
+set "SCONS_DEFAULT_FLAGS=--warn=target-not-built"
+
+if not defined FBT_VERBOSE (
+    set "SCONS_DEFAULT_FLAGS=%SCONS_DEFAULT_FLAGS% -Q"
+)
+
 %SCONS_EP% %SCONS_DEFAULT_FLAGS% %*

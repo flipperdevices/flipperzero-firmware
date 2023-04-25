@@ -24,7 +24,6 @@ struct FuriThreadStdout {
 };
 
 struct FuriThread {
-    bool is_service;
     FuriThreadState state;
     int32_t ret;
 
@@ -35,14 +34,21 @@ struct FuriThread {
     void* state_context;
 
     char* name;
-    configSTACK_DEPTH_TYPE stack_size;
+    char* appid;
+
     FuriThreadPriority priority;
 
     TaskHandle_t task_handle;
-    bool heap_trace_enabled;
     size_t heap_size;
 
     FuriThreadStdout output;
+
+    // Keep all non-alignable byte types in one place,
+    // this ensures that the size of this structure is minimal
+    bool is_service;
+    bool heap_trace_enabled;
+
+    configSTACK_DEPTH_TYPE stack_size;
 };
 
 static size_t __furi_thread_stdout_write(FuriThread* thread, const char* data, size_t size);
@@ -96,23 +102,17 @@ static void furi_thread_body(void* context) {
     furi_assert(thread->state == FuriThreadStateRunning);
 
     if(thread->is_service) {
-        FURI_LOG_E(
+        FURI_LOG_W(
             TAG,
-            "%s service thread exited. Thread memory cannot be reclaimed.",
+            "%s service thread TCB memory will not be reclaimed",
             thread->name ? thread->name : "<unknown service>");
     }
 
     // flush stdout
     __furi_thread_stdout_flush(thread);
 
-    // from here we can't use thread pointer
     furi_thread_set_state(thread, FuriThreadStateStopped);
 
-    // clear thread local storage
-    furi_assert(pvTaskGetThreadLocalStoragePointer(NULL, 0) != NULL);
-    vTaskSetThreadLocalStoragePointer(NULL, 0, NULL);
-
-    thread->task_handle = NULL;
     vTaskDelete(NULL);
     furi_thread_catch();
 }
@@ -122,11 +122,25 @@ FuriThread* furi_thread_alloc() {
     thread->output.buffer = furi_string_alloc();
     thread->is_service = false;
 
+    FuriThread* parent = NULL;
+    if(xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+        // TLS is not available, if we called not from thread context
+        parent = pvTaskGetThreadLocalStoragePointer(NULL, 0);
+
+        if(parent && parent->appid) {
+            furi_thread_set_appid(thread, parent->appid);
+        } else {
+            furi_thread_set_appid(thread, "unknown");
+        }
+    } else {
+        // if scheduler is not started, we are starting driver thread
+        furi_thread_set_appid(thread, "driver");
+    }
+
     FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
     if(mode == FuriHalRtcHeapTrackModeAll) {
         thread->heap_trace_enabled = true;
     } else if(mode == FuriHalRtcHeapTrackModeTree && furi_thread_get_current_id()) {
-        FuriThread* parent = pvTaskGetThreadLocalStoragePointer(NULL, 0);
         if(parent) thread->heap_trace_enabled = parent->heap_trace_enabled;
     } else {
         thread->heap_trace_enabled = false;
@@ -153,6 +167,7 @@ void furi_thread_free(FuriThread* thread) {
     furi_assert(thread->state == FuriThreadStateStopped);
 
     if(thread->name) free((void*)thread->name);
+    if(thread->appid) free((void*)thread->appid);
     furi_string_free(thread->output.buffer);
 
     free(thread);
@@ -163,6 +178,13 @@ void furi_thread_set_name(FuriThread* thread, const char* name) {
     furi_assert(thread->state == FuriThreadStateStopped);
     if(thread->name) free((void*)thread->name);
     thread->name = name ? strdup(name) : NULL;
+}
+
+void furi_thread_set_appid(FuriThread* thread, const char* appid) {
+    furi_assert(thread);
+    furi_assert(thread->state == FuriThreadStateStopped);
+    if(thread->appid) free((void*)thread->appid);
+    thread->appid = appid ? strdup(appid) : NULL;
 }
 
 void furi_thread_mark_as_service(FuriThread* thread) {
@@ -195,6 +217,15 @@ void furi_thread_set_priority(FuriThread* thread, FuriThreadPriority priority) {
     thread->priority = priority;
 }
 
+void furi_thread_set_current_priority(FuriThreadPriority priority) {
+    UBaseType_t new_priority = priority ? priority : FuriThreadPriorityNormal;
+    vTaskPrioritySet(NULL, new_priority);
+}
+
+FuriThreadPriority furi_thread_get_current_priority() {
+    return (FuriThreadPriority)uxTaskPriorityGet(NULL);
+}
+
 void furi_thread_set_state_callback(FuriThread* thread, FuriThreadStateCallback callback) {
     furi_assert(thread);
     furi_assert(thread->state == FuriThreadStateStopped);
@@ -216,11 +247,11 @@ void furi_thread_start(FuriThread* thread) {
     furi_assert(thread);
     furi_assert(thread->callback);
     furi_assert(thread->state == FuriThreadStateStopped);
-    furi_assert(thread->stack_size > 0 && thread->stack_size < 0xFFFF * 4);
+    furi_assert(thread->stack_size > 0 && thread->stack_size < (UINT16_MAX * sizeof(StackType_t)));
 
     furi_thread_set_state(thread, FuriThreadStateStarting);
 
-    uint32_t stack = thread->stack_size / 4;
+    uint32_t stack = thread->stack_size / sizeof(StackType_t);
     UBaseType_t priority = thread->priority ? thread->priority : FuriThreadPriorityNormal;
     if(thread->is_service) {
         thread->task_handle = xTaskCreateStatic(
@@ -240,12 +271,25 @@ void furi_thread_start(FuriThread* thread) {
     furi_check(thread->task_handle);
 }
 
+void furi_thread_cleanup_tcb_event(TaskHandle_t task) {
+    FuriThread* thread = pvTaskGetThreadLocalStoragePointer(task, 0);
+    if(thread) {
+        // clear thread local storage
+        vTaskSetThreadLocalStoragePointer(task, 0, NULL);
+
+        thread->task_handle = NULL;
+    }
+}
+
 bool furi_thread_join(FuriThread* thread) {
     furi_assert(thread);
 
     furi_check(furi_thread_get_current() != thread);
 
-    // Wait for thread to stop
+    // !!! IMPORTANT NOTICE !!!
+    //
+    // If your thread exited, but your app stuck here: some other thread uses
+    // all cpu time, which delays kernel from releasing task handle
     while(thread->task_handle) {
         furi_delay_ms(10);
     }
@@ -487,6 +531,20 @@ const char* furi_thread_get_name(FuriThreadId thread_id) {
     }
 
     return (name);
+}
+
+const char* furi_thread_get_appid(FuriThreadId thread_id) {
+    TaskHandle_t hTask = (TaskHandle_t)thread_id;
+    const char* appid = "system";
+
+    if(!FURI_IS_IRQ_MODE() && (hTask != NULL)) {
+        FuriThread* thread = (FuriThread*)pvTaskGetThreadLocalStoragePointer(hTask, 0);
+        if(thread) {
+            appid = thread->appid;
+        }
+    }
+
+    return (appid);
 }
 
 uint32_t furi_thread_get_stack_space(FuriThreadId thread_id) {

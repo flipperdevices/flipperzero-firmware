@@ -189,7 +189,7 @@ void subghz_protocol_decoder_came_atomo_feed(void* context, bool level, uint32_t
 /** 
  * Read bytes from rainbow table
  * @param file_name Full path to rainbow table the file 
- * @param number_atomo_magic_xor Сell number in the array
+ * @param number_atomo_magic_xor number in the array
  * @return atomo_magic_xor
  */
 static uint64_t subghz_protocol_came_atomo_get_magic_xor_in_file(
@@ -298,7 +298,7 @@ uint8_t subghz_protocol_decoder_came_atomo_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_came_atomo_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_came_atomo_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -307,22 +307,14 @@ bool subghz_protocol_decoder_came_atomo_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-bool subghz_protocol_decoder_came_atomo_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_came_atomo_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
-    bool ret = false;
-    do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            break;
-        }
-        if(instance->generic.data_count_bit !=
-           subghz_protocol_came_atomo_const.min_count_bit_for_found) {
-            FURI_LOG_E(TAG, "Wrong number of bits in key");
-            break;
-        }
-        ret = true;
-    } while(false);
-    return ret;
+    return subghz_block_generic_deserialize_check_count_bit(
+        &instance->generic,
+        flipper_format,
+        subghz_protocol_came_atomo_const.min_count_bit_for_found);
 }
 
 void subghz_protocol_decoder_came_atomo_get_string(void* context, FuriString* output) {
