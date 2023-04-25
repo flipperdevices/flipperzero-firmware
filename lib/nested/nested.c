@@ -3,7 +3,6 @@
 #include <furi_hal_nfc.h>
 #include "../../lib/parity/parity.h"
 #include "../../lib/crypto1/crypto1.h"
-
 #define TAG "Nested"
 
 void nfc_util_num2bytes(uint64_t src, uint8_t len, uint8_t* dest) {
@@ -370,7 +369,9 @@ struct distance_info nested_calibrate_distance_info(
     Crypto1* crypto = malloc(sizeof(Crypto1));
     uint32_t nt1, nt2, i = 0, davg = 0, dmin = 0, dmax = 0, rtr = 0, unsuccessful_tries = 0;
     struct distance_info r;
-    r.invalid = 0;
+    r.min_prng = 0;
+    r.max_prng = 0;
+    r.mid_prng = 0;
 
     for(rtr = 0; rtr < 10; rtr++) {
         nfc_activate();
@@ -519,6 +520,82 @@ struct nonce_info nested_attack(
     if(r.target_nt[0] && r.target_nt[1]) {
         r.full = true;
     }
+
+    nfc_deactivate();
+
+    return r;
+}
+
+struct nonce_info_hard hard_nested_collect_nonces(
+    FuriHalNfcTxRxContext* tx_rx,
+    uint8_t blockNo,
+    uint8_t keyType,
+    uint8_t targetBlockNo,
+    uint8_t targetKeyType,
+    uint64_t ui64Key,
+    uint32_t* found,
+    Stream* file_stream) {
+    uint32_t cuid = 0;
+    uint8_t same = 0;
+    uint64_t previous = 0;
+    Crypto1* crypto = malloc(sizeof(Crypto1));
+    uint8_t par_array[4] = {0x00};
+    struct nonce_info_hard r;
+    r.full = false;
+    r.static_encrypted = false;
+
+    for(uint32_t i = 0; i < 8; i++) {
+        nfc_activate();
+        if(!furi_hal_nfc_activate_nfca(200, &cuid)) return r;
+
+        r.cuid = cuid;
+
+        if(!mifare_classic_authex(crypto, tx_rx, cuid, blockNo, keyType, ui64Key, false, NULL))
+            continue;
+
+        if(!mifare_sendcmd_short(crypto, tx_rx, true, 0x60 + (targetKeyType & 0x01), targetBlockNo))
+            continue;
+
+        uint64_t nt = nfc_util_bytes2num(tx_rx->rx_data, 4);
+
+        for(uint32_t j = 0; j < 4; j++) {
+            par_array[j] =
+                (oddparity8(tx_rx->rx_data[j]) != ((tx_rx->rx_parity[0] >> (7 - j)) & 0x01));
+        }
+
+        // update unique nonces
+        if(!found[tx_rx->rx_data[0]]) {
+            found[tx_rx->rx_data[0]]++;
+        }
+
+        uint8_t pbits = 0;
+        for(uint8_t j = 0; j < 4; j++) {
+            uint8_t p = oddparity8(tx_rx->rx_data[j]);
+            if(par_array[j]) {
+                p ^= 1;
+            }
+            pbits <<= 1;
+            pbits |= p;
+        }
+
+        if(nt == previous) {
+            same++;
+        }
+
+        previous = nt;
+
+        FuriString* row = furi_string_alloc_printf("%llu|%u\n", nt, pbits);
+        stream_write_string(file_stream, row);
+
+        FURI_LOG_D(TAG, "Accured %lu/8 nonces", i + 1);
+        furi_string_free(row);
+    }
+
+    if(same > 4) {
+        r.static_encrypted = true;
+    }
+
+    r.full = true;
 
     nfc_deactivate();
 

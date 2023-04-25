@@ -4,6 +4,10 @@
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <lib/nfc/protocols/crypto1.h>
 
+#include <storage/storage.h>
+#include <stream/stream.h>
+#include <stream/buffered_file_stream.h>
+
 typedef enum {
     MifareNestedNonceNoTag,
 
@@ -20,6 +24,12 @@ struct nonce_info_static {
     bool full;
 };
 
+struct nonce_info_hard {
+    uint32_t cuid;
+    bool static_encrypted;
+    bool full;
+};
+
 struct nonce_info {
     uint32_t cuid;
     uint32_t target_nt[2];
@@ -32,7 +42,6 @@ struct distance_info {
     uint32_t min_prng;
     uint32_t max_prng;
     uint32_t mid_prng;
-    uint32_t invalid; // How many PRNG values <> mid_prng +- 100
 };
 
 struct nonce_info_static nested_static_nonce_attack(
@@ -52,6 +61,16 @@ struct nonce_info nested_attack(
     uint64_t ui64Key,
     uint32_t distance,
     uint32_t delay);
+
+struct nonce_info_hard hard_nested_collect_nonces(
+    FuriHalNfcTxRxContext* tx_rx,
+    uint8_t blockNo,
+    uint8_t keyType,
+    uint8_t targetBlockNo,
+    uint8_t targetKeyType,
+    uint64_t ui64Key,
+    uint32_t* found,
+    Stream* file_stream);
 
 uint32_t nested_calibrate_distance(
     FuriHalNfcTxRxContext* tx_rx,

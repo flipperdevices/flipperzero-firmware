@@ -44,9 +44,11 @@ NestedState* collection_alloc() {
             model->header = furi_string_alloc();
             furi_string_set(model->header, "Collecting nonces");
             model->keys_count = 0;
+            model->hardnested_states = 0;
             model->lost_tag = false;
             model->calibrating = false;
             model->need_prediction = false;
+            model->hardnested = false;
         },
         false);
 
@@ -93,6 +95,31 @@ static void nested_draw_callback(Canvas* canvas, void* model) {
             elements_multiline_text_aligned(
                 canvas, 64, 30, AlignCenter, AlignTop, "Calibration will take\nmore time");
         }
+    } else if(m->hardnested) {
+        char draw_str[32] = {};
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(
+            canvas, 64, 2, AlignCenter, AlignTop, furi_string_get_cstr(m->header));
+        canvas_set_font(canvas, FontSecondary);
+
+        float progress =
+            m->keys_count == 0 ? 0 : (float)(m->nonces_collected) / (float)(m->keys_count);
+
+        if(progress > 1.0) {
+            progress = 1.0;
+        }
+
+        elements_progress_bar(canvas, 5, 15, 120, progress);
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(
+            draw_str,
+            sizeof(draw_str),
+            "Nonces collected: %lu/%lu",
+            m->nonces_collected,
+            m->keys_count);
+        canvas_draw_str_aligned(canvas, 1, 28, AlignLeft, AlignTop, draw_str);
+        snprintf(draw_str, sizeof(draw_str), "States found: %lu/256", m->hardnested_states);
+        canvas_draw_str_aligned(canvas, 1, 40, AlignLeft, AlignTop, draw_str);
     } else {
         char draw_str[32] = {};
         canvas_set_font(canvas, FontPrimary);

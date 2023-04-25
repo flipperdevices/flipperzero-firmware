@@ -30,11 +30,12 @@ typedef enum {
     MifareNestedWorkerEventNeedKey,
     MifareNestedWorkerEventAttackFailed,
     MifareNestedWorkerEventCalibrating,
-    MifareNestedWorkerEventUnpredictablePRNG,
+    MifareNestedWorkerEventStaticEncryptedNonce,
     MifareNestedWorkerEventNeedPrediction,
     MifareNestedWorkerEventProcessingKeys,
     MifareNestedWorkerEventNeedKeyRecovery,
-    MifareNestedWorkerEventNeedCollection
+    MifareNestedWorkerEventNeedCollection,
+    MifareNestedWorkerEventHardnestedStatesFound
 } MifareNestedWorkerEvent;
 
 typedef bool (*MifareNestedWorkerCallback)(MifareNestedWorkerEvent event, void* context);
@@ -64,6 +65,7 @@ typedef struct {
     uint8_t parity[2][4];
     bool collected;
     bool skipped;
+    bool hardnested;
 } Nonces;
 
 typedef struct {
@@ -72,6 +74,8 @@ typedef struct {
     // 40 (or 16/5) sectors, 2 keys (A/B), 3 tries
     Nonces* nonces[40][2][3];
     uint32_t tries;
+    // unique first bytes
+    uint32_t hardnested_states;
 } NonceList_t;
 
 typedef struct {

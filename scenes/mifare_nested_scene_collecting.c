@@ -55,6 +55,7 @@ bool mifare_nested_collecting_worker_callback(MifareNestedWorkerEvent event, voi
                 model->calibrating = true;
                 model->lost_tag = false;
                 model->need_prediction = false;
+                model->hardnested = false;
             },
             true);
     } else if(event == MifareNestedWorkerEventNeedPrediction) {
@@ -62,6 +63,18 @@ bool mifare_nested_collecting_worker_callback(MifareNestedWorkerEvent event, voi
             plugin_state->view,
             NestedAttackViewModel * model,
             { model->need_prediction = true; },
+            true);
+    } else if(event == MifareNestedWorkerEventHardnestedStatesFound) {
+        NonceList_t* nonces = mifare_nested->nonces;
+        with_view_model(
+            plugin_state->view,
+            NestedAttackViewModel * model,
+            {
+                model->calibrating = false;
+                model->lost_tag = false;
+                model->hardnested = true;
+                model->hardnested_states = nonces->hardnested_states;
+            },
             true);
     }
 
@@ -113,15 +126,16 @@ bool mifare_nested_scene_collecting_on_event(void* context, SceneManagerEvent ev
         } else if(event.event == MifareNestedWorkerEventNeedKey) {
             scene_manager_next_scene(mifare_nested->scene_manager, MifareNestedSceneNoKeys);
             consumed = true;
-        } else if(event.event == MifareNestedWorkerEventUnpredictablePRNG) {
+        } else if(event.event == MifareNestedWorkerEventStaticEncryptedNonce) {
             scene_manager_next_scene(
-                mifare_nested->scene_manager, MifareNestedSceneUnpredictablePRNG);
+                mifare_nested->scene_manager, MifareNestedSceneStaticEncryptedNonce);
             consumed = true;
         } else if(
             event.event == MifareNestedWorkerEventNewNonce ||
             event.event == MifareNestedWorkerEventNoTagDetected ||
             event.event == MifareNestedWorkerEventCalibrating ||
-            event.event == MifareNestedWorkerEventNeedPrediction) {
+            event.event == MifareNestedWorkerEventNeedPrediction ||
+            event.event == MifareNestedWorkerEventHardnestedStatesFound) {
             consumed = true;
         }
     }

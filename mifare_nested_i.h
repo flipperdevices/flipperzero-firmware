@@ -19,10 +19,10 @@
 #include <lib/nfc/nfc_device.h>
 #include "mifare_nested_icons.h"
 
-#define NESTED_VERSION_APP "1.1.1"
+#define NESTED_VERSION_APP "1.2.0"
 #define NESTED_GITHUB_LINK "https://github.com/AloneLiberty/FlipperNested"
 #define NESTED_RECOVER_KEYS_GITHUB_LINK "https://github.com/AloneLiberty/FlipperNestedRecovery"
-#define NESTED_NONCE_FORMAT_VERSION "2"
+#define NESTED_NONCE_FORMAT_VERSION "3"
 #define NESTED_AUTHOR "@AloneLiberty (t.me/libertydev)"
 
 enum MifareNestedCustomEvent {
@@ -111,9 +111,11 @@ typedef struct {
     FuriString* header;
     uint32_t keys_count;
     uint32_t nonces_collected;
+    uint32_t hardnested_states;
     bool lost_tag;
     bool calibrating;
     bool need_prediction;
+    bool hardnested;
 } NestedAttackViewModel;
 
 typedef struct {
