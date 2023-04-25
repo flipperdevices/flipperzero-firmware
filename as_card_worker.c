@@ -136,6 +136,8 @@ int32_t as_card_worker_task(void* context) {
             recv_packet = NULL;
         }
     }
+    furi_hal_nfc_ll_txrx_off();
+    furi_hal_nfc_sleep();
 
     return 0;
 }

@@ -115,6 +115,8 @@ int32_t as_reader_worker_task(void* context) {
             packet = NULL;
         }
     }
+    furi_hal_nfc_ll_txrx_off();
+    furi_hal_nfc_sleep();
 
     return 0;
 }
