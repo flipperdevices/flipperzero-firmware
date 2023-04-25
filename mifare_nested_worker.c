@@ -315,6 +315,7 @@ uint32_t mifare_nested_worker_predict_delay(
     uint32_t nt1, nt2, i = 0, previous = 0, prng_delay = 0, zero_prng_value = 65565, repeat = 0;
 
     if(tries > 10) {
+        free(crypto);
         return 2; // Too many tries, fallback to hardnested
     }
 
@@ -324,6 +325,7 @@ uint32_t mifare_nested_worker_predict_delay(
     // First, we find RPNG rounds per 1000 us
     for(uint32_t rtr = 0; rtr < 25; rtr++) {
         if(mifare_nested_worker->state != MifareNestedWorkerStateCollecting) {
+            free(crypto);
             return 1;
         }
 
@@ -363,6 +365,7 @@ uint32_t mifare_nested_worker_predict_delay(
 
         // Let's hope...
         if(i > 810 && i < 840) {
+            free(crypto);
             return rtr * 1000;
         }
     }
@@ -373,6 +376,7 @@ uint32_t mifare_nested_worker_predict_delay(
     // Mifare Classic (weak) RPNG repeats every 65565 PRNG cycles
 
     if(zero_prng_value == 65565) {
+        free(crypto);
         // PRNG isn't pretictable
         return 1;
     }
@@ -384,6 +388,7 @@ uint32_t mifare_nested_worker_predict_delay(
     for(uint32_t rtr = cycles_to_reset - 1; rtr < cycles_to_reset + limit; rtr++) {
         for(uint32_t rtz = 0; rtz < 100; rtz++) {
             if(mifare_nested_worker->state != MifareNestedWorkerStateCollecting) {
+                free(crypto);
                 return 1;
             }
 
@@ -441,11 +446,13 @@ uint32_t mifare_nested_worker_predict_delay(
             previous = i;
 
             if(i > 810 && i < 840) {
+                free(crypto);
                 FURI_LOG_I(TAG, "Found delay: %lu us", delay);
                 return delay;
             } else if(i > 840 && i < 40000) {
                 FURI_LOG_D(TAG, "Trying again: timing lost");
                 tries++;
+                free(crypto);
                 return mifare_nested_worker_predict_delay(
                     tx_rx, blockNo, keyType, ui64Key, tries, mifare_nested_worker);
             }
@@ -455,10 +462,13 @@ uint32_t mifare_nested_worker_predict_delay(
     if(i > 1000 && i < 65000) {
         FURI_LOG_D(TAG, "Trying again: wrong predicted timing");
         tries++;
+        free(crypto);
         return mifare_nested_worker_predict_delay(
             tx_rx, blockNo, keyType, ui64Key, tries, mifare_nested_worker);
     }
 
+    free(crypto);
+    
     return 1;
 }
 
