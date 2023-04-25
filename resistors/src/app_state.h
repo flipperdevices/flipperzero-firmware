@@ -16,8 +16,8 @@ typedef enum {
     BandPurple = 7,
     BandGray = 8,
     BandWhite = 9,
-    BandGold,
-    BandSilver
+    BandGold = 10,
+    BandSilver = 11
 } ResistorBand;
 
 typedef struct AppState {
