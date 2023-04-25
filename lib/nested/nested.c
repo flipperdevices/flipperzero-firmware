@@ -228,7 +228,10 @@ struct nonce_info_static nested_static_nonce_attack(
 
     // Setup nfc poller
     nfc_activate();
-    if(!furi_hal_nfc_activate_nfca(200, &cuid)) return r;
+    if(!furi_hal_nfc_activate_nfca(200, &cuid)) {
+        free(crypto);
+        return r;
+    }
 
     r.cuid = cuid;
 
@@ -251,6 +254,7 @@ struct nonce_info_static nested_static_nonce_attack(
         mifare_sendcmd_short(crypto, tx_rx, true, 0x60 + (targetKeyType & 0x01), targetBlockNo);
 
     if(!success) {
+        free(crypto);
         return r;
     };
 
@@ -259,7 +263,10 @@ struct nonce_info_static nested_static_nonce_attack(
 
     nfc_activate();
 
-    if(!furi_hal_nfc_activate_nfca(200, &cuid)) return r;
+    if(!furi_hal_nfc_activate_nfca(200, &cuid)) {
+        free(crypto);
+        return r;
+    }
 
     crypto1_reset(crypto);
 
@@ -269,6 +276,8 @@ struct nonce_info_static nested_static_nonce_attack(
 
     success =
         mifare_sendcmd_short(crypto, tx_rx, true, 0x60 + (targetKeyType & 0x01), targetBlockNo);
+
+    free(crypto);
 
     if(!success) {
         return r;
@@ -334,6 +343,7 @@ uint32_t nested_calibrate_distance(
         } else {
             unsuccessful_tries++;
             if(unsuccessful_tries > 12) {
+                free(crypto);
                 FURI_LOG_E(
                     TAG,
                     "Tag isn't vulnerable to nested attack (random numbers are not predictable)");
@@ -354,6 +364,8 @@ uint32_t nested_calibrate_distance(
         dmax,
         davg,
         collected);
+
+    free(crypto);
 
     nfc_deactivate();
 
@@ -406,9 +418,12 @@ struct distance_info nested_calibrate_distance_info(
         } else {
             unsuccessful_tries++;
             if(unsuccessful_tries > 12) {
+                free(crypto);
+
                 FURI_LOG_E(
                     TAG,
                     "Tag isn't vulnerable to nested attack (random numbers are not predictable)");
+
                 return r;
             }
         }
@@ -422,6 +437,8 @@ struct distance_info nested_calibrate_distance_info(
     r.min_prng = dmin;
     r.max_prng = dmax;
     r.mid_prng = davg;
+
+    free(crypto);
 
     nfc_deactivate();
 
@@ -521,6 +538,8 @@ struct nonce_info nested_attack(
         r.full = true;
     }
 
+    free(crypto);
+
     nfc_deactivate();
 
     return r;
@@ -546,7 +565,10 @@ struct nonce_info_hard hard_nested_collect_nonces(
 
     for(uint32_t i = 0; i < 8; i++) {
         nfc_activate();
-        if(!furi_hal_nfc_activate_nfca(200, &cuid)) return r;
+        if(!furi_hal_nfc_activate_nfca(200, &cuid)) {
+            free(crypto);
+            return r;
+        }
 
         r.cuid = cuid;
 
@@ -596,6 +618,8 @@ struct nonce_info_hard hard_nested_collect_nonces(
     }
 
     r.full = true;
+
+    free(crypto);
 
     nfc_deactivate();
 
