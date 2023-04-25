@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 PLACE_IN_SECTION("MB_MEM2") const char* __furi_check_message = NULL;
-PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[12] = {0};
+PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[13] = {0};
 
 /** Load r12 value to __furi_check_message and store registers to __furi_check_registers */
 #define GET_MESSAGE_AND_STORE_REGISTERS()               \
@@ -22,6 +22,7 @@ PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[12] = {0};
                  "str r12, [r11]                    \n" \
                  "ldr r12, =__furi_check_registers  \n" \
                  "stm r12, {r0-r11}                 \n" \
+                 "str lr, [r12, #48]                \n" \
                  :                                      \
                  :                                      \
                  : "memory");
@@ -62,7 +63,23 @@ static void __furi_put_uint32_as_text(uint32_t data) {
     furi_hal_console_puts(tmp_str);
 }
 
-static void __furi_print_stack_info() {
+static void __furi_put_uint32_as_hex(uint32_t data) {
+    char tmp_str[] = "0xFFFFFFFF";
+    itoa(data, tmp_str, 16);
+    furi_hal_console_puts(tmp_str);
+}
+
+static void __furi_print_stack_and_register_info() {
+    // Print registers
+    for(uint8_t i = 0; i < 12; i++) {
+        furi_hal_console_puts("\r\n\tr");
+        __furi_put_uint32_as_text(i);
+        furi_hal_console_puts(" : ");
+        __furi_put_uint32_as_hex(__furi_check_registers[i]);
+    }
+
+    furi_hal_console_puts("\r\n\tlr : ");
+    __furi_put_uint32_as_hex(__furi_check_registers[12]);
     furi_hal_console_puts("\r\n\tstack watermark: ");
     __furi_put_uint32_as_text(uxTaskGetStackHighWaterMark(NULL) * 4);
 }
@@ -108,7 +125,7 @@ FURI_NORETURN void __furi_crash() {
     furi_hal_console_puts(__furi_check_message);
 
     if(!isr) {
-        __furi_print_stack_info();
+        __furi_print_stack_and_register_info();
     }
     __furi_print_heap_info();
 
