@@ -25,11 +25,11 @@ void resistors_edit_view_redraw_widget(App* app) {
     widget_reset(app->widget);
 
     int* arrow_positions;
-    int arrow_left;
-    int arrow_top;
-    int image_left;
-    int image_top;
+    int arrow_left, arrow_top, image_left, image_top;
     Icon* icon;
+
+    char descriptor[17] = "Xx Xx Xx Xx - Xx"; // Xx_Xx_Xx_Xx_-_Xx\0 = 17 characters
+    char calculation[] = "uncalculated";
 
     switch(app->state->resistor_type) {
     case Resistor4Band:
@@ -64,9 +64,9 @@ void resistors_edit_view_redraw_widget(App* app) {
     }
 
     widget_add_text_box_element(
-        app->widget, 5, 2, 123, 10, AlignCenter, AlignCenter, "uncalculated", true);
+        app->widget, 5, 2, 123, 10, AlignCenter, AlignCenter, calculation, true);
     widget_add_text_box_element(
-        app->widget, 5, 50, 123, 16, AlignCenter, AlignBottom, "Xx Xx Xx Xx - Xx", true);
+        app->widget, 5, 50, 123, 16, AlignCenter, AlignBottom, descriptor, true);
 
     // widget_add_button_element(app->widget, GuiButtonTypeCenter, buttonText, callback, app);
 }
