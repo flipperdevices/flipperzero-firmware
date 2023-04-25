@@ -20,25 +20,25 @@
 
 uint32_t count_files(const char* path)
 {
-    uint32_t file_count = 0;
-    DIR* dirp;
-    struct dirent* entry;
+	uint32_t file_count = 0;
+	DIR* dirp;
+	struct dirent* entry;
 
-    dirp = opendir(path); /* There should be error handling after this */
+	dirp = opendir(path); /* There should be error handling after this */
 	
-    while ((entry = readdir(dirp)) != NULL)
+	while ((entry = readdir(dirp)) != NULL)
 	{
-        if (entry->d_type == DT_REG)
+		if (entry->d_type == DT_REG)
 		{ /* If the entry is a regular file */
-            file_count++;
-        }
-    }
+			file_count++;
+		}
+	}
 	
-    closedir(dirp);
+	closedir(dirp);
 
-    free(entry);
+	free(entry);
 
-    return file_count;
+	return file_count;
 }
 
 int main(int argc, char **argv)
@@ -148,25 +148,25 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	
-    printf("Starting the converter...\n");
+	printf("Starting the converter...\n");
 
-    uint8_t* Data;
-    int32_t bmp_width, bmp_height, bmp_bits;
+	uint8_t* Data;
+	int32_t bmp_width, bmp_height, bmp_bits;
 
-    char frame_filename[10000];
-    char audio_filename[10000];
-    char bundle_filename[10000];
+	char frame_filename[10000];
+	char audio_filename[10000];
+	char bundle_filename[10000];
 
-    char frames_folder[10000];
+	char frames_folder[10000];
 
-    strcpy(audio_filename, folder_path);
-    strcat(audio_filename, "/audio.wav");
+	strcpy(audio_filename, folder_path);
+	strcat(audio_filename, "/audio.wav");
 
-    strcpy(bundle_filename, folder_path);
-    strcat(bundle_filename, "/bundle.bnd");
+	strcpy(bundle_filename, folder_path);
+	strcat(bundle_filename, "/bundle.bnd");
 
-    strcpy(frames_folder, folder_path);
-    strcat(frames_folder, "/frames");
+	strcpy(frames_folder, folder_path);
+	strcat(frames_folder, "/frames");
 	
 	mkdir(frames_folder);
 	
@@ -202,9 +202,9 @@ int main(int argc, char **argv)
 	
 	pclose(ffmpeg);
 
-    uint32_t num_frames = count_files(frames_folder);
+	uint32_t num_frames = count_files(frames_folder);
 
-    FILE* audio = fopen(audio_filename, "rb");
+	FILE* audio = fopen(audio_filename, "rb");
 	
 	if(audio == NULL)
 	{
@@ -220,98 +220,98 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-    //the header, the FPS is determined by sample rate and audio chunk settings. There sample rate is 44100 Hz and FPS is 30 so audio chunk is 1470
-    uint16_t audio_chunk_size = sample_rate / fps;
+	//the header, the FPS is determined by sample rate and audio chunk settings. There sample rate is 44100 Hz and FPS is 30 so audio chunk is 1470
+	uint16_t audio_chunk_size = sample_rate / fps;
 
-    uint8_t* audio_chunk = (uint8_t*)malloc(audio_chunk_size);
-    uint8_t version = VERSION;
+	uint8_t* audio_chunk = (uint8_t*)malloc(audio_chunk_size);
+	uint8_t version = VERSION;
 
-    fwrite(BUNDLE_SIGNATURE, sizeof(BUNDLE_SIGNATURE) - 1, 1, bundle);
-    fwrite(&version, sizeof(version), 1, bundle);
-    fwrite(&num_frames, sizeof(num_frames), 1, bundle);
-    fwrite(&audio_chunk_size, sizeof(audio_chunk_size), 1, bundle);
-    uint16_t sample_rate_16 = sample_rate;
-    fwrite(&sample_rate_16, sizeof(sample_rate_16), 1, bundle);
+	fwrite(BUNDLE_SIGNATURE, sizeof(BUNDLE_SIGNATURE) - 1, 1, bundle);
+	fwrite(&version, sizeof(version), 1, bundle);
+	fwrite(&num_frames, sizeof(num_frames), 1, bundle);
+	fwrite(&audio_chunk_size, sizeof(audio_chunk_size), 1, bundle);
+	uint16_t sample_rate_16 = sample_rate;
+	fwrite(&sample_rate_16, sizeof(sample_rate_16), 1, bundle);
 
-    uint8_t frame_height = height;
-    uint8_t frame_width = width;
+	uint8_t frame_height = height;
+	uint8_t frame_width = width;
 
-    fwrite(&frame_height, sizeof(frame_height), 1, bundle);
-    fwrite(&frame_width, sizeof(frame_width), 1, bundle);
+	fwrite(&frame_height, sizeof(frame_height), 1, bundle);
+	fwrite(&frame_width, sizeof(frame_width), 1, bundle);
 	
 	//printf("%d %d %d %d %d %d\n", version, num_frames, audio_chunk_size, sample_rate_16, frame_height, frame_width);
 
-    //seek for raw audio data start point
-    //fseek(audio, 44, 0);
+	//seek for raw audio data start point
+	//fseek(audio, 44, 0);
 
-    char data_sig[5];
-    data_sig[4] = '\0';
+	char data_sig[5];
+	data_sig[4] = '\0';
 
-    uint16_t pos = 0;
+	uint16_t pos = 0;
 
-    while (strcmp(data_sig, "data") != 0) //because not all wav files' headers are 44 bytes long! ffmpeg no exception
-    {
-        fseek(audio, pos, 0);
-        fread(&data_sig, 4, 1, audio);
-        pos++;
-    }
+	while (strcmp(data_sig, "data") != 0) //because not all wav files' headers are 44 bytes long! ffmpeg no exception
+	{
+		fseek(audio, pos, 0);
+		fread(&data_sig, 4, 1, audio);
+		pos++;
+	}
 
-    fseek(audio, pos + 4 + 4, 0); //after "data" there are 4 more bytes of data size
+	fseek(audio, pos + 4 + 4, 0); //after "data" there are 4 more bytes of data size
 	
 	uint8_t* pixel_frame = (uint8_t*)malloc(width * height / 8);
 
-    for (uint32_t i = 0; i < num_frames; i++)
-    //for (uint32_t i = 0; i < 300; i++)
-    {
-        snprintf(frame_filename, sizeof(frame_filename), "%s/frames/frame%07d.bmp", folder_path, i + 1);
+	for (uint32_t i = 0; i < num_frames; i++)
+	//for (uint32_t i = 0; i < 300; i++)
+	{
+		snprintf(frame_filename, sizeof(frame_filename), "%s/frames/frame%07d.bmp", folder_path, i + 1);
 
 		if(i % 100 == 0)
 		{
 			printf("Frame %d\n", i + 1);
 		}
 
-        Data = BmpLoad(frame_filename, &bmp_width, &bmp_height, &bmp_bits);
+		Data = BmpLoad(frame_filename, &bmp_width, &bmp_height, &bmp_bits);
 
-        if (Data == NULL)
-        {
-            printf("Error: could not open frame file \"%s\"\n", frame_filename);
-            exit(1);
-        }
+		if (Data == NULL)
+		{
+			printf("Error: could not open frame file \"%s\"\n", frame_filename);
+			exit(1);
+		}
 
-        //write blocks of image-audio data
-        //we imply that bmps are 24 bits per pixel; since only black and white, we will look at some bit in this 3-byte "number" for every pixel and chain them 8 pixels in 1 byte
+		//write blocks of image-audio data
+		//we imply that bmps are 24 bits per pixel; since only black and white, we will look at some bit in this 3-byte "number" for every pixel and chain them 8 pixels in 1 byte
 		
 		memset(pixel_frame, 0, width * height / 8);
 
-        for (uint32_t j = 0; j < width * height / 8; j++)
-        {
-            for (uint32_t k = 0; k < 8; k++)
-            {
-                pixel_frame[j] |= (Data[(j * 8 + k) * 3]) ? (0 << (k)) : (1 << (k));
-            }
-        }
+		for (uint32_t j = 0; j < width * height / 8; j++)
+		{
+			for (uint32_t k = 0; k < 8; k++)
+			{
+				pixel_frame[j] |= (Data[(j * 8 + k) * 3]) ? (0 << (k)) : (1 << (k));
+			}
+		}
 
-        fwrite(pixel_frame, width * height / 8 * sizeof(pixel_frame[0]), 1, bundle);
+		fwrite(pixel_frame, width * height / 8 * sizeof(pixel_frame[0]), 1, bundle);
 
-        fread(audio_chunk, audio_chunk_size, 1, audio);
-        fwrite(audio_chunk, audio_chunk_size, 1, bundle);
+		fread(audio_chunk, audio_chunk_size, 1, audio);
+		fwrite(audio_chunk, audio_chunk_size, 1, bundle);
 		
 		free(Data);
 		
-        remove(frame_filename);
-    }
+		remove(frame_filename);
+	}
 	
 	free(pixel_frame);
 
-    fclose(audio);
-    fclose(bundle);
+	fclose(audio);
+	fclose(bundle);
 
-    free(audio_chunk);
+	free(audio_chunk);
 	
 	rmdir(frames_folder);
 	remove(audio_filename);
 
-    printf("Conversion finished.\n");
+	printf("Conversion finished.\n");
 	
 	return 0;
 }
