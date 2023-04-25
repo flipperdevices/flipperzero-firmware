@@ -34,7 +34,6 @@ typedef struct NfcRelayConfig {
 typedef struct AsReaderWorker AsReaderWorker;
 typedef struct AsCardWorker AsCardWorker;
 typedef struct NfcRelay {
-    //NfcRelayWorker* worker;
     ViewDispatcher* view_dispatcher;
     Gui* gui;
     NotificationApp* notifications;
@@ -49,9 +48,6 @@ typedef struct NfcRelay {
     NfcRelayConfig* config;
     AsReaderWorker* as_reader_worker;
     AsCardWorker* as_card_worker;
-    // NfcRelayDevice* dev;
-    //NfcDevice* nfc_dev;
-
 } NfcRelay;
 
 typedef enum {

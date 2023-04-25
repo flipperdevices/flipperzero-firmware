@@ -4,8 +4,6 @@
 
 void as_reader_worker_change_state(AsReaderWorker* as_reader_worker, AsReaderWorkerState state) {
     as_reader_worker->state = state;
-    //scene_manager_set_scene_state(
-    //    as_reader_worker->nfc_relay->scene_manager, NfcRelaySceneAsReader, state);
     if(as_reader_worker->callback) as_reader_worker->callback(state, as_reader_worker->nfc_relay);
 }
 
@@ -55,14 +53,10 @@ int32_t as_reader_worker_task(void* context) {
     furi_assert(context);
     AsReaderWorker* as_reader_worker = context;
 
-    //while(furi_hal_nfc_is_busy()) {
-    //    furi_delay_ms(10);
-    //}
     furi_hal_nfc_deinit();
     furi_hal_nfc_init();
 
     FURI_LOG_D(TAG, "Send Ping Packet");
-    //comm_send_no_data(as_reader_worker->comm, NfcRelayPacketPing);
     comm_send_pingpong(as_reader_worker->comm, NfcRelayPacketPing, NfcRelayAsReader);
     NfcRelayPacket* packet = NULL;
 

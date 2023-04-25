@@ -12,7 +12,7 @@ void comm_init(Comm* comm) {
     if(NfcRelayModeUart == comm->config->mode) {
         comm->uart_worker = uart_worker_alloc(comm->config->uart_config);
         uart_worker_start(comm->uart_worker);
-    } // else
+    } // TODO: else
 }
 
 void comm_deinit(Comm* comm) {
@@ -80,7 +80,6 @@ bool comm_wait_pong(Comm* comm, NfcRelayRole role, NfcRelayRole selfRole) {
     if(recv_packet->typ == NfcRelayPacketPing && recv_packet->len == 1 &&
        recv_packet->buf[0] == role) {
         FURI_LOG_D(TAG, "Recv Ping, Send Pong");
-        //comm_send_no_data(comm, NfcRelayPacketPong);
         comm_send_pingpong(comm, NfcRelayPacketPong, selfRole);
         free(recv_packet);
         return true;

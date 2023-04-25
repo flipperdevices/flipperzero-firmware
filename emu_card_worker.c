@@ -176,7 +176,6 @@ void emu_card_worker_start(EmuCardWorker* emu_card_worker, FuriHalNfcDevData* de
     furi_hal_nfc_deinit();
     furi_hal_nfc_init();
 
-    //emu_card_worker->dev_data = *dev_data;
     memcpy(&emu_card_worker->dev_data, dev_data, sizeof(FuriHalNfcDevData));
     furi_thread_start(emu_card_worker->thread);
 }
@@ -202,7 +201,6 @@ int32_t emu_card_worker_task(void* context) {
             emu_callback,
             emu_card_worker,
             5000);
-        //emu_card_worker->state = EmuCardWorkerStateStop;
     }
     emu_card_worker->state = EmuCardWorkerStateStop;
     FURI_LOG_D(TAG, "task end");

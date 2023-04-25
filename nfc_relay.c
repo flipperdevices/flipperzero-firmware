@@ -88,7 +88,6 @@ NfcRelay* nfc_relay_alloc() {
     nfc_relay->config->mode = NfcRelayModeUart;
     nfc_relay->config->uart_config.baudrate = 38400; //115200;
     nfc_relay->config->uart_config.uartId = FuriHalUartIdLPUART1;
-    //nfc_relay->config->uart_config.uartId = FuriHalUartIdUSART1;
 
     return nfc_relay;
 }
