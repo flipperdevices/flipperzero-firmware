@@ -6,16 +6,16 @@ from typing import Optional
 
 import cv2 as cv
 import numpy
-from flippigator.modules.applications import AppApplications
-from flippigator.modules.badusb import AppBadusb
-from flippigator.modules.gpio import AppGpio
-from flippigator.modules.ibutton import AppIbutton
-from flippigator.modules.infrared import AppInfrared
-from flippigator.modules.nfc import AppNfc
-from flippigator.modules.rfid import AppRfid
-from flippigator.modules.settings import AppSettings
-from flippigator.modules.subghz import AppSubGhz
-from flippigator.modules.u2f import AppU2f
+from modules.applications import AppApplications
+from modules.badusb import AppBadusb
+from modules.gpio import AppGpio
+from modules.ibutton import AppIbutton
+from modules.infrared import AppInfrared
+from modules.nfc import AppNfc
+from modules.rfid import AppRfid
+from modules.settings import AppSettings
+from modules.subghz import AppSubGhz
+from modules.u2f import AppU2f
 from termcolor import colored
 
 # APPLY_TEMPLATE_THRESHOLD = 0.99
@@ -31,8 +31,9 @@ class Navigator:
         path: str = "./img/ref/",
         debug: bool = True,
         gui: bool = True,
-        scale: int = 12,
+        scale: int = 8,
         threshold: float = 0.99,
+        window_name="Default window name",
     ):
         self.imRef = dict()
         self.proto = proto
@@ -40,6 +41,7 @@ class Navigator:
         self._guiFlag = gui
         self._scale = scale
         self._threshold = threshold
+        self._window_name = window_name
         self.screen_image = numpy.zeros((SCREEN_H, SCREEN_W))
 
         self.logger = logging.getLogger("Navigator")
@@ -117,7 +119,7 @@ class Navigator:
 
         return display_image.copy()
 
-    def draw_screen(self, window_name="Flipper screen"):
+    def draw_screen(self):
         display_image = self.get_screen()
         mask = cv.inRange(display_image, (255, 255, 255, 0), (255, 255, 255, 0))
         display_image[mask > 0] = (1, 145, 251, 0)
@@ -127,10 +129,12 @@ class Navigator:
             interpolation=cv.INTER_NEAREST,
         )
 
-        cv.imshow(window_name, display_image)
+        cv.imshow(self._window_name, display_image)
         key = cv.waitKey(1)
 
-    def recog_ref(self, ref=[], area=(0, 128, 0, 64)):
+    def recog_ref(self, ref=None, area=(0, 64, 0, 128)):
+        if ref is None:
+            ref = []
         # self.updateScreen()
         temp_pic_list = list()
         screen_image = self.get_raw_screen()[area[0] : area[1], area[2] : area[3]]
@@ -146,7 +150,11 @@ class Navigator:
                 if max_val > self._threshold:
                     h, w, ch = template.shape
                     temp_pic_list.append(
-                        (str(im), max_loc, (max_loc[0] + w, max_loc[1] + h))
+                        (
+                            str(im),
+                            (max_loc[0] + area[2], max_loc[1] + area[0]),
+                            (max_loc[0] + w + area[2], max_loc[1] + h + area[0]),
+                        )
                     )
 
         found_ic = list()
@@ -181,7 +189,7 @@ class Navigator:
         # display_image = self.screen_image
 
         if self._guiFlag == 1:
-            cv.imshow("Debug recog screen", display_image)
+            cv.imshow(self._window_name, display_image)
             key = cv.waitKey(1)
 
         if self._debugFlag == 1:
@@ -189,7 +197,9 @@ class Navigator:
 
         return found_ic
 
-    def get_current_state(self, timeout: float = 5, ref=[], area=(0, 64, 0, 128)):
+    def get_current_state(self, timeout: float = 5, ref=None, area=(0, 64, 0, 128)):
+        if ref is None:
+            ref = []
         self.update_screen()
         state = self.recog_ref(ref, area)
         start_time = time.time()
@@ -201,6 +211,14 @@ class Navigator:
                 # raise FlippigatorException("Recognition timeout")
                 break
         return state
+
+    def wait_for_state(self, state, timeout=5) -> int:
+        start_time = time.time()
+        while start_time + timeout > time.time():
+            cur_state = self.get_current_state()
+            if state in cur_state:
+                return 0
+        return -1
 
     def save_screen(self, filename: str):
         cv.imwrite(f"img/{filename}", self.screen_image)
@@ -287,6 +305,8 @@ class Navigator:
 
     def go_to_main_screen(self):
         self.press_back()
+        self.press_back()
+        self.press_back()
         state = self.get_current_state()
         while not ("SDcardIcon" in state):
             state = self.get_current_state()
@@ -296,14 +316,18 @@ class Navigator:
                 self.press_back()
             if self._debugFlag == 1:
                 print(colored("Going back to main screen", "cyan"))
+        time.sleep(1)  # wait for some time, because of missing key pressing
 
     def open_file(self, module, filename):
         self.go_to_main_screen()
+        time.sleep(1)
         self.press_down()
+        time.sleep(0.4)  # some waste "heads" going at the opening of browser
 
         heads = list()
         start_time = time.time()
-        while start_time + 60 > time.time():
+
+        while start_time + 10 > time.time():
             cur = self.get_current_state(area=(0, 16, 0, 128))
             if not cur == []:
                 if cur[0] == ("browser_head_" + module):
@@ -312,11 +336,15 @@ class Navigator:
                     return -1
                 heads.append(cur[0])
                 self.press_right()
+        if start_time + 10 <= time.time():
+            return -1
 
         files = list()
         start_time = time.time()
-        while start_time + 60 > time.time():
+
+        while start_time + 10 > time.time():
             state = self.get_current_state(timeout=0.5, area=(15, 64, 0, 128))
+
             if not (state == []):
                 if state[0] in files:
                     return -1
@@ -324,18 +352,24 @@ class Navigator:
                     break
                 files.append(state[0])
             self.press_down()
+        if start_time + 10 <= time.time():
+            return -1
         self.press_ok()
         self.go_to("browser_Run in app", area=(15, 64, 0, 128))
         self.press_ok()
 
     def delete_file(self, module, filename):
         self.go_to_main_screen()
+        time.sleep(1)
         self.press_down()
+        time.sleep(0.4)
 
         heads = list()
         start_time = time.time()
-        while start_time + 60 > time.time():
+
+        while start_time + 10 > time.time():
             cur = self.get_current_state(area=(0, 16, 0, 128))
+
             if not cur == []:
                 if cur[0] == ("browser_head_" + module):
                     break
@@ -343,11 +377,15 @@ class Navigator:
                     return -1
                 heads.append(cur[0])
                 self.press_right()
+            if start_time + 10 <= time.time():
+                return -1
 
         files = list()
         start_time = time.time()
-        while start_time + 60 > time.time():
+
+        while start_time + 10 > time.time():
             state = self.get_current_state(timeout=0.5, area=(15, 64, 0, 128))
+
             if not (state == []):
                 if state[0] in files:
                     return -1
@@ -355,6 +393,9 @@ class Navigator:
                     break
                 files.append(state[0])
             self.press_down()
+        if start_time + 10 <= time.time():
+            return -1
+
         self.press_ok()
         self.go_to("browser_Delete", area=(15, 64, 0, 128))
         self.press_ok()
@@ -438,7 +479,7 @@ class Reader:
         self._x_coord = x_coord
         self._y_coord = y_coord
         self._debugFlag = debug
-        self._recieved_data = 0
+        self._recieved_data = None
 
     def __del__(self):
         pass
@@ -466,6 +507,47 @@ class Reader:
 
     def get(self) -> str:
         return self._recieved_data
+
+
+class Relay:
+    def __init__(
+        self,
+        serial,
+        debug: bool = True,
+    ):
+        self._serial = serial
+        self._debugFlag = debug
+        self._recieved_data = 0
+        self._curent_reader = 0
+        self._curent_key = 0
+        self._serial.reset_output_buffer()
+        self._serial.write(("R0K0\n").encode("ASCII"))
+
+    def __del__(self):
+        pass
+
+    def set_reader(self, reader):
+        self._serial.write(
+            ("R" + str(reader) + "K" + str(self._curent_key) + "\n").encode("ASCII")
+        )
+        self._curent_reader = reader
+
+    def set_key(self, key):
+        self._serial.write(
+            ("R" + str(self._curent_reader) + "K" + str(key) + "\n").encode("ASCII")
+        )
+        self._curent_key = key
+
+    def get_reader(self) -> int:
+        return self._curent_reader
+
+    def get_key(self) -> int:
+        return self._curent_key
+
+    def reset(self):
+        self._serial.write(("R0K0\n").encode("ASCII"))
+        self._curent_reader = 0
+        self._curent_key = 0
 
 
 class FlipperTextKeyboard:
