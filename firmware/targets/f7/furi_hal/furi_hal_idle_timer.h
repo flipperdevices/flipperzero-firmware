@@ -1,9 +1,10 @@
 #pragma once
 
 #include <stm32wbxx_ll_lptim.h>
-#include <stm32wbxx_ll_bus.h>
 #include <stm32wbxx_ll_rcc.h>
+#include <stm32wbxx_ll_bus.h>
 #include <stdint.h>
+#include <furi_hal_bus.h>
 
 // Timer used for tickless idle
 #define FURI_HAL_IDLE_TIMER_MAX 0xFFFF
@@ -11,6 +12,7 @@
 #define FURI_HAL_IDLE_TIMER_IRQ LPTIM1_IRQn
 
 static inline void furi_hal_idle_timer_init() {
+    furi_hal_bus_enable(FuriHalBusLPTIM1);
     // Configure clock source
     LL_RCC_SetLPTIMClockSource(LL_RCC_LPTIM1_CLKSOURCE_LSE);
     // There is a theoretical possibility that we need it
