@@ -121,9 +121,9 @@ FURI_NORETURN void __furi_crash() {
 
     if(__furi_check_message == NULL) {
         __furi_check_message = "Fatal Error";
-    } else if(__furi_check_message == (void*)__furi_assert_message_flag) {
+    } else if(__furi_check_message == (void*)__FURI_ASSERT_MESSAGE_FLAG) {
         __furi_check_message = "furi_assert failed";
-    } else if(__furi_check_message == (void*)__furi_check_message_flag) {
+    } else if(__furi_check_message == (void*)__FURI_CHECK_MESSAGE_FLAG) {
         __furi_check_message = "furi_check failed";
     }
 
