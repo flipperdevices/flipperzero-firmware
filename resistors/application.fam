@@ -2,7 +2,7 @@
 
 App(
     appid="resistors",  # Must be unique
-    name="App resistors",  # Displayed in menus
+    name="Resistance calculator",  # Displayed in menus
     apptype=FlipperAppType.EXTERNAL,
     entry_point="resistors_app",
     stack_size=2 * 1024,
