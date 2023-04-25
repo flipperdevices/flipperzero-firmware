@@ -21,43 +21,57 @@ Supported **target** microcontrollers:
 - ESP32-C2
 - ESP32-H2
 
+Supported hardware interfaces:
+- UART
+- SPI (only for RAM download, experimental)
+
 ## Supporting new host target
 
 In order to support new target, following function has to be implemented by user:
 
-- loader_port_read()
-- loader_port_write()
-- loader_port_enter_bootloader()
-- loader_port_delay_ms()
-- loader_port_start_timer()
-- loader_port_remaining_time()
+- `loader_port_read()`
+- `loader_port_write()`
+- `loader_port_enter_bootloader()`
+- `loader_port_delay_ms()`
+- `loader_port_start_timer()`
+- `loader_port_remaining_time()`
 
 Following functions are part of io.h header for convenience, however, user does not have to strictly follow function signatures, as there are not called directly from library.
 
-- loader_port_change_transmission_rate()
-- loader_port_reset_target()
-- loader_port_debug_print()
+- `loader_port_change_transmission_rate()`
+- `loader_port_reset_target()`
+- `loader_port_debug_print()`
+
+For the SPI interface ports
+- `loader_port_spi_set_cs()`
+needs to be implemented as well.
 
 Prototypes of all function mentioned above can be found in [io.h](include/io.h).
 Please refer to ports in `port` directory. Currently, ports for [ESP32](port/esp32_port.c), [STM32](port/stm32_port.c), and [Zephyr](port/zephyr_port.c) are available.
 
 ## Configuration
 
-These are the configuration toggles available to the user:
-* MD5_ENABLED
+* `SERIAL_FLASHER_INTERFACE_UART/SERIAL_FLASHER_INTERFACE_SPI`
 
-If enabled, serial flasher is capable of verifying flash integrity after writing to memory.
+This defines the hardware interface to use. SPI interface only supports RAM download mode and is in experimental stage and can undergo changes.
+
+Default: SERIAL_FLASHER_INTERFACE_UART
+
+These are the configuration toggles available to the user:
+* `MD5_ENABLED`
+
+If enabled, serial flasher is capable of verifying flash integrity after writing to flash.
 
 Default: Enabled
 > Warning: As ROM bootloader of ESP8266 does not support MD5_CHECK, this option has to be disabled!
 
-* SERIAL_FLASHER_RESET_HOLD_TIME_MS
+* `SERIAL_FLASHER_RESET_HOLD_TIME_MS`
 
 This is the time for which the reset pin is asserted when doing a hard reset in milliseconds.
 
 Default: 100
 
-* SERIAL_FLASHER_BOOT_HOLD_TIME_MS
+* `SERIAL_FLASHER_BOOT_HOLD_TIME_MS`
 
 This is the time for which the boot pin is asserted when doing a hard reset in milliseconds.
 

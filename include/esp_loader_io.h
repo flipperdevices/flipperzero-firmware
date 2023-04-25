@@ -100,6 +100,13 @@ void loader_port_reset_target(void);
   */
 void loader_port_debug_print(const char *str);
 
+#ifdef SERIAL_FLASHER_INTERFACE_SPI
+/**
+  * @brief Sets the chip select to a defined level
+  */
+void loader_port_spi_set_cs(uint32_t level);
+#endif /* SERIAL_FLASHER_INTERFACE_SPI */
+
 #ifdef __cplusplus
 }
 #endif

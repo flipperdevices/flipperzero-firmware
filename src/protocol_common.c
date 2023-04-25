@@ -14,16 +14,14 @@
  */
 
 #include "protocol.h"
+#include "protocol_prv.h"
 #include "esp_loader_io.h"
-#include "slip.h"
 #include <stddef.h>
 #include <string.h>
 
 #define CMD_SIZE(cmd) ( sizeof(cmd) - sizeof(command_common_t) )
 
 static uint32_t s_sequence_number = 0;
-
-static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value, void* resp, uint32_t resp_size);
 
 static uint8_t compute_checksum(const uint8_t *data, uint32_t size)
 {
@@ -36,52 +34,7 @@ static uint8_t compute_checksum(const uint8_t *data, uint32_t size)
     return checksum;
 }
 
-static esp_loader_error_t send_cmd(const void *cmd_data, uint32_t size, uint32_t *reg_value)
-{
-    response_t response;
-    command_t command = ((const command_common_t *)cmd_data)->command;
-
-    RETURN_ON_ERROR( SLIP_send_delimiter() );
-    RETURN_ON_ERROR( SLIP_send((const uint8_t *)cmd_data, size) );
-    RETURN_ON_ERROR( SLIP_send_delimiter() );
-
-    return check_response(command, reg_value, &response, sizeof(response));
-}
-
-
-static esp_loader_error_t send_cmd_with_data(const void *cmd_data, size_t cmd_size,
-                                             const void *data, size_t data_size)
-{
-    response_t response;
-    command_t command = ((const command_common_t *)cmd_data)->command;
-
-    RETURN_ON_ERROR( SLIP_send_delimiter() );
-    RETURN_ON_ERROR( SLIP_send((const uint8_t *)cmd_data, cmd_size) );
-    RETURN_ON_ERROR( SLIP_send(data, data_size) );
-    RETURN_ON_ERROR( SLIP_send_delimiter() );
-
-    return check_response(command, NULL, &response, sizeof(response));
-}
-
-
-static esp_loader_error_t send_cmd_md5(const void *cmd_data, size_t cmd_size, uint8_t md5_out[MD5_SIZE])
-{
-    rom_md5_response_t response;
-    command_t command = ((const command_common_t *)cmd_data)->command;
-
-    RETURN_ON_ERROR( SLIP_send_delimiter() );
-    RETURN_ON_ERROR( SLIP_send((const uint8_t *)cmd_data, cmd_size) );
-    RETURN_ON_ERROR( SLIP_send_delimiter() );
-
-    RETURN_ON_ERROR( check_response(command, NULL, &response, sizeof(response)) );
-
-    memcpy(md5_out, response.md5, MD5_SIZE);
-
-    return ESP_LOADER_SUCCESS;
-}
-
-
-static void log_loader_internal_error(error_code_t error)
+void log_loader_internal_error(error_code_t error)
 {
     loader_port_debug_print("Error: ");
 
@@ -99,32 +52,6 @@ static void log_loader_internal_error(error_code_t error)
     loader_port_debug_print("\n");
 }
 
-
-static esp_loader_error_t check_response(command_t cmd, uint32_t *reg_value, void* resp, uint32_t resp_size)
-{
-    esp_loader_error_t err;
-    common_response_t *response = (common_response_t *)resp;
-
-    do {
-        err = SLIP_receive_packet(resp, resp_size);
-        if (err != ESP_LOADER_SUCCESS) {
-            return err;
-        }
-    } while ((response->direction != READ_DIRECTION) || (response->command != cmd));
-
-    response_status_t *status = (response_status_t *)((uint8_t *)resp + resp_size - sizeof(response_status_t));
-
-    if (status->failed) {
-        log_loader_internal_error(status->error);
-        return ESP_LOADER_ERROR_INVALID_RESPONSE;
-    }
-
-    if (reg_value != NULL) {
-        *reg_value = response->value;
-    }
-
-    return ESP_LOADER_SUCCESS;
-}
 
 esp_loader_error_t loader_flash_begin_cmd(uint32_t offset,
                                           uint32_t erase_size,
