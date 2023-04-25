@@ -8,18 +8,21 @@
 const int left_R4 = 41;
 const int positions_R4[] = {0, 13, 24, 36};
 
+const int left_R5 = 48;
+const int positions_R5[] = {0, 7, 15, 25, 32};
+
 void resistors_edit_view_redraw_widget(App* app) {
     widget_reset(app->widget);
-    widget_add_icon_element(app->widget, 5, 23, &I_resistor);
-    if(app->state->edit_selection < COUNT_OF(positions_R4)) {
+    widget_add_icon_element(app->widget, 5, 23, &I_resistor_5);
+    if(app->state->edit_selection < COUNT_OF(positions_R5)) {
         widget_add_icon_element(
-            app->widget, left_R4 + positions_R4[app->state->edit_selection], 13, &I_arrow);
+            app->widget, left_R5 + positions_R5[app->state->edit_selection], 13, &I_arrow);
     }
 
     widget_add_text_box_element(
         app->widget, 5, 2, 123, 10, AlignCenter, AlignCenter, "uncalculated", true);
     widget_add_text_box_element(
-        app->widget, 5, 50, 123, 16, AlignCenter, AlignBottom, "X - X X X X", true);
+        app->widget, 5, 50, 123, 16, AlignCenter, AlignBottom, "Xx Xx Xx Xx - Xx", true);
 
     // widget_add_button_element(app->widget, GuiButtonTypeCenter, buttonText, callback, app);
 }
@@ -32,7 +35,7 @@ static bool widget_input_callback(InputEvent* input_event, void* context) {
     if(input_event->type == InputTypeShort) {
         switch(input_event->key) {
         case InputKeyRight:
-            if(app->state->edit_selection < 3) {
+            if(app->state->edit_selection < COUNT_OF(positions_R5) - 1) {
                 app->state->edit_selection += 1;
             }
             resistors_edit_view_redraw_widget(app);
