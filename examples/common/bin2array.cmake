@@ -3,7 +3,7 @@ function(create_resources dir output)
     # Create empty output file
     file(WRITE ${output} "#include <stdint.h>\n\n")
     # Collect input files
-    file(GLOB_RECURSE bin_paths ${dir}/*)
+    file(GLOB bin_paths ${dir}/ESP*/*)
     # Iterate through input files
     foreach(bin ${bin_paths})
         # Get short filenames, by discarding relative path

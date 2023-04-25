@@ -34,6 +34,8 @@ variables:
     - cd $CI_PROJECT_DIR/examples/esp32_example
     - idf.py build -DMD5_ENABLED=1
     - idf.py build -DMD5_ENABLED=0
+    - cd $CI_PROJECT_DIR/examples/esp32_load_ram_example
+    - idf.py build
 
 build_idf_v4.2:
   extends: .build_idf_template
