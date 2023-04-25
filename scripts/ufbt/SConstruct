@@ -1,6 +1,8 @@
 from SCons.Platform import TempFileMunge
 from SCons.Node import FS
 from SCons.Errors import UserError
+from SCons.Warnings import warn, WarningOnByDefault
+
 
 import os
 import multiprocessing
@@ -163,6 +165,18 @@ dist_env.Alias("flash", openocd_target)
 if env["FORCE"]:
     env.AlwaysBuild(openocd_target)
 
+
+firmware_jflash = dist_env.JFlash(
+    dist_env["UFBT_STATE_DIR"].File("jflash"),
+    dist_env["FW_BIN"],
+    JFLASHADDR="0x20000000",
+)
+dist_env.Alias("firmware_jflash", firmware_jflash)
+dist_env.Alias("jflash", firmware_jflash)
+if env["FORCE"]:
+    env.AlwaysBuild(firmware_jflash)
+
+
 firmware_debug = dist_env.PhonyTarget(
     "debug",
     "${GDBPYCOM}",
@@ -234,13 +248,25 @@ known_extapps = [
     for apptype in apps_to_build_as_faps
     for app in appenv["APPBUILD"].get_apps_of_type(apptype, True)
 ]
+incompatible_apps = []
 for app in known_extapps:
+    if not app.supports_hardware_target(appenv.subst("f${TARGET_HW}")):
+        incompatible_apps.append(app)
+        continue
+
     app_artifacts = appenv.BuildAppElf(app)
     app_src_dir = extract_abs_dir(app_artifacts.app._appdir)
     app_artifacts.installer = [
         appenv.Install(app_src_dir.Dir("dist"), app_artifacts.compact),
         appenv.Install(app_src_dir.Dir("dist").Dir("debug"), app_artifacts.debug),
     ]
+
+if len(incompatible_apps):
+    print(
+        "WARNING: The following apps are not compatible with the current target hardware and will not be built: {}".format(
+            ", ".join([app.name for app in incompatible_apps])
+        )
+    )
 
 if appenv["FORCE"]:
     appenv.AlwaysBuild([extapp.compact for extapp in apps_artifacts.values()])
@@ -391,3 +417,13 @@ AddPostAction(
 dist_env.Precious(app_template_dist)
 dist_env.NoClean(app_template_dist)
 dist_env.Alias("create", app_template_dist)
+
+dist_env.PhonyTarget(
+    "get_blackmagic",
+    "@echo $( ${BLACKMAGIC_ADDR} $)",
+)
+
+dist_env.PhonyTarget(
+    "get_apiversion",
+    "@echo $( ${UFBT_API_VERSION} $)",
+)
