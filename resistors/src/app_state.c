@@ -48,8 +48,13 @@ void app_init_resistor(App* app, ResistorType rtype) {
         break;
     default:
         FURI_LOG_E(TAG, "Unknown resistor type in app_init_resistor");
+        app_quit(app);
         break;
     }
+}
+
+void app_quit(App* app) {
+    scene_manager_stop(app->scene_manager);
 }
 
 void app_free(App* app) {

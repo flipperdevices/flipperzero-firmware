@@ -36,6 +36,7 @@ typedef struct App {
 
 App* app_alloc();
 AppState* app_state_alloc();
+void app_quit(App* app);
 void app_free(App* app);
 void app_init_resistor(App* app, ResistorType rtype);
 

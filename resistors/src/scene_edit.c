@@ -21,6 +21,73 @@ const int resistor_arrow_left_R5 = 48;
 const int resistor_arrow_top_R5 = 13;
 const int arrow_positions_R5[] = {0, 7, 15, 25, 32};
 
+// Xx_Xx_Xx_Xx_-_Xx\0 = 17 characters
+char blank_descriptor[17] = "                ";
+char resistor_descriptor[17] = "                ";
+
+char resistance_calculation[] = "uncalculated";
+
+void update_resistor_descriptor(ResistorType bands, int resistor_bands[], char descriptor[]) {
+    strcpy(descriptor, blank_descriptor);
+    for(int i = 0; i < bands; i++) {
+        int c = i * 3;
+        if(i == bands - 1) {
+            descriptor[c] = '-';
+            c += 2;
+        }
+        switch(resistor_bands[i]) {
+        case BandBlack:
+            descriptor[c] = 'B';
+            descriptor[c + 1] = 'l';
+            break;
+        case BandBrown:
+            descriptor[c] = 'B';
+            descriptor[c + 1] = 'r';
+            break;
+        case BandRed:
+            descriptor[c] = 'R';
+            descriptor[c + 1] = 'e';
+            break;
+        case BandOrange:
+            descriptor[c] = 'O';
+            descriptor[c + 1] = 'r';
+            break;
+        case BandYellow:
+            descriptor[c] = 'Y';
+            descriptor[c + 1] = 'e';
+            break;
+        case BandGreen:
+            descriptor[c] = 'G';
+            descriptor[c + 1] = 'r';
+            break;
+        case BandBlue:
+            descriptor[c] = 'B';
+            descriptor[c + 1] = 'l';
+            break;
+        case BandPurple:
+            descriptor[c] = 'P';
+            descriptor[c + 1] = 'u';
+            break;
+        case BandGray:
+            descriptor[c] = 'G';
+            descriptor[c + 1] = 'y';
+            break;
+        case BandWhite:
+            descriptor[c] = 'W';
+            descriptor[c + 1] = 'h';
+            break;
+        case BandGold:
+            descriptor[c] = 'G';
+            descriptor[c + 1] = 'o';
+            break;
+        case BandSilver:
+            descriptor[c] = 'S';
+            descriptor[c + 1] = 'i';
+            break;
+        }
+    } // i
+}
+
 void resistors_edit_view_redraw_widget(App* app) {
     widget_reset(app->widget);
 
@@ -47,7 +114,7 @@ void resistors_edit_view_redraw_widget(App* app) {
         break;
     default:
         FURI_LOG_E(TAG, "Unrecognised resistor type in resistors_edit_view_redraw_widget");
-        scene_manager_stop(app->scene_manager);
+        app_quit(app);
         return;
     }
 
@@ -63,16 +130,15 @@ void resistors_edit_view_redraw_widget(App* app) {
             &I_arrow);
     }
 
-    char descriptor[17] = "Xx Xx Xx Xx - Xx"; // Xx_Xx_Xx_Xx_-_Xx\0 = 17 characters
-    char calculation[] = "uncalculated";
-
     // render descriptor
+    update_resistor_descriptor(
+        app->state->resistor_type, app->state->resistor_bands, resistor_descriptor);
     widget_add_text_box_element(
-        app->widget, 5, 50, 123, 16, AlignCenter, AlignBottom, descriptor, true);
+        app->widget, 5, 50, 123, 16, AlignCenter, AlignBottom, resistor_descriptor, true);
 
     // render calculation
     widget_add_text_box_element(
-        app->widget, 5, 2, 123, 10, AlignCenter, AlignCenter, calculation, true);
+        app->widget, 5, 2, 123, 10, AlignCenter, AlignCenter, resistance_calculation, true);
 
     // widget_add_button_element(app->widget, GuiButtonTypeCenter, buttonText, callback, app);
 }
