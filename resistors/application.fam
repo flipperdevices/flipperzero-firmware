@@ -6,7 +6,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="resistors_app",
     stack_size=2 * 1024,
-    fap_category="Tools",
+    fap_category="Electronics",
     # Optional values
     fap_version=(1, 0),
     fap_icon="resistors.png",
