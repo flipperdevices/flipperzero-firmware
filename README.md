@@ -12,12 +12,12 @@ NB. These apps are in development - and will be marked complete when ready.
 
 ### Resistance calculator
 
-A simple app to calculate resistance from the coloured bands. See: [video](resistors/screenshots/2023-04-26%20resistance%20calculator%20flipper%20app.mov)
+A simple app to calculate resistance from the coloured bands. See: [video](https://github.com/instantiator/flipper-zero-experimental-apps/blob/main/resistors/screenshots/2023-04-26%20resistance%20calculator%20flipper%20app.mov?raw=true)
 
 * Pick from 4 or 5 band resistor.
 * Left and right to move the current focus, up and down to adjust the coloured bands.
 
-![A short video of the resistance calculator in action](resistors/screenshots/2023-04-26%20resistor%20view.png)
+![Screenshot of the resistance calculator in action](resistors/screenshots/2023-04-26%20resistor%20view.png)
 
 * Shown at the top: `resistance x multiplier @ tolerance`
 * Shown at the bottom: colours of each band
