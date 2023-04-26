@@ -20,7 +20,7 @@ const int resistor_arrow_top_R5 = 13;
 const int arrow_positions_R5[] = {0, 7, 15, 25, 32};
 
 char resistor_descriptor[17] = "                ";
-char resistance_calculation[] = "uncalculated";
+char resistance_calculation[24] = "                       ";
 
 void resistors_edit_view_redraw_widget(App* app) {
     widget_reset(app->widget);
@@ -71,6 +71,8 @@ void resistors_edit_view_redraw_widget(App* app) {
         app->widget, 5, 50, 123, 16, AlignCenter, AlignBottom, resistor_descriptor, true);
 
     // render calculation
+    update_calculation(
+        app->state->resistor_type, app->state->resistor_bands, resistance_calculation);
     widget_add_text_box_element(
         app->widget, 5, 2, 123, 10, AlignCenter, AlignCenter, resistance_calculation, true);
 
@@ -97,15 +99,20 @@ static bool widget_input_callback(InputEvent* input_event, void* context) {
             consumed = true;
             break;
         case InputKeyUp:
-            app->state->resistor_bands[app->state->edit_selection] =
-                (app->state->resistor_bands[app->state->edit_selection] + 1) % 12;
+            app->state->resistor_bands[app->state->edit_selection] = alter_resistor_band(
+                app->state->resistor_type,
+                app->state->edit_selection,
+                app->state->resistor_bands[app->state->edit_selection],
+                1);
             consumed = true;
             break;
         case InputKeyDown:
-            app->state->resistor_bands[app->state->edit_selection] =
-                (app->state->resistor_bands[app->state->edit_selection] - 1);
-            if(app->state->resistor_bands[app->state->edit_selection] < 0)
-                app->state->resistor_bands[app->state->edit_selection] = 11;
+            app->state->resistor_bands[app->state->edit_selection] = alter_resistor_band(
+                app->state->resistor_type,
+                app->state->edit_selection,
+                app->state->resistor_bands[app->state->edit_selection],
+                -1);
+            consumed = true;
             consumed = true;
             break;
         default:
