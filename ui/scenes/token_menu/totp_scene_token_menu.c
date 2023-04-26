@@ -29,7 +29,8 @@ void totp_scene_token_menu_activate(PluginState* plugin_state) {
 
 void totp_scene_token_menu_render(Canvas* const canvas, PluginState* plugin_state) {
     const SceneState* scene_state = (SceneState*)plugin_state->current_scene_state;
-    const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+    const TokenInfoIteratorContext* iterator_context =
+        totp_config_get_token_iterator_context(plugin_state);
     if(totp_token_info_iterator_get_total_count(iterator_context) == 0) {
         ui_control_button_render(
             canvas,
@@ -87,17 +88,19 @@ bool totp_scene_token_menu_handle_event(const PluginEvent* const event, PluginSt
 
     switch(event->input.key) {
     case InputKeyUp: {
-        const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+        const TokenInfoIteratorContext* iterator_context =
+            totp_config_get_token_iterator_context(plugin_state);
         totp_roll_value_uint8_t(
             &scene_state->selected_control, -1, AddNewToken, AppSettings, RollOverflowBehaviorRoll);
         if(scene_state->selected_control == DeleteToken &&
-            totp_token_info_iterator_get_total_count(iterator_context) == 0) {
+           totp_token_info_iterator_get_total_count(iterator_context) == 0) {
             scene_state->selected_control--;
         }
         break;
     }
     case InputKeyDown: {
-        const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+        const TokenInfoIteratorContext* iterator_context =
+            totp_config_get_token_iterator_context(plugin_state);
         totp_roll_value_uint8_t(
             &scene_state->selected_control, 1, AddNewToken, AppSettings, RollOverflowBehaviorRoll);
         if(scene_state->selected_control == DeleteToken &&
@@ -130,7 +133,8 @@ bool totp_scene_token_menu_handle_event(const PluginEvent* const event, PluginSt
             DialogMessageButton dialog_result =
                 dialog_message_show(plugin_state->dialogs_app, message);
             dialog_message_free(message);
-            TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+            TokenInfoIteratorContext* iterator_context =
+                totp_config_get_token_iterator_context(plugin_state);
             if(dialog_result == DialogMessageButtonRight &&
                totp_token_info_iterator_get_total_count(iterator_context) > 0) {
                 if(!totp_token_info_iterator_remove_current_token_info(iterator_context)) {

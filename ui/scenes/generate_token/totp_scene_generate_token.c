@@ -128,7 +128,8 @@ static const NotificationSequence*
 
 static void update_totp_params(PluginState* const plugin_state, size_t token_index) {
     SceneState* scene_state = (SceneState*)plugin_state->current_scene_state;
-    TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+    TokenInfoIteratorContext* iterator_context =
+        totp_config_get_token_iterator_context(plugin_state);
     if(totp_token_info_iterator_go_to(iterator_context, token_index)) {
         totp_generate_code_worker_notify(
             scene_state->generate_code_worker_context, TotpGenerateCodeWorkerEventForceUpdate);
@@ -137,9 +138,9 @@ static void update_totp_params(PluginState* const plugin_state, size_t token_ind
 
 static void draw_totp_code(Canvas* const canvas, const PluginState* const plugin_state) {
     const SceneState* scene_state = plugin_state->current_scene_state;
-    const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
-    uint8_t code_length =
-        totp_token_info_iterator_get_current_token(iterator_context)->digits;
+    const TokenInfoIteratorContext* iterator_context =
+        totp_config_get_token_iterator_context(plugin_state);
+    uint8_t code_length = totp_token_info_iterator_get_current_token(iterator_context)->digits;
     uint8_t offset_x = scene_state->ui_precalculated_dimensions.code_offset_x;
     uint8_t char_width = modeNine_15ptFontInfo.charInfo[0].width;
     uint8_t offset_x_inc = scene_state->ui_precalculated_dimensions.code_offset_x_inc;
@@ -162,8 +163,13 @@ static void draw_totp_code(Canvas* const canvas, const PluginState* const plugin
 
 static void on_new_token_code_generated(bool time_left, void* context) {
     const PluginState* plugin_state = context;
+    const TokenInfoIteratorContext* iterator_context =
+        totp_config_get_token_iterator_context(plugin_state);
+    if(totp_token_info_iterator_get_total_count(iterator_context) == 0) {
+        return;
+    }
+
     SceneState* scene_state = plugin_state->current_scene_state;
-    const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
     const TokenInfo* current_token = totp_token_info_iterator_get_current_token(iterator_context);
 
     uint8_t char_width = modeNine_15ptFontInfo.charInfo[0].width;
@@ -222,7 +228,8 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
             scene_state->last_code_update_sync);
     }
 #endif
-    const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+    const TokenInfoIteratorContext* iterator_context =
+        totp_config_get_token_iterator_context(plugin_state);
     scene_state->generate_code_worker_context = totp_generate_code_worker_start(
         scene_state->last_code,
         totp_token_info_iterator_get_current_token(iterator_context),
@@ -238,11 +245,13 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
         &on_code_lifetime_updated_generated,
         scene_state);
 
-    update_totp_params(plugin_state, totp_token_info_iterator_get_current_token_index(iterator_context));
+    update_totp_params(
+        plugin_state, totp_token_info_iterator_get_current_token_index(iterator_context));
 }
 
 void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_state) {
-    const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+    const TokenInfoIteratorContext* iterator_context =
+        totp_config_get_token_iterator_context(plugin_state);
     if(totp_token_info_iterator_get_total_count(iterator_context) == 0) {
         canvas_draw_str_aligned(
             canvas,
@@ -264,8 +273,8 @@ void totp_scene_generate_token_render(Canvas* const canvas, PluginState* plugin_
     const SceneState* scene_state = (SceneState*)plugin_state->current_scene_state;
 
     canvas_set_font(canvas, FontPrimary);
-    const char* token_name_cstr = furi_string_get_cstr(
-        totp_token_info_iterator_get_current_token(iterator_context)->name);
+    const char* token_name_cstr =
+        furi_string_get_cstr(totp_token_info_iterator_get_current_token(iterator_context)->name);
     uint16_t token_name_width = canvas_string_width(canvas, token_name_cstr);
     if(SCREEN_WIDTH - token_name_width > 18) {
         canvas_draw_str_aligned(
@@ -344,7 +353,8 @@ bool totp_scene_generate_token_handle_event(
         if(event->input.key == InputKeyDown &&
            plugin_state->automation_method & AutomationMethodBadUsb) {
             scene_state = (SceneState*)plugin_state->current_scene_state;
-            const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+            const TokenInfoIteratorContext* iterator_context =
+                totp_config_get_token_iterator_context(plugin_state);
             totp_usb_type_code_worker_notify(
                 scene_state->usb_type_code_worker_context,
                 TotpUsbTypeCodeWorkerEventType,
@@ -359,7 +369,8 @@ bool totp_scene_generate_token_handle_event(
             event->input.key == InputKeyUp &&
             plugin_state->automation_method & AutomationMethodBadBt) {
             scene_state = (SceneState*)plugin_state->current_scene_state;
-            const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+            const TokenInfoIteratorContext* iterator_context =
+                totp_config_get_token_iterator_context(plugin_state);
             totp_bt_type_code_worker_notify(
                 plugin_state->bt_type_code_worker_context,
                 TotpBtTypeCodeWorkerEventType,
@@ -382,8 +393,10 @@ bool totp_scene_generate_token_handle_event(
     case InputKeyDown:
         break;
     case InputKeyRight: {
-        const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
-        size_t current_token_index = totp_token_info_iterator_get_current_token_index(iterator_context);
+        const TokenInfoIteratorContext* iterator_context =
+            totp_config_get_token_iterator_context(plugin_state);
+        size_t current_token_index =
+            totp_token_info_iterator_get_current_token_index(iterator_context);
         totp_roll_value_size_t(
             &current_token_index,
             1,
@@ -395,8 +408,10 @@ bool totp_scene_generate_token_handle_event(
         break;
     }
     case InputKeyLeft: {
-        const TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
-        size_t current_token_index = totp_token_info_iterator_get_current_token_index(iterator_context);
+        const TokenInfoIteratorContext* iterator_context =
+            totp_config_get_token_iterator_context(plugin_state);
+        size_t current_token_index =
+            totp_token_info_iterator_get_current_token_index(iterator_context);
         totp_roll_value_size_t(
             &current_token_index,
             -1,

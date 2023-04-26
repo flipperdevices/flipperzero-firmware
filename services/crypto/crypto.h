@@ -9,17 +9,17 @@ enum CryptoSeedIVResults {
     /**
      * @brief IV seeding operation failed
      */
-    CRYPTO_SEED_IV_RESULT_FAILED = 0b00,
+    CryptoSeedIVResultFailed = 0b00,
 
     /**
      * @brief IV seeding operation succeeded
      */
-    CRYPTO_SEED_IV_RESULT_FLAG_SUCCESS = 0b01,
+    CryptoSeedIVResultFlagSuccess = 0b01,
 
     /**
      * @brief As a part of IV seeding operation new crypto verify data has been generated
      */
-    CRYPTO_SEED_IV_RESULT_FLAG_NEW_CRYPTO_VERIFY_DATA = 0b10
+    CryptoSeedIVResultFlagNewCryptoVerifyData = 0b10
 };
 
 /**

@@ -21,7 +21,8 @@ void totp_cli_command_list_handle(PluginState* plugin_state, Cli* cli) {
         return;
     }
 
-    TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+    TokenInfoIteratorContext* iterator_context =
+        totp_config_get_token_iterator_context(plugin_state);
     size_t total_count = totp_token_info_iterator_get_total_count(iterator_context);
     if(total_count <= 0) {
         TOTP_CLI_PRINTF("There are no tokens");

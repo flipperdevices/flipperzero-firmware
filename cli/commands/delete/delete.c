@@ -36,12 +36,12 @@ void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args,
         return;
     }
 
-    TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+    TokenInfoIteratorContext* iterator_context =
+        totp_config_get_token_iterator_context(plugin_state);
 
     int token_number;
     if(!args_read_int_and_trim(args, &token_number) || token_number <= 0 ||
-       (size_t)token_number >
-            totp_token_info_iterator_get_total_count(iterator_context)) {
+       (size_t)token_number > totp_token_info_iterator_get_total_count(iterator_context)) {
         totp_cli_print_invalid_arguments();
         return;
     }
@@ -62,7 +62,8 @@ void totp_cli_command_delete_handle(PluginState* plugin_state, FuriString* args,
 
     TOTP_CLI_LOCK_UI(plugin_state);
 
-    size_t original_token_index = totp_token_info_iterator_get_current_token_index(iterator_context);
+    size_t original_token_index =
+        totp_token_info_iterator_get_current_token_index(iterator_context);
     totp_token_info_iterator_go_to(iterator_context, token_number - 1);
     const TokenInfo* token_info = totp_token_info_iterator_get_current_token(iterator_context);
     const char* token_info_name = furi_string_get_cstr(token_info->name);

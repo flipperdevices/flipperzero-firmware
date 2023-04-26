@@ -96,7 +96,7 @@ CryptoSeedIVResult
         }
     }
 
-    result = CRYPTO_SEED_IV_RESULT_FLAG_SUCCESS;
+    result = CryptoSeedIVResultFlagSuccess;
     if(plugin_state->crypto_verify_data == NULL) {
         FURI_LOG_I(LOGGING_TAG, "Generating crypto verify data");
         plugin_state->crypto_verify_data = malloc(CRYPTO_VERIFY_KEY_LENGTH);
@@ -111,7 +111,7 @@ CryptoSeedIVResult
 
         plugin_state->pin_set = pin != NULL && pin_length > 0;
 
-        result |= CRYPTO_SEED_IV_RESULT_FLAG_NEW_CRYPTO_VERIFY_DATA;
+        result |= CryptoSeedIVResultFlagNewCryptoVerifyData;
     }
 
     return result;

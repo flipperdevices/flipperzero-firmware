@@ -118,8 +118,8 @@ bool totp_scene_authenticate_handle_event(
         CryptoSeedIVResult seed_result = totp_crypto_seed_iv(
             plugin_state, &scene_state->code_input[0], scene_state->code_length);
 
-        if(seed_result & CRYPTO_SEED_IV_RESULT_FLAG_SUCCESS &&
-           seed_result & CRYPTO_SEED_IV_RESULT_FLAG_NEW_CRYPTO_VERIFY_DATA) {
+        if(seed_result & CryptoSeedIVResultFlagSuccess &&
+           seed_result & CryptoSeedIVResultFlagNewCryptoVerifyData) {
             totp_config_file_update_crypto_signatures(plugin_state);
         }
 
