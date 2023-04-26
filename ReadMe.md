@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `21 Apr 14:02 GMT +3`
+### Apps checked & updated at `26 Apr 23:08 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -91,6 +91,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Radiation Sensor (By sionyx)](https://github.com/sionyx/flipper_radsens) -> works with RadSens module
 - [Pokemon Trading (for GameBoy) (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [[USPING] Distance Sensor (By privet971)](https://github.com/privet971/FlipperZeroApps/tree/main/usping)
+- [ESP32 Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
