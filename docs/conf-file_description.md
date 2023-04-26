@@ -1,6 +1,6 @@
 # Flipper Authenticator config file description
 
-By default Flipper Authenticator stores all its settings in [`/ext/authenticator/totp.conf`](https://github.com/akopachov/flipper-zero_authenticator/blob/master/totp/services/config/config.c#:~:text=%23define%20CONFIG_FILE_DIRECTORY_PATH,totp.conf%22) file.
+By default Flipper Authenticator stores all its settings in `/ext/authenticator/totp.conf` file.
 
 File format is standard for Flipper Zero device. Each line has one setting identified by key, where key and value are separated by `:` symbol.
 
@@ -160,11 +160,11 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 <summary><h3 style="display: inline">TokenAlgo</h3></summary>
 <p>
 
-**Type:** enum (available options are: `sha1`, `sha256`, `sha512`)
+**Type:** enum (available options are: `0` (`sha1`), `1` (`sha256`), `2` (`sha512`), `3` (`steam`))
 
-**Default value:** `sha1`
+**Default value:** `0` (`sha1`)
 
-**Description:** Token hashing algorithm to be used to generate TOTP code. If you don't know which one to use - use `sha1`.
+**Description:** Token hashing algorithm to be used to generate TOTP code. If you don't know which one to use - use `0` (`sha1`).
 
 </p>
 </details>
@@ -195,11 +195,28 @@ File format is standard for Flipper Zero device. Each line has one setting ident
 </p>
 </details>
 
+<details>
+<summary><h3 style="display: inline">TokenAutomationFeatures</h3></summary>
+<p>
+
+**Type:** unsigned int
+
+**Default value:** `0` (no features enabled)
+
+**Description:** Token automation features. Meaningful bits:
+
+* Bit 1 - if set, token input automation will type \<ENTER\> key at the end of automation
+* Bit 2 - if set, token input automation will type \<TAB\> key at the end of automation
+* Bit 3 - if set, token input automation will type slower
+
+</p>
+</details>
+
 ## Example config file
 
 ```text
 Filetype: Flipper TOTP plugin config file
-Version: 3
+Version: 5
 BaseIV: AD F2 DE F3 31 92 C8 77 4B EB BF FE 7D E1 27 51
 Crypto: FE CC 38 99 28 A9 28 6B BC E1 E3 92 B9 02 8A DF
 Timezone: 2.000000
@@ -207,17 +224,20 @@ PinIsSet: true
 NotificationMethod: 3
 TokenName: Test plain
 TokenSecret: 95 6B CE 3E 2F 01 AF 29 B2 9A DE CA E7 EF F5 B1
-TokenAlgo: sha1
+TokenAlgo: 0
 TokenDigits: 6
 TokenDuration: 30
+TokenAutomationFeatures: 0
 TokenName: Verifyr sha256
 TokenSecret: SSECIUHGRYRCRBCNKKXPUQBLBGEQZ3PKNA7TA7TQV6IL5WDFU62TNNT3NHKVWRCQWF4QTSE4IGLG4S7RGY3LDMVDZVMAGB2ARPG7XYQ
-TokenAlgo: sha256
+TokenAlgo: 1
 TokenDigits: 6
 TokenDuration: 60
+TokenAutomationFeatures: 0
 TokenName: Verifyr sha512 8
 TokenSecret: 3KKGABEJ4CKS5AHBZBDHFFNKUZHN6D7TKUGI3T7SHEUBAMIAPBUBWQNCMEEGEJX2LF23PYAFUCSRNVQ2ENOQWLHISCOJQCU2SCND4CI
-TokenAlgo: sha512
+TokenAlgo: 2
 TokenDigits: 8
 TokenDuration: 30
+TokenAutomationFeatures: 0
 ```

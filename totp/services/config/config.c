@@ -68,7 +68,7 @@ static void totp_close_config_file(FlipperFormat* file) {
  */
 static char* totp_config_file_backup_i(Storage* storage) {
     if(!storage_dir_exists(storage, CONFIG_FILE_BACKUP_DIR) &&
-        !storage_simply_mkdir(storage, CONFIG_FILE_BACKUP_DIR)) {
+       !storage_simply_mkdir(storage, CONFIG_FILE_BACKUP_DIR)) {
         return NULL;
     }
 
@@ -434,9 +434,7 @@ bool totp_config_file_load(PluginState* const plugin_state) {
         plugin_state->config_file_context->config_file = fff_data_file;
         plugin_state->config_file_context->token_info_iterator_context =
             totp_token_info_iterator_alloc(
-                storage,
-                plugin_state->config_file_context->config_file, 
-                plugin_state->iv);
+                storage, plugin_state->config_file_context->config_file, plugin_state->iv);
         result = true;
     } while(false);
 
@@ -493,8 +491,7 @@ bool totp_config_file_update_encryption(
     PluginState* plugin_state,
     const uint8_t* new_pin,
     uint8_t new_pin_length) {
-    FlipperFormat* config_file =
-        plugin_state->config_file_context->config_file;
+    FlipperFormat* config_file = plugin_state->config_file_context->config_file;
     Stream* stream = flipper_format_get_raw_stream(config_file);
     size_t original_offset = stream_tell(stream);
     if(!stream_rewind(stream)) {
@@ -513,12 +510,12 @@ bool totp_config_file_update_encryption(
 
     CryptoSeedIVResult seed_result =
         totp_crypto_seed_iv(plugin_state, new_pin_length > 0 ? new_pin : NULL, new_pin_length);
-    if(seed_result & CRYPTO_SEED_IV_RESULT_FLAG_SUCCESS &&
-       seed_result & CRYPTO_SEED_IV_RESULT_FLAG_NEW_CRYPTO_VERIFY_DATA) {
+    if(seed_result & CryptoSeedIVResultFlagSuccess &&
+       seed_result & CryptoSeedIVResultFlagNewCryptoVerifyData) {
         if(!totp_config_file_update_crypto_signatures(plugin_state)) {
             return false;
         }
-    } else if(seed_result == CRYPTO_SEED_IV_RESULT_FAILED) {
+    } else if(seed_result == CryptoSeedIVResultFailed) {
         return false;
     }
 

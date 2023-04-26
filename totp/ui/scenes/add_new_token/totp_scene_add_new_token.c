@@ -12,7 +12,10 @@
 
 char* TOKEN_ALGO_LIST[] = {"SHA1", "SHA256", "SHA512", "Steam"};
 char* TOKEN_DIGITS_TEXT_LIST[] = {"5 digits", "6 digits", "8 digits"};
-TokenDigitsCount TOKEN_DIGITS_VALUE_LIST[] = {TOTP_5_DIGITS, TOTP_6_DIGITS, TOTP_8_DIGITS};
+TokenDigitsCount TOKEN_DIGITS_VALUE_LIST[] = {
+    TotpFiveDigitsCount,
+    TotpSixDigitsCount,
+    TotpEightDigitsCount};
 
 typedef enum {
     TokenNameTextBox,
@@ -46,9 +49,7 @@ struct TotpAddContext {
     uint8_t* iv;
 };
 
-enum TotpIteratorUpdateTokenResultsEx {
-    TotpIteratorUpdateTokenResultInvalidSecret = 1
-};
+enum TotpIteratorUpdateTokenResultsEx { TotpIteratorUpdateTokenResultInvalidSecret = 1 };
 
 static void on_token_name_user_comitted(InputTextSceneCallbackResult* result) {
     SceneState* scene_state = result->callback_data;
@@ -74,16 +75,19 @@ static void update_duration_text(SceneState* scene_state) {
 
 static TotpIteratorUpdateTokenResult add_token_handler(TokenInfo* tokenInfo, const void* context) {
     const struct TotpAddContext* context_t = context;
-    if (!token_info_set_secret(
-        tokenInfo,
-        context_t->scene_state->token_secret,
-        context_t->scene_state->token_secret_length,
-        PLAIN_TOKEN_ENCODING_BASE32,
-        context_t->iv)) {
+    if(!token_info_set_secret(
+           tokenInfo,
+           context_t->scene_state->token_secret,
+           context_t->scene_state->token_secret_length,
+           PlainTokenSecretEncodingBase32,
+           context_t->iv)) {
         return TotpIteratorUpdateTokenResultInvalidSecret;
     }
 
-    furi_string_set_strn(tokenInfo->name, context_t->scene_state->token_name, context_t->scene_state->token_name_length + 1);
+    furi_string_set_strn(
+        tokenInfo->name,
+        context_t->scene_state->token_name,
+        context_t->scene_state->token_name_length + 1);
     tokenInfo->algo = context_t->scene_state->algo;
     tokenInfo->digits = TOKEN_DIGITS_VALUE_LIST[context_t->scene_state->digits_count_index];
     tokenInfo->duration = context_t->scene_state->duration;
@@ -277,16 +281,16 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
         case TokenDurationSelect:
             break;
         case ConfirmButton: {
-            struct TotpAddContext add_context = { .iv = plugin_state->iv, .scene_state = scene_state };
-            TokenInfoIteratorContext* iterator_context = totp_config_get_token_iterator_context(plugin_state);
+            struct TotpAddContext add_context = {
+                .iv = plugin_state->iv, .scene_state = scene_state};
+            TokenInfoIteratorContext* iterator_context =
+                totp_config_get_token_iterator_context(plugin_state);
             TotpIteratorUpdateTokenResult add_result = totp_token_info_iterator_add_new_token(
-                iterator_context,
-                &add_token_handler,
-                &add_context);
+                iterator_context, &add_token_handler, &add_context);
 
-            if (add_result == TotpIteratorUpdateTokenResultSuccess) {
+            if(add_result == TotpIteratorUpdateTokenResultSuccess) {
                 totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
-            } else if (add_result == TotpIteratorUpdateTokenResultInvalidSecret) {
+            } else if(add_result == TotpIteratorUpdateTokenResultInvalidSecret) {
                 DialogMessage* message = dialog_message_alloc();
                 dialog_message_set_buttons(message, "Back", NULL, NULL);
                 dialog_message_set_text(
@@ -300,7 +304,7 @@ bool totp_scene_add_new_token_handle_event(PluginEvent* const event, PluginState
                 dialog_message_free(message);
                 scene_state->selected_control = TokenSecretTextBox;
                 update_screen_y_offset(scene_state);
-            } else if (add_result == TotpIteratorUpdateTokenResultFileUpdateFailed) {
+            } else if(add_result == TotpIteratorUpdateTokenResultFileUpdateFailed) {
                 totp_dialogs_config_updating_error(plugin_state);
             }
 

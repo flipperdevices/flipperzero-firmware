@@ -30,13 +30,13 @@ bool token_info_set_secret(
     uint8_t* plain_secret;
     size_t plain_secret_length;
     size_t plain_secret_size;
-    if(plain_token_secret_encoding == PLAIN_TOKEN_ENCODING_BASE32) {
+    if(plain_token_secret_encoding == PlainTokenSecretEncodingBase32) {
         plain_secret_size = token_secret_length;
         plain_secret = malloc(plain_secret_size);
         furi_check(plain_secret != NULL);
         plain_secret_length =
             base32_decode((const uint8_t*)plain_token_secret, plain_secret, plain_secret_size);
-    } else if(plain_token_secret_encoding == PLAIN_TOKEN_ENCODING_BASE64) {
+    } else if(plain_token_secret_encoding == PlainTokenSecretEncodingBase64) {
         plain_secret_length = 0;
         plain_secret = base64_decode(
             (const uint8_t*)plain_token_secret,
@@ -69,13 +69,13 @@ bool token_info_set_secret(
 bool token_info_set_digits_from_int(TokenInfo* token_info, uint8_t digits) {
     switch(digits) {
     case 5:
-        token_info->digits = TOTP_5_DIGITS;
+        token_info->digits = TotpFiveDigitsCount;
         return true;
     case 6:
-        token_info->digits = TOTP_6_DIGITS;
+        token_info->digits = TotpSixDigitsCount;
         return true;
     case 8:
-        token_info->digits = TOTP_8_DIGITS;
+        token_info->digits = TotpEightDigitsCount;
         return true;
     default:
         break;
@@ -136,22 +136,22 @@ char* token_info_get_algo_as_cstr(const TokenInfo* token_info) {
 
 bool token_info_set_automation_feature_from_str(TokenInfo* token_info, const FuriString* str) {
     if(furi_string_cmpi_str(str, TOTP_TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END_NAME) == 0) {
-        token_info->automation_features |= TOKEN_AUTOMATION_FEATURE_ENTER_AT_THE_END;
+        token_info->automation_features |= TokenAutomationFeatureEnterAtTheEnd;
         return true;
     }
 
     if(furi_string_cmpi_str(str, TOTP_TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END_NAME) == 0) {
-        token_info->automation_features |= TOKEN_AUTOMATION_FEATURE_TAB_AT_THE_END;
+        token_info->automation_features |= TokenAutomationFeatureTabAtTheEnd;
         return true;
     }
 
     if(furi_string_cmpi_str(str, TOTP_TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER_NAME) == 0) {
-        token_info->automation_features |= TOKEN_AUTOMATION_FEATURE_TYPE_SLOWER;
+        token_info->automation_features |= TokenAutomationFeatureTypeSlower;
         return true;
     }
 
     if(furi_string_cmpi_str(str, TOTP_TOKEN_AUTOMATION_FEATURE_NONE_NAME) == 0) {
-        token_info->automation_features = TOKEN_AUTOMATION_FEATURE_NONE;
+        token_info->automation_features = TokenAutomationFeatureNone;
         return true;
     }
 
@@ -175,8 +175,8 @@ TokenInfo* token_info_clone(const TokenInfo* src) {
 void token_info_set_defaults(TokenInfo* token_info) {
     furi_check(token_info != NULL);
     token_info->algo = SHA1;
-    token_info->digits = TOTP_6_DIGITS;
+    token_info->digits = TotpSixDigitsCount;
     token_info->duration = TOTP_TOKEN_DURATION_DEFAULT;
-    token_info->automation_features = TOKEN_AUTOMATION_FEATURE_NONE;
+    token_info->automation_features = TokenAutomationFeatureNone;
     furi_string_reset(token_info->name);
 }

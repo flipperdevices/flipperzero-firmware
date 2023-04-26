@@ -121,10 +121,10 @@ bool totp_cli_try_read_plain_token_secret_encoding(
             totp_cli_printf_missed_argument_value(TOTP_CLI_COMMAND_ARG_SECRET_ENCODING_PREFIX);
         } else {
             if(furi_string_cmpi_str(arg, PLAIN_TOKEN_ENCODING_BASE32_NAME) == 0) {
-                *secret_encoding = PLAIN_TOKEN_ENCODING_BASE32;
+                *secret_encoding = PlainTokenSecretEncodingBase32;
                 *parsed = true;
             } else if(furi_string_cmpi_str(arg, PLAIN_TOKEN_ENCODING_BASE64_NAME) == 0) {
-                *secret_encoding = PLAIN_TOKEN_ENCODING_BASE64;
+                *secret_encoding = PlainTokenSecretEncodingBase64;
                 *parsed = true;
             } else {
                 TOTP_CLI_PRINTF_ERROR(

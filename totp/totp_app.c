@@ -54,13 +54,13 @@ static bool totp_activate_initial_scene(PluginState* const plugin_state) {
             totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication);
         } else {
             CryptoSeedIVResult seed_result = totp_crypto_seed_iv(plugin_state, NULL, 0);
-            if(seed_result & CRYPTO_SEED_IV_RESULT_FLAG_SUCCESS &&
-               seed_result & CRYPTO_SEED_IV_RESULT_FLAG_NEW_CRYPTO_VERIFY_DATA) {
+            if(seed_result & CryptoSeedIVResultFlagSuccess &&
+               seed_result & CryptoSeedIVResultFlagNewCryptoVerifyData) {
                 if(!totp_config_file_update_crypto_signatures(plugin_state)) {
                     totp_dialogs_config_loading_error(plugin_state);
                     return false;
                 }
-            } else if(seed_result == CRYPTO_SEED_IV_RESULT_FAILED) {
+            } else if(seed_result == CryptoSeedIVResultFailed) {
                 totp_dialogs_config_loading_error(plugin_state);
                 return false;
             }
@@ -71,13 +71,13 @@ static bool totp_activate_initial_scene(PluginState* const plugin_state) {
         totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication);
     } else {
         CryptoSeedIVResult seed_result = totp_crypto_seed_iv(plugin_state, NULL, 0);
-        if(seed_result & CRYPTO_SEED_IV_RESULT_FLAG_SUCCESS &&
-           seed_result & CRYPTO_SEED_IV_RESULT_FLAG_NEW_CRYPTO_VERIFY_DATA) {
+        if(seed_result & CryptoSeedIVResultFlagSuccess &&
+           seed_result & CryptoSeedIVResultFlagNewCryptoVerifyData) {
             if(!totp_config_file_update_crypto_signatures(plugin_state)) {
                 totp_dialogs_config_loading_error(plugin_state);
                 return false;
             }
-        } else if(seed_result == CRYPTO_SEED_IV_RESULT_FAILED) {
+        } else if(seed_result == CryptoSeedIVResultFailed) {
             totp_dialogs_config_loading_error(plugin_state);
             return false;
         }
