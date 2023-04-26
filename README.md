@@ -47,6 +47,8 @@ Build outputs are found in the `dist` directory for each application.
 * [Derek Jamison](https://github.com/jamisonderek) for the [Flipper Zero tutorials](https://github.com/jamisonderek/flipper-zero-tutorials) repository (in particular, [plugins](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/plugins))
 * [DroomOne](https://github.com/DroomOne) for the [Flipper Plugin tutorial](https://github.com/DroomOne/Flipper-Plugin-Tutorial).
 
-### See also
+A big thank you to Derek Jamison for kindly helping with debugging several issues, too. You should really check out his YouTube channel: [@MrDerekJamison](https://www.youtube.com/@MrDerekJamison)
+
+### See also
 
 * [Flipper plugin documentation](https://github.com/flipperdevices/flipperzero-firmware/tree/dev/documentation)
