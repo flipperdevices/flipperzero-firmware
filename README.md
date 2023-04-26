@@ -6,9 +6,21 @@ Experimenting with app development for flipper zero.
 
 NB. These apps are in development - and will be marked complete when ready.
 
-| App | Description | State |
-|-|-|-|
-| resistors | Coloured band resistance calculator. | In development |
+| Directory | App | Description | State |
+|-|-|-|-|
+| resistors | Resistance calculator | Coloured band resistance calculator. | Testing |
+
+### Resistance calculator
+
+A simple app to calculate resistance from the coloured bands. See: [video](resistors/screenshots/2023-04-26%20resistance%20calculator%20flipper%20app.mov)
+
+* Pick from 4 or 5 band resistor.
+* Left and right to move the current focus, up and down to adjust the coloured bands.
+
+![A short video of the resistance calculator in action](resistors/screenshots/2023-04-26%20resistor%20view.png)
+
+* Shown at the top: `resistance x multiplier @ tolerance`
+* Shown at the bottom: colours of each band
 
 ## Build tools
 
