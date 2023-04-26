@@ -8,7 +8,7 @@ NB. These apps are in development - and will be marked complete when ready.
 
 | Directory | App | Description | State |
 |-|-|-|-|
-| resistors | Resistance calculator | Coloured band resistance calculator. | Testing |
+| [resistors](resistors/) | Resistance calculator | Coloured band resistance calculator. | Testing |
 
 ### Resistance calculator
 
