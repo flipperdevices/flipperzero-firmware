@@ -6,18 +6,9 @@ Experimenting with app development for flipper zero.
 
 NB. These apps are in development - and will be marked complete when ready.
 
-| Directory | App | Description | State |
-|-|-|-|-|
-| [resistors](resistors/) | Resistance calculator | Coloured band resistance calculator. | Testing |
-
-### Resistance calculator
-
-A simple app to calculate resistance from the coloured bands. See:
-
-* [README](resistors/README.md)
-* [video](https://github.com/instantiator/flipper-zero-experimental-apps/blob/main/resistors/screenshots/2023-04-26%20resistance%20calculator%20flipper%20app.mov?raw=true)
-
-![Screenshot of the resistance calculator in action](resistors/screenshots/2023-04-26%20resistor%20view.png)
+| Screenshot | Directory | App | Description | State |
+|---|-|-|-|-|
+| ![Screenshot of the resistance calculator in action](resistors/screenshots/2023-04-26%20resistor%20view.png) | [resistors](resistors/) | Resistance calculator | Coloured band resistance calculator. | Testing |
 
 ## Build tools
 
