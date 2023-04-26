@@ -117,11 +117,9 @@ static bool ensure_stream_ends_with_lf(Stream* stream) {
         return false;
     }
 
-    if(last_char != '\n') {
-        const uint8_t lf = '\n';
-        if(!stream_write(stream, &lf, 1)) {
-            return false;
-        }
+    const uint8_t lf = '\n';
+    if(last_char != lf && !stream_write(stream, &lf, 1)) {
+        return false;
     }
 
     if(!stream_seek(stream, original_pos, StreamOffsetFromStart)) {
