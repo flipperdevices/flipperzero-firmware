@@ -38,7 +38,7 @@ void update_resistor_descriptor(ResistorType bands, int resistor_bands[], char d
         switch(resistor_bands[i]) {
         case BandBlack:
             descriptor[c] = 'B';
-            descriptor[c + 1] = 'l';
+            descriptor[c + 1] = 'k';
             break;
         case BandBrown:
             descriptor[c] = 'B';
@@ -62,7 +62,7 @@ void update_resistor_descriptor(ResistorType bands, int resistor_bands[], char d
             break;
         case BandBlue:
             descriptor[c] = 'B';
-            descriptor[c + 1] = 'l';
+            descriptor[c + 1] = 'u';
             break;
         case BandPurple:
             descriptor[c] = 'P';
@@ -154,14 +154,24 @@ static bool widget_input_callback(InputEvent* input_event, void* context) {
             if(app->state->edit_selection < app->state->resistor_type - 1) {
                 app->state->edit_selection += 1;
             }
-            resistors_edit_view_redraw_widget(app);
             consumed = true;
             break;
         case InputKeyLeft:
             if(app->state->edit_selection > 0) {
                 app->state->edit_selection -= 1;
             }
-            resistors_edit_view_redraw_widget(app);
+            consumed = true;
+            break;
+        case InputKeyUp:
+            app->state->resistor_bands[app->state->edit_selection] =
+                (app->state->resistor_bands[app->state->edit_selection] + 1) % 12;
+            consumed = true;
+            break;
+        case InputKeyDown:
+            app->state->resistor_bands[app->state->edit_selection] =
+                (app->state->resistor_bands[app->state->edit_selection] - 1);
+            if(app->state->resistor_bands[app->state->edit_selection] < 0)
+                app->state->resistor_bands[app->state->edit_selection] = 11;
             consumed = true;
             break;
         default:
@@ -169,6 +179,7 @@ static bool widget_input_callback(InputEvent* input_event, void* context) {
             break;
         }
     }
+    if(consumed) resistors_edit_view_redraw_widget(app);
     return consumed;
 }
 
