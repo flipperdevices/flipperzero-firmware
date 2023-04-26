@@ -34,15 +34,23 @@ Each directory contains the following scripts:
 
 Build outputs are found in the `dist` directory for each application.
 
+## Distribution
+
+Apps are also distributed through:
+
+* [flipc.org](https://flipc.org/) (unofficial Flipper app catalogue)
+
 ## TODO
 
 - [x] Complete first experiment (resistance calculator)
+- [x] List on [flipc.org](https://flipc.org/)
 - [ ] Add official [ufbt GitHub Action](https://github.com/marketplace/actions/build-flipper-application-package-fap)
 
 ## Credits
 
 * [Derek Jamison](https://github.com/jamisonderek) for the [Flipper Zero tutorials](https://github.com/jamisonderek/flipper-zero-tutorials) repository (in particular, [plugins](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/plugins))
 * [DroomOne](https://github.com/DroomOne) for the [Flipper Plugin tutorial](https://github.com/DroomOne/Flipper-Plugin-Tutorial).
+* [Aleksey Korolev](https://github.com/playmean) for the [flipc.org](https://flipc.org/) Flipper app catalogue.
 
 A big thank you to Derek Jamison for kindly helping with debugging several issues, too. You should really check out his YouTube channel: [@MrDerekJamison](https://www.youtube.com/@MrDerekJamison)
 
