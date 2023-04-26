@@ -1,13 +1,11 @@
 #include "flipper.h"
 #include "resistors_app.h"
+#include "resistor_logic.h"
 #include "app_state.h"
 #include "scenes.h"
 #include "scene_edit.h"
 
 /* edit view scene */
-
-const int resistor_image_top = 23;
-const int resistor_image_le = 23;
 
 const int resistor_image_left_R4 = 5;
 const int resistor_image_top_R4 = 23;
@@ -21,72 +19,8 @@ const int resistor_arrow_left_R5 = 48;
 const int resistor_arrow_top_R5 = 13;
 const int arrow_positions_R5[] = {0, 7, 15, 25, 32};
 
-// Xx_Xx_Xx_Xx_-_Xx\0 = 17 characters
-char blank_descriptor[17] = "                ";
 char resistor_descriptor[17] = "                ";
-
 char resistance_calculation[] = "uncalculated";
-
-void update_resistor_descriptor(ResistorType bands, int resistor_bands[], char descriptor[]) {
-    strcpy(descriptor, blank_descriptor);
-    for(int i = 0; i < bands; i++) {
-        int c = i * 3;
-        if(i == bands - 1) {
-            descriptor[c] = '-';
-            c += 2;
-        }
-        switch(resistor_bands[i]) {
-        case BandBlack:
-            descriptor[c] = 'B';
-            descriptor[c + 1] = 'k';
-            break;
-        case BandBrown:
-            descriptor[c] = 'B';
-            descriptor[c + 1] = 'r';
-            break;
-        case BandRed:
-            descriptor[c] = 'R';
-            descriptor[c + 1] = 'e';
-            break;
-        case BandOrange:
-            descriptor[c] = 'O';
-            descriptor[c + 1] = 'r';
-            break;
-        case BandYellow:
-            descriptor[c] = 'Y';
-            descriptor[c + 1] = 'e';
-            break;
-        case BandGreen:
-            descriptor[c] = 'G';
-            descriptor[c + 1] = 'r';
-            break;
-        case BandBlue:
-            descriptor[c] = 'B';
-            descriptor[c + 1] = 'u';
-            break;
-        case BandPurple:
-            descriptor[c] = 'P';
-            descriptor[c + 1] = 'u';
-            break;
-        case BandGray:
-            descriptor[c] = 'G';
-            descriptor[c + 1] = 'y';
-            break;
-        case BandWhite:
-            descriptor[c] = 'W';
-            descriptor[c + 1] = 'h';
-            break;
-        case BandGold:
-            descriptor[c] = 'G';
-            descriptor[c + 1] = 'o';
-            break;
-        case BandSilver:
-            descriptor[c] = 'S';
-            descriptor[c + 1] = 'i';
-            break;
-        }
-    } // i
-}
 
 void resistors_edit_view_redraw_widget(App* app) {
     widget_reset(app->widget);
