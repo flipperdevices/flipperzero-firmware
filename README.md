@@ -39,7 +39,7 @@ Build outputs are found in the `dist` directory for each application.
 
 ## TODO
 
-- [ ] Complete first experiment (resistance calculator)
+- [x] Complete first experiment (resistance calculator)
 - [ ] Add official [ufbt GitHub Action](https://github.com/marketplace/actions/build-flipper-application-package-fap)
 
 ## Credits
