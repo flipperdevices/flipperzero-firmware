@@ -28,7 +28,7 @@ static const char *TAG = "serial_ram_loader";
 
 // Max line size
 #define BUF_LEN 128
-static char buf[BUF_LEN] = {0};
+static uint8_t buf[BUF_LEN] = {0};
 
 void slave_monitor(void *arg)
 {
