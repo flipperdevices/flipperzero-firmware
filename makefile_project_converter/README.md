@@ -1,6 +1,6 @@
 # THIS IS EXPERIMENTAL TOOL!
 
-**It is not tested properly. You need to compile it by yourself using the makefile. It will print help if called without arguments. It should automatically call ffmpeg and clean all the intermediate files and folders made for or by ffmpeg. Windows build is provided which works in my case.**
+**It is not tested properly. You need to compile it by yourself using the makefile. It will print help if called without arguments. It should automatically call ffmpeg and clean all the intermediate files and folders made for or by ffmpeg.**
 
 # How to use:
 
