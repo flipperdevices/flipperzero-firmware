@@ -122,6 +122,15 @@ POCSAGPagerApp* pocsag_pager_app_alloc() {
         app->txrx->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
     subghz_worker_set_context(app->txrx->worker, app->txrx->receiver);
 
+    // Enable power for External CC1101 if it is connected
+    furi_hal_subghz_enable_ext_power();
+    // Auto switch to internal radio if external radio is not available
+    furi_delay_ms(15);
+    if(!furi_hal_subghz_check_radio()) {
+        furi_hal_subghz_select_radio_type(SubGhzRadioInternal);
+        furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
+    }
+
     furi_hal_power_suppress_charge_enter();
 
     scene_manager_next_scene(app->scene_manager, POCSAGPagerSceneStart);
@@ -134,6 +143,11 @@ void pocsag_pager_app_free(POCSAGPagerApp* app) {
 
     //CC1101 off
     pcsg_sleep(app);
+
+    // Disable power for External CC1101 if it was enabled and module is connected
+    furi_hal_subghz_disable_ext_power();
+    // Reinit SPI handles for internal radio / nfc
+    furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
 
     // Submenu
     view_dispatcher_remove_view(app->view_dispatcher, POCSAGPagerViewSubmenu);
