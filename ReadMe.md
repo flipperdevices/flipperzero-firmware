@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `26 Apr 23:08 GMT +3`
+### Apps checked & updated at `27 Apr 21:37 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -48,6 +48,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Race (By zyuhel)](https://github.com/zyuhel/flipperzero-racegame)
 - [Nu Pogodi! (Ну, погоди!) (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
 - [4 in row (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-4inrow)
+- [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 
 ## Media
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
@@ -92,6 +93,10 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Pokemon Trading (for GameBoy) (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - [[USPING] Distance Sensor (By privet971)](https://github.com/privet971/FlipperZeroApps/tree/main/usping)
 - [ESP32 Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main)
+- [ServoTester (2) (By mhasbini)](https://github.com/mhasbini/ServoTesterApp/tree/master)
+- [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
+- [Control 7-segment display with Flipper Zero (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
+- [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -126,6 +131,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Mifare Fuzzer (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
 - [HEX Editor (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 - [Flipper (Mifare) Nested (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested) -> Learn [How to Use](https://github.com/AloneLiberty/FlipperNested#how-to-use-it)
+- [Resistance calculator (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 
 --- 
 
