@@ -93,9 +93,9 @@ static void furi_hal_lpuart_init(uint32_t baud) {
 }
 
 void furi_hal_uart_init(FuriHalUartId ch, uint32_t baud) {
-    if(ch == FuriHalUartIdLPUART1){
+    if(ch == FuriHalUartIdLPUART1) {
         furi_hal_lpuart_init(baud);
-    }else if(ch == FuriHalUartIdUSART1){
+    } else if(ch == FuriHalUartIdUSART1) {
         furi_hal_usart_init(baud);
     }
 }

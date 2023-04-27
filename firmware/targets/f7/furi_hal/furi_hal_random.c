@@ -45,7 +45,8 @@ uint32_t furi_hal_random_get() {
 
     const uint32_t random_val = furi_hal_random_read_rng();
 
-    LL_RNG_Disable(RNG);;
+    LL_RNG_Disable(RNG);
+    ;
     LL_HSEM_ReleaseLock(HSEM, CFG_HW_RNG_SEMID, 0);
 
     return random_val;
