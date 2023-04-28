@@ -2,8 +2,8 @@
 
 
 from flipper.app import App
-from flipper.cube import CubeProgrammer
 from flipper.assets.coprobin import CoproBinary
+from flipper.cube import CubeProgrammer
 
 STATEMENT = "AGREE_TO_LOSE_FLIPPER_FEATURES_THAT_USE_CRYPTO_ENCLAVE"
 

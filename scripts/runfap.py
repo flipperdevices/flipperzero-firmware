@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+import operator
+from functools import reduce
+
 from flipper.app import App
 from flipper.storage import FlipperStorage, FlipperStorageOperations
 from flipper.utils.cdc import resolve_port
-
-from functools import reduce
-import operator
 
 
 class Main(App):

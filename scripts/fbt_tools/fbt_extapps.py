@@ -5,20 +5,17 @@ import shutil
 from dataclasses import dataclass, field
 from typing import Optional
 
-from ansi.color import fg
-
 import SCons.Warnings
-from SCons.Action import Action
-from SCons.Builder import Builder
-from SCons.Errors import UserError
-from SCons.Node.FS import File, Entry
-
+from ansi.color import fg
 from fbt.appmanifest import FlipperApplication, FlipperAppType, FlipperManifestException
 from fbt.elfmanifest import assemble_manifest_data
 from fbt.fapassets import FileBundler
 from fbt.sdk.cache import SdkCache
 from fbt.util import extract_abs_dir_path
-
+from SCons.Action import Action
+from SCons.Builder import Builder
+from SCons.Errors import UserError
+from SCons.Node.FS import Entry, File
 
 _FAP_META_SECTION = ".fapmeta"
 _FAP_FILEASSETS_SECTION = ".fapassets"

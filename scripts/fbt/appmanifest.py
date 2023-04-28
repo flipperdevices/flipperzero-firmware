@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Callable
-from enum import Enum
 import os
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Callable, List, Optional, Tuple
 
 
 class FlipperManifestException(Exception):

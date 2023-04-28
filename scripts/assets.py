@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
+import os
+
 from flipper.app import App
 from flipper.assets.icon import file2image
-
-import os
 
 ICONS_SUPPORTED_FORMATS = ["png"]
 

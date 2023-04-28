@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
+import binascii
+import filecmp
+import os
+import tempfile
+
 from flipper.app import App
 from flipper.storage import FlipperStorage, FlipperStorageOperations
 from flipper.utils.cdc import resolve_port
-
-import os
-import binascii
-import filecmp
-import tempfile
 
 
 def WrapStorageOp(func):

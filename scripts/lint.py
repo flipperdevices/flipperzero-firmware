@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 
+import multiprocessing
 import os
 import re
 import shutil
 import subprocess
-import multiprocessing
 
 from flipper.app import App
-
 
 SOURCE_CODE_FILE_EXTENSIONS = [".h", ".c", ".cpp", ".cxx", ".hpp"]
 SOURCE_CODE_FILE_PATTERN = r"^[0-9A-Za-z_]+\.[a-z]+$"

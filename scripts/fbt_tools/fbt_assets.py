@@ -1,10 +1,10 @@
-from SCons.Builder import Builder
-from SCons.Action import Action
-from SCons.Errors import StopError
-
 import os
 import subprocess
+
 from ansi.color import fg
+from SCons.Action import Action
+from SCons.Builder import Builder
+from SCons.Errors import StopError
 
 
 def icons_emitter(target, source, env):

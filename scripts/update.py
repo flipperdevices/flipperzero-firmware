@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
-from flipper.app import App
-from flipper.utils.fff import FlipperFormatFile
-from flipper.assets.coprobin import CoproBinary, get_stack_type
-from flipper.assets.obdata import OptionBytesData, ObReferenceValues
-from os.path import join, exists
+import math
 import os
 import shutil
-import zlib
 import tarfile
-import math
+import zlib
+from os.path import exists, join
 
+from flipper.app import App
+from flipper.assets.coprobin import CoproBinary, get_stack_type
+from flipper.assets.obdata import ObReferenceValues, OptionBytesData
+from flipper.utils.fff import FlipperFormatFile
 from slideshow import Main as SlideshowMain
 
 

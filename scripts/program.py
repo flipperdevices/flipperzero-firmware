@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-import typing
-import subprocess
 import logging
-import time
 import os
 import socket
-
+import subprocess
+import time
+import typing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+
 from flipper.app import App
 
 

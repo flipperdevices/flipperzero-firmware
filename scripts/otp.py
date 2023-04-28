@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
+import datetime
 import logging
 import os
 import re
 import struct
-import datetime
 
 from flipper.app import App
 from flipper.utils.programmer_openocd import OpenOCDProgrammer, OpenOCDProgrammerResult
-
 
 OTP_MAGIC = 0xBABE
 OTP_VERSION = 0x02

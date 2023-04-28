@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-from flipper.app import App
-from flipper.storage import FlipperStorage, FlipperStorageOperations
-from flipper.utils.cdc import resolve_port
-
 import logging
 import os
 import pathlib
+
+from flipper.app import App
+from flipper.storage import FlipperStorage, FlipperStorageOperations
+from flipper.utils.cdc import resolve_port
 
 
 class Main(App):
