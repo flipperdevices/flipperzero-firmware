@@ -145,3 +145,9 @@ bool mf_ultralight_is_all_data_read(MfUltralightData* data) {
     // TODO add logic
     return false;
 }
+
+bool mf_ultralight_is_counter_configured(MfUltralightData* data) {
+    furi_assert(data);
+
+    return false;
+}

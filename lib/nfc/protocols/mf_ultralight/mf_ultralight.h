@@ -105,6 +105,13 @@ typedef union {
     uint16_t pack;
 } MfUltralightAuthPack;
 
+typedef enum {
+    MfUltralightMirrorNone,
+    MfUltralightMirrorUid,
+    MfUltralightMirrorCounter,
+    MfUltralightMirrorUidCounter,
+} MfUltralightMirrorConf;
+
 typedef struct __attribute__((packed)) {
     union {
         uint8_t value;
@@ -137,11 +144,6 @@ typedef struct __attribute__((packed)) {
     uint8_t rfui3[2];
 } MfUltralightConfigPages;
 
-
-typedef struct {
-
-} MfUltralightConfigPages;
-
 typedef struct {
     NfcaData nfca_data;
     MfUltralightType type;
@@ -165,6 +167,8 @@ const char* mf_ultralight_get_name(MfUltralightType type, bool full_name);
 bool mf_ultralight_is_all_data_read(MfUltralightData* data);
 
 bool mf_ultralight_detect_protocol(NfcaData* nfca_data);
+
+bool mf_ultralight_is_counter_configured(MfUltralightData* data);
 
 #ifdef __cplusplus
 }

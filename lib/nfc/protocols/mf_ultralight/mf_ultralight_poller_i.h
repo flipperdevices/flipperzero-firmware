@@ -29,6 +29,7 @@ typedef enum {
     MfUltralightPollerStateReadTearingFlags,
     MfUltralightPollerStateAuth,
     MfUltralightPollerStateReadPages,
+    MfUltralightPollerStateTryDefaultPass,
     MfUltralightPollerStateReadFailed,
     MfUltralightPollerStateReadSuccess,
 
@@ -52,6 +53,10 @@ struct MfUltralightPoller {
     uint32_t feature_set;
     uint16_t pages_read;
     uint16_t pages_total;
+    uint8_t counters_read;
+    uint8_t counters_total;
+    uint8_t tearing_flag_read;
+    uint8_t tearing_flag_total;
     void* context;
 };
 
