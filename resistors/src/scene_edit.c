@@ -4,6 +4,9 @@
 #include "app_state.h"
 #include "scenes.h"
 #include "scene_edit.h"
+#include <applications/services/gui/modules/widget.h>
+#include <applications/services/gui/modules/widget_elements/widget_element.h>
+#include <applications/services/gui/view.h>
 
 /* edit view scene */
 
