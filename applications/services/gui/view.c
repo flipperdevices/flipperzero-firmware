@@ -25,7 +25,6 @@ void view_set_draw_callback(View* view, ViewDrawCallback callback) {
 
 void view_set_input_callback(View* view, ViewInputCallback callback) {
     furi_assert(view);
-    furi_assert(view->input_callback == NULL);
     view->input_callback = callback;
 }
 
