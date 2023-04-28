@@ -1,4 +1,12 @@
 AddOption(
+    "--extra-define",
+    action="append",
+    dest="extra_defines",
+    default=[],
+    help="Extra global define that will be passed to C/C++ compiler, can be specified multiple times",
+)
+
+AddOption(
     "--proxy-env",
     action="store",
     dest="proxy_env",

@@ -63,6 +63,8 @@ core_env = Environment(
     ],
 )
 
+core_env.Append(CPPDEFINES=GetOption("extra_defines"))
+
 # Now we can import stuff bundled with SDK - it was added to sys.path by ufbt_state
 
 from fbt.util import (
