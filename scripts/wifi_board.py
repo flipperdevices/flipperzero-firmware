@@ -182,52 +182,50 @@ class Main(App):
             return 1
 
         # get temporary dir
-        dir = tempfile.TemporaryDirectory()
-        downloader = UpdateDownloader()
+        with tempfile.TemporaryDirectory() as temp_dir:
+            downloader = UpdateDownloader()
 
-        # download latest channel update
-        try:
-            if not downloader.download(self.args.channel, dir.name):
-                self.logger.error(f"Cannot download update")
+            # download latest channel update
+            try:
+                if not downloader.download(self.args.channel, temp_dir):
+                    self.logger.error(f"Cannot download update")
+                    return 1
+            except Exception as e:
+                self.logger.error(f"Cannot download update: {e}")
                 return 1
-        except Exception as e:
-            self.logger.error(f"Cannot download update: {e}")
-            return 1
 
-        with open(os.path.join(dir.name, "flash.command"), "r") as f:
-            flash_command = f.read()
+            with open(os.path.join(temp_dir, "flash.command"), "r") as f:
+                flash_command = f.read()
 
-        flash_command = flash_command.replace("\n", "").replace("\r", "")
-        flash_command = flash_command.replace("(PORT)", port)
+            flash_command = flash_command.replace("\n", "").replace("\r", "")
+            flash_command = flash_command.replace("(PORT)", port)
 
-        # We can't reset the board after flashing via usb
-        flash_command = flash_command.replace(
-            "--after hard_reset", "--after no_reset_stub"
-        )
+            # We can't reset the board after flashing via usb
+            flash_command = flash_command.replace(
+                "--after hard_reset", "--after no_reset_stub"
+            )
 
-        args = flash_command.split(" ")[0:]
-        args = list(filter(None, args))
+            args = flash_command.split(" ")[0:]
+            args = list(filter(None, args))
 
-        esptool_params = []
-        esptool_params.extend(args)
+            esptool_params = []
+            esptool_params.extend(args)
 
-        self.logger.info(f'Running command: "{" ".join(args)}" in "{dir.name}"')
+            self.logger.info(f'Running command: "{" ".join(args)}" in "{temp_dir}"')
 
-        process = subprocess.Popen(
-            esptool_params,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            cwd=dir.name,
-            bufsize=1,
-            universal_newlines=True,
-        )
+            process = subprocess.Popen(
+                esptool_params,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                cwd=temp_dir,
+                bufsize=1,
+                universal_newlines=True,
+            )
 
-        while process.poll() is None:
-            if process.stdout is not None:
-                for line in process.stdout:
-                    self.logger.debug(f"{line.strip()}")
-
-        dir.cleanup()
+            while process.poll() is None:
+                if process.stdout is not None:
+                    for line in process.stdout:
+                        self.logger.debug(f"{line.strip()}")
 
         if process.returncode != 0:
             self.logger.error(f"Failed to flash WiFi board")
