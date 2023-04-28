@@ -12,6 +12,7 @@ import json
 import requests
 import tarfile
 
+
 class UpdateDownloader:
     UPDATE_SERVER = "https://test-update.flipperzero.one"
     UPDATE_PROJECT = "/blackmagic-firmware"
@@ -32,7 +33,7 @@ class UpdateDownloader:
         # Aliases
         if channel_id in self.CHANNEL_ID_ALIAS:
             channel_id = self.CHANNEL_ID_ALIAS[channel_id]
-        
+
         # Make directory
         if not os.path.exists(dir):
             self.logger.info(f"Creating directory {dir}")
@@ -44,14 +45,14 @@ class UpdateDownloader:
         if response.status_code != 200:
             self.logger.error(f"Failed to download {self.UPDATE_INDEX}")
             return False
-        
+
         # Parse json index
         try:
             index = json.loads(response.content)
         except Exception as e:
             self.logger.error(f"Failed to parse json index: {e}")
             return False
-        
+
         # Find channel
         channel = None
         for channel_candidate in index["channels"]:
@@ -61,7 +62,9 @@ class UpdateDownloader:
 
         # Check if channel found
         if channel is None:
-            self.logger.error(f"Channel '{channel_id}' not found. Valid channels: {', '.join([c['id'] for c in index['channels']])}")
+            self.logger.error(
+                f"Channel '{channel_id}' not found. Valid channels: {', '.join([c['id'] for c in index['channels']])}"
+            )
             return False
 
         self.logger.info(f"Using channel '{channel_id}'")
@@ -72,7 +75,7 @@ class UpdateDownloader:
         except Exception as e:
             self.logger.error(f"Failed to get version: {e}")
             return False
-        
+
         self.logger.info(f"Using version '{version['version']}'")
 
         # Get changelog
@@ -89,18 +92,18 @@ class UpdateDownloader:
                 if line.strip() == "":
                     continue
                 self.logger.info(f"  {line}")
-        
+
         # Find file
         file_url = None
-        for file_candidate in version['files']:
-            if file_candidate['type'] == self.UPDATE_TYPE:
-                file_url = file_candidate['url']
+        for file_candidate in version["files"]:
+            if file_candidate["type"] == self.UPDATE_TYPE:
+                file_url = file_candidate["url"]
                 break
 
         if file_url is None:
             self.logger.error(f"File not found")
             return False
-        
+
         # Make file path
         file_name = file_url.split("/")[-1]
         file_path = os.path.join(dir, file_name)
@@ -115,14 +118,16 @@ class UpdateDownloader:
         self.logger.info(f"Unzipping {file_path}")
         with tarfile.open(file_path, "r") as tar:
             tar.extractall(dir)
-            
+
         return True
-        
+
 
 class Main(App):
     def init(self):
         self.parser.add_argument("-p", "--port", help="CDC Port", default="auto")
-        self.parser.add_argument("-c", "--channel", help="Channel name", default="development")
+        self.parser.add_argument(
+            "-c", "--channel", help="Channel name", default="development"
+        )
         self.parser.set_defaults(func=self.update)
 
         # logging
@@ -179,9 +184,15 @@ class Main(App):
         # get temporary dir
         dir = tempfile.TemporaryDirectory()
         downloader = UpdateDownloader()
-        
-        # download
-        downloader.download(self.args.channel, dir.name)
+
+        # download latest channel update
+        try:
+            if not downloader.download(self.args.channel, dir.name):
+                self.logger.error(f"Cannot download update")
+                return 1
+        except Exception as e:
+            self.logger.error(f"Cannot download update: {e}")
+            return 1
 
         with open(os.path.join(dir.name, "flash.command"), "r") as f:
             flash_command = f.read()
