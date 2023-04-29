@@ -118,22 +118,21 @@ bool token_info_set_algo_from_str(TokenInfo* token_info, const FuriString* str) 
 }
 
 bool token_info_set_algo_from_int(TokenInfo* token_info, uint8_t algo_code) {
-    switch (algo_code)
-    {
-        case SHA1:
-            token_info->algo = SHA1;
-            break;
-        case SHA256:
-            token_info->algo = SHA256;
-            break;
-        case SHA512:
-            token_info->algo = SHA512;
-            break;
-        case STEAM:
-            token_info->algo = STEAM;
-            break;
-        default:
-            return false;
+    switch(algo_code) {
+    case SHA1:
+        token_info->algo = SHA1;
+        break;
+    case SHA256:
+        token_info->algo = SHA256;
+        break;
+    case SHA512:
+        token_info->algo = SHA512;
+        break;
+    case STEAM:
+        token_info->algo = STEAM;
+        break;
+    default:
+        return false;
     }
 
     return true;
