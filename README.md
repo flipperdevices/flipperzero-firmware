@@ -8,7 +8,7 @@ NB. These apps are in development - and will be marked complete when ready.
 
 | Screenshot | Directory | App | Description | State |
 |---|-|-|---|-|
-| ![Screenshot of the resistance calculator in action](resistors/screenshots/2023-04-26%20resistor%20view.png) | [resistors](resistors/) | Resistance calculator | Coloured band resistance calculator. | Testing |
+| ![Screenshot of the resistance calculator in action](resistors/screenshots/2023-04-26%20resistor%20view.png) | [resistors](resistors/) | Resistance calculator | Coloured band resistance calculator. | ![Build status](https://github.com/instantiator/flipper-zero-experimental-apps/actions/workflows/build-resistors.yml/badge.svg?branch=main) |
 
 ## Build tools
 
