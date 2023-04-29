@@ -1,6 +1,6 @@
 # Resistance calculator
 
-![Build status](https://github.com/instantiator/flipper-zero-experimental-apps/actions/workflows/build.yml/badge.svg?branch=main)
+![Build status](https://github.com/instantiator/flipper-zero-experimental-apps/actions/workflows/build-resistors.yml/badge.svg?branch=main)
 
 A simple app to calculate resistance from the coloured bands. See: 
 
