@@ -799,6 +799,7 @@ bool felica_lite_dump_data(
         }
     }
     if(data->type == FelicaICTypeLiteS) {
+        lite_info->is_lite_s = true;
         const uint8_t fixed_s_blocks[] = {
             CARD_KEY_LITE_BLOCK,
             MAC_A_LITE_BLOCK,
