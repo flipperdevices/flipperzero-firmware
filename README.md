@@ -35,12 +35,6 @@ Apps are also distributed through:
 
 * [flipc.org](https://flipc.org/) (unofficial Flipper app catalogue)
 
-## TODO
-
-- [x] Complete first experiment (resistance calculator)
-- [x] List on [flipc.org](https://flipc.org/)
-- [ ] Add official [ufbt GitHub Action](https://github.com/marketplace/actions/build-flipper-application-package-fap)
-
 ## Credits
 
 * [Derek Jamison](https://github.com/jamisonderek) for the [Flipper Zero tutorials](https://github.com/jamisonderek/flipper-zero-tutorials) repository (in particular, [plugins](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/plugins))
