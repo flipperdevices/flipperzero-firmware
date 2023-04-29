@@ -19,6 +19,7 @@ typedef struct {
     bool ok_pressed;
     bool connected;
     bool is_cursor_set;
+    bool back_mouse_pressed;
     HidTransport transport;
 } HidTikTokModel;
 
@@ -40,54 +41,68 @@ static void hid_tiktok_draw_callback(Canvas* canvas, void* context) {
     canvas_set_font(canvas, FontSecondary);
 
     // Keypad circles
-    canvas_draw_icon(canvas, 76, 8, &I_Circles_47x47);
+    canvas_draw_icon(canvas, 58, 3, &I_OutCircles);
+
+    // Pause
+    if(model->back_mouse_pressed) {
+        canvas_set_bitmap_mode(canvas, 1);
+        canvas_draw_icon(canvas, 107, 33, &I_Pressed_Button_19x19);
+        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_color(canvas, ColorWhite);
+    }
+    canvas_draw_icon(canvas, 113, 37, &I_Pause_icon_9x9);
+    canvas_set_color(canvas, ColorBlack);
 
     // Up
     if(model->up_pressed) {
         canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 93, 9, &I_Pressed_Button_13x13);
+        canvas_draw_icon(canvas, 68, 6, &I_S_UP);
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 96, 11, &I_Arr_up_7x9);
+    canvas_draw_icon(canvas, 80, 8, &I_Arr_up_7x9);
     canvas_set_color(canvas, ColorBlack);
 
     // Down
     if(model->down_pressed) {
         canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 93, 41, &I_Pressed_Button_13x13);
+        canvas_draw_icon(canvas, 68, 36, &I_S_DOWN);
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 96, 44, &I_Arr_dwn_7x9);
+    canvas_draw_icon(canvas, 80, 40, &I_Arr_dwn_7x9);
     canvas_set_color(canvas, ColorBlack);
 
     // Left
     if(model->left_pressed) {
         canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 77, 25, &I_Pressed_Button_13x13);
+        canvas_draw_icon(canvas, 61, 13, &I_S_LEFT);
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 81, 29, &I_Voldwn_6x6);
+    canvas_draw_icon(canvas, 64, 25, &I_Voldwn_6x6);
     canvas_set_color(canvas, ColorBlack);
 
     // Right
     if(model->right_pressed) {
         canvas_set_bitmap_mode(canvas, 1);
-        canvas_draw_icon(canvas, 109, 25, &I_Pressed_Button_13x13);
+        canvas_draw_icon(canvas, 91, 13, &I_S_RIGHT);
         canvas_set_bitmap_mode(canvas, 0);
         canvas_set_color(canvas, ColorWhite);
     }
-    canvas_draw_icon(canvas, 111, 29, &I_Volup_8x6);
+    canvas_draw_icon(canvas, 95, 25, &I_Volup_8x6);
     canvas_set_color(canvas, ColorBlack);
 
     // Ok
     if(model->ok_pressed) {
-        canvas_draw_icon(canvas, 91, 23, &I_Like_pressed_17x17);
-    } else {
-        canvas_draw_icon(canvas, 94, 27, &I_Like_def_11x9);
+        canvas_set_bitmap_mode(canvas, 1);
+        canvas_draw_icon(canvas, 74, 19, &I_Pressed_Button_19x19);
+        canvas_set_bitmap_mode(canvas, 0);
+        canvas_set_color(canvas, ColorWhite);
     }
+    canvas_draw_icon(canvas, 78, 25, &I_Like_def_11x9);
+    canvas_set_color(canvas, ColorBlack);
+
     // Exit
     canvas_draw_icon(canvas, 0, 54, &I_Pin_back_arrow_10x8);
     canvas_set_font(canvas, FontSecondary);
@@ -102,7 +117,8 @@ static void hid_tiktok_reset_cursor(HidTikTok* hid_tiktok) {
         furi_delay_ms(50);
     }
     // Move cursor from the corner
-    hid_hal_mouse_move(hid_tiktok->hid, 20, 120);
+    hid_hal_mouse_move(hid_tiktok->hid, 40, 120);
+    hid_hal_mouse_move(hid_tiktok->hid, 0, 120);
     furi_delay_ms(50);
 }
 
@@ -120,6 +136,8 @@ static void
         hid_hal_consumer_key_press(hid_tiktok->hid, HID_CONSUMER_VOLUME_INCREMENT);
     } else if(event->key == InputKeyOk) {
         model->ok_pressed = true;
+    } else if(event->key == InputKeyBack) {
+        model->back_mouse_pressed = true;
     }
 }
 
@@ -137,6 +155,8 @@ static void
         hid_hal_consumer_key_release(hid_tiktok->hid, HID_CONSUMER_VOLUME_INCREMENT);
     } else if(event->key == InputKeyOk) {
         model->ok_pressed = false;
+    } else if(event->key == InputKeyBack) {
+        model->back_mouse_pressed = false;
     }
 }
 
@@ -162,31 +182,26 @@ static bool hid_tiktok_input_callback(InputEvent* event, void* context) {
             } else if(event->type == InputTypeShort) {
                 if(event->key == InputKeyOk) {
                     hid_hal_mouse_press(hid_tiktok->hid, HID_MOUSE_BTN_LEFT);
-                    furi_delay_ms(50);
+                    furi_delay_ms(25);
                     hid_hal_mouse_release(hid_tiktok->hid, HID_MOUSE_BTN_LEFT);
-                    furi_delay_ms(50);
+                    furi_delay_ms(100);
+                    hid_hal_mouse_press(hid_tiktok->hid, HID_MOUSE_BTN_LEFT);
+                    furi_delay_ms(25);
+                    hid_hal_mouse_release(hid_tiktok->hid, HID_MOUSE_BTN_LEFT);
+                    consumed = true;
+                } else if(event->key == InputKeyDown) {
+                    // Swipe to previous video
+                    hid_hal_mouse_scroll(hid_tiktok->hid, 19);
+                    consumed = true;
+                } else if(event->key == InputKeyUp) {
+                    // Swipe to new video
+                    hid_hal_mouse_scroll(hid_tiktok->hid, -19);
+                    consumed = true;
+                } else if(event->key == InputKeyBack) {
+                    // Pause
                     hid_hal_mouse_press(hid_tiktok->hid, HID_MOUSE_BTN_LEFT);
                     furi_delay_ms(50);
                     hid_hal_mouse_release(hid_tiktok->hid, HID_MOUSE_BTN_LEFT);
-                    consumed = true;
-                } else if(event->key == InputKeyUp) {
-                    // Emulate up swipe
-                    hid_hal_mouse_scroll(hid_tiktok->hid, -6);
-                    hid_hal_mouse_scroll(hid_tiktok->hid, -12);
-                    hid_hal_mouse_scroll(hid_tiktok->hid, -19);
-                    hid_hal_mouse_scroll(hid_tiktok->hid, -12);
-                    hid_hal_mouse_scroll(hid_tiktok->hid, -6);
-                    consumed = true;
-                } else if(event->key == InputKeyDown) {
-                    // Emulate down swipe
-                    hid_hal_mouse_scroll(hid_tiktok->hid, 6);
-                    hid_hal_mouse_scroll(hid_tiktok->hid, 12);
-                    hid_hal_mouse_scroll(hid_tiktok->hid, 19);
-                    hid_hal_mouse_scroll(hid_tiktok->hid, 12);
-                    hid_hal_mouse_scroll(hid_tiktok->hid, 6);
-                    consumed = true;
-                } else if(event->key == InputKeyBack) {
-                    hid_hal_consumer_key_release_all(hid_tiktok->hid);
                     consumed = true;
                 }
             } else if(event->type == InputTypeLong) {
