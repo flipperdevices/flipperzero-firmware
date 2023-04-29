@@ -4,6 +4,8 @@ on:
     branches:
       - main
   pull_request:
+    branches:
+      - '**'
 jobs:
   ufbt-build-action:
     runs-on: ubuntu-latest
