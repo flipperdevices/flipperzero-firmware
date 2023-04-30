@@ -66,17 +66,29 @@ void resistors_edit_view_redraw_widget(App* app) {
     }
 
     // render calculation
-    char calculation[CALCULATION_LEN];
+    char calculation[CHARS_CALCULATION + 1];
     update_resistance_calculation(
         app->state->resistor_type, app->state->resistor_bands, calculation);
     widget_add_string_element(
         app->widget, values_left, rows_tops[0], AlignLeft, AlignTop, FontSecondary, calculation);
 
-    // TODO: update_tolerance
+    // update_tolerance
+    if(has_tolerance(app->state->resistor_type)) {
+        char tolerance[CHARS_TOLERANCE + 1];
+        update_resistance_tolerance(
+            app->state->resistor_type, app->state->resistor_bands, tolerance);
+        widget_add_string_element(
+            app->widget, values_left, rows_tops[1], AlignLeft, AlignTop, FontSecondary, tolerance);
+    }
 
-    // TODO: update_temp_coefficient
-
-    // widget_add_button_element(app->widget, GuiButtonTypeCenter, buttonText, callback, app);
+    // update_temp_coeff
+    if(has_temp_coeff(app->state->resistor_type)) {
+        char temp_coeff[CHARS_TEMP_COEFF + 1];
+        update_resistance_temp_coeff(
+            app->state->resistor_type, app->state->resistor_bands, temp_coeff);
+        widget_add_string_element(
+            app->widget, values_left, rows_tops[2], AlignLeft, AlignTop, FontSecondary, temp_coeff);
+    }
 }
 
 /** main menu events */
@@ -112,7 +124,6 @@ static bool widget_input_callback(InputEvent* input_event, void* context) {
                 app->state->edit_selection,
                 app->state->resistor_bands[app->state->edit_selection],
                 -1);
-            consumed = true;
             consumed = true;
             break;
         default:
