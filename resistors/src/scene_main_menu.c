@@ -9,13 +9,21 @@
 void resistors_menu_callback(void* context, uint32_t index) {
     App* app = context;
     switch(index) {
-    case ResistorsMainMenuScene4BarResistor:
+    case ResistorsMainMenuSelectionR3:
         scene_manager_handle_custom_event(
-            app->scene_manager, ResistorsMainMenuScene4BarSelectionEvent);
+            app->scene_manager, ResistorsMainMenuSceneSelectionEventR3);
         break;
-    case ResistorsMainMenuScene5BarResistor:
+    case ResistorsMainMenuSelectionR4:
         scene_manager_handle_custom_event(
-            app->scene_manager, ResistorsMainMenuScene5BarSelectionEvent);
+            app->scene_manager, ResistorsMainMenuSceneSelectionEventR4);
+        break;
+    case ResistorsMainMenuSelectionR5:
+        scene_manager_handle_custom_event(
+            app->scene_manager, ResistorsMainMenuSceneSelectionEventR5);
+        break;
+    case ResistorsMainMenuSelectionR6:
+        scene_manager_handle_custom_event(
+            app->scene_manager, ResistorsMainMenuSceneSelectionEventR6);
         break;
     }
 }
@@ -26,17 +34,13 @@ void resistors_main_menu_scene_on_enter(void* context) {
     submenu_reset(app->submenu);
     submenu_set_header(app->submenu, "Resistors");
     submenu_add_item(
-        app->submenu,
-        "4-bar resistor",
-        ResistorsMainMenuScene4BarResistor,
-        resistors_menu_callback,
-        app);
+        app->submenu, "3-bar resistor", ResistorsMainMenuSelectionR3, resistors_menu_callback, app);
     submenu_add_item(
-        app->submenu,
-        "5-bar resistor",
-        ResistorsMainMenuScene5BarResistor,
-        resistors_menu_callback,
-        app);
+        app->submenu, "4-bar resistor", ResistorsMainMenuSelectionR4, resistors_menu_callback, app);
+    submenu_add_item(
+        app->submenu, "5-bar resistor", ResistorsMainMenuSelectionR5, resistors_menu_callback, app);
+    submenu_add_item(
+        app->submenu, "6-bar resistor", ResistorsMainMenuSelectionR6, resistors_menu_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, ResistorsSubmenuView);
 }
 
@@ -47,19 +51,30 @@ bool resistors_main_menu_scene_on_event(void* context, SceneManagerEvent event) 
     switch(event.type) {
     case SceneManagerEventTypeCustom:
         switch(event.event) {
-        case ResistorsMainMenuScene4BarSelectionEvent:
-            app_init_resistor(app, Resistor4Band);
+        case ResistorsMainMenuSceneSelectionEventR3:
+            app_init_resistor(app, R3);
             scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
             consumed = true;
             break;
-        case ResistorsMainMenuScene5BarSelectionEvent:
-            app_init_resistor(app, Resistor5Band);
+        case ResistorsMainMenuSceneSelectionEventR4:
+            app_init_resistor(app, R4);
+            scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
+            consumed = true;
+            break;
+        case ResistorsMainMenuSceneSelectionEventR5:
+            app_init_resistor(app, R5);
+            scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
+            consumed = true;
+            break;
+        case ResistorsMainMenuSceneSelectionEventR6:
+            app_init_resistor(app, R6);
             scene_manager_next_scene(app->scene_manager, ResistorsEditScene);
             consumed = true;
             break;
         }
         break;
-    default:
+    default: // eg. SceneManagerEventTypeBack, SceneManagerEventTypeTick
+        consumed = false;
         break;
     }
     return consumed;

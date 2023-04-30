@@ -7,7 +7,7 @@
 typedef struct AppState {
     uint8_t edit_selection;
     ResistorType resistor_type;
-    BandColour resistor_bands[5];
+    BandColour resistor_bands[6];
 } AppState;
 
 typedef struct App {

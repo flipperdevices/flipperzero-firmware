@@ -1,7 +1,7 @@
 #ifndef RESISTOR_LOGIC_HEADERS
 #define RESISTOR_LOGIC_HEADERS
 
-typedef enum { Resistor4Band = 4, Resistor5Band = 5 } ResistorType;
+typedef enum { R3 = 3, R4 = 4, R5 = 5, R6 = 6 } ResistorType;
 
 typedef enum {
     BandBlack = 0,
@@ -18,13 +18,22 @@ typedef enum {
     BandSilver = 11
 } BandColour;
 
-extern const char blank_descriptor_R4[];
-extern const char blank_descriptor_R5[];
-
-void update_resistor_descriptor(ResistorType bands, BandColour resistor_bands[], char descriptor[]);
-void update_calculation(ResistorType rtype, BandColour bands[], char string[]);
+extern const int CHARS_NUMERIC;
+extern const int CHARS_MULTIPLIER;
+extern const int CHARS_TOLERANCE;
+extern const int CHARS_TEMP_COEFF;
+extern const int CHARS_CALCULATION;
 
 BandColour
     alter_resistor_band(ResistorType rtype, int band, BandColour current_colour, int direction);
+
+char* get_colour_short_description(BandColour colour);
+
+bool has_tolerance(ResistorType rtype);
+bool has_temp_coeff(ResistorType rtype);
+
+void update_resistance_calculation(ResistorType rtype, BandColour bands[], char string[]);
+void update_resistance_tolerance(ResistorType rtype, BandColour colours[], char string[]);
+void update_resistance_temp_coeff(ResistorType rtype, BandColour colours[], char string[]);
 
 #endif
