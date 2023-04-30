@@ -66,3 +66,6 @@ This is a two player game that uses the subghz_tx_rx worker library for communic
 [tutorial](./marauder/README.md) - This is a tutorial on how to use the Marauder tool to attack 2.4GHz devices.
 
 [tool](./marauder/secret_ssid/README.md) - This is a tool that can be used to send a secret message over WiFi.  The message is encoded into a SSID, which is then sent out over WiFi.  The message can be decoded on a PC.
+
+## Support
+[Buy me a coffee](https://ko-fi.com/codeallnight) - Thanks for supporting my work.
