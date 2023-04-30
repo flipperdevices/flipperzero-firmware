@@ -19,15 +19,45 @@ const int RESISTOR_TOLERANCE_POSITION = 14;
 const char blank_calculation[24] = "                   ";
 
 bool is_numeric_band(ResistorType rtype, int index) {
-    return index < (rtype - 2);
+    if(rtype < 5) {
+        return index <= 2;
+    } else {
+        return index <= 3;
+    }
 }
 
 bool is_multiplier_band(ResistorType rtype, int index) {
-    return index == (rtype - 2);
+    switch(rtype) {
+    case R3:
+        return index == 2;
+    case R4:
+        return index == 2;
+    case R5:
+        return index == 3;
+    case R6:
+        return index == 3;
+    default:
+        return false;
+    }
 }
 
 bool is_tolerance_band(ResistorType rtype, int index) {
-    return index == (rtype - 1);
+    switch(rtype) {
+    case R3:
+        return false;
+    case R4:
+        return index == 3;
+    case R5:
+        return index == 4;
+    case R6:
+        return index == 4;
+    default:
+        return false;
+    }
+}
+
+bool is_temp_coefficient_band(ResistorType rtype, int index) {
+    return rtype == R6 && index == 5;
 }
 
 bool is_numeric_colour(BandColour colour) {
@@ -139,13 +169,13 @@ void update_calculation(ResistorType rtype, BandColour bands[], char string[]) {
     update_resistance_tolerance(bands[rtype - 1], string, RESISTOR_TOLERANCE_POSITION);
 }
 
-void update_resistor_descriptor(ResistorType bands, BandColour resistor_bands[], char descriptor[]) {
-    if(bands == Resistor4Band) strcpy(descriptor, blank_descriptor_R4);
-    if(bands == Resistor5Band) strcpy(descriptor, blank_descriptor_R5);
+void update_resistor_descriptor(ResistorType rtype, BandColour resistor_bands[], char descriptor[]) {
+    if(rtype == R4) strcpy(descriptor, blank_descriptor_R4);
+    if(rtype == R5) strcpy(descriptor, blank_descriptor_R5);
 
-    for(int i = 0; i < bands; i++) {
+    for(int i = 0; i < rtype; i++) {
         int c = i * 3;
-        bool last_band = i == bands - 1;
+        bool last_band = i == rtype - 1;
         if(last_band) {
             descriptor[c] = '-';
             c += 2;

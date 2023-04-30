@@ -5,14 +5,18 @@
 
 /** main menu options enum */
 typedef enum {
-    ResistorsMainMenuScene4BarResistor,
-    ResistorsMainMenuScene5BarResistor,
+    ResistorsMainMenuSelectionR3,
+    ResistorsMainMenuSelectionR4,
+    ResistorsMainMenuSelectionR5,
+    ResistorsMainMenuSelectionR6,
 } ResistorsMainMenuSceneIndex;
 
 /** main menu events */
 typedef enum {
-    ResistorsMainMenuScene4BarSelectionEvent,
-    ResistorsMainMenuScene5BarSelectionEvent,
+    ResistorsMainMenuSceneSelectionEventR3,
+    ResistorsMainMenuSceneSelectionEventR4,
+    ResistorsMainMenuSceneSelectionEventR5,
+    ResistorsMainMenuSceneSelectionEventR6,
 } ResistorsMainMenuEvent;
 
 void resistors_main_menu_scene_on_enter(void* context);

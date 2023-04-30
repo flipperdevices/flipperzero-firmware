@@ -33,13 +33,13 @@ void app_init_resistor(App* app, ResistorType rtype) {
     app->state->resistor_type = rtype;
     app->state->edit_selection = 0;
     switch(rtype) {
-    case Resistor4Band:
+    case R4:
         app->state->resistor_bands[0] = BandRed;
         app->state->resistor_bands[1] = BandOrange;
         app->state->resistor_bands[2] = BandYellow;
         app->state->resistor_bands[3] = BandGreen;
         break;
-    case Resistor5Band:
+    case R5:
         app->state->resistor_bands[0] = BandRed;
         app->state->resistor_bands[1] = BandOrange;
         app->state->resistor_bands[2] = BandYellow;
