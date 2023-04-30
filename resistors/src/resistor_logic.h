@@ -18,13 +18,13 @@ typedef enum {
     BandSilver = 11
 } BandColour;
 
-extern const char blank_descriptor_R4[];
-extern const char blank_descriptor_R5[];
-
-void update_resistor_descriptor(ResistorType bands, BandColour resistor_bands[], char descriptor[]);
-void update_calculation(ResistorType rtype, BandColour bands[], char string[]);
+extern const int CALCULATION_LEN;
 
 BandColour
     alter_resistor_band(ResistorType rtype, int band, BandColour current_colour, int direction);
+
+void update_resistance_calculation(ResistorType rtype, BandColour bands[], char string[]);
+
+char* get_colour_short_description(BandColour colour);
 
 #endif

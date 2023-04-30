@@ -3,20 +3,17 @@
 #include "resistor_logic.h"
 #include <math.h>
 
-// Xx_Xx_Xx_Xx_-_Xx\0 = 17 characters
-const char blank_descriptor_R4[14] = "             ";
-const char blank_descriptor_R5[17] = "                ";
+const int CHARS_NUMERIC = 3;
+const int CHARS_MULTIPLIER = 7;
+const int CHARS_TOLERANCE = 7;
 
-const int RESISTOR_NUMERIC_CHARS = 3;
-const int RESISTOR_MULTIPLIER_UNIT_CHARS = 7;
-const int RESISTOR_TOLERANCE_CHARS = 7;
+const int INDEX_NUMERIC = 0;
+const int INDEX_MULTIPLIER = 4;
+const int INDEX_TOLERANCE = 0;
 
-const int RESISTOR_NUMERIC_POSITION = 0;
-const int RESISTOR_MULTIPLIER_UNIT_POSITION = 4;
-const int RESISTOR_TOLERANCE_POSITION = 14;
-
-//                                 "nnn x 10^nn @ nnnn%";
-const char blank_calculation[24] = "                   ";
+const int CALCULATION_LEN = 12;
+const char BLANK_CALCULATION[] = "           ";
+//                               "nnn x 10^nn";
 
 bool is_numeric_band(ResistorType rtype, int index) {
     if(rtype < 5) {
@@ -64,7 +61,8 @@ bool is_numeric_colour(BandColour colour) {
     return colour <= 9;
 }
 
-bool is_multiplier_colour() {
+bool is_multiplier_colour(BandColour colour) {
+    UNUSED(colour);
     return true;
 }
 
@@ -84,7 +82,7 @@ BandColour
         if(colour < 0) colour = 12;
         if(is_numeric_band(rtype, band) && is_numeric_colour(colour)) accepted = true;
         if(is_tolerance_band(rtype, band) && is_tolerance_colour(colour)) accepted = true;
-        if(is_multiplier_band(rtype, band) && is_multiplier_colour()) accepted = true;
+        if(is_multiplier_band(rtype, band) && is_multiplier_colour(colour)) accepted = true;
     }
     return colour;
 }
@@ -107,128 +105,80 @@ void update_resistance_number(ResistorType rtype, BandColour colours[], char str
     free(str);
 }
 
-void update_resistance_multiplier_unit(BandColour colour, char string[], int index) {
-    char unit[] = "x 10^  ";
+char* decode_resistance_multiplier(BandColour colour) {
+    static char unit[] = "x 10^  ";
     if(colour > 9) {
         unit[5] = '-';
         unit[6] = (char)(48 + colour - 9);
     } else {
         unit[5] = (char)(48 + colour);
-        unit[6] = ' ';
+        unit[6] = '\0';
     }
-    char* target = string + index;
-    strncpy(target, unit, RESISTOR_MULTIPLIER_UNIT_CHARS);
+    return unit;
 }
 
-void update_resistance_tolerance(BandColour colour, char string[], int index) {
+void update_resistance_multiplier(BandColour colour, char string[], int index) {
+    char* unit = decode_resistance_multiplier(colour);
     char* target = string + index;
+    strncpy(target, unit, CHARS_MULTIPLIER);
+}
+
+char* decode_resistance_tolerance(BandColour colour) {
     switch(colour) {
     case BandBrown:;
-        char tolerance_brown[8] = "@ 1%   ";
-        strncpy(target, tolerance_brown, RESISTOR_TOLERANCE_CHARS);
-        break;
+        return "1%";
     case BandRed:;
-        char tolerance_red[8] = "@ 2%   ";
-        strncpy(target, tolerance_red, RESISTOR_TOLERANCE_CHARS);
-        break;
+        return "2%";
     case BandGreen:;
-        char tolerance_green[8] = "@ 0.5% ";
-        strncpy(target, tolerance_green, RESISTOR_TOLERANCE_CHARS);
-        break;
+        return "0.5%";
     case BandBlue:;
-        char tolerance_blue[8] = "@ 0.25%";
-        strncpy(target, tolerance_blue, RESISTOR_TOLERANCE_CHARS);
-        break;
+        return "0.25%";
     case BandPurple:;
-        char tolerance_purple[8] = "@ 0.1% ";
-        strncpy(target, tolerance_purple, RESISTOR_TOLERANCE_CHARS);
-        break;
+        return "0.1%";
     case BandGray:;
-        char tolerance_gray[8] = "@ 0.05%";
-        strncpy(target, tolerance_gray, RESISTOR_TOLERANCE_CHARS);
-        break;
+        return "0.05%";
     case BandGold:;
-        char tolerance_gold[8] = "@ 5%   ";
-        strncpy(target, tolerance_gold, RESISTOR_TOLERANCE_CHARS);
-        break;
+        return "5%";
     case BandSilver:;
-        char tolerance_silver[8] = "@ 10%  ";
-        strncpy(target, tolerance_silver, RESISTOR_TOLERANCE_CHARS);
-        break;
+        return "10%";
     default:;
-        char tolerance_nk[8] = "@ ????%";
-        strncpy(target, tolerance_nk, RESISTOR_TOLERANCE_CHARS);
-        break;
+        return "--";
     }
 }
 
-void update_calculation(ResistorType rtype, BandColour bands[], char string[]) {
-    strcpy(string, blank_calculation);
-    update_resistance_number(rtype, bands, string, RESISTOR_NUMERIC_POSITION);
-    update_resistance_multiplier_unit(bands[rtype - 2], string, RESISTOR_MULTIPLIER_UNIT_POSITION);
-    update_resistance_tolerance(bands[rtype - 1], string, RESISTOR_TOLERANCE_POSITION);
+void update_resistance_calculation(ResistorType rtype, BandColour bands[], char* string) {
+    strcpy(string, BLANK_CALCULATION);
+    update_resistance_number(rtype, bands, string, INDEX_NUMERIC);
+    update_resistance_multiplier(bands[rtype - 2], string, INDEX_MULTIPLIER);
 }
 
-void update_resistor_descriptor(ResistorType rtype, BandColour resistor_bands[], char descriptor[]) {
-    if(rtype == R4) strcpy(descriptor, blank_descriptor_R4);
-    if(rtype == R5) strcpy(descriptor, blank_descriptor_R5);
-
-    for(int i = 0; i < rtype; i++) {
-        int c = i * 3;
-        bool last_band = i == rtype - 1;
-        if(last_band) {
-            descriptor[c] = '-';
-            c += 2;
-        }
-        switch(resistor_bands[i]) {
-        case BandBlack:
-            descriptor[c] = 'B';
-            descriptor[c + 1] = 'k';
-            break;
-        case BandBrown:
-            descriptor[c] = 'B';
-            descriptor[c + 1] = 'r';
-            break;
-        case BandRed:
-            descriptor[c] = 'R';
-            descriptor[c + 1] = 'e';
-            break;
-        case BandOrange:
-            descriptor[c] = 'O';
-            descriptor[c + 1] = 'r';
-            break;
-        case BandYellow:
-            descriptor[c] = 'Y';
-            descriptor[c + 1] = 'e';
-            break;
-        case BandGreen:
-            descriptor[c] = 'G';
-            descriptor[c + 1] = 'r';
-            break;
-        case BandBlue:
-            descriptor[c] = 'B';
-            descriptor[c + 1] = 'l';
-            break;
-        case BandPurple:
-            descriptor[c] = 'P';
-            descriptor[c + 1] = 'u';
-            break;
-        case BandGray:
-            descriptor[c] = 'G';
-            descriptor[c + 1] = 'y';
-            break;
-        case BandWhite:
-            descriptor[c] = 'W';
-            descriptor[c + 1] = 'h';
-            break;
-        case BandGold:
-            descriptor[c] = 'G';
-            descriptor[c + 1] = 'o';
-            break;
-        case BandSilver:
-            descriptor[c] = 'S';
-            descriptor[c + 1] = 'i';
-            break;
-        }
-    } // i
+char* get_colour_short_description(BandColour colour) {
+    switch(colour) {
+    case BandBlack:
+        return "Bk";
+    case BandBrown:
+        return "Br";
+    case BandRed:
+        return "Re";
+    case BandOrange:
+        return "Or";
+    case BandYellow:
+        return "Ye";
+    case BandGreen:
+        return "Gr";
+    case BandBlue:
+        return "Bl";
+    case BandPurple:
+        return "Pu";
+    case BandGray:
+        return "Gy";
+    case BandWhite:
+        return "Wh";
+    case BandGold:
+        return "Go";
+    case BandSilver:
+        return "Si";
+    default:
+        return "--";
+    }
 }
