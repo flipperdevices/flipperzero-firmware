@@ -408,13 +408,14 @@ int32_t bomberduck_app(void* p) {
             }
             for (int i = 0; i < world.bombs_count; i++)
             {
-                if(furi_get_tick() - world.bombs[i].planted > (unsigned long)min((3000 - world.level*150), 1000)){
+                if(furi_get_tick() - world.bombs[i].planted > (unsigned long)max((3000 - world.level*150), 1000)){
                     world.matrix[world.bombs[i].y][world.bombs[i].x] = 6;
 
                     for(int j = max(0, world.bombs[i].y-BombRange); j < min(WorldSizeY, world.bombs[i].y+BombRange+1); j++){
                         if(world.matrix[j][world.bombs[i].x]!=2){
                             world.matrix[j][world.bombs[i].x] = 6;
-                            if (j==world.player->y && world.bombs[i].x == world.player->x){
+                            if (j==world.player-
+                            >y && world.bombs[i].x == world.player->x){
                                 notification_message(notification, &end);
                                 world.running=0;
                             }
@@ -486,7 +487,7 @@ int32_t bomberduck_app(void* p) {
             for (int e = 0; e < world.enemies_count; e++)
             {
                 if(world.enemies[e].level>0){
-                    if (furi_get_tick() - world.enemies[e].last > (unsigned long)min((2000 - world.level*100), 1000)){
+                    if (furi_get_tick() - world.enemies[e].last > (unsigned long)max((2000 - world.level*100), 1000)){
                         world.enemies[e].last = furi_get_tick();
                         int move = rand()%4;
                         switch (move)
@@ -513,7 +514,7 @@ int32_t bomberduck_app(void* p) {
                         }
                     }                  
                 } else {
-                    if (furi_get_tick() - world.enemies[e].last > (unsigned long)min((1000 - world.level*50), 500)){
+                    if (furi_get_tick() - world.enemies[e].last > (unsigned long)max((1000 - world.level*50), 500)){
                         world.enemies[e].last = furi_get_tick();
                         int move = rand()%4;
                         switch (move)
