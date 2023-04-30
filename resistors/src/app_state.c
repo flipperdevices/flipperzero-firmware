@@ -33,6 +33,11 @@ void app_init_resistor(App* app, ResistorType rtype) {
     app->state->resistor_type = rtype;
     app->state->edit_selection = 0;
     switch(rtype) {
+    case R3:
+        app->state->resistor_bands[0] = BandRed;
+        app->state->resistor_bands[1] = BandOrange;
+        app->state->resistor_bands[2] = BandYellow;
+        break;
     case R4:
         app->state->resistor_bands[0] = BandRed;
         app->state->resistor_bands[1] = BandOrange;
@@ -45,6 +50,14 @@ void app_init_resistor(App* app, ResistorType rtype) {
         app->state->resistor_bands[2] = BandYellow;
         app->state->resistor_bands[3] = BandGreen;
         app->state->resistor_bands[4] = BandBlue;
+        break;
+    case R6:
+        app->state->resistor_bands[0] = BandRed;
+        app->state->resistor_bands[1] = BandOrange;
+        app->state->resistor_bands[2] = BandYellow;
+        app->state->resistor_bands[3] = BandGreen;
+        app->state->resistor_bands[4] = BandBlue;
+        app->state->resistor_bands[5] = BandPurple;
         break;
     default:
         FURI_LOG_E(TAG, "Unknown resistor type in app_init_resistor");
