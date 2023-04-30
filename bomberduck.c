@@ -314,7 +314,7 @@ static void draw_callback(Canvas* canvas, void* ctx) {
             canvas_draw_str(canvas, 90, 35, str);
 
         } else {
-            canvas_draw_str(canvas, 30, 35, "Game over!");
+            canvas_draw_str(canvas, 30, 35, "You died :(");
         }
     }
     
@@ -414,8 +414,7 @@ int32_t bomberduck_app(void* p) {
                     for(int j = max(0, world.bombs[i].y-BombRange); j < min(WorldSizeY, world.bombs[i].y+BombRange+1); j++){
                         if(world.matrix[j][world.bombs[i].x]!=2){
                             world.matrix[j][world.bombs[i].x] = 6;
-                            if (j==world.player-
-                            >y && world.bombs[i].x == world.player->x){
+                            if (j==world.player->y && world.bombs[i].x == world.player->x){
                                 notification_message(notification, &end);
                                 world.running=0;
                             }
