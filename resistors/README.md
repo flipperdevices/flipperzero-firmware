@@ -6,8 +6,9 @@ A simple app to calculate resistance from the coloured bands. See:
 
 * [video](https://github.com/instantiator/flipper-zero-experimental-apps/blob/main/resistors/v1.1/resistors-app-v1.1-video.mov?raw=true)
 
-* Pick from 4 or 5 band resistor.
+* Pick from 3, 4, 5, or 6 band resistor.
 * Left and right to move the current focus, up and down to adjust the coloured bands.
+* Resistance, tolerance, and temperature coefficient are updated instantly.
 
 ![Screenshot of the resistance calculator in action](screenshots/v1.1/4-bar.png)
 
