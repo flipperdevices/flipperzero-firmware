@@ -1,6 +1,6 @@
 App(
     appid="bomberduck",
-    name="bomberduck",
+    name="Bomberduck",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bomberduck_app",
     cdefines=["BOMBERDUCK"],
