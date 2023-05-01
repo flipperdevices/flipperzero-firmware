@@ -13,7 +13,7 @@ App(
     order=20,
     sources=[
       "seader.c",
-      "aeabi_uldivmod.S", "bsearch.c",
+      "bsearch.c", "aeabi_uldivmod.sx",
       "ccid.c", "uart.c",
       "rfal_picopass.c", "scenes/*.c",
       "seader_worker.c",
