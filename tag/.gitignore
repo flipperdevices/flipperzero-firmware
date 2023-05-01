@@ -2,4 +2,3 @@ dist/*
 .vscode
 .clang-format
 .editorconfig
-.DS_Store
