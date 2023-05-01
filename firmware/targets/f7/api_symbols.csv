@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,23.0,,
+Version,+,23.1,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -744,6 +744,7 @@ Function,-,digital_sequence_free,void,DigitalSequence*
 Function,-,digital_sequence_send,_Bool,DigitalSequence*
 Function,-,digital_sequence_set_sendtime,void,"DigitalSequence*, uint32_t"
 Function,-,digital_sequence_set_signal,void,"DigitalSequence*, uint8_t, DigitalSignal*"
+Function,-,digital_sequence_timebase_correction,void,"DigitalSequence*, float"
 Function,-,digital_signal_add,void,"DigitalSignal*, uint32_t"
 Function,-,digital_signal_add_pulse,void,"DigitalSignal*, uint32_t, _Bool"
 Function,-,digital_signal_alloc,DigitalSignal*,uint32_t
