@@ -27,6 +27,8 @@
 #include "helpers/mf_ultralight_auth.h"
 
 #include <dialogs/dialogs.h>
+#include <storage/storage.h>
+#include <toolbox/path.h>
 
 #include "rpc/rpc_app.h"
 
@@ -44,6 +46,7 @@
 
 #define NFC_TEXT_STORE_SIZE 128
 #define NFC_APP_FOLDER ANY_PATH("nfc")
+#define NFC_APP_EXTENSION ".nfc"
 
 typedef enum {
     NfcRpcStateIdle,
@@ -52,8 +55,10 @@ typedef enum {
 } NfcRpcState;
 
 struct NfcApp {
-    ViewDispatcher* view_dispatcher;
+    DialogsApp* dialogs;
+    Storage* storage;
     Gui* gui;
+    ViewDispatcher* view_dispatcher;
     NotificationApp* notifications;
     SceneManager* scene_manager;
 
@@ -86,6 +91,8 @@ struct NfcApp {
 
     NfcDev* nfc_dev;
     NfcDevData nfc_dev_data;
+    FuriString* file_path;
+    FuriString* file_name;
 };
 
 typedef enum {
@@ -115,6 +122,16 @@ void nfc_blink_detect_start(NfcApp* nfc);
 
 void nfc_blink_stop(NfcApp* nfc);
 
-bool nfc_save_file(NfcApp* nfc);
-
 void nfc_show_loading_popup(void* context, bool show);
+
+bool nfc_save(NfcApp* instance);
+
+bool nfc_delete(NfcApp* instance);
+
+bool nfc_load_from_file_select(NfcApp* instance);
+
+bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog);
+
+bool nfc_save_file(NfcApp* instance, FuriString* path);
+
+void nfc_make_app_folder(NfcApp* instance);

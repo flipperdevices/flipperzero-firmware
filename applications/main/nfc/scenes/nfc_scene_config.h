@@ -1,4 +1,5 @@
 ADD_SCENE(nfc, start, Start)
+ADD_SCENE(nfc, file_select, FileSelect)
 ADD_SCENE(nfc, read, Read)
 ADD_SCENE(nfc, read_card_type, ReadCardType)
 ADD_SCENE(nfc, nfca_read, NfcaRead)

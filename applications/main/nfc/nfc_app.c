@@ -70,6 +70,12 @@ NfcApp* nfc_app_alloc() {
     // Open Notification record
     instance->notifications = furi_record_open(RECORD_NOTIFICATION);
 
+    // Open Storage record
+    instance->storage = furi_record_open(RECORD_STORAGE);
+
+    // Open Dialogs record
+    instance->dialogs = furi_record_open(RECORD_DIALOGS);
+
     // Submenu
     instance->submenu = submenu_alloc();
     view_dispatcher_add_view(
@@ -110,6 +116,9 @@ NfcApp* nfc_app_alloc() {
     instance->widget = widget_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
+    
+    instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
+    instance->file_name = furi_string_alloc();
 
     return instance;
 }
@@ -186,13 +195,17 @@ void nfc_app_free(NfcApp* instance) {
     // Scene Manager
     scene_manager_free(instance->scene_manager);
 
+    furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_STORAGE);
+    furi_record_close(RECORD_NOTIFICATION);
     // GUI
     furi_record_close(RECORD_GUI);
     instance->gui = NULL;
 
-    // Notifications
-    furi_record_close(RECORD_NOTIFICATION);
     instance->notifications = NULL;
+
+    furi_string_free(instance->file_path);
+    furi_string_free(instance->file_name);
 
     free(instance);
 }
@@ -226,9 +239,88 @@ void nfc_blink_stop(NfcApp* nfc) {
     notification_message(nfc->notifications, &sequence_blink_stop);
 }
 
-bool nfc_save_file(NfcApp* nfc) {
-    furi_assert(nfc);
-    return true;
+void nfc_make_app_folder(NfcApp* instance) {
+    furi_assert(instance);
+
+    if(!storage_simply_mkdir(instance->storage, NFC_APP_FOLDER)) {
+        dialog_message_show_storage_error(instance->dialogs, "Cannot create\napp folder");
+    }
+}
+
+bool nfc_save_file(NfcApp* instance, FuriString* path) {
+    furi_assert(instance);
+    furi_assert(path);
+
+    bool result = nfc_dev_save(
+        instance->nfc_dev, &instance->nfc_dev_data, furi_string_get_cstr(instance->file_path));
+
+    if(!result) {
+        dialog_message_show_storage_error(instance->dialogs, "Cannot save\nkey file");
+    }
+
+    return result;
+}
+
+bool nfc_save(NfcApp* instance) {
+    furi_assert(instance);
+
+    bool result = false;
+
+    nfc_make_app_folder(instance);
+
+    if(furi_string_end_with(instance->file_path, NFC_APP_EXTENSION)) {
+        size_t filename_start = furi_string_search_rchar(instance->file_path, '/');
+        furi_string_left(instance->file_path, filename_start);
+    }
+
+    furi_string_cat_printf(
+        instance->file_path, "/%s%s", furi_string_get_cstr(instance->file_name), NFC_APP_EXTENSION);
+
+    result = nfc_save_file(instance, instance->file_path);
+    return result;
+}
+
+bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
+    furi_assert(instance);
+    furi_assert(path);
+    bool result = false;
+
+    result = nfc_dev_load(instance->nfc_dev, &instance->nfc_dev_data, furi_string_get_cstr(path));
+    if(result) {
+        path_extract_filename(path, instance->file_name, true);
+    }
+
+    if((!result) && (show_dialog)) {
+        dialog_message_show_storage_error(instance->dialogs, "Cannot load\nkey file");
+    }
+
+    return result;
+}
+
+bool nfc_delete(NfcApp* instance) {
+    furi_assert(instance);
+
+    return storage_simply_remove(instance->storage, furi_string_get_cstr(instance->file_path));
+}
+
+bool nfc_load_from_file_select(NfcApp* instance) {
+    furi_assert(instance);
+
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(&browser_options, NFC_APP_EXTENSION, &I_Nfc_10px);
+    browser_options.base_path = NFC_APP_FOLDER;
+    browser_options.hide_dot_files = true;
+
+
+    // Input events and views are managed by file_browser
+    bool result = dialog_file_browser_show(
+        instance->dialogs, instance->file_path, instance->file_path, &browser_options);
+
+    if(result) {
+        result = nfc_load_file(instance, instance->file_path, true);
+    }
+
+    return result;
 }
 
 void nfc_show_loading_popup(void* context, bool show) {

@@ -3,14 +3,7 @@
 #include <storage/storage.h>
 
 struct NfcDev {
-    Storage* storage;
-    // DialogsApp* dialogs;
-    // NfcDeviceData dev_data;
-    // char dev_name[NFC_DEV_NAME_MAX_LEN + 1];
-    // FuriString* load_path;
-    // FuriString* folder;
-    // NfcDeviceSaveFormat format;
-    // bool shadow_file_exist;
+    bool shadow_file_exist;
 
     // NfcLoadingCallback loading_cb;
     // void* loading_cb_ctx;
