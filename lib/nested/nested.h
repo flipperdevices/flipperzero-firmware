@@ -62,7 +62,7 @@ struct nonce_info nested_attack(
     uint32_t distance,
     uint32_t delay);
 
-struct nonce_info_hard hard_nested_collect_nonces(
+struct nonce_info_hard nested_hard_nonce_attack(
     FuriHalNfcTxRxContext* tx_rx,
     uint8_t blockNo,
     uint8_t keyType,
@@ -70,6 +70,7 @@ struct nonce_info_hard hard_nested_collect_nonces(
     uint8_t targetKeyType,
     uint64_t ui64Key,
     uint32_t* found,
+    uint32_t* first_byte_sum,
     Stream* file_stream);
 
 uint32_t nested_calibrate_distance(

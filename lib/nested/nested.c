@@ -545,7 +545,7 @@ struct nonce_info nested_attack(
     return r;
 }
 
-struct nonce_info_hard hard_nested_collect_nonces(
+struct nonce_info_hard nested_hard_nonce_attack(
     FuriHalNfcTxRxContext* tx_rx,
     uint8_t blockNo,
     uint8_t keyType,
@@ -553,6 +553,7 @@ struct nonce_info_hard hard_nested_collect_nonces(
     uint8_t targetKeyType,
     uint64_t ui64Key,
     uint32_t* found,
+    uint32_t* first_byte_sum,
     Stream* file_stream) {
     uint32_t cuid = 0;
     uint8_t same = 0;
@@ -585,11 +586,6 @@ struct nonce_info_hard hard_nested_collect_nonces(
                 (oddparity8(tx_rx->rx_data[j]) != ((tx_rx->rx_parity[0] >> (7 - j)) & 0x01));
         }
 
-        // update unique nonces
-        if(!found[tx_rx->rx_data[0]]) {
-            found[tx_rx->rx_data[0]]++;
-        }
-
         uint8_t pbits = 0;
         for(uint8_t j = 0; j < 4; j++) {
             uint8_t p = oddparity8(tx_rx->rx_data[j]);
@@ -598,6 +594,12 @@ struct nonce_info_hard hard_nested_collect_nonces(
             }
             pbits <<= 1;
             pbits |= p;
+        }
+
+        // update unique nonces
+        if(!found[tx_rx->rx_data[0]]) {
+            *first_byte_sum += evenparity32(pbits & 0x08);
+            found[tx_rx->rx_data[0]]++;
         }
 
         if(nt == previous) {

@@ -13,6 +13,10 @@
 
 #define TAG "MifareNestedWorker"
 
+// possible sum property values
+static uint16_t sums[] =
+    {0, 32, 56, 64, 80, 96, 104, 112, 120, 128, 136, 144, 152, 160, 176, 192, 200, 224, 256};
+
 void mifare_nested_worker_change_state(
     MifareNestedWorker* mifare_nested_worker,
     MifareNestedWorkerState state) {
@@ -468,7 +472,7 @@ uint32_t mifare_nested_worker_predict_delay(
     }
 
     free(crypto);
-    
+
     return 1;
 }
 
@@ -876,38 +880,38 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
                 continue;
             }
 
-            Stream* file_stream = file_stream_alloc(storage);
-            FuriString* hardnested_file = furi_string_alloc();
-            mifare_nested_worker_get_hardnested_file_path(
-                &data, hardnested_file, sector, key_type);
-
-            file_stream_open(
-                file_stream,
-                furi_string_get_cstr(hardnested_file),
-                FSAM_READ_WRITE,
-                FSOM_CREATE_ALWAYS);
-
-            FuriString* header = furi_string_alloc_printf(
-                "Filetype: Flipper Nested Nonces File\nVersion: %s\nNote: you will need desktop app to recover keys: %s\nKey %c cuid 0x%08lx sec %u\n",
-                NESTED_NONCE_FORMAT_VERSION,
-                NESTED_RECOVER_KEYS_GITHUB_LINK,
-                !key_type ? 'A' : 'B',
-                cuid,
-                sector);
-
-            stream_write_string(file_stream, header);
-            furi_string_free(header);
-            furi_string_free(hardnested_file);
-
             while(!info->collected &&
                   mifare_nested_worker->state == MifareNestedWorkerStateCollecting) {
+                Stream* file_stream = file_stream_alloc(storage);
+                FuriString* hardnested_file = furi_string_alloc();
+                mifare_nested_worker_get_hardnested_file_path(
+                    &data, hardnested_file, sector, key_type);
+
+                file_stream_open(
+                    file_stream,
+                    furi_string_get_cstr(hardnested_file),
+                    FSAM_READ_WRITE,
+                    FSOM_CREATE_ALWAYS);
+
+                FuriString* header = furi_string_alloc_printf(
+                    "Filetype: Flipper Nested Nonces File\nVersion: %s\nNote: you will need desktop app to recover keys: %s\nKey %c cuid 0x%08lx sec %u\n",
+                    NESTED_NONCE_FORMAT_VERSION,
+                    NESTED_RECOVER_KEYS_GITHUB_LINK,
+                    !key_type ? 'A' : 'B',
+                    cuid,
+                    sector);
+
+                stream_write_string(file_stream, header);
+                furi_string_free(header);
+
+                uint32_t first_byte_sum = 0;
                 uint32_t* found = malloc(sizeof(uint32_t) * 256);
                 for(uint32_t i = 0; i < 256; i++) {
                     found[i] = 0;
                 }
 
                 while(mifare_nested_worker->state == MifareNestedWorkerStateCollecting) {
-                    struct nonce_info_hard result = hard_nested_collect_nonces(
+                    struct nonce_info_hard result = nested_hard_nonce_attack(
                         &tx_rx,
                         key_block,
                         found_key_type,
@@ -915,11 +919,15 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
                         key_type,
                         key,
                         found,
+                        &first_byte_sum,
                         file_stream);
 
                     if(result.static_encrypted) {
-                        // TODO: Delete file?
                         file_stream_close(file_stream);
+
+                        storage_simply_remove(storage, furi_string_get_cstr(hardnested_file));
+
+                        furi_string_free(hardnested_file);
                         free(found);
                         free(mf_data);
                         nfc_deactivate();
@@ -946,6 +954,22 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
                         FURI_LOG_D(TAG, "Found states: %lu", states);
 
                         if(states == 256) {
+                            FURI_LOG_D(
+                                TAG, "All states collected, first_byte_sum: %lu", first_byte_sum);
+
+                            bool valid = false;
+                            for(uint8_t i = 0; i < sizeof(sums); i++) {
+                                if(sums[i] == first_byte_sum) {
+                                    valid = true;
+                                    break;
+                                }
+                            }
+
+                            if(!valid) {
+                                FURI_LOG_E(TAG, "Invalid first_byte_sum!");
+                                break;
+                            }
+
                             info->collected = true;
                             info->hardnested = true;
                             nonces->cuid = result.cuid;
@@ -966,9 +990,9 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
                 }
 
                 free(found);
+                furi_string_free(hardnested_file);
+                file_stream_close(file_stream);
             }
-
-            file_stream_close(file_stream);
         }
     }
 
