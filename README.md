@@ -6,7 +6,7 @@ Experimenting with app development for flipper zero.
 
 | Screenshot | Directory | App | Description |
 |---|-|-|---|
-| ![Screenshot of the resistance calculator in action](resistors/screenshots/2023-04-26%20resistor%20view.png) | [resistors](resistors/) | Resistance calculator | Coloured band resistance calculator. |
+| ![Screenshot of the resistance calculator in action](resistors/screenshots/v1.1/4-bar.png) | [resistors](resistors/) | Resistance calculator | Coloured band resistance calculator. |
 
 ## Build status
 
