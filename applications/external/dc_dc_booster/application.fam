@@ -1,0 +1,14 @@
+App(
+    appid="dc_dc_booster",
+    name="Dc-Dc Booster",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="dc_dc_booster_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="dc_dc_10x10.png",
+    fap_category="GPIO",
+    #fap_icon_assets="images",
+    #fap_private_libs=[
+    #],
+)
