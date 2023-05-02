@@ -10,7 +10,10 @@
         "*.scons": "python",
         "SConscript": "python",
         "SConstruct": "python",
-        "*.fam": "python"
+        "*.fam": "python",
+        "infrared_worker.h": "c",
+        "infrared_transmit.h": "c",
+        "tag_ir.h": "c"
     },
     "cortex-debug.registerUseNaturalFormat": false,
     "python.analysis.typeCheckingMode": "off",
