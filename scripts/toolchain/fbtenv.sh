@@ -43,6 +43,7 @@ fbtenv_restore_env()
     PATH="$(echo "$PATH" | /usr/bin/sed "s/$TOOLCHAIN_ARCH_DIR_SED\/protobuf\/bin://g")";
     PATH="$(echo "$PATH" | /usr/bin/sed "s/$TOOLCHAIN_ARCH_DIR_SED\/openocd\/bin://g")";
     PATH="$(echo "$PATH" | /usr/bin/sed "s/$TOOLCHAIN_ARCH_DIR_SED\/openssl\/bin://g")";
+    PATH="$(echo "$PATH" | /usr/bin/sed "s/$TOOLCHAIN_ARCH_DIR_SED\/ncurses\/bin://g")";
     if [ -n "${PS1:-""}" ]; then
         PS1="$(echo "$PS1" | sed 's/\[fbt\]//g')";
     elif [ -n "${PROMPT:-""}" ]; then
@@ -56,10 +57,13 @@ fbtenv_restore_env()
         unset SSL_CERT_FILE;
         unset REQUESTS_CA_BUNDLE;
     fi
+
+    export TERMINFO_DIRS="$SAVED_TERMINFO_DIRS";
     export PYTHONNOUSERSITE="$SAVED_PYTHONNOUSERSITE";
     export PYTHONPATH="$SAVED_PYTHONPATH";
     export PYTHONHOME="$SAVED_PYTHONHOME";
 
+    unset SAVED_TERMINFO_DIRS;
     unset SAVED_SSL_CERT_FILE;
     unset SAVED_REQUESTS_CA_BUNDLE;
     unset SAVED_PYTHONNOUSERSITE;
@@ -312,14 +316,17 @@ fbtenv_main()
     PATH="$TOOLCHAIN_ARCH_DIR/protobuf/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/openocd/bin:$PATH";
     PATH="$TOOLCHAIN_ARCH_DIR/openssl/bin:$PATH";
+    PATH="$TOOLCHAIN_ARCH_DIR/ncurses/bin:$PATH";
     export PATH;
 
+    export SAVED_TERMINFO_DIRS="${TERMINFO_DIRS:-""}";
     export SAVED_SSL_CERT_FILE="${SSL_CERT_FILE:-""}";
     export SAVED_REQUESTS_CA_BUNDLE="${REQUESTS_CA_BUNDLE:-""}";
     export SAVED_PYTHONNOUSERSITE="${PYTHONNOUSERSITE:-""}";
     export SAVED_PYTHONPATH="${PYTHONPATH:-""}";
     export SAVED_PYTHONHOME="${PYTHONHOME:-""}";
 
+    export TERMINFO_DIRS="$TOOLCHAIN_ARCH_DIR/ncurses/share/terminfo";
     export SSL_CERT_FILE="$TOOLCHAIN_ARCH_DIR/python/lib/python3.11/site-packages/certifi/cacert.pem";
     export REQUESTS_CA_BUNDLE="$SSL_CERT_FILE";
     export PYTHONNOUSERSITE=1;
