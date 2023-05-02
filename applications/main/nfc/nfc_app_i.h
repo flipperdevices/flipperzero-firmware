@@ -43,6 +43,7 @@
 #include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 
 #include <lib/nfc/nfc_dev.h>
+#include <lib/nfc/helpers/nfc_data_generator.h>
 
 #include <gui/modules/validators.h>
 #include <toolbox/path.h>

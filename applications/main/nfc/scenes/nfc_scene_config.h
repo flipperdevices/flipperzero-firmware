@@ -21,4 +21,7 @@ ADD_SCENE(nfc, mf_ultralight_unlock_warn, MfUltralightUnlockWarn)
 ADD_SCENE(nfc, mf_ultralight_key_input, MfUltralightKeyInput)
 
 
+ADD_SCENE(nfc, set_type, SetType)
+ADD_SCENE(nfc, generate_info, GenerateInfo)
+
 ADD_SCENE(nfc, not_implemented, NotImplemented)
