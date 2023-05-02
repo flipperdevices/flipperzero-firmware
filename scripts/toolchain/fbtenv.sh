@@ -58,7 +58,11 @@ fbtenv_restore_env()
     fi
 
     if [ "$SYS_TYPE" = "Linux" ]; then
-        export TERMINFO_DIRS="$SAVED_TERMINFO_DIRS";
+        if [ -n "$SAVED_TERMINFO_DIRS" ]; then
+            export TERMINFO_DIRS="$SAVED_TERMINFO_DIRS";
+        else
+            unset TERMINFO_DIRS;
+        fi
         unset SAVED_TERMINFO_DIRS;
     fi
 
