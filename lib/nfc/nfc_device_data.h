@@ -10,12 +10,14 @@ extern "C" {
 
 typedef enum {
     NfcDevProtocolNfca,
-    NfcDevProtocolNfcb,
-    NfcDevProtocolNfcf,
-    NfcDevProtocolNfcv,
+    // NfcDevProtocolNfcb,
+    // NfcDevProtocolNfcf,
+    // NfcDevProtocolNfcv,
     NfcDevProtocolMfUltralight,
     NfcDevProtocolMfClassic,
     NfcDevProtocolMfDesfire,
+
+    NfcDevProtocolNum,
 } NfcDevProtocol;
 
 typedef struct {

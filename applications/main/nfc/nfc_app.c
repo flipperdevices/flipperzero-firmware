@@ -63,6 +63,7 @@ NfcApp* nfc_app_alloc() {
 
     // Nfc device
     instance->nfc_dev = nfc_dev_alloc();
+    nfc_dev_set_loading_callback(instance->nfc_dev, nfc_show_loading_popup, instance);
 
     // Open GUI record
     instance->gui = furi_record_open(RECORD_GUI);

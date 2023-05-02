@@ -87,7 +87,8 @@ typedef struct {
     uint8_t data[MF_ULTRALIGHT_SIGNATURE_SIZE];
 } MfUltralightSignature;
 
-typedef struct {
+typedef union {
+    uint32_t counter;
     uint8_t data[MF_ULTRALIGHT_COUNTER_SIZE];
 } MfUltralightCounter;
 
@@ -154,6 +155,7 @@ typedef struct {
     MfUltralightPage page[MF_ULTRALIGHT_MAX_PAGE_NUM];
     uint16_t pages_read;
     uint16_t pages_total;
+    uint32_t auth_attempts;
 } MfUltralightData;
 
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version);
