@@ -311,13 +311,18 @@ int32_t four_in_row_app(void* p) {
     }
 
     // Специальная очистка памяти, занимаемой очередью
+    notification_message_block(notification, &sequence_display_backlight_enforce_auto);
+    furi_record_close(RECORD_NOTIFICATION);
+    // Специальная очистка памяти, занимаемой очередью
     furi_message_queue_free(event_queue);
 
     // Чистим созданные объекты, связанные с интерфейсом
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
-    furi_mutex_free(mutex);
+
+    furi_mutex_free(bomber_state->mutex);
     furi_record_close(RECORD_GUI);
+    free(bomber_state);
 
     return 0;
 }
