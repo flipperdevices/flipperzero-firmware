@@ -1,7 +1,9 @@
 #include "wiegand.h"
 
 const GpioPin* const pinD0 = &gpio_ext_pa4;
+const GpioPin* const pinD0mosfet = &gpio_ext_pb3;
 const GpioPin* const pinD1 = &gpio_ext_pa7;
+const GpioPin* const pinD1mosfet = &gpio_ext_pa6;
 volatile int bit_count = 0;
 volatile bool data[MAX_BITS];
 volatile uint32_t data_fall[MAX_BITS];
