@@ -95,6 +95,13 @@ AvrIspApp* avr_isp_app_alloc() {
         AvrIspViewChipDetect,
         avr_isp_chip_detect_view_get_view(app->avr_isp_chip_detect_view));
 
+    // TPI Reader view
+    app->avr_isp_tpi_reader_view = avr_isp_tpi_reader_view_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        AvrIspViewTpiReader,
+        avr_isp_tpi_reader_view_get_view(app->avr_isp_tpi_reader_view));
+
     // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
     uint8_t attempts = 0;
     while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
@@ -149,6 +156,10 @@ void avr_isp_app_free(AvrIspApp* app) {
     // Chip detect view
     view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewChipDetect);
     avr_isp_chip_detect_view_free(app->avr_isp_chip_detect_view);
+
+    // TPI Reader view
+    view_dispatcher_remove_view(app->view_dispatcher, AvrIspViewTpiReader);
+    avr_isp_tpi_reader_view_free(app->avr_isp_tpi_reader_view);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);

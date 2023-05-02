@@ -13,9 +13,22 @@ struct AvrTpiSignature {
 
 typedef struct AvrTpiSignature AvrTpiSignature;
 
-AvrTpi* avr_isp_alloc(void);
+AvrTpi* avr_tpi_alloc(void);
 
-void avr_isp_free(AvrTpi* instance);
+void avr_tpi_free(AvrTpi* instance);
 
-void avr_isp_set_tx_callback(AvrTpi* instance, AvrTpiCallback callback, void* context);
+void avr_tpi_set_tx_callback(AvrTpi* instance, AvrTpiCallback callback, void* context);
+
+bool avr_tpi_start_pmode(AvrTpi* instance);
+
+void avr_tpi_end_pmode(AvrTpi* instance);
+
+void avr_tpi_erase_chip(AvrTpi* instance);
+
+AvrTpiSignature avr_tpi_get_signature(AvrTpi* instance);
+uint8_t avr_tpi_get_nwm_lock_bit(AvrTpi* instance);
+uint8_t avr_tpi_get_configuration_bit(AvrTpi* instance);
+uint8_t avr_tpi_get_calibration_bit(AvrTpi* instance);
+void avr_tpi_read_data_memory(AvrTpi* instance, uint16_t address, uint8_t* data, uint16_t size);
+
 

@@ -5,8 +5,9 @@ typedef enum {
     SubmenuIndexAvrIspProgrammer = 10,
     SubmenuIndexAvrIspReader,
     SubmenuIndexAvrIspWriter,
-    SubmenuIndexAvrIsWiring,
+    SubmenuIndexAvrIspWiring,
     SubmenuIndexAvrIspAbout,
+    SubmenuIndexAvrIspReaderTpi,
 
     //AvrIspCustomEvent
     AvrIspCustomEventSceneChipDetectOk = 100,

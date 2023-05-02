@@ -23,7 +23,7 @@ AvrIspTpiSw* avr_isp_tpi_sw_init(AvrIspTpiSwSpeed speed) {
     instance->sck = AVR_ISP_TPI_SW_SCK;
     instance->res = AVR_ISP_TPI_SW_RESET;
 
-    furi_hal_gpio_init(instance->data, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(instance->data, GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
     furi_hal_gpio_write(instance->sck, false);
     furi_hal_gpio_init(instance->sck, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_init(instance->res, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
@@ -64,7 +64,7 @@ void avr_isp_tpi_sw_tx(AvrIspTpiSw* instance, uint8_t data) {
     uint8_t parity = 0;
 
     //set data output
-    furi_hal_gpio_init(instance->data, GpioModeOutputPushPull, , GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(instance->data, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
     //send start bit
     avr_isp_tpi_send_bit(instance, false);
@@ -84,15 +84,15 @@ void avr_isp_tpi_sw_tx(AvrIspTpiSw* instance, uint8_t data) {
     avr_isp_tpi_send_bit(instance, true);
 
     //set data input
-    furi_hal_gpio_init(instance->data, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(instance->data, GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
 }
 
 bool avr_isp_tpi_sw_rx(AvrIspTpiSw* instance, uint8_t* data) {
-    fuir_assert(instance);
+    furi_assert(instance);
 
     //wait for start bit
     uint8_t timeout = 255;
-    while((avr_isp_tpi_read_bit(instance) == true) && (!timeout--)) {
+    while((avr_isp_tpi_read_bit(instance) == true) && (timeout--)) {
     };
     if(timeout == 0) {
         return false;
@@ -130,25 +130,23 @@ bool avr_isp_tpi_sw_rx(AvrIspTpiSw* instance, uint8_t* data) {
 void avr_isp_tpi_sw_start_pmode(AvrIspTpiSw* instance) {
     furi_assert(instance);
 
-    
     furi_hal_gpio_write(instance->res, true);
     furi_delay_ms(20);
 
     //Wait tTOUT and then set the RESET pin low. This will reset the device and enable the TPI physical layer.
-    // The RESET pin must then be kept low for the entire programming session 
+    // The RESET pin must then be kept low for the entire programming session
     furi_hal_gpio_write(instance->res, false);
     //wait reset timeout
     furi_delay_ms(20);
-    //Keep the TPIDATA pin high for 16 TPICLK cycles 
+    //Keep the TPIDATA pin high for 16 TPICLK cycles
 
     //set data output
-    furi_hal_gpio_init(instance->data, GpioModeOutputPushPull, , GpioPullNo, GpioSpeedVeryHigh);
-    for (uint8_t i = 0; i < 32; i++)
-    {
+    furi_hal_gpio_init(instance->data, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    for(uint8_t i = 0; i < 32; i++) {
         avr_isp_tpi_send_bit(instance, true);
     }
     //set data input
-    furi_hal_gpio_init(instance->data, GpioModeInput, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(instance->data, GpioModeInput, GpioPullUp, GpioSpeedVeryHigh);
 }
 
 void avr_isp_tpi_sw_end_pmode(AvrIspTpiSw* instance) {

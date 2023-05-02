@@ -50,7 +50,7 @@ bool avr_tpi_start_pmode(AvrTpi* instance) {
         instance->tpi = NULL;
     }
 
-    instance->tpi = avr_isp_tpi_sw_init(AvrIspTpiSwSpeed125Khz);
+    instance->tpi = avr_isp_tpi_sw_init(AvrIspTpiSwSpeed250Khz);
     avr_isp_tpi_sw_start_pmode(instance->tpi);
     // 15.7.2 TPIPCR – tiny programming interface physical layer control register
     // the default guard time is 128 IDLE bits + 0
@@ -62,8 +62,9 @@ bool avr_tpi_start_pmode(AvrTpi* instance) {
     avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SLDCS | TPI_REG_TPIIR);
     uint8_t tpiir[1] = {0};
     avr_isp_tpi_sw_rx(instance->tpi, tpiir);
+    //Table 15-12. identification code for tiny programming interface
     if(tpiir[0] != 0x80) {
-        FULI_LOG_E(TAG, "TPIIR: %02x, Not TPI protocol", tpiir[0]);
+        FURI_LOG_E(TAG, "TPIIR: %02x, Not TPI protocol", tpiir[0]);
         return false;
     }
 
@@ -81,11 +82,12 @@ bool avr_tpi_start_pmode(AvrTpi* instance) {
         avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SLDCS | TPI_REG_TPISR);
         avr_isp_tpi_sw_rx(instance->tpi, nvmcsr);
         if(timeout-- == 0) {
-            FULI_LOG_E(TAG, "Timeout waiting for NVMEN");
+            FURI_LOG_E(TAG, "Timeout waiting for NVMEN");
             return false;
         }
     } while(!(nvmcsr[0] & TPI_REG_TPISR_NVMEN));
     instance->pmode = true;
+    FURI_LOG_E(TAG, "PROG OK");
     return true;
 }
 
@@ -93,6 +95,8 @@ void avr_tpi_end_pmode(AvrTpi* instance) {
     furi_assert(instance);
 
     if(instance->tpi) {
+        avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SLDCS | TPI_REG_TPISR);
+        avr_isp_tpi_sw_tx(instance->tpi, 0x00); //TPI_REG_TPISR_NVMEN clear
         avr_isp_tpi_sw_end_pmode(instance->tpi);
         avr_isp_tpi_sw_free(instance->tpi);
         instance->tpi = NULL;
@@ -104,9 +108,9 @@ static void avr_tpi_set_pointer_reg(AvrTpi* instance, uint16_t reg) {
     furi_assert(instance);
 
     //15.5.3 SSTPR - Serial STore to Pointer Register
-    avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SSTPR + 0);
+    avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SSTPR | 0);
     avr_isp_tpi_sw_tx(instance->tpi, reg & 0xFF);
-    avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SSTPR + 1);
+    avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SSTPR | 1);
     avr_isp_tpi_sw_tx(instance->tpi, (reg >> 8) & 0xFF);
 }
 
@@ -127,10 +131,19 @@ static void avr_tpi_nvm_status_pool(AvrTpi* instance) {
         avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SIN | TPI_SIO_ADDR(TPI_IOREG_NVMCSR));
         avr_isp_tpi_sw_rx(instance->tpi, nvmcsr);
         if(timeout-- == 0) {
-            FULI_LOG_E(TAG, "Timeout waiting for TPI_IOREG_NVMCSR");
+            FURI_LOG_E(TAG, "Timeout waiting for TPI_IOREG_NVMCSR");
             return;
         }
     } while(!(nvmcsr[0] & TPI_IOREG_NVMCSR_NVMBSY));
+}
+
+static uint8_t avr_tpi_read_data(AvrTpi* instance) {
+    furi_assert(instance);
+
+    uint8_t data[1] = {0};
+    avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SLD_PI);
+    avr_isp_tpi_sw_rx(instance->tpi, data);
+    return data[0];
 }
 
 void avr_tpi_erase_chip(AvrTpi* instance) {
@@ -138,11 +151,68 @@ void avr_tpi_erase_chip(AvrTpi* instance) {
 
     //Figure 6-1. Data Memory Map (Byte Addressing)
     avr_tpi_set_pointer_reg(instance, 0x4001); //need the +1 for chip erase
+    //16.4.3.1 Chip Erase
     avr_tpi_nvm_cmd(instance, TPI_NVMCMD_CHIP_ERASE);
-    avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SST_PI);
-    avr_isp_tpi_sw_tx(instance->tpi, 0xAA);
+    avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SST);
+    avr_isp_tpi_sw_tx(instance->tpi, 0xFF);
+
     avr_tpi_nvm_status_pool(instance);
 
     avr_tpi_nvm_cmd(instance, TPI_NVMCMD_NO_OPERATION);
     avr_tpi_nvm_status_pool(instance);
+}
+
+AvrTpiSignature avr_tpi_get_signature(AvrTpi* instance) {
+    furi_assert(instance);
+
+    AvrTpiSignature signature = {0};
+    //16.3.4 Signature Section
+    avr_tpi_set_pointer_reg(instance, 0x3FC0);
+    FURI_LOG_E("TAG", "read signature!!!");
+    signature.vendor = avr_tpi_read_data(instance);
+    signature.part_family = avr_tpi_read_data(instance);
+    signature.part_number = avr_tpi_read_data(instance);
+
+    FURI_LOG_E(
+        TAG,
+        "Signature: %02x %02x %02x",
+        signature.vendor,
+        signature.part_family,
+        signature.part_number);
+
+    return signature;
+}
+
+uint8_t avr_tpi_get_nwm_lock_bit(AvrTpi* instance) {
+    furi_assert(instance);
+
+    //16.3.1 Non-Volatile Memory Lock Bits
+    avr_tpi_set_pointer_reg(instance, 0x3F00);
+    return avr_tpi_read_data(instance);
+}
+
+uint8_t avr_tpi_get_configuration_bit(AvrTpi* instance) {
+    furi_assert(instance);
+
+    //16.3.3 Configuration Section
+    avr_tpi_set_pointer_reg(instance, 0x3F40);
+    return avr_tpi_read_data(instance);
+}
+
+uint8_t avr_tpi_get_calibration_bit(AvrTpi* instance) {
+    furi_assert(instance);
+
+    //16.3.5 Calibration Section
+    avr_tpi_set_pointer_reg(instance, 0x3F80);
+    return avr_tpi_read_data(instance);
+}
+
+void avr_tpi_read_data_memory(AvrTpi* instance, uint16_t address, uint8_t* data, uint16_t size) {
+    furi_assert(instance);
+    furi_assert(data);
+
+    avr_tpi_set_pointer_reg(instance, address);
+    for(uint16_t i = 0; i < size; i++) {
+        data[i] = avr_tpi_read_data(instance);
+    }
 }

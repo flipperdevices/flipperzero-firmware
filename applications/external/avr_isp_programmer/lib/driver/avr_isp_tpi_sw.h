@@ -20,7 +20,7 @@ typedef struct AvrIspTpiSw AvrIspTpiSw;
 AvrIspTpiSw* avr_isp_tpi_sw_init(AvrIspTpiSwSpeed speed);
 void avr_isp_tpi_sw_free(AvrIspTpiSw* instance);
 void avr_isp_tpi_sw_tx(AvrIspTpiSw* instance, uint8_t data);
-bool avr_isp_tpi_sw_rx(AvrIspTpiSw* instance, uint8_t* data)
+bool avr_isp_tpi_sw_rx(AvrIspTpiSw* instance, uint8_t* data);
 //void avr_isp_tpi_sw_res_set(AvrIspTpiSw* instance, bool state);
 //void avr_isp_tpi_sw_sck_set(AvrIspTpiSw* instance, bool state);
 
