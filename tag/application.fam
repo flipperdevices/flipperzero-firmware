@@ -8,7 +8,7 @@ App(
     fap_version=(0, 1),
     fap_icon="tag_game.png",
     fap_description="A game of tag - play with other Flippers",
-    # fap_author="Lewis Westbury",
-    # fap_weburl="https://github.com/instantiator/flipper-zero-experimental-apps/tree/main/tag",
+    fap_author="Lewis Westbury",
+    fap_weburl="https://github.com/instantiator/flipper-zero-experimental-apps/tree/main/tag",
     fap_icon_assets="images",  # Image assets to compile for this application
 )

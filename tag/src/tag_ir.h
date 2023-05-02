@@ -21,6 +21,10 @@ InfraredMessage* tag_ir_create_message(uint32_t address, uint32_t command);
 void tag_ir_free_message(InfraredMessage* message);
 void tag_ir_send(InfraredMessage* msg);
 
+/** 
+ * Validate the message address and command.
+ * Borrowed from: https://github.com/Hong5489/ir_remote/blob/main/infrared_signal.c#L27 
+ */
 bool tag_ir_message_valid(InfraredMessage* message);
 
 #endif
