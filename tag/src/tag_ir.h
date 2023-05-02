@@ -9,16 +9,54 @@
 
 #include "tag_app.h"
 
-typedef enum { Uninitialised, Ready, Listening, Sending } TagIrMode;
+typedef enum {
+    InfraredUninitialised,
+    InfraredReady,
+    InfraredListening,
+    InfraredSending
+} TagIrMode;
 
+/**
+ * Current state of the infrared.
+ */
 TagIrMode tag_ir_mode_get();
-void tag_ir_init(InfraredProtocol ir_protocol, int ir_repeats);
+
+/**
+ * Initialise infrared worker.
+ * protocol: protocol to use for all messages
+ * repeats: number of times to repeat each message
+ * address: fixed address portion of each message
+ */
+void tag_ir_init(InfraredProtocol protocol, int repeats, uint32_t address);
+
+/**
+ * Start listening for infrared signals.
+ */
 void tag_ir_rx_start(InfraredWorkerReceivedSignalCallback callback, void* context);
+
+/**
+ * Stop listening for infrared signals.
+ */
 void tag_ir_rx_stop();
+
+/**
+ * Destroy infrared worker.
+ */
 void tag_ir_destroy();
 
-InfraredMessage* tag_ir_create_message(uint32_t address, uint32_t command);
+/**
+ * Create an app specific "firing" message for the identity provided.
+ */
+InfraredMessage* tag_ir_create_firing_message(int identity);
+
+/**
+ * Free resources from the message.
+ */
 void tag_ir_free_message(InfraredMessage* message);
+
+/**
+ * Send the given message.
+ */
 void tag_ir_send(InfraredMessage* msg);
 
 /** 
