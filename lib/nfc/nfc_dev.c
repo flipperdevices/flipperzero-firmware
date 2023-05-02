@@ -405,6 +405,7 @@ NfcDev* nfc_dev_alloc() {
 
 void nfc_dev_free(NfcDev* instance) {
     furi_assert(instance);
+    free(instance);
 }
 
 void nfc_dev_set_loading_callback(NfcDev* instance, NfcLoadingCallback callback, void* context) {
