@@ -165,6 +165,14 @@ void furi_hal_rtc_init() {
     FURI_LOG_I(TAG, "Init OK");
 }
 
+void furi_hal_rtc_sync_shadow() {
+    if(!LL_RTC_IsShadowRegBypassEnabled(RTC)) {
+        LL_RTC_ClearFlag_RS(RTC);
+        while(!LL_RTC_IsActiveFlag_RS(RTC)) {
+        };
+    }
+}
+
 uint32_t furi_hal_rtc_get_register(FuriHalRtcRegister reg) {
     return LL_RTC_BAK_GetRegister(RTC, reg);
 }
@@ -281,8 +289,10 @@ FuriHalRtcLocaleDateFormat furi_hal_rtc_get_locale_dateformat() {
 }
 
 void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
+    furi_check(!FURI_IS_IRQ_MODE());
     furi_assert(datetime);
 
+    FURI_CRITICAL_ENTER();
     /* Disable write protection */
     LL_RTC_DisableWriteProtection(RTC);
 
@@ -310,22 +320,21 @@ void furi_hal_rtc_set_datetime(FuriHalRtcDateTime* datetime) {
     /* Exit Initialization mode */
     LL_RTC_DisableInitMode(RTC);
 
-    /* If RTC_CR_BYPSHAD bit = 0, wait for synchro else this check is not needed */
-    if(!LL_RTC_IsShadowRegBypassEnabled(RTC)) {
-        LL_RTC_ClearFlag_RS(RTC);
-        while(!LL_RTC_IsActiveFlag_RS(RTC)) {
-        };
-    }
+    furi_hal_rtc_sync_shadow();
 
     /* Enable write protection */
     LL_RTC_EnableWriteProtection(RTC);
+    FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_rtc_get_datetime(FuriHalRtcDateTime* datetime) {
+    furi_check(!FURI_IS_IRQ_MODE());
     furi_assert(datetime);
 
+    FURI_CRITICAL_ENTER();
     uint32_t time = LL_RTC_TIME_Get(RTC); // 0x00HHMMSS
     uint32_t date = LL_RTC_DATE_Get(RTC); // 0xWWDDMMYY
+    FURI_CRITICAL_EXIT();
 
     datetime->second = __LL_RTC_CONVERT_BCD2BIN((time >> 0) & 0xFF);
     datetime->minute = __LL_RTC_CONVERT_BCD2BIN((time >> 8) & 0xFF);
