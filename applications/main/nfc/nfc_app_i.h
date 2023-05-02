@@ -44,6 +44,11 @@
 
 #include <lib/nfc/nfc_dev.h>
 
+#include <gui/modules/validators.h>
+#include <toolbox/path.h>
+#include <dolphin/dolphin.h>
+
+#define NFC_NAME_SIZE 22
 #define NFC_TEXT_STORE_SIZE 128
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"
@@ -91,6 +96,7 @@ struct NfcApp {
 
     NfcDev* nfc_dev;
     NfcDevData nfc_dev_data;
+    NfcaData nfca_edit_data;
     FuriString* file_path;
     FuriString* file_name;
 };
