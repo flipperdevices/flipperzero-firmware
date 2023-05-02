@@ -53,18 +53,13 @@ bool nfc_scene_save_name_on_event(void* context, SceneManagerEvent event) {
             }
             furi_string_set(nfc->file_name, nfc->text_store);
 
-            // TODO uncoment
-            // if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetUid)) {
-            //     nfc->dev->dev_data.nfc_data = nfc->dev_edit_data;
-            // }
-
             if(nfc_save(nfc)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
-                // if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetType)) {
-                // DOLPHIN_DEED(DolphinDeedNfcAddSave);
-                // } else {
-                DOLPHIN_DEED(DolphinDeedNfcSave);
-                // }
+                if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetType)) {
+                    DOLPHIN_DEED(DolphinDeedNfcAddSave);
+                } else {
+                    DOLPHIN_DEED(DolphinDeedNfcSave);
+                }
                 consumed = true;
             } else {
                 consumed = scene_manager_search_and_switch_to_previous_scene(

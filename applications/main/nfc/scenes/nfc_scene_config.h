@@ -22,6 +22,10 @@ ADD_SCENE(nfc, mf_ultralight_key_input, MfUltralightKeyInput)
 
 
 ADD_SCENE(nfc, set_type, SetType)
+ADD_SCENE(nfc, set_sak, SetSak)
+ADD_SCENE(nfc, set_atqa, SetAtqa)
+ADD_SCENE(nfc, set_uid, SetUid)
+
 ADD_SCENE(nfc, generate_info, GenerateInfo)
 
 ADD_SCENE(nfc, not_implemented, NotImplemented)

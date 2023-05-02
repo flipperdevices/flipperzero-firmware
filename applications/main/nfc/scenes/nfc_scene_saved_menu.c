@@ -146,7 +146,7 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuIndexEditUid) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSetUid);
             consumed = true;
         } else if(event.event == SubmenuIndexDelete) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
