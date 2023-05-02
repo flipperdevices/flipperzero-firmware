@@ -41,6 +41,8 @@ Our application will have the following scenes:
 
 A module (or more specifically, a module's view) will display the user interface on the Flipper Zero. It will also handle the user input.
 
+For a list of all of the modules available in applications/services/gui, please see [A Visual Guide to Flipper Zero GUI Components](https://brodan.biz/blog/a-visual-guide-to-flipper-zero-gui-components/) over on brodan.biz/blog.
+
 Our application will use the following modules:
 
 - submenu - The submenu module (for displaying the main menu)
