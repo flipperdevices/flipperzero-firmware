@@ -25,14 +25,17 @@ static void hid_mouse_clicker_start_or_restart_timer(void* context) {
     furi_assert(context);
     HidMouseClicker* hid_mouse_clicker = context;
 
-    if (furi_timer_is_running(hid_mouse_clicker->timer)) {
+    if(furi_timer_is_running(hid_mouse_clicker->timer)) {
         furi_timer_stop(hid_mouse_clicker->timer);
     }
 
     with_view_model(
         hid_mouse_clicker->view,
         HidMouseClickerModel * model,
-        { furi_timer_start(hid_mouse_clicker->timer, furi_kernel_get_tick_frequency() / model->rate); },
+        {
+            furi_timer_start(
+                hid_mouse_clicker->timer, furi_kernel_get_tick_frequency() / model->rate);
+        },
         true);
 }
 
@@ -115,7 +118,7 @@ static bool hid_mouse_clicker_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
     bool rate_changed = false;
 
-    if (event->type != InputTypeRelease) {
+    if(event->type != InputTypeRelease) {
         return false;
     }
 
@@ -123,21 +126,20 @@ static bool hid_mouse_clicker_input_callback(InputEvent* event, void* context) {
         hid_mouse_clicker->view,
         HidMouseClickerModel * model,
         {
-            switch (event->key)
-            {
+            switch(event->key) {
             case InputKeyOk:
                 model->running = !model->running;
                 consumed = true;
                 break;
             case InputKeyUp:
-                if (model->rate < MAXIMUM_CLICK_RATE) {
+                if(model->rate < MAXIMUM_CLICK_RATE) {
                     model->rate++;
                 }
                 rate_changed = true;
                 consumed = true;
                 break;
             case InputKeyDown:
-                if (model->rate > 1) {
+                if(model->rate > 1) {
                     model->rate--;
                 }
                 rate_changed = true;
@@ -150,7 +152,7 @@ static bool hid_mouse_clicker_input_callback(InputEvent* event, void* context) {
         },
         true);
 
-    if (rate_changed) {
+    if(rate_changed) {
         hid_mouse_clicker_start_or_restart_timer(context);
     }
 
