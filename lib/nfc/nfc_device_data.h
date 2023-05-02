@@ -20,6 +20,7 @@ typedef enum {
     NfcDevProtocolNum,
 } NfcDevProtocol;
 
+// TODO rename to NfcData?
 typedef struct {
     NfcDevProtocol protocol;
     union {
@@ -31,4 +32,3 @@ typedef struct {
 #ifdef __cplusplus
 }
 #endif
-
