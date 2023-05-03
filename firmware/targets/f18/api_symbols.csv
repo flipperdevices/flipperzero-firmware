@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,23.2,,
+Version,+,23.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -36,6 +36,7 @@ Header,+,applications/services/notification/notification_messages.h,,
 Header,+,applications/services/power/power_service/power.h,,
 Header,+,applications/services/rpc/rpc_app.h,,
 Header,+,applications/services/storage/storage.h,,
+Header,-,firmware/targets/f18/furi_hal/furi_hal_power_calibration.h,,
 Header,+,firmware/targets/f18/furi_hal/furi_hal_resources.h,,
 Header,+,firmware/targets/f18/furi_hal/furi_hal_spi_config.h,,
 Header,+,firmware/targets/f18/furi_hal/furi_hal_target_hw.h,,
@@ -965,6 +966,7 @@ Function,+,furi_hal_i2c_write_mem,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t,
 Function,+,furi_hal_i2c_write_reg_16,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint16_t, uint32_t"
 Function,+,furi_hal_i2c_write_reg_8,_Bool,"FuriHalI2cBusHandle*, uint8_t, uint8_t, uint8_t, uint32_t"
 Function,+,furi_hal_info_get,void,"PropertyValueCallback, char, void*"
+Function,+,furi_hal_info_get_api_version,void,"uint16_t*, uint16_t*"
 Function,-,furi_hal_init,void,
 Function,-,furi_hal_init_early,void,
 Function,-,furi_hal_interrupt_init,void,
