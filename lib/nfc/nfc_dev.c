@@ -122,6 +122,7 @@ static bool nfc_dev_mf_ultralight_verify_handler(FuriString* device_type, NfcDev
         const char* name = mf_ultralight_get_name(i, true);
         verified = furi_string_equal_str(device_type, name);
         if(verified) {
+            data->protocol = NfcDevProtocolMfUltralight;
             data->mf_ul_data.type = i;
             break;
         }
@@ -140,6 +141,8 @@ static bool
     MfUltralightData* mfu_data = &data->mf_ul_data;
     bool saved = false;
     do {
+        const char* device_type_name = mf_ultralight_get_name(mfu_data->type, true);
+        if(!flipper_format_write_string_cstr(file, "Device type", device_type_name)) break;
         if(!nfc_dev_nfca_save_data(file, &data->nfca_data)) break;
         if(!flipper_format_write_comment_cstr(file, "Mifare Ultralight specific data")) break;
         if(!flipper_format_write_uint32(
@@ -171,10 +174,10 @@ static bool
         if(!counters_saved) break;
 
         // Write pages data
-        if(!flipper_format_write_uint32(file, "Pages total", (uint32_t*)&mfu_data->pages_total, 1))
-            break;
-        if(!flipper_format_write_uint32(file, "Pages read", (uint32_t*)&mfu_data->pages_read, 1))
-            break;
+        uint32_t pages_total = mfu_data->pages_total;
+        uint32_t pages_read = mfu_data->pages_read;
+        if(!flipper_format_write_uint32(file, "Pages total", &pages_total, 1)) break;
+        if(!flipper_format_write_uint32(file, "Pages read", &pages_read, 1)) break;
         bool pages_saved = true;
         for(size_t i = 0; i < mfu_data->pages_total; i++) {
             furi_string_printf(temp_str, "Page %d", i);
@@ -258,8 +261,6 @@ static bool
         mfu_data->pages_total = pages_total;
         mfu_data->pages_read = pages_read;
 
-        // data->data_size = pages_total * 4;
-        // data->data_read = pages_read * 4;
         if((pages_read > MF_ULTRALIGHT_MAX_PAGE_NUM) || (pages_total > MF_ULTRALIGHT_MAX_PAGE_NUM))
             break;
 
@@ -295,7 +296,13 @@ static bool nfc_dev_mf_classic_verify_handler(FuriString* device_type, NfcDevDat
     furi_assert(device_type);
     furi_assert(data);
 
-    return furi_string_start_with_str(device_type, "Mifare Classic");
+    // TODO set mfc type here
+    bool verified = furi_string_start_with_str(device_type, "Mifare Classic");
+    if(verified) {
+        data->protocol = NfcDevProtocolMfClassic;
+    }
+
+    return verified;
 }
 
 static bool
@@ -334,7 +341,12 @@ static bool nfc_dev_mf_desfire_verify_handler(FuriString* device_type, NfcDevDat
     furi_assert(device_type);
     furi_assert(data);
 
-    return furi_string_start_with_str(device_type, "Mifare Desfire");
+    bool verified = furi_string_start_with_str(device_type, "Mifare Desfire");
+    if(verified) {
+        data->protocol = NfcDevProtocolMfDesfire;
+    }
+
+    return verified;
 }
 
 static bool
