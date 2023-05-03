@@ -12,7 +12,7 @@ struct SubGhzThresholdRssi {
 
 SubGhzThresholdRssi* subghz_threshold_rssi_alloc(void) {
     SubGhzThresholdRssi* instance = malloc(sizeof(SubGhzThresholdRssi));
-    instance->threshold_rssi = SUBGHZ_RAW_TRESHOLD_MIN;
+    instance->threshold_rssi = SUBGHZ_RAW_THRESHOLD_MIN;
     instance->threshold_rssi_low_count = THRESHOLD_RSSI_LOW_COUNT;
     return instance;
 }
@@ -37,7 +37,7 @@ SubGhzThresholdRssiRet subghz_threshold_rssi_check_threshold(SubGhzThresholdRssi
     float rssi = furi_hal_subghz_get_rssi();
     SubGhzThresholdRssiRet ret = {.current_rssi = rssi, .threshold_level = false};
 
-    if(float_is_equal(instance->threshold_rssi, SUBGHZ_RAW_TRESHOLD_MIN)) {
+    if(float_is_equal(instance->threshold_rssi, SUBGHZ_RAW_THRESHOLD_MIN)) {
         ret.threshold_level = true;
     } else {
         if(rssi < instance->threshold_rssi) {
