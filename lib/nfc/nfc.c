@@ -71,6 +71,8 @@ static int32_t nfc_worker_listener(void* context) {
     NfcEvent nfc_event = {};
     // NfcCommand cmd = NfcCommandContinue;
 
+    f_hal_nfc_event_start();
+
     while(true) {
         FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
         if(event & FHalNfcEventAbortRequest) {
@@ -118,6 +120,8 @@ static int32_t nfc_worker_poller(void* context) {
     NfcEvent nfc_event = {};
     NfcCommand cmd = NfcCommandContinue;
 
+    f_hal_nfc_event_start();
+
     while(true) {
         if(instance->state == NfcStateIdle) {
             f_hal_nfc_low_power_mode_stop();
@@ -131,6 +135,10 @@ static int32_t nfc_worker_poller(void* context) {
             if(cmd == NfcCommandReset) {
                 instance->state = NfcStatePollerReset;
             } else if(cmd == NfcCommandStop) {
+                nfc_config(instance, NfcModeIdle);
+                nfc_event.type = NfcEventTypeReset;
+                instance->callback(nfc_event, instance->context);
+                f_hal_nfc_low_power_mode_start();
                 break;
             } else {
                 instance->state = NfcStateConfigured;
@@ -150,15 +158,25 @@ static int32_t nfc_worker_poller(void* context) {
             if(cmd == NfcCommandReset) {
                 instance->state = NfcStatePollerReset;
             } else if(cmd == NfcCommandStop) {
+                nfc_config(instance, NfcModeIdle);
+                nfc_event.type = NfcEventTypeReset;
+                instance->callback(nfc_event, instance->context);
+                f_hal_nfc_low_power_mode_start();
                 break;
             }
         } else if(instance->state == NfcStatePollerReset) {
             nfc_config(instance, NfcModeIdle);
+            nfc_event.type = NfcEventTypeReset;
+            cmd = instance->callback(nfc_event, instance->context);
             f_hal_nfc_low_power_mode_start();
+            if(cmd == NfcCommandStop) {
+                break;
+            }
+            // Delay to power off target nfc device
+            furi_delay_ms(200);
             instance->state = NfcStateChipSleep;
         }
     }
-    f_hal_nfc_low_power_mode_start();
     instance->state = NfcStateChipSleep;
 
     return 0;
@@ -308,7 +326,7 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
         if(event & FHalNfcEventTxEnd) {
             if(instance->comm_state == NfcCommStateWaitTxEnd) {
                 if(fwt_fc) {
-                    f_hal_nfc_timer_fwt_start(fwt_fc + F_HAL_NFC_TIMER_OFFSET_FC);
+                    f_hal_nfc_timer_fwt_start(fwt_fc);
                 }
                 f_hal_nfc_timer_block_tx_start_us(instance->fdt_poll_poll_us);
                 instance->comm_state = NfcCommStateWaitRxStart;
@@ -323,18 +341,21 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
         }
         if(event & FHalNfcEventRxEnd) {
             f_hal_nfc_timer_block_tx_start(instance->fdt_poll_fc);
+            f_hal_nfc_timer_fwt_stop();
             instance->comm_state = NfcCommStateWaitBlockTxTimer;
             break;
         }
         if(event & FHalNfcEventTimerFwtExpired) {
-            error = NfcErrorTimeout;
-            FURI_LOG_W(TAG, "FWT Timeout");
-            if(f_hal_nfc_timer_block_tx_is_running()) {
-                instance->comm_state = NfcCommStateWaitBlockTxTimer;
-            } else {
-                instance->comm_state = NfcCommStateReadyTx;
+            if(instance->comm_state == NfcCommStateWaitRxStart) {
+                error = NfcErrorTimeout;
+                FURI_LOG_W(TAG, "FWT Timeout");
+                if(f_hal_nfc_timer_block_tx_is_running()) {
+                    instance->comm_state = NfcCommStateWaitBlockTxTimer;
+                } else {
+                    instance->comm_state = NfcCommStateReadyTx;
+                }
+                break;
             }
-            break;
         }
     }
 

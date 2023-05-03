@@ -17,6 +17,10 @@ typedef enum {
     FHalNfcEventInternalTypeTimerBlockTxExpired = (1U << 3),
 } FHalNfcEventInternalType;
 
+#define F_HAL_NFC_EVENT_INTERNAL_ALL                                \
+    ((FHalNfcEventInternalTypeAbort | FHalNfcEventInternalTypeIrq | \
+      FHalNfcEventInternalTypeTimerFwtExpired | FHalNfcEventInternalTypeTimerBlockTxExpired))
+
 typedef struct {
     FuriThreadId thread;
     void* context;

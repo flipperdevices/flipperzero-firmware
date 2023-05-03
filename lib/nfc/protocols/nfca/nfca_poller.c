@@ -49,11 +49,11 @@ static NfcCommand nfca_poller_event_callback(NfcEvent event, void* context) {
 
     NfcaPoller* instance = context;
     furi_assert(instance->callback);
+    furi_assert(instance->session_state != NfcaPollerSessionStateIdle);
 
     NfcaPollerEvent nfca_poller_event = {};
     NfcaPollerCommand command = NfcaPollerCommandContinue;
 
-    furi_assert(instance->session_state != NfcaPollerSessionStateIdle);
     if(instance->session_state == NfcaPollerSessionStateStopRequest) {
         command = NfcaPollerCommandStop;
     } else {
@@ -80,6 +80,8 @@ static NfcCommand nfca_poller_event_callback(NfcEvent event, void* context) {
                 nfca_poller_event.data.error = NfcaErrorNone;
                 command = instance->callback(nfca_poller_event, instance->context);
             }
+        } else if(event.type == NfcEventTypeReset) {
+            nfca_poller_reset(instance);
         }
     }
 
@@ -120,7 +122,11 @@ NfcaError nfca_poller_stop(NfcaPoller* instance) {
     nfc_stop(instance->nfc);
     instance->session_state = NfcaPollerSessionStateIdle;
 
-    return nfca_poller_reset(instance);
+    // Check that data is freed
+    furi_assert(instance->data != NULL);
+    furi_assert(instance->buff != NULL);
+
+    return NfcaErrorNone;
 }
 
 static NfcaPollerCommand nfca_poller_sync_callback(NfcaPollerEvent event, void* context) {
@@ -145,7 +151,6 @@ NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
     if(context.error == NfcaErrorNone) {
         *nfca_data = *instance->data;
     }
-    nfca_poller_reset(instance);
 
     return context.error;
 }

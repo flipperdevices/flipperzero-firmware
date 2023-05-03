@@ -108,6 +108,8 @@ FHalNfcError f_hal_nfc_acquire();
 
 FHalNfcError f_hal_nfc_release();
 
+FHalNfcError f_hal_nfc_event_start();
+
 FHalNfcError f_hal_nfc_poller_tx(uint8_t* tx_data, uint16_t tx_bits);
 
 FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, uint16_t rx_data_size, uint16_t* rx_bits);

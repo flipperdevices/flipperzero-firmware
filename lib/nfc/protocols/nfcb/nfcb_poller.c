@@ -85,9 +85,9 @@ NfcbError nfcb_poller_reset(NfcbPoller* instance) {
 NfcbError nfcb_poller_config(NfcbPoller* instance) {
     furi_assert(instance);
 
-    instance->data = malloc(sizeof(NfcbData));
-    instance->buff =
-        nfc_poller_buffer_alloc(NFCB_POLLER_BUFER_MAX_SIZE, NFCB_POLLER_BUFER_MAX_SIZE);
+    // instance->data = malloc(sizeof(NfcbData));
+    // instance->buff =
+        // nfc_poller_buffer_alloc(NFCB_POLLER_BUFER_MAX_SIZE, NFCB_POLLER_BUFER_MAX_SIZE);
 
     nfc_config(instance->nfc, NfcModeNfcbPoller);
     nfc_set_guard_time_us(instance->nfc, NFCB_GUARD_TIME_US);

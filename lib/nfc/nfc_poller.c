@@ -54,6 +54,9 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
     furi_assert(context);
 
     NfcPoller* instance = context;
+    furi_assert(instance->callback);
+    furi_assert(instance->session_state != NfcPollerSessionStateIdle);
+
     NfcPollerEvent poller_event;
     NfcCommand command = NfcCommandContinue;
 
@@ -64,7 +67,7 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
             if(instance->state == NfcPollerStateCheckPresenceNfca) {
                 nfca_poller_config(instance->nfca_poller);
             } else if(instance->state == NfcPollerStateCheckPresenceNfcb) {
-                nfcb_poller_config(instance->nfcb_poller);
+                // nfcb_poller_config(instance->nfcb_poller);
             }
         } else if(event.type == NfcEventTypePollerReady) {
             if(instance->state == NfcPollerStateCheckPresenceNfca) {
@@ -79,22 +82,23 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
                     instance->callback(poller_event, instance->context);
                 } else {
                     // Nfca not present
+                    FURI_LOG_E("TAG", "NOT PRESENT");
                     furi_delay_ms(100);
                     instance->state = NfcPollerStateCheckPresenceNfcb;
                     command = NfcCommandReset;
                 }
             } else if(instance->state == NfcPollerStateCheckPresenceNfcb) {
-                NfcbError error =
-                    nfcb_poller_activate(instance->nfcb_poller, &instance->nfcb_data);
-                if(error == NfcbErrorNone) {
-                    poller_event = NfcPollerEventNfcbDetected;
-                    instance->callback(poller_event, instance->context);
-                } else {
-                    // Nfcb not present
-                    furi_delay_ms(100);
+                // NfcbError error =
+                //     nfcb_poller_activate(instance->nfcb_poller, &instance->nfcb_data);
+                // if(error == NfcbErrorNone) {
+                //     poller_event = NfcPollerEventNfcbDetected;
+                //     instance->callback(poller_event, instance->context);
+                // } else {
+                //     // Nfcb not present
+                //     furi_delay_ms(100);
                     instance->state = NfcPollerStateCheckPresenceNfca;
-                    command = NfcCommandReset;
-                }
+                //     command = NfcCommandReset;
+                // }
             }
         }
     }

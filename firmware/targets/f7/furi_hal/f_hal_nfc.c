@@ -58,6 +58,7 @@ FHalNfcError f_hal_nfc_init() {
     f_hal_nfc_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     FHalNfcError error = FHalNfcErrorNone;
     f_hal_nfc_event_init();
+    f_hal_nfc_event_start();
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
     furi_hal_spi_acquire(handle);

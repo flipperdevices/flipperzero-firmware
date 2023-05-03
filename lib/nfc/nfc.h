@@ -21,6 +21,7 @@ typedef enum {
 
     NfcEventTypeListenerActivated,
     NfcEventTypePollerReady,
+    NfcEventTypeReset,
 } NfcEventType;
 
 typedef struct {
