@@ -19,7 +19,6 @@ void view_tie_icon_animation(View* view, IconAnimation* icon_animation) {
 
 void view_set_draw_callback(View* view, ViewDrawCallback callback) {
     furi_assert(view);
-    furi_assert(view->draw_callback == NULL);
     view->draw_callback = callback;
 }
 
@@ -30,7 +29,6 @@ void view_set_input_callback(View* view, ViewInputCallback callback) {
 
 void view_set_custom_callback(View* view, ViewCustomCallback callback) {
     furi_assert(view);
-    furi_assert(callback);
     view->custom_callback = callback;
 }
 
@@ -61,7 +59,6 @@ void view_set_update_callback_context(View* view, void* context) {
 
 void view_set_context(View* view, void* context) {
     furi_assert(view);
-    furi_assert(context);
     view->context = context;
 }
 
