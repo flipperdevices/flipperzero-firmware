@@ -23,10 +23,10 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
     // Device Info version
     if(sep == '.') {
         property_value_out(&property_context, NULL, 2, "format", "major", "3");
-        property_value_out(&property_context, NULL, 2, "format", "minor", "0");
+        property_value_out(&property_context, NULL, 2, "format", "minor", "1");
     } else {
         property_value_out(&property_context, NULL, 3, "device", "info", "major", "2");
-        property_value_out(&property_context, NULL, 3, "device", "info", "minor", "0");
+        property_value_out(&property_context, NULL, 3, "device", "info", "minor", "1");
     }
 
     // Model name
