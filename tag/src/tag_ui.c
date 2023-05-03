@@ -9,9 +9,33 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
         return; // try again next callback
     }
 
+    const char* heading;
+    switch(state->mode) {
+    case TagAppModeUninitialised:
+        heading = "Uninitialised";
+        break;
+    case TagAppModeReady:
+        heading = "Ready";
+        break;
+    case TagAppModePlaying:
+        heading = "Playing";
+        break;
+    case TagAppModeFinished:
+        heading = "Finished";
+        break;
+    case TagAppModeError:
+        heading = "Error";
+        break;
+    default:
+        heading = "Unknown app state";
+        break;
+    }
+
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 5, 8, AlignLeft, AlignCenter, "Ready.");
-    canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignCenter, "Fine.");
+    canvas_draw_str_aligned(canvas, 5, 8, AlignLeft, AlignCenter, heading);
+
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignCenter, "---");
 
     // seems to do string formatting into a buffer
     // furi_string_printf(data->buffer, "%04u", localCounter);
@@ -22,9 +46,10 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
     furi_mutex_release(state->data_mutex);
 }
 
-static void tag_ui_input_callback(InputEvent* input_event, void* context) {
-    furi_assert(context);
-    FuriMessageQueue* queue = context;
+static void tag_ui_input_callback(InputEvent* input_event, void* context_q) {
+    FURI_LOG_I(TAG, "Input event");
+    furi_assert(context_q);
+    FuriMessageQueue* queue = context_q;
     TagEvent event = {.type = TagEventTypeInput, .input = *input_event};
     furi_message_queue_put(queue, &event, FuriWaitForever);
 }

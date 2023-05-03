@@ -14,10 +14,12 @@ void tag_app_init() {
     state = malloc(sizeof(state));
     state->mode = TagAppModeUninitialised;
     state->queue = furi_message_queue_alloc(8, sizeof(TagEvent));
+    state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
 void tag_app_destroy() {
     furi_message_queue_free(state->queue);
+    furi_mutex_free(state->data_mutex);
     free(state);
 }
 
@@ -41,10 +43,7 @@ int32_t tag_game_app(void* p) {
 
     test_tx();
 
-    tag_ir_rx_start(tag_ir_callback_decode_to_queue, state->queue);
-
-    tag_app_game_loop_run(state, 30);
-    tag_ir_rx_stop();
+    tag_app_game_loop_run(state, 10);
 
     FURI_LOG_I(TAG, "Tearing down app");
     tag_ir_destroy();

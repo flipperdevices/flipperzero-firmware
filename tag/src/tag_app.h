@@ -29,7 +29,8 @@ typedef enum {
     TagAppModeReady,
     TagAppModePlaying,
     TagAppModeFinished,
-    TagAppModeError
+    TagAppModeError,
+    TagAppModeQuit
 } TagAppMode;
 
 typedef struct {
