@@ -177,13 +177,91 @@ void avr_isp_tpi_reader_view_enter(void* context) {
             "TAG", "configuration_bit 0x%02X", avr_tpi_get_configuration_bit(instance->avr_tpi));
         FURI_LOG_E(
             "TAG", "calibration_bit 0x%02X", avr_tpi_get_calibration_bit(instance->avr_tpi));
-        FURI_LOG_E("TAG", "end pmode");
 
-        uint8_t data[32];
-        avr_tpi_read_data_memory(instance->avr_tpi, 0x0040, data, 32);
+        uint8_t data[1024];
+        avr_tpi_read_block(instance->avr_tpi, 0x0040, data, 32);
         for(int i = 0; i < 32; i++) {
-            FURI_LOG_E("TAG", "data[%d] 0x%02X", i, data[i]);
+            FURI_LOG_RAW_E ("0x%02X, ", data[i]);
         }
+        FURI_LOG_RAW_E ("\r\n");
+
+        avr_tpi_read_block(instance->avr_tpi, 0x4000, data, 1024);
+        for(int i = 0; i < 1024; i++) {
+            FURI_LOG_RAW_E ("0x%02X, ", data[i]);
+        }
+        FURI_LOG_RAW_E ("\r\n");
+
+        // FURI_LOG_E("TAG", "configuration_bit");
+        // avr_tpi_set_configuration_bit(instance->avr_tpi, 0xFB);
+        // FURI_LOG_E(
+        //     "TAG", "configuration_bit 0x%02X", avr_tpi_get_configuration_bit(instance->avr_tpi));
+
+        FURI_LOG_E("TAG", "Erase chip");
+        avr_tpi_erase_chip(instance->avr_tpi);
+
+        // FURI_LOG_E(
+        //     "TAG", "configuration_bit 0x%02X", avr_tpi_get_configuration_bit(instance->avr_tpi));
+
+        // FURI_LOG_E("TAG", "nwm_lock_bit 0x%02X", avr_tpi_get_nwm_lock_bit(instance->avr_tpi));
+        // avr_tpi_set_nwm_lock_bit(instance->avr_tpi, 0xFC);
+        // FURI_LOG_E("TAG", "nwm_lock_bit 0x%02X", avr_tpi_get_nwm_lock_bit(instance->avr_tpi));
+
+        // FURI_LOG_E("TAG", "Erase chip");
+        // avr_tpi_erase_chip(instance->avr_tpi);
+        // furi_delay_ms(100);
+        // avr_tpi_read_block(instance->avr_tpi, 0x4000, data, 1024);
+        // for(int i = 0; i < 1024; i++) {
+        //     FURI_LOG_RAW_E ("0x%02X, ", data[i]);
+        // }
+        // FURI_LOG_RAW_E ("\r\n");
+
+        // FURI_LOG_E("TAG", "READ");
+        // avr_tpi_read_block(instance->avr_tpi, 0x4000, data, 1024);
+        // for(int i = 0; i < 1024; i++) {
+        //     FURI_LOG_RAW_E ("0x%02X, ", data[i]);
+        // }
+        // FURI_LOG_RAW_E ("\r\n");
+
+        // FURI_LOG_E("TAG", "Erase chip");
+        // avr_tpi_erase_chip(instance->avr_tpi);
+        // uint8_t buf1[32] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A,
+        //                     0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15,
+        //                     0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F};
+        // FURI_LOG_E("TAG", "read block");
+        // avr_tpi_read_block(instance->avr_tpi, 0x4000, data, 32);
+        // for(int i = 0; i < 32; i++) {
+        //     FURI_LOG_RAW_E ("0x%02X, ", data[i]);
+        // }
+        // FURI_LOG_RAW_E ("\r\n");
+
+        // avr_tpi_write_block(instance->avr_tpi, 0x4000, buf1, 32);
+        // FURI_LOG_E("TAG", "read block");
+        // avr_tpi_read_block(instance->avr_tpi, 0x4000, data, 32);
+        // for(int i = 0; i < 32; i++) {
+        //     FURI_LOG_RAW_E ("0x%02X, ", data[i]);
+        // }
+        // FURI_LOG_RAW_E ("\r\n");
+
+        // avr_tpi_erase_chip(instance->avr_tpi);
+        // FURI_LOG_E("TAG", "read block");
+        // avr_tpi_read_block(instance->avr_tpi, 0x4000, data, 32);
+        // for(int i = 0; i < 32; i++) {
+        //     FURI_LOG_RAW_E ("0x%02X, ", data[i]);
+        // }
+        // FURI_LOG_RAW_E ("\r\n");
+        // uint8_t buf2[32] = {0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A,
+        //                     0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35,
+        //                     0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F};
+
+        // avr_tpi_write_block(instance->avr_tpi, 0x4000, buf2, 32);
+        // FURI_LOG_E("TAG", "read block");
+        // avr_tpi_read_block(instance->avr_tpi, 0x4000, data, 32);
+        // for(int i = 0; i < 32; i++) {
+        //     FURI_LOG_RAW_E ("0x%02X, ", data[i]);
+        // }
+        // FURI_LOG_RAW_E ("\r\n");
+
+        FURI_LOG_E("TAG", "end pmode");
         avr_tpi_end_pmode(instance->avr_tpi);
     }
     // //Start avr_isp_worker_rw

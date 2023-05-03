@@ -27,8 +27,11 @@ void avr_tpi_erase_chip(AvrTpi* instance);
 
 AvrTpiSignature avr_tpi_get_signature(AvrTpi* instance);
 uint8_t avr_tpi_get_nwm_lock_bit(AvrTpi* instance);
+void avr_tpi_set_nwm_lock_bit(AvrTpi* instance, uint8_t value);
 uint8_t avr_tpi_get_configuration_bit(AvrTpi* instance);
+void avr_tpi_set_configuration_bit(AvrTpi* instance, uint8_t value);
 uint8_t avr_tpi_get_calibration_bit(AvrTpi* instance);
-void avr_tpi_read_data_memory(AvrTpi* instance, uint16_t address, uint8_t* data, uint16_t size);
+void avr_tpi_read_block(AvrTpi* instance, uint16_t address, uint8_t* data, uint16_t size);
+void avr_tpi_write_block(AvrTpi* instance, uint16_t address, uint8_t* data, uint16_t size);
 
 

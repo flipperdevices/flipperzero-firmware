@@ -50,7 +50,7 @@ bool avr_tpi_start_pmode(AvrTpi* instance) {
         instance->tpi = NULL;
     }
 
-    instance->tpi = avr_isp_tpi_sw_init(AvrIspTpiSwSpeed250Khz);
+    instance->tpi = avr_isp_tpi_sw_init(AvrIspTpiSwSpeed125Khz);
     avr_isp_tpi_sw_start_pmode(instance->tpi);
     // 15.7.2 TPIPCR – tiny programming interface physical layer control register
     // the default guard time is 128 IDLE bits + 0
@@ -134,7 +134,7 @@ static void avr_tpi_nvm_status_pool(AvrTpi* instance) {
             FURI_LOG_E(TAG, "Timeout waiting for TPI_IOREG_NVMCSR");
             return;
         }
-    } while(!(nvmcsr[0] & TPI_IOREG_NVMCSR_NVMBSY));
+    } while((nvmcsr[0] & TPI_IOREG_NVMCSR_NVMBSY));
 }
 
 static uint8_t avr_tpi_read_data(AvrTpi* instance) {
@@ -146,6 +146,13 @@ static uint8_t avr_tpi_read_data(AvrTpi* instance) {
     return data[0];
 }
 
+static void avr_tpi_write_data(AvrTpi* instance, uint8_t data) {
+    furi_assert(instance);
+
+    avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SST_PI);
+    avr_isp_tpi_sw_tx(instance->tpi, data);
+}
+
 void avr_tpi_erase_chip(AvrTpi* instance) {
     furi_assert(instance);
 
@@ -155,7 +162,6 @@ void avr_tpi_erase_chip(AvrTpi* instance) {
     avr_tpi_nvm_cmd(instance, TPI_NVMCMD_CHIP_ERASE);
     avr_isp_tpi_sw_tx(instance->tpi, TPI_CMD_SST);
     avr_isp_tpi_sw_tx(instance->tpi, 0xFF);
-
     avr_tpi_nvm_status_pool(instance);
 
     avr_tpi_nvm_cmd(instance, TPI_NVMCMD_NO_OPERATION);
@@ -187,8 +193,23 @@ uint8_t avr_tpi_get_nwm_lock_bit(AvrTpi* instance) {
     furi_assert(instance);
 
     //16.3.1 Non-Volatile Memory Lock Bits
+    //16.4.4 Reading NVM Lock Bits
     avr_tpi_set_pointer_reg(instance, 0x3F00);
     return avr_tpi_read_data(instance);
+}
+
+void avr_tpi_set_nwm_lock_bit(AvrTpi* instance, uint8_t value) {
+    furi_assert(instance);
+
+    avr_tpi_set_pointer_reg(instance, 0x3F00);
+    //16.4.5 Writing NVM Lock Bits
+    avr_tpi_nvm_cmd(instance, TPI_NVMCMD_WORD_WRITE);
+    avr_tpi_write_data(instance, value);
+    avr_tpi_write_data(instance, 0xFF);
+    avr_tpi_nvm_status_pool(instance);
+
+    avr_tpi_nvm_cmd(instance, TPI_NVMCMD_NO_OPERATION);
+    avr_tpi_nvm_status_pool(instance);
 }
 
 uint8_t avr_tpi_get_configuration_bit(AvrTpi* instance) {
@@ -199,6 +220,30 @@ uint8_t avr_tpi_get_configuration_bit(AvrTpi* instance) {
     return avr_tpi_read_data(instance);
 }
 
+void avr_tpi_set_configuration_bit(AvrTpi* instance, uint8_t value) {
+    furi_assert(instance);
+
+    avr_tpi_set_pointer_reg(instance, 0x3F40);
+
+    //16.4.3.4 Erasing the Configuration Section
+    avr_tpi_nvm_cmd(instance, TPI_NVMCMD_SECTION_ERASE);
+    avr_tpi_write_data(instance, 0xFF);
+    avr_tpi_write_data(instance, 0xFF);
+    avr_tpi_nvm_status_pool(instance);
+
+    if(value != 0xFF) {
+        //16.4.3.5 Writing a Configuration Word
+        avr_tpi_set_pointer_reg(instance, 0x3F40);
+        avr_tpi_nvm_cmd(instance, TPI_NVMCMD_WORD_WRITE);
+        avr_tpi_write_data(instance, value);
+        avr_tpi_write_data(instance, 0xFF);
+        avr_tpi_nvm_status_pool(instance);
+    }
+
+    avr_tpi_nvm_cmd(instance, TPI_NVMCMD_NO_OPERATION);
+    avr_tpi_nvm_status_pool(instance);
+}
+
 uint8_t avr_tpi_get_calibration_bit(AvrTpi* instance) {
     furi_assert(instance);
 
@@ -207,12 +252,31 @@ uint8_t avr_tpi_get_calibration_bit(AvrTpi* instance) {
     return avr_tpi_read_data(instance);
 }
 
-void avr_tpi_read_data_memory(AvrTpi* instance, uint16_t address, uint8_t* data, uint16_t size) {
+void avr_tpi_read_block(AvrTpi* instance, uint16_t address, uint8_t* data, uint16_t size) {
     furi_assert(instance);
     furi_assert(data);
 
+    //Figure 6-1. Data Memory Map (Byte Addressing)
     avr_tpi_set_pointer_reg(instance, address);
     for(uint16_t i = 0; i < size; i++) {
         data[i] = avr_tpi_read_data(instance);
     }
+}
+
+void avr_tpi_write_block(AvrTpi* instance, uint16_t address, uint8_t* data, uint16_t size) {
+    furi_assert(instance);
+    furi_assert(data);
+
+    //16.4.3.3 Writing a Code Word
+    avr_tpi_set_pointer_reg(instance, address);
+    avr_tpi_nvm_cmd(instance, TPI_NVMCMD_WORD_WRITE);
+
+    for(uint16_t i = 0; i < size; i += 2) {
+        avr_tpi_write_data(instance, data[i]);
+        avr_tpi_write_data(instance, data[i + 1]);
+        avr_tpi_nvm_status_pool(instance);
+    }
+
+    avr_tpi_nvm_cmd(instance, TPI_NVMCMD_NO_OPERATION);
+    avr_tpi_nvm_status_pool(instance);
 }
