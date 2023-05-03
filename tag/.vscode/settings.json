@@ -13,7 +13,9 @@
         "*.fam": "python",
         "infrared_worker.h": "c",
         "infrared_transmit.h": "c",
-        "tag_ir.h": "c"
+        "tag_ir.h": "c",
+        "furi_hal_resources.h": "c",
+        "furi_hal.h": "c"
     },
     "cortex-debug.registerUseNaturalFormat": false,
     "python.analysis.typeCheckingMode": "off",
