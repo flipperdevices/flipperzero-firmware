@@ -12,6 +12,11 @@ void tag_app_init() {
     state->queue = furi_message_queue_alloc(8, sizeof(TagEvent));
 }
 
+void tag_app_destroy() {
+    furi_message_queue_free(state->queue);
+    free(state);
+}
+
 void tag_app_start_playing() {
     // TODO
 }
@@ -63,7 +68,6 @@ int32_t tag_game_app(void* p) {
 
     FURI_LOG_I(TAG, "Initialising app");
     tag_app_init();
-    FURI_LOG_I(TAG, "Initialising IR");
     tag_ir_init(InfraredProtocolNEC, 5, 0x4);
 
     test_tx();
@@ -72,7 +76,8 @@ int32_t tag_game_app(void* p) {
     queue_spin(10);
     tag_ir_rx_stop();
 
-    FURI_LOG_I(TAG, "Tearing down IR");
+    FURI_LOG_I(TAG, "Tearing down app");
     tag_ir_destroy();
+    tag_app_destroy();
     return 0;
 }
