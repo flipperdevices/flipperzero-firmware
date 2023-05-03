@@ -13,7 +13,6 @@ typedef enum {
     InfraredUninitialised,
     InfraredReady,
     InfraredListening,
-    InfraredSending
 } TagIrMode;
 
 /**
@@ -30,9 +29,17 @@ TagIrMode tag_ir_mode_get();
 void tag_ir_init(InfraredProtocol protocol, int repeats, uint32_t address);
 
 /**
+ * An InfraredWorkerReceivedSignalCallback that : **decodes the IR message,
+ * * creates a TagEvent of type TagEventTypeInfraredMessage,
+ * * pushes the IR message onto the FuriMessageQueue provided in context.
+ * Provide this method and a queue to tag_ir_rx_start.
+ */
+void tag_ir_callback_decode_to_queue(void* context, InfraredWorkerSignal* received_signal);
+
+/**
  * Start listening for infrared signals.
  */
-void tag_ir_rx_start(InfraredWorkerReceivedSignalCallback callback, void* context);
+void tag_ir_rx_start(InfraredWorkerReceivedSignalCallback callback, FuriMessageQueue* context);
 
 /**
  * Stop listening for infrared signals.

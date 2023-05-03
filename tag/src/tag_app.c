@@ -1,7 +1,5 @@
 #include "tag_app.h"
 
-char* TAG = "tag";
-
 static TagAppState* state;
 
 TagAppState* tag_app_state_get() {
@@ -10,7 +8,8 @@ TagAppState* tag_app_state_get() {
 
 void tag_app_init() {
     state = malloc(sizeof(state));
-    state->app_mode = AppUninitialised;
+    state->app_mode = TagAppModeUninitialised;
+    state->queue = furi_message_queue_alloc(8, sizeof(TagEvent));
 }
 
 void tag_app_start_playing() {
@@ -30,18 +29,33 @@ void test_tx() {
     tag_ir_free_message(message);
 }
 
-void print_stuff(void* context, InfraredWorkerSignal* received_signal) {
-    UNUSED(context);
-    const InfraredMessage* msg = infrared_worker_get_decoded_signal(received_signal);
-    FURI_LOG_I(TAG, "protocol: %s", infrared_get_protocol_name(msg->protocol));
-    FURI_LOG_I(TAG, "address:  %d", (int)msg->address);
-    FURI_LOG_I(TAG, "command:  %d", (int)msg->command);
-}
+void queue_spin(uint32_t duration_s) {
+    uint32_t start = furi_hal_rtc_get_timestamp();
+    TagEvent received;
+    state->running = true;
+    while(state->running) {
+        switch(furi_message_queue_get(state->queue, &received, (uint32_t)500)) {
+        case FuriStatusOk:
+            FURI_LOG_I(TAG, "Event from queue: %d", received.type);
+            // TODO: do something with this event
+            break;
+        case FuriStatusErrorTimeout:
+            FURI_LOG_I(TAG, "Queue timed out.");
+            break;
+        default:
+            FURI_LOG_E(
+                TAG, "furi_message_queue_get was not FuriStatusOk or FuriStatusErrorTimeout");
+            state->running = false;
+        }
 
-void test_rx() {
-    FURI_LOG_I(TAG, "Testing receive (10s)...");
-    tag_ir_rx_start(print_stuff, NULL);
-    furi_delay_ms(10000); // 10s delay
+        // check for the end of the queue
+        uint32_t now = furi_hal_rtc_get_timestamp();
+        uint32_t duration = now - start;
+        if(duration > duration_s) {
+            FURI_LOG_I(TAG, "Finishing with the queue");
+            state->running = false;
+        }
+    }
 }
 
 int32_t tag_game_app(void* p) {
@@ -53,7 +67,10 @@ int32_t tag_game_app(void* p) {
     tag_ir_init(InfraredProtocolNEC, 5, 0x4);
 
     test_tx();
-    test_rx();
+
+    tag_ir_rx_start(tag_ir_callback_decode_to_queue, state->queue);
+    queue_spin(10);
+    tag_ir_rx_stop();
 
     FURI_LOG_I(TAG, "Tearing down IR");
     tag_ir_destroy();

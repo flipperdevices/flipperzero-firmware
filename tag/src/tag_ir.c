@@ -23,9 +23,31 @@ void tag_ir_init(InfraredProtocol proto, int rpts, uint32_t addr) {
     mode = InfraredReady;
 }
 
-void tag_ir_rx_start(InfraredWorkerReceivedSignalCallback callback, void* context) {
+void tag_ir_callback_decode_to_queue(void* context, InfraredWorkerSignal* received_signal) {
+    FuriMessageQueue* queue = context;
+    furi_assert(queue);
+
+    // decode the signal
+    const InfraredMessage* msg = infrared_worker_get_decoded_signal(received_signal);
+    FURI_LOG_I(TAG, "protocol: %s", infrared_get_protocol_name(msg->protocol));
+    FURI_LOG_I(TAG, "address:  %d", (int)msg->address);
+    FURI_LOG_I(TAG, "command:  %d", (int)msg->command);
+
+    // copy out the infrared message
+    InfraredMessage* received = malloc(sizeof(InfraredMessage));
+    received->address = msg->address;
+    received->command = msg->command;
+    received->protocol = msg->protocol;
+    received->repeat = msg->repeat;
+    TagEvent event = {.type = TagEventTypeInfraredMessage, .ir_message = received};
+
+    // push it onto the queue
+    furi_message_queue_put(queue, &event, FuriWaitForever);
+}
+
+void tag_ir_rx_start(InfraredWorkerReceivedSignalCallback callback, FuriMessageQueue* queue) {
     furi_assert(mode == InfraredReady);
-    infrared_worker_rx_set_received_signal_callback(worker, callback, context);
+    infrared_worker_rx_set_received_signal_callback(worker, callback, queue);
     infrared_worker_rx_start(worker);
     mode = InfraredListening;
 }
