@@ -7,8 +7,6 @@
 #include <lib/infrared/worker/infrared_transmit.h>
 #include <lib/infrared/worker/infrared_worker.h>
 
-#include "tag_app.h"
-
 typedef enum {
     InfraredUninitialised,
     InfraredReady,

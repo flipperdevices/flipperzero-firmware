@@ -1,4 +1,5 @@
 #include "tag_ir.h"
+#include "tag_app.h"
 
 static InfraredWorker* worker;
 static TagIrMode mode = InfraredUninitialised;

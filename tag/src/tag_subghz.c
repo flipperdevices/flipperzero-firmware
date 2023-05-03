@@ -1,5 +1,4 @@
 #include "tag_subghz.h"
-#include <lib/subghz/subghz_tx_rx_worker.h>
 
 static TagSubGhzMode mode = SubGhzUninitialised;
 
@@ -11,6 +10,6 @@ TagSubGhzMode tag_subghz_mode_get() {
 
 void tag_subghz_init() {
     furi_assert(mode == SubGhzUninitialised);
-
+    // TODO: init
     mode = SubGhzReady;
 }
