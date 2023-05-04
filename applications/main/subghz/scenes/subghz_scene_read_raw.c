@@ -298,11 +298,11 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             subghz_read_raw_update_sample_write(
                 subghz->subghz_read_raw, subghz_protocol_raw_get_sample_write(decoder_raw));
 
-            SubGhzThresholdRssiRet ret_rssi =
-                subghz_threshold_rssi_check_threshold(subghz->threshold_rssi);
+            SubGhzThresholdRssiData ret_rssi =
+                subghz_threshold_get_rssi_data(subghz->threshold_rssi);
             subghz_read_raw_add_data_rssi(
-                subghz->subghz_read_raw, ret_rssi.current_rssi, ret_rssi.threshold_level);
-            subghz_protocol_raw_save_to_file_pause(decoder_raw, !ret_rssi.threshold_level);
+                subghz->subghz_read_raw, ret_rssi.rssi, ret_rssi.is_above);
+            subghz_protocol_raw_save_to_file_pause(decoder_raw, !ret_rssi.is_above);
             break;
         case SubGhzNotificationStateTx:
             notification_message(subghz->notifications, &sequence_blink_magenta_10);
