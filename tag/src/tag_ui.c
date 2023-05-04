@@ -26,7 +26,12 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
         heading = "Finished";
         break;
     case TagAppModeError:
+        // TODO: use error mode to explain known issues to the player
         heading = "Error";
+        break;
+    case TagAppModeQuit:
+        // unlikely to ever be seen by the player
+        heading = "Exiting";
         break;
     default:
         heading = "Unknown app state";
