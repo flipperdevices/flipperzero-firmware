@@ -40,7 +40,7 @@
 #define CONST_M2_2 (LF_POLY_EVEN << 1 | 1)
 #define BIT(x, n) ((x) >> (n)&1)
 #define BEBIT(x, n) BIT(x, (n) ^ 24)
-#define SWAPENDIAN(x) (x = (x >> 8 & 0xff00ff) | (x & 0xff00ff) << 8, x = x >> 16 | x << 16)
+#define SWAPENDIAN(x) (x = (x >> 8 & 0xff00ff) | (x & 0xff00ff) << 8, x = x >> 16 | x << 16) //-V{CODE}
 //#define SIZEOF(arr) sizeof(arr) / sizeof(*arr)
 
 static int eta_round_time = 56;
@@ -203,7 +203,7 @@ static inline uint32_t crypt_word(struct Crypto1State* s) {
     uint32_t res_ret = 0;
     uint32_t feedin, t;
     for(int i = 0; i <= 31; i++) {
-        res_ret |= (filter(s->odd) << (24 ^ i));
+        res_ret |= (filter(s->odd) << (24 ^ i)); //-V{CODE}
         feedin = LF_POLY_EVEN & s->even;
         feedin ^= LF_POLY_ODD & s->odd;
         s->even = s->even << 1 | (evenparity32(feedin));
@@ -479,7 +479,7 @@ int calculate_msb_tables(
             }
         }
 
-        if(filter(semi_state) == (oks & 1)) {
+        if(filter(semi_state) == (oks & 1)) { //-V{CODE}
             states_buffer[0] = semi_state;
             states_tail = state_loop(states_buffer, oks, CONST_M1_1, CONST_M2_1);
 
@@ -502,7 +502,7 @@ int calculate_msb_tables(
             }
         }
 
-        if(filter(semi_state) == (eks & 1)) {
+        if(filter(semi_state) == (eks & 1)) { //-V{CODE}
             states_buffer[0] = semi_state;
             states_tail = state_loop(states_buffer, eks, CONST_M1_2, CONST_M2_2);
 
@@ -956,7 +956,7 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
             }
             FURI_LOG_I(TAG, "No key found for %8lx %8lx", res.uid, res.ar1_enc);
             // TODO: Refactor
-            nonce_array->remaining_nonce_array = realloc(
+            nonce_array->remaining_nonce_array = realloc( //-V{CODE}
                 nonce_array->remaining_nonce_array,
                 sizeof(MfClassicNonce) * ((nonce_array->remaining_nonces) + 1));
             nonce_array->remaining_nonces++;
@@ -1093,7 +1093,7 @@ void mfkey32(ProgramState* program_state) {
         }
         if(already_found == false) {
             // New key
-            keyarray = realloc(keyarray, sizeof(uint64_t) * (keyarray_size + 1));
+            keyarray = realloc(keyarray, sizeof(uint64_t) * (keyarray_size + 1)); //-V{CODE}
             keyarray_size += 1;
             keyarray[keyarray_size - 1] = found_key;
             (program_state->unique_cracked)++;
