@@ -29,6 +29,10 @@
 #define FURI_HAL_POWER_DEBUG_STOP_GPIO (&gpio_ext_pc3)
 #endif
 
+#ifndef FURI_HAL_POWER_STOP_MODE
+#define FURI_HAL_POWER_STOP_MODE (LL_PWR_MODE_STOP2)
+#endif
+
 typedef struct {
     volatile uint8_t insomnia;
     volatile uint8_t suppress_charge;
@@ -42,43 +46,7 @@ static volatile FuriHalPower furi_hal_power = {
     .suppress_charge = 0,
 };
 
-const ParamCEDV cedv = {
-    .cedv_conf.gauge_conf =
-        {
-            .CCT = 1,
-            .CSYNC = 0,
-            .EDV_CMP = 0,
-            .SC = 1,
-            .FIXED_EDV0 = 1,
-            .FCC_LIM = 1,
-            .FC_FOR_VDQ = 1,
-            .IGNORE_SD = 1,
-            .SME0 = 0,
-        },
-    .full_charge_cap = 2101,
-    .design_cap = 2101,
-    .EDV0 = 3300,
-    .EDV1 = 3321,
-    .EDV2 = 3355,
-    .EMF = 3679,
-    .C0 = 430,
-    .C1 = 0,
-    .R1 = 408,
-    .R0 = 334,
-    .T0 = 4626,
-    .TC = 11,
-    .DOD0 = 4044,
-    .DOD10 = 3905,
-    .DOD20 = 3807,
-    .DOD30 = 3718,
-    .DOD40 = 3642,
-    .DOD50 = 3585,
-    .DOD60 = 3546,
-    .DOD70 = 3514,
-    .DOD80 = 3477,
-    .DOD90 = 3411,
-    .DOD100 = 3299,
-};
+#include <furi_hal_power_calibration.h>
 
 void furi_hal_power_init() {
 #ifdef FURI_HAL_POWER_DEBUG
@@ -90,8 +58,9 @@ void furi_hal_power_init() {
 
     LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
     LL_PWR_SMPS_SetMode(LL_PWR_SMPS_STEP_DOWN);
-    LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
+
+    LL_PWR_SetPowerMode(FURI_HAL_POWER_STOP_MODE);
+    LL_C2_PWR_SetPowerMode(FURI_HAL_POWER_STOP_MODE);
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
     bq27220_init(&furi_hal_i2c_handle_power, &cedv);
