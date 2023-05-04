@@ -405,7 +405,8 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
 
     if(sequence->sequence_used >= sequence->sequence_size) {
         sequence->sequence_size += 256;
-        sequence->sequence = realloc(sequence->sequence, sequence->sequence_size);
+        sequence->sequence = realloc(sequence->sequence, sequence->sequence_size); //-V701
+        furi_assert(sequence->sequence);
     }
 
     sequence->sequence[sequence->sequence_used++] = signal_index;
@@ -479,7 +480,7 @@ static void digital_sequence_finish(DigitalSequence* sequence) {
                 break;
             }
 
-            if(last_pos != dma_buffer->read_pos) {
+            if(last_pos != dma_buffer->read_pos) { //-V547
                 prev_timer = DWT->CYCCNT;
             }
             if(DWT->CYCCNT - prev_timer > wait_ticks) {
@@ -513,7 +514,7 @@ static void digital_sequence_queue_pulse(DigitalSequence* sequence, uint32_t len
                 break;
             }
 
-            if(last_pos != dma_buffer->read_pos) {
+            if(last_pos != dma_buffer->read_pos) { //-V547
                 prev_timer = DWT->CYCCNT;
             }
             if(DWT->CYCCNT - prev_timer > wait_ticks) {
