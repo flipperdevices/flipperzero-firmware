@@ -35,8 +35,16 @@ void test_tx() {
     tag_ir_free_message(message);
 }
 
-int32_t tag_game_app(void* p) {
+void tag_app_set_log_level() {
+#ifdef FURI_DEBUG
     furi_log_set_level(FuriLogLevelTrace);
+#else
+    furi_log_set_level(FuriLogLevelInfo);
+#endif
+}
+
+int32_t tag_game_app(void* p) {
+    tag_app_set_log_level();
     FURI_LOG_T(TAG, "tag_game_app");
     UNUSED(p);
 
