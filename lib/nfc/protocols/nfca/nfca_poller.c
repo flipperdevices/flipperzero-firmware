@@ -99,7 +99,7 @@ NfcaError
     instance->context = context;
 
     instance->session_state = NfcaPollerSessionStateActive;
-    nfc_start_worker(instance->nfc, nfca_poller_event_callback, instance);
+    nfc_start_poller(instance->nfc, nfca_poller_event_callback, instance);
 
     return NfcaErrorNone;
 }

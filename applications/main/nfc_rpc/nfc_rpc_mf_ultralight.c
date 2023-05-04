@@ -238,7 +238,7 @@ void nfc_rpc_mf_ultralight_emulate_stop(Nfc_Main* cmd, void* context) {
     cmd->which_content = Nfc_Main_mf_ultralight_emulate_stop_resp_tag;
     if(instance->mf_ul_listener) {
         // Stop before free
-        mf_ultralight_listener_reset(instance->mf_ul_listener);
+        mf_ultralight_listener_stop(instance->mf_ul_listener);
         instance->mf_ul_listener = NULL;
         pb_mf_ultralight_emulate_stop_resp.error = PB_MfUltralight_Error_None;
     } else {

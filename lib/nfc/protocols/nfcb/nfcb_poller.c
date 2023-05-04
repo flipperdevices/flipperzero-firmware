@@ -53,7 +53,7 @@ NfcbError
     instance->callback = callback;
     instance->context = context;
 
-    nfc_start_worker(instance->nfc, nfcb_poller_event_callback, instance);
+    nfc_start_poller(instance->nfc, nfcb_poller_event_callback, instance);
     return NfcbErrorNone;
 }
 

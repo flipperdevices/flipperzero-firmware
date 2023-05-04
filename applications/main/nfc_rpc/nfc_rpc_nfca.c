@@ -103,7 +103,7 @@ static void nfc_rpc_nfca_emulate_stop(Nfc_Main* cmd, void* context) {
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_emulate_stop_resp_tag;
     if(instance->nfca_listener) {
-        nfca_listener_reset(instance->nfca_listener);
+        nfca_listener_stop(instance->nfca_listener);
         instance->nfca_listener = NULL;
         pb_nfca_emulate_stop_resp.error = PB_Nfca_Error_None;
     } else {

@@ -92,7 +92,9 @@ NfcError nfc_listener_set_col_res_data(
     uint8_t* atqa,
     uint8_t sak);
 
-void nfc_start_worker(Nfc* instance, NfcEventCallback callback, void* context);
+void nfc_start_poller(Nfc* instance, NfcEventCallback callback, void* context);
+
+void nfc_start_listener(Nfc* instance, NfcEventCallback callback, void* context);
 
 NfcError nfc_listener_sleep(Nfc* instance);
 

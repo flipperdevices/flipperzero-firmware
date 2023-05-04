@@ -125,7 +125,7 @@ bool nfc_scene_nfca_emulate_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_nfca_emulate_on_exit(void* context) {
     NfcApp* nfc = context;
 
-    nfca_listener_reset(nfc->nfca_listener);
+    nfca_listener_stop(nfc->nfca_listener);
 
     // Clear view
     widget_reset(nfc->widget);

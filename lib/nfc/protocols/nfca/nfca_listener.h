@@ -10,12 +10,14 @@ extern "C" {
 typedef struct NfcaListener NfcaListener;
 
 typedef enum {
+    NfcaListenerEventConfigRequest,
     NfcaListenerEventTypeAbort,
     NfcaListenerEventTypeFieldOn,
     NfcaListenerEventTypeFieldOff,
     NfcaListenerEventTypeHalted,
     NfcaListenerEventTypeReceivedStandartFrame,
     NfcaListenerEventTypeReceivedData,
+    NfcaListenerEventTypeReset,
 } NfcaListenerEventType;
 
 typedef struct {
@@ -47,7 +49,7 @@ NfcaError nfca_listener_start(
 
 NfcaError nfca_listener_get_data(NfcaListener* instance, NfcaData* data);
 
-NfcaError nfca_listener_reset(NfcaListener* instance);
+NfcaError nfca_listener_stop(NfcaListener* instance);
 
 // Called from NfcWorker thread
 

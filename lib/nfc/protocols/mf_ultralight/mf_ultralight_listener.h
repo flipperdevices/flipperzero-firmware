@@ -42,7 +42,7 @@ MfUltralightError mf_ultralight_listener_start(
     MfUltralightListenerEventCallback callback,
     void* context);
 
-MfUltralightError mf_ultralight_listener_reset(MfUltralightListener* instance);
+MfUltralightError mf_ultralight_listener_stop(MfUltralightListener* instance);
 
 #ifdef __cplusplus
 }

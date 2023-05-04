@@ -216,11 +216,11 @@ void mf_ultralight_listener_free(MfUltralightListener* instance) {
     free(instance);
 }
 
-MfUltralightError mf_ultralight_listener_reset(MfUltralightListener* instance) {
+MfUltralightError mf_ultralight_listener_stop(MfUltralightListener* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
 
-    NfcaError error = nfca_listener_reset(instance->nfca_listener);
+    NfcaError error = nfca_listener_stop(instance->nfca_listener);
     instance->state = MfUltraligthListenerStateIdle;
     free(instance->data);
 

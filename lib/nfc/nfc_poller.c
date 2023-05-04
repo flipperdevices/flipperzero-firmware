@@ -138,7 +138,7 @@ void nfc_poller_start(NfcPoller* instance, NfcPollerEventCallback callback, void
     instance->state = NfcPollerStateCheckPresenceNfca;
     instance->session_state = NfcPollerSessionStateActive;
 
-    nfc_start_worker(instance->nfc, nfc_poller_event_callback, instance);
+    nfc_start_poller(instance->nfc, nfc_poller_event_callback, instance);
 }
 
 void nfc_poller_stop(NfcPoller* instance) {
