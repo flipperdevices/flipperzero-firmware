@@ -6,22 +6,8 @@
 #define EEPROM_I2C_ADDR (0x50 << 1)
 
 uint8_t data_buffer[4];
-uint8_t address_54_buffer[4] = { 0x83, 0x42, 0x02, 0x8C };
-uint8_t address_44_buffer[4] = { 0x83, 0x82, 0x02, 0x8C };
-
-uint8_t virgin_buffer[128] = {
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-};
+uint8_t address_54_buffer[4];
+uint8_t address_44_buffer[4];
 
 bool write_buffer(uint8_t *buffer, size_t buffer_size, uint8_t start_address){
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
@@ -42,11 +28,14 @@ bool write_buffer(uint8_t *buffer, size_t buffer_size, uint8_t start_address){
 	furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 	return result;
 }
-void virgin(){    
-	write_buffer(virgin_buffer, sizeof(virgin_buffer), 0x00);
+void write_dump(uint8_t* buffer, size_t size){    
+	write_buffer(buffer, size, 0x00);
 }
 
-void write_10_eur(){
+void write_credit(float value){
+	calc_credit(value, address_44_buffer);
+	memcpy(address_54_buffer, address_44_buffer, 4 * sizeof(uint8_t));
+    address_54_buffer[1] -= 0x40;
 	write_buffer(address_44_buffer, sizeof(address_44_buffer), 0x44);
 	write_buffer(address_54_buffer, sizeof(address_54_buffer), 0x54);
 }
@@ -70,7 +59,7 @@ void dump(){
 	furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 }
 
-double read_credit(){
+float read_credit(){
     memset(data_buffer, 0, sizeof(data_buffer)); //reset array
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
 	bool is_ready = false;
@@ -106,4 +95,42 @@ double read_credit(){
 	}
     furi_hal_i2c_release(&furi_hal_i2c_handle_external);
 	return 0.0;
+}
+void calc_credit(float value, uint8_t* result){
+	//credit
+	uint8_t coeff[8];
+	uint16_t n = value * 100;
+    for (size_t i = 0; i < 8; i++) {
+        coeff[i] = n % 4;
+        n /= 4;
+    }
+	uint8_t credit[4];
+	for (size_t i = 0; i < 4; i++) {
+		uint8_t bit3 = (coeff[7 - i] >> 1) & 1;
+		uint8_t bit2 = coeff[7 - i] & 1;
+		uint8_t bit1 = (coeff[3 - i] >> 1) & 1;
+		uint8_t bit0 = coeff[3 - i] & 1;
+		credit[i] = (bit3 << 3) | (bit2 << 2) | (bit1 << 1) | bit0;
+    }
+	//checksum
+	uint8_t exponents[] = {12, 8, 4, 0};
+	uint16_t numerator = value * 100;
+	uint8_t sub_factor = 0;
+
+	for (size_t i = 0; i < 4; i++) {
+		sub_factor += numerator / (1 << exponents[i]);
+		numerator = numerator % (1 << exponents[i]);
+	}
+	
+	uint8_t subbed = 187 - sub_factor;
+	
+	uint8_t checksum[4];
+	for (size_t i = 0; i < 4; i++) {
+        checksum[3 - i] = (subbed % 4) * 4;
+        subbed /= 4;
+    }
+    //concatnate
+    for (size_t i = 0; i < 4; i++) {
+        result[i] = (checksum[i] << 4) | credit[i];
+    }
 }
