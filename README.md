@@ -5,9 +5,11 @@
 
 ## Features
 - Read credit on load
-- Press -> right, set credit to 10 EUR
-- Press . center, dump the EEPROM to serial (USB connected, log mode ON)
-- Press <- left, erase the EEPROM
+- Press <- left, load .bin dump from storage
+- Press -> right, dump EEPROM .bin to storage /ext/app_data/coffee_eeprom
+- Hold . center, Enter credit editor mode
+    - <- -> to move the digit cursor
+    - up/down to increase/decrease the digit value (min 0.01 max 655.35)
 
 ## Flipper Prototyping Board Schematic
 
@@ -27,6 +29,10 @@ The upper 6 pins male header is not required (unless you want to use the PicKit2
 
 ![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAP/raw/master/assets/a74c600b-28eb-400c-b6e2-54530d133a6a.jpg)
 
+
+## FAP
+
+![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAP/raw/master/assets/Screenshot.png)
 
 ## Demo
 
