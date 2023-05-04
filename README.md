@@ -15,6 +15,7 @@ Flipper Zero port of Chrome's running T-rex game
 ## Screenshots
 
 ![image](imgs/Screenshot-20230504-232830.png)
+![image](imgs/Screenshot-20230504-234841.png)
 ![image](imgs/Screenshot-20230504-232915.png)
 ![image](imgs/Screenshot-20230504-233007.png)
 
