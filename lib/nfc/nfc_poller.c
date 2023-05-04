@@ -100,6 +100,12 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
                 //     command = NfcCommandReset;
                 // }
             }
+        } else if(event.type == NfcEventTypeReset) {
+            if(instance->state == NfcPollerStateCheckPresenceNfca) {
+                nfca_poller_reset(instance->nfca_poller);
+            } else if(instance->state == NfcPollerStateCheckPresenceNfcb) {
+                // nfcb_poller_reset(instance->nfcb_poller);
+            }
         }
     }
 

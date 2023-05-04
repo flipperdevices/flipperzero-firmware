@@ -173,7 +173,7 @@ static int32_t nfc_worker_poller(void* context) {
                 break;
             }
             // Delay to power off target nfc device
-            furi_delay_ms(200);
+            furi_delay_ms(100);
             instance->state = NfcStateChipSleep;
         }
     }
