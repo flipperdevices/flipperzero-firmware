@@ -23,6 +23,13 @@ static void tag_app_quit(TagAppState* state) {
     furi_mutex_release(state->data_mutex);
 }
 
+static void tag_app_error(TagAppState* state) {
+    furi_mutex_acquire(state->data_mutex, FuriWaitForever);
+    if(state->mode == TagAppModePlaying) tag_ir_rx_stop();
+    state->mode = TagAppModeError;
+    furi_mutex_release(state->data_mutex);
+}
+
 static bool tag_app_handle_input(TagAppState* state, InputEvent input) {
     if(input.type == InputTypeShort) {
         if(input.key == InputKeyOk) {
@@ -45,7 +52,7 @@ static bool tag_app_handle_input(TagAppState* state, InputEvent input) {
     }
     if(input.type == InputTypeLong && input.key == InputKeyBack) {
         tag_app_quit(state);
-        return true;
+        return false; // don't try to update the ui while quitting
     }
 
     return false;
@@ -59,7 +66,7 @@ void tag_app_game_loop_run(TagAppState* state, uint32_t duration_s) {
     TagEvent event;
     state->running = true;
     while(state->running) {
-        switch(furi_message_queue_get(state->queue, &event, (uint32_t)500)) {
+        switch(furi_message_queue_get(state->queue, &event, 500)) {
         case FuriStatusOk:
             FURI_LOG_I(TAG, "Event from queue: %d", event.type);
             bool updated = false;
@@ -77,7 +84,6 @@ void tag_app_game_loop_run(TagAppState* state, uint32_t duration_s) {
                 FURI_LOG_E(TAG, "Unknown event received from queue.");
                 break;
             }
-
             if(updated) {
                 view_port_update(state->view_port);
             }
@@ -88,14 +94,8 @@ void tag_app_game_loop_run(TagAppState* state, uint32_t duration_s) {
             FURI_LOG_D(TAG, "furi_message_queue_get timed out");
             break;
         default:
-            FURI_LOG_E(
-                TAG, "furi_message_queue_get was not FuriStatusOk or FuriStatusErrorTimeout");
-            state->mode = TagAppModeError;
-            state->running = false;
-        }
-
-        if(state->mode == TagAppModeQuit) {
-            state->running = false;
+            FURI_LOG_E(TAG, "furi_message_queue_get was neither ok nor timeout");
+            tag_app_error(state);
         }
 
         // TODO: this is for testing - remove when there are end conditions for the app
@@ -105,9 +105,13 @@ void tag_app_game_loop_run(TagAppState* state, uint32_t duration_s) {
             uint32_t duration = now - start;
             if(duration > duration_s) {
                 FURI_LOG_I(TAG, "Finishing the run loop");
-                state->running = false;
+                tag_app_quit(state);
             }
         } // duration check
+
+        if(state->mode == TagAppModeQuit || state->mode == TagAppModeError) {
+            state->running = false;
+        }
     } // run loop
     FURI_LOG_I(TAG, "Run loop completed");
 }

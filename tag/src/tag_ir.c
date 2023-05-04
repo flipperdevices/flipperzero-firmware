@@ -14,6 +14,8 @@ TagIrMode tag_ir_mode_get() {
 }
 
 void tag_ir_init(InfraredProtocol proto, int rpts, uint32_t addr) {
+    FURI_LOG_T(TAG, "tag_ir_init");
+    FURI_LOG_D(TAG, "tag_ir_init assertion: mode == InfraredUninitialised");
     furi_assert(mode == InfraredUninitialised);
     worker = infrared_worker_alloc();
     infrared_worker_rx_enable_blink_on_receiving(worker, true);
@@ -25,7 +27,9 @@ void tag_ir_init(InfraredProtocol proto, int rpts, uint32_t addr) {
 }
 
 void tag_ir_callback_decode_to_queue(void* context, InfraredWorkerSignal* received_signal) {
+    FURI_LOG_T(TAG, "tag_ir_callback_decode_to_queue");
     FuriMessageQueue* queue = context;
+    FURI_LOG_D(TAG, "tag_ir_callback_decode_to_queue assertion: queue");
     furi_assert(queue);
 
     // decode the signal
@@ -47,6 +51,8 @@ void tag_ir_callback_decode_to_queue(void* context, InfraredWorkerSignal* receiv
 }
 
 void tag_ir_rx_start(InfraredWorkerReceivedSignalCallback callback, FuriMessageQueue* queue) {
+    FURI_LOG_T(TAG, "tag_ir_rx_start");
+    FURI_LOG_D(TAG, "tag_ir_rx_start assertion:  mode == InfraredReady");
     furi_assert(mode == InfraredReady);
     infrared_worker_rx_set_received_signal_callback(worker, callback, queue);
     infrared_worker_rx_start(worker);
@@ -54,13 +60,17 @@ void tag_ir_rx_start(InfraredWorkerReceivedSignalCallback callback, FuriMessageQ
 }
 
 void tag_ir_rx_stop() {
+    FURI_LOG_T(TAG, "tag_ir_rx_stop");
+    FURI_LOG_D(TAG, "tag_ir_rx_stop assertion: mode == InfraredListening");
     furi_assert(mode == InfraredListening);
     infrared_worker_rx_stop(worker);
     mode = InfraredReady;
 }
 
 void tag_ir_destroy() {
+    FURI_LOG_T(TAG, "tag_ir_destroy");
     if(mode == InfraredListening) tag_ir_rx_stop();
+    FURI_LOG_D(TAG, "tag_ir_destroy assertion: mode == InfraredReady");
     furi_assert(mode == InfraredReady);
     infrared_worker_free(worker);
     mode = InfraredUninitialised;
@@ -76,26 +86,33 @@ static InfraredMessage* tag_ir_create_message(
     uint32_t address,
     uint32_t command,
     bool repeat) {
+    FURI_LOG_T(TAG, "tag_ir_create_message");
     InfraredMessage* msg = malloc(sizeof(InfraredMessage));
     msg->protocol = protocol;
     msg->address = address;
     msg->command = command;
     msg->repeat = repeat;
+    FURI_LOG_D(TAG, "tag_ir_create_message assertion: tag_ir_message_valid(msg)");
     furi_assert(tag_ir_message_valid(msg));
     return msg;
 }
 
 InfraredMessage* tag_ir_create_firing_message(int identity) {
+    FURI_LOG_T(TAG, "tag_ir_create_firing_message");
     uint32_t command = (uint32_t)identity;
     return tag_ir_create_message(protocol, address, command, true);
 }
 
 void tag_ir_free_message(InfraredMessage* msg) {
+    FURI_LOG_T(TAG, "tag_ir_free_message");
+    FURI_LOG_D(TAG, "tag_ir_free_message assertion: msg != NULL");
     furi_assert(msg != NULL);
     free(msg);
 }
 
 void tag_ir_send(InfraredMessage* msg) {
+    FURI_LOG_T(TAG, "tag_ir_send");
+    FURI_LOG_D(TAG, "tag_ir_send assertion: tag_ir_message_valid(msg)");
     furi_assert(tag_ir_message_valid(msg));
     infrared_send(msg, repeats);
 }
@@ -103,6 +120,7 @@ void tag_ir_send(InfraredMessage* msg) {
 // validation methods
 
 bool tag_ir_message_valid(InfraredMessage* message) {
+    FURI_LOG_T(TAG, "tag_ir_message_valid");
     if(!infrared_is_protocol_valid(message->protocol)) {
         FURI_LOG_E(TAG, "Unknown protocol");
         return false;

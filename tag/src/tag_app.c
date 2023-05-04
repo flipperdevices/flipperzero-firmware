@@ -11,28 +11,33 @@ TagAppState* tag_app_state_get() {
 }
 
 void tag_app_init() {
-    state = malloc(sizeof(state));
+    FURI_LOG_T(TAG, "tag_app_init");
+    state = malloc(sizeof(TagAppState));
     state->mode = TagAppModeUninitialised;
     state->queue = furi_message_queue_alloc(8, sizeof(TagEvent));
     state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
 void tag_app_destroy() {
+    FURI_LOG_T(TAG, "tag_app_destroy");
     furi_message_queue_free(state->queue);
     furi_mutex_free(state->data_mutex);
     free(state);
 }
 
 void test_tx() {
-    FURI_LOG_I(TAG, "Creating message for address: 0x4, command: 0x11");
+    FURI_LOG_T(TAG, "test_tx");
+    FURI_LOG_D(TAG, "Creating message for address: 0x4, command: 0x11");
     InfraredMessage* message = tag_ir_create_firing_message(0x11);
-    FURI_LOG_I(TAG, "Sending message (5 repeats)");
+    FURI_LOG_D(TAG, "Sending message (5 repeats)");
     tag_ir_send(message);
-    FURI_LOG_I(TAG, "Freeing message");
+    FURI_LOG_D(TAG, "Freeing message");
     tag_ir_free_message(message);
 }
 
 int32_t tag_game_app(void* p) {
+    furi_log_set_level(FuriLogLevelTrace);
+    FURI_LOG_T(TAG, "tag_game_app");
     UNUSED(p);
 
     FURI_LOG_I(TAG, "Initialising app");

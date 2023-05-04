@@ -2,6 +2,8 @@
 #include "tag_app.h"
 
 static void tag_ui_render_callback(Canvas* canvas, void* context) {
+    FURI_LOG_T(TAG, "tag_ui_render_callback");
+    FURI_LOG_D(TAG, "tag_ui_render_callback assertion: context");
     furi_assert(context);
     TagAppState* state = context;
 
@@ -47,7 +49,9 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
 }
 
 static void tag_ui_input_callback(InputEvent* input_event, void* context_q) {
-    FURI_LOG_I(TAG, "Input event");
+    FURI_LOG_T(TAG, "tag_ui_input_callback");
+    FURI_LOG_I(TAG, "Input event received");
+    FURI_LOG_D(TAG, "tag_ui_input_callback assertion: context_q");
     furi_assert(context_q);
     FuriMessageQueue* queue = context_q;
     TagEvent event = {.type = TagEventTypeInput, .input = *input_event};
@@ -55,6 +59,7 @@ static void tag_ui_input_callback(InputEvent* input_event, void* context_q) {
 }
 
 void tag_ui_init(TagAppState* state) {
+    FURI_LOG_T(TAG, "tag_ui_init");
     state->view_port = view_port_alloc();
     view_port_draw_callback_set(state->view_port, tag_ui_render_callback, state);
     view_port_input_callback_set(state->view_port, tag_ui_input_callback, state->queue);
@@ -63,6 +68,7 @@ void tag_ui_init(TagAppState* state) {
 }
 
 void tag_ui_destroy(TagAppState* state) {
+    FURI_LOG_T(TAG, "tag_ui_destroy");
     view_port_enabled_set(state->view_port, false);
     gui_remove_view_port(state->gui, state->view_port);
     view_port_free(state->view_port);
