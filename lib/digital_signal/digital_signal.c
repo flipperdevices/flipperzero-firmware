@@ -51,6 +51,16 @@ struct DigitalSignalInternals {
 #define T_TIM 1562 /* 15.625 ns *100 */
 #define T_TIM_DIV2 781 /* 15.625 ns / 2 *100 */
 
+/* maximum entry count of the sequence dma ring buffer */
+#define SEQUENCE_DMA_RINGBUFFER_SIZE 32
+/* maximum number of DigitalSignals in a sequence */
+#define SEQUENCE_SIGNALS_SIZE 32
+/*
+ * if sequence size runs out from the initial value passed to digital_sequence_alloc
+ * the size will be increased by this amount and reallocated
+ */
+#define SEQUENCE_SIZE_REALLOCATE_INCREMENT 256
+
 DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
     DigitalSignal* signal = malloc(sizeof(DigitalSignal));
     signal->start_level = true;
@@ -328,7 +338,7 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     sequence->bake = false;
 
     sequence->dma_buffer = malloc(sizeof(struct ReloadBuffer));
-    sequence->dma_buffer->size = 32;
+    sequence->dma_buffer->size = SEQUENCE_DMA_RINGBUFFER_SIZE;
     sequence->dma_buffer->buffer = malloc(sequence->dma_buffer->size * sizeof(uint32_t));
 
     sequence->dma_config_gpio.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
@@ -353,7 +363,7 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
     sequence->dma_config_timer.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
     sequence->dma_config_timer.Priority = LL_DMA_PRIORITY_HIGH;
 
-    digital_sequence_alloc_signals(sequence, 32);
+    digital_sequence_alloc_signals(sequence, SEQUENCE_SIGNALS_SIZE);
     digital_sequence_alloc_sequence(sequence, size);
 
     return sequence;
@@ -396,7 +406,7 @@ void digital_sequence_add(DigitalSequence* sequence, uint8_t signal_index) {
     furi_assert(signal_index < sequence->signals_size);
 
     if(sequence->sequence_used >= sequence->sequence_size) {
-        sequence->sequence_size += 256;
+        sequence->sequence_size += SEQUENCE_SIZE_REALLOCATE_INCREMENT;
         sequence->sequence = realloc(sequence->sequence, sequence->sequence_size); //-V701
         furi_assert(sequence->sequence);
     }
