@@ -78,7 +78,7 @@ void subghz_txrx_set_preset(
     preset->data_size = preset_data_size;
 }
 
-const char* subghz_txrx_get_name_preset(SubGhzTxRx* instance, const char* preset) {
+const char* subghz_txrx_get_preset_name(SubGhzTxRx* instance, const char* preset) {
     UNUSED(instance);
     const char* preset_name = "";
     if(!strcmp(preset, "FuriHalSubGhzPresetOok270Async")) {
@@ -102,7 +102,7 @@ SubGhzRadioPreset subghz_txrx_get_preset(SubGhzTxRx* instance) {
     return *instance->preset;
 }
 
-void subghz_txrx_get_frequency_modulation(
+void subghz_txrx_get_frequency_and_modulation(
     SubGhzTxRx* instance,
     FuriString* frequency,
     FuriString* modulation) {
@@ -280,7 +280,7 @@ void subghz_txrx_rx_start(SubGhzTxRx* instance) {
     subghz_txrx_rx(instance, instance->preset->frequency);
 }
 
-void subghz_txrx_need_save_callback_set(
+void subghz_txrx_set_need_save_callback(
     SubGhzTxRx* instance,
     SubGhzTxRxNeedSaveCallback callback,
     void* context) {
@@ -309,7 +309,7 @@ static void subghz_txrx_tx_stop(SubGhzTxRx* instance) {
     // notification_message(notifications, &sequence_reset_red);
 }
 
-FlipperFormat* subghz_txtx_get_fff_data(SubGhzTxRx* instance) {
+FlipperFormat* subghz_txrx_get_fff_data(SubGhzTxRx* instance) {
     furi_assert(instance);
     return instance->fff_data;
 }
@@ -396,7 +396,7 @@ void subghz_txrx_hopper_set_state(SubGhzTxRx* instance, SubGhzHopperState state)
     instance->hopper_state = state;
 }
 
-void subghz_txrx_hopper_remove_pause(SubGhzTxRx* instance) {
+void subghz_txrx_hopper_unpause(SubGhzTxRx* instance) {
     furi_assert(instance);
     if(instance->hopper_state == SubGhzHopperStatePause) {
         instance->hopper_state = SubGhzHopperStateRunnig;
@@ -478,14 +478,14 @@ SubGhzProtocolDecoderBase* subghz_txrx_get_decoder(SubGhzTxRx* instance) {
     return instance->decoder_result;
 }
 
-bool subghz_txrx_protocol_is_preserved(SubGhzTxRx* instance) {
+bool subghz_txrx_protocol_is_serializable(SubGhzTxRx* instance) {
     furi_assert(instance);
     return (
         (instance->decoder_result->protocol->flag & SubGhzProtocolFlag_Save) ==
         SubGhzProtocolFlag_Save);
 }
 
-bool subghz_txrx_protocol_is_send(SubGhzTxRx* instance, bool check_type) {
+bool subghz_txrx_protocol_is_transmittable(SubGhzTxRx* instance, bool check_type) {
     furi_assert(instance);
     const SubGhzProtocol* protocol = instance->decoder_result->protocol;
     if(check_type) {
@@ -510,7 +510,7 @@ void subghz_txrx_set_rx_calback(
     subghz_receiver_set_rx_callback(instance->receiver, callback, context);
 }
 
-void subghz_txrx_set_raw_file_encoder_worker_set_callback_end(
+void subghz_txrx_set_raw_file_encoder_worker_callback_end(
     SubGhzTxRx* instance,
     SubGhzProtocolEncoderRAWCallbackEnd callback,
     void* context) {

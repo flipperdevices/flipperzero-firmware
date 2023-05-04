@@ -40,7 +40,7 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
         FuriString* frequency_str = furi_string_alloc();
         FuriString* modulation_str = furi_string_alloc();
 
-        subghz_txrx_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
+        subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str);
 
         subghz_view_receiver_add_data_statusbar(
             subghz->subghz_receiver,

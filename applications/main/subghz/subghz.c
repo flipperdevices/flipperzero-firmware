@@ -161,7 +161,7 @@ SubGhz* subghz_alloc() {
     //init TxRx & History & KeyBoard
     subghz->txrx = subghz_txrx_alloc();
     subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
-    subghz_txrx_need_save_callback_set(subghz->txrx, subghz_save_to_file, subghz);
+    subghz_txrx_set_need_save_callback(subghz->txrx, subghz_save_to_file, subghz);
 
     //Init Error_str
     subghz->error_str = furi_string_alloc();

@@ -13,7 +13,7 @@ bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     do {
-        FlipperFormat* fff_data = subghz_txtx_get_fff_data(subghz->txrx);
+        FlipperFormat* fff_data = subghz_txrx_get_fff_data(subghz->txrx);
         if(!flipper_format_rewind(fff_data)) {
             FURI_LOG_E(TAG, "Rewind error");
             break;
@@ -40,7 +40,7 @@ static void subghz_scene_read_raw_update_statusbar(void* context) {
     FuriString* frequency_str = furi_string_alloc();
     FuriString* modulation_str = furi_string_alloc();
 
-    subghz_txrx_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
+    subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str);
     subghz_read_raw_add_data_statusbar(
         subghz->subghz_read_raw,
         furi_string_get_cstr(frequency_str),
@@ -194,7 +194,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             if(subghz_file_available(subghz) && subghz_scene_read_raw_update_filename(subghz)) {
                 //start send
                 subghz->state_notifications = SubGhzNotificationStateIDLE;
-                if(!subghz_tx_start(subghz, subghz_txtx_get_fff_data(subghz->txrx))) {
+                if(!subghz_tx_start(subghz, subghz_txrx_get_fff_data(subghz->txrx))) {
                     subghz_rx_key_state_set(subghz, SubGhzRxKeyStateBack);
                     subghz_read_raw_set_status(
                         subghz->subghz_read_raw,
@@ -207,7 +207,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                         DOLPHIN_DEED(DolphinDeedSubGhzSend);
                     }
                     // set callback end tx
-                    subghz_txrx_set_raw_file_encoder_worker_set_callback_end(
+                    subghz_txrx_set_raw_file_encoder_worker_callback_end(
                         subghz->txrx, subghz_scene_read_raw_callback_end_tx, subghz);
                     subghz->state_notifications = SubGhzNotificationStateTx;
                 }
@@ -238,7 +238,7 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
             furi_string_printf(
                 temp_str, "%s/%s%s", SUBGHZ_RAW_FOLDER, RAW_FILE_NAME, SUBGHZ_APP_EXTENSION);
             subghz_protocol_raw_gen_fff_data(
-                subghz_txtx_get_fff_data(subghz->txrx), furi_string_get_cstr(temp_str));
+                subghz_txrx_get_fff_data(subghz->txrx), furi_string_get_cstr(temp_str));
             furi_string_free(temp_str);
 
             if(spl_count > 0) {

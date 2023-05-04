@@ -50,7 +50,7 @@ void subghz_scene_receiver_info_on_enter(void* context) {
         FuriString* modulation_str = furi_string_alloc();
         FuriString* text = furi_string_alloc();
 
-        subghz_txrx_get_frequency_modulation(subghz->txrx, frequency_str, modulation_str);
+        subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str);
         widget_add_string_element(
             subghz->widget,
             78,
@@ -76,7 +76,7 @@ void subghz_scene_receiver_info_on_enter(void* context) {
         furi_string_free(modulation_str);
         furi_string_free(text);
 
-        if(subghz_txrx_protocol_is_preserved(subghz->txrx)) {
+        if(subghz_txrx_protocol_is_serializable(subghz->txrx)) {
             widget_add_button_element(
                 subghz->widget,
                 GuiButtonTypeRight,
@@ -84,7 +84,7 @@ void subghz_scene_receiver_info_on_enter(void* context) {
                 subghz_scene_receiver_info_callback,
                 subghz);
         }
-        if(subghz_txrx_protocol_is_send(subghz->txrx, true)) {
+        if(subghz_txrx_protocol_is_transmittable(subghz->txrx, true)) {
             widget_add_button_element(
                 subghz->widget,
                 GuiButtonTypeCenter,
@@ -114,7 +114,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                    subghz,
                    subghz_history_get_raw_data(subghz->history, subghz->idx_menu_chosen))) {
                 subghz_txrx_rx_start(subghz->txrx);
-                subghz_txrx_hopper_remove_pause(subghz->txrx);
+                subghz_txrx_hopper_unpause(subghz->txrx);
                 subghz->state_notifications = SubGhzNotificationStateRx;
             } else {
                 subghz->state_notifications = SubGhzNotificationStateTx;
@@ -126,7 +126,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
 
             subghz_txrx_rx_start(subghz->txrx);
 
-            subghz_txrx_hopper_remove_pause(subghz->txrx);
+            subghz_txrx_hopper_unpause(subghz->txrx);
             subghz->state_notifications = SubGhzNotificationStateRx;
             return true;
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoSave) {
@@ -139,7 +139,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
                 return false;
             }
 
-            if(subghz_txrx_protocol_is_preserved(subghz->txrx)) {
+            if(subghz_txrx_protocol_is_serializable(subghz->txrx)) {
                 subghz_file_name_clear(subghz);
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             }
