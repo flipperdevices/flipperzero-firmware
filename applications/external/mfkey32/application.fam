@@ -2,6 +2,7 @@ App(
     appid="mfkey32",
     name="Mfkey32",
     apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
     entry_point="mfkey32_main",
     requires=[
         "gui",
