@@ -34,12 +34,19 @@ typedef enum {
 } TagAppMode;
 
 typedef struct {
+    uint32_t start;
+    uint8_t total_damage;
+    uint8_t total_hits;
+} GameData;
+
+typedef struct {
     TagAppMode mode;
     FuriMessageQueue* queue;
     FuriMutex* data_mutex;
     ViewPort* view_port;
     Gui* gui;
     bool running;
+    GameData* data;
 } TagAppState;
 
 TagAppState* tag_app_state_get();

@@ -16,12 +16,14 @@ void tag_app_init() {
     state->mode = TagAppModeUninitialised;
     state->queue = furi_message_queue_alloc(8, sizeof(TagEvent));
     state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    state->data = malloc(sizeof(GameData));
 }
 
 void tag_app_destroy() {
     FURI_LOG_T(TAG, "tag_app_destroy");
     furi_message_queue_free(state->queue);
     furi_mutex_free(state->data_mutex);
+    free(state->data);
     free(state);
 }
 
