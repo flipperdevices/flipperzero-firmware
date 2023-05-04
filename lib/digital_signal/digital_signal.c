@@ -90,10 +90,6 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
 void digital_signal_free(DigitalSignal* signal) {
     furi_assert(signal);
 
-    if(!signal) {
-        return;
-    }
-
     free(signal->edge_timings);
     free(signal->reload_reg_buff);
     free(signal->internals);
@@ -365,10 +361,6 @@ DigitalSequence* digital_sequence_alloc(uint32_t size, const GpioPin* gpio) {
 
 void digital_sequence_free(DigitalSequence* sequence) {
     furi_assert(sequence);
-
-    if(!sequence) {
-        return;
-    }
 
     free(sequence->signals);
     free(sequence->sequence);

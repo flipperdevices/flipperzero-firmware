@@ -119,10 +119,6 @@ void pulse_reader_set_pull(PulseReader* signal, GpioPull pull) {
 void pulse_reader_free(PulseReader* signal) {
     furi_assert(signal);
 
-    if(!signal) {
-        return;
-    }
-
     free(signal->timer_buffer);
     free(signal->gpio_buffer);
     free(signal);
