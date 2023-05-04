@@ -7,17 +7,24 @@ enum {
     NfcSceneReadEventMfUltralightDetected,
 };
 
-void nfc_scene_read_worker_callback(NfcPollerEvent event, void* context) {
+NfcPollerCommand nfc_scene_read_worker_callback(NfcPollerEvent event, void* context) {
     NfcApp* nfc = context;
+
+    NfcPollerCommand command = NfcPollerCommandContinue;
 
     if(event == NfcPollerEventNfcaDetected) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcSceneReadEventNfcaDetected);
+        command = NfcPollerCommandStop;
     } else if(event == NfcPollerEventNfcbDetected) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcSceneReadEventNfcbDetected);
+        command = NfcPollerCommandStop;
     } else if(event == NfcPollerEventMfUltralightDetected) {
         view_dispatcher_send_custom_event(
             nfc->view_dispatcher, NfcSceneReadEventMfUltralightDetected);
+        command = NfcPollerCommandStop;
     }
+
+    return command;
 }
 
 void nfc_scene_read_on_enter(void* context) {

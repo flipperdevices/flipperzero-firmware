@@ -25,7 +25,13 @@ typedef enum {
     NfcPollerEventMfClassicDetected,
 } NfcPollerEvent;
 
-typedef void (*NfcPollerEventCallback)(NfcPollerEvent event, void* context);
+typedef enum {
+    NfcPollerCommandContinue = NfcCommandContinue,
+    NfcPollerCommandReset = NfcCommandReset,
+    NfcPollerCommandStop = NfcCommandStop,
+} NfcPollerCommand;
+
+typedef NfcPollerCommand (*NfcPollerEventCallback)(NfcPollerEvent event, void* context);
 
 NfcPoller* nfc_poller_alloc(NfcPollerCollection* pollers);
 

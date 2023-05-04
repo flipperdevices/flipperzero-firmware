@@ -50,6 +50,22 @@ void nfc_poller_free(NfcPoller* instance) {
     furi_assert(instance);
 }
 
+static NfcCommand nfc_poller_process_command(NfcPollerCommand command) {
+    NfcCommand ret = NfcCommandContinue;
+
+    if(command == NfcPollerCommandContinue) {
+        ret = NfcCommandContinue;
+    } else if(command == NfcPollerCommandReset) {
+        ret = NfcCommandReset;
+    } else if(command == NfcPollerCommandStop) {
+        ret = NfcCommandStop;
+    } else {
+        furi_crash("Unknown command");
+    }
+
+    return ret;
+}
+
 static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
     furi_assert(context);
 
@@ -58,10 +74,10 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
     furi_assert(instance->session_state != NfcPollerSessionStateIdle);
 
     NfcPollerEvent poller_event;
-    NfcCommand command = NfcCommandContinue;
+    NfcPollerCommand command = NfcPollerCommandContinue;
 
     if(instance->session_state == NfcPollerSessionStateStopRequest) {
-        command = NfcCommandStop;
+        command = NfcPollerCommandStop;
     } else {
         if(event.type == NfcEventTypeConfigureRequest) {
             if(instance->state == NfcPollerStateCheckPresenceNfca) {
@@ -79,13 +95,13 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
                     } else {
                         poller_event = NfcPollerEventNfcaDetected;
                     }
-                    instance->callback(poller_event, instance->context);
+                    command = instance->callback(poller_event, instance->context);
                 } else {
                     // Nfca not present
                     FURI_LOG_E("TAG", "NOT PRESENT");
                     furi_delay_ms(100);
                     instance->state = NfcPollerStateCheckPresenceNfcb;
-                    command = NfcCommandReset;
+                    command = NfcPollerCommandReset;
                 }
             } else if(instance->state == NfcPollerStateCheckPresenceNfcb) {
                 // NfcbError error =
@@ -109,7 +125,7 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
         }
     }
 
-    return command;
+    return nfc_poller_process_command(command);
 }
 
 void nfc_poller_start(NfcPoller* instance, NfcPollerEventCallback callback, void* context) {
