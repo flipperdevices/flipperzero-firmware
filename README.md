@@ -2,12 +2,12 @@
 
 It is a plugin like [UniversalRF Remix](https://github.com/ESurge/flipperzero-firmware-unirfremix) but for infrared files. I do this plugin for convenience, because the main IR app need to navigate for different button abit troublesome (buttons like up,down,left,right,back). I found it useful for TV and TV box.
 
-It supports short press and long press input for different ir remote buttons. Tested on the [unleashed firmware version unlshd-023](https://github.com/DarkFlippers/unleashed-firmware/releases/tag/unlshd-023)
+It supports short press and long press input for different ir remote buttons. Tested on the [unleashed firmware version unlshd-047](https://github.com/DarkFlippers/unleashed-firmware/releases/tag/unlshd-047)
 
 
 ## How to install
 
-1. Update unleashed firmware to the version unlshd-023, then download the `ir_remote.fap` from [releases](https://github.com/Hong5489/ir_remote/tags)
+1. Update unleashed firmware to the version unlshd-047, then download the `ir_remote.fap` from [releases](https://github.com/Hong5489/ir_remote/tags)
 
 2. Put the `ir_remote.fap` file in your flipper's SD card, under `apps` folder
 
@@ -17,7 +17,7 @@ It supports short press and long press input for different ir remote buttons. Te
 
 The format With `HOLD` one is long press, without is short press
 
-Example of the configuration file:
+Example of the configuration file (Update: the string format can be in any order):
 ```
 REMOTE: /ext/infrared/Philips_32PFL4208T.ir
 UP: Up
@@ -61,3 +61,12 @@ Choose config file to map
 Show all button name in the config file (If empty will show N/A). Upper part short press, Lower part long press
 
 ![image2](ir2.png)
+
+## Update
+Thanks to [friebel](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535), [d4ve10](https://github.com/Hong5489/ir_remote/pull/4) and [polarikus](https://github.com/Hong5489/ir_remote/pull/2)
+- Added auto create `ir_remote` directory
+- Fixed string format 
+- Added for hold button will send IR multiple times
+
+## TODO
+- Mulitiple remote in one config file
