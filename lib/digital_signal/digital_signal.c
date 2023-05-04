@@ -299,8 +299,6 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
     furi_hal_gpio_init(
         signal->internals->gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
 
-    /* single signal, add a temporary, terminating edge at the end */
-    signal->edge_timings[signal->edge_cnt++] = 10;
     digital_signal_prepare_arr(signal);
 
     digital_signal_setup_dma(signal);
@@ -312,8 +310,6 @@ void digital_signal_send(DigitalSignal* signal, const GpioPin* gpio) {
 
     digital_signal_stop_timer();
     digital_signal_stop_dma();
-
-    signal->edge_cnt--;
 }
 
 static void digital_sequence_alloc_signals(DigitalSequence* sequence, uint32_t size) {
