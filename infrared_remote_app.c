@@ -472,9 +472,15 @@ int32_t infrared_remote_app(void* p) {
 					if (is_transmitting) {
 						infrared_worker_tx_stop(app->infrared_worker);
 					}
-					InfraredMessage* message = infrared_signal_get_message(active_signal);
 
-					infrared_worker_set_decoded_signal(app->infrared_worker, message);
+					if(infrared_signal_is_raw(active_signal)) {
+						InfraredRawSignal* raw_signal = infrared_signal_get_raw_signal(active_signal);
+						infrared_worker_set_raw_signal(app->infrared_worker, raw_signal->timings, raw_signal->timings_size);
+					} else {
+						InfraredMessage* message = infrared_signal_get_message(active_signal);
+						infrared_worker_set_decoded_signal(app->infrared_worker, message);
+					}
+
 					infrared_worker_tx_set_get_signal_callback(app->infrared_worker, infrared_worker_tx_get_signal_steady_callback, app);
 
 					infrared_worker_tx_start(app->infrared_worker);
