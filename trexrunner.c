@@ -21,6 +21,7 @@
 
 #define CACTUS_W 8
 #define CACTUS_H 10
+#define START_CACTUS_SPEED 25
 
 typedef enum {
     EventTypeTick,
@@ -100,7 +101,7 @@ static void timer_callback(void *ctx) {
     else {
         game_state->has_cactus = 1;
         game_state->cactus_position = 120;
-        game_state->cactus_speed = 15;
+        game_state->cactus_speed = START_CACTUS_SPEED;
     }
 
     // Lose condition
