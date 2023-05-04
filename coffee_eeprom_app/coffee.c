@@ -40,18 +40,18 @@ void write_credit(float value){
 	write_buffer(address_54_buffer, sizeof(address_54_buffer), 0x54);
 }
 
-void dump(){
+void dump(uint8_t* out){
+	FuriString* dump_str = furi_string_alloc();
 	furi_hal_i2c_acquire(&furi_hal_i2c_handle_external);
 	if(furi_hal_i2c_is_device_ready(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, (uint32_t) 1000)){
 		uint8_t temp[1];
-		char str[513];
-		int index = 0;
 		FURI_LOG_E("COFFEE_eeprom", "Start dump");
 		for (size_t i=0; i<256; i++){
 			furi_hal_i2c_read_reg_8(&furi_hal_i2c_handle_external, EEPROM_I2C_ADDR, 0x00 + i, (uint8_t *) temp, (uint32_t) 500);
-			index += snprintf(&str[index], sizeof(str)-index, "%.2X", temp[0]);
+			furi_string_cat_printf(dump_str, "%.2X", temp[0]);
+			out[i] = temp[0];
 		}
-		FURI_LOG_E("COFFEE_eeprom", str);
+		FURI_LOG_E("COFFEE_eeprom", furi_string_get_cstr(dump_str));
 		FURI_LOG_E("COFFEE_eeprom", "End dump");
 	}else{
         FURI_LOG_D("COFFEE", "DUMP: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
@@ -87,7 +87,7 @@ float read_credit(){
 				exponent -= 2;
 			}
 			furi_hal_i2c_release(&furi_hal_i2c_handle_external);
-			return credit / 100.0;
+			return credit / 100.00;
 		}
 		else{
 			FURI_LOG_D("COFFEE", "READ CREDIT: EEPROM not ready %x (8-bit)", EEPROM_I2C_ADDR);
