@@ -16,8 +16,13 @@ void mifare_nested_scene_nonces_collected_on_enter(void* context) {
 
     notification_message(mifare_nested->notifications, &sequence_success);
 
-    widget_add_icon_element(widget, 50, 17, &I_DolphinSuccess);
-    widget_add_string_element(widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Nonces collected!");
+    widget_add_icon_element(widget, 52, 17, &I_DolphinSuccess);
+    widget_add_string_element(widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Nonces collected");
+    widget_add_string_element(
+        widget, 0, 12, AlignLeft, AlignTop, FontSecondary, "Now you can run");
+    widget_add_string_element(widget, 0, 22, AlignLeft, AlignTop, FontSecondary, "script on your");
+    widget_add_string_element(widget, 0, 32, AlignLeft, AlignTop, FontSecondary, "PC to recover");
+    widget_add_string_element(widget, 0, 42, AlignLeft, AlignTop, FontSecondary, "keys");
     widget_add_button_element(
         widget,
         GuiButtonTypeLeft,

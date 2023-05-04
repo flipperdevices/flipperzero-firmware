@@ -18,7 +18,12 @@ void mifare_nested_scene_failed_on_enter(void* context) {
 
     widget_add_icon_element(widget, 73, 13, &I_DolphinCry);
     widget_add_string_element(
-        widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Failed to preform attack");
+        widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Failed to preform attack");
+    widget_add_string_element(widget, 0, 12, AlignLeft, AlignTop, FontSecondary, "Try running");
+    widget_add_string_element(
+        widget, 0, 22, AlignLeft, AlignTop, FontSecondary, "\"Nested attack\"");
+    widget_add_string_element(widget, 0, 32, AlignLeft, AlignTop, FontSecondary, "again or check");
+    widget_add_string_element(widget, 0, 42, AlignLeft, AlignTop, FontSecondary, "logs");
     widget_add_button_element(
         widget,
         GuiButtonTypeLeft,

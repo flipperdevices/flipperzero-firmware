@@ -17,9 +17,15 @@ void mifare_nested_scene_no_keys_on_enter(void* context) {
     notification_message(mifare_nested->notifications, &sequence_success);
 
     widget_add_icon_element(widget, 73, 13, &I_DolphinCry);
-    widget_add_string_element(widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Scan tag and find");
-    widget_add_string_element(widget, 3, 16, AlignLeft, AlignTop, FontPrimary, "at least one");
-    widget_add_string_element(widget, 3, 28, AlignLeft, AlignTop, FontPrimary, "key to start");
+    widget_add_string_element(widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "No keys found");
+    widget_add_string_element(
+        widget, 0, 12, AlignLeft, AlignTop, FontSecondary, "Scan tag and find at");
+    widget_add_string_element(
+        widget, 0, 22, AlignLeft, AlignTop, FontSecondary, "least one key to");
+    widget_add_string_element(
+        widget, 0, 32, AlignLeft, AlignTop, FontSecondary, "start (save dump");
+    widget_add_string_element(
+        widget, 0, 42, AlignLeft, AlignTop, FontSecondary, "after scanning!)");
     widget_add_button_element(
         widget,
         GuiButtonTypeLeft,

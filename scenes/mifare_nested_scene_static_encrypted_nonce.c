@@ -18,12 +18,10 @@ void mifare_nested_scene_static_encrypted_nonce_on_enter(void* context) {
 
     widget_add_icon_element(widget, 73, 12, &I_DolphinCry);
     widget_add_string_element(
-        widget, 1, 9, AlignLeft, AlignTop, FontPrimary, "Static encrypted nonce");
-    widget_add_string_element(
-        widget, 1, 19, AlignLeft, AlignTop, FontSecondary, "This tag can't be");
-    widget_add_string_element(
-        widget, 1, 29, AlignLeft, AlignTop, FontSecondary, "used with Nested");
-    widget_add_string_element(widget, 1, 39, AlignLeft, AlignTop, FontSecondary, "attack.");
+        widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Static encrypted nonce");
+    widget_add_string_element(widget, 0, 12, AlignLeft, AlignTop, FontSecondary, "This tag isn't");
+    widget_add_string_element(widget, 0, 22, AlignLeft, AlignTop, FontSecondary, "vulnerable to");
+    widget_add_string_element(widget, 0, 32, AlignLeft, AlignTop, FontSecondary, "Nested attack");
 
     widget_add_button_element(
         widget,

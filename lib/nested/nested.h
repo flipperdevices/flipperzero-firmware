@@ -10,12 +10,12 @@
 
 typedef enum {
     MifareNestedNonceNoTag,
-
-    MifareNestedNonce,
-    MifareNestedNonceStatic
+    MifareNestedNonceWeak,
+    MifareNestedNonceStatic,
+    MifareNestedNonceHard,
 } MifareNestedNonceType;
 
-MifareNestedNonceType nested_check_nonce_type(FuriHalNfcTxRxContext* tx_rx);
+MifareNestedNonceType nested_check_nonce_type(FuriHalNfcTxRxContext* tx_rx, uint8_t blockNo);
 
 struct nonce_info_static {
     uint32_t cuid;
@@ -98,6 +98,8 @@ NestedCheckKeyResult nested_check_key(
     uint8_t blockNo,
     uint8_t keyType,
     uint64_t ui64Key);
+
+bool nested_check_block(FuriHalNfcTxRxContext* tx_rx, uint8_t blockNo, uint8_t keyType);
 
 void nested_get_data();
 

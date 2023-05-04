@@ -79,6 +79,8 @@ int32_t mifare_nested_worker_task(void* context) {
         mifare_nested_worker_collect_nonces_static(mifare_nested_worker);
     } else if(mifare_nested_worker->state == MifareNestedWorkerStateCollecting) {
         mifare_nested_worker_collect_nonces(mifare_nested_worker);
+    } else if(mifare_nested_worker->state == MifareNestedWorkerStateCollectingHard) {
+        mifare_nested_worker_collect_nonces_hard(mifare_nested_worker);
     } else if(mifare_nested_worker->state == MifareNestedWorkerStateValidating) {
         mifare_nested_worker_check_keys(mifare_nested_worker);
     }
@@ -86,46 +88,6 @@ int32_t mifare_nested_worker_task(void* context) {
     mifare_nested_worker_change_state(mifare_nested_worker, MifareNestedWorkerStateReady);
 
     return 0;
-}
-
-void mifare_nested_worker_check(MifareNestedWorker* mifare_nested_worker) {
-    bool tag_found_notified = false;
-
-    while(mifare_nested_worker->state == MifareNestedWorkerStateCheck) {
-        FuriHalNfcTxRxContext tx_rx = {};
-        MifareNestedNonceType type = nested_check_nonce_type(&tx_rx);
-
-        if(type == MifareNestedNonceStatic) {
-            mifare_nested_worker->context->collecting_type =
-                MifareNestedWorkerStateCollectingStatic;
-
-            if(!tag_found_notified) {
-                mifare_nested_worker->callback(
-                    MifareNestedWorkerEventCollecting, mifare_nested_worker->context);
-                tag_found_notified = true;
-            }
-
-            mifare_nested_worker->callback(
-                MifareNestedWorkerEventCollecting, mifare_nested_worker->context);
-            break;
-        } else if(type == MifareNestedNonce) {
-            mifare_nested_worker->context->collecting_type = MifareNestedWorkerStateCollecting;
-
-            if(!tag_found_notified) {
-                mifare_nested_worker->callback(
-                    MifareNestedWorkerEventCollecting, mifare_nested_worker->context);
-                tag_found_notified = true;
-            }
-
-            mifare_nested_worker->callback(
-                MifareNestedWorkerEventCollecting, mifare_nested_worker->context);
-            break;
-        }
-
-        furi_delay_ms(250);
-    }
-
-    nfc_deactivate();
 }
 
 void mifare_nested_worker_write_uid_string(FuriHalNfcDevData* data, FuriString* string) {
@@ -228,7 +190,7 @@ bool mifare_nested_worker_read_key_cache(FuriHalNfcDevData* data, MfClassicData*
             sector_count = 5;
         } else {
             break;
-        };
+        }
 
         if(!flipper_format_read_hex_uint64(file, "Key A map", &mf_data->key_a_mask, 1)) break;
         if(!flipper_format_read_hex_uint64(file, "Key B map", &mf_data->key_b_mask, 1)) break;
@@ -265,9 +227,9 @@ bool mifare_nested_worker_read_key_cache(FuriHalNfcDevData* data, MfClassicData*
 
 bool hex_char_to_hex_nibble(char c, uint8_t* nibble) {
     if((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')) {
-        if((c >= '0' && c <= '9')) {
+        if(c <= '9') {
             *nibble = c - '0';
-        } else if((c >= 'A' && c <= 'F')) {
+        } else if(c <= 'F') {
             *nibble = c - 'A' + 10;
         } else {
             *nibble = c - 'a' + 10;
@@ -287,6 +249,16 @@ bool hex_char_to_uint8(char hi, char low, uint8_t* value) {
         return true;
     } else {
         return false;
+    }
+}
+
+void free_nonces(NonceList_t* nonces, uint8_t sector_count, uint8_t tries_count) {
+    for(uint8_t sector = 0; sector < sector_count; sector++) {
+        for(uint8_t key_type = 0; key_type < 2; key_type++) {
+            for(uint8_t tries = 0; tries < tries_count; tries++) {
+                free(nonces->nonces[sector][key_type][tries]);
+            }
+        }
     }
 }
 
@@ -318,7 +290,7 @@ uint32_t mifare_nested_worker_predict_delay(
     Crypto1* crypto = malloc(sizeof(Crypto1));
     uint32_t nt1, nt2, i = 0, previous = 0, prng_delay = 0, zero_prng_value = 65565, repeat = 0;
 
-    if(tries > 10) {
+    if(tries > 25) {
         free(crypto);
         return 2; // Too many tries, fallback to hardnested
     }
@@ -555,7 +527,7 @@ void mifare_nested_worker_write_nonces(
         furi_string_free(str);
     }
 
-    free(nonces);
+    free_nonces(nonces, sector_count, tries_count);
     furi_string_free(path);
     file_stream_close(file_stream);
     free(file_stream);
@@ -633,11 +605,72 @@ bool mifare_nested_worker_check_initial_keys(
         }
     }
 
+    nonces->cuid = 0;
+    nonces->hardnested_states = 0;
+    nonces->sector_count = sector_count;
+    nonces->tries = tries_count;
+
     return *key_block;
 }
 
+void mifare_nested_worker_check(MifareNestedWorker* mifare_nested_worker) {
+    while(mifare_nested_worker->state == MifareNestedWorkerStateCheck) {
+        FuriHalNfcTxRxContext tx_rx = {};
+        NfcDevice* dev = mifare_nested_worker->context->nfc_dev;
+        MfClassicData* mf_data = &dev->dev_data.mf_classic_data;
+        FuriHalNfcDevData data = {};
+        MifareNestedNonceType type = MifareNestedNonceNoTag;
+        nested_get_data(&data);
+
+        if(mifare_nested_worker_read_key_cache(&data, mf_data)) {
+            for(uint8_t sector = 0; sector < 40; sector++) {
+                if(FURI_BIT(mf_data->key_a_mask, sector) ||
+                   FURI_BIT(mf_data->key_b_mask, sector)) {
+                    type = nested_check_nonce_type(
+                        &tx_rx, mifare_nested_worker_get_block_by_sector(sector));
+                    break;
+                }
+            }
+
+            if(type == MifareNestedNonceNoTag) {
+                type = nested_check_nonce_type(&tx_rx, 0);
+            }
+        } else {
+            type = nested_check_nonce_type(&tx_rx, 0);
+        }
+
+        if(type == MifareNestedNonceStatic) {
+            mifare_nested_worker->context->collecting_type =
+                MifareNestedWorkerStateCollectingStatic;
+
+            mifare_nested_worker->callback(
+                MifareNestedWorkerEventCollecting, mifare_nested_worker->context);
+
+            break;
+        } else if(type == MifareNestedNonceWeak) {
+            mifare_nested_worker->context->collecting_type = MifareNestedWorkerStateCollecting;
+
+            mifare_nested_worker->callback(
+                MifareNestedWorkerEventCollecting, mifare_nested_worker->context);
+
+            break;
+        } else if(type == MifareNestedNonceHard) {
+            mifare_nested_worker->context->collecting_type = MifareNestedWorkerStateCollectingHard;
+
+            mifare_nested_worker->callback(
+                MifareNestedWorkerEventCollecting, mifare_nested_worker->context);
+
+            break;
+        }
+
+        furi_delay_ms(250);
+    }
+
+    nfc_deactivate();
+}
+
 void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_nested_worker) {
-    NonceList_t* nonces = malloc(sizeof(NonceList_t));
+    NonceList_t nonces;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     NfcDevice* dev = mifare_nested_worker->context->nfc_dev;
     MfClassicData* mf_data = &dev->dev_data.mf_classic_data;
@@ -650,7 +683,7 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
     uint32_t key_block = 0;
     uint32_t sector_count = 0;
 
-    FURI_LOG_I(TAG, "Running static nested attack");
+    FURI_LOG_I(TAG, "Running Static Nested attack");
     FuriString* tag_info = furi_string_alloc_printf("Tag UID: ");
     mifare_nested_worker_write_uid_string(&data, tag_info);
     FURI_LOG_I(TAG, "%s", furi_string_get_cstr(tag_info));
@@ -662,7 +695,7 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
     } else if(type == MfClassicType1k) {
         sector_count = 16;
         FURI_LOG_I(TAG, "Found Mifare Classic 1K tag");
-    } else if(type == MfClassicTypeMini) {
+    } else { // if(type == MfClassicTypeMini)
         sector_count = 5;
         FURI_LOG_I(TAG, "Found Mifare Classic Mini tag");
     }
@@ -677,19 +710,19 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
         nfc_deactivate();
 
         free(mf_data);
-        free(nonces);
+        free_nonces(&nonces, sector_count, 1);
 
         return;
     }
 
     if(!mifare_nested_worker_check_initial_keys(
-           nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type)) {
+           &nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type)) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
         nfc_deactivate();
 
         free(mf_data);
-        free(nonces);
+        free_nonces(&nonces, sector_count, 1);
 
         return;
     }
@@ -697,14 +730,12 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
     FURI_LOG_I(
         TAG, "Using %c key for block %lu: %012llX", !found_key_type ? 'A' : 'B', key_block, key);
 
-    nonces->tries = 1;
-
     while(mifare_nested_worker->state == MifareNestedWorkerStateCollectingStatic) {
         FuriHalNfcTxRxContext tx_rx = {};
 
         for(uint8_t sector = 0; sector < sector_count; sector++) {
             for(uint8_t key_type = 0; key_type < 2; key_type++) {
-                Nonces* info = nonces->nonces[sector][key_type][0];
+                Nonces* info = nonces.nonces[sector][key_type][0];
 
                 if(info->collected) {
                     FURI_LOG_I(
@@ -716,11 +747,34 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
 
                     info->skipped = true;
 
-                    nonces->nonces[sector][key_type][0] = info;
-                    mifare_nested_worker->context->nonces = nonces;
+                    nonces.nonces[sector][key_type][0] = info;
+
+                    mifare_nested_worker->context->nonces = &nonces;
 
                     mifare_nested_worker->callback(
                         MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
+                    continue;
+                }
+
+                if(!nested_check_block(
+                       &tx_rx, mifare_nested_worker_get_block_by_sector(sector), key_type)) {
+                    FURI_LOG_E(
+                        TAG,
+                        "Skipping sector %u, block %u, key_type: %u as we can't auth on it",
+                        sector,
+                        mifare_nested_worker_get_block_by_sector(sector),
+                        key_type);
+
+                    info->skipped = true;
+
+                    nonces.nonces[sector][key_type][0] = info;
+
+                    mifare_nested_worker->context->nonces = &nonces;
+
+                    mifare_nested_worker->callback(
+                        MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
+
+                    continue;
                 }
 
                 while(!info->collected) {
@@ -743,17 +797,17 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
                             mifare_nested_worker_get_block_by_sector(sector),
                             key_type);
 
-                        info = nonces->nonces[sector][key_type][0];
+                        info = nonces.nonces[sector][key_type][0];
                         info->collected = true;
 
                         memcpy(&info->target_nt, result.target_nt, sizeof(result.target_nt));
                         memcpy(&info->target_ks, result.target_ks, sizeof(result.target_ks));
 
-                        nonces->nonces[sector][key_type][0] = info;
-                        nonces->cuid = result.cuid;
-                        nonces->sector_count = sector_count;
+                        nonces.nonces[sector][key_type][0] = info;
+                        nonces.cuid = result.cuid;
+                        nonces.sector_count = sector_count;
 
-                        mifare_nested_worker->context->nonces = nonces;
+                        mifare_nested_worker->context->nonces = &nonces;
 
                         mifare_nested_worker->callback(
                             MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
@@ -769,7 +823,7 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
         break;
     }
 
-    mifare_nested_worker_write_nonces(&data, storage, nonces, 1, sector_count, 0, 0);
+    mifare_nested_worker_write_nonces(&data, storage, &nonces, 1, sector_count, 0, 0);
 
     free(mf_data);
 
@@ -780,7 +834,7 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
 }
 
 void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_worker) {
-    NonceList_t* nonces = malloc(sizeof(NonceList_t));
+    NonceList_t nonces;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     NfcDevice* dev = mifare_nested_worker->context->nfc_dev;
     MfClassicData* mf_data = &dev->dev_data.mf_classic_data;
@@ -795,7 +849,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
     uint32_t cuid = 0;
     furi_hal_nfc_activate_nfca(200, &cuid);
 
-    FURI_LOG_I(TAG, "Running hardnested attack");
+    FURI_LOG_I(TAG, "Running Hard Nested attack");
     FuriString* tag_info = furi_string_alloc_printf("Tag UID: ");
     mifare_nested_worker_write_uid_string(&data, tag_info);
     FURI_LOG_I(TAG, "%s", furi_string_get_cstr(tag_info));
@@ -807,7 +861,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
     } else if(type == MfClassicType1k) {
         sector_count = 16;
         FURI_LOG_I(TAG, "Found Mifare Classic 1K tag");
-    } else if(type == MfClassicTypeMini) {
+    } else { // if(type == MfClassicTypeMini)
         sector_count = 5;
         FURI_LOG_I(TAG, "Found Mifare Classic Mini tag");
     }
@@ -822,19 +876,19 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
         nfc_deactivate();
 
         free(mf_data);
-        free(nonces);
+        free_nonces(&nonces, sector_count, 1);
 
         return;
     }
 
     if(!mifare_nested_worker_check_initial_keys(
-           nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type)) {
+           &nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type)) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
         nfc_deactivate();
 
         free(mf_data);
-        free(nonces);
+        free_nonces(&nonces, sector_count, 1);
 
         return;
     }
@@ -843,24 +897,24 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
         TAG, "Using %c key for block %lu: %012llX", !found_key_type ? 'A' : 'B', key_block, key);
 
     FuriHalNfcTxRxContext tx_rx = {};
-    nonces->tries = 1;
-    nonces->hardnested_states = 0;
-    nonces->sector_count = sector_count;
+    nonces.tries = 1;
+    nonces.hardnested_states = 0;
+    nonces.sector_count = sector_count;
 
-    mifare_nested_worker->context->nonces = nonces;
+    mifare_nested_worker->context->nonces = &nonces;
 
     mifare_nested_worker->callback(MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
 
     mifare_nested_worker->callback(
         MifareNestedWorkerEventHardnestedStatesFound, mifare_nested_worker->context);
 
-    for(uint8_t sector = 0;
-        sector < sector_count && mifare_nested_worker->state == MifareNestedWorkerStateCollecting;
+    for(uint8_t sector = 0; sector < sector_count &&
+                            mifare_nested_worker->state == MifareNestedWorkerStateCollectingHard;
         sector++) {
         for(uint8_t key_type = 0;
-            key_type < 2 && mifare_nested_worker->state == MifareNestedWorkerStateCollecting;
+            key_type < 2 && mifare_nested_worker->state == MifareNestedWorkerStateCollectingHard;
             key_type++) {
-            Nonces* info = nonces->nonces[sector][key_type][0];
+            Nonces* info = nonces.nonces[sector][key_type][0];
             if(info->collected) {
                 FURI_LOG_I(
                     TAG,
@@ -871,8 +925,28 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
 
                 info->skipped = true;
 
-                nonces->nonces[sector][key_type][0] = info;
-                mifare_nested_worker->context->nonces = nonces;
+                nonces.nonces[sector][key_type][0] = info;
+                mifare_nested_worker->context->nonces = &nonces;
+
+                mifare_nested_worker->callback(
+                    MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
+
+                continue;
+            }
+
+            if(!nested_check_block(
+                   &tx_rx, mifare_nested_worker_get_block_by_sector(sector), key_type)) {
+                FURI_LOG_E(
+                    TAG,
+                    "Skipping sector %u, block %u, key_type: %u as we can't auth on it",
+                    sector,
+                    mifare_nested_worker_get_block_by_sector(sector),
+                    key_type);
+
+                info->skipped = true;
+
+                nonces.nonces[sector][key_type][0] = info;
+                mifare_nested_worker->context->nonces = &nonces;
 
                 mifare_nested_worker->callback(
                     MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
@@ -881,7 +955,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
             }
 
             while(!info->collected &&
-                  mifare_nested_worker->state == MifareNestedWorkerStateCollecting) {
+                  mifare_nested_worker->state == MifareNestedWorkerStateCollectingHard) {
                 Stream* file_stream = file_stream_alloc(storage);
                 FuriString* hardnested_file = furi_string_alloc();
                 mifare_nested_worker_get_hardnested_file_path(
@@ -910,7 +984,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
                     found[i] = 0;
                 }
 
-                while(mifare_nested_worker->state == MifareNestedWorkerStateCollecting) {
+                while(mifare_nested_worker->state == MifareNestedWorkerStateCollectingHard) {
                     struct nonce_info_hard result = nested_hard_nonce_attack(
                         &tx_rx,
                         key_block,
@@ -945,7 +1019,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
                             states += found[i];
                         }
 
-                        mifare_nested_worker->context->nonces->hardnested_states = states;
+                        nonces.hardnested_states = states;
 
                         mifare_nested_worker->callback(
                             MifareNestedWorkerEventHardnestedStatesFound,
@@ -972,11 +1046,11 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
 
                             info->collected = true;
                             info->hardnested = true;
-                            nonces->cuid = result.cuid;
+                            nonces.cuid = result.cuid;
 
-                            nonces->nonces[sector][key_type][0] = info;
+                            nonces.nonces[sector][key_type][0] = info;
 
-                            mifare_nested_worker->context->nonces = nonces;
+                            mifare_nested_worker->context->nonces = &nonces;
 
                             mifare_nested_worker->callback(
                                 MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
@@ -996,9 +1070,9 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
         }
     }
 
-    free(mf_data);
+    mifare_nested_worker_write_nonces(&data, storage, &nonces, 1, sector_count, 0, 0);
 
-    mifare_nested_worker_write_nonces(&data, storage, nonces, 1, sector_count, 0, 0);
+    free(mf_data);
 
     mifare_nested_worker->callback(
         MifareNestedWorkerEventNoncesCollected, mifare_nested_worker->context);
@@ -1007,7 +1081,7 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
 }
 
 void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worker) {
-    NonceList_t* nonces = malloc(sizeof(NonceList_t));
+    NonceList_t nonces;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     NfcDevice* dev = mifare_nested_worker->context->nfc_dev;
     MfClassicData* mf_data = &dev->dev_data.mf_classic_data;
@@ -1023,7 +1097,7 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
     uint32_t distance = 0;
     uint32_t tries_count = 1;
 
-    FURI_LOG_I(TAG, "Running nested attack");
+    FURI_LOG_I(TAG, "Running Nested attack");
     FuriString* tag_info = furi_string_alloc_printf("Tag UID: ");
     mifare_nested_worker_write_uid_string(&data, tag_info);
     FURI_LOG_I(TAG, "%s", furi_string_get_cstr(tag_info));
@@ -1035,7 +1109,7 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
     } else if(type == MfClassicType1k) {
         sector_count = 16;
         FURI_LOG_I(TAG, "Found Mifare Classic 1K tag");
-    } else if(type == MfClassicTypeMini) {
+    } else { // if(type == MfClassicTypeMini)
         sector_count = 5;
         FURI_LOG_I(TAG, "Found Mifare Classic Mini tag");
     }
@@ -1050,19 +1124,19 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
         nfc_deactivate();
 
         free(mf_data);
-        free(nonces);
+        free_nonces(&nonces, sector_count, tries_count);
 
         return;
     }
 
     if(!mifare_nested_worker_check_initial_keys(
-           nonces, mf_data, 3, sector_count, &key, &key_block, &found_key_type)) {
+           &nonces, mf_data, 3, sector_count, &key, &key_block, &found_key_type)) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
         nfc_deactivate();
 
         free(mf_data);
-        free(nonces);
+        free_nonces(&nonces, sector_count, tries_count);
 
         return;
     }
@@ -1094,7 +1168,7 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
             nfc_deactivate();
 
             free(mf_data);
-            free(nonces);
+            free_nonces(&nonces, sector_count, tries_count);
 
             mifare_nested_worker_collect_nonces_hard(mifare_nested_worker);
             return;
@@ -1170,14 +1244,15 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
             }
 
             if(delay == 2) {
-                FURI_LOG_E(TAG, "Can't determine delay in 10 tries, fallback to hardnested");
+                FURI_LOG_E(TAG, "Can't determine delay in 25 tries, fallback to hardnested");
 
                 nfc_deactivate();
 
                 free(mf_data);
-                free(nonces);
+                free_nonces(&nonces, sector_count, tries_count);
 
                 mifare_nested_worker_collect_nonces_hard(mifare_nested_worker);
+                return;
             }
 
             if(mifare_nested_worker->state == MifareNestedWorkerStateCollecting && !failed) {
@@ -1188,17 +1263,17 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
             if(distance == 0 && !failed) {
                 FURI_LOG_E(TAG, "Found delay, but can't find distance");
 
-                mifare_nested_worker->callback(
-                    MifareNestedWorkerEventAttackFailed, mifare_nested_worker->context);
-
                 failed = true;
             }
 
             if(failed) {
                 nfc_deactivate();
 
+                mifare_nested_worker->callback(
+                    MifareNestedWorkerEventAttackFailed, mifare_nested_worker->context);
+
                 free(mf_data);
-                free(nonces);
+                free_nonces(&nonces, sector_count, tries_count);
 
                 return;
             }
@@ -1206,7 +1281,7 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
             tries_count = 3;
         }
 
-        mifare_nested_worker->context->nonces = nonces;
+        mifare_nested_worker->context->nonces = &nonces;
 
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
@@ -1214,7 +1289,7 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
         for(uint8_t tries = 0; tries < tries_count; tries++) {
             for(uint8_t sector = 0; sector < sector_count; sector++) {
                 for(uint8_t key_type = 0; key_type < 2; key_type++) {
-                    Nonces* info = nonces->nonces[sector][key_type][tries];
+                    Nonces* info = nonces.nonces[sector][key_type][tries];
                     if(info->collected) {
                         FURI_LOG_I(
                             TAG,
@@ -1225,11 +1300,33 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
 
                         info->skipped = true;
 
-                        nonces->nonces[sector][key_type][tries] = info;
-                        mifare_nested_worker->context->nonces = nonces;
+                        nonces.nonces[sector][key_type][tries] = info;
+                        mifare_nested_worker->context->nonces = &nonces;
 
                         mifare_nested_worker->callback(
                             MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
+
+                        continue;
+                    }
+
+                    if(!nested_check_block(
+                           &tx_rx, mifare_nested_worker_get_block_by_sector(sector), key_type)) {
+                        FURI_LOG_E(
+                            TAG,
+                            "Skipping sector %u, block %u, key_type: %u as we can't auth on it",
+                            sector,
+                            mifare_nested_worker_get_block_by_sector(sector),
+                            key_type);
+
+                        info->skipped = true;
+
+                        nonces.nonces[sector][key_type][0] = info;
+                        mifare_nested_worker->context->nonces = &nonces;
+
+                        mifare_nested_worker->callback(
+                            MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
+
+                        continue;
                     }
 
                     while(!info->collected) {
@@ -1255,19 +1352,19 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
                                 mifare_nested_worker_get_block_by_sector(sector),
                                 key_type);
 
-                            info = nonces->nonces[sector][key_type][tries];
+                            info = nonces.nonces[sector][key_type][tries];
                             info->collected = true;
 
                             memcpy(&info->target_nt, result.target_nt, sizeof(result.target_nt));
                             memcpy(&info->target_ks, result.target_ks, sizeof(result.target_ks));
                             memcpy(&info->parity, result.parity, sizeof(result.parity));
 
-                            nonces->nonces[sector][key_type][tries] = info;
-                            nonces->cuid = result.cuid;
-                            nonces->sector_count = sector_count;
-                            nonces->tries = tries_count;
+                            nonces.nonces[sector][key_type][tries] = info;
+                            nonces.cuid = result.cuid;
+                            nonces.sector_count = sector_count;
+                            nonces.tries = tries_count;
 
-                            mifare_nested_worker->context->nonces = nonces;
+                            mifare_nested_worker->context->nonces = &nonces;
 
                             mifare_nested_worker->callback(
                                 MifareNestedWorkerEventNewNonce, mifare_nested_worker->context);
@@ -1286,7 +1383,7 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
     }
 
     mifare_nested_worker_write_nonces(
-        &data, storage, nonces, tries_count, sector_count, delay, distance);
+        &data, storage, &nonces, tries_count, sector_count, delay, distance);
 
     free(mf_data);
 
@@ -1377,7 +1474,7 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
     } else if(type == MfClassicType1k) {
         sector_count = 16;
         FURI_LOG_I(TAG, "Found Mifare Classic 1K tag");
-    } else if(type == MfClassicTypeMini) {
+    } else { // if(type == MfClassicTypeMini)
         sector_count = 5;
         FURI_LOG_I(TAG, "Found Mifare Classic Mini tag");
     }

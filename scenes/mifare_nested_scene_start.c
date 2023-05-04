@@ -1,5 +1,10 @@
 #include "../mifare_nested_i.h"
-enum SubmenuIndex { SubmenuIndexCollect, SubmenuIndexCheck, SubmenuIndexAbout };
+enum SubmenuIndex {
+    SubmenuIndexCollect,
+    SubmenuIndexCheck,
+    SubmenuIndexSettings,
+    SubmenuIndexAbout
+};
 
 void mifare_nested_scene_start_submenu_callback(void* context, uint32_t index) {
     MifareNested* mifare_nested = context;
@@ -21,6 +26,13 @@ void mifare_nested_scene_start_on_enter(void* context) {
         submenu,
         "Check found keys",
         SubmenuIndexCheck,
+        mifare_nested_scene_start_submenu_callback,
+        mifare_nested);
+
+    submenu_add_item(
+        submenu,
+        "Settings",
+        SubmenuIndexSettings,
         mifare_nested_scene_start_submenu_callback,
         mifare_nested);
 
@@ -49,6 +61,10 @@ bool mifare_nested_scene_start_on_event(void* context, SceneManagerEvent event) 
         } else if(event.event == SubmenuIndexCheck) {
             mifare_nested->run = NestedRunCheckKeys;
             scene_manager_next_scene(mifare_nested->scene_manager, MifareNestedSceneCheck);
+            consumed = true;
+        } else if(event.event == SubmenuIndexSettings) {
+            mifare_nested->keys->found_keys = 123;
+            scene_manager_next_scene(mifare_nested->scene_manager, MifareNestedSceneSettings);
             consumed = true;
         } else if(event.event == SubmenuIndexAbout) {
             scene_manager_next_scene(mifare_nested->scene_manager, MifareNestedSceneAbout);

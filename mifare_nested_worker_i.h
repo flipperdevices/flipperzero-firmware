@@ -23,4 +23,6 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
 
 void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_nested_worker);
 
+void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_worker);
+
 void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker);

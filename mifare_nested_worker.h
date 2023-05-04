@@ -12,6 +12,7 @@ typedef enum {
     MifareNestedWorkerStateCheck,
     MifareNestedWorkerStateCollecting,
     MifareNestedWorkerStateCollectingStatic,
+    MifareNestedWorkerStateCollectingHard,
     MifareNestedWorkerStateValidating,
 
     MifareNestedWorkerStateStop,

@@ -17,9 +17,11 @@
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <lib/nfc/nfc_device.h>
+#include <lib/toolbox/value_index.h>
+#include <gui/modules/variable_item_list.h>
 #include "mifare_nested_icons.h"
 
-#define NESTED_VERSION_APP "1.3.0"
+#define NESTED_VERSION_APP "1.4.0"
 #define NESTED_GITHUB_LINK "https://github.com/AloneLiberty/FlipperNested"
 #define NESTED_RECOVER_KEYS_GITHUB_LINK "https://github.com/AloneLiberty/FlipperNestedRecovery"
 #define NESTED_NONCE_FORMAT_VERSION "3"
@@ -33,6 +35,7 @@ enum MifareNestedCustomEvent {
     MifareNestedCustomEventWorkerExit,
     MifareNestedCustomEventByteInputDone,
     MifareNestedCustomEventTextInputDone,
+    MifareNestedCustomEventSceneSettingLock
 };
 
 typedef void (*NestedCallback)(void* context);
@@ -67,6 +70,10 @@ typedef struct {
     InputEvent input;
 } PluginEvent;
 
+typedef struct {
+    bool only_hardnested;
+} MifareNestedSettings;
+
 typedef enum { NestedRunIdle, NestedRunCheckKeys, NestedRunAttack } NestedRunNext;
 
 struct MifareNested {
@@ -76,7 +83,8 @@ struct MifareNested {
     NotificationApp* notifications;
     SceneManager* scene_manager;
     NfcDevice* nfc_dev;
-
+    VariableItemList* variable_item_list;
+    MifareNestedSettings* settings;
     FuriString* text_box_store;
 
     // Common Views
@@ -103,6 +111,7 @@ typedef enum {
     MifareNestedViewLoading,
     MifareNestedViewTextInput,
     MifareNestedViewWidget,
+    MifareNestedViewVariableList,
     MifareNestedViewCollecting,
     MifareNestedViewCheckKeys,
 } MifareNestedView;

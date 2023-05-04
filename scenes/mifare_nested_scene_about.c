@@ -24,8 +24,14 @@ void mifare_nested_scene_about_on_enter(void* context) {
         "Ported nested attacks\nfrom proxmark (Iceman fork)\nCurrently supported attacks:\n - nested attack\n - static nested attack\n - hard nested attack\n\n");
     furi_string_cat_printf(
         temp_str,
-        "You will need desktop app to recover keys from collected nonces: %s",
+        "You will need desktop app to recover keys from collected nonces: %s\n\n",
         NESTED_RECOVER_KEYS_GITHUB_LINK);
+    furi_string_cat_printf(temp_str, "\e#%s\n", "Quick guide");
+    furi_string_cat_printf(temp_str, "1. Install key recovery script on PC:\n");
+    furi_string_cat_printf(temp_str, "pip install FlipperNested\n");
+    furi_string_cat_printf(temp_str, "2. Connect Flipper Zero to PC\n");
+    furi_string_cat_printf(temp_str, "3. Run key recovery:\n");
+    furi_string_cat_printf(temp_str, "FlipperNested");
 
     widget_add_text_box_element(
         mifare_nested->widget,

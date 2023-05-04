@@ -18,10 +18,12 @@ void mifare_nested_scene_need_key_recovery_on_enter(void* context) {
 
     widget_add_icon_element(widget, 74, 13, &I_DolphinCry);
     widget_add_string_element(
-        widget, 1, 4, AlignLeft, AlignTop, FontPrimary, "You need to recover");
-    widget_add_string_element(widget, 1, 16, AlignLeft, AlignTop, FontPrimary, "keys in desktop");
-    widget_add_string_element(widget, 1, 28, AlignLeft, AlignTop, FontPrimary, "app");
-    widget_add_string_element(widget, 1, 40, AlignLeft, AlignTop, FontPrimary, "Check \"About\"");
+        widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Missing found keys");
+    widget_add_string_element(
+        widget, 0, 12, AlignLeft, AlignTop, FontSecondary, "First you need to");
+    widget_add_string_element(widget, 0, 22, AlignLeft, AlignTop, FontSecondary, "recover keys");
+    widget_add_string_element(widget, 0, 32, AlignLeft, AlignTop, FontSecondary, "Read \"About\"");
+    widget_add_string_element(widget, 0, 42, AlignLeft, AlignTop, FontSecondary, "for more info");
     widget_add_button_element(
         widget,
         GuiButtonTypeLeft,

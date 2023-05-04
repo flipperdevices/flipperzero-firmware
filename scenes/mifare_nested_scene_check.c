@@ -65,6 +65,10 @@ bool mifare_nested_scene_check_on_event(void* context, SceneManagerEvent event) 
             consumed = true;
         } else if(event.event == MifareNestedWorkerEventCollecting) {
             if(mifare_nested->run == NestedRunAttack) {
+                if(mifare_nested->settings->only_hardnested) {
+                    FURI_LOG_I("MifareNested", "Using Hard Nested because user settings");
+                    mifare_nested->collecting_type = MifareNestedWorkerStateCollectingHard;
+                }
                 scene_manager_next_scene(
                     mifare_nested->scene_manager, MifareNestedSceneCollecting);
             } else {

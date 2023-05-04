@@ -169,9 +169,42 @@ static int valid_nonce(uint32_t Nt, uint32_t NtEnc, uint32_t Ks1, const uint8_t*
                0;
 }
 
-MifareNestedNonceType nested_check_nonce_type(FuriHalNfcTxRxContext* tx_rx) {
+void nonce_distance_notable(uint32_t* msb, uint32_t* lsb) {
+    uint16_t x = 1, pos;
+    uint8_t calc_ok = 0;
+
+    for(uint16_t i = 1; i; ++i) {
+        pos = (x & 0xff) << 8 | x >> 8;
+
+        if((pos == *msb) & !(calc_ok >> 0 & 0x01)) {
+            *msb = i;
+            calc_ok |= 0x01;
+        }
+
+        if((pos == *lsb) & !(calc_ok >> 1 & 0x01)) {
+            *lsb = i;
+            calc_ok |= 0x02;
+        }
+
+        if(calc_ok == 0x03) {
+            return;
+        }
+
+        x = x >> 1 | (x ^ x >> 2 ^ x >> 3 ^ x >> 5) << 15;
+    }
+}
+
+bool validate_prng_nonce_notable(uint32_t nonce) {
+    uint32_t msb = nonce >> 16;
+    uint32_t lsb = nonce & 0xffff;
+    nonce_distance_notable(&msb, &lsb);
+    return ((65535 - msb + lsb) % 65535) == 16;
+}
+
+MifareNestedNonceType nested_check_nonce_type(FuriHalNfcTxRxContext* tx_rx, uint8_t blockNo) {
     uint32_t nonces[5] = {};
-    uint16_t sameNonces = 0;
+    uint8_t sameNonces = 0;
+    uint8_t hardNonces = 0;
     Crypto1 crypt;
     Crypto1* crypto = {&crypt};
 
@@ -181,15 +214,15 @@ MifareNestedNonceType nested_check_nonce_type(FuriHalNfcTxRxContext* tx_rx) {
         furi_hal_nfc_activate_nfca(100, NULL);
 
         // Start communication
-        bool success = mifare_sendcmd_short(crypto, tx_rx, false, 0x60, 0);
+        bool success = mifare_sendcmd_short(crypto, tx_rx, false, 0x60, blockNo);
         if(!success) {
             continue;
         };
 
-        uint32_t byte = (uint32_t)nfc_util_bytes2num(tx_rx->rx_data, 4);
-
-        if(byte == 0) continue;
-        nonces[i] = byte;
+        uint32_t nt = (uint32_t)nfc_util_bytes2num(tx_rx->rx_data, 4);
+        if(nt == 0) continue;
+        if(!validate_prng_nonce_notable(nt)) hardNonces++;
+        nonces[i] = nt;
 
         nfc_deactivate();
     }
@@ -208,9 +241,13 @@ MifareNestedNonceType nested_check_nonce_type(FuriHalNfcTxRxContext* tx_rx) {
 
     if(sameNonces > 3) {
         return MifareNestedNonceStatic;
-    } else {
-        return MifareNestedNonce;
     }
+
+    if(hardNonces > 3) {
+        return MifareNestedNonceHard;
+    }
+
+    return MifareNestedNonceWeak;
 }
 
 struct nonce_info_static nested_static_nonce_attack(
@@ -404,12 +441,10 @@ struct distance_info nested_calibrate_distance_info(
         if(i != 65565) {
             if(rtr != 0) {
                 davg += i;
-                if(i != 0) {
-                    if(dmin == 0) {
-                        dmin = i;
-                    } else {
-                        dmin = MIN(dmin, i);
-                    }
+                if(dmin == 0) {
+                    dmin = i;
+                } else {
+                    dmin = MIN(dmin, i);
                 }
                 dmax = MAX(dmax, i);
             }
@@ -469,7 +504,10 @@ struct nonce_info nested_attack(
 
         while(r.target_nt[i] == 0) { // continue until we have an unambiguous nonce
             nfc_activate();
-            if(!furi_hal_nfc_activate_nfca(200, &cuid)) return r;
+            if(!furi_hal_nfc_activate_nfca(200, &cuid)) {
+                free(crypto);
+                return r;
+            }
 
             r.cuid = cuid;
 
@@ -524,7 +562,7 @@ struct nonce_info nested_attack(
                         break;
                     }
 
-                    FURI_LOG_D(TAG, "Nonce#%lu: valid, ntdist=%li", i + 1, j);
+                    FURI_LOG_D(TAG, "Nonce#%lu: valid, ntdist=%lu", i + 1, j);
                 }
             }
 
@@ -635,7 +673,6 @@ NestedCheckKeyResult nested_check_key(
     uint64_t ui64Key) {
     uint32_t cuid = 0;
     uint32_t nt;
-    Crypto1* crypto = malloc(sizeof(Crypto1));
 
     nfc_activate();
     if(!furi_hal_nfc_activate_nfca(200, &cuid)) return NestedCheckKeyNoTag;
@@ -643,12 +680,33 @@ NestedCheckKeyResult nested_check_key(
     FURI_LOG_D(
         TAG, "Checking %c key %012llX for block %u", !keyType ? 'A' : 'B', ui64Key, blockNo);
 
+    Crypto1* crypto = malloc(sizeof(Crypto1));
+
     bool success =
         mifare_classic_authex(crypto, tx_rx, cuid, blockNo, keyType, ui64Key, false, &nt);
+
+    free(crypto);
 
     nfc_deactivate();
 
     return success ? NestedCheckKeyValid : NestedCheckKeyInvalid;
+}
+
+bool nested_check_block(FuriHalNfcTxRxContext* tx_rx, uint8_t blockNo, uint8_t keyType) {
+    uint32_t cuid = 0;
+
+    nfc_activate();
+    if(!furi_hal_nfc_activate_nfca(200, &cuid)) return false;
+
+    Crypto1* crypto = malloc(sizeof(Crypto1));
+
+    bool success = mifare_sendcmd_short(crypto, tx_rx, false, 0x60 + (keyType & 0x01), blockNo);
+
+    free(crypto);
+
+    nfc_deactivate();
+
+    return success;
 }
 
 void nested_get_data(FuriHalNfcDevData* dev_data) {

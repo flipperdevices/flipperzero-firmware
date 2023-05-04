@@ -18,10 +18,9 @@ void mifare_nested_scene_need_collection_on_enter(void* context) {
 
     widget_add_icon_element(widget, 73, 13, &I_DolphinCry);
     widget_add_string_element(
-        widget, 0, 4, AlignLeft, AlignTop, FontPrimary, "You need to collect");
-    widget_add_string_element(widget, 0, 16, AlignLeft, AlignTop, FontPrimary, "nonces");
-    widget_add_string_element(widget, 1, 28, AlignLeft, AlignTop, FontPrimary, "Run \"Nested");
-    widget_add_string_element(widget, 1, 40, AlignLeft, AlignTop, FontPrimary, "attack\"");
+        widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Missing collected nonces");
+    widget_add_string_element(
+        widget, 0, 12, AlignLeft, AlignTop, FontSecondary, "Run \"Nested attack\"");
     widget_add_button_element(
         widget,
         GuiButtonTypeLeft,

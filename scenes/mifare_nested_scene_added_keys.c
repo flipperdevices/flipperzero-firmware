@@ -20,17 +20,22 @@ void mifare_nested_scene_added_keys_on_enter(void* context) {
         append[3] = 's';
     }
 
-    widget_add_string_element(widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "Found keys:");
+    widget_add_string_element(
+        widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Results of key recovery");
 
     if(key_info->added_keys != 0) {
         snprintf(draw_str, sizeof(draw_str), "Added: %lu %s", key_info->added_keys, append);
         notification_message(mifare_nested->notifications, &sequence_success);
+        widget_add_icon_element(widget, 52, 17, &I_DolphinSuccess);
     } else {
         snprintf(draw_str, sizeof(draw_str), "No new keys were added");
+        widget_add_string_element(
+            widget, 0, 22, AlignLeft, AlignTop, FontSecondary, "Try running \"Nested attack\"");
+        widget_add_string_element(widget, 0, 32, AlignLeft, AlignTop, FontSecondary, "again");
         notification_message(mifare_nested->notifications, &sequence_error);
     }
 
-    widget_add_string_element(widget, 3, 16, AlignLeft, AlignTop, FontPrimary, draw_str);
+    widget_add_string_element(widget, 0, 12, AlignLeft, AlignTop, FontSecondary, draw_str);
     widget_add_button_element(
         widget,
         GuiButtonTypeLeft,

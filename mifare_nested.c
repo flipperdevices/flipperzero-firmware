@@ -270,6 +270,13 @@ MifareNested* mifare_nested_alloc() {
         MifareNestedViewWidget,
         widget_get_view(mifare_nested->widget));
 
+    // Variable Item List
+    mifare_nested->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        mifare_nested->view_dispatcher,
+        MifareNestedViewVariableList,
+        variable_item_list_get_view(mifare_nested->variable_item_list));
+
     // Nested attack state
     NestedState* plugin_state = collection_alloc();
     view_set_context(plugin_state->view, mifare_nested);
@@ -286,6 +293,10 @@ MifareNested* mifare_nested_alloc() {
 
     KeyInfo_t* key_info = malloc(sizeof(KeyInfo_t));
     mifare_nested->keys = key_info;
+
+    MifareNestedSettings* settings = malloc(sizeof(MifareNestedSettings));
+    settings->only_hardnested = false;
+    mifare_nested->settings = settings;
 
     view_set_draw_callback(plugin_state->view, nested_draw_callback);
     view_set_input_callback(plugin_state->view, nested_input_callback);
@@ -325,14 +336,25 @@ void mifare_nested_free(MifareNested* mifare_nested) {
     view_dispatcher_remove_view(mifare_nested->view_dispatcher, MifareNestedViewWidget);
     widget_free(mifare_nested->widget);
 
+    // Variable Item List
+    view_dispatcher_remove_view(mifare_nested->view_dispatcher, MifareNestedViewVariableList);
+    variable_item_list_free(mifare_nested->variable_item_list);
+
     // Nested
     view_dispatcher_remove_view(mifare_nested->view_dispatcher, MifareNestedViewCollecting);
 
     // Check keys
     view_dispatcher_remove_view(mifare_nested->view_dispatcher, MifareNestedViewCheckKeys);
 
+    // Nonces states
     free(mifare_nested->nonces);
     free(mifare_nested->nested_state);
+
+    // Keys
+    free(mifare_nested->keys);
+
+    // Settings
+    free(mifare_nested->settings);
 
     // Worker
     mifare_nested_worker_stop(mifare_nested->worker);
