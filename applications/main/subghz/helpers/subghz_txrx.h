@@ -37,7 +37,7 @@ void subghz_txrx_free(SubGhzTxRx* instance);
  * @param instance Pointer to a SubGhzTxRx
  * @return bool True if the database is loaded
  */
-bool subghz_txrx_is_load_database(SubGhzTxRx* instance);
+bool subghz_txrx_is_database_loaded(SubGhzTxRx* instance);
 
 /**
  * Set preset 

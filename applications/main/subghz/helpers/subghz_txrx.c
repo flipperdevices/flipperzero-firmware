@@ -23,7 +23,7 @@ SubGhzTxRx* subghz_txrx_alloc() {
     instance->fff_data = flipper_format_string_alloc();
 
     instance->environment = subghz_environment_alloc();
-    instance->load_database = subghz_environment_load_keystore(
+    instance->is_database_loaded = subghz_environment_load_keystore(
         instance->environment, EXT_PATH("subghz/assets/keeloq_mfcodes"));
     subghz_environment_load_keystore(
         instance->environment, EXT_PATH("subghz/assets/keeloq_mfcodes_user"));
@@ -59,9 +59,9 @@ void subghz_txrx_free(SubGhzTxRx* instance) {
     free(instance);
 }
 
-bool subghz_txrx_is_load_database(SubGhzTxRx* instance) {
+bool subghz_txrx_is_database_loaded(SubGhzTxRx* instance) {
     furi_assert(instance);
-    return instance->load_database;
+    return instance->is_database_loaded;
 }
 
 void subghz_txrx_set_preset(
