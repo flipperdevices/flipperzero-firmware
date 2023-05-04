@@ -30,7 +30,7 @@
 #endif
 
 #ifndef FURI_HAL_POWER_STOP_MODE
-#define FURI_HAL_POWER_STOP_MODE (LL_PWR_MODE_STOP0)
+#define FURI_HAL_POWER_STOP_MODE (LL_PWR_MODE_STOP2)
 #endif
 
 typedef struct {
