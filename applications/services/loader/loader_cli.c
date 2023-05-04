@@ -29,7 +29,7 @@ static void loader_cli_info(Loader* loader) {
         printf("No application is running\r\n");
     } else {
         // TODO: print application name ???
-        printf("Running application: unknown\r\n");
+        printf("Application is running\r\n");
     }
 }
 
