@@ -7,8 +7,9 @@ App(
     requires=[
         "gui",
         "storage",
+        "dialogs",
     ],
-    stack_size=2 * 1024,
+    stack_size=3 * 1024,
     order=10,
     fap_icon="xremote_10px.png",
     fap_icon_assets="icons",

@@ -16,6 +16,7 @@ typedef struct {
     NotificationApp* notification;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
+    Submenu* editmenu;
     ButtonMenu* button_menu_create;
     ButtonMenu* button_menu_create_add;
     ButtonMenu* button_menu_ir;
@@ -30,11 +31,13 @@ typedef struct {
     XRemotePauseSet* xremote_pause_set;
     InfraredRemote* ir_remote_buffer;
     InfraredWorker* ir_worker;
+    SubGhzRemote* sg_remote_buffer;
     CrossRemote* cross_remote;
     uint32_t haptic; 
     uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;
+    uint32_t edit_item;
     bool transmitting;
     char text_store[XREMOTE_TEXT_STORE_NUM][XREMOTE_TEXT_STORE_SIZE + 1];
 } XRemote;
@@ -42,6 +45,7 @@ typedef struct {
 typedef enum {
     XRemoteViewIdInfoscreen,
     XRemoteViewIdMenu,
+    XRemoteViewIdEditItem,
     XRemoteViewIdCreate,
     XRemoteViewIdCreateAdd,
     XRemoteViewIdSettings,

@@ -109,6 +109,17 @@ bool cross_remote_add_pause(CrossRemote* remote, int time) {
     return true;
 }
 
+bool cross_remote_add_subghz(CrossRemote* remote, SubGhzRemote* subghz) {
+    UNUSED(subghz);
+    CrossRemoteItem* item = xremote_remote_item_alloc();
+    xremote_remote_item_set_type(item, XRemoteRemoteItemTypeSubGhz);
+    xremote_remote_item_set_name(item, xremote_sg_remote_get_name(subghz));
+    xremote_remote_item_set_sg_signal(item, subghz);
+
+    CrossRemoteItemArray_push_back(remote->items, item);
+    return true;
+}
+
 size_t cross_remote_get_item_count(CrossRemote* remote) {
     return CrossRemoteItemArray_size(remote->items);
 }
@@ -116,6 +127,15 @@ size_t cross_remote_get_item_count(CrossRemote* remote) {
 CrossRemoteItem* cross_remote_get_item(CrossRemote* remote, size_t index) {
     furi_assert(index < CrossRemoteItemArray_size(remote->items));
     return *CrossRemoteItemArray_get(remote->items, index);
+}
+
+void cross_remote_remove_item(CrossRemote* remote, size_t index) {
+    CrossRemoteItemArray_erase(remote->items, index);
+}
+
+void cross_remote_rename_item(CrossRemote* remote, size_t index, const char* name) {
+    CrossRemoteItem* item = cross_remote_get_item(remote, index);
+    xremote_remote_item_set_name(item, name);
 }
 
 
@@ -211,6 +231,11 @@ bool cross_remote_store(CrossRemote* remote) {
             } else if(item->type == XRemoteRemoteItemTypePause) {
                 success = xremote_pause_save(ff, 
                     item->time,
+                    xremote_remote_item_get_name(item));
+            } else if(item->type == XRemoteRemoteItemTypeSubGhz) {
+                success = xremote_sg_signal_save(
+                    xremote_remote_item_get_sg_signal(item),
+                    ff,
                     xremote_remote_item_get_name(item));
             }
             if(!success) {
