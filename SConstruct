@@ -251,7 +251,7 @@ distenv.PhonyTarget(
     "debug_other_blackmagic",
     "${GDBPYCOM}",
     GDBOPTS="${GDBOPTS_BASE}  ${GDBOPTS_BLACKMAGIC}",
-    GDBREMOTE="$${BLACKMAGIC_ADDR}",
+    GDBREMOTE="${BLACKMAGIC_ADDR}",
 )
 
 
