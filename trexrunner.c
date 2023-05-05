@@ -7,10 +7,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "assets_icons.h"
+#include "t-rex-runner_icons.h"
 
 #define DINO_START_X 10
-#define DINO_START_Y 42
+#define DINO_START_Y 35 // 64 - 22 - BACKGROUND_H / 2 - 1
 
 #define FPS 20
 
@@ -21,7 +21,10 @@
 
 #define CACTUS_W 8
 #define CACTUS_H 10
-#define START_CACTUS_SPEED 25
+#define START_x_speed 25
+
+#define BACKGROUND_W 176
+#define BACKGROUND_H 12
 
 typedef enum {
     EventTypeTick,
@@ -44,11 +47,14 @@ typedef struct {
     float y_position;
     float y_speed;
     int y_acceleration;
+    float x_speed;
 
     // Cactus info
     int cactus_position;
-    float cactus_speed;
     int has_cactus;
+
+    // Horizontal line
+    int background_position;
 
     int lost;
 } GameState;
@@ -91,7 +97,7 @@ static void timer_callback(void *ctx) {
 
     // Update Cactus state
     if (game_state->has_cactus){
-        game_state->cactus_position = game_state->cactus_position - game_state->cactus_speed *  delta_time_ms / 1000;
+        game_state->cactus_position = game_state->cactus_position - game_state->x_speed *  delta_time_ms / 1000;
         if (game_state->cactus_position <= CACTUS_W + 1) {
             game_state->has_cactus = 0;
             game_state->cactus_position = 120;
@@ -101,8 +107,13 @@ static void timer_callback(void *ctx) {
     else {
         game_state->has_cactus = 1;
         game_state->cactus_position = 120;
-        game_state->cactus_speed = START_CACTUS_SPEED;
+        game_state->x_speed = START_x_speed;
     }
+
+    // Move horizontal line
+    if (game_state->background_position <= - BACKGROUND_W)
+        game_state->background_position += BACKGROUND_W;
+    game_state->background_position = game_state->background_position - game_state->x_speed * delta_time_ms / 1000;
 
     // Lose condition
     if ((game_state->y_position + 22 >= (64 - CACTUS_H)) && ((DINO_START_X+20) >= game_state->cactus_position) && (DINO_START_X <= (game_state->cactus_position + CACTUS_W)))
@@ -127,10 +138,17 @@ static void render_callback(Canvas *const canvas, void *ctx) {
     }
 
     if(!game_state->lost){
+        // Show Ground
+        canvas_draw_icon(canvas, game_state->background_position, 64 - BACKGROUND_H, &I_HorizonLine0);
+        canvas_draw_icon(canvas, game_state->background_position + BACKGROUND_W, 64 - BACKGROUND_H, &I_HorizonLine0);
+
+        // Show DINO
         canvas_draw_icon(canvas, DINO_START_X, game_state->y_position, game_state->dino_icon);
 
+        // Show cactus
         if (game_state->has_cactus)
-            canvas_draw_triangle(canvas, game_state->cactus_position, 63, CACTUS_W, CACTUS_H, CanvasDirectionBottomToTop);
+            canvas_draw_triangle(canvas, game_state->cactus_position, 64 - BACKGROUND_H + CACTUS_W, CACTUS_W, CACTUS_H, CanvasDirectionBottomToTop);
+
     } else {
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignBottom, "You lost :c");
@@ -146,6 +164,7 @@ static void game_state_init(GameState *const game_state) {
     game_state->y_acceleration = game_state->y_speed = 0;
     game_state->y_position = DINO_START_Y;
     game_state->has_cactus = 0;
+    game_state->background_position = 0;
     game_state->lost = 0;
     game_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
@@ -185,11 +204,11 @@ int32_t trexrunner_app() {
                 if (event.input.type == InputTypeShort) {
                     switch (event.input.key) {
                         case InputKeyUp:
-                            //if (game_state->y_position == DINO_START_Y)
+                            // Test command
                                 game_state->y_position -= 10;
                             break;
                         case InputKeyDown:
-                            //if (game_state->y_position == DINO_START_Y)
+                            // Test command
                                 game_state->y_position += 10;
                             break;
                         case InputKeyLeft:

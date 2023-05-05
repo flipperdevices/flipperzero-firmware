@@ -5,22 +5,21 @@ Flipper Zero port of Chrome's running T-rex game
 - Added command to move DINO
 - Added (boring) cactus spawn
 - Added lose condition and lose screen
+- Added moving backgrounf
 
 ## TODO
 - Change cactus icon
 - More random cactus spawn
 - Increase cactus speed with time
+- Fix background speed with cactus
+- Fix Dino transparency
 - Allow to play again without the need to close the game in the lose screen
 
-## Screenshots
-
-![image](imgs/Screenshot-20230504-232830.png)
-![image](imgs/Screenshot-20230504-234841.png)
-![image](imgs/Screenshot-20230504-232915.png)
-![image](imgs/Screenshot-20230504-233007.png)
+## Gameplay
+![image](video.gif)
 
 ## Compiling
 
 The easier way to compile it is to use https://github.com/flipperdevices/flipperzero-ufbt.   
 Install it with: ```python3 -m pip install --upgrade ufbt```     
-Then run ```ufbt``` in this folder.
+Then run ```ufbt update && ufbt``` in this folder.
