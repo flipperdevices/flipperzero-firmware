@@ -40,5 +40,6 @@ bool xremote_scene_save_remote_item_on_event(void* context, SceneManagerEvent ev
 
 void xremote_scene_save_remote_item_on_exit(void* context) {
     XRemote* app = context;
-    UNUSED(app);
+    size_t enter_name_length = XREMOTE_MAX_REMOTE_NAME_LENGTH;
+    strncpy(app->text_store[0], "", enter_name_length);
 }
