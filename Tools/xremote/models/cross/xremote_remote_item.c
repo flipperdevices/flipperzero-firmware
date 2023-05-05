@@ -28,6 +28,14 @@ static inline bool xremote_ir_signal_save_raw(InfraredRawSignal* raw, FlipperFor
            flipper_format_write_uint32(ff, "data", raw->timings, raw->timings_size);
 }
 
+static inline bool xremote_sg_signal_save_data(SubGhzRemote* remote, FlipperFormat* ff) {
+    UNUSED(remote);
+    UNUSED(ff);
+    return true;
+    /*return flipper_format_write_uint32(ff, "frequency", xremote_sg_remote_get_frequency(remote)) &&
+           flipper_format_write_string_cstr(ff, "preset", xremote_sg_remote_get_preset(remote));*/
+}
+
 static bool xremote_ir_signal_is_message_valid(InfraredMessage* message) {
     if(!infrared_is_protocol_valid(message->protocol)) {
         FURI_LOG_E(TAG, "Unknown protocol");
@@ -182,12 +190,20 @@ void xremote_remote_item_set_ir_signal(CrossRemoteItem* item, InfraredSignal* si
     xremote_ir_signal_set_signal(item->ir_signal, signal);
 }
 
+void xremote_remote_item_set_sg_signal(CrossRemoteItem* item, SubGhzRemote* subghz) {
+    item->sg_signal = subghz;
+}
+
 const char* xremote_remote_item_get_name(CrossRemoteItem* item) {
     return furi_string_get_cstr(item->name);
 }
 
 InfraredSignal* xremote_remote_item_get_ir_signal(CrossRemoteItem* item) {
     return item->ir_signal;
+}
+
+SubGhzRemote* xremote_remote_item_get_sg_signal(CrossRemoteItem* item) {
+    return item->sg_signal;
 }
 
 bool xremote_ir_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char* name) {
@@ -210,4 +226,13 @@ bool xremote_pause_save(FlipperFormat* ff, int32_t time, const char* name) {
        return false;
     }
     return true;
+}
+
+bool xremote_sg_signal_save(SubGhzRemote* remote, FlipperFormat* ff, const char* name) {
+    if(!flipper_format_write_comment_cstr(ff, "") || 
+       !flipper_format_write_string_cstr(ff, "remote_type", "SG") || 
+       !flipper_format_write_string_cstr(ff, "name", name)) {
+        return false;
+    }
+    return xremote_sg_signal_save_data(remote, ff);
 }

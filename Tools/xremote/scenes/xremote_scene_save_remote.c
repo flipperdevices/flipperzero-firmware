@@ -66,6 +66,8 @@ void xremote_scene_save_remote_on_exit(void* context) {
     void* validator_context = text_input_get_validator_callback_context(text_input);
     text_input_set_validator(text_input, NULL, NULL);
 
+    size_t enter_name_length = XREMOTE_MAX_REMOTE_NAME_LENGTH;
+    strncpy(app->text_store[0], "", enter_name_length);
     if(validator_context) {
         validator_is_file_free((ValidatorIsFile*)validator_context);
     }
