@@ -94,6 +94,9 @@ bool xremote_scene_create_on_event(void* context, SceneManagerEvent event) {
             } else if(button_index == ButtonIndexSave) {
                 scene_manager_next_scene(app->scene_manager, XRemoteSceneSaveRemote);
             }
+        } else if(custom_type == XRemoteCustomEventMenuSelected) {
+            app->edit_item = button_index;
+            scene_manager_next_scene(app->scene_manager, XRemoteSceneEditItem);
         }
         /*switch(event.event) {
             case XRemoteCustomEventCreateLeft:
