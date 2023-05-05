@@ -1,3 +1,5 @@
+#ifndef APP_UNIT_TESTS
+
 #include "nfc.h"
 
 #include <f_hal_nfc.h>
@@ -546,3 +548,5 @@ NfcError nfc_iso13444a_sdd_frame(
 
     return ret;
 }
+
+#endif // APP_UNIT_TESTS

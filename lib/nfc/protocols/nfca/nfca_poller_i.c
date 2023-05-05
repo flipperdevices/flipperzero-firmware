@@ -94,7 +94,6 @@ static NfcaError nfca_poller_standart_frame_exchange(
 NfcaError nfca_poller_config(NfcaPoller* instance) {
     furi_assert(instance);
 
-    instance->data = malloc(sizeof(NfcaData));
     instance->buff =
         nfc_poller_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE, NFCA_POLLER_MAX_BUFFER_SIZE);
 
@@ -113,8 +112,6 @@ NfcaError nfca_poller_reset(NfcaPoller* instance) {
     instance->context = NULL;
     memset(&instance->col_res, 0, sizeof(NfcaPollerColRes));
     instance->state = NfcaPollerStateIdle;
-    free(instance->data);
-    instance->data = NULL;
     free(instance->buff);
     instance->buff = NULL;
 
