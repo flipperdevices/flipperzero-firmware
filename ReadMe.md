@@ -1,5 +1,5 @@
-# Flipper Application Files (FAPs) for Any Firmware with API v23.x
-## Apps from this pack should be compatible with OFW with API v23.x (dev branch) or any other firmware build with API 23.x
+# Flipper Application Files (FAPs) for Any Firmware with API v26.x
+## Apps from this pack should be compatible with OFW with API v26.x (dev branch) or any other firmware build with API 26.x
 
 ## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/all-the-plugins/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `3 May 18:46 GMT +3`
+### Apps checked & updated at `5 May 16:19 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -63,7 +63,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player) <- Follow link to download examples and learn how to convert videos
 
 ## GPIO
-- [IFTTT Virtual Button for ESP8266 (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button)
+- [IFTTT Virtual Button for ESP8266 (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/ae321fb5f4c616d3965546926b1b4b446eef8d86)
 - [Wifi Deauth v2 for ESP8266 (By Timmotools)](https://github.com/Timmotools/flipperzero_esp8266_deautherv2)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
@@ -105,7 +105,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
 - [Counter (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
-- [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) - improvements [(By friebel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option [(By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
+- [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) - improvements [(By friebel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [(By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
