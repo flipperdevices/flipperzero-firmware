@@ -50,7 +50,6 @@ void furi_hal_ibutton_emulate_start(
     furi_hal_ibutton->callback = callback;
     furi_hal_ibutton->context = context;
 
-    furi_hal_bus_disable(FURI_HAL_IBUTTON_TIMER_BUS);
     furi_hal_bus_enable(FURI_HAL_IBUTTON_TIMER_BUS);
 
     furi_hal_interrupt_set_isr(FURI_HAL_IBUTTON_TIMER_IRQ, furi_hal_ibutton_emulate_isr, NULL);
