@@ -5,13 +5,24 @@
 #include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
+#include <lib/subghz/registry.h>
+//#include <lib/subghz/protocols/keeloq.h>
+//#include <lib/subghz/protocols/secplus_v1.h>
+//#include <lib/subghz/protocols/secplus_v2.h>
+//#include <lib/subghz/protocols/princeton_for_testing.h>
+//#include <lib/subghz/blocks/math.h>
+//#include <lib/subghz/protocols/raw.h>
+//#include <lib/subghz/protocols/bin_raw.h>
 #include <lib/subghz/protocols/protocol_items.h>
+//#include <lib/subghz/protocols/protocol_items.c>
 #include <lib/subghz/subghz_keystore.h>
 #include <lib/subghz/subghz_file_encoder_worker.h>
 #include <gui/modules/variable_item_list.h>
 #include "xremote_sg_remote.h"
 
 #define TAG "Xremote"
+
+
 
 struct SubGhzRemote {
     FuriString* name;
@@ -25,18 +36,37 @@ const char* xremote_sg_remote_get_name(SubGhzRemote* remote) {
     return furi_string_get_cstr(remote->name);
 }
 
+void subghz_preset_init(
+    void* context,
+    const char* preset_name,
+    uint32_t frequency,
+    uint8_t* preset_data,
+    size_t preset_data_size) {
+    furi_assert(context);
+    SubGhzRemote* remote = context;
+    furi_string_set(remote->txrx->preset->name, preset_name);
+    remote->txrx->preset->frequency = frequency;
+    remote->txrx->preset->data = preset_data;
+    remote->txrx->preset->data_size = preset_data_size;
+}
+
 SubGhzRemote* xremote_sg_remote_alloc() {
     SubGhzRemote* remote = malloc(sizeof(SubGhzRemote));
     remote->name = furi_string_alloc();
     remote->path = furi_string_alloc();
-    remote->frequency = 0;
     
+    // SubGhz Settings
+    remote->setting = subghz_setting_alloc();
+    subghz_setting_load(remote->setting, EXT_PATH("subghz/assets/setting_user"));
+
     remote->txrx = malloc(sizeof(SubGhzTxRx));
     remote->txrx->preset = malloc(sizeof(SubGhzRadioPreset));
     remote->txrx->preset->name = furi_string_alloc();
+    subghz_preset_init(
+        remote, "AM650", subghz_setting_get_default_frequency(remote->setting), NULL, 0);
     remote->txrx->fff_data = flipper_format_string_alloc();
-    /*remote->txrx->environment = subghz_environment_alloc();
-    subghz_environment_set_came_atomo_rainbow_table_file_name(
+    remote->txrx->environment = subghz_environment_alloc();
+    /*subghz_environment_set_came_atomo_rainbow_table_file_name(
         remote->txrx->environment, EXT_PATH("subghz/assets/came_atomo"));
     subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
         remote->txrx->environment, EXT_PATH("subghz/assets/alutech_at_4n"));
@@ -55,7 +85,6 @@ void xremote_sg_remote_free(SubGhzRemote* remote) {
     furi_string_free(remote->name);
 
     // TXRX
-
     subghz_receiver_free(remote->txrx->receiver);
     subghz_environment_free(remote->txrx->environment);
     flipper_format_free(remote->txrx->fff_data);
@@ -84,6 +113,14 @@ bool xremtoe_sg_set_preset(SubGhzRemote* remote, const char* preset) {
     return true;
 }
 
+uint32_t xremote_sg_remote_get_frequency(SubGhzRemote* remote) {
+    return remote->txrx->preset->frequency;
+}
+
+const char* xremote_sg_remote_get_preset(SubGhzRemote* remote) {
+    return furi_string_get_cstr(remote->txrx->preset->name);
+}
+
 bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
@@ -99,6 +136,10 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
         if(!flipper_format_buffered_file_open_existing(ff, furi_string_get_cstr(path))) break;
         const char* fullPath = furi_string_get_cstr(path);
         char* fileName = strrchr(fullPath, '/') + 1;
+        char* dotPosition = strrchr(fileName, '.');
+        if (dotPosition != NULL) {  // check if there is a dot in the file name
+            *dotPosition = '\0';     // set the dot position to NULL character to truncate the string
+        }
         //remote->name = fileName;
         furi_string_set_str(remote->name, fileName);
         uint32_t version;
@@ -147,7 +188,7 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
                 flipper_format_get_raw_stream(remote->txrx->fff_data));
         }
 
-       /* remote->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
+        /*remote->txrx->decoder_result = subghz_receiver_search_decoder_base_by_name(
             remote->txrx->receiver, furi_string_get_cstr(buf));*/
         if(remote->txrx->decoder_result) {
             SubGhzProtocolStatus status = subghz_protocol_decoder_base_deserialize(

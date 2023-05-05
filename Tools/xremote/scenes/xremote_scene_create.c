@@ -12,7 +12,7 @@ static void xremote_create_callback(void* context, int32_t index, InputType type
     
     uint16_t custom_type;
     if(type == InputTypePress) {
-        custom_type = XRemoteCustomEventMenuVoid;
+        custom_type = XRemoteCustomEventMenuSelected;
     } else if(type == InputTypeRelease) {
         custom_type = XRemoteCustomEventMenuVoid;
     } else if(type == InputTypeShort) {
@@ -85,9 +85,11 @@ bool xremote_scene_create_on_event(void* context, SceneManagerEvent event) {
     } else if(event.type == SceneManagerEventTypeCustom) {
         const uint16_t custom_type = xremote_custom_menu_event_get_type(event.event);
         const int16_t button_index = xremote_custom_menu_event_get_value(event.event);
-        if (custom_type == XRemoteCustomEventMenuSelected && button_index < 0) {
-            scene_manager_set_scene_state(
+        scene_manager_set_scene_state(
                 app->scene_manager, XRemoteSceneCreate, (unsigned)button_index);
+        if (custom_type == XRemoteCustomEventMenuSelected && button_index < 0) {
+            //scene_manager_set_scene_state(
+            //    app->scene_manager, XRemoteSceneCreate, (unsigned)button_index);
             if(button_index == ButtonIndexPlus) {
                 scene_manager_next_scene(app->scene_manager, XRemoteSceneCreateAdd);
                 consumed = true;
