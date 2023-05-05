@@ -28,7 +28,7 @@ class TestRfidBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingRFID" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
@@ -89,7 +89,7 @@ class TestRfidBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingRFID" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
@@ -150,7 +150,7 @@ class TestRfidBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingRFID" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break

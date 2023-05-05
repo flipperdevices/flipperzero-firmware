@@ -28,12 +28,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
+                self.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         while "Mf Classic User Dict" in state:
@@ -95,12 +95,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
+                self.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert "card_NFC-A_bench" in state, "Result of reading reference card is fail"
@@ -143,12 +143,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
+                self.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         while "Mf Classic User Dict" in state:
@@ -182,7 +182,6 @@ class TestNfcBench(BaseCase):
         reader_nfc.go_to_place()
         reader_nfc.update()
         string = reader_nfc.get()
-        print(string)
         assert string == "W58W9D7CD67A000000", "Emulated NFC card reading failed"
 
         nav.press_back()
@@ -220,13 +219,13 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             time.sleep(0.5)
             while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
+                self.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert "card_Troika_bench" in state, "Result of reading reference card is fail"
@@ -270,12 +269,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
+                self.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert "card_NTAG215_bench" in state, "Result of reading reference card is fail"
@@ -320,12 +319,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
+                self.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert (
@@ -371,12 +370,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
+                self.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert (
@@ -422,12 +421,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
+                self.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert (
@@ -452,12 +451,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                print(colored("Reading", "yellow"))
+                self.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                print(colored("ReadingCardNFC", "yellow"))
+                self.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert (
