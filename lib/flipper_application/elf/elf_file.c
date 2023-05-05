@@ -630,7 +630,7 @@ void elf_file_free(ELFFile* elf) {
             if(itref->value.data) {
                 aligned_free(itref->value.data);
             }
-            free((void*)itref->key);
+            free(itref->key);
         }
 
         ELFSectionDict_clear(elf->sections);
@@ -642,7 +642,7 @@ void elf_file_free(ELFFile* elf) {
         for(AddressCache_it(it, elf->trampoline_cache); !AddressCache_end_p(it);
             AddressCache_next(it)) {
             const AddressCache_itref_t* itref = AddressCache_cref(it);
-            free((void*)itref->value);
+            free(itref->value);
         }
 
         AddressCache_clear(elf->trampoline_cache);

@@ -65,7 +65,7 @@ iButtonProtocols* ibutton_protocols_alloc() {
 
 void ibutton_protocols_free(iButtonProtocols* protocols) {
     for(iButtonProtocolGroupId i = 0; i < iButtonProtocolGroupMax; ++i) {
-        ibutton_protocol_groups[i]->free(protocols->group_datas[i]);
+        (ibutton_protocol_groups[i]->free)(protocols->group_datas[i]);
     }
 
     free(protocols->group_datas);

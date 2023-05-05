@@ -8,7 +8,7 @@
 
 void stream_free(Stream* stream) {
     furi_assert(stream);
-    stream->vtable->free(stream);
+    (stream->vtable->free)(stream);
 }
 
 void stream_clean(Stream* stream) {

@@ -50,7 +50,7 @@ void subghz_receiver_free(SubGhzReceiver* instance) {
     // Release allocated slots
     for
         M_EACH(slot, instance->slots, SubGhzReceiverSlotArray_t) {
-            slot->base->protocol->decoder->free(slot->base);
+            (slot->base->protocol->decoder->free)(slot->base);
             slot->base = NULL;
         }
     SubGhzReceiverSlotArray_clear(instance->slots);

@@ -80,7 +80,7 @@ void widget_reset(Widget* widget) {
             while(!ElementArray_end_p(it)) {
                 WidgetElement* element = *ElementArray_ref(it);
                 furi_assert(element->free);
-                element->free(element);
+                (element->free)(element);
                 ElementArray_next(it);
             }
             ElementArray_reset(model->element);

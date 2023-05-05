@@ -278,8 +278,8 @@ static void bubble_animation_release_frame(Icon** icon) {
     furi_assert(icon);
     furi_assert(*icon);
 
-    free((void*)(*icon)->frames[0]);
-    free((void*)(*icon)->frames);
+    free((*icon)->frames[0]);
+    free((*icon)->frames);
     free(*icon);
     *icon = NULL;
 }
