@@ -46,7 +46,7 @@ void slideshow_free(Slideshow* slideshow) {
             uint8_t* frame_data = (uint8_t*)icon->frames[frame_idx];
             free(frame_data);
         }
-        free(icon->frames);
+        free((uint8_t**)icon->frames);
     }
     free(slideshow);
 }

@@ -13,15 +13,8 @@ void* malloc(size_t size) {
     return pvPortMalloc(size);
 }
 
-#undef free
-
 void free(void* ptr) {
     vPortFree(ptr);
-}
-
-void _furi_free(void** p) {
-    vPortFree(*p);
-    *p = 0;
 }
 
 void* realloc(void* ptr, size_t size) {

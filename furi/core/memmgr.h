@@ -12,26 +12,10 @@
 
 #ifdef __cplusplus
 extern "C" {
-
-namespace std {
-void _furi_free(void** p);
-}
 #endif
 
 // define for test case "link against furi memmgr"
 #define FURI_MEMMGR_GUARD 1
-
-/** Free memory allocated by malloc
- *
- * @param      x     lvalue pointer to memory
- */
-#define free(x) _furi_free(((void**)(&(x))))
-
-/** Free memory and set pointer to NULL
- *
- * @param      p     pointer to memory pointer to free
- */
-void _furi_free(void** p);
 
 /** Get free heap size
  *

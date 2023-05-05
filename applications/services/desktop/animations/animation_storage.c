@@ -69,7 +69,7 @@ static bool animation_storage_load_single_manifest_info(
     } while(0);
 
     if(!result && manifest_info->name) {
-        free(manifest_info->name);
+        free((void*)manifest_info->name);
     }
     furi_string_free(read_string);
     flipper_format_free(file);
@@ -208,7 +208,7 @@ static void animation_storage_free_animation(BubbleAnimation** animation) {
         animation_storage_free_bubbles(*animation);
         animation_storage_free_frames(*animation);
         if((*animation)->frame_order) {
-            free((*animation)->frame_order);
+            free((void*)(*animation)->frame_order);
         }
         free(*animation);
         *animation = NULL;
@@ -223,7 +223,7 @@ void animation_storage_free_storage_animation(StorageAnimation** storage_animati
         animation_storage_free_animation((BubbleAnimation**)&(*storage_animation)->animation);
 
         if((*storage_animation)->manifest_info.name) {
-            free((*storage_animation)->manifest_info.name);
+            free((void*)(*storage_animation)->manifest_info.name);
         }
         free(*storage_animation);
     }
@@ -255,11 +255,11 @@ static void animation_storage_free_frames(BubbleAnimation* animation) {
     const Icon* icon = &animation->icon_animation;
     for(int i = 0; i < icon->frame_count; ++i) {
         if(icon->frames[i]) {
-            free(icon->frames[i]);
+            free((void*)icon->frames[i]);
         }
     }
 
-    free(icon->frames);
+    free((void*)icon->frames);
 }
 
 static bool animation_storage_load_frames(
@@ -501,7 +501,7 @@ static BubbleAnimation* animation_storage_load_animation(const char* name) {
 
     if(!success) { //-V547
         if(animation->frame_order) {
-            free(animation->frame_order);
+            free((void*)animation->frame_order);
         }
         free(animation);
         animation = NULL;
@@ -523,14 +523,14 @@ static void animation_storage_free_bubbles(BubbleAnimation* animation) {
         }
 
         if((*bubble)->bubble.text) {
-            free((*bubble)->bubble.text);
+            free((void*)(*bubble)->bubble.text);
         }
         if((*bubble) == animation->frame_bubble_sequences[i]) {
             ++i;
         }
-        free(*bubble);
+        free((void*)*bubble);
         FURI_CONST_ASSIGN_PTR(*bubble, NULL);
     }
-    free(animation->frame_bubble_sequences);
+    free((void*)animation->frame_bubble_sequences);
     animation->frame_bubble_sequences = NULL;
 }

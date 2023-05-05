@@ -22,7 +22,7 @@ ProtocolDict* protocol_dict_alloc(const ProtocolBase** protocols, size_t count) 
 
 void protocol_dict_free(ProtocolDict* dict) {
     for(size_t i = 0; i < dict->count; i++) {
-        (dict->base[i]->free)(dict->data[i]);
+        dict->base[i]->free(dict->data[i]);
     }
 
     free(dict->data);

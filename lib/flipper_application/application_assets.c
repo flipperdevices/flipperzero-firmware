@@ -66,7 +66,7 @@ static uint8_t* flipper_application_assets_alloc_and_load_data(File* file, size_
 
     // read data
     if(storage_file_read(file, (void*)data, length) != length) {
-        free(data);
+        free((void*)data);
         return NULL;
     }
 
