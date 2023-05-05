@@ -244,7 +244,14 @@ distenv.PhonyTarget(
     "${GDBPYCOM}",
     GDBOPTS="${GDBOPTS_BASE}",
     GDBREMOTE="${OPENOCD_GDB_PIPE}",
-    GDBPYOPTS='-ex "source ${FBT_DEBUG_DIR}/PyCortexMDebug/PyCortexMDebug.py" ',
+    GDBPYOPTS=[
+        "-ex",
+        "source ${FBT_DEBUG_DIR}/PyCortexMDebug/PyCortexMDebug.py",
+        # "-ex",
+        # "source ${FBT_DEBUG_DIR}/FreeRTOS/FreeRTOS.py",
+        "-ex",
+        "source ${FBT_DEBUG_DIR}/flipperversion.py",
+    ],
 )
 
 distenv.PhonyTarget(
