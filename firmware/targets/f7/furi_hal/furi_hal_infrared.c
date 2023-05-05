@@ -1,5 +1,4 @@
-#include "furi_hal_infrared.h"
-
+#include <furi_hal_infrared.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_bus.h>
