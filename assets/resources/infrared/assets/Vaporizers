@@ -1,0 +1,65 @@
+Filetype: IR signals file
+Version: 1
+# 
+# Model: Arizer XQ2
+## https://arizer.com/xq2/
+
+name: Power_btn
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 1B 00 00 00
+# 
+name: Fan_low
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 09 00 00 00
+# 
+name: Fan_med
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 04 00 00 00
+# 
+name: Fan_high
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 07 00 00 00
+# 
+name: Fan_off
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 01 00 00 00
+# 
+name: Temp+
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 05 00 00 00
+# 
+name: Temp-
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 0A 00 00 00
+# 
+name: Audio_btn
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 12 00 00 00
+# 
+name: Timer_btn
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 08 00 00 00
+# 
+name: Led_lights_btn
+type: parsed
+protocol: NEC
+address: 01 00 00 00
+command: 1E 00 00 00
