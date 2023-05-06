@@ -1,0 +1,16 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+
+App(
+    appid="devdump",  # Must be unique
+    name="Device Info",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="devdump_app",
+    stack_size=2 * 1024,
+    fap_category="Tools",
+    # Optional values
+    # fap_version=(0, 1),  # (major, minor)
+    fap_icon="devdump.png",  # 10x10 1-bit PNG
+    # fap_description="A simple app",
+    # fap_author="J. Doe",
+    # fap_weburl="https://github.com/user/devdump",
+)
