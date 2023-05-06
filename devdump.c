@@ -61,7 +61,6 @@ int32_t devdump_app(void* p) {
     dialog_message_show(dialogs, message);
     dialog_message_free(message);
     furi_record_close(RECORD_DIALOGS);
-    dialog_message_free(message);
 
     return 0;
 }
