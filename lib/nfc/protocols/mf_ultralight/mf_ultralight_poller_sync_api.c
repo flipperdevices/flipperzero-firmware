@@ -44,7 +44,8 @@ MfUltralightError mf_ultralight_poller_read_page(
     if(poller_context.error == MfUltralightErrorNone) {
         *data = poller_context.data.read_cmd.data.page[0];
     }
-    mf_ultralight_poller_reset(instance);
+    mf_ultralight_poller_stop(instance);
+    // mf_ultralight_poller_reset(instance);
 
     return poller_context.error;
 }

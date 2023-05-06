@@ -13,10 +13,6 @@ typedef struct {
 } MfUltralightPollerWritePageCommand;
 
 typedef struct {
-    MfUltralightPage page[4];
-} MfUltralightPagedCommandData;
-
-typedef struct {
     MfUltralightPagedCommandData data;
     uint8_t start_page;
 } MfUltralightPollerReadPageCommand;

@@ -343,8 +343,11 @@ void nfc_listener_abort(Nfc* instance) {
     furi_message_queue_put(listener_queue, &message, FuriWaitForever);
 
     furi_thread_join(instance->worker_thread);
+
     furi_message_queue_free(listener_queue);
     listener_queue = NULL;
+
+    furi_thread_free(instance->worker_thread);
     instance->worker_thread = NULL;
 }
 
@@ -356,6 +359,8 @@ void nfc_stop(Nfc* instance) {
 
     furi_message_queue_free(poller_queue);
     poller_queue = NULL;
+
+    furi_thread_free(instance->worker_thread);
     instance->worker_thread = NULL;
 }
 

@@ -17,8 +17,8 @@ struct MfUltralightListener {
     MfUltralightData* data;
     uint8_t tx_data[MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE];
     uint16_t tx_bits;
-    uint16_t pages_total;
     MfUltralightFeatureSupport features;
+
     MfUltralightListenerEventCallback callback;
     void* context;
 };
@@ -71,14 +71,19 @@ static bool mf_ultralight_listener_read_page_handler(
     UNUSED(rx_bits);
     bool command_processed = false;
     uint8_t start_page = rx_data[1];
-    if(instance->pages_total < start_page) {
+    uint16_t pages_total = instance->data->pages_total;
+    MfUltralightPagedCommandData read_cmd_data = {};
+
+    if(pages_total < start_page) {
         mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
         instance->state = MfUltraligthListenerStateIdle;
     } else {
-        memcpy(instance->tx_data, instance->data->page[start_page].data, 16);
-        instance->tx_bits = 16 * 8;
+        for(size_t i = 0; i < 4; i++) {
+            read_cmd_data.page[i] = instance->data->page[(start_page + i) % pages_total];
+        }
+        instance->tx_bits = sizeof(MfUltralightPagedCommandData) * 8;
         nfca_listener_send_standart_frame(
-            instance->nfca_listener, instance->tx_data, instance->tx_bits);
+            instance->nfca_listener, (uint8_t*)&read_cmd_data, instance->tx_bits);
     }
     command_processed = true;
 
@@ -145,7 +150,8 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
     },
 };
 
-static NfcaListenerCommand mf_ultralight_listener_event_handler(NfcaListenerEvent event, void* context) {
+static NfcaListenerCommand
+    mf_ultralight_listener_event_handler(NfcaListenerEvent event, void* context) {
     furi_assert(context);
 
     MfUltralightListener* instance = context;
@@ -171,17 +177,14 @@ static NfcaListenerCommand mf_ultralight_listener_event_handler(NfcaListenerEven
 
 static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* instance) {
     MfUltralightData* data = instance->data;
-    if(data->type == MfUltralightTypeUnknown) {
-        instance->features = MfUltralightFeatureSupportReadVersion |
-                             MfUltralightFeatureSupportReadSignature;
-        instance->pages_total = 16;
-    }
+    instance->features = mf_ultralight_get_feature_support_set(data->type);
 }
 
 MfUltralightListener* mf_ultralight_listener_alloc(NfcaListener* nfca_listener) {
     furi_assert(nfca_listener);
 
     MfUltralightListener* instance = malloc(sizeof(MfUltralightListener));
+    instance->nfca_listener = nfca_listener;
 
     return instance;
 }
@@ -206,7 +209,7 @@ MfUltralightError mf_ultralight_listener_start(
         &instance->data->nfca_data,
         mf_ultralight_listener_event_handler,
         instance);
-    
+
     return mf_ultralight_process_error(error);
 }
 

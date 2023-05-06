@@ -75,6 +75,10 @@ typedef struct {
 } MfUltralightPage;
 
 typedef struct {
+    MfUltralightPage page[4];
+} MfUltralightPagedCommandData;
+
+typedef struct {
     uint8_t header;
     uint8_t vendor_id;
     uint8_t prod_type;
