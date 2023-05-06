@@ -31,12 +31,12 @@ int32_t devdump_app(void* p) {
         const BleGlueC2Info* c2_info = ble_glue_get_c2_info();
         furi_string_printf(
             temp_str,
-            "%d.%d.%d.%d:%s",
+            "%d.%d.%d.%d.%d",
             c2_info->VersionMajor,
             c2_info->VersionMinor,
             c2_info->VersionSub,
             c2_info->VersionBranch,
-            c2_info->StackTypeString);
+            c2_info->VersionReleaseType);
         flipper_format_write_string(info_file, "BLE Stack", temp_str);
 
         flipper_format_write_hex(info_file, "BLE MAC", furi_hal_version_get_ble_mac(), 8);
