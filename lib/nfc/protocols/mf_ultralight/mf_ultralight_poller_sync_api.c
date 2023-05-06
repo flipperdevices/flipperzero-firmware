@@ -17,7 +17,7 @@ static NfcaPollerCommand mf_ultraight_read_page_callback(NfcaPollerEvent event, 
     MfUltralightPollerContext* poller_context = context;
     if(event.type == NfcaPollerEventTypeReady) {
         poller_context->error = mf_ultralight_poller_async_read_page(
-            poller_context->instance, poller_context->data.page_to_read);
+            poller_context->instance, poller_context->data.read_cmd.start_page, &poller_context->data.read_cmd.data);
         nfca_poller_halt(poller_context->instance->nfca_poller);
     } else if(event.type == NfcaPollerEventTypeError) {
         poller_context->error = mf_ultralight_process_error(event.data.error);
@@ -35,13 +35,15 @@ MfUltralightError mf_ultralight_poller_read_page(
     furi_assert(data);
 
     MfUltralightPollerContext poller_context = {};
-    poller_context.data.page_to_read = page;
+    poller_context.data.read_cmd.start_page = page;
     poller_context.instance = instance;
     poller_context.thread_id = furi_thread_get_current_id();
 
     mf_ultralight_poller_start(instance, mf_ultraight_read_page_callback, &poller_context);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
-    *data = instance->data->page[page];
+    if(poller_context.error == MfUltralightErrorNone) {
+        *data = poller_context.data.read_cmd.data.page[0];
+    }
     mf_ultralight_poller_reset(instance);
 
     return poller_context.error;

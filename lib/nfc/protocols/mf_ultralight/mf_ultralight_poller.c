@@ -68,7 +68,8 @@ static MfUltralightPollerCommand
 
 static MfUltralightPollerCommand
     mf_ultralight_poller_handler_check_ntag_203(MfUltralightPoller* instance) {
-    MfUltralightError error = mf_ultralight_poller_async_read_page(instance, 41);
+    MfUltralightPagedCommandData data = {};
+    MfUltralightError error = mf_ultralight_poller_async_read_page(instance, 41, &data);
     if(error == MfUltralightErrorNone) {
         FURI_LOG_I(TAG, "NTAG203 detected");
         instance->data->type = MfUltralightTypeNTAG203;
@@ -210,11 +211,19 @@ static MfUltralightPollerCommand mf_ultralight_poller_handler_auth(MfUltralightP
 
 static MfUltralightPollerCommand
     mf_ultralight_poller_handler_read_pages(MfUltralightPoller* instance) {
-    MfUltralightError error = mf_ultralight_poller_async_read_page(instance, instance->pages_read);
+    MfUltralightPagedCommandData data = {};
+    uint8_t start_page = instance->pages_read;
+    MfUltralightError error =
+        mf_ultralight_poller_async_read_page(instance, start_page, &data);
     if(error == MfUltralightErrorNone) {
-        FURI_LOG_I(TAG, "Read page %d success", instance->pages_read);
-        instance->pages_read++;
-        instance->data->pages_read = instance->pages_read;
+        for(size_t i = 0; i < 4; i++) {
+            if(start_page + i < instance->pages_total) {
+                FURI_LOG_I(TAG, "Read page %d success", start_page + i);
+                instance->data->page[start_page + i] = data.page[i];
+                instance->pages_read++;
+                instance->data->pages_read = instance->pages_read;
+            }
+        }
         if(instance->pages_read == instance->pages_total) {
             instance->state = MfUltralightPollerStateReadCounters;
         }

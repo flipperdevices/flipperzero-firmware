@@ -72,11 +72,13 @@ MfUltralightError
     return ret;
 }
 
-MfUltralightError
-    mf_ultralight_poller_async_read_page(MfUltralightPoller* instance, uint8_t page) {
+MfUltralightError mf_ultralight_poller_async_read_page(
+    MfUltralightPoller* instance,
+    uint8_t start_page,
+    MfUltralightPagedCommandData* data) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGHT_CMD_READ_PAGE;
-    buff->tx_data[1] = page;
+    buff->tx_data[1] = start_page;
     buff->tx_bits = 16;
 
     MfUltralightError ret = MfUltralightErrorNone;
@@ -94,11 +96,11 @@ MfUltralightError
             ret = mf_ultralight_process_error(error);
             break;
         }
-        if(buff->rx_bits != (MF_ULTRALIGHT_PAGE_SIZE * 4) * 8) {
+        if(buff->rx_bits != sizeof(MfUltralightPagedCommandData) * 8) {
             ret = MfUltralightErrorProtocol;
             break;
         }
-        memcpy(&instance->data->page[page], buff->rx_data, MF_ULTRALIGHT_PAGE_SIZE);
+        memcpy(data, buff->rx_data, sizeof(MfUltralightPagedCommandData));
     } while(false);
 
     return ret;
