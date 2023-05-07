@@ -23,16 +23,15 @@ typedef enum {
 } SwUsartMode;
 
 typedef enum {
-    SwUsartWordLength5b = 5U,
-    SwUsartWordLength6b = 6U,
-    SwUsartWordLength7b = 7U,
-    SwUsartWordLength8b = 8U,
-    SwUsartWordLength9b = 9U,
+    SwUsartDataBit5 = 5U,
+    SwUsartDataBit6 = 6U,
+    SwUsartDataBit7 = 7U,
+    SwUsartDataBit8 = 8U,
 } SwUsartWordLength;
 
 typedef enum {
-    SwUsartStopBits1 = 1U,
-    SwUsartStopBits2 = 2U,
+    SwUsartStopBit1 = 1U,
+    SwUsartStopBit2 = 2U,
 } SwUsartStopBits;
 
 typedef enum {
@@ -44,9 +43,9 @@ typedef enum {
 typedef struct {
     SwUsartMode mode;
     uint32_t baud_rate;
-    SwUsartWordLength word_length;
+    SwUsartWordLength data_bit;
     SwUsartParity parity;
-    SwUsartStopBits stop_bits;
+    SwUsartStopBits stop_bit;
     const GpioPin* rx_pin;
     const GpioPin* tx_pin;
 } SwUsartConfig;

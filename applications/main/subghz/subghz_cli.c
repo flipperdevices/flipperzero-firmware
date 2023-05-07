@@ -797,9 +797,9 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
     SwUsartConfig config = {
         .mode = SwUsartModeOnlyAsyncTx,
         .baud_rate = 115200,
-        .word_length = SwUsartWordLength8b,
+        .data_bit = SwUsartDataBit8,
         .parity = SwUsartParityNone,
-        .stop_bits = SwUsartStopBits1,
+        .stop_bit = SwUsartStopBit1,
         .tx_pin = &gpio_ext_pa7,
         .rx_pin = &gpio_ext_pa4,
     };

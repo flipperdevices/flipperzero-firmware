@@ -9,7 +9,7 @@ struct SwUsart {
     SwUsartConfig* config;
     uint8_t* tx_buffer;
     size_t tx_buffer_len;
-    size_t tx_buffer_pos;
+    size_t tx_buffer_pos_byte;
     size_t tx_buffer_pos_bit;
 
     uint32_t* tx_upload_char;
@@ -22,7 +22,12 @@ SwUsart* sw_usart_alloc(SwUsartConfig* config) {
     sw_usart->config = malloc(sizeof(SwUsartConfig));
     memcpy(sw_usart->config, config, sizeof(SwUsartConfig));
 
-    sw_usart->tx_upload_char_len = 1 + sw_usart->config->word_length + sw_usart->config->stop_bits;
+    sw_usart->tx_upload_char_len = 1 + sw_usart->config->data_bit + sw_usart->config->stop_bit;
+
+    if(sw_usart->config->parity != SwUsartParityNone) {
+        sw_usart->tx_upload_char_len += 1;
+    }
+
     sw_usart->tx_upload_char = malloc(sizeof(uint32_t) * sw_usart->tx_upload_char_len);
 
     switch(sw_usart->config->mode) {
@@ -54,70 +59,44 @@ static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
     uint8_t parity = 0;
     uint8_t ind = 0;
 
-    //todo: разобраться с кол бит
-    if(sw_usart->tx_buffer_pos_bit / 8 >= sw_usart->tx_buffer_len) {
+    if(sw_usart->tx_buffer_pos_byte > sw_usart->tx_buffer_len) {
         memset(sw_usart->tx_upload_char, 0, sizeof(uint32_t) * sw_usart->tx_upload_char_len);
         return;
     }
 
     // Start bit
     sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
-    // FURI_LOG_E(
-    //     TAG,
-    //     "sw_usart->tx_buffer %c %X ",
-    //     sw_usart->tx_buffer[sw_usart->tx_buffer_pos_bit / 8],
-    //     sw_usart->tx_buffer[sw_usart->tx_buffer_pos_bit / 8]);
-    // Data bits
-    if(sw_usart->config->parity == SwUsartParityNone) {
-        sw_usart->tx_buffer_pos_bit += sw_usart->config->word_length;
-        for(uint8_t i = 0; i < sw_usart->config->word_length; i++) {
-            if(sw_usart_get_bit_array(sw_usart->tx_buffer, sw_usart->tx_buffer_pos_bit - i - 1)) {
-                sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
-            } else {
-                sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
-            }
-        }
-    } else {
-        sw_usart->tx_buffer_pos_bit += sw_usart->config->word_length - 1;
-        for(uint8_t i = 0; i < sw_usart->config->word_length - 1; i++) {
-            if(sw_usart_get_bit_array(sw_usart->tx_buffer, sw_usart->tx_buffer_pos_bit - i - 1)) {
-                sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
-                parity++;
-            } else {
-                sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
-            }
-        }
-        // Parity
-        if(sw_usart->config->parity == SwUsartParityOdd) {
-            if(parity & 0x1) {
-                sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
-            } else {
-                sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
-            }
+
+    sw_usart->tx_buffer_pos_byte++;
+    sw_usart->tx_buffer_pos_bit = sw_usart->tx_buffer_pos_byte * 8;
+    for(uint8_t i = 0; i < sw_usart->config->data_bit; i++) {
+        if(sw_usart_get_bit_array(sw_usart->tx_buffer, sw_usart->tx_buffer_pos_bit - i - 1)) {
+            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
+            parity++;
         } else {
-            if(parity & 0x1) {
-                sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
-            } else {
-                sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
-            }
+            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
         }
-    }
-    // Stop bits
-    for(uint8_t i = 0; i < sw_usart->config->stop_bits; i++) {
-        sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
     }
 
-    // for(uint32_t i = 0; i < 10; i++) {
-    //     uint8_t temp = 0;
-    //     if(sw_usart->tx_upload_char[i] ==
-    //        (uint32_t)(sw_usart->config->tx_pin->pin << GPIO_NUMBER)) {
-    //         temp = 0;
-    //     } else {
-    //         temp = 1;
-    //     }
-    //     FURI_LOG_RAW_E("%d ", temp);
-    // }
-    // FURI_LOG_RAW_E("\r\n");
+    // Parity
+    if(sw_usart->config->parity == SwUsartParityEven) {
+        if(parity & 0x1) {
+            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
+        } else {
+            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
+        }
+    } else if(sw_usart->config->parity == SwUsartParityOdd) {
+        if(parity & 0x1) {
+            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
+        } else {
+            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
+        }
+    }
+
+    // Stop bits
+    for(uint8_t i = 0; i < sw_usart->config->stop_bit; i++) {
+        sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
+    }
 }
 
 uint32_t sw_usart_tx_encoder_yield(void* context) {
@@ -140,7 +119,7 @@ void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len) {
 
     sw_usart->tx_buffer = data;
     sw_usart->tx_buffer_len = len;
-    sw_usart->tx_buffer_pos = 0;
+    sw_usart->tx_buffer_pos_byte = 0;
     sw_usart->tx_buffer_pos_bit = 0;
     sw_usart->tx_upload_char_index = 0;
     // set default value, pin tx
@@ -150,21 +129,6 @@ void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len) {
 
     furi_hal_sw_digital_pin_tx_start(
         sw_usart_tx_encoder_yield, sw_usart, 24, sw_usart->config->tx_pin);
-
-    // uint32_t ind = 0;
-    // while(ind++ < 10) {
-    //     for(uint32_t i = 0; i < 24; i++) {
-    //         uint8_t temp = 0;
-    //         if(sw_usart_tx_encoder_yield(sw_usart) ==
-    //            (uint32_t)(sw_usart->config->tx_pin->pin << GPIO_NUMBER)) {
-    //             temp = 0;
-    //         } else {
-    //             temp = 1;
-    //         }
-    //         FURI_LOG_RAW_E("%d ", temp);
-    //     }
-    //     FURI_LOG_RAW_E("\r\n");
-    // }
 }
 
 bool sw_usart_is_end_tx(SwUsart* sw_usart) {
