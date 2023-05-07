@@ -177,6 +177,7 @@ int32_t nfc_magic_app(void* p) {
 
     view_dispatcher_run(nfc_magic->view_dispatcher);
 
+    magic_deactivate();
     nfc_magic_free(nfc_magic);
 
     return 0;

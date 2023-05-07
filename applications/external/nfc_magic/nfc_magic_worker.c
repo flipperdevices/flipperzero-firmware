@@ -311,6 +311,8 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
         magic_deactivate();
         furi_delay_ms(300);
     }
+
+    magic_deactivate();
 }
 
 void nfc_magic_worker_rekey(NfcMagicWorker* nfc_magic_worker) {
@@ -345,9 +347,9 @@ void nfc_magic_worker_rekey(NfcMagicWorker* nfc_magic_worker) {
                 NfcMagicWorkerEventNoCardDetected, nfc_magic_worker->context);
             card_found_notified = false;
         }
-        magic_deactivate();
         furi_delay_ms(300);
     }
+    magic_deactivate();
 }
 
 void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
