@@ -59,11 +59,11 @@ static FuriHalSwDigitalPinBuff furi_hal_sw_digital_pin_buff = {0};
 //     SwDigitalPinStateMAX,
 // } SwDigitalPinState;
 
-void furi_hal_sw_digital_pin_init(void) {
+void furi_hal_sw_digital_pin_init(uint16_t psc, uint16_t arr) {
     furi_assert(furi_hal_sw_digital_pin.state == SwDigitalPinStateInit);
 
-    /*##-1- Configure  the Timer peripheral (TIM1) in Bit Delay ##############*/
-    /* Initialize TIM1 peripheral as follow:
+
+  /* Initialize TIM peripheral as follow:
   + Period = TimerPeriod 
   + Prescaler = 0
   + ClockDivision = 0
@@ -71,9 +71,9 @@ void furi_hal_sw_digital_pin_init(void) {
   */
 
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    TIM_InitStruct.Prescaler = 64-1;
+    TIM_InitStruct.Prescaler = psc;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload = 1000;
+    TIM_InitStruct.Autoreload = arr;
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     LL_TIM_Init(SW_DIGITAL_PIN_TIM, &TIM_InitStruct);
     LL_TIM_DisableARRPreload(SW_DIGITAL_PIN_TIM);

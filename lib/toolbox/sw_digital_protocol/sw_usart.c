@@ -3,6 +3,7 @@
 
 #define TAG "SwUsart"
 
+#define CPU_CLOCK_TIM 64000000
 #define bit_read(value, bit) (((value) >> (bit)) & 0x01)
 
 struct SwUsart {
@@ -33,7 +34,7 @@ SwUsart* sw_usart_alloc(SwUsartConfig* config) {
     switch(sw_usart->config->mode) {
     case SwUsartModeOnlyAsyncTx:
         furi_assert(sw_usart->config->tx_pin);
-        furi_hal_sw_digital_pin_init();
+        furi_hal_sw_digital_pin_init(0, CPU_CLOCK_TIM / sw_usart->config->baud_rate);
         break;
 
     default:
@@ -49,7 +50,7 @@ void sw_usart_free(SwUsart* sw_usart) {
     free(sw_usart->config);
     free(sw_usart);
 }
-static bool sw_usart_get_bit_array(uint8_t* data_array, size_t read_index_bit) {
+static inline bool sw_usart_get_bit_array(uint8_t* data_array, size_t read_index_bit) {
     return bit_read(data_array[read_index_bit >> 3], 7 - (read_index_bit & 0x7));
 }
 
@@ -58,6 +59,8 @@ static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
 
     uint8_t parity = 0;
     uint8_t ind = 0;
+    uint32_t tx_pin_set = sw_usart->config->tx_pin->pin;
+    uint32_t tx_pin_reset = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
 
     if(sw_usart->tx_buffer_pos_byte > sw_usart->tx_buffer_len) {
         memset(sw_usart->tx_upload_char, 0, sizeof(uint32_t) * sw_usart->tx_upload_char_len);
@@ -65,37 +68,42 @@ static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
     }
 
     // Start bit
-    sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
+    sw_usart->tx_upload_char[ind++] = tx_pin_reset;
 
     sw_usart->tx_buffer_pos_byte++;
-    sw_usart->tx_buffer_pos_bit = sw_usart->tx_buffer_pos_byte * 8;
+    sw_usart->tx_buffer_pos_bit = sw_usart->tx_buffer_pos_byte << 3;
     for(uint8_t i = 0; i < sw_usart->config->data_bit; i++) {
         if(sw_usart_get_bit_array(sw_usart->tx_buffer, sw_usart->tx_buffer_pos_bit - i - 1)) {
-            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
+            sw_usart->tx_upload_char[ind++] = tx_pin_set;
             parity++;
         } else {
-            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
+            sw_usart->tx_upload_char[ind++] = tx_pin_reset;
         }
     }
 
     // Parity
-    if(sw_usart->config->parity == SwUsartParityEven) {
-        if(parity & 0x1) {
-            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
+    if(sw_usart->config->parity != SwUsartParityNone) {
+        if(sw_usart->config->parity == SwUsartParityEven) {
+            if(parity & 0x1) {
+                sw_usart->tx_upload_char[ind++] = tx_pin_set;
+            } else {
+                sw_usart->tx_upload_char[ind++] = tx_pin_reset;
+            }
         } else {
-            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
-        }
-    } else if(sw_usart->config->parity == SwUsartParityOdd) {
-        if(parity & 0x1) {
-            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin << GPIO_NUMBER;
-        } else {
-            sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
+            if(parity & 0x1) {
+                sw_usart->tx_upload_char[ind++] = tx_pin_reset;
+            } else {
+                sw_usart->tx_upload_char[ind++] = tx_pin_set;
+            }
         }
     }
 
     // Stop bits
-    for(uint8_t i = 0; i < sw_usart->config->stop_bit; i++) {
-        sw_usart->tx_upload_char[ind++] = sw_usart->config->tx_pin->pin;
+    if(sw_usart->config->stop_bit == SwUsartStopBit1) {
+        sw_usart->tx_upload_char[ind] = tx_pin_set;
+    } else {
+        sw_usart->tx_upload_char[ind++] = tx_pin_set;
+        sw_usart->tx_upload_char[ind] = tx_pin_set;
     }
 }
 
@@ -108,7 +116,6 @@ uint32_t sw_usart_tx_encoder_yield(void* context) {
         sw_usart_tx_char_encoder(sw_usart);
         sw_usart->tx_upload_char_index = 0;
     }
-    FURI_LOG_RAW_I("%d ", ret == (uint32_t)(sw_usart->config->tx_pin->pin << GPIO_NUMBER) ? 0 : 1);
     return ret;
 }
 
@@ -128,7 +135,10 @@ void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len) {
     sw_usart_tx_char_encoder(sw_usart);
 
     furi_hal_sw_digital_pin_tx_start(
-        sw_usart_tx_encoder_yield, sw_usart, 24, sw_usart->config->tx_pin);
+        sw_usart_tx_encoder_yield,
+        sw_usart,
+        sw_usart->tx_upload_char_len * 8,
+        sw_usart->config->tx_pin);
 }
 
 bool sw_usart_is_end_tx(SwUsart* sw_usart) {

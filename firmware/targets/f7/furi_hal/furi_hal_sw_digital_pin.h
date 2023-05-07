@@ -23,7 +23,7 @@ typedef enum {
 
 } SwDigitalPinState;
 
-void furi_hal_sw_digital_pin_init(void);
+void furi_hal_sw_digital_pin_init(uint16_t psc, uint16_t arr);
 void furi_hal_sw_digital_pin_tx_start(
     FuriHalSwDigitalPinTxCallback callback,
     void* context,
