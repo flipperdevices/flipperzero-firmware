@@ -788,6 +788,38 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     printf("\r\nExit chat\r\n");
 }
 
+#include <toolbox/sw_digital_protocol/sw_usart.h>
+#include <furi_hal_sw_digital_pin.h>
+
+static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
+    UNUSED(args);
+
+    SwUsartConfig config = {
+        .mode = SwUsartModeOnlyAsyncTx,
+        .baud_rate = 115200,
+        .word_length = SwUsartWordLength8b,
+        .parity = SwUsartParityNone,
+        .stop_bits = SwUsartStopBits1,
+        .tx_pin = &gpio_ext_pa7,
+        .rx_pin = &gpio_ext_pa4,
+    };
+    SwUsart* sw_usart = sw_usart_alloc(&config);
+    uint8_t data[] = "Hello world!\r\n";
+    sw_usart_dma_tx(sw_usart, data, sizeof(data));
+
+    // Wait for packets to arrive
+    printf("Listening at Usart. Press CTRL+C to stop\r\n");
+
+    while(!cli_cmd_interrupt_received(cli)) {
+        if(sw_usart_is_end_tx(sw_usart)) {
+            break;
+            // sw_usart_dma_tx(sw_usart, data, sizeof(data));
+        }
+    }
+    sw_usart_free(sw_usart);
+    printf("End Usart\r\n");
+}
+
 static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     FuriString* cmd;
     cmd = furi_string_alloc();
@@ -795,6 +827,11 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
     do {
         if(!args_read_string_and_trim(args, cmd)) {
             subghz_cli_command_print_usage();
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "us") == 0) {
+            subghz_cli_command_usart(cli, args);
             break;
         }
 
