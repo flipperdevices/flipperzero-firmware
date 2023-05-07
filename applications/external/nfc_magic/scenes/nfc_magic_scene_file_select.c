@@ -27,7 +27,15 @@ static bool nfc_magic_scene_file_select_is_file_suitable(NfcMagic* nfc_magic) {
         case MagicTypeUltralightC_Gen1:
         case MagicTypeUltralightC_DirectWrite:
         case MagicTypeGen4:
-            return true;
+            switch(nfc_dev->dev_data.mf_ul_data.type) {
+            case MfUltralightTypeNTAGI2C1K:
+            case MfUltralightTypeNTAGI2C2K:
+            case MfUltralightTypeNTAGI2CPlus1K:
+            case MfUltralightTypeNTAGI2CPlus2K:
+                return false;
+            default:
+                return true;
+            }
         default:
             return false;
         }

@@ -320,8 +320,7 @@ void nfc_magic_worker_rekey(NfcMagicWorker* nfc_magic_worker) {
     bool card_found_notified = false;
 
     if(magic_dev->type != MagicTypeGen4) {
-        nfc_magic_worker->callback(
-            NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
+        nfc_magic_worker->callback(NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
         return;
     }
 
@@ -331,8 +330,7 @@ void nfc_magic_worker_rekey(NfcMagicWorker* nfc_magic_worker) {
         furi_hal_nfc_activate_nfca(200, &cuid);
         if(cuid != magic_dev->cuid) continue;
         if(!card_found_notified) {
-            nfc_magic_worker->callback(
-                NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
+            nfc_magic_worker->callback(NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
             card_found_notified = true;
         }
 
@@ -355,7 +353,6 @@ void nfc_magic_worker_rekey(NfcMagicWorker* nfc_magic_worker) {
 void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
     NfcMagicDevice* magic_dev = nfc_magic_worker->magic_dev;
     bool card_found_notified = false;
-
 
     MfClassicBlock block;
     memset(&block, 0, sizeof(MfClassicBlock));
@@ -394,7 +391,7 @@ void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
                 card_found_notified = true;
             }
 
-            if(magic_gen4_wipe(magic_dev->password)) continue;
+            if(!magic_gen4_wipe(magic_dev->password)) continue;
             nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
             break;
         }
