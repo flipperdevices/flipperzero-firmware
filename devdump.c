@@ -39,7 +39,7 @@ int32_t devdump_app(void* p) {
             c2_info->VersionReleaseType);
         flipper_format_write_string(info_file, "BLE Stack", temp_str);
 
-        flipper_format_write_hex(info_file, "BLE MAC", furi_hal_version_get_ble_mac(), 8);
+        flipper_format_write_hex(info_file, "BLE MAC", furi_hal_version_get_ble_mac(), 6);
 
         uint32_t temp = furi_hal_version_get_hw_timestamp();
         flipper_format_write_uint32(info_file, "Hardware Timestamp", &temp, 1);
