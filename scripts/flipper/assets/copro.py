@@ -6,7 +6,7 @@ import tarfile
 from io import BytesIO
 
 from flipper.assets.coprobin import CoproBinary, get_stack_type
-from flipper.utils import *
+from flipper.utils import file_sha256, timestamp
 
 CUBE_COPRO_PATH = "firmware"
 

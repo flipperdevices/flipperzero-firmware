@@ -151,7 +151,7 @@ class FlipperStorage:
             try:
                 # TODO: better decoding, considering non-ascii characters
                 line = line.decode("ascii")
-            except:
+            except Exception:
                 continue
 
             line = line.strip()
@@ -194,7 +194,7 @@ class FlipperStorage:
             try:
                 # TODO: better decoding, considering non-ascii characters
                 line = line.decode("ascii")
-            except:
+            except Exception:
                 continue
 
             line = line.strip()
@@ -323,7 +323,7 @@ class FlipperStorage:
                 return False
             raise FlipperStorageException.from_error_code(path, error_code)
 
-        return True
+        return response == b"Directory" or response.startswith(b"Storage")
 
     def exist_file(self, path: str):
         """Does file exist on Flipper"""
