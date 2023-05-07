@@ -76,7 +76,7 @@ typedef struct {
 
 typedef struct {
     MfUltralightPage page[4];
-} MfUltralightPagedCommandData;
+} MfUltralightPageReadCommandData;
 
 typedef struct {
     uint8_t header;

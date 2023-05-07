@@ -72,7 +72,7 @@ static bool mf_ultralight_listener_read_page_handler(
     bool command_processed = false;
     uint8_t start_page = rx_data[1];
     uint16_t pages_total = instance->data->pages_total;
-    MfUltralightPagedCommandData read_cmd_data = {};
+    MfUltralightPageReadCommandData read_cmd_data = {};
 
     if(pages_total < start_page) {
         mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
@@ -81,7 +81,7 @@ static bool mf_ultralight_listener_read_page_handler(
         for(size_t i = 0; i < 4; i++) {
             read_cmd_data.page[i] = instance->data->page[(start_page + i) % pages_total];
         }
-        instance->tx_bits = sizeof(MfUltralightPagedCommandData) * 8;
+        instance->tx_bits = sizeof(MfUltralightPageReadCommandData) * 8;
         nfca_listener_send_standart_frame(
             instance->nfca_listener, (uint8_t*)&read_cmd_data, instance->tx_bits);
     }

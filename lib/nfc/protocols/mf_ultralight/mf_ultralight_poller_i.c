@@ -75,7 +75,7 @@ MfUltralightError
 MfUltralightError mf_ultralight_poller_async_read_page(
     MfUltralightPoller* instance,
     uint8_t start_page,
-    MfUltralightPagedCommandData* data) {
+    MfUltralightPageReadCommandData* data) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGHT_CMD_READ_PAGE;
     buff->tx_data[1] = start_page;
@@ -96,11 +96,11 @@ MfUltralightError mf_ultralight_poller_async_read_page(
             ret = mf_ultralight_process_error(error);
             break;
         }
-        if(buff->rx_bits != sizeof(MfUltralightPagedCommandData) * 8) {
+        if(buff->rx_bits != sizeof(MfUltralightPageReadCommandData) * 8) {
             ret = MfUltralightErrorProtocol;
             break;
         }
-        memcpy(data, buff->rx_data, sizeof(MfUltralightPagedCommandData));
+        memcpy(data, buff->rx_data, sizeof(MfUltralightPageReadCommandData));
     } while(false);
 
     return ret;
@@ -142,7 +142,9 @@ MfUltralightError mf_ultralight_poller_async_write_page(
     return ret;
 }
 
-MfUltralightError mf_ultralight_poller_async_read_version(MfUltralightPoller* instance) {
+MfUltralightError mf_ultralight_poller_async_read_version(
+    MfUltralightPoller* instance,
+    MfUltralightVersion* data) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGHT_CMD_GET_VERSION;
     buff->tx_bits = 8;
@@ -162,17 +164,19 @@ MfUltralightError mf_ultralight_poller_async_read_version(MfUltralightPoller* in
             ret = mf_ultralight_process_error(error);
             break;
         }
-        if(buff->rx_bits != 8 * 8) {
+        if(buff->rx_bits != sizeof(MfUltralightVersion) * 8) {
             ret = MfUltralightErrorProtocol;
             break;
         }
-        memcpy(&instance->data->version, buff->rx_data, sizeof(MfUltralightVersion));
+        memcpy(&data, buff->rx_data, sizeof(MfUltralightVersion));
     } while(false);
 
     return ret;
 }
 
-MfUltralightError mf_ultralight_poller_async_read_signature(MfUltralightPoller* instance) {
+MfUltralightError mf_ultralight_poller_async_read_signature(
+    MfUltralightPoller* instance,
+    MfUltralightSignature* data) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGTH_CMD_READ_SIG;
     buff->rx_data[1] = 0x00;
@@ -193,18 +197,20 @@ MfUltralightError mf_ultralight_poller_async_read_signature(MfUltralightPoller* 
             ret = mf_ultralight_process_error(error);
             break;
         }
-        if(buff->rx_bits != 32 * 8) {
+        if(buff->rx_bits != sizeof(MfUltralightSignature) * 8) {
             ret = MfUltralightErrorProtocol;
             break;
         }
-        memcpy(&instance->data->signature, buff->rx_data, sizeof(MfUltralightSignature));
+        memcpy(data, buff->rx_data, sizeof(MfUltralightSignature));
     } while(false);
 
     return ret;
 }
 
-MfUltralightError
-    mf_ultralight_poller_async_read_counter(MfUltralightPoller* instance, uint8_t counter_num) {
+MfUltralightError mf_ultralight_poller_async_read_counter(
+    MfUltralightPoller* instance,
+    uint8_t counter_num,
+    MfUltralightCounter* data) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGHT_CMD_READ_CNT;
     buff->tx_data[1] = counter_num;
@@ -229,7 +235,7 @@ MfUltralightError
             ret = MfUltralightErrorProtocol;
             break;
         }
-        memcpy(&instance->data->counter[counter_num], buff->rx_data, MF_ULTRALIGHT_COUNTER_SIZE);
+        memcpy(data, buff->rx_data, MF_ULTRALIGHT_COUNTER_SIZE);
     } while(false);
 
     return ret;
@@ -237,7 +243,8 @@ MfUltralightError
 
 MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
     MfUltralightPoller* instance,
-    uint8_t tearing_falg_num) {
+    uint8_t tearing_falg_num,
+    MfUltralightTearingFlag* data) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGHT_CMD_CHECK_TEARING;
     buff->tx_data[1] = tearing_falg_num;
@@ -258,14 +265,11 @@ MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
             ret = mf_ultralight_process_error(error);
             break;
         }
-        if(buff->rx_bits != 8) {
+        if(buff->rx_bits != sizeof(MfUltralightTearingFlag) * 8) {
             ret = MfUltralightErrorProtocol;
             break;
         }
-        memcpy(
-            &instance->data->tearing_flag[tearing_falg_num],
-            buff->rx_data,
-            MF_ULTRALIGHT_TEARING_FLAG_SIZE);
+        memcpy(data, buff->rx_data, MF_ULTRALIGHT_TEARING_FLAG_SIZE);
     } while(false);
 
     return ret;

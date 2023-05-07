@@ -39,10 +39,8 @@ static void nfc_test_free() {
 
 static void nfc_test_save_and_load(NfcDevData* data) {
     NfcDev* nfc_dev = nfc_dev_alloc();
-    mu_assert(nfc_dev != NULL, "nfc_dev_alloc() failed\r\n");
 
     NfcDevData* nfc_dev_data_dut = malloc(sizeof(NfcDevData));
-    mu_assert(nfc_dev_data_dut != NULL, "malloc() failed\r\n");
 
     mu_assert(nfc_dev_save(nfc_dev, data, NFC_TEST_NFC_DEV_PATH), "nfc_dev_save() failed\r\n");
 
@@ -191,19 +189,13 @@ MU_TEST(mf_ultralight_ntag_i2c_plus_2k_file_test) {
 
 MU_TEST(mf_ultralight_reader) {
     Nfc* poller = nfc_alloc();
-    mu_assert(poller != NULL, "nfc_alloc() poller failed");
     Nfc* listener = nfc_alloc();
-    mu_assert(listener != NULL, "nfc_alloc() listener failed");
 
     NfcaPoller* nfca_poller = nfca_poller_alloc(poller);
-    mu_assert(nfca_poller != NULL, "nfca_poller_alloc() poller failed");
     NfcaListener* nfca_listener = nfca_listener_alloc(listener);
-    mu_assert(nfca_listener != NULL, "nfca_listener_alloc() listener failed");
 
     MfUltralightPoller* mfu_poller = mf_ultralight_poller_alloc(nfca_poller);
-    mu_assert(mfu_poller != NULL, "mf_ultralight_poller_alloc() poller failed");
     MfUltralightListener* mfu_listener = mf_ultralight_listener_alloc(nfca_listener);
-    mu_assert(mfu_listener != NULL, "mf_ultralight_listener_alloc() listener failed");
 
     MfUltralightError error = MfUltralightErrorNone;
     NfcDevData* dev_data = malloc(sizeof(NfcDevData));

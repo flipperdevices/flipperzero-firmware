@@ -13,15 +13,27 @@ typedef struct {
 } MfUltralightPollerWritePageCommand;
 
 typedef struct {
-    MfUltralightPagedCommandData data;
+    MfUltralightPageReadCommandData data;
     uint8_t start_page;
 } MfUltralightPollerReadPageCommand;
 
+typedef struct {
+    MfUltralightCounter data;
+    uint8_t counter_num;
+} MfUltralightPollerReadCounterCommand;
+
+typedef struct {
+    MfUltralightTearingFlag data;
+    uint8_t tearing_flag_num;
+} MfUltralightPollerReadTearingFlagCommand;
+
 typedef union {
-    uint8_t counter_to_read;
-    uint8_t tearing_flag_to_read;
     MfUltralightPollerWritePageCommand write_cmd;
     MfUltralightPollerReadPageCommand read_cmd;
+    MfUltralightVersion version;
+    MfUltralightSignature signature;
+    MfUltralightPollerReadCounterCommand counter_cmd;
+    MfUltralightPollerReadTearingFlagCommand tearing_flag_cmd;
 } MfUltralightPollerContextData;
 
 typedef enum {
@@ -73,23 +85,30 @@ MfUltralightError
 MfUltralightError mf_ultralight_poller_async_read_page(
     MfUltralightPoller* instance,
     uint8_t start_page,
-    MfUltralightPagedCommandData* data);
+    MfUltralightPageReadCommandData* data);
 
 MfUltralightError mf_ultralight_poller_async_write_page(
     MfUltralightPoller* instance,
     uint8_t page,
     MfUltralightPage* data);
 
-MfUltralightError mf_ultralight_poller_async_read_version(MfUltralightPoller* instance);
+MfUltralightError mf_ultralight_poller_async_read_version(
+    MfUltralightPoller* instance,
+    MfUltralightVersion* data);
 
-MfUltralightError mf_ultralight_poller_async_read_signature(MfUltralightPoller* instance);
+MfUltralightError mf_ultralight_poller_async_read_signature(
+    MfUltralightPoller* instance,
+    MfUltralightSignature* data);
 
-MfUltralightError
-    mf_ultralight_poller_async_read_counter(MfUltralightPoller* instance, uint8_t counter_num);
+MfUltralightError mf_ultralight_poller_async_read_counter(
+    MfUltralightPoller* instance,
+    uint8_t counter_num,
+    MfUltralightCounter* data);
 
 MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
     MfUltralightPoller* instance,
-    uint8_t tearing_falg_num);
+    uint8_t tearing_falg_num,
+    MfUltralightTearingFlag* data);
 
 #ifdef __cplusplus
 extern "C" {
