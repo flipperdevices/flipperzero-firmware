@@ -8,7 +8,8 @@
 extern "C" {
 #endif
 
-typedef uint32_t (*FuriHalSwDigitalPinTxCallback)(void* context);
+typedef uint32_t (*FuriHalSwDigitalPinTxCallbackYield)(void* context);
+typedef void (*FuriHalSwDigitalPinTxCallbackEnd)(void* context);
 
 typedef enum {
     SwDigitalPinStateInit,
@@ -25,7 +26,8 @@ typedef enum {
 
 void furi_hal_sw_digital_pin_init(uint16_t psc, uint16_t arr);
 void furi_hal_sw_digital_pin_tx_start(
-    FuriHalSwDigitalPinTxCallback callback,
+    FuriHalSwDigitalPinTxCallbackYield tx_callback_yield,
+    FuriHalSwDigitalPinTxCallbackEnd tx_callback_end,
     void* context,
     size_t samples,
     const GpioPin* gpio);

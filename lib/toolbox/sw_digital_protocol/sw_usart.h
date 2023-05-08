@@ -53,7 +53,7 @@ typedef struct {
 
 SwUsart* sw_usart_alloc(SwUsartConfig* config);
 void sw_usart_free(SwUsart* sw_usart);
-uint32_t sw_usart_tx_encoder_yield(void* context);
+//uint32_t sw_usart_tx_encoder_yield(void* context);
 void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len);
 bool sw_usart_is_end_tx(SwUsart* sw_usart);
 

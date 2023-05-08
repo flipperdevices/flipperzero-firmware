@@ -118,7 +118,7 @@ static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
     }
 }
 
-uint32_t sw_usart_tx_encoder_yield(void* context) {
+static uint32_t sw_usart_tx_encoder_yield(void* context) {
     SwUsart* sw_usart = context;
     furi_assert(sw_usart);
 
@@ -128,6 +128,12 @@ uint32_t sw_usart_tx_encoder_yield(void* context) {
         sw_usart->tx_upload_char_index = 0;
     }
     return ret;
+}
+
+static void sw_usart_tx_end(void* context) {
+    SwUsart* sw_usart = context;
+    furi_assert(sw_usart);
+    FURI_LOG_I(TAG, "sw_usart_tx_end");
 }
 
 void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len) {
@@ -149,6 +155,7 @@ void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len) {
 
     furi_hal_sw_digital_pin_tx_start(
         sw_usart_tx_encoder_yield,
+        sw_usart_tx_end,
         sw_usart,
         sw_usart->tx_upload_char_len * 8,
         sw_usart->config->tx_pin);

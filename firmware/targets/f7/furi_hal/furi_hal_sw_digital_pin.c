@@ -20,16 +20,14 @@
 #define SW_DIGITAL_PIN_DMA_CH1_DEF SW_DIGITAL_PIN_DMA, SW_DIGITAL_PIN_DMA_CH1_CHANNEL
 #define SW_DIGITAL_PIN_DMA_CH2_DEF SW_DIGITAL_PIN_DMA, SW_DIGITAL_PIN_DMA_CH2_CHANNEL
 
-// #define SW_DIGITAL_PIN_BUFFER_FULL (24)
-// #define SW_DIGITAL_PIN_BUFFER_HALF (SW_DIGITAL_PIN_BUFFER_FULL / 2)
-
 typedef struct {
     uint32_t* buffer_tx_ptr;
     uint32_t* buffer_rx_ptr;
     size_t buffer_size;
     size_t buffer_half_size;
-    // LevelDuration carry_ld;
-    FuriHalSwDigitalPinTxCallback tx_callback;
+
+    FuriHalSwDigitalPinTxCallbackYield tx_callback_yield;
+    FuriHalSwDigitalPinTxCallbackEnd tx_callback_end;
     void* tx_context;
 } FuriHalSwDigitalPinBuff;
 
@@ -62,8 +60,7 @@ static FuriHalSwDigitalPinBuff furi_hal_sw_digital_pin_buff = {0};
 void furi_hal_sw_digital_pin_init(uint16_t psc, uint16_t arr) {
     furi_assert(furi_hal_sw_digital_pin.state == SwDigitalPinStateInit);
 
-
-  /* Initialize TIM peripheral as follow:
+    /* Initialize TIM peripheral as follow:
   + Period = TimerPeriod 
   + Prescaler = 0
   + ClockDivision = 0
@@ -86,8 +83,8 @@ static void furi_hal_sw_digital_pin_buff_tx_refill(uint32_t* buffer, size_t samp
     furi_assert(furi_hal_sw_digital_pin.state == SwDigitalPinStateTx);
 
     while(samples > 0) {
-        volatile uint32_t data =
-            furi_hal_sw_digital_pin_buff.tx_callback(furi_hal_sw_digital_pin_buff.tx_context);
+        volatile uint32_t data = furi_hal_sw_digital_pin_buff.tx_callback_yield(
+            furi_hal_sw_digital_pin_buff.tx_context);
 
         if(data == 0) {
             *buffer = 0;
@@ -117,6 +114,12 @@ static void furi_hal_sw_digital_pin_tx_timer_isr() {
                 //forcibly pulls the pin to the ground so that there is no carrier
                 //furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
                 // No need off???
+
+                // callback end of tx
+                if(furi_hal_sw_digital_pin_buff.tx_callback_end) {
+                    furi_hal_sw_digital_pin_buff.tx_callback_end(
+                        furi_hal_sw_digital_pin_buff.tx_context);
+                }
                 LL_TIM_DisableCounter(SW_DIGITAL_PIN_TIM);
             } else {
                 furi_crash(NULL);
@@ -150,29 +153,27 @@ static void furi_hal_sw_digital_pin_dma_tx_isr() {
 #error Update this code. Would you kindly?
 #endif
 }
-\
+
 void furi_hal_sw_digital_pin_tx_start(
-    FuriHalSwDigitalPinTxCallback callback,
+    FuriHalSwDigitalPinTxCallbackYield tx_callback_yield,
+    FuriHalSwDigitalPinTxCallbackEnd tx_callback_end,
     void* context,
     size_t samples,
     const GpioPin* gpio) {
-    //too many asserts
-    furi_assert(callback);
+    furi_assert(tx_callback_yield);
     furi_assert(samples > 0);
-
-    UNUSED(gpio);
 
     furi_hal_sw_digital_pin.state = SwDigitalPinStateTx;
 
     furi_hal_sw_digital_pin_buff.buffer_size = samples;
     furi_hal_sw_digital_pin_buff.buffer_half_size = furi_hal_sw_digital_pin_buff.buffer_size / 2;
-    furi_hal_sw_digital_pin_buff.tx_callback = callback;
+    furi_hal_sw_digital_pin_buff.tx_callback_yield = tx_callback_yield;
+    furi_hal_sw_digital_pin_buff.tx_callback_end = tx_callback_end;
     furi_hal_sw_digital_pin_buff.tx_context = context;
     furi_hal_sw_digital_pin_buff.buffer_tx_ptr =
         malloc(furi_hal_sw_digital_pin_buff.buffer_size * sizeof(uint32_t));
 
     furi_hal_gpio_init(&gpio_ext_pa6, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-
 
     // Configure DMA
     LL_DMA_InitTypeDef dma_config = {0};
@@ -202,7 +203,7 @@ void furi_hal_sw_digital_pin_tx_start(
     LL_TIM_EnableDMAReq_UPDATE(SW_DIGITAL_PIN_TIM);
     LL_TIM_GenerateEvent_UPDATE(SW_DIGITAL_PIN_TIM);
     LL_TIM_CC_EnableChannel(SW_DIGITAL_PIN_TIM, LL_TIM_CHANNEL_CH1);
-    
+
     LL_TIM_SetCounter(SW_DIGITAL_PIN_TIM, 0);
     LL_TIM_EnableCounter(SW_DIGITAL_PIN_TIM);
 }
