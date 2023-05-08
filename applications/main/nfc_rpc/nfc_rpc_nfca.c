@@ -49,7 +49,7 @@ static void nfc_rpc_nfca_read(Nfc_Main* cmd, void* context) {
     PB_Nfca_ReadResponse pb_nfca_read_resp = PB_Nfca_ReadResponse_init_default;
 
     NfcaData nfca_data = {};
-    NfcaError error = nfca_poller_activate(instance->nfca_poller, &nfca_data);
+    NfcaError error = nfca_poller_read(instance->nfca_poller, &nfca_data);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_read_resp_tag;

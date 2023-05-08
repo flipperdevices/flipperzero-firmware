@@ -365,7 +365,6 @@ MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance) {
     nfc_poller_buffer_free(instance->buffer);
     instance->callback = NULL;
     instance->context = NULL;
-    free(instance->data);
     instance->state = MfUltralightPollerStateIdle;
 
     return MfUltralightErrorNone;
@@ -378,6 +377,7 @@ MfUltralightError mf_ultralight_poller_stop(MfUltralightPoller* instance) {
     instance->session_state = MfUltralightPollerSessionStateStopRequest;
     nfca_poller_stop(instance->nfca_poller);
     instance->session_state = MfUltralightPollerSessionStateIdle;
+    free(instance->data);
 
     return mf_ultralight_poller_reset(instance);
 }

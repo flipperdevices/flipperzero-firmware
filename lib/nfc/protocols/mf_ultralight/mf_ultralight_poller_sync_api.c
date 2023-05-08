@@ -47,7 +47,6 @@ MfUltralightError mf_ultralight_poller_read_page(
         *data = poller_context.data.read_cmd.data.page[0];
     }
     mf_ultralight_poller_stop(instance);
-    // mf_ultralight_poller_reset(instance);
 
     return poller_context.error;
 }
@@ -65,7 +64,6 @@ static NfcaPollerCommand mf_ultraight_write_page_callback(NfcaPollerEvent event,
     } else if(event.type == NfcaPollerEventTypeError) {
         poller_context->error = mf_ultralight_process_error(event.data.error);
     }
-    mf_ultralight_poller_stop(poller_context->instance);
     furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
 
     return NfcaPollerCommandStop;
@@ -86,7 +84,7 @@ MfUltralightError mf_ultralight_poller_write_page(
 
     mf_ultralight_poller_start(instance, mf_ultraight_write_page_callback, &poller_context);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
-    mf_ultralight_poller_reset(instance);
+    mf_ultralight_poller_stop(instance);
 
     return poller_context.error;
 }
@@ -102,7 +100,6 @@ static NfcaPollerCommand mf_ultraight_read_version_callback(NfcaPollerEvent even
     } else if(event.type == NfcaPollerEventTypeError) {
         poller_context->error = mf_ultralight_process_error(event.data.error);
     }
-    mf_ultralight_poller_stop(poller_context->instance);
     furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
 
     return NfcaPollerCommandStop;
@@ -119,7 +116,7 @@ MfUltralightError
     mf_ultralight_poller_start(instance, mf_ultraight_read_version_callback, &poller_context);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     *data = poller_context.data.version;
-    mf_ultralight_poller_reset(instance);
+    mf_ultralight_poller_stop(instance);
 
     return poller_context.error;
 }
@@ -136,7 +133,6 @@ static NfcaPollerCommand
     } else if(event.type == NfcaPollerEventTypeError) {
         poller_context->error = mf_ultralight_process_error(event.data.error);
     }
-    mf_ultralight_poller_stop(poller_context->instance);
     furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
 
     return NfcaPollerCommandStop;
@@ -154,7 +150,7 @@ MfUltralightError
     mf_ultralight_poller_start(instance, mf_ultraight_read_signature_callback, &poller_context);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     *data = poller_context.data.signature;
-    mf_ultralight_poller_reset(instance);
+    mf_ultralight_poller_stop(instance);
 
     return poller_context.error;
 }
@@ -172,7 +168,6 @@ static NfcaPollerCommand mf_ultraight_read_counter_callback(NfcaPollerEvent even
     } else if(event.type == NfcaPollerEventTypeError) {
         poller_context->error = mf_ultralight_process_error(event.data.error);
     }
-    mf_ultralight_poller_stop(poller_context->instance);
     furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
 
     return NfcaPollerCommandStop;
@@ -193,7 +188,7 @@ MfUltralightError mf_ultralight_poller_read_counter(
     mf_ultralight_poller_start(instance, mf_ultraight_read_counter_callback, &poller_context);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     *data = poller_context.data.counter_cmd.data;
-    mf_ultralight_poller_reset(instance);
+    mf_ultralight_poller_stop(instance);
 
     return poller_context.error;
 }
@@ -212,7 +207,6 @@ static NfcaPollerCommand
     } else if(event.type == NfcaPollerEventTypeError) {
         poller_context->error = mf_ultralight_process_error(event.data.error);
     }
-    mf_ultralight_poller_stop(poller_context->instance);
     furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
 
     return NfcaPollerCommandStop;
@@ -233,7 +227,7 @@ MfUltralightError mf_ultralight_poller_read_tearing_flag(
     mf_ultralight_poller_start(instance, mf_ultraight_read_tering_flag_callback, &poller_context);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     *data = poller_context.data.tearing_flag_cmd.data;
-    mf_ultralight_poller_reset(instance);
+    mf_ultralight_poller_stop(instance);
 
     return poller_context.error;
 }

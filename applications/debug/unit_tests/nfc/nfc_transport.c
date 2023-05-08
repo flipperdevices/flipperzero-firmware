@@ -7,6 +7,11 @@
 
 #define NFC_MAX_DATA_SIZE (128)
 
+typedef enum {
+    NfcTransportLogLevelWarning,
+    NfcTransportLogLevelInfo,
+} NfcTransportLogLevel;
+
 FuriMessageQueue* poller_queue = NULL;
 FuriMessageQueue* listener_queue = NULL;
 
@@ -57,14 +62,22 @@ struct Nfc {
     FuriThread* worker_thread;
 };
 
-static void nfc_test_print(const char* message, uint8_t* buffer, uint16_t bits) {
+static void nfc_test_print(
+    NfcTransportLogLevel log_level,
+    const char* message,
+    uint8_t* buffer,
+    uint16_t bits) {
     FuriString* str = furi_string_alloc();
     size_t bytes = (bits + 7) / 8;
 
     for(size_t i = 0; i < bytes; i++) {
         furi_string_cat_printf(str, " %02X", buffer[i]);
     }
-    FURI_LOG_I(message, "%s", furi_string_get_cstr(str));
+    if(log_level == NfcTransportLogLevelWarning) {
+        FURI_LOG_W(message, "%s", furi_string_get_cstr(str));
+    } else {
+        FURI_LOG_I(message, "%s", furi_string_get_cstr(str));
+    }
 
     furi_string_free(str);
 }
@@ -276,7 +289,8 @@ static int32_t nfc_worker_listener(void* context) {
             instance->callback(event, instance->context);
             break;
         } else if(message.type == NfcMessageTypeTx) {
-            nfc_test_print("RDR", message.data.data, message.data.data_bits);
+            nfc_test_print(
+                NfcTransportLogLevelInfo, "RDR", message.data.data, message.data.data_bits);
             if(instance->col_res_status != NfcaColResStatusDone) {
                 nfc_worker_listener_pass_col_res(
                     instance, message.data.data, message.data.data_bits);
@@ -415,7 +429,7 @@ NfcError nfc_trx(
         furi_assert(message.data.data_bits / 8 <= rx_data_size);
         *rx_bits = message.data.data_bits;
         memcpy(rx_data, message.data.data, (message.data.data_bits + 7) / 8);
-        nfc_test_print("TAG", rx_data, *rx_bits);
+        nfc_test_print(NfcTransportLogLevelWarning, "TAG", rx_data, *rx_bits);
     } else if(message.type == NfcMessageTypeTimeout) {
         error = NfcErrorTimeout;
     }

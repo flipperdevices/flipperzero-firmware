@@ -42,7 +42,7 @@ NfcaError nfca_poller_stop(NfcaPoller* instance);
 NfcaError nfca_poller_get_data(NfcaPoller* instance, NfcaData* data);
 
 // Sync call
-NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data);
+NfcaError nfca_poller_read(NfcaPoller* instance, NfcaData* nfca_data);
 
 #ifdef __cplusplus
 }

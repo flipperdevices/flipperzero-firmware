@@ -16,7 +16,6 @@ NfcaPoller* nfca_poller_alloc(Nfc* nfc) {
     furi_assert(nfc);
 
     NfcaPoller* instance = malloc(sizeof(NfcaPoller));
-    instance->data = malloc(sizeof(NfcaData));
     instance->nfc = nfc;
 
     return instance;
@@ -26,7 +25,6 @@ void nfca_poller_free(NfcaPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
-    free(instance->data);
     free(instance);
 }
 
@@ -100,6 +98,8 @@ NfcaError
     instance->callback = callback;
     instance->context = context;
 
+    instance->data = malloc(sizeof(NfcaData));
+
     instance->session_state = NfcaPollerSessionStateActive;
     nfc_start_poller(instance->nfc, nfca_poller_event_callback, instance);
 
@@ -127,6 +127,8 @@ NfcaError nfca_poller_stop(NfcaPoller* instance) {
     // Check that data is freed
     furi_assert(instance->buff != NULL);
 
+    free(instance->data);
+
     return NfcaErrorNone;
 }
 
@@ -138,7 +140,7 @@ static NfcaPollerCommand nfca_poller_sync_callback(NfcaPollerEvent event, void* 
     return NfcaPollerCommandStop;
 }
 
-NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
+NfcaError nfca_poller_read(NfcaPoller* instance, NfcaData* nfca_data) {
     furi_assert(instance);
 
     NfcaPollerContext context = {};
@@ -147,10 +149,10 @@ NfcaError nfca_poller_activate(NfcaPoller* instance, NfcaData* nfca_data) {
     nfca_poller_start(instance, nfca_poller_sync_callback, &context);
     furi_thread_flags_wait(NFCA_POLLER_FLAG_COMMAND_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
     furi_thread_flags_clear(NFCA_POLLER_FLAG_COMMAND_COMPLETE);
-    nfc_stop(instance->nfc);
     if(context.error == NfcaErrorNone) {
         *nfca_data = *instance->data;
     }
+    nfc_stop(instance->nfc);
 
     return context.error;
 }

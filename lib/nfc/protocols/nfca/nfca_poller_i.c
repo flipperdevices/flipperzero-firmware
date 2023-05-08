@@ -112,7 +112,7 @@ NfcaError nfca_poller_reset(NfcaPoller* instance) {
     instance->context = NULL;
     memset(&instance->col_res, 0, sizeof(NfcaPollerColRes));
     instance->state = NfcaPollerStateIdle;
-    free(instance->buff);
+    nfc_poller_buffer_free(instance->buff);
     instance->buff = NULL;
 
     return NfcaErrorNone;
