@@ -1,6 +1,8 @@
 # WIFI_MAP
 
-An ESP32 and FillperZero wifi mapping
+An ESP32 and FlipperZero wifi mapping.
+
+Check the ESP32 side at: [esp32-wifi-map](https://github.com/carvilsi/esp32-wifi-map)
 
 ## Build and flash
 
