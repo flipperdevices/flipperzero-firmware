@@ -38,11 +38,6 @@ The upper 6 pins male header is not required (unless you want to use the PicKit2
 
 ![alt text](https://github.com/wh00hw/Coffee-EEPROM-FAP/raw/master/assets/flipper.jpg)
 
-## TODO
- - [ ] Write .bin dump loaded from file
- - [ ] Set any amount (see [CoffeeEditor](https://github.com/wh00hw/CoffeeEditor))
- - [ ] Threads for better UX (ex loading bar)
-
 ## Disclaimer
 **I am not responsible for any illegal use of this tool. Edit the credit is like stealing.**
 
