@@ -31,25 +31,25 @@ static void tag_app_error(TagAppState* state) {
 }
 
 static bool tag_app_handle_input(TagAppState* state, InputEvent input) {
-    if(input.type == InputTypeShort) {
-        if(input.key == InputKeyOk) {
-            if(state->mode == TagAppModeReady) {
-                tag_app_start_playing(state);
-                return true;
-            }
-            if(state->mode == TagAppModeFinished) {
-                tag_app_start_playing(state);
-                return true;
-            }
-            // TODO: when playing OK means something else
+    if(input.type == InputTypeShort && input.key == InputKeyOk) {
+        if(state->mode == TagAppModeReady) {
+            tag_app_start_playing(state);
+            return true;
         }
-        if(input.key == InputKeyBack) {
-            if(state->mode == TagAppModePlaying) {
-                tag_app_stop_playing(state);
-                return true;
-            }
+        if(state->mode == TagAppModeFinished) {
+            tag_app_start_playing(state);
+            return true;
+        }
+        // TODO: when playing, OK means fire
+    }
+
+    if(input.type == InputTypeShort && input.key == InputKeyBack) {
+        if(state->mode == TagAppModePlaying) {
+            tag_app_stop_playing(state);
+            return true;
         }
     }
+
     if(input.type == InputTypeLong && input.key == InputKeyBack) {
         tag_app_quit(state);
         return false; // don't try to update the ui while quitting
@@ -75,8 +75,16 @@ void tag_app_game_loop_run(TagAppState* state, uint32_t duration_s) {
                 updated = tag_app_handle_input(state, event.input);
                 break;
             case TagEventTypeInfraredMessage:
-                // TODO - handle ir message
+                FURI_LOG_D(
+                    TAG,
+                    "Received ir with address: %lu, command: %lu",
+                    event.ir_message->address,
+                    event.ir_message->command);
+                state->data->last_ir_address = event.ir_message->address;
+                state->data->last_ir_command = event.ir_message->command;
+                updated = true;
                 break;
+
             case TagEventTypeSubGhzDataDetected:
                 // TODO - fetch subghz data, and push as a new message into the queue
                 break;

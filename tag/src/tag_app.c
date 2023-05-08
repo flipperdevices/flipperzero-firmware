@@ -17,12 +17,14 @@ void tag_app_init() {
     state->queue = furi_message_queue_alloc(8, sizeof(TagEvent));
     state->data_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     state->data = malloc(sizeof(GameData));
+    state->data->string_buffer = furi_string_alloc();
 }
 
 void tag_app_destroy() {
     FURI_LOG_T(TAG, "tag_app_destroy");
     furi_message_queue_free(state->queue);
     furi_mutex_free(state->data_mutex);
+    furi_string_free(state->data->string_buffer);
     free(state->data);
     free(state);
 }
@@ -56,9 +58,9 @@ int32_t tag_game_app(void* p) {
     tag_ir_init(InfraredProtocolNEC, 5, 0x4);
     state->mode = TagAppModeReady;
 
-    test_tx();
-
-    tag_app_game_loop_run(state, 10);
+    // start the main loop
+    FURI_LOG_I(TAG, "Starting the main loop");
+    tag_app_game_loop_run(state, 0);
 
     FURI_LOG_I(TAG, "Tearing down app");
     tag_ir_destroy();

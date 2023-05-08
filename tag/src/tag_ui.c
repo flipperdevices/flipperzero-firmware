@@ -39,10 +39,20 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
     }
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 5, 8, AlignLeft, AlignCenter, heading);
+    canvas_draw_str_aligned(canvas, 5, 8, AlignLeft, AlignTop, heading);
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignCenter, "---");
+    if(state->data->last_ir_address > 0) {
+        furi_string_printf(
+            state->data->string_buffer,
+            "add: %lu, cmd: %lu",
+            state->data->last_ir_address,
+            state->data->last_ir_command);
+        canvas_draw_str_aligned(
+            canvas, 5, 20, AlignLeft, AlignTop, furi_string_get_cstr(state->data->string_buffer));
+    } else {
+        canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "---");
+    }
 
     // seems to do string formatting into a buffer
     // furi_string_printf(data->buffer, "%04u", localCounter);

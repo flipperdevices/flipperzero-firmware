@@ -26,28 +26,33 @@ void tag_ir_init(InfraredProtocol proto, int rpts, uint32_t addr) {
     mode = InfraredReady;
 }
 
-void tag_ir_callback_decode_to_queue(void* context, InfraredWorkerSignal* received_signal) {
+void tag_ir_callback_decode_to_queue(void* context_q, InfraredWorkerSignal* received_signal) {
     FURI_LOG_T(TAG, "tag_ir_callback_decode_to_queue");
-    FuriMessageQueue* queue = context;
+    FuriMessageQueue* queue = context_q;
     FURI_LOG_D(TAG, "tag_ir_callback_decode_to_queue assertion: queue");
     furi_assert(queue);
 
     // decode the signal
-    const InfraredMessage* msg = infrared_worker_get_decoded_signal(received_signal);
-    FURI_LOG_I(TAG, "protocol: %s", infrared_get_protocol_name(msg->protocol));
-    FURI_LOG_I(TAG, "address:  %d", (int)msg->address);
-    FURI_LOG_I(TAG, "command:  %d", (int)msg->command);
+    if(infrared_worker_signal_is_decoded(received_signal)) {
+        const InfraredMessage* msg = infrared_worker_get_decoded_signal(received_signal);
+        FURI_LOG_I(TAG, "signal decoded");
+        FURI_LOG_D(TAG, "protocol: %s", infrared_get_protocol_name(msg->protocol));
+        FURI_LOG_D(TAG, "address:  %lu", msg->address);
+        FURI_LOG_D(TAG, "command:  %lu", msg->command);
 
-    // copy out the infrared message
-    InfraredMessage* received = malloc(sizeof(InfraredMessage));
-    received->address = msg->address;
-    received->command = msg->command;
-    received->protocol = msg->protocol;
-    received->repeat = msg->repeat;
-    TagEvent event = {.type = TagEventTypeInfraredMessage, .ir_message = received};
+        // copy out the infrared message
+        InfraredMessage* received = malloc(sizeof(InfraredMessage));
+        received->address = msg->address;
+        received->command = msg->command;
+        received->protocol = msg->protocol;
+        received->repeat = msg->repeat;
+        TagEvent event = {.type = TagEventTypeInfraredMessage, .ir_message = received};
 
-    // push it onto the queue
-    furi_message_queue_put(queue, &event, FuriWaitForever);
+        // push it onto the queue
+        furi_message_queue_put(queue, &event, FuriWaitForever);
+    } else {
+        FURI_LOG_W(TAG, "signal not decoded");
+    }
 }
 
 void tag_ir_rx_start(InfraredWorkerReceivedSignalCallback callback, FuriMessageQueue* queue) {

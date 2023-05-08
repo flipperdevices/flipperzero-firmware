@@ -15,7 +15,6 @@ typedef enum {
     TagEventTypeInput,
     TagEventTypeSubGhzDataDetected,
     TagEventTypeInfraredMessage,
-    // app specific events go here
 } TagEventType;
 
 typedef struct {
@@ -37,6 +36,9 @@ typedef struct {
     uint32_t start;
     uint8_t total_damage;
     uint8_t total_hits;
+    uint32_t last_ir_address;
+    uint32_t last_ir_command;
+    FuriString* string_buffer;
 } GameData;
 
 typedef struct {
