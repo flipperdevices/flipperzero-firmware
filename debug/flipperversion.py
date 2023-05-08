@@ -28,7 +28,6 @@ class VersionData:
 
 class VersionLoader:
     def __init__(self, version_ptr):
-        self.version_data_dict = {}
         self.version_ptr = version_ptr
         self._cstr_type = gdb.lookup_type("char").pointer()
         self._uint_type = gdb.lookup_type("unsigned int")
