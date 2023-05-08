@@ -18,6 +18,7 @@ struct MfUltralightListener {
     uint8_t tx_data[MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE];
     uint16_t tx_bits;
     MfUltralightFeatureSupport features;
+    MfUltralightConfigPages* config;
 
     MfUltralightListenerEventCallback callback;
     void* context;
@@ -117,6 +118,7 @@ static bool mf_ultralight_listener_read_signature_handler(
     uint16_t rx_bits) {
     UNUSED(rx_bits);
     UNUSED(rx_data);
+
     bool command_processed = false;
     if((instance->features & MfUltralightFeatureSupportReadSignature)) {
         memcpy(instance->tx_data, &instance->data->signature, sizeof(instance->data->signature));
@@ -132,10 +134,104 @@ static bool mf_ultralight_listener_read_signature_handler(
     return command_processed;
 }
 
+static bool mf_ultralight_listener_read_counter_handler(
+    MfUltralightListener* instance,
+    uint8_t* rx_data,
+    uint16_t rx_bits) {
+    UNUSED(rx_bits);
+
+    bool command_processed = false;
+
+    do {
+        uint8_t counter_num = rx_data[1];
+        if((instance->features & MfUltralightFeatureSupportReadCounter) == 0) break;
+        if(instance->features & MfUltralightFeatureSupportSingleCounter) {
+            if(counter_num != 2) {
+                break;
+            }
+        }
+        if(instance->config) {
+            if(!instance->config->access.nfc_cnt_en) {
+                break;
+            }
+            if(instance->config->access.nfc_cnt_pwd_prot) {
+                if(instance->state != MfUltraligthListenerStateAuthSuccess) {
+                    break;
+                }
+            }
+        }
+        if(counter_num > 2) break;
+        instance->tx_data[0] = (instance->data->counter[counter_num].counter >> 0) & 0xff;
+        instance->tx_data[1] = (instance->data->counter[counter_num].counter >> 8) & 0xff;
+        instance->tx_data[2] = (instance->data->counter[counter_num].counter >> 16) & 0xff;
+        instance->tx_bits = 3 * 8;
+        nfca_listener_send_standart_frame(
+            instance->nfca_listener, instance->tx_data, instance->tx_bits);
+        command_processed = true;
+    } while(false);
+
+    return command_processed;
+}
+
+static bool mf_ultralight_listener_check_tearing_handler(
+    MfUltralightListener* instance,
+    uint8_t* rx_data,
+    uint16_t rx_bits) {
+    UNUSED(rx_bits);
+
+    bool command_processed = false;
+
+    do {
+        uint8_t tearing_flag_num = rx_data[1];
+        if((instance->features & MfUltralightFeatureSupportCheckTearingFlag) == 0) break;
+        if(tearing_flag_num > 2) break;
+        instance->tx_data[0] = instance->data->tearing_flag->data[0];
+        instance->tx_bits = 8;
+        nfca_listener_send_standart_frame(
+            instance->nfca_listener, instance->tx_data, instance->tx_bits);
+        command_processed = true;
+    } while(false);
+
+    return command_processed;
+}
+
+static bool mf_ultralight_listener_auth_handler(
+    MfUltralightListener* instance,
+    uint8_t* rx_data,
+    uint16_t rx_bits) {
+    UNUSED(rx_bits);
+
+    bool command_processed = false;
+
+    do {
+        if((instance->features & MfUltralightFeatureSupportAuthentication) == 0) break;
+        MfUltralightAuthPassword password = {};
+        memcpy(password.data, &rx_data[1], sizeof(MfUltralightAuthPassword));
+        if(instance->callback) {
+            MfUltralightListenerEventData data = {.password = password};
+            MfUltralightListenerEvent event = {
+                .type = MfUltralightListenerEventTypeAuth,
+                .data = &data,
+            };
+            instance->callback(event, instance->context);
+        }
+        if(password.pass != instance->config->password.pass) break;
+        memcpy(instance->tx_data, instance->config->pack.data, sizeof(MfUltralightAuthPack));
+        instance->tx_bits = sizeof(MfUltralightAuthPack) * 8;
+        instance->state = MfUltraligthListenerStateAuthSuccess;
+        nfca_listener_send_standart_frame(
+            instance->nfca_listener, instance->tx_data, instance->tx_bits);
+        
+        command_processed = true;
+    } while(false);
+
+    return command_processed;
+}
+
 static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
     {
         .cmd = MF_ULTRALIGHT_CMD_READ_PAGE,
-        .cmd_len_bits = 16,
+        .cmd_len_bits = 2 * 8,
         .callback = mf_ultralight_listener_read_page_handler,
     },
     {
@@ -145,10 +241,24 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
     },
     {
         .cmd = MF_ULTRALIGTH_CMD_READ_SIG,
-        .cmd_len_bits = 16,
+        .cmd_len_bits = 2 * 8,
         .callback = mf_ultralight_listener_read_signature_handler,
     },
-};
+    {
+        .cmd = MF_ULTRALIGHT_CMD_READ_CNT,
+        .cmd_len_bits = 2 * 8,
+        .callback = mf_ultralight_listener_read_counter_handler,
+    },
+    {
+        .cmd = MF_ULTRALIGHT_CMD_CHECK_TEARING,
+        .cmd_len_bits = 2 * 8,
+        .callback = mf_ultralight_listener_check_tearing_handler,
+    },
+    {
+        .cmd = MF_ULTRALIGHT_CMD_AUTH,
+        .cmd_len_bits = 5 * 8,
+        .callback = mf_ultralight_listener_auth_handler,
+    }};
 
 static NfcaListenerCommand
     mf_ultralight_listener_event_handler(NfcaListenerEvent event, void* context) {
@@ -169,6 +279,7 @@ static NfcaListenerCommand
         }
         if(!cmd_processed) {
             mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+            instance->state = MfUltraligthListenerStateIdle;
         }
     }
 
@@ -178,6 +289,7 @@ static NfcaListenerCommand
 static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* instance) {
     MfUltralightData* data = instance->data;
     instance->features = mf_ultralight_get_feature_support_set(data->type);
+    mf_ultralight_get_config_page(data, &instance->config);
 }
 
 MfUltralightListener* mf_ultralight_listener_alloc(NfcaListener* nfca_listener) {

@@ -200,13 +200,13 @@ bool mf_ultralight_is_counter_configured(MfUltralightData* data) {
     case MfUltralightTypeNTAG213:
     case MfUltralightTypeNTAG215:
     case MfUltralightTypeNTAG216:
-        configured = true;
-        break;
-
-    default:
         if(mf_ultralight_get_config_page(data, &config)) {
             configured = config->access.nfc_cnt_en;
         }
+        break;
+
+    default:
+        configured = true;
         break;
     }
 

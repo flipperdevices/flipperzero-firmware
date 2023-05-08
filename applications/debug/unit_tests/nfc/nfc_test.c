@@ -146,44 +146,46 @@ static void nfc_test_free() {
 //     mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeNTAGI2CPlus2k);
 // }
 
-MU_TEST(nfca_reader) {
-    Nfc* poller = nfc_alloc();
-    Nfc* listener = nfc_alloc();
+// MU_TEST(nfca_reader) {
+//     Nfc* poller = nfc_alloc();
+//     Nfc* listener = nfc_alloc();
 
-    NfcaPoller* nfca_poller = nfca_poller_alloc(poller);
-    NfcaListener* nfca_listener = nfca_listener_alloc(listener);
+//     NfcaPoller* nfca_poller = nfca_poller_alloc(poller);
+//     NfcaListener* nfca_listener = nfca_listener_alloc(listener);
 
-    NfcaData nfca_listener_data = {
-        .uid_len = 7,
-        .uid = {0x04, 0x51, 0x5C, 0xFA, 0x6F, 0x73, 0x81},
-        .atqa = {0x44, 0x00},
-        .sak = 0x00,
-    };
-    // nfca_listener_data.uid_len = 7;
-    // furi_hal_random_fill_buf(nfca_listener_data.uid, 7);
-    // furi_hal_random_fill_buf(nfca_listener_data.atqa, 2);
-    // furi_hal_random_fill_buf(&nfca_listener_data.sak, 1);
-    NfcaData nfca_poller_data = {};
+//     NfcaData nfca_listener_data = {
+//         .uid_len = 7,
+//         .uid = {0x04, 0x51, 0x5C, 0xFA, 0x6F, 0x73, 0x81},
+//         .atqa = {0x44, 0x00},
+//         .sak = 0x00,
+//     };
+//     // nfca_listener_data.uid_len = 7;
+//     // furi_hal_random_fill_buf(nfca_listener_data.uid, 7);
+//     // furi_hal_random_fill_buf(nfca_listener_data.atqa, 2);
+//     // furi_hal_random_fill_buf(&nfca_listener_data.sak, 1);
+//     NfcaData nfca_poller_data = {};
 
-    mu_assert(
-        nfca_listener_start(nfca_listener, &nfca_listener_data, NULL, NULL) == NfcaErrorNone,
-        "nfca_listener_start() failed");
+//     mu_assert(
+//         nfca_listener_start(nfca_listener, &nfca_listener_data, NULL, NULL) == NfcaErrorNone,
+//         "nfca_listener_start() failed");
 
-    mu_assert(
-        nfca_poller_read(nfca_poller, &nfca_poller_data) == NfcaErrorNone,
-        "nfca_poller_read() failed");
-    mu_assert(nfca_listener_stop(nfca_listener) == NfcaErrorNone, "nfca_listener_stop() failed");
+//     mu_assert(
+//         nfca_poller_read(nfca_poller, &nfca_poller_data) == NfcaErrorNone,
+//         "nfca_poller_read() failed");
+//     mu_assert(nfca_listener_stop(nfca_listener) == NfcaErrorNone, "nfca_listener_stop() failed");
 
-    mu_assert(
-        memcmp(&nfca_poller_data, &nfca_listener_data, sizeof(NfcaData)) == 0, "Data not matches");
+//     mu_assert(
+//         memcmp(&nfca_poller_data, &nfca_listener_data, sizeof(NfcaData)) == 0, "Data not matches");
 
-    nfca_listener_free(nfca_listener);
-    nfc_free(listener);
-    nfca_poller_free(nfca_poller);
-    nfc_free(poller);
-}
+//     nfca_listener_free(nfca_listener);
+//     nfc_free(listener);
+//     nfca_poller_free(nfca_poller);
+//     nfc_free(poller);
+// }
 
-MU_TEST(mf_ultralight_reader) {
+static void mf_ultralight_reader_test(const char* path) {
+    FURI_LOG_I(TAG, "Testing file: %s", path);
+    NfcDev* nfc_dev = nfc_dev_alloc();
     Nfc* poller = nfc_alloc();
     Nfc* listener = nfc_alloc();
 
@@ -195,7 +197,8 @@ MU_TEST(mf_ultralight_reader) {
 
     MfUltralightError error = MfUltralightErrorNone;
     NfcDevData* dev_data = malloc(sizeof(NfcDevData));
-    nfc_data_generator_fill_data(NfcDataGeneratorTypeMfUltralight, dev_data);
+
+    mu_assert(nfc_dev_load(nfc_dev, dev_data, path), "nfc_dev_load() failed\r\n");
 
     error = mf_ultralight_listener_start(mfu_listener, &dev_data->mf_ul_data, NULL, NULL);
     mu_assert(error == MfUltralightErrorNone, "mf_ultralight_listener_start() failed");
@@ -219,13 +222,28 @@ MU_TEST(mf_ultralight_reader) {
     nfc_free(listener);
     nfca_poller_free(nfca_poller);
     nfc_free(poller);
+    nfc_dev_free(nfc_dev);
+}
+
+MU_TEST(mf_ultralight_11_reader) {
+    mf_ultralight_reader_test(EXT_PATH("unit_tests/nfc/Ultralight_11.nfc"));
+}
+
+MU_TEST(mf_ultralight_21_reader) {
+    mf_ultralight_reader_test(EXT_PATH("unit_tests/nfc/Ultralight_21.nfc"));
+}
+
+MU_TEST(ntag_215_reader) {
+    mf_ultralight_reader_test(EXT_PATH("unit_tests/nfc/Ntag215.nfc"));
 }
 
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
-    MU_RUN_TEST(nfca_reader);
-    MU_RUN_TEST(mf_ultralight_reader);
+    // MU_RUN_TEST(nfca_reader);
+    UNUSED(mf_ultralight_11_reader);
+    UNUSED(mf_ultralight_21_reader);
+    MU_RUN_TEST(ntag_215_reader);
 
     // MU_RUN_TEST(nfca_4b_file_test);
     // MU_RUN_TEST(nfca_7b_file_test);

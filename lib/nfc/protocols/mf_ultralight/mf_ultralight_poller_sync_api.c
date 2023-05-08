@@ -259,6 +259,8 @@ static MfUltralightPollerCommand
     } else if(event.type == MfUltralightPollerEventTypeReadFailed) {
         poller_context->error = event.data->error;
         command = MfUltralightPollerCommandStop;
+    } else if(event.type == MfUltralightPollerEventTypeAuthRequest) {
+        event.data->auth_context.skip_auth = true;
     }
 
     if(command == MfUltralightPollerCommandStop) {

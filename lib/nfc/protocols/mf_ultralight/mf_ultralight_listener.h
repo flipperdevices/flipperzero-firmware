@@ -21,7 +21,7 @@ typedef struct {
 
 typedef struct {
     MfUltralightListenerEventType type;
-    MfUltralightListenerEventData data;
+    MfUltralightListenerEventData* data;
 } MfUltralightListenerEvent;
 
 typedef enum {

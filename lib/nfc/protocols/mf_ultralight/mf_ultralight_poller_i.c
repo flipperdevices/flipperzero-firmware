@@ -120,7 +120,7 @@ MfUltralightError mf_ultralight_poller_async_write_page(
             buff->rx_data_size,
             &buff->rx_bits,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        FURI_LOG_I(TAG, "Rx bits: %d", buff->rx_bits);
+        FURI_LOG_D(TAG, "Rx bits: %d", buff->rx_bits);
         if(error != NfcaErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
@@ -161,7 +161,7 @@ MfUltralightError mf_ultralight_poller_async_read_version(
             ret = MfUltralightErrorProtocol;
             break;
         }
-        memcpy(&data, buff->rx_data, sizeof(MfUltralightVersion));
+        memcpy(data, buff->rx_data, sizeof(MfUltralightVersion));
     } while(false);
 
     return ret;
