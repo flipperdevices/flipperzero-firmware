@@ -46,6 +46,7 @@ typedef struct {
     SwUsartWordLength data_bit;
     SwUsartParity parity;
     SwUsartStopBits stop_bit;
+    bool inverted;
     const GpioPin* rx_pin;
     const GpioPin* tx_pin;
 } SwUsartConfig;

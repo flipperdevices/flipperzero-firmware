@@ -171,9 +171,6 @@ void furi_hal_sw_digital_pin_tx_start(
     furi_hal_sw_digital_pin_buff.buffer_tx_ptr =
         malloc(furi_hal_sw_digital_pin_buff.buffer_size * sizeof(uint32_t));
 
-    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    //const GpioPin* gpio1 = &gpio_ext_pa7;
-
     furi_hal_gpio_init(&gpio_ext_pa6, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
 
@@ -232,7 +229,6 @@ void furi_hal_sw_digital_pin_tx_stop(void) {
 
     // Deinitialize GPIO
     furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    furi_hal_gpio_init(&gpio_ext_pa7, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     FURI_CRITICAL_EXIT();
 

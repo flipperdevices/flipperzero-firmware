@@ -800,11 +800,13 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
         .data_bit = SwUsartDataBit8,
         .parity = SwUsartParityNone,
         .stop_bit = SwUsartStopBit1,
+        .inverted = false,
         .tx_pin = &gpio_ext_pa7,
         .rx_pin = &gpio_ext_pa4,
     };
     SwUsart* sw_usart = sw_usart_alloc(&config);
-    uint8_t data[] = "Hello world! 123456789abcdef || Hello world! 123456789abcdef || Hello world! 123456789abcdef || \r\n";
+    uint8_t data[] =
+        "Hello world! 123456789abcdef || Hello world! 123456789abcdef || Hello world! 123456789abcdef || \r\n";
     sw_usart_dma_tx(sw_usart, data, sizeof(data));
 
     // Wait for packets to arrive
