@@ -37,7 +37,7 @@ MfUltralightPollerCommand
             event.data->auth_context.password = nfc->mf_ul_auth->password;
         }
     } else if(event.type == MfUltralightPollerEventTypeAuthSuccess) {
-        nfc->mf_ul_auth->pack = event.data->pack;
+        nfc->mf_ul_auth->pack = event.data->auth_context.pack;
     }
 
     return command;

@@ -136,7 +136,7 @@ static MfUltralightPollerCommand
                     &instance->data->counter[instance->counters_read]);
                 if(instance->error != MfUltralightErrorNone) {
                     FURI_LOG_E(TAG, "Failed to read %d counter", instance->counters_read);
-                    instance->state = MfUltralightPollerStateReadFailed;
+                    instance->state = MfUltralightPollerStateReadTearingFlags;
                 } else {
                     instance->counters_read++;
                 }
@@ -171,6 +171,7 @@ static MfUltralightPollerCommand
             }
         }
     } else {
+        FURI_LOG_D(TAG, "Skip reading tearing flags");
         instance->state = MfUltralightPollerStateTryDefaultPass;
     }
 
@@ -188,22 +189,23 @@ static MfUltralightPollerCommand mf_ultralight_poller_handler_auth(MfUltralightP
 
         command = instance->callback(event, instance->context);
         if(!event.data->auth_context.skip_auth) {
-            instance->auth_password = event.data->auth_context.password;
+            instance->auth_context.password = event.data->auth_context.password;
             FURI_LOG_D(
-                TAG, "Trying to authenticate with password %08lX", instance->auth_password.pass);
-            instance->error = mf_ultralight_poller_async_auth(instance, &instance->auth_password);
+                TAG,
+                "Trying to authenticate with password %08lX",
+                instance->auth_context.password.pass);
+            instance->error = mf_ultralight_poller_async_auth(instance, &instance->auth_context);
             if(instance->error == MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Auth success");
-                // TODO fill PACK in event
-                MfUltralightPollerEventData data = {.pack.pack = 0x8080};
-                MfUltralightPollerEvent event = {
-                    .type = MfUltralightPollerEventTypeAuthSuccess, .data = &data};
+                instance->auth_context.auth_success = true;
+                event.data->auth_context = instance->auth_context;
+                event.type = MfUltralightPollerEventTypeAuthSuccess;
                 command = instance->callback(event, instance->context);
             } else {
                 FURI_LOG_W(TAG, "Auth failed");
+                instance->auth_context.auth_success = false;
                 MfUltralightPollerEvent event = {.type = MfUltralightPollerEventTypeAuthFailed};
                 command = instance->callback(event, instance->context);
-                // TODO rework with HALT cmd
                 nfca_poller_halt(instance->nfca_poller);
             }
         }

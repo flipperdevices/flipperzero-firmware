@@ -112,7 +112,7 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
                 // } else {
                 //     // Nfcb not present
                 //     furi_delay_ms(100);
-                    instance->state = NfcPollerStateCheckPresenceNfca;
+                instance->state = NfcPollerStateCheckPresenceNfca;
                 //     command = NfcCommandReset;
                 // }
             }
@@ -138,6 +138,8 @@ void nfc_poller_start(NfcPoller* instance, NfcPollerEventCallback callback, void
     instance->state = NfcPollerStateCheckPresenceNfca;
     instance->session_state = NfcPollerSessionStateActive;
 
+    instance->nfca_poller->data = malloc(sizeof(NfcaData));
+
     nfc_start_poller(instance->nfc, nfc_poller_event_callback, instance);
 }
 
@@ -148,6 +150,8 @@ void nfc_poller_stop(NfcPoller* instance) {
     instance->session_state = NfcPollerSessionStateStopRequest;
     nfc_stop(instance->nfc);
     instance->session_state = NfcPollerSessionStateIdle;
+
+    free(instance->nfca_poller->data);
 
     instance->callback = NULL;
     instance->context = NULL;

@@ -140,14 +140,75 @@ bool mf_ultralight_detect_protocol(NfcaData* nfca_data) {
     return mfu_detected;
 }
 
+bool mf_ultralight_get_config_page(MfUltralightData* data, MfUltralightConfigPages* config) {
+    furi_assert(data);
+    furi_assert(config);
+
+    bool config_pages_found = false;
+    switch(data->type) {
+    case MfUltralightTypeUL11:
+    case MfUltralightTypeUL21:
+    case MfUltralightTypeNTAG213:
+    case MfUltralightTypeNTAG215:
+    case MfUltralightTypeNTAG216:
+        config = (MfUltralightConfigPages*)&data->page[data->pages_total - 4];
+        config_pages_found = true;
+        break;
+
+    case MfUltralightTypeNTAGI2CPlus1K:
+    case MfUltralightTypeNTAGI2CPlus2K:
+        config = (MfUltralightConfigPages*)&data->page[227];
+        config_pages_found = true;
+        break;
+
+    default:
+        break;
+    }
+
+    return config_pages_found;
+}
+
 bool mf_ultralight_is_all_data_read(MfUltralightData* data) {
     furi_assert(data);
-    // TODO add logic
-    return false;
+
+    bool all_read = false;
+    if(data->pages_read == data->pages_total) {
+        // Having read all the pages doesn't mean that we've got everything.
+        // By default PWD is 0xFFFFFFFF, but if read back it is always 0x00000000,
+        // so a default read on an auth-supported NTAG is never complete.
+        uint32_t feature_set = mf_ultralight_get_feature_support_set(data->type);
+        if(feature_set & MfUltralightFeatureSupportAuthentication) {
+            all_read = true;
+        } else {
+            MfUltralightConfigPages* config = NULL;
+            if(mf_ultralight_get_config_page(data, config)) {
+                all_read = ((config->password.pass != 0) || (config->pack.pack != 0));
+            }
+        }
+    }
+
+    return all_read;
 }
 
 bool mf_ultralight_is_counter_configured(MfUltralightData* data) {
     furi_assert(data);
 
-    return false;
+    MfUltralightConfigPages* config = NULL;
+    bool configured = false;
+
+    switch(data->type) {
+    case MfUltralightTypeNTAG213:
+    case MfUltralightTypeNTAG215:
+    case MfUltralightTypeNTAG216:
+        configured = true;
+        break;
+
+    default:
+        if(mf_ultralight_get_config_page(data, config)) {
+            configured = config->access.nfc_cnt_en;
+        }
+        break;
+    }
+
+    return configured;
 }

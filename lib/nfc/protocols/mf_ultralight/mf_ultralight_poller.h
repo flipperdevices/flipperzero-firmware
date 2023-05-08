@@ -18,14 +18,15 @@ typedef enum {
 } MfUltralightPollerEventType;
 
 typedef struct {
-    bool skip_auth;
     MfUltralightAuthPassword password;
+    MfUltralightAuthPack pack;
+    bool auth_success;
+    bool skip_auth;
 } MfUltralightPollerAuthContext;
 
 typedef struct {
     union {
         MfUltralightPollerAuthContext auth_context;
-        MfUltralightAuthPack pack;
         MfUltralightError error;
     };
 } MfUltralightPollerEventData;

@@ -30,12 +30,13 @@ MfUltralightError mf_ultralight_process_error(NfcaError error) {
     return ret;
 }
 
-MfUltralightError
-    mf_ultralight_poller_async_auth(MfUltralightPoller* instance, MfUltralightAuthPassword* data) {
+MfUltralightError mf_ultralight_poller_async_auth(
+    MfUltralightPoller* instance,
+    MfUltralightPollerAuthContext* data) {
     NfcPollerBuffer* buff = instance->buffer;
     buff->tx_data[0] = MF_ULTRALIGHT_CMD_AUTH;
     // fill password in lsb
-    nfc_util_num2bytes(data->pass, MF_ULTRALIGHT_AUTH_PASSWORD_SIZE, &buff->tx_data[1]);
+    nfc_util_num2bytes(data->password.pass, MF_ULTRALIGHT_AUTH_PASSWORD_SIZE, &buff->tx_data[1]);
     buff->tx_bits = (MF_ULTRALIGHT_AUTH_PASSWORD_SIZE + 1) * 8;
 
     MfUltralightError ret = MfUltralightErrorNone;
@@ -57,16 +58,8 @@ MfUltralightError
             ret = MfUltralightErrorAuth;
             break;
         }
-        if(instance->pages_total != 0) {
-            memcpy(
-                &instance->data->page[instance->pages_total - 2],
-                data,
-                MF_ULTRALIGHT_AUTH_PASSWORD_SIZE);
-            memcpy(
-                &instance->data->page[instance->pages_total - 1],
-                buff->rx_data,
-                MF_ULTRALIGHT_AUTH_PACK_SIZE);
-        }
+        data->pack.data[0] = buff->rx_data[0];
+        data->pack.data[1] = buff->rx_data[1];
     } while(false);
 
     return ret;

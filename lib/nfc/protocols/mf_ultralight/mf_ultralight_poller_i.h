@@ -67,7 +67,7 @@ struct MfUltralightPoller {
     NfcPollerBuffer* buffer;
     MfUltralightData* data;
     MfUltralightPollerCallback callback;
-    MfUltralightAuthPassword auth_password;
+    MfUltralightPollerAuthContext auth_context;
     uint32_t feature_set;
     uint16_t pages_read;
     uint16_t pages_total;
@@ -81,8 +81,9 @@ struct MfUltralightPoller {
 
 MfUltralightError mf_ultralight_process_error(NfcaError error);
 
-MfUltralightError
-    mf_ultralight_poller_async_auth(MfUltralightPoller* instance, MfUltralightAuthPassword* data);
+MfUltralightError mf_ultralight_poller_async_auth(
+    MfUltralightPoller* instance,
+    MfUltralightPollerAuthContext* data);
 
 MfUltralightError mf_ultralight_poller_async_read_page(
     MfUltralightPoller* instance,
