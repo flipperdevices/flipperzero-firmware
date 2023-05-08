@@ -140,7 +140,7 @@ bool mf_ultralight_detect_protocol(NfcaData* nfca_data) {
     return mfu_detected;
 }
 
-bool mf_ultralight_get_config_page(MfUltralightData* data, MfUltralightConfigPages* config) {
+bool mf_ultralight_get_config_page(MfUltralightData* data, MfUltralightConfigPages** config) {
     furi_assert(data);
     furi_assert(config);
 
@@ -151,13 +151,13 @@ bool mf_ultralight_get_config_page(MfUltralightData* data, MfUltralightConfigPag
     case MfUltralightTypeNTAG213:
     case MfUltralightTypeNTAG215:
     case MfUltralightTypeNTAG216:
-        config = (MfUltralightConfigPages*)&data->page[data->pages_total - 4];
+        *config = (MfUltralightConfigPages*)&data->page[data->pages_total - 4];
         config_pages_found = true;
         break;
 
     case MfUltralightTypeNTAGI2CPlus1K:
     case MfUltralightTypeNTAGI2CPlus2K:
-        config = (MfUltralightConfigPages*)&data->page[227];
+        *config = (MfUltralightConfigPages*)&data->page[227];
         config_pages_found = true;
         break;
 
@@ -181,7 +181,7 @@ bool mf_ultralight_is_all_data_read(MfUltralightData* data) {
             all_read = true;
         } else {
             MfUltralightConfigPages* config = NULL;
-            if(mf_ultralight_get_config_page(data, config)) {
+            if(mf_ultralight_get_config_page(data, &config)) {
                 all_read = ((config->password.pass != 0) || (config->pack.pack != 0));
             }
         }
@@ -204,7 +204,7 @@ bool mf_ultralight_is_counter_configured(MfUltralightData* data) {
         break;
 
     default:
-        if(mf_ultralight_get_config_page(data, config)) {
+        if(mf_ultralight_get_config_page(data, &config)) {
             configured = config->access.nfc_cnt_en;
         }
         break;

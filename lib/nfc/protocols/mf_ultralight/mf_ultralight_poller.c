@@ -5,6 +5,7 @@
 #define TAG "MfUltralightPoller"
 
 #define MF_ULTRALIGHT_MAX_BUFF_SIZE (64)
+#define MF_ULTRALIGHT_DEFAULT_PASSWORD (0xffffffffUL)
 
 typedef MfUltralightPollerCommand (*MfUltralightPollerReadHandler)(MfUltralightPoller* instance);
 
@@ -246,6 +247,32 @@ static MfUltralightPollerCommand
 
 static MfUltralightPollerCommand
     mf_ultralight_poller_handler_try_default_pass(MfUltralightPoller* instance) {
+    if(instance->feature_set & MfUltralightFeatureSupportAuthentication) {
+        MfUltralightConfigPages* config = NULL;
+        mf_ultralight_get_config_page(instance->data, &config);
+        if(instance->auth_context.auth_success) {
+            config->password = instance->auth_context.password;
+            config->pack = instance->auth_context.pack;
+        } else if(config->access.authlim == 0) {
+            FURI_LOG_D(TAG, "No limits in authentication. Trying default password");
+            instance->auth_context.password.pass = MF_ULTRALIGHT_DEFAULT_PASSWORD;
+            instance->error = mf_ultralight_poller_async_auth(instance, &instance->auth_context);
+            if(instance->error == MfUltralightErrorNone) {
+                FURI_LOG_D(TAG, "Default password detected");
+                config->password.pass = MF_ULTRALIGHT_DEFAULT_PASSWORD;
+                config->pack = instance->auth_context.pack;
+            }
+        }
+
+        if(instance->pages_read != instance->pages_total) {
+            // Probably password protected, fix AUTH0 and PROT so before AUTH0
+            // can be written and since AUTH0 won't be readable, like on the
+            // original card
+            config->auth0 = instance->pages_read;
+            config->access.prot = true;
+        }
+    }
+
     instance->state = MfUltralightPollerStateReadSuccess;
     return MfUltralightPollerCommandContinue;
 }
