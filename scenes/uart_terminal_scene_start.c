@@ -1,4 +1,4 @@
-#include "applications/external/lora_terminal/uart_terminal_app_i.h"
+#include "../uart_terminal_app_i.h"
 #include <furi.h>
 
 // For each command, define whether additional arguments are needed

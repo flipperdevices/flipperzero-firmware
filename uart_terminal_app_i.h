@@ -1,7 +1,7 @@
 #pragma once
 
 #include "uart_terminal_app.h"
-#include "applications/external/lora_terminal/scenes/uart_terminal_scene.h"
+#include "scenes/uart_terminal_scene.h"
 #include "uart_terminal_custom_event.h"
 #include "uart_terminal_uart.h"
 
