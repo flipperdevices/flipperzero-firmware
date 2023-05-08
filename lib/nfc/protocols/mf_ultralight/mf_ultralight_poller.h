@@ -26,6 +26,7 @@ typedef struct {
     union {
         MfUltralightPollerAuthContext auth_context;
         MfUltralightAuthPack pack;
+        MfUltralightError error;
     };
 } MfUltralightPollerEventData;
 
@@ -93,6 +94,9 @@ MfUltralightError mf_ultralight_poller_read_tearing_flag(
     MfUltralightPoller* instance,
     uint8_t flag_num,
     MfUltralightTearingFlag* data);
+
+MfUltralightError
+    mf_ultralight_poller_read_card(MfUltralightPoller* instance, MfUltralightData* data);
 
 #ifdef __cplusplus
 }

@@ -52,9 +52,8 @@ static MfUltralightPollerCommand mf_ultralight_poller_handler_idle(MfUltralightP
 
 static MfUltralightPollerCommand
     mf_ultralight_poller_handler_read_version(MfUltralightPoller* instance) {
-    MfUltralightError error =
-        mf_ultralight_poller_async_read_version(instance, &instance->data->version);
-    if(error == MfUltralightErrorNone) {
+    instance->error = mf_ultralight_poller_async_read_version(instance, &instance->data->version);
+    if(instance->error == MfUltralightErrorNone) {
         FURI_LOG_I(TAG, "Read version success");
         instance->data->type = mf_ultralight_get_type_by_version(&instance->data->version);
         instance->state = MfUltralightPollerStateGetFeatureSet;
@@ -70,8 +69,8 @@ static MfUltralightPollerCommand
 static MfUltralightPollerCommand
     mf_ultralight_poller_handler_check_ntag_203(MfUltralightPoller* instance) {
     MfUltralightPageReadCommandData data = {};
-    MfUltralightError error = mf_ultralight_poller_async_read_page(instance, 41, &data);
-    if(error == MfUltralightErrorNone) {
+    instance->error = mf_ultralight_poller_async_read_page(instance, 41, &data);
+    if(instance->error == MfUltralightErrorNone) {
         FURI_LOG_I(TAG, "NTAG203 detected");
         instance->data->type = MfUltralightTypeNTAG203;
     } else {
@@ -106,9 +105,9 @@ static MfUltralightPollerCommand
     MfUltralightPollerState next_state = MfUltralightPollerStateAuth;
     if(instance->feature_set & MfUltralightFeatureSupportReadSignature) {
         FURI_LOG_D(TAG, "Reading signature");
-        MfUltralightError error =
+        instance->error =
             mf_ultralight_poller_async_read_signature(instance, &instance->data->signature);
-        if(error != MfUltralightErrorNone) {
+        if(instance->error != MfUltralightErrorNone) {
             FURI_LOG_E(TAG, "Read signature failed");
             next_state = MfUltralightPollerStateReadFailed;
         }
@@ -131,11 +130,11 @@ static MfUltralightPollerCommand
                 instance->state = MfUltralightPollerStateReadTearingFlags;
             } else {
                 FURI_LOG_D(TAG, "Reading counter %d", instance->counters_read);
-                MfUltralightError error = mf_ultralight_poller_async_read_counter(
+                instance->error = mf_ultralight_poller_async_read_counter(
                     instance,
                     instance->counters_read,
                     &instance->data->counter[instance->counters_read]);
-                if(error != MfUltralightErrorNone) {
+                if(instance->error != MfUltralightErrorNone) {
                     FURI_LOG_E(TAG, "Failed to read %d counter", instance->counters_read);
                     instance->state = MfUltralightPollerStateReadFailed;
                 } else {
@@ -160,11 +159,11 @@ static MfUltralightPollerCommand
             instance->state = MfUltralightPollerStateTryDefaultPass;
         } else {
             FURI_LOG_D(TAG, "Reading tearing flag %d", instance->tearing_flag_read);
-            MfUltralightError error = mf_ultralight_poller_async_read_tearing_flag(
+            instance->error = mf_ultralight_poller_async_read_tearing_flag(
                 instance,
                 instance->tearing_flag_read,
                 &instance->data->tearing_flag[instance->tearing_flag_read]);
-            if(error != MfUltralightErrorNone) {
+            if(instance->error != MfUltralightErrorNone) {
                 FURI_LOG_E(TAG, "Reading tearing flag %d failed", instance->tearing_flag_read);
                 instance->state = MfUltralightPollerStateReadFailed;
             } else {
@@ -192,9 +191,8 @@ static MfUltralightPollerCommand mf_ultralight_poller_handler_auth(MfUltralightP
             instance->auth_password = event.data->auth_context.password;
             FURI_LOG_D(
                 TAG, "Trying to authenticate with password %08lX", instance->auth_password.pass);
-            MfUltralightError error =
-                mf_ultralight_poller_async_auth(instance, &instance->auth_password);
-            if(error == MfUltralightErrorNone) {
+            instance->error = mf_ultralight_poller_async_auth(instance, &instance->auth_password);
+            if(instance->error == MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Auth success");
                 // TODO fill PACK in event
                 MfUltralightPollerEventData data = {.pack.pack = 0x8080};
@@ -219,8 +217,8 @@ static MfUltralightPollerCommand
     mf_ultralight_poller_handler_read_pages(MfUltralightPoller* instance) {
     MfUltralightPageReadCommandData data = {};
     uint8_t start_page = instance->pages_read;
-    MfUltralightError error = mf_ultralight_poller_async_read_page(instance, start_page, &data);
-    if(error == MfUltralightErrorNone) {
+    instance->error = mf_ultralight_poller_async_read_page(instance, start_page, &data);
+    if(instance->error == MfUltralightErrorNone) {
         for(size_t i = 0; i < 4; i++) {
             if(start_page + i < instance->pages_total) {
                 FURI_LOG_I(TAG, "Read page %d success", start_page + i);
@@ -253,7 +251,9 @@ static MfUltralightPollerCommand
 static MfUltralightPollerCommand
     mf_ultralight_poller_handler_read_fail(MfUltralightPoller* instance) {
     FURI_LOG_W(TAG, "Read Failed");
-    MfUltralightPollerEvent event = {.type = MfUltralightPollerEventTypeReadFailed};
+    MfUltralightPollerEventData event_data = {.error = instance->error};
+    MfUltralightPollerEvent event = {
+        .type = MfUltralightPollerEventTypeReadFailed, .data = &event_data};
     MfUltralightPollerCommand command = instance->callback(event, instance->context);
     instance->state = MfUltralightPollerStateIdle;
     return command;

@@ -34,6 +34,7 @@ typedef union {
     MfUltralightSignature signature;
     MfUltralightPollerReadCounterCommand counter_cmd;
     MfUltralightPollerReadTearingFlagCommand tearing_flag_cmd;
+    MfUltralightData data;
 } MfUltralightPollerContextData;
 
 typedef enum {
@@ -74,6 +75,7 @@ struct MfUltralightPoller {
     uint8_t counters_total;
     uint8_t tearing_flag_read;
     uint8_t tearing_flag_total;
+    MfUltralightError error;
     void* context;
 };
 

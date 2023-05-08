@@ -195,20 +195,23 @@ MU_TEST(mf_ultralight_reader) {
 
     MfUltralightError error = MfUltralightErrorNone;
     NfcDevData* dev_data = malloc(sizeof(NfcDevData));
-    nfc_data_generator_fill_data(NfcDataGeneratorTypeNTAG216, dev_data);
+    nfc_data_generator_fill_data(NfcDataGeneratorTypeMfUltralight, dev_data);
 
     error = mf_ultralight_listener_start(mfu_listener, &dev_data->mf_ul_data, NULL, NULL);
     mu_assert(error == MfUltralightErrorNone, "mf_ultralight_listener_start() failed");
 
-    MfUltralightPage page = {};
-    for(size_t i = 0; i < dev_data->mf_ul_data.pages_total; i++) {
-        error = mf_ultralight_poller_read_page(mfu_poller, i, &page);
-        mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_page() failed");
-    }
+    MfUltralightData* mfu_data = malloc(sizeof(MfUltralightData));
+    error = mf_ultralight_poller_read_card(mfu_poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
 
     error = mf_ultralight_listener_stop(mfu_listener);
     mu_assert(error == MfUltralightErrorNone, "mf_ultralight_listener_stop() failed");
 
+    mu_assert(
+        memcmp(mfu_data, &dev_data->mf_ul_data, sizeof(MfUltralightData)) == 0,
+        "Data not matches");
+
+    free(mfu_data);
     free(dev_data);
     mf_ultralight_listener_free(mfu_listener);
     mf_ultralight_poller_free(mfu_poller);
