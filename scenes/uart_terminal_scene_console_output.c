@@ -1,4 +1,4 @@
-#include "applications/external/lora_terminal/uart_terminal_app_i.h"
+#include "../uart_terminal_app_i.h"
 #include <string.h>
 #include <furi.h>
 #define appName "lora_terminal"
