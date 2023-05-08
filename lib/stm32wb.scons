@@ -2,8 +2,8 @@ Import("env")
 
 env.Append(
     CPPPATH=[
+        "#/lib/cmsis_core",
         "#/lib/stm32wb_cmsis/Include",
-        "#/lib/stm32wb_copro/cmsis_core",
         "#/lib/stm32wb_hal/Inc",
         "#/lib/stm32wb_copro/wpan",
     ],
