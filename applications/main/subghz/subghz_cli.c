@@ -806,7 +806,7 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
     };
     SwUsart* sw_usart = sw_usart_alloc(&config);
     uint8_t data[] =
-        "Hello world! 123456789abcdef || Hello world! 123456789abcdef || Hello world! 123456789abcdef || \r\n";
+        "Hello world! 123456789abcdef";
     sw_usart_dma_tx(sw_usart, data, sizeof(data));
 
     // Wait for packets to arrive

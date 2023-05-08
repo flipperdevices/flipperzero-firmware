@@ -12,6 +12,8 @@
 /* DMA Channels definition */
 #define SW_DIGITAL_PIN_TIM TIM2
 #define SW_DIGITAL_PIN_TIM_IRQ FuriHalInterruptIdTIM2
+#define SW_DIGITAL_PIN_TIM_CHANNEL_TX LL_TIM_CHANNEL_CH1
+#define SW_DIGITAL_PIN_TIM_CHANNEL_RX LL_TIM_CHANNEL_CH2
 #define SW_DIGITAL_PIN_DMA DMA2
 #define SW_DIGITAL_PIN_DMA_CH1_CHANNEL LL_DMA_CHANNEL_1
 #define SW_DIGITAL_PIN_DMA_CH2_CHANNEL LL_DMA_CHANNEL_2
@@ -105,25 +107,23 @@ static void furi_hal_sw_digital_pin_buff_tx_refill(uint32_t* buffer, size_t samp
 static void furi_hal_sw_digital_pin_tx_timer_isr() {
     if(LL_TIM_IsActiveFlag_UPDATE(SW_DIGITAL_PIN_TIM)) {
         LL_TIM_ClearFlag_UPDATE(SW_DIGITAL_PIN_TIM);
-        if(LL_TIM_GetAutoReload(SW_DIGITAL_PIN_TIM) == 0) {
-            if(furi_hal_sw_digital_pin.state == SwDigitalPinStateTx) {
-                furi_hal_sw_digital_pin.state = SwDigitalPinStateTxLast;
-                LL_DMA_DisableChannel(SW_DIGITAL_PIN_DMA_CH1_DEF);
-            } else if(furi_hal_sw_digital_pin.state == SwDigitalPinStateTxLast) {
-                furi_hal_sw_digital_pin.state = SwDigitalPinStateTxEnd;
-                //forcibly pulls the pin to the ground so that there is no carrier
-                //furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
-                // No need off???
+        if(furi_hal_sw_digital_pin.state == SwDigitalPinStateTx) {
+            furi_hal_sw_digital_pin.state = SwDigitalPinStateTxLast;
+            LL_DMA_DisableChannel(SW_DIGITAL_PIN_DMA_CH1_DEF);
+        } else if(furi_hal_sw_digital_pin.state == SwDigitalPinStateTxLast) {
+            furi_hal_sw_digital_pin.state = SwDigitalPinStateTxEnd;
+            //forcibly pulls the pin to the ground so that there is no carrier
+            //furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullDown, GpioSpeedLow);
+            // No need off???
 
-                // callback end of tx
-                if(furi_hal_sw_digital_pin_buff.tx_callback_end) {
-                    furi_hal_sw_digital_pin_buff.tx_callback_end(
-                        furi_hal_sw_digital_pin_buff.tx_context);
-                }
-                LL_TIM_DisableCounter(SW_DIGITAL_PIN_TIM);
-            } else {
-                furi_crash(NULL);
+            // callback end of tx
+            if(furi_hal_sw_digital_pin_buff.tx_callback_end) {
+                furi_hal_sw_digital_pin_buff.tx_callback_end(
+                    furi_hal_sw_digital_pin_buff.tx_context);
             }
+            LL_TIM_DisableCounter(SW_DIGITAL_PIN_TIM);
+        } else {
+            furi_crash(NULL);
         }
     }
 }
@@ -186,14 +186,35 @@ void furi_hal_sw_digital_pin_tx_start(
     dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
     dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
     dma_config.NbData = furi_hal_sw_digital_pin_buff.buffer_size;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_CH1;
     dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
     LL_DMA_Init(SW_DIGITAL_PIN_DMA_CH1_DEF, &dma_config);
+   
+    // Start DMA irq
     furi_hal_interrupt_set_isr(
         SW_DIGITAL_PIN_DMA_CH1_IRQ, furi_hal_sw_digital_pin_dma_tx_isr, NULL);
     LL_DMA_EnableIT_TC(SW_DIGITAL_PIN_DMA_CH1_DEF);
     LL_DMA_EnableIT_HT(SW_DIGITAL_PIN_DMA_CH1_DEF);
     LL_DMA_EnableChannel(SW_DIGITAL_PIN_DMA_CH1_DEF);
+
+    // Configure TIM channel tx
+    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
+    TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_FROZEN;
+    TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
+    TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
+    TIM_OC_InitStruct.CompareValue = 100;
+    TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
+    LL_TIM_OC_Init(SW_DIGITAL_PIN_TIM, SW_DIGITAL_PIN_TIM_CHANNEL_TX, &TIM_OC_InitStruct);
+    LL_TIM_OC_DisableFast(SW_DIGITAL_PIN_TIM, SW_DIGITAL_PIN_TIM_CHANNEL_TX);
+    LL_TIM_SetTriggerOutput(SW_DIGITAL_PIN_TIM, LL_TIM_TRGO_RESET);
+    LL_TIM_DisableMasterSlaveMode(SW_DIGITAL_PIN_TIM);
+
+    //start timer irq for tx
+    /* Enable the capture/compare interrupt for channel 1 */
+    LL_TIM_EnableIT_CC1(SW_DIGITAL_PIN_TIM);  
+    LL_TIM_CC_EnableChannel(SW_DIGITAL_PIN_TIM, SW_DIGITAL_PIN_TIM_CHANNEL_TX);
+    //LL_TIM_EnableAllOutputs(SW_DIGITAL_PIN_TIM);
+
 
     furi_hal_interrupt_set_isr(SW_DIGITAL_PIN_TIM_IRQ, furi_hal_sw_digital_pin_tx_timer_isr, NULL);
     furi_hal_sw_digital_pin_buff_tx_refill(
@@ -202,7 +223,6 @@ void furi_hal_sw_digital_pin_tx_start(
     //start
     LL_TIM_EnableDMAReq_UPDATE(SW_DIGITAL_PIN_TIM);
     LL_TIM_GenerateEvent_UPDATE(SW_DIGITAL_PIN_TIM);
-    LL_TIM_CC_EnableChannel(SW_DIGITAL_PIN_TIM, LL_TIM_CHANNEL_CH1);
 
     LL_TIM_SetCounter(SW_DIGITAL_PIN_TIM, 0);
     LL_TIM_EnableCounter(SW_DIGITAL_PIN_TIM);
@@ -220,6 +240,9 @@ void furi_hal_sw_digital_pin_tx_stop(void) {
 
     // Deinitialize Timer
     FURI_CRITICAL_ENTER();
+    /* Disable the capture/compare interrupt for channel 1 */
+    LL_TIM_DisableIT_CC1(SW_DIGITAL_PIN_TIM);
+    
     LL_TIM_DeInit(SW_DIGITAL_PIN_TIM);
     furi_hal_interrupt_set_isr(SW_DIGITAL_PIN_TIM_IRQ, NULL, NULL);
 
