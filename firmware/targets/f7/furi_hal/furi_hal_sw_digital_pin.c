@@ -14,7 +14,7 @@
 #define SW_DIGITAL_PIN_TIM_IRQ FuriHalInterruptIdTIM2
 #define SW_DIGITAL_PIN_TIM_CHANNEL_TX LL_TIM_CHANNEL_CH1
 #define SW_DIGITAL_PIN_TIM_CHANNEL_RX LL_TIM_CHANNEL_CH2
-#define SW_DIGITAL_PIN_TIM_CHANNEL_SYNC LL_TIM_CHANNEL_CH2
+#define SW_DIGITAL_PIN_TIM_CHANNEL_SYNC LL_TIM_CHANNEL_CH3
 #define SW_DIGITAL_PIN_DMA DMA2
 #define SW_DIGITAL_PIN_DMA_CH1_CHANNEL LL_DMA_CHANNEL_1
 #define SW_DIGITAL_PIN_DMA_CH2_CHANNEL LL_DMA_CHANNEL_2
@@ -24,11 +24,13 @@
 #define SW_DIGITAL_PIN_DMA_CH3_IRQ FuriHalInterruptIdDma2Ch3
 #define SW_DIGITAL_PIN_DMA_CH1_DEF SW_DIGITAL_PIN_DMA, SW_DIGITAL_PIN_DMA_CH1_CHANNEL
 #define SW_DIGITAL_PIN_DMA_CH2_DEF SW_DIGITAL_PIN_DMA, SW_DIGITAL_PIN_DMA_CH2_CHANNEL
-#define SW_DIGITAL_PIN_DMA_CH3_DEF SW_DIGITAL_PIN_DMA, SW_DIGITAL_PIN_DMA_CH2_CHANNEL
+#define SW_DIGITAL_PIN_DMA_CH3_DEF SW_DIGITAL_PIN_DMA, SW_DIGITAL_PIN_DMA_CH3_CHANNEL
 
 typedef struct {
     uint32_t* buffer_tx_ptr;
     uint32_t* buffer_rx_ptr;
+    uint32_t sync_on;
+    uint32_t sync_off;
     size_t buffer_size;
     size_t buffer_half_size;
     size_t index_write_end;
@@ -197,6 +199,56 @@ void furi_hal_sw_digital_pin_deinit() {
     //furi_hal_sw_digital_pin.state = SwDigitalPinStateInit;
 }
 
+static void furi_hal_sw_digital_pin_sync_start(void) {
+    furi_hal_gpio_init(&gpio_ext_pb2, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+    const GpioPin* gpio = &gpio_ext_pb2;
+
+    furi_hal_sw_digital_pin_buff.sync_on = (uint32_t)gpio->pin << GPIO_NUMBER;
+    furi_hal_sw_digital_pin_buff.sync_off = gpio->pin;
+
+    // Configure DMA
+    LL_DMA_InitTypeDef dma_config = {0};
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)&furi_hal_sw_digital_pin_buff.sync_on;
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio->port->BSRR);
+    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.NbData = 1;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_CH1;
+    dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
+    LL_DMA_Init(SW_DIGITAL_PIN_DMA_CH3_DEF, &dma_config);
+    LL_DMA_EnableChannel(SW_DIGITAL_PIN_DMA_CH3_DEF);
+
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)&furi_hal_sw_digital_pin_buff.sync_off;
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio->port->BSRR);
+    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.NbData = 1;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_CH3;
+    dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
+    LL_DMA_Init(SW_DIGITAL_PIN_DMA_CH2_DEF, &dma_config);
+
+    // // Configure DMA Channel CC3
+    LL_TIM_EnableDMAReq_CC3(SW_DIGITAL_PIN_TIM);
+    LL_TIM_CC_EnableChannel(SW_DIGITAL_PIN_TIM, SW_DIGITAL_PIN_TIM_CHANNEL_SYNC);
+
+    // Sync timer Channel sync
+    uint32_t ccr3 =
+        LL_TIM_GetAutoReload(SW_DIGITAL_PIN_TIM) / 2 + LL_TIM_GetCounter(SW_DIGITAL_PIN_TIM);
+    if(ccr3 > LL_TIM_GetAutoReload(SW_DIGITAL_PIN_TIM)) {
+        ccr3 -= LL_TIM_GetAutoReload(SW_DIGITAL_PIN_TIM);
+    }
+    LL_TIM_OC_SetCompareCH3(SW_DIGITAL_PIN_TIM, ccr3);
+    LL_DMA_EnableChannel(SW_DIGITAL_PIN_DMA_CH2_DEF);
+}
+
 void furi_hal_sw_digital_pin_tx_start(
     FuriHalSwDigitalPinTxCallbackYield tx_callback_yield,
     FuriHalSwDigitalPinTxCallbackEnd tx_callback_end,
@@ -244,6 +296,8 @@ void furi_hal_sw_digital_pin_tx_start(
         SW_DIGITAL_PIN_DMA_CH1_IRQ, furi_hal_sw_digital_pin_dma_tx_isr, NULL);
     LL_DMA_EnableIT_TC(SW_DIGITAL_PIN_DMA_CH1_DEF);
     LL_DMA_EnableIT_HT(SW_DIGITAL_PIN_DMA_CH1_DEF);
+
+    furi_hal_sw_digital_pin_sync_start();
 
     // Sync timer Channel Tx
     LL_TIM_OC_SetCompareCH1(SW_DIGITAL_PIN_TIM, LL_TIM_GetCounter(SW_DIGITAL_PIN_TIM));
