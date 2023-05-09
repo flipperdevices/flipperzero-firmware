@@ -6,6 +6,7 @@ Flipper Zero port of Chrome's running T-rex game
 - Added (boring) cactus spawn
 - Added lose condition and lose screen
 - Added moving backgrounf
+- Added score system
 
 ## TODO
 - Change cactus icon

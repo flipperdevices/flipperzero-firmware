@@ -57,6 +57,8 @@ typedef struct {
     int background_position;
 
     int lost;
+
+    int score;
 } GameState;
 
 static void timer_callback(void *ctx) {
@@ -97,21 +99,20 @@ static void timer_callback(void *ctx) {
 
     // Update Cactus state
     if (game_state->has_cactus){
-        game_state->cactus_position = game_state->cactus_position - game_state->x_speed *  delta_time_ms / 1000;
+        game_state->cactus_position = game_state->cactus_position - game_state->x_speed * delta_time_ms / 1000;
         if (game_state->cactus_position <= CACTUS_W + 1) {
             game_state->has_cactus = 0;
-            game_state->cactus_position = 120;
+            game_state->score = game_state->score + 1;
         }
     } 
     // Create cactus (not random)
     else {
         game_state->has_cactus = 1;
         game_state->cactus_position = 120;
-        game_state->x_speed = START_x_speed;
     }
 
     // Move horizontal line
-    if (game_state->background_position <= - BACKGROUND_W)
+    if (game_state->background_position <= -BACKGROUND_W)
         game_state->background_position += BACKGROUND_W;
     game_state->background_position = game_state->background_position - game_state->x_speed * delta_time_ms / 1000;
 
@@ -137,6 +138,7 @@ static void render_callback(Canvas *const canvas, void *ctx) {
         return;
     }
 
+    char score_string[12];
     if(!game_state->lost){
         // Show Ground
         canvas_draw_icon(canvas, game_state->background_position, 64 - BACKGROUND_H, &I_HorizonLine0);
@@ -148,6 +150,12 @@ static void render_callback(Canvas *const canvas, void *ctx) {
         // Show cactus
         if (game_state->has_cactus)
             canvas_draw_triangle(canvas, game_state->cactus_position, 64 - BACKGROUND_H + CACTUS_W, CACTUS_W, CACTUS_H, CanvasDirectionBottomToTop);
+
+        // Show score
+        if(game_state->score == 0)
+            canvas_set_font(canvas, FontSecondary);
+        snprintf(score_string, 12, "Score: %d", game_state->score);
+        canvas_draw_str_aligned(canvas, 85, 5, AlignLeft, AlignTop, score_string);
 
     } else {
         canvas_set_font(canvas, FontPrimary);
@@ -166,6 +174,8 @@ static void game_state_init(GameState *const game_state) {
     game_state->has_cactus = 0;
     game_state->background_position = 0;
     game_state->lost = 0;
+    game_state->x_speed = START_x_speed;
+    game_state->score = 0;
     game_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 }
 
