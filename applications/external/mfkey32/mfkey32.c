@@ -40,7 +40,8 @@
 #define CONST_M2_2 (LF_POLY_EVEN << 1 | 1)
 #define BIT(x, n) ((x) >> (n)&1)
 #define BEBIT(x, n) BIT(x, (n) ^ 24)
-#define SWAPENDIAN(x) (x = (x >> 8 & 0xff00ff) | (x & 0xff00ff) << 8, x = x >> 16 | x << 16) //-V1003
+#define SWAPENDIAN(x) \
+    (x = (x >> 8 & 0xff00ff) | (x & 0xff00ff) << 8, x = x >> 16 | x << 16) //-V1003
 //#define SIZEOF(arr) sizeof(arr) / sizeof(*arr)
 
 static int eta_round_time = 56;
