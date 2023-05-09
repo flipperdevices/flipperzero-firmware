@@ -60,7 +60,7 @@ void ble_glue_set_key_storage_changed_callback(
 
 int32_t ble_glue_TL_SYS_SendCmd(uint8_t* buffer, uint16_t size) {
     if(furi_hal_bt_get_hardfault_info()) {
-        furi_crash("Core2 went away. XOXO, ST");
+        furi_crash("ST(R) Copro(R) HardFault");
     }
 
     return TL_SYS_SendCmd(buffer, size);
