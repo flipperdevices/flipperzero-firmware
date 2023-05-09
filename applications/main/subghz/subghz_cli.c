@@ -805,8 +805,8 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
         .rx_pin = &gpio_ext_pa4,
     };
     SwUsart* sw_usart = sw_usart_alloc(&config);
-    uint8_t data[] =
-        "Hello world! 123456789abcdef";
+    uint8_t data[] ="Hello World 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ | Hello World 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    //uint8_t data[] ={0x48, 0x65, 0x6c, 0x6c, 0x6f};
     sw_usart_dma_tx(sw_usart, data, sizeof(data));
 
     // Wait for packets to arrive
@@ -818,6 +818,15 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
             // sw_usart_dma_tx(sw_usart, data, sizeof(data));
         }
     }
+    furi_hal_sw_digital_pin_tx_stop();
+    sw_usart_dma_tx(sw_usart, data, sizeof(data));
+    while(!cli_cmd_interrupt_received(cli)) {
+        if(sw_usart_is_end_tx(sw_usart)) {
+            break;
+            // sw_usart_dma_tx(sw_usart, data, sizeof(data));
+        }
+    }
+furi_hal_sw_digital_pin_tx_stop();
     sw_usart_free(sw_usart);
     printf("End Usart\r\n");
 }

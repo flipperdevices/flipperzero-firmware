@@ -58,6 +58,7 @@ void sw_usart_free(SwUsart* sw_usart) {
     furi_assert(sw_usart);
 
     furi_hal_gpio_init(sw_usart->config->rx_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_sw_digital_pin_deinit();
 
     free(sw_usart->tx_upload_char);
     free(sw_usart->config);
@@ -73,7 +74,7 @@ static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
     uint8_t parity = 0;
     uint8_t ind = 0;
 
-    if(sw_usart->tx_buffer_pos_byte > sw_usart->tx_buffer_len) {
+    if(sw_usart->tx_buffer_pos_byte >= sw_usart->tx_buffer_len) {
         memset(sw_usart->tx_upload_char, 0, sizeof(uint32_t) * sw_usart->tx_upload_char_len);
         return;
     }
@@ -133,6 +134,7 @@ static uint32_t sw_usart_tx_encoder_yield(void* context) {
 static void sw_usart_tx_end(void* context) {
     SwUsart* sw_usart = context;
     furi_assert(sw_usart);
+    // furi_hal_sw_digital_pin_tx_stop();
     FURI_LOG_I(TAG, "sw_usart_tx_end");
 }
 
