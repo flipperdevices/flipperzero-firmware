@@ -207,10 +207,14 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                     for(size_t i = 0; (i * 4) < mf_ul_data->data_read; i++) {
                         size_t data_offset = i * 4;
                         FURI_LOG_D(
-                            TAG, "Writing page %d (%d/%d)", i, data_offset, mf_ul_data->data_read);
+                            TAG,
+                            "Writing page %lu (%lu/%u)",
+                            i,
+                            data_offset,
+                            mf_ul_data->data_read);
                         uint8_t* block = mf_ul_data->data + data_offset;
                         if(!magic_gen4_write_blk(password, i, block)) {
-                            FURI_LOG_E(TAG, "Failed to write %d page", i);
+                            FURI_LOG_E(TAG, "Failed to write %lu page", i);
                             nfc_magic_worker->callback(
                                 NfcMagicWorkerEventFail, nfc_magic_worker->context);
                             break;
@@ -220,7 +224,7 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                     uint8_t buffer[16] = {0};
 
                     for(size_t i = 0; i < 8; i++) {
-                        memcpy(buffer, &mf_ul_data->signature[i * 4], 4);
+                        memcpy(buffer, &mf_ul_data->signature[i * 4], 4); //-V1086
                         if(!magic_gen4_write_blk(password, 0xF2 + i, buffer)) {
                             FURI_LOG_E(TAG, "Failed to write signature block %d", i);
                             nfc_magic_worker->callback(
