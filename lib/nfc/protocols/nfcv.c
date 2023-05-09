@@ -461,10 +461,9 @@ void nfcv_emu_send(
         digital_sequence_add(nfcv->emu_air.nfcv_signal, eof);
     }
 
-    FURI_CRITICAL_ENTER();
     digital_sequence_set_sendtime(nfcv->emu_air.nfcv_signal, send_time);
+    // FURI_CRITICAL_ENTER/EXIT is already run in digital_sequnece_send
     digital_sequence_send(nfcv->emu_air.nfcv_signal);
-    FURI_CRITICAL_EXIT();
     furi_hal_gpio_write(&gpio_spi_r_mosi, false);
 
     if(tx_rx->sniff_tx) {
@@ -1128,7 +1127,6 @@ void nfcv_emu_deinit(NfcVData* nfcv_data) {
     furi_assert(nfcv_data);
 
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
-    rfal_platform_spi_release();
     nfcv_emu_free(nfcv_data);
 
     if(nfcv_data->emu_protocol_ctx) {
@@ -1139,6 +1137,7 @@ void nfcv_emu_deinit(NfcVData* nfcv_data) {
     /* set registers back to how we found them */
     st25r3916WriteRegister(ST25R3916_REG_OP_CONTROL, 0x00);
     st25r3916WriteRegister(ST25R3916_REG_MODE, 0x08);
+    rfal_platform_spi_release();
 }
 
 bool nfcv_emu_loop(
@@ -1309,7 +1308,6 @@ bool nfcv_emu_loop(
             tx_rx->sniff_rx(nfcv_data->frame, frame_pos * 8, false, tx_rx->sniff_context);
         }
         nfcv_data->emu_protocol_handler(tx_rx, nfc_data, nfcv_data);
-
 
         /* determine readers fc by analyzing transmission duration */
         uint32_t duration = eof_timestamp - sof_timestamp;
