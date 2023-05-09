@@ -3,9 +3,10 @@ Flipper Zero port of Chrome's running T-rex game
 
 ## Improvements
 - Added command to move DINO
+- Added gravity
 - Added (boring) cactus spawn
 - Added lose condition and lose screen
-- Added moving backgrounf
+- Added moving background
 - Added score system
 
 ## TODO
