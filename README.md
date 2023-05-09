@@ -10,11 +10,9 @@ Flipper Zero port of Chrome's running T-rex game
 - Added score system
 
 ## TODO
-- Change cactus icon
 - More random cactus spawn
 - Increase cactus speed with time
 - Fix background speed with cactus
-- Fix Dino transparency
 - Allow to play again without the need to close the game in the lose screen
 
 ## Gameplay

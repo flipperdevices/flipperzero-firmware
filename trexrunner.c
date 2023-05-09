@@ -10,7 +10,7 @@
 #include "t-rex-runner_icons.h"
 
 #define DINO_START_X 10
-#define DINO_START_Y 35 // 64 - 22 - BACKGROUND_H / 2 - 1
+#define DINO_START_Y 34 // 64 - 22 - BACKGROUND_H / 2 - 2
 
 #define FPS 20
 
@@ -19,7 +19,7 @@
 #define GRAVITY 60
 #define JUMP_SPEED 30
 
-#define CACTUS_W 8
+#define CACTUS_W 10
 #define CACTUS_H 10
 #define START_x_speed 25
 
@@ -100,7 +100,7 @@ static void timer_callback(void *ctx) {
     // Update Cactus state
     if (game_state->has_cactus){
         game_state->cactus_position = game_state->cactus_position - game_state->x_speed * delta_time_ms / 1000;
-        if (game_state->cactus_position <= CACTUS_W + 1) {
+        if (game_state->cactus_position <= 0 ) {
             game_state->has_cactus = 0;
             game_state->score = game_state->score + 1;
         }
@@ -149,7 +149,8 @@ static void render_callback(Canvas *const canvas, void *ctx) {
 
         // Show cactus
         if (game_state->has_cactus)
-            canvas_draw_triangle(canvas, game_state->cactus_position, 64 - BACKGROUND_H + CACTUS_W, CACTUS_W, CACTUS_H, CanvasDirectionBottomToTop);
+            //canvas_draw_triangle(canvas, game_state->cactus_position, 64 - BACKGROUND_H + CACTUS_W, CACTUS_W, CACTUS_H, CanvasDirectionBottomToTop);
+            canvas_draw_icon(canvas, game_state->cactus_position, 64 - BACKGROUND_H/2 - CACTUS_H - 2, &I_Cactus);
 
         // Show score
         if(game_state->score == 0)
