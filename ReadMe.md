@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `7 May 20:36 GMT +3`
+### Apps checked & updated at `9 May 20:04 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -97,6 +97,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Control 7-segment display with Flipper Zero (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
+- [MH-Z19 - CO2 sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -126,7 +127,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - [EM4100 universal keys generator (for RFID Fuzzer) (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - [FlipBIP Crypto Tool (By xtruan)](https://github.com/xtruan/FlipBIP)
-- [Mfkey32 (WIP) (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [NFC Magic (Gen4) (By nullableVoidPtr)](https://github.com/nullableVoidPtr/flipperzero-firmware/tree/gtu-magic)
 - [Mifare Fuzzer (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
 - [HEX Editor (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
