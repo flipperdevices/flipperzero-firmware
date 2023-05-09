@@ -215,12 +215,8 @@ int32_t trexrunner_app() {
                 if (event.input.type == InputTypeShort) {
                     switch (event.input.key) {
                         case InputKeyUp:
-                            // Test command
-                                game_state->y_position -= 10;
                             break;
                         case InputKeyDown:
-                            // Test command
-                                game_state->y_position += 10;
                             break;
                         case InputKeyLeft:
                             break;
