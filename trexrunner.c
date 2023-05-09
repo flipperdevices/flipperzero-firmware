@@ -23,7 +23,7 @@
 #define CACTUS_H 10
 #define START_x_speed 25
 
-#define BACKGROUND_W 176
+#define BACKGROUND_W 128
 #define BACKGROUND_H 12
 
 typedef enum {
