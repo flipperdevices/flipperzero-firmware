@@ -117,7 +117,7 @@ NfcApp* nfc_app_alloc() {
     instance->widget = widget_alloc();
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
-    
+
     instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
     instance->file_name = furi_string_alloc();
 
@@ -262,8 +262,48 @@ bool nfc_save_file(NfcApp* instance, FuriString* path) {
     return result;
 }
 
-bool nfc_save(NfcApp* instance) {
+static bool nfc_set_shadow_file_path(FuriString* file_path, FuriString* shadow_file_path) {
+    furi_assert(file_path);
+    furi_assert(shadow_file_path);
+
+    bool shadow_file_path_set = false;
+    if(furi_string_end_with(file_path, NFC_APP_EXTENSION)) {
+        size_t path_len = furi_string_size(file_path);
+        // Cut .nfc
+        furi_string_set_n(shadow_file_path, file_path, 0, path_len - 4);
+        furi_string_cat_printf(shadow_file_path, "%s", NFC_APP_SHADOW_EXTENSION);
+        shadow_file_path_set = true;
+    }
+
+    return shadow_file_path_set;
+}
+
+static bool nfc_has_shadow_file_internal(NfcApp* instance, FuriString* path) {
+    furi_assert(path);
+
+    bool has_shadow_file = false;
+    FuriString* shadow_file_path = furi_string_alloc();
+    do {
+        if(furi_string_empty(path)) break;
+        if(!nfc_set_shadow_file_path(path, shadow_file_path)) break;
+        has_shadow_file =
+            storage_common_exists(instance->storage, furi_string_get_cstr(shadow_file_path));
+    } while(false);
+
+    furi_string_free(shadow_file_path);
+
+    return has_shadow_file;
+}
+
+bool nfc_has_shadow_file(NfcApp* instance) {
     furi_assert(instance);
+
+    return nfc_has_shadow_file_internal(instance, instance->file_path);
+}
+
+static bool nfc_save_internal(NfcApp* instance, const char* extension) {
+    furi_assert(instance);
+    furi_assert(extension);
 
     bool result = false;
 
@@ -275,10 +315,23 @@ bool nfc_save(NfcApp* instance) {
     }
 
     furi_string_cat_printf(
-        instance->file_path, "/%s%s", furi_string_get_cstr(instance->file_name), NFC_APP_EXTENSION);
+        instance->file_path, "/%s%s", furi_string_get_cstr(instance->file_name), extension);
 
     result = nfc_save_file(instance, instance->file_path);
+
     return result;
+}
+
+bool nfc_save_shadow_file(NfcApp* instance) {
+    furi_assert(instance);
+
+    return nfc_save_internal(instance, NFC_APP_EXTENSION);
+}
+
+bool nfc_save(NfcApp* instance) {
+    furi_assert(instance);
+
+    return nfc_save_internal(instance, NFC_APP_SHADOW_EXTENSION);
 }
 
 bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
@@ -286,14 +339,24 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
     furi_assert(path);
     bool result = false;
 
-    result = nfc_dev_load(instance->nfc_dev, &instance->nfc_dev_data, furi_string_get_cstr(path));
+    FuriString* load_path = furi_string_alloc();
+    if(nfc_has_shadow_file_internal(instance, path)) {
+        nfc_set_shadow_file_path(path, load_path);
+    } else {
+        furi_string_set(load_path, path);
+    }
+
+    result =
+        nfc_dev_load(instance->nfc_dev, &instance->nfc_dev_data, furi_string_get_cstr(load_path));
     if(result) {
-        path_extract_filename(path, instance->file_name, true);
+        path_extract_filename(load_path, instance->file_name, true);
     }
 
     if((!result) && (show_dialog)) {
         dialog_message_show_storage_error(instance->dialogs, "Cannot load\nkey file");
     }
+
+    furi_string_free(load_path);
 
     return result;
 }
@@ -301,7 +364,19 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
 bool nfc_delete(NfcApp* instance) {
     furi_assert(instance);
 
-    return storage_simply_remove(instance->storage, furi_string_get_cstr(instance->file_path));
+    bool result = false;
+    FuriString* shadow_file_path = furi_string_alloc();
+
+    if(nfc_has_shadow_file(instance)) {
+        nfc_set_shadow_file_path(instance->file_path, shadow_file_path);
+        storage_simply_remove(instance->storage, furi_string_get_cstr(shadow_file_path));
+    }
+
+    result = storage_simply_remove(instance->storage, furi_string_get_cstr(instance->file_path));
+
+    furi_string_free(shadow_file_path);
+
+    return result;
 }
 
 bool nfc_load_from_file_select(NfcApp* instance) {
@@ -311,7 +386,6 @@ bool nfc_load_from_file_select(NfcApp* instance) {
     dialog_file_browser_set_basic_options(&browser_options, NFC_APP_EXTENSION, &I_Nfc_10px);
     browser_options.base_path = NFC_APP_FOLDER;
     browser_options.hide_dot_files = true;
-
 
     // Input events and views are managed by file_browser
     bool result = dialog_file_browser_show(

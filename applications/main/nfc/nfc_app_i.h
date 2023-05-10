@@ -53,6 +53,8 @@
 #define NFC_TEXT_STORE_SIZE 128
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"
+#define NFC_APP_SHADOW_EXTENSION ".shd"
+
 
 typedef enum {
     NfcRpcStateIdle,
@@ -130,6 +132,10 @@ void nfc_blink_detect_start(NfcApp* nfc);
 void nfc_blink_stop(NfcApp* nfc);
 
 void nfc_show_loading_popup(void* context, bool show);
+
+bool nfc_has_shadow_file(NfcApp* instance);
+
+bool nfc_save_shadow_file(NfcApp* instance);
 
 bool nfc_save(NfcApp* instance);
 
