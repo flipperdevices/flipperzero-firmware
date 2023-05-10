@@ -13,7 +13,7 @@ This Flipper application ("FAP") cracks Mifare Classic 1K/4K keys on your Flippe
 All cracked nonces are automatically added to your user dictionary, allowing you to clone Mifare Classic 1K/4K cards upon re-scanning them.
 
 ## Builds
-OFW pull request (will be soon provided by official channels): https://github.com/flipperdevices/flipperzero-firmware/pull/2517
+OFW pull request (Merged! Coming in the next release): https://github.com/flipperdevices/flipperzero-firmware/pull/2517
 
 Published (options):
 * [Unleashed repository](https://github.com/xMasterX/all-the-plugins/tree/main/apps/Tools_Extra)
