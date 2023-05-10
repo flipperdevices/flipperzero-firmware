@@ -295,6 +295,7 @@ static MfUltralightPollerCommand
 static MfUltralightPollerCommand
     mf_ultralight_poller_handler_read_fail(MfUltralightPoller* instance) {
     FURI_LOG_D(TAG, "Read Failed");
+    nfca_poller_halt(instance->nfca_poller);
     MfUltralightPollerEventData event_data = {.error = instance->error};
     MfUltralightPollerEvent event = {
         .type = MfUltralightPollerEventTypeReadFailed, .data = &event_data};
@@ -306,6 +307,7 @@ static MfUltralightPollerCommand
 static MfUltralightPollerCommand
     mf_ultralight_poller_handler_read_success(MfUltralightPoller* instance) {
     FURI_LOG_D(TAG, "Read success.");
+    nfca_poller_halt(instance->nfca_poller);
     MfUltralightPollerEvent event = {.type = MfUltralightPollerEventTypeReadSuccess};
     MfUltralightPollerCommand command = instance->callback(event, instance->context);
     return command;

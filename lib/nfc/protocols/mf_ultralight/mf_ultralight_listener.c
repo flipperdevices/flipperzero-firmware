@@ -145,6 +145,33 @@ static bool mf_ultralight_listener_read_page_handler(
     return command_processed;
 }
 
+static bool mf_ultralight_listener_write_page_handler(
+    MfUltralightListener* instance,
+    uint8_t* rx_data,
+    uint16_t rx_bits) {
+    UNUSED(rx_bits);
+    bool command_processed = false;
+    uint8_t start_page = rx_data[1];
+    uint16_t pages_total = instance->data->pages_total;
+
+    if(pages_total < start_page) {
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+        instance->state = MfUltraligthListenerStateIdle;
+        instance->auth_state = MfUltralightListenerAuthStateIdle;
+    } else if(!mf_ultralight_listener_check_access(
+                  instance, start_page, MfUltralightListenerAccessTypeWrite)) {
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+        instance->state = MfUltraligthListenerStateIdle;
+        instance->auth_state = MfUltralightListenerAuthStateIdle;
+    } else {
+        memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
+    }
+    command_processed = true;
+
+    return command_processed;
+}
+
 static bool mf_ultralight_listener_read_version_handler(
     MfUltralightListener* instance,
     uint8_t* rx_data,
@@ -289,6 +316,11 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .callback = mf_ultralight_listener_read_page_handler,
     },
     {
+        .cmd = MF_ULTRALIGHT_CMD_WRITE_PAGE,
+        .cmd_len_bits = 6 * 8,
+        .callback = mf_ultralight_listener_write_page_handler,
+    },
+    {
         .cmd = MF_ULTRALIGHT_CMD_GET_VERSION,
         .cmd_len_bits = 8,
         .callback = mf_ultralight_listener_read_version_handler,
@@ -384,6 +416,17 @@ void mf_ultralight_listener_free(MfUltralightListener* instance) {
     furi_assert(instance);
 
     free(instance);
+}
+
+MfUltralightError
+    mf_ultralight_listener_get_data(MfUltralightListener* instance, MfUltralightData* data) {
+    furi_assert(instance);
+    furi_assert(instance->data);
+    furi_assert(data);
+
+    *data = *instance->data;
+
+    return MfUltralightErrorNone;
 }
 
 MfUltralightError mf_ultralight_listener_stop(MfUltralightListener* instance) {

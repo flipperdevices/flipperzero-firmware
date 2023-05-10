@@ -42,6 +42,9 @@ MfUltralightError mf_ultralight_listener_start(
     MfUltralightListenerEventCallback callback,
     void* context);
 
+MfUltralightError
+    mf_ultralight_listener_get_data(MfUltralightListener* instance, MfUltralightData* data);
+
 MfUltralightError mf_ultralight_listener_stop(MfUltralightListener* instance);
 
 #ifdef __cplusplus

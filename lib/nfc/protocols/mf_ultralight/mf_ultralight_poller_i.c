@@ -331,12 +331,15 @@ MfUltralightError mf_ultralight_poller_async_write_page(
             buff->rx_data_size,
             &buff->rx_bits,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        FURI_LOG_D(TAG, "Rx bits: %d", buff->rx_bits);
-        if(error != NfcaErrorNone) {
+        if(error != NfcaErrorWrongCrc) {
             ret = mf_ultralight_process_error(error);
             break;
         }
         if(buff->rx_bits != 4) {
+            ret = MfUltralightErrorProtocol;
+            break;
+        }
+        if(buff->rx_data[0] != MF_ULTRALIGHT_CMD_ACK) {
             ret = MfUltralightErrorProtocol;
             break;
         }
