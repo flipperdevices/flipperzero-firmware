@@ -39,6 +39,10 @@ const GpioPin gpio_infrared_tx_debug = {.port = GPIOA, .pin = GpioModeAnalog};
 #define INFRARED_RX_TIMER_BUS FuriHalBusTIM2
 #define INFRARED_DMA_TIMER_BUS FuriHalBusTIM1
 
+/* Misc */
+#define INFRARED_RX_GPIO_ALT GpioAltFn1TIM2
+#define INFRARED_RX_IRQ FuriHalInterruptIdTIM2
+
 typedef struct {
     FuriHalInfraredRxCaptureCallback capture_callback;
     void* capture_context;
@@ -147,7 +151,7 @@ void furi_hal_infrared_async_rx_start(void) {
     furi_assert(furi_hal_infrared_state == InfraredStateIdle);
 
     furi_hal_gpio_init_ex(
-        &gpio_infrared_rx, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
+        &gpio_infrared_rx, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, INFRARED_RX_GPIO_ALT);
 
     furi_hal_bus_enable(INFRARED_RX_TIMER_BUS);
 
@@ -176,7 +180,7 @@ void furi_hal_infrared_async_rx_start(void) {
     LL_TIM_IC_SetActiveInput(INFRARED_RX_TIMER, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_INDIRECTTI);
     LL_TIM_IC_SetPrescaler(INFRARED_RX_TIMER, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
 
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, furi_hal_infrared_tim_rx_isr, NULL);
+    furi_hal_interrupt_set_isr(INFRARED_RX_IRQ, furi_hal_infrared_tim_rx_isr, NULL);
     furi_hal_infrared_state = InfraredStateAsyncRx;
 
     LL_TIM_EnableIT_CC1(INFRARED_RX_TIMER);
@@ -193,7 +197,7 @@ void furi_hal_infrared_async_rx_stop(void) {
 
     FURI_CRITICAL_ENTER();
     furi_hal_bus_disable(INFRARED_RX_TIMER_BUS);
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
+    furi_hal_interrupt_set_isr(INFRARED_RX_IRQ, NULL, NULL);
     furi_hal_infrared_state = InfraredStateIdle;
     FURI_CRITICAL_EXIT();
 }
@@ -332,8 +336,6 @@ static void furi_hal_infrared_tx_dma_isr() {
 }
 
 static void furi_hal_infrared_configure_tim_pwm_tx(uint32_t freq, float duty_cycle) {
-    /*    LL_DBGMCU_APB2_GRP1_FreezePeriph(LL_DBGMCU_APB2_GRP1_TIM1_STOP); */
-
     LL_TIM_DisableCounter(INFRARED_DMA_TIMER);
     LL_TIM_SetRepetitionCounter(INFRARED_DMA_TIMER, 0);
     LL_TIM_SetCounter(INFRARED_DMA_TIMER, 0);
