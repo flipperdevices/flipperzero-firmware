@@ -707,18 +707,8 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
     storage_common_mkdir(storage, furi_string_get_cstr(folder_path));
     furi_string_free(folder_path);
 
-    if(!mifare_nested_worker_read_key_cache(&data, mf_data)) {
-        mifare_nested_worker->callback(
-            MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
-        nfc_deactivate();
-
-        free(mf_data);
-        free_nonces(&nonces, sector_count, 1);
-
-        return;
-    }
-
-    if(!mifare_nested_worker_check_initial_keys(
+    if(!mifare_nested_worker_read_key_cache(&data, mf_data) ||
+       !mifare_nested_worker_check_initial_keys(
            &nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type)) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
@@ -873,18 +863,8 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
     storage_common_mkdir(storage, furi_string_get_cstr(folder_path));
     furi_string_free(folder_path);
 
-    if(!mifare_nested_worker_read_key_cache(&data, mf_data)) {
-        mifare_nested_worker->callback(
-            MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
-        nfc_deactivate();
-
-        free(mf_data);
-        free_nonces(&nonces, sector_count, 1);
-
-        return;
-    }
-
-    if(!mifare_nested_worker_check_initial_keys(
+    if(!mifare_nested_worker_read_key_cache(&data, mf_data) ||
+       !mifare_nested_worker_check_initial_keys(
            &nonces, mf_data, 1, sector_count, &key, &key_block, &found_key_type)) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
@@ -1121,19 +1101,9 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
     storage_common_mkdir(storage, furi_string_get_cstr(folder_path));
     furi_string_free(folder_path);
 
-    if(!mifare_nested_worker_read_key_cache(&data, mf_data)) {
-        mifare_nested_worker->callback(
-            MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
-        nfc_deactivate();
-
-        free(mf_data);
-        free_nonces(&nonces, sector_count, tries_count);
-
-        return;
-    }
-
-    if(!mifare_nested_worker_check_initial_keys(
-           &nonces, mf_data, 3, sector_count, &key, &key_block, &found_key_type)) {
+    if(!mifare_nested_worker_read_key_cache(&data, mf_data) ||
+       !mifare_nested_worker_check_initial_keys(
+           &nonces, mf_data, tries_count, sector_count, &key, &key_block, &found_key_type)) {
         mifare_nested_worker->callback(
             MifareNestedWorkerEventNeedKey, mifare_nested_worker->context);
         nfc_deactivate();

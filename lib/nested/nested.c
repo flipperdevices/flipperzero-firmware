@@ -169,7 +169,7 @@ static int valid_nonce(uint32_t Nt, uint32_t NtEnc, uint32_t Ks1, const uint8_t*
                0;
 }
 
-void nonce_distance_notable(uint32_t* msb, uint32_t* lsb) {
+void nonce_distance(uint32_t* msb, uint32_t* lsb) {
     uint16_t x = 1, pos;
     uint8_t calc_ok = 0;
 
@@ -194,10 +194,10 @@ void nonce_distance_notable(uint32_t* msb, uint32_t* lsb) {
     }
 }
 
-bool validate_prng_nonce_notable(uint32_t nonce) {
+bool validate_prng_nonce(uint32_t nonce) {
     uint32_t msb = nonce >> 16;
     uint32_t lsb = nonce & 0xffff;
-    nonce_distance_notable(&msb, &lsb);
+    nonce_distance(&msb, &lsb);
     return ((65535 - msb + lsb) % 65535) == 16;
 }
 
@@ -221,7 +221,7 @@ MifareNestedNonceType nested_check_nonce_type(FuriHalNfcTxRxContext* tx_rx, uint
 
         uint32_t nt = (uint32_t)nfc_util_bytes2num(tx_rx->rx_data, 4);
         if(nt == 0) continue;
-        if(!validate_prng_nonce_notable(nt)) hardNonces++;
+        if(!validate_prng_nonce(nt)) hardNonces++;
         nonces[i] = nt;
 
         nfc_deactivate();

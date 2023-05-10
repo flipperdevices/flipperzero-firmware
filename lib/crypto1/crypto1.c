@@ -53,7 +53,7 @@ uint32_t crypto1_word(Crypto1* crypto1, uint32_t in, int is_encrypted) {
     furi_assert(crypto1);
     uint32_t out = 0;
     for(uint8_t i = 0; i < 32; i++) {
-        out |= crypto1_bit(crypto1, BEBIT(in, i), is_encrypted) << (24 ^ i);
+        out |= (uint32_t)crypto1_bit(crypto1, BEBIT(in, i), is_encrypted) << (24 ^ i);
     }
     return out;
 }

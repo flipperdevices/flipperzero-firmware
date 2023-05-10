@@ -21,7 +21,7 @@ void mifare_nested_scene_about_on_enter(void* context) {
     furi_string_cat_printf(temp_str, "\e#%s\n", "Description");
     furi_string_cat_printf(
         temp_str,
-        "Ported nested attacks\nfrom proxmark (Iceman fork)\nCurrently supported attacks:\n - nested attack\n - static nested attack\n - hard nested attack\n\n");
+        "Ported Nested attacks\nfrom Proxmark3 (Iceman fork)\nCurrently supported attacks:\n - nested attack\n - static nested attack\n - hard nested attack\n\n");
     furi_string_cat_printf(
         temp_str,
         "You will need desktop app to recover keys from collected nonces: %s\n\n",
