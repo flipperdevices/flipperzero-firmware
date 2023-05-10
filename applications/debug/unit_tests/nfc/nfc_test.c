@@ -237,6 +237,10 @@ MU_TEST(ntag_215_reader) {
     mf_ultralight_reader_test(EXT_PATH("unit_tests/nfc/Ntag215.nfc"));
 }
 
+MU_TEST(ntag_216_reader) {
+    mf_ultralight_reader_test(EXT_PATH("unit_tests/nfc/Ntag216.nfc"));
+}
+
 MU_TEST(ntag_213_locked_reader) {
     FURI_LOG_I(TAG, "Testing Ntag215 locked file");
     NfcDev* nfc_dev = nfc_dev_alloc();
@@ -289,9 +293,10 @@ MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
     // MU_RUN_TEST(nfca_reader);
-    UNUSED(mf_ultralight_11_reader);
-    UNUSED(mf_ultralight_21_reader);
-    UNUSED(ntag_215_reader);
+    MU_RUN_TEST(mf_ultralight_11_reader);
+    MU_RUN_TEST(mf_ultralight_21_reader);
+    MU_RUN_TEST(ntag_215_reader);
+    MU_RUN_TEST(ntag_216_reader);
     MU_RUN_TEST(ntag_213_locked_reader);
 
     // MU_RUN_TEST(nfca_4b_file_test);
