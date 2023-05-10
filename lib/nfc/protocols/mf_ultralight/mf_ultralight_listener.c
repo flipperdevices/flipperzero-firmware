@@ -7,12 +7,22 @@
 #define MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE (32)
 
 typedef enum {
+    MfUltralightListenerAccessTypeRead,
+    MfUltralightListenerAccessTypeWrite,
+} MfUltralightListenerAccessType;
+
+typedef enum {
+    MfUltralightListenerAuthStateIdle,
+    MfUltralightListenerAuthStateSuccess,
+} MfUltralightListenerAuthState;
+
+typedef enum {
     MfUltraligthListenerStateIdle,
-    MfUltraligthListenerStateAuthSuccess,
 } MfUltraligthListenerState;
 
 struct MfUltralightListener {
     NfcaListener* nfca_listener;
+    MfUltralightListenerAuthState auth_state;
     MfUltraligthListenerState state;
     MfUltralightData* data;
     uint8_t tx_data[MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE];
@@ -61,6 +71,37 @@ static MfUltralightError mf_ultralight_process_error(NfcaError error) {
     return ret;
 }
 
+static bool mf_ultralight_listener_check_access(
+    MfUltralightListener* instance,
+    uint8_t start_page,
+    MfUltralightListenerAccessType access_type) {
+    bool access_success = false;
+    bool is_write_op = (access_type == MfUltralightListenerAccessTypeWrite);
+
+    do {
+        if((instance->features & MfUltralightFeatureSupportAuthentication) == 0) {
+            access_success = true;
+            break;
+        }
+        if(instance->auth_state != MfUltralightListenerAuthStateSuccess) {
+            if((instance->config->auth0 <= start_page) &&
+               (instance->config->access.prot || is_write_op)) {
+                break;
+            }
+        }
+        if(instance->config->access.cfglck && is_write_op) {
+            uint16_t config_page_start = instance->data->pages_total - 4;
+            if((start_page == config_page_start) || (start_page == config_page_start + 1)) {
+                break;
+            }
+        }
+
+        access_success = true;
+    } while(false);
+
+    return access_success;
+}
+
 static void mf_ultralight_listener_send_short_resp(MfUltralightListener* instance, uint8_t data) {
     nfca_listener_tx(instance->nfca_listener, &data, 4);
 };
@@ -78,9 +119,22 @@ static bool mf_ultralight_listener_read_page_handler(
     if(pages_total < start_page) {
         mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
         instance->state = MfUltraligthListenerStateIdle;
+        instance->auth_state = MfUltralightListenerAuthStateIdle;
+    } else if(!mf_ultralight_listener_check_access(
+                  instance, start_page, MfUltralightListenerAccessTypeRead)) {
+        mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+        instance->state = MfUltraligthListenerStateIdle;
+        instance->auth_state = MfUltralightListenerAuthStateIdle;
     } else {
+        uint16_t config_page = mf_ultralight_get_config_page_num(instance->data->type);
         for(size_t i = 0; i < 4; i++) {
-            read_cmd_data.page[i] = instance->data->page[(start_page + i) % pages_total];
+            bool hide_data =
+                ((config_page != 0) && ((i == config_page + 1U) || (i == config_page + 2U)));
+            if(hide_data) {
+                memset(read_cmd_data.page[i].data, 0, sizeof(MfUltralightPage));
+            } else {
+                read_cmd_data.page[i] = instance->data->page[(start_page + i) % pages_total];
+            }
         }
         instance->tx_bits = sizeof(MfUltralightPageReadCommandData) * 8;
         nfca_listener_send_standart_frame(
@@ -155,7 +209,7 @@ static bool mf_ultralight_listener_read_counter_handler(
                 break;
             }
             if(instance->config->access.nfc_cnt_pwd_prot) {
-                if(instance->state != MfUltraligthListenerStateAuthSuccess) {
+                if(instance->auth_state != MfUltralightListenerAuthStateSuccess) {
                     break;
                 }
             }
@@ -218,10 +272,10 @@ static bool mf_ultralight_listener_auth_handler(
         if(password.pass != instance->config->password.pass) break;
         memcpy(instance->tx_data, instance->config->pack.data, sizeof(MfUltralightAuthPack));
         instance->tx_bits = sizeof(MfUltralightAuthPack) * 8;
-        instance->state = MfUltraligthListenerStateAuthSuccess;
+        instance->auth_state = MfUltralightListenerAuthStateSuccess;
         nfca_listener_send_standart_frame(
             instance->nfca_listener, instance->tx_data, instance->tx_bits);
-        
+
         command_processed = true;
     } while(false);
 
@@ -280,6 +334,7 @@ static NfcaListenerCommand
         if(!cmd_processed) {
             mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
             instance->state = MfUltraligthListenerStateIdle;
+            instance->auth_state = MfUltralightListenerAuthStateIdle;
         }
     }
 

@@ -2,65 +2,115 @@
 
 #include <furi.h>
 
-static const uint16_t mf_ultralight_total_pages[MfUltralightTypeNum] = {
-    [MfUltralightTypeUnknown] = 16,
-    [MfUltralightTypeNTAG203] = 42,
-    [MfUltralightTypeUL11] = 20,
-    [MfUltralightTypeUL21] = 41,
-    [MfUltralightTypeNTAG213] = 45,
-    [MfUltralightTypeNTAG215] = 135,
-    [MfUltralightTypeNTAG216] = 231,
-    [MfUltralightTypeNTAGI2C1K] = 231,
-    [MfUltralightTypeNTAGI2C2K] = 485,
-    [MfUltralightTypeNTAGI2CPlus1K] = 236,
-    [MfUltralightTypeNTAGI2CPlus2K] = 492,
-};
+typedef struct {
+    uint16_t total_pages;
+    uint16_t config_page;
+    uint32_t feature_set;
+} MfUltralightFeatures;
 
-static const uint32_t mf_ultarlight_feature_sets[MfUltralightTypeNum] = {
-    [MfUltralightTypeUnknown] = MfUltralightFeatureSupportCompatibleWrite,
-    [MfUltralightTypeNTAG203] = MfUltralightFeatureSupportCompatibleWrite |
-                                MfUltralightFeatureSupportCounterInMemory,
+static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = {
+    [MfUltralightTypeUnknown] =
+        {
+            .total_pages = 16,
+            .config_page = 0,
+            .feature_set = MfUltralightFeatureSupportCompatibleWrite,
+        },
+    [MfUltralightTypeNTAG203] =
+        {
+            .total_pages = 42,
+            .config_page = 0,
+            .feature_set = MfUltralightFeatureSupportCompatibleWrite |
+                           MfUltralightFeatureSupportCounterInMemory,
+        },
     [MfUltralightTypeUL11] =
-        MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
-        MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportCheckTearingFlag |
-        MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportIncCounter |
-        MfUltralightFeatureSupportCompatibleWrite | MfUltralightFeatureSupportAuthentication |
-        MfUltralightFeatureSupportVcsl,
+        {
+            .total_pages = 20,
+            .config_page = 16,
+            .feature_set =
+                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
+                MfUltralightFeatureSupportReadCounter |
+                MfUltralightFeatureSupportCheckTearingFlag | MfUltralightFeatureSupportFastRead |
+                MfUltralightFeatureSupportIncCounter | MfUltralightFeatureSupportCompatibleWrite |
+                MfUltralightFeatureSupportAuthentication | MfUltralightFeatureSupportVcsl,
+        },
     [MfUltralightTypeUL21] =
-        MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
-        MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportCheckTearingFlag |
-        MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportIncCounter |
-        MfUltralightFeatureSupportCompatibleWrite | MfUltralightFeatureSupportAuthentication |
-        MfUltralightFeatureSupportVcsl,
+        {
+            .total_pages = 41,
+            .config_page = 37,
+            .feature_set =
+                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
+                MfUltralightFeatureSupportReadCounter |
+                MfUltralightFeatureSupportCheckTearingFlag | MfUltralightFeatureSupportFastRead |
+                MfUltralightFeatureSupportIncCounter | MfUltralightFeatureSupportCompatibleWrite |
+                MfUltralightFeatureSupportAuthentication | MfUltralightFeatureSupportVcsl,
+        },
     [MfUltralightTypeNTAG213] =
-        MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
-        MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportFastRead |
-        MfUltralightFeatureSupportCompatibleWrite | MfUltralightFeatureSupportAuthentication |
-        MfUltralightFeatureSupportSingleCounter | MfUltralightFeatureSupportAsciiMirror,
+        {
+            .total_pages = 45,
+            .config_page = 41,
+            .feature_set =
+                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
+                MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportFastRead |
+                MfUltralightFeatureSupportCompatibleWrite |
+                MfUltralightFeatureSupportAuthentication |
+                MfUltralightFeatureSupportSingleCounter | MfUltralightFeatureSupportAsciiMirror,
+        },
     [MfUltralightTypeNTAG215] =
-        MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
-        MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportFastRead |
-        MfUltralightFeatureSupportCompatibleWrite | MfUltralightFeatureSupportAuthentication |
-        MfUltralightFeatureSupportSingleCounter | MfUltralightFeatureSupportAsciiMirror,
+        {
+            .total_pages = 135,
+            .config_page = 131,
+            .feature_set =
+                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
+                MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportFastRead |
+                MfUltralightFeatureSupportCompatibleWrite |
+                MfUltralightFeatureSupportAuthentication |
+                MfUltralightFeatureSupportSingleCounter | MfUltralightFeatureSupportAsciiMirror,
+        },
     [MfUltralightTypeNTAG216] =
-        MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
-        MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportFastRead |
-        MfUltralightFeatureSupportCompatibleWrite | MfUltralightFeatureSupportAuthentication |
-        MfUltralightFeatureSupportSingleCounter | MfUltralightFeatureSupportAsciiMirror,
+        {
+            .total_pages = 231,
+            .config_page = 227,
+            .feature_set =
+                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
+                MfUltralightFeatureSupportReadCounter | MfUltralightFeatureSupportFastRead |
+                MfUltralightFeatureSupportCompatibleWrite |
+                MfUltralightFeatureSupportAuthentication |
+                MfUltralightFeatureSupportSingleCounter | MfUltralightFeatureSupportAsciiMirror,
+        },
     [MfUltralightTypeNTAGI2C1K] =
-        MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportFastRead |
-        MfUltralightFeatureSupportFastWrite | MfUltralightFeatureSupportSectorSelect,
+        {
+            .total_pages = 231,
+            .config_page = 0,
+            .feature_set =
+                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportFastRead |
+                MfUltralightFeatureSupportFastWrite | MfUltralightFeatureSupportSectorSelect,
+        },
     [MfUltralightTypeNTAGI2C2K] =
-        MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportFastRead |
-        MfUltralightFeatureSupportFastWrite | MfUltralightFeatureSupportSectorSelect,
+        {
+            .total_pages = 485,
+            .config_page = 0,
+            .feature_set =
+                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportFastRead |
+                MfUltralightFeatureSupportFastWrite | MfUltralightFeatureSupportSectorSelect,
+        },
     [MfUltralightTypeNTAGI2CPlus1K] =
-        MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
-        MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
-        MfUltralightFeatureSupportSectorSelect,
+        {
+            .total_pages = 236,
+            .config_page = 227,
+            .feature_set =
+                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
+                MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
+                MfUltralightFeatureSupportSectorSelect,
+        },
     [MfUltralightTypeNTAGI2CPlus2K] =
-        MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
-        MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
-        MfUltralightFeatureSupportSectorSelect,
+        {
+            .total_pages = 492,
+            .config_page = 227,
+            .feature_set =
+                MfUltralightFeatureSupportReadVersion | MfUltralightFeatureSupportReadSignature |
+                MfUltralightFeatureSupportFastRead | MfUltralightFeatureSupportAuthentication |
+                MfUltralightFeatureSupportSectorSelect,
+        },
 };
 
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version) {
@@ -98,11 +148,11 @@ MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version)
 }
 
 uint16_t mf_ultralight_get_pages_total(MfUltralightType type) {
-    return mf_ultralight_total_pages[type];
+    return mf_ultralight_features[type].total_pages;
 }
 
 uint32_t mf_ultralight_get_feature_support_set(MfUltralightType type) {
-    return mf_ultarlight_feature_sets[type];
+    return mf_ultralight_features[type].feature_set;
 }
 
 const char* mf_ultralight_get_name(MfUltralightType type, bool full_name) {
@@ -140,29 +190,20 @@ bool mf_ultralight_detect_protocol(NfcaData* nfca_data) {
     return mfu_detected;
 }
 
+uint16_t mf_ultralight_get_config_page_num(MfUltralightType type) {
+    return mf_ultralight_features[type].config_page;
+}
+
 bool mf_ultralight_get_config_page(MfUltralightData* data, MfUltralightConfigPages** config) {
     furi_assert(data);
     furi_assert(config);
 
     bool config_pages_found = false;
-    switch(data->type) {
-    case MfUltralightTypeUL11:
-    case MfUltralightTypeUL21:
-    case MfUltralightTypeNTAG213:
-    case MfUltralightTypeNTAG215:
-    case MfUltralightTypeNTAG216:
-        *config = (MfUltralightConfigPages*)&data->page[data->pages_total - 4];
-        config_pages_found = true;
-        break;
 
-    case MfUltralightTypeNTAGI2CPlus1K:
-    case MfUltralightTypeNTAGI2CPlus2K:
-        *config = (MfUltralightConfigPages*)&data->page[227];
+    uint16_t config_page = mf_ultralight_features[data->type].config_page;
+    if(config_page != 0) {
+        *config = (MfUltralightConfigPages*)&data->page[config_page];
         config_pages_found = true;
-        break;
-
-    default:
-        break;
     }
 
     return config_pages_found;
