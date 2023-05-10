@@ -129,7 +129,7 @@ RBatch: Work: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSlee
 RBatch: Hardware: ID;RxAddr;Ch;SpeedInitIdx;Flags;OutSpeedMax;IRRemotes;ZeroCrossLag,us;SSR_PulseWidth,us;OSCCAL_EMEM
 RBatch: All: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep;RxAddr;Ch;SpeedInitIdx;Flags;OutSpeedMax;IRRemotes;IRRemotesHash
 
-WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={870,930,1000};Fan speeds=3;FanSpeed={14,15,16};FanCook speeds=3;FanCookSpeed={15,16,32};FanSleep=20;FanCookSleep=6;FanOnTime=150;FanCookOnTime=0;FanOffTime=100;FanCookOffTime=0;SpeedInitIdx=0;SpeedKeyIdx=6;Flags=0x0D;OutPeriod=16;ZeroCrossLag,us=500;SSR_PulseWidth,us=9999
+WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={870,930,1000};Fan speeds=3;FanSpeed={14,15,16};FanCook speeds=3;FanCookSpeed={15,16,32};FanSleep=20;FanCookSleep=6;FanOnTime=150;FanCookOnTime=0;FanOffTime=100;FanCookOffTime=0;SpeedInitIdx=0;SpeedKeyIdx=6;Flags=0x0D;OutSpeedMax=16;ZeroCrossLag,us=500;SSR_PulseWidth,us=9999
 WBatch: IRRemotes clear: IRRemotes=0
 WBatch: IRRemotes 1 kitchen: IRRemotes=1;IRRemotesHash={0x6DA5,0xFCA5,0x7CA5,0xB425,0x3425,0x1625,0x8525}
 WBatch: Fans Speeds: Fan speeds=3;FanSpeed={14,15,16};FanCook speeds=3;FanCookSpeed={14,16,32}
