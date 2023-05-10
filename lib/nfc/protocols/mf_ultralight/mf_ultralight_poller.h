@@ -64,8 +64,6 @@ MfUltralightError
 
 MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance);
 
-// Called from NfcWorker thread
-
 MfUltralightError mf_ultralight_poller_stop(MfUltralightPoller* instance);
 
 // Sync API

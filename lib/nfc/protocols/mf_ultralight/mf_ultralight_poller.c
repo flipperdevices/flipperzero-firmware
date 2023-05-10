@@ -219,8 +219,23 @@ static MfUltralightPollerCommand mf_ultralight_poller_handler_auth(MfUltralightP
 static MfUltralightPollerCommand
     mf_ultralight_poller_handler_read_pages(MfUltralightPoller* instance) {
     MfUltralightPageReadCommandData data = {};
-    uint8_t start_page = instance->pages_read;
-    instance->error = mf_ultralight_poller_async_read_page(instance, start_page, &data);
+    uint16_t start_page = instance->pages_read;
+    if(MF_ULTRALIGHT_IS_NTAG_I2C(instance->data->type)) {
+        uint8_t tag = 0;
+        uint8_t sector = 0;
+        uint8_t pages_left = 0;
+        if(mf_ultralight_poller_ntag_i2c_addr_lin_to_tag(
+               instance, start_page, &sector, &tag, &pages_left)) {
+            instance->error =
+                mf_ultralight_poller_async_read_page_from_sector(instance, sector, tag, &data);
+        } else {
+            FURI_LOG_D(TAG, "Failed to calculate sector and tag from %d page", start_page);
+            instance->error = MfUltralightErrorProtocol;
+        }
+    } else {
+        instance->error = mf_ultralight_poller_async_read_page(instance, start_page, &data);
+    }
+
     if(instance->error == MfUltralightErrorNone) {
         for(size_t i = 0; i < 4; i++) {
             if(start_page + i < instance->pages_total) {

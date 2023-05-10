@@ -237,13 +237,62 @@ MU_TEST(ntag_215_reader) {
     mf_ultralight_reader_test(EXT_PATH("unit_tests/nfc/Ntag215.nfc"));
 }
 
+MU_TEST(ntag_213_locked_reader) {
+    FURI_LOG_I(TAG, "Testing Ntag215 locked file");
+    NfcDev* nfc_dev = nfc_dev_alloc();
+    Nfc* poller = nfc_alloc();
+    Nfc* listener = nfc_alloc();
+
+    NfcaPoller* nfca_poller = nfca_poller_alloc(poller);
+    NfcaListener* nfca_listener = nfca_listener_alloc(listener);
+
+    MfUltralightPoller* mfu_poller = mf_ultralight_poller_alloc(nfca_poller);
+    MfUltralightListener* mfu_listener = mf_ultralight_listener_alloc(nfca_listener);
+
+    MfUltralightError error = MfUltralightErrorNone;
+    NfcDevData* dev_data = malloc(sizeof(NfcDevData));
+
+    mu_assert(
+        nfc_dev_load(nfc_dev, dev_data, EXT_PATH("unit_tests/nfc/Ntag213_locked.nfc")),
+        "nfc_dev_load() failed\r\n");
+
+    error = mf_ultralight_listener_start(mfu_listener, &dev_data->mf_ul_data, NULL, NULL);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_listener_start() failed");
+
+    MfUltralightData* mfu_data = malloc(sizeof(MfUltralightData));
+    error = mf_ultralight_poller_read_card(mfu_poller, mfu_data);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_poller_read_card() failed");
+
+    error = mf_ultralight_listener_stop(mfu_listener);
+    mu_assert(error == MfUltralightErrorNone, "mf_ultralight_listener_stop() failed");
+
+    MfUltralightConfigPages* config = NULL;
+    mu_assert(
+        mf_ultralight_get_config_page(&dev_data->mf_ul_data, &config),
+        "mf_ultralight_get_config_page() failed");
+    uint16_t pages_locked = config->auth0;
+
+    mu_assert(mfu_data->pages_read == pages_locked, "Unexpected pages read");
+
+    free(mfu_data);
+    free(dev_data);
+    mf_ultralight_listener_free(mfu_listener);
+    mf_ultralight_poller_free(mfu_poller);
+    nfca_listener_free(nfca_listener);
+    nfc_free(listener);
+    nfca_poller_free(nfca_poller);
+    nfc_free(poller);
+    nfc_dev_free(nfc_dev);
+}
+
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
     // MU_RUN_TEST(nfca_reader);
     UNUSED(mf_ultralight_11_reader);
     UNUSED(mf_ultralight_21_reader);
-    MU_RUN_TEST(ntag_215_reader);
+    UNUSED(ntag_215_reader);
+    MU_RUN_TEST(ntag_213_locked_reader);
 
     // MU_RUN_TEST(nfca_4b_file_test);
     // MU_RUN_TEST(nfca_7b_file_test);
