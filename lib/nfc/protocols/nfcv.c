@@ -15,6 +15,9 @@
 
 #define TAG "NfcV"
 
+#define GPIO_LEVEL_MODULATED true
+#define GPIO_LEVEL_UNMODULATED false
+
 ReturnCode nfcv_inventory(uint8_t* uid) {
     uint16_t received = 0;
     rfalNfcvInventoryRes res;
@@ -304,7 +307,7 @@ bool nfcv_emu_alloc(NfcVData* nfcv_data) {
         if(!nfcv_data->emu_air.nfcv_resp_unmod) {
             return false;
         }
-        nfcv_data->emu_air.nfcv_resp_unmod->start_level = false;
+        nfcv_data->emu_air.nfcv_resp_unmod->start_level = GPIO_LEVEL_UNMODULATED;
         nfcv_data->emu_air.nfcv_resp_unmod->edge_timings[0] =
             (uint32_t)(NFCV_RESP_SUBC1_UNMOD_256 * DIGITAL_SIGNAL_UNIT_S);
         nfcv_data->emu_air.nfcv_resp_unmod->edge_cnt = 1;
@@ -315,7 +318,7 @@ bool nfcv_emu_alloc(NfcVData* nfcv_data) {
         if(!nfcv_data->emu_air.nfcv_resp_pulse) {
             return false;
         }
-        nfcv_data->emu_air.nfcv_resp_pulse->start_level = true;
+        nfcv_data->emu_air.nfcv_resp_pulse->start_level = GPIO_LEVEL_MODULATED;
         nfcv_data->emu_air.nfcv_resp_pulse->edge_timings[0] =
             (uint32_t)(NFCV_RESP_SUBC1_PULSE_32 * DIGITAL_SIGNAL_UNIT_S);
         nfcv_data->emu_air.nfcv_resp_pulse->edge_timings[1] =
@@ -329,7 +332,7 @@ bool nfcv_emu_alloc(NfcVData* nfcv_data) {
         if(!nfcv_data->emu_air.nfcv_resp_half_pulse) {
             return false;
         }
-        nfcv_data->emu_air.nfcv_resp_half_pulse->start_level = true;
+        nfcv_data->emu_air.nfcv_resp_half_pulse->start_level = GPIO_LEVEL_MODULATED;
         nfcv_data->emu_air.nfcv_resp_half_pulse->edge_timings[0] =
             (uint32_t)(NFCV_RESP_SUBC1_PULSE_32 * DIGITAL_SIGNAL_UNIT_S);
         nfcv_data->emu_air.nfcv_resp_half_pulse->edge_cnt = 1;
@@ -461,10 +464,10 @@ void nfcv_emu_send(
         digital_sequence_add(nfcv->emu_air.nfcv_signal, eof);
     }
 
+    furi_hal_gpio_write(&gpio_spi_r_mosi, GPIO_LEVEL_UNMODULATED);
     digital_sequence_set_sendtime(nfcv->emu_air.nfcv_signal, send_time);
-    // FURI_CRITICAL_ENTER/EXIT is already run in digital_sequnece_send
     digital_sequence_send(nfcv->emu_air.nfcv_signal);
-    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
+    furi_hal_gpio_write(&gpio_spi_r_mosi, GPIO_LEVEL_UNMODULATED);
 
     if(tx_rx->sniff_tx) {
         tx_rx->sniff_tx(data, length * 8, false, tx_rx->sniff_context);
@@ -1050,11 +1053,17 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     /* everything is initialized */
     nfcv_data->ready = true;
 
+    /* ensure the GPIO is already in unmodulated state */
+    furi_hal_gpio_init(&gpio_spi_r_mosi, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_write(&gpio_spi_r_mosi, GPIO_LEVEL_UNMODULATED);
+
     rfal_platform_spi_acquire();
     /* configure for transparent and passive mode */
     st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
     /* set enable, rx_enable and field detector enable */
     st25r3916WriteRegister(ST25R3916_REG_OP_CONTROL, 0xC3);
+    /* explicitely set the modulation resistor */
+    st25r3916WriteRegister(ST25R3916_REG_PT_MOD, 0x0F);
     /* target mode: ISO14443 passive mode */
     st25r3916WriteRegister(ST25R3916_REG_MODE, 0x88);
     /* let us modulate the field using MOSI, read ASK modulation using IRQ */
