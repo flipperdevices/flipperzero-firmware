@@ -18,6 +18,8 @@
 #define GPIO_LEVEL_MODULATED true
 #define GPIO_LEVEL_UNMODULATED false
 
+//#define NFCV_VERBOSE
+
 ReturnCode nfcv_inventory(uint8_t* uid) {
     uint16_t received = 0;
     rfalNfcvInventoryRes res;
@@ -519,7 +521,8 @@ void nfcv_emu_handle_packet(
     /* parse the frame data for the upcoming part 3 handling */
     ctx->flags = nfcv_data->frame[0];
     ctx->command = nfcv_data->frame[1];
-    ctx->selected = (ctx->flags & RFAL_NFCV_REQ_FLAG_SELECT);
+    ctx->selected = !(ctx->flags & RFAL_NFCV_REQ_FLAG_INVENTORY) &&
+                    (ctx->flags & RFAL_NFCV_REQ_FLAG_SELECT);
     ctx->addressed = !(ctx->flags & RFAL_NFCV_REQ_FLAG_INVENTORY) &&
                      (ctx->flags & RFAL_NFCV_REQ_FLAG_ADDRESS);
     ctx->advanced = (ctx->command >= 0xA0);
@@ -536,7 +539,9 @@ void nfcv_emu_handle_packet(
     }
 
     if(ctx->payload_offset + 2 > nfcv_data->frame_length) {
+#ifdef NFCV_VERBOSE
         FURI_LOG_D(TAG, "command 0x%02X, but packet is too short", ctx->command);
+#endif
         return;
     }
 
@@ -544,6 +549,7 @@ void nfcv_emu_handle_packet(
     if(ctx->addressed) {
         uint8_t* address = &nfcv_data->frame[ctx->address_offset];
         if(nfcv_revuidcmp(address, nfc_data->uid)) {
+#ifdef NFCV_VERBOSE
             FURI_LOG_D(TAG, "addressed command 0x%02X, but not for us:", ctx->command);
             FURI_LOG_D(
                 TAG,
@@ -567,15 +573,18 @@ void nfcv_emu_handle_packet(
                 nfc_data->uid[5],
                 nfc_data->uid[6],
                 nfc_data->uid[7]);
+#endif
             return;
         }
     }
 
     if(ctx->selected && !nfcv_data->selected) {
+#ifdef NFCV_VERBOSE
         FURI_LOG_D(
             TAG,
             "selected card shall execute command 0x%02X, but we were not selected",
             ctx->command);
+#endif
         return;
     }
 
@@ -583,8 +592,10 @@ void nfcv_emu_handle_packet(
     if(ctx->emu_protocol_filter != NULL) {
         if(ctx->emu_protocol_filter(tx_rx, nfc_data, nfcv_data)) {
             if(strlen(nfcv_data->last_command) > 0) {
+#ifdef NFCV_VERBOSE
                 FURI_LOG_D(
                     TAG, "Received command %s (handled by filter)", nfcv_data->last_command);
+#endif
             }
             return;
         }
@@ -592,7 +603,18 @@ void nfcv_emu_handle_packet(
 
     switch(ctx->command) {
     case ISO15693_INVENTORY: {
-        if(!nfcv_data->quiet) {
+        bool respond = false;
+
+        if(ctx->flags & RFAL_NFCV_REQ_FLAG_AFI) {
+            uint8_t afi = nfcv_data->frame[ctx->payload_offset];
+            if(afi == nfcv_data->afi) {
+                respond = true;
+            }
+        } else {
+            respond = true;
+        }
+
+        if(!nfcv_data->quiet && respond) {
             ctx->response_buffer[0] = ISO15693_NOERROR;
             ctx->response_buffer[1] = nfcv_data->dsfid;
             nfcv_revuidcpy(&ctx->response_buffer[2], nfc_data->uid);
@@ -839,7 +861,9 @@ void nfcv_emu_handle_packet(
     }
 
     if(strlen(nfcv_data->last_command) > 0) {
+#ifdef NFCV_VERBOSE
         FURI_LOG_D(TAG, "Received command %s", nfcv_data->last_command);
+#endif
     }
 }
 
@@ -1165,8 +1189,6 @@ bool nfcv_emu_loop(
     uint32_t byte_value = 0;
     uint32_t bits_received = 0;
     uint32_t timeout = timeout_ms * 1000;
-    uint32_t sof_timestamp = 0;
-    uint32_t eof_timestamp = 0;
     bool wait_for_pulse = false;
 
     if(!nfcv_data->ready) {
@@ -1208,7 +1230,6 @@ bool nfcv_emu_loop(
                 frame_state = NFCV_FRAME_STATE_SOF2;
             } else {
                 frame_state = NFCV_FRAME_STATE_SOF1;
-                sof_timestamp = timestamp;
                 break;
             }
             break;
@@ -1242,7 +1263,6 @@ bool nfcv_emu_loop(
                 break;
             } else if(periods == 2) {
                 frame_state = NFCV_FRAME_STATE_EOF;
-                eof_timestamp = timestamp;
                 break;
             }
 
@@ -1283,7 +1303,6 @@ bool nfcv_emu_loop(
                 periods_previous = 0;
             } else if(periods == 2) {
                 frame_state = NFCV_FRAME_STATE_EOF;
-                eof_timestamp = timestamp;
                 break;
             } else {
                 frame_state = NFCV_FRAME_STATE_RESET;
@@ -1318,27 +1337,13 @@ bool nfcv_emu_loop(
         }
         nfcv_data->emu_protocol_handler(tx_rx, nfc_data, nfcv_data);
 
-        /* determine readers fc by analyzing transmission duration */
-        uint32_t duration = eof_timestamp - sof_timestamp;
-        float fc_1024 = (4.0f * duration) / (4 * (frame_pos * 4 + 1) + 1);
-        /* it should be 1024/fc in 64MHz ticks */
-        float fact = fc_1024 / ((1000000.0f * 64.0f * 1024.0f) / NFCV_FC);
-        FURI_LOG_D(TAG, "1024/fc: %f -> %f %%", (double)fc_1024, (double)(fact * 100));
-#if 0
-        if(fact > 0.99f && fact < 1.01f) {
-            static float avg_err = 0.0f;
-
-            avg_err = (avg_err * 15.0f + (fact - 1.0f)) / 16.0f;
-            FURI_LOG_D(TAG, "  ==> set %f %%", (double)((1.0f + avg_err) * 100));
-            digital_sequence_timebase_correction(nfcv_data->emu_air.nfcv_signal, 1.0f + avg_err);
-        }
-#endif
-
         pulse_reader_start(nfcv_data->emu_air.reader_signal);
         ret = true;
     } else {
         if(frame_state != NFCV_FRAME_STATE_SOF1) {
+#ifdef NFCV_VERBOSE
             FURI_LOG_T(TAG, "leaving while in state: %lu", frame_state);
+#endif
         }
     }
 
