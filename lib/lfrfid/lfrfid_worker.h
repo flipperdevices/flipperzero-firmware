@@ -23,6 +23,7 @@ typedef enum {
     LFRFIDWorkerReadTypeAuto,
     LFRFIDWorkerReadTypeASKOnly,
     LFRFIDWorkerReadTypePSKOnly,
+	LFRFIDWorkerReadTypeRTFOnly,
 } LFRFIDWorkerReadType;
 
 typedef enum {
@@ -32,6 +33,8 @@ typedef enum {
     LFRFIDWorkerReadSenseCardEnd,
     LFRFIDWorkerReadStartASK,
     LFRFIDWorkerReadStartPSK,
+	LFRFIDWorkerReadStartRTF,
+	LFRFIDWorkerReadSenseHitag, //TODO combine with sense carstart?
     LFRFIDWorkerReadDone,
 } LFRFIDWorkerReadResult;
 
@@ -45,8 +48,7 @@ typedef enum {
     LFRFIDWorkerEmulateRawOverrun,
 } LFRFIDWorkerEmulateRawResult;
 
-typedef void (
-    *LFRFIDWorkerReadCallback)(LFRFIDWorkerReadResult result, ProtocolId protocol, void* context);
+typedef void (*LFRFIDWorkerReadCallback)(LFRFIDWorkerReadResult result, ProtocolId protocol, void* context);
 typedef void (*LFRFIDWorkerWriteCallback)(LFRFIDWorkerWriteResult result, void* context);
 
 typedef void (*LFRFIDWorkerReadRawCallback)(LFRFIDWorkerReadRawResult result, void* context);
