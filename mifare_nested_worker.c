@@ -793,6 +793,7 @@ void mifare_nested_worker_collect_nonces_static(MifareNestedWorker* mifare_neste
 
                         info = nonces.nonces[sector][key_type][0];
                         info->collected = true;
+                        info->skipped = false;
 
                         memcpy(&info->target_nt, result.target_nt, sizeof(result.target_nt));
                         memcpy(&info->target_ks, result.target_ks, sizeof(result.target_ks));
@@ -1030,6 +1031,8 @@ void mifare_nested_worker_collect_nonces_hard(MifareNestedWorker* mifare_nested_
 
                             info->collected = true;
                             info->hardnested = true;
+                            info->skipped = false;
+
                             nonces.cuid = result.cuid;
 
                             nonces.nonces[sector][key_type][0] = info;
@@ -1328,6 +1331,7 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
 
                             info = nonces.nonces[sector][key_type][tries];
                             info->collected = true;
+                            info->skipped = false;
 
                             memcpy(&info->target_nt, result.target_nt, sizeof(result.target_nt));
                             memcpy(&info->target_ks, result.target_ks, sizeof(result.target_ks));
