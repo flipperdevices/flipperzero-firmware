@@ -43,7 +43,7 @@ static inline void furi_hal_idle_timer_start(uint32_t count) {
 static inline void furi_hal_idle_timer_reset() {
     // Hard reset timer
     // THE ONLY RELIABLE WAY to stop it according to errata
-    LL_LPTIM_DeInit(FURI_HAL_IDLE_TIMER);
+    furi_hal_bus_reset(FuriHalBusLPTIM1);
     // Prevent IRQ handler call
     NVIC_ClearPendingIRQ(FURI_HAL_IDLE_TIMER_IRQ);
 }
