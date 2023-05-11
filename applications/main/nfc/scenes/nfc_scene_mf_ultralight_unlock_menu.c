@@ -68,7 +68,7 @@ bool nfc_scene_mf_ultralight_unlock_menu_on_event(void* context, SceneManagerEve
             consumed = true;
         } else if(event.event == SubmenuIndexMfUlUnlockMenuReader) {
             nfc->mf_ul_auth->type = MfUltralightAuthTypeReader;
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightCapturePass);
             consumed = true;
         }
         scene_manager_set_scene_state(

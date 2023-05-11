@@ -19,7 +19,7 @@ ADD_SCENE(nfc, mf_ultralight_menu, MfUltralightMenu)
 ADD_SCENE(nfc, mf_ultralight_unlock_menu, MfUltralightUnlockMenu)
 ADD_SCENE(nfc, mf_ultralight_unlock_warn, MfUltralightUnlockWarn)
 ADD_SCENE(nfc, mf_ultralight_key_input, MfUltralightKeyInput)
-
+ADD_SCENE(nfc, mf_ultralight_capture_pass, MfUltralightCapturePass)
 
 ADD_SCENE(nfc, set_type, SetType)
 ADD_SCENE(nfc, set_sak, SetSak)
