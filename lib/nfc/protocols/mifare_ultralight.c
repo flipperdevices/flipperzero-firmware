@@ -1253,6 +1253,10 @@ static void mf_ul_emulate_write(
     emulator->data_changed = true;
 }
 
+bool mf_ul_emulation_supported(MfUltralightData* data) {
+    return data->type != MfUltralightTypeULC;
+}
+
 void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) {
     emulator->comp_write_cmd_started = false;
     emulator->sector_select_cmd_started = false;

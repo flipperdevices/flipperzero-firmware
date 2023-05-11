@@ -240,6 +240,8 @@ bool mf_ul_read_card(
     MfUltralightReader* reader,
     MfUltralightData* data);
 
+bool mf_ul_emulation_supported(MfUltralightData* data);
+
 void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle);
 
 void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* data);
