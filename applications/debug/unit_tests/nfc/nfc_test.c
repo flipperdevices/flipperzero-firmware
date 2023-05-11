@@ -354,31 +354,31 @@ static void mf_ultralight_write() {
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
-    UNUSED(nfca_reader);
-    UNUSED(mf_ultralight_11_reader);
-    UNUSED(mf_ultralight_21_reader);
-    UNUSED(ntag_215_reader);
-    UNUSED(ntag_216_reader);
-    UNUSED(ntag_213_locked_reader);
+    MU_RUN_TEST(nfca_reader);
+    MU_RUN_TEST(mf_ultralight_11_reader);
+    MU_RUN_TEST(mf_ultralight_21_reader);
+    MU_RUN_TEST(ntag_215_reader);
+    MU_RUN_TEST(ntag_216_reader);
+    MU_RUN_TEST(ntag_213_locked_reader);
 
     MU_RUN_TEST(mf_ultralight_write);
 
-    UNUSED(nfca_4b_file_test);
-    UNUSED(nfca_7b_file_test);
+    MU_RUN_TEST(nfca_4b_file_test);
+    MU_RUN_TEST(nfca_7b_file_test);
 
-    UNUSED(mf_ultralight_file_test);
-    UNUSED(mf_ultralight_ev1_11_file_test);
-    UNUSED(mf_ultralight_ev1_h11_file_test);
-    UNUSED(mf_ultralight_ev1_21_file_test);
-    UNUSED(mf_ultralight_ev1_h21_file_test);
-    UNUSED(mf_ultralight_ntag_203_file_test);
-    UNUSED(mf_ultralight_ntag_213_file_test);
-    UNUSED(mf_ultralight_ntag_215_file_test);
-    UNUSED(mf_ultralight_ntag_216_file_test);
-    UNUSED(mf_ultralight_ntag_i2c_1k_file_test);
-    UNUSED(mf_ultralight_ntag_i2c_2k_file_test);
-    UNUSED(mf_ultralight_ntag_i2c_plus_1k_file_test);
-    UNUSED(mf_ultralight_ntag_i2c_plus_2k_file_test);
+    MU_RUN_TEST(mf_ultralight_file_test);
+    MU_RUN_TEST(mf_ultralight_ev1_11_file_test);
+    MU_RUN_TEST(mf_ultralight_ev1_h11_file_test);
+    MU_RUN_TEST(mf_ultralight_ev1_21_file_test);
+    MU_RUN_TEST(mf_ultralight_ev1_h21_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_203_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_213_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_215_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_216_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_i2c_1k_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_i2c_2k_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_1k_file_test);
+    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_2k_file_test);
 
     nfc_test_free();
 }
