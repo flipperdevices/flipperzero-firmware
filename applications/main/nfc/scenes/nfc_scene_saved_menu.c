@@ -124,7 +124,7 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSavedMenu, event.event);
         if(event.event == SubmenuIndexEmulate) {
             if(data->protocol == NfcDevProtocolMfUltralight) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
             } else if(data->protocol == NfcDevProtocolMfClassic) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             } else {
@@ -143,13 +143,13 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuIndexRename) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             consumed = true;
         } else if(event.event == SubmenuIndexEditUid) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSetUid);
             consumed = true;
         } else if(event.event == SubmenuIndexDelete) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneDelete);
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
             // bool application_info_present = false;
