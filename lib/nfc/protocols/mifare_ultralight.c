@@ -728,7 +728,8 @@ static bool mf_ul_probe_3des_auth(FuriHalNfcTxRxContext* tx_rx) {
     tx_rx->tx_data[1] = 0;
     tx_rx->tx_bits = 16;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
-    bool rc = furi_hal_nfc_tx_rx(tx_rx, 50) && tx_rx->rx_bits == 9 * 8;
+    bool rc = furi_hal_nfc_tx_rx(tx_rx, 50) && tx_rx->rx_bits == 9 * 8 &&
+              tx_rx->rx_data[0] == 0xAF;
 
     // Reset just in case, we're not going to finish authenticating and need to if tag doesn't support auth
     furi_hal_nfc_sleep();
