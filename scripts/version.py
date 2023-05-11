@@ -1,11 +1,11 @@
 #!/usb/bin/env python3
 
-from flipper.app import App
-
-import subprocess
-import os
 import json
+import os
+import subprocess
 from datetime import date, datetime
+
+from flipper.app import App
 
 
 class GitVersion:
@@ -35,8 +35,6 @@ class GitVersion:
             or "unknown"
         )
 
-        branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
-
         try:
             version = self._exec_git("describe --tags --abbrev=0 --exact-match")
         except subprocess.CalledProcessError:
@@ -45,7 +43,6 @@ class GitVersion:
         return {
             "GIT_COMMIT": commit,
             "GIT_BRANCH": branch,
-            "GIT_BRANCH_NUM": branch_num,
             "VERSION": version,
             "BUILD_DIRTY": dirty and 1 or 0,
         }
