@@ -7,7 +7,7 @@
 
 #include "../desktop.h"
 #include "../desktop_i.h"
-#include "../helpers/lock.h"
+#include "../helpers/pin.h"
 #include "../animations/animation_manager.h"
 #include "../views/desktop_events.h"
 #include "../views/desktop_view_pin_input.h"

@@ -1,3 +1,4 @@
+#include "pin.h"
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
@@ -6,7 +7,6 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 
-#include "lock.h"
 #include "../desktop_i.h"
 
 static const NotificationSequence sequence_pin_fail = {
@@ -61,20 +61,7 @@ uint32_t desktop_pin_lock_get_fail_timeout() {
     return pin_timeout;
 }
 
-bool desktop_pin_lock_verify(const PinCode* pin_set, const PinCode* pin_entered) {
-    bool result = false;
-    if(desktop_pins_are_equal(pin_set, pin_entered)) {
-        furi_hal_rtc_set_pin_fails(0);
-        result = true;
-    } else {
-        uint32_t pin_fails = furi_hal_rtc_get_pin_fails();
-        furi_hal_rtc_set_pin_fails(pin_fails + 1);
-        result = false;
-    }
-    return result;
-}
-
-bool desktop_pins_are_equal(const PinCode* pin_code1, const PinCode* pin_code2) {
+bool desktop_pin_compare(const PinCode* pin_code1, const PinCode* pin_code2) {
     furi_assert(pin_code1);
     furi_assert(pin_code2);
     bool result = false;

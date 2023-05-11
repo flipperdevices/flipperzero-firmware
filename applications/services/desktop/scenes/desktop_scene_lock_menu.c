@@ -10,7 +10,7 @@
 #include "../views/desktop_view_lock_menu.h"
 #include "desktop_scene_i.h"
 #include "desktop_scene.h"
-#include "../helpers/lock.h"
+#include "../helpers/pin.h"
 
 #define TAG "DesktopSceneLock"
 
