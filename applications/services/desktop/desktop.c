@@ -290,11 +290,14 @@ Desktop* desktop_alloc() {
     desktop->auto_lock_timer =
         furi_timer_alloc(desktop_auto_lock_timer_callback, FuriTimerTypeOnce, desktop);
 
+    furi_record_create(RECORD_DESKTOP, desktop);
+
     return desktop;
 }
 
 void desktop_free(Desktop* desktop) {
     furi_assert(desktop);
+    furi_check(furi_record_destroy(RECORD_DESKTOP));
 
     furi_pubsub_unsubscribe(
         loader_get_pubsub(desktop->loader), desktop->app_start_stop_subscription);
@@ -352,6 +355,16 @@ static bool desktop_check_file_flag(const char* flag_path) {
     return exists;
 }
 
+bool desktop_api_is_locked(Desktop* instance) {
+    furi_assert(instance);
+    return desktop_pin_lock_is_locked() || instance->settings.is_locked;
+}
+
+void desktop_api_unlock(Desktop* instance) {
+    furi_assert(instance);
+    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
+}
+
 int32_t desktop_srv(void* p) {
     UNUSED(p);
 
@@ -377,12 +390,12 @@ int32_t desktop_srv(void* p) {
 
     desktop_pin_lock_init(&desktop->settings);
 
-    if(!desktop_pin_lock_is_locked()) {
+    if(desktop_pin_lock_is_locked() || desktop->settings.is_locked) {
+        desktop_lock(desktop);
+    } else {
         if(!loader_is_locked(desktop->loader)) {
             desktop_auto_lock_arm(desktop);
         }
-    } else {
-        desktop_lock(desktop);
     }
 
     if(desktop_check_file_flag(SLIDESHOW_FS_PATH)) {
