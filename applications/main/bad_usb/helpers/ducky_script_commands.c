@@ -143,28 +143,47 @@ static int32_t ducky_fnc_release(BadUsbScript* bad_usb, const char* line, int32_
     return 0;
 }
 
+static int32_t ducky_fnc_waitforbutton(BadUsbScript* bad_usb, const char* line, int32_t param) {
+    UNUSED(param);
+    UNUSED(bad_usb);
+    UNUSED(line);
+
+    return SCRIPT_STATE_WAIT_FOR_BTN;
+}
+
 static const DuckyCmd ducky_commands[] = {
-    {"REM ", NULL, -1},
-    {"ID ", NULL, -1},
-    {"DELAY ", ducky_fnc_delay, -1},
-    {"STRING ", ducky_fnc_string, 0},
-    {"STRINGLN ", ducky_fnc_string, 1},
-    {"DEFAULT_DELAY ", ducky_fnc_defdelay, -1},
-    {"DEFAULTDELAY ", ducky_fnc_defdelay, -1},
-    {"STRINGDELAY ", ducky_fnc_strdelay, -1},
-    {"STRING_DELAY ", ducky_fnc_strdelay, -1},
-    {"REPEAT ", ducky_fnc_repeat, -1},
-    {"SYSRQ ", ducky_fnc_sysrq, -1},
-    {"ALTCHAR ", ducky_fnc_altchar, -1},
-    {"ALTSTRING ", ducky_fnc_altstring, -1},
-    {"ALTCODE ", ducky_fnc_altstring, -1},
-    {"HOLD ", ducky_fnc_hold, -1},
-    {"RELEASE ", ducky_fnc_release, -1},
+    {"REM", NULL, -1},
+    {"ID", NULL, -1},
+    {"DELAY", ducky_fnc_delay, -1},
+    {"STRING", ducky_fnc_string, 0},
+    {"STRINGLN", ducky_fnc_string, 1},
+    {"DEFAULT_DELAY", ducky_fnc_defdelay, -1},
+    {"DEFAULTDELAY", ducky_fnc_defdelay, -1},
+    {"STRINGDELAY", ducky_fnc_strdelay, -1},
+    {"STRING_DELAY", ducky_fnc_strdelay, -1},
+    {"REPEAT", ducky_fnc_repeat, -1},
+    {"SYSRQ", ducky_fnc_sysrq, -1},
+    {"ALTCHAR", ducky_fnc_altchar, -1},
+    {"ALTSTRING", ducky_fnc_altstring, -1},
+    {"ALTCODE", ducky_fnc_altstring, -1},
+    {"HOLD", ducky_fnc_hold, -1},
+    {"RELEASE", ducky_fnc_release, -1},
+    {"WAIT_FOR_BUTTON_PRESS", ducky_fnc_waitforbutton, -1},
 };
 
+#define TAG "BadUSB"
+#define WORKER_TAG TAG "Worker"
+
 int32_t ducky_execute_cmd(BadUsbScript* bad_usb, const char* line) {
+    size_t cmd_word_len = strcspn(line, " ");
     for(size_t i = 0; i < COUNT_OF(ducky_commands); i++) {
-        if(strncmp(line, ducky_commands[i].name, strlen(ducky_commands[i].name)) == 0) {
+        size_t cmd_compare_len = strlen(ducky_commands[i].name);
+
+        if(cmd_compare_len != cmd_word_len) {
+            continue;
+        }
+
+        if(strncmp(line, ducky_commands[i].name, cmd_compare_len) == 0) {
             if(ducky_commands[i].callback == NULL) {
                 return 0;
             } else {

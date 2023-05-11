@@ -19,6 +19,8 @@
 /* Time, in ms, to wait for mode transition before crashing */
 #define C2_MODE_SWITCH_TIMEOUT 10000
 
+#define FURI_HAL_BT_HARDFAULT_INFO_MAGIC 0x1170FD0F
+
 FuriMutex* furi_hal_bt_core2_mtx = NULL;
 static FuriHalBtStack furi_hal_bt_stack = FuriHalBtStackUnknown;
 
@@ -84,9 +86,7 @@ void furi_hal_bt_init() {
     }
 
     // Explicitly tell that we are in charge of CLK48 domain
-    if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_CLK48_CONFIG_SEMID)) {
-        furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
-    }
+    furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
 
     // Start Core2
     ble_glue_init();
@@ -129,9 +129,7 @@ bool furi_hal_bt_start_radio_stack() {
     furi_mutex_acquire(furi_hal_bt_core2_mtx, FuriWaitForever);
 
     // Explicitly tell that we are in charge of CLK48 domain
-    if(!LL_HSEM_IsSemaphoreLocked(HSEM, CFG_HW_CLK48_CONFIG_SEMID)) {
-        furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
-    }
+    furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
 
     do {
         // Wait until C2 is started or timeout
@@ -443,4 +441,13 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
 
     FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
     return false;
+}
+
+const FuriHalBtHardfaultInfo* furi_hal_bt_get_hardfault_info() {
+    /* AN5289, 4.8.2 */
+    const FuriHalBtHardfaultInfo* info = (FuriHalBtHardfaultInfo*)(SRAM2A_BASE);
+    if(info->magic != FURI_HAL_BT_HARDFAULT_INFO_MAGIC) {
+        return NULL;
+    }
+    return info;
 }

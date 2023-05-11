@@ -4,7 +4,9 @@
 #include <flipper_application/api_hashtable/compilesort.hpp>
 
 /* Generated table */
-#include <symbols.h>
+#include <firmware_api_table.h>
+
+#include <furi_hal_info.h>
 
 static_assert(!has_hash_collisions(elf_api_table), "Detected API method hash collision!");
 
@@ -19,3 +21,8 @@ constexpr HashtableApiInterface elf_api_interface{
 };
 
 const ElfApiInterface* const firmware_api_interface = &elf_api_interface;
+
+extern "C" void furi_hal_info_get_api_version(uint16_t* major, uint16_t* minor) {
+    *major = elf_api_interface.api_version_major;
+    *minor = elf_api_interface.api_version_minor;
+}

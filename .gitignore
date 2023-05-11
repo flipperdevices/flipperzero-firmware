@@ -2,6 +2,7 @@
 *.swp
 *.swo
 *.gdb_history
+*.old
 
 
 # LSP
@@ -30,7 +31,7 @@ bindings/
 Brewfile.lock.json
 
 # Visual Studio Code
-.vscode/
+/.vscode/
 
 # Kate
 .kateproject
@@ -60,5 +61,6 @@ openocd.log
 # PVS Studio temporary files
 .PVS-Studio/
 PVS-Studio.log
+*.PVS-Studio.*
 
 .gdbinit
