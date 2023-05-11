@@ -19,7 +19,8 @@ static void rpc_desktop_on_is_locked_request(const PB_Main* request, void* conte
     RpcDesktop* rpc_desktop = context;
     RpcSession* session = rpc_desktop->session;
 
-    PB_CommandStatus ret = desktop_api_is_locked(rpc_desktop->desktop) ? PB_CommandStatus_OK : PB_CommandStatus_ERROR;
+    PB_CommandStatus ret = desktop_api_is_locked(rpc_desktop->desktop) ? PB_CommandStatus_OK :
+                                                                         PB_CommandStatus_ERROR;
 
     rpc_send_and_release_empty(session, request->command_id, ret);
 }

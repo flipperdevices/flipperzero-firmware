@@ -137,7 +137,7 @@ void desktop_lock(Desktop* desktop) {
     furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
     furi_hal_rtc_set_pin_fails(0);
 
-    if (desktop->settings.pin_code.length) {
+    if(desktop->settings.pin_code.length) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_close(cli);
         furi_record_close(RECORD_CLI);
@@ -160,7 +160,7 @@ void desktop_unlock(Desktop* desktop) {
     desktop_auto_lock_arm(desktop);
     furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
 
-    if (desktop->settings.pin_code.length) {
+    if(desktop->settings.pin_code.length) {
         Cli* cli = furi_record_open(RECORD_CLI);
         cli_session_open(cli, &cli_vcp);
         furi_record_close(RECORD_CLI);
