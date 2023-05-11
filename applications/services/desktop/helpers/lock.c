@@ -6,10 +6,8 @@
 #include <furi_hal.h>
 #include <gui/gui.h>
 
-#include "../helpers/pin_lock.h"
+#include "lock.h"
 #include "../desktop_i.h"
-#include <cli/cli.h>
-#include <cli/cli_vcp.h>
 
 static const NotificationSequence sequence_pin_fail = {
     &message_display_backlight_on,
@@ -63,53 +61,6 @@ uint32_t desktop_pin_lock_get_fail_timeout() {
     return pin_timeout;
 }
 
-void desktop_pin_lock(DesktopSettings* settings) {
-    furi_assert(settings);
-
-    furi_hal_rtc_set_pin_fails(0);
-    furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_session_close(cli);
-    furi_record_close(RECORD_CLI);
-    settings->is_locked = 1;
-    DESKTOP_SETTINGS_SAVE(settings);
-}
-
-void desktop_pin_unlock(DesktopSettings* settings) {
-    furi_assert(settings);
-
-    furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
-    Cli* cli = furi_record_open(RECORD_CLI);
-    cli_session_open(cli, &cli_vcp);
-    furi_record_close(RECORD_CLI);
-    settings->is_locked = 0;
-    DESKTOP_SETTINGS_SAVE(settings);
-}
-
-void desktop_pin_lock_init(DesktopSettings* settings) {
-    furi_assert(settings);
-
-    if(settings->pin_code.length > 0) {
-        if(settings->is_locked == 1) {
-            furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
-        } else {
-            if(desktop_pin_lock_is_locked()) {
-                settings->is_locked = 1;
-                DESKTOP_SETTINGS_SAVE(settings);
-            }
-        }
-    } else {
-        furi_hal_rtc_set_pin_fails(0);
-        furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
-    }
-
-    if(desktop_pin_lock_is_locked()) {
-        Cli* cli = furi_record_open(RECORD_CLI);
-        cli_session_close(cli);
-        furi_record_close(RECORD_CLI);
-    }
-}
-
 bool desktop_pin_lock_verify(const PinCode* pin_set, const PinCode* pin_entered) {
     bool result = false;
     if(desktop_pins_are_equal(pin_set, pin_entered)) {
@@ -121,10 +72,6 @@ bool desktop_pin_lock_verify(const PinCode* pin_set, const PinCode* pin_entered)
         result = false;
     }
     return result;
-}
-
-bool desktop_pin_lock_is_locked() {
-    return furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock);
 }
 
 bool desktop_pins_are_equal(const PinCode* pin_code1, const PinCode* pin_code2) {

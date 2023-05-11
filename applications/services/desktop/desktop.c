@@ -6,6 +6,8 @@
 #include <notification/notification_messages.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <cli/cli.h>
+#include <cli/cli_vcp.h>
 
 #include "animations/animation_manager.h"
 #include "desktop/scenes/desktop_scene.h"
@@ -14,7 +16,7 @@
 #include "desktop/views/desktop_view_pin_input.h"
 #include "desktop/views/desktop_view_pin_timeout.h"
 #include "desktop_i.h"
-#include "helpers/pin_lock.h"
+#include "helpers/lock.h"
 #include "helpers/slideshow_filename.h"
 
 #define TAG "Desktop"
@@ -132,6 +134,15 @@ static void desktop_auto_lock_inhibit(Desktop* desktop) {
 }
 
 void desktop_lock(Desktop* desktop) {
+    furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
+    furi_hal_rtc_set_pin_fails(0);
+
+    if (desktop->settings.pin_code.length) {
+        Cli* cli = furi_record_open(RECORD_CLI);
+        cli_session_close(cli);
+        furi_record_close(RECORD_CLI);
+    }
+
     desktop_auto_lock_inhibit(desktop);
     scene_manager_set_scene_state(
         desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
@@ -147,6 +158,13 @@ void desktop_unlock(Desktop* desktop) {
     desktop_view_locked_unlock(desktop->locked_view);
     scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
     desktop_auto_lock_arm(desktop);
+    furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+
+    if (desktop->settings.pin_code.length) {
+        Cli* cli = furi_record_open(RECORD_CLI);
+        cli_session_open(cli, &cli_vcp);
+        furi_record_close(RECORD_CLI);
+    }
 }
 
 void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
@@ -357,7 +375,7 @@ static bool desktop_check_file_flag(const char* flag_path) {
 
 bool desktop_api_is_locked(Desktop* instance) {
     furi_assert(instance);
-    return desktop_pin_lock_is_locked() || instance->settings.is_locked;
+    return furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock);
 }
 
 void desktop_api_unlock(Desktop* instance) {
@@ -388,9 +406,7 @@ int32_t desktop_srv(void* p) {
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
-    desktop_pin_lock_init(&desktop->settings);
-
-    if(desktop_pin_lock_is_locked() || desktop->settings.is_locked) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
         desktop_lock(desktop);
     } else {
         if(!loader_is_locked(desktop->loader)) {

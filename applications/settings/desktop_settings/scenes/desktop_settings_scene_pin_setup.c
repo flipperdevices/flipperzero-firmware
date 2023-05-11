@@ -7,7 +7,7 @@
 #include <desktop/views/desktop_view_pin_input.h>
 #include "desktop_settings_scene.h"
 #include "desktop_settings_scene_i.h"
-#include <desktop/helpers/pin_lock.h>
+#include <desktop/helpers/lock.h>
 
 #define SCENE_EVENT_EXIT (0U)
 #define SCENE_EVENT_1ST_PIN_ENTERED (1U)

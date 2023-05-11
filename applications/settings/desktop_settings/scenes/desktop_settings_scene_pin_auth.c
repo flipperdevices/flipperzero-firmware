@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <core/check.h>
 #include <gui/scene_manager.h>
-#include <desktop/helpers/pin_lock.h>
+#include <desktop/helpers/lock.h>
 #include "../desktop_settings_app.h"
 #include <desktop/desktop_settings.h>
 #include <desktop/views/desktop_view_pin_input.h>

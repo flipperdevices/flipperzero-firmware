@@ -12,7 +12,7 @@
 #include "../animations/animation_manager.h"
 #include "../views/desktop_events.h"
 #include "../views/desktop_view_pin_input.h"
-#include "../helpers/pin_lock.h"
+#include "../helpers/lock.h"
 #include "desktop_scene.h"
 #include "desktop_scene_i.h"
 
@@ -126,7 +126,6 @@ bool desktop_scene_pin_input_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case DesktopPinInputEventUnlocked:
-            desktop_pin_unlock(&desktop->settings);
             desktop_unlock(desktop);
             consumed = true;
             break;
