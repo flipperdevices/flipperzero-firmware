@@ -59,9 +59,9 @@ ReturnCode slix_get_random(NfcVData* data) {
     uint8_t rxBuf[32];
 
     ReturnCode ret = rfalNfcvPollerTransceiveReq(
-        ISO15693_CMD_NXP_GET_RANDOM_NUMBER,
+        NFCV_CMD_NXP_GET_RANDOM_NUMBER,
         RFAL_NFCV_REQ_FLAG_DEFAULT,
-        ISO15693_MANUFACTURER_NXP,
+        NFCV_MANUFACTURER_NXP,
         NULL,
         NULL,
         0,
@@ -124,9 +124,9 @@ ReturnCode slix_unlock(NfcVData* data, uint32_t password_id) {
     }
 
     ReturnCode ret = rfalNfcvPollerTransceiveReq(
-        ISO15693_CMD_NXP_SET_PASSWORD,
+        NFCV_CMD_NXP_SET_PASSWORD,
         RFAL_NFCV_REQ_FLAG_DATA_RATE,
-        ISO15693_MANUFACTURER_NXP,
+        NFCV_MANUFACTURER_NXP,
         NULL,
         cmd_set_pass,
         sizeof(cmd_set_pass),
@@ -150,8 +150,8 @@ bool slix_generic_protocol_filter(
     NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
     NfcVSlixData* slix = &nfcv_data->sub_data.slix;
 
-    if(slix->privacy && ctx->command != ISO15693_CMD_NXP_GET_RANDOM_NUMBER &&
-       ctx->command != ISO15693_CMD_NXP_SET_PASSWORD) {
+    if(slix->privacy && ctx->command != NFCV_CMD_NXP_GET_RANDOM_NUMBER &&
+       ctx->command != NFCV_CMD_NXP_SET_PASSWORD) {
         snprintf(
             nfcv_data->last_command,
             sizeof(nfcv_data->last_command),
@@ -164,11 +164,11 @@ bool slix_generic_protocol_filter(
     bool handled = false;
 
     switch(ctx->command) {
-    case ISO15693_CMD_NXP_GET_RANDOM_NUMBER: {
+    case NFCV_CMD_NXP_GET_RANDOM_NUMBER: {
         slix->rand[0] = furi_hal_random_get();
         slix->rand[1] = furi_hal_random_get();
 
-        ctx->response_buffer[0] = ISO15693_NOERROR;
+        ctx->response_buffer[0] = NFCV_NOERROR;
         ctx->response_buffer[1] = slix->rand[1];
         ctx->response_buffer[2] = slix->rand[0];
 
@@ -185,7 +185,7 @@ bool slix_generic_protocol_filter(
         break;
     }
 
-    case ISO15693_CMD_NXP_SET_PASSWORD: {
+    case NFCV_CMD_NXP_SET_PASSWORD: {
         uint8_t password_id = nfcv_data->frame[ctx->payload_offset];
 
         if(!(password_id & password_supported)) {
@@ -246,7 +246,7 @@ bool slix_generic_protocol_filter(
             default:
                 break;
             }
-            ctx->response_buffer[0] = ISO15693_NOERROR;
+            ctx->response_buffer[0] = NFCV_NOERROR;
             nfcv_emu_send(
                 tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
             snprintf(
@@ -268,15 +268,15 @@ bool slix_generic_protocol_filter(
         break;
     }
 
-    case ISO15693_CMD_NXP_ENABLE_PRIVACY: {
-        ctx->response_buffer[0] = ISO15693_NOERROR;
+    case NFCV_CMD_NXP_ENABLE_PRIVACY: {
+        ctx->response_buffer[0] = NFCV_NOERROR;
 
         nfcv_emu_send(
             tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
         snprintf(
             nfcv_data->last_command,
             sizeof(nfcv_data->last_command),
-            "ISO15693_CMD_NXP_ENABLE_PRIVACY");
+            "NFCV_CMD_NXP_ENABLE_PRIVACY");
 
         slix->privacy = true;
         handled = true;

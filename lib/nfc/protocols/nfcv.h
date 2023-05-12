@@ -12,14 +12,13 @@
 extern "C" {
 #endif
 
+/* true: modulating releases load, false: modulating adds load resistor to field coil */
+#define NFCV_LOAD_MODULATION_POLARITY (true)
+
 #define NFCV_FC (13560000.0f / 0.9998f) /* MHz */
 #define NFCV_RESP_SUBC1_PULSE_32 (1.0f / (NFCV_FC / 32) / 2.0f) /*  1.1799 µs */
 #define NFCV_RESP_SUBC1_UNMOD_256 (256.0f / NFCV_FC) /* 18.8791 µs */
-
-#define PULSE_DURATION_NS (128.0f * 1000000000.0f / NFCV_FC)
-
-#define DIGITAL_SIGNAL_UNIT_S (100000000000.0f)
-#define DIGITAL_SIGNAL_UNIT_US (100000.0f)
+#define NFCV_PULSE_DURATION_NS (128.0f * 1000000000.0f / NFCV_FC)
 
 /* ISO/IEC 15693-3:2019(E) 10.4.12: maximum number of blocks is defined as 256 */
 #define NFCV_BLOCKS_MAX 256
@@ -30,15 +29,20 @@ extern "C" {
 /* ISO/IEC 15693-3:2019(E) 7.1b: standard allows up to 8192, the maxium frame length that we are expected to receive/send is less */
 #define NFCV_FRAMESIZE_MAX (1 + NFCV_MEMSIZE_MAX + NFCV_BLOCKS_MAX)
 
+/* maximum string length for log messages */
 #define NFCV_LOG_STR_LEN 128
+/* maximum of pulses to be buffered by pulse reader */
+#define NFCV_PULSE_BUFFER 512
 
-// #define NFCV_DIAGNOSTIC_DUMPS
-// #define NFCV_DIAGNOSTIC_DUMP_SIZE 128
+//#define NFCV_DIAGNOSTIC_DUMPS
+//#define NFCV_DIAGNOSTIC_DUMP_SIZE 256
+//#define NFCV_VERBOSE
 
 /* helpers to calculate the send time based on DWT->CYCCNT */
-#define NFCV_FDT_USEC(usec) (usec * 64)
+#define NFCV_FDT_USEC(usec) ((usec)*64)
 #define NFCV_FDT_FC(ticks) ((ticks)*6400 / 1356)
 
+/* state machine when receiving frame bits */
 #define NFCV_FRAME_STATE_SOF1 0
 #define NFCV_FRAME_STATE_SOF2 1
 #define NFCV_FRAME_STATE_CODING_4 2
@@ -56,37 +60,72 @@ extern "C" {
 #define NFCV_SIG_LOW_BIT1 6
 #define NFCV_SIG_LOW_EOF 7
 
+/* various constants */
+#define NFCV_COMMAND_RETRIES 5
+#define NFCV_UID_LENGTH 8
+
+/* ISO15693 protocol flags */
+typedef enum {
+    /* ISO15693 protocol flags when INVENTORY is NOT set */
+    NFCV_REQ_FLAG_SUB_CARRIER = (1 << 0),
+    NFCV_REQ_FLAG_DATA_RATE = (1 << 1),
+    NFCV_REQ_FLAG_INVENTORY = (1 << 2),
+    NFCV_REQ_FLAG_PROTOCOL_EXT = (1 << 3),
+    NFCV_REQ_FLAG_SELECT = (1 << 4),
+    NFCV_REQ_FLAG_ADDRESS = (1 << 5),
+    NFCV_REQ_FLAG_OPTION = (1 << 6),
+    /* ISO15693 protocol flags when INVENTORY flag is set */
+    NFCV_REQ_FLAG_AFI = (1 << 4),
+    NFCV_REQ_FLAG_NB_SLOTS = (1 << 5)
+} NfcVRequestFlags;
+
+/* flags for SYSINFO response */
+typedef enum {
+    NFCV_SYSINFO_FLAG_DSFID = (1 << 0),
+    NFCV_SYSINFO_FLAG_AFI = (1 << 1),
+    NFCV_SYSINFO_FLAG_MEMSIZE = (1 << 2),
+    NFCV_SYSINFO_FLAG_ICREF = (1 << 3)
+} NfcVSysinfoFlags;
+
 /* ISO15693 command codes */
-#define ISO15693_INVENTORY 0x01
-#define ISO15693_STAYQUIET 0x02
-#define ISO15693_READBLOCK 0x20
-#define ISO15693_WRITEBLOCK 0x21
-#define ISO15693_LOCKBLOCK 0x22
-#define ISO15693_READ_MULTI_BLOCK 0x23
-#define ISO15693_WRITE_MULTI_BLOCK 0x24
-#define ISO15693_SELECT 0x25
-#define ISO15693_RESET_TO_READY 0x26
-#define ISO15693_WRITE_AFI 0x27
-#define ISO15693_LOCK_AFI 0x28
-#define ISO15693_WRITE_DSFID 0x29
-#define ISO15693_LOCK_DSFID 0x2A
-#define ISO15693_GET_SYSTEM_INFO 0x2B
-#define ISO15693_READ_MULTI_SECSTATUS 0x2C
+typedef enum {
+    /* mandatory command codes */
+    NFCV_CMD_INVENTORY = 0x01,
+    NFCV_CMD_STAY_QUIET = 0x02,
+    /* optional command codes */
+    NFCV_CMD_READ_BLOCK = 0x20,
+    NFCV_CMD_WRITE_BLOCK = 0x21,
+    NFCV_CMD_LOCK_BLOCK = 0x22,
+    NFCV_CMD_READ_MULTI_BLOCK = 0x23,
+    NFCV_CMD_WRITE_MULTI_BLOCK = 0x24,
+    NFCV_CMD_SELECT = 0x25,
+    NFCV_CMD_RESET_TO_READY = 0x26,
+    NFCV_CMD_WRITE_AFI = 0x27,
+    NFCV_CMD_LOCK_AFI = 0x28,
+    NFCV_CMD_WRITE_DSFID = 0x29,
+    NFCV_CMD_LOCK_DSFID = 0x2A,
+    NFCV_CMD_GET_SYSTEM_INFO = 0x2B,
+    NFCV_CMD_READ_MULTI_SECSTATUS = 0x2C,
+    /* advanced command codes */
+    NFCV_CMD_ADVANCED = 0xA0,
+    /* flipper zero custom command codes */
+    NFCV_CMD_CUST_ECHO_MODE = 0xDE,
+    NFCV_CMD_CUST_ECHO_DATA = 0xDF
+} NfcVCommands;
 
-#define ISO15693_CUST_ECHO_MODE 0xDE
-#define ISO15693_CUST_ECHO_DATA 0xDF
-
-/* ISO15693 RESPONSE ERROR CODES */
-#define ISO15693_NOERROR 0x00
-#define ISO15693_ERROR_CMD_NOT_SUP 0x01 // Command not supported
-#define ISO15693_ERROR_CMD_NOT_REC 0x02 // Command not recognized (eg. parameter error)
-#define ISO15693_ERROR_CMD_OPTION 0x03 // Command option not supported
-#define ISO15693_ERROR_GENERIC 0x0F // No additional Info about this error
-#define ISO15693_ERROR_BLOCK_UNAVAILABLE 0x10
-#define ISO15693_ERROR_BLOCK_LOCKED_ALREADY 0x11 // cannot lock again
-#define ISO15693_ERROR_BLOCK_LOCKED 0x12 // cannot be changed
-#define ISO15693_ERROR_BLOCK_WRITE 0x13 // Writing was unsuccessful
-#define ISO15693_ERROR_BLOCL_WRITELOCK 0x14 // Locking was unsuccessful
+/* ISO15693 Response error codes */
+typedef enum {
+    NFCV_NOERROR = 0x00,
+    NFCV_ERROR_CMD_NOT_SUP = 0x01, // Command not supported
+    NFCV_ERROR_CMD_NOT_REC = 0x02, // Command not recognized (eg. parameter error)
+    NFCV_ERROR_CMD_OPTION = 0x03, // Command option not supported
+    NFCV_ERROR_GENERIC = 0x0F, // No additional Info about this error
+    NFCV_ERROR_BLOCK_UNAVAILABLE = 0x10,
+    NFCV_ERROR_BLOCK_LOCKED_ALREADY = 0x11, // cannot lock again
+    NFCV_ERROR_BLOCK_LOCKED = 0x12, // cannot be changed
+    NFCV_ERROR_BLOCK_WRITE = 0x13, // Writing was unsuccessful
+    NFCV_ERROR_BLOCL_WRITELOCK = 0x14 // Locking was unsuccessful
+} NfcVErrorcodes;
 
 typedef enum {
     NfcVLockBitDsfid = 1,
