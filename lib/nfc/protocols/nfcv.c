@@ -1109,16 +1109,19 @@ void nfcv_emu_init(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     furi_hal_gpio_write(&gpio_spi_r_mosi, GPIO_LEVEL_UNMODULATED);
 
     rfal_platform_spi_acquire();
-    /* configure for transparent and passive mode */
+    /* stop operation to configure for transparent and passive mode */
     st25r3916ExecuteCommand(ST25R3916_CMD_STOP);
     /* set enable, rx_enable and field detector enable */
-    st25r3916WriteRegister(ST25R3916_REG_OP_CONTROL, 0xC3);
-    /* explicitely set the modulation resistor */
-    st25r3916WriteRegister(ST25R3916_REG_PT_MOD, 0x0F);
-    /* explicitely set the modulation resistor */
-    st25r3916WriteRegister(ST25R3916_REG_RX_CONF1, 0x00);
-    /* target mode: ISO14443 passive mode */
-    st25r3916WriteRegister(ST25R3916_REG_MODE, 0x88);
+    st25r3916WriteRegister(
+        ST25R3916_REG_OP_CONTROL,
+        ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_rx_en |
+            ST25R3916_REG_OP_CONTROL_en_fd_auto_efd);
+    /* explicitely set the modulation resistor in case system config changes for some reason */
+    st25r3916WriteRegister(
+        ST25R3916_REG_PT_MOD,
+        (0 << ST25R3916_REG_PT_MOD_ptm_res_shift) | (15 << ST25R3916_REG_PT_MOD_pt_res_shift));
+    /* target mode: target, other fields do not have any effect as we use transparent mode */
+    st25r3916WriteRegister(ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ);
     /* let us modulate the field using MOSI, read ASK modulation using IRQ */
     st25r3916ExecuteCommand(ST25R3916_CMD_TRANSPARENT_MODE);
 
