@@ -769,6 +769,11 @@ void nfcv_emu_handle_packet(
                 buffer_pos,
                 ctx->response_flags,
                 ctx->send_time);
+        } else {
+            ctx->response_buffer[0] = NFCV_RES_FLAG_ERROR;
+            ctx->response_buffer[1] = NFCV_ERROR_GENERIC;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 2, ctx->response_flags, ctx->send_time);
         }
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "READ BLOCK %d", block);
 
@@ -800,6 +805,11 @@ void nfcv_emu_handle_packet(
 
             nfcv_emu_send(
                 tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+        } else {
+            ctx->response_buffer[0] = NFCV_RES_FLAG_ERROR;
+            ctx->response_buffer[1] = NFCV_ERROR_GENERIC;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 2, ctx->response_flags, ctx->send_time);
         }
 
         if(ctx->command == NFCV_CMD_WRITE_MULTI_BLOCK) {

@@ -79,6 +79,17 @@ typedef enum {
     NFCV_REQ_FLAG_NB_SLOTS = (1 << 5)
 } NfcVRequestFlags;
 
+/* ISO15693 protocol flags */
+typedef enum {
+    NFCV_RES_FLAG_ERROR = (1 << 0),
+    NFCV_RES_FLAG_VALIDITY = (1 << 1),
+    NFCV_RES_FLAG_FINAL = (1 << 2),
+    NFCV_RES_FLAG_PROTOCOL_EXT = (1 << 3),
+    NFCV_RES_FLAG_SEC_LEN1 = (1 << 4),
+    NFCV_RES_FLAG_SEC_LEN2 = (1 << 5),
+    NFCV_RES_FLAG_WAIT_EXT = (1 << 6),
+} NfcVRsponseFlags;
+
 /* flags for SYSINFO response */
 typedef enum {
     NFCV_SYSINFO_FLAG_DSFID = (1 << 0),
