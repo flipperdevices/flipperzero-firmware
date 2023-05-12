@@ -151,7 +151,11 @@ void furi_hal_infrared_async_rx_start(void) {
     furi_assert(furi_hal_infrared_state == InfraredStateIdle);
 
     furi_hal_gpio_init_ex(
-        &gpio_infrared_rx, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, INFRARED_RX_GPIO_ALT);
+        &gpio_infrared_rx,
+        GpioModeAltFunctionPushPull,
+        GpioPullNo,
+        GpioSpeedLow,
+        INFRARED_RX_GPIO_ALT);
 
     furi_hal_bus_enable(INFRARED_RX_TIMER_BUS);
 
