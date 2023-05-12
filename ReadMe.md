@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `9 May 20:04 GMT +3`
+### Apps checked & updated at `13 May 00:47 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -49,6 +49,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Nu Pogodi! (Ну, погоди!) (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
 - [4 in row (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-4inrow)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
+- [T-rex game (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
 
 ## Media
 - [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
