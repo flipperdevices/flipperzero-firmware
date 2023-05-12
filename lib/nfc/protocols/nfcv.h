@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 /* true: modulating releases load, false: modulating adds load resistor to field coil */
-#define NFCV_LOAD_MODULATION_POLARITY (true)
+#define NFCV_LOAD_MODULATION_POLARITY (false)
 
 #define NFCV_FC (13560000.0f / 0.9998f) /* MHz */
 #define NFCV_RESP_SUBC1_PULSE_32 (1.0f / (NFCV_FC / 32) / 2.0f) /*  1.1799 µs */
