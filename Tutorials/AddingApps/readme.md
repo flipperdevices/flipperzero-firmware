@@ -15,7 +15,7 @@ Each app contains a manifest. Depending if it is embedded in the firmware or add
 File: ´application.fam´
 <br><br>
 Make sure the AppType is set to plugin
-``` apptype=FlipperAppType.PLUGIN, ```
+``` apptype=FlipperAppType.EXTERNAL, ```
 <br><br>
 
 ## Run the app on your Flipper
