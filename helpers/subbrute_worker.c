@@ -6,8 +6,8 @@
 #include <lib/subghz/protocols/protocol_items.h>
 
 #define TAG "SubBruteWorker"
-#define SUBBRUTE_TX_TIMEOUT 5
-#define SUBBRUTE_MANUAL_TRANSMIT_INTERVAL 400
+#define SUBBRUTE_TX_TIMEOUT 6
+#define SUBBRUTE_MANUAL_TRANSMIT_INTERVAL 250
 
 SubBruteWorker* subbrute_worker_alloc() {
     SubBruteWorker* instance = malloc(sizeof(SubBruteWorker));
