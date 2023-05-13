@@ -8,7 +8,6 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <toolbox/api_lock.h>
 
 #define SEADER_UART_RX_BUF_SIZE (128)
 
@@ -37,8 +36,6 @@ struct SeaderUartBridge {
     FuriSemaphore* tx_sem;
 
     SeaderUartState st;
-
-    FuriApiLock cfg_lock;
 
     uint8_t rx_buf[SEADER_UART_RX_BUF_SIZE];
     uint8_t tx_buf[SEADER_UART_RX_BUF_SIZE];

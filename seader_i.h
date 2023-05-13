@@ -9,7 +9,6 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
-#include <gui/gui_i.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <notification/notification_messages.h>
@@ -22,7 +21,6 @@
 #include <gui/modules/widget.h>
 
 #include <input/input.h>
-#include <toolbox/api_lock.h>
 
 // ASN1
 #include <asn_system.h>
