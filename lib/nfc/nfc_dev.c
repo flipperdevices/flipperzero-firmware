@@ -364,7 +364,9 @@ static bool
     bool saved = false;
 
     do {
+        if(!flipper_format_write_string_cstr(file, "Device type", "Mifare Classic")) break;
         if(!nfc_dev_nfca_save_data(file, &data->nfca_data)) break;
+        if(!flipper_format_write_string_cstr(file, "Device type", "")) break;
         if(!flipper_format_write_comment_cstr(file, "Mifare Classic specific data")) break;
         const char* type_name = mf_classic_get_name(mfc_data->type, false);
         if(!flipper_format_write_string_cstr(file, "Mifare Classic type", type_name)) break;
@@ -391,6 +393,8 @@ static bool
 
         saved = true;
     } while(false);
+
+    furi_string_free(temp_str);
 
     return saved;
 }

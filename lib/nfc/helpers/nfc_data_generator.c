@@ -368,7 +368,7 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
         data->nfca_data.sak = 0x18;
     } else if(type == MfClassicType1k) {
         // Set every block to 0xFF
-        for(uint16_t i = 1; i < block_num * 4; i += 1) {
+        for(uint16_t i = 1; i < block_num; i += 1) {
             if(mf_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc_data, i);
             } else {
@@ -380,7 +380,7 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
         data->nfca_data.sak = 0x08;
     } else if(type == MfClassicTypeMini) {
         // Set every block to 0xFF
-        for(uint16_t i = 1; i < block_num * 4; i += 1) {
+        for(uint16_t i = 1; i < block_num; i += 1) {
             if(mf_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc_data, i);
             } else {
