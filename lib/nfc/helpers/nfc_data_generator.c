@@ -279,6 +279,149 @@ static void nfc_generate_ntag_i2c_plus_2k(NfcDevData* data) {
     mfu_data->version.storage_size = 0x15;
 }
 
+static void nfc_generate_mf_classic_uid(uint8_t* uid, uint8_t length) {
+    uid[0] = NXP_MANUFACTURER_ID;
+    furi_hal_random_fill_buf(&uid[1], length - 1);
+}
+
+static void
+    nfc_generate_mf_classic_common(MfClassicData* data, uint8_t uid_len, MfClassicType type) {
+    data->nfca_data.uid_len = uid_len;
+    data->nfca_data.atqa[0] = 0x44;
+    data->nfca_data.atqa[1] = 0x00;
+    data->nfca_data.sak = 0x08;
+    data->type = type;
+}
+
+static void nfc_generate_mf_classic_sector_trailer(MfClassicData* data, uint8_t block) {
+    // All keys are set to FFFF FFFF FFFFh at chip delivery and the bytes 6, 7 and 8 are set to FF0780h.
+    MfClassicSectorTrailer* sec_tr = (MfClassicSectorTrailer*)data->block[block].value;
+    sec_tr->access_bits[0] = 0xFF;
+    sec_tr->access_bits[1] = 0x07;
+    sec_tr->access_bits[2] = 0x80;
+    sec_tr->access_bits[3] = 0x69; // Nice
+
+    mf_classic_set_block_read(data, block, &data->block[block]);
+    mf_classic_set_key_found(
+        data, mf_classic_get_sector_by_block(block), MfClassicKeyA, 0xFFFFFFFFFFFF);
+    mf_classic_set_key_found(
+        data, mf_classic_get_sector_by_block(block), MfClassicKeyB, 0xFFFFFFFFFFFF);
+}
+
+static void nfc_generate_mf_classic_block_0(
+    uint8_t* block,
+    uint8_t uid_len,
+    uint8_t sak,
+    uint8_t atqa0,
+    uint8_t atqa1) {
+    // Block length is always 16 bytes, and the UID can be either 4 or 7 bytes
+    furi_assert(uid_len == 4 || uid_len == 7);
+    furi_assert(block);
+
+    if(uid_len == 4) {
+        // Calculate BCC
+        block[uid_len] = 0;
+
+        for(int i = 0; i < uid_len; i++) {
+            block[uid_len] ^= block[i];
+        }
+    } else {
+        uid_len -= 1;
+    }
+
+    block[uid_len + 1] = sak;
+    block[uid_len + 2] = atqa0;
+    block[uid_len + 3] = atqa1;
+
+    for(int i = uid_len + 4; i < 16; i++) {
+        block[i] = 0xFF;
+    }
+}
+
+static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassicType type) {
+    nfc_generate_common_start(data);
+    data->protocol = NfcDevProtocolMfClassic;
+    MfClassicData* mfc_data = &data->mf_classic_data;
+    nfc_generate_mf_classic_uid(mfc_data->block[0].value, uid_len);
+    nfc_generate_mf_classic_common(mfc_data, uid_len, type);
+
+    // Set the UID
+    mfc_data->nfca_data.uid[0] = NXP_MANUFACTURER_ID;
+    for(int i = 1; i < uid_len; i++) {
+        mfc_data->nfca_data.uid[i] = mfc_data->block[0].value[i];
+    }
+
+    mf_classic_set_block_read(mfc_data, 0, &mfc_data->block[0]);
+
+    uint16_t block_num = mf_classic_get_total_block_num(type);
+    if(type == MfClassicType4k) {
+        // Set every block to 0xFF
+        for(uint16_t i = 1; i < block_num; i += 1) {
+            if(mf_classic_is_sector_trailer(i)) {
+                nfc_generate_mf_classic_sector_trailer(mfc_data, i);
+            } else {
+                memset(&mfc_data->block[i].value, 0xFF, 16);
+            }
+            mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
+        }
+        // Set SAK to 18
+        data->nfca_data.sak = 0x18;
+    } else if(type == MfClassicType1k) {
+        // Set every block to 0xFF
+        for(uint16_t i = 1; i < block_num * 4; i += 1) {
+            if(mf_classic_is_sector_trailer(i)) {
+                nfc_generate_mf_classic_sector_trailer(mfc_data, i);
+            } else {
+                memset(&mfc_data->block[i].value, 0xFF, 16);
+            }
+            mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
+        }
+        // Set SAK to 08
+        data->nfca_data.sak = 0x08;
+    } else if(type == MfClassicTypeMini) {
+        // Set every block to 0xFF
+        for(uint16_t i = 1; i < block_num * 4; i += 1) {
+            if(mf_classic_is_sector_trailer(i)) {
+                nfc_generate_mf_classic_sector_trailer(mfc_data, i);
+            } else {
+                memset(&mfc_data->block[i].value, 0xFF, 16);
+            }
+            mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
+        }
+        // Set SAK to 09
+        data->nfca_data.sak = 0x09;
+    }
+
+    nfc_generate_mf_classic_block_0(
+        data->mf_classic_data.block[0].value,
+        uid_len,
+        data->nfca_data.sak,
+        data->nfca_data.atqa[0],
+        data->nfca_data.atqa[1]);
+
+    mfc_data->type = type;
+}
+
+static void nfc_generate_mf_classic_mini(NfcDevData* data) {
+    nfc_generate_mf_classic(data, 4, MfClassicTypeMini);
+}
+
+static void nfc_generate_mf_classic_1k_4b_uid(NfcDevData* data) {
+    nfc_generate_mf_classic(data, 4, MfClassicType1k);
+}
+
+static void nfc_generate_mf_classic_1k_7b_uid(NfcDevData* data) {
+    nfc_generate_mf_classic(data, 7, MfClassicType1k);
+}
+
+static void nfc_generate_mf_classic_4k_4b_uid(NfcDevData* data) {
+    nfc_generate_mf_classic(data, 4, MfClassicType4k);
+}
+
+static void nfc_generate_mf_classic_4k_7b_uid(NfcDevData* data) {
+    nfc_generate_mf_classic(data, 7, MfClassicType4k);
+}
+
 static const NfcDataGenerator nfc_data_generator[NfcDataGeneratorTypeNum] = {
     [NfcDataGeneratorTypeMfUltralight] =
         {
@@ -345,31 +488,31 @@ static const NfcDataGenerator nfc_data_generator[NfcDataGeneratorTypeNum] = {
             .name = "NTAG I2C Plus 2k",
             .handler = nfc_generate_ntag_i2c_plus_2k,
         },
-    // [NfcDataGeneratorTypeMfClassicMini] =
-    //     {
-    //         .name = "",
-    //         .handler =,
-    //     },
-    // [NfcDataGeneratorTypeMfClassic1k_4b] =
-    //     {
-    //         .name = "",
-    //         .handler =,
-    //     },
-    // [NfcDataGeneratorTypeMfClassic1k_7b] =
-    //     {
-    //         .name = "",
-    //         .handler =,
-    //     },
-    // [NfcDataGeneratorTypeMfClassic2k_4b] =
-    //     {
-    //         .name = "",
-    //         .handler =,
-    //     },
-    // [NfcDataGeneratorTypeMfClassic2k_7b] =
-    //     {
-    //         .name = "",
-    //         .handler =,
-    //     },
+    [NfcDataGeneratorTypeMfClassicMini] =
+        {
+            .name = "Mifare Mini",
+            .handler = nfc_generate_mf_classic_mini,
+        },
+    [NfcDataGeneratorTypeMfClassic1k_4b] =
+        {
+            .name = "Mifare Classic 1k 4byte UID",
+            .handler = nfc_generate_mf_classic_1k_4b_uid,
+        },
+    [NfcDataGeneratorTypeMfClassic1k_7b] =
+        {
+            .name = "Mifare Classic 1k 7byte UID",
+            .handler = nfc_generate_mf_classic_1k_7b_uid,
+        },
+    [NfcDataGeneratorTypeMfClassic2k_4b] =
+        {
+            .name = "Mifare Classic 4k 4byte UID",
+            .handler = nfc_generate_mf_classic_4k_4b_uid,
+        },
+    [NfcDataGeneratorTypeMfClassic2k_7b] =
+        {
+            .name = "Mifare Classic 4k 7byte UID",
+            .handler = nfc_generate_mf_classic_4k_7b_uid,
+        },
 };
 
 const char* nfc_data_generator_get_name(NfcDataGeneratorType type) {

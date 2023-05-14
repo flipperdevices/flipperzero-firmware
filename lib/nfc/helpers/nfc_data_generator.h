@@ -21,11 +21,11 @@ typedef enum {
     NfcDataGeneratorTypeNTAGI2CPlus1k,
     NfcDataGeneratorTypeNTAGI2CPlus2k,
 
-    // NfcDataGeneratorTypeMfClassicMini,
-    // NfcDataGeneratorTypeMfClassic1k_4b,
-    // NfcDataGeneratorTypeMfClassic1k_7b,
-    // NfcDataGeneratorTypeMfClassic2k_4b,
-    // NfcDataGeneratorTypeMfClassic2k_7b,
+    NfcDataGeneratorTypeMfClassicMini,
+    NfcDataGeneratorTypeMfClassic1k_4b,
+    NfcDataGeneratorTypeMfClassic1k_7b,
+    NfcDataGeneratorTypeMfClassic2k_4b,
+    NfcDataGeneratorTypeMfClassic2k_7b,
 
     NfcDataGeneratorTypeNum,
 
