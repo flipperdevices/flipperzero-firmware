@@ -693,13 +693,13 @@ static void nfc_device_write_mifare_classic_block(
     MfClassicData* data,
     uint8_t block_num) {
     furi_string_reset(block_str);
-    bool is_sec_trailer = mf_classic_is_sector_trailer(block_num);
+    bool is_sec_trailer = mifare_classic_is_sector_trailer(block_num);
     if(is_sec_trailer) {
-        uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
-        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
+        uint8_t sector_num = mifare_classic_get_sector_by_block(block_num);
+        MfClassicSectorTrailer* sec_tr = mifare_classic_get_sector_trailer_by_sector(data, sector_num);
         // Write key A
         for(size_t i = 0; i < sizeof(sec_tr->key_a); i++) {
-            if(mf_classic_is_key_found(data, sector_num, MfClassicKeyA)) {
+            if(mifare_classic_is_key_found(data, sector_num, MfClassicKeyA)) {
                 furi_string_cat_printf(block_str, "%02X ", sec_tr->key_a[i]);
             } else {
                 furi_string_cat_printf(block_str, "?? ");
@@ -707,7 +707,7 @@ static void nfc_device_write_mifare_classic_block(
         }
         // Write Access bytes
         for(size_t i = 0; i < MF_CLASSIC_ACCESS_BYTES_SIZE; i++) {
-            if(mf_classic_is_block_read(data, block_num)) {
+            if(mifare_classic_is_block_read(data, block_num)) {
                 furi_string_cat_printf(block_str, "%02X ", sec_tr->access_bits[i]);
             } else {
                 furi_string_cat_printf(block_str, "?? ");
@@ -715,7 +715,7 @@ static void nfc_device_write_mifare_classic_block(
         }
         // Write key B
         for(size_t i = 0; i < sizeof(sec_tr->key_b); i++) {
-            if(mf_classic_is_key_found(data, sector_num, MfClassicKeyB)) {
+            if(mifare_classic_is_key_found(data, sector_num, MfClassicKeyB)) {
                 furi_string_cat_printf(block_str, "%02X ", sec_tr->key_b[i]);
             } else {
                 furi_string_cat_printf(block_str, "?? ");
@@ -724,7 +724,7 @@ static void nfc_device_write_mifare_classic_block(
     } else {
         // Write data block
         for(size_t i = 0; i < MF_CLASSIC_BLOCK_SIZE; i++) {
-            if(mf_classic_is_block_read(data, block_num)) {
+            if(mifare_classic_is_block_read(data, block_num)) {
                 furi_string_cat_printf(block_str, "%02X ", data->block[block_num].value[i]);
             } else {
                 furi_string_cat_printf(block_str, "?? ");
@@ -787,8 +787,8 @@ static void nfc_device_load_mifare_classic_block(
     uint8_t block_num) {
     furi_string_trim(block_str);
     MfClassicBlock block_tmp = {};
-    bool is_sector_trailer = mf_classic_is_sector_trailer(block_num);
-    uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+    bool is_sector_trailer = mifare_classic_is_sector_trailer(block_num);
+    uint8_t sector_num = mifare_classic_get_sector_by_block(block_num);
     uint16_t block_unknown_bytes_mask = 0;
 
     furi_string_trim(block_str);
@@ -814,22 +814,22 @@ static void nfc_device_load_mifare_classic_block(
         // Key A mask 0b0000000000111111 = 0x003f
         if((block_unknown_bytes_mask & 0x003f) == 0) {
             uint64_t key = nfc_util_bytes2num(sec_tr_tmp->key_a, sizeof(sec_tr_tmp->key_a));
-            mf_classic_set_key_found(data, sector_num, MfClassicKeyA, key);
+            mifare_classic_set_key_found(data, sector_num, MfClassicKeyA, key);
         }
         // Load Access Bits
         // Access bits mask 0b0000001111000000 = 0x03c0
         if((block_unknown_bytes_mask & 0x03c0) == 0) {
-            mf_classic_set_block_read(data, block_num, &block_tmp);
+            mifare_classic_set_block_read(data, block_num, &block_tmp);
         }
         // Load Key B
         // Key B mask 0b1111110000000000 = 0xfc00
         if((block_unknown_bytes_mask & 0xfc00) == 0) {
             uint64_t key = nfc_util_bytes2num(sec_tr_tmp->key_b, sizeof(sec_tr_tmp->key_b));
-            mf_classic_set_key_found(data, sector_num, MfClassicKeyB, key);
+            mifare_classic_set_key_found(data, sector_num, MfClassicKeyB, key);
         }
     } else {
         if(block_unknown_bytes_mask == 0) {
-            mf_classic_set_block_read(data, block_num, &block_tmp);
+            mifare_classic_set_block_read(data, block_num, &block_tmp);
         }
     }
 }
@@ -933,10 +933,10 @@ static bool nfc_device_save_mifare_classic_keys(NfcDevice* dev) {
         }
         if(!flipper_format_write_hex_uint64(file, "Key A map", &data->key_a_mask, 1)) break;
         if(!flipper_format_write_hex_uint64(file, "Key B map", &data->key_b_mask, 1)) break;
-        uint8_t sector_num = mf_classic_get_total_sectors_num(data->type);
+        uint8_t sector_num = mifare_classic_get_total_sectors_num(data->type);
         bool key_save_success = true;
         for(size_t i = 0; (i < sector_num) && (key_save_success); i++) {
-            MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
+            MfClassicSectorTrailer* sec_tr = mifare_classic_get_sector_trailer_by_sector(data, i);
             if(FURI_BIT(data->key_a_mask, i)) {
                 furi_string_printf(temp_str, "Key A sector %d", i);
                 key_save_success = flipper_format_write_hex(
@@ -987,10 +987,10 @@ bool nfc_device_load_key_cache(NfcDevice* dev) {
         }
         if(!flipper_format_read_hex_uint64(file, "Key A map", &data->key_a_mask, 1)) break;
         if(!flipper_format_read_hex_uint64(file, "Key B map", &data->key_b_mask, 1)) break;
-        uint8_t sectors = mf_classic_get_total_sectors_num(data->type);
+        uint8_t sectors = mifare_classic_get_total_sectors_num(data->type);
         bool key_read_success = true;
         for(size_t i = 0; (i < sectors) && (key_read_success); i++) {
-            MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, i);
+            MfClassicSectorTrailer* sec_tr = mifare_classic_get_sector_trailer_by_sector(data, i);
             if(FURI_BIT(data->key_a_mask, i)) {
                 furi_string_printf(temp_str, "Key A sector %d", i);
                 key_read_success = flipper_format_read_hex(

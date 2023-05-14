@@ -28,7 +28,7 @@ static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* nfc) {
     uint8_t keys_found = 0;
 
     // Calculate found keys and read sectors
-    mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
+    mifare_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
     dict_attack_set_keys_found(nfc->dict_attack, keys_found);
     dict_attack_set_sector_read(nfc->dict_attack, sectors_read);
 }

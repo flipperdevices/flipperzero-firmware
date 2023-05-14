@@ -30,9 +30,9 @@ bool troika_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     }
 
     uint8_t sector = 11;
-    uint8_t block = mf_classic_get_sector_trailer_block_num_by_sector(sector);
+    uint8_t block = mifare_classic_get_sector_trailer_block_num_by_sector(sector);
     FURI_LOG_D("Troika", "Verifying sector %d", sector);
-    if(mf_classic_authenticate(tx_rx, block, 0x08b386463229, MfClassicKeyA)) {
+    if(mifare_classic_authenticate(tx_rx, block, 0x08b386463229, MfClassicKeyA)) {
         FURI_LOG_D("Troika", "Sector %d verified", sector);
         return true;
     }
@@ -44,14 +44,14 @@ bool troika_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
 
     MfClassicReader reader = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+    reader.type = mifare_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
 
     for(size_t i = 0; i < COUNT_OF(troika_keys); i++) {
-        mf_classic_reader_add_sector(
+        mifare_classic_reader_add_sector(
             &reader, troika_keys[i].sector, troika_keys[i].key_a, troika_keys[i].key_b);
     }
 
-    return mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 16;
+    return mifare_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 16;
 }
 
 bool troika_parser_parse(NfcDeviceData* dev_data) {
@@ -60,7 +60,7 @@ bool troika_parser_parse(NfcDeviceData* dev_data) {
 
     do {
         // Verify key
-        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 8);
+        MfClassicSectorTrailer* sec_tr = mifare_classic_get_sector_trailer_by_sector(data, 8);
         uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
         if(key != troika_keys[8].key_a) break;
 

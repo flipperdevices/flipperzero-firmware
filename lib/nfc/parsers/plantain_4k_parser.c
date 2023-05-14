@@ -57,9 +57,9 @@ bool plantain_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_
     }
 
     uint8_t sector = 8;
-    uint8_t block = mf_classic_get_sector_trailer_block_num_by_sector(sector);
+    uint8_t block = mifare_classic_get_sector_trailer_block_num_by_sector(sector);
     FURI_LOG_D("Plant4K", "Verifying sector %d", sector);
-    if(mf_classic_authenticate(tx_rx, block, 0x26973ea74321, MfClassicKeyA)) {
+    if(mifare_classic_authenticate(tx_rx, block, 0x26973ea74321, MfClassicKeyA)) {
         FURI_LOG_D("Plant4K", "Sector %d verified", sector);
         return true;
     }
@@ -71,9 +71,9 @@ bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
 
     MfClassicReader reader = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+    reader.type = mifare_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
     for(size_t i = 0; i < COUNT_OF(plantain_keys_4k); i++) {
-        mf_classic_reader_add_sector(
+        mifare_classic_reader_add_sector(
             &reader,
             plantain_keys_4k[i].sector,
             plantain_keys_4k[i].key_a,
@@ -81,7 +81,7 @@ bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
         FURI_LOG_T("plant4k", "Added sector %d", plantain_keys_4k[i].sector);
     }
     for(int i = 0; i < 5; i++) {
-        if(mf_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40) {
+        if(mifare_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 40) {
             return true;
         }
     }
@@ -92,7 +92,7 @@ bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     MfClassicData* data = &dev_data->mf_classic_data;
 
     // Verify key
-    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 8);
+    MfClassicSectorTrailer* sec_tr = mifare_classic_get_sector_trailer_by_sector(data, 8);
     uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
     if(key != plantain_keys_4k[8].key_a) return false;
 

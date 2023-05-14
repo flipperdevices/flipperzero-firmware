@@ -193,11 +193,11 @@ static bool nfc_worker_read_mf_classic(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
         if(nfc_worker->callback(NfcWorkerEventReadMfClassicLoadKeyCache, nfc_worker->context)) {
             FURI_LOG_I(TAG, "Load keys cache success. Start reading");
             uint8_t sectors_read =
-                mf_classic_update_card(tx_rx, &nfc_worker->dev_data->mf_classic_data);
+                mifare_classic_update_card(tx_rx, &nfc_worker->dev_data->mf_classic_data);
             uint8_t sectors_total =
-                mf_classic_get_total_sectors_num(nfc_worker->dev_data->mf_classic_data.type);
+                mifare_classic_get_total_sectors_num(nfc_worker->dev_data->mf_classic_data.type);
             FURI_LOG_I(TAG, "Read %d sectors out of %d total", sectors_read, sectors_total);
-            read_success = mf_classic_is_card_read(&nfc_worker->dev_data->mf_classic_data);
+            read_success = mifare_classic_is_card_read(&nfc_worker->dev_data->mf_classic_data);
         }
     } while(false);
 
@@ -238,11 +238,11 @@ static bool nfc_worker_read_nfca(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
         FURI_LOG_I(TAG, "Mifare Ultralight / NTAG detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareUl;
         card_read = nfc_worker_read_mf_ultralight(nfc_worker, tx_rx);
-    } else if(mf_classic_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
+    } else if(mifare_classic_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
         FURI_LOG_I(TAG, "Mifare Classic detected");
         nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareClassic;
         nfc_worker->dev_data->mf_classic_data.type =
-            mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+            mifare_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
         card_read = nfc_worker_read_mf_classic(nfc_worker, tx_rx);
     } else if(mf_df_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
         FURI_LOG_I(TAG, "Mifare DESFire detected");
@@ -344,7 +344,7 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
             if(nfc_data->type == FuriHalNfcTypeA) {
                 if(read_mode == NfcReadModeMfClassic) {
                     nfc_worker->dev_data->protocol = NfcDeviceProtocolMifareClassic;
-                    nfc_worker->dev_data->mf_classic_data.type = mf_classic_get_classic_type(
+                    nfc_worker->dev_data->mf_classic_data.type = mifare_classic_get_classic_type(
                         nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
                     if(nfc_worker_read_mf_classic(nfc_worker, &tx_rx)) {
                         FURI_LOG_D(TAG, "Card read");
@@ -496,7 +496,7 @@ static bool nfc_worker_mf_get_b_key_from_sector_trailer(
     uint64_t* found_key) {
     // Some access conditions allow reading B key via A key
 
-    uint8_t block = mf_classic_get_sector_trailer_block_num_by_sector(sector);
+    uint8_t block = mifare_classic_get_sector_trailer_block_num_by_sector(sector);
 
     Crypto1 crypto = {};
     MfClassicBlock block_tmp = {};
@@ -504,8 +504,8 @@ static bool nfc_worker_mf_get_b_key_from_sector_trailer(
 
     furi_hal_nfc_sleep();
 
-    if(mf_classic_auth_attempt(tx_rx, &crypto, &auth_context, key)) {
-        if(mf_classic_read_block(tx_rx, &crypto, block, &block_tmp)) {
+    if(mifare_classic_auth_attempt(tx_rx, &crypto, &auth_context, key)) {
+        if(mifare_classic_read_block(tx_rx, &crypto, block, &block_tmp)) {
             *found_key = nfc_util_bytes2num(&block_tmp.value[10], sizeof(uint8_t) * 6);
 
             return *found_key;
@@ -529,7 +529,7 @@ static void nfc_worker_mf_classic_key_attack(
     MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
     NfcMfClassicDictAttackData* dict_attack_data =
         &nfc_worker->dev_data->mf_classic_dict_attack_data;
-    uint32_t total_sectors = mf_classic_get_total_sectors_num(data->type);
+    uint32_t total_sectors = mifare_classic_get_total_sectors_num(data->type);
 
     furi_assert(start_sector < total_sectors);
 
@@ -547,17 +547,17 @@ static void nfc_worker_mf_classic_key_attack(
                 card_found_notified = true;
                 card_removed_notified = false;
             }
-            uint8_t block_num = mf_classic_get_sector_trailer_block_num_by_sector(i);
-            if(mf_classic_is_sector_read(data, i)) continue;
-            if(!mf_classic_is_key_found(data, i, MfClassicKeyA)) {
+            uint8_t block_num = mifare_classic_get_sector_trailer_block_num_by_sector(i);
+            if(mifare_classic_is_sector_read(data, i)) continue;
+            if(!mifare_classic_is_key_found(data, i, MfClassicKeyA)) {
                 FURI_LOG_D(
                     TAG,
                     "Trying A key for sector %d, key: %04lx%08lx",
                     i,
                     (uint32_t)(key >> 32),
                     (uint32_t)key);
-                if(mf_classic_authenticate(tx_rx, block_num, key, MfClassicKeyA)) {
-                    mf_classic_set_key_found(data, i, MfClassicKeyA, key);
+                if(mifare_classic_authenticate(tx_rx, block_num, key, MfClassicKeyA)) {
+                    mifare_classic_set_key_found(data, i, MfClassicKeyA, key);
                     FURI_LOG_D(
                         TAG, "Key A found: %04lx%08lx", (uint32_t)(key >> 32), (uint32_t)key);
                     nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
@@ -565,7 +565,7 @@ static void nfc_worker_mf_classic_key_attack(
                     uint64_t found_key;
                     if(nfc_worker_mf_get_b_key_from_sector_trailer(tx_rx, i, key, &found_key)) {
                         FURI_LOG_D(TAG, "Found B key via reading sector %d", i);
-                        mf_classic_set_key_found(data, i, MfClassicKeyB, found_key);
+                        mifare_classic_set_key_found(data, i, MfClassicKeyB, found_key);
 
                         if(nfc_worker->state == NfcWorkerStateMfClassicDictAttack) {
                             nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
@@ -573,23 +573,23 @@ static void nfc_worker_mf_classic_key_attack(
                     }
                 }
             }
-            if(!mf_classic_is_key_found(data, i, MfClassicKeyB)) {
+            if(!mifare_classic_is_key_found(data, i, MfClassicKeyB)) {
                 FURI_LOG_D(
                     TAG,
                     "Trying B key for sector %d, key: %04lx%08lx",
                     i,
                     (uint32_t)(key >> 32),
                     (uint32_t)key);
-                if(mf_classic_authenticate(tx_rx, block_num, key, MfClassicKeyB)) {
-                    mf_classic_set_key_found(data, i, MfClassicKeyB, key);
+                if(mifare_classic_authenticate(tx_rx, block_num, key, MfClassicKeyB)) {
+                    mifare_classic_set_key_found(data, i, MfClassicKeyB, key);
                     FURI_LOG_D(
                         TAG, "Key B found: %04lx%08lx", (uint32_t)(key >> 32), (uint32_t)key);
                     nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
                 }
             }
 
-            if(mf_classic_is_sector_read(data, i)) continue;
-            mf_classic_read_sector(tx_rx, data, i);
+            if(mifare_classic_is_sector_read(data, i)) continue;
+            mifare_classic_read_sector(tx_rx, data, i);
         } else {
             if(!card_removed_notified) {
                 nfc_worker->callback(NfcWorkerEventNoCardDetected, nfc_worker->context);
@@ -609,7 +609,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
     MfClassicData* data = &nfc_worker->dev_data->mf_classic_data;
     NfcMfClassicDictAttackData* dict_attack_data =
         &nfc_worker->dev_data->mf_classic_dict_attack_data;
-    uint32_t total_sectors = mf_classic_get_total_sectors_num(data->type);
+    uint32_t total_sectors = mifare_classic_get_total_sectors_num(data->type);
     uint64_t key = 0;
     uint64_t prev_key = 0;
     FuriHalNfcTxRxContext tx_rx = {};
@@ -629,10 +629,10 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
     for(size_t i = 0; i < total_sectors; i++) {
         FURI_LOG_I(TAG, "Sector %d", i);
         nfc_worker->callback(NfcWorkerEventNewSector, nfc_worker->context);
-        uint8_t block_num = mf_classic_get_sector_trailer_block_num_by_sector(i);
-        if(mf_classic_is_sector_read(data, i)) continue;
-        bool is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
-        bool is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
+        uint8_t block_num = mifare_classic_get_sector_trailer_block_num_by_sector(i);
+        if(mifare_classic_is_sector_read(data, i)) continue;
+        bool is_key_a_found = mifare_classic_is_key_found(data, i, MfClassicKeyA);
+        bool is_key_b_found = mifare_classic_is_key_found(data, i, MfClassicKeyB);
         uint16_t key_index = 0;
         while(mf_classic_dict_get_next_key(dict, &key)) {
             FURI_LOG_T(TAG, "Key %d", key_index);
@@ -657,10 +657,10 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     (uint32_t)(key >> 32),
                     (uint32_t)key);
                 if(!is_key_a_found) {
-                    is_key_a_found = mf_classic_is_key_found(data, i, MfClassicKeyA);
-                    if(mf_classic_authenticate_skip_activate(
+                    is_key_a_found = mifare_classic_is_key_found(data, i, MfClassicKeyA);
+                    if(mifare_classic_authenticate_skip_activate(
                            &tx_rx, block_num, key, MfClassicKeyA, !deactivated, cuid)) {
-                        mf_classic_set_key_found(data, i, MfClassicKeyA, key);
+                        mifare_classic_set_key_found(data, i, MfClassicKeyA, key);
                         FURI_LOG_D(TAG, "Key A found");
                         nfc_worker->callback(NfcWorkerEventFoundKeyA, nfc_worker->context);
 
@@ -668,7 +668,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                         if(nfc_worker_mf_get_b_key_from_sector_trailer(
                                &tx_rx, i, key, &found_key)) {
                             FURI_LOG_D(TAG, "Found B key via reading sector %d", i);
-                            mf_classic_set_key_found(data, i, MfClassicKeyB, found_key);
+                            mifare_classic_set_key_found(data, i, MfClassicKeyB, found_key);
 
                             if(nfc_worker->state == NfcWorkerStateMfClassicDictAttack) {
                                 nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
@@ -683,28 +683,28 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     deactivated = true;
                 } else {
                     // If the key A is marked as found and matches the searching key, invalidate it
-                    if(mf_classic_is_key_found(data, i, MfClassicKeyA) &&
+                    if(mifare_classic_is_key_found(data, i, MfClassicKeyA) &&
                        data->block[i].value[0] == key) {
-                        mf_classic_set_key_not_found(data, i, MfClassicKeyA);
+                        mifare_classic_set_key_not_found(data, i, MfClassicKeyA);
                         is_key_a_found = false;
                         FURI_LOG_D(TAG, "Key %dA not found in attack", i);
                     }
                 }
                 if(!is_key_b_found) {
-                    is_key_b_found = mf_classic_is_key_found(data, i, MfClassicKeyB);
-                    if(mf_classic_authenticate_skip_activate(
+                    is_key_b_found = mifare_classic_is_key_found(data, i, MfClassicKeyB);
+                    if(mifare_classic_authenticate_skip_activate(
                            &tx_rx, block_num, key, MfClassicKeyB, !deactivated, cuid)) {
                         FURI_LOG_D(TAG, "Key B found");
-                        mf_classic_set_key_found(data, i, MfClassicKeyB, key);
+                        mifare_classic_set_key_found(data, i, MfClassicKeyB, key);
                         nfc_worker->callback(NfcWorkerEventFoundKeyB, nfc_worker->context);
                         nfc_worker_mf_classic_key_attack(nfc_worker, key, &tx_rx, i + 1);
                     }
                     deactivated = true;
                 } else {
                     // If the key B is marked as found and matches the searching key, invalidate it
-                    if(mf_classic_is_key_found(data, i, MfClassicKeyB) &&
+                    if(mifare_classic_is_key_found(data, i, MfClassicKeyB) &&
                        data->block[i].value[10] == key) {
-                        mf_classic_set_key_not_found(data, i, MfClassicKeyB);
+                        mifare_classic_set_key_not_found(data, i, MfClassicKeyB);
                         is_key_b_found = false;
                         FURI_LOG_D(TAG, "Key %dB not found in attack", i);
                     }
@@ -722,7 +722,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
             memcpy(&prev_key, &key, sizeof(key));
         }
         if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
-        mf_classic_read_sector(&tx_rx, data, i);
+        mifare_classic_read_sector(&tx_rx, data, i);
         mf_classic_dict_rewind(dict);
     }
     if(nfc_worker->state == NfcWorkerStateMfClassicDictAttack) {
@@ -748,7 +748,7 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     furi_hal_nfc_listen_start(nfc_data);
     while(nfc_worker->state == NfcWorkerStateMfClassicEmulate) { //-V1044
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
-            mf_classic_emulator(&emulator, &tx_rx);
+            mifare_classic_emulator(&emulator, &tx_rx);
         }
     }
     if(emulator.data_changed) {
@@ -789,7 +789,7 @@ void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
 
             FURI_LOG_I(TAG, "Check mf classic type");
             MfClassicType type =
-                mf_classic_get_classic_type(nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak);
+                mifare_classic_get_classic_type(nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak);
             if(type != nfc_worker->dev_data->mf_classic_data.type) {
                 FURI_LOG_E(TAG, "Wrong mf classic type");
                 nfc_worker->callback(NfcWorkerEventWrongCard, nfc_worker->context);
@@ -797,22 +797,22 @@ void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
             }
 
             // Set blocks not read
-            mf_classic_set_sector_data_not_read(&dest_data);
+            mifare_classic_set_sector_data_not_read(&dest_data);
             FURI_LOG_I(TAG, "Updating card sectors");
-            uint8_t total_sectors = mf_classic_get_total_sectors_num(type);
+            uint8_t total_sectors = mifare_classic_get_total_sectors_num(type);
             bool write_success = true;
             for(uint8_t i = 0; i < total_sectors; i++) {
                 FURI_LOG_I(TAG, "Reading sector %d", i);
-                mf_classic_read_sector(&tx_rx, &dest_data, i);
-                bool old_data_read = mf_classic_is_sector_data_read(src_data, i);
-                bool new_data_read = mf_classic_is_sector_data_read(&dest_data, i);
+                mifare_classic_read_sector(&tx_rx, &dest_data, i);
+                bool old_data_read = mifare_classic_is_sector_data_read(src_data, i);
+                bool new_data_read = mifare_classic_is_sector_data_read(&dest_data, i);
                 if(old_data_read != new_data_read) {
                     FURI_LOG_E(TAG, "Failed to update sector %d", i);
                     write_success = false;
                     break;
                 }
                 if(nfc_worker->state != NfcWorkerStateMfClassicWrite) break;
-                if(!mf_classic_write_sector(&tx_rx, &dest_data, src_data, i)) {
+                if(!mifare_classic_write_sector(&tx_rx, &dest_data, src_data, i)) {
                     FURI_LOG_E(TAG, "Failed to write %d sector", i);
                     write_success = false;
                     break;
@@ -862,7 +862,7 @@ void nfc_worker_update_mf_classic(NfcWorker* nfc_worker) {
 
             FURI_LOG_I(TAG, "Check MF classic type");
             MfClassicType type =
-                mf_classic_get_classic_type(nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak);
+                mifare_classic_get_classic_type(nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak);
             if(type != nfc_worker->dev_data->mf_classic_data.type) {
                 FURI_LOG_E(TAG, "MF classic type mismatch");
                 nfc_worker->callback(NfcWorkerEventWrongCard, nfc_worker->context);
@@ -870,15 +870,15 @@ void nfc_worker_update_mf_classic(NfcWorker* nfc_worker) {
             }
 
             // Set blocks not read
-            mf_classic_set_sector_data_not_read(&new_data);
+            mifare_classic_set_sector_data_not_read(&new_data);
             FURI_LOG_I(TAG, "Updating card sectors");
-            uint8_t total_sectors = mf_classic_get_total_sectors_num(type);
+            uint8_t total_sectors = mifare_classic_get_total_sectors_num(type);
             bool update_success = true;
             for(uint8_t i = 0; i < total_sectors; i++) {
                 FURI_LOG_I(TAG, "Reading sector %d", i);
-                mf_classic_read_sector(&tx_rx, &new_data, i);
-                bool old_data_read = mf_classic_is_sector_data_read(old_data, i);
-                bool new_data_read = mf_classic_is_sector_data_read(&new_data, i);
+                mifare_classic_read_sector(&tx_rx, &new_data, i);
+                bool old_data_read = mifare_classic_is_sector_data_read(old_data, i);
+                bool new_data_read = mifare_classic_is_sector_data_read(&new_data, i);
                 if(old_data_read != new_data_read) {
                     FURI_LOG_E(TAG, "Failed to update sector %d", i);
                     update_success = false;
@@ -1035,7 +1035,7 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
             NfcProtocol protocol =
                 reader_analyzer_guess_protocol(reader_analyzer, tx_rx.rx_data, tx_rx.rx_bits / 8);
             if(protocol == NfcDeviceProtocolMifareClassic) {
-                mf_classic_emulator(&emulator, &tx_rx);
+                mifare_classic_emulator(&emulator, &tx_rx);
             }
         } else {
             reader_no_data_received_cnt++;

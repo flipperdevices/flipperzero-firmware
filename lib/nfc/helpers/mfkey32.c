@@ -169,7 +169,7 @@ void mfkey32_process_data(
         if(reader_to_tag) {
             if((data[0] == 0x60) || (data[0] == 0x61)) {
                 nonce->key = data[0] == 0x60 ? MfClassicKeyA : MfClassicKeyB;
-                nonce->sector = mf_classic_get_sector_by_block(data[1]);
+                nonce->sector = mifare_classic_get_sector_by_block(data[1]);
                 instance->state = Mfkey32StateAuthReceived;
                 data_processed = true;
             }

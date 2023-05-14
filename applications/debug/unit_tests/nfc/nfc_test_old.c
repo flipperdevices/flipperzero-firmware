@@ -404,9 +404,9 @@
 //     // Reference block data
 //     uint8_t block_data[16] = {};
 //     memset(block_data, 0xff, sizeof(block_data));
-//     uint16_t total_blocks = mf_classic_get_total_block_num(type);
+//     uint16_t total_blocks = mifare_classic_get_total_block_num(type);
 //     for(size_t i = 1; i < total_blocks; i++) {
-//         if(mf_classic_is_sector_trailer(i)) {
+//         if(mifare_classic_is_sector_trailer(i)) {
 //             mu_assert(
 //                 memcmp(mf_data->block[i].value, sector_trailer, 16) == 0,
 //                 "Failed sector trailer compare");
@@ -456,7 +456,7 @@
 //         "manufacturer_block assert failed\r\n");
 //     // Check other blocks
 //     for(size_t i = 1; i < total_blocks; i++) {
-//         if(mf_classic_is_sector_trailer(i)) {
+//         if(mifare_classic_is_sector_trailer(i)) {
 //             mu_assert(
 //                 memcmp(mf_data->block[i].value, sector_trailer, 16) == 0,
 //                 "Failed sector trailer compare");
@@ -472,12 +472,12 @@
 //     nfc_keys->dev_data.nfc_data.uid_len = uid_len;
 //     memcpy(nfc_keys->dev_data.nfc_data.uid, uid, uid_len);
 //     mu_assert(nfc_device_load_key_cache(nfc_keys), "Failed to load key cache");
-//     uint8_t total_sec = mf_classic_get_total_sectors_num(type);
+//     uint8_t total_sec = mifare_classic_get_total_sectors_num(type);
 //     uint8_t default_key[6] = {};
 //     memset(default_key, 0xff, 6);
 //     for(size_t i = 0; i < total_sec; i++) {
 //         MfClassicSectorTrailer* sec_tr =
-//             mf_classic_get_sector_trailer_by_sector(&nfc_keys->dev_data.mf_classic_data, i);
+//             mifare_classic_get_sector_trailer_by_sector(&nfc_keys->dev_data.mf_classic_data, i);
 //         mu_assert(memcmp(sec_tr->key_a, default_key, 6) == 0, "Failed key compare");
 //         mu_assert(memcmp(sec_tr->key_b, default_key, 6) == 0, "Failed key compare");
 //     }

@@ -33,11 +33,11 @@ void nfc_scene_mf_classic_read_success_on_enter(void* context) {
         for(size_t i = 0; i < dev_data->nfc_data.uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", dev_data->nfc_data.uid[i]);
         }
-        uint8_t sectors_total = mf_classic_get_total_sectors_num(mf_data->type);
+        uint8_t sectors_total = mifare_classic_get_total_sectors_num(mf_data->type);
         uint8_t keys_total = sectors_total * 2;
         uint8_t keys_found = 0;
         uint8_t sectors_read = 0;
-        mf_classic_get_read_sectors_and_keys(mf_data, &sectors_read, &keys_found);
+        mifare_classic_get_read_sectors_and_keys(mf_data, &sectors_read, &keys_found);
         furi_string_cat_printf(temp_str, "\nKeys Found: %d/%d", keys_found, keys_total);
         furi_string_cat_printf(temp_str, "\nSectors Read: %d/%d", sectors_read, sectors_total);
     }

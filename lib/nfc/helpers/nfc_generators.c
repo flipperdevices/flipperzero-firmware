@@ -71,11 +71,11 @@ static void nfc_generate_mf_classic_sector_trailer(MfClassicData* data, uint8_t 
     memset(sec_tr->key_a, 0xff, sizeof(sec_tr->key_a));
     memset(sec_tr->key_b, 0xff, sizeof(sec_tr->key_b));
 
-    mf_classic_set_block_read(data, block, &data->block[block]);
-    mf_classic_set_key_found(
-        data, mf_classic_get_sector_by_block(block), MfClassicKeyA, 0xFFFFFFFFFFFF);
-    mf_classic_set_key_found(
-        data, mf_classic_get_sector_by_block(block), MfClassicKeyB, 0xFFFFFFFFFFFF);
+    mifare_classic_set_block_read(data, block, &data->block[block]);
+    mifare_classic_set_key_found(
+        data, mifare_classic_get_sector_by_block(block), MfClassicKeyA, 0xFFFFFFFFFFFF);
+    mifare_classic_set_key_found(
+        data, mifare_classic_get_sector_by_block(block), MfClassicKeyB, 0xFFFFFFFFFFFF);
 }
 
 static void nfc_generate_mf_ul_common(NfcDeviceData* data) {
@@ -345,41 +345,41 @@ void nfc_generate_mf_classic(NfcDeviceData* data, uint8_t uid_len, MfClassicType
     }
 
     MfClassicData* mfc = &data->mf_classic_data;
-    mf_classic_set_block_read(mfc, 0, &mfc->block[0]);
+    mifare_classic_set_block_read(mfc, 0, &mfc->block[0]);
 
     if(type == MfClassicType4k) {
         // Set every block to 0xFF
         for(uint16_t i = 1; i < 256; i += 1) {
-            if(mf_classic_is_sector_trailer(i)) {
+            if(mifare_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc, i);
             } else {
                 memset(&mfc->block[i].value, 0xFF, 16);
             }
-            mf_classic_set_block_read(mfc, i, &mfc->block[i]);
+            mifare_classic_set_block_read(mfc, i, &mfc->block[i]);
         }
         // Set SAK to 18
         data->nfc_data.sak = 0x18;
     } else if(type == MfClassicType1k) {
         // Set every block to 0xFF
         for(uint16_t i = 1; i < MF_CLASSIC_1K_TOTAL_SECTORS_NUM * 4; i += 1) {
-            if(mf_classic_is_sector_trailer(i)) {
+            if(mifare_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc, i);
             } else {
                 memset(&mfc->block[i].value, 0xFF, 16);
             }
-            mf_classic_set_block_read(mfc, i, &mfc->block[i]);
+            mifare_classic_set_block_read(mfc, i, &mfc->block[i]);
         }
         // Set SAK to 08
         data->nfc_data.sak = 0x08;
     } else if(type == MfClassicTypeMini) {
         // Set every block to 0xFF
         for(uint16_t i = 1; i < MF_MINI_TOTAL_SECTORS_NUM * 4; i += 1) {
-            if(mf_classic_is_sector_trailer(i)) {
+            if(mifare_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc, i);
             } else {
                 memset(&mfc->block[i].value, 0xFF, 16);
             }
-            mf_classic_set_block_read(mfc, i, &mfc->block[i]);
+            mifare_classic_set_block_read(mfc, i, &mfc->block[i]);
         }
         // Set SAK to 09
         data->nfc_data.sak = 0x09;

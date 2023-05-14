@@ -55,7 +55,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
 
     if(data->protocol == NfcDevProtocolMfClassic) {
         // TODO
-        // if(!mf_classic_is_card_read(&nfc->dev->dev_data.mf_classic_data))
+        // if(!mifare_classic_is_card_read(&nfc->dev->dev_data.mf_classic_data))
         submenu_add_item(
             submenu,
             "Detect Reader",

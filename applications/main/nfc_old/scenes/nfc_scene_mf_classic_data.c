@@ -20,17 +20,17 @@ void nfc_scene_mf_classic_data_on_enter(void* context) {
 
     int bytes_written = 0;
     for(int block_num = 0; block_num < card_blocks; block_num++) {
-        bool is_sec_trailer = mf_classic_is_sector_trailer(block_num);
+        bool is_sec_trailer = mifare_classic_is_sector_trailer(block_num);
         if(is_sec_trailer) {
-            uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+            uint8_t sector_num = mifare_classic_get_sector_by_block(block_num);
             MfClassicSectorTrailer* sec_tr =
-                mf_classic_get_sector_trailer_by_sector(data, sector_num);
+                mifare_classic_get_sector_trailer_by_sector(data, sector_num);
             // Key A
             for(size_t i = 0; i < sizeof(sec_tr->key_a); i += 2) {
                 if((bytes_written % 8 == 0) && (bytes_written != 0)) {
                     furi_string_push_back(nfc->text_box_store, '\n');
                 }
-                if(mf_classic_is_key_found(data, sector_num, MfClassicKeyA)) {
+                if(mifare_classic_is_key_found(data, sector_num, MfClassicKeyA)) {
                     furi_string_cat_printf(
                         nfc->text_box_store, "%02X%02X ", sec_tr->key_a[i], sec_tr->key_a[i + 1]);
                 } else {
@@ -43,7 +43,7 @@ void nfc_scene_mf_classic_data_on_enter(void* context) {
                 if((bytes_written % 8 == 0) && (bytes_written != 0)) {
                     furi_string_push_back(nfc->text_box_store, '\n');
                 }
-                if(mf_classic_is_block_read(data, block_num)) {
+                if(mifare_classic_is_block_read(data, block_num)) {
                     furi_string_cat_printf(
                         nfc->text_box_store,
                         "%02X%02X ",
@@ -59,7 +59,7 @@ void nfc_scene_mf_classic_data_on_enter(void* context) {
                 if((bytes_written % 8 == 0) && (bytes_written != 0)) {
                     furi_string_push_back(nfc->text_box_store, '\n');
                 }
-                if(mf_classic_is_key_found(data, sector_num, MfClassicKeyB)) {
+                if(mifare_classic_is_key_found(data, sector_num, MfClassicKeyB)) {
                     furi_string_cat_printf(
                         nfc->text_box_store, "%02X%02X ", sec_tr->key_b[i], sec_tr->key_b[i + 1]);
                 } else {
@@ -73,7 +73,7 @@ void nfc_scene_mf_classic_data_on_enter(void* context) {
                 if((bytes_written % 8 == 0) && (bytes_written != 0)) {
                     furi_string_push_back(nfc->text_box_store, '\n');
                 }
-                if(mf_classic_is_block_read(data, block_num)) {
+                if(mifare_classic_is_block_read(data, block_num)) {
                     furi_string_cat_printf(
                         nfc->text_box_store,
                         "%02X%02X ",
