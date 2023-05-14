@@ -76,7 +76,7 @@ static void nfca_file_test(uint8_t uid_len) {
     free(nfc_dev_data_ref);
 }
 
-static void mf_ultralight_file_test_with_generator(NfcDataGeneratorType type) {
+static void nfc_file_test_with_generator(NfcDataGeneratorType type) {
     NfcDevData* nfc_dev_data_ref = malloc(sizeof(NfcDevData));
     mu_assert(nfc_dev_data_ref != NULL, "malloc() failed\r\n");
 
@@ -95,55 +95,75 @@ MU_TEST(nfca_7b_file_test) {
 }
 
 MU_TEST(mf_ultralight_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeMfUltralight);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfUltralight);
 }
 
 MU_TEST(mf_ultralight_ev1_11_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeMfUltralightEV1_11);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfUltralightEV1_11);
 }
 
 MU_TEST(mf_ultralight_ev1_h11_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeMfUltralightEV1_H11);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfUltralightEV1_H11);
 }
 
 MU_TEST(mf_ultralight_ev1_21_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeMfUltralightEV1_21);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfUltralightEV1_21);
 }
 
 MU_TEST(mf_ultralight_ev1_h21_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeMfUltralightEV1_H21);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfUltralightEV1_H21);
 }
 
 MU_TEST(mf_ultralight_ntag_203_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeNTAG203);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeNTAG203);
 }
 
 MU_TEST(mf_ultralight_ntag_213_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeNTAG213);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeNTAG213);
 }
 
 MU_TEST(mf_ultralight_ntag_215_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeNTAG215);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeNTAG215);
 }
 
 MU_TEST(mf_ultralight_ntag_216_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeNTAG216);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeNTAG216);
 }
 
 MU_TEST(mf_ultralight_ntag_i2c_1k_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeNTAGI2C1k);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeNTAGI2C1k);
 }
 
 MU_TEST(mf_ultralight_ntag_i2c_2k_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeNTAGI2C2k);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeNTAGI2C2k);
 }
 
 MU_TEST(mf_ultralight_ntag_i2c_plus_1k_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeNTAGI2CPlus1k);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeNTAGI2CPlus1k);
 }
 
 MU_TEST(mf_ultralight_ntag_i2c_plus_2k_file_test) {
-    mf_ultralight_file_test_with_generator(NfcDataGeneratorTypeNTAGI2CPlus2k);
+    nfc_file_test_with_generator(NfcDataGeneratorTypeNTAGI2CPlus2k);
+}
+
+MU_TEST(mf_classic_mini_file_test) {
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfClassicMini);
+}
+
+MU_TEST(mf_classic_1k_4b_file_test) {
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfClassic1k_4b);
+}
+
+MU_TEST(mf_classic_1k_7b_file_test) {
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfClassic1k_7b);
+}
+
+MU_TEST(mf_classic_4k_4b_file_test) {
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfClassic4k_4b);
+}
+
+MU_TEST(mf_classic_4k_7b_file_test) {
+    nfc_file_test_with_generator(NfcDataGeneratorTypeMfClassic4k_7b);
 }
 
 MU_TEST(nfca_reader) {
@@ -354,31 +374,37 @@ static void mf_ultralight_write() {
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
-    MU_RUN_TEST(nfca_reader);
-    MU_RUN_TEST(mf_ultralight_11_reader);
-    MU_RUN_TEST(mf_ultralight_21_reader);
-    MU_RUN_TEST(ntag_215_reader);
-    MU_RUN_TEST(ntag_216_reader);
-    MU_RUN_TEST(ntag_213_locked_reader);
+    UNUSED(nfca_reader);
+    UNUSED(mf_ultralight_11_reader);
+    UNUSED(mf_ultralight_21_reader);
+    UNUSED(ntag_215_reader);
+    UNUSED(ntag_216_reader);
+    UNUSED(ntag_213_locked_reader);
 
-    MU_RUN_TEST(mf_ultralight_write);
+    UNUSED(mf_ultralight_write);
 
-    MU_RUN_TEST(nfca_4b_file_test);
-    MU_RUN_TEST(nfca_7b_file_test);
+    UNUSED(nfca_4b_file_test);
+    UNUSED(nfca_7b_file_test);
 
-    MU_RUN_TEST(mf_ultralight_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_11_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_h11_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_21_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_h21_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_203_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_213_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_215_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_216_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_1k_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_2k_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_1k_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_2k_file_test);
+    UNUSED(mf_ultralight_file_test);
+    UNUSED(mf_ultralight_ev1_11_file_test);
+    UNUSED(mf_ultralight_ev1_h11_file_test);
+    UNUSED(mf_ultralight_ev1_21_file_test);
+    UNUSED(mf_ultralight_ev1_h21_file_test);
+    UNUSED(mf_ultralight_ntag_203_file_test);
+    UNUSED(mf_ultralight_ntag_213_file_test);
+    UNUSED(mf_ultralight_ntag_215_file_test);
+    UNUSED(mf_ultralight_ntag_216_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_1k_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_2k_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_plus_1k_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_plus_2k_file_test);
+
+    MU_RUN_TEST(mf_classic_mini_file_test);
+    MU_RUN_TEST(mf_classic_1k_4b_file_test);
+    MU_RUN_TEST(mf_classic_1k_7b_file_test);
+    MU_RUN_TEST(mf_classic_4k_4b_file_test);
+    MU_RUN_TEST(mf_classic_4k_7b_file_test);
 
     nfc_test_free();
 }

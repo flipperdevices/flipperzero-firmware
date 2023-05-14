@@ -503,12 +503,12 @@ static const NfcDataGenerator nfc_data_generator[NfcDataGeneratorTypeNum] = {
             .name = "Mifare Classic 1k 7byte UID",
             .handler = nfc_generate_mf_classic_1k_7b_uid,
         },
-    [NfcDataGeneratorTypeMfClassic2k_4b] =
+    [NfcDataGeneratorTypeMfClassic4k_4b] =
         {
             .name = "Mifare Classic 4k 4byte UID",
             .handler = nfc_generate_mf_classic_4k_4b_uid,
         },
-    [NfcDataGeneratorTypeMfClassic2k_7b] =
+    [NfcDataGeneratorTypeMfClassic4k_7b] =
         {
             .name = "Mifare Classic 4k 7byte UID",
             .handler = nfc_generate_mf_classic_4k_7b_uid,
