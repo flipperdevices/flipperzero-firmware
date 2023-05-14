@@ -42,7 +42,19 @@ uint16_t mf_classic_get_total_block_num(MfClassicType type) {
     return mf_classic_features[type].blocks_total;
 }
 
-uint8_t mf_classic_get_sector_trailer_block_num_by_sector(uint8_t sector) {
+const char* mf_classic_get_name(MfClassicType type, bool full_name) {
+    const char* ret = NULL;
+
+    if(full_name) {
+        ret = mf_classic_features[type].full_name;
+    } else {
+        ret = mf_classic_features[type].type_name;
+    }
+
+    return ret;
+}
+
+uint8_t mf_classic_get_sector_trailer_num_by_sector(uint8_t sector) {
     uint8_t block_num = 0;
 
     if(sector < 32) {
@@ -66,6 +78,16 @@ uint8_t mf_classic_get_sector_trailer_num_by_block(uint8_t block) {
     }
 
     return sec_tr_block_num;
+}
+
+MfClassicSectorTrailer*
+    mf_classic_get_sector_trailer_by_sector(MfClassicData* data, uint8_t sector_num) {
+    furi_assert(data);
+
+    uint8_t sec_tr_block = mf_classic_get_sector_trailer_num_by_sector(sector_num);
+    MfClassicSectorTrailer* sec_trailer = (MfClassicSectorTrailer*)&data->block[sec_tr_block];
+
+    return sec_trailer;
 }
 
 bool mf_classic_is_sector_trailer(uint8_t block) {
@@ -105,8 +127,8 @@ void mf_classic_set_key_found(
     furi_assert(data);
 
     uint8_t key_arr[6] = {};
-    uint8_t sec_tr_block = mf_classic_get_sector_trailer_block_num_by_sector(sector_num);
-    MfClassicSectorTrailer* sec_trailer = (MfClassicSectorTrailer*)&data->block[sec_tr_block];
+    MfClassicSectorTrailer* sec_trailer =
+        mf_classic_get_sector_trailer_by_sector(data, sector_num);
     nfc_util_num2bytes(key, 6, key_arr);
     if(key_type == MfClassicKeyA) {
         memcpy(sec_trailer->key_a, key_arr, sizeof(sec_trailer->key_a));

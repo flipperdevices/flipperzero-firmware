@@ -803,7 +803,7 @@ static void nfc_device_load_mifare_classic_block(
         }
     }
 
-    if(block_unknown_bytes_mask == 0xffff) {
+    if(block_unknown_bytes_mask != 0xffff) {
         // All data is unknown, exit
         return;
     }

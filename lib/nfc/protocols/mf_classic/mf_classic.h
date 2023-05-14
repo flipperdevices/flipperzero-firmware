@@ -69,9 +69,14 @@ uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
 
 uint16_t mf_classic_get_total_block_num(MfClassicType type);
 
-uint8_t mf_classic_get_sector_trailer_block_num_by_sector(uint8_t sector);
+const char* mf_classic_get_name(MfClassicType type, bool full_name);
+
+uint8_t mf_classic_get_sector_trailer_num_by_sector(uint8_t sector);
 
 uint8_t mf_classic_get_sector_trailer_num_by_block(uint8_t block);
+
+MfClassicSectorTrailer*
+    mf_classic_get_sector_trailer_by_sector(MfClassicData* data, uint8_t sector_num);
 
 bool mf_classic_is_sector_trailer(uint8_t block);
 
