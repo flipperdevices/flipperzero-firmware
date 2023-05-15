@@ -1,7 +1,6 @@
 #include <furi_hal_flash.h>
 #include <furi_hal_bt.h>
 #include <furi_hal_power.h>
-#include <furi_hal_bus.h>
 #include <furi_hal_cortex.h>
 #include <furi.h>
 #include <ble/ble.h>
@@ -92,7 +91,6 @@ size_t furi_hal_flash_get_free_page_count() {
 }
 
 void furi_hal_flash_init() {
-    furi_hal_bus_enable(FuriHalBusFLASH);
     /* Errata 2.2.9, Flash OPTVERR flag is always set after system reset */
     // WRITE_REG(FLASH->SR, FLASH_SR_OPTVERR);
     /* Actually, reset all error flags on start */
