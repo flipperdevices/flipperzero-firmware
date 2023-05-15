@@ -161,7 +161,7 @@ static const uint8_t lookup2[256] = {
     2, 6, 6, 6, 6, 2, 2, 6, 6, 2, 6, 2, 2, 2, 6, 2, 2, 6, 6, 6, 6, 2, 2, 6, 6, 2, 6, 2, 2,
     2, 6, 2, 2, 6, 6, 6, 6, 2, 2, 6, 6, 2, 6, 2, 2, 2, 6, 2, 2, 6, 6, 6, 6};
 
-uint32_t prng_successor(uint32_t x, uint32_t n) {
+uint32_t old_prng_successor(uint32_t x, uint32_t n) {
     SWAPENDIAN(x);
     while(n--) x = x >> 1 | (x >> 16 ^ x >> 18 ^ x >> 19 ^ x >> 21) << 31;
     return SWAPENDIAN(x);
@@ -945,7 +945,7 @@ MfClassicNonceArray* napi_mf_classic_nonce_array_alloc(
                 next_line_cstr = endptr;
             }
             (program_state->total)++;
-            uint32_t p64b = prng_successor(res.nt1, 64);
+            uint32_t p64b = old_prng_successor(res.nt1, 64);
             if((system_dict_exists &&
                 napi_key_already_found_for_nonce(
                     system_dict, res.uid ^ res.nt1, res.nr1_enc, p64b, res.ar1_enc)) ||
@@ -1051,8 +1051,8 @@ void mfkey32(ProgramState* program_state) {
     // TODO: Work backwards on this array and free memory
     for(i = 0; i < nonce_arr->total_nonces; i++) {
         MfClassicNonce next_nonce = nonce_arr->remaining_nonce_array[i];
-        uint32_t p64 = prng_successor(next_nonce.nt0, 64);
-        uint32_t p64b = prng_successor(next_nonce.nt1, 64);
+        uint32_t p64 = old_prng_successor(next_nonce.nt0, 64);
+        uint32_t p64b = old_prng_successor(next_nonce.nt1, 64);
         if(key_already_found_for_nonce(
                keyarray,
                keyarray_size,

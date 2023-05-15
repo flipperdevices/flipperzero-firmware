@@ -106,13 +106,13 @@ uint8_t mf_classic_get_sector_by_block(uint8_t block) {
     return sector;
 }
 
-bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type) {
+bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicKeyType key_type) {
     furi_assert(data);
 
     bool key_found = false;
-    if(key_type == MfClassicKeyA) {
+    if(key_type == MfClassicKeyTypeA) {
         key_found = (FURI_BIT(data->key_a_mask, sector_num) == 1);
-    } else if(key_type == MfClassicKeyB) {
+    } else if(key_type == MfClassicKeyTypeB) {
         key_found = (FURI_BIT(data->key_b_mask, sector_num) == 1);
     }
 
@@ -122,7 +122,7 @@ bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicK
 void mf_classic_set_key_found(
     MfClassicData* data,
     uint8_t sector_num,
-    MfClassicKey key_type,
+    MfClassicKeyType key_type,
     uint64_t key) {
     furi_assert(data);
 
@@ -130,21 +130,24 @@ void mf_classic_set_key_found(
     MfClassicSectorTrailer* sec_trailer =
         mf_classic_get_sector_trailer_by_sector(data, sector_num);
     nfc_util_num2bytes(key, 6, key_arr);
-    if(key_type == MfClassicKeyA) {
-        memcpy(sec_trailer->key_a, key_arr, sizeof(sec_trailer->key_a));
+    if(key_type == MfClassicKeyTypeA) {
+        memcpy(sec_trailer->key_a.data, key_arr, sizeof(MfClassicKey));
         FURI_BIT_SET(data->key_a_mask, sector_num);
-    } else if(key_type == MfClassicKeyB) {
-        memcpy(sec_trailer->key_b, key_arr, sizeof(sec_trailer->key_b));
+    } else if(key_type == MfClassicKeyTypeB) {
+        memcpy(sec_trailer->key_b.data, key_arr, sizeof(MfClassicKey));
         FURI_BIT_SET(data->key_b_mask, sector_num);
     }
 }
 
-void mf_classic_set_key_not_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type) {
+void mf_classic_set_key_not_found(
+    MfClassicData* data,
+    uint8_t sector_num,
+    MfClassicKeyType key_type) {
     furi_assert(data);
 
-    if(key_type == MfClassicKeyA) {
+    if(key_type == MfClassicKeyTypeA) {
         FURI_BIT_CLEAR(data->key_a_mask, sector_num);
-    } else if(key_type == MfClassicKeyB) {
+    } else if(key_type == MfClassicKeyTypeB) {
         FURI_BIT_CLEAR(data->key_b_mask, sector_num);
     }
 }
@@ -159,9 +162,9 @@ void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassic
     furi_assert(data);
 
     if(mf_classic_is_sector_trailer(block_num)) {
-        memcpy(&data->block[block_num].value[6], &block_data->value[6], 4);
+        memcpy(&data->block[block_num].data[6], &block_data->data[6], 4);
     } else {
-        memcpy(data->block[block_num].value, block_data->value, MF_CLASSIC_BLOCK_SIZE);
+        memcpy(data->block[block_num].data, block_data->data, MF_CLASSIC_BLOCK_SIZE);
     }
     FURI_BIT_SET(data->block_read_mask[block_num / 32], block_num % 32);
 }

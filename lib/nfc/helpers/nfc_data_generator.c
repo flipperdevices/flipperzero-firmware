@@ -295,17 +295,17 @@ static void
 
 static void nfc_generate_mf_classic_sector_trailer(MfClassicData* data, uint8_t block) {
     // All keys are set to FFFF FFFF FFFFh at chip delivery and the bytes 6, 7 and 8 are set to FF0780h.
-    MfClassicSectorTrailer* sec_tr = (MfClassicSectorTrailer*)data->block[block].value;
-    sec_tr->access_bits[0] = 0xFF;
-    sec_tr->access_bits[1] = 0x07;
-    sec_tr->access_bits[2] = 0x80;
-    sec_tr->access_bits[3] = 0x69; // Nice
+    MfClassicSectorTrailer* sec_tr = (MfClassicSectorTrailer*)data->block[block].data;
+    sec_tr->access_bits.data[0] = 0xFF;
+    sec_tr->access_bits.data[1] = 0x07;
+    sec_tr->access_bits.data[2] = 0x80;
+    sec_tr->access_bits.data[3] = 0x69; // Nice
 
     mf_classic_set_block_read(data, block, &data->block[block]);
     mf_classic_set_key_found(
-        data, mf_classic_get_sector_by_block(block), MfClassicKeyA, 0xFFFFFFFFFFFF);
+        data, mf_classic_get_sector_by_block(block), MfClassicKeyTypeA, 0xFFFFFFFFFFFF);
     mf_classic_set_key_found(
-        data, mf_classic_get_sector_by_block(block), MfClassicKeyB, 0xFFFFFFFFFFFF);
+        data, mf_classic_get_sector_by_block(block), MfClassicKeyTypeB, 0xFFFFFFFFFFFF);
 }
 
 static void nfc_generate_mf_classic_block_0(
@@ -342,13 +342,13 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
     nfc_generate_common_start(data);
     data->protocol = NfcDevProtocolMfClassic;
     MfClassicData* mfc_data = &data->mf_classic_data;
-    nfc_generate_mf_classic_uid(mfc_data->block[0].value, uid_len);
+    nfc_generate_mf_classic_uid(mfc_data->block[0].data, uid_len);
     nfc_generate_mf_classic_common(mfc_data, uid_len, type);
 
     // Set the UID
     mfc_data->nfca_data.uid[0] = NXP_MANUFACTURER_ID;
     for(int i = 1; i < uid_len; i++) {
-        mfc_data->nfca_data.uid[i] = mfc_data->block[0].value[i];
+        mfc_data->nfca_data.uid[i] = mfc_data->block[0].data[i];
     }
 
     mf_classic_set_block_read(mfc_data, 0, &mfc_data->block[0]);
@@ -360,7 +360,7 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
             if(mf_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc_data, i);
             } else {
-                memset(&mfc_data->block[i].value, 0xFF, 16);
+                memset(&mfc_data->block[i].data, 0xFF, 16);
             }
             mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
         }
@@ -372,7 +372,7 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
             if(mf_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc_data, i);
             } else {
-                memset(&mfc_data->block[i].value, 0xFF, 16);
+                memset(&mfc_data->block[i].data, 0xFF, 16);
             }
             mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
         }
@@ -384,7 +384,7 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
             if(mf_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc_data, i);
             } else {
-                memset(&mfc_data->block[i].value, 0xFF, 16);
+                memset(&mfc_data->block[i].data, 0xFF, 16);
             }
             mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
         }
@@ -393,7 +393,7 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
     }
 
     nfc_generate_mf_classic_block_0(
-        data->mf_classic_data.block[0].value,
+        data->mf_classic_data.block[0].data,
         uid_len,
         data->nfca_data.sak,
         data->nfca_data.atqa[0],

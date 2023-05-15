@@ -485,28 +485,28 @@ static bool mf_classic_auth(
         if(!furi_hal_nfc_tx_rx(tx_rx, 6)) break;
 
         uint32_t nt = (uint32_t)nfc_util_bytes2num(tx_rx->rx_data, 4);
-        crypto1_init(crypto, key);
-        crypto1_word(crypto, nt ^ cuid, 0);
+        old_crypto1_init(crypto, key);
+        old_crypto1_word(crypto, nt ^ cuid, 0);
         uint8_t nr[4] = {};
-        nfc_util_num2bytes(prng_successor(DWT->CYCCNT, 32), 4, nr);
+        nfc_util_num2bytes(old_prng_successor(DWT->CYCCNT, 32), 4, nr);
         for(uint8_t i = 0; i < 4; i++) {
-            tx_rx->tx_data[i] = crypto1_byte(crypto, nr[i], 0) ^ nr[i];
+            tx_rx->tx_data[i] = old_crypto1_byte(crypto, nr[i], 0) ^ nr[i];
             tx_rx->tx_parity[0] |=
-                (((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nr[i])) & 0x01) << (7 - i));
+                (((old_crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nr[i])) & 0x01) << (7 - i));
         }
-        nt = prng_successor(nt, 32);
+        nt = old_prng_successor(nt, 32);
         for(uint8_t i = 4; i < 8; i++) {
-            nt = prng_successor(nt, 8);
-            tx_rx->tx_data[i] = crypto1_byte(crypto, 0x00, 0) ^ (nt & 0xff);
+            nt = old_prng_successor(nt, 8);
+            tx_rx->tx_data[i] = old_crypto1_byte(crypto, 0x00, 0) ^ (nt & 0xff);
             tx_rx->tx_parity[0] |=
-                (((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nt & 0xff)) & 0x01)
+                (((old_crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nt & 0xff)) & 0x01)
                  << (7 - i));
         }
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
         tx_rx->tx_bits = 8 * 8;
         if(!furi_hal_nfc_tx_rx(tx_rx, 6)) break;
         if(tx_rx->rx_bits == 32) {
-            crypto1_word(crypto, 0, 0);
+            old_crypto1_word(crypto, 0, 0);
             auth_success = true;
         }
     } while(false);
@@ -604,7 +604,7 @@ bool mifare_classic_read_block(
     uint8_t plain_cmd[4] = {mifare_classic_read_block_CMD, block_num, 0x00, 0x00};
     nfca_append_crc16(plain_cmd, 2);
 
-    crypto1_encrypt(
+    old_crypto1_encrypt(
         crypto, NULL, plain_cmd, sizeof(plain_cmd) * 8, tx_rx->tx_data, tx_rx->tx_parity);
     tx_rx->tx_bits = sizeof(plain_cmd) * 8;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
@@ -612,7 +612,7 @@ bool mifare_classic_read_block(
     if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
         if(tx_rx->rx_bits == 8 * (MF_CLASSIC_BLOCK_SIZE + 2)) {
             uint8_t block_received[MF_CLASSIC_BLOCK_SIZE + 2];
-            crypto1_decrypt(crypto, tx_rx->rx_data, tx_rx->rx_bits, block_received);
+            old_crypto1_decrypt(crypto, tx_rx->rx_data, tx_rx->rx_bits, block_received);
             uint16_t crc_calc = nfca_get_crc16(block_received, MF_CLASSIC_BLOCK_SIZE);
             uint16_t crc_received = (block_received[MF_CLASSIC_BLOCK_SIZE + 1] << 8) |
                                     block_received[MF_CLASSIC_BLOCK_SIZE];
@@ -859,7 +859,7 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
     // Read command
     while(!command_processed) { //-V654
         if(!is_encrypted) {
-            crypto1_reset(&emulator->crypto);
+            old_crypto1_reset(&emulator->crypto);
             memcpy(plain_data, tx_rx->rx_data, tx_rx->rx_bits / 8);
         } else {
             if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
@@ -870,7 +870,7 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
                     tx_rx->rx_bits);
                 break;
             }
-            crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
+            old_crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
         }
 
         // After increment, decrement or restore the only allowed command is transfer
@@ -899,21 +899,21 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
                 access_key = MfClassicKeyB;
             }
 
-            uint32_t nonce = prng_successor(DWT->CYCCNT, 32) ^ 0xAA;
+            uint32_t nonce = old_prng_successor(DWT->CYCCNT, 32) ^ 0xAA;
             uint8_t nt[4];
             uint8_t nt_keystream[4];
             nfc_util_num2bytes(nonce, 4, nt);
             nfc_util_num2bytes(nonce ^ emulator->cuid, 4, nt_keystream);
-            crypto1_init(&emulator->crypto, key);
+            old_crypto1_init(&emulator->crypto, key);
             if(!is_encrypted) {
-                crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
+                old_crypto1_word(&emulator->crypto, emulator->cuid ^ nonce, 0);
                 memcpy(tx_rx->tx_data, nt, sizeof(nt));
                 tx_rx->tx_parity[0] = 0;
                 nfc_util_odd_parity(tx_rx->tx_data, tx_rx->tx_parity, sizeof(nt));
                 tx_rx->tx_bits = sizeof(nt) * 8;
                 tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             } else {
-                crypto1_encrypt(
+                old_crypto1_encrypt(
                     &emulator->crypto,
                     nt_keystream,
                     nt,
@@ -938,19 +938,19 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             uint32_t nr = nfc_util_bytes2num(tx_rx->rx_data, 4);
             uint32_t ar = nfc_util_bytes2num(&tx_rx->rx_data[4], 4);
 
-            crypto1_word(&emulator->crypto, nr, 1);
-            uint32_t cardRr = ar ^ crypto1_word(&emulator->crypto, 0, 0);
-            if(cardRr != prng_successor(nonce, 64)) {
-                FURI_LOG_T(TAG, "Wrong AUTH! %08lX != %08lX", cardRr, prng_successor(nonce, 64));
+            old_crypto1_word(&emulator->crypto, nr, 1);
+            uint32_t cardRr = ar ^ old_crypto1_word(&emulator->crypto, 0, 0);
+            if(cardRr != old_prng_successor(nonce, 64)) {
+                FURI_LOG_T(TAG, "Wrong AUTH! %08lX != %08lX", cardRr, old_prng_successor(nonce, 64));
                 // Don't send NACK, as the tag doesn't send it
                 command_processed = true;
                 break;
             }
 
-            uint32_t ans = prng_successor(nonce, 96);
+            uint32_t ans = old_prng_successor(nonce, 96);
             uint8_t response[4] = {};
             nfc_util_num2bytes(ans, 4, response);
-            crypto1_encrypt(
+            old_crypto1_encrypt(
                 &emulator->crypto,
                 NULL,
                 response,
@@ -990,7 +990,7 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
                           emulator, block, access_key, MfClassicActionDataRead)) {
                 // Send NACK
                 uint8_t nack = 0x04;
-                crypto1_encrypt(
+                old_crypto1_encrypt(
                     &emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
                 tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
                 tx_rx->tx_bits = 4;
@@ -999,7 +999,7 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             }
             nfca_append_crc16(block_data, 16);
 
-            crypto1_encrypt(
+            old_crypto1_encrypt(
                 &emulator->crypto,
                 NULL,
                 block_data,
@@ -1015,14 +1015,14 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             }
             // Send ACK
             uint8_t ack = MF_CLASSIC_ACK_CMD;
-            crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
 
             if(!furi_hal_nfc_tx_rx(tx_rx, 300)) break;
             if(tx_rx->rx_bits != (MF_CLASSIC_BLOCK_SIZE + 2) * 8) break;
 
-            crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
+            old_crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
             uint8_t block_data[MF_CLASSIC_BLOCK_SIZE] = {};
             memcpy(block_data, emulator->data.block[block].value, MF_CLASSIC_BLOCK_SIZE);
             if(mifare_classic_is_sector_trailer(block)) {
@@ -1052,7 +1052,7 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             }
             // Send ACK
             ack = MF_CLASSIC_ACK_CMD;
-            crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
         } else if(
@@ -1080,14 +1080,14 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
 
             // Send ACK
             uint8_t ack = MF_CLASSIC_ACK_CMD;
-            crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
 
             if(!furi_hal_nfc_tx_rx(tx_rx, 300)) break;
             if(tx_rx->rx_bits != (sizeof(int32_t) + 2) * 8) break;
 
-            crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
+            old_crypto1_decrypt(&emulator->crypto, tx_rx->rx_data, tx_rx->rx_bits, plain_data);
             int32_t value = *(int32_t*)&plain_data[0];
             if(value < 0) {
                 value = -value;
@@ -1115,7 +1115,7 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             transfer_buf_valid = false;
 
             uint8_t ack = MF_CLASSIC_ACK_CMD;
-            crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
         } else {
@@ -1129,7 +1129,7 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
         uint8_t nack = transfer_buf_valid ? MF_CLASSIC_NACK_BUF_VALID_CMD :
                                             MF_CLASSIC_NACK_BUF_INVALID_CMD;
         if(is_encrypted) {
-            crypto1_encrypt(&emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(&emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
         } else {
             tx_rx->tx_data[0] = nack;
         }
@@ -1148,7 +1148,7 @@ void mifare_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto) {
 
     nfca_append_crc16(plain_data, 2);
     if(crypto) {
-        crypto1_encrypt(
+        old_crypto1_encrypt(
             crypto, NULL, plain_data, sizeof(plain_data) * 8, tx_rx->tx_data, tx_rx->tx_parity);
     } else {
         memcpy(tx_rx->tx_data, plain_data, sizeof(plain_data));
@@ -1178,13 +1178,13 @@ bool mifare_classic_write_block(
         plain_data[0] = mifare_classic_write_block_CMD;
         plain_data[1] = block_num;
         nfca_append_crc16(plain_data, 2);
-        crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+        old_crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
         tx_rx->tx_bits = 4 * 8;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
+                old_crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
                 if(resp != 0x0A) {
                     FURI_LOG_D(TAG, "NACK received on write cmd: %02X", resp);
                     break;
@@ -1201,7 +1201,7 @@ bool mifare_classic_write_block(
         // Send data
         memcpy(plain_data, src_block->value, MF_CLASSIC_BLOCK_SIZE);
         nfca_append_crc16(plain_data, MF_CLASSIC_BLOCK_SIZE);
-        crypto1_encrypt(
+        old_crypto1_encrypt(
             crypto,
             NULL,
             plain_data,
@@ -1212,7 +1212,7 @@ bool mifare_classic_write_block(
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
+                old_crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
                 if(resp != MF_CLASSIC_ACK_CMD) {
                     FURI_LOG_D(TAG, "NACK received on sending data");
                     break;
@@ -1273,7 +1273,7 @@ bool mifare_classic_transfer(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto, uint
     bool transfer_success = false;
 
     nfca_append_crc16(plain_data, 2);
-    crypto1_encrypt(
+    old_crypto1_encrypt(
         crypto, NULL, plain_data, sizeof(plain_data) * 8, tx_rx->tx_data, tx_rx->tx_parity);
     tx_rx->tx_bits = sizeof(plain_data) * 8;
     tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
@@ -1281,7 +1281,7 @@ bool mifare_classic_transfer(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto, uint
     do {
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
+                old_crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
                 if(resp != 0x0A) {
                     FURI_LOG_D(TAG, "NACK received on transfer cmd: %02X", resp);
                     break;
@@ -1323,13 +1323,13 @@ bool mifare_classic_value_cmd(
         plain_data[0] = cmd;
         plain_data[1] = block_num;
         nfca_append_crc16(plain_data, 2);
-        crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
+        old_crypto1_encrypt(crypto, NULL, plain_data, 4 * 8, tx_rx->tx_data, tx_rx->tx_parity);
         tx_rx->tx_bits = 4 * 8;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
 
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
+                old_crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
                 if(resp != 0x0A) {
                     FURI_LOG_D(TAG, "NACK received on write cmd: %02X", resp);
                     break;
@@ -1346,14 +1346,14 @@ bool mifare_classic_value_cmd(
         // Send data
         memcpy(plain_data, &d_value, sizeof(d_value));
         nfca_append_crc16(plain_data, sizeof(d_value));
-        crypto1_encrypt(
+        old_crypto1_encrypt(
             crypto, NULL, plain_data, (sizeof(d_value) + 2) * 8, tx_rx->tx_data, tx_rx->tx_parity);
         tx_rx->tx_bits = (sizeof(d_value) + 2) * 8;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeRaw;
         // inc, dec, restore do not ACK, but they do NACK
         if(furi_hal_nfc_tx_rx(tx_rx, 50)) {
             if(tx_rx->rx_bits == 4) {
-                crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
+                old_crypto1_decrypt(crypto, tx_rx->rx_data, 4, &resp);
                 if(resp != 0x0A) {
                     FURI_LOG_D(TAG, "NACK received on transfer cmd: %02X", resp);
                     break;

@@ -318,8 +318,8 @@ static void nfc_dev_set_mf_classic_block_str(
         MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
         // Write key A
         for(size_t i = 0; i < sizeof(sec_tr->key_a); i++) {
-            if(mf_classic_is_key_found(data, sector_num, MfClassicKeyA)) {
-                furi_string_cat_printf(block_str, "%02X ", sec_tr->key_a[i]);
+            if(mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeA)) {
+                furi_string_cat_printf(block_str, "%02X ", sec_tr->key_a.data[i]);
             } else {
                 furi_string_cat_printf(block_str, "?? ");
             }
@@ -327,15 +327,15 @@ static void nfc_dev_set_mf_classic_block_str(
         // Write Access bytes
         for(size_t i = 0; i < MF_CLASSIC_ACCESS_BYTES_SIZE; i++) {
             if(mf_classic_is_block_read(data, block_num)) {
-                furi_string_cat_printf(block_str, "%02X ", sec_tr->access_bits[i]);
+                furi_string_cat_printf(block_str, "%02X ", sec_tr->access_bits.data[i]);
             } else {
                 furi_string_cat_printf(block_str, "?? ");
             }
         }
         // Write key B
         for(size_t i = 0; i < sizeof(sec_tr->key_b); i++) {
-            if(mf_classic_is_key_found(data, sector_num, MfClassicKeyB)) {
-                furi_string_cat_printf(block_str, "%02X ", sec_tr->key_b[i]);
+            if(mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeB)) {
+                furi_string_cat_printf(block_str, "%02X ", sec_tr->key_b.data[i]);
             } else {
                 furi_string_cat_printf(block_str, "?? ");
             }
@@ -344,7 +344,7 @@ static void nfc_dev_set_mf_classic_block_str(
         // Write data block
         for(size_t i = 0; i < MF_CLASSIC_BLOCK_SIZE; i++) {
             if(mf_classic_is_block_read(data, block_num)) {
-                furi_string_cat_printf(block_str, "%02X ", data->block[block_num].value[i]);
+                furi_string_cat_printf(block_str, "%02X ", data->block[block_num].data[i]);
             } else {
                 furi_string_cat_printf(block_str, "?? ");
             }
@@ -415,7 +415,7 @@ static void nfc_device_parse_mifare_classic_block(
         char low = furi_string_get_char(block_str, 3 * i + 1);
         uint8_t byte = 0;
         if(hex_char_to_uint8(hi, low, &byte)) {
-            block_tmp.value[i] = byte;
+            block_tmp.data[i] = byte;
         } else {
             FURI_BIT_SET(block_unknown_bytes_mask, i);
         }
@@ -427,8 +427,8 @@ static void nfc_device_parse_mifare_classic_block(
             // Load Key A
             // Key A mask 0b0000000000111111 = 0x003f
             if((block_unknown_bytes_mask & 0x003f) == 0) {
-                uint64_t key = nfc_util_bytes2num(sec_tr_tmp->key_a, sizeof(sec_tr_tmp->key_a));
-                mf_classic_set_key_found(data, sector_num, MfClassicKeyA, key);
+                uint64_t key = nfc_util_bytes2num(sec_tr_tmp->key_a.data, sizeof(MfClassicKey));
+                mf_classic_set_key_found(data, sector_num, MfClassicKeyTypeA, key);
             }
             // Load Access Bits
             // Access bits mask 0b0000001111000000 = 0x03c0
@@ -438,8 +438,8 @@ static void nfc_device_parse_mifare_classic_block(
             // Load Key B
             // Key B mask 0b1111110000000000 = 0xfc00
             if((block_unknown_bytes_mask & 0xfc00) == 0) {
-                uint64_t key = nfc_util_bytes2num(sec_tr_tmp->key_b, sizeof(sec_tr_tmp->key_b));
-                mf_classic_set_key_found(data, sector_num, MfClassicKeyB, key);
+                uint64_t key = nfc_util_bytes2num(sec_tr_tmp->key_b.data, sizeof(MfClassicKey));
+                mf_classic_set_key_found(data, sector_num, MfClassicKeyTypeB, key);
             }
         } else {
             if(block_unknown_bytes_mask == 0) {
