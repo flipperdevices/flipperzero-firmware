@@ -21,7 +21,7 @@ const uint8_t MAGIC_DEFAULT_CONFIG[] = {
 };
 
 const uint8_t MAGIC_DEFAULT_BLOCK0[] = {
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x04, 0x08, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xBE, 0xAF
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x04, 0x08, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 const uint8_t MAGIC_EMPTY_BLOCK[16] = { 0 };
@@ -181,9 +181,15 @@ bool magic_gen4_wipe(uint32_t pwd) {
         FURI_LOG_E(TAG, "Block 0 write failed");
         return false;
     }
-    for(size_t i = 1; i < 0xFF; i++) {
+    for(size_t i = 1; i < 64; i++) {
         const uint8_t* block = magic_gen4_is_block_num_trailer(i) ? MAGIC_DEFAULT_SECTOR_TRAILER : MAGIC_EMPTY_BLOCK;
-        if(!magic_gen4_write_blk(pwd, 0, block)) {
+        if(!magic_gen4_write_blk(pwd, i, block)) {
+            FURI_LOG_E(TAG, "Block %d write failed", i);
+            return false;
+        }
+    }
+    for(size_t i = 65; i < 256; i++) {
+        if(!magic_gen4_write_blk(pwd, i, MAGIC_EMPTY_BLOCK)) {
             FURI_LOG_E(TAG, "Block %d write failed", i);
             return false;
         }
