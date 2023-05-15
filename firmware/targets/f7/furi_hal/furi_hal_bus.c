@@ -41,6 +41,9 @@
      LL_APB1_GRP1_PERIPH_USB | LL_APB1_GRP1_PERIPH_LPTIM1)
 
 #define FURI_HAL_BUS_APB1_GRP2 (LL_APB1_GRP2_PERIPH_LPUART1 | LL_APB1_GRP2_PERIPH_LPTIM2)
+#define FURI_HAL_BUS_APB3_GRP1 (LL_APB3_GRP1_PERIPH_RF)
+
+#define FURI_HAL_BUS_IS_RESET(reg, value) (READ_BIT(RCC->reg, (value)) == (value))
 
 static const uint32_t furi_hal_bus[] = {
     [FuriHalBusAHB1_GRP1] = FURI_HAL_BUS_AHB1_GRP1,
@@ -101,23 +104,45 @@ static const uint32_t furi_hal_bus[] = {
 };
 
 void furi_hal_bus_init_early() {
-    furi_hal_bus_disable(FuriHalBusAHB1_GRP1);
-    furi_hal_bus_disable(FuriHalBusAHB2_GRP1);
-    furi_hal_bus_disable(FuriHalBusAHB3_GRP1);
-    furi_hal_bus_disable(FuriHalBusAPB1_GRP1);
-    furi_hal_bus_disable(FuriHalBusAPB1_GRP2);
-    furi_hal_bus_disable(FuriHalBusAPB2_GRP1);
-    furi_hal_bus_disable(FuriHalBusAPB3_GRP1);
+    FURI_CRITICAL_ENTER();
+
+    LL_AHB1_GRP1_ForceReset(FURI_HAL_BUS_AHB1_GRP1);
+    LL_AHB2_GRP1_ForceReset(FURI_HAL_BUS_AHB2_GRP1);
+    LL_AHB3_GRP1_ForceReset(FURI_HAL_BUS_AHB3_GRP1);
+    LL_APB1_GRP1_ForceReset(FURI_HAL_BUS_APB1_GRP1);
+    LL_APB1_GRP2_ForceReset(FURI_HAL_BUS_APB1_GRP2);
+    LL_APB2_GRP1_ForceReset(FURI_HAL_BUS_APB2_GRP1);
+    LL_APB3_GRP1_ForceReset(FURI_HAL_BUS_APB3_GRP1);
+
+    LL_AHB1_GRP1_DisableClock(FURI_HAL_BUS_AHB1_GRP1);
+    LL_AHB2_GRP1_DisableClock(FURI_HAL_BUS_AHB2_GRP1);
+    LL_AHB3_GRP1_DisableClock(FURI_HAL_BUS_AHB3_GRP1);
+    LL_APB1_GRP1_DisableClock(FURI_HAL_BUS_APB1_GRP1);
+    LL_APB1_GRP2_DisableClock(FURI_HAL_BUS_APB1_GRP2);
+    LL_APB2_GRP1_DisableClock(FURI_HAL_BUS_APB2_GRP1);
+
+    FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_bus_deinit_early() {
-    furi_hal_bus_enable(FuriHalBusAHB1_GRP1);
-    furi_hal_bus_enable(FuriHalBusAHB2_GRP1);
-    furi_hal_bus_enable(FuriHalBusAHB3_GRP1);
-    furi_hal_bus_enable(FuriHalBusAPB1_GRP1);
-    furi_hal_bus_enable(FuriHalBusAPB1_GRP2);
-    furi_hal_bus_enable(FuriHalBusAPB2_GRP1);
-    furi_hal_bus_enable(FuriHalBusAPB3_GRP1);
+    FURI_CRITICAL_ENTER();
+
+    LL_AHB1_GRP1_EnableClock(FURI_HAL_BUS_AHB1_GRP1);
+    LL_AHB2_GRP1_EnableClock(FURI_HAL_BUS_AHB2_GRP1);
+    LL_AHB3_GRP1_EnableClock(FURI_HAL_BUS_AHB3_GRP1);
+    LL_APB1_GRP1_EnableClock(FURI_HAL_BUS_APB1_GRP1);
+    LL_APB1_GRP2_EnableClock(FURI_HAL_BUS_APB1_GRP2);
+    LL_APB2_GRP1_EnableClock(FURI_HAL_BUS_APB2_GRP1);
+
+    LL_AHB1_GRP1_ReleaseReset(FURI_HAL_BUS_AHB1_GRP1);
+    LL_AHB2_GRP1_ReleaseReset(FURI_HAL_BUS_AHB2_GRP1);
+    LL_AHB3_GRP1_ReleaseReset(FURI_HAL_BUS_AHB3_GRP1);
+    LL_APB1_GRP1_ReleaseReset(FURI_HAL_BUS_APB1_GRP1);
+    LL_APB1_GRP2_ReleaseReset(FURI_HAL_BUS_APB1_GRP2);
+    LL_APB2_GRP1_ReleaseReset(FURI_HAL_BUS_APB2_GRP1);
+    LL_APB3_GRP1_ReleaseReset(FURI_HAL_BUS_APB3_GRP1);
+
+    FURI_CRITICAL_EXIT();
 }
 
 void furi_hal_bus_enable(FuriHalBus bus) {
@@ -129,30 +154,31 @@ void furi_hal_bus_enable(FuriHalBus bus) {
 
     FURI_CRITICAL_ENTER();
     if(bus < FuriHalBusAHB2_GRP1) {
-        furi_check(!LL_AHB1_GRP1_IsEnabledClock(value));
+        furi_check(!LL_AHB1_GRP1_IsEnabledClock(value) && FURI_HAL_BUS_IS_RESET(AHB1RSTR, value));
         LL_AHB1_GRP1_EnableClock(value);
         LL_AHB1_GRP1_ReleaseReset(value);
     } else if(bus < FuriHalBusAHB3_GRP1) {
-        furi_check(!LL_AHB2_GRP1_IsEnabledClock(value));
+        furi_check(!LL_AHB2_GRP1_IsEnabledClock(value) && FURI_HAL_BUS_IS_RESET(AHB2RSTR, value));
         LL_AHB2_GRP1_EnableClock(value);
         LL_AHB2_GRP1_ReleaseReset(value);
     } else if(bus < FuriHalBusAPB1_GRP1) {
-        furi_check(!LL_AHB3_GRP1_IsEnabledClock(value));
+        furi_check(!LL_AHB3_GRP1_IsEnabledClock(value) && FURI_HAL_BUS_IS_RESET(AHB3RSTR, value));
         LL_AHB3_GRP1_EnableClock(value);
         LL_AHB3_GRP1_ReleaseReset(value);
     } else if(bus < FuriHalBusAPB1_GRP2) {
-        furi_check(!LL_APB1_GRP1_IsEnabledClock(value));
+        furi_check(!LL_APB1_GRP1_IsEnabledClock(value) && FURI_HAL_BUS_IS_RESET(APB1RSTR1, value));
         LL_APB1_GRP1_EnableClock(value);
         LL_APB1_GRP1_ReleaseReset(value);
     } else if(bus < FuriHalBusAPB2_GRP1) {
-        furi_check(!LL_APB1_GRP2_IsEnabledClock(value));
+        furi_check(!LL_APB1_GRP2_IsEnabledClock(value) && FURI_HAL_BUS_IS_RESET(APB1RSTR2, value));
         LL_APB1_GRP2_EnableClock(value);
         LL_APB1_GRP2_ReleaseReset(value);
     } else if(bus < FuriHalBusAPB3_GRP1) {
-        furi_check(!LL_APB2_GRP1_IsEnabledClock(value));
+        furi_check(!LL_APB2_GRP1_IsEnabledClock(value) && FURI_HAL_BUS_IS_RESET(APB2RSTR, value));
         LL_APB2_GRP1_EnableClock(value);
         LL_APB2_GRP1_ReleaseReset(value);
     } else {
+        furi_check(FURI_HAL_BUS_IS_RESET(APB3RSTR, value));
         LL_APB3_GRP1_ReleaseReset(value);
     }
     FURI_CRITICAL_EXIT();
@@ -200,21 +226,29 @@ void furi_hal_bus_disable(FuriHalBus bus) {
 
     FURI_CRITICAL_ENTER();
     if(bus < FuriHalBusAHB2_GRP1) {
+        furi_check(LL_AHB1_GRP1_IsEnabledClock(value));
         LL_AHB1_GRP1_ForceReset(value);
         LL_AHB1_GRP1_DisableClock(value);
     } else if(bus < FuriHalBusAHB3_GRP1) {
+        furi_check(LL_AHB2_GRP1_IsEnabledClock(value));
         LL_AHB2_GRP1_ForceReset(value);
         LL_AHB2_GRP1_DisableClock(value);
     } else if(bus < FuriHalBusAPB1_GRP1) {
+        furi_check(LL_AHB3_GRP1_IsEnabledClock(value));
         LL_AHB3_GRP1_ForceReset(value);
         LL_AHB3_GRP1_DisableClock(value);
     } else if(bus < FuriHalBusAPB1_GRP2) {
+        //TODO: Fix crash
+        // furi_check(LL_APB1_GRP1_IsEnabledClock(value));
         LL_APB1_GRP1_ForceReset(value);
         LL_APB1_GRP1_DisableClock(value);
     } else if(bus < FuriHalBusAPB2_GRP1) {
+        furi_check(LL_APB1_GRP2_IsEnabledClock(value));
         LL_APB1_GRP2_ForceReset(value);
         LL_APB1_GRP2_DisableClock(value);
     } else if(bus < FuriHalBusAPB3_GRP1) {
+        //TODO: Fix crash
+        // furi_check(LL_APB2_GRP1_IsEnabledClock(value));
         LL_APB2_GRP1_ForceReset(value);
         LL_APB2_GRP1_DisableClock(value);
     } else {
