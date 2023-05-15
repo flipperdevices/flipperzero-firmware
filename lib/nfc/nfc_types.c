@@ -1,4 +1,5 @@
 #include "nfc_types.h"
+#include "protocols/felica.h"
 
 const char* nfc_get_dev_type(FuriHalNfcType type) {
     if(type == FuriHalNfcTypeA) {
@@ -115,12 +116,18 @@ const char* nfc_felica_type(FelicaICType type) {
         return "FeliCa Lite";
     } else if(type == FelicaICTypeLiteS) {
         return "FeliCa Lite-S";
-    } else if(type == FelicaICTypeLink) {
-        return "FeliCa Link";
+    } else if(type == FelicaICTypeLinkLiteS) {
+        return "FeliCa Link (Lite-S)";
+    } else if(type == FelicaICTypeLinkPlug) {
+        return "FeliCa Link (Plug)";
+    } else if(type == FelicaICTypeLinkNfcDep) {
+        return "FeliCa Link (NFC-DEP)";
     } else if(type == FelicaICTypePlug) {
         return "FeliCa Plug";
     } else if(type == FelicaICTypeSuica) {
         return "FeliCa (SuiCa)";
+    } else if(type == FelicaICTypeJREMTicket) {
+        return "FeliCa (JREM IC Ticket)";
     } else {
         return "FeliCa";
     }

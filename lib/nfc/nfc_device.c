@@ -865,7 +865,7 @@ static bool nfc_device_save_felica_area(FlipperFormat* file, FelicaArea* area) {
 
         bool node_saved = true;
         for
-            M_EACH(node, area->nodes, FelicaNodeArray_t) {
+            M_EACH(node, area->nodes, FelicaINodeArray_t) {
                 if (nfc_device_save_felica_node(file, node)) {
                     node_saved = false;
                     break;
@@ -962,7 +962,7 @@ static bool nfc_device_save_felica_data(FlipperFormat* file, NfcDevice* dev) {
                 if (system->code == LITE_SYSTEM_CODE) {
                     nfc_device_save_felica_lite(file, &system->lite_info);
                 } else {
-                    nfc_device_save_felica_node(file, &system->root);
+                    nfc_device_save_felica_node(file, &system->root_area);
                 }
             }
     } while(false);
@@ -1466,7 +1466,9 @@ void nfc_device_data_clear(NfcDeviceData* dev_data) {
         mf_ul_reset(&dev_data->mf_ul_data);
     } else if(dev_data->protocol == NfcDeviceProtocolEMV) {
         memset(&dev_data->emv_data, 0, sizeof(EmvData));
-    } else if(dev_data->protocol == NfcDeviceProtocolFelica) {
+    } else if(
+        dev_data->protocol == NfcDeviceProtocolFelica ||
+        dev_data->protocol == NfcDeviceProtocolFelicaMonolithic) {
         felica_clear(&dev_data->felica_data);
     }
     memset(&dev_data->nfc_data, 0, sizeof(FuriHalNfcDevData));

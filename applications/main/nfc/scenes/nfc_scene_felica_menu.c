@@ -67,7 +67,7 @@ bool nfc_scene_felica_menu_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         */
         } else if(event.event == SubmenuIndexInfo) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaInfoSelect);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
             consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneFelicaMenu, event.event);

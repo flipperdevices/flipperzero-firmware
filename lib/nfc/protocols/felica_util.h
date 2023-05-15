@@ -1,6 +1,12 @@
 #include "./felica.h"
 
-uint_least32_t felica_estimate_timing_us(uint_least8_t timing, uint_least8_t units);
 bool felica_lite_is_issued(FelicaLiteInfo* lite_info);
-FuriString* felica_get_system_name(FelicaSystem* system);
-FuriString* felica_get_service_name(FelicaService* service);
+void felica_describe_system(FelicaSystem* system, FuriString* out);
+const char* felica_get_service_type_name(FelicaServiceType type);
+const char* felica_get_service_attrib_name(FelicaServiceAttribute attrib, FelicaServiceType type);
+void felica_std_describe_node(FelicaNode* node, FuriString* result);
+void felica_std_hexdump_blocks(FelicaBlockArray_t blocks, FuriString* out);
+void felica_std_cat_service(FelicaService* service, FuriString* out);
+void felica_std_describe_node_detailed(FelicaNode* node, FuriString* out);
+void felica_print_card_stat(FelicaData* data, FuriString* out);
+void felica_print_card_spec(FelicaSpec* spec, FuriString* out);
