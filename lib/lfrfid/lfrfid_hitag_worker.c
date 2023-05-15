@@ -974,7 +974,9 @@ static void lfrfid_hitag_worker_decoder_feed(uint32_t pulse, uint32_t duration, 
 		if (HITAG_DURATION_S*(1-HITAG_DURATION_ERROR_MARGIN)<=duration && duration <=HITAG_DURATION_S*(1+HITAG_DURATION_ERROR_MARGIN) ){
 			//if first small: add 1 to memBlock and increase small counter
 			if (*Scount==0){
-				memBlock[(*bits-1)/32] |= (bit >> (*bits-1)%32);
+				if (*bits>0){
+					memBlock[(*bits-1)/32] |= (bit >> (*bits-1)%32);
+				}
 				(*bits)++;
 				(*Scount)++;
 			} else {
