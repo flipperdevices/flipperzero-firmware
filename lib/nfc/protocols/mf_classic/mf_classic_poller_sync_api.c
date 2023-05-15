@@ -2,11 +2,17 @@
 
 #include <furi.h>
 
-MfClassicError
-    mf_classic_poller_auth(MfClassicPoller* instance, uint8_t block_num, MfClassicKey* key) {
+MfClassicError mf_classic_poller_auth(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    MfClassicAuthContext* data) {
     furi_assert(instance);
     furi_assert(key);
     UNUSED(block_num);
+    UNUSED(key_type);
+    UNUSED(data);
 
     return MfClassicErrorNone;
 }

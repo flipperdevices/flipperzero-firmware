@@ -57,8 +57,12 @@ MfClassicError mf_classic_poller_stop(MfClassicPoller* instance);
 
 // Sync api
 
-MfClassicError
-    mf_classic_poller_auth(MfClassicPoller* instance, uint8_t block_num, MfClassicKey* key);
+MfClassicError mf_classic_poller_auth(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    MfClassicAuthContext* data);
 
 MfClassicError mf_classic_poller_read_block(
     MfClassicPoller* instance,

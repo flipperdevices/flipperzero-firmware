@@ -11,6 +11,11 @@ extern "C" {
 #define MF_CLASSIC_KEY_SIZE (6)
 #define MF_CLASSIC_ACCESS_BYTES_SIZE (4)
 
+#define MF_CLASSIC_NT_SIZE (4)
+#define MF_CLASSIC_NR_SIZE (4)
+#define MF_CLASSIC_AR_SIZE (4)
+#define MF_CLASSIC_AT_SIZE (4)
+
 typedef enum {
     MfClassicErrorNone,
     MfClassicErrorNotPresent,
@@ -57,6 +62,32 @@ typedef struct {
 typedef struct {
     uint8_t data[MF_CLASSIC_ACCESS_BYTES_SIZE];
 } MfClassicAccessBits;
+
+typedef struct {
+    uint8_t data[MF_CLASSIC_NT_SIZE];
+} MfClassicNt;
+
+typedef struct {
+    uint8_t data[MF_CLASSIC_AT_SIZE];
+} MfClassicAt;
+
+typedef struct {
+    uint8_t data[MF_CLASSIC_NR_SIZE];
+} MfClassicNr;
+
+typedef struct {
+    uint8_t data[MF_CLASSIC_AR_SIZE];
+} MfClassicAr;
+
+typedef struct {
+    uint8_t sector_num;
+    MfClassicKey key;
+    MfClassicKeyType key_type;
+    MfClassicNt nt;
+    MfClassicNr nr;
+    MfClassicAr ar;
+    MfClassicAt at;
+} MfClassicAuthContext;
 
 typedef struct {
     MfClassicKey key_a;
