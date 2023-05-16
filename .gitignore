@@ -63,3 +63,9 @@ PVS-Studio.log
 *.PVS-Studio.*
 
 .gdbinit
+
+# Doxygen and Sphinx
+/documentation/_build/
+/documentation/_doxygen/
+/documentation/build/
+/documentation/sphinx_out/

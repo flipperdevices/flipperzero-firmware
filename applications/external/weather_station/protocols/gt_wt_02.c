@@ -9,9 +9,9 @@
  *  GT-WT-02 sensor on 433.92MHz.
  * Example and frame description provided by https://github.com/ludwich66
  *    [01] {37} 34 00 ed 47 60 : 00110100 00000000 11101101 01000111 01100000
- *    code, BatOK,not-man-send, Channel1, +23,7°C, 35%
+ *    code, BatOK,not-man-send, Channel1, +23,7ÂºC, 35%
  *    [01] {37} 34 8f 87 15 90 : 00110100 10001111 10000111 00010101 10010000
- *    code, BatOK,not-man-send, Channel1,-12,1°C, 10%
+ *    code, BatOK,not-man-send, Channel1,-12,1ÂºC, 10%
  * Humidity:
  * - the working range is 20-90 %
  * - if "LL" in display view it sends 10 %
