@@ -14,7 +14,7 @@
 #include <u8g2.h>
 
 #define TAG 		"nrf24batch"
-#define VERSION		"1.8"
+#define VERSION		"1.9"
 
 #define SCAN_APP_PATH_FOLDER 	"/ext/nrf24batch"
 #define LOG_FILEEXT	 			".txt"
@@ -765,6 +765,7 @@ bool Run_WriteBatch_cmd()
 		if(*(delim_col - 2) == '*') {
 			if(len != delim_col - w - 2) continue;
 			size = *(delim_col - 1) - '0';
+			new = new & (size == 1 ? 0xFF : size == 2 ? 0xFFFF : size == 3 ? 0xFFFFFF : 0xFFFFFFFF);
 		} else if(len != delim_col - w) continue;
 		if(strncmp(p, w, len) != 0) continue;
 		delim_col++;
