@@ -1,11 +1,42 @@
 #include <stdlib.h>
 
+#include <jetpack_joyride_icons.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/icon_animation.h>
 #include <input/input.h>
 
 #define TAG "Jetpack Joyride"
+
+#define GRAVITY_BOOST -0.3
+#define GRAVITY_TICK 0.15
+
+#define SCIENTISTS_MAX 6
+#define COINS_MAX 25
+
+typedef struct {
+    int x;
+    int y;
+} POINT;
+
+typedef struct {
+    float gravity;
+    POINT point;
+    IconAnimation* sprite;
+    bool isBoosting;
+} BARRY;
+
+typedef struct {
+    float gravity;
+    POINT point;
+    IconAnimation* sprite;
+} COIN;
+
+typedef struct {
+    float gravity;
+    POINT point;
+    IconAnimation* sprite;
+} SCIENTIST;
 
 typedef enum {
     GameStateLife,
@@ -14,6 +45,10 @@ typedef enum {
 
 typedef struct {
     int points;
+    int distance;
+    BARRY barry;
+    SCIENTIST scientists[SCIENTISTS_MAX];
+    COIN coins[COINS_MAX];
     State state;
     FuriMutex* mutex;
 } GameState;
@@ -28,17 +63,47 @@ typedef struct {
     InputEvent input;
 } GameEvent;
 
-static void jetpack_game_state_init(GameState* const game_state) {
+static void jetpack_game_random_coins(GameState* const game_state) {
     UNUSED(game_state);
 }
 
+static void jetpack_game_state_init(GameState* const game_state) {
+    UNUSED(game_state);
+    BARRY barry;
+    barry.gravity = 0;
+    barry.point.x = 64;
+    barry.point.y = 32;
+    barry.sprite = icon_animation_alloc(&A_barry);
+    barry.isBoosting = false;
+
+    icon_animation_start(barry.sprite);
+
+    game_state->barry = barry;
+    game_state->points = 0;
+    game_state->distance = 0;
+    game_state->state = GameStateLife;
+
+    memset(game_state->scientists, 0, sizeof(game_state->scientists));
+    memset(game_state->coins, 0, sizeof(game_state->coins));
+}
+
 static void jetpack_game_state_free(GameState* const game_state) {
+    icon_animation_free(game_state->barry.sprite);
     free(game_state);
 }
 
 static void jetpack_game_tick(GameState* const game_state) {
     if(game_state->state == GameStateLife) {
         // Do jetpack things
+        game_state->barry.gravity += GRAVITY_TICK;
+        game_state->barry.point.y += game_state->barry.gravity;
+
+        // spawn scientists and coins...
+        jetpack_game_random_coins(game_state);
+
+        if(game_state->barry.isBoosting) {
+            game_state->barry.gravity += GRAVITY_BOOST;
+        }
     }
 }
 
@@ -51,6 +116,17 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
 
     if(game_state->state == GameStateLife) {
         // Draw scene
+
+        // Draw coins + scientists
+
+        // Draw barry
+        canvas_draw_icon_animation(
+            canvas, game_state->barry.point.x, game_state->barry.point.y, game_state->barry.sprite);
+
+        canvas_set_font(canvas, FontSecondary);
+        char buffer[12];
+        snprintf(buffer, sizeof(buffer), "Dist: %u", game_state->distance);
+        canvas_draw_str_aligned(canvas, 100, 12, AlignCenter, AlignBottom, buffer);
     }
 
     if(game_state->state == GameStateGameOver) {
@@ -111,6 +187,10 @@ int32_t jetpack_game_app(void* p) {
         if(event_status == FuriStatusOk) {
             // press events
             if(event.type == EventTypeKey) {
+                if(event.input.type == InputTypeRelease && event.input.key == InputKeyOk) {
+                    game_state->barry.isBoosting = false;
+                }
+
                 if(event.input.type == InputTypePress) {
                     switch(event.input.key) {
                     case InputKeyUp:
@@ -128,6 +208,7 @@ int32_t jetpack_game_app(void* p) {
 
                         if(game_state->state == GameStateLife) {
                             // Do something
+                            game_state->barry.isBoosting = true;
                         }
 
                         break;
