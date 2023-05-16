@@ -97,11 +97,9 @@ void furi_hal_spi_config_init() {
 static void furi_hal_spi_bus_r_event_callback(FuriHalSpiBus* bus, FuriHalSpiBusEvent event) {
     if(event == FuriHalSpiBusEventInit) {
         furi_hal_spi_bus_r_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-        furi_hal_bus_disable(FuriHalBusSPI1);
         bus->current_handle = NULL;
     } else if(event == FuriHalSpiBusEventDeinit) {
         furi_mutex_free(furi_hal_spi_bus_r_mutex);
-        furi_hal_bus_enable(FuriHalBusSPI1);
     } else if(event == FuriHalSpiBusEventLock) {
         furi_check(furi_mutex_acquire(furi_hal_spi_bus_r_mutex, FuriWaitForever) == FuriStatusOk);
     } else if(event == FuriHalSpiBusEventUnlock) {
@@ -123,11 +121,9 @@ FuriMutex* furi_hal_spi_bus_d_mutex = NULL;
 static void furi_hal_spi_bus_d_event_callback(FuriHalSpiBus* bus, FuriHalSpiBusEvent event) {
     if(event == FuriHalSpiBusEventInit) {
         furi_hal_spi_bus_d_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-        furi_hal_bus_disable(FuriHalBusSPI2);
         bus->current_handle = NULL;
     } else if(event == FuriHalSpiBusEventDeinit) {
         furi_mutex_free(furi_hal_spi_bus_d_mutex);
-        furi_hal_bus_enable(FuriHalBusSPI2);
     } else if(event == FuriHalSpiBusEventLock) {
         furi_check(furi_mutex_acquire(furi_hal_spi_bus_d_mutex, FuriWaitForever) == FuriStatusOk);
     } else if(event == FuriHalSpiBusEventUnlock) {
