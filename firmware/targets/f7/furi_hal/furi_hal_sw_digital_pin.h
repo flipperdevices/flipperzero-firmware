@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
 typedef struct {
-    uint32_t* rx_buff;
+    uint16_t* rx_buff;
     size_t rx_buff_size;
 } SwDigitalPinRx;
 
@@ -33,9 +33,9 @@ typedef enum {
 
 
 
-void furi_hal_sw_digital_pin_tim_init(uint16_t psc, uint16_t arr);
+void furi_hal_sw_digital_pin_tim_init(uint16_t psc, uint32_t arr);
 void furi_hal_sw_digital_pin_tim_deinit(void);
-void furi_hal_sw_digital_pin_set_tim_clock(uint16_t psc, uint16_t arr);
+void furi_hal_sw_digital_pin_set_tim_clock(uint16_t psc, uint32_t arr);
 void furi_hal_sw_digital_pin_sync_init(const GpioPin* gpio);
 void furi_hal_sw_digital_pin_sync_start(void);
 void furi_hal_sw_digital_pin_sync_stop(void);

@@ -806,7 +806,7 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
     };
     SwUsart* sw_usart = sw_usart_alloc(&config);
     uint8_t data[] =
-        "Hello World 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ | Hello World 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        "Hello World 1234567890 ABCDEFGHI JKLMNOPQR STUVWXYZ | Hello World 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ    ";
     //uint8_t data[] ={0x48, 0x65, 0x6c, 0x6c, 0x6f};
     sw_usart_dma_tx(sw_usart, data, sizeof(data));
 
