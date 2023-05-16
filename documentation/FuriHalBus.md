@@ -81,4 +81,25 @@ The system will take over any given peripheral only when the respective feature 
 
 
 ## DMA
-TODO
+The DMA1,2 peripherals are a special case in that they have multiple independent channels. Some of the channels may be in use by the system.
+
+Below is the list of DMA channels and their usage by the system.
+
+*Table 4* - DMA channels
+| DMA | Channel | System | Purpose |
+| :-: | :-----: | :----: | ------- |
+| DMA1 | 1 | ✔️ | digital signal |
+|  --  | 2 | ✔️ | -- |
+|  --  | 3 | | |
+|  --  | 4 | ✔️ |  pulse reader |
+|  --  | 5 | | |
+|  --  | 6 | | |
+|  --  | 7 | | |
+| DMA2 | 1 | ✔️ | infrared, lfrfid, subghz |
+|  --  | 2 | ✔️ | -- |
+|  --  | 3 | ✔️ | SPI |
+|  --  | 4 | ✔️ | SPI |
+|  --  | 5 | | |
+|  --  | 6 | | |
+|  --  | 7 | | |
+
