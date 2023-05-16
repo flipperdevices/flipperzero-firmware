@@ -119,7 +119,7 @@ Every CMSIS component is CMake's target (aka library), which defines compiler de
 add_executable(stm32-template main.c)
 target_link_libraries(stm32-template CMSIS::STM32::F407VG)
 ```
-That will add include directories, coretx peripheral layere files, startup source, linker script and compiler flags to your executable.
+That will add include directories, peripheral layer files, startup source, linker script and compiler flags to your executable.
 
 CMSIS creates the following targets:
 
