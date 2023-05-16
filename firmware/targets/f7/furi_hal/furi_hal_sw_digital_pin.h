@@ -30,12 +30,6 @@ typedef enum {
 
 } SwDigitalPinState;
 
-
-
-
-void furi_hal_sw_digital_pin_tim_init(uint16_t psc, uint32_t arr);
-void furi_hal_sw_digital_pin_tim_deinit(void);
-void furi_hal_sw_digital_pin_set_tim_clock(uint16_t psc, uint32_t arr);
 void furi_hal_sw_digital_pin_sync_init(const GpioPin* gpio);
 void furi_hal_sw_digital_pin_sync_start(void);
 void furi_hal_sw_digital_pin_sync_stop(void);
@@ -44,6 +38,8 @@ void furi_hal_sw_digital_pin_tx_init(
     FuriHalSwDigitalPinTxCallbackYield tx_callback_yield,
     FuriHalSwDigitalPinTxCallbackEnd tx_callback_end,
     void* context,
+    uint16_t tim_psc,
+    uint32_t tim_arr,
     size_t samples,
     const GpioPin* gpio);
 void furi_hal_sw_digital_pin_tx_start(void);
@@ -53,6 +49,8 @@ void furi_hal_sw_digital_pin_tx_deinit(void);
 void furi_hal_sw_digital_pin_rx_init(
     FuriHalSwDigitalPinRxCallback rx_callback,
     void* context,
+    uint16_t tim_psc,
+    uint32_t tim_arr,
     size_t samples,
     const GpioPin* gpio);
 void furi_hal_sw_digital_pin_rx_start(void);
