@@ -248,8 +248,6 @@ static void digital_signal_stop_timer() {
 }
 
 static void digital_signal_setup_timer() {
-    digital_signal_stop_timer();
-
     furi_hal_bus_enable(FuriHalBusTIM2);
 
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
