@@ -147,7 +147,7 @@ void furi_hal_rfid_pin_pull_pulldown() {
 }
 
 void furi_hal_rfid_tim_read(float freq, float duty_cycle) {
-    furi_hal_bus_reset(FURI_HAL_RFID_READ_TIMER_BUS);
+    furi_hal_bus_enable(FURI_HAL_RFID_READ_TIMER_BUS);
 
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     TIM_InitStruct.Autoreload = (SystemCoreClock / freq) - 1;
@@ -165,7 +165,6 @@ void furi_hal_rfid_tim_read(float freq, float duty_cycle) {
 }
 
 void furi_hal_rfid_tim_read_start() {
-    furi_hal_bus_enable(FURI_HAL_RFID_READ_TIMER_BUS);
     LL_TIM_EnableAllOutputs(FURI_HAL_RFID_READ_TIMER);
 }
 
@@ -177,7 +176,6 @@ void furi_hal_rfid_tim_read_stop() {
 void furi_hal_rfid_tim_emulate(float freq) {
     UNUSED(freq); // FIXME
     // basic PWM setup with needed freq and internal clock
-    furi_hal_bus_reset(FURI_HAL_RFID_READ_TIMER_BUS);
 
     LL_TIM_SetPrescaler(FURI_HAL_RFID_EMULATE_TIMER, 0);
     LL_TIM_SetCounterMode(FURI_HAL_RFID_EMULATE_TIMER, LL_TIM_COUNTERMODE_UP);

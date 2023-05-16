@@ -205,7 +205,7 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
                     average_index = 0;
 
                     if(worker->read_cb) {
-                        if(average > 0.2 && average < 0.8) {
+                        if(average > 0.2f && average < 0.8f) {
                             if(!card_detected) {
                                 card_detected = true;
                                 worker->read_cb(
