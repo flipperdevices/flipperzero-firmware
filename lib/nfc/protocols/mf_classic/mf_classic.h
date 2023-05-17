@@ -6,6 +6,9 @@
 extern "C" {
 #endif
 
+#define MF_CLASSIC_AUTH_KEY_A_CMD (0x60U)
+#define MF_CLASSIC_AUTH_KEY_B_CMD (0x61U)
+
 #define MF_CLASSIC_TOTAL_BLOCKS_MAX (256)
 #define MF_CLASSIC_BLOCK_SIZE (16)
 #define MF_CLASSIC_KEY_SIZE (6)

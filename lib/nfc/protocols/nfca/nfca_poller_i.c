@@ -79,10 +79,14 @@ static NfcaError nfca_poller_standart_frame_exchange(
                 ret = NfcaErrorBufferOverflow;
                 break;
             }
+
             if(!nfca_check_crc(buff->rx_data, rx_bytes)) {
+                memcpy(rx_data, buff->rx_data, rx_bytes);
+                *rx_bits = rx_bytes * 8;
                 ret = NfcaErrorWrongCrc;
                 break;
             }
+
             memcpy(rx_data, buff->rx_data, rx_bytes - 2);
             *rx_bits = (rx_bytes - 2) * 8;
         }

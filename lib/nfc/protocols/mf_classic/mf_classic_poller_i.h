@@ -24,7 +24,7 @@ typedef enum {
 } MfClassicAuthState;
 
 typedef enum {
-    MfClassicPollerStateIdle,    
+    MfClassicPollerStateIdle,
 } MfClassicPollerState;
 
 struct MfClassicPoller {
@@ -36,6 +36,23 @@ struct MfClassicPoller {
     MfClassicPollerCallback callback;
     void* context;
 };
+
+typedef union {
+    MfClassicAuthContext auth_context;
+} MfClassicPollerContextData;
+
+
+MfClassicError mf_classic_process_error(NfcaError error);
+
+MfClassicError mf_classic_async_auth(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    MfClassicAuthContext* data);
+
+MfClassicError
+    mf_classic_async_read_block(MfClassicPoller* instance, uint8_t block_num, MfClassicBlock* data);
 
 #ifdef __cplusplus
 }
