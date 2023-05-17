@@ -235,33 +235,29 @@ void furi_hal_sw_digital_pin_sync_init(const GpioPin* gpio) {
     furi_hal_sw_digital_pin_buff.sync_first_level = (uint32_t)gpio->pin << GPIO_NUMBER;
     furi_hal_sw_digital_pin_buff.sync_second_level = gpio->pin;
 
-    // Configure DMA
-    LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)&furi_hal_sw_digital_pin_buff.sync_first_level;
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio->port->BSRR);
-    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = 1;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_CH1;
-    dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
-    LL_DMA_Init(SW_DIGITAL_PIN_DMA_DEF_SYNC_2, &dma_config);
+    // Configure DMA sync first level
+    LL_DMA_SetMemoryAddress(
+        SW_DIGITAL_PIN_DMA_DEF_SYNC_2, (uint32_t)&furi_hal_sw_digital_pin_buff.sync_first_level);
+    LL_DMA_SetPeriphAddress(SW_DIGITAL_PIN_DMA_DEF_SYNC_2, (uint32_t) & (gpio->port->BSRR));
+    LL_DMA_ConfigTransfer(
+        SW_DIGITAL_PIN_DMA_DEF_SYNC_2,
+        LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
+            LL_DMA_MEMORY_NOINCREMENT | LL_DMA_PDATAALIGN_WORD | LL_DMA_MDATAALIGN_WORD |
+            LL_DMA_PRIORITY_MEDIUM);
+    LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_DEF_SYNC_2, 1);
+    LL_DMA_SetPeriphRequest(SW_DIGITAL_PIN_DMA_DEF_SYNC_2, LL_DMAMUX_REQ_TIM2_CH1);
 
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)&furi_hal_sw_digital_pin_buff.sync_second_level;
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio->port->BSRR);
-    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = 1;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_CH3;
-    dma_config.Priority = LL_DMA_PRIORITY_MEDIUM;
-    LL_DMA_Init(SW_DIGITAL_PIN_DMA_DEF_SYNC_1, &dma_config);
+    // Configure DMA sync second level
+    LL_DMA_SetMemoryAddress(
+        SW_DIGITAL_PIN_DMA_DEF_SYNC_1, (uint32_t)&furi_hal_sw_digital_pin_buff.sync_second_level);
+    LL_DMA_SetPeriphAddress(SW_DIGITAL_PIN_DMA_DEF_SYNC_1, (uint32_t) & (gpio->port->BSRR));
+    LL_DMA_ConfigTransfer(
+        SW_DIGITAL_PIN_DMA_DEF_SYNC_1,
+        LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
+            LL_DMA_MEMORY_NOINCREMENT | LL_DMA_PDATAALIGN_WORD | LL_DMA_MDATAALIGN_WORD |
+            LL_DMA_PRIORITY_MEDIUM);
+    LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_DEF_SYNC_1, 1);
+    LL_DMA_SetPeriphRequest(SW_DIGITAL_PIN_DMA_DEF_SYNC_1, LL_DMAMUX_REQ_TIM2_CH3);
 
     // // Configure DMA Channel CC3
     LL_TIM_EnableDMAReq_CC3(SW_DIGITAL_PIN_TIM_TX);
@@ -335,21 +331,25 @@ void furi_hal_sw_digital_pin_tx_init(
     //furi_hal_gpio_init(&gpio_ext_pa6, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 
     // Configure TIM
-    LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    TIM_InitStruct.Prescaler = tim_psc;
-    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload = tim_arr;
-    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-    LL_TIM_Init(SW_DIGITAL_PIN_TIM_TX, &TIM_InitStruct);
+    LL_TIM_SetPrescaler(SW_DIGITAL_PIN_TIM_TX, tim_psc);
+    LL_TIM_SetCounterMode(SW_DIGITAL_PIN_TIM_TX, LL_TIM_COUNTERMODE_UP);
+    LL_TIM_SetAutoReload(SW_DIGITAL_PIN_TIM_TX, tim_arr);
+    LL_TIM_SetClockDivision(SW_DIGITAL_PIN_TIM_TX, LL_TIM_CLOCKDIVISION_DIV1);
+
     LL_TIM_DisableARRPreload(SW_DIGITAL_PIN_TIM_TX);
     LL_TIM_SetClockSource(SW_DIGITAL_PIN_TIM_TX, LL_TIM_CLOCKSOURCE_INTERNAL);
 
     // Configure TIM channel TX
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
+    //LL_TIM_OC_SetMode(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Mode)
     TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_FROZEN;
+    
     TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
     TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
+    
+    //LL_TIM_OC_SetCompareCH1(TIMx, TIM_OCInitStruct->CompareValue);
     TIM_OC_InitStruct.CompareValue = tim_arr / 2;
+    //LL_TIM_OC_SetPolarity(TIM_TypeDef *TIMx, uint32_t Channel, uint32_t Polarity)
     TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
     LL_TIM_OC_Init(SW_DIGITAL_PIN_TIM_TX, SW_DIGITAL_PIN_TIM_CHANNEL_TX, &TIM_OC_InitStruct);
     LL_TIM_OC_DisableFast(SW_DIGITAL_PIN_TIM_TX, SW_DIGITAL_PIN_TIM_CHANNEL_TX);
@@ -377,19 +377,16 @@ void furi_hal_sw_digital_pin_tx_init(
     LL_TIM_EnableCounter(SW_DIGITAL_PIN_TIM_TX);
 
     // Configure DMA
-    LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)furi_hal_sw_digital_pin_buff.buffer_tx_ptr;
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio->port->BSRR);
-    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-    dma_config.NbData = furi_hal_sw_digital_pin_buff.buffer_tx_size;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_CH1;
-    dma_config.Priority = LL_DMA_PRIORITY_HIGH;
-    LL_DMA_Init(SW_DIGITAL_PIN_DMA_DEF_TX, &dma_config);
+    LL_DMA_SetMemoryAddress(
+        SW_DIGITAL_PIN_DMA_DEF_TX, (uint32_t)furi_hal_sw_digital_pin_buff.buffer_tx_ptr);
+    LL_DMA_SetPeriphAddress(SW_DIGITAL_PIN_DMA_DEF_TX, (uint32_t) & (gpio->port->BSRR));
+    LL_DMA_ConfigTransfer(
+        SW_DIGITAL_PIN_DMA_DEF_TX,
+        LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
+            LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_WORD | LL_DMA_MDATAALIGN_WORD |
+            LL_DMA_PRIORITY_HIGH);
+    LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_DEF_TX, furi_hal_sw_digital_pin_buff.buffer_tx_size);
+    LL_DMA_SetPeriphRequest(SW_DIGITAL_PIN_DMA_DEF_TX, LL_DMAMUX_REQ_TIM2_CH1);
 
     // Configure DMA Channel CC1
     LL_TIM_EnableDMAReq_CC1(SW_DIGITAL_PIN_TIM_TX);
@@ -492,12 +489,11 @@ void furi_hal_sw_digital_pin_rx_init(
 #endif
 
     // Configure TIM
-    LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    TIM_InitStruct.Prescaler = tim_psc;
-    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload = tim_arr;
-    TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-    LL_TIM_Init(SW_DIGITAL_PIN_TIM_RX, &TIM_InitStruct);
+    LL_TIM_SetPrescaler(SW_DIGITAL_PIN_TIM_RX, tim_psc);
+    LL_TIM_SetCounterMode(SW_DIGITAL_PIN_TIM_RX, LL_TIM_COUNTERMODE_UP);
+    LL_TIM_SetAutoReload(SW_DIGITAL_PIN_TIM_RX, tim_arr);
+    LL_TIM_SetClockDivision(SW_DIGITAL_PIN_TIM_RX, LL_TIM_CLOCKDIVISION_DIV1);
+
     LL_TIM_DisableARRPreload(SW_DIGITAL_PIN_TIM_RX);
     LL_TIM_SetClockSource(SW_DIGITAL_PIN_TIM_RX, LL_TIM_CLOCKSOURCE_INTERNAL);
 
@@ -509,6 +505,7 @@ void furi_hal_sw_digital_pin_rx_init(
     TIM_OC_InitStruct.CompareValue = tim_arr / 2;
     TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
     LL_TIM_OC_Init(SW_DIGITAL_PIN_TIM_RX, SW_DIGITAL_PIN_TIM_CHANNEL_SYNC_RX, &TIM_OC_InitStruct);
+    //LL_TIM_OC_SetCompareCH1(TIMx, TIM_OCInitStruct->CompareValue);
     LL_TIM_OC_DisableFast(SW_DIGITAL_PIN_TIM_RX, SW_DIGITAL_PIN_TIM_CHANNEL_SYNC_RX);
 
     LL_TIM_SetTriggerOutput(SW_DIGITAL_PIN_TIM_RX, LL_TIM_TRGO_RESET);
@@ -529,33 +526,30 @@ void furi_hal_sw_digital_pin_rx_init(
     /* Set the number of DMA requests that will be authorized after a generation event */
     LL_DMAMUX_SetGenRequestNb(DMAMUX1, LL_DMAMUX_REQ_GEN_0, 1);
 
-    LL_DMA_InitTypeDef dma_config = {0};
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)furi_hal_sw_digital_pin_buff.tim_arr_reset;
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (SW_DIGITAL_PIN_TIM_RX->CNT);
-    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_NOINCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_HALFWORD;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_HALFWORD;
-    dma_config.NbData = 1;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_GENERATOR0;
-    dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
-    LL_DMA_Init(SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, &dma_config);
+    // Configure DMA Sync
+    LL_DMA_SetMemoryAddress(
+        SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, (uint32_t)furi_hal_sw_digital_pin_buff.tim_arr_reset);
+    LL_DMA_SetPeriphAddress(
+        SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, (uint32_t) & (SW_DIGITAL_PIN_TIM_RX->CNT));
+    LL_DMA_ConfigTransfer(
+        SW_DIGITAL_PIN_DMA_SYNC_RX_DEF,
+        LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
+            LL_DMA_MEMORY_NOINCREMENT | LL_DMA_PDATAALIGN_HALFWORD | LL_DMA_MDATAALIGN_HALFWORD |
+            LL_DMA_PRIORITY_VERYHIGH);
+    LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, 1);
+    LL_DMA_SetPeriphRequest(SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, LL_DMAMUX_REQ_GENERATOR0);
 
     // Configure DMA Rx pin
-    dma_config.MemoryOrM2MDstAddress = (uint32_t)furi_hal_sw_digital_pin_buff.buffer_rx_ptr;
-    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio->port->IDR);
-    dma_config.Direction = LL_DMA_DIRECTION_PERIPH_TO_MEMORY;
-    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
-    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_HALFWORD;
-    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_HALFWORD;
-    dma_config.NbData = furi_hal_sw_digital_pin_buff.buffer_rx_size;
-    dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM17_CH1;
-    dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
-    LL_DMA_Init(SW_DIGITAL_PIN_DMA_DEF_RX, &dma_config);
+    LL_DMA_SetMemoryAddress(
+        SW_DIGITAL_PIN_DMA_DEF_RX, (uint32_t)furi_hal_sw_digital_pin_buff.buffer_rx_ptr);
+    LL_DMA_SetPeriphAddress(SW_DIGITAL_PIN_DMA_DEF_RX, (uint32_t) & (gpio->port->IDR));
+    LL_DMA_ConfigTransfer(
+        SW_DIGITAL_PIN_DMA_DEF_RX,
+        LL_DMA_DIRECTION_PERIPH_TO_MEMORY | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
+            LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_HALFWORD | LL_DMA_MDATAALIGN_HALFWORD |
+            LL_DMA_PRIORITY_VERYHIGH);
+    LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_DEF_RX, furi_hal_sw_digital_pin_buff.buffer_rx_size);
+    LL_DMA_SetPeriphRequest(SW_DIGITAL_PIN_DMA_DEF_RX, LL_DMAMUX_REQ_TIM17_CH1);
 
     // Configure DMA Channel CC1
     LL_TIM_EnableDMAReq_CC1(SW_DIGITAL_PIN_TIM_RX);
