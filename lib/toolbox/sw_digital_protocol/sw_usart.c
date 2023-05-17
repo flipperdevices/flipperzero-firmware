@@ -109,6 +109,7 @@ static void sw_usart_rx(void* context, SwDigitalPinRx data) {
     uint16_t ind = 0;
     uint8_t parity = 0;
     uint32_t mask = sw_usart->config->rx_pin->pin;
+    uint8_t bit_value = (sw_usart->config->inverted ? 0 : 1);
 
     do {
         // sw_usart->rx_buffer_data[sw_usart->rx_buffer_data_pos_byte] =
@@ -120,14 +121,16 @@ static void sw_usart_rx(void* context, SwDigitalPinRx data) {
 
         if(sw_usart->rx_buffer_parce_byte_pos == 0) {
             //Found start bit
-            if(data.rx_buff[ind++] & mask) {
+            if(!(data.rx_buff[ind++] & mask) == !bit_value) {
                 continue;
+            } else {
+                
             }
         }
 
         if(sw_usart->rx_buffer_parce_byte_pos < sw_usart->tx_upload_char_len - 1) {
             sw_usart->rx_buffer_parce_byte[sw_usart->rx_buffer_parce_byte_pos++] =
-                (data.rx_buff[ind++] & mask ? 1 : 0);
+                (data.rx_buff[ind++] & mask ? bit_value : !bit_value);
         } else {
             //if there is the required number of bits, parse the data
             //Data
@@ -170,7 +173,6 @@ static void sw_usart_rx(void* context, SwDigitalPinRx data) {
             }
             sw_usart->rx_buffer_parce_byte_pos = 0;
         }
-
     } while(ind < data.rx_buff_size);
     // if(sw_usart->rx_buffer_data_pos_byte < sw_usart->rx_buffer_len-3) {
     //     sw_usart->rx_buffer_data[sw_usart->rx_buffer_data_pos_byte++] = 8;
@@ -208,8 +210,6 @@ SwUsart* sw_usart_alloc(SwUsartConfig* config) {
     case SwUsartModeOnlyAsyncTx:
         furi_assert(sw_usart->config->tx_pin);
 
-        // furi_hal_gpio_init(
-        //     sw_usart->config->tx_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_write(sw_usart->config->tx_pin, (sw_usart->config->inverted ? false : true));
         furi_hal_sw_digital_pin_tx_init(
             sw_usart_tx_encoder_yield,
@@ -225,11 +225,7 @@ SwUsart* sw_usart_alloc(SwUsartConfig* config) {
         furi_assert(sw_usart->config->tx_pin);
         furi_assert(sw_usart->config->rx_pin);
 
-        // furi_hal_gpio_init(
-        //     sw_usart->config->tx_pin, GpioModeOutputPushPull, GpioPullNo, GpioSpeedHigh);
         furi_hal_gpio_write(sw_usart->config->tx_pin, (sw_usart->config->inverted ? false : true));
-
-        //furi_hal_gpio_init(sw_usart->config->rx_pin, GpioModeInput, GpioPullUp, GpioSpeedHigh);
 
         furi_hal_sw_digital_pin_tx_init(
             sw_usart_tx_encoder_yield,
@@ -259,10 +255,6 @@ SwUsart* sw_usart_alloc(SwUsartConfig* config) {
 
 void sw_usart_free(SwUsart* sw_usart) {
     furi_assert(sw_usart);
-
-    //todo: deinit check gpio
-    //furi_hal_gpio_init(sw_usart->config->tx_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    //furi_hal_gpio_init(sw_usart->config->rx_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
     furi_hal_sw_digital_pin_tx_deinit();
     furi_hal_sw_digital_pin_rx_deinit();

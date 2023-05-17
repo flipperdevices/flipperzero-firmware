@@ -800,7 +800,7 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
         .data_bit = SwUsartDataBit8,
         .parity = SwUsartParityEven,
         .stop_bit = SwUsartStopBit2,
-        .inverted = false,
+        .inverted = true,
         .tx_pin = &gpio_ext_pa7,
         .rx_pin = &gpio_ext_pa4,
     };
