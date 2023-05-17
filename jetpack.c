@@ -14,60 +14,70 @@
 #define SCIENTISTS_MAX 6
 #define COINS_MAX 25
 
-typedef struct {
+typedef struct
+{
     int x;
     int y;
 } POINT;
 
-typedef struct {
+typedef struct
+{
     float gravity;
     POINT point;
-    IconAnimation* sprite;
+    IconAnimation *sprite;
     bool isBoosting;
 } BARRY;
 
-typedef struct {
+typedef struct
+{
     float gravity;
     POINT point;
-    IconAnimation* sprite;
+    IconAnimation *sprite;
 } COIN;
 
-typedef struct {
+typedef struct
+{
     float gravity;
     POINT point;
-    IconAnimation* sprite;
+    IconAnimation *sprite;
 } SCIENTIST;
 
-typedef enum {
+typedef enum
+{
     GameStateLife,
     GameStateGameOver,
 } State;
 
-typedef struct {
+typedef struct
+{
     int points;
     int distance;
     BARRY barry;
     SCIENTIST scientists[SCIENTISTS_MAX];
     COIN coins[COINS_MAX];
     State state;
-    FuriMutex* mutex;
+    FuriMutex *mutex;
 } GameState;
 
-typedef enum {
+typedef enum
+{
     EventTypeTick,
     EventTypeKey,
 } EventType;
 
-typedef struct {
+typedef struct
+{
     EventType type;
     InputEvent input;
 } GameEvent;
 
-static void jetpack_game_random_coins(GameState* const game_state) {
+static void jetpack_game_random_coins(GameState *const game_state)
+{
     UNUSED(game_state);
 }
 
-static void jetpack_game_state_init(GameState* const game_state) {
+static void jetpack_game_state_init(GameState *const game_state)
+{
     UNUSED(game_state);
     BARRY barry;
     barry.gravity = 0;
@@ -87,34 +97,52 @@ static void jetpack_game_state_init(GameState* const game_state) {
     memset(game_state->coins, 0, sizeof(game_state->coins));
 }
 
-static void jetpack_game_state_free(GameState* const game_state) {
+static void jetpack_game_state_free(GameState *const game_state)
+{
     icon_animation_free(game_state->barry.sprite);
     free(game_state);
 }
 
-static void jetpack_game_tick(GameState* const game_state) {
-    if(game_state->state == GameStateLife) {
-        // Do jetpack things
-        game_state->barry.gravity += GRAVITY_TICK;
-        game_state->barry.point.y += game_state->barry.gravity;
+static void jetpack_game_tick(GameState *const game_state)
+{
+    // Do jetpack things
+    game_state->barry.gravity += GRAVITY_TICK;
+    game_state->barry.point.y += game_state->barry.gravity;
 
-        // spawn scientists and coins...
-        jetpack_game_random_coins(game_state);
+    // Sprite height of Barry
+    int sprite_height = 15;
 
-        if(game_state->barry.isBoosting) {
-            game_state->barry.gravity += GRAVITY_BOOST;
-        }
+    // Constrain barry's height within sprite_height and 64 - sprite_height
+    if (game_state->barry.point.y > (64 - sprite_height))
+    {
+        game_state->barry.point.y = 64 - sprite_height;
+        game_state->barry.gravity = 0; // stop upward momentum
+    }
+    else if (game_state->barry.point.y < 0)
+    {
+        game_state->barry.point.y = 0;
+        game_state->barry.gravity = 0; // stop downward momentum
+    }
+
+    // spawn scientists and coins...
+    jetpack_game_random_coins(game_state);
+
+    if (game_state->barry.isBoosting)
+    {
+        game_state->barry.gravity += GRAVITY_BOOST;
     }
 }
 
-static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
+static void jetpack_game_render_callback(Canvas *const canvas, void *ctx)
+{
     furi_assert(ctx);
-    const GameState* game_state = ctx;
+    const GameState *game_state = ctx;
     furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
     canvas_draw_frame(canvas, 0, 0, 128, 64);
 
-    if(game_state->state == GameStateLife) {
+    if (game_state->state == GameStateLife)
+    {
         // Draw scene
 
         // Draw coins + scientists
@@ -129,70 +157,81 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 100, 12, AlignCenter, AlignBottom, buffer);
     }
 
-    if(game_state->state == GameStateGameOver) {
+    if (game_state->state == GameStateGameOver)
+    {
         // Show highscore
     }
 
     furi_mutex_release(game_state->mutex);
 }
 
-static void jetpack_game_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
+static void jetpack_game_input_callback(InputEvent *input_event, FuriMessageQueue *event_queue)
+{
     furi_assert(event_queue);
 
     GameEvent event = {.type = EventTypeKey, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
 
-static void jetpack_game_update_timer_callback(FuriMessageQueue* event_queue) {
+static void jetpack_game_update_timer_callback(FuriMessageQueue *event_queue)
+{
     furi_assert(event_queue);
 
     GameEvent event = {.type = EventTypeTick};
     furi_message_queue_put(event_queue, &event, 0);
 }
 
-int32_t jetpack_game_app(void* p) {
+int32_t jetpack_game_app(void *p)
+{
     UNUSED(p);
     int32_t return_code = 0;
 
-    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(GameEvent));
+    FuriMessageQueue *event_queue = furi_message_queue_alloc(8, sizeof(GameEvent));
 
-    GameState* game_state = malloc(sizeof(GameState));
+    GameState *game_state = malloc(sizeof(GameState));
     jetpack_game_state_init(game_state);
 
     game_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(!game_state->mutex) {
+    if (!game_state->mutex)
+    {
         FURI_LOG_E(TAG, "cannot create mutex\r\n");
         return_code = 255;
         goto free_and_exit;
     }
 
     // Set system callbacks
-    ViewPort* view_port = view_port_alloc();
+    ViewPort *view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, jetpack_game_render_callback, game_state);
     view_port_input_callback_set(view_port, jetpack_game_input_callback, event_queue);
 
-    FuriTimer* timer =
+    FuriTimer *timer =
         furi_timer_alloc(jetpack_game_update_timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 25);
 
     // Open GUI and register view_port
-    Gui* gui = furi_record_open(RECORD_GUI);
+    Gui *gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     GameEvent event;
-    for(bool processing = true; processing;) {
+    for (bool processing = true; processing;)
+    {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
-        if(event_status == FuriStatusOk) {
+        if (event_status == FuriStatusOk)
+        {
             // press events
-            if(event.type == EventTypeKey) {
-                if(event.input.type == InputTypeRelease && event.input.key == InputKeyOk) {
+            if (event.type == EventTypeKey)
+            {
+                if (event.input.type == InputTypeRelease && event.input.key == InputKeyOk)
+                {
                     game_state->barry.isBoosting = false;
                 }
 
-                if(event.input.type == InputTypePress) {
-                    switch(event.input.key) {
+                if (event.input.type == InputTypePress)
+                {
+                    switch (event.input.key)
+                    {
                     case InputKeyUp:
                         break;
                     case InputKeyDown:
@@ -202,11 +241,13 @@ int32_t jetpack_game_app(void* p) {
                     case InputKeyLeft:
                         break;
                     case InputKeyOk:
-                        if(game_state->state == GameStateGameOver) {
+                        if (game_state->state == GameStateGameOver)
+                        {
                             jetpack_game_state_init(game_state);
                         }
 
-                        if(game_state->state == GameStateLife) {
+                        if (game_state->state == GameStateLife)
+                        {
                             // Do something
                             game_state->barry.isBoosting = true;
                         }
@@ -219,7 +260,9 @@ int32_t jetpack_game_app(void* p) {
                         break;
                     }
                 }
-            } else if(event.type == EventTypeTick) {
+            }
+            else if (event.type == EventTypeTick)
+            {
                 jetpack_game_tick(game_state);
             }
         }
