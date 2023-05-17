@@ -906,107 +906,146 @@ static uint16_t lfrfid_hitag_worker_yield_dma_buffer_AC(LfRfidHitagReplyData* da
 	return dma_len;
 }
 
-static void lfrfid_hitag_worker_decoder_feed(uint32_t pulse, uint32_t duration, uint32_t* memBlock, uint8_t* bits, uint8_t* Scount, bool* finished, LfRfidHitagProtocol protocol){
-	UNUSED(pulse);
+static void lfrfid_hitag_worker_decoder_feed(uint32_t pulse, uint32_t duration, uint32_t* memBlock, uint8_t* bits, bool* half, bool* finished, LfRfidHitagProtocol protocol, uint8_t startBits){
 	uint32_t bit = 1<<(32-1);
+	if (*bits==0){
+		*half = false;
+	}
 	if (protocol == HitagProtocolManchesterCoding){
-		if (HITAG_DURATION_S*(1-HITAG_DURATION_ERROR_MARGIN)<=duration && duration <=HITAG_DURATION_S*(1+HITAG_DURATION_ERROR_MARGIN) ){
-			if (*bits == 0){
-				//first bit is always a 1, this is startbit, no need to store it in memBlock
+		if (HITAG_DURATION_S*(1-HITAG_DURATION_ERROR_MARGIN) <= duration && duration <= HITAG_DURATION_S*(1+HITAG_DURATION_ERROR_MARGIN) ){
+			//short period (HL) detected: same bit as previous
+			if (*bits < startBits){
+				//don't store startbits in memory, just increase bitcounter
 				(*bits)++;
-			} else if (*bits == 1){
-				//add 1 to the memBlock
-				memBlock[(*bits-1)/32] |= (bit >> (*bits-1)%32);	//add 1
+			} else if (*bits == startBits){
+				//same as previous bit (last startbit it 1, so add 1 to the memBlock)
+				memBlock[(*bits-startBits)/32] |= (bit >> (*bits-startBits)%32);	//add 1
 				(*bits)++;
 			} else {
 				//add same as previous bit
-				if (memBlock[(*bits-2)/32] & (bit >> (*bits-2)%32)){
-					memBlock[(*bits-1)/32] |= (bit >> (*bits-1)%32);	//add 1
+				if (memBlock[(*bits-startBits-1)/32] & (bit >> (*bits-startBits-1)%32)){
+					memBlock[(*bits-startBits)/32] |= (bit >> (*bits-startBits)%32);	//add 1
 					(*bits)++;
 				} else {
-					(*bits)++;
+					(*bits)++;	//no mem action for 0, just increase bitcounter
 				}
 			}
-		} else if (HITAG_DURATION_M*(1-HITAG_DURATION_ERROR_MARGIN)<=duration && duration <=HITAG_DURATION_M*(1+HITAG_DURATION_ERROR_MARGIN) ){
-			if (*bits == 0){
-				//10 detected, but startbit is not to be added to memBlock, and 0 is already in bitarry:
+		}
+		else if (HITAG_DURATION_M*(1-HITAG_DURATION_ERROR_MARGIN) <= duration && duration <= HITAG_DURATION_M*(1+HITAG_DURATION_ERROR_MARGIN) ){
+			//medium period (H|HL or HL|L) detected: half 0 + full 1 or full 1 + half 0 detected
+			if (*bits < startBits){
+				//assuming all startbits are 1's, this can only happen on last startbit followed by 0
+				//don't store startbits, no mem action for 0, just increase bitcounter twice
 				(*bits)++;
 				(*bits)++;
-			} else if (*bits == 1){
-				//add 10 to the memBlock
-				memBlock[(*bits-1)/32] |= (bit >> (*bits-1)%32);	//add 1
+				*half = true;
+			} else if (*bits == startBits){
+				//assuming all startbits were 1's, this is a data 10 detection
+				memBlock[(*bits-startBits)/32] |= (bit >> (*bits-startBits)%32);	//add 1
 				(*bits)++;
-				(*bits)++;//add 0 is not necessary, since memBlock is initialized with all 0s, just increase counter
+				(*bits)++;	//no mem action for 0, just increase bitcounter
+				*half = true;
 			} else {
-				//if prev bit is 1 then add 10, else add 1
-				if (memBlock[(*bits-2)/32] & (bit >> (*bits-2)%32)){
-					memBlock[(*bits-1)/32] |= (bit >> (*bits-1)%32);	//add 1
+				//if we're in half of a bit, add 1, else add 10 and set half flag
+				if (*half){
+					memBlock[(*bits-startBits)/32] |= (bit >> (*bits-startBits)%32);	//add 1
 					(*bits)++;
-					(*bits)++;//add 0 is not necessary, since memBlock is initialized with all 0s, just increase counter
+					*half = false;
 				} else {
-					memBlock[(*bits-1)/32] |= (bit >> (*bits-1)%32);	//add 1
+					memBlock[(*bits-startBits)/32] |= (bit >> (*bits-startBits)%32);	//add 1
 					(*bits)++;
+					(*bits)++;	//no mem action for 0, just increase bitcounter
+					*half = true;
 				}
 			}
-		} else if (HITAG_DURATION_L*(1-HITAG_DURATION_ERROR_MARGIN)<=duration && duration <=HITAG_DURATION_L*(1+HITAG_DURATION_ERROR_MARGIN) ){
-			if (*bits==0){
-				//error, first pulse-duration of a bit sequence can't be a large one
-				//no need to do anything if bits is 0 then memBlock is also 00000...
+		}
+		else if (HITAG_DURATION_L*(1-HITAG_DURATION_ERROR_MARGIN) <= duration && duration <= HITAG_DURATION_L*(1+HITAG_DURATION_ERROR_MARGIN) ){
+			//long period (H|HL|L) detected: half 0 + full 1 + half 0 detected
+			if (*bits <= startBits){
+				//TODO: throw error since this can't happen till after first real bit, since all startbits should be 1's
 			} else {
+				//TODO check that prev bit is indeed 0
 				//add 10 to the memBlock
-				memBlock[(*bits-1)/32] |= (bit >> (*bits-1)%32);	//add 1
+				memBlock[(*bits-startBits)/32] |= (bit >> (*bits-startBits)%32);	//add 1
 				(*bits)++;
-				(*bits)++;//add 0 is not necessary, since memBlock is initialized with all 0s, just increase counter
+				(*bits)++;//no mem action for 0, just increase bitcounter
 			}
-		} else if (1000<=duration){
+		} 
+		else if (HITAG_DURATION_L*(1+HITAG_DURATION_ERROR_MARGIN) < duration){
+			//end of modulation by tag, check if this pulse duration includes a bit
 			if (*bits>0){
+				if (*half && pulse < HITAG_DURATION_S){
+					//second half of 0 bit, no action
+				} else if (*half && pulse < HITAG_DURATION_M){
+					//second half or 0 bit + another 1 bit
+					memBlock[(*bits-startBits)/32] |= (bit >> (*bits-startBits)%32);	//add 1
+					(*bits)++;
+				} else if (!(*half) && pulse < HITAG_DURATION_S){
+					//another 1 bit
+					memBlock[(*bits-startBits)/32] |= (bit >> (*bits-startBits)%32);	//add 1
+					(*bits)++;
+				} else {
+					//invalid pulse duration --> reset?
+				}
 				*finished = true;
 			}
-		} else {
-			//invalid pulse: reset tempData if necessary
+		} 
+		else {
+			//invalid pulse duration: reset tempData if necessary
 			if (*bits>0){
 				memset(memBlock, 0, HITAG_BLOCKPAGES*sizeof(memBlock[0]));
 				*bits = 0;
 				*finished = false;
 			}
 		}
-	} else if (protocol == HitagProtocolAntiCollision){
-		if (HITAG_DURATION_S*(1-HITAG_DURATION_ERROR_MARGIN)<=duration && duration <=HITAG_DURATION_S*(1+HITAG_DURATION_ERROR_MARGIN) ){
-			//if first small: add 1 to memBlock and increase small counter
-			if (*Scount==0){
-				if (*bits>0){
-					memBlock[(*bits-1)/32] |= (bit >> (*bits-1)%32);
-				}
+	} 
+	else if (protocol == HitagProtocolAntiCollision){
+		if (HITAG_DURATION_S*(1-HITAG_DURATION_ERROR_MARGIN) <= duration && duration <= HITAG_DURATION_S*(1+HITAG_DURATION_ERROR_MARGIN) ){
+			//short period (HL): first or second half of a 1 detected
+			//if first short: add 1 to memBlock and increase half counter
+			if (*half==false){
+				if (*bits >= startBits){
+					memBlock[(*bits-startBits)/32] |= (bit >> (*bits-startBits)%32);
+				} 
 				(*bits)++;
-				(*Scount)++;
+				*half = true;
 			} else {
-				//if second small: reset small counter
-				*Scount=0;
+				//if second small: reset half counter
+				*half = false;
 			}
-		} else if (HITAG_DURATION_L*(1-HITAG_DURATION_ERROR_MARGIN)<=duration && duration <=HITAG_DURATION_L*(1+HITAG_DURATION_ERROR_MARGIN) ){
-			//if small counter == 1: error
-			if (*bits==0 || *Scount ==1){
-				//error, first pulse-duration of a bit sequence can't be a large one or coming after only 1 small pulse-duration
+		}
+		else if (HITAG_DURATION_L*(1-HITAG_DURATION_ERROR_MARGIN) <= duration && duration <= HITAG_DURATION_L*(1+HITAG_DURATION_ERROR_MARGIN) ){
+			//long period (HHLL): 0 detected
+			//should only happen after full detection of 1 or after startBits
+			if (*bits < startBits || *half){
+				//reset
 				memset(memBlock, 0, HITAG_BLOCKPAGES*sizeof(memBlock[0]));
 				*bits = 0;
 				*finished = false;
 			} else {
-				//add 0 to memBlock
-				(*bits)++;
+				(*bits)++;	//add 0 to memBlock
 			}
-		} else if (1000<=duration){
+		} 
+		else if (HITAG_DURATION_L*(1+HITAG_DURATION_ERROR_MARGIN) < duration){
+			//end of modulation by tag, check if this pulse duration includes a bit
 			if (*bits>0){
+				if (!(*half) && pulse > HITAG_DURATION_S){
+					(*bits)++;	//add 0 to memBlock
+				} else {
+					//invalid pulse duration: reset?
+				}
 				*finished = true;
 			}
-		} else {
-			//invalid pulse: reset tempData if necessary
+		} 
+		else {
+			//invalid pulse duration: reset tempData if necessary
 			if (*bits>0){
 				memset(memBlock, 0, HITAG_BLOCKPAGES*sizeof(memBlock[0]));
 				*bits = 0;
 				*finished = false;
 			}
 		}
-	}
+	} 
 }
 
 static void lfrfid_hitag_worker_calc_crc(uint8_t* crc, uint8_t data, uint8_t bitcount){
@@ -1216,7 +1255,7 @@ void lfrfid_hitag_worker_process_config_page(LFRFIDHitag* tag){
 static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
     LFRFIDHitagWorker* worker = (LFRFIDHitagWorker*)thread_context;
 
-	//TODO: check if a tag has been properly loaded with known serial nr & config page
+	//load tag
 	worker->tag = malloc(sizeof(LFRFIDHitag));
 	lfrfid_hitag_worker_initialize_tag_data(worker->tag);
 	
@@ -1224,6 +1263,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 	protocol_dict_get_data(worker->dict, LFRFIDProtocolHitag1, worker->tag->tagData, data_size);
 	
 	lfrfid_hitag_worker_split_tag_data(worker->tag);
+	//TODO: check if a tag has been properly loaded with known serial nr & config page
 	lfrfid_hitag_worker_process_config_page(worker->tag);
 	
 	//init capData for carrier_in
@@ -1241,10 +1281,10 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
     
 	//set pins to read setup
 	furi_hal_rfid_pins_read();
-	// reconfigure carrier_out to fixed low state instead
+	//reconfigure carrier_out to fixed low state instead
 	furi_hal_gpio_init(&gpio_rfid_carrier_out, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
 	furi_hal_gpio_write(&gpio_rfid_carrier_out, false);
-	//reconfigure PA15 carrier_in to alt ftn 1 (TIM2 CH1) to use is for input capture
+	//reconfigure PA15 carrier_in to alt ftn 1 (TIM2 CH1) to use it for input capture
 	furi_hal_gpio_init_ex(&gpio_rfid_carrier, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
 	//reconfigure pull to alternate function 1 (TIM2 CH3) to drive low (for read carrier) or pull antenna via DMA (for emulation)
 	furi_hal_gpio_init_ex(&gpio_nfc_irq_rfid_pull, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn1TIM2);
@@ -1257,8 +1297,8 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 
 	bool carrier_on = false;
 	int8_t carrier_count = 0;
-	uint8_t carrier_threshold_on = 5;  //better to use the #define on top for this constant or make this a constant
-	int8_t carrier_threshold_off = -5; //better to use the #define on top for this constant or make this a constant
+	uint8_t carrier_threshold_on = 5; 
+	int8_t carrier_threshold_off = -5;
 	
 	uint32_t periodcounter = 0;
 	
@@ -1270,8 +1310,8 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 	uint32_t lastMinIndex = 0;
 	uint8_t maxBitCounter = 0;
 	uint8_t minBitCounter = 0;
-	uint32_t maxBits[5];	//room for 5x32 bits
-	uint32_t minBits[5];	//room for 5x32 bits
+	uint32_t maxBits[5];
+	uint32_t minBits[5];
 	int8_t cmd = 0;
 	uint32_t one = 1<<(32-1);
 	uint32_t cmdIndex = 0;
@@ -1289,14 +1329,14 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 	uint32_t prevduration = 0;
 	uint32_t duration = 0;
 	uint8_t durationcounter = 0;
-	uint8_t durationthreshold = 5; //better to use the #define on top for this constant or make this a constant
+	uint8_t durationthreshold = 5;
 	
 	uint8_t tagState = HitagStateIdle;
 	uint8_t tagMode = HitagModeBasic;
 	
 	while(1) {
 		Buffer* buffer = buffer_stream_receive(capData->stream, 1);
-		//and if so write fo file
+		
 		if(buffer != NULL) {
 			size_t buffsize = buffer_get_size(buffer);
 			uint8_t* buffdata = buffer_get_data(buffer);
@@ -1328,11 +1368,9 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 								minBits[1] = 0;
 								maxBits[0] = 0;
 								maxBits[1] = 0;
-								//maxBits = ""
 								
 								carrier_count = 0;
-								
-								//TODO: signal view that field is on (including the freq?) 
+								//TODO reset tagstate to Idle & tagMode to basic after power_on_reset (no carrier for 10ms)
 							}
 						} else {
 							carrier_count = 0;
@@ -1345,8 +1383,6 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 							if (carrier_count<=carrier_threshold_off){
 								carrier_on = false;
 								carrier_count = 0;
-								
-								//TODO: signal view that field is off? eg colored LED sequence?
 							}
 						} else{
 							carrier_count = 0;
@@ -1378,7 +1414,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 								//check if there's a miniDelta and if it should be added to previous or next delta
 								if (miniMaxDelta > 0){
 									//by default minidelta is added to next
-									//in case doing this does not result in 2 consequtive valid deltas, while adding it to previous does result in 2 consequtive valid deltas, then assign it to previous delta
+									//in case doing this does not result in 2 consequtive valid deltas, but adding it to previous does result in 2 consequtive valid deltas, then assign it to previous delta
 									if ((lfrfid_hitag_worker_validate_ripple_delta(prevMaxDelta+miniMaxDelta) + lfrfid_hitag_worker_validate_ripple_delta(maxDelta-miniMaxDelta)) > (lfrfid_hitag_worker_validate_ripple_delta(prevMaxDelta) + lfrfid_hitag_worker_validate_ripple_delta(maxDelta))){
 										//update the previous (last) bit from 0 to 1 if a command was ongoing
 										if (maxBitCounter > 0){
@@ -1457,7 +1493,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 								//check if there's a miniDelta and if it should be added to previous or next delta
 								if (miniMinDelta > 0){
 									//by default minidelta is added to next
-									//in case doing this does not result in 2 consequtive valid deltas, while adding it to previous does result in 2 consequtive valid deltas, then assign it to previous delta
+									//in case doing this does not result in 2 consequtive valid deltas, but adding it to previous does result in 2 consequtive valid deltas, then assign it to previous delta
 									if ((lfrfid_hitag_worker_validate_ripple_delta(prevMinDelta+miniMinDelta) + lfrfid_hitag_worker_validate_ripple_delta(minDelta-miniMinDelta)) > (lfrfid_hitag_worker_validate_ripple_delta(prevMinDelta) + lfrfid_hitag_worker_validate_ripple_delta(minDelta))){
 										//update the previous (last) bit from 0 to 1 if a command was ongoing
 										if (minBitCounter > 0){
@@ -1520,7 +1556,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 							}
 							
 							//if a valid cmd has been detected: process it & reply
-							if (cmd != 0 ){//|| periodcounter%62500 == 0){
+							if (cmd != 0 ){
 								uint32_t bits[5];
 								uint8_t size = 0;
 								//select the cmd bit source (max or min detection)
@@ -1532,7 +1568,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 									maxBits[0] = 0;
 									maxBits[1] = 0;
 									maxBitCounter = 0;
-								} else {//if (cmd ==-1){
+								} else {
 									bits[0] = minBits[0];
 									bits[1] = minBits[1];
 									size = minBitCounter;
@@ -1543,54 +1579,55 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 								}
 								cmd = 0;
 								
-								//TODO: signal view that cmd has been found? (eg start colored LED sequence
-								
 								dmaLen = 0;
 								if (size == 5 && (bits[0]>>(32-5)) == 0b11001){			//SET_CCNEW
-									//reset selected state
-									tagState = HitagStateIdle;
-									
-									//set tag in advanced mode
-									tagMode = HitagModeAdvanced;
-									
-									//prepare emulate DMA buffer with advanced SN reply (page 0) and switch Timer from carrier_in capture to carrier_pull driver
-									dataReply->replyvalue[0] = 0b00000111;
-									dataReply->replytype[0] = HITAG_STARTBIT3;
-									dataReply->replyvalue[1] = worker->tag->pageData[0];
-									dataReply->replytype[1] = HITAG_BYTE;
-									dataReply->replyvalue[2] = worker->tag->pageData[1];
-									dataReply->replytype[2] = HITAG_BYTE;
-									dataReply->replyvalue[3] = worker->tag->pageData[2];
-									dataReply->replytype[3] = HITAG_BYTE;
-									dataReply->replyvalue[4] = worker->tag->pageData[3];
-									dataReply->replytype[4] = HITAG_BYTE;
-									
-									dataReply->replylength=5;
+									if (tagState != HitagStateQuiet){
+										//reset selected state
+										tagState = HitagStateIdle;
+										
+										//set tag in advanced mode
+										tagMode = HitagModeAdvanced;
+										
+										//prepare emulate DMA buffer with advanced SN reply (page 0)
+										dataReply->replyvalue[0] = 0b00000111;
+										dataReply->replytype[0] = HITAG_STARTBIT3;
+										dataReply->replyvalue[1] = worker->tag->pageData[0];
+										dataReply->replytype[1] = HITAG_BYTE;
+										dataReply->replyvalue[2] = worker->tag->pageData[1];
+										dataReply->replytype[2] = HITAG_BYTE;
+										dataReply->replyvalue[3] = worker->tag->pageData[2];
+										dataReply->replytype[3] = HITAG_BYTE;
+										dataReply->replyvalue[4] = worker->tag->pageData[3];
+										dataReply->replytype[4] = HITAG_BYTE;
+										
+										dataReply->replylength=5;
 
-									dmaLen = lfrfid_hitag_worker_yield_dma_buffer_AC(dataReply, dataDMA, worker->carrierPrescaler);
-									
+										dmaLen = lfrfid_hitag_worker_yield_dma_buffer_AC(dataReply, dataDMA, worker->carrierPrescaler);
+									}
 								} 
 								else if (size == 5 && (bits[0]>>(32-5)) == 0b00110){	//SET_CC
-									//reset selected state
-									tagState = HitagStateIdle;
-									
-									//do not (re)set tag in basic mode, this only happens during power on reset
-									
-									//prepare emulate DMA buffer with basic SN reply (page 0) and switch Timer from carrier_in capture to carrier_pull driver
-									dataReply->replyvalue[0] = 0b00000001;
-									dataReply->replytype[0] = HITAG_STARTBIT;
-									dataReply->replyvalue[1] = worker->tag->pageData[0];
-									dataReply->replytype[1] = HITAG_BYTE;
-									dataReply->replyvalue[2] = worker->tag->pageData[1];
-									dataReply->replytype[2] = HITAG_BYTE;
-									dataReply->replyvalue[3] = worker->tag->pageData[2];
-									dataReply->replytype[3] = HITAG_BYTE;
-									dataReply->replyvalue[4] = worker->tag->pageData[3];
-									dataReply->replytype[4] = HITAG_BYTE;
-									
-									dataReply->replylength=5;
-									
-									dmaLen = lfrfid_hitag_worker_yield_dma_buffer_AC(dataReply, dataDMA, worker->carrierPrescaler);
+									if (tagState != HitagStateQuiet){
+										//reset selected state
+										tagState = HitagStateIdle;
+										
+										//do not (re)set tag in basic mode, this only happens during power on reset
+										
+										//prepare emulate DMA buffer with basic SN reply (page 0) 
+										dataReply->replyvalue[0] = 0b00000001;
+										dataReply->replytype[0] = HITAG_STARTBIT;
+										dataReply->replyvalue[1] = worker->tag->pageData[0];
+										dataReply->replytype[1] = HITAG_BYTE;
+										dataReply->replyvalue[2] = worker->tag->pageData[1];
+										dataReply->replytype[2] = HITAG_BYTE;
+										dataReply->replyvalue[3] = worker->tag->pageData[2];
+										dataReply->replytype[3] = HITAG_BYTE;
+										dataReply->replyvalue[4] = worker->tag->pageData[3];
+										dataReply->replytype[4] = HITAG_BYTE;
+										
+										dataReply->replylength=5;
+										
+										dmaLen = lfrfid_hitag_worker_yield_dma_buffer_AC(dataReply, dataDMA, worker->carrierPrescaler);
+									}
 								} 
 								else if (size == 45 && (bits[0]>>(32-5)) == 0b00000){ 	//SELECT
 									//check if SN is matching
@@ -1603,7 +1640,7 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 										//reply with config (page 1 from tag memory)
 										tagState = HitagStateSelected;
 										
-										//prepare emulate DMA buffer with basic/advanced config page reply (page 1) and switch Timer from carrier_in capture to carrier_pull driver
+										//prepare emulate DMA buffer with basic/advanced config page reply (page 1)
 										if (tagMode == HitagModeBasic){
 											dataReply->replyvalue[0] = 0b00000001;
 											dataReply->replytype[0] = HITAG_STARTBIT;
@@ -1740,10 +1777,10 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 									//switch carrier mode to ETR required for emulation
 									lfrfid_hitag_worker_carrier_in_ETR_mode(capData, prescaler);
 									
-									//respect hitag WAIT1 time (& make sure to have sufficient room in the capdata buffer to store all capdata while waiting for this
-									uint32_t wait1_periods = 180/prescaler;	//originally 204
+									//respect hitag WAIT1 time 
+									uint32_t wait1_periods = 180/prescaler;
 									while (capData->capCounter-cmdIndex < wait1_periods){
-										furi_delay_us(40);	//wait 5 more periods (datasheet says 204-213 periods, so waiting for 5 periods should land somewhere in this range)
+										furi_delay_us(40);	
 									}
 									
 									//just start the DMA, stopping is handled in DMA transfer complete interrupt
@@ -1789,38 +1826,38 @@ static int32_t lfrfid_hitag_worker_emulate_thread(void* thread_context) {
 static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 	LFRFIDHitagWorker* worker = (LFRFIDHitagWorker*)thread_context;
 	
-	LfRfidHitagProtocol currentProtocol = HitagProtocolAntiCollision;
-	LfRfidHitagCaptureData* capData = malloc(sizeof(LfRfidHitagCaptureData));
-	capData->stream = buffer_stream_alloc(READ_BUFFER_SIZE, READ_BUFFER_COUNT);
-    capData->pair = varint_pair_alloc();
+	//initialize a tag datastructure
+	worker->tag = malloc(sizeof(LFRFIDHitag));
+	lfrfid_hitag_worker_initialize_tag_data(worker->tag);
 	
+	//prep variables for decoder
+	LfRfidHitagProtocol currentProtocol = HitagProtocolAntiCollision;
+	uint8_t startBits = 1;
+	uint32_t memBlock[HITAG_BLOCKPAGES] = {0};
+	uint8_t bits = 0;
+	bool halfBit = false;
+	bool finished = false;
+	
+	//prep variables for worker
+	uint8_t expectedBits = 33;
+	uint8_t readings = 0;
+	uint8_t currPage = 0;
+	bool readSucces = false;
+	uint8_t readThreshold = 3;
+	
+	// setup pins for reading
+	furi_hal_rfid_pins_read(); 
+	
+	//and setup TIM1 CH1N with DMA
+	//fill the DMA arr & ccr buffers
+	/*start with looping SETCC command*/
 	LfRfidHitagCMDData* dataCMD = malloc(sizeof(LfRfidHitagCMDData));
 	dataCMD->CMDlength = 0;
 	dataCMD->CMDposition = 0;
 	dataCMD->CMDsubposition = 0;
 	dataCMD->CMDactive = false;
+	
 	LfRfidHitagCMDData* backupCMD = malloc(sizeof(LfRfidHitagCMDData));
-	TimerDMAData* dataDMA = malloc(sizeof(TimerDMAData));
-
-	//initialize a tag datastructure
-	worker->tag = malloc(sizeof(LFRFIDHitag));
-	lfrfid_hitag_worker_initialize_tag_data(worker->tag);
-	uint32_t memBlock[HITAG_BLOCKPAGES] = {0};
-	uint8_t bits = 0;
-	uint8_t expectedBits = 33;
-	uint8_t Scount = 0;
-	bool finished = false;
-	uint8_t readings = 0;
-	uint8_t currPage = 0;
-	bool readSucces = false;
-	
-	// setup carrier timer to generate ASK field
-	furi_hal_rfid_pins_read(); //--> ibutton low, pull low, carrier_out to TIM1 CH1N; carrier_pull low; data_in analog
-	
-	//and setup TIM1 CH1N with DMA (similar as is done with TIM2 in emulate mode
-	//fill the DMA arr & ccr buffers
-	
-	/*start with looping SETCC command*/
 	uint32_t value[] = {128, 		0b00110,	1,			213, 		(uint32_t)(1.05*33*HITAG_BITPERIODS_AC)};	//always take 5% reading time buffer 
 	uint8_t type[]  = {HITAG_ON,	HITAG_SET,	HITAG_STOP,	HITAG_ON,	HITAG_ON};
 	for (size_t i = 0;i<5;i++){
@@ -1832,10 +1869,12 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 	backupCMD->CMDsubposition=0;
 	backupCMD->CMDloop = true;	//not really required since by definition the backup cmd is looping already in yield code
 	backupCMD->CMDactive = true;
+	
+	TimerDMAData* dataDMA = malloc(sizeof(TimerDMAData));
 	lfrfid_hitag_worker_yield_dma_buffer_BPLM(dataCMD, backupCMD, dataDMA, 0, 							DMA_BUFFER_SIZE/2);
 	lfrfid_hitag_worker_yield_dma_buffer_BPLM(dataCMD, backupCMD, dataDMA, DMA_BUFFER_SIZE/2,	DMA_BUFFER_SIZE/2);
 			
-	//my own version of the TIMER with DMA function, since this was hardcoded using TIM2 CH3 and I need TIM1 CH1N
+	//start TIM1 with DMA function
 	lfrfid_hitag_worker_carrier_out_start(
 		dataDMA->timer_buffer_arr,
 		dataDMA->timer_buffer_ccr,
@@ -1843,15 +1882,15 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 		worker);
 
 	// start capture
+	LfRfidHitagCaptureData* capData = malloc(sizeof(LfRfidHitagCaptureData));
+	capData->stream = buffer_stream_alloc(READ_BUFFER_SIZE, READ_BUFFER_COUNT);
+    capData->pair = varint_pair_alloc();
 	furi_hal_rfid_tim_read_capture_start(lfrfid_hitag_worker_capture_in_cc_isr, capData);
 			
 	while(1) {
-		//check if there's data in raw capture buffer (this also serves a delay in case there's nothing in the buffer, not to overload mcu)
-		//I need to shorten the delay time, since I'm also using this routine to process DMA half transfer & transfer complete signals, which occurs  sooner than 100ms?
-		//minimal time interfal for HT & TC is DMA_BUFFER_SIZE/2*8us (normal 125kHz operation): 4000/2*8=16 milliseconds, if I do timeout with 8 ms, then i have minimum 8ms remaining to process the DMA HT & TC signals
 		Buffer* buffer = buffer_stream_receive(capData->stream, 1);
 		
-		//process date if available
+		//process data if available
 		if(buffer != NULL) {
 			size_t buffsize = buffer_get_size(buffer);
 			uint8_t* buffdata = buffer_get_data(buffer);
@@ -1870,14 +1909,13 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 					index += tmp_size;
 					
 					//feed pulse duration to decoder
-					lfrfid_hitag_worker_decoder_feed(pulse, duration, memBlock, &bits, &Scount, &finished, currentProtocol);
+					lfrfid_hitag_worker_decoder_feed(pulse, duration, memBlock, &bits, &halfBit, &finished, currentProtocol, startBits);
 					
 					//see if i have a valid bit sequence
 					if (finished ){	
-						//bitsequence ready for falidation
-						if (bits == expectedBits){//eligable bitsequence detected, accept it only after 3 consequtive readings
+						//bitsequence ready for validation
+						if (bits == expectedBits){	//eligable bitsequence detected, accept it only after x consequtive readings
 							//reset the backupCMD count to ensure some pause between bitsequence detection & the CMD injection
-							//rest is only required when scanning for the SN actually, since otherwise backup count is reset anyhow after switching from real to backup command
 							backupCMD->CMDcount = 0;
 							
 							if (readings == 0){
@@ -1889,7 +1927,7 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 									worker->tag->pageKnown[currPage+p] = 0;
 								}
 								readings=1;
-							} else if (readings < 3){
+							} else if (readings < readThreshold){
 								bool match = true;
 								for (uint8_t p=0;p<(expectedBits-1)/32;p++){
 									if (worker->tag->pageData[(currPage+p)*4+0] != (memBlock[p]>>24 & 0xff) ||
@@ -1902,7 +1940,7 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 								}
 								if(match){
 									readings++;
-									if (readings==3){
+									if (readings==readThreshold){
 										//succesful page(s) reading
 										readSucces = true;
 										
@@ -2046,9 +2084,9 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 			}
 		}
 		
-		//while not having 3 consequtive reads, relaunch the (already prepared) command
+		//while not having x consequtive reads, relaunch the (already prepared) command
 		if (!readSucces && backupCMD->CMDcount>=7 && currPage > 0 && expectedBits > 0){
-			backupCMD->CMDcount=0;//required since in next loop there might not be a HT/TC trigger to trigger the yield ftion where cmd count is updated/reset
+			backupCMD->CMDcount=0;
 			dataCMD->CMDposition=0;
 			dataCMD->CMDsubposition=0;
 		}
@@ -2065,7 +2103,7 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 		}
 		
 		//check for DMA HT/TC signals to repopulate the DMA buffer
-		if (worker->DMAeventCount>1){	//more than 1 unprocessed DMA event (aka DMA buffer is not timely refilled)
+		if (worker->DMAeventCount>1){
 			FURI_LOG_E(TAG, "DMA refilling can't keep up %u",worker->DMAeventCount);
 		}
 		if(FURI_BIT(flags, LFRFIDHitagWorkerSignalHalfTransfer)) {
@@ -2073,7 +2111,7 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 			lfrfid_hitag_worker_yield_dma_buffer_BPLM(dataCMD, backupCMD, dataDMA, 0, DMA_BUFFER_SIZE/2);
 		}
 		if(FURI_BIT(flags, LFRFIDHitagWorkerSignalTransferComplete)) {
-			//refill second half
+			//refill second half of dma buffer
 			lfrfid_hitag_worker_yield_dma_buffer_BPLM(dataCMD, backupCMD, dataDMA, DMA_BUFFER_SIZE/2, DMA_BUFFER_SIZE/2);
 		}
 		worker->DMAeventCount=0;
@@ -2086,7 +2124,7 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 	furi_hal_rfid_tim_read_capture_stop();
 	lfrfid_hitag_worker_carrier_out_stop();
     
-
+	//free memory
 	free(dataCMD);
 	free(backupCMD);
 	free(dataDMA);
@@ -2094,7 +2132,7 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
     buffer_stream_free(capData->stream);
     free(capData);
 	
-	//is this a routine to allow the view that started the thread to signal the stop, which will properly merge the threads & de-init the worker?
+	//allow the view that started the thread to signal the stop, which will properly merge the threads & de-init the worker
     if(currPage==HITAG_PAGES-4) {
         const uint32_t available_flags = (1 << LFRFIDHitagWorkerSignalStop);
         while(true) {
@@ -2109,7 +2147,7 @@ static int32_t lfrfid_hitag_worker_read_thread(void* thread_context) {
 	
 	free(worker->tag);
 	
-	//clear the stop flag on workder so that i can use the worker to launch a new read routine without having to restart the app
+	//clear the stop flag on workder so that i can use the same worker to launch a new routine
 	furi_event_flag_clear(worker->events, 1 << LFRFIDHitagWorkerSignalStop);
 	
     return 0;
