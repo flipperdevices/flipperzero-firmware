@@ -29,6 +29,7 @@ MfClassicError mf_classic_poller_start(
     furi_assert(instance->session_state == MfClassicPollerSessionStateIdle);
 
     instance->data = malloc(sizeof(MfClassicData));
+    instance->crypto = crypto1_alloc();
     instance->buffer = nfc_poller_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE, MF_CLASSIC_MAX_BUFF_SIZE);
 
     instance->session_state = MfClassicPollerSessionStateActive;
@@ -66,6 +67,7 @@ MfClassicError mf_classic_poller_reset(MfClassicPoller* instance) {
     furi_assert(instance->buffer);
     furi_assert(instance->nfca_poller);
 
+    crypto1_free(instance->crypto);
     nfc_poller_buffer_free(instance->buffer);
     instance->callback = NULL;
     instance->context = NULL;

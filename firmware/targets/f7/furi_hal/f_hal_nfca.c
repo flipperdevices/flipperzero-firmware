@@ -14,6 +14,11 @@ FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
 
     // Disable crc check
     st25r3916_set_reg_bits(handle, ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
+    st25r3916_change_reg_bits(
+        handle,
+        ST25R3916_REG_ISO14443A_NFC,
+        (ST25R3916_REG_ISO14443A_NFC_no_tx_par | ST25R3916_REG_ISO14443A_NFC_no_rx_par),
+        (ST25R3916_REG_ISO14443A_NFC_no_tx_par_off | ST25R3916_REG_ISO14443A_NFC_no_rx_par_off));
 
     st25r3916_write_reg(handle, ST25R3916_REG_NUM_TX_BYTES2, 0);
     uint32_t interrupts =

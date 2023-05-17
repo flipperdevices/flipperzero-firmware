@@ -4,6 +4,7 @@
 #include <lib/nfc/protocols/nfca/nfca_poller_i.h>
 #include <nfc/helpers/nfc_poller_buffer.h>
 #include <lib/nfc/protocols/nfc_util.h>
+#include "crypto1.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -17,10 +18,7 @@ typedef enum {
 
 typedef enum {
     MfClassicAuthStateIdle,
-    MfClassicAuthStateWaitNt,
-    MfClassicAuthStateWaitAt,
-    MfClassicAuthStateSuccess,
-    MfClassicAuthStateFail,
+    MfClassicAuthStatePassed,
 } MfClassicAuthState;
 
 typedef enum {
@@ -31,6 +29,7 @@ struct MfClassicPoller {
     NfcaPoller* nfca_poller;
     MfClassicPollerSessionState session_state;
     MfClassicAuthState auth_state;
+    Crypto1* crypto;
     NfcPollerBuffer* buffer;
     MfClassicData* data;
     MfClassicPollerCallback callback;

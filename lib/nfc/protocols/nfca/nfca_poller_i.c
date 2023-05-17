@@ -310,6 +310,112 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
     return ret;
 }
 
+static uint16_t
+    nfca_data_to_bitstream(uint8_t* data, uint8_t* parity, uint16_t bits, uint8_t* bitstream) {
+    furi_assert(data);
+    furi_assert(parity);
+    furi_assert(bitstream);
+
+    uint8_t next_par_bit = 0;
+    uint16_t curr_bit_pos = 0;
+    uint16_t bytes = bits / 8;
+
+    for(size_t i = 0; i < bytes; i++) {
+        next_par_bit = FURI_BIT(parity[i / 8], 7 - (i % 8));
+        if(curr_bit_pos % 8 == 0) {
+            bitstream[curr_bit_pos / 8] = data[i];
+            curr_bit_pos += 8;
+            bitstream[curr_bit_pos / 8] = next_par_bit;
+            curr_bit_pos++;
+        } else {
+            bitstream[curr_bit_pos / 8] |= data[i] << (curr_bit_pos % 8);
+            bitstream[curr_bit_pos / 8 + 1] = data[i] >> (8 - curr_bit_pos % 8);
+            bitstream[curr_bit_pos / 8 + 1] |= next_par_bit << (curr_bit_pos % 8);
+            curr_bit_pos += 9;
+        }
+    }
+    return curr_bit_pos;
+}
+
+static uint16_t
+    nfca_bitstream_to_data(uint8_t* bitstream, uint16_t bits, uint8_t* data, uint8_t* parity) {
+    uint32_t data_bits = 0;
+    uint8_t curr_byte = 0;
+    uint16_t bit_processed = 0;
+
+    if(bits < 8) {
+        data[0] = bitstream[0];
+        data_bits = bits;
+    } else if(bits % 9 != 0) {
+        data_bits = 0;
+    } else {
+        memset(parity, 0, bits / 9);
+        while(bit_processed < bits) {
+            data[curr_byte] = bitstream[bit_processed / 8] >> (bit_processed % 8);
+            data[curr_byte] |= bitstream[bit_processed / 8 + 1] << (8 - bit_processed % 8);
+            parity[curr_byte / 8] |= FURI_BIT(bitstream[bit_processed / 8 + 1], bit_processed % 8)
+                                     << (7 - curr_byte % 8);
+            bit_processed += 9;
+            curr_byte++;
+        }
+        data_bits = curr_byte * 8;
+    }
+
+    return data_bits;
+}
+
+NfcaError nfca_poller_txrx_custom_parity(
+    NfcaPoller* instance,
+    uint8_t* tx_data,
+    uint8_t* tx_parity,
+    uint16_t tx_bits,
+    uint8_t* rx_data,
+    uint8_t* rx_parity,
+    uint16_t rx_buff_size,
+    uint16_t* rx_bits,
+    uint32_t fwt) {
+    furi_assert(instance);
+    furi_assert(tx_data);
+    furi_assert(tx_parity);
+    furi_assert(rx_data);
+    furi_assert(rx_parity);
+    furi_assert(rx_bits);
+
+    NfcaError ret = NfcaErrorNone;
+    NfcError error = NfcErrorNone;
+    NfcPollerBuffer* buff = instance->buff;
+
+    do {
+        ret = nfca_poller_prepare_trx(instance);
+        if(ret != NfcaErrorNone) break;
+
+        buff->tx_bits = nfca_data_to_bitstream(tx_data, tx_parity, tx_bits, buff->tx_data);
+
+        error = nfc_trx_custom_parity(
+            instance->nfc,
+            buff->tx_data,
+            buff->tx_bits,
+            buff->rx_data,
+            buff->rx_data_size,
+            &buff->rx_bits,
+            fwt);
+        if(error != NfcErrorNone) {
+            ret = nfca_poller_process_error(error);
+            break;
+        }
+
+        uint16_t rx_bytes = buff->rx_bits / 9;
+        if(rx_buff_size < rx_bytes) {
+            ret = NfcaErrorBufferOverflow;
+            break;
+        }
+
+        *rx_bits = nfca_bitstream_to_data(buff->rx_data, buff->rx_bits, rx_data, rx_parity);
+    } while(false);
+
+    return ret;
+}
+
 NfcaError nfca_poller_txrx(
     NfcaPoller* instance,
     uint8_t* tx_buff,

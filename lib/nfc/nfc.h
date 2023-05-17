@@ -106,6 +106,15 @@ void nfc_stop(Nfc* instance);
 
 NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits);
 
+NfcError nfc_trx_custom_parity(
+    Nfc* instance,
+    uint8_t* tx_data,
+    uint16_t tx_bits,
+    uint8_t* rx_data,
+    uint16_t rx_data_size,
+    uint16_t* rx_bits,
+    uint32_t fwt);
+
 NfcError nfc_trx(
     Nfc* instance,
     uint8_t* tx_data,

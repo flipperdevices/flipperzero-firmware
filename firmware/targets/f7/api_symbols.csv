@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,26.2,,
+Version,+,26.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -152,6 +152,7 @@ Header,+,lib/one_wire/maxim_crc.h,,
 Header,+,lib/one_wire/one_wire_host.h,,
 Header,+,lib/one_wire/one_wire_slave.h,,
 Header,+,lib/print/wrappers.h,,
+Header,+,lib/pulse_reader/pulse_reader.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_adc.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_bus.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_comp.h,,
@@ -179,7 +180,6 @@ Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_tim.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_usart.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_utils.h,,
 Header,+,lib/stm32wb_hal/Inc/stm32wbxx_ll_wwdg.h,,
-Header,+,lib/pulse_reader/pulse_reader.h,,
 Header,+,lib/subghz/blocks/const.h,,
 Header,+,lib/subghz/blocks/decoder.h,,
 Header,+,lib/subghz/blocks/encoder.h,,
@@ -706,14 +706,6 @@ Function,-,coshl,long double,long double
 Function,-,cosl,long double,long double
 Function,+,crc32_calc_buffer,uint32_t,"uint32_t, const void*, size_t"
 Function,+,crc32_calc_file,uint32_t,"File*, const FileCrcProgressCb, void*"
-Function,-,old_crypto1_bit,uint8_t,"Crypto1*, uint8_t, int"
-Function,-,old_crypto1_byte,uint8_t,"Crypto1*, uint8_t, int"
-Function,-,old_crypto1_decrypt,void,"Crypto1*, uint8_t*, uint16_t, uint8_t*"
-Function,-,old_crypto1_encrypt,void,"Crypto1*, uint8_t*, uint8_t*, uint16_t, uint8_t*, uint8_t*"
-Function,-,old_crypto1_filter,uint32_t,uint32_t
-Function,-,old_crypto1_init,void,"Crypto1*, uint64_t"
-Function,-,old_crypto1_reset,void,Crypto1*
-Function,-,old_crypto1_word,uint32_t,"Crypto1*, uint32_t, int"
 Function,-,ctermid,char*,char*
 Function,-,ctime,char*,const time_t*
 Function,-,ctime_r,char*,"const time_t*, char*"
@@ -844,6 +836,7 @@ Function,-,f_hal_nfc_low_power_mode_stop,FHalNfcError,
 Function,-,f_hal_nfc_poller_field_on,FHalNfcError,
 Function,-,f_hal_nfc_poller_rx,FHalNfcError,"uint8_t*, uint16_t, uint16_t*"
 Function,-,f_hal_nfc_poller_tx,FHalNfcError,"uint8_t*, uint16_t"
+Function,-,f_hal_nfc_poller_tx_custom_parity,FHalNfcError,"uint8_t*, uint16_t"
 Function,-,f_hal_nfc_release,FHalNfcError,
 Function,-,f_hal_nfc_reset_mode,FHalNfcError,
 Function,-,f_hal_nfc_set_mask_receive_timer,void,uint32_t
@@ -1956,13 +1949,6 @@ Function,+,menu_free,void,Menu*
 Function,+,menu_get_view,View*,Menu*
 Function,+,menu_reset,void,Menu*
 Function,+,menu_set_selected_item,void,"Menu*, uint32_t"
-Function,-,mifare_classic_auth_attempt,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, MfClassicAuthContext*, uint64_t"
-Function,-,mifare_classic_auth_init_context,void,"MfClassicAuthContext*, uint8_t"
-Function,-,mifare_classic_auth_write_block,_Bool,"FuriHalNfcTxRxContext*, MfClassicBlock*, uint8_t, MfClassicKey, uint64_t"
-Function,-,mifare_classic_authenticate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey"
-Function,-,mifare_classic_authenticate_skip_activate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey, _Bool, uint32_t"
-Function,-,mifare_classic_block_to_value,_Bool,"const uint8_t*, int32_t*, uint8_t*"
-Function,-,mifare_classic_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
 Function,-,mf_classic_dict_add_key,_Bool,"MfClassicDict*, uint8_t*"
 Function,-,mf_classic_dict_add_key_str,_Bool,"MfClassicDict*, FuriString*"
 Function,-,mf_classic_dict_alloc,MfClassicDict*,MfClassicDictType
@@ -1979,40 +1965,7 @@ Function,-,mf_classic_dict_get_total_keys,uint32_t,MfClassicDict*
 Function,-,mf_classic_dict_is_key_present,_Bool,"MfClassicDict*, uint8_t*"
 Function,-,mf_classic_dict_is_key_present_str,_Bool,"MfClassicDict*, FuriString*"
 Function,-,mf_classic_dict_rewind,_Bool,MfClassicDict*
-Function,-,mifare_classic_emulator,_Bool,"MfClassicEmulator*, FuriHalNfcTxRxContext*"
-Function,-,mifare_classic_get_classic_type,MfClassicType,"uint8_t, uint8_t, uint8_t"
-Function,-,mifare_classic_get_read_sectors_and_keys,void,"MfClassicData*, uint8_t*, uint8_t*"
-Function,-,mifare_classic_get_sector_by_block,uint8_t,uint8_t
-Function,-,mifare_classic_get_sector_trailer_block_num_by_sector,uint8_t,uint8_t
-Function,-,mifare_classic_get_sector_trailer_by_sector,MfClassicSectorTrailer*,"MfClassicData*, uint8_t"
-Function,-,mifare_classic_get_total_block_num,uint16_t,MfClassicType
-Function,-,mifare_classic_get_total_sectors_num,uint8_t,MfClassicType
-Function,-,mifare_classic_get_type_str,const char*,MfClassicType
-Function,-,mifare_classic_halt,void,"FuriHalNfcTxRxContext*, Crypto1*"
-Function,-,mifare_classic_is_allowed_access_data_block,_Bool,"MfClassicData*, uint8_t, MfClassicKey, MfClassicAction"
 Function,-,mf_classic_is_allowed_access_sector_trailer,_Bool,"MfClassicData*, uint8_t, MfClassicKey, MfClassicAction"
-Function,-,mifare_classic_is_block_read,_Bool,"MfClassicData*, uint8_t"
-Function,-,mifare_classic_is_card_read,_Bool,MfClassicData*
-Function,-,mifare_classic_is_key_found,_Bool,"MfClassicData*, uint8_t, MfClassicKey"
-Function,-,mifare_classic_is_sector_data_read,_Bool,"MfClassicData*, uint8_t"
-Function,-,mifare_classic_is_sector_read,_Bool,"MfClassicData*, uint8_t"
-Function,-,mifare_classic_is_sector_trailer,_Bool,uint8_t
-Function,-,mifare_classic_is_value_block,_Bool,"MfClassicData*, uint8_t"
-Function,-,mifare_classic_read_block,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t, MfClassicBlock*"
-Function,-,mifare_classic_read_card,uint8_t,"FuriHalNfcTxRxContext*, MfClassicReader*, MfClassicData*"
-Function,-,mifare_classic_read_sector,void,"FuriHalNfcTxRxContext*, MfClassicData*, uint8_t"
-Function,-,mifare_classic_reader_add_sector,void,"MfClassicReader*, uint8_t, uint64_t, uint64_t"
-Function,-,mifare_classic_set_block_read,void,"MfClassicData*, uint8_t, MfClassicBlock*"
-Function,-,mifare_classic_set_key_found,void,"MfClassicData*, uint8_t, MfClassicKey, uint64_t"
-Function,-,mifare_classic_set_key_not_found,void,"MfClassicData*, uint8_t, MfClassicKey"
-Function,-,mifare_classic_set_sector_data_not_read,void,MfClassicData*
-Function,-,mifare_classic_transfer,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t"
-Function,-,mifare_classic_update_card,uint8_t,"FuriHalNfcTxRxContext*, MfClassicData*"
-Function,-,mifare_classic_value_cmd,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t, uint8_t, int32_t"
-Function,-,mifare_classic_value_cmd_full,_Bool,"FuriHalNfcTxRxContext*, MfClassicBlock*, uint8_t, MfClassicKey, uint64_t, int32_t"
-Function,-,mifare_classic_value_to_block,void,"int32_t, uint8_t, uint8_t*"
-Function,-,mifare_classic_write_block,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t, MfClassicBlock*"
-Function,-,mifare_classic_write_sector,_Bool,"FuriHalNfcTxRxContext*, MfClassicData*, MfClassicData*, uint8_t"
 Function,-,mf_df_cat_application,void,"MifareDesfireApplication*, FuriString*"
 Function,-,mf_df_cat_application_info,void,"MifareDesfireApplication*, FuriString*"
 Function,-,mf_df_cat_card_info,void,"MifareDesfireData*, FuriString*"
@@ -2062,6 +2015,46 @@ Function,-,mf_ultralight_read_pages_direct,_Bool,"FuriHalNfcTxRxContext*, uint8_
 Function,-,mf_ultralight_read_signature,_Bool,"FuriHalNfcTxRxContext*, MfUltralightData*"
 Function,-,mf_ultralight_read_tearing_flags,_Bool,"FuriHalNfcTxRxContext*, MfUltralightData*"
 Function,-,mf_ultralight_read_version,_Bool,"FuriHalNfcTxRxContext*, MfUltralightReader*, MfUltralightData*"
+Function,-,mifare_classic_auth_attempt,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, MfClassicAuthContext*, uint64_t"
+Function,-,mifare_classic_auth_init_context,void,"MfClassicAuthContext*, uint8_t"
+Function,-,mifare_classic_auth_write_block,_Bool,"FuriHalNfcTxRxContext*, MfClassicBlock*, uint8_t, MfClassicKey, uint64_t"
+Function,-,mifare_classic_authenticate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey"
+Function,-,mifare_classic_authenticate_skip_activate,_Bool,"FuriHalNfcTxRxContext*, uint8_t, uint64_t, MfClassicKey, _Bool, uint32_t"
+Function,-,mifare_classic_block_to_value,_Bool,"const uint8_t*, int32_t*, uint8_t*"
+Function,-,mifare_classic_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
+Function,-,mifare_classic_emulator,_Bool,"MfClassicEmulator*, FuriHalNfcTxRxContext*"
+Function,-,mifare_classic_get_classic_type,MfClassicType,"uint8_t, uint8_t, uint8_t"
+Function,-,mifare_classic_get_read_sectors_and_keys,void,"MfClassicData*, uint8_t*, uint8_t*"
+Function,-,mifare_classic_get_sector_by_block,uint8_t,uint8_t
+Function,-,mifare_classic_get_sector_trailer_block_num_by_sector,uint8_t,uint8_t
+Function,-,mifare_classic_get_sector_trailer_by_sector,MfClassicSectorTrailer*,"MfClassicData*, uint8_t"
+Function,-,mifare_classic_get_total_block_num,uint16_t,MfClassicType
+Function,-,mifare_classic_get_total_sectors_num,uint8_t,MfClassicType
+Function,-,mifare_classic_get_type_str,const char*,MfClassicType
+Function,-,mifare_classic_halt,void,"FuriHalNfcTxRxContext*, Crypto1*"
+Function,-,mifare_classic_is_allowed_access_data_block,_Bool,"MfClassicData*, uint8_t, MfClassicKey, MfClassicAction"
+Function,-,mifare_classic_is_block_read,_Bool,"MfClassicData*, uint8_t"
+Function,-,mifare_classic_is_card_read,_Bool,MfClassicData*
+Function,-,mifare_classic_is_key_found,_Bool,"MfClassicData*, uint8_t, MfClassicKey"
+Function,-,mifare_classic_is_sector_data_read,_Bool,"MfClassicData*, uint8_t"
+Function,-,mifare_classic_is_sector_read,_Bool,"MfClassicData*, uint8_t"
+Function,-,mifare_classic_is_sector_trailer,_Bool,uint8_t
+Function,-,mifare_classic_is_value_block,_Bool,"MfClassicData*, uint8_t"
+Function,-,mifare_classic_read_block,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t, MfClassicBlock*"
+Function,-,mifare_classic_read_card,uint8_t,"FuriHalNfcTxRxContext*, MfClassicReader*, MfClassicData*"
+Function,-,mifare_classic_read_sector,void,"FuriHalNfcTxRxContext*, MfClassicData*, uint8_t"
+Function,-,mifare_classic_reader_add_sector,void,"MfClassicReader*, uint8_t, uint64_t, uint64_t"
+Function,-,mifare_classic_set_block_read,void,"MfClassicData*, uint8_t, MfClassicBlock*"
+Function,-,mifare_classic_set_key_found,void,"MfClassicData*, uint8_t, MfClassicKey, uint64_t"
+Function,-,mifare_classic_set_key_not_found,void,"MfClassicData*, uint8_t, MfClassicKey"
+Function,-,mifare_classic_set_sector_data_not_read,void,MfClassicData*
+Function,-,mifare_classic_transfer,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t"
+Function,-,mifare_classic_update_card,uint8_t,"FuriHalNfcTxRxContext*, MfClassicData*"
+Function,-,mifare_classic_value_cmd,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t, uint8_t, int32_t"
+Function,-,mifare_classic_value_cmd_full,_Bool,"FuriHalNfcTxRxContext*, MfClassicBlock*, uint8_t, MfClassicKey, uint64_t, int32_t"
+Function,-,mifare_classic_value_to_block,void,"int32_t, uint8_t, uint8_t*"
+Function,-,mifare_classic_write_block,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, uint8_t, MfClassicBlock*"
+Function,-,mifare_classic_write_sector,_Bool,"FuriHalNfcTxRxContext*, MfClassicData*, MfClassicData*, uint8_t"
 Function,-,mkdtemp,char*,char*
 Function,-,mkostemp,int,"char*, int"
 Function,-,mkostemps,int,"char*, int, int"
@@ -2109,6 +2102,15 @@ Function,+,notification_internal_message_block,void,"NotificationApp*, const Not
 Function,+,notification_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,-,nrand48,long,unsigned short[3]
+Function,-,old_crypto1_bit,uint8_t,"Crypto1*, uint8_t, int"
+Function,-,old_crypto1_byte,uint8_t,"Crypto1*, uint8_t, int"
+Function,-,old_crypto1_decrypt,void,"Crypto1*, uint8_t*, uint16_t, uint8_t*"
+Function,-,old_crypto1_encrypt,void,"Crypto1*, uint8_t*, uint8_t*, uint16_t, uint8_t*, uint8_t*"
+Function,-,old_crypto1_filter,uint32_t,uint32_t
+Function,-,old_crypto1_init,void,"Crypto1*, uint64_t"
+Function,-,old_crypto1_reset,void,Crypto1*
+Function,-,old_crypto1_word,uint32_t,"Crypto1*, uint32_t, int"
+Function,-,old_prng_successor,uint32_t,"uint32_t, uint32_t"
 Function,-,on_exit,int,"void (*)(int, void*), void*"
 Function,+,onewire_host_alloc,OneWireHost*,const GpioPin*
 Function,+,onewire_host_free,void,OneWireHost*
@@ -2219,7 +2221,6 @@ Function,+,powf,float,"float, float"
 Function,-,powl,long double,"long double, long double"
 Function,+,pretty_format_bytes_hex_canonical,void,"FuriString*, size_t, const char*, const uint8_t*, size_t"
 Function,-,printf,int,"const char*, ..."
-Function,-,old_prng_successor,uint32_t,"uint32_t, uint32_t"
 Function,+,property_value_out,void,"PropertyValueContext*, const char*, unsigned int, ..."
 Function,+,protocol_dict_alloc,ProtocolDict*,"const ProtocolBase**, size_t"
 Function,+,protocol_dict_decoders_feed,ProtocolId,"ProtocolDict*, _Bool, uint32_t"

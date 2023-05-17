@@ -8,9 +8,11 @@ extern "C" {
 
 typedef struct {
     uint8_t* tx_data;
+    uint8_t* tx_parity;
     uint16_t tx_data_size;
     uint16_t tx_bits;
     uint8_t* rx_data;
+    uint8_t* rx_parity;
     uint16_t rx_data_size;
     uint16_t rx_bits;
 } NfcPollerBuffer;

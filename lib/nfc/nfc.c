@@ -414,6 +414,52 @@ static NfcError nfc_poller_prepare_trx(Nfc* instance) {
     return ret;
 }
 
+NfcError nfc_trx_custom_parity(
+    Nfc* instance,
+    uint8_t* tx_data,
+    uint16_t tx_bits,
+    uint8_t* rx_data,
+    uint16_t rx_data_size,
+    uint16_t* rx_bits,
+    uint32_t fwt) {
+    furi_assert(instance);
+    furi_assert(tx_data);
+    furi_assert(rx_data);
+    furi_assert(rx_bits);
+
+    furi_assert(instance->state == NfcStateFieldOn);
+
+    NfcError ret = NfcErrorNone;
+    FHalNfcError error = FHalNfcErrorNone;
+    do {
+        ret = nfc_poller_prepare_trx(instance);
+        if(ret != NfcErrorNone) {
+            FURI_LOG_E(TAG, "Failed in prepare tx rx");
+            break;
+        }
+        error = f_hal_nfc_poller_tx_custom_parity(tx_data, tx_bits);
+        if(error != FHalNfcErrorNone) {
+            FURI_LOG_E(TAG, "Failed in poller TX");
+            ret = nfc_process_hal_error(error);
+            break;
+        }
+        instance->comm_state = NfcCommStateWaitTxEnd;
+        ret = nfc_poller_trx_state_machine(instance, fwt);
+        if(ret != NfcErrorNone) {
+            FURI_LOG_E(TAG, "Failed TRX state machine");
+            break;
+        }
+        error = f_hal_nfc_poller_rx(rx_data, rx_data_size, rx_bits);
+        if(error != FHalNfcErrorNone) {
+            FURI_LOG_E(TAG, "Failed in poller RX");
+            ret = nfc_process_hal_error(error);
+            break;
+        }
+    } while(false);
+
+    return ret;
+}
+
 NfcError nfc_trx(
     Nfc* instance,
     uint8_t* tx_data,
@@ -423,6 +469,7 @@ NfcError nfc_trx(
     uint16_t* rx_bits,
     uint32_t fwt) {
     furi_assert(instance);
+    furi_assert(tx_data);
     furi_assert(rx_data);
     furi_assert(rx_bits);
 
