@@ -20,6 +20,7 @@
 #include <lib/nfc/protocols/nfca/nfca_listener.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
+#include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 
 typedef void (*NfcRpcHandler)(Nfc_Main* cmd, void* context);
 
@@ -59,6 +60,7 @@ struct NfcRpc {
     NfcaListener* nfca_listener;
     MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
+    MfClassicPoller* mf_classic_poller;
 };
 
 typedef struct {
@@ -70,3 +72,4 @@ void nfc_rpc_add_handler(NfcRpc* instance, pb_size_t message_tag, NfcRpcHandler 
 
 void nfc_rpc_nfca_alloc(void* context);
 void nfc_rpc_mf_ultralight_alloc(void* context);
+void nfc_rpc_mf_classic_alloc(void* context);

@@ -1,7 +1,6 @@
 #include "nfc_rpc_i.h"
 
 #include "assets/compiled/mf_ultralight.pb.h"
-#include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 
 #define TAG "NfcRpcMfUltralight"
 

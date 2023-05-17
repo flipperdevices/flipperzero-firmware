@@ -1,0 +1,11 @@
+PB_MfClassic.AuthRequest.block         int_size:IS_8
+PB_MfClassic.AuthRequest.key            max_size: 6
+PB_MfClassic.AuthResponse.block        int_size:IS_8
+PB_MfClassic.AuthResponse.key           max_size: 6
+PB_MfClassic.AuthResponse.nt            max_size: 4
+PB_MfClassic.AuthResponse.nr            max_size: 4
+PB_MfClassic.AuthResponse.ar            max_size: 4
+PB_MfClassic.AuthResponse.at            max_size: 4
+PB_MfClassic.ReadBlockRequest.block     int_size:IS_8
+PB_MfClassic.ReadBlockRequest.key       max_size: 6
+PB_MfClassic.ReadBlockResponse.data     max_size: 16

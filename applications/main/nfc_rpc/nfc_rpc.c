@@ -11,6 +11,10 @@ static const NfcRpcCallbacks nfc_rpc_callbacks[] = {
         .alloc = nfc_rpc_mf_ultralight_alloc,
         .free = NULL,
     },
+    {
+        .alloc = nfc_rpc_mf_classic_alloc,
+        .free = NULL,
+    }
 };
 
 uint32_t nfc_rpc_exit_callback(void* context) {
@@ -51,7 +55,6 @@ static void nfc_rpc_rpc_command_callback(RpcAppSystemEvent event, void* context)
     if(event == RpcAppEventSessionClose) {
         rpc_system_app_set_callback(app->rpc, NULL, NULL);
         rpc_system_app_set_data_exchange_callback(app->rpc, NULL, NULL);
-        view_dispatcher_switch_to_view(app->view_dispatcher, VIEW_NONE);
         view_dispatcher_stop(app->view_dispatcher);
         app->rpc = NULL;
     }
@@ -137,6 +140,7 @@ static NfcRpc* nfc_rpc_app_alloc() {
     instance->mf_ul_poller = mf_ultralight_poller_alloc(instance->nfca_poller);
     instance->nfca_listener = nfca_listener_alloc(instance->nfc);
     instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->nfca_listener);
+    instance->mf_classic_poller = mf_classic_poller_alloc(instance->nfca_poller);
 
     NfcRpcHandlerDict_init(instance->handlers);
     for(size_t i = 0; i < COUNT_OF(nfc_rpc_callbacks); i++) {
@@ -171,6 +175,7 @@ static NfcRpc* nfc_rpc_app_alloc() {
 void nfc_rpc_app_free(NfcRpc* instance) {
     furi_assert(instance);
 
+    mf_classic_poller_free(instance->mf_classic_poller);
     mf_ultralight_listener_free(instance->mf_ul_listener);
     mf_ultralight_poller_free(instance->mf_ul_poller);
     nfca_listener_free(instance->nfca_listener);

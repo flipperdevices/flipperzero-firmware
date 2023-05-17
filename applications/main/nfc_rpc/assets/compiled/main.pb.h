@@ -6,6 +6,7 @@
 #include <pb.h>
 #include "nfca.pb.h"
 #include "mf_ultralight.pb.h"
+#include "mf_classic.pb.h"
 
 #if PB_PROTO_HEADER_VERSION != 40
 #error Regenerate this file with the current version of nanopb generator.
@@ -53,6 +54,10 @@ typedef struct _Nfc_Main {
         PB_MfUltralight_EmulateStartResponse mf_ultralight_emulate_start_resp;
         PB_MfUltralight_EmulateStopRequest mf_ultralight_emulate_stop_req;
         PB_MfUltralight_EmulateStopResponse mf_ultralight_emulate_stop_resp;
+        PB_MfClassic_AuthRequest mf_classic_auth_req;
+        PB_MfClassic_AuthResponse mf_classic_auth_resp;
+        PB_MfClassic_ReadBlockRequest mf_classic_read_block_req;
+        PB_MfClassic_ReadBlockResponse mf_classic_read_block_resp;
     } content;
 } Nfc_Main;
 
@@ -101,6 +106,10 @@ extern "C" {
 #define Nfc_Main_mf_ultralight_emulate_start_resp_tag 22
 #define Nfc_Main_mf_ultralight_emulate_stop_req_tag 23
 #define Nfc_Main_mf_ultralight_emulate_stop_resp_tag 24
+#define Nfc_Main_mf_classic_auth_req_tag         25
+#define Nfc_Main_mf_classic_auth_resp_tag        26
+#define Nfc_Main_mf_classic_read_block_req_tag   27
+#define Nfc_Main_mf_classic_read_block_resp_tag  28
 
 /* Struct field encoding specification for nanopb */
 #define Nfc_Empty_FIELDLIST(X, a) \
@@ -132,7 +141,11 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_tearing_flag_resp
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_start_req,content.mf_ultralight_emulate_start_req),  21) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_start_resp,content.mf_ultralight_emulate_start_resp),  22) \
 X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_stop_req,content.mf_ultralight_emulate_stop_req),  23) \
-X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_stop_resp,content.mf_ultralight_emulate_stop_resp),  24)
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_stop_resp,content.mf_ultralight_emulate_stop_resp),  24) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_auth_req,content.mf_classic_auth_req),  25) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_auth_resp,content.mf_classic_auth_resp),  26) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_read_block_req,content.mf_classic_read_block_req),  27) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_read_block_resp,content.mf_classic_read_block_resp),  28)
 #define Nfc_Main_CALLBACK NULL
 #define Nfc_Main_DEFAULT NULL
 #define Nfc_Main_content_empty_MSGTYPE Nfc_Empty
@@ -158,6 +171,10 @@ X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_stop_resp,cont
 #define Nfc_Main_content_mf_ultralight_emulate_start_resp_MSGTYPE PB_MfUltralight_EmulateStartResponse
 #define Nfc_Main_content_mf_ultralight_emulate_stop_req_MSGTYPE PB_MfUltralight_EmulateStopRequest
 #define Nfc_Main_content_mf_ultralight_emulate_stop_resp_MSGTYPE PB_MfUltralight_EmulateStopResponse
+#define Nfc_Main_content_mf_classic_auth_req_MSGTYPE PB_MfClassic_AuthRequest
+#define Nfc_Main_content_mf_classic_auth_resp_MSGTYPE PB_MfClassic_AuthResponse
+#define Nfc_Main_content_mf_classic_read_block_req_MSGTYPE PB_MfClassic_ReadBlockRequest
+#define Nfc_Main_content_mf_classic_read_block_resp_MSGTYPE PB_MfClassic_ReadBlockResponse
 
 extern const pb_msgdesc_t Nfc_Empty_msg;
 extern const pb_msgdesc_t Nfc_Main_msg;

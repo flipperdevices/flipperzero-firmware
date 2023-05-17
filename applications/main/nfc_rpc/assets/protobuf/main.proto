@@ -1,6 +1,8 @@
 syntax = "proto3";
 import "nfca.proto";
 import "mf_ultralight.proto";
+import "mf_classic.proto";
+
 
 package Nfc;
 option java_package = "com.flipperdevices.nfc.protobuf";
@@ -47,5 +49,10 @@ message Main {
     .PB_MfUltralight.EmulateStartResponse mf_ultralight_emulate_start_resp = 22;
     .PB_MfUltralight.EmulateStopRequest mf_ultralight_emulate_stop_req = 23;
     .PB_MfUltralight.EmulateStopResponse mf_ultralight_emulate_stop_resp = 24;
+
+    .PB_MfClassic.AuthRequest mf_classic_auth_req = 25;
+    .PB_MfClassic.AuthResponse mf_classic_auth_resp = 26;
+    .PB_MfClassic.ReadBlockRequest mf_classic_read_block_req = 27;
+    .PB_MfClassic.ReadBlockResponse mf_classic_read_block_resp = 28;
   }
 }

@@ -80,7 +80,7 @@ typedef struct {
 } MfClassicAr;
 
 typedef struct {
-    uint8_t sector_num;
+    uint8_t block_num;
     MfClassicKey key;
     MfClassicKeyType key_type;
     MfClassicNt nt;
