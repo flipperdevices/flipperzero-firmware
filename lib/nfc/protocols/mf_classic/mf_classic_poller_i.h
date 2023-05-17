@@ -30,14 +30,23 @@ struct MfClassicPoller {
     MfClassicPollerSessionState session_state;
     MfClassicAuthState auth_state;
     Crypto1* crypto;
-    NfcPollerBuffer* buffer;
+    NfcPollerBuffer* plain_buff;
+    NfcPollerBuffer* encrypted_buff;
     MfClassicData* data;
     MfClassicPollerCallback callback;
     void* context;
 };
 
+typedef struct {
+    uint8_t block_num;
+    MfClassicKey key;
+    MfClassicKeyType key_type;
+    MfClassicBlock block;
+} MfClassicReadBlockContext;
+
 typedef union {
     MfClassicAuthContext auth_context;
+    MfClassicReadBlockContext read_block_context;
 } MfClassicPollerContextData;
 
 

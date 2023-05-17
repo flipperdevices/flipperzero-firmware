@@ -30,7 +30,10 @@ MfClassicError mf_classic_poller_start(
 
     instance->data = malloc(sizeof(MfClassicData));
     instance->crypto = crypto1_alloc();
-    instance->buffer = nfc_poller_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE, MF_CLASSIC_MAX_BUFF_SIZE);
+    instance->plain_buff =
+        nfc_poller_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE, MF_CLASSIC_MAX_BUFF_SIZE);
+    instance->encrypted_buff =
+        nfc_poller_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE, MF_CLASSIC_MAX_BUFF_SIZE);
 
     instance->session_state = MfClassicPollerSessionStateActive;
     nfca_poller_start(instance->nfca_poller, callback, context);
@@ -64,11 +67,14 @@ MfClassicError mf_classic_poller_get_data(MfClassicPoller* instance, MfClassicDa
 MfClassicError mf_classic_poller_reset(MfClassicPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
-    furi_assert(instance->buffer);
+    furi_assert(instance->plain_buff);
+    furi_assert(instance->encrypted_buff);
     furi_assert(instance->nfca_poller);
 
+    instance->auth_state = MfClassicAuthStateIdle;
     crypto1_free(instance->crypto);
-    nfc_poller_buffer_free(instance->buffer);
+    nfc_poller_buffer_free(instance->plain_buff);
+    nfc_poller_buffer_free(instance->encrypted_buff);
     instance->callback = NULL;
     instance->context = NULL;
 
