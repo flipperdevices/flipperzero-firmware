@@ -172,11 +172,15 @@ void infrared_worker_set_decoded_signal(InfraredWorker* instance, const Infrared
  * @param[out]  instance - InfraredWorker instance
  * @param[in]   timings - array of raw timings
  * @param[in]   timings_cnt - size of array of raw timings
+ * @param[in]   frequency - carrier frequency in Hertz
+ * @param[in]   duty_cycle - carrier duty cycle (0.0 - 1.0)
  */
 void infrared_worker_set_raw_signal(
     InfraredWorker* instance,
     const uint32_t* timings,
-    size_t timings_cnt);
+    size_t timings_cnt,
+    uint32_t frequency,
+    float duty_cycle);
 
 #ifdef __cplusplus
 }
