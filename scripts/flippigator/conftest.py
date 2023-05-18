@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import time
@@ -77,6 +78,12 @@ def pytest_addoption(parser):
         default=False,
         help="use this flag for E2E ibutton and ir bench tests",
     )
+    parser.addoption(
+        "--no_init",
+        action="store_true",
+        default=False,
+        help="use this flag for skip setup cycle",
+    )
 
 
 def pytest_configure(config):
@@ -90,21 +97,27 @@ def pytest_unconfigure(config):
 
 
 def pytest_collection_modifyitems(config, items):
+    if config.getoption("--debugger"):
+        logging.basicConfig(level=logging.DEBUG)
     if config.getoption("--bench_nfc_rfid"):
-        pass
+        logging.info("NFC and RFID bench option selected")
     else:
+        logging.info("NFC and RFID bench option unselected")
         skip_bench_nfc_rfid = pytest.mark.skip(
             reason="need --bench_nfc_rfid option to run"
         )
+
         for item in items:
             if "bench_nfc_rfid" in item.keywords:
                 item.add_marker(skip_bench_nfc_rfid)
     if config.getoption("--bench_ibutton_ir"):
-        pass
+        logging.info("IButton and Infrared bench option selected")
     else:
+        logging.info("IButton and Infrared bench option unselected")
         skip_bench_ibutton_ir = pytest.mark.skip(
             reason="need --bench__ibutton_ir option to run"
         )
+
         for item in items:
             if "bench_ibutton_ir" in item.keywords:
                 item.add_marker(skip_bench_ibutton_ir)
@@ -116,6 +129,7 @@ def pytest_runtest_makereport(item, call):
     report = outcome.get_result()
     if report.when == "call" and report.failed:
         with allure.step("Failure screenshot"):
+            logging.warning("Recognition failure, screenshot will be saved")
             nav = item.funcargs.get("nav")
 
             if nav:
@@ -145,12 +159,13 @@ def flipper_serial(request):
         flipper_serial.flushInput()
         flipper_serial.timeout = 5
     except serial.serialutil.SerialException:
-        print("can not open serial port")
+        logging.error("can not open serial port")
         sys.exit(0)
     except FlipperProtoException:
-        print("can not open flipper proto")
+        logging.error("can not open flipper proto")
         sys.exit(0)
 
+    logging.debug("Flipper serial port opened on" + port)
     return flipper_serial
 
 
@@ -173,6 +188,7 @@ def bench_serial(request):
     bench_serial.flushOutput()
     bench_serial.flushInput()
 
+    logging.debug("NFC and RFID bench serial port opened on" + port)
     return bench_serial
 
 
@@ -195,6 +211,7 @@ def reader_serial(request):
     reader_serial.flushOutput()
     reader_serial.flushInput()
 
+    logging.debug("NFC and RFID Readers serial port opened on" + port)
     return reader_serial
 
 
@@ -217,6 +234,7 @@ def flipper_reader_serial(request):
     flipper_reader_serial.flushOutput()
     flipper_reader_serial.flushInput()
 
+    logging.debug("Flipper 'reader' serial port opened on" + port)
     return flipper_reader_serial
 
 
@@ -239,6 +257,7 @@ def flipper_key_serial(request):
     flipper_key_serial.flushOutput()
     flipper_key_serial.flushInput()
 
+    logging.debug("Flipper 'key' serial port opened on" + port)
     return flipper_key_serial
 
 
@@ -261,15 +280,15 @@ def relay_serial(request):
     relay_serial.flushOutput()
     relay_serial.flushInput()
 
+    logging.debug("Relay serial port opened on" + port)
     return relay_serial
 
 
 @pytest.fixture(scope="session")
 def nav(flipper_serial, request):
     proto = FlipperProto(serial_port=flipper_serial, debug=True)
-    print("Request RPC session")
     proto.start_rpc_session()
-    print("RPC session started")
+    logging.debug("RPC session of main flipper started")
 
     path = request.config.getoption("--path")
     gui = request.config.getoption("--gui")
@@ -287,35 +306,36 @@ def nav(flipper_serial, request):
         window_name="Main flipper",
     )
     nav.update_screen()
+    port = request.config.getoption("--flipper_k_port")
+    if not (request.config.getoption("--no_init")):
+        # Enabling of bluetooth
+        nav.go_to_main_screen()
+        nav.press_ok()
+        nav.go_to("Settings")
+        nav.press_ok()
+        nav.go_to("Bluetooth")
+        nav.press_ok()
+        nav.update_screen()
+        menu = nav.get_menu_list()
+        if "BluetoothIsON" in menu:
+            pass
+        elif "BluetoothIsOFF" in menu:
+            nav.press_right()
+        else:
+            raise FlippigatorException("Can not enable bluetooth")
 
-    # Enabling of bluetooth
-    nav.go_to_main_screen()
-    nav.press_ok()
-    nav.go_to("Settings")
-    nav.press_ok()
-    nav.go_to("Bluetooth")
-    nav.press_ok()
-    nav.update_screen()
-    menu = nav.get_menu_list()
-    if "BluetoothIsON" in menu:
-        pass
-    elif "BluetoothIsOFF" in menu:
-        nav.press_right()
-    else:
-        raise FlippigatorException("Can not enable bluetooth")
-
-    # Enabling Debug
-    nav.press_back()
-    nav.go_to("System")
-    nav.press_ok()
-    menu = nav.get_menu_list()
-    if "DebugIsON" in menu:
-        pass
-    elif "DebugIsOFF" in menu:
-        nav.go_to("DebugIsOFF")
-        nav.press_right()
-    else:
-        raise FlippigatorException("Can not enable debug")
+        # Enabling Debug
+        nav.press_back()
+        nav.go_to("System")
+        nav.press_ok()
+        menu = nav.get_menu_list()
+        if "DebugIsON" in menu:
+            pass
+        elif "DebugIsOFF" in menu:
+            nav.go_to("DebugIsOFF")
+            nav.press_right()
+        else:
+            raise FlippigatorException("Can not enable debug")
 
     return nav
 
@@ -323,9 +343,8 @@ def nav(flipper_serial, request):
 @pytest.fixture(scope="session")
 def nav_reader(flipper_reader_serial, request):
     proto = FlipperProto(serial_port=flipper_reader_serial, debug=True)
-    print("Request RPC session")
     proto.start_rpc_session()
-    print("RPC session started")
+    logging.debug("RPC session of flipper 'reader' started")
 
     path = request.config.getoption("--path")
     gui = request.config.getoption("--gui")
@@ -343,35 +362,35 @@ def nav_reader(flipper_reader_serial, request):
         window_name="Reader flipper",
     )
     nav_reader.update_screen()
+    if not (request.config.getoption("--no_init")):
+        # Enabling of bluetooth
+        nav_reader.go_to_main_screen()
+        nav_reader.press_ok()
+        nav_reader.go_to("Settings")
+        nav_reader.press_ok()
+        nav_reader.go_to("Bluetooth")
+        nav_reader.press_ok()
+        nav_reader.update_screen()
+        menu = nav_reader.get_menu_list()
+        if "BluetoothIsON" in menu:
+            pass
+        elif "BluetoothIsOFF" in menu:
+            nav_reader.press_right()
+        else:
+            raise FlippigatorException("Can not enable bluetooth")
 
-    # Enabling of bluetooth
-    nav_reader.go_to_main_screen()
-    nav_reader.press_ok()
-    nav_reader.go_to("Settings")
-    nav_reader.press_ok()
-    nav_reader.go_to("Bluetooth")
-    nav_reader.press_ok()
-    nav_reader.update_screen()
-    menu = nav_reader.get_menu_list()
-    if "BluetoothIsON" in menu:
-        pass
-    elif "BluetoothIsOFF" in menu:
-        nav_reader.press_right()
-    else:
-        raise FlippigatorException("Can not enable bluetooth")
-
-    # Enabling Debug
-    nav_reader.press_back()
-    nav_reader.go_to("System")
-    nav_reader.press_ok()
-    menu = nav_reader.get_menu_list()
-    if "DebugIsON" in menu:
-        pass
-    elif "DebugIsOFF" in menu:
-        nav_reader.go_to("DebugIsOFF")
-        nav_reader.press_right()
-    else:
-        raise FlippigatorException("Can not enable debug")
+        # Enabling Debug
+        nav_reader.press_back()
+        nav_reader.go_to("System")
+        nav_reader.press_ok()
+        menu = nav_reader.get_menu_list()
+        if "DebugIsON" in menu:
+            pass
+        elif "DebugIsOFF" in menu:
+            nav_reader.go_to("DebugIsOFF")
+            nav_reader.press_right()
+        else:
+            raise FlippigatorException("Can not enable debug")
 
     return nav_reader
 
@@ -379,9 +398,8 @@ def nav_reader(flipper_reader_serial, request):
 @pytest.fixture(scope="session")
 def nav_key(flipper_key_serial, request):
     proto = FlipperProto(serial_port=flipper_key_serial, debug=True)
-    print("Request RPC session")
     proto.start_rpc_session()
-    print("RPC session started")
+    logging.debug("RPC session of flipper 'key' started")
 
     path = request.config.getoption("--path")
     gui = request.config.getoption("--gui")
@@ -399,35 +417,35 @@ def nav_key(flipper_key_serial, request):
         window_name="Key flipper",
     )
     nav_key.update_screen()
+    if not (request.config.getoption("--no_init")):
+        # Enabling of bluetooth
+        nav_key.go_to_main_screen()
+        nav_key.press_ok()
+        nav_key.go_to("Settings")
+        nav_key.press_ok()
+        nav_key.go_to("Bluetooth")
+        nav_key.press_ok()
+        nav_key.update_screen()
+        menu = nav_key.get_menu_list()
+        if "BluetoothIsON" in menu:
+            pass
+        elif "BluetoothIsOFF" in menu:
+            nav_key.press_right()
+        else:
+            raise FlippigatorException("Can not enable bluetooth")
 
-    # Enabling of bluetooth
-    nav_key.go_to_main_screen()
-    nav_key.press_ok()
-    nav_key.go_to("Settings")
-    nav_key.press_ok()
-    nav_key.go_to("Bluetooth")
-    nav_key.press_ok()
-    nav_key.update_screen()
-    menu = nav_key.get_menu_list()
-    if "BluetoothIsON" in menu:
-        pass
-    elif "BluetoothIsOFF" in menu:
-        nav_key.press_right()
-    else:
-        raise FlippigatorException("Can not enable bluetooth")
-
-    # Enabling Debug
-    nav_key.press_back()
-    nav_key.go_to("System")
-    nav_key.press_ok()
-    menu = nav_key.get_menu_list()
-    if "DebugIsON" in menu:
-        pass
-    elif "DebugIsOFF" in menu:
-        nav_key.go_to("DebugIsOFF")
-        nav_key.press_right()
-    else:
-        raise FlippigatorException("Can not enable debug")
+        # Enabling Debug
+        nav_key.press_back()
+        nav_key.go_to("System")
+        nav_key.press_ok()
+        menu = nav_key.get_menu_list()
+        if "DebugIsON" in menu:
+            pass
+        elif "DebugIsOFF" in menu:
+            nav_key.go_to("DebugIsOFF")
+            nav_key.press_right()
+        else:
+            raise FlippigatorException("Can not enable debug")
 
     return nav_key
 
@@ -436,11 +454,12 @@ def nav_key(flipper_key_serial, request):
 def gator(bench_serial, request) -> Gator:
     bench = request.config.getoption("--bench_nfc_rfid")
     if bench:
-        print("Gator initialization")
+        logging.debug("Gator initialization")
 
         gator = Gator(bench_serial, 900, 900)
         gator.home()
 
+        logging.debug("Gator initialization complete")
         return gator
 
 
@@ -448,10 +467,11 @@ def gator(bench_serial, request) -> Gator:
 def reader_nfc(reader_serial, gator, request) -> Reader:
     bench = request.config.getoption("--bench_nfc_rfid")
     if bench:
-        print("Reader NFC initialization")
+        logging.debug("NFC reader initialization")
 
-        reader = Reader(reader_serial, gator, -935.0, -890.0)
+        reader = Reader(reader_serial, gator, -925.0, -890.0)
 
+        logging.debug("NFC reader initialization complete")
         return reader
 
 
@@ -459,10 +479,11 @@ def reader_nfc(reader_serial, gator, request) -> Reader:
 def reader_em_hid(reader_serial, gator, request) -> Reader:
     bench = request.config.getoption("--bench_nfc_rfid")
     if bench:
-        print("Reader RFID Indala initialization")
+        logging.debug("Reader RFID EM and HID initialization")
 
-        reader = Reader(reader_serial, gator, -675.0, -875.0)
+        reader = Reader(reader_serial, gator, -665.0, -875.0)
 
+        logging.debug("Reader RFID EM and HID initialization complete")
         return reader
 
 
@@ -470,10 +491,11 @@ def reader_em_hid(reader_serial, gator, request) -> Reader:
 def reader_indala(reader_serial, gator, request) -> Reader:
     bench = request.config.getoption("--bench_nfc_rfid")
     if bench:
-        print("Reader RFID Indala initialization")
+        logging.debug("Reader RFID Indala initialization")
 
-        reader = Reader(reader_serial, gator, -935.0, -635.0)
+        reader = Reader(reader_serial, gator, -925.0, -635.0)
 
+        logging.debug("Reader RFID Indala initialization complete")
         return reader
 
 
@@ -481,8 +503,9 @@ def reader_indala(reader_serial, gator, request) -> Reader:
 def relay(relay_serial, gator, request) -> Relay:
     bench = request.config.getoption("--bench_ibutton_ir")
     if bench:
-        print("Relay module initialization")
+        logging.debug("Relay module initialization")
 
         relay = Relay(relay_serial)
 
+        logging.debug("Relay module initialization complete")
         return relay

@@ -3,7 +3,6 @@ import os
 import allure
 import pytest
 from flippigator.case import BaseCase
-from termcolor import colored
 
 os.system("color")
 
@@ -113,6 +112,7 @@ class TestApplications(BaseCase):
                 "FileBrowserLevelUp",
                 "app_Nfc Magic",
                 "app_PicoPass",
+                "app_MfKey32",
             ]
 
             assert menu, "NFC folder is empty"
