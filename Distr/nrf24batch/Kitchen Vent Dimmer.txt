@@ -87,18 +87,18 @@ W: _PORTA=,0x3B,,WRAM
 R: _PORTB=0x36,,RAM
 W: _PORTB=,0x38,WRAM
 
-R: _Fanspeed=0x75,,RAM
+R: _LED_Warning=0x6B,,RAM
+W: _LED_Warning=,0x6B,WRAM
+R: _IRHashLast*2=0x7C,,RAM2#
+R: _SleepTimer=0x84,,RAM
 R: _FanOn=0x76,,RAM
 R: _FanOnNext=0x74,,RAM
 R: _FanOnNextCnt=0x72,,RAM
 R: _FanOnLast=0x73,,RAM
-R: _IRHashLast*2=0x7C,,RAM2#
-R: _SleepTimer=0x84,,RAM
 
 R: _OutSpeedMax=0x87,,RAM
 W: _OutSpeedMax=,0x87,WRAM
-R: _LED_Warning=0x6B,,RAM
-W: _LED_Warning=,0x6B,WRAM
+R: _Fanspeed=0x75,,RAM
 R: _ZeroCrossDelay*2=0x8E,,RAM2
 W: _ZeroCrossDelay=,0x8E,WRAM2
 R: _PulseDelayAfterZero*2=0x9A,,RAM2
@@ -142,5 +142,5 @@ WBatch: LED Warning: _LED Warning=0x10
 WBatch: OSCCAL: _OSCCAL=146
 WBatch: CO2 Level: CO2 level={750,850,1000}
 WBatch: Zero cross EEPROM: ZeroCrossLag,us=30;SSR_PulseWidth,us=200;Reset
-WBatch: Zero cross RAM: _ZeroCrossDelay=1225;_PulseDelayAfterZero=0001;_PulseWidth=1249
+WBatch: Zero cross RAM: _ZeroCrossDelay=1246;_PulseDelayAfterZero=0001;_PulseWidth=1249
 WBatch: Reset: Reset
