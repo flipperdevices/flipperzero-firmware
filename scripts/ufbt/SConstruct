@@ -1,7 +1,6 @@
 from SCons.Platform import TempFileMunge
 from SCons.Node import FS
 from SCons.Errors import UserError
-from SCons.Warnings import warn, WarningOnByDefault
 
 
 import os
@@ -14,6 +13,7 @@ SetOption("max_drift", 1)
 
 ufbt_state_dir = Dir(os.environ.get("UFBT_STATE_DIR", "#.ufbt"))
 ufbt_script_dir = Dir(os.environ.get("UFBT_SCRIPT_DIR"))
+ufbt_build_dir = ufbt_state_dir.Dir("build")
 
 ufbt_current_sdk_dir = ufbt_state_dir.Dir("current")
 
@@ -63,16 +63,7 @@ core_env = Environment(
     ],
 )
 
-if "update" in BUILD_TARGETS:
-    SConscript(
-        "update.scons",
-        exports={"core_env": core_env},
-    )
-
-if "purge" in BUILD_TARGETS:
-    core_env.Execute(Delete(ufbt_state_dir))
-    print("uFBT state purged")
-    Exit(0)
+core_env.Append(CPPDEFINES=GetOption("extra_defines"))
 
 # Now we can import stuff bundled with SDK - it was added to sys.path by ufbt_state
 
@@ -109,7 +100,7 @@ env = core_env.Clone(
         "fbt_assets",
         ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
     ],
-    FBT_FAP_DEBUG_ELF_ROOT=ufbt_state_dir.Dir("build"),
+    FBT_FAP_DEBUG_ELF_ROOT=ufbt_build_dir,
     TEMPFILE=TempFileMunge,
     MAXLINELENGTH=2048,
     PROGSUFFIX=".elf",
@@ -194,6 +185,33 @@ dist_env.PhonyTarget(
     GDBREMOTE="${BLACKMAGIC_ADDR}",
     FBT_FAP_DEBUG_ELF_ROOT=path_as_posix(dist_env.subst("$FBT_FAP_DEBUG_ELF_ROOT")),
 )
+
+# Debug alien elf
+debug_other_opts = [
+    "-ex",
+    "source ${FBT_DEBUG_DIR}/PyCortexMDebug/PyCortexMDebug.py",
+    "-ex",
+    "source ${FBT_DEBUG_DIR}/flipperversion.py",
+    "-ex",
+    "fw-version",
+]
+
+dist_env.PhonyTarget(
+    "debug_other",
+    "${GDBPYCOM}",
+    GDBOPTS="${GDBOPTS_BASE}",
+    GDBREMOTE="${OPENOCD_GDB_PIPE}",
+    GDBPYOPTS=debug_other_opts,
+)
+
+dist_env.PhonyTarget(
+    "debug_other_blackmagic",
+    "${GDBPYCOM}",
+    GDBOPTS="${GDBOPTS_BASE}  ${GDBOPTS_BLACKMAGIC}",
+    GDBREMOTE="${BLACKMAGIC_ADDR}",
+    GDBPYOPTS=debug_other_opts,
+)
+
 
 dist_env.PhonyTarget(
     "flash_blackmagic",
@@ -389,8 +407,9 @@ dist_env.Alias("vscode_dist", vscode_dist)
 # Creating app from base template
 
 dist_env.SetDefault(FBT_APPID=appenv.subst("$APPID") or "template")
+app_template_dir = project_template_dir.Dir("app_template")
 app_template_dist = []
-for template_file in project_template_dir.Dir("app_template").glob("*"):
+for template_file in app_template_dir.glob("*"):
     dist_file_name = dist_env.subst(template_file.name)
     if template_file.name.endswith(".png"):
         app_template_dist.append(
@@ -406,12 +425,13 @@ for template_file in project_template_dir.Dir("app_template").glob("*"):
                 },
             )
         )
-
 AddPostAction(
     app_template_dist[-1],
     [
         Mkdir(original_app_dir.Dir("images")),
         Touch(original_app_dir.Dir("images").File(".gitkeep")),
+        # scons' glob ignores .dot directories, so we need to copy .github manually
+        Copy(original_app_dir.Dir(".github"), app_template_dir.Dir(".github")),
     ],
 )
 dist_env.Precious(app_template_dist)
@@ -426,4 +446,31 @@ dist_env.PhonyTarget(
 dist_env.PhonyTarget(
     "get_apiversion",
     "@echo $( ${UFBT_API_VERSION} $)",
+)
+
+# Dolphin animation builder. Expects "external" directory in current dir
+# with animation sources & manifests. Builds & uploads them to connected Flipper
+dolphin_src_dir = original_app_dir.Dir("external")
+if dolphin_src_dir.exists():
+    dolphin_dir = ufbt_build_dir.Dir("dolphin")
+    dolphin_external = dist_env.DolphinExtBuilder(
+        ufbt_build_dir.Dir("dolphin"),
+        original_app_dir,
+        DOLPHIN_RES_TYPE="external",
+    )
+    dist_env.PhonyTarget(
+        "dolphin_ext",
+        '${PYTHON3} ${FBT_SCRIPT_DIR}/storage.py send "${SOURCE}" /ext/dolphin',
+        source=ufbt_build_dir.Dir("dolphin"),
+    )
+else:
+
+    def missing_dolphin_folder(**kw):
+        raise UserError(f"Dolphin folder not found: {dolphin_src_dir}")
+
+    dist_env.PhonyTarget("dolphin_ext", Action(missing_dolphin_folder, None))
+
+dist_env.PhonyTarget(
+    "env",
+    "@echo $( ${FBT_SCRIPT_DIR}/toolchain/fbtenv.sh $)",
 )
