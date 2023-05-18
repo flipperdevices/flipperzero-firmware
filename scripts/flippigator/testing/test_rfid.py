@@ -11,7 +11,7 @@ os.system("color")
 @pytest.mark.rfid
 class TestRfid(BaseCase):
     @pytest.mark.smoke
-    def test_nfc_menu(self, nav):
+    def test_rfid_menu(self, nav):
         nav.rfid.go_into()
         menu = nav.get_menu_list()
         menu_ref = [
