@@ -19,7 +19,7 @@ Supported **target** microcontrollers:
 - ESP32-S3
 - ESP32-C3
 - ESP32-C2
-- ESP32-H4 (Beta1 and Beta2)
+- ESP32-H2
 
 ## Supporting new host target
 
