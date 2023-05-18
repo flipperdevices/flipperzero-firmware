@@ -96,6 +96,7 @@ class TestApplications(BaseCase):
             "FileBrowserLevelUp",
             "app_Nfc Magic",
             "app_PicoPass",
+            "app_MfKey32",
         ]
         for i in menu:
             if i in menu_ref:

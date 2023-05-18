@@ -44,6 +44,8 @@ class Navigator:
         self.screen_image = numpy.zeros((SCREEN_H, SCREEN_W))
 
         self.logger = logging.getLogger(window_name)
+        if(self._debugFlag):
+            self.logger.setLevel(logging.DEBUG)
 
         self.nfc = AppNfc(self)
         self.rfid = AppRfid(self)
@@ -194,6 +196,7 @@ class Navigator:
             self.update_screen()
             state = self.recog_ref(ref, area)
             if time.time() - start_time > timeout:
+                self.logger.error("Recognition timeout! Screenshot will be saved!")
                 cv.imwrite("img/recognitionFailPic.bmp", self.screen_image)
                 #raise FlippigatorException("Recognition timeout")
                 break
@@ -208,42 +211,36 @@ class Navigator:
         return -1
 
     def save_screen(self, filename: str):
+        self.logger.info("Save screenshot: " + str(filename))
         cv.imwrite(f"img/{filename}", self.screen_image)
 
     def press_down(self):
         self.proto.rpc_gui_send_input("SHORT DOWN")
-        if self._debugFlag == 1:
-            self.logger.debug("Press DOWN")
+        self.logger.debug("Press DOWN")
 
     def press_up(self):
         self.proto.rpc_gui_send_input("SHORT UP")
-        if self._debugFlag == 1:
-            self.logger.debug("Press UP")
+        self.logger.debug("Press UP")
 
     def press_left(self):
         self.proto.rpc_gui_send_input("SHORT LEFT")
-        if self._debugFlag == 1:
-            self.logger.debug("Press LEFT")
+        self.logger.debug("Press LEFT")
 
     def press_right(self):
         self.proto.rpc_gui_send_input("SHORT RIGHT")
-        if self._debugFlag == 1:
-            self.logger.debug("Press RIGHT")
+        self.logger.debug("Press RIGHT")
 
     def press_ok(self):
         self.proto.rpc_gui_send_input("SHORT OK")
-        if self._debugFlag == 1:
-            self.logger.debug("Press OK")
+        self.logger.debug("Press OK")
 
     def press_long_ok(self):
         self.proto.rpc_gui_send_input("LONG OK")
-        if self._debugFlag == 1:
-            self.logger.debug("Press LONG OK")
+        self.logger.debug("Press LONG OK")
 
     def press_back(self):
         self.proto.rpc_gui_send_input("SHORT BACK")
-        if self._debugFlag == 1:
-            self.logger.debug("Press BACK")
+        self.logger.debug("Press BACK")
 
     def press(self, duration: str = "SHORT", button: str = "OK"):
         if duration not in ["SHORT", "LONG"]:
@@ -251,12 +248,11 @@ class Navigator:
         if button not in ["OK", "BACK", "UP", "DOWN", "LEFT", "RIGHT"]:
             raise FlippigatorException("Invalid button")
         self.proto.rpc_gui_send_input(f"{duration} {button}")
-        if self._debugFlag:
-            self.logger.debug("Press " + button)
+        self.logger.debug("Press " + button)
 
     def get_menu_list(self):
         time.sleep(0.2)
-        self.logger.debug("Scanning menu list")
+        self.logger.info("Scanning menu list")
         menus = list()
         cur = self.get_current_state()
 
@@ -265,12 +261,12 @@ class Navigator:
                 menus.append(cur[0])
             self.press_down()
             cur = self.get_current_state()
-        self.logger.debug("Finded menus: " + str(menus))
+        self.logger.info("Finded menus: " + str(menus))
         return menus
 
     def go_to(self, target, area = (0, 64, 0, 128)):
         state = self.get_current_state(area = area)
-        self.logger.debug("Going to " + target)
+        self.logger.info("Going to " + target)
         while not (target in state):
             self.press_down()
             state = self.get_current_state(area = area)
@@ -287,12 +283,10 @@ class Navigator:
                 self.press_left()
             else:
                 self.press_back()
-            if self._debugFlag == 1:
-                self.logger.debug("Going back to main screen")
         time.sleep(1) #wait for some time, because of missing key pressing
 
     def open_file(self, module, filename):
-        self.logger.debug("Opening file '" + filename + "' in module '" + module + "'")
+        self.logger.info("Opening file '" + filename + "' in module '" + module + "'")
         self.go_to_main_screen()
         time.sleep(1)
         self.press_down()
@@ -332,10 +326,10 @@ class Navigator:
         self.press_ok()
         self.go_to("browser_Run in app", area = (15, 64, 0, 128))
         self.press_ok()
-        self.logger.debug("File opened")
+        self.logger.info("File opened")
 
     def delete_file(self, module, filename):
-        self.logger.debug("Deleting file '" + filename + "' in module '" + module + "'")
+        self.logger.info("Deleting file '" + filename + "' in module '" + module + "'")
         self.go_to_main_screen()
         time.sleep(1)
         self.press_down()
@@ -377,7 +371,7 @@ class Navigator:
         self.go_to("browser_Delete", area = (15, 64, 0, 128))
         self.press_ok()
         self.press_right()
-        self.logger.debug("File deleted")
+        self.logger.info("File deleted")
         self.go_to_main_screen()
 
 
@@ -394,6 +388,8 @@ class Gator:
         self._y_size = y_size
         self._debugFlag = debug
         self.logger = logging.getLogger("Gator")
+        if(self._debugFlag):
+            self.logger.setLevel(logging.DEBUG)
 
     def __del__(self):
         pass
@@ -404,8 +400,8 @@ class Gator:
         time.sleep(0.2)
         self._serial.write(("$H\n").encode("ASCII"))
         status = self._serial.readline()
+        self.logger.info("Homing in progress")
         while status.decode("ASCII").find("ok") == -1:
-            self.logger.debug("Homing in progress")
             status = self._serial.readline()
             time.sleep(0.2)
 
@@ -420,7 +416,7 @@ class Gator:
             )
         )
         if self._debugFlag == True:
-            self.logger.debug(
+            self.logger.info(
                 "Moving to X" + str(x) + " Y" + str(y) + " F" + str(speed)
             )
         time.sleep(0.2)
@@ -451,12 +447,14 @@ class Reader:
         self._debugFlag = debug
         self._recieved_data = 0
         self.logger = logging.getLogger("Reader")
+        if(self._debugFlag):
+            self.logger.setLevel(logging.DEBUG)
 
     def __del__(self):
         pass
 
     def go_to_place(self) -> None:
-        self.logger.debug("Moving to reader")
+        self.logger.info("Moving to reader")
         self._gator.swim_to(self._x_coord, self._y_coord, 15000)
 
     def is_available(self) -> bool:
@@ -478,7 +476,7 @@ class Reader:
         self._recieved_data = 0
 
     def get(self) -> str:
-        self.logger.debug("Returened data: " + str(self._recieved_data))
+        self.logger.info("Returened data: " + str(self._recieved_data))
         return self._recieved_data
 
 
@@ -501,6 +499,8 @@ class Relay:
             )
         )
         self.logger = logging.getLogger("Relay")
+        if(self._debugFlag):
+            self.logger.setLevel(logging.DEBUG)
 
     def __del__(self):
         pass
@@ -512,7 +512,7 @@ class Relay:
             )
         )
         self._curent_reader = reader
-        self.logger.debug("Selected reader: " +str(self._curent_reader))
+        self.logger.info("Selected reader: " +str(self._curent_reader))
 
     def set_key(self, key):
         self._serial.write(
@@ -521,7 +521,7 @@ class Relay:
             )
         )
         self._curent_key = key
-        self.logger.debug("Selected reader: " +str(self._curent_key))
+        self.logger.info("Selected key: " +str(self._curent_key))
 
     def get_reader(self) -> int:
         return self._curent_reader
@@ -537,7 +537,7 @@ class Relay:
         )
         self._curent_reader = 0
         self._curent_key = 0
-        self.logger.debug("Reset relay module")
+        self.logger.info("Reset relay module")
 
 
 class FlipperTextKeyboard:
@@ -565,7 +565,7 @@ class FlipperTextKeyboard:
             return (col_index, row_index)
 
     def send(self, text):
-        self.logger.debug("Printing on Text keyboard: " + text)
+        self.nav.logger.info("Printing on Text keyboard: " + text)
         current_x, current_y = self._coord("\n")
         text = text + "\n"
         for letter in list(text):
@@ -634,7 +634,7 @@ class FlipperHEXKeyboard:
             return (col_index, row_index)
 
     def send(self, text):
-        self.logger.debug("Printing on HEX keyboard: " + text)
+        self.nav.logger.info("Printing on HEX keyboard: " + text)
         current_x, current_y = self._coord("0")
         text = text + "\n"
         for letter in list(text):

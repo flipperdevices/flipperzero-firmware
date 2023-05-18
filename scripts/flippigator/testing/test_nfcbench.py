@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 
 import allure
 import pytest
@@ -18,7 +19,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(0.0, -10.0, 15000)
+            gator.swim_to(-1.0, -10.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -28,12 +29,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                self.logger.debug("ReadingCardNFC")
+                nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         while "Mf Classic User Dict" in state:
@@ -85,7 +86,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(0.0, -90.0, 15000)
+            gator.swim_to(-1.0, -90.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -95,12 +96,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                self.logger.debug("ReadingCardNFC")
+                nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert "card_NFC-A_bench" in state, "Result of reading reference card is fail"
@@ -143,12 +144,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                self.logger.debug("ReadingCardNFC")
+                nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         while "Mf Classic User Dict" in state:
@@ -209,7 +210,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(0.0, -250.0, 15000)
+            gator.swim_to(-1.0, -250.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -219,13 +220,13 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             time.sleep(0.5)
             while "ReadingCardNFC" in state:
-                self.logger.debug("ReadingCardNFC")
+                nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert "card_Troika_bench" in state, "Result of reading reference card is fail"
@@ -259,7 +260,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(0.0, -330.0, 15000)
+            gator.swim_to(-1.0, -330.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -269,12 +270,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                self.logger.debug("ReadingCardNFC")
+                nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert "card_NTAG215_bench" in state, "Result of reading reference card is fail"
@@ -309,7 +310,7 @@ class TestNfcBench(BaseCase):
         with allure.step("Go to NFC"):
             nav.nfc.go_into()
         with allure.step("Swim to NFC card"):
-            gator.swim_to(0.0, -410.0, 15000)
+            gator.swim_to(-1.0, -410.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -319,12 +320,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                self.logger.debug("ReadingCardNFC")
+                nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert (
@@ -370,12 +371,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                self.logger.debug("ReadingCardNFC")
+                nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert (
@@ -421,12 +422,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                self.logger.debug("ReadingCardNFC")
+                nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert (
@@ -451,12 +452,12 @@ class TestNfcBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingNFC" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
             while "ReadingCardNFC" in state:
-                self.logger.debug("ReadingCardNFC")
+                nav.logger.debug("ReadingCardNFC")
                 state = nav.get_current_state()
         state = nav.get_current_state()
         assert (

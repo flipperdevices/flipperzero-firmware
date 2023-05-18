@@ -18,7 +18,7 @@ class TestRfidBench(BaseCase):
         with allure.step("Go to RFID"):
             nav.rfid.go_into()
         with allure.step("Swim to RFID card"):
-            gator.swim_to(-1.0, -865.0, 15000)
+            gator.swim_to(-0.5, -865.0, 15000)
         with allure.step("Read a card"):
             nav.go_to("Read")
             nav.press_ok()
@@ -28,7 +28,7 @@ class TestRfidBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingRFID" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
@@ -50,7 +50,7 @@ class TestRfidBench(BaseCase):
         assert "status_Emulating Indala26" in state, "NFC Emulation fail"
         nav.press_back()
 
-        gator.swim_to(-1.0, -785.0, 15000)
+        gator.swim_to(-0.5, -785.0, 15000)
         nav.go_to("Write")
         nav.press_ok()
         start_time = time.time()
@@ -89,7 +89,7 @@ class TestRfidBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingRFID" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
@@ -111,7 +111,7 @@ class TestRfidBench(BaseCase):
         assert "status_Emulating EM4100" in state, "NFC Emulation fail"
         nav.press_back()
 
-        gator.swim_to(0.0, -785.0, 15000)
+        gator.swim_to(-1.0, -785.0, 15000)
         nav.go_to("Write")
         nav.press_ok()
         start_time = time.time()
@@ -150,7 +150,7 @@ class TestRfidBench(BaseCase):
             state = state[0]
             start_time = time.time()
             while "ReadingRFID" in state:
-                self.logger.debug("Reading")
+                nav.logger.debug("Reading")
                 state = nav.get_current_state()
                 if time.time() - start_time > 10:
                     break
@@ -172,7 +172,7 @@ class TestRfidBench(BaseCase):
         assert "status_Emulating H10301" in state, "NFC Emulation fail"
         nav.press_back()
 
-        gator.swim_to(0.0, -785.0, 15000)
+        gator.swim_to(-1.0, -785.0, 15000)
         nav.go_to("Write")
         nav.press_ok()
         start_time = time.time()
