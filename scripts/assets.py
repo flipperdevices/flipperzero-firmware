@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
+import os
+
 from flipper.app import App
 from flipper.assets.icon import file2image
-
-import os
 
 ICONS_SUPPORTED_FORMATS = ["png"]
 
@@ -60,7 +60,6 @@ class Main(App):
         )
         self.parser_copro.add_argument("cube_dir", help="Path to Cube folder")
         self.parser_copro.add_argument("output_dir", help="Path to output folder")
-        self.parser_copro.add_argument("mcu", help="MCU series as in copro folder")
         self.parser_copro.add_argument(
             "--cube_ver", dest="cube_ver", help="Cube version", required=True
         )
@@ -127,7 +126,7 @@ class Main(App):
             if not filenames:
                 continue
             if "frame_rate" in filenames:
-                self.logger.debug(f"Folder contains animation")
+                self.logger.debug("Folder contains animation")
                 icon_name = "A_" + os.path.split(dirpath)[1].replace("-", "_")
                 width = height = None
                 frame_count = 0
@@ -186,7 +185,7 @@ class Main(App):
                     icons_c.write("\n")
                     icons.append((icon_name, width, height, 0, 1))
         # Create array of images:
-        self.logger.debug(f"Finalizing source file")
+        self.logger.debug("Finalizing source file")
         for name, width, height, frame_rate, frame_count in icons:
             icons_c.write(
                 ICONS_TEMPLATE_C_ICONS.format(
@@ -201,7 +200,7 @@ class Main(App):
         icons_c.close()
 
         # Create Public Header
-        self.logger.debug(f"Creating header")
+        self.logger.debug("Creating header")
         icons_h = open(
             os.path.join(self.args.output_directory, f"{self.args.filename}.h"),
             "w",
@@ -211,7 +210,7 @@ class Main(App):
         for name, width, height, frame_rate, frame_count in icons:
             icons_h.write(ICONS_TEMPLATE_H_ICON_NAME.format(name=name))
         icons_h.close()
-        self.logger.debug(f"Done")
+        self.logger.debug("Done")
         return 0
 
     def manifest(self):
@@ -232,7 +231,7 @@ class Main(App):
         new_manifest = Manifest(self.args.timestamp)
         new_manifest.create(directory_path)
 
-        self.logger.info(f"Comparing new manifest with existing")
+        self.logger.info("Comparing new manifest with existing")
         only_in_old, changed, only_in_new = Manifest.compare(old_manifest, new_manifest)
         for record in only_in_old:
             self.logger.info(f"Only in old: {record}")
@@ -246,38 +245,42 @@ class Main(App):
         else:
             self.logger.info("Manifest is up-to-date!")
 
-        self.logger.info(f"Complete")
+        self.logger.info("Complete")
 
         return 0
 
     def copro(self):
         from flipper.assets.copro import Copro
 
-        self.logger.info(f"Bundling coprocessor binaries")
-        copro = Copro(self.args.mcu)
-        self.logger.info(f"Loading CUBE info")
-        copro.loadCubeInfo(self.args.cube_dir, self.args.cube_ver)
-        self.logger.info(f"Bundling")
-        copro.bundle(
-            self.args.output_dir,
-            self.args.stack_file,
-            self.args.stack_type,
-            self.args.stack_addr,
-        )
-        self.logger.info(f"Complete")
+        self.logger.info("Bundling coprocessor binaries")
+        copro = Copro()
+        try:
+            self.logger.info("Loading CUBE info")
+            copro.loadCubeInfo(self.args.cube_dir, self.args.cube_ver)
+            self.logger.info("Bundling")
+            copro.bundle(
+                self.args.output_dir,
+                self.args.stack_file,
+                self.args.stack_type,
+                self.args.stack_addr,
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to bundle: {e}")
+            return 1
+        self.logger.info("Complete")
 
         return 0
 
     def dolphin(self):
         from flipper.assets.dolphin import Dolphin
 
-        self.logger.info(f"Processing Dolphin sources")
+        self.logger.info("Processing Dolphin sources")
         dolphin = Dolphin()
-        self.logger.info(f"Loading data")
+        self.logger.info("Loading data")
         dolphin.load(self.args.input_directory)
-        self.logger.info(f"Packing")
+        self.logger.info("Packing")
         dolphin.pack(self.args.output_directory, self.args.symbol_name)
-        self.logger.info(f"Complete")
+        self.logger.info("Complete")
 
         return 0
 
