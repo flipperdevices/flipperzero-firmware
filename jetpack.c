@@ -11,6 +11,8 @@
 #define GRAVITY_BOOST -0.3
 #define GRAVITY_TICK 0.15
 #define PARTIVLE_VELOCITY 2
+#define SCIENTIST_VELOCITY_MIN 2
+#define SCIENTIST_VELOCITY_MAX 2
 
 #define SCIENTISTS_MAX 6
 #define COINS_MAX 25
@@ -24,7 +26,6 @@ typedef struct {
 typedef struct {
     float gravity;
     POINT point;
-    IconAnimation* sprite;
     bool isBoosting;
 } BARRY;
 
@@ -37,16 +38,28 @@ typedef struct {
     POINT point;
 } PARTICLE;
 
+typedef enum {
+    ScientistStateAlive,
+    ScientistStateDead,
+} ScientistState;
 typedef struct {
     float gravity;
     POINT point;
-    IconAnimation* sprite;
+    int velocity_x;
+    ScientistState state;
 } SCIENTIST;
 
 typedef enum {
     GameStateLife,
     GameStateGameOver,
 } State;
+
+typedef struct {
+    IconAnimation* barry;
+    IconAnimation* scientist;
+    Icon* coin;
+    Icon* dead_scientist;
+} GameSprites;
 
 typedef struct {
     int points;
@@ -56,6 +69,7 @@ typedef struct {
     COIN coins[COINS_MAX];
     PARTICLE particles[PARTICLES_MAX];
     State state;
+    GameSprites sprites;
     FuriMutex* mutex;
 } GameState;
 
@@ -80,6 +94,22 @@ static void jetpack_game_random_coins(GameState* const game_state) {
     }
 }
 
+static void jetpack_game_random_scientists(GameState* const game_state) {
+    // Check for an available slot for a new scientist
+    for(int i = 0; i < SCIENTISTS_MAX; ++i) {
+        if(game_state->scientists[i].point.x <= 0 &&
+           (rand() % 1000) < 10) { // Spawn rate is less frequent than coins
+            game_state->scientists[i].state = ScientistStateAlive;
+            game_state->scientists[i].point.x = 127;
+            game_state->scientists[i].point.y = 49;
+            game_state->scientists[i].velocity_x =
+                (rand() % (SCIENTIST_VELOCITY_MAX - SCIENTIST_VELOCITY_MIN + 1)) +
+                SCIENTIST_VELOCITY_MIN; // random velocity between SCIENTIST_VELOCITY_MIN and SCIENTIST_VELOCITY_MAX
+            break;
+        }
+    }
+}
+
 static void jetpack_game_spawn_particles(GameState* const game_state) {
     for(int i = 0; i < PARTICLES_MAX; i++) {
         if(game_state->particles[i].point.y <= 0) {
@@ -97,14 +127,19 @@ static void jetpack_game_state_init(GameState* const game_state) {
     barry.gravity = 0;
     barry.point.x = 64;
     barry.point.y = 32;
-    barry.sprite = icon_animation_alloc(&A_barry);
     barry.isBoosting = false;
 
-    icon_animation_start(barry.sprite);
+    GameSprites sprites;
+    sprites.barry = icon_animation_alloc(&A_barry);
+    sprites.scientist = icon_animation_alloc(&A_scientist);
+
+    icon_animation_start(sprites.scientist);
+    icon_animation_start(sprites.barry);
 
     game_state->barry = barry;
     game_state->points = 0;
     game_state->distance = 0;
+    game_state->sprites = sprites;
     game_state->state = GameStateLife;
 
     memset(game_state->scientists, 0, sizeof(game_state->scientists));
@@ -113,7 +148,8 @@ static void jetpack_game_state_init(GameState* const game_state) {
 }
 
 static void jetpack_game_state_free(GameState* const game_state) {
-    icon_animation_free(game_state->barry.sprite);
+    icon_animation_free(game_state->sprites.barry);
+    icon_animation_free(game_state->sprites.scientist);
     free(game_state);
 }
 
@@ -152,9 +188,45 @@ static void jetpack_game_tick(GameState* const game_state) {
     for(int i = 0; i < PARTICLES_MAX; i++) {
         if(game_state->particles[i].point.y > 0) {
             game_state->particles[i].point.y += PARTIVLE_VELOCITY;
+
+            // Check collision with scientists
+            for(int j = 0; j < SCIENTISTS_MAX; j++) {
+                if(game_state->scientists[j].state == ScientistStateAlive &&
+                   game_state->scientists[j].point.x > 0) {
+                    // Added half the width and height of the scientist sprite to the scientist's x and y respectively
+                    float scientist_center_x = game_state->scientists[j].point.x + 5.5;
+                    float scientist_center_y = game_state->scientists[j].point.y + 7.5;
+                    if(!(game_state->particles[i].point.x >
+                             scientist_center_x +
+                                 5.5 || // particle is to the right of the scientist
+                         game_state->particles[i].point.x + 11 <
+                             scientist_center_x -
+                                 5.5 || // particle is to the left of the scientist
+                         game_state->particles[i].point.y >
+                             scientist_center_y + 7.5 || // particle is below the scientist
+                         game_state->particles[i].point.y + 15 <
+                             scientist_center_y - 7.5)) { // particle is above the scientist
+                        game_state->scientists[j].state = ScientistStateDead;
+                        game_state->points += 2; // Increase the score by 2
+                    }
+                }
+            }
+
             if(game_state->particles[i].point.x < 0 || game_state->particles[i].point.x > 128 ||
                game_state->particles[i].point.y < 0 || game_state->particles[i].point.y > 64) {
                 game_state->particles[i].point.y = 0;
+            }
+        }
+    }
+
+    // Move scientists
+    for(int i = 0; i < SCIENTISTS_MAX; i++) {
+        if(game_state->scientists[i].point.x > 0) {
+            game_state->scientists[i].point.x -=
+                game_state->scientists[i].velocity_x; // move based on velocity_x
+            if(game_state->scientists[i].point.x < -16) { // if the scientist is out of screen
+                game_state->scientists[i].point.x =
+                    0; // set scientist x coordinate to 0 to mark it as "inactive"
             }
         }
     }
@@ -175,6 +247,7 @@ static void jetpack_game_tick(GameState* const game_state) {
 
     // spawn scientists and coins...
     jetpack_game_random_coins(game_state);
+    jetpack_game_random_scientists(game_state);
 
     if(game_state->barry.isBoosting) {
         game_state->barry.gravity += GRAVITY_BOOST;
@@ -187,8 +260,6 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
     const GameState* game_state = ctx;
     furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
-
     if(game_state->state == GameStateLife) {
         // Draw scene
 
@@ -200,9 +271,28 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
             }
         }
 
+        // Draw scientists
+        for(int i = 0; i < SCIENTISTS_MAX; ++i) {
+            if(game_state->scientists[i].point.x > 0) {
+                if(game_state->scientists[i].state == ScientistStateAlive) {
+                    canvas_draw_icon_animation(
+                        canvas,
+                        game_state->scientists[i].point.x,
+                        game_state->scientists[i].point.y,
+                        game_state->sprites.scientist);
+                } else {
+                    canvas_draw_icon(
+                        canvas,
+                        game_state->scientists[i].point.x,
+                        game_state->scientists[i].point.y,
+                        &I_dead_scientist);
+                }
+            }
+        }
+
         // Draw particles
         for(int i = 0; i < PARTICLES_MAX; i++) {
-            if(game_state->particles[i].point.x > 0) {
+            if(game_state->particles[i].point.y > 0) {
                 canvas_draw_line(
                     canvas,
                     game_state->particles[i].point.x,
@@ -214,7 +304,10 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
 
         // Draw barry
         canvas_draw_icon_animation(
-            canvas, game_state->barry.point.x, game_state->barry.point.y, game_state->barry.sprite);
+            canvas,
+            game_state->barry.point.x,
+            game_state->barry.point.y,
+            game_state->sprites.barry);
 
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
@@ -228,6 +321,8 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
     if(game_state->state == GameStateGameOver) {
         // Show highscore
     }
+
+    canvas_draw_frame(canvas, 0, 0, 128, 64);
 
     furi_mutex_release(game_state->mutex);
 }
