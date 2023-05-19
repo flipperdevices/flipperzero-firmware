@@ -10,9 +10,11 @@
 
 #define GRAVITY_BOOST -0.3
 #define GRAVITY_TICK 0.15
+#define PARTIVLE_VELOCITY 2
 
 #define SCIENTISTS_MAX 6
 #define COINS_MAX 25
+#define PARTICLES_MAX 50
 
 typedef struct {
     int x;
@@ -32,6 +34,10 @@ typedef struct {
 } COIN;
 
 typedef struct {
+    POINT point;
+} PARTICLE;
+
+typedef struct {
     float gravity;
     POINT point;
     IconAnimation* sprite;
@@ -48,6 +54,7 @@ typedef struct {
     BARRY barry;
     SCIENTIST scientists[SCIENTISTS_MAX];
     COIN coins[COINS_MAX];
+    PARTICLE particles[PARTICLES_MAX];
     State state;
     FuriMutex* mutex;
 } GameState;
@@ -73,6 +80,17 @@ static void jetpack_game_random_coins(GameState* const game_state) {
     }
 }
 
+static void jetpack_game_spawn_particles(GameState* const game_state) {
+    for(int i = 0; i < PARTICLES_MAX; i++) {
+        if(game_state->particles[i].point.y <= 0) {
+            game_state->particles[i].point.x = game_state->barry.point.x + (rand() % 7) - 3;
+
+            game_state->particles[i].point.y = game_state->barry.point.y;
+            break;
+        }
+    }
+}
+
 static void jetpack_game_state_init(GameState* const game_state) {
     UNUSED(game_state);
     BARRY barry;
@@ -91,6 +109,7 @@ static void jetpack_game_state_init(GameState* const game_state) {
 
     memset(game_state->scientists, 0, sizeof(game_state->scientists));
     memset(game_state->coins, 0, sizeof(game_state->coins));
+    memset(game_state->particles, 0, sizeof(game_state->particles));
 }
 
 static void jetpack_game_state_free(GameState* const game_state) {
@@ -129,6 +148,17 @@ static void jetpack_game_tick(GameState* const game_state) {
         }
     }
 
+    // Move particles
+    for(int i = 0; i < PARTICLES_MAX; i++) {
+        if(game_state->particles[i].point.y > 0) {
+            game_state->particles[i].point.y += PARTIVLE_VELOCITY;
+            if(game_state->particles[i].point.x < 0 || game_state->particles[i].point.x > 128 ||
+               game_state->particles[i].point.y < 0 || game_state->particles[i].point.y > 64) {
+                game_state->particles[i].point.y = 0;
+            }
+        }
+    }
+
     // Spawn scientists and coins...
     jetpack_game_random_coins(game_state);
     // Sprite height of Barry
@@ -148,6 +178,7 @@ static void jetpack_game_tick(GameState* const game_state) {
 
     if(game_state->barry.isBoosting) {
         game_state->barry.gravity += GRAVITY_BOOST;
+        jetpack_game_spawn_particles(game_state);
     }
 }
 
@@ -166,6 +197,18 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
             if(game_state->coins[i].point.x > 0) {
                 canvas_draw_icon(
                     canvas, game_state->coins[i].point.x, game_state->coins[i].point.y, &I_coin);
+            }
+        }
+
+        // Draw particles
+        for(int i = 0; i < PARTICLES_MAX; i++) {
+            if(game_state->particles[i].point.x > 0) {
+                canvas_draw_line(
+                    canvas,
+                    game_state->particles[i].point.x,
+                    game_state->particles[i].point.y,
+                    game_state->particles[i].point.x,
+                    game_state->particles[i].point.y + 3);
             }
         }
 
