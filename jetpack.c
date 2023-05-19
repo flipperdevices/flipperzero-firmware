@@ -29,7 +29,6 @@ typedef struct {
 typedef struct {
     float gravity;
     POINT point;
-    IconAnimation* sprite;
 } COIN;
 
 typedef struct {
@@ -64,7 +63,14 @@ typedef struct {
 } GameEvent;
 
 static void jetpack_game_random_coins(GameState* const game_state) {
-    UNUSED(game_state);
+    // Check for an available slot for a new coin
+    for(int i = 0; i < COINS_MAX; ++i) {
+        if(game_state->coins[i].point.x <= 0 && (rand() % 100) < 5) {
+            game_state->coins[i].point.x = 127;
+            game_state->coins[i].point.y = rand() % 64;
+            break;
+        }
+    }
 }
 
 static void jetpack_game_state_init(GameState* const game_state) {
@@ -98,7 +104,21 @@ static void jetpack_game_tick(GameState* const game_state) {
         game_state->barry.gravity += GRAVITY_TICK;
         game_state->barry.point.y += game_state->barry.gravity;
 
-        // spawn scientists and coins...
+        // Increment distance
+        game_state->distance++;
+
+        // Move coins towards the player
+        for(int i = 0; i < COINS_MAX; i++) {
+            if(game_state->coins[i].point.x > 0) {
+                game_state->coins[i].point.x -= 1; // move left by 1 unit
+                if(game_state->coins[i].point.x < -16) { // if the coin is out of screen
+                    game_state->coins[i].point.x =
+                        0; // set coin x coordinate to 0 to mark it as "inactive"
+                }
+            }
+        }
+
+        // Spawn scientists and coins...
         jetpack_game_random_coins(game_state);
 
         if(game_state->barry.isBoosting) {
@@ -117,7 +137,13 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
     if(game_state->state == GameStateLife) {
         // Draw scene
 
-        // Draw coins + scientists
+        // Draw coins
+        for(int i = 0; i < COINS_MAX; ++i) {
+            if(game_state->coins[i].point.x > 0) {
+                canvas_draw_icon(
+                    canvas, game_state->coins[i].point.x, game_state->coins[i].point.y, &I_coin);
+            }
+        }
 
         // Draw barry
         canvas_draw_icon_animation(
