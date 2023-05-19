@@ -6,6 +6,10 @@
 extern "C" {
 #endif
 
+typedef enum {
+    MfDesfireErrorNone,
+} MfDesfireError;
+
 typedef struct {
     NfcaData nfca_data;
 } MfDesfireData;

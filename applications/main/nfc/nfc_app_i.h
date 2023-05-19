@@ -40,6 +40,7 @@
 #include <lib/nfc/protocols/nfca/nfca_listener.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
+#include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
 #include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 
 #include <lib/nfc/nfc_dev.h>
@@ -91,6 +92,7 @@ struct NfcApp {
     NfcaListener* nfca_listener;
     MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
+    MfDesfirePoller* mf_desfire_poller;
     NfcbPoller* nfcb_poller;
     NfcPoller* nfc_poller;
 
