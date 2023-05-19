@@ -53,10 +53,15 @@ typedef struct {
 } NfcaSelResp;
 
 typedef struct {
+    uint8_t sak;
+} NfcaRats;
+
+typedef struct {
     uint8_t uid[NFCA_MAX_UID_SIZE];
     uint8_t uid_len;
     uint8_t atqa[2];
     uint8_t sak;
+    NfcaRats rats;
 } NfcaData;
 
 uint16_t nfca_get_crc(uint8_t* buff, uint16_t len);

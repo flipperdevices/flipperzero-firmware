@@ -41,7 +41,7 @@ MfClassicError mf_classic_poller_start(
     return MfClassicErrorNone;
 }
 
-MfClassicError mf_classic_poller_read(
+MfClassicError mf_classic_poller_dict_attack(
     MfClassicPoller* instance,
     MfClassicPollerCallback callback,
     void* context) {

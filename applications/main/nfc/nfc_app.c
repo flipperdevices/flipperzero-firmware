@@ -48,6 +48,7 @@ NfcApp* nfc_app_alloc() {
     instance->nfc = nfc_alloc();
     instance->nfca_poller = nfca_poller_alloc(instance->nfc);
     instance->mf_ul_poller = mf_ultralight_poller_alloc(instance->nfca_poller);
+    instance->mf_classic_poller = mf_classic_poller_alloc(instance->nfca_poller);
     instance->nfca_listener = nfca_listener_alloc(instance->nfc);
     instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->nfca_listener);
     instance->nfcb_poller = nfcb_poller_alloc(instance->nfc);
@@ -118,6 +119,18 @@ NfcApp* nfc_app_alloc() {
     view_dispatcher_add_view(
         instance->view_dispatcher, NfcViewWidget, widget_get_view(instance->widget));
 
+    // Dict attack
+    instance->dict_attack = dict_attack_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher, NfcViewDictAttack, dict_attack_get_view(instance->dict_attack));
+
+    // Detect Reader
+    instance->detect_reader = detect_reader_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher,
+        NfcViewDetectReader,
+        detect_reader_get_view(instance->detect_reader));
+
     instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
     instance->file_name = furi_string_alloc();
 
@@ -144,6 +157,7 @@ void nfc_app_free(NfcApp* instance) {
         instance->rpc_ctx = NULL;
     }
 
+    mf_classic_poller_free(instance->mf_classic_poller);
     mf_ultralight_listener_free(instance->mf_ul_listener);
     mf_ultralight_poller_free(instance->mf_ul_poller);
     nfca_listener_free(instance->nfca_listener);
@@ -189,6 +203,14 @@ void nfc_app_free(NfcApp* instance) {
     // Custom Widget
     view_dispatcher_remove_view(instance->view_dispatcher, NfcViewWidget);
     widget_free(instance->widget);
+
+    // Dict attack
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewDictAttack);
+    dict_attack_free(instance->dict_attack);
+
+    // Detect reader
+    view_dispatcher_remove_view(instance->view_dispatcher, NfcViewDetectReader);
+    detect_reader_free(instance->detect_reader);
 
     // View Dispatcher
     view_dispatcher_free(instance->view_dispatcher);

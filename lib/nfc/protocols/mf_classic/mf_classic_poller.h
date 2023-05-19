@@ -13,8 +13,12 @@ typedef enum {
     MfClassicPollerEventTypeAuthRequest,
     MfClassicPollerEventTypeAuthSuccess,
     MfClassicPollerEventTypeAuthFailed,
-    MfClassicPollerEventTypeReadSuccess,
-    MfClassicPollerEventTypeReadFailed,
+
+    MfClassicPollerEventTypeNewSector,
+    MfClassicPollerEventTypeFoundKeyA,
+    MfClassicPollerEventTypeFoundKeyB,
+
+    MfClassicPollerEventTypeReadComplete,
 } MfClassicPollerEventType;
 
 typedef struct {
@@ -44,7 +48,7 @@ MfClassicError mf_classic_poller_start(
     NfcaPollerEventCallback callback,
     void* context);
 
-MfClassicError mf_classic_poller_read(
+MfClassicError mf_classic_poller_dict_attack(
     MfClassicPoller* instance,
     MfClassicPollerCallback callback,
     void* context);

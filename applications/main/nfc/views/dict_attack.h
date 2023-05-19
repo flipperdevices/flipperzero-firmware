@@ -3,7 +3,7 @@
 #include <gui/view.h>
 #include <gui/modules/widget.h>
 
-#include <lib/nfc/protocols/mifare_classic.h>
+#include <lib/nfc/protocols/mf_classic/mf_classic.h>
 
 typedef struct DictAttack DictAttack;
 
