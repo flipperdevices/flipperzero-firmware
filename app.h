@@ -1,9 +1,10 @@
 #pragma once
 #include "view.h"
 
+#ifndef MAX_NUMBER_OF_NOTES
 #define MAX_NUMBER_OF_NOTES 10
 #define MAX_LENGTH_OF_NOTE 30
-
+#endif
 
 
 static struct App * initalize_app(void) {

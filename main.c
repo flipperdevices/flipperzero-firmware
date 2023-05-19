@@ -8,10 +8,6 @@ int note_entry_point(void *p) {
 
   Gui* gui = furi_record_open(RECORD_GUI);
 
-   if (!gui){
-    furi_delay_ms(1000);
-  }
-
   view_dispatcher_attach_to_gui(
     app->view_dispatcher,
     gui,

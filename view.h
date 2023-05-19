@@ -6,8 +6,10 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 
-
-
+#ifndef MAX_NUMBER_OF_NOTES
+#define MAX_NUMBER_OF_NOTES 10
+#define MAX_LENGTH_OF_NOTE 30
+#endif
 
 struct App {
   SceneManager *scene_manager;
@@ -112,15 +114,14 @@ void note_main_menu_on_leave( void * context ){
 void note_text_input_on_enter( void * context ){
     struct App* app = context;
     bool clear_text = true;
-    int max_text_length = 30;
     text_input_reset(app->text_input);
-    text_input_set_header_text(app->text_input, "~~~ Write down here your note ~~~");
+    text_input_set_header_text(app->text_input, "Write down here your note");
     text_input_set_result_callback(
         app->text_input,
         notes_text_input_callback,
         app,
         app->notes[ app->number_of_notes ],
-        max_text_length,
+        MAX_LENGTH_OF_NOTE,
         clear_text
     );
     app->number_of_notes++;
@@ -147,14 +148,23 @@ void note_list_of_notes_on_enter( void * context ){
 
     widget_reset(app->widget);
 
-    FuriString* message = furi_string_alloc();
-    furi_string_printf(message, "%s\n", app->notes[0]);
 
-    widget_add_string_multiline_element(
-        app->widget, 5, 15, AlignLeft,AlignCenter, FontPrimary, furi_string_get_cstr( message )
-    );
+    for (int i = 0; i < MAX_NUMBER_OF_NOTES; i++){
+        if (app->notes[i] == NULL || app->notes[i][0] == '\0'){
+            continue;
+        }
 
-    furi_string_free(message);
+        FuriString* message = furi_string_alloc();
+        furi_string_printf(message, "[ #%d ]%s\n", i,app->notes[i]);
+
+        widget_add_string_multiline_element(
+            app->widget, 5 , 5 + (i * 13), AlignLeft,AlignCenter, FontPrimary, furi_string_get_cstr( message )
+        );
+
+        furi_string_free(message);
+
+    }
+   
     view_dispatcher_switch_to_view(app->view_dispatcher, Notes_Widget_View);
 }
 
