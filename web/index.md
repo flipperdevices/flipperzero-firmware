@@ -13,18 +13,13 @@ layout: home
 
 Versioning TBD.
 
+- [seader](seader-API26.3.zip) (API 26.3)
 - [seader](seader-API26.0.zip) (API 26.0)
 - [seader](seader-API23.1.zip) (API 23.1)
 - [seader](seader-API23.0.zip) (API 23.0)
 - [seader](seader-API22.0.zip) (API 22.0)
 - [seader](seader-API21.0.zip) (API 21.0)
 - [seader](seader-API20.0.zip) (API 20.0)
-- [seader](seader-API19.0.zip) (API 19.0)
-- [seader](seader-API18.2.zip) (API 18.2)
-- [seader](seader-API18.0.zip) (API 18.0)
-- [seader](seader-API17.0.zip) (API 17.0)
-- [seader](seader-API15.0.zip) (API 15.0) (fixed)
-- [seader](seader-API14.1.zip) (API 14.1)
 
 ## Bugs
 
