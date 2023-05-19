@@ -42,12 +42,8 @@ struct SwUsart {
     uint8_t rx_buffer_parce_byte_pos;
 };
 
-static inline bool sw_usart_get_bit_array(uint8_t* data_array, size_t read_index_bit) {
-    return bit_read(data_array[read_index_bit >> 3], 7 - (read_index_bit & 0x7));
-}
-
 static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
-    furi_assert(sw_usart);
+    //furi_assert(sw_usart);
 
     uint8_t parity = 0;
     uint8_t ind = 0;
@@ -58,18 +54,19 @@ static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
     }
 
     // Start bit
-    sw_usart->tx_upload_char[ind++] = sw_usart->tx_pin_reset;
+    sw_usart->tx_upload_char[ind] = sw_usart->tx_pin_reset;
 
-    sw_usart->tx_buffer_pos_byte++;
-    sw_usart->tx_buffer_pos_bit = (sw_usart->tx_buffer_pos_byte << 3) - 1;
-    for(uint8_t i = 0; i < sw_usart->config.data_bit; i++) {
-        if(sw_usart_get_bit_array(sw_usart->tx_buffer, sw_usart->tx_buffer_pos_bit - i)) {
-            sw_usart->tx_upload_char[ind++] = sw_usart->tx_pin_set;
+    // Data
+    do {
+        if((sw_usart->tx_buffer[sw_usart->tx_buffer_pos_byte] >> ind) & 0x1) {
+            sw_usart->tx_upload_char[++ind] = sw_usart->tx_pin_set;
             parity++;
         } else {
-            sw_usart->tx_upload_char[ind++] = sw_usart->tx_pin_reset;
+            sw_usart->tx_upload_char[++ind] = sw_usart->tx_pin_reset;
         }
-    }
+    } while(ind < sw_usart->config.data_bit);
+    ind++;
+    sw_usart->tx_buffer_pos_byte++;
 
     // Parity
     if(sw_usart->config.parity != SwUsartParityNone) {
@@ -98,15 +95,13 @@ static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
 }
 
 static uint32_t sw_usart_tx_encoder_yield(void* context) {
-    furi_assert(context);
+    //furi_assert(context);
     SwUsart* sw_usart = context;
-
-    uint32_t ret = sw_usart->tx_upload_char[sw_usart->tx_upload_char_index++];
     if(sw_usart->tx_upload_char_index >= sw_usart->tx_upload_char_len) {
         sw_usart_tx_char_encoder(sw_usart);
         sw_usart->tx_upload_char_index = 0;
     }
-    return ret;
+    return sw_usart->tx_upload_char[sw_usart->tx_upload_char_index++];
 }
 
 static void sw_usart_tx_end(void* context) {
@@ -127,7 +122,7 @@ static inline void sw_usart_parce_byte(SwUsart* sw_usart) {
             parity++;
         }
     }
-
+    //furi_stream_buffer_send(sw_usart->rx_stream, &byte, 1, 0);
     do {
         // Check parity
         if(sw_usart->config.parity != SwUsartParityNone) {
@@ -235,7 +230,7 @@ void sw_usart_free(SwUsart* sw_usart) {
     furi_assert(sw_usart);
 
     furi_hal_sw_digital_pin_tx_deinit();
-    furi_hal_sw_digital_pin_rx_deinit();
+    //furi_hal_sw_digital_pin_rx_deinit();
 
     furi_stream_buffer_free(sw_usart->rx_stream);
     free(sw_usart->tx_upload_char);
@@ -380,6 +375,7 @@ bool sw_usart_is_end_tx(SwUsart* sw_usart) {
 }
 
 void sw_usart_print_data(SwUsart* sw_usart) {
+    furi_hal_sw_digital_pin_rx_stop();
     printf("pos byte = %d\r\n", furi_stream_buffer_bytes_available(sw_usart->rx_stream));
     uint8_t data = 0;
     while(furi_stream_buffer_bytes_available(sw_usart->rx_stream)) {

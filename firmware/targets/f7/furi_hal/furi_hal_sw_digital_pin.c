@@ -133,8 +133,8 @@ static void furi_hal_sw_digital_pin_buff_tx_refill(
     size_t base_index) {
     furi_assert(furi_hal_sw_digital_pin.state == SwDigitalPinStateTx);
 
-    while(samples > 0) {
-        volatile uint32_t data = furi_hal_sw_digital_pin_buff.tx_callback_yield(
+    do {
+        uint32_t data = furi_hal_sw_digital_pin_buff.tx_callback_yield(
             furi_hal_sw_digital_pin_buff.tx_context);
 
         if(data == 0) {
@@ -152,45 +152,28 @@ static void furi_hal_sw_digital_pin_buff_tx_refill(
         *buffer = data;
         buffer++;
         samples--;
-    }
+    } while(samples > 0);
 }
 
 static void furi_hal_sw_digital_pin_tx_timer_isr() {
     if(LL_TIM_IsActiveFlag_UPDATE(SW_DIGITAL_PIN_TIM_TX)) {
         LL_TIM_ClearFlag_UPDATE(SW_DIGITAL_PIN_TIM_TX);
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
+        furi_hal_gpio_write(gpio_debug_tx, false);
+#endif
         if(furi_hal_sw_digital_pin_buff.buffer_tx_index_write_end ==
            LL_DMA_GetDataLength(SW_DIGITAL_PIN_DMA_DEF_TX)) {
             LL_DMA_DisableChannel(SW_DIGITAL_PIN_DMA_DEF_TX);
             LL_TIM_DisableIT_UPDATE(SW_DIGITAL_PIN_TIM_TX);
-#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
-            furi_hal_gpio_write(gpio_debug_tx, false);
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            furi_hal_gpio_write(gpio_debug_tx, true);
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            furi_hal_gpio_write(gpio_debug_tx, false);
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            furi_hal_gpio_write(gpio_debug_tx, true);
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            furi_hal_gpio_write(gpio_debug_tx, false);
-#endif
             furi_hal_sw_digital_pin.state = SwDigitalPinStateTxEnd;
             if(furi_hal_sw_digital_pin_buff.tx_callback_end) {
                 furi_hal_sw_digital_pin_buff.tx_callback_end(
                     furi_hal_sw_digital_pin_buff.tx_context);
             }
         }
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
+        furi_hal_gpio_write(gpio_debug_tx, true);
+#endif
     }
 }
 
@@ -200,24 +183,28 @@ static void furi_hal_sw_digital_pin_dma_tx_isr() {
 #if SW_DIGITAL_PIN_DMA_CHANNEL_TX == LL_DMA_CHANNEL_1
     if(LL_DMA_IsActiveFlag_HT1(SW_DIGITAL_PIN_DMA)) {
         LL_DMA_ClearFlag_HT1(SW_DIGITAL_PIN_DMA);
-#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
+        // #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
+        //         furi_hal_gpio_write(gpio_debug_tx, false);
+        // #endif
         furi_hal_gpio_write(gpio_debug_tx, false);
-#endif
         furi_hal_sw_digital_pin_buff_tx_refill(
             furi_hal_sw_digital_pin_buff.buffer_tx_ptr,
             furi_hal_sw_digital_pin_buff.buffer_tx_half_size,
             furi_hal_sw_digital_pin_buff.buffer_tx_half_size);
+        furi_hal_gpio_write(gpio_debug_tx, true);
     }
     if(LL_DMA_IsActiveFlag_TC1(SW_DIGITAL_PIN_DMA)) {
         LL_DMA_ClearFlag_TC1(SW_DIGITAL_PIN_DMA);
-#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
-        furi_hal_gpio_write(gpio_debug_tx, true);
-#endif
+        // #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
+        //         furi_hal_gpio_write(gpio_debug_tx, true);
+        // #endif
+        furi_hal_gpio_write(gpio_debug_tx, false);
         furi_hal_sw_digital_pin_buff_tx_refill(
             furi_hal_sw_digital_pin_buff.buffer_tx_ptr +
                 furi_hal_sw_digital_pin_buff.buffer_tx_half_size,
             furi_hal_sw_digital_pin_buff.buffer_tx_half_size,
             0);
+        furi_hal_gpio_write(gpio_debug_tx, true);
     }
 #else
 #error Update this code. Would you kindly?
@@ -231,10 +218,10 @@ static void furi_hal_sw_digital_pin_dma_rx_isr() {
     if(LL_DMA_IsActiveFlag_HT2(SW_DIGITAL_PIN_DMA)) {
         LL_DMA_ClearFlag_HT2(SW_DIGITAL_PIN_DMA);
 
-// #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
-//         furi_hal_gpio_write(gpio_debug_rx, false);
-// #endif
-    furi_hal_gpio_write(gpio_debug_rx, false);
+        // #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
+        //         furi_hal_gpio_write(gpio_debug_rx, false);
+        // #endif
+        furi_hal_gpio_write(gpio_debug_rx, false);
         if(furi_hal_sw_digital_pin_buff.rx_callback) {
             SwDigitalPinRx data = {
                 .rx_buff = furi_hal_sw_digital_pin_buff.buffer_rx_ptr,
@@ -242,14 +229,14 @@ static void furi_hal_sw_digital_pin_dma_rx_isr() {
             furi_hal_sw_digital_pin_buff.rx_callback(
                 furi_hal_sw_digital_pin_buff.rx_context, data);
         }
-    furi_hal_gpio_write(gpio_debug_rx, true);
+        furi_hal_gpio_write(gpio_debug_rx, true);
     }
     if(LL_DMA_IsActiveFlag_TC2(SW_DIGITAL_PIN_DMA)) {
         LL_DMA_ClearFlag_TC2(SW_DIGITAL_PIN_DMA);
 
-// #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
-//         furi_hal_gpio_write(gpio_debug_rx, true);
-// #endif
+        // #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
+        //         furi_hal_gpio_write(gpio_debug_rx, true);
+        // #endif
         furi_hal_gpio_write(gpio_debug_rx, false);
         if(furi_hal_sw_digital_pin_buff.rx_callback) {
             SwDigitalPinRx data = {
@@ -578,7 +565,7 @@ void furi_hal_sw_digital_pin_rx_init(
     /* Set DMAMUX request generation signal ID on specified DMAMUX channel */
     LL_DMAMUX_SetRequestSignalID(DMAMUX1, LL_DMAMUX_REQ_GEN_0, GET_DMAMUX_EXTI_LINE(gpio->pin));
     /* Set the polarity of the signal on which the DMA request is generated */
-    LL_DMAMUX_SetRequestGenPolarity(DMAMUX1, LL_DMAMUX_REQ_GEN_0, LL_DMAMUX_REQ_GEN_POL_FALLING);
+    LL_DMAMUX_SetRequestGenPolarity(DMAMUX1, LL_DMAMUX_REQ_GEN_0, LL_DMAMUX_REQ_GEN_POL_RISING);
     /* Set the number of DMA requests that will be authorized after a generation event */
     LL_DMAMUX_SetGenRequestNb(DMAMUX1, LL_DMAMUX_REQ_GEN_0, 1);
 
