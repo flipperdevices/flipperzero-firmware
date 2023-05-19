@@ -794,22 +794,20 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
 static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
     UNUSED(args);
 
-    SwUsartConfig config = {
-        .mode = SwUsartModeAsyncRxTx,
-        .baud_rate = 115200,
-        .data_bit = SwUsartDataBit8,
-        .parity = SwUsartParityEven,
-        .stop_bit = SwUsartStopBit2,
-        .inverted = true,
-        .tx_pin = &gpio_ext_pa7,
-        .rx_pin = &gpio_ext_pa4,
-    };
-    SwUsart* sw_usart = sw_usart_alloc(&config);
-    //sw_usart_set_config(,mode, baud_rate,  data_bit, parity, stop_bit, )
-    uint8_t data[] =
-        "Hello World 1234567890 ABCDEFGHI JKLMNOPQR STUVWXYZ | Hello World 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ    ";
-    //uint8_t data[] ={0x48, 0x65, 0x6c, 0x6c, 0x6f};
-    sw_usart_dma_tx(sw_usart, data, sizeof(data));
+    SwUsart* sw_usart = sw_usart_alloc();
+    //sw_usart_set_config(sw_usart, SwUsartModeOnlyAsyncTx, SwUsartDataBit8, SwUsartParityNone, SwUsartStopBit1, NULL);
+    sw_usart_start(sw_usart, 9600, &gpio_ext_pa7, &gpio_ext_pa4, false);
+     uint8_t data[] =
+         "Hello World 1234567890 ABCDEFGHI JKLMNOPQR STUVWXYZ | Hello World 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ    ";
+    //uint8_t data1[] ={0x48, 0x65, 0x6c, 0x6c, 0x6f,0x48, 0x65, 0x6c, 0x6c, 0x6f,0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x00};
+    //uint8_t data1[] = {"Hello Woreeeeeeeeeld1\r\n"};
+    //uint8_t data2[] = {"12345 678902\r\n"};
+    //uint8_t data3[] = {"Hello World3\r\n"};
+    sw_usart_tx(sw_usart, data, sizeof(data), SW_USART_DEFAULT_TIMEOUT);
+    // sw_usart_tx(sw_usart, data1, sizeof(data1), SW_USART_DEFAULT_TIMEOUT);
+    //sw_usart_tx(sw_usart, data2, sizeof(data2), SW_USART_DEFAULT_TIMEOUT);
+    //sw_usart_tx(sw_usart, data2, sizeof(data2), SW_USART_DEFAULT_TIMEOUT);
+    //sw_usart_tx(sw_usart, data3, sizeof(data3), SW_USART_DEFAULT_TIMEOUT);
 
     // Wait for packets to arrive
     printf("Listening at Usart. Press CTRL+C to stop\r\n");
