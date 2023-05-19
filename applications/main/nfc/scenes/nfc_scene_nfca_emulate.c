@@ -7,7 +7,8 @@ enum {
     NfcSceneNfcaEmulateStateTextBox,
 };
 
-NfcaListenerCommand nfc_scene_nfca_emulate_worker_callback(NfcaListenerEvent event, void* context) {
+NfcaListenerCommand
+    nfc_scene_nfca_emulate_worker_callback(NfcaListenerEvent event, void* context) {
     furi_assert(context);
 
     NfcApp* nfc = context;

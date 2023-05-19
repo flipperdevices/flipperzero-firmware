@@ -134,11 +134,17 @@ void mifare_classic_set_key_found(
     MfClassicKey key_type,
     uint64_t key);
 
-void mifare_classic_set_key_not_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type);
+void mifare_classic_set_key_not_found(
+    MfClassicData* data,
+    uint8_t sector_num,
+    MfClassicKey key_type);
 
 bool mifare_classic_is_block_read(MfClassicData* data, uint8_t block_num);
 
-void mifare_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data);
+void mifare_classic_set_block_read(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicBlock* block_data);
 
 bool mifare_classic_is_sector_data_read(MfClassicData* data, uint8_t sector_num);
 

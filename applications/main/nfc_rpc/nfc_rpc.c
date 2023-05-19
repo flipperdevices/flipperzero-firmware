@@ -14,8 +14,7 @@ static const NfcRpcCallbacks nfc_rpc_callbacks[] = {
     {
         .alloc = nfc_rpc_mf_classic_alloc,
         .free = NULL,
-    }
-};
+    }};
 
 uint32_t nfc_rpc_exit_callback(void* context) {
     UNUSED(context);

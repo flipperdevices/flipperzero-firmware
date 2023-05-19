@@ -27,8 +27,7 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
     for(size_t i = 0; i < data->nfca_data.uid_len; i++) {
         furi_string_cat_printf(temp_str, " %02X", data->nfca_data.uid[i]);
     }
-    furi_string_cat_printf(
-        temp_str, "\nPages Read: %d/%d", data->pages_read, data->pages_total);
+    furi_string_cat_printf(temp_str, "\nPages Read: %d/%d", data->pages_read, data->pages_total);
     if(data->pages_read != data->pages_total) {
         furi_string_cat_printf(temp_str, "\nPassword-protected pages!");
     }

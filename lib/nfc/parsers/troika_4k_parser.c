@@ -68,7 +68,8 @@ bool troika_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) 
 
     MfClassicReader reader = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    reader.type = mifare_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+    reader.type =
+        mifare_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
     for(size_t i = 0; i < COUNT_OF(troika_4k_keys); i++) {
         mifare_classic_reader_add_sector(
             &reader, troika_4k_keys[i].sector, troika_4k_keys[i].key_a, troika_4k_keys[i].key_b);

@@ -55,7 +55,6 @@
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
 
-
 typedef enum {
     NfcRpcStateIdle,
     NfcRpcStateEmulating,
