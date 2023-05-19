@@ -56,13 +56,14 @@ W: SpeedKeyIdx=,17
 R: OutSpeedMax=18
 W: OutSpeedMax=,18
 
-R: ZeroCrossLag,us*2=27,,ROM2
-W: ZeroCrossLag,us*2=,27,WROM2
-R: SSR_PulseWidth,us*2=29,,ROM2
-W: SSR_PulseWidth,us*2=,29,WROM2
+R: PauseSetByCO2,min=27
+W: PauseSetByCO2,min=,27
 
-R: PauseSetByCO2,min=31
-W: PauseSetByCO2,min=,31
+R: SSR_PulseWidth,us*2=28,,ROM2
+W: SSR_PulseWidth,us*2=,28,WROM2
+
+R: SSR_PulseSafeTime,us*2=30,,ROM2
+W: SSR_PulseSafeTime,us*2=,30,WROM2
 
 R: IRRemotes=32
 W: IRRemotes=,32
@@ -87,24 +88,25 @@ W: _PORTA=,0x3B,,WRAM
 R: _PORTB=0x36,,RAM
 W: _PORTB=,0x38,WRAM
 
-R: _LED_Warning=0x6B,,RAM
-W: _LED_Warning=,0x6B,WRAM
-R: _IRHashLast*2=0x7C,,RAM2#
-R: _SleepTimer=0x84,,RAM
-R: _FanOn=0x76,,RAM
-R: _FanOnNext=0x74,,RAM
-R: _FanOnNextCnt=0x72,,RAM
-R: _FanOnLast=0x73,,RAM
+R: _LED_Warning=0x71,,RAM
+W: _LED_Warning=,0x71,WRAM
+R: _IRHashLast*2=0x87,,RAM2#
+R: _SleepTimer=0x8F,,RAM
+R: _FanOn=0x81,,RAM
+R: _FanOnNext=0x7F,,RAM
+R: _FanOnNextCnt=0x7D,,RAM
+R: _FanOnLast=0x7E,,RAM
 
-R: _OutSpeedMax=0x87,,RAM
-W: _OutSpeedMax=,0x87,WRAM
-R: _Fanspeed=0x75,,RAM
-R: _ZeroCrossDelay*2=0x8E,,RAM2
-W: _ZeroCrossDelay=,0x8E,WRAM2
-R: _PulseDelayAfterZero*2=0x9A,,RAM2
-W: _PulseDelayAfterZero=,0x9A,WRAM2
-R: _PulseWidth*2=0x8C,,RAM
-W: _PulseWidth=,0x8C,WRAM2
+R: _OutSpeedMax=0x90,,RAM
+W: _OutSpeedMax=,0x90,WRAM
+
+R: _Fanspeed=0x80,,RAM
+R: _SSR_full_period*2=0x64,,RAM2
+
+R: _PulseDelayAfterZero*2=0x9E,,RAM2
+W: _PulseDelayAfterZero*2=,0x9E,WRAM2
+R: _PulseWidth*2=0x92,,RAM2
+W: _PulseWidth*2=,0x92,WRAM2
 
 W: Reset=0xEEEE,14,SET
 
@@ -131,16 +133,16 @@ SBatch: Fan SAVE: FanSpdSave=0;
 SBatch: Add new IR: SetupIR=1
 
 RBatch: Work: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep
-RBatch: Hardware: ID;RxAddr;Ch;SpeedInitIdx;Flags;OutSpeedMax;IRRemotes;ZeroCrossLag,us;SSR_PulseWidth,us;OSCCAL_EMEM
+RBatch: Hardware: ID;RxAddr;Ch;SpeedInitIdx;Flags;OutSpeedMax;IRRemotes;SSR_PulseWidth,us;OSCCAL_EMEM
 RBatch: All: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep;RxAddr;Ch;SpeedInitIdx;Flags;OutSpeedMax;IRRemotes;IRRemotesHash
 
-WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={870,930,1000};Fan speeds=3;FanSpeed={10,12,16};FanCook speeds=3;FanCookSpeed={12,16,32};FanSleep=20;FanCookSleep=6;FanOnTime=150;FanCookOnTime=0;FanOffTime=100;FanCookOffTime=0;SpeedInitIdx=0;SpeedKeyIdx=6;Flags=0x0D;OutSpeedMax=16;ZeroCrossLag,us=30;SSR_PulseWidth,us=9990
+WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={870,930,1000};Fan speeds=3;FanSpeed={10,12,16};FanCook speeds=3;FanCookSpeed={12,16,32};FanSleep=20;FanCookSleep=6;FanOnTime=150;FanCookOnTime=0;FanOffTime=100;FanCookOffTime=0;SpeedInitIdx=0;SpeedKeyIdx=6;Flags=0x0D;OutSpeedMax=16;SSR_PulseWidth,us=9990
 WBatch: IRRemotes clear: IRRemotes=0
 WBatch: IRRemotes 1 kitchen: IRRemotes=1;IRRemotesHash={0x6DA5,0xFCA5,0x7CA5,0xB425,0x3425,0x1625,0x8525}
 WBatch: Fans Speeds: Fan speeds=3;FanSpeed={10,12,16};FanCook speeds=3;FanCookSpeed={12,16,32}
 WBatch: LED Warning: _LED Warning=0x10
 WBatch: OSCCAL: _OSCCAL=146
 WBatch: CO2 Level: CO2 level={750,850,1000}
-WBatch: Zero cross EEPROM: ZeroCrossLag,us=30;SSR_PulseWidth,us=200;Reset
-WBatch: Zero cross RAM: _ZeroCrossDelay=1246;_PulseDelayAfterZero=0001;_PulseWidth=1249
+WBatch: Zero cross EEPROM: SSR_PulseWidth,us=200;SSR_PulseSafeTime,us=100;Reset
+WBatch: Zero cross RAM: _PulseDelayAfterZero=0001;_PulseWidth=200
 WBatch: Reset: Reset
