@@ -65,7 +65,7 @@ typedef struct {
 static void jetpack_game_random_coins(GameState* const game_state) {
     // Check for an available slot for a new coin
     for(int i = 0; i < COINS_MAX; ++i) {
-        if(game_state->coins[i].point.x <= 0 && (rand() % 100) < 5) {
+        if(game_state->coins[i].point.x <= 0 && (rand() % 1000) < 1) {
             game_state->coins[i].point.x = 127;
             game_state->coins[i].point.y = rand() % 64;
             break;
@@ -109,6 +109,18 @@ static void jetpack_game_tick(GameState* const game_state) {
     // Move coins towards the player
     for(int i = 0; i < COINS_MAX; i++) {
         if(game_state->coins[i].point.x > 0) {
+            if(!(game_state->barry.point.x >
+                     game_state->coins[i].point.x + 7 || // Barry is to the right of the coin
+                 game_state->barry.point.x + 11 <
+                     game_state->coins[i].point.x || // Barry is to the left of the coin
+                 game_state->barry.point.y >
+                     game_state->coins[i].point.y + 7 || // Barry is below the coin
+                 game_state->barry.point.y + 15 <
+                     game_state->coins[i].point.y)) { // Barry is above the coin
+                game_state->coins[i].point.x = 0; // Remove the coin
+                game_state->points++; // Increase the score
+            }
+
             game_state->coins[i].point.x -= 1; // move left by 1 unit
             if(game_state->coins[i].point.x < -16) { // if the coin is out of screen
                 game_state->coins[i].point.x =
@@ -164,7 +176,10 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
         snprintf(buffer, sizeof(buffer), "Dist: %u", game_state->distance);
-        canvas_draw_str_aligned(canvas, 100, 12, AlignCenter, AlignBottom, buffer);
+        canvas_draw_str_aligned(canvas, 123, 12, AlignRight, AlignBottom, buffer);
+
+        snprintf(buffer, sizeof(buffer), "Score: %u", game_state->points);
+        canvas_draw_str_aligned(canvas, 5, 12, AlignLeft, AlignBottom, buffer);
     }
 
     if(game_state->state == GameStateGameOver) {
