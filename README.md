@@ -3,6 +3,15 @@ WIP of MagSpoof for the Flipper Zero. Basic TX of saved files confirmed working 
 
 Disclaimer: use responsibly, and at your own risk. While in my testing, I've seen no reason to believe this could damage the RFID (or other) hardware, this is inherently driving the coil in ways it was not designed or intended for; I take no responsibility for fried/bricked Flippers. Similarly, please only use this with magstripe cards and mag readers you own — this is solely meant as a proof of concept for educational purposes. I neither condone nor am sympathetic to malicious uses of my code.
 
+## Hummus's Fork
+I made this fork initially to add reading capability using UART magnetic card readers.
+
+Things that changed in this fork:
+- Added a basic card reading ability
+- Added a function to parse a new MagDevice from a Card String (%Track1?;Track2;Track3?;)
+- Swapped the pins between A6 to A7 on the card that I'm using, might add this to configuration scene later on
+- Adapted some of the APIs to the most recent firmware changes.
+
 ## Optional GPIO TX Module
 For those desiring better TX than the internal RFID coil can offer, one can build the module below, consisting of an H-bridge, a capacitor, and a coil.
 
