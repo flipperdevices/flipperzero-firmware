@@ -99,31 +99,43 @@ static void jetpack_game_state_free(GameState* const game_state) {
 }
 
 static void jetpack_game_tick(GameState* const game_state) {
-    if(game_state->state == GameStateLife) {
-        // Do jetpack things
-        game_state->barry.gravity += GRAVITY_TICK;
-        game_state->barry.point.y += game_state->barry.gravity;
+    // Do jetpack things
+    game_state->barry.gravity += GRAVITY_TICK;
+    game_state->barry.point.y += game_state->barry.gravity;
 
-        // Increment distance
-        game_state->distance++;
+    // Increment distance
+    game_state->distance++;
 
-        // Move coins towards the player
-        for(int i = 0; i < COINS_MAX; i++) {
-            if(game_state->coins[i].point.x > 0) {
-                game_state->coins[i].point.x -= 1; // move left by 1 unit
-                if(game_state->coins[i].point.x < -16) { // if the coin is out of screen
-                    game_state->coins[i].point.x =
-                        0; // set coin x coordinate to 0 to mark it as "inactive"
-                }
+    // Move coins towards the player
+    for(int i = 0; i < COINS_MAX; i++) {
+        if(game_state->coins[i].point.x > 0) {
+            game_state->coins[i].point.x -= 1; // move left by 1 unit
+            if(game_state->coins[i].point.x < -16) { // if the coin is out of screen
+                game_state->coins[i].point.x =
+                    0; // set coin x coordinate to 0 to mark it as "inactive"
             }
         }
+    }
 
-        // Spawn scientists and coins...
-        jetpack_game_random_coins(game_state);
+    // Spawn scientists and coins...
+    jetpack_game_random_coins(game_state);
+    // Sprite height of Barry
+    int sprite_height = 15;
 
-        if(game_state->barry.isBoosting) {
-            game_state->barry.gravity += GRAVITY_BOOST;
-        }
+    // Constrain barry's height within sprite_height and 64 - sprite_height
+    if(game_state->barry.point.y > (64 - sprite_height)) {
+        game_state->barry.point.y = 64 - sprite_height;
+        game_state->barry.gravity = 0; // stop upward momentum
+    } else if(game_state->barry.point.y < 0) {
+        game_state->barry.point.y = 0;
+        game_state->barry.gravity = 0; // stop downward momentum
+    }
+
+    // spawn scientists and coins...
+    jetpack_game_random_coins(game_state);
+
+    if(game_state->barry.isBoosting) {
+        game_state->barry.gravity += GRAVITY_BOOST;
     }
 }
 
