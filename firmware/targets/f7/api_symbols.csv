@@ -1991,6 +1991,8 @@ Function,-,mf_df_cat_key_settings,void,"MifareDesfireKeySettings*, FuriString*"
 Function,-,mf_df_cat_version,void,"MifareDesfireVersion*, FuriString*"
 Function,-,mf_df_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
 Function,-,mf_df_clear,void,MifareDesfireData*
+Function,-,mf_df_get_application,MifareDesfireApplication*,"MifareDesfireData*, const uint8_t[3]*"
+Function,-,mf_df_get_file,MifareDesfireFile*,"MifareDesfireApplication*, uint8_t"
 Function,-,mf_df_parse_get_application_ids_response,_Bool,"uint8_t*, uint16_t, MifareDesfireApplication**"
 Function,-,mf_df_parse_get_file_ids_response,_Bool,"uint8_t*, uint16_t, MifareDesfireFile**"
 Function,-,mf_df_parse_get_file_settings_response,_Bool,"uint8_t*, uint16_t, MifareDesfireFile*"
@@ -3083,6 +3085,7 @@ Variable,+,furi_hal_i2c_bus_external,FuriHalI2cBus,
 Variable,+,furi_hal_i2c_bus_power,FuriHalI2cBus,
 Variable,+,furi_hal_i2c_handle_external,FuriHalI2cBusHandle,
 Variable,+,furi_hal_i2c_handle_power,FuriHalI2cBusHandle,
+Variable,+,furi_hal_rtc_days_per_month,const uint8_t[2][12],
 Variable,+,furi_hal_sd_spi_handle,FuriHalSpiBusHandle*,
 Variable,+,furi_hal_spi_bus_d,FuriHalSpiBus,
 Variable,+,furi_hal_spi_bus_handle_display,FuriHalSpiBusHandle,

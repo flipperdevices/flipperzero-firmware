@@ -39,15 +39,7 @@ typedef struct {
 
 _Static_assert(sizeof(SystemReg) == 4, "SystemReg size mismatch");
 
-#define FURI_HAL_RTC_SECONDS_PER_MINUTE 60
-#define FURI_HAL_RTC_SECONDS_PER_HOUR (FURI_HAL_RTC_SECONDS_PER_MINUTE * 60)
-#define FURI_HAL_RTC_SECONDS_PER_DAY (FURI_HAL_RTC_SECONDS_PER_HOUR * 24)
-#define FURI_HAL_RTC_MONTHS_COUNT 12
-#define FURI_HAL_RTC_EPOCH_START_YEAR 1970
-#define FURI_HAL_RTC_IS_LEAP_YEAR(year) \
-    ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
-
-static const uint8_t furi_hal_rtc_days_per_month[][FURI_HAL_RTC_MONTHS_COUNT] = {
+const uint8_t furi_hal_rtc_days_per_month[2][FURI_HAL_RTC_MONTHS_COUNT] = {
     {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
     {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
 
