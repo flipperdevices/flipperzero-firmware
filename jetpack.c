@@ -6,72 +6,15 @@
 #include <gui/icon_animation.h>
 #include <input/input.h>
 
+#include "includes/point.h"
+#include "includes/barry.h"
+#include "includes/scientist.h"
+#include "includes/particle.h"
+#include "includes/coin.h"
+
+#include "includes/game_state.h"
+
 #define TAG "Jetpack Joyride"
-
-#define GRAVITY_BOOST -0.3
-#define GRAVITY_TICK 0.15
-#define PARTIVLE_VELOCITY 2
-#define SCIENTIST_VELOCITY_MIN 2
-#define SCIENTIST_VELOCITY_MAX 2
-
-#define SCIENTISTS_MAX 6
-#define COINS_MAX 25
-#define PARTICLES_MAX 50
-
-typedef struct {
-    int x;
-    int y;
-} POINT;
-
-typedef struct {
-    float gravity;
-    POINT point;
-    bool isBoosting;
-} BARRY;
-
-typedef struct {
-    float gravity;
-    POINT point;
-} COIN;
-
-typedef struct {
-    POINT point;
-} PARTICLE;
-
-typedef enum {
-    ScientistStateAlive,
-    ScientistStateDead,
-} ScientistState;
-typedef struct {
-    float gravity;
-    POINT point;
-    int velocity_x;
-    ScientistState state;
-} SCIENTIST;
-
-typedef enum {
-    GameStateLife,
-    GameStateGameOver,
-} State;
-
-typedef struct {
-    IconAnimation* barry;
-    IconAnimation* scientist;
-    Icon* coin;
-    Icon* dead_scientist;
-} GameSprites;
-
-typedef struct {
-    int points;
-    int distance;
-    BARRY barry;
-    SCIENTIST scientists[SCIENTISTS_MAX];
-    COIN coins[COINS_MAX];
-    PARTICLE particles[PARTICLES_MAX];
-    State state;
-    GameSprites sprites;
-    FuriMutex* mutex;
-} GameState;
 
 typedef enum {
     EventTypeTick,
@@ -82,44 +25,6 @@ typedef struct {
     EventType type;
     InputEvent input;
 } GameEvent;
-
-static void jetpack_game_random_coins(GameState* const game_state) {
-    // Check for an available slot for a new coin
-    for(int i = 0; i < COINS_MAX; ++i) {
-        if(game_state->coins[i].point.x <= 0 && (rand() % 1000) < 1) {
-            game_state->coins[i].point.x = 127;
-            game_state->coins[i].point.y = rand() % 64;
-            break;
-        }
-    }
-}
-
-static void jetpack_game_random_scientists(GameState* const game_state) {
-    // Check for an available slot for a new scientist
-    for(int i = 0; i < SCIENTISTS_MAX; ++i) {
-        if(game_state->scientists[i].point.x <= 0 &&
-           (rand() % 1000) < 10) { // Spawn rate is less frequent than coins
-            game_state->scientists[i].state = ScientistStateAlive;
-            game_state->scientists[i].point.x = 127;
-            game_state->scientists[i].point.y = 49;
-            game_state->scientists[i].velocity_x =
-                (rand() % (SCIENTIST_VELOCITY_MAX - SCIENTIST_VELOCITY_MIN + 1)) +
-                SCIENTIST_VELOCITY_MIN; // random velocity between SCIENTIST_VELOCITY_MIN and SCIENTIST_VELOCITY_MAX
-            break;
-        }
-    }
-}
-
-static void jetpack_game_spawn_particles(GameState* const game_state) {
-    for(int i = 0; i < PARTICLES_MAX; i++) {
-        if(game_state->particles[i].point.y <= 0) {
-            game_state->particles[i].point.x = game_state->barry.point.x + (rand() % 7) - 3;
-
-            game_state->particles[i].point.y = game_state->barry.point.y;
-            break;
-        }
-    }
-}
 
 static void jetpack_game_state_init(GameState* const game_state) {
     UNUSED(game_state);
@@ -154,104 +59,20 @@ static void jetpack_game_state_free(GameState* const game_state) {
 }
 
 static void jetpack_game_tick(GameState* const game_state) {
-    // Do jetpack things
-    game_state->barry.gravity += GRAVITY_TICK;
-    game_state->barry.point.y += game_state->barry.gravity;
+    barry_tick(&game_state->barry);
+    game_state_tick(game_state);
+    coin_tick(game_state->coins, &game_state->barry, &game_state->points);
+    particle_tick(game_state->particles, game_state->scientists, &game_state->points);
+    scientist_tick(game_state->scientists);
 
-    // Increment distance
-    game_state->distance++;
-
-    // Move coins towards the player
-    for(int i = 0; i < COINS_MAX; i++) {
-        if(game_state->coins[i].point.x > 0) {
-            if(!(game_state->barry.point.x >
-                     game_state->coins[i].point.x + 7 || // Barry is to the right of the coin
-                 game_state->barry.point.x + 11 <
-                     game_state->coins[i].point.x || // Barry is to the left of the coin
-                 game_state->barry.point.y >
-                     game_state->coins[i].point.y + 7 || // Barry is below the coin
-                 game_state->barry.point.y + 15 <
-                     game_state->coins[i].point.y)) { // Barry is above the coin
-                game_state->coins[i].point.x = 0; // Remove the coin
-                game_state->points++; // Increase the score
-            }
-
-            game_state->coins[i].point.x -= 1; // move left by 1 unit
-            if(game_state->coins[i].point.x < -16) { // if the coin is out of screen
-                game_state->coins[i].point.x =
-                    0; // set coin x coordinate to 0 to mark it as "inactive"
-            }
-        }
+    if((rand() % 100) < 1) {
+        spawn_random_coin(game_state->coins);
     }
 
-    // Move particles
-    for(int i = 0; i < PARTICLES_MAX; i++) {
-        if(game_state->particles[i].point.y > 0) {
-            game_state->particles[i].point.y += PARTIVLE_VELOCITY;
-
-            // Check collision with scientists
-            for(int j = 0; j < SCIENTISTS_MAX; j++) {
-                if(game_state->scientists[j].state == ScientistStateAlive &&
-                   game_state->scientists[j].point.x > 0) {
-                    // Added half the width and height of the scientist sprite to the scientist's x and y respectively
-                    float scientist_center_x = game_state->scientists[j].point.x + 5.5;
-                    float scientist_center_y = game_state->scientists[j].point.y + 7.5;
-                    if(!(game_state->particles[i].point.x >
-                             scientist_center_x +
-                                 5.5 || // particle is to the right of the scientist
-                         game_state->particles[i].point.x + 11 <
-                             scientist_center_x -
-                                 5.5 || // particle is to the left of the scientist
-                         game_state->particles[i].point.y >
-                             scientist_center_y + 7.5 || // particle is below the scientist
-                         game_state->particles[i].point.y + 15 <
-                             scientist_center_y - 7.5)) { // particle is above the scientist
-                        game_state->scientists[j].state = ScientistStateDead;
-                        game_state->points += 2; // Increase the score by 2
-                    }
-                }
-            }
-
-            if(game_state->particles[i].point.x < 0 || game_state->particles[i].point.x > 128 ||
-               game_state->particles[i].point.y < 0 || game_state->particles[i].point.y > 64) {
-                game_state->particles[i].point.y = 0;
-            }
-        }
-    }
-
-    // Move scientists
-    for(int i = 0; i < SCIENTISTS_MAX; i++) {
-        if(game_state->scientists[i].point.x > 0) {
-            game_state->scientists[i].point.x -=
-                game_state->scientists[i].velocity_x; // move based on velocity_x
-            if(game_state->scientists[i].point.x < -16) { // if the scientist is out of screen
-                game_state->scientists[i].point.x =
-                    0; // set scientist x coordinate to 0 to mark it as "inactive"
-            }
-        }
-    }
-
-    // Spawn scientists and coins...
-    jetpack_game_random_coins(game_state);
-    // Sprite height of Barry
-    int sprite_height = 15;
-
-    // Constrain barry's height within sprite_height and 64 - sprite_height
-    if(game_state->barry.point.y > (64 - sprite_height)) {
-        game_state->barry.point.y = 64 - sprite_height;
-        game_state->barry.gravity = 0; // stop upward momentum
-    } else if(game_state->barry.point.y < 0) {
-        game_state->barry.point.y = 0;
-        game_state->barry.gravity = 0; // stop downward momentum
-    }
-
-    // spawn scientists and coins...
-    jetpack_game_random_coins(game_state);
-    jetpack_game_random_scientists(game_state);
+    spawn_random_scientist(game_state->scientists);
 
     if(game_state->barry.isBoosting) {
-        game_state->barry.gravity += GRAVITY_BOOST;
-        jetpack_game_spawn_particles(game_state);
+        spawn_random_particles(game_state->particles, &game_state->barry);
     }
 }
 
@@ -261,53 +82,11 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
     if(game_state->state == GameStateLife) {
-        // Draw scene
+        draw_coins(game_state->coins, canvas);
+        draw_scientists(game_state->scientists, canvas, &game_state->sprites);
+        draw_particles(game_state->particles, canvas);
 
-        // Draw coins
-        for(int i = 0; i < COINS_MAX; ++i) {
-            if(game_state->coins[i].point.x > 0) {
-                canvas_draw_icon(
-                    canvas, game_state->coins[i].point.x, game_state->coins[i].point.y, &I_coin);
-            }
-        }
-
-        // Draw scientists
-        for(int i = 0; i < SCIENTISTS_MAX; ++i) {
-            if(game_state->scientists[i].point.x > 0) {
-                if(game_state->scientists[i].state == ScientistStateAlive) {
-                    canvas_draw_icon_animation(
-                        canvas,
-                        game_state->scientists[i].point.x,
-                        game_state->scientists[i].point.y,
-                        game_state->sprites.scientist);
-                } else {
-                    canvas_draw_icon(
-                        canvas,
-                        game_state->scientists[i].point.x,
-                        game_state->scientists[i].point.y,
-                        &I_dead_scientist);
-                }
-            }
-        }
-
-        // Draw particles
-        for(int i = 0; i < PARTICLES_MAX; i++) {
-            if(game_state->particles[i].point.y > 0) {
-                canvas_draw_line(
-                    canvas,
-                    game_state->particles[i].point.x,
-                    game_state->particles[i].point.y,
-                    game_state->particles[i].point.x,
-                    game_state->particles[i].point.y + 3);
-            }
-        }
-
-        // Draw barry
-        canvas_draw_icon_animation(
-            canvas,
-            game_state->barry.point.x,
-            game_state->barry.point.y,
-            game_state->sprites.barry);
+        draw_barry(&game_state->barry, canvas, &game_state->sprites);
 
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
