@@ -1149,6 +1149,9 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
             free(mf_data);
             free_nonces(&nonces, sector_count, 3);
 
+            mifare_nested_worker_change_state(
+                mifare_nested_worker, MifareNestedWorkerStateCollectingHard);
+
             mifare_nested_worker_collect_nonces_hard(mifare_nested_worker);
             return;
         }
@@ -1229,6 +1232,9 @@ void mifare_nested_worker_collect_nonces(MifareNestedWorker* mifare_nested_worke
 
                 free(mf_data);
                 free_nonces(&nonces, sector_count, 3);
+
+                mifare_nested_worker_change_state(
+                    mifare_nested_worker, MifareNestedWorkerStateCollectingHard);
 
                 mifare_nested_worker_collect_nonces_hard(mifare_nested_worker);
                 return;
@@ -1655,3 +1661,4 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
 
     return;
 }
+ 

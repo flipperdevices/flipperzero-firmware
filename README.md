@@ -1,6 +1,6 @@
 # Mifare Nested Attacks for Flipper Zero
 
-Ported nested attacks from proxmark3 (Iceman fork)
+Ported Nested attacks from Proxmark3 (Iceman fork)
 
 ## Download
 
