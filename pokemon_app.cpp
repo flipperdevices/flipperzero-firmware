@@ -124,10 +124,7 @@ extern "C" int32_t pokemon_app(void* p) {
     furi_hal_light_set(LightRed, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
     furi_hal_light_set(LightBlue, 0x00);
-    view_dispatcher_enable_queue(app->view_dispatcher);
-    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
     //switch view  and run dispatcher
-    view_dispatcher_switch_to_view(app->view_dispatcher, AppViewSelectPokemon);
     view_dispatcher_run(app->view_dispatcher);
 
     // Free resources
