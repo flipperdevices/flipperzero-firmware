@@ -40,7 +40,7 @@ void draw_scientists(const SCIENTIST* scientists, Canvas* const canvas, const Ga
                     canvas, scientists[i].point.x, scientists[i].point.y, sprites->scientist);
             } else {
                 canvas_draw_icon(
-                    canvas, scientists[i].point.x, scientists[i].point.y, &I_dead_scientist);
+                    canvas, scientists[i].point.x, scientists[i].point.y + 5, &I_dead_scientist);
             }
         }
     }
