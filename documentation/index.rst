@@ -14,5 +14,3 @@ Welcome to Flipper Zero Firmware's documentation!
 
    doxygen <doxygen/html/index.rst>
 
-.. toctree::
-   doxygen <doxygen/html/index.rst>
