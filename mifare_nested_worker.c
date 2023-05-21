@@ -1661,4 +1661,3 @@ void mifare_nested_worker_check_keys(MifareNestedWorker* mifare_nested_worker) {
 
     return;
 }
- 
