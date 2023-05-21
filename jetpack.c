@@ -82,6 +82,11 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
     if(game_state->state == GameStateLife) {
+        // canvas_draw_box(canvas, 0, 0, 128, 32);
+        // canvas_set_color(canvas, ColorXOR);
+
+        canvas_set_bitmap_mode(canvas, true);
+
         draw_coins(game_state->coins, canvas);
         draw_scientists(game_state->scientists, canvas, &game_state->sprites);
         draw_particles(game_state->particles, canvas);
