@@ -1,0 +1,14 @@
+.. meta::8b1f85aaf8fcc7966da46a259ce950c2beb88050f95947c15c0df18a0ac086cb6cc2ae1562dcc532d39cb0a3f7f8ddcb3330b5e7948144d9f8c9a85494121f51
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/debug/unit_tests/protocol_dict Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/debug/unit\_tests/protocol\_dict Directory Reference
+=======================================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_cecb0025de18b6ce054b331941e8afe3.html

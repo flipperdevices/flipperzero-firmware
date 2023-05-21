@@ -66,8 +66,8 @@ PVS-Studio.log
 
 # Doxygen and Sphinx
 /documentation/_build/
-/documentation/_doxygen/
 /documentation/build/
 /documentation/sphinx_out/
-/documentation/doxygen/html/
 /documentation/doxygen/latex/
+/documentation/doxygen/xml/
+/documentation_out/

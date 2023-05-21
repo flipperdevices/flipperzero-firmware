@@ -1,0 +1,14 @@
+.. meta::5b88f65dbe3dfdb6f132f9fc66ef178d9678987176d54a01640692527526fb1851ef93b9110e836cc34727ca9b7bac9292eb4d4de3f33b0f2b88a8fd0b18ff37
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/external/hid_app Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/external/hid\_app Directory Reference
+========================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_040f0d920362691c0c07cd645b46097b.html

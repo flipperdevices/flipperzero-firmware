@@ -1,0 +1,14 @@
+.. meta::f8058079c23c338da9e3078f40dc411820fbe917654b52540d11724112f3562f3f006979387356f47544fb5af2124716906c2c48dda68cc362d2134e12687c88
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/debug/uart_echo Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/debug/uart\_echo Directory Reference
+=======================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_ecb82f5cc6e0b197fd758059488e2c35.html

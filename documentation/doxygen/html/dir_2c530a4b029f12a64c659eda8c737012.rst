@@ -1,0 +1,14 @@
+.. meta::c8e5e8e8bb9125b78901fad65632dfa464c0b72add58f9a6679a421087a3086c4dc54244dabbd0545ae66264086bf4a43dfc2c1e3ed7432f9eda4fb1b33bec47
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/main/infrared Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/main/infrared Directory Reference
+====================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_2c530a4b029f12a64c659eda8c737012.html

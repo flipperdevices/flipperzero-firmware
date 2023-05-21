@@ -1,0 +1,14 @@
+.. meta::0c25b9d2ca0549654fbd53dce9696a71045c966b9c6bd230f56ac21cecb917fe8750f7d7c09c7bced60e3adf1f3ce95d0218f832b5966d125af5fb9cda85e8c5
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/lib/lfrfid Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/lib/lfrfid Directory Reference
+====================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_c02008fa94d328c32ab0bd635d1291a3.html

@@ -1,0 +1,14 @@
+.. meta::ea25f61fce9422fa0400a2ef7bb83893c7b507eac0f3ec621fbbc970fbc449224341c454ca8a869533988cd597e99df34ea9c477c762b1a3a2759f38a863d10f
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/external/nfc_magic/scenes Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/external/nfc\_magic/scenes Directory Reference
+=================================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_79363de697eaba45093cb519776ab8f7.html

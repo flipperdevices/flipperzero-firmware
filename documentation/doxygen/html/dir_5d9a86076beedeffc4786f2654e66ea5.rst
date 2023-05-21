@@ -1,0 +1,14 @@
+.. meta::4f4c4469c8c5f7f83da271d4ddbe60689350c3c80a0c257d1b972571d1c0b47ffd11812186199013c8b2f957419c948c824c5757bf3e110ad5bd012c6dd9329a
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/debug/bt_debug_app/views Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/debug/bt\_debug\_app/views Directory Reference
+=================================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_5d9a86076beedeffc4786f2654e66ea5.html

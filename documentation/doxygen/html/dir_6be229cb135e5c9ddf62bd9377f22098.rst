@@ -1,0 +1,14 @@
+.. meta::66b739969a560429f5432b60d716468f6cce041f73c8587198b27d6b9c1bb4eb4830ededb2a6b0dacf562a11bd7dd90dc327e98ad32d1290ea761ce9a57f573f
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/settings/about Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/settings/about Directory Reference
+=====================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_6be229cb135e5c9ddf62bd9377f22098.html

@@ -1,0 +1,14 @@
+.. meta::71386b8f0b8e22e9f3840000d672868962701ddca9c9000c8452b2cb8bdaef0f897940bb53d7b0015f85244ac2a44f193f6bb52bb5ee8dbc3beae897f8f03cba
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/services/power Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/services/power Directory Reference
+=====================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_3930cf8a6a85f23148c10d190af0e32a.html

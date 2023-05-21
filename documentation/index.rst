@@ -12,7 +12,7 @@ Welcome to Flipper Zero Firmware's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   doxygen <doxygen/html/index>
+   doxygen <${sourcedir}/doxygen/html/index>
 
 
 

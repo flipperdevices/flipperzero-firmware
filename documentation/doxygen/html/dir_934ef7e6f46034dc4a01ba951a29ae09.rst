@@ -1,0 +1,14 @@
+.. meta::f2eecfcd1fa5b94fb37f5a63d4d054dd5ec738430fdf4d220b76c9c1db046d404e6781e5f96ba4f81c562efd123706501bd7483de28113c01b1bc8ea9c1117b0
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/lib/ibutton/protocols/blanks Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/lib/ibutton/protocols/blanks Directory Reference
+======================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_934ef7e6f46034dc4a01ba951a29ae09.html

@@ -1,0 +1,14 @@
+.. meta::59458c30cc2ff8c2f21da4c8fa0599935c18c942d7657de5f3784483c82fc031003a139a75170b86adf62ed938a35fd552114862ab35d0d7131c7a0760fb1311
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/lib/qrcode Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/lib/qrcode Directory Reference
+====================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_342f7daf67214dd6905a3a6ab1aabc55.html

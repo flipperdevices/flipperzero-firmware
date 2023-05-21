@@ -1,0 +1,14 @@
+.. meta::b6354b0f482d70e229e10e9813fc351e4b629b204ba1620a706a84b25dea414d29081e17e6665671178632ffe7997e2fb56752bcd6cf58003feb26cac02edc86
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/debug/unit_tests/power Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/debug/unit\_tests/power Directory Reference
+==============================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_0d8556aa222d92de099ee4be2ddd0749.html

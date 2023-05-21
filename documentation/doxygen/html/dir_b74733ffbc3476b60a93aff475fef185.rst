@@ -1,0 +1,14 @@
+.. meta::154e791caa5005a2f99975cf45400d024f338ffb8b2debb426c2b977dbffdb5748c05defda88e8054cbaa5aafaa7426901f544e3f5e2ca2781c9dafe32c93802
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/firmware/targets/f7/ble_glue Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/firmware/targets/f7/ble\_glue Directory Reference
+=======================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_b74733ffbc3476b60a93aff475fef185.html
