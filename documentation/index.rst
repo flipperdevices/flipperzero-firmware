@@ -6,7 +6,7 @@
 Welcome to Flipper Zero Firmware's documentation!
 =================================================
 
-.. using doxysphinx to generate doxygen docs
+
 
 .. toctree::
    :maxdepth: 2
@@ -14,11 +14,5 @@ Welcome to Flipper Zero Firmware's documentation!
 
    doxygen <doxygen/html/index.rst>
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. toctree::
+   doxygen <doxygen/html/index.rst>
