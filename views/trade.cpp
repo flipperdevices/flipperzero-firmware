@@ -60,7 +60,7 @@ static void trade_draw_callback(Canvas* canvas, void* context) {
         } else if(
             model->gameboy_status == GAMEBOY_READY || model->gameboy_status == GAMEBOY_WAITING ||
             model->gameboy_status == GAMEBOY_SEND) {
-            canvas_draw_icon(canvas, 38, 11, pokemon_icons[model->current_pokemon]);
+            canvas_draw_icon(canvas, 38, 11, pokemon_table[model->current_pokemon].icon);
         }
         canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
 
