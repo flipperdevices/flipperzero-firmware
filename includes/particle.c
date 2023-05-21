@@ -43,8 +43,8 @@ void particle_tick(PARTICLE* const particles, SCIENTIST* const scientists, int* 
 void spawn_random_particles(PARTICLE* const particles, BARRY* const barry) {
     for(int i = 0; i < PARTICLES_MAX; i++) {
         if(particles[i].point.y <= 0) {
-            particles[i].point.x = barry->point.x + (rand() % 7) - 3;
-            particles[i].point.y = barry->point.y;
+            particles[i].point.x = barry->point.x + (rand() % 4);
+            particles[i].point.y = barry->point.y + 14;
             break;
         }
     }
