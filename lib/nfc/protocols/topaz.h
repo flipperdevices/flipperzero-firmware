@@ -4,6 +4,9 @@
 
 #define TOPAZ_MAX_SIZE (512)
 #define TOPAZ_UID_FULL_LENGTH (7)
+#define TOPAZ_BYTES_PER_BLOCK (8)
+#define TOPAZ_BYTES_PER_SECTOR (TOPAZ_BYTES_PER_BLOCK * 16)
+#define TOPAZ_BYTES_RALL (120)
 
 #define TOPAZ_CMD_RID (0x78)
 #define TOPAZ_CMD_RALL (0x00)
@@ -16,7 +19,7 @@
 #define TOPAZ_CMD_WRITE_NE8 (0x1B)
 
 #define TOPAZ_96_HR0 (0x11)
-#define TOPAZ_96_SIZE (96)
+#define TOPAZ_96_SIZE (120)
 #define TOPAZ_512_HR0 (0x12)
 #define TOPAZ_512_SIZE (512)
 

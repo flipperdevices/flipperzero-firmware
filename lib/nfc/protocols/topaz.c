@@ -59,14 +59,14 @@ bool topaz_read_card(FuriHalNfcTxRxContext* tx_rx, TopazData* data, uint8_t* uid
         }
         data->size = topaz_get_size_by_type(data->type);
 
-        memcpy(data->data, &tx_rx->rx_data[2], 120);
-        data_read += 120;
+        memcpy(data->data, &tx_rx->rx_data[2], TOPAZ_BYTES_RALL);
+        data_read += TOPAZ_BYTES_RALL;
 
         if(data->size > TOPAZ_96_SIZE) {
             // Perform READ8 on block 0F
             tx_rx->tx_data[0] = TOPAZ_CMD_READ8;
             tx_rx->tx_data[1] = 0x0F;
-            memset(&tx_rx->tx_data[2], 0, 8);
+            memset(&tx_rx->tx_data[2], 0, TOPAZ_BYTES_PER_BLOCK);
             memcpy(&tx_rx->tx_data[10], uid, 4);
             tx_rx->tx_bits = 14 * 8;
             tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
@@ -77,14 +77,14 @@ bool topaz_read_card(FuriHalNfcTxRxContext* tx_rx, TopazData* data, uint8_t* uid
                 break;
             }
 
-            memcpy(&data->data[data_read], &tx_rx->rx_data[1], 8);
-            data_read += 8;
+            memcpy(&data->data[data_read], &tx_rx->rx_data[1], TOPAZ_BYTES_PER_BLOCK);
+            data_read += TOPAZ_BYTES_PER_BLOCK;
 
             // Perform RSEG for rest of tag
             for(uint8_t i = 1; data_read < data->size; ++i) {
                 tx_rx->tx_data[0] = TOPAZ_CMD_RSEG;
                 tx_rx->tx_data[1] = i << 4;
-                memset(&tx_rx->tx_data[2], 0, 8);
+                memset(&tx_rx->tx_data[2], 0, TOPAZ_BYTES_PER_BLOCK);
                 memcpy(&tx_rx->tx_data[10], uid, 4);
                 tx_rx->tx_bits = 14 * 8;
                 tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
@@ -95,8 +95,8 @@ bool topaz_read_card(FuriHalNfcTxRxContext* tx_rx, TopazData* data, uint8_t* uid
                     break;
                 }
 
-                memcpy(&data->data[data_read], &tx_rx->rx_data[1], 128);
-                data_read += 128;
+                memcpy(&data->data[data_read], &tx_rx->rx_data[1], TOPAZ_BYTES_PER_SECTOR);
+                data_read += TOPAZ_BYTES_PER_SECTOR;
             }
         }
 

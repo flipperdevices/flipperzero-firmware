@@ -19,8 +19,6 @@ void nfc_scene_topaz_menu_on_enter(void* context) {
 
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, nfc_scene_topaz_menu_submenu_callback, nfc);
-    // submenu_add_item(
-    //     submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_topaz_menu_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, nfc_scene_topaz_menu_submenu_callback, nfc);
 
@@ -40,15 +38,6 @@ bool nfc_scene_topaz_menu_on_event(void* context, SceneManagerEvent event) {
             // Clear device name
             nfc_device_set_name(nfc->dev, "");
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
-            consumed = true;
-        } else if(event.event == SubmenuIndexEmulate) {
-            // TODO
-            //scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
-            if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetType)) {
-                DOLPHIN_DEED(DolphinDeedNfcAddEmulate);
-            } else {
-                DOLPHIN_DEED(DolphinDeedNfcEmulate);
-            }
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
