@@ -9,12 +9,8 @@
 #include "coin.h"
 #include "particle.h"
 #include "game_sprites.h"
-
-typedef enum {
-    GameStateLife,
-    GameStateGameOver,
-} State;
-
+#include "states.h"
+#include "missile.h"
 typedef struct {
     int points;
     int distance;
@@ -22,9 +18,11 @@ typedef struct {
     COIN coins[COINS_MAX];
     PARTICLE particles[PARTICLES_MAX];
     SCIENTIST scientists[SCIENTISTS_MAX];
+    MISSILE missiles[MISSILES_MAX];
     State state;
     GameSprites sprites;
     FuriMutex* mutex;
+    FuriTimer* timer;
 } GameState;
 
 void game_state_tick(GameState* const game_state);

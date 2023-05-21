@@ -6,6 +6,7 @@
 typedef struct {
     IconAnimation* barry;
     IconAnimation* scientist;
+    IconAnimation* missile;
 } GameSprites;
 
 #endif // GAME_SPRITES_H

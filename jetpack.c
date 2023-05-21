@@ -11,6 +11,7 @@
 #include "includes/scientist.h"
 #include "includes/particle.h"
 #include "includes/coin.h"
+#include "includes/missile.h"
 
 #include "includes/game_state.h"
 
@@ -30,16 +31,18 @@ static void jetpack_game_state_init(GameState* const game_state) {
     UNUSED(game_state);
     BARRY barry;
     barry.gravity = 0;
-    barry.point.x = 64;
+    barry.point.x = 32 + 5;
     barry.point.y = 32;
     barry.isBoosting = false;
 
     GameSprites sprites;
     sprites.barry = icon_animation_alloc(&A_barry);
     sprites.scientist = icon_animation_alloc(&A_scientist);
+    sprites.missile = icon_animation_alloc(&A_missile);
 
     icon_animation_start(sprites.scientist);
     icon_animation_start(sprites.barry);
+    icon_animation_start(sprites.missile);
 
     game_state->barry = barry;
     game_state->points = 0;
@@ -55,18 +58,25 @@ static void jetpack_game_state_init(GameState* const game_state) {
 static void jetpack_game_state_free(GameState* const game_state) {
     icon_animation_free(game_state->sprites.barry);
     icon_animation_free(game_state->sprites.scientist);
+    icon_animation_free(game_state->sprites.missile);
     free(game_state);
 }
 
 static void jetpack_game_tick(GameState* const game_state) {
+    if(game_state->state == GameStateGameOver) return;
     barry_tick(&game_state->barry);
     game_state_tick(game_state);
     coin_tick(game_state->coins, &game_state->barry, &game_state->points);
     particle_tick(game_state->particles, game_state->scientists, &game_state->points);
     scientist_tick(game_state->scientists);
+    missile_tick(game_state->missiles, &game_state->barry, &game_state->state);
 
     if((rand() % 100) < 1) {
         spawn_random_coin(game_state->coins);
+    }
+
+    if((rand() % 100) < 1) {
+        spawn_random_missile(game_state->missiles);
     }
 
     spawn_random_scientist(game_state->scientists);
@@ -90,6 +100,7 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         draw_coins(game_state->coins, canvas);
         draw_scientists(game_state->scientists, canvas, &game_state->sprites);
         draw_particles(game_state->particles, canvas);
+        draw_missiles(game_state->missiles, canvas, &game_state->sprites);
 
         draw_barry(&game_state->barry, canvas, &game_state->sprites);
 
@@ -104,6 +115,19 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
 
     if(game_state->state == GameStateGameOver) {
         // Show highscore
+
+        char buffer[12];
+        snprintf(buffer, sizeof(buffer), "Dist: %u", game_state->distance);
+        canvas_draw_str_aligned(canvas, 123, 12, AlignRight, AlignBottom, buffer);
+
+        snprintf(buffer, sizeof(buffer), "Score: %u", game_state->points);
+        canvas_draw_str_aligned(canvas, 5, 12, AlignLeft, AlignBottom, buffer);
+
+        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "boom.");
+
+        // if(furi_timer_is_running(game_state->timer)) {
+        //     furi_timer_start(game_state->timer, 0);
+        // }
     }
 
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -149,6 +173,8 @@ int32_t jetpack_game_app(void* p) {
     FuriTimer* timer =
         furi_timer_alloc(jetpack_game_update_timer_callback, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 25);
+
+    game_state->timer = timer;
 
     // Open GUI and register view_port
     Gui* gui = furi_record_open(RECORD_GUI);
