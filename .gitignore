@@ -64,10 +64,5 @@ PVS-Studio.log
 
 .gdbinit
 
-# Doxygen and Sphinx
-/documentation/_build/
-/documentation/build/
-/documentation/sphinx_out/
-/documentation/doxygen/latex/
-/documentation/doxygen/xml/
-/documentation_out/
+# Doxysphinx output
+documentation_out/

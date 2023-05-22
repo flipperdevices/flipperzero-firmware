@@ -1,1 +1,5 @@
-/build
+build/
+_build/
+sphinx_out/
+doxygen/latex/
+doxygen/xml/
