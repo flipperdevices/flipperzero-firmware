@@ -240,6 +240,9 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
                     }
                 } else {
                     FURI_LOG_W(TAG, "Unknown ATR");
+                    if(seader_worker->callback) {
+                        seader_worker->callback(SeaderWorkerEventSamWrong, seader_worker->context);
+                    }
                 }
             }
         } else {

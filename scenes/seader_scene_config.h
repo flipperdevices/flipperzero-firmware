@@ -1,6 +1,7 @@
 ADD_SCENE(seader, start, Start)
 ADD_SCENE(seader, sam_present, SamPresent)
 ADD_SCENE(seader, sam_missing, SamMissing)
+ADD_SCENE(seader, sam_wrong, SamWrong)
 ADD_SCENE(seader, read_picopass, ReadPicopass)
 ADD_SCENE(seader, read_14a, Read14a)
 ADD_SCENE(seader, read_card_success, ReadCardSuccess)

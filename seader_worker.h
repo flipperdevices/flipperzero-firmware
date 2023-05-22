@@ -27,6 +27,7 @@ typedef enum {
     SeaderWorkerEventSuccess,
     SeaderWorkerEventFail,
     SeaderWorkerEventSamPresent,
+    SeaderWorkerEventSamWrong,
     SeaderWorkerEventSamMissing,
     SeaderWorkerEventNoCardDetected,
     SeaderWorkerEventStartReading,
@@ -49,4 +50,4 @@ void seader_worker_start(
     void* context);
 
 void seader_worker_stop(SeaderWorker* seader_worker);
-void seader_worker_process_message(SeaderWorker* seader_worker, CCID_Message *message);
+void seader_worker_process_message(SeaderWorker* seader_worker, CCID_Message* message);

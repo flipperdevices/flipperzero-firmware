@@ -52,6 +52,9 @@ bool seader_scene_start_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SeaderWorkerEventSamMissing) {
             scene_manager_next_scene(seader->scene_manager, SeaderSceneSamMissing);
             consumed = true;
+        } else if(event.event == SeaderWorkerEventSamWrong) {
+            scene_manager_next_scene(seader->scene_manager, SeaderSceneSamWrong);
+            consumed = true;
         }
 
         scene_manager_set_scene_state(seader->scene_manager, SeaderSceneStart, event.event);
