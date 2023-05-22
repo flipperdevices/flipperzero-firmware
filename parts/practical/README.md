@@ -22,3 +22,11 @@ Cut a perfectly shaped screen protector
 
 **Download:** [screen.studio3](screen.studio3) | [screen.svg](screen.svg) 
 
+## Case and camera protector (in development)
+
+Protects the lens and the back part, and optionally adding antenna mount points
+
+![image](https://github.com/eried/flipperzero-mayhem/assets/1091420/d70aa206-ec82-4eb8-8b5f-7e853531a518)
+
+Check https://github.com/eried/flipperzero-mayhem/tree/master/parts/practical/case
+
