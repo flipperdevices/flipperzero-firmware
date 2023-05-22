@@ -276,7 +276,7 @@ class Main(App):
                 def tar_filter(tarinfo):
                     tarinfo.uid = tarinfo.gid = 0
                     return tarinfo
-                
+
                 tar.add(bundle_dir, arcname=bundle_dir_name, filter=tar_filter)
         return bundle_result
 
