@@ -24,3 +24,5 @@ void cross_remote_set_name(CrossRemote* remote, const char* name);
 void cross_remote_set_path(CrossRemote* remote, const char* path);
 bool cross_remote_save_new(CrossRemote* remote, const char* name);
 bool cross_remote_store(CrossRemote* remote);
+void cross_remote_reset(CrossRemote* remote);
+bool cross_remote_delete(CrossRemote* remote);
