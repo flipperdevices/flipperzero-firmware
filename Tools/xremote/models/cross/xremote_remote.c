@@ -160,7 +160,6 @@ bool cross_remote_load(CrossRemote* remote, FuriString* path) {
         cross_remote_clear_items(remote);
         cross_remote_set_name(remote, furi_string_get_cstr(buf));
         cross_remote_set_path(remote, furi_string_get_cstr(path));
-        
         // Load Items
         for(bool can_read = true; can_read;) {
             CrossRemoteItem* item = xremote_remote_item_alloc();
@@ -171,7 +170,6 @@ bool cross_remote_load(CrossRemote* remote, FuriString* path) {
                 xremote_remote_item_free(item);
             }
         }
-
         success = true;
     } while(false);
 
@@ -204,6 +202,23 @@ bool cross_remote_save_new(CrossRemote* remote, const char* name) {
     furi_string_free(new_name);
     furi_string_free(new_path);
     return cross_remote_store(remote);
+}
+
+void cross_remote_reset(CrossRemote* remote) {
+    furi_string_reset(remote->name);
+    furi_string_reset(remote->path);
+    CrossRemoteItemArray_clear(remote->items);
+    remote->transmitting = 0;
+}
+
+bool cross_remote_delete(CrossRemote* remote) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FS_Error status = storage_common_remove(storage, furi_string_get_cstr(remote->path));
+
+    cross_remote_reset(remote);
+
+    furi_record_close(RECORD_STORAGE);
+    return (status == FSE_OK || status == FSE_NOT_EXIST);
 }
 
 bool cross_remote_store(CrossRemote* remote) {

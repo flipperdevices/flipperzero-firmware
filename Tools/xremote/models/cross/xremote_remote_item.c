@@ -171,6 +171,9 @@ bool xremote_remote_item_read_message(CrossRemoteItem* item, FlipperFormat* ff) 
 
 void xremote_remote_item_free(CrossRemoteItem* item) {
     furi_string_free(item->name);
+    //Determine type before free
+    //xremote_ir_signal_free(item->ir_signal);
+    //xremote_sg_remote_free(item->sg_signal);
     free(item);
 }
 
