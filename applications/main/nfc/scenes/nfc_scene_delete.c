@@ -39,6 +39,8 @@ void nfc_scene_delete_on_enter(void* context) {
         furi_string_set(temp_str, nfc_mf_classic_type(nfc->dev->dev_data.mf_classic_data.type));
     } else if(protocol == NfcDeviceProtocolMifareDesfire) {
         furi_string_set(temp_str, "MIFARE DESFire");
+    } else if(protocol == NfcDeviceProtocolTopaz) {
+        furi_string_set(temp_str, nfc_topaz_type(nfc->dev->dev_data.topaz_data.type));
     } else {
         furi_string_set(temp_str, "Unknown ISO tag");
     }
