@@ -63,6 +63,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         }
     }
 
+#ifdef APP_FAP_LOADER
     submenu_add_item(
         submenu,
         FAP_LOADER_APP_DISPLAY_NAME,
@@ -73,6 +74,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
        !strcmp(curr_favorite_app->name_or_path, FAP_LOADER_APP_NAME)) {
         pre_select_item = FAP_LOADER_APP_FAVORITE_INDEX;
     }
+#endif
 
     submenu_set_header(
         submenu, primary_favorite ? "Primary favorite app:" : "Secondary favorite app:");
