@@ -7,8 +7,24 @@
 extern "C" {
 #endif
 
+typedef enum {
+    MfDesfirePollerStateIdle,
+    MfDesfirePollerStateReadFailed,
+    MfDesfirePollerStateReadSuccess,
+
+    MfDesfirePollerStateNum,
+} MfDesfirePollerState;
+
+typedef enum {
+    MfDesfirePollerSessionStateIdle,
+    MfDesfirePollerSessionStateActive,
+    MfDesfirePollerSessionStateStopRequest,
+} MfDesfirePollerSessionState;
+
 struct MfDesfirePoller {
     NfcaPoller* nfca_poller;
+    MfDesfirePollerSessionState session_state;
+    MfDesfirePollerState state;
     NfcPollerBuffer* buffer;
     MfDesfireData* data;
     MfDesfirePollerCallback callback;

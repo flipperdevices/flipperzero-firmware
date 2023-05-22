@@ -7,13 +7,16 @@ enum {
 
 MfDesfirePollerCommand
     nfc_scene_mf_desfire_read_worker_callback(MfDesfirePollerEvent event, void* context) {
-    UNUSED(event);
     NfcApp* nfc = context;
 
-    view_dispatcher_send_custom_event(
-        nfc->view_dispatcher, NfcWorkerEventMfDesfireReadSuccess);
-
     MfDesfirePollerCommand command = MfDesfirePollerCommandContinue;
+
+    if(event.type == MfDesfirePollerEventTypeReadSuccess) {
+        view_dispatcher_send_custom_event(
+            nfc->view_dispatcher, NfcWorkerEventMfDesfireReadSuccess);
+        command = MfDesfirePollerCommandStop;
+    }
+
     return command;
 }
 
@@ -23,8 +26,7 @@ void nfc_scene_mf_desfire_read_on_enter(void* context) {
     // Setup view
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
 
-    mf_desfire_poller_read(
-        nfc->mf_desfire_poller, nfc_scene_mf_desfire_read_worker_callback, nfc);
+    mf_desfire_poller_read(nfc->mf_desfire_poller, nfc_scene_mf_desfire_read_worker_callback, nfc);
 
     nfc_blink_read_start(nfc);
 }
