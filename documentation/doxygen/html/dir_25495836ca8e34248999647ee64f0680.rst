@@ -1,0 +1,14 @@
+.. meta::4c9107bdf356a6198165a42f7acb1900e845e9d7a5d80160bf458028db644d4a07818f64920bd1e39bb04bc183ecee7c04f94a7321b80303693164a23857b9b8
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/main/subghz/views Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/main/subghz/views Directory Reference
+========================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_25495836ca8e34248999647ee64f0680.html

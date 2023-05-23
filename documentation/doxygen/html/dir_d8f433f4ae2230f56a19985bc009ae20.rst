@@ -1,0 +1,14 @@
+.. meta::0a22babdcf850d2b904f302ca4212013331dfcc3c2dc5b2aafef1edcab4ba209993f662a01049e0369033e393695700544bf7b1747a908fdc078e2604f0494eb
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/services/cli Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/services/cli Directory Reference
+===================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_d8f433f4ae2230f56a19985bc009ae20.html

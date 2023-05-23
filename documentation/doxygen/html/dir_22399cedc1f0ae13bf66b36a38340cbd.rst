@@ -1,0 +1,14 @@
+.. meta::88b206e2a2b2c6caadc10fddc9a4bed4b37e4186911d8a1467cc078a20200c0ac3334d802b38cb8741b1558ae6baec8ead2dddb794c810c47f59e24e3bf82672
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/services/desktop/animations/views Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/services/desktop/animations/views Directory Reference
+========================================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_22399cedc1f0ae13bf66b36a38340cbd.html

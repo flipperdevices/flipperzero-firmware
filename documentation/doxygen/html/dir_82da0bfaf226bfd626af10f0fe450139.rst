@@ -1,0 +1,14 @@
+.. meta::67ef73c2adfcc396255d7a0816967bed6501357c43fe53009829a1ed654e84f3ab7e83f081e3ef836e7706748a946c71fc77a32bf8de83c7275590222e70196a
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/services/locale Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/services/locale Directory Reference
+======================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_82da0bfaf226bfd626af10f0fe450139.html

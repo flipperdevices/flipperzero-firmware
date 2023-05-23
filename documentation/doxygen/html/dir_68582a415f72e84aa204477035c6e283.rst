@@ -1,0 +1,14 @@
+.. meta::3d59bb178fc4c57bd69f4ba9a859abd8e14440324af8b5e9b7871c20f1c6ff75990ac5af3e764a1992a60a1cf620304c3e1c55a1900c6ed947f40997edf16031
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/debug/battery_test_app/views Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/debug/battery\_test\_app/views Directory Reference
+=====================================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_68582a415f72e84aa204477035c6e283.html

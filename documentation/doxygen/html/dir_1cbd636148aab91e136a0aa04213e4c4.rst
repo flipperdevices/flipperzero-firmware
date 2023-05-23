@@ -1,0 +1,14 @@
+.. meta::0458a591c7dd6a21839732a9c88d6fa7892e07cc56ec98b1afdc46cdb304f6dd7aecbd6a5af31215efa6a1b6cbb7720905a24c950f77512c63001ec48b2b909b
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/external/music_player Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/external/music\_player Directory Reference
+=============================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_1cbd636148aab91e136a0aa04213e4c4.html

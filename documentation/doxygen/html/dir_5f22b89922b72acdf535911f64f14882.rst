@@ -1,0 +1,14 @@
+.. meta::98b029a778c1dc928b06fe43c0d77901ff7e789f688704977816777cce055136ba6ef36ae3d76f749b34b9555ee8f618f5c37274d654abe2f35e7d303e1cf390
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/lib/infrared/encoder_decoder/sirc Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/lib/infrared/encoder\_decoder/sirc Directory Reference
+============================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_5f22b89922b72acdf535911f64f14882.html
