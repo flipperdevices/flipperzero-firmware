@@ -6,10 +6,16 @@
 Welcome to the Flipper Zero Firmware Developer Documentation!
 =============================================================
 
-.. contents:: 
-   :local:
-   :depth: 3
-   
+.. toctree::
+   :maxdepth: 4
+   :caption: Contents:
+
+   genindex
+   files
+   doxygen <doxygen/html/index>
+
+
+
 This documentation is intended for developers who want to modify the firmware of the Flipper Zero. If you are looking for the user manual, please visit [the User Documentation](https://docs.flipperzero.one/).
 
 The documentation is divided into several sections, with all of them accessible from the sidebar on the left. Aside from the manually-written documentation files, there's also a few automatically-generated ones at the bottom of the list, and also in the header of each page:
