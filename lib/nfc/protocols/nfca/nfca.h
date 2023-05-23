@@ -53,6 +53,20 @@ typedef struct {
 } NfcaSelResp;
 
 typedef struct {
+    uint8_t cmd;
+    uint8_t param;
+} NfcaAtsReq;
+
+typedef struct {
+    uint8_t tl;
+    uint8_t t0;
+    uint8_t ta_1;
+    uint8_t tb_1;
+    uint8_t tc_1;
+    uint8_t t1;
+} NfcaAtsResp;
+
+typedef struct {
     uint8_t uid[NFCA_MAX_UID_SIZE];
     uint8_t uid_len;
     uint8_t atqa[2];

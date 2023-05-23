@@ -214,11 +214,11 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
             &instance->col_res.sens_resp,
             sizeof(instance->col_res.sel_resp));
 
-        instance->state = NfcaPollerColResInProgress;
+        instance->state = NfcaPollerStateColResInProgress;
         instance->col_res.cascade_level = 0;
         instance->col_res.state = NfcaPollerColResStateStateNewCascade;
 
-        while(instance->state == NfcaPollerColResInProgress) {
+        while(instance->state == NfcaPollerStateColResInProgress) {
             if(instance->col_res.state == NfcaPollerColResStateStateNewCascade) {
                 instance->col_res.sdd_req.sel_cmd =
                     NFCA_POLLER_SEL_CMD(instance->col_res.cascade_level);
@@ -234,13 +234,13 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                     NFCA_FDT_LISTEN_FC);
                 if(error != NfcErrorNone) {
                     FURI_LOG_E(TAG, "Sdd request failed: %d", error);
-                    instance->state = NfcaPollerColResFailed;
+                    instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
                 }
                 if(rx_bits != 5 * 8) {
                     FURI_LOG_E(TAG, "Sdd response wrong length: %d bits", rx_bits);
-                    instance->state = NfcaPollerColResFailed;
+                    instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
                 }
@@ -267,13 +267,13 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                     NFCA_FDT_LISTEN_FC);
                 if(ret != NfcaErrorNone) {
                     FURI_LOG_E(TAG, "Sel request failed: %d", error);
-                    instance->state = NfcaPollerColResFailed;
+                    instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
                 }
                 if(rx_bits != 8 * sizeof(instance->col_res.sel_resp)) {
                     FURI_LOG_E(TAG, "Sel response wrong length: %d bits", rx_bits);
-                    instance->state = NfcaPollerColResFailed;
+                    instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
                 }
@@ -296,11 +296,46 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                         4);
                     instance->data->uid_len += 4;
                     instance->col_res.state = NfcaPollerColResStateStateSuccess;
-                    instance->state = NfcaPollerActivated;
+                    instance->state = NfcaPollerStateColResSuccess;
                 }
             }
         }
-        activated = (instance->state == NfcaPollerActivated);
+
+        if(instance->state == NfcaPollerStateColResSuccess) {
+            // Check whether ATS is available
+            if(instance->data->sak & (1U << 5)) {
+                // Send RATS & receive ATS
+                instance->iso_protocol.ats_req.cmd = 0xe0;
+                instance->iso_protocol.ats_req.param = 0x80;
+
+                ret = nfca_poller_send_standart_frame(
+                    instance,
+                    (uint8_t*)&instance->iso_protocol.ats_req,
+                    8 * sizeof(instance->iso_protocol.ats_req),
+                    (uint8_t*)&instance->iso_protocol.ats_resp,
+                    8 * sizeof(instance->iso_protocol.ats_resp),
+                    &rx_bits,
+                    NFCA_FDT_LISTEN_FC);
+
+                if(ret != NfcaErrorNone) {
+                    FURI_LOG_E(TAG, "Ats request failed: %d", error);
+                    instance->state = NfcaPollerStateIsoProtocolFailed;
+                    ret = NfcaErrorCommunication;
+                    break;
+                }
+
+                if(rx_bits != 8 * sizeof(instance->iso_protocol.ats_resp)) {
+                    FURI_LOG_E(TAG, "Ats response wrong length: %d bits", rx_bits);
+                    instance->state = NfcaPollerStateIsoProtocolFailed;
+                    ret = NfcaErrorCommunication;
+                    break;
+                }
+            }
+
+            instance->state = NfcaPollerStateActivated;
+        }
+
+        activated = (instance->state == NfcaPollerStateActivated);
     } while(false);
 
     if(activated && nfca_data) {

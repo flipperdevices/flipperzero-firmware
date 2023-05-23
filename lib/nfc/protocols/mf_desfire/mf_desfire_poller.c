@@ -96,6 +96,12 @@ MfDesfireError mf_desfire_poller_start(
     MfDesfirePoller* instance,
     NfcaPollerEventCallback callback,
     void* context) {
+    furi_assert(instance);
+    furi_assert(instance->state == MfDesfirePollerStateIdle);
+    furi_assert(instance->nfca_poller);
+    furi_assert(callback);
+    furi_assert(instance->session_state == MfDesfirePollerSessionStateIdle);
+
     instance->data = malloc(sizeof(MfDesfireData));
     instance->buffer = nfc_poller_buffer_alloc(MF_DESFIRE_MAX_BUFF_SIZE, MF_DESFIRE_MAX_BUFF_SIZE);
 
@@ -110,8 +116,9 @@ MfDesfireError mf_desfire_poller_read(
     MfDesfirePollerCallback callback,
     void* context) {
     furi_assert(instance);
+    furi_assert(instance->state == MfDesfirePollerStateIdle);
+    furi_assert(instance->nfca_poller);
     furi_assert(callback);
-    furi_assert(context);
 
     instance->callback = callback;
     instance->context = context;
