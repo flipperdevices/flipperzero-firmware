@@ -3,8 +3,6 @@
 #include <furi_hal_cortex.h>
 #include <furi_hal_sw_digital_pin.h>
 
-#include "bitbanding.h"
-
 #define TAG "SwUsart"
 
 #define SW_USART_RX_BUFFER_SIZE_DEFAULT 1024
