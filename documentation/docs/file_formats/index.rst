@@ -2,7 +2,7 @@ Flipper Zero File Formats
 =============================================================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
 
    BadUsbScriptFormat
