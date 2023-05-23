@@ -27,7 +27,7 @@ author = 'Flipper Devices'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx_rtd_theme", "sphinx_multiversion"]
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.todo", "sphinx.ext.viewcode", "sphinx_rtd_theme", "sphinx_multiversion", "myst_parser"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = [
