@@ -77,6 +77,21 @@ static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line)
       }
     } break;
 
+    case MINMEA_SENTENCE_GLL:
+    {
+      struct minmea_sentence_gll frame;
+      if (minmea_parse_gll(&frame, line))
+      {
+        gps_uart->status.latitude = minmea_tocoord(&frame.latitude);
+        gps_uart->status.longitude = minmea_tocoord(&frame.longitude);
+        gps_uart->status.time_hours = frame.time.hours;
+        gps_uart->status.time_minutes = frame.time.minutes;
+        gps_uart->status.time_seconds = frame.time.seconds;
+
+        notification_message_block(gps_uart->notifications, &sequence_blink_red_10);
+      }
+    } break;
+
     default:
       break;
   }
