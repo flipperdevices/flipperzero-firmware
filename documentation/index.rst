@@ -12,6 +12,7 @@ Welcome to the Flipper Zero Firmware Developer Documentation!
    :hidden:
 
    Auto-generated <doxygen/html/index>
+   docs/file_formats/index
    docs/AppManifests
    docs/AppsOnSDCard
    docs/fbt
