@@ -43,12 +43,12 @@ $(function() {
   <div class="headertitle"><div class="title">Unit tests </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md177"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md185"></a>
 Intro</h1>
 <p >Unit tests are special pieces of code that apply known inputs to the feature code and check the results to see if they are correct. They are crucial for writing robust, bug-free code.</p>
 <p >Flipper Zero firmware includes a separate application called <a href="/applications/debug/unit_tests">unit_tests</a>. It is run directly on Flipper devices in order to employ their hardware features and rule out any platform-related differences.</p>
 <p >When contributing code to the Flipper Zero firmware, it is highly desirable to supply unit tests along with the proposed features. Running existing unit tests is useful to ensure that the new code doesn't introduce any regressions.</p>
-<h1><a class="anchor" id="autotoc_md178"></a>
+<h1><a class="anchor" id="autotoc_md186"></a>
 Running unit tests</h1>
 <p >To run the unit tests, follow these steps:</p>
 <ol type="1">
@@ -58,19 +58,19 @@ Running unit tests</h1>
 <li>Launch the CLI session and run the <code>unit_tests</code> command.</li>
 </ol>
 <p ><b>NOTE:</b> To run a particular test (and skip all others), specify its name as the command argument. See <a href="/applications/debug/unit_tests/test_index.c">test_index.c</a> for the complete list of test names.</p>
-<h1><a class="anchor" id="autotoc_md179"></a>
+<h1><a class="anchor" id="autotoc_md187"></a>
 Adding unit tests</h1>
-<h2><a class="anchor" id="autotoc_md180"></a>
+<h2><a class="anchor" id="autotoc_md188"></a>
 General</h2>
-<h3><a class="anchor" id="autotoc_md181"></a>
+<h3><a class="anchor" id="autotoc_md189"></a>
 Entry point</h3>
 <p >The common entry point for all tests is the <a href="/applications/debug/unit_tests">unit_tests</a> application. Test-specific code is placed into an arbitrarily named subdirectory and is then called from the <a href="/applications/debug/unit_tests/test_index.c">test_index.c</a> source file.</p>
-<h3><a class="anchor" id="autotoc_md182"></a>
+<h3><a class="anchor" id="autotoc_md190"></a>
 Test assets</h3>
 <p >Some unit tests require external data in order to function. These files (commonly called assets) reside in the <a href="/assets/unit_tests">assets/unit_tests</a> directory in their respective subdirectories. Asset files can be of any type (plain text, <a class="el" href="struct_flipper_format.html">FlipperFormat</a> (FFF), binary, etc.).</p>
-<h2><a class="anchor" id="autotoc_md183"></a>
+<h2><a class="anchor" id="autotoc_md191"></a>
 Application-specific</h2>
-<h3><a class="anchor" id="autotoc_md184"></a>
+<h3><a class="anchor" id="autotoc_md192"></a>
 Infrared</h3>
 <p >Each infrared protocol has a corresponding set of unit tests, so it makes sense to implement one when adding support for a new protocol. To add unit tests for your protocol, follow these steps:</p>
 <ol type="1">
@@ -79,7 +79,7 @@ Infrared</h3>
 <li>Add the test code to <a href="/applications/debug/unit_tests/infrared/infrared_test.c">infrared_test.c</a>.</li>
 <li>Update the <a href="/assets/unit_tests/infrared">assets</a> on your Flipper Zero and run the tests to see if they pass.</li>
 </ol>
-<h4><a class="anchor" id="autotoc_md185"></a>
+<h4><a class="anchor" id="autotoc_md193"></a>
 Test data format</h4>
 <p >Each unit test has three sections:</p>
 <ol type="1">
@@ -89,7 +89,7 @@ Test data format</h4>
 </ol>
 <p ><a class="el" href="struct_infrared.html">Infrared</a> test asset files have an <code>.irtest</code> extension and are regular <code>.ir</code> files with a few additions. Decoder input data has signal names <code>decoder_input_N</code>, where N is a test sequence number. Expected data goes under the name <code>decoder_expected_N</code>. When testing the encoder, these two are switched.</p>
 <p >Decoded data is represented in arrays (since a single raw signal may be decoded into several messages). If there is only one signal, then it has to be an array of size 1. Use the existing files as syntax examples.</p>
-<h4><a class="anchor" id="autotoc_md186"></a>
+<h4><a class="anchor" id="autotoc_md194"></a>
 Getting raw signals</h4>
 <p >Recording raw IR signals are possible using the Flipper Zero. Launch the CLI session, run <code>ir rx raw</code>, then point the remote towards Flipper's receiver and send the signals. The raw signal data will be printed to the console in a convenient format. </p>
 </div></div><!-- contents -->

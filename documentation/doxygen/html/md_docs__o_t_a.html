@@ -43,31 +43,31 @@ $(function() {
   <div class="headertitle"><div class="title">Flipper Zero OTA update process </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md156"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md164"></a>
 Executing code from RAM</h1>
 <p >In Flipper firmware, we have a special boot mode that loads a specially crafted system image into RAM and transfers control to it. System image executing in RAM has full write access to Flipper's entire flash memory — something that's not possible when running main code from the same flash.</p>
 <p >We leverage that boot mode to perform OTA firmware updates, including operations on a radio stack running on the second MCU core.</p>
-<h1><a class="anchor" id="autotoc_md157"></a>
+<h1><a class="anchor" id="autotoc_md165"></a>
 How does Flipper OTA work?</h1>
 <p >Installation of OTA updates goes through 3 stages:</p>
-<h2><a class="anchor" id="autotoc_md158"></a>
+<h2><a class="anchor" id="autotoc_md166"></a>
 1. Backing up internal storage (&lt;tt&gt;/int&lt;/tt&gt;)</h2>
 <p >It is a special partition of Flipper's flash memory, taking up all available space not used by the firmware code. Newer versions of firmware may be of different size, and simply installing them would cause flash repartitioning and data loss.</p>
 <p >So, before taking any action on the firmware, we back up the current configuration from <code>/int</code> into a plain tar archive on the SD card.</p>
-<h2><a class="anchor" id="autotoc_md159"></a>
+<h2><a class="anchor" id="autotoc_md167"></a>
 2. Performing device update</h2>
 <p >The main firmware loads an updater image — a customized build of the main Flipper firmware — into RAM and runs it. <a class="el" href="struct_updater.html">Updater</a> performs operations on system flash as described by an Update manifest file.</p>
 <p >First, if there's a Radio stack image bundled with the update, updater compares its version with the currently installed one. If they don't match, updater performs stack deinstallation followed by writing and installing a new one. The installation itself is performed by proprietary software FUS running on Core2, and leads to a series of system restarts.</p>
 <p >Then, updater validates and corrects Option Bytes — a special memory region containing low-level configuration for Flipper's MCU.</p>
 <p >After that, updater loads a <code>.dfu</code> file with firmware to be flashed, checks its integrity using CRC32, writes it to system flash and validates written data.</p>
-<h2><a class="anchor" id="autotoc_md160"></a>
+<h2><a class="anchor" id="autotoc_md168"></a>
 3. Restoring internal storage and updating resources</h2>
 <p >After performing operations on flash memory, the system restarts into newly flashed firmware. Then it performs restoration of previously backed up <code>/int</code> contents.</p>
 <p >If the update package contains an additional resources archive, it is extracted onto the SD card.</p>
-<h1><a class="anchor" id="autotoc_md161"></a>
+<h1><a class="anchor" id="autotoc_md169"></a>
 Update manifest</h1>
 <p >An update package comes with a manifest that contains a description of its contents. The manifest is in Flipper <a class="el" href="struct_file.html" title="Structure that hold file index and returned api errors.">File</a> Format — a simple text file, comprised of key-value pairs.</p>
-<h2><a class="anchor" id="autotoc_md162"></a>
+<h2><a class="anchor" id="autotoc_md170"></a>
 Mandatory fields</h2>
 <p >An update manifest must contain the following keys in the given order:</p>
 <ul>
@@ -78,7 +78,7 @@ Mandatory fields</h2>
 <li><b><a class="el" href="struct_loader.html">Loader</a></b>: file name of stage 2 loader that is executed from RAM.</li>
 <li><b><a class="el" href="struct_loader.html">Loader</a> CRC</b>: CRC32 of loader file. Note that it is represented in little-endian hex.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md163"></a>
+<h2><a class="anchor" id="autotoc_md171"></a>
 Optional fields</h2>
 <p >Other fields may have empty values. In this case, updater skips all operations related to these values.</p>
 <ul>
@@ -89,7 +89,7 @@ Optional fields</h2>
 <li><b>Resources</b>: file name of TAR archive with resources to be extracted onto the SD card.</li>
 <li><b>OB reference</b>, <b>OB mask</b>, <b>OB write mask</b>: reference values for validating and correcting option bytes.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md164"></a>
+<h1><a class="anchor" id="autotoc_md172"></a>
 OTA update error codes</h1>
 <p >We designed the OTA update process to be as fail-safe as possible. We don't start any risky operations before validating all related pieces of data to ensure we don't leave the device in a partially updated, or bricked, state.</p>
 <p >Even if something goes wrong, updater allows you to retry failed operations and reports its state with an error code. These error codes have an <code>[XX-YY]</code> format, where <code>XX</code> encodes the failed operation, and <code>YY</code> contains extra details on its progress where the error occurred.</p>
@@ -145,23 +145,23 @@ OTA update error codes</h1>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyCenter">Updating resources   </td><td class="markdownTableBodyRight"><b>13</b>   </td><td class="markdownTableBodyNone"><b>0-100</b>   </td><td class="markdownTableBodyNone">SD card read/write error   </td></tr>
 </table>
-<h1><a class="anchor" id="autotoc_md165"></a>
+<h1><a class="anchor" id="autotoc_md173"></a>
 Building update packages</h1>
-<h2><a class="anchor" id="autotoc_md166"></a>
+<h2><a class="anchor" id="autotoc_md174"></a>
 Full package</h2>
 <p >To build a full update package, including firmware, radio stack and resources for the SD card, run:</p>
 <p ><code>./fbt COMPACT=1 DEBUG=0 updater_package</code></p>
-<h2><a class="anchor" id="autotoc_md167"></a>
+<h2><a class="anchor" id="autotoc_md175"></a>
 Minimal package</h2>
 <p >To build a minimal update package, including only firmware, run:</p>
 <p ><code>./fbt COMPACT=1 DEBUG=0 updater_minpackage</code></p>
-<h2><a class="anchor" id="autotoc_md168"></a>
+<h2><a class="anchor" id="autotoc_md176"></a>
 Customizing update bundles</h2>
 <p >Default update packages are built with Bluetooth Light stack. You can pick a different stack if your firmware version supports it, and build a bundle with it by passing the stack type and binary name to <code>fbt</code>:</p>
 <p ><code>./fbt updater_package COMPACT=1 DEBUG=0 COPRO_OB_DATA=scripts/ob_custradio.data COPRO_STACK_BIN=stm32wb5x_BLE_Stack_full_fw.bin COPRO_STACK_TYPE=ble_full</code></p>
 <p >Note that <code>COPRO_OB_DATA</code> must point to a valid file in the <code>scripts</code> folder containing reference Option Byte data matching your radio stack type.</p>
 <p >In certain cases, you might have to confirm your intentions by adding <code>COPRO_DISCLAIMER=...</code> to the build command line.</p>
-<h2><a class="anchor" id="autotoc_md169"></a>
+<h2><a class="anchor" id="autotoc_md177"></a>
 Building partial update packages</h2>
 <p >You can customize package contents by calling <code>scripts/update.py</code> directly. For example, to build a package only for installing BLE FULL stack:</p>
 <div class="fragment"><div class="line">scripts/update.py generate \</div>

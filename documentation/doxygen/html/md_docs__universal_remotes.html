@@ -43,7 +43,7 @@ $(function() {
   <div class="headertitle"><div class="title">Universal Remotes </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h1><a class="anchor" id="autotoc_md188"></a>
+<div class="textblock"><h1><a class="anchor" id="autotoc_md196"></a>
 Televisions</h1>
 <p >Adding your TV set to the universal remote is quite straightforward. Up to 6 signals can be recorded: <code><a class="el" href="struct_power.html">Power</a></code>, <code>Mute</code>, <code>Vol_up</code>, <code>Vol_dn</code>, <code>Ch_next</code>, and <code>Ch_prev</code>. Any of them can be omitted if not supported by your TV.</p>
 <p >Each signal is recorded using the following algorithm:</p>
@@ -55,15 +55,15 @@ Televisions</h1>
 </ol>
 <p >The signal names are self-explanatory. Remember to make sure that every recorded signal does what it's supposed to.</p>
 <p >If everything checks out, append these signals <b>to the end</b> of the <a href="/assets/resources/infrared/assets/tv.ir">TV universal remote file</a>.</p>
-<h1><a class="anchor" id="autotoc_md189"></a>
+<h1><a class="anchor" id="autotoc_md197"></a>
 Audio players</h1>
 <p >Adding your audio player to the universal remote is done in the same manner as described above. Up to 8 signals can be recorded: <code><a class="el" href="struct_power.html">Power</a></code>, <code>Play</code>, <code>Pause</code>, <code>Vol_up</code>, <code>Vol_dn</code>, <code>Next</code>, <code>Prev</code>, and <code>Mute</code>. Any of them can be omitted if not supported by the player.</p>
 <p >The signal names are self-explanatory. On many remotes, the <code>Play</code> button doubles as <code>Pause</code>. In this case, record it as <code>Play</code> omitting the <code>Pause</code>. Make sure that every signal does what it's supposed to.</p>
 <p >If everything checks out, append these signals <b>to the end</b> of the <a href="/assets/resources/infrared/assets/audio.ir">audio player universal remote file</a>.</p>
-<h1><a class="anchor" id="autotoc_md190"></a>
+<h1><a class="anchor" id="autotoc_md198"></a>
 Projectors</h1>
 <p >Adding your projector to the universal remote is really simple. Up to 4 signals can be recorded: <code><a class="el" href="struct_power.html">Power</a></code>, <code>Mute</code>, <code>Vol_up</code>, <code>Vol_dn</code>. Any of them can be omitted if not supported by your projector. To save time, please make sure every recording has been named accordingly. In case of omitting, on most projectors with the 4 following buttons, you should not have a problem.</p>
-<h1><a class="anchor" id="autotoc_md191"></a>
+<h1><a class="anchor" id="autotoc_md199"></a>
 Air conditioners</h1>
 <p >Air conditioners differ from most other infrared-controlled devices because their state is tracked by the remote. The majority of A/C remotes have a small display that shows the current mode, temperature, and other settings. When the user presses a button, a whole set of parameters is transmitted to the device, which must be recorded and used as a whole.</p>
 <p >In order to add a particular air conditioner to the universal remote, 6 signals must be recorded: <code>Off</code>, <code>Dh</code>, <code>Cool_hi</code>, <code>Cool_lo</code>, <code>Heat_hi</code>, and <code>Heat_lo</code>. Each signal (except <code>Off</code>) is recorded using the following algorithm:</p>
@@ -99,7 +99,7 @@ Air conditioners</h1>
 </ol>
 <p >The resulting remote file should now contain 6 signals. You can omit any of them, but you then won't be able to use their functionality. Test the file against the actual device. Make sure that every signal does what it's supposed to.</p>
 <p >If everything checks out, append these signals <b>to the end</b> of the <a href="/assets/resources/infrared/assets/ac.ir">A/C universal remote file</a>.</p>
-<h1><a class="anchor" id="autotoc_md192"></a>
+<h1><a class="anchor" id="autotoc_md200"></a>
 Final steps</h1>
 <p >The order of signals is not important, but they should be preceded by the following comment: <code># Model: &lt;Your model name&gt;</code> in order to keep the library organized.</p>
 <p >When done, open a pull request containing the changed file. </p>
