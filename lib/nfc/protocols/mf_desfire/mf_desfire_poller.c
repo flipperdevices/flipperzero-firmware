@@ -40,6 +40,22 @@ static MfDesfirePollerCommand mf_desfire_poller_handler_idle(MfDesfirePoller* in
     nfc_poller_buffer_reset(instance->buffer);
     nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
 
+    instance->state = MfDesfirePollerStateReadVersion;
+
+    return MfDesfirePollerCommandContinue;
+}
+
+static MfDesfirePollerCommand mf_desfire_poller_handler_read_version(MfDesfirePoller* instance) {
+    instance->error = mf_desfire_poller_async_read_version(instance, &instance->data->version);
+    if(instance->error == MfDesfireErrorNone) {
+        FURI_LOG_D(TAG, "Read version success");
+        instance->state = MfDesfirePollerStateReadSuccess;
+    } else {
+        FURI_LOG_D(TAG, "Failed to read version");
+        nfca_poller_halt(instance->nfca_poller);
+        instance->state = MfDesfirePollerStateReadFailed;
+    }
+
     return MfDesfirePollerCommandContinue;
 }
 
@@ -63,6 +79,7 @@ static MfDesfirePollerCommand mf_desfire_poller_handler_read_success(MfDesfirePo
 
 static const MfDesfirePollerReadHandler mf_desfire_poller_read_handler[MfDesfirePollerStateNum] = {
     [MfDesfirePollerStateIdle] = mf_desfire_poller_handler_idle,
+    [MfDesfirePollerStateReadVersion] = mf_desfire_poller_handler_read_version,
     [MfDesfirePollerStateReadFailed] = mf_desfire_poller_handler_read_fail,
     [MfDesfirePollerStateReadSuccess] = mf_desfire_poller_handler_read_success,
 };

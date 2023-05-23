@@ -9,6 +9,7 @@ extern "C" {
 
 typedef enum {
     MfDesfirePollerStateIdle,
+    MfDesfirePollerStateReadVersion,
     MfDesfirePollerStateReadFailed,
     MfDesfirePollerStateReadSuccess,
 
@@ -31,6 +32,9 @@ struct MfDesfirePoller {
     MfDesfireError error;
     void* context;
 };
+
+MfDesfireError
+    mf_desfire_poller_async_read_version(MfDesfirePoller* instance, MfDesfireVersion* data);
 
 #ifdef __cplusplus
 }
