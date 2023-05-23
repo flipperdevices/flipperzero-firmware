@@ -9,11 +9,19 @@ Welcome to the Flipper Zero Firmware Developer Documentation!
 .. toctree::
    :maxdepth: 4
    :caption: Contents:
+   :hidden:
 
-   doxygen <doxygen/html/index>
+   Auto-generated <doxygen/html/index>
    docs/AppManifests
    docs/AppsOnSDCard
-
+   docs/fbt
+   docs/FuriHalDebugging
+   docs/HardwareTargets
+   docs/KeyCombo
+   docs/OTA
+   docs/RoadMap
+   doca/UnitTests
+   docs/UniversalRemotes
 
 
 This documentation is intended for developers who want to modify the firmware of the Flipper Zero. If you are looking for the user manual, please visit [the User Documentation](https://docs.flipperzero.one/).
