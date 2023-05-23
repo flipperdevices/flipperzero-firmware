@@ -1,0 +1,14 @@
+.. meta::7186db80d9eb57ca082260a5b4b1677f59c1a63ae9a23ab4769a4f95d2de11e52031ed32eba7a95b246ef1b26769110bab33043a4300bb2246163f8b6b6c100d
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/lib/infrared/encoder_decoder/samsung Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/lib/infrared/encoder\_decoder/samsung Directory Reference
+===============================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_734ee08379ba50cda0950b9a01a75e27.html

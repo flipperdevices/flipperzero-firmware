@@ -1,0 +1,14 @@
+.. meta::b9a357204bcc02e3000ed8024c2422ff5ec2fbec7cc19c866db2ed5a94f83098a7464beec9995f692fbd5696e6334fffa8d19e4a1be83dc6013a48b8f2c0c5d1
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/main/nfc Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/main/nfc Directory Reference
+===============================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_5a78adedb431aca958bb2d622ec68609.html

@@ -1,0 +1,14 @@
+.. meta::4681ec2a5e334ef162bf079de892da867b45d4afdb537c55c55bd0068d3fc3fd6ece6668db923eb71fe56879563c5fa3c6c626706feffebe9eef618e1ee9599a
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/settings/power_settings_app Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/settings/power\_settings\_app Directory Reference
+====================================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_f206c1a5de605332d049bac41f22eb62.html

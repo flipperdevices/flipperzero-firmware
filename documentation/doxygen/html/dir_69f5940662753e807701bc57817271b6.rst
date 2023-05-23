@@ -1,0 +1,14 @@
+.. meta::76d3c6f022cdca9d2bd02a568d35c85db36167826609524de5207d763f2881c7f3a74a712168bee03d84b29a7bc9f9fc31086765cc0b6372def82b10a8173813
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/debug/locale_test Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/debug/locale\_test Directory Reference
+=========================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_69f5940662753e807701bc57817271b6.html

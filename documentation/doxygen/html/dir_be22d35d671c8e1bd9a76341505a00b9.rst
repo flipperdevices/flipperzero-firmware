@@ -1,0 +1,14 @@
+.. meta::91cc3f2d8831687215ca24aee41361ab5c76ad11d6b5f80e718800cad9e229e803a218434f274b68ee5bb7eefba19d9826f6e862239654f97f4265954338f023
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/debug/direct_draw Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/debug/direct\_draw Directory Reference
+=========================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_be22d35d671c8e1bd9a76341505a00b9.html

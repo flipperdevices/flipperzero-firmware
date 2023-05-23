@@ -1,0 +1,14 @@
+.. meta::9ddfcef5ef58e25768c773fb5313b474a40840b5d27844f8302b9cea8d65cc608dd22e7f8c8618214da67107bc3d323e5b0f52d8f248cfdd08d4fd562f11fe06
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/services/power/power_service/views Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/services/power/power\_service/views Directory Reference
+==========================================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_fed824b9dc795a5d94502045fe42bed7.html

@@ -1,0 +1,14 @@
+.. meta::97d7f775dc78c84b8b787fee6e6da40e46f635ec3250566049f950c6ec454c9542d2d1c638c716777f69f93d5def30985e12a17f7105ed3c68c85b9ea65eff1b
+
+:orphan:
+
+.. title:: Flipper Zero Firmware: /Users/astrr/wtf/flipperzero-firmware/applications/settings/desktop_settings/scenes Directory Reference
+
+/Users/astrr/wtf/flipperzero-firmware/applications/settings/desktop\_settings/scenes Directory Reference
+========================================================================================================
+
+.. container:: doxygen-content
+
+   
+   .. raw:: html
+     :file: dir_c86781ce97b46064190147d0087dd645.html
