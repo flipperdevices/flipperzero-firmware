@@ -1,8 +1,8 @@
-.. meta::5686dcdbc55d05dca32d210a5927b85365b6e7505d178da9c512cbfbdc7cc29a935976b3818a72915b1ecdc1b2998165262f2d14c05dca53bd4483d706a474ee
+.. meta::509d3dc6c1f26a2180dbf43e333a83fafafde0f35f45c6039356431f413d80c21455f14594cc299eae3859fab2a1e1ccbc4d80e1ffae9a6967b0e5f74242cf71
 
 :orphan:
 
-.. title:: Flipper Zero Firmware: Main Page
+.. title:: Flipper Zero Firmware: Flipper Zero Firmware
 
 Flipper Zero Firmware
 =====================
