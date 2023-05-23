@@ -50,7 +50,6 @@ const GpioPin* gpio_debug_tx = &gpio_ext_pa6;
 #define SW_DIGITAL_PIN_DMA_IRQ_SYNC_1 FuriHalInterruptIdDma2Ch3
 #define SW_DIGITAL_PIN_DMA_DEF_SYNC_1 SW_DIGITAL_PIN_DMA, SW_DIGITAL_PIN_DMA_CHANNEL_SYNC_1
 
-//#define SW_DIGITAL_PIN_TIM_CHANNEL_SYNC_1 LL_TIM_CHANNEL_CH4
 #define SW_DIGITAL_PIN_DMA_CHANNEL_SYNC_2 LL_DMA_CHANNEL_4
 #define SW_DIGITAL_PIN_DMA_IRQ_SYNC_2 FuriHalInterruptIdDma2Ch4
 #define SW_DIGITAL_PIN_DMA_DEF_SYNC_2 SW_DIGITAL_PIN_DMA, SW_DIGITAL_PIN_DMA_CHANNEL_SYNC_2
@@ -76,29 +75,33 @@ const GpioPin* gpio_debug_tx = &gpio_ext_pa6;
 #define GET_DMAMUX_EXTI_LINE(pin) GPIO_PIN_MAP(pin, LL_DMAMUX_REQ_GEN_EXTI_LINE)
 
 typedef struct {
+    const GpioPin* gpio;
+    uint32_t* buffer_ptr;
+    size_t buffer_size;
+    size_t buffer_half_size;
+    size_t buffer_index_write_end;
+    FuriHalSwDigitalPinTxCallbackYield callback_yield;
+    FuriHalSwDigitalPinTxCallbackEnd callback_end;
+    void* context;
+} FuriHalSwDigitalPinTx;
+
+typedef struct {
+    const GpioPin* gpio;
+    uint16_t* buffer_ptr;
+    size_t buffer_size;
+    size_t buffer_half_size;
+    uint16_t tim_arr_reset;
+    FuriHalSwDigitalPinRxCallback callback;
+    void* context;
+} FuriHalSwDigitalPinRx;
+
+typedef struct {
     // Sync
     uint32_t sync_first_level;
     uint32_t sync_second_level;
 
-    // Tx
-    const GpioPin* tx_gpio;
-    uint32_t* buffer_tx_ptr;
-    size_t buffer_tx_size;
-    size_t buffer_tx_half_size;
-    size_t buffer_tx_index_write_end;
-    FuriHalSwDigitalPinTxCallbackYield tx_callback_yield;
-    FuriHalSwDigitalPinTxCallbackEnd tx_callback_end;
-    void* tx_context;
-
-    // Rx
-    const GpioPin* rx_gpio;
-    uint16_t* buffer_rx_ptr;
-    size_t buffer_rx_size;
-    size_t buffer_rx_half_size;
-    uint16_t tim_arr_reset;
-    FuriHalSwDigitalPinRxCallback rx_callback;
-    void* rx_context;
-
+    FuriHalSwDigitalPinTx* tx;
+    FuriHalSwDigitalPinRx* rx;
 } FuriHalSwDigitalPinBuff;
 
 typedef struct {
@@ -134,15 +137,13 @@ static void furi_hal_sw_digital_pin_buff_tx_refill(
     furi_assert(furi_hal_sw_digital_pin.state == SwDigitalPinStateTx);
 
     do {
-        uint32_t data = furi_hal_sw_digital_pin_buff.tx_callback_yield(
-            furi_hal_sw_digital_pin_buff.tx_context);
+        uint32_t data = furi_hal_sw_digital_pin_buff.tx->callback_yield(
+            furi_hal_sw_digital_pin_buff.tx->context);
 
         if(data == 0) {
             *buffer = 0;
-            furi_hal_sw_digital_pin_buff.buffer_tx_index_write_end = base_index + samples;
+            furi_hal_sw_digital_pin_buff.tx->buffer_index_write_end = base_index + samples;
 
-            buffer++;
-            samples--;
             LL_DMA_DisableIT_HT(SW_DIGITAL_PIN_DMA_DEF_TX);
             LL_DMA_DisableIT_TC(SW_DIGITAL_PIN_DMA_DEF_TX);
             LL_TIM_EnableIT_UPDATE(SW_DIGITAL_PIN_TIM_TX);
@@ -161,14 +162,14 @@ static void furi_hal_sw_digital_pin_tx_timer_isr() {
 #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
         furi_hal_gpio_write(gpio_debug_tx, false);
 #endif
-        if(furi_hal_sw_digital_pin_buff.buffer_tx_index_write_end ==
+        if(furi_hal_sw_digital_pin_buff.tx->buffer_index_write_end ==
            LL_DMA_GetDataLength(SW_DIGITAL_PIN_DMA_DEF_TX)) {
             LL_DMA_DisableChannel(SW_DIGITAL_PIN_DMA_DEF_TX);
             LL_TIM_DisableIT_UPDATE(SW_DIGITAL_PIN_TIM_TX);
             furi_hal_sw_digital_pin.state = SwDigitalPinStateTxEnd;
-            if(furi_hal_sw_digital_pin_buff.tx_callback_end) {
-                furi_hal_sw_digital_pin_buff.tx_callback_end(
-                    furi_hal_sw_digital_pin_buff.tx_context);
+            if(furi_hal_sw_digital_pin_buff.tx->callback_end) {
+                furi_hal_sw_digital_pin_buff.tx->callback_end(
+                    furi_hal_sw_digital_pin_buff.tx->context);
             }
         }
 #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
@@ -183,28 +184,30 @@ static void furi_hal_sw_digital_pin_dma_tx_isr() {
 #if SW_DIGITAL_PIN_DMA_CHANNEL_TX == LL_DMA_CHANNEL_1
     if(LL_DMA_IsActiveFlag_HT1(SW_DIGITAL_PIN_DMA)) {
         LL_DMA_ClearFlag_HT1(SW_DIGITAL_PIN_DMA);
-        // #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
-        //         furi_hal_gpio_write(gpio_debug_tx, false);
-        // #endif
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
         furi_hal_gpio_write(gpio_debug_tx, false);
+#endif
         furi_hal_sw_digital_pin_buff_tx_refill(
-            furi_hal_sw_digital_pin_buff.buffer_tx_ptr,
-            furi_hal_sw_digital_pin_buff.buffer_tx_half_size,
-            furi_hal_sw_digital_pin_buff.buffer_tx_half_size);
+            furi_hal_sw_digital_pin_buff.tx->buffer_ptr,
+            furi_hal_sw_digital_pin_buff.tx->buffer_half_size,
+            furi_hal_sw_digital_pin_buff.tx->buffer_half_size);
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
         furi_hal_gpio_write(gpio_debug_tx, true);
+#endif
     }
     if(LL_DMA_IsActiveFlag_TC1(SW_DIGITAL_PIN_DMA)) {
         LL_DMA_ClearFlag_TC1(SW_DIGITAL_PIN_DMA);
-        // #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
-        //         furi_hal_gpio_write(gpio_debug_tx, true);
-        // #endif
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
         furi_hal_gpio_write(gpio_debug_tx, false);
+#endif
         furi_hal_sw_digital_pin_buff_tx_refill(
-            furi_hal_sw_digital_pin_buff.buffer_tx_ptr +
-                furi_hal_sw_digital_pin_buff.buffer_tx_half_size,
-            furi_hal_sw_digital_pin_buff.buffer_tx_half_size,
+            furi_hal_sw_digital_pin_buff.tx->buffer_ptr +
+                furi_hal_sw_digital_pin_buff.tx->buffer_half_size,
+            furi_hal_sw_digital_pin_buff.tx->buffer_half_size,
             0);
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_TX
         furi_hal_gpio_write(gpio_debug_tx, true);
+#endif
     }
 #else
 #error Update this code. Would you kindly?
@@ -217,36 +220,36 @@ static void furi_hal_sw_digital_pin_dma_rx_isr() {
 #if SW_DIGITAL_PIN_DMA_CHANNEL_RX == LL_DMA_CHANNEL_2
     if(LL_DMA_IsActiveFlag_HT2(SW_DIGITAL_PIN_DMA)) {
         LL_DMA_ClearFlag_HT2(SW_DIGITAL_PIN_DMA);
-
-        // #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
-        //         furi_hal_gpio_write(gpio_debug_rx, false);
-        // #endif
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
         furi_hal_gpio_write(gpio_debug_rx, false);
-        if(furi_hal_sw_digital_pin_buff.rx_callback) {
+#endif
+        if(furi_hal_sw_digital_pin_buff.rx->callback) {
             SwDigitalPinRx data = {
-                .rx_buff = furi_hal_sw_digital_pin_buff.buffer_rx_ptr,
-                .rx_buff_size = furi_hal_sw_digital_pin_buff.buffer_rx_half_size};
-            furi_hal_sw_digital_pin_buff.rx_callback(
-                furi_hal_sw_digital_pin_buff.rx_context, data);
+                .rx_buff = furi_hal_sw_digital_pin_buff.rx->buffer_ptr,
+                .rx_buff_size = furi_hal_sw_digital_pin_buff.rx->buffer_half_size};
+            furi_hal_sw_digital_pin_buff.rx->callback(
+                furi_hal_sw_digital_pin_buff.rx->context, data);
         }
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
         furi_hal_gpio_write(gpio_debug_rx, true);
+#endif
     }
     if(LL_DMA_IsActiveFlag_TC2(SW_DIGITAL_PIN_DMA)) {
         LL_DMA_ClearFlag_TC2(SW_DIGITAL_PIN_DMA);
-
-        // #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
-        //         furi_hal_gpio_write(gpio_debug_rx, true);
-        // #endif
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
         furi_hal_gpio_write(gpio_debug_rx, false);
-        if(furi_hal_sw_digital_pin_buff.rx_callback) {
+#endif
+        if(furi_hal_sw_digital_pin_buff.rx->callback) {
             SwDigitalPinRx data = {
-                .rx_buff = furi_hal_sw_digital_pin_buff.buffer_rx_ptr +
-                           furi_hal_sw_digital_pin_buff.buffer_rx_half_size,
-                .rx_buff_size = furi_hal_sw_digital_pin_buff.buffer_rx_half_size};
-            furi_hal_sw_digital_pin_buff.rx_callback(
-                furi_hal_sw_digital_pin_buff.rx_context, data);
+                .rx_buff = furi_hal_sw_digital_pin_buff.rx->buffer_ptr +
+                           furi_hal_sw_digital_pin_buff.rx->buffer_half_size,
+                .rx_buff_size = furi_hal_sw_digital_pin_buff.rx->buffer_half_size};
+            furi_hal_sw_digital_pin_buff.rx->callback(
+                furi_hal_sw_digital_pin_buff.rx->context, data);
         }
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
         furi_hal_gpio_write(gpio_debug_rx, true);
+#endif
     }
 #else
 #error Update this code. Would you kindly?
@@ -328,14 +331,14 @@ void furi_hal_sw_digital_pin_sync_deinit(void) {
 }
 
 void furi_hal_sw_digital_pin_tx_init(
-    FuriHalSwDigitalPinTxCallbackYield tx_callback_yield,
-    FuriHalSwDigitalPinTxCallbackEnd tx_callback_end,
+    FuriHalSwDigitalPinTxCallbackYield callback_yield,
+    FuriHalSwDigitalPinTxCallbackEnd callback_end,
     void* context,
     uint16_t tim_psc,
     uint32_t tim_arr,
     size_t samples,
     const GpioPin* gpio) {
-    furi_assert(tx_callback_yield);
+    furi_assert(callback_yield);
     furi_assert(samples > 0);
     furi_assert(!(samples & 0x1));
 
@@ -345,17 +348,18 @@ void furi_hal_sw_digital_pin_tx_init(
 #endif
 
     //furi_hal_sw_digital_pin.state = SwDigitalPinStateTx;
-    furi_hal_sw_digital_pin_buff.tx_gpio = gpio;
+    furi_hal_sw_digital_pin_buff.tx = malloc(sizeof(FuriHalSwDigitalPinTx));
+    furi_hal_sw_digital_pin_buff.tx->gpio = gpio;
 
-    furi_hal_sw_digital_pin_buff.buffer_tx_size = samples;
-    furi_hal_sw_digital_pin_buff.buffer_tx_half_size =
-        furi_hal_sw_digital_pin_buff.buffer_tx_size / 2;
-    furi_hal_sw_digital_pin_buff.buffer_tx_ptr =
-        malloc(furi_hal_sw_digital_pin_buff.buffer_tx_size * sizeof(uint32_t));
+    furi_hal_sw_digital_pin_buff.tx->buffer_size = samples;
+    furi_hal_sw_digital_pin_buff.tx->buffer_half_size =
+        furi_hal_sw_digital_pin_buff.tx->buffer_size / 2;
+    furi_hal_sw_digital_pin_buff.tx->buffer_ptr =
+        malloc(furi_hal_sw_digital_pin_buff.tx->buffer_size * sizeof(uint32_t));
 
-    furi_hal_sw_digital_pin_buff.tx_callback_yield = tx_callback_yield;
-    furi_hal_sw_digital_pin_buff.tx_callback_end = tx_callback_end;
-    furi_hal_sw_digital_pin_buff.tx_context = context;
+    furi_hal_sw_digital_pin_buff.tx->callback_yield = callback_yield;
+    furi_hal_sw_digital_pin_buff.tx->callback_end = callback_end;
+    furi_hal_sw_digital_pin_buff.tx->context = context;
 
     furi_hal_gpio_init(gpio, GpioModeOutputPushPull, GpioPullNo, GpioSpeedHigh);
 
@@ -393,8 +397,9 @@ void furi_hal_sw_digital_pin_tx_init(
     LL_TIM_DisableMasterSlaveMode(SW_DIGITAL_PIN_TIM_TX);
 
     // Configure Interrupt Timer
-    furi_hal_interrupt_set_isr(SW_DIGITAL_PIN_TIM_IRQ, furi_hal_sw_digital_pin_tx_timer_isr, NULL);
-
+    //furi_hal_interrupt_set_isr(SW_DIGITAL_PIN_TIM_IRQ, furi_hal_sw_digital_pin_tx_timer_isr, NULL);
+    furi_hal_interrupt_set_isr_ex(
+        SW_DIGITAL_PIN_TIM_IRQ, 3, furi_hal_sw_digital_pin_tx_timer_isr, NULL);
     // Start
     LL_TIM_EnableDMAReq_UPDATE(SW_DIGITAL_PIN_TIM_TX);
     LL_TIM_GenerateEvent_UPDATE(SW_DIGITAL_PIN_TIM_TX);
@@ -404,14 +409,15 @@ void furi_hal_sw_digital_pin_tx_init(
 
     // Configure DMA
     LL_DMA_SetMemoryAddress(
-        SW_DIGITAL_PIN_DMA_DEF_TX, (uint32_t)furi_hal_sw_digital_pin_buff.buffer_tx_ptr);
+        SW_DIGITAL_PIN_DMA_DEF_TX, (uint32_t)furi_hal_sw_digital_pin_buff.tx->buffer_ptr);
     LL_DMA_SetPeriphAddress(SW_DIGITAL_PIN_DMA_DEF_TX, (uint32_t) & (gpio->port->BSRR));
     LL_DMA_ConfigTransfer(
         SW_DIGITAL_PIN_DMA_DEF_TX,
         LL_DMA_DIRECTION_MEMORY_TO_PERIPH | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
             LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_WORD | LL_DMA_MDATAALIGN_WORD |
-            LL_DMA_PRIORITY_HIGH);
-    LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_DEF_TX, furi_hal_sw_digital_pin_buff.buffer_tx_size);
+            LL_DMA_PRIORITY_MEDIUM);
+    LL_DMA_SetDataLength(
+        SW_DIGITAL_PIN_DMA_DEF_TX, furi_hal_sw_digital_pin_buff.tx->buffer_size);
     LL_DMA_SetPeriphRequest(SW_DIGITAL_PIN_DMA_DEF_TX, LL_DMAMUX_REQ_TIM2_CH1);
 
     // Configure DMA Channel CC1
@@ -419,15 +425,18 @@ void furi_hal_sw_digital_pin_tx_init(
     LL_TIM_CC_EnableChannel(SW_DIGITAL_PIN_TIM_TX, SW_DIGITAL_PIN_TIM_CHANNEL_TX);
 
     // Start DMA irq
-    furi_hal_interrupt_set_isr(
-        SW_DIGITAL_PIN_DMA_IRQ_TX, furi_hal_sw_digital_pin_dma_tx_isr, NULL);
+    // furi_hal_interrupt_set_isr(
+    //     SW_DIGITAL_PIN_DMA_IRQ_TX, furi_hal_sw_digital_pin_dma_tx_isr, NULL);
+    furi_hal_interrupt_set_isr_ex(
+        SW_DIGITAL_PIN_DMA_IRQ_TX, 15, furi_hal_sw_digital_pin_dma_tx_isr, NULL);
 }
 
 void furi_hal_sw_digital_pin_tx_start(void) {
     FURI_CRITICAL_ENTER();
     furi_hal_sw_digital_pin.state = SwDigitalPinStateTx;
 
-    LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_DEF_TX, furi_hal_sw_digital_pin_buff.buffer_tx_size);
+    LL_DMA_SetDataLength(
+        SW_DIGITAL_PIN_DMA_DEF_TX, furi_hal_sw_digital_pin_buff.tx->buffer_size);
 #if SW_DIGITAL_PIN_DMA_CHANNEL_TX == LL_DMA_CHANNEL_1
     // Need to clear flags before enabling DMA !!!!
     if(LL_DMA_IsActiveFlag_HT1(SW_DIGITAL_PIN_DMA)) LL_DMA_ClearFlag_HT1(SW_DIGITAL_PIN_DMA);
@@ -440,8 +449,8 @@ void furi_hal_sw_digital_pin_tx_start(void) {
     LL_DMA_EnableIT_HT(SW_DIGITAL_PIN_DMA_DEF_TX);
 
     furi_hal_sw_digital_pin_buff_tx_refill(
-        furi_hal_sw_digital_pin_buff.buffer_tx_ptr,
-        furi_hal_sw_digital_pin_buff.buffer_tx_size,
+        furi_hal_sw_digital_pin_buff.tx->buffer_ptr,
+        furi_hal_sw_digital_pin_buff.tx->buffer_size,
         0);
 
     // Sync timer Channel Tx
@@ -499,14 +508,16 @@ void furi_hal_sw_digital_pin_tx_deinit(void) {
     furi_hal_gpio_init(gpio_debug_tx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 #endif
     furi_hal_gpio_init(
-        furi_hal_sw_digital_pin_buff.tx_gpio, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    free(furi_hal_sw_digital_pin_buff.buffer_tx_ptr);
+        furi_hal_sw_digital_pin_buff.tx->gpio, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    free(furi_hal_sw_digital_pin_buff.tx->buffer_ptr);
+    free(furi_hal_sw_digital_pin_buff.tx);
 
     //furi_hal_sw_digital_pin.state = SwDigitalPinStateIdle;
 }
+//static uint32_t furi_hal_subghz_debug_gpio_buff1[2];
 
 void furi_hal_sw_digital_pin_rx_init(
-    FuriHalSwDigitalPinRxCallback rx_callback,
+    FuriHalSwDigitalPinRxCallback callback,
     void* context,
     uint16_t tim_psc,
     uint32_t tim_arr,
@@ -515,16 +526,17 @@ void furi_hal_sw_digital_pin_rx_init(
     furi_assert(samples > 0);
     furi_assert(!(samples & 0x1));
 
-    furi_hal_sw_digital_pin_buff.rx_gpio = gpio;
-    furi_hal_sw_digital_pin_buff.buffer_rx_size = samples;
-    furi_hal_sw_digital_pin_buff.buffer_rx_half_size =
-        furi_hal_sw_digital_pin_buff.buffer_rx_size / 2;
-    furi_hal_sw_digital_pin_buff.buffer_rx_ptr = malloc(samples * sizeof(uint16_t));
+    furi_hal_sw_digital_pin_buff.rx = malloc(sizeof(FuriHalSwDigitalPinRx));
+    furi_hal_sw_digital_pin_buff.rx->gpio = gpio;
+    furi_hal_sw_digital_pin_buff.rx->buffer_size = samples;
+    furi_hal_sw_digital_pin_buff.rx->buffer_half_size =
+        furi_hal_sw_digital_pin_buff.rx->buffer_size / 2;
+    furi_hal_sw_digital_pin_buff.rx->buffer_ptr = malloc(samples * sizeof(uint16_t));
 
-    furi_hal_sw_digital_pin_buff.rx_callback = rx_callback;
-    furi_hal_sw_digital_pin_buff.rx_context = context;
+    furi_hal_sw_digital_pin_buff.rx->callback = callback;
+    furi_hal_sw_digital_pin_buff.rx->context = context;
 
-    furi_hal_sw_digital_pin_buff.tim_arr_reset = 0;
+    furi_hal_sw_digital_pin_buff.rx->tim_arr_reset = tim_arr;
 
 #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
     furi_hal_gpio_init(gpio_debug_rx, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -540,6 +552,34 @@ void furi_hal_sw_digital_pin_rx_init(
     LL_TIM_DisableARRPreload(SW_DIGITAL_PIN_TIM_RX);
     LL_TIM_SetClockSource(SW_DIGITAL_PIN_TIM_RX, LL_TIM_CLOCKSOURCE_INTERNAL);
 
+#ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
+    LL_TIM_OC_EnablePreload(SW_DIGITAL_PIN_TIM_RX, SW_DIGITAL_PIN_TIM_CHANNEL_SYNC_RX);
+    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
+    LL_TIM_BDTR_InitTypeDef TIM_BDTRInitStruct = {0};
+    TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
+    TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
+    TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
+    TIM_OC_InitStruct.CompareValue = (tim_arr / 2);
+    TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
+    TIM_OC_InitStruct.OCNPolarity = LL_TIM_OCPOLARITY_HIGH;
+    TIM_OC_InitStruct.OCIdleState = LL_TIM_OCIDLESTATE_LOW;
+    TIM_OC_InitStruct.OCNIdleState = LL_TIM_OCIDLESTATE_LOW;
+    LL_TIM_OC_Init(SW_DIGITAL_PIN_TIM_RX, SW_DIGITAL_PIN_TIM_CHANNEL_SYNC_RX, &TIM_OC_InitStruct);
+    LL_TIM_OC_DisableFast(SW_DIGITAL_PIN_TIM_RX, SW_DIGITAL_PIN_TIM_CHANNEL_SYNC_RX);
+    TIM_BDTRInitStruct.OSSRState = LL_TIM_OSSR_DISABLE;
+    TIM_BDTRInitStruct.OSSIState = LL_TIM_OSSI_DISABLE;
+    TIM_BDTRInitStruct.LockLevel = LL_TIM_LOCKLEVEL_OFF;
+    TIM_BDTRInitStruct.DeadTime = 0;
+    TIM_BDTRInitStruct.BreakState = LL_TIM_BREAK_DISABLE;
+    TIM_BDTRInitStruct.BreakPolarity = LL_TIM_BREAK_POLARITY_HIGH;
+    TIM_BDTRInitStruct.BreakFilter = LL_TIM_BREAK_FILTER_FDIV1;
+    TIM_BDTRInitStruct.AutomaticOutput = LL_TIM_AUTOMATICOUTPUT_DISABLE;
+    LL_TIM_BDTR_Init(SW_DIGITAL_PIN_TIM_RX, &TIM_BDTRInitStruct);
+
+    furi_hal_gpio_init_ex(
+        &gpio_ext_pa7, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM17);
+    LL_TIM_EnableAllOutputs(TIM17);
+#else
     // Configure TIM channel CC1
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
     TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_FROZEN;
@@ -548,11 +588,11 @@ void furi_hal_sw_digital_pin_rx_init(
     TIM_OC_InitStruct.CompareValue = tim_arr / 2;
     TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
     LL_TIM_OC_Init(SW_DIGITAL_PIN_TIM_RX, SW_DIGITAL_PIN_TIM_CHANNEL_SYNC_RX, &TIM_OC_InitStruct);
-    //LL_TIM_OC_SetCompareCH1(TIMx, TIM_OCInitStruct->CompareValue);
     LL_TIM_OC_DisableFast(SW_DIGITAL_PIN_TIM_RX, SW_DIGITAL_PIN_TIM_CHANNEL_SYNC_RX);
 
     LL_TIM_SetTriggerOutput(SW_DIGITAL_PIN_TIM_RX, LL_TIM_TRGO_RESET);
     LL_TIM_DisableMasterSlaveMode(SW_DIGITAL_PIN_TIM_RX);
+#endif
 
     // Start
     LL_TIM_GenerateEvent_UPDATE(SW_DIGITAL_PIN_TIM_RX);
@@ -560,7 +600,8 @@ void furi_hal_sw_digital_pin_rx_init(
     // Config DMA Sync timer
 
     /* We need the EXTI to be configured as interrupt generating line, but no ISR registered */
-    furi_hal_gpio_init(gpio, GpioModeInterruptRiseFall, GpioPullUp, GpioSpeedVeryHigh);
+    //furi_hal_gpio_init(gpio, GpioModeInterruptRiseFall, GpioPullUp, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(gpio, GpioModeInterruptFall, GpioPullUp, GpioSpeedVeryHigh);
 
     /* Set DMAMUX request generation signal ID on specified DMAMUX channel */
     LL_DMAMUX_SetRequestSignalID(DMAMUX1, LL_DMAMUX_REQ_GEN_0, GET_DMAMUX_EXTI_LINE(gpio->pin));
@@ -571,7 +612,7 @@ void furi_hal_sw_digital_pin_rx_init(
 
     // Configure DMA Sync
     LL_DMA_SetMemoryAddress(
-        SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, (uint32_t)furi_hal_sw_digital_pin_buff.tim_arr_reset);
+        SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, (uint32_t)&furi_hal_sw_digital_pin_buff.rx->tim_arr_reset);
     LL_DMA_SetPeriphAddress(
         SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, (uint32_t) & (SW_DIGITAL_PIN_TIM_RX->CNT));
     LL_DMA_ConfigTransfer(
@@ -582,25 +623,47 @@ void furi_hal_sw_digital_pin_rx_init(
     LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, 1);
     LL_DMA_SetPeriphRequest(SW_DIGITAL_PIN_DMA_SYNC_RX_DEF, LL_DMAMUX_REQ_GENERATOR0);
 
+    // const GpioPin* gpio1 = &gpio_ext_pc3;
+    // furi_hal_subghz_debug_gpio_buff1[0] = gpio1->pin ;
+    // furi_hal_subghz_debug_gpio_buff1[1] = (uint32_t)gpio1->pin<< GPIO_NUMBER;
+    // furi_hal_gpio_init(
+    //     gpio1,
+    //     GpioModeOutputPushPull,
+    //     GpioPullNo,
+    //     GpioSpeedVeryHigh);
+    //LL_DMA_InitTypeDef dma_config = {0};
+    // dma_config.MemoryOrM2MDstAddress = (uint32_t)furi_hal_subghz_debug_gpio_buff1;
+    // dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio1->port->BSRR);
+    // dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    // dma_config.Mode = LL_DMA_MODE_CIRCULAR;
+    // dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    // dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    // dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    // dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    // dma_config.NbData = 2;
+    // dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM17_CH1;
+    // dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
+    // LL_DMA_Init(DMA2, LL_DMA_CHANNEL_7, &dma_config);
+    // LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_7, 2);
+    // LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_7);
+
     // Configure DMA Rx pin
     LL_DMA_SetMemoryAddress(
-        SW_DIGITAL_PIN_DMA_DEF_RX, (uint32_t)furi_hal_sw_digital_pin_buff.buffer_rx_ptr);
+        SW_DIGITAL_PIN_DMA_DEF_RX, (uint32_t)furi_hal_sw_digital_pin_buff.rx->buffer_ptr);
     LL_DMA_SetPeriphAddress(SW_DIGITAL_PIN_DMA_DEF_RX, (uint32_t) & (gpio->port->IDR));
     LL_DMA_ConfigTransfer(
         SW_DIGITAL_PIN_DMA_DEF_RX,
         LL_DMA_DIRECTION_PERIPH_TO_MEMORY | LL_DMA_MODE_CIRCULAR | LL_DMA_PERIPH_NOINCREMENT |
             LL_DMA_MEMORY_INCREMENT | LL_DMA_PDATAALIGN_HALFWORD | LL_DMA_MDATAALIGN_HALFWORD |
             LL_DMA_PRIORITY_VERYHIGH);
-    LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_DEF_RX, furi_hal_sw_digital_pin_buff.buffer_rx_size);
+    LL_DMA_SetDataLength(
+        SW_DIGITAL_PIN_DMA_DEF_RX, furi_hal_sw_digital_pin_buff.rx->buffer_size);
     LL_DMA_SetPeriphRequest(SW_DIGITAL_PIN_DMA_DEF_RX, LL_DMAMUX_REQ_TIM17_CH1);
 
     // Configure DMA Channel CC1
     LL_TIM_EnableDMAReq_CC1(SW_DIGITAL_PIN_TIM_RX);
     LL_TIM_CC_EnableChannel(SW_DIGITAL_PIN_TIM_RX, SW_DIGITAL_PIN_TIM_CHANNEL_SYNC_RX);
 
-    // Start DMA irq, higher priority than normal
-    furi_hal_interrupt_set_isr_ex(
-        SW_DIGITAL_PIN_DMA_IRQ_RX, 4, furi_hal_sw_digital_pin_dma_rx_isr, NULL);
 #if SW_DIGITAL_PIN_DMA_CHANNEL_RX == LL_DMA_CHANNEL_2
     // Need to clear flags before enabling DMA !!!!
     if(LL_DMA_IsActiveFlag_HT2(SW_DIGITAL_PIN_DMA)) LL_DMA_ClearFlag_HT1(SW_DIGITAL_PIN_DMA);
@@ -615,8 +678,12 @@ void furi_hal_sw_digital_pin_rx_init(
 
 void furi_hal_sw_digital_pin_rx_start(void) {
     FURI_CRITICAL_ENTER();
+    // Start DMA irq, higher priority than normal
+    furi_hal_interrupt_set_isr_ex(
+        SW_DIGITAL_PIN_DMA_IRQ_RX, 14, furi_hal_sw_digital_pin_dma_rx_isr, NULL);
 
-    LL_DMA_SetDataLength(SW_DIGITAL_PIN_DMA_DEF_RX, furi_hal_sw_digital_pin_buff.buffer_rx_size);
+    LL_DMA_SetDataLength(
+        SW_DIGITAL_PIN_DMA_DEF_RX, furi_hal_sw_digital_pin_buff.rx->buffer_size);
 
     // Start DMA Sync timer
     LL_DMA_EnableChannel(SW_DIGITAL_PIN_DMA_SYNC_RX_DEF);
@@ -636,6 +703,7 @@ void furi_hal_sw_digital_pin_rx_start(void) {
 
 void furi_hal_sw_digital_pin_rx_stop(void) {
     FURI_CRITICAL_ENTER();
+    furi_hal_interrupt_set_isr(SW_DIGITAL_PIN_DMA_IRQ_RX, NULL, NULL);
     // Stop timer
     if(LL_TIM_IsEnabledCounter(SW_DIGITAL_PIN_TIM_RX))
         LL_TIM_DisableCounter(SW_DIGITAL_PIN_TIM_RX);
@@ -653,6 +721,23 @@ void furi_hal_sw_digital_pin_rx_stop(void) {
     if(LL_DMA_IsEnabledIT_TC(SW_DIGITAL_PIN_DMA_DEF_RX))
         LL_DMA_DisableIT_TC(SW_DIGITAL_PIN_DMA_DEF_RX);
     FURI_CRITICAL_EXIT();
+
+    // Send the rest of the message
+    if(furi_hal_sw_digital_pin_buff.rx->callback) {
+        size_t len = furi_hal_sw_digital_pin_buff.rx->buffer_size -
+                     LL_DMA_GetDataLength(SW_DIGITAL_PIN_DMA_DEF_RX);
+        SwDigitalPinRx data = {0};
+        if(len > furi_hal_sw_digital_pin_buff.rx->buffer_half_size) {
+            data.rx_buff = furi_hal_sw_digital_pin_buff.rx->buffer_ptr +
+                           furi_hal_sw_digital_pin_buff.rx->buffer_half_size;
+            data.rx_buff_size = len - furi_hal_sw_digital_pin_buff.rx->buffer_half_size;
+        } else {
+            data.rx_buff = furi_hal_sw_digital_pin_buff.rx->buffer_ptr;
+            data.rx_buff_size = len;
+        }
+        furi_hal_sw_digital_pin_buff.rx->callback(
+            furi_hal_sw_digital_pin_buff.rx->context, data);
+    }
 #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
     furi_hal_gpio_write(gpio_debug_rx, false);
 #endif
@@ -676,18 +761,17 @@ void furi_hal_sw_digital_pin_rx_deinit(void) {
     LL_DMA_DeInit(SW_DIGITAL_PIN_DMA_DEF_RX);
     // Deinit DMA Sync timer
     LL_DMA_DeInit(SW_DIGITAL_PIN_DMA_SYNC_RX_DEF);
-
-    furi_hal_interrupt_set_isr(SW_DIGITAL_PIN_DMA_IRQ_RX, NULL, NULL);
     FURI_CRITICAL_EXIT();
 
     // Deinitialize GPIO
-    furi_hal_gpio_remove_int_callback(furi_hal_sw_digital_pin_buff.rx_gpio);
+    furi_hal_gpio_remove_int_callback(furi_hal_sw_digital_pin_buff.rx->gpio);
 #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
 
     furi_hal_gpio_init(gpio_debug_rx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 #endif
 
-    free(furi_hal_sw_digital_pin_buff.buffer_rx_ptr);
+    free(furi_hal_sw_digital_pin_buff.rx->buffer_ptr);
+    free(furi_hal_sw_digital_pin_buff.rx);
 
     //furi_hal_sw_digital_pin.state = SwDigitalPinStateIdle;
 }

@@ -3,6 +3,8 @@
 #include <furi_hal_cortex.h>
 #include <furi_hal_sw_digital_pin.h>
 
+#include "bitbanding.h"
+
 #define TAG "SwUsart"
 
 #define SW_USART_RX_BUFFER_SIZE_DEFAULT 1024
@@ -38,7 +40,7 @@ struct SwUsart {
     uint32_t tx_pin_reset;
 
     FuriStreamBuffer* rx_stream;
-    uint8_t rx_buffer_parce_byte[12];
+    uint8_t rx_buffer_parse_byte[12];
     uint8_t rx_buffer_parce_byte_pos;
 };
 
@@ -110,39 +112,40 @@ static void sw_usart_tx_end(void* context) {
     // callback end tx
 }
 
-static inline void sw_usart_parce_byte(SwUsart* sw_usart) {
+static inline void sw_usart_parse_byte(SwUsart* sw_usart) {
     furi_assert(sw_usart);
     uint8_t parity = 0;
     uint8_t byte = 0;
+    uint8_t* ptr_buf = sw_usart->rx_buffer_parse_byte;
+    
     //Data
-    uint8_t i = 0;
-    for(i = 0; i < sw_usart->config.data_bit; i++) {
-        if(sw_usart->rx_buffer_parce_byte[i]) {
-            byte |= sw_usart->rx_buffer_parce_byte[i] << i;
+    for(uint8_t i = 0; i < sw_usart->config.data_bit; i++) {
+        if(*(++ptr_buf)) {
+            byte |= 1 << i;
             parity++;
         }
     }
-    //furi_stream_buffer_send(sw_usart->rx_stream, &byte, 1, 0);
+
     do {
         // Check parity
         if(sw_usart->config.parity != SwUsartParityNone) {
             if(sw_usart->config.parity == SwUsartParityEven) {
-                if((parity & 0x1) != (sw_usart->rx_buffer_parce_byte[i++])) {
+                if((parity & 0x1) != *(++ptr_buf)) {
                     break;
                 }
             } else {
-                if((parity & 0x1) == (sw_usart->rx_buffer_parce_byte[i++])) {
+                if((parity & 0x1) == *(++ptr_buf)) {
                     break;
                 }
             }
         }
 
         // Check stop bits
-        if(!sw_usart->rx_buffer_parce_byte[i]) {
+        if(!(*(++ptr_buf))) {
             break;
         }
         if(sw_usart->config.stop_bit == SwUsartStopBit2) {
-            if(!sw_usart->rx_buffer_parce_byte[++i]) {
+            if(!(*(++ptr_buf))) {
                 break;
             }
         }
@@ -163,16 +166,19 @@ static void sw_usart_rx(void* context, SwDigitalPinRx data) {
             //Found start bit
             if((data.rx_buff[ind++] & mask)) {
                 continue;
+            } else {
+                //sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parce_byte_pos++] = 0;
+                sw_usart->rx_buffer_parce_byte_pos++;
             }
         }
-
-        if(sw_usart->rx_buffer_parce_byte_pos < sw_usart->tx_upload_char_len - 1) {
-            sw_usart->rx_buffer_parce_byte[sw_usart->rx_buffer_parce_byte_pos++] =
+        if(ind < data.rx_buff_size) {
+            sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parce_byte_pos++] =
                 (data.rx_buff[ind++] & mask ? 1 : 0);
-        } else {
-            //if there is the required number of bits, parse the data
-            sw_usart_parce_byte(sw_usart);
-            sw_usart->rx_buffer_parce_byte_pos = 0;
+            if(sw_usart->rx_buffer_parce_byte_pos == sw_usart->tx_upload_char_len) {
+                //if there is the required number of bits, parse the data
+                sw_usart->rx_buffer_parce_byte_pos = 0;
+                sw_usart_parse_byte(sw_usart);
+            }
         }
     } while(ind < data.rx_buff_size);
 }
@@ -188,16 +194,19 @@ static void sw_usart_rx_inverted(void* context, SwDigitalPinRx data) {
             //Found start bit
             if(!(data.rx_buff[ind++] & mask)) {
                 continue;
+            } else {
+                //sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parce_byte_pos++] = 0;
+                sw_usart->rx_buffer_parce_byte_pos++;
             }
         }
-
-        if(sw_usart->rx_buffer_parce_byte_pos < sw_usart->tx_upload_char_len - 1) {
-            sw_usart->rx_buffer_parce_byte[sw_usart->rx_buffer_parce_byte_pos++] =
+        if(ind < data.rx_buff_size) {
+            sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parce_byte_pos++] =
                 (data.rx_buff[ind++] & mask ? 0 : 1);
-        } else {
-            //if there is the required number of bits, parse the data
-            sw_usart_parce_byte(sw_usart);
-            sw_usart->rx_buffer_parce_byte_pos = 0;
+            if(sw_usart->rx_buffer_parce_byte_pos == sw_usart->tx_upload_char_len) {
+                //if there is the required number of bits, parse the data
+                sw_usart->rx_buffer_parce_byte_pos = 0;
+                sw_usart_parse_byte(sw_usart);
+            }
         }
     } while(ind < data.rx_buff_size);
 }
@@ -230,7 +239,7 @@ void sw_usart_free(SwUsart* sw_usart) {
     furi_assert(sw_usart);
 
     furi_hal_sw_digital_pin_tx_deinit();
-    //furi_hal_sw_digital_pin_rx_deinit();
+    furi_hal_sw_digital_pin_rx_deinit();
 
     furi_stream_buffer_free(sw_usart->rx_stream);
     free(sw_usart->tx_upload_char);
@@ -306,7 +315,7 @@ void sw_usart_start(
             sw_usart,
             0,
             (CPU_CLOCK_TIM / sw_usart->config.baudrate) - 1,
-            sw_usart->tx_upload_char_len * 24,
+            sw_usart->tx_upload_char_len * 8,
             sw_usart->config.tx_pin);
 
         if(!sw_usart->config.inverted) {
@@ -315,7 +324,7 @@ void sw_usart_start(
                 sw_usart,
                 0,
                 (CPU_CLOCK_TIM / sw_usart->config.baudrate) - 1,
-                64,
+                256,
                 sw_usart->config.rx_pin);
         } else {
             furi_hal_sw_digital_pin_rx_init(
@@ -323,7 +332,7 @@ void sw_usart_start(
                 sw_usart,
                 0,
                 (CPU_CLOCK_TIM / sw_usart->config.baudrate) - 1,
-                64,
+                256,
                 sw_usart->config.rx_pin);
         }
         furi_hal_sw_digital_pin_rx_start();
