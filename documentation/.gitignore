@@ -3,8 +3,3 @@ _build/
 sphinx_out/
 doxygen/latex/
 doxygen/xml/
-doxygen/html/*.html
-doxygen/html/*.js
-doxygen/html/*.css
-doxygen/html/*.png
-doxygen/html/*.svg
