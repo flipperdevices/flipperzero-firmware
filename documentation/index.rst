@@ -19,9 +19,10 @@ Welcome to the Flipper Zero Firmware Developer Documentation!
    docs/FuriHalDebugging
    docs/HardwareTargets
    docs/KeyCombo
+   docs/LFRFIDRaw
    docs/OTA
    docs/RoadMap
-   doca/UnitTests
+   docs/UnitTests
    docs/UniversalRemotes
 
 
