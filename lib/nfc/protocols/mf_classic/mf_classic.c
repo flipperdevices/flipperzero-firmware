@@ -253,3 +253,23 @@ void mf_classic_get_read_sectors_and_keys(
         }
     }
 }
+
+bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num) {
+    furi_assert(data);
+
+    bool sector_read = false;
+    do {
+        if(!mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeA)) break;
+        if(!mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeB)) break;
+        uint8_t start_block = mf_classic_get_first_block_num_of_sector(sector_num);
+        uint8_t total_blocks = mf_classic_get_blocks_num_in_sector(sector_num);
+        uint8_t block_read = true;
+        for(size_t i = start_block; i < start_block + total_blocks; i++) {
+            block_read = mifare_classic_is_block_read(data, i);
+            if(!block_read) break;
+        }
+        sector_read = block_read;
+    } while(false);
+
+    return sector_read;
+}

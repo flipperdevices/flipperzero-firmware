@@ -9,6 +9,8 @@ extern "C" {
 #define MF_CLASSIC_AUTH_KEY_A_CMD (0x60U)
 #define MF_CLASSIC_AUTH_KEY_B_CMD (0x61U)
 #define MF_CLASSIC_READ_BLOCK_CMD (0x30U)
+#define MF_CLASSIC_HALT_MSB_CMD (0x50)
+#define MF_CLASSIC_HALT_LSB_CMD (0x00)
 
 #define MF_CLASSIC_TOTAL_BLOCKS_MAX (256)
 #define MF_CLASSIC_BLOCK_SIZE (16)
@@ -145,6 +147,8 @@ void mf_classic_set_key_not_found(
 bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num);
 
 void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data);
+
+bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num);
 
 void mf_classic_get_read_sectors_and_keys(
     MfClassicData* data,

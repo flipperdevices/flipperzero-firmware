@@ -20,6 +20,7 @@ MfClassicPollerCommand nfc_dict_attack_worker_callback(MfClassicPollerEvent even
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackCardNotDetected);
     } else if(event.type == MfClassicPollerEventTypeRequestKey) {
+        
         MfClassicKey key = {
             .data = {0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5},
         };

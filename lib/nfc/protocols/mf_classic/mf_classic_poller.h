@@ -10,6 +10,7 @@ extern "C" {
 typedef struct MfClassicPoller MfClassicPoller;
 
 typedef enum {
+    MfClassicPollerEventTypeStart,
     MfClassicPollerEventTypeRequestKey,
     MfClassicPollerEventTypeNewSector,
     MfClassicPollerEventTypeFoundKeyA,
@@ -20,23 +21,22 @@ typedef enum {
     MfClassicPollerEventTypeKeyAttackStop,
     MfClassicPollerEventTypeKeyAttackNextSector,
     MfClassicPollerEventTypeReadComplete,
-    MfClassicPollerEventTypeReadFail,
 } MfClassicPollerEventType;
+
+typedef struct {
+    uint8_t total_sectors;
+} MfClassicPollerEventDataStart;
 
 typedef struct {
     uint8_t sector_num;
     MfClassicKey key;
     bool key_provided;
-} MfClassicKeyRequestContext;
-
-typedef struct {
-    MfClassicType type;
-} MfClassicDetectContext;
+} MfClassicPollerEventDataKeyRequest;
 
 typedef union {
     MfClassicError error;
-    MfClassicDetectContext detect_context;
-    MfClassicKeyRequestContext key_request_context;
+    MfClassicPollerEventDataStart start_data;
+    MfClassicPollerEventDataKeyRequest key_request_data;
 } MfClassicPollerEventData;
 
 typedef struct {
@@ -48,6 +48,7 @@ typedef enum {
     MfClassicPollerCommandContinue = NfcaPollerCommandContinue,
     MfClassicPollerCommandReset = NfcaPollerCommandReset,
     MfClassicPollerCommandStop = NfcaPollerCommandStop,
+    MfClassicPollerCommandRestart,
 } MfClassicPollerCommand;
 
 typedef MfClassicPollerCommand (
