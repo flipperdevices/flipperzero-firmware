@@ -425,7 +425,10 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
     FS_Error error;
 
     if(storage_file_exists(storage, new_path)) {
-        storage_common_remove(storage, new_path);
+        error = storage_common_remove(storage, new_path);
+        if(error != FSE_OK) {
+            return error;
+        }
     }
 
     error = storage_common_copy(storage, old_path, new_path);
