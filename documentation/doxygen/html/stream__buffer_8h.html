@@ -100,7 +100,7 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p >Furi stream buffer primitive. </p>
 <p ><a class="el" href="struct_stream.html">Stream</a> buffers are used to send a continuous stream of data from one task or interrupt to another. Their implementation is light weight, making them particularly suited for interrupt to task and core to core communication scenarios.</p>
-<p ><em><b>NOTE</b></em>: <a class="el" href="struct_stream.html">Stream</a> buffer implementation assumes there is only one task or interrupt that will write to the buffer (the writer), and only one task or interrupt that will read from the buffer (the reader). </p>
+<p >***NOTE***: <a class="el" href="struct_stream.html">Stream</a> buffer implementation assumes there is only one task or interrupt that will write to the buffer (the writer), and only one task or interrupt that will read from the buffer (the reader). </p>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="a496892963c8fd564034443c233b24fcb" name="a496892963c8fd564034443c233b24fcb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a496892963c8fd564034443c233b24fcb">&#9670;&nbsp;</a></span>furi_stream_buffer_alloc()</h2>

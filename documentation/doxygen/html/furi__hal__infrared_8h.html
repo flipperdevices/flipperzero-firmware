@@ -462,10 +462,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>furi_hal_infrared_asy
 </div><div class="memdoc">
 
 <p>Start IR asynchronous transmission. </p>
-<p >It can be stopped by 2 reasons:</p><ol type="1">
-<li>implicit call for <a class="el" href="furi__hal__infrared_8h.html#a49ce63b5d9bfa06773bc7d29782c908a" title="Stop IR asynchronous transmission and free resources.">furi_hal_infrared_async_tx_stop()</a></li>
-<li>callback can provide FuriHalInfraredTxGetDataStateLastDone response which means no more data available for transmission.</li>
-</ol>
+<p >It can be stopped by 2 reasons: 1. implicit call for <a class="el" href="furi__hal__infrared_8h.html#a49ce63b5d9bfa06773bc7d29782c908a" title="Stop IR asynchronous transmission and free resources.">furi_hal_infrared_async_tx_stop()</a> 2. callback can provide FuriHalInfraredTxGetDataStateLastDone response which means no more data available for transmission.</p>
 <p >Any func (<a class="el" href="furi__hal__infrared_8h.html#a49ce63b5d9bfa06773bc7d29782c908a" title="Stop IR asynchronous transmission and free resources.">furi_hal_infrared_async_tx_stop()</a> or <a class="el" href="furi__hal__infrared_8h.html#af06a71f5c6cdf5292e4bd46abe5cf0c9" title="Wait for end of IR asynchronous transmission and free resources.">furi_hal_infrared_async_tx_wait_termination()</a>) has to be called to wait end of transmission and free resources.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

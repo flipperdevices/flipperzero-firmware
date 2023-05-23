@@ -227,87 +227,27 @@ Functions</h2></td></tr>
 <div class="textblock"><p >Flipper <a class="el" href="struct_file.html" title="Structure that hold file index and returned api errors.">File</a> Format helper library. </p>
 <p >Flipper <a class="el" href="struct_file.html" title="Structure that hold file index and returned api errors.">File</a> Format is a fairly simple format for storing data in a file.</p>
 <p >Flipper file structure:</p>
-<div class="fragment"><div class="line"><span class="preprocessor"># Commentary</span></div>
-<div class="line"><span class="preprocessor">Field name: field value</span></div>
-</div><!-- fragment --><p >Lines starting with the # character are ignored (considered as comments). The separator between the name of the value and the value itself is the string ": ".</p>
+<p >~~~~~~~~~~~~~~~~~~~~~ # Commentary Field name: field value ~~~~~~~~~~~~~~~~~~~~~</p>
+<p >Lines starting with the # character are ignored (considered as comments). The separator between the name of the value and the value itself is the string ": ".</p>
 <p >Currently supported types:</p>
-<div class="fragment"><div class="line">String: text</div>
-<div class="line">Int32: 1 2 -3 4</div>
-<div class="line">Uint32: 1 2 3 4</div>
-<div class="line">Float: 1.0 1234.654</div>
-<div class="line">Hex: A4 B3 C2 D1 12 FF</div>
-</div><!-- fragment --><p >End of line is LF when writing, but CR is supported when reading.</p>
+<p >~~~~~~~~~~~~~~~~~~~~~ String: text Int32: 1 2 -3 4 Uint32: 1 2 3 4 Float: 1.0 1234.654 Hex: A4 B3 C2 D1 12 FF ~~~~~~~~~~~~~~~~~~~~~</p>
+<p >End of line is LF when writing, but CR is supported when reading.</p>
 <p >The library is designed in such a way that comments and field values are completely ignored when searching for keys, that is, they do not consume memory.</p>
 <p ><a class="el" href="struct_file.html" title="Structure that hold file index and returned api errors.">File</a> example:</p>
-<div class="fragment"><div class="line">Filetype: Flipper Test <a class="code hl_struct" href="struct_file.html">File</a></div>
-<div class="line"><a class="code hl_struct" href="struct_version.html">Version</a>: 1</div>
-<div class="line"><span class="preprocessor"># Just test file</span></div>
-<div class="line">String: String value</div>
-<div class="line">UINT: 1234</div>
-<div class="line">Hex: 00 01 FF A3</div>
-<div class="ttc" id="astruct_file_html"><div class="ttname"><a href="struct_file.html">File</a></div><div class="ttdoc">Structure that hold file index and returned api errors.</div><div class="ttdef"><b>Definition:</b> filesystem_api_internal.h:17</div></div>
-<div class="ttc" id="astruct_version_html"><div class="ttname"><a href="struct_version.html">Version</a></div><div class="ttdef"><b>Definition:</b> version.c:6</div></div>
-</div><!-- fragment --><p >Writing:</p>
-<div class="fragment"><div class="line"><a class="code hl_struct" href="struct_flipper_format.html">FlipperFormat</a>* format = <a class="code hl_function" href="flipper__format_8h.html#a26853524ba9ae300fbefb326ac83ea5f">flipper_format_file_alloc</a>(storage);</div>
-<div class="line"> </div>
-<div class="line"><span class="keywordflow">do</span> {</div>
-<div class="line">    <span class="keyword">const</span> uint32_t version = 1;</div>
-<div class="line">    <span class="keyword">const</span> <span class="keywordtype">char</span>* string_value = <span class="stringliteral">&quot;String value&quot;</span>;</div>
-<div class="line">    <span class="keyword">const</span> uint32_t uint32_value = 1234;</div>
-<div class="line">    <span class="keyword">const</span> uint16_t array_size = 4;</div>
-<div class="line">    <span class="keyword">const</span> uint8_t* array[array_size] = {0x00, 0x01, 0xFF, 0xA3};</div>
-<div class="line">    </div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#a43d5432c487d3b966ff9f8dccbe3f3a0">flipper_format_file_open_new</a>(format, EXT_PATH(<span class="stringliteral">&quot;flipper_format_test&quot;</span>))) <span class="keywordflow">break</span>;</div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#ad286ec57feb592dad5e1902f5af08ba7">flipper_format_write_header_cstr</a>(format, <span class="stringliteral">&quot;Flipper Test File&quot;</span>, version)) <span class="keywordflow">break</span>;</div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#a5a2430eda0b9680abfd69e5ccb00c778">flipper_format_write_comment_cstr</a>(format, <span class="stringliteral">&quot;Just test file&quot;</span>)) <span class="keywordflow">break</span>;</div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#a380897d498afc563724eceee54e3dd59">flipper_format_write_string_cstr</a>(format, <span class="stringliteral">&quot;String&quot;</span>, string_value)) <span class="keywordflow">break</span>;</div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#a3ffa8fb4fd68568d3ad89812fa21a3ad">flipper_format_write_uint32</a>(format, <span class="stringliteral">&quot;UINT&quot;</span>, &amp;uint32_value, 1)) <span class="keywordflow">break</span>;</div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#a06e80c483e05c3b5b43e50f75e6c6f1f">flipper_format_write_hex</a>(format, <span class="stringliteral">&quot;Hex Array&quot;</span>, array, array_size)) <span class="keywordflow">break</span>;</div>
-<div class="line">    </div>
-<div class="line">    <span class="comment">// signal that the file was written successfully</span></div>
-<div class="line">} <span class="keywordflow">while</span>(0);</div>
-<div class="line"> </div>
-<div class="line"><a class="code hl_function" href="flipper__format_8h.html#a6fd4fa0606d25ef8131a42d8e5db5b0f">flipper_format_free</a>(file);</div>
-<div class="ttc" id="aflipper__format_8h_html_a06e80c483e05c3b5b43e50f75e6c6f1f"><div class="ttname"><a href="flipper__format_8h.html#a06e80c483e05c3b5b43e50f75e6c6f1f">flipper_format_write_hex</a></div><div class="ttdeci">bool flipper_format_write_hex(FlipperFormat *flipper_format, const char *key, const uint8_t *data, const uint16_t data_size)</div><div class="ttdoc">Write key and array of hex-formatted bytes.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:380</div></div>
-<div class="ttc" id="aflipper__format_8h_html_a26853524ba9ae300fbefb326ac83ea5f"><div class="ttname"><a href="flipper__format_8h.html#a26853524ba9ae300fbefb326ac83ea5f">flipper_format_file_alloc</a></div><div class="ttdeci">FlipperFormat * flipper_format_file_alloc(Storage *storage)</div><div class="ttdoc">Allocate FlipperFormat as file.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:33</div></div>
-<div class="ttc" id="aflipper__format_8h_html_a380897d498afc563724eceee54e3dd59"><div class="ttname"><a href="flipper__format_8h.html#a380897d498afc563724eceee54e3dd59">flipper_format_write_string_cstr</a></div><div class="ttdeci">bool flipper_format_write_string_cstr(FlipperFormat *flipper_format, const char *key, const char *data)</div><div class="ttdoc">Write key and string.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:199</div></div>
-<div class="ttc" id="aflipper__format_8h_html_a3ffa8fb4fd68568d3ad89812fa21a3ad"><div class="ttname"><a href="flipper__format_8h.html#a3ffa8fb4fd68568d3ad89812fa21a3ad">flipper_format_write_uint32</a></div><div class="ttdeci">bool flipper_format_write_uint32(FlipperFormat *flipper_format, const char *key, const uint32_t *data, const uint16_t data_size)</div><div class="ttdoc">Write key and array of uint32.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:260</div></div>
-<div class="ttc" id="aflipper__format_8h_html_a43d5432c487d3b966ff9f8dccbe3f3a0"><div class="ttname"><a href="flipper__format_8h.html#a43d5432c487d3b966ff9f8dccbe3f3a0">flipper_format_file_open_new</a></div><div class="ttdeci">bool flipper_format_file_open_new(FlipperFormat *flipper_format, const char *path)</div><div class="ttdoc">Open file.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:100</div></div>
-<div class="ttc" id="aflipper__format_8h_html_a5a2430eda0b9680abfd69e5ccb00c778"><div class="ttname"><a href="flipper__format_8h.html#a5a2430eda0b9680abfd69e5ccb00c778">flipper_format_write_comment_cstr</a></div><div class="ttdeci">bool flipper_format_write_comment_cstr(FlipperFormat *flipper_format, const char *data)</div><div class="ttdoc">Write comment.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:401</div></div>
-<div class="ttc" id="aflipper__format_8h_html_a6fd4fa0606d25ef8131a42d8e5db5b0f"><div class="ttname"><a href="flipper__format_8h.html#a6fd4fa0606d25ef8131a42d8e5db5b0f">flipper_format_free</a></div><div class="ttdeci">void flipper_format_free(FlipperFormat *flipper_format)</div><div class="ttdoc">Free FlipperFormat.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:115</div></div>
-<div class="ttc" id="aflipper__format_8h_html_ad286ec57feb592dad5e1902f5af08ba7"><div class="ttname"><a href="flipper__format_8h.html#ad286ec57feb592dad5e1902f5af08ba7">flipper_format_write_header_cstr</a></div><div class="ttdeci">bool flipper_format_write_header_cstr(FlipperFormat *flipper_format, const char *filetype, const uint32_t version)</div><div class="ttdoc">Write the header (file type and version).</div><div class="ttdef"><b>Definition:</b> flipper_format.c:162</div></div>
-<div class="ttc" id="astruct_flipper_format_html"><div class="ttname"><a href="struct_flipper_format.html">FlipperFormat</a></div><div class="ttdef"><b>Definition:</b> flipper_format.c:12</div></div>
-</div><!-- fragment --><p >Reading:</p>
-<div class="fragment"><div class="line"><a class="code hl_struct" href="struct_flipper_format.html">FlipperFormat</a>* file = <a class="code hl_function" href="flipper__format_8h.html#a26853524ba9ae300fbefb326ac83ea5f">flipper_format_file_alloc</a>(storage);</div>
-<div class="line"> </div>
-<div class="line"><span class="keywordflow">do</span> {</div>
-<div class="line">    uint32_t version = 1;</div>
-<div class="line">    <a class="code hl_struct" href="struct_furi_string.html">FuriString</a>* file_type;</div>
-<div class="line">    <a class="code hl_struct" href="struct_furi_string.html">FuriString</a>* string_value;</div>
-<div class="line">    uint32_t uint32_value = 1;</div>
-<div class="line">    uint16_t array_size = 4;</div>
-<div class="line">    uint8_t* array[array_size] = {0};</div>
-<div class="line">    file_type = <a class="code hl_function" href="string_8h.html#a410732d29d41b1b80f2f9031412d513e">furi_string_alloc</a>();</div>
-<div class="line">    string_value = <a class="code hl_function" href="string_8h.html#a410732d29d41b1b80f2f9031412d513e">furi_string_alloc</a>();</div>
-<div class="line">    </div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#a967adaaf9b4cc886e9ee38bbac233518">flipper_format_file_open_existing</a>(file, EXT_PATH(<span class="stringliteral">&quot;flipper_format_test&quot;</span>))) <span class="keywordflow">break</span>;</div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#ae2b53997ae11445d7bc2cac0d39082f3">flipper_format_read_header</a>(file, file_type, &amp;version)) <span class="keywordflow">break</span>;</div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#a107f70dd39aad70ef4f69bdce22ac11a">flipper_format_read_string</a>(file, <span class="stringliteral">&quot;String&quot;</span>, string_value)) <span class="keywordflow">break</span>;</div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#ad10f56e17fe4d11d9f0892fb4e48ac7f">flipper_format_read_uint32</a>(file, <span class="stringliteral">&quot;UINT&quot;</span>, &amp;uint32_value, 1)) <span class="keywordflow">break</span>;</div>
-<div class="line">    <span class="keywordflow">if</span>(!<a class="code hl_function" href="flipper__format_8h.html#a6fc803f2f2a6a4b522e3629310856a6d">flipper_format_read_hex</a>(file, <span class="stringliteral">&quot;Hex Array&quot;</span>, array, array_size)) <span class="keywordflow">break</span>;</div>
-<div class="line">    </div>
-<div class="line">    <span class="comment">// signal that the file was read successfully</span></div>
-<div class="line">} <span class="keywordflow">while</span>(0);</div>
-<div class="line"> </div>
-<div class="line"><a class="code hl_function" href="flipper__format_8h.html#a6fd4fa0606d25ef8131a42d8e5db5b0f">flipper_format_free</a>(file);</div>
-<div class="ttc" id="aflipper__format_8h_html_a107f70dd39aad70ef4f69bdce22ac11a"><div class="ttname"><a href="flipper__format_8h.html#a107f70dd39aad70ef4f69bdce22ac11a">flipper_format_read_string</a></div><div class="ttdeci">bool flipper_format_read_string(FlipperFormat *flipper_format, const char *key, FuriString *data)</div><div class="ttdoc">Read a string by key.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:181</div></div>
-<div class="ttc" id="aflipper__format_8h_html_a6fc803f2f2a6a4b522e3629310856a6d"><div class="ttname"><a href="flipper__format_8h.html#a6fc803f2f2a6a4b522e3629310856a6d">flipper_format_read_hex</a></div><div class="ttdeci">bool flipper_format_read_hex(FlipperFormat *flipper_format, const char *key, uint8_t *data, const uint16_t data_size)</div><div class="ttdoc">Read array of hex-formatted bytes by key.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:366</div></div>
-<div class="ttc" id="aflipper__format_8h_html_a967adaaf9b4cc886e9ee38bbac233518"><div class="ttname"><a href="flipper__format_8h.html#a967adaaf9b4cc886e9ee38bbac233518">flipper_format_file_open_existing</a></div><div class="ttdeci">bool flipper_format_file_open_existing(FlipperFormat *flipper_format, const char *path)</div><div class="ttdoc">Open existing file.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:47</div></div>
-<div class="ttc" id="aflipper__format_8h_html_ad10f56e17fe4d11d9f0892fb4e48ac7f"><div class="ttname"><a href="flipper__format_8h.html#ad10f56e17fe4d11d9f0892fb4e48ac7f">flipper_format_read_uint32</a></div><div class="ttdeci">bool flipper_format_read_uint32(FlipperFormat *flipper_format, const char *key, uint32_t *data, const uint16_t data_size)</div><div class="ttdoc">Read array of uint32 by key.</div><div class="ttdef"><b>Definition:</b> flipper_format.c:245</div></div>
-<div class="ttc" id="aflipper__format_8h_html_ae2b53997ae11445d7bc2cac0d39082f3"><div class="ttname"><a href="flipper__format_8h.html#ae2b53997ae11445d7bc2cac0d39082f3">flipper_format_read_header</a></div><div class="ttdeci">bool flipper_format_read_header(FlipperFormat *flipper_format, FuriString *filetype, uint32_t *version)</div><div class="ttdoc">Read the header (file type and version).</div><div class="ttdef"><b>Definition:</b> flipper_format.c:144</div></div>
-<div class="ttc" id="astring_8h_html_a410732d29d41b1b80f2f9031412d513e"><div class="ttname"><a href="string_8h.html#a410732d29d41b1b80f2f9031412d513e">furi_string_alloc</a></div><div class="ttdeci">FuriString * furi_string_alloc()</div><div class="ttdoc">Allocate new FuriString.</div><div class="ttdef"><b>Definition:</b> string.c:25</div></div>
-<div class="ttc" id="astruct_furi_string_html"><div class="ttname"><a href="struct_furi_string.html">FuriString</a></div><div class="ttdef"><b>Definition:</b> string.c:4</div></div>
-</div><!-- fragment --> </div><h2 class="groupheader">Function Documentation</h2>
+<p >~~~~~~~~~~~~~~~~~~~~~ Filetype: Flipper Test <a class="el" href="struct_file.html" title="Structure that hold file index and returned api errors.">File</a> <a class="el" href="struct_version.html">Version</a>: 1 # Just test file String: String value UINT: 1234 Hex: 00 01 FF A3 ~~~~~~~~~~~~~~~~~~~~~</p>
+<p >Writing:</p>
+<p >~~~~~~~~~~~~~~~~~~~~~ FlipperFormat* format = flipper_format_file_alloc(storage);</p>
+<p >do { const uint32_t version = 1; const char* string_value = "String value"; const uint32_t uint32_value = 1234; const uint16_t array_size = 4; const uint8_t* array[array_size] = {0x00, 0x01, 0xFF, 0xA3};</p>
+<p >if(!flipper_format_file_open_new(format, EXT_PATH("flipper_format_test"))) break; if(!flipper_format_write_header_cstr(format, "Flipper Test File", version)) break; if(!flipper_format_write_comment_cstr(format, "Just test file")) break; if(!flipper_format_write_string_cstr(format, "String", string_value)) break; if(!flipper_format_write_uint32(format, "UINT", &amp;uint32_value, 1)) break; if(!flipper_format_write_hex(format, "Hex Array", array, array_size)) break;</p>
+<p >// signal that the file was written successfully } while(0);</p>
+<p >flipper_format_free(file); ~~~~~~~~~~~~~~~~~~~~~</p>
+<p >Reading:</p>
+<p >~~~~~~~~~~~~~~~~~~~~~ FlipperFormat* file = flipper_format_file_alloc(storage);</p>
+<p >do { uint32_t version = 1; FuriString* file_type; FuriString* string_value; uint32_t uint32_value = 1; uint16_t array_size = 4; uint8_t* array[array_size] = {0}; file_type = <a class="el" href="string_8h.html#a410732d29d41b1b80f2f9031412d513e" title="Allocate new FuriString.">furi_string_alloc()</a>; string_value = <a class="el" href="string_8h.html#a410732d29d41b1b80f2f9031412d513e" title="Allocate new FuriString.">furi_string_alloc()</a>;</p>
+<p >if(!flipper_format_file_open_existing(file, EXT_PATH("flipper_format_test"))) break; if(!flipper_format_read_header(file, file_type, &amp;version)) break; if(!flipper_format_read_string(file, "String", string_value)) break; if(!flipper_format_read_uint32(file, "UINT", &amp;uint32_value, 1)) break; if(!flipper_format_read_hex(file, "Hex Array", array, array_size)) break;</p>
+<p >// signal that the file was read successfully } while(0);</p>
+<p >flipper_format_free(file); ~~~~~~~~~~~~~~~~~~~~~ </p>
+</div><h2 class="groupheader">Function Documentation</h2>
 <a id="a7e59fa5ecd8ce7e16e7aa92207b168dc" name="a7e59fa5ecd8ce7e16e7aa92207b168dc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7e59fa5ecd8ce7e16e7aa92207b168dc">&#9670;&nbsp;</a></span>flipper_format_buffered_file_alloc()</h2>
 
@@ -886,8 +826,7 @@ false </dd></dl>
 </div><div class="memdoc">
 
 <p>Updates the value of the first matching key to an array of hex-formatted bytes, or adds the key and value if the key did not exist. </p>
-<p ><br  />
- Sets the RW pointer to a position at the end of inserted data. </p><dl class="params"><dt>Parameters</dt><dd>
+<p >Sets the RW pointer to a position at the end of inserted data. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">flipper_format</td><td>Pointer to a <a class="el" href="struct_flipper_format.html">FlipperFormat</a> instance </td></tr>
     <tr><td class="paramname">key</td><td>Key </td></tr>
@@ -1028,8 +967,7 @@ false </dd></dl>
 </div><div class="memdoc">
 
 <p>Updates the value of the first matching key to a string value, or adds the key and value if the key did not exist. </p>
-<p ><br  />
- Plain C version. Sets the RW pointer to a position at the end of inserted data. </p><dl class="params"><dt>Parameters</dt><dd>
+<p >Plain C version. Sets the RW pointer to a position at the end of inserted data. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">flipper_format</td><td>Pointer to a <a class="el" href="struct_flipper_format.html">FlipperFormat</a> instance </td></tr>
     <tr><td class="paramname">key</td><td>Key </td></tr>

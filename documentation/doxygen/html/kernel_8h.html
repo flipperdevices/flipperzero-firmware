@@ -112,7 +112,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Delay in milliseconds. </p>
-<p >This method uses kernel ticks on the inside, which causes delay to be aliased to scheduler timer intervals. Real wait time will be between X+ milliseconds. Special value: 0, will cause task yield. Also if used when kernel is not running will fall back to <code>furi_delay_us</code>.</p>
+<p >This method uses kernel ticks on the inside, which causes delay to be aliased to scheduler timer intervals. Real wait time will be between X+ milliseconds. Special value: 0, will cause task yield. Also if used when kernel is not running will fall back to `furi_delay_us`.</p>
 <dl class="section warning"><dt>Warning</dt><dd>Cannot be used from ISR</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
