@@ -53,6 +53,7 @@ typedef enum {
     SubGhzLoadKeyStateUnknown,
     SubGhzLoadKeyStateOK,
     SubGhzLoadKeyStateParseErr,
+    SubGhzLoadKeyStateProtocolDescriptionErr,
 } SubGhzLoadKeyState;
 
 /** SubGhzLock */
@@ -76,3 +77,10 @@ typedef enum {
     SubGhzViewIdTestCarrier,
     SubGhzViewIdTestPacket,
 } SubGhzViewId;
+
+/** SubGhz load type file */
+typedef enum {
+    SubGhzLoadTypeFileNoLoad,
+    SubGhzLoadTypeFileKey,
+    SubGhzLoadTypeFileRaw,
+} SubGhzLoadTypeFile;

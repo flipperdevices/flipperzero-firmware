@@ -1,12 +1,12 @@
+import os
+import sys
+import traceback
+
 import SCons.Warnings as Warnings
+from ansi.color import fg
+from SCons.Errors import UserError
 
 # from SCons.Script.Main import find_deepest_user_frame
-
-from ansi.color import fg, bg, fx
-
-import traceback
-import sys
-import os
 
 
 def find_deepest_user_frame(tb):
@@ -36,6 +36,11 @@ def fbt_warning(e):
 
 
 def generate(env):
+    if env.get("UFBT_WORK_DIR"):
+        raise UserError(
+            "You're trying to use a new format SDK on a legacy ufbt version. "
+            "Please update ufbt to a version from PyPI: https://pypi.org/project/ufbt/"
+        )
     Warnings._warningOut = fbt_warning
 
 

@@ -63,6 +63,10 @@ void furi_hal_clock_init() {
     LL_RCC_HSI_Enable();
     while(!HS_CLOCK_IS_READY())
         ;
+    /* Select HSI as system clock source after Wake Up from Stop mode
+     * Must be set before enabling CSS */
+    LL_RCC_SetClkAfterWakeFromStop(LL_RCC_STOP_WAKEUPCLOCK_HSI);
+
     LL_RCC_HSE_EnableCSS();
 
     /* LSE and LSI1 configuration and activation */
@@ -140,6 +144,7 @@ void furi_hal_clock_init() {
     LL_RCC_SetRNGClockSource(LL_RCC_RNG_CLKSOURCE_CLK48);
     LL_RCC_SetUSBClockSource(LL_RCC_USB_CLKSOURCE_PLLSAI1);
     LL_RCC_SetCLK48ClockSource(LL_RCC_CLK48_CLKSOURCE_PLLSAI1);
+    LL_RCC_HSI_EnableInStopMode(); // Ensure that MR is capable of work in STOP0
     LL_RCC_SetSMPSClockSource(LL_RCC_SMPS_CLKSOURCE_HSE);
     LL_RCC_SetSMPSPrescaler(LL_RCC_SMPS_DIV_1);
     LL_RCC_SetRFWKPClockSource(LL_RCC_RFWKP_CLKSOURCE_LSE);
@@ -203,25 +208,36 @@ void furi_hal_clock_switch_to_hsi() {
     while(!LL_RCC_HSI_IsReady())
         ;
 
-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSI);
     LL_RCC_SetSMPSClockSource(LL_RCC_SMPS_CLKSOURCE_HSI);
+    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSI);
 
     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSI)
         ;
 
-    LL_FLASH_SetLatency(LL_FLASH_LATENCY_1);
+    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_1);
+
+    LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_0)
+        ;
 }
 
 void furi_hal_clock_switch_to_pll() {
     LL_RCC_HSE_Enable();
     LL_RCC_PLL_Enable();
+    LL_RCC_PLLSAI1_Enable();
 
     while(!LL_RCC_HSE_IsReady())
         ;
     while(!LL_RCC_PLL_IsReady())
         ;
+    while(!LL_RCC_PLLSAI1_IsReady())
+        ;
+
+    LL_C2_RCC_SetAHBPrescaler(LL_RCC_SYSCLK_DIV_2);
 
     LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
+    while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_3)
+        ;
 
     LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
     LL_RCC_SetSMPSClockSource(LL_RCC_SMPS_CLKSOURCE_HSE);

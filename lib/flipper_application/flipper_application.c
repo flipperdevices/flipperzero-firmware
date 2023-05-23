@@ -1,25 +1,65 @@
 #include "flipper_application.h"
 #include "elf/elf_file.h"
 #include <notification/notification_messages.h>
+#include "application_assets.h"
 
-#define TAG "fapp"
+#include <m-list.h>
+
+#define TAG "Fap"
 
 struct FlipperApplication {
     ELFDebugInfo state;
     FlipperApplicationManifest manifest;
     ELFFile* elf;
     FuriThread* thread;
+    void* ep_thread_args;
 };
 
-/* For debugger access to app state */
-FlipperApplication* last_loaded_app = NULL;
+/********************** Debugger access to loader state **********************/
+
+LIST_DEF(FlipperApplicationList, const FlipperApplication*, M_POD_OPLIST);
+
+FlipperApplicationList_t flipper_application_loaded_app_list = {0};
+static bool flipper_application_loaded_app_list_initialized = false;
+
+static void flipper_application_list_add_app(const FlipperApplication* app) {
+    furi_assert(app);
+
+    if(!flipper_application_loaded_app_list_initialized) {
+        FlipperApplicationList_init(flipper_application_loaded_app_list);
+        flipper_application_loaded_app_list_initialized = true;
+    }
+    FlipperApplicationList_push_back(flipper_application_loaded_app_list, app);
+}
+
+static void flipper_application_list_remove_app(const FlipperApplication* app) {
+    furi_assert(flipper_application_loaded_app_list_initialized);
+    furi_assert(app);
+
+    FlipperApplicationList_it_t it;
+    for(FlipperApplicationList_it(it, flipper_application_loaded_app_list);
+        !FlipperApplicationList_end_p(it);
+        FlipperApplicationList_next(it)) {
+        if(*FlipperApplicationList_ref(it) == app) {
+            FlipperApplicationList_remove(flipper_application_loaded_app_list, it);
+            break;
+        }
+    }
+}
+
+/*****************************************************************************/
 
 FlipperApplication*
     flipper_application_alloc(Storage* storage, const ElfApiInterface* api_interface) {
     FlipperApplication* app = malloc(sizeof(FlipperApplication));
     app->elf = elf_file_alloc(storage, api_interface);
     app->thread = NULL;
+    app->ep_thread_args = NULL;
     return app;
+}
+
+bool flipper_application_is_plugin(FlipperApplication* app) {
+    return app->manifest.stack_size == 0;
 }
 
 void flipper_application_free(FlipperApplication* app) {
@@ -30,9 +70,16 @@ void flipper_application_free(FlipperApplication* app) {
         furi_thread_free(app->thread);
     }
 
-    last_loaded_app = NULL;
+    if(app->state.entry) {
+        flipper_application_list_remove_app(app);
+    }
 
     elf_file_clear_debug_info(&app->state);
+
+    if(elf_file_is_init_complete(app->elf)) {
+        elf_file_call_fini(app->elf);
+    }
+
     elf_file_free(app->elf);
     free(app);
 }
@@ -55,24 +102,83 @@ static FlipperApplicationPreloadStatus
     return FlipperApplicationPreloadStatusSuccess;
 }
 
-/* Parse headers, load manifest */
-FlipperApplicationPreloadStatus
-    flipper_application_preload_manifest(FlipperApplication* app, const char* path) {
-    if(!elf_file_open(app->elf, path) || !elf_file_load_manifest(app->elf, &app->manifest)) {
+static bool flipper_application_process_manifest_section(
+    File* file,
+    size_t offset,
+    size_t size,
+    void* context) {
+    FlipperApplicationManifest* manifest = context;
+
+    if(size < sizeof(FlipperApplicationManifest)) {
+        return false;
+    }
+
+    if(manifest == NULL) {
+        return true;
+    }
+
+    return storage_file_seek(file, offset, true) &&
+           storage_file_read(file, manifest, size) == size;
+}
+
+// we can't use const char* as context because we will lose the const qualifier
+typedef struct {
+    const char* path;
+} FlipperApplicationPreloadAssetsContext;
+
+static bool flipper_application_process_assets_section(
+    File* file,
+    size_t offset,
+    size_t size,
+    void* context) {
+    FlipperApplicationPreloadAssetsContext* preload_context = context;
+    return flipper_application_assets_load(file, preload_context->path, offset, size);
+}
+
+static FlipperApplicationPreloadStatus
+    flipper_application_load(FlipperApplication* app, const char* path, bool load_full) {
+    if(!elf_file_open(app->elf, path)) {
+        return FlipperApplicationPreloadStatusInvalidFile;
+    }
+
+    // if we are loading full file
+    if(load_full) {
+        // load section table
+        if(!elf_file_load_section_table(app->elf)) {
+            return FlipperApplicationPreloadStatusInvalidFile;
+        }
+
+        // load assets section
+        FlipperApplicationPreloadAssetsContext preload_context = {.path = path};
+        if(elf_process_section(
+               app->elf,
+               ".fapassets",
+               flipper_application_process_assets_section,
+               &preload_context) == ElfProcessSectionResultCannotProcess) {
+            return FlipperApplicationPreloadStatusInvalidFile;
+        }
+    }
+
+    // load manifest section
+    if(elf_process_section(
+           app->elf, ".fapmeta", flipper_application_process_manifest_section, &app->manifest) !=
+       ElfProcessSectionResultSuccess) {
         return FlipperApplicationPreloadStatusInvalidFile;
     }
 
     return flipper_application_validate_manifest(app);
 }
 
+/* Parse headers, load manifest */
+FlipperApplicationPreloadStatus
+    flipper_application_preload_manifest(FlipperApplication* app, const char* path) {
+    return flipper_application_load(app, path, false);
+}
+
 /* Parse headers, load full file */
 FlipperApplicationPreloadStatus
     flipper_application_preload(FlipperApplication* app, const char* path) {
-    if(!elf_file_open(app->elf, path) || !elf_file_load_section_table(app->elf, &app->manifest)) {
-        return FlipperApplicationPreloadStatusInvalidFile;
-    }
-
-    return flipper_application_validate_manifest(app);
+    return flipper_application_load(app, path, true);
 }
 
 const FlipperApplicationManifest* flipper_application_get_manifest(FlipperApplication* app) {
@@ -80,12 +186,12 @@ const FlipperApplicationManifest* flipper_application_get_manifest(FlipperApplic
 }
 
 FlipperApplicationLoadStatus flipper_application_map_to_memory(FlipperApplication* app) {
-    last_loaded_app = app;
     ELFFileLoadStatus status = elf_file_load_sections(app->elf);
 
     switch(status) {
     case ELFFileLoadStatusSuccess:
         elf_file_init_debug_info(app->elf, &app->state);
+        flipper_application_list_add_app(app);
         return FlipperApplicationLoadStatusSuccess;
     case ELFFileLoadStatusNoFreeMemory:
         return FlipperApplicationLoadStatusNoFreeMemory;
@@ -97,9 +203,15 @@ FlipperApplicationLoadStatus flipper_application_map_to_memory(FlipperApplicatio
 }
 
 static int32_t flipper_application_thread(void* context) {
-    elf_file_pre_run(last_loaded_app->elf);
-    int32_t result = elf_file_run(last_loaded_app->elf, context);
-    elf_file_post_run(last_loaded_app->elf);
+    furi_assert(context);
+    FlipperApplication* app = (FlipperApplication*)context;
+
+    elf_file_call_init(app->elf);
+
+    FlipperApplicationEntryPoint entry_point = elf_file_get_entry_point(app->elf);
+    int32_t ret_code = entry_point(app->ep_thread_args);
+
+    elf_file_call_fini(app->elf);
 
     // wait until all notifications from RAM are completed
     NotificationApp* notifications = furi_record_open(RECORD_NOTIFICATION);
@@ -109,17 +221,17 @@ static int32_t flipper_application_thread(void* context) {
     notification_message_block(notifications, &sequence_empty);
     furi_record_close(RECORD_NOTIFICATION);
 
-    return result;
+    return ret_code;
 }
 
 FuriThread* flipper_application_spawn(FlipperApplication* app, void* args) {
     furi_check(app->thread == NULL);
+    furi_check(!flipper_application_is_plugin(app));
+    app->ep_thread_args = args;
 
     const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
-    furi_check(manifest->stack_size > 0);
-
     app->thread = furi_thread_alloc_ex(
-        manifest->name, manifest->stack_size, flipper_application_thread, args);
+        manifest->name, manifest->stack_size, flipper_application_thread, app);
 
     return app->thread;
 }
@@ -152,4 +264,29 @@ const char* flipper_application_load_status_to_string(FlipperApplicationLoadStat
         return "Unknown error";
     }
     return load_status_strings[status];
+}
+
+const FlipperAppPluginDescriptor*
+    flipper_application_plugin_get_descriptor(FlipperApplication* app) {
+    if(!flipper_application_is_plugin(app)) {
+        return NULL;
+    }
+
+    if(!elf_file_is_init_complete(app->elf)) {
+        elf_file_call_init(app->elf);
+    }
+
+    typedef const FlipperAppPluginDescriptor* (*get_lib_descriptor_t)(void);
+    get_lib_descriptor_t lib_ep = elf_file_get_entry_point(app->elf);
+    furi_check(lib_ep);
+
+    const FlipperAppPluginDescriptor* lib_descriptor = lib_ep();
+
+    FURI_LOG_D(
+        TAG,
+        "Library for %s, API v. %lu loaded",
+        lib_descriptor->appid,
+        lib_descriptor->ep_api_version);
+
+    return lib_descriptor;
 }

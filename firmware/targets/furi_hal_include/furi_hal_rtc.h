@@ -29,6 +29,9 @@ typedef enum {
     FuriHalRtcFlagFactoryReset = (1 << 1),
     FuriHalRtcFlagLock = (1 << 2),
     FuriHalRtcFlagC2Update = (1 << 3),
+    FuriHalRtcFlagHandOrient = (1 << 4),
+    FuriHalRtcFlagLegacySleep = (1 << 5),
+    FuriHalRtcFlagStealthMode = (1 << 6),
 } FuriHalRtcFlag;
 
 typedef enum {
@@ -83,6 +86,9 @@ void furi_hal_rtc_deinit_early();
 
 /** Initialize RTC subsystem */
 void furi_hal_rtc_init();
+
+/** Force sync shadow registers */
+void furi_hal_rtc_sync_shadow();
 
 /** Get RTC register content
  *

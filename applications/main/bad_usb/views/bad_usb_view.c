@@ -1,5 +1,5 @@
 #include "bad_usb_view.h"
-#include "../bad_usb_script.h"
+#include "../helpers/ducky_script.h"
 #include <toolbox/path.h>
 #include <gui/elements.h>
 #include <assets_icons.h>
@@ -48,15 +48,13 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
     if((model->state.state == BadUsbStateIdle) || (model->state.state == BadUsbStateDone) ||
        (model->state.state == BadUsbStateNotConnected)) {
         elements_button_center(canvas, "Run");
+        elements_button_left(canvas, "Config");
     } else if((model->state.state == BadUsbStateRunning) || (model->state.state == BadUsbStateDelay)) {
         elements_button_center(canvas, "Stop");
+    } else if(model->state.state == BadUsbStateWaitForBtn) {
+        elements_button_center(canvas, "Press to continue");
     } else if(model->state.state == BadUsbStateWillRun) {
         elements_button_center(canvas, "Cancel");
-    }
-
-    if((model->state.state == BadUsbStateNotConnected) ||
-       (model->state.state == BadUsbStateIdle) || (model->state.state == BadUsbStateDone)) {
-        elements_button_left(canvas, "Config");
     }
 
     if(model->state.state == BadUsbStateNotConnected) {
@@ -83,7 +81,12 @@ static void bad_usb_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(
             canvas, 127, 46, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
-        canvas_draw_str_aligned(canvas, 127, 56, AlignRight, AlignBottom, model->state.error);
+
+        furi_string_set_str(disp_str, model->state.error);
+        elements_string_fit_width(canvas, disp_str, canvas_width(canvas));
+        canvas_draw_str_aligned(
+            canvas, 127, 56, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
+        furi_string_reset(disp_str);
     } else if(model->state.state == BadUsbStateIdle) {
         canvas_draw_icon(canvas, 4, 26, &I_Smile_18x18);
         canvas_set_font(canvas, FontBigNumbers);
@@ -203,6 +206,7 @@ void bad_usb_set_layout(BadUsb* bad_usb, const char* layout) {
         { strlcpy(model->layout, layout, MAX_NAME_LEN); },
         true);
 }
+
 void bad_usb_set_state(BadUsb* bad_usb, BadUsbState* st) {
     furi_assert(st);
     with_view_model(
@@ -213,4 +217,20 @@ void bad_usb_set_state(BadUsb* bad_usb, BadUsbState* st) {
             model->anim_frame ^= 1;
         },
         true);
+}
+
+bool bad_usb_is_idle_state(BadUsb* bad_usb) {
+    bool is_idle = false;
+    with_view_model(
+        bad_usb->view,
+        BadUsbModel * model,
+        {
+            if((model->state.state == BadUsbStateIdle) ||
+               (model->state.state == BadUsbStateDone) ||
+               (model->state.state == BadUsbStateNotConnected)) {
+                is_idle = true;
+            }
+        },
+        false);
+    return is_idle;
 }

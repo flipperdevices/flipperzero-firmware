@@ -4,6 +4,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_rtc.h>
 #include <stdint.h>
 #include <u8g2_glue.h>
 
@@ -16,6 +17,7 @@ const CanvasFontParameters canvas_font_params[FontTotalNumber] = {
 
 Canvas* canvas_init() {
     Canvas* canvas = malloc(sizeof(Canvas));
+    canvas->compress_icon = compress_icon_alloc();
 
     // Setup u8g2
     u8g2_Setup_st756x_flipper(&canvas->fb, U8G2_R0, u8x8_hw_spi_stm32, u8g2_gpio_and_delay_stm32);
@@ -34,6 +36,7 @@ Canvas* canvas_init() {
 
 void canvas_free(Canvas* canvas) {
     furi_assert(canvas);
+    compress_icon_free(canvas->compress_icon);
     free(canvas);
 }
 
@@ -217,8 +220,8 @@ void canvas_draw_bitmap(
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* bitmap_data = NULL;
-    furi_hal_compress_icon_decode(compressed_bitmap_data, &bitmap_data);
-    u8g2_DrawXBM(&canvas->fb, x, y, width, height, bitmap_data);
+    compress_icon_decode(canvas->compress_icon, compressed_bitmap_data, &bitmap_data);
+    canvas_draw_u8g2_bitmap(&canvas->fb, x, y, width, height, bitmap_data, IconRotation0);
 }
 
 void canvas_draw_icon_animation(
@@ -232,14 +235,140 @@ void canvas_draw_icon_animation(
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
-    furi_hal_compress_icon_decode(icon_animation_get_data(icon_animation), &icon_data);
-    u8g2_DrawXBM(
+    compress_icon_decode(
+        canvas->compress_icon, icon_animation_get_data(icon_animation), &icon_data);
+    canvas_draw_u8g2_bitmap(
         &canvas->fb,
         x,
         y,
         icon_animation_get_width(icon_animation),
         icon_animation_get_height(icon_animation),
-        icon_data);
+        icon_data,
+        IconRotation0);
+}
+
+static void canvas_draw_u8g2_bitmap_int(
+    u8g2_t* u8g2,
+    u8g2_uint_t x,
+    u8g2_uint_t y,
+    u8g2_uint_t w,
+    u8g2_uint_t h,
+    bool mirror,
+    bool rotation,
+    const uint8_t* bitmap) {
+    u8g2_uint_t blen;
+    blen = w;
+    blen += 7;
+    blen >>= 3;
+
+    if(rotation && !mirror) {
+        x += w + 1;
+    } else if(mirror && !rotation) {
+        y += h - 1;
+    }
+
+    while(h > 0) {
+        const uint8_t* b = bitmap;
+        uint16_t len = w;
+        uint16_t x0 = x;
+        uint16_t y0 = y;
+        uint8_t mask;
+        uint8_t color = u8g2->draw_color;
+        uint8_t ncolor = (color == 0 ? 1 : 0);
+        mask = 1;
+
+        while(len > 0) {
+            if(u8x8_pgm_read(b) & mask) {
+                u8g2->draw_color = color;
+                u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
+            } else if(u8g2->bitmap_transparency == 0) {
+                u8g2->draw_color = ncolor;
+                u8g2_DrawHVLine(u8g2, x0, y0, 1, 0);
+            }
+
+            if(rotation) {
+                y0++;
+            } else {
+                x0++;
+            }
+
+            mask <<= 1;
+            if(mask == 0) {
+                mask = 1;
+                b++;
+            }
+            len--;
+        }
+
+        u8g2->draw_color = color;
+        bitmap += blen;
+
+        if(mirror) {
+            if(rotation) {
+                x++;
+            } else {
+                y--;
+            }
+        } else {
+            if(rotation) {
+                x--;
+            } else {
+                y++;
+            }
+        }
+        h--;
+    }
+}
+
+void canvas_draw_u8g2_bitmap(
+    u8g2_t* u8g2,
+    u8g2_uint_t x,
+    u8g2_uint_t y,
+    u8g2_uint_t w,
+    u8g2_uint_t h,
+    const uint8_t* bitmap,
+    IconRotation rotation) {
+    u8g2_uint_t blen;
+    blen = w;
+    blen += 7;
+    blen >>= 3;
+#ifdef U8G2_WITH_INTERSECTION
+    if(u8g2_IsIntersection(u8g2, x, y, x + w, y + h) == 0) return;
+#endif /* U8G2_WITH_INTERSECTION */
+
+    switch(rotation) {
+    case IconRotation0:
+        canvas_draw_u8g2_bitmap_int(u8g2, x, y, w, h, 0, 0, bitmap);
+        break;
+    case IconRotation90:
+        canvas_draw_u8g2_bitmap_int(u8g2, x, y, w, h, 0, 1, bitmap);
+        break;
+    case IconRotation180:
+        canvas_draw_u8g2_bitmap_int(u8g2, x, y, w, h, 1, 0, bitmap);
+        break;
+    case IconRotation270:
+        canvas_draw_u8g2_bitmap_int(u8g2, x, y, w, h, 1, 1, bitmap);
+        break;
+    default:
+        break;
+    }
+}
+
+void canvas_draw_icon_ex(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    const Icon* icon,
+    IconRotation rotation) {
+    furi_assert(canvas);
+    furi_assert(icon);
+
+    x += canvas->offset_x;
+    y += canvas->offset_y;
+    uint8_t* icon_data = NULL;
+    compress_icon_decode(canvas->compress_icon, icon_get_data(icon), &icon_data);
+    canvas_draw_u8g2_bitmap(
+        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, rotation);
 }
 
 void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
@@ -249,8 +378,9 @@ void canvas_draw_icon(Canvas* canvas, uint8_t x, uint8_t y, const Icon* icon) {
     x += canvas->offset_x;
     y += canvas->offset_y;
     uint8_t* icon_data = NULL;
-    furi_hal_compress_icon_decode(icon_get_data(icon), &icon_data);
-    u8g2_DrawXBM(&canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data);
+    compress_icon_decode(canvas->compress_icon, icon_get_data(icon), &icon_data);
+    canvas_draw_u8g2_bitmap(
+        &canvas->fb, x, y, icon_get_width(icon), icon_get_height(icon), icon_data, IconRotation0);
 }
 
 void canvas_draw_dot(Canvas* canvas, uint8_t x, uint8_t y) {
@@ -360,7 +490,7 @@ void canvas_draw_xbm(
     furi_assert(canvas);
     x += canvas->offset_x;
     y += canvas->offset_y;
-    u8g2_DrawXBM(&canvas->fb, x, y, w, h, bitmap);
+    canvas_draw_u8g2_bitmap(&canvas->fb, x, y, w, h, bitmap, IconRotation0);
 }
 
 void canvas_draw_glyph(Canvas* canvas, uint8_t x, uint8_t y, uint16_t ch) {
@@ -376,39 +506,36 @@ void canvas_set_bitmap_mode(Canvas* canvas, bool alpha) {
 
 void canvas_set_orientation(Canvas* canvas, CanvasOrientation orientation) {
     furi_assert(canvas);
+    const u8g2_cb_t* rotate_cb = NULL;
+    bool need_swap = false;
     if(canvas->orientation != orientation) {
         switch(orientation) {
         case CanvasOrientationHorizontal:
-            if(canvas->orientation == CanvasOrientationVertical ||
-               canvas->orientation == CanvasOrientationVerticalFlip) {
-                FURI_SWAP(canvas->width, canvas->height);
-            }
-            u8g2_SetDisplayRotation(&canvas->fb, U8G2_R0);
+            need_swap = canvas->orientation == CanvasOrientationVertical ||
+                        canvas->orientation == CanvasOrientationVerticalFlip;
+            rotate_cb = U8G2_R0;
             break;
         case CanvasOrientationHorizontalFlip:
-            if(canvas->orientation == CanvasOrientationVertical ||
-               canvas->orientation == CanvasOrientationVerticalFlip) {
-                FURI_SWAP(canvas->width, canvas->height);
-            }
-            u8g2_SetDisplayRotation(&canvas->fb, U8G2_R2);
+            need_swap = canvas->orientation == CanvasOrientationVertical ||
+                        canvas->orientation == CanvasOrientationVerticalFlip;
+            rotate_cb = U8G2_R2;
             break;
         case CanvasOrientationVertical:
-            if(canvas->orientation == CanvasOrientationHorizontal ||
-               canvas->orientation == CanvasOrientationHorizontalFlip) {
-                FURI_SWAP(canvas->width, canvas->height);
-            };
-            u8g2_SetDisplayRotation(&canvas->fb, U8G2_R3);
+            need_swap = canvas->orientation == CanvasOrientationHorizontal ||
+                        canvas->orientation == CanvasOrientationHorizontalFlip;
+            rotate_cb = U8G2_R3;
             break;
         case CanvasOrientationVerticalFlip:
-            if(canvas->orientation == CanvasOrientationHorizontal ||
-               canvas->orientation == CanvasOrientationHorizontalFlip) {
-                FURI_SWAP(canvas->width, canvas->height);
-            }
-            u8g2_SetDisplayRotation(&canvas->fb, U8G2_R1);
+            need_swap = canvas->orientation == CanvasOrientationHorizontal ||
+                        canvas->orientation == CanvasOrientationHorizontalFlip;
+            rotate_cb = U8G2_R1;
             break;
         default:
             furi_assert(0);
         }
+
+        if(need_swap) FURI_SWAP(canvas->width, canvas->height);
+        u8g2_SetDisplayRotation(&canvas->fb, rotate_cb);
         canvas->orientation = orientation;
     }
 }

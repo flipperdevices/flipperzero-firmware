@@ -225,7 +225,7 @@ static bool bt_on_gap_event_callback(GapEvent event, void* context) {
         furi_event_flag_clear(bt->rpc_event, BT_RPC_EVENT_DISCONNECTED);
         if(bt->profile == BtProfileSerial) {
             // Open RPC session
-            bt->rpc_session = rpc_session_open(bt->rpc);
+            bt->rpc_session = rpc_session_open(bt->rpc, RpcOwnerBle);
             if(bt->rpc_session) {
                 FURI_LOG_I(TAG, "Open RPC connection");
                 rpc_session_set_send_bytes_callback(bt->rpc_session, bt_rpc_send_bytes_callback);
@@ -373,7 +373,7 @@ int32_t bt_srv(void* p) {
     Bt* bt = bt_alloc();
 
     if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
-        FURI_LOG_W(TAG, "Skipped BT init: device in special startup mode");
+        FURI_LOG_W(TAG, "Skipping start in special boot mode");
         ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT);
         furi_record_create(RECORD_BT, bt);
         return 0;

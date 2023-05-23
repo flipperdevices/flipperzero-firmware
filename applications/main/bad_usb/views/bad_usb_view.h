@@ -1,7 +1,7 @@
 #pragma once
 
 #include <gui/view.h>
-#include "../bad_usb_script.h"
+#include "../helpers/ducky_script.h"
 
 typedef struct BadUsb BadUsb;
 typedef void (*BadUsbButtonCallback)(InputKey key, void* context);
@@ -19,3 +19,5 @@ void bad_usb_set_file_name(BadUsb* bad_usb, const char* name);
 void bad_usb_set_layout(BadUsb* bad_usb, const char* layout);
 
 void bad_usb_set_state(BadUsb* bad_usb, BadUsbState* st);
+
+bool bad_usb_is_idle_state(BadUsb* bad_usb);

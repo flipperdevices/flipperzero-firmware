@@ -1,15 +1,18 @@
-#include <furi.h>
-#include <gui/gui.h>
-#include <assets_icons.h>
-#include <gui/view_dispatcher.h>
-#include <storage/storage.h>
-#include <gui/modules/loading.h>
-#include <dialogs/dialogs.h>
-#include <flipper_application/flipper_application.h>
-#include "elf_cpp/elf_hashtable.h"
 #include "fap_loader_app.h"
 
-#define TAG "fap_loader_app"
+#include <furi.h>
+#include <furi_hal_debug.h>
+
+#include <assets_icons.h>
+#include <gui/gui.h>
+#include <gui/view_dispatcher.h>
+#include <gui/modules/loading.h>
+#include <dialogs/dialogs.h>
+#include <toolbox/path.h>
+#include <flipper_application/flipper_application.h>
+#include <loader/firmware_api/firmware_api.h>
+
+#define TAG "FapLoader"
 
 struct FapLoader {
     FlipperApplication* app;
@@ -26,7 +29,7 @@ bool fap_loader_load_name_and_icon(
     Storage* storage,
     uint8_t** icon_ptr,
     FuriString* item_name) {
-    FlipperApplication* app = flipper_application_alloc(storage, &hashtable_api_interface);
+    FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
 
     FlipperApplicationPreloadStatus preload_res =
         flipper_application_preload_manifest(app, furi_string_get_cstr(path));
@@ -70,7 +73,7 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
     bool show_error = true;
     do {
         file_selected = true;
-        loader->app = flipper_application_alloc(loader->storage, &hashtable_api_interface);
+        loader->app = flipper_application_alloc(loader->storage, firmware_api_interface);
         size_t start = furi_get_tick();
 
         FURI_LOG_I(TAG, "FAP Loader is loading %s", furi_string_get_cstr(loader->fap_path));
@@ -105,6 +108,20 @@ static bool fap_loader_run_selected_app(FapLoader* loader) {
         FURI_LOG_I(TAG, "FAP Loader is starting app");
 
         FuriThread* thread = flipper_application_spawn(loader->app, NULL);
+
+        /* This flag is set by the debugger - to break on app start */
+        if(furi_hal_debug_is_gdb_session_active()) {
+            FURI_LOG_W(TAG, "Triggering BP for debugger");
+            /* After hitting this, you can set breakpoints in your .fap's code
+             * Note that you have to toggle breakpoints that were set before */
+            __asm volatile("bkpt 0");
+        }
+
+        FuriString* app_name = furi_string_alloc();
+        path_extract_filename_no_ext(furi_string_get_cstr(loader->fap_path), app_name);
+        furi_thread_set_appid(thread, furi_string_get_cstr(app_name));
+        furi_string_free(app_name);
+
         furi_thread_start(thread);
         furi_thread_join(thread);
 

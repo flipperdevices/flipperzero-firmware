@@ -5,21 +5,18 @@
 
 void storage_file_init(StorageFile* obj) {
     obj->file = NULL;
-    obj->type = ST_ERROR;
     obj->file_data = NULL;
     obj->path = furi_string_alloc();
 }
 
 void storage_file_init_set(StorageFile* obj, const StorageFile* src) {
     obj->file = src->file;
-    obj->type = src->type;
     obj->file_data = src->file_data;
     obj->path = furi_string_alloc_set(src->path);
 }
 
 void storage_file_set(StorageFile* obj, const StorageFile* src) { //-V524
     obj->file = src->file;
-    obj->type = src->type;
     obj->file_data = src->file_data;
     furi_string_set(obj->path, src->path);
 }
@@ -76,29 +73,34 @@ uint32_t storage_data_get_timestamp(StorageData* storage) {
 
 /****************** storage glue ******************/
 
-bool storage_has_file(const File* file, StorageData* storage_data) {
-    bool result = false;
+static StorageFile* storage_get_file(const File* file, StorageData* storage) {
+    StorageFile* storage_file_ref = NULL;
 
     StorageFileList_it_t it;
-    for(StorageFileList_it(it, storage_data->files); !StorageFileList_end_p(it);
+    for(StorageFileList_it(it, storage->files); !StorageFileList_end_p(it);
         StorageFileList_next(it)) {
-        const StorageFile* storage_file = StorageFileList_cref(it);
+        StorageFile* storage_file = StorageFileList_ref(it);
 
         if(storage_file->file->file_id == file->file_id) {
-            result = true;
+            storage_file_ref = storage_file;
             break;
         }
     }
 
-    return result;
+    return storage_file_ref;
 }
 
-bool storage_path_already_open(FuriString* path, StorageFileList_t array) {
+bool storage_has_file(const File* file, StorageData* storage) {
+    return storage_get_file(file, storage) != NULL;
+}
+
+bool storage_path_already_open(FuriString* path, StorageData* storage) {
     bool open = false;
 
     StorageFileList_it_t it;
 
-    for(StorageFileList_it(it, array); !StorageFileList_end_p(it); StorageFileList_next(it)) {
+    for(StorageFileList_it(it, storage->files); !StorageFileList_end_p(it);
+        StorageFileList_next(it)) {
         const StorageFile* storage_file = StorageFileList_cref(it);
 
         if(furi_string_cmp(storage_file->path, path) == 0) {
@@ -111,55 +113,21 @@ bool storage_path_already_open(FuriString* path, StorageFileList_t array) {
 }
 
 void storage_set_storage_file_data(const File* file, void* file_data, StorageData* storage) {
-    StorageFile* founded_file = NULL;
-
-    StorageFileList_it_t it;
-
-    for(StorageFileList_it(it, storage->files); !StorageFileList_end_p(it);
-        StorageFileList_next(it)) {
-        StorageFile* storage_file = StorageFileList_ref(it);
-
-        if(storage_file->file->file_id == file->file_id) {
-            founded_file = storage_file;
-            break;
-        }
-    }
-
-    furi_check(founded_file != NULL);
-
-    founded_file->file_data = file_data;
+    StorageFile* storage_file_ref = storage_get_file(file, storage);
+    furi_check(storage_file_ref != NULL);
+    storage_file_ref->file_data = file_data;
 }
 
 void* storage_get_storage_file_data(const File* file, StorageData* storage) {
-    const StorageFile* founded_file = NULL;
-
-    StorageFileList_it_t it;
-
-    for(StorageFileList_it(it, storage->files); !StorageFileList_end_p(it);
-        StorageFileList_next(it)) {
-        const StorageFile* storage_file = StorageFileList_cref(it);
-
-        if(storage_file->file->file_id == file->file_id) {
-            founded_file = storage_file;
-            break;
-        }
-    }
-
-    furi_check(founded_file != NULL);
-
-    return founded_file->file_data;
+    StorageFile* storage_file_ref = storage_get_file(file, storage);
+    furi_check(storage_file_ref != NULL);
+    return storage_file_ref->file_data;
 }
 
-void storage_push_storage_file(
-    File* file,
-    FuriString* path,
-    StorageType type,
-    StorageData* storage) {
+void storage_push_storage_file(File* file, FuriString* path, StorageData* storage) {
     StorageFile* storage_file = StorageFileList_push_new(storage->files);
-
     file->file_id = (uint32_t)storage_file;
     storage_file->file = file;
-    storage_file->type = type;
     furi_string_set(storage_file->path, path);
 }
 
