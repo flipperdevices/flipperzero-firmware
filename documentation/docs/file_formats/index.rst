@@ -7,7 +7,7 @@ Flipper Zero File Formats
 
    BadUsbScriptFormat
    iButtonFileFormat
-   InfraredFileFormat
+   InfraredFileFormats
    LfRfidFileFormat
-   NfcFileFormat
-   SubGhzFileForm
+   NfcFileFormats
+   SubGhzFileFormats
