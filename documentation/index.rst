@@ -6,7 +6,8 @@
 Welcome to the Flipper Zero Firmware Developer Documentation!
 =============================================================
 
-.. contents:: :local:
+.. contents:: 
+   :local:
    :maxdepth: 3
    :caption: Contents:
 
