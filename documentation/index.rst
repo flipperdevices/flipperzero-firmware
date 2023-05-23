@@ -10,9 +10,9 @@ Welcome to the Flipper Zero Firmware Developer Documentation!
    :maxdepth: 4
    :caption: Contents:
 
-   genindex
-   files
    doxygen <doxygen/html/index>
+   docs/AppManifests
+   docs/AppsOnSDCard
 
 
 
