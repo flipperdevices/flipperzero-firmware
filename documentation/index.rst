@@ -9,7 +9,6 @@ Welcome to the Flipper Zero Firmware Developer Documentation!
 .. contents:: 
    :local:
    :depth: 3
-   :caption: Contents:
 
    doxygen <doxygen/html/index.rst>
    documentation <docs/>
