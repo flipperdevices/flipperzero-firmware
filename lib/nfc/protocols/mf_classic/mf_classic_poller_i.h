@@ -22,13 +22,34 @@ typedef enum {
 } MfClassicAuthState;
 
 typedef enum {
+    MfClassicCardStateNotDetected,
+    MfClassicCardStateDetected,
+} MfClassicCardState;
+
+typedef enum {
     MfClassicPollerStateIdle,
+    MfClassicPollerStateRequestKey,
+    MfClassicPollerStateAuthKeyA,
+    MfClassicPollerStateAuthKeyB,
+    MfClassicPollerStateReadSector,
+    MfClassicPollerStateNextSector,
+
+    MfClassicPollerStateReadFail,
+    MfClassicPollerStateReadSuccess,
+
+    MfClassicPollerStateNum,
 } MfClassicPollerState;
 
 struct MfClassicPoller {
     NfcaPoller* nfca_poller;
+    MfClassicPollerState state;
     MfClassicPollerSessionState session_state;
     MfClassicAuthState auth_state;
+    MfClassicCardState card_state;
+    MfClassicKey current_key;
+    MfClassicPollerEventData event_data;
+    uint8_t sectors_read;
+    uint8_t sectors_total;
     Crypto1* crypto;
     NfcPollerBuffer* plain_buff;
     NfcPollerBuffer* encrypted_buff;

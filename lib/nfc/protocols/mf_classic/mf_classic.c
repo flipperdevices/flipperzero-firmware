@@ -54,6 +54,42 @@ const char* mf_classic_get_name(MfClassicType type, bool full_name) {
     return ret;
 }
 
+bool mf_classic_detect_protocol(NfcaData* data, MfClassicType* type) {
+    furi_assert(data);
+
+    uint8_t atqa0 = data->atqa[0];
+    uint8_t atqa1 = data->atqa[1];
+    uint8_t sak = data->sak;
+    bool mf_classic_detected = false;
+
+    if((atqa0 = 0x44) || (atqa0 = 0x44)) {
+        if((sak == 0x08) || (sak = 0x88)) {
+            if(type) {
+                *type = MfClassicType1k;
+            }
+            mf_classic_detected = true;
+        } else if(sak == 0x09) {
+            if(type) {
+                *type = MfClassicTypeMini;
+            }
+            mf_classic_detected = true;
+        }
+    } else if((atqa0 == 0x01) && (atqa1 == 0x0f) && (sak == 0x01)) {
+        // Skylender support
+        if(type) {
+            *type = MfClassicType1k;
+        }
+        mf_classic_detected = true;
+    } else if(((atqa0 == 0x42) || (atqa0 == 0x02)) && (sak == 0x18)) {
+        if(*type) {
+            *type = MfClassicType4k;
+        }
+        mf_classic_detected = true;
+    }
+
+    return mf_classic_detected;
+}
+
 uint8_t mf_classic_get_sector_trailer_num_by_sector(uint8_t sector) {
     uint8_t block_num = 0;
 
@@ -167,4 +203,53 @@ void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassic
         memcpy(data->block[block_num].data, block_data->data, MF_CLASSIC_BLOCK_SIZE);
     }
     FURI_BIT_SET(data->block_read_mask[block_num / 32], block_num % 32);
+}
+
+uint8_t mf_classic_get_first_block_num_of_sector(uint8_t sector) {
+    furi_assert(sector < 40);
+
+    uint8_t block = 0;
+    if(sector < 32) {
+        block = sector * 4;
+    } else {
+        block = 32 * 4 + (sector - 32) * 16;
+    }
+
+    return block;
+}
+
+static uint8_t mf_classic_get_blocks_num_in_sector(uint8_t sector) {
+    furi_assert(sector < 40);
+    return sector < 32 ? 4 : 16;
+}
+
+void mf_classic_get_read_sectors_and_keys(
+    MfClassicData* data,
+    uint8_t* sectors_read,
+    uint8_t* keys_found) {
+    furi_assert(data);
+    furi_assert(sectors_read);
+    furi_assert(keys_found);
+
+    *sectors_read = 0;
+    *keys_found = 0;
+    uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
+    for(size_t i = 0; i < sectors_total; i++) {
+        if(mf_classic_is_key_found(data, i, MfClassicKeyTypeA)) {
+            *keys_found += 1;
+        }
+        if(mf_classic_is_key_found(data, i, MfClassicKeyTypeB)) {
+            *keys_found += 1;
+        }
+        uint8_t first_block = mf_classic_get_first_block_num_of_sector(i);
+        uint8_t total_blocks_in_sec = mf_classic_get_blocks_num_in_sector(i);
+        bool blocks_read = true;
+        for(size_t j = first_block; j < first_block + total_blocks_in_sec; j++) {
+            blocks_read = mf_classic_is_block_read(data, j);
+            if(!blocks_read) break;
+        }
+        if(blocks_read) {
+            *sectors_read += 1;
+        }
+    }
 }

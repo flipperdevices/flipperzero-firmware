@@ -108,9 +108,13 @@ typedef struct {
     MfClassicBlock block[MF_CLASSIC_TOTAL_BLOCKS_MAX];
 } MfClassicData;
 
+bool mf_classic_detect_protocol(NfcaData* data, MfClassicType* type);
+
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
 
 uint16_t mf_classic_get_total_block_num(MfClassicType type);
+
+uint8_t mf_classic_get_first_block_num_of_sector(uint8_t sector);
 
 const char* mf_classic_get_name(MfClassicType type, bool full_name);
 
@@ -141,6 +145,11 @@ void mf_classic_set_key_not_found(
 bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num);
 
 void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data);
+
+void mf_classic_get_read_sectors_and_keys(
+    MfClassicData* data,
+    uint8_t* sectors_read,
+    uint8_t* keys_found);
 
 #ifdef __cplusplus
 }

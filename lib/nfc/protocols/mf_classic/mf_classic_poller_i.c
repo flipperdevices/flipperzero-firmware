@@ -132,6 +132,10 @@ MfClassicError mf_classic_async_auth(
         }
     } while(false);
 
+    if(ret != MfClassicErrorNone) {
+        nfca_poller_halt(instance->nfca_poller);
+    }
+
     return ret;
 }
 

@@ -10,24 +10,38 @@ extern "C" {
 typedef struct MfClassicPoller MfClassicPoller;
 
 typedef enum {
-    MfClassicPollerEventTypeAuthRequest,
-    MfClassicPollerEventTypeAuthSuccess,
-    MfClassicPollerEventTypeAuthFailed,
-
+    MfClassicPollerEventTypeRequestKey,
     MfClassicPollerEventTypeNewSector,
     MfClassicPollerEventTypeFoundKeyA,
     MfClassicPollerEventTypeFoundKeyB,
-
+    MfClassicPollerEventTypeCardDetected,
+    MfClassicPollerEventTypeCardNotDetected,
+    MfClassicPollerEventTypeKeyAttackStart,
+    MfClassicPollerEventTypeKeyAttackStop,
+    MfClassicPollerEventTypeKeyAttackNextSector,
     MfClassicPollerEventTypeReadComplete,
+    MfClassicPollerEventTypeReadFail,
 } MfClassicPollerEventType;
 
 typedef struct {
+    uint8_t sector_num;
+    MfClassicKey key;
+    bool key_provided;
+} MfClassicKeyRequestContext;
+
+typedef struct {
+    MfClassicType type;
+} MfClassicDetectContext;
+
+typedef union {
     MfClassicError error;
+    MfClassicDetectContext detect_context;
+    MfClassicKeyRequestContext key_request_context;
 } MfClassicPollerEventData;
 
 typedef struct {
     MfClassicPollerEventType type;
-    MfClassicPollerEventData data;
+    MfClassicPollerEventData* data;
 } MfClassicPollerEvent;
 
 typedef enum {
