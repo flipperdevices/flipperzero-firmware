@@ -82,9 +82,9 @@ void update_widgets(Mag* mag) {
 void mag_scene_read_on_enter(void* context) {
     Mag* mag = context;
     FuriString* message = furi_string_alloc();
-    furi_string_printf(message, "Flipper Elite, swipe a card!\n");
+    furi_string_printf(message, "Please swipe a card!\n");
     mag->uart_text_box_store = message;
-
+    furi_string_free(message);
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
     
     update_widgets(mag);
