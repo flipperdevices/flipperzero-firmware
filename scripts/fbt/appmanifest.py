@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple
 
 
 class FlipperManifestException(Exception):
@@ -19,6 +19,7 @@ class FlipperAppType(Enum):
     EXTERNAL = "External"
     METAPACKAGE = "Package"
     PLUGIN = "Plugin"
+    EXTMAINAPP = "ExtMainApp"
 
 
 @dataclass
@@ -51,12 +52,13 @@ class FlipperApplication:
     stack_size: int = 2048
     icon: Optional[str] = None
     order: int = 0
+    link: Optional[str] = ""
     sdk_headers: List[str] = field(default_factory=list)
     targets: List[str] = field(default_factory=lambda: ["all"])
 
     # .fap-specific
     sources: List[str] = field(default_factory=lambda: ["*.c*"])
-    fap_version: Union[str, Tuple[int]] = "0.1"
+    fap_version: Tuple[int] = field(default_factory=lambda: (0, 1))
     fap_icon: Optional[str] = None
     fap_libs: List[str] = field(default_factory=list)
     fap_category: str = ""
@@ -84,13 +86,6 @@ class FlipperApplication:
     def __post_init__(self):
         if self.apptype == FlipperAppType.PLUGIN:
             self.stack_size = 0
-        if isinstance(self.fap_version, str):
-            try:
-                self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
-            except ValueError:
-                raise FlipperManifestException(
-                    f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
-                )
 
 
 class AppManager:
@@ -231,6 +226,7 @@ class AppBuildset:
 
     def _get_app_depends(self, app_name: str) -> List[str]:
         app_def = self.appmgr.get(app_name)
+
         # Skip app if its target is not supported by the target we are building for
         if not self._check_if_app_target_supported(app_name):
             self._writer(
@@ -366,13 +362,24 @@ class ApplicationsCGenerator:
     def get_app_descr(self, app: FlipperApplication):
         if app.apptype == FlipperAppType.STARTUP:
             return app.entry_point
+        if app.apptype == FlipperAppType.EXTMAINAPP:
+            return f"""
+    {{.app = NULL,
+     .name = "{app.name}",
+     .appid = "{app.link}",
+     .stack_size = 0,
+     .icon = {f"&{app.icon}" if app.icon else "NULL"},
+     .link = "{f"{app.link}" if app.link else "NULL"}",
+     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)}}}"""
+     # .appid = "/ext/apps/.Main/{app.link}.fap",
         return f"""
     {{.app = {app.entry_point},
      .name = "{app.name}",
-     .appid = "{app.appid}", 
+     .appid = "{app.appid}",
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
+     .link = "{f"{app.link}" if app.link else "NULL"}",
+     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)}}}"""
 
     def generate(self):
         contents = [
@@ -386,11 +393,11 @@ class ApplicationsCGenerator:
             )
             entry_type, entry_block = self.APP_TYPE_MAP[apptype]
             contents.append(f"const {entry_type} {entry_block}[] = {{")
-            contents.append(
-                ",\n".join(
-                    map(self.get_app_descr, self.buildset.get_apps_of_type(apptype))
-                )
-            )
+            apps = self.buildset.get_apps_of_type(apptype)
+            if apptype is FlipperAppType.APP:
+                apps += self.buildset.get_apps_of_type(FlipperAppType.EXTMAINAPP)
+            apps.sort(key=lambda app: app.order)
+            contents.append(",\n".join(map(self.get_app_descr, apps)))
             contents.append("};")
             contents.append(
                 f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});"

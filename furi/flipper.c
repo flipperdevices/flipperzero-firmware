@@ -4,6 +4,7 @@
 #include <furi_hal_version.h>
 #include <furi_hal_memory.h>
 #include <furi_hal_rtc.h>
+#include <cfw/private.h>
 
 #define TAG "Flipper"
 
@@ -27,24 +28,27 @@ static void flipper_print_version(const char* target, const Version* version) {
     }
 }
 
+void flipper_start_service(const FlipperApplication* service) {
+    FURI_LOG_D(TAG, "Starting service %s", service->name);
+
+    FuriThread* thread =
+        furi_thread_alloc_ex(service->name, service->stack_size, service->app, NULL);
+    furi_thread_mark_as_service(thread);
+    furi_thread_set_appid(thread, service->appid);
+
+    furi_thread_start(thread);
+}
+
 void flipper_init() {
     flipper_print_version("Firmware", furi_hal_version_get_firmware_version());
 
     FURI_LOG_I(TAG, "Boot mode %d, starting services", furi_hal_rtc_get_boot_mode());
 
     for(size_t i = 0; i < FLIPPER_SERVICES_COUNT; i++) {
-        FURI_LOG_D(TAG, "Starting service %s", FLIPPER_SERVICES[i].name);
-
-        FuriThread* thread = furi_thread_alloc_ex(
-            FLIPPER_SERVICES[i].name,
-            FLIPPER_SERVICES[i].stack_size,
-            FLIPPER_SERVICES[i].app,
-            NULL);
-        furi_thread_mark_as_service(thread);
-        furi_thread_set_appid(thread, FLIPPER_SERVICES[i].appid);
-
-        furi_thread_start(thread);
+        flipper_start_service(&FLIPPER_SERVICES[i]);
     }
+
+    CFW_SETTINGS_LOAD();
 
     FURI_LOG_I(TAG, "Startup complete");
 }

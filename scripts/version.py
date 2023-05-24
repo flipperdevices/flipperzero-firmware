@@ -35,16 +35,24 @@ class GitVersion:
             or "unknown"
         )
 
-        try:
-            version = self._exec_git("describe --tags --abbrev=0 --exact-match")
-        except subprocess.CalledProcessError:
-            version = "unknown"
+        version = (
+            os.environ.get("DIST_SUFFIX", None)
+            or "0.83.2"
+        )
+
+        force_no_dirty = (
+            os.environ.get("FORCE_NO_DIRTY", None)
+            or ""
+        )
+
+        if (force_no_dirty != ""):
+            dirty = False
 
         return {
             "GIT_COMMIT": commit,
             "GIT_BRANCH": branch,
             "VERSION": version,
-            "BUILD_DIRTY": dirty and 1 or 0,
+            "BUILD_DIRTY": 0,
         }
 
     def _exec_git(self, args):
@@ -129,6 +137,7 @@ class Main(App):
             "firmware_commit": current_info["GIT_COMMIT"],
             "firmware_branch": current_info["GIT_BRANCH"],
             "firmware_target": current_info["TARGET"],
+            "firmware_version": current_info["VERSION"],
         }
         with open(version_json_name, "w", newline="\n") as file:
             json.dump(version_json, file, indent=4)

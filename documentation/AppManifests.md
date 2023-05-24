@@ -132,6 +132,6 @@ App(
     ],
     order=10,
 )
-```
+
 
 For more examples, see `.fam` files from various firmware parts.

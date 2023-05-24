@@ -16,6 +16,7 @@ extern "C" {
 
 #define FURI_HAL_VERSION_NAME_LENGTH 8
 #define FURI_HAL_VERSION_ARRAY_NAME_LENGTH (FURI_HAL_VERSION_NAME_LENGTH + 1)
+#define FURI_HAL_BT_ADV_NAME_LENGTH (18 + 1) // 18 characters + null terminator
 /** BLE symbol + "Flipper " + name */
 #define FURI_HAL_VERSION_DEVICE_NAME_LENGTH (1 + 8 + FURI_HAL_VERSION_ARRAY_NAME_LENGTH)
 
@@ -121,17 +122,29 @@ FuriHalVersionColor furi_hal_version_get_hw_color();
  */
 uint8_t furi_hal_version_get_hw_connect();
 
-/** Get hardware region
+/** Get hardware region (fake) = 0
  *
- * @return     Hardware Region
+ * @return     Hardware Region (fake)
  */
 FuriHalVersionRegion furi_hal_version_get_hw_region();
 
-/** Get hardware region name
+/** Get hardware region name (fake) = R00
+ *
+ * @return     Hardware Region name (fake)
+ */
+const char* furi_hal_version_get_hw_region_name();
+
+/** Get hardware region (OTP)
+ *
+ * @return     Hardware Region
+ */
+FuriHalVersionRegion furi_hal_version_get_hw_region_otp();
+
+/** Get hardware region name (OTP)
  *
  * @return     Hardware Region name
  */
-const char* furi_hal_version_get_hw_region_name();
+const char* furi_hal_version_get_hw_region_name_otp();
 
 /** Get hardware display id
  *
@@ -162,6 +175,10 @@ const char* furi_hal_version_get_device_name_ptr();
  * @return     Ble Device Name C-string
  */
 const char* furi_hal_version_get_ble_local_device_name_ptr();
+
+/** Set flipper name
+ */
+void furi_hal_version_set_name(const char* name);
 
 /** Get BLE MAC address
  *

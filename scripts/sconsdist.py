@@ -4,8 +4,8 @@ import json
 import shutil
 import tarfile
 import zipfile
-from os import makedirs, walk
-from os.path import basename, exists, join, relpath
+from os import makedirs, walk, environ
+from os.path import exists, join, relpath, basename, split
 
 from ansi.color import fg
 from flipper.app import App
@@ -249,7 +249,7 @@ class Main(App):
                 )
             )
         bundle_args.extend(self.other_args)
-
+        
         if (bundle_result := UpdateMain(no_exit=True)(bundle_args)) == 0:
             self.note_dist_component("update", "dir", bundle_dir)
             self.logger.info(

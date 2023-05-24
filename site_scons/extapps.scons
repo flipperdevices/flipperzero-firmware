@@ -47,6 +47,7 @@ appenv.AppendUnique(
         "-Map=${TARGET}.map",
         "-specs=nano.specs",
         "-specs=nosys.specs",
+        "-O3",
     ],
     LIBS=[
         "m",
@@ -67,6 +68,7 @@ class FlipperExtAppBuildArtifacts:
 apps_to_build_as_faps = [
     FlipperAppType.PLUGIN,
     FlipperAppType.EXTERNAL,
+    FlipperAppType.EXTMAINAPP,
     FlipperAppType.DEBUG,
 ]
 

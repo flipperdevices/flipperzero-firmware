@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <toolbox/level_duration.h>
 #include <furi_hal_gpio.h>
+#include <furi_hal_spi_types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,6 +62,28 @@ typedef enum {
     SubGhzRegulationTxRx, /**TxRx*/
 } SubGhzRegulation;
 
+/** SubGhz radio types */
+typedef enum {
+    SubGhzRadioInternal,
+    SubGhzRadioExternal,
+} SubGhzRadioType;
+
+/** Structure for accessing SubGhz settings*/
+typedef struct {
+    volatile SubGhzState state;
+    volatile SubGhzRegulation regulation;
+    volatile FuriHalSubGhzPreset preset;
+    const GpioPin* async_mirror_pin;
+    SubGhzRadioType radio_type;
+    FuriHalSpiBusHandle* spi_bus_handle;
+    const GpioPin* cc1101_g0_pin;
+    uint8_t rolling_counter_mult;
+    bool ext_module_power_disabled : 1;
+    bool timestamp_file_names : 1;
+} FuriHalSubGhz;
+
+extern volatile FuriHalSubGhz furi_hal_subghz;
+
 /* Mirror RX/TX async modulation signal to specified pin
  *
  * @warning    Configures pin to output mode. Make sure it is not connected
@@ -75,6 +98,13 @@ void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin);
  * send it to sleep
  */
 void furi_hal_subghz_init();
+
+/** Initialize and switch to power save mode Used by internal API-HAL
+ * initialization routine Can be used to reinitialize device to safe state and
+ * send it to sleep
+ * @return     true if initialisation is successfully
+ */
+bool furi_hal_subghz_init_check(void);
 
 /** Send device to sleep mode
  */
@@ -195,6 +225,28 @@ bool furi_hal_subghz_is_frequency_valid(uint32_t value);
  */
 uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
 
+/** Read extend and bypass settings values into out params
+ *
+ * @param      extend  pointer to bool for extend
+ * @param      bypass  pointer to bool for bypass
+ */
+void furi_hal_subghz_get_extend_settings(bool* extend, bool* bypass);
+
+/** Set extend and bypass settings values to file
+ *
+ * @param      extend  bool for extend
+ * @param      bypass  bool for bypass
+ */
+void furi_hal_subghz_set_extend_settings(bool extend, bool bypass);
+
+/** Сheck if transmission is allowed on this frequency with your current config
+ *
+ * @param      value  frequency in Hz
+ *
+ * @return     true if allowed
+ */
+bool furi_hal_subghz_is_tx_allowed(uint32_t value);
+
 /** Set frequency
  *
  * @param      value  frequency in Hz
@@ -249,6 +301,61 @@ bool furi_hal_subghz_is_async_tx_complete();
 /** Stop async transmission and cleanup resources Resets GPIO, TIM2, and DMA1
  */
 void furi_hal_subghz_stop_async_tx();
+
+/** Switching between internal and external radio
+ * @param      state SubGhzRadioInternal or SubGhzRadioExternal
+ * @return     true if switching is successful
+ */
+bool furi_hal_subghz_init_radio_type(SubGhzRadioType state);
+
+/** Get current radio
+ * @return     SubGhzRadioInternal or SubGhzRadioExternal
+ */
+SubGhzRadioType furi_hal_subghz_get_radio_type(void);
+
+/** Check for a radio module
+ * @return     true if check is successful
+ */
+bool furi_hal_subghz_check_radio(void);
+
+/** Turn on the power of the external radio module
+ * @return     true if power-up is successful
+ */
+bool furi_hal_subghz_enable_ext_power(void);
+
+/** Turn off the power of the external radio module
+ */
+void furi_hal_subghz_disable_ext_power(void);
+
+/** Get the current rolling protocols counter ++ value
+ * @return    uint8_t current value
+ */
+uint8_t furi_hal_subghz_get_rolling_counter_mult(void);
+
+/** Set the current rolling protocols counter ++ value
+ * @param      mult uint8_t = 1, 2, 4, 8
+ */
+void furi_hal_subghz_set_rolling_counter_mult(uint8_t mult);
+
+/** If true - disable 5v power of the external radio module
+ */
+void furi_hal_subghz_set_external_power_disable(bool state);
+
+/** Get the current state of the external power disable flag
+ */
+bool furi_hal_subghz_get_external_power_disable(void);
+
+/** If true - disable generation of random name and add timestamp to filenames instead
+ */
+void furi_hal_subghz_set_timestamp_file_names(bool state);
+
+/** Get the current state of the timestamp instead of random name flag
+ */
+bool furi_hal_subghz_get_timestamp_file_names(void);
+
+/** Set what radio module we will be using
+ */
+void furi_hal_subghz_select_radio_type(SubGhzRadioType state);
 
 #ifdef __cplusplus
 }
