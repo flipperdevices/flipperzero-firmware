@@ -14,6 +14,9 @@ App(
         "subghz_start",
         # "subghz_load_dangerous_settings",
     ],
+    sdk_headers=[
+        "helpers/subghz_txrx.h",
+    ],
     icon="A_Sub1ghz_14",
     stack_size=3 * 1024,
     order=10,

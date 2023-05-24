@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Clock on desktop #484 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/484)
 - Updated: [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- Updated: [Sub-GHz Remote Refactored (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477)SubGhz (Fixes By Willy-JL)
 
 <a name="release">
 

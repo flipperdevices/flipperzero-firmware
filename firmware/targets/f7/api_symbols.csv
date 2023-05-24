@@ -1,6 +1,7 @@
 entry,status,name,type,params
 Version,+,27.0,,
 Header,+,applications/main/fap_loader/fap_loader_app.h,,
+Header,+,applications/main/subghz/helpers/subghz_txrx.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -3458,6 +3459,41 @@ Function,+,subghz_tx_rx_worker_set_callback_have_read,void,"SubGhzTxRxWorker*, S
 Function,+,subghz_tx_rx_worker_start,_Bool,"SubGhzTxRxWorker*, uint32_t"
 Function,+,subghz_tx_rx_worker_stop,void,SubGhzTxRxWorker*
 Function,+,subghz_tx_rx_worker_write,_Bool,"SubGhzTxRxWorker*, uint8_t*, size_t"
+Function,+,subghz_txrx_alloc,SubGhzTxRx*,
+Function,+,subghz_txrx_free,void,SubGhzTxRx*
+Function,-,subghz_txrx_get_debug_pin_state,_Bool,SubGhzTxRx*
+Function,+,subghz_txrx_get_decoder,SubGhzProtocolDecoderBase*,SubGhzTxRx*
+Function,-,subghz_txrx_get_fff_data,FlipperFormat*,SubGhzTxRx*
+Function,-,subghz_txrx_get_frequency_and_modulation,void,"SubGhzTxRx*, FuriString*, FuriString*, _Bool"
+Function,-,subghz_txrx_get_preset,SubGhzRadioPreset,SubGhzTxRx*
+Function,+,subghz_txrx_get_preset_name,const char*,"SubGhzTxRx*, const char*"
+Function,-,subghz_txrx_get_receiver,SubGhzReceiver*,SubGhzTxRx*
+Function,+,subghz_txrx_get_setting,SubGhzSetting*,SubGhzTxRx*
+Function,-,subghz_txrx_hopper_get_state,SubGhzHopperState,SubGhzTxRx*
+Function,-,subghz_txrx_hopper_pause,void,SubGhzTxRx*
+Function,-,subghz_txrx_hopper_set_state,void,"SubGhzTxRx*, SubGhzHopperState"
+Function,-,subghz_txrx_hopper_unpause,void,SubGhzTxRx*
+Function,-,subghz_txrx_hopper_update,void,SubGhzTxRx*
+Function,-,subghz_txrx_is_database_loaded,_Bool,SubGhzTxRx*
+Function,+,subghz_txrx_load_decoder_by_name_protocol,_Bool,"SubGhzTxRx*, const char*"
+Function,-,subghz_txrx_protocol_is_serializable,_Bool,SubGhzTxRx*
+Function,-,subghz_txrx_protocol_is_transmittable,_Bool,"SubGhzTxRx*, _Bool"
+Function,-,subghz_txrx_receiver_set_filter,void,"SubGhzTxRx*, SubGhzProtocolFlag"
+Function,-,subghz_txrx_rx_start,void,SubGhzTxRx*
+Function,-,subghz_txrx_set_debug_pin_state,void,"SubGhzTxRx*, _Bool"
+Function,+,subghz_txrx_set_need_save_callback,void,"SubGhzTxRx*, SubGhzTxRxNeedSaveCallback, void*"
+Function,+,subghz_txrx_set_preset,void,"SubGhzTxRx*, const char*, uint32_t, uint8_t*, size_t"
+Function,+,subghz_txrx_set_raw_file_encoder_worker_callback_end,void,"SubGhzTxRx*, SubGhzProtocolEncoderRAWCallbackEnd, void*"
+Function,-,subghz_txrx_set_rx_calback,void,"SubGhzTxRx*, SubGhzReceiverCallback, void*"
+Function,-,subghz_txrx_sleep,void,SubGhzTxRx*
+Function,-,subghz_txrx_speaker_get_state,SubGhzSpeakerState,SubGhzTxRx*
+Function,-,subghz_txrx_speaker_mute,void,SubGhzTxRx*
+Function,-,subghz_txrx_speaker_off,void,SubGhzTxRx*
+Function,-,subghz_txrx_speaker_on,void,SubGhzTxRx*
+Function,-,subghz_txrx_speaker_set_state,void,"SubGhzTxRx*, SubGhzSpeakerState"
+Function,-,subghz_txrx_speaker_unmute,void,SubGhzTxRx*
+Function,+,subghz_txrx_stop,void,SubGhzTxRx*
+Function,+,subghz_txrx_tx_start,SubGhzTxRxStartTxState,"SubGhzTxRx*, FlipperFormat*"
 Function,+,subghz_worker_alloc,SubGhzWorker*,
 Function,+,subghz_worker_free,void,SubGhzWorker*
 Function,+,subghz_worker_is_running,_Bool,SubGhzWorker*
