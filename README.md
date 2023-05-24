@@ -5,8 +5,7 @@ A simple Flipper Zero application for NMEA 0183 serial GPS modules, such as the
 
 ![ui](ui.png)
 
-Heavy lifting (NMEA parsing) provided by [minmea], which is included in this
-repository.
+Heavy lifting (NMEA parsing) provided by [minmea].
 
 ## Hardware Setup
 
@@ -27,15 +26,6 @@ the hardware setup.
 
 If you have verified this application working with a module not listed here,
 please submit a PR adding it to the list.
-
-## Building the FAP
-
-1. Clone the [flipperzero-firmware] repository.
-2. Create a symbolic link in `applications_user` named `gps`, pointing to this
-   repository.
-3. Compile with `./fbt fap_gps`.
-4. Copy `build/f7-firmware-D/.extapps/gps.fap` to `apps/Tools` on the SD card
-   (directly or using [qFlipper]).
 
 ## Contributing
 
