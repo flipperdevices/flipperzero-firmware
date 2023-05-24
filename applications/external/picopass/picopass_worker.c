@@ -99,7 +99,7 @@ ReturnCode picopass_detect_card(int timeout) {
 
     err = rfalPicoPassPollerCheckPresence();
     if(err != ERR_RF_COLLISION) {
-        FURI_LOG_E(TAG, "rfalPicoPassPollerCheckPresence error %d", err);
+        //FURI_LOG_E(TAG, "rfalPicoPassPollerCheckPresence error %d", err);
         return err;
     }
 

@@ -1,0 +1,13 @@
+App(
+    appid="4inrow",
+    name="4 in row",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="four_in_row_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+	fap_icon="4inrow_10px.png",
+    fap_category="Games",
+)

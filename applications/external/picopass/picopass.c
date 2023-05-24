@@ -1,4 +1,5 @@
 #include "picopass_i.h"
+#include <dolphin/dolphin.h>
 
 #define TAG "PicoPass"
 
@@ -200,6 +201,7 @@ int32_t picopass_app(void* p) {
     UNUSED(p);
     picopass_migrate_from_old_folder();
 
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     Picopass* picopass = picopass_alloc();
 
     scene_manager_next_scene(picopass->scene_manager, PicopassSceneStart);

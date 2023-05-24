@@ -1,0 +1,15 @@
+App(
+    appid="SCD30",
+    name="SCD30 Reader",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="scd30_main",
+    requires=[
+        "gui",
+    ],
+    fap_category="GPIO",
+    stack_size=2 * 1024,
+    order=65,
+    fap_icon="scd30.png",
+    fap_author="Heimskr",
+    fap_weburl="https://github.com/heimskr/flipperzero-scd30"
+)

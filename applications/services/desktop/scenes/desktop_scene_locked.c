@@ -46,7 +46,17 @@ void desktop_scene_locked_on_enter(void* context) {
     uint32_t state = scene_manager_get_scene_state(desktop->scene_manager, DesktopSceneLocked);
     if(state == SCENE_LOCKED_FIRST_ENTER) {
         bool pin_locked = desktop->settings.pin_code.length > 0;
-        view_port_enabled_set(desktop->lock_icon_viewport, true);
+
+        if(desktop->settings.lock_icon) {
+            switch(desktop->settings.icon_style) {
+            case ICON_STYLE_SLIM:
+                view_port_enabled_set(desktop->lock_icon_slim_viewport, true);
+                break;
+            case ICON_STYLE_STOCK:
+                view_port_enabled_set(desktop->lock_icon_viewport, true);
+                break;
+            }
+        }
         Gui* gui = furi_record_open(RECORD_GUI);
         gui_set_lockdown(gui, true);
         furi_record_close(RECORD_GUI);

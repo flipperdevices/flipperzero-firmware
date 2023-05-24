@@ -58,6 +58,7 @@ void nfc_scene_mf_ultralight_unlock_auto_on_exit(void* context) {
     // Stop worker
     nfc_worker_stop(nfc->worker);
     // Clear view
+    popup_reset(nfc->popup);
     widget_reset(nfc->widget);
 
     nfc_blink_stop(nfc);

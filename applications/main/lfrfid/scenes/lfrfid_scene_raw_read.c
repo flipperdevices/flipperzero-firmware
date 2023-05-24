@@ -46,7 +46,7 @@ void lfrfid_scene_raw_read_on_enter(void* context) {
         LFRFID_SD_FOLDER,
         furi_string_get_cstr(app->raw_file_name),
         LFRFID_APP_RAW_ASK_EXTENSION);
-    popup_set_header(popup, "Reading\nRAW RFID\nASK", 89, 30, AlignCenter, AlignTop);
+    popup_set_header(popup, "Reading\nRAW RFID\nASK", 102, 10, AlignCenter, AlignTop);
     lfrfid_worker_read_raw_start(
         app->lfworker,
         furi_string_get_cstr(state->string_file_name),
@@ -74,7 +74,7 @@ bool lfrfid_scene_raw_read_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             state->error = true;
             popup_set_header(
-                popup, "Reading\nRAW RFID\nFile error", 89, 30, AlignCenter, AlignTop);
+                popup, "Reading\nRAW RFID\nFile error", 102, 10, AlignCenter, AlignTop);
             notification_message(app->notifications, &sequence_blink_start_red);
             furi_timer_stop(state->timer);
         } else if(event.event == LfRfidEventReadDone) {
@@ -85,7 +85,7 @@ bool lfrfid_scene_raw_read_on_event(void* context, SceneManagerEvent event) {
                     scene_manager_next_scene(app->scene_manager, LfRfidSceneRawSuccess);
                 } else {
                     popup_set_header(
-                        popup, "Reading\nRAW RFID\nPSK", 89, 30, AlignCenter, AlignTop);
+                        popup, "Reading\nRAW RFID\nPSK", 102, 10, AlignCenter, AlignTop);
                     notification_message(app->notifications, &sequence_blink_start_yellow);
                     lfrfid_worker_stop(app->lfworker);
                     furi_string_printf(

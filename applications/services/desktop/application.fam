@@ -14,4 +14,9 @@ App(
     conflicts=["updater"],
     stack_size=2 * 1024,
     order=60,
+    sdk_headers=[
+        "desktop_settings.h",
+        "helpers/pin.h",
+        "views/desktop_view_pin_input.h",
+    ],
 )

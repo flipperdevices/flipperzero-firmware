@@ -1,0 +1,16 @@
+App(
+    appid="Hex_Editor",
+    name="Hex Editor",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="hex_editor_app",
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="icons/edit_10px.png",
+    fap_category="Misc",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="hex_editor",
+)

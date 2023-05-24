@@ -6,13 +6,16 @@ enum SubGhzSettingIndex {
     SubGhzSettingIndexHopping,
     SubGhzSettingIndexModulation,
     SubGhzSettingIndexBinRAW,
+    SubGhzSettingIndexIgnoreStarline,
+    SubGhzSettingIndexIgnoreCars,
+    SubGhzSettingIndexIgnoreMagellan,
     SubGhzSettingIndexSound,
     SubGhzSettingIndexLock,
-    SubGhzSettingIndexRAWThesholdRSSI,
+    SubGhzSettingIndexRAWThresholdRSSI,
 };
 
 #define RAW_THRESHOLD_RSSI_COUNT 11
-const char* const raw_theshold_rssi_text[RAW_THRESHOLD_RSSI_COUNT] = {
+const char* const raw_threshold_rssi_text[RAW_THRESHOLD_RSSI_COUNT] = {
     "-----",
     "-85.0",
     "-80.0",
@@ -26,7 +29,7 @@ const char* const raw_theshold_rssi_text[RAW_THRESHOLD_RSSI_COUNT] = {
     "-40.0",
 
 };
-const float raw_theshold_rssi_value[RAW_THRESHOLD_RSSI_COUNT] = {
+const float raw_threshold_rssi_value[RAW_THRESHOLD_RSSI_COUNT] = {
     -90.0f,
     -85.0f,
     -80.0f,
@@ -47,7 +50,7 @@ const char* const hopping_text[HOPPING_COUNT] = {
 };
 const uint32_t hopping_value[HOPPING_COUNT] = {
     SubGhzHopperStateOFF,
-    SubGhzHopperStateRunnig,
+    SubGhzHopperStateRunning,
 };
 
 #define SPEAKER_COUNT 2
@@ -67,6 +70,23 @@ const char* const bin_raw_text[BIN_RAW_COUNT] = {
 const uint32_t bin_raw_value[BIN_RAW_COUNT] = {
     SubGhzProtocolFlag_Decodable,
     SubGhzProtocolFlag_Decodable | SubGhzProtocolFlag_BinRAW,
+};
+#define STARLINE_COUNT 2
+const char* const starline_text[STARLINE_COUNT] = {
+    "OFF",
+    "ON",
+};
+
+#define AUTO_ALARMS_COUNT 2
+const char* const auto_alarms_text[AUTO_ALARMS_COUNT] = {
+    "OFF",
+    "ON",
+};
+
+#define MAGELLAN_COUNT 2
+const char* const magellan_text[MAGELLAN_COUNT] = {
+    "OFF",
+    "ON",
 };
 
 uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* context) {
@@ -89,15 +109,15 @@ uint8_t subghz_scene_receiver_config_next_frequency(const uint32_t value, void* 
 uint8_t subghz_scene_receiver_config_next_preset(const char* preset_name, void* context) {
     furi_assert(context);
     SubGhz* subghz = context;
+    uint8_t index = 0;
     SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
 
-    uint8_t index = 0;
     for(uint8_t i = 0; i < subghz_setting_get_preset_count(setting); i++) {
         if(!strcmp(subghz_setting_get_preset_name(setting, i), preset_name)) {
             index = i;
             break;
         } else {
-            //  index = subghz_setting_get_frequency_default_index(subghz_txrx_get_setting(subghz->txrx));
+            //  index = subghz_setting_get_frequency_default_index(setting);
         }
     }
     return index;
@@ -146,6 +166,11 @@ static void subghz_scene_receiver_config_set_frequency(VariableItem* item) {
             frequency,
             preset.data,
             preset.data_size);
+
+        preset = subghz_txrx_get_preset(subghz->txrx);
+
+        subghz->last_settings->frequency = preset.frequency;
+        subghz_setting_set_default_frequency(setting, preset.frequency);
     } else {
         variable_item_set_current_value_index(
             item, subghz_setting_get_frequency_default_index(setting));
@@ -157,12 +182,13 @@ static void subghz_scene_receiver_config_set_preset(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
 
-    variable_item_set_current_value_text(item, subghz_setting_get_preset_name(setting, index));
-
+    const char* preset_name = subghz_setting_get_preset_name(setting, index);
+    variable_item_set_current_value_text(item, preset_name);
+    //subghz->last_settings->preset = index;
     SubGhzRadioPreset preset = subghz_txrx_get_preset(subghz->txrx);
     subghz_txrx_set_preset(
         subghz->txrx,
-        subghz_setting_get_preset_name(setting, index),
+        preset_name,
         preset.frequency,
         subghz_setting_get_preset_data(setting, index),
         subghz_setting_get_preset_data_size(setting, index));
@@ -227,8 +253,32 @@ static void subghz_scene_receiver_config_set_raw_threshold_rssi(VariableItem* it
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    variable_item_set_current_value_text(item, raw_theshold_rssi_text[index]);
-    subghz_threshold_rssi_set(subghz->threshold_rssi, raw_theshold_rssi_value[index]);
+    variable_item_set_current_value_text(item, raw_threshold_rssi_text[index]);
+    subghz_threshold_rssi_set(subghz->threshold_rssi, raw_threshold_rssi_value[index]);
+}
+
+static void subghz_scene_receiver_config_set_starline(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, starline_text[index]);
+    subghz->ignore_starline = (index == 1);
+}
+
+static void subghz_scene_receiver_config_set_auto_alarms(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, auto_alarms_text[index]);
+    subghz->ignore_auto_alarms = (index == 1);
+}
+
+static void subghz_scene_receiver_config_set_magellan(VariableItem* item) {
+    SubGhz* subghz = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, magellan_text[index]);
+    subghz->ignore_magellan = (index == 1);
 }
 
 static void subghz_scene_receiver_config_var_list_enter_callback(void* context, uint32_t index) {
@@ -267,20 +317,6 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         (frequency % 1000000) / 10000);
     variable_item_set_current_value_text(item, text_buf);
 
-    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
-       SubGhzCustomEventManagerSet) {
-        item = variable_item_list_add(
-            subghz->variable_item_list,
-            "Hopping:",
-            HOPPING_COUNT,
-            subghz_scene_receiver_config_set_hopping_running,
-            subghz);
-        value_index = subghz_scene_receiver_config_hopper_value_index(
-            subghz_txrx_hopper_get_state(subghz->txrx), hopping_value, HOPPING_COUNT, subghz);
-        variable_item_set_current_value_index(item, value_index);
-        variable_item_set_current_value_text(item, hopping_text[value_index]);
-    }
-
     item = variable_item_list_add(
         subghz->variable_item_list,
         "Modulation:",
@@ -295,9 +331,24 @@ void subghz_scene_receiver_config_on_enter(void* context) {
 
     if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
        SubGhzCustomEventManagerSet) {
+        // Hopping
         item = variable_item_list_add(
             subghz->variable_item_list,
-            "Bin_RAW:",
+            "Hopping:",
+            HOPPING_COUNT,
+            subghz_scene_receiver_config_set_hopping_running,
+            subghz);
+        value_index = subghz_scene_receiver_config_hopper_value_index(
+            subghz_txrx_hopper_get_state(subghz->txrx), hopping_value, HOPPING_COUNT, subghz);
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, hopping_text[value_index]);
+    }
+
+    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
+       SubGhzCustomEventManagerSet) {
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Bin RAW:",
             BIN_RAW_COUNT,
             subghz_scene_receiver_config_set_bin_raw,
             subghz);
@@ -306,6 +357,43 @@ void subghz_scene_receiver_config_on_enter(void* context) {
         variable_item_set_current_value_text(item, bin_raw_text[value_index]);
     }
 
+    if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
+       SubGhzCustomEventManagerSet) {
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Ignore Starline:",
+            STARLINE_COUNT,
+            subghz_scene_receiver_config_set_starline,
+            subghz);
+
+        value_index = subghz->ignore_starline;
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, starline_text[value_index]);
+
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Ignore Cars:",
+            AUTO_ALARMS_COUNT,
+            subghz_scene_receiver_config_set_auto_alarms,
+            subghz);
+
+        value_index = subghz->ignore_auto_alarms;
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, auto_alarms_text[value_index]);
+
+        item = variable_item_list_add(
+            subghz->variable_item_list,
+            "Ignore Magellan:",
+            MAGELLAN_COUNT,
+            subghz_scene_receiver_config_set_magellan,
+            subghz);
+
+        value_index = subghz->ignore_magellan;
+        variable_item_set_current_value_index(item, value_index);
+        variable_item_set_current_value_text(item, magellan_text[value_index]);
+    }
+
+    // Enable speaker, will send all incoming noises and signals to speaker so you can listen how your remote sounds like :)
     item = variable_item_list_add(
         subghz->variable_item_list,
         "Sound:",
@@ -319,6 +407,7 @@ void subghz_scene_receiver_config_on_enter(void* context) {
 
     if(scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneReadRAW) !=
        SubGhzCustomEventManagerSet) {
+        // Lock keyboard
         variable_item_list_add(subghz->variable_item_list, "Lock Keyboard", 1, NULL, NULL);
         variable_item_list_set_enter_callback(
             subghz->variable_item_list,
@@ -335,10 +424,10 @@ void subghz_scene_receiver_config_on_enter(void* context) {
             subghz);
         value_index = value_index_float(
             subghz_threshold_rssi_get(subghz->threshold_rssi),
-            raw_theshold_rssi_value,
+            raw_threshold_rssi_value,
             RAW_THRESHOLD_RSSI_COUNT);
         variable_item_set_current_value_index(item, value_index);
-        variable_item_set_current_value_text(item, raw_theshold_rssi_text[value_index]);
+        variable_item_set_current_value_text(item, raw_threshold_rssi_text[value_index]);
     }
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
 }
@@ -361,6 +450,7 @@ void subghz_scene_receiver_config_on_exit(void* context) {
     SubGhz* subghz = context;
     variable_item_list_set_selected_item(subghz->variable_item_list, 0);
     variable_item_list_reset(subghz->variable_item_list);
+    subghz_last_settings_save(subghz->last_settings);
     scene_manager_set_scene_state(
         subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerNoSet);
 }

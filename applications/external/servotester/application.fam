@@ -1,0 +1,15 @@
+App(
+    appid="Servotester",
+    name="Servotester",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="servotester_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+    fap_icon="servotester.png",
+    fap_category="GPIO",
+    fap_icon_assets_symbol="servotester",
+    fap_author="Alexander Semion"
+)

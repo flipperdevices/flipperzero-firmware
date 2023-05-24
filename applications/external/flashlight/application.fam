@@ -1,0 +1,13 @@
+App(
+    appid="Flashlight",
+    name="Flashlight",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flashlight_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="flash10px.png",
+    fap_category="GPIO",
+)

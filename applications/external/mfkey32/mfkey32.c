@@ -1253,6 +1253,7 @@ void start_mfkey32_thread(ProgramState* program_state) {
 int32_t mfkey32_main() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
+    DOLPHIN_DEED(DolphinDeedPluginStart);
     ProgramState* program_state = malloc(sizeof(ProgramState));
 
     mfkey32_state_init(program_state);

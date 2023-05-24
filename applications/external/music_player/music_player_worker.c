@@ -397,7 +397,7 @@ bool music_player_worker_load_rtttl_from_file(MusicPlayerWorker* instance, const
         if(!storage_file_open(file, file_path, FSAM_READ, FSOM_OPEN_EXISTING)) {
             FURI_LOG_E(TAG, "Unable to open file");
             break;
-        };
+        }
 
         uint16_t ret = 0;
         do {

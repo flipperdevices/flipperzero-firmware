@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <music_player_icons.h>
+#include <Music_Player_icons.h>
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -257,7 +257,7 @@ MusicPlayer* music_player_alloc() {
     MusicPlayer* instance = malloc(sizeof(MusicPlayer));
 
     instance->model = malloc(sizeof(MusicPlayerModel));
-    instance->model->volume = 3;
+    instance->model->volume = 4;
 
     instance->model_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 

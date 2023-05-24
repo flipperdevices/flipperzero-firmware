@@ -59,7 +59,7 @@ RpcOwner rpc_session_get_owner(RpcSession* session);
  *
  *
  * @param   rpc     instance
- * @param   owner   owner of session
+ * @param owner owner of session
  * @return          pointer to RpcSession descriptor, or
  *                  NULL if RPC is busy and can't open session now
  */

@@ -57,7 +57,7 @@ static void popup_view_draw_callback(Canvas* canvas, void* _model) {
 
     // Draw text
     if(model->text.text != NULL) {
-        canvas_set_font(canvas, FontSecondary);
+        canvas_set_font(canvas, FontBatteryPercent);
         elements_multiline_text_aligned(
             canvas,
             model->text.x,
@@ -99,7 +99,7 @@ void popup_start_timer(void* context) {
 
         if(furi_timer_start(popup->timer, timer_period) != FuriStatusOk) {
             furi_assert(0);
-        };
+        }
     }
 }
 

@@ -1,6 +1,11 @@
 /* Abandon hope, all ye who enter here. */
 
+#include <subghz/types.h>
+#include <lib/toolbox/path.h>
 #include "subghz_i.h"
+#include <lib/subghz/protocols/protocol_items.h>
+
+#define TAG "SubGhzApp"
 
 bool subghz_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -46,7 +51,7 @@ static void subghz_rpc_command_callback(RpcAppSystemEvent event, void* context) 
     }
 }
 
-SubGhz* subghz_alloc() {
+SubGhz* subghz_alloc(bool alloc_for_tx_only) {
     SubGhz* subghz = malloc(sizeof(SubGhz));
 
     subghz->file_path = furi_string_alloc();
@@ -71,33 +76,43 @@ SubGhz* subghz_alloc() {
     // Open Notification record
     subghz->notifications = furi_record_open(RECORD_NOTIFICATION);
 
-    // SubMenu
-    subghz->submenu = submenu_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher, SubGhzViewIdMenu, submenu_get_view(subghz->submenu));
+    if(!alloc_for_tx_only) {
+        // SubMenu
+        subghz->submenu = submenu_alloc();
+        view_dispatcher_add_view(
+            subghz->view_dispatcher, SubGhzViewIdMenu, submenu_get_view(subghz->submenu));
 
-    // Receiver
-    subghz->subghz_receiver = subghz_view_receiver_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher,
-        SubGhzViewIdReceiver,
-        subghz_view_receiver_get_view(subghz->subghz_receiver));
-
+        // Receiver
+        subghz->subghz_receiver = subghz_view_receiver_alloc();
+        view_dispatcher_add_view(
+            subghz->view_dispatcher,
+            SubGhzViewIdReceiver,
+            subghz_view_receiver_get_view(subghz->subghz_receiver));
+    }
     // Popup
     subghz->popup = popup_alloc();
     view_dispatcher_add_view(
         subghz->view_dispatcher, SubGhzViewIdPopup, popup_get_view(subghz->popup));
+    if(!alloc_for_tx_only) {
+        // Text Input
+        subghz->text_input = text_input_alloc();
+        view_dispatcher_add_view(
+            subghz->view_dispatcher,
+            SubGhzViewIdTextInput,
+            text_input_get_view(subghz->text_input));
 
-    // Text Input
-    subghz->text_input = text_input_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher, SubGhzViewIdTextInput, text_input_get_view(subghz->text_input));
+        // Byte Input
+        subghz->byte_input = byte_input_alloc();
+        view_dispatcher_add_view(
+            subghz->view_dispatcher,
+            SubGhzViewIdByteInput,
+            byte_input_get_view(subghz->byte_input));
 
-    // Custom Widget
-    subghz->widget = widget_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher, SubGhzViewIdWidget, widget_get_view(subghz->widget));
-
+        // Custom Widget
+        subghz->widget = widget_alloc();
+        view_dispatcher_add_view(
+            subghz->view_dispatcher, SubGhzViewIdWidget, widget_get_view(subghz->widget));
+    }
     //Dialog
     subghz->dialogs = furi_record_open(RECORD_DIALOGS);
 
@@ -107,35 +122,36 @@ SubGhz* subghz_alloc() {
         subghz->view_dispatcher,
         SubGhzViewIdTransmitter,
         subghz_view_transmitter_get_view(subghz->subghz_transmitter));
+    if(!alloc_for_tx_only) {
+        // Variable Item List
+        subghz->variable_item_list = variable_item_list_alloc();
+        view_dispatcher_add_view(
+            subghz->view_dispatcher,
+            SubGhzViewIdVariableItemList,
+            variable_item_list_get_view(subghz->variable_item_list));
 
-    // Variable Item List
-    subghz->variable_item_list = variable_item_list_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher,
-        SubGhzViewIdVariableItemList,
-        variable_item_list_get_view(subghz->variable_item_list));
+        // Frequency Analyzer
+        subghz->subghz_frequency_analyzer = subghz_frequency_analyzer_alloc();
+        view_dispatcher_add_view(
+            subghz->view_dispatcher,
+            SubGhzViewIdFrequencyAnalyzer,
+            subghz_frequency_analyzer_get_view(subghz->subghz_frequency_analyzer));
 
-    // Frequency Analyzer
-    subghz->subghz_frequency_analyzer = subghz_frequency_analyzer_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher,
-        SubGhzViewIdFrequencyAnalyzer,
-        subghz_frequency_analyzer_get_view(subghz->subghz_frequency_analyzer));
-
+        // Carrier Test Module
+        subghz->subghz_test_carrier = subghz_test_carrier_alloc();
+        view_dispatcher_add_view(
+            subghz->view_dispatcher,
+            SubGhzViewIdTestCarrier,
+            subghz_test_carrier_get_view(subghz->subghz_test_carrier));
+    }
     // Read RAW
-    subghz->subghz_read_raw = subghz_read_raw_alloc();
+    subghz->subghz_read_raw = subghz_read_raw_alloc(alloc_for_tx_only);
     view_dispatcher_add_view(
         subghz->view_dispatcher,
         SubGhzViewIdReadRAW,
         subghz_read_raw_get_view(subghz->subghz_read_raw));
 
-    // Carrier Test Module
-    subghz->subghz_test_carrier = subghz_test_carrier_alloc();
-    view_dispatcher_add_view(
-        subghz->view_dispatcher,
-        SubGhzViewIdTestCarrier,
-        subghz_test_carrier_get_view(subghz->subghz_test_carrier));
-
+#if FURI_DEBUG
     // Packet Test
     subghz->subghz_test_packet = subghz_test_packet_alloc();
     view_dispatcher_add_view(
@@ -149,17 +165,102 @@ SubGhz* subghz_alloc() {
         subghz->view_dispatcher,
         SubGhzViewIdStatic,
         subghz_test_static_get_view(subghz->subghz_test_static));
+#endif
 
     //init threshold rssi
     subghz->threshold_rssi = subghz_threshold_rssi_alloc();
 
+    //init TxRx & Protocol & History & KeyBoard
     subghz_unlock(subghz);
-    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
-    subghz->history = subghz_history_alloc();
-    subghz->filter = SubGhzProtocolFlag_Decodable;
 
-    //init TxRx & History & KeyBoard
     subghz->txrx = subghz_txrx_alloc();
+
+    SubGhzSetting* setting = subghz_txrx_get_setting(subghz->txrx);
+
+    // Custom Presets load without using config file
+    if(!alloc_for_tx_only) {
+        FlipperFormat* temp_fm_preset = flipper_format_string_alloc();
+        flipper_format_write_string_cstr(
+            temp_fm_preset,
+            (const char*)"Custom_preset_data",
+            (const char*)"02 0D 0B 06 08 32 07 04 14 00 13 02 12 04 11 83 10 67 15 24 18 18 19 16 1D 91 1C 00 1B 07 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00");
+        flipper_format_rewind(temp_fm_preset);
+        subghz_setting_load_custom_preset(setting, (const char*)"FM95", temp_fm_preset);
+
+        flipper_format_free(temp_fm_preset);
+
+        // #2-FSK 200khz BW / 135kHz Filter/ 15.86Khz Deviation + Ramping
+        FlipperFormat* temp_fm_preset2 = flipper_format_string_alloc();
+        flipper_format_write_string_cstr(
+            temp_fm_preset2,
+            (const char*)"Custom_preset_data",
+            (const char*)"02 0D 03 47 08 32 0B 06 15 32 14 00 13 00 12 00 11 32 10 A7 18 18 19 1D 1D 92 1C 00 1B 04 20 FB 22 17 21 B6 00 00 00 12 0E 34 60 C5 C1 C0");
+        flipper_format_rewind(temp_fm_preset2);
+        subghz_setting_load_custom_preset(setting, (const char*)"FM15k", temp_fm_preset2);
+
+        flipper_format_free(temp_fm_preset2);
+
+        // Pagers
+        FlipperFormat* temp_fm_preset3 = flipper_format_string_alloc();
+        flipper_format_write_string_cstr(
+            temp_fm_preset3,
+            (const char*)"Custom_preset_data",
+            (const char*)"02 0D 07 04 08 32 0B 06 10 64 11 93 12 0C 13 02 14 00 15 15 18 18 19 16 1B 07 1C 00 1D 91 20 FB 21 56 22 10 00 00 C0 00 00 00 00 00 00 00");
+        flipper_format_rewind(temp_fm_preset3);
+        subghz_setting_load_custom_preset(setting, (const char*)"Pagers", temp_fm_preset3);
+
+        flipper_format_free(temp_fm_preset3);
+
+        // # HND - FM presets
+        FlipperFormat* temp_fm_preset4 = flipper_format_string_alloc();
+        flipper_format_write_string_cstr(
+            temp_fm_preset4,
+            (const char*)"Custom_preset_data",
+            (const char*)"02 0D 0B 06 08 32 07 04 14 00 13 02 12 04 11 36 10 69 15 32 18 18 19 16 1D 91 1C 00 1B 07 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00");
+        flipper_format_rewind(temp_fm_preset4);
+        subghz_setting_load_custom_preset(setting, (const char*)"HND_1", temp_fm_preset4);
+
+        flipper_format_free(temp_fm_preset4);
+
+        FlipperFormat* temp_fm_preset5 = flipper_format_string_alloc();
+        flipper_format_write_string_cstr(
+            temp_fm_preset5,
+            (const char*)"Custom_preset_data",
+            (const char*)"02 0D 0B 06 08 32 07 04 14 00 13 02 12 07 11 36 10 E9 15 32 18 18 19 16 1D 92 1C 40 1B 03 20 FB 22 10 21 56 00 00 C0 00 00 00 00 00 00 00");
+        flipper_format_rewind(temp_fm_preset5);
+        subghz_setting_load_custom_preset(setting, (const char*)"HND_2", temp_fm_preset5);
+
+        flipper_format_free(temp_fm_preset5);
+    }
+    // custom presets loading - end
+
+    // Load last used values for Read, Read RAW, etc. or default
+    subghz->last_settings = subghz_last_settings_alloc();
+    subghz_last_settings_load(subghz->last_settings, 0);
+    if(!alloc_for_tx_only) {
+#if FURI_DEBUG
+        FURI_LOG_D(
+            TAG,
+            "last frequency: %ld, preset: %ld",
+            subghz->last_settings->frequency,
+            subghz->last_settings->preset);
+#endif
+        subghz_setting_set_default_frequency(setting, subghz->last_settings->frequency);
+    }
+
+    if(!alloc_for_tx_only) {
+        subghz_txrx_set_preset(subghz->txrx, "AM650", subghz->last_settings->frequency, NULL, 0);
+    }
+
+    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
+
+    if(!alloc_for_tx_only) {
+        subghz->history = subghz_history_alloc();
+    }
+
+    subghz->secure_data = malloc(sizeof(SecureData));
+
+    subghz->filter = SubGhzProtocolFlag_Decodable;
     subghz_txrx_receiver_set_filter(subghz->txrx, subghz->filter);
     subghz_txrx_set_need_save_callback(subghz->txrx, subghz_save_to_file, subghz);
 
@@ -169,7 +270,7 @@ SubGhz* subghz_alloc() {
     return subghz;
 }
 
-void subghz_free(SubGhz* subghz) {
+void subghz_free(SubGhz* subghz, bool alloc_for_tx_only) {
     furi_assert(subghz);
 
     if(subghz->rpc_ctx) {
@@ -183,53 +284,60 @@ void subghz_free(SubGhz* subghz) {
     subghz_txrx_stop(subghz->txrx);
     subghz_txrx_sleep(subghz->txrx);
 
+#if FURI_DEBUG
     // Packet Test
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTestPacket);
     subghz_test_packet_free(subghz->subghz_test_packet);
 
-    // Carrier Test
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTestCarrier);
-    subghz_test_carrier_free(subghz->subghz_test_carrier);
-
     // Static
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdStatic);
     subghz_test_static_free(subghz->subghz_test_static);
+#endif
 
-    // Receiver
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
-    subghz_view_receiver_free(subghz->subghz_receiver);
+    if(!alloc_for_tx_only) {
+        // Carrier Test
+        view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTestCarrier);
+        subghz_test_carrier_free(subghz->subghz_test_carrier);
 
-    // TextInput
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTextInput);
-    text_input_free(subghz->text_input);
+        // Receiver
+        view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdReceiver);
+        subghz_view_receiver_free(subghz->subghz_receiver);
 
-    // Custom Widget
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdWidget);
-    widget_free(subghz->widget);
+        // TextInput
+        view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTextInput);
+        text_input_free(subghz->text_input);
 
+        // ByteInput
+        view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdByteInput);
+        byte_input_free(subghz->byte_input);
+
+        // Custom Widget
+        view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdWidget);
+        widget_free(subghz->widget);
+    }
     //Dialog
     furi_record_close(RECORD_DIALOGS);
 
     // Transmitter
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdTransmitter);
     subghz_view_transmitter_free(subghz->subghz_transmitter);
+    if(!alloc_for_tx_only) {
+        // Variable Item List
+        view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
+        variable_item_list_free(subghz->variable_item_list);
 
-    // Variable Item List
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdVariableItemList);
-    variable_item_list_free(subghz->variable_item_list);
-
-    // Frequency Analyzer
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdFrequencyAnalyzer);
-    subghz_frequency_analyzer_free(subghz->subghz_frequency_analyzer);
-
+        // Frequency Analyzer
+        view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdFrequencyAnalyzer);
+        subghz_frequency_analyzer_free(subghz->subghz_frequency_analyzer);
+    }
     // Read RAW
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdReadRAW);
     subghz_read_raw_free(subghz->subghz_read_raw);
-
-    // Submenu
-    view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdMenu);
-    submenu_free(subghz->submenu);
-
+    if(!alloc_for_tx_only) {
+        // Submenu
+        view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdMenu);
+        submenu_free(subghz->submenu);
+    }
     // Popup
     view_dispatcher_remove_view(subghz->view_dispatcher, SubGhzViewIdPopup);
     popup_free(subghz->popup);
@@ -244,11 +352,16 @@ void subghz_free(SubGhz* subghz) {
     furi_record_close(RECORD_GUI);
     subghz->gui = NULL;
 
+    subghz_last_settings_free(subghz->last_settings);
+
     // threshold rssi
     subghz_threshold_rssi_free(subghz->threshold_rssi);
 
-    //Worker & Protocol & History
-    subghz_history_free(subghz->history);
+    if(!alloc_for_tx_only) {
+        subghz_history_free(subghz->history);
+    }
+
+    free(subghz->secure_data);
 
     //TxRx
     subghz_txrx_free(subghz->txrx);
@@ -269,17 +382,34 @@ void subghz_free(SubGhz* subghz) {
 }
 
 int32_t subghz_app(void* p) {
-    SubGhz* subghz = subghz_alloc();
-
-    if(!furi_hal_region_is_provisioned()) {
-        subghz_dialog_message_show_only_rx(subghz);
-        subghz_free(subghz);
-        return 1;
+    bool alloc_for_tx;
+    if(p && strlen(p)) {
+        alloc_for_tx = true;
+    } else {
+        alloc_for_tx = false;
     }
 
+    SubGhz* subghz = subghz_alloc(alloc_for_tx);
+
+    if(alloc_for_tx) {
+        subghz->raw_send_only = true;
+    } else {
+        subghz->raw_send_only = false;
+    }
+
+    // Call enable power for external module
+    furi_hal_subghz_enable_ext_power();
+
+    // Auto switch to internal radio if external radio is not available
+    if(!furi_hal_subghz_check_radio()) {
+        subghz->last_settings->external_module_enabled = false;
+        furi_hal_subghz_select_radio_type(SubGhzRadioInternal);
+        furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
+    }
     // Check argument and run corresponding scene
     if(p && strlen(p)) {
         uint32_t rpc_ctx = 0;
+
         if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
             subghz->rpc_ctx = (void*)rpc_ctx;
             rpc_system_app_set_callback(subghz->rpc_ctx, subghz_rpc_command_callback, subghz);
@@ -328,8 +458,12 @@ int32_t subghz_app(void* p) {
     view_dispatcher_run(subghz->view_dispatcher);
 
     furi_hal_power_suppress_charge_exit();
+    // Disable power for External CC1101 if it was enabled and module is connected
+    furi_hal_subghz_disable_ext_power();
+    // Reinit SPI handles for internal radio / nfc
+    furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
 
-    subghz_free(subghz);
+    subghz_free(subghz, alloc_for_tx);
 
     return 0;
 }

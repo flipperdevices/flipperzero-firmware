@@ -1,0 +1,14 @@
+App(
+    appid="ESP32CAM_Morse_Flasher",
+    name="[ESP32CAM] Morse Flasher",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="uart_terminal_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=90,
+    fap_icon_assets="assets",
+    fap_icon="icon.png",
+    fap_category="GPIO",
+    fap_description="ESP32-CAM app to stream a message in morse using the powerful flashlight. [Unplug the USB cable to test with Mayhem]",
+    fap_icon_assets_symbol="MAYHEM_MorseFlash",
+)

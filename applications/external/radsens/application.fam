@@ -1,0 +1,17 @@
+App(
+    appid="Radiation_Sensor",
+    name="Radiation Sensor",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="rad_sens_app",
+    requires=[
+        "gui",
+        "power",
+        "dolphin",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+	fap_icon="rad_sens.png",
+    fap_category="GPIO",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="rad_sens",
+)

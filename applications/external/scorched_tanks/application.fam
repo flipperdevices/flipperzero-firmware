@@ -1,0 +1,11 @@
+App(
+    appid="Scorched_Tanks",
+    name="Scorched Tanks",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="scorched_tanks_game_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=100,
+    fap_icon="scorchedTanks_10px.png",
+    fap_category="Games",
+)

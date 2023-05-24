@@ -1,0 +1,13 @@
+App(
+    appid="ESP8266_IFTTT_Virtual_Button",
+    name="[ESP8266] IFTTT Virtual Button",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ifttt_virtual_button_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="icon.png",
+    fap_category="GPIO",
+)

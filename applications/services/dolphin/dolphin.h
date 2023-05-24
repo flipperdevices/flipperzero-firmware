@@ -1,6 +1,7 @@
 #pragma once
 
-#include "helpers/dolphin_deed.h"
+//#include "helpers/dolphin_deed.h"
+#include "helpers/dolphin_state.h"
 
 #include <gui/view.h>
 #include <core/pubsub.h>
@@ -43,6 +44,10 @@ void dolphin_deed(Dolphin* dolphin, DolphinDeed deed);
  * Thread safe, blocking
  */
 DolphinStats dolphin_stats(Dolphin* dolphin);
+
+/** GET RANDOM 3PT DEED
+ */
+DolphinDeed getRandomDeed();
 
 /** Flush dolphin queue and save state
  * Thread safe, blocking

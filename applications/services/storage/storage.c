@@ -9,11 +9,12 @@
 
 #define STORAGE_TICK 1000
 
-#define ICON_SD_MOUNTED &I_SDcardMounted_11x8
-#define ICON_SD_ERROR &I_SDcardFail_11x8
+//#define ICON_SD_MOUNTED &I_SDcardMounted_11x8
+//#define ICON_SD_ERROR &I_SDcardFail_11x8
 
 #define TAG RECORD_STORAGE
 
+/*
 static void storage_app_sd_icon_draw_callback(Canvas* canvas, void* context) {
     furi_assert(canvas);
     furi_assert(context);
@@ -31,6 +32,7 @@ static void storage_app_sd_icon_draw_callback(Canvas* canvas, void* context) {
         break;
     }
 }
+*/
 
 Storage* storage_app_alloc() {
     Storage* app = malloc(sizeof(Storage));
@@ -49,14 +51,12 @@ Storage* storage_app_alloc() {
 
     // sd icon gui
     app->sd_gui.enabled = false;
+    /*
     app->sd_gui.view_port = view_port_alloc();
     view_port_set_width(app->sd_gui.view_port, icon_get_width(ICON_SD_MOUNTED));
     view_port_draw_callback_set(app->sd_gui.view_port, storage_app_sd_icon_draw_callback, app);
     view_port_enabled_set(app->sd_gui.view_port, false);
-
-    Gui* gui = furi_record_open(RECORD_GUI);
-    gui_add_view_port(gui, app->sd_gui.view_port, GuiLayerStatusBarLeft);
-    furi_record_close(RECORD_GUI);
+	*/
 
     return app;
 }
@@ -72,7 +72,7 @@ void storage_tick(Storage* app) {
     // storage not enabled but was enabled (sd card unmount)
     if(app->storage[ST_EXT].status == StorageStatusNotReady && app->sd_gui.enabled == true) {
         app->sd_gui.enabled = false;
-        view_port_enabled_set(app->sd_gui.view_port, false);
+        //view_port_enabled_set(app->sd_gui.view_port, false);
 
         FURI_LOG_I(TAG, "SD card unmount");
         StorageEvent event = {.type = StorageEventTypeCardUnmount};
@@ -87,7 +87,7 @@ void storage_tick(Storage* app) {
         app->storage[ST_EXT].status == StorageStatusErrorInternal) &&
        app->sd_gui.enabled == false) {
         app->sd_gui.enabled = true;
-        view_port_enabled_set(app->sd_gui.view_port, true);
+        //view_port_enabled_set(app->sd_gui.view_port, app->sd_gui.iconshow);
 
         if(app->storage[ST_EXT].status == StorageStatusOK) {
             FURI_LOG_I(TAG, "SD card mount");

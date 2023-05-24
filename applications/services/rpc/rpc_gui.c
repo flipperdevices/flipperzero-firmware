@@ -2,6 +2,7 @@
 #include "rpc_i.h"
 #include "gui.pb.h"
 #include <gui/gui_i.h>
+#include <desktop/desktop_settings.h>
 #include <assets_icons.h>
 
 #define TAG "RpcGui"
@@ -34,6 +35,9 @@ typedef struct {
     uint32_t input_counter;
 
     ViewPort* rpc_session_active_viewport;
+    ViewPort* rpc_session_active_viewport_slim;
+
+    DesktopSettings settings;
 } RpcGuiSystem;
 
 static const PB_Gui_ScreenOrientation rpc_system_gui_screen_orientation_map[] = {
@@ -368,6 +372,58 @@ void* rpc_system_gui_alloc(RpcSession* session) {
     rpc_gui->gui = furi_record_open(RECORD_GUI);
     rpc_gui->session = session;
 
+    bool loaded = DESKTOP_SETTINGS_LOAD(&rpc_gui->settings);
+
+    // Active session icon
+    rpc_gui->rpc_session_active_viewport_slim = view_port_alloc();
+    rpc_gui->rpc_session_active_viewport = view_port_alloc();
+
+    view_port_set_width(
+        rpc_gui->rpc_session_active_viewport_slim, icon_get_width(&I_Rpc_active_7x8));
+    view_port_draw_callback_set(
+        rpc_gui->rpc_session_active_viewport_slim, rpc_active_session_icon_draw_callback, session);
+    view_port_enabled_set(rpc_gui->rpc_session_active_viewport_slim, false);
+
+    view_port_set_width(rpc_gui->rpc_session_active_viewport, icon_get_width(&I_Rpc_active_7x8));
+    view_port_draw_callback_set(
+        rpc_gui->rpc_session_active_viewport, rpc_active_session_icon_draw_callback, session);
+    view_port_enabled_set(rpc_gui->rpc_session_active_viewport, false);
+
+    if(rpc_session_get_owner(rpc_gui->session) != RpcOwnerBle) {
+        if(loaded) {
+            switch(rpc_gui->settings.icon_style) {
+            case ICON_STYLE_SLIM:
+                view_port_enabled_set(
+                    rpc_gui->rpc_session_active_viewport_slim, rpc_gui->settings.rpc_icon);
+                view_port_enabled_set(rpc_gui->rpc_session_active_viewport, false);
+                view_port_update(rpc_gui->rpc_session_active_viewport_slim);
+                gui_add_view_port(
+                    rpc_gui->gui,
+                    rpc_gui->rpc_session_active_viewport_slim,
+                    GuiLayerStatusBarLeftSlim);
+                break;
+            case ICON_STYLE_STOCK:
+                view_port_enabled_set(rpc_gui->rpc_session_active_viewport_slim, false);
+                view_port_enabled_set(
+                    rpc_gui->rpc_session_active_viewport, rpc_gui->settings.rpc_icon);
+                view_port_update(rpc_gui->rpc_session_active_viewport);
+                gui_add_view_port(
+                    rpc_gui->gui, rpc_gui->rpc_session_active_viewport, GuiLayerStatusBarLeft);
+                break;
+            }
+        } else {
+            view_port_enabled_set(rpc_gui->rpc_session_active_viewport_slim, true);
+            view_port_enabled_set(rpc_gui->rpc_session_active_viewport, false);
+            view_port_update(rpc_gui->rpc_session_active_viewport);
+            gui_add_view_port(
+                rpc_gui->gui, rpc_gui->rpc_session_active_viewport, GuiLayerStatusBarLeftSlim);
+        }
+    } else {
+        view_port_enabled_set(rpc_gui->rpc_session_active_viewport_slim, false);
+        view_port_enabled_set(rpc_gui->rpc_session_active_viewport, false);
+    }
+
+    /*
     // Active session icon
     rpc_gui->rpc_session_active_viewport = view_port_alloc();
     view_port_set_width(rpc_gui->rpc_session_active_viewport, icon_get_width(&I_Rpc_active_7x8));
@@ -379,6 +435,7 @@ void* rpc_system_gui_alloc(RpcSession* session) {
         view_port_enabled_set(rpc_gui->rpc_session_active_viewport, false);
     }
     gui_add_view_port(rpc_gui->gui, rpc_gui->rpc_session_active_viewport, GuiLayerStatusBarLeft);
+	*/
 
     RpcHandler rpc_handler = {
         .message_handler = NULL,
@@ -422,6 +479,9 @@ void rpc_system_gui_free(void* context) {
 
     gui_remove_view_port(rpc_gui->gui, rpc_gui->rpc_session_active_viewport);
     view_port_free(rpc_gui->rpc_session_active_viewport);
+
+    gui_remove_view_port(rpc_gui->gui, rpc_gui->rpc_session_active_viewport_slim);
+    view_port_free(rpc_gui->rpc_session_active_viewport_slim);
 
     if(rpc_gui->is_streaming) {
         rpc_gui->is_streaming = false;

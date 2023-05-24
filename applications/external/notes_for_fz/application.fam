@@ -1,0 +1,10 @@
+App(
+    appid="Notes",
+    name="Notes for FZ (WIP)",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="note_entry_point",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="note.png",
+    fap_category="Misc",
+)

@@ -6,5 +6,8 @@ App(
     cdefines=["SRV_DOLPHIN"],
     stack_size=1 * 1024,
     order=50,
-    sdk_headers=["dolphin.h"],
+    sdk_headers=[
+        "dolphin.h",
+        "helpers/dolphin_state.h",
+    ],
 )

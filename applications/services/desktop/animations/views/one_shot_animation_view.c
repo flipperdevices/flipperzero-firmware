@@ -6,6 +6,7 @@
 #include <gui/view.h>
 #include <gui/icon_i.h>
 #include <stdint.h>
+#include <loader/loader.h>
 
 typedef void (*OneShotInteractCallback)(void*);
 
@@ -70,6 +71,10 @@ static bool one_shot_view_input(InputEvent* event, void* context) {
                 if(view->interact_callback) {
                     view->interact_callback(view->interact_callback_context);
                 }
+            } else if(event->type == InputTypeLong) {
+                Loader* loader = furi_record_open(RECORD_LOADER);
+                loader_start(loader, "About", "batt");
+                furi_record_close(RECORD_LOADER);
             }
         }
     }

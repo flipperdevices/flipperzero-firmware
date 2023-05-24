@@ -11,6 +11,8 @@
 extern "C" {
 #endif
 
+#define CUSTOM_ICON_MAX_SIZE 32
+
 typedef struct FileBrowser FileBrowser;
 typedef void (*FileBrowserCallback)(void* context);
 

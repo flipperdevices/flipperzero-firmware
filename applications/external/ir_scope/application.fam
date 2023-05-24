@@ -1,0 +1,12 @@
+# Visualizes raw IR signals. It's useful for detecting and inspecting raw IR.
+App(
+    appid="IR_Scope",
+    name="IR Scope",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="ir_scope_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="ir_scope.png",
+    fap_category="Infrared",
+    fap_icon_assets_symbol="ir_scope",
+)

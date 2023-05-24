@@ -17,9 +17,10 @@ void lfrfid_scene_save_type_on_enter(void* context) {
     SaveTypeCtx* state = malloc(sizeof(SaveTypeCtx));
     FuriString* protocol_string = furi_string_alloc();
     for(uint8_t i = 0; i < LFRFIDProtocolMax; i++) {
-        if(strcmp(
-               protocol_dict_get_manufacturer(app->dict, i),
-               protocol_dict_get_name(app->dict, i)) != 0) {
+        if((strcmp(
+                protocol_dict_get_manufacturer(app->dict, i),
+                protocol_dict_get_name(app->dict, i)) != 0) &&
+           (strcmp(protocol_dict_get_manufacturer(app->dict, i), "N/A") != 0)) {
             furi_string_printf(
                 protocol_string,
                 "%s %s",

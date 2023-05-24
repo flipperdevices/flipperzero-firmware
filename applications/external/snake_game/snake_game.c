@@ -1,3 +1,6 @@
+#include "helpers/snake_file_handler.h"
+#include "helpers/snake_types.h"
+
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>
@@ -5,53 +8,7 @@
 #include <dolphin/dolphin.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-
-typedef struct {
-    //    +-----x
-    //    |
-    //    |
-    //    y
-    uint8_t x;
-    uint8_t y;
-} Point;
-
-typedef enum {
-    GameStateLife,
-
-    // https://melmagazine.com/en-us/story/snake-nokia-6110-oral-history-taneli-armanto
-    // Armanto: While testing the early versions of the game, I noticed it was hard
-    // to control the snake upon getting close to and edge but not crashing — especially
-    // in the highest speed levels. I wanted the highest level to be as fast as I could
-    // possibly make the device "run," but on the other hand, I wanted to be friendly
-    // and help the player manage that level. Otherwise it might not be fun to play. So
-    // I implemented a little delay. A few milliseconds of extra time right before
-    // the player crashes, during which she can still change the directions. And if
-    // she does, the game continues.
-    GameStateLastChance,
-
-    GameStateGameOver,
-} GameState;
-
-// Note: do not change without purpose. Current values are used in smart
-// orthogonality calculation in `snake_game_get_turn_snake`.
-typedef enum {
-    DirectionUp,
-    DirectionRight,
-    DirectionDown,
-    DirectionLeft,
-} Direction;
-
-#define MAX_SNAKE_LEN 253
-
-typedef struct {
-    Point points[MAX_SNAKE_LEN];
-    uint16_t len;
-    Direction currentMovement;
-    Direction nextMovement; // if backward of currentMovement, ignore
-    Point fruit;
-    GameState state;
-    FuriMutex* mutex;
-} SnakeState;
+#include <dolphin/dolphin.h>
 
 typedef enum {
     EventTypeTick,
@@ -115,22 +72,35 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_box(canvas, p.x, p.y, 4, 4);
     }
 
+    // Show score on the game field
+    if(snake_state->state != GameStateGameOver) {
+        char buffer2[6];
+        canvas_set_font(canvas, FontBatteryPercent);
+        snprintf(buffer2, sizeof(buffer2), "%u", (snake_state->len - 7));
+        canvas_draw_str_aligned(canvas, 124, 10, AlignRight, AlignBottom, buffer2);
+    }
     // Game Over banner
     if(snake_state->state == GameStateGameOver) {
         // Screen is 128x64 px
         canvas_set_color(canvas, ColorWhite);
-        canvas_draw_box(canvas, 34, 20, 62, 24);
+        canvas_draw_box(canvas, 32, 20, 64, 34);
 
         canvas_set_color(canvas, ColorBlack);
-        canvas_draw_frame(canvas, 34, 20, 62, 24);
+        canvas_draw_frame(canvas, 32, 20, 64, 34);
 
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str(canvas, 37, 31, "Game Over");
 
+        char buffer[18];
         canvas_set_font(canvas, FontSecondary);
-        char buffer[12];
-        snprintf(buffer, sizeof(buffer), "Score: %u", snake_state->len - 7U);
+        snprintf(buffer, sizeof(buffer), "Score: %u", snake_state->len);
         canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignBottom, buffer);
+
+        snprintf(buffer, sizeof(buffer), "Highscore: %d", snake_state->highscore);
+        canvas_draw_str_aligned(canvas, 64, 51, AlignCenter, AlignBottom, buffer);
+    }
+    if((snake_state->len - 7) % 20 == 0 && (snake_state->len - 7) != 0) {
+        DOLPHIN_DEED(getRandomDeed());
     }
 
     furi_mutex_release(snake_state->mutex);
@@ -261,16 +231,24 @@ static void snake_game_move_snake(SnakeState* const snake_state, Point const nex
     snake_state->points[0] = next_step;
 }
 
+static void snake_game_game_over(SnakeState* const snake_state, NotificationApp* notification) {
+    snake_state->state = GameStateGameOver;
+    snake_state->len = snake_state->len - 7;
+    if(snake_state->len > snake_state->highscore) {
+        snake_state->isNewHighscore = true;
+        snake_state->highscore = snake_state->len;
+    }
+
+    notification_message_block(notification, &sequence_fail);
+}
+
 static void
     snake_game_process_game_step(SnakeState* const snake_state, NotificationApp* notification) {
     if(snake_state->state == GameStateGameOver) {
         return;
     }
 
-    bool can_turn = (snake_state->points[0].x % 2 == 0) && (snake_state->points[0].y % 2 == 0);
-    if(can_turn) {
-        snake_state->currentMovement = snake_game_get_turn_snake(snake_state);
-    }
+    snake_state->currentMovement = snake_game_get_turn_snake(snake_state);
 
     Point next_step = snake_game_get_next_step(snake_state);
 
@@ -280,8 +258,7 @@ static void
             snake_state->state = GameStateLastChance;
             return;
         } else if(snake_state->state == GameStateLastChance) {
-            snake_state->state = GameStateGameOver;
-            notification_message_block(notification, &sequence_fail);
+            snake_game_game_over(snake_state, notification);
             return;
         }
     } else {
@@ -292,8 +269,7 @@ static void
 
     crush = snake_game_collision_with_tail(snake_state, next_step);
     if(crush) {
-        snake_state->state = GameStateGameOver;
-        notification_message_block(notification, &sequence_fail);
+        snake_game_game_over(snake_state, notification);
         return;
     }
 
@@ -301,8 +277,7 @@ static void
     if(eatFruit) {
         snake_state->len++;
         if(snake_state->len >= MAX_SNAKE_LEN) {
-            snake_state->state = GameStateGameOver;
-            notification_message_block(notification, &sequence_fail);
+            snake_game_game_over(snake_state, notification);
             return;
         }
     }
@@ -321,12 +296,17 @@ int32_t snake_game_app(void* p) {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(SnakeEvent));
 
     SnakeState* snake_state = malloc(sizeof(SnakeState));
-    snake_game_init_game(snake_state);
+    snake_state->isNewHighscore = false;
+    snake_state->highscore = 0;
+    if(!snake_game_init_game_from_file(snake_state)) {
+        snake_game_init_game(snake_state);
+    }
 
     snake_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     if(!snake_state->mutex) {
         FURI_LOG_E("SnakeGame", "cannot create mutex\r\n");
+        furi_message_queue_free(event_queue);
         free(snake_state);
         return 255;
     }
@@ -377,6 +357,9 @@ int32_t snake_game_app(void* p) {
                         }
                         break;
                     case InputKeyBack:
+                        if(snake_state->state == GameStateLife) {
+                            snake_game_save_game_to_file(snake_state);
+                        }
                         processing = false;
                         break;
                     default:
@@ -394,7 +377,10 @@ int32_t snake_game_app(void* p) {
         furi_mutex_release(snake_state->mutex);
     }
 
-    // Return backlight to normal state
+    if(snake_state->isNewHighscore) {
+        snake_game_save_score_to_file(snake_state->highscore);
+    }
+    // Wait for all notifications to be played and return backlight to normal state
     notification_message(notification, &sequence_display_backlight_enforce_auto);
 
     furi_timer_free(timer);
@@ -409,26 +395,3 @@ int32_t snake_game_app(void* p) {
 
     return 0;
 }
-
-// Screen is 128x64 px
-// (4 + 4) * 16 - 4 + 2 + 2border == 128
-// (4 + 4) * 8 - 4 + 2 + 2border == 64
-// Game field from point{x:  0, y: 0} to point{x: 30, y: 14}.
-// The snake turns only in even cells - intersections.
-// ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
-// ╎ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ╎
-// ╎ ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪ ╎
-// ╎ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ╎
-// ╎ ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪ ╎
-// ╎ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ╎
-// ╎ ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪ ╎
-// ╎ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ╎
-// ╎ ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪ ╎
-// ╎ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ╎
-// ╎ ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪ ╎
-// ╎ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ╎
-// ╎ ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪ ╎
-// ╎ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ╎
-// ╎ ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪   ▪ ╎
-// ╎ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ▪ ╎
-// └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘

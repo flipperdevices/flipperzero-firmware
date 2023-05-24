@@ -1,4 +1,8 @@
 #include "../subghz_i.h"
+#include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/protocols/star_line.h>
+
+#include <lib/subghz/blocks/custom_btn.h>
 
 typedef enum {
     SubGhzRpcStateIdle,
@@ -48,7 +52,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                 rpc_system_app_set_error_code(subghz->rpc_ctx, SubGhzErrorTypeOnlyRX);
                 rpc_system_app_set_error_text(
                     subghz->rpc_ctx,
-                    "Transmission on this frequency is restricted in your region");
+                    "Transmission on this frequency is restricted in your settings");
             }
             rpc_system_app_confirm(subghz->rpc_ctx, RpcAppEventButtonPress, result);
         } else if(event.event == SubGhzCustomEventSceneRpcButtonRelease) {
@@ -69,8 +73,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
                         subghz->scene_manager, SubGhzSceneRpc, SubGhzRpcStateLoaded);
                     furi_string_set(subghz->file_path, arg);
                     result = true;
-                    FuriString* file_name;
-                    file_name = furi_string_alloc();
+                    FuriString* file_name = furi_string_alloc();
                     path_extract_filename(subghz->file_path, file_name, true);
 
                     snprintf(
@@ -94,6 +97,7 @@ bool subghz_scene_rpc_on_event(void* context, SceneManagerEvent event) {
 
 void subghz_scene_rpc_on_exit(void* context) {
     SubGhz* subghz = context;
+
     SubGhzRpcState state = scene_manager_get_scene_state(subghz->scene_manager, SubGhzSceneRpc);
     if(state != SubGhzRpcStateIdle) {
         subghz_txrx_stop(subghz->txrx);
@@ -105,4 +109,11 @@ void subghz_scene_rpc_on_exit(void* context) {
     popup_set_header(popup, NULL, 0, 0, AlignCenter, AlignBottom);
     popup_set_text(popup, NULL, 0, 0, AlignCenter, AlignTop);
     popup_set_icon(popup, 0, 0, NULL);
+
+    keeloq_reset_mfname();
+    keeloq_reset_kl_type();
+    keeloq_reset_original_btn();
+    subghz_custom_btns_reset();
+    star_line_reset_mfname();
+    star_line_reset_kl_type();
 }

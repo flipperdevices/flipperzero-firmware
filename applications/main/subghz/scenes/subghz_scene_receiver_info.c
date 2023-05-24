@@ -1,5 +1,9 @@
 #include "../subghz_i.h"
 #include "../helpers/subghz_custom_event.h"
+#include <lib/subghz/protocols/keeloq.h>
+#include <lib/subghz/protocols/star_line.h>
+
+#include <lib/subghz/blocks/custom_btn.h>
 
 void subghz_scene_receiver_info_callback(GuiButtonType result, InputType type, void* context) {
     furi_assert(context);
@@ -23,7 +27,7 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
     if(subghz_txrx_load_decoder_by_name_protocol(
            subghz->txrx,
            subghz_history_get_protocol_name(subghz->history, subghz->idx_menu_chosen))) {
-        //todo we are trying to deserialize without checking for errors, since it is assumed that we just received this chignal
+        //todo we are trying to deserialize without checking for errors, since it is assumed that we just received this signal
         subghz_protocol_decoder_base_deserialize(
             subghz_txrx_get_decoder(subghz->txrx),
             subghz_history_get_raw_data(subghz->history, subghz->idx_menu_chosen));
@@ -42,15 +46,14 @@ static bool subghz_scene_receiver_info_update_parser(void* context) {
     return false;
 }
 
-void subghz_scene_receiver_info_on_enter(void* context) {
-    SubGhz* subghz = context;
-
+void subghz_scene_receiver_info_draw_widget(SubGhz* subghz) {
     if(subghz_scene_receiver_info_update_parser(subghz)) {
         FuriString* frequency_str = furi_string_alloc();
         FuriString* modulation_str = furi_string_alloc();
         FuriString* text = furi_string_alloc();
 
-        subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str);
+        subghz_txrx_get_frequency_and_modulation(
+            subghz->txrx, frequency_str, modulation_str, false);
         widget_add_string_element(
             subghz->widget,
             78,
@@ -84,7 +87,8 @@ void subghz_scene_receiver_info_on_enter(void* context) {
                 subghz_scene_receiver_info_callback,
                 subghz);
         }
-        if(subghz_txrx_protocol_is_transmittable(subghz->txrx, true)) {
+        // Removed static check
+        if(subghz_txrx_protocol_is_transmittable(subghz->txrx, false)) {
             widget_add_button_element(
                 subghz->widget,
                 GuiButtonTypeCenter,
@@ -99,6 +103,15 @@ void subghz_scene_receiver_info_on_enter(void* context) {
     }
 
     view_dispatcher_switch_to_view(subghz->view_dispatcher, SubGhzViewIdWidget);
+}
+
+void subghz_scene_receiver_info_on_enter(void* context) {
+    SubGhz* subghz = context;
+
+    keeloq_reset_original_btn();
+    subghz_custom_btns_reset();
+
+    subghz_scene_receiver_info_draw_widget(subghz);
 }
 
 bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event) {
@@ -124,10 +137,16 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
             //CC1101 Stop Tx -> Start RX
             subghz->state_notifications = SubGhzNotificationStateIDLE;
 
-            subghz_txrx_rx_start(subghz->txrx);
+            widget_reset(subghz->widget);
+            subghz_scene_receiver_info_draw_widget(subghz);
 
-            subghz_txrx_hopper_unpause(subghz->txrx);
-            subghz->state_notifications = SubGhzNotificationStateRx;
+            subghz_txrx_stop(subghz->txrx);
+            if(!scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneDecodeRAW)) {
+                subghz_txrx_rx_start(subghz->txrx);
+
+                subghz_txrx_hopper_unpause(subghz->txrx);
+                subghz->state_notifications = SubGhzNotificationStateRx;
+            }
             return true;
         } else if(event.event == SubGhzCustomEventSceneReceiverInfoSave) {
             //CC1101 Stop RX -> Save
@@ -141,6 +160,7 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
 
             if(subghz_txrx_protocol_is_serializable(subghz->txrx)) {
                 subghz_file_name_clear(subghz);
+
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaveName);
             }
             return true;
@@ -169,5 +189,12 @@ bool subghz_scene_receiver_info_on_event(void* context, SceneManagerEvent event)
 
 void subghz_scene_receiver_info_on_exit(void* context) {
     SubGhz* subghz = context;
+
     widget_reset(subghz->widget);
+    keeloq_reset_mfname();
+    keeloq_reset_kl_type();
+    keeloq_reset_original_btn();
+    subghz_custom_btns_reset();
+    star_line_reset_mfname();
+    star_line_reset_kl_type();
 }

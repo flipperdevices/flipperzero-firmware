@@ -1,0 +1,14 @@
+App(
+    appid="DVD_Bouncer",
+    name="DVD Bouncer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="bounce_moment",
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    fap_icon="iconimage.png",
+    fap_category="Games",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="dvd_bounce",
+)

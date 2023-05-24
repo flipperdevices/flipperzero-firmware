@@ -7,12 +7,6 @@
 
 #define TAG "U2F"
 
-#define U2F_DATA_FOLDER ANY_PATH("u2f/")
-#define U2F_CERT_FILE U2F_DATA_FOLDER "assets/cert.der"
-#define U2F_CERT_KEY_FILE U2F_DATA_FOLDER "assets/cert_key.u2f"
-#define U2F_KEY_FILE U2F_DATA_FOLDER "key.u2f"
-#define U2F_CNT_FILE U2F_DATA_FOLDER "cnt.u2f"
-
 #define U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_FACTORY 2
 #define U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_UNIQUE 11
 
@@ -178,7 +172,7 @@ bool u2f_data_cert_key_load(uint8_t* cert_key) {
     uint8_t key_slot = 0;
     uint32_t version = 0;
 
-    // Check if unique key exists in secure eclave and generate it if missing
+    // Check if unique key exists in secure eclave(typo?) and generate it if missing
     if(!furi_hal_crypto_verify_key(U2F_DATA_FILE_ENCRYPTION_KEY_SLOT_UNIQUE)) return false;
 
     FuriString* filetype;

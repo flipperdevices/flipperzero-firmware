@@ -1,11 +1,14 @@
 #pragma once
 #include <furi.h>
+#include "loader_extmainapp.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define RECORD_LOADER "loader"
+
+#define FAP_LOADER_APP_NAME "Applications"
 
 typedef struct Loader Loader;
 

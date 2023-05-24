@@ -460,7 +460,7 @@ int32_t cli_srv(void* p) {
         furi_thread_set_stdout_callback(NULL);
     }
 
-    if(furi_hal_rtc_get_boot_mode() == FuriHalRtcBootModeNormal) {
+    if(furi_hal_is_normal_boot()) {
         cli_session_open(cli, &cli_vcp);
     } else {
         FURI_LOG_W(TAG, "Skipping start in special boot mode");

@@ -9,10 +9,11 @@
 #include "views/subghz_frequency_analyzer.h"
 #include "views/subghz_read_raw.h"
 
-#include "views/subghz_test_static.h"
 #include "views/subghz_test_carrier.h"
+#if FURI_DEBUG
+#include "views/subghz_test_static.h"
 #include "views/subghz_test_packet.h"
-
+#endif
 #include <gui/gui.h>
 #include <assets_icons.h>
 #include <dialogs/dialogs.h>
@@ -22,11 +23,18 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>
 #include <gui/modules/text_input.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/widget.h>
 
 #include <subghz/scenes/subghz_scene.h>
+#include <lib/subghz/subghz_worker.h>
+#include <lib/subghz/subghz_file_encoder_worker.h>
+#include <lib/subghz/subghz_setting.h>
+#include <lib/subghz/receiver.h>
+#include <lib/subghz/transmitter.h>
 
 #include "subghz_history.h"
+#include "subghz_last_settings.h"
 
 #include <gui/modules/variable_item_list.h>
 #include <lib/toolbox/path.h>
@@ -38,6 +46,13 @@
 #include "helpers/subghz_txrx.h"
 
 #define SUBGHZ_MAX_LEN_NAME 64
+#define SUBGHZ_EXT_PRESET_NAME true
+
+typedef struct {
+    uint8_t fix[4];
+    uint8_t cnt[3];
+    uint8_t seed[4];
+} SecureData;
 
 struct SubGhz {
     Gui* gui;
@@ -51,6 +66,7 @@ struct SubGhz {
     Submenu* submenu;
     Popup* popup;
     TextInput* text_input;
+    ByteInput* byte_input;
     Widget* widget;
     DialogsApp* dialogs;
     FuriString* file_path;
@@ -64,18 +80,33 @@ struct SubGhz {
 
     SubGhzFrequencyAnalyzer* subghz_frequency_analyzer;
     SubGhzReadRAW* subghz_read_raw;
-    SubGhzTestStatic* subghz_test_static;
+    bool raw_send_only;
     SubGhzTestCarrier* subghz_test_carrier;
+#if FURI_DEBUG
+    SubGhzTestStatic* subghz_test_static;
     SubGhzTestPacket* subghz_test_packet;
+#endif
+    SubGhzLastSettings* last_settings;
 
     SubGhzProtocolFlag filter;
     FuriString* error_str;
     SubGhzLock lock;
+
+    bool ignore_starline;
+    bool ignore_auto_alarms;
+    bool ignore_magellan;
+
+    SecureData* secure_data;
+
+    SubGhzFileEncoderWorker* decode_raw_file_worker_encoder;
+
     SubGhzThresholdRssi* threshold_rssi;
     SubGhzRxKeyState rx_key_state;
     SubGhzHistory* history;
+
     uint16_t idx_menu_chosen;
     SubGhzLoadTypeFile load_type_file;
+
     void* rpc_ctx;
 };
 
@@ -107,3 +138,6 @@ bool subghz_is_locked(SubGhz* subghz);
 
 void subghz_rx_key_state_set(SubGhz* subghz, SubGhzRxKeyState state);
 SubGhzRxKeyState subghz_rx_key_state_get(SubGhz* subghz);
+
+extern const NotificationSequence subghz_sequence_rx;
+extern const NotificationSequence subghz_sequence_rx_locked;

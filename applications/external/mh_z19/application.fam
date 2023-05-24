@@ -1,0 +1,13 @@
+App(
+    appid="MH_Z19_CO2_Sensor",
+    name="[MH-Z19] CO2 Sensor",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="mh_z19_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=20,
+    fap_icon="co2_icon_10x10.png",
+    fap_category="GPIO",
+    fap_icon_assets="media",
+    fap_icon_assets_symbol="mh_z19",
+)

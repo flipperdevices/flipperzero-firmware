@@ -3,7 +3,10 @@ App(
     name="Basic settings apps bundle",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
-        "passport",
+        # "dolphin_passport",
+        # "passport_settings",
+        "desktop_settings_loader",
+        "passport_settings_loader",
         "system_settings",
         "about",
     ],

@@ -1,0 +1,15 @@
+App(
+    appid="Game_of_Tag",
+    name="Game of Tag WIP",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="tag_game_app",
+    stack_size=2 * 1024,
+    fap_category="Games",
+    fap_version=(0, 1),
+    fap_icon="tag_game.png",
+    fap_description="A game of tag - play with other Flippers",
+    fap_author="Lewis Westbury",
+    fap_weburl="https://github.com/instantiator/flipper-zero-experimental-apps/tree/main/tag",
+    fap_icon_assets="images",  # Image assets to compile for this application
+    fap_icon_assets_symbol="tag_game",
+)

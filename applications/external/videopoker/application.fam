@@ -1,0 +1,11 @@
+App(
+    appid="VideoPoker",
+    name="Video Poker",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="video_poker_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    order=270,
+    fap_icon="pokerIcon.png",
+    fap_category="Games",
+)

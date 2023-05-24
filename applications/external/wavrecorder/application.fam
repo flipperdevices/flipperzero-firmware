@@ -1,0 +1,15 @@
+App(
+    appid="WAV_Recorder",
+    name="WAV Recorder",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="wav_recorder_app",
+    stack_size=2 * 1024,
+    fap_category="GPIO",
+    # Optional values
+    # fap_version=(0, 1),  # (major, minor)
+    fap_icon="wav_recorder.png",  # 10x10 1-bit PNG
+    # fap_description="A simple app",
+    # fap_author="J. Doe",
+    # fap_weburl="https://github.com/user/wav_recorder",
+    # fap_icon_assets="images",  # Image assets to compile for this application
+)

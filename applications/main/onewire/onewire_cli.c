@@ -21,7 +21,7 @@ void onewire_on_system_start() {
 static void onewire_cli_print_usage() {
     printf("Usage:\r\n");
     printf("onewire search\r\n");
-};
+}
 
 static void onewire_cli_search(Cli* cli) {
     UNUSED(cli);

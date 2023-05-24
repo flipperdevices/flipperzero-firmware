@@ -1,0 +1,11 @@
+App(
+    appid="Mx2125_Accelerometer",
+    name="[Mx2125] Accelerometer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="memsic_2125_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    fap_icon="memsic_2125.png",
+    fap_category="GPIO",
+    fap_icon_assets_symbol="Memsic_2125",
+)

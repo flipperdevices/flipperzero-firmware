@@ -186,11 +186,16 @@ int32_t lfrfid_app(void* p) {
             DOLPHIN_DEED(DolphinDeedRfidEmulate);
         } else {
             furi_string_set(app->file_path, args);
-            lfrfid_load_key_data(app, app->file_path, true);
-            view_dispatcher_attach_to_gui(
-                app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-            scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
-            DOLPHIN_DEED(DolphinDeedRfidEmulate);
+            if(lfrfid_load_key_data(app, app->file_path, true)) {
+                view_dispatcher_attach_to_gui(
+                    app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+                scene_manager_next_scene(app->scene_manager, LfRfidSceneEmulate);
+                DOLPHIN_DEED(DolphinDeedRfidEmulate);
+            } else {
+                // TODO: exit properly
+                lfrfid_free(app);
+                return 0;
+            }
         }
 
     } else {
@@ -238,6 +243,27 @@ bool lfrfid_load_key_from_file_select(LfRfid* app) {
 
     if(result) {
         result = lfrfid_load_key_data(app, app->file_path, true);
+    }
+
+    return result;
+}
+
+bool lfrfid_load_raw_key_from_file_select(LfRfid* app) {
+    furi_assert(app);
+
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(
+        &browser_options, LFRFID_APP_RAW_ASK_EXTENSION, &I_125_10px);
+    browser_options.base_path = LFRFID_APP_FOLDER;
+
+    // Input events and views are managed by file_browser
+    bool result =
+        dialog_file_browser_show(app->dialogs, app->file_path, app->file_path, &browser_options);
+
+    if(result) {
+        // Extract .raw and then .ask
+        path_extract_filename(app->file_path, app->file_name, true);
+        path_extract_filename(app->file_name, app->file_name, true);
     }
 
     return result;

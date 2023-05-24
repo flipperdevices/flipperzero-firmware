@@ -1,0 +1,10 @@
+App(
+    appid="ReactionTest",
+    name="Reaction Test",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="reaction_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_category="Games",
+    fap_icon="icon.png",
+)

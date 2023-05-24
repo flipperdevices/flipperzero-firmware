@@ -3,15 +3,15 @@
 #include <dolphin/dolphin.h>
 #include <lib/subghz/protocols/raw.h>
 #include <lib/toolbox/path.h>
+#include <float_tools.h>
 
-#define RAW_FILE_NAME "Raw_signal_"
+#define RAW_FILE_NAME "R_"
 #define TAG "SubGhzSceneReadRAW"
 
 bool subghz_scene_read_raw_update_filename(SubGhz* subghz) {
     bool ret = false;
     //set the path to read the file
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
+    FuriString* temp_str = furi_string_alloc();
     do {
         FlipperFormat* fff_data = subghz_txrx_get_fff_data(subghz->txrx);
         if(!flipper_format_rewind(fff_data)) {
@@ -40,7 +40,11 @@ static void subghz_scene_read_raw_update_statusbar(void* context) {
     FuriString* frequency_str = furi_string_alloc();
     FuriString* modulation_str = furi_string_alloc();
 
-    subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str);
+#ifdef SUBGHZ_EXT_PRESET_NAME
+    subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str, true);
+#else
+    subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str, false);
+#endif
     subghz_read_raw_add_data_statusbar(
         subghz->subghz_read_raw,
         furi_string_get_cstr(frequency_str),
@@ -131,7 +135,12 @@ bool subghz_scene_read_raw_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(subghz->scene_manager, SubGhzSceneNeedSaving);
             } else {
                 //Restore default setting
-                subghz_set_default_preset(subghz);
+                if(subghz->raw_send_only) {
+                    subghz_set_default_preset(subghz);
+                } else {
+                    subghz_txrx_set_preset(
+                        subghz->txrx, "AM650", subghz->last_settings->frequency, NULL, 0);
+                }
                 if(!scene_manager_search_and_switch_to_previous_scene(
                        subghz->scene_manager, SubGhzSceneSaved)) {
                     if(!scene_manager_search_and_switch_to_previous_scene(

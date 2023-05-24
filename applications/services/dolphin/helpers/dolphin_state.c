@@ -1,6 +1,5 @@
 #include "dolphin_state.h"
 #include "dolphin/helpers/dolphin_deed.h"
-#include "dolphin_state_filename.h"
 
 #include <stdint.h>
 #include <storage/storage.h>
@@ -11,16 +10,51 @@
 
 #define TAG "DolphinState"
 
-#define DOLPHIN_STATE_PATH INT_PATH(DOLPHIN_STATE_FILE_NAME)
 #define DOLPHIN_STATE_HEADER_MAGIC 0xD0
 #define DOLPHIN_STATE_HEADER_VERSION 0x01
-#define LEVEL2_THRESHOLD 300
-#define LEVEL3_THRESHOLD 1800
+
+/*
+The way the math works:
+
+Current xp (icounter) is subtracted from the threshold (xp requirement for next level up)
+
+The array values in level_array result in the following XP requirements per level below:
+
+500,  750, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750,
+3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 6000,
+7000, 8000, 9000, 10000, 11000, 12000, 13000, 14000, 15000
+
+To change the level requirement, add the last level's value with the desired next level's value.
+Ex: Level 1 is 0 - 500. Level 2 needs to be Level 1 + next desired XP value.
+
+Level 2 is calculated:
+Previous Level's Required XP: 500
++
+Desired Level XP: 750
+=
+Value in level_array: 1250
+*/
+
+const int DOLPHIN_LEVELS[DOLPHIN_LEVEL_COUNT] = {500,    1250,   2250,   3500,   5000,  6750,
+                                                 8750,   11000,  13500,  16250,  19250, 22500,
+                                                 26000,  29750,  33750,  38000,  42500, 47250,
+                                                 52250,  58250,  65250,  73250,  82250, 92250,
+                                                 103250, 115250, 128250, 142250, 157250};
+
+/*
+This calculates the size of an array. This is good as it's used for dynamic for loops below. Therefore, you can just add more values to level_array for more levels.
+*/
+#define NUM(a) (sizeof(a) / sizeof(*a))
+
 #define BUTTHURT_MAX 14
 #define BUTTHURT_MIN 0
 
 DolphinState* dolphin_state_alloc() {
     return malloc(sizeof(DolphinState));
+}
+
+int dolphin_state_max_level() {
+    return NUM(DOLPHIN_LEVELS) + 1;
 }
 
 void dolphin_state_free(DolphinState* dolphin_state) {
@@ -79,42 +113,44 @@ uint64_t dolphin_state_timestamp() {
     return furi_hal_rtc_datetime_to_timestamp(&datetime);
 }
 
-bool dolphin_state_is_levelup(uint32_t icounter) {
-    return (icounter == LEVEL2_THRESHOLD) || (icounter == LEVEL3_THRESHOLD);
+bool dolphin_state_is_levelup(int icounter) {
+    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+        if((icounter == DOLPHIN_LEVELS[i])) {
+            return true;
+        }
+    }
+    return false;
 }
 
-uint8_t dolphin_get_level(uint32_t icounter) {
-    if(icounter <= LEVEL2_THRESHOLD) {
-        return 1;
-    } else if(icounter <= LEVEL3_THRESHOLD) {
-        return 2;
-    } else {
-        return 3;
-    }
+const int* dolphin_get_levels() {
+    return DOLPHIN_LEVELS;
 }
 
-uint32_t dolphin_state_xp_above_last_levelup(uint32_t icounter) {
-    uint32_t threshold = 0;
-    if(icounter <= LEVEL2_THRESHOLD) {
-        threshold = 0;
-    } else if(icounter <= LEVEL3_THRESHOLD) {
-        threshold = LEVEL2_THRESHOLD + 1;
-    } else {
-        threshold = LEVEL3_THRESHOLD + 1;
+uint8_t dolphin_get_level(int icounter) {
+    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+        if(icounter <= DOLPHIN_LEVELS[i]) {
+            return i + 1;
+        }
     }
-    return icounter - threshold;
+    return DOLPHIN_LEVEL_COUNT + 1;
 }
 
-uint32_t dolphin_state_xp_to_levelup(uint32_t icounter) {
-    uint32_t threshold = 0;
-    if(icounter <= LEVEL2_THRESHOLD) {
-        threshold = LEVEL2_THRESHOLD;
-    } else if(icounter <= LEVEL3_THRESHOLD) {
-        threshold = LEVEL3_THRESHOLD;
-    } else {
-        threshold = (uint32_t)-1;
+uint32_t dolphin_state_xp_above_last_levelup(int icounter) {
+    for(int i = DOLPHIN_LEVEL_COUNT; i >= 0; --i) {
+        if(icounter >= DOLPHIN_LEVELS[i]) {
+            return icounter - DOLPHIN_LEVELS[i];
+        }
     }
-    return threshold - icounter;
+    return icounter;
+}
+
+uint32_t dolphin_state_xp_to_levelup(int icounter) {
+    for(int i = 0; i < DOLPHIN_LEVEL_COUNT; ++i) {
+        if(icounter <= DOLPHIN_LEVELS[i]) {
+            return DOLPHIN_LEVELS[i] - icounter;
+        }
+    }
+    return (uint32_t)-1;
 }
 
 void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
@@ -164,6 +200,7 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
     int32_t new_butthurt = ((int32_t)dolphin_state->data.butthurt) -
                            (butthurt_icounter_level_old != butthurt_icounter_level_new);
     new_butthurt = CLAMP(new_butthurt, BUTTHURT_MAX, BUTTHURT_MIN);
+    if(new_butthurt >= 7) new_butthurt = BUTTHURT_MIN; // FLIPPER STAYS HAPPY
 
     dolphin_state->data.butthurt = new_butthurt;
     dolphin_state->data.timestamp = dolphin_state_timestamp();
@@ -171,7 +208,7 @@ void dolphin_state_on_deed(DolphinState* dolphin_state, DolphinDeed deed) {
 
     FURI_LOG_D(
         TAG,
-        "icounter %lu, butthurt %ld",
+        "icounter %ld, butthurt %ld",
         dolphin_state->data.icounter,
         dolphin_state->data.butthurt);
 }

@@ -601,6 +601,12 @@ MU_TEST(subghz_decoder_ansonic_test) {
         "Test decoder " SUBGHZ_PROTOCOL_ANSONIC_NAME " error\r\n");
 }
 
+MU_TEST(subghz_decoder_pocsag_test) {
+    mu_assert(
+        subghz_decoder_test(EXT_PATH("unit_tests/subghz/pocsag.sub"), SUBGHZ_PROTOCOL_POCSAG_NAME),
+        "Test decoder " SUBGHZ_PROTOCOL_POCSAG_NAME " error\r\n");
+}
+
 MU_TEST(subghz_decoder_smc5326_test) {
     mu_assert(
         subghz_decoder_test(
@@ -840,6 +846,7 @@ MU_TEST_SUITE(subghz) {
     MU_RUN_TEST(subghz_decoder_intertechno_v3_test);
     MU_RUN_TEST(subghz_decoder_clemsa_test);
     MU_RUN_TEST(subghz_decoder_ansonic_test);
+    MU_RUN_TEST(subghz_decoder_pocsag_test);
     MU_RUN_TEST(subghz_decoder_smc5326_test);
     MU_RUN_TEST(subghz_decoder_holtek_ht12x_test);
     MU_RUN_TEST(subghz_decoder_dooya_test);

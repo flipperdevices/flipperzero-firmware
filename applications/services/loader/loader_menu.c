@@ -15,10 +15,13 @@ struct LoaderMenu {
     Menu* primary_menu;
     Submenu* settings_menu;
 
+    bool settings;
+    ExtMainAppList_t* ext_main_apps;
+
     void (*closed_callback)(void*);
     void* closed_callback_context;
 
-    void (*click_callback)(const char*, void*);
+    void (*click_callback)(const char*, bool, void*);
     void* click_callback_context;
 
     FuriThread* thread;
@@ -53,9 +56,11 @@ void loader_menu_free(LoaderMenu* loader_menu) {
     free(loader_menu);
 }
 
-void loader_menu_start(LoaderMenu* loader_menu) {
+void loader_menu_start(LoaderMenu* loader_menu, bool settings, ExtMainAppList_t* ext_main_apps) {
     furi_assert(loader_menu);
     furi_assert(!loader_menu->thread);
+    loader_menu->settings = settings;
+    loader_menu->ext_main_apps = ext_main_apps;
     loader_menu->thread = furi_thread_alloc_ex(TAG, 1024, loader_menu_thread, loader_menu);
     furi_thread_start(loader_menu->thread);
 }
@@ -79,7 +84,7 @@ void loader_menu_set_closed_callback(
 
 void loader_menu_set_click_callback(
     LoaderMenu* loader_menu,
-    void (*callback)(const char*, void*),
+    void (*callback)(const char*, bool, void*),
     void* context) {
     loader_menu->click_callback = callback;
     loader_menu->click_callback_context = context;
@@ -89,7 +94,15 @@ static void loader_menu_callback(void* context, uint32_t index) {
     LoaderMenu* loader_menu = context;
     const char* name = FLIPPER_APPS[index].name;
     if(loader_menu->click_callback) {
-        loader_menu->click_callback(name, loader_menu->click_callback_context);
+        loader_menu->click_callback(name, false, loader_menu->click_callback_context);
+    }
+}
+
+static void loader_menu_external_callback(void* context, uint32_t index) {
+    LoaderMenu* loader_menu = context;
+    const char* path = (const char*)index;
+    if(loader_menu->click_callback) {
+        loader_menu->click_callback(path, true, loader_menu->click_callback_context);
     }
 }
 
@@ -97,7 +110,7 @@ static void loader_menu_settings_menu_callback(void* context, uint32_t index) {
     LoaderMenu* loader_menu = context;
     const char* name = FLIPPER_SETTINGS_APPS[index].name;
     if(loader_menu->click_callback) {
-        loader_menu->click_callback(name, loader_menu->click_callback_context);
+        loader_menu->click_callback(name, false, loader_menu->click_callback_context);
     }
 }
 
@@ -135,6 +148,17 @@ static void loader_menu_build_menu(LoaderMenu* loader_menu) {
         i++,
         loader_menu_switch_to_settings,
         loader_menu);
+
+    for(i = 0; i < ExtMainAppList_size(*loader_menu->ext_main_apps); i++) {
+        const ExtMainApp* app = ExtMainAppList_get(*loader_menu->ext_main_apps, i);
+        menu_add_item(
+            loader_menu->primary_menu,
+            app->name,
+            app->icon,
+            (uint32_t)app->path,
+            loader_menu_external_callback,
+            (void*)loader_menu);
+    }
 };
 
 static void loader_menu_build_submenu(LoaderMenu* loader_menu) {
@@ -152,31 +176,38 @@ static int32_t loader_menu_thread(void* p) {
     LoaderMenu* loader_menu = p;
     furi_assert(loader_menu);
 
-    loader_menu_build_menu(loader_menu);
+    if(!loader_menu->settings) loader_menu_build_menu(loader_menu);
     loader_menu_build_submenu(loader_menu);
 
     view_dispatcher_attach_to_gui(
         loader_menu->view_dispatcher, loader_menu->gui, ViewDispatcherTypeFullscreen);
 
     // Primary menu
-    View* primary_view = menu_get_view(loader_menu->primary_menu);
-    view_set_context(primary_view, loader_menu->primary_menu);
-    view_set_previous_callback(primary_view, loader_menu_exit);
-    view_dispatcher_add_view(loader_menu->view_dispatcher, LoaderMenuViewPrimary, primary_view);
+    if(!loader_menu->settings) {
+        View* primary_view = menu_get_view(loader_menu->primary_menu);
+        view_set_context(primary_view, loader_menu->primary_menu);
+        view_set_previous_callback(primary_view, loader_menu_exit);
+        view_dispatcher_add_view(
+            loader_menu->view_dispatcher, LoaderMenuViewPrimary, primary_view);
+    }
 
     // Settings menu
     View* settings_view = submenu_get_view(loader_menu->settings_menu);
     view_set_context(settings_view, loader_menu->settings_menu);
-    view_set_previous_callback(settings_view, loader_menu_switch_to_primary);
+    view_set_previous_callback(
+        settings_view, loader_menu->settings ? loader_menu_exit : loader_menu_switch_to_primary);
     view_dispatcher_add_view(loader_menu->view_dispatcher, LoaderMenuViewSettings, settings_view);
 
     view_dispatcher_enable_queue(loader_menu->view_dispatcher);
-    view_dispatcher_switch_to_view(loader_menu->view_dispatcher, LoaderMenuViewPrimary);
+    view_dispatcher_switch_to_view(
+        loader_menu->view_dispatcher,
+        loader_menu->settings ? LoaderMenuViewSettings : LoaderMenuViewPrimary);
 
     // run view dispatcher
     view_dispatcher_run(loader_menu->view_dispatcher);
 
-    view_dispatcher_remove_view(loader_menu->view_dispatcher, LoaderMenuViewPrimary);
+    if(!loader_menu->settings)
+        view_dispatcher_remove_view(loader_menu->view_dispatcher, LoaderMenuViewPrimary);
     view_dispatcher_remove_view(loader_menu->view_dispatcher, LoaderMenuViewSettings);
 
     if(loader_menu->closed_callback) {

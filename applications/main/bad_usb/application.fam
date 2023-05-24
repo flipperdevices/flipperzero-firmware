@@ -1,9 +1,9 @@
 App(
     appid="bad_usb",
     name="Bad USB",
-    apptype=FlipperAppType.APP,
+    apptype=FlipperAppType.EXTMAINAPP,
     entry_point="bad_usb_app",
-    cdefines=["APP_BAD_USB"],
+    # cdefines=["APP_BAD_USB"],
     requires=[
         "gui",
         "dialogs",
@@ -11,5 +11,9 @@ App(
     stack_size=2 * 1024,
     icon="A_BadUsb_14",
     order=70,
+    fap_category="Main",
+    fap_icon="badusb_10px.png",
+    fap_icon_assets="images",
     fap_libs=["assets"],
+    link="/ext/apps/Main/bad_usb.fap",
 )

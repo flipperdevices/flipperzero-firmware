@@ -1,0 +1,12 @@
+App(
+    appid="Geiger_Coutner",
+    name="Geiger Counter",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_geiger_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    fap_icon="geiger.png",
+    fap_category="GPIO",
+)

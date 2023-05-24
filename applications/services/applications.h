@@ -15,6 +15,7 @@ typedef struct {
     const size_t stack_size;
     const Icon* icon;
     const FlipperApplicationFlag flags;
+    const char* link;
 } FlipperApplication;
 
 typedef void (*FlipperOnStartHook)(void);

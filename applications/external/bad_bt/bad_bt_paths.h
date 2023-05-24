@@ -1,0 +1,14 @@
+#pragma once
+
+#include <storage/storage.h>
+
+#define BAD_BT_APP_BASE_FOLDER EXT_PATH("badusb")
+#define BAD_BT_APP_BASE_CONFIG_FOLDER EXT_PATH("apps_data/badbt")
+#define BAD_BT_APP_PATH_LAYOUT_FOLDER BAD_BT_APP_BASE_FOLDER "/assets/layouts"
+#define BAD_BT_APP_SCRIPT_EXTENSION ".txt"
+#define BAD_BT_APP_LAYOUT_EXTENSION ".kl"
+
+#define BAD_BT_SETTINGS_FILE_NAME ".badbt.settings"
+#define BAD_BT_APP_PATH_BOUND_KEYS_FOLDER EXT_PATH("apps_data/badbt")
+#define BAD_BT_APP_PATH_BOUND_KEYS_FILE BAD_BT_APP_PATH_BOUND_KEYS_FOLDER "/.badbt.keys"
+#define BAD_BT_SETTINGS_PATH BAD_BT_APP_BASE_CONFIG_FOLDER "/" BAD_BT_SETTINGS_FILE_NAME

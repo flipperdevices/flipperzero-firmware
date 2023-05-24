@@ -79,7 +79,7 @@ void cli_command_help(Cli* cli, FuriString* args, void* context) {
             printf("%s", furi_string_get_cstr(*CliCommandTree_ref(it_right)->key_ptr));
             CliCommandTree_next(it_right);
         }
-    };
+    }
 
     if(furi_string_size(args) > 0) {
         cli_nl();
@@ -156,6 +156,16 @@ void cli_command_date(Cli* cli, FuriString* args, void* context) {
             datetime.second,
             datetime.weekday);
     }
+}
+
+void cli_command_src(Cli* cli, FuriString* args, void* context) {
+    // Quality of life feature for people exploring CLI on lab.flipper.net/cli
+    // By Yousef AK
+    UNUSED(cli);
+    UNUSED(args);
+    UNUSED(context);
+
+    printf("https://github.com/RogueMaster/flipperzero-firmware-wPlugins");
 }
 
 #define CLI_COMMAND_LOG_RING_SIZE 2048
@@ -440,6 +450,8 @@ void cli_commands_init(Cli* cli) {
     cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
     cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
     cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
+    cli_add_command(cli, "src", CliCommandFlagParallelSafe, cli_command_src, NULL);
+    cli_add_command(cli, "source", CliCommandFlagParallelSafe, cli_command_src, NULL);
 
     cli_add_command(cli, "?", CliCommandFlagParallelSafe, cli_command_help, NULL);
     cli_add_command(cli, "help", CliCommandFlagParallelSafe, cli_command_help, NULL);

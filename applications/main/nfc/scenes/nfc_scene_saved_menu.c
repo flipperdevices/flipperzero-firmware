@@ -26,7 +26,8 @@ void nfc_scene_saved_menu_on_enter(void* context) {
     Submenu* submenu = nfc->submenu;
 
     if(nfc->dev->format == NfcDeviceSaveFormatUid ||
-       nfc->dev->format == NfcDeviceSaveFormatMifareDesfire) {
+       nfc->dev->format == NfcDeviceSaveFormatMifareDesfire ||
+       nfc->dev->format == NfcDeviceSaveFormatBankCard) {
         submenu_add_item(
             submenu,
             "Emulate UID",
@@ -42,7 +43,9 @@ void nfc_scene_saved_menu_on_enter(void* context) {
                 nfc);
         }
     } else if(
-        nfc->dev->format == NfcDeviceSaveFormatMifareUl ||
+        (nfc->dev->format == NfcDeviceSaveFormatMifareUl &&
+         mf_ul_emulation_supported(&nfc->dev->dev_data.mf_ul_data)) ||
+        nfc->dev->format == NfcDeviceSaveFormatNfcV ||
         nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
         submenu_add_item(
             submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_saved_menu_submenu_callback, nfc);
@@ -72,6 +75,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, nfc_scene_saved_menu_submenu_callback, nfc);
     if(nfc->dev->format == NfcDeviceSaveFormatMifareUl &&
+       nfc->dev->dev_data.mf_ul_data.type != MfUltralightTypeULC &&
        !mf_ul_is_full_capture(&nfc->dev->dev_data.mf_ul_data)) {
         submenu_add_item(
             submenu,
@@ -116,6 +120,8 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
             } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
+            } else if(nfc->dev->format == NfcDeviceSaveFormatNfcV) {
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVEmulate);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
             }

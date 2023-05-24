@@ -16,6 +16,7 @@ void desktop_scene_slideshow_on_enter(void* context) {
 
     desktop_view_slideshow_set_callback(slideshow_view, desktop_scene_slideshow_callback, desktop);
 
+    gui_set_hide_statusbar(desktop->gui, true);
     view_dispatcher_switch_to_view(desktop->view_dispatcher, DesktopViewIdSlideshow);
 }
 
@@ -45,8 +46,9 @@ bool desktop_scene_slideshow_on_event(void* context, SceneManagerEvent event) {
 }
 
 void desktop_scene_slideshow_on_exit(void* context) {
-    UNUSED(context);
+    Desktop* desktop = (Desktop*)context;
 
+    gui_set_hide_statusbar(desktop->gui, false);
     Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_common_remove(storage, SLIDESHOW_FS_PATH);
     furi_record_close(RECORD_STORAGE);

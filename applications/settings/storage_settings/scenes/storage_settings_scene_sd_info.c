@@ -25,14 +25,45 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
             dialog_ex, "Try to reinsert\nor format SD\ncard.", 3, 19, AlignLeft, AlignTop);
         dialog_ex_set_center_button_text(dialog_ex, "Ok");
     } else {
+        char unit_kb[] = "KB";
+        char unit_mb[] = "MB";
+        char unit_gb[] = "GB";
+
+        double sd_total_val = (double)sd_info.kb_total;
+        char* sd_total_unit = unit_kb;
+        double sd_free_val = (double)sd_info.kb_free;
+        char* sd_free_unit = unit_kb;
+
+        if(sd_total_val > 1024) {
+            sd_total_val /= 1024;
+            sd_total_unit = unit_mb;
+        }
+        if(sd_total_val > 1024) {
+            sd_total_val /= 1024;
+            sd_total_unit = unit_gb;
+        }
+
+        if(sd_free_val > 1024) {
+            sd_free_val /= 1024;
+            sd_free_unit = unit_mb;
+        }
+        if(sd_free_val > 1024) {
+            sd_free_val /= 1024;
+            sd_free_unit = unit_gb;
+        }
+
         furi_string_printf(
             app->text_string,
-            "Label: %s\nType: %s\n%lu KiB total\n%lu KiB free\n"
+            "Label: %s\nType: %s\n%.2f %s total\n%.2f %s free  %.2f%% free\n"
+            // "%02X%2.2s %5.5s %i.%i\nSN:%04lX %02i/%i",
             "%02X%s %s v%i.%i\nSN:%04lX %02i/%i",
             sd_info.label,
             sd_api_get_fs_type_text(sd_info.fs_type),
-            sd_info.kb_total,
-            sd_info.kb_free,
+            sd_total_val,
+            sd_total_unit,
+            sd_free_val,
+            sd_free_unit,
+            (double)(((int)sd_info.kb_free * 100.0) / (int)sd_info.kb_total),
             sd_info.manufacturer_id,
             sd_info.oem_id,
             sd_info.product_name,

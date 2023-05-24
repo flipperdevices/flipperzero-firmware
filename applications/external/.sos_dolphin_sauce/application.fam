@@ -1,0 +1,15 @@
+App(
+    appid="SOS",
+    name="SOS Dolphin Sauce",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="sos_app",
+    requires=["gui", "subghz"],
+    stack_size=1 * 1024,
+    # icon="A_Plugins_14",
+    fap_icon="sos.png",
+    order=30,
+    fap_category="Sub-GHz",
+    fap_icon_assets_symbol="sos",
+    fap_author="arha",
+    fap_weburl="https://github.com/arha/dolphin-sos",
+)

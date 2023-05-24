@@ -1,0 +1,20 @@
+App(
+    appid="NRF24_Batch",
+    name="[NRF24] Batch",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="nrf24batch_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    order=60,
+    fap_icon="nrf24batch_10px.png",
+    fap_category="GPIO",
+    fap_private_libs=[
+        Lib(
+            name="nrf24",
+            sources=[
+                "nrf24.c",
+            ],
+        ),
+    ],
+    fap_icon_assets_symbol="nRF24_Batch",
+)

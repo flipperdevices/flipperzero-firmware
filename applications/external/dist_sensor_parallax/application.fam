@@ -1,0 +1,14 @@
+App(
+    appid="USPING_Dist_Sensor",
+    name="[USPING] Dist. Sensor",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="usping_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="dist_sensor10px.png",
+    fap_category="GPIO",
+    fap_icon_assets_symbol="usping",
+)

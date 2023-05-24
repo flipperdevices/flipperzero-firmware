@@ -1,0 +1,14 @@
+App(
+    appid="SubGHz_Playlist",
+    name="Sub-GHz Playlist",
+    apptype=FlipperAppType.EXTMAINAPP,
+    entry_point="playlist_app",
+    requires=["storage", "gui", "dialogs", "subghz"],
+    stack_size=2 * 1024,
+    icon="A_Sub1ghz_14",
+    order=13,
+    fap_icon="playlist_10px.png",
+    fap_category="Sub-GHz",
+    fap_icon_assets="images",
+    link="/ext/apps/Sub-GHz/SubGHz_Playlist.fap",
+)

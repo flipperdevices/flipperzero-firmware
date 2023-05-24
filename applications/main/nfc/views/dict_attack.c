@@ -33,7 +33,7 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
     DictAttackViewModel* m = model;
     if(m->state == DictAttackStateCardRemoved) {
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Lost the tag!");
+        canvas_draw_str_aligned(canvas, 64, 4, AlignCenter, AlignTop, "Lost The Tag!");
         canvas_set_font(canvas, FontSecondary);
         elements_multiline_text_aligned(
             canvas, 64, 23, AlignCenter, AlignTop, "Make sure the tag is\npositioned correctly.");
@@ -70,7 +70,7 @@ static void dict_attack_draw_callback(Canvas* canvas, void* model) {
         }
         elements_progress_bar_with_text(canvas, 0, 20, 128, dict_progress, draw_str);
         canvas_set_font(canvas, FontSecondary);
-        snprintf(draw_str, sizeof(draw_str), "Keys found: %d/%d", m->keys_found, m->keys_total);
+        snprintf(draw_str, sizeof(draw_str), "Keys Found: %d/%d", m->keys_found, m->keys_total);
         canvas_draw_str_aligned(canvas, 0, 33, AlignLeft, AlignTop, draw_str);
         snprintf(
             draw_str, sizeof(draw_str), "Sectors Read: %d/%d", m->sectors_read, m->sectors_total);

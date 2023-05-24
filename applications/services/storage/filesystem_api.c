@@ -10,10 +10,10 @@ const char* filesystem_api_error_get_desc(FS_Error error_id) {
         result = "filesystem not ready";
         break;
     case(FSE_EXIST):
-        result = "file/dir already exist";
+        result = "file/dir already exists";
         break;
     case(FSE_NOT_EXIST):
-        result = "file/dir not exist";
+        result = "file/dir doesn't exist";
         break;
     case(FSE_INVALID_PARAMETER):
         result = "invalid parameter";

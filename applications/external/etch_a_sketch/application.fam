@@ -1,0 +1,11 @@
+App(
+    appid="EtchASketch",
+    name="Etch A Sketch",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="etch_a_sketch_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    order=175,
+    fap_icon="etch_a_sketch_icon.png",
+    fap_category="Games",
+)

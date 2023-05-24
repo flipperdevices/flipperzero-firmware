@@ -1,0 +1,11 @@
+App(
+    appid="MontyHall",
+    name="Monty Hall",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="montyhall_game_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=185,
+    fap_icon="Monty.png",
+    fap_category="Games",
+)

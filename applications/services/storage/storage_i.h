@@ -16,7 +16,7 @@ extern "C" {
 #define APPS_ASSETS_PATH EXT_PATH("apps_assets")
 
 typedef struct {
-    ViewPort* view_port;
+    //ViewPort* view_port;
     bool enabled;
 } StorageSDGui;
 

@@ -1,0 +1,10 @@
+App(
+    appid="GPIO_7Segment_Output",
+    name="[GPIO] 7-Segment Output",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_7segment_app",
+    requires=["gui", "gpio"],
+    stack_size=2 * 1024,
+    fap_icon="gpio_7segment.png",
+    fap_category="GPIO",
+)

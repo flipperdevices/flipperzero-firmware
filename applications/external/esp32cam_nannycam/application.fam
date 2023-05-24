@@ -1,0 +1,15 @@
+App(
+    appid="ESP32CAM_NannyCam",
+    name="[ESP32CAM] Nanny Cam",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="uart_echo_app",
+    requires=["gui"],
+    stack_size=8*1024,
+    order=1,
+    fap_icon="icon.png",
+    fap_category="GPIO",
+    fap_description="ESP32-CAM simple app to start a remote camera. [Unplug the USB cable to test with Mayhem]",
+    fap_author="eried",
+    fap_weburl="https://flipper.ried.cl",
+    fap_icon_assets_symbol="MAYHEM_NannyCam",
+)

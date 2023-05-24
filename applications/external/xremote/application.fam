@@ -1,0 +1,17 @@
+App(
+    appid="Cross_Remote",
+    name="Cross Remote",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="xremote_app",
+    requires=[
+        "gui",
+        "storage",
+        "dialogs",
+    ],
+    stack_size=3 * 1024,
+    order=10,
+    fap_icon="xremote_10px.png",
+    fap_icon_assets="icons",
+    fap_category="Tools",
+    fap_icon_assets_symbol="xremote",
+)

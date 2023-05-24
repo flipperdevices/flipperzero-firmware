@@ -15,11 +15,8 @@ void subghz_scene_delete_raw_callback(GuiButtonType result, InputType type, void
 
 void subghz_scene_delete_raw_on_enter(void* context) {
     SubGhz* subghz = context;
-    FuriString* frequency_str;
-    FuriString* modulation_str;
-
-    frequency_str = furi_string_alloc();
-    modulation_str = furi_string_alloc();
+    FuriString* frequency_str = furi_string_alloc();
+    FuriString* modulation_str = furi_string_alloc();
 
     char delete_str[SUBGHZ_MAX_LEN_NAME + 16];
     FuriString* file_name;
@@ -33,7 +30,7 @@ void subghz_scene_delete_raw_on_enter(void* context) {
 
     widget_add_string_element(
         subghz->widget, 38, 25, AlignLeft, AlignTop, FontSecondary, "RAW signal");
-    subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str);
+    subghz_txrx_get_frequency_and_modulation(subghz->txrx, frequency_str, modulation_str, false);
     widget_add_string_element(
         subghz->widget,
         35,

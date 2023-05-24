@@ -3,9 +3,8 @@
 #include <gui/view.h>
 
 #include "desktop_events.h"
-#include "../helpers/slideshow_filename.h"
 
-#define SLIDESHOW_FS_PATH INT_PATH(SLIDESHOW_FILE_NAME)
+#define SLIDESHOW_FS_PATH EXT_PATH(".slideshow")
 
 typedef struct DesktopSlideshowView DesktopSlideshowView;
 

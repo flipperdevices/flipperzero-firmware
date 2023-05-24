@@ -1,0 +1,15 @@
+App(
+    appid="Nu_Pogodi",
+    name="Nu pogodi",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="nupogodi_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+	fap_icon="nupogodi.png",
+    fap_category="Games",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="nupogodi",
+)

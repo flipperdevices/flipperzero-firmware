@@ -26,6 +26,7 @@ typedef enum {
     FontSecondary,
     FontKeyboard,
     FontBigNumbers,
+    FontBatteryPercent,
 
     // Keep last for fonts number calculation
     FontTotalNumber,
@@ -118,6 +119,14 @@ uint8_t canvas_height(const Canvas* canvas);
  * @return     height in pixels.
  */
 uint8_t canvas_current_font_height(const Canvas* canvas);
+
+/** Get current font width
+ *
+ * @param      canvas  Canvas instance
+ *
+ * @return     width in pixels.
+ */
+uint8_t canvas_current_font_width(const Canvas* canvas);
 
 /** Get font parameters
  *
@@ -394,7 +403,7 @@ void canvas_draw_rframe(
     uint8_t height,
     uint8_t radius);
 
-/** Draw rounded-corner box of width, height at x,y, with round value raduis
+/** Draw rounded-corner box of width, height at x,y, with round value radius
  *
  * @param      canvas  Canvas instance
  * @param      x       x coordinate
@@ -410,6 +419,14 @@ void canvas_draw_rbox(
     uint8_t width,
     uint8_t height,
     uint8_t radius);
+
+void canvas_draw_icon_bitmap(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    int16_t w,
+    int16_t h,
+    const Icon* icon);
 
 #ifdef __cplusplus
 }

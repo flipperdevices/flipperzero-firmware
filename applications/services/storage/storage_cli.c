@@ -33,7 +33,7 @@ static void storage_cli_print_usage() {
     printf("\tmd5\t - md5 hash of the file\r\n");
     printf("\tstat\t - info about file or dir\r\n");
     printf("\ttimestamp\t - last modification timestamp\r\n");
-};
+}
 
 static void storage_cli_print_error(FS_Error error) {
     printf("Storage error: %s\r\n", storage_error_get_desc(error));
@@ -86,7 +86,7 @@ static void storage_cli_info(Cli* cli, FuriString* path) {
     }
 
     furi_record_close(RECORD_STORAGE);
-};
+}
 
 static void storage_cli_format(Cli* cli, FuriString* path) {
     if(furi_string_cmp_str(path, STORAGE_INT_PATH_PREFIX) == 0) {
@@ -112,7 +112,7 @@ static void storage_cli_format(Cli* cli, FuriString* path) {
     } else {
         storage_cli_print_usage();
     }
-};
+}
 
 static void storage_cli_list(Cli* cli, FuriString* path) {
     UNUSED(cli);

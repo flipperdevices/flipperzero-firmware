@@ -24,16 +24,37 @@ bool subghz_scene_save_success_on_event(void* context, SceneManagerEvent event) 
     SubGhz* subghz = context;
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubGhzCustomEventSceneSaveSuccess) {
-            if(!scene_manager_search_and_switch_to_previous_scene(
-                   subghz->scene_manager, SubGhzSceneReceiver)) {
-                subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWSave);
+            if(!scene_manager_has_previous_scene(subghz->scene_manager, SubGhzSceneDecodeRAW)) {
                 if(!scene_manager_search_and_switch_to_previous_scene(
-                       subghz->scene_manager, SubGhzSceneReadRAW)) {
-                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
+                       subghz->scene_manager, SubGhzSceneReceiver)) {
+                    subghz_rx_key_state_set(subghz, SubGhzRxKeyStateRAWSave);
                     if(!scene_manager_search_and_switch_to_previous_scene(
-                           subghz->scene_manager, SubGhzSceneSaved)) {
-                        scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
+                           subghz->scene_manager, SubGhzSceneReadRAW)) {
+                        subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
+                        if(!scene_manager_search_and_switch_to_previous_scene(
+                               subghz->scene_manager, SubGhzSceneSaved)) {
+                            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
+                        }
                     }
+                }
+            } else {
+                scene_manager_set_scene_state(
+                    subghz->scene_manager, SubGhzSceneDecodeRAW, SubGhzDecodeRawStateStart);
+
+                subghz->idx_menu_chosen = 0;
+                subghz_txrx_set_rx_calback(subghz->txrx, NULL, subghz);
+
+                if(subghz_file_encoder_worker_is_running(subghz->decode_raw_file_worker_encoder)) {
+                    subghz_file_encoder_worker_stop(subghz->decode_raw_file_worker_encoder);
+                }
+                subghz_file_encoder_worker_free(subghz->decode_raw_file_worker_encoder);
+
+                subghz->state_notifications = SubGhzNotificationStateIDLE;
+                scene_manager_set_scene_state(
+                    subghz->scene_manager, SubGhzSceneReadRAW, SubGhzCustomEventManagerNoSet);
+                if(!scene_manager_search_and_switch_to_previous_scene(
+                       subghz->scene_manager, SubGhzSceneSaved)) {
+                    scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
                 }
             }
             return true;
@@ -44,6 +65,8 @@ bool subghz_scene_save_success_on_event(void* context, SceneManagerEvent event) 
 
 void subghz_scene_save_success_on_exit(void* context) {
     SubGhz* subghz = context;
+
+    // Clear view
     Popup* popup = subghz->popup;
 
     popup_reset(popup);

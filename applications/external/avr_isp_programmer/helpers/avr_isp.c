@@ -174,7 +174,7 @@ static void avr_isp_commit(AvrIsp* instance, uint16_t addr, uint8_t data) {
         while((furi_get_tick() - starttime) < 30) {
             if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FLASH_HI(addr)) != 0xFF) {
                 break;
-            };
+            }
         }
     }
 }
@@ -357,7 +357,7 @@ uint8_t avr_isp_read_lock_byte(AvrIsp* instance) {
         data = avr_isp_spi_transaction(instance, AVR_ISP_READ_LOCK_BYTE);
         if(avr_isp_spi_transaction(instance, AVR_ISP_READ_LOCK_BYTE) == data) {
             break;
-        };
+        }
         data = 0x00;
     }
     return data;
@@ -377,7 +377,7 @@ bool avr_isp_write_lock_byte(AvrIsp* instance, uint8_t lock) {
             if(avr_isp_spi_transaction(instance, AVR_ISP_READ_LOCK_BYTE) == lock) {
                 ret = true;
                 break;
-            };
+            }
         }
     }
     return ret;
@@ -392,7 +392,7 @@ uint8_t avr_isp_read_fuse_low(AvrIsp* instance) {
         data = avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_LOW);
         if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_LOW) == data) {
             break;
-        };
+        }
         data = 0x00;
     }
     return data;
@@ -412,7 +412,7 @@ bool avr_isp_write_fuse_low(AvrIsp* instance, uint8_t lfuse) {
             if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_LOW) == lfuse) {
                 ret = true;
                 break;
-            };
+            }
         }
     }
     return ret;
@@ -427,7 +427,7 @@ uint8_t avr_isp_read_fuse_high(AvrIsp* instance) {
         data = avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_HIGH);
         if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_HIGH) == data) {
             break;
-        };
+        }
         data = 0x00;
     }
     return data;
@@ -447,7 +447,7 @@ bool avr_isp_write_fuse_high(AvrIsp* instance, uint8_t hfuse) {
             if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_HIGH) == hfuse) {
                 ret = true;
                 break;
-            };
+            }
         }
     }
     return ret;
@@ -462,7 +462,7 @@ uint8_t avr_isp_read_fuse_extended(AvrIsp* instance) {
         data = avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_EXTENDED);
         if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_EXTENDED) == data) {
             break;
-        };
+        }
         data = 0x00;
     }
     return data;
@@ -482,7 +482,7 @@ bool avr_isp_write_fuse_extended(AvrIsp* instance, uint8_t efuse) {
             if(avr_isp_spi_transaction(instance, AVR_ISP_READ_FUSE_EXTENDED) == efuse) {
                 ret = true;
                 break;
-            };
+            }
         }
     }
     return ret;

@@ -1,0 +1,17 @@
+App(
+    appid="GPIO_wI2C",
+    name="GPIO with I2C",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="gpio_i2c_app",
+    # cdefines=["APP_GPIO"],
+    requires=["gui"],
+    stack_size=1 * 1024,
+    # icon="A_GPIO_14",
+    order=50,
+    fap_icon="gpioIcon.png",
+    fap_category="GPIO",
+    fap_icon_assets="images",
+    fap_libs=["assets"],
+    fap_icon_assets_symbol="gpio",
+    # THIS IS THE SAME AS THE GPIO APP BUT WITH I2C ADDITIONS FROM  [I²C-Scanner #1431 (By GitChris3004)](https://github.com/flipperdevices/flipperzero-firmware/pull/1431) and [read EEPROM of SFP Modules using I2C (By marcusju)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/198)
+)

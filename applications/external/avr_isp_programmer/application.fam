@@ -1,5 +1,5 @@
 App(
-    appid="avr_isp",
+    appid="AVR_Flasher",
     name="AVR Flasher",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="avr_isp_app",
@@ -14,4 +14,5 @@ App(
             name="driver",
         ),
     ],
+    fap_icon_assets_symbol="avr_isp",
 )

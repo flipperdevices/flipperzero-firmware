@@ -8,6 +8,10 @@
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/protocols/raw.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct SubGhzTxRx SubGhzTxRx;
 
 typedef void (*SubGhzTxRxNeedSaveCallback)(void* context);
@@ -83,7 +87,8 @@ SubGhzRadioPreset subghz_txrx_get_preset(SubGhzTxRx* instance);
 void subghz_txrx_get_frequency_and_modulation(
     SubGhzTxRx* instance,
     FuriString* frequency,
-    FuriString* modulation);
+    FuriString* modulation,
+    bool long_name);
 
 /**
  * Start TX CC1101
@@ -288,3 +293,12 @@ void subghz_txrx_set_raw_file_encoder_worker_callback_end(
     SubGhzTxRx* instance,
     SubGhzProtocolEncoderRAWCallbackEnd callback,
     void* context);
+
+void subghz_txrx_set_debug_pin_state(SubGhzTxRx* instance, bool state);
+bool subghz_txrx_get_debug_pin_state(SubGhzTxRx* instance);
+
+SubGhzReceiver* subghz_txrx_get_receiver(SubGhzTxRx* instance); // TODO use only in DecodeRaw
+
+#ifdef __cplusplus
+}
+#endif

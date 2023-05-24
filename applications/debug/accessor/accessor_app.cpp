@@ -23,7 +23,7 @@ void AccessorApp::run(void) {
                 exit = switch_to_previous_scene();
             }
         }
-    };
+    }
 
     scenes[current_scene]->on_exit(this);
 

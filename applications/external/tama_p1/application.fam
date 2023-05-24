@@ -1,0 +1,11 @@
+App(
+    appid="TAMA_P1",
+    name="TAMA P1",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="tama_p1_app",
+    requires=["gui", "storage"],
+    stack_size= 2 * 1024,
+    order = 215,
+    fap_icon="tamaIcon2.png",
+    fap_category="Games",
+)

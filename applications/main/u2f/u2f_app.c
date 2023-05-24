@@ -2,6 +2,7 @@
 #include "u2f_data.h"
 #include <furi.h>
 #include <furi_hal.h>
+#include <storage/storage.h>
 
 static bool u2f_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);

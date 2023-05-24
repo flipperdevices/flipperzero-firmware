@@ -7,6 +7,7 @@
 typedef struct {
     char* args;
     char* name;
+    char* link;
     FuriThread* thread;
     bool insomniac;
 } LoaderAppData;
@@ -16,6 +17,7 @@ struct Loader {
     FuriMessageQueue* queue;
     LoaderMenu* loader_menu;
     LoaderAppData app;
+    ExtMainAppList_t ext_main_apps;
 };
 
 typedef enum {

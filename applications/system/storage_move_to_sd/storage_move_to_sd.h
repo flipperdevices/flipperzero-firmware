@@ -12,6 +12,16 @@
 #include <storage/storage_sd_api.h>
 #include <furi.h>
 
+#include <cfw/private.h>
+#include <bt/bt_settings.h>
+#include <bt/bt_service/bt_i.h>
+#include <power/power_settings.h>
+#include <desktop/desktop_settings.h>
+#include <notification/notification_app.h>
+#include <dolphin/helpers/dolphin_state.h>
+#include <applications/main/u2f/u2f_data.h>
+#include <applications/main/archive/helpers/archive_favorites.h>
+
 #include "scenes/storage_move_to_sd_scene.h"
 
 #ifdef __cplusplus

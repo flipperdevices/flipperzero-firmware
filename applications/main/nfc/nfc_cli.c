@@ -34,13 +34,25 @@ static void nfc_cli_detect(Cli* cli, FuriString* args) {
     while(!cmd_exit) {
         cmd_exit |= cli_cmd_interrupt_received(cli);
         if(furi_hal_nfc_detect(&dev_data, 400)) {
-            printf("Found: %s ", nfc_get_dev_type(dev_data.type));
-            printf("UID length: %d, UID:", dev_data.uid_len);
-            for(size_t i = 0; i < dev_data.uid_len; i++) {
-                printf("%02X", dev_data.uid[i]);
+            if(dev_data.type == FuriHalNfcTypeA) {
+                printf("UID length: %d, UID:", dev_data.uid_len);
+                for(size_t i = 0; i < dev_data.uid_len; i++) {
+                    printf("%02X", dev_data.uid[i]);
+                }
+                printf("\r\n");
+                break;
+            } else if(dev_data.type == FuriHalNfcTypeF) {
+                printf("IDm:");
+                for(size_t i = 0; i < 8; i++) {
+                    printf("%02X", dev_data.uid[i]);
+                }
+                printf(", PMm:");
+                for(size_t i = 0; i < 8; i++) {
+                    printf("%02X", dev_data.f_data.pmm[i]);
+                }
+                printf("\r\n");
+                break;
             }
-            printf("\r\n");
-            break;
         }
         furi_hal_nfc_sleep();
         furi_delay_ms(50);
@@ -63,13 +75,17 @@ static void nfc_cli_emulate(Cli* cli, FuriString* args) {
     FuriHalNfcDevData params = {
         .uid = {0x36, 0x9C, 0xe7, 0xb1, 0x0A, 0xC1, 0x34},
         .uid_len = 7,
-        .atqa = {0x44, 0x00},
-        .sak = 0x00,
+        .a_data =
+            {
+                .atqa = {0x44, 0x00},
+                .sak = 0x00,
+            },
         .type = FuriHalNfcTypeA,
     };
 
     while(!cli_cmd_interrupt_received(cli)) {
-        if(furi_hal_nfc_listen(params.uid, params.uid_len, params.atqa, params.sak, false, 100)) {
+        if(furi_hal_nfc_listen(
+               params.uid, params.uid_len, params.a_data.atqa, params.a_data.sak, false, 100)) {
             printf("Reader detected\r\n");
             furi_hal_nfc_sleep();
         }

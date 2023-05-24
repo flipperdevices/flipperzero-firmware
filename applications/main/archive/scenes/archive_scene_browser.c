@@ -7,6 +7,7 @@
 #include "archive/scenes/archive_scene.h"
 
 #define TAG "ArchiveSceneBrowser"
+#define FAP_LOADER_APP_NAME "Applications"
 
 #define SCENE_STATE_DEFAULT (0)
 #define SCENE_STATE_NEED_REFRESH (1)
@@ -19,8 +20,9 @@ static const char* flipper_app_name[] = {
     [ArchiveFileTypeInfrared] = "Infrared",
     [ArchiveFileTypeBadUsb] = "Bad USB",
     [ArchiveFileTypeU2f] = "U2F",
+    [ArchiveFileTypeApplication] = FAP_LOADER_APP_NAME,
     [ArchiveFileTypeUpdateManifest] = "UpdaterApp",
-    [ArchiveFileTypeApplication] = "Applications",
+    [ArchiveFileTypeFolder] = "Archive",
 };
 
 static void archive_loader_callback(const void* message, void* context) {
@@ -45,10 +47,55 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
         if(param != NULL) {
             param++;
         }
-        status = loader_start(loader, flipper_app_name[selected->type], param);
+
+        if(strcmp(flipper_app_name[selected->type], "U2F") == 0) {
+            char* tmpType = "/ext/apps/Main/U2F.fap¯";
+            char* result =
+                malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
+
+            strcpy(result, tmpType);
+            strcat(result, furi_string_get_cstr(selected->path));
+            status = loader_start(loader, FAP_LOADER_APP_NAME, result);
+        } else {
+            status = loader_start(loader, flipper_app_name[selected->type], param);
+        }
     } else {
-        status = loader_start(
-            loader, flipper_app_name[selected->type], furi_string_get_cstr(selected->path));
+        if(strcmp(flipper_app_name[selected->type], "iButton") == 0) {
+            char* tmpType = "/ext/apps/Main/iButton.fap¯";
+            char* result =
+                malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
+
+            strcpy(result, tmpType);
+            strcat(result, furi_string_get_cstr(selected->path));
+            status = loader_start(loader, FAP_LOADER_APP_NAME, result);
+        } else if(strcmp(flipper_app_name[selected->type], "Bad USB") == 0) {
+            char* tmpType = "/ext/apps/Main/bad_usb.fap¯";
+            char* result =
+                malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
+
+            strcpy(result, tmpType);
+            strcat(result, furi_string_get_cstr(selected->path));
+            status = loader_start(loader, FAP_LOADER_APP_NAME, result);
+            // } else if(strcmp(flipper_app_name[selected->type], "125 kHz RFID") == 0) {
+            // char* tmpType = "/ext/apps/Main/lfrfid.fap¯";
+            // char* result =
+            // malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
+
+            // strcpy(result, tmpType);
+            // strcat(result, furi_string_get_cstr(selected->path));
+            // status = loader_start(loader, FAP_LOADER_APP_NAME, result);
+        } else if(strcmp(flipper_app_name[selected->type], "Infrared") == 0) {
+            char* tmpType = "/ext/apps/Main/infrared.fap¯";
+            char* result =
+                malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
+
+            strcpy(result, tmpType);
+            strcat(result, furi_string_get_cstr(selected->path));
+            status = loader_start(loader, FAP_LOADER_APP_NAME, result);
+        } else {
+            status = loader_start(
+                loader, flipper_app_name[selected->type], furi_string_get_cstr(selected->path));
+        }
     }
 
     if(status != LoaderStatusOk) {
@@ -107,7 +154,11 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuRun:
-            if(archive_is_known_app(selected->type)) {
+            if(selected->type == ArchiveFileTypeFolder) {
+                archive_switch_tab(browser, TAB_LEFT);
+                archive_show_file_menu(browser, false);
+                archive_enter_dir(browser, selected->path);
+            } else if(archive_is_known_app(selected->type)) {
                 archive_run_in_app(browser, selected);
                 archive_show_file_menu(browser, false);
             }
@@ -133,12 +184,28 @@ bool archive_scene_browser_on_event(void* context, SceneManagerEvent event) {
         case ArchiveBrowserEventFileMenuRename:
             if(favorites) {
                 browser->callback(ArchiveBrowserEventEnterFavMove, browser->context);
-            } else if(selected->is_app == false) {
+                //} else if((archive_is_known_app(selected->type)) && (selected->is_app == false)) {
+            } else {
+                // Added ability to rename files and folders
                 archive_show_file_menu(browser, false);
                 scene_manager_set_scene_state(
                     archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_NEED_REFRESH);
                 scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneRename);
             }
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuInfo:
+            archive_show_file_menu(browser, false);
+            scene_manager_set_scene_state(
+                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_DEFAULT);
+            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneInfo);
+            consumed = true;
+            break;
+        case ArchiveBrowserEventFileMenuShow:
+            archive_show_file_menu(browser, false);
+            scene_manager_set_scene_state(
+                archive->scene_manager, ArchiveAppSceneBrowser, SCENE_STATE_DEFAULT);
+            scene_manager_next_scene(archive->scene_manager, ArchiveAppSceneShow);
             consumed = true;
             break;
         case ArchiveBrowserEventFileMenuDelete:

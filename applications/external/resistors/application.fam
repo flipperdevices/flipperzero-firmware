@@ -1,0 +1,15 @@
+App(
+    appid="Resistance_Calculator",
+    name="Resistance Calculator",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="resistors_app",
+    stack_size=2 * 1024,
+    fap_category="Misc",
+    fap_version=(1, 1),
+    fap_icon="resistors.png",
+    fap_description="Resistor calculations",
+    fap_author="Lewis Westbury",
+    fap_weburl="https://github.com/instantiator/flipper-zero-experimental-apps",
+    fap_icon_assets="images",
+    fap_icon_assets_symbol="resistors",
+)

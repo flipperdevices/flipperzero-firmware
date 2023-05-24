@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+#define BROWSER_SORT_THRESHOLD 400
+
 typedef struct BrowserWorker BrowserWorker;
 typedef void (*BrowserWorkerFolderOpenCallback)(
     void* context,
@@ -17,6 +19,7 @@ typedef void (*BrowserWorkerListLoadCallback)(void* context, uint32_t list_load_
 typedef void (*BrowserWorkerListItemCallback)(
     void* context,
     FuriString* item_path,
+    uint32_t idx,
     bool is_folder,
     bool is_last);
 typedef void (*BrowserWorkerLongLoadCallback)(void* context);

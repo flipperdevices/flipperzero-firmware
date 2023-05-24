@@ -150,6 +150,12 @@ static Infrared* infrared_alloc() {
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewTextInput, text_input_get_view(infrared->text_input));
 
+    infrared->variable_item_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        infrared->view_dispatcher,
+        InfraredViewVariableItemList,
+        variable_item_list_get_view(infrared->variable_item_list));
+
     infrared->dialog_ex = dialog_ex_alloc();
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewDialogEx, dialog_ex_get_view(infrared->dialog_ex));
@@ -165,13 +171,11 @@ static Infrared* infrared_alloc() {
     view_dispatcher_add_view(
         view_dispatcher, InfraredViewStack, view_stack_get_view(infrared->view_stack));
 
-    if(app_state->is_debug_enabled) {
-        infrared->debug_view = infrared_debug_view_alloc();
-        view_dispatcher_add_view(
-            view_dispatcher,
-            InfraredViewDebugView,
-            infrared_debug_view_get_view(infrared->debug_view));
-    }
+    infrared->debug_view = infrared_debug_view_alloc();
+    view_dispatcher_add_view(
+        view_dispatcher,
+        InfraredViewDebugView,
+        infrared_debug_view_get_view(infrared->debug_view));
 
     infrared->button_panel = button_panel_alloc();
     infrared->loading = loading_alloc();
@@ -197,6 +201,9 @@ static void infrared_free(Infrared* infrared) {
     view_dispatcher_remove_view(view_dispatcher, InfraredViewTextInput);
     text_input_free(infrared->text_input);
 
+    view_dispatcher_remove_view(infrared->view_dispatcher, InfraredViewVariableItemList);
+    variable_item_list_free(infrared->variable_item_list);
+
     view_dispatcher_remove_view(view_dispatcher, InfraredViewDialogEx);
     dialog_ex_free(infrared->dialog_ex);
 
@@ -209,10 +216,8 @@ static void infrared_free(Infrared* infrared) {
     view_dispatcher_remove_view(view_dispatcher, InfraredViewStack);
     view_stack_free(infrared->view_stack);
 
-    if(app_state->is_debug_enabled) {
-        view_dispatcher_remove_view(view_dispatcher, InfraredViewDebugView);
-        infrared_debug_view_free(infrared->debug_view);
-    }
+    view_dispatcher_remove_view(view_dispatcher, InfraredViewDebugView);
+    infrared_debug_view_free(infrared->debug_view);
 
     button_panel_free(infrared->button_panel);
     loading_free(infrared->loading);
@@ -236,6 +241,11 @@ static void infrared_free(Infrared* infrared) {
     infrared->gui = NULL;
 
     furi_string_free(infrared->file_path);
+
+    // Disable 5v power if was enabled for external module
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     free(infrared);
 }
@@ -312,7 +322,8 @@ void infrared_tx_start_signal(Infrared* infrared, InfraredSignal* signal) {
 
     if(infrared_signal_is_raw(signal)) {
         InfraredRawSignal* raw = infrared_signal_get_raw_signal(signal);
-        infrared_worker_set_raw_signal(infrared->worker, raw->timings, raw->timings_size);
+        infrared_worker_set_raw_signal(
+            infrared->worker, raw->timings, raw->timings_size, raw->frequency, raw->duty_cycle);
     } else {
         InfraredMessage* message = infrared_signal_get_message(signal);
         infrared_worker_set_decoded_signal(infrared->worker, message);

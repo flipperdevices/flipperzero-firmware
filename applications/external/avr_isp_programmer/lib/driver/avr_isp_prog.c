@@ -111,7 +111,7 @@ static uint8_t avr_isp_prog_getch(AvrIspProg* instance) {
     uint8_t data[1] = {0};
     while(furi_stream_buffer_receive(instance->stream_rx, &data, sizeof(int8_t), 30) == 0) {
         if(instance->exit) break;
-    };
+    }
     return data[0];
 }
 
@@ -196,7 +196,7 @@ static void avr_isp_prog_set_cfg(AvrIspProg* instance) {
     instance->cfg->lockbytes = instance->buff[6];
     instance->cfg->fusebytes = instance->buff[7];
     instance->cfg->flashpoll = instance->buff[8];
-    // ignore (instance->buff[9] == instance->buff[8]) //FLASH polling value. Same as “flashpoll”
+    // ignore (instance->buff[9] == instance->buff[8]) //FLASH polling value. Same as ï¿½flashpollï¿½
     instance->cfg->eeprompoll = instance->buff[10] << 8 | instance->buff[11];
     instance->cfg->pagesize = instance->buff[12] << 8 | instance->buff[13];
     instance->cfg->eepromsize = instance->buff[14] << 8 | instance->buff[15];
@@ -348,7 +348,7 @@ static void avr_isp_prog_commit(AvrIspProg* instance, uint16_t addr, uint8_t dat
         while((furi_get_tick() - starttime) < 30) {
             if(avr_isp_prog_spi_transaction(instance, AVR_ISP_READ_FLASH_HI(addr)) != 0xFF) {
                 break;
-            };
+            }
         }
     }
 }

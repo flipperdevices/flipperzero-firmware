@@ -1,5 +1,5 @@
 App(
-    appid="mfkey32",
+    appid="Mfkey32",
     name="Mfkey32",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
@@ -10,8 +10,9 @@ App(
     ],
     stack_size=1 * 1024,
     fap_icon="mfkey.png",
-    fap_category="Nfc",
+    fap_category="NFC",
     fap_author="noproto",
     fap_icon_assets="images",
+    fap_icon_assets_symbol="mfkey32",
     fap_weburl="https://github.com/noproto/FlipperMfkey",
 )

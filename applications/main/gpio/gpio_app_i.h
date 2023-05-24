@@ -15,7 +15,8 @@
 #include <gui/modules/widget.h>
 #include "views/gpio_test.h"
 #include "views/gpio_usb_uart.h"
-#include <assets_icons.h>
+// #include <assets_icons.h>
+#include <gpio_icons.h>
 
 struct GpioApp {
     Gui* gui;

@@ -1,0 +1,41 @@
+Info: CO2 sensor mini
+Address: C8C8CF   <- nRF24 address (3..5 bytes)
+Rate: 1	          <- nRF24 data rate (0 - 250Kbps, 1 - 1Mbps, 2 - 2Mbps)
+Ch: 121           <- nRF24 channel (0..125)
+CRC: 2            <- nRF24 CRC size
+DPL: 0            <- nRF24 dynamic payload en/dis
+RETR: 0x0F        <- nRF24 SETUP_RETR register (address 04)
+Resend: 3         <- resend attempts on error
+Delay_ms: 30      <- delay between cmd and resend
+ReadCmd repeat: 3 <- seconds (long press "Ok" in ReadCmd mode turn on repeating)
+
+Payload struct: 2,1,1   <- field sizes of send packet in bytes, received packet consists of 1 field with default size 1 byte (int8)
+EEPROM=0; RAM=1; PROGMEM=2; ID=3; RESET=4   <- Constants
+
+R default: ,EEPROM,0xC1     <- default for read
+W default: n,,0x81          <- default for write, 'n' - means field value position
+Write start: 0,0,0x8F       <- if exist in the file - packet before write a batch
+
+R: ID*=,ID                  <- Read cmd, '*' - means string like device ID, payload result in bytes = { 0, 0, 3, 0xC1 }
+R: OSCCAL=0x51,RAM          <- Read cmd, result in bytes = { 0x51, 0, 1, 0xC1 }
+R: OSCCAL_EMEM=0#           <- Read cmd, result in bytes = { 0, 0, 0, 0xC1 }, in the end of line '#' - returned value in hexadecimal format
+R: CO2=0x67,RAM,0xC2        <- Read cmd, result in bytes = { 0x67, 0, 1, 0xC2 }
+
+R: CO2 threshold*2=5,,0xC2  <- Read cmd, '*2' - means received field with 2 bytes size (int16), result in bytes = { 5, 0, 0, 0xC2 }
+W: CO2 threshold=,5,0x82    <- Write cmd, send pkt = { <from WBatch first byte of value>, <from WBatch second byte of value>, 5, 0x82 }
+
+R: FanLSB[10]=i:9           <- Read cmd, '[10]' - means array with 10 elements, 'i:9' - means array index field (9) that will be incemented after each send
+                               result in bytes = 1 pkt: { 9, 0, 0, 0xC1 }, 2 pkt: { 10, 0, 0, 0xC1 }, 3 pkt: { 10, 0, 0, 0xC1 },... total 10 packets
+W: FanLSB=,i:9              <- Write cmd, 'i' - index field. Send packets: { n & 0xFF, n >> 8, 9, 0x81 }, { n & 0xFF, n >> 8, 10, 0x81 },...  
+R: Int16Array*2[10]=i:21    <- Read cmd, array with 10 elements of int16 (2 bytes)
+W: RxAddr=,1                <- Write cmd, payload = { n, 0, 1, 0x81 }
+W: Reset=,RESET,0xC1        <- Send payload = { 0, 0, 4, 0xC1 }
+
+RBatch: Settings: ID;OSCCAL;RxAddr;Ch;nRF RETR;CO2 threshold;CO2 correct;FanLSB   <- Read Batch, 8 packets will be sent and received
+
+WBatch: Default: RxAddr=0xCF;CO2 threshold=1000;Reset  <- Write Batch, Send: { 0,0,0,0x8F }, { 0xCF, 0, 1, 0x81 }, { 0xE8, 0x03, 5, 0x82 }, { 0, 0, 4, 0xC1 }
+WBatch: Fans: FanLSB={0xC2,0xC3,0}                     <- Write Batch, Send: { 0,0,0,0x8F }, { 0xC2, 0, 9, 0x81 }, { 0xC3, 0, 10, 0x81 }
+
+S: Lamp=,0,0x40             <- Set cmd
+SBatch: Lamp On: Lamp=1     <- Set batch
+SBatch: Lamp Off: Lamp=0    <- Set batch

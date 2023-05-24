@@ -1,0 +1,13 @@
+App(
+    appid="Logic_Analyzer",
+    name="Logic Analyzer",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="logic_analyzer_app_main",
+    requires=["gui", "storage", "dialogs"],
+    stack_size=2 * 1024,
+    order=10,
+    fap_icon="icons/app.png",
+    fap_category="GPIO",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="logic_analyzer",
+)

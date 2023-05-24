@@ -10,6 +10,7 @@
 #include "views/desktop_view_debug.h"
 #include "views/desktop_view_slideshow.h"
 #include <desktop/desktop_settings.h>
+#include <bt/bt_settings.h>
 
 #include <furi.h>
 #include <gui/gui.h>
@@ -17,6 +18,8 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/popup.h>
 #include <gui/scene_manager.h>
+#include <bt/bt_service/bt.h>
+#include <storage/storage.h>
 
 #include <loader/loader.h>
 #include <notification/notification_app.h>
@@ -59,7 +62,17 @@ struct Desktop {
 
     ViewPort* lock_icon_viewport;
     ViewPort* dummy_mode_icon_viewport;
+    ViewPort* topbar_icon_viewport;
+    ViewPort* sdcard_icon_viewport;
+    ViewPort* bt_icon_viewport;
     ViewPort* stealth_mode_icon_viewport;
+
+    ViewPort* lock_icon_slim_viewport;
+    ViewPort* dummy_mode_icon_slim_viewport;
+    ViewPort* topbar_icon_slim_viewport;
+    ViewPort* sdcard_icon_slim_viewport;
+    ViewPort* bt_icon_slim_viewport;
+    ViewPort* stealth_mode_icon_slim_viewport;
 
     AnimationManager* animation_manager;
 
@@ -69,9 +82,13 @@ struct Desktop {
     FuriPubSubSubscription* app_start_stop_subscription;
     FuriPubSub* input_events_pubsub;
     FuriPubSubSubscription* input_events_subscription;
+    FuriPubSubSubscription* storage_sub;
     FuriTimer* auto_lock_timer;
 
+    Bt* bt;
     bool in_transition;
+
+    bool sdcard_status;
 };
 
 Desktop* desktop_alloc();

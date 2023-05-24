@@ -133,7 +133,7 @@ void weather_station_scene_receiver_on_enter(void* context) {
 
     if(app->txrx->txrx_state == WSTxRxStateRx) {
         ws_rx_end(app);
-    };
+    }
     if((app->txrx->txrx_state == WSTxRxStateIDLE) || (app->txrx->txrx_state == WSTxRxStateSleep)) {
         ws_begin(
             app,
@@ -157,7 +157,7 @@ bool weather_station_scene_receiver_on_event(void* context, SceneManagerEvent ev
             if(app->txrx->txrx_state == WSTxRxStateRx) {
                 ws_rx_end(app);
                 ws_sleep(app);
-            };
+            }
             app->txrx->hopper_state = WSHopperStateOFF;
             app->txrx->idx_menu_chosen = 0;
             subghz_receiver_set_rx_callback(app->txrx->receiver, NULL, app);

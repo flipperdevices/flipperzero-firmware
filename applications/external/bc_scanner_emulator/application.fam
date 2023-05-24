@@ -1,0 +1,20 @@
+App(
+    appid="BarCode_ScannerE",
+    name="BarCode ScannerE",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="bc_scanner_app",
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=2 * 1024,
+    fap_icon="logo_bc.png",
+    fap_libs=["assets"],
+    fap_description="Emulates a barcode scanner for testing cash registers. Why buy a scanner when you have a flipper?",
+    fap_author="Igor Danilov",
+    fap_version=(0, 5),
+    order=70,
+    fap_category="USB",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="bc_scanner",
+)
