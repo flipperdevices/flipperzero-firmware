@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+#define MF_DESFIRE_POLLER_STANDARD_FWT_FC (60000)
+
 typedef enum {
     MfDesfirePollerStateIdle,
     MfDesfirePollerStateReadVersion,
@@ -32,6 +34,8 @@ struct MfDesfirePoller {
     MfDesfireError error;
     void* context;
 };
+
+MfDesfireError mf_desfire_process_error(NfcaError error);
 
 MfDesfireError
     mf_desfire_poller_async_read_version(MfDesfirePoller* instance, MfDesfireVersion* data);

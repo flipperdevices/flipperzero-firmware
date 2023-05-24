@@ -89,7 +89,7 @@ static NfcaPollerCommand mf_desfire_poller_read_callback(NfcaPollerEvent event, 
 
     MfDesfirePoller* instance = context;
     MfDesfirePollerEventData event_data = {};
-    MfDesfirePollerEvent mf_ul_poller_event = {.data = &event_data};
+    MfDesfirePollerEvent poller_event = {.data = &event_data};
     MfDesfirePollerCommand command = MfDesfirePollerCommandContinue;
 
     furi_assert(instance->session_state != MfDesfirePollerSessionStateIdle);
@@ -100,8 +100,8 @@ static NfcaPollerCommand mf_desfire_poller_read_callback(NfcaPollerEvent event, 
             command = mf_desfire_poller_read_handler[instance->state](instance);
         } else if(event.type == NfcaPollerEventTypeError) {
             if(instance->callback) {
-                mf_ul_poller_event.type = MfDesfirePollerEventTypeReadFailed;
-                command = instance->callback(mf_ul_poller_event, instance->context);
+                poller_event.type = MfDesfirePollerEventTypeReadFailed;
+                command = instance->callback(poller_event, instance->context);
             }
         }
     }
@@ -153,8 +153,28 @@ MfDesfireError mf_desfire_poller_get_data(MfDesfirePoller* instance, MfDesfireDa
     return MfDesfireErrorNone;
 }
 
-MfDesfireError mf_desfire_poller_stop(MfDesfirePoller* instance) {
+MfDesfireError mf_desfire_poller_reset(MfDesfirePoller* instance) {
     furi_assert(instance);
+    furi_assert(instance->data);
+    furi_assert(instance->buffer);
+    furi_assert(instance->nfca_poller);
+
+    nfc_poller_buffer_free(instance->buffer);
+    instance->callback = NULL;
+    instance->context = NULL;
+    instance->state = MfDesfirePollerStateIdle;
 
     return MfDesfireErrorNone;
+}
+
+MfDesfireError mf_desfire_poller_stop(MfDesfirePoller* instance) {
+    furi_assert(instance);
+    furi_assert(instance->nfca_poller);
+
+    instance->session_state = MfDesfirePollerSessionStateStopRequest;
+    nfca_poller_stop(instance->nfca_poller);
+    instance->session_state = MfDesfirePollerSessionStateIdle;
+    free(instance->data);
+
+    return mf_desfire_poller_reset(instance);
 }

@@ -6,6 +6,19 @@
 extern "C" {
 #endif
 
+#define MF_DESFIRE_CMD_GET_VERSION (0x60)
+#define MF_DESFIRE_CMD_GET_FREE_MEMORY (0x6E)
+#define MF_DESFIRE_CMD_GET_KEY_SETTINGS (0x45)
+#define MF_DESFIRE_CMD_GET_KEY_VERSION (0x64)
+#define MF_DESFIRE_CMD_GET_APPLICATION_IDS (0x6A)
+#define MF_DESFIRE_CMD_SELECT_APPLICATION (0x5A)
+#define MF_DESFIRE_CMD_GET_FILE_IDS (0x6F)
+#define MF_DESFIRE_CMD_GET_FILE_SETTINGS (0xF5)
+
+#define MF_DESFIRE_CMD_READ_DATA (0xBD)
+#define MF_DESFIRE_CMD_GET_VALUE (0x6C)
+#define MF_DESFIRE_CMD_READ_RECORDS (0xBB)
+
 typedef struct {
     uint8_t hw_vendor;
     uint8_t hw_type;
@@ -100,6 +113,9 @@ typedef struct MfDesfireApplication {
 
 typedef enum {
     MfDesfireErrorNone,
+    MfDesfireErrorNotPresent,
+    MfDesfireErrorProtocol,
+    MfDesfireErrorTimeout,
 } MfDesfireError;
 
 typedef struct {
