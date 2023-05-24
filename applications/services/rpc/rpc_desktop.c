@@ -85,6 +85,7 @@ static void rpc_desktop_on_status_unsubscribe_request(const PB_Main* request, vo
 
     if(rpc_desktop->status_subscription) {
         furi_pubsub_unsubscribe(rpc_desktop->status_pubsub, rpc_desktop->status_subscription);
+        rpc_desktop->status_subscription = NULL;
         rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_OK);
     } else {
         rpc_send_and_release_empty(session, request->command_id, PB_CommandStatus_ERROR);
@@ -123,6 +124,10 @@ void* rpc_desktop_alloc(RpcSession* session) {
 void rpc_desktop_free(void* context) {
     furi_assert(context);
     RpcDesktop* rpc_desktop = context;
+
+    if(rpc_desktop->status_subscription) {
+        furi_pubsub_unsubscribe(rpc_desktop->status_pubsub, rpc_desktop->status_subscription);
+    }
 
     furi_assert(rpc_desktop->desktop);
     furi_record_close(RECORD_DESKTOP);
