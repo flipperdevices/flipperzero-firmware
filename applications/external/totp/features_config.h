@@ -15,3 +15,19 @@
 // End of list
 
 #define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_CFW
+
+// List of available font for TOTP code
+#define TOTP_FONT_MODENINE (1)
+#define TOTP_FONT_REDHATMONO (2)
+#define TOTP_FONT_BEDSTEAD (3)
+#define TOTP_FONT_ZECTOR (4)
+#define TOTP_FONT_712SERIF (5)
+#define TOTP_FONT_GRAPH35PIX (6)
+#define TOTP_FONT_KARMAFUTURE (7)
+
+// End of list
+
+// Active font for TOTP codes
+#ifndef TOTP_FONT
+#define TOTP_FONT TOTP_FONT_MODENINE
+#endif
