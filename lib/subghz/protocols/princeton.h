@@ -4,6 +4,10 @@
 
 #define SUBGHZ_PROTOCOL_PRINCETON_NAME "Princeton"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct SubGhzProtocolDecoderPrinceton SubGhzProtocolDecoderPrinceton;
 typedef struct SubGhzProtocolEncoderPrinceton SubGhzProtocolEncoderPrinceton;
 
@@ -107,3 +111,7 @@ SubGhzProtocolStatus
  * @param output Resulting text
  */
 void subghz_protocol_decoder_princeton_get_string(void* context, FuriString* output);
+
+#ifdef __cplusplus
+}
+#endif

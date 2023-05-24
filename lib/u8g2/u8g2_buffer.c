@@ -45,6 +45,14 @@ void u8g2_ClearBuffer(u8g2_t* u8g2) {
     memset(u8g2->tile_buf_ptr, 0, cnt);
 }
 
+void u8g2_FillBuffer(u8g2_t* u8g2) {
+    size_t cnt;
+    cnt = u8g2_GetU8x8(u8g2)->display_info->tile_width;
+    cnt *= u8g2->tile_buf_height;
+    cnt *= 8;
+    memset(u8g2->tile_buf_ptr, 255, cnt);
+}
+
 /*============================================*/
 
 static void u8g2_send_tile_row(u8g2_t* u8g2, uint8_t src_tile_row, uint8_t dest_tile_row) {

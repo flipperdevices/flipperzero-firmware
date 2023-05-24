@@ -234,7 +234,11 @@ void mf_df_cat_file(MifareDesfireFile* file, FuriString* out) {
     }
 }
 
-bool mf_df_check_card_type(uint8_t ATQA0, uint8_t ATQA1, uint8_t SAK) {
+bool mf_df_check_card_type(FuriHalNfcADevData* data) {
+    uint8_t ATQA0 = data->atqa[0];
+    uint8_t ATQA1 = data->atqa[1];
+    uint8_t SAK = data->sak;
+
     return ATQA0 == 0x44 && ATQA1 == 0x03 && SAK == 0x20;
 }
 

@@ -45,8 +45,8 @@ bool plantain_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
 
     MfClassicReader reader = {};
-    FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
-    reader.type = mf_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
+    FuriHalNfcADevData* nfc_a_data = &nfc_worker->dev_data->nfc_data.a_data;
+    reader.type = mf_classic_get_classic_type(nfc_a_data);
     for(size_t i = 0; i < COUNT_OF(plantain_keys); i++) {
         mf_classic_reader_add_sector(
             &reader, plantain_keys[i].sector, plantain_keys[i].key_a, plantain_keys[i].key_b);

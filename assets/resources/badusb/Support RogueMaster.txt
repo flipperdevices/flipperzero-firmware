@@ -1,0 +1,11 @@
+REM Author: OpenAI Assistant
+REM Modified by RogueMaster
+REM Date: 2022-12-27
+REM Description: A simple Ruby Ducky script to open RogueMater's Patreon
+
+DELAY 1000
+GUI r
+DELAY 200
+STRING powershell Start-Process "https://patreon.com/RogueMaster"
+DELAY 500
+ENTER

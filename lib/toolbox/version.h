@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,6 +64,23 @@ const char* version_get_builddate(const Version* v);
  * @return     build date
  */
 const char* version_get_version(const Version* v);
+
+/** Get custom flipper name if set in version_set_custom_name
+ *
+ * @param      v     pointer to Version data. NULL for currently running
+ *                   software.
+ *
+ * @return     custom name or NULL
+ */
+const char* version_get_custom_name(const Version* v);
+
+/** Set custom flipper name
+ *
+ * @param      v     pointer to Version data. NULL for currently running
+ *                   software.
+ * @param      name  Custom name or NULL
+ */
+void version_set_custom_name(Version* v, const char* name);
 
 /** Get hardware target this firmware was built for
  *

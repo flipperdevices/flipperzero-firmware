@@ -86,6 +86,16 @@ SubGhzProtocolStatus subghz_block_generic_serialize(
             res = SubGhzProtocolStatusErrorParserKey;
             break;
         }
+
+        // Nice One - Manual adding support
+        if(instance->data_count_bit == 72 &&
+           (strcmp(instance->protocol_name, "Nice FloR-S") == 0)) {
+            uint32_t temp = (instance->data_2 >> 4) & 0xFFFFF;
+            if(!flipper_format_write_uint32(flipper_format, "Data", &temp, 1)) {
+                FURI_LOG_E(TAG, "Unable to add Data");
+                break;
+            }
+        }
         res = SubGhzProtocolStatusOk;
     } while(false);
     furi_string_free(temp_str);
@@ -142,7 +152,7 @@ SubGhzProtocolStatus subghz_block_generic_deserialize_check_count_bit(
             break;
         }
         if(instance->data_count_bit != count_bit) {
-            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            FURI_LOG_D(TAG, "Wrong number of bits in key");
             ret = SubGhzProtocolStatusErrorValueBitCount;
             break;
         }

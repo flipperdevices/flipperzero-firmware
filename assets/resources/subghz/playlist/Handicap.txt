@@ -1,0 +1,5 @@
+# Handicap
+sub: /ext/subghz/Handicap/Handicap_button_1270.sub
+sub: /ext/subghz/Handicap/Handicap_button_1650.sub
+sub: /ext/subghz/Handicap/handicap_push_door.sub
+sub: /ext/subghz/Handicap/ook650_315brute.sub

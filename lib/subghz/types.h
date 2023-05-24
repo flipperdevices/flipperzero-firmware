@@ -99,6 +99,7 @@ typedef enum {
     SubGhzProtocolTypeRAW,
     SubGhzProtocolWeatherStation,
     SubGhzProtocolCustom,
+    SubGhzProtocolTypeBinRAW,
 } SubGhzProtocolType;
 
 typedef enum {

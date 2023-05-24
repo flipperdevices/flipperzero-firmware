@@ -100,6 +100,10 @@ DigitalSignal* digital_signal_alloc(uint32_t max_edges_cnt) {
 void digital_signal_free(DigitalSignal* signal) {
     furi_assert(signal);
 
+    if(!signal) {
+        return;
+    }
+
     free(signal->edge_timings);
     free(signal->reload_reg_buff);
     free(signal->internals);

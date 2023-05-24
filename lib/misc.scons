@@ -5,11 +5,13 @@ Import("env")
 env.Append(
     CPPPATH=[
         "#/lib/digital_signal",
+        "#/lib/pulse_reader",
         "#/lib/fnv1a_hash",
         "#/lib/heatshrink",
         "#/lib/micro-ecc",
         "#/lib/nanopb",
         "#/lib/u8g2",
+        "#/lib/cfw",
     ],
     CPPDEFINES=[
         "PB_ENABLE_MALLOC",
@@ -27,9 +29,11 @@ sources = []
 
 libs_recurse = [
     "digital_signal",
+    "pulse_reader",
     "micro-ecc",
     "u8g2",
     "update_util",
+    "cfw",
 ]
 
 for lib in libs_recurse:

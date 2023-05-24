@@ -1,8 +1,12 @@
-# to use manual settings and prevent them from being deleted on upgrade, rename *_user.example files to *_user
+# Rename or Create new file with name keeloq_mfcodes_user and copy contents of that file, remove sample keys and add yours
+# keep empty line at the end of that file!
+#
 # for adding manufacture keys
 # AABBCCDDEEFFAABB:X:NAME\r\n
 # AABBCCDDEEFFAABB - man 64 bit
-# X - encryption method 1 - Simple Learning, 2 - Normal_Learning, 3 - Secure_Learning,  4 - Magic_xor_type1 Learning
+# X - encryption method - 1 - Simple Learning, 2 - Normal_Learning, 3 - Secure_Learning, 
+# 4 - Magic_xor_type1 Learning, 5 - FAAC SLH, 
+# 6 - Magic Serial typ1, 7 - Magic Serial typ2, 8 - Magic Serial typ3
 #   	0 - iterates over both previous and man in direct and reverse byte sequence
 # NAME - name (string without spaces) max 64 characters long
 Filetype: Flipper SubGhz Keystore File

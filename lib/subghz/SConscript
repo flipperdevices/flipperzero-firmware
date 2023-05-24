@@ -7,10 +7,11 @@ env.Append(
     SDK_HEADERS=[
         File("environment.h"),
         File("receiver.h"),
-        File("registry.h"),
         File("subghz_worker.h"),
         File("subghz_tx_rx_worker.h"),
         File("transmitter.h"),
+        File("registry.h"),
+        File("protocols/protocol_items.h"),
         File("protocols/raw.h"),
         File("blocks/const.h"),
         File("blocks/decoder.h"),

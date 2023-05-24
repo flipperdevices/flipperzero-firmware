@@ -1,0 +1,12 @@
+Filetype: Flipper SubGhz RAW File
+Version: 1
+UP: /any/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Cough.sub
+DOWN: /any/subghz/Customer_Assistance_Buttons/CVS/Cashier_to_the_Front_of_the_Store_ENGLISH.sub
+LEFT: /any/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Skincare.sub
+RIGHT: /any/subghz/Customer_Assistance_Buttons/Walgreens/Walgreens_Vitamin.sub
+OK: /any/subghz/Customer_Assistance_Buttons/CVS/the_Photo_Lab_ENGLISH.sub
+ULABEL: Cough_Wal
+DLABEL: Cashier_CVS
+LLABEL: Skincare_Wal
+RLABEL: Vitamin_Wal
+OKLABEL: PhotoLab_CVS

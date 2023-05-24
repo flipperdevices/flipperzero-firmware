@@ -1,0 +1,1 @@
+DayandNight:d=32,o=4,b=35:g,g,f#,f#,e,e,d,d,b3,b3,b3,b3,b3,d,d,d
