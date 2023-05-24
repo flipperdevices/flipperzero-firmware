@@ -568,7 +568,7 @@ ReturnCode rfalNfcDataExchangeStart(
             *rvdLen = (uint16_t*)&gNfcDev.rxLen;
             *rxData = (uint8_t*)(  (gNfcDev.activeDev->rfInterface == RFAL_NFC_INTERFACE_ISODEP) ? gNfcDev.rxBuf.isoDepBuf.apdu : 
                                   ((gNfcDev.activeDev->rfInterface == RFAL_NFC_INTERFACE_NFCDEP) ? gNfcDev.rxBuf.nfcDepBuf.pdu  : gNfcDev.rxBuf.rfBuf));
-            if(gNfcDev.disc.activate_after_sak) {
+            if(gNfcDev.disc.activateAfterSak) {
                 gNfcDev.state = RFAL_NFC_STATE_DATAEXCHANGE_DONE;
             }
             return ERR_NONE;
@@ -713,7 +713,7 @@ ReturnCode rfalNfcDataExchangeCustomStart(
             *rvdLen = (uint16_t*)&gNfcDev.rxLen;
             *rxData = (uint8_t*)(  (gNfcDev.activeDev->rfInterface == RFAL_NFC_INTERFACE_ISODEP) ? gNfcDev.rxBuf.isoDepBuf.apdu : 
                                   ((gNfcDev.activeDev->rfInterface == RFAL_NFC_INTERFACE_NFCDEP) ? gNfcDev.rxBuf.nfcDepBuf.pdu  : gNfcDev.rxBuf.rfBuf));
-            if(gNfcDev.disc.activate_after_sak) {
+            if(gNfcDev.disc.activateAfterSak) {
                 gNfcDev.state = RFAL_NFC_STATE_DATAEXCHANGE_DONE;
             }
             return ERR_NONE;
@@ -1501,6 +1501,12 @@ static ReturnCode rfalNfcPollActivation(uint8_t devIt) {
         /*******************************************************************************/
         case RFAL_NFCA_T4T: /* Device supports ISO-DEP */
 
+            if(gNfcDev.disc.skipRats) {
+                // Don't preform 14443-4 activation
+                gNfcDev.devList[devIt].rfInterface = RFAL_NFC_INTERFACE_RF;
+                break;
+            }
+
 #if RFAL_FEATURE_ISO_DEP && RFAL_FEATURE_ISO_DEP_POLL
             if(!gNfcDev.isOperOngoing) {
                 /* Perform ISO-DEP (ISO14443-4) activation: RATS and PPS if supported */
@@ -1760,7 +1766,7 @@ static ReturnCode rfalNfcListenActivation(void) {
                         &gNfcDev.rxLen));
             }
 
-            else if(gNfcDev.disc.activate_after_sak) {
+            else if(gNfcDev.disc.activateAfterSak) {
                 gNfcDev.devList->type = RFAL_NFC_POLL_TYPE_NFCA;
                 rfalListenSetState(RFAL_LM_STATE_ACTIVE_A);
                 return ERR_NONE;

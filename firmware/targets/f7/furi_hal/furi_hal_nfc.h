@@ -144,7 +144,7 @@ void furi_hal_nfc_exit_sleep();
  *
  * @return     true on success
  */
-bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout);
+bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout, bool emv_compliance);
 
 /** Activate NFC-A tag
  *

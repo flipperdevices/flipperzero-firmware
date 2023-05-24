@@ -78,7 +78,7 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
     MfClassicData* src_data = &nfc_magic_worker->dev_data->mf_classic_data;
 
     while(nfc_magic_worker->state == NfcMagicWorkerStateWrite) {
-        if(furi_hal_nfc_detect(&nfc_data, 200)) {
+        if(furi_hal_nfc_detect(&nfc_data, 200, false)) {
             if(!card_found_notified) {
                 nfc_magic_worker->callback(
                     NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);

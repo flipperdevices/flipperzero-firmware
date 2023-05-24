@@ -211,7 +211,8 @@ typedef struct {
     bool wakeupConfigDefault; /*!< Wake-Up mode default configuration                    */
     rfalWakeUpConfig wakeupConfig; /*!< Wake-Up mode configuration                            */
 
-    bool activate_after_sak; // Set device to Active mode after SAK responce
+    bool activateAfterSak; // Set device to Active mode after SAK responce
+    bool skipRats; // Skip RATS even if card supports it
 } rfalNfcDiscoverParam;
 
 /*! Buffer union, only one interface is used at a time                                                             */

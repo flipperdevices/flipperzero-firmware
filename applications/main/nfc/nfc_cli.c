@@ -33,7 +33,8 @@ static void nfc_cli_detect(Cli* cli, FuriString* args) {
     printf("Detecting nfc...\r\nPress Ctrl+C to abort\r\n");
     while(!cmd_exit) {
         cmd_exit |= cli_cmd_interrupt_received(cli);
-        if(furi_hal_nfc_detect(&dev_data, 400)) {
+        if(furi_hal_nfc_detect(&dev_data, 400, true) ||
+           furi_hal_nfc_detect(&dev_data, 400, false)) {
             printf("Found: %s ", nfc_get_dev_type(dev_data.type));
             printf("UID length: %d, UID:", dev_data.uid_len);
             for(size_t i = 0; i < dev_data.uid_len; i++) {
@@ -125,7 +126,7 @@ static void nfc_cli_apdu(Cli* cli, FuriString* args) {
         }
 
         printf("detecting tag\r\n");
-        if(!furi_hal_nfc_detect(&dev_data, 300)) {
+        if(!furi_hal_nfc_detect(&dev_data, 300, true)) {
             printf("Failed to detect tag\r\n");
             break;
         }

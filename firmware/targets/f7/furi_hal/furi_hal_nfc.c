@@ -76,7 +76,7 @@ void furi_hal_nfc_exit_sleep() {
     rfalLowPowerModeStop();
 }
 
-bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
+bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout, bool emv_compliance) {
     furi_assert(nfc_data);
 
     rfalNfcDevice* dev_list = NULL;
@@ -90,7 +90,7 @@ bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
         rfalNfcInitialize();
     }
     rfalNfcDiscoverParam params;
-    params.compMode = RFAL_COMPLIANCE_MODE_EMV;
+    params.compMode = emv_compliance ? RFAL_COMPLIANCE_MODE_EMV : RFAL_COMPLIANCE_MODE_NFC;
     params.techs2Find = RFAL_NFC_POLL_TECH_A | RFAL_NFC_POLL_TECH_B | RFAL_NFC_POLL_TECH_F |
                         RFAL_NFC_POLL_TECH_V | RFAL_NFC_POLL_TECH_AP2P | RFAL_NFC_POLL_TECH_ST25TB;
     params.totalDuration = 1000;
@@ -102,6 +102,7 @@ bool furi_hal_nfc_detect(FuriHalNfcDevData* nfc_data, uint32_t timeout) {
     params.maxBR = RFAL_BR_KEEP;
     params.GBLen = RFAL_NFCDEP_GB_MAX_LEN;
     params.notifyCb = NULL;
+    params.skipRats = !emv_compliance;
 
     uint32_t start = DWT->CYCCNT;
     rfalNfcDiscover(&params);
@@ -186,6 +187,7 @@ bool furi_hal_nfc_activate_nfca(uint32_t timeout, uint32_t* cuid) {
         .maxBR = RFAL_BR_KEEP,
         .GBLen = RFAL_NFCDEP_GB_MAX_LEN,
         .notifyCb = NULL,
+        .skipRats = true,
     };
     uint32_t start = DWT->CYCCNT;
     rfalNfcDiscover(&params);
@@ -246,7 +248,7 @@ bool furi_hal_nfc_listen(
         .maxBR = RFAL_BR_KEEP,
         .GBLen = RFAL_NFCDEP_GB_MAX_LEN,
         .notifyCb = NULL,
-        .activate_after_sak = activate_after_sak,
+        .activateAfterSak = activate_after_sak,
     };
     if(FURI_BIT(sak, 5)) {
         params.compMode = RFAL_COMPLIANCE_MODE_EMV;

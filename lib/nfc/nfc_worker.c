@@ -148,7 +148,7 @@ static bool nfc_worker_read_mf_ultralight(NfcWorker* nfc_worker, FuriHalNfcTxRxC
         furi_hal_nfc_sleep();
 
         // Otherwise, try to read as usual
-        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200, false)) break;
         if(!mf_ul_read_card(tx_rx, &reader, &data)) break;
         // Copy data
         nfc_worker->dev_data->mf_ul_data = data;
@@ -217,7 +217,7 @@ static bool nfc_worker_read_mf_desfire(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
     }
 
     do {
-        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300)) break;
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 300, false)) break;
         if(!mf_df_read_card(tx_rx, data)) break;
         read_success = true;
     } while(false);
@@ -272,7 +272,7 @@ void nfc_worker_read(NfcWorker* nfc_worker) {
     bool card_not_detected_notified = false;
 
     while(nfc_worker->state == NfcWorkerStateRead) {
-        if(furi_hal_nfc_detect(nfc_data, 300)) {
+        if(furi_hal_nfc_detect(nfc_data, 300, true) || furi_hal_nfc_detect(nfc_data, 300, false)) {
             // Process first found device
             nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
             card_not_detected_notified = false;
@@ -335,7 +335,8 @@ void nfc_worker_read_type(NfcWorker* nfc_worker) {
     bool card_not_detected_notified = false;
 
     while(nfc_worker->state == NfcWorkerStateRead) {
-        if(furi_hal_nfc_detect(nfc_data, 300)) {
+        if((read_mode == NfcReadModeMfClassic && furi_hal_nfc_detect(nfc_data, 300, false)) ||
+           (read_mode != NfcReadModeMfClassic && furi_hal_nfc_detect(nfc_data, 300, true))) {
             FURI_LOG_D(TAG, "Card detected");
             furi_hal_nfc_sleep();
             // Process first found device
@@ -772,7 +773,7 @@ void nfc_worker_write_mf_classic(NfcWorker* nfc_worker) {
     MfClassicData dest_data = *src_data;
 
     while(nfc_worker->state == NfcWorkerStateMfClassicWrite) {
-        if(furi_hal_nfc_detect(&nfc_data, 200)) {
+        if(furi_hal_nfc_detect(&nfc_data, 200, false)) {
             if(!card_found_notified) {
                 nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
                 card_found_notified = true;
@@ -845,7 +846,7 @@ void nfc_worker_update_mf_classic(NfcWorker* nfc_worker) {
     MfClassicData new_data = *old_data;
 
     while(nfc_worker->state == NfcWorkerStateMfClassicUpdate) {
-        if(furi_hal_nfc_detect(&nfc_data, 200)) {
+        if(furi_hal_nfc_detect(&nfc_data, 200, false)) {
             if(!card_found_notified) {
                 nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
                 card_found_notified = true;
@@ -923,7 +924,7 @@ void nfc_worker_mf_ultralight_read_auth(NfcWorker* nfc_worker) {
     uint16_t pack = 0;
     while(nfc_worker->state == NfcWorkerStateReadMfUltralightReadAuth) {
         furi_hal_nfc_sleep();
-        if(furi_hal_nfc_detect(nfc_data, 300) && nfc_data->type == FuriHalNfcTypeA) {
+        if(furi_hal_nfc_detect(nfc_data, 300, false) && nfc_data->type == FuriHalNfcTypeA) {
             if(mf_ul_check_card_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak)) {
                 nfc_worker->callback(NfcWorkerEventCardDetected, nfc_worker->context);
                 if(data->auth_method == MfUltralightAuthMethodManual ||
