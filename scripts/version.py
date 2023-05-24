@@ -44,7 +44,6 @@ class GitVersion:
             os.environ.get("FORCE_NO_DIRTY", None)
             or ""
         )
-
         if (force_no_dirty != ""):
             dirty = False
 
