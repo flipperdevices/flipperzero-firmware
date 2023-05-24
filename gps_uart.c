@@ -22,7 +22,7 @@ static void gps_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 static void gps_uart_serial_init(GpsUart* gps_uart) {
     furi_hal_console_disable();
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, gps_uart_on_irq_cb, gps_uart);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, GPS_BAUDRATE);
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, gps_uart->baudrate);
 }
 
 static void gps_uart_serial_deinit(GpsUart* gps_uart) {
@@ -87,10 +87,7 @@ static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line) {
 static int32_t gps_uart_worker(void* context) {
     GpsUart* gps_uart = (GpsUart*)context;
 
-    gps_uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE * 5, 1);
     size_t rx_offset = 0;
-
-    gps_uart_serial_init(gps_uart);
 
     while(1) {
         uint32_t events =
@@ -164,16 +161,8 @@ static int32_t gps_uart_worker(void* context) {
     return 0;
 }
 
-GpsUart* gps_uart_enable() {
-    GpsUart* gps_uart = malloc(sizeof(GpsUart));
-
-    gps_uart->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(!gps_uart->mutex) {
-        FURI_LOG_E("GPS", "cannot create mutex\r\n");
-        free(gps_uart);
-        return NULL;
-    }
-
+void gps_uart_init_thread(GpsUart* gps_uart) {
+    furi_assert(gps_uart);
     gps_uart->status.valid = false;
     gps_uart->status.latitude = 0.0;
     gps_uart->status.longitude = 0.0;
@@ -187,7 +176,7 @@ GpsUart* gps_uart_enable() {
     gps_uart->status.time_minutes = 0;
     gps_uart->status.time_seconds = 0;
 
-    gps_uart->notifications = furi_record_open(RECORD_NOTIFICATION);
+    gps_uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE * 5, 1);
 
     gps_uart->thread = furi_thread_alloc();
     furi_thread_set_name(gps_uart->thread, "GpsUartWorker");
@@ -196,15 +185,32 @@ GpsUart* gps_uart_enable() {
     furi_thread_set_callback(gps_uart->thread, gps_uart_worker);
 
     furi_thread_start(gps_uart->thread);
+
+    gps_uart_serial_init(gps_uart);
+}
+
+void gps_uart_deinit_thread(GpsUart* gps_uart) {
+    furi_assert(gps_uart);
+    furi_thread_flags_set(furi_thread_get_id(gps_uart->thread), WorkerEvtStop);
+    furi_thread_join(gps_uart->thread);
+    furi_thread_free(gps_uart->thread);
+}
+
+GpsUart* gps_uart_enable() {
+    GpsUart* gps_uart = malloc(sizeof(GpsUart));
+
+    gps_uart->notifications = furi_record_open(RECORD_NOTIFICATION);
+
+    gps_uart->baudrate = gps_baudrates[current_gps_baudrate];
+
+    gps_uart_init_thread(gps_uart);
+
     return gps_uart;
 }
 
 void gps_uart_disable(GpsUart* gps_uart) {
     furi_assert(gps_uart);
-    furi_thread_flags_set(furi_thread_get_id(gps_uart->thread), WorkerEvtStop);
-    furi_thread_join(gps_uart->thread);
-    furi_thread_free(gps_uart->thread);
-
+    gps_uart_deinit_thread(gps_uart);
     furi_record_close(RECORD_NOTIFICATION);
 
     free(gps_uart);

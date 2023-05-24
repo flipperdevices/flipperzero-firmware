@@ -3,8 +3,10 @@
 #include <furi_hal.h>
 #include <notification/notification_messages.h>
 
-#define GPS_BAUDRATE 9600
 #define RX_BUF_SIZE 1024
+
+static const int gps_baudrates[5] = {9600, 19200, 38400, 57600, 115200};
+static int current_gps_baudrate = 0;
 
 typedef struct {
     bool valid;
@@ -28,9 +30,16 @@ typedef struct {
     uint8_t rx_buf[RX_BUF_SIZE];
 
     NotificationApp* notifications;
+    uint32_t baudrate;
+    bool changing_baudrate;
+    bool backlight_on;
+    bool speed_in_kms;
 
     GpsStatus status;
 } GpsUart;
+
+void gps_uart_init_thread(GpsUart* gps_uart);
+void gps_uart_deinit_thread(GpsUart* gps_uart);
 
 GpsUart* gps_uart_enable();
 
