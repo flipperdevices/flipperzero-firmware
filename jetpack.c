@@ -37,10 +37,21 @@ static void jetpack_game_state_init(GameState* const game_state) {
 
     GameSprites sprites;
     sprites.barry = icon_animation_alloc(&A_barry);
-    sprites.scientist = icon_animation_alloc(&A_scientist);
+    sprites.scientist_left = icon_animation_alloc(&A_scientist_left);
+    sprites.scientist_right = icon_animation_alloc(&A_scientist_right);
     sprites.missile = icon_animation_alloc(&A_missile);
 
-    icon_animation_start(sprites.scientist);
+    sprites.bg[0] = &I_bg1;
+    sprites.bg[1] = &I_bg2;
+    sprites.bg[2] = &I_bg3;
+
+    for(int i = 0; i < 3; ++i) {
+        sprites.bg_pos[i].x = i * 128;
+        sprites.bg_pos[i].y = 0;
+    }
+
+    icon_animation_start(sprites.scientist_left);
+    icon_animation_start(sprites.scientist_right);
     icon_animation_start(sprites.barry);
     icon_animation_start(sprites.missile);
 
@@ -57,8 +68,10 @@ static void jetpack_game_state_init(GameState* const game_state) {
 
 static void jetpack_game_state_free(GameState* const game_state) {
     icon_animation_free(game_state->sprites.barry);
-    icon_animation_free(game_state->sprites.scientist);
+    icon_animation_free(game_state->sprites.scientist_left);
+    icon_animation_free(game_state->sprites.scientist_right);
     icon_animation_free(game_state->sprites.missile);
+
     free(game_state);
 }
 
@@ -70,6 +83,13 @@ static void jetpack_game_tick(GameState* const game_state) {
     particle_tick(game_state->particles, game_state->scientists, &game_state->points);
     scientist_tick(game_state->scientists);
     missile_tick(game_state->missiles, &game_state->barry, &game_state->state);
+
+    for(int i = 0; i < 3; ++i) {
+        game_state->sprites.bg_pos[i].x -= 1;
+        if(game_state->sprites.bg_pos[i].x <= -128) {
+            game_state->sprites.bg_pos[i].x = 128 * 2; // 2 other images are 128 px each
+        }
+    }
 
     if((rand() % 100) < 1) {
         spawn_random_coin(game_state->coins);
@@ -94,6 +114,14 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
     if(game_state->state == GameStateLife) {
         // canvas_draw_box(canvas, 0, 0, 128, 32);
         // canvas_set_color(canvas, ColorXOR);
+
+        for(int i = 0; i < 3; ++i) {
+            // Check if the image is within the screen's boundaries
+            if(game_state->sprites.bg_pos[i].x >= -127 && game_state->sprites.bg_pos[i].x < 128) {
+                canvas_draw_icon(
+                    canvas, game_state->sprites.bg_pos[i].x, 0, game_state->sprites.bg[i]);
+            }
+        }
 
         canvas_set_bitmap_mode(canvas, true);
 

@@ -5,8 +5,8 @@
 #include "game_sprites.h"
 #include <gui/gui.h>
 
-#define SCIENTIST_VELOCITY_MIN 2
-#define SCIENTIST_VELOCITY_MAX 2
+#define SCIENTIST_VELOCITY_MIN -0.5f
+#define SCIENTIST_VELOCITY_MAX 0.5f
 
 #define SCIENTISTS_MAX 6
 
@@ -17,8 +17,8 @@ typedef enum {
 
 typedef struct {
     float gravity;
-    POINT point;
-    int velocity_x;
+    POINTF point;
+    float velocity_x;
     ScientistState state;
 } SCIENTIST;
 
