@@ -22,6 +22,7 @@
 #define SCENE_EVENT_SELECT_TOP_BAR 14
 #define SCENE_EVENT_SELECT_DUMBMODE 15
 #define SCENE_EVENT_SELECT_DUMBMODE_ICON 16
+#define SCENE_EVENT_SELECT_CLOCK_DISPLAY 17
 
 #define AUTO_LOCK_DELAY_COUNT 9
 const char* const auto_lock_delay_text[AUTO_LOCK_DELAY_COUNT] = {
@@ -68,6 +69,8 @@ const char* const desktop_on_off_text[DESKTOP_ON_OFF_COUNT] = {
     "ON",
 };
 
+const uint32_t clock_enable_value[DESKTOP_ON_OFF_COUNT] = {false, true};
+
 const uint32_t lockicon_value[DESKTOP_ON_OFF_COUNT] = {false, true};
 
 const uint32_t bticon_value[DESKTOP_ON_OFF_COUNT] = {false, true};
@@ -87,6 +90,14 @@ const uint32_t dumbmode_icon_value[DESKTOP_ON_OFF_COUNT] = {false, true};
 static void desktop_settings_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     DesktopSettingsApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
+static void desktop_settings_scene_start_clock_enable_changed(VariableItem* item) {
+    DesktopSettingsApp* app = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+
+    variable_item_set_current_value_text(item, desktop_on_off_text[index]);
+    app->settings.display_clock = index;
 }
 
 static void desktop_settings_scene_start_auto_lock_delay_changed(VariableItem* item) {
@@ -310,6 +321,18 @@ void desktop_settings_scene_start_on_enter(void* context) {
 
     item = variable_item_list_add(
         variable_item_list,
+        "Show Clock",
+        DESKTOP_ON_OFF_COUNT,
+        desktop_settings_scene_start_clock_enable_changed, //
+        app);
+
+    value_index =
+        value_index_uint32(app->settings.display_clock, clock_enable_value, DESKTOP_ON_OFF_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, desktop_on_off_text[value_index]);
+
+    item = variable_item_list_add(
+        variable_item_list,
         "Top Bar",
         DESKTOP_ON_OFF_COUNT,
         desktop_settings_scene_start_topbar_changed,
@@ -412,6 +435,9 @@ bool desktop_settings_scene_start_on_event(void* context, SceneManagerEvent sme)
             consumed = true;
             break;
         case SCENE_EVENT_SELECT_DUMBMODE_ICON:
+            consumed = true;
+            break;
+        case SCENE_EVENT_SELECT_CLOCK_DISPLAY:
             consumed = true;
             break;
         }

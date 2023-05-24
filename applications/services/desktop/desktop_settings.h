@@ -8,7 +8,7 @@
 #include <toolbox/saved_struct.h>
 #include <storage/storage.h>
 
-#define DESKTOP_SETTINGS_VER (9)
+#define DESKTOP_SETTINGS_VER (10)
 
 #define DESKTOP_SETTINGS_OLD_PATH CFG_PATH(DESKTOP_SETTINGS_FILE_NAME)
 #define DESKTOP_SETTINGS_PATH INT_PATH(DESKTOP_SETTINGS_FILE_NAME)
@@ -79,4 +79,5 @@ typedef struct {
     uint8_t dummy_mode;
     bool dumbmode_icon;
     bool auto_lock_with_pin;
+    uint8_t display_clock;
 } DesktopSettings;
