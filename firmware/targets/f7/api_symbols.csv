@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,39.0,,
+Version,+,39.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1379,11 +1379,14 @@ Function,+,furi_hal_subghz_stop_async_rx,void,
 Function,+,furi_hal_subghz_stop_async_tx,void,
 Function,+,furi_hal_subghz_tx,_Bool,
 Function,+,furi_hal_subghz_write_packet,void,"const uint8_t*, uint8_t"
+Function,+,furi_hal_sw_digital_pin_is_rx_running,_Bool,
 Function,+,furi_hal_sw_digital_pin_is_tx_complete,_Bool,
 Function,+,furi_hal_sw_digital_pin_rx_deinit,void,
 Function,+,furi_hal_sw_digital_pin_rx_init,void,"FuriHalSwDigitalPinRxCallback, void*, uint16_t, uint32_t, size_t, const GpioPin*"
 Function,+,furi_hal_sw_digital_pin_rx_start,void,
 Function,+,furi_hal_sw_digital_pin_rx_stop,void,
+Function,+,furi_hal_sw_digital_pin_switch_rx_to_tx,void,
+Function,+,furi_hal_sw_digital_pin_switch_tx_to_rx,void,
 Function,+,furi_hal_sw_digital_pin_sync_deinit,void,
 Function,+,furi_hal_sw_digital_pin_sync_init,void,const GpioPin*
 Function,+,furi_hal_sw_digital_pin_sync_start,void,

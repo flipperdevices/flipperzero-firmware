@@ -8,7 +8,6 @@
 #define SW_USART_RX_BUFFER_SIZE_DEFAULT 1024
 
 #define CPU_CLOCK_TIM 64000000
-#define bit_read(value, bit) (((value) >> (bit)) & 0x01)
 
 typedef struct {
     SwUsartMode mode;
@@ -108,6 +107,9 @@ static void sw_usart_tx_end(void* context) {
     SwUsart* sw_usart = context;
     furi_assert(sw_usart);
     // callback end tx
+    if(sw_usart->config.mode == SwUsartModeAsyncRxTxHalfDuplex) {
+        furi_hal_sw_digital_pin_switch_tx_to_rx();
+    }
 }
 
 static inline void sw_usart_parse_byte(SwUsart* sw_usart) {
@@ -115,7 +117,7 @@ static inline void sw_usart_parse_byte(SwUsart* sw_usart) {
     uint8_t parity = 0;
     uint8_t byte = 0;
     uint8_t* ptr_buf = sw_usart->rx_buffer_parse_byte;
-    
+
     //Data
     for(uint8_t i = 0; i < sw_usart->config.data_bit; i++) {
         if(*(++ptr_buf)) {
@@ -266,6 +268,9 @@ void sw_usart_set_config(
     sw_usart->config.sync_pin = sync_pin;
 }
 
+static uint16_t sw_usart_get_arr(uint32_t speed) {
+    return (CPU_CLOCK_TIM / speed) - 1;
+}
 void sw_usart_start(
     SwUsart* sw_usart,
     uint32_t baudrate,
@@ -296,7 +301,7 @@ void sw_usart_start(
             sw_usart_tx_end,
             sw_usart,
             0,
-            (CPU_CLOCK_TIM / sw_usart->config.baudrate) - 1,
+            sw_usart_get_arr(sw_usart->config.baudrate),
             sw_usart->tx_upload_char_len * 8,
             sw_usart->config.tx_pin);
 
@@ -312,7 +317,7 @@ void sw_usart_start(
             sw_usart_tx_end,
             sw_usart,
             0,
-            (CPU_CLOCK_TIM / sw_usart->config.baudrate) - 1,
+            sw_usart_get_arr(sw_usart->config.baudrate),
             sw_usart->tx_upload_char_len * 8,
             sw_usart->config.tx_pin);
 
@@ -321,7 +326,7 @@ void sw_usart_start(
                 sw_usart_rx,
                 sw_usart,
                 0,
-                (CPU_CLOCK_TIM / sw_usart->config.baudrate) - 1,
+                sw_usart_get_arr(sw_usart->config.baudrate),
                 256,
                 sw_usart->config.rx_pin);
         } else {
@@ -329,11 +334,48 @@ void sw_usart_start(
                 sw_usart_rx_inverted,
                 sw_usart,
                 0,
-                (CPU_CLOCK_TIM / sw_usart->config.baudrate) - 1,
+                sw_usart_get_arr(sw_usart->config.baudrate),
                 256,
                 sw_usart->config.rx_pin);
         }
         furi_hal_sw_digital_pin_rx_start();
+        break;
+    
+    case SwUsartModeAsyncRxTxHalfDuplex:
+        furi_assert(sw_usart->config.tx_pin);
+        furi_assert(sw_usart->config.rx_pin);
+
+        furi_hal_gpio_write(sw_usart->config.tx_pin, (sw_usart->config.inverted ? false : true));
+
+        furi_hal_sw_digital_pin_tx_init(
+            sw_usart_tx_encoder_yield,
+            sw_usart_tx_end,
+            sw_usart,
+            0,
+            sw_usart_get_arr(sw_usart->config.baudrate),
+            sw_usart->tx_upload_char_len * 8,
+            sw_usart->config.tx_pin);
+
+        if(!sw_usart->config.inverted) {
+            furi_hal_sw_digital_pin_rx_init(
+                sw_usart_rx,
+                sw_usart,
+                0,
+                sw_usart_get_arr(sw_usart->config.baudrate),
+                256,
+                sw_usart->config.rx_pin);
+        } else {
+            furi_hal_sw_digital_pin_rx_init(
+                sw_usart_rx_inverted,
+                sw_usart,
+                0,
+                sw_usart_get_arr(sw_usart->config.baudrate),
+                256,
+                sw_usart->config.rx_pin);
+        }
+        furi_hal_sw_digital_pin_rx_start();
+
+        //furi_hal_sw_digital_pin_switch_tx_to_rx();
         break;
 
     default:
@@ -354,8 +396,13 @@ void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len) {
 
     sw_usart_tx_char_encoder(sw_usart);
 
-    furi_hal_sw_digital_pin_rx_start();
-    furi_hal_sw_digital_pin_tx_start();
+    //furi_hal_sw_digital_pin_rx_start();
+    if(sw_usart->config.mode == SwUsartModeAsyncRxTxHalfDuplex) {
+        furi_hal_sw_digital_pin_switch_rx_to_tx();
+    } else {
+        furi_hal_sw_digital_pin_tx_start();
+    }
+    
 }
 
 void sw_usart_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len, uint32_t timeout_ms) {
@@ -382,14 +429,16 @@ bool sw_usart_is_end_tx(SwUsart* sw_usart) {
 }
 
 void sw_usart_print_data(SwUsart* sw_usart) {
-    furi_hal_sw_digital_pin_rx_stop();
-    printf("pos byte = %d\r\n", furi_stream_buffer_bytes_available(sw_usart->rx_stream));
+    //furi_hal_sw_digital_pin_rx_stop();
+    if(!furi_stream_buffer_bytes_available(sw_usart->rx_stream)) return;
+
+    //printf("pos byte = %d\r\n", furi_stream_buffer_bytes_available(sw_usart->rx_stream));
     uint8_t data = 0;
     while(furi_stream_buffer_bytes_available(sw_usart->rx_stream)) {
         furi_stream_buffer_receive(sw_usart->rx_stream, &data, sizeof(data), 10);
         printf("%c", data);
     }
-    printf("\r\n");
+    //printf("\r\n");
 }
 
 // void sw_usart_start_rx(SwUsart* sw_usart) {

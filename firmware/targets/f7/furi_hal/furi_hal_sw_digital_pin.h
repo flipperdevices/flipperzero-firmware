@@ -17,19 +17,6 @@ typedef uint32_t (*FuriHalSwDigitalPinTxCallbackYield)(void* context);
 typedef void (*FuriHalSwDigitalPinTxCallbackEnd)(void* context);
 typedef void (*FuriHalSwDigitalPinRxCallback)(void* context, SwDigitalPinRx data);
 
-typedef enum {
-    SwDigitalPinStateInit,
-
-    SwDigitalPinStateIdle,
-
-    //SwDigitalPinStateAsyncRx,
-
-    SwDigitalPinStateTx,
-    SwDigitalPinStateTxLast,
-    SwDigitalPinStateTxEnd,
-
-} SwDigitalPinState;
-
 void furi_hal_sw_digital_pin_sync_init(const GpioPin* gpio);
 void furi_hal_sw_digital_pin_sync_start(void);
 void furi_hal_sw_digital_pin_sync_stop(void);
@@ -57,7 +44,11 @@ void furi_hal_sw_digital_pin_rx_init(
     const GpioPin* gpio);
 void furi_hal_sw_digital_pin_rx_start(void);
 void furi_hal_sw_digital_pin_rx_stop(void);
+bool furi_hal_sw_digital_pin_is_rx_running(void);
 void furi_hal_sw_digital_pin_rx_deinit(void);
+
+void furi_hal_sw_digital_pin_switch_rx_to_tx(void);
+void furi_hal_sw_digital_pin_switch_tx_to_rx(void);
 
 #ifdef __cplusplus
 }
