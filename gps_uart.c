@@ -122,39 +122,51 @@ static int32_t gps_uart_worker(void* context)
       size_t len = 0;
       do 
       {
+        // receive serial bytes into rx_buf, starting at rx_offset from the start of the buffer
+        // the maximum we can receive is RX_BUF_SIZE - 1 - rx_offset
         len = furi_stream_buffer_receive(gps_uart->rx_stream, gps_uart->rx_buf + rx_offset, RX_BUF_SIZE - 1 - rx_offset,
                                          0);
         if (len > 0)
         {
+          // increase rx_offset by the number of bytes received, and null-terminate rx_buf
           rx_offset += len;
           gps_uart->rx_buf[rx_offset] = '\0';
 
+          // look for strings ending in newlines, starting at the start of rx_buf
           char * line_current = (char *)gps_uart->rx_buf;
           while (1)
           {
+            // skip null characters
             while (*line_current == '\0' && line_current < (char *)gps_uart->rx_buf + rx_offset - 1)
             {
               line_current++;
             }
 
+            // find the next newline
             char * newline = strchr(line_current, '\n');
-            if (newline)
+            if (newline)  // newline found
             {
+              // put a null terminator in place of the newline, to delimit the line string
               *newline = '\0';
+
+              // attempt to parse the line as a NMEA sentence
               gps_uart_parse_nmea(gps_uart, line_current);
+
+              // move the cursor to the character after the newline
               line_current = newline + 1;
             }
-            else
+            else  // no more newlines found
             {
-              if (line_current > (char *)gps_uart->rx_buf)
+              if (line_current > (char *)gps_uart->rx_buf)  // at least one line was found
               {
+                // clear parsed lines, and move any leftover bytes to the start of rx_buf
                 rx_offset = 0;
-                while (*line_current)
+                while (*line_current)  // stop when the original rx_offset terminator is reached
                 {
                   gps_uart->rx_buf[rx_offset++] = *(line_current++);
                 }
               }
-              break;
+              break;  // go back to receiving bytes from the serial stream
             }
           }
         }
