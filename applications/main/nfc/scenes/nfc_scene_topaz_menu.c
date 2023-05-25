@@ -3,7 +3,6 @@
 
 enum SubmenuIndex {
     SubmenuIndexSave,
-    SubmenuIndexEmulate,
     SubmenuIndexInfo,
 };
 
