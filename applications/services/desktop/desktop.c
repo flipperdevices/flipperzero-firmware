@@ -175,7 +175,16 @@ static void desktop_toggle_clock_view(Desktop* desktop, bool is_enabled) {
         furi_timer_stop(desktop->update_clock_timer);
     }
 
-    view_port_enabled_set(desktop->clock_viewport, is_enabled);
+	switch(desktop->settings.icon_style) {
+        case ICON_STYLE_SLIM:
+			view_port_enabled_set(desktop->clock_viewport, is_enabled);
+			view_port_enabled_set(desktop->clock_slim_viewport, false);
+			break;
+        case ICON_STYLE_STOCK:
+			view_port_enabled_set(desktop->clock_viewport, false);
+			view_port_enabled_set(desktop->clock_slim_viewport, is_enabled);
+			break;
+	}
 }
 
 static uint8_t desktop_clock_get_num_w(uint8_t num) {
@@ -213,6 +222,7 @@ static void desktop_clock_draw_callback(Canvas* canvas, void* context) {
 
     // further away from the battery charge indicator, if the smallest minute is 1
     view_port_set_width(desktop->clock_viewport, new_w - !(d[0] == 1));
+    view_port_set_width(desktop->clock_slim_viewport, new_w - !(d[0] == 1));
 
     uint8_t x = new_w;
 
@@ -376,26 +386,54 @@ static void desktop_auto_lock_inhibit(Desktop* desktop) {
 static void desktop_update_clock_timer_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
+	
+	switch(desktop->settings.icon_style) {
+		case ICON_STYLE_SLIM:
+			if(gui_get_count_of_enabled_view_port_in_layer(desktop->gui, GuiLayerStatusBarLeftSlim) < 6) {
+				FuriHalRtcDateTime curr_dt;
+				furi_hal_rtc_get_datetime(&curr_dt);
 
-    if(gui_get_count_of_enabled_view_port_in_layer(desktop->gui, GuiLayerStatusBarLeft) < 6) {
-        FuriHalRtcDateTime curr_dt;
-        furi_hal_rtc_get_datetime(&curr_dt);
+				if(desktop->minute != curr_dt.minute) {
+					if(desktop->clock_type) {
+						desktop->hour = curr_dt.hour;
+					} else {
+						desktop->hour = (curr_dt.hour > 12) ? curr_dt.hour - 12 : ((curr_dt.hour == 0) ? 12 : curr_dt.hour);
+					}
+					desktop->minute = curr_dt.minute;
+					view_port_update(desktop->clock_slim_viewport);
+				}
 
-        if(desktop->minute != curr_dt.minute) {
-            if(desktop->clock_type) {
-                desktop->hour = curr_dt.hour;
-            } else {
-                desktop->hour = (curr_dt.hour > 12) ? curr_dt.hour - 12 :
+				view_port_enabled_set(desktop->clock_slim_viewport, true);
+				view_port_enabled_set(desktop->clock_viewport, false);
+			} else {
+				view_port_enabled_set(desktop->clock_slim_viewport, false);
+				view_port_enabled_set(desktop->clock_viewport, false);
+			}
+			break;
+    case ICON_STYLE_STOCK:
+		if(gui_get_count_of_enabled_view_port_in_layer(desktop->gui, GuiLayerStatusBarLeft) < 6) {
+			FuriHalRtcDateTime curr_dt;
+			furi_hal_rtc_get_datetime(&curr_dt);
+
+			if(desktop->minute != curr_dt.minute) {
+				if(desktop->clock_type) {
+					desktop->hour = curr_dt.hour;
+				} else {
+					desktop->hour = (curr_dt.hour > 12) ? curr_dt.hour - 12 :
                                                       ((curr_dt.hour == 0) ? 12 : curr_dt.hour);
-            }
-            desktop->minute = curr_dt.minute;
-            view_port_update(desktop->clock_viewport);
-        }
+				}
+				desktop->minute = curr_dt.minute;
+				view_port_update(desktop->clock_viewport);
+			}
 
-        view_port_enabled_set(desktop->clock_viewport, true);
-    } else {
-        view_port_enabled_set(desktop->clock_viewport, false);
-    }
+			view_port_enabled_set(desktop->clock_slim_viewport, false);
+			view_port_enabled_set(desktop->clock_viewport, true);
+		} else {
+			view_port_enabled_set(desktop->clock_slim_viewport, false);
+			view_port_enabled_set(desktop->clock_viewport, false);
+		}
+		break;
+	}
 }
 
 void desktop_lock(Desktop* desktop) {
@@ -622,6 +660,13 @@ Desktop* desktop_alloc() {
     view_port_draw_callback_set(desktop->clock_viewport, desktop_clock_draw_callback, desktop);
     view_port_enabled_set(desktop->clock_viewport, false);
     gui_add_view_port(desktop->gui, desktop->clock_viewport, GuiLayerStatusBarRight);
+
+    // Clock Slim
+    desktop->clock_slim_viewport = view_port_alloc();
+    view_port_set_width(desktop->clock_slim_viewport, 25);
+    view_port_draw_callback_set(desktop->clock_slim_viewport, desktop_clock_draw_callback, desktop);
+    view_port_enabled_set(desktop->clock_slim_viewport, false);
+    gui_add_view_port(desktop->gui, desktop->clock_slim_viewport, GuiLayerStatusBarRightSlim);
 
     // Stealth mode icon
     desktop->stealth_mode_icon_viewport = view_port_alloc();
