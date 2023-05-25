@@ -73,6 +73,7 @@ struct Desktop {
     ViewPort* topbar_icon_slim_viewport;
     ViewPort* sdcard_icon_slim_viewport;
     ViewPort* bt_icon_slim_viewport;
+    ViewPort* clock_slim_viewport;
     ViewPort* stealth_mode_icon_slim_viewport;
 
     AnimationManager* animation_manager;
