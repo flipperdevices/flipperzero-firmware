@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - Updated: [Sub-GHz Remote Refactored (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) (SubGhz Fixes By Willy-JL)
 - [Fixed Desktop Clock to have Slim/Stock Viewports #648 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/648)
+- [Small fix for Desktop Clock Slim/Stock Viewports Logic #649 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/649)
 
 <a name="release">
 
