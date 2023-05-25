@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,39.2,,
+Version,+,41.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1380,6 +1380,7 @@ Function,+,furi_hal_subghz_stop_async_tx,void,
 Function,+,furi_hal_subghz_tx,_Bool,
 Function,+,furi_hal_subghz_write_packet,void,"const uint8_t*, uint8_t"
 Function,+,furi_hal_sw_digital_pin_is_rx_running,_Bool,
+Function,+,furi_hal_sw_digital_pin_is_sync_running,_Bool,
 Function,+,furi_hal_sw_digital_pin_is_tx_complete,_Bool,
 Function,+,furi_hal_sw_digital_pin_rx_deinit,void,
 Function,+,furi_hal_sw_digital_pin_rx_init,void,"FuriHalSwDigitalPinRxCallback, void*, uint16_t, uint32_t, size_t, const GpioPin*"
@@ -1388,7 +1389,7 @@ Function,+,furi_hal_sw_digital_pin_rx_stop,void,
 Function,+,furi_hal_sw_digital_pin_switch_rx_to_tx,void,
 Function,+,furi_hal_sw_digital_pin_switch_tx_to_rx,void,
 Function,+,furi_hal_sw_digital_pin_sync_deinit,void,
-Function,+,furi_hal_sw_digital_pin_sync_init,void,const GpioPin*
+Function,+,furi_hal_sw_digital_pin_sync_init,void,"const GpioPin*, _Bool"
 Function,+,furi_hal_sw_digital_pin_sync_start,void,
 Function,+,furi_hal_sw_digital_pin_sync_stop,void,
 Function,+,furi_hal_sw_digital_pin_tx_deinit,void,
@@ -2763,9 +2764,12 @@ Function,+,sw_usart_is_end_tx,_Bool,SwUsart*
 Function,-,sw_usart_print_data,void,SwUsart*
 Function,+,sw_usart_read,_Bool,"SwUsart*, uint8_t*, uint32_t"
 Function,+,sw_usart_read_line,void,"SwUsart*, FuriString*, uint32_t"
-Function,+,sw_usart_set_config,void,"SwUsart*, SwUsartMode, SwUsartWordLength, SwUsartParity, SwUsartStopBits, const GpioPin*"
+Function,+,sw_usart_set_config,void,"SwUsart*, SwUsartMode, SwUsartWordLength, SwUsartParity, SwUsartStopBits"
 Function,+,sw_usart_set_rx_buffer_size,void,"SwUsart*, size_t"
+Function,+,sw_usart_set_sync_config,void,"SwUsart*, const GpioPin*, _Bool"
 Function,+,sw_usart_start,void,"SwUsart*, uint32_t, const GpioPin*, const GpioPin*, _Bool"
+Function,+,sw_usart_sync_start,void,SwUsart*
+Function,+,sw_usart_sync_stop,void,SwUsart*
 Function,+,sw_usart_tx,void,"SwUsart*, uint8_t*, uint8_t, uint32_t"
 Function,-,system,int,const char*
 Function,+,t5577_write,void,LFRFIDT5577*

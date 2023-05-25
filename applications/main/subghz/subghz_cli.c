@@ -795,11 +795,13 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
     UNUSED(args);
 
     SwUsart* sw_usart = sw_usart_alloc();
-    sw_usart_set_config(sw_usart, SwUsartModeAsyncRxTxHalfDuplex, SwUsartDataBit8, SwUsartParityNone, SwUsartStopBit1, NULL);
+    sw_usart_set_config(sw_usart, SwUsartModeRxTxHalfDuplex, SwUsartDataBit8, SwUsartParityNone, SwUsartStopBit1);
+    sw_usart_set_sync_config(sw_usart,&gpio_ext_pc3, false);
     sw_usart_set_rx_buffer_size(sw_usart, 4096);
     sw_usart_start(sw_usart, 115200, &gpio_ext_pa4, &gpio_ext_pa4, false);
+    sw_usart_sync_start(sw_usart);
      uint8_t data[] =
-          "Hello World 1234567890 ABCDEFGHI JKLMNOPQR STUVWXYZ | Hello World 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ    ";
+          "Hello World 1234567890 ABCDEFGHI JKLMNOPQR STUVWXYZ | Hello World 1234567890 ABCDEFGHIJKLMNOPQRSTUVWXYZ\r\n";
     //uint8_t data1[] ={0x48, 0x65, 0x6c, 0x6c, 0x6f,0x48, 0x65, 0x6c, 0x6c, 0x6f,0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x00};
      uint8_t data1[] = {"Hello Woreeeeeeeeeld1\r\n"};
     uint8_t data2[] = {"12345 678902\r\n"};
@@ -821,8 +823,9 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
         // if(sw_usart_is_end_tx(sw_usart)) {
         //     break;
         // }
+        sw_usart_tx(sw_usart, data, sizeof(data), SW_USART_DEFAULT_TIMEOUT);
         sw_usart_print_data(sw_usart);
-        furi_delay_ms(100);
+        furi_delay_ms(500);
     }
     sw_usart_tx(sw_usart, data2, sizeof(data2), SW_USART_DEFAULT_TIMEOUT);
 

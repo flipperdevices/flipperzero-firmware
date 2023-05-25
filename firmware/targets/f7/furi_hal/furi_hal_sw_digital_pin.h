@@ -17,9 +17,10 @@ typedef uint32_t (*FuriHalSwDigitalPinTxCallbackYield)(void* context);
 typedef void (*FuriHalSwDigitalPinTxCallbackEnd)(void* context);
 typedef void (*FuriHalSwDigitalPinRxCallback)(void* context, SwDigitalPinRx data);
 
-void furi_hal_sw_digital_pin_sync_init(const GpioPin* gpio);
+void furi_hal_sw_digital_pin_sync_init(const GpioPin* gpio, bool inverse);
 void furi_hal_sw_digital_pin_sync_start(void);
 void furi_hal_sw_digital_pin_sync_stop(void);
+bool furi_hal_sw_digital_pin_is_sync_running(void);
 void furi_hal_sw_digital_pin_sync_deinit(void);
 
 void furi_hal_sw_digital_pin_tx_init(

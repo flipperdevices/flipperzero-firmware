@@ -11,17 +11,11 @@ typedef struct SwUsart SwUsart;
 #define SW_USART_DEFAULT_TIMEOUT 1000
 
 typedef enum {
-    SwUsartModeOnlyAsyncRx, // Only receive data asynchronously
-    SwUsartModeOnlySyncRx, // Only receive data synchronously
+    SwUsartModeOnlyRx, // Only receive data
+    SwUsartModeOnlyTx, // Only transmit data
+    SwUsartModeRxTx, // Receive and transmit data
+    SwUsartModeRxTxHalfDuplex, // Receive and transmit data in half-duplex mode
 
-    SwUsartModeOnlyAsyncTx, // Only transmit data asynchronously
-    SwUsartModeOnlySyncTx, // Only transmit data synchronously
-
-    SwUsartModeAsyncRxTx, // Receive and transmit data asynchronously
-    SwUsartModeSyncRxTx, // Receive and transmit data synchronously
-
-    SwUsartModeAsyncRxTxHalfDuplex, // Receive and transmit data asynchronously in half-duplex mode
-    SwUsartModeSyncRxTxHalfDuplex, // Receive and transmit data synchronously in half-duplex mode
 } SwUsartMode;
 
 typedef enum {
@@ -56,15 +50,13 @@ void sw_usart_set_config(
     SwUsartMode mode,
     SwUsartWordLength data_bit,
     SwUsartParity parity,
-    SwUsartStopBits stop_bit,
-    const GpioPin* sync_pin);
+    SwUsartStopBits stop_bit);
+void sw_usart_sync_start(SwUsart* sw_usart);
+void sw_usart_sync_stop(SwUsart* sw_usart);
+void sw_usart_set_sync_config(SwUsart* sw_usart, const GpioPin* gpio, bool inverse);
 void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len);
-void sw_usart_tx(
-    SwUsart* sw_usart,
-    uint8_t* data,
-    uint8_t len,
-    uint32_t timeout_ms);
-    
+void sw_usart_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len, uint32_t timeout_ms);
+
 bool sw_usart_is_end_tx(SwUsart* sw_usart);
 void sw_usart_print_data(SwUsart* sw_usart);
 

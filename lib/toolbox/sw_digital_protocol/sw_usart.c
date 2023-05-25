@@ -16,6 +16,7 @@ typedef struct {
     SwUsartParity parity;
     SwUsartStopBits stop_bit;
     bool inverted;
+    bool sync;
     const GpioPin* rx_pin;
     const GpioPin* tx_pin;
     const GpioPin* sync_pin;
@@ -39,12 +40,9 @@ struct SwUsart {
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buffer_parse_byte[24];
     uint8_t rx_buffer_parse_byte_pos;
-    uint32_t error_counter_not_found_start_bit;
 };
 
 static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
-    //furi_assert(sw_usart);
-
     uint8_t parity = 0;
     uint8_t ind = 0;
 
@@ -108,7 +106,7 @@ static void sw_usart_tx_end(void* context) {
     SwUsart* sw_usart = context;
     furi_assert(sw_usart);
     // callback end tx
-    if(sw_usart->config.mode == SwUsartModeAsyncRxTxHalfDuplex) {
+    if(sw_usart->config.mode == SwUsartModeRxTxHalfDuplex) {
         furi_hal_sw_digital_pin_switch_tx_to_rx();
     }
 }
@@ -245,14 +243,16 @@ static void sw_usart_rx_inverted(void* context, SwDigitalPinRx data) {
 SwUsart* sw_usart_alloc(void) {
     SwUsart* sw_usart = malloc(sizeof(SwUsart));
 
-    sw_usart->config.mode = SwUsartModeAsyncRxTx;
+    sw_usart->config.mode = SwUsartModeRxTx;
     sw_usart->config.baudrate = 115200;
     sw_usart->config.data_bit = SwUsartDataBit8;
     sw_usart->config.parity = SwUsartParityNone;
     sw_usart->config.stop_bit = SwUsartStopBit1;
     sw_usart->config.inverted = false;
+    sw_usart->config.sync = false;
     sw_usart->config.rx_pin = NULL;
     sw_usart->config.tx_pin = NULL;
+    sw_usart->config.sync_pin = NULL;
 
     sw_usart->tx_upload_char_len = 1 + sw_usart->config.data_bit + sw_usart->config.stop_bit;
     if(sw_usart->config.parity != SwUsartParityNone) {
@@ -269,8 +269,26 @@ SwUsart* sw_usart_alloc(void) {
 void sw_usart_free(SwUsart* sw_usart) {
     furi_assert(sw_usart);
 
-    furi_hal_sw_digital_pin_tx_deinit();
-    furi_hal_sw_digital_pin_rx_deinit();
+    if(sw_usart->config.sync) {
+        furi_hal_sw_digital_pin_sync_deinit();
+    }
+
+    switch(sw_usart->config.mode) {
+    case SwUsartModeOnlyTx:
+        furi_hal_sw_digital_pin_tx_deinit();
+        break;
+    case SwUsartModeOnlyRx:
+        furi_hal_sw_digital_pin_rx_deinit();
+        break;
+
+    case SwUsartModeRxTx:
+    case SwUsartModeRxTxHalfDuplex:
+        furi_hal_sw_digital_pin_tx_deinit();
+        furi_hal_sw_digital_pin_rx_deinit();
+        break;
+    default:
+        break;
+    }
 
     furi_stream_buffer_free(sw_usart->rx_stream);
     free(sw_usart->tx_upload_char);
@@ -289,23 +307,40 @@ void sw_usart_set_config(
     SwUsartMode mode,
     SwUsartWordLength data_bit,
     SwUsartParity parity,
-    SwUsartStopBits stop_bit,
-    const GpioPin* sync_pin) {
+    SwUsartStopBits stop_bit) {
     furi_assert(sw_usart);
     sw_usart->config.mode = mode;
     sw_usart->config.data_bit = data_bit;
     sw_usart->config.parity = parity;
     sw_usart->config.stop_bit = stop_bit;
-    sw_usart->config.sync_pin = sync_pin;
+}
+
+void sw_usart_set_sync_config(SwUsart* sw_usart, const GpioPin* gpio, bool inverse) {
+    furi_assert(sw_usart);
+    sw_usart->config.sync = true;
+    sw_usart->config.sync_pin = gpio;
+    furi_hal_sw_digital_pin_sync_init(gpio, inverse);
+}
+
+void sw_usart_sync_start(SwUsart* sw_usart) {
+    furi_assert(sw_usart);
+    furi_assert(sw_usart->config.sync);
+    furi_hal_sw_digital_pin_sync_start();
+}
+
+void sw_usart_sync_stop(SwUsart* sw_usart) {
+    furi_assert(sw_usart);
+    furi_assert(sw_usart->config.sync);
+    furi_hal_sw_digital_pin_sync_stop();
 }
 
 static uint16_t sw_usart_get_arr(uint32_t speed) {
     return (CPU_CLOCK_TIM / speed) - 1;
 }
 
-static void sw_uart_tx_init(SwUsart* sw_usart) {
+static void sw_usart_tx_init(SwUsart* sw_usart) {
     furi_assert(sw_usart);
-    furi_assert(sw_usart->config.tx_pin);
+    furi_check(sw_usart->config.tx_pin);
 
     furi_hal_gpio_write(sw_usart->config.tx_pin, (sw_usart->config.inverted ? false : true));
     furi_hal_sw_digital_pin_tx_init(
@@ -320,7 +355,7 @@ static void sw_uart_tx_init(SwUsart* sw_usart) {
 
 static void sw_usart_rx_init(SwUsart* sw_usart) {
     furi_assert(sw_usart);
-    furi_assert(sw_usart->config.rx_pin);
+    furi_check(sw_usart->config.rx_pin);
 
     if(!sw_usart->config.inverted) {
         furi_hal_sw_digital_pin_rx_init(
@@ -363,20 +398,18 @@ void sw_usart_start(
     }
 
     switch(sw_usart->config.mode) {
-    case SwUsartModeOnlyAsyncTx:
-        sw_uart_tx_init(sw_usart);
+    case SwUsartModeOnlyTx:
+        sw_usart_tx_init(sw_usart);
         break;
-
-    case SwUsartModeAsyncRxTx:
-        sw_uart_tx_init(sw_usart);
+    case SwUsartModeOnlyRx:
         sw_usart_rx_init(sw_usart);
         break;
 
-    case SwUsartModeAsyncRxTxHalfDuplex:
-        sw_uart_tx_init(sw_usart);
+    case SwUsartModeRxTx:
+    case SwUsartModeRxTxHalfDuplex:
+        sw_usart_tx_init(sw_usart);
         sw_usart_rx_init(sw_usart);
         break;
-
     default:
         break;
     }
@@ -396,7 +429,7 @@ void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len) {
     sw_usart_tx_char_encoder(sw_usart);
 
     //furi_hal_sw_digital_pin_rx_start();
-    if(sw_usart->config.mode == SwUsartModeAsyncRxTxHalfDuplex) {
+    if(sw_usart->config.mode == SwUsartModeRxTxHalfDuplex) {
         furi_hal_sw_digital_pin_switch_rx_to_tx();
     } else {
         furi_hal_sw_digital_pin_tx_start();
@@ -438,11 +471,6 @@ void sw_usart_print_data(SwUsart* sw_usart) {
     }
     //printf("\r\n");
 }
-
-// void sw_usart_start_rx(SwUsart* sw_usart) {
-//     furi_assert(sw_usart);
-//     furi_hal_sw_digital_pin_rx_start();
-// }
 
 size_t sw_usart_available(SwUsart* sw_usart) {
     furi_assert(sw_usart);
