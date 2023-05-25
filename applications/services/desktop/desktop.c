@@ -177,12 +177,12 @@ static void desktop_toggle_clock_view(Desktop* desktop, bool is_enabled) {
 
     switch(desktop->settings.icon_style) {
     case ICON_STYLE_SLIM:
-        view_port_enabled_set(desktop->clock_viewport, is_enabled);
-        view_port_enabled_set(desktop->clock_slim_viewport, false);
+        view_port_enabled_set(desktop->clock_slim_viewport, is_enabled);
+        view_port_enabled_set(desktop->clock_viewport, false);
         break;
     case ICON_STYLE_STOCK:
-        view_port_enabled_set(desktop->clock_viewport, false);
-        view_port_enabled_set(desktop->clock_slim_viewport, is_enabled);
+        view_port_enabled_set(desktop->clock_slim_viewport, false);
+        view_port_enabled_set(desktop->clock_viewport, is_enabled);
         break;
     }
 }
