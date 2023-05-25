@@ -426,7 +426,7 @@ FS_Error storage_common_rename(Storage* storage, const char* old_path, const cha
 
     do {
         if(!storage_common_exists(storage, old_path)) {
-            error = FSE_NOT_EXIST;
+            error = FSE_INVALID_NAME;
             break;
         }
 
