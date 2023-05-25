@@ -5,7 +5,8 @@
 #include <dialogs/dialogs.h>
 #include <fap_loader/fap_loader_app.h>
 
-#define FAP_LOADER_APP_FAVORITE_INDEX (FLIPPER_APPS_COUNT + 1)
+#define EXTERNAL_APPLICATION_NAME ("[External Application]")
+#define EXTERNAL_APPLICATION_INDEX (FLIPPER_APPS_COUNT + 1)
 
 static bool favorite_fap_selector_item_callback(
     FuriString* file_path,
@@ -67,12 +68,12 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
 #ifdef APP_FAP_LOADER
     submenu_add_item(
         submenu,
-        FAP_LOADER_APP_DISPLAY_NAME,
-        FAP_LOADER_APP_FAVORITE_INDEX,
+        EXTERNAL_APPLICATION_NAME,
+        EXTERNAL_APPLICATION_INDEX,
         desktop_settings_scene_favorite_submenu_callback,
         app);
     if(curr_favorite_app->is_external) {
-        pre_select_item = FAP_LOADER_APP_FAVORITE_INDEX;
+        pre_select_item = EXTERNAL_APPLICATION_INDEX;
     }
 #endif
 
@@ -94,7 +95,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                                                         &app->settings.favorite_secondary;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == FAP_LOADER_APP_FAVORITE_INDEX) {
+        if(event.event == EXTERNAL_APPLICATION_INDEX) {
             const DialogsFileBrowserOptions browser_options = {
                 .extension = ".fap",
                 .icon = &I_unknown_10px,
