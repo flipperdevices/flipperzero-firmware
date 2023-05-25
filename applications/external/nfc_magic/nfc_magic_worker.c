@@ -223,13 +223,13 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                             size_t data_offset = i * 4;
                             FURI_LOG_D(
                                 TAG,
-                                "Writing page %u (%u/%u)",
+                                "Writing page %zu (%zu/%u)",
                                 i,
                                 data_offset,
                                 mf_ul_data->data_read);
                             uint8_t* block = mf_ul_data->data + data_offset;
                             if(!magic_gen4_write_blk(password, i, block)) {
-                                FURI_LOG_E(TAG, "Failed to write %u page", i);
+                                FURI_LOG_E(TAG, "Failed to write %zu page", i);
                                 nfc_magic_worker->callback(
                                     NfcMagicWorkerEventFail, nfc_magic_worker->context);
                                 done = true;
@@ -377,7 +377,7 @@ void nfc_magic_worker_rekey(NfcMagicWorker* nfc_magic_worker) {
             break;
         }
 
-        if(card_found_notified) {
+        if(card_found_notified) { //-V547
             nfc_magic_worker->callback(
                 NfcMagicWorkerEventNoCardDetected, nfc_magic_worker->context);
             card_found_notified = false;
