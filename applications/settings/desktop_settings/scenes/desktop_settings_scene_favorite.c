@@ -5,6 +5,8 @@
 #include <dialogs/dialogs.h>
 #include <fap_loader/fap_loader_app.h>
 
+#define FAP_LOADER_APP_FAVORITE_INDEX (FLIPPER_APPS_COUNT + 1)
+
 static bool favorite_fap_selector_item_callback(
     FuriString* file_path,
     void* context,
@@ -56,9 +58,8 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
             app);
 
         // Select favorite item in submenu
-        if((curr_favorite_app->is_external &&
-            !strcmp(FLIPPER_APPS[i].name, FAP_LOADER_APP_NAME)) ||
-           (!strcmp(FLIPPER_APPS[i].name, curr_favorite_app->name_or_path))) {
+        if(!curr_favorite_app->is_external &&
+           !strcmp(FLIPPER_APPS[i].name, curr_favorite_app->name_or_path)) {
             pre_select_item = i;
         }
     }
@@ -70,8 +71,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         FAP_LOADER_APP_FAVORITE_INDEX,
         desktop_settings_scene_favorite_submenu_callback,
         app);
-    if(!curr_favorite_app->is_external &&
-       !strcmp(curr_favorite_app->name_or_path, FAP_LOADER_APP_NAME)) {
+    if(curr_favorite_app->is_external) {
         pre_select_item = FAP_LOADER_APP_FAVORITE_INDEX;
     }
 #endif
@@ -95,13 +95,6 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == FAP_LOADER_APP_FAVORITE_INDEX) {
-            curr_favorite_app->is_external = false;
-            strncpy(curr_favorite_app->name_or_path, FAP_LOADER_APP_NAME, MAX_APP_LENGTH);
-        } else if(strcmp(FLIPPER_APPS[event.event].name, FAP_LOADER_APP_NAME) != 0) {
-            curr_favorite_app->is_external = false;
-            strncpy(
-                curr_favorite_app->name_or_path, FLIPPER_APPS[event.event].name, MAX_APP_LENGTH);
-        } else {
             const DialogsFileBrowserOptions browser_options = {
                 .extension = ".fap",
                 .icon = &I_unknown_10px,
@@ -125,6 +118,10 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                     furi_string_get_cstr(temp_path),
                     MAX_APP_LENGTH);
             }
+        } else {
+            curr_favorite_app->is_external = false;
+            strncpy(
+                curr_favorite_app->name_or_path, FLIPPER_APPS[event.event].name, MAX_APP_LENGTH);
         }
         scene_manager_previous_scene(app->scene_manager);
         consumed = true;

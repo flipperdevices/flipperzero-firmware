@@ -37,8 +37,7 @@
 #define MAX_APP_LENGTH 128
 
 #define FAP_LOADER_APP_NAME "Applications"
-#define FAP_LOADER_APP_DISPLAY_NAME (FAP_LOADER_APP_NAME " Browser")
-#define FAP_LOADER_APP_FAVORITE_INDEX FLIPPER_APPS_COUNT
+#define FAP_LOADER_APP_DISPLAY_NAME ("[External Application]")
 
 typedef struct {
     InputKey data[MAX_PIN_SIZE];
