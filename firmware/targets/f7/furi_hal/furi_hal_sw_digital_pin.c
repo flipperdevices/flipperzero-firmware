@@ -520,7 +520,8 @@ void furi_hal_sw_digital_pin_rx_init(
     furi_hal_sw_digital_pin_buff.rx->callback = callback;
     furi_hal_sw_digital_pin_buff.rx->context = context;
 
-    furi_hal_sw_digital_pin_buff.rx->tim_arr_reset = tim_arr;
+    // EXTI delay compensation
+    furi_hal_sw_digital_pin_buff.rx->tim_arr_reset = 18 / (tim_psc + 1);
 
 #ifdef FURI_HAL_SW_DIGITAL_DEBUG_PIN_RX
     furi_hal_gpio_init(gpio_debug_rx, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -543,7 +544,7 @@ void furi_hal_sw_digital_pin_rx_init(
     TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
     TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
     TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
-    TIM_OC_InitStruct.CompareValue = (tim_arr / 2);
+    TIM_OC_InitStruct.CompareValue = (tim_arr / 2) - 1;
     TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
     TIM_OC_InitStruct.OCNPolarity = LL_TIM_OCPOLARITY_HIGH;
     TIM_OC_InitStruct.OCIdleState = LL_TIM_OCIDLESTATE_LOW;
@@ -584,7 +585,7 @@ void furi_hal_sw_digital_pin_rx_init(
     // Config DMA Sync timer
 
     /* We need the EXTI to be configured as interrupt generating line, but no ISR registered */
-    furi_hal_gpio_init(gpio, GpioModeInterruptFall, GpioPullUp, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(gpio, GpioModeInterruptRiseFall, GpioPullUp, GpioSpeedVeryHigh);
 
     /* Set DMAMUX request generation signal ID on specified DMAMUX channel */
     LL_DMAMUX_SetRequestSignalID(DMAMUX1, LL_DMAMUX_REQ_GEN_0, GET_DMAMUX_EXTI_LINE(gpio->pin));

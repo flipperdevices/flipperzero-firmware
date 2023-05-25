@@ -37,8 +37,9 @@ struct SwUsart {
     uint32_t tx_pin_reset;
 
     FuriStreamBuffer* rx_stream;
-    uint8_t rx_buffer_parse_byte[12];
-    uint8_t rx_buffer_parce_byte_pos;
+    uint8_t rx_buffer_parse_byte[24];
+    uint8_t rx_buffer_parse_byte_pos;
+    uint32_t error_counter_not_found_start_bit;
 };
 
 static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
@@ -112,40 +113,46 @@ static void sw_usart_tx_end(void* context) {
     }
 }
 
-static inline void sw_usart_parse_byte(SwUsart* sw_usart) {
+static inline void sw_usart_parse_byte(SwUsart* sw_usart, uint8_t base) {
     furi_assert(sw_usart);
     uint8_t parity = 0;
     uint8_t byte = 0;
-    uint8_t* ptr_buf = sw_usart->rx_buffer_parse_byte;
+    uint8_t* ptr_buf = sw_usart->rx_buffer_parse_byte + base;
 
     //Data
-    for(uint8_t i = 0; i < sw_usart->config.data_bit; i++) {
-        if(*(++ptr_buf)) {
+    uint8_t i = 0;
+    do {
+        ptr_buf += 2;
+        if(*(ptr_buf)) {
             byte |= 1 << i;
             parity++;
         }
-    }
+    } while(++i < sw_usart->config.data_bit);
 
     do {
         // Check parity
         if(sw_usart->config.parity != SwUsartParityNone) {
             if(sw_usart->config.parity == SwUsartParityEven) {
-                if((parity & 0x1) != *(++ptr_buf)) {
+                ptr_buf += 2;
+                if((parity & 0x1) != *ptr_buf) {
                     break;
                 }
             } else {
-                if((parity & 0x1) == *(++ptr_buf)) {
+                ptr_buf += 2;
+                if((parity & 0x1) == *ptr_buf) {
                     break;
                 }
             }
         }
 
         // Check stop bits
-        if(!(*(++ptr_buf))) {
+        ptr_buf += 2;
+        if(!(*ptr_buf)) {
             break;
         }
         if(sw_usart->config.stop_bit == SwUsartStopBit2) {
-            if(!(*(++ptr_buf))) {
+            ptr_buf += 2;
+            if(!(*ptr_buf)) {
                 break;
             }
         }
@@ -162,22 +169,34 @@ static void sw_usart_rx(void* context, SwDigitalPinRx data) {
     uint32_t mask = sw_usart->config.rx_pin->pin;
 
     do {
-        if(sw_usart->rx_buffer_parce_byte_pos == 0) {
+        if(sw_usart->rx_buffer_parse_byte_pos == 0) {
             //Found start bit
             if((data.rx_buff[ind++] & mask)) {
                 continue;
             } else {
-                //sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parce_byte_pos++] = 0;
-                sw_usart->rx_buffer_parce_byte_pos++;
+                //sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parse_byte_pos++] = 0;
+                sw_usart->rx_buffer_parse_byte_pos++;
             }
         }
+
         if(ind < data.rx_buff_size) {
-            sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parce_byte_pos++] =
+            sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parse_byte_pos++] =
                 (data.rx_buff[ind++] & mask ? 1 : 0);
-            if(sw_usart->rx_buffer_parce_byte_pos == sw_usart->tx_upload_char_len) {
+            if(sw_usart->rx_buffer_parse_byte_pos == sw_usart->tx_upload_char_len * 2) {
                 //if there is the required number of bits, parse the data
-                sw_usart->rx_buffer_parce_byte_pos = 0;
-                sw_usart_parse_byte(sw_usart);
+                uint8_t i = 0;
+                do {
+                    if(sw_usart->rx_buffer_parse_byte[i] == 1) {
+                        i &= 0x01;
+                        if(i)
+                            sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parse_byte_pos++] =
+                                (data.rx_buff[ind++] & mask ? 1 : 0);
+                        break;
+                    }
+                    i++;
+                } while(ind < sw_usart->rx_buffer_parse_byte_pos);
+                sw_usart->rx_buffer_parse_byte_pos = 0;
+                sw_usart_parse_byte(sw_usart, i);
             }
         }
     } while(ind < data.rx_buff_size);
@@ -190,22 +209,34 @@ static void sw_usart_rx_inverted(void* context, SwDigitalPinRx data) {
     uint32_t mask = sw_usart->config.rx_pin->pin;
 
     do {
-        if(sw_usart->rx_buffer_parce_byte_pos == 0) {
+        if(sw_usart->rx_buffer_parse_byte_pos == 0) {
             //Found start bit
             if(!(data.rx_buff[ind++] & mask)) {
                 continue;
             } else {
-                //sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parce_byte_pos++] = 0;
-                sw_usart->rx_buffer_parce_byte_pos++;
+                //sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parse_byte_pos++] = 0;
+                sw_usart->rx_buffer_parse_byte_pos++;
             }
         }
+
         if(ind < data.rx_buff_size) {
-            sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parce_byte_pos++] =
+            sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parse_byte_pos++] =
                 (data.rx_buff[ind++] & mask ? 0 : 1);
-            if(sw_usart->rx_buffer_parce_byte_pos == sw_usart->tx_upload_char_len) {
+            if(sw_usart->rx_buffer_parse_byte_pos == sw_usart->tx_upload_char_len * 2) {
                 //if there is the required number of bits, parse the data
-                sw_usart->rx_buffer_parce_byte_pos = 0;
-                sw_usart_parse_byte(sw_usart);
+                uint8_t i = 0;
+                do {
+                    if(sw_usart->rx_buffer_parse_byte[i] == 1) {
+                        i &= 0x01;
+                        if(i)
+                            sw_usart->rx_buffer_parse_byte[sw_usart->rx_buffer_parse_byte_pos++] =
+                                (data.rx_buff[ind++] & mask ? 0 : 1);
+                        break;
+                    }
+                    i++;
+                } while(ind < sw_usart->rx_buffer_parse_byte_pos);
+                sw_usart->rx_buffer_parse_byte_pos = 0;
+                sw_usart_parse_byte(sw_usart, i);
             }
         }
     } while(ind < data.rx_buff_size);
@@ -271,6 +302,46 @@ void sw_usart_set_config(
 static uint16_t sw_usart_get_arr(uint32_t speed) {
     return (CPU_CLOCK_TIM / speed) - 1;
 }
+
+static void sw_uart_tx_init(SwUsart* sw_usart) {
+    furi_assert(sw_usart);
+    furi_assert(sw_usart->config.tx_pin);
+
+    furi_hal_gpio_write(sw_usart->config.tx_pin, (sw_usart->config.inverted ? false : true));
+    furi_hal_sw_digital_pin_tx_init(
+        sw_usart_tx_encoder_yield,
+        sw_usart_tx_end,
+        sw_usart,
+        0,
+        sw_usart_get_arr(sw_usart->config.baudrate),
+        sw_usart->tx_upload_char_len * 8,
+        sw_usart->config.tx_pin);
+}
+
+static void sw_usart_rx_init(SwUsart* sw_usart) {
+    furi_assert(sw_usart);
+    furi_assert(sw_usart->config.rx_pin);
+
+    if(!sw_usart->config.inverted) {
+        furi_hal_sw_digital_pin_rx_init(
+            sw_usart_rx,
+            sw_usart,
+            0,
+            sw_usart_get_arr(sw_usart->config.baudrate) / 2, // oversampling x2
+            512,
+            sw_usart->config.rx_pin);
+    } else {
+        furi_hal_sw_digital_pin_rx_init(
+            sw_usart_rx_inverted,
+            sw_usart,
+            0,
+            sw_usart_get_arr(sw_usart->config.baudrate) / 2, // oversampling x2
+            512,
+            sw_usart->config.rx_pin);
+    }
+    furi_hal_sw_digital_pin_rx_start();
+}
+
 void sw_usart_start(
     SwUsart* sw_usart,
     uint32_t baudrate,
@@ -293,89 +364,17 @@ void sw_usart_start(
 
     switch(sw_usart->config.mode) {
     case SwUsartModeOnlyAsyncTx:
-        furi_assert(sw_usart->config.tx_pin);
-
-        furi_hal_gpio_write(sw_usart->config.tx_pin, (sw_usart->config.inverted ? false : true));
-        furi_hal_sw_digital_pin_tx_init(
-            sw_usart_tx_encoder_yield,
-            sw_usart_tx_end,
-            sw_usart,
-            0,
-            sw_usart_get_arr(sw_usart->config.baudrate),
-            sw_usart->tx_upload_char_len * 8,
-            sw_usart->config.tx_pin);
-
+        sw_uart_tx_init(sw_usart);
         break;
+
     case SwUsartModeAsyncRxTx:
-        furi_assert(sw_usart->config.tx_pin);
-        furi_assert(sw_usart->config.rx_pin);
-
-        furi_hal_gpio_write(sw_usart->config.tx_pin, (sw_usart->config.inverted ? false : true));
-
-        furi_hal_sw_digital_pin_tx_init(
-            sw_usart_tx_encoder_yield,
-            sw_usart_tx_end,
-            sw_usart,
-            0,
-            sw_usart_get_arr(sw_usart->config.baudrate),
-            sw_usart->tx_upload_char_len * 8,
-            sw_usart->config.tx_pin);
-
-        if(!sw_usart->config.inverted) {
-            furi_hal_sw_digital_pin_rx_init(
-                sw_usart_rx,
-                sw_usart,
-                0,
-                sw_usart_get_arr(sw_usart->config.baudrate),
-                256,
-                sw_usart->config.rx_pin);
-        } else {
-            furi_hal_sw_digital_pin_rx_init(
-                sw_usart_rx_inverted,
-                sw_usart,
-                0,
-                sw_usart_get_arr(sw_usart->config.baudrate),
-                256,
-                sw_usart->config.rx_pin);
-        }
-        furi_hal_sw_digital_pin_rx_start();
+        sw_uart_tx_init(sw_usart);
+        sw_usart_rx_init(sw_usart);
         break;
-    
+
     case SwUsartModeAsyncRxTxHalfDuplex:
-        furi_assert(sw_usart->config.tx_pin);
-        furi_assert(sw_usart->config.rx_pin);
-
-        furi_hal_gpio_write(sw_usart->config.tx_pin, (sw_usart->config.inverted ? false : true));
-
-        furi_hal_sw_digital_pin_tx_init(
-            sw_usart_tx_encoder_yield,
-            sw_usart_tx_end,
-            sw_usart,
-            0,
-            sw_usart_get_arr(sw_usart->config.baudrate),
-            sw_usart->tx_upload_char_len * 8,
-            sw_usart->config.tx_pin);
-
-        if(!sw_usart->config.inverted) {
-            furi_hal_sw_digital_pin_rx_init(
-                sw_usart_rx,
-                sw_usart,
-                0,
-                sw_usart_get_arr(sw_usart->config.baudrate),
-                256,
-                sw_usart->config.rx_pin);
-        } else {
-            furi_hal_sw_digital_pin_rx_init(
-                sw_usart_rx_inverted,
-                sw_usart,
-                0,
-                sw_usart_get_arr(sw_usart->config.baudrate),
-                256,
-                sw_usart->config.rx_pin);
-        }
-        furi_hal_sw_digital_pin_rx_start();
-
-        //furi_hal_sw_digital_pin_switch_tx_to_rx();
+        sw_uart_tx_init(sw_usart);
+        sw_usart_rx_init(sw_usart);
         break;
 
     default:
@@ -402,7 +401,6 @@ void sw_usart_dma_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len) {
     } else {
         furi_hal_sw_digital_pin_tx_start();
     }
-    
 }
 
 void sw_usart_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len, uint32_t timeout_ms) {
