@@ -111,20 +111,24 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                 furi_string_set_str(temp_path, curr_favorite_app->name_or_path);
             }
 
-            submenu_reset(app->submenu);
             if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
+                submenu_reset(app->submenu); // Prevent menu from being shown when we exiting scene
                 curr_favorite_app->is_external = true;
                 strncpy(
                     curr_favorite_app->name_or_path,
                     furi_string_get_cstr(temp_path),
                     MAX_APP_LENGTH);
+                consumed = true;
             }
         } else {
             curr_favorite_app->is_external = false;
             strncpy(
                 curr_favorite_app->name_or_path, FLIPPER_APPS[event.event].name, MAX_APP_LENGTH);
+            consumed = true;
         }
-        scene_manager_previous_scene(app->scene_manager);
+        if(consumed) {
+            scene_manager_previous_scene(app->scene_manager);
+        };
         consumed = true;
     }
 
