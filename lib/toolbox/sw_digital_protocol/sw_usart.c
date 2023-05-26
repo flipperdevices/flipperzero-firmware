@@ -40,6 +40,9 @@ struct SwUsart {
     FuriStreamBuffer* rx_stream;
     uint8_t rx_buffer_parse_byte[24];
     uint8_t rx_buffer_parse_byte_pos;
+
+    SwUsartTxCallbackEnd tx_callback_end;
+    void* tx_context_end;
 };
 
 static void sw_usart_tx_char_encoder(SwUsart* sw_usart) {
@@ -105,9 +108,13 @@ static uint32_t sw_usart_tx_encoder_yield(void* context) {
 static void sw_usart_tx_end(void* context) {
     SwUsart* sw_usart = context;
     furi_assert(sw_usart);
-    // callback end tx
+
     if(sw_usart->config.mode == SwUsartModeRxTxHalfDuplex) {
         furi_hal_sw_digital_pin_switch_tx_to_rx();
+    }
+
+    if(sw_usart->tx_callback_end) {
+        sw_usart->tx_callback_end(sw_usart->tx_context_end);
     }
 }
 
@@ -295,6 +302,12 @@ void sw_usart_free(SwUsart* sw_usart) {
     free(sw_usart);
 }
 
+void sw_uasart_set_tx_callback(SwUsart* sw_usart, SwUsartTxCallbackEnd callback, void* context) {
+    furi_assert(sw_usart);
+    sw_usart->tx_callback_end = callback;
+    sw_usart->tx_context_end = context;
+}
+
 void sw_usart_set_rx_buffer_size(SwUsart* sw_usart, size_t size) {
     furi_assert(sw_usart);
     furi_assert(size);
@@ -451,25 +464,20 @@ void sw_usart_tx(SwUsart* sw_usart, uint8_t* data, uint8_t len, uint32_t timeout
     }
 }
 
-//add callback end tx ля внешних
-
 bool sw_usart_is_end_tx(SwUsart* sw_usart) {
     furi_assert(sw_usart);
     UNUSED(sw_usart);
     return furi_hal_sw_digital_pin_is_tx_complete();
 }
 
-void sw_usart_print_data(SwUsart* sw_usart) {
-    //furi_hal_sw_digital_pin_rx_stop();
+void sw_usart_print_debug_data(SwUsart* sw_usart) {
+    furi_assert(sw_usart);
     if(!furi_stream_buffer_bytes_available(sw_usart->rx_stream)) return;
-
-    //printf("pos byte = %d\r\n", furi_stream_buffer_bytes_available(sw_usart->rx_stream));
     uint8_t data = 0;
     while(furi_stream_buffer_bytes_available(sw_usart->rx_stream)) {
         furi_stream_buffer_receive(sw_usart->rx_stream, &data, sizeof(data), 10);
         printf("%c", data);
     }
-    //printf("\r\n");
 }
 
 size_t sw_usart_available(SwUsart* sw_usart) {

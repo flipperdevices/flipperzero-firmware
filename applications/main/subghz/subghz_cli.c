@@ -824,12 +824,12 @@ static void subghz_cli_command_usart(Cli* cli, FuriString* args) {
         //     break;
         // }
         sw_usart_tx(sw_usart, data, sizeof(data), SW_USART_DEFAULT_TIMEOUT);
-        sw_usart_print_data(sw_usart);
+        sw_usart_print_debug_data(sw_usart);
         furi_delay_ms(500);
     }
     sw_usart_tx(sw_usart, data2, sizeof(data2), SW_USART_DEFAULT_TIMEOUT);
 
-    sw_usart_print_data(sw_usart);
+    sw_usart_print_debug_data(sw_usart);
     sw_usart_free(sw_usart);
     printf("End Usart\r\n");
 }
