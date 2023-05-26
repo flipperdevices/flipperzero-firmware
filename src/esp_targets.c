@@ -133,7 +133,7 @@ static const esp_target_t esp_target[ESP_MAX_CHIP] = {
             .miso_dlen = ESP32xx_SPI_REG_BASE + 0x28,
         },
         .efuse_base = 0x60008800,
-        .chip_magic_value = { 0x6f51306f, 0 },
+        .chip_magic_value = { 0x6f51306f, 0x7c41a06f },
         .read_spi_config = spi_config_esp32xx,
     },
     // ESP32H4
