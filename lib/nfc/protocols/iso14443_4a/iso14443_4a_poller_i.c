@@ -15,6 +15,9 @@ Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance) {
 }
 
 Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance) {
+    furi_assert(instance);
+    furi_assert(instance->iso14443_3a_poller);
+
     Iso14443_4aError ret = Iso14443_4aErrorProtocol;
 
     do {
@@ -49,6 +52,29 @@ Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance) 
 
         ret = Iso14443_4aErrorNone;
     } while(false);
+
+    return ret;
+}
+
+Iso14443_4aError iso14443_4a_poller_send_frame(
+    Iso14443_4aPoller* instance,
+    uint8_t* tx_data,
+    uint16_t tx_bits,
+    uint8_t* rx_data,
+    uint16_t rx_data_size,
+    uint16_t* rx_bits,
+    uint32_t fwt) {
+    furi_assert(instance);
+    furi_assert(instance->iso14443_3a_poller);
+    furi_assert(tx_data);
+    furi_assert(rx_data);
+    furi_assert(rx_bits);
+    furi_assert(tx_bits >= 8);
+
+    *rx_bits = rx_data_size * 8;
+    UNUSED(fwt);
+
+    Iso14443_4aError ret = Iso14443_4aErrorNone;
 
     return ret;
 }

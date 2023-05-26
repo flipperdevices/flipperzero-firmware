@@ -36,7 +36,7 @@ struct MfDesfirePoller {
     void* context;
 };
 
-MfDesfireError mf_desfire_process_error(NfcaError error);
+MfDesfireError mf_desfire_process_error(Iso14443_4aError error);
 
 MfDesfireError
     mf_desfire_poller_async_read_version(MfDesfirePoller* instance, MfDesfireVersion* data);

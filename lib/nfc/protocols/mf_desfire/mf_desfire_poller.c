@@ -50,7 +50,7 @@ static MfDesfirePollerCommand mf_desfire_poller_handler_read_version(MfDesfirePo
         FURI_LOG_D(TAG, "Read version success");
         instance->state = MfDesfirePollerStateReadSuccess;
     } else {
-        FURI_LOG_D(TAG, "Failed to read version");
+        FURI_LOG_E(TAG, "Failed to read version");
         iso14443_4a_poller_halt(instance->iso14443_4a_poller);
         instance->state = MfDesfirePollerStateReadFailed;
     }
@@ -83,7 +83,8 @@ static const MfDesfirePollerReadHandler mf_desfire_poller_read_handler[MfDesfire
     [MfDesfirePollerStateReadSuccess] = mf_desfire_poller_handler_read_success,
 };
 
-static Iso14443_4aPollerCommand mf_desfire_poller_read_callback(Iso14443_4aPollerEvent event, void* context) {
+static Iso14443_4aPollerCommand
+    mf_desfire_poller_read_callback(Iso14443_4aPollerEvent event, void* context) {
     furi_assert(context);
 
     MfDesfirePoller* instance = context;

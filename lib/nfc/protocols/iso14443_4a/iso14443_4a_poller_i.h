@@ -32,6 +32,7 @@ struct Iso14443_4aPoller {
     NfcaPoller* iso14443_3a_poller;
     Iso14443_4aPollerState state;
     Iso14443_4aPollerSessionState session_state;
+    NfcPollerBuffer* buffer;
     Iso14443_4aData* data;
     Iso14443_4aPollerProtocolData protocol_data;
     Iso14443_4aPollerCallback callback;
@@ -42,6 +43,15 @@ struct Iso14443_4aPoller {
 Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance);
 
 Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance);
+
+Iso14443_4aError iso14443_4a_poller_send_frame(
+    Iso14443_4aPoller* instance,
+    uint8_t* tx_data,
+    uint16_t tx_bits,
+    uint8_t* rx_data,
+    uint16_t rx_data_size,
+    uint16_t* rx_bits,
+    uint32_t fwt);
 
 #ifdef __cplusplus
 }
