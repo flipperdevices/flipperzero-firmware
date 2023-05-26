@@ -6,9 +6,13 @@
 
 typedef struct {
     IconAnimation* barry;
-    IconAnimation* scientist_left;
-    IconAnimation* scientist_right;
+    const Icon* barry_infill;
+    const Icon* scientist_left;
+    const Icon* scientist_left_infill;
+    const Icon* scientist_right;
+    const Icon* scientist_right_infill;
     IconAnimation* missile;
+    const Icon* missile_infill;
     const Icon* bg[3];
     POINT bg_pos[3];
 } GameSprites;

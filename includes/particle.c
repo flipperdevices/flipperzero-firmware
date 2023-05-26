@@ -48,6 +48,7 @@ void spawn_random_particles(PARTICLE* const particles, BARRY* const barry) {
 }
 
 void draw_particles(const PARTICLE* particles, Canvas* const canvas) {
+    canvas_set_color(canvas, ColorBlack);
     for(int i = 0; i < PARTICLES_MAX; i++) {
         if(particles[i].point.y > 0) {
             canvas_draw_line(

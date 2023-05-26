@@ -47,8 +47,13 @@ void spawn_random_missile(MISSILE* const missiles) {
 void draw_missiles(const MISSILE* missiles, Canvas* const canvas, const GameSprites* sprites) {
     for(int i = 0; i < MISSILES_MAX; ++i) {
         if(missiles[i].point.x > 0) {
+            canvas_set_color(canvas, ColorBlack);
             canvas_draw_icon_animation(
                 canvas, missiles[i].point.x, missiles[i].point.y, sprites->missile);
+
+            canvas_set_color(canvas, ColorWhite);
+            canvas_draw_icon(
+                canvas, missiles[i].point.x, missiles[i].point.y, sprites->missile_infill);
         }
     }
 }

@@ -24,5 +24,9 @@ void barry_tick(BARRY* const barry) {
 }
 
 void draw_barry(const BARRY* barry, Canvas* const canvas, const GameSprites* sprites) {
+    canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon_animation(canvas, barry->point.x, barry->point.y, sprites->barry);
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_icon(canvas, barry->point.x, barry->point.y, sprites->barry_infill);
 }

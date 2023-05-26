@@ -43,6 +43,7 @@ void spawn_random_coin(COIN* const coins) {
 }
 
 void draw_coins(const COIN* coins, Canvas* const canvas) {
+    canvas_set_color(canvas, ColorBlack);
     for(int i = 0; i < COINS_MAX; ++i) {
         if(coins[i].point.x > 0) {
             canvas_draw_icon(canvas, coins[i].point.x, coins[i].point.y, &I_coin);

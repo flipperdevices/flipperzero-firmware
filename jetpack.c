@@ -37,9 +37,15 @@ static void jetpack_game_state_init(GameState* const game_state) {
 
     GameSprites sprites;
     sprites.barry = icon_animation_alloc(&A_barry);
-    sprites.scientist_left = icon_animation_alloc(&A_scientist_left);
-    sprites.scientist_right = icon_animation_alloc(&A_scientist_right);
+    sprites.barry_infill = &I_barry_infill;
+
+    sprites.scientist_left = (&I_scientist_left);
+    sprites.scientist_left_infill = (&I_scientist_left_infill);
+    sprites.scientist_right = (&I_scientist_right);
+    sprites.scientist_right_infill = (&I_scientist_right_infill);
+
     sprites.missile = icon_animation_alloc(&A_missile);
+    sprites.missile_infill = &I_missile_infill;
 
     sprites.bg[0] = &I_bg1;
     sprites.bg[1] = &I_bg2;
@@ -50,8 +56,6 @@ static void jetpack_game_state_init(GameState* const game_state) {
         sprites.bg_pos[i].y = 0;
     }
 
-    icon_animation_start(sprites.scientist_left);
-    icon_animation_start(sprites.scientist_right);
     icon_animation_start(sprites.barry);
     icon_animation_start(sprites.missile);
 
@@ -68,8 +72,6 @@ static void jetpack_game_state_init(GameState* const game_state) {
 
 static void jetpack_game_state_free(GameState* const game_state) {
     icon_animation_free(game_state->sprites.barry);
-    icon_animation_free(game_state->sprites.scientist_left);
-    icon_animation_free(game_state->sprites.scientist_right);
     icon_animation_free(game_state->sprites.missile);
 
     free(game_state);
@@ -113,7 +115,6 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
 
     if(game_state->state == GameStateLife) {
         // canvas_draw_box(canvas, 0, 0, 128, 32);
-        // canvas_set_color(canvas, ColorXOR);
 
         for(int i = 0; i < 3; ++i) {
             // Check if the image is within the screen's boundaries
@@ -132,6 +133,7 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
 
         draw_barry(&game_state->barry, canvas, &game_state->sprites);
 
+        canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
         snprintf(buffer, sizeof(buffer), "Dist: %u", game_state->distance);
