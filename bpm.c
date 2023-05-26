@@ -3,7 +3,7 @@
 #include <dialogs/dialogs.h>
 #include <gui/gui.h>
 #include <input/input.h>
-#include <m-string.h>
+#include <core/string.h>
 #include <stdlib.h>
 #include "bpm_tapper_icons.h"
 
@@ -130,7 +130,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 }
 
 static void render_callback(Canvas* const canvas, void* ctx) {
-    string_t tempStr;
+    FuriString* tempStr;
 
     const BPMTapper* bpm_state = ctx;
     furi_mutex_acquire(bpm_state->mutex, FuriWaitForever);
@@ -139,30 +139,30 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     //canvas_draw_frame(canvas, 0, 0, 128, 64);
     canvas_set_font(canvas, FontPrimary);
 
-    string_init(tempStr);
+    tempStr = furi_string_alloc();
 
-    string_printf(tempStr, "Taps: %d", bpm_state->taps);
-    canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignBottom, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "Taps: %d", bpm_state->taps);
+    canvas_draw_str_aligned(canvas, 5, 10, AlignLeft, AlignBottom, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_printf(tempStr, "Queue: %d", bpm_state->tap_queue->size);
-    canvas_draw_str_aligned(canvas, 70, 10, AlignLeft, AlignBottom, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "Queue: %d", bpm_state->tap_queue->size);
+    canvas_draw_str_aligned(canvas, 70, 10, AlignLeft, AlignBottom, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_printf(tempStr, "Interval: %dms", bpm_state->interval);
-    canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignBottom, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "Interval: %dms", (int)bpm_state->interval);
+    canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignBottom, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_printf(tempStr, "x2 %.2f /2 %.2f", bpm_state->bpm*2, bpm_state->bpm/2);
-    canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignCenter, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    furi_string_printf(tempStr, "x2 %.2f /2 %.2f", bpm_state->bpm*2, bpm_state->bpm/2);
+    canvas_draw_str_aligned(canvas, 64, 60, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_printf(tempStr, "%.2f", bpm_state->bpm);
+    furi_string_printf(tempStr, "%.2f", bpm_state->bpm);
     canvas_set_font(canvas, FontBigNumbers);
-    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, string_get_cstr(tempStr));
-    string_reset(tempStr);
+    canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignCenter, furi_string_get_cstr(tempStr));
+    furi_string_reset(tempStr);
 
-    string_clear(tempStr);
+    furi_string_free(tempStr);
 
     furi_mutex_release(bpm_state->mutex);
 }
