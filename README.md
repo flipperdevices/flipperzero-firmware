@@ -46,6 +46,7 @@ the hardware setup.
 
 * [Adafruit Ultimate GPS Breakout]
 * Beitian BN-180
+* Royaltek RBT-2100LP
 * [u-blox NEO-6M] (YMMV, see [#9](https://github.com/ezod/flipperzero-gps/issues/9))
 
 If you have verified this application working with a module not listed here,
