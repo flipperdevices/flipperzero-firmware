@@ -39,7 +39,7 @@ except ImportError:
         def PreConfigureFwEnvionment(env):
             # print("PreConfigureFwEnvionment")
             env.Append(
-                CPPDEFINES=["FW_OFFICIAL"],
+                CPPDEFINES=("FW_ORIGIN", "Official"),
             )
 
     fbt_hooks = DefaultFbtHooks()

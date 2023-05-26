@@ -173,6 +173,8 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
             &property_context, "%d", 3, "firmware", "api", "major", api_version_major);
         property_value_out(
             &property_context, "%d", 3, "firmware", "api", "minor", api_version_minor);
+
+        property_value_out(&property_context, NULL, 2, "firmware", "origin", TOSTRING(FW_ORIGIN));
     }
 
     if(furi_hal_bt_is_alive()) {
