@@ -53,4 +53,5 @@ dkms.conf
 
 # uFBT
 .vscode
+.clang-format
 dist/
