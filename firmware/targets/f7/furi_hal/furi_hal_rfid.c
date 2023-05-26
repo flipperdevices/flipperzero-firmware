@@ -411,7 +411,7 @@ void furi_hal_rfid_tim_emulate_dma_stop() {
 
 void furi_hal_rfid_tim_reset() {
     FURI_CRITICAL_ENTER();
-    furi_hal_bus_reset(FURI_HAL_RFID_EMULATE_TIMER_BUS);
+    furi_hal_bus_reset(FURI_HAL_RFID_READ_TIMER_BUS);
     furi_hal_bus_reset(FURI_HAL_RFID_EMULATE_TIMER_BUS);
     FURI_CRITICAL_EXIT();
 }
