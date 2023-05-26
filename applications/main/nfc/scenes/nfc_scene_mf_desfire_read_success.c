@@ -18,14 +18,15 @@ void nfc_scene_mf_desfire_read_success_on_enter(void* context) {
     // Setup view
     nfc->nfc_dev_data.protocol = NfcDevProtocolMfDesfire;
     MfDesfireData* data = &nfc->nfc_dev_data.mf_desfire_data;
+    NfcaData* iso14443_3a_data = &data->iso14443_4a_data.iso14443_3a_data;
     Widget* widget = nfc->widget;
 
     FuriString* temp_str;
 
     temp_str = furi_string_alloc_printf("\e#MIFARE DESfire\n");
     furi_string_cat_printf(temp_str, "UID:");
-    for(size_t i = 0; i < data->nfca_data.uid_len; i++) {
-        furi_string_cat_printf(temp_str, " %02X", data->nfca_data.uid[i]);
+    for(size_t i = 0; i < iso14443_3a_data->uid_len; i++) {
+        furi_string_cat_printf(temp_str, " %02X", iso14443_3a_data->uid[i]);
     }
 
     uint32_t bytes_total = 1UL << (data->version.sw_storage >> 1);

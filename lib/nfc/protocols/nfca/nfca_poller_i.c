@@ -296,43 +296,9 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                         4);
                     instance->data->uid_len += 4;
                     instance->col_res.state = NfcaPollerColResStateStateSuccess;
-                    instance->state = NfcaPollerStateColResSuccess;
+                    instance->state = NfcaPollerStateActivated;
                 }
             }
-        }
-
-        if(instance->state == NfcaPollerStateColResSuccess) {
-            // Check whether ATS is available
-            if(instance->data->sak & (1U << 5)) {
-                // Send RATS & receive ATS
-                instance->iso_protocol.ats_req.cmd = 0xe0;
-                instance->iso_protocol.ats_req.param = 0x80;
-
-                ret = nfca_poller_send_standart_frame(
-                    instance,
-                    (uint8_t*)&instance->iso_protocol.ats_req,
-                    8 * sizeof(instance->iso_protocol.ats_req),
-                    (uint8_t*)&instance->iso_protocol.ats_resp,
-                    8 * sizeof(instance->iso_protocol.ats_resp),
-                    &rx_bits,
-                    NFCA_FDT_LISTEN_FC);
-
-                if(ret != NfcaErrorNone) {
-                    FURI_LOG_E(TAG, "Ats request failed: %d", error);
-                    instance->state = NfcaPollerStateIsoProtocolFailed;
-                    ret = NfcaErrorCommunication;
-                    break;
-                }
-
-                if(rx_bits != 8 * sizeof(instance->iso_protocol.ats_resp)) {
-                    FURI_LOG_E(TAG, "Ats response wrong length: %d bits", rx_bits);
-                    instance->state = NfcaPollerStateIsoProtocolFailed;
-                    ret = NfcaErrorCommunication;
-                    break;
-                }
-            }
-
-            instance->state = NfcaPollerStateActivated;
         }
 
         activated = (instance->state == NfcaPollerStateActivated);

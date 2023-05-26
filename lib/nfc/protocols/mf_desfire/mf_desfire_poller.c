@@ -8,15 +8,15 @@
 
 typedef MfDesfirePollerCommand (*MfDesfirePollerReadHandler)(MfDesfirePoller* instance);
 
-static NfcaPollerCommand mf_desfire_process_command(MfDesfirePollerCommand command) {
-    NfcaPollerCommand ret = NfcaPollerCommandContinue;
+static Iso14443_4aPollerCommand mf_desfire_process_command(MfDesfirePollerCommand command) {
+    Iso14443_4aPollerCommand ret = Iso14443_4aPollerCommandContinue;
 
     if(command == MfDesfirePollerCommandContinue) {
-        ret = NfcaPollerCommandContinue;
+        ret = Iso14443_4aPollerCommandContinue;
     } else if(command == MfDesfirePollerCommandReset) {
-        ret = NfcaPollerCommandReset;
+        ret = Iso14443_4aPollerCommandReset;
     } else if(command == MfDesfirePollerCommandStop) {
-        ret = NfcaPollerCommandStop;
+        ret = Iso14443_4aPollerCommandStop;
     } else {
         furi_crash("Unknown command");
     }
@@ -24,9 +24,9 @@ static NfcaPollerCommand mf_desfire_process_command(MfDesfirePollerCommand comma
     return ret;
 }
 
-MfDesfirePoller* mf_desfire_poller_alloc(NfcaPoller* nfca_poller) {
+MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_poller) {
     MfDesfirePoller* instance = malloc(sizeof(MfDesfirePoller));
-    instance->nfca_poller = nfca_poller;
+    instance->iso14443_4a_poller = iso14443_4a_poller;
 
     return instance;
 }
@@ -38,10 +38,9 @@ void mf_desfire_poller_free(MfDesfirePoller* instance) {
 
 static MfDesfirePollerCommand mf_desfire_poller_handler_idle(MfDesfirePoller* instance) {
     nfc_poller_buffer_reset(instance->buffer);
-    nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
+    iso14443_4a_poller_get_data(instance->iso14443_4a_poller, &instance->data->iso14443_4a_data);
 
     instance->state = MfDesfirePollerStateReadVersion;
-
     return MfDesfirePollerCommandContinue;
 }
 
@@ -52,7 +51,7 @@ static MfDesfirePollerCommand mf_desfire_poller_handler_read_version(MfDesfirePo
         instance->state = MfDesfirePollerStateReadSuccess;
     } else {
         FURI_LOG_D(TAG, "Failed to read version");
-        nfca_poller_halt(instance->nfca_poller);
+        iso14443_4a_poller_halt(instance->iso14443_4a_poller);
         instance->state = MfDesfirePollerStateReadFailed;
     }
 
@@ -61,7 +60,7 @@ static MfDesfirePollerCommand mf_desfire_poller_handler_read_version(MfDesfirePo
 
 static MfDesfirePollerCommand mf_desfire_poller_handler_read_fail(MfDesfirePoller* instance) {
     FURI_LOG_D(TAG, "Read Failed");
-    nfca_poller_halt(instance->nfca_poller);
+    iso14443_4a_poller_halt(instance->iso14443_4a_poller);
     MfDesfirePollerEventData event_data = {.error = instance->error};
     MfDesfirePollerEvent event = {.type = MfDesfirePollerEventTypeReadFailed, .data = &event_data};
     MfDesfirePollerCommand command = instance->callback(event, instance->context);
@@ -71,7 +70,7 @@ static MfDesfirePollerCommand mf_desfire_poller_handler_read_fail(MfDesfirePolle
 
 static MfDesfirePollerCommand mf_desfire_poller_handler_read_success(MfDesfirePoller* instance) {
     FURI_LOG_D(TAG, "Read success.");
-    nfca_poller_halt(instance->nfca_poller);
+    iso14443_4a_poller_halt(instance->iso14443_4a_poller);
     MfDesfirePollerEvent event = {.type = MfDesfirePollerEventTypeReadSuccess};
     MfDesfirePollerCommand command = instance->callback(event, instance->context);
     return command;
@@ -84,7 +83,7 @@ static const MfDesfirePollerReadHandler mf_desfire_poller_read_handler[MfDesfire
     [MfDesfirePollerStateReadSuccess] = mf_desfire_poller_handler_read_success,
 };
 
-static NfcaPollerCommand mf_desfire_poller_read_callback(NfcaPollerEvent event, void* context) {
+static Iso14443_4aPollerCommand mf_desfire_poller_read_callback(Iso14443_4aPollerEvent event, void* context) {
     furi_assert(context);
 
     MfDesfirePoller* instance = context;
@@ -96,9 +95,9 @@ static NfcaPollerCommand mf_desfire_poller_read_callback(NfcaPollerEvent event, 
     if(instance->session_state == MfDesfirePollerSessionStateStopRequest) {
         command = MfDesfirePollerCommandStop;
     } else {
-        if(event.type == NfcaPollerEventTypeReady) {
+        if(event.type == Iso14443_4aPollerEventTypeReady) {
             command = mf_desfire_poller_read_handler[instance->state](instance);
-        } else if(event.type == NfcaPollerEventTypeError) {
+        } else if(event.type == Iso14443_4aPollerEventTypeError) {
             if(instance->callback) {
                 poller_event.type = MfDesfirePollerEventTypeReadFailed;
                 command = instance->callback(poller_event, instance->context);
@@ -111,11 +110,11 @@ static NfcaPollerCommand mf_desfire_poller_read_callback(NfcaPollerEvent event, 
 
 MfDesfireError mf_desfire_poller_start(
     MfDesfirePoller* instance,
-    NfcaPollerEventCallback callback,
+    Iso14443_4aPollerCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(instance->state == MfDesfirePollerStateIdle);
-    furi_assert(instance->nfca_poller);
+    furi_assert(instance->iso14443_4a_poller);
     furi_assert(callback);
     furi_assert(instance->session_state == MfDesfirePollerSessionStateIdle);
 
@@ -123,7 +122,7 @@ MfDesfireError mf_desfire_poller_start(
     instance->buffer = nfc_poller_buffer_alloc(MF_DESFIRE_MAX_BUFF_SIZE, MF_DESFIRE_MAX_BUFF_SIZE);
 
     instance->session_state = MfDesfirePollerSessionStateActive;
-    nfca_poller_start(instance->nfca_poller, callback, context);
+    iso14443_4a_poller_read(instance->iso14443_4a_poller, callback, context);
 
     return MfDesfireErrorNone;
 }
@@ -134,7 +133,7 @@ MfDesfireError mf_desfire_poller_read(
     void* context) {
     furi_assert(instance);
     furi_assert(instance->state == MfDesfirePollerStateIdle);
-    furi_assert(instance->nfca_poller);
+    furi_assert(instance->iso14443_4a_poller);
     furi_assert(callback);
 
     instance->callback = callback;
@@ -157,7 +156,7 @@ MfDesfireError mf_desfire_poller_reset(MfDesfirePoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
     furi_assert(instance->buffer);
-    furi_assert(instance->nfca_poller);
+    furi_assert(instance->iso14443_4a_poller);
 
     nfc_poller_buffer_free(instance->buffer);
     instance->callback = NULL;
@@ -169,10 +168,10 @@ MfDesfireError mf_desfire_poller_reset(MfDesfirePoller* instance) {
 
 MfDesfireError mf_desfire_poller_stop(MfDesfirePoller* instance) {
     furi_assert(instance);
-    furi_assert(instance->nfca_poller);
+    furi_assert(instance->iso14443_4a_poller);
 
     instance->session_state = MfDesfirePollerSessionStateStopRequest;
-    nfca_poller_stop(instance->nfca_poller);
+    iso14443_4a_poller_stop(instance->iso14443_4a_poller);
     instance->session_state = MfDesfirePollerSessionStateIdle;
     free(instance->data);
 

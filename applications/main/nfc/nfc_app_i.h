@@ -90,6 +90,7 @@ struct NfcApp {
     Nfc* nfc;
     NfcaPoller* nfca_poller;
     NfcaListener* nfca_listener;
+    Iso14443_4aPoller* iso14443_4a_poller;
     MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
     MfDesfirePoller* mf_desfire_poller;

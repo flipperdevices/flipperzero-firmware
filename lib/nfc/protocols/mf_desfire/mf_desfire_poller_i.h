@@ -1,7 +1,8 @@
 #pragma once
 
 #include "mf_desfire_poller.h"
-#include <lib/nfc/protocols/nfca/nfca_poller_i.h>
+
+#include <lib/nfc/protocols/iso14443_4a/iso14443_4a_poller_i.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +26,7 @@ typedef enum {
 } MfDesfirePollerSessionState;
 
 struct MfDesfirePoller {
-    NfcaPoller* nfca_poller;
+    Iso14443_4aPoller* iso14443_4a_poller;
     MfDesfirePollerSessionState session_state;
     MfDesfirePollerState state;
     NfcPollerBuffer* buffer;

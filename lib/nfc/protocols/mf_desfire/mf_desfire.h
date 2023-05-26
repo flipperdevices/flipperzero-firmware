@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/nfc/protocols/nfca/nfca.h>
+#include <lib/nfc/protocols/iso14443_4a/iso14443_4a.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -119,7 +119,7 @@ typedef enum {
 } MfDesfireError;
 
 typedef struct {
-    NfcaData nfca_data;
+    Iso14443_4aData iso14443_4a_data;
     MfDesfireVersion version;
     MfDesfireFreeMemory* free_memory;
     MfDesfireKeySettings* master_key_settings;

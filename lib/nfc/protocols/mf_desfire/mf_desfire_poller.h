@@ -1,7 +1,8 @@
 #pragma once
 
 #include "mf_desfire.h"
-#include <lib/nfc/protocols/nfca/nfca_poller.h>
+
+#include <lib/nfc/protocols/iso14443_4a/iso14443_4a_poller.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,13 +35,13 @@ typedef enum {
 typedef MfDesfirePollerCommand (
     *MfDesfirePollerCallback)(MfDesfirePollerEvent event, void* context);
 
-MfDesfirePoller* mf_desfire_poller_alloc(NfcaPoller* nfca_poller);
+MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_poller);
 
 void mf_desfire_poller_free(MfDesfirePoller* instance);
 
 MfDesfireError mf_desfire_poller_start(
     MfDesfirePoller* instance,
-    NfcaPollerEventCallback callback,
+    Iso14443_4aPollerCallback callback,
     void* context);
 
 MfDesfireError mf_desfire_poller_read(

@@ -31,17 +31,10 @@ typedef struct {
     uint8_t cascade_level;
 } NfcaPollerColRes;
 
-typedef struct {
-    NfcaAtsReq ats_req;
-    NfcaAtsResp ats_resp;
-} NfcaPollerIsoProtocol;
-
 typedef enum {
     NfcaPollerStateIdle,
     NfcaPollerStateColResInProgress,
-    NfcaPollerStateColResSuccess,
     NfcaPollerStateColResFailed,
-    NfcaPollerStateIsoProtocolFailed,
     NfcaPollerStateActivated,
 } NfcaPollerState;
 
@@ -56,7 +49,6 @@ struct NfcaPoller {
     NfcaPollerState state;
     NfcaPollerSessionState session_state;
     NfcaPollerColRes col_res;
-    NfcaPollerIsoProtocol iso_protocol;
     NfcaData* data;
     NfcPollerBuffer* buff;
     NfcaPollerEventCallback callback;
