@@ -53,9 +53,9 @@ def generate(env):
         "PreConfigureUfbtEnvionment",
         "PostConfigureUfbtEnvionment",
     ]
-    for hook_names in control_hooks:
-        hook_fn = getattr(fbt_hooks, hook_names, stub_hook)
-        env.AddMethod(hook_fn, hook_names)
+    for hook_name in control_hooks:
+        hook_fn = getattr(fbt_hooks, hook_name, stub_hook)
+        env.AddMethod(hook_fn, hook_name)
 
 
 def exists():
