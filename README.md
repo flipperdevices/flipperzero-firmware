@@ -1,5 +1,7 @@
 # GPS for Flipper Zero
 
+[![FAP Build](https://github.com/ezod/flipperzero-gps/actions/workflows/build.yml/badge.svg)](https://github.com/ezod/flipperzero-gps/actions/workflows/build.yml)
+
 A simple Flipper Zero application for NMEA 0183 serial GPS modules, such as the
 [Adafruit Ultimate GPS Breakout].
 

@@ -1,4 +1,4 @@
-name: "FAP: Build for dev and release SDK"
+name: "FAP Build"
 on:
   push:
     branches:
