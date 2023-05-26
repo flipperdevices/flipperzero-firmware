@@ -1,22 +1,33 @@
-REM made by DEXV#6969
-REM this script auto installs qFlipper
-DELAY 3000
+REM Written by DEXV#6969
+DELAY 2000
 GUI r
-DELAY 1000
-STRING powershell (new-object System.Net.WebClient).DownloadFile('https://update.flipperzero.one/qFlipper/release/windows-amd64/installer','%TEMP%\qFlipper.exe'); Start-Process "%TEMP%\qFlipper.exe"
 DELAY 500
-ENTER
-DELAY 750
-ALT SPACE
-STRING M
-DOWNARROW
-REPEAT 100
-ENTER
-DELAY 13000
+STRING powershell
 ENTER
 DELAY 1000
+STRING $url = "https://update.flipperzero.one/qFlipper/release/windows-amd64/portable"
+ENTER
+DELAY 500
+STRING $output = "$env:USERPROFILE\Documents\qFlipper.zip"
+ENTER
+DELAY 500
+STRING (New-Object System.Net.WebClient).DownloadFile($url, $output)
+ENTER
+DELAY 2000
+STRING Expand-Archive -Path $output -DestinationPath "$env:USERPROFILE\Documents\qFlipper" -Force
+ENTER
+DELAY 2000
+STRING Set-Location -Path "$env:USERPROFILE\Documents\qFlipper"
 ENTER
 DELAY 1000
+STRING Start-Process -FilePath ".\qFlipper.exe"
 ENTER
-DELAY 4000
+DELAY 5000
+STRING $shortcut = (New-Object -ComObject WScript.Shell).CreateShortcut("$env:USERPROFILE\Desktop\qFlipper.lnk")
+ENTER
+DELAY 500
+STRING $shortcut.TargetPath = "$env:USERPROFILE\Documents\qFlipper\qFlipper.exe"
+ENTER
+DELAY 500
+STRING $shortcut.Save()
 ENTER
