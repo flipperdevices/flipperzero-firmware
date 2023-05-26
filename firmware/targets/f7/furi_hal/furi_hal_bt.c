@@ -262,6 +262,12 @@ void furi_hal_bt_reinit() {
     furi_delay_ms(100);
     ble_glue_thread_stop();
 
+    furi_hal_bus_disable(FuriHalBusHSEM);
+    furi_hal_bus_disable(FuriHalBusIPCC);
+    furi_hal_bus_disable(FuriHalBusAES2);
+    furi_hal_bus_disable(FuriHalBusPKA);
+
+
     FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_bt_init();
 
