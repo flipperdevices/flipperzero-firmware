@@ -20,12 +20,11 @@ typedef struct {
     char desc[13];
     uint8_t chk;
 } ProtocolNexwatchMagic;
-    
+
 ProtocolNexwatchMagic magic_items[] = {
     {0xBE, "Quadrakey", 0},
     {0x88, "Nexkey", 0},
-    {0x86, "Honeywell", 0}
-};
+    {0x86, "Honeywell", 0}};
 
 typedef struct {
     uint8_t data_index;
@@ -81,9 +80,9 @@ static uint8_t protocol_nexwatch_parity_swap(uint8_t parity) {
 
 static uint8_t protocol_nexwatch_parity(const uint8_t hexid[5]) {
     uint8_t p = 0;
-    for (uint8_t i = 0; i < 5; i++) {
+    for(uint8_t i = 0; i < 5; i++) {
         p ^= ((hexid[i]) & 0xF0) >> 4;
-        p ^= ((hexid[i]) & 0x0F );
+        p ^= ((hexid[i]) & 0x0F);
     }
     return protocol_nexwatch_parity_swap(p);
 }
@@ -100,7 +99,7 @@ static uint8_t protocol_nexwatch_checksum(uint8_t magic, uint32_t id, uint8_t pa
 
 static bool protocol_nexwatch_can_be_decoded(uint8_t* data) {
     if(!protocol_nexwatch_check_preamble(data, 0)) return false;
-    
+
     // Check for reserved word (32-bit)
     if(bit_lib_get_bits_32(data, 8, 32) != 0) {
         return false;
@@ -111,7 +110,7 @@ static bool protocol_nexwatch_can_be_decoded(uint8_t* data) {
     // parity check
     // from 32b hex id, 4b mode
     uint8_t hex[5] = {0};
-    for (uint8_t i = 0; i < 5; i++) {
+    for(uint8_t i = 0; i < 5; i++) {
         hex[i] = bit_lib_get_bits(data, 40 + (i * 8), 8);
     }
     //mode is only 4 bits.
@@ -146,18 +145,12 @@ static bool protocol_nexwatch_decoder_feed_internal(bool polarity, uint32_t time
 
 static void protocol_nexwatch_descramble(uint32_t* id, uint32_t* scrambled) {
     // 255 = Not used/Unknown other values are the bit offset in the ID/FC values
-    const uint8_t hex_2_id [] = {
-        31, 27, 23, 19, 15, 11, 7, 3,
-        30, 26, 22, 18, 14, 10, 6, 2,
-        29, 25, 21, 17, 13, 9, 5, 1,
-        28, 24, 20, 16, 12, 8, 4, 0
-    };
+    const uint8_t hex_2_id[] = {31, 27, 23, 19, 15, 11, 7, 3, 30, 26, 22, 18, 14, 10, 6, 2,
+                                29, 25, 21, 17, 13, 9,  5, 1, 28, 24, 20, 16, 12, 8,  4, 0};
 
     *id = 0;
-    for (uint8_t idx = 0; idx < 32; idx++) {
-
-        if (hex_2_id[idx] == 255)
-            continue;
+    for(uint8_t idx = 0; idx < 32; idx++) {
+        if(hex_2_id[idx] == 255) continue;
 
         bool bit_state = (*scrambled >> hex_2_id[idx]) & 1;
         *id |= (bit_state << (31 - idx));
@@ -187,7 +180,8 @@ bool protocol_nexwatch_decoder_feed(ProtocolNexwatch* protocol, bool level, uint
             return result;
         }
 
-        if(protocol_nexwatch_decoder_feed_internal(!level, duration, protocol->negative_encoded_data)) {
+        if(protocol_nexwatch_decoder_feed_internal(
+               !level, duration, protocol->negative_encoded_data)) {
             protocol_nexwatch_decoder_save(protocol->data, protocol->negative_encoded_data);
             result = true;
             return result;
@@ -204,7 +198,8 @@ bool protocol_nexwatch_decoder_feed(ProtocolNexwatch* protocol, bool level, uint
             }
         }
 
-        if(protocol_nexwatch_decoder_feed_internal(level, duration, protocol->corrupted_encoded_data)) {
+        if(protocol_nexwatch_decoder_feed_internal(
+               level, duration, protocol->corrupted_encoded_data)) {
             protocol_nexwatch_decoder_save(protocol->data, protocol->corrupted_encoded_data);
 
             result = true;
@@ -213,7 +208,8 @@ bool protocol_nexwatch_decoder_feed(ProtocolNexwatch* protocol, bool level, uint
 
         if(protocol_nexwatch_decoder_feed_internal(
                !level, duration, protocol->corrupted_negative_encoded_data)) {
-            protocol_nexwatch_decoder_save(protocol->data, protocol->corrupted_negative_encoded_data);
+            protocol_nexwatch_decoder_save(
+                protocol->data, protocol->corrupted_negative_encoded_data);
 
             result = true;
             return result;
@@ -278,9 +274,9 @@ void protocol_nexwatch_render_data(ProtocolNexwatch* protocol, FuriString* resul
     uint8_t mode = bit_lib_get_bits(protocol->data, 40, 4);
     uint8_t parity = bit_lib_get_bits(protocol->data, 44, 4);
     uint8_t chk = bit_lib_get_bits(protocol->data, 48, 8);
-    for (m_idx = 0; m_idx < 3; m_idx++) {
+    for(m_idx = 0; m_idx < 3; m_idx++) {
         magic_items[m_idx].chk = protocol_nexwatch_checksum(magic_items[m_idx].magic, id, parity);
-        if (magic_items[m_idx].chk == chk) {
+        if(magic_items[m_idx].chk == chk) {
             break;
         }
     }
@@ -290,7 +286,6 @@ void protocol_nexwatch_render_data(ProtocolNexwatch* protocol, FuriString* resul
 bool protocol_nexwatch_write_data(ProtocolNexwatch* protocol, void* data) {
     LFRFIDWriteRequest* request = (LFRFIDWriteRequest*)data;
     bool result = false;
-
 
     protocol_nexwatch_encoder_start(protocol);
     if(request->write_type == LFRFIDWriteTypeT5577) {
