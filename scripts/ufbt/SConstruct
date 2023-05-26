@@ -98,7 +98,7 @@ env = core_env.Clone(
         "fbt_apps",
         "fbt_extapps",
         "fbt_assets",
-        "fbt_fwflavor",
+        "fbt_envhooks",
         ("compilation_db", {"COMPILATIONDB_COMSTR": "\tCDB\t${TARGET}"}),
     ],
     FBT_FAP_DEBUG_ELF_ROOT=ufbt_build_dir,

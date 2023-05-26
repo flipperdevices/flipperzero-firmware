@@ -18,7 +18,7 @@ env = ENV.Clone(
         "fbt_apps",
         "pvsstudio",
         "fbt_hwtarget",
-        "fbt_fwflavor",
+        "fbt_envhooks",
     ],
     COMPILATIONDB_USE_ABSPATH=False,
     BUILD_DIR=fw_build_meta["build_dir"],
