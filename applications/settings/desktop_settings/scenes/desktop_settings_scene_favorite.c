@@ -6,7 +6,7 @@
 #include <fap_loader/fap_loader_app.h>
 
 #define EXTERNAL_APPLICATION_NAME ("[External Application]")
-#define EXTERNAL_APPLICATION_INDEX (FLIPPER_APPS_COUNT + 1)
+#define EXTERNAL_APPLICATION_INDEX (FLIPPER_APPS_COUNT2 + 1)
 
 static bool favorite_fap_selector_item_callback(
     FuriString* file_path,
@@ -74,7 +74,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
 
         // Select favorite item in submenu
         if(!curr_favorite_app->is_external &&
-           !strcmp(FLIPPER_APPS[i].name, curr_favorite_app->name_or_path)) {
+           !strcmp(FLIPPER_APPS2[i].name, curr_favorite_app->name_or_path)) {
             pre_select_item = i;
         }
     }
@@ -166,7 +166,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
         } else {
             curr_favorite_app->is_external = false;
             strncpy(
-                curr_favorite_app->name_or_path, FLIPPER_APPS[event.event].name, MAX_APP_LENGTH);
+                curr_favorite_app->name_or_path, FLIPPER_APPS2[event.event].name, MAX_APP_LENGTH);
             consumed = true;
         }
         if(consumed) {
