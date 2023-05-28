@@ -6,9 +6,7 @@ Requires a connected dev board running Marauder FW. [See install instructions fr
 
 The app is now released as a FAP for use with official firmware. Alternative firmwares manage their own releases and may come with the app preinstalled.
 
-From a local clone of this repo, you can also build the app yourself using the command: `./fbt fap_ESP32_WiFi_Marauder`
-
-This will build using the included API, so make sure it matches your firmware!
+From a local clone of this repo, you can also build the app yourself using ufbt.
 
 ## Support
 
