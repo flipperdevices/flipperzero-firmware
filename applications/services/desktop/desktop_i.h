@@ -92,6 +92,7 @@ struct Desktop {
 
     bool sdcard_status;
 
+    FuriPubSub* status_pubsub;
     uint8_t hour;
     uint8_t minute;
     bool clock_type : 1; // true - 24h false - 12h

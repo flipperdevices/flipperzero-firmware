@@ -24,6 +24,8 @@
 #define ARKANOID_APP EXT_PATH("apps/Games/Arkanoid.fap")
 #define HEAP_DEFENCE_APP EXT_PATH("apps/Games/Heap_Defence.fap")
 
+#define FAP_LOADER_APP_NAME "Applications"
+
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
@@ -88,6 +90,21 @@ static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char*
             }
         }
     } while(false);
+}
+
+static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* application) {
+    LoaderStatus status = LoaderStatusErrorInternal;
+    if(application->is_external) {
+        status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, application->name_or_path);
+    } else if(strlen(application->name_or_path) > 0) {
+        status = loader_start(desktop->loader, application->name_or_path, NULL);
+    } else {
+        status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, NULL);
+    }
+
+    if(status != LoaderStatusOk) {
+        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+    }
 }
 
 void desktop_scene_main_callback(DesktopEvent event, void* context) {
@@ -159,78 +176,22 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
         }
         case DesktopMainEventOpenFavoritePrimary:
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.favorite_primary.is_external) {
-                LoaderStatus status = loader_start(
-                    desktop->loader,
-                    FAP_LOADER_APP_NAME,
-                    desktop->settings.favorite_primary.name_or_path);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            } else {
-                LoaderStatus status = loader_start(
-                    desktop->loader, desktop->settings.favorite_primary.name_or_path, NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_primary);
             consumed = true;
             break;
         case DesktopMainEventOpenFavoriteSecondary:
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.favorite_secondary.is_external) {
-                LoaderStatus status = loader_start(
-                    desktop->loader,
-                    FAP_LOADER_APP_NAME,
-                    desktop->settings.favorite_secondary.name_or_path);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            } else {
-                LoaderStatus status = loader_start(
-                    desktop->loader, desktop->settings.favorite_secondary.name_or_path, NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_secondary);
             consumed = true;
             break;
         case DesktopMainEventOpenFavoriteTertiary:
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.favorite_tertiary.is_external) {
-                LoaderStatus status = loader_start(
-                    desktop->loader,
-                    FAP_LOADER_APP_NAME,
-                    desktop->settings.favorite_tertiary.name_or_path);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            } else {
-                LoaderStatus status = loader_start(
-                    desktop->loader, desktop->settings.favorite_tertiary.name_or_path, NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_tertiary);
             consumed = true;
             break;
         case DesktopMainEventOpenFavoriteQuaternary:
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.favorite_quaternary.is_external) {
-                LoaderStatus status = loader_start(
-                    desktop->loader,
-                    FAP_LOADER_APP_NAME,
-                    desktop->settings.favorite_quaternary.name_or_path);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            } else {
-                LoaderStatus status = loader_start(
-                    desktop->loader, desktop->settings.favorite_quaternary.name_or_path, NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_quaternary);
             consumed = true;
             break;
         case DesktopAnimationEventCheckAnimation:
