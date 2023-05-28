@@ -5,6 +5,7 @@ on:
       - feature_wifi_marauder_app
   pull_request:
   schedule:
+    # do a build every day
     - cron: "1 1 * * *"
 jobs:
   ufbt-build-action:
@@ -15,6 +16,12 @@ jobs:
           - name: dev channel
             sdk-channel: dev
           - name: release channel
+            sdk-channel: release
+          - name: Unleashed dev
+            sdk-index-url: https://up.unleashedflip.com/directory.json
+            sdk-channel: dev
+          - name: Unleashed release
+            sdk-index-url: https://up.unleashedflip.com/directory.json
             sdk-channel: release
     name: 'ufbt: Build for ${{ matrix.name }}'
     steps:
@@ -27,6 +34,7 @@ jobs:
         id: build-app
         with:
           sdk-channel: ${{ matrix.sdk-channel }}
+          sdk-index-url: ${{ matrix.sdk-index-url }}
       - name: Upload app artifacts
         uses: actions/upload-artifact@v3
         with:
