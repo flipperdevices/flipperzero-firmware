@@ -746,6 +746,7 @@ Function,-,ctermid,char*,char*
 Function,-,ctime,char*,const time_t*
 Function,-,ctime_r,char*,"const time_t*, char*"
 Function,-,cuserid,char*,char*
+Function,-,desktop_api_get_status_pubsub,FuriPubSub*,Desktop*
 Function,-,desktop_api_is_locked,_Bool,Desktop*
 Function,-,desktop_api_unlock,void,Desktop*
 Function,+,desktop_pin_compare,_Bool,"const PinCode*, const PinCode*"
@@ -2138,7 +2139,7 @@ Function,-,mf_df_prepare_read_data,uint16_t,"uint8_t*, uint8_t, uint32_t, uint32
 Function,-,mf_df_prepare_read_records,uint16_t,"uint8_t*, uint8_t, uint32_t, uint32_t"
 Function,-,mf_df_prepare_select_application,uint16_t,"uint8_t*, uint8_t[3]"
 Function,-,mf_df_read_card,_Bool,"FuriHalNfcTxRxContext*, MifareDesfireData*"
-Function,-,mf_ul_check_card_type,_Bool,"uint8_t, uint8_t, uint8_t"
+Function,-,mf_ul_check_card_type,_Bool,FuriHalNfcADevData*
 Function,-,mf_ul_emulation_supported,_Bool,MfUltralightData*
 Function,-,mf_ul_is_full_capture,_Bool,MfUltralightData*
 Function,-,mf_ul_prepare_emulation,void,"MfUltralightEmulator*, MfUltralightData*"
