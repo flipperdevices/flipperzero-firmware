@@ -2,7 +2,7 @@ name: "FAP Build"
 on:
   push:
     branches:
-      - main 
+      - feature_wifi_marauder_app
   pull_request:
   schedule:
     - cron: "1 1 * * *"
