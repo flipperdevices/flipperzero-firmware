@@ -2,27 +2,31 @@
 
 char* _wifi_marauder_get_prefix_from_cmd(const char* command) {
     int end = strcspn(command, " ");
-    char* prefix = (char*) malloc(sizeof(char) * (end + 1));
+    char* prefix = (char*)malloc(sizeof(char) * (end + 1));
     strncpy(prefix, command, end);
     prefix[end] = '\0';
     return prefix;
 }
 
 bool _wifi_marauder_is_save_pcaps_enabled(WifiMarauderApp* app) {
-    if (!app->ok_to_save_pcaps) {
+    if(!app->ok_to_save_pcaps) {
         return false;
     }
     // If it is a script that contains a sniff function
-    if (app->script != NULL) {
+    if(app->script != NULL) {
         return wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffRaw) ||
-               wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffBeacon) ||
-               wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffDeauth) ||
+               wifi_marauder_script_has_stage(
+                   app->script, WifiMarauderScriptStageTypeSniffBeacon) ||
+               wifi_marauder_script_has_stage(
+                   app->script, WifiMarauderScriptStageTypeSniffDeauth) ||
                wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffEsp) ||
-               wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffPmkid) ||
+               wifi_marauder_script_has_stage(
+                   app->script, WifiMarauderScriptStageTypeSniffPmkid) ||
                wifi_marauder_script_has_stage(app->script, WifiMarauderScriptStageTypeSniffPwn);
     }
     // If it is a sniff function
-    return app->is_command && app->selected_tx_string && strncmp("sniff", app->selected_tx_string, strlen("sniff")) == 0;
+    return app->is_command && app->selected_tx_string &&
+           strncmp("sniff", app->selected_tx_string, strlen("sniff")) == 0;
 }
 
 void wifi_marauder_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
@@ -97,21 +101,30 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewConsoleOutput);
 
     // Register callbacks to receive data
-    wifi_marauder_uart_set_handle_rx_data_cb(app->uart, wifi_marauder_console_output_handle_rx_data_cb); // setup callback for general log rx thread
-    wifi_marauder_uart_set_handle_rx_data_cb(app->lp_uart, wifi_marauder_console_output_handle_rx_packets_cb); // setup callback for packets rx thread
-    
+    wifi_marauder_uart_set_handle_rx_data_cb(
+        app->uart,
+        wifi_marauder_console_output_handle_rx_data_cb); // setup callback for general log rx thread
+    wifi_marauder_uart_set_handle_rx_data_cb(
+        app->lp_uart,
+        wifi_marauder_console_output_handle_rx_packets_cb); // setup callback for packets rx thread
+
     // Get ready to send command
     if((app->is_command && app->selected_tx_string) || app->script) {
-        const char* prefix = strlen(app->selected_tx_string) > 0 ?
-                             _wifi_marauder_get_prefix_from_cmd(app->selected_tx_string) : // Function name
-                             app->script->name;                                            // Script name
+        const char* prefix =
+            strlen(app->selected_tx_string) > 0 ?
+                _wifi_marauder_get_prefix_from_cmd(app->selected_tx_string) : // Function name
+                app->script->name; // Script name
 
         // Create files *before* sending command
         // (it takes time to iterate through the directory)
         if(app->ok_to_save_logs) {
-            strcpy(app->log_file_path, sequential_file_resolve_path(app->storage, MARAUDER_APP_FOLDER_LOGS, prefix, "log"));
-            if (app->log_file_path != NULL) {
-                if (storage_file_open(app->log_file, app->log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            strcpy(
+                app->log_file_path,
+                sequential_file_resolve_path(
+                    app->storage, MARAUDER_APP_FOLDER_LOGS, prefix, "log"));
+            if(app->log_file_path != NULL) {
+                if(storage_file_open(
+                       app->log_file, app->log_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
                     app->is_writing_log = true;
                 } else {
                     dialog_message_show_storage_error(app->dialogs, "Cannot open log file");
@@ -122,8 +135,9 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         }
 
         // If it is a sniff function or script, open the pcap file for recording
-        if (_wifi_marauder_is_save_pcaps_enabled(app)) {
-            if (sequential_file_open(app->storage, app->capture_file, MARAUDER_APP_FOLDER_PCAPS, prefix, "pcap")) {
+        if(_wifi_marauder_is_save_pcaps_enabled(app)) {
+            if(sequential_file_open(
+                   app->storage, app->capture_file, MARAUDER_APP_FOLDER_PCAPS, prefix, "pcap")) {
                 app->is_writing_pcap = true;
             } else {
                 dialog_message_show_storage_error(app->dialogs, "Cannot open pcap file");
@@ -131,7 +145,7 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         }
 
         // Send command with newline '\n'
-        if (app->selected_tx_string) {
+        if(app->selected_tx_string) {
             wifi_marauder_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));
             wifi_marauder_uart_tx((uint8_t*)("\n"), 1);

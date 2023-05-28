@@ -64,9 +64,11 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
     app->text_box_store = furi_string_alloc();
     furi_string_reserve(app->text_box_store, WIFI_MARAUDER_TEXT_BOX_STORE_SIZE);
 
-    app->text_input = text_input_alloc();
+    app->text_input = wifi_text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, WifiMarauderAppViewTextInput, text_input_get_view(app->text_input));
+        app->view_dispatcher,
+        WifiMarauderAppViewTextInput,
+        wifi_text_input_get_view(app->text_input));
 
     app->widget = widget_alloc();
     view_dispatcher_add_view(
@@ -81,7 +83,8 @@ WifiMarauderApp* wifi_marauder_app_alloc() {
 
     // Submenu
     app->submenu = submenu_alloc();
-    view_dispatcher_add_view(app->view_dispatcher, WifiMarauderAppViewSubmenu, submenu_get_view(app->submenu));
+    view_dispatcher_add_view(
+        app->view_dispatcher, WifiMarauderAppViewSubmenu, submenu_get_view(app->submenu));
 
     scene_manager_next_scene(app->scene_manager, WifiMarauderSceneStart);
 
@@ -145,7 +148,7 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
     widget_free(app->widget);
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
-    text_input_free(app->text_input);
+    wifi_text_input_free(app->text_input);
     submenu_free(app->submenu);
     variable_item_list_free(app->var_item_list);
     storage_file_free(app->capture_file);
@@ -170,6 +173,14 @@ void wifi_marauder_app_free(WifiMarauderApp* app) {
 
 int32_t wifi_marauder_app(void* p) {
     UNUSED(p);
+
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
+    furi_delay_ms(200);
+
     WifiMarauderApp* wifi_marauder_app = wifi_marauder_app_alloc();
 
     wifi_marauder_make_app_folder(wifi_marauder_app);
@@ -181,6 +192,10 @@ int32_t wifi_marauder_app(void* p) {
     view_dispatcher_run(wifi_marauder_app->view_dispatcher);
 
     wifi_marauder_app_free(wifi_marauder_app);
+
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     return 0;
 }

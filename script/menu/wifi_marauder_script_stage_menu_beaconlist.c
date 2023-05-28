@@ -39,24 +39,21 @@ void wifi_marauder_script_stage_menu_beaconlist_load(WifiMarauderScriptStageMenu
     stage_menu->num_items = 3;
     stage_menu->items = malloc(3 * sizeof(WifiMarauderScriptMenuItem));
 
-    stage_menu->items[0] = (WifiMarauderScriptMenuItem) {
+    stage_menu->items[0] = (WifiMarauderScriptMenuItem){
         .name = strdup("SSIDs"),
         .type = WifiMarauderScriptMenuItemTypeListString,
         .num_options = 1,
-        .select_callback = wifi_marauder_beaconlist_stage_ssids_select_callback
-    };
-    stage_menu->items[1] = (WifiMarauderScriptMenuItem) {
+        .select_callback = wifi_marauder_beaconlist_stage_ssids_select_callback};
+    stage_menu->items[1] = (WifiMarauderScriptMenuItem){
         .name = strdup("Generate random"),
         .type = WifiMarauderScriptMenuItemTypeNumber,
         .num_options = 1,
         .setup_callback = wifi_marauder_beaconlist_stage_random_ssids_setup_callback,
-        .select_callback = wifi_marauder_beaconlist_stage_random_ssids_select_callback
-    };
-    stage_menu->items[2] = (WifiMarauderScriptMenuItem) {
+        .select_callback = wifi_marauder_beaconlist_stage_random_ssids_select_callback};
+    stage_menu->items[2] = (WifiMarauderScriptMenuItem){
         .name = strdup("Timeout"),
         .type = WifiMarauderScriptMenuItemTypeNumber,
         .num_options = 1,
         .setup_callback = wifi_marauder_beaconlist_stage_timeout_setup_callback,
-        .select_callback = wifi_marauder_beaconlist_stage_timeout_select_callback
-    };
+        .select_callback = wifi_marauder_beaconlist_stage_timeout_select_callback};
 }

@@ -152,7 +152,7 @@ typedef enum {
 typedef struct WifiMarauderScriptStage {
     WifiMarauderScriptStageType type;
     void* stage;
-    struct WifiMarauderScriptStage *next_stage;
+    struct WifiMarauderScriptStage* next_stage;
 } WifiMarauderScriptStage;
 
 typedef struct WifiMarauderScriptStageScan {
@@ -205,7 +205,7 @@ typedef struct WifiMarauderScriptStageSniffPwn {
 } WifiMarauderScriptStageSniffPwn;
 
 typedef struct WifiMarauderScriptStageBeaconList {
-    char **ssids;
+    char** ssids;
     int ssid_count;
     int random_ssids;
     int timeout;
@@ -227,8 +227,8 @@ typedef struct WifiMarauderScriptStageDelay {
 typedef struct WifiMarauderScript {
     char* name;
     char* description;
-    WifiMarauderScriptStage *first_stage;
-    WifiMarauderScriptStage *last_stage;
+    WifiMarauderScriptStage* first_stage;
+    WifiMarauderScriptStage* last_stage;
     WifiMarauderScriptBoolean enable_led;
     WifiMarauderScriptBoolean save_pcap;
     int repeat;
@@ -243,7 +243,15 @@ WifiMarauderScript* wifi_marauder_script_alloc();
 WifiMarauderScript* wifi_marauder_script_create(const char* script_name);
 WifiMarauderScript* wifi_marauder_script_parse_raw(const char* script_raw);
 WifiMarauderScript* wifi_marauder_script_parse_json(Storage* storage, const char* file_path);
-void wifi_marauder_script_save_json(Storage* storage, const char* file_path, WifiMarauderScript* script);
-void wifi_marauder_script_add_stage(WifiMarauderScript* script, WifiMarauderScriptStageType stage_type, void* stage_data);
-bool wifi_marauder_script_has_stage(WifiMarauderScript* script, WifiMarauderScriptStageType stage_type);
-void wifi_marauder_script_free(WifiMarauderScript *script);
+void wifi_marauder_script_save_json(
+    Storage* storage,
+    const char* file_path,
+    WifiMarauderScript* script);
+void wifi_marauder_script_add_stage(
+    WifiMarauderScript* script,
+    WifiMarauderScriptStageType stage_type,
+    void* stage_data);
+bool wifi_marauder_script_has_stage(
+    WifiMarauderScript* script,
+    WifiMarauderScriptStageType stage_type);
+void wifi_marauder_script_free(WifiMarauderScript* script);

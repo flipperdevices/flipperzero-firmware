@@ -9,11 +9,11 @@ typedef enum {
 } WifiMarauderScriptWorkerStatus;
 
 typedef struct WifiMarauderScriptWorker {
-    WifiMarauderScript *script;
-    FuriThread *worker_thread;
+    WifiMarauderScript* script;
+    FuriThread* worker_thread;
     void (*callback_start)(void*);
     void (*callback_stage)(WifiMarauderScriptStage*, void*);
-    void *context;
+    void* context;
     bool is_running;
 } WifiMarauderScriptWorker;
 
@@ -31,7 +31,9 @@ WifiMarauderScriptWorker* wifi_marauder_script_worker_alloc();
  * @param script Script to be executed
  * @return True if the worker was successfully started, false otherwise.
  */
-bool wifi_marauder_script_worker_start(WifiMarauderScriptWorker* instance, WifiMarauderScript* script);
+bool wifi_marauder_script_worker_start(
+    WifiMarauderScriptWorker* instance,
+    WifiMarauderScript* script);
 
 /**
  * @brief Frees the memory used by the instance of WifiMarauderScriptWorker.

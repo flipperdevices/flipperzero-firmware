@@ -1,7 +1,11 @@
 #include "sequential_file.h"
 
-char* sequential_file_resolve_path(Storage* storage, const char* dir, const char* prefix, const char* extension) {
-    if (storage == NULL || dir == NULL || prefix == NULL || extension == NULL) {
+char* sequential_file_resolve_path(
+    Storage* storage,
+    const char* dir,
+    const char* prefix,
+    const char* extension) {
+    if(storage == NULL || dir == NULL || prefix == NULL || extension == NULL) {
         return NULL;
     }
 
@@ -9,7 +13,9 @@ char* sequential_file_resolve_path(Storage* storage, const char* dir, const char
     int file_index = 0;
 
     do {
-        if (snprintf(file_path, sizeof(file_path), "%s/%s_%d.%s", dir, prefix, file_index, extension) < 0) {
+        if(snprintf(
+               file_path, sizeof(file_path), "%s/%s_%d.%s", dir, prefix, file_index, extension) <
+           0) {
             return NULL;
         }
         file_index++;
@@ -18,13 +24,18 @@ char* sequential_file_resolve_path(Storage* storage, const char* dir, const char
     return strdup(file_path);
 }
 
-bool sequential_file_open(Storage* storage, File* file, const char* dir, const char* prefix, const char* extension) {
-    if (storage == NULL || file == NULL || dir == NULL || prefix == NULL || extension == NULL) {
+bool sequential_file_open(
+    Storage* storage,
+    File* file,
+    const char* dir,
+    const char* prefix,
+    const char* extension) {
+    if(storage == NULL || file == NULL || dir == NULL || prefix == NULL || extension == NULL) {
         return false;
     }
 
     char* file_path = sequential_file_resolve_path(storage, dir, prefix, extension);
-    if (file_path == NULL) {
+    if(file_path == NULL) {
         return false;
     }
 

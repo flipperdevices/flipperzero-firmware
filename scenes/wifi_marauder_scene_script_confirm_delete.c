@@ -13,14 +13,29 @@ void wifi_marauder_scene_script_confirm_delete_widget_callback(
 void wifi_marauder_scene_script_confirm_delete_on_enter(void* context) {
     WifiMarauderApp* app = context;
 
-    widget_add_button_element(app->widget, GuiButtonTypeLeft, "No", wifi_marauder_scene_script_confirm_delete_widget_callback, app);
-    widget_add_button_element(app->widget, GuiButtonTypeRight, "Yes", wifi_marauder_scene_script_confirm_delete_widget_callback, app);
+    widget_add_button_element(
+        app->widget,
+        GuiButtonTypeLeft,
+        "No",
+        wifi_marauder_scene_script_confirm_delete_widget_callback,
+        app);
+    widget_add_button_element(
+        app->widget,
+        GuiButtonTypeRight,
+        "Yes",
+        wifi_marauder_scene_script_confirm_delete_widget_callback,
+        app);
 
-    widget_add_string_element(app->widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Are you sure?");
+    widget_add_string_element(
+        app->widget, 0, 0, AlignLeft, AlignTop, FontPrimary, "Are you sure?");
     widget_add_text_box_element(
         app->widget,
-        0, 12, 128, 38,
-        AlignCenter, AlignCenter,
+        0,
+        12,
+        128,
+        38,
+        AlignCenter,
+        AlignCenter,
         "The script will be\npermanently deleted",
         false);
 
@@ -35,9 +50,14 @@ bool wifi_marauder_scene_script_confirm_delete_on_event(void* context, SceneMana
         // get which button press: "Yes" or "No"
         if(event.event == GuiButtonTypeRight) {
             // Yes
-            if (app->script != NULL) {
+            if(app->script != NULL) {
                 char script_path[256];
-                snprintf(script_path, sizeof(script_path), "%s/%s.json", MARAUDER_APP_FOLDER_SCRIPTS, app->script->name);
+                snprintf(
+                    script_path,
+                    sizeof(script_path),
+                    "%s/%s.json",
+                    MARAUDER_APP_FOLDER_SCRIPTS,
+                    app->script->name);
                 storage_simply_remove(app->storage, script_path);
                 wifi_marauder_script_free(app->script);
                 app->script = NULL;

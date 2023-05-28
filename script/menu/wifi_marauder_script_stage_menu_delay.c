@@ -18,11 +18,10 @@ void wifi_marauder_script_stage_menu_delay_load(WifiMarauderScriptStageMenu* sta
     stage_menu->num_items = 1;
     stage_menu->items = malloc(1 * sizeof(WifiMarauderScriptMenuItem));
 
-    stage_menu->items[0] = (WifiMarauderScriptMenuItem) {
+    stage_menu->items[0] = (WifiMarauderScriptMenuItem){
         .name = strdup("Timeout"),
         .type = WifiMarauderScriptMenuItemTypeNumber,
         .num_options = 1,
         .setup_callback = wifi_marauder_delay_stage_timeout_setup_callback,
-        .select_callback = wifi_marauder_delay_stage_timeout_select_callback
-    };
+        .select_callback = wifi_marauder_delay_stage_timeout_select_callback};
 }

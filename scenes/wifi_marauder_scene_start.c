@@ -97,13 +97,7 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
      NO_ARGS,
      FOCUS_CONSOLE_END,
      SHOW_STOPSCAN_TIP},
-    {"Signal Monitor",
-     {""},
-     1,
-     {"sigmon"},
-     NO_ARGS,
-     FOCUS_CONSOLE_END,
-     SHOW_STOPSCAN_TIP},
+    {"Signal Monitor", {""}, 1, {"sigmon"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP},
     {"Channel",
      {"get", "set"},
      2,
@@ -161,15 +155,18 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
         return;
     }
 
-    if (app->selected_tx_string && strncmp("sniffpmkid", app->selected_tx_string, strlen("sniffpmkid")) == 0) {
+    if(app->selected_tx_string &&
+       strncmp("sniffpmkid", app->selected_tx_string, strlen("sniffpmkid")) == 0) {
         // sniffpmkid submenu
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartSniffPmkidOptions);
+        view_dispatcher_send_custom_event(
+            app->view_dispatcher, WifiMarauderEventStartSniffPmkidOptions);
         return;
     }
 
     // Select automation script
     if(index == NUM_MENU_ITEMS - 2) {
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartScriptSelect);
+        view_dispatcher_send_custom_event(
+            app->view_dispatcher, WifiMarauderEventStartScriptSelect);
         return;
     }
 

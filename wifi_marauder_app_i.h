@@ -16,10 +16,10 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/text_box.h>
-#include <gui/modules/text_input.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
+#include "wifi_marauder_text_input.h"
 
 #include <ESP32_WiFi_Marauder_icons.h>
 #include <storage/storage.h>
@@ -32,7 +32,7 @@
 #define WIFI_MARAUDER_TEXT_INPUT_STORE_SIZE (512)
 
 #define MARAUDER_APP_FOLDER_USER "apps_data/marauder"
-#define MARAUDER_APP_FOLDER ANY_PATH(MARAUDER_APP_FOLDER_USER)
+#define MARAUDER_APP_FOLDER EXT_PATH(MARAUDER_APP_FOLDER_USER)
 #define MARAUDER_APP_FOLDER_PCAPS MARAUDER_APP_FOLDER "/pcaps"
 #define MARAUDER_APP_FOLDER_LOGS MARAUDER_APP_FOLDER "/logs"
 #define MARAUDER_APP_FOLDER_USER_PCAPS MARAUDER_APP_FOLDER_USER "/pcaps"
@@ -57,7 +57,7 @@ struct WifiMarauderApp {
     FuriString* text_box_store;
     size_t text_box_store_strlen;
     TextBox* text_box;
-    TextInput* text_input;
+    WIFI_TextInput* text_input;
     Storage* storage;
     File* capture_file;
     File* log_file;
