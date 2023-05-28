@@ -302,7 +302,7 @@ void sw_usart_free(SwUsart* sw_usart) {
     free(sw_usart);
 }
 
-void sw_uasart_set_tx_callback(SwUsart* sw_usart, SwUsartTxCallbackEnd callback, void* context) {
+void sw_usart_set_tx_callback(SwUsart* sw_usart, SwUsartTxCallbackEnd callback, void* context) {
     furi_assert(sw_usart);
     sw_usart->tx_callback_end = callback;
     sw_usart->tx_context_end = context;

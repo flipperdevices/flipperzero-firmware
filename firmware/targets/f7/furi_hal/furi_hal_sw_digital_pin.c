@@ -542,6 +542,8 @@ void furi_hal_sw_digital_pin_tx_deinit(void) {
     furi_hal_sw_digital_pin_buff.tx = NULL;
 }
 
+static uint32_t furi_hal_subghz_debug_gpio_buff1[2];
+
 void furi_hal_sw_digital_pin_rx_init(
     FuriHalSwDigitalPinRxCallback callback,
     void* context,
@@ -636,6 +638,32 @@ void furi_hal_sw_digital_pin_rx_init(
     LL_DMAMUX_SetRequestGenPolarity(DMAMUX1, LL_DMAMUX_REQ_GEN_0, LL_DMAMUX_REQ_GEN_POL_RISING);
     /* Set the number of DMA requests that will be authorized after a generation event */
     LL_DMAMUX_SetGenRequestNb(DMAMUX1, LL_DMAMUX_REQ_GEN_0, 1);
+
+    const GpioPin* gpio1 = &gpio_ext_pc3;
+    furi_hal_subghz_debug_gpio_buff1[0] = gpio1->pin ;
+    furi_hal_subghz_debug_gpio_buff1[1] = (uint32_t)gpio1->pin<< GPIO_NUMBER;
+    furi_hal_gpio_init(
+        gpio1,
+        GpioModeOutputPushPull,
+        GpioPullNo,
+        GpioSpeedVeryHigh);
+    LL_DMA_InitTypeDef dma_config = {0};
+    dma_config.MemoryOrM2MDstAddress = (uint32_t)furi_hal_subghz_debug_gpio_buff1;
+    dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (gpio1->port->BSRR);
+    dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
+    dma_config.Mode = LL_DMA_MODE_CIRCULAR;
+    dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
+    dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
+    dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
+    dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
+    dma_config.NbData = 2;
+    dma_config.PeriphRequest = LL_DMAMUX_REQ_GENERATOR0;
+    dma_config.Priority = LL_DMA_PRIORITY_VERYHIGH;
+    LL_DMA_Init(DMA2, LL_DMA_CHANNEL_7, &dma_config);
+    LL_DMA_SetDataLength(DMA2, LL_DMA_CHANNEL_7, 2);
+    LL_DMA_EnableChannel(DMA2, LL_DMA_CHANNEL_7);
+
+
 
     // Configure DMA Sync
     LL_DMA_SetMemoryAddress(

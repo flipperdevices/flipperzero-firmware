@@ -1,0 +1,30 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/sw_digital_protocol",
+    ],
+    SDK_HEADERS=[
+        File("sw_usart.h"),
+    ],
+)
+
+
+libenv = env.Clone(FW_LIB_NAME="sw_digital_protocol")
+libenv.ApplyLibFlags()
+
+libenv.AppendUnique(
+    CCFLAGS=[
+        # Required for lib to be linkable with .faps
+        "-mword-relocations",
+        "-mlong-calls",
+    ],
+)
+
+sources = libenv.GlobRecursive("*.c")
+
+libenv.Append(CPPPATH=[libenv.Dir(".")])
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

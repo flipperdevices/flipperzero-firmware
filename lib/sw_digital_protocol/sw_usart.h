@@ -55,7 +55,7 @@ void sw_usart_free(SwUsart* sw_usart);
  * @param callback Callback
  * @param context Context
  */
-void sw_uasart_set_tx_callback(SwUsart* sw_usart, SwUsartTxCallbackEnd callback, void* context);
+void sw_usart_set_tx_callback(SwUsart* sw_usart, SwUsartTxCallbackEnd callback, void* context);
 
 /**
  * @brief Start SwUsart
@@ -81,7 +81,7 @@ void sw_usart_set_rx_buffer_size(SwUsart* sw_usart, size_t size);
 
 /**
  * @brief Set the package format to something other than the default
- * @note Default setting: 1 start bit, 8 data bits, 1 stop bit, no parity
+ * @note Default setting: 1 start bit, 8 data bits, no parity, 1 stop bit 
  * @param sw_usart SwUsart pointer
  * @param mode Mode
  * @param data_bit Data bit

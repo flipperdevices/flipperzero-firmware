@@ -1,0 +1,11 @@
+App(
+    appid="example_sw_usart",
+    name="Example: SW USART",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="example_sw_usart_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_icon="example_sw_usart_10px.png",
+    fap_category="Examples",
+    fap_libs=['sw_digital_protocol'],
+)
