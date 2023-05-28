@@ -54,8 +54,16 @@ void draw_scientists(const SCIENTIST* scientists, Canvas* const canvas, const Ga
                                                     sprites->scientist_left_infill);
 
             } else {
+                canvas_set_color(canvas, ColorBlack);
                 canvas_draw_icon(
                     canvas, scientists[i].point.x, scientists[i].point.y + 5, &I_dead_scientist);
+
+                canvas_set_color(canvas, ColorWhite);
+                canvas_draw_icon(
+                    canvas,
+                    scientists[i].point.x,
+                    scientists[i].point.y + 5,
+                    &I_dead_scientist_infill);
             }
         }
     }

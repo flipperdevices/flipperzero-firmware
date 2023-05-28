@@ -119,8 +119,8 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         for(int i = 0; i < 3; ++i) {
             // Check if the image is within the screen's boundaries
             if(game_state->sprites.bg_pos[i].x >= -127 && game_state->sprites.bg_pos[i].x < 128) {
-                canvas_draw_icon(
-                    canvas, game_state->sprites.bg_pos[i].x, 0, game_state->sprites.bg[i]);
+                // canvas_draw_icon(
+                //     canvas, game_state->sprites.bg_pos[i].x, 0, game_state->sprites.bg[i]);
             }
         }
 

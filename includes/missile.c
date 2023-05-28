@@ -13,7 +13,7 @@ void missile_tick(MISSILE* const missiles, BARRY* const barry, State* const stat
     // Move missiles towards the player
     for(int i = 0; i < MISSILES_MAX; i++) {
         if(missile_colides(&missiles[i], barry)) {
-            (*state) = GameStateGameOver;
+            // (*state) = GameStateGameOver;
             UNUSED(state);
         }
         if(missiles[i].point.x > 0) {

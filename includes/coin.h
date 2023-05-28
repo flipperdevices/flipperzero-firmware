@@ -6,12 +6,17 @@
 #include "point.h"
 #include "barry.h"
 
-#define COINS_MAX 25
+#define COINS_MAX 15
 
 typedef struct {
     float gravity;
     POINT point;
 } COIN;
+
+typedef struct {
+    int count;
+    POINT coins[COINS_MAX];
+} COIN_PATTERN;
 
 void coin_tick(COIN* const coins, BARRY* const barry, int* const poins);
 void spawn_random_coin(COIN* const coins);

@@ -8,7 +8,7 @@
 #include "point.h"
 #include "barry.h"
 
-#define MISSILES_MAX 5
+#define MISSILES_MAX 2
 
 typedef struct {
     float gravity;
