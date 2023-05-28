@@ -7,12 +7,10 @@ Requires a connected dev board running Marauder FW. [See install instructions fr
 ## Get the app
 1. Navigate to the [FAP Build](https://github.com/0xchocolate/flipperzero-wifi-marauder/actions/workflows/build.yml)
    GitHub action workflow, and select the most recent run.
-2. The FAP is built for both the `dev` and `release` channels of the official
+2. The FAP is built for the `dev` and `release` channels of both official and unleashed
    firmware. Download the artifact corresponding to your firmware version.
 3. Extract `ESP32_WiFi_Marauder.fap` from the ZIP file to your Flipper
    Zero SD card.
-
-The app is now released as a FAP for use with official firmware. Alternative firmwares manage their own releases and may come with the app preinstalled.
 
 From a local clone of this repo, you can also build the app yourself using ufbt.
 
