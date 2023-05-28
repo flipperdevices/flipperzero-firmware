@@ -115,7 +115,7 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                     }
                     for(size_t i = 0; i < 64; i++) {
                         FURI_LOG_D(TAG, "Writing block %d", i);
-                        if(!magic_gen1_write_blk(i, &src_data->block[i])) {
+                        if(!magic_gen1_write_blk(i, &mfc_data->block[i])) {
                             FURI_LOG_E(TAG, "Failed to write %d block", i);
                             done = true;
                             nfc_magic_worker->callback(
