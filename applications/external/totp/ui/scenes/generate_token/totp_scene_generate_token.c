@@ -180,8 +180,8 @@ static void draw_totp_code(Canvas* const canvas, const PluginState* const plugin
                 offset_x,
                 scene_state->ui_precalculated_dimensions.code_offset_y,
                 char_width,
-                TOTP_CODE_FONT_INFO.height,
-                &TOTP_CODE_FONT_INFO.data[TOTP_CODE_FONT_INFO.charInfo[char_index].offset]);
+                current_font->height,
+                &current_font->data[current_font->charInfo[char_index].offset]);
         }
 
         offset_x += offset_x_inc;
