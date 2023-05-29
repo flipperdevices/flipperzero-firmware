@@ -71,6 +71,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Implement support for reading Opal card (Sydney, Australia) #2683 (By micolous)](https://github.com/flipperdevices/flipperzero-firmware/pull/2683)
 - OFW: [BadUSB: script execution pause #2700 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2700)
 - OFW: IR: [Add Carrier 42QHB12D8S #2707 (By minchogaydarov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2700)
+- Temporarily removed HITAG RFID support
 
 <a name="release">
 
