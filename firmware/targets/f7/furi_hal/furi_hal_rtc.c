@@ -39,7 +39,13 @@ typedef struct {
 
 _Static_assert(sizeof(SystemReg) == 4, "SystemReg size mismatch");
 
-const uint8_t furi_hal_rtc_days_per_month[2][FURI_HAL_RTC_MONTHS_COUNT] = {
+#define FURI_HAL_RTC_SECONDS_PER_MINUTE 60
+#define FURI_HAL_RTC_SECONDS_PER_HOUR (FURI_HAL_RTC_SECONDS_PER_MINUTE * 60)
+#define FURI_HAL_RTC_SECONDS_PER_DAY (FURI_HAL_RTC_SECONDS_PER_HOUR * 24)
+#define FURI_HAL_RTC_MONTHS_COUNT 12
+#define FURI_HAL_RTC_EPOCH_START_YEAR 1970
+
+static const uint8_t furi_hal_rtc_days_per_month[2][FURI_HAL_RTC_MONTHS_COUNT] = {
     {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
     {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
 
@@ -387,7 +393,7 @@ uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime) {
     uint8_t leap_years = 0;
 
     for(uint16_t y = FURI_HAL_RTC_EPOCH_START_YEAR; y < datetime->year; y++) {
-        if(FURI_HAL_RTC_IS_LEAP_YEAR(y)) {
+        if(furi_hal_rtc_is_leap_year(y)) {
             leap_years++;
         } else {
             years++;
@@ -398,10 +404,10 @@ uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime) {
         ((years * furi_hal_rtc_days_per_year[0]) + (leap_years * furi_hal_rtc_days_per_year[1])) *
         FURI_HAL_RTC_SECONDS_PER_DAY;
 
-    uint8_t year_index = (FURI_HAL_RTC_IS_LEAP_YEAR(datetime->year)) ? 1 : 0;
+    bool leap_year = furi_hal_rtc_is_leap_year(datetime->year);
 
-    for(uint8_t m = 0; m < (datetime->month - 1); m++) {
-        timestamp += furi_hal_rtc_days_per_month[year_index][m] * FURI_HAL_RTC_SECONDS_PER_DAY;
+    for(uint8_t m = 1; m < datetime->month; m++) {
+        timestamp += furi_hal_rtc_get_days_per_month(leap_year, m) * FURI_HAL_RTC_SECONDS_PER_DAY;
     }
 
     timestamp += (datetime->day - 1) * FURI_HAL_RTC_SECONDS_PER_DAY;
@@ -410,4 +416,16 @@ uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime) {
     timestamp += datetime->second;
 
     return timestamp;
+}
+
+uint16_t furi_hal_rtc_get_days_per_year(uint16_t year) {
+    return furi_hal_rtc_days_per_year[furi_hal_rtc_is_leap_year(year) ? 1 : 0];
+}
+
+bool furi_hal_rtc_is_leap_year(uint16_t year) {
+    return (((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0);
+}
+
+uint8_t furi_hal_rtc_get_days_per_month(bool leap_year, uint8_t month) {
+    return furi_hal_rtc_days_per_month[leap_year ? 1 : 0][month - 1];
 }

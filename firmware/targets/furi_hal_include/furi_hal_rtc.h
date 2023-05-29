@@ -12,17 +12,6 @@
 extern "C" {
 #endif
 
-#define FURI_HAL_RTC_SECONDS_PER_MINUTE 60
-#define FURI_HAL_RTC_SECONDS_PER_HOUR (FURI_HAL_RTC_SECONDS_PER_MINUTE * 60)
-#define FURI_HAL_RTC_SECONDS_PER_DAY (FURI_HAL_RTC_SECONDS_PER_HOUR * 24)
-#define FURI_HAL_RTC_EPOCH_START_YEAR 1970
-#define FURI_HAL_RTC_IS_LEAP_YEAR(year) \
-    ((((year) % 4 == 0) && ((year) % 100 != 0)) || ((year) % 400 == 0))
-
-#define FURI_HAL_RTC_MONTHS_COUNT 12
-
-extern const uint8_t furi_hal_rtc_days_per_month[2][FURI_HAL_RTC_MONTHS_COUNT];
-
 typedef struct {
     // Time
     uint8_t hour; /**< Hour in 24H format: 0-23 */
@@ -265,6 +254,30 @@ uint32_t furi_hal_rtc_get_timestamp();
  * @return     UNIX Timestamp in seconds from UNIX epoch start
  */
 uint32_t furi_hal_rtc_datetime_to_timestamp(FuriHalRtcDateTime* datetime);
+
+/** Gets the number of days in the year according to the Gregorian calendar.
+ *
+ * @param year Input year.
+ *
+ * @return number of days in `year`.
+ */
+uint16_t furi_hal_rtc_get_days_per_year(uint16_t year);
+
+/** Check if a year a leap year in the Gregorian calendar.
+ *
+ * @param year Input year.
+ *
+ * @return true if `year` is a leap year.
+ */
+bool furi_hal_rtc_is_leap_year(uint16_t year);
+
+/** Get the number of days in the month.
+ *
+ * @param leap_year true to calculate based on leap years
+ * @param month month to check, where 1 = January
+ * @return the number of days in the month
+ */
+uint8_t furi_hal_rtc_get_days_per_month(bool leap_year, uint8_t month);
 
 #ifdef __cplusplus
 }

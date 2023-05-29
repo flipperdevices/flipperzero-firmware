@@ -64,7 +64,7 @@ void opal_date_time_to_furi(uint16_t days, uint16_t minutes, FuriHalRtcDateTime*
     if(!out) return;
     uint16_t diy;
     out->year = 1980;
-    out->month = 0;
+    out->month = 1;
     // 1980-01-01 is a Tuesday
     out->weekday = ((days + 1) % 7) + 1;
     out->hour = minutes / 60;
@@ -73,7 +73,7 @@ void opal_date_time_to_furi(uint16_t days, uint16_t minutes, FuriHalRtcDateTime*
 
     // What year is it?
     for(;;) {
-        diy = (FURI_HAL_RTC_IS_LEAP_YEAR(out->year) ? 366 : 365);
+        diy = furi_hal_rtc_get_days_per_year(out->year);
         if(days < diy) break;
         days -= diy;
         out->year++;
@@ -82,16 +82,15 @@ void opal_date_time_to_furi(uint16_t days, uint16_t minutes, FuriHalRtcDateTime*
     // 1-index the day of the year
     days++;
     // What month is it?
-    uint8_t is_leap = diy - 365;
+    bool is_leap = furi_hal_rtc_is_leap_year(out->year);
 
     for(;;) {
-        uint8_t dim = furi_hal_rtc_days_per_month[is_leap][out->month];
+        uint8_t dim = furi_hal_rtc_get_days_per_month(is_leap, out->month);
         if(days <= dim) break;
         days -= dim;
         out->month++;
     }
 
-    out->month++;
     out->day = days;
 }
 
