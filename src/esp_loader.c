@@ -234,10 +234,33 @@ static esp_loader_error_t detect_flash_size(size_t *flash_size)
     return ESP_LOADER_SUCCESS;
 }
 
+static uint32_t calc_erase_size(const target_chip_t target, const uint32_t offset,
+                                const uint32_t image_size)
+{
+    if (target != ESP8266_CHIP) {
+        return image_size;
+    } else {
+        /* Needed to fix a bug in the ESP8266 ROM */
+        const uint32_t sectors_per_block = 16U;
+        const uint32_t sector_size = 4096U;
+
+        const uint32_t num_sectors = (image_size + sector_size - 1) / sector_size;
+        const uint32_t start_sector = offset / sector_size;
+
+        uint32_t head_sectors = sectors_per_block - (start_sector % sectors_per_block);
+
+        /* The ROM bug deletes extra num_sectors if we don't cross the block boundary
+           and extra head_sectors if we do */
+        if (num_sectors <= head_sectors) {
+            return ((num_sectors + 1) / 2) * sector_size;
+        } else {
+            return (num_sectors - head_sectors) * sector_size;
+        }
+    }
+}
+
 esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, uint32_t block_size)
 {
-    uint32_t blocks_to_write = (image_size + block_size - 1) / block_size;
-    uint32_t erase_size = block_size * blocks_to_write;
     s_flash_write_size = block_size;
 
     size_t flash_size = 0;
@@ -254,6 +277,8 @@ esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, 
     init_md5(offset, image_size);
 
     bool encryption_in_cmd = encryption_in_begin_flash_cmd(s_target);
+    const uint32_t erase_size = calc_erase_size(esp_loader_get_target(), offset, image_size);
+    const uint32_t blocks_to_write = (image_size + block_size - 1) / block_size;
 
     loader_port_start_timer(timeout_per_mb(erase_size, ERASE_REGION_TIMEOUT_PER_MB));
     return loader_flash_begin_cmd(offset, erase_size, block_size, blocks_to_write, encryption_in_cmd);
