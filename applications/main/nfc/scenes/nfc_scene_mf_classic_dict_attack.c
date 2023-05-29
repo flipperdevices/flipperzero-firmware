@@ -38,8 +38,6 @@ MfClassicPollerCommand nfc_dict_attack_worker_callback(MfClassicPollerEvent even
     } else if(event.type == MfClassicPollerEventTypeReadComplete) {
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackComplete);
-    } else if(event.type == MfClassicPollerEventTypeReadFail) {
-        // TODO
     }
 
     return MfClassicPollerCommandContinue;

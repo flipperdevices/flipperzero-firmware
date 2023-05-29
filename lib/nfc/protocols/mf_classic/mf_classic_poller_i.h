@@ -55,6 +55,7 @@ struct MfClassicPoller {
     MfClassicKey current_key;
     MfClassicPollerEventData event_data;
     uint8_t sectors_read;
+    uint8_t key_reuse_sector;
     uint8_t sectors_total;
     Crypto1* crypto;
     NfcPollerBuffer* plain_buff;

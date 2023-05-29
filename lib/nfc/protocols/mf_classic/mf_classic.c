@@ -218,7 +218,7 @@ uint8_t mf_classic_get_first_block_num_of_sector(uint8_t sector) {
     return block;
 }
 
-static uint8_t mf_classic_get_blocks_num_in_sector(uint8_t sector) {
+uint8_t mf_classic_get_blocks_num_in_sector(uint8_t sector) {
     furi_assert(sector < 40);
     return sector < 32 ? 4 : 16;
 }

@@ -102,7 +102,11 @@ MfClassicPollerCommand mf_classic_poller_handler_new_sector(MfClassicPoller* ins
     MfClassicPollerEvent event = {};
 
     if(instance->sectors_read == instance->sectors_total) {
-        instance->state = MfClassicPollerStateReadComplete;
+        if(instance->read_mode == MfClassicReadModeKeyReuse) {
+            instance->read_mode = MfClassicReadModeDictAttack;
+        } else {
+            instance->state = MfClassicPollerStateReadComplete;
+        }
     } else if(mf_classic_is_sector_read(instance->data, instance->sectors_read)) {
         instance->sectors_read++;
         event.type = MfClassicPollerEventTypeNewSector;
@@ -150,6 +154,10 @@ MfClassicPollerCommand mf_classic_poller_handler_auth_a(MfClassicPoller* instanc
             FURI_LOG_I(TAG, "Key A found");
             mf_classic_set_key_found(
                 instance->data, instance->sectors_read, MfClassicKeyTypeA, key);
+            if(instance->sectors_read < instance->sectors_total - 1) {
+                instance->read_mode = MfClassicReadModeKeyReuse;
+                instance->key_reuse_sector = instance->sectors_read;
+            }
             event.type = MfClassicPollerEventTypeFoundKeyA;
             command = instance->callback(event, instance->context);
             instance->prev_state = instance->state;
@@ -166,19 +174,30 @@ MfClassicPollerCommand mf_classic_poller_handler_auth_b(MfClassicPoller* instanc
     MfClassicPollerCommand command = MfClassicPollerCommandContinue;
     MfClassicPollerEvent event = {};
 
-    uint8_t block = mf_classic_get_first_block_num_of_sector(instance->sectors_read);
-    uint64_t key = nfc_util_bytes2num(instance->current_key.data, 6);
-    FURI_LOG_D(TAG, "Auth to block %d with key B: %06llx", block, key);
-    MfClassicError error =
-        mf_classic_async_auth(instance, block, &instance->current_key, MfClassicKeyTypeB, NULL);
-    if(error == MfClassicErrorNone) {
-        FURI_LOG_D(TAG, "Key B found");
-        event.type = MfClassicPollerEventTypeFoundKeyB;
-        command = instance->callback(event, instance->context);
-        // TODO read here
-        instance->state = MfClassicPollerStateRequestKey;
+    if(mf_classic_is_key_found(instance->data, instance->sectors_read, MfClassicKeyTypeB)) {
+        instance->prev_state = instance->state;
+        instance->state = MfClassicPollerStateNewSector;
     } else {
-        instance->state = MfClassicPollerStateRequestKey;
+        uint8_t block = mf_classic_get_first_block_num_of_sector(instance->sectors_read);
+        uint64_t key = nfc_util_bytes2num(instance->current_key.data, 6);
+        FURI_LOG_D(TAG, "Auth to block %d with key B: %06llx", block, key);
+        MfClassicError error = mf_classic_async_auth(
+            instance, block, &instance->current_key, MfClassicKeyTypeB, NULL);
+        if(error == MfClassicErrorNone) {
+            FURI_LOG_D(TAG, "Key B found");
+            event.type = MfClassicPollerEventTypeFoundKeyB;
+            mf_classic_set_key_found(
+                instance->data, instance->sectors_read, MfClassicKeyTypeB, key);
+            if(instance->sectors_read < instance->sectors_total - 1) {
+                instance->read_mode = MfClassicReadModeKeyReuse;
+                instance->key_reuse_sector = instance->sectors_read;
+            }
+            command = instance->callback(event, instance->context);
+            instance->prev_state = instance->state;
+            instance->state = MfClassicPollerStateReadSector;
+        } else {
+            instance->state = MfClassicPollerStateRequestKey;
+        }
     }
 
     return command;
@@ -186,9 +205,28 @@ MfClassicPollerCommand mf_classic_poller_handler_auth_b(MfClassicPoller* instanc
 
 MfClassicPollerCommand mf_classic_poller_handler_read_sector(MfClassicPoller* instance) {
     MfClassicPollerCommand command = MfClassicPollerCommandContinue;
-    MfClassicPollerEvent event = {.type = MfClassicPollerEventTypeReadComplete};
-    command = instance->callback(event, instance->context);
-    instance->state = MfClassicPollerStateIdle;
+
+    uint8_t block_start = mf_classic_get_first_block_num_of_sector(instance->sectors_read);
+    uint8_t total_blocks = mf_classic_get_blocks_num_in_sector(instance->sectors_read);
+    MfClassicBlock block = {};
+
+    for(size_t i = block_start; i < block_start + total_blocks; i++) {
+        if(mf_classic_is_block_read(instance->data, i)) continue;
+        MfClassicError error = mf_classic_async_read_block(instance, i, &block);
+        if(error == MfClassicErrorNone) {
+            mf_classic_set_block_read(instance->data, i, &block);
+        } else {
+            FURI_LOG_D(TAG, "Failed to read %d block", i);
+            break;
+        }
+    }
+
+    instance->prev_state = instance->state;
+    if(instance->prev_state == MfClassicPollerStateAuthKeyA) {
+        instance->state = MfClassicPollerStateAuthKeyB;
+    } else {
+        instance->state = MfClassicPollerStateNewSector;
+    }
 
     return command;
 }
