@@ -73,6 +73,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: IR: [Add Carrier 42QHB12D8S #2707 (By minchogaydarov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2700)
 - Temporarily removed HITAG RFID support
 - Updated: [Mifare Nested 1.5.0 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
+- Updated: [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77) (By xMasterX)
 
 <a name="release">
 

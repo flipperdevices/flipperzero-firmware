@@ -113,18 +113,14 @@ void dcf77_lf_init(int freq, AppFSM* app_fsm) {
     // LL_TIM_OC_SetCompareCH1(FURI_HAL_RFID_READ_TIMER, period*duty_cycle);
     */
 
-    furi_hal_rfid_tim_reset();
     furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
     furi_hal_rfid_comp_set_callback(comparator_trigger_callback, app_fsm);
-    furi_hal_rfid_pins_read();
-    furi_hal_rfid_tim_read(freq, 0.5);
+    furi_hal_rfid_tim_read_start(freq, 0.5);
 }
 
 void dcf77_mark(int freq) {
-    furi_hal_rfid_tim_reset();
-    furi_hal_rfid_tim_read(freq, 0.5);
     furi_hal_rfid_comp_start();
-    furi_hal_rfid_tim_read_start();
+    furi_hal_rfid_tim_read_start(freq, 0.5);
     /* --- */
     furi_hal_rfid_comp_stop();
     furi_hal_rfid_tim_read_stop();
@@ -141,7 +137,6 @@ void dcf77_deinit() {
     furi_hal_rfid_comp_set_callback(NULL, NULL);
     furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeAnalog);
     furi_hal_rfid_tim_read_stop();
-    furi_hal_rfid_tim_reset();
     furi_hal_rfid_pins_reset();
 }
 
