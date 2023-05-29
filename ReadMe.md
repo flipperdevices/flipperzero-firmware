@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0528-2127-0.83.2-ec6d2a6](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-05-29 10:15 JST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-05-29 10:15 JST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-05-30 08:00 JST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-05-30 08:00 JST`
 - Cleaned up GitHub branch so all CFW/UL/RM changes are in 4 commits... going from 7118 commits to 2694 commits (mostly added from UL merge check)...
 - UL: [Clock on desktop #484 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/484)
 - Updated: [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
@@ -63,6 +63,14 @@ This software is for experimental purposes only and is not meant for any illegal
 - ReAdded NFC Magic Gen 1 Old App For Testing
 - Updated: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
 - Updated: [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
+- Infrared module with external power fixes (Thanks qqMajikpp for troubleshooting help)
+- UL: [Desktop Clock: some improvements #490 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/490)
+- UL: Fixes for new bus changes (By xMasterX)
+- OFW: [fbt: added hooks for build & dist environments; added FW_ORIGIN_* macro for apps & SDK #2705 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2705)
+- OFW: [FuriHal: add bus abstraction #2614 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2614)
+- OFW: [Implement support for reading Opal card (Sydney, Australia) #2683 (By micolous)](https://github.com/flipperdevices/flipperzero-firmware/pull/2683)
+- OFW: [BadUSB: script execution pause #2700 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2700)
+- OFW: IR: [Add Carrier 42QHB12D8S #2707 (By minchogaydarov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2700)
 
 <a name="release">
 
