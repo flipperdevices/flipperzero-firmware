@@ -75,8 +75,8 @@ bool nfc_supported_card_verify_and_parse(NfcDeviceData* dev_data) {
     return card_parsed;
 }
 
-bool stub_parser_verify_read(
-    NfcWorker* nfc_worker __attribute__((unused)),
-    FuriHalNfcTxRxContext* tx_rx __attribute__((unused))) {
+bool stub_parser_verify_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+    UNUSED(nfc_worker);
+    UNUSED(tx_rx);
     return false;
 }
