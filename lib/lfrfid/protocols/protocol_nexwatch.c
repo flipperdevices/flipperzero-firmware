@@ -150,8 +150,6 @@ static void protocol_nexwatch_descramble(uint32_t* id, uint32_t* scrambled) {
 
     *id = 0;
     for(uint8_t idx = 0; idx < 32; idx++) {
-        if(hex_2_id[idx] == 255) continue;
-
         bool bit_state = (*scrambled >> hex_2_id[idx]) & 1;
         *id |= (bit_state << (31 - idx));
     }
