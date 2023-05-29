@@ -72,6 +72,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [BadUSB: script execution pause #2700 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2700)
 - OFW: IR: [Add Carrier 42QHB12D8S #2707 (By minchogaydarov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2700)
 - Temporarily removed HITAG RFID support
+- Updated: [Mifare Nested 1.5.0 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 
 <a name="release">
 
@@ -370,7 +371,7 @@ $ ./fbt dolphin_ext
 - [Mfkey32 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - [Mifare Fuzzer (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
-- [Mifare Nested 1.4.6 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
+- [Mifare Nested 1.5.0 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 - [Morse Code (By wh00hw)](https://github.com/DarkFlippers/unleashed-firmware/pull/144)
 - [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) ([Pin Out](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/tree/420/applications/mousejacker) from nocomp/Frog/UberGuidoZ) `Req: NRF24`
 - [Mouse Jiggler (By Jacob-Tate)](https://github.com/Jacob-Tate/flipperzero-firmware/blob/dev/applications/mouse_jiggler/mouse_jiggler.c) (Original By MuddleBox)
