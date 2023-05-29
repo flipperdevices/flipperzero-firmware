@@ -22,19 +22,6 @@ bool magic_gen1_wupa() {
     FuriHalNfcReturn ret = 0;
 
     do {
-        // Setup nfc poller
-        furi_hal_nfc_exit_sleep();
-        furi_hal_nfc_ll_txrx_on();
-        furi_hal_nfc_ll_poll();
-        ret = furi_hal_nfc_ll_set_mode(
-            FuriHalNfcModePollNfca, FuriHalNfcBitrate106, FuriHalNfcBitrate106);
-        if(ret != FuriHalNfcReturnOk) break;
-
-        furi_hal_nfc_ll_set_fdt_listen(FURI_HAL_NFC_LL_FDT_LISTEN_NFCA_POLLER);
-        furi_hal_nfc_ll_set_fdt_poll(FURI_HAL_NFC_LL_FDT_POLL_NFCA_POLLER);
-        furi_hal_nfc_ll_set_error_handling(FuriHalNfcErrorHandlingNfc);
-        furi_hal_nfc_ll_set_guard_time(FURI_HAL_NFC_LL_GT_NFCA);
-
         // Start communication
         tx_data[0] = MAGIC_CMD_WUPA;
         ret = furi_hal_nfc_ll_txrx_bits(

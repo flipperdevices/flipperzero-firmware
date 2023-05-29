@@ -94,7 +94,8 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
         do {
             if(magic_dev->type == MagicTypeClassicGen1) {
                 if(furi_hal_nfc_detect(&nfc_data, 200)) {
-                    furi_hal_nfc_sleep();
+                    magic_deactivate();
+                    magic_activate();
                     if(!magic_gen1_wupa()) {
                         FURI_LOG_E(TAG, "No card response to WUPA (not a magic card)");
                         nfc_magic_worker->callback(
@@ -102,8 +103,9 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                         done = true;
                         break;
                     }
-                    furi_hal_nfc_sleep();
+                    magic_deactivate();
                 }
+                magic_activate();
                 if(magic_gen1_wupa()) {
                     if(!magic_gen1_data_access_cmd()) {
                         FURI_LOG_E(
