@@ -34,7 +34,7 @@ SubGhzTxRx* subghz_txrx_alloc() {
     subghz_environment_set_nice_flor_s_rainbow_table_file_name(
         instance->environment, EXT_PATH("subghz/assets/nice_flor_s"));
     subghz_environment_set_protocol_registry(
-        instance->environment, (void*)&subghz_protocol_registry);
+        instance->environment, &subghz_protocol_registry);
     instance->receiver = subghz_receiver_alloc_init(instance->environment);
 
     subghz_worker_set_overrun_callback(

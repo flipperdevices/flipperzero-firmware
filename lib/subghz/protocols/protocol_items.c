@@ -1,4 +1,5 @@
 #include "protocol_items.h"
+#include "../subghz_protocol_registry.h"
 
 const SubGhzProtocol* subghz_protocol_registry_items[] = {
     &subghz_protocol_gate_tx,
