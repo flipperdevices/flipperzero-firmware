@@ -56,6 +56,24 @@ static const char* opal_usages[14] = {
     "Unknown usage",
 };
 
+// Opal file 0x7 structure. Assumes a little-endian CPU.
+typedef struct __attribute__((__packed__)) {
+    uint32_t serial : 32;
+    uint8_t check_digit : 4;
+    bool blocked : 1;
+    uint16_t txn_number : 16;
+    int32_t balance : 21;
+    uint16_t days : 15;
+    uint16_t minutes : 11;
+    uint8_t mode : 3;
+    uint16_t usage : 4;
+    bool auto_topup : 1;
+    uint8_t weekly_journeys : 4;
+    uint16_t checksum : 16;
+} OpalFile;
+
+static_assert(sizeof(OpalFile) == 16);
+
 // Converts an Opal timestamp to FuriHalRtcDateTime.
 //
 // Opal measures days since 1980-01-01 and minutes since midnight, and presumes
@@ -109,55 +127,45 @@ bool opal_parser_parse(NfcDeviceData* dev_data) {
         return false;
     }
 
-    uint32_t serial = *(uint32_t*)(f->contents); // bit 96..127
-    uint8_t serial2 = serial / 10000000;
-    uint16_t serial3 = (serial / 1000) % 10000;
-    uint16_t serial4 = (serial % 1000);
+    OpalFile* o = (OpalFile*)f->contents;
 
-    uint8_t check_digit = f->contents[4] & 0x0f; // bit 92..95
-    if(check_digit > 9) {
+    uint8_t serial2 = o->serial / 10000000;
+    uint16_t serial3 = (o->serial / 1000) % 10000;
+    uint16_t serial4 = (o->serial % 1000);
+
+    if(o->check_digit > 9) {
         return false;
     }
-    bool blocked = (f->contents[4] >> 4) & 0x1; // bit 91
-    uint16_t txn_number = (*(uint32_t*)(f->contents + 4)) >> 5; // bit 75..90
 
-    int32_t balance = ((*(uint32_t*)(f->contents + 6)) >> 5) & 0x1fffff; // bit 54..74
     char* sign = "";
-    if((balance & 0x100000) > 0) {
+    if(o->balance < 0) {
         // Negative balance. Make this a positive value again and record the
         // sign separately, because then we can handle balances of -99..-1
         // cents, as the "dollars" division below would result in a positive
         // zero value.
-        balance = abs((int32_t)(balance | 0xfff00000));
+        o->balance = abs(o->balance);
         sign = "-";
     }
-    uint8_t cents = balance % 100;
-    int32_t dollars = balance / 100;
+    uint8_t cents = o->balance % 100;
+    int32_t dollars = o->balance / 100;
 
-    uint16_t days = ((*(uint32_t*)(f->contents + 9)) >> 2) & 0x7fff; // bit 39..53
-    uint16_t minutes = ((*(uint32_t*)(f->contents + 11)) >> 1) & 0x7ff; // bit 28..38
     FuriHalRtcDateTime timestamp;
-    opal_date_time_to_furi(days, minutes, &timestamp);
+    opal_date_time_to_furi(o->days, o->minutes, &timestamp);
 
-    uint8_t mode = ((*(uint16_t*)(f->contents + 12)) >> 4) & 0x7; // bit 25..27
-    if(mode >= 3) {
+    if(o->mode >= 3) {
         // 3..7 are "reserved", but we use 4 to indicate the Manly Ferry.
-        mode = 3;
+        o->mode = 3;
     }
 
-    uint8_t usage = ((*(uint16_t*)(f->contents + 12)) >> 7) & 0xf; // bit 21..24
-    if(usage >= 4 && usage <= 6) {
+    if(o->usage >= 4 && o->usage <= 6) {
         // Usages 4..6 associated with the Manly Ferry, which correspond to
         // usages 1..3 for other modes.
-        usage -= 3;
-        mode = 4;
+        o->usage -= 3;
+        o->mode = 4;
     }
 
-    bool auto_topup = (f->contents[13] >> 3) & 0x1; // bit 20
-    uint8_t weekly_journeys = f->contents[13] >> 4; // bit 16..19
-
-    const char* mode_str = (mode <= 4 ? opal_modes[mode] : opal_modes[3]);
-    const char* usage_str = (usage <= 12 ? opal_usages[usage] : opal_usages[13]);
+    const char* mode_str = (o->mode <= 4 ? opal_modes[o->mode] : opal_modes[3]);
+    const char* usage_str = (o->usage <= 12 ? opal_usages[o->usage] : opal_usages[13]);
 
     furi_string_printf(
         dev_data->parsed_data,
@@ -168,7 +176,7 @@ bool opal_parser_parse(NfcDeviceData* dev_data) {
         serial2,
         serial3,
         serial4,
-        check_digit,
+        o->check_digit,
         mode_str,
         usage_str);
     FuriString* timestamp_str = furi_string_alloc();
@@ -181,12 +189,15 @@ bool opal_parser_parse(NfcDeviceData* dev_data) {
 
     furi_string_free(timestamp_str);
     furi_string_cat_printf(
-        dev_data->parsed_data, "\nWeekly journeys: %hhu, Txn #%hu\n", weekly_journeys, txn_number);
+        dev_data->parsed_data,
+        "\nWeekly journeys: %hhu, Txn #%hu\n",
+        o->weekly_journeys,
+        o->txn_number);
 
-    if(auto_topup) {
+    if(o->auto_topup) {
         furi_string_cat_str(dev_data->parsed_data, "Auto-topup enabled\n");
     }
-    if(blocked) {
+    if(o->blocked) {
         furi_string_cat_str(dev_data->parsed_data, "Card blocked\n");
     }
     return true;
