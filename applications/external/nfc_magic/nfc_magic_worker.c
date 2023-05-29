@@ -390,6 +390,11 @@ void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
 
     MfClassicBlock block;
     memset(&block, 0, sizeof(MfClassicBlock));
+    MfClassicBlock empty_block;
+    memset(&empty_block, 0, sizeof(MfClassicBlock));
+    MfClassicBlock trailer_block;
+    memset(&trailer_block, 0xff, sizeof(MfClassicBlock));
+
     block.value[0] = 0x01;
     block.value[1] = 0x02;
     block.value[2] = 0x03;
@@ -397,6 +402,10 @@ void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
     block.value[4] = 0x04;
     block.value[5] = 0x08;
     block.value[6] = 0x04;
+
+    trailer_block.value[7] = 0x07;
+    trailer_block.value[8] = 0x80;
+    trailer_block.value[9] = 0x69;
 
     while(nfc_magic_worker->state == NfcMagicWorkerStateWipe) {
         do {
@@ -411,9 +420,25 @@ void nfc_magic_worker_wipe(NfcMagicWorker* nfc_magic_worker) {
                     card_found_notified = true;
                 }
 
-                if(!magic_gen1_wipe()) break;
                 if(!magic_gen1_data_access_cmd()) break;
                 if(!magic_gen1_write_blk(0, &block)) break;
+
+                for(size_t i = 1; i < 64; i++) {
+                    FURI_LOG_D(TAG, "Wiping block %d", i);
+                    bool success = false;
+                    if((i | 0x03) == i) {
+                        success = magic_gen1_write_blk(i, &trailer_block);
+                    } else {
+                        success = magic_gen1_write_blk(i, &empty_block);
+                    }
+
+                    if(!success) {
+                        FURI_LOG_E(TAG, "Failed to write %d block", i);
+                        nfc_magic_worker->callback(
+                            NfcMagicWorkerEventFail, nfc_magic_worker->context);
+                        break;
+                    }
+                }
 
                 card_wiped = true;
                 nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
