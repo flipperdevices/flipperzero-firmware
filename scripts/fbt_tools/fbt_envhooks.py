@@ -30,18 +30,14 @@ Here is a list of all available hooks:
         configuration and target creation is done.
 """
 
+
+class DefaultFbtHooks:
+    pass
+
+
 try:
     from fbt import fbt_hooks
 except ImportError:
-
-    class DefaultFbtHooks:
-        @staticmethod
-        def PreConfigureFwEnvionment(env):
-            # print("PreConfigureFwEnvionment")
-            env.Append(
-                CPPDEFINES=("FW_ORIGIN", "Official"),
-            )
-
     fbt_hooks = DefaultFbtHooks()
 
 
@@ -53,6 +49,15 @@ def generate(env):
         "PreConfigureUfbtEnvionment",
         "PostConfigureUfbtEnvionment",
     ]
+
+    if (
+        isinstance(fbt_hooks, DefaultFbtHooks)
+        and env.subst("${FIRMWARE_ORIGIN}") != "Official"
+    ):
+        # If fbt_hooks.py is not present, but we are not building official firmware,
+        # create "scripts/fbt/fbt_hooks.py" to implement changes to firmware build environment.
+        pass
+
     for hook_name in control_hooks:
         hook_fn = getattr(fbt_hooks, hook_name, stub_hook)
         env.AddMethod(hook_fn, hook_name)

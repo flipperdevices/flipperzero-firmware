@@ -103,6 +103,13 @@ lib_targets = env.BuildModules(
     ],
 )
 
+# Configure firmware origin definitions
+env.Append(
+    CPPDEFINES=[
+        env.subst("FW_ORIGIN_${FIRMWARE_ORIGIN}"),
+    ]
+)
+
 
 # Now, env is fully set up with everything to build apps
 fwenv = env.Clone(FW_ARTIFACTS=[])
