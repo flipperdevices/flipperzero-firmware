@@ -194,6 +194,7 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                     gen4_config[25] = dev_data->nfc_data.atqa[1];
                     gen4_config[26] = dev_data->nfc_data.sak;
 
+                    furi_hal_nfc_sleep();
                     furi_hal_nfc_activate_nfca(200, &cuid);
                     if(!magic_gen4_set_cfg(password, gen4_config, sizeof(gen4_config), false)) {
                         nfc_magic_worker->callback(
