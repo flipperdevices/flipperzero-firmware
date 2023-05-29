@@ -61,6 +61,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGHz: Security+ 2.0 -> add extra custom button `0x78` - Fixes issue #469 (By xMasterX)
 - Updated: OFW PR 2680: RFID - Add support for Nexkey/Nexwatch (By mauimauer)
 - ReAdded NFC Magic Gen 1 Old App For Testing
+- Updated: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
+- Updated: [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
 
 <a name="release">
 
