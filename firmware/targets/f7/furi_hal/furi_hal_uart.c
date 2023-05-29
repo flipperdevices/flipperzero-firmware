@@ -134,11 +134,15 @@ void furi_hal_uart_set_br(FuriHalUartId ch, uint32_t baud) {
 void furi_hal_uart_deinit(FuriHalUartId ch) {
     furi_hal_uart_set_irq_cb(ch, NULL, NULL);
     if(ch == FuriHalUartIdUSART1) {
-        furi_hal_bus_disable(FuriHalBusUSART1);
+        if(furi_hal_bus_is_enabled(FuriHalBusUSART1)) {
+            furi_hal_bus_disable(FuriHalBusUSART1);
+        }
         furi_hal_gpio_init(&gpio_usart_tx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(&gpio_usart_rx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     } else if(ch == FuriHalUartIdLPUART1) {
-        furi_hal_bus_disable(FuriHalBusLPUART1);
+        if(furi_hal_bus_is_enabled(FuriHalBusLPUART1)) {
+            furi_hal_bus_disable(FuriHalBusLPUART1);
+        }
         furi_hal_gpio_init(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }

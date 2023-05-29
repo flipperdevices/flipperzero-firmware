@@ -5,6 +5,7 @@ extern "C" {
 #endif
 
 #include "stm32wbxx.h"
+#include "stdbool.h"
 
 typedef enum {
     FuriHalBusAHB1_GRP1,
@@ -92,6 +93,19 @@ void furi_hal_bus_reset(FuriHalBus bus);
  * @warning Peripheral must be in enabled state in order to be disabled.
  */
 void furi_hal_bus_disable(FuriHalBus bus);
+
+/** Check if peripheral is enabled
+ *
+ * @warning    FuriHalBusAPB3_GRP1 is a special group of shared peripherals, for
+ *             core1 its clock is always on and the only status we can report is
+ *             peripheral reset status. Check code and Reference Manual for
+ *             details.
+ *
+ * @param[in]  bus   The peripheral to check
+ *
+ * @return     true if enabled or always enabled, false otherwise
+ */
+bool furi_hal_bus_is_enabled(FuriHalBus bus);
 
 #ifdef __cplusplus
 }

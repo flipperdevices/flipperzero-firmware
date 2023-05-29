@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,27.1,,
+Version,+,27.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -879,6 +879,7 @@ Function,+,furi_hal_bus_deinit_early,void,
 Function,+,furi_hal_bus_disable,void,FuriHalBus
 Function,+,furi_hal_bus_enable,void,FuriHalBus
 Function,+,furi_hal_bus_init_early,void,
+Function,+,furi_hal_bus_is_enabled,_Bool,FuriHalBus
 Function,+,furi_hal_bus_reset,void,FuriHalBus
 Function,+,furi_hal_cdc_get_ctrl_line_state,uint8_t,uint8_t
 Function,+,furi_hal_cdc_get_port_settings,usb_cdc_line_coding*,uint8_t

@@ -271,3 +271,32 @@ void furi_hal_bus_disable(FuriHalBus bus) {
     }
     FURI_CRITICAL_EXIT();
 }
+
+bool furi_hal_bus_is_enabled(FuriHalBus bus) {
+    furi_check(bus < FuriHalBusMAX);
+    const uint32_t value = furi_hal_bus[bus];
+    if(value == FURI_HAL_BUS_IGNORE) {
+        return true;
+    }
+
+    bool ret = false;
+    FURI_CRITICAL_ENTER();
+    if(bus < FuriHalBusAHB2_GRP1) {
+        ret = FURI_HAL_BUS_IS_PERIPH_ENABLED(AHB1, value);
+    } else if(bus < FuriHalBusAHB3_GRP1) {
+        ret = FURI_HAL_BUS_IS_PERIPH_ENABLED(AHB2, value);
+    } else if(bus < FuriHalBusAPB1_GRP1) {
+        ret = FURI_HAL_BUS_IS_PERIPH_ENABLED(AHB3, value);
+    } else if(bus < FuriHalBusAPB1_GRP2) {
+        ret = FURI_HAL_BUS_IS_PERIPH_ENABLED(APB1, value, 1);
+    } else if(bus < FuriHalBusAPB2_GRP1) {
+        ret = FURI_HAL_BUS_IS_PERIPH_ENABLED(APB1, value, 2);
+    } else if(bus < FuriHalBusAPB3_GRP1) {
+        ret = FURI_HAL_BUS_IS_PERIPH_ENABLED(APB2, value);
+    } else {
+        ret = FURI_HAL_BUS_IS_RESET_DEASSERTED(APB3, value);
+    }
+    FURI_CRITICAL_EXIT();
+
+    return ret;
+}
