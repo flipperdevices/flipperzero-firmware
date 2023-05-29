@@ -267,7 +267,6 @@ void furi_hal_bt_reinit() {
     furi_hal_bus_disable(FuriHalBusAES2);
     furi_hal_bus_disable(FuriHalBusPKA);
 
-
     FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_bt_init();
 
