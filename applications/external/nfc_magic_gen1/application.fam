@@ -1,0 +1,22 @@
+App(
+    appid="NFC_Magic_Gen1",
+    name="NFC Magic [Gen1]",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="nfc_magic_g1_app",
+    requires=[
+        "storage",
+        "gui",
+    ],
+    stack_size=4 * 1024,
+    order=30,
+    fap_icon="../../../assets/icons/Archive/125_10px.png",
+    fap_category="NFC",
+    fap_private_libs=[
+        Lib(
+            name="magic",
+        ),
+    ],
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="nfc_magic",
+)
