@@ -64,3 +64,5 @@ PVS-Studio.log
 *.PVS-Studio.*
 
 .gdbinit
+
+./fbt_options_local.py
