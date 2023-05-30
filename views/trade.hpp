@@ -9,6 +9,8 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 
+#include "../pokemon_app.h"
+
 #define GAME_BOY_CLK gpio_ext_pb2
 #define GAME_BOY_SI gpio_ext_pc3
 #define GAME_BOY_SO gpio_ext_pb3
@@ -53,18 +55,9 @@ typedef enum {
     DONE
 } trade_centre_state_t;
 
-typedef struct App App;
+View* trade_alloc(PokemonFap* pokemon_fap);
 
-typedef struct {
-    View* view;
-    App* app;
-} Trade;
-
-Trade* trade_alloc(App* app);
-
-void trade_free(App* app);
-
-View* trade_get_view(App* app);
+void trade_free(PokemonFap* pokemon_fap);
 
 extern unsigned char INPUT_BLOCK[405];
 extern unsigned char* DATA_BLOCK;

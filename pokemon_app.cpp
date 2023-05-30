@@ -1,6 +1,8 @@
 #include "pokemon_app.h"
+#include "views/trade.hpp"
+#include "views/select_pokemon.hpp"
 
-struct pokemon_lut pokemon_table[] = {
+const PokemonTable pokemon_table[] = {
     {"Bulbasaur", &I_bulbasaur, 0x99},
     {"Ivysaur", &I_ivysaur, 0x09},
     {"Venusaur", &I_venusaur, 0x9A},
@@ -159,66 +161,77 @@ uint32_t pokemon_exit_confirm_view(void* context) {
     UNUSED(context);
     return AppViewExitConfirm;
 }
-App* pokemon_alloc() {
-    App* app = (App*)malloc(sizeof(App));
+
+PokemonFap* pokemon_alloc() {
+    PokemonFap* pokemon_fap = (PokemonFap*)malloc(sizeof(PokemonFap));
 
     // Gui
-    app->gui = (Gui*)furi_record_open(RECORD_GUI);
-    // View dispatcher
-    app->view_dispatcher = view_dispatcher_alloc();
+    /* XXX: what is furi_record open for? It doesn't return a Gui handle. */
+    pokemon_fap->gui = (Gui*)furi_record_open(RECORD_GUI);
 
-    view_dispatcher_enable_queue(app->view_dispatcher);
-    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
-    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+    // View dispatcher
+    pokemon_fap->view_dispatcher = view_dispatcher_alloc();
+
+    view_dispatcher_enable_queue(pokemon_fap->view_dispatcher);
+    view_dispatcher_set_event_callback_context(pokemon_fap->view_dispatcher, pokemon_fap);
+    view_dispatcher_attach_to_gui(
+        pokemon_fap->view_dispatcher, pokemon_fap->gui, ViewDispatcherTypeFullscreen);
 
     //  Start Index first pokemon
-    app->current_pokemon = 0;
+    pokemon_fap->curr_pokemon = 0;
+
+    // Set up pointer to pokemon table
+    pokemon_fap->pokemon_table = pokemon_table;
+
     // Select Pokemon View
-    app->select_pokemon = select_pokemon_alloc(app);
-    view_set_previous_callback(select_pokemon_get_view(app), pokemon_exit_confirm_view);
+    pokemon_fap->select_view = select_pokemon_alloc(pokemon_fap);
+    view_set_previous_callback(select_pokemon_get_view(pokemon_fap), pokemon_exit_confirm_view);
     view_dispatcher_add_view(
-        app->view_dispatcher, AppViewSelectPokemon, select_pokemon_get_view(app));
+        pokemon_fap->view_dispatcher, AppViewSelectPokemon, select_pokemon_get_view(pokemon_fap));
 
     // Trade View
-    app->trade = trade_alloc(app);
-    view_set_previous_callback(trade_get_view(app), pokemon_exit_confirm_view);
-    view_dispatcher_add_view(app->view_dispatcher, AppViewTrade, trade_get_view(app));
+    pokemon_fap->trade_view = trade_alloc(pokemon_fap);
+    view_set_previous_callback(pokemon_fap->trade_view, pokemon_exit_confirm_view);
+    view_dispatcher_add_view(pokemon_fap->view_dispatcher, AppViewTrade, pokemon_fap->trade_view);
 
-    view_dispatcher_switch_to_view(app->view_dispatcher, AppViewSelectPokemon);
+    view_dispatcher_switch_to_view(pokemon_fap->view_dispatcher, AppViewSelectPokemon);
 
-    return app;
+    return pokemon_fap;
 }
 
-void free_app(App* app) {
-    furi_assert(app);
+void free_app(PokemonFap* pokemon_fap) {
+    furi_assert(pokemon_fap);
 
     // Free views
-    view_dispatcher_remove_view(app->view_dispatcher, AppViewSelectPokemon);
-    select_pokemon_free(app);
-    view_dispatcher_remove_view(app->view_dispatcher, AppViewTrade);
-    trade_free(app);
+    view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewSelectPokemon);
+    /* XXX: Still need to deal with select_pokemon code */
+    select_pokemon_free(pokemon_fap);
+    view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewTrade);
+    trade_free(pokemon_fap);
     // Close records
     furi_record_close(RECORD_GUI);
-    app->gui = NULL;
+    /* XXX: Since furi_record doesn't appear to be a Gui function, it wouldn't clear the pointer */
+    pokemon_fap->gui = NULL;
 
     // Free rest
-    free(app);
+    free(pokemon_fap);
+    pokemon_fap = NULL;
 }
 
 extern "C" int32_t pokemon_app(void* p) {
     UNUSED(p);
     //FURI_LOG_D(TAG, "init scene");
-    App* app = (App*)pokemon_alloc();
+    //App* app = (App*)pokemon_alloc();
+    PokemonFap* pokemon_fap = pokemon_alloc();
 
     furi_hal_light_set(LightRed, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
     furi_hal_light_set(LightBlue, 0x00);
     //switch view  and run dispatcher
-    view_dispatcher_run(app->view_dispatcher);
+    view_dispatcher_run(pokemon_fap->view_dispatcher);
 
     // Free resources
-    free_app(app);
-    furi_record_close(RECORD_GUI);
+    free_app(pokemon_fap);
 
     return 0;
 }

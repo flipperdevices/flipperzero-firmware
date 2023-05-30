@@ -9,17 +9,12 @@
 #include <gui/elements.h>
 #include <string>
 
-typedef struct App App;
+#include "../pokemon_app.h"
 
-typedef struct {
-    View* view;
-    App* app;
-} SelectPokemon;
+View* select_pokemon_alloc(PokemonFap* pokemon_fap);
 
-SelectPokemon* select_pokemon_alloc(App* app);
+void select_pokemon_free(PokemonFap* pokemon_fap);
 
-void select_pokemon_free(App* app);
-
-View* select_pokemon_get_view(App* app);
+View* select_pokemon_get_view(PokemonFap* pokemon_fap);
 
 #endif /* SELECCT_POKEMON_HPP */
