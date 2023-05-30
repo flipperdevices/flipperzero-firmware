@@ -114,6 +114,18 @@ if ($buildCustomFontFap -eq $true) {
         [PSCustomObject]@{
             CDEF = "TOTP_FONT_KARMAFUTURE";
             Subfolder = 'Karma_future'
+        },
+        [PSCustomObject]@{
+            CDEF = "TOTP_FONT_FUNCLIMBING";
+            Subfolder = 'Funclimbing'
+        },
+        [PSCustomObject]@{
+            CDEF = "TOTP_FONT_DPCOMIC";
+            Subfolder = 'DPComic'
+        },
+        [PSCustomObject]@{
+            CDEF = "TOTP_FONT_PIXELFLAG";
+            Subfolder = 'Pixel_flag'
         }
     )
 
