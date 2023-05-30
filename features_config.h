@@ -37,6 +37,9 @@
 #define TOTP_FONT_712SERIF (5)
 #define TOTP_FONT_GRAPH35PIX (6)
 #define TOTP_FONT_KARMAFUTURE (7)
+#define TOTP_FONT_FUNCLIMBING (8)
+#define TOTP_FONT_DPCOMIC (9)
+#define TOTP_FONT_PIXELFLAG (10)
 
 // End of list
 
