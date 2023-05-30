@@ -3,8 +3,7 @@
 // author: nitepone <sierra>
 
 #include "intervalometer.h"
-
-#include "gui/scene_manager.h"
+#include <gui/scene_manager.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <furi.h>
@@ -12,6 +11,7 @@
 #include <core/string.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
+#include <infrared_transmit.h>
 
 #include <input/input.h>
 
@@ -88,6 +88,12 @@ static void flipvalo_run_state_init(struct flipvalo_run_state* fv_run_state) {
 
 static int sony_ir_trigger(void* ctx) {
     UNUSED(ctx);
+    InfraredMessage message = {
+        .address = 0x1E3A,
+        .command = 0x2D,
+        .protocol = InfraredProtocolSIRC20,
+    };
+    infrared_send(&message, 1);
     return 0;
 }
 
