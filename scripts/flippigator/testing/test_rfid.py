@@ -132,6 +132,7 @@ class TestRfid(BaseCase):
             "NA PACStanley",
             "Keri",
             "Gallagher",
+            "Honeywell Nextwatch",
         ]
 
         assert menu == menu_ref, "RFID Add manually option list is wrong"

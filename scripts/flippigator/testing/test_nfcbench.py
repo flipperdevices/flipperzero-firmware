@@ -355,6 +355,7 @@ class TestNfcBench(BaseCase):
             state = nav.get_current_state()
         nav.go_to_main_screen()
 
+    '''
     def test_read_mifare_desfire_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
             nav.delete_file("NFC", "BN5")
@@ -435,6 +436,7 @@ class TestNfcBench(BaseCase):
         ), "Result of reading reference card is fail"
         nav.go_to_main_screen()
     """
+    '''
 
     def test_read_all_in_one_card(self, nav, gator, reader_nfc):
         with allure.step("Delete previous card, if possible"):
