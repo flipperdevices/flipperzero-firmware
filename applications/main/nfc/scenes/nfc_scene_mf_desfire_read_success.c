@@ -30,7 +30,7 @@ void nfc_scene_mf_desfire_read_success_on_enter(void* context) {
     }
 
     uint32_t bytes_total = 1UL << (data->version.sw_storage >> 1);
-    uint32_t bytes_free = data->free_memory ? data->free_memory->bytes : 0;
+    uint32_t bytes_free =  data->free_memory.bytes;
     furi_string_cat_printf(temp_str, "\n%lu", bytes_total);
     if(data->version.sw_storage & 1) {
         furi_string_push_back(temp_str, '+');

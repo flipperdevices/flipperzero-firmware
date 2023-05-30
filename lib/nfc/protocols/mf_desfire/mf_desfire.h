@@ -123,7 +123,7 @@ typedef enum {
 typedef struct {
     Iso14443_4aData iso14443_4a_data;
     MfDesfireVersion version;
-    MfDesfireFreeMemory* free_memory;
+    MfDesfireFreeMemory free_memory;
     MfDesfireKeySettings* master_key_settings;
     MfDesfireApplication* app_head;
 } MfDesfireData;

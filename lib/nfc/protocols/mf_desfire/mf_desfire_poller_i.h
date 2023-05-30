@@ -13,6 +13,7 @@ extern "C" {
 typedef enum {
     MfDesfirePollerStateIdle,
     MfDesfirePollerStateReadVersion,
+    MfDesfirePollerStateReadFreeMemory,
     MfDesfirePollerStateReadFailed,
     MfDesfirePollerStateReadSuccess,
 
@@ -48,6 +49,9 @@ MfDesfireError mf_desfire_send_chunks(
 
 MfDesfireError
     mf_desfire_poller_async_read_version(MfDesfirePoller* instance, MfDesfireVersion* data);
+
+MfDesfireError
+    mf_desfire_poller_async_read_free_memory(MfDesfirePoller* instance, MfDesfireFreeMemory* data);
 
 #ifdef __cplusplus
 }

@@ -84,3 +84,15 @@ MfDesfireError
         sizeof(MfDesfireVersion),
         MF_DESFIRE_POLLER_STANDARD_FWT_FC);
 }
+
+MfDesfireError
+    mf_desfire_poller_async_read_free_memory(MfDesfirePoller* instance, MfDesfireFreeMemory* data) {
+    const uint8_t cmd = MF_DESFIRE_CMD_GET_FREE_MEMORY;
+    return mf_desfire_send_chunks(
+        instance,
+        &cmd,
+        sizeof(cmd),
+        (uint8_t*)data,
+        sizeof(MfDesfireFreeMemory),
+        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+}

@@ -48,9 +48,25 @@ static MfDesfirePollerCommand mf_desfire_poller_handler_read_version(MfDesfirePo
     instance->error = mf_desfire_poller_async_read_version(instance, &instance->data->version);
     if(instance->error == MfDesfireErrorNone) {
         FURI_LOG_D(TAG, "Read version success");
-        instance->state = MfDesfirePollerStateReadSuccess;
+        instance->state = MfDesfirePollerStateReadFreeMemory;
     } else {
         FURI_LOG_E(TAG, "Failed to read version");
+        iso14443_4a_poller_halt(instance->iso14443_4a_poller);
+        instance->state = MfDesfirePollerStateReadFailed;
+    }
+
+    return MfDesfirePollerCommandContinue;
+}
+
+static MfDesfirePollerCommand
+    mf_desfire_poller_handler_read_free_memory(MfDesfirePoller* instance) {
+    instance->error =
+        mf_desfire_poller_async_read_free_memory(instance, &instance->data->free_memory);
+    if(instance->error == MfDesfireErrorNone) {
+        FURI_LOG_D(TAG, "Read free memory success");
+        instance->state = MfDesfirePollerStateReadSuccess;
+    } else {
+        FURI_LOG_E(TAG, "Failed to read free memory");
         iso14443_4a_poller_halt(instance->iso14443_4a_poller);
         instance->state = MfDesfirePollerStateReadFailed;
     }
@@ -79,6 +95,7 @@ static MfDesfirePollerCommand mf_desfire_poller_handler_read_success(MfDesfirePo
 static const MfDesfirePollerReadHandler mf_desfire_poller_read_handler[MfDesfirePollerStateNum] = {
     [MfDesfirePollerStateIdle] = mf_desfire_poller_handler_idle,
     [MfDesfirePollerStateReadVersion] = mf_desfire_poller_handler_read_version,
+    [MfDesfirePollerStateReadFreeMemory] = mf_desfire_poller_handler_read_free_memory,
     [MfDesfirePollerStateReadFailed] = mf_desfire_poller_handler_read_fail,
     [MfDesfirePollerStateReadSuccess] = mf_desfire_poller_handler_read_success,
 };
