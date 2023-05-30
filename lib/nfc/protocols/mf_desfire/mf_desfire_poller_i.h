@@ -38,6 +38,14 @@ struct MfDesfirePoller {
 
 MfDesfireError mf_desfire_process_error(Iso14443_4aError error);
 
+MfDesfireError mf_desfire_send_chunks(
+    MfDesfirePoller* instance,
+    const uint8_t* tx_data,
+    size_t tx_data_size,
+    uint8_t* rx_data,
+    size_t rx_data_size,
+    uint32_t fwt);
+
 MfDesfireError
     mf_desfire_poller_async_read_version(MfDesfirePoller* instance, MfDesfireVersion* data);
 

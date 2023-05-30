@@ -4,7 +4,7 @@
 
 #define TAG "Iso14443_4aPoller"
 
-#define ISO14443_4A_BUF_SIZE_MAX (64U)
+#define ISO14443_4A_BUF_SIZE_MAX (512U)
 
 typedef Iso14443_4aPollerCommand (*Iso14443_4aPollerStateHandler)(Iso14443_4aPoller* instance);
 
@@ -121,6 +121,8 @@ Iso14443_4aError iso14443_4a_poller_start(
     instance->buffer = nfc_poller_buffer_alloc(ISO14443_4A_BUF_SIZE_MAX, ISO14443_4A_BUF_SIZE_MAX);
 
     instance->session_state = Iso14443_4aPollerSessionStateActive;
+    instance->protocol_data.block_number = 0;
+
     nfca_poller_start(instance->iso14443_3a_poller, callback, context);
 
     return Iso14443_4aErrorNone;

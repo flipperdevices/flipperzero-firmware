@@ -26,6 +26,7 @@ typedef enum {
 typedef struct {
     Iso14443_4aAtsRequest ats_request;
     Iso14443_4aAtsResponse ats_response;
+    uint32_t block_number;
 } Iso14443_4aPollerProtocolData;
 
 struct Iso14443_4aPoller {
@@ -40,11 +41,13 @@ struct Iso14443_4aPoller {
     void* context;
 };
 
+Iso14443_4aError iso14443_4a_poller_process_error(NfcaError error);
+
 Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance);
 
 Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance);
 
-Iso14443_4aError iso14443_4a_poller_send_frame(
+Iso14443_4aError iso14443_4a_poller_send_block(
     Iso14443_4aPoller* instance,
     uint8_t* tx_data,
     uint16_t tx_bits,

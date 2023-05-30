@@ -19,6 +19,8 @@ extern "C" {
 #define MF_DESFIRE_CMD_GET_VALUE (0x6C)
 #define MF_DESFIRE_CMD_READ_RECORDS (0xBB)
 
+#define MF_DESFIRE_FLAG_HAS_NEXT (0xAF)
+
 typedef struct {
     uint8_t hw_vendor;
     uint8_t hw_type;

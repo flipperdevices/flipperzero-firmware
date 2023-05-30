@@ -4,7 +4,7 @@
 
 #define TAG "MfDesfirePoller"
 
-#define MF_DESFIRE_MAX_BUFF_SIZE (64)
+#define MF_DESFIRE_BUF_SIZE_MAX (64U)
 
 typedef MfDesfirePollerCommand (*MfDesfirePollerReadHandler)(MfDesfirePoller* instance);
 
@@ -120,7 +120,7 @@ MfDesfireError mf_desfire_poller_start(
     furi_assert(instance->session_state == MfDesfirePollerSessionStateIdle);
 
     instance->data = malloc(sizeof(MfDesfireData));
-    instance->buffer = nfc_poller_buffer_alloc(MF_DESFIRE_MAX_BUFF_SIZE, MF_DESFIRE_MAX_BUFF_SIZE);
+    instance->buffer = nfc_poller_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX, MF_DESFIRE_BUF_SIZE_MAX);
 
     instance->session_state = MfDesfirePollerSessionStateActive;
     iso14443_4a_poller_read(instance->iso14443_4a_poller, callback, context);
