@@ -24,4 +24,15 @@
 #elif TOTP_FONT == TOTP_FONT_KARMAFUTURE
 #include "karma_future/karma_future.h"
 #define TOTP_CODE_FONT_INFO karmaFuture_14ptFontInfo
+#elif TOTP_FONT == TOTP_FONT_FUNCLIMBING
+#include "funclimbing/funclimbing.h"
+#define TOTP_CODE_FONT_INFO funclimbingDemo_18ptFontInfo
+#elif TOTP_FONT == TOTP_FONT_DPCOMIC
+#include "dpcomic/dpcomic.h"
+#define TOTP_CODE_FONT_INFO dPComic_18ptFontInfo
+#elif TOTP_FONT == TOTP_FONT_PIXELFLAG
+#include "pixelflag/pixelflag.h"
+#define TOTP_CODE_FONT_INFO pixelFlag_18ptFontInfo
+#else
+#error TOTP Font is not set or unknown
 #endif
