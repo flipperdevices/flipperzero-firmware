@@ -3,7 +3,6 @@
 // author: nitepone <sierra>
 
 #include "intervalometer.h"
-#include <gui/scene_manager.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <furi.h>
@@ -42,10 +41,10 @@ struct flipvalo_config {
 
 // run time states for intervalometer
 enum flipvalo_state {
-    FVDone = 0, // done, 0 so it is default if state struct is zeroed
-    FVWaitInitShot, // waiting for first shot
-    FVWaitContShot, // waiting between "bursts" or "shots"
-    FVWaitBurst, // waiting between shots in a "burst"
+    FVDone = 0,                   // done, 0 so it is default if state struct is zeroed
+    FVWaitInitShot,               // waiting for first shot
+    FVWaitContShot,               // waiting between "bursts" or "shots"
+    FVWaitBurst,                  // waiting between shots in a "burst"
 };
 
 // run time data for intervalometer
@@ -58,9 +57,35 @@ struct flipvalo_run_state {
     int burst_cur;              // current trigger in a burst
 };
 
+enum flipvalo_config_edit_lines {
+    FvConfigEditInitDelay,
+    FvConfigEditMIN = FvConfigEditInitDelay,
+    FvConfigEditShotDelay,
+    FvConfigEditShotCount,
+    FvConfigEditBurstDelay,
+    FvConfigEditBurstCount,
+    FvConfigEditMAX = FvConfigEditBurstCount,
+};
+
+struct flipvalo_config_edit_view {
+    // the `config` that is under edit
+    struct flipvalo_config* config;
+    // the `cur_index` of the selection
+    // (e.g. editing the 3rd value of a number)
+    int cur_index;
+    // the `cur_line` of the selection
+    enum flipvalo_config_edit_lines cur_line;
+    // the current line that is at the top of the scrolled view
+    enum flipvalo_config_edit_lines scroll_pos;
+    // are we editing the selection?
+    // (this is really only needed for number fields)
+    bool edit_mode;
+};
+
 // private data of app
 struct flipvalo_priv {
     struct flipvalo_config config;
+    struct flipvalo_config_edit_view config_edit_view;
     struct flipvalo_run_state run_state;
     enum flipvalo_ui_scene ui_scene;
     FuriTimer* timer;
@@ -78,12 +103,236 @@ struct plugin_event {
     InputEvent input;
 };
 
+
+// XXX(luna) settings experimental ui kludge
+
+enum flipvalo_config_edit_line_type {
+    FvConfigEditTypeTimer,
+    FvConfigEditTypeCount,
+};
+
+
+#define ITEM_H 64 / 3
+#define ITEM_W 128
+#define VALUE_X 100
+#define VALUE_W 100
+static void flipvalo_config_edit_draw(Canvas* canvas, struct flipvalo_config_edit_view* view) {
+    int* line_value;
+    char* line_label = NULL;
+    FuriString* temp_str = furi_string_alloc();
+    enum flipvalo_config_edit_line_type line_type;
+
+    for (size_t line = 0; line < 3; line++) {
+        switch (view->scroll_pos + line) {
+            case FvConfigEditInitDelay:
+                line_value = &view->config->init_delay_msec;
+                line_type = FvConfigEditTypeTimer;
+                line_label = "Init Timer";
+                break;
+            case FvConfigEditShotDelay:
+                line_value = &view->config->interval_delay_msec;
+                line_type = FvConfigEditTypeTimer;
+                line_label = "Seq. Timer";
+                break;
+            case FvConfigEditShotCount:
+                line_value = &view->config->shot_count;
+                line_type = FvConfigEditTypeCount;
+                line_label = "Seq. Count";
+                break;
+            case FvConfigEditBurstDelay:
+                line_value = &view->config->burst_delay_msec;
+                line_type = FvConfigEditTypeTimer;
+                line_label = "Burst Timer";
+                break;
+            case FvConfigEditBurstCount:
+                line_value = &view->config->burst_count;
+                line_type = FvConfigEditTypeCount;
+                line_label = "Burst Count";
+                break;
+            default:
+                continue;
+        };
+
+        canvas_set_color(canvas, ColorBlack);
+        if ((view->scroll_pos + line) == view->cur_line) {
+            elements_slightly_rounded_box(canvas, 0, ITEM_H * line + 1, ITEM_W, ITEM_H - 1);
+            canvas_set_color(canvas, ColorWhite);
+        }
+
+        uint8_t text_y = ITEM_H * line + ITEM_H / 2 + 2;
+
+        canvas_draw_str_aligned(canvas, 6, text_y, AlignLeft, AlignCenter, line_label);
+
+        switch(line_type) {
+            case FvConfigEditTypeTimer:
+                furi_string_printf(
+                        temp_str, "%02d:%02d:%02d:%03d",
+                        *line_value / 3600000,
+                        (*line_value / 60000) % 60,
+                        (*line_value / 1000) % 60,
+                        *line_value % 1000);
+                canvas_set_font(canvas, FontKeyboard);
+                canvas_draw_str_aligned(
+                        canvas, 124, text_y, AlignRight, AlignCenter,
+                        furi_string_get_cstr(temp_str));
+                canvas_set_font(canvas, FontSecondary);
+                if (view->edit_mode) {
+                    //TODO(luna) review positioning.
+                    //uint8_t icon_x = (128) - ((7 - view->cur_index - 1) * 6);
+                    //canvas_draw_icon(canvas, icon_x, text_y - 9, &I_SmallArrowUp_3x5);
+                    //canvas_draw_icon(canvas, icon_x, text_y + 5, &I_SmallArrowDown_3x5);
+                }
+                break;
+            case FvConfigEditTypeCount:
+                furi_string_printf(temp_str, "%d", *line_value);
+                canvas_draw_str_aligned(
+                        canvas, VALUE_X, text_y, AlignCenter, AlignCenter,
+                        furi_string_get_cstr(temp_str));
+                // TODO(luna) 0 values are actually more special for shot count and burst count.
+                // former being infinite, latter being uh.. nothing? not allowed?.. review this logic later.
+                if(*line_value > 0) {
+                    canvas_draw_str_aligned(
+                        canvas, VALUE_X - VALUE_W / 2, text_y, AlignCenter, AlignCenter, "<");
+                }
+                canvas_draw_str_aligned(
+                    canvas, VALUE_X + VALUE_W / 2, text_y, AlignCenter, AlignCenter, ">");
+                break;
+        }
+    }
+
+    furi_string_free(temp_str);
+}
+
+static void flipvalo_config_edit_input_move_cursor(struct flipvalo_config_edit_view* view, int dx, int dy) {
+    enum flipvalo_config_edit_lines new_line = 0;
+
+    int* line_value;
+    enum flipvalo_config_edit_line_type line_type;
+
+    switch (view->cur_line) {
+        case FvConfigEditInitDelay:
+            line_value = &view->config->init_delay_msec;
+            line_type = FvConfigEditTypeTimer;
+            break;
+        case FvConfigEditShotDelay:
+            line_value = &view->config->interval_delay_msec;
+            line_type = FvConfigEditTypeTimer;
+            break;
+        case FvConfigEditShotCount:
+            line_value = &view->config->shot_count;
+            line_type = FvConfigEditTypeCount;
+            break;
+        case FvConfigEditBurstDelay:
+            line_value = &view->config->burst_delay_msec;
+            line_type = FvConfigEditTypeTimer;
+            break;
+        case FvConfigEditBurstCount:
+            line_value = &view->config->burst_count;
+            line_type = FvConfigEditTypeCount;
+            break;
+        default:
+            return;
+    };
+
+    if (!view->edit_mode) {
+        // Do `dy` behaviors
+        new_line = view->cur_line + dy;
+        if (new_line > FvConfigEditMAX) {
+            // Out of bound cursor. No-op.
+            return;
+        }
+        view->cur_line = new_line;
+
+        // Handle moving scroll position.
+        if (new_line < view->scroll_pos) {
+            view->scroll_pos = new_line;
+        }
+        else if (new_line >= (view->scroll_pos + 3)) {
+            view->scroll_pos+=dy;
+        }
+
+        // Do `dx` behavior
+        switch (line_type) {
+            case FvConfigEditTypeCount:
+                if (*line_value + dx >= 0) {
+                    *line_value += dx;
+                }
+                break;
+            case FvConfigEditTypeTimer:
+                // no-op unless edit mode
+                break;
+        }
+    }
+    else /* edit mode */ {
+        switch (line_type) {
+            case FvConfigEditTypeCount:
+                // If current line does not edit mode.. why are we in edit mode?
+                // Reaching this would be a bug, so lets go back to normal mode.
+                view->edit_mode = false;
+                return;
+            case FvConfigEditTypeTimer:
+                // bro the math here is gonna suck.
+                // I'm doing it WRONG for now x3
+                // TODO(luna) REAL MATHS
+                if (*line_value + (dy * -100) >= 0) {
+                    *line_value += (dy * -100);
+                }
+                view->cur_index += dx;
+                if (view->cur_index < 0) {
+                    view->cur_index = 0;
+                }
+                if (view->cur_index > 10) {
+                    view->cur_index = 10;
+                }
+                break;
+        }
+    }
+}
+
+static int flipvalo_config_edit_input(InputEvent* event, struct flipvalo_config_edit_view* view) {
+    // ignore all but short and repeats
+    if (!(event->type == InputTypeShort || event->type == InputTypeRepeat)) {
+        return 0;
+    }
+    switch (event->key) {
+        case InputKeyRight:
+            flipvalo_config_edit_input_move_cursor(view, 1, 0);
+            break;
+        case InputKeyLeft:
+            flipvalo_config_edit_input_move_cursor(view, -1, 0);
+            break;
+        case InputKeyUp:
+            flipvalo_config_edit_input_move_cursor(view, 0, -1);
+            break;
+        case InputKeyDown:
+            flipvalo_config_edit_input_move_cursor(view, 0, 1);
+            break;
+        case InputKeyOk:
+            view->edit_mode = !view->edit_mode;
+            break;
+        case InputKeyBack:
+            if (view->edit_mode) {
+                view->edit_mode = false;
+            } else {
+                // exit config edit view
+                return 1;
+            }
+        default:
+            break;
+    }
+    return 0;
+}
+
+
+// XXX(luna) back to app
+
 static void flipvalo_run_state_init(struct flipvalo_run_state* fv_run_state) {
     fv_run_state->burst_cur = 0;
     fv_run_state->shot_cur = 0;
     fv_run_state->tick_next = 0;
     fv_run_state->state = FVDone;
     fv_run_state->tick_next = 0;
+    fv_run_state->tick_cur = 0;
 }
 
 static int sony_ir_trigger(void* ctx) {
@@ -203,6 +452,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
             elements_button_center(canvas, "Stop ");
         }
     }
+    else if (fv_priv->ui_scene == FVSceneConfig) {
+        flipvalo_config_edit_draw(canvas, &fv_priv->config_edit_view);
+    }
 
     furi_string_free(temp_str);
     furi_mutex_release(fv_priv->mutex);
@@ -274,32 +526,54 @@ int32_t flipvalo_app() {
         }
 
         // handle input
-        if (event.type == EventTypeKey) {
-            if (event.input.type == InputTypeShort) {
-                switch (event.input.key) {
-                    case InputKeyUp:
-                        break;
-                    case InputKeyDown:
-                        break;
-                    case InputKeyLeft:
-                        break;
-                    case InputKeyRight:
-                        fv_priv->config.send_trigger_fn(fv_priv->config.output_config);
-                        break;
-                    case InputKeyOk:
-                        if (flipvalo_intv_running(fv_priv)) {
-                            flipvalo_intv_stop(fv_priv);
-                        } else {
-                            flipvalo_intv_start(fv_priv);
+        if (
+            event.type == EventTypeKey
+            && event.input.type == InputTypeLong
+            && event.input.key == InputKeyBack
+        ) {
+            goto cleanup;
+        }
+        switch (fv_priv->ui_scene) {
+            case FVSceneMain:
+                if (event.type == EventTypeKey) {
+                    if (event.input.type == InputTypeShort) {
+                        switch (event.input.key) {
+                            case InputKeyUp:
+                                break;
+                            case InputKeyDown:
+                                break;
+                            case InputKeyLeft:
+                                fv_priv->config_edit_view.config = &fv_priv->config;
+                                fv_priv->config_edit_view.cur_index = 0;
+                                fv_priv->config_edit_view.cur_line = 0;
+                                fv_priv->config_edit_view.scroll_pos = 0;
+                                fv_priv->config_edit_view.edit_mode = false;
+                                fv_priv->ui_scene = FVSceneConfig;
+                                break;
+                            case InputKeyRight:
+                                fv_priv->config.send_trigger_fn(fv_priv->config.output_config);
+                                break;
+                            case InputKeyOk:
+                                if (flipvalo_intv_running(fv_priv)) {
+                                    flipvalo_intv_stop(fv_priv);
+                                } else {
+                                    flipvalo_intv_start(fv_priv);
+                                }
+                                break;
+                            case InputKeyMAX:
+                                break;
+                            case InputKeyBack:
+                                break;
                         }
-                        break;
-                    case InputKeyMAX:
-                        break;
-                    case InputKeyBack:
-                        // Exit the app
-                        goto cleanup;
+                    }
                 }
-            }
+                break;
+            case FVSceneConfig:
+                ret = flipvalo_config_edit_input(&event.input, &fv_priv->config_edit_view);
+                if (ret) {
+                    fv_priv->ui_scene = FVSceneMain;
+                }
+                break;
         }
 
 next_event:
