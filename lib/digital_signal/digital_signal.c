@@ -8,6 +8,8 @@
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_tim.h>
 
+#pragma GCC optimize("O3,unroll-loops,Ofast")
+
 /* must be on bank B */
 #define DEBUG_OUTPUT gpio_ext_pb3
 
@@ -212,8 +214,7 @@ void digital_signal_prepare_arr(DigitalSignal* signal) {
     internals->reload_reg_entries = 0;
 
     for(size_t pos = 0; pos < signal->edge_cnt; pos++) {
-        uint32_t edge_scaled = (internals->factor * signal->edge_timings[pos]) / (1024 * 1024);
-        uint32_t pulse_duration = edge_scaled + internals->reload_reg_remainder;
+        uint32_t pulse_duration = signal->edge_timings[pos] + internals->reload_reg_remainder;
         if(pulse_duration < 10 || pulse_duration > 10000000) {
             FURI_LOG_D(
                 TAG,
