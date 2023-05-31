@@ -12,7 +12,7 @@ App(
         "dialogs",
     ],
     icon="A_SubGHzRemote_14",
-    stack_size=4 * 1024,
+    stack_size=2 * 1024,
     order=11,
     fap_libs=["assets"],
     fap_icon="subghz_remote_10px.png",

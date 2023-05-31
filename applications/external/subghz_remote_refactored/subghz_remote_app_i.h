@@ -6,11 +6,7 @@
 
 #include "helpers/txrx/subghz_txrx.h"
 
-#ifdef APP_SUBGHZREMOTE
 #include <assets_icons.h>
-#else
-#include <subrem_remote_fap_icons.h>
-#endif
 
 #include "views/remote.h"
 
