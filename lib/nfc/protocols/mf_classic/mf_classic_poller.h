@@ -24,7 +24,7 @@ typedef enum {
 } MfClassicPollerEventType;
 
 typedef struct {
-    uint8_t total_sectors;
+    MfClassicType type;
 } MfClassicPollerEventDataStart;
 
 typedef struct {
@@ -33,10 +33,15 @@ typedef struct {
     bool key_provided;
 } MfClassicPollerEventDataKeyRequest;
 
+typedef struct {
+    uint8_t start_sector;
+} MfClassicPollerEventKeyAttackData;
+
 typedef union {
     MfClassicError error;
     MfClassicPollerEventDataStart start_data;
     MfClassicPollerEventDataKeyRequest key_request_data;
+    MfClassicPollerEventKeyAttackData key_attack_data;
 } MfClassicPollerEventData;
 
 typedef struct {

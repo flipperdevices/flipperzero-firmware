@@ -66,6 +66,14 @@ typedef enum {
     NfcRpcStateEmulated,
 } NfcRpcState;
 
+typedef struct {
+    MfDict* dict;
+    uint32_t total_keys;
+    uint32_t current_key;
+    uint8_t current_sector;
+    MfClassicType type;
+} NfcMfClassicDictAttackContext;
+
 struct NfcApp {
     DialogsApp* dialogs;
     Storage* storage;
@@ -103,6 +111,7 @@ struct NfcApp {
     NfcPoller* nfc_poller;
 
     MfUltralightAuth* mf_ul_auth;
+    NfcMfClassicDictAttackContext mf_dict_context;
 
     NfcDev* nfc_dev;
     NfcDevData nfc_dev_data;

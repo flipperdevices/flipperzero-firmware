@@ -85,7 +85,7 @@ MfClassicPollerCommand mf_classic_poller_handler_start(MfClassicPoller* instance
 
     instance->sectors_read = 0;
     instance->sectors_total = mf_classic_get_total_sectors_num(instance->data->type);
-    instance->event_data.start_data.total_sectors = instance->sectors_total;
+    instance->event_data.start_data.type = instance->data->type;
     MfClassicPollerEvent event = {
         .type = MfClassicPollerEventTypeStart,
         .data = &instance->event_data,
@@ -101,19 +101,32 @@ MfClassicPollerCommand mf_classic_poller_handler_new_sector(MfClassicPoller* ins
     MfClassicPollerCommand command = MfClassicPollerCommandContinue;
     MfClassicPollerEvent event = {};
 
-    if(instance->sectors_read == instance->sectors_total) {
-        if(instance->read_mode == MfClassicReadModeKeyReuse) {
+    if(instance->read_mode == MfClassicReadModeKeyReuse) {
+        instance->key_reuse_sector++;
+        if(instance->key_reuse_sector == instance->sectors_total) {
             instance->read_mode = MfClassicReadModeDictAttack;
+            event.type = MfClassicPollerEventTypeKeyAttackStop;
+            command = instance->callback(event, instance->context);
+        } else if(mf_classic_is_sector_read(instance->data, instance->sectors_read)) {
+            event.type = MfClassicPollerEventTypeKeyAttackNextSector;
+            command = instance->callback(event, instance->context);
         } else {
-            instance->state = MfClassicPollerStateReadComplete;
+            instance->state = MfClassicPollerStateAuthKeyA;
+            event.type = MfClassicPollerEventTypeKeyAttackNextSector;
+            command = instance->callback(event, instance->context);
         }
-    } else if(mf_classic_is_sector_read(instance->data, instance->sectors_read)) {
-        instance->sectors_read++;
-        event.type = MfClassicPollerEventTypeNewSector;
-        command = instance->callback(event, instance->context);
     } else {
-        instance->state = MfClassicPollerStateRequestKey;
+        if(instance->sectors_read == instance->sectors_total) {
+            instance->state = MfClassicPollerStateReadComplete;
+        } else if(mf_classic_is_sector_read(instance->data, instance->sectors_read)) {
+            instance->sectors_read++;
+            event.type = MfClassicPollerEventTypeNewSector;
+            command = instance->callback(event, instance->context);
+        } else {
+            instance->state = MfClassicPollerStateRequestKey;
+        }
     }
+    instance->prev_state = instance->state;
 
     return command;
 }
@@ -141,29 +154,46 @@ MfClassicPollerCommand mf_classic_poller_handler_auth_a(MfClassicPoller* instanc
     MfClassicPollerCommand command = MfClassicPollerCommandContinue;
     MfClassicPollerEvent event = {};
 
-    if(mf_classic_is_key_found(instance->data, instance->sectors_read, MfClassicKeyTypeA)) {
+    uint8_t sector = 0;
+    if(instance->read_mode == MfClassicReadModeKeyReuse) {
+        sector = instance->key_reuse_sector;
+    } else {
+        sector = instance->sectors_read;
+    }
+
+    if(mf_classic_is_key_found(instance->data, sector, MfClassicKeyTypeA)) {
         instance->prev_state = instance->state;
         instance->state = MfClassicPollerStateAuthKeyB;
     } else {
-        uint8_t block = mf_classic_get_first_block_num_of_sector(instance->sectors_read);
+        uint8_t block = mf_classic_get_first_block_num_of_sector(sector);
         uint64_t key = nfc_util_bytes2num(instance->current_key.data, 6);
         FURI_LOG_D(TAG, "Auth to block %d with key A: %06llx", block, key);
+
         MfClassicError error = mf_classic_async_auth(
             instance, block, &instance->current_key, MfClassicKeyTypeA, NULL);
         if(error == MfClassicErrorNone) {
             FURI_LOG_I(TAG, "Key A found");
-            mf_classic_set_key_found(
-                instance->data, instance->sectors_read, MfClassicKeyTypeA, key);
-            if(instance->sectors_read < instance->sectors_total - 1) {
-                instance->read_mode = MfClassicReadModeKeyReuse;
-                instance->key_reuse_sector = instance->sectors_read;
+            mf_classic_set_key_found(instance->data, sector, MfClassicKeyTypeA, key);
+            if(instance->read_mode != MfClassicReadModeKeyReuse) {
+                if(sector < instance->sectors_total - 1) {
+                    instance->read_mode = MfClassicReadModeKeyReuse;
+                    instance->key_reuse_sector = sector;
+                    event.type = MfClassicPollerEventTypeKeyAttackStart;
+                    instance->event_data.key_attack_data.start_sector = instance->key_reuse_sector;
+                    event.data = &instance->event_data;
+                    command = instance->callback(event, instance->context);
+                }
             }
             event.type = MfClassicPollerEventTypeFoundKeyA;
             command = instance->callback(event, instance->context);
             instance->prev_state = instance->state;
             instance->state = MfClassicPollerStateReadSector;
         } else {
-            instance->state = MfClassicPollerStateAuthKeyB;
+            if(instance->read_mode == MfClassicReadModeKeyReuse) {
+                instance->state = MfClassicPollerStateAuthKeyB;
+            } else {
+                instance->state = MfClassicPollerStateRequestKey;
+            }
         }
     }
 
@@ -174,31 +204,48 @@ MfClassicPollerCommand mf_classic_poller_handler_auth_b(MfClassicPoller* instanc
     MfClassicPollerCommand command = MfClassicPollerCommandContinue;
     MfClassicPollerEvent event = {};
 
-    if(mf_classic_is_key_found(instance->data, instance->sectors_read, MfClassicKeyTypeB)) {
-        instance->prev_state = instance->state;
+    uint8_t sector = 0;
+    if(instance->read_mode == MfClassicReadModeKeyReuse) {
+        sector = instance->key_reuse_sector;
+    } else {
+        sector = instance->sectors_read;
+    }
+
+    if(mf_classic_is_key_found(instance->data, sector, MfClassicKeyTypeB)) {
         instance->state = MfClassicPollerStateNewSector;
     } else {
-        uint8_t block = mf_classic_get_first_block_num_of_sector(instance->sectors_read);
+        uint8_t block = mf_classic_get_first_block_num_of_sector(sector);
         uint64_t key = nfc_util_bytes2num(instance->current_key.data, 6);
         FURI_LOG_D(TAG, "Auth to block %d with key B: %06llx", block, key);
+
         MfClassicError error = mf_classic_async_auth(
             instance, block, &instance->current_key, MfClassicKeyTypeB, NULL);
         if(error == MfClassicErrorNone) {
             FURI_LOG_D(TAG, "Key B found");
             event.type = MfClassicPollerEventTypeFoundKeyB;
-            mf_classic_set_key_found(
-                instance->data, instance->sectors_read, MfClassicKeyTypeB, key);
-            if(instance->sectors_read < instance->sectors_total - 1) {
-                instance->read_mode = MfClassicReadModeKeyReuse;
-                instance->key_reuse_sector = instance->sectors_read;
+            mf_classic_set_key_found(instance->data, sector, MfClassicKeyTypeB, key);
+            if(instance->read_mode != MfClassicReadModeKeyReuse) {
+                if(sector < instance->sectors_total - 1) {
+                    instance->read_mode = MfClassicReadModeKeyReuse;
+                    instance->key_reuse_sector = sector;
+
+                    event.type = MfClassicPollerEventTypeKeyAttackStart;
+                    instance->event_data.key_attack_data.start_sector = instance->key_reuse_sector;
+                    event.data = &instance->event_data;
+                    command = instance->callback(event, instance->context);
+                }
             }
             command = instance->callback(event, instance->context);
-            instance->prev_state = instance->state;
             instance->state = MfClassicPollerStateReadSector;
         } else {
-            instance->state = MfClassicPollerStateRequestKey;
+            if(instance->read_mode == MfClassicReadModeKeyReuse) {
+                instance->state = MfClassicPollerStateNewSector;
+            } else {
+                instance->state = MfClassicPollerStateRequestKey;
+            }
         }
     }
+    instance->prev_state = instance->state;
 
     return command;
 }
@@ -211,6 +258,7 @@ MfClassicPollerCommand mf_classic_poller_handler_read_sector(MfClassicPoller* in
     MfClassicBlock block = {};
 
     for(size_t i = block_start; i < block_start + total_blocks; i++) {
+        FURI_LOG_D(TAG, "Reding block %d", i);
         if(mf_classic_is_block_read(instance->data, i)) continue;
         MfClassicError error = mf_classic_async_read_block(instance, i, &block);
         if(error == MfClassicErrorNone) {
@@ -267,6 +315,7 @@ NfcaPollerCommand mf_classic_dict_attack_callback(NfcaPollerEvent event, void* c
         command = MfClassicPollerCommandStop;
     } else {
         if(event.type == NfcaPollerEventTypeReady) {
+            // furi_delay_ms(100);
             command = mf_classic_poller_dict_attack_handler[instance->state](instance);
         } else if(event.type == NfcaPollerEventTypeError) {
             if(event.data.error == NfcaErrorNotPresent) {

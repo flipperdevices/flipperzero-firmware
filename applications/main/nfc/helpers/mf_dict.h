@@ -5,6 +5,7 @@
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/toolbox/stream/file_stream.h>
 #include <lib/toolbox/stream/buffered_file_stream.h>
+#include <lib/nfc/protocols/mf_classic/mf_classic.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,7 +55,7 @@ bool mf_dict_is_key_present(MfDict* dict, uint8_t* key);
 
 bool mf_dict_is_key_present_str(MfDict* dict, FuriString* key);
 
-bool mf_dict_get_next_key(MfDict* dict, uint64_t* key);
+bool mf_dict_get_next_key(MfDict* dict, MfClassicKey* key);
 
 bool mf_dict_get_next_key_str(MfDict* dict, FuriString* key);
 

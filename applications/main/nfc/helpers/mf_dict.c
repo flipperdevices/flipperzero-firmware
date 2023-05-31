@@ -3,7 +3,9 @@
 #include <lib/toolbox/args.h>
 #include <lib/flipper_format/flipper_format.h>
 
-#define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_dict.nfc")
+#include <lib/nfc/protocols/nfc_util.h>
+
+#define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
 #define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_dict_user.nfc")
 #define MF_CLASSIC_DICT_UNIT_TEST_PATH EXT_PATH("unit_tests/mf_dict.nfc")
 
@@ -170,15 +172,17 @@ bool mf_dict_get_next_key_str(MfDict* dict, FuriString* key) {
     return key_read;
 }
 
-bool mf_dict_get_next_key(MfDict* dict, uint64_t* key) {
+bool mf_dict_get_next_key(MfDict* dict, MfClassicKey* key) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
     FuriString* temp_key;
+    uint64_t key_int = 0;
     temp_key = furi_string_alloc();
     bool key_read = mf_dict_get_next_key_str(dict, temp_key);
     if(key_read) {
-        mf_dict_str_to_int(temp_key, key);
+        mf_dict_str_to_int(temp_key, &key_int);
+        nfc_util_num2bytes(key_int, 6, key->data);
     }
     furi_string_free(temp_key);
     return key_read;
