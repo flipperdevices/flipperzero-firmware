@@ -11,7 +11,7 @@ env.Append(
 
 libenv = env.Clone(FW_LIB_NAME="digital_signal")
 libenv.ApplyLibFlags()
-libenv.Append(CCFLAGS=["-O3", "-unroll-loops", "-Ofast"])
+libenv.Append(CCFLAGS=["-O3", "-funroll-loops", "-Ofast"])
 
 sources = libenv.GlobRecursive("*.c*")
 
