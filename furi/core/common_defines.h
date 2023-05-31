@@ -47,7 +47,6 @@ void __furi_critical_exit(__FuriCriticalInfo info);
 
 #ifndef FURI_CRITICAL_EXIT
 #define FURI_CRITICAL_EXIT() __furi_critical_exit(__furi_critical_info);
-
 #endif
 
 #ifdef __cplusplus
