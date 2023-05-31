@@ -88,44 +88,38 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     furi_assert(instance->buffer);
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
-    // furi_assert(tx_bits >= BITS_IN_BYTE);
 
     const uint8_t pcb = ISO14443_4A_PCB_I | instance->protocol_data.block_number;
     instance->protocol_data.block_number ^= 1;
 
-    bit_buffer_prepend_cat(instance->tx_buffer, tx_buffer, &pcb, sizeof(uint8_t));
+    bit_buffer_copy_prepend_bytes(instance->tx_buffer, tx_buffer, &pcb, sizeof(pcb));
 
     Iso14443_4aError ret = Iso14443_4aErrorNone;
 
     do {
-        uint16_t rx_bits;
+        // TODO: Adapt lower methods to use BitBuffers
+        uint16_t rx_size_bits;
         NfcaError error = nfca_poller_send_standart_frame(
             instance->iso14443_3a_poller,
-            buf->tx_data,
-            buf->tx_bits,
-            buf->rx_data,
-            buf->rx_data_size,
-            &rx_bits,
+            bit_buffer_get_data(instance->tx_buffer),
+            bit_buffer_get_size(instance->tx_buffer),
+            bit_buffer_get_data(instance->rx_buffer),
+            bit_buffer_get_capacity_bytes(instance->rx_buffer),
+            &rx_size_bits,
             fwt);
 
-        // if(error != NfcaErrorNone) {
-        //     FURI_LOG_E(TAG, "Iso14443-3 error: %d", error);
-        //     ret = iso14443_4a_poller_process_error(error);
-        //     break;
-        // } else if((rx_bits < BITS_IN_BYTE) || (buf->rx_data[0] != pcb)) {
-        //     ret = Iso14443_4aErrorProtocol;
-        //     break;
-        // }
-        //
-        // const uint16_t rx_data_size_actual = rx_bits / BITS_IN_BYTE - 1;
-        //
-        // if(rx_data_size < rx_data_size_actual) {
-        //     ret = Iso14443_4aErrorProtocol;
-        //     break;
-        // }
-        //
-        // memcpy(rx_data, &buf->rx_data[1], rx_data_size_actual);
-        // *rx_bits = rx_data_size_actual * BITS_IN_BYTE;
+        if(error != NfcaErrorNone) {
+            FURI_LOG_E(TAG, "Iso14443-3 error: %d", error);
+            ret = iso14443_4a_poller_process_error(error);
+            break;
+        } else if(bit_buffer_get_byte(instance->rx_buffer, 0) != pcb) {
+            ret = Iso14443_4aErrorProtocol;
+            break;
+        }
+
+        // TODO: Do not set the size directly
+        bit_buffer_set_size(instance->rx_buffer, rx_size_bits);
+        bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(pcb));
 
         ret = Iso14443_4aErrorNone;
     } while(false);
