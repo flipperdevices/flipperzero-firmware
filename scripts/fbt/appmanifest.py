@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Union
 
 
 class FlipperManifestException(Exception):
@@ -56,7 +56,7 @@ class FlipperApplication:
 
     # .fap-specific
     sources: List[str] = field(default_factory=lambda: ["*.c*"])
-    fap_version: Tuple[int] = field(default_factory=lambda: (0, 1))
+    fap_version: Union[str, Tuple[int]] = "0.1"
     fap_icon: Optional[str] = None
     fap_libs: List[str] = field(default_factory=list)
     fap_category: str = ""
@@ -84,6 +84,13 @@ class FlipperApplication:
     def __post_init__(self):
         if self.apptype == FlipperAppType.PLUGIN:
             self.stack_size = 0
+        if isinstance(self.fap_version, str):
+            try:
+                self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
+            except ValueError:
+                raise FlipperManifestException(
+                    f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
+                )
 
 
 class AppManager:
