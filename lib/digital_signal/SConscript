@@ -11,15 +11,7 @@ env.Append(
 
 libenv = env.Clone(FW_LIB_NAME="digital_signal")
 libenv.ApplyLibFlags()
-libenv.Append(CCFLAGS=["-O3","-unroll-loops","-Ofast"])
-
-libenv.AppendUnique(
-    CCFLAGS=[
-        # Required for lib to be linkable with .faps
-        "-mword-relocations",
-        "-mlong-calls",
-    ],
-)
+libenv.Append(CCFLAGS=["-O3", "-unroll-loops", "-Ofast"])
 
 sources = libenv.GlobRecursive("*.c*")
 

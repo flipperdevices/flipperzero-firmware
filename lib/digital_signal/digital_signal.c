@@ -8,8 +8,6 @@
 #include <stm32wbxx_ll_dma.h>
 #include <stm32wbxx_ll_tim.h>
 
-#pragma GCC optimize("O3,unroll-loops,Ofast")
-
 /* must be on bank B */
 #define DEBUG_OUTPUT gpio_ext_pb3
 
