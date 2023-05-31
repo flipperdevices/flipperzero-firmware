@@ -80,63 +80,52 @@ Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance) 
 
 Iso14443_4aError iso14443_4a_poller_send_block(
     Iso14443_4aPoller* instance,
-    uint8_t* tx_data,
-    uint16_t tx_bits,
-    uint8_t* rx_data,
-    uint16_t rx_data_size,
-    uint16_t* rx_bits,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
     uint32_t fwt) {
     furi_assert(instance);
     furi_assert(instance->iso14443_3a_poller);
     furi_assert(instance->buffer);
-    furi_assert(tx_data);
-    furi_assert(rx_data);
-    furi_assert(rx_bits);
-    furi_assert(tx_bits >= BITS_IN_BYTE);
-
-    NfcPollerBuffer* buf = instance->buffer;
-
-    const uint16_t tx_data_size = tx_bits / BITS_IN_BYTE;
-    furi_assert(tx_data_size <= buf->tx_data_size - 1);
+    furi_assert(tx_buffer);
+    furi_assert(rx_buffer);
+    // furi_assert(tx_bits >= BITS_IN_BYTE);
 
     const uint8_t pcb = ISO14443_4A_PCB_I | instance->protocol_data.block_number;
     instance->protocol_data.block_number ^= 1;
 
-    buf->tx_data[0] = pcb;
-    buf->tx_bits = tx_bits + BITS_IN_BYTE;
-
-    memcpy(&buf->tx_data[1], tx_data, tx_data_size);
+    bit_buffer_prepend_cat(instance->tx_buffer, tx_buffer, &pcb, sizeof(uint8_t));
 
     Iso14443_4aError ret = Iso14443_4aErrorNone;
 
     do {
+        uint16_t rx_bits;
         NfcaError error = nfca_poller_send_standart_frame(
             instance->iso14443_3a_poller,
             buf->tx_data,
             buf->tx_bits,
             buf->rx_data,
             buf->rx_data_size,
-            &buf->rx_bits,
+            &rx_bits,
             fwt);
 
-        if(error != NfcaErrorNone) {
-            FURI_LOG_E(TAG, "Iso14443-3 error: %d", error);
-            ret = iso14443_4a_poller_process_error(error);
-            break;
-        } else if((buf->rx_bits < BITS_IN_BYTE) || (buf->rx_data[0] != pcb)) {
-            ret = Iso14443_4aErrorProtocol;
-            break;
-        }
-
-        const uint16_t rx_data_size_actual = buf->rx_bits / BITS_IN_BYTE - 1;
-
-        if(rx_data_size < rx_data_size_actual) {
-            ret = Iso14443_4aErrorProtocol;
-            break;
-        }
-
-        memcpy(rx_data, &buf->rx_data[1], rx_data_size_actual);
-        *rx_bits = rx_data_size_actual * BITS_IN_BYTE;
+        // if(error != NfcaErrorNone) {
+        //     FURI_LOG_E(TAG, "Iso14443-3 error: %d", error);
+        //     ret = iso14443_4a_poller_process_error(error);
+        //     break;
+        // } else if((rx_bits < BITS_IN_BYTE) || (buf->rx_data[0] != pcb)) {
+        //     ret = Iso14443_4aErrorProtocol;
+        //     break;
+        // }
+        //
+        // const uint16_t rx_data_size_actual = rx_bits / BITS_IN_BYTE - 1;
+        //
+        // if(rx_data_size < rx_data_size_actual) {
+        //     ret = Iso14443_4aErrorProtocol;
+        //     break;
+        // }
+        //
+        // memcpy(rx_data, &buf->rx_data[1], rx_data_size_actual);
+        // *rx_bits = rx_data_size_actual * BITS_IN_BYTE;
 
         ret = Iso14443_4aErrorNone;
     } while(false);
