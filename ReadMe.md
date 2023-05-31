@@ -74,6 +74,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Temporarily removed HITAG RFID support
 - Updated: [Mifare Nested 1.5.0 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 - Updated: [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77) (By xMasterX)
+- OFW: [Dolphin: new KAIJU animation #2713 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2713)
+- UL: [Subrem main and maker #492 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/492)
+- UL: [Lfrfid t5577 #493 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/493)
 
 <a name="release">
 
