@@ -254,6 +254,18 @@ void mf_classic_get_read_sectors_and_keys(
     }
 }
 
+bool mf_classic_is_card_read(MfClassicData* data) {
+    furi_assert(data);
+
+    uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
+    uint8_t sectors_read = 0;
+    uint8_t keys_found = 0;
+    mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
+    bool card_read = (sectors_read == sectors_total) && (keys_found == sectors_total * 2);
+
+    return card_read;
+}
+
 bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num) {
     furi_assert(data);
 

@@ -58,7 +58,7 @@ bool nfc_scene_mf_classic_read_success_on_event(void* context, SceneManagerEvent
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
                 consumed = true;
             } else if(event.event == GuiButtonTypeRight) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicMenu);
                 consumed = true;
             }
         } else if(event.type == SceneManagerEventTypeBack) {

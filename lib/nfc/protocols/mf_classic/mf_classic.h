@@ -157,6 +157,8 @@ void mf_classic_get_read_sectors_and_keys(
     uint8_t* sectors_read,
     uint8_t* keys_found);
 
+bool mf_classic_is_card_read(MfClassicData* data);
+
 #ifdef __cplusplus
 }
 #endif
