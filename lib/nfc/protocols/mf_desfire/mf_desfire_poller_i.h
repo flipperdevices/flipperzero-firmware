@@ -30,7 +30,10 @@ struct MfDesfirePoller {
     Iso14443_4aPoller* iso14443_4a_poller;
     MfDesfirePollerSessionState session_state;
     MfDesfirePollerState state;
-    NfcPollerBuffer* buffer;
+    BitBuffer* tx_buffer;
+    BitBuffer* rx_buffer;
+    BitBuffer* input_buffer;
+    BitBuffer* result_buffer;
     MfDesfireData* data;
     MfDesfirePollerCallback callback;
     MfDesfireError error;
@@ -41,10 +44,8 @@ MfDesfireError mf_desfire_process_error(Iso14443_4aError error);
 
 MfDesfireError mf_desfire_send_chunks(
     MfDesfirePoller* instance,
-    const uint8_t* tx_data,
-    size_t tx_data_size,
-    uint8_t* rx_data,
-    size_t rx_data_size,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
     uint32_t fwt);
 
 MfDesfireError

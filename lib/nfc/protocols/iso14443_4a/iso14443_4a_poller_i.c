@@ -55,6 +55,7 @@ Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance) 
 
         uint16_t rx_bits;
 
+        // TODO: Adapt lower methods to use BitBuffers
         NfcaError error = nfca_poller_send_standart_frame(
             instance->iso14443_3a_poller,
             (uint8_t*)&instance->protocol_data.ats_request,

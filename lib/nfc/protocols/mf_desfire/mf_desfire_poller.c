@@ -37,7 +37,10 @@ void mf_desfire_poller_free(MfDesfirePoller* instance) {
 }
 
 static MfDesfirePollerCommand mf_desfire_poller_handler_idle(MfDesfirePoller* instance) {
-    nfc_poller_buffer_reset(instance->buffer);
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_reset(instance->result_buffer);
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_reset(instance->rx_buffer);
     iso14443_4a_poller_get_data(instance->iso14443_4a_poller, &instance->data->iso14443_4a_data);
 
     instance->state = MfDesfirePollerStateReadVersion;
@@ -137,7 +140,10 @@ MfDesfireError mf_desfire_poller_start(
     furi_assert(instance->session_state == MfDesfirePollerSessionStateIdle);
 
     instance->data = malloc(sizeof(MfDesfireData));
-    instance->buffer = nfc_poller_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX, MF_DESFIRE_BUF_SIZE_MAX);
+    instance->input_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
+    instance->result_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
+    instance->tx_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
+    instance->rx_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
 
     instance->session_state = MfDesfirePollerSessionStateActive;
     iso14443_4a_poller_read(instance->iso14443_4a_poller, callback, context);
@@ -173,10 +179,17 @@ MfDesfireError mf_desfire_poller_get_data(MfDesfirePoller* instance, MfDesfireDa
 MfDesfireError mf_desfire_poller_reset(MfDesfirePoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
-    furi_assert(instance->buffer);
-    furi_assert(instance->iso14443_4a_poller);
 
-    nfc_poller_buffer_free(instance->buffer);
+    bit_buffer_free(instance->input_buffer);
+    bit_buffer_free(instance->result_buffer);
+    bit_buffer_free(instance->tx_buffer);
+    bit_buffer_free(instance->rx_buffer);
+
+    instance->input_buffer = NULL;
+    instance->result_buffer = NULL;
+    instance->tx_buffer = NULL;
+    instance->rx_buffer = NULL;
+
     instance->callback = NULL;
     instance->context = NULL;
     instance->state = MfDesfirePollerStateIdle;
