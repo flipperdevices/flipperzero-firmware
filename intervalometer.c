@@ -10,12 +10,15 @@
 #include <core/string.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
+#include <gui/icon.h>
 #include <infrared_transmit.h>
 
 #include <input/input.h>
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
+
+#include <intervalometer_icons.h>
 
 // app ui scenes
 enum flipvalo_ui_scene {
@@ -60,11 +63,11 @@ struct flipvalo_run_state {
 enum flipvalo_config_edit_lines {
     FvConfigEditInitDelay,
     FvConfigEditMIN = FvConfigEditInitDelay,
-    FvConfigEditShotDelay,
     FvConfigEditShotCount,
-    FvConfigEditBurstDelay,
+    FvConfigEditShotDelay,
     FvConfigEditBurstCount,
-    FvConfigEditMAX = FvConfigEditBurstCount,
+    FvConfigEditBurstDelay,
+    FvConfigEditMAX = FvConfigEditBurstDelay,
 };
 
 struct flipvalo_config_edit_view {
@@ -88,6 +91,7 @@ struct flipvalo_priv {
     struct flipvalo_config_edit_view config_edit_view;
     struct flipvalo_run_state run_state;
     enum flipvalo_ui_scene ui_scene;
+    int gui_shutter_blink;
     FuriTimer* timer;
     NotificationApp* notifications;
     FuriMutex* mutex;
@@ -111,50 +115,59 @@ enum flipvalo_config_edit_line_type {
     FvConfigEditTypeCount,
 };
 
+static void flipvalo_config_edit_view_init(struct flipvalo_config_edit_view* view) {
+    view->config = NULL;
+    view->cur_index = 0;
+    view->cur_line = 0;
+    view->scroll_pos = 0;
+    view->edit_mode = false;
+}
 
 #define ITEM_H 64 / 3
 #define ITEM_W 128
 #define VALUE_X 100
-#define VALUE_W 100
+#define VALUE_W 45
 static void flipvalo_config_edit_draw(Canvas* canvas, struct flipvalo_config_edit_view* view) {
     int* line_value;
     char* line_label = NULL;
     FuriString* temp_str = furi_string_alloc();
     enum flipvalo_config_edit_line_type line_type;
+    enum flipvalo_config_edit_lines selected_line;
 
     for (size_t line = 0; line < 3; line++) {
-        switch (view->scroll_pos + line) {
+        selected_line = view->scroll_pos + line;
+        switch (selected_line) {
             case FvConfigEditInitDelay:
                 line_value = &view->config->init_delay_msec;
                 line_type = FvConfigEditTypeTimer;
-                line_label = "Init Timer";
+                line_label = "Init Time";
                 break;
             case FvConfigEditShotDelay:
                 line_value = &view->config->interval_delay_msec;
                 line_type = FvConfigEditTypeTimer;
-                line_label = "Seq. Timer";
+                line_label = "Seq Time";
                 break;
             case FvConfigEditShotCount:
                 line_value = &view->config->shot_count;
                 line_type = FvConfigEditTypeCount;
-                line_label = "Seq. Count";
+                line_label = "Seq Count";
                 break;
             case FvConfigEditBurstDelay:
                 line_value = &view->config->burst_delay_msec;
                 line_type = FvConfigEditTypeTimer;
-                line_label = "Burst Timer";
+                line_label = "Brst Time";
                 break;
             case FvConfigEditBurstCount:
                 line_value = &view->config->burst_count;
                 line_type = FvConfigEditTypeCount;
-                line_label = "Burst Count";
+                line_label = "Brst Count";
                 break;
             default:
                 continue;
         };
 
         canvas_set_color(canvas, ColorBlack);
-        if ((view->scroll_pos + line) == view->cur_line) {
+        if ((selected_line) == view->cur_line) {
             elements_slightly_rounded_box(canvas, 0, ITEM_H * line + 1, ITEM_W, ITEM_H - 1);
             canvas_set_color(canvas, ColorWhite);
         }
@@ -176,11 +189,35 @@ static void flipvalo_config_edit_draw(Canvas* canvas, struct flipvalo_config_edi
                         canvas, 124, text_y, AlignRight, AlignCenter,
                         furi_string_get_cstr(temp_str));
                 canvas_set_font(canvas, FontSecondary);
-                if (view->edit_mode) {
-                    //TODO(luna) review positioning.
-                    //uint8_t icon_x = (128) - ((7 - view->cur_index - 1) * 6);
-                    //canvas_draw_icon(canvas, icon_x, text_y - 9, &I_SmallArrowUp_3x5);
-                    //canvas_draw_icon(canvas, icon_x, text_y + 5, &I_SmallArrowDown_3x5);
+                if (view->edit_mode && view->cur_line == selected_line) {
+                    switch (view->cur_index) {
+                        case 0:
+                            canvas_draw_icon(canvas, 117, text_y - 9, &I_ArrowUp_3x5);
+                            canvas_draw_icon(canvas, 117, text_y + 5, &I_ArrowDown_3x5);
+                            canvas_draw_icon(canvas, 112, text_y - 9, &I_ArrowUp_3x5);
+                            canvas_draw_icon(canvas, 112, text_y + 5, &I_ArrowDown_3x5);
+                            canvas_draw_icon(canvas, 107, text_y - 9, &I_ArrowUp_3x5);
+                            canvas_draw_icon(canvas, 107, text_y + 5, &I_ArrowDown_3x5);
+                            break;
+                        case 1:
+                            canvas_draw_icon(canvas, 93, text_y - 9, &I_ArrowUp_3x5);
+                            canvas_draw_icon(canvas, 93, text_y + 5, &I_ArrowDown_3x5);
+                            canvas_draw_icon(canvas, 89, text_y - 9, &I_ArrowUp_3x5);
+                            canvas_draw_icon(canvas, 89, text_y + 5, &I_ArrowDown_3x5);
+                            break;
+                        case 2:
+                            canvas_draw_icon(canvas, 75, text_y - 9, &I_ArrowUp_3x5);
+                            canvas_draw_icon(canvas, 75, text_y + 5, &I_ArrowDown_3x5);
+                            canvas_draw_icon(canvas, 71, text_y - 9, &I_ArrowUp_3x5);
+                            canvas_draw_icon(canvas, 71, text_y + 5, &I_ArrowDown_3x5);
+                            break;
+                        case 3:
+                            canvas_draw_icon(canvas, 57, text_y - 9, &I_ArrowUp_3x5);
+                            canvas_draw_icon(canvas, 57, text_y + 5, &I_ArrowDown_3x5);
+                            canvas_draw_icon(canvas, 53, text_y - 9, &I_ArrowUp_3x5);
+                            canvas_draw_icon(canvas, 53, text_y + 5, &I_ArrowDown_3x5);
+                            break;
+                    }
                 }
                 break;
             case FvConfigEditTypeCount:
@@ -271,18 +308,35 @@ static void flipvalo_config_edit_input_move_cursor(struct flipvalo_config_edit_v
                 view->edit_mode = false;
                 return;
             case FvConfigEditTypeTimer:
-                // bro the math here is gonna suck.
-                // I'm doing it WRONG for now x3
-                // TODO(luna) REAL MATHS
-                if (*line_value + (dy * -100) >= 0) {
-                    *line_value += (dy * -100);
+                switch (view->cur_index) {
+                    case 0:
+                        if (*line_value + (dy * -10) >= 0) {
+                            *line_value += (dy * -10);
+                        }
+                        break;
+                    case 1:
+                        if (*line_value + (dy * -1000) >= 0) {
+                            *line_value += (dy * -1000);
+                        }
+                        break;
+                    case 2:
+                        if (*line_value + (dy * -60000) >= 0) {
+                            *line_value += (dy * -60000);
+                        }
+                        break;
+                    case 3:
+                        if (*line_value + (dy * -3600000) >= 0) {
+                            *line_value += (dy * -3600000);
+                        }
+                        break;
                 }
-                view->cur_index += dx;
+
+                view->cur_index -= dx;
                 if (view->cur_index < 0) {
                     view->cur_index = 0;
                 }
-                if (view->cur_index > 10) {
-                    view->cur_index = 10;
+                if (view->cur_index > 3) {
+                    view->cur_index = 3;
                 }
                 break;
         }
@@ -308,6 +362,7 @@ static int flipvalo_config_edit_input(InputEvent* event, struct flipvalo_config_
             flipvalo_config_edit_input_move_cursor(view, 0, 1);
             break;
         case InputKeyOk:
+            //TODO(luna) Check if line supports edit mode before doing this.
             view->edit_mode = !view->edit_mode;
             break;
         case InputKeyBack:
@@ -327,8 +382,8 @@ static int flipvalo_config_edit_input(InputEvent* event, struct flipvalo_config_
 // XXX(luna) back to app
 
 static void flipvalo_run_state_init(struct flipvalo_run_state* fv_run_state) {
-    fv_run_state->burst_cur = 0;
-    fv_run_state->shot_cur = 0;
+    fv_run_state->burst_cur = 1;
+    fv_run_state->shot_cur = 1;
     fv_run_state->tick_next = 0;
     fv_run_state->state = FVDone;
     fv_run_state->tick_next = 0;
@@ -363,17 +418,22 @@ static void flipvalo_intv_tick(struct flipvalo_priv* fv_priv) {
     if (run->tick_cur++ >= run->tick_next) {
         // call trigger function
         conf->send_trigger_fn(conf->output_config);
-        run->shot_cur++;
-        run->burst_cur++;
+        fv_priv->gui_shutter_blink = 3;
         // end of burst, prepare next shot
         if (run->burst_cur >= conf->burst_count) {
+            run->burst_cur = 1;
+            run->shot_cur++;
             run->state = FVWaitContShot;
             run->tick_next = run->tick_cur + ((conf->interval_delay_msec * conf->tickrate) / 1000);
         }
         else /*continue burst */ {
+            run->burst_cur++;
             run->state = FVWaitBurst;
             run->tick_next = run->tick_cur + ((conf->burst_delay_msec * conf->tickrate) / 1000);
         }
+    }
+    if (run->shot_cur > conf->shot_count) {
+        run->state = FVDone;
     }
 }
 
@@ -405,6 +465,13 @@ static void render_callback(Canvas* const canvas, void* ctx) {
     struct flipvalo_priv* fv_priv = ctx;
     FuriString* temp_str = furi_string_alloc();
     furi_mutex_acquire(fv_priv->mutex, FuriWaitForever);
+
+    // invert screen if blinking
+    if (fv_priv->gui_shutter_blink > 0) {
+        fv_priv->gui_shutter_blink--;
+        canvas_draw_box(canvas, 0, 0, 127, 63);
+        canvas_set_color(canvas, ColorWhite);
+    }
 
     if (fv_priv->ui_scene == FVSceneMain) {
         int countdown_msec = (1000 * (fv_priv->run_state.tick_next
@@ -461,22 +528,25 @@ static void render_callback(Canvas* const canvas, void* ctx) {
 }
 
 static void flipvalo_config_init(struct flipvalo_config* fv_conf) {
-    fv_conf->init_delay_msec = 0;
-    fv_conf->interval_delay_msec = 5000;
-    fv_conf->shot_count = 10;
+    fv_conf->init_delay_msec = 2000;
+    fv_conf->interval_delay_msec = 0;
+    fv_conf->shot_count = 1;
     fv_conf->burst_count = 1;
     fv_conf->burst_delay_msec = 0;
-    fv_conf->tickrate = 60;
+    fv_conf->tickrate = 125;
     fv_conf->send_trigger_fn = sony_ir_trigger;
     fv_conf->output_config = NULL;
 }
 
 static void flipvalo_priv_init(struct flipvalo_priv* fv_priv) {
-    flipvalo_config_init(&(fv_priv->config));
-    flipvalo_run_state_init(&(fv_priv->run_state));
+    flipvalo_config_init(&fv_priv->config);
+    flipvalo_config_edit_view_init(&fv_priv->config_edit_view);
+    flipvalo_run_state_init(&fv_priv->run_state);
+    fv_priv->gui_shutter_blink = 0;
     fv_priv->timer = NULL;
     fv_priv->notifications = NULL;
     fv_priv->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    fv_priv->gui_shutter_blink = 0;
 }
 
 int32_t flipvalo_app() {
@@ -526,7 +596,7 @@ int32_t flipvalo_app() {
         }
 
         // handle input
-        if (
+        if ( /* long press back */
             event.type == EventTypeKey
             && event.input.type == InputTypeLong
             && event.input.key == InputKeyBack
@@ -535,6 +605,7 @@ int32_t flipvalo_app() {
         }
         switch (fv_priv->ui_scene) {
             case FVSceneMain:
+                // TODO(luna) Maybe give this a function.. look howl clean FVSceneConfig is...
                 if (event.type == EventTypeKey) {
                     if (event.input.type == InputTypeShort) {
                         switch (event.input.key) {
@@ -543,14 +614,12 @@ int32_t flipvalo_app() {
                             case InputKeyDown:
                                 break;
                             case InputKeyLeft:
+                                flipvalo_intv_stop(fv_priv);
                                 fv_priv->config_edit_view.config = &fv_priv->config;
-                                fv_priv->config_edit_view.cur_index = 0;
-                                fv_priv->config_edit_view.cur_line = 0;
-                                fv_priv->config_edit_view.scroll_pos = 0;
-                                fv_priv->config_edit_view.edit_mode = false;
                                 fv_priv->ui_scene = FVSceneConfig;
                                 break;
                             case InputKeyRight:
+                                fv_priv->gui_shutter_blink = 3;
                                 fv_priv->config.send_trigger_fn(fv_priv->config.output_config);
                                 break;
                             case InputKeyOk:
