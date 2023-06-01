@@ -33,7 +33,6 @@ void iso14443_4a_poller_free(Iso14443_4aPoller* instance) {
 }
 
 Iso14443_4aPollerCommand iso14443_4a_poller_handler_idle(Iso14443_4aPoller* instance) {
-    nfc_poller_buffer_reset(instance->buffer);
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
     nfca_poller_get_data(instance->iso14443_3a_poller, &instance->data->iso14443_3a_data);
@@ -120,7 +119,6 @@ Iso14443_4aError iso14443_4a_poller_start(
     furi_assert(context);
 
     instance->data = malloc(sizeof(Iso14443_4aData));
-    instance->buffer = nfc_poller_buffer_alloc(ISO14443_4A_BUF_SIZE_MAX, ISO14443_4A_BUF_SIZE_MAX);
     instance->tx_buffer = bit_buffer_alloc(ISO14443_4A_BUF_SIZE_MAX);
     instance->rx_buffer = bit_buffer_alloc(ISO14443_4A_BUF_SIZE_MAX);
 
@@ -152,7 +150,6 @@ Iso14443_4aError iso14443_4a_poller_reset(Iso14443_4aPoller* instance) {
     furi_assert(instance->data);
     furi_assert(instance->iso14443_3a_poller);
 
-    nfc_poller_buffer_free(instance->buffer);
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
     instance->callback = NULL;

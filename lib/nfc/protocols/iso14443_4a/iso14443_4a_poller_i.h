@@ -33,7 +33,6 @@ struct Iso14443_4aPoller {
     NfcaPoller* iso14443_3a_poller;
     Iso14443_4aPollerState state;
     Iso14443_4aPollerSessionState session_state;
-    NfcPollerBuffer* buffer;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
     Iso14443_4aData* data;

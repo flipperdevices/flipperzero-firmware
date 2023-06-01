@@ -85,7 +85,6 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     uint32_t fwt) {
     furi_assert(instance);
     furi_assert(instance->iso14443_3a_poller);
-    furi_assert(instance->buffer);
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
 
