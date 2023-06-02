@@ -212,8 +212,7 @@ void digital_signal_prepare_arr(DigitalSignal* signal) {
     internals->reload_reg_entries = 0;
 
     for(size_t pos = 0; pos < signal->edge_cnt; pos++) {
-        uint32_t edge_scaled = (internals->factor * signal->edge_timings[pos]) / (1024 * 1024);
-        uint32_t pulse_duration = edge_scaled + internals->reload_reg_remainder;
+        uint32_t pulse_duration = signal->edge_timings[pos] + internals->reload_reg_remainder;
         if(pulse_duration < 10 || pulse_duration > 10000000) {
             FURI_LOG_D(
                 TAG,
@@ -243,10 +242,12 @@ static void digital_signal_stop_timer() {
     LL_TIM_DisableCounter(TIM2);
     LL_TIM_DisableUpdateEvent(TIM2);
     LL_TIM_DisableDMAReq_UPDATE(TIM2);
+
+    furi_hal_bus_disable(FuriHalBusTIM2);
 }
 
 static void digital_signal_setup_timer() {
-    digital_signal_stop_timer();
+    furi_hal_bus_enable(FuriHalBusTIM2);
 
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetClockDivision(TIM2, LL_TIM_CLOCKDIVISION_DIV1);
