@@ -4,8 +4,6 @@ Import("env")
 
 env.Append(
     CPPPATH=[
-        "#/lib/digital_signal",
-        "#/lib/pulse_reader",
         "#/lib/fnv1a_hash",
         "#/lib/heatshrink",
         "#/lib/micro-ecc",
@@ -28,8 +26,6 @@ libenv.ApplyLibFlags()
 sources = []
 
 libs_recurse = [
-    "digital_signal",
-    "pulse_reader",
     "micro-ecc",
     "u8g2",
     "update_util",

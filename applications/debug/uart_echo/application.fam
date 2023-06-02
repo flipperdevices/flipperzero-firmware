@@ -1,5 +1,5 @@
 App(
-    appid="uart_echo",
+    appid="UART_Echo",
     name="UART Echo",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",

@@ -1,5 +1,5 @@
 App(
-    appid="metronome",
+    appid="Metronome",
     name="Metronome",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="metronome_app",
