@@ -93,8 +93,8 @@ Header,+,firmware/targets/furi_hal_include/furi_hal_usb_hid_u2f.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_version.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_vibro.h,,
 Header,+,lib/cfw/cfw.h,,
-Header,+,lib/drivers/rgb_backlight.h,,
 Header,+,lib/digital_signal/digital_signal.h,,
+Header,+,lib/drivers/rgb_backlight.h,,
 Header,+,lib/flipper_application/api_hashtable/api_hashtable.h,,
 Header,+,lib/flipper_application/api_hashtable/compilesort.hpp,,
 Header,+,lib/flipper_application/flipper_application.h,,
@@ -1897,9 +1897,6 @@ Function,-,j1f,float,float
 Function,-,jn,double,"int, double"
 Function,-,jnf,float,"int, float"
 Function,-,jrand48,long,unsigned short[3]
-Function,+,keeloq_reset_kl_type,void,
-Function,+,keeloq_reset_mfname,void,
-Function,+,keeloq_reset_original_btn,void,
 Function,-,l64a,char*,long
 Function,-,labs,long,long
 Function,-,lcong48,void,unsigned short[7]
@@ -2678,8 +2675,6 @@ Function,+,srand,void,unsigned
 Function,-,srand48,void,long
 Function,-,srandom,void,unsigned
 Function,+,sscanf,int,"const char*, const char*, ..."
-Function,+,star_line_reset_kl_type,void,
-Function,+,star_line_reset_mfname,void,
 Function,+,storage_common_copy,FS_Error,"Storage*, const char*, const char*"
 Function,+,storage_common_exists,_Bool,"Storage*, const char*"
 Function,+,storage_common_fs_info,FS_Error,"Storage*, const char*, uint64_t*, uint64_t*"
@@ -2830,8 +2825,6 @@ Function,-,subghz_custom_btn_get,uint8_t,
 Function,-,subghz_custom_btn_get_original,uint8_t,
 Function,-,subghz_custom_btn_is_allowed,_Bool,
 Function,+,subghz_custom_btn_set,_Bool,uint8_t
-Function,-,subghz_custom_btn_set_max,void,uint8_t
-Function,-,subghz_custom_btn_set_original,void,uint8_t
 Function,+,subghz_custom_btns_reset,void,
 Function,+,subghz_environment_alloc,SubGhzEnvironment*,
 Function,+,subghz_environment_free,void,SubGhzEnvironment*
@@ -3492,6 +3485,7 @@ Function,+,subghz_txrx_load_decoder_by_name_protocol,_Bool,"SubGhzTxRx*, const c
 Function,-,subghz_txrx_protocol_is_serializable,_Bool,SubGhzTxRx*
 Function,-,subghz_txrx_protocol_is_transmittable,_Bool,"SubGhzTxRx*, _Bool"
 Function,-,subghz_txrx_receiver_set_filter,void,"SubGhzTxRx*, SubGhzProtocolFlag"
+Function,+,subghz_txrx_reset_dynamic_and_custom_btns,void,SubGhzTxRx*
 Function,-,subghz_txrx_rx_start,void,SubGhzTxRx*
 Function,-,subghz_txrx_set_debug_pin_state,void,"SubGhzTxRx*, _Bool"
 Function,+,subghz_txrx_set_need_save_callback,void,"SubGhzTxRx*, SubGhzTxRxNeedSaveCallback, void*"

@@ -52,12 +52,10 @@ Weight: 7
 
 Name: L1_Kaiju_128x64
 Min butthurt: 0
-Max butthurt: 10
+Max butthurt: 14
 Min level: 1
-Max level: 3
-Weight: 4
-Max level: 3
-Weight: 3
+Max level: 30
+Weight: 7
 
 Name: L2_Wake_up_128x64
 Min butthurt: 0
