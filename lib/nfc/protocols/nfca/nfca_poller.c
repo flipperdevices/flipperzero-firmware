@@ -125,7 +125,7 @@ NfcaError nfca_poller_stop(NfcaPoller* instance) {
     instance->session_state = NfcaPollerSessionStateIdle;
 
     // Check that data is freed
-    furi_assert(instance->buff != NULL);
+    furi_assert(instance->buff == NULL);
 
     free(instance->data);
 
