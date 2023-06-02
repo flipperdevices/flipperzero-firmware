@@ -46,7 +46,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: NFCV Code Updates & Crash Fixes (By xMasterX)
 - Fixed App Names from the unsorted mess in Unleashed (By RogueMaster)
 - Fixed Infrared images to be used on Infrared FAP (By RogueMaster)
-- Minor Update: [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life)
+- Updated: [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life) (Minor)
+- Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 
 <a name="release">
 
