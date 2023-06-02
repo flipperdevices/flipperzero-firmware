@@ -1,6 +1,6 @@
 #include "infrared_progress_view.h"
 
-#include <assets_icons.h>
+#include <infrared_icons.h>
 #include <gui/canvas.h>
 #include <gui/view.h>
 #include <gui/elements.h>
