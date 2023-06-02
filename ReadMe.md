@@ -36,6 +36,16 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Dolphin: new KAIJU animation #2713 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2713)
 - UL: [Subrem main and maker #492 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/492)
 - UL: [Lfrfid t5577 #493 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/493)
+- OFW: [SubGhz: fix flipper crashes after exiting broadcast blocking message and crash cli #2714 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2714)
+- OFW: [NFC: Fix gen1 writing with invalid BCC (lost fix from PR #2511) #2710 (By AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2710)
+- OFW: [Update dolphin.py #2717 (By ZoeMeetAgaub)](https://github.com/flipperdevices/flipperzero-firmware/pull/2717)
+- OFW: [NFC: fix MFC timings #2719 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2719)
+- UL: Updated Audio IR Asset
+- UL: [keeloq to keystore updates (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/479)
+- UL: Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- UL: NFCV Code Updates & Crash Fixes (By xMasterX)
+- Fixed App Names from the unsorted mess in Unleashed (By RogueMaster)
+- Fixed Infrared images to be used on Infrared FAP (By RogueMaster)
 
 <a name="release">
 
