@@ -16,7 +16,8 @@ static const NotificationSequence sequence_blink_set_cyan = {
     NULL,
 };
 
-static void lfrfid_read_callback(LFRFIDWorkerReadResult result, ProtocolId protocol, void* context) {
+static void
+    lfrfid_read_callback(LFRFIDWorkerReadResult result, ProtocolId protocol, void* context) {
     LfRfid* app = context;
     uint32_t event = 0;
 
@@ -35,9 +36,9 @@ static void lfrfid_read_callback(LFRFIDWorkerReadResult result, ProtocolId proto
         event = LfRfidEventReadStartASK;
     } else if(result == LFRFIDWorkerReadStartPSK) {
         event = LfRfidEventReadStartPSK;
-    // } else if(result == LFRFIDWorkerReadStartRTF) {
+        // } else if(result == LFRFIDWorkerReadStartRTF) {
         // event = LfRfidEventReadStartRTF;
-    // } else if(result == LFRFIDWorkerReadSenseHitag) { //TODO combine with sensecardstart?
+        // } else if(result == LFRFIDWorkerReadSenseHitag) { //TODO combine with sensecardstart?
         // event = LfRfidEventReadSenseHitag;
     } else {
         return;
@@ -53,7 +54,7 @@ void lfrfid_scene_read_on_enter(void* context) {
         lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadPskOnly);
     } else if(app->read_type == LFRFIDWorkerReadTypeASKOnly) {
         lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadAskOnly);
-    // } else if(app->read_type == LFRFIDWorkerReadTypeRTFOnly) {
+        // } else if(app->read_type == LFRFIDWorkerReadTypeRTFOnly) {
         // lfrfid_view_read_set_read_state(app->read_view, LfRfidReadScanning);
         // lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadRtfOnly);
     }
@@ -99,16 +100,16 @@ bool lfrfid_scene_read_on_event(void* context, SceneManagerEvent event) {
                 lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadAsk);
             }
             consumed = true;
-        // } else if(event.event == LfRfidEventReadStartRTF) {
+            // } else if(event.event == LfRfidEventReadStartRTF) {
             // if(app->read_type == LFRFIDWorkerReadTypeAuto) {
-                // lfrfid_view_read_set_read_state(app->read_view, LfRfidReadScanning);
-                // lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadHitag);
+            // lfrfid_view_read_set_read_state(app->read_view, LfRfidReadScanning);
+            // lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadHitag);
             // }
             // consumed = true;
-        // } else if(event.event == LfRfidEventReadSenseHitag) { //TODO combine with sensecardstart?
+            // } else if(event.event == LfRfidEventReadSenseHitag) { //TODO combine with sensecardstart?
             // if(app->read_type == LFRFIDWorkerReadTypeAuto ||
-               // app->read_type == LFRFIDWorkerReadTypeRTFOnly) {
-                // lfrfid_view_read_set_read_state(app->read_view, LfRfidReadTagDetected);
+            // app->read_type == LFRFIDWorkerReadTypeRTFOnly) {
+            // lfrfid_view_read_set_read_state(app->read_view, LfRfidReadTagDetected);
             // }
         }
     }

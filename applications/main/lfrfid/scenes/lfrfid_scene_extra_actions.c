@@ -39,11 +39,11 @@ void lfrfid_scene_extra_actions_on_enter(void* context) {
         lfrfid_scene_extra_actions_submenu_callback,
         app);
     // submenu_add_item(
-        // submenu,
-        // "Read RTF (Reader Talks First)",
-        // SubmenuIndexHitag,
-        // lfrfid_scene_extra_actions_submenu_callback,
-        // app);
+    // submenu,
+    // "Read RTF (Reader Talks First)",
+    // SubmenuIndexHitag,
+    // lfrfid_scene_extra_actions_submenu_callback,
+    // app);
     submenu_add_item(
         submenu,
         "Read RAW RFID data",
@@ -86,7 +86,7 @@ bool lfrfid_scene_extra_actions_on_event(void* context, SceneManagerEvent event)
         } else if(event.event == SubmenuIndexClearT5577) {
             scene_manager_next_scene(app->scene_manager, LfRfidSceneClearT5577Confirm);
             consumed = true;
-        // } else if(event.event == SubmenuIndexHitag) {
+            // } else if(event.event == SubmenuIndexHitag) {
             // app->read_type = LFRFIDWorkerReadTypeRTFOnly;
             // scene_manager_next_scene(app->scene_manager, LfRfidSceneRead);
             // DOLPHIN_DEED(DolphinDeedRfidRead);
