@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Fixed Infrared images to be used on Infrared FAP (By RogueMaster)
 - Updated: [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life) (Minor)
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
+- Updated: [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 
 <a name="release">
 
