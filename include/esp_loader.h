@@ -69,6 +69,26 @@ typedef enum {
 } target_chip_t;
 
 /**
+ * @brief Application binary header
+ */
+typedef struct {
+  uint8_t magic;
+  uint8_t segments;
+  uint8_t flash_mode;
+  uint8_t flash_size_freq;
+  uint32_t entrypoint;
+} esp_loader_bin_header_t;
+
+/**
+ * @brief Segment binary header
+ */
+typedef struct {
+    uint32_t addr;
+    uint32_t size;
+    uint8_t *data;
+} esp_loader_bin_segment_t;
+
+/**
  * @brief SPI pin configuration arguments
  */
 typedef union {
@@ -119,6 +139,8 @@ esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args);
   */
 target_chip_t esp_loader_get_target(void);
 
+
+#ifdef SERIAL_FLASHER_INTERFACE_UART
 /**
   * @brief Initiates flash operation
   *
@@ -165,6 +187,7 @@ esp_loader_error_t esp_loader_flash_write(void *payload, uint32_t size);
   *     - ESP_LOADER_ERROR_INVALID_RESPONSE Internal error
   */
 esp_loader_error_t esp_loader_flash_finish(bool reboot);
+#endif /* SERIAL_FLASHER_INTERFACE_UART */
 
 
 /**
@@ -192,7 +215,7 @@ esp_loader_error_t esp_loader_mem_start(uint32_t offset, uint32_t size, uint32_t
   * @param size[in]         Size of data in bytes.
   *
   * @note  size must not be greater that block_size supplied to previously called
-  *        esp_loader_mem_start function. 
+  *        esp_loader_mem_start function.
   *        Therefore, size of data buffer has to be equal or greater than block_size.
   *
   * @return

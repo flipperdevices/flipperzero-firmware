@@ -6,7 +6,8 @@ add_executable( ${PROJECT_NAME}
 	../src/esp_loader.c
 	../src/esp_targets.c
 	../src/md5_hash.c
-	../src/protocol.c
+	../src/protocol_common.c
+	../src/protocol_uart.c
 	../src/slip.c)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../include ../private_include ../test ../port)
@@ -21,4 +22,4 @@ else()
     target_sources(${PROJECT_NAME} PRIVATE serial_io_mock.cpp test.cpp)
 endif()
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE -DMD5_ENABLED=1)
+target_compile_definitions(${PROJECT_NAME} PRIVATE MD5_ENABLED=1 SERIAL_FLASHER_INTERFACE_UART)

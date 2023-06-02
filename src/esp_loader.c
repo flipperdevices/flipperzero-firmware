@@ -35,15 +35,12 @@
 
 static const uint32_t DEFAULT_TIMEOUT = 1000;
 static const uint32_t DEFAULT_FLASH_TIMEOUT = 3000;       // timeout for most flash operations
-static const uint32_t ERASE_REGION_TIMEOUT_PER_MB = 10000; // timeout (per megabyte) for erasing a region
 static const uint32_t LOAD_RAM_TIMEOUT_PER_MB = 2000000; // timeout (per megabyte) for erasing a region
-static const uint8_t  PADDING_PATTERN = 0xFF;
 
 typedef enum {
     SPI_FLASH_READ_ID = 0x9F
 } spi_flash_cmd_t;
 
-static uint32_t s_flash_write_size = 0;
 static const target_registers_t *s_reg = NULL;
 static target_chip_t s_target = ESP_UNKNOWN_CHIP;
 
@@ -88,27 +85,15 @@ static uint32_t timeout_per_mb(uint32_t size_bytes, uint32_t time_per_mb)
 
 esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
 {
-    uint32_t spi_config;
-    esp_loader_error_t err;
-    int32_t trials = connect_args->trials;
-
     loader_port_enter_bootloader();
 
-    do {
-        loader_port_start_timer(connect_args->sync_timeout);
-        err = loader_sync_cmd();
-        if (err == ESP_LOADER_ERROR_TIMEOUT) {
-            if (--trials == 0) {
-                return ESP_LOADER_ERROR_TIMEOUT;
-            }
-            loader_port_delay_ms(100);
-        } else if (err != ESP_LOADER_SUCCESS) {
-            return err;
-        }
-    } while (err != ESP_LOADER_SUCCESS);
+    RETURN_ON_ERROR(loader_initialize_conn(connect_args));
 
-    RETURN_ON_ERROR( loader_detect_chip(&s_target, &s_reg) );
+    RETURN_ON_ERROR(loader_detect_chip(&s_target, &s_reg));
 
+#ifdef SERIAL_FLASHER_INTERFACE_UART
+    esp_loader_error_t err;
+    uint32_t spi_config;
     if (s_target == ESP8266_CHIP) {
         err = loader_flash_begin_cmd(0, 0, 0, 0, s_target);
     } else {
@@ -116,14 +101,18 @@ esp_loader_error_t esp_loader_connect(esp_loader_connect_args_t *connect_args)
         loader_port_start_timer(DEFAULT_TIMEOUT);
         err = loader_spi_attach_cmd(spi_config);
     }
-
     return err;
+#endif /* SERIAL_FLASHER_INTERFACE_UART */
+    return ESP_LOADER_SUCCESS;
 }
 
 target_chip_t esp_loader_get_target(void)
 {
     return s_target;
 }
+
+#ifdef SERIAL_FLASHER_INTERFACE_UART
+static uint32_t s_flash_write_size = 0;
 
 static esp_loader_error_t spi_set_data_lengths(size_t mosi_bits, size_t miso_bits)
 {
@@ -280,7 +269,8 @@ esp_loader_error_t esp_loader_flash_start(uint32_t offset, uint32_t image_size, 
     const uint32_t erase_size = calc_erase_size(esp_loader_get_target(), offset, image_size);
     const uint32_t blocks_to_write = (image_size + block_size - 1) / block_size;
 
-    loader_port_start_timer(timeout_per_mb(erase_size, ERASE_REGION_TIMEOUT_PER_MB));
+    const uint32_t erase_region_timeout_per_mb = 10000;
+    loader_port_start_timer(timeout_per_mb(erase_size, erase_region_timeout_per_mb));
     return loader_flash_begin_cmd(offset, erase_size, block_size, blocks_to_write, encryption_in_cmd);
 }
 
@@ -295,8 +285,9 @@ esp_loader_error_t esp_loader_flash_write(void *payload, uint32_t size)
         return ESP_LOADER_ERROR_INVALID_PARAM;
     }
 
+    const uint8_t padding_pattern = 0xFF;
     while (padding_bytes--) {
-        data[padding_index++] = PADDING_PATTERN;
+        data[padding_index++] = padding_pattern;
     }
 
     md5_update(payload, (size + 3) & ~3);
@@ -313,7 +304,7 @@ esp_loader_error_t esp_loader_flash_finish(bool reboot)
 
     return loader_flash_end_cmd(!reboot);
 }
-
+#endif /* SERIAL_FLASHER_INTERFACE_UART */
 
 esp_loader_error_t esp_loader_mem_start(uint32_t offset, uint32_t size, uint32_t block_size)
 {

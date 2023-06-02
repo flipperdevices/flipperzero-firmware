@@ -16,6 +16,9 @@ zephyr_library_include_directories(
   ../binaries
   )
 
+# Needed for example_common
+add_compile_definitions(SERIAL_FLASHER_INTERFACE_UART)
+
 # Embed binaries into the app.
 include(${CMAKE_CURRENT_LIST_DIR}/../common/bin2array.cmake)
 create_resources(${CMAKE_CURRENT_LIST_DIR}/../binaries/Hello-world ${CMAKE_BINARY_DIR}/binaries.c)
