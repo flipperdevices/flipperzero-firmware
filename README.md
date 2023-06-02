@@ -32,3 +32,9 @@ The application will be compiled and copied onto your device.
 
 ## Licensing
 This code is open-source and may be used for whatever you want to do with it. 
+
+## Thank you notes
+- [Roguemaster](https://github.com/RogueMaster/flipperzero-firmware-wPlugins) for distributing the boilerplate 
+- [Flipc](flipc.org) for distributing the boilerplate
+- [Nikita Vostokov](https://github.com/wosk) for code contributions
+
