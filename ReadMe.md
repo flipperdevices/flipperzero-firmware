@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0523-2142-0.83.2-53a33f6.tgz&channel=RM0523-2142-0.83.2-53a33f6&version=0.83.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0523-2142-0.83.2-53a33f6-NoAnim.tgz&channel=RM0523-2142-0.83.2-53a33f6-NoAnim&version=0.83.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0602-0936-0.83.2-8927831.tgz&channel=RM0602-0936-0.83.2-8927831&version=0.83.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0602-0936-0.83.2-8927831-NoAnim.tgz&channel=RM0602-0936-0.83.2-8927831-NoAnim&version=0.83.2)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -31,49 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0529-2014-0.83.2-4471b10](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-05-30 08:00 JST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-05-30 08:00 JST`
-- Cleaned up GitHub branch so all CFW/UL/RM changes are in 4 commits... going from 7118 commits to 2694 commits (mostly added from UL merge check)...
-- UL: [Clock on desktop #484 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/484)
-- Updated: [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183`
-- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- Updated: [Sub-GHz Remote Refactored (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) (SubGhz Fixes By Willy-JL)
-- [Fixed Desktop Clock to have Slim/Stock Viewports #648 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/648)
-- [Small fix for Desktop Clock Slim/Stock Viewports Logic #649 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/649)
-- OFW: [Storage, common_rename: check that old path is exists #2698 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2698)
-- OFW: [Desktop,Rpc: desktop status subscription #2696 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2696)
-- OFW: [Add fr-FR-mac key layout #2666 (By FelixLgr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2666)
-- OFW: [Infrared: respect carrier frequency and duty cycle settings #2677 (By gsurkov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2677)
-- OFW: [USB HID report timeout #2682 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2682)
-- OFW: [Add Airwell Prime DCI Series and match file style #2686 (By minchogaydarov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2686)
-- OFW: [desktop: Refactor favorites settings and allow app browser in selection #2687 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/2687)
-- OFW: [NFC: Add support for Gen4 'ultimate card' in Magic app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
-- OFW: [nfc: Fix MFUL tearing flags read #2669 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/2669)
-- OFW: [api: added toolbox/api_lock.h #2702 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2702)
-- OFW: [Update ac.ir #2701 (By technobulb)](https://github.com/flipperdevices/flipperzero-firmware/pull/2701)
-- OFW: [nfc: Mifare Ultralight C detection #2668 (By GMMan)](https://github.com/flipperdevices/flipperzero-firmware/pull/2668)
-- UL: Added: [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
-- Removed Old NFC Magic Gen 4 App since NFC Magic app now supports both
-- ReAdded NFC Magic Gen 4 For Testing
-- Removed Duplicate Mifare Nested app
-- UL: Archive: Fix rename, show error message to user (By xMasterX)
-- UL: LFRFID: Debug: Allow PSK RAW emulation in gui (By xMasterX)
-- UL: SubGHz: Security+ 2.0 -> add extra custom button `0x78` - Fixes issue #469 (By xMasterX)
-- Updated: OFW PR 2680: RFID - Add support for Nexkey/Nexwatch (By mauimauer)
-- ReAdded NFC Magic Gen 1 Old App For Testing
-- Updated: [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
-- Updated: [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
-- Infrared module with external power fixes (Thanks qqMajikpp for troubleshooting help)
-- UL: [Desktop Clock: some improvements #490 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/490)
-- UL: Fixes for new bus changes (By xMasterX)
-- OFW: [fbt: added hooks for build & dist environments; added FW_ORIGIN_* macro for apps & SDK #2705 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2705)
-- OFW: [FuriHal: add bus abstraction #2614 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2614)
-- OFW: [Implement support for reading Opal card (Sydney, Australia) #2683 (By micolous)](https://github.com/flipperdevices/flipperzero-firmware/pull/2683)
-- OFW: [BadUSB: script execution pause #2700 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2700)
-- OFW: IR: [Add Carrier 42QHB12D8S #2707 (By minchogaydarov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2700)
-- Temporarily removed HITAG RFID support
-- Updated: [Mifare Nested 1.5.0 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
-- Updated: [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77) (By xMasterX)
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-02 23:15 JST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-02 23:15 JST`
 - OFW: [Dolphin: new KAIJU animation #2713 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2713)
 - UL: [Subrem main and maker #492 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/492)
 - UL: [Lfrfid t5577 #493 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/493)
@@ -454,4 +413,4 @@ $ ./fbt dolphin_ext
 - [Dolphin SOS (By arha)](https://github.com/arha/dolphin-sos)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0523-2142-0.83.2-53a33f6.tgz&channel=RM0523-2142-0.83.2-53a33f6&version=0.83.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0523-2142-0.83.2-53a33f6-NoAnim.tgz&channel=RM0523-2142-0.83.2-53a33f6-NoAnim&version=0.83.2)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0602-0936-0.83.2-8927831.tgz&channel=RM0602-0936-0.83.2-8927831&version=0.83.2) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0602-0936-0.83.2-8927831-NoAnim.tgz&channel=RM0602-0936-0.83.2-8927831-NoAnim&version=0.83.2)
