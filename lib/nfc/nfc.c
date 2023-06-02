@@ -122,7 +122,6 @@ static int32_t nfc_worker_poller(void* context) {
     furi_assert(context);
 
     Nfc* instance = context;
-    furi_assert(instance->state == NfcStateConfigured);
     furi_assert(instance->callback);
     instance->state = NfcStateIdle;
 
@@ -379,7 +378,6 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
 
 static NfcError nfc_poller_prepare_trx(Nfc* instance) {
     furi_assert(instance);
-    furi_assert(instance->state == NfcStateIdle);
 
     FHalNfcError error = FHalNfcErrorNone;
     NfcError ret = NfcErrorNone;
@@ -427,7 +425,7 @@ NfcError nfc_trx_custom_parity(
     furi_assert(rx_data);
     furi_assert(rx_bits);
 
-    furi_assert(instance->state == NfcStateFieldOn);
+    furi_assert(instance->state == NfcStatePollerReady);
 
     NfcError ret = NfcErrorNone;
     FHalNfcError error = FHalNfcErrorNone;
@@ -473,7 +471,7 @@ NfcError nfc_trx(
     furi_assert(rx_data);
     furi_assert(rx_bits);
 
-    furi_assert(instance->state == NfcStateFieldOn);
+    furi_assert(instance->state == NfcStatePollerReady);
 
     NfcError ret = NfcErrorNone;
     FHalNfcError error = FHalNfcErrorNone;
@@ -521,7 +519,7 @@ NfcError nfc_iso13444a_short_frame(
                                          FHalNfcaShortFrameAllReq :
                                          FHalNfcaShortFrameSensReq;
 
-    furi_assert(instance->state == NfcStateFieldOn);
+    furi_assert(instance->state == NfcStatePollerReady);
 
     NfcError ret = NfcErrorNone;
     FHalNfcError error = FHalNfcErrorNone;
@@ -563,7 +561,7 @@ NfcError nfc_iso13444a_sdd_frame(
     uint16_t* rx_bits,
     uint32_t fwt) {
     furi_assert(instance);
-    furi_assert(instance->state == NfcStateFieldOn);
+    furi_assert(instance->state == NfcStatePollerReady);
 
     NfcError ret = NfcErrorNone;
     FHalNfcError error = FHalNfcErrorNone;
