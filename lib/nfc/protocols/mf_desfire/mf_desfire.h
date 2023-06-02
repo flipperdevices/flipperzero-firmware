@@ -45,7 +45,8 @@ typedef struct {
 } MfDesfireVersion;
 
 typedef struct {
-    uint32_t bytes;
+    uint32_t bytes_free;
+    bool is_present;
 } MfDesfireFreeMemory; // EV1+ only
 
 typedef struct MfDesfireKeyVersion {

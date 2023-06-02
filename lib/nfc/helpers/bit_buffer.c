@@ -49,51 +49,18 @@ void bit_buffer_copy(BitBuffer* buf, const BitBuffer* other) {
     furi_assert(other);
     furi_assert(buf->capacity_bytes * BITS_IN_BYTE >= other->size_bits);
 
-    memcpy(buf->data, other->data, other->size_bits / BITS_IN_BYTE);
+    memcpy(buf->data, other->data, bit_buffer_get_size_bytes(other));
     buf->size_bits = other->size_bits;
 }
 
-void bit_buffer_copy_right(BitBuffer* buf, const BitBuffer* other, size_t start) {
+void bit_buffer_copy_right(BitBuffer* buf, const BitBuffer* other, size_t start_index) {
     furi_assert(buf);
     furi_assert(other);
-    furi_assert(other->size_bits > start * BITS_IN_BYTE);
-    furi_assert((buf->capacity_bytes * BITS_IN_BYTE) >= (other->size_bits - start * BITS_IN_BYTE));
+    furi_assert(bit_buffer_get_size_bytes(other) > start_index);
+    furi_assert(buf->capacity_bytes >= bit_buffer_get_size_bytes(other) - start_index);
 
-    memcpy(buf->data, other->data + start, other->size_bits / BITS_IN_BYTE - start);
-}
-
-void bit_buffer_copy_prepend_bytes(
-    BitBuffer* buf,
-    const BitBuffer* other,
-    const uint8_t* prefix,
-    size_t prefix_size_bytes) {
-    furi_assert(buf);
-    furi_assert(other);
-    furi_assert(prefix);
-    furi_assert(
-        buf->capacity_bytes * BITS_IN_BYTE >= other->size_bits + prefix_size_bytes * BITS_IN_BYTE);
-
-    memcpy(buf->data, prefix, prefix_size_bytes);
-    memcpy(buf->data + prefix_size_bytes, other->data, other->size_bits / BITS_IN_BYTE);
-
-    buf->size_bits = other->size_bits + prefix_size_bytes * BITS_IN_BYTE;
-}
-
-void bit_buffer_copy_append_bytes(
-    BitBuffer* buf,
-    const BitBuffer* other,
-    const uint8_t* suffix,
-    size_t suffix_size_bytes) {
-    furi_assert(buf);
-    furi_assert(other);
-    furi_assert(suffix);
-    furi_assert(
-        buf->capacity_bytes * BITS_IN_BYTE >= other->size_bits + suffix_size_bytes * BITS_IN_BYTE);
-
-    memcpy(buf->data, other->data, other->size_bits / BITS_IN_BYTE);
-    memcpy(buf->data + other->size_bits / BITS_IN_BYTE, suffix, suffix_size_bytes);
-
-    buf->size_bits = other->size_bits + suffix_size_bytes * BITS_IN_BYTE;
+    memcpy(buf->data, other->data + start_index, bit_buffer_get_size_bytes(other) - start_index);
+    buf->size_bits = other->size_bits - start_index * BITS_IN_BYTE;
 }
 
 void bit_buffer_copy_bytes(BitBuffer* buf, const uint8_t* data, size_t size_bytes) {
@@ -104,11 +71,12 @@ void bit_buffer_copy_bytes(BitBuffer* buf, const uint8_t* data, size_t size_byte
     buf->size_bits = size_bytes * BITS_IN_BYTE;
 }
 
-void bit_buffer_write_bytes(const BitBuffer* buf, void* dest, size_t max_size_bytes) {
+void bit_buffer_write_bytes(const BitBuffer* buf, void* dest, size_t size_bytes) {
     furi_assert(buf);
     furi_assert(dest);
+    furi_assert(bit_buffer_get_size_bytes(buf) >= size_bytes);
 
-    memcpy(dest, buf->data, max_size_bytes);
+    memcpy(dest, buf->data, size_bytes);
 }
 
 bool bit_buffer_has_partial_byte(const BitBuffer* buf) {
@@ -138,7 +106,7 @@ size_t bit_buffer_get_size(const BitBuffer* buf) {
 size_t bit_buffer_get_size_bytes(const BitBuffer* buf) {
     furi_assert(buf);
 
-    return buf->size_bits / BITS_IN_BYTE;
+    return (buf->size_bits / BITS_IN_BYTE) + (buf->size_bits % BITS_IN_BYTE ? 1 : 0);
 }
 
 uint8_t bit_buffer_get_byte(const BitBuffer* buf, size_t index) {
@@ -175,7 +143,7 @@ void bit_buffer_append_right(BitBuffer* buf, const BitBuffer* other, size_t star
     furi_assert(buf->capacity_bytes >= size_bytes + other_size_bytes);
 
     memcpy(buf->data + size_bytes, other->data + start_index, other_size_bytes);
-    buf->size_bits += other->size_bits;
+    buf->size_bits += other->size_bits - start_index * BITS_IN_BYTE;
 }
 
 void bit_buffer_set_size(BitBuffer* buf, size_t new_size) {

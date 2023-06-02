@@ -92,7 +92,8 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     const uint8_t pcb = ISO14443_4A_PCB_I | instance->protocol_data.block_number;
     instance->protocol_data.block_number ^= 1;
 
-    bit_buffer_copy_prepend_bytes(instance->tx_buffer, tx_buffer, &pcb, sizeof(pcb));
+    bit_buffer_copy_bytes(instance->tx_buffer, &pcb, sizeof(pcb));
+    bit_buffer_append(instance->tx_buffer, tx_buffer);
 
     Iso14443_4aError ret = Iso14443_4aErrorNone;
 
@@ -112,15 +113,17 @@ Iso14443_4aError iso14443_4a_poller_send_block(
             FURI_LOG_E(TAG, "Iso14443-3 error: %d", error);
             ret = iso14443_4a_poller_process_error(error);
             break;
-        } else if(bit_buffer_get_byte(instance->rx_buffer, 0) != pcb) {
-            ret = Iso14443_4aErrorProtocol;
-            break;
         }
 
         // TODO: Do not set the size directly
         bit_buffer_set_size(instance->rx_buffer, rx_size_bits);
-        bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(pcb));
 
+        if(!bit_buffer_starts_with_byte(instance->rx_buffer, pcb)) {
+            ret = Iso14443_4aErrorProtocol;
+            break;
+        }
+
+        bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(pcb));
         ret = Iso14443_4aErrorNone;
     } while(false);
 
