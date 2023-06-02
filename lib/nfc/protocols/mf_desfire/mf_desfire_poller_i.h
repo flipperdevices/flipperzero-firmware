@@ -14,6 +14,7 @@ typedef enum {
     MfDesfirePollerStateIdle,
     MfDesfirePollerStateReadVersion,
     MfDesfirePollerStateReadFreeMemory,
+    MfDesfirePollerStateReadKeySettings,
     MfDesfirePollerStateReadFailed,
     MfDesfirePollerStateReadSuccess,
 
@@ -53,6 +54,10 @@ MfDesfireError
 
 MfDesfireError
     mf_desfire_poller_async_read_free_memory(MfDesfirePoller* instance, MfDesfireFreeMemory* data);
+
+MfDesfireError mf_desfire_poller_async_read_key_settings(
+    MfDesfirePoller* instance,
+    MfDesfireKeySettings* data);
 
 #ifdef __cplusplus
 }

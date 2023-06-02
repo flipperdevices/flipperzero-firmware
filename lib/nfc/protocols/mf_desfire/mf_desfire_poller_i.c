@@ -105,3 +105,52 @@ MfDesfireError
 
     return error;
 }
+
+MfDesfireError mf_desfire_poller_async_read_key_settings(
+    MfDesfirePoller* instance,
+    MfDesfireKeySettings* data) {
+    furi_assert(instance);
+
+    MfDesfireError error = MfDesfireErrorNone;
+
+    do {
+        bit_buffer_set_size_bytes(instance->input_buffer, sizeof(uint8_t));
+        bit_buffer_set_byte(instance->input_buffer, 0, MF_DESFIRE_CMD_GET_KEY_SETTINGS);
+
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        bit_buffer_write_bytes(instance->result_buffer, &data->settings, sizeof(data->settings));
+
+        bit_buffer_set_size_bytes(instance->input_buffer, sizeof(uint8_t) * 2);
+        bit_buffer_set_byte(instance->input_buffer, 0, MF_DESFIRE_CMD_GET_KEY_VERSION);
+
+        MfDesfireKeyVersion** key_version_head = &data->key_version_head;
+        for(size_t key_id = 0; key_id < data->settings.max_keys; ++key_id) {
+            bit_buffer_set_byte(instance->input_buffer, 1, key_id);
+
+            error = mf_desfire_send_chunks(
+                instance,
+                instance->input_buffer,
+                instance->result_buffer,
+                MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+            if(error != MfDesfireErrorNone) break;
+
+            MfDesfireKeyVersion* key_version = malloc(sizeof(MfDesfireKeyVersion));
+            key_version->id = key_id;
+            key_version->version = bit_buffer_get_byte(instance->result_buffer, 0);
+
+            *key_version_head = key_version;
+            key_version_head = &key_version->next;
+        }
+
+    } while(false);
+
+    return error;
+}

@@ -138,7 +138,7 @@ size_t bit_buffer_get_size_bytes(const BitBuffer* buf);
 uint8_t bit_buffer_get_byte(const BitBuffer* buf, size_t index);
 
 /**
- * Get the pointer to a BitBuffer instance's underlying data. Use sparingly.
+ * Get the pointer to a BitBuffer instance's underlying data.
  * TODO: Make it return const uint8_t* after all compatibility problems
  * will have been resolved.
  *
@@ -154,10 +154,28 @@ uint8_t* bit_buffer_get_data(const BitBuffer* buf);
  * The index must be valid (i.e. less than the instance's data size in bytes).
  *
  * @param [in,out] buf pointer to a BitBuffer instance to be modified
- * @param [in] byte byte value to be set at index
  * @param [in] index index of the byte in question
+ * @param [in] byte byte value to be set at index
  */
-void bit_buffer_set_byte(BitBuffer* buf, uint8_t byte, size_t index);
+void bit_buffer_set_byte(BitBuffer* buf, size_t index, uint8_t byte);
+
+/**
+ * Resize a BitBuffer instance to a new size, in bits.
+ * @warning May cause bugs. Use only if absolutely necessary.
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to be resized
+ * @param [in] new_size the new size of the buffer, in bits
+ */
+void bit_buffer_set_size(BitBuffer* buf, size_t new_size);
+
+/**
+ * Resize a BitBuffer instance to a new size, in bytes.
+ * @warning May cause bugs. Use only if absolutely necessary.
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to be resized
+ * @param [in] new_size_bytes the new size of the buffer, in bytes
+ */
+void bit_buffer_set_size_bytes(BitBuffer* buf, size_t new_size_bytes);
 
 // Modification
 
@@ -180,16 +198,6 @@ void bit_buffer_append(BitBuffer* buf, const BitBuffer* other);
  * @param [in] start_index index to begin copying source data from
  */
 void bit_buffer_append_right(BitBuffer* buf, const BitBuffer* other, size_t start_index);
-
-/**
- * Override the BitBuffer instance's data size and replace it with the new value, in bits.
- * @warning This method exists for compatibility purposes only. It will be removed
- * once the other APIs will allow for it.
- *
- * @param [in,out] buf pointer to a BitBuffer instance to be modified
- * @param [in] new_size the new size of the buffer, in bits
- */
-void bit_buffer_set_size(BitBuffer* buf, size_t new_size);
 
 #ifdef __cplusplus
 }

@@ -122,7 +122,7 @@ uint8_t* bit_buffer_get_data(const BitBuffer* buf) {
     return buf->data;
 }
 
-void bit_buffer_set_byte(BitBuffer* buf, uint8_t byte, size_t index) {
+void bit_buffer_set_byte(BitBuffer* buf, size_t index, uint8_t byte) {
     furi_assert(buf);
     furi_assert(buf->size_bits / BITS_IN_BYTE > index);
 
@@ -148,7 +148,14 @@ void bit_buffer_append_right(BitBuffer* buf, const BitBuffer* other, size_t star
 
 void bit_buffer_set_size(BitBuffer* buf, size_t new_size) {
     furi_assert(buf);
-    furi_assert(buf->capacity_bytes * BITS_IN_BYTE > new_size);
+    furi_assert(buf->capacity_bytes * BITS_IN_BYTE >= new_size);
 
     buf->size_bits = new_size;
+}
+
+void bit_buffer_set_size_bytes(BitBuffer* buf, size_t new_size_bytes) {
+    furi_assert(buf);
+    furi_assert(buf->capacity_bytes >= new_size_bytes);
+
+    buf->size_bits = new_size_bytes * BITS_IN_BYTE;
 }

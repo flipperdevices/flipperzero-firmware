@@ -56,13 +56,15 @@ typedef struct MfDesfireKeyVersion {
 } MfDesfireKeyVersion;
 
 typedef struct {
-    uint8_t change_key_id;
-    bool config_changeable;
-    bool free_create_delete;
-    bool free_directory_list;
-    bool master_key_changeable;
-    uint8_t flags;
-    uint8_t max_keys;
+    struct {
+        bool is_config_changeable : 1;
+        bool is_free_directory_list : 1;
+        bool is_free_create_delete : 1;
+        bool is_master_key_changeable : 1;
+        uint8_t change_key_id : 4;
+        uint8_t max_keys : 4;
+        uint8_t flags : 4;
+    } settings;
     MfDesfireKeyVersion* key_version_head;
 } MfDesfireKeySettings;
 
@@ -125,7 +127,7 @@ typedef struct {
     Iso14443_4aData iso14443_4a_data;
     MfDesfireVersion version;
     MfDesfireFreeMemory free_memory;
-    MfDesfireKeySettings* master_key_settings;
+    MfDesfireKeySettings master_key_settings;
     MfDesfireApplication* app_head;
 } MfDesfireData;
 
