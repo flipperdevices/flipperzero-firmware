@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,28.1,,
+Version,+,28.2,,
 Header,+,applications/main/fap_loader/fap_loader_app.h,,
 Header,+,applications/main/subghz/helpers/subghz_txrx.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
@@ -94,6 +94,7 @@ Header,+,firmware/targets/furi_hal_include/furi_hal_version.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_vibro.h,,
 Header,+,lib/cfw/cfw.h,,
 Header,+,lib/drivers/rgb_backlight.h,,
+Header,+,lib/digital_signal/digital_signal.h,,
 Header,+,lib/flipper_application/api_hashtable/api_hashtable.h,,
 Header,+,lib/flipper_application/api_hashtable/compilesort.hpp,,
 Header,+,lib/flipper_application/flipper_application.h,,
@@ -2841,6 +2842,7 @@ Function,+,subghz_environment_get_nice_flor_s_rainbow_table_file_name,const char
 Function,+,subghz_environment_get_protocol_name_registry,const char*,"SubGhzEnvironment*, size_t"
 Function,+,subghz_environment_get_protocol_registry,void*,SubGhzEnvironment*
 Function,+,subghz_environment_load_keystore,_Bool,"SubGhzEnvironment*, const char*"
+Function,+,subghz_environment_reset_keeloq,void,SubGhzEnvironment*
 Function,+,subghz_environment_set_alutech_at_4n_rainbow_table_file_name,void,"SubGhzEnvironment*, const char*"
 Function,+,subghz_environment_set_came_atomo_rainbow_table_file_name,void,"SubGhzEnvironment*, const char*"
 Function,+,subghz_environment_set_nice_flor_s_rainbow_table_file_name,void,"SubGhzEnvironment*, const char*"
@@ -2851,6 +2853,7 @@ Function,-,subghz_keystore_get_data,SubGhzKeyArray_t*,SubGhzKeystore*
 Function,-,subghz_keystore_load,_Bool,"SubGhzKeystore*, const char*"
 Function,-,subghz_keystore_raw_encrypted_save,_Bool,"const char*, const char*, uint8_t*"
 Function,-,subghz_keystore_raw_get_data,_Bool,"const char*, size_t, uint8_t*, size_t"
+Function,-,subghz_keystore_reset_kl,void,SubGhzKeystore*
 Function,-,subghz_keystore_save,_Bool,"SubGhzKeystore*, const char*, uint8_t*"
 Function,-,subghz_protocol_alutech_at_4n_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint16_t, SubGhzRadioPreset*"
 Function,+,subghz_protocol_blocks_add_bit,void,"SubGhzBlockDecoder*, uint8_t"

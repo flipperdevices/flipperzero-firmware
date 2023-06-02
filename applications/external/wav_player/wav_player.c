@@ -13,7 +13,7 @@
 #include <math.h>
 #include <WAV_Player_icons.h>
 
-#include <WAV_Player_icons.h>
+#include <wav_player_icons.h>
 
 #define TAG "WavPlayer"
 

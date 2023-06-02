@@ -15,3 +15,6 @@
 // End of list
 
 #define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_CFW
+
+// Max custom fonts value
+#define MAX_CUSTOM_FONTS (9)
