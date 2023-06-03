@@ -6,7 +6,7 @@ App(
         "Dab_Timer",
         "fap_loader",
         "subghz",
-        "SubGHz_Remote",
+        "Subghz_Remote_Refactored",
         "SubGHz_Playlist",
         "lfrfid",
         "nfc",
