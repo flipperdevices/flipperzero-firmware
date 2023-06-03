@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0602-1145-0.83.2-61b47c6](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-02 23:15 JST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-02 23:15 JST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-03 23:30 JST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-03 23:30 JST`
 - OFW: [Dolphin: new KAIJU animation #2713 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2713)
 - UL: [Subrem main and maker #492 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/492)
 - UL: [Lfrfid t5577 #493 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/493)
@@ -55,6 +55,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: NFC V: Fixed crash when exiting emulation and starting it again
 - UL: Infrared: Update universal remote assets (By amec0e)
 - Fixed random UID generation in reader_analyzer.c (By NathanielJS1541)
+- Known Issue: Looking into FAP as Favorite Issue
 
 <a name="release">
 
