@@ -57,9 +57,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated main menu to use SubGHz Remote Refactored app now renamed SubGHz Remote
 - Updated: [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 - Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
-- Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
-- Updated: [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
+- Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker) (Thanks xMasterX)
+- Updated: [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player) (Thanks xMasterX)
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
+- Updated: [TAMA P1: Save State & Layout Update (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1) [Original TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) [Mute & Settings (By Round-Pi)](https://github.com/Round-Pi/flipperzero-tamagotch-p1) (Thanks xMasterX)
+- Updated: [Zero Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker) (Thanks xMasterX)
 - Known Issue: Looking into FAP as Favorite Issue
 
 <a name="release">

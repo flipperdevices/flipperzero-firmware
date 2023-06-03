@@ -71,6 +71,8 @@ void tracker_interrupt_init(float freq, FuriHalInterruptISR isr, void* context) 
     tracker_isr = isr;
     tracker_isr_context = context;
 
+    furi_hal_bus_enable(FuriHalBusTIM2);
+
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, tracker_interrupt_cb, NULL);
 
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
@@ -88,7 +90,7 @@ void tracker_interrupt_init(float freq, FuriHalInterruptISR isr, void* context) 
 
 void tracker_interrupt_deinit() {
     FURI_CRITICAL_ENTER();
-    LL_TIM_DeInit(TIM2);
+    furi_hal_bus_disable(FuriHalBusTIM2);
     FURI_CRITICAL_EXIT();
 
     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
