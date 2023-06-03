@@ -52,7 +52,7 @@ void xremote_scene_transmit_send_ir_signal(XRemote* app, CrossRemoteItem* item) 
     xremote_scene_ir_notification_message(app, InfraredNotificationMessageBlinkStartSend);
     if (xremote_scene_ir_signal_is_raw(signal)) {
         InfraredRawSignal* raw = xremote_ir_signal_get_raw_signal(signal);
-        infrared_worker_set_raw_signal(app->ir_worker, raw->timings, raw->timings_size);
+        infrared_worker_set_raw_signal(app->ir_worker, raw->timings, raw->timings_size, raw->frequency, raw->duty_cycle);
     } else {
         InfraredMessage* message = xremote_ir_signal_get_message(signal);
         infrared_worker_set_decoded_signal(app->ir_worker, message);
