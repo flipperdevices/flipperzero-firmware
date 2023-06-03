@@ -7,6 +7,7 @@ Use this code as a foundation for developing Flipper Zero Applications, change t
 ### Features
 - Start Screen
 - Menu
+- Button Menu
 - Different Scenes / Views
 - Settings Page (On/Off for haptics, sound, led)
 - Handling of Button Inputs
