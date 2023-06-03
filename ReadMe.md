@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life) (Minor)
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 - Updated: [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
+- OFW: [FuriHal: disable bus re-initialization on early init and extra asserts for AHB1,AHB2,AHB3 which must be left intact on entering to FUS #2725 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2725)
 
 <a name="release">
 
