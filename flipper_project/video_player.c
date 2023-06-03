@@ -23,8 +23,7 @@ bool input_callback(InputEvent* input_event, void* ctx) {
 
     bool consumed = false;
 
-    VideoPlayerEvent event = {
-        .type = EventTypeInput, .input = *input_event};
+    VideoPlayerEvent event = {.type = EventTypeInput, .input = *input_event};
 
     furi_message_queue_put(player->event_queue, &event, FuriWaitForever);
 
@@ -38,8 +37,7 @@ void direct_input_callback(const void* value, void* ctx) {
     const InputEvent* input_event = value;
     VideoPlayerApp* player = (VideoPlayerApp*)(ctx);
 
-    VideoPlayerEvent event = {
-        .type = EventTypeInput, .input = *input_event};
+    VideoPlayerEvent event = {.type = EventTypeInput, .input = *input_event};
 
     furi_message_queue_put(player->event_queue, &event, FuriWaitForever);
 }
@@ -50,8 +48,7 @@ void player_view_free(PlayerView* player_view) {
     free(player_view);
 }
 
-bool open_file_stream(Stream* stream) 
-{
+bool open_file_stream(Stream* stream) {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
     bool result = false;
     FuriString* path;
@@ -88,48 +85,46 @@ int32_t video_player_app(void* p) {
 
     VideoPlayerApp* player = init_player();
 
-    if(open_file_stream(player->stream))
-    {
-
+    if(open_file_stream(player->stream)) {
     }
 
-    else
-    {
+    else {
         player->quit = true;
         //goto end;
     }
 
-    if(!(player->quit))
-    {
+    if(!(player->quit)) {
         char header[8];
         header[7] = '\0';
         stream_read(player->stream, (uint8_t*)header, 7);
 
-        if(strcmp(header, "BND!VID") != 0)
-        {
+        if(strcmp(header, "BND!VID") != 0) {
             player->quit = true;
             //goto end;
         }
 
         stream_read(player->stream, (uint8_t*)&player->version, sizeof(player->version));
         stream_read(player->stream, (uint8_t*)&player->num_frames, sizeof(player->num_frames));
-        stream_read(player->stream, (uint8_t*)&player->audio_chunk_size, sizeof(player->audio_chunk_size));
+        stream_read(
+            player->stream, (uint8_t*)&player->audio_chunk_size, sizeof(player->audio_chunk_size));
         stream_read(player->stream, (uint8_t*)&player->sample_rate, sizeof(player->sample_rate));
         stream_read(player->stream, &player->height, sizeof(player->height));
         stream_read(player->stream, &player->width, sizeof(player->width));
 
-        player->buffer = (uint8_t*)malloc(player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
-        memset(player->buffer, 0, player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
+        player->buffer = (uint8_t*)malloc(
+            player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
+        memset(
+            player->buffer,
+            0,
+            player->audio_chunk_size * 2 + (uint32_t)player->height * (uint32_t)player->width / 8);
 
         player->image_buffer_length = (uint32_t)player->height * (uint32_t)player->width / 8;
         player->audio_buffer = (uint8_t*)&player->buffer[player->image_buffer_length];
         player->image_buffer = player->buffer;
     }
 
-    if(furi_hal_speaker_acquire(1000))
-    {
-        if(!(player->quit))
-        {
+    if(furi_hal_speaker_acquire(1000)) {
+        if(!(player->quit)) {
             player_init_hardware_and_play(player);
         }
 
@@ -153,8 +148,7 @@ int32_t video_player_app(void* p) {
         player->input_subscription =
             furi_pubsub_subscribe(player->input, direct_input_callback, player);
 
-        if(player->quit)
-        {
+        if(player->quit) {
             deinit_player(player);
             player_deinit_hardware();
             return 0;
@@ -164,66 +158,63 @@ int32_t video_player_app(void* p) {
 
         vTaskPrioritySet(furi_thread_get_current_id(), FuriThreadPriorityIdle);
 
-        while(!(player->quit))
-        {
+        while(!(player->quit)) {
             furi_check(
-                furi_message_queue_get(player->event_queue, &event, FuriWaitForever) == FuriStatusOk);
+                furi_message_queue_get(player->event_queue, &event, FuriWaitForever) ==
+                FuriStatusOk);
 
-            if(event.type == EventTypeInput)
-            {
-                if(event.input.key == InputKeyBack)
-                {
+            if(event.type == EventTypeInput) {
+                if(event.input.key == InputKeyBack) {
                     player->quit = true;
                 }
 
-                if(event.input.key == InputKeyOk)
-                {
+                if(event.input.key == InputKeyOk) {
                     player->playing = !player->playing;
                 }
 
-                if(player->playing)
-                {
+                if(player->playing) {
                     player_start();
                 }
 
-                else
-                {
+                else {
                     player_stop();
                 }
             }
 
-            if(event.type == EventType1stHalf)
-            {
+            if(event.type == EventType1stHalf) {
                 //reading image+sound data in one pass since in this case image buffer and first part of audio buffer are continuous chunk of memory; should probably improve FPS
-                stream_read(player->stream, player->image_buffer, player->image_buffer_length + player->audio_chunk_size);
+                stream_read(
+                    player->stream,
+                    player->image_buffer,
+                    player->image_buffer_length + player->audio_chunk_size);
 
                 player->frames_played++;
 
                 canvas_reset(player->canvas);
-                
-                canvas_draw_xbm(player->canvas, 0, 0, player->width, player->height, player->image_buffer);
+
+                canvas_draw_xbm(
+                    player->canvas, 0, 0, player->width, player->height, player->image_buffer);
 
                 canvas_commit(player->canvas);
             }
 
-            if(event.type == EventType2ndHalf)
-            {
+            if(event.type == EventType2ndHalf) {
                 uint8_t* audio_buffer = &player->audio_buffer[player->audio_chunk_size];
-            
+
                 stream_read(player->stream, player->image_buffer, player->image_buffer_length);
                 stream_read(player->stream, audio_buffer, player->audio_chunk_size);
 
                 player->frames_played++;
 
                 canvas_reset(player->canvas);
-                
-                canvas_draw_xbm(player->canvas, 0, 0, player->width, player->height, player->image_buffer);
+
+                canvas_draw_xbm(
+                    player->canvas, 0, 0, player->width, player->height, player->image_buffer);
 
                 canvas_commit(player->canvas);
             }
 
-            if(player->frames_played == player->num_frames)
-            {
+            if(player->frames_played == player->num_frames) {
                 player->quit = true;
             }
 

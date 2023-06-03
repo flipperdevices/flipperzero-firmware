@@ -1,8 +1,7 @@
 #include "video_player_hal.h"
 #include "video_player.h"
 
-void video_player_dma_isr(void* context)
-{
+void video_player_dma_isr(void* context) {
     VideoPlayerApp* player = (VideoPlayerApp*)context;
 
     // half of transfer
@@ -10,12 +9,11 @@ void video_player_dma_isr(void* context)
         LL_DMA_ClearFlag_HT1(DMA1);
         // fill first half of the buffer
         //uint8_t* audio_buffer = player->audio_buffer;
-        
+
         //stream_read(player->stream, player->image_buffer, player->image_buffer_length);
         //stream_read(player->stream, audio_buffer, player->audio_chunk_size);
 
-        static VideoPlayerEvent event = {
-        .type = EventType1stHalf};
+        static VideoPlayerEvent event = {.type = EventType1stHalf};
 
         furi_message_queue_put(player->event_queue, &event, 0);
     }
@@ -25,19 +23,17 @@ void video_player_dma_isr(void* context)
         LL_DMA_ClearFlag_TC1(DMA1);
         // fill second half of buffer
         //uint8_t* audio_buffer = &player->audio_buffer[player->audio_chunk_size];
-        
+
         //stream_read(player->stream, player->image_buffer, player->image_buffer_length);
         //stream_read(player->stream, audio_buffer, player->audio_chunk_size);
 
-        static VideoPlayerEvent event = {
-        .type = EventType2ndHalf};
+        static VideoPlayerEvent event = {.type = EventType2ndHalf};
 
         furi_message_queue_put(player->event_queue, &event, 0);
     }
 }
 
-void player_init_hardware_and_play(VideoPlayerApp* player)
-{
+void player_init_hardware_and_play(VideoPlayerApp* player) {
     //DMA:
 
     uint32_t address = (uint32_t)player->audio_buffer;
@@ -84,7 +80,8 @@ void player_init_hardware_and_play(VideoPlayerApp* player)
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct1 = {0};
 
     TIM_InitStruct1.Prescaler = 0;
-    TIM_InitStruct1.Autoreload = (TIMER_BASE_CLOCK / (uint32_t)player->sample_rate - 1); // to support various sample rates
+    TIM_InitStruct1.Autoreload =
+        (TIMER_BASE_CLOCK / (uint32_t)player->sample_rate - 1); // to support various sample rates
     TIM_InitStruct1.CounterMode = LL_TIM_COUNTERMODE_UP;
     LL_TIM_Init(SAMPLE_RATE_TIMER, &TIM_InitStruct1);
 
@@ -105,8 +102,7 @@ void player_init_hardware_and_play(VideoPlayerApp* player)
         UNUSED(unu);
     }*/
 
-    furi_hal_interrupt_set_isr_ex(
-        FuriHalInterruptIdDma1Ch1, 15, video_player_dma_isr, player);
+    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 15, video_player_dma_isr, player);
 
     // START!!
     LL_TIM_EnableDMAReq_UPDATE(SAMPLE_RATE_TIMER);
@@ -114,28 +110,25 @@ void player_init_hardware_and_play(VideoPlayerApp* player)
     LL_TIM_EnableCounter(SAMPLE_RATE_TIMER);
 }
 
-void player_deinit_hardware()
-{
+void player_deinit_hardware() {
     LL_DMA_DisableChannel(DMA_INSTANCE);
-    FURI_CRITICAL_ENTER();
-    LL_TIM_DeInit(SAMPLE_RATE_TIMER);
-    LL_TIM_DeInit(SPEAKER_PWM_TIMER);
-    FURI_CRITICAL_EXIT();
 
-    furi_hal_speaker_release();
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_release();
+    }
 
     furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 15, NULL, NULL);
 
-    furi_hal_bus_disable(FuriHalBusTIM1);
+    if(furi_hal_bus_is_enabled(FuriHalBusTIM1)) {
+        furi_hal_bus_disable(FuriHalBusTIM1);
+    }
 }
 
-void player_stop()
-{
+void player_stop() {
     LL_TIM_DisableCounter(SAMPLE_RATE_TIMER);
 }
 
-void player_start()
-{
+void player_start() {
     LL_TIM_EnableCounter(SAMPLE_RATE_TIMER);
 }
