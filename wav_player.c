@@ -11,9 +11,8 @@
 #include "wav_parser.h"
 #include "wav_player_view.h"
 #include <math.h>
-#include <My_WAV_Player_icons.h>
 
-#include <My_WAV_Player_icons.h>
+#include <wav_player_icons.h>
 
 #define TAG "WavPlayer"
 
@@ -127,10 +126,8 @@ static void app_free(WavPlayerApp* app) {
 }
 
 // TODO: that works only with 8-bit 2ch audio
-static bool fill_data(WavPlayerApp* app, size_t index)
-{
-    if(app->num_channels == 1 && app->bits_per_sample == 8)
-    {
+static bool fill_data(WavPlayerApp* app, size_t index) {
+    if(app->num_channels == 1 && app->bits_per_sample == 8) {
         uint16_t* sample_buffer_start = &app->sample_buffer[index];
         size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count_half);
 
@@ -169,8 +166,7 @@ static bool fill_data(WavPlayerApp* app, size_t index)
         return count != app->samples_count_half;
     }
 
-    if(app->num_channels == 1 && app->bits_per_sample == 16)
-    {
+    if(app->num_channels == 1 && app->bits_per_sample == 16) {
         uint16_t* sample_buffer_start = &app->sample_buffer[index];
         size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
 
@@ -178,9 +174,9 @@ static bool fill_data(WavPlayerApp* app, size_t index)
             //app->tmp_buffer[i] = 0;
         }
 
-        for(size_t i = 0; i < app->samples_count; i += 2)
-        {
-            int16_t int_16 = (((int16_t)app->tmp_buffer[i + 1] << 8) + (int16_t)app->tmp_buffer[i]);
+        for(size_t i = 0; i < app->samples_count; i += 2) {
+            int16_t int_16 =
+                (((int16_t)app->tmp_buffer[i + 1] << 8) + (int16_t)app->tmp_buffer[i]);
 
             float data = ((float)int_16 / 256.0 + 127.0);
             data -= UINT8_MAX / 2; // to signed
@@ -208,17 +204,15 @@ static bool fill_data(WavPlayerApp* app, size_t index)
         return count != app->samples_count;
     }
 
-    if(app->num_channels == 2 && app->bits_per_sample == 16)
-    {
+    if(app->num_channels == 2 && app->bits_per_sample == 16) {
         uint16_t* sample_buffer_start = &app->sample_buffer[index];
         size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
 
-        for(size_t i = 0; i < app->samples_count; i += 4)
-        {
+        for(size_t i = 0; i < app->samples_count; i += 4) {
             int16_t L = (((int16_t)app->tmp_buffer[i + 1] << 8) + (int16_t)app->tmp_buffer[i]);
             int16_t R = (((int16_t)app->tmp_buffer[i + 3] << 8) + (int16_t)app->tmp_buffer[i + 2]);
             int32_t int_16 = L / 2 + R / 2; // (L + R) / 2
-            
+
             float data = ((float)int_16 / 256.0 + 127.0);
             data -= UINT8_MAX / 2; // to signed
             data /= UINT8_MAX / 2; // scale -1..1
@@ -242,12 +236,11 @@ static bool fill_data(WavPlayerApp* app, size_t index)
 
         count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
 
-        for(size_t i = 0; i < app->samples_count; i += 4)
-        {
+        for(size_t i = 0; i < app->samples_count; i += 4) {
             int16_t L = (((int16_t)app->tmp_buffer[i + 1] << 8) + (int16_t)app->tmp_buffer[i]);
             int16_t R = (((int16_t)app->tmp_buffer[i + 3] << 8) + (int16_t)app->tmp_buffer[i + 2]);
             int32_t int_16 = L / 2 + R / 2; // (L + R) / 2
-            
+
             float data = ((float)int_16 / 256.0 + 127.0);
             data -= UINT8_MAX / 2; // to signed
             data /= UINT8_MAX / 2; // scale -1..1
@@ -274,8 +267,7 @@ static bool fill_data(WavPlayerApp* app, size_t index)
         return count != app->samples_count;
     }
 
-    if(app->num_channels == 2 && app->bits_per_sample == 8)
-    {
+    if(app->num_channels == 2 && app->bits_per_sample == 8) {
         uint16_t* sample_buffer_start = &app->sample_buffer[index];
         size_t count = stream_read(app->stream, app->tmp_buffer, app->samples_count);
 
@@ -283,8 +275,7 @@ static bool fill_data(WavPlayerApp* app, size_t index)
             app->tmp_buffer[i] = 0;
         }
 
-        for(size_t i = 0; i < app->samples_count; i += 2) 
-        {
+        for(size_t i = 0; i < app->samples_count; i += 2) {
             float data = (app->tmp_buffer[i] + app->tmp_buffer[i + 1]) / 2; // (L + R) / 2
             data -= UINT8_MAX / 2; // to signed
             data /= UINT8_MAX / 2; // scale -1..1
@@ -366,12 +357,12 @@ static void app_run(WavPlayerApp* app) {
     bool eof = fill_data(app, 0);
     eof = fill_data(app, app->samples_count_half);
 
-    wav_player_speaker_init(app->sample_rate);
-    wav_player_dma_init((uint32_t)app->sample_buffer, app->samples_count);
-
-    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, wav_player_dma_isr, app->queue);
-
     if(furi_hal_speaker_acquire(1000)) {
+        wav_player_speaker_init(app->sample_rate);
+        wav_player_dma_init((uint32_t)app->sample_buffer, app->samples_count);
+
+        furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, wav_player_dma_isr, app->queue);
+
         wav_player_dma_start();
         wav_player_speaker_start();
 
@@ -413,14 +404,20 @@ static void app_run(WavPlayerApp* app) {
                 } else if(event.type == WavPlayerEventCtrlMoveL) {
                     int32_t seek =
                         stream_tell(app->stream) - wav_parser_get_data_start(app->parser);
-                    seek =
-                        MIN(seek, (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) % 2 ? ((int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) - 1) : (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
+                    seek = MIN(
+                        seek,
+                        (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) % 2 ?
+                            ((int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) - 1) :
+                            (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
                     stream_seek(app->stream, -seek, StreamOffsetFromCurrent);
                     wav_player_view_set_current(app->view, stream_tell(app->stream));
                 } else if(event.type == WavPlayerEventCtrlMoveR) {
                     int32_t seek = wav_parser_get_data_end(app->parser) - stream_tell(app->stream);
-                    seek =
-                        MIN(seek, (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) % 2 ? ((int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) - 1) : (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
+                    seek = MIN(
+                        seek,
+                        (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) % 2 ?
+                            ((int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100) - 1) :
+                            (int32_t)(wav_parser_get_data_len(app->parser) / (size_t)100));
                     stream_seek(app->stream, seek, StreamOffsetFromCurrent);
                     wav_player_view_set_current(app->view, stream_tell(app->stream));
                 } else if(event.type == WavPlayerEventCtrlOk) {
@@ -442,6 +439,9 @@ static void app_run(WavPlayerApp* app) {
         wav_player_dma_stop();
         furi_hal_speaker_release();
     }
+
+    // Reset GPIO pin and bus states
+    wav_player_hal_deinit();
 
     furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
 }
