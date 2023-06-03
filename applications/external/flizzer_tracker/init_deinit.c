@@ -294,11 +294,5 @@ void deinit_tracker(FlizzerTrackerApp* tracker) {
 
     tracker_engine_deinit(&tracker->tracker_engine, false);
 
-    FURI_CRITICAL_ENTER();
-    LL_TIM_DeInit(TRACKER_ENGINE_TIMER);
-    LL_TIM_DeInit(SAMPLE_RATE_TIMER);
-    LL_TIM_DeInit(SPEAKER_PWM_TIMER);
-    FURI_CRITICAL_EXIT();
-
     free(tracker);
 }

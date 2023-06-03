@@ -39,22 +39,6 @@ void tracker_engine_timer_isr(
 
 void sound_engine_PWM_timer_init(bool external_audio_output) // external audio on pin PA6
 {
-    LL_TIM_DisableAllOutputs(SPEAKER_PWM_TIMER);
-    LL_TIM_DisableCounter(SPEAKER_PWM_TIMER);
-
-    LL_TIM_InitTypeDef TIM_InitStruct = {0};
-    LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
-
-    TIM_InitStruct.Prescaler = 0;
-    TIM_InitStruct.Autoreload = 1023; // 10-bit PWM resolution at around 60 kHz PWM rate
-    TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    LL_TIM_Init(SPEAKER_PWM_TIMER, &TIM_InitStruct);
-
-    TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
-    TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_ENABLE;
-    TIM_OC_InitStruct.CompareValue = 0;
-    LL_TIM_OC_Init(SPEAKER_PWM_TIMER, SPEAKER_PWM_TIMER_CHANNEL, &TIM_OC_InitStruct);
-
     if(external_audio_output) {
         furi_hal_gpio_init_ex(
             &gpio_ext_pa6, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
@@ -66,17 +50,33 @@ void sound_engine_PWM_timer_init(bool external_audio_output) // external audio o
 
     else {
         if(!(furi_hal_speaker_is_mine())) {
-            bool unu = furi_hal_speaker_acquire(1000);
-            UNUSED(unu);
+            if(furi_hal_speaker_acquire(1000)) {
+                LL_TIM_DisableAllOutputs(SPEAKER_PWM_TIMER);
+                LL_TIM_DisableCounter(SPEAKER_PWM_TIMER);
+
+                LL_TIM_InitTypeDef TIM_InitStruct = {0};
+                LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
+
+                TIM_InitStruct.Prescaler = 0;
+                TIM_InitStruct.Autoreload =
+                    1023; // 10-bit PWM resolution at around 60 kHz PWM rate
+                TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+                LL_TIM_Init(SPEAKER_PWM_TIMER, &TIM_InitStruct);
+
+                TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM1;
+                TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_ENABLE;
+                TIM_OC_InitStruct.CompareValue = 0;
+                LL_TIM_OC_Init(SPEAKER_PWM_TIMER, SPEAKER_PWM_TIMER_CHANNEL, &TIM_OC_InitStruct);
+
+                SPEAKER_PWM_TIMER->CNT = 0;
+
+                LL_TIM_EnableAllOutputs(SPEAKER_PWM_TIMER);
+                LL_TIM_EnableCounter(SPEAKER_PWM_TIMER);
+            }
         }
 
         furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
-
-    SPEAKER_PWM_TIMER->CNT = 0;
-
-    LL_TIM_EnableAllOutputs(SPEAKER_PWM_TIMER);
-    LL_TIM_EnableCounter(SPEAKER_PWM_TIMER);
 }
 
 void sound_engine_set_audio_output(bool external_audio_output) {
@@ -101,6 +101,10 @@ void sound_engine_set_audio_output(bool external_audio_output) {
 
 void sound_engine_timer_init(uint32_t sample_rate) // external audio on pin PA6
 {
+    if(!furi_hal_bus_is_enabled(FuriHalBusTIM1)) {
+        furi_hal_bus_enable(FuriHalBusTIM1);
+    }
+
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
 
@@ -121,6 +125,10 @@ void sound_engine_timer_init(uint32_t sample_rate) // external audio on pin PA6
 
 void tracker_engine_timer_init(uint8_t rate) // 0-255 hz
 {
+    if(!furi_hal_bus_is_enabled(FuriHalBusTIM2)) {
+        furi_hal_bus_enable(FuriHalBusTIM2);
+    }
+
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
 
@@ -140,6 +148,10 @@ void tracker_engine_timer_init(uint8_t rate) // 0-255 hz
 }
 
 void tracker_engine_set_rate(uint8_t rate) {
+    if(!furi_hal_bus_is_enabled(FuriHalBusTIM2)) {
+        furi_hal_bus_enable(FuriHalBusTIM2);
+    }
+
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
 
     TIM_InitStruct.Prescaler = 0; // using 32-bit timer
@@ -212,6 +224,17 @@ void sound_engine_deinit_timer() {
     LL_TIM_DisableAllOutputs(SPEAKER_PWM_TIMER);
 
     LL_TIM_DisableCounter(SPEAKER_PWM_TIMER);
+
+    if(furi_hal_speaker_is_mine()) {
+        furi_hal_speaker_release();
+    }
+
+    if(furi_hal_bus_is_enabled(FuriHalBusTIM2)) {
+        furi_hal_bus_disable(FuriHalBusTIM2);
+    }
+    if(furi_hal_bus_is_enabled(FuriHalBusTIM1)) {
+        furi_hal_bus_disable(FuriHalBusTIM1);
+    }
 }
 
 void tracker_engine_start() {
