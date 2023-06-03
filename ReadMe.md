@@ -54,6 +54,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: NFC V: Code review fixes + some GUI rework (by nvx & xMasterX)
 - UL: NFC V: Fixed crash when exiting emulation and starting it again
 - UL: Infrared: Update universal remote assets (By amec0e)
+- Fixed random UID generation in reader_analyzer.c (By NathanielJS1541)
 
 <a name="release">
 

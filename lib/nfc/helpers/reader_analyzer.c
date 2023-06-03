@@ -2,6 +2,7 @@
 #include <lib/nfc/protocols/nfc_util.h>
 #include <lib/nfc/protocols/mifare_classic.h>
 #include <m-array.h>
+#include <furi_hal_random.h>
 
 #include "mfkey32.h"
 #include "nfc_debug_pcap.h"
@@ -10,6 +11,9 @@
 #define TAG "ReaderAnalyzer"
 
 #define READER_ANALYZER_MAX_BUFF_SIZE (1024)
+
+#define READER_ANALYZER_UID_SIZE 7
+#define READER_ANALYZER_CUID_SIZE 4
 
 typedef struct {
     bool reader_to_tag;
@@ -20,6 +24,19 @@ typedef struct {
 typedef enum {
     ReaderAnalyzerNfcDataMfClassic,
 } ReaderAnalyzerNfcData;
+
+// This union stores a 7-byte UID, and allows it to be converted to a 4-byte CUID.
+// This is used as only the last 4 bytes of the UID are used for the crapto-1 algorithm.
+union {
+    // The full 7-byte UID
+    uint8_t full_uid[READER_ANALYZER_UID_SIZE];
+    struct {
+        // The first 3 bytes of the full UID are not used
+        uint8_t discard[READER_ANALYZER_UID_SIZE - READER_ANALYZER_CUID_SIZE];
+        // The last 4 bytes form the CUID
+        uint8_t cuid[READER_ANALYZER_CUID_SIZE];
+    } __attribute__((packed)) uid_converter;
+} Uid;
 
 struct ReaderAnalyzer {
     FuriHalNfcDevData nfc_data;
@@ -37,11 +54,11 @@ struct ReaderAnalyzer {
     NfcDebugPcap* pcap;
 };
 
-const FuriHalNfcDevData reader_analyzer_nfc_data[] = {
+static FuriHalNfcDevData reader_analyzer_nfc_data[] = {
     [ReaderAnalyzerNfcDataMfClassic] =
         {.interface = FuriHalNfcInterfaceRf,
          .type = FuriHalNfcTypeA,
-         .uid_len = 7,
+         .uid_len = READER_ANALYZER_UID_SIZE,
          .uid = {0x04, 0x77, 0x70, 0x2A, 0x23, 0x4F, 0x80},
          .a_data = {.sak = 0x08, .atqa = {0x44, 0x00}, .cuid = 0x2A234F80}},
 };
@@ -96,6 +113,17 @@ int32_t reader_analyzer_thread(void* context) {
 
 ReaderAnalyzer* reader_analyzer_alloc() {
     ReaderAnalyzer* instance = malloc(sizeof(ReaderAnalyzer));
+
+    // Generate a random 7-byte UID for the reader analyzer
+    furi_hal_random_fill_buf(Uid.full_uid, READER_ANALYZER_UID_SIZE);
+
+    // Use the Uid union to assign the UID and CUID
+    memcpy(
+        reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic].uid,
+        Uid.full_uid,
+        READER_ANALYZER_UID_SIZE);
+    reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic].a_data.cuid =
+        nfc_util_bytes2num(Uid.uid_converter.cuid, READER_ANALYZER_CUID_SIZE);
 
     instance->nfc_data = reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic];
     instance->alive = false;
