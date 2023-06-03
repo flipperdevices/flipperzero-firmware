@@ -59,10 +59,9 @@ void player_init_hardware_and_play(VideoPlayerApp* player)
     LL_DMA_EnableIT_TC(DMA_INSTANCE);
     LL_DMA_EnableIT_HT(DMA_INSTANCE);
 
-    LL_DMA_EnableChannel(DMA_INSTANCE);
-    LL_TIM_EnableDMAReq_UPDATE(SAMPLE_RATE_TIMER);
-
     // ==== TIMERS:
+
+    furi_hal_bus_enable(FuriHalBusTIM1);
 
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
@@ -100,16 +99,18 @@ void player_init_hardware_and_play(VideoPlayerApp* player)
     furi_hal_gpio_init_ex(
         &gpio_ext_pa6, GpioModeAltFunctionPushPull, GpioPullNo, GpioSpeedLow, GpioAltFn14TIM16);
 
-    if(!(furi_hal_speaker_is_mine())) 
+    /*if(!(furi_hal_speaker_is_mine())) 
     {
         bool unu = furi_hal_speaker_acquire(1000);
         UNUSED(unu);
-    }
+    }*/
 
     furi_hal_interrupt_set_isr_ex(
         FuriHalInterruptIdDma1Ch1, 15, video_player_dma_isr, player);
 
     // START!!
+    LL_TIM_EnableDMAReq_UPDATE(SAMPLE_RATE_TIMER);
+    LL_DMA_EnableChannel(DMA_INSTANCE);
     LL_TIM_EnableCounter(SAMPLE_RATE_TIMER);
 }
 
@@ -121,12 +122,12 @@ void player_deinit_hardware()
     LL_TIM_DeInit(SPEAKER_PWM_TIMER);
     FURI_CRITICAL_EXIT();
 
-    if(furi_hal_speaker_is_mine()) {
-        furi_hal_speaker_release();
-    }
+    furi_hal_speaker_release();
 
     furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 15, NULL, NULL);
+
+    furi_hal_bus_disable(FuriHalBusTIM1);
 }
 
 void player_stop()
