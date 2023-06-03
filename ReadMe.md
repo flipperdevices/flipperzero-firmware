@@ -56,6 +56,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Infrared: Update universal remote assets (By amec0e)
 - Fixed random UID generation in reader_analyzer.c (By NathanielJS1541)
 - Updated main menu to use SubGHz Remote Refactored app now renamed SubGHz Remote
+- Updated: [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
+- Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - Known Issue: Looking into FAP as Favorite Issue
 
 <a name="release">

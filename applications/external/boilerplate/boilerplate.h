@@ -5,11 +5,13 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <assets_icons.h>
 #include <notification/notification_messages.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/button_menu.h>
 #include "scenes/boilerplate_scene.h"
 #include "views/boilerplate_startscreen.h"
 #include "views/boilerplate_scene_1.h"
@@ -32,6 +34,7 @@ typedef struct {
     uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;
+    ButtonMenu* button_menu;
 } Boilerplate;
 
 typedef enum {
@@ -39,6 +42,9 @@ typedef enum {
     BoilerplateViewIdMenu,
     BoilerplateViewIdScene1,
     BoilerplateViewIdScene2,
+    BoilerplateViewIdScene3,
+    BoilerplateViewIdScene4,
+    BoilerplateViewIdScene5,
     BoilerplateViewIdSettings,
 } BoilerplateViewId;
 

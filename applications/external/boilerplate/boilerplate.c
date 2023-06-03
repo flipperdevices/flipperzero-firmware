@@ -67,6 +67,10 @@ Boilerplate* boilerplate_app_alloc() {
         app->view_dispatcher,
         BoilerplateViewIdScene2,
         boilerplate_scene_2_get_view(app->boilerplate_scene_2));
+    app->button_menu = button_menu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, BoilerplateViewIdScene3, button_menu_get_view(app->button_menu));
+
     app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
