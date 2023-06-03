@@ -49,6 +49,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life) (Minor)
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 - Updated: [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
+- OFW: [FuriHal: disable bus re-initialization on early init and extra asserts for AHB1,AHB2,AHB3 which must be left intact on entering to FUS #2725 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2725)
+- UL: Plugins: Protoview, WAV Player, DTMF Dolphin - fixed all known crashes, ported to latest hal bus system
+- UL: NFC V: Code review fixes + some GUI rework (by nvx & xMasterX)
+- UL: NFC V: Fixed crash when exiting emulation and starting it again
+- UL: Infrared: Update universal remote assets (By amec0e)
 
 <a name="release">
 
