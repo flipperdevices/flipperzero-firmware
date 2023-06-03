@@ -68,11 +68,14 @@ W: SSR_PulseSafeTime,us*2=,30,WROM2
 R: SSR2_PulseWidth,us*2=32,,ROM2
 W: SSR2_PulseWidth,us*2=,32,WROM2
 
-R: IRRemotes=34
-W: IRRemotes=,34
+R: DamperOpenTime=34
+W: DamperOpenTime=,34
 
-R: IRRemotesHash*2[70]=i:35,,ROM2#
-W: IRRemotesHash*2=,i:35,WROM2
+R: IRRemotes=35
+W: IRRemotes=,35
+
+R: IRRemotesHash*2[70]=i:36,,ROM2#
+W: IRRemotesHash*2=,i:36,WROM2
 
 R: Flags=1#
 W: Flags=,1
@@ -110,8 +113,8 @@ R: _PulseDelayAfterZero*2=0x9E,,RAM2
 W: _PulseDelayAfterZero*2=,0x9E,WRAM2
 R: _PulseWidth*2=0x91,,RAM2
 W: _PulseWidth*2=,0x91,WRAM2
-R: _PulseWidth2*2=0xA2,,RAM2
-W: _PulseWidth2*2=,0xA2,WRAM2
+R: _PulseWidth2=0xA2,,RAM
+W: _PulseWidth2=,0xA2,WRAM
 
 W: Reset=0xEEEE,14,SET
 
@@ -137,11 +140,11 @@ SBatch: Fan Down: FanSpdDn=0
 SBatch: Fan SAVE: FanSpdSave=0;
 SBatch: Add new IR: SetupIR=1
 
-RBatch: Work: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep
+RBatch: Work: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep;DamperOpenTime
 RBatch: Hardware: ID;RxAddr;Ch;SpeedInitIdx;Flags;OutSpeedMax;IRRemotes;SSR_PulseWidth,us;OSCCAL_EMEM
-RBatch: All: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep;RxAddr;Ch;SpeedInitIdx;Flags;OutSpeedMax;IRRemotes;IRRemotesHash
+RBatch: All: ID;CO2 level;FanCookSpeed;FanCookOnTime;FanCookOffTime;FanCookSleep;FanSpeed;FanOnTime;FanOffTime;FanSleep;DamperOpenTime;RxAddr;Ch;SpeedInitIdx;Flags;OutSpeedMax;IRRemotes;IRRemotesHash
 
-WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={870,930,1000};Fan speeds=3;FanSpeed={10,12,16};FanCook speeds=3;FanCookSpeed={12,16,32};FanSleep=20;FanCookSleep=6;FanOnTime=150;FanCookOnTime=0;FanOffTime=100;FanCookOffTime=0;SpeedInitIdx=0;SpeedKeyIdx=6;Flags=0x0D;OutSpeedMax=16;SSR_PulseWidth,us=9990
+WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={870,930,1000};Fan speeds=3;FanSpeed={10,12,16};FanCook speeds=3;FanCookSpeed={12,16,32};FanSleep=20;FanCookSleep=6;FanOnTime=1;FanCookOnTime=3;FanOffTime=100;FanCookOffTime=0;DamperOpenTime=60;SpeedInitIdx=0;SpeedKeyIdx=6;Flags=0x0D;OutSpeedMax=16;SSR_PulseWidth,us=9990
 WBatch: IRRemotes clear: IRRemotes=0
 WBatch: IRRemotes 1 kitchen: IRRemotes=1;IRRemotesHash={0x6DA5,0xFCA5,0x7CA5,0xB425,0x3425,0x1625,0x8525}
 WBatch: Fans Speeds: Fan speeds=3;FanSpeed={10,12,16};FanCook speeds=3;FanCookSpeed={12,16,32}

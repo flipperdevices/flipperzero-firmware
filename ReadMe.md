@@ -47,7 +47,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Fixed App Names from the unsorted mess in Unleashed (By RogueMaster)
 - Fixed Infrared images to be used on Infrared FAP (By RogueMaster)
 - Updated: [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life) (Minor)
-- Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 - Updated: [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - OFW: [FuriHal: disable bus re-initialization on early init and extra asserts for AHB1,AHB2,AHB3 which must be left intact on entering to FUS #2725 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2725)
 - UL: Plugins: Protoview, WAV Player, DTMF Dolphin - fixed all known crashes, ported to latest hal bus system
@@ -60,6 +59,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
+- Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 - Known Issue: Looking into FAP as Favorite Issue
 
 <a name="release">
