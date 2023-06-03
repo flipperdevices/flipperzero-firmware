@@ -2,6 +2,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
+#include <dolphin/dolphin.h>
 
 #include <furi_hal.h>
 
@@ -23,10 +24,9 @@ typedef struct {
 const char* status_texts[3] = {"[Press OK to open safe]", "Sending...", "Done !"};
 
 static void sentry_safe_render_callback(Canvas* const canvas, void* ctx) {
-    SentryState* state = ctx;
-    if (furi_mutex_acquire(state->mutex, 25) != FuriStatusOk){
-        return;
-    }
+    furi_assert(ctx);
+    const SentryState* sentry_state = ctx;
+    furi_mutex_acquire(sentry_state->mutex, FuriWaitForever);
 
     // Before the function is called, the state is set with the canvas_reset(canvas)
 
@@ -40,9 +40,9 @@ static void sentry_safe_render_callback(Canvas* const canvas, void* ctx) {
     canvas_draw_str_aligned(canvas, 64, 15, AlignCenter, AlignBottom, "BLACK <-> GND");
     canvas_draw_str_aligned(canvas, 64, 25, AlignCenter, AlignBottom, "GREEN <-> C1 ");
     canvas_draw_str_aligned(
-        canvas, 64, 50, AlignCenter, AlignBottom, status_texts[state->status]);
+        canvas, 64, 50, AlignCenter, AlignBottom, status_texts[sentry_state->status]);
 
-    furi_mutex_release(state->mutex);
+    furi_mutex_release(sentry_state->mutex);
 }
 
 static void sentry_safe_input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
@@ -85,10 +85,12 @@ int32_t sentry_safe_app(void* p) {
     UNUSED(p);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(Event));
+    DOLPHIN_DEED(DolphinDeedPluginStart);
 
     SentryState* sentry_state = malloc(sizeof(SentryState));
 
     sentry_state->status = 0;
+
     sentry_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     if(!sentry_state->mutex) {
         FURI_LOG_E("SentrySafe", "cannot create mutex\r\n");
