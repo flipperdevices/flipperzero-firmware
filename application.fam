@@ -12,5 +12,5 @@ App(
     fap_weburl="https://github.com/LTVA1/flizzer_tracker",
 	fap_icon="flizzer_tracker.png",
 	fap_icon_assets="images",
-    fap_category="Media",
+    fap_category="Media_Extra",
 )
