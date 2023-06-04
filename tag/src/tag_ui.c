@@ -11,6 +11,7 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
         return; // try again next callback
     }
 
+    // configure display based on mode and status
     const char* heading;
     switch(state->mode) {
     case TagAppModeUninitialised:
@@ -26,7 +27,7 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
         heading = "Finished";
         break;
     case TagAppModeError:
-        // TODO: use error mode to explain known issues to the player
+        // TODO: use error mode to explain any known issues to the player
         heading = "Error";
         break;
     case TagAppModeQuit:
@@ -45,7 +46,7 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
     if(state->data->last_ir_address > 0) {
         furi_string_printf(
             state->data->string_buffer,
-            "add: %lu, cmd: %lu",
+            "add: %lu, cmd: %lu", // %lu = long unsigned
             state->data->last_ir_address,
             state->data->last_ir_command);
         canvas_draw_str_aligned(
@@ -53,12 +54,6 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
     } else {
         canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "---");
     }
-
-    // seems to do string formatting into a buffer
-    // furi_string_printf(data->buffer, "%04u", localCounter);
-    // canvas_set_font(canvas, FontSecondary);
-    // canvas_draw_str_aligned(
-    //     canvas, 64, 42, AlignCenter, AlignTop, furi_string_get_cstr(data->buffer));
 
     furi_mutex_release(state->data_mutex);
 }
