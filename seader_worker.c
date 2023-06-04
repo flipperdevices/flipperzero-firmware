@@ -147,7 +147,7 @@ bool sendAPDU(
 static int toString(const void* buffer, size_t size, void* app_key) {
     if(app_key) {
         char* str = (char*)app_key;
-        uint8_t next = strlen(str);
+        size_t next = strlen(str);
         strncpy(str + next, buffer, size);
     } else {
         uint8_t next = strlen(asn1_log);
