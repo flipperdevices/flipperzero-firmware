@@ -36,6 +36,7 @@ typedef struct {
     uint32_t start;
     uint8_t total_damage;
     uint8_t total_hits;
+    uint8_t current_energy;
     uint32_t last_ir_address;
     uint32_t last_ir_command;
     FuriString* string_buffer;
