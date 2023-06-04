@@ -4,6 +4,7 @@
 static void tag_ui_render_mode(Canvas* canvas, TagAppState* state) {
     // all other modes
     const char* heading;
+    const char* detail = "This app is not playable yet.";
     switch(state->mode) {
     case TagAppModeUninitialised:
         heading = "Uninitialised";
@@ -25,11 +26,14 @@ static void tag_ui_render_mode(Canvas* canvas, TagAppState* state) {
     default:
         FURI_LOG_E(TAG, "unexpected app mode");
         heading = "Unexpected app mode";
+        detail = "---";
         break;
     }
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 5, 8, AlignLeft, AlignTop, heading);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, 5, 18, AlignLeft, AlignTop, detail);
 
     canvas_set_font(canvas, FontSecondary);
     if(state->data->last_ir_address > 0) {
@@ -41,7 +45,7 @@ static void tag_ui_render_mode(Canvas* canvas, TagAppState* state) {
         canvas_draw_str_aligned(
             canvas, 5, 20, AlignLeft, AlignTop, furi_string_get_cstr(state->data->string_buffer));
     } else {
-        canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "---");
+        canvas_draw_str_aligned(canvas, 5, 28, AlignLeft, AlignTop, "---");
     }
 }
 
