@@ -110,6 +110,7 @@ typedef struct {
     bool is_root;
     bool folder_loading;
     bool list_loading;
+    bool large_step;
     uint32_t item_cnt;
     int32_t item_idx;
     int32_t array_offset;
@@ -577,6 +578,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
     furi_assert(browser);
     bool consumed = false;
     bool is_loading = false;
+    uint8_t step_weight;
 
     with_view_model(
         browser->view, FileBrowserModel * model, { is_loading = model->folder_loading; }, false);
@@ -589,9 +591,14 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                 browser->view,
                 FileBrowserModel * model,
                 {
+                    if(model->large_step) {
+                        step_weight = 5;
+                    } else {
+                        step_weight = 1;
+                    }
                     if(event->key == InputKeyUp) {
                         model->item_idx =
-                            ((model->item_idx - 1) + model->item_cnt) % model->item_cnt;
+                            ((model->item_idx - step_weight) + model->item_cnt) % model->item_cnt;
                         if(browser_is_list_load_required(model)) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
@@ -603,7 +610,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                         }
                         model->scroll_counter = 0;
                     } else if(event->key == InputKeyDown) {
-                        model->item_idx = (model->item_idx + 1) % model->item_cnt;
+                        model->item_idx = (model->item_idx + step_weight) % model->item_cnt;
                         if(browser_is_list_load_required(model)) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
@@ -658,10 +665,16 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
         if(event->type == InputTypeShort) {
             bool is_root = false;
             with_view_model(
-                browser->view, FileBrowserModel * model, { is_root = model->is_root; }, false);
-            if(!is_root) {
-                file_browser_worker_folder_exit(browser->worker);
-            }
+                browser->view, FileBrowserModel * model, 
+                {
+                    is_root = model->is_root;
+                    if(model->large_step) {
+                        model->large_step = false;
+                    } else if(!is_root) {
+                        file_browser_worker_folder_exit(browser->worker);
+                    }
+                },
+            false);
             consumed = true;
         }
     } else if(event->key == InputKeyBack) {
@@ -675,6 +688,16 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                 file_browser_worker_folder_exit(browser->worker);
             }
         }
+    } else if(event->key == InputKeyRight) {
+            with_view_model(
+                browser->view,
+                FileBrowserModel * model,
+                {
+                    if(event->type == InputTypeShort) {
+                        model->large_step = true;
+                    }
+                },
+                false);
     }
 
     return consumed;
