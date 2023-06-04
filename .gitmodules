@@ -38,5 +38,5 @@
 	path = lib/heatshrink
 	url = https://github.com/flipperdevices/heatshrink.git
 [submodule "documentation/flipperzero-documentation"]
-	path = documentation/flipperzero-documentation
+	path = flipperzero-documentation
 	url = https://github.com/flipperdevices/flipperzero-documentation.git
