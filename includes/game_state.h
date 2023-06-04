@@ -11,6 +11,7 @@
 #include "game_sprites.h"
 #include "states.h"
 #include "missile.h"
+#include "background_assets.h"
 typedef struct {
     int points;
     int distance;
@@ -19,6 +20,7 @@ typedef struct {
     PARTICLE particles[PARTICLES_MAX];
     SCIENTIST scientists[SCIENTISTS_MAX];
     MISSILE missiles[MISSILES_MAX];
+    BackgroundAsset bg_assets[BG_ASSETS_MAX];
     State state;
     GameSprites sprites;
     FuriMutex* mutex;

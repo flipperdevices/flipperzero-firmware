@@ -13,8 +13,6 @@ typedef struct {
     const Icon* scientist_right_infill;
     IconAnimation* missile;
     const Icon* missile_infill;
-    const Icon* bg[3];
-    POINT bg_pos[3];
 } GameSprites;
 
 #endif // GAME_SPRITES_H
