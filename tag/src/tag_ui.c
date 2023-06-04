@@ -1,17 +1,8 @@
 #include "tag_ui.h"
 #include "tag_app.h"
 
-static void tag_ui_render_callback(Canvas* canvas, void* context) {
-    FURI_LOG_T(TAG, "tag_ui_render_callback");
-    FURI_LOG_D(TAG, "tag_ui_render_callback assertion: context");
-    furi_assert(context);
-    TagAppState* state = context;
-
-    if(furi_mutex_acquire(state->data_mutex, 200) != FuriStatusOk) {
-        return; // try again next callback
-    }
-
-    // configure display based on mode and status
+static void tag_ui_render_mode(Canvas* canvas, TagAppState* state) {
+    // all other modes
     const char* heading;
     switch(state->mode) {
     case TagAppModeUninitialised:
@@ -19,9 +10,6 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
         break;
     case TagAppModeReady:
         heading = "Ready";
-        break;
-    case TagAppModePlaying:
-        heading = "Playing";
         break;
     case TagAppModeFinished:
         heading = "Finished";
@@ -35,7 +23,8 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
         heading = "Exiting";
         break;
     default:
-        heading = "Unknown app state";
+        FURI_LOG_E(TAG, "unexpected app mode");
+        heading = "Unexpected app mode";
         break;
     }
 
@@ -54,7 +43,32 @@ static void tag_ui_render_callback(Canvas* canvas, void* context) {
     } else {
         canvas_draw_str_aligned(canvas, 5, 20, AlignLeft, AlignTop, "---");
     }
+}
 
+static void tag_ui_render_play(Canvas* canvas, TagAppState* state) {
+    FURI_LOG_T(TAG, "tag_ui_render_play");
+    UNUSED(state);
+    canvas_draw_icon(canvas, 0, 0, &I_background);
+}
+
+static void tag_ui_render_callback(Canvas* canvas, void* context) {
+    FURI_LOG_T(TAG, "tag_ui_render_callback");
+    FURI_LOG_D(TAG, "tag_ui_render_callback assertion: context");
+    furi_assert(context);
+    TagAppState* state = context;
+
+    if(furi_mutex_acquire(state->data_mutex, 200) != FuriStatusOk) {
+        return; // try again next callback
+    }
+
+    // configure display based on mode and status
+    if(state->mode == TagAppModePlaying) {
+        tag_ui_render_play(canvas, state);
+    } else {
+        tag_ui_render_mode(canvas, state);
+    }
+
+    // always release the mutex
     furi_mutex_release(state->data_mutex);
 }
 
