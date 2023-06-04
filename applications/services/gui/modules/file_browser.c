@@ -666,7 +666,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
             bool is_root = false;
             with_view_model(
                 browser->view,
-                FileBrowserModel * model, 
+                FileBrowserModel * model,
                 {
                     is_root = model->is_root;
                     if(model->large_step) {
