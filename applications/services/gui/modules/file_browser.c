@@ -665,7 +665,8 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
         if(event->type == InputTypeShort) {
             bool is_root = false;
             with_view_model(
-                browser->view, FileBrowserModel * model, 
+                browser->view,
+                FileBrowserModel * model, 
                 {
                     is_root = model->is_root;
                     if(model->large_step) {
@@ -674,7 +675,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                         file_browser_worker_folder_exit(browser->worker);
                     }
                 },
-            false);
+                false);
             consumed = true;
         }
     } else if(event->key == InputKeyBack) {
@@ -689,15 +690,15 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
             }
         }
     } else if(event->key == InputKeyRight) {
-            with_view_model(
-                browser->view,
-                FileBrowserModel * model,
-                {
-                    if(event->type == InputTypeShort) {
-                        model->large_step = true;
-                    }
-                },
-                false);
+        with_view_model(
+            browser->view,
+            FileBrowserModel * model,
+            {
+                if(event->type == InputTypeShort) {
+                    model->large_step = true;
+                }
+            },
+            false);
     }
 
     return consumed;
