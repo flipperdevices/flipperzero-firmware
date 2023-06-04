@@ -97,7 +97,11 @@ static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* app
     if(application->is_external) {
         status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, application->name_or_path);
     } else if(strlen(application->name_or_path) > 0) {
-        status = loader_start(desktop->loader, application->name_or_path, NULL);
+        if(strcmp(application->name_or_path, "None (disable)") != 0) {
+            status = loader_start(desktop->loader, application->name_or_path, NULL);
+        } else {
+            return;
+        }
     } else {
         // No favourite app is set! So we skipping this part
         return;
