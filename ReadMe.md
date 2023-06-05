@@ -59,7 +59,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker) (Thanks xMasterX)
 - Updated: [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player) (Thanks xMasterX)
-- Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 - Updated: [TAMA P1: Save State & Layout Update (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1) [Original TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) [Mute & Settings (By Round-Pi)](https://github.com/Round-Pi/flipperzero-tamagotch-p1) (Thanks xMasterX)
 - Updated: [Zero Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker) (Thanks xMasterX)
 - [Desktop Favorites Fixed (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/653)
@@ -70,6 +69,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: NFC V: Remove delay from emulation loop. This improves compatibility when the reader is Android.
 - UL: Plugins: iButton Fuzzer -> Fix v2 key files load (all new saved files)
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
+- Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 
 <a name="release">
 

@@ -96,25 +96,27 @@ W: _PORTB=,0x38,WRAM
 
 R: _LED_Warning=0x71,,RAM
 W: _LED_Warning=,0x71,WRAM
-R: _IRHashLast*2=0x85,,RAM2#
-R: _SleepTimer=0x8D,,RAM
+R: _IRHashLast*2=0x89,,RAM2#
+R: _IRCntLast=0x87,,RAM
+R: _IRHash*2=0x8B,,RAM2#
+R: _SleepTimer=0x8E,,RAM
 R: _FanOn=0x7F,,RAM
 R: _FanOnNext=0x7D,,RAM
 R: _FanOnNextCnt=0x7B,,RAM
 R: _FanOnLast=0x7C,,RAM
 
-R: _OutSpeedMax=0x8F,,RAM
-W: _OutSpeedMax=,0x8F,WRAM
+R: _OutSpeedMax=0x90,,RAM
+W: _OutSpeedMax=,0x90,WRAM
 
 R: _Fanspeed=0x7E,,RAM
 R: _SSR_full_period*2=0x64,,RAM2
 
-R: _PulseDelayAfterZero*2=0x9E,,RAM2
-W: _PulseDelayAfterZero*2=,0x9E,WRAM2
-R: _PulseWidth*2=0x91,,RAM2
-W: _PulseWidth*2=,0x91,WRAM2
-R: _PulseWidth2=0xA2,,RAM
-W: _PulseWidth2=,0xA2,WRAM
+R: _PulseDelayAfterZero*2=0x9F,,RAM2
+W: _PulseDelayAfterZero*2=,0x9F,WRAM2
+R: _PulseWidth*2=0x92,,RAM2
+W: _PulseWidth*2=,0x92,WRAM2
+R: _PulseWidth2=0xA3,,RAM
+W: _PulseWidth2=,0xA3,WRAM
 
 W: Reset=0xEEEE,14,SET
 
