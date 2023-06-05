@@ -7,6 +7,8 @@
 #include "coin.h"
 #include "barry.h"
 
+#define PATTERN_MAX_HEIGHT 40
+
 // Patterns
 const COIN_PATTERN coin_patterns[] = {
     {// Square pattern
@@ -30,7 +32,7 @@ void coin_tick(COIN* const coins, BARRY* const barry, int* const poins) {
         }
         if(coins[i].point.x > 0) {
             coins[i].point.x -= 1; // move left by 1 unit
-            if(coins[i].point.x < -16) { // if the coin is out of screen
+            if(coins[i].point.x < -COIN_WIDTH) { // if the coin is out of screen
                 coins[i].point.x = 0; // set coin x coordinate to 0 to mark it as "inactive"
             }
         }
@@ -39,10 +41,10 @@ void coin_tick(COIN* const coins, BARRY* const barry, int* const poins) {
 
 bool coin_colides(COIN* const coin, BARRY* const barry) {
     return !(
-        barry->point.x > coin->point.x + 7 || // Barry is to the right of the coin
-        barry->point.x + 11 < coin->point.x || // Barry is to the left of the coin
-        barry->point.y > coin->point.y + 7 || // Barry is below the coin
-        barry->point.y + 15 < coin->point.y); // Barry is above the coin
+        barry->point.x > coin->point.x + COIN_WIDTH || // Barry is to the right of the coin
+        barry->point.x + BARRY_WIDTH < coin->point.x || // Barry is to the left of the coin
+        barry->point.y > coin->point.y + COIN_WIDTH || // Barry is below the coin
+        barry->point.y + BARRY_HEIGHT < coin->point.y); // Barry is above the coin
 }
 
 void spawn_random_coin(COIN* const coins) {
@@ -63,7 +65,8 @@ void spawn_random_coin(COIN* const coins) {
 
     // Spawn coins according to the selected pattern
     int coin_index = 0;
-    int random_offset = rand() % (64 - 32);
+    int random_offset = rand() % (SCREEN_HEIGHT - PATTERN_MAX_HEIGHT);
+    int random_offset_x = rand() % 16;
     for(int i = 0; i < pattern->count; ++i) {
         // Find an available slot for a new coin
         while(coins[coin_index].point.x > 0 && coin_index < COINS_MAX) {
@@ -73,7 +76,7 @@ void spawn_random_coin(COIN* const coins) {
         if(coin_index == COINS_MAX) break;
 
         // Spawn the coin
-        coins[coin_index].point.x = 127 + pattern->coins[i].x;
+        coins[coin_index].point.x = SCREEN_WIDTH - 1 + pattern->coins[i].x + random_offset_x;
         coins[coin_index].point.y =
             random_offset +
             pattern->coins[i]
@@ -81,15 +84,15 @@ void spawn_random_coin(COIN* const coins) {
     }
 }
 
-void draw_coins(const COIN* coins, Canvas* const canvas) {
+void draw_coins(const COIN* coins, Canvas* const canvas, const GameSprites* sprites) {
     canvas_set_color(canvas, ColorBlack);
     for(int i = 0; i < COINS_MAX; ++i) {
         if(coins[i].point.x > 0) {
             canvas_set_color(canvas, ColorBlack);
-            canvas_draw_icon(canvas, coins[i].point.x, coins[i].point.y, &I_coin);
+            canvas_draw_icon(canvas, coins[i].point.x, coins[i].point.y, sprites->coin);
 
             canvas_set_color(canvas, ColorWhite);
-            canvas_draw_icon(canvas, coins[i].point.x, coins[i].point.y, &I_coin_infill);
+            canvas_draw_icon(canvas, coins[i].point.x, coins[i].point.y, sprites->coin_infill);
         }
     }
 }

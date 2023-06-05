@@ -21,6 +21,6 @@ typedef struct {
 void coin_tick(COIN* const coins, BARRY* const barry, int* const poins);
 void spawn_random_coin(COIN* const coins);
 bool coin_colides(COIN* const coin, BARRY* const barry);
-void draw_coins(const COIN* coins, Canvas* const canvas);
+void draw_coins(const COIN* coins, Canvas* const canvas, const GameSprites* sprites);
 
 #endif // COIN_H
