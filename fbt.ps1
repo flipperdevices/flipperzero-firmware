@@ -3,7 +3,7 @@ Push-Location $PSScriptRoot
 $firmware_path = ""
 $firmware_name = ""
 $FW_CDEF = ""
-if (('official-dev', 'off-dev', 'od', 'unleashed', 'un', 'u').Contains($args[0])) {
+if (('official-dev', 'off-dev', 'od').Contains($args[0])) {
     $firmware_path = "flipperzero-firmware_official_dev"
     $firmware_name = "Official Dev"
     $FW_CDEF = "TOTP_FIRMWARE_OFFICIAL_DEV"
@@ -12,9 +12,9 @@ elseif (('official-stable', 'off-stbl', 'os').Contains($args[0])) {
     $firmware_path = "flipperzero-firmware_official_stable"
     $firmware_name = "Official Stable"
     $FW_CDEF = "TOTP_FIRMWARE_OFFICIAL_STABLE"
-} elseif (('xtreme', 'xt', 'x').Contains($args[0])) {
+} elseif (('xtreme', 'xt', 'x', 'unleashed', 'un', 'u').Contains($args[0])) {
     $firmware_path = "flipperzero-firmware_xtreme"
-    $firmware_name = "Xtreme"
+    $firmware_name = "Xtreme \ Unleashed"
     $FW_CDEF = "TOTP_FIRMWARE_XTREME_UL"
 }
 else {
