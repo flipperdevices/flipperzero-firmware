@@ -22,7 +22,7 @@ static const char* map_file_labels[SubRemSubKeyNameMaxCount][2] = {
     [SubRemSubKeyNameOk] = {"OK", "OKLABEL"},
 };
 
-static void subrem_map_preset_reset(SubRemMapPreset* map_preset) {
+void subrem_map_preset_reset(SubRemMapPreset* map_preset) {
     furi_assert(map_preset);
 
     for(uint8_t i = 0; i < SubRemSubKeyNameMaxCount; i++) {
@@ -101,7 +101,7 @@ static bool subrem_map_preset_load(SubRemMapPreset* map_preset, FlipperFormat* f
             ret = true;
         }
         if(ret) {
-            // Preload seccesful
+            // Preload successful
             FURI_LOG_I(
                 TAG,
                 "%-5s: %s %s",
@@ -145,9 +145,9 @@ SubRemLoadMapState subrem_map_file_load(SubGhzRemoteApp* app, const char* file_p
     }
 
     if(ret == SubRemLoadMapStateOK) {
-        FURI_LOG_I(TAG, "Load Map File Seccesful");
+        FURI_LOG_I(TAG, "Load Map File Successful");
     } else if(ret == SubRemLoadMapStateNotAllOK) {
-        FURI_LOG_I(TAG, "Load Map File Seccesful [Not all files]");
+        FURI_LOG_I(TAG, "Load Map File Successful [Not all files]");
     } else {
         FURI_LOG_E(TAG, "Broken Map File");
     }
@@ -277,4 +277,48 @@ SubRemLoadMapState subrem_load_from_file(SubGhzRemoteApp* app) {
     furi_string_free(file_path);
 
     return ret;
+}
+
+bool subrem_save_map_to_file(SubGhzRemoteApp* app) {
+    furi_assert(app);
+
+    const char* file_name = furi_string_get_cstr(app->file_path);
+    bool saved = false;
+    FlipperFormat* fff_data = flipper_format_string_alloc();
+
+    SubRemSubFilePreset* sub_preset;
+
+    flipper_format_write_header_cstr(
+        fff_data, SUBREM_APP_APP_FILE_TYPE, SUBREM_APP_APP_FILE_VERSION);
+    for(uint8_t i = 0; i < SubRemSubKeyNameMaxCount; i++) {
+        sub_preset = app->map_preset->subs_preset[i];
+        if(!furi_string_empty(sub_preset->file_path)) {
+            flipper_format_write_string(fff_data, map_file_labels[i][0], sub_preset->file_path);
+        }
+    }
+    for(uint8_t i = 0; i < SubRemSubKeyNameMaxCount; i++) {
+        sub_preset = app->map_preset->subs_preset[i];
+        if(!furi_string_empty(sub_preset->file_path)) {
+            flipper_format_write_string(fff_data, map_file_labels[i][1], sub_preset->label);
+        }
+    }
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Stream* flipper_format_stream = flipper_format_get_raw_stream(fff_data);
+
+    do {
+        if(!storage_simply_remove(storage, file_name)) {
+            break;
+        }
+        //ToDo check Write
+        stream_seek(flipper_format_stream, 0, StreamOffsetFromStart);
+        stream_save_to_file(flipper_format_stream, storage, file_name, FSOM_CREATE_ALWAYS);
+
+        saved = true;
+    } while(0);
+
+    furi_record_close(RECORD_STORAGE);
+    flipper_format_free(fff_data);
+
+    return saved;
 }
