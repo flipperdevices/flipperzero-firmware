@@ -26,6 +26,22 @@ static struct tty_serial tty;
 static char tty_rx_buf[CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE];
 static char tty_tx_buf[CONFIG_ESP_SERIAL_FLASHER_UART_BUFSIZE];
 
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+static void transfer_debug_print(const uint8_t *data, uint16_t size, bool write)
+{
+    static bool write_prev = false;
+
+    if (write_prev != write) {
+        write_prev = write;
+        printk("\n--- %s ---\n", write ? "WRITE" : "READ");
+    }
+
+    for (uint32_t i = 0; i < size; i++) {
+        printk("%02x ", data[i]);
+    }
+}
+#endif
+
 esp_loader_error_t configure_tty()
 {
     if (tty_init(&tty, uart_dev) < 0 ||
@@ -54,6 +70,9 @@ esp_loader_error_t loader_port_read(uint8_t *data, const uint16_t size, const ui
         if (read < 0) {
             return ESP_LOADER_ERROR_TIMEOUT;
         }
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, read, false);
+#endif
         total_read += read;
         remaining -= read;
     }
@@ -78,6 +97,9 @@ esp_loader_error_t loader_port_write(const uint8_t *data, const uint16_t size, c
         if (written < 0) {
             return ESP_LOADER_ERROR_TIMEOUT;
         }
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, written, true);
+#endif
         total_written += written;
         remaining -= written;
     }

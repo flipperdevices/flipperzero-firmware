@@ -20,57 +20,36 @@
 #include <stdio.h>
 #include "stm32_port.h"
 
-// #define SERIAL_DEBUG_ENABLE
-
 static UART_HandleTypeDef *uart;
 static GPIO_TypeDef* gpio_port_io0, *gpio_port_rst;
 static uint16_t gpio_num_io0, gpio_num_rst;
 
-#ifdef SERIAL_DEBUG_ENABLE
-
-static void dec_to_hex_str(const uint8_t dec, uint8_t hex_str[3])
-{
-    static const uint8_t dec_to_hex[] = {
-        '0', '1', '2', '3', '4', '5', '6', '7',
-        '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
-    };
-
-    hex_str[0] = dec_to_hex[(dec >> 4)];
-    hex_str[1] = dec_to_hex[(dec & 0xF)];
-    hex_str[2] = '\0';
-}
-
-static void serial_debug_print(const uint8_t *data, uint16_t size, bool write)
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+static void transfer_debug_print(const uint8_t *data, uint16_t size, bool write)
 {
     static bool write_prev = false;
-    uint8_t hex_str[3];
 
-    if(write_prev != write) {
+    if (write_prev != write) {
         write_prev = write;
         printf("\n--- %s ---\n", write ? "WRITE" : "READ");
     }
 
-    for(uint32_t i = 0; i < size; i++) {
-        dec_to_hex_str(data[i], hex_str);
-        printf("%s ", hex_str);
+    for (uint32_t i = 0; i < size; i++) {
+        printf("%02x ", data[i]);
     }
 }
-
-#else
-
-static void serial_debug_print(const uint8_t *data, uint16_t size, bool write) { }
-
 #endif
 
 static uint32_t s_time_end;
 
 esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
-    serial_debug_print(data, size, true);
-
     HAL_StatusTypeDef err = HAL_UART_Transmit(uart, (uint8_t *)data, size, timeout);
 
     if (err == HAL_OK) {
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, size, true);
+#endif
         return ESP_LOADER_SUCCESS;
     } else if (err == HAL_TIMEOUT) {
         return ESP_LOADER_ERROR_TIMEOUT;
@@ -84,9 +63,10 @@ esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeo
 {
     HAL_StatusTypeDef err = HAL_UART_Receive(uart, data, size, timeout);
 
-    serial_debug_print(data, size, false);
-
     if (err == HAL_OK) {
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, size, false);
+#endif
         return ESP_LOADER_SUCCESS;
     } else if (err == HAL_TIMEOUT) {
         return ESP_LOADER_ERROR_TIMEOUT;

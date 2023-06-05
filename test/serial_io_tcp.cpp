@@ -33,6 +33,22 @@ const uint32_t PORT = 5555;
 static int sock = 0;
 ofstream file;
 
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+static void transfer_debug_print(const uint8_t *data, uint16_t size, bool write)
+{
+    static bool write_prev = false;
+
+    if (write_prev != write) {
+        write_prev = write;
+        cout << endl << "--- " << (write ? "WRITE" : "READ") << " ---" << endl;
+    }
+
+    for (uint32_t i = 0; i < size; i++) {
+        cout << hex << static_cast<unsigned int>(data[i]) << dec << ' ';
+    }
+}
+#endif
+
 esp_loader_error_t loader_port_mock_init(const loader_serial_config_t *config)
 {
     struct sockaddr_in serv_addr;
@@ -89,6 +105,9 @@ esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_
             cout << "Socket send failed\n";
             return ESP_LOADER_ERROR_FAIL;
         }
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, bytes_written, true);
+#endif
         written += bytes_written;
     } while (written != size);
     return ESP_LOADER_SUCCESS;
@@ -105,6 +124,10 @@ esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeo
             cout << "Socket connection lost\n";
             return ESP_LOADER_ERROR_FAIL;
         }
+
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, bytes_read, false);
+#endif
 
         file.write((const char*)&data[written], bytes_read);
         file.flush();

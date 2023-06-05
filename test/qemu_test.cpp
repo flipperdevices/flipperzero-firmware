@@ -64,7 +64,8 @@ void flash_application(ifstream& image)
 
         ESP_ERR_CHECK( esp_loader_flash_write(payload, to_read) );
 
-        cout << "packet: " << count++ <<  " written: " << to_read << endl;
+        cout << endl << "--- FLASH DATA PACKET: " << count++
+             <<  " DATA WRITTEN: " << to_read << " ---" << endl;
 
         image_size -= to_read;
     };

@@ -22,4 +22,8 @@ else()
     target_sources(${PROJECT_NAME} PRIVATE serial_io_mock.cpp test.cpp)
 endif()
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE MD5_ENABLED=1 SERIAL_FLASHER_INTERFACE_UART)
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+	MD5_ENABLED=1
+	SERIAL_FLASHER_INTERFACE_UART
+	SERIAL_FLASHER_DEBUG_TRACE
+)
