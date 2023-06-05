@@ -5,6 +5,7 @@
 #include <gui/gui.h>
 #include <gui/icon_animation.h>
 #include <input/input.h>
+#include <storage/storage.h>
 
 #include "includes/point.h"
 #include "includes/barry.h"
@@ -17,6 +18,9 @@
 #include "includes/game_state.h"
 
 #define TAG "Jetpack Joyride"
+#define SAVING_DIRECTORY "/ext/apps/Games"
+#define SAVING_FILENAME SAVING_DIRECTORY "/jetpack.save"
+static GameState* global_state;
 
 typedef enum {
     EventTypeTick,
@@ -28,8 +32,59 @@ typedef struct {
     InputEvent input;
 } GameEvent;
 
+typedef struct {
+    int max_distance;
+    int max_score;
+} SaveGame;
+
+static SaveGame save_game;
+
+static bool storage_game_state_load() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    File* file = storage_file_alloc(storage);
+
+    uint16_t bytes_readed = 0;
+    if(storage_file_open(file, SAVING_FILENAME, FSAM_READ, FSOM_OPEN_EXISTING))
+        bytes_readed = storage_file_read(file, &save_game, sizeof(SaveGame));
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+    return bytes_readed == sizeof(SaveGame);
+}
+
+static void storage_game_state_save() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
+        if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
+            return;
+        }
+    }
+
+    File* file = storage_file_alloc(storage);
+    if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+        storage_file_write(file, &save_game, sizeof(SaveGame));
+    }
+    storage_file_close(file);
+    storage_file_free(file);
+    furi_record_close(RECORD_STORAGE);
+}
+
+void handle_death() {
+    global_state->state = GameStateGameOver;
+    if(global_state->distance > save_game.max_distance) {
+        save_game.max_distance = global_state->distance;
+    }
+
+    if(global_state->points > save_game.max_score) {
+        save_game.max_score = global_state->points;
+    }
+    storage_game_state_save();
+}
+
 static void jetpack_game_state_init(GameState* const game_state) {
     UNUSED(game_state);
+    UNUSED(storage_game_state_save);
     BARRY barry;
     barry.gravity = 0;
     barry.point.x = 32 + 5;
@@ -45,35 +100,37 @@ static void jetpack_game_state_init(GameState* const game_state) {
     sprites.scientist_right = (&I_scientist_right);
     sprites.scientist_right_infill = (&I_scientist_right_infill);
 
+    sprites.coin = (&I_coin);
+    sprites.coin_infill = (&I_coin_infill);
+
     sprites.missile = icon_animation_alloc(&A_missile);
     sprites.missile_infill = &I_missile_infill;
 
-    // sprites.bg[0] = &I_bg1;
-    // sprites.bg[1] = &I_bg2;
-    // sprites.bg[2] = &I_bg3;
-
-    // for(int i = 0; i < 3; ++i) {
-    //     sprites.bg_pos[i].x = i * 128;
-    //     sprites.bg_pos[i].y = 0;
-    // }
+    sprites.alert = icon_animation_alloc(&A_alert);
 
     icon_animation_start(sprites.barry);
     icon_animation_start(sprites.missile);
+    icon_animation_start(sprites.alert);
 
     game_state->barry = barry;
     game_state->points = 0;
-    game_state->distance = 0;
+    game_state->distance = 5000;
     game_state->sprites = sprites;
     game_state->state = GameStateLife;
+    game_state->death_handler = handle_death;
+
+    memset(game_state->bg_assets, 0, sizeof(game_state->bg_assets));
 
     memset(game_state->scientists, 0, sizeof(game_state->scientists));
     memset(game_state->coins, 0, sizeof(game_state->coins));
     memset(game_state->particles, 0, sizeof(game_state->particles));
+    memset(game_state->missiles, 0, sizeof(game_state->missiles));
 }
 
 static void jetpack_game_state_free(GameState* const game_state) {
     icon_animation_free(game_state->sprites.barry);
     icon_animation_free(game_state->sprites.missile);
+    icon_animation_free(game_state->sprites.alert);
 
     free(game_state);
 }
@@ -85,26 +142,21 @@ static void jetpack_game_tick(GameState* const game_state) {
     coin_tick(game_state->coins, &game_state->barry, &game_state->points);
     particle_tick(game_state->particles, game_state->scientists, &game_state->points);
     scientist_tick(game_state->scientists);
-    missile_tick(game_state->missiles, &game_state->barry, &game_state->state);
+    missile_tick(game_state->missiles, &game_state->barry, game_state->death_handler);
 
     background_assets_tick(game_state->bg_assets);
 
-    if(game_state->distance % 64 == 0) {
+    // generate background every 64px aka. ticks
+    if(game_state->distance % 64 == 0 && rand() % 3 == 0) {
         spawn_random_background_asset(game_state->bg_assets);
     }
 
-    // for(int i = 0; i < 3; ++i) {
-    //     game_state->sprites.bg_pos[i].x -= 1;
-    //     if(game_state->sprites.bg_pos[i].x <= -128) {
-    //         game_state->sprites.bg_pos[i].x = 128 * 2; // 2 other images are 128 px each
-    //     }
-    // }
-
-    if((rand() % 100) < 1) {
+    if(game_state->distance % 48 == 0 && rand() % 2 == 0) {
         spawn_random_coin(game_state->coins);
     }
 
-    if((rand() % 100) < 1) {
+    if(game_state->distance % get_rocket_spawn_distance(game_state->distance) == 0 &&
+       rand() % 2 == 0) {
         spawn_random_missile(game_state->missiles);
     }
 
@@ -121,23 +173,13 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
     furi_mutex_acquire(game_state->mutex, FuriWaitForever);
 
     if(game_state->state == GameStateLife) {
-        // canvas_draw_box(canvas, 0, 0, 128, 32);
-
-        // for(int i = 0; i < 3; ++i) {
-        //     // Check if the image is within the screen's boundaries
-        //     if(game_state->sprites.bg_pos[i].x >= -127 && game_state->sprites.bg_pos[i].x < 128) {
-        //         canvas_draw_icon(
-        //             canvas, game_state->sprites.bg_pos[i].x, 0, game_state->sprites.bg[i]);
-        //     }
-        // }
-
         canvas_set_bitmap_mode(canvas, false);
 
         draw_background_assets(game_state->bg_assets, canvas, game_state->distance);
 
         canvas_set_bitmap_mode(canvas, true);
 
-        draw_coins(game_state->coins, canvas);
+        draw_coins(game_state->coins, canvas, &game_state->sprites);
         draw_scientists(game_state->scientists, canvas, &game_state->sprites);
         draw_particles(game_state->particles, canvas);
         draw_missiles(game_state->missiles, canvas, &game_state->sprites);
@@ -164,7 +206,14 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         snprintf(buffer, sizeof(buffer), "Score: %u", game_state->points);
         canvas_draw_str_aligned(canvas, 5, 12, AlignLeft, AlignBottom, buffer);
 
-        canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "boom.");
+        canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, "Highscore:");
+        snprintf(buffer, sizeof(buffer), "Dist: %u", save_game.max_distance);
+        canvas_draw_str_aligned(canvas, 123, 50, AlignRight, AlignBottom, buffer);
+
+        snprintf(buffer, sizeof(buffer), "Score: %u", save_game.max_score);
+        canvas_draw_str_aligned(canvas, 5, 50, AlignLeft, AlignBottom, buffer);
+
+        // canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "boom.");
 
         // if(furi_timer_is_running(game_state->timer)) {
         //     furi_timer_start(game_state->timer, 0);
@@ -194,9 +243,15 @@ int32_t jetpack_game_app(void* p) {
     UNUSED(p);
     int32_t return_code = 0;
 
+    if(!storage_game_state_load()) {
+        memset(&save_game, 0, sizeof(save_game));
+    }
+
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(GameEvent));
 
     GameState* game_state = malloc(sizeof(GameState));
+
+    global_state = game_state;
     jetpack_game_state_init(game_state);
 
     game_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);

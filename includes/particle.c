@@ -14,23 +14,18 @@ void particle_tick(PARTICLE* const particles, SCIENTIST* const scientists, int* 
             for(int j = 0; j < SCIENTISTS_MAX; j++) {
                 if(scientists[j].state == ScientistStateAlive && scientists[j].point.x > 0) {
                     // Check whether the particle lies within the scientist's bounding box
-                    if(!(particles[i].point.x >
-                             scientists[j].point.x +
-                                 9 || // particle is to the right of the scientist
-                         particles[i].point.x <
-                             scientists[j].point.x || // particle is to the left of the scientist
-                         particles[i].point.y >
-                             scientists[j].point.y + 14 || // particle is below the scientist
-                         particles[i].point.y <
-                             scientists[j].point.y)) { // particle is above the scientist
+                    if(!(particles[i].point.x > scientists[j].point.x + SCIENTIST_WIDTH ||
+                         particles[i].point.x < scientists[j].point.x ||
+                         particles[i].point.y > scientists[j].point.y + SCIENTIST_HEIGHT ||
+                         particles[i].point.y < scientists[j].point.y)) {
                         scientists[j].state = ScientistStateDead;
                         (*points) += 2; // Increase the score by 2
                     }
                 }
             }
 
-            if(particles[i].point.x < 0 || particles[i].point.x > 128 ||
-               particles[i].point.y < 0 || particles[i].point.y > 64) {
+            if(particles[i].point.x < 0 || particles[i].point.x > SCREEN_WIDTH ||
+               particles[i].point.y < 0 || particles[i].point.y > SCREEN_HEIGHT) {
                 particles[i].point.y = 0;
             }
         }

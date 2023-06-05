@@ -25,6 +25,7 @@ typedef struct {
     GameSprites sprites;
     FuriMutex* mutex;
     FuriTimer* timer;
+    void (*death_handler)();
 } GameState;
 
 void game_state_tick(GameState* const game_state);
