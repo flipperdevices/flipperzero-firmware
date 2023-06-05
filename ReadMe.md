@@ -29,7 +29,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0603-1236-0.84.3-9aae39f](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
+## Latest Updates - [PATREON: Latest Release RM0605-1137-0.84.3-1f56f08](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-05 08:25 JST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-05 08:25 JST`
@@ -67,7 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed dupe configurator since it was merged into SubGHz Remote
 - UL: TOTP Fix for UID (By xMasterX)
 - UL: NFC V: Remove delay from emulation loop. This improves compatibility when the reader is Android.
-- UL: Plugins: iButton Fuzzer -> Fix v2 key files load (all new saved files)
+- UL: Plugins: iButton Fuzzer - Fix v2 key files load (all new saved files)
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 
