@@ -13,10 +13,10 @@ function Get-LatestDirectory {
 
 $build_commands = @(
     [PSCustomObject]@{
-        Name = "Official Dev \ Unleashed";
+        Name = "Official Dev";
         FbtSwitch = "od";
         FirmwarePath = "flipperzero-firmware_official_dev";
-        ArtifactName = "totp_official-dev_unleashed_fw{FEATURES_SUFFIX}.fap";
+        ArtifactName = "totp_official-dev_fw{FEATURES_SUFFIX}.fap";
     }
     [PSCustomObject]@{
         Name = "Official Stable";
@@ -25,10 +25,10 @@ $build_commands = @(
         ArtifactName = "totp_official-stable_fw{FEATURES_SUFFIX}.fap";
     }
     [PSCustomObject]@{
-        Name = "Xtreme";
+        Name = "Xtreme \ Unleashed";
         FbtSwitch = "x";
         FirmwarePath = "flipperzero-firmware_xtreme";
-        ArtifactName = "totp_xtreme_fw{FEATURES_SUFFIX}.fap";
+        ArtifactName = "totp_xtreme_unleashed_fw{FEATURES_SUFFIX}.fap";
     }
 )
 

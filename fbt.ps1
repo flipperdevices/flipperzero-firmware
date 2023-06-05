@@ -15,7 +15,7 @@ elseif (('official-stable', 'off-stbl', 'os').Contains($args[0])) {
 } elseif (('xtreme', 'xt', 'x').Contains($args[0])) {
     $firmware_path = "flipperzero-firmware_xtreme"
     $firmware_name = "Xtreme"
-    $FW_CDEF = "TOTP_FIRMWARE_XTREME"
+    $FW_CDEF = "TOTP_FIRMWARE_XTREME_UL"
 }
 else {
     throw "Unable to recognize which firmware to use"
