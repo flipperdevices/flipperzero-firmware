@@ -7,11 +7,9 @@
 #include "point.h"
 #include "game_sprites.h"
 
-#define GRAVITY_BOOST -0.3
-#define GRAVITY_TICK 0.15
-
-#define BARRY_HEIGHT 15
-#define BARRY_WIDTH 11
+#define GRAVITY_TICK 0.2
+#define GRAVITY_BOOST -0.4
+#define GRAVITY_FALL 0.3
 
 typedef struct {
     float gravity;

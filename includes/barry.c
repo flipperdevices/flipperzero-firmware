@@ -6,7 +6,12 @@
 
 void barry_tick(BARRY* const barry) {
     // Do jetpack things
-    barry->gravity += GRAVITY_TICK;
+    if(barry->isBoosting) {
+        barry->gravity += GRAVITY_BOOST; // Increase upward momentum
+    } else {
+        barry->gravity += GRAVITY_FALL; // Increase downward momentum faster
+    }
+
     barry->point.y += barry->gravity;
 
     // Constrain barry's height within sprite_height and 64 - sprite_height
@@ -16,10 +21,6 @@ void barry_tick(BARRY* const barry) {
     } else if(barry->point.y < 0) {
         barry->point.y = 0;
         barry->gravity = 0; // stop downward momentum
-    }
-
-    if(barry->isBoosting) {
-        barry->gravity += GRAVITY_BOOST;
     }
 }
 
