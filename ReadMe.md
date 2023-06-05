@@ -62,7 +62,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 - Updated: [TAMA P1: Save State & Layout Update (By DroomOne)](https://github.com/DroomOne/flipperzero-tamagotch-p1) [Original TAMA P1 (By GMMan)](https://github.com/GMMan/flipperzero-firmware/tree/tama-p1) [Mute & Settings (By Round-Pi)](https://github.com/Round-Pi/flipperzero-tamagotch-p1) (Thanks xMasterX)
 - Updated: [Zero Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker) (Thanks xMasterX)
-- Known Issue: Looking into FAP as Favorite Issue
+- [Desktop Favorites Fixed (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/653)
+- [SubGHz Remote + Configurator Combined to One App (By gid9798) (Apps Merged By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655)
+- OFW: [Add map file parser, mariadb inserter #2732 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2732)
+- Removed dupe configurator since it was merged into SubGHz Remote
+- UL: TOTP Fix for UID (By xMasterX)
+- UL: NFC V: Remove delay from emulation loop. This improves compatibility when the reader is Android.
+- UL: Plugins: iButton Fuzzer -> Fix v2 key files load (all new saved files)
 
 <a name="release">
 
@@ -407,7 +413,7 @@ $ ./fbt dolphin_ext
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
 - [Sub-GHz Bruteforcer v3.5 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
-- [Sub-GHz Remote (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) Refactored - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
+- [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
 - [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675`
 - [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
