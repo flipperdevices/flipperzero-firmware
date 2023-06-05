@@ -6,6 +6,8 @@
 #include <notification/notification_messages.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <cli/cli.h>
+#include <cli/cli_vcp.h>
 
 #include "animations/animation_manager.h"
 #include "desktop/scenes/desktop_scene.h"
@@ -14,7 +16,7 @@
 #include "desktop/views/desktop_view_pin_input.h"
 #include "desktop/views/desktop_view_pin_timeout.h"
 #include "desktop_i.h"
-#include "helpers/pin_lock.h"
+#include "helpers/pin.h"
 #include "helpers/slideshow_filename.h"
 
 #define TAG "Desktop"
@@ -132,11 +134,22 @@ static void desktop_auto_lock_inhibit(Desktop* desktop) {
 }
 
 void desktop_lock(Desktop* desktop) {
+    furi_hal_rtc_set_flag(FuriHalRtcFlagLock);
+
+    if(desktop->settings.pin_code.length) {
+        Cli* cli = furi_record_open(RECORD_CLI);
+        cli_session_close(cli);
+        furi_record_close(RECORD_CLI);
+    }
+
     desktop_auto_lock_inhibit(desktop);
     scene_manager_set_scene_state(
         desktop->scene_manager, DesktopSceneLocked, SCENE_LOCKED_FIRST_ENTER);
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneLocked);
     notification_message(desktop->notification, &sequence_display_backlight_off_delay_1000);
+
+    DesktopStatus status = {.locked = true};
+    furi_pubsub_publish(desktop->status_pubsub, &status);
 }
 
 void desktop_unlock(Desktop* desktop) {
@@ -147,6 +160,17 @@ void desktop_unlock(Desktop* desktop) {
     desktop_view_locked_unlock(desktop->locked_view);
     scene_manager_search_and_switch_to_previous_scene(desktop->scene_manager, DesktopSceneMain);
     desktop_auto_lock_arm(desktop);
+    furi_hal_rtc_reset_flag(FuriHalRtcFlagLock);
+    furi_hal_rtc_set_pin_fails(0);
+
+    if(desktop->settings.pin_code.length) {
+        Cli* cli = furi_record_open(RECORD_CLI);
+        cli_session_open(cli, &cli_vcp);
+        furi_record_close(RECORD_CLI);
+    }
+
+    DesktopStatus status = {.locked = false};
+    furi_pubsub_publish(desktop->status_pubsub, &status);
 }
 
 void desktop_set_dummy_mode_state(Desktop* desktop, bool enabled) {
@@ -290,58 +314,11 @@ Desktop* desktop_alloc() {
     desktop->auto_lock_timer =
         furi_timer_alloc(desktop_auto_lock_timer_callback, FuriTimerTypeOnce, desktop);
 
+    desktop->status_pubsub = furi_pubsub_alloc();
+
+    furi_record_create(RECORD_DESKTOP, desktop);
+
     return desktop;
-}
-
-void desktop_free(Desktop* desktop) {
-    furi_assert(desktop);
-
-    furi_pubsub_unsubscribe(
-        loader_get_pubsub(desktop->loader), desktop->app_start_stop_subscription);
-
-    if(desktop->input_events_subscription) {
-        furi_pubsub_unsubscribe(desktop->input_events_pubsub, desktop->input_events_subscription);
-        desktop->input_events_subscription = NULL;
-    }
-
-    desktop->loader = NULL;
-    desktop->input_events_pubsub = NULL;
-    furi_record_close(RECORD_LOADER);
-    furi_record_close(RECORD_NOTIFICATION);
-    furi_record_close(RECORD_INPUT_EVENTS);
-
-    view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdMain);
-    view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdLockMenu);
-    view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdLocked);
-    view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdDebug);
-    view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdHwMismatch);
-    view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdPinInput);
-    view_dispatcher_remove_view(desktop->view_dispatcher, DesktopViewIdPinTimeout);
-
-    view_dispatcher_free(desktop->view_dispatcher);
-    scene_manager_free(desktop->scene_manager);
-
-    animation_manager_free(desktop->animation_manager);
-    view_stack_free(desktop->main_view_stack);
-    desktop_main_free(desktop->main_view);
-    view_stack_free(desktop->locked_view_stack);
-    desktop_view_locked_free(desktop->locked_view);
-    desktop_lock_menu_free(desktop->lock_menu);
-    desktop_view_locked_free(desktop->locked_view);
-    desktop_debug_free(desktop->debug_view);
-    popup_free(desktop->hw_mismatch_popup);
-    desktop_view_pin_timeout_free(desktop->pin_timeout_view);
-
-    furi_record_close(RECORD_GUI);
-    desktop->gui = NULL;
-
-    furi_thread_free(desktop->scene_thread);
-
-    furi_record_close("menu");
-
-    furi_timer_free(desktop->auto_lock_timer);
-
-    free(desktop);
 }
 
 static bool desktop_check_file_flag(const char* flag_path) {
@@ -350,6 +327,21 @@ static bool desktop_check_file_flag(const char* flag_path) {
     furi_record_close(RECORD_STORAGE);
 
     return exists;
+}
+
+bool desktop_api_is_locked(Desktop* instance) {
+    furi_assert(instance);
+    return furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock);
+}
+
+void desktop_api_unlock(Desktop* instance) {
+    furi_assert(instance);
+    view_dispatcher_send_custom_event(instance->view_dispatcher, DesktopLockedEventUnlocked);
+}
+
+FuriPubSub* desktop_api_get_status_pubsub(Desktop* instance) {
+    furi_assert(instance);
+    return instance->status_pubsub;
 }
 
 int32_t desktop_srv(void* p) {
@@ -375,14 +367,12 @@ int32_t desktop_srv(void* p) {
 
     scene_manager_next_scene(desktop->scene_manager, DesktopSceneMain);
 
-    desktop_pin_lock_init(&desktop->settings);
-
-    if(!desktop_pin_lock_is_locked()) {
+    if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock)) {
+        desktop_lock(desktop);
+    } else {
         if(!loader_is_locked(desktop->loader)) {
             desktop_auto_lock_arm(desktop);
         }
-    } else {
-        desktop_lock(desktop);
     }
 
     if(desktop_check_file_flag(SLIDESHOW_FS_PATH)) {
@@ -398,7 +388,8 @@ int32_t desktop_srv(void* p) {
     }
 
     view_dispatcher_run(desktop->view_dispatcher);
-    desktop_free(desktop);
+
+    furi_crash("That was unexpected");
 
     return 0;
 }
