@@ -16,7 +16,7 @@ typedef enum {
 } ScientistState;
 
 typedef struct {
-    float gravity;
+    bool visible;
     POINTF point;
     float velocity_x;
     ScientistState state;
