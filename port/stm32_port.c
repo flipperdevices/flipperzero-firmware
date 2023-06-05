@@ -82,8 +82,6 @@ esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_
 
 esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeout)
 {
-    memset(data, 0x22, size);
-
     HAL_StatusTypeDef err = HAL_UART_Receive(uart, data, size, timeout);
 
     serial_debug_print(data, size, false);
