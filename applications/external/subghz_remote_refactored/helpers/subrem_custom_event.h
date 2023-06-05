@@ -1,12 +1,27 @@
 #pragma once
 
 typedef enum {
+    SubRemEditMenuStateUP = 0,
+    SubRemEditMenuStateDOWN,
+    SubRemEditMenuStateLEFT,
+    SubRemEditMenuStateRIGHT,
+    SubRemEditMenuStateOK,
+} SubRemEditMenuState;
+
+typedef enum {
     // StartSubmenuIndex
-    SubmenuIndexSubRemOpenMapFile = 0,
+    SubmenuIndexSubRemOpenMapFile,
+    SubmenuIndexSubRemRunMapFile,
+    SubmenuIndexSubRemEditMapFile,
+    SubmenuIndexSubRemNewMapFile,
 #if FURI_DEBUG
     SubmenuIndexSubRemRemoteView,
 #endif
     // SubmenuIndexSubRemAbout,
+
+    // EditSubmenuIndex
+    EditSubmenuIndexEditLabel,
+    EditSubmenuIndexEditFile,
 
     // SubRemCustomEvent
     SubRemCustomEventViewRemoteStartUP = 100,
@@ -17,4 +32,21 @@ typedef enum {
     SubRemCustomEventViewRemoteBack,
     SubRemCustomEventViewRemoteStop,
     SubRemCustomEventViewRemoteForcedStop,
+
+    SubRemCustomEventViewEditMenuBack,
+    SubRemCustomEventViewEditMenuUP,
+    SubRemCustomEventViewEditMenuDOWN,
+    SubRemCustomEventViewEditMenuEdit,
+    SubRemCustomEventViewEditMenuSave,
+
+    SubRemCustomEventSceneEditsubmenu,
+    SubRemCustomEventSceneEditLabelInputDone,
+    SubRemCustomEventSceneEditLabelWidgetAcces,
+    SubRemCustomEventSceneEditLabelWidgetBack,
+
+    SubRemCustomEventSceneEditOpenSubErrorPopup,
+
+    SubRemCustomEventSceneEditPreviewSaved,
+
+    SubRemCustomEventSceneNewName,
 } SubRemCustomEvent;
