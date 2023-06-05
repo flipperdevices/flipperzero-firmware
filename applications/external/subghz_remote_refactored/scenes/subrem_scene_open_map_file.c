@@ -10,7 +10,7 @@ void subrem_scene_open_map_file_submenu_callback(void* context, uint32_t index) 
 void subrem_scene_open_map_file_on_enter(void* context) {
     furi_assert(context);
     SubGhzRemoteApp* app = context;
-	view_dispatcher_switch_to_view(app->view_dispatcher, SubRemViewIDSubmenu);
+    view_dispatcher_switch_to_view(app->view_dispatcher, SubRemViewIDSubmenu);
     SubRemLoadMapState load_state = subrem_load_from_file(app);
 
     if(load_state == SubRemLoadMapStateBack) {
