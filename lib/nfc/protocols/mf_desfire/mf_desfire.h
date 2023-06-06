@@ -21,6 +21,9 @@ extern "C" {
 
 #define MF_DESFIRE_FLAG_HAS_NEXT (0xAF)
 
+#define MF_DESFIRE_MAX_KEYS (14)
+#define MF_DESFIRE_MAX_FILES (32)
+
 typedef struct {
     uint8_t hw_vendor;
     uint8_t hw_type;
@@ -49,24 +52,22 @@ typedef struct {
     bool is_present;
 } MfDesfireFreeMemory; // EV1+ only
 
-typedef struct MfDesfireKeyVersion {
-    uint8_t id;
-    uint8_t version;
-    struct MfDesfireKeyVersion* next;
-} MfDesfireKeyVersion;
+typedef struct {
+    bool is_master_key_changeable : 1;
+    bool is_free_directory_list : 1;
+    bool is_free_create_delete : 1;
+    bool is_config_changeable : 1;
+    uint8_t change_key_id : 4;
+    uint8_t max_keys : 4;
+    uint8_t flags : 4;
+} MfDesfireKeySettings;
+
+typedef uint8_t MfDesfireKeyVersion;
 
 typedef struct {
-    struct {
-        bool is_config_changeable : 1;
-        bool is_free_directory_list : 1;
-        bool is_free_create_delete : 1;
-        bool is_master_key_changeable : 1;
-        uint8_t change_key_id : 4;
-        uint8_t max_keys : 4;
-        uint8_t flags : 4;
-    } settings;
-    MfDesfireKeyVersion* key_version_head;
-} MfDesfireKeySettings;
+    MfDesfireKeySettings key_settings;
+    MfDesfireKeyVersion* key_versions;
+} MfDesfireKeyConfiguration;
 
 typedef enum {
     MfDesfireFileTypeStandard = 0,
@@ -102,19 +103,25 @@ typedef struct MifareDesfireFile {
             uint32_t max;
             uint32_t cur;
         } record;
-    } settings;
+    };
     uint8_t* contents;
-
-    struct MifareDesfireFile* next;
 } MfDesfireFile;
+
+typedef struct {
+    MfDesfireFile* data;
+    uint8_t count;
+} MfDesfireFiles;
 
 typedef struct MfDesfireApplication {
     uint8_t id[3];
-    MfDesfireKeySettings* key_settings;
-    MfDesfireFile* file_head;
-
-    struct MfDesfireApplication* next;
+    MfDesfireKeyConfiguration key_config;
+    MfDesfireFiles files;
 } MfDesfireApplication;
+
+typedef struct {
+    MfDesfireApplication* data;
+    uint8_t count;
+} MfDesfireApplications;
 
 typedef enum {
     MfDesfireErrorNone,
@@ -127,8 +134,8 @@ typedef struct {
     Iso14443_4aData iso14443_4a_data;
     MfDesfireVersion version;
     MfDesfireFreeMemory free_memory;
-    MfDesfireKeySettings master_key_settings;
-    MfDesfireApplication* app_head;
+    MfDesfireKeyConfiguration master_key;
+    MfDesfireApplications applications;
 } MfDesfireData;
 
 bool mf_desfire_detect_protocol(NfcaData* nfca_data);
