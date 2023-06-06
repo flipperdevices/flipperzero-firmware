@@ -1,6 +1,8 @@
 #pragma once
 
 #include "nfca_poller.h"
+
+#include <lib/nfc/helpers/bit_buffer.h>
 #include <lib/nfc/helpers/nfc_poller_buffer.h>
 
 #ifdef __cplusplus
@@ -33,9 +35,9 @@ typedef struct {
 
 typedef enum {
     NfcaPollerStateIdle,
-    NfcaPollerColResInProgress,
-    NfcaPollerColResFailed,
-    NfcaPollerActivated,
+    NfcaPollerStateColResInProgress,
+    NfcaPollerStateColResFailed,
+    NfcaPollerStateActivated,
 } NfcaPollerState;
 
 typedef enum {

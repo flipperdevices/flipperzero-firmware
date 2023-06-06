@@ -49,7 +49,6 @@ typedef union {
     MfClassicReadBlockContext read_block_context;
 } MfClassicPollerContextData;
 
-
 MfClassicError mf_classic_process_error(NfcaError error);
 
 MfClassicError mf_classic_async_auth(

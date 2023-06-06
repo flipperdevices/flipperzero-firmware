@@ -5,6 +5,7 @@ enum {
     NfcSceneReadEventNfcaDetected = 100,
     NfcSceneReadEventNfcbDetected,
     NfcSceneReadEventMfUltralightDetected,
+    NfcSceneReadEventMfDesfireDetected,
 };
 
 NfcPollerCommand nfc_scene_read_worker_callback(NfcPollerEvent event, void* context) {
@@ -21,6 +22,10 @@ NfcPollerCommand nfc_scene_read_worker_callback(NfcPollerEvent event, void* cont
     } else if(event == NfcPollerEventMfUltralightDetected) {
         view_dispatcher_send_custom_event(
             nfc->view_dispatcher, NfcSceneReadEventMfUltralightDetected);
+        command = NfcPollerCommandStop;
+    } else if(event == NfcPollerEventMfDesfireDetected) {
+        view_dispatcher_send_custom_event(
+            nfc->view_dispatcher, NfcSceneReadEventMfDesfireDetected);
         command = NfcPollerCommandStop;
     }
 
@@ -55,6 +60,9 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == NfcSceneReadEventMfUltralightDetected) {
             mf_ultralight_auth_reset(nfc->mf_ul_auth);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightRead);
+            consumed = true;
+        } else if(event.event == NfcSceneReadEventMfDesfireDetected) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireRead);
             consumed = true;
         }
     }

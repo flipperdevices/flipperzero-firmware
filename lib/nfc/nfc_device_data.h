@@ -3,6 +3,7 @@
 #include <lib/nfc/protocols/nfca/nfca.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic.h>
+#include <lib/nfc/protocols/mf_desfire/mf_desfire.h>
 #include <lib/nfc/protocols/nfcb/nfcb.h>
 
 #ifdef __cplusplus
@@ -28,6 +29,7 @@ typedef struct {
         NfcaData nfca_data;
         MfUltralightData mf_ul_data;
         MfClassicData mf_classic_data;
+        MfDesfireData mf_desfire_data;
     };
 } NfcDevData;
 

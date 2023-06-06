@@ -68,8 +68,7 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneExtraActions);
             consumed = true;
         } else if(event.event == SubmenuIndexAddManually) {
-            scene_manager_set_scene_state(
-                nfc->scene_manager, NfcSceneStart, NfcSceneSetType);
+            scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, NfcSceneSetType);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSetType);
             consumed = true;
         } else if(event.event == SubmenuIndexDebug) {

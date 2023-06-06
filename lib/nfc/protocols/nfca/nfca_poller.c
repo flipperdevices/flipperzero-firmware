@@ -60,12 +60,12 @@ static NfcCommand nfca_poller_event_callback(NfcEvent event, void* context) {
         if(event.type == NfcEventTypeConfigureRequest) {
             nfca_poller_config(instance);
         } else if(event.type == NfcEventTypePollerReady) {
-            if(instance->state != NfcaPollerActivated) {
+            if(instance->state != NfcaPollerStateActivated) {
                 NfcaData data = {};
                 NfcaError error = nfca_poller_async_activate(instance, &data);
                 if(error == NfcaErrorNone) {
                     nfca_poller_event.type = NfcaPollerEventTypeReady;
-                    instance->state = NfcaPollerActivated;
+                    instance->state = NfcaPollerStateActivated;
                     nfca_poller_event.data.error = error;
                     command = instance->callback(nfca_poller_event, instance->context);
                 } else {

@@ -40,6 +40,7 @@
 #include <lib/nfc/protocols/nfca/nfca_listener.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
+#include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
 #include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 
 #include <lib/nfc/nfc_dev.h>
@@ -54,7 +55,6 @@
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
-
 
 typedef enum {
     NfcRpcStateIdle,
@@ -90,8 +90,10 @@ struct NfcApp {
     Nfc* nfc;
     NfcaPoller* nfca_poller;
     NfcaListener* nfca_listener;
+    Iso14443_4aPoller* iso14443_4a_poller;
     MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
+    MfDesfirePoller* mf_desfire_poller;
     NfcbPoller* nfcb_poller;
     NfcPoller* nfc_poller;
 

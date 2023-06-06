@@ -5,6 +5,7 @@
 #include "nfc.h"
 #include <lib/nfc/protocols/nfca/nfca_poller_i.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
+#include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
 
 typedef enum {
     NfcPollerStateIdle,
@@ -92,6 +93,8 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
                 if(error == NfcaErrorNone) {
                     if(mf_ultralight_detect_protocol(&instance->nfca_data)) {
                         poller_event = NfcPollerEventMfUltralightDetected;
+                    } else if(mf_desfire_detect_protocol(&instance->nfca_data)) {
+                        poller_event = NfcPollerEventMfDesfireDetected;
                     } else {
                         poller_event = NfcPollerEventNfcaDetected;
                     }

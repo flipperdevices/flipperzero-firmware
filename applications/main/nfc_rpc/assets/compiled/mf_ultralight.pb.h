@@ -106,7 +106,6 @@ typedef struct _PB_MfUltralight_EmulateStopResponse {
     PB_MfUltralight_Error error;
 } PB_MfUltralight_EmulateStopResponse;
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -114,66 +113,162 @@ extern "C" {
 /* Helper constants for enums */
 #define _PB_MfUltralight_Error_MIN PB_MfUltralight_Error_None
 #define _PB_MfUltralight_Error_MAX PB_MfUltralight_Error_Timeout
-#define _PB_MfUltralight_Error_ARRAYSIZE ((PB_MfUltralight_Error)(PB_MfUltralight_Error_Timeout+1))
-
+#define _PB_MfUltralight_Error_ARRAYSIZE \
+    ((PB_MfUltralight_Error)(PB_MfUltralight_Error_Timeout + 1))
 
 #define PB_MfUltralight_ReadPageResponse_error_ENUMTYPE PB_MfUltralight_Error
 
-
 #define PB_MfUltralight_ReadVersionResponse_error_ENUMTYPE PB_MfUltralight_Error
-
 
 #define PB_MfUltralight_WritePageResponse_error_ENUMTYPE PB_MfUltralight_Error
 
-
 #define PB_MfUltralight_ReadSignatureResponse_error_ENUMTYPE PB_MfUltralight_Error
-
 
 #define PB_MfUltralight_ReadCounterResponse_error_ENUMTYPE PB_MfUltralight_Error
 
-
 #define PB_MfUltralight_ReadTearingFlagResponse_error_ENUMTYPE PB_MfUltralight_Error
-
 
 #define PB_MfUltralight_EmulateStartResponse_error_ENUMTYPE PB_MfUltralight_Error
 
-
 #define PB_MfUltralight_EmulateStopResponse_error_ENUMTYPE PB_MfUltralight_Error
 
-
 /* Initializer values for message structs */
-#define PB_MfUltralight_ReadPageRequest_init_default {0}
-#define PB_MfUltralight_ReadPageResponse_init_default {_PB_MfUltralight_Error_MIN, 0, {0, {0}}}
-#define PB_MfUltralight_ReadVersionRequest_init_default {0}
-#define PB_MfUltralight_ReadVersionResponse_init_default {_PB_MfUltralight_Error_MIN, 0, 0, 0, 0, 0, 0, 0, 0}
-#define PB_MfUltralight_WritePageRequest_init_default {0, {0, {0}}}
-#define PB_MfUltralight_WritePageResponse_init_default {_PB_MfUltralight_Error_MIN, 0}
-#define PB_MfUltralight_ReadSignatureRequest_init_default {0}
-#define PB_MfUltralight_ReadSignatureResponse_init_default {_PB_MfUltralight_Error_MIN, {0, {0}}}
-#define PB_MfUltralight_ReadCounterRequest_init_default {0}
-#define PB_MfUltralight_ReadCounterResponse_init_default {_PB_MfUltralight_Error_MIN, 0, {0, {0}}}
-#define PB_MfUltralight_ReadTearingFlagRequest_init_default {0}
-#define PB_MfUltralight_ReadTearingFlagResponse_init_default {_PB_MfUltralight_Error_MIN, 0, {0, {0}}}
-#define PB_MfUltralight_EmulateStartRequest_init_default {{0, {0}}}
-#define PB_MfUltralight_EmulateStartResponse_init_default {_PB_MfUltralight_Error_MIN}
-#define PB_MfUltralight_EmulateStopRequest_init_default {0}
-#define PB_MfUltralight_EmulateStopResponse_init_default {_PB_MfUltralight_Error_MIN}
-#define PB_MfUltralight_ReadPageRequest_init_zero {0}
-#define PB_MfUltralight_ReadPageResponse_init_zero {_PB_MfUltralight_Error_MIN, 0, {0, {0}}}
-#define PB_MfUltralight_ReadVersionRequest_init_zero {0}
-#define PB_MfUltralight_ReadVersionResponse_init_zero {_PB_MfUltralight_Error_MIN, 0, 0, 0, 0, 0, 0, 0, 0}
-#define PB_MfUltralight_WritePageRequest_init_zero {0, {0, {0}}}
-#define PB_MfUltralight_WritePageResponse_init_zero {_PB_MfUltralight_Error_MIN, 0}
-#define PB_MfUltralight_ReadSignatureRequest_init_zero {0}
-#define PB_MfUltralight_ReadSignatureResponse_init_zero {_PB_MfUltralight_Error_MIN, {0, {0}}}
-#define PB_MfUltralight_ReadCounterRequest_init_zero {0}
-#define PB_MfUltralight_ReadCounterResponse_init_zero {_PB_MfUltralight_Error_MIN, 0, {0, {0}}}
-#define PB_MfUltralight_ReadTearingFlagRequest_init_zero {0}
-#define PB_MfUltralight_ReadTearingFlagResponse_init_zero {_PB_MfUltralight_Error_MIN, 0, {0, {0}}}
-#define PB_MfUltralight_EmulateStartRequest_init_zero {{0, {0}}}
-#define PB_MfUltralight_EmulateStartResponse_init_zero {_PB_MfUltralight_Error_MIN}
-#define PB_MfUltralight_EmulateStopRequest_init_zero {0}
-#define PB_MfUltralight_EmulateStopResponse_init_zero {_PB_MfUltralight_Error_MIN}
+#define PB_MfUltralight_ReadPageRequest_init_default \
+    { 0 }
+#define PB_MfUltralight_ReadPageResponse_init_default \
+    {                                                 \
+        _PB_MfUltralight_Error_MIN, 0, {              \
+            0, {                                      \
+                0                                     \
+            }                                         \
+        }                                             \
+    }
+#define PB_MfUltralight_ReadVersionRequest_init_default \
+    { 0 }
+#define PB_MfUltralight_ReadVersionResponse_init_default \
+    { _PB_MfUltralight_Error_MIN, 0, 0, 0, 0, 0, 0, 0, 0 }
+#define PB_MfUltralight_WritePageRequest_init_default \
+    {                                                 \
+        0, {                                          \
+            0, {                                      \
+                0                                     \
+            }                                         \
+        }                                             \
+    }
+#define PB_MfUltralight_WritePageResponse_init_default \
+    { _PB_MfUltralight_Error_MIN, 0 }
+#define PB_MfUltralight_ReadSignatureRequest_init_default \
+    { 0 }
+#define PB_MfUltralight_ReadSignatureResponse_init_default \
+    {                                                      \
+        _PB_MfUltralight_Error_MIN, {                      \
+            0, {                                           \
+                0                                          \
+            }                                              \
+        }                                                  \
+    }
+#define PB_MfUltralight_ReadCounterRequest_init_default \
+    { 0 }
+#define PB_MfUltralight_ReadCounterResponse_init_default \
+    {                                                    \
+        _PB_MfUltralight_Error_MIN, 0, {                 \
+            0, {                                         \
+                0                                        \
+            }                                            \
+        }                                                \
+    }
+#define PB_MfUltralight_ReadTearingFlagRequest_init_default \
+    { 0 }
+#define PB_MfUltralight_ReadTearingFlagResponse_init_default \
+    {                                                        \
+        _PB_MfUltralight_Error_MIN, 0, {                     \
+            0, {                                             \
+                0                                            \
+            }                                                \
+        }                                                    \
+    }
+#define PB_MfUltralight_EmulateStartRequest_init_default \
+    {                                                    \
+        {                                                \
+            0, {                                         \
+                0                                        \
+            }                                            \
+        }                                                \
+    }
+#define PB_MfUltralight_EmulateStartResponse_init_default \
+    { _PB_MfUltralight_Error_MIN }
+#define PB_MfUltralight_EmulateStopRequest_init_default \
+    { 0 }
+#define PB_MfUltralight_EmulateStopResponse_init_default \
+    { _PB_MfUltralight_Error_MIN }
+#define PB_MfUltralight_ReadPageRequest_init_zero \
+    { 0 }
+#define PB_MfUltralight_ReadPageResponse_init_zero \
+    {                                              \
+        _PB_MfUltralight_Error_MIN, 0, {           \
+            0, {                                   \
+                0                                  \
+            }                                      \
+        }                                          \
+    }
+#define PB_MfUltralight_ReadVersionRequest_init_zero \
+    { 0 }
+#define PB_MfUltralight_ReadVersionResponse_init_zero \
+    { _PB_MfUltralight_Error_MIN, 0, 0, 0, 0, 0, 0, 0, 0 }
+#define PB_MfUltralight_WritePageRequest_init_zero \
+    {                                              \
+        0, {                                       \
+            0, {                                   \
+                0                                  \
+            }                                      \
+        }                                          \
+    }
+#define PB_MfUltralight_WritePageResponse_init_zero \
+    { _PB_MfUltralight_Error_MIN, 0 }
+#define PB_MfUltralight_ReadSignatureRequest_init_zero \
+    { 0 }
+#define PB_MfUltralight_ReadSignatureResponse_init_zero \
+    {                                                   \
+        _PB_MfUltralight_Error_MIN, {                   \
+            0, {                                        \
+                0                                       \
+            }                                           \
+        }                                               \
+    }
+#define PB_MfUltralight_ReadCounterRequest_init_zero \
+    { 0 }
+#define PB_MfUltralight_ReadCounterResponse_init_zero \
+    {                                                 \
+        _PB_MfUltralight_Error_MIN, 0, {              \
+            0, {                                      \
+                0                                     \
+            }                                         \
+        }                                             \
+    }
+#define PB_MfUltralight_ReadTearingFlagRequest_init_zero \
+    { 0 }
+#define PB_MfUltralight_ReadTearingFlagResponse_init_zero \
+    {                                                     \
+        _PB_MfUltralight_Error_MIN, 0, {                  \
+            0, {                                          \
+                0                                         \
+            }                                             \
+        }                                                 \
+    }
+#define PB_MfUltralight_EmulateStartRequest_init_zero \
+    {                                                 \
+        {                                             \
+            0, {                                      \
+                0                                     \
+            }                                         \
+        }                                             \
+    }
+#define PB_MfUltralight_EmulateStartResponse_init_zero \
+    { _PB_MfUltralight_Error_MIN }
+#define PB_MfUltralight_EmulateStopRequest_init_zero \
+    { 0 }
+#define PB_MfUltralight_EmulateStopResponse_init_zero \
+    { _PB_MfUltralight_Error_MIN }
 
 /* Field tags (for use in manual encoding/decoding) */
 #define PB_MfUltralight_ReadPageRequest_page_tag 1
@@ -208,100 +303,97 @@ extern "C" {
 #define PB_MfUltralight_EmulateStopResponse_error_tag 1
 
 /* Struct field encoding specification for nanopb */
-#define PB_MfUltralight_ReadPageRequest_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   page,              1)
+#define PB_MfUltralight_ReadPageRequest_FIELDLIST(X, a) X(a, STATIC, SINGULAR, UINT32, page, 1)
 #define PB_MfUltralight_ReadPageRequest_CALLBACK NULL
 #define PB_MfUltralight_ReadPageRequest_DEFAULT NULL
 
 #define PB_MfUltralight_ReadPageResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1) \
-X(a, STATIC,   SINGULAR, UINT32,   page,              2) \
-X(a, STATIC,   SINGULAR, BYTES,    data,              3)
+    X(a, STATIC, SINGULAR, UENUM, error, 1)              \
+    X(a, STATIC, SINGULAR, UINT32, page, 2)              \
+    X(a, STATIC, SINGULAR, BYTES, data, 3)
 #define PB_MfUltralight_ReadPageResponse_CALLBACK NULL
 #define PB_MfUltralight_ReadPageResponse_DEFAULT NULL
 
-#define PB_MfUltralight_ReadVersionRequest_FIELDLIST(X, a) \
+#define PB_MfUltralight_ReadVersionRequest_FIELDLIST(X, a)
 
 #define PB_MfUltralight_ReadVersionRequest_CALLBACK NULL
 #define PB_MfUltralight_ReadVersionRequest_DEFAULT NULL
 
 #define PB_MfUltralight_ReadVersionResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1) \
-X(a, STATIC,   SINGULAR, UINT32,   header,            2) \
-X(a, STATIC,   SINGULAR, UINT32,   vendor_id,         3) \
-X(a, STATIC,   SINGULAR, UINT32,   prod_type,         4) \
-X(a, STATIC,   SINGULAR, UINT32,   prod_subtype,      5) \
-X(a, STATIC,   SINGULAR, UINT32,   prod_ver_major,    6) \
-X(a, STATIC,   SINGULAR, UINT32,   prod_ver_minor,    7) \
-X(a, STATIC,   SINGULAR, UINT32,   storage_size,      8) \
-X(a, STATIC,   SINGULAR, UINT32,   protocol_type,     9)
+    X(a, STATIC, SINGULAR, UENUM, error, 1)                 \
+    X(a, STATIC, SINGULAR, UINT32, header, 2)               \
+    X(a, STATIC, SINGULAR, UINT32, vendor_id, 3)            \
+    X(a, STATIC, SINGULAR, UINT32, prod_type, 4)            \
+    X(a, STATIC, SINGULAR, UINT32, prod_subtype, 5)         \
+    X(a, STATIC, SINGULAR, UINT32, prod_ver_major, 6)       \
+    X(a, STATIC, SINGULAR, UINT32, prod_ver_minor, 7)       \
+    X(a, STATIC, SINGULAR, UINT32, storage_size, 8)         \
+    X(a, STATIC, SINGULAR, UINT32, protocol_type, 9)
 #define PB_MfUltralight_ReadVersionResponse_CALLBACK NULL
 #define PB_MfUltralight_ReadVersionResponse_DEFAULT NULL
 
 #define PB_MfUltralight_WritePageRequest_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   page,              1) \
-X(a, STATIC,   SINGULAR, BYTES,    data,              2)
+    X(a, STATIC, SINGULAR, UINT32, page, 1)              \
+    X(a, STATIC, SINGULAR, BYTES, data, 2)
 #define PB_MfUltralight_WritePageRequest_CALLBACK NULL
 #define PB_MfUltralight_WritePageRequest_DEFAULT NULL
 
 #define PB_MfUltralight_WritePageResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1) \
-X(a, STATIC,   SINGULAR, BOOL,     result,            2)
+    X(a, STATIC, SINGULAR, UENUM, error, 1)               \
+    X(a, STATIC, SINGULAR, BOOL, result, 2)
 #define PB_MfUltralight_WritePageResponse_CALLBACK NULL
 #define PB_MfUltralight_WritePageResponse_DEFAULT NULL
 
-#define PB_MfUltralight_ReadSignatureRequest_FIELDLIST(X, a) \
+#define PB_MfUltralight_ReadSignatureRequest_FIELDLIST(X, a)
 
 #define PB_MfUltralight_ReadSignatureRequest_CALLBACK NULL
 #define PB_MfUltralight_ReadSignatureRequest_DEFAULT NULL
 
 #define PB_MfUltralight_ReadSignatureResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1) \
-X(a, STATIC,   SINGULAR, BYTES,    data,              2)
+    X(a, STATIC, SINGULAR, UENUM, error, 1)                   \
+    X(a, STATIC, SINGULAR, BYTES, data, 2)
 #define PB_MfUltralight_ReadSignatureResponse_CALLBACK NULL
 #define PB_MfUltralight_ReadSignatureResponse_DEFAULT NULL
 
 #define PB_MfUltralight_ReadCounterRequest_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   counter_num,       1)
+    X(a, STATIC, SINGULAR, UINT32, counter_num, 1)
 #define PB_MfUltralight_ReadCounterRequest_CALLBACK NULL
 #define PB_MfUltralight_ReadCounterRequest_DEFAULT NULL
 
 #define PB_MfUltralight_ReadCounterResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1) \
-X(a, STATIC,   SINGULAR, UINT32,   counter_num,       2) \
-X(a, STATIC,   SINGULAR, BYTES,    data,              3)
+    X(a, STATIC, SINGULAR, UENUM, error, 1)                 \
+    X(a, STATIC, SINGULAR, UINT32, counter_num, 2)          \
+    X(a, STATIC, SINGULAR, BYTES, data, 3)
 #define PB_MfUltralight_ReadCounterResponse_CALLBACK NULL
 #define PB_MfUltralight_ReadCounterResponse_DEFAULT NULL
 
 #define PB_MfUltralight_ReadTearingFlagRequest_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   flag_num,          1)
+    X(a, STATIC, SINGULAR, UINT32, flag_num, 1)
 #define PB_MfUltralight_ReadTearingFlagRequest_CALLBACK NULL
 #define PB_MfUltralight_ReadTearingFlagRequest_DEFAULT NULL
 
 #define PB_MfUltralight_ReadTearingFlagResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1) \
-X(a, STATIC,   SINGULAR, UINT32,   flag_num,          2) \
-X(a, STATIC,   SINGULAR, BYTES,    data,              3)
+    X(a, STATIC, SINGULAR, UENUM, error, 1)                     \
+    X(a, STATIC, SINGULAR, UINT32, flag_num, 2)                 \
+    X(a, STATIC, SINGULAR, BYTES, data, 3)
 #define PB_MfUltralight_ReadTearingFlagResponse_CALLBACK NULL
 #define PB_MfUltralight_ReadTearingFlagResponse_DEFAULT NULL
 
-#define PB_MfUltralight_EmulateStartRequest_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, BYTES,    data,              1)
+#define PB_MfUltralight_EmulateStartRequest_FIELDLIST(X, a) X(a, STATIC, SINGULAR, BYTES, data, 1)
 #define PB_MfUltralight_EmulateStartRequest_CALLBACK NULL
 #define PB_MfUltralight_EmulateStartRequest_DEFAULT NULL
 
 #define PB_MfUltralight_EmulateStartResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1)
+    X(a, STATIC, SINGULAR, UENUM, error, 1)
 #define PB_MfUltralight_EmulateStartResponse_CALLBACK NULL
 #define PB_MfUltralight_EmulateStartResponse_DEFAULT NULL
 
-#define PB_MfUltralight_EmulateStopRequest_FIELDLIST(X, a) \
+#define PB_MfUltralight_EmulateStopRequest_FIELDLIST(X, a)
 
 #define PB_MfUltralight_EmulateStopRequest_CALLBACK NULL
 #define PB_MfUltralight_EmulateStopRequest_DEFAULT NULL
 
-#define PB_MfUltralight_EmulateStopResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1)
+#define PB_MfUltralight_EmulateStopResponse_FIELDLIST(X, a) X(a, STATIC, SINGULAR, UENUM, error, 1)
 #define PB_MfUltralight_EmulateStopResponse_CALLBACK NULL
 #define PB_MfUltralight_EmulateStopResponse_DEFAULT NULL
 
@@ -343,20 +435,20 @@ extern const pb_msgdesc_t PB_MfUltralight_EmulateStopResponse_msg;
 /* Maximum encoded size of messages (where known) */
 #define PB_MfUltralight_EmulateStartRequest_size 2051
 #define PB_MfUltralight_EmulateStartResponse_size 2
-#define PB_MfUltralight_EmulateStopRequest_size  0
+#define PB_MfUltralight_EmulateStopRequest_size 0
 #define PB_MfUltralight_EmulateStopResponse_size 2
-#define PB_MfUltralight_ReadCounterRequest_size  6
+#define PB_MfUltralight_ReadCounterRequest_size 6
 #define PB_MfUltralight_ReadCounterResponse_size 13
-#define PB_MfUltralight_ReadPageRequest_size     4
-#define PB_MfUltralight_ReadPageResponse_size    12
+#define PB_MfUltralight_ReadPageRequest_size 4
+#define PB_MfUltralight_ReadPageResponse_size 12
 #define PB_MfUltralight_ReadSignatureRequest_size 0
 #define PB_MfUltralight_ReadSignatureResponse_size 36
 #define PB_MfUltralight_ReadTearingFlagRequest_size 6
 #define PB_MfUltralight_ReadTearingFlagResponse_size 11
-#define PB_MfUltralight_ReadVersionRequest_size  0
+#define PB_MfUltralight_ReadVersionRequest_size 0
 #define PB_MfUltralight_ReadVersionResponse_size 50
-#define PB_MfUltralight_WritePageRequest_size    10
-#define PB_MfUltralight_WritePageResponse_size   4
+#define PB_MfUltralight_WritePageRequest_size 10
+#define PB_MfUltralight_WritePageResponse_size 4
 
 #ifdef __cplusplus
 } /* extern "C" */

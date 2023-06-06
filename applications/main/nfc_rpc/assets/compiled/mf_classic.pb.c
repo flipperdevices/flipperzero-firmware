@@ -8,16 +8,8 @@
 
 PB_BIND(PB_MfClassic_AuthRequest, PB_MfClassic_AuthRequest, AUTO)
 
-
 PB_BIND(PB_MfClassic_AuthResponse, PB_MfClassic_AuthResponse, AUTO)
-
 
 PB_BIND(PB_MfClassic_ReadBlockRequest, PB_MfClassic_ReadBlockRequest, AUTO)
 
-
 PB_BIND(PB_MfClassic_ReadBlockResponse, PB_MfClassic_ReadBlockResponse, AUTO)
-
-
-
-
-
