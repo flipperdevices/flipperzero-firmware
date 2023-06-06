@@ -69,28 +69,20 @@ If everything goes well it will appear some 3 files in the root folder like the 
 
 ---
 
-### Put your Flipper into Recovery/DFU mode
-Put your flipper into DFU mode by:
+### Updating using qFlipper
+1. Connect the Flipper Zero to your pc.
 
-1. holding BACK + LEFT until it turns off
-2. once turned off, release BACK but keep holding LEFT until the LED flashes blue
-3. once the LED flashes blue, release LEFT and your Flipper should be in recovery mode
+![image](https://github.com/EltonAlvess/flipperzero-firmware-wPlugins/assets/1638045/e2be7a6b-2ff2-46f5-9312-b928cf4cf560)
+
+2. Click in ***Install from File***
+3. Select the compiled firmware file created on the root folder i.e ***RM0606-0922-0.84.3-36d65f3.tgz***
+
+![image](https://github.com/EltonAlvess/flipperzero-firmware-wPlugins/assets/1638045/4220f68a-b775-47a9-a2d6-2eae33fc8c70)
+
+4. Click Install.
 
 ---
 
-### Install the firmware
-Open qFlipper.app
-
-Connect your Flipper via USB
-
-In qFlipper, click "Install from file" (underneath the big INSTALL button)
-
-Navigate to your DFU file (**flipperzero-firmware-wPlugins/dist/f7-C/flipper-z-f7-full-local.dfu**)
-
-Wait for the process to finish. If your Flipper device is no longer in DFU mode (i.e. shows the normal Desktop), unplug your Flipper and close the qFlipper app
-
-### Post-Install
-Open qFlipper.app and connect your Flipper via USB
-
-If everything worked, your Flipper should be recognized and the firmware version should match the github commit shown here:
-[https://github.com/RogueMaster/flipperzero-firmware-wPlugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins)
+> If everything worked, your Flipper should be recognized and the firmware version should match the github commit shown here:
+>
+> [https://github.com/RogueMaster/flipperzero-firmware-wPlugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins)
