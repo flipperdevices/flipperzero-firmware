@@ -16,6 +16,13 @@ App(
 )
 
 App(
+    appid="troika_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="troika_plugin_ep",
+    requires=["nfc"],
+)
+
+App(
     appid="nfc_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="nfc_on_system_start",

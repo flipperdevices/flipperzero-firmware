@@ -105,6 +105,7 @@ NfcaError nfca_poller_config(NfcaPoller* instance) {
     nfc_set_guard_time_us(instance->nfc, NFCA_GUARD_TIME_US);
     nfc_set_fdt_poll_fc(instance->nfc, NFCA_FDT_POLL_FC);
     nfc_set_fdt_poll_poll_us(instance->nfc, NFCA_POLL_POLL_MIN_US);
+    instance->config_state = NfcaPollerConfigStateDone;
 
     return NfcaErrorNone;
 }
@@ -118,6 +119,7 @@ NfcaError nfca_poller_reset(NfcaPoller* instance) {
     instance->state = NfcaPollerStateIdle;
     nfc_poller_buffer_free(instance->buff);
     instance->buff = NULL;
+    instance->config_state = NfcaPollerConfigStateIdle;
 
     return NfcaErrorNone;
 }

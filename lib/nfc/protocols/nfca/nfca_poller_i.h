@@ -46,10 +46,16 @@ typedef enum {
     NfcaPollerSessionStateStopRequest,
 } NfcaPollerSessionState;
 
+typedef enum {
+    NfcaPollerConfigStateIdle,
+    NfcaPollerConfigStateDone,
+} NfcaPollerConfigState;
+
 struct NfcaPoller {
     Nfc* nfc;
     NfcaPollerState state;
     NfcaPollerSessionState session_state;
+    NfcaPollerConfigState config_state;
     NfcaPollerColRes col_res;
     NfcaData* data;
     NfcPollerBuffer* buff;

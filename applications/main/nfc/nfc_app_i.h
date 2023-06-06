@@ -21,10 +21,14 @@
 #include <gui/modules/byte_input.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/widget.h>
+#include "views/dict_attack.h"
+#include "views/detect_reader.h"
 
 #include <nfc/scenes/nfc_scene.h>
-#include <nfc/helpers/nfc_custom_event.h>
+#include "helpers/nfc_custom_event.h"
 #include "helpers/mf_ultralight_auth.h"
+#include "helpers/mf_dict.h"
+#include "helpers/nfc_supported_cards.h"
 
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -41,6 +45,7 @@
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
 #include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
+#include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 #include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 
 #include <lib/nfc/nfc_dev.h>
@@ -61,6 +66,14 @@ typedef enum {
     NfcRpcStateEmulating,
     NfcRpcStateEmulated,
 } NfcRpcState;
+
+typedef struct {
+    MfDict* dict;
+    uint32_t total_keys;
+    uint32_t current_key;
+    uint8_t current_sector;
+    MfClassicType type;
+} NfcMfClassicDictAttackContext;
 
 struct NfcApp {
     DialogsApp* dialogs;
@@ -86,6 +99,8 @@ struct NfcApp {
     ByteInput* byte_input;
     TextBox* text_box;
     Widget* widget;
+    DictAttack* dict_attack;
+    DetectReader* detect_reader;
 
     Nfc* nfc;
     NfcaPoller* nfca_poller;
@@ -94,10 +109,14 @@ struct NfcApp {
     MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
     MfDesfirePoller* mf_desfire_poller;
+    MfClassicPoller* mf_classic_poller;
     NfcbPoller* nfcb_poller;
     NfcPoller* nfc_poller;
 
     MfUltralightAuth* mf_ul_auth;
+    NfcMfClassicDictAttackContext mf_dict_context;
+    FuriString* parsed_data;
+    NfcSupportedCards* supported_cards;
 
     NfcDev* nfc_dev;
     NfcDevData nfc_dev_data;

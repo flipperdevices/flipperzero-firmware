@@ -120,16 +120,22 @@ NfcaError nfca_poller_stop(NfcaPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
 
+    NfcaError error = NfcaErrorNone;
+
     instance->session_state = NfcaPollerSessionStateStopRequest;
     nfc_stop(instance->nfc);
     instance->session_state = NfcaPollerSessionStateIdle;
+
+    if(instance->config_state == NfcaPollerConfigStateDone) {
+        error = nfca_poller_reset(instance);
+    }
 
     // Check that data is freed
     furi_assert(instance->buff == NULL);
 
     free(instance->data);
 
-    return NfcaErrorNone;
+    return error;
 }
 
 static NfcaPollerCommand nfca_poller_sync_callback(NfcaPollerEvent event, void* context) {

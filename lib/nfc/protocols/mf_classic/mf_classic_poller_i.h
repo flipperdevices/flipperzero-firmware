@@ -22,13 +22,41 @@ typedef enum {
 } MfClassicAuthState;
 
 typedef enum {
+    MfClassicCardStateNotDetected,
+    MfClassicCardStateDetected,
+} MfClassicCardState;
+
+typedef enum {
+    MfClassicReadModeDictAttack,
+    MfClassicReadModeKeyReuse,
+} MfClassicReadMode;
+
+typedef enum {
+    MfClassicPollerStateStart,
     MfClassicPollerStateIdle,
+    MfClassicPollerStateNewSector,
+    MfClassicPollerStateRequestKey,
+    MfClassicPollerStateAuthKeyA,
+    MfClassicPollerStateAuthKeyB,
+    MfClassicPollerStateReadSector,
+    MfClassicPollerStateReadComplete,
+
+    MfClassicPollerStateNum,
 } MfClassicPollerState;
 
 struct MfClassicPoller {
     NfcaPoller* nfca_poller;
+    MfClassicPollerState state;
+    MfClassicPollerState prev_state;
     MfClassicPollerSessionState session_state;
     MfClassicAuthState auth_state;
+    MfClassicCardState card_state;
+    MfClassicReadMode read_mode;
+    MfClassicKey current_key;
+    MfClassicPollerEventData event_data;
+    uint8_t sectors_read;
+    uint8_t key_reuse_sector;
+    uint8_t sectors_total;
     Crypto1* crypto;
     NfcPollerBuffer* plain_buff;
     NfcPollerBuffer* encrypted_buff;
@@ -57,6 +85,8 @@ MfClassicError mf_classic_async_auth(
     MfClassicKey* key,
     MfClassicKeyType key_type,
     MfClassicAuthContext* data);
+
+MfClassicError mf_classic_aync_halt(MfClassicPoller* instance);
 
 MfClassicError
     mf_classic_async_read_block(MfClassicPoller* instance, uint8_t block_num, MfClassicBlock* data);

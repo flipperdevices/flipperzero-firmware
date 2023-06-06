@@ -9,7 +9,10 @@ extern "C" {
 #define MF_CLASSIC_AUTH_KEY_A_CMD (0x60U)
 #define MF_CLASSIC_AUTH_KEY_B_CMD (0x61U)
 #define MF_CLASSIC_READ_BLOCK_CMD (0x30U)
+#define MF_CLASSIC_HALT_MSB_CMD (0x50)
+#define MF_CLASSIC_HALT_LSB_CMD (0x00)
 
+#define MF_CLASSIC_TOTAL_SECTORS_MAX (40)
 #define MF_CLASSIC_TOTAL_BLOCKS_MAX (256)
 #define MF_CLASSIC_BLOCK_SIZE (16)
 #define MF_CLASSIC_KEY_SIZE (6)
@@ -100,6 +103,13 @@ typedef struct {
 } MfClassicSectorTrailer;
 
 typedef struct {
+    MfClassicKey key_a[MF_CLASSIC_TOTAL_SECTORS_MAX];
+    MfClassicKey key_b[MF_CLASSIC_TOTAL_SECTORS_MAX];
+    uint64_t key_a_mask;
+    uint64_t key_b_mask;
+} MfClassicDeviceKeys;
+
+typedef struct {
     NfcaData nfca_data;
     MfClassicType type;
     uint32_t block_read_mask[MF_CLASSIC_TOTAL_BLOCKS_MAX / 32];
@@ -108,9 +118,15 @@ typedef struct {
     MfClassicBlock block[MF_CLASSIC_TOTAL_BLOCKS_MAX];
 } MfClassicData;
 
+bool mf_classic_detect_protocol(NfcaData* data, MfClassicType* type);
+
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
 
 uint16_t mf_classic_get_total_block_num(MfClassicType type);
+
+uint8_t mf_classic_get_first_block_num_of_sector(uint8_t sector);
+
+uint8_t mf_classic_get_blocks_num_in_sector(uint8_t sector);
 
 const char* mf_classic_get_name(MfClassicType type, bool full_name);
 
@@ -141,6 +157,15 @@ void mf_classic_set_key_not_found(
 bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num);
 
 void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data);
+
+bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num);
+
+void mf_classic_get_read_sectors_and_keys(
+    MfClassicData* data,
+    uint8_t* sectors_read,
+    uint8_t* keys_found);
+
+bool mf_classic_is_card_read(MfClassicData* data);
 
 #ifdef __cplusplus
 }

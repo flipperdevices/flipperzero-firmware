@@ -10,26 +10,50 @@ extern "C" {
 typedef struct MfClassicPoller MfClassicPoller;
 
 typedef enum {
-    MfClassicPollerEventTypeAuthRequest,
-    MfClassicPollerEventTypeAuthSuccess,
-    MfClassicPollerEventTypeAuthFailed,
-    MfClassicPollerEventTypeReadSuccess,
-    MfClassicPollerEventTypeReadFailed,
+    MfClassicPollerEventTypeStart,
+    MfClassicPollerEventTypeRequestKey,
+    MfClassicPollerEventTypeNewSector,
+    MfClassicPollerEventTypeFoundKeyA,
+    MfClassicPollerEventTypeFoundKeyB,
+    MfClassicPollerEventTypeCardDetected,
+    MfClassicPollerEventTypeCardNotDetected,
+    MfClassicPollerEventTypeKeyAttackStart,
+    MfClassicPollerEventTypeKeyAttackStop,
+    MfClassicPollerEventTypeKeyAttackNextSector,
+    MfClassicPollerEventTypeReadComplete,
 } MfClassicPollerEventType;
 
 typedef struct {
+    MfClassicType type;
+} MfClassicPollerEventDataStart;
+
+typedef struct {
+    uint8_t sector_num;
+    MfClassicKey key;
+    bool key_provided;
+} MfClassicPollerEventDataKeyRequest;
+
+typedef struct {
+    uint8_t start_sector;
+} MfClassicPollerEventKeyAttackData;
+
+typedef union {
     MfClassicError error;
+    MfClassicPollerEventDataStart start_data;
+    MfClassicPollerEventDataKeyRequest key_request_data;
+    MfClassicPollerEventKeyAttackData key_attack_data;
 } MfClassicPollerEventData;
 
 typedef struct {
     MfClassicPollerEventType type;
-    MfClassicPollerEventData data;
+    MfClassicPollerEventData* data;
 } MfClassicPollerEvent;
 
 typedef enum {
     MfClassicPollerCommandContinue = NfcaPollerCommandContinue,
     MfClassicPollerCommandReset = NfcaPollerCommandReset,
     MfClassicPollerCommandStop = NfcaPollerCommandStop,
+    MfClassicPollerCommandRestart,
 } MfClassicPollerCommand;
 
 typedef MfClassicPollerCommand (
@@ -44,7 +68,7 @@ MfClassicError mf_classic_poller_start(
     NfcaPollerEventCallback callback,
     void* context);
 
-MfClassicError mf_classic_poller_read(
+MfClassicError mf_classic_poller_dict_attack(
     MfClassicPoller* instance,
     MfClassicPollerCallback callback,
     void* context);
@@ -70,6 +94,11 @@ MfClassicError mf_classic_poller_read_block(
     MfClassicKey* key,
     MfClassicKeyType key_type,
     MfClassicBlock* data);
+
+MfClassicError mf_classic_poller_read(
+    MfClassicPoller* instance,
+    MfClassicDeviceKeys* keys,
+    MfClassicData* data);
 
 #ifdef __cplusplus
 }

@@ -40,6 +40,7 @@ MfClassicError mf_classic_async_auth(
     MfClassicKeyType key_type,
     MfClassicAuthContext* data) {
     NfcPollerBuffer* buff = instance->plain_buff;
+    nfc_poller_buffer_reset(buff);
     MfClassicError ret = MfClassicErrorNone;
     NfcaError error = NfcaErrorNone;
 
@@ -130,6 +131,52 @@ MfClassicError mf_classic_async_auth(
             memcpy(data->ar.data, &buff->tx_data[4], sizeof(MfClassicAr));
             memcpy(data->at.data, buff->rx_data, sizeof(MfClassicAt));
         }
+    } while(false);
+
+    if(ret != MfClassicErrorNone) {
+        nfca_poller_halt(instance->nfca_poller);
+    }
+
+    return ret;
+}
+
+MfClassicError mf_classic_aync_halt(MfClassicPoller* instance) {
+    NfcPollerBuffer* plain_buff = instance->plain_buff;
+    NfcPollerBuffer* encrypted_buff = instance->encrypted_buff;
+    MfClassicError ret = MfClassicErrorNone;
+    NfcaError error = NfcaErrorNone;
+
+    do {
+        plain_buff->tx_data[0] = MF_CLASSIC_HALT_MSB_CMD;
+        plain_buff->tx_data[1] = MF_CLASSIC_HALT_LSB_CMD;
+        nfca_append_crc(plain_buff->tx_data, 2);
+        plain_buff->tx_bits = 4 * 8;
+
+        encrypted_buff->tx_bits = plain_buff->tx_bits;
+        crypto1_encrypt(
+            instance->crypto,
+            NULL,
+            plain_buff->tx_data,
+            plain_buff->tx_bits,
+            encrypted_buff->tx_data,
+            encrypted_buff->tx_parity);
+
+        error = nfca_poller_txrx_custom_parity(
+            instance->nfca_poller,
+            encrypted_buff->tx_data,
+            encrypted_buff->tx_parity,
+            encrypted_buff->tx_bits,
+            encrypted_buff->rx_data,
+            encrypted_buff->rx_parity,
+            encrypted_buff->rx_data_size,
+            &encrypted_buff->rx_bits,
+            MF_CLASSIC_FWT_FC);
+        if(error != NfcaErrorTimeout) {
+            ret = mf_classic_process_error(error);
+            break;
+        }
+        instance->auth_state = MfClassicAuthStateIdle;
+        instance->nfca_poller->state = NfcaPollerStateIdle;
     } while(false);
 
     return ret;
