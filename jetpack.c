@@ -115,7 +115,7 @@ static void jetpack_game_state_init(GameState* const game_state) {
 
     game_state->barry = barry;
     game_state->total_coins = 0;
-    game_state->distance = 7000;
+    game_state->distance = 0;
     game_state->new_highscore = false;
     game_state->sprites = sprites;
     game_state->state = GameStateLife;
