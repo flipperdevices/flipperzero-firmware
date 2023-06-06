@@ -15,6 +15,7 @@
 typedef struct {
     int points;
     int distance;
+    bool new_highscore;
     BARRY barry;
     COIN coins[COINS_MAX];
     PARTICLE particles[PARTICLES_MAX];

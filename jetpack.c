@@ -72,6 +72,8 @@ static void storage_game_state_save() {
 
 void handle_death() {
     global_state->state = GameStateGameOver;
+    global_state->new_highscore = global_state->distance > save_game.max_distance;
+
     if(global_state->distance > save_game.max_distance) {
         save_game.max_distance = global_state->distance;
     }
@@ -79,6 +81,7 @@ void handle_death() {
     if(global_state->points > save_game.max_score) {
         save_game.max_score = global_state->points;
     }
+
     storage_game_state_save();
 }
 
@@ -114,7 +117,8 @@ static void jetpack_game_state_init(GameState* const game_state) {
 
     game_state->barry = barry;
     game_state->points = 0;
-    game_state->distance = 5000;
+    game_state->distance = 7000;
+    game_state->new_highscore = false;
     game_state->sprites = sprites;
     game_state->state = GameStateLife;
     game_state->death_handler = handle_death;
@@ -198,20 +202,45 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
 
     if(game_state->state == GameStateGameOver) {
         // Show highscore
+        char buffer[24];
 
-        char buffer[12];
-        snprintf(buffer, sizeof(buffer), "Dist: %u", game_state->distance);
-        canvas_draw_str_aligned(canvas, 123, 12, AlignRight, AlignBottom, buffer);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignTop, "You flew");
 
-        snprintf(buffer, sizeof(buffer), "Score: %u", game_state->points);
-        canvas_draw_str_aligned(canvas, 5, 12, AlignLeft, AlignBottom, buffer);
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            game_state->new_highscore ? "%u m (new best)" : "%u m",
+            game_state->distance);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignTop, buffer);
 
-        canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, "Highscore:");
-        snprintf(buffer, sizeof(buffer), "Dist: %u", save_game.max_distance);
-        canvas_draw_str_aligned(canvas, 123, 50, AlignRight, AlignBottom, buffer);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignTop, "and collected");
 
-        snprintf(buffer, sizeof(buffer), "Score: %u", save_game.max_score);
-        canvas_draw_str_aligned(canvas, 5, 50, AlignLeft, AlignBottom, buffer);
+        snprintf(buffer, sizeof(buffer), "%u coins", game_state->points);
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignTop, buffer);
+
+        snprintf(buffer, sizeof(buffer), "Your best was %u m", save_game.max_distance);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 63, AlignCenter, AlignBottom, buffer);
+
+        canvas_draw_frame(canvas, 0, 3, 128, 49);
+
+        // char buffer[12];
+        // snprintf(buffer, sizeof(buffer), "Dist: %u", game_state->distance);
+        // canvas_draw_str_aligned(canvas, 123, 12, AlignRight, AlignBottom, buffer);
+
+        // snprintf(buffer, sizeof(buffer), "Score: %u", game_state->points);
+        // canvas_draw_str_aligned(canvas, 5, 12, AlignLeft, AlignBottom, buffer);
+
+        // canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, "Highscore:");
+        // snprintf(buffer, sizeof(buffer), "Dist: %u", save_game.max_distance);
+        // canvas_draw_str_aligned(canvas, 123, 50, AlignRight, AlignBottom, buffer);
+
+        // snprintf(buffer, sizeof(buffer), "Score: %u", save_game.max_score);
+        // canvas_draw_str_aligned(canvas, 5, 50, AlignLeft, AlignBottom, buffer);
 
         // canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "boom.");
 
@@ -220,7 +249,7 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         // }
     }
 
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
+    // canvas_draw_frame(canvas, 0, 0, 128, 64);
 
     furi_mutex_release(game_state->mutex);
 }
@@ -286,6 +315,13 @@ int32_t jetpack_game_app(void* p) {
             if(event.type == EventTypeKey) {
                 if(event.input.type == InputTypeRelease && event.input.key == InputKeyOk) {
                     game_state->barry.isBoosting = false;
+                }
+
+                // Reset highscore, for debug purposes
+                if(event.input.type == InputTypeLong && event.input.key == InputKeyLeft) {
+                    save_game.max_distance = 0;
+                    save_game.max_score = 0;
+                    storage_game_state_save();
                 }
 
                 if(event.input.type == InputTypePress) {
