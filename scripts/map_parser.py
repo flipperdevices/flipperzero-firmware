@@ -3,6 +3,9 @@
 # Requiremets:
 #   cxxfilt==0.3.0
 
+# Most part of this code written by Lars-Dominik Braun <lars@6xq.net> https://github.com/PromyLOPh/linkermapviz
+# and distributes under MIT licence
+
 import sys
 import re
 import os
