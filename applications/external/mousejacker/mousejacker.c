@@ -56,6 +56,11 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 22, 20, AlignLeft, AlignBottom, "<- select address ->");
         canvas_draw_str_aligned(canvas, 10, 30, AlignLeft, AlignBottom, "Press Ok button to ");
         canvas_draw_str_aligned(canvas, 10, 40, AlignLeft, AlignBottom, "browse for ducky script");
+        if(!plugin_state->is_nrf24_connected) {
+            canvas_draw_str_aligned(
+                canvas, 10, 60, AlignLeft, AlignBottom, "NRF24 not connected!");
+        }
+
     } else if(plugin_state->addr_err) {
         canvas_draw_str_aligned(
             canvas, 10, 10, AlignLeft, AlignBottom, "Error: No nrfsniff folder");
@@ -95,6 +100,7 @@ static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queu
 
 static void mousejacker_state_init(PluginState* const plugin_state) {
     plugin_state->is_thread_running = false;
+    plugin_state->is_nrf24_connected = true;
 }
 
 static void hexlify(uint8_t* in, uint8_t size, char* out) {
@@ -288,6 +294,7 @@ void start_mjthread(PluginState* plugin_state) {
 int32_t mousejacker_app(void* p) {
     UNUSED(p);
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
+    DOLPHIN_DEED(getRandomDeed());
 
     PluginState* plugin_state = malloc(sizeof(PluginState));
     mousejacker_state_init(plugin_state);
@@ -317,6 +324,10 @@ int32_t mousejacker_app(void* p) {
     furi_thread_set_stack_size(plugin_state->mjthread, 2048);
     furi_thread_set_context(plugin_state->mjthread, plugin_state);
     furi_thread_set_callback(plugin_state->mjthread, mj_worker_thread);
+
+    while(!furi_hal_speaker_acquire(100)) {
+        furi_delay_ms(100);
+    }
 
     // spawn load file dialog to choose sniffed addresses file
     if(load_addrs_file(plugin_state->file_stream)) {
@@ -359,7 +370,13 @@ int32_t mousejacker_app(void* p) {
                         break;
                     case InputKeyOk:
                         if(!plugin_state->addr_err) {
-                            if(!plugin_state->is_thread_running) {
+                            if(!nrf24_checkconnected(nrf24_HANDLE)) {
+                                plugin_state->is_nrf24_connected = false;
+                                view_port_update(view_port);
+                                furi_hal_speaker_start(100, 100);
+                                furi_delay_ms(100);
+                                furi_hal_speaker_stop();
+                            } else if(!plugin_state->is_thread_running) {
                                 start_mjthread(plugin_state);
                                 view_port_update(view_port);
                             }
@@ -387,6 +404,7 @@ int32_t mousejacker_app(void* p) {
 
     furi_thread_free(plugin_state->mjthread);
     nrf24_deinit();
+    furi_hal_speaker_release();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);

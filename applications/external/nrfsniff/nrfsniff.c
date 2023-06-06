@@ -5,6 +5,7 @@
 #include <notification/notification_messages.h>
 #include <stdlib.h>
 #include <dolphin/dolphin.h>
+
 #include <nrf24.h>
 #include <toolbox/stream/file_stream.h>
 
@@ -331,6 +332,10 @@ int32_t nrfsniff_app(void* p) {
 
     nrf24_init();
 
+    while(!furi_hal_speaker_acquire(100)) {
+        furi_delay_ms(100);
+    }
+
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
     view_port_draw_callback_set(view_port, render_callback, plugin_state);
@@ -390,10 +395,27 @@ int32_t nrfsniff_app(void* p) {
                     case InputKeyOk:
                         // toggle sniffing
                         sniffing_state = !sniffing_state;
+
                         if(sniffing_state) {
-                            clear_cache();
-                            start_sniffing();
-                            start = furi_get_tick();
+                            if(nrf24_checkconnected(nrf24_HANDLE)) {
+                                clear_cache();
+                                start_sniffing();
+                                start = furi_get_tick();
+                            } else {
+                                nrf24_flush_rx(nrf24_HANDLE);
+
+                                // check again
+                                if(nrf24_checkconnected(nrf24_HANDLE)) {
+                                    clear_cache();
+                                    start_sniffing();
+                                    start = furi_get_tick();
+                                } else {
+                                    sniffing_state = false;
+                                    furi_hal_speaker_start(100, 100);
+                                    furi_delay_ms(100);
+                                    furi_hal_speaker_stop();
+                                }
+                            }
                         } else
                             wrap_up(storage, notification);
                         break;
@@ -405,12 +427,9 @@ int32_t nrfsniff_app(void* p) {
                     }
                 }
             }
-        } else {
-            // FURI_LOG_D(TAG, "osMessageQueue: event timeout");
-            // event timeout
         }
 
-        if(sniffing_state) {
+        if(sniffing_state && nrf24_checkconnected(nrf24_HANDLE)) {
             if(nrf24_sniff_address(nrf24_HANDLE, 5, address)) {
                 int idx;
                 uint8_t* top_addr;
@@ -447,6 +466,7 @@ int32_t nrfsniff_app(void* p) {
     target_rate = 8; // rate can be either 8 (2Mbps) or 0 (1Mbps)
     sniffing_state = false;
     nrf24_deinit();
+    furi_hal_speaker_release();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);
