@@ -162,9 +162,9 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             // FURI_LOG_I("nfc", "application_info_present: %d", application_info_present);
 
             // if(application_info_present) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             // } else {
-                // scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
+            // scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
             // }
             consumed = true;
         } else if(event.event == SubmenuIndexRestoreOriginal) {

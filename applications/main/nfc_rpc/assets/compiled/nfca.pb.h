@@ -59,7 +59,6 @@ typedef struct _PB_Nfca_EmulateStopResponse {
     PB_Nfca_Error error;
 } PB_Nfca_EmulateStopResponse;
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -67,80 +66,110 @@ extern "C" {
 /* Helper constants for enums */
 #define _PB_Nfca_Error_MIN PB_Nfca_Error_None
 #define _PB_Nfca_Error_MAX PB_Nfca_Error_Timeout
-#define _PB_Nfca_Error_ARRAYSIZE ((PB_Nfca_Error)(PB_Nfca_Error_Timeout+1))
-
+#define _PB_Nfca_Error_ARRAYSIZE ((PB_Nfca_Error)(PB_Nfca_Error_Timeout + 1))
 
 #define PB_Nfca_ReadResponse_error_ENUMTYPE PB_Nfca_Error
 
-
 #define PB_Nfca_EmulateStartResponse_error_ENUMTYPE PB_Nfca_Error
-
 
 #define PB_Nfca_EmulateStopResponse_error_ENUMTYPE PB_Nfca_Error
 
-
 /* Initializer values for message structs */
-#define PB_Nfca_ReadRequest_init_default         {0}
-#define PB_Nfca_ReadResponse_init_default        {_PB_Nfca_Error_MIN, 0, {0, {0}}, {0, {0}}, {0, {0}}}
-#define PB_Nfca_EmulateStartRequest_init_default {0, {0, {0}}, {0, {0}}, {0, {0}}}
-#define PB_Nfca_EmulateStartResponse_init_default {_PB_Nfca_Error_MIN}
-#define PB_Nfca_EmulateStopRequest_init_default  {0}
-#define PB_Nfca_EmulateStopResponse_init_default {_PB_Nfca_Error_MIN}
-#define PB_Nfca_ReadRequest_init_zero            {0}
-#define PB_Nfca_ReadResponse_init_zero           {_PB_Nfca_Error_MIN, 0, {0, {0}}, {0, {0}}, {0, {0}}}
-#define PB_Nfca_EmulateStartRequest_init_zero    {0, {0, {0}}, {0, {0}}, {0, {0}}}
-#define PB_Nfca_EmulateStartResponse_init_zero   {_PB_Nfca_Error_MIN}
-#define PB_Nfca_EmulateStopRequest_init_zero     {0}
-#define PB_Nfca_EmulateStopResponse_init_zero    {_PB_Nfca_Error_MIN}
+#define PB_Nfca_ReadRequest_init_default \
+    { 0 }
+#define PB_Nfca_ReadResponse_init_default            \
+    {                                                \
+        _PB_Nfca_Error_MIN, 0, {0, {0}}, {0, {0}}, { \
+            0, {                                     \
+                0                                    \
+            }                                        \
+        }                                            \
+    }
+#define PB_Nfca_EmulateStartRequest_init_default \
+    {                                            \
+        0, {0, {0}}, {0, {0}}, {                 \
+            0, {                                 \
+                0                                \
+            }                                    \
+        }                                        \
+    }
+#define PB_Nfca_EmulateStartResponse_init_default \
+    { _PB_Nfca_Error_MIN }
+#define PB_Nfca_EmulateStopRequest_init_default \
+    { 0 }
+#define PB_Nfca_EmulateStopResponse_init_default \
+    { _PB_Nfca_Error_MIN }
+#define PB_Nfca_ReadRequest_init_zero \
+    { 0 }
+#define PB_Nfca_ReadResponse_init_zero               \
+    {                                                \
+        _PB_Nfca_Error_MIN, 0, {0, {0}}, {0, {0}}, { \
+            0, {                                     \
+                0                                    \
+            }                                        \
+        }                                            \
+    }
+#define PB_Nfca_EmulateStartRequest_init_zero \
+    {                                         \
+        0, {0, {0}}, {0, {0}}, {              \
+            0, {                              \
+                0                             \
+            }                                 \
+        }                                     \
+    }
+#define PB_Nfca_EmulateStartResponse_init_zero \
+    { _PB_Nfca_Error_MIN }
+#define PB_Nfca_EmulateStopRequest_init_zero \
+    { 0 }
+#define PB_Nfca_EmulateStopResponse_init_zero \
+    { _PB_Nfca_Error_MIN }
 
 /* Field tags (for use in manual encoding/decoding) */
-#define PB_Nfca_ReadResponse_error_tag           1
-#define PB_Nfca_ReadResponse_uid_len_tag         2
-#define PB_Nfca_ReadResponse_uid_tag             3
-#define PB_Nfca_ReadResponse_sak_tag             4
-#define PB_Nfca_ReadResponse_atqa_tag            5
-#define PB_Nfca_EmulateStartRequest_uid_len_tag  1
-#define PB_Nfca_EmulateStartRequest_uid_tag      2
-#define PB_Nfca_EmulateStartRequest_sak_tag      3
-#define PB_Nfca_EmulateStartRequest_atqa_tag     4
-#define PB_Nfca_EmulateStartResponse_error_tag   1
-#define PB_Nfca_EmulateStopResponse_error_tag    1
+#define PB_Nfca_ReadResponse_error_tag 1
+#define PB_Nfca_ReadResponse_uid_len_tag 2
+#define PB_Nfca_ReadResponse_uid_tag 3
+#define PB_Nfca_ReadResponse_sak_tag 4
+#define PB_Nfca_ReadResponse_atqa_tag 5
+#define PB_Nfca_EmulateStartRequest_uid_len_tag 1
+#define PB_Nfca_EmulateStartRequest_uid_tag 2
+#define PB_Nfca_EmulateStartRequest_sak_tag 3
+#define PB_Nfca_EmulateStartRequest_atqa_tag 4
+#define PB_Nfca_EmulateStartResponse_error_tag 1
+#define PB_Nfca_EmulateStopResponse_error_tag 1
 
 /* Struct field encoding specification for nanopb */
-#define PB_Nfca_ReadRequest_FIELDLIST(X, a) \
+#define PB_Nfca_ReadRequest_FIELDLIST(X, a)
 
 #define PB_Nfca_ReadRequest_CALLBACK NULL
 #define PB_Nfca_ReadRequest_DEFAULT NULL
 
-#define PB_Nfca_ReadResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1) \
-X(a, STATIC,   SINGULAR, UINT32,   uid_len,           2) \
-X(a, STATIC,   SINGULAR, BYTES,    uid,               3) \
-X(a, STATIC,   SINGULAR, BYTES,    sak,               4) \
-X(a, STATIC,   SINGULAR, BYTES,    atqa,              5)
+#define PB_Nfca_ReadResponse_FIELDLIST(X, a)   \
+    X(a, STATIC, SINGULAR, UENUM, error, 1)    \
+    X(a, STATIC, SINGULAR, UINT32, uid_len, 2) \
+    X(a, STATIC, SINGULAR, BYTES, uid, 3)      \
+    X(a, STATIC, SINGULAR, BYTES, sak, 4)      \
+    X(a, STATIC, SINGULAR, BYTES, atqa, 5)
 #define PB_Nfca_ReadResponse_CALLBACK NULL
 #define PB_Nfca_ReadResponse_DEFAULT NULL
 
 #define PB_Nfca_EmulateStartRequest_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   uid_len,           1) \
-X(a, STATIC,   SINGULAR, BYTES,    uid,               2) \
-X(a, STATIC,   SINGULAR, BYTES,    sak,               3) \
-X(a, STATIC,   SINGULAR, BYTES,    atqa,              4)
+    X(a, STATIC, SINGULAR, UINT32, uid_len, 1)      \
+    X(a, STATIC, SINGULAR, BYTES, uid, 2)           \
+    X(a, STATIC, SINGULAR, BYTES, sak, 3)           \
+    X(a, STATIC, SINGULAR, BYTES, atqa, 4)
 #define PB_Nfca_EmulateStartRequest_CALLBACK NULL
 #define PB_Nfca_EmulateStartRequest_DEFAULT NULL
 
-#define PB_Nfca_EmulateStartResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1)
+#define PB_Nfca_EmulateStartResponse_FIELDLIST(X, a) X(a, STATIC, SINGULAR, UENUM, error, 1)
 #define PB_Nfca_EmulateStartResponse_CALLBACK NULL
 #define PB_Nfca_EmulateStartResponse_DEFAULT NULL
 
-#define PB_Nfca_EmulateStopRequest_FIELDLIST(X, a) \
+#define PB_Nfca_EmulateStopRequest_FIELDLIST(X, a)
 
 #define PB_Nfca_EmulateStopRequest_CALLBACK NULL
 #define PB_Nfca_EmulateStopRequest_DEFAULT NULL
 
-#define PB_Nfca_EmulateStopResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1)
+#define PB_Nfca_EmulateStopResponse_FIELDLIST(X, a) X(a, STATIC, SINGULAR, UENUM, error, 1)
 #define PB_Nfca_EmulateStopResponse_CALLBACK NULL
 #define PB_Nfca_EmulateStopResponse_DEFAULT NULL
 
@@ -160,12 +189,12 @@ extern const pb_msgdesc_t PB_Nfca_EmulateStopResponse_msg;
 #define PB_Nfca_EmulateStopResponse_fields &PB_Nfca_EmulateStopResponse_msg
 
 /* Maximum encoded size of messages (where known) */
-#define PB_Nfca_EmulateStartRequest_size         25
-#define PB_Nfca_EmulateStartResponse_size        2
-#define PB_Nfca_EmulateStopRequest_size          0
-#define PB_Nfca_EmulateStopResponse_size         2
-#define PB_Nfca_ReadRequest_size                 0
-#define PB_Nfca_ReadResponse_size                27
+#define PB_Nfca_EmulateStartRequest_size 25
+#define PB_Nfca_EmulateStartResponse_size 2
+#define PB_Nfca_EmulateStopRequest_size 0
+#define PB_Nfca_EmulateStopResponse_size 2
+#define PB_Nfca_ReadRequest_size 0
+#define PB_Nfca_ReadResponse_size 27
 
 #ifdef __cplusplus
 } /* extern "C" */

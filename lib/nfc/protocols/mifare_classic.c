@@ -111,7 +111,10 @@ bool mifare_classic_is_block_read(MfClassicData* data, uint8_t block_num) {
     return (FURI_BIT(data->block_read_mask[block_num / 32], block_num % 32) == 1);
 }
 
-void mifare_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data) {
+void mifare_classic_set_block_read(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicBlock* block_data) {
     furi_assert(data);
 
     if(mifare_classic_is_sector_trailer(block_num)) {
@@ -173,7 +176,10 @@ void mifare_classic_set_key_found(
     }
 }
 
-void mifare_classic_set_key_not_found(MfClassicData* data, uint8_t sector_num, MfClassicKey key_type) {
+void mifare_classic_set_key_not_found(
+    MfClassicData* data,
+    uint8_t sector_num,
+    MfClassicKey key_type) {
     furi_assert(data);
 
     if(key_type == MfClassicKeyA) {
@@ -360,7 +366,8 @@ static bool mf_classic_is_allowed_access(
         return mf_classic_is_allowed_access_sector_trailer(
             &emulator->data, block_num, key, action);
     } else {
-        return mifare_classic_is_allowed_access_data_block(&emulator->data, block_num, key, action);
+        return mifare_classic_is_allowed_access_data_block(
+            &emulator->data, block_num, key, action);
     }
 }
 
@@ -492,7 +499,8 @@ static bool mf_classic_auth(
         for(uint8_t i = 0; i < 4; i++) {
             tx_rx->tx_data[i] = old_crypto1_byte(crypto, nr[i], 0) ^ nr[i];
             tx_rx->tx_parity[0] |=
-                (((old_crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nr[i])) & 0x01) << (7 - i));
+                (((old_crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nr[i])) & 0x01)
+                 << (7 - i));
         }
         nt = old_prng_successor(nt, 32);
         for(uint8_t i = 4; i < 8; i++) {
@@ -763,7 +771,8 @@ static bool mifare_classic_read_sector_with_reader(
 
         // Read blocks
         for(uint8_t i = 0; i < sector->total_blocks; i++) {
-            if(mifare_classic_read_block(tx_rx, crypto, first_block + i, &sector->block[i])) continue;
+            if(mifare_classic_read_block(tx_rx, crypto, first_block + i, &sector->block[i]))
+                continue;
             if(i == 0) continue;
             // Try to auth to read next block in case previous is locked
             furi_hal_nfc_sleep();
@@ -941,7 +950,8 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             old_crypto1_word(&emulator->crypto, nr, 1);
             uint32_t cardRr = ar ^ old_crypto1_word(&emulator->crypto, 0, 0);
             if(cardRr != old_prng_successor(nonce, 64)) {
-                FURI_LOG_T(TAG, "Wrong AUTH! %08lX != %08lX", cardRr, old_prng_successor(nonce, 64));
+                FURI_LOG_T(
+                    TAG, "Wrong AUTH! %08lX != %08lX", cardRr, old_prng_successor(nonce, 64));
                 // Don't send NACK, as the tag doesn't send it
                 command_processed = true;
                 break;
@@ -1015,7 +1025,8 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             }
             // Send ACK
             uint8_t ack = MF_CLASSIC_ACK_CMD;
-            old_crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(
+                &emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
 
@@ -1052,7 +1063,8 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             }
             // Send ACK
             ack = MF_CLASSIC_ACK_CMD;
-            old_crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(
+                &emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
         } else if(
@@ -1074,13 +1086,15 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
 
             int32_t prev_value;
             uint8_t addr;
-            if(!mifare_classic_block_to_value(emulator->data.block[block].value, &prev_value, &addr)) {
+            if(!mifare_classic_block_to_value(
+                   emulator->data.block[block].value, &prev_value, &addr)) {
                 break;
             }
 
             // Send ACK
             uint8_t ack = MF_CLASSIC_ACK_CMD;
-            old_crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(
+                &emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
 
@@ -1115,7 +1129,8 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             transfer_buf_valid = false;
 
             uint8_t ack = MF_CLASSIC_ACK_CMD;
-            old_crypto1_encrypt(&emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(
+                &emulator->crypto, NULL, &ack, 4, tx_rx->tx_data, tx_rx->tx_parity);
             tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             tx_rx->tx_bits = 4;
         } else {
@@ -1129,7 +1144,8 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
         uint8_t nack = transfer_buf_valid ? MF_CLASSIC_NACK_BUF_VALID_CMD :
                                             MF_CLASSIC_NACK_BUF_INVALID_CMD;
         if(is_encrypted) {
-            old_crypto1_encrypt(&emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
+            old_crypto1_encrypt(
+                &emulator->crypto, NULL, &nack, 4, tx_rx->tx_data, tx_rx->tx_parity);
         } else {
             tx_rx->tx_data[0] = nack;
         }
@@ -1430,7 +1446,8 @@ bool mifare_classic_write_sector(
 
     uint8_t first_block = mf_classic_get_first_block_num_of_sector(sec_num);
     uint8_t total_blocks = mf_classic_get_blocks_num_in_sector(sec_num);
-    MfClassicSectorTrailer* sec_tr = mifare_classic_get_sector_trailer_by_sector(dest_data, sec_num);
+    MfClassicSectorTrailer* sec_tr =
+        mifare_classic_get_sector_trailer_by_sector(dest_data, sec_num);
     bool key_a_found = mifare_classic_is_key_found(dest_data, sec_num, MfClassicKeyA);
     bool key_b_found = mifare_classic_is_key_found(dest_data, sec_num, MfClassicKeyB);
 

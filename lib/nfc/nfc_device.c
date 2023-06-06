@@ -696,7 +696,8 @@ static void nfc_device_write_mifare_classic_block(
     bool is_sec_trailer = mifare_classic_is_sector_trailer(block_num);
     if(is_sec_trailer) {
         uint8_t sector_num = mifare_classic_get_sector_by_block(block_num);
-        MfClassicSectorTrailer* sec_tr = mifare_classic_get_sector_trailer_by_sector(data, sector_num);
+        MfClassicSectorTrailer* sec_tr =
+            mifare_classic_get_sector_trailer_by_sector(data, sector_num);
         // Write key A
         for(size_t i = 0; i < sizeof(sec_tr->key_a); i++) {
             if(mifare_classic_is_key_found(data, sector_num, MfClassicKeyA)) {

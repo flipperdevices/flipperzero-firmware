@@ -25,7 +25,7 @@ void nfc_scene_mf_classic_read_supported_card_on_enter(void* context) {
             &nfc->nfc_dev_data.mf_classic_data,
             nfc->parsed_data);
     }
-    
+
     if(supported) {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
     } else {

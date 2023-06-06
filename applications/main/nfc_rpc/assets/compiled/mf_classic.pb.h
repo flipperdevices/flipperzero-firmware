@@ -60,7 +60,6 @@ typedef struct _PB_MfClassic_ReadBlockResponse {
     PB_MfClassic_ReadBlockResponse_data_t data;
 } PB_MfClassic_ReadBlockResponse;
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -68,11 +67,11 @@ extern "C" {
 /* Helper constants for enums */
 #define _PB_MfClassic_Error_MIN PB_MfClassic_Error_None
 #define _PB_MfClassic_Error_MAX PB_MfClassic_Error_Timeout
-#define _PB_MfClassic_Error_ARRAYSIZE ((PB_MfClassic_Error)(PB_MfClassic_Error_Timeout+1))
+#define _PB_MfClassic_Error_ARRAYSIZE ((PB_MfClassic_Error)(PB_MfClassic_Error_Timeout + 1))
 
 #define _PB_MfClassic_KeyType_MIN PB_MfClassic_KeyType_KeyTypeA
 #define _PB_MfClassic_KeyType_MAX PB_MfClassic_KeyType_KeyTypeB
-#define _PB_MfClassic_KeyType_ARRAYSIZE ((PB_MfClassic_KeyType)(PB_MfClassic_KeyType_KeyTypeB+1))
+#define _PB_MfClassic_KeyType_ARRAYSIZE ((PB_MfClassic_KeyType)(PB_MfClassic_KeyType_KeyTypeB + 1))
 
 #define PB_MfClassic_AuthRequest_key_type_ENUMTYPE PB_MfClassic_KeyType
 
@@ -83,65 +82,98 @@ extern "C" {
 
 #define PB_MfClassic_ReadBlockResponse_error_ENUMTYPE PB_MfClassic_Error
 
-
 /* Initializer values for message structs */
-#define PB_MfClassic_AuthRequest_init_default    {0, {0, {0}}, _PB_MfClassic_KeyType_MIN}
-#define PB_MfClassic_AuthResponse_init_default   {_PB_MfClassic_Error_MIN, 0, {0, {0}}, _PB_MfClassic_KeyType_MIN, {0, {0}}, {0, {0}}, {0, {0}}, {0, {0}}}
-#define PB_MfClassic_ReadBlockRequest_init_default {0, {0, {0}}, _PB_MfClassic_KeyType_MIN}
-#define PB_MfClassic_ReadBlockResponse_init_default {_PB_MfClassic_Error_MIN, {0, {0}}}
-#define PB_MfClassic_AuthRequest_init_zero       {0, {0, {0}}, _PB_MfClassic_KeyType_MIN}
-#define PB_MfClassic_AuthResponse_init_zero      {_PB_MfClassic_Error_MIN, 0, {0, {0}}, _PB_MfClassic_KeyType_MIN, {0, {0}}, {0, {0}}, {0, {0}}, {0, {0}}}
-#define PB_MfClassic_ReadBlockRequest_init_zero  {0, {0, {0}}, _PB_MfClassic_KeyType_MIN}
-#define PB_MfClassic_ReadBlockResponse_init_zero {_PB_MfClassic_Error_MIN, {0, {0}}}
+#define PB_MfClassic_AuthRequest_init_default \
+    { 0, {0, {0}}, _PB_MfClassic_KeyType_MIN }
+#define PB_MfClassic_AuthResponse_init_default                                               \
+    {                                                                                        \
+        _PB_MfClassic_Error_MIN, 0, {0, {0}}, _PB_MfClassic_KeyType_MIN, {0, {0}}, {0, {0}}, \
+            {0, {0}}, {                                                                      \
+            0, {                                                                             \
+                0                                                                            \
+            }                                                                                \
+        }                                                                                    \
+    }
+#define PB_MfClassic_ReadBlockRequest_init_default \
+    { 0, {0, {0}}, _PB_MfClassic_KeyType_MIN }
+#define PB_MfClassic_ReadBlockResponse_init_default \
+    {                                               \
+        _PB_MfClassic_Error_MIN, {                  \
+            0, {                                    \
+                0                                   \
+            }                                       \
+        }                                           \
+    }
+#define PB_MfClassic_AuthRequest_init_zero \
+    { 0, {0, {0}}, _PB_MfClassic_KeyType_MIN }
+#define PB_MfClassic_AuthResponse_init_zero                                                  \
+    {                                                                                        \
+        _PB_MfClassic_Error_MIN, 0, {0, {0}}, _PB_MfClassic_KeyType_MIN, {0, {0}}, {0, {0}}, \
+            {0, {0}}, {                                                                      \
+            0, {                                                                             \
+                0                                                                            \
+            }                                                                                \
+        }                                                                                    \
+    }
+#define PB_MfClassic_ReadBlockRequest_init_zero \
+    { 0, {0, {0}}, _PB_MfClassic_KeyType_MIN }
+#define PB_MfClassic_ReadBlockResponse_init_zero \
+    {                                            \
+        _PB_MfClassic_Error_MIN, {               \
+            0, {                                 \
+                0                                \
+            }                                    \
+        }                                        \
+    }
 
 /* Field tags (for use in manual encoding/decoding) */
-#define PB_MfClassic_AuthRequest_block_tag       1
-#define PB_MfClassic_AuthRequest_key_tag         2
-#define PB_MfClassic_AuthRequest_key_type_tag    3
-#define PB_MfClassic_AuthResponse_error_tag      1
-#define PB_MfClassic_AuthResponse_block_tag      2
-#define PB_MfClassic_AuthResponse_key_tag        3
-#define PB_MfClassic_AuthResponse_key_type_tag   4
-#define PB_MfClassic_AuthResponse_nt_tag         5
-#define PB_MfClassic_AuthResponse_nr_tag         6
-#define PB_MfClassic_AuthResponse_ar_tag         7
-#define PB_MfClassic_AuthResponse_at_tag         8
-#define PB_MfClassic_ReadBlockRequest_block_tag  1
-#define PB_MfClassic_ReadBlockRequest_key_tag    2
+#define PB_MfClassic_AuthRequest_block_tag 1
+#define PB_MfClassic_AuthRequest_key_tag 2
+#define PB_MfClassic_AuthRequest_key_type_tag 3
+#define PB_MfClassic_AuthResponse_error_tag 1
+#define PB_MfClassic_AuthResponse_block_tag 2
+#define PB_MfClassic_AuthResponse_key_tag 3
+#define PB_MfClassic_AuthResponse_key_type_tag 4
+#define PB_MfClassic_AuthResponse_nt_tag 5
+#define PB_MfClassic_AuthResponse_nr_tag 6
+#define PB_MfClassic_AuthResponse_ar_tag 7
+#define PB_MfClassic_AuthResponse_at_tag 8
+#define PB_MfClassic_ReadBlockRequest_block_tag 1
+#define PB_MfClassic_ReadBlockRequest_key_tag 2
 #define PB_MfClassic_ReadBlockRequest_key_type_tag 3
 #define PB_MfClassic_ReadBlockResponse_error_tag 1
-#define PB_MfClassic_ReadBlockResponse_data_tag  2
+#define PB_MfClassic_ReadBlockResponse_data_tag 2
 
 /* Struct field encoding specification for nanopb */
 #define PB_MfClassic_AuthRequest_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   block,             1) \
-X(a, STATIC,   SINGULAR, BYTES,    key,               2) \
-X(a, STATIC,   SINGULAR, UENUM,    key_type,          3)
+    X(a, STATIC, SINGULAR, UINT32, block, 1)     \
+    X(a, STATIC, SINGULAR, BYTES, key, 2)        \
+    X(a, STATIC, SINGULAR, UENUM, key_type, 3)
 #define PB_MfClassic_AuthRequest_CALLBACK NULL
 #define PB_MfClassic_AuthRequest_DEFAULT NULL
 
 #define PB_MfClassic_AuthResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1) \
-X(a, STATIC,   SINGULAR, UINT32,   block,             2) \
-X(a, STATIC,   SINGULAR, BYTES,    key,               3) \
-X(a, STATIC,   SINGULAR, UENUM,    key_type,          4) \
-X(a, STATIC,   SINGULAR, BYTES,    nt,                5) \
-X(a, STATIC,   SINGULAR, BYTES,    nr,                6) \
-X(a, STATIC,   SINGULAR, BYTES,    ar,                7) \
-X(a, STATIC,   SINGULAR, BYTES,    at,                8)
+    X(a, STATIC, SINGULAR, UENUM, error, 1)       \
+    X(a, STATIC, SINGULAR, UINT32, block, 2)      \
+    X(a, STATIC, SINGULAR, BYTES, key, 3)         \
+    X(a, STATIC, SINGULAR, UENUM, key_type, 4)    \
+    X(a, STATIC, SINGULAR, BYTES, nt, 5)          \
+    X(a, STATIC, SINGULAR, BYTES, nr, 6)          \
+    X(a, STATIC, SINGULAR, BYTES, ar, 7)          \
+    X(a, STATIC, SINGULAR, BYTES, at, 8)
 #define PB_MfClassic_AuthResponse_CALLBACK NULL
 #define PB_MfClassic_AuthResponse_DEFAULT NULL
 
 #define PB_MfClassic_ReadBlockRequest_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UINT32,   block,             1) \
-X(a, STATIC,   SINGULAR, BYTES,    key,               2) \
-X(a, STATIC,   SINGULAR, UENUM,    key_type,          3)
+    X(a, STATIC, SINGULAR, UINT32, block, 1)          \
+    X(a, STATIC, SINGULAR, BYTES, key, 2)             \
+    X(a, STATIC, SINGULAR, UENUM, key_type, 3)
 #define PB_MfClassic_ReadBlockRequest_CALLBACK NULL
 #define PB_MfClassic_ReadBlockRequest_DEFAULT NULL
 
 #define PB_MfClassic_ReadBlockResponse_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, UENUM,    error,             1) \
-X(a, STATIC,   SINGULAR, BYTES,    data,              2)
+    X(a, STATIC, SINGULAR, UENUM, error, 1)            \
+    X(a, STATIC, SINGULAR, BYTES, data, 2)
 #define PB_MfClassic_ReadBlockResponse_CALLBACK NULL
 #define PB_MfClassic_ReadBlockResponse_DEFAULT NULL
 
@@ -157,10 +189,10 @@ extern const pb_msgdesc_t PB_MfClassic_ReadBlockResponse_msg;
 #define PB_MfClassic_ReadBlockResponse_fields &PB_MfClassic_ReadBlockResponse_msg
 
 /* Maximum encoded size of messages (where known) */
-#define PB_MfClassic_AuthRequest_size            13
-#define PB_MfClassic_AuthResponse_size           39
-#define PB_MfClassic_ReadBlockRequest_size       13
-#define PB_MfClassic_ReadBlockResponse_size      20
+#define PB_MfClassic_AuthRequest_size 13
+#define PB_MfClassic_AuthResponse_size 39
+#define PB_MfClassic_ReadBlockRequest_size 13
+#define PB_MfClassic_ReadBlockResponse_size 20
 
 #ifdef __cplusplus
 } /* extern "C" */
