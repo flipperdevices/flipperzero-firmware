@@ -5,7 +5,7 @@
 [![issues - flipper-zero_authenticator](https://img.shields.io/github/issues/akopachov/flipper-zero_authenticator)](https://github.com/akopachov/flipper-zero_authenticator/issues)
 ![maintained - yes](https://img.shields.io/badge/maintained-yes-blue)
 ![contributions - welcome](https://img.shields.io/badge/contributions-welcome-blue)
-[![Discord server](https://img.shields.io/discord/937479784148115456)](https://discord.gg/flipperzero-unofficial)
+[![Discord server](https://img.shields.io/discord/937479784148115456)](https://discord.gg/flipper-xtreme)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=akopachov_flipper-zero_authenticator&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=akopachov_flipper-zero_authenticator)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=akopachov_flipper-zero_authenticator&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=akopachov_flipper-zero_authenticator)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=akopachov_flipper-zero_authenticator&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=akopachov_flipper-zero_authenticator)
@@ -37,5 +37,5 @@ It is like [Google Authenticator](https://play.google.com/store/apps/details?id=
 
 ## Have questions?
 
-Checkout [FAQ](https://github.com/akopachov/flipper-zero_authenticator/wiki/FAQ) or ask in [Discord channel](https://discord.gg/flipperzero-unofficial)
+Checkout [FAQ](https://github.com/akopachov/flipper-zero_authenticator/wiki/FAQ) or ask in [Discord channel](https://discord.gg/flipper-xtreme)
 

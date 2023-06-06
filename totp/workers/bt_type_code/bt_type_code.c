@@ -49,7 +49,7 @@ static void totp_type_code_worker_bt_set_app_mac(uint8_t* mac) {
         max_i = TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN;
     }
 
-    const uint8_t* uid = (const uint8_t*)UID64_BASE;
+    const uint8_t* uid = (const uint8_t*)UID64_BASE; //-V566
     memcpy(mac, uid, max_i);
     for(uint8_t i = max_i; i < TOTP_BT_WORKER_BT_MAC_ADDRESS_LEN; i++) {
         mac[i] = 0;
