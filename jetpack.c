@@ -191,11 +191,11 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
-        snprintf(buffer, sizeof(buffer), "Dist: %u m", game_state->distance);
-        canvas_draw_str_aligned(canvas, 123, 12, AlignRight, AlignBottom, buffer);
+        snprintf(buffer, sizeof(buffer), "%u m", game_state->distance);
+        canvas_draw_str_aligned(canvas, 123, 15, AlignRight, AlignBottom, buffer);
 
-        snprintf(buffer, sizeof(buffer), "Coins: %u", game_state->total_coins);
-        canvas_draw_str_aligned(canvas, 5, 12, AlignLeft, AlignBottom, buffer);
+        snprintf(buffer, sizeof(buffer), "$%u", game_state->total_coins);
+        canvas_draw_str_aligned(canvas, 5, 15, AlignLeft, AlignBottom, buffer);
     }
 
     if(game_state->state == GameStateGameOver) {
@@ -216,20 +216,20 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignTop, "and collected");
 
-        snprintf(buffer, sizeof(buffer), "%u coins", game_state->total_coins);
+        snprintf(buffer, sizeof(buffer), "$%u", game_state->total_coins);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignTop, buffer);
 
         snprintf(
             buffer,
             sizeof(buffer),
-            "Best: %u m, Coins: %u",
+            "Best: %u m, Tot: $%u",
             save_game.max_distance,
             save_game.total_coins);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 63, AlignCenter, AlignBottom, buffer);
 
-        canvas_draw_frame(canvas, 0, 3, 128, 49);
+        canvas_draw_rframe(canvas, 0, 3, 128, 49, 5);
 
         // char buffer[12];
         // snprintf(buffer, sizeof(buffer), "Dist: %u", game_state->distance);
