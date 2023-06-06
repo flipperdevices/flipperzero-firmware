@@ -19,7 +19,7 @@ void particle_tick(PARTICLE* const particles, SCIENTIST* const scientists, int* 
                          particles[i].point.y > scientists[j].point.y + SCIENTIST_HEIGHT ||
                          particles[i].point.y < scientists[j].point.y)) {
                         scientists[j].state = ScientistStateDead;
-                        (*points) += 2; // Increase the score by 2
+                        // (*points) += 2; // Increase the score by 2
                     }
                 }
             }
