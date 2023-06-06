@@ -191,7 +191,7 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
-        snprintf(buffer, sizeof(buffer), "%u m", game_state->distance);
+        snprintf(buffer, sizeof(buffer), "%u m", game_state->distance / 10);
         canvas_draw_str_aligned(canvas, 123, 15, AlignRight, AlignBottom, buffer);
 
         snprintf(buffer, sizeof(buffer), "$%u", game_state->total_coins);
@@ -209,7 +209,7 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
             buffer,
             sizeof(buffer),
             game_state->new_highscore ? "%u m (new best)" : "%u m",
-            game_state->distance);
+            game_state->distance / 10);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignTop, buffer);
 
@@ -224,7 +224,7 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
             buffer,
             sizeof(buffer),
             "Best: %u m, Tot: $%u",
-            save_game.max_distance,
+            save_game.max_distance / 10,
             save_game.total_coins);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 63, AlignCenter, AlignBottom, buffer);
