@@ -8,7 +8,7 @@
 #include "point.h"
 #include "barry.h"
 
-#define MISSILES_MAX 3
+#define MISSILES_MAX 5
 
 typedef struct {
     POINT point;

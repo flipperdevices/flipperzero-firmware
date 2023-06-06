@@ -59,16 +59,17 @@ void draw_missiles(const MISSILE* missiles, Canvas* const canvas, const GameSpri
 bool missile_colides(MISSILE* const missile, BARRY* const barry) {
     return !(
         barry->point.x >
-            missile->point.x + MISSILE_WIDTH - 10 || // Barry is to the right of the missile
-        barry->point.x + BARRY_WIDTH < missile->point.x || // Barry is to the left of the missile
-        barry->point.y > missile->point.y + MISSILE_WIDTH || // Barry is below the missile
+            missile->point.x + MISSILE_WIDTH - 14 || // Barry is to the right of the missile
+        barry->point.x + BARRY_WIDTH - 3 <
+            missile->point.x || // Barry is to the left of the missile
+        barry->point.y > missile->point.y + MISSILE_HEIGHT || // Barry is below the missile
         barry->point.y + BARRY_HEIGHT < missile->point.y); // Barry is above the missile
 }
 
 int get_rocket_spawn_distance(int player_distance) {
     // Define the start and end points for rocket spawn distance
     int start_distance = 256;
-    int end_distance = 32;
+    int end_distance = 24;
 
     // Define the maximum player distance at which the spawn distance should be at its minimum
     int max_player_distance = 5000; // Adjust this value based on your game's difficulty curve
