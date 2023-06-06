@@ -91,7 +91,7 @@ CryptoSeedIVResult
             max_i = uid_size;
         }
 
-        const uint8_t* uid = (const uint8_t*)UID64_BASE;
+        const uint8_t* uid = (const uint8_t*)UID64_BASE; //-V566
         for(uint8_t i = 0; i < max_i; i++) {
             plugin_state->iv[i] = plugin_state->iv[i] ^ uid[i];
         }
