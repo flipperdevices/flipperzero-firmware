@@ -59,7 +59,7 @@ class Copro:
         return posixpath.join(self.COPRO_TAR_DIR, name)
 
     def _addFileReadPermission(self, tarinfo):
-        tarinfo.mode = int("0644", base=8)
+        tarinfo.mode = 0o644
         return tarinfo
 
     def addFile(self, array, filename, **kwargs):
@@ -74,7 +74,7 @@ class Copro:
     def bundle(self, output_file, stack_file_name, stack_type, stack_addr=None):
         self.output_tar = tarfile.open(output_file, "w:gz", format=tarfile.USTAR_FORMAT)
         fw_directory = tarfile.TarInfo(self.COPRO_TAR_DIR)
-        fw_directory.mode = int("0755", base=8)
+        fw_directory.mode = 0o755
         fw_directory.type = tarfile.DIRTYPE
         self.output_tar.addfile(fw_directory)
 
