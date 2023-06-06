@@ -23,12 +23,12 @@ const COIN_PATTERN coin_patterns[] = {
     // Add more patterns here
 };
 
-void coin_tick(COIN* const coins, BARRY* const barry, int* const poins) {
+void coin_tick(COIN* const coins, BARRY* const barry, int* const total_coins) {
     // Move coins towards the player
     for(int i = 0; i < COINS_MAX; i++) {
         if(coin_colides(&coins[i], barry)) {
             coins[i].point.x = 0; // Remove the coin
-            (*poins)++;
+            (*total_coins)++;
         }
         if(coins[i].point.x > 0) {
             coins[i].point.x -= 1; // move left by 1 unit

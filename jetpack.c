@@ -34,7 +34,7 @@ typedef struct {
 
 typedef struct {
     int max_distance;
-    int max_score;
+    int total_coins;
 } SaveGame;
 
 static SaveGame save_game;
@@ -78,9 +78,7 @@ void handle_death() {
         save_game.max_distance = global_state->distance;
     }
 
-    if(global_state->points > save_game.max_score) {
-        save_game.max_score = global_state->points;
-    }
+    save_game.total_coins += global_state->total_coins;
 
     storage_game_state_save();
 }
@@ -116,7 +114,7 @@ static void jetpack_game_state_init(GameState* const game_state) {
     icon_animation_start(sprites.alert);
 
     game_state->barry = barry;
-    game_state->points = 0;
+    game_state->total_coins = 0;
     game_state->distance = 7000;
     game_state->new_highscore = false;
     game_state->sprites = sprites;
@@ -143,8 +141,8 @@ static void jetpack_game_tick(GameState* const game_state) {
     if(game_state->state == GameStateGameOver) return;
     barry_tick(&game_state->barry);
     game_state_tick(game_state);
-    coin_tick(game_state->coins, &game_state->barry, &game_state->points);
-    particle_tick(game_state->particles, game_state->scientists, &game_state->points);
+    coin_tick(game_state->coins, &game_state->barry, &game_state->total_coins);
+    particle_tick(game_state->particles, game_state->scientists);
     scientist_tick(game_state->scientists);
     missile_tick(game_state->missiles, &game_state->barry, game_state->death_handler);
 
@@ -193,16 +191,16 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
         char buffer[12];
-        snprintf(buffer, sizeof(buffer), "Dist: %u", game_state->distance);
+        snprintf(buffer, sizeof(buffer), "Dist: %u m", game_state->distance);
         canvas_draw_str_aligned(canvas, 123, 12, AlignRight, AlignBottom, buffer);
 
-        snprintf(buffer, sizeof(buffer), "Score: %u", game_state->points);
+        snprintf(buffer, sizeof(buffer), "Coins: %u", game_state->total_coins);
         canvas_draw_str_aligned(canvas, 5, 12, AlignLeft, AlignBottom, buffer);
     }
 
     if(game_state->state == GameStateGameOver) {
         // Show highscore
-        char buffer[24];
+        char buffer[64];
 
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignTop, "You flew");
@@ -218,11 +216,16 @@ static void jetpack_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignTop, "and collected");
 
-        snprintf(buffer, sizeof(buffer), "%u coins", game_state->points);
+        snprintf(buffer, sizeof(buffer), "%u coins", game_state->total_coins);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 64, 41, AlignCenter, AlignTop, buffer);
 
-        snprintf(buffer, sizeof(buffer), "Your best was %u m", save_game.max_distance);
+        snprintf(
+            buffer,
+            sizeof(buffer),
+            "Best: %u m, Coins: %u",
+            save_game.max_distance,
+            save_game.total_coins);
         canvas_set_font(canvas, FontSecondary);
         canvas_draw_str_aligned(canvas, 64, 63, AlignCenter, AlignBottom, buffer);
 
@@ -320,7 +323,7 @@ int32_t jetpack_game_app(void* p) {
                 // Reset highscore, for debug purposes
                 if(event.input.type == InputTypeLong && event.input.key == InputKeyLeft) {
                     save_game.max_distance = 0;
-                    save_game.max_score = 0;
+                    save_game.total_coins = 0;
                     storage_game_state_save();
                 }
 

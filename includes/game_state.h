@@ -13,7 +13,7 @@
 #include "missile.h"
 #include "background_assets.h"
 typedef struct {
-    int points;
+    int total_coins;
     int distance;
     bool new_highscore;
     BARRY barry;

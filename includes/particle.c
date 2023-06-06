@@ -4,7 +4,7 @@
 #include "scientist.h"
 #include "barry.h"
 
-void particle_tick(PARTICLE* const particles, SCIENTIST* const scientists, int* const points) {
+void particle_tick(PARTICLE* const particles, SCIENTIST* const scientists) {
     // Move particles
     for(int i = 0; i < PARTICLES_MAX; i++) {
         if(particles[i].point.y > 0) {
