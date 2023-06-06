@@ -46,16 +46,11 @@ Settings* load_settings() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
 
-    FuriString* string_value;
-    string_value = furi_string_alloc();
-    FuriString* text_ssid_value;
-    text_ssid_value = furi_string_alloc();
-    FuriString* text_password_value;
-    text_password_value = furi_string_alloc();
-    FuriString* text_key_value;
-    text_key_value = furi_string_alloc();
-    FuriString* text_event_value;
-    text_event_value = furi_string_alloc();
+    FuriString* string_value = furi_string_alloc();
+    FuriString* text_ssid_value = furi_string_alloc();
+    FuriString* text_password_value = furi_string_alloc();
+    FuriString* text_key_value = furi_string_alloc();
+    FuriString* text_event_value = furi_string_alloc();
 
     if(storage_common_stat(storage, CONFIG_FILE_PATH, NULL) != FSE_OK) {
         if(flipper_format_file_open_new(file, CONFIG_FILE_PATH)) {

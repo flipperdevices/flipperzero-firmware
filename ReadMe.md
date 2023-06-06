@@ -71,6 +71,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch) (Assets Only)
 - [Improved NRF24 apps (Check if connected) (By Sil333033)](https://github.com/Sil333033/Flipper-Xtreme-Boostbabe/tree/improvednrf24apps)
+- Updated: [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) (By Willy-JL)
+- Updated: [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco) (By Willy-JL)
+- Updated: [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer) (By Willy-JL)
 
 <a name="release">
 
