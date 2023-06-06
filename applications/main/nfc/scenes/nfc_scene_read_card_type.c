@@ -1,9 +1,9 @@
 #include "../nfc_app_i.h"
 
 enum SubmenuIndex {
-    SubmenuIndexReadMifareClassic,
     SubmenuIndexReadNFCA,
     SubmenuIndexReadMfUltralight,
+    SubmenuIndexReadMifareClassic,
     SubmenuIndexReadMifareDesfire,
     SubmenuIndexReadEMV,
 };
@@ -20,12 +20,6 @@ void nfc_scene_read_card_type_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Read Mifare Classic",
-        SubmenuIndexReadMifareClassic,
-        nfc_scene_read_card_type_submenu_callback,
-        nfc);
-    submenu_add_item(
-        submenu,
         "Read NFC-A data",
         SubmenuIndexReadNFCA,
         nfc_scene_read_card_type_submenu_callback,
@@ -34,6 +28,12 @@ void nfc_scene_read_card_type_on_enter(void* context) {
         submenu,
         "Read NTAG/Ultralight",
         SubmenuIndexReadMfUltralight,
+        nfc_scene_read_card_type_submenu_callback,
+        nfc);
+    submenu_add_item(
+        submenu,
+        "Read Mifare Classic",
+        SubmenuIndexReadMifareClassic,
         nfc_scene_read_card_type_submenu_callback,
         nfc);
     submenu_add_item(
@@ -59,16 +59,16 @@ bool nfc_scene_read_card_type_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexReadMifareClassic) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicDictAttack);
-            consumed = true;
-        }
         if(event.event == SubmenuIndexReadMifareDesfire) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadMfUltralight) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightRead);
+            consumed = true;
+        }
+        if(event.event == SubmenuIndexReadMifareClassic) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSupportedCard);
             consumed = true;
         }
         if(event.event == SubmenuIndexReadEMV) {

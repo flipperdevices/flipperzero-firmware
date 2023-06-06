@@ -24,13 +24,13 @@ void nfc_scene_mf_classic_read_success_on_enter(void* context) {
         widget, GuiButtonTypeRight, "More", nfc_scene_mf_classic_read_success_widget_callback, nfc);
 
     FuriString* temp_str = NULL;
-    // if(furi_string_size(nfc->dev->dev_data.parsed_data)) {
-    //     temp_str = furi_string_alloc_set(nfc->dev->dev_data.parsed_data);
-    // } else {
+    if(furi_string_size(nfc->parsed_data)) {
+        temp_str = furi_string_alloc_set(nfc->parsed_data);
+    } else {
         temp_str = furi_string_alloc_printf("\e#%s\n", mf_classic_get_name(mfc_data->type, true));
         furi_string_cat_printf(temp_str, "UID:");
         for(size_t i = 0; i < mfc_data->nfca_data.uid_len; i++) {
-        furi_string_cat_printf(temp_str, " %02X", mfc_data->nfca_data.uid[i]);
+            furi_string_cat_printf(temp_str, " %02X", mfc_data->nfca_data.uid[i]);
         }
         uint8_t sectors_total = mf_classic_get_total_sectors_num(mfc_data->type);
         uint8_t keys_total = sectors_total * 2;
@@ -39,7 +39,7 @@ void nfc_scene_mf_classic_read_success_on_enter(void* context) {
         mf_classic_get_read_sectors_and_keys(mfc_data, &sectors_read, &keys_found);
         furi_string_cat_printf(temp_str, "\nKeys Found: %d/%d", keys_found, keys_total);
         furi_string_cat_printf(temp_str, "\nSectors Read: %d/%d", sectors_read, sectors_total);
-    // }
+    }
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);
@@ -50,30 +50,30 @@ void nfc_scene_mf_classic_read_success_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_read_success_on_event(void* context, SceneManagerEvent event) {
-        NfcApp* nfc = context;
-        bool consumed = false;
+    NfcApp* nfc = context;
+    bool consumed = false;
 
-        if(event.type == SceneManagerEventTypeCustom) {
-            if(event.event == GuiButtonTypeLeft) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
-                consumed = true;
-            } else if(event.event == GuiButtonTypeRight) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicMenu);
-                consumed = true;
-            }
-        } else if(event.type == SceneManagerEventTypeBack) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneExitConfirm);
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == GuiButtonTypeLeft) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
+            consumed = true;
+        } else if(event.event == GuiButtonTypeRight) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicMenu);
             consumed = true;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneExitConfirm);
+        consumed = true;
+    }
 
-        return consumed;
+    return consumed;
 }
 
 void nfc_scene_mf_classic_read_success_on_exit(void* context) {
-        NfcApp* nfc = context;
+    NfcApp* nfc = context;
 
-        notification_message_block(nfc->notifications, &sequence_reset_green);
+    notification_message_block(nfc->notifications, &sequence_reset_green);
 
-        // Clear view
-        widget_reset(nfc->widget);
+    // Clear view
+    widget_reset(nfc->widget);
 }

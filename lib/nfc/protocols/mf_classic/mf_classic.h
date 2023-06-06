@@ -12,6 +12,7 @@ extern "C" {
 #define MF_CLASSIC_HALT_MSB_CMD (0x50)
 #define MF_CLASSIC_HALT_LSB_CMD (0x00)
 
+#define MF_CLASSIC_TOTAL_SECTORS_MAX (40)
 #define MF_CLASSIC_TOTAL_BLOCKS_MAX (256)
 #define MF_CLASSIC_BLOCK_SIZE (16)
 #define MF_CLASSIC_KEY_SIZE (6)
@@ -100,6 +101,13 @@ typedef struct {
     MfClassicAccessBits access_bits;
     MfClassicKey key_b;
 } MfClassicSectorTrailer;
+
+typedef struct {
+    MfClassicKey key_a[MF_CLASSIC_TOTAL_SECTORS_MAX];
+    MfClassicKey key_b[MF_CLASSIC_TOTAL_SECTORS_MAX];
+    uint64_t key_a_mask;
+    uint64_t key_b_mask;
+} MfClassicDeviceKeys;
 
 typedef struct {
     NfcaData nfca_data;

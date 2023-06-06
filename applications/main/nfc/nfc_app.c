@@ -53,6 +53,8 @@ NfcApp* nfc_app_alloc() {
     instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->nfca_listener);
     instance->nfcb_poller = nfcb_poller_alloc(instance->nfc);
 
+    instance->parsed_data = furi_string_alloc();
+
     NfcPollerCollection collection = {
         .nfc = instance->nfc,
         .nfca_poller = instance->nfca_poller,
@@ -156,6 +158,8 @@ void nfc_app_free(NfcApp* instance) {
         rpc_system_app_set_callback(instance->rpc_ctx, NULL, NULL);
         instance->rpc_ctx = NULL;
     }
+
+    furi_string_free(instance->parsed_data);
 
     mf_classic_poller_free(instance->mf_classic_poller);
     mf_ultralight_listener_free(instance->mf_ul_listener);
@@ -497,7 +501,7 @@ int32_t nfc_app(void* p) {
     } else {
         view_dispatcher_attach_to_gui(
             nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
-        scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardType);
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneStart);
     }
 
     view_dispatcher_run(nfc->view_dispatcher);

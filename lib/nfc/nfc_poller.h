@@ -7,6 +7,7 @@ extern "C" {
 #include <lib/nfc/protocols/nfca/nfca_poller.h>
 #include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
+#include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 
 typedef struct NfcPoller NfcPoller;
 
@@ -14,6 +15,8 @@ typedef struct {
     Nfc* nfc;
     NfcaPoller* nfca_poller;
     NfcbPoller* nfcb_poller;
+    MfUltralightPoller* mfu_poller;
+    MfClassicPoller* mfc_poller;
 } NfcPollerCollection;
 
 typedef enum {

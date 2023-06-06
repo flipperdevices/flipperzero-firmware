@@ -95,6 +95,11 @@ MfClassicError mf_classic_poller_read_block(
     MfClassicKeyType key_type,
     MfClassicBlock* data);
 
+MfClassicError mf_classic_poller_read(
+    MfClassicPoller* instance,
+    MfClassicDeviceKeys* keys,
+    MfClassicData* data);
+
 #ifdef __cplusplus
 }
 #endif

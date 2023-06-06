@@ -28,6 +28,7 @@
 #include "helpers/nfc_custom_event.h"
 #include "helpers/mf_ultralight_auth.h"
 #include "helpers/mf_dict.h"
+#include "helpers/nfc_supported_cards.h"
 
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -58,7 +59,6 @@
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
-
 
 typedef enum {
     NfcRpcStateIdle,
@@ -112,6 +112,8 @@ struct NfcApp {
 
     MfUltralightAuth* mf_ul_auth;
     NfcMfClassicDictAttackContext mf_dict_context;
+    FuriString* parsed_data;
+    NfcSupportedCards* supported_cards;
 
     NfcDev* nfc_dev;
     NfcDevData nfc_dev_data;
