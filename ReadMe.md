@@ -1,5 +1,5 @@
-# Flipper Application Files (FAPs) for Any Firmware with API v28.x
-## Apps from this pack should be compatible with OFW with API v28.x (dev branch) or any other firmware build with API 28.x
+# Flipper Application Files (FAPs) for Any Firmware with API v29.x
+## Apps from this pack should be compatible with OFW with API v29.x (dev branch) or any other firmware build with API 29.x
 
 ## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/all-the-plugins/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `3 Jun 14:26 GMT +3`
+### Apps checked & updated at `7 Jun 23:12 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -52,7 +52,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [T-rex game (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
 
 ## Media
-- [Software Automatic Mouth aka SAM (By ctoth)](https://github.com/ctoth/SAM)
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina)
