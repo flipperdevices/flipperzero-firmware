@@ -845,7 +845,10 @@ uint8_t mf_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data
     return sectors_read;
 }
 
-bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx) {
+bool mf_classic_emulator(
+    MfClassicEmulator* emulator,
+    FuriHalNfcTxRxContext* tx_rx,
+    bool is_reader_analyzer) {
     furi_assert(emulator);
     furi_assert(tx_rx);
     bool command_processed = false;
@@ -893,7 +896,8 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
             if(cmd == MF_CLASSIC_AUTH_KEY_A_CMD) {
                 if(mf_classic_is_key_found(
-                       &emulator->data, mf_classic_get_sector_by_block(block), MfClassicKeyA)) {
+                       &emulator->data, mf_classic_get_sector_by_block(block), MfClassicKeyA) ||
+                   is_reader_analyzer) {
                     key = nfc_util_bytes2num(sector_trailer->key_a, 6);
                     access_key = MfClassicKeyA;
                 } else {
@@ -903,7 +907,8 @@ bool mf_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_
                 }
             } else {
                 if(mf_classic_is_key_found(
-                       &emulator->data, mf_classic_get_sector_by_block(block), MfClassicKeyB)) {
+                       &emulator->data, mf_classic_get_sector_by_block(block), MfClassicKeyB) ||
+                   is_reader_analyzer) {
                     key = nfc_util_bytes2num(sector_trailer->key_b, 6);
                     access_key = MfClassicKeyB;
                 } else {
