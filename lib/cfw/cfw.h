@@ -24,6 +24,7 @@ typedef struct {
     bool sort_dirs_first;
     bool dark_mode;
     // uint32_t favorite_timeout;
+    uint32_t charge_cap;
     bool rgb_backlight;
 } CfwSettings;
 

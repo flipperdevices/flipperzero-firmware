@@ -87,9 +87,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Merge/SubGHz API Fixes (By xMasterX)
 - OFW: [fbt, ufbt: added checks for appid in app manifests #2720 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2720) Neutered this most useless annoying update
 - OFW: [Map parser licence description #2739 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2739)
-- UL PR: [iButton Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
-- UL PR: [RFID Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
+- UL PR: Added: [iButton Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
+- UL PR: Added: [RFID Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
 - [Macos compile doc update #658 (By EltonAlvess)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/658)
+- [Charge Cap Setting (By oltenxyz)](https://github.com/oltenxyz/Flipper-Xtreme/tree/dev)
 
 <a name="release">
 

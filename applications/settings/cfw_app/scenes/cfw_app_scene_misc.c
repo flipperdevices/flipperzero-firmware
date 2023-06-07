@@ -2,6 +2,7 @@
 
 enum VarItemListIndex {
     VarItemListIndexChangeDeviceName,
+    VarItemListIndexChargeCap,
     VarItemListIndexRgbBacklight,
     VarItemListIndexLcdColor,
 };
@@ -9,6 +10,17 @@ enum VarItemListIndex {
 void cfw_app_scene_misc_var_item_list_callback(void* context, uint32_t index) {
     CfwApp* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
+}
+
+#define CHARGE_CAP_INTV 5
+static void cfw_app_scene_misc_charge_cap_changed(VariableItem* item) {
+    CfwApp* app = variable_item_get_context(item);
+    char cap_str[6];
+    uint32_t value = (variable_item_get_current_value_index(item) + 1) * CHARGE_CAP_INTV;
+    snprintf(cap_str, 6, "%lu%%", value);
+    variable_item_set_current_value_text(item, cap_str);
+    CFW_SETTINGS()->charge_cap = value;
+    app->save_settings = true;
 }
 
 static void cfw_app_scene_misc_lcd_color_changed(VariableItem* item) {
@@ -28,6 +40,18 @@ void cfw_app_scene_misc_on_enter(void* context) {
     uint8_t value_index;
 
     variable_item_list_add(var_item_list, "Change Device Name", 0, NULL, app);
+
+    char cap_str[6];
+    value_index = cfw_settings->charge_cap / CHARGE_CAP_INTV;
+    snprintf(cap_str, 6, "%lu%%", (uint32_t)value_index * CHARGE_CAP_INTV);
+    item = variable_item_list_add(
+        var_item_list,
+        "Charge Cap",
+        100 / CHARGE_CAP_INTV,
+        cfw_app_scene_misc_charge_cap_changed,
+        app);
+    variable_item_set_current_value_index(item, value_index - 1);
+    variable_item_set_current_value_text(item, cap_str);
 
     item = variable_item_list_add(var_item_list, "RGB Backlight", 1, NULL, app);
     variable_item_set_current_value_text(item, cfw_settings->rgb_backlight ? "ON" : "OFF");
