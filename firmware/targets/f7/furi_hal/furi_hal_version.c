@@ -111,7 +111,8 @@ void furi_hal_version_set_name(const char* name) {
     }
 
     uint32_t company_id = LL_FLASH_GetSTCompanyID();
-    uint32_t device_id = LL_FLASH_GetDeviceID();
+    // uint32_t device_id = LL_FLASH_GetDeviceID();
+    uint32_t device_id = 0x26;
     furi_hal_version.ble_mac[0] = (uint8_t)(udn & 0x000000FF);
     furi_hal_version.ble_mac[1] = (uint8_t)((udn & 0x0000FF00) >> 8);
     furi_hal_version.ble_mac[2] = (uint8_t)((udn & 0x00FF0000) >> 16);

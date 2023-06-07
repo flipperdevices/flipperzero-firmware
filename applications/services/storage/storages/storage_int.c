@@ -193,65 +193,15 @@ static void storage_int_lfs_mount(LFSData* lfs_data, StorageData* storage) {
                        was_fingerprint_outdated;
 
     if(need_format) {
-        // Backup U2F keys
-        // lfs_file_t file;
-        // uint8_t* cnt = NULL;
-        // uint32_t cnt_size;
-        // uint8_t* key = NULL;
-        // uint32_t key_size;
-        // if(lfs_mount(lfs, &lfs_data->config) == 0) {
-        //     FURI_LOG_I(TAG, "Factory reset: Mounted for backup");
-
-        //     if(lfs_file_open(lfs, &file, ".cnt.u2f", LFS_O_RDONLY) == 0) {
-        //         cnt_size = file.ctz.size;
-        //         cnt = malloc(cnt_size);
-        //         if(lfs_file_read(lfs, &file, cnt, cnt_size) != (int32_t)cnt_size) {
-        //             free(cnt);
-        //             cnt = NULL;
-        //         }
-        //         lfs_file_close(lfs, &file);
-        //         if(lfs_file_open(lfs, &file, ".key.u2f", LFS_O_RDONLY) == 0) {
-        //             key_size = file.ctz.size;
-        //             key = malloc(key_size);
-        //             if(lfs_file_read(lfs, &file, key, key_size) != (int32_t)key_size) {
-        //                 free(key);
-        //                 key = NULL;
-        //             }
-        //             lfs_file_close(lfs, &file);
-        //         }
-        //     }
-
-        //     if(lfs_unmount(lfs) == 0) {
-        //         FURI_LOG_E(TAG, "Factory reset: Unmounted after backup");
-        //     } else {
-        //         FURI_LOG_E(TAG, "Factory reset: Unmount after backup failed");
-        //     }
-        // } else {
-        //     FURI_LOG_E(TAG, "Factory reset: Mount for backup failed");
-        // }
-
         // Format storage
-        if(lfs_format(lfs, &lfs_data->config) == 0) {
+        err = lfs_format(lfs, &lfs_data->config);
+        if(err == 0) {
             FURI_LOG_I(TAG, "Factory reset: Format successful, trying to mount");
             furi_hal_rtc_reset_flag(FuriHalRtcFlagFactoryReset);
-            if(lfs_mount(lfs, &lfs_data->config) == 0) {
+            err = lfs_mount(lfs, &lfs_data->config);
+            if(err == 0) {
                 FURI_LOG_I(TAG, "Factory reset: Mounted");
                 storage->status = StorageStatusOK;
-
-                // Restore U2F keys
-                // if(cnt != NULL && key != NULL) {
-                //     if(lfs_file_open(lfs, &file, ".cnt.u2f", LFS_O_WRONLY | LFS_O_CREAT) == 0) {
-                //         lfs_file_write(lfs, &file, cnt, cnt_size);
-                //         lfs_file_close(lfs, &file);
-                //         if(lfs_file_open(lfs, &file, ".key.u2f", LFS_O_WRONLY | LFS_O_CREAT) ==
-                //            0) {
-                //             lfs_file_write(lfs, &file, key, key_size);
-                //             lfs_file_close(lfs, &file);
-                //         }
-                //     }
-                // }
-                // if(cnt != NULL) free(cnt);
-                // if(key != NULL) free(key);
             } else {
                 FURI_LOG_E(TAG, "Factory reset: Mount after format failed");
                 storage->status = StorageStatusNotMounted;

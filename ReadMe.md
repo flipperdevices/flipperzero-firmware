@@ -74,7 +74,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) (By Willy-JL)
 - Updated: [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco) (By Willy-JL)
 - Updated: [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer) (By Willy-JL)
-- Services order changes (By Willy-JL)
+- Services order changes & Random Housekeeping (By Willy-JL)
 
 <a name="release">
 
