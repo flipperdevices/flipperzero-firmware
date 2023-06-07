@@ -1,8 +1,6 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <lib/nfc/helpers/bit_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,6 +66,11 @@ typedef struct {
 uint16_t nfca_get_crc(uint8_t* buff, uint16_t len);
 
 void nfca_append_crc(uint8_t* buff, uint16_t len);
+
+// TODO delete nfca_append_crc and rename this
+void nfca_append_crc_buff(BitBuffer* buffer);
+
+bool nfca_check_and_trim_crc_buff(BitBuffer* buffer, const BitBuffer* src);
 
 bool nfca_check_crc(uint8_t* buff, uint16_t len);
 

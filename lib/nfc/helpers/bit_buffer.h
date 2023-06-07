@@ -60,6 +60,18 @@ void bit_buffer_copy(BitBuffer* buf, const BitBuffer* other);
 void bit_buffer_copy_right(BitBuffer* buf, const BitBuffer* other, size_t start_index);
 
 /**
+ * Copy all BitBuffer instance's contents to this one, ending with end_index,
+ * replacing all of the original data.
+ * The destination capacity must be no less than the source data size
+ * counting to end_index.
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to copy into
+ * @param [in] other pointer to a BitBuffer instance to copy from
+ * @param [in] start_index index to begin copying source data from
+ */
+void bit_buffer_copy_left(BitBuffer* buf, const BitBuffer* other, size_t end_index);
+
+/**
  * Copy a byte array to a BitBuffer instance, replacing all of the original data.
  * The destination capacity must be no less than the source data size.
  *
@@ -68,6 +80,16 @@ void bit_buffer_copy_right(BitBuffer* buf, const BitBuffer* other, size_t start_
  * @param [in] size_bytes size of the data to be copied, in bytes
  */
 void bit_buffer_copy_bytes(BitBuffer* buf, const uint8_t* data, size_t size_bytes);
+
+/**
+ * Append a byte array to a BitBuffer instance, replacing all of the original data.
+ * The destination capacity must be no less its original data size plus source data size.
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to copy into
+ * @param [in] data pointer to the byte array to be copied
+ * @param [in] size_bytes size of the data to be copied, in bytes
+ */
+void bit_buffer_append_bytes(BitBuffer* buf, const uint8_t* data, size_t size_bytes);
 
 /**
  * Write a BitBuffer instance's contents to an arbitrary memory location.
