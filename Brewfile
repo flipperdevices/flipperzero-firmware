@@ -1,4 +1,4 @@
-cask "brew-cask/gcc-arm-embedded.rb"
+cask "brew-cask/gcc-arm-embedded"
 brew "protobuf"
 brew "gdb"
 brew "open-ocd"

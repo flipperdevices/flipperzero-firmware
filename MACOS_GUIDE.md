@@ -1,103 +1,88 @@
-# **macOS compile guide**  by deafbed
+## **macOS compile guide**  by deafbed, 
+* Updated by **@eltonalvess**
+
 ### Tested with M1 Macbook Air, macOS Monterey (12.4)
+### :arrow_up: Update
+ * Tested with M1 Macbook Pro, macOS Ventura (13.4, 22F66) [06-06-2023]
 
-* *(NB: do NOT include the "$ " if copying/pasting any of the below commands)*
-
-## FROM SCRATCH
+## **FROM THE BEGINNING**
 
 ### Install qFlipper
-qFlipper can be found on the App Store or you can download it from [https://flipperzero.one/update](https://flipperzero.one/update)
+- qFlipper can be found on the App Store or you can download it from [https://flipperzero.one/update](https://flipperzero.one/update)
 
-### Install Brew
-Open Terminal.app and run
+---
 
-`$ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+### **Install the Homebrew application**
 
-**IMPORTANT:** once installed, run the two commands given to you ("Next steps")
+`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
 
-*(first should begin `$ echo 'eval...'`, second should begin `$ eval "$(/opt/...))`*
+Open `Terminal.app` or `iTerm.app` and run `source ~/.bashrc` of if you are using zsh the command should be `source ~/.zshrc` (It will refresh enviroment variables that Homebrew creates).
 
-Quit and re-open Terminal.app, then run
+To have sure that Brew was installed sucessfully then run
 
-`$ brew help`
+`brew help` it should output something like this:
 
-to check if the installation was successful
+![out](https://github.com/EltonAlvess/flipperzero-firmware-wPlugins/assets/1638045/a3f56314-c9ff-4e73-9811-81042f1e731a)
 
-### Install Docker Desktop
-Download the appropriate version (Intel/M1) of Docker Desktop from
-[https://docs.docker.com/desktop/mac/install/](https://docs.docker.com/desktop/mac/install/)
+---
 
-*(If the downloaded file has no extension/won't open, simply append .dmg to the filename)*
+### **Download the source code of the firmware**
+To clone the repository, just run the command below:
 
-Open Docker.dmg and drag Docker.app to the Applications folder
+`git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git`
 
-Eject Docker.dmg from the sidebar, navigate to your Applications folder and open Docker. Install as prompted and wait a few seconds until Docker is running
+It will download the latest build files from the github repository (in your prefered folder)
 
-Quit and re-open Terminal, and run
+Inside the source code folder (flipperzero-firmware-wPlugins) run the follow command:
 
-`$ docker help`
+`chmod u+x buildRelease.sh`
 
-to check if the install was successful
+> This command will give permission to execute the Shell Script (.sh).
 
+---
 
-### Make sure PIP is up-to-date
-Still in Terminal, run
+### **Install the necessary prerequisites**
 
-`$ python3 -m pip install --upgrade pip`
+Go to the downloaded firmware folder
 
-### Download the firmware
-Next, run
+`cd flipperzero-firmware-wPlugins`
 
-`$ git clone --recursive https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git`
+Next, we run the following command to download the remaining requirements:
 
-This will download the latest build files from the github repository (in this case most likely to your Home folder)
+`brew bundle --verbose`
 
-### Install the necessary prerequisites
-Navigate to the folder you just downloaded
-
-`$ cd flipperzero-firmware-wPlugins`
-
-Next, we run 2 scripts to download the remaining requirements. First:
-
-`$ brew bundle --verbose`
-
-Then:
-
-`$ pip3 install -r scripts/requirements.txt`
+---
 
 ### Compile
-Make sure Docker is still open, if not open Docker.app
 
-In Terminal, still in the flipperzero-firmware-wPlugins directory, run
+To compile the source code just run the following command inside the root folder.
 
-`$ docker-compose up -d`
+`./buildRelease.sh`
 
-Then:
+> :sleeping: It will start to compile, be patient it take a while! 
+---
 
-`$ docker-compose exec dev ./fbt`
+### The output files
+If everything goes well it will appear some 3 files in the root folder like the image below:
 
-It may take a while and you might see some errors but if all goes well the compiled firmware (DFU) file should now be in **flipperzero-firmware-wPlugins/dist/f7-C/flipper-z-f7-full-local.dfu**
+![image](https://github.com/EltonAlvess/flipperzero-firmware-wPlugins/assets/1638045/eec62f52-8a6a-4f3a-a293-196cb83aeba3)
 
-### Put your Flipper into Recovery/DFU mode
-Put your flipper into DFU mode by:
+---
 
-1. holding BACK + LEFT until it turns off
-2. once turned off, release BACK but keep holding LEFT until the LED flashes blue
-3. once the LED flashes blue, release LEFT and your Flipper should be in recovery mode
+### Updating using qFlipper
+1. Connect the Flipper Zero to your pc.
 
-### Install the firmware
-Open qFlipper.app
+![image](https://github.com/EltonAlvess/flipperzero-firmware-wPlugins/assets/1638045/e2be7a6b-2ff2-46f5-9312-b928cf4cf560)
 
-Connect your Flipper via USB
+2. Click in ***Install from File***
+3. Select the compiled firmware file created on the root folder i.e ***RM0606-0922-0.84.3-36d65f3.tgz***
 
-In qFlipper, click "Install from file" (underneath the big INSTALL button)
+![image](https://github.com/EltonAlvess/flipperzero-firmware-wPlugins/assets/1638045/4220f68a-b775-47a9-a2d6-2eae33fc8c70)
 
-Navigate to your DFU file (**flipperzero-firmware-wPlugins/dist/f7-C/flipper-z-f7-full-local.dfu**)
+4. Click Install.
 
-Wait for the process to finish. If your Flipper device is no longer in DFU mode (i.e. shows the normal Desktop), unplug your Flipper and close the qFlipper app
+---
 
-### Post-Install
-Open qFlipper.app and connect your Flipper via USB
-
-If everything worked, your Flipper should be recognized and the firmware version should match the github commit shown here:
-[https://github.com/RogueMaster/flipperzero-firmware-wPlugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins)
+> If everything worked, your Flipper should be recognized and the firmware version should match the github commit shown here:
+>
+> [https://github.com/RogueMaster/flipperzero-firmware-wPlugins](https://github.com/RogueMaster/flipperzero-firmware-wPlugins)
