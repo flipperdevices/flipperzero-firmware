@@ -15,6 +15,13 @@ Min level: 2
 Max level: 30
 Weight: 7
 
+Name: L2_Dj_128x64
+Min butthurt: 0
+Max butthurt: 14
+Min level: 2
+Max level: 30
+Weight: 7
+
 Name: L1_Mods_128x64
 Min butthurt: 0
 Max butthurt: 14
