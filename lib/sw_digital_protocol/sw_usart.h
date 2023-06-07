@@ -155,10 +155,9 @@ size_t sw_usart_available(SwUsart* sw_usart);
  * @brief Read 1 byte data from the receive buffer
  * @param sw_usart SwUsart pointer
  * @param data Data pointer
- * @param timeout_ms Timeout in milliseconds
  * @return True if data is read, false if timeout
  */
-bool sw_usart_read(SwUsart* sw_usart, uint8_t* data, uint32_t timeout_ms);
+bool sw_usart_read(SwUsart* sw_usart, uint8_t* data);
 
 /**
  * @brief Read line from the receive buffer

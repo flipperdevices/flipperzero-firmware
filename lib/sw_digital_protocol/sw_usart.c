@@ -2,6 +2,7 @@
 #include <furi_hal_resources.h>
 #include <furi_hal_cortex.h>
 #include <furi_hal_sw_digital_pin.h>
+#include "ring_buffer.h"
 
 #define TAG "SwUsart"
 
@@ -37,7 +38,7 @@ struct SwUsart {
     uint32_t tx_pin_set;
     uint32_t tx_pin_reset;
 
-    FuriStreamBuffer* rx_stream;
+    RingBuffer* rx_stream;
     uint8_t rx_buffer_parse_byte[24];
     uint8_t rx_buffer_parse_byte_pos;
 
@@ -163,7 +164,7 @@ static inline void sw_usart_parse_byte(SwUsart* sw_usart, uint8_t base) {
         }
 
         //Todo check overrun?
-        furi_stream_buffer_send(sw_usart->rx_stream, &byte, 1, 0);
+        ring_buffer_write_byte(sw_usart->rx_stream, byte);
     } while(false);
 }
 
@@ -267,8 +268,7 @@ SwUsart* sw_usart_alloc(void) {
     }
     sw_usart->tx_upload_char = malloc(sizeof(uint32_t) * sw_usart->tx_upload_char_len);
 
-    sw_usart->rx_stream = furi_stream_buffer_alloc(
-        sizeof(uint8_t) * SW_USART_RX_BUFFER_SIZE_DEFAULT, sizeof(uint8_t));
+    sw_usart->rx_stream = ring_buffer_alloc(SW_USART_RX_BUFFER_SIZE_DEFAULT);
 
     return sw_usart;
 }
@@ -297,7 +297,7 @@ void sw_usart_free(SwUsart* sw_usart) {
         break;
     }
 
-    furi_stream_buffer_free(sw_usart->rx_stream);
+    ring_buffer_free(sw_usart->rx_stream);
     free(sw_usart->tx_upload_char);
     free(sw_usart);
 }
@@ -311,8 +311,8 @@ void sw_usart_set_tx_callback(SwUsart* sw_usart, SwUsartTxCallbackEnd callback, 
 void sw_usart_set_rx_buffer_size(SwUsart* sw_usart, size_t size) {
     furi_assert(sw_usart);
     furi_assert(size);
-    furi_stream_buffer_free(sw_usart->rx_stream);
-    sw_usart->rx_stream = furi_stream_buffer_alloc(sizeof(uint8_t) * size, sizeof(uint8_t));
+    ring_buffer_free(sw_usart->rx_stream);
+    sw_usart->rx_stream = ring_buffer_alloc(size);
 }
 
 void sw_usart_set_config(
@@ -472,22 +472,23 @@ bool sw_usart_is_end_tx(SwUsart* sw_usart) {
 
 void sw_usart_print_debug_data(SwUsart* sw_usart) {
     furi_assert(sw_usart);
-    if(!furi_stream_buffer_bytes_available(sw_usart->rx_stream)) return;
+    //if(!furi_stream_buffer_bytes_available(sw_usart->rx_stream)) return;
+    //printf("size data = %d \r\n", furi_stream_buffer_bytes_available(sw_usart->rx_stream));
     uint8_t data = 0;
-    while(furi_stream_buffer_bytes_available(sw_usart->rx_stream)) {
-        furi_stream_buffer_receive(sw_usart->rx_stream, &data, sizeof(data), 10);
+    //volatile size_t count = furi_stream_buffer_bytes_available(sw_usart->rx_stream);
+    while(ring_buffer_read_byte(sw_usart->rx_stream, &data)) {
         printf("%c", data);
     }
 }
 
 size_t sw_usart_available(SwUsart* sw_usart) {
     furi_assert(sw_usart);
-    return furi_stream_buffer_bytes_available(sw_usart->rx_stream);
+    return ring_buffer_available(sw_usart->rx_stream);
 }
 
-bool sw_usart_read(SwUsart* sw_usart, uint8_t* data, uint32_t timeout_ms) {
+bool sw_usart_read(SwUsart* sw_usart, uint8_t* data) {
     furi_assert(sw_usart);
-    return furi_stream_buffer_receive(sw_usart->rx_stream, &data, 1, timeout_ms);
+    return ring_buffer_read_byte(sw_usart->rx_stream, data);
 }
 
 void sw_usart_read_line(SwUsart* sw_usart, FuriString* data, uint32_t timeout_ms) {
@@ -496,13 +497,18 @@ void sw_usart_read_line(SwUsart* sw_usart, FuriString* data, uint32_t timeout_ms
 
     uint8_t data_tmp = 0;
     furi_string_reset(data);
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(timeout_ms * 1000);
     do {
-        if(!sw_usart_read(sw_usart, &data_tmp, timeout_ms)) {
+        if(!sw_usart_read(sw_usart, &data_tmp)) {
             //timeout
             break;
         }
         if(data_tmp != '\r') {
             furi_string_push_back(data, data_tmp);
+        }
+        if(furi_hal_cortex_timer_is_expired(timer)) {
+            //timeout
+            break;
         }
     } while(data_tmp != '\n');
 }

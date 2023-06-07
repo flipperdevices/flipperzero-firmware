@@ -12,7 +12,7 @@
 
 #include <furi_hal_power.h>
 
-#define UPDATE_PERIOD_MS 1000UL
+#define UPDATE_PERIOD_MS 200UL
 #define TEXT_STORE_SIZE 64U
 
 // #define DS18B20_CMD_SKIP_ROM 0xccU
@@ -198,10 +198,27 @@ static int32_t example_sw_usart_reader_thread_callback(void* ctx) {
 
         // /* The measurement is now ready, read it from the termometer. */
         // example_sw_usart_read_temperature(context);
-        const char data[] = "Hello World!\r\n";
-        sw_usart_tx(context->sw_usart, (uint8_t*)data, sizeof(data), SW_USART_DEFAULT_TIMEOUT);
+         const char data[] = "Hello World!\r\n";
+         sw_usart_tx(context->sw_usart, (uint8_t*)data, sizeof(data), SW_USART_DEFAULT_TIMEOUT);
+        // printf("HELLO world\r\n");
+        // for (size_t i = 0; i < 1000; i++)
+        // {
+        //      printf("*");
+        // }
+        //  printf("\r\n");
+        
+        // furi_delay_ms(100);
+        // volatile size_t count = sw_usart_available(context->sw_usart);
+        // while (count)
+        // {
+        //    uint8_t data1 = 0;
+        //     sw_usart_read(context->sw_usart, &data1 ,10);
+        //     printf("%c", data1);
+        //     count--;
+        // }
+        
         sw_usart_print_debug_data(context->sw_usart);
-        furi_delay_ms(1000);
+        
     }
 
     return 0;
@@ -340,7 +357,7 @@ static ExampleSwUsartContext* example_sw_usart_context_alloc() {
     // context->onewire = onewire_host_alloc(&THERMO_GPIO_PIN);
     context->sw_usart = sw_usart_alloc();
     sw_usart_set_rx_buffer_size(context->sw_usart, 4096);
-    sw_usart_start(context->sw_usart, 9600, &SW_USART_GPIO_PIN_TX, &SW_USART_GPIO_PIN_RX, false);
+    sw_usart_start(context->sw_usart, 115200, &SW_USART_GPIO_PIN_TX, &SW_USART_GPIO_PIN_RX, false);
     return context;
 }
 
