@@ -1,8 +1,8 @@
 import os
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, List, Optional, Tuple
-
+from typing import Callable, ClassVar, List, Optional, Tuple
 
 class FlipperManifestException(Exception):
     pass
@@ -24,6 +24,8 @@ class FlipperAppType(Enum):
 
 @dataclass
 class FlipperApplication:
+    APP_ID_REGEX: ClassVar[re.Pattern] = re.compile(r"^[a-z0-9_]+$")
+
     @dataclass
     class ExternallyBuiltFile:
         path: str
@@ -86,7 +88,6 @@ class FlipperApplication:
     def __post_init__(self):
         if self.apptype == FlipperAppType.PLUGIN:
             self.stack_size = 0
-
 
 class AppManager:
     def __init__(self):
