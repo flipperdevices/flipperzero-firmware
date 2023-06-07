@@ -91,6 +91,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL PR: Added: [RFID Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
 - [Macos compile doc update #658 (By EltonAlvess)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/658)
 - [Charge Cap Setting (By oltenxyz)](https://github.com/oltenxyz/Flipper-Xtreme/tree/dev)
+- Added Universal Remote (By uwuw7)
 
 <a name="release">
 

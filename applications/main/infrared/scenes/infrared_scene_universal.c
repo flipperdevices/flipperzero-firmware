@@ -2,10 +2,13 @@
 
 typedef enum {
     SubmenuIndexUniversalTV,
-    SubmenuIndexUniversalAudio,
+    SubmenuIndexUniversalMonitor,
+    SubmenuIndexUniversalDigitalSign,
     SubmenuIndexUniversalProjector,
-    SubmenuIndexUniversalFan,
+    SubmenuIndexUniversalAudio,
+    SubmenuIndexUniversalLED,
     SubmenuIndexUniversalAirConditioner,
+    SubmenuIndexUniversalFan,
 } SubmenuIndex;
 
 static void infrared_scene_universal_submenu_callback(void* context, uint32_t index) {
@@ -26,8 +29,15 @@ void infrared_scene_universal_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Audio",
-        SubmenuIndexUniversalAudio,
+        "Monitors",
+        SubmenuIndexUniversalMonitor,
+        infrared_scene_universal_submenu_callback,
+        context);
+
+    submenu_add_item(
+        submenu,
+        "Digital Signs",
+        SubmenuIndexUniversalDigitalSign,
         infrared_scene_universal_submenu_callback,
         context);
 
@@ -40,8 +50,15 @@ void infrared_scene_universal_on_enter(void* context) {
 
     submenu_add_item(
         submenu,
-        "Fans",
-        SubmenuIndexUniversalFan,
+        "Audio",
+        SubmenuIndexUniversalAudio,
+        infrared_scene_universal_submenu_callback,
+        context);
+
+    submenu_add_item(
+        submenu,
+        "LEDs",
+        SubmenuIndexUniversalLED,
         infrared_scene_universal_submenu_callback,
         context);
 
@@ -49,6 +66,13 @@ void infrared_scene_universal_on_enter(void* context) {
         submenu,
         "ACs",
         SubmenuIndexUniversalAirConditioner,
+        infrared_scene_universal_submenu_callback,
+        context);
+
+    submenu_add_item(
+        submenu,
+        "Fans",
+        SubmenuIndexUniversalFan,
         infrared_scene_universal_submenu_callback,
         context);
 
@@ -67,17 +91,26 @@ bool infrared_scene_universal_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexUniversalTV) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalTV);
             consumed = true;
-        } else if(event.event == SubmenuIndexUniversalAudio) {
-            scene_manager_next_scene(scene_manager, InfraredSceneUniversalAudio);
+        } else if(event.event == SubmenuIndexUniversalMonitor) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalMonitor);
+            consumed = true;
+        } else if(event.event == SubmenuIndexUniversalDigitalSign) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalDigitalSign);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalProjector) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalProjector);
             consumed = true;
-        } else if(event.event == SubmenuIndexUniversalFan) {
-            scene_manager_next_scene(scene_manager, InfraredSceneUniversalFan);
+        } else if(event.event == SubmenuIndexUniversalAudio) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalAudio);
+            consumed = true;
+        } else if(event.event == SubmenuIndexUniversalLED) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalLED);
             consumed = true;
         } else if(event.event == SubmenuIndexUniversalAirConditioner) {
             scene_manager_next_scene(scene_manager, InfraredSceneUniversalAC);
+            consumed = true;
+        } else if(event.event == SubmenuIndexUniversalFan) {
+            scene_manager_next_scene(scene_manager, InfraredSceneUniversalFan);
             consumed = true;
         }
         scene_manager_set_scene_state(scene_manager, InfraredSceneUniversal, event.event);
