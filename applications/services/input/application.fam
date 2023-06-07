@@ -5,6 +5,6 @@ App(
     entry_point="input_srv",
     cdefines=["SRV_INPUT"],
     stack_size=1 * 1024,
-    order=80,
+    order=70,
     sdk_headers=["input.h"],
 )

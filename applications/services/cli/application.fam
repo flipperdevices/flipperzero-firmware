@@ -5,6 +5,6 @@ App(
     entry_point="cli_srv",
     cdefines=["SRV_CLI"],
     stack_size=4 * 1024,
-    order=30,
+    order=20,
     sdk_headers=["cli.h", "cli_vcp.h"],
 )

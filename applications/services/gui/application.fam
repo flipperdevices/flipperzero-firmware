@@ -9,7 +9,7 @@ App(
         "notification",
     ],
     stack_size=2 * 1024,
-    order=70,
+    order=60,
     sdk_headers=[
         "gui.h",
         "icon_i.h",
