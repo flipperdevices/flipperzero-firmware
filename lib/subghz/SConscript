@@ -13,6 +13,7 @@ env.Append(
         File("transmitter.h"),
         File("protocols/raw.h"),
         File("blocks/const.h"),
+        File("blocks/custom_btn.h"),
         File("blocks/decoder.h"),
         File("blocks/encoder.h"),
         File("blocks/generic.h"),
