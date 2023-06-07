@@ -89,6 +89,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Map parser licence description #2739 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2739)
 - UL PR: [iButton Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
 - UL PR: [RFID Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
+- [Macos compile doc update #658 (By EltonAlvess)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/658)
 
 <a name="release">
 
