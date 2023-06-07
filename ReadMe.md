@@ -75,6 +75,20 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [RC2014 ColecoVision (By ezod)](https://github.com/ezod/flipperzero-rc2014-coleco) (By Willy-JL)
 - Updated: [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer) (By Willy-JL)
 - Services order changes & Random Housekeeping (By Willy-JL)
+- OFW: [FuriHal: add system setting to device info, bump device info version #2736 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2736)
+- OFW: [Settings: add contrast adjustment #2737 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2737)
+- OFW: [f7: add PB9 to debug pins #2738 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2738)
+- OFW: [Dolphin: new animation: DJ #2735 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2735)
+- OFW: [Remove unused resources #2740 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2740)
+- OFW: [Scripts: Fixing serial cli logger error so it sounds more concise #2721 (By DXVVAY)](https://github.com/flipperdevices/flipperzero-firmware/pull/2721)
+- OFW: [Furi: smaller critical enter and critical exit macro #2716 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2716)
+- OFW: [SubGhz: add subghz_protocol_registry external API #2712 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2712)
+- OFW: [Fix core2 permisions #2742 (By Drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2742)
+- UL: Merge/SubGHz API Fixes (By xMasterX)
+- OFW: [fbt, ufbt: added checks for appid in app manifests #2720 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2720) Neutered this most useless annoying update
+- OFW: [Map parser licence description #2739 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2739)
+- UL PR: [iButton Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
+- UL PR: [RFID Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
 
 <a name="release">
 
@@ -359,6 +373,7 @@ $ ./fbt dolphin_ext
 - [HEX Viewer (By QtRoS)](https://github.com/QtRoS/flipperzero-firmware)
 - [i2c Tools (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - [iButton Fuzzer (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
+- [iButton Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
 - [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
@@ -407,6 +422,7 @@ $ ./fbt dolphin_ext
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
 - [Resistance Calculator (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [RFID Fuzzer (By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245) [Changes by Unleashed/xMasterX](https://github.com/DarkFlippers/unleashed-firmware)
+- [RFID Fuzzer (B) (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
 - [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
