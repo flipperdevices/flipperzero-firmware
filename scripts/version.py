@@ -127,6 +127,8 @@ class Main(App):
             }
         )
 
+        del current_info["GIT_COMMIT_DATE"]
+
         version_values = []
         for key in current_info:
             val = current_info[key]
