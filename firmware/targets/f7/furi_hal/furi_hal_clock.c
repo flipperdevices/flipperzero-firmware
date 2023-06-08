@@ -1,5 +1,6 @@
 #include <furi_hal_clock.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_rtc.h>
 #include <furi.h>
 
 #include <stm32wbxx_ll_pwr.h>
@@ -167,6 +168,7 @@ void furi_hal_clock_switch_to_pll() {
 
     uint32_t total = DWT->CYCCNT - clock_start_time;
     if(total > (20 * 0x148)) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagLegacySleep);
         furi_crash("Slow HSE/PLL startup");
     }
 }
