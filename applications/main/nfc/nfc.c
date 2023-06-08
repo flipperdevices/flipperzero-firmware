@@ -286,15 +286,18 @@ int32_t nfc_app(void* p) {
             if(nfc_device_load(nfc->dev, p, true)) {
                 if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
-                    dolphin_deed(DolphinDeedNfcEmulate);
+                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
                 } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
-                    dolphin_deed(DolphinDeedNfcEmulate);
+                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
+                } else if(nfc->dev->format == NfcDeviceSaveFormatNfcV) {
+                    scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVEmulate);
+                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
                 } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
                 } else {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-                    dolphin_deed(DolphinDeedNfcEmulate);
+                    DOLPHIN_DEED(DolphinDeedNfcEmulate);
                 }
             } else {
                 // Exit app

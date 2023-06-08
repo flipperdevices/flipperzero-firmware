@@ -3,6 +3,8 @@
 FBT is the entry point for firmware-related commands and utilities.
 It is invoked by `./fbt` in the firmware project root directory. Internally, it is a wrapper around [scons](https://scons.org/) build system.
 
+If you don't need all features of `fbt` - like building the whole firmware - and only want to build and debug a single application, you can use [ufbt](https://pypi.org/project/ufbt/).
+
 ## Environment
 
 To use `fbt`, you only need `git` installed in your system.
@@ -11,6 +13,7 @@ To use `fbt`, you only need `git` installed in your system.
  > However, if you wish to use tools supplied with the toolchain outside `fbt`, you can open an *fbt shell*, with properly configured environment.
  >    - On Windows, simply run `scripts/toolchain/fbtenv.cmd`.
  >    - On Linux & MacOS, run `source scripts/toolchain/fbtenv.sh` in a new shell.
+ >    - You can also type ```. `./fbt -s env` ``` in your shell. (Keep  the "." at the beginning.)
  
  If your system is not supported by pre-built toolchain variants or you want to use custom versions of dependencies, you can `set FBT_NOENV=1`. `fbt` will skip toolchain & environment configuration and will expect all tools to be available on your system's `PATH`. *(this option is not available on Windows)*
  
@@ -103,12 +106,15 @@ To run cleanup (think of `make clean`) for specified targets, add the `-c` optio
 - `--options optionfile.py` (default value `fbt_options.py`) - load a file with multiple configuration values
 - `--extra-int-apps=app1,app2,appN` - force listed apps to be built as internal with the `firmware` target
 - `--extra-ext-apps=app1,app2,appN` - force listed apps to be built as external with the `firmware_extapps` target
+- `--extra-define=A --extra-define=B=C ` - extra global defines that will be passed to the C/C++ compiler, can be specified multiple times
 - `--proxy-env=VAR1,VAR2` - additional environment variables to expose to subprocesses spawned by `fbt`. By default, `fbt` sanitizes the execution environment and doesn't forward all inherited environment variables. You can find the list of variables that are always forwarded in the `environ.scons` file.
 
 ## Configuration
 
 Default configuration variables are set in the configuration file: `fbt_options.py`.
 Values set in the command line have higher precedence over the configuration file.
+
+You can also create a file called `fbt_options_local.py` that will be evaluated when loading default options file, enabling persisent overriding of  default options without modifying default configuration.
 
 You can find out available options with `./fbt -h`.
 

@@ -4,6 +4,7 @@ env.Append(
     LINT_SOURCES=[
         Dir("app-scened-template"),
         Dir("digital_signal"),
+        Dir("pulse_reader"),
         Dir("drivers"),
         Dir("flipper_format"),
         Dir("infrared"),
@@ -76,7 +77,7 @@ env.Append(
 
 libs = env.BuildModules(
     [
-        "STM32CubeWB",
+        "stm32wb",
         "freertos",
         "print",
         "microtar",
@@ -93,6 +94,8 @@ libs = env.BuildModules(
         "mbedtls",
         "subghz",
         "nfc",
+        "digital_signal",
+        "pulse_reader",
         "appframe",
         "misc",
         "lfrfid",

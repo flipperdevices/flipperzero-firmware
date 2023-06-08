@@ -1,12 +1,13 @@
-import os
-import sys
-import serial
-import time
-import hashlib
-import math
-import logging
-import posixpath
 import enum
+import hashlib
+import logging
+import math
+import os
+import posixpath
+import sys
+import time
+
+import serial
 
 
 def timing(func):
@@ -56,11 +57,11 @@ class StorageErrorCode(enum.Enum):
 
 
 class FlipperStorageException(Exception):
-    def __init__(self, message):
-        super().__init__(f"Storage error: {message}")
-
-    def __init__(self, path: str, error_code: StorageErrorCode):
-        super().__init__(f"Storage error: path '{path}': {error_code.value}")
+    @staticmethod
+    def from_error_code(path: str, error_code: StorageErrorCode):
+        return FlipperStorageException(
+            f"Storage error: path '{path}': {error_code.value}"
+        )
 
 
 class BufferedRead:
@@ -151,7 +152,7 @@ class FlipperStorage:
             try:
                 # TODO: better decoding, considering non-ascii characters
                 line = line.decode("ascii")
-            except:
+            except Exception:
                 continue
 
             line = line.strip()
@@ -194,7 +195,7 @@ class FlipperStorage:
             try:
                 # TODO: better decoding, considering non-ascii characters
                 line = line.decode("ascii")
-            except:
+            except Exception:
                 continue
 
             line = line.strip()
@@ -236,6 +237,7 @@ class FlipperStorage:
             filesize = os.fstat(file.fileno()).st_size
 
             buffer_size = self.chunk_size
+            start_time = time.time()
             while True:
                 filedata = file.read(buffer_size)
                 size = len(filedata)
@@ -247,16 +249,20 @@ class FlipperStorage:
                 if self.has_error(answer):
                     last_error = self.get_error(answer)
                     self.read.until(self.CLI_PROMPT)
-                    raise FlipperStorageException(filename_to, last_error)
+                    raise FlipperStorageException.from_error_code(
+                        filename_to, last_error
+                    )
 
                 self.port.write(filedata)
                 self.read.until(self.CLI_PROMPT)
 
-                percent = str(math.ceil(file.tell() / filesize * 100))
-                total_chunks = str(math.ceil(filesize / buffer_size))
-                current_chunk = str(math.ceil(file.tell() / buffer_size))
+                ftell = file.tell()
+                percent = math.ceil(ftell / filesize * 100)
+                total_chunks = math.ceil(filesize / buffer_size)
+                current_chunk = math.ceil(ftell / buffer_size)
+                approx_speed = ftell / (time.time() - start_time + 0.0001)
                 sys.stdout.write(
-                    f"\r{percent}%, chunk {current_chunk} of {total_chunks}"
+                    f"\r<{percent:3d}%, chunk {current_chunk:2d} of {total_chunks:2d} @ {approx_speed/1024:.2f} kb/s"
                 )
                 sys.stdout.flush()
         print()
@@ -264,6 +270,7 @@ class FlipperStorage:
     def read_file(self, filename: str):
         """Receive file from Flipper, and get filedata (bytes)"""
         buffer_size = self.chunk_size
+        start_time = time.time()
         self.send_and_wait_eol(
             'storage read_chunks "' + filename + '" ' + str(buffer_size) + "\r"
         )
@@ -284,10 +291,13 @@ class FlipperStorage:
             filedata.extend(self.port.read(chunk_size))
             read_size = read_size + chunk_size
 
-            percent = str(math.ceil(read_size / size * 100))
-            total_chunks = str(math.ceil(size / buffer_size))
-            current_chunk = str(math.ceil(read_size / buffer_size))
-            sys.stdout.write(f"\r{percent}%, chunk {current_chunk} of {total_chunks}")
+            percent = math.ceil(read_size / size * 100)
+            total_chunks = math.ceil(size / buffer_size)
+            current_chunk = math.ceil(read_size / buffer_size)
+            approx_speed = read_size / (time.time() - start_time + 0.0001)
+            sys.stdout.write(
+                f"\r>{percent:3d}%, chunk {current_chunk:2d} of {total_chunks:2d} @ {approx_speed/1024:.2f} kb/s"
+            )
             sys.stdout.flush()
         print()
         self.read.until(self.CLI_PROMPT)
@@ -319,9 +329,9 @@ class FlipperStorage:
                 StorageErrorCode.INVALID_NAME,
             ):
                 return False
-            raise FlipperStorageException(path, error_code)
+            raise FlipperStorageException.from_error_code(path, error_code)
 
-        return True
+        return response == b"Directory" or response.startswith(b"Storage")
 
     def exist_file(self, path: str):
         """Does file exist on Flipper"""
@@ -333,7 +343,9 @@ class FlipperStorage:
 
     def _check_no_error(self, response, path=None):
         if self.has_error(response):
-            raise FlipperStorageException(self.get_error(response))
+            raise FlipperStorageException.from_error_code(
+                path, self.get_error(response)
+            )
 
     def size(self, path: str):
         """file size on Flipper"""

@@ -15,6 +15,8 @@ typedef enum {
     BadUsbStateRunning,
     BadUsbStateDelay,
     BadUsbStateStringDelay,
+    BadUsbStateWaitForBtn,
+    BadUsbStatePaused,
     BadUsbStateDone,
     BadUsbStateScriptError,
     BadUsbStateFileError,
@@ -41,7 +43,9 @@ void bad_usb_script_start(BadUsbScript* bad_usb);
 
 void bad_usb_script_stop(BadUsbScript* bad_usb);
 
-void bad_usb_script_toggle(BadUsbScript* bad_usb);
+void bad_usb_script_start_stop(BadUsbScript* bad_usb);
+
+void bad_usb_script_pause_resume(BadUsbScript* bad_usb);
 
 BadUsbState* bad_usb_script_get_state(BadUsbScript* bad_usb);
 
