@@ -50,7 +50,7 @@ jobs:
           doxygen Doxyfile-awesome.cfg
           doxysphinx build doxygen/html sphinx_out/ Doxyfile-awesome.cfg
           popd
-          sphinx-multiversion flipperzero-documentation flipperzero-documentation/sphinx_out/
+          sphinx-multiversion --debug flipperzero-documentation flipperzero-documentation/sphinx_out/
           pushd flipperzero-documentation
           doxysphinx build doxygen/html sphinx_out/${BRANCH_NAME}/doxygen/html/ Doxyfile-awesome.cfg
           popd
