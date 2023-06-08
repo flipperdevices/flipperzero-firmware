@@ -64,4 +64,4 @@ jobs:
 
       - name: 'List out directory'
         run: |
-          ls -la flipperzero-documentation/sphinx_out/${BRANCH_NAME}/doxygen/html/
+          ls -la flipperzero-documentation/sphinx_out/${BRANCH_NAME}/
