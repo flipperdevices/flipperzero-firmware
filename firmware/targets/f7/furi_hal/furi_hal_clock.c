@@ -142,6 +142,7 @@ void furi_hal_clock_switch_to_hsi() {
 }
 
 void furi_hal_clock_switch_to_pll() {
+    uint32_t clock_start_time = DWT->CYCCNT;
     LL_RCC_HSE_Enable();
     LL_RCC_PLL_Enable();
     LL_RCC_PLLSAI1_Enable();
@@ -163,6 +164,11 @@ void furi_hal_clock_switch_to_pll() {
 
     while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
         ;
+
+    uint32_t total = DWT->CYCCNT - clock_start_time;
+    if(total > (20 * 0x148)) {
+        furi_crash("Slow HSE/PLL startup");
+    }
 }
 
 void furi_hal_clock_suspend_tick() {
