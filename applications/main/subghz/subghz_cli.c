@@ -177,6 +177,8 @@ void subghz_cli_command_tx_ext(Cli* cli, FuriString* args, void* context) {
     subghz_device_cc1101_ext_load_preset(FuriHalSubGhzPresetOok650Async);
     frequency = subghz_device_cc1101_ext_set_frequency(frequency);
 
+    subghz_device_cc1101_ext_set_async_mirror_pin(&gpio_ext_pc3);
+
     furi_hal_power_suppress_charge_enter();
 
     if(subghz_device_cc1101_ext_start_async_tx(subghz_transmitter_yield, transmitter)) {
@@ -367,7 +369,7 @@ void subghz_cli_command_rx_ext(Cli* cli, FuriString* args, void* context) {
     subghz_device_cc1101_ext_reset();
     subghz_device_cc1101_ext_load_preset(FuriHalSubGhzPresetOok650Async);
     frequency = subghz_device_cc1101_ext_set_frequency(frequency);
-    //furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    subghz_device_cc1101_ext_set_async_mirror_pin(&gpio_ext_pc3);
 
     furi_hal_power_suppress_charge_enter();
 
