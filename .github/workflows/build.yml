@@ -79,10 +79,6 @@ jobs:
         run: |
           git diff --exit-code
 
-      - name: 'Bundle resources'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
-        run: |
-
       - name: 'Bundle core2 firmware'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
