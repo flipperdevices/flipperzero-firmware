@@ -56,7 +56,9 @@ The program will automatically be launched after compilation
 
 Press **Ok** button to clear the graph, press **Left/Right** to choose unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), press **Back** button to quit
 
+
 If you don't want to build this application, just simply copy **flipper_geiger.fap** on your **Flipper Zero** 
+
 **API Mismatch** error may appear. If you are using Unleashed firmware you can bypass and ignore the error
 
 ## Use cases
