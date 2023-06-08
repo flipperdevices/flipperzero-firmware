@@ -80,20 +80,9 @@ class Main(App):
                     src_file,
                     self.get_dist_path(self.get_project_file_name(project, filetype)),
                 )
-        for foldertype in ("sdk_headers", "lib"):
+        for foldertype in ("sdk_headers",):
             if exists(sdk_folder := join(obj_directory, foldertype)):
                 self.note_dist_component(foldertype, "dir", sdk_folder)
-
-        # TODO: remove this after everyone migrates to new uFBT
-        self.create_zip_stub("lib")
-
-    def create_zip_stub(self, foldertype):
-        with zipfile.ZipFile(
-            self.get_dist_path(self.get_dist_file_name(foldertype, "zip")),
-            "w",
-            zipfile.ZIP_DEFLATED,
-        ) as _:
-            pass
 
     def copy(self) -> int:
         self._dist_components: dict[str, str] = dict()
@@ -169,7 +158,6 @@ class Main(App):
             "firmware.elf",
             "update.dir",
             "sdk_headers.dir",
-            "lib.dir",
             "scripts.dir",
         )
 
