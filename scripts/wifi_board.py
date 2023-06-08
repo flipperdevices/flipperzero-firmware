@@ -14,7 +14,7 @@ import tarfile
 
 
 class UpdateDownloader:
-    UPDATE_SERVER = "https://test-update.flipperzero.one"
+    UPDATE_SERVER = "https://update.flipperzero.one"
     UPDATE_PROJECT = "/blackmagic-firmware"
     UPDATE_INDEX = UPDATE_SERVER + UPDATE_PROJECT + "/directory.json"
     UPDATE_TYPE = "full_tgz"
@@ -126,7 +126,7 @@ class Main(App):
     def init(self):
         self.parser.add_argument("-p", "--port", help="CDC Port", default="auto")
         self.parser.add_argument(
-            "-c", "--channel", help="Channel name", default="development"
+            "-c", "--channel", help="Channel name", default="release"
         )
         self.parser.set_defaults(func=self.update)
 
