@@ -43,3 +43,13 @@ jobs:
         run: |
           sudo apt install -y doxygen
           sudo python3 -m pip install sphinx sphinx_rtd_theme doxysphinx sphinx-multiversion myst-parser
+
+      - name: 'Build the docs'
+        run: |
+          pushd flipperzero-documentation
+          doxygen Doxyfile-awesome.cfg
+          doxysphinx build doxygen/html sphinx_out/ Doxyfile-awesome.cfg
+          popd
+          sphinx-multiversion flipperzero-documentation flipperzero-documentation/sphinx_out/
+          pushd flipperzero-documentation
+          doxysphinx build doxygen/html sphinx_out/${BRANCH_NAME}/doxygen/html/ Doxyfile-awesome.cfg
