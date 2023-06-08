@@ -8,20 +8,16 @@ on:
       - '*'
 
 env:
-  TARGETS: f7
+  TARGETS: f7 f18
   DEFAULT_TARGET: f7
-  FBT_TOOLCHAIN_PATH: /runner/_work
 
 jobs:
   doxygen:
     if: ${{ !github.event.pull_request.head.repo.fork }}
     runs-on: ubuntu-latest
     steps:
-      - name: 'Decontaminate previous build leftovers'
-        run: |
-          if [ -d .git ]; then
-            git submodule status || git checkout "$(git rev-list --max-parents=0 HEAD | tail -n 1)"
-          fi
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout code'
         uses: actions/checkout@v3
@@ -42,19 +38,7 @@ jobs:
           fi
           python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE"
 
-      - name: 'Generate documentation'
-        uses: mattnotmitt/doxygen-action@v1.9.5
-        with:
-          working-directory: 'documentation/'
-          doxyfile-path: './Doxyfile-awesome.cfg'
-
-      - name: 'Upload documentation'
-        uses: prewk/s3-cp-action@v2
-        with:
-          aws_s3_endpoint: "${{ secrets.FW_DOCS_AWS_ENDPOINT }}"
-          aws_access_key_id: "${{ secrets.FW_DOCS_AWS_ACCESS_KEY }}"
-          aws_secret_access_key: "${{ secrets.FW_DOCS_AWS_SECRET_KEY }}"
-          source: "./documentation/build/html"
-          dest: "s3://${{ secrets.FW_DOCS_AWS_BUCKET }}/${{steps.names.outputs.branch_name}}"
-          flags: "--recursive --acl public-read"
-
+      - name: 'Install requirements'
+        run: |
+          sudo apt install -y doxygen
+          sudo python3 -m pip install sphinx sphinx_rtd_theme doxysphinx sphinx-multiversion myst-parser
