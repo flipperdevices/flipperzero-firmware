@@ -1,7 +1,8 @@
-from dataclasses import dataclass, field
-from typing import List, Optional, Tuple, Callable
-from enum import Enum
 import os
+import re
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Callable, ClassVar, List, Optional, Tuple, Union
 
 
 class FlipperManifestException(Exception):
@@ -23,6 +24,8 @@ class FlipperAppType(Enum):
 
 @dataclass
 class FlipperApplication:
+    APP_ID_REGEX: ClassVar[re.Pattern] = re.compile(r"^[a-z0-9_]+$")
+
     @dataclass
     class ExternallyBuiltFile:
         path: str
@@ -56,7 +59,7 @@ class FlipperApplication:
 
     # .fap-specific
     sources: List[str] = field(default_factory=lambda: ["*.c*"])
-    fap_version: Tuple[int] = field(default_factory=lambda: (0, 1))
+    fap_version: Union[str, Tuple[int]] = "0.1"
     fap_icon: Optional[str] = None
     fap_libs: List[str] = field(default_factory=list)
     fap_category: str = ""
@@ -84,6 +87,17 @@ class FlipperApplication:
     def __post_init__(self):
         if self.apptype == FlipperAppType.PLUGIN:
             self.stack_size = 0
+        if not self.APP_ID_REGEX.match(self.appid):
+            raise FlipperManifestException(
+                f"Invalid appid '{self.appid}'. Must match regex '{self.APP_ID_REGEX}'"
+            )
+        if isinstance(self.fap_version, str):
+            try:
+                self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
+            except ValueError:
+                raise FlipperManifestException(
+                    f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
+                )
 
 
 class AppManager:
@@ -93,7 +107,7 @@ class AppManager:
     def get(self, appname: str):
         try:
             return self.known_apps[appname]
-        except KeyError as _:
+        except KeyError:
             raise FlipperManifestException(
                 f"Missing application manifest for '{appname}'"
             )
@@ -223,6 +237,7 @@ class AppBuildset:
         return self.appmgr.get(app_name).supports_hardware_target(self.hw_target)
 
     def _get_app_depends(self, app_name: str) -> List[str]:
+        app_def = self.appmgr.get(app_name)
         # Skip app if its target is not supported by the target we are building for
         if not self._check_if_app_target_supported(app_name):
             self._writer(
@@ -230,7 +245,6 @@ class AppBuildset:
             )
             return []
 
-        app_def = self.appmgr.get(app_name)
         return list(
             filter(
                 self._check_if_app_target_supported,
@@ -296,7 +310,7 @@ class AppBuildset:
                 try:
                     parent_app = self.appmgr.get(parent_app_id)
                     parent_app._plugins.append(extension_app)
-                except FlipperManifestException as e:
+                except FlipperManifestException:
                     self._writer(
                         f"Module {extension_app.appid} has unknown parent {parent_app_id}"
                     )

@@ -13,6 +13,7 @@ To use `fbt`, you only need `git` installed in your system.
  > However, if you wish to use tools supplied with the toolchain outside `fbt`, you can open an *fbt shell*, with properly configured environment.
  >    - On Windows, simply run `scripts/toolchain/fbtenv.cmd`.
  >    - On Linux & MacOS, run `source scripts/toolchain/fbtenv.sh` in a new shell.
+ >    - You can also type ```. `./fbt -s env` ``` in your shell. (Keep  the "." at the beginning.)
  
  If your system is not supported by pre-built toolchain variants or you want to use custom versions of dependencies, you can `set FBT_NOENV=1`. `fbt` will skip toolchain & environment configuration and will expect all tools to be available on your system's `PATH`. *(this option is not available on Windows)*
  
@@ -112,6 +113,8 @@ To run cleanup (think of `make clean`) for specified targets, add the `-c` optio
 
 Default configuration variables are set in the configuration file: `fbt_options.py`.
 Values set in the command line have higher precedence over the configuration file.
+
+You can also create a file called `fbt_options_local.py` that will be evaluated when loading default options file, enabling persisent overriding of  default options without modifying default configuration.
 
 You can find out available options with `./fbt -h`.
 
