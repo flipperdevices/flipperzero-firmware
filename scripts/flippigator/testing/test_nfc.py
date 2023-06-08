@@ -116,6 +116,8 @@ class TestNfc(BaseCase):
                 "Read Specific Card Type",
                 "Mifare Classic Keys",
                 "Unlock NTAG",
+                "Unlock SLIX-L",
+                "Listen NfcV Reader",
             ]
             assert menu == menu_ref, "NFC Extra Actions list is wrong"
 

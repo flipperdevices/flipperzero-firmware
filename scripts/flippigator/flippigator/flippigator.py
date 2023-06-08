@@ -264,13 +264,19 @@ class Navigator:
         time.sleep(0.2)
         self.logger.info("Scanning menu list")
         menus = list()
-        cur = self.get_current_state()
 
-        while not (cur[0] in menus):
+        while True:
+            cur = self.get_current_state(timeout = 1)
             if not (cur == []):
-                menus.append(cur[0])
+                if (cur[0] in menus):
+                    break
+                else:
+                    menus.append(cur[0])
+            else:
+                menus.append("Missed template!!")
+                self.logger.warning("Finded undescribed item")
             self.press_down()
-            cur = self.get_current_state()
+
         self.logger.info("Finded menus: " + str(menus))
         return menus
 
