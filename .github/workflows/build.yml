@@ -64,13 +64,13 @@ jobs:
         run: |
           set -e
           for TARGET in ${TARGETS}; do
-            TARGET="$(echo "${TARGET}" | sed 's/f//')"; \
-            ./fbt TARGET_HW=$TARGET copro_dist updater_package \
+            TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
+            ./fbt TARGET_HW=$TARGET_HW copro_dist updater_package \
               ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
             mv dist/${TARGET}-*/* artifacts/
             tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
               -C assets resources
-            ./fbt TARGET_HW=$TARGET fap_dist
+            ./fbt TARGET_HW=$TARGET_HW fap_dist
             tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
               -C dist/${TARGET}-*/apps/Debug dist/${TARGET}-*/apps/Debug 
           done
