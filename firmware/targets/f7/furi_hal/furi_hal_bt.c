@@ -7,6 +7,7 @@
 #include <furi_hal_version.h>
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_bt_serial.h>
+#include <furi_hal_bus.c>
 #include "battery_service.h"
 
 #include <furi.h>
@@ -18,6 +19,8 @@
 
 /* Time, in ms, to wait for mode transition before crashing */
 #define C2_MODE_SWITCH_TIMEOUT 10000
+
+#define FURI_HAL_BT_HARDFAULT_INFO_MAGIC 0x1170FD0F
 
 FuriMutex* furi_hal_bt_core2_mtx = NULL;
 static FuriHalBtStack furi_hal_bt_stack = FuriHalBtStackUnknown;
@@ -78,6 +81,12 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
 FuriHalBtProfileConfig* current_profile = NULL;
 
 void furi_hal_bt_init() {
+    furi_hal_bus_enable(FuriHalBusHSEM);
+    furi_hal_bus_enable(FuriHalBusIPCC);
+    furi_hal_bus_enable(FuriHalBusAES2);
+    furi_hal_bus_enable(FuriHalBusPKA);
+    furi_hal_bus_enable(FuriHalBusCRC);
+
     if(!furi_hal_bt_core2_mtx) {
         furi_hal_bt_core2_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
         furi_assert(furi_hal_bt_core2_mtx);
@@ -253,6 +262,12 @@ void furi_hal_bt_reinit() {
 
     furi_delay_ms(100);
     ble_glue_thread_stop();
+
+    furi_hal_bus_disable(FuriHalBusHSEM);
+    furi_hal_bus_disable(FuriHalBusIPCC);
+    furi_hal_bus_disable(FuriHalBusAES2);
+    furi_hal_bus_disable(FuriHalBusPKA);
+    furi_hal_bus_disable(FuriHalBusCRC);
 
     FURI_LOG_I(TAG, "Start BT initialization");
     furi_hal_bt_init();
@@ -439,4 +454,13 @@ bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
 
     FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
     return false;
+}
+
+const FuriHalBtHardfaultInfo* furi_hal_bt_get_hardfault_info() {
+    /* AN5289, 4.8.2 */
+    const FuriHalBtHardfaultInfo* info = (FuriHalBtHardfaultInfo*)(SRAM2A_BASE);
+    if(info->magic != FURI_HAL_BT_HARDFAULT_INFO_MAGIC) {
+        return NULL;
+    }
+    return info;
 }

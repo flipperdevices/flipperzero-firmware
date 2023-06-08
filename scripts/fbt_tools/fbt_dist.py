@@ -1,6 +1,5 @@
-from SCons.Builder import Builder
 from SCons.Action import Action
-from SCons.Script import Mkdir
+from SCons.Builder import Builder
 from SCons.Defaults import Touch
 
 
@@ -133,7 +132,7 @@ def generate(env):
             "UsbInstall": Builder(
                 action=[
                     Action(
-                        '${PYTHON3} "${SELFUPDATE_SCRIPT}" ${UPDATE_BUNDLE_DIR}/update.fuf'
+                        '${PYTHON3} "${SELFUPDATE_SCRIPT}" -p ${FLIP_PORT} ${UPDATE_BUNDLE_DIR}/update.fuf'
                     ),
                     Touch("${TARGET}"),
                 ]
