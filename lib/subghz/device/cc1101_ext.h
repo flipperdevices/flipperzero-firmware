@@ -4,9 +4,7 @@
  */
 
 #pragma once
-
-#include <lib\subghz\device\preset.h>
-
+#include "preset.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -17,14 +15,6 @@
 extern "C" {
 #endif
 
-/** Switchable Radio Paths */
-typedef enum {
-    FuriHalSubGhzPathIsolate, /**< Isolate Radio from antenna */
-    FuriHalSubGhzPath433, /**< Center Frequency: 433MHz. Path 1: SW1RF1-SW2RF2, LCLCL */
-    FuriHalSubGhzPath315, /**< Center Frequency: 315MHz. Path 2: SW1RF2-SW2RF1, LCLCLCL */
-    FuriHalSubGhzPath868, /**< Center Frequency: 868MHz. Path 3: SW1RF3-SW2RF3, LCLC */
-} FuriHalSubGhzPath;
-
 /* Mirror RX/TX async modulation signal to specified pin
  *
  * @warning    Configures pin to output mode. Make sure it is not connected
@@ -32,115 +22,118 @@ typedef enum {
  *
  * @param[in]  pin   pointer to the gpio pin structure or NULL to disable
  */
-void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin);
+void subghz_device_cc1101_ext_set_async_mirror_pin(const GpioPin* pin);
 
-/** Initialize and switch to power save mode Used by internal API-HAL
+bool subghz_device_cc1101_ext_alloc();
+void subghz_device_cc1101_ext_free();
+
+/** Check and switch to power save mode Used by internal API-HAL
  * initialization routine Can be used to reinitialize device to safe state and
  * send it to sleep
  */
-void furi_hal_subghz_init();
+bool subghz_device_cc1101_ext_check();
 
 /** Send device to sleep mode
  */
-void furi_hal_subghz_sleep();
+void subghz_device_cc1101_ext_sleep();
 
 /** Dump info to stdout
  */
-void furi_hal_subghz_dump_state();
+void subghz_device_cc1101_ext_dump_state();
 
 /** Load registers from preset by preset name
  *
  * @param      preset  to load
  */
-void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset);
+void subghz_device_cc1101_ext_load_preset(FuriHalSubGhzPreset preset);
 
 /** Load custom registers from preset
  *
  * @param      preset_data   registers to load
  */
-void furi_hal_subghz_load_custom_preset(uint8_t* preset_data);
+void subghz_device_cc1101_ext_load_custom_preset(uint8_t* preset_data);
 
 /** Load registers
  *
  * @param      data  Registers data
  */
-void furi_hal_subghz_load_registers(uint8_t* data);
+void subghz_device_cc1101_ext_load_registers(uint8_t* data);
 
 /** Load PATABLE
  *
  * @param      data  8 uint8_t values
  */
-void furi_hal_subghz_load_patable(const uint8_t data[8]);
+void subghz_device_cc1101_ext_load_patable(const uint8_t data[8]);
 
 /** Write packet to FIFO
  *
  * @param      data  bytes array
  * @param      size  size
  */
-void furi_hal_subghz_write_packet(const uint8_t* data, uint8_t size);
+void subghz_device_cc1101_ext_write_packet(const uint8_t* data, uint8_t size);
 
 /** Check if receive pipe is not empty
  *
  * @return     true if not empty
  */
-bool furi_hal_subghz_rx_pipe_not_empty();
+bool subghz_device_cc1101_ext_rx_pipe_not_empty();
 
 /** Check if received data crc is valid
  *
  * @return     true if valid
  */
-bool furi_hal_subghz_is_rx_data_crc_valid();
+bool subghz_device_cc1101_ext_is_rx_data_crc_valid();
 
 /** Read packet from FIFO
  *
  * @param      data  pointer
  * @param      size  size
  */
-void furi_hal_subghz_read_packet(uint8_t* data, uint8_t* size);
+void subghz_device_cc1101_ext_read_packet(uint8_t* data, uint8_t* size);
 
 /** Flush rx FIFO buffer
  */
-void furi_hal_subghz_flush_rx();
+void subghz_device_cc1101_ext_flush_rx();
 
 /** Flush tx FIFO buffer
  */
-void furi_hal_subghz_flush_tx();
+void subghz_device_cc1101_ext_flush_tx();
 
 /** Shutdown Issue SPWD command
  * @warning    registers content will be lost
  */
-void furi_hal_subghz_shutdown();
+void subghz_device_cc1101_ext_shutdown();
 
 /** Reset Issue reset command
  * @warning    registers content will be lost
  */
-void furi_hal_subghz_reset();
+void subghz_device_cc1101_ext_reset();
 
 /** Switch to Idle
  */
-void furi_hal_subghz_idle();
+void subghz_device_cc1101_ext_idle();
 
 /** Switch to Receive
  */
-void furi_hal_subghz_rx();
+void subghz_device_cc1101_ext_rx();
 
 /** Switch to Transmit
  *
  * @return     true if the transfer is allowed by belonging to the region
  */
-bool furi_hal_subghz_tx();
+bool subghz_device_cc1101_ext_tx();
 
 /** Get RSSI value in dBm
  *
  * @return     RSSI value
  */
-float furi_hal_subghz_get_rssi();
+float subghz_device_cc1101_ext_get_rssi();
 
 /** Get LQI
  *
  * @return     LQI value
  */
-uint8_t furi_hal_subghz_get_lqi();
+uint8_t subghz_device_cc1101_ext_get_lqi();
 
 /** Check if frequency is in valid range
  *
@@ -148,16 +141,7 @@ uint8_t furi_hal_subghz_get_lqi();
  *
  * @return     true if frequency is valid, otherwise false
  */
-bool furi_hal_subghz_is_frequency_valid(uint32_t value);
-
-/** Set frequency and path This function automatically selects antenna matching
- * network
- *
- * @param      value  frequency in Hz
- *
- * @return     real frequency in Hz
- */
-uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
+bool subghz_device_cc1101_ext_is_frequency_valid(uint32_t value);
 
 /** Set frequency
  *
@@ -165,54 +149,48 @@ uint32_t furi_hal_subghz_set_frequency_and_path(uint32_t value);
  *
  * @return     real frequency in Hz
  */
-uint32_t furi_hal_subghz_set_frequency(uint32_t value);
-
-/** Set path
- *
- * @param      path  path to use
- */
-void furi_hal_subghz_set_path(FuriHalSubGhzPath path);
+uint32_t subghz_device_cc1101_ext_set_frequency(uint32_t value);
 
 /* High Level API */
 
 /** Signal Timings Capture callback */
-typedef void (*FuriHalSubGhzCaptureCallback)(bool level, uint32_t duration, void* context);
+typedef void (*SubGhzDeviceCC1101ExtCaptureCallback)(bool level, uint32_t duration, void* context);
 
 /** Enable signal timings capture Initializes GPIO and TIM2 for timings capture
  *
- * @param      callback  FuriHalSubGhzCaptureCallback
+ * @param      callback  SubGhzDeviceCC1101ExtCaptureCallback
  * @param      context   callback context
  */
-void furi_hal_subghz_start_async_rx(FuriHalSubGhzCaptureCallback callback, void* context);
+void subghz_device_cc1101_ext_start_async_rx(SubGhzDeviceCC1101ExtCaptureCallback callback, void* context);
 
 /** Disable signal timings capture Resets GPIO and TIM2
  */
-void furi_hal_subghz_stop_async_rx();
+void subghz_device_cc1101_ext_stop_async_rx();
 
 /** Async TX callback type
  * @param      context  callback context
  * @return     LevelDuration
  */
-typedef LevelDuration (*FuriHalSubGhzAsyncTxCallback)(void* context);
+typedef LevelDuration (*SubGhzDeviceCC1101ExtCallback)(void* context);
 
 /** Start async TX Initializes GPIO, TIM2 and DMA1 for signal output
  *
- * @param      callback  FuriHalSubGhzAsyncTxCallback
+ * @param      callback  SubGhzDeviceCC1101ExtCallback
  * @param      context   callback context
  *
  * @return     true if the transfer is allowed by belonging to the region
  */
-bool furi_hal_subghz_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context);
+bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callback, void* context);
 
 /** Wait for async transmission to complete
  *
  * @return     true if TX complete
  */
-bool furi_hal_subghz_is_async_tx_complete();
+bool subghz_device_cc1101_ext_is_async_tx_complete();
 
 /** Stop async transmission and cleanup resources Resets GPIO, TIM2, and DMA1
  */
-void furi_hal_subghz_stop_async_tx();
+void subghz_device_cc1101_ext_stop_async_tx();
 
 #ifdef __cplusplus
 }

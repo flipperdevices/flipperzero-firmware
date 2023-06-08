@@ -2,7 +2,7 @@
 
 #include <cc1101.h>
 
-static const uint8_t furi_hal_subghz_preset_ook_270khz_async_regs[][2] = {
+static const uint8_t subghz_device_cc1101_preset_ook_270khz_async_regs[][2] = {
     // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
 
     /* GPIO GD0 */
@@ -49,7 +49,7 @@ static const uint8_t furi_hal_subghz_preset_ook_270khz_async_regs[][2] = {
     {0, 0},
 };
 
-static const uint8_t furi_hal_subghz_preset_ook_650khz_async_regs[][2] = {
+static const uint8_t subghz_device_cc1101_preset_ook_650khz_async_regs[][2] = {
     // https://e2e.ti.com/support/wireless-connectivity/sub-1-ghz-group/sub-1-ghz/f/sub-1-ghz-forum/382066/cc1101---don-t-know-the-correct-registers-configuration
 
     /* GPIO GD0 */
@@ -100,7 +100,7 @@ static const uint8_t furi_hal_subghz_preset_ook_650khz_async_regs[][2] = {
     {0, 0},
 };
 
-static const uint8_t furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs[][2] = {
+static const uint8_t subghz_device_cc1101_preset_2fsk_dev2_38khz_async_regs[][2] = {
 
     /* GPIO GD0 */
     {CC1101_IOCFG0, 0x0D}, // GD0 as async serial data output/input
@@ -145,7 +145,7 @@ static const uint8_t furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs[][2] = {
     {0, 0},
 };
 
-static const uint8_t furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs[][2] = {
+static const uint8_t subghz_device_cc1101_preset_2fsk_dev47_6khz_async_regs[][2] = {
 
     /* GPIO GD0 */
     {CC1101_IOCFG0, 0x0D}, // GD0 as async serial data output/input
@@ -190,7 +190,7 @@ static const uint8_t furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs[][2] = {
     {0, 0},
 };
 
-static const uint8_t furi_hal_subghz_preset_msk_99_97kb_async_regs[][2] = {
+static const uint8_t subghz_device_cc1101_preset_msk_99_97kb_async_regs[][2] = {
     /* GPIO GD0 */
     {CC1101_IOCFG0, 0x06},
 
@@ -230,7 +230,7 @@ static const uint8_t furi_hal_subghz_preset_msk_99_97kb_async_regs[][2] = {
     {0, 0},
 };
 
-static const uint8_t furi_hal_subghz_preset_gfsk_9_99kb_async_regs[][2] = {
+static const uint8_t subghz_device_cc1101_preset_gfsk_9_99kb_async_regs[][2] = {
 
     {CC1101_IOCFG0, 0x06}, //GDO0 Output Pin Configuration
     {CC1101_FIFOTHR, 0x47}, //RX FIFO and TX FIFO Thresholds
@@ -263,7 +263,7 @@ static const uint8_t furi_hal_subghz_preset_gfsk_9_99kb_async_regs[][2] = {
     {0, 0},
 };
 
-static const uint8_t furi_hal_subghz_preset_ook_async_patable[8] = {
+static const uint8_t subghz_device_cc1101_preset_ook_async_patable[8] = {
     0x00,
     0xC0, // 12dBm 0xC0, 10dBm 0xC5, 7dBm 0xCD, 5dBm 0x86, 0dBm 0x50, -6dBm 0x37, -10dBm 0x26, -15dBm 0x1D, -20dBm 0x17, -30dBm 0x03
     0x00,
@@ -273,7 +273,7 @@ static const uint8_t furi_hal_subghz_preset_ook_async_patable[8] = {
     0x00,
     0x00};
 
-static const uint8_t furi_hal_subghz_preset_ook_async_patable_au[8] = {
+static const uint8_t subghz_device_cc1101_preset_ook_async_patable_au[8] = {
     0x00,
     0x37, // 12dBm 0xC0, 10dBm 0xC5, 7dBm 0xCD, 5dBm 0x86, 0dBm 0x50, -6dBm 0x37, -10dBm 0x26, -15dBm 0x1D, -20dBm 0x17, -30dBm 0x03
     0x00,
@@ -283,7 +283,7 @@ static const uint8_t furi_hal_subghz_preset_ook_async_patable_au[8] = {
     0x00,
     0x00};
 
-static const uint8_t furi_hal_subghz_preset_2fsk_async_patable[8] = {
+static const uint8_t subghz_device_cc1101_preset_2fsk_async_patable[8] = {
     0xC0, // 10dBm 0xC0, 7dBm 0xC8, 5dBm 0x84, 0dBm 0x60, -10dBm 0x34, -15dBm 0x1D, -20dBm 0x0E, -30dBm 0x12
     0x00,
     0x00,
@@ -293,7 +293,7 @@ static const uint8_t furi_hal_subghz_preset_2fsk_async_patable[8] = {
     0x00,
     0x00};
 
-static const uint8_t furi_hal_subghz_preset_msk_async_patable[8] = {
+static const uint8_t subghz_device_cc1101_preset_msk_async_patable[8] = {
     0xC0, // 10dBm 0xC0, 7dBm 0xC8, 5dBm 0x84, 0dBm 0x60, -10dBm 0x34, -15dBm 0x1D, -20dBm 0x0E, -30dBm 0x12
     0x00,
     0x00,
@@ -303,7 +303,7 @@ static const uint8_t furi_hal_subghz_preset_msk_async_patable[8] = {
     0x00,
     0x00};
 
-static const uint8_t furi_hal_subghz_preset_gfsk_async_patable[8] = {
+static const uint8_t subghz_device_cc1101_preset_gfsk_async_patable[8] = {
     0xC0, // 10dBm 0xC0, 7dBm 0xC8, 5dBm 0x84, 0dBm 0x60, -10dBm 0x34, -15dBm 0x1D, -20dBm 0x0E, -30dBm 0x12
     0x00,
     0x00,

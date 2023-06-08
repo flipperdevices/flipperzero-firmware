@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,29.0,,
+Version,+,31.1,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -56,7 +56,6 @@ Header,+,firmware/targets/f7/furi_hal/furi_hal_rfid.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_spi_config.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_spi_types.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_subghz.h,,
-Header,+,firmware/targets/f7/furi_hal/furi_hal_subghz_configs.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_target_hw.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_uart.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_usb_cdc.h,,
@@ -656,26 +655,6 @@ Function,+,canvas_width,uint8_t,const Canvas*
 Function,-,cbrt,double,double
 Function,-,cbrtf,float,float
 Function,-,cbrtl,long double,long double
-Function,+,cc1101_calibrate,void,FuriHalSpiBusHandle*
-Function,+,cc1101_flush_rx,void,FuriHalSpiBusHandle*
-Function,+,cc1101_flush_tx,void,FuriHalSpiBusHandle*
-Function,-,cc1101_get_partnumber,uint8_t,FuriHalSpiBusHandle*
-Function,+,cc1101_get_rssi,uint8_t,FuriHalSpiBusHandle*
-Function,+,cc1101_get_status,CC1101Status,FuriHalSpiBusHandle*
-Function,-,cc1101_get_version,uint8_t,FuriHalSpiBusHandle*
-Function,+,cc1101_read_fifo,uint8_t,"FuriHalSpiBusHandle*, uint8_t*, uint8_t*"
-Function,+,cc1101_read_reg,CC1101Status,"FuriHalSpiBusHandle*, uint8_t, uint8_t*"
-Function,+,cc1101_reset,void,FuriHalSpiBusHandle*
-Function,+,cc1101_set_frequency,uint32_t,"FuriHalSpiBusHandle*, uint32_t"
-Function,-,cc1101_set_intermediate_frequency,uint32_t,"FuriHalSpiBusHandle*, uint32_t"
-Function,+,cc1101_set_pa_table,void,"FuriHalSpiBusHandle*, const uint8_t[8]"
-Function,+,cc1101_shutdown,void,FuriHalSpiBusHandle*
-Function,+,cc1101_strobe,CC1101Status,"FuriHalSpiBusHandle*, uint8_t"
-Function,+,cc1101_switch_to_idle,void,FuriHalSpiBusHandle*
-Function,+,cc1101_switch_to_rx,void,FuriHalSpiBusHandle*
-Function,+,cc1101_switch_to_tx,void,FuriHalSpiBusHandle*
-Function,+,cc1101_write_fifo,uint8_t,"FuriHalSpiBusHandle*, const uint8_t*, uint8_t"
-Function,+,cc1101_write_reg,CC1101Status,"FuriHalSpiBusHandle*, uint8_t, uint8_t"
 Function,-,ceil,double,double
 Function,-,ceilf,float,float
 Function,-,ceill,long double,long double
@@ -1392,7 +1371,7 @@ Function,+,furi_hal_subghz_rx_pipe_not_empty,_Bool,
 Function,+,furi_hal_subghz_set_async_mirror_pin,void,const GpioPin*
 Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
-Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
+Function,-,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
 Function,-,furi_hal_subghz_shutdown,void,
 Function,+,furi_hal_subghz_sleep,void,
 Function,+,furi_hal_subghz_start_async_rx,void,"FuriHalSubGhzCaptureCallback, void*"

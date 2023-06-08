@@ -4,7 +4,7 @@
 
 #include <furi.h>
 #include <m-list.h>
-#include <furi_hal_subghz_configs.h>
+#include <lib/subghz/device/cc1101_configs.h>
 
 #define TAG "SubGhzSetting"
 
@@ -264,23 +264,23 @@ static void subghz_setting_load_default_region(
     subghz_setting_load_default_preset(
         instance,
         "AM270",
-        (uint8_t*)furi_hal_subghz_preset_ook_270khz_async_regs,
-        furi_hal_subghz_preset_ook_async_patable);
+        (uint8_t*)subghz_device_cc1101_preset_ook_270khz_async_regs,
+        subghz_device_cc1101_preset_ook_async_patable);
     subghz_setting_load_default_preset(
         instance,
         "AM650",
-        (uint8_t*)furi_hal_subghz_preset_ook_650khz_async_regs,
-        furi_hal_subghz_preset_ook_async_patable);
+        (uint8_t*)subghz_device_cc1101_preset_ook_650khz_async_regs,
+        subghz_device_cc1101_preset_ook_async_patable);
     subghz_setting_load_default_preset(
         instance,
         "FM238",
-        (uint8_t*)furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs,
-        furi_hal_subghz_preset_2fsk_async_patable);
+        (uint8_t*)subghz_device_cc1101_preset_2fsk_dev2_38khz_async_regs,
+        subghz_device_cc1101_preset_2fsk_async_patable);
     subghz_setting_load_default_preset(
         instance,
         "FM476",
-        (uint8_t*)furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs,
-        furi_hal_subghz_preset_2fsk_async_patable);
+        (uint8_t*)subghz_device_cc1101_preset_2fsk_dev47_6khz_async_regs,
+        subghz_device_cc1101_preset_2fsk_async_patable);
 }
 
 void subghz_setting_load_default(SubGhzSetting* instance) {

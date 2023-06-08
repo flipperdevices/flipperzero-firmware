@@ -1,6 +1,5 @@
 #include <furi_hal_subghz.h>
-#include <furi_hal_subghz_configs.h>
-
+#include <lib/subghz/device/cc1101_configs.h>
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
 #include <furi_hal_rtc.h>
@@ -26,6 +25,32 @@ static uint32_t furi_hal_subghz_debug_gpio_buff[2];
 #define SUBGHZ_DMA_CH1_IRQ FuriHalInterruptIdDma2Ch1
 #define SUBGHZ_DMA_CH1_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH1_CHANNEL
 #define SUBGHZ_DMA_CH2_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH2_CHANNEL
+
+/** Low level buffer dimensions and guard times */
+#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256)
+#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
+#define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME 999
+
+/** SubGhz state */
+typedef enum {
+    SubGhzStateInit, /**< Init pending */
+
+    SubGhzStateIdle, /**< Idle, energy save mode */
+
+    SubGhzStateAsyncRx, /**< Async RX started */
+
+    SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
+    SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
+    SubGhzStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
+
+} SubGhzState;
+
+/** SubGhz regulation, receive transmission on the current frequency for the
+ * region */
+typedef enum {
+    SubGhzRegulationOnlyRx, /**only Rx*/
+    SubGhzRegulationTxRx, /**TxRx*/
+} SubGhzRegulation;
 
 typedef struct {
     volatile SubGhzState state;
@@ -117,25 +142,29 @@ void furi_hal_subghz_dump_state() {
 
 void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset) {
     if(preset == FuriHalSubGhzPresetOok650Async) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_ook_650khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
+        furi_hal_subghz_load_registers(
+            (uint8_t*)subghz_device_cc1101_preset_ook_650khz_async_regs);
+        furi_hal_subghz_load_patable(subghz_device_cc1101_preset_ook_async_patable);
     } else if(preset == FuriHalSubGhzPresetOok270Async) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_ook_270khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_ook_async_patable);
+        furi_hal_subghz_load_registers(
+            (uint8_t*)subghz_device_cc1101_preset_ook_270khz_async_regs);
+        furi_hal_subghz_load_patable(subghz_device_cc1101_preset_ook_async_patable);
     } else if(preset == FuriHalSubGhzPreset2FSKDev238Async) {
         furi_hal_subghz_load_registers(
-            (uint8_t*)furi_hal_subghz_preset_2fsk_dev2_38khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
+            (uint8_t*)subghz_device_cc1101_preset_2fsk_dev2_38khz_async_regs);
+        furi_hal_subghz_load_patable(subghz_device_cc1101_preset_2fsk_async_patable);
     } else if(preset == FuriHalSubGhzPreset2FSKDev476Async) {
         furi_hal_subghz_load_registers(
-            (uint8_t*)furi_hal_subghz_preset_2fsk_dev47_6khz_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_2fsk_async_patable);
+            (uint8_t*)subghz_device_cc1101_preset_2fsk_dev47_6khz_async_regs);
+        furi_hal_subghz_load_patable(subghz_device_cc1101_preset_2fsk_async_patable);
     } else if(preset == FuriHalSubGhzPresetMSK99_97KbAsync) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_msk_99_97kb_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_msk_async_patable);
+        furi_hal_subghz_load_registers(
+            (uint8_t*)subghz_device_cc1101_preset_msk_99_97kb_async_regs);
+        furi_hal_subghz_load_patable(subghz_device_cc1101_preset_msk_async_patable);
     } else if(preset == FuriHalSubGhzPresetGFSK9_99KbAsync) {
-        furi_hal_subghz_load_registers((uint8_t*)furi_hal_subghz_preset_gfsk_9_99kb_async_regs);
-        furi_hal_subghz_load_patable(furi_hal_subghz_preset_gfsk_async_patable);
+        furi_hal_subghz_load_registers(
+            (uint8_t*)subghz_device_cc1101_preset_gfsk_9_99kb_async_regs);
+        furi_hal_subghz_load_patable(subghz_device_cc1101_preset_gfsk_async_patable);
     } else {
         furi_crash("SubGhz: Missing config.");
     }
