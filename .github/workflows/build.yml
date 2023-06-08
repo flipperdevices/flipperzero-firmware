@@ -72,7 +72,7 @@ jobs:
               -C assets resources
             ./fbt TARGET_HW=$TARGET_HW fap_dist
             tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
-              -C dist/${TARGET}-*/apps/Debug dist/${TARGET}-*/apps/Debug 
+              -C dist/${TARGET}-*/apps/Debug .
           done
 
       - name: "Check for uncommitted changes"
