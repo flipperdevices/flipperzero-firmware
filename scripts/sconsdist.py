@@ -80,7 +80,7 @@ class Main(App):
                     src_file,
                     self.get_dist_path(self.get_project_file_name(project, filetype)),
                 )
-        for foldertype in ("sdk_headers",):
+        for foldertype in ("sdk_headers", "lib"):
             if exists(sdk_folder := join(obj_directory, foldertype)):
                 self.note_dist_component(foldertype, "dir", sdk_folder)
 
@@ -158,6 +158,7 @@ class Main(App):
             "firmware.elf",
             "update.dir",
             "sdk_headers.dir",
+            "lib.dir",
             "scripts.dir",
         )
 
