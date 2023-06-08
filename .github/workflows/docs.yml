@@ -59,5 +59,9 @@ jobs:
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./flipperzero-documentation/sphinx_out/${{steps.names.outputs.branch_name}}
+          publish_dir: ./flipperzero-documentation/sphinx_out/${{steps.names.outputs.branch_name}}/doxygen/html/
           publish_branch: docs
+
+      - name: 'List out directory'
+        run: |
+          ls -la flipperzero-documentation/sphinx_out/${BRANCH_NAME}/doxygen/html/
