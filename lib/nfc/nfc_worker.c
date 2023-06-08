@@ -704,7 +704,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     memcpy(current_key, &key, 6);
 
                     if(mf_classic_is_key_found(data, i, MfClassicKeyA) &&
-                       found_key == current_key) {
+                       memcmp(found_key, current_key, 6) == 0) {
                         mf_classic_set_key_not_found(data, i, MfClassicKeyA);
                         is_key_a_found = false;
                         FURI_LOG_D(TAG, "Key %dA not found in attack", i);
@@ -730,7 +730,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                     memcpy(current_key, &key, 6);
 
                     if(mf_classic_is_key_found(data, i, MfClassicKeyB) &&
-                       found_key == current_key) {
+                       memcmp(found_key, current_key, 6) == 0) {
                         mf_classic_set_key_not_found(data, i, MfClassicKeyB);
                         is_key_b_found = false;
                         FURI_LOG_D(TAG, "Key %dB not found in attack", i);
