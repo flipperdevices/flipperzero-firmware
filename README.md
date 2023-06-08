@@ -56,7 +56,8 @@ The program will automatically be launched after compilation
 
 Press **Ok** button to clear the graph, press **Left/Right** to choose unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), press **Back** button to quit
 
-If you don't want to build this application, just simply copy **flipper_geiger.fap** on your **Flipper Zero**
+If you don't want to build this application, just simply copy **flipper_geiger.fap** on your **Flipper Zero** 
+**API Mismatch** error may appear. If you are using Unleashed firmware you can bypass and ignore the error
 
 ## Use cases
 
@@ -104,6 +105,9 @@ Here are some nice ideas to improve this app :
 * Buzz when it gets dangerous like a dosimeter
 
 ## Changelog
+
+* 2023-06-08
+  * Bug fixing
 
 * 2023-04-11
   * More usable/unusable sources
