@@ -120,15 +120,15 @@ void dcf77_lf_init(int freq, AppFSM* app_fsm) {
 
 void dcf77_mark(int freq) {
     furi_hal_rfid_comp_start();
-    furi_hal_rfid_tim_read_start(freq, 0.5);
+    furi_hal_rfid_tim_read_continue();
     /* --- */
     furi_hal_rfid_comp_stop();
-    furi_hal_rfid_tim_read_stop();
+    furi_hal_rfid_tim_read_pause();
 }
 
 void dcf77_space() {
     furi_hal_rfid_comp_stop();
-    furi_hal_rfid_tim_read_stop();
+    furi_hal_rfid_tim_read_pause();
 }
 
 void dcf77_deinit() {
