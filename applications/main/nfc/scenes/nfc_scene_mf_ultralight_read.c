@@ -16,16 +16,16 @@ MfUltralightPollerCommand
             nfc->view_dispatcher, NfcWorkerEventMfUltralightReadSuccess);
         command = MfUltralightPollerCommandStop;
     } else if(event.type == MfUltralightPollerEventTypeAuthRequest) {
-        MfUltralightData* data = &nfc->nfc_dev_data.mf_ul_data;
+        MfUltralightData* data = nfc->nfc_dev_data.mf_ul_data;
         mf_ultralight_poller_get_data(nfc->mf_ul_poller, data);
         if(nfc->mf_ul_auth->type == MfUltralightAuthTypeXiaomii) {
             if(mf_ultralight_generate_xiaomi_pass(
-                   nfc->mf_ul_auth, data->nfca_data.uid, data->nfca_data.uid_len)) {
+                   nfc->mf_ul_auth, data->nfca_data->uid, data->nfca_data->uid_len)) {
                 event.data->auth_context.skip_auth = false;
             }
         } else if(nfc->mf_ul_auth->type == MfUltralightAuthTypeAmiibo) {
             if(mf_ultralight_generate_amiibo_pass(
-                   nfc->mf_ul_auth, data->nfca_data.uid, data->nfca_data.uid_len)) {
+                   nfc->mf_ul_auth, data->nfca_data->uid, data->nfca_data->uid_len)) {
                 event.data->auth_context.skip_auth = false;
             }
         } else if(nfc->mf_ul_auth->type == MfUltralightAuthTypeManual) {
@@ -62,7 +62,7 @@ bool nfc_scene_mf_ultralight_read_on_event(void* context, SceneManagerEvent even
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcWorkerEventMfUltralightReadSuccess) {
             notification_message(nfc->notifications, &sequence_success);
-            mf_ultralight_poller_get_data(nfc->mf_ul_poller, &nfc->nfc_dev_data.mf_ul_data);
+            mf_ultralight_poller_get_data(nfc->mf_ul_poller, nfc->nfc_dev_data.mf_ul_data);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightReadSuccess);
             DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;

@@ -283,7 +283,7 @@ MfUltralightError
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
 
     if(poller_context.error == MfUltralightErrorNone) {
-        *data = poller_context.data.data;
+        mf_ultralight_copy(data, &poller_context.data.data);
     }
     mf_ultralight_poller_stop(instance);
 

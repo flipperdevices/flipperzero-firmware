@@ -28,8 +28,16 @@ typedef struct {
 } Iso14443_4aAtsResponse;
 
 typedef struct {
-    NfcaData iso14443_3a_data;
+    NfcaData* iso14443_3a_data;
 } Iso14443_4aData;
+
+Iso14443_4aData* iso14443_4a_alloc();
+
+void iso14443_4a_free(Iso14443_4aData* data);
+
+void iso14443_4a_reset(Iso14443_4aData* data);
+
+void iso14443_4a_copy(Iso14443_4aData* data, const Iso14443_4aData* other);
 
 #ifdef __cplusplus
 }

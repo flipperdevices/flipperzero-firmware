@@ -17,8 +17,8 @@ void nfc_scene_mf_desfire_read_success_on_enter(void* context) {
 
     // Setup view
     nfc->nfc_dev_data.protocol = NfcDevProtocolMfDesfire;
-    MfDesfireData* data = &nfc->nfc_dev_data.mf_desfire_data;
-    NfcaData* iso14443_3a_data = &data->iso14443_4a_data.iso14443_3a_data;
+    MfDesfireData* data = nfc->nfc_dev_data.mf_desfire_data;
+    NfcaData* iso14443_3a_data = data->iso14443_4a_data->iso14443_3a_data;
     Widget* widget = nfc->widget;
 
     FuriString* temp_str;

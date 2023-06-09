@@ -113,6 +113,43 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
         },
 };
 
+MfUltralightData* mf_ultralight_alloc() {
+    MfUltralightData* data = malloc(sizeof(MfUltralightData));
+    data->nfca_data = nfca_alloc();
+    return data;
+}
+
+void mf_ultralight_free(MfUltralightData* data) {
+    furi_assert(data);
+
+    nfca_free(data->nfca_data);
+    free(data);
+}
+
+void mf_ultralight_reset(MfUltralightData* data) {
+    furi_assert(data);
+
+    nfca_reset(data->nfca_data);
+}
+
+void mf_ultralight_copy(MfUltralightData* data, const MfUltralightData* other) {
+    furi_assert(data);
+    furi_assert(other);
+
+    nfca_copy(data->nfca_data, other->nfca_data);
+    memcpy(data->counter, other->counter, MF_ULTRALIGHT_COUNTER_NUM);
+    memcpy(data->tearing_flag, other->tearing_flag, MF_ULTRALIGHT_TEARING_FLAG_NUM);
+    memcpy(data->page, other->page, MF_ULTRALIGHT_MAX_PAGE_NUM);
+
+    data->type = other->type;
+    data->version = other->version;
+    data->signature = other->signature;
+
+    data->pages_read = other->pages_read;
+    data->pages_total = other->pages_total;
+    data->auth_attempts = other->auth_attempts;
+}
+
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version) {
     furi_assert(version);
 

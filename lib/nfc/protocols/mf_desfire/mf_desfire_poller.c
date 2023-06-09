@@ -41,7 +41,8 @@ static MfDesfirePollerCommand mf_desfire_poller_handler_idle(MfDesfirePoller* in
     bit_buffer_reset(instance->result_buffer);
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
-    iso14443_4a_poller_get_data(instance->iso14443_4a_poller, &instance->data->iso14443_4a_data);
+
+    iso14443_4a_poller_get_data(instance->iso14443_4a_poller, instance->data->iso14443_4a_data);
 
     instance->state = MfDesfirePollerStateReadVersion;
     return MfDesfirePollerCommandContinue;
@@ -156,7 +157,7 @@ MfDesfireError mf_desfire_poller_start(
     furi_assert(callback);
     furi_assert(instance->session_state == MfDesfirePollerSessionStateIdle);
 
-    instance->data = malloc(sizeof(MfDesfireData));
+    instance->data = mf_desfire_alloc();
     instance->input_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
     instance->result_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
     instance->tx_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
@@ -221,7 +222,7 @@ MfDesfireError mf_desfire_poller_stop(MfDesfirePoller* instance) {
     instance->session_state = MfDesfirePollerSessionStateStopRequest;
     iso14443_4a_poller_stop(instance->iso14443_4a_poller);
     instance->session_state = MfDesfirePollerSessionStateIdle;
-    free(instance->data);
+    mf_desfire_free(instance->data);
 
     return mf_desfire_poller_reset(instance);
 }

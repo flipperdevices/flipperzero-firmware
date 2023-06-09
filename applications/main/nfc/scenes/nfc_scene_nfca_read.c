@@ -11,7 +11,7 @@ NfcaPollerCommand nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, voi
     NfcaPollerCommand command = NfcaPollerCommandContinue;
 
     if(event.type == NfcaPollerEventTypeReady) {
-        nfca_poller_get_data(nfc->nfca_poller, &nfc->nfc_dev_data.nfca_data);
+        nfca_poller_get_data(nfc->nfca_poller, nfc->nfc_dev_data.nfca_data);
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcWorkerEventReadUidNfcA);
         command = NfcaPollerCommandStop;
     }

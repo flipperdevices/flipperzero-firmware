@@ -148,8 +148,8 @@ NfcaError nfca_listener_start(
     instance->callback = callback;
     instance->context = context;
 
-    instance->data = malloc(sizeof(NfcaData));
-    *instance->data = *data;
+    instance->data = nfca_alloc();
+    nfca_copy(instance->data, data);
 
     nfc_start_listener(instance->nfc, nfca_listener_event_handler, instance);
 
@@ -158,11 +158,9 @@ NfcaError nfca_listener_start(
 
 NfcaError nfca_listener_stop(NfcaListener* instance) {
     furi_assert(instance);
-    furi_assert(instance->nfc);
-    furi_assert(instance->data);
 
     nfc_listener_abort(instance->nfc);
-    free(instance->data);
+    nfca_free(instance->data);
 
     instance->callback = NULL;
     instance->context = NULL;
@@ -173,10 +171,8 @@ NfcaError nfca_listener_stop(NfcaListener* instance) {
 
 NfcaError nfca_listener_get_data(NfcaListener* instance, NfcaData* data) {
     furi_assert(instance);
-    furi_assert(data);
-    furi_assert(instance->data);
 
-    *data = *instance->data;
+    nfca_copy(data, instance->data);
 
     return NfcaErrorNone;
 }

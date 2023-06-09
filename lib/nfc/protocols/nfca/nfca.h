@@ -65,6 +65,14 @@ typedef struct {
     NfcaRats rats;
 } NfcaData;
 
+NfcaData* nfca_alloc();
+
+void nfca_free(NfcaData* data);
+
+void nfca_reset(NfcaData* data);
+
+void nfca_copy(NfcaData* data, const NfcaData* other);
+
 uint16_t nfca_get_crc(uint8_t* buff, uint16_t len);
 
 void nfca_append_crc(uint8_t* buff, uint16_t len);

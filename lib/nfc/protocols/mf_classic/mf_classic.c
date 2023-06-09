@@ -34,6 +34,38 @@ MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
         },
 };
 
+MfClassicData* mf_classic_alloc() {
+    MfClassicData* data = malloc(sizeof(MfClassicData));
+    data->nfca_data = nfca_alloc();
+    return data;
+}
+
+void mf_classic_free(MfClassicData* data) {
+    furi_assert(data);
+
+    nfca_free(data->nfca_data);
+    free(data);
+}
+
+void mf_classic_reset(MfClassicData* data) {
+    furi_assert(data);
+
+    nfca_reset(data->nfca_data);
+}
+
+void mf_classic_copy(MfClassicData* data, const MfClassicData* other) {
+    furi_assert(data);
+    furi_assert(other);
+
+    nfca_copy(data->nfca_data, other->nfca_data);
+    memcpy(data->block, other->block, MF_CLASSIC_TOTAL_BLOCKS_MAX);
+    memcpy(data->block_read_mask, other->block_read_mask, MF_CLASSIC_READ_MASK_SIZE);
+
+    data->type = other->type;
+    data->key_a_mask = other->key_a_mask;
+    data->key_b_mask = other->key_b_mask;
+}
+
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type) {
     return mf_classic_features[type].sectors_total;
 }

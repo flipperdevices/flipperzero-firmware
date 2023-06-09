@@ -119,8 +119,7 @@ struct NfcApp {
     NfcSupportedCards* supported_cards;
 
     NfcDev* nfc_dev;
-    NfcDevData nfc_dev_data;
-    NfcaData nfca_edit_data;
+    NfcaData* nfca_edit_data;
     FuriString* file_path;
     FuriString* file_name;
 };

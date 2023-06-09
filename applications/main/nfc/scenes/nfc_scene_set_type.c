@@ -37,12 +37,12 @@ bool nfc_scene_set_type_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexNFCA7) {
             nfc->nfc_dev_data.protocol = NfcDevProtocolNfca;
-            nfc->nfc_dev_data.nfca_data.uid_len = 7;
+            nfc->nfc_dev_data.nfca_data->uid_len = 7;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSetSak);
             consumed = true;
         } else if(event.event == SubmenuIndexNFCA4) {
             nfc->nfc_dev_data.protocol = NfcDevProtocolNfca;
-            nfc->nfc_dev_data.nfca_data.uid_len = 4;
+            nfc->nfc_dev_data.nfca_data->uid_len = 4;
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSetSak);
             consumed = true;
         } else {

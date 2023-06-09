@@ -80,7 +80,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
         submenu, "Info", SubmenuIndexInfo, nfc_scene_saved_menu_submenu_callback, nfc);
 
     if(data->protocol == NfcDevProtocolMfUltralight) {
-        if(!mf_ultralight_is_all_data_read(&data->mf_ul_data)) {
+        if(!mf_ultralight_is_all_data_read(data->mf_ul_data)) {
             submenu_add_item(
                 submenu,
                 "Unlock with Reader",

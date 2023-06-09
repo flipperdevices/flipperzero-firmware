@@ -396,8 +396,8 @@ MfUltralightError mf_ultralight_listener_start(
     furi_assert(instance);
     furi_assert(data);
 
-    instance->data = malloc(sizeof(MfUltralightData));
-    *instance->data = *data;
+    instance->data = mf_ultralight_alloc();
+    mf_ultralight_copy(instance->data, data);
     mf_ultralight_listener_prepare_emulation(instance);
 
     instance->callback = callback;
@@ -405,7 +405,7 @@ MfUltralightError mf_ultralight_listener_start(
 
     NfcaError error = nfca_listener_start(
         instance->nfca_listener,
-        &instance->data->nfca_data,
+        instance->data->nfca_data,
         mf_ultralight_listener_event_handler,
         instance);
 
@@ -424,7 +424,7 @@ MfUltralightError
     furi_assert(instance->data);
     furi_assert(data);
 
-    *data = *instance->data;
+    mf_ultralight_copy(data, instance->data);
 
     return MfUltralightErrorNone;
 }
@@ -435,7 +435,7 @@ MfUltralightError mf_ultralight_listener_stop(MfUltralightListener* instance) {
 
     NfcaError error = nfca_listener_stop(instance->nfca_listener);
     instance->state = MfUltraligthListenerStateIdle;
-    free(instance->data);
+    mf_ultralight_free(instance->data);
 
     return mf_ultralight_process_error(error);
 }

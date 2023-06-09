@@ -45,7 +45,7 @@ MfClassicError mf_classic_async_auth(
     NfcaError error = NfcaErrorNone;
 
     do {
-        nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
+        nfca_poller_get_data(instance->nfca_poller, instance->data->nfca_data);
         uint8_t auth_cmd = (key_type == MfClassicKeyTypeB) ? MF_CLASSIC_AUTH_KEY_B_CMD :
                                                              MF_CLASSIC_AUTH_KEY_A_CMD;
         buff->tx_data[0] = auth_cmd;
@@ -72,9 +72,9 @@ MfClassicError mf_classic_async_auth(
             memcpy(data->nt.data, buff->rx_data, sizeof(MfClassicNt));
         }
 
-        uint8_t* cuid_start = instance->data->nfca_data.uid;
-        if(instance->data->nfca_data.uid_len == 7) {
-            cuid_start = &instance->data->nfca_data.uid[3];
+        uint8_t* cuid_start = instance->data->nfca_data->uid;
+        if(instance->data->nfca_data->uid_len == 7) {
+            cuid_start = &instance->data->nfca_data->uid[3];
         }
         uint32_t cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) |
                         (cuid_start[3]);

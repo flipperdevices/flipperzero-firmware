@@ -135,6 +135,7 @@ NfcApp* nfc_app_alloc() {
         NfcViewDetectReader,
         detect_reader_get_view(instance->detect_reader));
 
+    instance->nfca_edit_data = nfca_alloc();
     instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
     instance->file_name = furi_string_alloc();
 
@@ -235,6 +236,7 @@ void nfc_app_free(NfcApp* instance) {
 
     instance->notifications = NULL;
 
+    nfca_free(instance->nfca_edit_data);
     furi_string_free(instance->file_path);
     furi_string_free(instance->file_name);
 

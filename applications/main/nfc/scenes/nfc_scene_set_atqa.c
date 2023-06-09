@@ -17,7 +17,7 @@ void nfc_scene_set_atqa_on_enter(void* context) {
         nfc_scene_set_atqa_byte_input_callback,
         NULL,
         nfc,
-        nfc->nfc_dev_data.nfca_data.atqa,
+        nfc->nfc_dev_data.nfca_data->atqa,
         2);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewByteInput);
 }

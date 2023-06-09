@@ -1,5 +1,12 @@
 #include "nfc_dev.h"
 
+#include <lib/nfc/protocols/nfca/nfca.h>
+#include <lib/nfc/protocols/iso14443_4a/iso14443_4a.h>
+#include <lib/nfc/protocols/mf_ultralight/mf_ultralight.h>
+#include <lib/nfc/protocols/mf_classic/mf_classic.h>
+#include <lib/nfc/protocols/mf_desfire/mf_desfire.h>
+#include <lib/nfc/protocols/nfcb/nfcb.h>
+
 #include <storage/storage.h>
 #include <flipper_format/flipper_format.h>
 
@@ -18,14 +25,30 @@ static const uint32_t nfc_mifare_classic_data_format_version = 2;
 static const uint32_t nfc_mifare_ultralight_data_format_version = 1;
 
 struct NfcDev {
+    NfcDevProtocol protocol;
+    NfcDevProtocolData* protocol_data;
     bool shadow_file_exist;
-
     NfcLoadingCallback loading_callback;
     void* loading_callback_context;
 };
 
-typedef bool (*NfcDevVerifyProtocol)(FuriString* device_type, NfcDevData* data);
-typedef bool (*NfcDevDataHandler)(FlipperFormat* file, uint32_t version, NfcDevData* data);
+typedef NfcDevProtocolData* (*NfcDevProtocolAlloc)();
+typedef void (*NfcDevProtocolFree)(NfcDevProtocolData*);
+typedef void (*NfcDevProtocolReset)(NfcDevProtocolData*);
+typedef void (*NfcDevProtocolCopy)(NfcDevProtocolData*, const NfcDevProtocolData*);
+
+typedef struct {
+    NfcDevProtocolAlloc alloc;
+    NfcDevProtocolFree free;
+    NfcDevProtocolReset reset;
+    NfcDevProtocolCopy copy;
+} NfcDevProtocolBase;
+
+typedef bool (*NfcDevVerifyProtocol)(
+    FuriString* device_type,
+    NfcDevProtocol* protocol,
+    NfcDevProtocolData* data);
+typedef bool (*NfcDevDataHandler)(FlipperFormat* file, uint32_t version, NfcDevProtocolData* data);
 
 typedef struct {
     NfcDevVerifyProtocol verify_handler;
@@ -81,19 +104,24 @@ static bool nfc_dev_nfca_save_data(FlipperFormat* file, NfcaData* data) {
     return saved;
 }
 
-static bool nfc_dev_nfca_verify_handler(FuriString* device_type, NfcDevData* data) {
+static bool nfc_dev_nfca_verify_handler(
+    FuriString* device_type,
+    NfcDevProtocol* protocol,
+    NfcaData* protocol_data) {
     furi_assert(device_type);
-    furi_assert(data);
+    furi_assert(protocol);
+
+    UNUSED(protocol_data);
 
     bool verified = (furi_string_cmp_str(device_type, "UID") == 0);
     if(verified) {
-        data->protocol = NfcDevProtocolNfca;
+        *protocol = NfcDevProtocolNfca;
     }
 
     return verified;
 }
 
-static bool nfc_dev_nfca_save_handler(FlipperFormat* file, uint32_t version, NfcDevData* data) {
+static bool nfc_dev_nfca_save_handler(FlipperFormat* file, uint32_t version, NfcaData* data) {
     furi_assert(file);
     furi_assert(data);
     UNUSED(version);
@@ -101,32 +129,36 @@ static bool nfc_dev_nfca_save_handler(FlipperFormat* file, uint32_t version, Nfc
     bool saved = false;
     do {
         if(!flipper_format_write_string_cstr(file, "Device type", "UID")) break;
-        if(!nfc_dev_nfca_save_data(file, &data->nfca_data)) break;
+        if(!nfc_dev_nfca_save_data(file, data)) break;
         saved = true;
     } while(false);
 
     return saved;
 }
 
-static bool nfc_dev_nfca_load_handler(FlipperFormat* file, uint32_t version, NfcDevData* data) {
+static bool nfc_dev_nfca_load_handler(FlipperFormat* file, uint32_t version, NfcaData* data) {
     furi_assert(file);
     furi_assert(data);
     UNUSED(version);
 
-    return nfc_dev_nfca_load_data(file, version, &data->nfca_data);
+    return nfc_dev_nfca_load_data(file, version, data);
 }
 
-static bool nfc_dev_mf_ultralight_verify_handler(FuriString* device_type, NfcDevData* data) {
+static bool nfc_dev_mf_ultralight_verify_handler(
+    FuriString* device_type,
+    NfcDevProtocol* protocol,
+    MfUltralightData* protocol_data) {
     furi_assert(device_type);
-    furi_assert(data);
+    furi_assert(protocol);
+    furi_assert(protocol_data);
 
     bool verified = false;
     for(size_t i = 0; i < MfUltralightTypeNum; i++) {
         const char* name = mf_ultralight_get_name(i, true);
         verified = furi_string_equal_str(device_type, name);
         if(verified) {
-            data->protocol = NfcDevProtocolMfUltralight;
-            data->mf_ul_data.type = i;
+            *protocol = NfcDevProtocolMfUltralight;
+            protocol_data->type = i;
             break;
         }
     }
@@ -134,28 +166,29 @@ static bool nfc_dev_mf_ultralight_verify_handler(FuriString* device_type, NfcDev
     return verified;
 }
 
-static bool
-    nfc_dev_mf_ultralight_save_handler(FlipperFormat* file, uint32_t version, NfcDevData* data) {
+static bool nfc_dev_mf_ultralight_save_handler(
+    FlipperFormat* file,
+    uint32_t version,
+    MfUltralightData* data) {
     furi_assert(file);
     furi_assert(data);
     UNUSED(version);
 
     FuriString* temp_str = furi_string_alloc();
-    MfUltralightData* mfu_data = &data->mf_ul_data;
     bool saved = false;
     do {
-        const char* device_type_name = mf_ultralight_get_name(mfu_data->type, true);
+        const char* device_type_name = mf_ultralight_get_name(data->type, true);
         if(!flipper_format_write_string_cstr(file, "Device type", device_type_name)) break;
-        if(!nfc_dev_nfca_save_data(file, &data->nfca_data)) break;
+        if(!nfc_dev_nfca_save_data(file, data->nfca_data)) break;
         if(!flipper_format_write_comment_cstr(file, "Mifare Ultralight specific data")) break;
         if(!flipper_format_write_uint32(
                file, "Data format version", &nfc_mifare_ultralight_data_format_version, 1))
             break;
         if(!flipper_format_write_hex(
-               file, "Signature", mfu_data->signature.data, sizeof(MfUltralightSignature)))
+               file, "Signature", data->signature.data, sizeof(MfUltralightSignature)))
             break;
         if(!flipper_format_write_hex(
-               file, "Mifare version", (uint8_t*)&mfu_data->version, sizeof(MfUltralightVersion)))
+               file, "Mifare version", (uint8_t*)&data->version, sizeof(MfUltralightVersion)))
             break;
 
         // Write conters and tearing flags data
@@ -163,13 +196,13 @@ static bool
         for(size_t i = 0; i < 3; i++) {
             furi_string_printf(temp_str, "Counter %d", i);
             if(!flipper_format_write_uint32(
-                   file, furi_string_get_cstr(temp_str), &mfu_data->counter[i].counter, 1)) {
+                   file, furi_string_get_cstr(temp_str), &data->counter[i].counter, 1)) {
                 counters_saved = false;
                 break;
             }
             furi_string_printf(temp_str, "Tearing %d", i);
             if(!flipper_format_write_hex(
-                   file, furi_string_get_cstr(temp_str), mfu_data->tearing_flag->data, 1)) {
+                   file, furi_string_get_cstr(temp_str), data->tearing_flag->data, 1)) {
                 counters_saved = false;
                 break;
             }
@@ -177,17 +210,17 @@ static bool
         if(!counters_saved) break;
 
         // Write pages data
-        uint32_t pages_total = mfu_data->pages_total;
-        uint32_t pages_read = mfu_data->pages_read;
+        uint32_t pages_total = data->pages_total;
+        uint32_t pages_read = data->pages_read;
         if(!flipper_format_write_uint32(file, "Pages total", &pages_total, 1)) break;
         if(!flipper_format_write_uint32(file, "Pages read", &pages_read, 1)) break;
         bool pages_saved = true;
-        for(size_t i = 0; i < mfu_data->pages_total; i++) {
+        for(size_t i = 0; i < data->pages_total; i++) {
             furi_string_printf(temp_str, "Page %d", i);
             if(!flipper_format_write_hex(
                    file,
                    furi_string_get_cstr(temp_str),
-                   mfu_data->page[i].data,
+                   data->page[i].data,
                    sizeof(MfUltralightPage))) {
                 pages_saved = false;
                 break;
@@ -197,7 +230,7 @@ static bool
 
         // Write authentication counter
         if(!flipper_format_write_uint32(
-               file, "Failed authentication attempts", &mfu_data->auth_attempts, 1))
+               file, "Failed authentication attempts", &data->auth_attempts, 1))
             break;
 
         saved = true;
@@ -208,8 +241,10 @@ static bool
     return saved;
 }
 
-static bool
-    nfc_dev_mf_ultralight_load_handler(FlipperFormat* file, uint32_t version, NfcDevData* data) {
+static bool nfc_dev_mf_ultralight_load_handler(
+    FlipperFormat* file,
+    uint32_t version,
+    MfUltralightData* data) {
     furi_assert(file);
     furi_assert(data);
 
@@ -217,7 +252,7 @@ static bool
     bool parsed = false;
     do {
         // Read NFCA data
-        if(!nfc_dev_nfca_load_data(file, version, &data->mf_ul_data.nfca_data)) break;
+        if(!nfc_dev_nfca_load_data(file, version, data->nfca_data)) break;
 
         // Read Ultralight specific data
         // Read Mifare Ultralight format version
@@ -227,26 +262,25 @@ static bool
         }
 
         // Read signature
-        MfUltralightData* mfu_data = &data->mf_ul_data;
         if(!flipper_format_read_hex(
-               file, "Signature", mfu_data->signature.data, sizeof(MfUltralightSignature)))
+               file, "Signature", data->signature.data, sizeof(MfUltralightSignature)))
             break;
         // Read Mifare version
         if(!flipper_format_read_hex(
-               file, "Mifare version", (uint8_t*)&mfu_data->version, sizeof(MfUltralightVersion)))
+               file, "Mifare version", (uint8_t*)&data->version, sizeof(MfUltralightVersion)))
             break;
         // Read counters and tearing flags
         bool counters_parsed = true;
         for(size_t i = 0; i < 3; i++) {
             furi_string_printf(temp_str, "Counter %d", i);
             if(!flipper_format_read_uint32(
-                   file, furi_string_get_cstr(temp_str), &mfu_data->counter[i].counter, 1)) {
+                   file, furi_string_get_cstr(temp_str), &data->counter[i].counter, 1)) {
                 counters_parsed = false;
                 break;
             }
             furi_string_printf(temp_str, "Tearing %d", i);
             if(!flipper_format_read_hex(
-                   file, furi_string_get_cstr(temp_str), mfu_data->tearing_flag[i].data, 1)) {
+                   file, furi_string_get_cstr(temp_str), data->tearing_flag[i].data, 1)) {
                 counters_parsed = false;
                 break;
             }
@@ -261,8 +295,8 @@ static bool
         } else {
             if(!flipper_format_read_uint32(file, "Pages read", &pages_read, 1)) break;
         }
-        mfu_data->pages_total = pages_total;
-        mfu_data->pages_read = pages_read;
+        data->pages_total = pages_total;
+        data->pages_read = pages_read;
 
         if((pages_read > MF_ULTRALIGHT_MAX_PAGE_NUM) || (pages_total > MF_ULTRALIGHT_MAX_PAGE_NUM))
             break;
@@ -273,7 +307,7 @@ static bool
             if(!flipper_format_read_hex(
                    file,
                    furi_string_get_cstr(temp_str),
-                   mfu_data->page[i].data,
+                   data->page[i].data,
                    sizeof(MfUltralightPage))) {
                 pages_parsed = false;
                 break;
@@ -283,8 +317,8 @@ static bool
 
         // Read authentication counter
         if(!flipper_format_read_uint32(
-               file, "Failed authentication attempts", &mfu_data->auth_attempts, 1)) {
-            mfu_data->auth_attempts = 0;
+               file, "Failed authentication attempts", &data->auth_attempts, 1)) {
+            data->auth_attempts = 0;
         }
 
         parsed = true;
@@ -295,13 +329,18 @@ static bool
     return parsed;
 }
 
-static bool nfc_dev_mf_classic_verify_handler(FuriString* device_type, NfcDevData* data) {
+static bool nfc_dev_mf_classic_verify_handler(
+    FuriString* device_type,
+    NfcDevProtocol* protocol,
+    MfClassicData* protocol_data) {
     furi_assert(device_type);
-    furi_assert(data);
+    furi_assert(protocol);
+
+    UNUSED(protocol_data);
 
     bool verified = furi_string_equal_str(device_type, "Mifare Classic");
     if(verified) {
-        data->protocol = NfcDevProtocolMfClassic;
+        *protocol = NfcDevProtocolMfClassic;
     }
 
     return verified;
@@ -354,21 +393,20 @@ static void nfc_dev_set_mf_classic_block_str(
 }
 
 static bool
-    nfc_dev_mf_classic_save_handler(FlipperFormat* file, uint32_t version, NfcDevData* data) {
+    nfc_dev_mf_classic_save_handler(FlipperFormat* file, uint32_t version, MfClassicData* data) {
     furi_assert(file);
     furi_assert(data);
     UNUSED(version);
 
     FuriString* temp_str = furi_string_alloc();
-    MfClassicData* mfc_data = &data->mf_classic_data;
     bool saved = false;
 
     do {
         if(!flipper_format_write_string_cstr(file, "Device type", "Mifare Classic")) break;
-        if(!nfc_dev_nfca_save_data(file, &data->nfca_data)) break;
+        if(!nfc_dev_nfca_save_data(file, data->nfca_data)) break;
         if(!flipper_format_write_string_cstr(file, "Device type", "")) break;
         if(!flipper_format_write_comment_cstr(file, "Mifare Classic specific data")) break;
-        const char* type_name = mf_classic_get_name(mfc_data->type, false);
+        const char* type_name = mf_classic_get_name(data->type, false);
         if(!flipper_format_write_string_cstr(file, "Mifare Classic type", type_name)) break;
         if(!flipper_format_write_uint32(
                file, "Data format version", &nfc_mifare_classic_data_format_version, 1))
@@ -377,12 +415,12 @@ static bool
                file, "Mifare Classic blocks, \'??\' means unknown data"))
             break;
 
-        uint16_t blocks_total = mf_classic_get_total_block_num(mfc_data->type);
+        uint16_t blocks_total = mf_classic_get_total_block_num(data->type);
         FuriString* block_str = furi_string_alloc();
         bool block_saved = true;
         for(size_t i = 0; i < blocks_total; i++) {
             furi_string_printf(temp_str, "Block %d", i);
-            nfc_dev_set_mf_classic_block_str(block_str, mfc_data, i);
+            nfc_dev_set_mf_classic_block_str(block_str, data, i);
             if(!flipper_format_write_string(file, furi_string_get_cstr(temp_str), block_str)) {
                 block_saved = false;
                 break;
@@ -450,17 +488,16 @@ static void nfc_device_parse_mifare_classic_block(
 }
 
 static bool
-    nfc_dev_mf_classic_load_handler(FlipperFormat* file, uint32_t version, NfcDevData* data) {
+    nfc_dev_mf_classic_load_handler(FlipperFormat* file, uint32_t version, MfClassicData* data) {
     furi_assert(file);
     furi_assert(data);
 
-    MfClassicData* mfc_data = &data->mf_classic_data;
     FuriString* temp_str = furi_string_alloc();
     bool parsed = false;
 
     do {
         // Read NFCA data
-        if(!nfc_dev_nfca_load_data(file, version, &data->mf_ul_data.nfca_data)) break;
+        if(!nfc_dev_nfca_load_data(file, version, data->nfca_data)) break;
 
         // Read Mifare Classic type
         if(!flipper_format_read_string(file, "Mifare Classic type", temp_str)) break;
@@ -468,7 +505,7 @@ static bool
         for(size_t i = 0; i < MfClassicTypeNum; i++) {
             const char* type_name = mf_classic_get_name(i, false);
             if(furi_string_equal_str(temp_str, type_name)) {
-                mfc_data->type = i;
+                data->type = i;
                 type_parsed = true;
             }
         }
@@ -491,23 +528,23 @@ static bool
         // Read Mifare Classic blocks
         bool block_read = true;
         FuriString* block_str = furi_string_alloc();
-        uint16_t blocks_total = mf_classic_get_total_block_num(mfc_data->type);
+        uint16_t blocks_total = mf_classic_get_total_block_num(data->type);
         for(size_t i = 0; i < blocks_total; i++) {
             furi_string_printf(temp_str, "Block %d", i);
             if(!flipper_format_read_string(file, furi_string_get_cstr(temp_str), block_str)) {
                 block_read = false;
                 break;
             }
-            nfc_device_parse_mifare_classic_block(block_str, mfc_data, i);
+            nfc_device_parse_mifare_classic_block(block_str, data, i);
         }
         furi_string_free(block_str);
         if(!block_read) break;
 
         // Set keys and blocks as unknown for backward compatibility
         if(old_format) {
-            mfc_data->key_a_mask = 0ULL;
-            mfc_data->key_b_mask = 0ULL;
-            memset(mfc_data->block_read_mask, 0, sizeof(mfc_data->block_read_mask));
+            data->key_a_mask = 0ULL;
+            data->key_b_mask = 0ULL;
+            memset(data->block_read_mask, 0, sizeof(data->block_read_mask));
         }
 
         parsed = true;
@@ -518,20 +555,25 @@ static bool
     return parsed;
 }
 
-static bool nfc_dev_mf_desfire_verify_handler(FuriString* device_type, NfcDevData* data) {
+static bool nfc_dev_mf_desfire_verify_handler(
+    FuriString* device_type,
+    NfcDevProtocol* protocol,
+    MfDesfireData* protocol_data) {
     furi_assert(device_type);
-    furi_assert(data);
+    furi_assert(protocol);
+
+    UNUSED(protocol_data);
 
     bool verified = furi_string_equal_str(device_type, "Mifare Desfire");
     if(verified) {
-        data->protocol = NfcDevProtocolMfDesfire;
+        *protocol = NfcDevProtocolMfDesfire;
     }
 
     return verified;
 }
 
 static bool
-    nfc_dev_mf_desfire_save_handler(FlipperFormat* file, uint32_t version, NfcDevData* data) {
+    nfc_dev_mf_desfire_save_handler(FlipperFormat* file, uint32_t version, MfDesfireData* data) {
     furi_assert(file);
     furi_assert(data);
     UNUSED(version);
@@ -539,7 +581,7 @@ static bool
     bool saved = false;
 
     do {
-        if(!nfc_dev_nfca_save_data(file, &data->nfca_data)) break;
+        if(!nfc_dev_nfca_save_data(file, data->iso14443_4a_data->iso14443_3a_data)) break;
         saved = true;
     } while(false);
 
@@ -547,20 +589,63 @@ static bool
 }
 
 static bool
-    nfc_dev_mf_desfire_load_handler(FlipperFormat* file, uint32_t version, NfcDevData* data) {
+    nfc_dev_mf_desfire_load_handler(FlipperFormat* file, uint32_t version, MfDesfireData* data) {
     furi_assert(file);
     furi_assert(data);
 
     bool parsed = false;
     do {
         // Read NFCA data
-        if(!nfc_dev_nfca_load_data(file, version, &data->mf_ul_data.nfca_data)) break;
+        if(!nfc_dev_nfca_load_data(file, version, data->iso14443_4a_data->iso14443_3a_data)) break;
 
         parsed = true;
     } while(false);
 
     return parsed;
 }
+
+static const NfcDevProtocolBase nfc_dev_protocols[NfcDevProtocolNum] = {
+    [NfcDevProtocolNfca] =
+        {
+            .alloc = (NfcDevProtocolAlloc)nfca_alloc,
+            .free = (NfcDevProtocolFree)nfca_free,
+            .reset = (NfcDevProtocolReset)nfca_reset,
+            .copy = (NfcDevProtocolCopy)nfca_copy,
+        },
+
+    [NfcDevProtocolIso14443_4a] =
+        {
+            .alloc = (NfcDevProtocolAlloc)iso14443_4a_alloc,
+            .free = (NfcDevProtocolFree)iso14443_4a_free,
+            .reset = (NfcDevProtocolReset)iso14443_4a_reset,
+            .copy = (NfcDevProtocolCopy)iso14443_4a_copy,
+        },
+
+    [NfcDevProtocolMfUltralight] =
+        {
+            .alloc = (NfcDevProtocolAlloc)mf_ultralight_alloc,
+            .free = (NfcDevProtocolFree)mf_ultralight_free,
+            .reset = (NfcDevProtocolReset)mf_ultralight_reset,
+            .copy = (NfcDevProtocolCopy)mf_ultralight_copy,
+        },
+
+    [NfcDevProtocolMfClassic] =
+        {
+            .alloc = (NfcDevProtocolAlloc)mf_classic_alloc,
+            .free = (NfcDevProtocolFree)mf_classic_free,
+            .reset = (NfcDevProtocolReset)mf_classic_reset,
+            .copy = (NfcDevProtocolCopy)mf_classic_copy,
+        },
+
+    [NfcDevProtocolMfDesfire] =
+        {
+            .alloc = (NfcDevProtocolAlloc)mf_desfire_alloc,
+            .free = (NfcDevProtocolFree)mf_desfire_free,
+            .reset = (NfcDevProtocolReset)mf_desfire_reset,
+            .copy = (NfcDevProtocolCopy)mf_desfire_copy,
+        },
+
+};
 
 static const NfcDevDataParser nfc_dev_data_parser[NfcDevProtocolNum] = {
     [NfcDevProtocolNfca] =
@@ -598,7 +683,53 @@ NfcDev* nfc_dev_alloc() {
 
 void nfc_dev_free(NfcDev* instance) {
     furi_assert(instance);
+
+    nfc_dev_clear(instance);
     free(instance);
+}
+
+void nfc_dev_clear(NfcDev* instance) {
+    furi_assert(instance);
+    furi_assert(instance->protocol < NfcDevProtocolNum);
+
+    if(instance->protocol_data) {
+        nfc_dev_protocols[instance->protocol].free(instance->protocol_data);
+        instance->protocol_data = NULL;
+    }
+}
+
+void nfc_dev_reset(NfcDev* instance) {
+    furi_assert(instance);
+    furi_assert(instance->protocol < NfcDevProtocolNum);
+
+    if(instance->protocol_data) {
+        nfc_dev_protocols[instance->protocol].reset(instance->protocol_data);
+    }
+}
+
+NfcDevProtocol nfc_dev_get_protocol(const NfcDev* instance) {
+    furi_assert(instance);
+    return instance->protocol;
+}
+
+const NfcDevProtocolData* nfc_dev_get_data(const NfcDev* instance) {
+    furi_assert(instance);
+    return instance->protocol_data;
+}
+
+void nfc_dev_set_protocol_data(
+    NfcDev* instance,
+    NfcDevProtocol protocol,
+    const NfcDevProtocolData* protocol_data) {
+    furi_assert(instance);
+    furi_assert(protocol < NfcDevProtocolNum);
+
+    nfc_dev_clear(instance);
+
+    instance->protocol = protocol;
+    instance->protocol_data = nfc_dev_protocols[protocol].alloc();
+
+    nfc_dev_protocols[protocol].copy(instance->protocol_data, protocol_data);
 }
 
 void nfc_dev_set_loading_callback(NfcDev* instance, NfcLoadingCallback callback, void* context) {
@@ -609,9 +740,8 @@ void nfc_dev_set_loading_callback(NfcDev* instance, NfcLoadingCallback callback,
     instance->loading_callback_context = context;
 }
 
-bool nfc_dev_save(NfcDev* instance, NfcDevData* data, const char* path) {
+bool nfc_dev_save(NfcDev* instance, const char* path) {
     furi_assert(instance);
-    furi_assert(data);
     furi_assert(path);
 
     bool saved = false;
@@ -638,8 +768,9 @@ bool nfc_dev_save(NfcDev* instance, NfcDevData* data, const char* path) {
             break;
 
         for(size_t i = 0; i < COUNT_OF(nfc_dev_data_parser); i++) {
-            if(data->protocol == i) {
-                saved = nfc_dev_data_parser[i].save_handler(file, nfc_file_version, data);
+            if(instance->protocol == i) {
+                saved = nfc_dev_data_parser[i].save_handler(
+                    file, nfc_file_version, instance->protocol_data);
             }
             if(saved) break;
         }
@@ -656,9 +787,8 @@ bool nfc_dev_save(NfcDev* instance, NfcDevData* data, const char* path) {
     return saved;
 }
 
-bool nfc_dev_load(NfcDev* instance, NfcDevData* data, const char* path) {
+bool nfc_dev_load(NfcDev* instance, const char* path) {
     furi_assert(instance);
-    furi_assert(data);
     furi_assert(path);
 
     bool loaded = false;
@@ -685,8 +815,10 @@ bool nfc_dev_load(NfcDev* instance, NfcDevData* data, const char* path) {
         if(!flipper_format_read_string(file, "Device type", temp_str)) break;
 
         for(size_t i = 0; i < COUNT_OF(nfc_dev_data_parser); i++) {
-            if(nfc_dev_data_parser[i].verify_handler(temp_str, data)) {
-                loaded = nfc_dev_data_parser[i].load_handler(file, version, data);
+            if(nfc_dev_data_parser[i].verify_handler(
+                   temp_str, &instance->protocol, instance->protocol_data)) {
+                loaded =
+                    nfc_dev_data_parser[i].load_handler(file, version, instance->protocol_data);
             }
             if(loaded) break;
         }

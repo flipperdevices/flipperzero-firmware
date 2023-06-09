@@ -35,12 +35,12 @@ static void nfc_generate_mf_ul_uid(uint8_t* uid) {
 }
 
 static void nfc_generate_mf_ul_common(NfcDevData* data) {
-    MfUltralightData* mfu_data = &data->mf_ul_data;
-    mfu_data->nfca_data.uid_len = 7;
-    nfc_generate_mf_ul_uid(mfu_data->nfca_data.uid);
-    mfu_data->nfca_data.atqa[0] = 0x44;
-    mfu_data->nfca_data.atqa[1] = 0x00;
-    mfu_data->nfca_data.sak = 0x00;
+    MfUltralightData* mfu_data = data->mf_ul_data;
+    mfu_data->nfca_data->uid_len = 7;
+    nfc_generate_mf_ul_uid(mfu_data->nfca_data->uid);
+    mfu_data->nfca_data->atqa[0] = 0x44;
+    mfu_data->nfca_data->atqa[1] = 0x00;
+    mfu_data->nfca_data->sak = 0x00;
     data->protocol = NfcDevProtocolMfUltralight;
 }
 
@@ -50,19 +50,19 @@ static void nfc_generate_calc_bcc(uint8_t* uid, uint8_t* bcc0, uint8_t* bcc1) {
 }
 
 static void nfc_generate_mf_ul_copy_uid_with_bcc(NfcDevData* data) {
-    MfUltralightData* mfu_data = &data->mf_ul_data;
-    memcpy(mfu_data->page[0].data, mfu_data->nfca_data.uid, 3);
-    memcpy(mfu_data->page[1].data, &mfu_data->nfca_data.uid[3], 4);
+    MfUltralightData* mfu_data = data->mf_ul_data;
+    memcpy(mfu_data->page[0].data, mfu_data->nfca_data->uid, 3);
+    memcpy(mfu_data->page[1].data, &mfu_data->nfca_data->uid[3], 4);
 
     nfc_generate_calc_bcc(
-        mfu_data->nfca_data.uid, &mfu_data->page[0].data[3], &mfu_data->page[2].data[0]);
+        mfu_data->nfca_data->uid, &mfu_data->page[0].data[3], &mfu_data->page[2].data[0]);
 }
 
 static void nfc_generate_mf_ul_orig(NfcDevData* data) {
     nfc_generate_common_start(data);
     nfc_generate_mf_ul_common(data);
 
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = MfUltralightTypeUnknown;
     mfu_data->pages_total = 16;
     mfu_data->pages_read = 16;
@@ -75,7 +75,7 @@ static void nfc_generate_mf_ul_with_config_common(NfcDevData* data, uint8_t num_
     nfc_generate_common_start(data);
     nfc_generate_mf_ul_common(data);
 
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->pages_total = num_pages;
     mfu_data->pages_read = num_pages;
     nfc_generate_mf_ul_copy_uid_with_bcc(data);
@@ -91,7 +91,7 @@ static void nfc_generate_mf_ul_with_config_common(NfcDevData* data, uint8_t num_
 
 static void nfc_generate_mf_ul_ev1_common(NfcDevData* data, uint8_t num_pages) {
     nfc_generate_mf_ul_with_config_common(data, num_pages);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     memcpy(&mfu_data->version, version_bytes_mf0ulx1, sizeof(MfUltralightVersion));
     for(size_t i = 0; i < 3; ++i) {
         mfu_data->tearing_flag[i].data[0] = MF_ULTRALIGHT_TEARING_FLAG_DEFAULT;
@@ -101,7 +101,7 @@ static void nfc_generate_mf_ul_ev1_common(NfcDevData* data, uint8_t num_pages) {
 
 static void nfc_generate_mf_ul_11(NfcDevData* data) {
     nfc_generate_mf_ul_ev1_common(data, 20);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = MfUltralightTypeUL11;
     mfu_data->version.prod_subtype = 0x01;
     mfu_data->version.storage_size = 0x0B;
@@ -110,7 +110,7 @@ static void nfc_generate_mf_ul_11(NfcDevData* data) {
 
 static void nfc_generate_mf_ul_h11(NfcDevData* data) {
     nfc_generate_mf_ul_ev1_common(data, 20);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = MfUltralightTypeUL11;
     mfu_data->version.prod_subtype = 0x02;
     mfu_data->version.storage_size = 0x0B;
@@ -118,7 +118,7 @@ static void nfc_generate_mf_ul_h11(NfcDevData* data) {
 
 static void nfc_generate_mf_ul_21(NfcDevData* data) {
     nfc_generate_mf_ul_ev1_common(data, 41);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = MfUltralightTypeUL21;
     mfu_data->version.prod_subtype = 0x01;
     mfu_data->version.storage_size = 0x0E;
@@ -127,7 +127,7 @@ static void nfc_generate_mf_ul_21(NfcDevData* data) {
 
 static void nfc_generate_mf_ul_h21(NfcDevData* data) {
     nfc_generate_mf_ul_ev1_common(data, 41);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = MfUltralightTypeUL21;
     mfu_data->version.prod_subtype = 0x02;
     mfu_data->version.storage_size = 0x0E;
@@ -137,7 +137,7 @@ static void nfc_generate_ntag203(NfcDevData* data) {
     nfc_generate_common_start(data);
     nfc_generate_mf_ul_common(data);
 
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = MfUltralightTypeNTAG203;
     mfu_data->pages_total = 42;
     mfu_data->pages_read = 42;
@@ -148,7 +148,7 @@ static void nfc_generate_ntag203(NfcDevData* data) {
 
 static void nfc_generate_ntag21x_common(NfcDevData* data, uint8_t num_pages) {
     nfc_generate_mf_ul_with_config_common(data, num_pages);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     memcpy(&mfu_data->version, version_bytes_ntag21x, sizeof(MfUltralightVersion));
     mfu_data->page[2].data[1] = 0x48; // Internal byte
     // Capability container
@@ -158,7 +158,7 @@ static void nfc_generate_ntag21x_common(NfcDevData* data, uint8_t num_pages) {
 
 static void nfc_generate_ntag213(NfcDevData* data) {
     nfc_generate_ntag21x_common(data, 45);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = MfUltralightTypeNTAG213;
     mfu_data->version.storage_size = 0x0F;
     mfu_data->page[3].data[2] = 0x12;
@@ -168,7 +168,7 @@ static void nfc_generate_ntag213(NfcDevData* data) {
 
 static void nfc_generate_ntag215(NfcDevData* data) {
     nfc_generate_ntag21x_common(data, 135);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = MfUltralightTypeNTAG215;
     mfu_data->version.storage_size = 0x11;
     mfu_data->page[3].data[2] = 0x3E;
@@ -178,7 +178,7 @@ static void nfc_generate_ntag215(NfcDevData* data) {
 
 static void nfc_generate_ntag216(NfcDevData* data) {
     nfc_generate_ntag21x_common(data, 231);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = MfUltralightTypeNTAG216;
     mfu_data->version.storage_size = 0x13;
     mfu_data->page[3].data[2] = 0x6D;
@@ -191,15 +191,15 @@ static void
     nfc_generate_common_start(data);
     nfc_generate_mf_ul_common(data);
 
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->type = type;
     memcpy(&mfu_data->version, version_bytes_ntag_i2c, sizeof(version_bytes_ntag_i2c));
     mfu_data->pages_total = num_pages;
     mfu_data->pages_read = num_pages;
-    memcpy(mfu_data->page[0].data, mfu_data->nfca_data.uid, mfu_data->nfca_data.uid_len);
-    mfu_data->page[1].data[3] = mfu_data->nfca_data.sak;
-    mfu_data->page[2].data[0] = mfu_data->nfca_data.atqa[0];
-    mfu_data->page[2].data[1] = mfu_data->nfca_data.atqa[1];
+    memcpy(mfu_data->page[0].data, mfu_data->nfca_data->uid, mfu_data->nfca_data->uid_len);
+    mfu_data->page[1].data[3] = mfu_data->nfca_data->sak;
+    mfu_data->page[2].data[0] = mfu_data->nfca_data->atqa[0];
+    mfu_data->page[2].data[1] = mfu_data->nfca_data->atqa[1];
 
     uint16_t config_register_page = 0;
     uint16_t session_register_page = 0;
@@ -236,7 +236,7 @@ static void
 
 static void nfc_generate_ntag_i2c_1k(NfcDevData* data) {
     nfc_generate_ntag_i2c_common(data, MfUltralightTypeNTAGI2C1K, 231);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->version.prod_ver_minor = 0x01;
     mfu_data->version.storage_size = 0x13;
 
@@ -246,7 +246,7 @@ static void nfc_generate_ntag_i2c_1k(NfcDevData* data) {
 
 static void nfc_generate_ntag_i2c_2k(NfcDevData* data) {
     nfc_generate_ntag_i2c_common(data, MfUltralightTypeNTAGI2C2K, 485);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->version.prod_ver_minor = 0x01;
     mfu_data->version.storage_size = 0x15;
 
@@ -258,7 +258,7 @@ static void
     nfc_generate_ntag_i2c_plus_common(NfcDevData* data, MfUltralightType type, uint16_t num_pages) {
     nfc_generate_ntag_i2c_common(data, type, num_pages);
 
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     uint16_t config_index = 227;
     mfu_data->page[config_index].data[3] = 0xff; // AUTH0
 
@@ -267,14 +267,14 @@ static void
 
 static void nfc_generate_ntag_i2c_plus_1k(NfcDevData* data) {
     nfc_generate_ntag_i2c_plus_common(data, MfUltralightTypeNTAGI2CPlus1K, 236);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->version.prod_ver_minor = 0x02;
     mfu_data->version.storage_size = 0x13;
 }
 
 static void nfc_generate_ntag_i2c_plus_2k(NfcDevData* data) {
     nfc_generate_ntag_i2c_plus_common(data, MfUltralightTypeNTAGI2CPlus2K, 492);
-    MfUltralightData* mfu_data = &data->mf_ul_data;
+    MfUltralightData* mfu_data = data->mf_ul_data;
     mfu_data->version.prod_ver_minor = 0x02;
     mfu_data->version.storage_size = 0x15;
 }
@@ -286,10 +286,10 @@ static void nfc_generate_mf_classic_uid(uint8_t* uid, uint8_t length) {
 
 static void
     nfc_generate_mf_classic_common(MfClassicData* data, uint8_t uid_len, MfClassicType type) {
-    data->nfca_data.uid_len = uid_len;
-    data->nfca_data.atqa[0] = 0x44;
-    data->nfca_data.atqa[1] = 0x00;
-    data->nfca_data.sak = 0x08;
+    data->nfca_data->uid_len = uid_len;
+    data->nfca_data->atqa[0] = 0x44;
+    data->nfca_data->atqa[1] = 0x00;
+    data->nfca_data->sak = 0x08;
     data->type = type;
 }
 
@@ -341,14 +341,14 @@ static void nfc_generate_mf_classic_block_0(
 static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassicType type) {
     nfc_generate_common_start(data);
     data->protocol = NfcDevProtocolMfClassic;
-    MfClassicData* mfc_data = &data->mf_classic_data;
+    MfClassicData* mfc_data = data->mf_classic_data;
     nfc_generate_mf_classic_uid(mfc_data->block[0].data, uid_len);
     nfc_generate_mf_classic_common(mfc_data, uid_len, type);
 
     // Set the UID
-    mfc_data->nfca_data.uid[0] = NXP_MANUFACTURER_ID;
+    mfc_data->nfca_data->uid[0] = NXP_MANUFACTURER_ID;
     for(int i = 1; i < uid_len; i++) {
-        mfc_data->nfca_data.uid[i] = mfc_data->block[0].data[i];
+        mfc_data->nfca_data->uid[i] = mfc_data->block[0].data[i];
     }
 
     mf_classic_set_block_read(mfc_data, 0, &mfc_data->block[0]);
@@ -365,7 +365,7 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
             mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
         }
         // Set SAK to 18
-        data->nfca_data.sak = 0x18;
+        data->nfca_data->sak = 0x18;
     } else if(type == MfClassicType1k) {
         // Set every block to 0xFF
         for(uint16_t i = 1; i < block_num; i += 1) {
@@ -377,7 +377,7 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
             mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
         }
         // Set SAK to 08
-        data->nfca_data.sak = 0x08;
+        data->nfca_data->sak = 0x08;
     } else if(type == MfClassicTypeMini) {
         // Set every block to 0xFF
         for(uint16_t i = 1; i < block_num; i += 1) {
@@ -389,15 +389,15 @@ static void nfc_generate_mf_classic(NfcDevData* data, uint8_t uid_len, MfClassic
             mf_classic_set_block_read(mfc_data, i, &mfc_data->block[i]);
         }
         // Set SAK to 09
-        data->nfca_data.sak = 0x09;
+        data->nfca_data->sak = 0x09;
     }
 
     nfc_generate_mf_classic_block_0(
-        data->mf_classic_data.block[0].data,
+        data->mf_classic_data->block[0].data,
         uid_len,
-        data->nfca_data.sak,
-        data->nfca_data.atqa[0],
-        data->nfca_data.atqa[1]);
+        data->nfca_data->sak,
+        data->nfca_data->atqa[0],
+        data->nfca_data->atqa[1]);
 
     mfc_data->type = type;
 }

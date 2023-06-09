@@ -14,6 +14,7 @@ extern "C" {
 
 #define MF_CLASSIC_TOTAL_SECTORS_MAX (40)
 #define MF_CLASSIC_TOTAL_BLOCKS_MAX (256)
+#define MF_CLASSIC_READ_MASK_SIZE (MF_CLASSIC_TOTAL_BLOCKS_MAX / 32)
 #define MF_CLASSIC_BLOCK_SIZE (16)
 #define MF_CLASSIC_KEY_SIZE (6)
 #define MF_CLASSIC_ACCESS_BYTES_SIZE (4)
@@ -110,13 +111,21 @@ typedef struct {
 } MfClassicDeviceKeys;
 
 typedef struct {
-    NfcaData nfca_data;
+    NfcaData* nfca_data;
     MfClassicType type;
-    uint32_t block_read_mask[MF_CLASSIC_TOTAL_BLOCKS_MAX / 32];
+    uint32_t block_read_mask[MF_CLASSIC_READ_MASK_SIZE];
     uint64_t key_a_mask;
     uint64_t key_b_mask;
     MfClassicBlock block[MF_CLASSIC_TOTAL_BLOCKS_MAX];
 } MfClassicData;
+
+MfClassicData* mf_classic_alloc();
+
+void mf_classic_free(MfClassicData* data);
+
+void mf_classic_reset(MfClassicData* data);
+
+void mf_classic_copy(MfClassicData* data, const MfClassicData* other);
 
 bool mf_classic_detect_protocol(NfcaData* data, MfClassicType* type);
 

@@ -28,7 +28,6 @@ Iso14443_4aError iso14443_4a_poller_process_error(NfcaError error) {
 
 Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance) {
     furi_assert(instance);
-    furi_assert(instance->iso14443_3a_poller);
 
     nfca_poller_halt(instance->iso14443_3a_poller);
     instance->state = Iso14443_4aPollerStateIdle;
@@ -38,13 +37,13 @@ Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance) {
 
 Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance) {
     furi_assert(instance);
-    furi_assert(instance->iso14443_3a_poller);
 
     Iso14443_4aError ret = Iso14443_4aErrorProtocol;
 
     do {
         // Check whether ATS is available
-        if(!(instance->data->iso14443_3a_data.sak & ISO14443_4A_ATS_BIT)) {
+        NfcaData* iso14443_3a_data = instance->data->iso14443_3a_data;
+        if(!(iso14443_3a_data->sak & ISO14443_4A_ATS_BIT)) {
             FURI_LOG_E(TAG, "Ats not supported: not an ISO14443-4 card");
             break;
         }
@@ -85,7 +84,6 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     BitBuffer* rx_buffer,
     uint32_t fwt) {
     furi_assert(instance);
-    furi_assert(instance->iso14443_3a_poller);
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
 

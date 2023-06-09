@@ -4,6 +4,30 @@
 
 #define NFCA_CRC_INIT (0x6363)
 
+NfcaData* nfca_alloc() {
+    NfcaData* data = malloc(sizeof(NfcaData));
+    return data;
+}
+
+void nfca_free(NfcaData* data) {
+    furi_assert(data);
+
+    free(data);
+}
+
+void nfca_reset(NfcaData* data) {
+    furi_assert(data);
+
+    UNUSED(data);
+}
+
+void nfca_copy(NfcaData* data, const NfcaData* other) {
+    furi_assert(data);
+    furi_assert(other);
+
+    *data = *other;
+}
+
 uint16_t nfca_get_crc(uint8_t* buff, uint16_t len) {
     furi_assert(buff);
 

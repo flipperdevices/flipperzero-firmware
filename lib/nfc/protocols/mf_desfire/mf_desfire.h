@@ -131,12 +131,20 @@ typedef enum {
 } MfDesfireError;
 
 typedef struct {
-    Iso14443_4aData iso14443_4a_data;
+    Iso14443_4aData* iso14443_4a_data;
     MfDesfireVersion version;
     MfDesfireFreeMemory free_memory;
     MfDesfireKeyConfiguration master_key;
     MfDesfireApplications applications;
 } MfDesfireData;
+
+MfDesfireData* mf_desfire_alloc();
+
+void mf_desfire_free(MfDesfireData* data);
+
+void mf_desfire_reset(MfDesfireData* data);
+
+void mf_desfire_copy(MfDesfireData* data, const MfDesfireData* other);
 
 bool mf_desfire_detect_protocol(NfcaData* nfca_data);
 

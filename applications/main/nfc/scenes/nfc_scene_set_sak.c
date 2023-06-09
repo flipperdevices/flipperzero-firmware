@@ -17,7 +17,7 @@ void nfc_scene_set_sak_on_enter(void* context) {
         nfc_scene_set_sak_byte_input_callback,
         NULL,
         nfc,
-        &nfc->nfc_dev_data.nfca_data.sak,
+        &nfc->nfc_dev_data.nfca_data->sak,
         1);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewByteInput);
 }

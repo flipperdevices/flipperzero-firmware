@@ -4,7 +4,7 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
     NfcApp* nfc = context;
 
     // Setup view
-    MfUltralightData* data = &nfc->nfc_dev_data.mf_ul_data;
+    MfUltralightData* data = nfc->nfc_dev_data.mf_ul_data;
     MfUltralightType type = data->type;
     bool is_ultralight = (type == MfUltralightTypeUL11) || (type == MfUltralightTypeUL21) ||
                          (type == MfUltralightTypeUnknown);

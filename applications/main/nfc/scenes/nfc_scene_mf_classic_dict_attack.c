@@ -77,7 +77,7 @@ void nfc_dict_attack_dict_attack_result_callback(void* context) {
 }
 
 static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* nfc) {
-    MfClassicData* data = &nfc->nfc_dev_data.mf_classic_data;
+    MfClassicData* data = nfc->nfc_dev_data.mf_classic_data;
     uint8_t sectors_read = 0;
     uint8_t keys_found = 0;
 
@@ -88,7 +88,7 @@ static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* nfc) {
 }
 
 static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* nfc, DictAttackState state) {
-    MfClassicData* data = &nfc->nfc_dev_data.mf_classic_data;
+    MfClassicData* data = nfc->nfc_dev_data.mf_classic_data;
 
     // Identify scene state
     if(state == DictAttackStateIdle) {
@@ -132,7 +132,7 @@ void nfc_scene_mf_classic_dict_attack_on_enter(void* context) {
 
 bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent event) {
     NfcApp* nfc = context;
-    // MfClassicData* data = &nfc->nfc_dev_data.mf_classic_data;
+    MfClassicData* mf_classic_data = nfc->nfc_dev_data.mf_classic_data;
     bool consumed = false;
 
     uint32_t state =
@@ -161,12 +161,12 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             dict_attack_inc_keys_found(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackNewSector) {
-            mf_classic_poller_get_data(nfc->mf_classic_poller, &nfc->nfc_dev_data.mf_classic_data);
+            mf_classic_poller_get_data(nfc->mf_classic_poller, mf_classic_data);
             nfc_scene_mf_classic_dict_attack_update_view(nfc);
             dict_attack_inc_current_sector(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackNewKeyBatch) {
-            mf_classic_poller_get_data(nfc->mf_classic_poller, &nfc->nfc_dev_data.mf_classic_data);
+            mf_classic_poller_get_data(nfc->mf_classic_poller, mf_classic_data);
             nfc_scene_mf_classic_dict_attack_update_view(nfc);
             dict_attack_inc_current_dict_key(nfc->dict_attack, 10);
             consumed = true;

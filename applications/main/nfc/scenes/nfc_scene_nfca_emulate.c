@@ -40,7 +40,7 @@ void nfc_nfca_emulate_textbox_callback(void* context) {
 
 // Add widget with device name or inform that data received
 static void nfc_scene_nfca_emulate_widget_config(NfcApp* nfc, bool data_received) {
-    NfcaData* data = &nfc->nfc_dev_data.nfca_data;
+    NfcaData* data = nfc->nfc_dev_data.nfca_data;
     Widget* widget = nfc->widget;
     widget_reset(widget);
     FuriString* info_str;
@@ -74,7 +74,7 @@ void nfc_scene_nfca_emulate_on_enter(void* context) {
 
     nfca_listener_start(
         nfc->nfca_listener,
-        &nfc->nfc_dev_data.nfca_data,
+        nfc->nfc_dev_data.nfca_data,
         nfc_scene_nfca_emulate_worker_callback,
         nfc);
 

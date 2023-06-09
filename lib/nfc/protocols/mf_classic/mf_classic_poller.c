@@ -50,7 +50,7 @@ MfClassicError mf_classic_poller_start(
     furi_assert(instance->nfca_poller);
     furi_assert(instance->session_state == MfClassicPollerSessionStateIdle);
 
-    instance->data = malloc(sizeof(MfClassicData));
+    instance->data = mf_classic_alloc();
     instance->crypto = crypto1_alloc();
     instance->plain_buff =
         nfc_poller_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE, MF_CLASSIC_MAX_BUFF_SIZE);
@@ -64,11 +64,11 @@ MfClassicError mf_classic_poller_start(
 }
 
 MfClassicPollerCommand mf_classic_poller_handler_idle(MfClassicPoller* instance) {
-    nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
+    nfca_poller_get_data(instance->nfca_poller, instance->data->nfca_data);
     MfClassicPollerCommand command = MfClassicPollerCommandContinue;
     MfClassicPollerEvent event = {};
 
-    if(mf_classic_detect_protocol(&instance->data->nfca_data, &instance->data->type)) {
+    if(mf_classic_detect_protocol(instance->data->nfca_data, &instance->data->type)) {
         if(instance->card_state == MfClassicCardStateNotDetected) {
             instance->card_state = MfClassicCardStateDetected;
             event.type = MfClassicPollerEventTypeCardDetected;
@@ -349,10 +349,8 @@ MfClassicError mf_classic_poller_dict_attack(
 
 MfClassicError mf_classic_poller_get_data(MfClassicPoller* instance, MfClassicData* data) {
     furi_assert(instance);
-    furi_assert(instance->data);
-    furi_assert(data);
 
-    *data = *instance->data;
+    mf_classic_copy(data, instance->data);
 
     return MfClassicErrorNone;
 }
@@ -381,7 +379,7 @@ MfClassicError mf_classic_poller_stop(MfClassicPoller* instance) {
     instance->session_state = MfClassicPollerSessionStateStopRequest;
     nfca_poller_stop(instance->nfca_poller);
     instance->session_state = MfClassicPollerSessionStateIdle;
-    free(instance->data);
+    mf_classic_free(instance->data);
 
     return mf_classic_poller_reset(instance);
 }

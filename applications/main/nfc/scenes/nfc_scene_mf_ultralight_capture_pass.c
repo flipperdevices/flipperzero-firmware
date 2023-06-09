@@ -32,7 +32,7 @@ void nfc_scene_mf_ultralight_capture_pass_on_enter(void* context) {
     // Start worker
     mf_ultralight_listener_start(
         nfc->mf_ul_listener,
-        &nfc->nfc_dev_data.mf_ul_data,
+        nfc->nfc_dev_data.mf_ul_data,
         nfc_scene_mf_ultralight_capture_pass_worker_callback,
         nfc);
 

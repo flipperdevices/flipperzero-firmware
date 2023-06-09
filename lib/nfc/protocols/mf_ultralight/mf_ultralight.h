@@ -153,7 +153,7 @@ typedef struct __attribute__((packed)) {
 } MfUltralightConfigPages;
 
 typedef struct {
-    NfcaData nfca_data;
+    NfcaData* nfca_data;
     MfUltralightType type;
     MfUltralightVersion version;
     MfUltralightSignature signature;
@@ -164,6 +164,14 @@ typedef struct {
     uint16_t pages_total;
     uint32_t auth_attempts;
 } MfUltralightData;
+
+MfUltralightData* mf_ultralight_alloc();
+
+void mf_ultralight_free(MfUltralightData* data);
+
+void mf_ultralight_reset(MfUltralightData* data);
+
+void mf_ultralight_copy(MfUltralightData* data, const MfUltralightData* other);
 
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version);
 
