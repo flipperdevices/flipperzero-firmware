@@ -1,4 +1,4 @@
-#include <dialog.h>
+#include <dialogs/dialogs.h>
 
 #include "../minunit.h"
 
@@ -10,8 +10,8 @@ MU_TEST(test_dialog_file_browser_set_basic_options_should_init_all_fields) {
     dialog_file_browser_set_basic_options(&options, ".fap", NULL);
     // assert that no bytes remained set to 'n' after default-initialiaztion
     mu_assert(
-            memchr(&options, 'n', sizeof(DialogsFileBrowserOptions)) == NULL,
-            "`options` contained an 'n' symbol although it should have been overwritten");
+        memchr(&options, 'n', sizeof(DialogsFileBrowserOptions)) == NULL,
+        "`options` contained an 'n' symbol although it should have been overwritten");
 }
 
 MU_TEST_SUITE(dialogs_file_browser_options) {
