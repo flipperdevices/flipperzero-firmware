@@ -72,8 +72,11 @@ bool subbrute_attack_view_input(InputEvent* event, void* context) {
             instance->is_attacking = true;
             instance->callback(SubBruteCustomEventTypeTransmitStarted, instance->context);
             update = true;
-        } else if(event->key == InputKeyUp) {
+        } else if(event->key == InputKeyUp && event->type == InputTypeShort) {
             instance->callback(SubBruteCustomEventTypeSaveFile, instance->context);
+            update = true;
+        } else if(event->key == InputKeyUp && event->type == InputTypeLong) {
+            instance->callback(SubBruteCustomEventTypeExtraSettings, instance->context);
             update = true;
         } else if(event->key == InputKeyDown) {
             instance->callback(SubBruteCustomEventTypeTransmitCustom, instance->context);
