@@ -31,9 +31,30 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0607-1127-0.84.3-502ab04](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release) 
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-08 00:27 JST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-08 00:27 JST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-10 12:30 JST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-10 12:30 JST`
 - [Fixed DCF77 App from crashing #660 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/660)
+- OFW: [Fix reading Mifare Classic cards with unusual access conditions and fix emulation of unknown keys #2620 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2620)
+- OFW: [fbt: stable build dates #2751 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2751)
+- OFW: [weather_station: add oregon3 protocol support with THGR221 #2748 (By clashlab)](https://github.com/flipperdevices/flipperzero-firmware/pull/2748)
+- OFW: [Services: simplify api #2540 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2540)
+- OFW: [Core2, SRAM2: provide safety gap #2754 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2754)
+- OFW: [FuriHal: always clock SMPS from HSI #2643 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2643)
+- OFW: [github: added debugapps artifact; packaging resources per-target #2750 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2750)
+- OFW: [ble: refactored bt gatt characteristics setup #2587 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2587)
+- OFW: [Scripts: WiFi board updater #2625 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2625)
+- OFW: [github: re-enabled f18 build #2743 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2743)
+- OFW: [fbt: added Flipper selection when multiple are connected over USB #2723 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2723)
+- OFW (But Added to RM LONG AGO): [added ISO15693 (NfcV) reading, saving, emulating and revealing from privacy mode (unlock) #2316 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/2316)
+- UL: Removal of iButton Fuzzer and RFID Fuzzer to be replaced with the new iButton Fuzzer & RFID Fuzzer (By xMasterX)
+- UL: [Byte input add feature: editor without keyboard #509 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/509)
+- UL: [SubGHz: Notifications refines #464 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/464)
+- UL: [Fix LED Descriptor for BLE (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f4cc929a99805d634d5e8da1c42ee3d1af0853a3)
+- UL: [Fix ProtoView Issue for custom modulations (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/9af3c22a6a3acef2652ced06b3646a928cad9f9e)
+- UL: [Updated IR Assets (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/fef5efb38afd4e9b9ac12ea4747fbd14f48bf6db)
+- UL: Updated: [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
+- Correct Fuzzer Dictionary Folders (By RogueMaster)
+- Re-Add Dolphin Experience for Sub-GHz Bruteforcer (By RogueMaster)
 
 <a name="release">
 
@@ -378,7 +399,7 @@ $ ./fbt dolphin_ext
 - [ServoTester (2) (By mhasbini)](https://github.com/mhasbini/ServoTesterApp/tree/master)
 - [Signal Generator (By nminaylov)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1793)
 - [Spectrum Analyzer (By jolcese)](https://github.com/jolcese/flipperzero-firmware/tree/spectrum/applications/spectrum_analyzer) [Updates (for testing) Thanks to theY4Kman](https://github.com/theY4Kman/flipperzero-firmware)
-- [Sub-GHz Bruteforcer v3.5 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
+- [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
