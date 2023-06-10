@@ -347,7 +347,7 @@ int32_t dcf77_app_main(void* p) {
         ;
     }
 
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     AppEvent event;
     for(bool processing = true; processing;) {

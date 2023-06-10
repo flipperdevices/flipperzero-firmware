@@ -60,39 +60,39 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
            (event.event == NfcWorkerEventReadUidNfcV)) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadUidNfcA) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadNfcV) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfUltralight) {
             notification_message(nfc->notifications, &sequence_success);
             // Set unlock password input to 0xFFFFFFFF only on fresh read
             memset(nfc->byte_input_store, 0xFF, sizeof(nfc->byte_input_store));
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfClassicDone) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfDesfire) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadBankCard) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneEmvReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadPassport) {
             notification_message(nfc->notifications, &sequence_success);
@@ -117,12 +117,12 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == NfcWorkerEventReadUidNfcF) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcfReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadFelica) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventCardDetected) {
             nfc_scene_read_set_state(nfc, NfcSceneReadStateReading);

@@ -174,7 +174,7 @@ void subbrute_popup_closed_callback(void* context) {
 int32_t subbrute_app(void* p) {
     UNUSED(p);
 
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
     SubBruteState* instance = subbrute_alloc();
     view_dispatcher_attach_to_gui(
         instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);

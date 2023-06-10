@@ -172,7 +172,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 85, 5, AlignLeft, AlignTop, score_string);
 
         if(game_state->score % 10 == 0) {
-            DOLPHIN_DEED(getRandomDeed());
+            dolphin_deed(getRandomDeed());
         }
     } else {
         canvas_set_font(canvas, FontPrimary);

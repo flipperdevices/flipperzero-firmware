@@ -276,7 +276,7 @@ void dealer_tick(GameState* game_state) {
 
     if(dealer_score >= DEALER_MAX) {
         if(dealer_score > 21 || dealer_score < player_score) {
-            DOLPHIN_DEED(DolphinDeedPluginGameWin);
+            dolphin_deed(DolphinDeedPluginGameWin);
             enqueue(
                 &(game_state->queue_state),
                 game_state,
@@ -284,7 +284,7 @@ void dealer_tick(GameState* game_state) {
                 NULL,
                 to_win_state,
                 game_state->settings.message_duration);
-            DOLPHIN_DEED(DolphinDeedPluginGameWin);
+            dolphin_deed(DolphinDeedPluginGameWin);
         } else if(dealer_score > player_score) {
             enqueue(
                 &(game_state->queue_state),
@@ -572,7 +572,7 @@ int32_t blackjack_app(void* p) {
     AppEvent event;
 
     // Call dolphin deed on game start
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     for(bool processing = true; processing;) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);

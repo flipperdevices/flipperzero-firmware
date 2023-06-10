@@ -251,7 +251,7 @@ static void game_2048_process_move(GameState* const game_state) {
                     game_state->next_field[next_y][x]++;
                     game_state->score.gameScore += pow(2, game_state->next_field[next_y][x]);
                     if(game_state->next_field[next_y][x] == 11 && !game_state->debug) {
-                        DOLPHIN_DEED(getRandomDeed());
+                        dolphin_deed(getRandomDeed());
                     } // get some xp for making a 2048 tile
                     next_y++;
                     continue;
@@ -282,7 +282,7 @@ static void game_2048_process_move(GameState* const game_state) {
                     game_state->next_field[y][next_x]++;
                     game_state->score.gameScore += pow(2, game_state->next_field[y][next_x]);
                     if(game_state->next_field[y][next_x] == 11 && !game_state->debug) {
-                        DOLPHIN_DEED(getRandomDeed());
+                        dolphin_deed(getRandomDeed());
                     } // get some xp for making a 2048 tile
                     next_x--;
                     continue;
@@ -313,7 +313,7 @@ static void game_2048_process_move(GameState* const game_state) {
                     game_state->next_field[next_y][x]++;
                     game_state->score.gameScore += pow(2, game_state->next_field[next_y][x]);
                     if(game_state->next_field[next_y][x] == 11 && !game_state->debug) {
-                        DOLPHIN_DEED(getRandomDeed());
+                        dolphin_deed(getRandomDeed());
                     } // get some xp for making a 2048 tile
                     next_y--;
                     continue;
@@ -347,7 +347,7 @@ static void game_2048_process_move(GameState* const game_state) {
                     game_state->next_field[y][next_x]++;
                     game_state->score.gameScore += pow(2, game_state->next_field[y][next_x]);
                     if(game_state->next_field[y][next_x] == 11 && !game_state->debug) {
-                        DOLPHIN_DEED(getRandomDeed());
+                        dolphin_deed(getRandomDeed());
                     } // get some xp for making a 2048 tile
                     next_x++;
                     continue;

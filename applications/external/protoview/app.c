@@ -262,7 +262,7 @@ static bool keyboard_view_dispatcher_navigation_callback(void* ctx) {
 int32_t protoview_app_entry(void* p) {
     UNUSED(p);
     ProtoViewApp* app = protoview_app_alloc();
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     /* Create a timer. We do data analysis in the callback. */
     FuriTimer* timer = furi_timer_alloc(timer_callback, FuriTimerTypePeriodic, app);

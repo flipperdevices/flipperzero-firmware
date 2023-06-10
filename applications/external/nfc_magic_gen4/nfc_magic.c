@@ -174,7 +174,7 @@ int32_t nfc_magic_g4_app(void* p) {
     UNUSED(p);
     NfcMagic* nfc_magic = nfc_magic_alloc();
 
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
     scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneStart);
 
     view_dispatcher_run(nfc_magic->view_dispatcher);

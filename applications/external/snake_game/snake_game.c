@@ -100,7 +100,7 @@ static void snake_game_render_callback(Canvas* const canvas, void* ctx) {
         canvas_draw_str_aligned(canvas, 64, 51, AlignCenter, AlignBottom, buffer);
     }
     if((snake_state->len - 7) % 20 == 0 && (snake_state->len - 7) != 0) {
-        DOLPHIN_DEED(getRandomDeed());
+        dolphin_deed(getRandomDeed());
     }
 
     furi_mutex_release(snake_state->mutex);
@@ -326,7 +326,7 @@ int32_t snake_game_app(void* p) {
 
     notification_message_block(notification, &sequence_display_backlight_enforce_on);
 
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     SnakeEvent event;
     for(bool processing = true; processing;) {

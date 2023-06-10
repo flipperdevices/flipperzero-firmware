@@ -14,12 +14,13 @@
 
 static void dolphin_update_clear_limits_timer_period(Dolphin* dolphin);
 
-void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
-    furi_assert(dolphin);
+void dolphin_deed(DolphinDeed deed) {
+    Dolphin* dolphin = (Dolphin*)furi_record_open(RECORD_DOLPHIN);
     DolphinEvent event;
     event.type = DolphinEventTypeDeed;
     event.deed = deed;
     dolphin_event_send_async(dolphin, &event);
+    furi_record_close(RECORD_DOLPHIN);
 }
 
 DolphinDeed getRandomDeed() {

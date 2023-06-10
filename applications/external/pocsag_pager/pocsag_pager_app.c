@@ -202,7 +202,7 @@ int32_t pocsag_pager_app(void* p) {
     UNUSED(p);
     POCSAGPagerApp* pocsag_pager_app = pocsag_pager_app_alloc();
 
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
     view_dispatcher_run(pocsag_pager_app->view_dispatcher);
 
     pocsag_pager_app_free(pocsag_pager_app);

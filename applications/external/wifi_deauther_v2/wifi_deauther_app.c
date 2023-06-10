@@ -25,7 +25,7 @@ static void wifi_deauther_app_tick_event_callback(void* context) {
 
 WifideautherApp* wifi_deauther_app_alloc() {
     WifideautherApp* app = malloc(sizeof(WifideautherApp));
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     app->gui = furi_record_open(RECORD_GUI);
 

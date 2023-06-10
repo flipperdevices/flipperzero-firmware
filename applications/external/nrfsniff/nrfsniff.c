@@ -291,7 +291,7 @@ static void wrap_up(Storage* storage, NotificationApp* notification) {
             hexlify(addr, 5, top_address);
             found_count++;
             save_addr_to_file(storage, addr, 5, notification);
-            DOLPHIN_DEED(getRandomDeed());
+            dolphin_deed(getRandomDeed());
             if(confirmed_idx < MAX_CONFIRMED) memcpy(confirmed[confirmed_idx++], addr, 5);
             break;
         }
@@ -316,7 +316,7 @@ static void start_sniffing() {
 
 int32_t nrfsniff_app(void* p) {
     UNUSED(p);
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
     uint8_t address[5] = {0};
     uint32_t start = 0;
     hexlify(address, 5, top_address);

@@ -772,7 +772,7 @@ int32_t clock_app(void* p) {
                             notification_message(notification, &sequence_rainbow);
                             notification_message(notification, &sequence_rainbow);
                         }
-                        DOLPHIN_DEED(getRandomDeed());
+                        dolphin_deed(getRandomDeed());
                     }
                 } else if(event.input.type == InputTypeLong) {
                     if(event.input.key == InputKeyLeft) {
@@ -811,7 +811,7 @@ int32_t clock_app(void* p) {
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(getRandomDeed());
+                                dolphin_deed(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_pr1);
                         }
@@ -831,7 +831,7 @@ int32_t clock_app(void* p) {
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(getRandomDeed());
+                                dolphin_deed(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_mario1);
                         }
@@ -851,7 +851,7 @@ int32_t clock_app(void* p) {
                             if(plugin_state->lastexp_timestamp + 10 <= curr_ts &&
                                plugin_state->w_test) {
                                 plugin_state->lastexp_timestamp = curr_ts;
-                                DOLPHIN_DEED(getRandomDeed());
+                                dolphin_deed(getRandomDeed());
                             }
                             notification_message(notification, &clock_alert_silent);
                             notification_message(notification, &sequence_rainbow);

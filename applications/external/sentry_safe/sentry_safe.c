@@ -85,7 +85,7 @@ int32_t sentry_safe_app(void* p) {
     UNUSED(p);
 
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(Event));
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     SentryState* sentry_state = malloc(sizeof(SentryState));
 

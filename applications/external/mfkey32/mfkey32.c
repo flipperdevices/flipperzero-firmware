@@ -1112,7 +1112,7 @@ void mfkey32(ProgramState* program_state) {
     }
     if(keyarray_size > 0) {
         // TODO: Should we use DolphinDeedNfcMfcAdd?
-        DOLPHIN_DEED(DolphinDeedNfcMfcAdd);
+        dolphin_deed(DolphinDeedNfcMfcAdd);
     }
     napi_mf_classic_nonce_array_free(nonce_arr);
     napi_mf_classic_dict_free(user_dict);
@@ -1253,7 +1253,7 @@ void start_mfkey32_thread(ProgramState* program_state) {
 int32_t mfkey32_main() {
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
     ProgramState* program_state = malloc(sizeof(ProgramState));
 
     mfkey32_state_init(program_state);

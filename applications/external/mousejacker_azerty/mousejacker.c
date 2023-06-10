@@ -184,7 +184,7 @@ static bool process_ducky_file(
             mj_process_ducky_script(
                 nrf24_HANDLE, addr, addr_size, rate, (char*)file_buf, plugin_state);
             FURI_LOG_D(TAG, "finished execution");
-            DOLPHIN_DEED(getRandomDeed());
+            dolphin_deed(getRandomDeed());
             loaded = true;
         } else {
             FURI_LOG_D(TAG, "load failed. file size: %d", file_size);

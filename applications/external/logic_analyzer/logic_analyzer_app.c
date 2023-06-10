@@ -301,7 +301,7 @@ int32_t logic_analyzer_app_main(void* p) {
     AppFSM* app = malloc(sizeof(AppFSM));
     app_init(app);
 
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
     notification_message_block(app->notification, &sequence_display_backlight_enforce_on);
 
     while(app->processing) {

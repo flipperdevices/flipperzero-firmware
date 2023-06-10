@@ -94,7 +94,7 @@ void color_guess_play_calculate_closeness(void* context, ColorGuessPlayModel* mo
     float percentageBlue = 100 - ((distanceBlue / 255.0) * 100);
     if(percentageRed == 100 && percentageGreen == 100 && percentageBlue == 100) {
         model->success = 1;
-        DOLPHIN_DEED(DolphinDeedPluginGameWin);
+        dolphin_deed(DolphinDeedPluginGameWin);
     }
     float fullPercentage = (percentageRed + percentageGreen + percentageBlue) / 3;
     model->prev_closeness = model->closeness;
@@ -293,7 +293,7 @@ void color_guess_play_exit(void* context) {
 void color_guess_play_enter(void* context) {
     furi_assert(context);
     ColorGuessPlay* instance = (ColorGuessPlay*)context;
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
     with_view_model(
         instance->view,
         ColorGuessPlayModel * model,

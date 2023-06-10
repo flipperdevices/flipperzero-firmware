@@ -403,7 +403,7 @@ void spectrum_analyzer_free(SpectrumAnalyzer* instance) {
 int32_t spectrum_analyzer_app(void* p) {
     UNUSED(p);
 
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
     SpectrumAnalyzer* spectrum_analyzer = spectrum_analyzer_alloc();
     InputEvent input;
 

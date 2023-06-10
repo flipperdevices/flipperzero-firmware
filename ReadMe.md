@@ -33,6 +33,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-08 00:27 JST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-08 00:27 JST`
+- [Fixed DCF77 App from crashing #660 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/660)
 
 <a name="release">
 

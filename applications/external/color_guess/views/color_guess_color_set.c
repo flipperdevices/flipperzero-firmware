@@ -149,7 +149,7 @@ void color_guess_color_set_exit(void* context) {
 
 void color_guess_color_set_enter(void* context) {
     furi_assert(context);
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
     // ColorGuessColorSet* instance = context;
 }
 
