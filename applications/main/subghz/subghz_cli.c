@@ -109,7 +109,8 @@ void subghz_cli_command_rx_carrier(Cli* cli, FuriString* args, void* context) {
     furi_hal_subghz_sleep();
 }
 
-#include <lib/subghz/device/cc1101_ext.h>
+#include <lib/subghz/device/cc1101_ext_interconnect.h>
+#include <lib/subghz/device/devices.h>
 
 void subghz_cli_command_tx_ext(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
@@ -172,30 +173,29 @@ void subghz_cli_command_tx_ext(Cli* cli, FuriString* args, void* context) {
     SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "Princeton");
     subghz_transmitter_deserialize(transmitter, flipper_format);
 
-    subghz_device_cc1101_ext_alloc();
-    subghz_device_cc1101_ext_reset();
-    subghz_device_cc1101_ext_load_preset(FuriHalSubGhzPresetOok650Async);
-    frequency = subghz_device_cc1101_ext_set_frequency(frequency);
-
-    subghz_device_cc1101_ext_set_async_mirror_pin(&gpio_ext_pc3);
+    const SubGhzDevice* device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
+    subghz_devices_begin(device);
+    subghz_devices_reset(device);
+    subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async);
+    frequency = subghz_devices_set_frequency(device, frequency);
+    subghz_devices_set_async_mirror_pin(device, &gpio_ext_pc3);
 
     furi_hal_power_suppress_charge_enter();
-
-    if(subghz_device_cc1101_ext_start_async_tx(subghz_transmitter_yield, transmitter)) {
-        while(!(
-            subghz_device_cc1101_ext_is_async_tx_complete() || cli_cmd_interrupt_received(cli))) {
+    if(subghz_devices_start_async_tx(device, subghz_transmitter_yield, transmitter)) {
+        while(!(subghz_devices_is_async_complete_tx(device) || cli_cmd_interrupt_received(cli))) {
             printf(".");
             fflush(stdout);
             furi_delay_ms(333);
         }
-        subghz_device_cc1101_ext_stop_async_tx();
+        subghz_devices_stop_async_tx(device);
 
     } else {
         printf("Transmission on this frequency is restricted in your region\r\n");
     }
 
-    subghz_device_cc1101_ext_sleep();
-    subghz_device_cc1101_ext_free();
+    subghz_devices_sleep(device);
+    subghz_devices_end(device);
+
     furi_hal_power_suppress_charge_exit();
 
     flipper_format_free(flipper_format);
@@ -365,16 +365,17 @@ void subghz_cli_command_rx_ext(Cli* cli, FuriString* args, void* context) {
     subghz_receiver_set_rx_callback(receiver, subghz_cli_command_rx_callback, instance);
 
     // Configure radio
-    subghz_device_cc1101_ext_alloc();
-    subghz_device_cc1101_ext_reset();
-    subghz_device_cc1101_ext_load_preset(FuriHalSubGhzPresetOok650Async);
-    frequency = subghz_device_cc1101_ext_set_frequency(frequency);
-    subghz_device_cc1101_ext_set_async_mirror_pin(&gpio_ext_pc3);
+    const SubGhzDevice* device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
+    subghz_devices_begin(device);
+    subghz_devices_reset(device);
+    subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async);
+    frequency = subghz_devices_set_frequency(device, frequency);
+    subghz_devices_set_async_mirror_pin(device, &gpio_ext_pc3);
 
     furi_hal_power_suppress_charge_enter();
 
     // Prepare and start RX
-    subghz_device_cc1101_ext_start_async_rx(subghz_cli_command_rx_capture_callback, instance);
+    subghz_devices_start_async_rx(device, subghz_cli_command_rx_capture_callback, instance);
 
     // Wait for packets to arrive
     printf("Listening at %lu. Press CTRL+C to stop\r\n", frequency);
@@ -395,9 +396,9 @@ void subghz_cli_command_rx_ext(Cli* cli, FuriString* args, void* context) {
     }
 
     // Shutdown radio
-    subghz_device_cc1101_ext_stop_async_rx();
-    subghz_device_cc1101_ext_sleep();
-    subghz_device_cc1101_ext_free();
+    subghz_devices_stop_async_rx(device);
+    subghz_devices_sleep(device);
+    subghz_devices_end(device);
 
     furi_hal_power_suppress_charge_exit();
 
