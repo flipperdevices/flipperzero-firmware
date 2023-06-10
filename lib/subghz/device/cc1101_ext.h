@@ -24,6 +24,7 @@ extern "C" {
  */
 void subghz_device_cc1101_ext_set_async_mirror_pin(const GpioPin* pin);
 
+const GpioPin* subghz_device_cc1101_ext_get_data_gpio();
 bool subghz_device_cc1101_ext_alloc();
 void subghz_device_cc1101_ext_free();
 

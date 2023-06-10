@@ -109,6 +109,10 @@ void subghz_device_cc1101_ext_set_async_mirror_pin(const GpioPin* pin) {
     subghz_device_cc1101_ext->async_mirror_pin = pin;
 }
 
+const GpioPin* subghz_device_cc1101_ext_get_data_gpio() {
+    return subghz_device_cc1101_ext->g0_pin;
+}
+
 bool subghz_device_cc1101_ext_check() {
     furi_assert(subghz_device_cc1101_ext->state == SubGhzDeviceCC1101ExtStateInit);
     subghz_device_cc1101_ext->state = SubGhzDeviceCC1101ExtStateIdle;

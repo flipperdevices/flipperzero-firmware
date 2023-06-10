@@ -45,9 +45,9 @@ void subghz_devices_idle(const SubGhzDevice* device) {
     }
 }
 
-void subghz_devices_load_preset(const SubGhzDevice* device, FuriHalSubGhzPreset preset) {
+void subghz_devices_load_preset(const SubGhzDevice* device, FuriHalSubGhzPreset preset, uint8_t *preset_data) {
     if(device && device->interconnect->load_preset) {
-        device->interconnect->load_preset(preset);
+        device->interconnect->load_preset(preset, preset_data);
     }
 }
 
@@ -65,12 +65,26 @@ void subghz_devices_set_async_mirror_pin(const SubGhzDevice* device, const GpioP
     }
 }
 
+const GpioPin* subghz_devices_get_data_gpio(const SubGhzDevice* device) {
+    const GpioPin* ret = NULL;
+    if(device && device->interconnect->get_data_gpio) {
+        ret = device->interconnect->get_data_gpio();
+    }
+    return ret;
+}
+
 bool subghz_devices_set_tx(const SubGhzDevice* device) {
     bool ret = 0;
     if(device && device->interconnect->set_tx) {
         ret = device->interconnect->set_tx();
     }
     return ret;
+}
+
+void subghz_devices_flush_tx(const SubGhzDevice* device) {
+    if(device && device->interconnect->flush_tx) {
+        device->interconnect->flush_tx();
+    }
 }
 
 bool subghz_devices_start_async_tx(const SubGhzDevice* device, void* callback, void* context) {
@@ -101,6 +115,12 @@ void subghz_devices_set_rx(const SubGhzDevice* device) {
     }
 }
 
+void subghz_devices_flush_rx(const SubGhzDevice* device) {
+    if(device && device->interconnect->flush_rx) {
+        device->interconnect->flush_rx();
+    }
+}
+
 void subghz_devices_start_async_rx(const SubGhzDevice* device, void* callback, void* context) {
     if(device && device->interconnect->start_async_rx) {
         device->interconnect->start_async_rx(callback, context);
@@ -112,3 +132,48 @@ void subghz_devices_stop_async_rx(const SubGhzDevice* device) {
         device->interconnect->stop_async_rx();
     }
 }
+
+float subghz_devices_get_rssi(const SubGhzDevice* device) {
+    float ret = 0;
+    if(device && device->interconnect->get_rssi) {
+        ret = device->interconnect->get_rssi();
+    }
+    return ret;
+}
+
+uint8_t subghz_devices_get_lqi(const SubGhzDevice* device) {
+    uint8_t ret = 0;
+    if(device && device->interconnect->get_lqi) {
+        ret = device->interconnect->get_lqi();
+    }
+    return ret;
+}
+
+bool subghz_devices_rx_pipe_not_empty(const SubGhzDevice* device) {
+    bool ret = false;
+    if(device && device->interconnect->rx_pipe_not_empty) {
+        ret = device->interconnect->rx_pipe_not_empty();
+    }
+    return ret;
+}
+
+bool subghz_devices_is_rx_data_crc_valid(const SubGhzDevice* device) {
+    bool ret = false;
+    if(device && device->interconnect->is_rx_data_crc_valid) {
+        ret = device->interconnect->is_rx_data_crc_valid();
+    }
+    return ret;
+}
+
+void subghz_devices_read_packet(const SubGhzDevice* device, uint8_t* data, uint8_t* size) {
+    if(device && device->interconnect->read_packet) {
+        device->interconnect->read_packet(data, size);
+    }
+}
+
+void subghz_devices_write_packet(const SubGhzDevice* device, const uint8_t* data, uint8_t size) {
+    if(device && device->interconnect->write_packet) {
+        device->interconnect->write_packet(data, size);
+    }
+}
+

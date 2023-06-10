@@ -176,7 +176,7 @@ void subghz_cli_command_tx_ext(Cli* cli, FuriString* args, void* context) {
     const SubGhzDevice* device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
     subghz_devices_begin(device);
     subghz_devices_reset(device);
-    subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async);
+    subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async, NULL);
     frequency = subghz_devices_set_frequency(device, frequency);
     subghz_devices_set_async_mirror_pin(device, &gpio_ext_pc3);
 
@@ -368,7 +368,7 @@ void subghz_cli_command_rx_ext(Cli* cli, FuriString* args, void* context) {
     const SubGhzDevice* device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
     subghz_devices_begin(device);
     subghz_devices_reset(device);
-    subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async);
+    subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async, NULL);
     frequency = subghz_devices_set_frequency(device, frequency);
     subghz_devices_set_async_mirror_pin(device, &gpio_ext_pc3);
 
@@ -691,7 +691,7 @@ static void subghz_cli_command_print_usage() {
     printf("subghz <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
 
-    printf("\tchat <frequency:in Hz>\t - Chat with other Flippers\r\n");
+    printf("\tchat <frequency:in Hz> <device_ind: 0 - CC1101_INTERNAL, 1 - CC1101_EXT>\t - Chat with other Flippers\r\n");
     printf(
         "\ttx <3 byte Key: in hex> <frequency: in Hz> <te: us> <repeat: count>\t - Transmitting key\r\n");
     printf("\trx <frequency:in Hz>\t - Receive\r\n");
@@ -792,12 +792,17 @@ static void subghz_cli_command_encrypt_raw(Cli* cli, FuriString* args) {
 
 static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     uint32_t frequency = 433920000;
+    uint32_t device_ind = 0; // 0 - CC1101_INTERNAL, 1 - CC1101_EXT
 
     if(furi_string_size(args)) {
-        int ret = sscanf(furi_string_get_cstr(args), "%lu", &frequency);
-        if(ret != 1) {
+        int ret = sscanf(furi_string_get_cstr(args), "%lu %lu", &frequency, &device_ind);
+        if(ret != 2) {
             printf("sscanf returned %d, frequency: %lu\r\n", ret, frequency);
-            cli_print_usage("subghz chat", "<Frequency: in Hz>", furi_string_get_cstr(args));
+            printf("sscanf returned %d, device_ind: %lu\r\n", ret, device_ind);
+            cli_print_usage(
+                "subghz chat",
+                "<frequency: in Hz> <device_ind: 0 - CC1101_INTERNAL, 1 - CC1101_EXT>",
+                furi_string_get_cstr(args));
             return;
         }
         if(!furi_hal_subghz_is_frequency_valid(frequency)) {
@@ -816,7 +821,18 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
     }
 
     SubGhzChatWorker* subghz_chat = subghz_chat_worker_alloc(cli);
-    if(!subghz_chat_worker_start(subghz_chat, frequency)) {
+    const SubGhzDevice* device = NULL;
+    switch(device_ind) {
+    case 1:
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
+        break;
+
+    default:
+       // device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INTERNAL_NAME);
+        break;
+    }
+
+    if(!subghz_chat_worker_start(subghz_chat, device, frequency)) {
         printf("Startup error SubGhzChatWorker\r\n");
 
         if(subghz_chat_worker_is_running(subghz_chat)) {
