@@ -1,7 +1,6 @@
 #include "subbrute_i.h"
 #include "subbrute_custom_event.h"
 #include "scenes/subbrute_scene.h"
-#include <dolphin/dolphin.h>
 
 #define TAG "SubBruteApp"
 
@@ -94,11 +93,17 @@ SubBruteState* subbrute_alloc() {
     //instance->flipper_format = flipper_format_string_alloc();
     //instance->environment = subghz_environment_alloc();
 
+    // Uncomment to enable Debug pin output on PIN 17(1W)
+    //furi_hal_subghz_set_async_mirror_pin(&gpio_ibutton);
+
     return instance;
 }
 
 void subbrute_free(SubBruteState* instance) {
     furi_assert(instance);
+
+    // Uncomment to enable Debug pin output on PIN 17(1W)
+    //furi_hal_subghz_set_async_mirror_pin(NULL);
 
     // SubBruteWorker
     subbrute_worker_stop(instance->worker);
@@ -174,7 +179,6 @@ void subbrute_popup_closed_callback(void* context) {
 int32_t subbrute_app(void* p) {
     UNUSED(p);
 
-    dolphin_deed(DolphinDeedPluginStart);
     SubBruteState* instance = subbrute_alloc();
     view_dispatcher_attach_to_gui(
         instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);
