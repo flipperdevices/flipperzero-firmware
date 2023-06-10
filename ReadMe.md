@@ -46,7 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [github: re-enabled f18 build #2743 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2743)
 - OFW: [fbt: added Flipper selection when multiple are connected over USB #2723 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2723)
 - OFW (But Added to RM LONG AGO): [added ISO15693 (NfcV) reading, saving, emulating and revealing from privacy mode (unlock) #2316 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/2316)
-- UL: Removal of iButton Fuzzer and RFID Fuzzer to be replaced with the new iButton Fuzzer & RFID Fuzzer (By xMasterX)
+- UL: Removal of iButton Fuzzer and RFID Fuzzer to be replaced with the new iButton Fuzzer & RFID Fuzzer - Remade with new features (By gid9798)
 - UL: [Byte input add feature: editor without keyboard #509 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/509)
 - UL: [SubGHz: Notifications refines #464 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/464)
 - UL: [Fix LED Descriptor for BLE (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f4cc929a99805d634d5e8da1c42ee3d1af0853a3)
@@ -55,6 +55,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Updated: [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Correct Fuzzer Dictionary Folders (By RogueMaster)
 - Re-Add Dolphin Experience for Sub-GHz Bruteforcer (By RogueMaster)
+- UL: Plugins: SubGHz Bruteforcer - Time delay (between signals) setting (hold Up in main screen(says Up to Save)) + allow more repeats (by gid9798 & xMasterX)
+- UL: Plugins: Update TOTP (Authenticator) [(by akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- UL: Plugins: Unitemp SCD30 support (PR in unitemp repo by divinebird / fixed by xMasterX)
+- UL: SubGHz: Remove broken modulation that was causing buffer overrun (fixes issue UL#506)
+- UL: OFW PR 2756: fix: make dialog_file_browser_set_basic_options initialize all fields (by JarvisCraft)
+- Settings->LCD and Notifications will be resetted to default due to new Contrast setting from OFW
 
 <a name="release">
 
