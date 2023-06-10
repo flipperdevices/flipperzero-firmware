@@ -9,7 +9,7 @@ void picopass_emulate_worker_callback(PicopassWorkerEvent event, void* context) 
 
 void picopass_scene_emulate_on_enter(void* context) {
     Picopass* picopass = context;
-    DOLPHIN_DEED(DolphinDeedNfcEmulate);
+    dolphin_deed(DolphinDeedNfcEmulate);
 
     Widget* widget = picopass->widget;
     widget_reset(widget);

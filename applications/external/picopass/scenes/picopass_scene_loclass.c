@@ -15,7 +15,7 @@ void picopass_loclass_result_callback(void* context) {
 
 void picopass_scene_loclass_on_enter(void* context) {
     Picopass* picopass = context;
-    DOLPHIN_DEED(DolphinDeedNfcEmulate);
+    dolphin_deed(DolphinDeedNfcEmulate);
 
     scene_manager_set_scene_state(picopass->scene_manager, PicopassSceneLoclass, 0);
 
