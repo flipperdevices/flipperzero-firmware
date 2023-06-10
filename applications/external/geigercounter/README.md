@@ -16,6 +16,7 @@ You also need jumper wires to connect the board on the **Flipper Zero**.
 - natural thorium (alpha, beta, gamma)
 - radium-226 (alpha, beta, gamma)
 - cobalt-60 (beta & gamma)
+- iodine-131 (beta & gamma)
 
 **Not really usable** radioactive sources : 
 - americium-241 (alpha & low gamma, some strong beta/gamma rays are emitted during radioactive cascade)

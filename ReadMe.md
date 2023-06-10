@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGHz: Remove broken modulation that was causing buffer overrun (fixes issue UL#506)
 - UL: OFW PR 2756: fix: make dialog_file_browser_set_basic_options initialize all fields (by JarvisCraft)
 - Settings->LCD and Notifications will be resetted to default due to new Contrast setting from OFW
+- Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 
 <a name="release">
 

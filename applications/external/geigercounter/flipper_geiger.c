@@ -109,7 +109,7 @@ static void clock_tick(void* ctx) {
     randomNumber &= 0xFFF;
     if(randomNumber == 0) randomNumber = 1;
 
-    furi_hal_pwm_start(FuriHalPwmOutputIdLptim2PA4, randomNumber, 50);
+    furi_hal_pwm_set_params(FuriHalPwmOutputIdLptim2PA4, randomNumber, 50);
 
     FuriMessageQueue* queue = ctx;
     EventApp event = {.type = ClockEventTypeTick};
