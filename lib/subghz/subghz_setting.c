@@ -4,7 +4,7 @@
 
 #include <furi.h>
 #include <m-list.h>
-#include <lib/subghz/device/cc1101_configs.h>
+#include <lib/subghz/devices/cc1101_configs.h>
 
 #define TAG "SubGhzSetting"
 

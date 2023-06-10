@@ -1,6 +1,6 @@
 #pragma once
 #include "../subghz_i.h"
-#include <lib/subghz/device/devices.h>
+#include <lib/subghz/devices/devices.h>
 #include <cli/cli.h>
 
 typedef struct SubGhzChatWorker SubGhzChatWorker;

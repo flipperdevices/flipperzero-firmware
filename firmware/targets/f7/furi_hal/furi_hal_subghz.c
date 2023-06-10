@@ -1,5 +1,5 @@
 #include <furi_hal_subghz.h>
-#include <lib/subghz/device/cc1101_configs.h>
+#include <lib/subghz/devices/cc1101_configs.h>
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
 #include <furi_hal_rtc.h>
@@ -68,6 +68,10 @@ volatile FuriHalSubGhz furi_hal_subghz = {
 
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin) {
     furi_hal_subghz.async_mirror_pin = pin;
+}
+
+const GpioPin* furi_hal_subghz_get_data_gpio() {
+    return &gpio_cc1101_g0;
 }
 
 void furi_hal_subghz_init() {

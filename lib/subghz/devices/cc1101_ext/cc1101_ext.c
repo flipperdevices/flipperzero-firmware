@@ -1,5 +1,5 @@
 #include "cc1101_ext.h"
-#include "cc1101_configs.h"
+#include "../cc1101_configs.h"
 
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>
@@ -10,6 +10,7 @@
 #include <furi_hal_bus.h>
 
 #include <stm32wbxx_ll_dma.h>
+#include <furi_hal_cortex.h>
 
 #include <furi.h>
 #include <cc1101.h>
@@ -118,42 +119,73 @@ bool subghz_device_cc1101_ext_check() {
     subghz_device_cc1101_ext->state = SubGhzDeviceCC1101ExtStateIdle;
     subghz_device_cc1101_ext->preset = FuriHalSubGhzPresetIDLE;
 
+    bool ret = false;
+
     furi_hal_spi_acquire(subghz_device_cc1101_ext->spi_bus_handle);
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(100 * 1000);
+    do {
+        // Reset
+        furi_hal_gpio_init(
+            subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        cc1101_reset(subghz_device_cc1101_ext->spi_bus_handle);
+        cc1101_write_reg(
+            subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
 
-    // Reset
-    furi_hal_gpio_init(subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    cc1101_reset(subghz_device_cc1101_ext->spi_bus_handle);
-    cc1101_write_reg(
-        subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+        // Prepare GD0 for power on self test
+        furi_hal_gpio_init(
+            subghz_device_cc1101_ext->g0_pin, GpioModeInput, GpioPullNo, GpioSpeedLow);
 
-    // Prepare GD0 for power on self test
-    furi_hal_gpio_init(subghz_device_cc1101_ext->g0_pin, GpioModeInput, GpioPullNo, GpioSpeedLow);
+        // GD0 low
+        cc1101_write_reg(subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHW);
+        while(furi_hal_gpio_read(subghz_device_cc1101_ext->g0_pin) != false) {
+            if(furi_hal_cortex_timer_is_expired(timer)) {
+                //timeout
+                break;
+            }
+        }
+        if(furi_hal_cortex_timer_is_expired(timer)) {
+            //timeout
+            break;
+        }
 
-    // GD0 low
-    cc1101_write_reg(subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHW);
-    while(furi_hal_gpio_read(subghz_device_cc1101_ext->g0_pin) != false)
-        ;
+        // GD0 high
+        cc1101_write_reg(
+            subghz_device_cc1101_ext->spi_bus_handle,
+            CC1101_IOCFG0,
+            CC1101IocfgHW | CC1101_IOCFG_INV);
+        while(furi_hal_gpio_read(subghz_device_cc1101_ext->g0_pin) != true) {
+            if(furi_hal_cortex_timer_is_expired(timer)) {
+                //timeout
+                break;
+            }
+        }
+        if(furi_hal_cortex_timer_is_expired(timer)) {
+            //timeout
+            break;
+        }
 
-    // GD0 high
-    cc1101_write_reg(
-        subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHW | CC1101_IOCFG_INV);
-    while(furi_hal_gpio_read(subghz_device_cc1101_ext->g0_pin) != true)
-        ;
+        // Reset GD0 to floating state
+        cc1101_write_reg(
+            subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
+        furi_hal_gpio_init(
+            subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 
-    // Reset GD0 to floating state
-    cc1101_write_reg(
-        subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG0, CC1101IocfgHighImpedance);
-    furi_hal_gpio_init(subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        // RF switches
+        furi_hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+        cc1101_write_reg(subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW);
 
-    // RF switches
-    furi_hal_gpio_init(&gpio_rf_sw_0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
-    cc1101_write_reg(subghz_device_cc1101_ext->spi_bus_handle, CC1101_IOCFG2, CC1101IocfgHW);
-
-    // Go to sleep
-    cc1101_shutdown(subghz_device_cc1101_ext->spi_bus_handle);
+        // Go to sleep
+        cc1101_shutdown(subghz_device_cc1101_ext->spi_bus_handle);
+        ret = true;
+    } while(false);
 
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
-    FURI_LOG_I(TAG, "Init OK");
+
+    if(ret) {
+        FURI_LOG_I(TAG, "Init OK");
+    } else {
+        FURI_LOG_E(TAG, "Init failed");
+    }
     return true;
 }
 

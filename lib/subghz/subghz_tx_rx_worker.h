@@ -1,7 +1,7 @@
 #pragma once
 
 #include <furi_hal.h>
-#include <device/devices.h>
+#include <devices/devices.h>
 
 #ifdef __cplusplus
 extern "C" {

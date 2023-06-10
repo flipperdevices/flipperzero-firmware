@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <lib\subghz\device\preset.h>
+#include <lib\subghz\devices\preset.h>
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -33,6 +33,12 @@ typedef enum {
  * @param[in]  pin   pointer to the gpio pin structure or NULL to disable
  */
 void furi_hal_subghz_set_async_mirror_pin(const GpioPin* pin);
+
+/** Get data GPIO
+ *
+ * @return     pointer to the gpio pin structure
+ */
+const GpioPin* furi_hal_subghz_get_data_gpio();
 
 /** Initialize and switch to power save mode Used by internal API-HAL
  * initialization routine Can be used to reinitialize device to safe state and
