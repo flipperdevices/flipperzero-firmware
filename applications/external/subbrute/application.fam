@@ -9,4 +9,5 @@ App(
     fap_icon="images/subbrute_10px.png",
     fap_category="Sub-GHz",
     fap_icon_assets="images",
+    fap_icon_assets_symbol="subghz_bruteforcer",
 )
