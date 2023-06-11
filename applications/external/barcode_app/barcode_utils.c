@@ -43,6 +43,14 @@ void init_types() {
     code_128->start_pos = 0;
     barcode_type_objs[CODE128] = code_128;
 
+    BarcodeTypeObj* code_128c = malloc(sizeof(BarcodeTypeObj));
+    code_128c->name = "CODE-128C";
+    code_128c->type = CODE128C;
+    code_128c->min_digits = 2;
+    code_128c->max_digits = -1;
+    code_128c->start_pos = 0;
+    barcode_type_objs[CODE128C] = code_128c;
+
     BarcodeTypeObj* codabar = malloc(sizeof(BarcodeTypeObj));
     codabar->name = "Codabar";
     codabar->type = CODABAR;
@@ -82,9 +90,13 @@ BarcodeTypeObj* get_type(FuriString* type_string) {
     if(furi_string_cmp_str(type_string, "CODE-128") == 0) {
         return barcode_type_objs[CODE128];
     }
+    if(furi_string_cmp_str(type_string, "CODE-128C") == 0) {
+        return barcode_type_objs[CODE128C];
+    }
     if(furi_string_cmp_str(type_string, "Codabar") == 0) {
         return barcode_type_objs[CODABAR];
     }
+
 
     return barcode_type_objs[UNKNOWN];
 }
@@ -109,7 +121,7 @@ const char* get_error_code_name(ErrorCode error_code) {
         return "OK";
     default:
         return "Unknown Code";
-    }
+    };
 }
 
 const char* get_error_code_message(ErrorCode error_code) {
@@ -132,5 +144,5 @@ const char* get_error_code_message(ErrorCode error_code) {
         return "OK";
     default:
         return "Could not read barcode data";
-    }
+    };
 }

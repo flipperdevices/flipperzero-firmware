@@ -13,6 +13,9 @@ void barcode_loader(BarcodeData* barcode_data) {
     case CODE128:
         code_128_loader(barcode_data);
         break;
+    case CODE128C:
+        code_128c_loader(barcode_data);
+        break;
     case CODABAR:
         codabar_loader(barcode_data);
         break;
@@ -39,6 +42,7 @@ int calculate_check_digit(BarcodeData* barcode_data) {
         break;
     case CODE39:
     case CODE128:
+    case CODE128C:
     case CODABAR:
     case UNKNOWN:
     default:
@@ -345,7 +349,133 @@ void code_128_loader(BarcodeData* barcode_data) {
     furi_string_free(barcode_bits);
 }
 
-void codabar_loader(BarcodeData* barcode_data) {
+/**
+ * Loads a code 128 C barcode
+*/
+void code_128c_loader(BarcodeData* barcode_data) {
+    int barcode_length = furi_string_size(barcode_data->raw_data);
+
+    //the start code for character set C 
+    int start_code_value = 105;
+
+    //The bits for the start code
+    const char* start_code_bits = "11010011100";
+
+    //The bits for the stop code
+    const char* stop_code_bits = "1100011101011";
+
+    int min_digits = barcode_data->type_obj->min_digits;
+
+    int checksum_adder = start_code_value;
+    int checksum_digits = 0;
+
+    //the calculated check digit
+    int final_check_digit = 0;
+
+    // check the length of the barcode, must contain atleast 2 character,
+    // this can have as many characters as it wants, it might not fit on the screen
+    // code 128 C: the length must be even
+    if((barcode_length < min_digits) || (barcode_length & 1)) {
+        barcode_data->reason = WrongNumberOfDigits;
+        barcode_data->valid = false;
+        return;
+    }
+    //Open Storage
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    FlipperFormat* ff = flipper_format_file_alloc(storage);
+
+    FuriString* barcode_bits = furi_string_alloc();
+
+    //add the start code
+    furi_string_cat(barcode_bits, start_code_bits);
+
+    if(!flipper_format_file_open_existing(ff, CODE128C_DICT_FILE_PATH)) {
+        FURI_LOG_E(TAG, "c128c Could not open file %s", CODE128C_DICT_FILE_PATH);
+        barcode_data->reason = MissingEncodingTable;
+        barcode_data->valid = false;
+    } else {
+        FuriString* value = furi_string_alloc();
+        FuriString* char_bits = furi_string_alloc();
+        for(int i = 0; i < barcode_length; i+=2) {
+            char barcode_char1 = furi_string_get_char(barcode_data->raw_data, i);
+            char barcode_char2 = furi_string_get_char(barcode_data->raw_data, i+1);
+            FURI_LOG_I(TAG, "c128c bc1='%c' bc2='%c'", barcode_char1, barcode_char2);
+
+            char current_chars[4];
+            snprintf(current_chars, 3, "%c%c", barcode_char1, barcode_char2);
+	    FURI_LOG_I(TAG, "c128c current_chars='%s'", current_chars);
+
+            //using the value of the characters, get the characters bits
+            if(!flipper_format_read_string(ff, current_chars, char_bits)) {
+                FURI_LOG_E(TAG, "c128c Could not read \"%s\" string", current_chars);
+                barcode_data->reason = EncodingTableError;
+                barcode_data->valid = false;
+                break;
+            } else {
+                //add the bits to the full barcode
+                furi_string_cat(barcode_bits, char_bits);
+
+                // calculate the checksum
+                checksum_digits += 1;
+                checksum_adder += (atoi(current_chars) * checksum_digits);
+
+                FURI_LOG_I(
+                    TAG,
+                    "c128c \"%s\" string: %s : %s : %d : %d : %d",
+                    current_chars,
+                    furi_string_get_cstr(char_bits),
+                    furi_string_get_cstr(value),
+                    checksum_digits,
+                    (atoi(furi_string_get_cstr(value)) * checksum_digits),
+                    checksum_adder);
+            }
+            //bring the file pointer back to the begining
+            flipper_format_rewind(ff);
+        }
+        //calculate the check digit and convert it into a c string for lookup in the encoding table
+        final_check_digit = checksum_adder % 103;
+	FURI_LOG_I(TAG, "c128c finale_check_digit=%d", final_check_digit);
+
+	int length = snprintf(NULL, 0, "%d", final_check_digit);
+	if (final_check_digit < 100)
+            length=2;
+        char* final_check_digit_string = malloc(length+1);
+	snprintf(final_check_digit_string, length + 1, "%02d", final_check_digit);
+
+        //after the checksum has been calculated, add the bits to the full barcode
+        if(!flipper_format_read_string(ff, final_check_digit_string, char_bits)) {
+            FURI_LOG_E(TAG, "c128c cksum Could not read \"%s\" string", final_check_digit_string);
+            barcode_data->reason = EncodingTableError;
+            barcode_data->valid = false;
+        } else {
+            //add the check digit bits to the full barcode
+            furi_string_cat(barcode_bits, char_bits);
+
+            FURI_LOG_I(
+                TAG,
+                "check digit \"%s\" string: %s",
+                final_check_digit_string,
+                furi_string_get_cstr(char_bits));
+        }
+
+        free(final_check_digit_string);
+        furi_string_free(value);
+        furi_string_free(char_bits);
+    }
+
+    //add the stop code
+    furi_string_cat(barcode_bits, stop_code_bits);
+
+    //Close Storage
+    flipper_format_free(ff);
+    furi_record_close(RECORD_STORAGE);
+
+    FURI_LOG_I(TAG, "c128c %s", furi_string_get_cstr(barcode_bits));
+    furi_string_cat(barcode_data->correct_data, barcode_bits);
+    furi_string_free(barcode_bits);
+}
+
+void codabar_loader(BarcodeData* barcode_data){
     int barcode_length = furi_string_size(barcode_data->raw_data);
 
     int min_digits = barcode_data->type_obj->min_digits;
