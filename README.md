@@ -80,9 +80,9 @@ For example, if you wanted to represent `1234` as a barcode you will need to ent
 
 ## Credits
 
-[Kingal1337](https://github.com/Kingal1337) - Developer
+- [Kingal1337](https://github.com/Kingal1337) - Developer
+- [Z0wl](https://github.com/Z0wl) - Added Code128-C Support
+- [@teeebor](https://github.com/teeebor) - Menu Code Snippet
 
-[@teeebor](https://github.com/teeebor) - Menu Code Snippet
 
-
-[1] - Only supports Set B and only the characters from 0-94
+[1] - supports Set B (only the characters from 0-94). Also supports Set C

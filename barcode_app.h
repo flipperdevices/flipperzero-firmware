@@ -35,6 +35,9 @@
 //the folder where the code 128 encoding table is located
 #define CODE128_DICT_FILE_PATH BARCODE_DATA_FILE_DIR_PATH "/code128_encodings.txt"
 
+//the folder where the code 128 C encoding table is located
+#define CODE128C_DICT_FILE_PATH BARCODE_DATA_FILE_DIR_PATH "/code128c_encodings.txt"
+
 //the folder where the user stores their barcodes
 #define DEFAULT_USER_BARCODES EXT_PATH("apps_data/barcodes")
 
