@@ -30,7 +30,7 @@
 //   last 8 bits are inverted from previous 8 bits.
 //
 // Format: SSSSXBXX ssssxbxx DBOQBXXX dboqbxxx
-// S - The serial number (Channel) is encoded in the first four bits that were sent. 
+// S - The serial number (Channel) is encoded in the first four bits that were sent.
 // x - Unused bits
 // B - Bit 6 is set if the button should be button 9-16, instead of buttons 1-8.
 // DQ - The 1st bit of byte 3 is 1 if DIMMER. (bit 4=0 for BRIGHT, bit 4=1 for DIM)
@@ -119,14 +119,14 @@ void subghz_protocol_decoder_x10_reset(void* context) {
 
 bool subghz_protocol_x10_validate(void* context) {
     furi_assert(context);
-    
+
     SubGhzProtocolDecoderX10* instance = context;
     SubGhzBlockDecoder* decoder = &instance->decoder;
-    uint64_t data = decoder->decode_data; 
+    uint64_t data = decoder->decode_data;
 
     return decoder->decode_count_bit >= subghz_protocol_x10_const.min_count_bit_for_found &&
-        ((((data >> 24) ^ (data >> 16)) & 0xFF) == 0xFF) &&
-        ((((data >> 8) ^ (data )) & 0xFF) == 0xFF);
+           ((((data >> 24) ^ (data >> 16)) & 0xFF) == 0xFF) &&
+           ((((data >> 8) ^ (data )) & 0xFF) == 0xFF);
 }
 
 void subghz_protocol_decoder_x10_feed(void* context, bool level, uint32_t duration) {
@@ -152,27 +152,27 @@ void subghz_protocol_decoder_x10_feed(void* context, bool level, uint32_t durati
         break;
     case X10DecoderStepSaveDuration:
         if(level) {
-          if(DURATION_DIFF(duration, subghz_protocol_x10_const.te_short) <
-                subghz_protocol_x10_const.te_delta) {
-              if(instance->decoder.decode_count_bit ==
-                  subghz_protocol_x10_const.min_count_bit_for_found) {
-                  instance->decoder.parser_step = X10DecoderStepReset;
-                  if (subghz_protocol_x10_validate(context)) {
-                    FURI_LOG_E(TAG, "Decoded a signal!");
-                    instance->generic.data = instance->decoder.decode_data;
-                    instance->generic.data_count_bit = instance->decoder.decode_count_bit;
+            if(DURATION_DIFF(duration, subghz_protocol_x10_const.te_short) <
+               subghz_protocol_x10_const.te_delta) {
+                if(instance->decoder.decode_count_bit ==
+                   subghz_protocol_x10_const.min_count_bit_for_found) {
+                    instance->decoder.parser_step = X10DecoderStepReset;
+                    if (subghz_protocol_x10_validate(context)) {
+                        FURI_LOG_E(TAG, "Decoded a signal!");
+                        instance->generic.data = instance->decoder.decode_data;
+                        instance->generic.data_count_bit = instance->decoder.decode_count_bit;
 
-                    if(instance->base.callback)
-                        instance->base.callback(&instance->base, instance->base.context);
-                  }
-                  subghz_protocol_decoder_x10_reset(context);
-              } else {
-                  instance->decoder.te_last = duration;
-                  instance->decoder.parser_step = X10DecoderStepCheckDuration;
-              }
-          } else {
-            subghz_protocol_decoder_x10_reset(context);
-          }
+                        if(instance->base.callback)
+                            instance->base.callback(&instance->base, instance->base.context);
+                    }
+                    subghz_protocol_decoder_x10_reset(context);
+                } else {
+                    instance->decoder.te_last = duration;
+                    instance->decoder.parser_step = X10DecoderStepCheckDuration;
+                }
+            } else {
+                subghz_protocol_decoder_x10_reset(context);
+            }
         } else {
             subghz_protocol_decoder_x10_reset(context);
         }
@@ -218,7 +218,7 @@ uint8_t subghz_protocol_decoder_x10_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_x10_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_x10_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -227,7 +227,8 @@ bool subghz_protocol_decoder_x10_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-bool subghz_protocol_decoder_x10_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_x10_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderX10* instance = context;
     bool ret = false;
@@ -236,7 +237,7 @@ bool subghz_protocol_decoder_x10_deserialize(void* context, FlipperFormat* flipp
             break;
         }
         if(instance->generic.data_count_bit !=
-           subghz_protocol_x10_const.min_count_bit_for_found) {
+            subghz_protocol_x10_const.min_count_bit_for_found) {
             FURI_LOG_E(TAG, "Wrong number of bits in key");
             break;
         }
@@ -255,8 +256,8 @@ void subghz_protocol_decoder_x10_get_string(void* context, FuriString* output) {
 
     uint32_t code_button = 1 + (
         ((instance->generic.btn&0x10) >> 4) |
-        ((instance->generic.btn&0x8) >> 2) | 
-        ((instance->generic.btn&0x40)>>4) | 
+        ((instance->generic.btn&0x8) >> 2) |
+        ((instance->generic.btn&0x40)>>4) |
         ((instance->generic.btn&4)<<1));
 
     char* code_action = (instance->generic.btn & 0x20) == 0x20 ? "Off" : "On";
