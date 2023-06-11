@@ -174,6 +174,8 @@ Hid* hid_app_alloc_view(void* context) {
         "Use the configuration setting\n"
         "to change the location of the\n"
         "clicking!\n"
+        "iPhone 14: x=40,y=80, m=3\n"
+        "Samsung A53: x=40, y=120, m=10\n"
         "Enjoy!\n");
     view_set_previous_callback(widget_get_view(app->widget_instructions), hid_submenu_view);
     view_dispatcher_add_view(
