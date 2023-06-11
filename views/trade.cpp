@@ -327,6 +327,7 @@ void trade_enter_callback(void* context) {
         GpioModeInterruptRise,
         GpioPullNo,
         GpioSpeedVeryHigh); // <-- This line causes the "OK" to stop functioning when exiting the application, so a reboot of the Flipper Zero is required.
+    furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
     furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, trade);
 
     // furi_hal_gpio_disable_int_callback(&GAME_BOY_CLK);
