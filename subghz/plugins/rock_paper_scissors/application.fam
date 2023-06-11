@@ -1,5 +1,5 @@
 App(
-    appid="Rock_Paper_Scissors",
+    appid="rock_paper_scissors",
     name="Rock Paper Scissors",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rock_paper_scissors_app",

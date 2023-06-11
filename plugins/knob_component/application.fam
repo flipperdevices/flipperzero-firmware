@@ -1,5 +1,5 @@
 App(
-    appid="Knob_Demo",
+    appid="knob_demo",
     name="Knob Demo",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="knob_demo_app",

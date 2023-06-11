@@ -1,5 +1,5 @@
 App(
-    appid="Minimal_Viewport_Demo",
+    appid="minimal_viewport_demo",
     name="Minimal Viewport Demo",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="minimal_viewport_demo_app",

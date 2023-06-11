@@ -1,5 +1,5 @@
 App(
-    appid="Gpio_Interrupt_Demo",
+    appid="gpio_interrupt_demo",
     name="GPIO Interrupt Demo",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gpio_interrupt_demo_app",
