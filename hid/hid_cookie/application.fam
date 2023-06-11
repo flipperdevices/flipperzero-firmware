@@ -1,5 +1,5 @@
 App(
-    appid="CookieBT",
+    appid="cookie_bt",
     name="Cookie Clicker",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="hid_cookie_ble_app",
