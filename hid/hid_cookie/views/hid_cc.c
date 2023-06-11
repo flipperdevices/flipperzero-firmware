@@ -20,6 +20,9 @@ typedef struct {
     bool is_cursor_set;
     float timer_duration;
     bool timer_click_enabled;
+    uint8_t click_x;
+    uint8_t click_y;
+    uint8_t click_loop;
 } HidCCModel;
 
 static void hid_cc_draw_callback(Canvas* canvas, void* context) {
@@ -114,9 +117,18 @@ static void hid_cc_reset_cursor(HidCC* hid_cc) {
         hid_hal_mouse_move(hid_cc->hid, -127, -127);
         furi_delay_ms(50);
     }
+
     // Move cursor from the corner
-    hid_hal_mouse_move(hid_cc->hid, 20, 120);
-    furi_delay_ms(50);
+    with_view_model(
+        hid_cc->view,
+        HidCCModel * model,
+        {
+            for(size_t i = 0; i < model->click_loop; i++) {
+                hid_hal_mouse_move(hid_cc->hid, model->click_x, model->click_y);
+                furi_delay_ms(50);
+            }
+        },
+        true);
 }
 
 static void hid_cc_process_press(HidCC* hid_cc, HidCCModel* model, InputEvent* event) {
@@ -193,6 +205,19 @@ static bool hid_cc_input_callback(InputEvent* event, void* context) {
         true);
 
     return consumed;
+}
+
+void hid_cc_set_cursor_position(HidCC* hid_cc, uint8_t x, uint8_t y, uint8_t repeat) {
+    furi_assert(hid_cc);
+    with_view_model(
+        hid_cc->view,
+        HidCCModel * model,
+        {
+            model->click_x = x;
+            model->click_y = y;
+            model->click_loop = repeat;
+        },
+        true);
 }
 
 HidCC* hid_cc_alloc(Hid* bt_hid) {

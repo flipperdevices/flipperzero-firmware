@@ -7,6 +7,7 @@
 
 enum HidDebugSubmenuIndex {
     HidSubmenuIndexInstructions,
+    HidSubmenuConfigure,
     HidSubmenuIndexClicker,
     HidSubmenuIndexCredits,
 };
@@ -22,6 +23,9 @@ static void hid_submenu_callback(void* context, uint32_t index) {
         view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
     } else if(index == HidSubmenuIndexCredits) {
         app->view_id = BtHidViewCredits;
+        view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
+    } else if(index == HidSubmenuConfigure) {
+        app->view_id = BtHidViewConfigure;
         view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
     }
 }
@@ -71,6 +75,8 @@ Hid* hid_alloc() {
     submenu_add_item(
         app->submenu, "Instructions", HidSubmenuIndexInstructions, hid_submenu_callback, app);
     submenu_add_item(
+        app->submenu, "Configuration", HidSubmenuConfigure, hid_submenu_callback, app);
+    submenu_add_item(
         app->submenu, "BT Phone Clicker", HidSubmenuIndexClicker, hid_submenu_callback, app);
     submenu_add_item(app->submenu, "Credits", HidSubmenuIndexCredits, hid_submenu_callback, app);
     view_set_previous_callback(submenu_get_view(app->submenu), hid_exit);
@@ -78,6 +84,44 @@ Hid* hid_alloc() {
     app->view_id = HidViewSubmenu;
     view_dispatcher_switch_to_view(app->view_dispatcher, app->view_id);
     return app;
+}
+
+void hid_setting_changed(Hid* instance) {
+    hid_cc_set_cursor_position(
+        instance->hid_cc, instance->offset_x, instance->offset_y, instance->offset_repeat);
+}
+
+void hid_setting_change_x(VariableItem* item) {
+    FuriString* str = furi_string_alloc();
+    Hid* instance = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    instance->offset_x = index * 10;
+    furi_string_cat_printf(str, "%d", instance->offset_x);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(str));
+    furi_string_free(str);
+    hid_setting_changed(instance);
+}
+
+void hid_setting_change_y(VariableItem* item) {
+    FuriString* str = furi_string_alloc();
+    Hid* instance = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    instance->offset_y = index * 10;
+    furi_string_cat_printf(str, "%d", instance->offset_y);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(str));
+    furi_string_free(str);
+    hid_setting_changed(instance);
+}
+
+void hid_setting_change_repeat(VariableItem* item) {
+    FuriString* str = furi_string_alloc();
+    Hid* instance = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    instance->offset_repeat = index + 1;
+    furi_string_cat_printf(str, "%d", instance->offset_repeat);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(str));
+    furi_string_free(str);
+    hid_setting_changed(instance);
 }
 
 Hid* hid_app_alloc_view(void* context) {
@@ -112,10 +156,37 @@ Hid* hid_app_alloc_view(void* context) {
         "speed. Click the OK button on\n"
         "the Flipper to enable/\n"
         "disable the clicker.\n"
+        "Use the configuration setting\n"
+        "to change the location of the\n"
+        "clicking!\n"
         "Enjoy!\n");
     view_set_previous_callback(widget_get_view(app->widget_instructions), hid_submenu_view);
     view_dispatcher_add_view(
         app->view_dispatcher, BtHidViewInstructions, widget_get_view(app->widget_instructions));
+
+    app->variable_item_list = variable_item_list_alloc();
+    variable_item_list_reset(app->variable_item_list);
+    VariableItem* item =
+        variable_item_list_add(app->variable_item_list, "X offset", 13, hid_setting_change_x, app);
+    variable_item_set_current_value_index(item, 3); // 0,10,20,30,...
+    variable_item_set_current_value_text(item, "30");
+    app->offset_x = 10;
+    item =
+        variable_item_list_add(app->variable_item_list, "Y offset", 13, hid_setting_change_y, app);
+    variable_item_set_current_value_index(item, 8); // 0,10,20,30,...
+    variable_item_set_current_value_text(item, "80");
+    app->offset_y = 100;
+    item = variable_item_list_add(
+        app->variable_item_list, "Multiplier", 20, hid_setting_change_repeat, app);
+    variable_item_set_current_value_index(item, 2); // 1,2,3,4,...
+    variable_item_set_current_value_text(item, "3");
+    app->offset_repeat = 2;
+    view_set_previous_callback(
+        variable_item_list_get_view(app->variable_item_list), hid_submenu_view);
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        BtHidViewConfigure,
+        variable_item_list_get_view(app->variable_item_list));
 
     // Clicker view
     app->hid_cc = hid_cc_alloc(app);
@@ -157,6 +228,8 @@ void hid_free(Hid* app) {
     hid_cc_free(app->hid_cc);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewCredits);
     widget_free(app->widget_credits);
+    view_dispatcher_remove_view(app->view_dispatcher, BtHidViewConfigure);
+    variable_item_list_free(app->variable_item_list);
     view_dispatcher_remove_view(app->view_dispatcher, BtHidViewInstructions);
     widget_free(app->widget_instructions);
     view_dispatcher_remove_view(app->view_dispatcher, HidViewSubmenu);
