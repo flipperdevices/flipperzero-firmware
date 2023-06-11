@@ -1,5 +1,5 @@
 App(
-    appid="Wiegand_Reader",
+    appid="wiegand_reader",
     name="Wiegand Reader",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wiegand_app",
