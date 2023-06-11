@@ -20,9 +20,10 @@ typedef struct {
     bool is_cursor_set;
     float timer_duration;
     bool timer_click_enabled;
-    uint8_t click_x;
-    uint8_t click_y;
-    uint8_t click_loop;
+    uint8_t move_x;
+    uint8_t move_y;
+    uint8_t move_loop;
+    uint8_t move_speed;
 } HidCCModel;
 
 static void hid_cc_draw_callback(Canvas* canvas, void* context) {
@@ -111,21 +112,23 @@ static void hid_cc_tick_callback(void* context) {
 }
 
 static void hid_cc_reset_cursor(HidCC* hid_cc) {
-    // Set cursor to the phone's left up corner
-    // Delays to guarantee one packet per connection interval
-    for(size_t i = 0; i < 8; i++) {
-        hid_hal_mouse_move(hid_cc->hid, -127, -127);
-        furi_delay_ms(50);
-    }
-
+    FURI_LOG_I("HID", "Reset cursor!");
     // Move cursor from the corner
     with_view_model(
         hid_cc->view,
         HidCCModel * model,
         {
-            for(size_t i = 0; i < model->click_loop; i++) {
-                hid_hal_mouse_move(hid_cc->hid, model->click_x, model->click_y);
-                furi_delay_ms(50);
+            // Set cursor to the phone's left up corner
+            // Delays to guarantee one packet per connection interval
+            for(size_t i = 0; i < 20; i++) {
+                hid_hal_mouse_move(hid_cc->hid, -127, -127);
+                furi_delay_ms(model->move_speed);
+            }
+
+            FURI_LOG_I("HID", "%d %d", model->move_x, model->move_y);
+            for(size_t i = 0; i < model->move_loop; i++) {
+                hid_hal_mouse_move(hid_cc->hid, model->move_x, model->move_y);
+                furi_delay_ms(model->move_speed);
             }
         },
         true);
@@ -207,15 +210,16 @@ static bool hid_cc_input_callback(InputEvent* event, void* context) {
     return consumed;
 }
 
-void hid_cc_set_cursor_position(HidCC* hid_cc, uint8_t x, uint8_t y, uint8_t repeat) {
+void hid_cc_set_cursor_position(HidCC* hid_cc, uint8_t x, uint8_t y, uint8_t repeat, uint8_t speed) {
     furi_assert(hid_cc);
     with_view_model(
         hid_cc->view,
         HidCCModel * model,
         {
-            model->click_x = x;
-            model->click_y = y;
-            model->click_loop = repeat;
+            model->move_x = x;
+            model->move_y = y;
+            model->move_loop = repeat;
+            model->move_speed = speed;
         },
         true);
 }

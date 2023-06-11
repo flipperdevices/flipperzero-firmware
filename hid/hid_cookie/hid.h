@@ -36,6 +36,7 @@ struct Hid {
     HidCC* hid_cc;
     uint32_t view_id;
     uint8_t offset_repeat;
+    uint8_t offset_speed;
     uint8_t offset_x;
     uint8_t offset_y;
 };

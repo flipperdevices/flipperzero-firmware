@@ -88,7 +88,11 @@ Hid* hid_alloc() {
 
 void hid_setting_changed(Hid* instance) {
     hid_cc_set_cursor_position(
-        instance->hid_cc, instance->offset_x, instance->offset_y, instance->offset_repeat);
+        instance->hid_cc,
+        instance->offset_x,
+        instance->offset_y,
+        instance->offset_repeat,
+        instance->offset_speed);
 }
 
 void hid_setting_change_x(VariableItem* item) {
@@ -119,6 +123,17 @@ void hid_setting_change_repeat(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
     instance->offset_repeat = index + 1;
     furi_string_cat_printf(str, "%d", instance->offset_repeat);
+    variable_item_set_current_value_text(item, furi_string_get_cstr(str));
+    furi_string_free(str);
+    hid_setting_changed(instance);
+}
+
+void hid_setting_change_speed(VariableItem* item) {
+    FuriString* str = furi_string_alloc();
+    Hid* instance = variable_item_get_context(item);
+    uint8_t index = variable_item_get_current_value_index(item);
+    instance->offset_speed = index * 10 + 1;
+    furi_string_cat_printf(str, "%d", instance->offset_speed);
     variable_item_set_current_value_text(item, furi_string_get_cstr(str));
     furi_string_free(str);
     hid_setting_changed(instance);
@@ -168,19 +183,24 @@ Hid* hid_app_alloc_view(void* context) {
     variable_item_list_reset(app->variable_item_list);
     VariableItem* item =
         variable_item_list_add(app->variable_item_list, "X offset", 13, hid_setting_change_x, app);
-    variable_item_set_current_value_index(item, 3); // 0,10,20,30,...
-    variable_item_set_current_value_text(item, "30");
-    app->offset_x = 10;
+    variable_item_set_current_value_index(item, 5); // 0,10,20,30,...
+    variable_item_set_current_value_text(item, "40");
+    app->offset_x = 40;
     item =
         variable_item_list_add(app->variable_item_list, "Y offset", 13, hid_setting_change_y, app);
     variable_item_set_current_value_index(item, 8); // 0,10,20,30,...
     variable_item_set_current_value_text(item, "80");
-    app->offset_y = 100;
+    app->offset_y = 80;
     item = variable_item_list_add(
         app->variable_item_list, "Multiplier", 20, hid_setting_change_repeat, app);
     variable_item_set_current_value_index(item, 2); // 1,2,3,4,...
     variable_item_set_current_value_text(item, "3");
-    app->offset_repeat = 2;
+    app->offset_repeat = 3;
+    item = variable_item_list_add(
+        app->variable_item_list, "CursorSpeed", 50, hid_setting_change_speed, app);
+    variable_item_set_current_value_index(item, 5); // 1,2,3,4,...
+    variable_item_set_current_value_text(item, "50");
+    app->offset_speed = 50;
     view_set_previous_callback(
         variable_item_list_get_view(app->variable_item_list), hid_submenu_view);
     view_dispatcher_add_view(
@@ -192,6 +212,7 @@ Hid* hid_app_alloc_view(void* context) {
     app->hid_cc = hid_cc_alloc(app);
     view_set_previous_callback(hid_cc_get_view(app->hid_cc), hid_submenu_view);
     view_dispatcher_add_view(app->view_dispatcher, BtHidViewClicker, hid_cc_get_view(app->hid_cc));
+    hid_setting_changed(app);
 
     // Credits view
     app->widget_credits = widget_alloc();
