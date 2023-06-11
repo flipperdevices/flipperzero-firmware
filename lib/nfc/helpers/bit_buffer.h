@@ -82,6 +82,26 @@ void bit_buffer_copy_left(BitBuffer* buf, const BitBuffer* other, size_t end_ind
 void bit_buffer_copy_bytes(BitBuffer* buf, const uint8_t* data, size_t size_bytes);
 
 /**
+ * Copy a byte array to a BitBuffer instance, replacing all of the original data.
+ * The destination capacity must be no less than the source data size.
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to copy into
+ * @param [in] data pointer to the byte array to be copied
+ * @param [in] size_bits size of the data to be copied, in bits
+ */
+void bit_buffer_copy_bits(BitBuffer* buf, const uint8_t* data, size_t size_bits);
+
+/**
+ * Copy a byte with parity array to a BitBuffer instance, replacing all of the original data.
+ * The destination capacity must be no less than the source data size.
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to copy into
+ * @param [in] data pointer to the byte array to be copied
+ * @param [in] size_bitss size of the data to be copied, in bits
+ */
+void bit_buffer_copy_bytes_with_parity(BitBuffer* buf, const uint8_t* data, size_t size_bits);
+
+/**
  * Append a byte array to a BitBuffer instance, replacing all of the original data.
  * The destination capacity must be no less its original data size plus source data size.
  *
@@ -98,9 +118,25 @@ void bit_buffer_append_bytes(BitBuffer* buf, const uint8_t* data, size_t size_by
  *
  * @param [in] buf pointer to a BitBuffer instance to write from
  * @param [out] dest pointer to the destination memory location
- * @param [in] size_bytes size of the data to be written, in bytes
+ * @param [in] size_bytes maximum destination data size, in bytes
  */
 void bit_buffer_write_bytes(const BitBuffer* buf, void* dest, size_t size_bytes);
+
+/**
+ * Write a BitBuffer instance's contents to an arbitrary memory location.
+ * The destination memory must be allocated. Additionally, the instance
+ * must contain at least the requested amount of data (for easier underflow detection).
+ *
+ * @param [in] buf pointer to a BitBuffer instance to write from
+ * @param [out] dest pointer to the destination memory location
+ * @param [in] size_bytes maximum destination data size, in bytes
+ * @param [out] bits_written actual number of bits writen, in bits
+ */
+void bit_buffer_write_bytes_with_parity(
+    const BitBuffer* buf,
+    void* dest,
+    size_t size_bytes,
+    size_t* bits_written);
 
 // Checks
 
@@ -161,13 +197,11 @@ uint8_t bit_buffer_get_byte(const BitBuffer* buf, size_t index);
 
 /**
  * Get the pointer to a BitBuffer instance's underlying data.
- * TODO: Make it return const uint8_t* after all compatibility problems
- * will have been resolved.
  *
  * @param [in] buf pointer to a BitBuffer instance to be queried
  * @return pointer to the underlying data
  */
-uint8_t* bit_buffer_get_data(const BitBuffer* buf);
+const uint8_t* bit_buffer_get_data(const BitBuffer* buf);
 
 // Setters
 
@@ -180,6 +214,17 @@ uint8_t* bit_buffer_get_data(const BitBuffer* buf);
  * @param [in] byte byte value to be set at index
  */
 void bit_buffer_set_byte(BitBuffer* buf, size_t index, uint8_t byte);
+
+/**
+ * Set byte and parity bit value at a specified index in a BitBuffer instance.
+ * The index must be valid (i.e. less than the instance's data size in bytes).
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to be modified
+ * @param [in] index index of the byte in question
+ * @param [in] byte byte value to be set at index
+ * @param [in] parity parity bit value to be set at index
+ */
+void bit_buffer_set_byte_with_parity(BitBuffer* buff, size_t index, uint8_t byte, bool parity);
 
 /**
  * Resize a BitBuffer instance to a new size, in bits.

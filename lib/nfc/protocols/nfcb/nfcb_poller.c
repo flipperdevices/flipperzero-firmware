@@ -1,5 +1,4 @@
 #include "nfcb_poller.h"
-#include <lib/nfc/helpers/nfc_poller_buffer.h>
 
 #include <furi.h>
 
@@ -16,7 +15,6 @@ struct NfcbPoller {
     Nfc* nfc;
     NfcbPollerState state;
     NfcbData* data;
-    NfcPollerBuffer* buff;
     NfcbPollerEventCallback callback;
     void* context;
 };
@@ -76,8 +74,6 @@ NfcbError nfcb_poller_reset(NfcbPoller* instance) {
     instance->context = NULL;
     free(instance->data);
     instance->data = NULL;
-    nfc_poller_buffer_free(instance->buff);
-    instance->buff = NULL;
 
     return NfcbErrorNone;
 }
@@ -86,8 +82,6 @@ NfcbError nfcb_poller_config(NfcbPoller* instance) {
     furi_assert(instance);
 
     // instance->data = malloc(sizeof(NfcbData));
-    // instance->buff =
-    // nfc_poller_buffer_alloc(NFCB_POLLER_BUFER_MAX_SIZE, NFCB_POLLER_BUFER_MAX_SIZE);
 
     nfc_config(instance->nfc, NfcModeNfcbPoller);
     nfc_set_guard_time_us(instance->nfc, NFCB_GUARD_TIME_US);

@@ -18,8 +18,7 @@ struct NfcaListener {
     NfcaListenerState state;
     NfcaListenerEventCallback callback;
 
-    uint8_t* tx_data;
-    uint16_t tx_bits;
+    BitBuffer* tx_buffer;
     void* context;
 };
 
@@ -40,8 +39,7 @@ static NfcaError nfca_listener_process_nfc_error(NfcError error) {
 static void nfca_listener_config(NfcaListener* instance) {
     furi_assert(instance);
 
-    instance->tx_data = malloc(NFCA_LISTENER_MAX_BUFFER_SIZE);
-    instance->tx_bits = 0;
+    instance->tx_buffer = bit_buffer_alloc(NFCA_LISTENER_MAX_BUFFER_SIZE);
 
     nfc_set_fdt_listen_fc(instance->nfc, NFCA_FDT_LISTEN_FC);
     nfc_config(instance->nfc, NfcModeNfcaListener);
@@ -55,20 +53,20 @@ static void nfca_listener_config(NfcaListener* instance) {
 
 static void nfca_listener_reset(NfcaListener* instance) {
     furi_assert(instance);
-    furi_assert(instance->tx_data);
+    furi_assert(instance->tx_buffer);
 
-    free(instance->tx_data);
-    instance->tx_bits = 0;
+    bit_buffer_free(instance->tx_buffer);
+    instance->tx_buffer = NULL;
 }
 
-static bool nfca_listener_halt_received(uint8_t* rx_data, uint16_t rx_bits) {
+static bool nfca_listener_halt_received(BitBuffer* buf) {
     bool halt_cmd_received = false;
 
     do {
-        if(rx_bits != 4 * 8) break;
-        uint16_t rx_bytes = rx_bits / 8;
-        if(!nfca_check_crc(rx_data, rx_bytes)) break;
-        if(!((rx_data[0] == 0x50) && (rx_data[1] == 0x00))) break;
+        if(bit_buffer_get_size_bytes(buf) != 4) break;
+        if(!nfca_check_crc(buf)) break;
+        if(bit_buffer_get_byte(buf, 0) != 0x50) break;
+        if(bit_buffer_get_byte(buf, 1) != 0x00) break;
         halt_cmd_received = true;
     } while(false);
 
@@ -92,7 +90,7 @@ static NfcCommand nfca_listener_event_handler(NfcEvent event, void* context) {
     } else if(event_type == NfcEventTypeListenerActivated) {
         instance->state = NfcaListenerStateActive;
     } else if((event_type == NfcEventTypeRxEnd) && (instance->state == NfcaListenerStateActive)) {
-        if(nfca_listener_halt_received(event.data.rx_data, event.data.rx_bits)) {
+        if(nfca_listener_halt_received(event.data.buffer)) {
             // TODO rework with commands
             nfca_listener_sleep(instance);
             instance->state = NfcaListenerStateIdle;
@@ -101,14 +99,14 @@ static NfcCommand nfca_listener_event_handler(NfcEvent event, void* context) {
                 instance->callback(nfca_listener_event, instance->context);
             }
         } else if(instance->callback) {
-            nfca_listener_event.data.rx_data = event.data.rx_data;
-            if(nfca_check_crc(event.data.rx_data, event.data.rx_bits / 8)) {
+            if(nfca_check_crc(event.data.buffer)) {
                 nfca_listener_event.type = NfcaListenerEventTypeReceivedStandartFrame;
-                nfca_listener_event.data.rx_bits = event.data.rx_bits - 16;
+                size_t bytes = bit_buffer_get_size_bytes(event.data.buffer);
+                bit_buffer_set_size_bytes(event.data.buffer, bytes - 2);
             } else {
                 nfca_listener_event.type = NfcaListenerEventTypeReceivedData;
-                nfca_listener_event.data.rx_bits = event.data.rx_bits;
             }
+            nfca_listener_event.data.buffer = event.data.buffer;
             if(instance->callback) {
                 instance->callback(nfca_listener_event, instance->context);
             }
@@ -190,37 +188,31 @@ NfcaError nfca_listener_sleep(NfcaListener* instance) {
     return nfca_listener_process_nfc_error(error);
 }
 
-NfcaError nfca_listener_tx(NfcaListener* instance, uint8_t* tx_data, uint16_t tx_bits) {
+NfcaError nfca_listener_tx(NfcaListener* instance, const BitBuffer* tx_buffer) {
     furi_assert(instance);
-    furi_assert(tx_data);
+    furi_assert(tx_buffer);
 
     NfcaError ret = NfcaErrorNone;
-    NfcError error = nfc_listener_tx(instance->nfc, tx_data, tx_bits);
+    NfcError error = nfc_listener_tx(instance->nfc, tx_buffer);
     if(error != NfcErrorNone) {
         FURI_LOG_W(TAG, "Tx error: %d", error);
         ret = nfca_listener_process_nfc_error(error);
     }
+
     return ret;
 }
 
-NfcaError
-    nfca_listener_send_standart_frame(NfcaListener* instance, uint8_t* tx_data, uint16_t tx_bits) {
+NfcaError nfca_listener_send_standart_frame(NfcaListener* instance, const BitBuffer* tx_buffer) {
     furi_assert(instance);
-    furi_assert(tx_data);
-    furi_assert(instance->tx_data);
+    furi_assert(tx_buffer);
+    furi_assert(instance->tx_buffer);
 
     NfcaError ret = NfcaErrorNone;
-    uint16_t tx_bytes = tx_bits / 8;
-
     do {
-        if(tx_bytes > NFCA_LISTENER_MAX_BUFFER_SIZE - 2) {
-            ret = NfcaErrorBufferOverflow;
-            break;
-        }
-        memcpy(instance->tx_data, tx_data, tx_bytes);
-        nfca_append_crc(instance->tx_data, tx_bytes);
+        bit_buffer_copy(instance->tx_buffer, tx_buffer);
+        nfca_append_crc(instance->tx_buffer);
 
-        NfcError error = nfc_listener_tx(instance->nfc, instance->tx_data, tx_bits + 16);
+        NfcError error = nfc_listener_tx(instance->nfc, instance->tx_buffer);
         if(error != NfcErrorNone) {
             FURI_LOG_W(TAG, "Tx error: %d", error);
             ret = nfca_listener_process_nfc_error(error);

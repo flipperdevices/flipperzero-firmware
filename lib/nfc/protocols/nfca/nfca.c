@@ -4,7 +4,7 @@
 
 #define NFCA_CRC_INIT (0x6363)
 
-uint16_t nfca_get_crc(uint8_t* buff, uint16_t len) {
+static uint16_t nfca_get_crc(const uint8_t* buff, uint16_t len) {
     furi_assert(buff);
     furi_assert(len);
 
@@ -22,18 +22,10 @@ uint16_t nfca_get_crc(uint8_t* buff, uint16_t len) {
     return crc;
 }
 
-void nfca_append_crc(uint8_t* buff, uint16_t len) {
-    furi_assert(buff);
-
-    uint16_t crc = nfca_get_crc(buff, len);
-    buff[len] = (uint8_t)crc;
-    buff[len + 1] = (uint8_t)(crc >> 8);
-}
-
-void nfca_append_crc_buff(BitBuffer* buffer) {
+void nfca_append_crc(BitBuffer* buffer) {
     furi_assert(buffer);
 
-    uint8_t* data = bit_buffer_get_data(buffer);
+    const uint8_t* data = bit_buffer_get_data(buffer);
     size_t bytes = bit_buffer_get_size_bytes(buffer);
 
     uint16_t crc = nfca_get_crc(data, bytes);
@@ -41,38 +33,49 @@ void nfca_append_crc_buff(BitBuffer* buffer) {
     bit_buffer_append_bytes(buffer, crc_bytes, sizeof(crc_bytes));
 }
 
-bool nfca_check_and_trim_crc_buff(BitBuffer* buffer, const BitBuffer* src) {
-    furi_assert(buffer);
+bool nfca_check_crc(const BitBuffer* buf) {
+    furi_assert(buf);
 
     bool crc_ok = false;
     do {
-        uint8_t* data = bit_buffer_get_data(src);
-        size_t bytes = bit_buffer_get_size_bytes(src);
+        const uint8_t* data = bit_buffer_get_data(buf);
+        size_t bytes = bit_buffer_get_size_bytes(buf);
         if(bytes < 3) break;
 
         uint16_t crc_calc = nfca_get_crc(data, bytes - 2);
-        uint8_t crc_start = bit_buffer_get_byte(src, bytes - 2);
-        uint8_t crc_end = bit_buffer_get_byte(src, bytes - 1);
+        uint8_t crc_start = bit_buffer_get_byte(buf, bytes - 2);
+        uint8_t crc_end = bit_buffer_get_byte(buf, bytes - 1);
         uint16_t crc_received = (crc_end << 8) | crc_start;
         crc_ok = (crc_calc == crc_received);
-        if(crc_ok) {
-            bit_buffer_copy_left(buffer, src, bytes - 2);
-        } else {
-            bit_buffer_copy(buffer, src);
-        }
     } while(false);
 
     return crc_ok;
 }
 
-bool nfca_check_crc(uint8_t* buff, uint16_t len) {
-    bool crc_ok = false;
+bool nfca_check_and_trim_crc(const BitBuffer* buf, BitBuffer* out) {
+    furi_assert(buf);
+    furi_assert(out);
 
-    if(len > 2) {
-        uint16_t crc_calc = nfca_get_crc(buff, len - 2);
-        uint16_t crc_received = (buff[len - 1] << 8) | buff[len - 2];
-        crc_ok = (crc_calc == crc_received);
+    size_t bytes = bit_buffer_get_size_bytes(buf);
+    bool crc_ok = nfca_check_crc(buf);
+    if(crc_ok) {
+        bit_buffer_copy_left(out, buf, bytes - 2);
+    } else {
+        bit_buffer_copy(out, buf);
     }
 
     return crc_ok;
+}
+
+uint32_t nfca_get_cuid(NfcaData* nfca_data) {
+    furi_assert(nfca_data);
+
+    uint32_t cuid = 0;
+    uint8_t* cuid_start = nfca_data->uid;
+    if(nfca_data->uid_len == 7) {
+        cuid_start = &nfca_data->uid[3];
+    }
+    cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) | (cuid_start[3]);
+
+    return cuid;
 }

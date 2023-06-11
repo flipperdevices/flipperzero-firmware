@@ -63,16 +63,13 @@ typedef struct {
     NfcaRats rats;
 } NfcaData;
 
-uint16_t nfca_get_crc(uint8_t* buff, uint16_t len);
+uint32_t nfca_get_cuid(NfcaData* nfca_data);
 
-void nfca_append_crc(uint8_t* buff, uint16_t len);
+void nfca_append_crc(BitBuffer* buffer);
 
-// TODO delete nfca_append_crc and rename this
-void nfca_append_crc_buff(BitBuffer* buffer);
+bool nfca_check_and_trim_crc(const BitBuffer* buf, BitBuffer* out);
 
-bool nfca_check_and_trim_crc_buff(BitBuffer* buffer, const BitBuffer* src);
-
-bool nfca_check_crc(uint8_t* buff, uint16_t len);
+bool nfca_check_crc(const BitBuffer* buf);
 
 #ifdef __cplusplus
 }

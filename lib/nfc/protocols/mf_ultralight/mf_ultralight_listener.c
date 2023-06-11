@@ -25,8 +25,7 @@ struct MfUltralightListener {
     MfUltralightListenerAuthState auth_state;
     MfUltraligthListenerState state;
     MfUltralightData* data;
-    uint8_t tx_data[MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE];
-    uint16_t tx_bits;
+    BitBuffer* tx_buffer;
     MfUltralightFeatureSupport features;
     MfUltralightConfigPages* config;
 
@@ -34,14 +33,11 @@ struct MfUltralightListener {
     void* context;
 };
 
-typedef bool (*MfUltralightListenerCommandCallback)(
-    MfUltralightListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_bits);
+typedef bool (*MfUltralightListenerCommandCallback)(MfUltralightListener* instance, BitBuffer* buf);
 
 typedef struct {
     uint8_t cmd;
-    uint16_t cmd_len_bits;
+    size_t cmd_len_bits;
     MfUltralightListenerCommandCallback callback;
 } MfUltralightListenerCmdHandler;
 
@@ -103,16 +99,17 @@ static bool mf_ultralight_listener_check_access(
 }
 
 static void mf_ultralight_listener_send_short_resp(MfUltralightListener* instance, uint8_t data) {
-    nfca_listener_tx(instance->nfca_listener, &data, 4);
+    furi_assert(instance->tx_buffer);
+
+    bit_buffer_set_size(instance->tx_buffer, 4);
+    bit_buffer_set_byte(instance->tx_buffer, 0, data);
+    nfca_listener_tx(instance->nfca_listener, instance->tx_buffer);
 };
 
-static bool mf_ultralight_listener_read_page_handler(
-    MfUltralightListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_bits) {
-    UNUSED(rx_bits);
+static bool
+    mf_ultralight_listener_read_page_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     bool command_processed = false;
-    uint8_t start_page = rx_data[1];
+    uint8_t start_page = bit_buffer_get_byte(buffer, 1);
     uint16_t pages_total = instance->data->pages_total;
     MfUltralightPageReadCommandData read_cmd_data = {};
 
@@ -136,22 +133,21 @@ static bool mf_ultralight_listener_read_page_handler(
                 read_cmd_data.page[i] = instance->data->page[(start_page + i) % pages_total];
             }
         }
-        instance->tx_bits = sizeof(MfUltralightPageReadCommandData) * 8;
-        nfca_listener_send_standart_frame(
-            instance->nfca_listener, (uint8_t*)&read_cmd_data, instance->tx_bits);
+        bit_buffer_copy_bytes(
+            instance->tx_buffer,
+            (uint8_t*)&read_cmd_data,
+            sizeof(MfUltralightPageReadCommandData));
+        nfca_listener_send_standart_frame(instance->nfca_listener, instance->tx_buffer);
     }
     command_processed = true;
 
     return command_processed;
 }
 
-static bool mf_ultralight_listener_write_page_handler(
-    MfUltralightListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_bits) {
-    UNUSED(rx_bits);
+static bool
+    mf_ultralight_listener_write_page_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     bool command_processed = false;
-    uint8_t start_page = rx_data[1];
+    uint8_t start_page = bit_buffer_get_byte(buffer, 1);
     uint16_t pages_total = instance->data->pages_total;
 
     if(pages_total < start_page) {
@@ -164,6 +160,7 @@ static bool mf_ultralight_listener_write_page_handler(
         instance->state = MfUltraligthListenerStateIdle;
         instance->auth_state = MfUltralightListenerAuthStateIdle;
     } else {
+        const uint8_t* rx_data = bit_buffer_get_data(buffer);
         memcpy(instance->data->page[start_page].data, &rx_data[2], sizeof(MfUltralightPage));
         mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_ACK);
     }
@@ -172,18 +169,16 @@ static bool mf_ultralight_listener_write_page_handler(
     return command_processed;
 }
 
-static bool mf_ultralight_listener_read_version_handler(
-    MfUltralightListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_bits) {
-    UNUSED(rx_bits);
-    UNUSED(rx_data);
+static bool
+    mf_ultralight_listener_read_version_handler(MfUltralightListener* instance, BitBuffer* buffer) {
+    UNUSED(buffer);
+
     bool command_processed = false;
+
     if((instance->features & MfUltralightFeatureSupportReadVersion)) {
-        memcpy(instance->tx_data, &instance->data->version, sizeof(instance->data->version));
-        instance->tx_bits = sizeof(instance->data->version) * 8;
-        nfca_listener_send_standart_frame(
-            instance->nfca_listener, instance->tx_data, instance->tx_bits);
+        bit_buffer_copy_bytes(
+            instance->tx_buffer, (uint8_t*)&instance->data->version, sizeof(MfUltralightVersion));
+        nfca_listener_send_standart_frame(instance->nfca_listener, instance->tx_buffer);
     } else {
         nfca_listener_sleep(instance->nfca_listener);
         instance->state = MfUltraligthListenerStateIdle;
@@ -195,17 +190,15 @@ static bool mf_ultralight_listener_read_version_handler(
 
 static bool mf_ultralight_listener_read_signature_handler(
     MfUltralightListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_bits) {
-    UNUSED(rx_bits);
-    UNUSED(rx_data);
+    BitBuffer* buffer) {
+    UNUSED(buffer);
 
     bool command_processed = false;
+
     if((instance->features & MfUltralightFeatureSupportReadSignature)) {
-        memcpy(instance->tx_data, &instance->data->signature, sizeof(instance->data->signature));
-        instance->tx_bits = sizeof(instance->data->signature) * 8;
-        nfca_listener_send_standart_frame(
-            instance->nfca_listener, instance->tx_data, instance->tx_bits);
+        bit_buffer_copy_bytes(
+            instance->tx_buffer, instance->data->signature.data, sizeof(MfUltralightSignature));
+        nfca_listener_send_standart_frame(instance->nfca_listener, instance->tx_buffer);
     } else {
         nfca_listener_sleep(instance->nfca_listener);
         instance->state = MfUltraligthListenerStateIdle;
@@ -215,16 +208,12 @@ static bool mf_ultralight_listener_read_signature_handler(
     return command_processed;
 }
 
-static bool mf_ultralight_listener_read_counter_handler(
-    MfUltralightListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_bits) {
-    UNUSED(rx_bits);
-
+static bool
+    mf_ultralight_listener_read_counter_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     bool command_processed = false;
 
     do {
-        uint8_t counter_num = rx_data[1];
+        uint8_t counter_num = bit_buffer_get_byte(buffer, 1);
         if((instance->features & MfUltralightFeatureSupportReadCounter) == 0) break;
         if(instance->features & MfUltralightFeatureSupportSingleCounter) {
             if(counter_num != 2) {
@@ -242,12 +231,13 @@ static bool mf_ultralight_listener_read_counter_handler(
             }
         }
         if(counter_num > 2) break;
-        instance->tx_data[0] = (instance->data->counter[counter_num].counter >> 0) & 0xff;
-        instance->tx_data[1] = (instance->data->counter[counter_num].counter >> 8) & 0xff;
-        instance->tx_data[2] = (instance->data->counter[counter_num].counter >> 16) & 0xff;
-        instance->tx_bits = 3 * 8;
-        nfca_listener_send_standart_frame(
-            instance->nfca_listener, instance->tx_data, instance->tx_bits);
+        uint8_t cnt_value[3] = {
+            (instance->data->counter[counter_num].counter >> 0) & 0xff,
+            (instance->data->counter[counter_num].counter >> 8) & 0xff,
+            (instance->data->counter[counter_num].counter >> 16) & 0xff,
+        };
+        bit_buffer_copy_bytes(instance->tx_buffer, cnt_value, sizeof(cnt_value));
+        nfca_listener_send_standart_frame(instance->nfca_listener, instance->tx_buffer);
         command_processed = true;
     } while(false);
 
@@ -256,36 +246,30 @@ static bool mf_ultralight_listener_read_counter_handler(
 
 static bool mf_ultralight_listener_check_tearing_handler(
     MfUltralightListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_bits) {
-    UNUSED(rx_bits);
-
+    BitBuffer* buffer) {
     bool command_processed = false;
 
     do {
-        uint8_t tearing_flag_num = rx_data[1];
+        uint8_t tearing_flag_num = bit_buffer_get_byte(buffer, 1);
         if((instance->features & MfUltralightFeatureSupportCheckTearingFlag) == 0) break;
         if(tearing_flag_num > 2) break;
-        instance->tx_data[0] = instance->data->tearing_flag->data[0];
-        instance->tx_bits = 8;
-        nfca_listener_send_standart_frame(
-            instance->nfca_listener, instance->tx_data, instance->tx_bits);
+        bit_buffer_set_size_bytes(instance->tx_buffer, 1);
+        bit_buffer_set_byte(instance->tx_buffer, 0, instance->data->tearing_flag->data[0]);
+        nfca_listener_send_standart_frame(instance->nfca_listener, instance->tx_buffer);
         command_processed = true;
     } while(false);
 
     return command_processed;
 }
 
-static bool mf_ultralight_listener_auth_handler(
-    MfUltralightListener* instance,
-    uint8_t* rx_data,
-    uint16_t rx_bits) {
-    UNUSED(rx_bits);
-
+static bool
+    mf_ultralight_listener_auth_handler(MfUltralightListener* instance, BitBuffer* buffer) {
     bool command_processed = false;
 
     do {
         if((instance->features & MfUltralightFeatureSupportAuthentication) == 0) break;
+
+        const uint8_t* rx_data = bit_buffer_get_data(buffer);
         MfUltralightAuthPassword password = {};
         memcpy(password.data, &rx_data[1], sizeof(MfUltralightAuthPassword));
         if(instance->callback) {
@@ -297,11 +281,11 @@ static bool mf_ultralight_listener_auth_handler(
             instance->callback(event, instance->context);
         }
         if(password.pass != instance->config->password.pass) break;
-        memcpy(instance->tx_data, instance->config->pack.data, sizeof(MfUltralightAuthPack));
-        instance->tx_bits = sizeof(MfUltralightAuthPack) * 8;
+
+        bit_buffer_copy_bytes(
+            instance->tx_buffer, instance->config->pack.data, sizeof(MfUltralightAuthPack));
         instance->auth_state = MfUltralightListenerAuthStateSuccess;
-        nfca_listener_send_standart_frame(
-            instance->nfca_listener, instance->tx_data, instance->tx_bits);
+        nfca_listener_send_standart_frame(instance->nfca_listener, instance->tx_buffer);
 
         command_processed = true;
     } while(false);
@@ -351,16 +335,15 @@ static NfcaListenerCommand
     furi_assert(context);
 
     MfUltralightListener* instance = context;
-    uint8_t* rx_data = event.data.rx_data;
-    uint16_t rx_bits = event.data.rx_bits;
+    BitBuffer* rx_buffer = event.data.buffer;
 
     NfcaListenerCommand command = NfcaListenerCommandContinue;
     if(event.type == NfcaListenerEventTypeReceivedStandartFrame) {
         bool cmd_processed = false;
         for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
-            if(rx_bits != mf_ultralight_command[i].cmd_len_bits) continue;
-            if(rx_data[0] != mf_ultralight_command[i].cmd) continue;
-            cmd_processed = mf_ultralight_command[i].callback(instance, rx_data, rx_bits);
+            if(bit_buffer_get_size(rx_buffer) != mf_ultralight_command[i].cmd_len_bits) continue;
+            if(bit_buffer_get_byte(rx_buffer, 0) != mf_ultralight_command[i].cmd) continue;
+            cmd_processed = mf_ultralight_command[i].callback(instance, rx_buffer);
             if(cmd_processed) break;
         }
         if(!cmd_processed) {
@@ -398,6 +381,7 @@ MfUltralightError mf_ultralight_listener_start(
 
     instance->data = malloc(sizeof(MfUltralightData));
     *instance->data = *data;
+    instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE);
     mf_ultralight_listener_prepare_emulation(instance);
 
     instance->callback = callback;
@@ -432,9 +416,12 @@ MfUltralightError
 MfUltralightError mf_ultralight_listener_stop(MfUltralightListener* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
+    furi_assert(instance->tx_buffer);
 
     NfcaError error = nfca_listener_stop(instance->nfca_listener);
     instance->state = MfUltraligthListenerStateIdle;
+
+    bit_buffer_free(instance->tx_buffer);
     free(instance->data);
 
     return mf_ultralight_process_error(error);

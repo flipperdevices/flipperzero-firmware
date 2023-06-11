@@ -42,6 +42,11 @@ struct Nfc {
     NfcEventCallback callback;
     void* context;
 
+    uint8_t tx_buffer[NFC_MAX_BUFFER_SIZE];
+    size_t tx_bits;
+    uint8_t rx_buffer[NFC_MAX_BUFFER_SIZE];
+    size_t rx_bits;
+
     FuriThread* worker_thread;
 };
 
@@ -63,8 +68,6 @@ static int32_t nfc_worker_listener(void* context) {
     Nfc* instance = context;
     furi_assert(instance->callback);
 
-    BitBuffer* rx_buffer = bit_buffer_alloc(NFC_MAX_BUFFER_SIZE);
-
     f_hal_nfc_low_power_mode_stop();
 
     NfcEvent nfc_event = {.type = NfcEventTypeConfigureRequest};
@@ -74,6 +77,9 @@ static int32_t nfc_worker_listener(void* context) {
     instance->state = NfcStateListenStarted;
 
     f_hal_nfc_event_start();
+
+    NfcEventData event_data = {};
+    event_data.buffer = bit_buffer_alloc(NFC_MAX_BUFFER_SIZE);
 
     while(true) {
         FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
@@ -100,13 +106,9 @@ static int32_t nfc_worker_listener(void* context) {
         }
         if(event & FHalNfcEventRxEnd) {
             nfc_event.type = NfcEventTypeRxEnd;
-            size_t rx_bits = 0;
             f_hal_nfc_poller_rx(
-                bit_buffer_get_data(rx_buffer),
-                bit_buffer_get_capacity_bytes(rx_buffer),
-                &rx_bits);
-            bit_buffer_set_size(rx_buffer, rx_bits);
-            nfc_event.data.buffer = rx_buffer;
+                instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
+            bit_buffer_copy_bits(event_data.buffer, instance->rx_buffer, instance->rx_bits);
             instance->callback(nfc_event, instance->context);
         }
     }
@@ -114,8 +116,8 @@ static int32_t nfc_worker_listener(void* context) {
     nfc_event.type = NfcEventTypeReset;
     instance->callback(nfc_event, instance->context);
     nfc_config(instance, NfcModeIdle);
+    bit_buffer_free(event_data.buffer);
     f_hal_nfc_low_power_mode_start();
-    free(rx_data);
 
     return 0;
 }
@@ -434,8 +436,10 @@ NfcError nfc_trx_custom_parity(
             FURI_LOG_E(TAG, "Failed in prepare tx rx");
             break;
         }
-        error = f_hal_nfc_poller_tx_custom_parity(
-            bit_buffer_get_data(tx_buffer), bit_buffer_get_size(tx_buffer));
+
+        bit_buffer_write_bytes_with_parity(
+            tx_buffer, instance->tx_buffer, sizeof(instance->tx_buffer), &instance->tx_bits);
+        error = f_hal_nfc_poller_tx_custom_parity(instance->tx_buffer, instance->tx_bits);
         if(error != FHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller TX");
             ret = nfc_process_hal_error(error);
@@ -448,16 +452,15 @@ NfcError nfc_trx_custom_parity(
             break;
         }
 
-        size_t rx_bits = 0;
         error = f_hal_nfc_poller_rx(
-            bit_buffer_get_data(rx_buffer), bit_buffer_get_capacity_bytes(rx_buffer), rx_bits);
-        bit_buffer_set_size(rx_buffer, rx_bits);
-
+            instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
         if(error != FHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller RX");
             ret = nfc_process_hal_error(error);
             break;
         }
+
+        bit_buffer_copy_bytes_with_parity(rx_buffer, instance->rx_buffer, instance->rx_bits);
     } while(false);
 
     return ret;
@@ -492,16 +495,15 @@ NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer
             break;
         }
 
-        size_t rx_bits = 0;
         error = f_hal_nfc_poller_rx(
-            bit_buffer_get_data(rx_buffer), bit_buffer_get_capacity_bytes(rx_buffer), rx_bits);
-        bit_buffer_set_size(rx_buffer, rx_bits);
-
+            instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
         if(error != FHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller RX");
             ret = nfc_process_hal_error(error);
             break;
         }
+
+        bit_buffer_copy_bits(rx_buffer, instance->rx_buffer, instance->rx_bits);
     } while(false);
 
     return ret;
@@ -542,16 +544,15 @@ NfcError nfc_iso13444a_short_frame(
             break;
         }
 
-        size_t rx_bits = 0;
         error = f_hal_nfc_poller_rx(
-            bit_buffer_get_data(rx_buffer), bit_buffer_get_capacity_bytes(rx_buffer), rx_bits);
-        bit_buffer_set_size(rx_buffer, rx_bits);
-
+            instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
         if(error != FHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller RX");
             ret = nfc_process_hal_error(error);
             break;
         }
+
+        bit_buffer_copy_bits(rx_buffer, instance->rx_buffer, instance->rx_bits);
     } while(false);
 
     return ret;
@@ -590,16 +591,15 @@ NfcError nfc_iso13444a_sdd_frame(
             break;
         }
 
-        size_t rx_bits = 0;
-        error = f_hal_nfca_receive_sdd_frame(
-            bit_buffer_get_data(rx_buffer), bit_buffer_get_capacity_bytes(rx_buffer), rx_bits);
-        bit_buffer_set_size(rx_buffer, rx_bits);
-
+        error = f_hal_nfc_poller_rx(
+            instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
         if(error != FHalNfcErrorNone) {
             FURI_LOG_E(TAG, "Failed in poller RX");
             ret = nfc_process_hal_error(error);
             break;
         }
+
+        bit_buffer_copy_bits(rx_buffer, instance->rx_buffer, instance->rx_bits);
     } while(false);
 
     return ret;

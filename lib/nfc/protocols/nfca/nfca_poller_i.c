@@ -39,7 +39,7 @@ static NfcaError nfca_poller_standart_frame_exchange(
     furi_assert(tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - 2);
 
     bit_buffer_copy(instance->tx_buffer, tx_buffer);
-    nfca_append_crc_buff(instance->tx_buffer);
+    nfca_append_crc(instance->tx_buffer);
     NfcaError ret = NfcaErrorNone;
 
     do {
@@ -48,7 +48,7 @@ static NfcaError nfca_poller_standart_frame_exchange(
             ret = nfca_poller_process_error(error);
             break;
         }
-        if(!nfca_check_and_trim_crc_buff(rx_buffer, instance->rx_buffer)) {
+        if(!nfca_check_and_trim_crc(instance->rx_buffer, rx_buffer)) {
             ret = NfcaErrorWrongCrc;
             break;
         }
@@ -98,22 +98,16 @@ NfcaError nfca_poller_check_presence(NfcaPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
-    uint16_t rx_bits = 0;
     NfcError error = NfcErrorNone;
     NfcaError ret = NfcaErrorNone;
     do {
         error = nfc_iso13444a_short_frame(
-            instance->nfc,
-            NfcIso14443aShortFrameSensReq,
-            (uint8_t*)&instance->col_res.sens_resp,
-            sizeof(instance->col_res.sens_resp),
-            &rx_bits,
-            NFCA_FDT_LISTEN_FC);
+            instance->nfc, NfcIso14443aShortFrameSensReq, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
         if(error != NfcErrorNone) {
             ret = nfca_poller_process_error(error);
             break;
         }
-        if(rx_bits != 8 * sizeof(instance->col_res.sens_resp)) {
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(instance->col_res.sens_resp)) {
             ret = NfcaErrorCommunication;
             break;
         }
@@ -146,6 +140,8 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
     // Reset Nfca poller state
     memset(&instance->col_res, 0, sizeof(instance->col_res));
     memset(instance->data, 0, sizeof(NfcaData));
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_reset(instance->rx_buffer);
 
     // Halt if necessary
     if(instance->state != NfcaPollerStateIdle) {
@@ -155,27 +151,24 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
 
     NfcError error = NfcErrorNone;
     NfcaError ret = NfcaErrorNone;
-    uint16_t rx_bits = 0;
-    uint16_t tx_bits = 0;
 
     bool activated = false;
     do {
         error = nfc_iso13444a_short_frame(
-            instance->nfc,
-            NfcIso14443aShortFrameSensReq,
-            (uint8_t*)&instance->col_res.sens_resp,
-            sizeof(instance->col_res.sens_resp),
-            &rx_bits,
-            NFCA_FDT_LISTEN_FC);
+            instance->nfc, NfcIso14443aShortFrameSensReq, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
         if(error != NfcErrorNone) {
             ret = NfcaErrorNotPresent;
             break;
         }
-        if(rx_bits != 8 * sizeof(instance->col_res.sens_resp)) {
-            FURI_LOG_W(TAG, "Wrong response: %d", rx_bits);
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(instance->col_res.sens_resp)) {
+            FURI_LOG_W(TAG, "Wrong sens response size");
             ret = NfcaErrorCommunication;
             break;
         }
+        bit_buffer_write_bytes(
+            instance->rx_buffer,
+            &instance->col_res.sens_resp,
+            sizeof(instance->col_res.sens_resp));
         memcpy(
             instance->data->atqa,
             &instance->col_res.sens_resp,
@@ -187,26 +180,20 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
 
         while(instance->state == NfcaPollerStateColResInProgress) {
             if(instance->col_res.state == NfcaPollerColResStateStateNewCascade) {
-                instance->col_res.sdd_req.sel_cmd =
-                    NFCA_POLLER_SEL_CMD(instance->col_res.cascade_level);
-                instance->col_res.sdd_req.sel_par = NFCA_POLLER_SEL_PAR(2, 0);
-                tx_bits = 16;
+                bit_buffer_set_size_bytes(instance->tx_buffer, 2);
+                bit_buffer_set_byte(
+                    instance->tx_buffer, 0, NFCA_POLLER_SEL_CMD(instance->col_res.cascade_level));
+                bit_buffer_set_byte(instance->tx_buffer, 1, NFCA_POLLER_SEL_PAR(2, 0));
                 error = nfc_iso13444a_sdd_frame(
-                    instance->nfc,
-                    (uint8_t*)&instance->col_res.sdd_req,
-                    tx_bits,
-                    (uint8_t*)&instance->col_res.sdd_resp,
-                    sizeof(instance->col_res.sdd_resp),
-                    &rx_bits,
-                    NFCA_FDT_LISTEN_FC);
+                    instance->nfc, instance->tx_buffer, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
                 if(error != NfcErrorNone) {
                     FURI_LOG_E(TAG, "Sdd request failed: %d", error);
                     instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
                 }
-                if(rx_bits != 5 * 8) {
-                    FURI_LOG_E(TAG, "Sdd response wrong length: %d bits", rx_bits);
+                if(bit_buffer_get_size_bytes(instance->rx_buffer) != 8) {
+                    FURI_LOG_E(TAG, "Sdd response wrong length");
                     instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
@@ -222,28 +209,31 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                     instance->col_res.sdd_resp.nfcid,
                     sizeof(instance->col_res.sdd_resp.nfcid));
                 instance->col_res.sel_req.bcc = instance->col_res.sdd_resp.bss;
+                bit_buffer_copy_bytes(
+                    instance->tx_buffer,
+                    (uint8_t*)&instance->col_res.sel_req,
+                    sizeof(instance->col_res.sel_req));
                 // Todo remove after Nfc handles timings
                 furi_delay_ms(10);
                 ret = nfca_poller_send_standart_frame(
-                    instance,
-                    (uint8_t*)&instance->col_res.sel_req,
-                    8 * sizeof(instance->col_res.sel_req),
-                    (uint8_t*)&instance->col_res.sel_resp,
-                    sizeof(NfcaSelResp),
-                    &rx_bits,
-                    NFCA_FDT_LISTEN_FC);
+                    instance, instance->tx_buffer, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
                 if(ret != NfcaErrorNone) {
                     FURI_LOG_E(TAG, "Sel request failed: %d", error);
                     instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
                 }
-                if(rx_bits != 8 * sizeof(instance->col_res.sel_resp)) {
-                    FURI_LOG_E(TAG, "Sel response wrong length: %d bits", rx_bits);
+                if(bit_buffer_get_size_bytes(instance->rx_buffer) !=
+                   sizeof(instance->col_res.sel_resp)) {
+                    FURI_LOG_E(TAG, "Sel response wrong length");
                     instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
                 }
+                bit_buffer_write_bytes(
+                    instance->rx_buffer,
+                    &instance->col_res.sel_resp,
+                    sizeof(instance->col_res.sel_resp));
                 FURI_LOG_T(TAG, "Sel resp: %02X", instance->col_res.sel_resp.sak);
                 if(instance->col_res.sel_req.nfcid[0] == NFCA_POLLER_SDD_CL) {
                     // Copy part of UID

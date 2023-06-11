@@ -40,7 +40,7 @@ FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
     return error;
 }
 
-FHalNfcError f_hal_nfca_send_sdd_frame(uint8_t* tx_data, uint16_t tx_bits) {
+FHalNfcError f_hal_nfca_send_sdd_frame(const uint8_t* tx_data, size_t tx_bits) {
     FHalNfcError error = FHalNfcErrorNone;
     // TODO Set anticollision parameters
     error = f_hal_nfc_poller_tx(tx_data, tx_bits);
@@ -48,8 +48,7 @@ FHalNfcError f_hal_nfca_send_sdd_frame(uint8_t* tx_data, uint16_t tx_bits) {
     return error;
 }
 
-FHalNfcError
-    f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, uint16_t rx_data_size, uint16_t* rx_bits) {
+FHalNfcError f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
     FHalNfcError error = FHalNfcErrorNone;
     UNUSED(rx_data);
     UNUSED(rx_bits);

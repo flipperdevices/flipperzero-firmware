@@ -1037,20 +1037,20 @@ void st25r3916_write_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t val);
 void st25r3916_write_burst_regs(
     FuriHalSpiBusHandle* handle,
     uint8_t reg_start,
-    uint8_t* values,
+    const uint8_t* values,
     uint8_t length);
 
-void st25r3916_reg_write_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t length);
+void st25r3916_reg_write_fifo(FuriHalSpiBusHandle* handle, const uint8_t* buff, size_t length);
 
-void st25r3916_reg_read_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t length);
+void st25r3916_reg_read_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, size_t length);
 
-void st25r3916_write_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* values, uint16_t length);
+void st25r3916_write_pta_mem(FuriHalSpiBusHandle* handle, const uint8_t* values, size_t length);
 
-void st25r3916_read_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* values, uint16_t length);
+void st25r3916_read_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* values, size_t length);
 
-void st25r3916_write_ptf_mem(FuriHalSpiBusHandle* handle, uint8_t* values, uint16_t length);
+void st25r3916_write_ptf_mem(FuriHalSpiBusHandle* handle, const uint8_t* values, size_t length);
 
-void st25r3916_write_pttsn_mem(FuriHalSpiBusHandle* handle, uint8_t* values, uint16_t length);
+void st25r3916_write_pttsn_mem(FuriHalSpiBusHandle* handle, uint8_t* values, size_t length);
 
 void st25r3916_direct_cmd(FuriHalSpiBusHandle* handle, uint8_t cmd);
 

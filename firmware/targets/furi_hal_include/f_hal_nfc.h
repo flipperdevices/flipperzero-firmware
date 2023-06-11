@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -110,13 +111,13 @@ FHalNfcError f_hal_nfc_release();
 
 FHalNfcError f_hal_nfc_event_start();
 
-FHalNfcError f_hal_nfc_poller_tx(uint8_t* tx_data, uint16_t tx_bits);
+FHalNfcError f_hal_nfc_poller_tx(const uint8_t* tx_data, size_t tx_bits);
 
-FHalNfcError f_hal_nfc_poller_tx_custom_parity(uint8_t* tx_data, uint16_t tx_bits);
+FHalNfcError f_hal_nfc_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits);
 
-FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, uint16_t rx_data_size, uint16_t* rx_bits);
+FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
 
-FHalNfcError f_hal_nfc_listener_tx(uint8_t* tx_data, uint16_t tx_bits);
+FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits);
 
 FHalNfcError f_hal_nfc_trx_reset();
 
@@ -148,10 +149,9 @@ void f_hal_nfc_set_mask_receive_timer(uint32_t time_fc);
 
 FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame);
 
-FHalNfcError f_hal_nfca_send_sdd_frame(uint8_t* tx_data, uint16_t tx_bits);
+FHalNfcError f_hal_nfca_send_sdd_frame(const uint8_t* tx_data, size_t tx_bits);
 
-FHalNfcError
-    f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, uint16_t rx_data_size, uint16_t* rx_bits);
+FHalNfcError f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
 
 FHalNfcError
     furi_hal_nfca_set_col_res_data(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t sak);

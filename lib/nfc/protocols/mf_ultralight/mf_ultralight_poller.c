@@ -39,7 +39,8 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance) {
 }
 
 static MfUltralightPollerCommand mf_ultralight_poller_handler_idle(MfUltralightPoller* instance) {
-    nfc_poller_buffer_reset(instance->buffer);
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_reset(instance->rx_buffer);
     nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
     instance->counters_read = 0;
     instance->counters_total = 3;
@@ -367,8 +368,8 @@ MfUltralightError mf_ultralight_poller_start(
     furi_assert(instance->session_state == MfUltralightPollerSessionStateIdle);
 
     instance->data = malloc(sizeof(MfUltralightData));
-    instance->buffer =
-        nfc_poller_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE, MF_ULTRALIGHT_MAX_BUFF_SIZE);
+    instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
+    instance->rx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
 
     instance->session_state = MfUltralightPollerSessionStateActive;
     nfca_poller_start(instance->nfca_poller, callback, context);
@@ -405,10 +406,15 @@ MfUltralightError
 MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
-    furi_assert(instance->buffer);
+    furi_assert(instance->tx_buffer);
+    furi_assert(instance->rx_buffer);
     furi_assert(instance->nfca_poller);
 
-    nfc_poller_buffer_free(instance->buffer);
+    bit_buffer_free(instance->tx_buffer);
+    bit_buffer_free(instance->rx_buffer);
+    instance->tx_buffer = NULL;
+    instance->rx_buffer = NULL;
+
     instance->callback = NULL;
     instance->context = NULL;
     instance->state = MfUltralightPollerStateIdle;

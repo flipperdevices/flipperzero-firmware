@@ -21,8 +21,7 @@ typedef enum {
 } NfcaListenerEventType;
 
 typedef struct {
-    uint8_t* rx_data;
-    uint16_t rx_bits;
+    BitBuffer* buffer;
 } NfcaListenerEventData;
 
 typedef struct {
@@ -55,10 +54,9 @@ NfcaError nfca_listener_stop(NfcaListener* instance);
 
 NfcaError nfca_listener_sleep(NfcaListener* instance);
 
-NfcaError nfca_listener_tx(NfcaListener* instance, uint8_t* tx_data, uint16_t tx_bits);
+NfcaError nfca_listener_tx(NfcaListener* instance, const BitBuffer* tx_buffer);
 
-NfcaError
-    nfca_listener_send_standart_frame(NfcaListener* instance, uint8_t* tx_data, uint16_t tx_bits);
+NfcaError nfca_listener_send_standart_frame(NfcaListener* instance, const BitBuffer* tx_buffer);
 
 #ifdef __cplusplus
 }

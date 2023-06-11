@@ -68,7 +68,7 @@ void st25r3916_write_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t val) 
 void st25r3916_write_burst_regs(
     FuriHalSpiBusHandle* handle,
     uint8_t reg_start,
-    uint8_t* values,
+    const uint8_t* values,
     uint8_t length) {
     furi_assert(handle);
     furi_assert(values);
@@ -86,7 +86,7 @@ void st25r3916_write_burst_regs(
     furi_hal_gpio_write(handle->cs, true);
 }
 
-void st25r3916_reg_write_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t length) {
+void st25r3916_reg_write_fifo(FuriHalSpiBusHandle* handle, const uint8_t* buff, size_t length) {
     furi_assert(handle);
     furi_assert(buff);
     furi_assert(length);
@@ -98,7 +98,7 @@ void st25r3916_reg_write_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16
     furi_hal_gpio_write(handle->cs, true);
 }
 
-void st25r3916_reg_read_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t length) {
+void st25r3916_reg_read_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, size_t length) {
     furi_assert(handle);
     furi_assert(buff);
     furi_assert(length);
@@ -110,19 +110,19 @@ void st25r3916_reg_read_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_
     furi_hal_gpio_write(handle->cs, true);
 }
 
-void st25r3916_write_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t length) {
+void st25r3916_write_pta_mem(FuriHalSpiBusHandle* handle, const uint8_t* values, size_t length) {
     furi_assert(handle);
-    furi_assert(buff);
+    furi_assert(values);
     furi_assert(length);
     furi_assert(length <= ST25R3916_PTM_LEN);
 
     furi_hal_gpio_write(handle->cs, false);
     st25r3916_reg_tx_byte(handle, ST25R3916_PT_A_CONFIG_LOAD);
-    furi_hal_spi_bus_tx(handle, buff, length, 200);
+    furi_hal_spi_bus_tx(handle, values, length, 200);
     furi_hal_gpio_write(handle->cs, true);
 }
 
-void st25r3916_read_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t length) {
+void st25r3916_read_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* buff, size_t length) {
     furi_assert(handle);
     furi_assert(buff);
     furi_assert(length);
@@ -137,17 +137,17 @@ void st25r3916_read_pta_mem(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t
     memcpy(buff, tmp_buff + 1, length);
 }
 
-void st25r3916_write_ptf_mem(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t length) {
+void st25r3916_write_ptf_mem(FuriHalSpiBusHandle* handle, const uint8_t* values, size_t length) {
     furi_assert(handle);
-    furi_assert(buff);
+    furi_assert(values);
 
     furi_hal_gpio_write(handle->cs, false);
     st25r3916_reg_tx_byte(handle, ST25R3916_PT_F_CONFIG_LOAD);
-    furi_hal_spi_bus_tx(handle, buff, length, 200);
+    furi_hal_spi_bus_tx(handle, values, length, 200);
     furi_hal_gpio_write(handle->cs, true);
 }
 
-void st25r3916_write_pttsn_mem(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t length) {
+void st25r3916_write_pttsn_mem(FuriHalSpiBusHandle* handle, uint8_t* buff, size_t length) {
     furi_assert(handle);
     furi_assert(buff);
 
