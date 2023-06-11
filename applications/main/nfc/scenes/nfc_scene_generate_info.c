@@ -15,7 +15,9 @@ void nfc_scene_generate_info_on_enter(void* context) {
 
     NfcaData* nfca_data = NULL;
     if(nfc_dev_get_protocol_type(nfc->nfc_dev) == NfcProtocolTypeMfUltralight) {
-        nfca_data = ((const MfUltralightData*)nfc_dev_get_protocol_data(nfc->nfc_dev))->nfca_data;
+        const MfUltralightData* mfu_data =
+            nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfUltralight);
+        nfca_data = mfu_data->nfca_data;
     } else {
         // TODO add Mf Classic
         furi_crash("Not supported protocol");

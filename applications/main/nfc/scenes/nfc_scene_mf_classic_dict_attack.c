@@ -77,7 +77,7 @@ void nfc_dict_attack_dict_attack_result_callback(void* context) {
 }
 
 static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* nfc) {
-    const MfClassicData* data = nfc_dev_get_protocol_data(nfc->nfc_dev);
+    const MfClassicData* data = nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfClassic);
     uint8_t sectors_read = 0;
     uint8_t keys_found = 0;
 
@@ -88,7 +88,7 @@ static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* nfc) {
 }
 
 static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* nfc, DictAttackState state) {
-    const MfClassicData* data = nfc_dev_get_protocol_data(nfc->nfc_dev);
+    const MfClassicData* data = nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfClassic);
 
     // Identify scene state
     if(state == DictAttackStateIdle) {

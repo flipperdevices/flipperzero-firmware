@@ -22,7 +22,8 @@ void nfc_dev_reset(NfcDev* instance);
 
 NfcProtocolType nfc_dev_get_protocol_type(const NfcDev* instance);
 
-const NfcProtocolData* nfc_dev_get_protocol_data(const NfcDev* instance);
+const NfcProtocolData*
+    nfc_dev_get_protocol_data(const NfcDev* instance, NfcProtocolType protocol_type);
 
 const char* nfc_dev_get_protocol_name(const NfcDev* instance);
 

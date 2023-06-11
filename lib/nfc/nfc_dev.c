@@ -52,9 +52,14 @@ NfcProtocolType nfc_dev_get_protocol_type(const NfcDev* instance) {
     return instance->protocol_type;
 }
 
-const NfcProtocolData* nfc_dev_get_protocol_data(const NfcDev* instance) {
+const NfcProtocolData*
+    nfc_dev_get_protocol_data(const NfcDev* instance, NfcProtocolType protocol_type) {
     furi_assert(instance);
-    furi_assert(instance->protocol_type < NfcProtocolTypeMax);
+    furi_assert(protocol_type < NfcProtocolTypeMax);
+
+    if(instance->protocol_type != protocol_type) {
+        furi_crash(NFC_DEV_TYPE_ERROR);
+    }
 
     return instance->protocol_data;
 }
@@ -93,6 +98,7 @@ void nfc_dev_copy_protocol_data(
     NfcProtocolType protocol_type,
     NfcProtocolData* protocol_data) {
     furi_assert(instance);
+    furi_assert(protocol_type < NfcProtocolTypeMax);
     furi_assert(protocol_data);
 
     if(instance->protocol_type != protocol_type) {

@@ -22,7 +22,10 @@ void nfc_scene_mf_classic_menu_on_enter(void* context) {
         submenu, "Save", SubmenuIndexSave, nfc_scene_mf_classic_menu_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_mf_classic_menu_submenu_callback, nfc);
-    if(!mf_classic_is_card_read((MfClassicData*)nfc_dev_get_protocol_data(nfc->nfc_dev))) {
+
+    const MfClassicData* mfc_data =
+        nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfClassic);
+    if(!mf_classic_is_card_read(mfc_data)) {
         submenu_add_item(
             submenu,
             "Detect Reader",

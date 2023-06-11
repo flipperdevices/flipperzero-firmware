@@ -16,7 +16,8 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
     NfcApp* nfc = context;
 
     // Setup view
-    const MfUltralightData* data = nfc_dev_get_protocol_data(nfc->nfc_dev);
+    const MfUltralightData* data =
+        nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfUltralight);
     Widget* widget = nfc->widget;
 
     FuriString* temp_str;

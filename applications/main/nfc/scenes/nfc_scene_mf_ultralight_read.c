@@ -20,7 +20,8 @@ MfUltralightPollerCommand
             nfc->nfc_dev,
             NfcProtocolTypeMfUltralight,
             mf_ultralight_poller_get_data(nfc->mf_ul_poller));
-        const MfUltralightData* data = nfc_dev_get_protocol_data(nfc->nfc_dev);
+        const MfUltralightData* data =
+            nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfUltralight);
         if(nfc->mf_ul_auth->type == MfUltralightAuthTypeXiaomii) {
             if(mf_ultralight_generate_xiaomi_pass(
                    nfc->mf_ul_auth, data->nfca_data->uid, data->nfca_data->uid_len)) {

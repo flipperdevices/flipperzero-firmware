@@ -17,7 +17,9 @@ void nfc_scene_mf_ultralight_menu_submenu_callback(void* context, uint32_t index
 void nfc_scene_mf_ultralight_menu_on_enter(void* context) {
     NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
-    const MfUltralightData* data = nfc_dev_get_protocol_data(nfc->nfc_dev);
+
+    const MfUltralightData* data =
+        nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfUltralight);
 
     if(!mf_ultralight_is_all_data_read(data)) {
         submenu_add_item(

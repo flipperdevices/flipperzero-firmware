@@ -14,7 +14,8 @@ void nfc_scene_mf_classic_read_success_widget_callback(
 
 void nfc_scene_mf_classic_read_success_on_enter(void* context) {
     NfcApp* nfc = context;
-    const MfClassicData* mfc_data = nfc_dev_get_protocol_data(nfc->nfc_dev);
+    const MfClassicData* mfc_data =
+        nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfClassic);
 
     // Setup view
     Widget* widget = nfc->widget;
