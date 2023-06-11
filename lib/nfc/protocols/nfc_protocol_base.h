@@ -1,0 +1,37 @@
+#pragma once
+
+#include <flipper_format.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef void NfcProtocolData;
+
+typedef NfcProtocolData* (*NfcProtocolAlloc)();
+typedef void (*NfcProtocolFree)(NfcProtocolData* data);
+typedef void (*NfcProtocolReset)(NfcProtocolData* data);
+typedef void (*NfcProtocolCopy)(NfcProtocolData* data, const NfcProtocolData* other);
+typedef bool (*NfcProtocolVerify)(NfcProtocolData* data, const FuriString* device_type);
+typedef bool (*NfcProtocolLoad)(NfcProtocolData* data, FlipperFormat* ff, uint32_t version);
+typedef bool (*NfcProtocolSave)(const NfcProtocolData* data, FlipperFormat* ff, uint32_t version);
+typedef bool (*NfcProtocolEqual)(const NfcProtocolData* data, const NfcProtocolData* other);
+typedef const char* (*NfcProtocolGetName)(const NfcProtocolData* data);
+typedef const uint8_t* (*NfcProtocolGetUid)(const NfcProtocolData* data, size_t* uid_len);
+
+typedef struct {
+    NfcProtocolAlloc alloc;
+    NfcProtocolFree free;
+    NfcProtocolReset reset;
+    NfcProtocolCopy copy;
+    NfcProtocolVerify verify;
+    NfcProtocolLoad load;
+    NfcProtocolSave save;
+    NfcProtocolEqual is_equal;
+    NfcProtocolGetName get_name;
+    NfcProtocolGetUid get_uid;
+} NfcProtocolBase;
+
+#ifdef __cplusplus
+}
+#endif

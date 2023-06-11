@@ -28,6 +28,12 @@ void nfca_poller_free(NfcaPoller* instance) {
     free(instance);
 }
 
+const NfcaData* nfca_poller_get_data(NfcaPoller* instance) {
+    furi_assert(instance);
+
+    return instance->data;
+}
+
 static NfcCommand nfca_poller_process_command(NfcaPollerCommand command) {
     NfcCommand ret = NfcCommandContinue;
 
@@ -102,14 +108,6 @@ NfcaError
     instance->session_state = NfcaPollerSessionStateActive;
     nfc_start_poller(instance->nfc, nfca_poller_event_callback, instance);
 
-    return NfcaErrorNone;
-}
-
-NfcaError nfca_poller_get_data(NfcaPoller* instance, NfcaData* data) {
-    furi_assert(instance);
-    furi_assert(data);
-
-    nfca_copy(data, instance->data);
     return NfcaErrorNone;
 }
 

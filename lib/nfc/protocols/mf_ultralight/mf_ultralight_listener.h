@@ -38,7 +38,7 @@ void mf_ultralight_listener_free(MfUltralightListener* instance);
 
 MfUltralightError mf_ultralight_listener_start(
     MfUltralightListener* instance,
-    MfUltralightData* data,
+    const MfUltralightData* data,
     MfUltralightListenerEventCallback callback,
     void* context);
 

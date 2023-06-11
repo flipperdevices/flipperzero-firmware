@@ -3,7 +3,6 @@
 #include <storage/storage.h>
 
 #include <lib/nfc/nfc_dev.h>
-#include <lib/nfc/nfc_device_data.h>
 #include <lib/nfc/helpers/nfc_data_generator.h>
 
 #include <lib/nfc/nfc.h>

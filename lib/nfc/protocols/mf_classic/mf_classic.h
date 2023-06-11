@@ -119,6 +119,8 @@ typedef struct {
     MfClassicBlock block[MF_CLASSIC_TOTAL_BLOCKS_MAX];
 } MfClassicData;
 
+extern const NfcProtocolBase nfc_protocol_mf_classic;
+
 MfClassicData* mf_classic_alloc();
 
 void mf_classic_free(MfClassicData* data);
@@ -126,6 +128,18 @@ void mf_classic_free(MfClassicData* data);
 void mf_classic_reset(MfClassicData* data);
 
 void mf_classic_copy(MfClassicData* data, const MfClassicData* other);
+
+bool mf_classic_verify(MfClassicData* data, const FuriString* device_type);
+
+bool mf_classic_load(MfClassicData* data, FlipperFormat* ff, uint32_t version);
+
+bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff, uint32_t version);
+
+bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other);
+
+const char* mf_classic_get_name(const MfClassicData* data);
+
+const uint8_t* mf_classic_get_uid(const MfClassicData* data, size_t* uid_len);
 
 bool mf_classic_detect_protocol(NfcaData* data, MfClassicType* type);
 
@@ -137,20 +151,21 @@ uint8_t mf_classic_get_first_block_num_of_sector(uint8_t sector);
 
 uint8_t mf_classic_get_blocks_num_in_sector(uint8_t sector);
 
-const char* mf_classic_get_name(MfClassicType type, bool full_name);
-
 uint8_t mf_classic_get_sector_trailer_num_by_sector(uint8_t sector);
 
 uint8_t mf_classic_get_sector_trailer_num_by_block(uint8_t block);
 
 MfClassicSectorTrailer*
-    mf_classic_get_sector_trailer_by_sector(MfClassicData* data, uint8_t sector_num);
+    mf_classic_get_sector_trailer_by_sector(const MfClassicData* data, uint8_t sector_num);
 
 bool mf_classic_is_sector_trailer(uint8_t block);
 
 uint8_t mf_classic_get_sector_by_block(uint8_t block);
 
-bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicKeyType key_type);
+bool mf_classic_is_key_found(
+    const MfClassicData* data,
+    uint8_t sector_num,
+    MfClassicKeyType key_type);
 
 void mf_classic_set_key_found(
     MfClassicData* data,
@@ -163,18 +178,18 @@ void mf_classic_set_key_not_found(
     uint8_t sector_num,
     MfClassicKeyType key_type);
 
-bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num);
+bool mf_classic_is_block_read(const MfClassicData* data, uint8_t block_num);
 
 void mf_classic_set_block_read(MfClassicData* data, uint8_t block_num, MfClassicBlock* block_data);
 
-bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num);
+bool mf_classic_is_sector_read(const MfClassicData* data, uint8_t sector_num);
 
 void mf_classic_get_read_sectors_and_keys(
-    MfClassicData* data,
+    const MfClassicData* data,
     uint8_t* sectors_read,
     uint8_t* keys_found);
 
-bool mf_classic_is_card_read(MfClassicData* data);
+bool mf_classic_is_card_read(const MfClassicData* data);
 
 #ifdef __cplusplus
 }

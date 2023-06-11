@@ -34,10 +34,18 @@ void iso14443_4a_poller_free(Iso14443_4aPoller* instance) {
     free(instance);
 }
 
+const Iso14443_4aData* iso14443_4a_poller_get_data(Iso14443_4aPoller* instance) {
+    furi_assert(instance);
+
+    return instance->data;
+}
+
 Iso14443_4aPollerCommand iso14443_4a_poller_handler_idle(Iso14443_4aPoller* instance) {
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
-    nfca_poller_get_data(instance->iso14443_3a_poller, instance->data->iso14443_3a_data);
+    nfca_copy(
+        instance->data->iso14443_3a_data, nfca_poller_get_data(instance->iso14443_3a_poller));
+
     instance->state = Iso14443_4aPollerStateReadAts;
     return Iso14443_4aPollerCommandContinue;
 }
@@ -171,11 +179,4 @@ Iso14443_4aError iso14443_4a_poller_stop(Iso14443_4aPoller* instance) {
     iso14443_4a_free(instance->data);
 
     return iso14443_4a_poller_reset(instance);
-}
-
-Iso14443_4aError iso14443_4a_poller_get_data(Iso14443_4aPoller* instance, Iso14443_4aData* data) {
-    furi_assert(instance);
-
-    iso14443_4a_copy(data, instance->data);
-    return Iso14443_4aErrorNone;
 }

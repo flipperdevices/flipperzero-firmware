@@ -165,6 +165,8 @@ typedef struct {
     uint32_t auth_attempts;
 } MfUltralightData;
 
+extern const NfcProtocolBase nfc_protocol_mf_ultralight;
+
 MfUltralightData* mf_ultralight_alloc();
 
 void mf_ultralight_free(MfUltralightData* data);
@@ -173,23 +175,33 @@ void mf_ultralight_reset(MfUltralightData* data);
 
 void mf_ultralight_copy(MfUltralightData* data, const MfUltralightData* other);
 
+bool mf_ultralight_verify(MfUltralightData* data, const FuriString* device_type);
+
+bool mf_ultralight_load(MfUltralightData* data, FlipperFormat* ff, uint32_t version);
+
+bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_t version);
+
+bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData* other);
+
+const char* mf_ultralight_get_name(const MfUltralightData* data);
+
+const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_len);
+
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version);
 
 uint16_t mf_ultralight_get_pages_total(MfUltralightType type);
 
 uint32_t mf_ultralight_get_feature_support_set(MfUltralightType type);
 
-const char* mf_ultralight_get_name(MfUltralightType type, bool full_name);
-
 uint16_t mf_ultralight_get_config_page_num(MfUltralightType type);
 
-bool mf_ultralight_get_config_page(MfUltralightData* data, MfUltralightConfigPages** config);
+bool mf_ultralight_get_config_page(const MfUltralightData* data, MfUltralightConfigPages** config);
 
-bool mf_ultralight_is_all_data_read(MfUltralightData* data);
+bool mf_ultralight_is_all_data_read(const MfUltralightData* data);
 
-bool mf_ultralight_detect_protocol(NfcaData* nfca_data);
+bool mf_ultralight_detect_protocol(const NfcaData* nfca_data);
 
-bool mf_ultralight_is_counter_configured(MfUltralightData* data);
+bool mf_ultralight_is_counter_configured(const MfUltralightData* data);
 
 #ifdef __cplusplus
 }

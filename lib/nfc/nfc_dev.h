@@ -2,24 +2,11 @@
 
 #include <stdbool.h>
 
+#include "protocols/nfc_protocol_defs.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    NfcDevProtocolNfca,
-    // NfcDevProtocolNfcb,
-    // NfcDevProtocolNfcf,
-    // NfcDevProtocolNfcv,
-    NfcDevProtocolIso14443_4a,
-    NfcDevProtocolMfUltralight,
-    NfcDevProtocolMfClassic,
-    NfcDevProtocolMfDesfire,
-
-    NfcDevProtocolNum,
-} NfcDevProtocol;
-
-typedef void NfcDevProtocolData;
 
 typedef struct NfcDev NfcDev;
 
@@ -33,14 +20,23 @@ void nfc_dev_clear(NfcDev* instance);
 
 void nfc_dev_reset(NfcDev* instance);
 
-NfcDevProtocol nfc_dev_get_protocol(const NfcDev* instance);
+NfcProtocolType nfc_dev_get_protocol_type(const NfcDev* instance);
 
-const NfcDevProtocolData* nfc_dev_get_data(const NfcDev* instance);
+const NfcProtocolData* nfc_dev_get_protocol_data(const NfcDev* instance);
+
+const char* nfc_dev_get_protocol_name(const NfcDev* instance);
+
+const uint8_t* nfc_dev_get_uid(const NfcDev* instance, size_t* uid_len);
 
 void nfc_dev_set_protocol_data(
     NfcDev* instance,
-    NfcDevProtocol protocol,
-    const NfcDevProtocolData* protocol_data);
+    NfcProtocolType protocol_type,
+    const NfcProtocolData* protocol_data);
+
+void nfc_dev_copy_protocol_data(
+    const NfcDev* instance,
+    NfcProtocolType protocol_type,
+    NfcProtocolData* protocol_data);
 
 void nfc_dev_set_loading_callback(NfcDev* instance, NfcLoadingCallback callback, void* context);
 

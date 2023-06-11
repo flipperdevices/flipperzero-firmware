@@ -49,60 +49,61 @@ void nfc_supported_cards_free(NfcSupportedCards* instance) {
     free(instance);
 }
 
-bool nfc_supported_cards_read(
-    NfcSupportedCards* instance,
-    NfcDevProtocol protocol,
-    void* poller,
-    void* data) {
-    furi_assert(instance);
-    furi_assert(poller);
-    furi_assert(data);
-
-    bool card_read = false;
-    bool verified = false;
-
-    do {
-        if(instance->status != NfcSupportCardsStatusLoadSuccess) break;
-
-        for(size_t i = 0; i < instance->plugin_cnt; i++) {
-            const NfcSupportedCardsPlugin* plugin = plugin_manager_get_ep(instance->manager, i);
-            if(plugin->protocol != protocol) continue;
-            if(plugin->verify) {
-                verified = plugin->verify(poller);
-            }
-            if(verified && (plugin->read)) {
-                card_read = plugin->read(poller, data);
-            }
-            if(card_read) break;
-        }
-    } while(false);
-
-    return card_read;
-}
-
-bool nfc_supported_cards_parse(
-    NfcSupportedCards* instance,
-    NfcDevProtocol protocol,
-    void* data,
-    FuriString* parsed_data) {
-    furi_assert(instance);
-    furi_assert(data);
-    furi_assert(parsed_data);
-
-    bool parsed = false;
-
-    do {
-        if(instance->status != NfcSupportCardsStatusLoadSuccess) break;
-
-        for(size_t i = 0; i < instance->plugin_cnt; i++) {
-            const NfcSupportedCardsPlugin* plugin = plugin_manager_get_ep(instance->manager, i);
-            if(plugin->protocol != protocol) continue;
-            if(plugin->parse) {
-                parsed = plugin->parse(data, parsed_data);
-            }
-            if(parsed) break;
-        }
-    } while(false);
-
-    return parsed;
-}
+//FIXME: Make it compile
+// bool nfc_supported_cards_read(
+//     NfcSupportedCards* instance,
+//     NfcDevProtocol protocol,
+//     void* poller,
+//     void* data) {
+//     furi_assert(instance);
+//     furi_assert(poller);
+//     furi_assert(data);
+//
+//     bool card_read = false;
+//     bool verified = false;
+//
+//     do {
+//         if(instance->status != NfcSupportCardsStatusLoadSuccess) break;
+//
+//         for(size_t i = 0; i < instance->plugin_cnt; i++) {
+//             const NfcSupportedCardsPlugin* plugin = plugin_manager_get_ep(instance->manager, i);
+//             if(plugin->protocol != protocol) continue;
+//             if(plugin->verify) {
+//                 verified = plugin->verify(poller);
+//             }
+//             if(verified && (plugin->read)) {
+//                 card_read = plugin->read(poller, data);
+//             }
+//             if(card_read) break;
+//         }
+//     } while(false);
+//
+//     return card_read;
+// }
+//
+// bool nfc_supported_cards_parse(
+//     NfcSupportedCards* instance,
+//     NfcDevProtocol protocol,
+//     void* data,
+//     FuriString* parsed_data) {
+//     furi_assert(instance);
+//     furi_assert(data);
+//     furi_assert(parsed_data);
+//
+//     bool parsed = false;
+//
+//     do {
+//         if(instance->status != NfcSupportCardsStatusLoadSuccess) break;
+//
+//         for(size_t i = 0; i < instance->plugin_cnt; i++) {
+//             const NfcSupportedCardsPlugin* plugin = plugin_manager_get_ep(instance->manager, i);
+//             if(plugin->protocol != protocol) continue;
+//             if(plugin->parse) {
+//                 parsed = plugin->parse(data, parsed_data);
+//             }
+//             if(parsed) break;
+//         }
+//     } while(false);
+//
+//     return parsed;
+// }

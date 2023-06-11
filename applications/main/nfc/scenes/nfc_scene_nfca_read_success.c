@@ -16,7 +16,7 @@ void nfc_scene_nfca_read_success_on_enter(void* context) {
     NfcApp* nfc = context;
 
     // Setup view
-    NfcaData* data = nfc->nfc_dev_data.nfca_data;
+    const NfcaData* data = nfc_dev_get_protocol_data(nfc->nfc_dev);
     Widget* widget = nfc->widget;
 
     FuriString* temp_str;

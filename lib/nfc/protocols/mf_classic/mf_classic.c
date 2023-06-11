@@ -1,7 +1,9 @@
 #include "mf_classic.h"
 
 #include <furi/furi.h>
-#include <lib/nfc/protocols/nfc_util.h>
+#include <toolbox/hex.h>
+
+#include <nfc/protocols/nfc_util.h>
 
 typedef struct {
     uint8_t sectors_total;
@@ -10,7 +12,9 @@ typedef struct {
     const char* type_name;
 } MfClassicFeatures;
 
-MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
+static const uint32_t mf_classic_data_format_version = 2;
+
+static const MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
     [MfClassicTypeMini] =
         {
             .sectors_total = 5,
@@ -32,6 +36,19 @@ MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
             .full_name = "Mifare Classic 4K",
             .type_name = "4K",
         },
+};
+
+const NfcProtocolBase nfc_protocol_mf_classic = {
+    .alloc = (NfcProtocolAlloc)mf_classic_alloc,
+    .free = (NfcProtocolFree)mf_classic_free,
+    .reset = (NfcProtocolReset)mf_classic_reset,
+    .copy = (NfcProtocolCopy)mf_classic_copy,
+    .verify = (NfcProtocolVerify)mf_classic_verify,
+    .load = (NfcProtocolLoad)mf_classic_load,
+    .save = (NfcProtocolSave)mf_classic_save,
+    .is_equal = (NfcProtocolEqual)mf_classic_is_equal,
+    .get_name = (NfcProtocolGetName)mf_classic_get_name,
+    .get_uid = (NfcProtocolGetUid)mf_classic_get_uid,
 };
 
 MfClassicData* mf_classic_alloc() {
@@ -66,24 +83,234 @@ void mf_classic_copy(MfClassicData* data, const MfClassicData* other) {
     data->key_b_mask = other->key_b_mask;
 }
 
+bool mf_classic_verify(MfClassicData* data, const FuriString* device_type) {
+    UNUSED(data);
+    return furi_string_equal_str(device_type, "Mifare Classic");
+}
+
+static void mf_classic_parse_block(FuriString* block_str, MfClassicData* data, uint8_t block_num) {
+    furi_string_trim(block_str);
+    MfClassicBlock block_tmp = {};
+    bool is_sector_trailer = mf_classic_is_sector_trailer(block_num);
+    uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+    uint16_t block_unknown_bytes_mask = 0;
+
+    furi_string_trim(block_str);
+    for(size_t i = 0; i < MF_CLASSIC_BLOCK_SIZE; i++) {
+        char hi = furi_string_get_char(block_str, 3 * i);
+        char low = furi_string_get_char(block_str, 3 * i + 1);
+        uint8_t byte = 0;
+        if(hex_char_to_uint8(hi, low, &byte)) {
+            block_tmp.data[i] = byte;
+        } else {
+            FURI_BIT_SET(block_unknown_bytes_mask, i);
+        }
+    }
+
+    if(block_unknown_bytes_mask != 0xffff) {
+        if(is_sector_trailer) {
+            MfClassicSectorTrailer* sec_tr_tmp = (MfClassicSectorTrailer*)&block_tmp;
+            // Load Key A
+            // Key A mask 0b0000000000111111 = 0x003f
+            if((block_unknown_bytes_mask & 0x003f) == 0) {
+                uint64_t key = nfc_util_bytes2num(sec_tr_tmp->key_a.data, sizeof(MfClassicKey));
+                mf_classic_set_key_found(data, sector_num, MfClassicKeyTypeA, key);
+            }
+            // Load Access Bits
+            // Access bits mask 0b0000001111000000 = 0x03c0
+            if((block_unknown_bytes_mask & 0x03c0) == 0) {
+                mf_classic_set_block_read(data, block_num, &block_tmp);
+            }
+            // Load Key B
+            // Key B mask 0b1111110000000000 = 0xfc00
+            if((block_unknown_bytes_mask & 0xfc00) == 0) {
+                uint64_t key = nfc_util_bytes2num(sec_tr_tmp->key_b.data, sizeof(MfClassicKey));
+                mf_classic_set_key_found(data, sector_num, MfClassicKeyTypeB, key);
+            }
+        } else {
+            if(block_unknown_bytes_mask == 0) {
+                mf_classic_set_block_read(data, block_num, &block_tmp);
+            }
+        }
+    }
+}
+
+bool mf_classic_load(MfClassicData* data, FlipperFormat* ff, uint32_t version) {
+    furi_assert(data);
+
+    FuriString* temp_str = furi_string_alloc();
+    bool parsed = false;
+
+    do {
+        // Read NFCA data
+        if(!nfca_load_data(data->nfca_data, ff, version)) break;
+
+        // Read Mifare Classic type
+        if(!flipper_format_read_string(ff, "Mifare Classic type", temp_str)) break;
+        bool type_parsed = false;
+        for(size_t i = 0; i < MfClassicTypeNum; i++) {
+            if(furi_string_equal_str(temp_str, mf_classic_features[i].type_name)) {
+                data->type = i;
+                type_parsed = true;
+            }
+        }
+        if(!type_parsed) break;
+
+        // Read format version
+        uint32_t data_format_version = 0;
+        bool old_format = false;
+        // Read Mifare Classic format version
+        if(!flipper_format_read_uint32(ff, "Data format version", &data_format_version, 1)) {
+            // Load unread sectors with zero keys access for backward compatibility
+            if(!flipper_format_rewind(ff)) break;
+            old_format = true;
+        } else {
+            if(data_format_version < mf_classic_data_format_version) {
+                old_format = true;
+            }
+        }
+
+        // Read Mifare Classic blocks
+        bool block_read = true;
+        FuriString* block_str = furi_string_alloc();
+        uint16_t blocks_total = mf_classic_get_total_block_num(data->type);
+        for(size_t i = 0; i < blocks_total; i++) {
+            furi_string_printf(temp_str, "Block %d", i);
+            if(!flipper_format_read_string(ff, furi_string_get_cstr(temp_str), block_str)) {
+                block_read = false;
+                break;
+            }
+            mf_classic_parse_block(block_str, data, i);
+        }
+        furi_string_free(block_str);
+        if(!block_read) break;
+
+        // Set keys and blocks as unknown for backward compatibility
+        if(old_format) {
+            data->key_a_mask = 0ULL;
+            data->key_b_mask = 0ULL;
+            memset(data->block_read_mask, 0, sizeof(data->block_read_mask));
+        }
+
+        parsed = true;
+    } while(false);
+
+    furi_string_free(temp_str);
+
+    return parsed;
+}
+
+static void
+    mf_classic_set_block_str(FuriString* block_str, const MfClassicData* data, uint8_t block_num) {
+    furi_string_reset(block_str);
+    bool is_sec_trailer = mf_classic_is_sector_trailer(block_num);
+    if(is_sec_trailer) {
+        uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+        MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
+        // Write key A
+        for(size_t i = 0; i < sizeof(sec_tr->key_a); i++) {
+            if(mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeA)) {
+                furi_string_cat_printf(block_str, "%02X ", sec_tr->key_a.data[i]);
+            } else {
+                furi_string_cat_printf(block_str, "?? ");
+            }
+        }
+        // Write Access bytes
+        for(size_t i = 0; i < MF_CLASSIC_ACCESS_BYTES_SIZE; i++) {
+            if(mf_classic_is_block_read(data, block_num)) {
+                furi_string_cat_printf(block_str, "%02X ", sec_tr->access_bits.data[i]);
+            } else {
+                furi_string_cat_printf(block_str, "?? ");
+            }
+        }
+        // Write key B
+        for(size_t i = 0; i < sizeof(sec_tr->key_b); i++) {
+            if(mf_classic_is_key_found(data, sector_num, MfClassicKeyTypeB)) {
+                furi_string_cat_printf(block_str, "%02X ", sec_tr->key_b.data[i]);
+            } else {
+                furi_string_cat_printf(block_str, "?? ");
+            }
+        }
+    } else {
+        // Write data block
+        for(size_t i = 0; i < MF_CLASSIC_BLOCK_SIZE; i++) {
+            if(mf_classic_is_block_read(data, block_num)) {
+                furi_string_cat_printf(block_str, "%02X ", data->block[block_num].data[i]);
+            } else {
+                furi_string_cat_printf(block_str, "?? ");
+            }
+        }
+    }
+    furi_string_trim(block_str);
+}
+
+bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff, uint32_t version) {
+    furi_assert(data);
+    UNUSED(version);
+
+    FuriString* temp_str = furi_string_alloc();
+    bool saved = false;
+
+    do {
+        if(!flipper_format_write_string_cstr(ff, "Device type", "Mifare Classic")) break;
+        if(!nfca_save_data(data->nfca_data, ff, version)) break;
+        if(!flipper_format_write_string_cstr(ff, "Device type", "")) break;
+        if(!flipper_format_write_comment_cstr(ff, "Mifare Classic specific data")) break;
+        if(!flipper_format_write_string_cstr(
+               ff, "Mifare Classic type", mf_classic_features[data->type].type_name))
+            break;
+        if(!flipper_format_write_uint32(
+               ff, "Data format version", &mf_classic_data_format_version, 1))
+            break;
+        if(!flipper_format_write_comment_cstr(
+               ff, "Mifare Classic blocks, \'??\' means unknown data"))
+            break;
+
+        uint16_t blocks_total = mf_classic_get_total_block_num(data->type);
+        FuriString* block_str = furi_string_alloc();
+        bool block_saved = true;
+        for(size_t i = 0; i < blocks_total; i++) {
+            furi_string_printf(temp_str, "Block %d", i);
+            mf_classic_set_block_str(block_str, data, i);
+            if(!flipper_format_write_string(ff, furi_string_get_cstr(temp_str), block_str)) {
+                block_saved = false;
+                break;
+            }
+        }
+        furi_string_free(block_str);
+        if(!block_saved) break;
+
+        saved = true;
+    } while(false);
+
+    furi_string_free(temp_str);
+
+    return saved;
+}
+
+bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other) {
+    // TODO: Complete equality method
+    return nfca_is_equal(data->nfca_data, other->nfca_data);
+}
+
+const char* mf_classic_get_name(const MfClassicData* data) {
+    furi_assert(data);
+
+    return mf_classic_features[data->type].full_name;
+}
+
+const uint8_t* mf_classic_get_uid(const MfClassicData* data, size_t* uid_len) {
+    furi_assert(data);
+
+    return nfca_get_uid(data->nfca_data, uid_len);
+}
+
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type) {
     return mf_classic_features[type].sectors_total;
 }
 
 uint16_t mf_classic_get_total_block_num(MfClassicType type) {
     return mf_classic_features[type].blocks_total;
-}
-
-const char* mf_classic_get_name(MfClassicType type, bool full_name) {
-    const char* ret = NULL;
-
-    if(full_name) {
-        ret = mf_classic_features[type].full_name;
-    } else {
-        ret = mf_classic_features[type].type_name;
-    }
-
-    return ret;
 }
 
 bool mf_classic_detect_protocol(NfcaData* data, MfClassicType* type) {
@@ -149,7 +376,7 @@ uint8_t mf_classic_get_sector_trailer_num_by_block(uint8_t block) {
 }
 
 MfClassicSectorTrailer*
-    mf_classic_get_sector_trailer_by_sector(MfClassicData* data, uint8_t sector_num) {
+    mf_classic_get_sector_trailer_by_sector(const MfClassicData* data, uint8_t sector_num) {
     furi_assert(data);
 
     uint8_t sec_tr_block = mf_classic_get_sector_trailer_num_by_sector(sector_num);
@@ -174,7 +401,10 @@ uint8_t mf_classic_get_sector_by_block(uint8_t block) {
     return sector;
 }
 
-bool mf_classic_is_key_found(MfClassicData* data, uint8_t sector_num, MfClassicKeyType key_type) {
+bool mf_classic_is_key_found(
+    const MfClassicData* data,
+    uint8_t sector_num,
+    MfClassicKeyType key_type) {
     furi_assert(data);
 
     bool key_found = false;
@@ -220,7 +450,7 @@ void mf_classic_set_key_not_found(
     }
 }
 
-bool mf_classic_is_block_read(MfClassicData* data, uint8_t block_num) {
+bool mf_classic_is_block_read(const MfClassicData* data, uint8_t block_num) {
     furi_assert(data);
 
     return (FURI_BIT(data->block_read_mask[block_num / 32], block_num % 32) == 1);
@@ -256,7 +486,7 @@ uint8_t mf_classic_get_blocks_num_in_sector(uint8_t sector) {
 }
 
 void mf_classic_get_read_sectors_and_keys(
-    MfClassicData* data,
+    const MfClassicData* data,
     uint8_t* sectors_read,
     uint8_t* keys_found) {
     furi_assert(data);
@@ -286,7 +516,7 @@ void mf_classic_get_read_sectors_and_keys(
     }
 }
 
-bool mf_classic_is_card_read(MfClassicData* data) {
+bool mf_classic_is_card_read(const MfClassicData* data) {
     furi_assert(data);
 
     uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
@@ -298,7 +528,7 @@ bool mf_classic_is_card_read(MfClassicData* data) {
     return card_read;
 }
 
-bool mf_classic_is_sector_read(MfClassicData* data, uint8_t sector_num) {
+bool mf_classic_is_sector_read(const MfClassicData* data, uint8_t sector_num) {
     furi_assert(data);
 
     bool sector_read = false;

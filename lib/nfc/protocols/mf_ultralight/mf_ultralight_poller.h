@@ -49,6 +49,8 @@ MfUltralightPoller* mf_ultralight_poller_alloc(NfcaPoller* nfca_poller);
 
 void mf_ultralight_poller_free(MfUltralightPoller* instance);
 
+const MfUltralightData* mf_ultralight_poller_get_data(MfUltralightPoller* instance);
+
 MfUltralightError mf_ultralight_poller_start(
     MfUltralightPoller* instance,
     NfcaPollerEventCallback callback,
@@ -58,9 +60,6 @@ MfUltralightError mf_ultralight_poller_read(
     MfUltralightPoller* instance,
     MfUltralightPollerCallback callback,
     void* context);
-
-MfUltralightError
-    mf_ultralight_poller_get_data(MfUltralightPoller* instance, MfUltralightData* data);
 
 MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance);
 

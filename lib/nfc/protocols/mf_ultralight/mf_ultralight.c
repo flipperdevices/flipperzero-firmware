@@ -8,6 +8,8 @@ typedef struct {
     uint32_t feature_set;
 } MfUltralightFeatures;
 
+static const uint32_t mf_ultralight_data_format_version = 1;
+
 static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = {
     [MfUltralightTypeUnknown] =
         {
@@ -113,6 +115,16 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
         },
 };
 
+const NfcProtocolBase nfc_protocol_mf_ultralight = {
+    .alloc = (NfcProtocolAlloc)mf_ultralight_alloc,
+    .free = (NfcProtocolFree)mf_ultralight_free,
+    .reset = (NfcProtocolReset)mf_ultralight_reset,
+    .copy = (NfcProtocolCopy)mf_ultralight_copy,
+    .is_equal = (NfcProtocolEqual)mf_ultralight_is_equal,
+    .get_name = (NfcProtocolGetName)mf_ultralight_get_name,
+    .get_uid = (NfcProtocolGetUid)mf_ultralight_get_uid,
+};
+
 MfUltralightData* mf_ultralight_alloc() {
     MfUltralightData* data = malloc(sizeof(MfUltralightData));
     data->nfca_data = nfca_alloc();
@@ -148,6 +160,223 @@ void mf_ultralight_copy(MfUltralightData* data, const MfUltralightData* other) {
     data->pages_read = other->pages_read;
     data->pages_total = other->pages_total;
     data->auth_attempts = other->auth_attempts;
+}
+
+// TODO: Improve this function
+static const char* mf_ultralight_get_name_by_type(MfUltralightType type, bool full_name) {
+    if(type == MfUltralightTypeNTAG213) {
+        return "NTAG213";
+    } else if(type == MfUltralightTypeNTAG215) {
+        return "NTAG215";
+    } else if(type == MfUltralightTypeNTAG216) {
+        return "NTAG216";
+    } else if(type == MfUltralightTypeNTAGI2C1K) {
+        return "NTAG I2C 1K";
+    } else if(type == MfUltralightTypeNTAGI2C2K) {
+        return "NTAG I2C 2K";
+    } else if(type == MfUltralightTypeNTAGI2CPlus1K) {
+        return "NTAG I2C Plus 1K";
+    } else if(type == MfUltralightTypeNTAGI2CPlus2K) {
+        return "NTAG I2C Plus 2K";
+    } else if(type == MfUltralightTypeNTAG203) {
+        return "NTAG203";
+    } else if(type == MfUltralightTypeUL11 && full_name) {
+        return "Mifare Ultralight 11";
+    } else if(type == MfUltralightTypeUL21 && full_name) {
+        return "Mifare Ultralight 21";
+    } else {
+        return "Mifare Ultralight";
+    }
+}
+
+bool mf_ultralight_verify(MfUltralightData* data, const FuriString* device_type) {
+    furi_assert(data);
+
+    bool verified = false;
+
+    for(MfUltralightType i = 0; i < MfUltralightTypeNum; i++) {
+        const char* name = mf_ultralight_get_name_by_type(i, true);
+        verified = furi_string_equal_str(device_type, name);
+        if(verified) {
+            data->type = i;
+            break;
+        }
+    }
+
+    return verified;
+}
+
+bool mf_ultralight_load(MfUltralightData* data, FlipperFormat* ff, uint32_t version) {
+    furi_assert(data);
+
+    FuriString* temp_str = furi_string_alloc();
+    bool parsed = false;
+
+    do {
+        // Read NFCA data
+        if(!nfca_load_data(data->nfca_data, ff, version)) break;
+
+        // Read Ultralight specific data
+        // Read Mifare Ultralight format version
+        uint32_t data_format_version = 0;
+        if(!flipper_format_read_uint32(ff, "Data format version", &data_format_version, 1)) {
+            if(!flipper_format_rewind(ff)) break;
+        }
+
+        // Read signature
+        if(!flipper_format_read_hex(
+               ff, "Signature", data->signature.data, sizeof(MfUltralightSignature)))
+            break;
+        // Read Mifare version
+        if(!flipper_format_read_hex(
+               ff, "Mifare version", (uint8_t*)&data->version, sizeof(MfUltralightVersion)))
+            break;
+        // Read counters and tearing flags
+        bool counters_parsed = true;
+        for(size_t i = 0; i < 3; i++) {
+            furi_string_printf(temp_str, "Counter %d", i);
+            if(!flipper_format_read_uint32(
+                   ff, furi_string_get_cstr(temp_str), &data->counter[i].counter, 1)) {
+                counters_parsed = false;
+                break;
+            }
+            furi_string_printf(temp_str, "Tearing %d", i);
+            if(!flipper_format_read_hex(
+                   ff, furi_string_get_cstr(temp_str), data->tearing_flag[i].data, 1)) {
+                counters_parsed = false;
+                break;
+            }
+        }
+        if(!counters_parsed) break;
+        // Read pages
+        uint32_t pages_total = 0;
+        if(!flipper_format_read_uint32(ff, "Pages total", &pages_total, 1)) break;
+        uint32_t pages_read = 0;
+        if(data_format_version < mf_ultralight_data_format_version) {
+            pages_read = pages_total;
+        } else {
+            if(!flipper_format_read_uint32(ff, "Pages read", &pages_read, 1)) break;
+        }
+        data->pages_total = pages_total;
+        data->pages_read = pages_read;
+
+        if((pages_read > MF_ULTRALIGHT_MAX_PAGE_NUM) || (pages_total > MF_ULTRALIGHT_MAX_PAGE_NUM))
+            break;
+
+        bool pages_parsed = true;
+        for(size_t i = 0; i < pages_total; i++) {
+            furi_string_printf(temp_str, "Page %d", i);
+            if(!flipper_format_read_hex(
+                   ff,
+                   furi_string_get_cstr(temp_str),
+                   data->page[i].data,
+                   sizeof(MfUltralightPage))) {
+                pages_parsed = false;
+                break;
+            }
+        }
+        if(!pages_parsed) break;
+
+        // Read authentication counter
+        if(!flipper_format_read_uint32(
+               ff, "Failed authentication attempts", &data->auth_attempts, 1)) {
+            data->auth_attempts = 0;
+        }
+
+        parsed = true;
+    } while(false);
+
+    furi_string_free(temp_str);
+
+    return parsed;
+}
+
+bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_t version) {
+    furi_assert(data);
+
+    FuriString* temp_str = furi_string_alloc();
+    bool saved = false;
+
+    do {
+        const char* device_type_name = mf_ultralight_get_name_by_type(data->type, true);
+        if(!flipper_format_write_string_cstr(ff, "Device type", device_type_name)) break;
+        if(!nfca_save_data(data->nfca_data, ff, version)) break;
+        if(!flipper_format_write_comment_cstr(ff, "Mifare Ultralight specific data")) break;
+        if(!flipper_format_write_uint32(
+               ff, "Data format version", &mf_ultralight_data_format_version, 1))
+            break;
+        if(!flipper_format_write_hex(
+               ff, "Signature", data->signature.data, sizeof(MfUltralightSignature)))
+            break;
+        if(!flipper_format_write_hex(
+               ff, "Mifare version", (uint8_t*)&data->version, sizeof(MfUltralightVersion)))
+            break;
+
+        // Write conters and tearing flags data
+        bool counters_saved = true;
+        for(size_t i = 0; i < 3; i++) {
+            furi_string_printf(temp_str, "Counter %d", i);
+            if(!flipper_format_write_uint32(
+                   ff, furi_string_get_cstr(temp_str), &data->counter[i].counter, 1)) {
+                counters_saved = false;
+                break;
+            }
+            furi_string_printf(temp_str, "Tearing %d", i);
+            if(!flipper_format_write_hex(
+                   ff, furi_string_get_cstr(temp_str), data->tearing_flag->data, 1)) {
+                counters_saved = false;
+                break;
+            }
+        }
+        if(!counters_saved) break;
+
+        // Write pages data
+        uint32_t pages_total = data->pages_total;
+        uint32_t pages_read = data->pages_read;
+        if(!flipper_format_write_uint32(ff, "Pages total", &pages_total, 1)) break;
+        if(!flipper_format_write_uint32(ff, "Pages read", &pages_read, 1)) break;
+        bool pages_saved = true;
+        for(size_t i = 0; i < data->pages_total; i++) {
+            furi_string_printf(temp_str, "Page %d", i);
+            if(!flipper_format_write_hex(
+                   ff,
+                   furi_string_get_cstr(temp_str),
+                   data->page[i].data,
+                   sizeof(MfUltralightPage))) {
+                pages_saved = false;
+                break;
+            }
+        }
+        if(!pages_saved) break;
+
+        // Write authentication counter
+        if(!flipper_format_write_uint32(
+               ff, "Failed authentication attempts", &data->auth_attempts, 1))
+            break;
+
+        saved = true;
+    } while(false);
+
+    furi_string_free(temp_str);
+
+    return saved;
+}
+
+bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData* other) {
+    // TODO: Complete equality method
+    return nfca_is_equal(data->nfca_data, other->nfca_data);
+}
+
+const char* mf_ultralight_get_name(const MfUltralightData* data) {
+    furi_assert(data);
+
+    return mf_ultralight_get_name_by_type(data->type, true);
+}
+
+const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_len) {
+    furi_assert(data);
+
+    return nfca_get_uid(data->nfca_data, uid_len);
 }
 
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version) {
@@ -192,33 +421,7 @@ uint32_t mf_ultralight_get_feature_support_set(MfUltralightType type) {
     return mf_ultralight_features[type].feature_set;
 }
 
-const char* mf_ultralight_get_name(MfUltralightType type, bool full_name) {
-    if(type == MfUltralightTypeNTAG213) {
-        return "NTAG213";
-    } else if(type == MfUltralightTypeNTAG215) {
-        return "NTAG215";
-    } else if(type == MfUltralightTypeNTAG216) {
-        return "NTAG216";
-    } else if(type == MfUltralightTypeNTAGI2C1K) {
-        return "NTAG I2C 1K";
-    } else if(type == MfUltralightTypeNTAGI2C2K) {
-        return "NTAG I2C 2K";
-    } else if(type == MfUltralightTypeNTAGI2CPlus1K) {
-        return "NTAG I2C Plus 1K";
-    } else if(type == MfUltralightTypeNTAGI2CPlus2K) {
-        return "NTAG I2C Plus 2K";
-    } else if(type == MfUltralightTypeNTAG203) {
-        return "NTAG203";
-    } else if(type == MfUltralightTypeUL11 && full_name) {
-        return "Mifare Ultralight 11";
-    } else if(type == MfUltralightTypeUL21 && full_name) {
-        return "Mifare Ultralight 21";
-    } else {
-        return "Mifare Ultralight";
-    }
-}
-
-bool mf_ultralight_detect_protocol(NfcaData* nfca_data) {
+bool mf_ultralight_detect_protocol(const NfcaData* nfca_data) {
     furi_assert(nfca_data);
 
     bool mfu_detected = (nfca_data->atqa[0] == 0x44) && (nfca_data->atqa[1] == 0x00) &&
@@ -231,7 +434,7 @@ uint16_t mf_ultralight_get_config_page_num(MfUltralightType type) {
     return mf_ultralight_features[type].config_page;
 }
 
-bool mf_ultralight_get_config_page(MfUltralightData* data, MfUltralightConfigPages** config) {
+bool mf_ultralight_get_config_page(const MfUltralightData* data, MfUltralightConfigPages** config) {
     furi_assert(data);
     furi_assert(config);
 
@@ -246,7 +449,7 @@ bool mf_ultralight_get_config_page(MfUltralightData* data, MfUltralightConfigPag
     return config_pages_found;
 }
 
-bool mf_ultralight_is_all_data_read(MfUltralightData* data) {
+bool mf_ultralight_is_all_data_read(const MfUltralightData* data) {
     furi_assert(data);
 
     bool all_read = false;
@@ -268,7 +471,7 @@ bool mf_ultralight_is_all_data_read(MfUltralightData* data) {
     return all_read;
 }
 
-bool mf_ultralight_is_counter_configured(MfUltralightData* data) {
+bool mf_ultralight_is_counter_configured(const MfUltralightData* data) {
     furi_assert(data);
 
     MfUltralightConfigPages* config = NULL;

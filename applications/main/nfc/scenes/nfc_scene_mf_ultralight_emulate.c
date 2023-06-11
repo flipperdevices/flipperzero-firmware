@@ -4,7 +4,7 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
     NfcApp* nfc = context;
 
     // Setup view
-    MfUltralightData* data = nfc->nfc_dev_data.mf_ul_data;
+    const MfUltralightData* data = nfc_dev_get_protocol_data(nfc->nfc_dev);
     MfUltralightType type = data->type;
     bool is_ultralight = (type == MfUltralightTypeUL11) || (type == MfUltralightTypeUL21) ||
                          (type == MfUltralightTypeUnknown);
@@ -32,20 +32,21 @@ bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent e
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeBack) {
-        MfUltralightData* mfu_data_after_emulation = malloc(sizeof(MfUltralightData));
+        MfUltralightData* mfu_data_after_emulation = mf_ultralight_alloc();
         mf_ultralight_listener_get_data(nfc->mf_ul_listener, mfu_data_after_emulation);
         mf_ultralight_listener_stop(nfc->mf_ul_listener);
         // Check if data changed and save in shadow file
-        if(memcmp(
-               mfu_data_after_emulation,
-               &nfc->nfc_dev_data.mf_ul_data,
-               sizeof(MfUltralightData)) != 0) {
-            // Save shadow file
-            if(!furi_string_empty(nfc->file_name)) {
-                nfc_save_shadow_file(nfc);
-            }
-        }
-        free(mfu_data_after_emulation);
+        // FIXME: A comparison method?
+        // if(memcmp(
+        //        mfu_data_after_emulation,
+        //        &nfc->nfc_dev_data.mf_ul_data,
+        //        sizeof(MfUltralightData)) != 0) {
+        //     // Save shadow file
+        //     if(!furi_string_empty(nfc->file_name)) {
+        //         nfc_save_shadow_file(nfc);
+        //     }
+        // }
+        mf_ultralight_free(mfu_data_after_emulation);
         consumed = false;
     }
     return consumed;

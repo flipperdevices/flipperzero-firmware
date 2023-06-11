@@ -390,7 +390,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(NfcaListener* nfca_listener) 
 
 MfUltralightError mf_ultralight_listener_start(
     MfUltralightListener* instance,
-    MfUltralightData* data,
+    const MfUltralightData* data,
     MfUltralightListenerEventCallback callback,
     void* context) {
     furi_assert(instance);

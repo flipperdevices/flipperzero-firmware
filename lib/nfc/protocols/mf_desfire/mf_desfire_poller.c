@@ -36,13 +36,21 @@ void mf_desfire_poller_free(MfDesfirePoller* instance) {
     free(instance);
 }
 
+const MfDesfireData* mf_desfire_poller_get_data(MfDesfirePoller* instance) {
+    furi_assert(instance);
+
+    return instance->data;
+}
+
 static MfDesfirePollerCommand mf_desfire_poller_handler_idle(MfDesfirePoller* instance) {
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_reset(instance->result_buffer);
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
 
-    iso14443_4a_poller_get_data(instance->iso14443_4a_poller, instance->data->iso14443_4a_data);
+    iso14443_4a_copy(
+        instance->data->iso14443_4a_data,
+        iso14443_4a_poller_get_data(instance->iso14443_4a_poller));
 
     instance->state = MfDesfirePollerStateReadVersion;
     return MfDesfirePollerCommandContinue;
@@ -182,16 +190,6 @@ MfDesfireError mf_desfire_poller_read(
     instance->context = context;
 
     return mf_desfire_poller_start(instance, mf_desfire_poller_read_callback, instance);
-}
-
-MfDesfireError mf_desfire_poller_get_data(MfDesfirePoller* instance, MfDesfireData* data) {
-    furi_assert(instance);
-    furi_assert(instance->data);
-    furi_assert(data);
-
-    *data = *instance->data;
-
-    return MfDesfireErrorNone;
 }
 
 MfDesfireError mf_desfire_poller_reset(MfDesfirePoller* instance) {

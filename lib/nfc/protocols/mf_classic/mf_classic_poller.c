@@ -41,6 +41,12 @@ void mf_classic_poller_free(MfClassicPoller* instance) {
     free(instance);
 }
 
+const MfClassicData* mf_classic_poller_get_data(MfClassicPoller* instance) {
+    furi_assert(instance);
+
+    return instance->data;
+}
+
 MfClassicError mf_classic_poller_start(
     MfClassicPoller* instance,
     NfcaPollerEventCallback callback,
@@ -64,7 +70,7 @@ MfClassicError mf_classic_poller_start(
 }
 
 MfClassicPollerCommand mf_classic_poller_handler_idle(MfClassicPoller* instance) {
-    nfca_poller_get_data(instance->nfca_poller, instance->data->nfca_data);
+    nfca_copy(instance->data->nfca_data, nfca_poller_get_data(instance->nfca_poller));
     MfClassicPollerCommand command = MfClassicPollerCommandContinue;
     MfClassicPollerEvent event = {};
 
@@ -345,14 +351,6 @@ MfClassicError mf_classic_poller_dict_attack(
     instance->state = MfClassicPollerStateIdle;
 
     return mf_classic_poller_start(instance, mf_classic_dict_attack_callback, instance);
-}
-
-MfClassicError mf_classic_poller_get_data(MfClassicPoller* instance, MfClassicData* data) {
-    furi_assert(instance);
-
-    mf_classic_copy(data, instance->data);
-
-    return MfClassicErrorNone;
 }
 
 MfClassicError mf_classic_poller_reset(MfClassicPoller* instance) {

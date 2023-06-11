@@ -16,13 +16,12 @@ void nfc_scene_mf_ultralight_read_success_on_enter(void* context) {
     NfcApp* nfc = context;
 
     // Setup view
-    nfc->nfc_dev_data.protocol = NfcDevProtocolMfUltralight;
-    MfUltralightData* data = nfc->nfc_dev_data.mf_ul_data;
+    const MfUltralightData* data = nfc_dev_get_protocol_data(nfc->nfc_dev);
     Widget* widget = nfc->widget;
 
     FuriString* temp_str;
 
-    temp_str = furi_string_alloc_printf("\e#%s\n", mf_ultralight_get_name(data->type, true));
+    temp_str = furi_string_alloc_printf("\e#%s\n", nfc_dev_get_protocol_name(nfc->nfc_dev));
     furi_string_cat_printf(temp_str, "UID:");
     for(size_t i = 0; i < data->nfca_data->uid_len; i++) {
         furi_string_cat_printf(temp_str, " %02X", data->nfca_data->uid[i]);

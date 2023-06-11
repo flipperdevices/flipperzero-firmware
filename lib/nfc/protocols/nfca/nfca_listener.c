@@ -140,7 +140,7 @@ void nfca_listener_free(NfcaListener* instance) {
 
 NfcaError nfca_listener_start(
     NfcaListener* instance,
-    NfcaData* data,
+    const NfcaData* data,
     NfcaListenerEventCallback callback,
     void* context) {
     furi_assert(instance);

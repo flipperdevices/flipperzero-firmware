@@ -2,6 +2,15 @@
 
 #include <furi.h>
 
+#define MF_DESFIRE_PROTOCOL_NAME "Mifare DESfire"
+
+const NfcProtocolBase nfc_protocol_mf_desfire = {
+    .alloc = (NfcProtocolAlloc)mf_desfire_alloc,
+    .free = (NfcProtocolFree)mf_desfire_free,
+    .reset = (NfcProtocolReset)mf_desfire_reset,
+    .copy = (NfcProtocolCopy)mf_desfire_copy,
+};
+
 MfDesfireData* mf_desfire_alloc() {
     MfDesfireData* data = malloc(sizeof(MfDesfireData));
     data->iso14443_4a_data = iso14443_4a_alloc();
@@ -28,6 +37,48 @@ void mf_desfire_copy(MfDesfireData* data, const MfDesfireData* other) {
     mf_desfire_reset(data);
 
     // TODO: Implementation
+}
+
+bool mf_desfire_verify(MfDesfireData* data, const FuriString* device_type) {
+    UNUSED(data);
+    return furi_string_equal_str(device_type, "Mifare Desfire");
+}
+
+bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
+    UNUSED(data);
+    UNUSED(ff);
+    UNUSED(version);
+
+    // TODO: Implementation
+    return false;
+}
+
+bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
+    UNUSED(data);
+    UNUSED(ff);
+    UNUSED(version);
+
+    // TODO: Implementation
+    return false;
+}
+
+bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other) {
+    furi_assert(data);
+    furi_assert(other);
+
+    // TODO: Complete equality method
+    return iso14443_4a_is_equal(data->iso14443_4a_data, other->iso14443_4a_data);
+}
+
+const char* mf_desfire_get_name(const MfDesfireData* data) {
+    UNUSED(data);
+    return MF_DESFIRE_PROTOCOL_NAME;
+}
+
+const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len) {
+    furi_assert(data);
+
+    return iso14443_4a_get_uid(data->iso14443_4a_data, uid_len);
 }
 
 bool mf_desfire_detect_protocol(NfcaData* nfca_data) {

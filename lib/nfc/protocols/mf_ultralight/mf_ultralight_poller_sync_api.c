@@ -253,7 +253,8 @@ static MfUltralightPollerCommand
     MfUltralightPollerCommand command = MfUltralightPollerCommandContinue;
 
     if(event.type == MfUltralightPollerEventTypeReadSuccess) {
-        mf_ultralight_poller_get_data(poller_context->instance, &poller_context->data.data);
+        mf_ultralight_copy(
+            &poller_context->data.data, mf_ultralight_poller_get_data(poller_context->instance));
         poller_context->error = MfUltralightErrorNone;
         command = MfUltralightPollerCommandStop;
     } else if(event.type == MfUltralightPollerEventTypeReadFailed) {

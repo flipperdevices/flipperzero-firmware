@@ -45,7 +45,7 @@ MfClassicError mf_classic_async_auth(
     NfcaError error = NfcaErrorNone;
 
     do {
-        nfca_poller_get_data(instance->nfca_poller, instance->data->nfca_data);
+        nfca_copy(instance->data->nfca_data, nfca_poller_get_data(instance->nfca_poller));
         uint8_t auth_cmd = (key_type == MfClassicKeyTypeB) ? MF_CLASSIC_AUTH_KEY_B_CMD :
                                                              MF_CLASSIC_AUTH_KEY_A_CMD;
         buff->tx_data[0] = auth_cmd;
