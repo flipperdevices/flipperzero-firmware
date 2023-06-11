@@ -9,6 +9,12 @@ const NfcProtocolBase nfc_protocol_mf_desfire = {
     .free = (NfcProtocolFree)mf_desfire_free,
     .reset = (NfcProtocolReset)mf_desfire_reset,
     .copy = (NfcProtocolCopy)mf_desfire_copy,
+    .verify = (NfcProtocolVerify)mf_desfire_verify,
+    .load = (NfcProtocolLoad)mf_desfire_load,
+    .save = (NfcProtocolSave)mf_desfire_save,
+    .is_equal = (NfcProtocolEqual)mf_desfire_is_equal,
+    .get_name = (NfcProtocolGetName)mf_desfire_get_name,
+    .get_uid = (NfcProtocolGetUid)mf_desfire_get_uid,
 };
 
 MfDesfireData* mf_desfire_alloc() {
@@ -35,6 +41,11 @@ void mf_desfire_copy(MfDesfireData* data, const MfDesfireData* other) {
     furi_assert(other);
 
     mf_desfire_reset(data);
+
+    iso14443_4a_copy(data->iso14443_4a_data, other->iso14443_4a_data);
+
+    data->version = other->version;
+    data->free_memory = other->free_memory;
 
     // TODO: Implementation
 }
