@@ -71,8 +71,9 @@ bool nfca_is_equal(const NfcaData* data, const NfcaData* other) {
     return memcmp(data, other, sizeof(NfcaData)) == 0;
 }
 
-const char* nfca_get_name(const NfcaData* data) {
+const char* nfca_get_name(const NfcaData* data, NfcProtocolNameType name_type) {
     UNUSED(data);
+    UNUSED(name_type);
     return NFCA_PROTOCOL_NAME;
 }
 

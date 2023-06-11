@@ -293,10 +293,15 @@ bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other) 
     return nfca_is_equal(data->nfca_data, other->nfca_data);
 }
 
-const char* mf_classic_get_name(const MfClassicData* data) {
+const char* mf_classic_get_name(const MfClassicData* data, NfcProtocolNameType name_type) {
     furi_assert(data);
+    furi_assert(data->type < MfClassicTypeNum);
 
-    return mf_classic_features[data->type].full_name;
+    if(name_type == NfcProtocolNameTypeFull) {
+        return mf_classic_features[data->type].full_name;
+    } else {
+        return mf_classic_features[data->type].type_name;
+    }
 }
 
 const uint8_t* mf_classic_get_uid(const MfClassicData* data, size_t* uid_len) {

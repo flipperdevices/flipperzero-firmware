@@ -28,7 +28,8 @@ void nfc_scene_mf_classic_read_success_on_enter(void* context) {
     if(furi_string_size(nfc->parsed_data)) {
         temp_str = furi_string_alloc_set(nfc->parsed_data);
     } else {
-        temp_str = furi_string_alloc_printf("\e#%s\n", nfc_dev_get_protocol_name(nfc->nfc_dev));
+        temp_str = furi_string_alloc_printf(
+            "\e#%s\n", nfc_dev_get_protocol_name(nfc->nfc_dev, NfcProtocolNameTypeFull));
         furi_string_cat_printf(temp_str, "UID:");
         for(size_t i = 0; i < mfc_data->nfca_data->uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", mfc_data->nfca_data->uid[i]);

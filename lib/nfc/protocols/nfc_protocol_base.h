@@ -6,6 +6,11 @@
 extern "C" {
 #endif
 
+typedef enum {
+    NfcProtocolNameTypeFull,
+    NfcProtocolNameTypeShort,
+} NfcProtocolNameType;
+
 typedef void NfcProtocolData;
 
 typedef NfcProtocolData* (*NfcProtocolAlloc)();
@@ -16,7 +21,8 @@ typedef bool (*NfcProtocolVerify)(NfcProtocolData* data, const FuriString* devic
 typedef bool (*NfcProtocolLoad)(NfcProtocolData* data, FlipperFormat* ff, uint32_t version);
 typedef bool (*NfcProtocolSave)(const NfcProtocolData* data, FlipperFormat* ff, uint32_t version);
 typedef bool (*NfcProtocolEqual)(const NfcProtocolData* data, const NfcProtocolData* other);
-typedef const char* (*NfcProtocolGetName)(const NfcProtocolData* data);
+typedef const char* (
+    *NfcProtocolGetName)(const NfcProtocolData* data, NfcProtocolNameType name_type);
 typedef const uint8_t* (*NfcProtocolGetUid)(const NfcProtocolData* data, size_t* uid_len);
 
 typedef struct {

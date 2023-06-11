@@ -70,8 +70,9 @@ bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other) 
     return iso14443_4a_is_equal(data->iso14443_4a_data, other->iso14443_4a_data);
 }
 
-const char* mf_desfire_get_name(const MfDesfireData* data) {
+const char* mf_desfire_get_name(const MfDesfireData* data, NfcProtocolNameType name_type) {
     UNUSED(data);
+    UNUSED(name_type);
     return MF_DESFIRE_PROTOCOL_NAME;
 }
 

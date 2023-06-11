@@ -84,7 +84,7 @@ bool nfca_save(const NfcaData* data, FlipperFormat* ff, uint32_t version);
 
 bool nfca_is_equal(const NfcaData* data, const NfcaData* other);
 
-const char* nfca_get_name(const NfcaData* data);
+const char* nfca_get_name(const NfcaData* data, NfcProtocolNameType name_type);
 
 const uint8_t* nfca_get_uid(const NfcaData* data, size_t* uid_len);
 

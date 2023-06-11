@@ -164,6 +164,7 @@ void mf_ultralight_copy(MfUltralightData* data, const MfUltralightData* other) {
 
 // TODO: Improve this function
 static const char* mf_ultralight_get_name_by_type(MfUltralightType type, bool full_name) {
+    // FIXME: Use a LUT instead of if/switch
     if(type == MfUltralightTypeNTAG213) {
         return "NTAG213";
     } else if(type == MfUltralightTypeNTAG215) {
@@ -367,10 +368,12 @@ bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData
     return nfca_is_equal(data->nfca_data, other->nfca_data);
 }
 
-const char* mf_ultralight_get_name(const MfUltralightData* data) {
+// TODO: Improve this function
+const char* mf_ultralight_get_name(const MfUltralightData* data, NfcProtocolNameType name_type) {
     furi_assert(data);
+    furi_assert(data->type < MfUltralightTypeNum);
 
-    return mf_ultralight_get_name_by_type(data->type, true);
+    return mf_ultralight_get_name_by_type(data->type, name_type == NfcProtocolNameTypeFull);
 }
 
 const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_len) {

@@ -74,8 +74,9 @@ bool iso14443_4a_is_equal(const Iso14443_4aData* data, const Iso14443_4aData* ot
     return nfca_is_equal(data->iso14443_3a_data, other->iso14443_3a_data);
 }
 
-const char* iso14443_4a_get_name(const Iso14443_4aData* data) {
+const char* iso14443_4a_get_name(const Iso14443_4aData* data, NfcProtocolNameType name_type) {
     UNUSED(data);
+    UNUSED(name_type);
     return ISO14443_4A_PROTOCOL_NAME;
 }
 

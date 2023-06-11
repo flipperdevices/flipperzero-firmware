@@ -183,7 +183,7 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_
 
 bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData* other);
 
-const char* mf_ultralight_get_name(const MfUltralightData* data);
+const char* mf_ultralight_get_name(const MfUltralightData* data, NfcProtocolNameType name_type);
 
 const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_len);
 

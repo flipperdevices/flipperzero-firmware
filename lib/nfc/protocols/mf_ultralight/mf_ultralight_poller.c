@@ -100,7 +100,7 @@ static MfUltralightPollerCommand
     FURI_LOG_D(
         TAG,
         "%s detected. Total pages: %d",
-        mf_ultralight_get_name(instance->data),
+        mf_ultralight_get_name(instance->data, NfcProtocolNameTypeFull),
         instance->pages_total);
 
     instance->state = MfUltralightPollerStateReadSignature;

@@ -25,7 +25,7 @@ NfcProtocolType nfc_dev_get_protocol_type(const NfcDev* instance);
 const NfcProtocolData*
     nfc_dev_get_protocol_data(const NfcDev* instance, NfcProtocolType protocol_type);
 
-const char* nfc_dev_get_protocol_name(const NfcDev* instance);
+const char* nfc_dev_get_protocol_name(const NfcDev* instance, NfcProtocolNameType name_type);
 
 const uint8_t* nfc_dev_get_uid(const NfcDev* instance, size_t* uid_len);
 
