@@ -2,7 +2,7 @@
 
 #include "mf_ultralight_poller.h"
 #include <lib/nfc/protocols/nfca/nfca_poller_i.h>
-#include <lib/nfc/protocols/nfc_util.h>
+#include <lib/nfc/helpers/nfc_util.h>
 
 #define MF_ULTRALIGHT_POLLER_STANDART_FWT_FC (60000)
 

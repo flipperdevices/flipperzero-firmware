@@ -1,6 +1,6 @@
 #include "mifare_classic.h"
-#include "nfca_utils.h"
-#include "nfc_util.h"
+#include <lib/nfc/deprycated/protocols/nfca_utils.h>
+#include <lib/nfc/helpers/nfc_util.h>
 #include <furi_hal_rtc.h>
 
 // Algorithm from https://github.com/RfidResearchGroup/proxmark3.git

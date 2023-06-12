@@ -2,7 +2,7 @@
 #include "all_in_one.h"
 
 #include <gui/modules/widget.h>
-#include <nfc_worker_i.h>
+#include <lib/nfc/deprycated/nfc_worker_i.h>
 
 #include <furi_hal.h>
 

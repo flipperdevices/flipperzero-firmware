@@ -3,7 +3,7 @@
 #include <furi/furi.h>
 #include <toolbox/hex.h>
 
-#include <nfc/protocols/nfc_util.h>
+#include <lib/nfc/helpers/nfc_util.h>
 
 typedef struct {
     uint8_t sectors_total;

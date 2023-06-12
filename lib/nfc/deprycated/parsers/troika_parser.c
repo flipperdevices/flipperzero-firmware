@@ -1,7 +1,7 @@
 #include "nfc_supported_card.h"
 
 #include <gui/modules/widget.h>
-#include <nfc_worker_i.h>
+#include <lib/nfc/deprycated/nfc_worker_i.h>
 
 static const MfClassicAuthContext troika_keys[] = {
     {.sector = 0, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xfbf225dc5d58},

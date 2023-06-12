@@ -1,5 +1,5 @@
 #include "crypto1.h"
-#include "nfc_util.h"
+#include <lib/nfc/helpers/nfc_util.h>
 #include <furi.h>
 
 // Algorithm from https://github.com/RfidResearchGroup/proxmark3.git

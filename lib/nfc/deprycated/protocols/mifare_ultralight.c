@@ -1,7 +1,7 @@
 #include <limits.h>
 #include <mbedtls/sha1.h>
 #include "mifare_ultralight.h"
-#include "nfc_util.h"
+#include <lib/nfc/helpers/nfc_util.h>
 #include <furi.h>
 #include <furi_hal_nfc.h>
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/nfc/protocols/mifare_classic.h>
+#include <lib/nfc/deprycated/protocols/mifare_classic.h>
 
 typedef struct Mfkey32 Mfkey32;
 

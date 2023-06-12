@@ -2,7 +2,7 @@
 
 #include "mf_classic_poller.h"
 #include <lib/nfc/protocols/nfca/nfca_poller_i.h>
-#include <lib/nfc/protocols/nfc_util.h>
+#include <lib/nfc/helpers/nfc_util.h>
 #include "crypto1.h"
 
 #ifdef __cplusplus

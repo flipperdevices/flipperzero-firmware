@@ -6,8 +6,7 @@
 #include <stream/buffered_file_stream.h>
 #include <m-array.h>
 
-#include <lib/nfc/protocols/mifare_classic.h>
-#include <lib/nfc/protocols/nfc_util.h>
+#include <lib/nfc/helpers/nfc_util.h>
 
 #define TAG "Mfkey32"
 

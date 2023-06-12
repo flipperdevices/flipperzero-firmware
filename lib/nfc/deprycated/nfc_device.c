@@ -4,7 +4,7 @@
 
 #include <lib/toolbox/path.h>
 #include <lib/toolbox/hex.h>
-#include <lib/nfc/protocols/nfc_util.h>
+#include <lib/nfc/helpers/nfc_util.h>
 #include <flipper_format/flipper_format.h>
 
 #define TAG "NfcDevice"

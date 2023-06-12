@@ -3,7 +3,7 @@
 #include <lib/toolbox/args.h>
 #include <lib/flipper_format/flipper_format.h>
 
-#include <lib/nfc/protocols/nfc_util.h>
+#include <lib/nfc/helpers/nfc_util.h>
 
 #define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
 #define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_dict_user.nfc")
