@@ -1,8 +1,6 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdint.h>
-
+#include <lib/nfc/helpers/bit_buffer.h>
 #include <nfc/protocols/nfc_protocol_base.h>
 
 #ifdef __cplusplus
@@ -88,11 +86,13 @@ const char* nfca_get_name(const NfcaData* data, NfcProtocolNameType name_type);
 
 const uint8_t* nfca_get_uid(const NfcaData* data, size_t* uid_len);
 
-uint16_t nfca_get_crc(uint8_t* buff, uint16_t len);
+uint32_t nfca_get_cuid(NfcaData* nfca_data);
 
-void nfca_append_crc(uint8_t* buff, uint16_t len);
+void nfca_append_crc(BitBuffer* buffer);
 
-bool nfca_check_crc(uint8_t* buff, uint16_t len);
+bool nfca_check_crc(const BitBuffer* buf);
+
+void nfca_trim_crc(BitBuffer* buf);
 
 // TODO: Decide where should these methods go (*_i file?)
 bool nfca_load_data(NfcaData* data, FlipperFormat* ff, uint32_t version);

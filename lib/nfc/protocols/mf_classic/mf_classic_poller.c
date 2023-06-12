@@ -58,10 +58,10 @@ MfClassicError mf_classic_poller_start(
 
     instance->data = mf_classic_alloc();
     instance->crypto = crypto1_alloc();
-    instance->plain_buff =
-        nfc_poller_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE, MF_CLASSIC_MAX_BUFF_SIZE);
-    instance->encrypted_buff =
-        nfc_poller_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE, MF_CLASSIC_MAX_BUFF_SIZE);
+    instance->tx_plain_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
+    instance->tx_encrypted_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
+    instance->rx_plain_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
+    instance->rx_encrypted_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
 
     instance->session_state = MfClassicPollerSessionStateActive;
     nfca_poller_start(instance->nfca_poller, callback, context);
@@ -321,7 +321,6 @@ NfcaPollerCommand mf_classic_dict_attack_callback(NfcaPollerEvent event, void* c
         command = MfClassicPollerCommandStop;
     } else {
         if(event.type == NfcaPollerEventTypeReady) {
-            // furi_delay_ms(100);
             command = mf_classic_poller_dict_attack_handler[instance->state](instance);
         } else if(event.type == NfcaPollerEventTypeError) {
             if(event.data.error == NfcaErrorNotPresent) {
@@ -356,14 +355,18 @@ MfClassicError mf_classic_poller_dict_attack(
 MfClassicError mf_classic_poller_reset(MfClassicPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
-    furi_assert(instance->plain_buff);
-    furi_assert(instance->encrypted_buff);
     furi_assert(instance->nfca_poller);
+    furi_assert(instance->tx_plain_buffer);
+    furi_assert(instance->rx_plain_buffer);
+    furi_assert(instance->tx_encrypted_buffer);
+    furi_assert(instance->rx_encrypted_buffer);
 
     instance->auth_state = MfClassicAuthStateIdle;
     crypto1_free(instance->crypto);
-    nfc_poller_buffer_free(instance->plain_buff);
-    nfc_poller_buffer_free(instance->encrypted_buff);
+    bit_buffer_free(instance->tx_plain_buffer);
+    bit_buffer_free(instance->rx_plain_buffer);
+    bit_buffer_free(instance->tx_encrypted_buffer);
+    bit_buffer_free(instance->rx_encrypted_buffer);
     instance->callback = NULL;
     instance->context = NULL;
 

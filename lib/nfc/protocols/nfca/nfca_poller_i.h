@@ -3,7 +3,6 @@
 #include "nfca_poller.h"
 
 #include <lib/nfc/helpers/bit_buffer.h>
-#include <lib/nfc/helpers/nfc_poller_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +57,8 @@ struct NfcaPoller {
     NfcaPollerConfigState config_state;
     NfcaPollerColRes col_res;
     NfcaData* data;
-    NfcPollerBuffer* buff;
+    BitBuffer* tx_buffer;
+    BitBuffer* rx_buffer;
     NfcaPollerEventCallback callback;
     void* context;
 };
@@ -75,31 +75,20 @@ NfcaError nfca_poller_halt(NfcaPoller* instance);
 
 NfcaError nfca_poller_txrx_custom_parity(
     NfcaPoller* instance,
-    uint8_t* tx_data,
-    uint8_t* tx_parity,
-    uint16_t tx_bits,
-    uint8_t* rx_data,
-    uint8_t* rx_parity,
-    uint16_t rx_buff_size,
-    uint16_t* rx_bits,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
     uint32_t fwt);
 
 NfcaError nfca_poller_txrx(
     NfcaPoller* instance,
-    uint8_t* tx_buff,
-    uint16_t tx_bits,
-    uint8_t* rx_buff,
-    uint16_t rx_buff_size,
-    uint16_t* rx_bits,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
     uint32_t fwt);
 
 NfcaError nfca_poller_send_standart_frame(
     NfcaPoller* instance,
-    uint8_t* tx_data,
-    uint16_t tx_bits,
-    uint8_t* rx_data,
-    uint16_t rx_data_size,
-    uint16_t* rx_bits,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
     uint32_t fwt);
 
 #ifdef __cplusplus

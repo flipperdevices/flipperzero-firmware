@@ -404,7 +404,7 @@ FHalNfcError f_hal_nfc_poller_field_on() {
     return error;
 }
 
-FHalNfcError f_hal_nfc_poller_tx_custom_parity(uint8_t* tx_data, uint16_t tx_bits) {
+FHalNfcError f_hal_nfc_poller_tx_custom_parity(const uint8_t* tx_data, size_t tx_bits) {
     furi_assert(tx_data);
 
     // TODO common code for f_hal_nfc_poller_tx
@@ -437,7 +437,7 @@ FHalNfcError f_hal_nfc_poller_tx_custom_parity(uint8_t* tx_data, uint16_t tx_bit
     return err;
 }
 
-FHalNfcError f_hal_nfc_poller_tx(uint8_t* tx_data, uint16_t tx_bits) {
+FHalNfcError f_hal_nfc_poller_tx(const uint8_t* tx_data, size_t tx_bits) {
     furi_assert(tx_data);
 
     FHalNfcError err = FHalNfcErrorNone;
@@ -468,7 +468,7 @@ FHalNfcError f_hal_nfc_poller_tx(uint8_t* tx_data, uint16_t tx_bits) {
     return err;
 }
 
-FHalNfcError f_hal_nfc_listener_tx(uint8_t* tx_data, uint16_t tx_bits) {
+FHalNfcError f_hal_nfc_listener_tx(const uint8_t* tx_data, size_t tx_bits) {
     furi_assert(tx_data);
 
     FHalNfcError err = FHalNfcErrorNone;
@@ -483,7 +483,7 @@ FHalNfcError f_hal_nfc_listener_tx(uint8_t* tx_data, uint16_t tx_bits) {
     return err;
 }
 
-FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, uint16_t rx_data_size, uint16_t* rx_bits) {
+FHalNfcError f_hal_nfc_poller_rx(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits) {
     furi_assert(rx_data);
     furi_assert(rx_bits);
 

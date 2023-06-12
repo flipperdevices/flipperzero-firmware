@@ -89,13 +89,13 @@ void st25r3916_mask_irq(FuriHalSpiBusHandle* handle, uint32_t mask);
 
 uint32_t st25r3916_get_irq(FuriHalSpiBusHandle* handle);
 
-void st25r3916_write_fifo(FuriHalSpiBusHandle* handle, uint8_t* buff, uint16_t bits);
+void st25r3916_write_fifo(FuriHalSpiBusHandle* handle, const uint8_t* buff, size_t bits);
 
 bool st25r3916_read_fifo(
     FuriHalSpiBusHandle* handle,
     uint8_t* buff,
-    uint16_t buff_size,
-    uint16_t* buff_bits);
+    size_t buff_size,
+    size_t* buff_bits);
 
 #ifdef __cplusplus
 }

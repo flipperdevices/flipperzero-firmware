@@ -2,7 +2,6 @@
 
 #include "mf_classic_poller.h"
 #include <lib/nfc/protocols/nfca/nfca_poller_i.h>
-#include <nfc/helpers/nfc_poller_buffer.h>
 #include <lib/nfc/protocols/nfc_util.h>
 #include "crypto1.h"
 
@@ -58,8 +57,10 @@ struct MfClassicPoller {
     uint8_t key_reuse_sector;
     uint8_t sectors_total;
     Crypto1* crypto;
-    NfcPollerBuffer* plain_buff;
-    NfcPollerBuffer* encrypted_buff;
+    BitBuffer* tx_plain_buffer;
+    BitBuffer* tx_encrypted_buffer;
+    BitBuffer* rx_plain_buffer;
+    BitBuffer* rx_encrypted_buffer;
     MfClassicData* data;
     MfClassicPollerCallback callback;
     void* context;

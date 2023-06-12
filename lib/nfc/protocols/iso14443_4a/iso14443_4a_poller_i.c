@@ -52,23 +52,24 @@ Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance) 
         instance->protocol_data.ats_request.cmd = 0xe0;
         instance->protocol_data.ats_request.param = 0x80;
 
-        uint16_t rx_bits;
+        bit_buffer_copy_bytes(
+            instance->tx_buffer,
+            (uint8_t*)&instance->protocol_data.ats_request,
+            sizeof(instance->protocol_data.ats_request));
 
-        // TODO: Adapt lower methods to use BitBuffers
         NfcaError error = nfca_poller_send_standart_frame(
             instance->iso14443_3a_poller,
-            (uint8_t*)&instance->protocol_data.ats_request,
-            BITS_IN_BYTE * sizeof(instance->protocol_data.ats_request),
-            (uint8_t*)&instance->protocol_data.ats_response,
-            BITS_IN_BYTE * sizeof(instance->protocol_data.ats_response),
-            &rx_bits,
+            instance->tx_buffer,
+            instance->rx_buffer,
             NFCA_FDT_LISTEN_FC);
-
         if(error != NfcaErrorNone) {
             FURI_LOG_E(TAG, "Ats request failed: %d", error);
             break;
-        } else if(rx_bits != BITS_IN_BYTE * sizeof(instance->protocol_data.ats_response)) {
-            FURI_LOG_E(TAG, "Ats response wrong length: %d bits", rx_bits);
+        }
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) !=
+           sizeof(instance->protocol_data.ats_response)) {
+            FURI_LOG_E(TAG, "Ats response wrong length");
+            ret = Iso14443_4aErrorProtocol;
             break;
         }
 
@@ -96,25 +97,14 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     Iso14443_4aError ret = Iso14443_4aErrorNone;
 
     do {
-        // TODO: Adapt lower methods to use BitBuffers
-        uint16_t rx_size_bits;
         NfcaError error = nfca_poller_send_standart_frame(
-            instance->iso14443_3a_poller,
-            bit_buffer_get_data(instance->tx_buffer),
-            bit_buffer_get_size(instance->tx_buffer),
-            bit_buffer_get_data(instance->rx_buffer),
-            bit_buffer_get_capacity_bytes(instance->rx_buffer),
-            &rx_size_bits,
-            fwt);
+            instance->iso14443_3a_poller, instance->tx_buffer, instance->rx_buffer, fwt);
 
         if(error != NfcaErrorNone) {
             FURI_LOG_E(TAG, "Iso14443-3 error: %d", error);
             ret = iso14443_4a_poller_process_error(error);
             break;
         }
-
-        // TODO: Do not set the size directly
-        bit_buffer_set_size(instance->rx_buffer, rx_size_bits);
 
         if(!bit_buffer_starts_with_byte(instance->rx_buffer, pcb)) {
             ret = Iso14443_4aErrorProtocol;

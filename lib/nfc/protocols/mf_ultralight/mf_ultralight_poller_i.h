@@ -2,7 +2,6 @@
 
 #include "mf_ultralight_poller.h"
 #include <lib/nfc/protocols/nfca/nfca_poller_i.h>
-#include <nfc/helpers/nfc_poller_buffer.h>
 #include <lib/nfc/protocols/nfc_util.h>
 
 #define MF_ULTRALIGHT_POLLER_STANDART_FWT_FC (60000)
@@ -68,7 +67,8 @@ struct MfUltralightPoller {
     NfcaPoller* nfca_poller;
     MfUltralightPollerSessionState session_state;
     MfUltralightPollerState state;
-    NfcPollerBuffer* buffer;
+    BitBuffer* tx_buffer;
+    BitBuffer* rx_buffer;
     MfUltralightData* data;
     MfUltralightPollerCallback callback;
     MfUltralightPollerAuthContext auth_context;

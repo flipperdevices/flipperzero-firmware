@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <lib/nfc/helpers/bit_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,8 +25,7 @@ typedef enum {
 } NfcEventType;
 
 typedef struct {
-    uint8_t* rx_data;
-    uint16_t rx_bits;
+    BitBuffer* buffer;
 } NfcEventData;
 
 typedef struct {
@@ -104,43 +103,28 @@ void nfc_stop(Nfc* instance);
 
 // Called from worker thread
 
-NfcError nfc_listener_tx(Nfc* instance, uint8_t* tx_data, uint16_t tx_bits);
+NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer);
 
 NfcError nfc_trx_custom_parity(
     Nfc* instance,
-    uint8_t* tx_data,
-    uint16_t tx_bits,
-    uint8_t* rx_data,
-    uint16_t rx_data_size,
-    uint16_t* rx_bits,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
     uint32_t fwt);
 
-NfcError nfc_trx(
-    Nfc* instance,
-    uint8_t* tx_data,
-    uint16_t tx_bits,
-    uint8_t* rx_data,
-    uint16_t rx_data_size,
-    uint16_t* rx_bits,
-    uint32_t fwt);
+NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt);
 
 // Technology specific API
 
 NfcError nfc_iso13444a_short_frame(
     Nfc* instance,
     NfcIso14443aShortFrame frame,
-    uint8_t* rx_data,
-    uint16_t rx_data_size,
-    uint16_t* rx_bits,
+    BitBuffer* rx_buffer,
     uint32_t fwt);
 
 NfcError nfc_iso13444a_sdd_frame(
     Nfc* instance,
-    uint8_t* tx_data,
-    uint16_t tx_bits,
-    uint8_t* rx_data,
-    uint16_t rx_data_size,
-    uint16_t* rx_bits,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
     uint32_t fwt);
 
 #ifdef __cplusplus
