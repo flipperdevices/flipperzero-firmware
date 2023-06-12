@@ -437,6 +437,7 @@ NfcError nfc_trx_custom_parity(
             break;
         }
 
+        memset(instance->tx_buffer, 0, sizeof(instance->tx_buffer));
         bit_buffer_write_bytes_with_parity(
             tx_buffer, instance->tx_buffer, sizeof(instance->tx_buffer), &instance->tx_bits);
         error = f_hal_nfc_poller_tx_custom_parity(instance->tx_buffer, instance->tx_bits);

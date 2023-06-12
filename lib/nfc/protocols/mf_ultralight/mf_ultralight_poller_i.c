@@ -298,7 +298,7 @@ MfUltralightError mf_ultralight_poller_async_write_page(
 
     do {
         uint8_t write_page_cmd[MF_ULTRALIGHT_PAGE_SIZE + 2] = {MF_ULTRALIGHT_CMD_WRITE_PAGE, page};
-        memcpy(write_page_cmd, data->data, MF_ULTRALIGHT_PAGE_SIZE);
+        memcpy(&write_page_cmd[2], data->data, MF_ULTRALIGHT_PAGE_SIZE);
         bit_buffer_copy_bytes(instance->tx_buffer, write_page_cmd, sizeof(write_page_cmd));
         error = nfca_poller_send_standart_frame(
             instance->nfca_poller,
@@ -341,6 +341,8 @@ MfUltralightError mf_ultralight_poller_async_read_version(
             break;
         }
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(MfUltralightVersion)) {
+            FURI_LOG_I(
+                TAG, "Read Version failed: %d", bit_buffer_get_size_bytes(instance->rx_buffer));
             ret = MfUltralightErrorProtocol;
             break;
         }

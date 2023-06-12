@@ -72,8 +72,6 @@ static void nfc_rpc_mf_ultralight_write_page(Nfc_Main* cmd, void* context) {
     cmd->command_status = Nfc_CommandStatus_OK;
     pb_mf_ul_write_page_resp.error = nfc_rpc_mf_ultralight_process_error(error);
     cmd->content.mf_ultralight_write_page_resp = pb_mf_ul_write_page_resp;
-
-    mf_ultralight_poller_reset(instance->mf_ul_poller);
 }
 
 static void nfc_rpc_mf_ultralight_read_version(Nfc_Main* cmd, void* context) {
@@ -146,8 +144,6 @@ static void nfc_rpc_mf_ultralight_read_counter(Nfc_Main* cmd, void* context) {
         pb_mf_ul_read_counter_resp.data.size = sizeof(MfUltralightCounter);
     }
     cmd->content.mf_ultralight_read_counter_resp = pb_mf_ul_read_counter_resp;
-
-    mf_ultralight_poller_reset(instance->mf_ul_poller);
 }
 
 static void nfc_rpc_mf_ultralight_read_tearing_flag(Nfc_Main* cmd, void* context) {
@@ -177,8 +173,6 @@ static void nfc_rpc_mf_ultralight_read_tearing_flag(Nfc_Main* cmd, void* context
     cmd->content.mf_ultralight_read_tearing_flag_resp = pb_mf_ul_read_tearing_flag_resp;
     FURI_LOG_D(
         TAG, "Tearing flag %ld: %02X", pb_mf_ul_read_tearing_flag_resp.flag_num, data.data[0]);
-
-    mf_ultralight_poller_reset(instance->mf_ul_poller);
 }
 
 // TODO DELETE!

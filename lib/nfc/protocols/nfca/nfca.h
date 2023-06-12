@@ -67,9 +67,9 @@ uint32_t nfca_get_cuid(NfcaData* nfca_data);
 
 void nfca_append_crc(BitBuffer* buffer);
 
-bool nfca_check_and_trim_crc(const BitBuffer* buf, BitBuffer* out);
-
 bool nfca_check_crc(const BitBuffer* buf);
+
+void nfca_trim_crc(BitBuffer* buf);
 
 #ifdef __cplusplus
 }

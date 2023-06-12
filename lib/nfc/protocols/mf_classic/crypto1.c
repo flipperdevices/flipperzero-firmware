@@ -95,9 +95,10 @@ void crypto1_decrypt(Crypto1* crypto, const BitBuffer* buff, BitBuffer* out) {
 
     size_t bits = bit_buffer_get_size(buff);
     bit_buffer_set_size(out, bits);
+    const uint8_t* encrypted_data = bit_buffer_get_data(buff);
     if(bits < 8) {
         uint8_t decrypted_byte = 0;
-        uint8_t encrypted_byte = bit_buffer_get_byte(buff, 0);
+        uint8_t encrypted_byte = encrypted_data[0];
         decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_byte, 0)) << 0;
         decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_byte, 1)) << 1;
         decrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(encrypted_byte, 2)) << 2;
@@ -105,8 +106,7 @@ void crypto1_decrypt(Crypto1* crypto, const BitBuffer* buff, BitBuffer* out) {
         bit_buffer_set_byte(out, 0, decrypted_byte);
     } else {
         for(size_t i = 0; i < bits / 8; i++) {
-            uint8_t encrypted_byte = bit_buffer_get_byte(buff, i);
-            uint8_t decrypted_byte = crypto1_byte(crypto, 0, 0) ^ encrypted_byte;
+            uint8_t decrypted_byte = crypto1_byte(crypto, 0, 0) ^ encrypted_data[i];
             bit_buffer_set_byte(out, i, decrypted_byte);
         }
     }
@@ -119,20 +119,19 @@ void crypto1_encrypt(Crypto1* crypto, uint8_t* keystream, const BitBuffer* buff,
 
     size_t bits = bit_buffer_get_size(buff);
     bit_buffer_set_size(out, bits);
+    const uint8_t* plain_data = bit_buffer_get_data(buff);
     if(bits < 8) {
-        uint8_t plain_byte = bit_buffer_get_byte(buff, 0);
         uint8_t encrypted_byte = 0;
         for(size_t i = 0; i < bits; i++) {
-            encrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(plain_byte, i)) << i;
+            encrypted_byte |= (crypto1_bit(crypto, 0, 0) ^ FURI_BIT(plain_data[0], i)) << i;
         }
         bit_buffer_set_byte(out, 0, encrypted_byte);
     } else {
         for(uint8_t i = 0; i < bits / 8; i++) {
-            uint8_t plain_byte = bit_buffer_get_byte(buff, i);
             uint8_t encrypted_byte = crypto1_byte(crypto, keystream ? keystream[i] : 0, 0) ^
-                                     plain_byte;
+                                     plain_data[i];
             bool parity_bit =
-                ((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(plain_byte)) & 0x01);
+                ((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(plain_data[i])) & 0x01);
             bit_buffer_set_byte_with_parity(out, i, encrypted_byte, parity_bit);
         }
     }
@@ -151,23 +150,23 @@ void crypto1_encrypt_reader_nonce(
     furi_assert(out);
 
     bit_buffer_set_size_bytes(out, 8);
-    uint32_t nt_num = (uint32_t)nfc_util_bytes2num(nt, sizeof(uint32_t));
+    uint32_t nt_num = nfc_util_bytes2num(nt, sizeof(uint32_t));
 
     crypto1_init(crypto, key);
     crypto1_word(crypto, nt_num ^ cuid, 0);
 
     for(size_t i = 0; i < 4; i++) {
-        nr[i] = crypto1_byte(crypto, nr[i], 0) ^ nr[i];
+        uint8_t byte = crypto1_byte(crypto, nr[i], 0) ^ nr[i];
         bool parity_bit = ((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nr[i])) & 0x01);
-        bit_buffer_set_byte_with_parity(out, i, nr[i], parity_bit);
+        bit_buffer_set_byte_with_parity(out, i, byte, parity_bit);
+        nr[i] = byte;
     }
 
     nt_num = prng_successor(nt_num, 32);
     for(size_t i = 4; i < 8; i++) {
         nt_num = prng_successor(nt_num, 8);
-        uint8_t byte = crypto1_byte(crypto, 0, 0) ^ (nt_num & 0xff);
-        bool parity_bit =
-            ((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nt_num & 0xff)) & 0x01);
+        uint8_t byte = crypto1_byte(crypto, 0, 0) ^ (uint8_t)(nt_num);
+        bool parity_bit = ((crypto1_filter(crypto->odd) ^ nfc_util_odd_parity8(nt_num)) & 0x01);
         bit_buffer_set_byte_with_parity(out, i, byte, parity_bit);
     }
 }

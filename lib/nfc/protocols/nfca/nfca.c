@@ -52,19 +52,13 @@ bool nfca_check_crc(const BitBuffer* buf) {
     return crc_ok;
 }
 
-bool nfca_check_and_trim_crc(const BitBuffer* buf, BitBuffer* out) {
+void nfca_trim_crc(BitBuffer* buf) {
     furi_assert(buf);
-    furi_assert(out);
 
     size_t bytes = bit_buffer_get_size_bytes(buf);
-    bool crc_ok = nfca_check_crc(buf);
-    if(crc_ok) {
-        bit_buffer_copy_left(out, buf, bytes - 2);
-    } else {
-        bit_buffer_copy(out, buf);
-    }
+    furi_assert(bytes > 2);
 
-    return crc_ok;
+    bit_buffer_set_size_bytes(buf, bytes - 2);
 }
 
 uint32_t nfca_get_cuid(NfcaData* nfca_data) {

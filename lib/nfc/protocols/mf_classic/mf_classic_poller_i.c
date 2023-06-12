@@ -68,19 +68,19 @@ MfClassicError mf_classic_async_auth(
         if(data) {
             data->nt = nt;
         }
-
         uint32_t cuid = nfca_get_cuid(&instance->data->nfca_data);
         uint64_t key_num = nfc_util_bytes2num(key->data, sizeof(MfClassicKey));
         MfClassicNr nr = {};
         furi_hal_random_fill_buf(nr.data, sizeof(MfClassicNr));
 
         crypto1_encrypt_reader_nonce(
-            instance->crypto, key_num, cuid, nt.data, nt.data, instance->tx_encrypted_buffer);
+            instance->crypto, key_num, cuid, nt.data, nr.data, instance->tx_encrypted_buffer);
         error = nfca_poller_txrx_custom_parity(
             instance->nfca_poller,
             instance->tx_encrypted_buffer,
             instance->rx_encrypted_buffer,
             MF_CLASSIC_FWT_FC);
+
         if(error != NfcaErrorNone) {
             ret = mf_classic_process_error(error);
             break;
@@ -94,8 +94,8 @@ MfClassicError mf_classic_async_auth(
 
         if(data) {
             data->nr = nr;
-            bit_buffer_write_bytes(
-                instance->tx_encrypted_buffer, data->ar.data, sizeof(MfClassicAr));
+            const uint8_t* nr_ar = bit_buffer_get_data(instance->tx_encrypted_buffer);
+            memcpy(data->ar.data, &nr_ar[4], sizeof(MfClassicAr));
             bit_buffer_write_bytes(
                 instance->rx_encrypted_buffer, data->at.data, sizeof(MfClassicAt));
         }
@@ -175,6 +175,7 @@ MfClassicError mf_classic_async_read_block(
             break;
         }
 
+        nfca_trim_crc(instance->rx_plain_buffer);
         bit_buffer_write_bytes(instance->rx_plain_buffer, data->data, sizeof(MfClassicBlock));
     } while(false);
 

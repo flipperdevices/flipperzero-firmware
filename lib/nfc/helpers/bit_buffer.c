@@ -66,11 +66,11 @@ void bit_buffer_copy_right(BitBuffer* buf, const BitBuffer* other, size_t start_
 void bit_buffer_copy_left(BitBuffer* buf, const BitBuffer* other, size_t end_index) {
     furi_assert(buf);
     furi_assert(other);
-    furi_assert(bit_buffer_get_size_bytes(buf) > end_index);
+    furi_assert(bit_buffer_get_capacity_bytes(buf) >= end_index);
     furi_assert(bit_buffer_get_size_bytes(other) >= end_index);
 
     memcpy(buf->data, other->data, end_index);
-    buf->size_bits = end_index;
+    buf->size_bits = end_index * BITS_IN_BYTE;
 }
 
 void bit_buffer_copy_bytes(BitBuffer* buf, const uint8_t* data, size_t size_bytes) {

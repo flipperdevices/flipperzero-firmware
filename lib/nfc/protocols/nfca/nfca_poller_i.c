@@ -48,10 +48,14 @@ static NfcaError nfca_poller_standart_frame_exchange(
             ret = nfca_poller_process_error(error);
             break;
         }
-        if(!nfca_check_and_trim_crc(instance->rx_buffer, rx_buffer)) {
+
+        bit_buffer_copy(rx_buffer, instance->rx_buffer);
+        if(!nfca_check_crc(instance->rx_buffer)) {
             ret = NfcaErrorWrongCrc;
             break;
         }
+
+        nfca_trim_crc(rx_buffer);
     } while(false);
 
     return ret;
@@ -63,7 +67,7 @@ NfcaError nfca_poller_config(NfcaPoller* instance) {
     furi_assert(instance->rx_buffer == NULL);
 
     instance->tx_buffer = bit_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE);
-    instance->tx_buffer = bit_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE);
+    instance->rx_buffer = bit_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE);
 
     nfc_config(instance->nfc, NfcModeNfcaPoller);
     nfc_set_guard_time_us(instance->nfc, NFCA_GUARD_TIME_US);
@@ -192,13 +196,15 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                     ret = NfcaErrorColResFailed;
                     break;
                 }
-                if(bit_buffer_get_size_bytes(instance->rx_buffer) != 8) {
+                if(bit_buffer_get_size_bytes(instance->rx_buffer) != 5) {
                     FURI_LOG_E(TAG, "Sdd response wrong length");
                     instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
                 }
                 // TODO BCC check here
+                bit_buffer_write_bytes(
+                    instance->rx_buffer, &instance->col_res.sdd_resp, sizeof(NfcaSddResp));
                 instance->col_res.state = NfcaPollerColResStateStateSelectCascade;
             } else if(instance->col_res.state == NfcaPollerColResStateStateSelectCascade) {
                 instance->col_res.sel_req.sel_cmd =
@@ -213,12 +219,10 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                     instance->tx_buffer,
                     (uint8_t*)&instance->col_res.sel_req,
                     sizeof(instance->col_res.sel_req));
-                // Todo remove after Nfc handles timings
-                furi_delay_ms(10);
                 ret = nfca_poller_send_standart_frame(
                     instance, instance->tx_buffer, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
                 if(ret != NfcaErrorNone) {
-                    FURI_LOG_E(TAG, "Sel request failed: %d", error);
+                    FURI_LOG_E(TAG, "Sel request failed: %d", ret);
                     instance->state = NfcaPollerStateColResFailed;
                     ret = NfcaErrorColResFailed;
                     break;
