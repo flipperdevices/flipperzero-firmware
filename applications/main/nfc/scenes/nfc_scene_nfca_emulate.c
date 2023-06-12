@@ -15,7 +15,8 @@ NfcaListenerCommand
     if(event.type == NfcaListenerEventTypeReceivedStandartFrame) {
         furi_string_cat_printf(nfc->text_box_store, "R:");
         for(size_t i = 0; i < bit_buffer_get_size_bytes(event.data.buffer); i++) {
-            furi_string_cat_printf(nfc->text_box_store, " %02X", bit_buffer_get_byte(event.data.buffer, i));
+            furi_string_cat_printf(
+                nfc->text_box_store, " %02X", bit_buffer_get_byte(event.data.buffer, i));
         }
         furi_string_cat_printf(nfc->text_box_store, "\n");
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerUpdate);
