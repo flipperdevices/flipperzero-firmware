@@ -322,7 +322,7 @@ static void draw_code_128(Canvas* canvas, BarcodeData* barcode_data) {
         canvas, 62, y + height + 8, AlignCenter, AlignBottom, furi_string_get_cstr(raw_data));
 }
 
-static void draw_codabar(Canvas* canvas, BarcodeData* barcode_data) {
+static void draw_codabar(Canvas* canvas, BarcodeData* barcode_data){
     FuriString* raw_data = barcode_data->raw_data;
     FuriString* barcode_digits = barcode_data->correct_data;
     //BarcodeTypeObj* type_obj = barcode_data->type_obj;
@@ -406,6 +406,7 @@ static void barcode_draw_callback(Canvas* canvas, void* ctx) {
             draw_code_39(canvas, data);
             break;
         case CODE128:
+        case CODE128C:
             draw_code_128(canvas, data);
             break;
         case CODABAR:

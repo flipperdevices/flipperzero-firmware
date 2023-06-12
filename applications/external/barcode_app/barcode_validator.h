@@ -10,5 +10,6 @@ void ean_8_loader(BarcodeData* barcode_data);
 void ean_13_loader(BarcodeData* barcode_data);
 void code_39_loader(BarcodeData* barcode_data);
 void code_128_loader(BarcodeData* barcode_data);
+void code_128c_loader(BarcodeData* barcode_data);
 void codabar_loader(BarcodeData* barcode_data);
 void barcode_loader(BarcodeData* barcode_data);
