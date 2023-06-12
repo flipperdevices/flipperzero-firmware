@@ -38,7 +38,10 @@ bool nfc_scene_mf_desfire_read_on_event(void* context, SceneManagerEvent event) 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcWorkerEventMfDesfireReadSuccess) {
             notification_message(nfc->notifications, &sequence_success);
-            mf_desfire_poller_get_data(nfc->mf_desfire_poller, &nfc->nfc_dev_data.mf_desfire_data);
+            nfc_dev_set_protocol_data(
+                nfc->nfc_dev,
+                NfcProtocolTypeMfDesfire,
+                mf_desfire_poller_get_data(nfc->mf_desfire_poller));
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireReadSuccess);
             DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;

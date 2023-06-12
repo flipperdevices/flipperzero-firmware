@@ -14,17 +14,18 @@ void nfc_scene_mf_classic_read_supported_card_on_enter(void* context) {
 
     bool supported = false;
     nfc->supported_cards = nfc_supported_cards_alloc();
-    if(nfc_supported_cards_read(
-           nfc->supported_cards,
-           NfcDevProtocolMfClassic,
-           nfc->mf_classic_poller,
-           &nfc->nfc_dev_data.mf_classic_data)) {
-        supported = nfc_supported_cards_parse(
-            nfc->supported_cards,
-            NfcDevProtocolMfClassic,
-            &nfc->nfc_dev_data.mf_classic_data,
-            nfc->parsed_data);
-    }
+    // FIXME: Make it compile
+    // if(nfc_supported_cards_read(
+    //        nfc->supported_cards,
+    //        NfcDevProtocolMfClassic,
+    //        nfc->mf_classic_poller,
+    //        &nfc->nfc_dev_data.mf_classic_data)) {
+    //     supported = nfc_supported_cards_parse(
+    //         nfc->supported_cards,
+    //         NfcDevProtocolMfClassic,
+    //         &nfc->nfc_dev_data.mf_classic_data,
+    //         nfc->parsed_data);
+    // }
 
     if(supported) {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);

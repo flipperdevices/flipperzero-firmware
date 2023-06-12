@@ -183,7 +183,7 @@ static void nfc_rpc_mf_ultralight_read_tearing_flag(Nfc_Main* cmd, void* context
 
 // TODO DELETE!
 static void init_mf_ul_data(MfUltralightData* data) {
-    NfcaData* nfca_data = &data->nfca_data;
+    NfcaData* nfca_data = data->nfca_data;
     uint8_t uid[7] = {0x44, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
     uint8_t atqa[2] = {0x44, 0x00};
     nfca_data->uid_len = sizeof(uid);

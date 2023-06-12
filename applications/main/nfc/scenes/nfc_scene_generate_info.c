@@ -14,8 +14,10 @@ void nfc_scene_generate_info_on_enter(void* context) {
     NfcApp* nfc = context;
 
     NfcaData* nfca_data = NULL;
-    if(nfc->nfc_dev_data.protocol == NfcDevProtocolMfUltralight) {
-        nfca_data = &nfc->nfc_dev_data.mf_ul_data.nfca_data;
+    if(nfc_dev_get_protocol_type(nfc->nfc_dev) == NfcProtocolTypeMfUltralight) {
+        const MfUltralightData* mfu_data =
+            nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfUltralight);
+        nfca_data = mfu_data->nfca_data;
     } else {
         // TODO add Mf Classic
         furi_crash("Not supported protocol");
@@ -52,7 +54,7 @@ bool nfc_scene_generate_info_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeRight) {
             // Switch either to NfcSceneMfClassicMenu or NfcSceneMfUltralightMenu
-            if(nfc->nfc_dev_data.protocol == NfcDevProtocolMfUltralight) {
+            if(nfc_dev_get_protocol_type(nfc->nfc_dev) == NfcProtocolTypeMfUltralight) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightMenu);
             } else {
                 // TODO add classic

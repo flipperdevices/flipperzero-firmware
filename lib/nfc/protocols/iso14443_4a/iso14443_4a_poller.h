@@ -37,6 +37,8 @@ Iso14443_4aPoller* iso14443_4a_poller_alloc(NfcaPoller* iso14443_3a_poller);
 
 void iso14443_4a_poller_free(Iso14443_4aPoller* instance);
 
+const Iso14443_4aData* iso14443_4a_poller_get_data(Iso14443_4aPoller* instance);
+
 Iso14443_4aError iso14443_4a_poller_start(
     Iso14443_4aPoller* instance,
     NfcaPollerEventCallback callback,
@@ -48,8 +50,6 @@ Iso14443_4aError iso14443_4a_poller_read(
     void* context);
 
 Iso14443_4aError iso14443_4a_poller_stop(Iso14443_4aPoller* instance);
-
-Iso14443_4aError iso14443_4a_poller_get_data(Iso14443_4aPoller* instance, Iso14443_4aData* data);
 
 #ifdef __cplusplus
 }

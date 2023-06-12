@@ -35,11 +35,11 @@ NfcaPoller* nfca_poller_alloc(Nfc* nfc);
 
 void nfca_poller_free(NfcaPoller* instance);
 
+const NfcaData* nfca_poller_get_data(NfcaPoller* instance);
+
 NfcaError nfca_poller_start(NfcaPoller* instance, NfcaPollerEventCallback callback, void* context);
 
 NfcaError nfca_poller_stop(NfcaPoller* instance);
-
-NfcaError nfca_poller_get_data(NfcaPoller* instance, NfcaData* data);
 
 // Sync call
 NfcaError nfca_poller_read(NfcaPoller* instance, NfcaData* nfca_data);
