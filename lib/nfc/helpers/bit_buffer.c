@@ -110,7 +110,8 @@ void bit_buffer_copy_bytes_with_parity(BitBuffer* buf, const uint8_t* data, size
                                    (bit_processed % BITS_IN_BYTE);
             buf->data[curr_byte] |= data[bit_processed / BITS_IN_BYTE + 1]
                                     << (BITS_IN_BYTE - bit_processed % BITS_IN_BYTE);
-            buf->parity[curr_byte] = FURI_BIT(data[bit_processed / 8 + 1], bit_processed % 8);
+            buf->parity[curr_byte] =
+                FURI_BIT(data[bit_processed / BITS_IN_BYTE + 1], bit_processed % BITS_IN_BYTE);
             bit_processed += BITS_IN_BYTE + 1;
             curr_byte++;
         }
@@ -157,16 +158,19 @@ void bit_buffer_write_bytes_with_parity(
 
     for(size_t i = 0; i < buf_size_bytes; i++) {
         next_par_bit = buf->parity[i];
-        if(curr_bit_pos % 8 == 0) {
-            bitstream[curr_bit_pos / 8] = buf->data[i];
-            curr_bit_pos += 8;
-            bitstream[curr_bit_pos / 8] = next_par_bit;
+        if(curr_bit_pos % BITS_IN_BYTE == 0) {
+            bitstream[curr_bit_pos / BITS_IN_BYTE] = buf->data[i];
+            curr_bit_pos += BITS_IN_BYTE;
+            bitstream[curr_bit_pos / BITS_IN_BYTE] = next_par_bit;
             curr_bit_pos++;
         } else {
-            bitstream[curr_bit_pos / 8] |= buf->data[i] << (curr_bit_pos % 8);
-            bitstream[curr_bit_pos / 8 + 1] = buf->data[i] >> (8 - curr_bit_pos % 8);
-            bitstream[curr_bit_pos / 8 + 1] |= next_par_bit << (curr_bit_pos % 8);
-            curr_bit_pos += 9;
+            bitstream[curr_bit_pos / BITS_IN_BYTE] |= buf->data[i]
+                                                      << (curr_bit_pos % BITS_IN_BYTE);
+            bitstream[curr_bit_pos / BITS_IN_BYTE + 1] =
+                buf->data[i] >> (BITS_IN_BYTE - curr_bit_pos % BITS_IN_BYTE);
+            bitstream[curr_bit_pos / BITS_IN_BYTE + 1] |= next_par_bit
+                                                          << (curr_bit_pos % BITS_IN_BYTE);
+            curr_bit_pos += BITS_IN_BYTE + 1;
         }
     }
 
