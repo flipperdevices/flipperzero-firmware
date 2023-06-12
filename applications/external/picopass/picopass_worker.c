@@ -8,7 +8,7 @@
 #define HAS_MASK(x, b) ((x & b) == b)
 
 // CSNs from Proxmark3 repo
-static const uint8_t loclass_csns[LOCLASS_NUM_CSNS][PICOPASS_BLOCK_LEN] = {
+static const uint8_t loclass_csns[LOCLASS_NUM_CSNS][RFAL_PICOPASS_BLOCK_LEN] = {
     {0x01, 0x0A, 0x0F, 0xFF, 0xF7, 0xFF, 0x12, 0xE0},
     {0x0C, 0x06, 0x0C, 0xFE, 0xF7, 0xFF, 0x12, 0xE0},
     {0x10, 0x97, 0x83, 0x7B, 0xF7, 0xFF, 0x12, 0xE0},
@@ -184,19 +184,19 @@ ReturnCode picopass_read_preauth(PicopassBlock* AA1) {
         AA1[PICOPASS_CONFIG_BLOCK_INDEX].data[7]);
 
     rfalPicoPassReadBlockRes aia;
-    rfalPicoPassPollerReadBlock(PICOPASS_AIA_BLOCK_INDEX, &aia);
-    memcpy(AA1[PICOPASS_AIA_BLOCK_INDEX].data, aia.data, sizeof(aia.data));
+    rfalPicoPassPollerReadBlock(PICOPASS_SECURE_AIA_BLOCK_INDEX, &aia);
+    memcpy(AA1[PICOPASS_SECURE_AIA_BLOCK_INDEX].data, aia.data, sizeof(aia.data));
     FURI_LOG_D(
         TAG,
         "aia %02x%02x%02x%02x%02x%02x%02x%02x",
-        AA1[PICOPASS_AIA_BLOCK_INDEX].data[0],
-        AA1[PICOPASS_AIA_BLOCK_INDEX].data[1],
-        AA1[PICOPASS_AIA_BLOCK_INDEX].data[2],
-        AA1[PICOPASS_AIA_BLOCK_INDEX].data[3],
-        AA1[PICOPASS_AIA_BLOCK_INDEX].data[4],
-        AA1[PICOPASS_AIA_BLOCK_INDEX].data[5],
-        AA1[PICOPASS_AIA_BLOCK_INDEX].data[6],
-        AA1[PICOPASS_AIA_BLOCK_INDEX].data[7]);
+        AA1[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[0],
+        AA1[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[1],
+        AA1[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[2],
+        AA1[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[3],
+        AA1[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[4],
+        AA1[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[5],
+        AA1[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[6],
+        AA1[PICOPASS_SECURE_AIA_BLOCK_INDEX].data[7]);
 
     return ERR_NONE;
 }
@@ -212,7 +212,7 @@ static ReturnCode
     PicopassPacs* pacs = &dev_data->pacs;
 
     uint8_t* csn = AA1[PICOPASS_CSN_BLOCK_INDEX].data;
-    uint8_t* div_key = AA1[PICOPASS_KD_BLOCK_INDEX].data;
+    uint8_t* div_key = AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data;
 
     ReturnCode err = ERR_PARAM;
 
@@ -220,7 +220,7 @@ static ReturnCode
     uint8_t ccnr[12] = {0};
 
     size_t index = 0;
-    uint8_t key[PICOPASS_BLOCK_LEN] = {0};
+    uint8_t key[RFAL_PICOPASS_BLOCK_LEN] = {0};
 
     if(!iclass_elite_dict_check_presence(dict_type)) {
         FURI_LOG_E(TAG, "Dictionary not found");
@@ -261,7 +261,7 @@ static ReturnCode
 
         err = rfalPicoPassPollerCheck(mac, &chkRes);
         if(err == ERR_NONE) {
-            memcpy(pacs->key, key, PICOPASS_BLOCK_LEN);
+            memcpy(pacs->key, key, RFAL_PICOPASS_BLOCK_LEN);
             break;
         }
 
@@ -305,7 +305,7 @@ ReturnCode picopass_read_card(PicopassBlock* AA1) {
                            PICOPASS_MAX_APP_LIMIT;
 
     for(size_t i = 2; i < app_limit; i++) {
-        if(i == PICOPASS_KD_BLOCK_INDEX) {
+        if(i == PICOPASS_SECURE_KD_BLOCK_INDEX) {
             // Skip over Kd block which is populated earlier (READ of Kd returns all FF's)
             continue;
         }
@@ -380,7 +380,7 @@ ReturnCode picopass_write_card(PicopassBlock* AA1) {
         FURI_LOG_D(TAG, "rfalPicoPassPollerWriteBlock %d", i);
         uint8_t data[9] = {0};
         data[0] = i;
-        memcpy(data + 1, AA1[i].data, RFAL_PICOPASS_MAX_BLOCK_LEN);
+        memcpy(data + 1, AA1[i].data, RFAL_PICOPASS_BLOCK_LEN);
         loclass_doMAC_N(data, sizeof(data), div_key, mac);
         FURI_LOG_D(
             TAG,
@@ -439,12 +439,12 @@ ReturnCode picopass_write_block(PicopassBlock* AA1, uint8_t blockNo, uint8_t* ne
     }
     memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
-    if(memcmp(selRes.CSN, AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN) != 0) {
+    if(memcmp(selRes.CSN, AA1[PICOPASS_CSN_BLOCK_INDEX].data, RFAL_PICOPASS_BLOCK_LEN) != 0) {
         FURI_LOG_E(TAG, "Wrong CSN for write");
         return ERR_REQUEST;
     }
 
-    loclass_opt_doReaderMAC(ccnr, AA1[PICOPASS_KD_BLOCK_INDEX].data, mac);
+    loclass_opt_doReaderMAC(ccnr, AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, mac);
     err = rfalPicoPassPollerCheck(mac, &chkRes);
     if(err != ERR_NONE) {
         FURI_LOG_E(TAG, "rfalPicoPassPollerCheck error %d", err);
@@ -462,7 +462,7 @@ ReturnCode picopass_write_block(PicopassBlock* AA1, uint8_t blockNo, uint8_t* ne
         newBlock[5],
         newBlock[6],
         newBlock[7]};
-    loclass_doMAC_N(data, sizeof(data), AA1[PICOPASS_KD_BLOCK_INDEX].data, mac);
+    loclass_doMAC_N(data, sizeof(data), AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data, mac);
     FURI_LOG_D(
         TAG,
         "loclass_doMAC_N %d %02x%02x%02x%02x%02x%02x%02x%02x %02x%02x%02x%02x",
@@ -515,7 +515,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
     uint8_t ccnr[12] = {0};
 
     size_t index = 0;
-    uint8_t key[PICOPASS_BLOCK_LEN] = {0};
+    uint8_t key[RFAL_PICOPASS_BLOCK_LEN] = {0};
 
     // Load dictionary
     IclassEliteDict* dict = dict_attack_data->dict;
@@ -572,7 +572,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
         memcpy(ccnr, rcRes.CCNR, sizeof(rcRes.CCNR)); // last 4 bytes left 0
 
         uint8_t* csn = AA1[PICOPASS_CSN_BLOCK_INDEX].data;
-        uint8_t* div_key = AA1[PICOPASS_KD_BLOCK_INDEX].data;
+        uint8_t* div_key = AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data;
 
         loclass_iclass_calc_div_key(csn, key, div_key, elite);
         loclass_opt_doReaderMAC(ccnr, div_key, mac);
@@ -580,7 +580,7 @@ void picopass_worker_elite_dict_attack(PicopassWorker* picopass_worker) {
         err = rfalPicoPassPollerCheck(mac, &chkRes);
         if(err == ERR_NONE) {
             FURI_LOG_I(TAG, "Found key");
-            memcpy(pacs->key, key, PICOPASS_BLOCK_LEN);
+            memcpy(pacs->key, key, RFAL_PICOPASS_BLOCK_LEN);
             err = picopass_read_card(AA1);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_read_card error %d", err);
@@ -755,9 +755,9 @@ void picopass_worker_write_key(PicopassWorker* picopass_worker) {
     uint8_t* csn = AA1[PICOPASS_CSN_BLOCK_INDEX].data;
     uint8_t* configBlock = AA1[PICOPASS_CONFIG_BLOCK_INDEX].data;
     uint8_t fuses = configBlock[7];
-    uint8_t* oldKey = AA1[PICOPASS_KD_BLOCK_INDEX].data;
+    uint8_t* oldKey = AA1[PICOPASS_SECURE_KD_BLOCK_INDEX].data;
 
-    uint8_t newKey[PICOPASS_BLOCK_LEN] = {0};
+    uint8_t newKey[RFAL_PICOPASS_BLOCK_LEN] = {0};
     loclass_iclass_calc_div_key(csn, pacs->key, newKey, false);
 
     if((fuses & 0x80) == 0x80) {
@@ -765,14 +765,14 @@ void picopass_worker_write_key(PicopassWorker* picopass_worker) {
     } else {
         FURI_LOG_D(TAG, "XOR write for application mode key change");
         // XOR when in application mode
-        for(size_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+        for(size_t i = 0; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
             newKey[i] ^= oldKey[i];
         }
     }
 
     while(picopass_worker->state == PicopassWorkerStateWriteKey) {
         if(picopass_detect_card(1000) == ERR_NONE) {
-            err = picopass_write_block(AA1, PICOPASS_KD_BLOCK_INDEX, newKey);
+            err = picopass_write_block(AA1, PICOPASS_SECURE_KD_BLOCK_INDEX, newKey);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_write_block error %d", err);
                 nextState = PicopassWorkerEventFail;
@@ -808,7 +808,9 @@ static inline void picopass_emu_read_blocks(
     uint8_t block_num,
     uint8_t block_count) {
     memcpy(
-        buf, nfcv_data->data + (block_num * PICOPASS_BLOCK_LEN), block_count * PICOPASS_BLOCK_LEN);
+        buf,
+        nfcv_data->data + (block_num * RFAL_PICOPASS_BLOCK_LEN),
+        block_count * RFAL_PICOPASS_BLOCK_LEN);
 }
 
 static inline void picopass_emu_write_blocks(
@@ -817,14 +819,16 @@ static inline void picopass_emu_write_blocks(
     uint8_t block_num,
     uint8_t block_count) {
     memcpy(
-        nfcv_data->data + (block_num * PICOPASS_BLOCK_LEN), buf, block_count * PICOPASS_BLOCK_LEN);
+        nfcv_data->data + (block_num * RFAL_PICOPASS_BLOCK_LEN),
+        buf,
+        block_count * RFAL_PICOPASS_BLOCK_LEN);
 }
 
 static void picopass_init_cipher_state(NfcVData* nfcv_data, PicopassEmulatorCtx* ctx) {
-    uint8_t cc[PICOPASS_BLOCK_LEN];
-    uint8_t key[PICOPASS_BLOCK_LEN];
+    uint8_t cc[RFAL_PICOPASS_BLOCK_LEN];
+    uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
 
-    picopass_emu_read_blocks(nfcv_data, cc, PICOPASS_EPURSE_BLOCK_INDEX, 1);
+    picopass_emu_read_blocks(nfcv_data, cc, PICOPASS_SECURE_EPURSE_BLOCK_INDEX, 1);
     picopass_emu_read_blocks(nfcv_data, key, ctx->key_block_num, 1);
 
     ctx->cipher_state = loclass_opt_doTagMAC_1(cc, key);
@@ -834,7 +838,7 @@ static void
     loclass_update_csn(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data, PicopassEmulatorCtx* ctx) {
     // collect two nonces in a row for each CSN
     uint8_t csn_num = (ctx->key_block_num / 2) % LOCLASS_NUM_CSNS;
-    memcpy(nfc_data->uid, loclass_csns[csn_num], PICOPASS_BLOCK_LEN);
+    memcpy(nfc_data->uid, loclass_csns[csn_num], RFAL_PICOPASS_BLOCK_LEN);
     picopass_emu_write_blocks(nfcv_data, loclass_csns[csn_num], PICOPASS_CSN_BLOCK_INDEX, 1);
 }
 
@@ -846,7 +850,7 @@ static void picopass_emu_handle_packet(
     PicopassEmulatorCtx* ctx = nfcv_data->emu_protocol_ctx;
     uint8_t response[34];
     uint8_t response_length = 0;
-    uint8_t key_block_num = PICOPASS_KD_BLOCK_INDEX;
+    uint8_t key_block_num = PICOPASS_SECURE_KD_BLOCK_INDEX;
 
     const uint8_t block_ff[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
@@ -855,7 +859,7 @@ static void picopass_emu_handle_packet(
     }
 
     switch(nfcv_data->frame[0]) {
-    case PICOPASS_CMD_ACTALL: // No args
+    case RFAL_PICOPASS_CMD_ACTALL: // No args
         if(nfcv_data->frame_length != 1) {
             return;
         }
@@ -866,14 +870,14 @@ static void picopass_emu_handle_packet(
 
         // Send SOF only
         break;
-    case PICOPASS_CMD_ACT: // No args
+    case RFAL_PICOPASS_CMD_ACT: // No args
         if(nfcv_data->frame_length != 1 || ctx->state != PicopassEmulatorStateActive) {
             return;
         }
 
         // Send SOF only
         break;
-    case PICOPASS_CMD_HALT: // No args
+    case RFAL_PICOPASS_CMD_HALT: // No args
         if(nfcv_data->frame_length != 1 || ctx->state != PicopassEmulatorStateSelected) {
             return;
         }
@@ -883,13 +887,13 @@ static void picopass_emu_handle_packet(
 
         // Send SOF only
         break;
-    case PICOPASS_CMD_READ_OR_IDENTIFY:
+    case RFAL_PICOPASS_CMD_READ_OR_IDENTIFY:
         if(nfcv_data->frame_length == 1 &&
            ctx->state == PicopassEmulatorStateActive) { // PICOPASS_CMD_IDENTIFY
             // ASNB(8) CRC16(2)
             picopass_anticoll_csn(response, nfc_data->uid);
-            picopass_append_crc(response, PICOPASS_BLOCK_LEN);
-            response_length = PICOPASS_BLOCK_LEN + 2;
+            picopass_append_crc(response, RFAL_PICOPASS_BLOCK_LEN);
+            response_length = RFAL_PICOPASS_BLOCK_LEN + 2;
             break;
         } else if(
             nfcv_data->frame_length == 4 &&
@@ -902,20 +906,20 @@ static void picopass_emu_handle_packet(
             // TODO: Check auth?
 
             // DATA(8) CRC16(2)
-            if(nfcv_data->frame[1] == PICOPASS_KD_BLOCK_INDEX ||
-               nfcv_data->frame[1] == PICOPASS_KC_BLOCK_INDEX) {
+            if(nfcv_data->frame[1] == PICOPASS_SECURE_KD_BLOCK_INDEX ||
+               nfcv_data->frame[1] == PICOPASS_SECURE_KC_BLOCK_INDEX) {
                 // Reading Kd or Kc blocks always returns FF's
-                memcpy(response, block_ff, PICOPASS_BLOCK_LEN);
+                memcpy(response, block_ff, RFAL_PICOPASS_BLOCK_LEN);
             } else {
                 picopass_emu_read_blocks(nfcv_data, response, nfcv_data->frame[1], 1);
             }
-            picopass_append_crc(response, PICOPASS_BLOCK_LEN);
-            response_length = PICOPASS_BLOCK_LEN + 2;
+            picopass_append_crc(response, RFAL_PICOPASS_BLOCK_LEN);
+            response_length = RFAL_PICOPASS_BLOCK_LEN + 2;
             break;
         }
 
         return;
-    case PICOPASS_CMD_READ4: // ADDRESS(1) CRC16(2)
+    case RFAL_PICOPASS_CMD_READ4: // ADDRESS(1) CRC16(2)
         if(nfcv_data->frame_length != 4 || ctx->state != PicopassEmulatorStateSelected ||
            nfcv_data->frame[1] + 4 >= PICOPASS_MAX_APP_LIMIT) {
             return;
@@ -930,32 +934,32 @@ static void picopass_emu_handle_packet(
         picopass_emu_read_blocks(nfcv_data, response, blockNum, 4);
         if(blockNum == 4) {
             // Kc is block 4, so just redact first block of response
-            memcpy(response, block_ff, PICOPASS_BLOCK_LEN);
+            memcpy(response, block_ff, RFAL_PICOPASS_BLOCK_LEN);
         } else if(blockNum < 4) {
             // Kd is block 3
-            uint8_t* kdOffset = response + ((3 - blockNum) * PICOPASS_BLOCK_LEN);
-            memcpy(kdOffset, block_ff, PICOPASS_BLOCK_LEN);
+            uint8_t* kdOffset = response + ((3 - blockNum) * RFAL_PICOPASS_BLOCK_LEN);
+            memcpy(kdOffset, block_ff, RFAL_PICOPASS_BLOCK_LEN);
             if(blockNum != 0) {
                 // Redact Kc
-                memcpy(kdOffset + PICOPASS_BLOCK_LEN, block_ff, PICOPASS_BLOCK_LEN);
+                memcpy(kdOffset + RFAL_PICOPASS_BLOCK_LEN, block_ff, RFAL_PICOPASS_BLOCK_LEN);
             }
         }
-        picopass_append_crc(response, PICOPASS_BLOCK_LEN * 4);
-        response_length = (PICOPASS_BLOCK_LEN * 4) + 2;
+        picopass_append_crc(response, RFAL_PICOPASS_BLOCK_LEN * 4);
+        response_length = (RFAL_PICOPASS_BLOCK_LEN * 4) + 2;
         break;
-    case PICOPASS_CMD_SELECT: // ASNB(8)|SERIALNB(8)
+    case RFAL_PICOPASS_CMD_SELECT: // ASNB(8)|SERIALNB(8)
         if(nfcv_data->frame_length != 9) {
             return;
         }
 
-        uint8_t select_csn[PICOPASS_BLOCK_LEN];
+        uint8_t select_csn[RFAL_PICOPASS_BLOCK_LEN];
         if(ctx->state == PicopassEmulatorStateHalt || ctx->state == PicopassEmulatorStateIdle) {
-            memcpy(select_csn, nfc_data->uid, PICOPASS_BLOCK_LEN);
+            memcpy(select_csn, nfc_data->uid, RFAL_PICOPASS_BLOCK_LEN);
         } else {
             picopass_anticoll_csn(select_csn, nfc_data->uid);
         }
 
-        if(memcmp(nfcv_data->frame + 1, select_csn, PICOPASS_BLOCK_LEN)) {
+        if(memcmp(nfcv_data->frame + 1, select_csn, RFAL_PICOPASS_BLOCK_LEN)) {
             if(ctx->state == PicopassEmulatorStateActive) {
                 ctx->state = PicopassEmulatorStateIdle;
             } else if(ctx->state == PicopassEmulatorStateSelected) {
@@ -969,16 +973,17 @@ static void picopass_emu_handle_packet(
         ctx->state = PicopassEmulatorStateSelected;
 
         // SERIALNB(8) CRC16(2)
-        memcpy(response, nfc_data->uid, PICOPASS_BLOCK_LEN);
-        picopass_append_crc(response, PICOPASS_BLOCK_LEN);
+        memcpy(response, nfc_data->uid, RFAL_PICOPASS_BLOCK_LEN);
+        picopass_append_crc(response, RFAL_PICOPASS_BLOCK_LEN);
 
-        response_length = PICOPASS_BLOCK_LEN + 2;
+        response_length = RFAL_PICOPASS_BLOCK_LEN + 2;
         break;
-    case PICOPASS_CMD_READCHECK_KC: // ADDRESS(1)
-        key_block_num = PICOPASS_KC_BLOCK_INDEX;
+    case RFAL_PICOPASS_CMD_READCHECK_KC: // ADDRESS(1)
+        key_block_num = PICOPASS_SECURE_KC_BLOCK_INDEX;
         // fallthrough
-    case PICOPASS_CMD_READCHECK_KD: // ADDRESS(1)
-        if(nfcv_data->frame_length != 2 || nfcv_data->frame[1] != PICOPASS_EPURSE_BLOCK_INDEX ||
+    case RFAL_PICOPASS_CMD_READCHECK_KD: // ADDRESS(1)
+        if(nfcv_data->frame_length != 2 ||
+           nfcv_data->frame[1] != PICOPASS_SECURE_EPURSE_BLOCK_INDEX ||
            ctx->state != PicopassEmulatorStateSelected) {
             return;
         }
@@ -990,9 +995,9 @@ static void picopass_emu_handle_packet(
 
         // DATA(8)
         picopass_emu_read_blocks(nfcv_data, response, nfcv_data->frame[1], 1);
-        response_length = PICOPASS_BLOCK_LEN;
+        response_length = RFAL_PICOPASS_BLOCK_LEN;
         break;
-    case PICOPASS_CMD_CHECK: // CHALLENGE(4) READERSIGNATURE(4)
+    case RFAL_PICOPASS_CMD_CHECK: // CHALLENGE(4) READERSIGNATURE(4)
         if(nfcv_data->frame_length != 9 || ctx->state != PicopassEmulatorStateSelected) {
             return;
         }
@@ -1001,11 +1006,11 @@ static void picopass_emu_handle_packet(
             // LOCLASS Reader attack mode
 
             // Copy EPURSE
-            uint8_t cc[PICOPASS_BLOCK_LEN];
-            picopass_emu_read_blocks(nfcv_data, cc, PICOPASS_EPURSE_BLOCK_INDEX, 1);
+            uint8_t cc[RFAL_PICOPASS_BLOCK_LEN];
+            picopass_emu_read_blocks(nfcv_data, cc, PICOPASS_SECURE_EPURSE_BLOCK_INDEX, 1);
 
             // Check if the nonce is from a standard key
-            uint8_t key[PICOPASS_BLOCK_LEN];
+            uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
             loclass_iclass_calc_div_key(nfc_data->uid, picopass_iclass_key, key, false);
             ctx->cipher_state = loclass_opt_doTagMAC_1(cc, key);
 
@@ -1042,7 +1047,7 @@ static void picopass_emu_handle_packet(
             return;
         }
 
-        uint8_t key[PICOPASS_BLOCK_LEN];
+        uint8_t key[RFAL_PICOPASS_BLOCK_LEN];
         picopass_emu_read_blocks(nfcv_data, key, ctx->key_block_num, 1);
 
         uint8_t rmac[4];
@@ -1057,7 +1062,7 @@ static void picopass_emu_handle_packet(
         // CHIPRESPONSE(4)
         response_length = 4;
         break;
-    case PICOPASS_CMD_UPDATE: // ADDRESS(1) DATA(8) SIGN(4)|CRC16(2)
+    case RFAL_PICOPASS_CMD_UPDATE: // ADDRESS(1) DATA(8) SIGN(4)|CRC16(2)
         if((nfcv_data->frame_length != 12 && nfcv_data->frame_length != 14) ||
            ctx->state != PicopassEmulatorStateSelected) {
             return;
@@ -1067,7 +1072,7 @@ static void picopass_emu_handle_packet(
             return;
         }
 
-        uint8_t cfgBlock[PICOPASS_BLOCK_LEN];
+        uint8_t cfgBlock[RFAL_PICOPASS_BLOCK_LEN];
         picopass_emu_read_blocks(nfcv_data, cfgBlock, PICOPASS_CONFIG_BLOCK_INDEX, 1);
         bool persMode = HAS_MASK(cfgBlock[7], PICOPASS_FUSE_PERS);
 
@@ -1077,10 +1082,10 @@ static void picopass_emu_handle_packet(
             !HAS_MASK(cfgBlock[3], 0x80)) // Chip is in RO mode, no updated possible (even ePurse)
            || (!persMode &&
                nfcv_data->frame[1] ==
-                   PICOPASS_AIA_BLOCK_INDEX) // AIA can only be set in personalisation mode
+                   PICOPASS_SECURE_AIA_BLOCK_INDEX) // AIA can only be set in personalisation mode
            || (!persMode &&
-               (nfcv_data->frame[1] == PICOPASS_KD_BLOCK_INDEX ||
-                nfcv_data->frame[1] == PICOPASS_KC_BLOCK_INDEX) &&
+               (nfcv_data->frame[1] == PICOPASS_SECURE_KD_BLOCK_INDEX ||
+                nfcv_data->frame[1] == PICOPASS_SECURE_KC_BLOCK_INDEX) &&
                (!HAS_MASK(cfgBlock[7], PICOPASS_FUSE_CRYPT10)))) {
             return; // TODO: Is this the right response?
         }
@@ -1102,7 +1107,7 @@ static void picopass_emu_handle_packet(
         // -> must auth with that key to change it
 
         uint8_t blockOffset = nfcv_data->frame[1];
-        uint8_t block[PICOPASS_BLOCK_LEN];
+        uint8_t block[RFAL_PICOPASS_BLOCK_LEN];
         switch(nfcv_data->frame[1]) {
         case PICOPASS_CONFIG_BLOCK_INDEX:
             block[0] = cfgBlock[0]; // Applications Limit
@@ -1125,50 +1130,50 @@ static void picopass_emu_handle_packet(
                 block[7] &= nfcv_data->frame[9] | ~PICOPASS_FUSE_CRYPT10;
             }
             break;
-        case PICOPASS_EPURSE_BLOCK_INDEX:
+        case PICOPASS_SECURE_EPURSE_BLOCK_INDEX:
             // ePurse updates swap first and second half of the block each update
             memcpy(block + 4, nfcv_data->frame + 2, 4);
             memcpy(block, nfcv_data->frame + 6, 4);
             break;
-        case PICOPASS_KD_BLOCK_INDEX:
+        case PICOPASS_SECURE_KD_BLOCK_INDEX:
             // fallthrough
-        case PICOPASS_KC_BLOCK_INDEX:
+        case PICOPASS_SECURE_KC_BLOCK_INDEX:
             if(!persMode) {
                 picopass_emu_read_blocks(nfcv_data, block, blockOffset, 1);
-                for(uint8_t i = 0; i < sizeof(PICOPASS_BLOCK_LEN); i++)
+                for(uint8_t i = 0; i < sizeof(RFAL_PICOPASS_BLOCK_LEN); i++)
                     block[i] ^= nfcv_data->frame[i + 2];
                 break;
             }
             // Use default case when in personalisation mode
             // fallthrough
         default:
-            memcpy(block, nfcv_data->frame + 2, PICOPASS_BLOCK_LEN);
+            memcpy(block, nfcv_data->frame + 2, RFAL_PICOPASS_BLOCK_LEN);
             break;
         }
 
         picopass_emu_write_blocks(nfcv_data, block, blockOffset, 1);
 
         if((nfcv_data->frame[1] == ctx->key_block_num ||
-            nfcv_data->frame[1] == PICOPASS_EPURSE_BLOCK_INDEX) &&
+            nfcv_data->frame[1] == PICOPASS_SECURE_EPURSE_BLOCK_INDEX) &&
            !ctx->loclass_mode)
             picopass_init_cipher_state(nfcv_data, ctx);
 
         // DATA(8) CRC16(2)
-        if(nfcv_data->frame[1] == PICOPASS_KD_BLOCK_INDEX ||
-           nfcv_data->frame[1] == PICOPASS_KD_BLOCK_INDEX) {
+        if(nfcv_data->frame[1] == PICOPASS_SECURE_KD_BLOCK_INDEX ||
+           nfcv_data->frame[1] == PICOPASS_SECURE_KD_BLOCK_INDEX) {
             // Key updates always return FF's
-            memcpy(response, block_ff, PICOPASS_BLOCK_LEN);
+            memcpy(response, block_ff, RFAL_PICOPASS_BLOCK_LEN);
         } else {
-            memcpy(response, block, PICOPASS_BLOCK_LEN);
+            memcpy(response, block, RFAL_PICOPASS_BLOCK_LEN);
         }
-        picopass_append_crc(response, PICOPASS_BLOCK_LEN);
-        response_length = PICOPASS_BLOCK_LEN + 2;
+        picopass_append_crc(response, RFAL_PICOPASS_BLOCK_LEN);
+        response_length = RFAL_PICOPASS_BLOCK_LEN + 2;
         break;
-    case PICOPASS_CMD_PAGESEL: // PAGE(1) CRC16(2)
+    case RFAL_PICOPASS_CMD_PAGESEL: // PAGE(1) CRC16(2)
         // Chips with a single page do not answer to this command
         // BLOCK1(8) CRC16(2)
         return;
-    case PICOPASS_CMD_DETECT:
+    case RFAL_PICOPASS_CMD_DETECT:
         // TODO - not used by iClass though
         return;
     default:
@@ -1193,16 +1198,16 @@ void picopass_worker_emulate(PicopassWorker* picopass_worker, bool loclass_mode)
     FuriHalNfcTxRxContext tx_rx = {};
     PicopassEmulatorCtx emu_ctx = {
         .state = PicopassEmulatorStateIdle,
-        .key_block_num = PICOPASS_KD_BLOCK_INDEX,
+        .key_block_num = PICOPASS_SECURE_KD_BLOCK_INDEX,
         .loclass_mode = loclass_mode,
         .loclass_got_std_key = false,
         .loclass_writer = NULL,
     };
     FuriHalNfcDevData nfc_data = {
-        .uid_len = PICOPASS_BLOCK_LEN,
+        .uid_len = RFAL_PICOPASS_UID_LEN,
     };
     NfcVData* nfcv_data = malloc(sizeof(NfcVData));
-    nfcv_data->block_size = PICOPASS_BLOCK_LEN;
+    nfcv_data->block_size = RFAL_PICOPASS_BLOCK_LEN;
     nfcv_data->emu_protocol_ctx = &emu_ctx;
     nfcv_data->emu_protocol_handler = &picopass_emu_handle_packet;
 
@@ -1218,15 +1223,15 @@ void picopass_worker_emulate(PicopassWorker* picopass_worker, bool loclass_mode)
         picopass_emu_write_blocks(nfcv_data, conf, PICOPASS_CONFIG_BLOCK_INDEX, 1);
 
         uint8_t epurse[8] = {0xFE, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-        picopass_emu_write_blocks(nfcv_data, epurse, PICOPASS_EPURSE_BLOCK_INDEX, 1);
+        picopass_emu_write_blocks(nfcv_data, epurse, PICOPASS_SECURE_EPURSE_BLOCK_INDEX, 1);
 
         uint8_t aia[8] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-        picopass_emu_write_blocks(nfcv_data, aia, PICOPASS_AIA_BLOCK_INDEX, 1);
+        picopass_emu_write_blocks(nfcv_data, aia, PICOPASS_SECURE_AIA_BLOCK_INDEX, 1);
 
         emu_ctx.loclass_writer = loclass_writer_alloc();
         loclass_writer_write_start_stop(emu_ctx.loclass_writer, true);
     } else {
-        memcpy(nfc_data.uid, blocks[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
+        memcpy(nfc_data.uid, blocks[PICOPASS_CSN_BLOCK_INDEX].data, RFAL_PICOPASS_BLOCK_LEN);
         memcpy(nfcv_data->data, blocks, sizeof(dev_data->AA1));
         picopass_init_cipher_state(nfcv_data, &emu_ctx);
     }
