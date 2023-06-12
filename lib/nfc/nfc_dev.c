@@ -118,6 +118,7 @@ void nfc_dev_set_loading_callback(NfcDev* instance, NfcLoadingCallback callback,
 
 bool nfc_dev_save(NfcDev* instance, const char* path) {
     furi_assert(instance);
+    furi_assert(instance->protocol_type < NfcProtocolTypeMax);
     furi_assert(path);
 
     bool saved = false;
@@ -144,14 +145,8 @@ bool nfc_dev_save(NfcDev* instance, const char* path) {
                file, "Nfc device type can be UID, Mifare Ultralight, Mifare Classic"))
             break;
 
-        // TODO: Is this really necessary?
-        for(NfcProtocolType i = 0; i < NfcProtocolTypeMax; i++) {
-            if(instance->protocol_type == i) {
-                saved = nfc_protocols[i]->save(
-                    instance->protocol_data, file, NFC_CURRENT_FORMAT_VERSION);
-            }
-            if(saved) break;
-        }
+        saved = nfc_protocols[instance->protocol_type]->save(
+            instance->protocol_data, file, NFC_CURRENT_FORMAT_VERSION);
 
     } while(false);
 
