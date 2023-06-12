@@ -31,48 +31,27 @@ void mf_desfire_free(MfDesfireData* data) {
 }
 
 static inline void mf_desfire_reset_key_config(MfDesfireKeyConfiguration* config) {
-    memset(&config->key_settings, 0, sizeof(MfDesfireKeySettings));
     if(config->key_versions) {
         free(config->key_versions);
-        config->key_versions = NULL;
     }
+    memset(config, 0, sizeof(MfDesfireKeyConfiguration));
 }
 
 static inline void mf_desfire_reset_file(MfDesfireFile* file) {
-    if(file->type == MfDesfireFileTypeStandard || file->type == MfDesfireFileTypeBackup) {
-        memset(&file->data, 0, sizeof(file->data));
-        if(file->contents) {
-            free(file->contents);
-            file->contents = NULL;
-        }
-
-    } else if(file->type == MfDesfireFileTypeValue) {
-        memset(&file->value, 0, sizeof(file->value));
-    } else if(
-        file->type == MfDesfireFileTypeLinearRecord ||
-        file->type == MfDesfireFileTypeCyclicRecord) {
-        memset(&file->record, 0, sizeof(file->record));
-    } else {
-        furi_crash("Invalid file type");
+    if(file->contents) {
+        free(file->contents);
     }
-
-    file->id = 0;
-    file->type = 0;
-    file->comm = 0;
-    file->type = 0;
+    memset(file, 0, sizeof(MfDesfireFile));
 }
 
 static inline void mf_desfire_reset_files(MfDesfireFiles* files) {
-    for(size_t i = 0; i < files->count; ++i) {
-        mf_desfire_reset_file(&files->data[i]);
-    }
-
-    files->count = 0;
-
     if(files->data) {
+        for(size_t i = 0; i < files->count; ++i) {
+            mf_desfire_reset_file(&files->data[i]);
+        }
         free(files->data);
-        files->data = NULL;
     }
+    memset(files, 0, sizeof(MfDesfireFiles));
 }
 
 static inline void mf_desfire_reset_application(MfDesfireApplication* app) {
@@ -82,16 +61,13 @@ static inline void mf_desfire_reset_application(MfDesfireApplication* app) {
 }
 
 static inline void mf_desfire_reset_applications(MfDesfireApplications* apps) {
-    for(size_t i = 0; i < apps->count; ++i) {
-        mf_desfire_reset_application(&apps->data[i]);
-    }
-
-    apps->count = 0;
-
     if(apps->data) {
+        for(size_t i = 0; i < apps->count; ++i) {
+            mf_desfire_reset_application(&apps->data[i]);
+        }
         free(apps->data);
-        apps->data = NULL;
     }
+    memset(apps, 0, sizeof(MfDesfireApplications));
 }
 
 void mf_desfire_reset(MfDesfireData* data) {
