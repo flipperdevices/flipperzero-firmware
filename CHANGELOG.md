@@ -1,22 +1,27 @@
 ### New changes
 * If you have copied any apps manually into `apps` folder - remove `apps` folder or that specific apps you copied on your microSD before installing this release to avoid issues due to OFW API version update! If you using regular builds or extra pack builds (e) without your manually added apps, all included apps will be installed automatically, no extra actions needed!
 * Settings->LCD and Notifications will be resetted to default due to new Contrast setting from OFW
+* Core2 (Crash in idle) issues was reduced to current possible minimum, you can try using DeepSleep again (Sleep Method = Default) (+ more checks was added, if you get `Slow HSE/PLL startup` message more than one time, create issue with steps what to do to reproduce it again)
 -----
 * Plugins: **New RFID 125KHz and iButton Fuzzers (remake from scratch + new features)** (by @gid9798 | PR #507)
 * Plugins: SubGHz Bruteforcer -> Time delay (between signals) setting (hold Up in main screen(says Up to Save)) + allow more repeats (by @gid9798 & @xMasterX)
 * Plugins: Update TOTP (Authenticator) [(by akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 * Plugins: Unitemp SCD30 support (PR in unitemp repo by @divinebird / fixed by @xMasterX)
 * Plugins: Fix ProtoView issue #503 -> (Broken saved files with custom modulation)
+* SubGHz: Added 430, 431 MHz to default list
 * SubGHz: Remove broken modulation that was causing buffer overrun (fixes issue #506)
 * SubGHz: Notifications fixes (by @wosk | PR #464)
 * GUI: `Byte input` new feature: editor without keyboard (press Up until you get into new input, then use up/down to input values) (by @gid9798 | PR #509)
+* CI/CD: Provide builds with RGB patch for modded flippers (with special led board installed)
+* Infrared: `RCA` protocol support
 * Infrared: Update universal remote assets - add new ACs and TCL TV
 * API: Add furi_hal_version_uid_default (+ Fix TOTP) (by @ClaraCrazy | PR #502)
+* OFW PR 2760: NFC: Improvements to NFC Magic app (by AloneLiberty)
 * OFW PR 2756: fix: make dialog_file_browser_set_basic_options initialize all fields (by JarvisCraft)
 * OFW: Fix reading Mifare Classic cards with unusual access conditions and fix emulation of unknown keys
 * OFW: fbt: stable build dates
 * OFW: weather_station: add oregon3 with THGR221
-* OFW: Services: simplify api (DOLPHIN_DEED->dolphin_deed - function instead of macros + remake all apps in extra pack and main fw to use new API)
+* OFW: Services: simplify api (DOLPHIN_DEED->dolphin_deed - function instead of macros + remake all apps in extra pack and main fw to use new API) -> **Breaking API change, API version was changed from 29.x to 30.x**
 * OFW: Core2, SRAM2: provide safety gap
 * OFW: FuriHal: always clock SMPS from HSI
 * OFW: ble: refactored bt gatt characteristics setup (+ remake of BT HID Led descriptor in new way to work with this changes)
@@ -49,9 +54,11 @@ and all other great people who supported our project and me (xMasterX), thanks t
 
 **Recommended option - Web Updater**
 
+### What `n`, `e`, `r` means? What I need to download if I don't want to use Web updater?
 What means `n` or `e` in - `flipper-z-f7-update-(version)(n / e).tgz` ? - `n` means this build comes without our custom animations, only official flipper animations, 
-`e` means build has extra apps pack preinstalled
+`e` means build has extra apps pack preinstalled,
+`r` means RGB patch (+ extra apps) for flippers with rgb backlight mod (this is hardware mod!) (Works only on modded flippers!)
 
-Self-update package (update from microSD) - `flipper-z-f7-update-(version).zip` or download `.tgz` for mobile app / qFlipper
+Self-update package (update from microSD) - `flipper-z-f7-update-(version).zip` or download `.tgz` for mobile app / qFlipper / web
 
 
