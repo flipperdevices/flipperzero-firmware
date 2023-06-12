@@ -38,7 +38,7 @@ static bool flipp_pomodoro_app_custom_event_callback(void *ctx, uint32_t event)
         if (flipp_pomodoro__get_stage(app->state) == FlippPomodoroStageFocus)
         {
             // REGISTER a deed on work stage complete to get an acheivement
-            DOLPHIN_DEED(DolphinDeedPluginGameWin);
+            dolphin_deed(DolphinDeedPluginGameWin);
         };
 
         flipp_pomodoro__toggle_stage(app->state);
@@ -98,6 +98,8 @@ int32_t flipp_pomodoro_app(void *p)
 {
     UNUSED(p);
     FlippPomodoroApp *app = flipp_pomodoro_app_alloc();
+
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     view_dispatcher_run(app->view_dispatcher);
 
