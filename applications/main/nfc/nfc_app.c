@@ -135,6 +135,7 @@ NfcApp* nfc_app_alloc() {
         NfcViewDetectReader,
         detect_reader_get_view(instance->detect_reader));
 
+    instance->nfca_edit_data = nfca_alloc();
     instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
     instance->file_name = furi_string_alloc();
 
@@ -235,6 +236,7 @@ void nfc_app_free(NfcApp* instance) {
 
     instance->notifications = NULL;
 
+    nfca_free(instance->nfca_edit_data);
     furi_string_free(instance->file_path);
     furi_string_free(instance->file_name);
 
@@ -282,8 +284,7 @@ bool nfc_save_file(NfcApp* instance, FuriString* path) {
     furi_assert(instance);
     furi_assert(path);
 
-    bool result = nfc_dev_save(
-        instance->nfc_dev, &instance->nfc_dev_data, furi_string_get_cstr(instance->file_path));
+    bool result = nfc_dev_save(instance->nfc_dev, furi_string_get_cstr(instance->file_path));
 
     if(!result) {
         dialog_message_show_storage_error(instance->dialogs, "Cannot save\nkey file");
@@ -376,8 +377,8 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
         furi_string_set(load_path, path);
     }
 
-    result =
-        nfc_dev_load(instance->nfc_dev, &instance->nfc_dev_data, furi_string_get_cstr(load_path));
+    result = nfc_dev_load(instance->nfc_dev, furi_string_get_cstr(load_path));
+
     if(result) {
         path_extract_filename(load_path, instance->file_name, true);
     }

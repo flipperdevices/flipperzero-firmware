@@ -43,7 +43,7 @@ MfClassicError mf_classic_async_auth(
     NfcaError error = NfcaErrorNone;
 
     do {
-        nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
+        nfca_copy(instance->data->nfca_data, nfca_poller_get_data(instance->nfca_poller));
         uint8_t auth_type = (key_type == MfClassicKeyTypeB) ? MF_CLASSIC_AUTH_KEY_B_CMD :
                                                               MF_CLASSIC_AUTH_KEY_A_CMD;
         uint8_t auth_cmd[2] = {auth_type, block_num};
@@ -68,7 +68,7 @@ MfClassicError mf_classic_async_auth(
         if(data) {
             data->nt = nt;
         }
-        uint32_t cuid = nfca_get_cuid(&instance->data->nfca_data);
+        uint32_t cuid = nfca_get_cuid(instance->data->nfca_data);
         uint64_t key_num = nfc_util_bytes2num(key->data, sizeof(MfClassicKey));
         MfClassicNr nr = {};
         furi_hal_random_fill_buf(nr.data, sizeof(MfClassicNr));

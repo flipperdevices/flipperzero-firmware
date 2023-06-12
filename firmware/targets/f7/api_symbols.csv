@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,27.7,,
+Version,+,28.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1973,35 +1973,44 @@ Function,+,menu_free,void,Menu*
 Function,+,menu_get_view,View*,Menu*
 Function,+,menu_reset,void,Menu*
 Function,+,menu_set_selected_item,void,"Menu*, uint32_t"
+Function,+,mf_classic_alloc,MfClassicData*,
+Function,+,mf_classic_copy,void,"MfClassicData*, const MfClassicData*"
 Function,-,mf_classic_detect_protocol,_Bool,"NfcaData*, MfClassicType*"
+Function,+,mf_classic_free,void,MfClassicData*
 Function,-,mf_classic_get_blocks_num_in_sector,uint8_t,uint8_t
 Function,-,mf_classic_get_first_block_num_of_sector,uint8_t,uint8_t
-Function,-,mf_classic_get_name,const char*,"MfClassicType, _Bool"
-Function,-,mf_classic_get_read_sectors_and_keys,void,"MfClassicData*, uint8_t*, uint8_t*"
+Function,+,mf_classic_get_name,const char*,"const MfClassicData*, NfcProtocolNameType"
+Function,+,mf_classic_get_read_sectors_and_keys,void,"const MfClassicData*, uint8_t*, uint8_t*"
 Function,-,mf_classic_get_sector_by_block,uint8_t,uint8_t
-Function,-,mf_classic_get_sector_trailer_by_sector,MfClassicSectorTrailer*,"MfClassicData*, uint8_t"
+Function,+,mf_classic_get_sector_trailer_by_sector,MfClassicSectorTrailer*,"const MfClassicData*, uint8_t"
 Function,-,mf_classic_get_sector_trailer_num_by_block,uint8_t,uint8_t
 Function,+,mf_classic_get_sector_trailer_num_by_sector,uint8_t,uint8_t
 Function,-,mf_classic_get_total_block_num,uint16_t,MfClassicType
 Function,-,mf_classic_get_total_sectors_num,uint8_t,MfClassicType
-Function,-,mf_classic_is_block_read,_Bool,"MfClassicData*, uint8_t"
-Function,-,mf_classic_is_card_read,_Bool,MfClassicData*
-Function,-,mf_classic_is_key_found,_Bool,"MfClassicData*, uint8_t, MfClassicKeyType"
-Function,-,mf_classic_is_sector_read,_Bool,"MfClassicData*, uint8_t"
+Function,+,mf_classic_get_uid,const uint8_t*,"const MfClassicData*, size_t*"
+Function,+,mf_classic_is_block_read,_Bool,"const MfClassicData*, uint8_t"
+Function,+,mf_classic_is_card_read,_Bool,const MfClassicData*
+Function,+,mf_classic_is_equal,_Bool,"const MfClassicData*, const MfClassicData*"
+Function,+,mf_classic_is_key_found,_Bool,"const MfClassicData*, uint8_t, MfClassicKeyType"
+Function,+,mf_classic_is_sector_read,_Bool,"const MfClassicData*, uint8_t"
 Function,-,mf_classic_is_sector_trailer,_Bool,uint8_t
+Function,+,mf_classic_load,_Bool,"MfClassicData*, FlipperFormat*, uint32_t"
 Function,-,mf_classic_poller_alloc,MfClassicPoller*,NfcaPoller*
 Function,+,mf_classic_poller_auth,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
 Function,-,mf_classic_poller_dict_attack,MfClassicError,"MfClassicPoller*, MfClassicPollerCallback, void*"
 Function,-,mf_classic_poller_free,void,MfClassicPoller*
-Function,-,mf_classic_poller_get_data,MfClassicError,"MfClassicPoller*, MfClassicData*"
+Function,+,mf_classic_poller_get_data,const MfClassicData*,MfClassicPoller*
 Function,-,mf_classic_poller_read,MfClassicError,"MfClassicPoller*, MfClassicDeviceKeys*, MfClassicData*"
 Function,-,mf_classic_poller_read_block,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicBlock*"
 Function,-,mf_classic_poller_reset,MfClassicError,MfClassicPoller*
 Function,-,mf_classic_poller_start,MfClassicError,"MfClassicPoller*, NfcaPollerEventCallback, void*"
 Function,-,mf_classic_poller_stop,MfClassicError,MfClassicPoller*
+Function,+,mf_classic_reset,void,MfClassicData*
+Function,+,mf_classic_save,_Bool,"const MfClassicData*, FlipperFormat*, uint32_t"
 Function,-,mf_classic_set_block_read,void,"MfClassicData*, uint8_t, MfClassicBlock*"
 Function,-,mf_classic_set_key_found,void,"MfClassicData*, uint8_t, MfClassicKeyType, uint64_t"
 Function,-,mf_classic_set_key_not_found,void,"MfClassicData*, uint8_t, MfClassicKeyType"
+Function,+,mf_classic_verify,_Bool,"MfClassicData*, const FuriString*"
 Function,-,mkdtemp,char*,char*
 Function,-,mkostemp,int,"char*, int"
 Function,-,mkostemps,int,"char*, int, int"
@@ -2050,16 +2059,29 @@ Function,-,nfca_check_crc,_Bool,const BitBuffer*
 Function,-,nfca_emulation_handler,_Bool,"uint8_t*, uint16_t, uint8_t*, uint16_t*"
 Function,-,nfca_get_crc16,uint16_t,"uint8_t*, uint16_t"
 Function,-,nfca_get_cuid,uint32_t,NfcaData*
+Function,+,nfca_alloc,NfcaData*,
+Function,+,nfca_copy,void,"NfcaData*, const NfcaData*"
+Function,+,nfca_free,void,NfcaData*
+Function,-,nfca_get_crc,uint16_t,"uint8_t*, uint16_t"
+Function,+,nfca_get_name,const char*,"const NfcaData*, NfcProtocolNameType"
+Function,+,nfca_get_uid,const uint8_t*,"const NfcaData*, size_t*"
+Function,+,nfca_is_equal,_Bool,"const NfcaData*, const NfcaData*"
+Function,+,nfca_load,_Bool,"NfcaData*, FlipperFormat*, uint32_t"
+Function,+,nfca_load_data,_Bool,"NfcaData*, FlipperFormat*, uint32_t"
 Function,-,nfca_poller_alloc,NfcaPoller*,Nfc*
 Function,-,nfca_poller_free,void,NfcaPoller*
-Function,-,nfca_poller_get_data,NfcaError,"NfcaPoller*, NfcaData*"
+Function,+,nfca_poller_get_data,const NfcaData*,NfcaPoller*
 Function,-,nfca_poller_read,NfcaError,"NfcaPoller*, NfcaData*"
 Function,-,nfca_poller_start,NfcaError,"NfcaPoller*, NfcaPollerEventCallback, void*"
 Function,-,nfca_poller_stop,NfcaError,NfcaPoller*
+Function,+,nfca_reset,void,NfcaData*
+Function,+,nfca_save,_Bool,"const NfcaData*, FlipperFormat*, uint32_t"
+Function,+,nfca_save_data,_Bool,"const NfcaData*, FlipperFormat*, uint32_t"
 Function,-,nfca_signal_alloc,NfcaSignal*,
 Function,-,nfca_signal_encode,void,"NfcaSignal*, uint8_t*, uint16_t, uint8_t*"
 Function,-,nfca_signal_free,void,NfcaSignal*
 Function,-,nfca_trim_crc,void,BitBuffer*
+Function,+,nfca_verify,_Bool,"NfcaData*, const FuriString*"
 Function,+,notification_internal_message,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_internal_message_block,void,"NotificationApp*, const NotificationSequence*"
 Function,+,notification_message,void,"NotificationApp*, const NotificationSequence*"
@@ -3304,6 +3326,8 @@ Variable,+,message_red_255,const NotificationMessage,
 Variable,+,message_sound_off,const NotificationMessage,
 Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
+Variable,+,nfc_protocol_iso14443_3a,const NfcProtocolBase,
+Variable,+,nfc_protocol_mf_classic,const NfcProtocolBase,
 Variable,+,sequence_audiovisual_alert,const NotificationSequence,
 Variable,+,sequence_blink_blue_10,const NotificationSequence,
 Variable,+,sequence_blink_blue_100,const NotificationSequence,

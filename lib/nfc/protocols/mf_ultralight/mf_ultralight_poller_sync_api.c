@@ -253,7 +253,8 @@ static MfUltralightPollerCommand
     MfUltralightPollerCommand command = MfUltralightPollerCommandContinue;
 
     if(event.type == MfUltralightPollerEventTypeReadSuccess) {
-        mf_ultralight_poller_get_data(poller_context->instance, &poller_context->data.data);
+        mf_ultralight_copy(
+            &poller_context->data.data, mf_ultralight_poller_get_data(poller_context->instance));
         poller_context->error = MfUltralightErrorNone;
         command = MfUltralightPollerCommandStop;
     } else if(event.type == MfUltralightPollerEventTypeReadFailed) {
@@ -283,7 +284,7 @@ MfUltralightError
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
 
     if(poller_context.error == MfUltralightErrorNone) {
-        *data = poller_context.data.data;
+        mf_ultralight_copy(data, &poller_context.data.data);
     }
     mf_ultralight_poller_stop(instance);
 

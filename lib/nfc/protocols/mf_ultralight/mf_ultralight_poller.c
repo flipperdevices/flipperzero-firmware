@@ -38,10 +38,16 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance) {
     free(instance);
 }
 
+const MfUltralightData* mf_ultralight_poller_get_data(MfUltralightPoller* instance) {
+    furi_assert(instance);
+
+    return instance->data;
+}
+
 static MfUltralightPollerCommand mf_ultralight_poller_handler_idle(MfUltralightPoller* instance) {
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
-    nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
+    nfca_copy(instance->data->nfca_data, nfca_poller_get_data(instance->nfca_poller));
     instance->counters_read = 0;
     instance->counters_total = 3;
     instance->tearing_flag_read = 0;
@@ -95,7 +101,7 @@ static MfUltralightPollerCommand
     FURI_LOG_D(
         TAG,
         "%s detected. Total pages: %d",
-        mf_ultralight_get_name(instance->data->type, true),
+        mf_ultralight_get_name(instance->data, NfcProtocolNameTypeFull),
         instance->pages_total);
 
     instance->state = MfUltralightPollerStateReadSignature;
@@ -367,7 +373,7 @@ MfUltralightError mf_ultralight_poller_start(
     furi_assert(callback);
     furi_assert(instance->session_state == MfUltralightPollerSessionStateIdle);
 
-    instance->data = malloc(sizeof(MfUltralightData));
+    instance->data = mf_ultralight_alloc();
     instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
     instance->rx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
 
@@ -390,17 +396,6 @@ MfUltralightError mf_ultralight_poller_read(
     instance->context = context;
 
     return mf_ultralight_poller_start(instance, mf_ultralight_poller_read_callback, instance);
-}
-
-MfUltralightError
-    mf_ultralight_poller_get_data(MfUltralightPoller* instance, MfUltralightData* data) {
-    furi_assert(instance);
-    furi_assert(instance->data);
-    furi_assert(data);
-
-    *data = *instance->data;
-
-    return MfUltralightErrorNone;
 }
 
 MfUltralightError mf_ultralight_poller_reset(MfUltralightPoller* instance) {
@@ -429,7 +424,7 @@ MfUltralightError mf_ultralight_poller_stop(MfUltralightPoller* instance) {
     instance->session_state = MfUltralightPollerSessionStateStopRequest;
     nfca_poller_stop(instance->nfca_poller);
     instance->session_state = MfUltralightPollerSessionStateIdle;
-    free(instance->data);
+    mf_ultralight_free(instance->data);
 
     return mf_ultralight_poller_reset(instance);
 }

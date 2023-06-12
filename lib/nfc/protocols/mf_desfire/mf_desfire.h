@@ -131,12 +131,34 @@ typedef enum {
 } MfDesfireError;
 
 typedef struct {
-    Iso14443_4aData iso14443_4a_data;
+    Iso14443_4aData* iso14443_4a_data;
     MfDesfireVersion version;
     MfDesfireFreeMemory free_memory;
     MfDesfireKeyConfiguration master_key;
     MfDesfireApplications applications;
 } MfDesfireData;
+
+extern const NfcProtocolBase nfc_protocol_mf_desfire;
+
+MfDesfireData* mf_desfire_alloc();
+
+void mf_desfire_free(MfDesfireData* data);
+
+void mf_desfire_reset(MfDesfireData* data);
+
+void mf_desfire_copy(MfDesfireData* data, const MfDesfireData* other);
+
+bool mf_desfire_verify(MfDesfireData* data, const FuriString* device_type);
+
+bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version);
+
+bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff, uint32_t version);
+
+bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other);
+
+const char* mf_desfire_get_name(const MfDesfireData* data, NfcProtocolNameType name_type);
+
+const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len);
 
 bool mf_desfire_detect_protocol(NfcaData* nfca_data);
 

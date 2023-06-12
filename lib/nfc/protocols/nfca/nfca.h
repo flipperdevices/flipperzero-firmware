@@ -1,6 +1,7 @@
 #pragma once
 
 #include <lib/nfc/helpers/bit_buffer.h>
+#include <nfc/protocols/nfc_protocol_base.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,6 +64,28 @@ typedef struct {
     NfcaRats rats;
 } NfcaData;
 
+extern const NfcProtocolBase nfc_protocol_iso14443_3a;
+
+NfcaData* nfca_alloc();
+
+void nfca_free(NfcaData* data);
+
+void nfca_reset(NfcaData* data);
+
+void nfca_copy(NfcaData* data, const NfcaData* other);
+
+bool nfca_verify(NfcaData* data, const FuriString* device_type);
+
+bool nfca_load(NfcaData* data, FlipperFormat* ff, uint32_t version);
+
+bool nfca_save(const NfcaData* data, FlipperFormat* ff, uint32_t version);
+
+bool nfca_is_equal(const NfcaData* data, const NfcaData* other);
+
+const char* nfca_get_name(const NfcaData* data, NfcProtocolNameType name_type);
+
+const uint8_t* nfca_get_uid(const NfcaData* data, size_t* uid_len);
+
 uint32_t nfca_get_cuid(NfcaData* nfca_data);
 
 void nfca_append_crc(BitBuffer* buffer);
@@ -70,6 +93,11 @@ void nfca_append_crc(BitBuffer* buffer);
 bool nfca_check_crc(const BitBuffer* buf);
 
 void nfca_trim_crc(BitBuffer* buf);
+
+// TODO: Decide where should these methods go (*_i file?)
+bool nfca_load_data(NfcaData* data, FlipperFormat* ff, uint32_t version);
+
+bool nfca_save_data(const NfcaData* data, FlipperFormat* ff, uint32_t version);
 
 #ifdef __cplusplus
 }

@@ -22,26 +22,18 @@ void nfc_scene_delete_on_enter(void* context) {
     widget_add_button_element(
         nfc->widget, GuiButtonTypeRight, "Delete", nfc_scene_delete_widget_callback, nfc);
 
-    NfcaData* nfca_data = &nfc->nfc_dev_data.nfca_data;
+    size_t uid_len;
+    const uint8_t* uid = nfc_dev_get_uid(nfc->nfc_dev, &uid_len);
+
     furi_string_set(temp_str, "UID:");
-    for(size_t i = 0; i < nfca_data->uid_len; i++) {
-        furi_string_cat_printf(temp_str, " %02X", nfca_data->uid[i]);
+    for(size_t i = 0; i < uid_len; i++) {
+        furi_string_cat_printf(temp_str, " %02X", uid[i]);
     }
     widget_add_string_element(
         nfc->widget, 64, 24, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));
 
-    NfcDevProtocol protocol = nfc->nfc_dev_data.protocol;
-    if(protocol == NfcDevProtocolMfUltralight) {
-        furi_string_set_str(
-            temp_str, mf_ultralight_get_name(nfc->nfc_dev_data.mf_ul_data.type, true));
-    } else if(protocol == NfcDevProtocolMfClassic) {
-        furi_string_set(temp_str, "Mifare Classic");
-        // furi_string_set(temp_str, nfc_mf_classic_type(nfc->dev->dev_data.mf_classic_data.type));
-    } else if(protocol == NfcDevProtocolMfDesfire) {
-        furi_string_set(temp_str, "MIFARE DESFire");
-    } else {
-        furi_string_set(temp_str, "Unknown ISO tag");
-    }
+    furi_string_set_str(
+        temp_str, nfc_dev_get_protocol_name(nfc->nfc_dev, NfcProtocolNameTypeFull));
     widget_add_string_element(
         nfc->widget, 64, 34, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));
     widget_add_string_element(nfc->widget, 64, 44, AlignCenter, AlignTop, FontSecondary, "NFC-A");

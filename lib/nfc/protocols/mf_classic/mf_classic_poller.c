@@ -41,6 +41,12 @@ void mf_classic_poller_free(MfClassicPoller* instance) {
     free(instance);
 }
 
+const MfClassicData* mf_classic_poller_get_data(MfClassicPoller* instance) {
+    furi_assert(instance);
+
+    return instance->data;
+}
+
 MfClassicError mf_classic_poller_start(
     MfClassicPoller* instance,
     NfcaPollerEventCallback callback,
@@ -50,7 +56,7 @@ MfClassicError mf_classic_poller_start(
     furi_assert(instance->nfca_poller);
     furi_assert(instance->session_state == MfClassicPollerSessionStateIdle);
 
-    instance->data = malloc(sizeof(MfClassicData));
+    instance->data = mf_classic_alloc();
     instance->crypto = crypto1_alloc();
     instance->tx_plain_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
     instance->tx_encrypted_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
@@ -64,11 +70,11 @@ MfClassicError mf_classic_poller_start(
 }
 
 MfClassicPollerCommand mf_classic_poller_handler_idle(MfClassicPoller* instance) {
-    nfca_poller_get_data(instance->nfca_poller, &instance->data->nfca_data);
+    nfca_copy(instance->data->nfca_data, nfca_poller_get_data(instance->nfca_poller));
     MfClassicPollerCommand command = MfClassicPollerCommandContinue;
     MfClassicPollerEvent event = {};
 
-    if(mf_classic_detect_protocol(&instance->data->nfca_data, &instance->data->type)) {
+    if(mf_classic_detect_protocol(instance->data->nfca_data, &instance->data->type)) {
         if(instance->card_state == MfClassicCardStateNotDetected) {
             instance->card_state = MfClassicCardStateDetected;
             event.type = MfClassicPollerEventTypeCardDetected;
@@ -346,16 +352,6 @@ MfClassicError mf_classic_poller_dict_attack(
     return mf_classic_poller_start(instance, mf_classic_dict_attack_callback, instance);
 }
 
-MfClassicError mf_classic_poller_get_data(MfClassicPoller* instance, MfClassicData* data) {
-    furi_assert(instance);
-    furi_assert(instance->data);
-    furi_assert(data);
-
-    *data = *instance->data;
-
-    return MfClassicErrorNone;
-}
-
 MfClassicError mf_classic_poller_reset(MfClassicPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
@@ -384,7 +380,7 @@ MfClassicError mf_classic_poller_stop(MfClassicPoller* instance) {
     instance->session_state = MfClassicPollerSessionStateStopRequest;
     nfca_poller_stop(instance->nfca_poller);
     instance->session_state = MfClassicPollerSessionStateIdle;
-    free(instance->data);
+    mf_classic_free(instance->data);
 
     return mf_classic_poller_reset(instance);
 }

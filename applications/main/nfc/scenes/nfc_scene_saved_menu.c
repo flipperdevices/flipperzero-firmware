@@ -25,9 +25,9 @@ void nfc_scene_saved_menu_on_enter(void* context) {
     NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    NfcDevData* data = &nfc->nfc_dev_data;
+    const NfcProtocolType protocol = nfc_dev_get_protocol_type(nfc->nfc_dev);
 
-    if(data->protocol == NfcDevProtocolNfca) {
+    if(protocol == NfcProtocolTypeIso14443_3a) {
         submenu_add_item(
             submenu,
             "Emulate UID",
@@ -36,24 +36,20 @@ void nfc_scene_saved_menu_on_enter(void* context) {
             nfc);
         submenu_add_item(
             submenu, "Edit UID", SubmenuIndexEditUid, nfc_scene_saved_menu_submenu_callback, nfc);
-    }
 
-    if(data->protocol == NfcDevProtocolMfDesfire) {
+    } else if(protocol == NfcProtocolTypeMfDesfire) {
         submenu_add_item(
             submenu,
             "Emulate UID",
             SubmenuIndexEmulate,
             nfc_scene_saved_menu_submenu_callback,
             nfc);
-    }
-
-    if((data->protocol == NfcDevProtocolMfUltralight) ||
-       (data->protocol == NfcDevProtocolMfClassic)) {
+    } else if((protocol == NfcProtocolTypeMfUltralight) || (protocol == NfcProtocolTypeMfClassic)) {
         submenu_add_item(
             submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_saved_menu_submenu_callback, nfc);
     }
 
-    if(data->protocol == NfcDevProtocolMfClassic) {
+    if(protocol == NfcProtocolTypeMfClassic) {
         // TODO
         // if(!mifare_classic_is_card_read(&nfc->dev->dev_data.mf_classic_data))
         submenu_add_item(
@@ -79,8 +75,10 @@ void nfc_scene_saved_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, nfc_scene_saved_menu_submenu_callback, nfc);
 
-    if(data->protocol == NfcDevProtocolMfUltralight) {
-        if(!mf_ultralight_is_all_data_read(&data->mf_ul_data)) {
+    if(protocol == NfcProtocolTypeMfUltralight) {
+        const MfUltralightData* mfu_data =
+            nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfUltralight);
+        if(!mf_ultralight_is_all_data_read(mfu_data)) {
             submenu_add_item(
                 submenu,
                 "Unlock with Reader",
@@ -117,15 +115,15 @@ void nfc_scene_saved_menu_on_enter(void* context) {
 bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
     NfcApp* nfc = context;
 
-    NfcDevData* data = &nfc->nfc_dev_data;
+    const NfcProtocolType protocol = nfc_dev_get_protocol_type(nfc->nfc_dev);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSavedMenu, event.event);
         if(event.event == SubmenuIndexEmulate) {
-            if(data->protocol == NfcDevProtocolMfUltralight) {
+            if(protocol == NfcProtocolTypeMfUltralight) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
-            } else if(data->protocol == NfcDevProtocolMfClassic) {
+            } else if(protocol == NfcProtocolTypeMfClassic) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             } else {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaEmulate);

@@ -19,7 +19,7 @@ void nfc_scene_mf_ultralight_unlock_menu_on_enter(void* context) {
 
     uint32_t state =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
-    if(nfc->nfc_dev_data.protocol == NfcDevProtocolMfUltralight) {
+    if(nfc_dev_get_protocol_type(nfc->nfc_dev) == NfcProtocolTypeMfUltralight) {
         submenu_add_item(
             submenu,
             "Unlock With Reader",

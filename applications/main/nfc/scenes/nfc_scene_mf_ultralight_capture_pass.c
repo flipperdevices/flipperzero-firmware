@@ -30,11 +30,12 @@ void nfc_scene_mf_ultralight_capture_pass_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 
     // Start worker
-    mf_ultralight_listener_start(
-        nfc->mf_ul_listener,
-        &nfc->nfc_dev_data.mf_ul_data,
-        nfc_scene_mf_ultralight_capture_pass_worker_callback,
-        nfc);
+    // FIXME: Make it compile
+    // mf_ultralight_listener_start(
+    //     nfc->mf_ul_listener,
+    //     nfc->nfc_dev_data.mf_ul_data,
+    //     nfc_scene_mf_ultralight_capture_pass_worker_callback,
+    //     nfc);
 
     nfc_blink_read_start(nfc);
 }
@@ -44,7 +45,7 @@ bool nfc_scene_mf_ultralight_capture_pass_on_event(void* context, SceneManagerEv
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if((event.event == MfUltralightListenerEventTypeAuth)) {
+        if(event.event == MfUltralightListenerEventTypeAuth) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockWarn);
             consumed = true;
