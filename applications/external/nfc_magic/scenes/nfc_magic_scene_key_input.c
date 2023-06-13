@@ -29,7 +29,7 @@ bool nfc_magic_scene_key_input_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcMagicCustomEventByteInputDone) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneCheck);
+            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneCheckGen4);
             consumed = true;
         }
     }

@@ -61,18 +61,20 @@ bool nfc_magic_scene_check_gen4_on_event(void* context, SceneManagerEvent event)
                 // If it was detected - go to gen4 actions
                 scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneGen4Actions);
             } else {
-                // If it was checked with the default password - ask the user for a custom one
-                if(nfc_magic->dev->password == MAGIC_GEN4_DEFAULT_PWD) {
-                    scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneKeyInput);
-                } else {
-                    // If it was checked with a custom password - go to fail
-                    scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneCheckGen4Fail);
-                }
+                // It's not a gen4 card - go to wrong card scene
+                scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWrongCard);
             }
             consumed = true;
 
-        } else if(event.event == NfcMagicWorkerEventWrongCard) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneNotMagic);
+        } else if(event.event == NfcMagicWorkerEventNotMagic) {
+            // It may be a gen4 card with wrong password
+            // If it was checked with the default password - ask the user for a custom one
+            if(nfc_magic->dev->password == MAGIC_GEN4_DEFAULT_PWD) {
+                scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneKeyInput);
+            } else {
+                // If it was checked with a custom password - go to fail
+                scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneCheckGen4Fail);
+            }
             consumed = true;
         } else if(event.event == NfcMagicWorkerEventCardDetected) {
             scene_manager_set_scene_state(
