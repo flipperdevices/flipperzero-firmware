@@ -155,12 +155,15 @@ void rgb_backlight_update(uint8_t brightness) {
 
     static uint8_t last_color_index = 255;
     static uint8_t last_brightness = 123;
+    static uint32_t last_update_time = 0;
 
-    if(last_brightness == brightness && last_color_index == rgb_settings.display_color_index)
+    if(last_brightness == brightness && last_color_index == rgb_settings.display_color_index &&
+       furi_get_tick() - last_update_time < 1000)
         return;
 
     last_brightness = brightness;
     last_color_index = rgb_settings.display_color_index;
+    last_update_time = furi_get_tick();
 
     for(uint8_t i = 0; i < SK6805_get_led_count(); i++) {
         uint8_t r = colors[rgb_settings.display_color_index].red * (brightness / 255.0f);
