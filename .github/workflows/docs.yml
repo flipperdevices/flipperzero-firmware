@@ -42,11 +42,11 @@ jobs:
 
       - name: 'Install requirements'
         run: |
+          sudo apt install -y doxygen
+          sudo python3 -m pip install sphinx sphinx_rtd_theme doxysphinx myst-parser
           pushd flipperzero-documentation/sphinx-multiversion
           sudo python3 setup.py install
           popd
-          sudo apt install -y doxygen
-          sudo python3 -m pip install sphinx sphinx_rtd_theme doxysphinx myst-parser
 
       - name: 'Build the docs'
         run: |
