@@ -24,6 +24,10 @@ extern "C" {
 #define MF_DESFIRE_MAX_KEYS (14)
 #define MF_DESFIRE_MAX_FILES (32)
 
+#define MF_DESFIRE_UID_SIZE (7)
+#define MF_DESFIRE_BATCH_SIZE (5)
+#define MF_DESFIRE_APP_ID_SIZE (3)
+
 typedef struct {
     uint8_t hw_vendor;
     uint8_t hw_type;
@@ -41,8 +45,8 @@ typedef struct {
     uint8_t sw_storage;
     uint8_t sw_proto;
 
-    uint8_t uid[7];
-    uint8_t batch[5];
+    uint8_t uid[MF_DESFIRE_UID_SIZE];
+    uint8_t batch[MF_DESFIRE_BATCH_SIZE];
     uint8_t prod_week;
     uint8_t prod_year;
 } MfDesfireVersion;
@@ -112,8 +116,10 @@ typedef struct {
     uint8_t count;
 } MfDesfireFiles;
 
+typedef uint8_t MfDesfireApplicationId[MF_DESFIRE_APP_ID_SIZE];
+
 typedef struct MfDesfireApplication {
-    uint8_t id[3];
+    MfDesfireApplicationId id;
     MfDesfireKeyConfiguration key_config;
     MfDesfireFiles files;
 } MfDesfireApplication;
@@ -140,6 +146,8 @@ typedef struct {
 
 extern const NfcProtocolBase nfc_protocol_mf_desfire;
 
+// Virtual methods
+
 MfDesfireData* mf_desfire_alloc();
 
 void mf_desfire_free(MfDesfireData* data);
@@ -160,6 +168,7 @@ const char* mf_desfire_get_name(const MfDesfireData* data, NfcProtocolNameType n
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len);
 
+// Deprecated
 bool mf_desfire_detect_protocol(NfcaData* nfca_data);
 
 #ifdef __cplusplus

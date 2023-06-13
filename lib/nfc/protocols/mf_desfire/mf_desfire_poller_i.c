@@ -2,6 +2,8 @@
 
 #include <furi.h>
 
+#include "mf_desfire_i.h"
+
 #define TAG "MfDesfirePoller"
 
 MfDesfireError mf_desfire_process_error(Iso14443_4aError error) {
@@ -75,7 +77,7 @@ MfDesfireError
         MF_DESFIRE_POLLER_STANDARD_FWT_FC);
 
     if(error == MfDesfireErrorNone) {
-        bit_buffer_write_bytes(instance->result_buffer, data, sizeof(*data));
+        mf_desfire_version_parse(data, instance->result_buffer);
     }
 
     return error;
@@ -95,12 +97,7 @@ MfDesfireError
         MF_DESFIRE_POLLER_STANDARD_FWT_FC);
 
     if(error == MfDesfireErrorNone) {
-        bit_buffer_write_bytes(
-            instance->result_buffer, &data->bytes_free, sizeof(data->bytes_free) - 1);
-        data->bytes_free &= 0x00ffffff;
-        data->is_present = true;
-    } else {
-        data->is_present = false;
+        mf_desfire_free_memory_parse(data, instance->result_buffer);
     }
 
     return error;
@@ -109,9 +106,6 @@ MfDesfireError
 MfDesfireError mf_desfire_poller_async_read_key_settings(
     MfDesfirePoller* instance,
     MfDesfireKeySettings* data) {
-    furi_assert(instance);
-    furi_assert(data);
-
     bit_buffer_set_size_bytes(instance->input_buffer, sizeof(uint8_t));
     bit_buffer_set_byte(instance->input_buffer, 0, MF_DESFIRE_CMD_GET_KEY_SETTINGS);
 
@@ -122,7 +116,7 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
         MF_DESFIRE_POLLER_STANDARD_FWT_FC);
 
     if(error == MfDesfireErrorNone) {
-        bit_buffer_write_bytes(instance->result_buffer, data, sizeof(*data));
+        mf_desfire_key_settings_parse(data, instance->result_buffer);
     }
 
     return error;
@@ -131,29 +125,19 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
 MfDesfireError mf_desfire_poller_async_read_key_version(
     MfDesfirePoller* instance,
     MfDesfireKeyVersion* data,
-    size_t key_count) {
-    furi_assert(instance);
-    furi_assert(data);
-
-    MfDesfireError error = MfDesfireErrorNone;
-
+    uint32_t index) {
     bit_buffer_set_size_bytes(instance->input_buffer, sizeof(uint8_t) * 2);
     bit_buffer_set_byte(instance->input_buffer, 0, MF_DESFIRE_CMD_GET_KEY_VERSION);
+    bit_buffer_set_byte(instance->input_buffer, 1, index);
 
-    for(size_t key_id = 0; key_id < key_count; ++key_id) {
-        bit_buffer_set_byte(instance->input_buffer, 1, key_id);
+    MfDesfireError error = mf_desfire_send_chunks(
+        instance,
+        instance->input_buffer,
+        instance->result_buffer,
+        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
 
-        error = mf_desfire_send_chunks(
-            instance,
-            instance->input_buffer,
-            instance->result_buffer,
-            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
-
-        if(error == MfDesfireErrorNone) {
-            data[key_id] = bit_buffer_get_byte(instance->result_buffer, 0);
-        } else {
-            break;
-        }
+    if(error == MfDesfireErrorNone) {
+        mf_desfire_key_version_parse(data, instance->result_buffer);
     }
 
     return error;
@@ -166,16 +150,18 @@ MfDesfireError mf_desfire_poller_async_read_key_configuration(
     furi_assert(data);
     furi_assert(data->key_versions == NULL);
 
-    MfDesfireError error = MfDesfireErrorNone;
+    MfDesfireError error;
 
     do {
         error = mf_desfire_poller_async_read_key_settings(instance, &data->key_settings);
         if(error != MfDesfireErrorNone) break;
 
-        const uint8_t key_count = data->key_settings.max_keys;
-        data->key_versions = malloc(sizeof(MfDesfireKeyVersion) * key_count);
+        mf_desfire_key_version_init(&data->key_versions, data->key_settings.max_keys);
 
-        error = mf_desfire_poller_async_read_key_version(instance, data->key_versions, key_count);
+        for(uint32_t i = 0; i < data->key_settings.max_keys; ++i) {
+            error = mf_desfire_poller_async_read_key_version(instance, &data->key_versions[i], i);
+            if(error != MfDesfireErrorNone) break;
+        }
     } while(false);
 
     return error;

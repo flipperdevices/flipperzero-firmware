@@ -62,11 +62,29 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
 MfDesfireError mf_desfire_poller_async_read_key_version(
     MfDesfirePoller* instance,
     MfDesfireKeyVersion* data,
-    size_t key_count);
+    uint32_t index);
 
 MfDesfireError mf_desfire_poller_async_read_key_configuration(
     MfDesfirePoller* instance,
     MfDesfireKeyConfiguration* data);
+
+MfDesfireError mf_desfire_poller_async_read_application_ids(
+    MfDesfirePoller* instance,
+    MfDesfireApplicationId* ids);
+
+MfDesfireError mf_desfire_poller_async_select_application(
+    MfDesfirePoller* instance,
+    const MfDesfireApplicationId id);
+
+MfDesfireError mf_desfire_poller_async_read_file_ids(MfDesfirePoller* instance);
+
+MfDesfireError mf_desfire_poller_async_read_file_ids(MfDesfirePoller* instance);
+
+MfDesfireError mf_desfire_poller_async_read_file_settings(MfDesfirePoller* instance);
+
+MfDesfireError mf_desfire_poller_async_read_file_contents(MfDesfirePoller* instance);
+
+MfDesfireError mf_desfire_poller_async_read_application(MfDesfirePoller* instance);
 
 #ifdef __cplusplus
 }
