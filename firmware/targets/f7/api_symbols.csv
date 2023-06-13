@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,32.2,,
+Version,+,32.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2646,6 +2646,7 @@ Function,+,subghz_devices_get_lqi,uint8_t,const SubGhzDevice*
 Function,+,subghz_devices_get_rssi,float,const SubGhzDevice*
 Function,+,subghz_devices_idle,void,const SubGhzDevice*
 Function,+,subghz_devices_is_async_complete_tx,_Bool,const SubGhzDevice*
+Function,+,subghz_devices_is_connect,_Bool,const SubGhzDevice*
 Function,+,subghz_devices_is_rx_data_crc_valid,_Bool,const SubGhzDevice*
 Function,+,subghz_devices_load_preset,void,"const SubGhzDevice*, FuriHalSubGhzPreset, uint8_t*"
 Function,+,subghz_devices_read_packet,void,"const SubGhzDevice*, uint8_t*, uint8_t*"

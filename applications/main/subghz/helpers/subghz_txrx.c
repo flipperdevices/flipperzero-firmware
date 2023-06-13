@@ -1,8 +1,25 @@
 #include "subghz_txrx_i.h"
 
 #include <lib/subghz/protocols/protocol_items.h>
+#include <lib/subghz/devices/cc1101_ext/cc1101_ext_interconnect.h>
+#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
 #define TAG "SubGhz"
+
+static void subghz_txrx_radio_device_power_on(SubGhzTxRx* instance) {
+    UNUSED(instance);
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        //CC1101 power-up time
+        furi_delay_ms(10);
+    }
+}
+
+static void subghz_txrx_radio_device_power_off(SubGhzTxRx* instance) {
+    UNUSED(instance);
+    if(furi_hal_power_is_otg_enabled()) furi_hal_power_disable_otg();
+}
 
 SubGhzTxRx* subghz_txrx_alloc() {
     SubGhzTxRx* instance = malloc(sizeof(SubGhzTxRx));
@@ -23,10 +40,9 @@ SubGhzTxRx* subghz_txrx_alloc() {
     instance->fff_data = flipper_format_string_alloc();
 
     instance->environment = subghz_environment_alloc();
-    instance->is_database_loaded = subghz_environment_load_keystore(
-        instance->environment, SUBGHZ_KEYSTORE_DIR_NAME);
-    subghz_environment_load_keystore(
-        instance->environment, SUBGHZ_KEYSTORE_DIR_USER_NAME);
+    instance->is_database_loaded =
+        subghz_environment_load_keystore(instance->environment, SUBGHZ_KEYSTORE_DIR_NAME);
+    subghz_environment_load_keystore(instance->environment, SUBGHZ_KEYSTORE_DIR_USER_NAME);
     subghz_environment_set_came_atomo_rainbow_table_file_name(
         instance->environment, SUBGHZ_CAME_ATOMO_DIR_NAME);
     subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
@@ -43,11 +59,20 @@ SubGhzTxRx* subghz_txrx_alloc() {
         instance->worker, (SubGhzWorkerPairCallback)subghz_receiver_decode);
     subghz_worker_set_context(instance->worker, instance->receiver);
 
+    //set default device External
+    instance->radio_device_state =
+        subghz_txrx_radio_device_set(instance, SubGhzRadioDeviceStateExternalCC1101);
+
     return instance;
 }
 
 void subghz_txrx_free(SubGhzTxRx* instance) {
     furi_assert(instance);
+
+    if(instance->radio_device_state != SubGhzRadioDeviceStateInternal) {
+        subghz_txrx_radio_device_power_off(instance);
+        subghz_devices_end(instance->radio_device);
+    }
 
     subghz_worker_free(instance->worker);
     subghz_receiver_free(instance->receiver);
@@ -55,6 +80,7 @@ void subghz_txrx_free(SubGhzTxRx* instance) {
     flipper_format_free(instance->fff_data);
     furi_string_free(instance->preset->name);
     subghz_setting_free(instance->setting);
+
     free(instance->preset);
     free(instance);
 }
@@ -518,4 +544,50 @@ void subghz_txrx_set_raw_file_encoder_worker_callback_end(
         (SubGhzProtocolEncoderRAW*)subghz_transmitter_get_protocol_instance(instance->transmitter),
         callback,
         context);
+}
+
+bool subghz_txrx_radio_device_is_connect_external_cc1101(SubGhzTxRx* instance) {
+    furi_assert(instance);
+
+    bool is_connect = false;
+    bool is_otg_enabled = furi_hal_power_is_otg_enabled();
+
+    if(!is_otg_enabled) {
+        subghz_txrx_radio_device_power_on(instance);
+    }
+
+    is_connect =
+        subghz_devices_is_connect(subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME));
+
+    if(!is_otg_enabled) {
+        subghz_txrx_radio_device_power_off(instance);
+    }
+    return is_connect;
+}
+
+SubGhzRadioDeviceState
+    subghz_txrx_radio_device_set(SubGhzTxRx* instance, SubGhzRadioDeviceState radio_device_state) {
+    furi_assert(instance);
+
+    if(radio_device_state == SubGhzRadioDeviceStateExternalCC1101 &&
+       subghz_txrx_radio_device_is_connect_external_cc1101(instance)) {
+        subghz_txrx_radio_device_power_on(instance);
+        instance->radio_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
+        subghz_devices_begin(instance->radio_device);
+        instance->radio_device_state = SubGhzRadioDeviceStateExternalCC1101;
+    } else {
+        subghz_txrx_radio_device_power_off(instance);
+        if(instance->radio_device_state != SubGhzRadioDeviceStateInternal) {
+            subghz_devices_end(instance->radio_device);
+        }
+        instance->radio_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+        instance->radio_device_state = SubGhzRadioDeviceStateInternal;
+    }
+
+    return instance->radio_device_state;
+}
+
+SubGhzRadioDeviceState subghz_txrx_radio_device_get(SubGhzTxRx* instance) {
+    furi_assert(instance);
+    return instance->radio_device_state;
 }

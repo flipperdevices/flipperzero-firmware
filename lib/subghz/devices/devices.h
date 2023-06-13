@@ -12,6 +12,7 @@ typedef struct SubGhzDevice SubGhzDevice;
 const SubGhzDevice* subghz_devices_get_by_name(const char* device_name);
 bool subghz_devices_begin(const SubGhzDevice* device);
 void subghz_devices_end(const SubGhzDevice* device);
+bool subghz_devices_is_connect(const SubGhzDevice* device);
 void subghz_devices_reset(const SubGhzDevice* device);
 void subghz_devices_sleep(const SubGhzDevice* device);
 void subghz_devices_idle(const SubGhzDevice* device);

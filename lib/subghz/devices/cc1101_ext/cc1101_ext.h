@@ -32,7 +32,7 @@ void subghz_device_cc1101_ext_free();
  * initialization routine Can be used to reinitialize device to safe state and
  * send it to sleep
  */
-bool subghz_device_cc1101_ext_check();
+bool subghz_device_cc1101_ext_is_connect();
 
 /** Send device to sleep mode
  */

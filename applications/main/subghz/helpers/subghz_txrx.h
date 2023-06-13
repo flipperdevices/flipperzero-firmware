@@ -7,6 +7,7 @@
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/protocols/raw.h>
+#include <lib/subghz/devices/devices.h>
 
 typedef struct SubGhzTxRx SubGhzTxRx;
 
@@ -288,3 +289,8 @@ void subghz_txrx_set_raw_file_encoder_worker_callback_end(
     SubGhzTxRx* instance,
     SubGhzProtocolEncoderRAWCallbackEnd callback,
     void* context);
+
+bool subghz_txrx_radio_device_is_connect_external_cc1101(SubGhzTxRx* instance);
+SubGhzRadioDeviceState
+    subghz_txrx_radio_device_set(SubGhzTxRx* instance, SubGhzRadioDeviceState radio_device_state);
+SubGhzRadioDeviceState subghz_txrx_radio_device_get(SubGhzTxRx* instance);

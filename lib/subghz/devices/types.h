@@ -14,6 +14,7 @@ typedef struct SubGhzDevice SubGhzDevice;
 
 typedef bool (*SubGhzBegin)(void);
 typedef void (*SubGhzEnd)(void);
+typedef bool (*SubGhzIsConnect)(void);
 typedef void (*SubGhzReset)(void);
 typedef void (*SubGhzSleep)(void);
 typedef void (*SubGhzIdle)(void);
@@ -46,6 +47,7 @@ typedef struct {
     SubGhzBegin begin;
     SubGhzEnd end;
 
+    SubGhzIsConnect is_connect;
     SubGhzReset reset;
     SubGhzSleep sleep;
     SubGhzIdle idle;

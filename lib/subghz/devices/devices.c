@@ -27,6 +27,14 @@ void subghz_devices_end(const SubGhzDevice* device) {
     }
 }
 
+bool subghz_devices_is_connect(const SubGhzDevice* device) {
+    bool ret = false;
+    if(device && device->interconnect->is_connect) {
+        ret = device->interconnect->is_connect();
+    }
+    return ret;
+}
+
 void subghz_devices_reset(const SubGhzDevice* device) {
     if(device && device->interconnect->reset) {
         device->interconnect->reset();

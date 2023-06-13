@@ -39,7 +39,7 @@ static void subghz_device_cc1101_ext_interconnect_load_preset(
 const SubGhzDeviceInterconnect subghz_device_cc1101_ext_interconnect = {
     .begin = subghz_device_cc1101_ext_alloc,
     .end = subghz_device_cc1101_ext_free,
-    //.check = subghz_device_cc1101_ext_check,
+    .is_connect = subghz_device_cc1101_ext_is_connect,
     .reset = subghz_device_cc1101_ext_reset,
     .sleep = subghz_device_cc1101_ext_sleep,
     .idle = subghz_device_cc1101_ext_idle,

@@ -35,6 +35,13 @@ typedef enum {
     SubGhzSpeakerStateEnable,
 } SubGhzSpeakerState;
 
+/** SubGhzRadioDeviceState */
+typedef enum {
+    SubGhzRadioDeviceStateAuto,
+    SubGhzRadioDeviceStateInternal,
+    SubGhzRadioDeviceStateExternalCC1101,
+} SubGhzRadioDeviceState;
+
 /** SubGhzRxKeyState state */
 typedef enum {
     SubGhzRxKeyStateIDLE,

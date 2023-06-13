@@ -36,10 +36,14 @@ static void subghz_device_cc1101_int_interconnect_load_preset(
     }
 }
 
+static bool subghz_device_cc1101_int_interconnect_is_connect(void) {
+    return true;
+}
+
 const SubGhzDeviceInterconnect subghz_device_cc1101_int_interconnect = {
     .begin = NULL,
     .end = furi_hal_subghz_shutdown,
-    //.check = subghz_device_cc1101_int_check,
+    .is_connect = subghz_device_cc1101_int_interconnect_is_connect,
     .reset = furi_hal_subghz_reset,
     .sleep = furi_hal_subghz_sleep,
     .idle = furi_hal_subghz_idle,
