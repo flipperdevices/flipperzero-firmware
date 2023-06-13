@@ -5,51 +5,34 @@ enum {
     NfcMagicSceneCheckStateCardFound,
 };
 
-static bool nfc_magic_scene_check_is_file_suitable(NfcMagic* nfc_magic) {
-    NfcDevice* nfc_dev = nfc_magic->source_dev;
-    if(nfc_dev->format == NfcDeviceSaveFormatMifareClassic) {
-        switch(nfc_magic->dev->type) {
-        case MagicTypeClassicGen1:
-        case MagicTypeClassicDirectWrite:
-        case MagicTypeClassicAPDU:
-            if((nfc_dev->dev_data.mf_classic_data.type != MfClassicType1k) ||
-               (nfc_dev->dev_data.nfc_data.uid_len != 4)) {
-                return false;
-            }
-            return true;
+static bool nfc_magic_scene_wipe_check_is_card_suitable(NfcMagic* nfc_magic) {
+    switch(nfc_magic->dev->type) {
+    case MagicTypeClassicGen1:
+        return true;
 
-        case MagicTypeGen4:
-            return true;
-        default:
-            return false;
-        }
-    } else if(
-        (nfc_dev->format == NfcDeviceSaveFormatMifareUl) &&
-        (nfc_dev->dev_data.nfc_data.uid_len == 7)) {
-        switch(nfc_magic->dev->type) {
-        case MagicTypeUltralightGen1:
-        case MagicTypeUltralightDirectWrite:
-        case MagicTypeUltralightC_Gen1:
-        case MagicTypeUltralightC_DirectWrite:
-        case MagicTypeGen4:
-            switch(nfc_dev->dev_data.mf_ul_data.type) {
-            case MfUltralightTypeNTAGI2C1K:
-            case MfUltralightTypeNTAGI2C2K:
-            case MfUltralightTypeNTAGI2CPlus1K:
-            case MfUltralightTypeNTAGI2CPlus2K:
-                return false;
-            default:
-                return true;
-            }
-        default:
-            return false;
-        }
+    case MagicTypeClassicDirectWrite:
+    case MagicTypeClassicAPDU:
+        return false;
+
+    case MagicTypeGen4:
+        return true;
+
+    case MagicTypeUltralightGen1:
+        return true;
+
+    case MagicTypeUltralightDirectWrite:
+    case MagicTypeUltralightC_Gen1:
+    case MagicTypeUltralightC_DirectWrite:
+        return false;
+
+    default:
+        return false;
     }
 
     return false;
 }
 
-bool nfc_magic_check_worker_callback(NfcMagicWorkerEvent event, void* context) {
+bool nfc_magic_wipe_check_worker_callback(NfcMagicWorkerEvent event, void* context) {
     furi_assert(context);
 
     NfcMagic* nfc_magic = context;
@@ -58,7 +41,7 @@ bool nfc_magic_check_worker_callback(NfcMagicWorkerEvent event, void* context) {
     return true;
 }
 
-static void nfc_magic_scene_check_setup_view(NfcMagic* nfc_magic) {
+static void nfc_magic_scene_wipe_check_setup_view(NfcMagic* nfc_magic) {
     Popup* popup = nfc_magic->popup;
     popup_reset(popup);
     uint32_t state = scene_manager_get_scene_state(nfc_magic->scene_manager, NfcMagicSceneCheck);
@@ -75,12 +58,12 @@ static void nfc_magic_scene_check_setup_view(NfcMagic* nfc_magic) {
     view_dispatcher_switch_to_view(nfc_magic->view_dispatcher, NfcMagicViewPopup);
 }
 
-void nfc_magic_scene_check_on_enter(void* context) {
+void nfc_magic_scene_wipe_check_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
 
     scene_manager_set_scene_state(
         nfc_magic->scene_manager, NfcMagicSceneCheck, NfcMagicSceneCheckStateCardSearch);
-    nfc_magic_scene_check_setup_view(nfc_magic);
+    nfc_magic_scene_wipe_check_setup_view(nfc_magic);
 
     // Setup and start worker
     nfc_magic_worker_start(
@@ -89,23 +72,19 @@ void nfc_magic_scene_check_on_enter(void* context) {
         nfc_magic->dev,
         &nfc_magic->source_dev->dev_data,
         nfc_magic->new_password,
-        nfc_magic_check_worker_callback,
+        nfc_magic_wipe_check_worker_callback,
         nfc_magic);
     nfc_magic_blink_start(nfc_magic);
 }
 
-bool nfc_magic_scene_check_on_event(void* context, SceneManagerEvent event) {
+bool nfc_magic_scene_wipe_check_on_event(void* context, SceneManagerEvent event) {
     NfcMagic* nfc_magic = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcMagicWorkerEventSuccess) {
-            if(nfc_magic_scene_check_is_file_suitable(nfc_magic)) {
-                if(nfc_magic->dev->type == MagicTypeClassicGen1) {
-                    scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWriteConfirm);
-                } else {
-                    scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWrite);
-                }
+            if(nfc_magic_scene_wipe_check_is_card_suitable(nfc_magic)) {
+                scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWipe);
             } else {
                 scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWrongCard);
             }
@@ -119,22 +98,22 @@ bool nfc_magic_scene_check_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == NfcMagicWorkerEventCardDetected) {
             scene_manager_set_scene_state(
                 nfc_magic->scene_manager, NfcMagicSceneCheck, NfcMagicSceneCheckStateCardFound);
-            nfc_magic_scene_check_setup_view(nfc_magic);
+            nfc_magic_scene_wipe_check_setup_view(nfc_magic);
             consumed = true;
         } else if(event.event == NfcMagicWorkerEventNoCardDetected) {
             scene_manager_set_scene_state(
                 nfc_magic->scene_manager, NfcMagicSceneCheck, NfcMagicSceneCheckStateCardSearch);
-            nfc_magic_scene_check_setup_view(nfc_magic);
+            nfc_magic_scene_wipe_check_setup_view(nfc_magic);
             consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_search_and_switch_to_previous_scene(
-            nfc_magic->scene_manager, NfcMagicSceneFileSelect);
+            nfc_magic->scene_manager, NfcMagicSceneStart);
     }
     return consumed;
 }
 
-void nfc_magic_scene_check_on_exit(void* context) {
+void nfc_magic_scene_wipe_check_on_exit(void* context) {
     NfcMagic* nfc_magic = context;
 
     nfc_magic_worker_stop(nfc_magic->worker);

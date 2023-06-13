@@ -1,13 +1,16 @@
 #include "../nfc_magic_i.h"
 
-void nfc_magic_scene_not_magic_widget_callback(GuiButtonType result, InputType type, void* context) {
+void nfc_magic_scene_file_not_supported_widget_callback(
+    GuiButtonType result,
+    InputType type,
+    void* context) {
     NfcMagic* nfc_magic = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc_magic->view_dispatcher, result);
     }
 }
 
-void nfc_magic_scene_not_magic_on_enter(void* context) {
+void nfc_magic_scene_file_not_supported_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
     Widget* widget = nfc_magic->widget;
 
@@ -15,23 +18,27 @@ void nfc_magic_scene_not_magic_on_enter(void* context) {
 
     widget_add_icon_element(widget, 73, 17, &I_DolphinCommon_56x48);
     widget_add_string_element(
-        widget, 3, 4, AlignLeft, AlignTop, FontPrimary, "This is a wrong card");
+        widget, 1, 4, AlignLeft, AlignTop, FontPrimary, "File not supported");
     widget_add_string_multiline_element(
         widget,
-        4,
+        1,
         17,
         AlignLeft,
         AlignTop,
         FontSecondary,
-        "Not a magic card,\nwrong gen4 pass,\nor weak signal");
+        "Writing this file is\ncurrently not\nsupported.");
     widget_add_button_element(
-        widget, GuiButtonTypeLeft, "Retry", nfc_magic_scene_not_magic_widget_callback, nfc_magic);
+        widget,
+        GuiButtonTypeLeft,
+        "Retry",
+        nfc_magic_scene_file_not_supported_widget_callback,
+        nfc_magic);
 
     // Setup and start worker
     view_dispatcher_switch_to_view(nfc_magic->view_dispatcher, NfcMagicViewWidget);
 }
 
-bool nfc_magic_scene_not_magic_on_event(void* context, SceneManagerEvent event) {
+bool nfc_magic_scene_file_not_supported_on_event(void* context, SceneManagerEvent event) {
     NfcMagic* nfc_magic = context;
     bool consumed = false;
 
@@ -43,7 +50,7 @@ bool nfc_magic_scene_not_magic_on_event(void* context, SceneManagerEvent event) 
     return consumed;
 }
 
-void nfc_magic_scene_not_magic_on_exit(void* context) {
+void nfc_magic_scene_file_not_supported_on_exit(void* context) {
     NfcMagic* nfc_magic = context;
 
     widget_reset(nfc_magic->widget);

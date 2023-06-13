@@ -19,6 +19,7 @@ typedef enum {
 typedef enum {
     NfcMagicWorkerEventSuccess,
     NfcMagicWorkerEventFail,
+    NfcMagicWorkerEventNotMagic,
     NfcMagicWorkerEventCardDetected,
     NfcMagicWorkerEventNoCardDetected,
     NfcMagicWorkerEventWrongCard,

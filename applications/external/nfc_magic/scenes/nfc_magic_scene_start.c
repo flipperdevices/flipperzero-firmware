@@ -1,7 +1,8 @@
 #include "../nfc_magic_i.h"
 enum SubmenuIndex {
-    SubmenuIndexCheck,
-    SubmenuIndexAuthenticateGen4,
+    SubmenuIndexWrite,
+    SubmenuIndexWipe,
+    SubmenuIndexGen4,
 };
 
 void nfc_magic_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -14,15 +15,13 @@ void nfc_magic_scene_start_on_enter(void* context) {
 
     Submenu* submenu = nfc_magic->submenu;
     submenu_add_item(
-        submenu,
-        "Check Magic Tag",
-        SubmenuIndexCheck,
-        nfc_magic_scene_start_submenu_callback,
-        nfc_magic);
+        submenu, "Write", SubmenuIndexWrite, nfc_magic_scene_start_submenu_callback, nfc_magic);
+    submenu_add_item(
+        submenu, "Wipe", SubmenuIndexWipe, nfc_magic_scene_start_submenu_callback, nfc_magic);
     submenu_add_item(
         submenu,
-        "Authenticate Gen4",
-        SubmenuIndexAuthenticateGen4,
+        "Gen4 Actions",
+        SubmenuIndexGen4,
         nfc_magic_scene_start_submenu_callback,
         nfc_magic);
 
@@ -36,14 +35,24 @@ bool nfc_magic_scene_start_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == SubmenuIndexCheck) {
+        if(event.event == SubmenuIndexWrite) {
             nfc_magic->dev->password = MAGIC_GEN4_DEFAULT_PWD;
             scene_manager_set_scene_state(
-                nfc_magic->scene_manager, NfcMagicSceneStart, SubmenuIndexCheck);
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneCheck);
+                nfc_magic->scene_manager, NfcMagicSceneStart, SubmenuIndexWrite);
+            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneFileSelect);
             consumed = true;
-        } else if(event.event == SubmenuIndexAuthenticateGen4) {
-            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneKeyInput);
+        } else if(event.event == SubmenuIndexWipe) {
+            nfc_magic->dev->password = MAGIC_GEN4_DEFAULT_PWD;
+            scene_manager_set_scene_state(
+                nfc_magic->scene_manager, NfcMagicSceneStart, SubmenuIndexWipe);
+            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWipeCheck);
+            consumed = true;
+        } else if(event.event == SubmenuIndexGen4) {
+            nfc_magic->dev->password = MAGIC_GEN4_DEFAULT_PWD;
+            scene_manager_set_scene_state(
+                nfc_magic->scene_manager, NfcMagicSceneStart, SubmenuIndexGen4);
+            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneCheckGen4);
+            consumed = true;
         }
     }
 

@@ -21,12 +21,7 @@ static void nfc_magic_scene_write_setup_view(NfcMagic* nfc_magic) {
 
     if(state == NfcMagicSceneWriteStateCardSearch) {
         popup_set_text(
-            nfc_magic->popup,
-            "Apply the\nsame card\nto the back",
-            128,
-            32,
-            AlignRight,
-            AlignCenter);
+            nfc_magic->popup, "Apply card to\nthe back", 128, 32, AlignRight, AlignCenter);
         popup_set_icon(nfc_magic->popup, 0, 8, &I_NFC_manual_60x50);
     } else {
         popup_set_icon(popup, 12, 23, &I_Loading_24);
@@ -66,8 +61,11 @@ bool nfc_magic_scene_write_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == NfcMagicWorkerEventFail) {
             scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWriteFail);
             consumed = true;
-        } else if(event.event == NfcMagicWorkerEventWrongCard) {
+        } else if(event.event == NfcMagicWorkerEventNotMagic) {
             scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneNotMagic);
+            consumed = true;
+        } else if(event.event == NfcMagicWorkerEventWrongCard) {
+            scene_manager_next_scene(nfc_magic->scene_manager, NfcMagicSceneWrongCard);
             consumed = true;
         } else if(event.event == NfcMagicWorkerEventCardDetected) {
             scene_manager_set_scene_state(
@@ -80,6 +78,9 @@ bool nfc_magic_scene_write_on_event(void* context, SceneManagerEvent event) {
             nfc_magic_scene_write_setup_view(nfc_magic);
             consumed = true;
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        consumed = scene_manager_search_and_switch_to_previous_scene(
+            nfc_magic->scene_manager, NfcMagicSceneFileSelect);
     }
     return consumed;
 }
