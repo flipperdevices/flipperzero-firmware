@@ -57,11 +57,12 @@ jobs:
           sphinx-multiversion flipperzero-documentation flipperzero-documentation/sphinx_out/ --debug
           pushd flipperzero-documentation
           doxysphinx build doxygen/html sphinx_out/${BRANCH_NAME}/doxygen/html/ Doxyfile-awesome.cfg
+          cp root-index-template.html sphinx_out/index.html
           popd
 
       - name: 'Upload to Github Pages'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./flipperzero-documentation/sphinx_out/${{steps.names.outputs.branch_name}}/
+          publish_dir: ./flipperzero-documentation/sphinx_out/
           publish_branch: docs
