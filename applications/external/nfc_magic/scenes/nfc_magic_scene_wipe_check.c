@@ -8,18 +8,12 @@ enum {
 static bool nfc_magic_scene_wipe_check_is_card_suitable(NfcMagic* nfc_magic) {
     switch(nfc_magic->dev->type) {
     case MagicTypeClassicGen1:
+    case MagicTypeGen4:
+    case MagicTypeUltralightGen1:
         return true;
 
     case MagicTypeClassicDirectWrite:
     case MagicTypeClassicAPDU:
-        return false;
-
-    case MagicTypeGen4:
-        return true;
-
-    case MagicTypeUltralightGen1:
-        return true;
-
     case MagicTypeUltralightDirectWrite:
     case MagicTypeUltralightC_Gen1:
     case MagicTypeUltralightC_DirectWrite:
