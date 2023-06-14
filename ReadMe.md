@@ -69,6 +69,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fixed occasional RGB backlight problems #664 (By jbohack)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/664)
 - UL: Protoview fix for custom modulations
 - OFW: [FuriHal: remove clock startup time tracking from clean builds #2764 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2764)
+- Desktop Setting Fixes for Passport App & Dice (By RogueMaster)
 
 <a name="release">
 
