@@ -91,3 +91,8 @@
 #define AddressStartDOD80 0x92CD
 #define AddressStartDOD90 0x92CF
 #define AddressStartDOD100 0x92D1
+
+#define DataMemoryCalibrationCurrentDeadband 0x91DE
+
+#define DataMemoryConfigurationPowerSleepCurrent 0x9217
+#define DataMemoryConfigurationCurrentThresholdsDischargeDetectionThreshold 0x9228

@@ -15,6 +15,7 @@
 
 #include <hw_conf.h>
 #include <bq27220.h>
+#include <bq27220_config.h>
 #include <bq25896.h>
 
 #include <furi.h>
@@ -46,7 +47,7 @@ static volatile FuriHalPower furi_hal_power = {
     .suppress_charge = 0,
 };
 
-#include <furi_hal_power_calibration.h>
+extern const BQ27220DMData furi_hal_power_gauge_data_memory[];
 
 void furi_hal_power_init() {
 #ifdef FURI_HAL_POWER_DEBUG
@@ -63,7 +64,7 @@ void furi_hal_power_init() {
     LL_C2_PWR_SetPowerMode(FURI_HAL_POWER_STOP_MODE);
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
-    bq27220_init(&furi_hal_i2c_handle_power, &cedv);
+    bq27220_init(&furi_hal_i2c_handle_power, furi_hal_power_gauge_data_memory);
     bq25896_init(&furi_hal_i2c_handle_power);
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 
@@ -85,7 +86,7 @@ bool furi_hal_power_gauge_is_ok() {
     } else {
         ret &= battery_status.BATTPRES;
         ret &= operation_status.INITCOMP;
-        ret &= (cedv.design_cap == bq27220_get_design_capacity(&furi_hal_i2c_handle_power));
+        // ret &= (cedv.design_cap == bq27220_get_design_capacity(&furi_hal_i2c_handle_power));
     }
 
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
