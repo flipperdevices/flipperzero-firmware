@@ -247,6 +247,8 @@ void tick(GameState *game_state, NotificationApp *notification) {
         if (game_state->top_cards[0].character == 11 && game_state->top_cards[1].character == 11 &&
             game_state->top_cards[2].character == 11 && game_state->top_cards[3].character == 11) {
             game_state->state = GameStateAnimate;
+            DOLPHIN_DEED(DolphinDeedPluginGameWin);
+
             return;
         }
     }
@@ -381,6 +383,7 @@ void tick(GameState *game_state, NotificationApp *notification) {
 }
 
 void init(GameState *game_state) {
+    DOLPHIN_DEED(DolphinDeedPluginGameStart);
     game_state->selectColumn = 0;
     game_state->selected_card = 0;
     game_state->selectRow = 0;
