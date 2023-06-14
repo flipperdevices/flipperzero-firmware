@@ -76,6 +76,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) (from xMasterX)
 - Updated: [Pokemon Trading (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
 - Updated: [NRF24 Scanner v2.2 (By vad7)](https://github.com/vad7/nrf24scan)
+- Updated: [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) (By Willy-JL)
 
 <a name="release">
 
