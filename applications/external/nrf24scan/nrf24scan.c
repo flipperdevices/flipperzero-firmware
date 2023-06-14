@@ -531,7 +531,7 @@ static void prepare_nrf24(bool fsend_packet) {
                 nrf24_HANDLE,
                 REG_FEATURE,
                 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
-                // EN_DYN_ACK(0x01)  for W_TX_PAYLOAD_NOACK cmd broke AA on some fake nRF24l01+ modules
+            // EN_DYN_ACK(0x01)  for W_TX_PAYLOAD_NOACK cmd broke AA on some fake nRF24l01+ modules
         } else if(setup_from_log) { // Scan
             nrf24_write_reg(
                 nrf24_HANDLE,
