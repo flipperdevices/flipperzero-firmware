@@ -482,7 +482,7 @@ bool furi_hal_nfc_emulate_nfca(
                     buff_tx,
                     buff_tx_len,
                     buff_rx,
-                    sizeof(buff_rx),
+                    rfalConvBytesToBits(buff_rx_size),
                     &buff_rx_len,
                     data_type,
                     RFAL_FWT_NONE);
@@ -506,7 +506,7 @@ bool furi_hal_nfc_emulate_nfca(
                         buff_tx,
                         buff_tx_len,
                         buff_rx,
-                        sizeof(buff_rx),
+                        rfalConvBytesToBits(buff_rx_size),
                         &buff_rx_len,
                         data_type,
                         RFAL_FWT_NONE);
