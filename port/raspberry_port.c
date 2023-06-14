@@ -33,14 +33,10 @@
 #include <sys/stat.h>
 #include <sys/param.h>
 
-// #define SERIAL_DEBUG_ENABLE
-
-#ifdef SERIAL_DEBUG_ENABLE
-
-static void serial_debug_print(const uint8_t *data, uint16_t size, bool write)
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+static void transfer_debug_print(const uint8_t *data, uint16_t size, bool write)
 {
     static bool write_prev = false;
-    uint8_t hex_str[3];
 
     if (write_prev != write) {
         write_prev = write;
@@ -51,11 +47,6 @@ static void serial_debug_print(const uint8_t *data, uint16_t size, bool write)
         printf("%02x ", data[i]);
     }
 }
-
-#else
-
-static void serial_debug_print(const uint8_t *data, uint16_t size, bool write) { }
-
 #endif
 
 static int serial;
@@ -233,15 +224,19 @@ esp_loader_error_t loader_port_raspberry_init(const loader_raspberry_config_t *c
 
 esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
-    serial_debug_print(data, size, true);
-
     int written = write(serial, data, size);
 
     if (written < 0) {
         return ESP_LOADER_ERROR_FAIL;
     } else if (written < size) {
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, written, true);
+#endif
         return ESP_LOADER_ERROR_TIMEOUT;
     } else {
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, written, true);
+#endif
         return ESP_LOADER_SUCCESS;
     }
 }
@@ -251,7 +246,9 @@ esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeo
 {
     RETURN_ON_ERROR( read_data(data, size) );
 
-    serial_debug_print(data, size, false);
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+    transfer_debug_print(data, size, false);
+#endif
 
     return ESP_LOADER_SUCCESS;
 }

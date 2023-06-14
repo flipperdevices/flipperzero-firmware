@@ -27,4 +27,8 @@ menu "ESP serial flasher"
         int "Time for which the boot pin is asserted when doing a hard reset"
         default 50
 
+    config SERIAL_FLASHER_DEBUG_TRACE
+        bool "Enable debug tracing output (only transfer data tracing is supported at the time)"
+        default n
+
 endmenu

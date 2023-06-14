@@ -21,42 +21,20 @@
 #include "esp_idf_version.h"
 #include <unistd.h>
 
-// #define SERIAL_DEBUG_ENABLE
-
-#ifdef SERIAL_DEBUG_ENABLE
-
-static void dec_to_hex_str(const uint8_t dec, uint8_t hex_str[3])
-{
-    static const uint8_t dec_to_hex[] = {
-        '0', '1', '2', '3', '4', '5', '6', '7',
-        '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
-    };
-
-    hex_str[0] = dec_to_hex[dec >> 4];
-    hex_str[1] = dec_to_hex[dec & 0xF];
-    hex_str[2] = '\0';
-}
-
-static void serial_debug_print(const uint8_t *data, uint16_t size, bool write)
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+static void transfer_debug_print(const uint8_t *data, uint16_t size, bool write)
 {
     static bool write_prev = false;
-    uint8_t hex_str[3];
 
-    if(write_prev != write) {
+    if (write_prev != write) {
         write_prev = write;
         printf("\n--- %s ---\n", write ? "WRITE" : "READ");
     }
 
-    for(uint32_t i = 0; i < size; i++) {
-        dec_to_hex_str(data[i], hex_str);
-        printf("%s ", hex_str);
+    for (uint32_t i = 0; i < size; i++) {
+        printf("%02x ", data[i]);
     }
 }
-
-#else
-
-static void serial_debug_print(const uint8_t *data, uint16_t size, bool write) { }
-
 #endif
 
 static int64_t s_time_end;
@@ -117,12 +95,13 @@ void loader_port_esp32_deinit(void)
 
 esp_loader_error_t loader_port_write(const uint8_t *data, uint16_t size, uint32_t timeout)
 {
-    serial_debug_print(data, size, true);
-
     uart_write_bytes(s_uart_port, (const char *)data, size);
     esp_err_t err = uart_wait_tx_done(s_uart_port, pdMS_TO_TICKS(timeout));
 
     if (err == ESP_OK) {
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, size, true);
+#endif
         return ESP_LOADER_SUCCESS;
     } else if (err == ESP_ERR_TIMEOUT) {
         return ESP_LOADER_ERROR_TIMEOUT;
@@ -136,13 +115,17 @@ esp_loader_error_t loader_port_read(uint8_t *data, uint16_t size, uint32_t timeo
 {
     int read = uart_read_bytes(s_uart_port, data, size, pdMS_TO_TICKS(timeout));
 
-    serial_debug_print(data, read, false);
-
     if (read < 0) {
         return ESP_LOADER_ERROR_FAIL;
     } else if (read < size) {
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, read, false);
+#endif
         return ESP_LOADER_ERROR_TIMEOUT;
     } else {
+#ifdef SERIAL_FLASHER_DEBUG_TRACE
+        transfer_debug_print(data, read, false);
+#endif
         return ESP_LOADER_SUCCESS;
     }
 }
