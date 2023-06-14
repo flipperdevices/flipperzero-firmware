@@ -29,8 +29,8 @@ static FHalNfcTimerConfig f_hal_nfc_timers[FHalNfcTimerCount] = {
         {
             .pin = &gpio_ext_pa7,
             .timer = TIM1,
-            .prescaler = 7,
-            .freq_khz = 8000U,
+            .prescaler = 15,
+            .freq_khz = 4000U,
             .event = FHalNfcEventInternalTypeTimerFwtExpired,
             .irq_id = FuriHalInterruptIdTim1UpTim16,
             .irq_type = TIM1_UP_TIM16_IRQn,
