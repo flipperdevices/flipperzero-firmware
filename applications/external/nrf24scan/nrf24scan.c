@@ -531,7 +531,7 @@ static void prepare_nrf24(bool fsend_packet) {
                 nrf24_HANDLE,
                 REG_FEATURE,
                 0); // Enables the W_TX_PAYLOAD_NOACK command, Disable Payload with ACK, set Dynamic Payload
-            // EN_DYN_ACK(0x01)  for W_TX_PAYLOAD_NOACK cmd broke AA on some fake nRF24l01+ modules
+                // EN_DYN_ACK(0x01)  for W_TX_PAYLOAD_NOACK cmd broke AA on some fake nRF24l01+ modules
         } else if(setup_from_log) { // Scan
             nrf24_write_reg(
                 nrf24_HANDLE,
@@ -1434,8 +1434,13 @@ int32_t nrf24scan_app(void* p) {
                             else
                                 menu_selected = 0;
                         } else if(what_doing == 1) {
-                            view_log_arr_idx += event.input.type == InputTypeRepeat ? 10 : 1;
-                            if(view_log_arr_idx >= log_arr_idx) view_log_arr_idx = log_arr_idx - 1;
+                            if(log_arr_idx == 0)
+                                view_log_arr_idx = 0;
+                            else {
+                                view_log_arr_idx += event.input.type == InputTypeRepeat ? 10 : 1;
+                                if(view_log_arr_idx >= log_arr_idx)
+                                    view_log_arr_idx = log_arr_idx - 1;
+                            }
                         } else if(what_doing == 2) {
                             if(view_found < found_total / 7) view_found++;
                         }
