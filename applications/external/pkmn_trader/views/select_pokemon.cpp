@@ -5,29 +5,22 @@ static void select_pokemon_render_callback(Canvas* canvas, void* context) {
     canvas_clear(canvas);
 
     SelectPokemonModel* model = (SelectPokemonModel*)context;
-    const int current_index = model->current_pokemon;
-    const char* current_name = pokemon_names[current_index];
-    char hex_str[5];
-    snprintf(hex_str, sizeof(hex_str), "0x%02X", pokemon_hex_codes[current_index]);
+    const uint8_t current_index = model->current_pokemon;
+    char pokedex_num[5];
+
+    snprintf(pokedex_num, sizeof(pokedex_num), "#%03d", current_index + 1);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(
-        canvas,
-        55,
-        54 / 2,
-        AlignLeft,
-        AlignTop,
-        ("#" + std::to_string(current_index + 1) + " " + current_name).c_str());
+        canvas, 55, 54 / 2, AlignLeft, AlignTop, pokemon_table[current_index].name);
 
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 55, 37, AlignLeft, AlignTop, hex_str);
-    canvas_draw_icon(canvas, 0, 0, pokemon_icons[current_index]);
+    canvas_draw_str_aligned(canvas, 55, 38, AlignLeft, AlignTop, pokedex_num);
+    canvas_draw_icon(canvas, 0, 0, pokemon_table[current_index].icon);
     canvas_draw_icon(canvas, 128 - 80, 0, &I_Space_80x18);
     canvas_draw_str_aligned(canvas, (128 - 40), 5, AlignCenter, AlignTop, "Select Pokemon");
 
     canvas_set_font(canvas, FontPrimary);
-    elements_button_left(canvas, "Prev");
     elements_button_center(canvas, "OK");
-    elements_button_right(canvas, "Next");
 }
 
 static bool select_pokemon_input_callback(InputEvent* event, void* context) {
@@ -42,7 +35,7 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
             model,
             {
                 select_pokemon->app->current_pokemon = model->current_pokemon;
-                select_pokemon->app->pokemon_hex_code = pokemon_hex_codes[model->current_pokemon];
+                select_pokemon->app->pokemon_hex_code = pokemon_table[model->current_pokemon].hex;
             },
             false);
         view_dispatcher_switch_to_view(select_pokemon->app->view_dispatcher, AppViewTrade);

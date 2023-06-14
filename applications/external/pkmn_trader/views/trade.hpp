@@ -67,6 +67,6 @@ void trade_free(App* app);
 View* trade_get_view(App* app);
 
 extern unsigned char INPUT_BLOCK[405];
-extern unsigned char DATA_BLOCK[405];
+extern unsigned char* DATA_BLOCK;
 
 #endif /* TRADE_HPP */

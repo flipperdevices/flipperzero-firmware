@@ -1,5 +1,4 @@
 # 🐬 Flipper Zero - Pokemon Trading in Game Boy
-# PARTS: [PortData EXT Link](https://shop.rogue-master.net/products/gpio-ext-link-portdata-line-interface-connecting-line-interface-for-game-boy-color-game-boy-pocket-gbc-gbp-gbl) & [Proto Board](https://shop.rogue-master.net/products/gpio-10pcs-pcb-prototype-pcb-board-circuit-board-protoboard-pcb-price-universal-stripboard-prototyping-veroboard-2-x-8-double-side) 
 
 <p align="center">
 <a target="_blank" href="https://www.reddit.com/r/flipperzero/comments/121ncot/flipper_zero_game_boy_pokemon_trading/">
@@ -156,6 +155,8 @@ _An example GB SPI transfer. Here, the master sends 0xD9 (217) and the slave sen
 You can learn more about it in the following video. [**Analyzing the Different Versions of the Link Cable**](https://youtu.be/h1KKkCfzOws?t=151).
 
 ## Board for Flipper Zero with PortData EXT Link.
+
+For the Flipper Zero board, a [PortData EXT Link](https://es.aliexpress.com/item/1005004116983895.html) and a 2x8  [prototype board](https://es.aliexpress.com/item/32478242317.html) were used.
 
 <p align='center'>
 <br />

@@ -1,5 +1,4 @@
 # 🐬 Flipper Zero - Pokemon Trading in Game Boy
-# PARTES: [PortData EXT Link](https://shop.rogue-master.net/products/gpio-ext-link-portdata-line-interface-connecting-line-interface-for-game-boy-color-game-boy-pocket-gbc-gbp-gbl) Y [place de prototipo](https://shop.rogue-master.net/products/gpio-10pcs-pcb-prototype-pcb-board-circuit-board-protoboard-pcb-price-universal-stripboard-prototyping-veroboard-2-x-8-double-side) 
 
 <p align="center">
 <a target="_blank" href="https://www.reddit.com/r/flipperzero/comments/121ncot/flipper_zero_game_boy_pokemon_trading/">
@@ -152,6 +151,8 @@ Se puede conocer mas al respecto en el siguiente Video [**Analyzing the Differen
 
 ## Placa para Flipper Zero con Socket PortData EXT Link
 
+Para la placa del Fipper Zero se utilizó un [PortData EXT Link](https://es.aliexpress.com/item/1005004116983895.html) y una [place de prototipo](https://es.aliexpress.com/item/32478242317.html) de 2x8.
+
 <p align='center'>
 <br />
 <img src="./docs/images/EXT-Link.png" width="400" /><br />
@@ -244,5 +245,5 @@ De cada imagen se transformó el color `#aaa` a `#fff` para que Flipper Zero la 
 <p align='center'>
 <br />
 <br />
-Desde Talcahuano 🇨🇱 con �?
+Desde Talcahuano 🇨🇱 con ❤ 
 </p>

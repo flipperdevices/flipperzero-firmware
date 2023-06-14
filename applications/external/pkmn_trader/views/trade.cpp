@@ -60,7 +60,7 @@ static void trade_draw_callback(Canvas* canvas, void* context) {
         } else if(
             model->gameboy_status == GAMEBOY_READY || model->gameboy_status == GAMEBOY_WAITING ||
             model->gameboy_status == GAMEBOY_SEND) {
-            canvas_draw_icon(canvas, 38, 11, pokemon_icons[model->current_pokemon]);
+            canvas_draw_icon(canvas, 38, 11, pokemon_table[model->current_pokemon].icon);
         }
         canvas_draw_icon(canvas, 0, 53, &I_Background_128x11);
 
@@ -327,6 +327,7 @@ void trade_enter_callback(void* context) {
         GpioModeInterruptRise,
         GpioPullNo,
         GpioSpeedVeryHigh); // <-- This line causes the "OK" to stop functioning when exiting the application, so a reboot of the Flipper Zero is required.
+    furi_hal_gpio_remove_int_callback(&GAME_BOY_CLK);
     furi_hal_gpio_add_int_callback(&GAME_BOY_CLK, input_clk_gameboy, trade);
 
     // furi_hal_gpio_disable_int_callback(&GAME_BOY_CLK);

@@ -15,6 +15,12 @@
 
 #define TAG "Pokemon"
 
+struct pokemon_lut {
+    const char* name;
+    const Icon* icon;
+    const uint8_t hex;
+};
+
 typedef struct App App;
 typedef enum {
     GAMEBOY_INITIAL,
@@ -54,8 +60,6 @@ typedef struct SelectPokemonModel {
     void* callback_context;
 } SelectPokemonModel;
 
-extern const char* pokemon_names[];
-extern const Icon* pokemon_icons[];
-extern const unsigned char pokemon_hex_codes[];
+extern struct pokemon_lut pokemon_table[];
 
 #endif /* POKEMON_APP_H */
