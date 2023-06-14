@@ -73,6 +73,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Revert BLE gatt characteristics refactoring temporarily (By xMasterX)
 - UL: Remove un-needed SubGHz global var (By xMasterX)
 - Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
+- Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) (from xMasterX)
 
 <a name="release">
 

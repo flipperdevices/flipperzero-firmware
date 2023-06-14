@@ -157,8 +157,12 @@ int32_t flipper_geiger_app() {
     FuriTimer* timer = furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, 1000);
 
-    // ENABLE 5V pin
-    furi_hal_power_enable_otg();
+    // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
+    uint8_t attempts = 0;
+    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
+        furi_hal_power_enable_otg();
+        furi_delay_ms(10);
+    }
 
     while(1) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, FuriWaitForever);
@@ -235,7 +239,10 @@ int32_t flipper_geiger_app() {
         if(screenRefresh == 1) view_port_update(view_port);
     }
 
-    furi_hal_power_disable_otg();
+    // Disable 5v power
+    if(furi_hal_power_is_otg_enabled()) {
+        furi_hal_power_disable_otg();
+    }
 
     furi_hal_gpio_disable_int_callback(&gpio_ext_pa7);
     furi_hal_gpio_remove_int_callback(&gpio_ext_pa7);
