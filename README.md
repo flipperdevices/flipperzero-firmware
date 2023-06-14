@@ -1,15 +1,16 @@
-# Serial flasher
+# esp-serial-flasher
 
-## Overview
+`esp-serial-flasher` is a portable C library for flashing or loading apps to RAM of Espressif SoCs from other host microcontrollers.
 
-Serial flasher component provides portable library for flashing or loading ram loadble app to Espressif SoCs from other host microcontroller. Espressif SoCs are normally programmed via serial interface (UART). Port layer for given host microcontroller has to be implemented, if not available. Details can be found in section below.
+## Using the library
+Espressif SoCs are normally programmed via serial interface (UART). The port layer for the given host microcontroller has to be implemented if not available. Details can be found in section below.
 
 Supported **host** microcontrollers:
 
 - STM32
-- Raspberry Pi
+- Raspberry Pi SBC
 - ESP32
-- MCU running Zephyr OS
+- Any MCU running Zephyr OS
 
 Supported **target** microcontrollers:
 
@@ -25,9 +26,11 @@ Supported hardware interfaces:
 - UART
 - SPI (only for RAM download, experimental)
 
-## Supporting new host target
+For example usage check the `examples` directory.
 
-In order to support new target, following function has to be implemented by user:
+## Supporting a new host target
+
+In order to support a new target, following functions have to be implemented by user:
 
 - `loader_port_read()`
 - `loader_port_write()`
@@ -36,20 +39,21 @@ In order to support new target, following function has to be implemented by user
 - `loader_port_start_timer()`
 - `loader_port_remaining_time()`
 
-Following functions are part of io.h header for convenience, however, user does not have to strictly follow function signatures, as there are not called directly from library.
+For the SPI interface ports
+- `loader_port_spi_set_cs()`
+needs to be implemented as well.
+
+The following functions are part of the [io.h](include/io.h) header for convenience, however, the user does not have to strictly follow function signatures, as there are not called directly from library.
 
 - `loader_port_change_transmission_rate()`
 - `loader_port_reset_target()`
 - `loader_port_debug_print()`
 
-For the SPI interface ports
-- `loader_port_spi_set_cs()`
-needs to be implemented as well.
-
-Prototypes of all function mentioned above can be found in [io.h](include/io.h).
-Please refer to ports in `port` directory. Currently, ports for [ESP32](port/esp32_port.c), [STM32](port/stm32_port.c), and [Zephyr](port/zephyr_port.c) are available.
+Prototypes of all functions mentioned above can be found in [io.h](include/io.h).
 
 ## Configuration
+
+These are the configuration toggles available to the user:
 
 * `SERIAL_FLASHER_INTERFACE_UART/SERIAL_FLASHER_INTERFACE_SPI`
 
@@ -57,13 +61,12 @@ This defines the hardware interface to use. SPI interface only supports RAM down
 
 Default: SERIAL_FLASHER_INTERFACE_UART
 
-These are the configuration toggles available to the user:
 * `MD5_ENABLED`
 
-If enabled, serial flasher is capable of verifying flash integrity after writing to flash.
+If enabled, `esp-serial-flasher` is capable of verifying flash integrity after writing to flash.
 
 Default: Enabled
-> Warning: As ROM bootloader of ESP8266 does not support MD5_CHECK, this option has to be disabled!
+> Warning: As ROM bootloader of the ESP8266 does not support MD5_CHECK, this option has to be disabled!
 
 * `SERIAL_FLASHER_RESET_HOLD_TIME_MS`
 
@@ -85,7 +88,7 @@ cmake -DMD5_ENABLED=1 .. && cmake --build .
 
 ### STM32 support
 
-STM32 port make use of STM32 HAL libraries, that does not come with CMake support. In order to compile the project, `stm32-cmake` (`cmake` support package) has to be pulled as submodule.
+The STM32 port makes use of STM32 HAL libraries, and these do not come with CMake support. In order to compile the project, `stm32-cmake` (a `CMake` support package) has to be pulled as submodule.
 
 ```
 git clone --recursive https://github.com/espressif/esp-serial-flasher.git
@@ -104,13 +107,13 @@ In addition to configuration parameters mentioned above, following definitions h
 - STM32_CHIP: name of STM32 for which project should be compiled (i.e STM32F407VG)
 - PORT: STM32
 
-This can be achieved by passing definition to command line, such as:
+This can be achieved by passing definitions to the command line, such as:
 
 ```
 cmake -DTOOLCHAIN_PREFIX="/path_to_toolchain" -DSTM32Cube_DIR="path_to_stm32Cube" -DSTM32_CHIP="STM32F407VG" -DPORT="STM32" .. && cmake --build .
 ```
 
-Alternatively, set those variables in top level `cmake` directory:
+Alternatively, those variables can be set in the top level `cmake` directory:
 
 ```
 set(TOOLCHAIN_PREFIX    path_to_toolchain)
@@ -121,7 +124,7 @@ set(PORT                STM32)
 
 ### Zephyr support
 
-The Zephyr port is ready to be integrated into your Zephyr app as a Zephyr module. In the manifest file (west.yml), add:
+The Zephyr port is ready to be integrated into Zephyr apps as a Zephyr module. In the manifest file (west.yml), add:
 
 ```
     - name: esp-flasher
@@ -138,9 +141,9 @@ CONFIG_CONSOLE_GETCHAR=y
 CONFIG_SERIAL_FLASHER_MD5_ENABLED=y
 ```
 
-to your project configuration `prj.conf`.
+to the project configuration `prj.conf`.
 
-For your C/C++ source code, you can use the example code provided in `examples/zephyr_example` as a starting point.
+For the C/C++ source code, the example code provided in `examples/zephyr_example` can be used as a starting point.
 
 ## Licence
 
