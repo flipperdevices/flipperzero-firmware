@@ -8,6 +8,8 @@
 extern "C" {
 #endif
 
+#define ISO14443_4A_POLLER_ATS_FWT_FC (12000)
+
 typedef enum {
     Iso14443_4aPollerStateIdle,
     Iso14443_4aPollerStateReadAts,
