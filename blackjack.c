@@ -179,6 +179,7 @@ void lose(void *ctx) {
 }
 
 void win(void *ctx) {
+    DOLPHIN_DEED(DolphinDeedPluginGameWin);
     GameState *game_state = ctx;
     game_state->state = GameStatePlay;
     game_state->player_score += game_state->bet * 2;
@@ -473,7 +474,7 @@ int32_t blackjack_app(void *p) {
     int32_t return_code = 0;
 
     FuriMessageQueue *event_queue = furi_message_queue_alloc(8, sizeof(AppEvent));
-
+    DOLPHIN_DEED(DolphinDeedPluginGameStart);
     GameState *game_state = malloc(sizeof(GameState));
     game_state->menu= malloc(sizeof(Menu));
     game_state->menu->menu_width=40;
