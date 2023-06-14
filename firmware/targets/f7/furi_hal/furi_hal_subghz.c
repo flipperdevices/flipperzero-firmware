@@ -26,11 +26,6 @@ static uint32_t furi_hal_subghz_debug_gpio_buff[2];
 #define SUBGHZ_DMA_CH1_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH1_CHANNEL
 #define SUBGHZ_DMA_CH2_DEF SUBGHZ_DMA, SUBGHZ_DMA_CH2_CHANNEL
 
-/** Low level buffer dimensions and guard times */
-#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256)
-#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
-#define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME 999
-
 /** SubGhz state */
 typedef enum {
     SubGhzStateInit, /**< Init pending */

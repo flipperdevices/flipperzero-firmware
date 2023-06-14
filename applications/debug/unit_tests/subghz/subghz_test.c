@@ -68,7 +68,7 @@ static bool subghz_decoder_test(const char* path, const char* name_decoder) {
 
     if(decoder) {
         file_worker_encoder_handler = subghz_file_encoder_worker_alloc();
-        if(subghz_file_encoder_worker_start(file_worker_encoder_handler, path)) {
+        if(subghz_file_encoder_worker_start(file_worker_encoder_handler, path, NULL)) {
             // the worker needs a file in order to open and read part of the file
             furi_delay_ms(100);
 
@@ -108,7 +108,7 @@ static bool subghz_decode_random_test(const char* path) {
     uint32_t test_start = furi_get_tick();
 
     file_worker_encoder_handler = subghz_file_encoder_worker_alloc();
-    if(subghz_file_encoder_worker_start(file_worker_encoder_handler, path)) {
+    if(subghz_file_encoder_worker_start(file_worker_encoder_handler, path, NULL)) {
         // the worker needs a file in order to open and read part of the file
         furi_delay_ms(100);
 

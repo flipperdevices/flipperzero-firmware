@@ -5,9 +5,11 @@ const SubGhzDevice* subghz_device_registry_get_by_name(
     const char* name) {
     furi_assert(subghz_device);
 
-    for(size_t i = 0; i < subghz_device_registry_count(subghz_device); i++) {
-        if(strcmp(name, subghz_device->items[i]->name) == 0) {
-            return subghz_device->items[i];
+    if(name != NULL) {
+        for(size_t i = 0; i < subghz_device_registry_count(subghz_device); i++) {
+            if(strcmp(name, subghz_device->items[i]->name) == 0) {
+                return subghz_device->items[i];
+            }
         }
     }
     return NULL;

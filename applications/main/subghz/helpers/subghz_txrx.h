@@ -294,3 +294,5 @@ bool subghz_txrx_radio_device_is_connect_external_cc1101(SubGhzTxRx* instance);
 SubGhzRadioDeviceType
     subghz_txrx_radio_device_set(SubGhzTxRx* instance, SubGhzRadioDeviceType radio_device_type);
 SubGhzRadioDeviceType subghz_txrx_radio_device_get(SubGhzTxRx* instance);
+float subghz_txrx_radio_device_get_rssi(SubGhzTxRx* instance);
+const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance);

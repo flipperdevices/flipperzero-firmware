@@ -163,7 +163,8 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
         if(!strcmp(furi_string_get_cstr(temp_str), "RAW")) {
             //if RAW
             subghz->load_type_file = SubGhzLoadTypeFileRaw;
-            subghz_protocol_raw_gen_fff_data(fff_data, file_path);
+            subghz_protocol_raw_gen_fff_data(
+                fff_data, file_path, subghz_txrx_radio_device_get_name(subghz->txrx));
         } else {
             subghz->load_type_file = SubGhzLoadTypeFileKey;
             stream_copy_full(

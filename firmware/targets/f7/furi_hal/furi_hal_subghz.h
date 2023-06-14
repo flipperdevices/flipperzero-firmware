@@ -17,6 +17,11 @@
 extern "C" {
 #endif
 
+/** Low level buffer dimensions and guard times */
+#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256)
+#define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
+#define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME 999
+
 /** Switchable Radio Paths */
 typedef enum {
     FuriHalSubGhzPathIsolate, /**< Isolate Radio from antenna */
