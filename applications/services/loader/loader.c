@@ -111,9 +111,9 @@ static Loader* loader_alloc() {
     return loader;
 }
 
-static FlipperApplication const* loader_find_application_by_name_in_list(
+static FlipperInternalApplication const* loader_find_application_by_name_in_list(
     const char* name,
-    const FlipperApplication* list,
+    const FlipperInternalApplication* list,
     const uint32_t n_apps) {
     for(size_t i = 0; i < n_apps; i++) {
         if(strcmp(name, list[i].name) == 0) {
@@ -123,8 +123,8 @@ static FlipperApplication const* loader_find_application_by_name_in_list(
     return NULL;
 }
 
-static const FlipperApplication* loader_find_application_by_name(const char* name) {
-    const FlipperApplication* application = NULL;
+static const FlipperInternalApplication* loader_find_application_by_name(const char* name) {
+    const FlipperInternalApplication* application = NULL;
     application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
     if(!application) {
         application = loader_find_application_by_name_in_list(
@@ -138,8 +138,10 @@ static const FlipperApplication* loader_find_application_by_name(const char* nam
     return application;
 }
 
-static void
-    loader_start_internal_app(Loader* loader, const FlipperApplication* app, const char* args) {
+static void loader_start_internal_app(
+    Loader* loader,
+    const FlipperInternalApplication* app,
+    const char* args) {
     FURI_LOG_I(TAG, "Starting %s", app->name);
 
     // store args
@@ -166,7 +168,7 @@ static void
     }
 
     // setup insomnia
-    if(!(app->flags & FlipperApplicationFlagInsomniaSafe)) {
+    if(!(app->flags & FlipperInternalApplicationFlagInsomniaSafe)) {
         furi_hal_power_insomnia_enter();
         loader->app.insomniac = true;
     } else {
@@ -209,7 +211,7 @@ static LoaderStatus loader_do_start_by_name(Loader* loader, const char* name, co
         return LoaderStatusErrorAppStarted;
     }
 
-    const FlipperApplication* app = loader_find_application_by_name(name);
+    const FlipperInternalApplication* app = loader_find_application_by_name(name);
 
     if(!app) {
         return LoaderStatusErrorUnknownApp;

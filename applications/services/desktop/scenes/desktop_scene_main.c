@@ -40,7 +40,8 @@ static void desktop_scene_main_interact_animation_callback(void* context) {
 }
 
 #ifdef APP_ARCHIVE
-static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* flipper_app) {
+static void
+    desktop_switch_to_app(Desktop* desktop, const FlipperInternalApplication* flipper_app) {
     furi_assert(desktop);
     furi_assert(flipper_app);
     furi_assert(flipper_app->app);
