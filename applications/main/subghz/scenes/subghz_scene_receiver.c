@@ -56,6 +56,9 @@ static void subghz_scene_receiver_update_statusbar(void* context) {
         subghz->state_notifications = SubGhzNotificationStateIDLE;
     }
     furi_string_free(history_stat_str);
+
+    subghz_view_receiver_set_radio_device_type(
+        subghz->subghz_receiver, subghz_txrx_radio_device_get(subghz->txrx));
 }
 
 void subghz_scene_receiver_callback(SubGhzCustomEvent event, void* context) {

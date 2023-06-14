@@ -60,8 +60,8 @@ SubGhzTxRx* subghz_txrx_alloc() {
     subghz_worker_set_context(instance->worker, instance->receiver);
 
     //set default device External
-    instance->radio_device_state =
-        subghz_txrx_radio_device_set(instance, SubGhzRadioDeviceStateExternalCC1101);
+    instance->radio_device_type =
+        subghz_txrx_radio_device_set(instance, SubGhzRadioDeviceTypeExternalCC1101);
 
     return instance;
 }
@@ -69,7 +69,7 @@ SubGhzTxRx* subghz_txrx_alloc() {
 void subghz_txrx_free(SubGhzTxRx* instance) {
     furi_assert(instance);
 
-    if(instance->radio_device_state != SubGhzRadioDeviceStateInternal) {
+    if(instance->radio_device_type != SubGhzRadioDeviceTypeInternal) {
         subghz_txrx_radio_device_power_off(instance);
         subghz_devices_end(instance->radio_device);
     }
@@ -565,29 +565,29 @@ bool subghz_txrx_radio_device_is_connect_external_cc1101(SubGhzTxRx* instance) {
     return is_connect;
 }
 
-SubGhzRadioDeviceState
-    subghz_txrx_radio_device_set(SubGhzTxRx* instance, SubGhzRadioDeviceState radio_device_state) {
+SubGhzRadioDeviceType
+    subghz_txrx_radio_device_set(SubGhzTxRx* instance, SubGhzRadioDeviceType radio_device_type) {
     furi_assert(instance);
 
-    if(radio_device_state == SubGhzRadioDeviceStateExternalCC1101 &&
+    if(radio_device_type == SubGhzRadioDeviceTypeExternalCC1101 &&
        subghz_txrx_radio_device_is_connect_external_cc1101(instance)) {
         subghz_txrx_radio_device_power_on(instance);
         instance->radio_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
         subghz_devices_begin(instance->radio_device);
-        instance->radio_device_state = SubGhzRadioDeviceStateExternalCC1101;
+        instance->radio_device_type = SubGhzRadioDeviceTypeExternalCC1101;
     } else {
         subghz_txrx_radio_device_power_off(instance);
-        if(instance->radio_device_state != SubGhzRadioDeviceStateInternal) {
+        if(instance->radio_device_type != SubGhzRadioDeviceTypeInternal) {
             subghz_devices_end(instance->radio_device);
         }
         instance->radio_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
-        instance->radio_device_state = SubGhzRadioDeviceStateInternal;
+        instance->radio_device_type = SubGhzRadioDeviceTypeInternal;
     }
 
-    return instance->radio_device_state;
+    return instance->radio_device_type;
 }
 
-SubGhzRadioDeviceState subghz_txrx_radio_device_get(SubGhzTxRx* instance) {
+SubGhzRadioDeviceType subghz_txrx_radio_device_get(SubGhzTxRx* instance) {
     furi_assert(instance);
-    return instance->radio_device_state;
+    return instance->radio_device_type;
 }

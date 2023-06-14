@@ -291,6 +291,6 @@ void subghz_txrx_set_raw_file_encoder_worker_callback_end(
     void* context);
 
 bool subghz_txrx_radio_device_is_connect_external_cc1101(SubGhzTxRx* instance);
-SubGhzRadioDeviceState
-    subghz_txrx_radio_device_set(SubGhzTxRx* instance, SubGhzRadioDeviceState radio_device_state);
-SubGhzRadioDeviceState subghz_txrx_radio_device_get(SubGhzTxRx* instance);
+SubGhzRadioDeviceType
+    subghz_txrx_radio_device_set(SubGhzTxRx* instance, SubGhzRadioDeviceType radio_device_type);
+SubGhzRadioDeviceType subghz_txrx_radio_device_get(SubGhzTxRx* instance);

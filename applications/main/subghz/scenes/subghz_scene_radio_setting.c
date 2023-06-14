@@ -12,8 +12,8 @@ const char* const radio_device_text[RADIO_DEVICE_COUNT] = {
 };
 
 const uint32_t radio_device_value[RADIO_DEVICE_COUNT] = {
-    SubGhzRadioDeviceStateInternal,
-    SubGhzRadioDeviceStateExternalCC1101,
+    SubGhzRadioDeviceTypeInternal,
+    SubGhzRadioDeviceTypeExternalCC1101,
 };
 
 static void subghz_scene_radio_settings_set_device(VariableItem* item) {
@@ -21,7 +21,7 @@ static void subghz_scene_radio_settings_set_device(VariableItem* item) {
     uint8_t index = variable_item_get_current_value_index(item);
 
     if(!subghz_txrx_radio_device_is_connect_external_cc1101(subghz->txrx) &&
-       radio_device_value[index] == SubGhzRadioDeviceStateExternalCC1101) {
+       radio_device_value[index] == SubGhzRadioDeviceTypeExternalCC1101) {
         //ToDo correct if there is more than 1 module
         index = 0;
     }

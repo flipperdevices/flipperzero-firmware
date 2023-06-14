@@ -48,6 +48,9 @@ static void subghz_scene_read_raw_update_statusbar(void* context) {
 
     furi_string_free(frequency_str);
     furi_string_free(modulation_str);
+
+    subghz_read_raw_set_radio_device_type(
+        subghz->subghz_read_raw, subghz_txrx_radio_device_get(subghz->txrx));
 }
 
 void subghz_scene_read_raw_callback(SubGhzCustomEvent event, void* context) {
