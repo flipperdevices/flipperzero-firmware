@@ -62,9 +62,11 @@ class GitVersion:
             "GIT_BRANCH": branch,
             "VERSION": version,
             "BUILD_DIRTY": 0,
-            "GIT_ORIGIN": ",".join(self._get_git_origins()),
+            "GIT_ORIGIN": "https://github.com/RogueMaster/flipperzero-firmware-wPlugins.git",
             "GIT_COMMIT_DATE": commit_date,
         }
+    
+    # "GIT_ORIGIN": ",".join(self._get_git_origins()),
 
     def _get_git_origins(self):
         try:
