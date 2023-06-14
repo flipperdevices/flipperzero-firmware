@@ -15,6 +15,7 @@ typedef enum {
     MfDesfirePollerStateReadVersion,
     MfDesfirePollerStateReadFreeMemory,
     MfDesfirePollerStateReadMasterKey,
+    MfDesfirePollerStateReadApplicationIds,
     MfDesfirePollerStateReadFailed,
     MfDesfirePollerStateReadSuccess,
 
@@ -59,18 +60,17 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
     MfDesfirePoller* instance,
     MfDesfireKeySettings* data);
 
-MfDesfireError mf_desfire_poller_async_read_key_version(
+MfDesfireError mf_desfire_poller_async_read_key_versions(
     MfDesfirePoller* instance,
-    MfDesfireKeyVersion* data,
-    uint32_t index);
+    SimpleArray* data,
+    uint32_t count);
 
 MfDesfireError mf_desfire_poller_async_read_key_configuration(
     MfDesfirePoller* instance,
     MfDesfireKeyConfiguration* data);
 
-MfDesfireError mf_desfire_poller_async_read_application_ids(
-    MfDesfirePoller* instance,
-    MfDesfireApplicationId* ids);
+MfDesfireError
+    mf_desfire_poller_async_read_application_ids(MfDesfirePoller* instance, SimpleArray* data);
 
 MfDesfireError mf_desfire_poller_async_select_application(
     MfDesfirePoller* instance,

@@ -2,6 +2,8 @@
 
 #include <lib/nfc/protocols/iso14443_4a/iso14443_4a.h>
 
+#include "helpers/simple_array.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -70,7 +72,7 @@ typedef uint8_t MfDesfireKeyVersion;
 
 typedef struct {
     MfDesfireKeySettings key_settings;
-    MfDesfireKeyVersion* key_versions;
+    SimpleArray* key_versions;
 } MfDesfireKeyConfiguration;
 
 typedef enum {
@@ -87,11 +89,14 @@ typedef enum {
     MfDesfireFileCommunicationSettingsEnciphered = 3,
 } MfDesfireFileCommunicationSettings;
 
+typedef uint8_t MfDesfireFileId;
+typedef uint16_t MfDesfireFileAccessRights;
+
 typedef struct MifareDesfireFile {
-    uint8_t id;
+    MfDesfireFileId id;
     MfDesfireFileType type;
     MfDesfireFileCommunicationSettings comm;
-    uint16_t access_rights;
+    MfDesfireFileAccessRights access_rights;
     union {
         struct {
             uint32_t size;
@@ -111,23 +116,18 @@ typedef struct MifareDesfireFile {
     uint8_t* contents;
 } MfDesfireFile;
 
+// TODO: replace with a generic array struct
 typedef struct {
     MfDesfireFile* data;
-    uint8_t count;
+    uint32_t count;
 } MfDesfireFiles;
 
 typedef uint8_t MfDesfireApplicationId[MF_DESFIRE_APP_ID_SIZE];
 
 typedef struct MfDesfireApplication {
-    MfDesfireApplicationId id;
     MfDesfireKeyConfiguration key_config;
     MfDesfireFiles files;
 } MfDesfireApplication;
-
-typedef struct {
-    MfDesfireApplication* data;
-    uint8_t count;
-} MfDesfireApplications;
 
 typedef enum {
     MfDesfireErrorNone,
@@ -141,7 +141,8 @@ typedef struct {
     MfDesfireVersion version;
     MfDesfireFreeMemory free_memory;
     MfDesfireKeyConfiguration master_key;
-    MfDesfireApplications applications;
+    SimpleArray* application_ids;
+    SimpleArray* applications;
 } MfDesfireData;
 
 extern const NfcProtocolBase nfc_protocol_mf_desfire;
@@ -168,7 +169,7 @@ const char* mf_desfire_get_name(const MfDesfireData* data, NfcProtocolNameType n
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len);
 
-// Deprecated
+// Deprecated ?
 bool mf_desfire_detect_protocol(NfcaData* nfca_data);
 
 #ifdef __cplusplus

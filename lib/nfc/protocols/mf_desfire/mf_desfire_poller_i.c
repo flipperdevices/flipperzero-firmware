@@ -45,7 +45,12 @@ MfDesfireError mf_desfire_send_chunks(
         const uint8_t flag_has_next = MF_DESFIRE_FLAG_HAS_NEXT;
 
         bit_buffer_copy_bytes(instance->tx_buffer, &flag_has_next, sizeof(flag_has_next));
-        bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(flag_has_next));
+
+        if(bit_buffer_get_size_bytes(rx_buffer) > sizeof(flag_has_next)) {
+            bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(flag_has_next));
+        } else {
+            bit_buffer_reset(rx_buffer);
+        }
 
         while(bit_buffer_starts_with_byte(instance->rx_buffer, flag_has_next)) {
             Iso14443_4aError error = iso14443_4a_poller_send_block(
@@ -106,6 +111,9 @@ MfDesfireError
 MfDesfireError mf_desfire_poller_async_read_key_settings(
     MfDesfirePoller* instance,
     MfDesfireKeySettings* data) {
+    furi_assert(instance);
+    furi_assert(data);
+
     bit_buffer_set_size_bytes(instance->input_buffer, sizeof(uint8_t));
     bit_buffer_set_byte(instance->input_buffer, 0, MF_DESFIRE_CMD_GET_KEY_SETTINGS);
 
@@ -122,22 +130,32 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
     return error;
 }
 
-MfDesfireError mf_desfire_poller_async_read_key_version(
+MfDesfireError mf_desfire_poller_async_read_key_versions(
     MfDesfirePoller* instance,
-    MfDesfireKeyVersion* data,
-    uint32_t index) {
+    SimpleArray* data,
+    uint32_t count) {
+    furi_assert(instance);
+    furi_assert(count > 0);
+
+    simple_array_init(data, count);
+
     bit_buffer_set_size_bytes(instance->input_buffer, sizeof(uint8_t) * 2);
     bit_buffer_set_byte(instance->input_buffer, 0, MF_DESFIRE_CMD_GET_KEY_VERSION);
-    bit_buffer_set_byte(instance->input_buffer, 1, index);
 
-    MfDesfireError error = mf_desfire_send_chunks(
-        instance,
-        instance->input_buffer,
-        instance->result_buffer,
-        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+    MfDesfireError error = MfDesfireErrorNone;
 
-    if(error == MfDesfireErrorNone) {
-        mf_desfire_key_version_parse(data, instance->result_buffer);
+    for(uint32_t i = 0; i < count; ++i) {
+        bit_buffer_set_byte(instance->input_buffer, 1, i);
+
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        mf_desfire_key_version_parse(simple_array_get(data, i), instance->result_buffer);
     }
 
     return error;
@@ -148,19 +166,47 @@ MfDesfireError mf_desfire_poller_async_read_key_configuration(
     MfDesfireKeyConfiguration* data) {
     furi_assert(instance);
     furi_assert(data);
-    furi_assert(data->key_versions == NULL);
 
     MfDesfireError error;
 
     do {
         error = mf_desfire_poller_async_read_key_settings(instance, &data->key_settings);
         if(error != MfDesfireErrorNone) break;
+        error = mf_desfire_poller_async_read_key_versions(
+            instance, data->key_versions, data->key_settings.max_keys);
+    } while(false);
 
-        mf_desfire_key_version_init(&data->key_versions, data->key_settings.max_keys);
+    return error;
+}
 
-        for(uint32_t i = 0; i < data->key_settings.max_keys; ++i) {
-            error = mf_desfire_poller_async_read_key_version(instance, &data->key_versions[i], i);
-            if(error != MfDesfireErrorNone) break;
+MfDesfireError
+    mf_desfire_poller_async_read_application_ids(MfDesfirePoller* instance, SimpleArray* data) {
+    furi_assert(instance);
+
+    bit_buffer_set_size_bytes(instance->input_buffer, sizeof(uint8_t));
+    bit_buffer_set_byte(instance->input_buffer, 0, MF_DESFIRE_CMD_GET_APPLICATION_IDS);
+
+    MfDesfireError error;
+
+    do {
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        const uint32_t ids_count =
+            bit_buffer_get_size_bytes(instance->result_buffer) / sizeof(MfDesfireApplicationId);
+        if(ids_count == 0) break;
+
+        simple_array_init(data, ids_count);
+
+        FURI_LOG_D(TAG, "Application id count: %lu", ids_count);
+
+        for(uint32_t i = 0; i < ids_count; ++i) {
+            mf_desfire_application_id_parse(simple_array_get(data, i), instance->result_buffer);
         }
     } while(false);
 

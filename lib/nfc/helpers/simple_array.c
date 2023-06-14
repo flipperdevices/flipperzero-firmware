@@ -1,0 +1,90 @@
+#include "simple_array.h"
+
+#include <furi.h>
+
+struct SimpleArray {
+    const SimpleArrayConfig* config;
+    SimpleArrayElement* data;
+    uint32_t count;
+};
+
+SimpleArray* simple_array_alloc(const SimpleArrayConfig* config) {
+    SimpleArray* instance = malloc(sizeof(SimpleArray));
+    instance->config = config;
+    return instance;
+}
+
+void simple_array_free(SimpleArray* instance) {
+    furi_assert(instance);
+
+    simple_array_reset(instance);
+    free(instance);
+}
+
+void simple_array_init(SimpleArray* instance, uint32_t count) {
+    furi_assert(instance);
+    furi_assert(count > 0);
+
+    simple_array_reset(instance);
+
+    instance->data = malloc(count * instance->config->type_size);
+    instance->count = count;
+}
+
+void simple_array_reset(SimpleArray* instance) {
+    furi_assert(instance);
+
+    if(instance->data) {
+        SimpleArrayReset reset = instance->config->reset;
+
+        if(reset) {
+            for(uint32_t i = 0; i < instance->count; ++i) {
+                reset(simple_array_get(instance, i));
+            }
+        }
+
+        free(instance->data);
+
+        instance->count = 0;
+        instance->data = NULL;
+    }
+}
+
+void simple_array_copy(SimpleArray* instance, const SimpleArray* other) {
+    furi_assert(instance);
+    furi_assert(other);
+    furi_assert(instance->config == other->config);
+
+    simple_array_reset(instance);
+
+    if(other->count == 0) {
+        return;
+    }
+
+    simple_array_init(instance, other->count);
+
+    SimpleArrayCopy copy = instance->config->copy;
+    if(copy) {
+        for(uint32_t i = 0; i < other->count; ++i) {
+            copy(simple_array_get(instance, i), simple_array_cget(other, i));
+        }
+    } else {
+        memcpy(instance->data, other->data, other->count * instance->config->type_size);
+    }
+}
+
+uint32_t simple_array_get_count(const SimpleArray* instance) {
+    furi_assert(instance);
+    return instance->count;
+}
+
+SimpleArrayElement* simple_array_get(SimpleArray* instance, uint32_t index) {
+    furi_assert(instance);
+    furi_assert(index < instance->count);
+
+    return instance->data + index * instance->config->type_size;
+}
+
+const SimpleArrayElement* simple_array_cget(const SimpleArray* instance, uint32_t index) {
+    return simple_array_get((SimpleArrayElement*)instance, index);
+}

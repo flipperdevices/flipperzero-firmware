@@ -16,22 +16,17 @@ void mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* 
     bit_buffer_write_bytes(buf, data, sizeof(MfDesfireKeySettings));
 }
 
-void mf_desfire_key_version_init(MfDesfireKeyVersion** data, uint32_t count) {
-    furi_assert(*data == NULL);
-
-    *data = malloc(sizeof(MfDesfireKeyVersion) * count);
-}
-
 void mf_desfire_key_version_parse(MfDesfireKeyVersion* data, const BitBuffer* buf) {
-    *data = bit_buffer_get_byte(buf, 0);
+    bit_buffer_write_bytes(buf, data, sizeof(MfDesfireKeyVersion));
 }
 
-void mf_desfire_key_config_reset(MfDesfireKeyConfiguration* config) {
-    if(config->key_versions) {
-        free(config->key_versions);
-    }
-    memset(config, 0, sizeof(MfDesfireKeyConfiguration));
+void mf_desfire_application_id_parse(MfDesfireApplicationId data, const BitBuffer* buf) {
+    bit_buffer_write_bytes(buf, data, sizeof(MfDesfireApplicationId));
 }
+
+// void mf_desfire_key_config_reset(MfDesfireKeyConfiguration* data) {
+//     simple_array_reset(data->key_versions);
+// }
 
 void mf_desfire_file_reset(MfDesfireFile* file) {
     if(file->contents) {
@@ -50,36 +45,30 @@ void mf_desfire_files_reset(MfDesfireFiles* files) {
     memset(files, 0, sizeof(MfDesfireFiles));
 }
 
-void mf_desfire_application_reset(MfDesfireApplication* app) {
-    memset(app->id, 0, sizeof(app->id));
-    mf_desfire_key_config_reset(&app->key_config);
-    mf_desfire_files_reset(&app->files);
-}
+// void mf_desfire_application_reset(MfDesfireApplication* app) {
+//     memset(app->id, 0, sizeof(app->id));
+//     mf_desfire_key_config_reset(&app->key_config);
+//     mf_desfire_files_reset(&app->files);
+// }
 
-void mf_desfire_applications_reset(MfDesfireApplications* apps) {
-    if(apps->data) {
-        for(size_t i = 0; i < apps->count; ++i) {
-            mf_desfire_application_reset(&apps->data[i]);
-        }
-        free(apps->data);
-    }
-    memset(apps, 0, sizeof(MfDesfireApplications));
-}
+// void mf_desfire_applications_reset(MfDesfireApplications* apps) {
+//     if(apps->data) {
+//         for(size_t i = 0; i < apps->count; ++i) {
+//             mf_desfire_application_reset(&apps->data[i]);
+//         }
+//         free(apps->data);
+//     }
+//     memset(apps, 0, sizeof(MfDesfireApplications));
+// }
 
-void mf_desfire_key_config_copy(
-    MfDesfireKeyConfiguration* config,
-    const MfDesfireKeyConfiguration* other) {
-    furi_assert(config->key_versions == NULL);
-
-    config->key_settings = other->key_settings;
-    if(other->key_settings.max_keys == 0) {
-        return;
-    }
-
-    const size_t key_versions_size = other->key_settings.max_keys * sizeof(MfDesfireKeyVersion);
-    config->key_versions = malloc(key_versions_size);
-    memcpy(config->key_versions, other->key_versions, key_versions_size);
-}
+// void mf_desfire_key_config_copy(
+//     MfDesfireKeyConfiguration* config,
+//     const MfDesfireKeyConfiguration* other) {
+//     // furi_assert(config->key_versions == NULL);
+//
+//     config->key_settings = other->key_settings;
+//     simple_array_copy(config->key_versions, other->key_versions);
+// }
 
 void mf_desfire_file_copy(MfDesfireFile* file, const MfDesfireFile* other) {
     furi_assert(file->contents == NULL);
@@ -124,23 +113,42 @@ void mf_desfire_files_copy(MfDesfireFiles* files, const MfDesfireFiles* other) {
     }
 }
 
-void mf_desfire_application_copy(MfDesfireApplication* app, const MfDesfireApplication* other) {
-    memcpy(app->id, other->id, sizeof(other->id));
-    mf_desfire_key_config_copy(&app->key_config, &other->key_config);
-    mf_desfire_files_copy(&app->files, &other->files);
-}
+// void mf_desfire_application_copy(MfDesfireApplication* app, const MfDesfireApplication* other) {
+//     memcpy(app->id, other->id, sizeof(other->id));
+//     mf_desfire_key_config_copy(&app->key_config, &other->key_config);
+//     mf_desfire_files_copy(&app->files, &other->files);
+// }
+//
+// void mf_desfire_applications_copy(MfDesfireApplications* apps, const MfDesfireApplications* other) {
+//     furi_assert(apps->data == NULL);
+//
+//     apps->count = other->count;
+//     if(other->count == 0) {
+//         return;
+//     }
+//
+//     apps->data = malloc(other->count * sizeof(MfDesfireApplication));
+//
+//     for(size_t i = 0; i < other->count; ++i) {
+//         mf_desfire_application_copy(&apps->data[i], &other->data[i]);
+//     }
+// }
 
-void mf_desfire_applications_copy(MfDesfireApplications* apps, const MfDesfireApplications* other) {
-    furi_assert(apps->data == NULL);
+const SimpleArrayConfig mf_desfire_key_version_array_config = {
+    .copy = NULL,
+    .reset = NULL,
+    .type_size = sizeof(MfDesfireKeyVersion),
+};
 
-    apps->count = other->count;
-    if(other->count == 0) {
-        return;
-    }
+const SimpleArrayConfig mf_desfire_app_id_array_config = {
+    .copy = NULL,
+    .reset = NULL,
+    .type_size = sizeof(MfDesfireApplicationId),
+};
 
-    apps->data = malloc(other->count * sizeof(MfDesfireApplication));
-
-    for(size_t i = 0; i < other->count; ++i) {
-        mf_desfire_application_copy(&apps->data[i], &other->data[i]);
-    }
-}
+// TODO: Custom methods
+const SimpleArrayConfig mf_desfire_app_array_config = {
+    .copy = NULL,
+    .reset = NULL,
+    .type_size = sizeof(MfDesfireApplication),
+};

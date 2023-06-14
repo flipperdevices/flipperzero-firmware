@@ -2,40 +2,42 @@
 
 #include "mf_desfire.h"
 
+// SimpleArray configurations
+
+extern const SimpleArrayConfig mf_desfire_key_version_array_config;
+extern const SimpleArrayConfig mf_desfire_app_id_array_config;
+extern const SimpleArrayConfig mf_desfire_app_array_config;
+
 // Parse internal MfDesfire structures
 
-void mf_desfire_version_parse(MfDesfireVersion* version, const BitBuffer* buf);
+void mf_desfire_version_parse(MfDesfireVersion* data, const BitBuffer* buf);
 
-void mf_desfire_free_memory_parse(MfDesfireFreeMemory* free_mem, const BitBuffer* buf);
+void mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* buf);
 
 void mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf);
 
-void mf_desfire_key_version_init(MfDesfireKeyVersion** data, uint32_t count);
-
 void mf_desfire_key_version_parse(MfDesfireKeyVersion* data, const BitBuffer* buf);
+
+void mf_desfire_application_id_parse(MfDesfireApplicationId data, const BitBuffer* buf);
 
 // Reset internal MfDesfire structures
 
-void mf_desfire_key_config_reset(MfDesfireKeyConfiguration* config);
+void mf_desfire_file_reset(MfDesfireFile* data);
 
-void mf_desfire_file_reset(MfDesfireFile* file);
+void mf_desfire_files_reset(MfDesfireFiles* data);
 
-void mf_desfire_files_reset(MfDesfireFiles* files);
-
-void mf_desfire_application_reset(MfDesfireApplication* app);
-
-void mf_desfire_applications_reset(MfDesfireApplications* apps);
+void mf_desfire_application_reset(MfDesfireApplication* data);
 
 // Copy internal MfDesfire structures
 
-void mf_desfire_key_config_copy(
-    MfDesfireKeyConfiguration* config,
-    const MfDesfireKeyConfiguration* other);
+// void mf_desfire_key_config_copy(
+//     MfDesfireKeyConfiguration* data,
+//     const MfDesfireKeyConfiguration* other);
 
-void mf_desfire_file_copy(MfDesfireFile* file, const MfDesfireFile* other);
-
-void mf_desfire_files_copy(MfDesfireFiles* files, const MfDesfireFiles* other);
-
-void mf_desfire_application_copy(MfDesfireApplication* app, const MfDesfireApplication* other);
-
-void mf_desfire_applications_copy(MfDesfireApplications* apps, const MfDesfireApplications* other);
+// void mf_desfire_file_copy(MfDesfireFile* data, const MfDesfireFile* other);
+//
+// void mf_desfire_files_copy(MfDesfireFiles* data, const MfDesfireFiles* other);
+//
+// void mf_desfire_application_copy(MfDesfireApplication* data, const MfDesfireApplication* other);
+//
+// void mf_desfire_applications_copy(MfDesfireApplications* data, const MfDesfireApplications* other);
