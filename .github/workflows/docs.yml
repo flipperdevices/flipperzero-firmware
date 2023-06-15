@@ -1,7 +1,6 @@
 name: 'Generate documentation with Doxygen'
 
 on:
-  pull_request:
   push:
     branches:
       - dev
