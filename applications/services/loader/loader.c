@@ -187,16 +187,13 @@ static void loader_start_internal_app(
 
 static void loader_do_menu_show(Loader* loader) {
     if(!loader->loader_menu) {
-        loader->loader_menu = loader_menu_alloc();
-        loader_menu_set_closed_callback(loader->loader_menu, loader_menu_closed_callback, loader);
-        loader_menu_set_click_callback(loader->loader_menu, loader_menu_click_callback, loader);
-        loader_menu_start(loader->loader_menu);
+        loader->loader_menu =
+            loader_menu_alloc(loader_menu_click_callback, loader_menu_closed_callback, loader);
     }
 }
 
 static void loader_do_menu_closed(Loader* loader) {
     if(loader->loader_menu) {
-        loader_menu_stop(loader->loader_menu);
         loader_menu_free(loader->loader_menu);
         loader->loader_menu = NULL;
     }
@@ -214,6 +211,7 @@ static LoaderStatus loader_do_start_by_name(Loader* loader, const char* name, co
     const FlipperInternalApplication* app = loader_find_application_by_name(name);
 
     if(!app) {
+        FURI_LOG_E(TAG, "Application \"%s\" not found", name);
         return LoaderStatusErrorUnknownApp;
     }
 
