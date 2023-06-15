@@ -331,12 +331,6 @@ static void gap_init_svc(Gap* gap) {
         FURI_LOG_E(TAG, "Failed updating name characteristic: %d", status);
     }
 
-    status = aci_gatt_set_access_permission(
-        gap->service.gap_svc_handle, gap->service.dev_name_char_handle, 0x01);
-    if(status) {
-        FURI_LOG_E(TAG, "Failed to set name characteristic permissions: %d", status);
-    }
-
     uint8_t gap_appearence_char_uuid[2] = {
         gap->config->appearance_char & 0xff, gap->config->appearance_char >> 8};
     status = aci_gatt_update_char_value(
