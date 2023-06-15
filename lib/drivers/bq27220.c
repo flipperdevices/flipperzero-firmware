@@ -1,3 +1,4 @@
+
 #include "bq27220.h"
 #include "bq27220_reg.h"
 #include "bq27220_config.h"
@@ -7,7 +8,7 @@
 
 #define TAG "Gauge"
 
-uint16_t bq27220_read_word(FuriHalI2cBusHandle* handle, uint8_t address) {
+static uint16_t bq27220_read_word(FuriHalI2cBusHandle* handle, uint8_t address) {
     uint16_t buf = 0;
 
     furi_hal_i2c_read_mem(
@@ -16,14 +17,14 @@ uint16_t bq27220_read_word(FuriHalI2cBusHandle* handle, uint8_t address) {
     return buf;
 }
 
-bool bq27220_control(FuriHalI2cBusHandle* handle, uint16_t control) {
+static bool bq27220_control(FuriHalI2cBusHandle* handle, uint16_t control) {
     bool ret = furi_hal_i2c_write_mem(
         handle, BQ27220_ADDRESS, CommandControl, (uint8_t*)&control, 2, BQ27220_I2C_TIMEOUT);
 
     return ret;
 }
 
-uint8_t bq27220_get_checksum(uint8_t* data, uint16_t len) {
+static uint8_t bq27220_get_checksum(uint8_t* data, uint16_t len) {
     uint8_t ret = 0;
     for(uint16_t i = 0; i < len; i++) {
         ret += data[i];
@@ -31,54 +32,40 @@ uint8_t bq27220_get_checksum(uint8_t* data, uint16_t len) {
     return 0xFF - ret;
 }
 
-// static bool bq27220_set_parameter_u16(FuriHalI2cBusHandle* handle, uint16_t address, uint16_t value) {
-//     bool ret;
-//     uint8_t buffer[4];
-
-//     buffer[0] = address & 0xFF;
-//     buffer[1] = (address >> 8) & 0xFF;
-//     buffer[2] = (value >> 8) & 0xFF;
-//     buffer[3] = value & 0xFF;
-//     ret = furi_hal_i2c_write_mem(
-//         handle, BQ27220_ADDRESS, CommandSelectSubclass, buffer, 4, BQ27220_I2C_TIMEOUT);
-
-//     furi_delay_us(10000);
-
-//     uint8_t checksum = bq27220_get_checksum(buffer, 4);
-//     buffer[0] = checksum;
-//     buffer[1] = 6;
-//     ret &= furi_hal_i2c_write_mem(
-//         handle, BQ27220_ADDRESS, CommandMACDataSum, buffer, 2, BQ27220_I2C_TIMEOUT);
-
-//     furi_delay_us(10000);
-//     return ret;
-// }
-
-static bool bq27220_set_parameter(FuriHalI2cBusHandle* handle, uint16_t address, uint32_t value, size_t size) {
-    furi_assert(size==1 || size==2 || size ==4);
+static bool bq27220_set_parameter(
+    FuriHalI2cBusHandle* handle,
+    uint16_t address,
+    uint32_t value,
+    size_t size) {
+    furi_assert(size == 1 || size == 2 || size == 4);
     bool ret = false;
     uint8_t buffer[6];
 
     do {
         buffer[0] = address & 0xFF;
         buffer[1] = (address >> 8) & 0xFF;
-        for (size_t i=0; i<size; i++) {
-            buffer[1+size-i] = (value >> i) & 0xFF;
+        for(size_t i = 0; i < size; i++) {
+            buffer[1 + size - i] = (value >> i) & 0xFF;
         }
 
-        if (!furi_hal_i2c_write_mem(
-                handle, BQ27220_ADDRESS, CommandSelectSubclass, buffer, size+2, BQ27220_I2C_TIMEOUT)) {
+        if(!furi_hal_i2c_write_mem(
+               handle,
+               BQ27220_ADDRESS,
+               CommandSelectSubclass,
+               buffer,
+               size + 2,
+               BQ27220_I2C_TIMEOUT)) {
             FURI_LOG_I(TAG, "DM write failed");
             break;
         }
 
         furi_delay_us(10000);
 
-        uint8_t checksum = bq27220_get_checksum(buffer, size+2);
+        uint8_t checksum = bq27220_get_checksum(buffer, size + 2);
         buffer[0] = checksum;
         buffer[1] = 2 + size;
-        if (!furi_hal_i2c_write_mem(
-                    handle, BQ27220_ADDRESS, CommandMACDataSum, buffer, 2, BQ27220_I2C_TIMEOUT)) {
+        if(!furi_hal_i2c_write_mem(
+               handle, BQ27220_ADDRESS, CommandMACDataSum, buffer, 2, BQ27220_I2C_TIMEOUT)) {
             FURI_LOG_I(TAG, "CRC write failed");
             break;
         }
@@ -90,72 +77,46 @@ static bool bq27220_set_parameter(FuriHalI2cBusHandle* handle, uint16_t address,
     return ret;
 }
 
-bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory) {
-    uint32_t timeout = 100;
-    // uint16_t design_cap = bq27220_get_design_capacity(handle);
-    // if(cedv->design_cap == design_cap) {
-    //     FURI_LOG_I(TAG, "Skip battery profile update");
-    //     return true;
-    // }
+bool bq27220_init(FuriHalI2cBusHandle* handle) {
+    // Check ID and
+}
+
+bool bq27220_apply_data_memory(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory) {
     FURI_LOG_I(TAG, "Start updating battery profile");
-    OperationStatus status = {0};
+
     if(!bq27220_control(handle, Control_ENTER_CFG_UPDATE)) {
         FURI_LOG_E(TAG, "Can't configure update");
         return false;
     };
 
+    // Wait for enter CFG update mode
+    uint32_t timeout = 100;
+    OperationStatus status = {0};
     while((status.CFGUPDATE != true) && (timeout-- > 0)) {
         bq27220_get_operation_status(handle, &status);
     }
 
+    // Process data memory records
     while(data_memory->type != BQ27220DMTypeEnd) {
-        if (data_memory->type == BQ27220DMTypeWait) {
-        } else if (data_memory->type == BQ27220DMTypeU8) {
+        if(data_memory->type == BQ27220DMTypeWait) {
+        } else if(data_memory->type == BQ27220DMTypeU8) {
             bq27220_set_parameter(handle, data_memory->address, data_memory->value.u8, 1);
-        } else if (data_memory->type == BQ27220DMTypeU16) {
+        } else if(data_memory->type == BQ27220DMTypeU16) {
             bq27220_set_parameter(handle, data_memory->address, data_memory->value.u16, 2);
-        } else if (data_memory->type == BQ27220DMTypeU32) {
+        } else if(data_memory->type == BQ27220DMTypeU32) {
             bq27220_set_parameter(handle, data_memory->address, data_memory->value.u32, 4);
-        } else if (data_memory->type == BQ27220DMTypeF32) {
+        } else if(data_memory->type == BQ27220DMTypeF32) {
             bq27220_set_parameter(handle, data_memory->address, data_memory->value.u32, 4);
         }
         data_memory++;
     }
-    // bq27220_set_parameter_u16(handle, AddressGaugingConfig, cedv->cedv_conf.gauge_conf_raw);
-    // bq27220_set_parameter_u16(handle, AddressFullChargeCapacity, cedv->full_charge_cap);
-    // bq27220_set_parameter_u16(handle, AddressDesignCapacity, cedv->design_cap);
-    // bq27220_set_parameter_u16(handle, AddressEMF, cedv->EMF);
-    // bq27220_set_parameter_u16(handle, AddressC0, cedv->C0);
-    // bq27220_set_parameter_u16(handle, AddressR0, cedv->R0);
-    // bq27220_set_parameter_u16(handle, AddressT0, cedv->T0);
-    // bq27220_set_parameter_u16(handle, AddressR1, cedv->R1);
-    // bq27220_set_parameter_u16(handle, AddressTC, (cedv->TC) << 8 | cedv->C1);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD0, cedv->DOD0);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD10, cedv->DOD10);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD20, cedv->DOD20);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD30, cedv->DOD30);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD40, cedv->DOD40);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD50, cedv->DOD40);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD60, cedv->DOD60);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD70, cedv->DOD70);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD80, cedv->DOD80);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD90, cedv->DOD90);
-    // bq27220_set_parameter_u16(handle, AddressStartDOD100, cedv->DOD100);
-    // bq27220_set_parameter_u16(handle, AddressEDV0, cedv->EDV0);
-    // bq27220_set_parameter_u16(handle, AddressEDV1, cedv->EDV1);
-    // bq27220_set_parameter_u16(handle, AddressEDV2, cedv->EDV2);
 
+    // Finalize configuration update
     bq27220_control(handle, Control_EXIT_CFG_UPDATE_REINIT);
     furi_delay_us(10000);
+
     FURI_LOG_I(TAG, "Battery profile updated");
-    // design_cap = bq27220_get_design_capacity(handle);
-    // if(cedv->design_cap == design_cap) {
-    //     FURI_LOG_I(TAG, "Battery profile update success");
-    //     return true;
-    // } else {
-    //     FURI_LOG_E(TAG, "Battery profile update failed");
-    //     return false;
-    // }
+
     return true;
 }
 

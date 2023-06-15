@@ -52,7 +52,12 @@ typedef struct BQ27220DMData BQ27220DMData;
 /** Initialize Driver
  * @return true on success, false otherwise
  */
-bool bq27220_init(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory);
+bool bq27220_init(FuriHalI2cBusHandle* handle);
+
+/** Initialize Driver
+ * @return true on success, false otherwise
+ */
+bool bq27220_apply_data_memory(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory);
 
 /** Get battery voltage in mV or error */
 uint16_t bq27220_get_voltage(FuriHalI2cBusHandle* handle);
