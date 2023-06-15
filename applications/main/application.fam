@@ -12,7 +12,7 @@ App(
         "subghz",
         "bad_usb",
         "u2f",
-        "fap_loader",
+        # "fap_loader",
         "archive",
     ],
 )

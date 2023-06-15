@@ -84,18 +84,15 @@ static void loader_thread_state_callback(FuriThreadState thread_state, void* con
     furi_assert(context);
 
     Loader* loader = context;
-    LoaderEvent event;
 
     if(thread_state == FuriThreadStateRunning) {
+        LoaderEvent event;
         event.type = LoaderEventTypeApplicationStarted;
         furi_pubsub_publish(loader->pubsub, &event);
     } else if(thread_state == FuriThreadStateStopped) {
         LoaderMessage message;
         message.type = LoaderMessageTypeAppClosed;
         furi_message_queue_put(loader->queue, &message, FuriWaitForever);
-
-        event.type = LoaderEventTypeApplicationStopped;
-        furi_pubsub_publish(loader->pubsub, &event);
     }
 }
 
@@ -108,9 +105,9 @@ static Loader* loader_alloc() {
     loader->loader_menu = NULL;
     loader->loader_applications = NULL;
     loader->app.args = NULL;
-    loader->app.name = NULL;
     loader->app.thread = NULL;
     loader->app.insomniac = false;
+    loader->app.fap = NULL;
     return loader;
 }
 
@@ -141,6 +138,31 @@ static const FlipperInternalApplication* loader_find_application_by_name(const c
     return application;
 }
 
+static void loader_start_app_thread(Loader* loader, FlipperInternalApplicationFlag flags) {
+    // setup heap trace
+    FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
+    if(mode > FuriHalRtcHeapTrackModeNone) {
+        furi_thread_enable_heap_trace(loader->app.thread);
+    } else {
+        furi_thread_disable_heap_trace(loader->app.thread);
+    }
+
+    // setup insomnia
+    if(!(flags & FlipperInternalApplicationFlagInsomniaSafe)) {
+        furi_hal_power_insomnia_enter();
+        loader->app.insomniac = true;
+    } else {
+        loader->app.insomniac = false;
+    }
+
+    // setup thread state callbacks
+    furi_thread_set_state_context(loader->app.thread, loader);
+    furi_thread_set_state_callback(loader->app.thread, loader_thread_state_callback);
+
+    // start app thread
+    furi_thread_start(loader->app.thread);
+}
+
 static void loader_start_internal_app(
     Loader* loader,
     const FlipperInternalApplication* app,
@@ -153,37 +175,95 @@ static void loader_start_internal_app(
         loader->app.args = strdup(args);
     }
 
-    // store name
-    furi_assert(loader->app.name == NULL);
-    loader->app.name = strdup(app->name);
-
-    // setup app thread
     loader->app.thread =
         furi_thread_alloc_ex(app->name, app->stack_size, app->app, loader->app.args);
     furi_thread_set_appid(loader->app.thread, app->appid);
 
-    // setup heap trace
-    FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
-    if(mode > FuriHalRtcHeapTrackModeNone) {
-        furi_thread_enable_heap_trace(loader->app.thread);
-    } else {
-        furi_thread_disable_heap_trace(loader->app.thread);
+    loader_start_app_thread(loader, app->flags);
+}
+
+#include <dialogs/dialogs.h>
+#include <toolbox/path.h>
+#include <flipper_application/flipper_application.h>
+#include <loader/firmware_api/firmware_api.h>
+
+static bool loader_start_external_app(Loader* loader, const char* path, const char* args) {
+    FuriString* error_message = furi_string_alloc();
+
+    do {
+        Storage* storage = furi_record_open(RECORD_STORAGE);
+        loader->app.fap = flipper_application_alloc(storage, firmware_api_interface);
+        size_t start = furi_get_tick();
+
+        FURI_LOG_I(TAG, "FAP Loader is loading %s", path);
+
+        FlipperApplicationPreloadStatus preload_res =
+            flipper_application_preload(loader->app.fap, path);
+        if(preload_res != FlipperApplicationPreloadStatusSuccess) {
+            const char* err_msg = flipper_application_preload_status_to_string(preload_res);
+            furi_string_printf(error_message, "Preload failed: %s", err_msg);
+            FURI_LOG_E(TAG, "FAP Loader failed to preload %s: %s", path, err_msg);
+            break;
+        }
+
+        FURI_LOG_I(TAG, "FAP Loader is mapping");
+        FlipperApplicationLoadStatus load_status =
+            flipper_application_map_to_memory(loader->app.fap);
+        if(load_status != FlipperApplicationLoadStatusSuccess) {
+            const char* err_msg = flipper_application_load_status_to_string(load_status);
+            furi_string_printf(error_message, "Load failed: %s", err_msg);
+            FURI_LOG_E(TAG, "FAP Loader failed to map to memory %s: %s", path, err_msg);
+            break;
+        }
+
+        FURI_LOG_I(TAG, "Loaded in %ums", (size_t)(furi_get_tick() - start));
+        FURI_LOG_I(TAG, "FAP Loader is starting app");
+
+        loader->app.thread = flipper_application_spawn(loader->app.fap, args);
+        FuriString* app_name = furi_string_alloc();
+        path_extract_filename_no_ext(path, app_name);
+        furi_thread_set_appid(loader->app.thread, furi_string_get_cstr(app_name));
+        furi_string_free(app_name);
+
+        /* This flag is set by the debugger - to break on app start */
+        if(furi_hal_debug_is_gdb_session_active()) {
+            FURI_LOG_W(TAG, "Triggering BP for debugger");
+            /* After hitting this, you can set breakpoints in your .fap's code
+             * Note that you have to toggle breakpoints that were set before */
+            __asm volatile("bkpt 0");
+        }
+
+        loader_start_app_thread(loader, FlipperInternalApplicationFlagDefault);
+
+        furi_record_close(RECORD_STORAGE);
+    } while(0);
+
+    bool success = furi_string_size(error_message) == 0;
+
+    if(!success) {
+        flipper_application_free(loader->app.fap);
+        loader->app.fap = NULL;
+
+        DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+        DialogMessage* message = dialog_message_alloc();
+        dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
+        dialog_message_set_buttons(message, NULL, NULL, NULL);
+
+        FuriString* buffer;
+        buffer = furi_string_alloc();
+        furi_string_printf(buffer, "%s", furi_string_get_cstr(error_message));
+        furi_string_replace(buffer, ":", "\n");
+        dialog_message_set_text(
+            message, furi_string_get_cstr(buffer), 64, 32, AlignCenter, AlignCenter);
+
+        dialog_message_show(dialogs, message);
+        dialog_message_free(message);
+        furi_string_free(buffer);
+        furi_record_close(RECORD_DIALOGS);
     }
 
-    // setup insomnia
-    if(!(app->flags & FlipperInternalApplicationFlagInsomniaSafe)) {
-        furi_hal_power_insomnia_enter();
-        loader->app.insomniac = true;
-    } else {
-        loader->app.insomniac = false;
-    }
-
-    // setup app thread callbacks
-    furi_thread_set_state_context(loader->app.thread, loader);
-    furi_thread_set_state_callback(loader->app.thread, loader_thread_state_callback);
-
-    // start app thread
-    furi_thread_start(loader->app.thread);
+    furi_string_free(error_message);
+    return success;
 }
 
 // process messages
@@ -226,19 +306,18 @@ static LoaderStatus loader_do_start_by_name(Loader* loader, const char* name, co
 
     const FlipperInternalApplication* app = loader_find_application_by_name(name);
 
-    if(!app) {
-        if(strcmp(name, LOADER_APPLICATIONS_NAME) == 0) {
-            loader_do_applications_show(loader);
-            return LoaderStatusOk;
-        } else {
-            FURI_LOG_E(TAG, "Application \"%s\" not found", name);
-            furi_delay_ms(1000);
-            return LoaderStatusErrorUnknownApp;
-        }
+    if(app) {
+        loader_start_internal_app(loader, app, args);
+        return LoaderStatusOk;
+    } else if(strcmp(name, LOADER_APPLICATIONS_NAME) == 0) {
+        loader_do_applications_show(loader);
+        return LoaderStatusOk;
+    } else if(loader_start_external_app(loader, name, args)) {
+        return LoaderStatusOk;
+    } else {
+        FURI_LOG_E(TAG, "Application \"%s\" not found", name);
+        return LoaderStatusErrorUnknownApp;
     }
-
-    loader_start_internal_app(loader, app, args);
-    return LoaderStatusOk;
 }
 
 static bool loader_do_lock(Loader* loader) {
@@ -257,7 +336,10 @@ static void loader_do_unlock(Loader* loader) {
 
 static void loader_do_app_closed(Loader* loader) {
     furi_assert(loader->app.thread);
-    FURI_LOG_I(TAG, "Application stopped. Free heap: %zu", memmgr_get_free_heap());
+
+    furi_thread_join(loader->app.thread);
+    FURI_LOG_I(TAG, "App returned: %li", furi_thread_get_return_code(loader->app.thread));
+
     if(loader->app.args) {
         free(loader->app.args);
         loader->app.args = NULL;
@@ -267,12 +349,20 @@ static void loader_do_app_closed(Loader* loader) {
         furi_hal_power_insomnia_exit();
     }
 
-    free(loader->app.name);
-    loader->app.name = NULL;
+    if(loader->app.fap) {
+        flipper_application_free(loader->app.fap);
+        loader->app.fap = NULL;
+        loader->app.thread = NULL;
+    } else {
+        furi_thread_free(loader->app.thread);
+        loader->app.thread = NULL;
+    }
 
-    furi_thread_join(loader->app.thread);
-    furi_thread_free(loader->app.thread);
-    loader->app.thread = NULL;
+    FURI_LOG_I(TAG, "Application stopped. Free heap: %zu", memmgr_get_free_heap());
+
+    LoaderEvent event;
+    event.type = LoaderEventTypeApplicationStopped;
+    furi_pubsub_publish(loader->pubsub, &event);
 }
 
 // app

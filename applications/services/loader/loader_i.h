@@ -1,15 +1,16 @@
 #pragma once
 #include <furi.h>
 #include <toolbox/api_lock.h>
+#include <flipper_application/flipper_application.h>
 #include "loader.h"
 #include "loader_menu.h"
 #include "loader_applications.h"
 
 typedef struct {
     char* args;
-    char* name;
     FuriThread* thread;
     bool insomniac;
+    FlipperApplication* fap;
 } LoaderAppData;
 
 struct Loader {
