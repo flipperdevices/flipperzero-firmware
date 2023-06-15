@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0614-0519-0.84.3-06293aa](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-14 14:42 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-14 14:42 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-14 22:45 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-14 22:45 EST`
 - [Fixed DCF77 App from crashing #660 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/660)
 - OFW: [Fix reading Mifare Classic cards with unusual access conditions and fix emulation of unknown keys #2620 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2620)
 - OFW: [fbt: stable build dates #2751 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2751)
@@ -79,6 +79,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) (By Willy-JL)
 - UL: [added external cc1101 module at cli #513 (By Sil333033/xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/pull/513)
 - OFW: [furi_hal_nfc: fix furi_hal_nfc_emulate_nfca #2773 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/2773)
+- UL: Updated: [WiFi (Marauder) v0.3.7 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) Proper deinit of lpuart bus (By xMasterX)
+- Updated: [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem) Proper deinit of lpuart bus (By xMasterX)
 
 <a name="release">
 
