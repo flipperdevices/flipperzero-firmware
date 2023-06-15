@@ -24,34 +24,6 @@ struct FapLoader {
     Loading* loading;
 };
 
-bool fap_loader_load_name_and_icon(
-    FuriString* path,
-    Storage* storage,
-    uint8_t** icon_ptr,
-    FuriString* item_name) {
-    FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
-
-    FlipperApplicationPreloadStatus preload_res =
-        flipper_application_preload_manifest(app, furi_string_get_cstr(path));
-
-    bool load_success = false;
-
-    if(preload_res == FlipperApplicationPreloadStatusSuccess) {
-        const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
-        if(manifest->has_icon) {
-            memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
-        }
-        furi_string_set(item_name, manifest->name);
-        load_success = true;
-    } else {
-        FURI_LOG_E(TAG, "FAP Loader failed to preload %s", furi_string_get_cstr(path));
-        load_success = false;
-    }
-
-    flipper_application_free(app);
-    return load_success;
-}
-
 static bool fap_loader_item_callback(
     FuriString* path,
     void* context,
@@ -59,7 +31,7 @@ static bool fap_loader_item_callback(
     FuriString* item_name) {
     FapLoader* fap_loader = context;
     furi_assert(fap_loader);
-    return fap_loader_load_name_and_icon(path, fap_loader->storage, icon_ptr, item_name);
+    return flipper_application_load_name_and_icon(path, fap_loader->storage, icon_ptr, item_name);
 }
 
 static bool fap_loader_run_selected_app(FapLoader* loader) {

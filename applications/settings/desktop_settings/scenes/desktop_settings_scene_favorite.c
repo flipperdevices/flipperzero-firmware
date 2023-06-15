@@ -3,7 +3,6 @@
 #include "desktop_settings_scene.h"
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
-#include <fap_loader/fap_loader_app.h>
 
 #define EXTERNAL_APPLICATION_NAME ("[External Application]")
 #define EXTERNAL_APPLICATION_INDEX (FLIPPER_APPS_COUNT + 1)

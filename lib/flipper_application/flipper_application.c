@@ -2,6 +2,7 @@
 #include "elf/elf_file.h"
 #include <notification/notification_messages.h>
 #include "application_assets.h"
+#include <loader/firmware_api/firmware_api.h>
 
 #include <m-list.h>
 
@@ -289,4 +290,32 @@ const FlipperAppPluginDescriptor*
         lib_descriptor->ep_api_version);
 
     return lib_descriptor;
+}
+
+bool flipper_application_load_name_and_icon(
+    FuriString* path,
+    Storage* storage,
+    uint8_t** icon_ptr,
+    FuriString* item_name) {
+    FlipperApplication* app = flipper_application_alloc(storage, firmware_api_interface);
+
+    FlipperApplicationPreloadStatus preload_res =
+        flipper_application_preload_manifest(app, furi_string_get_cstr(path));
+
+    bool load_success = false;
+
+    if(preload_res == FlipperApplicationPreloadStatusSuccess) {
+        const FlipperApplicationManifest* manifest = flipper_application_get_manifest(app);
+        if(manifest->has_icon) {
+            memcpy(*icon_ptr, manifest->icon, FAP_MANIFEST_MAX_ICON_SIZE);
+        }
+        furi_string_set(item_name, manifest->name);
+        load_success = true;
+    } else {
+        FURI_LOG_E(TAG, "Failed to preload %s", furi_string_get_cstr(path));
+        load_success = false;
+    }
+
+    flipper_application_free(app);
+    return load_success;
 }

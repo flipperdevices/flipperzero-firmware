@@ -149,6 +149,21 @@ typedef const FlipperAppPluginDescriptor* (*FlipperApplicationPluginEntryPoint)(
 const FlipperAppPluginDescriptor*
     flipper_application_plugin_get_descriptor(FlipperApplication* app);
 
+/**
+ * @brief Load name and icon from FAP file.
+ * 
+ * @param path Path to FAP file.
+ * @param storage Storage instance.
+ * @param icon_ptr Icon pointer.
+ * @param item_name Application name.
+ * @return true if icon and name were loaded successfully.
+ */
+bool flipper_application_load_name_and_icon(
+    FuriString* path,
+    Storage* storage,
+    uint8_t** icon_ptr,
+    FuriString* item_name);
+
 #ifdef __cplusplus
 }
 #endif
