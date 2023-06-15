@@ -177,6 +177,18 @@ void bit_buffer_write_bytes_with_parity(
     *bits_written = curr_bit_pos;
 }
 
+void bit_buffer_write_bytes_mid(
+    const BitBuffer* buf,
+    void* dest,
+    size_t start_index,
+    size_t size_bytes) {
+    furi_assert(buf);
+    furi_assert(dest);
+    furi_assert(start_index + size_bytes <= bit_buffer_get_size_bytes(buf));
+
+    memcpy(buf->data + start_index, dest, size_bytes);
+}
+
 bool bit_buffer_has_partial_byte(const BitBuffer* buf) {
     furi_assert(buf);
 

@@ -46,7 +46,7 @@ MfDesfireError mf_desfire_send_chunks(
 
         bit_buffer_copy_bytes(instance->tx_buffer, &flag_has_next, sizeof(flag_has_next));
 
-        if(bit_buffer_get_size_bytes(rx_buffer) > sizeof(flag_has_next)) {
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) > sizeof(flag_has_next)) {
             bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(flag_has_next));
         } else {
             bit_buffer_reset(rx_buffer);
@@ -203,10 +203,8 @@ MfDesfireError
 
         simple_array_init(data, ids_count);
 
-        FURI_LOG_D(TAG, "Application id count: %lu", ids_count);
-
         for(uint32_t i = 0; i < ids_count; ++i) {
-            mf_desfire_application_id_parse(simple_array_get(data, i), instance->result_buffer);
+            mf_desfire_application_id_parse(simple_array_get(data, i), i, instance->result_buffer);
         }
     } while(false);
 

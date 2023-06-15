@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define MF_DESFIRE_POLLER_STANDARD_FWT_FC (150000)
+#define MF_DESFIRE_POLLER_STANDARD_FWT_FC (190000)
 
 typedef enum {
     MfDesfirePollerStateIdle,

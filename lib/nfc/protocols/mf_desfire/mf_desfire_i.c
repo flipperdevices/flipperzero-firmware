@@ -1,15 +1,15 @@
 #include "mf_desfire_i.h"
 
-void mf_desfire_version_parse(MfDesfireVersion* version, const BitBuffer* buf) {
-    bit_buffer_write_bytes(buf, version, sizeof(MfDesfireVersion));
+void mf_desfire_version_parse(MfDesfireVersion* data, const BitBuffer* buf) {
+    bit_buffer_write_bytes(buf, data, sizeof(MfDesfireVersion));
 }
 
-void mf_desfire_free_memory_parse(MfDesfireFreeMemory* free_mem, const BitBuffer* buf) {
-    furi_assert(!free_mem->is_present);
+void mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* buf) {
+    furi_assert(!data->is_present);
 
-    bit_buffer_write_bytes(buf, &free_mem->bytes_free, sizeof(free_mem->bytes_free) - 1);
-    free_mem->bytes_free &= 0x00ffffff;
-    free_mem->is_present = true;
+    bit_buffer_write_bytes(buf, &data->bytes_free, sizeof(data->bytes_free) - 1);
+    data->bytes_free &= 0x00ffffff;
+    data->is_present = true;
 }
 
 void mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf) {
@@ -20,8 +20,12 @@ void mf_desfire_key_version_parse(MfDesfireKeyVersion* data, const BitBuffer* bu
     bit_buffer_write_bytes(buf, data, sizeof(MfDesfireKeyVersion));
 }
 
-void mf_desfire_application_id_parse(MfDesfireApplicationId data, const BitBuffer* buf) {
-    bit_buffer_write_bytes(buf, data, sizeof(MfDesfireApplicationId));
+void mf_desfire_application_id_parse(
+    MfDesfireApplicationId data,
+    uint32_t index,
+    const BitBuffer* buf) {
+    bit_buffer_write_bytes_mid(
+        buf, data, index * sizeof(MfDesfireApplicationId), sizeof(MfDesfireApplicationId));
 }
 
 // void mf_desfire_key_config_reset(MfDesfireKeyConfiguration* data) {
