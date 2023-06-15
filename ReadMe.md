@@ -81,6 +81,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [furi_hal_nfc: fix furi_hal_nfc_emulate_nfca #2773 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/2773)
 - UL: Updated: [WiFi (Marauder) v0.3.7 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) Proper deinit of lpuart bus (By xMasterX)
 - Updated: [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem) Proper deinit of lpuart bus (By xMasterX)
+- Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
+- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
 
 <a name="release">
 
