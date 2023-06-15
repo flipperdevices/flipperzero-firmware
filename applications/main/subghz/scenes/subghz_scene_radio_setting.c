@@ -1,6 +1,6 @@
 #include "../subghz_i.h"
 #include <lib/toolbox/value_index.h>
-#include <lib/subghz/devices/cc1101_ext/cc1101_ext_interconnect.h>
+//#include <lib/subghz/devices/cc1101_ext/cc1101_ext_interconnect.h>
 
 enum SubGhzRadioSettingIndex {
     SubGhzRadioSettingIndexDevice,

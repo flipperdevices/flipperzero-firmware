@@ -4,7 +4,7 @@
  */
 
 #pragma once
-#include "../preset.h"
+#include <lib/subghz/devices/preset.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>

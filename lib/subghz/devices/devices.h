@@ -6,8 +6,10 @@
 extern "C" {
 #endif
 
-typedef struct SubGhzDevices SubGhzDevices;
 typedef struct SubGhzDevice SubGhzDevice;
+
+void subghz_devices_init();
+void subghz_devices_deinit(void);
 
 const SubGhzDevice* subghz_devices_get_by_name(const char* device_name);
 const char* subghz_devices_get_name(const SubGhzDevice* device);

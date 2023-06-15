@@ -3,6 +3,8 @@
 #include <furi.h>
 #include <furi_hal.h>
 
+#define SUBGHZ_DEVICE_CC1101_EXT_NAME "cc1101_ext"
+
 /** SubGhzNotification state */
 typedef enum {
     SubGhzNotificationStateStarting,

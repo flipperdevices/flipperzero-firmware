@@ -3,13 +3,19 @@
 #include "registry.h"
 #include "items.h"
 
-struct SubGhzDevices {
-    const SubGhzDevice* device;
-};
+void subghz_devices_init() {
+    furi_check(!subghz_device_registry_is_valid());
+    subghz_device_registry_init();
+}
+
+void subghz_devices_deinit(void) {
+    furi_check(subghz_device_registry_is_valid());
+    subghz_device_registry_deinit();
+}
 
 const SubGhzDevice* subghz_devices_get_by_name(const char* device_name) {
-    const SubGhzDevice* device =
-        subghz_device_registry_get_by_name(&subghz_device_registry, device_name);
+    furi_check(subghz_device_registry_is_valid());
+    const SubGhzDevice* device = subghz_device_registry_get_by_name(device_name);
     return device;
 }
 

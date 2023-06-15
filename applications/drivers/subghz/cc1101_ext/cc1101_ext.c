@@ -1,5 +1,5 @@
 #include "cc1101_ext.h"
-#include "../cc1101_configs.h"
+#include <lib/subghz/devices/cc1101_configs.h>
 
 #include <furi_hal_region.h>
 #include <furi_hal_version.h>

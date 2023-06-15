@@ -73,3 +73,13 @@ const SubGhzDevice subghz_device_cc1101_ext = {
     .name = SUBGHZ_DEVICE_CC1101_EXT_NAME,
     .interconnect = &subghz_device_cc1101_ext_interconnect,
 };
+
+static const FlipperAppPluginDescriptor subghz_device_cc1101_ext_descriptor = {
+    .appid = SUBGHZ_RADIO_DEVICE_PLUGIN_APP_ID,
+    .ep_api_version = SUBGHZ_RADIO_DEVICE_PLUGIN_API_VERSION,
+    .entry_point = &subghz_device_cc1101_ext,
+};
+
+const FlipperAppPluginDescriptor* subghz_device_cc1101_ext_ep() {
+    return &subghz_device_cc1101_ext_descriptor;
+}

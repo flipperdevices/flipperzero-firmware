@@ -10,7 +10,7 @@
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/subghz_file_encoder_worker.h>
 #include <lib/subghz/protocols/protocol_items.h>
-#include <lib/subghz/devices/cc1101_ext/cc1101_ext_interconnect.h>
+// #include <lib/subghz/devices/cc1101_ext/cc1101_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 #include <lib/subghz/devices/devices.h>
 

@@ -1,7 +1,7 @@
 #include "subghz_txrx_i.h"
 
 #include <lib/subghz/protocols/protocol_items.h>
-#include <lib/subghz/devices/cc1101_ext/cc1101_ext_interconnect.h>
+//#include <lib/subghz/devices/cc1101_ext/cc1101_ext_interconnect.h>
 #include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
 #define TAG "SubGhz"
@@ -60,6 +60,7 @@ SubGhzTxRx* subghz_txrx_alloc() {
     subghz_worker_set_context(instance->worker, instance->receiver);
 
     //set default device External
+    subghz_devices_init();
     instance->radio_device_type =
         subghz_txrx_radio_device_set(instance, SubGhzRadioDeviceTypeExternalCC1101);
 
@@ -73,6 +74,8 @@ void subghz_txrx_free(SubGhzTxRx* instance) {
         subghz_txrx_radio_device_power_off(instance);
         subghz_devices_end(instance->radio_device);
     }
+
+    subghz_devices_deinit();
 
     subghz_worker_free(instance->worker);
     subghz_receiver_free(instance->receiver);
