@@ -102,16 +102,6 @@ void bit_buffer_copy_bits(BitBuffer* buf, const uint8_t* data, size_t size_bits)
 void bit_buffer_copy_bytes_with_parity(BitBuffer* buf, const uint8_t* data, size_t size_bits);
 
 /**
- * Append a byte array to a BitBuffer instance, replacing all of the original data.
- * The destination capacity must be no less its original data size plus source data size.
- *
- * @param [in,out] buf pointer to a BitBuffer instance to copy into
- * @param [in] data pointer to the byte array to be copied
- * @param [in] size_bytes size of the data to be copied, in bytes
- */
-void bit_buffer_append_bytes(BitBuffer* buf, const uint8_t* data, size_t size_bytes);
-
-/**
  * Write a BitBuffer instance's entire contents to an arbitrary memory location.
  * The destination memory must be allocated. Additionally, the destination
  * capacity must be no less than the source data size.
@@ -282,6 +272,25 @@ void bit_buffer_append(BitBuffer* buf, const BitBuffer* other);
  * @param [in] start_index index to begin copying source data from
  */
 void bit_buffer_append_right(BitBuffer* buf, const BitBuffer* other, size_t start_index);
+
+/**
+ * Append a byte to a BitBuffer instance.
+ * The destination capacity must be no less its original data size plus one.
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to be appended to
+ * @param [in] byte byte value to be appended
+ */
+void bit_buffer_append_byte(BitBuffer* buf, uint8_t byte);
+
+/**
+ * Append a byte array to a BitBuffer instance.
+ * The destination capacity must be no less its original data size plus source data size.
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to be appended to
+ * @param [in] data pointer to the byte array to be appended
+ * @param [in] size_bytes size of the data to be appended, in bytes
+ */
+void bit_buffer_append_bytes(BitBuffer* buf, const uint8_t* data, size_t size_bytes);
 
 #ifdef __cplusplus
 }

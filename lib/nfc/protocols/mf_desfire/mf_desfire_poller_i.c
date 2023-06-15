@@ -42,17 +42,16 @@ MfDesfireError mf_desfire_send_chunks(
             break;
         }
 
-        const uint8_t flag_has_next = MF_DESFIRE_FLAG_HAS_NEXT;
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_append_byte(instance->tx_buffer, MF_DESFIRE_FLAG_HAS_NEXT);
 
-        bit_buffer_copy_bytes(instance->tx_buffer, &flag_has_next, sizeof(flag_has_next));
-
-        if(bit_buffer_get_size_bytes(instance->rx_buffer) > sizeof(flag_has_next)) {
-            bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(flag_has_next));
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) > sizeof(uint8_t)) {
+            bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(uint8_t));
         } else {
             bit_buffer_reset(rx_buffer);
         }
 
-        while(bit_buffer_starts_with_byte(instance->rx_buffer, flag_has_next)) {
+        while(bit_buffer_starts_with_byte(instance->rx_buffer, MF_DESFIRE_FLAG_HAS_NEXT)) {
             Iso14443_4aError error = iso14443_4a_poller_send_block(
                 instance->iso14443_4a_poller, instance->tx_buffer, instance->rx_buffer, fwt);
 
@@ -61,7 +60,7 @@ MfDesfireError mf_desfire_send_chunks(
                 break;
             }
 
-            bit_buffer_append_right(rx_buffer, instance->rx_buffer, sizeof(flag_has_next));
+            bit_buffer_append_right(rx_buffer, instance->rx_buffer, sizeof(uint8_t));
         }
     } while(false);
 
@@ -72,8 +71,8 @@ MfDesfireError
     mf_desfire_poller_async_read_version(MfDesfirePoller* instance, MfDesfireVersion* data) {
     furi_assert(instance);
 
-    const uint8_t cmd = MF_DESFIRE_CMD_GET_VERSION;
-    bit_buffer_copy_bytes(instance->input_buffer, &cmd, sizeof(cmd));
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_VERSION);
 
     MfDesfireError error = mf_desfire_send_chunks(
         instance,
@@ -92,8 +91,8 @@ MfDesfireError
     mf_desfire_poller_async_read_free_memory(MfDesfirePoller* instance, MfDesfireFreeMemory* data) {
     furi_assert(instance);
 
-    const uint8_t cmd = MF_DESFIRE_CMD_GET_FREE_MEMORY;
-    bit_buffer_copy_bytes(instance->input_buffer, &cmd, sizeof(cmd));
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_FREE_MEMORY);
 
     MfDesfireError error = mf_desfire_send_chunks(
         instance,
@@ -112,10 +111,9 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
     MfDesfirePoller* instance,
     MfDesfireKeySettings* data) {
     furi_assert(instance);
-    furi_assert(data);
 
-    bit_buffer_set_size_bytes(instance->input_buffer, sizeof(uint8_t));
-    bit_buffer_set_byte(instance->input_buffer, 0, MF_DESFIRE_CMD_GET_KEY_SETTINGS);
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_KEY_SETTINGS);
 
     MfDesfireError error = mf_desfire_send_chunks(
         instance,
@@ -183,8 +181,8 @@ MfDesfireError
     mf_desfire_poller_async_read_application_ids(MfDesfirePoller* instance, SimpleArray* data) {
     furi_assert(instance);
 
-    bit_buffer_set_size_bytes(instance->input_buffer, sizeof(uint8_t));
-    bit_buffer_set_byte(instance->input_buffer, 0, MF_DESFIRE_CMD_GET_APPLICATION_IDS);
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_APPLICATION_IDS);
 
     MfDesfireError error;
 
@@ -207,6 +205,64 @@ MfDesfireError
             mf_desfire_application_id_parse(simple_array_get(data, i), i, instance->result_buffer);
         }
     } while(false);
+
+    return error;
+}
+
+MfDesfireError mf_desfire_poller_async_select_application(
+    MfDesfirePoller* instance,
+    const MfDesfireApplicationId id) {
+    furi_assert(instance);
+
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_SELECT_APPLICATION);
+    bit_buffer_append_bytes(instance->input_buffer, id, sizeof(MfDesfireApplicationId));
+
+    MfDesfireError error = mf_desfire_send_chunks(
+        instance,
+        instance->input_buffer,
+        instance->result_buffer,
+        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+    return error;
+}
+
+MfDesfireError mf_desfire_poller_async_read_application(
+    MfDesfirePoller* instance,
+    MfDesfireApplication* data) {
+    furi_assert(instance);
+    UNUSED(instance);
+    UNUSED(data);
+
+    MfDesfireError error = MfDesfireErrorNone;
+
+    return error;
+}
+
+MfDesfireError mf_desfire_poller_async_read_applications(
+    MfDesfirePoller* instance,
+    const SimpleArray* app_ids,
+    SimpleArray* data) {
+    furi_assert(instance);
+
+    MfDesfireError error = MfDesfireErrorNone;
+
+    const uint32_t app_id_count = simple_array_get_count(app_ids);
+    if(app_id_count > 0) {
+        simple_array_init(data, app_id_count);
+    }
+
+    for(uint32_t i = 0; i < app_id_count; ++i) {
+        do {
+            error = mf_desfire_poller_async_select_application(
+                instance, simple_array_cget(app_ids, i));
+            if(error != MfDesfireErrorNone) break;
+
+            MfDesfireApplication* current_app = simple_array_get(data, i);
+            error = mf_desfire_poller_async_read_application(instance, current_app);
+
+        } while(false);
+    }
 
     return error;
 }

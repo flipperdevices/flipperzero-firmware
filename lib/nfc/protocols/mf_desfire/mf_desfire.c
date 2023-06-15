@@ -48,6 +48,7 @@ void mf_desfire_reset(MfDesfireData* data) {
 
     simple_array_reset(data->master_key.key_versions);
     simple_array_reset(data->application_ids);
+    simple_array_reset(data->applications);
 }
 
 void mf_desfire_copy(MfDesfireData* data, const MfDesfireData* other) {
@@ -64,6 +65,7 @@ void mf_desfire_copy(MfDesfireData* data, const MfDesfireData* other) {
 
     simple_array_copy(data->master_key.key_versions, other->master_key.key_versions);
     simple_array_copy(data->application_ids, other->application_ids);
+    simple_array_copy(data->applications, other->applications);
 }
 
 bool mf_desfire_verify(MfDesfireData* data, const FuriString* device_type) {
