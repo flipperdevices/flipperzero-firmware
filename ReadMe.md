@@ -31,58 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0614-2255-0.84.3-603bbf8](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-14 22:55 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-14 22:55 EST`
-- [Fixed DCF77 App from crashing #660 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/660)
-- OFW: [Fix reading Mifare Classic cards with unusual access conditions and fix emulation of unknown keys #2620 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2620)
-- OFW: [fbt: stable build dates #2751 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2751)
-- OFW: [weather_station: add oregon3 protocol support with THGR221 #2748 (By clashlab)](https://github.com/flipperdevices/flipperzero-firmware/pull/2748)
-- OFW: [Services: simplify api #2540 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2540)
-- OFW: [Core2, SRAM2: provide safety gap #2754 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2754)
-- OFW: [FuriHal: always clock SMPS from HSI #2643 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2643)
-- OFW: [github: added debugapps artifact; packaging resources per-target #2750 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2750)
-- OFW: [ble: refactored bt gatt characteristics setup #2587 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2587)
-- OFW: [Scripts: WiFi board updater #2625 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2625)
-- OFW: [github: re-enabled f18 build #2743 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2743)
-- OFW: [fbt: added Flipper selection when multiple are connected over USB #2723 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2723)
-- OFW (But Added to RM LONG AGO): [added ISO15693 (NfcV) reading, saving, emulating and revealing from privacy mode (unlock) #2316 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/2316)
-- UL: Removal of iButton Fuzzer and RFID Fuzzer to be replaced with the new iButton Fuzzer & RFID Fuzzer - Remade with new features (By gid9798)
-- UL: [Byte input add feature: editor without keyboard #509 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/509)
-- UL: [SubGHz: Notifications refines #464 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/464)
-- UL: [Fix LED Descriptor for BLE (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/f4cc929a99805d634d5e8da1c42ee3d1af0853a3)
-- UL: [Fix ProtoView Issue for custom modulations (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/9af3c22a6a3acef2652ced06b3646a928cad9f9e)
-- UL: [Updated IR Assets (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/fef5efb38afd4e9b9ac12ea4747fbd14f48bf6db)
-- UL: Updated: [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
-- Correct Fuzzer Dictionary Folders (By RogueMaster)
-- Re-Add Dolphin Experience for Sub-GHz Bruteforcer (By RogueMaster)
-- UL: Plugins: SubGHz Bruteforcer - Time delay (between signals) setting (hold Up in main screen(says Up to Save)) + allow more repeats (by gid9798 & xMasterX)
-- UL: Plugins: Update TOTP (Authenticator) [(by akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- UL: Plugins: Unitemp SCD30 support (PR in unitemp repo by divinebird / fixed by xMasterX)
-- UL: SubGHz: Remove broken modulation that was causing buffer overrun (fixes issue UL#506)
-- UL: OFW PR 2756: fix: make dialog_file_browser_set_basic_options initialize all fields (by JarvisCraft)
-- Settings->LCD and Notifications will be resetted to default due to new Contrast setting from OFW
-- Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
-- [Added Code128-C support to barcode app #661 (By Kingal1337)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/661)
-- UL: Infrared: `RCA` protocol support
-- UL: SubGHz: Added 430, 431 MHz to default list
-- UL: OFW PR 2760: NFC: Improvements to NFC Magic app (by AloneLiberty)
-- [Fixed occasional RGB backlight problems #664 (By jbohack)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/664)
-- UL: Protoview fix for custom modulations
-- OFW: [FuriHal: remove clock startup time tracking from clean builds #2764 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2764)
-- Desktop Setting Fixes for Passport App & Dice (By RogueMaster)
-- UL: Revert BLE gatt characteristics refactoring temporarily (By xMasterX)
-- UL: Remove un-needed SubGHz global var (By xMasterX)
-- Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
-- Updated: [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) (from xMasterX)
-- Updated: [Pokemon Trading (By EstebanFuentealba)](https://github.com/EstebanFuentealba/Flipper-Zero-Game-Boy-Trading-Pokemons)
-- Updated: [NRF24 Scanner v2.2 (By vad7)](https://github.com/vad7/nrf24scan)
-- Updated: [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) (By Willy-JL)
-- UL: [added external cc1101 module at cli #513 (By Sil333033/xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/pull/513)
-- OFW: [furi_hal_nfc: fix furi_hal_nfc_emulate_nfca #2773 (By leommxj)](https://github.com/flipperdevices/flipperzero-firmware/pull/2773)
-- UL: Updated: [WiFi (Marauder) v0.3.7 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) Proper deinit of lpuart bus (By xMasterX)
-- Updated: [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem) Proper deinit of lpuart bus (By xMasterX)
-- Updated: [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
-- Updated: [Solitaire (By teeebor)](https://github.com/teeebor/flipper_games)
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-15 00:45 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-15 00:45 EST`
 
 <a name="release">
 
