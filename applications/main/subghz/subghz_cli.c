@@ -158,14 +158,14 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
                 furi_string_get_cstr(args));
             return;
         }
-        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-            printf(
-                "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
-                frequency);
-            return;
-        }
     }
 
+    const SubGhzDevice* device = subghz_cli_command_get_device(device_ind);
+    if(!subghz_devices_is_frequency_valid(device, frequency)) {
+        printf(
+            "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
+        return;
+    }
     printf(
         "Transmitting at %lu, key %lx, te %lu, repeat %lu device %lu. Press CTRL+C to stop\r\n",
         frequency,
@@ -196,7 +196,6 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
     SubGhzTransmitter* transmitter = subghz_transmitter_alloc_init(environment, "Princeton");
     subghz_transmitter_deserialize(transmitter, flipper_format);
 
-    const SubGhzDevice* device = subghz_cli_command_get_device(device_ind);
     subghz_devices_begin(device);
     subghz_devices_reset(device);
     subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async, NULL);
@@ -275,12 +274,13 @@ void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
                 furi_string_get_cstr(args));
             return;
         }
-        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-            printf(
-                "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
-                frequency);
-            return;
-        }
+    }
+
+    const SubGhzDevice* device = subghz_cli_command_get_device(device_ind);
+    if(!subghz_devices_is_frequency_valid(device, frequency)) {
+        printf(
+            "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
+        return;
     }
 
     // Allocate context and buffers
@@ -305,7 +305,6 @@ void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
     subghz_receiver_set_rx_callback(receiver, subghz_cli_command_rx_callback, instance);
 
     // Configure radio
-    const SubGhzDevice* device = subghz_cli_command_get_device(device_ind);
     subghz_devices_begin(device);
     subghz_devices_reset(device);
     subghz_devices_load_preset(device, FuriHalSubGhzPresetOok650Async, NULL);
@@ -506,7 +505,8 @@ void subghz_cli_command_decode_raw(Cli* cli, FuriString* args, void* context) {
         subghz_receiver_set_rx_callback(receiver, subghz_cli_command_rx_callback, instance);
 
         SubGhzFileEncoderWorker* file_worker_encoder = subghz_file_encoder_worker_alloc();
-        if(subghz_file_encoder_worker_start(file_worker_encoder, furi_string_get_cstr(file_name), NULL)) {
+        if(subghz_file_encoder_worker_start(
+               file_worker_encoder, furi_string_get_cstr(file_name), NULL)) {
             //the worker needs a file in order to open and read part of the file
             furi_delay_ms(100);
         }
@@ -663,12 +663,13 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
                 furi_string_get_cstr(args));
             return;
         }
-        if(!furi_hal_subghz_is_frequency_valid(frequency)) {
-            printf(
-                "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n",
-                frequency);
-            return;
-        }
+    }
+
+    const SubGhzDevice* device = subghz_cli_command_get_device(device_ind);
+    if(!subghz_devices_is_frequency_valid(device, frequency)) {
+        printf(
+            "Frequency must be in " SUBGHZ_FREQUENCY_RANGE_STR " range, not %lu\r\n", frequency);
+        return;
     }
     if(!furi_hal_region_is_frequency_allowed(frequency)) {
         printf(
@@ -680,8 +681,7 @@ static void subghz_cli_command_chat(Cli* cli, FuriString* args) {
 
     SubGhzChatWorker* subghz_chat = subghz_chat_worker_alloc(cli);
 
-    if(!subghz_chat_worker_start(
-           subghz_chat, subghz_cli_command_get_device(device_ind), frequency)) {
+    if(!subghz_chat_worker_start(subghz_chat, device, frequency)) {
         printf("Startup error SubGhzChatWorker\r\n");
 
         if(subghz_chat_worker_is_running(subghz_chat)) {

@@ -25,4 +25,3 @@ ADD_SCENE(subghz, need_saving, NeedSaving)
 ADD_SCENE(subghz, rpc, Rpc)
 ADD_SCENE(subghz, region_info, RegionInfo)
 ADD_SCENE(subghz, radio_settings, RadioSettings)
-

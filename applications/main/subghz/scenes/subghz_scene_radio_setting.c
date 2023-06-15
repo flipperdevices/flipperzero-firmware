@@ -1,5 +1,6 @@
 #include "../subghz_i.h"
 #include <lib/toolbox/value_index.h>
+#include <lib/subghz/devices/cc1101_ext/cc1101_ext_interconnect.h>
 
 enum SubGhzRadioSettingIndex {
     SubGhzRadioSettingIndexDevice,
@@ -20,7 +21,7 @@ static void subghz_scene_radio_settings_set_device(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    if(!subghz_txrx_radio_device_is_connect_external_cc1101(subghz->txrx) &&
+    if(!subghz_txrx_radio_device_is_connect_external(subghz->txrx, SUBGHZ_DEVICE_CC1101_EXT_NAME) &&
        radio_device_value[index] == SubGhzRadioDeviceTypeExternalCC1101) {
         //ToDo correct if there is more than 1 module
         index = 0;

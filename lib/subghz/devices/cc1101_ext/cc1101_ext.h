@@ -24,8 +24,20 @@ extern "C" {
  */
 void subghz_device_cc1101_ext_set_async_mirror_pin(const GpioPin* pin);
 
+/** Get data GPIO
+ *
+ * @return     pointer to the gpio pin structure
+ */
 const GpioPin* subghz_device_cc1101_ext_get_data_gpio();
+
+/** Initialize device
+ *
+ * @return     true if success
+ */
 bool subghz_device_cc1101_ext_alloc();
+
+/** Deinitialize device
+ */
 void subghz_device_cc1101_ext_free();
 
 /** Check and switch to power save mode Used by internal API-HAL

@@ -378,7 +378,7 @@ void subghz_txrx_hopper_update(SubGhzTxRx* instance) {
     float rssi = -127.0f;
     if(instance->hopper_state != SubGhzHopperStateRSSITimeOut) {
         // See RSSI Calculation timings in CC1101 17.3 RSSI
-        rssi =  subghz_devices_get_rssi(instance->radio_device);
+        rssi = subghz_devices_get_rssi(instance->radio_device);
 
         // Stay if RSSI is high enough
         if(rssi > -90.0f) {
@@ -542,7 +542,7 @@ void subghz_txrx_set_raw_file_encoder_worker_callback_end(
         context);
 }
 
-bool subghz_txrx_radio_device_is_connect_external_cc1101(SubGhzTxRx* instance) {
+bool subghz_txrx_radio_device_is_connect_external(SubGhzTxRx* instance, const char* name) {
     furi_assert(instance);
 
     bool is_connect = false;
@@ -552,8 +552,7 @@ bool subghz_txrx_radio_device_is_connect_external_cc1101(SubGhzTxRx* instance) {
         subghz_txrx_radio_device_power_on(instance);
     }
 
-    is_connect =
-        subghz_devices_is_connect(subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME));
+    is_connect = subghz_devices_is_connect(subghz_devices_get_by_name(name));
 
     if(!is_otg_enabled) {
         subghz_txrx_radio_device_power_off(instance);
@@ -566,7 +565,7 @@ SubGhzRadioDeviceType
     furi_assert(instance);
 
     if(radio_device_type == SubGhzRadioDeviceTypeExternalCC1101 &&
-       subghz_txrx_radio_device_is_connect_external_cc1101(instance)) {
+       subghz_txrx_radio_device_is_connect_external(instance, SUBGHZ_DEVICE_CC1101_EXT_NAME)) {
         subghz_txrx_radio_device_power_on(instance);
         instance->radio_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
         subghz_devices_begin(instance->radio_device);
@@ -596,4 +595,9 @@ float subghz_txrx_radio_device_get_rssi(SubGhzTxRx* instance) {
 const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance) {
     furi_assert(instance);
     return subghz_devices_get_name(instance->radio_device);
+}
+
+bool subghz_txrx_radio_device_is_frequecy_valid(SubGhzTxRx* instance, uint32_t frequency) {
+    furi_assert(instance);
+    return subghz_devices_is_frequency_valid(instance->radio_device, frequency);
 }

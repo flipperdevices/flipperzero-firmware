@@ -115,7 +115,7 @@ bool subghz_key_load(SubGhz* subghz, const char* file_path, bool show_dialog) {
             break;
         }
 
-        if(!furi_hal_subghz_is_frequency_valid(temp_data32)) {
+        if(!subghz_txrx_radio_device_is_frequecy_valid(subghz->txrx, temp_data32)) {
             FURI_LOG_E(TAG, "Frequency not supported");
             break;
         }

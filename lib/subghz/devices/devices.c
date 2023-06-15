@@ -61,7 +61,10 @@ void subghz_devices_idle(const SubGhzDevice* device) {
     }
 }
 
-void subghz_devices_load_preset(const SubGhzDevice* device, FuriHalSubGhzPreset preset, uint8_t *preset_data) {
+void subghz_devices_load_preset(
+    const SubGhzDevice* device,
+    FuriHalSubGhzPreset preset,
+    uint8_t* preset_data) {
     if(device && device->interconnect->load_preset) {
         device->interconnect->load_preset(preset, preset_data);
     }
@@ -71,6 +74,14 @@ uint32_t subghz_devices_set_frequency(const SubGhzDevice* device, uint32_t frequ
     uint32_t ret = 0;
     if(device && device->interconnect->set_frequency) {
         ret = device->interconnect->set_frequency(frequency);
+    }
+    return ret;
+}
+
+bool subghz_devices_is_frequency_valid(const SubGhzDevice* device, uint32_t frequency) {
+    bool ret = false;
+    if(device && device->interconnect->is_frequency_valid) {
+        ret = device->interconnect->is_frequency_valid(frequency);
     }
     return ret;
 }
@@ -192,4 +203,3 @@ void subghz_devices_write_packet(const SubGhzDevice* device, const uint8_t* data
         device->interconnect->write_packet(data, size);
     }
 }
-

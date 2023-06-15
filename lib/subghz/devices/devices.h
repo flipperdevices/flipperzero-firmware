@@ -22,6 +22,7 @@ void subghz_devices_load_preset(
     FuriHalSubGhzPreset preset,
     uint8_t* preset_data);
 uint32_t subghz_devices_set_frequency(const SubGhzDevice* device, uint32_t frequency);
+bool subghz_devices_is_frequency_valid(const SubGhzDevice* device, uint32_t frequency);
 void subghz_devices_set_async_mirror_pin(const SubGhzDevice* device, const GpioPin* gpio);
 const GpioPin* subghz_devices_get_data_gpio(const SubGhzDevice* device);
 

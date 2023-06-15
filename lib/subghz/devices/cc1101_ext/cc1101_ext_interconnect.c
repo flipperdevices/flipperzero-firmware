@@ -45,6 +45,7 @@ const SubGhzDeviceInterconnect subghz_device_cc1101_ext_interconnect = {
     .idle = subghz_device_cc1101_ext_idle,
     .load_preset = subghz_device_cc1101_ext_interconnect_load_preset,
     .set_frequency = subghz_device_cc1101_ext_interconnect_set_frequency,
+    .is_frequency_valid = subghz_device_cc1101_ext_is_frequency_valid,
     .set_async_mirror_pin = subghz_device_cc1101_ext_set_async_mirror_pin,
     .get_data_gpio = subghz_device_cc1101_ext_get_data_gpio,
 
