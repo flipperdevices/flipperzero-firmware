@@ -5,26 +5,21 @@
 #include <assets_icons.h>
 #include <applications.h>
 
+#include "loader.h"
 #include "loader_menu.h"
 
 #define TAG "LoaderMenu"
-#define APPLICATIONS_NAME "Applications"
 
 struct LoaderMenu {
     FuriThread* thread;
-    void (*click_cb)(const char*, void*);
     void (*closed_cb)(void*);
     void* context;
 };
 
 static int32_t loader_menu_thread(void* p);
 
-LoaderMenu* loader_menu_alloc(
-    void (*click_cb)(const char*, void*),
-    void (*closed_cb)(void*),
-    void* context) {
+LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context) {
     LoaderMenu* loader_menu = malloc(sizeof(LoaderMenu));
-    loader_menu->click_cb = click_cb;
     loader_menu->closed_cb = closed_cb;
     loader_menu->context = context;
     loader_menu->thread = furi_thread_alloc_ex(TAG, 1024, loader_menu_thread, loader_menu);
@@ -34,7 +29,6 @@ LoaderMenu* loader_menu_alloc(
 
 void loader_menu_free(LoaderMenu* loader_menu) {
     furi_assert(loader_menu);
-    furi_assert(loader_menu->thread);
     furi_thread_join(loader_menu->thread);
     furi_thread_free(loader_menu->thread);
     free(loader_menu);
@@ -52,29 +46,29 @@ typedef struct {
     Submenu* settings_menu;
 } LoaderMenuApp;
 
+static void loader_menu_start(const char* name) {
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    loader_start(loader, name, NULL);
+    furi_record_close(RECORD_LOADER);
+}
+
 static void loader_menu_callback(void* context, uint32_t index) {
-    LoaderMenu* loader_menu = context;
+    UNUSED(context);
     const char* name = FLIPPER_APPS[index].name;
-    if(loader_menu->click_cb) {
-        loader_menu->click_cb(name, loader_menu->context);
-    }
+    loader_menu_start(name);
 }
 
 static void loader_menu_applications_callback(void* context, uint32_t index) {
     UNUSED(index);
-    LoaderMenu* loader_menu = context;
-    const char* name = APPLICATIONS_NAME;
-    if(loader_menu->click_cb) {
-        loader_menu->click_cb(name, loader_menu->context);
-    }
+    UNUSED(context);
+    const char* name = LOADER_APPLICATIONS_NAME;
+    loader_menu_start(name);
 }
 
 static void loader_menu_settings_menu_callback(void* context, uint32_t index) {
-    LoaderMenu* loader_menu = context;
+    UNUSED(context);
     const char* name = FLIPPER_SETTINGS_APPS[index].name;
-    if(loader_menu->click_cb) {
-        loader_menu->click_cb(name, loader_menu->context);
-    }
+    loader_menu_start(name);
 }
 
 static void loader_menu_switch_to_settings(void* context, uint32_t index) {
@@ -93,7 +87,7 @@ static uint32_t loader_menu_exit(void* context) {
     return VIEW_NONE;
 }
 
-static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* loader_menu) {
+static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
     size_t i;
     for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
         menu_add_item(
@@ -102,22 +96,17 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* loader_menu) 
             FLIPPER_APPS[i].icon,
             i,
             loader_menu_callback,
-            (void*)loader_menu);
+            (void*)menu);
     }
     menu_add_item(
-        app->primary_menu,
-        "Settings",
-        &A_Settings_14,
-        i++,
-        loader_menu_switch_to_settings,
-        loader_menu);
+        app->primary_menu, "Settings", &A_Settings_14, i++, loader_menu_switch_to_settings, app);
     menu_add_item(
         app->primary_menu,
-        APPLICATIONS_NAME,
+        LOADER_APPLICATIONS_NAME,
         &A_Plugins_14,
         i++,
         loader_menu_applications_callback,
-        (void*)loader_menu);
+        (void*)menu);
 };
 
 static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_menu) {
@@ -162,10 +151,10 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
 static void loader_menu_app_free(LoaderMenuApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, LoaderMenuViewPrimary);
     view_dispatcher_remove_view(app->view_dispatcher, LoaderMenuViewSettings);
-
-    submenu_free(app->settings_menu);
-    menu_free(app->primary_menu);
     view_dispatcher_free(app->view_dispatcher);
+
+    menu_free(app->primary_menu);
+    submenu_free(app->settings_menu);
     furi_record_close(RECORD_GUI);
     free(app);
 }
@@ -177,8 +166,6 @@ static int32_t loader_menu_thread(void* p) {
     LoaderMenuApp* app = loader_menu_app_alloc(loader_menu);
 
     view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
-
-    // run view dispatcher
     view_dispatcher_run(app->view_dispatcher);
 
     if(loader_menu->closed_cb) {

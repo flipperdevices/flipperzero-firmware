@@ -1,7 +1,7 @@
 #include "loader.h"
 #include "loader_i.h"
-#include "loader_menu.h"
 #include <applications.h>
+#include <storage/storage.h>
 #include <furi_hal.h>
 
 #define TAG "Loader"
@@ -73,9 +73,11 @@ static void loader_menu_closed_callback(void* context) {
     furi_message_queue_put(loader->queue, &message, FuriWaitForever);
 }
 
-static void loader_menu_click_callback(const char* name, void* context) {
+static void loader_applications_closed_callback(void* context) {
     Loader* loader = context;
-    loader_start(loader, name, NULL);
+    LoaderMessage message;
+    message.type = LoaderMessageTypeApplicationsClosed;
+    furi_message_queue_put(loader->queue, &message, FuriWaitForever);
 }
 
 static void loader_thread_state_callback(FuriThreadState thread_state, void* context) {
@@ -104,6 +106,7 @@ static Loader* loader_alloc() {
     loader->pubsub = furi_pubsub_alloc();
     loader->queue = furi_message_queue_alloc(1, sizeof(LoaderMessage));
     loader->loader_menu = NULL;
+    loader->loader_applications = NULL;
     loader->app.args = NULL;
     loader->app.name = NULL;
     loader->app.thread = NULL;
@@ -187,8 +190,7 @@ static void loader_start_internal_app(
 
 static void loader_do_menu_show(Loader* loader) {
     if(!loader->loader_menu) {
-        loader->loader_menu =
-            loader_menu_alloc(loader_menu_click_callback, loader_menu_closed_callback, loader);
+        loader->loader_menu = loader_menu_alloc(loader_menu_closed_callback, loader);
     }
 }
 
@@ -196,6 +198,20 @@ static void loader_do_menu_closed(Loader* loader) {
     if(loader->loader_menu) {
         loader_menu_free(loader->loader_menu);
         loader->loader_menu = NULL;
+    }
+}
+
+static void loader_do_applications_show(Loader* loader) {
+    if(!loader->loader_applications) {
+        loader->loader_applications =
+            loader_applications_alloc(loader_applications_closed_callback, loader);
+    }
+}
+
+static void loader_do_applications_closed(Loader* loader) {
+    if(loader->loader_applications) {
+        loader_applications_free(loader->loader_applications);
+        loader->loader_applications = NULL;
     }
 }
 
@@ -211,8 +227,14 @@ static LoaderStatus loader_do_start_by_name(Loader* loader, const char* name, co
     const FlipperInternalApplication* app = loader_find_application_by_name(name);
 
     if(!app) {
-        FURI_LOG_E(TAG, "Application \"%s\" not found", name);
-        return LoaderStatusErrorUnknownApp;
+        if(strcmp(name, LOADER_APPLICATIONS_NAME) == 0) {
+            loader_do_applications_show(loader);
+            return LoaderStatusOk;
+        } else {
+            FURI_LOG_E(TAG, "Application \"%s\" not found", name);
+            furi_delay_ms(1000);
+            return LoaderStatusErrorUnknownApp;
+        }
     }
 
     loader_start_internal_app(loader, app, args);
@@ -229,7 +251,7 @@ static bool loader_do_lock(Loader* loader) {
 }
 
 static void loader_do_unlock(Loader* loader) {
-    furi_assert(loader->app.thread == (FuriThread*)LOADER_MAGIC_THREAD_VALUE);
+    furi_check(loader->app.thread == (FuriThread*)LOADER_MAGIC_THREAD_VALUE);
     loader->app.thread = NULL;
 }
 
@@ -297,6 +319,10 @@ int32_t loader_srv(void* p) {
                 break;
             case LoaderMessageTypeUnlock:
                 loader_do_unlock(loader);
+                break;
+            case LoaderMessageTypeApplicationsClosed:
+                loader_do_applications_closed(loader);
+                break;
             }
         }
     }

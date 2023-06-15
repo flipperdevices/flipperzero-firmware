@@ -3,6 +3,7 @@
 #include <toolbox/api_lock.h>
 #include "loader.h"
 #include "loader_menu.h"
+#include "loader_applications.h"
 
 typedef struct {
     char* args;
@@ -15,6 +16,7 @@ struct Loader {
     FuriPubSub* pubsub;
     FuriMessageQueue* queue;
     LoaderMenu* loader_menu;
+    LoaderApplications* loader_applications;
     LoaderAppData app;
 };
 
@@ -23,6 +25,7 @@ typedef enum {
     LoaderMessageTypeAppClosed,
     LoaderMessageTypeShowMenu,
     LoaderMessageTypeMenuClosed,
+    LoaderMessageTypeApplicationsClosed,
     LoaderMessageTypeLock,
     LoaderMessageTypeUnlock,
     LoaderMessageTypeIsLocked,
