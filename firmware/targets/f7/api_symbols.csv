@@ -917,8 +917,8 @@ Function,-,felica_estimate_timing_us,uint_least32_t,"uint_least8_t, uint_least8_
 Function,-,felica_get_ic_type,FelicaICType,uint8_t*
 Function,-,felica_get_service_name,FuriString*,FelicaService*
 Function,-,felica_get_system_name,FuriString*,FelicaSystem*
-Function,-,felica_lite_can_read_without_mac,_Bool,"uint8_t*, uint8_t"
 Function,-,felica_lite_dump_data,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, FelicaData*, FelicaSystem*"
+Function,-,felica_lite_is_issued,_Bool,FelicaLiteInfo*
 Function,-,felica_lite_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, _Bool, const uint8_t*, uint8_t"
 Function,-,felica_lite_prepare_unencrypted_write,uint8_t,"uint8_t*, const FelicaReader*, const uint8_t*, uint8_t, const uint8_t*"
 Function,-,felica_parse_unencrypted_read,uint16_t,"uint8_t*, uint8_t, FelicaReader*, uint8_t*, uint16_t"

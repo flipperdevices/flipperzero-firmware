@@ -4,7 +4,9 @@
 enum SubmenuIndex {
     /*
     SubmenuIndexUnlock,
+    */
     SubmenuIndexSave,
+    /*
     SubmenuIndexEmulate,
     */
     SubmenuIndexInfo,
@@ -24,8 +26,10 @@ void nfc_scene_felica_menu_on_enter(void* context) {
     /*
     submenu_add_item(
         submenu, "Unlock", SubmenuIndexUnlock, nfc_scene_felica_menu_submenu_callback, nfc);
+    */
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, nfc_scene_felica_menu_submenu_callback, nfc);
+    /*
     submenu_add_item(
         submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_felica_menu_submenu_callback, nfc);
     */
@@ -43,13 +47,13 @@ bool nfc_scene_felica_menu_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        /*
         if(event.event == SubmenuIndexSave) {
             nfc->dev->format = NfcDeviceSaveFormatFelica;
             // Clear device name
             nfc_device_set_name(nfc->dev, "");
             scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             consumed = true;
+            /*
         } else if(event.event == SubmenuIndexEmulate) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaEmulate);
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetType)) {
@@ -61,9 +65,8 @@ bool nfc_scene_felica_menu_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexUnlock) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaUnlockMenu);
             consumed = true;
-        } else
         */
-        if(event.event == SubmenuIndexInfo) {
+        } else if(event.event == SubmenuIndexInfo) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneFelicaInfoSelect);
             consumed = true;
         }

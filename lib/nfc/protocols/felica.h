@@ -206,6 +206,7 @@ typedef struct {
     uint16_t card_key_version;
     uint8_t memory_config[FELICA_BLOCK_SIZE];
 
+    bool is_lite_s;
     // Lite-S only
     uint8_t MAC_A[8];
     uint32_t write_count;
@@ -293,8 +294,6 @@ uint8_t felica_lite_prepare_unencrypted_write(
     uint8_t block_count,
     const uint8_t* block_data);
 bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* reader);
-
-bool felica_lite_can_read_without_mac(uint8_t* mc_r_restr, uint8_t block_number);
 
 void felica_define_normal_block(FelicaService* service, uint16_t number, uint8_t* data);
 void felica_push_normal_block(FelicaService* service, uint8_t* data);

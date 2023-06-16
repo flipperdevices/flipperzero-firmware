@@ -40,6 +40,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Version Increment from OFW to 0.85.3
 - OFW: [Debug: sync apps on attach, makes it possible to debug already started app that has crashed #2778 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2778)
 - UL PR: [Updated infrared assets #519 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/519)
+- [NFC Felica WIP updates (By nullableVoidPtr)](https://github.com/nullableVoidPtr/flipperzero-firmware/tree/nfcf)
+- [mlib-fix (By P-p-H-d)](https://github.com/P-p-H-d/flipperzero-firmware/tree/mlib-fix)
 
 <a name="release">
 

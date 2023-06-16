@@ -11,6 +11,20 @@ uint_least32_t felica_estimate_timing_us(uint_least8_t timing, uint_least8_t uni
     return TIME_CONSTANT_US * scale * (base_cost_factor + unit_cost_factor * units);
 }
 
+bool felica_lite_is_issued(FelicaLiteInfo* lite_info) {
+    // System blocks aren't writable?
+    if(lite_info->memory_config[2] == 0x00) {
+        return false;
+    }
+
+    // MC is not writable?
+    if(lite_info->memory_config[1] & 0x80) {
+        return false;
+    }
+
+    return true;
+}
+
 FuriString* felica_get_system_name(FelicaSystem* system) {
     uint16_t code = system->code;
 

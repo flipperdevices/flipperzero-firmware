@@ -20,6 +20,7 @@ static const uint32_t nfc_keys_file_version = 1;
 // Protocols format versions
 static const uint32_t nfc_mifare_classic_data_format_version = 2;
 static const uint32_t nfc_mifare_ultralight_data_format_version = 1;
+static const uint32_t nfc_felica_data_format_version = 1;
 
 NfcDevice* nfc_device_alloc() {
     NfcDevice* nfc_dev = malloc(sizeof(NfcDevice));
@@ -60,6 +61,8 @@ static void nfc_device_prepare_format_string(NfcDevice* dev, FuriString* format_
         furi_string_set(format_string, "Mifare DESFire");
     } else if(dev->format == NfcDeviceSaveFormatNfcV) {
         furi_string_set(format_string, "ISO15693");
+    } else if(dev->format == NfcDeviceSaveFormatFelica) {
+        furi_string_set(format_string, "FeliCa");
     } else {
         furi_string_set(format_string, "Unknown");
     }
@@ -1114,6 +1117,211 @@ static bool nfc_device_save_mifare_classic_data(FlipperFormat* file, NfcDevice* 
     return saved;
 }
 
+static bool nfc_device_save_felica_lite(FlipperFormat* file, FelicaLiteInfo* info) {
+    bool saved = false;
+    FuriString* key = furi_string_alloc();
+    FuriString* temp = furi_string_alloc();
+
+    do {
+        flipper_format_write_comment_cstr(file, "Lite(-S) System");
+        flipper_format_write_hex(
+            file, "Data Format Code", (uint8_t*)&info->data_format_code, sizeof(uint16_t));
+        flipper_format_write_hex(file, "ID Arbitrary Value", info->ID_value, 6);
+        flipper_format_write_hex(file, "Memory Config", info->memory_config, FELICA_BLOCK_SIZE);
+
+        for(uint8_t block_num = 0; block_num < 14; block_num++) {
+            furi_string_reset(temp);
+            for(size_t i = 0; i < FELICA_BLOCK_SIZE; i++) {
+                if(info->S_PAD[block_num] != NULL) {
+                    furi_string_cat_printf(temp, "%02X ", info->S_PAD[block_num][i]);
+                } else {
+                    furi_string_cat_printf(temp, "?? ");
+                }
+            }
+
+            furi_string_printf(key, "S_PAD%d", block_num);
+            flipper_format_write_string(file, furi_string_get_cstr(key), temp);
+        }
+
+        furi_string_reset(temp);
+        for(size_t i = 0; i < FELICA_BLOCK_SIZE; i++) {
+            if(info->REG != NULL) {
+                furi_string_cat_printf(temp, "%02X ", info->REG[i]);
+            } else {
+                furi_string_cat_printf(temp, "?? ");
+            }
+        }
+        flipper_format_write_string(file, "REG", temp);
+
+        flipper_format_write_hex(
+            file, "Card Key Version", (uint8_t*)&info->card_key_version, sizeof(uint16_t));
+        furi_string_reset(temp);
+        for(size_t i = 0; i < FELICA_BLOCK_SIZE; i++) {
+            if(info->REG != NULL) {
+                furi_string_cat_printf(temp, "%02X ", info->card_key_1[i]);
+            } else {
+                furi_string_cat_printf(temp, "?? ");
+            }
+        }
+        flipper_format_write_string(file, "Card Key 1", temp);
+
+        furi_string_reset(temp);
+        for(size_t i = 0; i < FELICA_BLOCK_SIZE; i++) {
+            if(info->REG != NULL) {
+                furi_string_cat_printf(temp, "%02X ", info->card_key_2[i]);
+            } else {
+                furi_string_cat_printf(temp, "?? ");
+            }
+        }
+        flipper_format_write_string(file, "Card Key 2", temp);
+
+        flipper_format_write_hex(file, "Fixed Challenge MAC Response", info->MAC, 8);
+
+        flipper_format_write_bool(file, "Is Lite-S", &info->is_lite_s, 1);
+        if(info->is_lite_s) {
+            flipper_format_write_hex(file, "Fixed Challenge MAC-A Response", info->MAC_A, 8);
+            flipper_format_write_uint32(file, "Write Count", &info->write_count, 1);
+        }
+
+    } while(false);
+
+    furi_string_free(temp);
+    furi_string_free(key);
+    return saved;
+}
+
+static bool nfc_device_save_felica_node(FlipperFormat* file, FelicaNode* node);
+
+static bool nfc_device_save_felica_area(FlipperFormat* file, FelicaArea* area) {
+    bool saved = false;
+    FuriString* prefix = furi_string_alloc_printf("Area %d", area->number);
+    FuriString* key = furi_string_alloc();
+
+    do {
+        furi_string_printf(key, "%s Can Create Subareas", furi_string_get_cstr(prefix));
+        flipper_format_write_bool(file, furi_string_get_cstr(key), &area->can_create_subareas, 1);
+        furi_string_printf(key, "%s End Service Code", furi_string_get_cstr(prefix));
+        flipper_format_write_hex(
+            file, furi_string_get_cstr(key), (uint8_t*)&area->end_service_code, sizeof(uint16_t));
+
+        bool node_saved = true;
+        for
+            M_EACH(node, area->nodes, FelicaNodeArray_t) {
+                if(nfc_device_save_felica_node(file, node)) {
+                    node_saved = false;
+                    break;
+                }
+            }
+
+        if(!node_saved) break;
+        saved = true;
+    } while(false);
+
+    furi_string_free(prefix);
+    furi_string_free(key);
+    return saved;
+}
+
+static bool nfc_device_save_felica_service(FlipperFormat* file, FelicaService* service) {
+    bool saved = false;
+    FuriString* prefix = furi_string_alloc_printf("Service %d", service->number);
+    FuriString* key = furi_string_alloc();
+
+    do {
+        furi_string_printf(key, "%s Is Extended Overlap", furi_string_get_cstr(prefix));
+        flipper_format_write_bool(
+            file, furi_string_get_cstr(key), &service->is_extended_overlap, 1);
+        if(service->is_extended_overlap) {
+            furi_string_printf(key, "%s Overlap Target", furi_string_get_cstr(prefix));
+            flipper_format_write_hex(
+                file,
+                furi_string_get_cstr(key),
+                (uint8_t*)&service->overlap_target,
+                sizeof(uint16_t));
+
+            furi_string_printf(key, "%s Block Start", furi_string_get_cstr(prefix));
+            const uint32_t block_start = service->block_start;
+            flipper_format_write_uint32(file, furi_string_get_cstr(key), &block_start, 1);
+
+            furi_string_printf(key, "%s Block Count", furi_string_get_cstr(prefix));
+            const uint32_t block_count = service->block_count;
+            flipper_format_write_uint32(file, furi_string_get_cstr(key), &block_count, 1);
+
+            uint32_t i = 0;
+            for
+                M_EACH(block, service->blocks, FelicaBlockArray_t) {
+                    furi_string_printf(key, "%s Block %ld", furi_string_get_cstr(prefix), i);
+                    flipper_format_write_hex(
+                        file, furi_string_get_cstr(key), block->data, FELICA_BLOCK_SIZE);
+                }
+        } else {
+            furi_string_printf(key, "%s Block Count", furi_string_get_cstr(prefix));
+            uint32_t block_count = FelicaBlockArray_size(service->blocks);
+            flipper_format_write_uint32(file, furi_string_get_cstr(key), &block_count, 1);
+            uint32_t i = 0;
+            for
+                M_EACH(block, service->blocks, FelicaBlockArray_t) {
+                    furi_string_printf(key, "%s Block %ld", furi_string_get_cstr(prefix), i);
+                    flipper_format_write_hex(
+                        file, furi_string_get_cstr(key), block->data, FELICA_BLOCK_SIZE);
+                }
+        }
+
+        saved = true;
+    } while(false);
+
+    furi_string_free(prefix);
+    furi_string_free(key);
+    return saved;
+}
+
+static bool nfc_device_save_felica_node(FlipperFormat* file, FelicaNode* node) {
+    bool saved = false;
+
+    do {
+        if(node->type == FelicaNodeTypeArea) {
+            if(!nfc_device_save_felica_area(file, node->area)) {
+                saved = false;
+                break;
+            }
+        } else if(node->type == FelicaNodeTypeService) {
+            if(!nfc_device_save_felica_service(file, node->service)) {
+                saved = false;
+                break;
+            }
+        }
+
+        saved = true;
+    } while(false);
+
+    return saved;
+}
+
+static bool nfc_device_save_felica_data(FlipperFormat* file, NfcDevice* dev) {
+    bool saved = false;
+    FelicaData* data = &dev->dev_data.felica_data;
+    // Save FeliCa specific data
+    do {
+        if(!flipper_format_write_comment_cstr(file, "FeliCa specific data")) break;
+        if(!flipper_format_write_uint32(
+               file, "Data format version", &nfc_felica_data_format_version, 1))
+            break;
+
+        for
+            M_EACH(system, data->systems, FelicaSystemArray_t) {
+                flipper_format_write_hex(file, "System", &system->number, sizeof(uint8_t));
+                flipper_format_write_hex(file, "Code", (uint8_t*)&system->code, sizeof(uint16_t));
+                if(system->code == LITE_SYSTEM_CODE) {
+                    nfc_device_save_felica_lite(file, &system->lite_info);
+                } else {
+                    nfc_device_save_felica_node(file, &system->root);
+                }
+            }
+    } while(false);
+
+    return saved;
+}
+
 static void nfc_device_load_mifare_classic_block(
     FuriString* block_str,
     MfClassicData* data,
@@ -1402,39 +1610,43 @@ bool nfc_device_save(NfcDevice* dev, const char* dev_name) {
         if(!flipper_format_write_header_cstr(file, nfc_file_header, nfc_file_version)) break;
         // Write nfc device type
         if(!flipper_format_write_comment_cstr(
-               file, "Nfc device type can be UID, Mifare Ultralight, Mifare Classic or ISO15693"))
+               file,
+               "Nfc device type can be UID, Mifare Ultralight, Mifare Classic, FeliCa or ISO15693"))
             break;
         nfc_device_prepare_format_string(dev, temp_str);
         if(!flipper_format_write_string(file, "Device type", temp_str)) break;
-        // Write UID
-        if(!flipper_format_write_comment_cstr(file, "UID is common for all formats")) break;
-        if(!flipper_format_write_hex(file, "UID", data->uid, data->uid_len)) break;
+        if(data->type == FuriHalNfcTypeA) {
+            if(!flipper_format_write_comment_cstr(file, "UID is common for all formats")) break;
+            if(!flipper_format_write_hex(file, "UID", data->uid, data->uid_len)) break;
 
-        if(dev->format != NfcDeviceSaveFormatNfcV) {
-            // Write ATQA, SAK
-            if(!flipper_format_write_comment_cstr(file, "ISO14443 specific fields")) break;
-            // Save ATQA in MSB order for correct companion apps display
-            uint8_t atqa[2] = {data->a_data.atqa[1], data->a_data.atqa[0]};
-            if(!flipper_format_write_hex(file, "ATQA", atqa, 2)) break;
-            if(!flipper_format_write_hex(file, "SAK", &data->a_data.sak, 1)) break;
-        }
+            if(dev->format != NfcDeviceSaveFormatNfcV) {
+                // Write ATQA, SAK
+                if(!flipper_format_write_comment_cstr(file, "ISO14443 specific fields")) break;
+                // Save ATQA in MSB order for correct companion apps display
+                uint8_t atqa[2] = {data->a_data.atqa[1], data->a_data.atqa[0]};
+                if(!flipper_format_write_hex(file, "ATQA", atqa, 2)) break;
+                if(!flipper_format_write_hex(file, "SAK", &data->a_data.sak, 1)) break;
+            }
 
-        // Save more data if necessary
-        if(dev->format == NfcDeviceSaveFormatMifareUl) {
-            if(!nfc_device_save_mifare_ul_data(file, dev)) break;
-        } else if(dev->format == NfcDeviceSaveFormatMifareDesfire) {
-            if(!nfc_device_save_mifare_df_data(file, dev)) break;
-        } else if(dev->format == NfcDeviceSaveFormatNfcV) {
-            if(!nfc_device_save_nfcv_data(file, dev)) break;
-        } else if(dev->format == NfcDeviceSaveFormatBankCard) {
-            if(!nfc_device_save_bank_card_data(file, dev)) break;
-        } else if(dev->format == NfcDeviceSaveFormatMifareClassic) {
-            // Save data
-            if(!nfc_device_save_mifare_classic_data(file, dev)) break;
-            // Save keys cache
-            if(!nfc_device_save_mifare_classic_keys(dev)) break;
+            // Save more data if necessary
+            if(dev->format == NfcDeviceSaveFormatMifareUl) {
+                if(!nfc_device_save_mifare_ul_data(file, dev)) break;
+            } else if(dev->format == NfcDeviceSaveFormatMifareDesfire) {
+                if(!nfc_device_save_mifare_df_data(file, dev)) break;
+            } else if(dev->format == NfcDeviceSaveFormatNfcV) {
+                if(!nfc_device_save_nfcv_data(file, dev)) break;
+            } else if(dev->format == NfcDeviceSaveFormatBankCard) {
+                if(!nfc_device_save_bank_card_data(file, dev)) break;
+            } else if(dev->format == NfcDeviceSaveFormatMifareClassic) {
+                // Save data
+                if(!nfc_device_save_mifare_classic_data(file, dev)) break;
+                // Save keys cache
+                if(!nfc_device_save_mifare_classic_keys(dev)) break;
+            }
+            saved = true;
+        } else if(data->type == FuriHalNfcTypeF) {
+            if(!nfc_device_save_felica_data(file, dev)) break;
         }
-        saved = true;
     } while(0);
 
     if(!saved) { //-V547

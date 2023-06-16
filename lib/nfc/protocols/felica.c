@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <mbedtls/des.h>
 #include <mbedtls/sha1.h>
 #include "felica.h"
 #include "nfc_util.h"
@@ -151,6 +152,215 @@ FelicaICType felica_get_ic_type(uint8_t* PMm) {
     return FelicaICType2K;
 }
 
+// static void felica_lite_diversify_key(uint8_t* id_block, uint8_t* master_key, uint8_t* card_key) {
+//     uint8_t ZERO[8] = {0};
+//     uint8_t L[8];
+//     mbedtls_des3_context ctx;
+//     mbedtls_des3_init(&ctx);
+//     mbedtls_des3_set3key_enc(&ctx, master_key);
+//     mbedtls_des3_crypt_ecb(&ctx, ZERO, L);
+//     mbedtls_des3_free(&ctx);
+
+//     uint8_t K1[8];
+//     for(int i = 0; i < 8; i++) {
+//         K1[i] = L[i] << 1;
+//         if(i < 7) {
+//             K1[i] |= (L[i + 1] >> 7);
+//         }
+//     }
+
+//     if((L[0] ^ 0x80) == 0) {
+//         K1[7] ^= 0x1B;
+//     }
+
+//     uint8_t M1[8];
+//     uint8_t M2[8];
+//     memcpy(M1, id_block, 8);
+//     memcpy(M2, id_block + 8, 8);
+//     for(int i = 0; i < 8; i++) {
+//         M2[i] ^= K1[i];
+//     }
+
+//     uint8_t C1[8];
+//     mbedtls_des3_init(&ctx);
+//     mbedtls_des3_set3key_enc(&ctx, master_key);
+//     mbedtls_des3_crypt_ecb(&ctx, M1, C1);
+//     for(int i = 0; i < 8; i++) {
+//         C1[i] ^= M2[i];
+//     }
+
+//     mbedtls_des3_crypt_ecb(&ctx, C1, card_key); // T
+
+//     M1[0] ^= 0x80; // M'1
+//     mbedtls_des3_crypt_ecb(&ctx, M1, C1); // C'1
+//     for(int i = 0; i < 8; i++) {
+//         C1[i] ^= M2[i];
+//     }
+
+//     mbedtls_des3_crypt_ecb(&ctx, C1, card_key + 8); // T'
+//     mbedtls_des3_free(&ctx);
+// }
+
+// static void felica_lite_generate_session_key(
+//     uint8_t* random_challenge,
+//     uint8_t* card_key,
+//     uint8_t* session_key) {
+//     uint8_t RC1[8];
+//     uint8_t RC2[8];
+//     uint8_t CK[16];
+
+//     for(int i = 0; i < 8; i++) {
+//         RC1[i] = random_challenge[7 - i];
+//         RC2[i] = random_challenge[i];
+//         CK[i] = card_key[7 - i];
+//         CK[i + 8] = card_key[15 - i];
+//     }
+
+//     mbedtls_des3_context ctx;
+
+//     uint8_t SK1[8];
+//     mbedtls_des3_init(&ctx);
+//     mbedtls_des3_set2key_enc(&ctx, CK);
+//     mbedtls_des3_crypt_ecb(&ctx, RC1, SK1);
+
+//     uint8_t SK2[8];
+//     for(int i = 0; i < 8; i++) {
+//         RC2[i] ^= SK1[i];
+//     }
+//     mbedtls_des3_crypt_ecb(&ctx, RC2, SK2);
+//     mbedtls_des3_free(&ctx);
+
+//     for(int i = 0; i < 8; i++) {
+//         session_key[i] = SK1[7 - i];
+//         session_key[i + 8] = SK2[7 - i];
+//     }
+// }
+
+// static void felica_lite_calculate_mac(
+//     uint8_t* random_challenge,
+//     uint8_t* session_key,
+//     uint8_t* block_data,
+//     size_t block_count,
+//     uint8_t* MAC) {
+//     uint8_t SK[16];
+
+//     for(int i = 0; i < 8; i++) {
+//         MAC[i] = random_challenge[7 - i];
+//         SK[i] = session_key[7 - i];
+//         SK[i + 8] = session_key[15 - i];
+//     }
+
+//     mbedtls_des3_context ctx;
+//     mbedtls_des3_init(&ctx);
+//     mbedtls_des3_set3key_enc(&ctx, SK);
+
+//     for(size_t block_num = 0; block_num < block_count; block_num++) {
+//         for(int i = 0; i < 8; i++) {
+//             MAC[i] ^= block_data[block_num * FELICA_BLOCK_SIZE + 7 - i];
+//         }
+
+//         uint8_t intermediate[8];
+//         mbedtls_des3_crypt_ecb(&ctx, MAC, intermediate);
+//         for(int i = 0; i < 8; i++) {
+//             intermediate[i] ^= block_data[block_num * FELICA_BLOCK_SIZE + 15 - i];
+//         }
+
+//         mbedtls_des3_crypt_ecb(&ctx, intermediate, MAC);
+//     }
+
+//     mbedtls_des3_free(&ctx);
+// }
+
+// static void felica_lite_calculate_mac_a(
+//     uint8_t* random_challenge,
+//     uint8_t* session_key,
+//     uint8_t* iv,
+//     uint8_t* block_data,
+//     size_t block_count,
+//     uint8_t* MAC_A) {
+//     uint8_t SK[16];
+//     uint8_t intermediate_a[8];
+//     uint8_t intermediate_b[8];
+
+//     for(int i = 0; i < 8; i++) {
+//         intermediate_a[i] = iv[7 - 1] ^ random_challenge[7 - i];
+//         SK[i] = session_key[7 - i];
+//         SK[i + 8] = session_key[15 - i];
+//     }
+
+//     mbedtls_des3_context ctx;
+//     mbedtls_des3_init(&ctx);
+//     mbedtls_des3_set3key_enc(&ctx, SK);
+//     mbedtls_des3_crypt_ecb(&ctx, intermediate_a, intermediate_b);
+
+//     for(size_t block_num = 0; block_num < block_count; block_num++) {
+//         for(int i = 0; i < 8; i++) {
+//             intermediate_b[i] ^= block_data[block_num * FELICA_BLOCK_SIZE + 7 - i];
+//         }
+
+//         mbedtls_des3_crypt_ecb(&ctx, intermediate_b, intermediate_a);
+//         for(int i = 0; i < 8; i++) {
+//             intermediate_a[i] ^= block_data[block_num * FELICA_BLOCK_SIZE + 7 - i];
+//         }
+
+//         mbedtls_des3_crypt_ecb(&ctx, intermediate_a, intermediate_b);
+//     }
+
+//     for(int i = 0; i < 8; i++) {
+//         MAC_A[i] = intermediate_b[7 - 1];
+//     }
+// }
+
+// static void felica_lite_calculate_mac_a_for_write(
+//     uint8_t* random_challenge,
+//     uint8_t* session_key,
+//     uint32_t write_count,
+//     uint8_t block_number,
+//     uint8_t* block_data,
+//     uint8_t* MAC_A) {
+//     uint8_t iv[8];
+//     nfc_util_num2bytes(write_count, 3, iv);
+//     iv[3] = 0x00;
+//     iv[4] = block_number;
+//     iv[5] = 0x00;
+//     iv[6] = 0x91;
+//     iv[7] = 0x00;
+
+//     uint8_t SK[16];
+//     for(int i = 0; i < 8; i++) {
+//         SK[i] = session_key[i + 8];
+//         SK[i + 8] = session_key[i];
+//     }
+
+//     felica_lite_calculate_mac_a(random_challenge, SK, iv, block_data, 1, MAC_A);
+// }
+
+// static void felica_lite_calculate_mac_a_for_read(
+//     uint8_t* random_challenge,
+//     uint8_t* session_key,
+//     uint8_t* block_list,
+//     uint8_t block_list_count,
+//     uint8_t* block_data,
+//     uint8_t block_count,
+//     uint8_t* MAC_A) {
+//     uint8_t iv[8] = {0};
+
+//     uint8_t block_list_to_write = MIN(block_list_count, 4);
+//     for(int i = 0; i < block_list_to_write; i++) {
+//         iv[i * 2] = block_list[i];
+//     }
+//     if(block_list_to_write < 4) {
+//         iv[6] = 0xFF;
+//         iv[7] = 0xFF;
+//     }
+//     if(block_list_to_write < 3) {
+//         iv[4] = 0xFF;
+//         iv[5] = 0xFF;
+//     }
+
+//     felica_lite_calculate_mac_a(random_challenge, session_key, iv, block_data, block_count, MAC_A);
+// }
+
 /** Parse common FeliCa response headers.
  *
  * This parses and validates the most commonly occurring response header types.
@@ -165,7 +375,7 @@ FelicaICType felica_get_ic_type(uint8_t* PMm) {
  * @param always_succeed When set to true, skip status flags (sf1 and sf2) parsing.
  * @return The number of bytes parsed, or 0 when response is invalid or status flags are set.
  */
-static uint8_t felica_consume_header(
+static uint8_t felica_consume_unencrypted_header(
     uint8_t* buf,
     uint8_t len,
     FelicaReader* reader,
@@ -261,7 +471,8 @@ uint16_t felica_parse_unencrypted_read(
     FelicaReader* reader,
     uint8_t* out,
     uint16_t out_len) {
-    uint8_t consumed = felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_READ_RES, false);
+    uint8_t consumed =
+        felica_consume_unencrypted_header(buf, len, reader, FELICA_UNENCRYPTED_READ_RES, false);
     if(!consumed) {
         return 0;
     }
@@ -345,7 +556,7 @@ uint8_t felica_lite_prepare_unencrypted_write(
 
 bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* reader) {
     uint8_t consumed =
-        felica_consume_header(buf, len, reader, FELICA_UNENCRYPTED_WRITE_RES, false);
+        felica_consume_unencrypted_header(buf, len, reader, FELICA_UNENCRYPTED_WRITE_RES, false);
     if(!consumed) {
         return false;
     }
@@ -364,7 +575,7 @@ bool felica_parse_request_system_code(
     FelicaReader* reader,
     FelicaSystemArray_t* systems) {
     uint8_t consumed =
-        felica_consume_header(buf, len, reader, FELICA_REQUEST_SYSTEM_CODE_RES, true);
+        felica_consume_unencrypted_header(buf, len, reader, FELICA_REQUEST_SYSTEM_CODE_RES, true);
     if(consumed == 0) {
         return false;
     }
@@ -588,6 +799,7 @@ bool felica_lite_dump_data(
         }
     }
     if(data->type == FelicaICTypeLiteS) {
+        lite_info->is_lite_s = true;
         const uint8_t fixed_s_blocks[] = {
             CARD_KEY_LITE_BLOCK,
             MAC_A_LITE_BLOCK,
