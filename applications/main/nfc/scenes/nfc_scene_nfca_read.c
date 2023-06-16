@@ -28,13 +28,11 @@ NfcCommand nfc_scene_nfca_read_worker_callback(NfcPollerEvent event, void* conte
     NfcApp* instance = context;
     NfcCommand command = NfcCommandContinue;
     NfcaPollerEvent* nfca_event = event.data;
-    const NfcPollerBase* nfca_poller_api = nfc_pollers_api[NfcProtocolTypeIso14443_3a];
+    const NfcPollerBase* poller_api = nfc_pollers_api[event.protocol_type];
 
     if(nfca_event->type == NfcaPollerEventTypeReady) {
         nfc_dev_set_protocol_data(
-            instance->nfc_dev,
-            NfcProtocolTypeIso14443_3a,
-            nfca_poller_api->get_data(event.poller));
+            instance->nfc_dev, event.protocol_type, poller_api->get_data(event.poller));
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcWorkerEventReadUidNfcA);
         command = NfcCommandStop;
     }

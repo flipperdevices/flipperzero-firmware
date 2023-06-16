@@ -4,8 +4,6 @@
 
 #define TAG "MfUltralightPoller"
 
-#define MF_ULTRALIGHT_DEFAULT_PASSWORD (0xffffffffUL)
-
 typedef MfUltralightPollerCommand (*MfUltralightPollerReadHandler)(MfUltralightPoller* instance);
 
 static NfcaPollerCommand mf_ultralight_process_command(MfUltralightPollerCommand command) {
