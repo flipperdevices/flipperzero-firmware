@@ -8,7 +8,7 @@ extern "C" {
 
 typedef struct NfcPollerManager NfcPollerManager;
 
-NfcPollerManager* nfc_poller_manager_alloc();
+NfcPollerManager* nfc_poller_manager_alloc(Nfc* nfc);
 
 void nfc_poller_manager_free(NfcPollerManager* instance);
 

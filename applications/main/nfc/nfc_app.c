@@ -64,6 +64,8 @@ NfcApp* nfc_app_alloc() {
     };
     instance->nfc_poller = nfc_poller_alloc(&collection);
 
+    instance->poller_manager = nfc_poller_manager_alloc(instance->nfc);
+
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
 
     // Nfc device
@@ -174,6 +176,7 @@ void nfc_app_free(NfcApp* instance) {
     nfcb_poller_free(instance->nfcb_poller);
     nfc_poller_free(instance->nfc_poller);
     nfc_free(instance->nfc);
+    nfc_poller_manager_free(instance->poller_manager);
 
     mf_ultralight_auth_free(instance->mf_ul_auth);
 

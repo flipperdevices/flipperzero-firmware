@@ -5,40 +5,67 @@ enum {
     NfcWorkerEventReadUidNfcA = 100,
 };
 
-NfcaPollerCommand nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, void* context) {
-    NfcApp* nfc = context;
+// NfcaPollerCommand nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, void* context) {
+//     NfcApp* nfc = context;
 
-    NfcaPollerCommand command = NfcaPollerCommandContinue;
+//     NfcaPollerCommand command = NfcaPollerCommandContinue;
 
-    if(event.type == NfcaPollerEventTypeReady) {
+//     if(event.type == NfcaPollerEventTypeReady) {
+//         nfc_dev_set_protocol_data(
+//             nfc->nfc_dev, NfcProtocolTypeIso14443_3a, nfca_poller_get_data(nfc->nfca_poller));
+//         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcWorkerEventReadUidNfcA);
+//         command = NfcaPollerCommandStop;
+//     }
+
+//     return command;
+// }
+
+NfcCommand nfc_scene_nfca_read_worker_callback(NfcPollerEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.data);
+    furi_assert(event.poller);
+
+    NfcApp* instance = context;
+    NfcCommand command = NfcCommandContinue;
+    NfcaPollerEvent* nfca_event = event.data;
+    const NfcPollerBase* nfca_poller_api = nfc_pollers_api[NfcProtocolTypeIso14443_3a];
+
+    if(nfca_event->type == NfcaPollerEventTypeReady) {
         nfc_dev_set_protocol_data(
-            nfc->nfc_dev, NfcProtocolTypeIso14443_3a, nfca_poller_get_data(nfc->nfca_poller));
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcWorkerEventReadUidNfcA);
-        command = NfcaPollerCommandStop;
+            instance->nfc_dev,
+            NfcProtocolTypeIso14443_3a,
+            nfca_poller_api->get_data(event.poller));
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcWorkerEventReadUidNfcA);
+        command = NfcCommandStop;
     }
 
     return command;
 }
 
 void nfc_scene_nfca_read_on_enter(void* context) {
-    NfcApp* nfc = context;
+    NfcApp* instance = context;
 
     // Setup view
-    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
+    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
-    nfca_poller_start(nfc->nfca_poller, nfc_scene_nfca_read_worker_callback, nfc);
+    // nfca_poller_start(nfc->nfca_poller, nfc_scene_nfca_read_worker_callback, nfc);
+    nfc_poller_manager_start(
+        instance->poller_manager,
+        NfcProtocolTypeIso14443_3a,
+        nfc_scene_nfca_read_worker_callback,
+        instance);
 
-    nfc_blink_read_start(nfc);
+    nfc_blink_read_start(instance);
 }
 
 bool nfc_scene_nfca_read_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    NfcApp* instance = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcWorkerEventReadUidNfcA) {
-            notification_message(nfc->notifications, &sequence_success);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaReadSuccess);
+            notification_message(instance->notifications, &sequence_success);
+            scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaReadSuccess);
             DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
         }
@@ -47,11 +74,12 @@ bool nfc_scene_nfca_read_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_nfca_read_on_exit(void* context) {
-    NfcApp* nfc = context;
+    NfcApp* instance = context;
 
-    nfca_poller_stop(nfc->nfca_poller);
+    // nfca_poller_stop(nfc->nfca_poller);
+    nfc_poller_manager_stop(instance->poller_manager);
     // Clear view
-    popup_reset(nfc->popup);
+    popup_reset(instance->popup);
 
-    nfc_blink_stop(nfc);
+    nfc_blink_stop(instance);
 }

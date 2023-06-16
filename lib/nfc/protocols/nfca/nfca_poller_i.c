@@ -410,12 +410,12 @@ static NfcCommand nfca_poller_run(NfcPollerEvent event, void* context) {
                 instance->event->data.error = error;
                 instance->state = NfcaPollerStateActivated;
                 nfca_poller_event.data = instance->event;
-                command = instance->callback_new(nfca_poller_event, instance->context);
+                command = instance->callback_new(nfca_poller_event, instance->context_new);
             } else {
                 instance->event->type = NfcaPollerEventTypeError;
                 instance->event->data.error = error;
                 nfca_poller_event.data = instance->event;
-                command = instance->callback_new(nfca_poller_event, instance->context);
+                command = instance->callback_new(nfca_poller_event, instance->context_new);
                 // Add delay to switch context
                 furi_delay_ms(100);
             }
@@ -423,7 +423,7 @@ static NfcCommand nfca_poller_run(NfcPollerEvent event, void* context) {
             instance->event->type = NfcaPollerEventTypeReady;
             instance->event->data.error = NfcaErrorNone;
             nfca_poller_event.data = instance->event;
-            command = instance->callback_new(nfca_poller_event, instance->context);
+            command = instance->callback_new(nfca_poller_event, instance->context_new);
         }
     }
 

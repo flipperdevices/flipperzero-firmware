@@ -49,9 +49,9 @@ struct NfcPollerManager {
     void* context;
 };
 
-NfcPollerManager* nfc_poller_manager_alloc() {
+NfcPollerManager* nfc_poller_manager_alloc(Nfc* nfc) {
     NfcPollerManager* instance = malloc(sizeof(NfcPollerManager));
-    instance->nfc = nfc_alloc();
+    instance->nfc = nfc;
     instance->event = malloc(sizeof(NfcEvent));
 
     return instance;
@@ -62,7 +62,6 @@ void nfc_poller_manager_free(NfcPollerManager* instance) {
     furi_assert(instance->event);
     furi_assert(instance->nfc);
 
-    nfc_free(instance->nfc);
     free(instance->event);
     free(instance);
 }
