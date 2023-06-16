@@ -82,6 +82,12 @@ void flipper_application_free(FlipperApplication* app) {
     }
 
     elf_file_free(app->elf);
+
+    if(app->ep_thread_args) {
+        free(app->ep_thread_args);
+        app->ep_thread_args = NULL;
+    }
+
     free(app);
 }
 
@@ -222,15 +228,10 @@ static int32_t flipper_application_thread(void* context) {
     notification_message_block(notifications, &sequence_empty);
     furi_record_close(RECORD_NOTIFICATION);
 
-    if(app->ep_thread_args) {
-        free(app->ep_thread_args);
-        app->ep_thread_args = NULL;
-    }
-
     return ret_code;
 }
 
-FuriThread* flipper_application_spawn(FlipperApplication* app, const char* args) {
+FuriThread* flipper_application_alloc_thread(FlipperApplication* app, const char* args) {
     furi_check(app->thread == NULL);
     furi_check(!flipper_application_is_plugin(app));
 

@@ -106,14 +106,14 @@ const FlipperApplicationManifest* flipper_application_get_manifest(FlipperApplic
 FlipperApplicationLoadStatus flipper_application_map_to_memory(FlipperApplication* app);
 
 /**
- * @brief Create application thread at entry point address, using app name and
+ * @brief Allocate application thread at entry point address, using app name and
  * stack size from metadata. Returned thread isn't started yet. 
  * Can be only called once for application instance.
  * @param app Applicaiton pointer
  * @param args Args to pass to app's entry point
  * @return Created thread
  */
-FuriThread* flipper_application_spawn(FlipperApplication* app, const char* args);
+FuriThread* flipper_application_alloc_thread(FlipperApplication* app, const char* args);
 
 /**
  * @brief Check if application is a plugin (not a runnable standalone app)
