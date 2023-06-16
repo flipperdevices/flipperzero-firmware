@@ -22,11 +22,13 @@ void subghz_device_registry_init(void) {
         SUBGHZ_RADIO_DEVICE_PLUGIN_API_VERSION,
         firmware_api_interface);
 
-    if(plugin_manager_load_all(subghz_device->manager, APP_DATA_PATH("plugins")) !=
+    //ToDo: fix path to plugins
+    if(plugin_manager_load_all(subghz_device->manager, "/any/apps_data/subghz/plugins") !=
+       //if(plugin_manager_load_all(subghz_device->manager, APP_DATA_PATH("plugins")) !=
        PluginManagerErrorNone) {
         FURI_LOG_E(TAG, "Failed to load all libs");
     }
-    
+
     subghz_device->size = plugin_manager_get_count(subghz_device->manager) + 1;
     subghz_device->items =
         (const SubGhzDevice**)malloc(sizeof(SubGhzDevice*) * subghz_device->size);
@@ -35,7 +37,7 @@ void subghz_device_registry_init(void) {
         const SubGhzDevice* plugin = plugin_manager_get_ep(subghz_device->manager, i - 1);
         subghz_device->items[i] = plugin;
     }
-    
+
     FURI_LOG_I(TAG, "Loaded %d radio device", subghz_device->size);
     subghz_device_registry = subghz_device;
 }
@@ -55,7 +57,7 @@ const SubGhzDevice* subghz_device_registry_get_by_name(const char* name) {
     furi_assert(subghz_device_registry);
 
     if(name != NULL) {
-        for(size_t i = 1; i < subghz_device_registry->size; i++) {
+        for(size_t i = 0; i < subghz_device_registry->size; i++) {
             if(strcmp(name, subghz_device_registry->items[i]->name) == 0) {
                 return subghz_device_registry->items[i];
             }
