@@ -41,12 +41,12 @@ typedef struct {
 } LoaderApplicationsApp;
 
 static LoaderApplicationsApp* loader_applications_app_alloc() {
-    LoaderApplicationsApp* app = malloc(sizeof(LoaderApplicationsApp));
+    LoaderApplicationsApp* app = malloc(sizeof(LoaderApplicationsApp)); //-V799
     app->fap_path = furi_string_alloc_set(EXT_PATH("apps"));
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
     return app;
-}
+} //-V773
 
 static void loader_applications_app_free(LoaderApplicationsApp* loader_applications_app) {
     furi_assert(loader_applications_app);
