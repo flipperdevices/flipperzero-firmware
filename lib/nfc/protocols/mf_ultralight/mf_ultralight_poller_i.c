@@ -774,6 +774,7 @@ static const MfUltralightPollerReadHandler
 static NfcCommand mf_ultralight_poller_run(NfcPollerEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
+    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
 
     MfUltralightPoller* instance = context;
     furi_assert(instance->callback_new);

@@ -22,8 +22,6 @@ extern const NfcPollerBase* nfc_pollers_api[NfcProtocolTypeMax];
 
 extern const NfcPollerTreeNode nfc_poller_nodes[NfcProtocolTypeMax];
 
-extern const NfcPollerBaseProtocol nfc_poller_base_protocols;
-
 #ifdef __cplusplus
 }
 #endif

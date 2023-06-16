@@ -12,18 +12,11 @@ const NfcPollerBase* nfc_pollers_api[NfcProtocolTypeMax] = {
     [NfcProtocolTypeMfUltralight] = &mf_ultralight_poller,
 };
 
-const NfcProtocolType nfc_poller_base_protocol_types[] = {NfcProtocolTypeIso14443_3a};
-
-const NfcPollerBaseProtocol nfc_poller_base_protocols = {
-    .base_protocol_num = COUNT_OF(nfc_poller_base_protocol_types),
-    .base_protocols = nfc_poller_base_protocol_types,
-};
-
 //              nfc-a                               nfc-b            nfc-f     nfc-v
 //
 //  iso14443-4a      mf ultraligh    mf classic
 //
-//  mf desfire
+//  mf desfire  bank card
 
 static const NfcProtocolType nfc_poller_iso14443_3a_children_protocol[] = {
     NfcProtocolTypeIso14443_4a,
