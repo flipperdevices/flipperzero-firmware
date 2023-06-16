@@ -38,7 +38,7 @@ void subghz_device_registry_init(void) {
         subghz_device->items[i] = plugin;
     }
 
-    FURI_LOG_I(TAG, "Loaded %d radio device", subghz_device->size);
+    FURI_LOG_I(TAG, "Loaded %zu radio device", subghz_device->size);
     subghz_device_registry = subghz_device;
 }
 
