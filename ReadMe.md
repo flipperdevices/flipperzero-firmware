@@ -31,8 +31,14 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0614-2255-0.84.3-603bbf8](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-15 00:45 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-15 00:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-16 05:15 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-16 05:15 EST`
+- UL: Restore reverted BLE gatt characteristics refactoring
+- OFW: [Fixed GATT attribute order #2776 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2776)
+- UL: Testing LED Characteristic and descriptor for BadBT to get numlock state for altchars (By xMasterX)
+- Removed: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator) does not work well and duplicate app.
+- Version Increment from OFW to 0.85.3
+- OFW: [Debug: sync apps on attach, makes it possible to debug already started app that has crashed #2778 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2778)
 
 <a name="release">
 
@@ -275,7 +281,6 @@ $ ./fbt dolphin_ext
 - [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
-- [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator)
 - [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [CFW Settings - Imported/Modified By RogueMaster WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/ecf91524a956f773881d564c4ada833f844264ca)
