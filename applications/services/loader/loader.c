@@ -298,7 +298,7 @@ static LoaderStatus loader_start_external_app(
             break;
         }
 
-        FURI_LOG_I(TAG, "Loaded in %lums", (size_t)(furi_get_tick() - start));
+        FURI_LOG_I(TAG, "Loaded in %zums", (size_t)(furi_get_tick() - start));
         FURI_LOG_I(TAG, "Starting app");
 
         loader->app.thread = flipper_application_alloc_thread(loader->app.fap, args);
