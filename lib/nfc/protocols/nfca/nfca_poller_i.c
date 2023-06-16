@@ -346,7 +346,7 @@ NfcaError nfca_poller_send_standart_frame(
     return ret;
 }
 
-NfcPoller* nfca_poller_alloc_new(NfcPoller* nfc) {
+static NfcPoller* nfca_poller_alloc_new(NfcPoller* nfc) {
     furi_assert(nfc);
 
     NfcaPoller* instance = malloc(sizeof(NfcaPoller));
@@ -359,25 +359,90 @@ NfcPoller* nfca_poller_alloc_new(NfcPoller* nfc) {
     nfc_set_fdt_poll_fc(instance->nfc, NFCA_FDT_POLL_FC);
     nfc_set_fdt_poll_poll_us(instance->nfc, NFCA_POLL_POLL_MIN_US);
     instance->data = nfca_alloc();
+    instance->event = malloc(sizeof(NfcaPollerEvent));
 
     return instance;
 }
 
-void nfca_poller_free_new(NfcPoller* nfca_poller) {
+static void nfca_poller_free_new(NfcPoller* nfca_poller) {
     furi_assert(nfca_poller);
 
     NfcaPoller* instance = nfca_poller;
     furi_assert(instance->tx_buffer);
     furi_assert(instance->rx_buffer);
     furi_assert(instance->data);
+    furi_assert(instance->event);
 
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
     nfca_free(instance->data);
+    free(instance->event);
     free(instance);
+}
+
+static void
+    nfca_poller_set_callback(NfcPoller* poller, NfcPollerCallback callback, void* context) {
+    furi_assert(poller);
+    furi_assert(callback);
+
+    NfcaPoller* instance = poller;
+    instance->callback_new = callback;
+    instance->context_new = context;
+}
+
+static NfcCommand nfca_poller_run(NfcPollerEvent event, void* context) {
+    furi_assert(context);
+
+    NfcaPoller* instance = context;
+    NfcEvent* nfc_event = event.data;
+    NfcCommand command = NfcCommandContinue;
+    NfcPollerEvent nfca_poller_event = {
+        .protocol_type = NfcProtocolTypeIso14443_3a,
+        .poller = instance,
+    };
+
+    if(nfc_event->type == NfcEventTypePollerReady) {
+        if(instance->state != NfcaPollerStateActivated) {
+            NfcaData data = {};
+            NfcaError error = nfca_poller_async_activate(instance, &data);
+            if(error == NfcaErrorNone) {
+                instance->event->type = NfcaPollerEventTypeReady;
+                instance->event->data.error = error;
+                instance->state = NfcaPollerStateActivated;
+                nfca_poller_event.data = instance->event;
+                command = instance->callback_new(nfca_poller_event, instance->context);
+            } else {
+                instance->event->type = NfcaPollerEventTypeError;
+                instance->event->data.error = error;
+                nfca_poller_event.data = instance->event;
+                command = instance->callback_new(nfca_poller_event, instance->context);
+                // Add delay to switch context
+                furi_delay_ms(100);
+            }
+        } else {
+            instance->event->type = NfcaPollerEventTypeReady;
+            instance->event->data.error = NfcaErrorNone;
+            nfca_poller_event.data = instance->event;
+            command = instance->callback_new(nfca_poller_event, instance->context);
+        }
+    }
+
+    return command;
+}
+
+static const NfcProtocolData* nfca_poller_get_data_new(const NfcPoller* nfca_poller) {
+    furi_assert(nfca_poller);
+
+    const NfcaPoller* instance = nfca_poller;
+    furi_assert(instance->data);
+
+    return instance->data;
 }
 
 const NfcPollerBase nfc_poller_iso14443_3a = {
     .alloc = nfca_poller_alloc_new,
     .free = nfca_poller_free_new,
+    .set_callback = nfca_poller_set_callback,
+    .run = nfca_poller_run,
+    .get_data = nfca_poller_get_data_new,
 };

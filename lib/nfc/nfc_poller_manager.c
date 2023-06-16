@@ -36,7 +36,7 @@ struct NfcPollerManager {
 
     size_t base_protocol_current;
     size_t base_protocol_total;
-    NfcPollerEvent* event;
+    NfcEvent* event;
 
     NfcPollerBase* current_poller_base;
     NfcPoller* current_poller;
@@ -52,15 +52,18 @@ struct NfcPollerManager {
 NfcPollerManager* nfc_poller_manager_alloc() {
     NfcPollerManager* instance = malloc(sizeof(NfcPollerManager));
     instance->nfc = nfc_alloc();
+    instance->event = malloc(sizeof(NfcEvent));
 
     return instance;
 }
 
 void nfc_poller_manager_free(NfcPollerManager* instance) {
     furi_assert(instance);
+    furi_assert(instance->event);
     furi_assert(instance->nfc);
 
     nfc_free(instance->nfc);
+    free(instance->event);
     free(instance);
 }
 
@@ -141,11 +144,14 @@ static void nfc_poller_manager_poller_list_alloc(NfcPollerManager* instance) {
 
     do {
         if(iter->child == NULL) break;
-
         iter->child->poller = iter->child->poller_api->alloc(iter->poller);
+        iter->poller_api->set_callback(
+            iter->poller, iter->child->poller_api->run, iter->child->poller);
 
         iter = iter->child;
     } while(true);
+
+    iter->poller_api->set_callback(iter->poller, instance->callback, instance->context);
 }
 
 static void nfc_poller_manager_poller_list_free(NfcPollerManager* instance) {
@@ -170,14 +176,21 @@ static NfcCommand nfc_poller_manager_start_event_callback(NfcEvent event, void* 
     furi_assert(instance->callback);
 
     NfcCommand command = NfcCommandContinue;
+    NfcPollerEvent poller_manager_event = {
+        .protocol_type = NfcProtocolTypeInvalid,
+        .poller = instance->nfc,
+    };
 
     if(instance->session_state == NfcPollerManagerSessionStateStopRequest) {
         command = NfcCommandStop;
     } else {
         if(event.type == NfcEventTypeConfigureRequest) {
             nfc_poller_manager_poller_list_alloc(instance);
-            instance->current_poller = instance->current_poller_base->alloc(instance->base_poller);
         } else if(event.type == NfcEventTypePollerReady) {
+            *instance->event = event;
+            poller_manager_event.data = instance->event;
+            NfcPollerListElement* head = instance->list->head;
+            command = head->poller_api->run(poller_manager_event, head->poller);
         } else if(event.type == NfcEventTypeReset) {
             nfc_poller_manager_poller_list_free(instance);
         }

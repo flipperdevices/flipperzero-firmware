@@ -62,6 +62,10 @@ struct NfcaPoller {
     BitBuffer* rx_buffer;
     NfcaPollerEventCallback callback;
     void* context;
+
+    NfcaPollerEvent* event;
+    NfcPollerCallback callback_new;
+    void* context_new;
 };
 
 NfcaError nfca_poller_config(NfcaPoller* instance);

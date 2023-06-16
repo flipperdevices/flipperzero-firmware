@@ -9,15 +9,9 @@ extern "C" {
 
 typedef void NfcPoller;
 
-typedef enum {
-    NfcPollerEventTypeError,
-    NfcPollerEventTypeCustom,
-} NfcPollerEventType;
-
 typedef void NfcPollerEventData;
 
 typedef struct {
-    NfcPollerEventType event_type;
     NfcProtocolType protocol_type;
     NfcPoller* poller;
     NfcPollerEventData* data;
@@ -28,7 +22,7 @@ typedef NfcCommand (*NfcPollerCallback)(NfcPollerEvent event, void* context);
 typedef NfcPoller* (*NfcPollerAlloc)(NfcPoller* base_poller);
 typedef void (*NfcPollerFree)(NfcPoller* instance);
 
-typedef void (*NfcPollerSetCallback)(NfcPollerCallback* callback, void* context);
+typedef void (*NfcPollerSetCallback)(NfcPoller* poller, NfcPollerCallback callback, void* context);
 typedef NfcCommand (*NfcPollerRun)(NfcPollerEvent event, void* context);
 
 typedef const NfcProtocolData* (*NfcPollerGetData)(const NfcPoller* instance);
