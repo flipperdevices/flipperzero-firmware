@@ -57,7 +57,7 @@ NfcApp* nfc_app_alloc() {
 
     instance->parsed_data = furi_string_alloc();
 
-    NfcPollerCollection collection = {
+    NfcPollerOldCollection collection = {
         .nfc = instance->nfc,
         .nfca_poller = instance->nfca_poller,
         .nfcb_poller = instance->nfcb_poller,

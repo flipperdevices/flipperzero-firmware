@@ -2,7 +2,8 @@
 
 #include "nfca_poller.h"
 
-#include <lib/nfc/helpers/bit_buffer.h>
+#include <nfc/helpers/bit_buffer.h>
+#include <nfc/nfc_poller_base.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -90,6 +91,8 @@ NfcaError nfca_poller_send_standart_frame(
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt);
+
+extern const NfcPollerBase nfc_poller_iso14443_3a;
 
 #ifdef __cplusplus
 }

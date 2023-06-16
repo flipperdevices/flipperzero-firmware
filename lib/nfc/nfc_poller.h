@@ -10,7 +10,7 @@ extern "C" {
 #include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 
-typedef struct NfcPoller NfcPoller;
+typedef struct NfcPollerOld NfcPollerOld;
 
 typedef struct {
     Nfc* nfc;
@@ -18,33 +18,33 @@ typedef struct {
     NfcbPoller* nfcb_poller;
     MfUltralightPoller* mfu_poller;
     MfClassicPoller* mfc_poller;
-} NfcPollerCollection;
+} NfcPollerOldCollection;
 
 typedef enum {
-    NfcPollerEventNfcaDetected,
-    NfcPollerEventNfcbDetected,
-    NfcPollerEventNfcfDetected,
-    NfcPollerEventNfcvDetected,
-    NfcPollerEventMfUltralightDetected,
-    NfcPollerEventMfClassicDetected,
-    NfcPollerEventMfDesfireDetected,
-} NfcPollerEvent;
+    NfcPollerOldEventNfcaDetected,
+    NfcPollerOldEventNfcbDetected,
+    NfcPollerOldEventNfcfDetected,
+    NfcPollerOldEventNfcvDetected,
+    NfcPollerOldEventMfUltralightDetected,
+    NfcPollerOldEventMfClassicDetected,
+    NfcPollerOldEventMfDesfireDetected,
+} NfcPollerOldEvent;
 
 typedef enum {
-    NfcPollerCommandContinue = NfcCommandContinue,
-    NfcPollerCommandReset = NfcCommandReset,
-    NfcPollerCommandStop = NfcCommandStop,
-} NfcPollerCommand;
+    NfcPollerOldCommandContinue = NfcCommandContinue,
+    NfcPollerOldCommandReset = NfcCommandReset,
+    NfcPollerOldCommandStop = NfcCommandStop,
+} NfcPollerOldCommand;
 
-typedef NfcPollerCommand (*NfcPollerEventCallback)(NfcPollerEvent event, void* context);
+typedef NfcPollerOldCommand (*NfcPollerOldEventCallback)(NfcPollerOldEvent event, void* context);
 
-NfcPoller* nfc_poller_alloc(NfcPollerCollection* pollers);
+NfcPollerOld* nfc_poller_alloc(NfcPollerOldCollection* pollers);
 
-void nfc_poller_free(NfcPoller* instance);
+void nfc_poller_free(NfcPollerOld* instance);
 
-void nfc_poller_start(NfcPoller* instance, NfcPollerEventCallback callback, void* context);
+void nfc_poller_start(NfcPollerOld* instance, NfcPollerOldEventCallback callback, void* context);
 
-void nfc_poller_stop(NfcPoller* instance);
+void nfc_poller_stop(NfcPollerOld* instance);
 
 #ifdef __cplusplus
 }

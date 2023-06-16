@@ -8,38 +8,38 @@
 #include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
 
 typedef enum {
-    NfcPollerStateIdle,
-    NfcPollerStateCheckPresenceNfca,
-    NfcPollerStateCheckPresenceNfcb,
-    NfcPollerStateCheckPresenceNfcf,
-    NfcPollerStateCheckPresenceNfcv,
-} NfcPollerState;
+    NfcPollerOldStateIdle,
+    NfcPollerOldStateCheckPresenceNfca,
+    NfcPollerOldStateCheckPresenceNfcb,
+    NfcPollerOldStateCheckPresenceNfcf,
+    NfcPollerOldStateCheckPresenceNfcv,
+} NfcPollerOldState;
 
 typedef enum {
-    NfcPollerSessionStateIdle,
-    NfcPollerSessionStateActive,
-    NfcPollerSessionStateStopRequest,
-} NfcPollerSessionState;
+    NfcPollerOldSessionStateIdle,
+    NfcPollerOldSessionStateActive,
+    NfcPollerOldSessionStateStopRequest,
+} NfcPollerOldSessionState;
 
-struct NfcPoller {
+struct NfcPollerOld {
     Nfc* nfc;
-    NfcPollerSessionState session_state;
+    NfcPollerOldSessionState session_state;
     NfcaPoller* nfca_poller;
     NfcaData nfca_data;
     NfcbPoller* nfcb_poller;
     NfcbData nfcb_data;
-    NfcPollerState state;
-    NfcPollerEventCallback callback;
+    NfcPollerOldState state;
+    NfcPollerOldEventCallback callback;
     void* context;
 };
 
-NfcPoller* nfc_poller_alloc(NfcPollerCollection* pollers) {
+NfcPollerOld* nfc_poller_alloc(NfcPollerOldCollection* pollers) {
     furi_assert(pollers);
     furi_assert(pollers->nfc);
     furi_assert(pollers->nfca_poller);
     furi_assert(pollers->nfcb_poller);
 
-    NfcPoller* instance = malloc(sizeof(NfcPoller));
+    NfcPollerOld* instance = malloc(sizeof(NfcPollerOld));
     instance->nfc = pollers->nfc;
     instance->nfca_poller = pollers->nfca_poller;
     instance->nfcb_poller = pollers->nfcb_poller;
@@ -47,18 +47,18 @@ NfcPoller* nfc_poller_alloc(NfcPollerCollection* pollers) {
     return instance;
 }
 
-void nfc_poller_free(NfcPoller* instance) {
+void nfc_poller_free(NfcPollerOld* instance) {
     furi_assert(instance);
 }
 
-static NfcCommand nfc_poller_process_command(NfcPollerCommand command) {
+static NfcCommand nfc_poller_process_command(NfcPollerOldCommand command) {
     NfcCommand ret = NfcCommandContinue;
 
-    if(command == NfcPollerCommandContinue) {
+    if(command == NfcPollerOldCommandContinue) {
         ret = NfcCommandContinue;
-    } else if(command == NfcPollerCommandReset) {
+    } else if(command == NfcPollerOldCommandReset) {
         ret = NfcCommandReset;
-    } else if(command == NfcPollerCommandStop) {
+    } else if(command == NfcPollerOldCommandStop) {
         ret = NfcCommandStop;
     } else {
         furi_crash("Unknown command");
@@ -70,59 +70,59 @@ static NfcCommand nfc_poller_process_command(NfcPollerCommand command) {
 static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
     furi_assert(context);
 
-    NfcPoller* instance = context;
+    NfcPollerOld* instance = context;
     furi_assert(instance->callback);
-    furi_assert(instance->session_state != NfcPollerSessionStateIdle);
+    furi_assert(instance->session_state != NfcPollerOldSessionStateIdle);
 
-    NfcPollerEvent poller_event;
-    NfcPollerCommand command = NfcPollerCommandContinue;
+    NfcPollerOldEvent poller_event;
+    NfcPollerOldCommand command = NfcPollerOldCommandContinue;
 
-    if(instance->session_state == NfcPollerSessionStateStopRequest) {
-        command = NfcPollerCommandStop;
+    if(instance->session_state == NfcPollerOldSessionStateStopRequest) {
+        command = NfcPollerOldCommandStop;
     } else {
         if(event.type == NfcEventTypeConfigureRequest) {
-            if(instance->state == NfcPollerStateCheckPresenceNfca) {
+            if(instance->state == NfcPollerOldStateCheckPresenceNfca) {
                 nfca_poller_config(instance->nfca_poller);
-            } else if(instance->state == NfcPollerStateCheckPresenceNfcb) {
+            } else if(instance->state == NfcPollerOldStateCheckPresenceNfcb) {
                 // nfcb_poller_config(instance->nfcb_poller);
             }
         } else if(event.type == NfcEventTypePollerReady) {
-            if(instance->state == NfcPollerStateCheckPresenceNfca) {
+            if(instance->state == NfcPollerOldStateCheckPresenceNfca) {
                 NfcaError error =
                     nfca_poller_async_activate(instance->nfca_poller, &instance->nfca_data);
                 if(error == NfcaErrorNone) {
                     if(mf_ultralight_detect_protocol(&instance->nfca_data)) {
-                        poller_event = NfcPollerEventMfUltralightDetected;
+                        poller_event = NfcPollerOldEventMfUltralightDetected;
                     } else if(mf_desfire_detect_protocol(&instance->nfca_data)) {
-                        poller_event = NfcPollerEventMfDesfireDetected;
+                        poller_event = NfcPollerOldEventMfDesfireDetected;
                     } else {
-                        poller_event = NfcPollerEventNfcaDetected;
+                        poller_event = NfcPollerOldEventNfcaDetected;
                     }
                     command = instance->callback(poller_event, instance->context);
                 } else {
                     // Nfca not present
                     FURI_LOG_E("TAG", "NOT PRESENT");
                     furi_delay_ms(100);
-                    instance->state = NfcPollerStateCheckPresenceNfcb;
-                    command = NfcPollerCommandReset;
+                    instance->state = NfcPollerOldStateCheckPresenceNfcb;
+                    command = NfcPollerOldCommandReset;
                 }
-            } else if(instance->state == NfcPollerStateCheckPresenceNfcb) {
+            } else if(instance->state == NfcPollerOldStateCheckPresenceNfcb) {
                 // NfcbError error =
                 //     nfcb_poller_activate(instance->nfcb_poller, &instance->nfcb_data);
                 // if(error == NfcbErrorNone) {
-                //     poller_event = NfcPollerEventNfcbDetected;
+                //     poller_event = NfcPollerOldEventNfcbDetected;
                 //     instance->callback(poller_event, instance->context);
                 // } else {
                 //     // Nfcb not present
                 //     furi_delay_ms(100);
-                instance->state = NfcPollerStateCheckPresenceNfca;
+                instance->state = NfcPollerOldStateCheckPresenceNfca;
                 //     command = NfcCommandReset;
                 // }
             }
         } else if(event.type == NfcEventTypeReset) {
-            if(instance->state == NfcPollerStateCheckPresenceNfca) {
+            if(instance->state == NfcPollerOldStateCheckPresenceNfca) {
                 nfca_poller_reset(instance->nfca_poller);
-            } else if(instance->state == NfcPollerStateCheckPresenceNfcb) {
+            } else if(instance->state == NfcPollerOldStateCheckPresenceNfcb) {
                 // nfcb_poller_reset(instance->nfcb_poller);
             }
         }
@@ -131,32 +131,32 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
     return nfc_poller_process_command(command);
 }
 
-void nfc_poller_start(NfcPoller* instance, NfcPollerEventCallback callback, void* context) {
+void nfc_poller_start(NfcPollerOld* instance, NfcPollerOldEventCallback callback, void* context) {
     furi_assert(instance);
     furi_assert(callback);
-    furi_assert(instance->session_state == NfcPollerSessionStateIdle);
+    furi_assert(instance->session_state == NfcPollerOldSessionStateIdle);
 
     instance->callback = callback;
     instance->context = context;
-    instance->state = NfcPollerStateCheckPresenceNfca;
-    instance->session_state = NfcPollerSessionStateActive;
+    instance->state = NfcPollerOldStateCheckPresenceNfca;
+    instance->session_state = NfcPollerOldSessionStateActive;
 
     instance->nfca_poller->data = malloc(sizeof(NfcaData));
 
     nfc_start_poller(instance->nfc, nfc_poller_event_callback, instance);
 }
 
-void nfc_poller_stop(NfcPoller* instance) {
+void nfc_poller_stop(NfcPollerOld* instance) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
-    instance->session_state = NfcPollerSessionStateStopRequest;
+    instance->session_state = NfcPollerOldSessionStateStopRequest;
     nfc_stop(instance->nfc);
-    instance->session_state = NfcPollerSessionStateIdle;
+    instance->session_state = NfcPollerOldSessionStateIdle;
 
     free(instance->nfca_poller->data);
 
     instance->callback = NULL;
     instance->context = NULL;
-    instance->state = NfcPollerStateIdle;
+    instance->state = NfcPollerOldStateIdle;
 }

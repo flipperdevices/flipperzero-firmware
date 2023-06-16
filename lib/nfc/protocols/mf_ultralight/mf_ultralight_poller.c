@@ -4,7 +4,6 @@
 
 #define TAG "MfUltralightPoller"
 
-#define MF_ULTRALIGHT_MAX_BUFF_SIZE (64)
 #define MF_ULTRALIGHT_DEFAULT_PASSWORD (0xffffffffUL)
 
 typedef MfUltralightPollerCommand (*MfUltralightPollerReadHandler)(MfUltralightPoller* instance);

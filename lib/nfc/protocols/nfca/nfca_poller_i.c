@@ -345,3 +345,39 @@ NfcaError nfca_poller_send_standart_frame(
 
     return ret;
 }
+
+NfcPoller* nfca_poller_alloc_new(NfcPoller* nfc) {
+    furi_assert(nfc);
+
+    NfcaPoller* instance = malloc(sizeof(NfcaPoller));
+    instance->nfc = nfc;
+    instance->tx_buffer = bit_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE);
+    instance->rx_buffer = bit_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE);
+
+    nfc_config(instance->nfc, NfcModeNfcaPoller);
+    nfc_set_guard_time_us(instance->nfc, NFCA_GUARD_TIME_US);
+    nfc_set_fdt_poll_fc(instance->nfc, NFCA_FDT_POLL_FC);
+    nfc_set_fdt_poll_poll_us(instance->nfc, NFCA_POLL_POLL_MIN_US);
+    instance->data = nfca_alloc();
+
+    return instance;
+}
+
+void nfca_poller_free_new(NfcPoller* nfca_poller) {
+    furi_assert(nfca_poller);
+
+    NfcaPoller* instance = nfca_poller;
+    furi_assert(instance->tx_buffer);
+    furi_assert(instance->rx_buffer);
+    furi_assert(instance->data);
+
+    bit_buffer_free(instance->tx_buffer);
+    bit_buffer_free(instance->rx_buffer);
+    nfca_free(instance->data);
+    free(instance);
+}
+
+const NfcPollerBase nfc_poller_iso14443_3a = {
+    .alloc = nfca_poller_alloc_new,
+    .free = nfca_poller_free_new,
+};

@@ -437,3 +437,30 @@ MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
 
     return ret;
 }
+
+NfcPoller* mf_ultralight_poller_alloc_new(NfcPoller* nfca_poller) {
+    furi_assert(nfca_poller);
+
+    MfUltralightPoller* instance = malloc(sizeof(MfUltralightPoller));
+    instance->nfca_poller = nfca_poller;
+    instance->data = mf_ultralight_alloc();
+    instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
+    instance->rx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
+
+    return instance;
+}
+
+void mf_ultralight_poller_free_new(NfcPoller* mfu_poller) {
+    furi_assert(mfu_poller);
+
+    MfUltralightPoller* instance = mfu_poller;
+    mf_ultralight_free(instance->data);
+    bit_buffer_free(instance->tx_buffer);
+    bit_buffer_free(instance->rx_buffer);
+    free(mfu_poller);
+}
+
+const NfcPollerBase mf_ultralight_poller = {
+    .alloc = mf_ultralight_poller_alloc_new,
+    .free = mf_ultralight_poller_free_new,
+};

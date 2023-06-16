@@ -117,3 +117,24 @@ Iso14443_4aError iso14443_4a_poller_send_block(
 
     return ret;
 }
+
+NfcPoller* iso14443_4a_poller_alloc_new(NfcPoller* iso14443_3a_poller) {
+    furi_assert(iso14443_3a_poller);
+
+    Iso14443_4aPoller* instance = malloc(sizeof(Iso14443_4aPoller));
+    instance->iso14443_3a_poller = iso14443_3a_poller;
+
+    return instance;
+}
+
+void iso14443_4a_poller_free_new(NfcPoller* iso14443_4a_poller) {
+    furi_assert(iso14443_4a_poller);
+
+    Iso14443_4aPoller* instance = iso14443_4a_poller;
+    free(instance);
+}
+
+const NfcPollerBase nfc_poller_iso14443_4a = {
+    .alloc = iso14443_4a_poller_alloc_new,
+    .free = iso14443_4a_poller_free_new,
+};

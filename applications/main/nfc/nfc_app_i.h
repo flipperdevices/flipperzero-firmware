@@ -111,7 +111,7 @@ struct NfcApp {
     MfDesfirePoller* mf_desfire_poller;
     MfClassicPoller* mf_classic_poller;
     NfcbPoller* nfcb_poller;
-    NfcPoller* nfc_poller;
+    NfcPollerOld* nfc_poller;
 
     MfUltralightAuth* mf_ul_auth;
     NfcMfClassicDictAttackContext mf_dict_context;
