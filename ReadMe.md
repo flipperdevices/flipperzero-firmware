@@ -43,6 +43,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [NFC Felica WIP updates (By nullableVoidPtr)](https://github.com/nullableVoidPtr/flipperzero-firmware/tree/nfcf)
 - [mlib-fix (By P-p-H-d)](https://github.com/P-p-H-d/flipperzero-firmware/tree/mlib-fix)
 - Added: [USB Mass Storage (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b)
+- Added: [Intravelometer 2 (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer) `works for Sony cameras`
+- Added: [Airmon (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 
 <a name="release">
 
@@ -271,6 +273,7 @@ $ ./fbt dolphin_ext
 ## Plugins
 
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
+- [Airmon (By 3cky)](https://github.com/3cky/flipperzero-airmon) `Req: Plantower PMS5003/PMS7003/PMS9003`
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [AVR Flasher WIP (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
@@ -330,6 +333,7 @@ $ ./fbt dolphin_ext
 - [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
+- [Intravelometer 2 (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer) `works for Sony cameras`
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - [IR Scope (By kallanreed)](https://github.com/kallanreed/unleashed-firmware/tree/dev/applications/external/ir_scope)
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
