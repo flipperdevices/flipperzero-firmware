@@ -13,6 +13,12 @@ void avr_isp_scene_start_on_enter(void* context) {
     AvrIspApp* app = context;
     Submenu* submenu = app->submenu;
     submenu_add_item(
+        submenu,
+        "Dump AVR TPI",
+        SubmenuIndexAvrIspReaderTpi,
+        avr_isp_scene_start_submenu_callback,
+        app);
+    submenu_add_item(
         submenu, "Dump AVR", SubmenuIndexAvrIspReader, avr_isp_scene_start_submenu_callback, app);
     submenu_add_item(
         submenu, "Flash AVR", SubmenuIndexAvrIspWriter, avr_isp_scene_start_submenu_callback, app);
@@ -23,7 +29,7 @@ void avr_isp_scene_start_on_enter(void* context) {
         avr_isp_scene_start_submenu_callback,
         app);
     submenu_add_item(
-        submenu, "Wiring", SubmenuIndexAvrIsWiring, avr_isp_scene_start_submenu_callback, app);
+        submenu, "Wiring", SubmenuIndexAvrIspWiring, avr_isp_scene_start_submenu_callback, app);
     submenu_add_item(
         submenu, "About", SubmenuIndexAvrIspAbout, avr_isp_scene_start_submenu_callback, app);
 
@@ -57,8 +63,13 @@ bool avr_isp_scene_start_on_event(void* context, SceneManagerEvent event) {
                 app->scene_manager, AvrIspSceneChipDetect, AvrIspViewWriter);
             scene_manager_next_scene(app->scene_manager, AvrIspSceneChipDetect);
             consumed = true;
-        } else if(event.event == SubmenuIndexAvrIsWiring) {
+        } else if(event.event == SubmenuIndexAvrIspWiring) {
             scene_manager_next_scene(app->scene_manager, AvrIspSceneWiring);
+            consumed = true;
+        } else if(event.event == SubmenuIndexAvrIspReaderTpi) {
+            // scene_manager_set_scene_state(
+            //     app->scene_manager, AvrIspSceneChipDetect, AvrIspViewTpiReader);
+            scene_manager_next_scene(app->scene_manager, AvrIspSceneTpiReader);
             consumed = true;
         }
         scene_manager_set_scene_state(app->scene_manager, AvrIspSceneStart, event.event);

@@ -21,6 +21,7 @@ typedef enum {
     AvrIspViewPopup,
     AvrIspViewTextInput,
     AvrIspViewChipDetect,
+    AvrIspViewTpiReader,
 } AvrIspView;
 
 typedef enum {
