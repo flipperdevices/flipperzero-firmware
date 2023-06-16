@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed: [Calculator "2" (By theCow61)](https://github.com/theCow61/calculator) does not work well and duplicate app.
 - Version Increment from OFW to 0.85.3
 - OFW: [Debug: sync apps on attach, makes it possible to debug already started app that has crashed #2778 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2778)
+- UL PR: [Updated infrared assets #519 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/519)
 
 <a name="release">
 
