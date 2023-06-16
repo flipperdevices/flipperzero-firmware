@@ -13,6 +13,7 @@ layout: home
 
 Versioning TBD.
 
+- [seader](seader-API30.1.zip) (API 30.1, FW 0.85.2)
 - [seader](seader-API28.2.zip) (API 28.2)
 - [seader](seader-API26.3.zip) (API 26.3)
 - [seader](seader-API26.0.zip) (API 26.0)
