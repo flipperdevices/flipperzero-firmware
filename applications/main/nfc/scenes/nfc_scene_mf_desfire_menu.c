@@ -52,8 +52,7 @@ bool nfc_scene_mf_desfire_menu_on_event(void* context, SceneManagerEvent event) 
             }
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
-            // TODO: Implement info
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneInfo);
             consumed = true;
         }
     }
