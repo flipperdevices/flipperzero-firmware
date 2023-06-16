@@ -66,11 +66,10 @@ uint16_t bq27220_get_voltage(FuriHalI2cBusHandle* handle);
 int16_t bq27220_get_current(FuriHalI2cBusHandle* handle);
 
 /** Get battery status */
-uint8_t bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* battery_status);
+bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* battery_status);
 
 /** Get operation status */
-uint8_t
-    bq27220_get_operation_status(FuriHalI2cBusHandle* handle, OperationStatus* operation_status);
+bool bq27220_get_operation_status(FuriHalI2cBusHandle* handle, OperationStatus* operation_status);
 
 /** Get temperature in units of 0.1°K */
 uint16_t bq27220_get_temperature(FuriHalI2cBusHandle* handle);

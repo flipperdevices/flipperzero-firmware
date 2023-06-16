@@ -3,26 +3,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct {
-    // Low byte, Low bit first
-    bool CCT : 1;
-    bool CSYNC : 1;
-    bool RSVD0 : 1;
-    bool EDV_CMP : 1;
-    bool SC : 1;
-    bool FIXED_EDV0 : 1;
-    uint8_t RSVD1 : 2;
-    // High byte, Low bit first
-    bool FCC_LIM : 1;
-    bool RSVD2 : 1;
-    bool FC_FOR_VDQ : 1;
-    bool IGNORE_SD : 1;
-    bool SME0 : 1;
-    uint8_t RSVD3 : 3;
-} GaugingConfig;
-
-_Static_assert(sizeof(GaugingConfig) == 2, "Incorrect structure size");
-
 typedef enum {
     BQ27220DMTypeEnd,
     BQ27220DMTypeWait,

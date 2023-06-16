@@ -15,7 +15,7 @@
 
 #include <hw_conf.h>
 #include <bq27220.h>
-#include <bq27220_config.h>
+#include <bq27220_data_memory.h>
 #include <bq25896.h>
 
 #include <furi.h>
@@ -64,7 +64,8 @@ void furi_hal_power_init() {
     LL_C2_PWR_SetPowerMode(FURI_HAL_POWER_STOP_MODE);
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
-    bq27220_init(&furi_hal_i2c_handle_power, furi_hal_power_gauge_data_memory);
+    bq27220_init(&furi_hal_i2c_handle_power);
+    bq27220_apply_data_memory(&furi_hal_i2c_handle_power, furi_hal_power_gauge_data_memory);
     bq25896_init(&furi_hal_i2c_handle_power);
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 
@@ -79,9 +80,8 @@ bool furi_hal_power_gauge_is_ok() {
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
 
-    if(bq27220_get_battery_status(&furi_hal_i2c_handle_power, &battery_status) == BQ27220_ERROR ||
-       bq27220_get_operation_status(&furi_hal_i2c_handle_power, &operation_status) ==
-           BQ27220_ERROR) {
+    if(!bq27220_get_battery_status(&furi_hal_i2c_handle_power, &battery_status) ||
+       !bq27220_get_operation_status(&furi_hal_i2c_handle_power, &operation_status)) {
         ret = false;
     } else {
         ret &= battery_status.BATTPRES;
@@ -565,9 +565,8 @@ void furi_hal_power_debug_get(PropertyValueCallback out, void* context) {
 
     const uint32_t ntc_mpct = bq25896_get_ntc_mpct(&furi_hal_i2c_handle_power);
 
-    if(bq27220_get_battery_status(&furi_hal_i2c_handle_power, &battery_status) != BQ27220_ERROR &&
-       bq27220_get_operation_status(&furi_hal_i2c_handle_power, &operation_status) !=
-           BQ27220_ERROR) {
+    if(bq27220_get_battery_status(&furi_hal_i2c_handle_power, &battery_status) &&
+       bq27220_get_operation_status(&furi_hal_i2c_handle_power, &operation_status)) {
         property_value_out(&property_context, "%lu", 2, "charger", "ntc", ntc_mpct);
         property_value_out(&property_context, "%d", 2, "gauge", "calmd", operation_status.CALMD);
         property_value_out(&property_context, "%d", 2, "gauge", "sec", operation_status.SEC);

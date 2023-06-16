@@ -1,19 +1,43 @@
-#include <bq27220_config.h>
+#include <bq27220_data_memory.h>
 
-const GaugingConfig gauge_conf = {
-    .CCT = 1,
-    .CSYNC = 0,
-    .EDV_CMP = 0,
-    .SC = 1,
-    .FIXED_EDV0 = 1,
-    .FCC_LIM = 1,
-    .FC_FOR_VDQ = 1,
-    .IGNORE_SD = 1,
-    .SME0 = 0,
-};
+// typedef struct {
+//     // Low byte, Low bit first
+//     bool CCT : 1;
+//     bool CSYNC : 1;
+//     bool RSVD0 : 1;
+//     bool EDV_CMP : 1;
+//     bool SC : 1;
+//     bool FIXED_EDV0 : 1;
+//     uint8_t RSVD1 : 2;
+//     // High byte, Low bit first
+//     bool FCC_LIM : 1;
+//     bool RSVD2 : 1;
+//     bool FC_FOR_VDQ : 1;
+//     bool IGNORE_SD : 1;
+//     bool SME0 : 1;
+//     uint8_t RSVD3 : 3;
+// } GaugingConfig;
+
+// _Static_assert(sizeof(GaugingConfig) == 2, "Incorrect structure size");
+
+// const GaugingConfig gauge_conf = {
+//     .CCT = 1,
+//     .CSYNC = 0,
+//     .EDV_CMP = 0,
+//     .SC = 1,
+//     .FIXED_EDV0 = 1,
+//     .FCC_LIM = 1,
+//     .FC_FOR_VDQ = 1,
+//     .IGNORE_SD = 1,
+//     .SME0 = 0,
+// };
 
 const BQ27220DMData furi_hal_power_gauge_data_memory[] = {
-    // {.address=BQ27220DMAddressGasGaugingCEDVProfile1GaugingConfig,      .type=BQ27220DMTypeU16, .value.u16=(*(uint16_t*)&gauge_conf), },
+    {
+        .address=BQ27220DMAddressGasGaugingCEDVProfile1GaugingConfig,
+        .type=BQ27220DMTypeU16,
+        .value.u16=0b1011000010001100,
+    },
     {
         .address = BQ27220DMAddressGasGaugingCEDVProfile1FullChargeCapacity,
         .type = BQ27220DMTypeU16,

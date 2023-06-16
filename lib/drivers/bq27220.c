@@ -1,7 +1,7 @@
 
 #include "bq27220.h"
 #include "bq27220_reg.h"
-#include "bq27220_config.h"
+#include "bq27220_data_memory.h"
 
 #include <furi.h>
 #include <stdbool.h>
@@ -79,6 +79,22 @@ static bool bq27220_set_parameter(
 
 bool bq27220_init(FuriHalI2cBusHandle* handle) {
     // Check ID and
+    if(!bq27220_control(handle, Control_DEVICE_NUMBER)) {
+        FURI_LOG_E(TAG, "Device is not present");
+        return false;
+    };
+
+    uint16_t data=0;
+    data = bq27220_read_word(handle, CommandControl);
+    if(data != 0xFFA5) {
+        FURI_LOG_E(TAG, "Invalid control response: %x", data);
+        return false;
+    };
+
+    data = bq27220_read_word(handle, CommandMACData);
+    FURI_LOG_I(TAG, "Device Number %x", data);
+
+    return true;
 }
 
 bool bq27220_apply_data_memory(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory) {
@@ -128,24 +144,23 @@ int16_t bq27220_get_current(FuriHalI2cBusHandle* handle) {
     return bq27220_read_word(handle, CommandCurrent);
 }
 
-uint8_t bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* battery_status) {
+bool bq27220_get_battery_status(FuriHalI2cBusHandle* handle, BatteryStatus* battery_status) {
     uint16_t data = bq27220_read_word(handle, CommandBatteryStatus);
     if(data == BQ27220_ERROR) {
-        return BQ27220_ERROR;
+        return false;
     } else {
         *(uint16_t*)battery_status = data;
-        return BQ27220_SUCCESS;
+        return true;
     }
 }
 
-uint8_t
-    bq27220_get_operation_status(FuriHalI2cBusHandle* handle, OperationStatus* operation_status) {
+bool bq27220_get_operation_status(FuriHalI2cBusHandle* handle, OperationStatus* operation_status) {
     uint16_t data = bq27220_read_word(handle, CommandOperationStatus);
     if(data == BQ27220_ERROR) {
-        return BQ27220_ERROR;
+        return false;
     } else {
         *(uint16_t*)operation_status = data;
-        return BQ27220_SUCCESS;
+        return true;
     }
 }
 
