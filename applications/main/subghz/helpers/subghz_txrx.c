@@ -154,7 +154,6 @@ static void subghz_txrx_begin(SubGhzTxRx* instance, uint8_t* preset_data) {
     subghz_devices_reset(instance->radio_device);
     subghz_devices_idle(instance->radio_device);
     subghz_devices_load_preset(instance->radio_device, FuriHalSubGhzPresetCustom, preset_data);
-    //furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     instance->txrx_state = SubGhzTxRxStateIDLE;
 }
 
@@ -167,10 +166,8 @@ static uint32_t subghz_txrx_rx(SubGhzTxRx* instance, uint32_t frequency) {
     subghz_devices_idle(instance->radio_device);
 
     uint32_t value = subghz_devices_set_frequency(instance->radio_device, frequency);
-    //furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
     subghz_devices_flush_rx(instance->radio_device);
     subghz_txrx_speaker_on(instance);
-    //furi_hal_subghz_rx();
 
     subghz_devices_start_async_rx(
         instance->radio_device, subghz_worker_rx_callback, instance->worker);
@@ -211,8 +208,7 @@ static bool subghz_txrx_tx(SubGhzTxRx* instance, uint32_t frequency) {
     furi_assert(instance->txrx_state != SubGhzTxRxStateSleep);
     subghz_devices_idle(instance->radio_device);
     subghz_devices_set_frequency(instance->radio_device, frequency);
-    // furi_hal_gpio_write(&gpio_cc1101_g0, false);
-    // furi_hal_gpio_init(&gpio_cc1101_g0, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
+ 
     bool ret = subghz_devices_set_tx(instance->radio_device);
     if(ret) {
         subghz_txrx_speaker_on(instance);
