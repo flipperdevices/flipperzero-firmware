@@ -33,19 +33,16 @@ void mf_desfire_file_id_parse(MfDesfireFileId* data, uint32_t index, const BitBu
         buf, data, index * sizeof(MfDesfireFileId), sizeof(MfDesfireFileId));
 }
 
+void mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer* buf) {
+    bit_buffer_write_bytes(buf, data, sizeof(MfDesfireFileSettings));
+}
+
 void mf_desfire_application_init(MfDesfireApplication* data) {
     data->key_versions = simple_array_alloc(&mf_desfire_key_version_array_config);
     data->file_ids = simple_array_alloc(&mf_desfire_file_id_array_config);
     data->file_settings = simple_array_alloc(&mf_desfire_file_settings_array_config);
     data->file_data = simple_array_alloc(&mf_desfire_file_data_array_config);
 }
-
-// void mf_desfire_file_reset(MfDesfireFile* file) {
-//     if(file->contents) {
-//         free(file->contents);
-//     }
-//     memset(file, 0, sizeof(MfDesfireFile));
-// }
 
 void mf_desfire_application_reset(MfDesfireApplication* app) {
     simple_array_free(app->key_versions);
@@ -54,34 +51,6 @@ void mf_desfire_application_reset(MfDesfireApplication* app) {
     simple_array_free(app->file_data);
     memset(app, 0, sizeof(MfDesfireApplication));
 }
-
-// void mf_desfire_file_copy(MfDesfireFile* file, const MfDesfireFile* other) {
-//     furi_assert(file->contents == NULL);
-//
-//     file->id = other->id;
-//     file->type = other->type;
-//     file->comm = other->comm;
-//     file->access_rights = other->access_rights;
-//
-//     if(other->type == MfDesfireFileTypeStandard || other->type == MfDesfireFileTypeBackup) {
-//         file->data = other->data;
-//         if(other->data.size == 0) {
-//             return;
-//         }
-//
-//         file->contents = malloc(other->data.size);
-//         memcpy(file->contents, other->contents, other->data.size);
-//
-//     } else if(other->type == MfDesfireFileTypeValue) {
-//         file->value = other->value;
-//     } else if(
-//         other->type == MfDesfireFileTypeLinearRecord ||
-//         other->type == MfDesfireFileTypeCyclicRecord) {
-//         file->record = other->record;
-//     } else {
-//         furi_crash("Invalid file type");
-//     }
-// }
 
 void mf_desfire_application_copy(MfDesfireApplication* data, const MfDesfireApplication* other) {
     data->key_settings = other->key_settings;

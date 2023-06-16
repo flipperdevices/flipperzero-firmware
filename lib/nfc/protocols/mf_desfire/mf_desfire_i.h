@@ -28,6 +28,8 @@ void mf_desfire_application_id_parse(
 
 void mf_desfire_file_id_parse(MfDesfireFileId* data, uint32_t index, const BitBuffer* buf);
 
+void mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer* buf);
+
 // Init internal MfDesfire structures
 
 void mf_desfire_application_init(MfDesfireApplication* data);
@@ -38,10 +40,4 @@ void mf_desfire_application_reset(MfDesfireApplication* data);
 
 // Copy internal MfDesfire structures
 
-// void mf_desfire_file_copy(MfDesfireFile* data, const MfDesfireFile* other);
-//
-// void mf_desfire_files_copy(MfDesfireFiles* data, const MfDesfireFiles* other);
-
 void mf_desfire_application_copy(MfDesfireApplication* data, const MfDesfireApplication* other);
-
-// void mf_desfire_applications_copy(MfDesfireApplications* data, const MfDesfireApplications* other);

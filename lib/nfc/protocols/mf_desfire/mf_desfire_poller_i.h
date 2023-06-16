@@ -81,7 +81,7 @@ MfDesfireError mf_desfire_poller_async_read_file_settings(
     MfDesfireFileId id,
     MfDesfireFileSettings* data);
 
-MfDesfireError mf_desfire_poller_async_read_file_settings_all(
+MfDesfireError mf_desfire_poller_async_read_file_settings_multi(
     MfDesfirePoller* instance,
     const SimpleArray* file_ids,
     SimpleArray* data);
