@@ -16,8 +16,6 @@
 #define SNAKE_GAME_APP EXT_PATH("/apps/Games/snake_game.fap")
 #define CLOCK_APP EXT_PATH("/apps/Tools/clock.fap")
 
-#define FAP_LOADER_APP_NAME "Applications"
-
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
@@ -68,30 +66,16 @@ static void
 #endif
 
 static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char* path) {
-    do {
-        LoaderStatus status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, path);
-        if(status == LoaderStatusOk) break;
-        FURI_LOG_E(TAG, "loader_start failed: %d", status);
-
-        status = loader_start(desktop->loader, "Passport", NULL);
-        if(status != LoaderStatusOk) {
-            FURI_LOG_E(TAG, "loader_start failed: %d", status);
-        }
-    } while(false);
+    if(loader_start_with_gui_error(desktop->loader, path, NULL) != LoaderStatusOk) {
+        loader_start(desktop->loader, "Passport", NULL, NULL);
+    }
 }
 
 static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* application) {
-    LoaderStatus status = LoaderStatusErrorInternal;
-    if(application->is_external) {
-        status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, application->name_or_path);
-    } else if(strlen(application->name_or_path) > 0) {
-        status = loader_start(desktop->loader, application->name_or_path, NULL);
+    if(strlen(application->name_or_path) > 0) {
+        loader_start_with_gui_error(desktop->loader, application->name_or_path, NULL);
     } else {
-        status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, NULL);
-    }
-
-    if(status != LoaderStatusOk) {
-        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+        loader_start(desktop->loader, LOADER_APPLICATIONS_NAME, NULL, NULL);
     }
 }
 
@@ -149,10 +133,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenPowerOff: {
-            LoaderStatus status = loader_start(desktop->loader, "Power", "off");
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+            loader_start(desktop->loader, "Power", "off", NULL);
             consumed = true;
             break;
         }
@@ -177,18 +158,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopAnimationEventInteractAnimation:
             if(!animation_manager_interact_process(desktop->animation_manager)) {
-                LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
+                loader_start(desktop->loader, "Passport", NULL, NULL);
             }
             consumed = true;
             break;
         case DesktopMainEventOpenPassport: {
-            LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+            loader_start(desktop->loader, "Passport", NULL, NULL);
             break;
         }
         case DesktopMainEventOpenGame: {

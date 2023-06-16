@@ -48,7 +48,7 @@ typedef struct {
 
 static void loader_menu_start(const char* name) {
     Loader* loader = furi_record_open(RECORD_LOADER);
-    loader_start(loader, name, NULL);
+    loader_start_with_gui_error(loader, name, NULL);
     furi_record_close(RECORD_LOADER);
 }
 

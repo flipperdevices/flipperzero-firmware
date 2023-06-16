@@ -39,20 +39,15 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
     UNUSED(browser);
     Loader* loader = furi_record_open(RECORD_LOADER);
 
-    LoaderStatus status;
     if(selected->is_app) {
         char* param = strrchr(furi_string_get_cstr(selected->path), '/');
         if(param != NULL) {
             param++;
         }
-        status = loader_start(loader, flipper_app_name[selected->type], param);
+        loader_start(loader, flipper_app_name[selected->type], param, NULL);
     } else {
-        status = loader_start(
-            loader, flipper_app_name[selected->type], furi_string_get_cstr(selected->path));
-    }
-
-    if(status != LoaderStatusOk) {
-        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+        loader_start(
+            loader, flipper_app_name[selected->type], furi_string_get_cstr(selected->path), NULL);
     }
 
     furi_record_close(RECORD_LOADER);

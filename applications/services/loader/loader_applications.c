@@ -112,7 +112,7 @@ static void loader_applications_start_app(const char* name) {
     FuriPubSubSubscription* subscription =
         furi_pubsub_subscribe(loader_get_pubsub(loader), loader_pubsub_callback, thread_id);
 
-    LoaderStatus status = loader_start(loader, name, NULL);
+    LoaderStatus status = loader_start_with_gui_error(loader, name, NULL);
 
     if(status == LoaderStatusOk) {
         furi_thread_flags_wait(APPLICATION_STOP_EVENT, FuriFlagWaitAny, FuriWaitForever);
