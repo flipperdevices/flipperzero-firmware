@@ -33,7 +33,9 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
     FuriString* error_message = furi_string_alloc();
     LoaderStatus status = loader_start(loader, name, args, error_message);
 
-    if(status != LoaderStatusOk) {
+    // TODO: we have many places where we can emit a double start, ex: desktop, menu
+    // so i prefer to not show LoaderStatusErrorAppStarted error message for now
+    if(status == LoaderStatusErrorUnknownApp || status == LoaderStatusErrorInternal) {
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
         dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
