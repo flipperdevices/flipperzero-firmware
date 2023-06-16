@@ -1,7 +1,6 @@
 #include "devices.h"
 
 #include "registry.h"
-#include "items.h"
 
 void subghz_devices_init() {
     furi_check(!subghz_device_registry_is_valid());
