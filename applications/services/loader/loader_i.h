@@ -35,6 +35,7 @@ typedef enum {
 typedef struct {
     const char* name;
     const char* args;
+    FuriString* error_message;
 } LoaderMessageStartByName;
 
 typedef struct {

@@ -31,7 +31,10 @@ typedef struct {
  * @param args - application arguments
  * @retval true on success
  */
-LoaderStatus loader_start(Loader* instance, const char* name, const char* args);
+LoaderStatus
+    loader_start(Loader* instance, const char* name, const char* args, FuriString* error_message);
+
+LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args);
 
 /** Lock application start
  * @retval true on success
