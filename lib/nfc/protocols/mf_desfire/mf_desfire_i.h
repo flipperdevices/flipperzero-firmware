@@ -6,7 +6,10 @@
 
 extern const SimpleArrayConfig mf_desfire_key_version_array_config;
 extern const SimpleArrayConfig mf_desfire_app_id_array_config;
-extern const SimpleArrayConfig mf_desfire_app_array_config;
+extern const SimpleArrayConfig mf_desfire_file_id_array_config;
+extern const SimpleArrayConfig mf_desfire_file_settings_array_config;
+extern const SimpleArrayConfig mf_desfire_file_data_array_config;
+extern const SimpleArrayConfig mf_desfire_application_array_config;
 
 // Parse internal MfDesfire structures
 
@@ -23,24 +26,22 @@ void mf_desfire_application_id_parse(
     uint32_t index,
     const BitBuffer* buf);
 
+void mf_desfire_file_id_parse(MfDesfireFileId* data, uint32_t index, const BitBuffer* buf);
+
+// Init internal MfDesfire structures
+
+void mf_desfire_application_init(MfDesfireApplication* data);
+
 // Reset internal MfDesfire structures
-
-void mf_desfire_file_reset(MfDesfireFile* data);
-
-void mf_desfire_files_reset(MfDesfireFiles* data);
 
 void mf_desfire_application_reset(MfDesfireApplication* data);
 
 // Copy internal MfDesfire structures
 
-// void mf_desfire_key_config_copy(
-//     MfDesfireKeyConfiguration* data,
-//     const MfDesfireKeyConfiguration* other);
-
 // void mf_desfire_file_copy(MfDesfireFile* data, const MfDesfireFile* other);
 //
 // void mf_desfire_files_copy(MfDesfireFiles* data, const MfDesfireFiles* other);
-//
-// void mf_desfire_application_copy(MfDesfireApplication* data, const MfDesfireApplication* other);
-//
+
+void mf_desfire_application_copy(MfDesfireApplication* data, const MfDesfireApplication* other);
+
 // void mf_desfire_applications_copy(MfDesfireApplications* data, const MfDesfireApplications* other);

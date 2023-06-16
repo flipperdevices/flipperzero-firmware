@@ -20,9 +20,9 @@ const NfcProtocolBase nfc_protocol_mf_desfire = {
 MfDesfireData* mf_desfire_alloc() {
     MfDesfireData* data = malloc(sizeof(MfDesfireData));
     data->iso14443_4a_data = iso14443_4a_alloc();
-    data->master_key.key_versions = simple_array_alloc(&mf_desfire_key_version_array_config);
+    data->master_key_versions = simple_array_alloc(&mf_desfire_key_version_array_config);
     data->application_ids = simple_array_alloc(&mf_desfire_app_id_array_config);
-    data->applications = simple_array_alloc(&mf_desfire_app_array_config);
+    data->applications = simple_array_alloc(&mf_desfire_application_array_config);
 
     return data;
 }
@@ -33,7 +33,7 @@ void mf_desfire_free(MfDesfireData* data) {
     mf_desfire_reset(data);
     simple_array_free(data->applications);
     simple_array_free(data->application_ids);
-    simple_array_free(data->master_key.key_versions);
+    simple_array_free(data->master_key_versions);
     iso14443_4a_free(data->iso14443_4a_data);
     free(data);
 }
@@ -46,7 +46,7 @@ void mf_desfire_reset(MfDesfireData* data) {
     memset(&data->version, 0, sizeof(MfDesfireVersion));
     memset(&data->free_memory, 0, sizeof(MfDesfireFreeMemory));
 
-    simple_array_reset(data->master_key.key_versions);
+    simple_array_reset(data->master_key_versions);
     simple_array_reset(data->application_ids);
     simple_array_reset(data->applications);
 }
@@ -61,9 +61,9 @@ void mf_desfire_copy(MfDesfireData* data, const MfDesfireData* other) {
 
     data->version = other->version;
     data->free_memory = other->free_memory;
-    data->master_key.key_settings = other->master_key.key_settings;
+    data->master_key_settings = other->master_key_settings;
 
-    simple_array_copy(data->master_key.key_versions, other->master_key.key_versions);
+    simple_array_copy(data->master_key_versions, other->master_key_versions);
     simple_array_copy(data->application_ids, other->application_ids);
     simple_array_copy(data->applications, other->applications);
 }

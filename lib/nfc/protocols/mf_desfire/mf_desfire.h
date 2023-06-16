@@ -92,8 +92,7 @@ typedef enum {
 typedef uint8_t MfDesfireFileId;
 typedef uint16_t MfDesfireFileAccessRights;
 
-typedef struct MifareDesfireFile {
-    MfDesfireFileId id;
+typedef struct {
     MfDesfireFileType type;
     MfDesfireFileCommunicationSettings comm;
     MfDesfireFileAccessRights access_rights;
@@ -113,20 +112,16 @@ typedef struct MifareDesfireFile {
             uint32_t cur;
         } record;
     };
-    uint8_t* contents;
-} MfDesfireFile;
-
-// TODO: replace with a generic array struct
-typedef struct {
-    MfDesfireFile* data;
-    uint32_t count;
-} MfDesfireFiles;
+} MfDesfireFileSettings;
 
 typedef uint8_t MfDesfireApplicationId[MF_DESFIRE_APP_ID_SIZE];
 
 typedef struct MfDesfireApplication {
-    MfDesfireKeyConfiguration key_config;
-    MfDesfireFiles files;
+    MfDesfireKeySettings key_settings;
+    SimpleArray* key_versions;
+    SimpleArray* file_ids;
+    SimpleArray* file_settings;
+    SimpleArray* file_data;
 } MfDesfireApplication;
 
 typedef enum {
@@ -140,7 +135,8 @@ typedef struct {
     Iso14443_4aData* iso14443_4a_data;
     MfDesfireVersion version;
     MfDesfireFreeMemory free_memory;
-    MfDesfireKeyConfiguration master_key;
+    MfDesfireKeySettings master_key_settings;
+    SimpleArray* master_key_versions;
     SimpleArray* application_ids;
     SimpleArray* applications;
 } MfDesfireData;

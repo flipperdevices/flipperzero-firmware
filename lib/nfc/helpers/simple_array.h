@@ -7,10 +7,12 @@ typedef struct SimpleArray SimpleArray;
 
 typedef void SimpleArrayElement;
 
+typedef void (*SimpleArrayInit)(SimpleArrayElement* elem);
 typedef void (*SimpleArrayReset)(SimpleArrayElement* elem);
 typedef void (*SimpleArrayCopy)(SimpleArrayElement* elem, const SimpleArrayElement* other);
 
 typedef struct {
+    SimpleArrayInit init;
     SimpleArrayReset reset;
     SimpleArrayCopy copy;
     const size_t type_size;

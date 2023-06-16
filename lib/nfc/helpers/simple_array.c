@@ -29,6 +29,13 @@ void simple_array_init(SimpleArray* instance, uint32_t count) {
 
     instance->data = malloc(count * instance->config->type_size);
     instance->count = count;
+
+    SimpleArrayInit init = instance->config->init;
+    if(init) {
+        for(uint32_t i = 0; i < instance->count; ++i) {
+            init(simple_array_get(instance, i));
+        }
+    }
 }
 
 void simple_array_reset(SimpleArray* instance) {

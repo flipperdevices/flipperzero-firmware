@@ -159,24 +159,6 @@ MfDesfireError mf_desfire_poller_async_read_key_versions(
     return error;
 }
 
-MfDesfireError mf_desfire_poller_async_read_key_configuration(
-    MfDesfirePoller* instance,
-    MfDesfireKeyConfiguration* data) {
-    furi_assert(instance);
-    furi_assert(data);
-
-    MfDesfireError error;
-
-    do {
-        error = mf_desfire_poller_async_read_key_settings(instance, &data->key_settings);
-        if(error != MfDesfireErrorNone) break;
-        error = mf_desfire_poller_async_read_key_versions(
-            instance, data->key_versions, data->key_settings.max_keys);
-    } while(false);
-
-    return error;
-}
-
 MfDesfireError
     mf_desfire_poller_async_read_application_ids(MfDesfirePoller* instance, SimpleArray* data) {
     furi_assert(instance);
@@ -195,13 +177,13 @@ MfDesfireError
 
         if(error != MfDesfireErrorNone) break;
 
-        const uint32_t ids_count =
+        const uint32_t app_id_count =
             bit_buffer_get_size_bytes(instance->result_buffer) / sizeof(MfDesfireApplicationId);
-        if(ids_count == 0) break;
+        if(app_id_count == 0) break;
 
-        simple_array_init(data, ids_count);
+        simple_array_init(data, app_id_count);
 
-        for(uint32_t i = 0; i < ids_count; ++i) {
+        for(uint32_t i = 0; i < app_id_count; ++i) {
             mf_desfire_application_id_parse(simple_array_get(data, i), i, instance->result_buffer);
         }
     } while(false);
@@ -227,14 +209,98 @@ MfDesfireError mf_desfire_poller_async_select_application(
     return error;
 }
 
+MfDesfireError
+    mf_desfire_poller_async_read_file_ids(MfDesfirePoller* instance, SimpleArray* data) {
+    furi_assert(instance);
+
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_FILE_IDS);
+
+    MfDesfireError error;
+
+    do {
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        const uint32_t id_count =
+            bit_buffer_get_size_bytes(instance->result_buffer) / sizeof(MfDesfireFileId);
+
+        if(id_count == 0) break;
+        simple_array_init(data, id_count);
+
+        for(uint32_t i = 0; i < id_count; ++i) {
+            mf_desfire_file_id_parse(simple_array_get(data, i), i, instance->result_buffer);
+        }
+    } while(false);
+
+    return error;
+}
+
+MfDesfireError mf_desfire_poller_async_read_file_settings(
+    MfDesfirePoller* instance,
+    MfDesfireFileId id,
+    MfDesfireFileSettings* data) {
+    furi_assert(instance);
+    UNUSED(instance);
+    UNUSED(id);
+    UNUSED(data);
+
+    MfDesfireError error = MfDesfireErrorNone;
+    return error;
+}
+
+MfDesfireError mf_desfire_poller_async_read_file_settings_all(
+    MfDesfirePoller* instance,
+    const SimpleArray* file_ids,
+    SimpleArray* data) {
+    furi_assert(instance);
+
+    MfDesfireError error = MfDesfireErrorNone;
+
+    const uint32_t file_id_count = simple_array_get_count(file_ids);
+    if(file_id_count > 0) {
+        simple_array_init(data, file_id_count);
+    }
+
+    for(MfDesfireFileId id = 0; id < file_id_count; ++id) {
+        error =
+            mf_desfire_poller_async_read_file_settings(instance, id, simple_array_get(data, id));
+        if(error != MfDesfireErrorNone) break;
+    }
+
+    return error;
+}
+
 MfDesfireError mf_desfire_poller_async_read_application(
     MfDesfirePoller* instance,
     MfDesfireApplication* data) {
     furi_assert(instance);
-    UNUSED(instance);
-    UNUSED(data);
+    furi_assert(data);
 
-    MfDesfireError error = MfDesfireErrorNone;
+    MfDesfireError error;
+
+    do {
+        // Read Key settings;
+        error = mf_desfire_poller_async_read_key_settings(instance, &data->key_settings);
+        if(error != MfDesfireErrorNone) break;
+        // Read Key verisons;
+        error = mf_desfire_poller_async_read_key_versions(
+            instance, data->key_versions, data->key_settings.max_keys);
+        if(error != MfDesfireErrorNone) break;
+        // Read File ids;
+        error = mf_desfire_poller_async_read_file_ids(instance, data->file_ids);
+        if(error != MfDesfireErrorNone) break;
+        // Read File settings;
+        error = mf_desfire_poller_async_read_file_settings_all(
+            instance, data->file_ids, data->file_settings);
+        if(error != MfDesfireErrorNone) break;
+        // Read File data;
+    } while(false);
 
     return error;
 }

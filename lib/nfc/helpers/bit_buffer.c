@@ -169,7 +169,7 @@ void bit_buffer_write_bytes_mid(
     furi_assert(dest);
     furi_assert(start_index + size_bytes <= bit_buffer_get_size_bytes(buf));
 
-    memcpy(buf->data + start_index, dest, size_bytes);
+    memcpy(dest, buf->data + start_index, size_bytes);
 }
 
 bool bit_buffer_has_partial_byte(const BitBuffer* buf) {

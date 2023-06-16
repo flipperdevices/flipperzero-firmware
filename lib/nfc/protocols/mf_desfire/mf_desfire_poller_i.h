@@ -14,7 +14,8 @@ typedef enum {
     MfDesfirePollerStateIdle,
     MfDesfirePollerStateReadVersion,
     MfDesfirePollerStateReadFreeMemory,
-    MfDesfirePollerStateReadMasterKey,
+    MfDesfirePollerStateReadMasterKeySettings,
+    MfDesfirePollerStateReadMasterKeyVersion,
     MfDesfirePollerStateReadApplicationIds,
     MfDesfirePollerStateReadApplications,
     MfDesfirePollerStateReadFailed,
@@ -66,10 +67,6 @@ MfDesfireError mf_desfire_poller_async_read_key_versions(
     SimpleArray* data,
     uint32_t count);
 
-MfDesfireError mf_desfire_poller_async_read_key_configuration(
-    MfDesfirePoller* instance,
-    MfDesfireKeyConfiguration* data);
-
 MfDesfireError
     mf_desfire_poller_async_read_application_ids(MfDesfirePoller* instance, SimpleArray* data);
 
@@ -79,9 +76,18 @@ MfDesfireError mf_desfire_poller_async_select_application(
 
 MfDesfireError mf_desfire_poller_async_read_file_ids(MfDesfirePoller* instance, SimpleArray* data);
 
-MfDesfireError mf_desfire_poller_async_read_file_settings(MfDesfirePoller* instance);
+MfDesfireError mf_desfire_poller_async_read_file_settings(
+    MfDesfirePoller* instance,
+    MfDesfireFileId id,
+    MfDesfireFileSettings* data);
 
-MfDesfireError mf_desfire_poller_async_read_file_contents(MfDesfirePoller* instance);
+MfDesfireError mf_desfire_poller_async_read_file_settings_all(
+    MfDesfirePoller* instance,
+    const SimpleArray* file_ids,
+    SimpleArray* data);
+
+MfDesfireError
+    mf_desfire_poller_async_read_file_data(MfDesfirePoller* instance, SimpleArray* data);
 
 MfDesfireError
     mf_desfire_poller_async_read_application(MfDesfirePoller* instance, MfDesfireApplication* data);
