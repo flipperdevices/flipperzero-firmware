@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `11 Jun 22:00 GMT +3`
+### Apps checked & updated at `17 Jun 04:40 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -52,13 +52,13 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [T-rex game (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
 
 ## Media
-- [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
+- [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/44023851f7349b6ae9ca9f9bd9228d795a7e04c0)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina)
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi)
 - [Music Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 - [Music Beeper (By qqMajiKpp / Haseo)](https://github.com/qqmajikpp/)
-- [Text 2 SAM (By Round-Pi)](https://github.com/Round-Pi/flipperzero-text2sam)
+- [Text 2 SAM (By Round-Pi)](https://github.com/Round-Pi/flipperzero-text2sam) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/e688f81b53b0138d80de4b609daf1f9fca5be647)
 - [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player) <- Follow link to download examples and learn how to convert videos
 
@@ -98,6 +98,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Control 7-segment display with Flipper Zero (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [MH-Z19 - CO2 sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
+- [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon)
 
 ## Tools / Misc
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
@@ -130,6 +131,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Mifare Fuzzer (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
 - [HEX Editor (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 - [Resistance calculator (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
+- [IR Intervalometer for Sony Cameras (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer)
 
 --- 
 
