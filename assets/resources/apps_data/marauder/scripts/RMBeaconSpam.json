@@ -1,0 +1,12 @@
+{
+	"meta":	{
+		"description":	"RM Beacon Spam",
+		"repeat":	1.0000000000000000
+	},
+	"stages":	[{
+			"beaconList":	{
+				"ssids":	["FBI_Surveillance_Van", "Its_the_Cops", "SWAT_Van", "Sketchy_WiFi", "Free_Beer", "Dankest_Internet", "RogueMaster_Rules"],
+				"timeout":	120.00000000000000
+			}
+		}]
+}

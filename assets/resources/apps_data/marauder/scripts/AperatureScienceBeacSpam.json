@@ -1,0 +1,12 @@
+{
+	"meta":	{
+		"description":	"Aperature Beacon Spam",
+		"repeat":	1.0000000000000000
+	},
+	"stages":	[{
+			"beaconList":	{
+				"ssids":	["01 APERTURE SCIENCE", "02 WE DO WHAT WE MUST", "03 BECAUSE WE CAN", "04 FOR THE GOOD", "05 OF ALL OF US"],
+				"timeout":	120.00000000000000
+			}
+		}]
+}

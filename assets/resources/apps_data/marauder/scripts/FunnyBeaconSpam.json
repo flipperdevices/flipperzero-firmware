@@ -1,0 +1,12 @@
+{
+	"meta":	{
+		"description":	"Funny Beacon Spam",
+		"repeat":	1.0000000000000000
+	},
+	"stages":	[{
+			"beaconList":	{
+				"ssids":	["Going Rogue", "No Wi-Fi for You!", "Bill Wi the Science Fi", "Hide Yo Kids, Hide Yo Wi-Fi", "Friendly Neighborhood Spider-Lan", "Keep It on The Download", "We've Been Trying to Reach You About Your Car's Extended Warranty", "LAN Solo", "Live Long and Router", "Wi-Fi Ms. American Pie", "Go Go Gadget Internet", "99 Problems but Wi-Fi Ain't One", "Go Go Router Rangers", "Never Gonna Give You Wi-Fi", "Dungeon Masters Only", "You Shall Not Password", "Definitely Not an FBI Surveillance Van"],
+				"timeout":	120.00000000000000
+			}
+		}]
+}

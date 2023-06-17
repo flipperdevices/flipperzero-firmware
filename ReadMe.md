@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Updated infrared assets #519 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/519) (AC Assets)
 - [Updates to BadBT - Imported by ESurge (From BadKB by Willy-JL) #669](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/669)
 - [Fix Music Player crash - Removed folder migration #670](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/670)
+- Added: Assets: Includes 3 Sample Beacon Spam Marauder Companion Scripts (Thanks to TalkingSasquach for the RM Beacon Spam)
 
 <a name="release">
 
@@ -108,6 +109,7 @@ $ ./fbt dolphin_ext
 - [Archive: Allow Folder Favorites (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/20bc89888ecaa47f3ee65c63416e609eeff70026)
 - [Archive: Browser: Context menu to show file content (By askoriy)](https://github.com/DarkFlippers/unleashed-firmware/pull/139)
 - Archive: FAPs are now launchable from Archive [By RogueMaster], thanks xMasterX for the suggestion
+- Assets: Includes 3 Sample Beacon Spam Marauder Companion Scripts (Thanks to TalkingSasquach for the RM Beacon Spam)
 - Assets: Includes a NFC Level 50 Z3lda Amiibo
 - Assets: Includes a NFC link to TalkingSasquach on YouTube
 - Assets: Includes a NFC Rick Roll link
