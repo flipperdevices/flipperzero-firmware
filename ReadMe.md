@@ -38,6 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Updates to BadBT - Imported by ESurge (From BadKB by Willy-JL) #669](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/669)
 - [Fix Music Player crash - Removed folder migration #670](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/670)
 - Added: Assets: Includes 3 Sample Beacon Spam Marauder Companion Scripts (Thanks to TalkingSasquach for the RM Beacon Spam)
+- Rename [GPIO] Intervalometer 2 to IR Intervalometer for Sony Cameras along with recategorization
 
 <a name="release">
 
@@ -327,7 +328,7 @@ $ ./fbt dolphin_ext
 - [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware)
 - [IFTTT Virtual Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button) `Req: ESP8266 w/ IFTTT FW Flashed`
 - [Intravelometer (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
-- [Intravelometer 2 (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer) `works for Sony cameras`
+- [IR Intervalometer for Sony Cameras (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer) `works for Sony cameras`
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - [IR Scope (By kallanreed)](https://github.com/kallanreed/unleashed-firmware/tree/dev/applications/external/ir_scope)
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)

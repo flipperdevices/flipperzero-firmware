@@ -1,13 +1,13 @@
 App(
-    appid="GPIO_Intervalometer2",
-    name="[GPIO] Intervalometer 2",
+    appid="IR_IntervalometerSony",
+    name="IR Intervalometer for Sony Cameras",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipvalo_app",
     requires=["gui"],
     stack_size=2 * 1024,
     order=20,
     fap_icon="intervalometer_10x.png",
-    fap_category="GPIO",
+    fap_category="Infrared",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="intervalometer",
 )
