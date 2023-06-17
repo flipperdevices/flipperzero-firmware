@@ -39,6 +39,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix Music Player crash - Removed folder migration #670](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/670)
 - Added: Assets: Includes 3 Sample Beacon Spam Marauder Companion Scripts (Thanks to TalkingSasquach for the RM Beacon Spam)
 - Rename [GPIO] Intervalometer 2 to IR Intervalometer for Sony Cameras along with recategorization
+- Updated: [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam) (Changes by Willy-JL)
+- Updated: [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem) (Changes by xMasterX)
 
 <a name="release">
 
