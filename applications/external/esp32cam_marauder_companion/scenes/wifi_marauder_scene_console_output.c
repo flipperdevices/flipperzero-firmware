@@ -46,8 +46,7 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         furi_string_reset(app->text_box_store);
         app->text_box_store_strlen = 0;
         if(0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
-            const char* help_msg = "Marauder companion " WIFI_MARAUDER_APP_VERSION
-                                   "\nby @0xchocolate\nmodified by @tcpassos\n";
+            const char* help_msg = "Marauder companion " WIFI_MARAUDER_APP_VERSION "\n";
             furi_string_cat_str(app->text_box_store, help_msg);
             app->text_box_store_strlen += strlen(help_msg);
         }
