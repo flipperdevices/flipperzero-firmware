@@ -1112,7 +1112,7 @@ Function,-,furi_hal_bt_get_hardfault_info,const FuriHalBtHardfaultInfo*,
 Function,+,furi_hal_bt_get_key_storage_buff,void,"uint8_t**, uint16_t*"
 Function,+,furi_hal_bt_get_profile_adv_name,const char*,FuriHalBtProfile
 Function,+,furi_hal_bt_get_profile_mac_addr,const uint8_t*,FuriHalBtProfile
-Function,-,furi_hal_bt_get_profile_pairing_method,GapPairing,FuriHalBtProfile
+Function,+,furi_hal_bt_get_profile_pairing_method,GapPairing,FuriHalBtProfile
 Function,+,furi_hal_bt_get_radio_stack,FuriHalBtStack,
 Function,+,furi_hal_bt_get_rssi,float,
 Function,+,furi_hal_bt_get_transmitted_packets,uint32_t,

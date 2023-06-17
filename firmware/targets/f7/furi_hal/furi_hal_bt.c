@@ -13,9 +13,6 @@
 
 #define TAG "FuriHalBt"
 
-#define FURI_HAL_BT_DEFAULT_MAC_ADDR \
-    { 0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72 }
-
 /* Time, in ms, to wait for mode transition before crashing */
 #define C2_MODE_SWITCH_TIMEOUT 10000
 
@@ -220,12 +217,13 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             config->adv_service_uuid |= furi_hal_version_get_hw_color();
         } else if(profile == FuriHalBtProfileHidKeyboard) {
             // Change MAC address for HID profile
-            uint8_t default_mac[sizeof(config->mac_address)] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
             const uint8_t* normal_mac = furi_hal_version_get_ble_mac();
-            if(memcmp(config->mac_address, default_mac, sizeof(config->mac_address)) == 0) {
+            uint8_t empty_mac[sizeof(config->mac_address)] = FURI_HAL_BT_EMPTY_MAC_ADDR;
+            uint8_t default_mac[sizeof(config->mac_address)] = FURI_HAL_BT_DEFAULT_MAC_ADDR;
+            if(memcmp(config->mac_address, empty_mac, sizeof(config->mac_address)) == 0 ||
+               memcmp(config->mac_address, normal_mac, sizeof(config->mac_address)) == 0 ||
+               memcmp(config->mac_address, default_mac, sizeof(config->mac_address)) == 0) {
                 memcpy(config->mac_address, normal_mac, sizeof(config->mac_address));
-            }
-            if(memcmp(config->mac_address, normal_mac, sizeof(config->mac_address)) == 0) {
                 config->mac_address[2]++;
             }
             // Change name Flipper -> Control
@@ -235,8 +233,8 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
                     config->adv_name,
                     FURI_HAL_VERSION_DEVICE_NAME_LENGTH,
                     "%cControl %s",
-                    *furi_hal_version_get_ble_local_device_name_ptr(),
-                    furi_hal_version_get_ble_local_device_name_ptr() + 9);
+                    AD_TYPE_COMPLETE_LOCAL_NAME,
+                    furi_hal_version_get_name_ptr());
             }
         }
         if(!gap_init(config, event_cb, context)) {
