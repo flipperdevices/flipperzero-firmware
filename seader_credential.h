@@ -11,11 +11,11 @@
 typedef void (*SeaderLoadingCallback)(void* context, bool state);
 
 typedef enum {
-  SeaderCredentialTypeNone,
-  SeaderCredentialTypePicopass,
-  SeaderCredentialType14A,
-  // Might need to make 14a into "javacard" and add Desfire
-  SeaderCredentialTypeMifareClassic,
+    SeaderCredentialTypeNone,
+    SeaderCredentialTypePicopass,
+    SeaderCredentialType14A,
+    // Might need to make 14a into "javacard" and add Desfire
+    SeaderCredentialTypeMifareClassic,
 } SeaderCredentialType;
 
 typedef enum {

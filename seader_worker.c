@@ -201,7 +201,8 @@ bool read_nfc(SeaderUartBridge* seader_uart) {
                 cardDetails->atqa = &atqa;
                 sendCardDetected(seader_uart, cardDetails);
                 rtn = true;
-            } else if(mf_classic_check_card_type(nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak)) {
+            } else if(mf_classic_check_card_type(
+                          nfc_data.atqa[0], nfc_data.atqa[1], nfc_data.sak)) {
                 FURI_LOG_D(TAG, "MFC");
                 OCTET_STRING_t atqa = {.buf = nfc_data.atqa, .size = sizeof(nfc_data.atqa)};
                 cardDetails->atqa = &atqa;

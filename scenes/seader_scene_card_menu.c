@@ -19,9 +19,17 @@ void seader_scene_card_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, seader_scene_card_menu_submenu_callback, seader);
     submenu_add_item(
-        submenu, "Save Picopass", SubmenuIndexSavePicopass, seader_scene_card_menu_submenu_callback, seader);
+        submenu,
+        "Save Picopass",
+        SubmenuIndexSavePicopass,
+        seader_scene_card_menu_submenu_callback,
+        seader);
     submenu_add_item(
-        submenu, "Save RFID", SubmenuIndexSaveRFID, seader_scene_card_menu_submenu_callback, seader);
+        submenu,
+        "Save RFID",
+        SubmenuIndexSaveRFID,
+        seader_scene_card_menu_submenu_callback,
+        seader);
 
     submenu_set_selected_item(
         seader->submenu,

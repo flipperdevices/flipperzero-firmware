@@ -42,5 +42,4 @@ struct SeaderUartBridge {
     size_t tx_len;
 };
 
-
 typedef struct SeaderUartBridge SeaderUartBridge;

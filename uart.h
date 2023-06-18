@@ -15,6 +15,5 @@ void seader_uart_set_config(SeaderUartBridge* seader_uart, SeaderUartConfig* cfg
 void seader_uart_get_config(SeaderUartBridge* seader_uart, SeaderUartConfig* cfg);
 void seader_uart_get_state(SeaderUartBridge* seader_uart, SeaderUartState* st);
 
-
 SeaderUartBridge* seader_uart_alloc();
 void seader_uart_free(SeaderUartBridge* seader_uart);
