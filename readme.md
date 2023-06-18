@@ -4,7 +4,7 @@
 
 ## Bugs
 
-File issues in [GitLab](https://gitlab.com/bettse/seader/-/issues).
+File issues in [GitHub](https://github.com/bettse/seader/issues).
 
 ## Hardware
 
