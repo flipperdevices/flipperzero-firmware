@@ -1,6 +1,6 @@
 App(
-    appid="Geiger_Coutner",
-    name="Geiger Counter",
+    appid="J305_Geiger_Coutner",
+    name="[J305] Geiger Counter",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipper_geiger_app",
     requires=[

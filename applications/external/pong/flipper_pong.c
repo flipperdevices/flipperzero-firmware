@@ -15,7 +15,8 @@
 
 #define PAD_SIZE_X 3
 #define PAD_SIZE_Y 8
-#define PLAYER1_PAD_SPEED 2
+#define PLAYER1_PAD_SPEED 4
+
 #define PLAYER2_PAD_SPEED 2
 #define BALL_SIZE 4
 
@@ -38,22 +39,29 @@ typedef struct Players {
 
 static void draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
-    Players* players = ctx;
-    furi_mutex_acquire(players->mutex, FuriWaitForever);
+    Players* playersMutex = ctx;
+    furi_mutex_acquire(playersMutex->mutex, FuriWaitForever);
 
     canvas_draw_frame(canvas, 0, 0, 128, 64);
-    canvas_draw_box(canvas, players->player1_X, players->player1_Y, PAD_SIZE_X, PAD_SIZE_Y);
-    canvas_draw_box(canvas, players->player2_X, players->player2_Y, PAD_SIZE_X, PAD_SIZE_Y);
-    canvas_draw_box(canvas, players->ball_X, players->ball_Y, BALL_SIZE, BALL_SIZE);
+    canvas_draw_box(
+        canvas, playersMutex->player1_X, playersMutex->player1_Y, PAD_SIZE_X, PAD_SIZE_Y);
+    canvas_draw_box(
+        canvas, playersMutex->player2_X, playersMutex->player2_Y, PAD_SIZE_X, PAD_SIZE_Y);
+    canvas_draw_box(canvas, playersMutex->ball_X, playersMutex->ball_Y, BALL_SIZE, BALL_SIZE);
 
     canvas_set_font(canvas, FontPrimary);
     canvas_set_font_direction(canvas, CanvasDirectionBottomToTop);
     char buffer[16];
-    snprintf(buffer, sizeof(buffer), "%u - %u", players->player1_score, players->player2_score);
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "%u - %u",
+        playersMutex->player1_score,
+        playersMutex->player2_score);
     canvas_draw_str_aligned(
         canvas, SCREEN_SIZE_X / 2 + 15, SCREEN_SIZE_Y / 2 + 2, AlignCenter, AlignTop, buffer);
 
-    furi_mutex_release(players->mutex);
+    furi_mutex_release(playersMutex->mutex);
 }
 
 static void input_callback(InputEvent* input_event, void* ctx) {
@@ -93,7 +101,8 @@ uint8_t changeDirection() {
     return randomuint8[0];
 }
 
-int32_t flipper_pong_app() {
+int32_t flipper_pong_app(void* p) {
+    UNUSED(p);
     EventApp event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(EventApp));
 
@@ -120,7 +129,7 @@ int32_t flipper_pong_app() {
     }
 
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, draw_callback, &players.mutex);
+    view_port_draw_callback_set(view_port, draw_callback, &players);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     Gui* gui = furi_record_open(RECORD_GUI);
@@ -143,6 +152,7 @@ int32_t flipper_pong_app() {
             if(event.type == EventTypeInput) {
                 if(event.input.key == InputKeyBack) {
                     furi_mutex_release(players.mutex);
+                    notification_message(notification, &sequence_set_only_green_255);
                     break;
                 } else if(event.input.key == InputKeyUp) {
                     if(players.player1_Y >= 1 + PLAYER1_PAD_SPEED)

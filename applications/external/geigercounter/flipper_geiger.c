@@ -39,53 +39,33 @@ typedef struct {
 static void draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
 
-    mutexStruct* mutexVal = ctx;
-    mutexStruct mutexDraw;
-    furi_mutex_acquire(mutexVal->mutex, FuriWaitForever);
-    memcpy(&mutexDraw, mutexVal, sizeof(mutexStruct));
-    furi_mutex_release(mutexVal->mutex);
+    mutexStruct displayStruct;
+    mutexStruct* geigerMutex = ctx;
+    furi_mutex_acquire(geigerMutex->mutex, FuriWaitForever);
+    memcpy(&displayStruct, geigerMutex, sizeof(mutexStruct));
+    furi_mutex_release(geigerMutex->mutex);
 
     char buffer[32];
-    if(mutexDraw.data == 0)
-        snprintf(buffer, sizeof(buffer), "%ld cps - %ld cpm", mutexDraw.cps, mutexDraw.cpm);
-    else if(mutexDraw.data == 1)
+    if(displayStruct.data == 0)
+        snprintf(
+            buffer, sizeof(buffer), "%ld cps - %ld cpm", displayStruct.cps, displayStruct.cpm);
+    else if(displayStruct.data == 1)
         snprintf(
             buffer,
             sizeof(buffer),
             "%ld cps - %.2f uSv/h",
-            mutexDraw.cps,
-            ((double)mutexDraw.cpm * (double)CONVERSION_FACTOR));
-    else if(mutexDraw.data == 2)
-        snprintf(
-            buffer,
-            sizeof(buffer),
-            "%ld cps - %.2f mSv/y",
-            mutexDraw.cps,
-            (((double)mutexDraw.cpm * (double)CONVERSION_FACTOR)) * (double)8.76);
-    else if(mutexDraw.data == 3)
-        snprintf(
-            buffer,
-            sizeof(buffer),
-            "%ld cps - %.4f Rad/h",
-            mutexDraw.cps,
-            ((double)mutexDraw.cpm * (double)CONVERSION_FACTOR) / (double)10000);
-    else if(mutexDraw.data == 4)
-        snprintf(
-            buffer,
-            sizeof(buffer),
-            "%ld cps - %.2f mR/h",
-            mutexDraw.cps,
-            ((double)mutexDraw.cpm * (double)CONVERSION_FACTOR) / (double)10);
+            displayStruct.cps,
+            ((double)displayStruct.cpm * (double)CONVERSION_FACTOR));
     else
         snprintf(
             buffer,
             sizeof(buffer),
-            "%ld cps - %.2f uR/h",
-            mutexDraw.cps,
-            ((double)mutexDraw.cpm * (double)CONVERSION_FACTOR) * (double)100);
+            "%ld cps - %.2f mSv/y",
+            displayStruct.cps,
+            (((double)displayStruct.cpm * (double)CONVERSION_FACTOR)) * (double)8.76);
 
     for(int i = 0; i < SCREEN_SIZE_X; i += 2) {
-        float Y = SCREEN_SIZE_Y - (mutexDraw.line[i / 2] * mutexDraw.coef);
+        float Y = SCREEN_SIZE_Y - (displayStruct.line[i / 2] * displayStruct.coef);
 
         canvas_draw_line(canvas, i, Y, i, SCREEN_SIZE_Y);
         canvas_draw_line(canvas, i + 1, Y, i + 1, SCREEN_SIZE_Y);
@@ -123,7 +103,8 @@ static void gpiocallback(void* ctx) {
     furi_message_queue_put(queue, &event, 0);
 }
 
-int32_t flipper_geiger_app() {
+int32_t flipper_geiger_app(void* p) {
+    UNUSED(p);
     EventApp event;
     FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(EventApp));
 
@@ -146,7 +127,7 @@ int32_t flipper_geiger_app() {
     }
 
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, draw_callback, &mutexVal.mutex);
+    view_port_draw_callback_set(view_port, draw_callback, &mutexVal);
     view_port_input_callback_set(view_port, input_callback, event_queue);
 
     furi_hal_gpio_add_int_callback(&gpio_ext_pa7, gpiocallback, event_queue);
@@ -156,6 +137,8 @@ int32_t flipper_geiger_app() {
 
     FuriTimer* timer = furi_timer_alloc(clock_tick, FuriTimerTypePeriodic, event_queue);
     furi_timer_start(timer, 1000);
+
+    // ENABLE 5V pin
 
     // Enable 5v power, multiple attempts to avoid issues with power chip protection false triggering
     uint8_t attempts = 0;
@@ -190,7 +173,7 @@ int32_t flipper_geiger_app() {
                     if(mutexVal.data != 0)
                         mutexVal.data--;
                     else
-                        mutexVal.data = 5;
+                        mutexVal.data = 2;
 
                     screenRefresh = 1;
                     furi_mutex_release(mutexVal.mutex);
@@ -198,7 +181,7 @@ int32_t flipper_geiger_app() {
                            event.input.type == InputTypeShort)) {
                     furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
-                    if(mutexVal.data != 5)
+                    if(mutexVal.data != 2)
                         mutexVal.data++;
                     else
                         mutexVal.data = 0;
