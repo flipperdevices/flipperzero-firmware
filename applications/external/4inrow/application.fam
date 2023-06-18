@@ -1,6 +1,6 @@
 App(
-    appid="4inrow",
-    name="4 in row",
+    appid="4_In_A_Row",
+    name="4 In A Row",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="four_in_row_app",
     requires=[

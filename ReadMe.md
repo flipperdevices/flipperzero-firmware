@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0617-0604-0.85.3-175b612](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-17 19:19 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-17 19:19 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-18 12:34 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-18 12:34 EST`
 - UL: Revert all BLE Gatt Characteristic Changes (By xMasterX) (done on UL via git rollback instead of properly via commits)
 - UL: [Updated infrared assets #519 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/519) (AC Assets)
 - [Updates to BadBT - Imported by ESurge (From BadKB by Willy-JL) #669](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/669)
@@ -41,6 +41,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Rename [GPIO] Intervalometer 2 to IR Intervalometer for Sony Cameras along with recategorization
 - Updated: [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam) (Changes by Willy-JL)
 - Updated: [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem) (Changes by xMasterX)
+- Fixed name for [4 In A Row (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-4inrow)
+- HAPPY FATHERS DAY TO ALL THE FATHERS!!
 
 <a name="release">
 
@@ -226,7 +228,7 @@ $ ./fbt dolphin_ext
 - [15 (By x27)](https://github.com/x27/flipperzero-game15)
 - [2048 (By OlegSchwann)](https://github.com/OlegSchwann/flipperzero-firmware/tree/hackaton/game_2048/applications/game-2048) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/186)
 - [2048 (By eugene-kirzhanov)](https://github.com/eugene-kirzhanov/flipper-zero-2048-game) (Titled 2048 (Improved))
-- [4 in row (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-4inrow)
+- [4 In A Row (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-4inrow)
 - [Arkanoid (By gotnull)](https://github.com/gotnull/flipperzero-firmware-wPlugins) [(Score By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188)
 - [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
