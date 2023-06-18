@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0617-0604-0.85.3-175b612](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-18 12:34 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-18 12:34 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-18 13:14 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-18 13:14 EST`
 - UL: Revert all BLE Gatt Characteristic Changes (By xMasterX) (done on UL via git rollback instead of properly via commits)
 - UL: [Updated infrared assets #519 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/519) (AC Assets)
 - [Updates to BadBT - Imported by ESurge (From BadKB by Willy-JL) #669](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/669)
@@ -42,10 +42,14 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam) (Changes by Willy-JL)
 - Updated: [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem) (Changes by xMasterX)
 - Fixed name for [4 In A Row (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-4inrow)
-- HAPPY FATHERS DAY TO ALL THE FATHERS!!
-- Some apps renamed
+- Fixed name for [ESP WiFi Scanner v.0.4 (By SequoiaSan)](https://github.com/SequoiaSan/FlipperZero-WiFi-Scanner_Module-ESP8266)
+- Fixed name for [FlipBIP Crypto Wallet (By xtruan)](https://github.com/xtruan/FlipBIP)
+- Fixed name for [IFTTT Button (By Ferrazzi)](https://github.com/Ferrazzi/FlipperZero_IFTTT_Virtual_Button)
+- Fixed name for [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) updates (By xMasterX)
+- Fixed name for [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon)
 - Updated: [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) updates (By Willy-JL)
+- HAPPY FATHERS DAY TO ALL THE FATHERS!!
 
 <a name="release">
 
