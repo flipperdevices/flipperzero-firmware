@@ -9,7 +9,7 @@ void seader_read_14a_worker_callback(SeaderWorkerEvent event, void* context) {
 
 void seader_scene_read_14a_on_enter(void* context) {
     Seader* seader = context;
-    DOLPHIN_DEED(DolphinDeedNfcRead);
+    dolphin_deed(DolphinDeedNfcRead);
 
     // Setup view
     Popup* popup = seader->popup;

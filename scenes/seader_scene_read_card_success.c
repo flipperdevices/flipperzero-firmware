@@ -21,7 +21,7 @@ void seader_scene_read_card_success_on_enter(void* context) {
     FuriString* credential_str = furi_string_alloc();
     FuriString* type_str = furi_string_alloc();
 
-    DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+    dolphin_deed(DolphinDeedNfcReadSuccess);
 
     // Send notification
     notification_message(seader->notifications, &sequence_success);

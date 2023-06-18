@@ -8,7 +8,7 @@ void seader_scene_save_success_popup_callback(void* context) {
 
 void seader_scene_save_success_on_enter(void* context) {
     Seader* seader = context;
-    DOLPHIN_DEED(DolphinDeedNfcSave);
+    dolphin_deed(DolphinDeedNfcSave);
 
     // Setup view
     Popup* popup = seader->popup;
