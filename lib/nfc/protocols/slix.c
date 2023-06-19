@@ -150,7 +150,8 @@ bool slix_generic_protocol_filter(
     NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
     NfcVSlixData* slix = &nfcv_data->sub_data.slix;
 
-    if(slix->privacy && ctx->command != NFCV_CMD_NXP_GET_RANDOM_NUMBER &&
+    if((slix->flags & NfcVSlixDataFlagsPrivacy) &&
+       ctx->command != NFCV_CMD_NXP_GET_RANDOM_NUMBER &&
        ctx->command != NFCV_CMD_NXP_SET_PASSWORD) {
         snprintf(
             nfcv_data->last_command,
@@ -196,22 +197,38 @@ bool slix_generic_protocol_filter(
         uint8_t* rand = slix->rand;
         uint8_t* password = NULL;
         uint8_t password_rcv[4];
+        bool pass_valid = false;
 
         switch(password_id) {
         case SLIX_PASS_READ:
             password = slix->key_read;
+            if(!(slix->flags & NfcVSlixDataFlagsHasKeyRead)) {
+                pass_valid = true;
+            }
             break;
         case SLIX_PASS_WRITE:
             password = slix->key_write;
+            if(!(slix->flags & NfcVSlixDataFlagsHasKeyWrite)) {
+                pass_valid = true;
+            }
             break;
         case SLIX_PASS_PRIVACY:
             password = slix->key_privacy;
+            if(!(slix->flags & NfcVSlixDataFlagsHasKeyPrivacy)) {
+                pass_valid = true;
+            }
             break;
         case SLIX_PASS_DESTROY:
             password = slix->key_destroy;
+            if(!(slix->flags & NfcVSlixDataFlagsHasKeyDestroy)) {
+                pass_valid = true;
+            }
             break;
         case SLIX_PASS_EASAFI:
             password = slix->key_eas;
+            if(!(slix->flags & NfcVSlixDataFlagsHasKeyEas)) {
+                pass_valid = true;
+            }
             break;
         default:
             break;
@@ -227,21 +244,30 @@ bool slix_generic_protocol_filter(
         uint32_t pass_expect = slix_read_be(password, 4);
         uint32_t pass_received = slix_read_be(password_rcv, 4);
 
-        /* if the password is all-zeroes, just accept any password*/
-        if(!pass_expect || pass_expect == pass_received) {
+        if(pass_expect == pass_received) {
+            pass_valid = true;
+        }
+
+        if(pass_valid) {
             switch(password_id) {
             case SLIX_PASS_READ:
+                slix->flags |= NfcVSlixDataFlagsValidKeyRead;
                 break;
             case SLIX_PASS_WRITE:
+                slix->flags |= NfcVSlixDataFlagsValidKeyWrite;
                 break;
             case SLIX_PASS_PRIVACY:
-                slix->privacy = false;
+                slix->flags |= NfcVSlixDataFlagsValidKeyPrivacy;
+                slix->flags &= ~NfcVSlixDataFlagsPrivacy;
                 nfcv_data->modified = true;
                 break;
             case SLIX_PASS_DESTROY:
+                slix->flags |= NfcVSlixDataFlagsValidKeyDestroy;
+                slix->flags |= NfcVSlixDataFlagsDestroyed;
                 FURI_LOG_D(TAG, "Pooof! Got destroyed");
                 break;
             case SLIX_PASS_EASAFI:
+                slix->flags |= NfcVSlixDataFlagsValidKeyEas;
                 break;
             default:
                 break;
@@ -268,6 +294,73 @@ bool slix_generic_protocol_filter(
         break;
     }
 
+    case NFCV_CMD_NXP_WRITE_PASSWORD: {
+        uint8_t password_id = nfcv_data->frame[ctx->payload_offset];
+
+        if(!(password_id & password_supported)) {
+            break;
+        }
+
+        uint8_t* new_password = &nfcv_data->frame[ctx->payload_offset + 1];
+        uint8_t* password = NULL;
+        bool pass_valid = false;
+        uint32_t flag_valid = 0;
+        uint32_t flag_set = 0;
+
+        switch(password_id) {
+        case SLIX_PASS_READ:
+            password = slix->key_read;
+            flag_valid = NfcVSlixDataFlagsValidKeyRead;
+            flag_set = NfcVSlixDataFlagsHasKeyRead;
+            break;
+        case SLIX_PASS_WRITE:
+            password = slix->key_write;
+            flag_valid = NfcVSlixDataFlagsValidKeyWrite;
+            flag_set = NfcVSlixDataFlagsHasKeyWrite;
+            break;
+        case SLIX_PASS_PRIVACY:
+            password = slix->key_privacy;
+            flag_valid = NfcVSlixDataFlagsValidKeyPrivacy;
+            flag_set = NfcVSlixDataFlagsHasKeyPrivacy;
+            break;
+        case SLIX_PASS_DESTROY:
+            password = slix->key_destroy;
+            flag_valid = NfcVSlixDataFlagsValidKeyDestroy;
+            flag_set = NfcVSlixDataFlagsHasKeyDestroy;
+            break;
+        case SLIX_PASS_EASAFI:
+            password = slix->key_eas;
+            flag_valid = NfcVSlixDataFlagsValidKeyEas;
+            flag_set = NfcVSlixDataFlagsHasKeyEas;
+            break;
+        default:
+            break;
+        }
+
+        pass_valid = (slix->flags & flag_valid);
+        if(!(slix->flags & flag_set)) {
+            pass_valid = true;
+        }
+
+        if(password && pass_valid) {
+            slix->flags |= flag_valid;
+            slix->flags |= flag_set;
+
+            memcpy(password, new_password, 4);
+
+            ctx->response_buffer[0] = NFCV_NOERROR;
+            nfcv_emu_send(
+                tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
+            snprintf(
+                nfcv_data->last_command, sizeof(nfcv_data->last_command), "WRITE_PASSWORD OK");
+        } else {
+            snprintf(
+                nfcv_data->last_command, sizeof(nfcv_data->last_command), "WRITE_PASSWORD FAIL");
+        }
+        handled = true;
+        break;
+    }
+
     case NFCV_CMD_NXP_ENABLE_PRIVACY: {
         ctx->response_buffer[0] = NFCV_NOERROR;
 
@@ -278,7 +371,7 @@ bool slix_generic_protocol_filter(
             sizeof(nfcv_data->last_command),
             "NFCV_CMD_NXP_ENABLE_PRIVACY");
 
-        slix->privacy = true;
+        slix->flags |= NfcVSlixDataFlagsPrivacy;
         handled = true;
         break;
     }
@@ -315,7 +408,10 @@ void slix_l_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(
         TAG, "  Destroy pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_destroy, 4));
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
-    FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
+    FURI_LOG_D(
+        TAG,
+        "  Privacy mode: %s",
+        (nfcv_data->sub_data.slix.flags & NfcVSlixDataFlagsPrivacy) ? "ON" : "OFF");
 
     NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
     ctx->emu_protocol_filter = &slix_l_protocol_filter;
@@ -345,7 +441,10 @@ void slix_s_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(
         TAG, "  Destroy pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_destroy, 4));
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
-    FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
+    FURI_LOG_D(
+        TAG,
+        "  Privacy mode: %s",
+        (nfcv_data->sub_data.slix.flags & NfcVSlixDataFlagsPrivacy) ? "ON" : "OFF");
 
     NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
     ctx->emu_protocol_filter = &slix_s_protocol_filter;
@@ -375,7 +474,10 @@ void slix_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(
         TAG, "  Destroy pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_destroy, 4));
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
-    FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
+    FURI_LOG_D(
+        TAG,
+        "  Privacy mode: %s",
+        (nfcv_data->sub_data.slix.flags & NfcVSlixDataFlagsPrivacy) ? "ON" : "OFF");
 
     NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
     ctx->emu_protocol_filter = &slix_protocol_filter;
@@ -389,11 +491,166 @@ bool slix2_protocol_filter( // -V524
     furi_assert(nfc_data);
     furi_assert(nfcv_data_in);
 
+    NfcVData* nfcv_data = (NfcVData*)nfcv_data_in;
+    NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
+    NfcVSlixData* slix = &nfcv_data->sub_data.slix;
+
     bool handled = false;
 
     /* many SLIX share some of the functions, place that in a generic handler */
     if(slix_generic_protocol_filter(tx_rx, nfc_data, nfcv_data_in, SLIX_PASS_ALL)) {
         return true;
+    }
+
+    switch(ctx->command) {
+    /* override WRITE BLOCK for block 79 (16 bit counter)  */
+    case NFCV_CMD_WRITE_BLOCK:
+    case NFCV_CMD_WRITE_MULTI_BLOCK: {
+        uint8_t resp_len = 1;
+        uint8_t blocks = 1;
+        uint8_t block = nfcv_data->frame[ctx->payload_offset];
+        uint8_t data_pos = ctx->payload_offset + 1;
+
+        if(ctx->command == NFCV_CMD_WRITE_MULTI_BLOCK) {
+            blocks = nfcv_data->frame[data_pos] + 1;
+            data_pos++;
+        }
+
+        uint8_t* data = &nfcv_data->frame[data_pos];
+        uint32_t data_len = nfcv_data->block_size * blocks;
+
+        if((block + blocks) <= nfcv_data->block_num &&
+           (data_pos + data_len + 2) == nfcv_data->frame_length) {
+            ctx->response_buffer[0] = NFCV_NOERROR;
+
+            for(int block_num = block; block_num < block + blocks; block_num++) {
+                /* special case, 16-bit counter */
+                if(block_num == 79) {
+                    uint32_t dest;
+                    uint32_t ctr_old;
+
+                    memcpy(&dest, &nfcv_data->frame[data_pos], 4);
+                    memcpy(&ctr_old, &nfcv_data->data[nfcv_data->block_size * block_num], 4);
+
+                    uint32_t ctr_new = ctr_old;
+                    bool allowed = true;
+
+                    /* increment counter */
+                    if(dest == 1) {
+                        ctr_new = (ctr_old & 0xFFFF0000) | ((ctr_old + 1) & 0xFFFF);
+
+                        /* protection flag set? */
+                        if(ctr_old & 0x01000000) {
+                            allowed = nfcv_data->sub_data.slix.flags &
+                                      NfcVSlixDataFlagsValidKeyRead;
+                        }
+                    } else {
+                        ctr_new = dest;
+                        allowed = nfcv_data->sub_data.slix.flags & NfcVSlixDataFlagsValidKeyWrite;
+                    }
+
+                    if(allowed) {
+                        memcpy(&nfcv_data->data[nfcv_data->block_size * block_num], &ctr_new, 4);
+                    } else {
+                        /* incorrect read or write password */
+                        ctx->response_buffer[0] = NFCV_RES_FLAG_ERROR;
+                        ctx->response_buffer[1] = NFCV_ERROR_GENERIC;
+                        resp_len = 2;
+                    }
+                } else {
+                    memcpy(
+                        &nfcv_data->data[nfcv_data->block_size * block_num],
+                        &nfcv_data->frame[data_pos],
+                        nfcv_data->block_size);
+                }
+                data_pos += nfcv_data->block_size;
+            }
+            nfcv_data->modified = true;
+
+        } else {
+            ctx->response_buffer[0] = NFCV_RES_FLAG_ERROR;
+            ctx->response_buffer[1] = NFCV_ERROR_GENERIC;
+            resp_len = 2;
+        }
+
+        bool respond = (ctx->response_buffer[0] == NFCV_NOERROR) ||
+                       (ctx->addressed || ctx->selected);
+
+        if(respond) {
+            nfcv_emu_send(
+                tx_rx,
+                nfcv_data,
+                ctx->response_buffer,
+                resp_len,
+                ctx->response_flags,
+                ctx->send_time);
+        }
+
+        if(ctx->command == NFCV_CMD_WRITE_MULTI_BLOCK) {
+            snprintf(
+                nfcv_data->last_command,
+                sizeof(nfcv_data->last_command),
+                "WRITE MULTI BLOCK %d, %d blocks",
+                block,
+                blocks);
+        } else {
+            snprintf(
+                nfcv_data->last_command,
+                sizeof(nfcv_data->last_command),
+                "WRITE BLOCK %d <- %02X %02X %02X %02X",
+                block,
+                data[0],
+                data[1],
+                data[2],
+                data[3]);
+        }
+        handled = true;
+        break;
+    }
+
+    case NFCV_CMD_NXP_READ_SIGNATURE: {
+        uint32_t len = 0;
+        ctx->response_buffer[len++] = NFCV_NOERROR;
+        memcpy(&ctx->response_buffer[len], slix->signature, sizeof(slix->signature));
+        len += sizeof(slix->signature);
+
+        nfcv_emu_send(
+            tx_rx, nfcv_data, ctx->response_buffer, len, ctx->response_flags, ctx->send_time);
+        snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "READ_SIGNATURE");
+
+        handled = true;
+        break;
+    }
+
+    case NFCV_CMD_NXP_GET_NXP_SYSTEM_INFORMATION: {
+        uint32_t len = 0;
+        uint8_t lock_bits = 0;
+
+        /* convert our internal lock bits format into NXP's */
+        lock_bits |= (nfcv_data->security_status[0] & NfcVLockBitDsfid) ? SlixLockBitDsfid : 0;
+        lock_bits |= (nfcv_data->security_status[0] & NfcVLockBitAfi) ? SlixLockBitAfi : 0;
+        lock_bits |= (nfcv_data->security_status[0] & NfcVLockBitEas) ? SlixLockBitEas : 0;
+        lock_bits |= (nfcv_data->security_status[0] & NfcVLockBitPpl) ? SlixLockBitPpl : 0;
+
+        ctx->response_buffer[len++] = NFCV_NOERROR;
+        ctx->response_buffer[len++] = nfcv_data->sub_data.slix.pp_pointer;
+        ctx->response_buffer[len++] = nfcv_data->sub_data.slix.pp_condition;
+        ctx->response_buffer[len++] = lock_bits;
+        ctx->response_buffer[len++] = 0x7F; /* features LSB */
+        ctx->response_buffer[len++] = 0x35; /* features */
+        ctx->response_buffer[len++] = 0; /* features */
+        ctx->response_buffer[len++] = 0; /* features MSB */
+
+        nfcv_emu_send(
+            tx_rx, nfcv_data, ctx->response_buffer, len, ctx->response_flags, ctx->send_time);
+        snprintf(
+            nfcv_data->last_command,
+            sizeof(nfcv_data->last_command),
+            "GET_NXP_SYSTEM_INFORMATION");
+
+        handled = true;
+        break;
+    }
     }
 
     return handled;
@@ -405,7 +662,10 @@ void slix2_prepare(NfcVData* nfcv_data) {
     FURI_LOG_D(
         TAG, "  Destroy pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_destroy, 4));
     FURI_LOG_D(TAG, "  EAS     pass: 0x%08lX", slix_read_be(nfcv_data->sub_data.slix.key_eas, 4));
-    FURI_LOG_D(TAG, "  Privacy mode: %s", nfcv_data->sub_data.slix.privacy ? "ON" : "OFF");
+    FURI_LOG_D(
+        TAG,
+        "  Privacy mode: %s",
+        (nfcv_data->sub_data.slix.flags & NfcVSlixDataFlagsPrivacy) ? "ON" : "OFF");
 
     NfcVEmuProtocolCtx* ctx = nfcv_data->emu_protocol_ctx;
     ctx->emu_protocol_filter = &slix2_protocol_filter;
