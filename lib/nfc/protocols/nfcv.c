@@ -765,13 +765,19 @@ void nfcv_emu_handle_packet(
     case NFCV_CMD_READ_MULTI_BLOCK:
     case NFCV_CMD_READ_BLOCK: {
         uint8_t block = nfcv_data->frame[ctx->payload_offset];
-        uint8_t blocks = 1;
+        int blocks = 1;
 
         if(ctx->command == NFCV_CMD_READ_MULTI_BLOCK) {
             blocks = nfcv_data->frame[ctx->payload_offset + 1] + 1;
         }
 
-        if(block + blocks <= nfcv_data->block_num) {
+        /* limit the maximum block count, underflow accepted */
+        if(block + blocks > nfcv_data->block_num) {
+            blocks = nfcv_data->block_num - block;
+        }
+
+        /* only respond with the valid blocks, if there are any */
+        if(blocks > 0) {
             uint8_t buffer_pos = 0;
 
             ctx->response_buffer[buffer_pos++] = NFCV_NOERROR;
@@ -798,10 +804,13 @@ void nfcv_emu_handle_packet(
                 ctx->response_flags,
                 ctx->send_time);
         } else {
-            ctx->response_buffer[0] = NFCV_RES_FLAG_ERROR;
-            ctx->response_buffer[1] = NFCV_ERROR_GENERIC;
-            nfcv_emu_send(
-                tx_rx, nfcv_data, ctx->response_buffer, 2, ctx->response_flags, ctx->send_time);
+            /* reply with an error only in addressed or selected mode */
+            if(ctx->addressed || ctx->selected) {
+                ctx->response_buffer[0] = NFCV_RES_FLAG_ERROR;
+                ctx->response_buffer[1] = NFCV_ERROR_GENERIC;
+                nfcv_emu_send(
+                    tx_rx, nfcv_data, ctx->response_buffer, 2, ctx->response_flags, ctx->send_time);
+            }
         }
         snprintf(nfcv_data->last_command, sizeof(nfcv_data->last_command), "READ BLOCK %d", block);
 
