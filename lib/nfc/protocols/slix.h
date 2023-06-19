@@ -53,6 +53,10 @@ bool slix2_check_card_type(FuriHalNfcDevData* nfc_data);
 bool slix_s_check_card_type(FuriHalNfcDevData* nfc_data);
 bool slix_l_check_card_type(FuriHalNfcDevData* nfc_data);
 
+ReturnCode slix2_dump_custom(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data);
+ReturnCode slix2_dump_signature(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data);
+ReturnCode slix2_dump_nxp_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data);
+
 ReturnCode slix_get_random(NfcVData* data);
 ReturnCode slix_unlock(NfcVData* data, uint32_t password_id);
 

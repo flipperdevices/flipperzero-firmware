@@ -155,6 +155,9 @@ bool nfcv_read_card(NfcVReader* reader, FuriHalNfcDevData* nfc_data, NfcVData* n
     } else if(slix2_check_card_type(nfc_data)) {
         FURI_LOG_I(TAG, "NXP SLIX2 detected");
         nfcv_data->sub_type = NfcVTypeSlix2;
+        if(slix2_dump_custom(nfc_data, nfcv_data) != ERR_NONE) {
+            return false;
+        }
     } else if(slix_s_check_card_type(nfc_data)) {
         FURI_LOG_I(TAG, "NXP SLIX-S detected");
         nfcv_data->sub_type = NfcVTypeSlixS;

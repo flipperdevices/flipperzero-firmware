@@ -219,7 +219,6 @@ typedef struct {
     /* SLIX2 options */
     uint8_t pp_pointer;
     uint8_t pp_condition;
-    uint8_t lock_bits;
 } NfcVSlixData;
 
 typedef union {

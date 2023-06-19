@@ -9,6 +9,120 @@
 
 #define TAG "SLIX"
 
+ReturnCode slix2_dump_nxp_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data);
+
+    uint8_t rxBuf[32];
+    uint16_t received = 0;
+    ReturnCode ret = ERR_NONE;
+
+    FURI_LOG_D(TAG, "Read NXP SYSTEM INFORMATION...");
+
+    for(int tries = 0; tries < NFCV_COMMAND_RETRIES; tries++) {
+        uint8_t cmd[] = {};
+        uint8_t uid[NFCV_UID_LENGTH];
+
+        /* UID is stored reversed in requests */
+        for(int pos = 0; pos < nfc_data->uid_len; pos++) {
+            uid[pos] = nfc_data->uid[nfc_data->uid_len - 1 - pos];
+        }
+
+        ReturnCode ret = rfalNfcvPollerTransceiveReq(
+            NFCV_CMD_NXP_GET_NXP_SYSTEM_INFORMATION,
+            RFAL_NFCV_REQ_FLAG_DEFAULT,
+            NFCV_MANUFACTURER_NXP,
+            uid,
+            cmd,
+            sizeof(cmd),
+            rxBuf,
+            sizeof(rxBuf),
+            &received);
+
+        if(ret == ERR_NONE) {
+            break;
+        }
+    }
+
+    if(ret != ERR_NONE || received != 10) {
+        FURI_LOG_D(TAG, "Failed: %d, %d", ret, received);
+        return ret;
+    }
+    FURI_LOG_D(TAG, "Success...");
+
+    NfcVSlixData* slix = &nfcv_data->sub_data.slix;
+    slix->pp_pointer = rxBuf[1];
+    slix->pp_condition = rxBuf[2];
+
+    /* convert NXP's to our internal lock bits format */
+    nfcv_data->security_status[0] = 0;
+    nfcv_data->security_status[0] |= (rxBuf[3] & SlixLockBitDsfid) ? NfcVLockBitDsfid : 0;
+    nfcv_data->security_status[0] |= (rxBuf[3] & SlixLockBitAfi) ? NfcVLockBitAfi : 0;
+    nfcv_data->security_status[0] |= (rxBuf[3] & SlixLockBitEas) ? NfcVLockBitEas : 0;
+    nfcv_data->security_status[0] |= (rxBuf[3] & SlixLockBitPpl) ? NfcVLockBitPpl : 0;
+
+    return ERR_NONE;
+}
+
+ReturnCode slix2_dump_signature(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
+    furi_assert(nfc_data);
+    furi_assert(nfcv_data);
+
+    uint8_t rxBuf[64];
+    uint16_t received = 0;
+    ReturnCode ret = ERR_NONE;
+
+    FURI_LOG_D(TAG, "Read SIGNATURE...");
+
+    for(int tries = 0; tries < NFCV_COMMAND_RETRIES; tries++) {
+        uint8_t cmd[] = {};
+        uint8_t uid[NFCV_UID_LENGTH];
+
+        /* UID is stored reversed in requests */
+        for(int pos = 0; pos < nfc_data->uid_len; pos++) {
+            uid[pos] = nfc_data->uid[nfc_data->uid_len - 1 - pos];
+        }
+
+        ReturnCode ret = rfalNfcvPollerTransceiveReq(
+            NFCV_CMD_NXP_READ_SIGNATURE,
+            RFAL_NFCV_REQ_FLAG_DEFAULT,
+            NFCV_MANUFACTURER_NXP,
+            uid,
+            cmd,
+            sizeof(cmd),
+            rxBuf,
+            sizeof(rxBuf),
+            &received);
+
+        if(ret == ERR_NONE) {
+            break;
+        }
+    }
+
+    if(ret != ERR_NONE || received != 33) {
+        FURI_LOG_D(TAG, "Failed: %d, %d", ret, received);
+        return ret;
+    }
+    FURI_LOG_D(TAG, "Success...");
+
+    NfcVSlixData* slix = &nfcv_data->sub_data.slix;
+    memcpy(slix->signature, &rxBuf[1], 32);
+
+    return ERR_NONE;
+}
+
+ReturnCode slix2_dump_custom(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
+    ReturnCode ret = ERR_NONE;
+
+    ret = slix2_dump_nxp_sysinfo(nfc_data, nfcv_data);
+    if(ret != ERR_NONE) {
+        return ret;
+    }
+    ret = slix2_dump_signature(nfc_data, nfcv_data);
+
+    return ret;
+}
+
 static uint32_t slix_read_be(uint8_t* data, uint32_t length) {
     uint32_t value = 0;
 
