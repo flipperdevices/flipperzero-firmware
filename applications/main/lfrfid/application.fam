@@ -17,6 +17,7 @@ App(
 
 App(
     appid="lfrfid_start",
+    targets=["f7"],
     apptype=FlipperAppType.STARTUP,
     entry_point="lfrfid_on_system_start",
     order=50,

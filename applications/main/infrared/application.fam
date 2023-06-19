@@ -17,6 +17,7 @@ App(
 
 App(
     appid="infrared_start",
+    targets=["f7"],
     apptype=FlipperAppType.STARTUP,
     entry_point="infrared_on_system_start",
     order=20,

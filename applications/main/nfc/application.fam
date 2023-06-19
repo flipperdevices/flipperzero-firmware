@@ -17,6 +17,7 @@ App(
 
 App(
     appid="nfc_start",
+    targets=["f7"],
     apptype=FlipperAppType.STARTUP,
     entry_point="nfc_on_system_start",
     order=30,
