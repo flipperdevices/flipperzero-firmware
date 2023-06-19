@@ -9,10 +9,20 @@ App(
         # "infrared",
         # "lfrfid",
         # "nfc",
-        "subghz",
+        # "subghz",
         # "bad_usb",
         # "u2f",
         "fap_loader",
         "archive",
+        "main_apps_on_start",
+    ],
+)
+
+App(
+    appid="main_apps_on_start",
+    name="On start hooks",
+    apptype=FlipperAppType.METAPACKAGE,
+    provides=[
+        "subghz_start",
     ],
 )

@@ -38,7 +38,7 @@ AddOption(
     "--extra-ext-apps",
     action="store",
     dest="extra_ext_apps",
-    default="gpio,ibutton,infrared,lfrfid,bad_usb,u2f,nfc",
+    default="gpio,ibutton,infrared,lfrfid,bad_usb,u2f,nfc,subghz",
     help="List of applications to forcefully build as standalone .elf",
 )
 
