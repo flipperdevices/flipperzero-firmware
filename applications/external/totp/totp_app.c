@@ -195,7 +195,11 @@ int32_t totp_app() {
     }
 
     // Affecting dolphin level
+#if defined(DOLPHIN_DEED)
+    DOLPHIN_DEED(DolphinDeedPluginStart);
+#else
     dolphin_deed(DolphinDeedPluginStart);
+#endif
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
