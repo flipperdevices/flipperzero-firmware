@@ -118,6 +118,8 @@ typedef struct {
     const Icon* file_icon;
     bool hide_ext;
     size_t scroll_counter;
+
+    uint32_t button_held_for_ticks;
 } FileBrowserModel;
 
 static const Icon* BrowserItemIcons[] = {
@@ -590,8 +592,18 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                 FileBrowserModel * model,
                 {
                     if(event->key == InputKeyUp) {
+                        int32_t scroll_speed = (model->button_held_for_ticks / 5) + 1;
+
+                        if(scroll_speed > 5) {
+                            scroll_speed = 5;
+                        }
+
+                        if(model->item_idx < scroll_speed) {
+                            scroll_speed = model->item_idx;
+                        }
+
                         model->item_idx =
-                            ((model->item_idx - 1) + model->item_cnt) % model->item_cnt;
+                            ((model->item_idx - scroll_speed) + model->item_cnt) % model->item_cnt;
                         if(browser_is_list_load_required(model)) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
@@ -602,8 +614,22 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                                 browser->worker, load_offset, ITEM_LIST_LEN_MAX);
                         }
                         model->scroll_counter = 0;
+
+                        model->button_held_for_ticks += 1;
                     } else if(event->key == InputKeyDown) {
-                        model->item_idx = (model->item_idx + 1) % model->item_cnt;
+                        int32_t scroll_speed = (model->button_held_for_ticks / 5) + 1;
+
+                        if(scroll_speed > 5) {
+                            scroll_speed = 5;
+                        }
+
+                        int32_t count = model->item_cnt;
+
+                        if(model->item_idx + scroll_speed >= count) {
+                            scroll_speed = count - model->item_idx - 1;
+                        }
+
+                        model->item_idx = (model->item_idx + scroll_speed) % model->item_cnt;
                         if(browser_is_list_load_required(model)) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
@@ -614,11 +640,29 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                                 browser->worker, load_offset, ITEM_LIST_LEN_MAX);
                         }
                         model->scroll_counter = 0;
+
+                        model->button_held_for_ticks += 1;
                     }
                 },
                 true);
             browser_update_offset(browser);
             consumed = true;
+        } else if(event->type == InputTypeRelease) {
+            with_view_model(
+                browser->view,
+                FileBrowserModel * model,
+                {
+                    model->button_held_for_ticks = 0;
+                    if(browser_is_list_load_required(model)) {
+                        model->list_loading = true;
+                        int32_t load_offset = CLAMP(
+                            model->item_idx - ITEM_LIST_LEN_MAX / 4 * 1,
+                            (int32_t)model->item_cnt,
+                            0);
+                        file_browser_worker_load(browser->worker, load_offset, ITEM_LIST_LEN_MAX);
+                    }
+                },
+                true);
         }
     } else if(event->key == InputKeyOk) {
         if(event->type == InputTypeShort) {

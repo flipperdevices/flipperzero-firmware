@@ -28,6 +28,8 @@ typedef struct {
     int8_t selected_row; // row -1 - input, row 0 & 1 - keyboard
     uint8_t selected_column;
     uint8_t first_visible_byte;
+
+    uint8_t button_held_for_ticks;
 } ByteInputModel;
 
 static const uint8_t keyboard_origin_x = 7;
@@ -464,10 +466,19 @@ static void byte_input_handle_down(ByteInputModel* model) {
 static void byte_input_handle_left(ByteInputModel* model) {
     if(byte_input_keyboard_selected(model)) {
         if(model->selected_column > 0) {
-            model->selected_column -= 1;
+            if(model->button_held_for_ticks > 2) {
+                if(model->selected_column - 2 < 0) {
+                    model->selected_column = byte_input_get_row_size(model->selected_row) - 1;
+                } else {
+                    model->selected_column -= 2;
+                }
+            } else {
+                model->selected_column -= 1;
+            }
         } else {
             model->selected_column = byte_input_get_row_size(model->selected_row) - 1;
         }
+        model->button_held_for_ticks += 1;
     } else {
         byte_input_dec_selected_byte(model);
     }
@@ -481,10 +492,20 @@ static void byte_input_handle_left(ByteInputModel* model) {
 static void byte_input_handle_right(ByteInputModel* model) {
     if(byte_input_keyboard_selected(model)) {
         if(model->selected_column < byte_input_get_row_size(model->selected_row) - 1) {
-            model->selected_column += 1;
+            if(model->button_held_for_ticks > 2) {
+                if(model->selected_column + 2 > byte_input_get_row_size(model->selected_row) - 1) {
+                    model->selected_column = 0;
+                } else {
+                    model->selected_column += 2;
+                }
+            } else {
+                model->selected_column += 1;
+            }
         } else {
             model->selected_column = 0;
         }
+
+        model->button_held_for_ticks += 1;
     } else {
         byte_input_inc_selected_byte(model);
     }
@@ -517,6 +538,15 @@ static void byte_input_handle_ok(ByteInputModel* model) {
     } else {
         byte_input_transition_from_keyboard(model);
     }
+}
+
+/**
+ * @brief Handle releasing the button
+ * 
+ * @param model 
+ */
+static void byte_input_handle_release(ByteInputModel* model) {
+    model->button_held_for_ticks = 0;
 }
 
 /**
@@ -654,6 +684,12 @@ static bool byte_input_view_input_callback(InputEvent* event, void* context) {
         default:
             break;
         }
+    }
+
+    if(event->type == InputTypeRelease) {
+        with_view_model(
+            byte_input->view, ByteInputModel * model, { byte_input_handle_release(model); }, true);
+        consumed = true;
     }
 
     if((event->type == InputTypeLong || event->type == InputTypeRepeat) &&

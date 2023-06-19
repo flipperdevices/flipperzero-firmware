@@ -30,6 +30,8 @@ typedef struct {
     void* validator_callback_context;
     FuriString* validator_text;
     bool validator_message_visible;
+
+    uint8_t button_held_for_ticks;
 } TextInputModel;
 
 static const uint8_t keyboard_origin_x = 1;
@@ -290,19 +292,39 @@ static void text_input_handle_down(TextInput* text_input, TextInputModel* model)
 static void text_input_handle_left(TextInput* text_input, TextInputModel* model) {
     UNUSED(text_input);
     if(model->selected_column > 0) {
-        model->selected_column--;
+        if(model->button_held_for_ticks > 2) {
+            if(model->selected_column - 2 < 0) {
+                model->selected_column = get_row_size(model->selected_row) - 1;
+            } else {
+                model->selected_column -= 2;
+            }
+        } else {
+            model->selected_column--;
+        }
     } else {
         model->selected_column = get_row_size(model->selected_row) - 1;
     }
+
+    model->button_held_for_ticks += 1;
 }
 
 static void text_input_handle_right(TextInput* text_input, TextInputModel* model) {
     UNUSED(text_input);
     if(model->selected_column < get_row_size(model->selected_row) - 1) {
-        model->selected_column++;
+        if(model->button_held_for_ticks > 2) {
+            if(model->selected_column + 2 > get_row_size(model->selected_row) - 1) {
+                model->selected_column = 0;
+            } else {
+                model->selected_column += 2;
+            }
+        } else {
+            model->selected_column++;
+        }
     } else {
         model->selected_column = 0;
     }
+
+    model->button_held_for_ticks += 1;
 }
 
 static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, bool shift) {
@@ -336,6 +358,11 @@ static void text_input_handle_ok(TextInput* text_input, TextInputModel* model, b
         }
     }
     model->clear_default_text = false;
+}
+
+static void text_input_handle_release(TextInput* text_input, TextInputModel* model) {
+    UNUSED(text_input);
+    model->button_held_for_ticks = 0;
 }
 
 static bool text_input_view_input_callback(InputEvent* event, void* context) {
@@ -415,6 +442,19 @@ static bool text_input_view_input_callback(InputEvent* event, void* context) {
             break;
         case InputKeyBack:
             text_input_backspace_cb(model);
+            break;
+        default:
+            consumed = false;
+            break;
+        }
+    } else if(event->type == InputTypeRelease) {
+        consumed = true;
+        switch(event->key) {
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyLeft:
+        case InputKeyRight:
+            text_input_handle_release(text_input, model);
             break;
         default:
             consumed = false;
