@@ -1,4 +1,4 @@
-#include "APRS_hello_world_clean_app.h"
+#include "aprs_hello_world_clean_app.h"
 
 #include <furi.h>
 #include <furi_hal.h>
@@ -438,7 +438,7 @@ void randomize(unsigned int *var, unsigned int low, unsigned int high)
 
 //---------------------------------------------------------------------------
 
-static void APRS_hello_world_clean_app_input_callback(InputEvent* input_event, void* ctx){
+static void aprs_hello_world_clean_app_input_callback(InputEvent* input_event, void* ctx){
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
 
@@ -449,7 +449,7 @@ static void APRS_hello_world_clean_app_input_callback(InputEvent* input_event, v
 
 //---------------------------------------------------------------------------
 
-static void APRS_hello_world_clean_app_draw_callback(Canvas* canvas, void* ctx){
+static void aprs_hello_world_clean_app_draw_callback(Canvas* canvas, void* ctx){
     UNUSED(ctx);
     canvas_clear(canvas);
 
@@ -476,15 +476,15 @@ static void timer_callback(FuriMessageQueue* event_queue) {
 
 //---------------------------------------------------------------------------
 
-APRSHelloWorldCleanApp* APRS_hello_world_clean_app_alloc(){
+APRSHelloWorldCleanApp* aprs_hello_world_clean_app_alloc(){
     APRSHelloWorldCleanApp* app = malloc(sizeof(APRSHelloWorldCleanApp));
 
     app->view_port = view_port_alloc();
     app->event_queue = furi_message_queue_alloc(8, sizeof(APRSHelloWorldCleanEvent));
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
-    view_port_draw_callback_set(app->view_port, APRS_hello_world_clean_app_draw_callback, NULL);
-    view_port_input_callback_set(app->view_port, APRS_hello_world_clean_app_input_callback, app->event_queue);
+    view_port_draw_callback_set(app->view_port, aprs_hello_world_clean_app_draw_callback, NULL);
+    view_port_input_callback_set(app->view_port, aprs_hello_world_clean_app_input_callback, app->event_queue);
 
     app->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
@@ -500,7 +500,7 @@ APRSHelloWorldCleanApp* APRS_hello_world_clean_app_alloc(){
 
 //---------------------------------------------------------------------------
 
-void APRS_hello_world_clean_app_free(APRSHelloWorldCleanApp* app){
+void aprs_hello_world_clean_app_free(APRSHelloWorldCleanApp* app){
     furi_assert(app);
 
     view_port_enabled_set(app->view_port, false);   
@@ -517,9 +517,9 @@ void APRS_hello_world_clean_app_free(APRSHelloWorldCleanApp* app){
 
 //---------------------------------------------------------------------------
 
-int32_t APRS_hello_world_clean_app(void *p){
+int32_t aprs_hello_world_clean_app(void *p){
     UNUSED(p);
-    APRSHelloWorldCleanApp* app = APRS_hello_world_clean_app_alloc();
+    APRSHelloWorldCleanApp* app = aprs_hello_world_clean_app_alloc();
 
     APRSHelloWorldCleanEvent event;
 
@@ -547,6 +547,6 @@ int32_t APRS_hello_world_clean_app(void *p){
         }
     }
 
-    APRS_hello_world_clean_app_free(app);
+    aprs_hello_world_clean_app_free(app);
     return 0;
 }

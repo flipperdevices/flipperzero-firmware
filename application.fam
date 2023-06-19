@@ -1,9 +1,9 @@
 App(
-    appid="APRS_hello_world_clean",
+    appid="aprs_hello_world_clean",
     name="APRS Cln Hello World application",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="APRS_hello_world_clean_app",
-    cdefines=["APP_APRS_HELLO_WORLD_CLEAN"],
+    entry_point="aprs_hello_world_clean_app",
+    cdefines=["APP_aprs_hello_world_clean"],
     requires=[
         "gui",
     ],
