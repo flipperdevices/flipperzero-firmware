@@ -23,6 +23,10 @@ App(
     name="On start hooks",
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
+        "ibutton_start",
         "subghz_start",
+        "infrared_start",
+        "lfrfid_start",
+        "nfc_start",
     ],
 )
