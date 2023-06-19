@@ -2,6 +2,10 @@
 
 #include "../nfc_device.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (*NfcGeneratorFunc)(NfcDeviceData* data);
 
 typedef struct {
@@ -12,3 +16,7 @@ typedef struct {
 extern const NfcGenerator* const nfc_generators[];
 
 void nfc_generate_mf_classic(NfcDeviceData* data, uint8_t uid_len, MfClassicType type);
+
+#ifdef __cplusplus
+}
+#endif

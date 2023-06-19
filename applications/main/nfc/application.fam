@@ -13,6 +13,7 @@ App(
     icon="A_NFC_14",
     stack_size=5 * 1024,
     order=30,
+    fap_libs=["assets"],
 )
 
 App(

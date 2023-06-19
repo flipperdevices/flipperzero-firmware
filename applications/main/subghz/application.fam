@@ -14,6 +14,7 @@ App(
     icon="A_Sub1ghz_14",
     stack_size=3 * 1024,
     order=10,
+    fap_libs=["assets"],
 )
 
 App(
