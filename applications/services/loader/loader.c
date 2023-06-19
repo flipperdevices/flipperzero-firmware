@@ -279,7 +279,7 @@ static LoaderStatus loader_start_external_app(
         loader->app.fap = flipper_application_alloc(storage, firmware_api_interface);
         size_t start = furi_get_tick();
 
-        FURI_LOG_I(TAG, " Loading %s", path);
+        FURI_LOG_I(TAG, "Loading %s", path);
 
         FlipperApplicationPreloadStatus preload_res =
             flipper_application_preload(loader->app.fap, path);
