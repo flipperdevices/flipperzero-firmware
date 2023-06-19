@@ -612,9 +612,34 @@ void nfcv_emu_handle_packet(
 
         if(ctx->flags & NFCV_REQ_FLAG_AFI) {
             uint8_t afi = nfcv_data->frame[ctx->payload_offset];
-            if(afi == nfcv_data->afi) {
-                respond = true;
+
+            uint8_t family = (afi & 0xF0);
+            uint8_t subfamily = (afi & 0x0F);
+
+            if(family) {
+                if(subfamily) {
+                    /* selected family and subfamily only */
+                    if(afi == nfcv_data->afi) {
+                        respond = true;
+                    }
+                } else {
+                    /* selected family, any subfamily */
+                    if(family == (nfcv_data->afi & 0xf0)) {
+                        respond = true;
+                    }
+                }
+            } else {
+                if(subfamily) {
+                    /* proprietary subfamily only */
+                    if(afi == nfcv_data->afi) {
+                        respond = true;
+                    }
+                } else {
+                    /* all families and subfamilies */
+                    respond = true;
+                }
             }
+
         } else {
             respond = true;
         }
