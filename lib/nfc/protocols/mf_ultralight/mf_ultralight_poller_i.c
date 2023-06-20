@@ -795,10 +795,29 @@ static NfcCommand mf_ultralight_poller_run(NfcPollerEvent event, void* context) 
     return command;
 }
 
+static bool mf_ultralight_poller_detect(NfcPollerEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.data);
+    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
+
+    bool protocol_detected = false;
+    MfUltralightPoller* instance = context;
+    NfcaPollerEvent* nfca_event = event.data;
+
+    if(nfca_event->type == NfcaPollerEventTypeReady) {
+        MfUltralightPage page = {};
+        MfUltralightError error = mf_ultralight_poller_read_page(instance, 0, &page);
+        protocol_detected = (error == MfUltralightErrorNone);
+    }
+
+    return protocol_detected;
+}
+
 const NfcPollerBase mf_ultralight_poller = {
     .alloc = mf_ultralight_poller_alloc_new,
     .free = mf_ultralight_poller_free_new,
     .set_callback = mf_ultralight_poller_set_callback,
-    .get_data = mf_ultralight_poller_get_data_new,
     .run = mf_ultralight_poller_run,
+    .detect = mf_ultralight_poller_detect,
+    .get_data = mf_ultralight_poller_get_data_new,
 };
