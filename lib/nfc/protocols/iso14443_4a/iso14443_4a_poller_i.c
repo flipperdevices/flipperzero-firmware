@@ -61,7 +61,7 @@ Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance) 
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
-            NFCA_FDT_LISTEN_FC);
+            ISO14443_4A_POLLER_ATS_FWT_FC);
         if(error != NfcaErrorNone) {
             FURI_LOG_E(TAG, "Ats request failed: %d", error);
             break;

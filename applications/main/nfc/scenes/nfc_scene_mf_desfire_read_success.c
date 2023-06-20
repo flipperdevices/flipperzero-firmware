@@ -40,10 +40,11 @@ void nfc_scene_mf_desfire_read_success_on_enter(void* context) {
     furi_string_cat_printf(temp_str, " bytes, %lu bytes free\n", bytes_free);
 
     uint16_t n_files = 0;
-    uint16_t n_apps = data->applications.count;
+    uint16_t n_apps = simple_array_get_count(data->applications);
 
     for(size_t i = 0; i < n_apps; ++i) {
-        n_files += data->applications.data[i].files.count;
+        const MfDesfireApplication* app = simple_array_cget(data->applications, i);
+        n_files += simple_array_get_count(app->file_ids);
     }
     furi_string_cat_printf(temp_str, "%d Application", n_apps);
     if(n_apps != 1) {

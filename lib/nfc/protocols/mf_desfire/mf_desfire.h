@@ -2,6 +2,8 @@
 
 #include <lib/nfc/protocols/iso14443_4a/iso14443_4a.h>
 
+#include "helpers/simple_array.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,6 +26,10 @@ extern "C" {
 #define MF_DESFIRE_MAX_KEYS (14)
 #define MF_DESFIRE_MAX_FILES (32)
 
+#define MF_DESFIRE_UID_SIZE (7)
+#define MF_DESFIRE_BATCH_SIZE (5)
+#define MF_DESFIRE_APP_ID_SIZE (3)
+
 typedef struct {
     uint8_t hw_vendor;
     uint8_t hw_type;
@@ -41,8 +47,8 @@ typedef struct {
     uint8_t sw_storage;
     uint8_t sw_proto;
 
-    uint8_t uid[7];
-    uint8_t batch[5];
+    uint8_t uid[MF_DESFIRE_UID_SIZE];
+    uint8_t batch[MF_DESFIRE_BATCH_SIZE];
     uint8_t prod_week;
     uint8_t prod_year;
 } MfDesfireVersion;
@@ -66,7 +72,7 @@ typedef uint8_t MfDesfireKeyVersion;
 
 typedef struct {
     MfDesfireKeySettings key_settings;
-    MfDesfireKeyVersion* key_versions;
+    SimpleArray* key_versions;
 } MfDesfireKeyConfiguration;
 
 typedef enum {
@@ -83,11 +89,13 @@ typedef enum {
     MfDesfireFileCommunicationSettingsEnciphered = 3,
 } MfDesfireFileCommunicationSettings;
 
-typedef struct MifareDesfireFile {
-    uint8_t id;
+typedef uint8_t MfDesfireFileId;
+typedef uint16_t MfDesfireFileAccessRights;
+
+typedef struct {
     MfDesfireFileType type;
     MfDesfireFileCommunicationSettings comm;
-    uint16_t access_rights;
+    MfDesfireFileAccessRights access_rights;
     union {
         struct {
             uint32_t size;
@@ -104,24 +112,21 @@ typedef struct MifareDesfireFile {
             uint32_t cur;
         } record;
     };
-    uint8_t* contents;
-} MfDesfireFile;
+} MfDesfireFileSettings;
 
 typedef struct {
-    MfDesfireFile* data;
-    uint8_t count;
-} MfDesfireFiles;
+    SimpleArray* data;
+} MfDesfireFileData;
+
+typedef uint8_t MfDesfireApplicationId[MF_DESFIRE_APP_ID_SIZE];
 
 typedef struct MfDesfireApplication {
-    uint8_t id[3];
-    MfDesfireKeyConfiguration key_config;
-    MfDesfireFiles files;
+    MfDesfireKeySettings key_settings;
+    SimpleArray* key_versions;
+    SimpleArray* file_ids;
+    SimpleArray* file_settings;
+    SimpleArray* file_data;
 } MfDesfireApplication;
-
-typedef struct {
-    MfDesfireApplication* data;
-    uint8_t count;
-} MfDesfireApplications;
 
 typedef enum {
     MfDesfireErrorNone,
@@ -134,11 +139,15 @@ typedef struct {
     Iso14443_4aData* iso14443_4a_data;
     MfDesfireVersion version;
     MfDesfireFreeMemory free_memory;
-    MfDesfireKeyConfiguration master_key;
-    MfDesfireApplications applications;
+    MfDesfireKeySettings master_key_settings;
+    SimpleArray* master_key_versions;
+    SimpleArray* application_ids;
+    SimpleArray* applications;
 } MfDesfireData;
 
 extern const NfcProtocolBase nfc_protocol_mf_desfire;
+
+// Virtual methods
 
 MfDesfireData* mf_desfire_alloc();
 
@@ -160,6 +169,7 @@ const char* mf_desfire_get_name(const MfDesfireData* data, NfcProtocolNameType n
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len);
 
+// Deprecated ?
 bool mf_desfire_detect_protocol(NfcaData* nfca_data);
 
 #ifdef __cplusplus

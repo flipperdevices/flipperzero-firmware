@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,28.0,,
+Version,+,28.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -549,6 +549,7 @@ Function,-,bcmp,int,"const void*, const void*, size_t"
 Function,-,bcopy,void,"const void*, void*, size_t"
 Function,-,bit_buffer_alloc,BitBuffer*,size_t
 Function,-,bit_buffer_append,void,"BitBuffer*, const BitBuffer*"
+Function,+,bit_buffer_append_byte,void,"BitBuffer*, uint8_t"
 Function,-,bit_buffer_append_bytes,void,"BitBuffer*, const uint8_t*, size_t"
 Function,-,bit_buffer_append_right,void,"BitBuffer*, const BitBuffer*, size_t"
 Function,-,bit_buffer_copy,void,"BitBuffer*, const BitBuffer*"
@@ -571,6 +572,7 @@ Function,-,bit_buffer_set_size,void,"BitBuffer*, size_t"
 Function,-,bit_buffer_set_size_bytes,void,"BitBuffer*, size_t"
 Function,-,bit_buffer_starts_with_byte,_Bool,"const BitBuffer*, uint8_t"
 Function,-,bit_buffer_write_bytes,void,"const BitBuffer*, void*, size_t"
+Function,+,bit_buffer_write_bytes_mid,void,"const BitBuffer*, void*, size_t, size_t"
 Function,-,bit_buffer_write_bytes_with_parity,void,"const BitBuffer*, void*, size_t, size_t*"
 Function,+,bit_lib_add_parity,size_t,"const uint8_t*, size_t, uint8_t*, size_t, uint8_t, uint8_t, BitLibParity"
 Function,+,bit_lib_copy_bits,void,"uint8_t*, size_t, size_t, const uint8_t*, size_t"
@@ -2053,16 +2055,15 @@ Function,-,nfc_start_poller,void,"Nfc*, NfcEventCallback, void*"
 Function,-,nfc_stop,void,Nfc*
 Function,-,nfc_trx,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,-,nfc_trx_custom_parity,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
+Function,+,nfca_alloc,NfcaData*,
 Function,-,nfca_append_crc,void,BitBuffer*
 Function,-,nfca_append_crc16,void,"uint8_t*, uint16_t"
 Function,-,nfca_check_crc,_Bool,const BitBuffer*
+Function,+,nfca_copy,void,"NfcaData*, const NfcaData*"
 Function,-,nfca_emulation_handler,_Bool,"uint8_t*, uint16_t, uint8_t*, uint16_t*"
+Function,+,nfca_free,void,NfcaData*
 Function,-,nfca_get_crc16,uint16_t,"uint8_t*, uint16_t"
 Function,-,nfca_get_cuid,uint32_t,NfcaData*
-Function,+,nfca_alloc,NfcaData*,
-Function,+,nfca_copy,void,"NfcaData*, const NfcaData*"
-Function,+,nfca_free,void,NfcaData*
-Function,-,nfca_get_crc,uint16_t,"uint8_t*, uint16_t"
 Function,+,nfca_get_name,const char*,"const NfcaData*, NfcProtocolNameType"
 Function,+,nfca_get_uid,const uint8_t*,"const NfcaData*, size_t*"
 Function,+,nfca_is_equal,_Bool,"const NfcaData*, const NfcaData*"
