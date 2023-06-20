@@ -44,7 +44,7 @@ ReturnCode slix2_dump_nxp_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_da
         }
     }
 
-    if(ret != ERR_NONE || received != 10) {
+    if(ret != ERR_NONE || received != 8) {
         FURI_LOG_D(TAG, "Failed: %d, %d", ret, received);
         return ret;
     }
