@@ -174,7 +174,7 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case BG_DB:
             canvas_draw_icon(canvas, 0, 0, &I_passport_dragonball);
             break;
-		case BG_CIRCUIT:
+        case BG_CIRCUIT:
             canvas_draw_icon(canvas, 0, 0, &I_passport_Circuit_v1);
             break;
         case BG_STOCK:
