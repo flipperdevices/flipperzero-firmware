@@ -29,13 +29,14 @@ extern "C" {
 
 #define BG_NONE 0
 #define BG_DB 1
-#define BG_STOCK 2
-#define BG_FURI 3
-#define BG_MARIO 4
-#define BG_MOUNTAINS 5
-#define BG_MULTI 6
-#define BG_SCROLL 7
-#define BG_SLUT 8
+#define BG_CIRCUIT 2
+#define BG_STOCK 3
+#define BG_FURI 4
+#define BG_MARIO 5
+#define BG_MOUNTAINS 6
+#define BG_MULTI 7
+#define BG_SCROLL 8
+#define BG_SLUT 9
 
 #define PROFILE_IMG_COUNT 30
 
