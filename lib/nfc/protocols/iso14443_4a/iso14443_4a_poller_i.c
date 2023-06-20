@@ -4,8 +4,6 @@
 
 #define TAG "Iso14443_4aPoller"
 
-#define BITS_IN_BYTE (8)
-
 #define ISO14443_4A_ATS_BIT (1 << 5)
 #define ISO14443_4A_PCB_I (0x02)
 
@@ -85,8 +83,6 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     BitBuffer* rx_buffer,
     uint32_t fwt) {
     furi_assert(instance);
-    furi_assert(tx_buffer);
-    furi_assert(rx_buffer);
 
     const uint8_t pcb = ISO14443_4A_PCB_I | instance->protocol_data.block_number;
     instance->protocol_data.block_number ^= 1;
@@ -118,23 +114,7 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     return ret;
 }
 
-NfcPoller* iso14443_4a_poller_alloc_new(NfcPoller* iso14443_3a_poller) {
-    furi_assert(iso14443_3a_poller);
-
-    Iso14443_4aPoller* instance = malloc(sizeof(Iso14443_4aPoller));
-    instance->iso14443_3a_poller = iso14443_3a_poller;
-
-    return instance;
-}
-
-void iso14443_4a_poller_free_new(NfcPoller* iso14443_4a_poller) {
-    furi_assert(iso14443_4a_poller);
-
-    Iso14443_4aPoller* instance = iso14443_4a_poller;
-    free(instance);
-}
-
 const NfcPollerBase nfc_poller_iso14443_4a = {
-    .alloc = iso14443_4a_poller_alloc_new,
-    .free = iso14443_4a_poller_free_new,
+    .alloc = (NfcPollerAlloc)iso14443_4a_poller_alloc,
+    .free = (NfcPollerFree)iso14443_4a_poller_free,
 };
