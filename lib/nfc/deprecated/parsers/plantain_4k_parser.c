@@ -1,12 +1,12 @@
 #include "nfc_supported_card.h"
 
 #include <gui/modules/widget.h>
-#include <lib/nfc/deprycated/nfc_worker_i.h>
+#include <lib/nfc/deprecated/nfc_worker_i.h>
 
 #include <furi_hal.h>
 
-static const MfClassicAuthContext plantain_keys[] = {
-    {.sector = 0, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
+static const MfClassicAuthContext plantain_keys_4k[] = {
+    {.sector = 0, .key_a = 0xFFFFFFFFFFFF, .key_b = 0xFFFFFFFFFFFF},
     {.sector = 1, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
     {.sector = 2, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
     {.sector = 3, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
@@ -22,53 +22,81 @@ static const MfClassicAuthContext plantain_keys[] = {
     {.sector = 13, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
     {.sector = 14, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
     {.sector = 15, .key_a = 0xffffffffffff, .key_b = 0xffffffffffff},
+    {.sector = 16, .key_a = 0x72f96bdd3714, .key_b = 0x462225cd34cf},
+    {.sector = 17, .key_a = 0x044ce1872bc3, .key_b = 0x8c90c70cff4a},
+    {.sector = 18, .key_a = 0xbc2d1791dec1, .key_b = 0xca96a487de0b},
+    {.sector = 19, .key_a = 0x8791b2ccb5c4, .key_b = 0xc956c3b80da3},
+    {.sector = 20, .key_a = 0x8e26e45e7d65, .key_b = 0x8e65b3af7d22},
+    {.sector = 21, .key_a = 0x0f318130ed18, .key_b = 0x0c420a20e056},
+    {.sector = 22, .key_a = 0x045ceca15535, .key_b = 0x31bec3d9e510},
+    {.sector = 23, .key_a = 0x9d993c5d4ef4, .key_b = 0x86120e488abf},
+    {.sector = 24, .key_a = 0xc65d4eaa645b, .key_b = 0xb69d40d1a439},
+    {.sector = 25, .key_a = 0x3a8a139c20b4, .key_b = 0x8818a9c5d406},
+    {.sector = 26, .key_a = 0xbaff3053b496, .key_b = 0x4b7cb25354d3},
+    {.sector = 27, .key_a = 0x7413b599c4ea, .key_b = 0xb0a2AAF3A1BA},
+    {.sector = 28, .key_a = 0x0ce7cd2cc72b, .key_b = 0xfa1fbb3f0f1f},
+    {.sector = 29, .key_a = 0x0be5fac8b06a, .key_b = 0x6f95887a4fd3},
+    {.sector = 30, .key_a = 0x0eb23cc8110b, .key_b = 0x04dc35277635},
+    {.sector = 31, .key_a = 0xbc4580b7f20b, .key_b = 0xd0a4131fb290},
+    {.sector = 32, .key_a = 0x7a396f0d633d, .key_b = 0xad2bdc097023},
+    {.sector = 33, .key_a = 0xa3faa6daff67, .key_b = 0x7600e889adf9},
+    {.sector = 34, .key_a = 0xfd8705e721b0, .key_b = 0x296fc317a513},
+    {.sector = 35, .key_a = 0x22052b480d11, .key_b = 0xe19504c39461},
+    {.sector = 36, .key_a = 0xa7141147d430, .key_b = 0xff16014fefc7},
+    {.sector = 37, .key_a = 0x8a8d88151a00, .key_b = 0x038b5f9b5a2a},
+    {.sector = 38, .key_a = 0xb27addfb64b0, .key_b = 0x152fd0c420a7},
+    {.sector = 39, .key_a = 0x7259fa0197c6, .key_b = 0x5583698df085},
 };
 
-bool plantain_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+bool plantain_4k_parser_verify(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
     UNUSED(nfc_worker);
-    if(nfc_worker->dev_data->mf_classic_data.type != MfClassicType1k) {
+
+    if(nfc_worker->dev_data->mf_classic_data.type != MfClassicType4k) {
         return false;
     }
 
     uint8_t sector = 8;
     uint8_t block = mifare_classic_get_sector_trailer_block_num_by_sector(sector);
-    FURI_LOG_D("Plant", "Verifying sector %d", sector);
+    FURI_LOG_D("Plant4K", "Verifying sector %d", sector);
     if(mifare_classic_authenticate(tx_rx, block, 0x26973ea74321, MfClassicKeyA)) {
-        FURI_LOG_D("Plant", "Sector %d verified", sector);
+        FURI_LOG_D("Plant4K", "Sector %d verified", sector);
         return true;
     }
     return false;
 }
 
-bool plantain_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
+bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     furi_assert(nfc_worker);
 
     MfClassicReader reader = {};
     FuriHalNfcDevData* nfc_data = &nfc_worker->dev_data->nfc_data;
     reader.type =
         mifare_classic_get_classic_type(nfc_data->atqa[0], nfc_data->atqa[1], nfc_data->sak);
-    for(size_t i = 0; i < COUNT_OF(plantain_keys); i++) {
+    for(size_t i = 0; i < COUNT_OF(plantain_keys_4k); i++) {
         mifare_classic_reader_add_sector(
-            &reader, plantain_keys[i].sector, plantain_keys[i].key_a, plantain_keys[i].key_b);
+            &reader,
+            plantain_keys_4k[i].sector,
+            plantain_keys_4k[i].key_a,
+            plantain_keys_4k[i].key_b);
+        FURI_LOG_T("plant4k", "Added sector %d", plantain_keys_4k[i].sector);
     }
-
-    return mifare_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 16;
+    for(int i = 0; i < 5; i++) {
+        if(mifare_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) ==
+           40) {
+            return true;
+        }
+    }
+    return false;
 }
 
-uint8_t plantain_calculate_luhn(uint64_t number) {
-    // No.
-    UNUSED(number);
-    return 0;
-}
-
-bool plantain_parser_parse(NfcDeviceData* dev_data) {
+bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
     MfClassicData* data = &dev_data->mf_classic_data;
 
     // Verify key
     MfClassicSectorTrailer* sec_tr = mifare_classic_get_sector_trailer_by_sector(data, 8);
     uint64_t key = nfc_util_bytes2num(sec_tr->key_a, 6);
-    if(key != plantain_keys[8].key_a) return false;
+    if(key != plantain_keys_4k[8].key_a) return false;
 
     // Point to block 0 of sector 4, value 0
     uint8_t* temp_ptr = &data->block[4 * 4].value[0];

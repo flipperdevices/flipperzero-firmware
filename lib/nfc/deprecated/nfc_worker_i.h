@@ -6,11 +6,11 @@
 #include <lib/toolbox/stream/file_stream.h>
 
 #include <lib/nfc/helpers/nfc_util.h>
-#include <lib/nfc/deprycated/protocols/mifare_common.h>
-#include <lib/nfc/deprycated/protocols/mifare_ultralight.h>
-#include <lib/nfc/deprycated/protocols/mifare_classic.h>
-#include <lib/nfc/deprycated/protocols/mifare_desfire.h>
-#include <lib/nfc/deprycated/helpers/reader_analyzer.h>
+#include <lib/nfc/deprecated/protocols/mifare_common.h>
+#include <lib/nfc/deprecated/protocols/mifare_ultralight.h>
+#include <lib/nfc/deprecated/protocols/mifare_classic.h>
+#include <lib/nfc/deprecated/protocols/mifare_desfire.h>
+#include <lib/nfc/deprecated/helpers/reader_analyzer.h>
 
 struct NfcWorker {
     FuriThread* thread;

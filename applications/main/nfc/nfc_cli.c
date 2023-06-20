@@ -4,8 +4,8 @@
 #include <lib/toolbox/args.h>
 #include <lib/toolbox/hex.h>
 
-#include <lib/nfc/deprycated/nfc_types.h>
-#include <lib/nfc/deprycated/nfc_device.h>
+#include <lib/nfc/deprecated/nfc_types.h>
+#include <lib/nfc/deprecated/nfc_device.h>
 
 static void nfc_cli_print_usage() {
     printf("Usage:\r\n");

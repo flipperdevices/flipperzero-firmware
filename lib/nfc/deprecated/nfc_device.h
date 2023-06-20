@@ -6,11 +6,11 @@
 #include <dialogs/dialogs.h>
 
 #include <furi_hal_nfc.h>
-#include <lib/nfc/deprycated/helpers/mf_classic_dict.h>
-#include <lib/nfc/deprycated/protocols/emv.h>
-#include <lib/nfc/deprycated/protocols/mifare_ultralight.h>
-#include <lib/nfc/deprycated/protocols/mifare_classic.h>
-#include <lib/nfc/deprycated/protocols/mifare_desfire.h>
+#include <lib/nfc/deprecated/helpers/mf_classic_dict.h>
+#include <lib/nfc/deprecated/protocols/emv.h>
+#include <lib/nfc/deprecated/protocols/mifare_ultralight.h>
+#include <lib/nfc/deprecated/protocols/mifare_classic.h>
+#include <lib/nfc/deprecated/protocols/mifare_desfire.h>
 
 #ifdef __cplusplus
 extern "C" {

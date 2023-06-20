@@ -1,6 +1,6 @@
 #include "reader_analyzer.h"
 #include <lib/nfc/helpers/nfc_util.h>
-#include <lib/nfc/deprycated/protocols/mifare_classic.h>
+#include <lib/nfc/deprecated/protocols/mifare_classic.h>
 #include <m-array.h>
 
 #include "mfkey32.h"

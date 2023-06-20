@@ -2,7 +2,7 @@
 #include "plantain_parser.h" // For plantain-specific stuff
 
 #include <gui/modules/widget.h>
-#include <lib/nfc/deprycated/nfc_worker_i.h>
+#include <lib/nfc/deprecated/nfc_worker_i.h>
 
 #include <furi_hal.h>
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <lib/nfc/deprycated/nfc_device.h>
+#include <lib/nfc/deprecated/nfc_device.h>
 
 typedef enum {
     ReaderAnalyzerModeDebugLog = 0x01,

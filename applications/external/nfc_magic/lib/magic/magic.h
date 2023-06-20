@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/nfc/deprycated/protocols/mifare_classic.h>
+#include <lib/nfc/deprecated/protocols/mifare_classic.h>
 
 bool magic_wupa();
 
