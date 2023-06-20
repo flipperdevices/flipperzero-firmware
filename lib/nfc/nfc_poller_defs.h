@@ -13,11 +13,6 @@ typedef struct {
     const NfcProtocolType* children_protocol;
 } NfcPollerTreeNode;
 
-typedef struct {
-    size_t base_protocol_num;
-    const NfcProtocolType* base_protocols;
-} NfcPollerBaseProtocol;
-
 extern const NfcPollerBase* nfc_pollers_api[NfcProtocolTypeMax];
 
 extern const NfcPollerTreeNode nfc_poller_nodes[NfcProtocolTypeMax];

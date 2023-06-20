@@ -24,7 +24,7 @@ typedef void (*NfcPollerFree)(NfcPoller* instance);
 
 typedef void (*NfcPollerSetCallback)(NfcPoller* poller, NfcPollerCallback callback, void* context);
 typedef NfcCommand (*NfcPollerRun)(NfcPollerEvent event, void* context);
-
+typedef bool (*NfcPollerDetect)(NfcPollerEvent event, void* context);
 typedef const NfcProtocolData* (*NfcPollerGetData)(const NfcPoller* instance);
 
 typedef struct {
@@ -32,6 +32,7 @@ typedef struct {
     NfcPollerFree free;
     NfcPollerSetCallback set_callback;
     NfcPollerRun run;
+    NfcPollerDetect detect;
     NfcPollerGetData get_data;
 } NfcPollerBase;
 
