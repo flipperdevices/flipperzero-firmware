@@ -37,6 +37,19 @@ void mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer
     bit_buffer_write_bytes(buf, data, sizeof(MfDesfireFileSettings));
 }
 
+void mf_desfire_file_data_parse(MfDesfireFileData* data, const BitBuffer* buf) {
+    const size_t data_size = bit_buffer_get_size_bytes(buf);
+
+    if(data_size > 0) {
+        simple_array_init(data->data, data_size);
+        bit_buffer_write_bytes(buf, simple_array_get(data->data, 0), data_size);
+    }
+}
+
+void mf_desfire_file_data_init(MfDesfireFileData* data) {
+    data->data = simple_array_alloc(&mf_desfire_file_data_element_array_config);
+}
+
 void mf_desfire_application_init(MfDesfireApplication* data) {
     data->key_versions = simple_array_alloc(&mf_desfire_key_version_array_config);
     data->file_ids = simple_array_alloc(&mf_desfire_file_id_array_config);
@@ -44,12 +57,21 @@ void mf_desfire_application_init(MfDesfireApplication* data) {
     data->file_data = simple_array_alloc(&mf_desfire_file_data_array_config);
 }
 
-void mf_desfire_application_reset(MfDesfireApplication* app) {
-    simple_array_free(app->key_versions);
-    simple_array_free(app->file_ids);
-    simple_array_free(app->file_settings);
-    simple_array_free(app->file_data);
-    memset(app, 0, sizeof(MfDesfireApplication));
+void mf_desfire_file_data_reset(MfDesfireFileData* data) {
+    simple_array_free(data->data);
+    memset(data, 0, sizeof(MfDesfireFileData));
+}
+
+void mf_desfire_application_reset(MfDesfireApplication* data) {
+    simple_array_free(data->key_versions);
+    simple_array_free(data->file_ids);
+    simple_array_free(data->file_settings);
+    simple_array_free(data->file_data);
+    memset(data, 0, sizeof(MfDesfireApplication));
+}
+
+void mf_desfire_file_data_copy(MfDesfireFileData* data, const MfDesfireFileData* other) {
+    simple_array_copy(data->data, other->data);
 }
 
 void mf_desfire_application_copy(MfDesfireApplication* data, const MfDesfireApplication* other) {
@@ -89,6 +111,13 @@ const SimpleArrayConfig mf_desfire_file_settings_array_config = {
 };
 
 const SimpleArrayConfig mf_desfire_file_data_array_config = {
+    .init = (SimpleArrayInit)mf_desfire_file_data_init,
+    .copy = (SimpleArrayCopy)mf_desfire_file_data_copy,
+    .reset = (SimpleArrayReset)mf_desfire_file_data_reset,
+    .type_size = sizeof(MfDesfireData),
+};
+
+const SimpleArrayConfig mf_desfire_file_data_element_array_config = {
     .init = NULL,
     .copy = NULL,
     .reset = NULL,

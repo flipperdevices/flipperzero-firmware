@@ -1,6 +1,6 @@
 #include "../nfc_app_i.h"
 
-#include "../helpers/nfc_protocol_format.h"
+#include "../helpers/format/nfc_protocol_format.h"
 
 static void
     nfc_scene_nfc_info_widget_callback(GuiButtonType result, InputType type, void* context) {
@@ -43,9 +43,9 @@ bool nfc_scene_info_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeRight) {
-            // TODO: Do not if protocol type directly
+            // TODO: Do not if the protocol type directly
             if(protocol_type == NfcProtocolTypeMfDesfire) {
-                //             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireData);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireData);
                 consumed = true;
             } else if(protocol_type == NfcProtocolTypeMfUltralight) {
                 //             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightData);

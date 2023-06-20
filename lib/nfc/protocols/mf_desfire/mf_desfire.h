@@ -114,6 +114,10 @@ typedef struct {
     };
 } MfDesfireFileSettings;
 
+typedef struct {
+    SimpleArray* data;
+} MfDesfireFileData;
+
 typedef uint8_t MfDesfireApplicationId[MF_DESFIRE_APP_ID_SIZE];
 
 typedef struct MfDesfireApplication {

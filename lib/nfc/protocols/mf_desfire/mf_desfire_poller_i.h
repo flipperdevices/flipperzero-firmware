@@ -86,8 +86,30 @@ MfDesfireError mf_desfire_poller_async_read_file_settings_multi(
     const SimpleArray* file_ids,
     SimpleArray* data);
 
-MfDesfireError
-    mf_desfire_poller_async_read_file_data(MfDesfirePoller* instance, SimpleArray* data);
+MfDesfireError mf_desfire_poller_async_read_file_data(
+    MfDesfirePoller* instance,
+    MfDesfireFileId id,
+    uint32_t offset,
+    size_t size,
+    MfDesfireFileData* data);
+
+MfDesfireError mf_desfire_poller_async_read_file_value(
+    MfDesfirePoller* instance,
+    MfDesfireFileId id,
+    MfDesfireFileData* data);
+
+MfDesfireError mf_desfire_poller_async_read_file_records(
+    MfDesfirePoller* instance,
+    MfDesfireFileId id,
+    uint32_t offset,
+    size_t size,
+    MfDesfireFileData* data);
+
+MfDesfireError mf_desfire_poller_async_read_file_data_multi(
+    MfDesfirePoller* instance,
+    const SimpleArray* file_ids,
+    const SimpleArray* file_settings,
+    SimpleArray* data);
 
 MfDesfireError
     mf_desfire_poller_async_read_application(MfDesfirePoller* instance, MfDesfireApplication* data);

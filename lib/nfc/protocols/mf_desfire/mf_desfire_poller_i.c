@@ -277,9 +277,127 @@ MfDesfireError mf_desfire_poller_async_read_file_settings_multi(
         simple_array_init(data, file_id_count);
     }
 
-    for(MfDesfireFileId id = 0; id < file_id_count; ++id) {
-        error =
-            mf_desfire_poller_async_read_file_settings(instance, id, simple_array_get(data, id));
+    for(uint32_t i = 0; i < file_id_count; ++i) {
+        const MfDesfireFileId file_id = *(const MfDesfireFileId*)simple_array_cget(file_ids, i);
+        error = mf_desfire_poller_async_read_file_settings(
+            instance, file_id, simple_array_get(data, i));
+        if(error != MfDesfireErrorNone) break;
+    }
+
+    return error;
+}
+
+MfDesfireError mf_desfire_poller_async_read_file_data(
+    MfDesfirePoller* instance,
+    MfDesfireFileId id,
+    uint32_t offset,
+    size_t size,
+    MfDesfireFileData* data) {
+    furi_assert(instance);
+
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_READ_DATA);
+    bit_buffer_append_byte(instance->input_buffer, id);
+    bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&offset, 3);
+    bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&size, 3);
+
+    MfDesfireError error = mf_desfire_send_chunks(
+        instance,
+        instance->input_buffer,
+        instance->result_buffer,
+        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+    if(error == MfDesfireErrorNone) {
+        mf_desfire_file_data_parse(data, instance->result_buffer);
+    }
+
+    return error;
+}
+
+MfDesfireError mf_desfire_poller_async_read_file_value(
+    MfDesfirePoller* instance,
+    MfDesfireFileId id,
+    MfDesfireFileData* data) {
+    furi_assert(instance);
+
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_VALUE);
+    bit_buffer_append_byte(instance->input_buffer, id);
+
+    MfDesfireError error = mf_desfire_send_chunks(
+        instance,
+        instance->input_buffer,
+        instance->result_buffer,
+        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+    if(error == MfDesfireErrorNone) {
+        mf_desfire_file_data_parse(data, instance->result_buffer);
+    }
+
+    return error;
+}
+
+MfDesfireError mf_desfire_poller_async_read_file_records(
+    MfDesfirePoller* instance,
+    MfDesfireFileId id,
+    uint32_t offset,
+    size_t size,
+    MfDesfireFileData* data) {
+    furi_assert(instance);
+
+    bit_buffer_reset(instance->input_buffer);
+    bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_READ_DATA);
+    bit_buffer_append_byte(instance->input_buffer, id);
+    bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&offset, 3);
+    bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&size, 3);
+
+    MfDesfireError error = mf_desfire_send_chunks(
+        instance,
+        instance->input_buffer,
+        instance->result_buffer,
+        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+    if(error == MfDesfireErrorNone) {
+        mf_desfire_file_data_parse(data, instance->result_buffer);
+    }
+
+    return error;
+}
+
+MfDesfireError mf_desfire_poller_async_read_file_data_multi(
+    MfDesfirePoller* instance,
+    const SimpleArray* file_ids,
+    const SimpleArray* file_settings,
+    SimpleArray* data) {
+    furi_assert(instance);
+    furi_assert(simple_array_get_count(file_ids) == simple_array_get_count(file_settings));
+
+    MfDesfireError error = MfDesfireErrorNone;
+
+    const uint32_t file_id_count = simple_array_get_count(file_ids);
+    if(file_id_count > 0) {
+        simple_array_init(data, file_id_count);
+    }
+
+    for(uint32_t i = 0; i < file_id_count; ++i) {
+        const MfDesfireFileId file_id = *(const MfDesfireFileId*)simple_array_cget(file_ids, i);
+        const MfDesfireFileSettings* file_settings_cur = simple_array_cget(file_settings, i);
+        const MfDesfireFileType file_type = file_settings_cur->type;
+
+        MfDesfireFileData* file_data = simple_array_get(data, i);
+
+        if(file_type == MfDesfireFileTypeStandard || file_type == MfDesfireFileTypeBackup) {
+            error = mf_desfire_poller_async_read_file_data(
+                instance, file_id, 0, file_settings_cur->data.size, file_data);
+        } else if(file_type == MfDesfireFileTypeValue) {
+            error = mf_desfire_poller_async_read_file_value(instance, file_id, file_data);
+        } else if(
+            file_type == MfDesfireFileTypeLinearRecord ||
+            file_type == MfDesfireFileTypeCyclicRecord) {
+            error = mf_desfire_poller_async_read_file_records(
+                instance, file_id, 0, file_settings_cur->data.size, file_data);
+        }
+
         if(error != MfDesfireErrorNone) break;
     }
 
@@ -307,6 +425,10 @@ MfDesfireError mf_desfire_poller_async_read_application(
 
         error = mf_desfire_poller_async_read_file_settings_multi(
             instance, data->file_ids, data->file_settings);
+        if(error != MfDesfireErrorNone) break;
+
+        error = mf_desfire_poller_async_read_file_data_multi(
+            instance, data->file_ids, data->file_settings, data->file_data);
         if(error != MfDesfireErrorNone) break;
 
     } while(false);
