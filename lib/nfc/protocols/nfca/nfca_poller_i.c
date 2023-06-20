@@ -430,6 +430,24 @@ static NfcCommand nfca_poller_run(NfcPollerEvent event, void* context) {
     return command;
 }
 
+static bool nfca_poller_detect(NfcPollerEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.data);
+    furi_assert(event.poller);
+
+    bool protocol_detected = false;
+    NfcaPoller* instance = context;
+    NfcEvent* nfc_event = event.data;
+    furi_assert(instance->state == NfcaPollerStateIdle);
+
+    if(nfc_event->type == NfcEventTypePollerReady) {
+        NfcaError error = nfca_poller_async_activate(instance, NULL);
+        protocol_detected = (error == NfcaErrorNone);
+    }
+
+    return protocol_detected;
+}
+
 static const NfcProtocolData* nfca_poller_get_data_new(const NfcPoller* nfca_poller) {
     furi_assert(nfca_poller);
 
@@ -444,5 +462,6 @@ const NfcPollerBase nfc_poller_iso14443_3a = {
     .free = nfca_poller_free_new,
     .set_callback = nfca_poller_set_callback,
     .run = nfca_poller_run,
+    .detect = nfca_poller_detect,
     .get_data = nfca_poller_get_data_new,
 };
