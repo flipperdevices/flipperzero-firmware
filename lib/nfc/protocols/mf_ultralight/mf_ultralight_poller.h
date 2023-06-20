@@ -72,6 +72,11 @@ MfUltralightError mf_ultralight_poller_read_page(
     uint16_t page,
     MfUltralightPage* data);
 
+MfUltralightError mf_ultralight_poller_read_page_new(
+    NfcPollerManager* poller_manager,
+    uint16_t page,
+    MfUltralightPage* data);
+
 MfUltralightError mf_ultralight_poller_write_page(
     MfUltralightPoller* instance,
     uint16_t page,

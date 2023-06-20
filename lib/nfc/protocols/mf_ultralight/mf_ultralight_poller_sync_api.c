@@ -52,6 +52,57 @@ MfUltralightError mf_ultralight_poller_read_page(
     return poller_context.error;
 }
 
+NfcCommand mf_ultralight_poller_read_page_new_callback(NfcPollerEvent event, void* context) {
+    furi_assert(event.poller);
+    furi_assert(event.protocol_type == NfcProtocolTypeMfUltralight);
+    furi_assert(event.data);
+    furi_assert(context);
+
+    MfUltralightPollerContext* poller_context = context;
+    NfcaPollerEvent* nfca_event = event.data;
+    MfUltralightPoller* mfu_poller = event.poller;
+
+    if(nfca_event->type == NfcaPollerEventTypeReady) {
+        poller_context->error = mf_ultralight_poller_async_read_page(
+            mfu_poller,
+            poller_context->data.read_cmd.start_page,
+            &poller_context->data.read_cmd.data);
+        nfca_poller_halt(mfu_poller->nfca_poller);
+    } else if(nfca_event->type == NfcaPollerEventTypeError) {
+        poller_context->error = mf_ultralight_process_error(nfca_event->data.error);
+    }
+    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
+
+    return NfcCommandStop;
+}
+
+MfUltralightError mf_ultralight_poller_read_page_new(
+    NfcPollerManager* poller_manager,
+    uint16_t page,
+    MfUltralightPage* data) {
+    furi_assert(poller_manager);
+    furi_assert(data);
+
+    MfUltralightPollerContext poller_context = {};
+    poller_context.data.read_cmd.start_page = page;
+    poller_context.thread_id = furi_thread_get_current_id();
+
+    nfc_poller_manager_start(
+        poller_manager,
+        NfcProtocolTypeMfUltralight,
+        mf_ultralight_poller_read_page_new_callback,
+        &poller_context);
+    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+
+    if(poller_context.error == MfUltralightErrorNone) {
+        *data = poller_context.data.read_cmd.data.page[0];
+    }
+
+    nfc_poller_manager_stop(poller_manager);
+
+    return poller_context.error;
+}
+
 static NfcaPollerCommand mf_ultraight_write_page_callback(NfcaPollerEvent event, void* context) {
     furi_assert(context);
 

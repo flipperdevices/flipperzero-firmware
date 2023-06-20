@@ -3,6 +3,8 @@
 #include "nfca.h"
 #include <lib/nfc/nfc.h>
 
+#include <nfc/nfc_poller_manager.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,6 +45,8 @@ NfcaError nfca_poller_stop(NfcaPoller* instance);
 
 // Sync call
 NfcaError nfca_poller_read(NfcaPoller* instance, NfcaData* nfca_data);
+
+NfcaError nfca_poller_read_new(NfcPollerManager* poller_manager, NfcaData* nfca_data);
 
 #ifdef __cplusplus
 }

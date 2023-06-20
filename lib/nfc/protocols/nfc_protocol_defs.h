@@ -15,6 +15,8 @@ typedef enum {
     /* Add new protocols here */
 
     NfcProtocolTypeMax,
+
+    NfcProtocolTypeInvalid,
 } NfcProtocolType;
 
 extern const NfcProtocolBase* nfc_protocols[];

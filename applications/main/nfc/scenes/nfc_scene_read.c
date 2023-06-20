@@ -8,25 +8,25 @@ enum {
     NfcSceneReadEventMfDesfireDetected,
 };
 
-NfcPollerCommand nfc_scene_read_worker_callback(NfcPollerEvent event, void* context) {
+NfcPollerOldCommand nfc_scene_read_worker_callback(NfcPollerOldEvent event, void* context) {
     NfcApp* nfc = context;
 
-    NfcPollerCommand command = NfcPollerCommandContinue;
+    NfcPollerOldCommand command = NfcPollerOldCommandContinue;
 
-    if(event == NfcPollerEventNfcaDetected) {
+    if(event == NfcPollerOldEventNfcaDetected) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcSceneReadEventNfcaDetected);
-        command = NfcPollerCommandStop;
-    } else if(event == NfcPollerEventNfcbDetected) {
+        command = NfcPollerOldCommandStop;
+    } else if(event == NfcPollerOldEventNfcbDetected) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcSceneReadEventNfcbDetected);
-        command = NfcPollerCommandStop;
-    } else if(event == NfcPollerEventMfUltralightDetected) {
+        command = NfcPollerOldCommandStop;
+    } else if(event == NfcPollerOldEventMfUltralightDetected) {
         view_dispatcher_send_custom_event(
             nfc->view_dispatcher, NfcSceneReadEventMfUltralightDetected);
-        command = NfcPollerCommandStop;
-    } else if(event == NfcPollerEventMfDesfireDetected) {
+        command = NfcPollerOldCommandStop;
+    } else if(event == NfcPollerOldEventMfDesfireDetected) {
         view_dispatcher_send_custom_event(
             nfc->view_dispatcher, NfcSceneReadEventMfDesfireDetected);
-        command = NfcPollerCommandStop;
+        command = NfcPollerOldCommandStop;
     }
 
     return command;

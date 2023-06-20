@@ -4,7 +4,14 @@
 #include <lib/nfc/protocols/nfca/nfca_poller_i.h>
 #include <lib/nfc/helpers/nfc_util.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MF_ULTRALIGHT_POLLER_STANDART_FWT_FC (60000)
+#define MF_ULTRALIGHT_MAX_BUFF_SIZE (64)
+
+#define MF_ULTRALIGHT_DEFAULT_PASSWORD (0xffffffffUL)
 
 #define MF_ULTRALIGHT_IS_NTAG_I2C(type)                                                \
     (((type) == MfUltralightTypeNTAGI2C1K) || ((type) == MfUltralightTypeNTAGI2C2K) || \
@@ -81,6 +88,11 @@ struct MfUltralightPoller {
     uint8_t tearing_flag_total;
     MfUltralightError error;
     void* context;
+
+    NfcPollerEvent* event;
+    MfUltralightPollerEvent* mfu_event;
+    NfcPollerCallback callback_new;
+    void* context_new;
 };
 
 MfUltralightError mf_ultralight_process_error(NfcaError error);
@@ -130,9 +142,7 @@ MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
     uint8_t tearing_falg_num,
     MfUltralightTearingFlag* data);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+extern const NfcPollerBase mf_ultralight_poller;
 
 #ifdef __cplusplus
 }

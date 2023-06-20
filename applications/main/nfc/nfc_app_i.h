@@ -48,6 +48,9 @@
 #include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 #include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 
+#include <nfc/nfc_poller_manager.h>
+#include <nfc/nfc_poller_defs.h>
+
 #include <lib/nfc/nfc_dev.h>
 #include <lib/nfc/helpers/nfc_data_generator.h>
 
@@ -111,7 +114,9 @@ struct NfcApp {
     MfDesfirePoller* mf_desfire_poller;
     MfClassicPoller* mf_classic_poller;
     NfcbPoller* nfcb_poller;
-    NfcPoller* nfc_poller;
+    NfcPollerOld* nfc_poller;
+
+    NfcPollerManager* poller_manager;
 
     MfUltralightAuth* mf_ul_auth;
     NfcMfClassicDictAttackContext mf_dict_context;
