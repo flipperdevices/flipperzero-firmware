@@ -36,6 +36,7 @@ extern "C" {
 #define BG_MULTI 6
 #define BG_SCROLL 7
 #define BG_SLUT 8
+#define BG_CIRCUIT 9
 
 #define PROFILE_IMG_COUNT 30
 

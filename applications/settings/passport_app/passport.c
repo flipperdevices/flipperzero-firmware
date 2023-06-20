@@ -195,6 +195,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case BG_SLUT:
             canvas_draw_icon(canvas, 0, 0, &I_passport_SlutPass);
             break;
+		case BG_CIRCUIT:
+            canvas_draw_icon(canvas, 0, 0, &I_passport_Circuit_v1);
+            break;
         }
 
         // draw portrait
