@@ -66,37 +66,38 @@ static void flipp_pomodoro_view_timer_draw_countdown(Canvas *canvas, TimeDiffere
 };
 
 static void draw_str_with_drop_shadow(
-    Canvas *canvas,  uint8_t x,
+    Canvas *canvas, uint8_t x,
     uint8_t y,
     Align horizontal,
     Align vertical,
-    const char* str
-    ) {
-        canvas_set_color(canvas, ColorWhite);
-        for (int x_off = -2; x_off <= 2; x_off++)
+    const char *str)
+{
+    canvas_set_color(canvas, ColorWhite);
+    for (int x_off = -2; x_off <= 2; x_off++)
+    {
+        for (int y_off = -2; y_off <= 2; y_off++)
         {
-            for (int y_off = -2; y_off <= 2; y_off++)
-            {
-               canvas_draw_str_aligned(
+            canvas_draw_str_aligned(
                 canvas,
                 x + x_off,
                 y + y_off,
                 horizontal,
                 vertical,
                 str);
-            }
         }
-        canvas_set_color(canvas, ColorBlack);
-        canvas_draw_str_aligned(
-            canvas,
-            x,
-            y,
-            horizontal,
-            vertical,
-            str);
     }
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_str_aligned(
+        canvas,
+        x,
+        y,
+        horizontal,
+        vertical,
+        str);
+}
 
-static void flipp_pomodoro_view_timer_draw_current_stage_label(Canvas *canvas, FlippPomodoroState *state) {
+static void flipp_pomodoro_view_timer_draw_current_stage_label(Canvas *canvas, FlippPomodoroState *state)
+{
     canvas_set_font(canvas, FontPrimary);
     draw_str_with_drop_shadow(
         canvas,
@@ -184,7 +185,7 @@ FlippPomodoroTimerView *flipp_pomodoro_view_timer_alloc()
     FlippPomodoroTimerView *timer = malloc(sizeof(FlippPomodoroTimerView));
     timer->view = view_alloc();
 
-    view_allocate_model(timer->view, ViewModelTypeLockFree, sizeof(FlippPomodoroTimerViewModel));
+    view_allocate_model(flipp_pomodoro_view_timer_get_view(timer), ViewModelTypeLockFree, sizeof(FlippPomodoroTimerViewModel));
     view_set_context(flipp_pomodoro_view_timer_get_view(timer), timer);
     view_set_draw_callback(timer->view, flipp_pomodoro_view_timer_draw_callback);
     view_set_input_callback(timer->view, flipp_pomodoro_view_timer_input_callback);

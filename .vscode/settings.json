@@ -120,6 +120,10 @@
         "log.h": "c",
         "mutex.h": "c",
         "m-array.h": "c",
-        "cwctype": "c"
-    }
+        "cwctype": "c",
+        "dolphin_deed.h": "c",
+        "flipp_pomodoro_info_view.h": "c",
+        "scene_manager.h": "c"
+    },
+    "chatgpt-helper.model": "gpt-4"
 }

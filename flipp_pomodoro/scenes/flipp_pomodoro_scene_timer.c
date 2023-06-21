@@ -1,6 +1,8 @@
 #include <furi.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
+#include <gui/scene_manager.h>
+#include "flipp_pomodoro_scene.h"
 #include "../flipp_pomodoro_app.h"
 #include "../views/flipp_pomodoro_timer_view.h"
 
@@ -9,8 +11,6 @@ enum
     SceneEventConusmed = true,
     SceneEventNotConusmed = false
 };
-
-uint8_t ExitSignal = 0;
 
 void flipp_pomodoro_scene_timer_sync_view_state(void *ctx)
 {
@@ -39,6 +39,12 @@ void flipp_pomodoro_scene_timer_on_enter(void *ctx)
     furi_assert(ctx);
 
     FlippPomodoroApp *app = ctx;
+
+    if (flipp_pomodoro__is_stage_expired(app->state))
+    {
+        flipp_pomodoro__destroy(app->state);
+        app->state = flipp_pomodoro__new();
+    }
 
     view_dispatcher_switch_to_view(app->view_dispatcher, FlippPomodoroAppViewTimer);
     flipp_pomodoro_scene_timer_sync_view_state(app);
@@ -76,7 +82,8 @@ bool flipp_pomodoro_scene_timer_on_event(void *ctx, SceneManagerEvent event)
             event.event);
         return SceneEventConusmed;
     case SceneManagerEventTypeBack:
-        return ExitSignal;
+        scene_manager_next_scene(app->scene_manager, FlippPomodoroSceneInfo);
+        return SceneEventConusmed;
     default:
         break;
     };

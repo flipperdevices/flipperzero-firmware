@@ -1,6 +1,6 @@
 #pragma once
 
-#define FURI_DEBUG 1
+// #define FURI_DEBUG 1
 
 /**
  * Index of dependencies for the main app

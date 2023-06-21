@@ -1,3 +1,4 @@
+#pragma once
 #include <gui/scene_manager.h>
 
 // Generate scene id and total number
