@@ -15,7 +15,7 @@ void nfc_mf_desfire_format_key_version(
     uint32_t index,
     FuriString* str);
 
-void nfc_mf_desfire_format_application_id(const MfDesfireApplicationId data, FuriString* str);
+void nfc_mf_desfire_format_application_id(const MfDesfireApplicationId* data, FuriString* str);
 
 void nfc_mf_desfire_format_application(const MfDesfireApplication* data, FuriString* str);
 

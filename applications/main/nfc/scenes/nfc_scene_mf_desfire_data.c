@@ -38,9 +38,8 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
     FuriString* label = furi_string_alloc();
 
     for(uint32_t i = 0; i < simple_array_get_count(data->application_ids); ++i) {
-        // TODO: Make it more type safe
-        const uint8_t* app_id = simple_array_cget(data->application_ids, i);
-        furi_string_printf(label, "App %02x%02x%02x", app_id[0], app_id[1], app_id[2]);
+        const MfDesfireApplicationId* app_id = simple_array_cget(data->application_ids, i);
+        furi_string_printf(label, "App %02x%02x%02x", app_id->data[0], app_id->data[1], app_id->data[2]);
         submenu_add_item(
             submenu,
             furi_string_get_cstr(label),

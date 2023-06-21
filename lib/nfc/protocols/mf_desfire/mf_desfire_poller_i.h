@@ -75,7 +75,7 @@ MfDesfireError
 
 MfDesfireError mf_desfire_poller_async_select_application(
     MfDesfirePoller* instance,
-    const MfDesfireApplicationId id);
+    const MfDesfireApplicationId* id);
 
 MfDesfireError mf_desfire_poller_async_read_file_ids(MfDesfirePoller* instance, SimpleArray* data);
 
