@@ -31,14 +31,14 @@ MfDesfireError mf_desfire_send_chunks(
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
 
-    MfDesfireError ret = MfDesfireErrorNone;
+    MfDesfireError error = MfDesfireErrorNone;
 
     do {
-        Iso14443_4aError error = iso14443_4a_poller_send_block(
+        Iso14443_4aError iso14443_4a_error = iso14443_4a_poller_send_block(
             instance->iso14443_4a_poller, tx_buffer, instance->rx_buffer, fwt);
 
-        if(error != Iso14443_4aErrorNone) {
-            ret = mf_desfire_process_error(error);
+        if(iso14443_4a_error != Iso14443_4aErrorNone) {
+            error = mf_desfire_process_error(iso14443_4a_error);
             break;
         }
 
@@ -52,11 +52,11 @@ MfDesfireError mf_desfire_send_chunks(
         }
 
         while(bit_buffer_starts_with_byte(instance->rx_buffer, MF_DESFIRE_FLAG_HAS_NEXT)) {
-            Iso14443_4aError error = iso14443_4a_poller_send_block(
+            Iso14443_4aError iso14443_4a_error = iso14443_4a_poller_send_block(
                 instance->iso14443_4a_poller, instance->tx_buffer, instance->rx_buffer, fwt);
 
-            if(error != Iso14443_4aErrorNone) {
-                ret = mf_desfire_process_error(error);
+            if(iso14443_4a_error != Iso14443_4aErrorNone) {
+                error = mf_desfire_process_error(iso14443_4a_error);
                 break;
             }
 
@@ -64,7 +64,7 @@ MfDesfireError mf_desfire_send_chunks(
         }
     } while(false);
 
-    return ret;
+    return error;
 }
 
 MfDesfireError
@@ -82,6 +82,8 @@ MfDesfireError
 
     if(error == MfDesfireErrorNone) {
         mf_desfire_version_parse(data, instance->result_buffer);
+    } else {
+        FURI_LOG_D(TAG, "Read version error: %d", error);
     }
 
     return error;

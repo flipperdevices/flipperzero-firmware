@@ -2,11 +2,10 @@
 
 #include <furi.h>
 
+#include "iso14443_4a_i.h"
+
 #define TAG "Iso14443_4aPoller"
 
-#define BITS_IN_BYTE (8)
-
-#define ISO14443_4A_ATS_BIT (1 << 5)
 #define ISO14443_4A_PCB_I (0x02)
 
 Iso14443_4aError iso14443_4a_poller_process_error(NfcaError error) {
@@ -30,53 +29,42 @@ Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance) {
     furi_assert(instance);
 
     nfca_poller_halt(instance->iso14443_3a_poller);
-    instance->state = Iso14443_4aPollerStateIdle;
+    instance->poller_state = Iso14443_4aPollerStateIdle;
 
     return Iso14443_4aErrorNone;
 }
 
-Iso14443_4aError iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance) {
+Iso14443_4aError
+    iso14443_4a_poller_async_read_ats(Iso14443_4aPoller* instance, Iso14443_4aAtsData* data) {
     furi_assert(instance);
 
-    Iso14443_4aError ret = Iso14443_4aErrorProtocol;
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_append_byte(instance->tx_buffer, ISO14443_4A_CMD_READ_ATS);
+    bit_buffer_append_byte(instance->tx_buffer, 0x80);
+
+    Iso14443_4aError error = Iso14443_4aErrorNone;
 
     do {
-        // Check whether ATS is available
-        NfcaData* iso14443_3a_data = instance->data->iso14443_3a_data;
-        if(!(iso14443_3a_data->sak & ISO14443_4A_ATS_BIT)) {
-            FURI_LOG_E(TAG, "Ats not supported: not an ISO14443-4 card");
-            break;
-        }
-
-        // Send RATS & receive ATS
-        instance->protocol_data.ats_request.cmd = 0xe0;
-        instance->protocol_data.ats_request.param = 0x80;
-
-        bit_buffer_copy_bytes(
-            instance->tx_buffer,
-            (uint8_t*)&instance->protocol_data.ats_request,
-            sizeof(instance->protocol_data.ats_request));
-
-        NfcaError error = nfca_poller_send_standart_frame(
+        const NfcaError iso14443_3a_error = nfca_poller_send_standart_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             ISO14443_4A_POLLER_ATS_FWT_FC);
-        if(error != NfcaErrorNone) {
-            FURI_LOG_E(TAG, "Ats request failed: %d", error);
+
+        if(iso14443_3a_error != NfcaErrorNone) {
+            FURI_LOG_E(TAG, "ATS request failed");
+            error = iso14443_4a_poller_process_error(iso14443_3a_error);
             break;
-        }
-        if(bit_buffer_get_size_bytes(instance->rx_buffer) !=
-           sizeof(instance->protocol_data.ats_response)) {
-            FURI_LOG_E(TAG, "Ats response wrong length");
-            ret = Iso14443_4aErrorProtocol;
+
+        } else if(!iso14443_4a_ats_parse(data, instance->rx_buffer)) {
+            FURI_LOG_E(TAG, "Failed to parse ATS response");
+            error = Iso14443_4aErrorProtocol;
             break;
         }
 
-        ret = Iso14443_4aErrorNone;
     } while(false);
 
-    return ret;
+    return error;
 }
 
 Iso14443_4aError iso14443_4a_poller_send_block(
@@ -85,56 +73,31 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     BitBuffer* rx_buffer,
     uint32_t fwt) {
     furi_assert(instance);
-    furi_assert(tx_buffer);
-    furi_assert(rx_buffer);
 
-    const uint8_t pcb = ISO14443_4A_PCB_I | instance->protocol_data.block_number;
-    instance->protocol_data.block_number ^= 1;
+    const uint8_t pcb = ISO14443_4A_PCB_I | instance->protocol_state.block_number;
+    instance->protocol_state.block_number ^= 1;
 
-    bit_buffer_copy_bytes(instance->tx_buffer, &pcb, sizeof(pcb));
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_append_byte(instance->tx_buffer, pcb);
     bit_buffer_append(instance->tx_buffer, tx_buffer);
 
-    Iso14443_4aError ret = Iso14443_4aErrorNone;
+    Iso14443_4aError error = Iso14443_4aErrorNone;
 
     do {
-        NfcaError error = nfca_poller_send_standart_frame(
+        NfcaError iso14443_3a_error = nfca_poller_send_standart_frame(
             instance->iso14443_3a_poller, instance->tx_buffer, instance->rx_buffer, fwt);
 
-        if(error != NfcaErrorNone) {
-            FURI_LOG_E(TAG, "Iso14443-3 error: %d", error);
-            ret = iso14443_4a_poller_process_error(error);
+        if(iso14443_3a_error != NfcaErrorNone) {
+            error = iso14443_4a_poller_process_error(iso14443_3a_error);
             break;
-        }
 
-        if(!bit_buffer_starts_with_byte(instance->rx_buffer, pcb)) {
-            ret = Iso14443_4aErrorProtocol;
+        } else if(!bit_buffer_starts_with_byte(instance->rx_buffer, pcb)) {
+            error = Iso14443_4aErrorProtocol;
             break;
         }
 
         bit_buffer_copy_right(rx_buffer, instance->rx_buffer, sizeof(pcb));
-        ret = Iso14443_4aErrorNone;
     } while(false);
 
-    return ret;
+    return error;
 }
-
-NfcPoller* iso14443_4a_poller_alloc_new(NfcPoller* iso14443_3a_poller) {
-    furi_assert(iso14443_3a_poller);
-
-    Iso14443_4aPoller* instance = malloc(sizeof(Iso14443_4aPoller));
-    instance->iso14443_3a_poller = iso14443_3a_poller;
-
-    return instance;
-}
-
-void iso14443_4a_poller_free_new(NfcPoller* iso14443_4a_poller) {
-    furi_assert(iso14443_4a_poller);
-
-    Iso14443_4aPoller* instance = iso14443_4a_poller;
-    free(instance);
-}
-
-const NfcPollerBase nfc_poller_iso14443_4a = {
-    .alloc = iso14443_4a_poller_alloc_new,
-    .free = iso14443_4a_poller_free_new,
-};

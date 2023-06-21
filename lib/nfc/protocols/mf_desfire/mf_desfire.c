@@ -110,10 +110,3 @@ const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len) {
 
     return iso14443_4a_get_uid(data->iso14443_4a_data, uid_len);
 }
-
-bool mf_desfire_detect_protocol(NfcaData* nfca_data) {
-    furi_assert(nfca_data);
-
-    bool mfu_detected = false;
-    return mfu_detected;
-}
