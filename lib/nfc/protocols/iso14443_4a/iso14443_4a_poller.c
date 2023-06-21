@@ -126,6 +126,8 @@ static bool iso14443_4a_poller_detect(NfcPollerEvent event, void* context) {
 
     const NfcaPollerEvent* iso14443_3a_event = event.data;
     furi_assert(iso14443_3a_event);
+    nfca_copy(
+        instance->data->iso14443_3a_data, nfca_poller_get_data(instance->iso14443_3a_poller));
 
     bool protocol_detected = false;
 
