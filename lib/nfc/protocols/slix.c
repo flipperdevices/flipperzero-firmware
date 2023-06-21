@@ -9,7 +9,7 @@
 
 #define TAG "SLIX"
 
-ReturnCode slix2_dump_nxp_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
+ReturnCode slix2_read_nxp_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     furi_assert(nfc_data);
     furi_assert(nfcv_data);
 
@@ -64,7 +64,7 @@ ReturnCode slix2_dump_nxp_sysinfo(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_da
     return ERR_NONE;
 }
 
-ReturnCode slix2_dump_signature(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
+ReturnCode slix2_read_signature(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     furi_assert(nfc_data);
     furi_assert(nfcv_data);
 
@@ -111,14 +111,14 @@ ReturnCode slix2_dump_signature(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data
     return ERR_NONE;
 }
 
-ReturnCode slix2_dump_custom(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
+ReturnCode slix2_read_custom(FuriHalNfcDevData* nfc_data, NfcVData* nfcv_data) {
     ReturnCode ret = ERR_NONE;
 
-    ret = slix2_dump_nxp_sysinfo(nfc_data, nfcv_data);
+    ret = slix2_read_nxp_sysinfo(nfc_data, nfcv_data);
     if(ret != ERR_NONE) {
         return ret;
     }
-    ret = slix2_dump_signature(nfc_data, nfcv_data);
+    ret = slix2_read_signature(nfc_data, nfcv_data);
 
     return ret;
 }
