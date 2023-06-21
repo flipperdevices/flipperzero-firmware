@@ -49,6 +49,7 @@
 #include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 
 #include <nfc/nfc_poller_manager.h>
+#include <nfc/nfc_scanner.h>
 #include <nfc/nfc_poller_defs.h>
 
 #include <lib/nfc/nfc_dev.h>
@@ -90,6 +91,9 @@ struct NfcApp {
     FuriString* text_box_store;
     uint8_t byte_input_store[6];
 
+    size_t protocols_detected_num;
+    NfcProtocolType protocols_detected[NfcProtocolTypeMax];
+
     void* rpc_ctx;
     NfcRpcState rpc_state;
 
@@ -117,6 +121,7 @@ struct NfcApp {
     NfcPollerOld* nfc_poller;
 
     NfcPollerManager* poller_manager;
+    NfcScanner* scanner;
 
     MfUltralightAuth* mf_ul_auth;
     NfcMfClassicDictAttackContext mf_dict_context;

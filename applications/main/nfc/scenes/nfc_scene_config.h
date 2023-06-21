@@ -6,6 +6,7 @@ ADD_SCENE(nfc, save_success, SaveSuccess)
 ADD_SCENE(nfc, delete, Delete)
 ADD_SCENE(nfc, delete_success, DeleteSuccess)
 
+ADD_SCENE(nfc, detect, Detect)
 ADD_SCENE(nfc, read, Read)
 ADD_SCENE(nfc, info, Info)
 ADD_SCENE(nfc, read_card_type, ReadCardType)
