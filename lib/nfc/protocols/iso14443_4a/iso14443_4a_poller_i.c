@@ -113,8 +113,3 @@ Iso14443_4aError iso14443_4a_poller_send_block(
 
     return ret;
 }
-
-const NfcPollerBase nfc_poller_iso14443_4a = {
-    .alloc = (NfcPollerAlloc)iso14443_4a_poller_alloc,
-    .free = (NfcPollerFree)iso14443_4a_poller_free,
-};

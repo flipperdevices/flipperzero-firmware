@@ -34,13 +34,15 @@ struct MfDesfirePoller {
     Iso14443_4aPoller* iso14443_4a_poller;
     MfDesfirePollerSessionState session_state;
     MfDesfirePollerState state;
+    MfDesfireError error;
+    MfDesfireData* data;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
     BitBuffer* input_buffer;
     BitBuffer* result_buffer;
-    MfDesfireData* data;
-    MfDesfirePollerCallback callback;
-    MfDesfireError error;
+    NfcPollerEvent general_event;
+    MfDesfirePollerEvent mf_desfire_event;
+    NfcPollerCallback callback;
     void* context;
 };
 
@@ -118,6 +120,8 @@ MfDesfireError mf_desfire_poller_async_read_applications(
     MfDesfirePoller* instance,
     const SimpleArray* app_ids,
     SimpleArray* data);
+
+extern const NfcPollerBase mf_desfire_poller;
 
 #ifdef __cplusplus
 }

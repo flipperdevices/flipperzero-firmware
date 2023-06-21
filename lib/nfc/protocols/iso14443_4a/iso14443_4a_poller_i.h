@@ -35,12 +35,14 @@ struct Iso14443_4aPoller {
     NfcaPoller* iso14443_3a_poller;
     Iso14443_4aPollerState state;
     Iso14443_4aPollerSessionState session_state;
+    Iso14443_4aPollerProtocolData protocol_data;
+    Iso14443_4aError error;
+    Iso14443_4aData* data;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
-    Iso14443_4aData* data;
-    Iso14443_4aPollerProtocolData protocol_data;
-    Iso14443_4aPollerCallback callback;
-    Iso14443_4aError error;
+    NfcPollerEvent general_event;
+    Iso14443_4aPollerEvent iso14443_4a_event;
+    NfcPollerCallback callback;
     void* context;
 };
 
