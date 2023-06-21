@@ -33,7 +33,7 @@ typedef struct WifiMapModel WifiMapModel;
 
 struct WifiMapModel {
         FuriString* line;
-        bool lnrdy;
+        int lnrdy;
 };
 
 typedef enum {
@@ -80,12 +80,15 @@ static void retrieve_ap_ssid_distance(const char *data, char *apssid, char *dst)
 {
         for (size_t i = 0; i < 8; i++) {
                 apssid[i] = data[i];
+                FURI_LOG_D(TAG, "apssid %c", apssid[i]);
         }
-        for (size_t i = 8; i < strlen(data); i++) {
-               if (data[i] != ';')
+        for (size_t i = 9; i < strlen(data); i++) {
+               if (data[i] != ';') {
                        dst[i] = data[i];
-               else
-                       break;
+                    FURI_LOG_D(TAG, "dst %c", dst[i]);
+                } else {
+                    break;
+                }
         }
 }
 
@@ -94,19 +97,27 @@ static void uart_echo_view_draw_callback(Canvas* canvas, void* _model)
         WifiMapModel* model = _model;
 
         // Prepare canvas
-        canvas_clear(canvas);
-        canvas_set_color(canvas, ColorBlack);
-        canvas_set_font(canvas, FontKeyboard);
+        // canvas_clear(canvas);
+        // canvas_set_color(canvas, ColorBlack);
+        // canvas_set_font(canvas, FontKeyboard);
+        canvas_draw_dot(canvas, 50, 50);
 
-        const char *line = furi_string_get_cstr(model->line);
-        char apssid[8], dst[6];
-        retrieve_ap_ssid_distance(line, apssid, dst);
+
         if (model->lnrdy) {
+            const char *line = furi_string_get_cstr(model->line);
+            char apssid[8], dst[6];
+            retrieve_ap_ssid_distance(line, apssid, dst);
             canvas_draw_str(canvas, 10, 10, line);
+            canvas_draw_str(canvas, 10, 20, apssid);
+            canvas_draw_str(canvas, 10, 30, dst);
+            canvas_draw_str(canvas, 10, 40, line);
+            canvas_draw_str(canvas, 10, 50, line);
             FURI_LOG_D(TAG, "tha line: %s", line);
+            FURI_LOG_D(TAG, "tha ssid: %s", apssid);
+            FURI_LOG_D(TAG, "tha dst: %s", dst);
             canvas_draw_dot(canvas, 20, 20);
             canvas_draw_dot(canvas, 30, 30);
-            model->lnrdy = false;
+            model->lnrdy = 0;
             furi_string_reset(model->line);
         }
 }
@@ -134,11 +145,15 @@ static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 
 static void uart_push_to_list(WifiMapModel* model, const char data , WiFiMapApp* app) {
         write_to_file((char) data,  app->file);
-        furi_string_push_back(model->line, data);
-        FURI_LOG_D(TAG,"that line was: %s", furi_string_get_cstr(model->line));
+        if (!model->lnrdy) {
+            furi_string_push_back(model->line, data);
+
+        } 
+        // FURI_LOG_D(TAG,"that line was: %s", furi_string_get_cstr(model->line));
         if (data == '\n') {
-            FURI_LOG_D(TAG, "R E S E T /e");
-            model->lnrdy = true;
+            // FURI_LOG_D(TAG, "R E S E T /e");
+            model->lnrdy = 1;
+            // furi_string_reset(model->line);
         } 
 }
 
@@ -204,13 +219,8 @@ static WiFiMapApp* wifi_map_app_alloc() {
         app->view,
         WifiMapModel* model,
         {
-            // for (size_t i = 0; i < LINES_ON_SCREEN; i++) {
-                // model->line = 0;
-                // model->escape = false;
-                // model->list[i] = malloc(sizeof(ListElement));
                 model->line = furi_string_alloc();
-                model->lnrdy = false;
-            // }
+                model->lnrdy = 0;
         },
         true);
 
@@ -222,7 +232,7 @@ static WiFiMapApp* wifi_map_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener
-    furi_hal_console_disable();
+    // furi_hal_console_disable();
     furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_echo_on_irq_cb, app);
 
