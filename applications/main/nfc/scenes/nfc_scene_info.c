@@ -26,7 +26,7 @@ void nfc_scene_info_on_enter(void* context) {
     FuriString* temp_str;
     temp_str = furi_string_alloc();
 
-    nfc_protocol_format_render_info(nfc->nfc_dev, temp_str);
+    nfc_protocol_format_info(nfc->nfc_dev, NfcProtocolFormatTypeFull, temp_str);
 
     widget_add_text_scroll_element(
         widget, 0, 0, 128, text_scroll_height, furi_string_get_cstr(temp_str));
