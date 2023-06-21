@@ -262,6 +262,7 @@ void deinit_tracker(FlizzerTrackerApp* tracker) {
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SETTINGS);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_FILE_OVERWRITE);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SUBMENU_INSTRUMENT);
+    view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_INSTRUMENT_FILE_OVERWRITE);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SUBMENU_PATTERN_COPYPASTE);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_SUBMENU_PATTERN);
     view_dispatcher_remove_view(tracker->view_dispatcher, VIEW_KEYBOARD);
