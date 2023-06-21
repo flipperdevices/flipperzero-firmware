@@ -805,8 +805,9 @@ static bool mf_ultralight_poller_detect(NfcPollerEvent event, void* context) {
     NfcaPollerEvent* nfca_event = event.data;
 
     if(nfca_event->type == NfcaPollerEventTypeReady) {
-        MfUltralightPage page = {};
-        MfUltralightError error = mf_ultralight_poller_read_page(instance, 0, &page);
+        MfUltralightPageReadCommandData read_page_cmd_data = {};
+        MfUltralightError error =
+            mf_ultralight_poller_async_read_page(instance, 0, &read_page_cmd_data);
         protocol_detected = (error == MfUltralightErrorNone);
     }
 

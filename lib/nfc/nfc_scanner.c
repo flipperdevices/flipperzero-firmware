@@ -4,9 +4,14 @@
 
 #include <furi/furi.h>
 
+#define TAG "NfcScanner"
+
+#define NFC_SCANNER_POLLER_MANAGER_COMPLETE_EVENT (1UL << 0)
+
 typedef enum {
     NfcScannerStateIdle,
     NfcScannerStateTryBasePollers,
+    NfcScannerStateFindChildrenProtocols,
     NfcScannerStateDetectChildrenProtocols,
     NfcScannerStateComplete,
 
@@ -31,8 +36,12 @@ struct NfcScanner {
     NfcEvent nfc_event;
 
     size_t base_protocols_num;
-    size_t base_protocol_idx;
+    size_t base_protocols_idx;
     NfcProtocolType base_protocols[NfcProtocolTypeMax];
+
+    size_t children_protocols_num;
+    size_t children_protocols_idx;
+    NfcProtocolType children_protocols[NfcProtocolTypeMax];
 
     size_t detected_protocols_num;
     NfcProtocolType detected_protocols[NfcProtocolTypeMax];
@@ -44,20 +53,30 @@ struct NfcScanner {
 };
 
 static void nfc_scanner_reset(NfcScanner* instance) {
+    instance->base_protocols_idx = 0;
     instance->base_protocols_num = 0;
+
+    instance->children_protocols_idx = 0;
+    instance->children_protocols_num = 0;
+
     instance->detected_protocols_num = 0;
+
+    instance->current_protocol = 0;
 }
 
 typedef void (*NfcScannerStateHandler)(NfcScanner* instance);
 
 void nfc_scanner_state_handler_idle(NfcScanner* instance) {
     for(size_t i = 0; i < NfcProtocolTypeMax; i++) {
-        if(nfc_poller_nodes->parent_protocol == NfcProtocolTypeInvalid) {
+        if(nfc_poller_nodes[i].parent_protocol == NfcProtocolTypeInvalid) {
             instance->base_protocols[instance->base_protocols_num] = i;
             instance->base_protocols_num++;
         }
     }
-    instance->base_protocol_idx = 0;
+    instance->base_protocols_idx = 0;
+    FURI_LOG_D(TAG, "Found %d base protocols", instance->base_protocols_num);
+
+    instance->state = NfcScannerStateTryBasePollers;
 }
 
 static NfcCommand nfc_scanner_base_poller_detect_callback(NfcEvent event, void* context) {
@@ -93,24 +112,110 @@ static NfcCommand nfc_scanner_base_poller_detect_callback(NfcEvent event, void* 
 }
 
 void nfc_scanner_state_handler_try_base_pollers(NfcScanner* instance) {
-    instance->current_protocol = instance->base_protocols[instance->base_protocol_idx];
+    instance->current_protocol = instance->base_protocols[instance->base_protocols_idx];
 
     nfc_start_poller(instance->nfc, nfc_scanner_base_poller_detect_callback, instance);
     nfc_stop(instance->nfc);
 
     if(instance->detected_protocols_num > 0) {
-        instance->state = NfcScannerStateDetectChildrenProtocols;
+        instance->state = NfcScannerStateFindChildrenProtocols;
     } else {
-        instance->base_protocol_idx =
-            (instance->base_protocol_idx + 1) % instance->base_protocols_num;
+        instance->base_protocols_idx =
+            (instance->base_protocols_idx + 1) % instance->base_protocols_num;
     }
 }
 
+static bool nfc_scanner_check_parent_protocol(NfcProtocolType child, NfcProtocolType parent) {
+    bool parent_found = false;
+
+    const NfcPollerTreeNode* iter = &nfc_poller_nodes[child];
+    while(iter->parent_protocol != NfcProtocolTypeInvalid) {
+        if(iter->parent_protocol == parent) {
+            parent_found = true;
+            break;
+        }
+        iter = &nfc_poller_nodes[iter->parent_protocol];
+    }
+
+    return parent_found;
+}
+
+void nfc_scanner_state_handler_find_children_protocols(NfcScanner* instance) {
+    for(size_t i = 0; i < NfcProtocolTypeMax; i++) {
+        if(nfc_scanner_check_parent_protocol(i, instance->current_protocol)) {
+            instance->children_protocols[instance->children_protocols_num] = i;
+            instance->children_protocols_num++;
+        }
+    }
+
+    if(instance->children_protocols_num > 0) {
+        instance->state = NfcScannerStateDetectChildrenProtocols;
+    } else {
+        instance->state = NfcScannerStateComplete;
+    }
+    FURI_LOG_D(TAG, "Found %d children", instance->children_protocols_num);
+}
+
+static NfcCommand nfc_scanner_detect_child_protocol_callback(NfcPollerEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.poller);
+
+    bool protocol_detected = false;
+    NfcScanner* instance = context;
+    const NfcPollerBase* current_poller_api = nfc_pollers_api[instance->current_protocol];
+
+    // TODO change to assert after all api is implemented
+    if(current_poller_api->alloc) {
+        instance->current_poller = current_poller_api->alloc(event.poller);
+        if(current_poller_api->detect) {
+            protocol_detected = current_poller_api->detect(event, instance->current_poller);
+        }
+        current_poller_api->free(instance->current_poller);
+    }
+
+    if(protocol_detected) {
+        instance->detected_protocols[instance->detected_protocols_num] =
+            instance->current_protocol;
+        instance->detected_protocols_num++;
+    }
+
+    // Notify scan worker that detection is complete
+    FuriThreadId scan_worker_thread_id = furi_thread_get_id(instance->scan_worker);
+    furi_thread_flags_set(scan_worker_thread_id, NFC_SCANNER_POLLER_MANAGER_COMPLETE_EVENT);
+
+    return NfcCommandStop;
+}
+
 void nfc_scanner_state_handler_detect_children_protocols(NfcScanner* instance) {
-    instance->state = NfcScannerStateComplete;
+    furi_assert(instance->children_protocols_num);
+
+    instance->current_protocol = instance->children_protocols[instance->children_protocols_idx];
+    NfcProtocolType parent_protocol = nfc_poller_nodes[instance->current_protocol].parent_protocol;
+
+    nfc_poller_manager_start(
+        instance->poller_manager,
+        parent_protocol,
+        nfc_scanner_detect_child_protocol_callback,
+        instance);
+
+    // Wait until detection is complete
+    furi_thread_flags_wait(
+        NFC_SCANNER_POLLER_MANAGER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    furi_thread_flags_clear(NFC_SCANNER_POLLER_MANAGER_COMPLETE_EVENT);
+    nfc_poller_manager_stop(instance->poller_manager);
+
+    instance->children_protocols_idx++;
+    if(instance->children_protocols_idx == instance->children_protocols_num) {
+        instance->state = NfcScannerStateComplete;
+    }
 }
 
 void nfc_scanner_state_handler_complete(NfcScanner* instance) {
+    FURI_LOG_I(TAG, "Detected %d protocols", instance->detected_protocols_num);
+    for(size_t i = 0; i < instance->detected_protocols_num; i++) {
+        FURI_LOG_W(TAG, "%s", nfc_protocols[i]->get_name(NULL, NfcProtocolNameTypeShort));
+    }
+
     NfcScannerEvent event = {
         .type = NfcScannerEventTypeDetected,
         .data =
@@ -121,13 +226,13 @@ void nfc_scanner_state_handler_complete(NfcScanner* instance) {
     };
 
     instance->callback(event, instance->context);
-
-    instance->state = NfcScannerStateIdle;
+    furi_delay_ms(100);
 }
 
 static NfcScannerStateHandler nfc_scanner_state_handlers[NfcScannerStateNum] = {
     [NfcScannerStateIdle] = nfc_scanner_state_handler_idle,
     [NfcScannerStateTryBasePollers] = nfc_scanner_state_handler_try_base_pollers,
+    [NfcScannerStateFindChildrenProtocols] = nfc_scanner_state_handler_find_children_protocols,
     [NfcScannerStateDetectChildrenProtocols] = nfc_scanner_state_handler_detect_children_protocols,
     [NfcScannerStateComplete] = nfc_scanner_state_handler_complete,
 };
@@ -179,6 +284,8 @@ void nfc_scanner_start(NfcScanner* instance, NfcScannerCallback callback, void* 
     instance->callback = callback;
     instance->context = context;
     instance->session_state = NfcScannerSessionStateActive;
+
+    furi_thread_start(instance->scan_worker);
 }
 
 void nfc_scanner_stop(NfcScanner* instance) {
@@ -190,4 +297,5 @@ void nfc_scanner_stop(NfcScanner* instance) {
 
     instance->callback = NULL;
     instance->context = NULL;
+    instance->state = NfcScannerStateIdle;
 }
