@@ -1,4 +1,4 @@
-#include "iso14443_4a.h"
+#include "iso14443_4a_i.h"
 
 #include <furi.h>
 
@@ -42,6 +42,7 @@ void iso14443_4a_copy(Iso14443_4aData* data, const Iso14443_4aData* other) {
     furi_assert(other);
 
     nfca_copy(data->iso14443_3a_data, other->iso14443_3a_data);
+    data->ats_data = other->ats_data;
 }
 
 bool iso14443_4a_verify(Iso14443_4aData* data, const FuriString* device_type) {

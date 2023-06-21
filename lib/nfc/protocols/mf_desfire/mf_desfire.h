@@ -169,9 +169,6 @@ const char* mf_desfire_get_name(const MfDesfireData* data, NfcProtocolNameType n
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len);
 
-// Deprecated ?
-bool mf_desfire_detect_protocol(NfcaData* nfca_data);
-
 #ifdef __cplusplus
 }
 #endif

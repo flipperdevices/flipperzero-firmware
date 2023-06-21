@@ -23,6 +23,12 @@ static MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_p
     instance->input_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
     instance->result_buffer = bit_buffer_alloc(MF_DESFIRE_BUF_SIZE_MAX);
 
+    instance->mf_desfire_event.data = &instance->mf_desfire_event_data;
+
+    instance->general_event.protocol_type = NfcProtocolTypeMfDesfire;
+    instance->general_event.data = &instance->mf_desfire_event;
+    instance->general_event.poller = instance;
+
     return instance;
 }
 
@@ -192,10 +198,6 @@ static NfcCommand mf_desfire_poller_run(NfcPollerEvent event, void* context) {
 
     const Iso14443_4aPollerEvent* iso14443_4a_event = event.data;
     furi_assert(iso14443_4a_event);
-
-    instance->general_event.protocol_type = NfcProtocolTypeMfDesfire;
-    instance->general_event.poller = instance;
-    instance->general_event.data = &instance->mf_desfire_event;
 
     NfcCommand command = NfcCommandContinue;
 

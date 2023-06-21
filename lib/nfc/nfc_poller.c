@@ -93,8 +93,6 @@ static NfcCommand nfc_poller_event_callback(NfcEvent event, void* context) {
                 if(error == NfcaErrorNone) {
                     if(mf_ultralight_detect_protocol(&instance->nfca_data)) {
                         poller_event = NfcPollerOldEventMfUltralightDetected;
-                    } else if(mf_desfire_detect_protocol(&instance->nfca_data)) {
-                        poller_event = NfcPollerOldEventMfDesfireDetected;
                     } else {
                         poller_event = NfcPollerOldEventNfcaDetected;
                     }

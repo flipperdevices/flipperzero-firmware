@@ -20,12 +20,19 @@ static Iso14443_4aPoller* iso14443_4a_poller_alloc(NfcaPoller* iso14443_3a_polle
     instance->data = iso14443_4a_alloc();
     instance->tx_buffer = bit_buffer_alloc(ISO14443_4A_BUF_SIZE_MAX);
     instance->rx_buffer = bit_buffer_alloc(ISO14443_4A_BUF_SIZE_MAX);
+
+    instance->iso14443_4a_event.data = &instance->iso14443_4a_event_data;
+
+    instance->general_event.protocol_type = NfcProtocolTypeIso14443_4a;
+    instance->general_event.data = &instance->iso14443_4a_event;
+    instance->general_event.poller = instance;
+
     return instance;
 }
 
 static void iso14443_4a_poller_free(Iso14443_4aPoller* instance) {
     furi_assert(instance);
-    furi_assert(instance->state == Iso14443_4aPollerStateIdle);
+    furi_assert(instance->poller_state == Iso14443_4aPollerStateIdle);
 
     iso14443_4a_free(instance->data);
     bit_buffer_free(instance->tx_buffer);
@@ -34,23 +41,23 @@ static void iso14443_4a_poller_free(Iso14443_4aPoller* instance) {
 }
 
 static NfcCommand iso14443_4a_poller_handler_idle(Iso14443_4aPoller* instance) {
-    bit_buffer_reset(instance->tx_buffer);
-    bit_buffer_reset(instance->rx_buffer);
     nfca_copy(
         instance->data->iso14443_3a_data, nfca_poller_get_data(instance->iso14443_3a_poller));
 
-    instance->state = Iso14443_4aPollerStateReadAts;
+    instance->poller_state = Iso14443_4aPollerStateReadAts;
+    instance->protocol_state.block_number = 0;
     return NfcCommandContinue;
 }
 
 static NfcCommand iso14443_4a_poller_handler_read_ats(Iso14443_4aPoller* instance) {
-    Iso14443_4aError error = iso14443_4a_poller_async_read_ats(instance);
+    Iso14443_4aError error =
+        iso14443_4a_poller_async_read_ats(instance, &instance->data->ats_data);
     if(error == Iso14443_4aErrorNone) {
         FURI_LOG_D(TAG, "Read ATS success");
-        instance->state = Iso14443_4aPollerStateReady;
+        instance->poller_state = Iso14443_4aPollerStateReady;
     } else {
         FURI_LOG_D(TAG, "Failed to read ATS");
-        instance->state = Iso14443_4aPollerStateError;
+        instance->poller_state = Iso14443_4aPollerStateError;
     }
 
     return NfcCommandContinue;
@@ -58,9 +65,9 @@ static NfcCommand iso14443_4a_poller_handler_read_ats(Iso14443_4aPoller* instanc
 
 static NfcCommand iso14443_4a_poller_handler_error(Iso14443_4aPoller* instance) {
     nfca_poller_halt(instance->iso14443_3a_poller);
-    instance->iso14443_4a_event.data->error = instance->error;
+    instance->iso14443_4a_event_data.error = instance->error;
     NfcCommand command = instance->callback(instance->general_event, instance->context);
-    instance->state = Iso14443_4aPollerStateIdle;
+    instance->poller_state = Iso14443_4aPollerStateIdle;
     return command;
 }
 
@@ -96,17 +103,14 @@ static NfcCommand iso14443_4a_poller_run(NfcPollerEvent event, void* context) {
     furi_assert(instance);
     furi_assert(instance->callback);
 
-    NfcaPollerEvent* nfca_event = event.data;
-    furi_assert(nfca_event);
+    NfcaPollerEvent* iso14443_3a_event = event.data;
+    furi_assert(iso14443_3a_event);
 
-    instance->general_event.protocol_type = NfcProtocolTypeIso14443_4a;
-    instance->general_event.poller = instance;
-    instance->general_event.data = &instance->iso14443_4a_event;
     NfcCommand command = NfcCommandContinue;
 
-    if(nfca_event->type == NfcaPollerEventTypeReady) {
-        command = iso14443_4a_poller_state_handler[instance->state](instance);
-    } else if(nfca_event->type == NfcaPollerEventTypeError) {
+    if(iso14443_3a_event->type == NfcaPollerEventTypeReady) {
+        command = iso14443_4a_poller_state_handler[instance->poller_state](instance);
+    } else if(iso14443_3a_event->type == NfcaPollerEventTypeError) {
         instance->iso14443_4a_event.type = Iso14443_4aPollerEventTypeError;
         command = instance->callback(instance->general_event, instance->context);
     }

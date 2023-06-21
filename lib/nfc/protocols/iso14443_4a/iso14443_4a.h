@@ -6,6 +6,8 @@
 extern "C" {
 #endif
 
+#define ISO14443_4A_CMD_READ_ATS (0xE0)
+
 typedef enum {
     Iso14443_4aErrorNone,
     Iso14443_4aErrorNotPresent,
@@ -14,21 +16,17 @@ typedef enum {
 } Iso14443_4aError;
 
 typedef struct {
-    uint8_t cmd;
-    uint8_t param;
-} Iso14443_4aAtsRequest;
-
-typedef struct {
     uint8_t tl;
     uint8_t t0;
     uint8_t ta_1;
     uint8_t tb_1;
     uint8_t tc_1;
     uint8_t t1;
-} Iso14443_4aAtsResponse;
+} Iso14443_4aAtsData;
 
 typedef struct {
     NfcaData* iso14443_3a_data;
+    Iso14443_4aAtsData ats_data;
 } Iso14443_4aData;
 
 extern const NfcProtocolBase nfc_protocol_iso14443_4a;
