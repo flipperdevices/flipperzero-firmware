@@ -251,6 +251,43 @@ ReturnCode slix_unlock(NfcVData* data, uint32_t password_id) {
     return ret;
 }
 
+static void slix_generic_pass_infos(
+    uint8_t password_id,
+    NfcVSlixData* slix,
+    uint8_t** password,
+    uint32_t* flag_valid,
+    uint32_t* flag_set) {
+    switch(password_id) {
+    case SLIX_PASS_READ:
+        *password = slix->key_read;
+        *flag_valid = NfcVSlixDataFlagsValidKeyRead;
+        *flag_set = NfcVSlixDataFlagsHasKeyRead;
+        break;
+    case SLIX_PASS_WRITE:
+        *password = slix->key_write;
+        *flag_valid = NfcVSlixDataFlagsValidKeyWrite;
+        *flag_set = NfcVSlixDataFlagsHasKeyWrite;
+        break;
+    case SLIX_PASS_PRIVACY:
+        *password = slix->key_privacy;
+        *flag_valid = NfcVSlixDataFlagsValidKeyPrivacy;
+        *flag_set = NfcVSlixDataFlagsHasKeyPrivacy;
+        break;
+    case SLIX_PASS_DESTROY:
+        *password = slix->key_destroy;
+        *flag_valid = NfcVSlixDataFlagsValidKeyDestroy;
+        *flag_set = NfcVSlixDataFlagsHasKeyDestroy;
+        break;
+    case SLIX_PASS_EASAFI:
+        *password = slix->key_eas;
+        *flag_valid = NfcVSlixDataFlagsValidKeyEas;
+        *flag_set = NfcVSlixDataFlagsHasKeyEas;
+        break;
+    default:
+        break;
+    }
+}
+
 bool slix_generic_protocol_filter(
     FuriHalNfcTxRxContext* tx_rx,
     FuriHalNfcDevData* nfc_data,
@@ -301,91 +338,73 @@ bool slix_generic_protocol_filter(
     }
 
     case NFCV_CMD_NXP_SET_PASSWORD: {
+        /* the password to be set is the first parameter */
         uint8_t password_id = nfcv_data->frame[ctx->payload_offset];
+        /* right after that is the XORed password */
+        uint8_t* password_xored = &nfcv_data->frame[ctx->payload_offset + 1];
 
+        /* only handle if the password type is supported */
         if(!(password_id & password_supported)) {
             break;
         }
 
-        uint8_t* password_xored = &nfcv_data->frame[ctx->payload_offset + 1];
+        /* fetch the last RAND value */
         uint8_t* rand = slix->rand;
-        uint8_t* password = NULL;
+
+        /* first calc the password that has been sent */
         uint8_t password_rcv[4];
-        bool pass_valid = false;
-
-        switch(password_id) {
-        case SLIX_PASS_READ:
-            password = slix->key_read;
-            if(!(slix->flags & NfcVSlixDataFlagsHasKeyRead)) {
-                pass_valid = true;
-            }
-            break;
-        case SLIX_PASS_WRITE:
-            password = slix->key_write;
-            if(!(slix->flags & NfcVSlixDataFlagsHasKeyWrite)) {
-                pass_valid = true;
-            }
-            break;
-        case SLIX_PASS_PRIVACY:
-            password = slix->key_privacy;
-            if(!(slix->flags & NfcVSlixDataFlagsHasKeyPrivacy)) {
-                pass_valid = true;
-            }
-            break;
-        case SLIX_PASS_DESTROY:
-            password = slix->key_destroy;
-            if(!(slix->flags & NfcVSlixDataFlagsHasKeyDestroy)) {
-                pass_valid = true;
-            }
-            break;
-        case SLIX_PASS_EASAFI:
-            password = slix->key_eas;
-            if(!(slix->flags & NfcVSlixDataFlagsHasKeyEas)) {
-                pass_valid = true;
-            }
-            break;
-        default:
-            break;
+        for(int pos = 0; pos < 4; pos++) {
+            password_rcv[pos] = password_xored[3 - pos] ^ rand[pos % 2];
         }
+        uint32_t pass_received = slix_read_be(password_rcv, 4);
 
+        /* then determine the password type (or even update if not set yet) */
+        uint8_t* password = NULL;
+        uint32_t flag_valid = 0;
+        uint32_t flag_set = 0;
+
+        slix_generic_pass_infos(password_id, slix, &password, &flag_valid, &flag_set);
+
+        /* when the password is not supported, return silently */
         if(!password) {
             break;
         }
 
-        for(int pos = 0; pos < 4; pos++) {
-            password_rcv[pos] = password_xored[3 - pos] ^ rand[pos % 2];
-        }
-        uint32_t pass_expect = slix_read_be(password, 4);
-        uint32_t pass_received = slix_read_be(password_rcv, 4);
+        /* check if the password is known */
+        bool pass_valid = false;
+        uint32_t pass_expect = 0;
 
-        if(pass_expect == pass_received) {
+        if(slix->flags & flag_set) {
+            /* if so, fetch the stored password and compare */
+            pass_expect = slix_read_be(password, 4);
+            pass_valid = (pass_expect == pass_received);
+        } else {
+            /* if not known, just accept it and store that password */
+            memcpy(password, password_rcv, 4);
+            nfcv_data->modified = true;
+            slix->flags |= flag_set;
+
             pass_valid = true;
         }
 
+        /* if the pass was valid or accepted for other reasons, continue */
         if(pass_valid) {
+            slix->flags |= flag_valid;
+
+            /* handle actions when a correct password was given, aside of setting the flag */
             switch(password_id) {
-            case SLIX_PASS_READ:
-                slix->flags |= NfcVSlixDataFlagsValidKeyRead;
-                break;
-            case SLIX_PASS_WRITE:
-                slix->flags |= NfcVSlixDataFlagsValidKeyWrite;
-                break;
             case SLIX_PASS_PRIVACY:
-                slix->flags |= NfcVSlixDataFlagsValidKeyPrivacy;
                 slix->flags &= ~NfcVSlixDataFlagsPrivacy;
                 nfcv_data->modified = true;
                 break;
             case SLIX_PASS_DESTROY:
-                slix->flags |= NfcVSlixDataFlagsValidKeyDestroy;
                 slix->flags |= NfcVSlixDataFlagsDestroyed;
                 FURI_LOG_D(TAG, "Pooof! Got destroyed");
-                break;
-            case SLIX_PASS_EASAFI:
-                slix->flags |= NfcVSlixDataFlagsValidKeyEas;
                 break;
             default:
                 break;
             }
+
             ctx->response_buffer[0] = NFCV_NOERROR;
             nfcv_emu_send(
                 tx_rx, nfcv_data, ctx->response_buffer, 1, ctx->response_flags, ctx->send_time);
@@ -417,46 +436,22 @@ bool slix_generic_protocol_filter(
 
         uint8_t* new_password = &nfcv_data->frame[ctx->payload_offset + 1];
         uint8_t* password = NULL;
-        bool pass_valid = false;
         uint32_t flag_valid = 0;
         uint32_t flag_set = 0;
 
-        switch(password_id) {
-        case SLIX_PASS_READ:
-            password = slix->key_read;
-            flag_valid = NfcVSlixDataFlagsValidKeyRead;
-            flag_set = NfcVSlixDataFlagsHasKeyRead;
-            break;
-        case SLIX_PASS_WRITE:
-            password = slix->key_write;
-            flag_valid = NfcVSlixDataFlagsValidKeyWrite;
-            flag_set = NfcVSlixDataFlagsHasKeyWrite;
-            break;
-        case SLIX_PASS_PRIVACY:
-            password = slix->key_privacy;
-            flag_valid = NfcVSlixDataFlagsValidKeyPrivacy;
-            flag_set = NfcVSlixDataFlagsHasKeyPrivacy;
-            break;
-        case SLIX_PASS_DESTROY:
-            password = slix->key_destroy;
-            flag_valid = NfcVSlixDataFlagsValidKeyDestroy;
-            flag_set = NfcVSlixDataFlagsHasKeyDestroy;
-            break;
-        case SLIX_PASS_EASAFI:
-            password = slix->key_eas;
-            flag_valid = NfcVSlixDataFlagsValidKeyEas;
-            flag_set = NfcVSlixDataFlagsHasKeyEas;
-            break;
-        default:
+        slix_generic_pass_infos(password_id, slix, &password, &flag_valid, &flag_set);
+
+        /* when the password is not supported, return silently */
+        if(!password) {
             break;
         }
 
-        pass_valid = (slix->flags & flag_valid);
+        bool pass_valid = (slix->flags & flag_valid);
         if(!(slix->flags & flag_set)) {
             pass_valid = true;
         }
 
-        if(password && pass_valid) {
+        if(pass_valid) {
             slix->flags |= flag_valid;
             slix->flags |= flag_set;
 
