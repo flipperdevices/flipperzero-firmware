@@ -3,6 +3,7 @@
 #include <furi.h>
 
 #define ISO14443_4A_PROTOCOL_NAME "Unknown ISO14443-4A Tag"
+#define ISO14443_4A_ATS_BIT (1 << 5)
 
 const NfcProtocolBase nfc_protocol_iso14443_4a = {
     .alloc = (NfcProtocolAlloc)iso14443_4a_alloc,
@@ -83,4 +84,9 @@ const char* iso14443_4a_get_name(const Iso14443_4aData* data, NfcProtocolNameTyp
 
 const uint8_t* iso14443_4a_get_uid(const Iso14443_4aData* data, size_t* uid_len) {
     return nfca_get_uid(data->iso14443_3a_data, uid_len);
+}
+
+bool iso14443_4a_is_ats_supported(const Iso14443_4aData* data) {
+    const NfcaData* iso14443_3a_data = data->iso14443_3a_data;
+    return iso14443_3a_data->sak & ISO14443_4A_ATS_BIT;
 }

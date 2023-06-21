@@ -31,6 +31,8 @@ typedef struct {
 
 extern const NfcProtocolBase nfc_protocol_iso14443_4a;
 
+// Virtual methods
+
 Iso14443_4aData* iso14443_4a_alloc();
 
 void iso14443_4a_free(Iso14443_4aData* data);
@@ -50,6 +52,10 @@ bool iso14443_4a_is_equal(const Iso14443_4aData* data, const Iso14443_4aData* ot
 const char* iso14443_4a_get_name(const Iso14443_4aData* data, NfcProtocolNameType name_type);
 
 const uint8_t* iso14443_4a_get_uid(const Iso14443_4aData* data, size_t* uid_len);
+
+// Getters & Tests
+
+bool iso14443_4a_is_ats_supported(const Iso14443_4aData* data);
 
 #ifdef __cplusplus
 }
