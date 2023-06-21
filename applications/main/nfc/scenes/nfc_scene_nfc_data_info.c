@@ -153,9 +153,9 @@ void nfc_scene_nfc_data_info_on_enter(void* context) {
         }
         furi_string_cat_printf(temp_str, "\n");
 
-        furi_string_cat_printf(temp_str, "IC Ref: %02X\n", nfcv_data->ic_ref);
-        furi_string_cat_printf(temp_str, "Blocks: %02X\n", nfcv_data->block_num);
-        furi_string_cat_printf(temp_str, "Blocksize: %02X\n", nfcv_data->block_size);
+        furi_string_cat_printf(temp_str, "IC Ref: %d\n", nfcv_data->ic_ref);
+        furi_string_cat_printf(temp_str, "Blocks: %d\n", nfcv_data->block_num);
+        furi_string_cat_printf(temp_str, "Blocksize: %d\n", nfcv_data->block_size);
 
         switch(dev_data->nfcv_data.sub_type) {
         case NfcVTypePlain:
