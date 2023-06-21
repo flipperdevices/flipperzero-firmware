@@ -124,12 +124,12 @@ static bool iso14443_4a_poller_detect(NfcPollerEvent event, void* context) {
     const Iso14443_4aPoller* instance = context;
     furi_assert(instance);
 
-    const NfcaPollerEvent* nfca_event = event.data;
-    furi_assert(nfca_event);
+    const NfcaPollerEvent* iso14443_3a_event = event.data;
+    furi_assert(iso14443_3a_event);
 
     bool protocol_detected = false;
 
-    if(nfca_event->type == NfcaPollerEventTypeReady) {
+    if(iso14443_3a_event->type == NfcaPollerEventTypeReady) {
         protocol_detected = iso14443_4a_is_ats_supported(instance->data);
     }
 

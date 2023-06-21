@@ -212,10 +212,23 @@ static NfcCommand mf_desfire_poller_run(NfcPollerEvent event, void* context) {
 }
 
 static bool mf_desfire_poller_detect(NfcPollerEvent event, void* context) {
-    UNUSED(event);
-    UNUSED(context);
-    // TODO: Complete the method
-    return false;
+    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_4a);
+
+    MfDesfirePoller* instance = context;
+    furi_assert(instance);
+
+    const Iso14443_4aPollerEvent* iso14443_4a_event = event.data;
+    furi_assert(iso14443_4a_event);
+
+    bool protocol_detected = false;
+
+    if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
+        MfDesfireVersion version = {};
+        const MfDesfireError error = mf_desfire_poller_async_read_version(instance, &version);
+        protocol_detected = (error == MfDesfireErrorNone);
+    }
+
+    return protocol_detected;
 }
 
 const NfcPollerBase mf_desfire_poller = {
