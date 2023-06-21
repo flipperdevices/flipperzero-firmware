@@ -58,8 +58,6 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     BitBuffer* rx_buffer,
     uint32_t fwt);
 
-extern const NfcPollerBase nfc_poller_iso14443_4a;
-
 #ifdef __cplusplus
 }
 #endif

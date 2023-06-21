@@ -96,8 +96,6 @@ NfcaError nfca_poller_send_standart_frame(
     BitBuffer* rx_buffer,
     uint32_t fwt);
 
-extern const NfcPollerBase nfc_poller_iso14443_3a;
-
 #ifdef __cplusplus
 }
 #endif

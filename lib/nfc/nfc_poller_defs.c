@@ -1,9 +1,9 @@
 #include "nfc_poller_defs.h"
 
-#include <nfc/protocols/nfca/nfca_poller_i.h>
-#include <nfc/protocols/iso14443_4a/iso14443_4a_poller_i.h>
-#include <nfc/protocols/mf_ultralight/mf_ultralight_poller_i.h>
-#include <nfc/protocols/mf_desfire/mf_desfire_poller_i.h>
+#include <nfc/protocols/nfca/nfca_poller_defs.h>
+#include <nfc/protocols/iso14443_4a/iso14443_4a_poller_defs.h>
+#include <nfc/protocols/mf_ultralight/mf_ultralight_poller_defs.h>
+#include <nfc/protocols/mf_desfire/mf_desfire_poller_defs.h>
 
 #include <furi/core/core_defines.h>
 
@@ -15,7 +15,7 @@ const NfcPollerBase* nfc_pollers_api[NfcProtocolTypeMax] = {
     [NfcProtocolTypeMfDesfire] = &mf_desfire_poller,
 };
 
-/*
+/**************************** Poller tree structure ****************************
  *                               _________ start ___________________________
  *                              /                         |        |        \
  *               _________ iso14443-3a _______          nfc-b    nfc-f     nfc-v

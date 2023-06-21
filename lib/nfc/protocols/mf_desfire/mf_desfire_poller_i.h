@@ -122,8 +122,6 @@ MfDesfireError mf_desfire_poller_async_read_applications(
     const SimpleArray* app_ids,
     SimpleArray* data);
 
-extern const NfcPollerBase mf_desfire_poller;
-
 #ifdef __cplusplus
 }
 #endif
