@@ -142,8 +142,6 @@ MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
     uint8_t tearing_falg_num,
     MfUltralightTearingFlag* data);
 
-extern const NfcPollerBase mf_ultralight_poller;
-
 #ifdef __cplusplus
 }
 #endif

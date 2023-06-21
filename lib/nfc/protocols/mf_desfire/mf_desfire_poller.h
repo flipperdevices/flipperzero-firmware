@@ -26,32 +26,7 @@ typedef struct {
     MfDesfirePollerEventData* data;
 } MfDesfirePollerEvent;
 
-typedef enum {
-    MfDesfirePollerCommandContinue = NfcaPollerCommandContinue,
-    MfDesfirePollerCommandReset = NfcaPollerCommandReset,
-    MfDesfirePollerCommandStop = NfcaPollerCommandStop,
-} MfDesfirePollerCommand;
-
-typedef MfDesfirePollerCommand (
-    *MfDesfirePollerCallback)(MfDesfirePollerEvent event, void* context);
-
-MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_poller);
-
-void mf_desfire_poller_free(MfDesfirePoller* instance);
-
 const MfDesfireData* mf_desfire_poller_get_data(MfDesfirePoller* instance);
-
-MfDesfireError mf_desfire_poller_start(
-    MfDesfirePoller* instance,
-    Iso14443_4aPollerCallback callback,
-    void* context);
-
-MfDesfireError mf_desfire_poller_read(
-    MfDesfirePoller* instance,
-    MfDesfirePollerCallback callback,
-    void* context);
-
-MfDesfireError mf_desfire_poller_stop(MfDesfirePoller* instance);
 
 #ifdef __cplusplus
 }

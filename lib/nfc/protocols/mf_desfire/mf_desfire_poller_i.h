@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define MF_DESFIRE_POLLER_STANDARD_FWT_FC (190000)
+#define MF_DESFIRE_POLLER_STANDARD_FWT_FC (200000)
 
 typedef enum {
     MfDesfirePollerStateIdle,
@@ -34,13 +34,16 @@ struct MfDesfirePoller {
     Iso14443_4aPoller* iso14443_4a_poller;
     MfDesfirePollerSessionState session_state;
     MfDesfirePollerState state;
+    MfDesfireError error;
+    MfDesfireData* data;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
     BitBuffer* input_buffer;
     BitBuffer* result_buffer;
-    MfDesfireData* data;
-    MfDesfirePollerCallback callback;
-    MfDesfireError error;
+    MfDesfirePollerEventData mf_desfire_event_data;
+    MfDesfirePollerEvent mf_desfire_event;
+    NfcPollerEvent general_event;
+    NfcPollerCallback callback;
     void* context;
 };
 
