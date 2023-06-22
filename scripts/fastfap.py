@@ -8,7 +8,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from elftools.elf.elffile import ELFFile
-from elftools.elf.enums import ENUM_RELOC_TYPE_ARM
 from elftools.elf.relocation import RelocationSection
 from elftools.elf.sections import SymbolTableSection
 from fbt.sdk.hashes import gnu_sym_hash
