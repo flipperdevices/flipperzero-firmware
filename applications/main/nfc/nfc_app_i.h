@@ -91,6 +91,7 @@ struct NfcApp {
     uint8_t byte_input_store[6];
 
     size_t protocols_detected_num;
+    size_t protocols_detected_idx;
     NfcProtocolType protocols_detected[NfcProtocolTypeMax];
 
     void* rpc_ctx;
