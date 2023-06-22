@@ -25,4 +25,6 @@ enum NfcCustomEvent {
     NfcCustomEventDictAttackDone,
     NfcCustomEventRpcLoad,
     NfcCustomEventRpcSessionClose,
+    NfcCustomEventUpdateLog,
+    NfcCustomEventSaveShadow,
 };

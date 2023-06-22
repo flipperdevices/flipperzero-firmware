@@ -51,7 +51,7 @@ bool nfc_scene_mf_desfire_read_on_event(void* context, SceneManagerEvent event) 
         if(event.event == NfcWorkerEventMfDesfireReadSuccess) {
             notification_message(instance->notifications, &sequence_success);
             scene_manager_next_scene(instance->scene_manager, NfcSceneMfDesfireReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         }
     }

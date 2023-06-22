@@ -854,7 +854,10 @@ uint8_t mifare_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* 
     return sectors_read;
 }
 
-bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx) {
+bool mifare_classic_emulator(
+    MfClassicEmulator* emulator,
+    FuriHalNfcTxRxContext* tx_rx,
+    bool is_reader_analyzer) {
     furi_assert(emulator);
     furi_assert(tx_rx);
     bool command_processed = false;
@@ -901,11 +904,27 @@ bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext*
             MfClassicSectorTrailer* sector_trailer =
                 (MfClassicSectorTrailer*)emulator->data.block[sector_trailer_block].value;
             if(cmd == MF_CLASSIC_AUTH_KEY_A_CMD) {
-                key = nfc_util_bytes2num(sector_trailer->key_a, 6);
-                access_key = MfClassicKeyA;
+                if(mifare_classic_is_key_found(
+                       &emulator->data, mifare_classic_get_sector_by_block(block), MfClassicKeyA) ||
+                   is_reader_analyzer) {
+                    key = nfc_util_bytes2num(sector_trailer->key_a, 6);
+                    access_key = MfClassicKeyA;
+                } else {
+                    FURI_LOG_D(TAG, "Key not known");
+                    command_processed = true;
+                    break;
+                }
             } else {
-                key = nfc_util_bytes2num(sector_trailer->key_b, 6);
-                access_key = MfClassicKeyB;
+                if(mifare_classic_is_key_found(
+                       &emulator->data, mifare_classic_get_sector_by_block(block), MfClassicKeyB) ||
+                   is_reader_analyzer) {
+                    key = nfc_util_bytes2num(sector_trailer->key_b, 6);
+                    access_key = MfClassicKeyB;
+                } else {
+                    FURI_LOG_D(TAG, "Key not known");
+                    command_processed = true;
+                    break;
+                }
             }
 
             uint32_t nonce = old_prng_successor(DWT->CYCCNT, 32) ^ 0xAA;
