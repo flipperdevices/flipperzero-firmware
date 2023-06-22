@@ -21,8 +21,9 @@ typedef bool (*NfcProtocolVerify)(NfcProtocolData* data, const FuriString* devic
 typedef bool (*NfcProtocolLoad)(NfcProtocolData* data, FlipperFormat* ff, uint32_t version);
 typedef bool (*NfcProtocolSave)(const NfcProtocolData* data, FlipperFormat* ff, uint32_t version);
 typedef bool (*NfcProtocolEqual)(const NfcProtocolData* data, const NfcProtocolData* other);
+typedef const char* (*NfcProtocolGetProtocolName)();
 typedef const char* (
-    *NfcProtocolGetName)(const NfcProtocolData* data, NfcProtocolNameType name_type);
+    *NfcProtocolGetDeviceName)(const NfcProtocolData* data, NfcProtocolNameType name_type);
 typedef const uint8_t* (*NfcProtocolGetUid)(const NfcProtocolData* data, size_t* uid_len);
 
 typedef struct {
@@ -34,7 +35,8 @@ typedef struct {
     NfcProtocolLoad load;
     NfcProtocolSave save;
     NfcProtocolEqual is_equal;
-    NfcProtocolGetName get_name;
+    NfcProtocolGetProtocolName get_protocol_name;
+    NfcProtocolGetDeviceName get_device_name;
     NfcProtocolGetUid get_uid;
 } NfcProtocolBase;
 

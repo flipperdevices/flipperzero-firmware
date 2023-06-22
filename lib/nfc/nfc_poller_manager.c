@@ -102,7 +102,6 @@ static void nfc_poller_manager_poller_list_free(NfcPollerManager* instance) {
         instance->list->head = child;
     } while(true);
 
-
     free(instance->list);
     instance->list = NULL;
 }

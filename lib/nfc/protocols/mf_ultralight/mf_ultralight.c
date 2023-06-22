@@ -2,6 +2,8 @@
 
 #include <furi.h>
 
+#define MF_ULTRALIGHT_PROTOCOL_NAME "NTAG/Ultralight"
+
 typedef struct {
     uint16_t total_pages;
     uint16_t config_page;
@@ -124,7 +126,8 @@ const NfcProtocolBase nfc_protocol_mf_ultralight = {
     .load = (NfcProtocolLoad)mf_ultralight_load,
     .save = (NfcProtocolSave)mf_ultralight_save,
     .is_equal = (NfcProtocolEqual)mf_ultralight_is_equal,
-    .get_name = (NfcProtocolGetName)mf_ultralight_get_name,
+    .get_protocol_name = (NfcProtocolGetProtocolName)mf_ultralight_get_protocol_name,
+    .get_device_name = (NfcProtocolGetDeviceName)mf_ultralight_get_device_name,
     .get_uid = (NfcProtocolGetUid)mf_ultralight_get_uid,
 };
 
@@ -166,7 +169,7 @@ void mf_ultralight_copy(MfUltralightData* data, const MfUltralightData* other) {
 }
 
 // TODO: Improve this function
-static const char* mf_ultralight_get_name_by_type(MfUltralightType type, bool full_name) {
+static const char* mf_ultralight_get_device_name_by_type(MfUltralightType type, bool full_name) {
     // FIXME: Use a LUT instead of if/switch
     if(type == MfUltralightTypeNTAG213) {
         return "NTAG213";
@@ -199,7 +202,7 @@ bool mf_ultralight_verify(MfUltralightData* data, const FuriString* device_type)
     bool verified = false;
 
     for(MfUltralightType i = 0; i < MfUltralightTypeNum; i++) {
-        const char* name = mf_ultralight_get_name_by_type(i, true);
+        const char* name = mf_ultralight_get_device_name_by_type(i, true);
         verified = furi_string_equal_str(device_type, name);
         if(verified) {
             data->type = i;
@@ -302,7 +305,7 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_
     bool saved = false;
 
     do {
-        const char* device_type_name = mf_ultralight_get_name_by_type(data->type, true);
+        const char* device_type_name = mf_ultralight_get_device_name_by_type(data->type, true);
         if(!flipper_format_write_string_cstr(ff, "Device type", device_type_name)) break;
         if(!nfca_save_data(data->nfca_data, ff, version)) break;
         if(!flipper_format_write_comment_cstr(ff, "Mifare Ultralight specific data")) break;
@@ -371,12 +374,17 @@ bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData
     return nfca_is_equal(data->nfca_data, other->nfca_data);
 }
 
+const char* mf_ultralight_get_protocol_name() {
+    return MF_ULTRALIGHT_PROTOCOL_NAME;
+}
+
 // TODO: Improve this function
-const char* mf_ultralight_get_name(const MfUltralightData* data, NfcProtocolNameType name_type) {
+const char*
+    mf_ultralight_get_device_name(const MfUltralightData* data, NfcProtocolNameType name_type) {
     furi_assert(data);
     furi_assert(data->type < MfUltralightTypeNum);
 
-    return mf_ultralight_get_name_by_type(data->type, name_type == NfcProtocolNameTypeFull);
+    return mf_ultralight_get_device_name_by_type(data->type, name_type == NfcProtocolNameTypeFull);
 }
 
 const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_len) {

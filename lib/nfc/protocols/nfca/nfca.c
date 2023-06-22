@@ -4,7 +4,8 @@
 #include <nfc/nfc_common.h>
 
 #define NFCA_CRC_INIT (0x6363)
-#define NFCA_PROTOCOL_NAME "Unknown ISO14443-3A Tag"
+#define NFCA_PROTOCOL_NAME "ISO14443-3A"
+#define NFCA_DEVICE_NAME "Unknown ISO14443-3A Tag"
 
 const NfcProtocolBase nfc_protocol_iso14443_3a = {
     .alloc = (NfcProtocolAlloc)nfca_alloc,
@@ -15,7 +16,8 @@ const NfcProtocolBase nfc_protocol_iso14443_3a = {
     .load = (NfcProtocolLoad)nfca_load,
     .save = (NfcProtocolSave)nfca_save,
     .is_equal = (NfcProtocolEqual)nfca_is_equal,
-    .get_name = (NfcProtocolGetName)nfca_get_name,
+    .get_protocol_name = (NfcProtocolGetProtocolName)nfca_get_protocol_name,
+    .get_device_name = (NfcProtocolGetDeviceName)nfca_get_device_name,
     .get_uid = (NfcProtocolGetUid)nfca_get_uid,
 };
 
@@ -71,10 +73,14 @@ bool nfca_is_equal(const NfcaData* data, const NfcaData* other) {
     return memcmp(data, other, sizeof(NfcaData)) == 0;
 }
 
-const char* nfca_get_name(const NfcaData* data, NfcProtocolNameType name_type) {
+const char* nfca_get_protocol_name() {
+    return NFCA_PROTOCOL_NAME;
+}
+
+const char* nfca_get_device_name(const NfcaData* data, NfcProtocolNameType name_type) {
     UNUSED(data);
     UNUSED(name_type);
-    return NFCA_PROTOCOL_NAME;
+    return NFCA_DEVICE_NAME;
 }
 
 const uint8_t* nfca_get_uid(const NfcaData* data, size_t* uid_len) {

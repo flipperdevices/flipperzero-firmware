@@ -3,6 +3,7 @@
 #include <furi.h>
 
 #define MF_DESFIRE_PROTOCOL_NAME "Mifare DESfire"
+#define MF_DESFIRE_DEVICE_NAME "Mifare DESfire"
 
 const NfcProtocolBase nfc_protocol_mf_desfire = {
     .alloc = (NfcProtocolAlloc)mf_desfire_alloc,
@@ -13,7 +14,8 @@ const NfcProtocolBase nfc_protocol_mf_desfire = {
     .load = (NfcProtocolLoad)mf_desfire_load,
     .save = (NfcProtocolSave)mf_desfire_save,
     .is_equal = (NfcProtocolEqual)mf_desfire_is_equal,
-    .get_name = (NfcProtocolGetName)mf_desfire_get_name,
+    .get_protocol_name = (NfcProtocolGetProtocolName)mf_desfire_get_protocol_name,
+    .get_device_name = (NfcProtocolGetDeviceName)mf_desfire_get_device_name,
     .get_uid = (NfcProtocolGetUid)mf_desfire_get_uid,
 };
 
@@ -99,10 +101,14 @@ bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other) 
     return iso14443_4a_is_equal(data->iso14443_4a_data, other->iso14443_4a_data);
 }
 
-const char* mf_desfire_get_name(const MfDesfireData* data, NfcProtocolNameType name_type) {
+const char* mf_desfire_get_protocol_name() {
+    return MF_DESFIRE_PROTOCOL_NAME;
+}
+
+const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcProtocolNameType name_type) {
     UNUSED(data);
     UNUSED(name_type);
-    return MF_DESFIRE_PROTOCOL_NAME;
+    return MF_DESFIRE_DEVICE_NAME;
 }
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len) {
