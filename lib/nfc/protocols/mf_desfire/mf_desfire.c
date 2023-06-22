@@ -6,6 +6,7 @@
 #define MF_DESFIRE_DEVICE_NAME "Mifare DESfire"
 
 const NfcProtocolBase nfc_protocol_mf_desfire = {
+    .protocol_name = MF_DESFIRE_PROTOCOL_NAME,
     .alloc = (NfcProtocolAlloc)mf_desfire_alloc,
     .free = (NfcProtocolFree)mf_desfire_free,
     .reset = (NfcProtocolReset)mf_desfire_reset,
@@ -14,7 +15,6 @@ const NfcProtocolBase nfc_protocol_mf_desfire = {
     .load = (NfcProtocolLoad)mf_desfire_load,
     .save = (NfcProtocolSave)mf_desfire_save,
     .is_equal = (NfcProtocolEqual)mf_desfire_is_equal,
-    .get_protocol_name = (NfcProtocolGetProtocolName)mf_desfire_get_protocol_name,
     .get_device_name = (NfcProtocolGetDeviceName)mf_desfire_get_device_name,
     .get_uid = (NfcProtocolGetUid)mf_desfire_get_uid,
 };
@@ -99,10 +99,6 @@ bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other) 
 
     // TODO: Complete equality method
     return iso14443_4a_is_equal(data->iso14443_4a_data, other->iso14443_4a_data);
-}
-
-const char* mf_desfire_get_protocol_name() {
-    return MF_DESFIRE_PROTOCOL_NAME;
 }
 
 const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcProtocolNameType name_type) {

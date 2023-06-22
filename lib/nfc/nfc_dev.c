@@ -67,7 +67,7 @@ const NfcProtocolData*
 const char* nfc_dev_get_protocol_name(NfcProtocolType protocol) {
     furi_assert(protocol < NfcProtocolTypeMax);
 
-    return nfc_protocols[protocol]->get_protocol_name();
+    return nfc_protocols[protocol]->protocol_name;
 }
 
 const char* nfc_dev_get_device_name(const NfcDev* instance, NfcProtocolNameType name_type) {

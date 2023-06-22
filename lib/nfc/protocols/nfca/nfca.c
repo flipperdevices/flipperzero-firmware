@@ -8,6 +8,7 @@
 #define NFCA_DEVICE_NAME "Unknown ISO14443-3A Tag"
 
 const NfcProtocolBase nfc_protocol_iso14443_3a = {
+    .protocol_name = NFCA_PROTOCOL_NAME,
     .alloc = (NfcProtocolAlloc)nfca_alloc,
     .free = (NfcProtocolFree)nfca_free,
     .reset = (NfcProtocolReset)nfca_reset,
@@ -16,7 +17,6 @@ const NfcProtocolBase nfc_protocol_iso14443_3a = {
     .load = (NfcProtocolLoad)nfca_load,
     .save = (NfcProtocolSave)nfca_save,
     .is_equal = (NfcProtocolEqual)nfca_is_equal,
-    .get_protocol_name = (NfcProtocolGetProtocolName)nfca_get_protocol_name,
     .get_device_name = (NfcProtocolGetDeviceName)nfca_get_device_name,
     .get_uid = (NfcProtocolGetUid)nfca_get_uid,
 };
@@ -71,10 +71,6 @@ bool nfca_is_equal(const NfcaData* data, const NfcaData* other) {
     furi_assert(other);
 
     return memcmp(data, other, sizeof(NfcaData)) == 0;
-}
-
-const char* nfca_get_protocol_name() {
-    return NFCA_PROTOCOL_NAME;
 }
 
 const char* nfca_get_device_name(const NfcaData* data, NfcProtocolNameType name_type) {

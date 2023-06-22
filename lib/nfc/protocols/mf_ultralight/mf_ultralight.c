@@ -118,6 +118,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
 };
 
 const NfcProtocolBase nfc_protocol_mf_ultralight = {
+    .protocol_name = MF_ULTRALIGHT_PROTOCOL_NAME,
     .alloc = (NfcProtocolAlloc)mf_ultralight_alloc,
     .free = (NfcProtocolFree)mf_ultralight_free,
     .reset = (NfcProtocolReset)mf_ultralight_reset,
@@ -126,7 +127,6 @@ const NfcProtocolBase nfc_protocol_mf_ultralight = {
     .load = (NfcProtocolLoad)mf_ultralight_load,
     .save = (NfcProtocolSave)mf_ultralight_save,
     .is_equal = (NfcProtocolEqual)mf_ultralight_is_equal,
-    .get_protocol_name = (NfcProtocolGetProtocolName)mf_ultralight_get_protocol_name,
     .get_device_name = (NfcProtocolGetDeviceName)mf_ultralight_get_device_name,
     .get_uid = (NfcProtocolGetUid)mf_ultralight_get_uid,
 };
@@ -372,10 +372,6 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_
 bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData* other) {
     // TODO: Complete equality method
     return nfca_is_equal(data->nfca_data, other->nfca_data);
-}
-
-const char* mf_ultralight_get_protocol_name() {
-    return MF_ULTRALIGHT_PROTOCOL_NAME;
 }
 
 // TODO: Improve this function
