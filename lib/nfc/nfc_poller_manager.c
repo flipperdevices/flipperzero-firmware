@@ -94,15 +94,14 @@ static void nfc_poller_manager_poller_list_alloc(NfcPollerManager* instance) {
 
 static void nfc_poller_manager_poller_list_free(NfcPollerManager* instance) {
     do {
-        NfcPollerListElement* child = instance->list->head->child;
-        if(child == NULL) break;
-
         instance->list->head->poller_api->free(instance->list->head->poller);
+        NfcPollerListElement* child = instance->list->head->child;
         free(instance->list->head);
+        if(child == NULL) break;
         instance->list->head = child;
     } while(true);
 
-    free(instance->list->head);
+
     free(instance->list);
     instance->list = NULL;
 }
