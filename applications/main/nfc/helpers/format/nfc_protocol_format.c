@@ -58,6 +58,11 @@ static void nfc_protocol_format_info_mf_ultralight(
     FuriString* str) {
     const MfUltralightData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeMfUltralight);
     nfc_protocol_format_info_iso14443_3a_common(data->nfca_data, type, str);
+
+    furi_string_cat_printf(str, "\nPages Read: %u/%u", data->pages_read, data->pages_total);
+    if(data->pages_read != data->pages_total) {
+        furi_string_cat_printf(str, "\nPassword-protected pages!");
+    }
 }
 
 static void nfc_protocol_format_info_mf_classic(
