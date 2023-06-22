@@ -5,6 +5,8 @@
 
 #include <lib/nfc/helpers/nfc_util.h>
 
+#define MF_CLASSIC_PROTOCOL_NAME "Mifare Classic"
+
 typedef struct {
     uint8_t sectors_total;
     uint16_t blocks_total;
@@ -39,6 +41,7 @@ static const MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
 };
 
 const NfcProtocolBase nfc_protocol_mf_classic = {
+    .protocol_name = MF_CLASSIC_PROTOCOL_NAME,
     .alloc = (NfcProtocolAlloc)mf_classic_alloc,
     .free = (NfcProtocolFree)mf_classic_free,
     .reset = (NfcProtocolReset)mf_classic_reset,
@@ -47,7 +50,7 @@ const NfcProtocolBase nfc_protocol_mf_classic = {
     .load = (NfcProtocolLoad)mf_classic_load,
     .save = (NfcProtocolSave)mf_classic_save,
     .is_equal = (NfcProtocolEqual)mf_classic_is_equal,
-    .get_name = (NfcProtocolGetName)mf_classic_get_name,
+    .get_device_name = (NfcProtocolGetDeviceName)mf_classic_get_device_name,
     .get_uid = (NfcProtocolGetUid)mf_classic_get_uid,
 };
 
@@ -293,7 +296,7 @@ bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other) 
     return nfca_is_equal(data->nfca_data, other->nfca_data);
 }
 
-const char* mf_classic_get_name(const MfClassicData* data, NfcProtocolNameType name_type) {
+const char* mf_classic_get_device_name(const MfClassicData* data, NfcProtocolNameType name_type) {
     furi_assert(data);
     furi_assert(data->type < MfClassicTypeNum);
 

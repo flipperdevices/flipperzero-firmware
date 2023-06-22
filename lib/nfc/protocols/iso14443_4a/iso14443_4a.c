@@ -2,10 +2,12 @@
 
 #include <furi.h>
 
-#define ISO14443_4A_PROTOCOL_NAME "Unknown ISO14443-4A Tag"
+#define ISO14443_4A_PROTOCOL_NAME "ISO14443-4A"
+#define ISO14443_4A_DEVICE_NAME "Unknown ISO14443-4A Tag"
 #define ISO14443_4A_ATS_BIT (1 << 5)
 
 const NfcProtocolBase nfc_protocol_iso14443_4a = {
+    .protocol_name = ISO14443_4A_PROTOCOL_NAME,
     .alloc = (NfcProtocolAlloc)iso14443_4a_alloc,
     .free = (NfcProtocolFree)iso14443_4a_free,
     .reset = (NfcProtocolReset)iso14443_4a_reset,
@@ -14,7 +16,7 @@ const NfcProtocolBase nfc_protocol_iso14443_4a = {
     .load = (NfcProtocolLoad)iso14443_4a_load,
     .save = (NfcProtocolSave)iso14443_4a_save,
     .is_equal = (NfcProtocolEqual)iso14443_4a_is_equal,
-    .get_name = (NfcProtocolGetName)iso14443_4a_get_name,
+    .get_device_name = (NfcProtocolGetDeviceName)iso14443_4a_get_device_name,
     .get_uid = (NfcProtocolGetUid)iso14443_4a_get_uid,
 };
 
@@ -76,10 +78,11 @@ bool iso14443_4a_is_equal(const Iso14443_4aData* data, const Iso14443_4aData* ot
     return nfca_is_equal(data->iso14443_3a_data, other->iso14443_3a_data);
 }
 
-const char* iso14443_4a_get_name(const Iso14443_4aData* data, NfcProtocolNameType name_type) {
+const char*
+    iso14443_4a_get_device_name(const Iso14443_4aData* data, NfcProtocolNameType name_type) {
     UNUSED(data);
     UNUSED(name_type);
-    return ISO14443_4A_PROTOCOL_NAME;
+    return ISO14443_4A_DEVICE_NAME;
 }
 
 const uint8_t* iso14443_4a_get_uid(const Iso14443_4aData* data, size_t* uid_len) {

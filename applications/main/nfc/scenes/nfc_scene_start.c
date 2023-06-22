@@ -47,7 +47,7 @@ bool nfc_scene_start_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexRead) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneStart, SubmenuIndexRead);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneDetect);
             DOLPHIN_DEED(DolphinDeedNfcRead);
             consumed = true;
         } else if(event.event == SubmenuIndexDetectReader) {

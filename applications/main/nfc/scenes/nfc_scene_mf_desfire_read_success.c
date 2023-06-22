@@ -22,7 +22,7 @@ void nfc_scene_mf_desfire_read_success_on_enter(void* context) {
     FuriString* temp_str;
 
     temp_str = furi_string_alloc_printf(
-        "\e#%s\n", nfc_dev_get_protocol_name(nfc->nfc_dev, NfcProtocolNameTypeFull));
+        "\e#%s\n", nfc_dev_get_device_name(nfc->nfc_dev, NfcProtocolNameTypeFull));
     furi_string_cat_printf(temp_str, "UID:");
 
     size_t uid_len;

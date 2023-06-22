@@ -5,21 +5,6 @@ enum {
     NfcWorkerEventReadUidNfcA = 100,
 };
 
-// NfcaPollerCommand nfc_scene_nfca_read_worker_callback(NfcaPollerEvent event, void* context) {
-//     NfcApp* nfc = context;
-
-//     NfcaPollerCommand command = NfcaPollerCommandContinue;
-
-//     if(event.type == NfcaPollerEventTypeReady) {
-//         nfc_dev_set_protocol_data(
-//             nfc->nfc_dev, NfcProtocolTypeIso14443_3a, nfca_poller_get_data(nfc->nfca_poller));
-//         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcWorkerEventReadUidNfcA);
-//         command = NfcaPollerCommandStop;
-//     }
-
-//     return command;
-// }
-
 NfcCommand nfc_scene_nfca_read_worker_callback(NfcPollerEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
@@ -28,11 +13,11 @@ NfcCommand nfc_scene_nfca_read_worker_callback(NfcPollerEvent event, void* conte
     NfcApp* instance = context;
     NfcCommand command = NfcCommandContinue;
     NfcaPollerEvent* nfca_event = event.data;
-    const NfcPollerBase* poller_api = nfc_pollers_api[event.protocol_type];
+    NfcaPoller* nfca_poller = event.poller;
 
     if(nfca_event->type == NfcaPollerEventTypeReady) {
         nfc_dev_set_protocol_data(
-            instance->nfc_dev, event.protocol_type, poller_api->get_data(event.poller));
+            instance->nfc_dev, event.protocol_type, nfca_poller_get_data(nfca_poller));
         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcWorkerEventReadUidNfcA);
         command = NfcCommandStop;
     }
@@ -46,7 +31,6 @@ void nfc_scene_nfca_read_on_enter(void* context) {
     // Setup view
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
-    // nfca_poller_start(nfc->nfca_poller, nfc_scene_nfca_read_worker_callback, nfc);
     nfc_poller_manager_start(
         instance->poller_manager,
         NfcProtocolTypeIso14443_3a,
@@ -74,7 +58,6 @@ bool nfc_scene_nfca_read_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_nfca_read_on_exit(void* context) {
     NfcApp* instance = context;
 
-    // nfca_poller_stop(nfc->nfca_poller);
     nfc_poller_manager_stop(instance->poller_manager);
     // Clear view
     popup_reset(instance->popup);

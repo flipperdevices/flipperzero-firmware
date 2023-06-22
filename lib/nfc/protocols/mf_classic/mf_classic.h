@@ -137,7 +137,7 @@ bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff, uint32_t vers
 
 bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other);
 
-const char* mf_classic_get_name(const MfClassicData* data, NfcProtocolNameType name_type);
+const char* mf_classic_get_device_name(const MfClassicData* data, NfcProtocolNameType name_type);
 
 const uint8_t* mf_classic_get_uid(const MfClassicData* data, size_t* uid_len);
 

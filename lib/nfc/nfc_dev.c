@@ -64,11 +64,18 @@ const NfcProtocolData*
     return instance->protocol_data;
 }
 
-const char* nfc_dev_get_protocol_name(const NfcDev* instance, NfcProtocolNameType name_type) {
+const char* nfc_dev_get_protocol_name(NfcProtocolType protocol) {
+    furi_assert(protocol < NfcProtocolTypeMax);
+
+    return nfc_protocols[protocol]->protocol_name;
+}
+
+const char* nfc_dev_get_device_name(const NfcDev* instance, NfcProtocolNameType name_type) {
     furi_assert(instance);
     furi_assert(instance->protocol_type < NfcProtocolTypeMax);
 
-    return nfc_protocols[instance->protocol_type]->get_name(instance->protocol_data, name_type);
+    return nfc_protocols[instance->protocol_type]->get_device_name(
+        instance->protocol_data, name_type);
 }
 
 const uint8_t* nfc_dev_get_uid(const NfcDev* instance, size_t* uid_len) {

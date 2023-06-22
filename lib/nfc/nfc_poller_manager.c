@@ -1,10 +1,8 @@
 #include "nfc_poller_manager.h"
 
-#include "nfc_poller_defs.h"
+#include <nfc/protocols/nfc_poller_defs.h>
 
 #include <furi.h>
-
-#include "nfc.h"
 
 typedef enum {
     NfcPollerManagerStateIdle,
@@ -34,14 +32,7 @@ struct NfcPollerManager {
     NfcPollerManagerState state;
     NfcPollerManagerSessionState session_state;
 
-    size_t base_protocol_current;
-    size_t base_protocol_total;
     NfcEvent* event;
-
-    NfcPollerBase* current_poller_base;
-    NfcPoller* current_poller;
-    NfcPoller* base_poller;
-
     NfcPollerList* list;
     NfcProtocolType protocol;
 
@@ -65,57 +56,6 @@ void nfc_poller_manager_free(NfcPollerManager* instance) {
     free(instance->event);
     free(instance);
 }
-
-// typedef NfcCommand (*NfcPollerManagerHandler)(NfcPollerManager* instance);
-
-// NfcCommand nfc_poller_manager_handler_idle(NfcPollerManager* instance) {
-//     NfcCommand command = NfcCommandContinue;
-
-//     instance->base_protocol_total = COUNT_OF(nfc_poller_base_type);
-//     instance->base_protocol_current = 0;
-
-//     return command;
-// }
-
-// static const NfcPollerManagerHandler nfc_poller_manager_handler[NfcPollerManagerStateNum] = {
-//     [NfcPollerManagerStateIdle] = nfc_poller_manager_handler_idle,
-// };
-
-// static NfcCommand nfc_poller_manager_scan_event_callback(NfcEvent event, void* context) {
-//     furi_assert(context);
-
-//     NfcPollerManager* instance = context;
-//     furi_assert(instance->callback);
-
-//     NfcPollerEvent poller_event;
-//     NfcPollerCommand command = NfcPollerCommandContinue;
-
-//     if(instance->session_state == NfcPollerManagerSessionStateStopRequest) {
-//         command = NfcPollerCommandStop;
-//     } else {
-//         if(event.type == NfcEventTypeConfigureRequest) {
-//             instance->current_poller = instance->current_poller_base->alloc(instance->base_poller);
-//         } else if(event.type == NfcEventTypePollerReady) {
-//             command = instance->current_poller_base->run(instance->current_poller);
-//         } else if(event.type == NfcEventTypeReset) {
-//             instance->current_poller_base->free(instance->current_poller);
-//         }
-//     }
-
-//     return nfc_poller_manager_process_command(command);
-// }
-
-// void nfc_poller_manager_scan(NfcPollerManager* instance, NfcPollerCallback callback, void* context) {
-//     furi_assert(instance);
-//     furi_assert(callback);
-//     furi_assert(instance->session_state == NfcPollerManagerSessionStateIdle);
-
-//     instance->callback = callback;
-//     instance->context = context;
-//     instance->session_state = NfcPollerManagerSessionStateActive;
-
-//     nfc_start_poller(instance->nfc, nfc_poller_manager_scan_event_callback, instance);
-// }
 
 static void nfc_poller_manager_poller_list_alloc(NfcPollerManager* instance) {
     furi_assert(instance->list == NULL);
@@ -155,15 +95,13 @@ static void nfc_poller_manager_poller_list_alloc(NfcPollerManager* instance) {
 
 static void nfc_poller_manager_poller_list_free(NfcPollerManager* instance) {
     do {
-        NfcPollerListElement* child = instance->list->head->child;
-        if(child == NULL) break;
-
         instance->list->head->poller_api->free(instance->list->head->poller);
+        NfcPollerListElement* child = instance->list->head->child;
         free(instance->list->head);
+        if(child == NULL) break;
         instance->list->head = child;
     } while(true);
 
-    free(instance->list->head);
     free(instance->list);
     instance->list = NULL;
 }
@@ -180,19 +118,19 @@ static NfcCommand nfc_poller_manager_start_event_callback(NfcEvent event, void* 
         .poller = instance->nfc,
     };
 
+    if(event.type == NfcEventTypeConfigureRequest) {
+        nfc_poller_manager_poller_list_alloc(instance);
+    } else if(event.type == NfcEventTypePollerReady) {
+        *instance->event = event;
+        poller_manager_event.data = instance->event;
+        NfcPollerListElement* head = instance->list->head;
+        command = head->poller_api->run(poller_manager_event, head->poller);
+    } else if(event.type == NfcEventTypeReset) {
+        nfc_poller_manager_poller_list_free(instance);
+    }
+
     if(instance->session_state == NfcPollerManagerSessionStateStopRequest) {
         command = NfcCommandStop;
-    } else {
-        if(event.type == NfcEventTypeConfigureRequest) {
-            nfc_poller_manager_poller_list_alloc(instance);
-        } else if(event.type == NfcEventTypePollerReady) {
-            *instance->event = event;
-            poller_manager_event.data = instance->event;
-            NfcPollerListElement* head = instance->list->head;
-            command = head->poller_api->run(poller_manager_event, head->poller);
-        } else if(event.type == NfcEventTypeReset) {
-            nfc_poller_manager_poller_list_free(instance);
-        }
     }
 
     return command;
