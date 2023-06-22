@@ -66,7 +66,7 @@ bool nfc_scene_mf_ultralight_menu_on_event(void* context, SceneManagerEvent even
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightUnlockMenu);
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneInfo);
             consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfUltralightMenu, event.event);
