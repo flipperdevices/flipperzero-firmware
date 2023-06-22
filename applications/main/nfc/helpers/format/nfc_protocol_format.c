@@ -71,6 +71,15 @@ static void nfc_protocol_format_info_mf_classic(
     FuriString* str) {
     const MfClassicData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeMfClassic);
     nfc_protocol_format_info_iso14443_3a_common(data->nfca_data, type, str);
+
+    uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
+    uint8_t keys_total = sectors_total * 2;
+    uint8_t keys_found = 0;
+    uint8_t sectors_read = 0;
+    mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
+
+    furi_string_cat_printf(str, "\nKeys Found: %u/%u", keys_found, keys_total);
+    furi_string_cat_printf(str, "\nSectors Read: %u/%u", sectors_read, sectors_total);
 }
 
 // TODO: use proper type getters
