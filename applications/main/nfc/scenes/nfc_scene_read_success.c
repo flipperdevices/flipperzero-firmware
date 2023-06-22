@@ -31,7 +31,7 @@ void nfc_scene_read_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
-static const NfcScene nfc_scene_read_success_menus[NfcProtocolTypeMax] = {
+static const NfcScene nfc_scene_read_success_menu_scenes[NfcProtocolTypeMax] = {
     [NfcProtocolTypeIso14443_3a] = NfcSceneNfcaMenu,
     [NfcProtocolTypeIso14443_4a] = NfcSceneNotImplemented, //TODO: ISO14443-4A menu
     [NfcProtocolTypeMfUltralight] = NfcSceneMfUltralightMenu,
@@ -50,7 +50,7 @@ bool nfc_scene_read_success_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == GuiButtonTypeRight) {
             const NfcProtocolType protocol_type = nfc_dev_get_protocol_type(nfc->nfc_dev);
-            const NfcScene menu_scene = nfc_scene_read_success_menus[protocol_type];
+            const NfcScene menu_scene = nfc_scene_read_success_menu_scenes[protocol_type];
             scene_manager_next_scene(nfc->scene_manager, menu_scene);
             consumed = true;
         }

@@ -14,7 +14,4 @@ typedef enum {
 
 NfcProtocolFormatFeature nfc_protocol_format_get_features(const NfcDev* device);
 
-void nfc_protocol_format_info(
-    const NfcDev* device,
-    NfcProtocolFormatType type,
-    FuriString* str);
+void nfc_protocol_format_info(const NfcDev* device, NfcProtocolFormatType type, FuriString* str);
