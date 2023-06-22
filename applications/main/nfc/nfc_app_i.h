@@ -39,13 +39,12 @@
 #include <m-array.h>
 
 #include <lib/nfc/nfc.h>
-#include <lib/nfc/nfc_poller.h>
 #include <lib/nfc/protocols/nfca/nfca_poller.h>
 #include <lib/nfc/protocols/nfca/nfca_listener.h>
+#include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
-#include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 
 #include <nfc/nfc_poller_manager.h>
 #include <nfc/nfc_scanner.h>
@@ -115,8 +114,6 @@ struct NfcApp {
     MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
     MfClassicPoller* mf_classic_poller;
-    NfcbPoller* nfcb_poller;
-    NfcPollerOld* nfc_poller;
 
     NfcPollerManager* poller_manager;
     NfcScanner* scanner;
