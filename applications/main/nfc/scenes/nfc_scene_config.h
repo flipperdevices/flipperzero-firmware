@@ -17,7 +17,6 @@ ADD_SCENE(nfc, exit_confirm, ExitConfirm)
 
 ADD_SCENE(nfc, nfca_read, NfcaRead)
 ADD_SCENE(nfc, nfca_emulate, NfcaEmulate)
-ADD_SCENE(nfc, nfca_read_success, NfcaReadSuccess)
 ADD_SCENE(nfc, nfca_menu, NfcaMenu)
 
 ADD_SCENE(nfc, mf_ultralight_read, MfUltralightRead)

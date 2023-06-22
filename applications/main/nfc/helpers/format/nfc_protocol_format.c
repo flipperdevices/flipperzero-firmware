@@ -40,16 +40,19 @@ static void nfc_protocol_format_info_iso14443_3a(
     const NfcDev* device,
     NfcProtocolFormatType type,
     FuriString* str) {
+    UNUSED(type);
     const NfcaData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeIso14443_3a);
-    nfc_protocol_format_info_iso14443_3a_common(data, type, str);
+    nfc_protocol_format_info_iso14443_3a_common(data, NfcProtocolFormatTypeFull, str);
 }
 
 static void nfc_protocol_format_info_iso14443_4a(
     const NfcDev* device,
     NfcProtocolFormatType type,
     FuriString* str) {
+    UNUSED(type);
     const Iso14443_4aData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeIso14443_4a);
-    nfc_protocol_format_info_iso14443_3a_common(data->iso14443_3a_data, type, str);
+    nfc_protocol_format_info_iso14443_3a_common(
+        data->iso14443_3a_data, NfcProtocolFormatTypeFull, str);
 }
 
 static void nfc_protocol_format_info_mf_ultralight(

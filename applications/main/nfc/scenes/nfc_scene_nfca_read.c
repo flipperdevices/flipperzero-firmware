@@ -63,7 +63,7 @@ bool nfc_scene_nfca_read_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcWorkerEventReadUidNfcA) {
             notification_message(instance->notifications, &sequence_success);
-            scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaReadSuccess);
+            scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
             DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
             consumed = true;
         }
