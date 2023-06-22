@@ -8,7 +8,7 @@ ADD_SCENE(nfc, delete_success, DeleteSuccess)
 
 ADD_SCENE(nfc, detect, Detect)
 ADD_SCENE(nfc, info, Info)
-ADD_SCENE(nfc, read_card_type, ReadCardType)
+ADD_SCENE(nfc, select_protocol, SelectProtocol)
 ADD_SCENE(nfc, nfca_read, NfcaRead)
 ADD_SCENE(nfc, nfca_emulate, NfcaEmulate)
 ADD_SCENE(nfc, nfca_read_success, NfcaReadSuccess)

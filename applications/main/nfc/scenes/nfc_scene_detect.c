@@ -35,7 +35,7 @@ bool nfc_scene_detect_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventWorkerExit) {
             if(instance->protocols_detected_num > 1) {
-                scene_manager_next_scene(instance->scene_manager, NfcSceneReadCardType);
+                scene_manager_next_scene(instance->scene_manager, NfcSceneSelectProtocol);
             } else {
                 // TODO rework with generic read scene
                 const uint32_t nfc_read_scenes[NfcProtocolTypeMax] = {
