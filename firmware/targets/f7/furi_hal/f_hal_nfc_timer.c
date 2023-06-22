@@ -4,6 +4,7 @@
 #include <stm32wbxx_ll_tim.h>
 #include <furi_hal_resources.h>
 #include <furi_hal_gpio.h>
+#include <furi_hal_bus.h>
 
 #define F_HAL_NFC_FREQ_KHZ (13560U)
 
@@ -15,6 +16,7 @@ typedef enum {
 
 typedef struct {
     TIM_TypeDef* timer;
+    FuriHalBus bus;
     uint32_t prescaler;
     uint32_t freq_khz;
     FHalNfcEventInternalType event;
@@ -29,6 +31,7 @@ static FHalNfcTimerConfig f_hal_nfc_timers[FHalNfcTimerCount] = {
         {
             .pin = &gpio_ext_pa7,
             .timer = TIM1,
+            .bus = FuriHalBusTIM1,
             .prescaler = 15,
             .freq_khz = 4000U,
             .event = FHalNfcEventInternalTypeTimerFwtExpired,
@@ -40,6 +43,7 @@ static FHalNfcTimerConfig f_hal_nfc_timers[FHalNfcTimerCount] = {
         {
             .pin = &gpio_ext_pa6,
             .timer = TIM2,
+            .bus = FuriHalBusTIM2,
             .prescaler = 0,
             .freq_khz = 64000U,
             .event = FHalNfcEventInternalTypeTimerBlockTxExpired,
@@ -83,9 +87,15 @@ static void f_hal_nfc_timer_deinit(FHalNfcTimer timer) {
     furi_hal_interrupt_set_isr(f_hal_nfc_timers[timer].irq_id, NULL, NULL);
     NVIC_DisableIRQ(f_hal_nfc_timers[timer].irq_type);
     f_hal_nfc_timers[timer].is_configured = false;
+
+    if(furi_hal_bus_is_enabled(f_hal_nfc_timers[timer].bus)) {
+        furi_hal_bus_disable(f_hal_nfc_timers[timer].bus);
+    }
 }
 
 static void f_hal_nfc_timer_start(FHalNfcTimer timer, uint32_t time_fc) {
+    furi_hal_bus_enable(f_hal_nfc_timers[timer].bus);
+
     uint32_t arr_reg = f_hal_nfc_timers[timer].freq_khz * time_fc / F_HAL_NFC_FREQ_KHZ;
     LL_TIM_SetAutoReload(f_hal_nfc_timers[timer].timer, arr_reg);
     LL_TIM_EnableCounter(f_hal_nfc_timers[timer].timer);
@@ -100,6 +110,10 @@ static void f_hal_nfc_timer_stop(FHalNfcTimer timer) {
         LL_TIM_ClearFlag_UPDATE(f_hal_nfc_timers[timer].timer);
     }
     furi_hal_gpio_write(f_hal_nfc_timers[timer].pin, false);
+
+    if(furi_hal_bus_is_enabled(f_hal_nfc_timers[timer].bus)) {
+        furi_hal_bus_disable(f_hal_nfc_timers[timer].bus);
+    }
 }
 
 void f_hal_nfc_timers_init() {
