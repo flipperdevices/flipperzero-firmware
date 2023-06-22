@@ -1,7 +1,7 @@
 #pragma once
 
 #include "nfcb_poller.h"
-#include <nfc/nfc_poller_base.h>
+#include <nfc/protocols/nfc_poller_base.h>
 
 #ifdef __cplusplus
 extern "C" {

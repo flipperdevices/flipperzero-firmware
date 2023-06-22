@@ -48,7 +48,6 @@
 
 #include <nfc/nfc_poller_manager.h>
 #include <nfc/nfc_scanner.h>
-#include <nfc/nfc_poller_defs.h>
 
 #include <lib/nfc/nfc_dev.h>
 #include <lib/nfc/helpers/nfc_data_generator.h>

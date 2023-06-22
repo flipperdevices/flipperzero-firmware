@@ -3,7 +3,7 @@
 #include "nfca_poller.h"
 
 #include <nfc/helpers/bit_buffer.h>
-#include <nfc/nfc_poller_base.h>
+#include <nfc/protocols/nfc_poller_base.h>
 
 #ifdef __cplusplus
 extern "C" {

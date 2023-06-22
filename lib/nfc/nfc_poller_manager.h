@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-#include "nfc_poller_base.h"
+#include <nfc/protocols/nfc_poller_base.h>
 
 typedef struct NfcPollerManager NfcPollerManager;
 

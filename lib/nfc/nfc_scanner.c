@@ -1,6 +1,7 @@
 #include "nfc_scanner.h"
 #include "nfc_poller_manager.h"
-#include "nfc_poller_defs.h"
+
+#include <nfc/protocols/nfc_poller_defs.h>
 
 #include <furi/furi.h>
 
