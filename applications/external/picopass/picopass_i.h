@@ -22,12 +22,17 @@
 
 #include "scenes/picopass_scene.h"
 #include "views/dict_attack.h"
+#include "views/loclass.h"
 
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
-#include <Picopass_icons.h>
+#include <picopass_icons.h>
 
 #define PICOPASS_TEXT_STORE_SIZE 128
+
+#define LOCLASS_NUM_CSNS 9
+// Collect 2 MACs per CSN to account for keyroll modes
+#define LOCLASS_MACS_TO_COLLECT (LOCLASS_NUM_CSNS * 2)
 
 enum PicopassCustomEvent {
     // Reserve first 100 events for button types and indexes, starting from 0
@@ -63,6 +68,7 @@ struct Picopass {
     TextInput* text_input;
     Widget* widget;
     DictAttack* dict_attack;
+    Loclass* loclass;
 };
 
 typedef enum {
@@ -72,6 +78,7 @@ typedef enum {
     PicopassViewTextInput,
     PicopassViewWidget,
     PicopassViewDictAttack,
+    PicopassViewLoclass,
 } PicopassView;
 
 Picopass* picopass_alloc();
@@ -81,6 +88,8 @@ void picopass_text_store_set(Picopass* picopass, const char* text, ...);
 void picopass_text_store_clear(Picopass* picopass);
 
 void picopass_blink_start(Picopass* picopass);
+
+void picopass_blink_emulate_start(Picopass* picopass);
 
 void picopass_blink_stop(Picopass* picopass);
 

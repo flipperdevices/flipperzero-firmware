@@ -80,6 +80,10 @@ Picopass* picopass_alloc() {
         PicopassViewDictAttack,
         dict_attack_get_view(picopass->dict_attack));
 
+    picopass->loclass = loclass_alloc();
+    view_dispatcher_add_view(
+        picopass->view_dispatcher, PicopassViewLoclass, loclass_get_view(picopass->loclass));
+
     return picopass;
 }
 
@@ -112,6 +116,9 @@ void picopass_free(Picopass* picopass) {
 
     view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewDictAttack);
     dict_attack_free(picopass->dict_attack);
+
+    view_dispatcher_remove_view(picopass->view_dispatcher, PicopassViewLoclass);
+    loclass_free(picopass->loclass);
 
     // Worker
     picopass_worker_stop(picopass->worker);
@@ -154,6 +161,13 @@ static const NotificationSequence picopass_sequence_blink_start_cyan = {
     NULL,
 };
 
+static const NotificationSequence picopass_sequence_blink_start_magenta = {
+    &message_blink_start_10,
+    &message_blink_set_color_magenta,
+    &message_do_not_reset,
+    NULL,
+};
+
 static const NotificationSequence picopass_sequence_blink_stop = {
     &message_blink_stop,
     NULL,
@@ -161,6 +175,10 @@ static const NotificationSequence picopass_sequence_blink_stop = {
 
 void picopass_blink_start(Picopass* picopass) {
     notification_message(picopass->notifications, &picopass_sequence_blink_start_cyan);
+}
+
+void picopass_blink_emulate_start(Picopass* picopass) {
+    notification_message(picopass->notifications, &picopass_sequence_blink_start_magenta);
 }
 
 void picopass_blink_stop(Picopass* picopass) {

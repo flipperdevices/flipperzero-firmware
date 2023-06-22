@@ -18,12 +18,9 @@ void vibro_test_draw_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 2, 10, "Vibro Modes");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 22, "LEFT: strong / RIGHT: Soft");
-    canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 34, "UP: Pulsed");
-    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 2, 22, "LEFT: strong / RIGHT: Soft");
     canvas_draw_str(canvas, 2, 46, "DOWN Pleasure combo");
-    canvas_set_font(canvas, FontSecondary);
     canvas_draw_str(canvas, 2, 58, "OK: Pause");
     furi_mutex_release(plugin_state->mutex);
 }

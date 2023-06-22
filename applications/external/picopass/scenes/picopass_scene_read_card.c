@@ -38,7 +38,7 @@ bool picopass_scene_read_card_on_event(void* context, SceneManagerEvent event) {
             if(memcmp(
                    picopass->dev->dev_data.pacs.key,
                    picopass_factory_debit_key,
-                   PICOPASS_BLOCK_LEN) == 0) {
+                   RFAL_PICOPASS_BLOCK_LEN) == 0) {
                 scene_manager_next_scene(picopass->scene_manager, PicopassSceneReadFactorySuccess);
             } else {
                 scene_manager_next_scene(picopass->scene_manager, PicopassSceneReadCardSuccess);

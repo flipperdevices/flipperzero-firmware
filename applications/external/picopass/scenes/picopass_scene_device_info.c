@@ -26,9 +26,9 @@ void picopass_scene_device_info_on_enter(void* context) {
     PicopassPacs* pacs = &picopass->dev->dev_data.pacs;
     Widget* widget = picopass->widget;
 
-    uint8_t csn[PICOPASS_BLOCK_LEN] = {0};
-    memcpy(csn, AA1[PICOPASS_CSN_BLOCK_INDEX].data, PICOPASS_BLOCK_LEN);
-    for(uint8_t i = 0; i < PICOPASS_BLOCK_LEN; i++) {
+    uint8_t csn[RFAL_PICOPASS_BLOCK_LEN] = {0};
+    memcpy(csn, AA1[PICOPASS_CSN_BLOCK_INDEX].data, RFAL_PICOPASS_BLOCK_LEN);
+    for(uint8_t i = 0; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
         furi_string_cat_printf(csn_str, "%02X ", csn[i]);
     }
 
@@ -42,7 +42,7 @@ void picopass_scene_device_info_on_enter(void* context) {
             bytesLength++;
         }
         furi_string_set(credential_str, "");
-        for(uint8_t i = PICOPASS_BLOCK_LEN - bytesLength; i < PICOPASS_BLOCK_LEN; i++) {
+        for(uint8_t i = RFAL_PICOPASS_BLOCK_LEN - bytesLength; i < RFAL_PICOPASS_BLOCK_LEN; i++) {
             furi_string_cat_printf(credential_str, " %02X", pacs->credential[i]);
         }
 

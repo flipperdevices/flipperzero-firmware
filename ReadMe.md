@@ -31,14 +31,16 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0620-1359-0.85.3-80a25aa](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-20 13:55 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-20 13:55 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-22 04:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-22 04:50 EST`
 - HAPPY FATHERS DAY TO ALL THE FATHERS!!
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [Add circuit theme to passport #673 (By Fiattarone)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/673)
 - [Patreon Build Update: New DJ & Kaiju animations added to ALL, Minimal, Dolphin & Stock builds](https://www.patreon.com/RogueMaster/membership)
 - Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch)
+- [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
+- Updated: [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) (Minot changes by Willy-JL)
 
 <a name="release">
 
@@ -183,6 +185,7 @@ $ ./fbt dolphin_ext
 - Plugins: 2048, Arkanoid, Snake, and Tetris show score. Thanks to [whoamins](https://github.com/flipperdevices/flipperzero-firmware/commit/7feda832ede1ba8468eff2ca055fef3ddbdc16ac) and [DevMilanIan](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/188) With position changes by RogueMaster. Also all + Tic Tac Toe updated by [Unleashed/Eng1n33r](https://github.com/DarkFlippers/unleashed-firmware) for stability.
 - Plugins: Icon for Clock [Thanks to Redlink](https://github.com/redlink2/flipperzero-firmware/tree/menuChanges)
 - Plugins: OFW PR [Snake Plugin: Store game state on close and restore it on restart, show highscore #1922 (By JuanJakobo)](https://github.com/flipperdevices/flipperzero-firmware/pull/1922)
+- Plugins: [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - [RFID: LFRFID AS FAP #397 (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/397) (With Thanks to ESurge) [Restored Infrared and RFID CLI #405 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/405)
 - Settings: OFW PR [Automatic shutdown on idle #1647 (By SHxKenzuto)](https://github.com/flipperdevices/flipperzero-firmware/pull/1647)
 - Settings: Actual PIN Lock [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/desktop/desktop.c)
@@ -359,7 +362,7 @@ $ ./fbt dolphin_ext
 - [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch)
 - [NRF24 Scanner v2.2 (By vad7)](https://github.com/vad7/nrf24scan)
 - [Ocarina (By invalidna-me)](https://github.com/invalidna-me/flipperzero-ocarina) [Here are the LOTZ Songs](https://www.zeldadungeon.net/wiki/Ocarina_of_Time_Songs)
-- [Orgasmotron (By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) [Updated by jbohack](https://github.com/jbohack)
+- [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins)
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
 - [PicoPass Reader (By Bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/1366)

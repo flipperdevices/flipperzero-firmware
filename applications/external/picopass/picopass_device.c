@@ -2,7 +2,7 @@
 
 #include <toolbox/path.h>
 #include <flipper_format/flipper_format.h>
-#include <Picopass_icons.h>
+#include <picopass_icons.h>
 
 #define TAG "PicopassDevice"
 
@@ -67,13 +67,14 @@ static bool picopass_device_save_file(
                 if(!flipper_format_write_uint32(file, "Facility Code", &fc, 1)) break;
                 if(!flipper_format_write_uint32(file, "Card Number", &cn, 1)) break;
                 if(!flipper_format_write_hex(
-                       file, "Credential", pacs->credential, PICOPASS_BLOCK_LEN))
+                       file, "Credential", pacs->credential, RFAL_PICOPASS_BLOCK_LEN))
                     break;
                 if(pacs->pin_length > 0) {
-                    if(!flipper_format_write_hex(file, "PIN\t\t", pacs->pin0, PICOPASS_BLOCK_LEN))
+                    if(!flipper_format_write_hex(
+                           file, "PIN\t\t", pacs->pin0, RFAL_PICOPASS_BLOCK_LEN))
                         break;
                     if(!flipper_format_write_hex(
-                           file, "PIN(cont.)\t", pacs->pin1, PICOPASS_BLOCK_LEN))
+                           file, "PIN(cont.)\t", pacs->pin1, RFAL_PICOPASS_BLOCK_LEN))
                         break;
                 }
             }
@@ -86,7 +87,10 @@ static bool picopass_device_save_file(
             for(size_t i = 0; i < app_limit; i++) {
                 furi_string_printf(temp_str, "Block %d", i);
                 if(!flipper_format_write_hex(
-                       file, furi_string_get_cstr(temp_str), AA1[i].data, PICOPASS_BLOCK_LEN)) {
+                       file,
+                       furi_string_get_cstr(temp_str),
+                       AA1[i].data,
+                       RFAL_PICOPASS_BLOCK_LEN)) {
                     block_saved = false;
                     break;
                 }
@@ -160,7 +164,7 @@ static bool picopass_device_load_data(PicopassDevice* dev, FuriString* path, boo
         for(size_t i = 0; i < 6; i++) {
             furi_string_printf(temp_str, "Block %d", i);
             if(!flipper_format_read_hex(
-                   file, furi_string_get_cstr(temp_str), AA1[i].data, PICOPASS_BLOCK_LEN)) {
+                   file, furi_string_get_cstr(temp_str), AA1[i].data, RFAL_PICOPASS_BLOCK_LEN)) {
                 block_read = false;
                 break;
             }
@@ -172,7 +176,7 @@ static bool picopass_device_load_data(PicopassDevice* dev, FuriString* path, boo
         for(size_t i = 6; i < app_limit; i++) {
             furi_string_printf(temp_str, "Block %d", i);
             if(!flipper_format_read_hex(
-                   file, furi_string_get_cstr(temp_str), AA1[i].data, PICOPASS_BLOCK_LEN)) {
+                   file, furi_string_get_cstr(temp_str), AA1[i].data, RFAL_PICOPASS_BLOCK_LEN)) {
                 block_read = false;
                 break;
             }
@@ -335,9 +339,9 @@ ReturnCode picopass_device_parse_credential(PicopassBlock* AA1, PicopassPacs* pa
         }
     } else if(pacs->encryption == PicopassDeviceEncryptionNone) {
         FURI_LOG_D(TAG, "No Encryption");
-        memcpy(pacs->credential, AA1[7].data, PICOPASS_BLOCK_LEN);
-        memcpy(pacs->pin0, AA1[8].data, PICOPASS_BLOCK_LEN);
-        memcpy(pacs->pin1, AA1[9].data, PICOPASS_BLOCK_LEN);
+        memcpy(pacs->credential, AA1[7].data, RFAL_PICOPASS_BLOCK_LEN);
+        memcpy(pacs->pin0, AA1[8].data, RFAL_PICOPASS_BLOCK_LEN);
+        memcpy(pacs->pin1, AA1[9].data, RFAL_PICOPASS_BLOCK_LEN);
     } else if(pacs->encryption == PicopassDeviceEncryptionDES) {
         FURI_LOG_D(TAG, "DES Encrypted");
     } else {

@@ -1,6 +1,6 @@
 App(
-    appid="Picopass",
-    name="PicoPass Reader",
+    appid="PicoPass",
+    name="PicoPass",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="picopass_app",
@@ -19,4 +19,5 @@ App(
         ),
     ],
     fap_icon_assets="icons",
+    fap_icon_assets_symbol="picopass",
 )

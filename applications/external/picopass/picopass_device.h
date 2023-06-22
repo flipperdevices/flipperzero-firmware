@@ -7,23 +7,38 @@
 #include <mbedtls/des.h>
 
 #include "rfal_picopass.h"
+#include "loclass_writer.h"
 #include <optimized_ikeys.h>
 #include <optimized_cipher.h>
 #include "helpers/iclass_elite_dict.h"
 
 #define PICOPASS_DEV_NAME_MAX_LEN 22
 #define PICOPASS_READER_DATA_MAX_SIZE 64
-#define PICOPASS_BLOCK_LEN 8
 #define PICOPASS_MAX_APP_LIMIT 32
 
 #define PICOPASS_CSN_BLOCK_INDEX 0
 #define PICOPASS_CONFIG_BLOCK_INDEX 1
-#define PICOPASS_EPURSE_BLOCK_INDEX 2
-#define PICOPASS_KD_BLOCK_INDEX 3
-#define PICOPASS_KC_BLOCK_INDEX 4
-#define PICOPASS_AIA_BLOCK_INDEX 5
-#define PICOPASS_PACS_CFG_BLOCK_INDEX 6
+// These definitions for blocks above 2 only hold for secure cards.
+#define PICOPASS_SECURE_EPURSE_BLOCK_INDEX 2
+#define PICOPASS_SECURE_KD_BLOCK_INDEX 3
+#define PICOPASS_SECURE_KC_BLOCK_INDEX 4
+#define PICOPASS_SECURE_AIA_BLOCK_INDEX 5
+// Non-secure cards instead have an AIA at block 2
+#define PICOPASS_NONSECURE_AIA_BLOCK_INDEX 2
+// Only iClass cards
+#define PICOPASS_ICLASS_PACS_CFG_BLOCK_INDEX 6
 
+// Personalization Mode
+#define PICOPASS_FUSE_PERS 0x80
+// Crypt1 // 1+1 (crypt1+crypt0) means secured and keys changable
+#define PICOPASS_FUSE_CRYPT1 0x10
+// Crypt0 // 1+0 means secure and keys locked, 0+1 means not secured, 0+0 means disable auth entirely
+#define PICOPASS_FUSE_CRTPT0 0x08
+#define PICOPASS_FUSE_CRYPT10 (PICOPASS_FUSE_CRYPT1 | PICOPASS_FUSE_CRTPT0)
+// Read Access, 1 meanns anonymous read enabled, 0 means must auth to read applicaion
+#define PICOPASS_FUSE_RA 0x01
+
+#define PICOPASS_APP_FOLDER ANY_PATH("picopass")
 #define PICOPASS_APP_EXTENSION ".picopass"
 #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
 
@@ -49,6 +64,13 @@ typedef enum {
     PicopassDeviceSaveFormatLF,
 } PicopassDeviceSaveFormat;
 
+typedef enum {
+    PicopassEmulatorStateHalt,
+    PicopassEmulatorStateIdle,
+    PicopassEmulatorStateActive,
+    PicopassEmulatorStateSelected,
+} PicopassEmulatorState;
+
 typedef struct {
     bool valid;
     uint8_t bitLength;
@@ -71,7 +93,7 @@ typedef struct {
 } PicopassPacs;
 
 typedef struct {
-    uint8_t data[PICOPASS_BLOCK_LEN];
+    uint8_t data[RFAL_PICOPASS_BLOCK_LEN];
 } PicopassBlock;
 
 typedef struct {
@@ -79,6 +101,15 @@ typedef struct {
     PicopassPacs pacs;
     IclassEliteDictAttackData iclass_elite_dict_attack_data;
 } PicopassDeviceData;
+
+typedef struct {
+    PicopassEmulatorState state;
+    LoclassState_t cipher_state;
+    uint8_t key_block_num; // in loclass mode used to store csn#
+    bool loclass_mode;
+    bool loclass_got_std_key;
+    LoclassWriter* loclass_writer;
+} PicopassEmulatorCtx;
 
 typedef struct {
     Storage* storage;
