@@ -898,7 +898,7 @@ static uint8_t load_settings_file() {
     NRF_INITED = false;
     while(stream_read_line(file_stream, str)) {
         char* p = (char*)furi_string_get_cstr(str);
-        if(*p <= ' ') continue;
+        if(*p <= '!' || *p == ';') continue;
         //char* delim_eq = strchr(p, '=');
         char* delim_col = strchr(p, ':');
         if(delim_col == NULL) { // Constant found - no ':'

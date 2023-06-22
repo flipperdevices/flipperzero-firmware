@@ -71,6 +71,11 @@ W: SSR2_PulseWidth,us*2=,32,WROM2
 R: DamperOpenTime=34
 W: DamperOpenTime=,34
 
+!R: FanCookSpIdxDnKey=35
+!W: FanCookSpIdxDnKey=,35
+!R: FanCookSpIdxUpKey=36
+!W: FanCookSpIdxUpKey=,36
+
 R: IRRemotes=35
 W: IRRemotes=,35
 
@@ -150,6 +155,7 @@ WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={870,930,1000};Fa
 WBatch: IRRemotes clear: IRRemotes=0
 WBatch: IRRemotes 1 kitchen: IRRemotes=1;IRRemotesHash={0x6DA5,0xFCA5,0x7CA5,0xB425,0x3425,0x1625,0x8525}
 WBatch: Fans Speeds: Fan speeds=3;FanSpeed={10,12,16};FanCook speeds=3;FanCookSpeed={12,16,32}
+WBatch: FanCooker Down/Up key idx: FanCookSpIdxDnKey=2;FanCookSpIdxUpKey=3
 WBatch: LED Warning: _LED Warning=0x10
 WBatch: OSCCAL: _OSCCAL=146
 WBatch: CO2 Level: CO2 level={750,850,1000}
