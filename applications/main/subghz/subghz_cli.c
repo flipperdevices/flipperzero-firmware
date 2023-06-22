@@ -196,6 +196,32 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
     subghz_environment_free(environment);
 }
 
+#include "fild_validation_rfid_driver.h"
+void subghz_cli_command_us(Cli* cli, FuriString* args, void* context) {
+    UNUSED(context);
+    UNUSED(args);
+
+    printf("Check frecuency. Press CTRL+C to stop\r\n");
+    furi_hal_power_suppress_charge_enter();
+
+    FildValdationDriverRfid* driver = fild_validation_rfid_driver_alloc();
+    uint32_t frequency = 0;
+    bool fild = false;
+    fild_validation_rfid_driver_dma_start(driver);
+
+    while(!(cli_cmd_interrupt_received(cli))) {
+        fild = fild_validation_rfid_driver_check(driver, &frequency);
+        printf("fild = %d frecuency= %lu\r\n", fild, frequency);
+        fflush(stdout);
+        furi_delay_ms(100);
+    }
+
+    fild_validation_rfid_driver_dma_stop(driver);
+    fild_validation_rfid_driver_free(driver);
+
+    furi_hal_power_suppress_charge_exit();
+}
+
 typedef struct {
     volatile bool overrun;
     FuriStreamBuffer* stream;
@@ -808,6 +834,11 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "tx") == 0) {
             subghz_cli_command_tx(cli, args, context);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "us") == 0) {
+            subghz_cli_command_us(cli, args, context);
             break;
         }
 
