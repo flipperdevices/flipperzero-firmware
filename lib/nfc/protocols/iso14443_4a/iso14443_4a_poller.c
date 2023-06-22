@@ -32,7 +32,6 @@ static Iso14443_4aPoller* iso14443_4a_poller_alloc(NfcaPoller* iso14443_3a_polle
 
 static void iso14443_4a_poller_free(Iso14443_4aPoller* instance) {
     furi_assert(instance);
-    furi_assert(instance->poller_state == Iso14443_4aPollerStateIdle);
 
     iso14443_4a_free(instance->data);
     bit_buffer_free(instance->tx_buffer);
@@ -126,6 +125,8 @@ static bool iso14443_4a_poller_detect(NfcPollerEvent event, void* context) {
 
     const NfcaPollerEvent* iso14443_3a_event = event.data;
     furi_assert(iso14443_3a_event);
+    nfca_copy(
+        instance->data->iso14443_3a_data, nfca_poller_get_data(instance->iso14443_3a_poller));
 
     bool protocol_detected = false;
 

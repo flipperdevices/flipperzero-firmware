@@ -39,16 +39,15 @@
 #include <m-array.h>
 
 #include <lib/nfc/nfc.h>
-#include <lib/nfc/nfc_poller.h>
 #include <lib/nfc/protocols/nfca/nfca_poller.h>
 #include <lib/nfc/protocols/nfca/nfca_listener.h>
+#include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
-#include <lib/nfc/protocols/nfcb/nfcb_poller.h>
 
 #include <nfc/nfc_poller_manager.h>
-#include <nfc/nfc_poller_defs.h>
+#include <nfc/nfc_scanner.h>
 
 #include <lib/nfc/nfc_dev.h>
 #include <lib/nfc/helpers/nfc_data_generator.h>
@@ -89,6 +88,10 @@ struct NfcApp {
     FuriString* text_box_store;
     uint8_t byte_input_store[6];
 
+    size_t protocols_detected_num;
+    size_t protocols_detected_idx;
+    NfcProtocolType protocols_detected[NfcProtocolTypeMax];
+
     void* rpc_ctx;
     NfcRpcState rpc_state;
 
@@ -107,13 +110,11 @@ struct NfcApp {
     Nfc* nfc;
     NfcaPoller* nfca_poller;
     NfcaListener* nfca_listener;
-    MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
     MfClassicPoller* mf_classic_poller;
-    NfcbPoller* nfcb_poller;
-    NfcPollerOld* nfc_poller;
 
     NfcPollerManager* poller_manager;
+    NfcScanner* scanner;
 
     MfUltralightAuth* mf_ul_auth;
     NfcMfClassicDictAttackContext mf_dict_context;

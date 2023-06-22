@@ -345,7 +345,7 @@ static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
         if(event & FHalNfcEventTxEnd) {
             if(instance->comm_state == NfcCommStateWaitTxEnd) {
                 if(fwt_fc) {
-                    f_hal_nfc_timer_fwt_start(fwt_fc);
+                    f_hal_nfc_timer_fwt_start(fwt_fc + F_HAL_NFC_TIMER_OFFSET_FC);
                 }
                 f_hal_nfc_timer_block_tx_start_us(instance->fdt_poll_poll_us);
                 instance->comm_state = NfcCommStateWaitRxStart;

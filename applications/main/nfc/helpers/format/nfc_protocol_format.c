@@ -151,6 +151,6 @@ NfcProtocolFormatFeature nfc_protocol_format_get_features(const NfcDev* device) 
 
 void nfc_protocol_format_info(const NfcDev* device, NfcProtocolFormatType type, FuriString* str) {
     furi_string_cat_printf(
-        str, "\e#%s\n", nfc_dev_get_protocol_name(device, NfcProtocolNameTypeFull));
+        str, "\e#%s\n", nfc_dev_get_device_name(device, NfcProtocolNameTypeFull));
     nfc_protocol_format[nfc_dev_get_protocol_type(device)].render_info(device, type, str);
 }

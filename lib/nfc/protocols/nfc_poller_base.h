@@ -1,6 +1,6 @@
 #pragma once
 
-#include "protocols/nfc_protocol_defs.h"
+#include "nfc_protocol_defs.h"
 #include "nfc.h"
 
 #ifdef __cplusplus
