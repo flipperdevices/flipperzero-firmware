@@ -234,9 +234,6 @@ void nfc_scanner_state_handler_complete(NfcScanner* instance) {
         nfc_scanner_filter_detected_protocols(instance);
     }
     FURI_LOG_I(TAG, "Detected %d protocols", instance->detected_protocols_num);
-    for(size_t i = 0; i < instance->detected_protocols_num; i++) {
-        FURI_LOG_W(TAG, "%d", instance->detected_protocols[i]);
-    }
 
     NfcScannerEvent event = {
         .type = NfcScannerEventTypeDetected,
