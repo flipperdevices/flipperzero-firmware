@@ -651,17 +651,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
             with_view_model(
                 browser->view,
                 FileBrowserModel * model,
-                {
-                    model->button_held_for_ticks = 0;
-                    if(browser_is_list_load_required(model)) {
-                        model->list_loading = true;
-                        int32_t load_offset = CLAMP(
-                            model->item_idx - ITEM_LIST_LEN_MAX / 4 * 1,
-                            (int32_t)model->item_cnt,
-                            0);
-                        file_browser_worker_load(browser->worker, load_offset, ITEM_LIST_LEN_MAX);
-                    }
-                },
+                { model->button_held_for_ticks = 0; },
                 true);
         }
     } else if(event->key == InputKeyOk) {
