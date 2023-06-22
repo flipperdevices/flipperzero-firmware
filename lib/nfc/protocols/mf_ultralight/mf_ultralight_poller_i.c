@@ -809,6 +809,7 @@ static bool mf_ultralight_poller_detect(NfcPollerEvent event, void* context) {
         MfUltralightError error =
             mf_ultralight_poller_async_read_page(instance, 0, &read_page_cmd_data);
         protocol_detected = (error == MfUltralightErrorNone);
+        nfca_poller_halt(instance->nfca_poller);
     }
 
     return protocol_detected;

@@ -13,6 +13,7 @@ typedef enum {
     NfcScannerStateTryBasePollers,
     NfcScannerStateFindChildrenProtocols,
     NfcScannerStateDetectChildrenProtocols,
+    // TODO add state to retry base pollers after children pollers detection
     NfcScannerStateComplete,
 
     NfcScannerStateNum,
@@ -164,12 +165,9 @@ static NfcCommand nfc_scanner_detect_child_protocol_callback(NfcPollerEvent even
     NfcScanner* instance = context;
     const NfcPollerBase* current_poller_api = nfc_pollers_api[instance->current_protocol];
 
-    // TODO change to assert after all api is implemented
-    if(current_poller_api->alloc) {
+    if(current_poller_api) {
         instance->current_poller = current_poller_api->alloc(event.poller);
-        if(current_poller_api->detect) {
-            protocol_detected = current_poller_api->detect(event, instance->current_poller);
-        }
+        protocol_detected = current_poller_api->detect(event, instance->current_poller);
         current_poller_api->free(instance->current_poller);
     }
 
@@ -210,10 +208,34 @@ void nfc_scanner_state_handler_detect_children_protocols(NfcScanner* instance) {
     }
 }
 
+static void nfc_scanner_filter_detected_protocols(NfcScanner* instance) {
+    size_t filtered_protocols_num = 0;
+    NfcProtocolType filtered_protocols[NfcProtocolTypeMax] = {};
+
+    for(size_t i = 0; i < instance->detected_protocols_num; i++) {
+        bool is_parent = false;
+        for(size_t j = i; j < instance->detected_protocols_num; j++) {
+            is_parent = nfc_scanner_check_parent_protocol(
+                instance->detected_protocols[j], instance->detected_protocols[i]);
+            if(is_parent) break;
+        }
+        if(!is_parent) {
+            filtered_protocols[filtered_protocols_num] = instance->detected_protocols[i];
+            filtered_protocols_num++;
+        }
+    }
+
+    instance->detected_protocols_num = filtered_protocols_num;
+    memcpy(instance->detected_protocols, filtered_protocols, filtered_protocols_num);
+}
+
 void nfc_scanner_state_handler_complete(NfcScanner* instance) {
+    if(instance->detected_protocols_num > 1) {
+        nfc_scanner_filter_detected_protocols(instance);
+    }
     FURI_LOG_I(TAG, "Detected %d protocols", instance->detected_protocols_num);
     for(size_t i = 0; i < instance->detected_protocols_num; i++) {
-        FURI_LOG_W(TAG, "%s", nfc_protocols[i]->get_name(NULL, NfcProtocolNameTypeShort));
+        FURI_LOG_W(TAG, "%d", instance->detected_protocols[i]);
     }
 
     NfcScannerEvent event = {
@@ -259,12 +281,6 @@ NfcScanner* nfc_scanner_alloc(Nfc* nfc) {
     instance->nfc = nfc;
     instance->poller_manager = nfc_poller_manager_alloc(instance->nfc);
 
-    instance->scan_worker = furi_thread_alloc();
-    furi_thread_set_name(instance->scan_worker, "NfcScanWorker");
-    furi_thread_set_context(instance->scan_worker, instance);
-    furi_thread_set_stack_size(instance->scan_worker, 2 * 1024);
-    furi_thread_set_callback(instance->scan_worker, nfc_scanner_worker);
-
     return instance;
 }
 
@@ -280,21 +296,31 @@ void nfc_scanner_start(NfcScanner* instance, NfcScannerCallback callback, void* 
     furi_assert(instance);
     furi_assert(callback);
     furi_assert(instance->session_state == NfcScannerSessionStateIdle);
+    furi_assert(instance->scan_worker == NULL);
 
     instance->callback = callback;
     instance->context = context;
     instance->session_state = NfcScannerSessionStateActive;
+
+    instance->scan_worker = furi_thread_alloc();
+    furi_thread_set_name(instance->scan_worker, "NfcScanWorker");
+    furi_thread_set_context(instance->scan_worker, instance);
+    furi_thread_set_stack_size(instance->scan_worker, 4 * 1024);
+    furi_thread_set_callback(instance->scan_worker, nfc_scanner_worker);
 
     furi_thread_start(instance->scan_worker);
 }
 
 void nfc_scanner_stop(NfcScanner* instance) {
     furi_assert(instance);
+    furi_assert(instance->scan_worker);
 
     instance->session_state = NfcScannerSessionStateStopRequest;
     furi_thread_join(instance->scan_worker);
     instance->session_state = NfcScannerSessionStateIdle;
 
+    furi_thread_free(instance->scan_worker);
+    instance->scan_worker = NULL;
     instance->callback = NULL;
     instance->context = NULL;
     instance->state = NfcScannerStateIdle;

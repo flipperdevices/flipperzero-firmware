@@ -122,15 +122,11 @@ static NfcCommand nfc_poller_manager_start_event_callback(NfcEvent event, void* 
     if(instance->session_state == NfcPollerManagerSessionStateStopRequest) {
         command = NfcCommandStop;
     } else {
-        if(event.type == NfcEventTypeConfigureRequest) {
-            nfc_poller_manager_poller_list_alloc(instance);
-        } else if(event.type == NfcEventTypePollerReady) {
+        if(event.type == NfcEventTypePollerReady) {
             *instance->event = event;
             poller_manager_event.data = instance->event;
             NfcPollerListElement* head = instance->list->head;
             command = head->poller_api->run(poller_manager_event, head->poller);
-        } else if(event.type == NfcEventTypeReset) {
-            nfc_poller_manager_poller_list_free(instance);
         }
     }
 
@@ -152,6 +148,7 @@ void nfc_poller_manager_start(
     instance->context = context;
     instance->session_state = NfcPollerManagerSessionStateActive;
 
+    nfc_poller_manager_poller_list_alloc(instance);
     nfc_start_poller(instance->nfc, nfc_poller_manager_start_event_callback, instance);
 }
 
@@ -162,6 +159,7 @@ void nfc_poller_manager_stop(NfcPollerManager* instance) {
     instance->session_state = NfcPollerManagerSessionStateStopRequest;
     nfc_stop(instance->nfc);
     instance->session_state = NfcPollerManagerSessionStateIdle;
+    nfc_poller_manager_poller_list_free(instance);
 
     instance->callback = NULL;
     instance->context = NULL;
