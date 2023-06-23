@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a Pokemon exchange application from Flipper Zero to Game Boy [(Generación I)](https://bulbapedia.bulbagarden.net/wiki/Generation_I). Flipper Zero emulates a "Slave" Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.
+This is a Pokemon exchange application from Flipper Zero to Game Boy (Generación I). Flipper Zero emulates a "Slave" Game Boy connected to a Game Link Cable to be able to exchange any Pokemon from the First Generation (Red, Blue, Yellow) to a real Game Boy.
 
 It is a Proof of Concept (POC) for using views, GPIO, and FURI (Flipper Universal Registry Implementation).
 
