@@ -86,6 +86,16 @@ void fuzzer_view_attack_pause(FuzzerViewAttack* view) {
     with_view_model(
         view->view,
         FuzzerViewAttackModel * model,
+        { model->attack_state = FuzzerAttackStatePause; },
+        true);
+}
+
+void fuzzer_view_attack_idle(FuzzerViewAttack* view) {
+    furi_assert(view);
+
+    with_view_model(
+        view->view,
+        FuzzerViewAttackModel * model,
         { model->attack_state = FuzzerAttackStateIdle; },
         true);
 }
@@ -108,6 +118,29 @@ void fuzzer_view_attack_set_callback(
 
     view_attack->callback = callback;
     view_attack->context = context;
+}
+
+static void fuzzer_view_attack_draw_idle(Canvas* canvas, FuzzerViewAttackModel* model) {
+    if(model->td_emt_cursor) {
+        elements_button_center(canvas, "Start");
+        elements_button_left(canvas, "EmT -");
+        elements_button_right(canvas, "+ EmT");
+    } else {
+        elements_button_center(canvas, "Start");
+        elements_button_left(canvas, "TD -");
+        elements_button_right(canvas, "+ TD");
+    }
+}
+
+static void fuzzer_view_attack_draw_running(Canvas* canvas, FuzzerViewAttackModel* model) {
+    UNUSED(model);
+    elements_button_center(canvas, "Stop");
+}
+
+static void fuzzer_view_attack_draw_end(Canvas* canvas, FuzzerViewAttackModel* model) {
+    UNUSED(model);
+    // elements_button_center(canvas, "Restart"); // Reset
+    elements_button_left(canvas, "Exit");
 }
 
 void fuzzer_view_attack_draw(Canvas* canvas, FuzzerViewAttackModel* model) {
@@ -174,112 +207,83 @@ void fuzzer_view_attack_draw(Canvas* canvas, FuzzerViewAttackModel* model) {
 
     canvas_set_font(canvas, FontSecondary);
     if(model->attack_state == FuzzerAttackStateRunning) {
-        elements_button_center(canvas, "Stop");
+        fuzzer_view_attack_draw_running(canvas, model);
     } else if(model->attack_state == FuzzerAttackStateIdle) {
-        if(model->td_emt_cursor) {
-            elements_button_center(canvas, "Start");
-            elements_button_left(canvas, "EmT -");
-            elements_button_right(canvas, "+ EmT");
-        } else {
-            elements_button_center(canvas, "Start");
-            elements_button_left(canvas, "TD -");
-            elements_button_right(canvas, "+ TD");
-        }
-
+        fuzzer_view_attack_draw_idle(canvas, model);
+    } else if(model->attack_state == FuzzerAttackStatePause) {
+        elements_button_left(canvas, "Prev");
+        elements_button_right(canvas, "Next");
+        elements_button_center(canvas, "Try"); // XXX
     } else if(model->attack_state == FuzzerAttackStateEnd) {
-        // elements_button_center(canvas, "Restart"); // Reset
-        elements_button_left(canvas, "Exit");
+        fuzzer_view_attack_draw_end(canvas, model);
     }
 }
 
-bool fuzzer_view_attack_input(InputEvent* event, void* context) {
-    furi_assert(context);
-    FuzzerViewAttack* view_attack = context;
-
+static bool fuzzer_view_attack_input_idle(
+    FuzzerViewAttack* view_attack,
+    InputEvent* event,
+    FuzzerViewAttackModel* model) {
     if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        view_attack->callback(FuzzerCustomEventViewAttackBack, view_attack->context);
+        view_attack->callback(FuzzerCustomEventViewAttackExit, view_attack->context);
         return true;
     } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        view_attack->callback(FuzzerCustomEventViewAttackOk, view_attack->context);
+        view_attack->callback(FuzzerCustomEventViewAttackRunAttack, view_attack->context);
         return true;
     } else if(event->key == InputKeyLeft) {
-        with_view_model(
-            view_attack->view,
-            FuzzerViewAttackModel * model,
-            {
-                if(model->attack_state == FuzzerAttackStateIdle) {
-                    if(!model->td_emt_cursor) {
-                        // TimeDelay --
-                        if(event->type == InputTypeShort) {
-                            if(model->time_delay > model->time_delay_min) {
-                                model->time_delay--;
-                            }
-                        } else if(event->type == InputTypeLong) {
-                            if((model->time_delay - 10) >= model->time_delay_min) {
-                                model->time_delay -= 10;
-                            } else {
-                                model->time_delay = model->time_delay_min;
-                            }
-                        }
-                    } else {
-                        // EmuTime --
-                        if(event->type == InputTypeShort) {
-                            if(model->emu_time > model->emu_time_min) {
-                                model->emu_time--;
-                            }
-                        } else if(event->type == InputTypeLong) {
-                            if((model->emu_time - 10) >= model->emu_time_min) {
-                                model->emu_time -= 10;
-                            } else {
-                                model->emu_time = model->emu_time_min;
-                            }
-                        }
-                    }
-                } else if(
-                    (model->attack_state == FuzzerAttackStateEnd) &&
-                    (event->type == InputTypeShort)) {
-                    // Exit if Ended
-                    view_attack->callback(FuzzerCustomEventViewAttackBack, view_attack->context);
+        if(!model->td_emt_cursor) {
+            // TimeDelay --
+            if(event->type == InputTypeShort) {
+                if(model->time_delay > model->time_delay_min) {
+                    model->time_delay--;
                 }
-            },
-            true);
+            } else if(event->type == InputTypeLong) {
+                if((model->time_delay - 10) >= model->time_delay_min) {
+                    model->time_delay -= 10;
+                } else {
+                    model->time_delay = model->time_delay_min;
+                }
+            }
+        } else {
+            // EmuTime --
+            if(event->type == InputTypeShort) {
+                if(model->emu_time > model->emu_time_min) {
+                    model->emu_time--;
+                }
+            } else if(event->type == InputTypeLong) {
+                if((model->emu_time - 10) >= model->emu_time_min) {
+                    model->emu_time -= 10;
+                } else {
+                    model->emu_time = model->emu_time_min;
+                }
+            }
+        }
         return true;
     } else if(event->key == InputKeyRight) {
-        with_view_model(
-            view_attack->view,
-            FuzzerViewAttackModel * model,
-            {
-                if(model->attack_state == FuzzerAttackStateIdle) {
-                    if(!model->td_emt_cursor) {
-                        // TimeDelay ++
-                        if(event->type == InputTypeShort) {
-                            if(model->time_delay < FUZZ_TIME_DELAY_MAX) {
-                                model->time_delay++;
-                            }
-                        } else if(event->type == InputTypeLong) {
-                            model->time_delay += 10;
-                            if(model->time_delay > FUZZ_TIME_DELAY_MAX) {
-                                model->time_delay = FUZZ_TIME_DELAY_MAX;
-                            }
-                        }
-                    } else {
-                        // EmuTime ++
-                        if(event->type == InputTypeShort) {
-                            if(model->emu_time < FUZZ_TIME_DELAY_MAX) {
-                                model->emu_time++;
-                            }
-                        } else if(event->type == InputTypeLong) {
-                            model->emu_time += 10;
-                            if(model->emu_time > FUZZ_TIME_DELAY_MAX) {
-                                model->emu_time = FUZZ_TIME_DELAY_MAX;
-                            }
-                        }
-                    }
-                } else {
-                    // Nothing
+        if(!model->td_emt_cursor) {
+            // TimeDelay ++
+            if(event->type == InputTypeShort) {
+                if(model->time_delay < FUZZ_TIME_DELAY_MAX) {
+                    model->time_delay++;
                 }
-            },
-            true);
+            } else if(event->type == InputTypeLong) {
+                model->time_delay += 10;
+                if(model->time_delay > FUZZ_TIME_DELAY_MAX) {
+                    model->time_delay = FUZZ_TIME_DELAY_MAX;
+                }
+            }
+        } else {
+            // EmuTime ++
+            if(event->type == InputTypeShort) {
+                if(model->emu_time < FUZZ_TIME_DELAY_MAX) {
+                    model->emu_time++;
+                }
+            } else if(event->type == InputTypeLong) {
+                model->emu_time += 10;
+                if(model->emu_time > FUZZ_TIME_DELAY_MAX) {
+                    model->emu_time = FUZZ_TIME_DELAY_MAX;
+                }
+            }
+        }
         return true;
     } else if(
         (event->key == InputKeyUp || event->key == InputKeyDown) &&
@@ -291,6 +295,73 @@ bool fuzzer_view_attack_input(InputEvent* event, void* context) {
             true);
         return true;
     }
+    return true;
+}
+
+static bool fuzzer_view_attack_input_end(
+    FuzzerViewAttack* view_attack,
+    InputEvent* event,
+    FuzzerViewAttackModel* model) {
+    UNUSED(model);
+    if(event->key == InputKeyBack && event->type == InputTypeShort) {
+        view_attack->callback(FuzzerCustomEventViewAttackExit, view_attack->context);
+        return true;
+        // } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
+        //     view_attack->callback(FuzzerCustomEventViewAttackOk, view_attack->context);
+        //     return true;
+    } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
+        // Exit if Ended
+        view_attack->callback(FuzzerCustomEventViewAttackExit, view_attack->context);
+    }
+    return true;
+}
+
+bool fuzzer_view_attack_input(InputEvent* event, void* context) {
+    furi_assert(context);
+    FuzzerViewAttack* view_attack = context;
+
+    // if(event->key == InputKeyBack && event->type == InputTypeShort) {
+    //     view_attack->callback(FuzzerCustomEventViewAttackBack, view_attack->context);
+    //     return true;
+    // } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
+    //     view_attack->callback(FuzzerCustomEventViewAttackOk, view_attack->context);
+    //     return true;
+    // } else
+    // {
+    with_view_model(
+        view_attack->view,
+        FuzzerViewAttackModel * model,
+        {
+            switch(model->attack_state) {
+            case FuzzerAttackStateIdle:
+                fuzzer_view_attack_input_idle(view_attack, event, model);
+                break;
+
+            case FuzzerAttackStateEnd:
+                fuzzer_view_attack_input_end(view_attack, event, model);
+                break;
+
+            case FuzzerAttackStateRunning:
+                if(event->key == InputKeyBack && event->type == InputTypeShort) {
+                    view_attack->callback(FuzzerCustomEventViewAttackIdle, view_attack->context);
+                } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
+                    view_attack->callback(FuzzerCustomEventViewAttackIdle, view_attack->context);
+                    // view_attack->callback(FuzzerCustomEventViewAttackPause, view_attack->context);
+                }
+                break;
+
+            case FuzzerAttackStatePause:
+                if(event->key == InputKeyBack && event->type == InputTypeShort) {
+                    view_attack->callback(FuzzerCustomEventViewAttackIdle, view_attack->context);
+                }
+                break;
+
+            default:
+                break;
+            }
+        },
+        true);
+    // }
 
     return true;
 }

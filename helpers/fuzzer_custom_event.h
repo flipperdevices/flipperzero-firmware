@@ -7,10 +7,16 @@ typedef enum {
     FuzzerCustomEventViewMainOk,
     FuzzerCustomEventViewMainPopupErr,
 
-    FuzzerCustomEventViewAttackBack,
-    FuzzerCustomEventViewAttackOk,
-    // FuzzerCustomEventViewAttackTick, // now not use
     FuzzerCustomEventViewAttackEnd,
+
+    FuzzerCustomEventViewAttackExit,
+    FuzzerCustomEventViewAttackRunAttack,
+    FuzzerCustomEventViewAttackPause,
+    FuzzerCustomEventViewAttackIdle, // Setup
+    // FuzzerCustomEventViewAttackEmulateCurrent,
+    // FuzzerCustomEventViewAttackSave,
+    // FuzzerCustomEventViewAttackNextUid,
+    // FuzzerCustomEventViewAttackPrevUid,
 
     FuzzerCustomEventViewFieldEditorBack,
     FuzzerCustomEventViewFieldEditorOk,

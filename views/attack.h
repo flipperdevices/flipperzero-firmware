@@ -35,6 +35,8 @@ void fuzzer_view_attack_stop(FuzzerViewAttack* view);
 
 void fuzzer_view_attack_pause(FuzzerViewAttack* view);
 
+void fuzzer_view_attack_idle(FuzzerViewAttack* view);
+
 void fuzzer_view_attack_end(FuzzerViewAttack* view);
 
 uint8_t fuzzer_view_attack_get_time_delay(FuzzerViewAttack* view);

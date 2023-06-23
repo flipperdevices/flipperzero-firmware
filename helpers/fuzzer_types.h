@@ -11,6 +11,7 @@ typedef enum {
     FuzzerAttackStateOff = 0,
     FuzzerAttackStateIdle,
     FuzzerAttackStateRunning,
+    FuzzerAttackStatePause,
     FuzzerAttackStateEnd,
 
 } FuzzerAttackState;
