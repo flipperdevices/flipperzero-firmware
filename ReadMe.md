@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL PR: [Hid app - vertical redraws #524 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/524)
 - [Faster Power off, Power off from locked requires more testing (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89611ab6a8534c730e5cd89dba7f4846640cab57)
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Heat Index (By ClementGre)](https://github.com/quen0n/unitemp-flipperzero/pull/17)
+- UL PR Update: [Hid app - vertical redraws #524 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/524)
 
 <a name="release">
 
