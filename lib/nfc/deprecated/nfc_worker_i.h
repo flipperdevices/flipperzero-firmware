@@ -14,7 +14,6 @@
 #include <lib/nfc/deprecated/protocols/nfcv.h>
 #include <lib/nfc/deprecated/protocols/slix.h>
 
-
 struct NfcWorker {
     FuriThread* thread;
     Storage* storage;
