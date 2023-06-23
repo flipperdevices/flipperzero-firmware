@@ -53,15 +53,15 @@ bool nfc_scene_mf_classic_menu_on_event(void* context, SceneManagerEvent event) 
             consumed = true;
         } else if(event.event == SubmenuIndexEmulate) {
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetType)) {
-                DOLPHIN_DEED(DolphinDeedNfcAddEmulate);
+                dolphin_deed(DolphinDeedNfcAddEmulate);
             } else {
-                DOLPHIN_DEED(DolphinDeedNfcEmulate);
+                dolphin_deed(DolphinDeedNfcEmulate);
             }
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
             consumed = true;
         } else if(event.event == SubmenuIndexDetectReader) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
-            DOLPHIN_DEED(DolphinDeedNfcDetectReader);
+            dolphin_deed(DolphinDeedNfcDetectReader);
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneInfo);

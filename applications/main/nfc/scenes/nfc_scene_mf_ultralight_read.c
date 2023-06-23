@@ -75,7 +75,7 @@ bool nfc_scene_mf_ultralight_read_on_event(void* context, SceneManagerEvent even
         if(event.event == NfcWorkerEventMfUltralightReadSuccess) {
             notification_message(instance->notifications, &sequence_success);
             scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         }
     }

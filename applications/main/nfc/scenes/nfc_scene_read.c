@@ -35,7 +35,7 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
         if(event.event == NfcCustomEventPollerManagerReadSuccess) {
             notification_message(instance->notifications, &sequence_success);
             scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcCustomEventPollerManagerReadAltMethod) {
             // TODO: Go to alternative read scene
