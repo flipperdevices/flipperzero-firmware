@@ -1,20 +1,29 @@
 #include "../nfc_app_i.h"
 
-#include "../helpers/handlers/nfc_poller_handlers.h"
-
 static NfcCommand nfc_scene_read_poller_callback(NfcPollerEvent event, void* context) {
-    UNUSED(event);
     UNUSED(context);
+    UNUSED(event);
+    // NfcApp* instance = context;
 
     NfcCommand command = NfcCommandContinue;
 
-    FURI_LOG_D("PollerManager", "Protocol type: %d", event.protocol_type);
+    // Process event
+
+    // Set nfc_dev data
+    // const NfcPoller* poller = event.poller;
+    // const NfcProtocolType protocol_type = event.protocol_type;
+    //
+    // nfc_dev_set_protocol_data(instance->nfc_dev, protocol_type, nfc_pollers_api[protocol_type]->get_data(poller));
 
     return command;
 }
 
 void nfc_scene_read_on_enter(void* context) {
     NfcApp* instance = context;
+
+    popup_set_header(
+        instance->popup, "Reading card\nDon't move...", 85, 24, AlignCenter, AlignTop);
+    popup_set_icon(instance->popup, 12, 23, &A_Loading_24);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
@@ -32,15 +41,20 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        if(event.event == NfcCustomEventPollerManagerReadSuccess) {
-            notification_message(instance->notifications, &sequence_success);
-            scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
-            dolphin_deed(DolphinDeedNfcReadSuccess);
-            consumed = true;
-        } else if(event.event == NfcCustomEventPollerManagerReadAltMethod) {
-            // TODO: Go to alternative read scene
-            consumed = true;
-        }
+        // if(event.event == NfcPollerHandlerEventReadSuccess) {
+        //     notification_message(instance->notifications, &sequence_success);
+        //     scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
+        //     dolphin_deed(DolphinDeedNfcReadSuccess);
+        //     consumed = true;
+        // } else if(event.event == NfcPollerHandlerEventReadAltMethod) {
+        //     // TODO: Go to alternative read scene
+        //     consumed = true;
+        // } else if(event.event == NfcPollerHandlerEventReadFailure) {
+        //     if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneDetect)) {
+        //         scene_manager_search_and_switch_to_previous_scene(instance->scene_manager, NfcSceneDetect);
+        //     }
+        //     consumed = true;
+        // }
     } else if(event.type == SceneManagerEventTypeBack) {
         static const uint32_t possible_scenes[] = {NfcSceneSelectProtocol, NfcSceneStart};
         scene_manager_search_and_switch_to_previous_scene_one_of(

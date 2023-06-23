@@ -25,6 +25,4 @@ enum NfcCustomEvent {
     NfcCustomEventDictAttackDone,
     NfcCustomEventRpcLoad,
     NfcCustomEventRpcSessionClose,
-    NfcCustomEventPollerManagerReadSuccess,
-    NfcCustomEventPollerManagerReadAltMethod,
 };
