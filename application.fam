@@ -6,7 +6,7 @@ App(
     requires=["gui"],
     stack_size=2 * 1024,
     fap_version=[1,2],
-    fap_category="Game Boy",
+    fap_category="GPIO",
     fap_icon="pokemon_10px.png",
     fap_icon_assets="assets",
     fap_author="Esteban Fuentealba",
