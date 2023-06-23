@@ -63,7 +63,7 @@ static void f_hal_nfc_timer_irq_callback(void* context) {
 }
 
 static void f_hal_nfc_timer_init(FHalNfcTimer timer) {
-    LL_TIM_DeInit(f_hal_nfc_timers[timer].timer);
+    furi_hal_bus_enable(f_hal_nfc_timers[timer].bus);
     LL_TIM_EnableUpdateEvent(f_hal_nfc_timers[timer].timer);
     LL_TIM_SetOnePulseMode(f_hal_nfc_timers[timer].timer, LL_TIM_ONEPULSEMODE_SINGLE);
     LL_TIM_SetCounterMode(f_hal_nfc_timers[timer].timer, LL_TIM_COUNTERMODE_UP);
@@ -83,7 +83,6 @@ static void f_hal_nfc_timer_init(FHalNfcTimer timer) {
 }
 
 static void f_hal_nfc_timer_deinit(FHalNfcTimer timer) {
-    LL_TIM_DeInit(f_hal_nfc_timers[timer].timer);
     furi_hal_interrupt_set_isr(f_hal_nfc_timers[timer].irq_id, NULL, NULL);
     NVIC_DisableIRQ(f_hal_nfc_timers[timer].irq_type);
     f_hal_nfc_timers[timer].is_configured = false;
@@ -94,8 +93,6 @@ static void f_hal_nfc_timer_deinit(FHalNfcTimer timer) {
 }
 
 static void f_hal_nfc_timer_start(FHalNfcTimer timer, uint32_t time_fc) {
-    furi_hal_bus_enable(f_hal_nfc_timers[timer].bus);
-
     uint32_t arr_reg = f_hal_nfc_timers[timer].freq_khz * time_fc / F_HAL_NFC_FREQ_KHZ;
     LL_TIM_SetAutoReload(f_hal_nfc_timers[timer].timer, arr_reg);
     LL_TIM_EnableCounter(f_hal_nfc_timers[timer].timer);
@@ -110,10 +107,6 @@ static void f_hal_nfc_timer_stop(FHalNfcTimer timer) {
         LL_TIM_ClearFlag_UPDATE(f_hal_nfc_timers[timer].timer);
     }
     furi_hal_gpio_write(f_hal_nfc_timers[timer].pin, false);
-
-    if(furi_hal_bus_is_enabled(f_hal_nfc_timers[timer].bus)) {
-        furi_hal_bus_disable(f_hal_nfc_timers[timer].bus);
-    }
 }
 
 void f_hal_nfc_timers_init() {
