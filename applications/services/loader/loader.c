@@ -229,29 +229,11 @@ static void loader_log_status_error(
     }
 }
 
-static LoaderStatus
-    loader_make_unknown_app_error_status(FuriString* error_message, const char* format, ...) {
-    LoaderStatus status = LoaderStatusErrorUnknownApp;
-    va_list args;
-    va_start(args, format);
-    loader_log_status_error(status, error_message, format, args);
-    va_end(args);
-    return status;
-}
-
-static LoaderStatus
-    loader_make_internal_error_status(FuriString* error_message, const char* format, ...) {
-    LoaderStatus status = LoaderStatusErrorInternal;
-    va_list args;
-    va_start(args, format);
-    loader_log_status_error(status, error_message, format, args);
-    va_end(args);
-    return status;
-}
-
-static LoaderStatus
-    loader_make_app_started_error_status(FuriString* error_message, const char* format, ...) {
-    LoaderStatus status = LoaderStatusErrorAppStarted;
+static LoaderStatus loader_make_status_error(
+    LoaderStatus status,
+    FuriString* error_message,
+    const char* format,
+    ...) {
     va_list args;
     va_start(args, format);
     loader_log_status_error(status, error_message, format, args);
@@ -285,8 +267,8 @@ static LoaderStatus loader_start_external_app(
             flipper_application_preload(loader->app.fap, path);
         if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             const char* err_msg = flipper_application_preload_status_to_string(preload_res);
-            status = loader_make_internal_error_status(
-                error_message, "Preload failed %s: %s", path, err_msg);
+            status = loader_make_status_error(
+                LoaderStatusErrorInternal, error_message, "Preload failed %s: %s", path, err_msg);
             break;
         }
 
@@ -295,8 +277,8 @@ static LoaderStatus loader_start_external_app(
             flipper_application_map_to_memory(loader->app.fap);
         if(load_status != FlipperApplicationLoadStatusSuccess) {
             const char* err_msg = flipper_application_load_status_to_string(load_status);
-            status = loader_make_internal_error_status(
-                error_message, "Load failed %s: %s", path, err_msg);
+            status = loader_make_status_error(
+                LoaderStatusErrorInternal, error_message, "Load failed %s: %s", path, err_msg);
             break;
         }
 
@@ -372,7 +354,8 @@ static LoaderStatus loader_do_start_by_name(
         if(loader_do_is_locked(loader)) {
             const char* current_thread_name =
                 furi_thread_get_name(furi_thread_get_id(loader->app.thread));
-            status = loader_make_app_started_error_status(
+            status = loader_make_status_error(
+                LoaderStatusErrorAppStarted,
                 error_message,
                 "Loader is locked, please close the \"%s\" first",
                 current_thread_name);
@@ -407,8 +390,8 @@ static LoaderStatus loader_do_start_by_name(
             furi_record_close(RECORD_STORAGE);
         }
 
-        status = loader_make_unknown_app_error_status(
-            error_message, "Application \"%s\" not found", name);
+        status = loader_make_status_error(
+            LoaderStatusErrorUnknownApp, error_message, "Application \"%s\" not found", name);
     } while(false);
 
     return status;
