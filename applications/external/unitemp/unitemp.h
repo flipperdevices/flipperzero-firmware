@@ -79,6 +79,8 @@ typedef struct {
     tempMeasureUnit temp_unit;
     //Единица измерения давления
     pressureMeasureUnit pressure_unit;
+    // Do calculate and show heat index
+    bool heat_index;
     //Последнее состояние OTG
     bool lastOTGState;
 } UnitempSettings;
@@ -109,6 +111,13 @@ typedef struct {
 } Unitemp;
 
 /* Объявление прототипов функций */
+
+/**
+ * @brief Calculates the heat index in Celsius from the temperature and humidity and stores it in the sensor heat_index field
+ *
+ * @param sensor The sensor struct, with temperature in Celcius and humidity in percent
+ */
+void unitemp_calculate_heat_index(Sensor* sensor);
 
 /**
  * @brief Перевод значения температуры датчика из Цельсия в Фаренгейты
