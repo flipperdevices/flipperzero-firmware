@@ -45,13 +45,6 @@ extern const size_t FLIPPER_ON_SYSTEM_START_COUNT;
 extern const FlipperInternalApplication FLIPPER_SYSTEM_APPS[];
 extern const size_t FLIPPER_SYSTEM_APPS_COUNT;
 
-/* Separate scene app holder
- * Spawned by loader
- */
-extern const FlipperInternalApplication FLIPPER_SCENE;
-extern const FlipperInternalApplication FLIPPER_SCENE_APPS[];
-extern const size_t FLIPPER_SCENE_APPS_COUNT;
-
 extern const FlipperInternalApplication FLIPPER_ARCHIVE;
 
 /* Settings list
