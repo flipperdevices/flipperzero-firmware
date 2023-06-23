@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0622-2300-0.85.3-53e66fb](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-23 04:20 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-23 04:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-23 05:20 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-23 05:20 EST`
 - HAPPY FATHERS DAY TO ALL THE FATHERS!!
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [Add circuit theme to passport #673 (By Fiattarone)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/673)
@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - Updated: [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) (Minor changes by Willy-JL)
 - UL PR: [Hid app - vertical redraws #524 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/524)
+- [Faster Power off, Power off from locked requires more testing (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89611ab6a8534c730e5cd89dba7f4846640cab57)
 
 <a name="release">
 
