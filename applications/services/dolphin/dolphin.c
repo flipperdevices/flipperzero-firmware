@@ -13,12 +13,13 @@
 
 static void dolphin_update_clear_limits_timer_period(Dolphin* dolphin);
 
-void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
-    furi_assert(dolphin);
+void dolphin_deed(DolphinDeed deed) {
+    Dolphin* dolphin = (Dolphin*)furi_record_open(RECORD_DOLPHIN);
     DolphinEvent event;
     event.type = DolphinEventTypeDeed;
     event.deed = deed;
     dolphin_event_send_async(dolphin, &event);
+    furi_record_close(RECORD_DOLPHIN);
 }
 
 DolphinStats dolphin_stats(Dolphin* dolphin) {
@@ -87,15 +88,6 @@ Dolphin* dolphin_alloc() {
         NULL, HOURS_IN_TICKS(24), pdTRUE, dolphin, dolphin_clear_limits_timer_callback);
 
     return dolphin;
-}
-
-void dolphin_free(Dolphin* dolphin) {
-    furi_assert(dolphin);
-
-    dolphin_state_free(dolphin->state);
-    furi_message_queue_free(dolphin->event_queue);
-
-    free(dolphin);
 }
 
 void dolphin_event_send_async(Dolphin* dolphin, DolphinEvent* event) {
@@ -204,7 +196,7 @@ int32_t dolphin_srv(void* p) {
         }
     }
 
-    dolphin_free(dolphin);
+    furi_crash("That was unexpected");
 
     return 0;
 }

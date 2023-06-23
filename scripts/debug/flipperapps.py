@@ -188,6 +188,7 @@ class FlipperAppStateHelper:
         )
         self.app_type_ptr = gdb.lookup_type("FlipperApplication").pointer()
         self.app_list_entry_type = gdb.lookup_type("struct FlipperApplicationList_s")
+        self._sync_apps()
 
     def handle_stop(self, event) -> None:
         self._sync_apps()
@@ -196,7 +197,10 @@ class FlipperAppStateHelper:
         self.set_debug_mode(False)
 
     def set_debug_mode(self, mode: bool) -> None:
-        gdb.execute(f"set variable furi_hal_debug_gdb_session_active = {int(mode)}")
+        try:
+            gdb.execute(f"set variable furi_hal_debug_gdb_session_active = {int(mode)}")
+        except gdb.error as e:
+            print(f"Failed to set debug mode: {e}")
 
 
 # Init additional 'fap-set-debug-elf-root' command and set up hooks

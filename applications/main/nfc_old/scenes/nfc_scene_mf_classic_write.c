@@ -34,7 +34,7 @@ static void nfc_scene_mf_classic_write_setup_view(NfcApp* nfc) {
 
 void nfc_scene_mf_classic_write_on_enter(void* context) {
     NfcApp* nfc = context;
-    DOLPHIN_DEED(DolphinDeedNfcEmulate);
+    dolphin_deed(DolphinDeedNfcEmulate);
 
     scene_manager_set_scene_state(
         nfc->scene_manager, NfcSceneMfClassicWrite, NfcSceneMfClassicWriteStateCardSearch);

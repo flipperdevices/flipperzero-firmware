@@ -205,7 +205,10 @@ uint8_t mifare_classic_read_card(
 
 uint8_t mifare_classic_update_card(FuriHalNfcTxRxContext* tx_rx, MfClassicData* data);
 
-bool mifare_classic_emulator(MfClassicEmulator* emulator, FuriHalNfcTxRxContext* tx_rx);
+bool mifare_classic_emulator(
+    MfClassicEmulator* emulator,
+    FuriHalNfcTxRxContext* tx_rx,
+    bool is_reader_analyzer);
 
 void mifare_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto);
 

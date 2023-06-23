@@ -11,6 +11,9 @@
 #include <lib/nfc/deprecated/protocols/mifare_classic.h>
 #include <lib/nfc/deprecated/protocols/mifare_desfire.h>
 #include <lib/nfc/deprecated/helpers/reader_analyzer.h>
+#include <lib/nfc/deprecated/protocols/nfcv.h>
+#include <lib/nfc/deprecated/protocols/slix.h>
+
 
 struct NfcWorker {
     FuriThread* thread;
