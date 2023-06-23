@@ -197,6 +197,9 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
 }
 
 #include "fild_validation_rfid_driver.h"
+#include <furi_hal_nfc.h>
+#include <lib/ST25RFAL002/include/rfal_nfc.h>
+#include <lib/ST25RFAL002/source/st25r3916/st25r3916_com.h>
 void subghz_cli_command_us(Cli* cli, FuriString* args, void* context) {
     UNUSED(context);
     UNUSED(args);
@@ -209,13 +212,28 @@ void subghz_cli_command_us(Cli* cli, FuriString* args, void* context) {
     bool fild = false;
     fild_validation_rfid_driver_dma_start(driver);
 
+    furi_hal_nfc_exit_sleep();
+    st25r3916WriteRegister(
+        ST25R3916_REG_OP_CONTROL,
+        ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_en_fd_mask);
+    st25r3916WriteRegister(ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ | ST25R3916_REG_MODE_om0);
+
     while(!(cli_cmd_interrupt_received(cli))) {
         fild = fild_validation_rfid_driver_check(driver, &frequency);
-        printf("fild = %d frecuency= %lu\r\n", fild, frequency);
+        printf("RFID fild = %d frecuency= %lu\r\n", fild, frequency);
+        printf(
+            "NFC fild = %d \r\n",
+            st25r3916CheckReg(
+                ST25R3916_REG_AUX_DISPLAY,
+                ST25R3916_REG_AUX_DISPLAY_efd_o,
+                ST25R3916_REG_AUX_DISPLAY_efd_o) ?
+                1 :
+                0);
         fflush(stdout);
-        furi_delay_ms(100);
+        furi_delay_ms(33);
     }
 
+    furi_hal_nfc_start_sleep();
     fild_validation_rfid_driver_dma_stop(driver);
     fild_validation_rfid_driver_free(driver);
 
