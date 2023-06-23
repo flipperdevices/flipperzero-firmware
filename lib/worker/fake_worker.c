@@ -24,6 +24,8 @@
 
 #include <toolbox/stream/stream.h>
 
+typedef uint8_t FuzzerWorkerPayload[MAX_PAYLOAD_SIZE];
+
 struct FuzzerWorker {
 #if defined(RFID_125_PROTOCOL)
     LFRFIDWorker* proto_worker;
@@ -37,18 +39,18 @@ struct FuzzerWorker {
 #endif
 
     const FuzzerProtocol* protocol;
-    FuzzerWorkerAttackType attack_type;
-    uint16_t timer_idle_time_ms;
-    uint16_t timer_emu_time_ms;
+    FuzzerWorkerPayload payload;
 
-    uint8_t payload[MAX_PAYLOAD_SIZE];
-    Stream* uids_stream;
+    FuzzerWorkerAttackType attack_type;
     uint16_t index;
+    Stream* uids_stream;
     uint8_t chusen_byte;
 
     bool treead_running;
     bool in_emu_phase;
     FuriTimer* timer;
+    uint16_t timer_idle_time_ms;
+    uint16_t timer_emu_time_ms;
 
     FuzzerWorkerUidChagedCallback tick_callback;
     void* tick_context;
@@ -56,6 +58,150 @@ struct FuzzerWorker {
     FuzzerWorkerEndCallback end_callback;
     void* end_context;
 };
+
+static void hardware_worker_alloc_init(FuzzerWorker* instance) {
+#if defined(RFID_125_PROTOCOL)
+    instance->protocols_items = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+
+    instance->proto_worker = lfrfid_worker_alloc(instance->protocols_items);
+#else
+    instance->protocols_items = ibutton_protocols_alloc();
+    instance->key =
+        ibutton_key_alloc(ibutton_protocols_get_max_data_size(instance->protocols_items));
+
+    instance->proto_worker = ibutton_worker_alloc(instance->protocols_items);
+#endif
+}
+
+static void hardware_worker_free(FuzzerWorker* instance) {
+#if defined(RFID_125_PROTOCOL)
+    lfrfid_worker_free(instance->proto_worker);
+
+    protocol_dict_free(instance->protocols_items);
+#else
+    ibutton_worker_free(instance->proto_worker);
+
+    ibutton_key_free(instance->key);
+    ibutton_protocols_free(instance->protocols_items);
+#endif
+}
+
+static void hardware_worker_start_thread(FuzzerWorker* instance) {
+#if defined(RFID_125_PROTOCOL)
+    lfrfid_worker_start_thread(instance->proto_worker);
+#else
+    ibutton_worker_start_thread(instance->proto_worker);
+#endif
+}
+
+static void hardware_worker_stop_thread(FuzzerWorker* instance) {
+#if defined(RFID_125_PROTOCOL)
+    lfrfid_worker_stop(instance->proto_worker);
+    lfrfid_worker_stop_thread(instance->proto_worker);
+#else
+    ibutton_worker_stop(instance->proto_worker);
+    ibutton_worker_stop_thread(instance->proto_worker);
+#endif
+}
+
+static void hardware_worker_emulate_start(FuzzerWorker* instance) {
+#if defined(RFID_125_PROTOCOL)
+    lfrfid_worker_emulate_start(instance->proto_worker, instance->protocol_id);
+#else
+    ibutton_worker_emulate_start(instance->proto_worker, instance->key);
+#endif
+}
+
+static void hardware_worker_stop(FuzzerWorker* instance) {
+#if defined(RFID_125_PROTOCOL)
+    lfrfid_worker_stop(instance->proto_worker);
+#else
+    ibutton_worker_stop(instance->proto_worker);
+#endif
+}
+
+static void
+    hardware_worker_set_protocol_data(FuzzerWorker* instance, FuzzerWorkerPayload payload) {
+#if defined(RFID_125_PROTOCOL)
+    protocol_dict_set_data(
+        instance->protocols_items, instance->protocol_id, payload, MAX_PAYLOAD_SIZE);
+#else
+    ibutton_key_set_protocol_id(instance->key, instance->protocol_id);
+    iButtonEditableData data;
+    ibutton_protocols_get_editable_data(instance->protocols_items, instance->key, &data);
+
+    //  TODO  check data.size logic
+    data.size = MAX_PAYLOAD_SIZE;
+    memcpy(data.ptr, payload, MAX_PAYLOAD_SIZE); // data.size);
+#endif
+}
+
+static void
+    hardware_worker_set_protocol(FuzzerWorker* instance, FuzzerProtocolsID protocol_index) {
+    instance->protocol = &fuzzer_proto_items[protocol_index];
+
+#if defined(RFID_125_PROTOCOL)
+    instance->protocol_id =
+        protocol_dict_get_protocol_by_name(instance->protocols_items, instance->protocol->name);
+#else
+    // TODO iButtonProtocolIdInvalid check
+    instance->protocol_id =
+        ibutton_protocols_get_id_by_name(instance->protocols_items, instance->protocol->name);
+#endif
+}
+
+// TODO make it protocol independent
+bool fuzzer_worker_load_key_from_file(
+    FuzzerWorker* instance,
+    FuzzerProtocolsID protocol_index,
+    const char* filename) {
+    furi_assert(instance);
+
+    bool res = false;
+    hardware_worker_set_protocol(instance, protocol_index);
+
+#if defined(RFID_125_PROTOCOL)
+    ProtocolId loaded_proto_id = lfrfid_dict_file_load(instance->protocols_items, filename);
+    if(loaded_proto_id == PROTOCOL_NO) {
+        // Err Cant load file
+        FURI_LOG_W(TAG, "Cant load file");
+    } else if(instance->protocol_id != loaded_proto_id) { // Err wrong protocol
+        FURI_LOG_W(TAG, "Wrong protocol");
+        FURI_LOG_W(
+            TAG,
+            "Selected: %s Loaded: %s",
+            instance->protocol->name,
+            protocol_dict_get_name(instance->protocols_items, loaded_proto_id));
+    } else {
+        protocol_dict_get_data(
+            instance->protocols_items, instance->protocol_id, instance->payload, MAX_PAYLOAD_SIZE);
+        res = true;
+    }
+#else
+    if(!ibutton_protocols_load(instance->protocols_items, instance->key, filename)) {
+        // Err Cant load file
+        FURI_LOG_W(TAG, "Cant load file");
+    } else {
+        if(instance->protocol_id != ibutton_key_get_protocol_id(instance->key)) {
+            // Err wrong protocol
+            FURI_LOG_W(TAG, "Wrong protocol");
+            FURI_LOG_W(
+                TAG,
+                "Selected: %s Loaded: %s",
+                instance->protocol->name,
+                ibutton_protocols_get_name(
+                    instance->protocols_items, ibutton_key_get_protocol_id(instance->key)));
+        } else {
+            iButtonEditableData data;
+            ibutton_protocols_get_editable_data(instance->protocols_items, instance->key, &data);
+            memcpy(instance->payload, data.ptr, data.size);
+            res = true;
+        }
+    }
+#endif
+
+    return res;
+}
 
 static bool fuzzer_worker_load_key(FuzzerWorker* instance, bool next) {
     furi_assert(instance);
@@ -128,18 +274,9 @@ static bool fuzzer_worker_load_key(FuzzerWorker* instance, bool next) {
     default:
         break;
     }
-#if defined(RFID_125_PROTOCOL)
-    protocol_dict_set_data(
-        instance->protocols_items, instance->protocol_id, instance->payload, MAX_PAYLOAD_SIZE);
-#else
-    ibutton_key_set_protocol_id(instance->key, instance->protocol_id);
-    iButtonEditableData data;
-    ibutton_protocols_get_editable_data(instance->protocols_items, instance->key, &data);
 
-    //  TODO  check data.size logic
-    data.size = MAX_PAYLOAD_SIZE;
-    memcpy(data.ptr, instance->payload, MAX_PAYLOAD_SIZE); // data.size);
-#endif
+    hardware_worker_set_protocol_data(instance, instance->payload);
+
     return res;
 }
 
@@ -150,11 +287,7 @@ static void fuzzer_worker_on_tick_callback(void* context) {
 
     if(instance->in_emu_phase) {
         if(instance->treead_running) {
-#if defined(RFID_125_PROTOCOL)
-            lfrfid_worker_stop(instance->proto_worker);
-#else
-            ibutton_worker_stop(instance->proto_worker);
-#endif
+            hardware_worker_stop(instance);
         }
         instance->in_emu_phase = false;
         furi_timer_start(instance->timer, furi_ms_to_ticks(instance->timer_idle_time_ms));
@@ -166,11 +299,7 @@ static void fuzzer_worker_on_tick_callback(void* context) {
             }
         } else {
             if(instance->treead_running) {
-#if defined(RFID_125_PROTOCOL)
-                lfrfid_worker_emulate_start(instance->proto_worker, instance->protocol_id);
-#else
-                ibutton_worker_emulate_start(instance->proto_worker, instance->key);
-#endif
+                hardware_worker_emulate_start(instance);
             }
             instance->in_emu_phase = true;
             furi_timer_start(instance->timer, furi_ms_to_ticks(instance->timer_emu_time_ms));
@@ -190,24 +319,11 @@ void fuzzer_worker_get_current_key(FuzzerWorker* instance, FuzzerPayload* output
     memcpy(output_key->data, instance->payload, instance->protocol->data_size);
 }
 
-static void fuzzer_worker_set_protocol(FuzzerWorker* instance, FuzzerProtocolsID protocol_index) {
-    instance->protocol = &fuzzer_proto_items[protocol_index];
-
-#if defined(RFID_125_PROTOCOL)
-    instance->protocol_id =
-        protocol_dict_get_protocol_by_name(instance->protocols_items, instance->protocol->name);
-#else
-    // TODO iButtonProtocolIdInvalid check
-    instance->protocol_id =
-        ibutton_protocols_get_id_by_name(instance->protocols_items, instance->protocol->name);
-#endif
-}
-
 bool fuzzer_worker_init_attack_dict(FuzzerWorker* instance, FuzzerProtocolsID protocol_index) {
     furi_assert(instance);
 
     bool res = false;
-    fuzzer_worker_set_protocol(instance, protocol_index);
+    hardware_worker_set_protocol(instance, protocol_index);
 
     instance->attack_type = FuzzerWorkerAttackTypeDefaultDict;
     instance->index = 0;
@@ -229,7 +345,7 @@ bool fuzzer_worker_init_attack_file_dict(
     furi_assert(file_path);
 
     bool res = false;
-    fuzzer_worker_set_protocol(instance, protocol_index);
+    hardware_worker_set_protocol(instance, protocol_index);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     instance->uids_stream = buffered_file_stream_alloc(storage);
@@ -262,7 +378,7 @@ bool fuzzer_worker_init_attack_bf_byte(
     furi_assert(instance);
 
     bool res = false;
-    fuzzer_worker_set_protocol(instance, protocol_index);
+    hardware_worker_set_protocol(instance, protocol_index);
 
     instance->attack_type = FuzzerWorkerAttackTypeLoadFile;
     instance->index = chusen;
@@ -274,73 +390,11 @@ bool fuzzer_worker_init_attack_bf_byte(
     return res;
 }
 
-// TODO make it protocol independent
-bool fuzzer_worker_load_key_from_file(
-    FuzzerWorker* instance,
-    FuzzerProtocolsID protocol_index,
-    const char* filename) {
-    furi_assert(instance);
-
-    bool res = false;
-    fuzzer_worker_set_protocol(instance, protocol_index);
-
-#if defined(RFID_125_PROTOCOL)
-    ProtocolId loaded_proto_id = lfrfid_dict_file_load(instance->protocols_items, filename);
-    if(loaded_proto_id == PROTOCOL_NO) {
-        // Err Cant load file
-        FURI_LOG_W(TAG, "Cant load file");
-    } else if(instance->protocol_id != loaded_proto_id) { // Err wrong protocol
-        FURI_LOG_W(TAG, "Wrong protocol");
-        FURI_LOG_W(
-            TAG,
-            "Selected: %s Loaded: %s",
-            instance->protocol->name,
-            protocol_dict_get_name(instance->protocols_items, loaded_proto_id));
-    } else {
-        protocol_dict_get_data(
-            instance->protocols_items, instance->protocol_id, instance->payload, MAX_PAYLOAD_SIZE);
-        res = true;
-    }
-#else
-    if(!ibutton_protocols_load(instance->protocols_items, instance->key, filename)) {
-        // Err Cant load file
-        FURI_LOG_W(TAG, "Cant load file");
-    } else {
-        if(instance->protocol_id != ibutton_key_get_protocol_id(instance->key)) {
-            // Err wrong protocol
-            FURI_LOG_W(TAG, "Wrong protocol");
-            FURI_LOG_W(
-                TAG,
-                "Selected: %s Loaded: %s",
-                instance->protocol->name,
-                ibutton_protocols_get_name(
-                    instance->protocols_items, ibutton_key_get_protocol_id(instance->key)));
-        } else {
-            iButtonEditableData data;
-            ibutton_protocols_get_editable_data(instance->protocols_items, instance->key, &data);
-            memcpy(instance->payload, data.ptr, data.size);
-            res = true;
-        }
-    }
-#endif
-
-    return res;
-}
-
 FuzzerWorker* fuzzer_worker_alloc() {
     FuzzerWorker* instance = malloc(sizeof(FuzzerWorker));
 
-#if defined(RFID_125_PROTOCOL)
-    instance->protocols_items = protocol_dict_alloc(lfrfid_protocols, LFRFIDProtocolMax);
+    hardware_worker_alloc_init(instance);
 
-    instance->proto_worker = lfrfid_worker_alloc(instance->protocols_items);
-#else
-    instance->protocols_items = ibutton_protocols_alloc();
-    instance->key =
-        ibutton_key_alloc(ibutton_protocols_get_max_data_size(instance->protocols_items));
-
-    instance->proto_worker = ibutton_worker_alloc(instance->protocols_items);
-#endif
     instance->attack_type = FuzzerWorkerAttackTypeMax;
     instance->index = 0;
     instance->treead_running = false;
@@ -364,16 +418,7 @@ void fuzzer_worker_free(FuzzerWorker* instance) {
 
     furi_timer_free(instance->timer);
 
-#if defined(RFID_125_PROTOCOL)
-    lfrfid_worker_free(instance->proto_worker);
-
-    protocol_dict_free(instance->protocols_items);
-#else
-    ibutton_worker_free(instance->proto_worker);
-
-    ibutton_key_free(instance->key);
-    ibutton_protocols_free(instance->protocols_items);
-#endif
+    hardware_worker_free(instance);
 
     free(instance);
 }
@@ -400,24 +445,16 @@ bool fuzzer_worker_start(FuzzerWorker* instance, uint8_t idle_time, uint8_t emu_
             instance->timer_idle_time_ms);
 
         if(!instance->treead_running) {
-#if defined(RFID_125_PROTOCOL)
-            lfrfid_worker_start_thread(instance->proto_worker);
-#else
-            ibutton_worker_start_thread(instance->proto_worker);
-#endif
+            hardware_worker_start_thread(instance);
+
             FURI_LOG_D(TAG, "Worker Starting");
             instance->treead_running = true;
         } else {
             FURI_LOG_D(TAG, "Worker UnPaused");
         }
 
-#if defined(RFID_125_PROTOCOL)
-        // lfrfid_worker_start_thread(instance->proto_worker);
-        lfrfid_worker_emulate_start(instance->proto_worker, instance->protocol_id);
-#else
-        // ibutton_worker_start_thread(instance->proto_worker);
-        ibutton_worker_emulate_start(instance->proto_worker, instance->key);
-#endif
+        hardware_worker_emulate_start(instance);
+
         instance->in_emu_phase = true;
         furi_timer_start(instance->timer, furi_ms_to_ticks(instance->timer_emu_time_ms));
         return true;
@@ -431,11 +468,8 @@ void fuzzer_worker_pause(FuzzerWorker* instance) {
     furi_timer_stop(instance->timer);
 
     if(instance->treead_running) {
-#if defined(RFID_125_PROTOCOL)
-        lfrfid_worker_stop(instance->proto_worker);
-#else
-        ibutton_worker_stop(instance->proto_worker);
-#endif
+        hardware_worker_stop(instance);
+
         FURI_LOG_D(TAG, "Worker Paused");
     }
 }
@@ -446,13 +480,8 @@ void fuzzer_worker_stop(FuzzerWorker* instance) {
     furi_timer_stop(instance->timer);
 
     if(instance->treead_running) {
-#if defined(RFID_125_PROTOCOL)
-        lfrfid_worker_stop(instance->proto_worker);
-        lfrfid_worker_stop_thread(instance->proto_worker);
-#else
-        ibutton_worker_stop(instance->proto_worker);
-        ibutton_worker_stop_thread(instance->proto_worker);
-#endif
+        hardware_worker_stop_thread(instance);
+
         FURI_LOG_D(TAG, "Worker Stopping");
         instance->treead_running = false;
     }
