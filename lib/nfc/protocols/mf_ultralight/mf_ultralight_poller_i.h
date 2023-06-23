@@ -64,20 +64,12 @@ typedef enum {
     MfUltralightPollerStateNum,
 } MfUltralightPollerState;
 
-typedef enum {
-    MfUltralightPollerSessionStateIdle,
-    MfUltralightPollerSessionStateActive,
-    MfUltralightPollerSessionStateStopRequest,
-} MfUltralightPollerSessionState;
-
 struct MfUltralightPoller {
     NfcaPoller* nfca_poller;
-    MfUltralightPollerSessionState session_state;
     MfUltralightPollerState state;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
     MfUltralightData* data;
-    MfUltralightPollerCallback callback;
     MfUltralightPollerAuthContext auth_context;
     uint32_t feature_set;
     uint16_t pages_read;
@@ -87,7 +79,6 @@ struct MfUltralightPoller {
     uint8_t tearing_flag_read;
     uint8_t tearing_flag_total;
     MfUltralightError error;
-    void* context;
 
     NfcPollerEvent* event;
     MfUltralightPollerEvent* mfu_event;
