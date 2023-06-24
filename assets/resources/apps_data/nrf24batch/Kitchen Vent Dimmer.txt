@@ -155,7 +155,7 @@ WBatch: Init(Cook2spd,Lamp-F2.2): RxAddr=0xC1;Ch=122;CO2 level={820,910,1000};Fa
 WBatch: IRRemotes clear: IRRemotes=0
 WBatch: IRRemotes 1 kitchen: IRRemotes=1;IRRemotesHash={0x6DA5,0xFCA5,0x7CA5,0xB425,0x3425,0x1625,0x8525}
 WBatch: Fans Speeds: Fan speeds=3;FanSpeed={13,15,20};FanCook speeds=3;FanCookSpeed={14,20,40};OutSpeedMax=20
-WBatch: FanCooker Down/Up key idx: FanCookSpIdxDnKey=2;FanCookSpIdxUpKey=3
+WBatch: FanCooker Down/Up key idx: FanCookSpIdxDnKey=5;FanCookSpIdxUpKey=6
 WBatch: LED Warning: _LED Warning=0x10
 WBatch: OSCCAL: _OSCCAL=146
 WBatch: CO2 Level: CO2 level={820,910,1000};PauseSetByCO2,min=10
