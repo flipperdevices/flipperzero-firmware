@@ -165,17 +165,15 @@ uint32_t pokemon_exit_confirm_view(void* context) {
 PokemonFap* pokemon_alloc() {
     PokemonFap* pokemon_fap = (PokemonFap*)malloc(sizeof(PokemonFap));
 
-    // Gui
-    /* XXX: what is furi_record open for? It doesn't return a Gui handle. */
-    pokemon_fap->gui = (Gui*)furi_record_open(RECORD_GUI);
-
     // View dispatcher
     pokemon_fap->view_dispatcher = view_dispatcher_alloc();
 
     view_dispatcher_enable_queue(pokemon_fap->view_dispatcher);
     view_dispatcher_set_event_callback_context(pokemon_fap->view_dispatcher, pokemon_fap);
     view_dispatcher_attach_to_gui(
-        pokemon_fap->view_dispatcher, pokemon_fap->gui, ViewDispatcherTypeFullscreen);
+        pokemon_fap->view_dispatcher,
+        (Gui*)furi_record_open(RECORD_GUI),
+        ViewDispatcherTypeFullscreen);
 
     //  Start Index first pokemon
     pokemon_fap->curr_pokemon = 0;
@@ -204,14 +202,13 @@ void free_app(PokemonFap* pokemon_fap) {
 
     // Free views
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewSelectPokemon);
-    /* XXX: Still need to deal with select_pokemon code */
     select_pokemon_free(pokemon_fap);
+
     view_dispatcher_remove_view(pokemon_fap->view_dispatcher, AppViewTrade);
     trade_free(pokemon_fap);
+
     // Close records
     furi_record_close(RECORD_GUI);
-    /* XXX: Since furi_record doesn't appear to be a Gui function, it wouldn't clear the pointer */
-    pokemon_fap->gui = NULL;
 
     // Free rest
     free(pokemon_fap);
@@ -220,14 +217,14 @@ void free_app(PokemonFap* pokemon_fap) {
 
 extern "C" int32_t pokemon_app(void* p) {
     UNUSED(p);
-    //FURI_LOG_D(TAG, "init scene");
     //App* app = (App*)pokemon_alloc();
     PokemonFap* pokemon_fap = pokemon_alloc();
 
     furi_hal_light_set(LightRed, 0x00);
     furi_hal_light_set(LightGreen, 0x00);
     furi_hal_light_set(LightBlue, 0x00);
-    //switch view  and run dispatcher
+
+    //switch view and run dispatcher
     view_dispatcher_run(pokemon_fap->view_dispatcher);
 
     // Free resources

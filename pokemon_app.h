@@ -30,21 +30,7 @@ typedef enum {
     GAMEBOY_TRADING
 } render_gameboy_state_t;
 
-#if 0
-struct App {
-    Gui* gui;
-    ViewDispatcher* view_dispatcher;
-    SelectPokemon* select_pokemon;
-    Trade* trade;
-    uint32_t view_id;
-
-    int current_pokemon = 0;
-    char pokemon_hex_code = ' ';
-};
-#endif
-
 struct pokemon_fap {
-    Gui* gui;
     ViewDispatcher* view_dispatcher;
 
     /* View ports for each of the application's steps */
