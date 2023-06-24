@@ -213,7 +213,7 @@ void boilerplate_scene_2_exit(void* context) {
 
 void boilerplate_scene_2_enter(void* context) {
     furi_assert(context);
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 }
 
 BoilerplateScene2* boilerplate_scene_2_alloc() {
