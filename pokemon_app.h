@@ -15,7 +15,7 @@
 struct pokemon_data_table {
     const char* name;
     const Icon* icon;
-    const uint8_t hex;
+    const uint8_t species;
 };
 
 typedef struct pokemon_data_table PokemonTable;

@@ -3,7 +3,7 @@
 
 #include "../pokemon_data.h"
 
-/* XXX: Convert all of these to be maintained in a struct in the Trade context */
+/* TODO: Convert all of these to be maintained in a struct in the Trade context */
 uint8_t out_data = 0;
 uint8_t in_data = 0;
 uint8_t shift = 0;
@@ -357,8 +357,7 @@ void trade_enter_callback(void* context) {
     pokemon_fap->connected = false;
     pokemon_fap->gameboy_status = GAMEBOY_INITIAL;
 
-    /* XXX: Change hex to species to match pokemon nomenclature */
-    DATA_BLOCK[12] = pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].hex;
+    DATA_BLOCK[12] = pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].species;
     // B3 (Pin6) / SO (2)
     furi_hal_gpio_write(&GAME_BOY_SO, false);
     furi_hal_gpio_init(&GAME_BOY_SO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
