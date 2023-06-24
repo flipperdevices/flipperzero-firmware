@@ -38,13 +38,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Add circuit theme to passport #673 (By Fiattarone)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/673)
 - [Patreon Build Update: New DJ & Kaiju animations added to ALL, Minimal, Dolphin & Stock builds](https://www.patreon.com/RogueMaster/membership)
 - Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
-- Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch)
 - [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - Updated: [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) (Minor changes by Willy-JL)
-- UL PR: [Hid app - vertical redraws #524 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/524)
 - [Faster Power off, Power off from locked requires more testing (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89611ab6a8534c730e5cd89dba7f4846640cab57)
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Heat Index (By ClementGre)](https://github.com/quen0n/unitemp-flipperzero/pull/17)
-- UL PR Update: [Hid app - vertical redraws #524 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/524)
+- UL PR: [Hid app - vertical redraws #524 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/524)
+- Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch)
 
 <a name="release">
 
