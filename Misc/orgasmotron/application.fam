@@ -1,5 +1,5 @@
 App(
-    appid="Orgasmotron",
+    appid="orgasmotron",
     name="Orgasmotron",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="orgasmotron_app",

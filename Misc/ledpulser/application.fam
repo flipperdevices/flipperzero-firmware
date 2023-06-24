@@ -1,5 +1,5 @@
 App(
-    appid="ledpulser",
+    appid="led_pulsator",
     name="LED Pulsator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ledpulser_app",
@@ -9,9 +9,10 @@ App(
     ],
     stack_size=2 * 1024,
     order=30,
+    fap_icon_assets="icons",
     fap_icon="ledpulser_10px.png",
-	fap_icon_assets="icons",
     fap_category="Misc",
+    fap_icon_assets_symbol="ledpulser",
     fap_author="Leed",
     fap_weburl="https://github.com/leedave/Leeds-Flipper-Zero-Applications",
 )
