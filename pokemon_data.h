@@ -100,7 +100,7 @@
 #define _8_ 0xfe
 #define _9_ 0xff
 
-/* XXX: These are all opposite endianness on the flipper than they are in the
+/* NOTE: These are all opposite endianness on the flipper than they are in the
  * GB/Z80. e.g. a uint16_t value of 0x2c01 translates to 0x012c. Does flipper
  * API have calls to swap endianness?
  */
