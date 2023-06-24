@@ -247,7 +247,7 @@ void tick(GameState *game_state, NotificationApp *notification) {
         if (game_state->top_cards[0].character == 11 && game_state->top_cards[1].character == 11 &&
             game_state->top_cards[2].character == 11 && game_state->top_cards[3].character == 11) {
             game_state->state = GameStateAnimate;
-            DOLPHIN_DEED(DolphinDeedPluginGameWin);
+            dolphin_deed(DolphinDeedPluginGameWin);
 
             return;
         }
@@ -256,7 +256,7 @@ void tick(GameState *game_state, NotificationApp *notification) {
         if (game_state->state == GameStatePlay) {
             if (game_state->longPress && game_state->dragging_hand.index == 1) {
                 for (uint8_t i = 0; i < 4; i++) {
-                    if (place_on_top(&(game_state->top_cards[i]), game_state->dragging_hand.cards[0])) {
+                    if (place_on_top(&(game_state->top_car0ds[i]), game_state->dragging_hand.cards[0])) {
                         remove_drag(game_state);
                         wasAction = true;
                         break;
@@ -383,7 +383,7 @@ void tick(GameState *game_state, NotificationApp *notification) {
 }
 
 void init(GameState *game_state) {
-    DOLPHIN_DEED(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginGameStart);
     game_state->selectColumn = 0;
     game_state->selected_card = 0;
     game_state->selectRow = 0;
