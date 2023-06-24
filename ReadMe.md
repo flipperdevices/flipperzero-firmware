@@ -128,7 +128,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - [EM4100 universal keys generator (for RFID Fuzzer) (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - [FlipBIP Crypto Tool (By xtruan)](https://github.com/xtruan/FlipBIP)
-- [Mifare Fuzzer (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer)
+- [Mifare Fuzzer (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) -> (+Fixed crash on exit)
 - [HEX Editor (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 - [Resistance calculator (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [IR Intervalometer for Sony Cameras (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer)
