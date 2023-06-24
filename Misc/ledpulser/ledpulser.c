@@ -108,7 +108,7 @@ int32_t ledpulser_app(void* p) {
     }
     plugin_state->direction = 0;
     plugin_state->intensity = 0;
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
