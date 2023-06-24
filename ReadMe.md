@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `24 Jun 00:52 GMT +3`
+### Apps checked & updated at `25 Jun 01:18 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -77,7 +77,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Pwnagotchi->Flipper interface (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
 - [ESP32->Flipper Camera (By Z4urce)](https://github.com/Z4urce/flipperzero-camera)
 - [Bar code scanner emulator via COM port (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator)
-- [Oscilloscope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
+- [Oscilloscope (By anfractuosity)](https://github.com/anfractuosity/flipperscope) -> (Fixed furi_bus issues by @xMasterX)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
 - [NRF24 Batch Read/Send (WIP) (By vad7)](https://github.com/vad7/nRF24-Batch)
 - [ESP32CAM Camera (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
