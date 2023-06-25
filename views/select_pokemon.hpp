@@ -2,13 +2,8 @@
 #define SELECCT_POKEMON_HPP
 
 #pragma once
-#include <furi.h>
+
 #include <gui/view.h>
-#include <gui/view_dispatcher.h>
-
-#include <gui/elements.h>
-#include <string>
-
 #include "../pokemon_app.h"
 
 View* select_pokemon_alloc(PokemonFap* pokemon_fap);

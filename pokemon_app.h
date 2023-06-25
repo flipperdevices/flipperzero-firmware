@@ -2,13 +2,10 @@
 #define POKEMON_APP_H
 
 #pragma once
-#include <furi.h>
-#include <furi_hal_light.h>
-#include <gui/gui.h>
+
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/icon.h>
-#include <pokemon_icons.h>
 
 #include "pokemon_data.h"
 

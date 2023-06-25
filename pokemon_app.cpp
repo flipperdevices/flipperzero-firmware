@@ -1,6 +1,9 @@
-#include "pokemon_app.h"
+#include <furi_hal_light.h>
+#include <pokemon_icons.h>
+
 #include "views/trade.hpp"
 #include "views/select_pokemon.hpp"
+#include "pokemon_app.h"
 
 const PokemonTable pokemon_table[] = {
     {"Bulbasaur", &I_bulbasaur, 0x99},
