@@ -55,12 +55,16 @@ The program will automatically be launched after compilation
 
 **A4** GPIO can be connected on **A7** GPIO to test this application without using a geiger tube. **A4** GPIO is generating a signal whose frequency changes every second.
 
-Press **Ok** button to clear the graph, press **Left/Right** to choose unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), press **Back** button to quit
+Button assignments : 
+
+**Ok** [long press] : clear the graph
+**Left/Right** [short press] : choose right unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** is always displayed
+**Up/Down** [short press] : zoom / unzoom 
+**Back** [long press] : exit
 
 
 If you don't want to build this application, just simply copy **flipper_geiger.fap** on your **Flipper Zero** 
-
-**API Mismatch** error may appear. If you are using Unleashed firmware you can bypass and ignore the error
+Build has been made with official toolchain, **API Mismatch** error may appear if you are using custom firmware. You can bypass this error.
 
 ## Use cases
 
@@ -98,6 +102,23 @@ Measure of americium-241 button from a smoke detector :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper7.png" width=25% height=25%>
 
+Zoom levels (the third picture is the default zoom) :
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom0.png" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom1.png" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom2.png" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom3.png" width=25% height=25%>
+
+## User gallery
+
+[BRD8 [Reddit]](https://www.reddit.com/user/BRD8/) https://www.reddit.com/r/flipperzero/comments/110062z/am_i_a_hacker_now_mom/ : 
+
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/abQXuEz.jpg" width=25% height=25%>
+
+[Funbob235 [Reddit]](https://www.reddit.com/user/Funbob235/) https://www.reddit.com/r/flipperzero/comments/13m1qly/testing_of_the_geiger_counter/ : 
+
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/abQXuEz.jpg" width=25% height=25%>
+
+
 ## What's next ?
 
 Here are some nice ideas to improve this app :
@@ -108,6 +129,10 @@ Here are some nice ideas to improve this app :
 * Buzz when it gets dangerous like a dosimeter
 
 ## Changelog
+
+* 2023-06-25
+  * Add zoom levels
+  * User gallery has been added
 
 * 2023-06-08
   * Bug fixing
