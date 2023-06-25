@@ -256,7 +256,7 @@ void tick(GameState *game_state, NotificationApp *notification) {
         if (game_state->state == GameStatePlay) {
             if (game_state->longPress && game_state->dragging_hand.index == 1) {
                 for (uint8_t i = 0; i < 4; i++) {
-                    if (place_on_top(&(game_state->top_car0ds[i]), game_state->dragging_hand.cards[0])) {
+                    if (place_on_top(&(game_state->top_cards[i]), game_state->dragging_hand.cards[0])) {
                         remove_drag(game_state);
                         wasAction = true;
                         break;
