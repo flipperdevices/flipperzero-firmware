@@ -116,7 +116,7 @@ Zoom levels (the third picture is the default zoom) :
 
 [Funbob235 [Reddit]](https://www.reddit.com/user/Funbob235/) https://www.reddit.com/r/flipperzero/comments/13m1qly/testing_of_the_geiger_counter/ : 
 
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/abQXuEz.jpg" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/testing-of-the-geiger-counter-v0-3zv9gdq4nt0b1.jpg" width=25% height=25%>
 
 
 ## What's next ?
