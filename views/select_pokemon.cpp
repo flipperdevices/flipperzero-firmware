@@ -9,7 +9,7 @@ static void select_pokemon_render_callback(Canvas* canvas, void* model) {
     snprintf(pokedex_num, sizeof(pokedex_num), "#%03d", current_index + 1);
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(
-        canvas, 55, 54 / 2, AlignLeft, AlignTop, pokemon_table[current_index].name);
+        canvas, 55, 54 / 2, AlignLeft, AlignTop, pokemon_fap->pokemon_table[current_index].name);
 
     canvas_set_font(canvas, FontSecondary);
     canvas_draw_str_aligned(canvas, 55, 38, AlignLeft, AlignTop, pokedex_num);

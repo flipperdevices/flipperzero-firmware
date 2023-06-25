@@ -157,6 +157,50 @@ const PokemonTable pokemon_table[] = {
     {},
 };
 
+TradeBlock OUTPUT_BLOCK = {
+    .trainer_name = {F_, l_, i_, p_, p_, e_, r_, TERM_, 0x00, 0x00, 0x00},
+    .party_cnt = 1,
+    /* Only the first pokemon is ever used even though there are 7 bytes here.
+     * If the remaining 6 bytes are _not_ 0xff, then the trade window renders
+     * garbage for the Flipper's party.
+     */
+    .party_members = {0x15, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
+    /* Only the first pokemon is set up, even though there are 6 total party members */
+    .party =
+        {
+            {.species = 0x4a,
+             .hp = 0x2c01,
+             .level = 0x4a,
+             .status_condition = 0x0,
+             .type = {0x14, 0x08},
+             .catch_held = 0x1f,
+             .move = {0x7e, 0x38, 0x09, 0x19},
+             .orig_trainer = 0xd204,
+             .exp = {0x3, 0xd, 0x40},
+             .hp_ev = 0xffff,
+             .atk_ev = 0xffff,
+             .def_ev = 0xffff,
+             .spd_ev = 0xffff,
+             .special_ev = 0xffff,
+             .iv = 0xffff,
+             .move_pp = {0xc0, 0xc0, 0xc0, 0xc0},
+             .level_again = 0x4a,
+             .max_hp = 0x2c01,
+             .atk = 0x9600,
+             .def = 0x9700,
+             .spd = 0x9800,
+             .special = 0x9900},
+        },
+    /* Only the first pokemon has an OT name and nickname even though there are 6 members */
+    /* NOTE: I think this shouldn't exceed 7 chars */
+    .ot_name =
+        {
+            {.str = {F_, l_, i_, p_, p_, e_, r_, TERM_, 0x00, 0x00}},
+        },
+    .nickname = {
+        {.str = {F_, l_, o_, p_, p_, e_, r_, TERM_, 0x00, 0x00}},
+    }};
+
 uint32_t pokemon_exit_confirm_view(void* context) {
     UNUSED(context);
     return AppViewExitConfirm;
@@ -180,6 +224,9 @@ PokemonFap* pokemon_alloc() {
 
     // Set up pointer to pokemon table
     pokemon_fap->pokemon_table = pokemon_table;
+
+    // Set up trade party struct
+    pokemon_fap->trade_party = &OUTPUT_BLOCK;
 
     // Select Pokemon View
     pokemon_fap->select_view = select_pokemon_alloc(pokemon_fap);

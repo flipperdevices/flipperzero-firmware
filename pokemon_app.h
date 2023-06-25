@@ -10,6 +10,8 @@
 #include <gui/icon.h>
 #include <pokemon_icons.h>
 
+#include "pokemon_data.h"
+
 #define TAG "Pokemon"
 
 struct pokemon_data_table {
@@ -39,6 +41,13 @@ struct pokemon_fap {
 
     /* Table of pokemon data for Gen I */
     const PokemonTable* pokemon_table;
+
+    /* Struct for holding trade data */
+    /* NOTE: There may be some runtime memory savings by adding more intelligence
+     * to views/trade and slimming down this struct to only contain the single
+     * pokemon data rather than the full 6 member party data.
+     */
+    TradeBlock* trade_party;
 
     /* The currently selected pokemon */
     int curr_pokemon;

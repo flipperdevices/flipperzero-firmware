@@ -12,6 +12,7 @@ volatile int counter = 0;
 volatile bool procesing = true;
 volatile connection_state_t connection_state = NOT_CONNECTED;
 volatile trade_centre_state_t trade_centre_state = INIT;
+unsigned char INPUT_BLOCK[405];
 
 void screen_gameboy_connect(Canvas* const canvas) {
     canvas_draw_frame(canvas, 0, 0, 128, 64);
@@ -184,6 +185,7 @@ byte getMenuResponse(byte in) {
 
 byte getTradeCentreResponse(byte in, void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
+    uint8_t* trade_party_flat = (uint8_t*)pokemon_fap->trade_party;
     byte send = in;
 
     furi_assert(context);
@@ -227,7 +229,7 @@ byte getTradeCentreResponse(byte in, void* context) {
         if((in & 0xF0) != 0xF0) {
             counter = 0;
             INPUT_BLOCK[counter] = in;
-            send = DATA_BLOCK[counter];
+            send = trade_party_flat[counter];
             counter++;
             trade_centre_state = SENDING_DATA;
         }
@@ -235,7 +237,7 @@ byte getTradeCentreResponse(byte in, void* context) {
 
     case SENDING_DATA:
         INPUT_BLOCK[counter] = in;
-        send = DATA_BLOCK[counter];
+        send = trade_party_flat[counter];
         counter++;
         if(counter == 405) //TODO: replace with sizeof struct rather than static number
             trade_centre_state = SENDING_PATCH_DATA;
@@ -357,7 +359,9 @@ void trade_enter_callback(void* context) {
     pokemon_fap->connected = false;
     pokemon_fap->gameboy_status = GAMEBOY_INITIAL;
 
-    DATA_BLOCK[12] = pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].species;
+    pokemon_fap->trade_party->party_members[0] =
+        pokemon_fap->pokemon_table[pokemon_fap->curr_pokemon].species;
+
     // B3 (Pin6) / SO (2)
     furi_hal_gpio_write(&GAME_BOY_SO, false);
     furi_hal_gpio_init(&GAME_BOY_SO, GpioModeOutputPushPull, GpioPullNo, GpioSpeedVeryHigh);
