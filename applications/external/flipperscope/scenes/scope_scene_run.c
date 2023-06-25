@@ -381,6 +381,8 @@ void scope_scene_run_on_enter(void* context) {
     ramVector[44] = (uint32_t)TIM2_IRQHandler;
     __enable_irq();
 
+    furi_hal_bus_enable(FuriHalBusTIM2);
+
     // Found this recommended by https://www.freertos.org/RTOS-Cortex-M3-M4.html
     // although we're using after RTOS started
     HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
@@ -463,6 +465,8 @@ void scope_scene_run_on_enter(void* context) {
         }
         view_port_update(view_port);
     }
+
+    furi_hal_bus_disable(FuriHalBusTIM2);
 
     // Stop DMA and switch back to original vector table
     HAL_ADC_Stop_DMA(&hadc1);
