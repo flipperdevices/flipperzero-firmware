@@ -59,7 +59,7 @@ The program will automatically be launched after compilation
 
 **Ok** [long press] : clear the graph
 
-**Left/Right** [short press] : choose right unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** is always displayed
+**Left/Right** [short press] : choose right unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** on the left is always displayed
 
 **Up/Down** [short press] : zoom / unzoom 
 
