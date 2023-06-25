@@ -22,6 +22,8 @@ App(
     ],
     fap_icon="icons/logo.png",
     fap_category="NFC",
+    fap_version="1.0",
+    fap_author="bettse",
 #    fap_extbuild=(
 #        ExtFile(
 #            path="${FAP_SRC_DIR}/lib/asn1/asn_system.h",
