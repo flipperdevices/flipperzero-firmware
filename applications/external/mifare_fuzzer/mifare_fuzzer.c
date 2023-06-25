@@ -95,6 +95,7 @@ void mifare_fuzzer_free(MifareFuzzerApp* app) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_free() :: Views");
     view_dispatcher_remove_view(app->view_dispatcher, MifareFuzzerViewSelectCard);
     view_dispatcher_remove_view(app->view_dispatcher, MifareFuzzerViewSelectAttack);
+    view_dispatcher_remove_view(app->view_dispatcher, MifareFuzzerViewEmulator);
 
     // Submenus
     //FURI_LOG_D(TAG, "mifare_fuzzer_free() :: Submenus");

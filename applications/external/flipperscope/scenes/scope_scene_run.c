@@ -1,6 +1,7 @@
 #include <float.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_bus.h>
 #include <furi_hal_resources.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -183,6 +184,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim) {
 
 // Init timer2
 static void MX_TIM2_Init(uint32_t period) {
+    if(!furi_hal_bus_is_enabled(FuriHalBusTIM2)) {
+        furi_hal_bus_enable(FuriHalBusTIM2);
+    }
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
     htim2.Instance = TIM2;
@@ -381,8 +385,6 @@ void scope_scene_run_on_enter(void* context) {
     ramVector[44] = (uint32_t)TIM2_IRQHandler;
     __enable_irq();
 
-    furi_hal_bus_enable(FuriHalBusTIM2);
-
     // Found this recommended by https://www.freertos.org/RTOS-Cortex-M3-M4.html
     // although we're using after RTOS started
     HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
@@ -466,14 +468,15 @@ void scope_scene_run_on_enter(void* context) {
         view_port_update(view_port);
     }
 
-    furi_hal_bus_disable(FuriHalBusTIM2);
-
     // Stop DMA and switch back to original vector table
     HAL_ADC_Stop_DMA(&hadc1);
     __disable_irq();
     SCB->VTOR = 0;
     __enable_irq();
 
+    if(furi_hal_bus_is_enabled(FuriHalBusTIM2)) {
+        furi_hal_bus_disable(FuriHalBusTIM2);
+    }
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
