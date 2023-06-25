@@ -1,4 +1,4 @@
-#pragma once
+\#pragma once
 
 #include <stdint.h>
 
@@ -14,6 +14,7 @@ typedef enum {
     DolphinAppIbutton,
     DolphinAppBadusb,
     DolphinAppPlugin,
+    DolphinAppGame,
     DolphinAppMAX,
 } DolphinApp;
 
@@ -56,8 +57,9 @@ typedef enum {
     DolphinDeedGpioUartBridge,
 
     DolphinDeedPluginStart,
-    DolphinDeedPluginGameStart,
-    DolphinDeedPluginGameWin,
+
+    DolphinDeedGameWin,
+    DolphinDeedGameLost,
 
     DolphinDeedMAX,
 
