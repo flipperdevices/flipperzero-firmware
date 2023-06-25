@@ -49,6 +49,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope) (By xMasterX)
 - Updated: [Mifare Fuzzer (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) (By xMasterX)
 - Updated: [WiFi (Marauder) v0.3.7 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [PR: UI Tweaks #20 (By michaeldufault)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/20)
+- Added: [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
 - OFW: Loader Refactor Coming Soon
 
 <a name="release">
