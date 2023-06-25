@@ -23,6 +23,7 @@ static void select_pokemon_render_callback(Canvas* canvas, void* model) {
 
 static bool select_pokemon_input_callback(InputEvent* event, void* context) {
     PokemonFap* pokemon_fap = (PokemonFap*)context;
+    int pokemon_num = pokemon_fap->curr_pokemon;
     bool consumed = false;
 
     furi_assert(context);
@@ -45,41 +46,41 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
 
     /* Move back one through the pokedex listing */
     case InputKeyLeft:
-        if(pokemon_fap->curr_pokemon == 0)
-            pokemon_fap->curr_pokemon = 150;
+        if(pokemon_num == 0)
+            pokemon_num = 150;
         else
-            pokemon_fap->curr_pokemon--;
+            pokemon_num--;
         consumed = true;
         break;
 
-        /* Move back ten through the pokemon listing, wrap to max pokemon on
+    /* Move back ten through the pokemon listing, wrap to max pokemon on
          * underflow.
          */
     case InputKeyDown:
-        if(pokemon_fap->curr_pokemon >= 10)
-            pokemon_fap->curr_pokemon -= 10;
+        if(pokemon_num >= 10)
+            pokemon_num -= 10;
         else
-            pokemon_fap->curr_pokemon = 150;
+            pokemon_num = 150;
         consumed = true;
         break;
 
     /* Move forward one through the pokedex listing */
     case InputKeyRight:
-        if(pokemon_fap->curr_pokemon == 150)
-            pokemon_fap->curr_pokemon = 0;
+        if(pokemon_num == 150)
+            pokemon_num = 0;
         else
-            pokemon_fap->curr_pokemon++;
+            pokemon_num++;
         consumed = true;
         break;
 
-        /* Move forward ten through the pokemon listing, wrap to min pokemon on
+    /* Move forward ten through the pokemon listing, wrap to min pokemon on
          * overflow.
          */
     case InputKeyUp:
-        if(pokemon_fap->curr_pokemon <= 140)
-            pokemon_fap->curr_pokemon += 10;
+        if(pokemon_num <= 140)
+            pokemon_num += 10;
         else
-            pokemon_fap->curr_pokemon = 0;
+            pokemon_num = 0;
         consumed = true;
         break;
 
@@ -87,6 +88,8 @@ static bool select_pokemon_input_callback(InputEvent* event, void* context) {
         // Do Nothing
         break;
     }
+
+    pokemon_fap->curr_pokemon = pokemon_num;
 
     return consumed;
 }
