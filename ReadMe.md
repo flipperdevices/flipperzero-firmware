@@ -40,15 +40,15 @@ This software is for experimental purposes only and is not meant for any illegal
 - [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
 - Updated: [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) (Minor changes by Willy-JL)
 - [Faster Power off, Power off from locked requires more testing (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89611ab6a8534c730e5cd89dba7f4846640cab57)
-- Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Heat Index (By ClementGre)](https://github.com/quen0n/unitemp-flipperzero/pull/17)
 - UL: [Hid app - vertical redraws #524 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/524)
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch)
-- UL: Plugins: UniTemp update merged PRs -  Append carbon dioxide sensor (SCD40) (by divinebird)
-- UL: Plugins: Fix furi_hal_bus issues in AVR Programmer and Signal Generator (fixes issue UL525)
-- UL: OFW PR 2783: SLIX2 emulation support / practical use for Dymo printers (by g3gg0)
-- UL: OFW PR 2782: NFC: Fix key invalidation logic (by AloneLiberty)
+- UL: Updated: [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Heat Index (By ClementGre)](https://github.com/quen0n/unitemp-flipperzero/pull/17) Append carbon dioxide sensor (SCD40) (by divinebird)
+- UL: Plugins: Fix furi_hal_bus issues in AVR Programmer and Signal Generator (fixes issue UL525) (By xMasterX)
+- UL: [OFW PR 2783: SLIX2 emulation support / practical use for Dymo printers (by g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/2783)
+- UL: [OFW PR 2782: NFC: Fix key invalidation logic (by AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2782)
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope) (By xMasterX)
 - Updated: [Mifare Fuzzer (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) (By xMasterX)
+- Updated: [WiFi (Marauder) v0.3.7 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [PR: UI Tweaks #20 (By michaeldufault)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/20)
 - OFW: Loader Refactor Coming Soon
 
 <a name="release">
@@ -402,7 +402,7 @@ $ ./fbt dolphin_ext
 - [Sub-GHz Playlist (By darmiel)](https://github.com/darmiel/flipper-playlist)
 - [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477) [(Merged Into One By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/655) - Previously: [(By ESurge)](https://github.com/ESurge/flipperzero-firmware-unirfremix) [(Original By jimilinuxguy)](https://github.com/jimilinuxguy/flipperzero-universal-rf-remote/tree/028d615c83f059bb2c905530ddb3d4efbd3cbcae/applications/jukebox)
 - [SWD Probe (By g3gg0)](https://github.com/g3gg0/flipper-swd_probe)
-- [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
+- [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
 - [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
 - [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer)
 - [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp) WIP
