@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0623-1245-0.85.3-16b66ad](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-24 14:43 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-23 05:20 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-25 06:08 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-25 06:08 EST`
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [Add circuit theme to passport #673 (By Fiattarone)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/673)
 - [Patreon Build Update: New DJ & Kaiju animations added to ALL, Minimal, Dolphin & Stock builds](https://www.patreon.com/RogueMaster/membership)
@@ -43,6 +43,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Temp Sensors Reader (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Heat Index (By ClementGre)](https://github.com/quen0n/unitemp-flipperzero/pull/17)
 - UL: [Hid app - vertical redraws #524 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/524)
 - Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch)
+- UL: Plugins: UniTemp update merged PRs -  Append carbon dioxide sensor (SCD40) (by divinebird)
+- UL: Plugins: Fix furi_hal_bus issues in AVR Programmer and Signal Generator (fixes issue UL525)
+- UL: OFW PR 2783: SLIX2 emulation support / practical use for Dymo printers (by g3gg0)
+- UL: OFW PR 2782: NFC: Fix key invalidation logic (by AloneLiberty)
+- OFW: Loader Refactor Coming Soon
 
 <a name="release">
 
