@@ -55,11 +55,14 @@ The program will automatically be launched after compilation
 
 **A4** GPIO can be connected on **A7** GPIO to test this application without using a geiger tube. **A4** GPIO is generating a signal whose frequency changes every second.
 
-Button assignments : 
+**Button assignments** : 
 
 **Ok** [long press] : clear the graph
+
 **Left/Right** [short press] : choose right unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** is always displayed
+
 **Up/Down** [short press] : zoom / unzoom 
+
 **Back** [long press] : exit
 
 
