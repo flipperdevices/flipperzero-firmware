@@ -1378,6 +1378,7 @@ Function,+,furi_hal_power_sleep,void,
 Function,+,furi_hal_power_sleep_available,_Bool,
 Function,+,furi_hal_power_suppress_charge_enter,void,
 Function,+,furi_hal_power_suppress_charge_exit,void,
+Function,+,furi_hal_pwm_is_running,_Bool,FuriHalPwmOutputId
 Function,+,furi_hal_pwm_set_params,void,"FuriHalPwmOutputId, uint32_t, uint8_t"
 Function,+,furi_hal_pwm_start,void,"FuriHalPwmOutputId, uint32_t, uint8_t"
 Function,+,furi_hal_pwm_stop,void,FuriHalPwmOutputId
