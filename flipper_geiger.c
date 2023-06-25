@@ -28,12 +28,15 @@ typedef struct {
     InputEvent input;
 } EventApp;
 
+#define lineArraySize 128
+
 typedef struct {
     FuriMutex* mutex;
     uint32_t cps, cpm;
-    uint32_t line[SCREEN_SIZE_X/2];
+    uint32_t line[lineArraySize];
     float coef;
     uint8_t data;
+    uint8_t zoom;
 } mutexStruct;
 
 static void draw_callback(Canvas* canvas, void* ctx) 
@@ -54,12 +57,39 @@ static void draw_callback(Canvas* canvas, void* ctx)
     else if (mutexDraw.data == 4) snprintf(buffer, sizeof(buffer), "%ld cps - %.2f mR/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR)/(double)10);
     else snprintf(buffer, sizeof(buffer), "%ld cps - %.2f uR/h", mutexDraw.cps, ((double)mutexDraw.cpm*(double)CONVERSION_FACTOR)*(double)100);
 
-    for (int i=0;i<SCREEN_SIZE_X;i+=2)
-    {
-        float Y = SCREEN_SIZE_Y-(mutexDraw.line[i/2]*mutexDraw.coef);
 
-        canvas_draw_line(canvas, i, Y, i, SCREEN_SIZE_Y);
-        canvas_draw_line(canvas, i+1, Y, i+1, SCREEN_SIZE_Y);
+    if (mutexDraw.zoom == 0)
+    {
+        for (int i=0;i<SCREEN_SIZE_X;i+=8)
+        {
+            float Y = SCREEN_SIZE_Y-(mutexDraw.line[i/8]*mutexDraw.coef);
+            for (int j=0;j<8;j++)canvas_draw_line(canvas, i+j, Y, i+j, SCREEN_SIZE_Y);
+        }
+    }
+    else if (mutexDraw.zoom == 1)
+    {
+        for (int i=0;i<SCREEN_SIZE_X;i+=4)
+        {
+            float Y = SCREEN_SIZE_Y-(mutexDraw.line[i/4]*mutexDraw.coef);
+            for (int j=0;j<4;j++)canvas_draw_line(canvas, i+j, Y, i+j, SCREEN_SIZE_Y);
+        }
+    }
+    else if (mutexDraw.zoom == 2)
+    {
+        for (int i=0;i<SCREEN_SIZE_X;i+=2)
+        {
+            float Y = SCREEN_SIZE_Y-(mutexDraw.line[i/2]*mutexDraw.coef);
+            for (int j=0;j<2;j++)canvas_draw_line(canvas, i+j, Y, i+j, SCREEN_SIZE_Y);
+        }
+    }
+    else if (mutexDraw.zoom == 3)
+    {
+        for (int i=0;i<SCREEN_SIZE_X;i++)
+        {
+            float Y = SCREEN_SIZE_Y-(mutexDraw.line[i]*mutexDraw.coef);
+
+            canvas_draw_line(canvas, i, Y, i, SCREEN_SIZE_Y);
+        }
     }
 
     canvas_set_font(canvas, FontPrimary);
@@ -106,9 +136,10 @@ int32_t flipper_geiger_app()
     mutexStruct mutexVal;
     mutexVal.cps = 0;
     mutexVal.cpm = 0;
-    for (int i=0;i<SCREEN_SIZE_X/2;i++) mutexVal.line[i] = 0;
+    for (int i=0;i<lineArraySize;i++) mutexVal.line[i] = 0;
     mutexVal.coef = 1;
     mutexVal.data = 0;
+    mutexVal.zoom = 2;
 
     uint32_t counter = 0;
 
@@ -143,18 +174,18 @@ int32_t flipper_geiger_app()
         {   
             if(event.type == EventTypeInput) 
             {
-                if(event.input.key == InputKeyBack) 
+                if(event.input.key == InputKeyBack && event.input.type == InputTypeLong) 
                 {
                     break;
                 }
-                else if(event.input.key == InputKeyOk && event.input.type == InputTypeShort)
+                else if(event.input.key == InputKeyOk && event.input.type == InputTypeLong)
                 {
                     counter = 0;
                     furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
                     mutexVal.cps = 0;
                     mutexVal.cpm = 0;
-                    for (int i=0;i<SCREEN_SIZE_X/2;i++) mutexVal.line[i] = 0;
+                    for (int i=0;i<lineArraySize;i++) mutexVal.line[i] = 0;
 
                     screenRefresh = 1;
                     furi_mutex_release(mutexVal.mutex);
@@ -179,12 +210,29 @@ int32_t flipper_geiger_app()
                     screenRefresh = 1;
                     furi_mutex_release(mutexVal.mutex);
                 }
+                else if((event.input.key == InputKeyUp && event.input.type == InputTypeShort))
+                {
+                    furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                    if (mutexVal.zoom != 0) mutexVal.zoom--;
+
+                    screenRefresh = 1;
+                    furi_mutex_release(mutexVal.mutex);
+
+                }
+                else if((event.input.key == InputKeyDown && event.input.type == InputTypeShort))
+                {
+                    furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
+                    if (mutexVal.zoom != 3) mutexVal.zoom++;
+
+                    screenRefresh = 1;
+                    furi_mutex_release(mutexVal.mutex);
+                }
             }
             else if (event.type == ClockEventTypeTick)
             {
                 furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
-                for (int i=0;i<SCREEN_SIZE_X/2-1;i++) mutexVal.line[SCREEN_SIZE_X/2-1-i] = mutexVal.line[SCREEN_SIZE_X/2-2-i]; 
+                for (int i=0;i<lineArraySize-1;i++) mutexVal.line[lineArraySize-1-i] = mutexVal.line[lineArraySize-2-i]; 
 
                 mutexVal.line[0] = counter;
                 mutexVal.cps = counter;
@@ -192,7 +240,7 @@ int32_t flipper_geiger_app()
 
                 mutexVal.cpm = mutexVal.line[0];
                 uint32_t max = mutexVal.line[0];
-                for (int i=1;i<SCREEN_SIZE_X/2;i++)
+                for (int i=1;i<lineArraySize;i++)
                 {
                     if (i < 60) mutexVal.cpm += mutexVal.line[i];
                     if (mutexVal.line[i] > max) max = mutexVal.line[i];
