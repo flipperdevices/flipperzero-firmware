@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,30.2,,
+Version,+,30.3,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1304,6 +1304,9 @@ Function,-,furi_hal_resources_init_early,void,
 Function,+,furi_hal_rfid_comp_set_callback,void,"FuriHalRfidCompCallback, void*"
 Function,+,furi_hal_rfid_comp_start,void,
 Function,+,furi_hal_rfid_comp_stop,void,
+Function,+,furi_hal_rfid_field_check,_Bool,uint32_t*
+Function,+,furi_hal_rfid_field_dma_start,void,
+Function,+,furi_hal_rfid_field_dma_stop,void,
 Function,-,furi_hal_rfid_init,void,
 Function,+,furi_hal_rfid_pin_pull_pulldown,void,
 Function,+,furi_hal_rfid_pin_pull_release,void,

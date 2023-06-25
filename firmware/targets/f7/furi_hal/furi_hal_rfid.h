@@ -87,6 +87,18 @@ typedef void (*FuriHalRfidCompCallback)(bool level, void* context);
 /** Set comparator callback */
 void furi_hal_rfid_comp_set_callback(FuriHalRfidCompCallback callback, void* context);
 
+/** Start/Enable Field Presence mode */
+void furi_hal_rfid_field_dma_start(void);
+
+/** Stop/Disable Field Presence mode */
+void furi_hal_rfid_field_dma_stop(void);
+
+/** Check Field Presence 
+ * @param      frequency  pointer to frequency value to be filled
+ * @return     true if field is present, false if not
+ */
+bool furi_hal_rfid_field_check(uint32_t* frequency);
+
 #ifdef __cplusplus
 }
 #endif

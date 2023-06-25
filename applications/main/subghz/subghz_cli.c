@@ -196,7 +196,7 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
     subghz_environment_free(environment);
 }
 
-#include "fild_validation_rfid_driver.h"
+#include <furi_hal_rfid.h>
 #include <furi_hal_nfc.h>
 
 void subghz_cli_command_us(Cli* cli, FuriString* args, void* context) {
@@ -206,16 +206,16 @@ void subghz_cli_command_us(Cli* cli, FuriString* args, void* context) {
     printf("Check frequency. Press CTRL+C to stop\r\n");
     furi_hal_power_suppress_charge_enter();
 
-    FildValdationDriverRfid* driver = fild_validation_rfid_driver_alloc();
+    
     uint32_t frequency = 0;
     bool fild = false;
-    fild_validation_rfid_driver_dma_start(driver);
+    furi_hal_rfid_field_dma_start();
 
     furi_hal_nfc_exit_sleep();
     furi_hal_nfc_check_vield_start();
 
     while(!(cli_cmd_interrupt_received(cli))) {
-        fild = fild_validation_rfid_driver_check(driver, &frequency);
+        fild = furi_hal_rfid_field_check(&frequency);
         printf("RFID fild = %d frecuency= %lu\r\n", fild, frequency);
         printf("NFC fild = %d \r\n", furi_hal_nfc_check_is_vield() ? 1 : 0);
         fflush(stdout);
@@ -223,8 +223,7 @@ void subghz_cli_command_us(Cli* cli, FuriString* args, void* context) {
     }
 
     furi_hal_nfc_start_sleep();
-    fild_validation_rfid_driver_dma_stop(driver);
-    fild_validation_rfid_driver_free(driver);
+    furi_hal_rfid_field_dma_stop();
 
     furi_hal_power_suppress_charge_exit();
 }
