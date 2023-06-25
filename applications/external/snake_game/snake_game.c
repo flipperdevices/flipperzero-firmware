@@ -346,7 +346,7 @@ int32_t snake_game_app(void* p) {
 
     notification_message_block(notification, &sequence_display_backlight_enforce_on);
 
-    dolphin_deed(DolphinDeedPluginGameStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     SnakeEvent event;
     for(bool processing = true; processing;) {
