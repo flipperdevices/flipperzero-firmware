@@ -171,9 +171,13 @@ NfcPoller* mf_ultralight_poller_alloc(NfcPoller* nfca_poller) {
     instance->nfca_poller = nfca_poller;
     instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
     instance->rx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
-    instance->event = malloc(sizeof(NfcPollerEvent));
-    instance->mfu_event = malloc(sizeof(MfUltralightPollerEvent));
     instance->data = mf_ultralight_alloc();
+
+    instance->mfu_event.data = &instance->mfu_event_data;
+
+    instance->general_event.protocol_type = NfcProtocolTypeMfUltralight;
+    instance->general_event.data = &instance->mfu_event;
+    instance->general_event.poller = instance;
 
     return instance;
 }
@@ -185,14 +189,10 @@ void mf_ultralight_poller_free(NfcPoller* mfu_poller) {
     furi_assert(instance->data);
     furi_assert(instance->tx_buffer);
     furi_assert(instance->rx_buffer);
-    furi_assert(instance->mfu_event);
-    furi_assert(instance->event);
 
     bit_buffer_free(instance->tx_buffer);
     bit_buffer_free(instance->rx_buffer);
     mf_ultralight_free(instance->data);
-    free(instance->mfu_event);
-    free(instance->event);
     free(instance);
 }
 
@@ -351,13 +351,11 @@ static NfcCommand mf_ultralight_poller_handler_read_tearing_flags(MfUltralightPo
 static NfcCommand mf_ultralight_poller_handler_auth(MfUltralightPoller* instance) {
     NfcCommand command = NfcCommandContinue;
     if(instance->feature_set & MfUltralightFeatureSupportAuthentication) {
-        MfUltralightPollerEventData event_data = {};
-        instance->mfu_event->type = MfUltralightPollerEventTypeAuthRequest;
-        instance->mfu_event->data = &event_data;
+        instance->mfu_event.type = MfUltralightPollerEventTypeAuthRequest;
 
-        command = instance->callback(*instance->event, instance->context);
-        if(!instance->mfu_event->data->auth_context.skip_auth) {
-            instance->auth_context.password = instance->mfu_event->data->auth_context.password;
+        command = instance->callback(instance->general_event, instance->context);
+        if(!instance->mfu_event.data->auth_context.skip_auth) {
+            instance->auth_context.password = instance->mfu_event.data->auth_context.password;
             FURI_LOG_D(
                 TAG,
                 "Trying to authenticate with password %08lX",
@@ -366,14 +364,14 @@ static NfcCommand mf_ultralight_poller_handler_auth(MfUltralightPoller* instance
             if(instance->error == MfUltralightErrorNone) {
                 FURI_LOG_D(TAG, "Auth success");
                 instance->auth_context.auth_success = true;
-                instance->mfu_event->data->auth_context = instance->auth_context;
-                instance->mfu_event->type = MfUltralightPollerEventTypeAuthSuccess;
-                command = instance->callback(*instance->event, instance->context);
+                instance->mfu_event.data->auth_context = instance->auth_context;
+                instance->mfu_event.type = MfUltralightPollerEventTypeAuthSuccess;
+                command = instance->callback(instance->general_event, instance->context);
             } else {
                 FURI_LOG_D(TAG, "Auth failed");
                 instance->auth_context.auth_success = false;
-                instance->mfu_event->type = MfUltralightPollerEventTypeAuthFailed;
-                command = instance->callback(*instance->event, instance->context);
+                instance->mfu_event.type = MfUltralightPollerEventTypeAuthFailed;
+                command = instance->callback(instance->general_event, instance->context);
                 nfca_poller_halt(instance->nfca_poller);
             }
         }
@@ -460,17 +458,17 @@ static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoll
 static NfcCommand mf_ultralight_poller_handler_read_fail(MfUltralightPoller* instance) {
     FURI_LOG_D(TAG, "Read Failed");
     nfca_poller_halt(instance->nfca_poller);
-    instance->mfu_event->data->error = instance->error;
-    NfcCommand command = instance->callback(*instance->event, instance->context);
+    instance->mfu_event.data->error = instance->error;
+    NfcCommand command = instance->callback(instance->general_event, instance->context);
     instance->state = MfUltralightPollerStateIdle;
     return command;
 }
 
 static NfcCommand mf_ultralight_poller_handler_read_success(MfUltralightPoller* instance) {
-    FURI_LOG_D(TAG, "Read success.");
+    FURI_LOG_D(TAG, "Read success");
     nfca_poller_halt(instance->nfca_poller);
-    instance->mfu_event->type = MfUltralightPollerEventTypeReadSuccess;
-    NfcCommand command = instance->callback(*instance->event, instance->context);
+    instance->mfu_event.type = MfUltralightPollerEventTypeReadSuccess;
+    NfcCommand command = instance->callback(instance->general_event, instance->context);
     return command;
 }
 
@@ -499,18 +497,16 @@ static NfcCommand mf_ultralight_poller_run(NfcPollerEvent event, void* context) 
 
     MfUltralightPoller* instance = context;
     furi_assert(instance->callback);
-    NfcaPollerEvent* nfca_event = event.data;
 
-    instance->event->protocol_type = NfcProtocolTypeMfUltralight;
-    instance->event->poller = instance;
-    instance->event->data = instance->mfu_event;
+    const NfcaPollerEvent* nfca_event = event.data;
+
     NfcCommand command = NfcCommandContinue;
 
     if(nfca_event->type == NfcaPollerEventTypeReady) {
         command = mf_ultralight_poller_read_handler[instance->state](instance);
     } else if(nfca_event->type == NfcaPollerEventTypeError) {
-        instance->mfu_event->type = MfUltralightPollerEventTypeReadFailed;
-        command = instance->callback(*instance->event, instance->context);
+        instance->mfu_event.type = MfUltralightPollerEventTypeReadFailed;
+        command = instance->callback(instance->general_event, instance->context);
     }
 
     return command;
@@ -523,7 +519,7 @@ static bool mf_ultralight_poller_detect(NfcPollerEvent event, void* context) {
 
     bool protocol_detected = false;
     MfUltralightPoller* instance = context;
-    NfcaPollerEvent* nfca_event = event.data;
+    const NfcaPollerEvent* nfca_event = event.data;
 
     if(nfca_event->type == NfcaPollerEventTypeReady) {
         MfUltralightPageReadCommandData read_page_cmd_data = {};
