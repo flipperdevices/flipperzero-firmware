@@ -18,7 +18,6 @@
 #include <lib/nfc/nfc.h>
 #include <lib/nfc/protocols/nfca/nfca_poller.h>
 #include <lib/nfc/protocols/nfca/nfca_listener.h>
-#include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 
@@ -58,7 +57,6 @@ struct NfcRpc {
     Nfc* nfc;
     NfcaPoller* nfca_poller;
     NfcaListener* nfca_listener;
-    MfUltralightPoller* mf_ul_poller;
     MfUltralightListener* mf_ul_listener;
     MfClassicPoller* mf_classic_poller;
 };

@@ -82,11 +82,15 @@ struct MfUltralightPoller {
 
     NfcPollerEvent* event;
     MfUltralightPollerEvent* mfu_event;
-    NfcPollerCallback callback_new;
-    void* context_new;
+    NfcPollerCallback callback;
+    void* context;
 };
 
 MfUltralightError mf_ultralight_process_error(NfcaError error);
+
+NfcPoller* mf_ultralight_poller_alloc(NfcPoller* nfca_poller);
+
+void mf_ultralight_poller_free(NfcPoller* mfu_poller);
 
 bool mf_ultralight_poller_ntag_i2c_addr_lin_to_tag(
     MfUltralightPoller* instance,
