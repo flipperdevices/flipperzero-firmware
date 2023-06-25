@@ -1,5 +1,7 @@
 #include "flipp_pomodoro_app_i.h"
 
+#define TAG "FlippPomodoro"
+
 enum {
     CustomEventConsumed = true,
     CustomEventNotConsumed = false,
@@ -32,6 +34,9 @@ static bool flipp_pomodoro_app_custom_event_callback(void* ctx, uint32_t event) 
         if(flipp_pomodoro__get_stage(app->state) == FlippPomodoroStageFocus) {
             // REGISTER a deed on work stage complete to get an acheivement
             dolphin_deed(DolphinDeedPluginGameWin);
+            FURI_LOG_I(TAG, "Focus stage reward added");
+
+            flipp_pomodoro_statistics__increase_focus_stages_completed(app->statistics);
         };
 
         flipp_pomodoro__toggle_stage(app->state);
@@ -56,6 +61,8 @@ FlippPomodoroApp* flipp_pomodoro_app_alloc() {
     app->notification_app = furi_record_open(RECORD_NOTIFICATION);
 
     app->view_dispatcher = view_dispatcher_alloc();
+    app->statistics = flipp_pomodoro_statistics__new();
+
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
     view_dispatcher_set_custom_event_callback(
@@ -67,22 +74,31 @@ FlippPomodoroApp* flipp_pomodoro_app_alloc() {
         app->view_dispatcher, flipp_pomodoro_app_back_event_callback);
 
     app->timer_view = flipp_pomodoro_view_timer_alloc();
+    app->info_view = flipp_pomodoro_info_view_alloc();
 
     view_dispatcher_add_view(
         app->view_dispatcher,
         FlippPomodoroAppViewTimer,
         flipp_pomodoro_view_timer_get_view(app->timer_view));
 
-    scene_manager_next_scene(app->scene_manager, FlippPomodoroSceneTimer);
+    view_dispatcher_add_view(
+        app->view_dispatcher,
+        FlippPomodoroAppViewInfo,
+        flipp_pomodoro_info_view_get_view(app->info_view));
 
+    scene_manager_next_scene(app->scene_manager, FlippPomodoroSceneTimer);
+    FURI_LOG_I(TAG, "Alloc complete");
     return app;
 }
 
 void flipp_pomodoro_app_free(FlippPomodoroApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, FlippPomodoroAppViewTimer);
+    view_dispatcher_remove_view(app->view_dispatcher, FlippPomodoroAppViewInfo);
     view_dispatcher_free(app->view_dispatcher);
     scene_manager_free(app->scene_manager);
     flipp_pomodoro_view_timer_free(app->timer_view);
+    flipp_pomodoro_info_view_free(app->info_view);
+    flipp_pomodoro_statistics__destroy(app->statistics);
     flipp_pomodoro__destroy(app->state);
     free(app);
     furi_record_close(RECORD_GUI);
@@ -91,7 +107,11 @@ void flipp_pomodoro_app_free(FlippPomodoroApp* app) {
 
 int32_t flipp_pomodoro_app(void* p) {
     UNUSED(p);
+    FURI_LOG_I(TAG, "Initial");
     FlippPomodoroApp* app = flipp_pomodoro_app_alloc();
+
+    FURI_LOG_I(TAG, "Run deed added");
+    dolphin_deed(DolphinDeedPluginGameStart);
 
     view_dispatcher_run(app->view_dispatcher);
 
