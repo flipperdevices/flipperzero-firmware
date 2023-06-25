@@ -423,6 +423,10 @@ FuriHalNfcReturn furi_hal_nfc_ll_txrx_bits(
 
 void furi_hal_nfc_ll_poll();
 
+void furi_hal_nfc_check_vield_start();
+
+bool furi_hal_nfc_check_is_vield();
+
 #ifdef __cplusplus
 }
 #endif
