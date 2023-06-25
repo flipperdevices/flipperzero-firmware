@@ -15,6 +15,4 @@ View* select_pokemon_alloc(PokemonFap* pokemon_fap);
 
 void select_pokemon_free(PokemonFap* pokemon_fap);
 
-View* select_pokemon_get_view(PokemonFap* pokemon_fap);
-
 #endif /* SELECCT_POKEMON_HPP */

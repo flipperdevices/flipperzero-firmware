@@ -132,8 +132,3 @@ void select_pokemon_free(PokemonFap* pokemon_fap) {
     furi_assert(pokemon_fap);
     view_free(pokemon_fap->select_view);
 }
-
-View* select_pokemon_get_view(PokemonFap* pokemon_fap) {
-    furi_assert(pokemon_fap);
-    return pokemon_fap->select_view;
-}

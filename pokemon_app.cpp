@@ -230,9 +230,9 @@ PokemonFap* pokemon_alloc() {
 
     // Select Pokemon View
     pokemon_fap->select_view = select_pokemon_alloc(pokemon_fap);
-    view_set_previous_callback(select_pokemon_get_view(pokemon_fap), pokemon_exit_confirm_view);
+    view_set_previous_callback(pokemon_fap->select_view, pokemon_exit_confirm_view);
     view_dispatcher_add_view(
-        pokemon_fap->view_dispatcher, AppViewSelectPokemon, select_pokemon_get_view(pokemon_fap));
+        pokemon_fap->view_dispatcher, AppViewSelectPokemon, pokemon_fap->select_view);
 
     // Trade View
     pokemon_fap->trade_view = trade_alloc(pokemon_fap);
