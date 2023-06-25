@@ -103,21 +103,22 @@ Measure of americium-241 button from a smoke detector :
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/flipper7.png" width=25% height=25%>
 
 Zoom levels (the third picture is the default zoom) :
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom0.png" width=25% height=25%>
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom1.png" width=25% height=25%>
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom2.png" width=25% height=25%>
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom3.png" width=25% height=25%>
+
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom0.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom1.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom3.png" width=25% height=25%>
 
 ## User gallery
 
 [BRD8 [Reddit]](https://www.reddit.com/user/BRD8/) https://www.reddit.com/r/flipperzero/comments/110062z/am_i_a_hacker_now_mom/ : 
 
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/abQXuEz.jpg" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/abQXuEz.jpg" width=50% height=50%>
 
 [Funbob235 [Reddit]](https://www.reddit.com/user/Funbob235/) https://www.reddit.com/r/flipperzero/comments/13m1qly/testing_of_the_geiger_counter/ : 
 
-<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/testing-of-the-geiger-counter-v0-3zv9gdq4nt0b1.jpg" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/user/testing-of-the-geiger-counter-v0-3zv9gdq4nt0b1.jpg" width=50% height=50%>
 
+[Seanclark2409 [YouTube]](https://www.youtube.com/@seanclark2409) : 
+
+[![Watch the video](https://img.youtube.com/vi/JQB2jvY1oZ0/maxresdefault.jpg)](https://youtu.be/JQB2jvY1oZ0)
 
 ## What's next ?
 
