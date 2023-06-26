@@ -34,6 +34,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-25 11:47 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-25 11:47 EST`
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
+- OFW PR: [LF-RFID debug: make it work #2793 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2793)
 - OFW: Loader Refactor Coming Soon
 
 <a name="release">
