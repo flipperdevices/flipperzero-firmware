@@ -28,7 +28,7 @@ void nfc_scene_mf_classic_read_supported_card_on_enter(void* context) {
     // }
 
     if(supported) {
-        scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
+        scene_manager_next_scene(nfc->scene_manager, NfcSceneReadSuccess);
     } else {
         scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicDictAttack);
     }

@@ -26,7 +26,7 @@ void nfc_scene_info_on_enter(void* context) {
     FuriString* temp_str;
     temp_str = furi_string_alloc();
 
-    nfc_protocol_format_render_info(nfc->nfc_dev, temp_str);
+    nfc_protocol_format_info(nfc->nfc_dev, NfcProtocolFormatTypeFull, temp_str);
 
     widget_add_text_scroll_element(
         widget, 0, 0, 128, text_scroll_height, furi_string_get_cstr(temp_str));
@@ -35,25 +35,24 @@ void nfc_scene_info_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
+static const NfcScene nfc_scene_info_data_scenes[NfcProtocolTypeMax] = {
+    [NfcProtocolTypeIso14443_3a] = NfcSceneNotImplemented,
+    [NfcProtocolTypeIso14443_4a] = NfcSceneNotImplemented,
+    [NfcProtocolTypeMfUltralight] = NfcSceneNotImplemented,
+    [NfcProtocolTypeMfClassic] = NfcSceneNotImplemented,
+    [NfcProtocolTypeMfDesfire] = NfcSceneMfDesfireData,
+};
+
 bool nfc_scene_info_on_event(void* context, SceneManagerEvent event) {
     NfcApp* nfc = context;
-    NfcProtocolType protocol_type = nfc_dev_get_protocol_type(nfc->nfc_dev);
-
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeRight) {
-            // TODO: Do not if the protocol type directly
-            if(protocol_type == NfcProtocolTypeMfDesfire) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireData);
-                consumed = true;
-            } else if(protocol_type == NfcProtocolTypeMfUltralight) {
-                //             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightData);
-                consumed = true;
-            } else if(protocol_type == NfcProtocolTypeMfClassic) {
-                //             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicData);
-                consumed = true;
-            }
+            const NfcProtocolType protocol_type = nfc_dev_get_protocol_type(nfc->nfc_dev);
+            const NfcScene menu_scene = nfc_scene_info_data_scenes[protocol_type];
+            scene_manager_next_scene(nfc->scene_manager, menu_scene);
+            consumed = true;
         }
     }
 

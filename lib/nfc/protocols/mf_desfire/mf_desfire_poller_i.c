@@ -195,12 +195,13 @@ MfDesfireError
 
 MfDesfireError mf_desfire_poller_async_select_application(
     MfDesfirePoller* instance,
-    const MfDesfireApplicationId id) {
+    const MfDesfireApplicationId* id) {
     furi_assert(instance);
 
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_SELECT_APPLICATION);
-    bit_buffer_append_bytes(instance->input_buffer, id, sizeof(MfDesfireApplicationId));
+    bit_buffer_append_bytes(
+        instance->input_buffer, (const uint8_t*)id, sizeof(MfDesfireApplicationId));
 
     MfDesfireError error = mf_desfire_send_chunks(
         instance,

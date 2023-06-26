@@ -69,7 +69,8 @@ bool nfc_scene_mf_desfire_app_on_event(void* context, SceneManagerEvent event) {
             TextBox* text_box = nfc->text_box;
             furi_string_reset(nfc->text_box_store);
             if(event.event == SubmenuIndexAppInfo) {
-                const uint8_t* app_id = simple_array_cget(data->application_ids, app_index);
+                const MfDesfireApplicationId* app_id =
+                    simple_array_cget(data->application_ids, app_index);
                 nfc_mf_desfire_format_application_id(app_id, nfc->text_box_store);
                 nfc_mf_desfire_format_application(app, nfc->text_box_store);
             } else {

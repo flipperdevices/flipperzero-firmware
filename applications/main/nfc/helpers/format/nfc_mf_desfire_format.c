@@ -85,8 +85,9 @@ void nfc_mf_desfire_format_key_version(
     furi_string_cat_printf(str, "key %lu version %u\n", index, *data);
 }
 
-void nfc_mf_desfire_format_application_id(const MfDesfireApplicationId data, FuriString* str) {
-    furi_string_cat_printf(str, "Application %02x%02x%02x\n", data[0], data[1], data[2]);
+void nfc_mf_desfire_format_application_id(const MfDesfireApplicationId* data, FuriString* str) {
+    const uint8_t* app_id = data->data;
+    furi_string_cat_printf(str, "Application %02x%02x%02x\n", app_id[0], app_id[1], app_id[2]);
 }
 
 void nfc_mf_desfire_format_application(const MfDesfireApplication* data, FuriString* str) {

@@ -52,11 +52,12 @@ bool nfc_scene_mf_ultralight_unlock_warn_on_event(void* context, SceneManagerEve
 
     bool consumed = false;
 
+    // TODO: Set detected protocol accordingly
     MfUltralightAuthType type = nfc->mf_ul_auth->type;
     if((type == MfUltralightAuthTypeReader) || (type == MfUltralightAuthTypeManual)) {
         if(event.type == SceneManagerEventTypeCustom) {
             if(event.event == DialogExResultRight) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightRead);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
                 dolphin_deed(DolphinDeedNfcRead);
                 consumed = true;
             } else if(event.event == DialogExResultLeft) {
@@ -74,7 +75,7 @@ bool nfc_scene_mf_ultralight_unlock_warn_on_event(void* context, SceneManagerEve
     } else {
         if(event.type == SceneManagerEventTypeCustom) {
             if(event.event == DialogExResultCenter) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightRead);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
                 dolphin_deed(DolphinDeedNfcRead);
                 consumed = true;
             }

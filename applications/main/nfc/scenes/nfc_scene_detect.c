@@ -23,6 +23,10 @@ void nfc_scene_detect_on_enter(void* context) {
     popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
+    // Clear detected protocols
+    instance->protocols_detected_num = 0;
+    instance->protocols_detected_idx = 0;
+
     nfc_scanner_start(instance->scanner, nfc_scene_detect_scan_callback, instance);
 
     nfc_blink_detect_start(instance);
@@ -37,18 +41,8 @@ bool nfc_scene_detect_on_event(void* context, SceneManagerEvent event) {
             if(instance->protocols_detected_num > 1) {
                 scene_manager_next_scene(instance->scene_manager, NfcSceneSelectProtocol);
             } else {
-                // TODO rework with generic read scene
-                const uint32_t nfc_read_scenes[NfcProtocolTypeMax] = {
-                    NfcSceneNfcaRead,
-                    NfcSceneNfcaRead,
-                    NfcSceneMfUltralightRead,
-                    NfcSceneMfClassicDictAttack,
-                    NfcSceneMfDesfireRead,
-                };
                 instance->protocols_detected_idx = 0;
-                scene_manager_next_scene(
-                    instance->scene_manager,
-                    nfc_read_scenes[instance->protocols_detected[instance->protocols_detected_idx]]);
+                scene_manager_next_scene(instance->scene_manager, NfcSceneRead);
             }
             consumed = true;
         }

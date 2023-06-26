@@ -48,17 +48,7 @@ bool nfc_scene_select_protocol_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         instance->protocols_detected_idx = event.event;
-        // TODO remove this and switch to generic read
-        const uint32_t nfc_read_scenes[NfcProtocolTypeMax] = {
-            NfcSceneNfcaRead,
-            NfcSceneNfcaRead,
-            NfcSceneMfUltralightRead,
-            NfcSceneMfClassicDictAttack,
-            NfcSceneMfDesfireRead,
-        };
-        scene_manager_next_scene(
-            instance->scene_manager,
-            nfc_read_scenes[instance->protocols_detected[instance->protocols_detected_idx]]);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneRead);
         scene_manager_set_scene_state(
             instance->scene_manager, NfcSceneSelectProtocol, event.event);
         consumed = true;

@@ -46,7 +46,7 @@ bool nfc_scene_nfca_menu_on_event(void* context, SceneManagerEvent event) {
             }
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneInfo);
             consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneNfcaMenu, event.event);

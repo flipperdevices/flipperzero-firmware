@@ -23,7 +23,7 @@ void mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* 
 void mf_desfire_key_version_parse(MfDesfireKeyVersion* data, const BitBuffer* buf);
 
 void mf_desfire_application_id_parse(
-    MfDesfireApplicationId data,
+    MfDesfireApplicationId* data,
     uint32_t index,
     const BitBuffer* buf);
 

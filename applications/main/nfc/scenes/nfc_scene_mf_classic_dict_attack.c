@@ -143,7 +143,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 consumed = true;
             } else {
                 notification_message(nfc->notifications, &sequence_success);
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
+                scene_manager_next_scene(nfc->scene_manager, NfcSceneReadSuccess);
                 dolphin_deed(DolphinDeedNfcReadSuccess);
                 consumed = true;
             }

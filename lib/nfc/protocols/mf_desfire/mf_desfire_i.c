@@ -21,7 +21,7 @@ void mf_desfire_key_version_parse(MfDesfireKeyVersion* data, const BitBuffer* bu
 }
 
 void mf_desfire_application_id_parse(
-    MfDesfireApplicationId data,
+    MfDesfireApplicationId* data,
     uint32_t index,
     const BitBuffer* buf) {
     bit_buffer_write_bytes_mid(
