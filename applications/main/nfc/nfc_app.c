@@ -432,6 +432,23 @@ void nfc_show_loading_popup(void* context, bool show) {
     }
 }
 
+void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocolType* types, uint32_t count) {
+    furi_assert(instance);
+    furi_assert(types);
+    furi_assert(count < NfcProtocolTypeMax);
+
+    memcpy(instance->protocols_detected, types, count);
+    instance->protocols_detected_num = count;
+    instance->protocols_detected_idx = 0;
+}
+
+void nfc_app_reset_detected_protocols(NfcApp* instance) {
+    furi_assert(instance);
+
+    instance->protocols_detected_idx = 0;
+    instance->protocols_detected_num = 0;
+}
+
 static bool nfc_is_hal_ready() {
     if(f_hal_nfc_is_hal_ready() != FHalNfcErrorNone) {
         // No connection to the chip, show an error screen

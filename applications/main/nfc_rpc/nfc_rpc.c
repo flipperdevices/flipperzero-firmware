@@ -136,7 +136,6 @@ static NfcRpc* nfc_rpc_app_alloc() {
 
     instance->nfc = nfc_alloc();
     instance->nfca_poller = nfca_poller_alloc(instance->nfc);
-    instance->mf_ul_poller = mf_ultralight_poller_alloc(instance->nfca_poller);
     instance->nfca_listener = nfca_listener_alloc(instance->nfc);
     instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->nfca_listener);
     instance->mf_classic_poller = mf_classic_poller_alloc(instance->nfca_poller);
@@ -176,7 +175,6 @@ void nfc_rpc_app_free(NfcRpc* instance) {
 
     mf_classic_poller_free(instance->mf_classic_poller);
     mf_ultralight_listener_free(instance->mf_ul_listener);
-    mf_ultralight_poller_free(instance->mf_ul_poller);
     nfca_listener_free(instance->nfca_listener);
     nfca_poller_free(instance->nfca_poller);
     nfc_free(instance->nfc);

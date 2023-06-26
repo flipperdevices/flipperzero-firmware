@@ -1,6 +1,7 @@
 #include "nfc_rpc_i.h"
 
 #include "assets/compiled/mf_ultralight.pb.h"
+#include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync_api.h>
 
 #define TAG "NfcRpcMfUltralight"
 
@@ -42,7 +43,7 @@ static void nfc_rpc_mf_ultralight_read_page(Nfc_Main* cmd, void* context) {
 
     MfUltralightPage page = {};
     MfUltralightError error = mf_ultralight_poller_read_page(
-        instance->mf_ul_poller, cmd->content.mf_ultralight_read_page_req.page, &page);
+        instance->nfc, cmd->content.mf_ultralight_read_page_req.page, &page);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_mf_ultralight_read_page_resp_tag;
@@ -66,7 +67,7 @@ static void nfc_rpc_mf_ultralight_write_page(Nfc_Main* cmd, void* context) {
     MfUltralightPage data = {};
     memcpy(&data, cmd->content.mf_ultralight_write_page_req.data.bytes, sizeof(MfUltralightPage));
     uint16_t page = cmd->content.mf_ultralight_write_page_req.page;
-    MfUltralightError error = mf_ultralight_poller_write_page(instance->mf_ul_poller, page, &data);
+    MfUltralightError error = mf_ultralight_poller_write_page(instance->nfc, page, &data);
 
     cmd->which_content = Nfc_Main_mf_ultralight_write_page_resp_tag;
     cmd->command_status = Nfc_CommandStatus_OK;
@@ -83,7 +84,7 @@ static void nfc_rpc_mf_ultralight_read_version(Nfc_Main* cmd, void* context) {
         PB_MfUltralight_ReadVersionResponse_init_default;
 
     MfUltralightVersion data = {};
-    MfUltralightError error = mf_ultralight_poller_read_version(instance->mf_ul_poller, &data);
+    MfUltralightError error = mf_ultralight_poller_read_version(instance->nfc, &data);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_mf_ultralight_read_version_resp_tag;
@@ -110,7 +111,7 @@ static void nfc_rpc_mf_ultralight_read_signature(Nfc_Main* cmd, void* context) {
         PB_MfUltralight_ReadSignatureResponse_init_default;
 
     MfUltralightSignature data = {};
-    MfUltralightError error = mf_ultralight_poller_read_signature(instance->mf_ul_poller, &data);
+    MfUltralightError error = mf_ultralight_poller_read_signature(instance->nfc, &data);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_mf_ultralight_read_signature_resp_tag;
@@ -132,7 +133,7 @@ static void nfc_rpc_mf_ultralight_read_counter(Nfc_Main* cmd, void* context) {
 
     MfUltralightCounter data = {};
     MfUltralightError error = mf_ultralight_poller_read_counter(
-        instance->mf_ul_poller, cmd->content.mf_ultralight_read_counter_req.counter_num, &data);
+        instance->nfc, cmd->content.mf_ultralight_read_counter_req.counter_num, &data);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_mf_ultralight_read_counter_resp_tag;
@@ -156,7 +157,7 @@ static void nfc_rpc_mf_ultralight_read_tearing_flag(Nfc_Main* cmd, void* context
 
     MfUltralightTearingFlag data = {};
     MfUltralightError error = mf_ultralight_poller_read_tearing_flag(
-        instance->mf_ul_poller, cmd->content.mf_ultralight_read_tearing_flag_req.flag_num, &data);
+        instance->nfc, cmd->content.mf_ultralight_read_tearing_flag_req.flag_num, &data);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_mf_ultralight_read_tearing_flag_resp_tag;

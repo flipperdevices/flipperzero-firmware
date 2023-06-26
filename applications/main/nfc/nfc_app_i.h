@@ -171,3 +171,7 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog);
 bool nfc_save_file(NfcApp* instance, FuriString* path);
 
 void nfc_make_app_folder(NfcApp* instance);
+
+void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocolType* types, uint32_t count);
+
+void nfc_app_reset_detected_protocols(NfcApp* instance);

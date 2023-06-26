@@ -1,343 +1,288 @@
 #include "mf_ultralight_poller_i.h"
 
+#include <nfc/nfc_poller_manager.h>
+
 #include <furi.h>
 
 #define MF_ULTRALIGHT_POLLER_COMPLETE_EVENT (1UL << 0)
 
+typedef enum {
+    MfUltralightPollerCmdTypeReadPage,
+    MfUltralightPollerCmdTypeWritePage,
+    MfUltralightPollerCmdTypeReadVersion,
+    MfUltralightPollerCmdTypeReadSignature,
+    MfUltralightPollerCmdTypeReadCounter,
+    MfUltralightPollerCmdTypeReadTearingFlag,
+
+    MfUltralightPollerCmdTypeNum,
+} MfUltralightPollerCmdType;
+
 typedef struct {
-    MfUltralightPoller* instance;
+    MfUltralightPollerCmdType cmd_type;
     FuriThreadId thread_id;
     MfUltralightError error;
     MfUltralightPollerContextData data;
 } MfUltralightPollerContext;
 
-static NfcaPollerCommand mf_ultraight_read_page_callback(NfcaPollerEvent event, void* context) {
-    furi_assert(context);
+typedef MfUltralightError (*MfUltralightPollerCmdHandler)(
+    MfUltralightPoller* poller,
+    MfUltralightPollerContextData* data);
 
-    MfUltralightPollerContext* poller_context = context;
-    if(event.type == NfcaPollerEventTypeReady) {
-        poller_context->error = mf_ultralight_poller_async_read_page(
-            poller_context->instance,
-            poller_context->data.read_cmd.start_page,
-            &poller_context->data.read_cmd.data);
-        nfca_poller_halt(poller_context->instance->nfca_poller);
-    } else if(event.type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_ultralight_process_error(event.data.error);
-    }
-    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
-
-    return NfcaPollerCommandStop;
+MfUltralightError mf_ultralight_poller_read_page_handler(
+    MfUltralightPoller* poller,
+    MfUltralightPollerContextData* data) {
+    return mf_ultralight_poller_async_read_page(
+        poller, data->read_cmd.start_page, &data->read_cmd.data);
 }
 
-MfUltralightError mf_ultralight_poller_read_page(
-    MfUltralightPoller* instance,
-    uint16_t page,
-    MfUltralightPage* data) {
-    furi_assert(instance);
-    furi_assert(data);
-
-    MfUltralightPollerContext poller_context = {};
-    poller_context.data.read_cmd.start_page = page;
-    poller_context.instance = instance;
-    poller_context.thread_id = furi_thread_get_current_id();
-
-    mf_ultralight_poller_start(instance, mf_ultraight_read_page_callback, &poller_context);
-    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
-
-    if(poller_context.error == MfUltralightErrorNone) {
-        *data = poller_context.data.read_cmd.data.page[0];
-    }
-    mf_ultralight_poller_stop(instance);
-
-    return poller_context.error;
+MfUltralightError mf_ultralight_poller_write_page_handler(
+    MfUltralightPoller* poller,
+    MfUltralightPollerContextData* data) {
+    return mf_ultralight_poller_async_write_page(
+        poller, data->write_cmd.page_to_write, &data->write_cmd.page);
 }
 
-NfcCommand mf_ultralight_poller_read_page_new_callback(NfcPollerEvent event, void* context) {
+MfUltralightError mf_ultralight_poller_read_version_handler(
+    MfUltralightPoller* poller,
+    MfUltralightPollerContextData* data) {
+    return mf_ultralight_poller_async_read_version(poller, &data->version);
+}
+
+MfUltralightError mf_ultralight_poller_read_signature_handler(
+    MfUltralightPoller* poller,
+    MfUltralightPollerContextData* data) {
+    return mf_ultralight_poller_async_read_signature(poller, &data->signature);
+}
+
+MfUltralightError mf_ultralight_poller_read_counter_handler(
+    MfUltralightPoller* poller,
+    MfUltralightPollerContextData* data) {
+    return mf_ultralight_poller_async_read_counter(
+        poller, data->counter_cmd.counter_num, &data->counter_cmd.data);
+}
+
+MfUltralightError mf_ultralight_poller_read_tearing_flag_handler(
+    MfUltralightPoller* poller,
+    MfUltralightPollerContextData* data) {
+    return mf_ultralight_poller_async_read_tearing_flag(
+        poller, data->tearing_flag_cmd.tearing_flag_num, &data->tearing_flag_cmd.data);
+}
+
+static const MfUltralightPollerCmdHandler
+    mf_ultralight_poller_cmd_handlers[MfUltralightPollerCmdTypeNum] = {
+        [MfUltralightPollerCmdTypeReadPage] = mf_ultralight_poller_read_page_handler,
+        [MfUltralightPollerCmdTypeWritePage] = mf_ultralight_poller_write_page_handler,
+        [MfUltralightPollerCmdTypeReadVersion] = mf_ultralight_poller_read_version_handler,
+        [MfUltralightPollerCmdTypeReadSignature] = mf_ultralight_poller_read_signature_handler,
+        [MfUltralightPollerCmdTypeReadCounter] = mf_ultralight_poller_read_counter_handler,
+        [MfUltralightPollerCmdTypeReadTearingFlag] =
+            mf_ultralight_poller_read_tearing_flag_handler,
+};
+
+static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* context) {
     furi_assert(event.poller);
-    furi_assert(event.protocol_type == NfcProtocolTypeMfUltralight);
+    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
     furi_assert(event.data);
     furi_assert(context);
 
     MfUltralightPollerContext* poller_context = context;
     NfcaPollerEvent* nfca_event = event.data;
-    MfUltralightPoller* mfu_poller = event.poller;
+    NfcaPoller* nfca_poller = event.poller;
+    MfUltralightPoller* mfu_poller = mf_ultralight_poller_alloc(nfca_poller);
 
     if(nfca_event->type == NfcaPollerEventTypeReady) {
-        poller_context->error = mf_ultralight_poller_async_read_page(
-            mfu_poller,
-            poller_context->data.read_cmd.start_page,
-            &poller_context->data.read_cmd.data);
-        nfca_poller_halt(mfu_poller->nfca_poller);
+        poller_context->error = mf_ultralight_poller_cmd_handlers[poller_context->cmd_type](
+            mfu_poller, &poller_context->data);
     } else if(nfca_event->type == NfcaPollerEventTypeError) {
         poller_context->error = mf_ultralight_process_error(nfca_event->data.error);
     }
+
     furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
+
+    mf_ultralight_poller_free(mfu_poller);
 
     return NfcCommandStop;
 }
 
-MfUltralightError mf_ultralight_poller_read_page_new(
-    NfcPollerManager* poller_manager,
-    uint16_t page,
-    MfUltralightPage* data) {
-    furi_assert(poller_manager);
-    furi_assert(data);
+static MfUltralightError
+    mf_ultralight_poller_cmd_execute(Nfc* nfc, MfUltralightPollerContext* poller_ctx) {
+    furi_assert(poller_ctx->cmd_type < MfUltralightPollerCmdTypeNum);
 
-    MfUltralightPollerContext poller_context = {};
-    poller_context.data.read_cmd.start_page = page;
-    poller_context.thread_id = furi_thread_get_current_id();
+    poller_ctx->thread_id = furi_thread_get_current_id();
+    NfcPollerManager* poller_manager = nfc_poller_manager_alloc(nfc);
 
     nfc_poller_manager_start(
-        poller_manager,
-        NfcProtocolTypeMfUltralight,
-        mf_ultralight_poller_read_page_new_callback,
-        &poller_context);
+        poller_manager, NfcProtocolTypeIso14443_3a, mf_ultralgiht_poller_cmd_callback, poller_ctx);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    furi_thread_flags_clear(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
+    nfc_poller_manager_stop(poller_manager);
 
-    if(poller_context.error == MfUltralightErrorNone) {
+    nfc_poller_manager_free(poller_manager);
+
+    return poller_ctx->error;
+}
+
+MfUltralightError mf_ultralight_poller_read_page(Nfc* nfc, uint16_t page, MfUltralightPage* data) {
+    furi_assert(nfc);
+    furi_assert(data);
+
+    MfUltralightPollerContext poller_context = {
+        .cmd_type = MfUltralightPollerCmdTypeReadPage,
+        .data.read_cmd.start_page = page,
+    };
+
+    MfUltralightError error = mf_ultralight_poller_cmd_execute(nfc, &poller_context);
+
+    if(error == MfUltralightErrorNone) {
         *data = poller_context.data.read_cmd.data.page[0];
     }
 
-    nfc_poller_manager_stop(poller_manager);
-
-    return poller_context.error;
-}
-
-static NfcaPollerCommand mf_ultraight_write_page_callback(NfcaPollerEvent event, void* context) {
-    furi_assert(context);
-
-    MfUltralightPollerContext* poller_context = context;
-    if(event.type == NfcaPollerEventTypeReady) {
-        poller_context->error = mf_ultralight_poller_async_write_page(
-            poller_context->instance,
-            poller_context->data.write_cmd.page_to_write,
-            &poller_context->data.write_cmd.page);
-        nfca_poller_halt(poller_context->instance->nfca_poller);
-    } else if(event.type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_ultralight_process_error(event.data.error);
-    }
-    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
-
-    return NfcaPollerCommandStop;
-}
-
-MfUltralightError mf_ultralight_poller_write_page(
-    MfUltralightPoller* instance,
-    uint16_t page,
-    MfUltralightPage* data) {
-    furi_assert(instance);
-    furi_assert(data);
-
-    MfUltralightPollerContext poller_context = {};
-    poller_context.data.write_cmd.page_to_write = page;
-    poller_context.data.write_cmd.page = *data;
-    poller_context.instance = instance;
-    poller_context.thread_id = furi_thread_get_current_id();
-
-    mf_ultralight_poller_start(instance, mf_ultraight_write_page_callback, &poller_context);
-    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
-    mf_ultralight_poller_stop(instance);
-
-    return poller_context.error;
-}
-
-static NfcaPollerCommand mf_ultraight_read_version_callback(NfcaPollerEvent event, void* context) {
-    furi_assert(context);
-
-    MfUltralightPollerContext* poller_context = context;
-    if(event.type == NfcaPollerEventTypeReady) {
-        poller_context->error = mf_ultralight_poller_async_read_version(
-            poller_context->instance, &poller_context->data.version);
-        nfca_poller_halt(poller_context->instance->nfca_poller);
-    } else if(event.type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_ultralight_process_error(event.data.error);
-    }
-    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
-
-    return NfcaPollerCommandStop;
+    return error;
 }
 
 MfUltralightError
-    mf_ultralight_poller_read_version(MfUltralightPoller* instance, MfUltralightVersion* data) {
-    furi_assert(instance);
+    mf_ultralight_poller_write_page(Nfc* nfc, uint16_t page, MfUltralightPage* data) {
+    furi_assert(nfc);
     furi_assert(data);
-    MfUltralightPollerContext poller_context = {};
-    poller_context.instance = instance;
-    poller_context.thread_id = furi_thread_get_current_id();
 
-    mf_ultralight_poller_start(instance, mf_ultraight_read_version_callback, &poller_context);
-    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    MfUltralightPollerContext poller_context = {
+        .cmd_type = MfUltralightPollerCmdTypeWritePage,
+        .data.write_cmd =
+            {
+                .page_to_write = page,
+                .page = *data,
+            },
+    };
 
-    if(poller_context.error == MfUltralightErrorNone) {
+    MfUltralightError error = mf_ultralight_poller_cmd_execute(nfc, &poller_context);
+
+    return error;
+}
+
+MfUltralightError mf_ultralight_poller_read_version(Nfc* nfc, MfUltralightVersion* data) {
+    furi_assert(nfc);
+    furi_assert(data);
+
+    MfUltralightPollerContext poller_context = {
+        .cmd_type = MfUltralightPollerCmdTypeReadVersion,
+    };
+
+    MfUltralightError error = mf_ultralight_poller_cmd_execute(nfc, &poller_context);
+
+    if(error == MfUltralightErrorNone) {
         *data = poller_context.data.version;
     }
-    mf_ultralight_poller_stop(instance);
 
-    return poller_context.error;
+    return error;
 }
 
-static NfcaPollerCommand
-    mf_ultraight_read_signature_callback(NfcaPollerEvent event, void* context) {
-    furi_assert(context);
+MfUltralightError mf_ultralight_poller_read_signature(Nfc* nfc, MfUltralightSignature* data) {
+    furi_assert(nfc);
+    furi_assert(data);
 
-    MfUltralightPollerContext* poller_context = context;
-    if(event.type == NfcaPollerEventTypeReady) {
-        poller_context->error = mf_ultralight_poller_async_read_signature(
-            poller_context->instance, &poller_context->data.signature);
-        nfca_poller_halt(poller_context->instance->nfca_poller);
-    } else if(event.type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_ultralight_process_error(event.data.error);
+    MfUltralightPollerContext poller_context = {
+        .cmd_type = MfUltralightPollerCmdTypeReadSignature,
+    };
+
+    MfUltralightError error = mf_ultralight_poller_cmd_execute(nfc, &poller_context);
+
+    if(error == MfUltralightErrorNone) {
+        *data = poller_context.data.signature;
     }
-    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
 
-    return NfcaPollerCommandStop;
+    return error;
 }
 
 MfUltralightError
-    mf_ultralight_poller_read_signature(MfUltralightPoller* instance, MfUltralightSignature* data) {
-    furi_assert(instance);
+    mf_ultralight_poller_read_counter(Nfc* nfc, uint8_t counter_num, MfUltralightCounter* data) {
+    furi_assert(nfc);
     furi_assert(data);
 
-    MfUltralightPollerContext poller_context = {};
-    poller_context.instance = instance;
-    poller_context.thread_id = furi_thread_get_current_id();
+    MfUltralightPollerContext poller_context = {
+        .cmd_type = MfUltralightPollerCmdTypeReadCounter,
+        .data.counter_cmd.counter_num = counter_num,
+    };
 
-    mf_ultralight_poller_start(instance, mf_ultraight_read_signature_callback, &poller_context);
-    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    MfUltralightError error = mf_ultralight_poller_cmd_execute(nfc, &poller_context);
 
-    if(poller_context.error == MfUltralightErrorNone) {
-        *data = poller_context.data.signature;
-    }
-    mf_ultralight_poller_stop(instance);
-
-    return poller_context.error;
-}
-
-static NfcaPollerCommand mf_ultraight_read_counter_callback(NfcaPollerEvent event, void* context) {
-    furi_assert(context);
-
-    MfUltralightPollerContext* poller_context = context;
-    if(event.type == NfcaPollerEventTypeReady) {
-        poller_context->error = mf_ultralight_poller_async_read_counter(
-            poller_context->instance,
-            poller_context->data.counter_cmd.counter_num,
-            &poller_context->data.counter_cmd.data);
-        nfca_poller_halt(poller_context->instance->nfca_poller);
-    } else if(event.type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_ultralight_process_error(event.data.error);
-    }
-    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
-
-    return NfcaPollerCommandStop;
-}
-
-MfUltralightError mf_ultralight_poller_read_counter(
-    MfUltralightPoller* instance,
-    uint8_t counter_num,
-    MfUltralightCounter* data) {
-    furi_assert(instance);
-    furi_assert(data);
-
-    MfUltralightPollerContext poller_context = {};
-    poller_context.data.counter_cmd.counter_num = counter_num;
-    poller_context.instance = instance;
-    poller_context.thread_id = furi_thread_get_current_id();
-
-    mf_ultralight_poller_start(instance, mf_ultraight_read_counter_callback, &poller_context);
-    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
-
-    if(poller_context.error == MfUltralightErrorNone) {
+    if(error == MfUltralightErrorNone) {
         *data = poller_context.data.counter_cmd.data;
     }
-    mf_ultralight_poller_stop(instance);
 
-    return poller_context.error;
-}
-
-static NfcaPollerCommand
-    mf_ultraight_read_tering_flag_callback(NfcaPollerEvent event, void* context) {
-    furi_assert(context);
-
-    MfUltralightPollerContext* poller_context = context;
-    if(event.type == NfcaPollerEventTypeReady) {
-        poller_context->error = mf_ultralight_poller_async_read_tearing_flag(
-            poller_context->instance,
-            poller_context->data.tearing_flag_cmd.tearing_flag_num,
-            &poller_context->data.tearing_flag_cmd.data);
-        nfca_poller_halt(poller_context->instance->nfca_poller);
-    } else if(event.type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_ultralight_process_error(event.data.error);
-    }
-    furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
-
-    return NfcaPollerCommandStop;
+    return error;
 }
 
 MfUltralightError mf_ultralight_poller_read_tearing_flag(
-    MfUltralightPoller* instance,
+    Nfc* nfc,
     uint8_t flag_num,
     MfUltralightTearingFlag* data) {
-    furi_assert(instance);
+    furi_assert(nfc);
     furi_assert(data);
 
-    MfUltralightPollerContext poller_context = {};
-    poller_context.data.tearing_flag_cmd.tearing_flag_num = flag_num;
-    poller_context.instance = instance;
-    poller_context.thread_id = furi_thread_get_current_id();
+    MfUltralightPollerContext poller_context = {
+        .cmd_type = MfUltralightPollerCmdTypeReadTearingFlag,
+        .data.tearing_flag_cmd.tearing_flag_num = flag_num,
+    };
 
-    mf_ultralight_poller_start(instance, mf_ultraight_read_tering_flag_callback, &poller_context);
-    furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    MfUltralightError error = mf_ultralight_poller_cmd_execute(nfc, &poller_context);
 
-    if(poller_context.error == MfUltralightErrorNone) {
+    if(error == MfUltralightErrorNone) {
         *data = poller_context.data.tearing_flag_cmd.data;
     }
-    mf_ultralight_poller_stop(instance);
 
-    return poller_context.error;
+    return error;
 }
 
-static MfUltralightPollerCommand
-    mf_ultralight_poller_read_callback(MfUltralightPollerEvent event, void* context) {
+static NfcCommand mf_ultralight_poller_read_callback(NfcPollerEvent event, void* context) {
     furi_assert(context);
+    furi_assert(event.poller);
+    furi_assert(event.data);
+    furi_assert(event.protocol_type == NfcProtocolTypeMfUltralight);
 
+    NfcCommand command = NfcCommandContinue;
     MfUltralightPollerContext* poller_context = context;
-    MfUltralightPollerCommand command = MfUltralightPollerCommandContinue;
+    MfUltralightPoller* mfu_poller = event.poller;
+    MfUltralightPollerEvent* mfu_event = event.data;
 
-    if(event.type == MfUltralightPollerEventTypeReadSuccess) {
-        mf_ultralight_copy(
-            &poller_context->data.data, mf_ultralight_poller_get_data(poller_context->instance));
+    if(mfu_event->type == MfUltralightPollerEventTypeReadSuccess) {
+        mf_ultralight_copy(&poller_context->data.data, mf_ultralight_poller_get_data(mfu_poller));
         poller_context->error = MfUltralightErrorNone;
-        command = MfUltralightPollerCommandStop;
-    } else if(event.type == MfUltralightPollerEventTypeReadFailed) {
-        poller_context->error = event.data->error;
-        command = MfUltralightPollerCommandStop;
-    } else if(event.type == MfUltralightPollerEventTypeAuthRequest) {
-        event.data->auth_context.skip_auth = true;
+        command = NfcCommandStop;
+    } else if(mfu_event->type == MfUltralightPollerEventTypeReadFailed) {
+        poller_context->error = mfu_event->data->error;
+        command = NfcCommandStop;
+    } else if(mfu_event->type == MfUltralightPollerEventTypeAuthRequest) {
+        mfu_event->data->auth_context.skip_auth = true;
     }
 
-    if(command == MfUltralightPollerCommandStop) {
+    if(command == NfcCommandStop) {
         furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
     }
 
     return command;
 }
 
-MfUltralightError
-    mf_ultralight_poller_read_card(MfUltralightPoller* instance, MfUltralightData* data) {
-    furi_assert(instance);
+MfUltralightError mf_ultralight_poller_read_card(Nfc* nfc, MfUltralightData* data) {
+    furi_assert(nfc);
     furi_assert(data);
 
     MfUltralightPollerContext poller_context = {};
-    poller_context.instance = instance;
     poller_context.thread_id = furi_thread_get_current_id();
+    NfcPollerManager* poller_manager = nfc_poller_manager_alloc(nfc);
 
-    mf_ultralight_poller_read(instance, mf_ultralight_poller_read_callback, &poller_context);
+    nfc_poller_manager_start(
+        poller_manager,
+        NfcProtocolTypeMfUltralight,
+        mf_ultralight_poller_read_callback,
+        &poller_context);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    furi_thread_flags_clear(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
+    nfc_poller_manager_stop(poller_manager);
 
+    nfc_poller_manager_free(poller_manager);
     if(poller_context.error == MfUltralightErrorNone) {
         mf_ultralight_copy(data, &poller_context.data.data);
     }
-    mf_ultralight_poller_stop(instance);
 
     return poller_context.error;
 }
