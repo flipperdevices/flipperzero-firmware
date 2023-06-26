@@ -87,7 +87,8 @@ static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* 
 
     MfUltralightPollerContext* poller_context = context;
     NfcaPollerEvent* nfca_event = event.data;
-    MfUltralightPoller* mfu_poller = mf_ultralight_poller_alloc(event.poller);
+    NfcaPoller* nfca_poller = event.poller;
+    MfUltralightPoller* mfu_poller = mf_ultralight_poller_alloc(nfca_poller);
 
     if(nfca_event->type == NfcaPollerEventTypeReady) {
         poller_context->error = mf_ultralight_poller_cmd_handlers[poller_context->cmd_type](

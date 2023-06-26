@@ -164,7 +164,7 @@ bool mf_ultralight_poller_ntag_i2c_addr_lin_to_tag(
     return tag_calculated;
 }
 
-NfcPoller* mf_ultralight_poller_alloc(NfcPoller* nfca_poller) {
+MfUltralightPoller* mf_ultralight_poller_alloc(NfcaPoller* nfca_poller) {
     furi_assert(nfca_poller);
 
     MfUltralightPoller* instance = malloc(sizeof(MfUltralightPoller));
@@ -182,10 +182,8 @@ NfcPoller* mf_ultralight_poller_alloc(NfcPoller* nfca_poller) {
     return instance;
 }
 
-void mf_ultralight_poller_free(NfcPoller* mfu_poller) {
-    furi_assert(mfu_poller);
-
-    MfUltralightPoller* instance = mfu_poller;
+void mf_ultralight_poller_free(MfUltralightPoller* instance) {
+    furi_assert(instance);
     furi_assert(instance->data);
     furi_assert(instance->tx_buffer);
     furi_assert(instance->rx_buffer);
@@ -197,13 +195,12 @@ void mf_ultralight_poller_free(NfcPoller* mfu_poller) {
 }
 
 static void mf_ultralight_poller_set_callback(
-    NfcPoller* mfu_poller,
+    MfUltralightPoller* instance,
     NfcPollerCallback callback,
     void* context) {
-    furi_assert(mfu_poller);
+    furi_assert(instance);
     furi_assert(callback);
 
-    MfUltralightPoller* instance = mfu_poller;
     instance->callback = callback;
     instance->context = context;
 }

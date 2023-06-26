@@ -89,9 +89,9 @@ struct MfUltralightPoller {
 
 MfUltralightError mf_ultralight_process_error(NfcaError error);
 
-NfcPoller* mf_ultralight_poller_alloc(NfcPoller* nfca_poller);
+MfUltralightPoller* mf_ultralight_poller_alloc(NfcaPoller* nfca_poller);
 
-void mf_ultralight_poller_free(NfcPoller* mfu_poller);
+void mf_ultralight_poller_free(MfUltralightPoller* instance);
 
 bool mf_ultralight_poller_ntag_i2c_addr_lin_to_tag(
     MfUltralightPoller* instance,
