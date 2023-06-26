@@ -11,6 +11,7 @@
 
 #define T5577_OPCODE_PAGE_0 0b10
 #define T5577_OPCODE_PAGE_1 0b11
+#define T5577_OPCODE_TESTMODE 0b01
 #define T5577_OPCODE_RESET 0b00
 
 static void t5577_start() {
@@ -112,6 +113,89 @@ void t5577_write_with_pass(LFRFIDT5577* data, uint32_t password) {
     for(size_t i = 0; i < data->blocks_to_write; i++) {
         t5577_write_block_pass(0, false, data->block[i], true, password);
     }
+    t5577_write_reset();
+    FURI_CRITICAL_EXIT();
+    t5577_stop();
+}
+
+void t5577_write_page_block_pass(
+    uint8_t page,
+    uint8_t block,
+    bool lock_bit,
+    uint32_t data,
+    bool with_pass,
+    uint32_t password/*,
+    bool testmode*/) {
+    furi_delay_us(T5577_TIMING_WAIT_TIME * 8);
+
+    // start gap
+    t5577_write_gap(T5577_TIMING_START_GAP);
+
+    // opcode for test mode access!
+    //if(testmode)
+    //	t5577_write_opcode(T5577_OPCODE_TESTMODE);
+    //else
+    // opcode for page 0 or 1
+    if(!page)
+	t5577_write_opcode(T5577_OPCODE_PAGE_0);
+    else
+	t5577_write_opcode(T5577_OPCODE_PAGE_1);
+
+    // password
+    if(with_pass) {
+        for(uint8_t i = 0; i < 32; i++) {
+            t5577_write_bit((password >> (31 - i)) & 1);
+        }
+    }
+
+    // lock bit
+    t5577_write_bit(lock_bit);
+
+    // data
+    for(uint8_t i = 0; i < 32; i++) {
+        t5577_write_bit((data >> (31 - i)) & 1);
+    }
+
+    // block address
+    t5577_write_bit((block >> 2) & 1);
+    t5577_write_bit((block >> 1) & 1);
+    t5577_write_bit((block >> 0) & 1);
+
+    furi_delay_us(T5577_TIMING_PROGRAM * 8);
+
+    furi_delay_us(T5577_TIMING_WAIT_TIME * 8);
+    t5577_write_reset();
+}
+
+void t5577_write_page_block_pass_with_start_and_stop(
+    uint8_t page,
+    uint8_t block,
+    bool lock_bit,
+    uint32_t data,
+    bool with_pass,
+    uint32_t password/*,
+    bool testmode*/) {
+
+    t5577_start();
+    FURI_CRITICAL_ENTER();
+    t5577_write_page_block_pass(page, block, lock_bit,
+		    data, with_pass, password/*, testmode*/);
+    t5577_write_reset();
+    FURI_CRITICAL_EXIT();
+    t5577_stop();
+}
+
+void t5577_write_page_block_simple_with_start_and_stop(
+    uint8_t page,
+    uint8_t block,
+    bool lock_bit,
+    uint32_t data/*,
+    bool testmode*/) {
+
+    t5577_start();
+    FURI_CRITICAL_ENTER();
+    t5577_write_page_block_pass(page, block, lock_bit,
+		    data, false, 0/*, testmode*/);
     t5577_write_reset();
     FURI_CRITICAL_EXIT();
     t5577_stop();

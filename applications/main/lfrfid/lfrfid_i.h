@@ -32,6 +32,9 @@
 #include <lfrfid/lfrfid_worker.h>
 
 #include <lfrfid/scenes/lfrfid_scene.h>
+//
+//#include "scenes/lfrfid_scene.h"
+
 #include <assets_icons.h>
 // #include <lfrfid_icons.h>
 
@@ -45,6 +48,11 @@
 
 #define LFRFID_APP_RAW_ASK_EXTENSION ".ask.raw"
 #define LFRFID_APP_RAW_PSK_EXTENSION ".psk.raw"
+
+#define SCREEN_WIDTH (128)
+#define SCREEN_HEIGHT (64)
+#define SCREEN_WIDTH_CENTER (SCREEN_WIDTH >> 1)
+#define SCREEN_HEIGHT_CENTER (SCREEN_HEIGHT >> 1)
 
 enum LfRfidCustomEvent {
     LfRfidEventNext = 100,
@@ -73,6 +81,24 @@ typedef enum {
     LfRfidRpcStateIdle,
     LfRfidRpcStateEmulating,
 } LfRfidRpcState;
+
+typedef enum {
+    LfRfidUsePassword = 1 << 0,
+    LfRfidSetConfigurationLockBit = 1 << 1,
+    LfRfidSetPasswordLockBit = 1 << 2,
+    LfRfidSetMasterKeyDisableTestMode = 1 << 3,
+    LfRfidDisablePasswordMode = 1 << 4,
+    LfRfidWriteBlockMode = 1 << 5,
+    LfRfidWriteBlockLockBit = 1 << 6,
+    LfRfidReadBlockMode = 1 << 7,
+    LfRfidTestModeAccess = 1 << 8
+ } LfRfidExtraOptions;
+
+typedef enum {
+    LfRfidSettingHexGeneric = 1 << 0,
+    LfRfidSettingCurrentPassword = 1 << 1,
+    LfRfidSettingNewPassword = 1 << 2,
+} LfRfidSettingHex;
 
 typedef struct LfRfid LfRfid;
 
@@ -111,6 +137,15 @@ struct LfRfid {
 
     // Custom views
     LfRfidReadView* read_view;
+
+    LfRfidExtraOptions extra_options;
+    uint8_t* password;
+    uint8_t* new_password;
+    LfRfidSettingHex setting_hex;
+    uint8_t write_page;
+    uint8_t write_block;
+    //uint8_t read_page;
+    //uint8_t read_block;
 };
 
 typedef enum {
