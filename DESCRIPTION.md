@@ -26,18 +26,6 @@ The custom module is using Bosch BMI160 accelerometer/gyroscope chip connected v
 
 Take a look into the `schematic` folder for Gerber, BOM and CPL files, so you can order directly from JLCPCB.
 
-Original idea:
-
-![What I thought it would look like](https://github.com/ginkage/FlippAirMouse/blob/main/schematic/schematic.png)
-
-Expectation:
-
-![What EDA though it would look like](https://github.com/ginkage/FlippAirMouse/blob/main/schematic/render.png)
-
-Reality:
-
-![What it looks like](https://github.com/ginkage/FlippAirMouse/blob/main/schematic/flipper.jpg)
-
 ## Software
 
 The code is based on the original Bosch driver and an orientation tracking implementation from the Google Cardboard project
