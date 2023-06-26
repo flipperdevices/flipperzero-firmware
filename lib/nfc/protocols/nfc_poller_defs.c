@@ -11,7 +11,7 @@ const NfcPollerBase* nfc_pollers_api[NfcProtocolTypeMax] = {
     [NfcProtocolTypeIso14443_3a] = &nfc_poller_iso14443_3a,
     [NfcProtocolTypeIso14443_4a] = &nfc_poller_iso14443_4a,
     [NfcProtocolTypeMfUltralight] = &mf_ultralight_poller,
-    [NfcProtocolTypeMfClassic] = NULL,
+    [NfcProtocolTypeMfClassic] = &mf_ultralight_poller,
     [NfcProtocolTypeMfDesfire] = &mf_desfire_poller,
 };
 

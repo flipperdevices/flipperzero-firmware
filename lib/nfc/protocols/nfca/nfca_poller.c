@@ -177,20 +177,20 @@ NfcCommand nfca_poller_read_new_callback(NfcPollerEvent event, void* context) {
     return NfcCommandStop;
 }
 
-NfcaError nfca_poller_read_new(NfcPollerManager* poller_manager, NfcaData* nfca_data) {
-    furi_assert(poller_manager);
+NfcaError nfca_poller_read_new(Nfc* nfc, NfcaData* nfca_data) {
+    furi_assert(nfc);
     furi_assert(nfca_data);
 
-    NfcaPollerContext context = {};
-    context.thread_id = furi_thread_get_current_id();
+    // NfcaPollerContext context = {};
+    // context.thread_id = furi_thread_get_current_id();
 
-    nfc_poller_manager_start(
-        poller_manager, NfcProtocolTypeIso14443_3a, nfca_poller_read_new_callback, &context);
+        // nfc_poller_manager_start(
+    //     poller_manager, NfcProtocolTypeIso14443_3a, nfca_poller_read_new_callback, &context);
 
-    furi_thread_flags_wait(NFCA_POLLER_FLAG_COMMAND_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
-    furi_thread_flags_clear(NFCA_POLLER_FLAG_COMMAND_COMPLETE);
+    // furi_thread_flags_wait(NFCA_POLLER_FLAG_COMMAND_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
+    // furi_thread_flags_clear(NFCA_POLLER_FLAG_COMMAND_COMPLETE);
 
-    nfc_poller_manager_stop(poller_manager);
+    // nfc_poller_manager_stop(poller_manager);
 
-    return context.error;
+    return NfcaErrorNotPresent;
 }

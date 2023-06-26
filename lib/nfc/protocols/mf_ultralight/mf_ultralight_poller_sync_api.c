@@ -1,6 +1,6 @@
 #include "mf_ultralight_poller_i.h"
 
-#include <nfc/nfc_poller_manager.h>
+#include <nfc/nfc_poller.h>
 
 #include <furi.h>
 
@@ -109,15 +109,14 @@ static MfUltralightError
     furi_assert(poller_ctx->cmd_type < MfUltralightPollerCmdTypeNum);
 
     poller_ctx->thread_id = furi_thread_get_current_id();
-    NfcPollerManager* poller_manager = nfc_poller_manager_alloc(nfc);
 
-    nfc_poller_manager_start(
-        poller_manager, NfcProtocolTypeIso14443_3a, mf_ultralgiht_poller_cmd_callback, poller_ctx);
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolTypeIso14443_3a);
+    nfc_poller_start(poller, mf_ultralgiht_poller_cmd_callback, poller_ctx);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     furi_thread_flags_clear(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
-    nfc_poller_manager_stop(poller_manager);
 
-    nfc_poller_manager_free(poller_manager);
+    nfc_poller_stop(poller);
+    nfc_poller_free(poller);
 
     return poller_ctx->error;
 }
@@ -268,18 +267,15 @@ MfUltralightError mf_ultralight_poller_read_card(Nfc* nfc, MfUltralightData* dat
 
     MfUltralightPollerContext poller_context = {};
     poller_context.thread_id = furi_thread_get_current_id();
-    NfcPollerManager* poller_manager = nfc_poller_manager_alloc(nfc);
 
-    nfc_poller_manager_start(
-        poller_manager,
-        NfcProtocolTypeMfUltralight,
-        mf_ultralight_poller_read_callback,
-        &poller_context);
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolTypeMfUltralight);
+    nfc_poller_start(poller, mf_ultralight_poller_read_callback, &poller_context);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     furi_thread_flags_clear(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
-    nfc_poller_manager_stop(poller_manager);
 
-    nfc_poller_manager_free(poller_manager);
+    nfc_poller_stop(poller);
+    nfc_poller_free(poller);
+
     if(poller_context.error == MfUltralightErrorNone) {
         mf_ultralight_copy(data, &poller_context.data.data);
     }

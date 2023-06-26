@@ -21,8 +21,8 @@ void nfc_scene_read_on_enter(void* context) {
 
     const NfcProtocolType protocol_type =
         instance->protocols_detected[instance->protocols_detected_idx];
-    nfc_poller_manager_start(
-        instance->poller_manager, protocol_type, nfc_scene_read_poller_callback, instance);
+    instance->poller = nfc_poller_alloc(instance->nfc, protocol_type);
+    nfc_poller_start(instance->poller, nfc_scene_read_poller_callback, instance);
 
     nfc_blink_detect_start(instance);
 }
@@ -61,7 +61,8 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_read_on_exit(void* context) {
     NfcApp* instance = context;
 
-    nfc_poller_manager_stop(instance->poller_manager);
+    nfc_poller_stop(instance->poller);
+    nfc_poller_free(instance->poller);
     popup_reset(instance->popup);
 
     nfc_blink_stop(instance);
