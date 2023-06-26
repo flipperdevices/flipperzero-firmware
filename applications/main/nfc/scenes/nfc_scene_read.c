@@ -93,7 +93,7 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == NfcWorkerEventReadTopaz) {
             notification_message(nfc->notifications, &sequence_success);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneTopazReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+            dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcWorkerEventReadMfClassicDictAttackRequired) {
             if(mf_classic_dict_check_presence(MfClassicDictTypeSystem)) {
