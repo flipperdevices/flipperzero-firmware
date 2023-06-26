@@ -17,11 +17,12 @@ typedef enum {
     NfcEventTypeRxStart,
     NfcEventTypeRxEnd,
 
+    // TODO delete 
     NfcEventTypeConfigureRequest,
+    NfcEventTypeReset,
 
     NfcEventTypeListenerActivated,
     NfcEventTypePollerReady,
-    NfcEventTypeReset,
 } NfcEventType;
 
 typedef struct {
