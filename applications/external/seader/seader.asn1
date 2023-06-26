@@ -1,0 +1,82 @@
+Seader DEFINITIONS ::=
+BEGIN
+
+Protocol ::= OCTET STRING
+RfStatus ::= OCTET STRING
+SamResponse ::= OCTET STRING
+-- omnikey_5326_dfr_softwaredeveloperguide 4.2
+PAC ::= BIT STRING
+
+-- omnikey_5326_dfr_softwaredeveloperguide 3.3
+Payload ::= CHOICE {
+  samCommand [0] SamCommand, --aka SioAPI
+  nfcCommand [1] NFCCommand,
+  response [29] Response,
+  errorResponse [30] IMPLICIT ErrorResponse
+}
+
+ErrorResponse ::= SEQUENCE {
+  errorCode [0] IMPLICIT INTEGER,
+  data [1] IMPLICIT OCTET STRING
+}
+
+SamCommand ::= CHOICE {
+  requestPacs [1] IMPLICIT RequestPacs,
+  cardDetected [13] IMPLICIT CardDetected
+}
+
+CardDetected ::= SEQUENCE {
+  detectedCardDetails [0] IMPLICIT CardDetails
+}
+
+CardDetails ::= SEQUENCE {
+  protocol [0] IMPLICIT Protocol,
+  csn [1] IMPLICIT OCTET STRING,
+  atqa [2] IMPLICIT OCTET STRING OPTIONAL,
+  sak [3] IMPLICIT OCTET STRING OPTIONAL
+}
+
+Response ::= CHOICE {
+  nfcResponse [0] NFCResponse,
+  samResponse [10] IMPLICIT SamResponse
+}
+
+NFCResponse ::= CHOICE {
+  nfcRx [0] IMPLICIT NFCRx,
+  nfcAck [2] IMPLICIT NULL
+}
+
+NFCRx ::= SEQUENCE {
+  data [0] IMPLICIT OCTET STRING OPTIONAL,
+  rfStatus [1] IMPLICIT RfStatus
+}
+
+NFCCommand ::= CHOICE {
+  nfcSend [1] IMPLICIT NFCSend,
+  nfcOff [2] IMPLICIT NULL
+}
+
+NFCSend ::= SEQUENCE {
+  data [0] IMPLICIT OCTET STRING,
+  protocol [1] IMPLICIT Protocol,
+  timeOut [2] IMPLICIT INTEGER,
+  format [5] IMPLICIT OCTET STRING OPTIONAL
+}
+
+-- omnikey_5326_dfr_softwaredeveloperguide 4.2
+RequestPacs ::= SEQUENCE {
+  contentElementTag [0] IMPLICIT ContentElementTag
+}
+
+-- omnikey_5326_dfr_softwaredeveloperguide 4.2
+-- omnikey_5025_cl_software_developer_guide_mn_en 6.2
+ContentElementTag ::= ENUMERATED {
+  implicitFormatPhysicalAccessBits (4)
+}
+
+FrameProtocol ::= ENUMERATED {
+  nfc (2),
+  iclass (4)
+}
+
+END
