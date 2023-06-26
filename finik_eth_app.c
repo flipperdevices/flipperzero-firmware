@@ -1,5 +1,5 @@
 
-#include "example_5_app.h"
+#include "finik_eth_app.h"
 
 #include <furi.h>
 #include <gui/gui.h>
@@ -7,9 +7,9 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 
-static void example_5_app_draw_callback(Canvas* canvas, void* ctx) {
+static void finik_eth_app_draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
-    Example5App* app = ctx;
+    FinikEthApp* app = ctx;
 
     canvas_clear(canvas);
 
@@ -30,21 +30,21 @@ static void example_5_app_draw_callback(Canvas* canvas, void* ctx) {
     }
 }
 
-static void example_5_app_input_callback(InputEvent* input_event, void* ctx) {
+static void finik_eth_app_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
 
     FuriMessageQueue* event_queue = ctx;
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
 }
 
-Example5App* example_5_app_alloc() {
-    Example5App* app = malloc(sizeof(Example5App));
+FinikEthApp* finik_eth_app_alloc() {
+    FinikEthApp* app = malloc(sizeof(FinikEthApp));
 
     app->view_port = view_port_alloc();
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
 
-    view_port_draw_callback_set(app->view_port, example_5_app_draw_callback, app);
-    view_port_input_callback_set(app->view_port, example_5_app_input_callback, app->event_queue);
+    view_port_draw_callback_set(app->view_port, finik_eth_app_draw_callback, app);
+    view_port_input_callback_set(app->view_port, finik_eth_app_input_callback, app->event_queue);
 
     app->gui = furi_record_open(RECORD_GUI);
     gui_add_view_port(app->gui, app->view_port, GuiLayerFullscreen);
@@ -54,7 +54,7 @@ Example5App* example_5_app_alloc() {
     return app;
 }
 
-void example_5_app_free(Example5App* app) {
+void finik_eth_app_free(FinikEthApp* app) {
     furi_assert(app);
 
     view_port_enabled_set(app->view_port, false);
@@ -67,9 +67,9 @@ void example_5_app_free(Example5App* app) {
     furi_record_close(RECORD_NOTIFICATION);
 }
 
-int32_t example_5_app(void* p) {
+int32_t finik_eth_app(void* p) {
     UNUSED(p);
-    Example5App* app = example_5_app_alloc();
+    FinikEthApp* app = finik_eth_app_alloc();
 
     InputEvent event;
 
@@ -97,6 +97,6 @@ int32_t example_5_app(void* p) {
         }
     }
 
-    example_5_app_free(app);
+    finik_eth_app_free(app);
     return 0;
 }

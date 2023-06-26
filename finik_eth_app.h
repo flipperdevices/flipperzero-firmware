@@ -4,7 +4,7 @@
 #include <gui/gui.h>
 #include <notification/notification_messages.h>
 
-#include "example_5_icons.h"
+#include "finik_eth_icons.h"
 
 typedef enum {
     DRAW_ALL,
@@ -13,7 +13,7 @@ typedef enum {
     TOTAL_DRAW_MODES = 3,
 } DrawMode;
 
-struct Example5App {
+struct FinikEthApp {
     Gui* gui;
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
@@ -22,7 +22,7 @@ struct Example5App {
     DrawMode draw_mode;
 };
 
-typedef struct Example5App Example5App;
+typedef struct FinikEthApp FinikEthApp;
 
 const NotificationSequence example_led_sequence = {
     &message_red_255,

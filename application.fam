@@ -1,15 +1,15 @@
 App(
-	appid="example_5",
-	name="Example 5 application",
+	appid="finik_eth",
+	name="[ETH]finik",
 	apptype=FlipperAppType.EXTERNAL,
-	entry_point="example_5_app",
-	cdefines=["APP_EXAMPLE_5"],
+	entry_point="finik_eth_app",
+	cdefines=["FINIK_ETH"],
 	requires=[
 		"gui",
 	],
 	stack_size=1 * 1024,
 	order=90,
-	fap_icon="emoji_smile_icon_10x10px.png",
+	fap_icon="ethernet_icon.png",
 	fap_category="Misc",
 	fap_icon_assets="images",
 )
