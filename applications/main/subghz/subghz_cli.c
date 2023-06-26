@@ -196,38 +196,6 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
     subghz_environment_free(environment);
 }
 
-#include <furi_hal_rfid.h>
-#include <furi_hal_nfc.h>
-
-void subghz_cli_command_us(Cli* cli, FuriString* args, void* context) {
-    UNUSED(context);
-    UNUSED(args);
-
-    printf("Check frequency. Press CTRL+C to stop\r\n");
-    furi_hal_power_suppress_charge_enter();
-
-    
-    uint32_t frequency = 0;
-    bool fild = false;
-    furi_hal_rfid_field_dma_start();
-
-    furi_hal_nfc_exit_sleep();
-    furi_hal_nfc_check_vield_start();
-
-    while(!(cli_cmd_interrupt_received(cli))) {
-        fild = furi_hal_rfid_field_check(&frequency);
-        printf("RFID fild = %d frecuency= %lu\r\n", fild, frequency);
-        printf("NFC fild = %d \r\n", furi_hal_nfc_check_is_vield() ? 1 : 0);
-        fflush(stdout);
-        furi_delay_ms(33);
-    }
-
-    furi_hal_nfc_start_sleep();
-    furi_hal_rfid_field_dma_stop();
-
-    furi_hal_power_suppress_charge_exit();
-}
-
 typedef struct {
     volatile bool overrun;
     FuriStreamBuffer* stream;
@@ -840,11 +808,6 @@ static void subghz_cli_command(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "tx") == 0) {
             subghz_cli_command_tx(cli, args, context);
-            break;
-        }
-
-        if(furi_string_cmp_str(cmd, "us") == 0) {
-            subghz_cli_command_us(cli, args, context);
             break;
         }
 
