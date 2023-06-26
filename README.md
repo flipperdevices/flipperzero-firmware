@@ -19,7 +19,7 @@ You also need jumper wires to connect the board on the **Flipper Zero**.
 - iodine-131 (beta & gamma)
 
 **Not really usable** radioactive sources : 
-- americium-241 (alpha & low gamma, some strong beta/gamma rays are emitted during radioactive cascade)
+- americium-241 (alpha & low gamma, some strong beta/gamma rays are emitted during radioactive cascade or due to the present of radioisotope impurity)
 - high purity metallic uranium/thorium (same as am241)
 
 
@@ -67,7 +67,8 @@ The program will automatically be launched after compilation
 
 
 If you don't want to build this application, just simply copy **flipper_geiger.fap** on your **Flipper Zero** 
-Build has been made with official toolchain, **API Mismatch** error may appear if you are using custom firmware. You can bypass this error.
+
+Build has been made with official toolchain, **API Mismatch** error may appear if you are using custom firmware. You can bypass this error but the program may crash.
 
 ## Use cases
 
