@@ -5,6 +5,6 @@ App(
     entry_point="air_mouse_app",
     stack_size=10 * 1024,
     fap_category="Tools",
-    icon="A_Plugins_14",
+    fap_icon="icon.png",
     sources=["*.c", "*.cc"],
 )
