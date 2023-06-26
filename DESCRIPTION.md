@@ -5,7 +5,7 @@
 The app allows you to turn your Flipper into a USB or Bluetooth air mouse (you do need an extra module, see the Hardware section below)...
 
 Using it is really simple:
- * Connect the Flipper via a USB cable and pick `USB`, or pick `Bluetooth` and pair it with your PC;
+ * Connect the Flipper via a USB cable and pick USB, or pick Bluetooth and pair it with your PC;
  * Hold the Flipper in your hand with the buttons pointing towards the screen;
  * Wave your Flipper like you don't care to move the cursor;
  * Up button for Left mouse click;
@@ -18,7 +18,7 @@ Using it is really simple:
 
 The custom module is using Bosch BMI160 accelerometer/gyroscope chip connected via I2C.
 
-Take a look into the `schematic` folder for Gerber, BOM and CPL files, so you can order directly from JLCPCB.
+Take a look into the schematic folder for Gerber, BOM and CPL files, so you can order directly from JLCPCB.
 
 ## Software
 
