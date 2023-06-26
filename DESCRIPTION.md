@@ -1,11 +1,5 @@
 # Flipper Air Mouse
 
-## Brief
-
-> "You can turn anything into an air mouse if you're brave enough"
-
- — Piper, a.k.a. Pez
-
 ## What?
 
 The app allows you to turn your Flipper into a USB or Bluetooth air mouse (you do need an extra module, see the Hardware section below)...
