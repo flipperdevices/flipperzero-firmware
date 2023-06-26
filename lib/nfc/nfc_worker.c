@@ -141,7 +141,9 @@ static bool nfc_worker_read_nfcv(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* t
     }
 
     do {
-        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200)) break;
+        if(!furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200, true) &&
+           !furi_hal_nfc_detect(&nfc_worker->dev_data->nfc_data, 200, false))
+            break;
         if(!nfcv_read_card(&reader, nfc_data, nfcv_data)) break;
 
         read_success = true;
