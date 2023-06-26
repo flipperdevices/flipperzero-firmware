@@ -33,24 +33,7 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-25 11:47 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-25 11:47 EST`
-- Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
-- [Add circuit theme to passport #673 (By Fiattarone)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/673)
-- [Patreon Build Update: New DJ & Kaiju animations added to ALL, Minimal, Dolphin & Stock builds](https://www.patreon.com/RogueMaster/membership)
-- Updated: [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
-- [PicoPass Emulation (By nvx)](https://github.com/nvx/flipperzero-firmware/tree/picopass_emulation)
-- Updated: [Orgasmotron (By jbohack)](https://github.com/jbohack) [(Original By qqmajikpp)](https://github.com/qqmajikpp/flipperzero-firmware-wPlugins) (Minor changes by Willy-JL)
-- [Faster Power off, Power off from locked requires more testing (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89611ab6a8534c730e5cd89dba7f4846640cab57)
-- UL: [Hid app - vertical redraws #524 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/524)
-- Updated: [NRF24 Batch v1.9 (By vad7)](https://github.com/vad7/nRF24-Batch)
-- UL: Updated: [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) [Heat Index (By ClementGre)](https://github.com/quen0n/unitemp-flipperzero/pull/17) Append carbon dioxide sensor (SCD40) (by divinebird)
-- UL: Plugins: Fix furi_hal_bus issues in AVR Programmer and Signal Generator (fixes issue UL525) (By xMasterX)
-- UL: [OFW PR 2783: SLIX2 emulation support / practical use for Dymo printers (by g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/2783)
-- UL: [OFW PR 2782: NFC: Fix key invalidation logic (by AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2782)
-- Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope) (By xMasterX)
-- Updated: [Mifare Fuzzer (By spheeere98)](https://github.com/spheeere98/mifare_fuzzer) (By xMasterX)
-- Updated: [WiFi (Marauder) v0.3.7 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [PR: UI Tweaks #20 (By michaeldufault)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/20)
-- Added: [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
-- Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro) Now with statistics!
+- Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - OFW: Loader Refactor Coming Soon
 
 <a name="release">
