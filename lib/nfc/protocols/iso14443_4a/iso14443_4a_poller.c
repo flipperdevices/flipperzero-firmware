@@ -1,5 +1,7 @@
 #include "iso14443_4a_poller_i.h"
 
+#include <nfc/protocols/nfc_poller_base.h>
+
 #include <furi.h>
 
 #define TAG "Iso14443_4aPoller"

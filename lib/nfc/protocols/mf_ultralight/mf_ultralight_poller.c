@@ -1,5 +1,7 @@
 #include "mf_ultralight_poller_i.h"
 
+#include <nfc/protocols/nfc_poller_base.h>
+
 #include <furi.h>
 
 #define TAG "MfUltralightPoller"

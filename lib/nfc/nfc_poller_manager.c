@@ -18,7 +18,7 @@ typedef enum {
 
 typedef struct NfcPollerListElement {
     NfcProtocolType protocol;
-    NfcPoller* poller;
+    NfcPollerInstance* poller;
     const NfcPollerBase* poller_api;
     struct NfcPollerListElement* child;
 } NfcPollerListElement;

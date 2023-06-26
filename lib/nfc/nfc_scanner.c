@@ -49,7 +49,7 @@ struct NfcScanner {
     NfcProtocolType detected_protocols[NfcProtocolTypeMax];
 
     NfcProtocolType current_protocol;
-    NfcPoller* current_poller;
+    NfcPollerInstance* current_poller;
 
     FuriThread* scan_worker;
 };

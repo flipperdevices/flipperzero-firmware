@@ -1,5 +1,7 @@
 #include "nfca_poller_i.h"
 
+#include <nfc/protocols/nfc_poller_base.h>
+
 #include <furi.h>
 
 #define TAG "NFCA"
@@ -346,7 +348,7 @@ NfcaError nfca_poller_send_standart_frame(
     return ret;
 }
 
-static NfcPoller* nfca_poller_alloc_new(NfcPoller* nfc) {
+static NfcaPoller* nfca_poller_alloc_new(Nfc* nfc) {
     furi_assert(nfc);
 
     NfcaPoller* instance = malloc(sizeof(NfcaPoller));
@@ -364,7 +366,7 @@ static NfcPoller* nfca_poller_alloc_new(NfcPoller* nfc) {
     return instance;
 }
 
-static void nfca_poller_free_new(NfcPoller* nfca_poller) {
+static void nfca_poller_free_new(NfcaPoller* nfca_poller) {
     furi_assert(nfca_poller);
 
     NfcaPoller* instance = nfca_poller;
@@ -381,7 +383,7 @@ static void nfca_poller_free_new(NfcPoller* nfca_poller) {
 }
 
 static void
-    nfca_poller_set_callback(NfcPoller* poller, NfcPollerCallback callback, void* context) {
+    nfca_poller_set_callback(NfcaPoller* poller, NfcPollerCallback callback, void* context) {
     furi_assert(poller);
     furi_assert(callback);
 
@@ -448,7 +450,7 @@ static bool nfca_poller_detect(NfcPollerEvent event, void* context) {
     return protocol_detected;
 }
 
-static const NfcProtocolData* nfca_poller_get_data_new(const NfcPoller* nfca_poller) {
+static const NfcProtocolData* nfca_poller_get_data_new(const NfcaPoller* nfca_poller) {
     furi_assert(nfca_poller);
 
     const NfcaPoller* instance = nfca_poller;
@@ -458,10 +460,10 @@ static const NfcProtocolData* nfca_poller_get_data_new(const NfcPoller* nfca_pol
 }
 
 const NfcPollerBase nfc_poller_iso14443_3a = {
-    .alloc = nfca_poller_alloc_new,
-    .free = nfca_poller_free_new,
-    .set_callback = nfca_poller_set_callback,
-    .run = nfca_poller_run,
-    .detect = nfca_poller_detect,
-    .get_data = nfca_poller_get_data_new,
+    .alloc = (NfcPollerAlloc)nfca_poller_alloc_new,
+    .free = (NfcPollerFree)nfca_poller_free_new,
+    .set_callback = (NfcPollerSetCallback)nfca_poller_set_callback,
+    .run = (NfcPollerRun)nfca_poller_run,
+    .detect = (NfcPollerDetect)nfca_poller_detect,
+    .get_data = (NfcPollerGetData)nfca_poller_get_data_new,
 };

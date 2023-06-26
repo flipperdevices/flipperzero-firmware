@@ -112,7 +112,16 @@ static const NfcPollerReadHandler nfc_poller_handlers_read[] = {
 };
 
 NfcCustomEvent nfc_poller_handler_read(NfcPollerEvent event, void* context) {
+    furi_assert(context);
     furi_assert(event.protocol_type < COUNT_OF(nfc_poller_handlers_read));
 
-    return nfc_poller_handlers_read[event.protocol_type](event.poller, event.data, context);
+    // NfcApp* nfc_app = context;
+    NfcCustomEvent custom_event =
+        nfc_poller_handlers_read[event.protocol_type](event.poller, event.data, context);
+    // if(custom_event == NfcCustomEventReadHandlerSuccess) {
+    // nfc_dev_set_protocol_data(
+    // nfc_app->nfc_dev, event.protocol_type, nfc_poller_get_data(event.poller));
+    // }
+
+    return custom_event;
 }
