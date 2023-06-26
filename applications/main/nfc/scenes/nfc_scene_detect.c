@@ -23,6 +23,10 @@ void nfc_scene_detect_on_enter(void* context) {
     popup_set_icon(instance->popup, 0, 8, &I_NFC_manual_60x50);
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
+    // Clear detected protocols
+    instance->protocols_detected_num = 0;
+    instance->protocols_detected_idx = 0;
+
     nfc_scanner_start(instance->scanner, nfc_scene_detect_scan_callback, instance);
 
     nfc_blink_detect_start(instance);
