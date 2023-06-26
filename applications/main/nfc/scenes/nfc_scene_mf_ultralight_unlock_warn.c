@@ -75,6 +75,9 @@ bool nfc_scene_mf_ultralight_unlock_warn_on_event(void* context, SceneManagerEve
     } else {
         if(event.type == SceneManagerEventTypeCustom) {
             if(event.event == DialogExResultCenter) {
+                nfc->protocols_detected[0] = NfcProtocolTypeMfUltralight;
+                nfc->protocols_detected_num = 1;
+                nfc->protocols_detected_idx = 0;
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneRead);
                 dolphin_deed(DolphinDeedNfcRead);
                 consumed = true;
