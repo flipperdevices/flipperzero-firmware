@@ -288,7 +288,7 @@ NfcCommand mf_classsic_poller_run(NfcPollerEvent event, void* context) {
     if(nfca_event->type == NfcaPollerEventTypeReady) {
         command = mf_classic_poller_dict_attack_handler[instance->state](instance);
     } else if(nfca_event->type == NfcaPollerEventTypeError) {
-        if(nfca_event->data.error == NfcaErrorNotPresent) {
+        if(nfca_event->data->error == NfcaErrorNotPresent) {
             if(instance->card_state == MfClassicCardStateDetected) {
                 instance->card_state = MfClassicCardStateNotDetected;
                 instance->mfc_event.type = MfClassicPollerEventTypeCardNotDetected;

@@ -40,12 +40,6 @@ typedef enum {
 } NfcaPollerState;
 
 typedef enum {
-    NfcaPollerSessionStateIdle,
-    NfcaPollerSessionStateActive,
-    NfcaPollerSessionStateStopRequest,
-} NfcaPollerSessionState;
-
-typedef enum {
     NfcaPollerConfigStateIdle,
     NfcaPollerConfigStateDone,
 } NfcaPollerConfigState;
@@ -53,18 +47,17 @@ typedef enum {
 struct NfcaPoller {
     Nfc* nfc;
     NfcaPollerState state;
-    NfcaPollerSessionState session_state;
     NfcaPollerConfigState config_state;
     NfcaPollerColRes col_res;
     NfcaData* data;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
-    NfcaPollerEventCallback callback;
-    void* context;
 
-    NfcaPollerEvent* event;
-    NfcPollerCallback callback_new;
-    void* context_new;
+    NfcPollerEvent general_event;
+    NfcaPollerEvent nfca_event;
+    NfcaPollerEventData nfca_event_data;
+    NfcPollerCallback callback;
+    void* context;
 };
 
 NfcaError nfca_poller_config(NfcaPoller* instance);

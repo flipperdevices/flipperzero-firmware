@@ -27,7 +27,7 @@ NfcCommand nfca_poller_read_callback(NfcPollerEvent event, void* context) {
     if(nfca_event->type == NfcaPollerEventTypeReady) {
         nfca_copy(&poller_context->data, nfca_poller->data);
     }
-    poller_context->error = nfca_event->data.error;
+    poller_context->error = nfca_event->data->error;
 
     furi_thread_flags_set(poller_context->thread_id, NFCA_POLLER_FLAG_COMMAND_COMPLETE);
 

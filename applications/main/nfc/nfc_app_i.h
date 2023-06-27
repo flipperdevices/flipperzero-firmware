@@ -108,7 +108,6 @@ struct NfcApp {
     DetectReader* detect_reader;
 
     Nfc* nfc;
-    NfcaPoller* nfca_poller;
     NfcaListener* nfca_listener;
     MfUltralightListener* mf_ul_listener;
 

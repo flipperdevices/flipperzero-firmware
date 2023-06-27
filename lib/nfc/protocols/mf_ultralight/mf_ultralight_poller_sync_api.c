@@ -94,7 +94,7 @@ static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* 
         poller_context->error = mf_ultralight_poller_cmd_handlers[poller_context->cmd_type](
             mfu_poller, &poller_context->data);
     } else if(nfca_event->type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_ultralight_process_error(nfca_event->data.error);
+        poller_context->error = mf_ultralight_process_error(nfca_event->data->error);
     }
 
     furi_thread_flags_set(poller_context->thread_id, MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
