@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mf_classic_poller.h"
-#include <lib/nfc/protocols/nfca/nfca_poller_i.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
 #include <lib/nfc/helpers/nfc_util.h>
 #include "crypto1.h"
 
@@ -38,7 +38,7 @@ typedef enum {
 } MfClassicPollerState;
 
 struct MfClassicPoller {
-    NfcaPoller* nfca_poller;
+    Iso14443_3aPoller* iso14443_3a_poller;
 
     MfClassicPollerState state;
     MfClassicPollerState prev_state;
@@ -76,9 +76,9 @@ typedef union {
     MfClassicReadBlockContext read_block_context;
 } MfClassicPollerContextData;
 
-MfClassicError mf_classic_process_error(NfcaError error);
+MfClassicError mf_classic_process_error(Iso14443_3aError error);
 
-MfClassicPoller* mf_classic_poller_alloc(NfcaPoller* nfca_poller);
+MfClassicPoller* mf_classic_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller);
 
 void mf_classic_poller_free(MfClassicPoller* instance);
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nfc/protocols/nfca/nfca.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,7 @@ typedef struct {
 } Iso14443_4aAtsData;
 
 typedef struct {
-    NfcaData* iso14443_3a_data;
+    Iso14443_3aData* iso14443_3a_data;
     Iso14443_4aAtsData ats_data;
 } Iso14443_4aData;
 

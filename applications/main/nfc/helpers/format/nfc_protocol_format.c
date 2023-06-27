@@ -1,6 +1,6 @@
 #include "nfc_protocol_format.h"
 
-#include <nfc/protocols/nfca/nfca.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
 #include <nfc/protocols/mf_desfire/mf_desfire.h>
@@ -16,7 +16,7 @@ typedef struct {
 } NfcProtocolFormatBase;
 
 static void nfc_protocol_format_info_iso14443_3a_common(
-    const NfcaData* nfc_data,
+    const Iso14443_3aData* nfc_data,
     NfcProtocolFormatType type,
     FuriString* str) {
     if(type == NfcProtocolFormatTypeFull) {
@@ -41,7 +41,7 @@ static void nfc_protocol_format_info_iso14443_3a(
     NfcProtocolFormatType type,
     FuriString* str) {
     UNUSED(type);
-    const NfcaData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeIso14443_3a);
+    const Iso14443_3aData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeIso14443_3a);
     nfc_protocol_format_info_iso14443_3a_common(data, NfcProtocolFormatTypeFull, str);
 }
 
@@ -60,7 +60,7 @@ static void nfc_protocol_format_info_mf_ultralight(
     NfcProtocolFormatType type,
     FuriString* str) {
     const MfUltralightData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeMfUltralight);
-    nfc_protocol_format_info_iso14443_3a_common(data->nfca_data, type, str);
+    nfc_protocol_format_info_iso14443_3a_common(data->iso14443_3a_data, type, str);
 
     furi_string_cat_printf(str, "\nPages Read: %u/%u", data->pages_read, data->pages_total);
     if(data->pages_read != data->pages_total) {
@@ -73,7 +73,7 @@ static void nfc_protocol_format_info_mf_classic(
     NfcProtocolFormatType type,
     FuriString* str) {
     const MfClassicData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeMfClassic);
-    nfc_protocol_format_info_iso14443_3a_common(data->nfca_data, type, str);
+    nfc_protocol_format_info_iso14443_3a_common(data->iso14443_3a_data, type, str);
 
     uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
     uint8_t keys_total = sectors_total * 2;

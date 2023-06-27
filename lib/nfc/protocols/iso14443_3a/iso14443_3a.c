@@ -1,85 +1,86 @@
-#include "nfca.h"
+#include "iso14443_3a.h"
 
 #include <furi.h>
 #include <nfc/nfc_common.h>
 
-#define NFCA_CRC_INIT (0x6363)
-#define NFCA_PROTOCOL_NAME "ISO14443-3A"
-#define NFCA_DEVICE_NAME "Unknown ISO14443-3A Tag"
+#define ISO14443_3A_CRC_INIT (0x6363)
+#define ISO14443_3A_PROTOCOL_NAME "ISO14443-3A"
+#define ISO14443_3A_DEVICE_NAME "Unknown ISO14443-3A Tag"
 
 const NfcProtocolBase nfc_protocol_iso14443_3a = {
-    .protocol_name = NFCA_PROTOCOL_NAME,
-    .alloc = (NfcProtocolAlloc)nfca_alloc,
-    .free = (NfcProtocolFree)nfca_free,
-    .reset = (NfcProtocolReset)nfca_reset,
-    .copy = (NfcProtocolCopy)nfca_copy,
-    .verify = (NfcProtocolVerify)nfca_verify,
-    .load = (NfcProtocolLoad)nfca_load,
-    .save = (NfcProtocolSave)nfca_save,
-    .is_equal = (NfcProtocolEqual)nfca_is_equal,
-    .get_device_name = (NfcProtocolGetDeviceName)nfca_get_device_name,
-    .get_uid = (NfcProtocolGetUid)nfca_get_uid,
+    .protocol_name = ISO14443_3A_PROTOCOL_NAME,
+    .alloc = (NfcProtocolAlloc)iso14443_3a_alloc,
+    .free = (NfcProtocolFree)iso14443_3a_free,
+    .reset = (NfcProtocolReset)iso14443_3a_reset,
+    .copy = (NfcProtocolCopy)iso14443_3a_copy,
+    .verify = (NfcProtocolVerify)iso14443_3a_verify,
+    .load = (NfcProtocolLoad)iso14443_3a_load,
+    .save = (NfcProtocolSave)iso14443_3a_save,
+    .is_equal = (NfcProtocolEqual)iso14443_3a_is_equal,
+    .get_device_name = (NfcProtocolGetDeviceName)iso14443_3a_get_device_name,
+    .get_uid = (NfcProtocolGetUid)iso14443_3a_get_uid,
 };
 
-NfcaData* nfca_alloc() {
-    NfcaData* data = malloc(sizeof(NfcaData));
+Iso14443_3aData* iso14443_3a_alloc() {
+    Iso14443_3aData* data = malloc(sizeof(Iso14443_3aData));
     return data;
 }
 
-void nfca_free(NfcaData* data) {
+void iso14443_3a_free(Iso14443_3aData* data) {
     furi_assert(data);
 
     free(data);
 }
 
-void nfca_reset(NfcaData* data) {
+void iso14443_3a_reset(Iso14443_3aData* data) {
     furi_assert(data);
 
     UNUSED(data);
 }
 
-void nfca_copy(NfcaData* data, const NfcaData* other) {
+void iso14443_3a_copy(Iso14443_3aData* data, const Iso14443_3aData* other) {
     furi_assert(data);
     furi_assert(other);
 
     *data = *other;
 }
 
-bool nfca_verify(NfcaData* data, const FuriString* device_type) {
+bool iso14443_3a_verify(Iso14443_3aData* data, const FuriString* device_type) {
     UNUSED(data);
     return furi_string_equal(device_type, "UID");
 }
 
-bool nfca_load(NfcaData* data, FlipperFormat* ff, uint32_t version) {
-    return nfca_load_data(data, ff, version);
+bool iso14443_3a_load(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
+    return iso14443_3a_load_data(data, ff, version);
     return true;
 }
 
-bool nfca_save(const NfcaData* data, FlipperFormat* ff, uint32_t version) {
+bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
     bool saved = false;
     do {
         if(!flipper_format_write_string_cstr(ff, "Device type", "UID")) break;
-        if(!nfca_save_data(data, ff, version)) break;
+        if(!iso14443_3a_save_data(data, ff, version)) break;
         saved = true;
     } while(false);
 
     return saved;
 }
 
-bool nfca_is_equal(const NfcaData* data, const NfcaData* other) {
+bool iso14443_3a_is_equal(const Iso14443_3aData* data, const Iso14443_3aData* other) {
     furi_assert(data);
     furi_assert(other);
 
-    return memcmp(data, other, sizeof(NfcaData)) == 0;
+    return memcmp(data, other, sizeof(Iso14443_3aData)) == 0;
 }
 
-const char* nfca_get_device_name(const NfcaData* data, NfcProtocolNameType name_type) {
+const char*
+    iso14443_3a_get_device_name(const Iso14443_3aData* data, NfcProtocolNameType name_type) {
     UNUSED(data);
     UNUSED(name_type);
-    return NFCA_DEVICE_NAME;
+    return ISO14443_3A_DEVICE_NAME;
 }
 
-const uint8_t* nfca_get_uid(const NfcaData* data, size_t* uid_len) {
+const uint8_t* iso14443_3a_get_uid(const Iso14443_3aData* data, size_t* uid_len) {
     furi_assert(data);
 
     if(uid_len) {
@@ -89,7 +90,7 @@ const uint8_t* nfca_get_uid(const NfcaData* data, size_t* uid_len) {
     return data->uid;
 }
 
-bool nfca_load_data(NfcaData* data, FlipperFormat* ff, uint32_t version) {
+bool iso14443_3a_load_data(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
     furi_assert(data);
 
     uint32_t data_cnt = 0;
@@ -116,7 +117,7 @@ bool nfca_load_data(NfcaData* data, FlipperFormat* ff, uint32_t version) {
     return parsed;
 }
 
-bool nfca_save_data(const NfcaData* data, FlipperFormat* ff, uint32_t version) {
+bool iso14443_3a_save_data(const Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
     furi_assert(data);
 
     UNUSED(version);
@@ -137,11 +138,11 @@ bool nfca_save_data(const NfcaData* data, FlipperFormat* ff, uint32_t version) {
     return saved;
 }
 
-static uint16_t nfca_get_crc(const uint8_t* buff, uint16_t len) {
+static uint16_t iso14443_3a_get_crc(const uint8_t* buff, uint16_t len) {
     furi_assert(buff);
     furi_assert(len);
 
-    uint16_t crc = NFCA_CRC_INIT;
+    uint16_t crc = ISO14443_3A_CRC_INIT;
     uint8_t byte = 0;
 
     for(uint8_t i = 0; i < len; i++) {
@@ -155,31 +156,31 @@ static uint16_t nfca_get_crc(const uint8_t* buff, uint16_t len) {
     return crc;
 }
 
-uint32_t nfca_get_cuid(NfcaData* nfca_data) {
-    furi_assert(nfca_data);
+uint32_t iso14443_3a_get_cuid(Iso14443_3aData* iso14443_3a_data) {
+    furi_assert(iso14443_3a_data);
 
     uint32_t cuid = 0;
-    uint8_t* cuid_start = nfca_data->uid;
-    if(nfca_data->uid_len == 7) {
-        cuid_start = &nfca_data->uid[3];
+    uint8_t* cuid_start = iso14443_3a_data->uid;
+    if(iso14443_3a_data->uid_len == 7) {
+        cuid_start = &iso14443_3a_data->uid[3];
     }
     cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) | (cuid_start[3]);
 
     return cuid;
 }
 
-void nfca_append_crc(BitBuffer* buffer) {
+void iso14443_3a_append_crc(BitBuffer* buffer) {
     furi_assert(buffer);
 
     const uint8_t* data = bit_buffer_get_data(buffer);
     size_t bytes = bit_buffer_get_size_bytes(buffer);
 
-    uint16_t crc = nfca_get_crc(data, bytes);
+    uint16_t crc = iso14443_3a_get_crc(data, bytes);
     uint8_t crc_bytes[2] = {(uint8_t)crc, (uint8_t)(crc >> 8)};
     bit_buffer_append_bytes(buffer, crc_bytes, sizeof(crc_bytes));
 }
 
-bool nfca_check_crc(const BitBuffer* buf) {
+bool iso14443_3a_check_crc(const BitBuffer* buf) {
     furi_assert(buf);
 
     bool crc_ok = false;
@@ -188,7 +189,7 @@ bool nfca_check_crc(const BitBuffer* buf) {
         size_t bytes = bit_buffer_get_size_bytes(buf);
         if(bytes < 3) break;
 
-        uint16_t crc_calc = nfca_get_crc(data, bytes - 2);
+        uint16_t crc_calc = iso14443_3a_get_crc(data, bytes - 2);
         uint8_t crc_start = bit_buffer_get_byte(buf, bytes - 2);
         uint8_t crc_end = bit_buffer_get_byte(buf, bytes - 1);
         uint16_t crc_received = (crc_end << 8) | crc_start;
@@ -198,7 +199,7 @@ bool nfca_check_crc(const BitBuffer* buf) {
     return crc_ok;
 }
 
-void nfca_trim_crc(BitBuffer* buf) {
+void iso14443_3a_trim_crc(BitBuffer* buf) {
     furi_assert(buf);
 
     size_t bytes = bit_buffer_get_size_bytes(buf);

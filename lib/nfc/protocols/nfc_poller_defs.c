@@ -1,6 +1,6 @@
 #include "nfc_poller_defs.h"
 
-#include <nfc/protocols/nfca/nfca_poller_defs.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a_poller_defs.h>
 #include <nfc/protocols/iso14443_4a/iso14443_4a_poller_defs.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_defs.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_defs.h>

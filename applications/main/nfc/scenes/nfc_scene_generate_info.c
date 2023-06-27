@@ -13,11 +13,11 @@ void nfc_scene_generate_info_widget_callback(GuiButtonType result, InputType typ
 void nfc_scene_generate_info_on_enter(void* context) {
     NfcApp* nfc = context;
 
-    NfcaData* nfca_data = NULL;
+    Iso14443_3aData* iso14443_3a_data = NULL;
     if(nfc_dev_get_protocol_type(nfc->nfc_dev) == NfcProtocolTypeMfUltralight) {
         const MfUltralightData* mfu_data =
             nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfUltralight);
-        nfca_data = mfu_data->nfca_data;
+        iso14443_3a_data = mfu_data->iso14443_3a_data;
     } else {
         // TODO add Mf Classic
         furi_crash("Not supported protocol");
@@ -37,8 +37,8 @@ void nfc_scene_generate_info_on_enter(void* context) {
 
     FuriString* temp_str = furi_string_alloc_printf("UID:");
     // Append UID
-    for(int i = 0; i < nfca_data->uid_len; i++) {
-        furi_string_cat_printf(temp_str, " %02X", nfca_data->uid[i]);
+    for(int i = 0; i < iso14443_3a_data->uid_len; i++) {
+        furi_string_cat_printf(temp_str, " %02X", iso14443_3a_data->uid[i]);
     }
     widget_add_string_element(
         widget, 0, 25, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));

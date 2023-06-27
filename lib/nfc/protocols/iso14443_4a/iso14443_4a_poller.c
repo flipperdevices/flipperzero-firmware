@@ -16,7 +16,7 @@ const Iso14443_4aData* iso14443_4a_poller_get_data(Iso14443_4aPoller* instance) 
     return instance->data;
 }
 
-static Iso14443_4aPoller* iso14443_4a_poller_alloc(NfcaPoller* iso14443_3a_poller) {
+static Iso14443_4aPoller* iso14443_4a_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller) {
     Iso14443_4aPoller* instance = malloc(sizeof(Iso14443_4aPoller));
     instance->iso14443_3a_poller = iso14443_3a_poller;
     instance->data = iso14443_4a_alloc();
@@ -42,8 +42,9 @@ static void iso14443_4a_poller_free(Iso14443_4aPoller* instance) {
 }
 
 static NfcCommand iso14443_4a_poller_handler_idle(Iso14443_4aPoller* instance) {
-    nfca_copy(
-        instance->data->iso14443_3a_data, nfca_poller_get_data(instance->iso14443_3a_poller));
+    iso14443_3a_copy(
+        instance->data->iso14443_3a_data,
+        iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
 
     instance->poller_state = Iso14443_4aPollerStateReadAts;
     instance->protocol_state.block_number = 0;
@@ -65,7 +66,7 @@ static NfcCommand iso14443_4a_poller_handler_read_ats(Iso14443_4aPoller* instanc
 }
 
 static NfcCommand iso14443_4a_poller_handler_error(Iso14443_4aPoller* instance) {
-    nfca_poller_halt(instance->iso14443_3a_poller);
+    iso14443_3a_poller_halt(instance->iso14443_3a_poller);
     instance->iso14443_4a_event_data.error = instance->error;
     NfcCommand command = instance->callback(instance->general_event, instance->context);
     instance->poller_state = Iso14443_4aPollerStateIdle;
@@ -104,14 +105,14 @@ static NfcCommand iso14443_4a_poller_run(NfcPollerEvent event, void* context) {
     furi_assert(instance);
     furi_assert(instance->callback);
 
-    NfcaPollerEvent* iso14443_3a_event = event.data;
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
     furi_assert(iso14443_3a_event);
 
     NfcCommand command = NfcCommandContinue;
 
-    if(iso14443_3a_event->type == NfcaPollerEventTypeReady) {
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         command = iso14443_4a_poller_state_handler[instance->poller_state](instance);
-    } else if(iso14443_3a_event->type == NfcaPollerEventTypeError) {
+    } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
         instance->iso14443_4a_event.type = Iso14443_4aPollerEventTypeError;
         command = instance->callback(instance->general_event, instance->context);
     }
@@ -125,14 +126,15 @@ static bool iso14443_4a_poller_detect(NfcPollerEvent event, void* context) {
     const Iso14443_4aPoller* instance = context;
     furi_assert(instance);
 
-    const NfcaPollerEvent* iso14443_3a_event = event.data;
+    const Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
     furi_assert(iso14443_3a_event);
-    nfca_copy(
-        instance->data->iso14443_3a_data, nfca_poller_get_data(instance->iso14443_3a_poller));
+    iso14443_3a_copy(
+        instance->data->iso14443_3a_data,
+        iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
 
     bool protocol_detected = false;
 
-    if(iso14443_3a_event->type == NfcaPollerEventTypeReady) {
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         protocol_detected = iso14443_4a_is_ats_supported(instance->data);
     }
 

@@ -64,15 +64,15 @@ static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* 
     furi_assert(context);
 
     MfClassicPollerContext* poller_context = context;
-    NfcaPollerEvent* nfca_event = event.data;
-    NfcaPoller* nfca_poller = event.poller;
-    MfClassicPoller* mfc_poller = mf_classic_poller_alloc(nfca_poller);
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    Iso14443_3aPoller* iso14443_3a_poller = event.poller;
+    MfClassicPoller* mfc_poller = mf_classic_poller_alloc(iso14443_3a_poller);
 
-    if(nfca_event->type == NfcaPollerEventTypeReady) {
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         poller_context->error = mf_classic_poller_cmd_handlers[poller_context->cmd_type](
             mfc_poller, &poller_context->data);
-    } else if(nfca_event->type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_classic_process_error(nfca_event->data->error);
+    } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
+        poller_context->error = mf_classic_process_error(iso14443_3a_event->data->error);
     }
 
     furi_thread_flags_set(poller_context->thread_id, MF_CLASSIC_POLLER_COMPLETE_EVENT);

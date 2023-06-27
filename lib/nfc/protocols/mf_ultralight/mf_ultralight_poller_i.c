@@ -4,22 +4,22 @@
 
 #define TAG "MfUltralightPoller"
 
-MfUltralightError mf_ultralight_process_error(NfcaError error) {
+MfUltralightError mf_ultralight_process_error(Iso14443_3aError error) {
     MfUltralightError ret = MfUltralightErrorNone;
 
     switch(error) {
-    case NfcaErrorNone:
+    case Iso14443_3aErrorNone:
         ret = MfUltralightErrorNone;
         break;
-    case NfcaErrorNotPresent:
+    case Iso14443_3aErrorNotPresent:
         ret = MfUltralightErrorNotPresent;
         break;
-    case NfcaErrorColResFailed:
-    case NfcaErrorCommunication:
-    case NfcaErrorWrongCrc:
+    case Iso14443_3aErrorColResFailed:
+    case Iso14443_3aErrorCommunication:
+    case Iso14443_3aErrorWrongCrc:
         ret = MfUltralightErrorProtocol;
         break;
-    case NfcaErrorTimeout:
+    case Iso14443_3aErrorTimeout:
         ret = MfUltralightErrorTimeout;
         break;
     default:
@@ -38,14 +38,14 @@ MfUltralightError mf_ultralight_poller_async_auth(
     bit_buffer_copy_bytes(instance->tx_buffer, auth_cmd, sizeof(auth_cmd));
 
     MfUltralightError ret = MfUltralightErrorNone;
-    NfcaError error = NfcaErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
     do {
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
+        error = iso14443_3a_poller_send_standart_frame(
+            instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
+        if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
         }
@@ -65,17 +65,17 @@ MfUltralightError mf_ultralight_poller_async_read_page_from_sector(
     uint8_t tag,
     MfUltralightPageReadCommandData* data) {
     MfUltralightError ret = MfUltralightErrorNone;
-    NfcaError error = NfcaErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
         const uint8_t select_sector_cmd[2] = {MF_ULTRALIGHT_CMD_SECTOR_SELECT, 0xff};
         bit_buffer_copy_bytes(instance->tx_buffer, select_sector_cmd, sizeof(select_sector_cmd));
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
+        error = iso14443_3a_poller_send_standart_frame(
+            instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorWrongCrc) {
+        if(error != Iso14443_3aErrorWrongCrc) {
             FURI_LOG_D(TAG, "Failed to issue sector select command");
             ret = mf_ultralight_process_error(error);
             break;
@@ -83,12 +83,12 @@ MfUltralightError mf_ultralight_poller_async_read_page_from_sector(
 
         const uint8_t read_sector_cmd[4] = {sector, 0x00, 0x00, 0x00};
         bit_buffer_copy_bytes(instance->tx_buffer, read_sector_cmd, sizeof(read_sector_cmd));
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
+        error = iso14443_3a_poller_send_standart_frame(
+            instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorTimeout) {
+        if(error != Iso14443_3aErrorTimeout) {
             // This is NOT a typo! The tag ACKs by not sending a response within 1ms.
             FURI_LOG_D(TAG, "Sector %u select NAK'd", sector);
             ret = MfUltralightErrorProtocol;
@@ -106,17 +106,17 @@ MfUltralightError mf_ultralight_poller_async_read_page(
     uint8_t start_page,
     MfUltralightPageReadCommandData* data) {
     MfUltralightError ret = MfUltralightErrorNone;
-    NfcaError error = NfcaErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
         uint8_t read_page_cmd[2] = {MF_ULTRALIGHT_CMD_READ_PAGE, start_page};
         bit_buffer_copy_bytes(instance->tx_buffer, read_page_cmd, sizeof(read_page_cmd));
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
+        error = iso14443_3a_poller_send_standart_frame(
+            instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
+        if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
         }
@@ -136,18 +136,18 @@ MfUltralightError mf_ultralight_poller_async_write_page(
     uint8_t page,
     MfUltralightPage* data) {
     MfUltralightError ret = MfUltralightErrorNone;
-    NfcaError error = NfcaErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
         uint8_t write_page_cmd[MF_ULTRALIGHT_PAGE_SIZE + 2] = {MF_ULTRALIGHT_CMD_WRITE_PAGE, page};
         memcpy(&write_page_cmd[2], data->data, MF_ULTRALIGHT_PAGE_SIZE);
         bit_buffer_copy_bytes(instance->tx_buffer, write_page_cmd, sizeof(write_page_cmd));
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
+        error = iso14443_3a_poller_send_standart_frame(
+            instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorWrongCrc) {
+        if(error != Iso14443_3aErrorWrongCrc) {
             ret = mf_ultralight_process_error(error);
             break;
         }
@@ -168,17 +168,17 @@ MfUltralightError mf_ultralight_poller_async_read_version(
     MfUltralightPoller* instance,
     MfUltralightVersion* data) {
     MfUltralightError ret = MfUltralightErrorNone;
-    NfcaError error = NfcaErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
         const uint8_t get_version_cmd = MF_ULTRALIGHT_CMD_GET_VERSION;
         bit_buffer_copy_bytes(instance->tx_buffer, &get_version_cmd, sizeof(get_version_cmd));
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
+        error = iso14443_3a_poller_send_standart_frame(
+            instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
+        if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
         }
@@ -198,17 +198,17 @@ MfUltralightError mf_ultralight_poller_async_read_signature(
     MfUltralightPoller* instance,
     MfUltralightSignature* data) {
     MfUltralightError ret = MfUltralightErrorNone;
-    NfcaError error = NfcaErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
         const uint8_t read_signature_cmd[2] = {MF_ULTRALIGTH_CMD_READ_SIG, 0x00};
         bit_buffer_copy_bytes(instance->tx_buffer, read_signature_cmd, sizeof(read_signature_cmd));
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
+        error = iso14443_3a_poller_send_standart_frame(
+            instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
+        if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
         }
@@ -227,17 +227,17 @@ MfUltralightError mf_ultralight_poller_async_read_counter(
     uint8_t counter_num,
     MfUltralightCounter* data) {
     MfUltralightError ret = MfUltralightErrorNone;
-    NfcaError error = NfcaErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
         uint8_t read_counter_cmd[2] = {MF_ULTRALIGHT_CMD_READ_CNT, counter_num};
         bit_buffer_copy_bytes(instance->tx_buffer, read_counter_cmd, sizeof(read_counter_cmd));
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
+        error = iso14443_3a_poller_send_standart_frame(
+            instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
+        if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
         }
@@ -256,17 +256,17 @@ MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
     uint8_t tearing_falg_num,
     MfUltralightTearingFlag* data) {
     MfUltralightError ret = MfUltralightErrorNone;
-    NfcaError error = NfcaErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
         uint8_t check_tearing_cmd[2] = {MF_ULTRALIGHT_CMD_CHECK_TEARING, tearing_falg_num};
         bit_buffer_copy_bytes(instance->tx_buffer, check_tearing_cmd, sizeof(check_tearing_cmd));
-        error = nfca_poller_send_standart_frame(
-            instance->nfca_poller,
+        error = iso14443_3a_poller_send_standart_frame(
+            instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             MF_ULTRALIGHT_POLLER_STANDART_FWT_FC);
-        if(error != NfcaErrorNone) {
+        if(error != Iso14443_3aErrorNone) {
             ret = mf_ultralight_process_error(error);
             break;
         }

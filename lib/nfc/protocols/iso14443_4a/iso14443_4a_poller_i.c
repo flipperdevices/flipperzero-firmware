@@ -8,17 +8,17 @@
 
 #define ISO14443_4A_PCB_I (0x02)
 
-Iso14443_4aError iso14443_4a_poller_process_error(NfcaError error) {
+Iso14443_4aError iso14443_4a_poller_process_error(Iso14443_3aError error) {
     switch(error) {
-    case NfcaErrorNone:
+    case Iso14443_3aErrorNone:
         return Iso14443_4aErrorNone;
-    case NfcaErrorNotPresent:
+    case Iso14443_3aErrorNotPresent:
         return Iso14443_4aErrorNotPresent;
-    case NfcaErrorColResFailed:
-    case NfcaErrorCommunication:
-    case NfcaErrorWrongCrc:
+    case Iso14443_3aErrorColResFailed:
+    case Iso14443_3aErrorCommunication:
+    case Iso14443_3aErrorWrongCrc:
         return Iso14443_4aErrorProtocol;
-    case NfcaErrorTimeout:
+    case Iso14443_3aErrorTimeout:
         return Iso14443_4aErrorTimeout;
     default:
         return Iso14443_4aErrorProtocol;
@@ -28,7 +28,7 @@ Iso14443_4aError iso14443_4a_poller_process_error(NfcaError error) {
 Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance) {
     furi_assert(instance);
 
-    nfca_poller_halt(instance->iso14443_3a_poller);
+    iso14443_3a_poller_halt(instance->iso14443_3a_poller);
     instance->poller_state = Iso14443_4aPollerStateIdle;
 
     return Iso14443_4aErrorNone;
@@ -45,13 +45,13 @@ Iso14443_4aError
     Iso14443_4aError error = Iso14443_4aErrorNone;
 
     do {
-        const NfcaError iso14443_3a_error = nfca_poller_send_standart_frame(
+        const Iso14443_3aError iso14443_3a_error = iso14443_3a_poller_send_standart_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
             ISO14443_4A_POLLER_ATS_FWT_FC);
 
-        if(iso14443_3a_error != NfcaErrorNone) {
+        if(iso14443_3a_error != Iso14443_3aErrorNone) {
             FURI_LOG_E(TAG, "ATS request failed");
             error = iso14443_4a_poller_process_error(iso14443_3a_error);
             break;
@@ -84,10 +84,10 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     Iso14443_4aError error = Iso14443_4aErrorNone;
 
     do {
-        NfcaError iso14443_3a_error = nfca_poller_send_standart_frame(
+        Iso14443_3aError iso14443_3a_error = iso14443_3a_poller_send_standart_frame(
             instance->iso14443_3a_poller, instance->tx_buffer, instance->rx_buffer, fwt);
 
-        if(iso14443_3a_error != NfcaErrorNone) {
+        if(iso14443_3a_error != Iso14443_3aErrorNone) {
             error = iso14443_4a_poller_process_error(iso14443_3a_error);
             break;
 

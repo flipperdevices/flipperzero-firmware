@@ -10,11 +10,11 @@
 
 typedef NfcCommand (*MfClassicPollerReadHandler)(MfClassicPoller* instance);
 
-MfClassicPoller* mf_classic_poller_alloc(NfcaPoller* nfca_poller) {
-    furi_assert(nfca_poller);
+MfClassicPoller* mf_classic_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller) {
+    furi_assert(iso14443_3a_poller);
 
     MfClassicPoller* instance = malloc(sizeof(MfClassicPoller));
-    instance->nfca_poller = nfca_poller;
+    instance->iso14443_3a_poller = iso14443_3a_poller;
     instance->data = mf_classic_alloc();
     instance->crypto = crypto1_alloc();
     instance->tx_plain_buffer = bit_buffer_alloc(MF_CLASSIC_MAX_BUFF_SIZE);
@@ -51,10 +51,12 @@ void mf_classic_poller_free(MfClassicPoller* instance) {
 }
 
 NfcCommand mf_classic_poller_handler_idle(MfClassicPoller* instance) {
-    nfca_copy(instance->data->nfca_data, nfca_poller_get_data(instance->nfca_poller));
+    iso14443_3a_copy(
+        instance->data->iso14443_3a_data,
+        iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
     NfcCommand command = NfcCommandContinue;
 
-    if(mf_classic_detect_protocol(instance->data->nfca_data, &instance->data->type)) {
+    if(mf_classic_detect_protocol(instance->data->iso14443_3a_data, &instance->data->type)) {
         if(instance->card_state == MfClassicCardStateNotDetected) {
             instance->card_state = MfClassicCardStateDetected;
             instance->mfc_event.type = MfClassicPollerEventTypeCardDetected;
@@ -282,13 +284,13 @@ NfcCommand mf_classsic_poller_run(NfcPollerEvent event, void* context) {
     furi_assert(context);
 
     MfClassicPoller* instance = context;
-    NfcaPollerEvent* nfca_event = event.data;
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
     NfcCommand command = NfcCommandContinue;
 
-    if(nfca_event->type == NfcaPollerEventTypeReady) {
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         command = mf_classic_poller_dict_attack_handler[instance->state](instance);
-    } else if(nfca_event->type == NfcaPollerEventTypeError) {
-        if(nfca_event->data->error == NfcaErrorNotPresent) {
+    } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
+        if(iso14443_3a_event->data->error == Iso14443_3aErrorNotPresent) {
             if(instance->card_state == MfClassicCardStateDetected) {
                 instance->card_state = MfClassicCardStateNotDetected;
                 instance->mfc_event.type = MfClassicPollerEventTypeCardNotDetected;

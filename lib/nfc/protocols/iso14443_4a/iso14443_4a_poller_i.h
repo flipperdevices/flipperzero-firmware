@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/nfc/protocols/nfca/nfca_poller_i.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
 
 #include "iso14443_4a_poller.h"
 
@@ -30,7 +30,7 @@ typedef struct {
 } Iso14443_4aPollerProtocolState;
 
 struct Iso14443_4aPoller {
-    NfcaPoller* iso14443_3a_poller;
+    Iso14443_3aPoller* iso14443_3a_poller;
     Iso14443_4aPollerState poller_state;
     Iso14443_4aPollerSessionState session_state;
     Iso14443_4aPollerProtocolState protocol_state;
@@ -45,7 +45,7 @@ struct Iso14443_4aPoller {
     void* context;
 };
 
-Iso14443_4aError iso14443_4a_poller_process_error(NfcaError error);
+Iso14443_4aError iso14443_4a_poller_process_error(Iso14443_3aError error);
 
 const Iso14443_4aData* iso14443_4a_poller_get_data(Iso14443_4aPoller* instance);
 

@@ -46,8 +46,8 @@ NfcApp* nfc_app_alloc() {
         instance->view_dispatcher, nfc_back_event_callback);
 
     instance->nfc = nfc_alloc();
-    instance->nfca_listener = nfca_listener_alloc(instance->nfc);
-    instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->nfca_listener);
+    instance->iso14443_3a_listener = iso14443_3a_listener_alloc(instance->nfc);
+    instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->iso14443_3a_listener);
 
     instance->parsed_data = furi_string_alloc();
 
@@ -124,7 +124,7 @@ NfcApp* nfc_app_alloc() {
         NfcViewDetectReader,
         detect_reader_get_view(instance->detect_reader));
 
-    instance->nfca_edit_data = nfca_alloc();
+    instance->iso14443_3a_edit_data = iso14443_3a_alloc();
     instance->file_path = furi_string_alloc_set(NFC_APP_FOLDER);
     instance->file_name = furi_string_alloc();
 
@@ -154,7 +154,7 @@ void nfc_app_free(NfcApp* instance) {
     furi_string_free(instance->parsed_data);
 
     mf_ultralight_listener_free(instance->mf_ul_listener);
-    nfca_listener_free(instance->nfca_listener);
+    iso14443_3a_listener_free(instance->iso14443_3a_listener);
     nfc_free(instance->nfc);
     nfc_scanner_free(instance->scanner);
 
@@ -219,7 +219,7 @@ void nfc_app_free(NfcApp* instance) {
 
     instance->notifications = NULL;
 
-    nfca_free(instance->nfca_edit_data);
+    iso14443_3a_free(instance->iso14443_3a_edit_data);
     furi_string_free(instance->file_path);
     furi_string_free(instance->file_name);
 

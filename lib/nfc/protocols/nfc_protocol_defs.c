@@ -1,6 +1,6 @@
 #include "nfc_protocol_defs.h"
 
-#include <nfc/protocols/nfca/nfca.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_4a/iso14443_4a.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>

@@ -2,14 +2,14 @@
 
 #include "../../nfc_app_i.h"
 
-typedef NfcCustomEvent (*NfcPollerReadHandler)(NfcaPollerEvent* event, NfcApp* nfc_app);
+typedef NfcCustomEvent (*NfcPollerReadHandler)(Iso14443_3aPollerEvent* event, NfcApp* nfc_app);
 
 static NfcCustomEvent
-    nfc_poller_handler_read_iso14443_3a(NfcaPollerEvent* event, NfcApp* nfc_app) {
+    nfc_poller_handler_read_iso14443_3a(Iso14443_3aPollerEvent* event, NfcApp* nfc_app) {
     UNUSED(nfc_app);
     NfcCustomEvent custom_event = NfcCustomEventReadHandlerIgnore;
 
-    if(event->type == NfcaPollerEventTypeReady) {
+    if(event->type == Iso14443_3aPollerEventTypeReady) {
         custom_event = NfcCustomEventReadHandlerSuccess;
     }
 
@@ -41,12 +41,16 @@ static NfcCustomEvent
             nfc_dev_get_protocol_data(nfc_app->nfc_dev, NfcProtocolTypeMfUltralight);
         if(nfc_app->mf_ul_auth->type == MfUltralightAuthTypeXiaomii) {
             if(mf_ultralight_generate_xiaomi_pass(
-                   nfc_app->mf_ul_auth, data->nfca_data->uid, data->nfca_data->uid_len)) {
+                   nfc_app->mf_ul_auth,
+                   data->iso14443_3a_data->uid,
+                   data->iso14443_3a_data->uid_len)) {
                 event->data->auth_context.skip_auth = false;
             }
         } else if(nfc_app->mf_ul_auth->type == MfUltralightAuthTypeAmiibo) {
             if(mf_ultralight_generate_amiibo_pass(
-                   nfc_app->mf_ul_auth, data->nfca_data->uid, data->nfca_data->uid_len)) {
+                   nfc_app->mf_ul_auth,
+                   data->iso14443_3a_data->uid,
+                   data->iso14443_3a_data->uid_len)) {
                 event->data->auth_context.skip_auth = false;
             }
         } else if(nfc_app->mf_ul_auth->type == MfUltralightAuthTypeManual) {
@@ -93,7 +97,6 @@ static const NfcPollerReadHandler nfc_poller_handlers_read[] = {
     [NfcProtocolTypeMfClassic] = (NfcPollerReadHandler)nfc_poller_handler_read_mf_classic,
     [NfcProtocolTypeMfDesfire] = (NfcPollerReadHandler)nfc_poller_handler_read_mf_desfire,
 };
-
 NfcCustomEvent nfc_poller_handler_read(NfcPollerEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.poller);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mf_ultralight_poller.h"
-#include <lib/nfc/protocols/nfca/nfca_poller_i.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
 #include <lib/nfc/helpers/nfc_util.h>
 
 #ifdef __cplusplus
@@ -65,7 +65,7 @@ typedef enum {
 } MfUltralightPollerState;
 
 struct MfUltralightPoller {
-    NfcaPoller* nfca_poller;
+    Iso14443_3aPoller* iso14443_3a_poller;
     MfUltralightPollerState state;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
@@ -87,9 +87,9 @@ struct MfUltralightPoller {
     void* context;
 };
 
-MfUltralightError mf_ultralight_process_error(NfcaError error);
+MfUltralightError mf_ultralight_process_error(Iso14443_3aError error);
 
-MfUltralightPoller* mf_ultralight_poller_alloc(NfcaPoller* nfca_poller);
+MfUltralightPoller* mf_ultralight_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller);
 
 void mf_ultralight_poller_free(MfUltralightPoller* instance);
 

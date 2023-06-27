@@ -39,8 +39,8 @@
 #include <m-array.h>
 
 #include <lib/nfc/nfc.h>
-#include <lib/nfc/protocols/nfca/nfca_poller.h>
-#include <lib/nfc/protocols/nfca/nfca_listener.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h>
 #include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
@@ -108,7 +108,7 @@ struct NfcApp {
     DetectReader* detect_reader;
 
     Nfc* nfc;
-    NfcaListener* nfca_listener;
+    Iso14443_3aListener* iso14443_3a_listener;
     MfUltralightListener* mf_ul_listener;
 
     NfcPoller* poller;
@@ -120,7 +120,7 @@ struct NfcApp {
     NfcSupportedCards* supported_cards;
 
     NfcDev* nfc_dev;
-    NfcaData* nfca_edit_data;
+    Iso14443_3aData* iso14443_3a_edit_data;
     FuriString* file_path;
     FuriString* file_name;
 };
