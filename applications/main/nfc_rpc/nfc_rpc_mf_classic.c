@@ -1,6 +1,7 @@
 #include "nfc_rpc_i.h"
 
 #include "assets/compiled/mf_classic.pb.h"
+#include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
 
 #define TAG "NfcRpcMfClassic"
 

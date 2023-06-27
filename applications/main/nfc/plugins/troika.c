@@ -4,6 +4,7 @@
 
 #include <lib/nfc/protocols/mf_classic/mf_classic.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
+#include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
 
 #define TAG "Troika"
 

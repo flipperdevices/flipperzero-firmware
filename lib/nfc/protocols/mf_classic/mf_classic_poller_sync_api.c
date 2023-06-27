@@ -1,5 +1,7 @@
 #include "mf_classic_poller_i.h"
 
+#include <nfc/nfc_poller.h>
+
 #include <furi.h>
 
 #define MF_CLASSIC_POLLER_COMPLETE_EVENT (1UL << 0)
