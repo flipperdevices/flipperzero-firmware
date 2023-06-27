@@ -49,36 +49,6 @@ typedef struct {
     MfClassicPollerEventData* data;
 } MfClassicPollerEvent;
 
-typedef enum {
-    MfClassicPollerCommandContinue = NfcaPollerCommandContinue,
-    MfClassicPollerCommandReset = NfcaPollerCommandReset,
-    MfClassicPollerCommandStop = NfcaPollerCommandStop,
-    MfClassicPollerCommandRestart,
-} MfClassicPollerCommand;
-
-typedef MfClassicPollerCommand (
-    *MfClassicPollerCallback)(MfClassicPollerEvent event, void* context);
-
-MfClassicPoller* mf_classic_poller_alloc(NfcaPoller* nfca_poller);
-
-void mf_classic_poller_free(MfClassicPoller* instance);
-
-const MfClassicData* mf_classic_poller_get_data(MfClassicPoller* instance);
-
-MfClassicError mf_classic_poller_start(
-    MfClassicPoller* instance,
-    NfcaPollerEventCallback callback,
-    void* context);
-
-MfClassicError mf_classic_poller_dict_attack(
-    MfClassicPoller* instance,
-    MfClassicPollerCallback callback,
-    void* context);
-
-MfClassicError mf_classic_poller_reset(MfClassicPoller* instance);
-
-MfClassicError mf_classic_poller_stop(MfClassicPoller* instance);
-
 #ifdef __cplusplus
 }
 #endif

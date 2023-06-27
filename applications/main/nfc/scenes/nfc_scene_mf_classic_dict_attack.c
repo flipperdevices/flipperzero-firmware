@@ -9,62 +9,66 @@ typedef enum {
     DictAttackStateFlipperDictInProgress,
 } DictAttackState;
 
-MfClassicPollerCommand nfc_dict_attack_worker_callback(MfClassicPollerEvent event, void* context) {
+NfcCommand nfc_dict_attack_worker_callback(NfcPollerEvent event, void* context) {
     furi_assert(context);
+    furi_assert(event.data);
+    furi_assert(event.poller);
+    furi_assert(event.protocol_type == NfcProtocolTypeMfClassic);
 
-    MfClassicPollerCommand command = MfClassicPollerCommandContinue;
+    NfcCommand command = NfcCommandContinue;
+    MfClassicPollerEvent* mfc_event = event.data;
 
     NfcApp* nfc_app = context;
-    if(event.type == MfClassicPollerEventTypeStart) {
-        nfc_app->mf_dict_context.type = event.data->start_data.type;
+    if(mfc_event->type == MfClassicPollerEventTypeStart) {
+        nfc_app->mf_dict_context.type = mfc_event->data->start_data.type;
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackCardDetected);
-    } else if(event.type == MfClassicPollerEventTypeCardDetected) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeCardDetected) {
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackCardDetected);
-    } else if(event.type == MfClassicPollerEventTypeCardNotDetected) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeCardNotDetected) {
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackCardNotDetected);
-    } else if(event.type == MfClassicPollerEventTypeRequestKey) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeRequestKey) {
         MfClassicKey key = {};
         if(mf_dict_get_next_key(nfc_app->mf_dict_context.dict, &key)) {
-            event.data->key_request_data.key = key;
-            event.data->key_request_data.key_provided = true;
+            mfc_event->data->key_request_data.key = key;
+            mfc_event->data->key_request_data.key_provided = true;
             nfc_app->mf_dict_context.current_key++;
             if(nfc_app->mf_dict_context.current_key % 10 == 0) {
                 view_dispatcher_send_custom_event(
                     nfc_app->view_dispatcher, NfcCustomEventDictAttackNewKeyBatch);
             }
         } else {
-            event.data->key_request_data.key_provided = false;
+            mfc_event->data->key_request_data.key_provided = false;
         }
-    } else if(event.type == MfClassicPollerEventTypeNewSector) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeNewSector) {
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackNewSector);
         mf_dict_rewind(nfc_app->mf_dict_context.dict);
         nfc_app->mf_dict_context.current_key = 0;
-    } else if(event.type == MfClassicPollerEventTypeFoundKeyA) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeFoundKeyA) {
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackFoundKeyA);
-    } else if(event.type == MfClassicPollerEventTypeFoundKeyB) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeFoundKeyB) {
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackFoundKeyB);
-    } else if(event.type == MfClassicPollerEventTypeKeyAttackStart) {
-        nfc_app->mf_dict_context.current_sector = event.data->key_attack_data.start_sector;
+    } else if(mfc_event->type == MfClassicPollerEventTypeKeyAttackStart) {
+        nfc_app->mf_dict_context.current_sector = mfc_event->data->key_attack_data.start_sector;
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackKeyAttackStart);
-    } else if(event.type == MfClassicPollerEventTypeKeyAttackStop) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeKeyAttackStop) {
         mf_dict_rewind(nfc_app->mf_dict_context.dict);
         nfc_app->mf_dict_context.current_key = 0;
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackKeyAttackStop);
-    } else if(event.type == MfClassicPollerEventTypeKeyAttackNextSector) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeKeyAttackNextSector) {
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackKeyAttackNextSector);
-    } else if(event.type == MfClassicPollerEventTypeReadComplete) {
+    } else if(mfc_event->type == MfClassicPollerEventTypeReadComplete) {
         view_dispatcher_send_custom_event(
             nfc_app->view_dispatcher, NfcCustomEventDictAttackComplete);
-        command = MfClassicPollerCommandStop;
+        command = NfcCommandStop;
     }
 
     return command;
@@ -127,7 +131,9 @@ void nfc_scene_mf_classic_dict_attack_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewDictAttack);
     nfc_blink_read_start(nfc);
     notification_message(nfc->notifications, &sequence_display_backlight_enforce_on);
-    mf_classic_poller_dict_attack(nfc->mf_classic_poller, nfc_dict_attack_worker_callback, nfc);
+
+    nfc->poller = nfc_poller_alloc(nfc->nfc, NfcProtocolTypeMfClassic);
+    nfc_poller_start(nfc->poller, nfc_dict_attack_worker_callback, nfc);
 }
 
 bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent event) {
@@ -161,26 +167,22 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackNewSector) {
             nfc_dev_set_protocol_data(
-                nfc->nfc_dev,
-                NfcProtocolTypeMfClassic,
-                mf_classic_poller_get_data(nfc->mf_classic_poller));
+                nfc->nfc_dev, NfcProtocolTypeMfClassic, nfc_poller_get_data(nfc->poller));
             nfc_scene_mf_classic_dict_attack_update_view(nfc);
             dict_attack_inc_current_sector(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackNewKeyBatch) {
             nfc_dev_set_protocol_data(
-                nfc->nfc_dev,
-                NfcProtocolTypeMfClassic,
-                mf_classic_poller_get_data(nfc->mf_classic_poller));
+                nfc->nfc_dev, NfcProtocolTypeMfClassic, nfc_poller_get_data(nfc->poller));
             nfc_scene_mf_classic_dict_attack_update_view(nfc);
             dict_attack_inc_current_dict_key(nfc->dict_attack, 10);
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackSkip) {
             if(state == DictAttackStateUserDictInProgress) {
-                mf_classic_poller_stop(nfc->mf_classic_poller);
+                nfc_poller_stop(nfc->poller);
                 consumed = true;
             } else if(state == DictAttackStateFlipperDictInProgress) {
-                mf_classic_poller_stop(nfc->mf_classic_poller);
+                nfc_poller_stop(nfc->poller);
                 consumed = true;
             }
         } else if(event.event == NfcCustomEventDictAttackKeyAttackStart) {
@@ -200,7 +202,10 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
 
 void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
     NfcApp* nfc = context;
-    mf_classic_poller_stop(nfc->mf_classic_poller);
+
+    nfc_poller_stop(nfc->poller);
+    nfc_poller_free(nfc->poller);
+
     nfc_blink_stop(nfc);
     notification_message(nfc->notifications, &sequence_display_backlight_enforce_auto);
 }

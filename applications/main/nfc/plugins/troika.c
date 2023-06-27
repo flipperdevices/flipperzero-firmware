@@ -31,18 +31,18 @@ bool troika_verify(void* poller) {
     furi_assert(poller);
 
     bool verified = false;
-    MfClassicPoller* mfc_poller = poller;
-    uint8_t sector = 11;
-    uint8_t block = mf_classic_get_sector_trailer_num_by_sector(sector);
-    MfClassicKey key = {.data = {0x08, 0xb3, 0x86, 0x46, 0x32, 0x29}};
-    MfClassicAuthContext auth_context = {};
+    // MfClassicPoller* mfc_poller = poller;
+    // uint8_t sector = 11;
+    // uint8_t block = mf_classic_get_sector_trailer_num_by_sector(sector);
+    // MfClassicKey key = {.data = {0x08, 0xb3, 0x86, 0x46, 0x32, 0x29}};
+    // MfClassicAuthContext auth_context = {};
 
-    FURI_LOG_D("Troika", "Verifying sector %d", sector);
-    if(mf_classic_poller_auth(mfc_poller, block, &key, MfClassicKeyTypeA, &auth_context) ==
-       MfClassicErrorNone) {
-        FURI_LOG_D(TAG, "Sector %d verified", sector);
-        verified = true;
-    }
+    // FURI_LOG_D("Troika", "Verifying sector %d", sector);
+    // if(mf_classic_poller_auth(mfc_poller, block, &key, MfClassicKeyTypeA, &auth_context) ==
+    //    MfClassicErrorNone) {
+    //     FURI_LOG_D(TAG, "Sector %d verified", sector);
+    //     verified = true;
+    // }
 
     return verified;
 }

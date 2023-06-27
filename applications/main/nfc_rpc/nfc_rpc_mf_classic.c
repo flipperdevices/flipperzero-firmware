@@ -46,8 +46,8 @@ static void nfc_rpc_mf_classic_auth(Nfc_Main* cmd, void* context) {
     memcpy(key.data, req->key.bytes, sizeof(MfClassicKey));
     MfClassicKeyType key_type =
         (req->key_type == PB_MfClassic_KeyType_KeyTypeB) ? MfClassicKeyTypeB : MfClassicKeyTypeA;
-    MfClassicError error = mf_classic_poller_auth(
-        instance->mf_classic_poller, req->block, &key, key_type, &auth_context);
+    MfClassicError error =
+        mf_classic_poller_auth(instance->nfc, req->block, &key, key_type, &auth_context);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_mf_classic_auth_resp_tag;
@@ -86,8 +86,8 @@ static void nfc_rpc_mf_classic_read_block(Nfc_Main* cmd, void* context) {
     MfClassicKeyType key_type =
         (req->key_type == PB_MfClassic_KeyType_KeyTypeB) ? MfClassicKeyTypeB : MfClassicKeyTypeA;
     MfClassicBlock block = {};
-    MfClassicError error = mf_classic_poller_read_block(
-        instance->mf_classic_poller, req->block, &key, key_type, &block);
+    MfClassicError error =
+        mf_classic_poller_read_block(instance->nfc, req->block, &key, key_type, &block);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_mf_classic_read_block_resp_tag;

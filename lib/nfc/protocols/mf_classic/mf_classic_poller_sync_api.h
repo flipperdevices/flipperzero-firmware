@@ -8,23 +8,18 @@ extern "C" {
 #endif
 
 MfClassicError mf_classic_poller_auth(
-    MfClassicPoller* instance,
+    Nfc* nfc,
     uint8_t block_num,
     MfClassicKey* key,
     MfClassicKeyType key_type,
     MfClassicAuthContext* data);
 
 MfClassicError mf_classic_poller_read_block(
-    MfClassicPoller* instance,
+    Nfc* nfc,
     uint8_t block_num,
     MfClassicKey* key,
     MfClassicKeyType key_type,
     MfClassicBlock* data);
-
-MfClassicError mf_classic_poller_read(
-    MfClassicPoller* instance,
-    MfClassicDeviceKeys* keys,
-    MfClassicData* data);
 
 #ifdef __cplusplus
 }

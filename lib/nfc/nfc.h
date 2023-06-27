@@ -17,7 +17,7 @@ typedef enum {
     NfcEventTypeRxStart,
     NfcEventTypeRxEnd,
 
-    // TODO delete 
+    // TODO delete
     NfcEventTypeConfigureRequest,
     NfcEventTypeReset,
 
