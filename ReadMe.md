@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Fix MLIB usage #2762 (By P-p-H-d)](https://github.com/flipperdevices/flipperzero-firmware/pull/2762)
 - OFW: [fix: make dialog_file_browser_set_basic_options initialize all fields #2756 (By JarvisCraft)](https://github.com/flipperdevices/flipperzero-firmware/pull/2756)
 - OFW: [Scroll acceleration #2784 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2784)
+- OFW: Loader Refactor Coming Soon (Working on qFlipper bug)
 
 <a name="release">
 
