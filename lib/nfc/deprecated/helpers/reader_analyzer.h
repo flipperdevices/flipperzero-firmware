@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <lib/nfc/deprecated/nfc_device.h>
+#include <lib/nfc/deprecated/nfc_device_old.h>
 
 typedef enum {
     ReaderAnalyzerModeDebugLog = 0x01,
@@ -30,7 +30,7 @@ void reader_analyzer_start(ReaderAnalyzer* instance, ReaderAnalyzerMode mode);
 
 void reader_analyzer_stop(ReaderAnalyzer* instance);
 
-NfcProtocol
+NfcProtocolOld
     reader_analyzer_guess_protocol(ReaderAnalyzer* instance, uint8_t* buff_rx, uint16_t len);
 
 FuriHalNfcDevData* reader_analyzer_get_nfc_data(ReaderAnalyzer* instance);

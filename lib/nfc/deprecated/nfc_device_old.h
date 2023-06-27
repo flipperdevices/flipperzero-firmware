@@ -27,22 +27,22 @@ extern "C" {
 typedef void (*NfcLoadingCallback)(void* context, bool state);
 
 typedef enum {
-    NfcDeviceProtocolUnknown,
-    NfcDeviceProtocolEMV,
-    NfcDeviceProtocolMifareUl,
-    NfcDeviceProtocolMifareClassic,
-    NfcDeviceProtocolMifareDesfire,
-    NfcDeviceProtocolNfcV
-} NfcProtocol;
+    NfcDeviceOldProtocolUnknown,
+    NfcDeviceOldProtocolEMV,
+    NfcDeviceOldProtocolMifareUl,
+    NfcDeviceOldProtocolMifareClassic,
+    NfcDeviceOldProtocolMifareDesfire,
+    NfcDeviceOldProtocolNfcV
+} NfcProtocolOld;
 
 typedef enum {
-    NfcDeviceSaveFormatUid,
-    NfcDeviceSaveFormatBankCard,
-    NfcDeviceSaveFormatMifareUl,
-    NfcDeviceSaveFormatMifareClassic,
-    NfcDeviceSaveFormatMifareDesfire,
-    NfcDeviceSaveFormatNfcV,
-} NfcDeviceSaveFormat;
+    NfcDeviceOldSaveFormatUid,
+    NfcDeviceOldSaveFormatBankCard,
+    NfcDeviceOldSaveFormatMifareUl,
+    NfcDeviceOldSaveFormatMifareClassic,
+    NfcDeviceOldSaveFormatMifareDesfire,
+    NfcDeviceOldSaveFormatNfcV,
+} NfcDeviceOldSaveFormat;
 
 typedef struct {
     uint8_t data[NFC_READER_DATA_MAX_SIZE];
@@ -64,7 +64,7 @@ typedef enum {
 
 typedef struct {
     FuriHalNfcDevData nfc_data;
-    NfcProtocol protocol;
+    NfcProtocolOld protocol;
     NfcReadMode read_mode;
     union {
         NfcReaderRequestData reader_data;
@@ -79,47 +79,50 @@ typedef struct {
         NfcVData nfcv_data;
     };
     FuriString* parsed_data;
-} NfcDeviceData;
+} NfcDeviceOldDataOld;
 
 typedef struct {
     Storage* storage;
     DialogsApp* dialogs;
-    NfcDeviceData dev_data;
+    NfcDeviceOldDataOld dev_data;
     char dev_name[NFC_DEV_NAME_MAX_LEN + 1];
     FuriString* load_path;
     FuriString* folder;
-    NfcDeviceSaveFormat format;
+    NfcDeviceOldSaveFormat format;
     bool shadow_file_exist;
 
     NfcLoadingCallback loading_cb;
     void* loading_cb_ctx;
-} NfcDevice;
+} NfcDeviceOld;
 
-NfcDevice* nfc_device_alloc();
+NfcDeviceOld* nfc_device_old_alloc();
 
-void nfc_device_free(NfcDevice* nfc_dev);
+void nfc_device_old_free(NfcDeviceOld* nfc_dev);
 
-void nfc_device_set_name(NfcDevice* dev, const char* name);
+void nfc_device_old_set_name(NfcDeviceOld* dev, const char* name);
 
-bool nfc_device_save(NfcDevice* dev, const char* dev_name);
+bool nfc_device_old_save(NfcDeviceOld* dev, const char* dev_name);
 
-bool nfc_device_save_shadow(NfcDevice* dev, const char* dev_name);
+bool nfc_device_old_save_shadow(NfcDeviceOld* dev, const char* dev_name);
 
-bool nfc_device_load(NfcDevice* dev, const char* file_path, bool show_dialog);
+bool nfc_device_old_load(NfcDeviceOld* dev, const char* file_path, bool show_dialog);
 
-bool nfc_device_load_key_cache(NfcDevice* dev);
+bool nfc_device_old_load_key_cache(NfcDeviceOld* dev);
 
-bool nfc_file_select(NfcDevice* dev);
+bool nfc_file_select(NfcDeviceOld* dev);
 
-void nfc_device_data_clear(NfcDeviceData* dev);
+void nfc_device_old_data_clear(NfcDeviceOldDataOld* dev);
 
-void nfc_device_clear(NfcDevice* dev);
+void nfc_device_old_clear(NfcDeviceOld* dev);
 
-bool nfc_device_delete(NfcDevice* dev, bool use_load_path);
+bool nfc_device_old_delete(NfcDeviceOld* dev, bool use_load_path);
 
-bool nfc_device_restore(NfcDevice* dev, bool use_load_path);
+bool nfc_device_old_restore(NfcDeviceOld* dev, bool use_load_path);
 
-void nfc_device_set_loading_callback(NfcDevice* dev, NfcLoadingCallback callback, void* context);
+void nfc_device_old_set_loading_callback(
+    NfcDeviceOld* dev,
+    NfcLoadingCallback callback,
+    void* context);
 
 #ifdef __cplusplus
 }

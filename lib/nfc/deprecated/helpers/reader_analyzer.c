@@ -183,15 +183,15 @@ void reader_analyzer_set_callback(
     instance->context = context;
 }
 
-NfcProtocol
+NfcProtocolOld
     reader_analyzer_guess_protocol(ReaderAnalyzer* instance, uint8_t* buff_rx, uint16_t len) {
     furi_assert(instance);
     furi_assert(buff_rx);
     UNUSED(len);
-    NfcProtocol protocol = NfcDeviceProtocolUnknown;
+    NfcProtocolOld protocol = NfcDeviceOldProtocolUnknown;
 
     if((buff_rx[0] == 0x60) || (buff_rx[0] == 0x61)) {
-        protocol = NfcDeviceProtocolMifareClassic;
+        protocol = NfcDeviceOldProtocolMifareClassic;
     }
 
     return protocol;

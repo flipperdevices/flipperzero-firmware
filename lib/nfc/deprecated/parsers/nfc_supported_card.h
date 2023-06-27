@@ -2,7 +2,7 @@
 
 #include <furi_hal_nfc.h>
 #include "../nfc_worker.h"
-#include "../nfc_device.h"
+#include "../nfc_device_old.h"
 
 typedef enum {
     NfcSupportedCardTypePlantain,
@@ -20,10 +20,10 @@ typedef bool (*NfcSupportedCardVerify)(NfcWorker* nfc_worker, FuriHalNfcTxRxCont
 
 typedef bool (*NfcSupportedCardRead)(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx);
 
-typedef bool (*NfcSupportedCardParse)(NfcDeviceData* dev_data);
+typedef bool (*NfcSupportedCardParse)(NfcDeviceOldDataOld* dev_data);
 
 typedef struct {
-    NfcProtocol protocol;
+    NfcProtocolOld protocol;
     NfcSupportedCardVerify verify;
     NfcSupportedCardRead read;
     NfcSupportedCardParse parse;
@@ -31,7 +31,7 @@ typedef struct {
 
 extern NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd];
 
-bool nfc_supported_card_verify_and_parse(NfcDeviceData* dev_data);
+bool nfc_supported_card_verify_and_parse(NfcDeviceOldDataOld* dev_data);
 
 // stub_parser_verify_read does nothing, and always reports that it does not
 // support the card. This is needed for DESFire card parsers which can't

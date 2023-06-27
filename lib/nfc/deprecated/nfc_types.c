@@ -14,14 +14,14 @@ const char* nfc_get_dev_type(FuriHalNfcType type) {
     }
 }
 
-const char* nfc_guess_protocol(NfcProtocol protocol) {
-    if(protocol == NfcDeviceProtocolEMV) {
+const char* nfc_guess_protocol(NfcProtocolOld protocol) {
+    if(protocol == NfcDeviceOldProtocolEMV) {
         return "EMV bank card";
-    } else if(protocol == NfcDeviceProtocolMifareUl) {
+    } else if(protocol == NfcDeviceOldProtocolMifareUl) {
         return "Mifare Ultral/NTAG";
-    } else if(protocol == NfcDeviceProtocolMifareClassic) {
+    } else if(protocol == NfcDeviceOldProtocolMifareClassic) {
         return "Mifare Classic";
-    } else if(protocol == NfcDeviceProtocolMifareDesfire) {
+    } else if(protocol == NfcDeviceOldProtocolMifareDesfire) {
         return "Mifare DESFire";
     } else {
         return "Unrecognized";
