@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,32.0,,
+Version,+,33.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2076,11 +2076,6 @@ Function,+,nfca_get_uid,const uint8_t*,"const NfcaData*, size_t*"
 Function,+,nfca_is_equal,_Bool,"const NfcaData*, const NfcaData*"
 Function,+,nfca_load,_Bool,"NfcaData*, FlipperFormat*, uint32_t"
 Function,+,nfca_load_data,_Bool,"NfcaData*, FlipperFormat*, uint32_t"
-Function,-,nfca_poller_alloc,NfcaPoller*,Nfc*
-Function,-,nfca_poller_free,void,NfcaPoller*
-Function,+,nfca_poller_get_data,const NfcaData*,NfcaPoller*
-Function,-,nfca_poller_start,NfcaError,"NfcaPoller*, NfcaPollerEventCallback, void*"
-Function,-,nfca_poller_stop,NfcaError,NfcaPoller*
 Function,+,nfca_reset,void,NfcaData*
 Function,+,nfca_save,_Bool,"const NfcaData*, FlipperFormat*, uint32_t"
 Function,+,nfca_save_data,_Bool,"const NfcaData*, FlipperFormat*, uint32_t"

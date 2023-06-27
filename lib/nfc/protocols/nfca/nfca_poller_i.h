@@ -60,6 +60,8 @@ struct NfcaPoller {
     void* context;
 };
 
+const NfcaData* nfca_poller_get_data(NfcaPoller* instance);
+
 NfcaError nfca_poller_config(NfcaPoller* instance);
 
 NfcaError nfca_poller_reset(NfcaPoller* instance);

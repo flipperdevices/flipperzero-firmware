@@ -36,8 +36,6 @@ typedef struct {
     MfUltralightPollerEventData* data;
 } MfUltralightPollerEvent;
 
-const MfUltralightData* mf_ultralight_poller_get_data(MfUltralightPoller* instance);
-
 #ifdef __cplusplus
 }
 #endif

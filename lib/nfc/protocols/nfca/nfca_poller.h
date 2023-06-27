@@ -25,8 +25,6 @@ typedef struct {
     NfcaPollerEventData* data;
 } NfcaPollerEvent;
 
-const NfcaData* nfca_poller_get_data(NfcaPoller* instance);
-
 #ifdef __cplusplus
 }
 #endif
