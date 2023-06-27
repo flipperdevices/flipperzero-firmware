@@ -425,7 +425,7 @@ void furi_hal_nfc_ll_poll();
 
 void furi_hal_nfc_check_vield_start();
 
-bool furi_hal_nfc_check_is_vield();
+bool furi_hal_nfc_check_is_field();
 
 #ifdef __cplusplus
 }

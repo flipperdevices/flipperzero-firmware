@@ -29,7 +29,7 @@ bool nfc_rfid_detector_app_field_presence_is_nfc(NfcRfidDetectorApp* app) {
     furi_assert(app);
 
     // check if the field presence is nfc
-    return furi_hal_nfc_check_is_vield();
+    return furi_hal_nfc_check_is_field();
 }
 
 bool nfc_rfid_detector_app_field_presence_is_rfid(NfcRfidDetectorApp* app, uint32_t* frequency) {
