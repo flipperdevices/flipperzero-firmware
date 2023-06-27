@@ -31,13 +31,15 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0625-1147-0.85.3-4f7f5a5](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-25 11:47 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-25 11:47 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-27 09:30 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-27 09:30 EST`
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - OFW PR: [LF-RFID debug: make it work #2793 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2793)
 - Added: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 - RFID: [3 new T5577 extra actions: Set/clear custom pw; write block; wipe #678 (By plgcoder)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/678)
-- OFW: Loader Refactor Coming Soon
+- OFW: [Fix MLIB usage #2762 (By P-p-H-d)](https://github.com/flipperdevices/flipperzero-firmware/pull/2762)
+- OFW: [fix: make dialog_file_browser_set_basic_options initialize all fields #2756 (By JarvisCraft)](https://github.com/flipperdevices/flipperzero-firmware/pull/2756)
+- OFW: [Scroll acceleration #2784 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2784)
 
 <a name="release">
 
