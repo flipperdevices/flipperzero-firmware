@@ -1,7 +1,7 @@
 #include "nfc_rpc_i.h"
 
 #include "assets/compiled/nfca.pb.h"
-#include <lib/nfc/protocols/nfca/nfca_poller.h>
+#include <nfc/protocols/nfca/nfca_poller_sync_api.h>
 
 #define TAG "NfcRpcNfca"
 
@@ -49,7 +49,7 @@ static void nfc_rpc_nfca_read(Nfc_Main* cmd, void* context) {
     PB_Nfca_ReadResponse pb_nfca_read_resp = PB_Nfca_ReadResponse_init_default;
 
     NfcaData nfca_data = {};
-    NfcaError error = nfca_poller_read(instance->nfca_poller, &nfca_data);
+    NfcaError error = nfca_poller_read(instance->nfc, &nfca_data);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_read_resp_tag;
@@ -64,8 +64,6 @@ static void nfc_rpc_nfca_read(Nfc_Main* cmd, void* context) {
         pb_nfca_read_resp.atqa.size = sizeof(nfca_data.atqa);
     }
     cmd->content.nfca_read_resp = pb_nfca_read_resp;
-
-    nfca_poller_stop(instance->nfca_poller);
 }
 
 static void nfc_rpc_nfca_emulate_start(Nfc_Main* cmd, void* context) {

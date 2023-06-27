@@ -43,11 +43,6 @@ NfcaError nfca_poller_start(NfcaPoller* instance, NfcaPollerEventCallback callba
 
 NfcaError nfca_poller_stop(NfcaPoller* instance);
 
-// Sync call
-NfcaError nfca_poller_read(NfcaPoller* instance, NfcaData* nfca_data);
-
-NfcaError nfca_poller_read_new(Nfc* nfc, NfcaData* nfca_data);
-
 #ifdef __cplusplus
 }
 #endif

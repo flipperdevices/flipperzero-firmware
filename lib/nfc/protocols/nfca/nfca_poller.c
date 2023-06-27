@@ -4,15 +4,6 @@
 
 #define TAG "NFCA"
 
-#define NFCA_POLLER_FLAG_COMMAND_COMPLETE (1UL << 0)
-
-typedef struct {
-    NfcaPoller* instance;
-    FuriThreadId thread_id;
-    NfcaError error;
-    NfcaData data;
-} NfcaPollerContext;
-
 NfcaPoller* nfca_poller_alloc(Nfc* nfc) {
     furi_assert(nfc);
 
@@ -133,64 +124,4 @@ NfcaError nfca_poller_stop(NfcaPoller* instance) {
     nfca_free(instance->data);
 
     return error;
-}
-
-static NfcaPollerCommand nfca_poller_sync_callback(NfcaPollerEvent event, void* context) {
-    NfcaPollerContext* nfca_poller_context = context;
-    nfca_poller_context->error = event.data.error;
-    furi_thread_flags_set(nfca_poller_context->thread_id, NFCA_POLLER_FLAG_COMMAND_COMPLETE);
-
-    return NfcaPollerCommandStop;
-}
-
-NfcaError nfca_poller_read(NfcaPoller* instance, NfcaData* nfca_data) {
-    furi_assert(instance);
-
-    NfcaPollerContext context = {};
-    context.instance = instance;
-    context.thread_id = furi_thread_get_current_id();
-    nfca_poller_start(instance, nfca_poller_sync_callback, &context);
-    furi_thread_flags_wait(NFCA_POLLER_FLAG_COMMAND_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
-    furi_thread_flags_clear(NFCA_POLLER_FLAG_COMMAND_COMPLETE);
-    if(context.error == NfcaErrorNone) {
-        nfca_copy(nfca_data, instance->data);
-    }
-    nfc_stop(instance->nfc);
-
-    return context.error;
-}
-
-NfcCommand nfca_poller_read_new_callback(NfcPollerEvent event, void* context) {
-    furi_assert(event.poller);
-    furi_assert(event.data);
-    furi_assert(context);
-
-    NfcaPollerContext* nfca_poller_context = context;
-    NfcaPoller* nfca_poller = event.poller;
-    NfcEvent* nfc_event = event.data;
-    if(nfc_event->type == NfcEventTypePollerReady) {
-        nfca_poller_context->error =
-            nfca_poller_async_activate(nfca_poller, &nfca_poller_context->data);
-    }
-    furi_thread_flags_set(nfca_poller_context->thread_id, NFCA_POLLER_FLAG_COMMAND_COMPLETE);
-
-    return NfcCommandStop;
-}
-
-NfcaError nfca_poller_read_new(Nfc* nfc, NfcaData* nfca_data) {
-    furi_assert(nfc);
-    furi_assert(nfca_data);
-
-    // NfcaPollerContext context = {};
-    // context.thread_id = furi_thread_get_current_id();
-
-        // nfc_poller_manager_start(
-    //     poller_manager, NfcProtocolTypeIso14443_3a, nfca_poller_read_new_callback, &context);
-
-    // furi_thread_flags_wait(NFCA_POLLER_FLAG_COMMAND_COMPLETE, FuriFlagWaitAny, FuriWaitForever);
-    // furi_thread_flags_clear(NFCA_POLLER_FLAG_COMMAND_COMPLETE);
-
-    // nfc_poller_manager_stop(poller_manager);
-
-    return NfcaErrorNotPresent;
 }
