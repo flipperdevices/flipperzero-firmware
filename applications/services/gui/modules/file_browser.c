@@ -591,13 +591,16 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                 browser->view,
                 FileBrowserModel * model,
                 {
-                    if(event->key == InputKeyUp) {
-                        int32_t scroll_speed = (model->button_held_for_ticks / 5) + 1;
-
-                        if(scroll_speed > 5) {
-                            scroll_speed = 5;
+                    int32_t scroll_speed = 1;
+                    if(model->button_held_for_ticks > 5) {
+                        if(model->button_held_for_ticks % 2) {
+                            scroll_speed = 0;
+                        } else {
+                            scroll_speed = model->button_held_for_ticks > 9 ? 5 : 3;
                         }
+                    }
 
+                    if(event->key == InputKeyUp) {
                         if(model->item_idx < scroll_speed) {
                             scroll_speed = model->item_idx;
                         }
@@ -617,12 +620,6 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
 
                         model->button_held_for_ticks += 1;
                     } else if(event->key == InputKeyDown) {
-                        int32_t scroll_speed = (model->button_held_for_ticks / 5) + 1;
-
-                        if(scroll_speed > 5) {
-                            scroll_speed = 5;
-                        }
-
                         int32_t count = model->item_cnt;
 
                         if(model->item_idx + scroll_speed >= count) {

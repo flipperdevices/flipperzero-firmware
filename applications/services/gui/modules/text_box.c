@@ -139,20 +139,24 @@ static bool text_box_view_input_callback(InputEvent* event, void* context) {
     TextBox* text_box = context;
     bool consumed = false;
     if(event->type == InputTypeShort || event->type == InputTypeRepeat) {
-        text_box->button_held_for_ticks++;
-
-        uint8_t lines_to_scroll = text_box->button_held_for_ticks / 5 + 1;
-        if(lines_to_scroll > 5) {
-            lines_to_scroll = 5;
+        int32_t scroll_speed = 1;
+        if(text_box->button_held_for_ticks > 5) {
+            if(text_box->button_held_for_ticks % 2) {
+                scroll_speed = 0;
+            } else {
+                scroll_speed = text_box->button_held_for_ticks > 9 ? 5 : 3;
+            }
         }
 
         if(event->key == InputKeyDown) {
-            text_box_process_down(text_box, lines_to_scroll);
+            text_box_process_down(text_box, scroll_speed);
             consumed = true;
         } else if(event->key == InputKeyUp) {
-            text_box_process_up(text_box, lines_to_scroll);
+            text_box_process_up(text_box, scroll_speed);
             consumed = true;
         }
+
+        text_box->button_held_for_ticks++;
     } else if(event->type == InputTypeRelease) {
         text_box->button_held_for_ticks = 0;
         consumed = true;
