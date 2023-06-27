@@ -25,7 +25,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
     NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
 
-    const NfcProtocol protocol = nfc_device_get_protocol_type(nfc->nfc_device);
+    const NfcProtocol protocol = nfc_device_get_protocol(nfc->nfc_device);
 
     if(protocol == NfcProtocolIso14443_3a) {
         submenu_add_item(
@@ -77,7 +77,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
 
     if(protocol == NfcProtocolMfUltralight) {
         const MfUltralightData* mfu_data =
-            nfc_device_get_protocol_data(nfc->nfc_device, NfcProtocolMfUltralight);
+            nfc_device_get_data(nfc->nfc_device, NfcProtocolMfUltralight);
         if(!mf_ultralight_is_all_data_read(mfu_data)) {
             submenu_add_item(
                 submenu,
@@ -115,7 +115,7 @@ void nfc_scene_saved_menu_on_enter(void* context) {
 bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
     NfcApp* nfc = context;
 
-    const NfcProtocol protocol = nfc_device_get_protocol_type(nfc->nfc_device);
+    const NfcProtocol protocol = nfc_device_get_protocol(nfc->nfc_device);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {

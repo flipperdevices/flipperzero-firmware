@@ -35,10 +35,10 @@ static NfcCustomEvent
     if(event->type == MfUltralightPollerEventTypeReadSuccess) {
         custom_event = NfcCustomEventReadHandlerSuccess;
     } else if(event->type == MfUltralightPollerEventTypeAuthRequest) {
-        nfc_device_set_protocol_data(
+        nfc_device_set_data(
             nfc_app->nfc_device, NfcProtocolMfUltralight, nfc_poller_get_data(nfc_app->poller));
         const MfUltralightData* data =
-            nfc_device_get_protocol_data(nfc_app->nfc_device, NfcProtocolMfUltralight);
+            nfc_device_get_data(nfc_app->nfc_device, NfcProtocolMfUltralight);
         if(nfc_app->mf_ul_auth->type == MfUltralightAuthTypeXiaomii) {
             if(mf_ultralight_generate_xiaomi_pass(
                    nfc_app->mf_ul_auth,
@@ -101,15 +101,14 @@ NfcCustomEvent nfc_poller_handler_read(NfcPollerEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.poller);
     furi_assert(event.data);
-    furi_assert(event.protocol_type < COUNT_OF(nfc_poller_handlers_read));
+    furi_assert(event.protocol < COUNT_OF(nfc_poller_handlers_read));
 
     NfcApp* nfc_app = context;
 
-    NfcCustomEvent custom_event =
-        nfc_poller_handlers_read[event.protocol_type](event.data, context);
+    NfcCustomEvent custom_event = nfc_poller_handlers_read[event.protocol](event.data, context);
     if(custom_event == NfcCustomEventReadHandlerSuccess) {
-        nfc_device_set_protocol_data(
-            nfc_app->nfc_device, event.protocol_type, nfc_poller_get_data(nfc_app->poller));
+        nfc_device_set_data(
+            nfc_app->nfc_device, event.protocol, nfc_poller_get_data(nfc_app->poller));
     }
 
     return custom_event;

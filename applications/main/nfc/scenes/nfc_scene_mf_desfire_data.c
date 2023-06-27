@@ -24,8 +24,7 @@ void nfc_scene_mf_desfire_data_on_enter(void* context) {
 
     const uint32_t state =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireData);
-    const MfDesfireData* data =
-        nfc_device_get_protocol_data(nfc->nfc_device, NfcProtocolMfDesfire);
+    const MfDesfireData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolMfDesfire);
 
     text_box_set_font(nfc->text_box, TextBoxFontHex);
 
@@ -68,8 +67,7 @@ bool nfc_scene_mf_desfire_data_on_event(void* context, SceneManagerEvent event) 
 
     const uint32_t state =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireData);
-    const MfDesfireData* data =
-        nfc_device_get_protocol_data(nfc->nfc_device, NfcProtocolMfDesfire);
+    const MfDesfireData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolMfDesfire);
 
     if(event.type == SceneManagerEventTypeCustom) {
         TextBox* text_box = nfc->text_box;

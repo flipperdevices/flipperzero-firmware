@@ -98,7 +98,7 @@ static NfcCommand nfc_poller_start_callback(NfcEvent event, void* context) {
 
     NfcCommand command = NfcCommandContinue;
     NfcPollerEvent poller_event = {
-        .protocol_type = NfcProtocolInvalid,
+        .protocol = NfcProtocolInvalid,
         .poller = instance->nfc,
         .data = &event,
     };
@@ -156,7 +156,7 @@ static NfcCommand nfc_poller_detect_callback(NfcEvent event, void* context) {
 
     NfcCommand command = NfcCommandContinue;
     NfcPollerEvent poller_event = {
-        .protocol_type = NfcProtocolInvalid,
+        .protocol = NfcProtocolInvalid,
         .poller = instance->nfc,
         .data = &event,
     };

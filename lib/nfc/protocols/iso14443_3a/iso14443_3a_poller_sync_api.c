@@ -18,7 +18,7 @@ NfcCommand iso14443_3a_poller_read_callback(NfcPollerEvent event, void* context)
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.poller);
-    furi_assert(event.protocol_type == NfcProtocolIso14443_3a);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     Iso14443_3aPollerContext* poller_context = context;
     Iso14443_3aPoller* iso14443_3a_poller = event.poller;

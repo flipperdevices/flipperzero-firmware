@@ -59,7 +59,7 @@ static const MfClassicPollerCmdHandler mf_classic_poller_cmd_handlers[MfClassicP
 
 static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* context) {
     furi_assert(event.poller);
-    furi_assert(event.protocol_type == NfcProtocolIso14443_3a);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(event.data);
     furi_assert(context);
 

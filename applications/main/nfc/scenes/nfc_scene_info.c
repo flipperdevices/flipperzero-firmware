@@ -49,8 +49,8 @@ bool nfc_scene_info_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeRight) {
-            const NfcProtocol protocol_type = nfc_device_get_protocol_type(nfc->nfc_device);
-            const NfcScene menu_scene = nfc_scene_info_data_scenes[protocol_type];
+            const NfcProtocol protocol = nfc_device_get_protocol(nfc->nfc_device);
+            const NfcScene menu_scene = nfc_scene_info_data_scenes[protocol];
             scene_manager_next_scene(nfc->scene_manager, menu_scene);
             consumed = true;
         }

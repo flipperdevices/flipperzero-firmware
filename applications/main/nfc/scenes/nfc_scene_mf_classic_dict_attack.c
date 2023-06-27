@@ -13,7 +13,7 @@ NfcCommand nfc_dict_attack_worker_callback(NfcPollerEvent event, void* context) 
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.poller);
-    furi_assert(event.protocol_type == NfcProtocolMfClassic);
+    furi_assert(event.protocol == NfcProtocolMfClassic);
 
     NfcCommand command = NfcCommandContinue;
     MfClassicPollerEvent* mfc_event = event.data;
@@ -81,8 +81,7 @@ void nfc_dict_attack_dict_attack_result_callback(void* context) {
 }
 
 static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* nfc) {
-    const MfClassicData* data =
-        nfc_device_get_protocol_data(nfc->nfc_device, NfcProtocolMfClassic);
+    const MfClassicData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolMfClassic);
     uint8_t sectors_read = 0;
     uint8_t keys_found = 0;
 
@@ -93,8 +92,7 @@ static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* nfc) {
 }
 
 static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* nfc, DictAttackState state) {
-    const MfClassicData* data =
-        nfc_device_get_protocol_data(nfc->nfc_device, NfcProtocolMfClassic);
+    const MfClassicData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolMfClassic);
 
     // Identify scene state
     if(state == DictAttackStateIdle) {
@@ -168,13 +166,13 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             dict_attack_inc_keys_found(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackNewSector) {
-            nfc_device_set_protocol_data(
+            nfc_device_set_data(
                 nfc->nfc_device, NfcProtocolMfClassic, nfc_poller_get_data(nfc->poller));
             nfc_scene_mf_classic_dict_attack_update_view(nfc);
             dict_attack_inc_current_sector(nfc->dict_attack);
             consumed = true;
         } else if(event.event == NfcCustomEventDictAttackNewKeyBatch) {
-            nfc_device_set_protocol_data(
+            nfc_device_set_data(
                 nfc->nfc_device, NfcProtocolMfClassic, nfc_poller_get_data(nfc->poller));
             nfc_scene_mf_classic_dict_attack_update_view(nfc);
             dict_attack_inc_current_dict_key(nfc->dict_attack, 10);

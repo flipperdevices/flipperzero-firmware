@@ -24,7 +24,7 @@ MfClassicPoller* mf_classic_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller) 
 
     instance->mfc_event.data = &instance->mfc_event_data;
 
-    instance->general_event.protocol_type = NfcProtocolMfClassic;
+    instance->general_event.protocol = NfcProtocolMfClassic;
     instance->general_event.data = &instance->mfc_event;
     instance->general_event.poller = instance;
 
@@ -280,7 +280,7 @@ static const MfClassicPollerReadHandler
 
 NfcCommand mf_classsic_poller_run(NfcPollerEvent event, void* context) {
     furi_assert(event.data);
-    furi_assert(event.protocol_type == NfcProtocolIso14443_3a);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(context);
 
     MfClassicPoller* instance = context;
@@ -305,7 +305,7 @@ NfcCommand mf_classsic_poller_run(NfcPollerEvent event, void* context) {
 
 bool mf_classsic_poller_detect(NfcPollerEvent event, void* context) {
     furi_assert(event.data);
-    furi_assert(event.protocol_type == NfcProtocolIso14443_3a);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(context);
 
     return false;

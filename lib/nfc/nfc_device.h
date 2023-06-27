@@ -20,25 +20,24 @@ void nfc_device_clear(NfcDevice* instance);
 
 void nfc_device_reset(NfcDevice* instance);
 
-NfcProtocol nfc_device_get_protocol_type(const NfcDevice* instance);
+NfcProtocol nfc_device_get_protocol(const NfcDevice* instance);
 
-const NfcDeviceData*
-    nfc_device_get_protocol_data(const NfcDevice* instance, NfcProtocol protocol_type);
+const NfcDeviceData* nfc_device_get_data(const NfcDevice* instance, NfcProtocol protocol);
 
 const char* nfc_device_get_protocol_name(NfcProtocol protocol);
 
-const char* nfc_device_get_device_name(const NfcDevice* instance, NfcDeviceNameType name_type);
+const char* nfc_device_get_name(const NfcDevice* instance, NfcDeviceNameType name_type);
 
 const uint8_t* nfc_device_get_uid(const NfcDevice* instance, size_t* uid_len);
 
-void nfc_device_set_protocol_data(
+void nfc_device_set_data(
     NfcDevice* instance,
-    NfcProtocol protocol_type,
+    NfcProtocol protocol,
     const NfcDeviceData* protocol_data);
 
-void nfc_device_copy_protocol_data(
+void nfc_device_copy_data(
     const NfcDevice* instance,
-    NfcProtocol protocol_type,
+    NfcProtocol protocol,
     NfcDeviceData* protocol_data);
 
 void nfc_device_set_loading_callback(

@@ -12,7 +12,7 @@ typedef void NfcPollerInstance;
 typedef void NfcPollerEventData;
 
 typedef struct {
-    NfcProtocol protocol_type;
+    NfcProtocol protocol;
     NfcPollerInstance* poller;
     NfcPollerEventData* data;
 } NfcPollerEvent;
