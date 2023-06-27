@@ -18,7 +18,7 @@ NfcCommand iso14443_3a_poller_read_callback(NfcPollerEvent event, void* context)
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.poller);
-    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
+    furi_assert(event.protocol_type == NfcProtocolIso14443_3a);
 
     Iso14443_3aPollerContext* poller_context = context;
     Iso14443_3aPoller* iso14443_3a_poller = event.poller;
@@ -41,7 +41,7 @@ Iso14443_3aError iso14443_3a_poller_read(Nfc* nfc, Iso14443_3aData* iso14443_3a_
     Iso14443_3aPollerContext poller_context = {};
     poller_context.thread_id = furi_thread_get_current_id();
 
-    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolTypeIso14443_3a);
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolIso14443_3a);
     nfc_poller_start(poller, iso14443_3a_poller_read_callback, &poller_context);
     furi_thread_flags_wait(
         ISO14443_3A_POLLER_FLAG_COMMAND_COMPLETE, FuriFlagWaitAny, FuriWaitForever);

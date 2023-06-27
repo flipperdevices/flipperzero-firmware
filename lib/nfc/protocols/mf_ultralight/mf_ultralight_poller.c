@@ -177,7 +177,7 @@ MfUltralightPoller* mf_ultralight_poller_alloc(Iso14443_3aPoller* iso14443_3a_po
 
     instance->mfu_event.data = &instance->mfu_event_data;
 
-    instance->general_event.protocol_type = NfcProtocolTypeMfUltralight;
+    instance->general_event.protocol_type = NfcProtocolMfUltralight;
     instance->general_event.data = &instance->mfu_event;
     instance->general_event.poller = instance;
 
@@ -267,7 +267,7 @@ static NfcCommand mf_ultralight_poller_handler_get_feature_set(MfUltralightPolle
     FURI_LOG_D(
         TAG,
         "%s detected. Total pages: %d",
-        mf_ultralight_get_device_name(instance->data, NfcProtocolNameTypeFull),
+        mf_ultralight_get_device_name(instance->data, NfcDeviceNameTypeFull),
         instance->pages_total);
 
     instance->state = MfUltralightPollerStateReadSignature;
@@ -494,7 +494,7 @@ static const MfUltralightPollerReadHandler
 static NfcCommand mf_ultralight_poller_run(NfcPollerEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
-    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
+    furi_assert(event.protocol_type == NfcProtocolIso14443_3a);
 
     MfUltralightPoller* instance = context;
     furi_assert(instance->callback);
@@ -516,7 +516,7 @@ static NfcCommand mf_ultralight_poller_run(NfcPollerEvent event, void* context) 
 static bool mf_ultralight_poller_detect(NfcPollerEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
-    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
+    furi_assert(event.protocol_type == NfcProtocolIso14443_3a);
 
     bool protocol_detected = false;
     MfUltralightPoller* instance = context;

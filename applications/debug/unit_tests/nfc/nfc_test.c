@@ -2,7 +2,7 @@
 #include <furi_hal.h>
 #include <storage/storage.h>
 
-#include <lib/nfc/nfc_dev.h>
+#include <lib/nfc/nfc_device.h>
 #include <lib/nfc/helpers/nfc_data_generator.h>
 
 #include <lib/nfc/nfc.h>
@@ -15,7 +15,7 @@
 
 #define TAG "NfcTest"
 
-#define NFC_TEST_NFC_DEV_PATH EXT_PATH("unit_tests/nfc/nfc_dev_test.nfc")
+#define NFC_TEST_NFC_DEV_PATH EXT_PATH("unit_tests/nfc/nfc_device_test.nfc")
 
 typedef struct {
     Storage* storage;
@@ -37,51 +37,52 @@ static void nfc_test_free() {
 }
 
 static void nfc_test_save_and_load(NfcDevData* data) {
-    NfcDev* nfc_dev = nfc_dev_alloc();
+    NfcDevice* nfc_device = nfc_device_alloc();
 
-    NfcDevData* nfc_dev_data_dut = malloc(sizeof(NfcDevData));
-
-    mu_assert(nfc_dev_save(nfc_dev, data, NFC_TEST_NFC_DEV_PATH), "nfc_dev_save() failed\r\n");
+    NfcDevData* nfc_device_data_dut = malloc(sizeof(NfcDevData));
 
     mu_assert(
-        nfc_dev_load(nfc_dev, nfc_dev_data_dut, NFC_TEST_NFC_DEV_PATH),
-        "nfc_dev_load() failed\r\n");
+        nfc_device_save(nfc_device, data, NFC_TEST_NFC_DEV_PATH), "nfc_device_save() failed\r\n");
 
     mu_assert(
-        memcmp(nfc_dev_data_dut, data, sizeof(NfcDevData)) == 0,
-        "nfc_dev_data_dut != nfc_dev_data_ref\r\n");
+        nfc_device_load(nfc_device, nfc_device_data_dut, NFC_TEST_NFC_DEV_PATH),
+        "nfc_device_load() failed\r\n");
+
+    mu_assert(
+        memcmp(nfc_device_data_dut, data, sizeof(NfcDevData)) == 0,
+        "nfc_device_data_dut != nfc_device_data_ref\r\n");
 
     mu_assert(
         storage_simply_remove(nfc_test->storage, NFC_TEST_NFC_DEV_PATH),
         "storage_simply_remove() failed\r\n");
 
-    free(nfc_dev_data_dut);
-    nfc_dev_free(nfc_dev);
+    free(nfc_device_data_dut);
+    nfc_device_free(nfc_device);
 }
 
 static void nfca_file_test(uint8_t uid_len) {
-    NfcDevData* nfc_dev_data_ref = malloc(sizeof(NfcDevData));
-    mu_assert(nfc_dev_data_ref != NULL, "malloc() failed\r\n");
+    NfcDevData* nfc_device_data_ref = malloc(sizeof(NfcDevData));
+    mu_assert(nfc_device_data_ref != NULL, "malloc() failed\r\n");
 
-    NfcaData* data = &nfc_dev_data_ref->nfca_data;
+    NfcaData* data = &nfc_device_data_ref->nfca_data;
 
     data->uid_len = uid_len;
     furi_hal_random_fill_buf(data->uid, uid_len);
     furi_hal_random_fill_buf(data->atqa, 2);
     furi_hal_random_fill_buf(&data->sak, 1);
 
-    nfc_test_save_and_load(nfc_dev_data_ref);
+    nfc_test_save_and_load(nfc_device_data_ref);
 
-    free(nfc_dev_data_ref);
+    free(nfc_device_data_ref);
 }
 
 static void nfc_file_test_with_generator(NfcDataGeneratorType type) {
-    NfcDevData* nfc_dev_data_ref = malloc(sizeof(NfcDevData));
+    NfcDevData* nfc_device_data_ref = malloc(sizeof(NfcDevData));
 
-    nfc_data_generator_fill_data(type, nfc_dev_data_ref);
-    nfc_test_save_and_load(nfc_dev_data_ref);
+    nfc_data_generator_fill_data(type, nfc_device_data_ref);
+    nfc_test_save_and_load(nfc_device_data_ref);
 
-    free(nfc_dev_data_ref);
+    free(nfc_device_data_ref);
 }
 
 MU_TEST(nfca_4b_file_test) {
@@ -203,7 +204,7 @@ MU_TEST(nfca_reader) {
 
 static void mf_ultralight_reader_test(const char* path) {
     FURI_LOG_I(TAG, "Testing file: %s", path);
-    NfcDev* nfc_dev = nfc_dev_alloc();
+    NfcDevice* nfc_device = nfc_device_alloc();
     Nfc* poller = nfc_alloc();
     Nfc* listener = nfc_alloc();
 
@@ -216,7 +217,7 @@ static void mf_ultralight_reader_test(const char* path) {
     MfUltralightError error = MfUltralightErrorNone;
     NfcDevData* dev_data = malloc(sizeof(NfcDevData));
 
-    mu_assert(nfc_dev_load(nfc_dev, dev_data, path), "nfc_dev_load() failed\r\n");
+    mu_assert(nfc_device_load(nfc_device, dev_data, path), "nfc_device_load() failed\r\n");
 
     error = mf_ultralight_listener_start(mfu_listener, &dev_data->mf_ul_data, NULL, NULL);
     mu_assert(error == MfUltralightErrorNone, "mf_ultralight_listener_start() failed");
@@ -240,7 +241,7 @@ static void mf_ultralight_reader_test(const char* path) {
     nfc_free(listener);
     nfca_poller_free(nfca_poller);
     nfc_free(poller);
-    nfc_dev_free(nfc_dev);
+    nfc_device_free(nfc_device);
 }
 
 MU_TEST(mf_ultralight_11_reader) {
@@ -261,7 +262,7 @@ MU_TEST(ntag_216_reader) {
 
 MU_TEST(ntag_213_locked_reader) {
     FURI_LOG_I(TAG, "Testing Ntag215 locked file");
-    NfcDev* nfc_dev = nfc_dev_alloc();
+    NfcDevice* nfc_device = nfc_device_alloc();
     Nfc* poller = nfc_alloc();
     Nfc* listener = nfc_alloc();
 
@@ -275,8 +276,8 @@ MU_TEST(ntag_213_locked_reader) {
     NfcDevData* dev_data = malloc(sizeof(NfcDevData));
 
     mu_assert(
-        nfc_dev_load(nfc_dev, dev_data, EXT_PATH("unit_tests/nfc/Ntag213_locked.nfc")),
-        "nfc_dev_load() failed\r\n");
+        nfc_device_load(nfc_device, dev_data, EXT_PATH("unit_tests/nfc/Ntag213_locked.nfc")),
+        "nfc_device_load() failed\r\n");
 
     error = mf_ultralight_listener_start(mfu_listener, &dev_data->mf_ul_data, NULL, NULL);
     mu_assert(error == MfUltralightErrorNone, "mf_ultralight_listener_start() failed");
@@ -304,11 +305,11 @@ MU_TEST(ntag_213_locked_reader) {
     nfc_free(listener);
     nfca_poller_free(nfca_poller);
     nfc_free(poller);
-    nfc_dev_free(nfc_dev);
+    nfc_device_free(nfc_device);
 }
 
 static void mf_ultralight_write() {
-    NfcDev* nfc_dev = nfc_dev_alloc();
+    NfcDevice* nfc_device = nfc_device_alloc();
     Nfc* poller = nfc_alloc();
     Nfc* listener = nfc_alloc();
 
@@ -366,7 +367,7 @@ static void mf_ultralight_write() {
     nfc_free(listener);
     nfca_poller_free(nfca_poller);
     nfc_free(poller);
-    nfc_dev_free(nfc_dev);
+    nfc_device_free(nfc_device);
 }
 
 MU_TEST_SUITE(nfc) {

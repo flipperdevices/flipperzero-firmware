@@ -27,7 +27,8 @@ void nfc_scene_mf_desfire_app_on_enter(void* context) {
     const uint32_t app_idx =
         scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireApp) >> 1;
 
-    const MfDesfireData* data = nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfDesfire);
+    const MfDesfireData* data =
+        nfc_device_get_protocol_data(nfc->nfc_device, NfcProtocolMfDesfire);
     const MfDesfireApplication* app = simple_array_cget(data->applications, app_idx);
 
     FuriString* label = furi_string_alloc();
@@ -60,7 +61,7 @@ bool nfc_scene_mf_desfire_app_on_event(void* context, SceneManagerEvent event) {
             consumed = scene_manager_previous_scene(nfc->scene_manager);
         } else {
             const MfDesfireData* data =
-                nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfDesfire);
+                nfc_device_get_protocol_data(nfc->nfc_device, NfcProtocolMfDesfire);
 
             const uint32_t app_index =
                 scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfDesfireApp) >> 1;

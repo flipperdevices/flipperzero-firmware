@@ -49,7 +49,7 @@
 #include <nfc/nfc_poller.h>
 #include <nfc/nfc_scanner.h>
 
-#include <lib/nfc/nfc_dev.h>
+#include <lib/nfc/nfc_device.h>
 #include <lib/nfc/helpers/nfc_data_generator.h>
 
 #include <gui/modules/validators.h>
@@ -90,7 +90,7 @@ struct NfcApp {
 
     size_t protocols_detected_num;
     size_t protocols_detected_idx;
-    NfcProtocolType protocols_detected[NfcProtocolTypeMax];
+    NfcProtocol protocols_detected[NfcProtocolNum];
 
     void* rpc_ctx;
     NfcRpcState rpc_state;
@@ -119,7 +119,7 @@ struct NfcApp {
     FuriString* parsed_data;
     NfcSupportedCards* supported_cards;
 
-    NfcDev* nfc_dev;
+    NfcDevice* nfc_device;
     Iso14443_3aData* iso14443_3a_edit_data;
     FuriString* file_path;
     FuriString* file_name;
@@ -170,6 +170,6 @@ bool nfc_save_file(NfcApp* instance, FuriString* path);
 
 void nfc_make_app_folder(NfcApp* instance);
 
-void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocolType* types, uint32_t count);
+void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocol* types, uint32_t count);
 
 void nfc_app_reset_detected_protocols(NfcApp* instance);

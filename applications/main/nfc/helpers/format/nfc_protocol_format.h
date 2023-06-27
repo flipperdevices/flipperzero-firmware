@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nfc/nfc_dev.h>
+#include <nfc/nfc_device.h>
 
 typedef enum {
     NfcProtocolFormatFeatureNone = 0,
@@ -12,6 +12,6 @@ typedef enum {
     NfcProtocolFormatTypeFull,
 } NfcProtocolFormatType;
 
-NfcProtocolFormatFeature nfc_protocol_format_get_features(const NfcDev* device);
+NfcProtocolFormatFeature nfc_protocol_format_get_features(const NfcDevice* device);
 
-void nfc_protocol_format_info(const NfcDev* device, NfcProtocolFormatType type, FuriString* str);
+void nfc_protocol_format_info(const NfcDevice* device, NfcProtocolFormatType type, FuriString* str);

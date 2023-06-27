@@ -17,7 +17,7 @@ void nfc_scene_read_success_on_enter(void* context) {
     Widget* widget = nfc->widget;
 
     FuriString* temp_str = furi_string_alloc();
-    nfc_protocol_format_info(nfc->nfc_dev, NfcProtocolFormatTypeShort, temp_str);
+    nfc_protocol_format_info(nfc->nfc_device, NfcProtocolFormatTypeShort, temp_str);
 
     widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);
@@ -31,12 +31,12 @@ void nfc_scene_read_success_on_enter(void* context) {
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
 }
 
-static const NfcScene nfc_scene_read_success_menu_scenes[NfcProtocolTypeMax] = {
-    [NfcProtocolTypeIso14443_3a] = NfcSceneNfcaMenu,
-    [NfcProtocolTypeIso14443_4a] = NfcSceneNotImplemented, //TODO: ISO14443-4A menu
-    [NfcProtocolTypeMfUltralight] = NfcSceneMfUltralightMenu,
-    [NfcProtocolTypeMfClassic] = NfcSceneMfUltralightMenu,
-    [NfcProtocolTypeMfDesfire] = NfcSceneMfDesfireMenu,
+static const NfcScene nfc_scene_read_success_menu_scenes[NfcProtocolNum] = {
+    [NfcProtocolIso14443_3a] = NfcSceneNfcaMenu,
+    [NfcProtocolIso14443_4a] = NfcSceneNotImplemented, //TODO: ISO14443-4A menu
+    [NfcProtocolMfUltralight] = NfcSceneMfUltralightMenu,
+    [NfcProtocolMfClassic] = NfcSceneMfUltralightMenu,
+    [NfcProtocolMfDesfire] = NfcSceneMfDesfireMenu,
 };
 
 bool nfc_scene_read_success_on_event(void* context, SceneManagerEvent event) {
@@ -49,7 +49,7 @@ bool nfc_scene_read_success_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneRetryConfirm);
             consumed = true;
         } else if(event.event == GuiButtonTypeRight) {
-            const NfcProtocolType protocol_type = nfc_dev_get_protocol_type(nfc->nfc_dev);
+            const NfcProtocol protocol_type = nfc_device_get_protocol_type(nfc->nfc_device);
             const NfcScene menu_scene = nfc_scene_read_success_menu_scenes[protocol_type];
             scene_manager_next_scene(nfc->scene_manager, menu_scene);
             consumed = true;

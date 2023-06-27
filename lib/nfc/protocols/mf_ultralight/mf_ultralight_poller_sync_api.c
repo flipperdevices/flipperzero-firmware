@@ -81,7 +81,7 @@ static const MfUltralightPollerCmdHandler
 
 static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* context) {
     furi_assert(event.poller);
-    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
+    furi_assert(event.protocol_type == NfcProtocolIso14443_3a);
     furi_assert(event.data);
     furi_assert(context);
 
@@ -110,7 +110,7 @@ static MfUltralightError
 
     poller_ctx->thread_id = furi_thread_get_current_id();
 
-    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolTypeIso14443_3a);
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolIso14443_3a);
     nfc_poller_start(poller, mf_ultralgiht_poller_cmd_callback, poller_ctx);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     furi_thread_flags_clear(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);
@@ -236,7 +236,7 @@ static NfcCommand mf_ultralight_poller_read_callback(NfcPollerEvent event, void*
     furi_assert(context);
     furi_assert(event.poller);
     furi_assert(event.data);
-    furi_assert(event.protocol_type == NfcProtocolTypeMfUltralight);
+    furi_assert(event.protocol_type == NfcProtocolMfUltralight);
 
     NfcCommand command = NfcCommandContinue;
     MfUltralightPollerContext* poller_context = context;
@@ -268,7 +268,7 @@ MfUltralightError mf_ultralight_poller_read_card(Nfc* nfc, MfUltralightData* dat
     MfUltralightPollerContext poller_context = {};
     poller_context.thread_id = furi_thread_get_current_id();
 
-    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolTypeMfUltralight);
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolMfUltralight);
     nfc_poller_start(poller, mf_ultralight_poller_read_callback, &poller_context);
     furi_thread_flags_wait(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     furi_thread_flags_clear(MF_ULTRALIGHT_POLLER_COMPLETE_EVENT);

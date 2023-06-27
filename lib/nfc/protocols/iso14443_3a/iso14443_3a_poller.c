@@ -28,7 +28,7 @@ static Iso14443_3aPoller* iso14443_3a_poller_alloc(Nfc* nfc) {
     instance->data = iso14443_3a_alloc();
 
     instance->iso14443_3a_event.data = &instance->iso14443_3a_event_data;
-    instance->general_event.protocol_type = NfcProtocolTypeIso14443_3a;
+    instance->general_event.protocol_type = NfcProtocolIso14443_3a;
     instance->general_event.data = &instance->iso14443_3a_event;
     instance->general_event.poller = instance;
 
@@ -62,7 +62,7 @@ static void iso14443_3a_poller_set_callback(
 
 static NfcCommand iso14443_3a_poller_run(NfcPollerEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.protocol_type == NfcProtocolTypeInvalid);
+    furi_assert(event.protocol_type == NfcProtocolInvalid);
     furi_assert(event.data);
 
     Iso14443_3aPoller* instance = context;
@@ -99,7 +99,7 @@ static bool iso14443_3a_poller_detect(NfcPollerEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.poller);
-    furi_assert(event.protocol_type = NfcProtocolTypeInvalid);
+    furi_assert(event.protocol_type = NfcProtocolInvalid);
 
     bool protocol_detected = false;
     Iso14443_3aPoller* instance = context;

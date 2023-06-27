@@ -49,8 +49,7 @@ bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff, uint32_t v
 
 bool iso14443_4a_is_equal(const Iso14443_4aData* data, const Iso14443_4aData* other);
 
-const char*
-    iso14443_4a_get_device_name(const Iso14443_4aData* data, NfcProtocolNameType name_type);
+const char* iso14443_4a_get_device_name(const Iso14443_4aData* data, NfcDeviceNameType name_type);
 
 const uint8_t* iso14443_4a_get_uid(const Iso14443_4aData* data, size_t* uid_len);
 

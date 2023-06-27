@@ -14,9 +14,9 @@ void nfc_scene_generate_info_on_enter(void* context) {
     NfcApp* nfc = context;
 
     Iso14443_3aData* iso14443_3a_data = NULL;
-    if(nfc_dev_get_protocol_type(nfc->nfc_dev) == NfcProtocolTypeMfUltralight) {
+    if(nfc_device_get_protocol_type(nfc->nfc_device) == NfcProtocolMfUltralight) {
         const MfUltralightData* mfu_data =
-            nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfUltralight);
+            nfc_device_get_protocol_data(nfc->nfc_device, NfcProtocolMfUltralight);
         iso14443_3a_data = mfu_data->iso14443_3a_data;
     } else {
         // TODO add Mf Classic
@@ -54,7 +54,7 @@ bool nfc_scene_generate_info_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeRight) {
             // Switch either to NfcSceneMfClassicMenu or NfcSceneMfUltralightMenu
-            if(nfc_dev_get_protocol_type(nfc->nfc_dev) == NfcProtocolTypeMfUltralight) {
+            if(nfc_device_get_protocol_type(nfc->nfc_device) == NfcProtocolMfUltralight) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightMenu);
             } else {
                 // TODO add classic

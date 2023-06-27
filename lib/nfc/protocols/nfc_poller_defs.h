@@ -7,14 +7,14 @@ extern "C" {
 #endif
 
 typedef struct {
-    NfcProtocolType parent_protocol;
+    NfcProtocol parent_protocol;
     size_t children_num;
-    const NfcProtocolType* children_protocol;
+    const NfcProtocol* children_protocol;
 } NfcPollerTreeNode;
 
-extern const NfcPollerBase* nfc_pollers_api[NfcProtocolTypeMax];
+extern const NfcPollerBase* nfc_pollers_api[NfcProtocolNum];
 
-extern const NfcPollerTreeNode nfc_poller_nodes[NfcProtocolTypeMax];
+extern const NfcPollerTreeNode nfc_poller_nodes[NfcProtocolNum];
 
 #ifdef __cplusplus
 }

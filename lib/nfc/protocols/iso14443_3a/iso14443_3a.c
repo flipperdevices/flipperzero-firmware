@@ -9,16 +9,16 @@
 
 const NfcProtocolBase nfc_protocol_iso14443_3a = {
     .protocol_name = ISO14443_3A_PROTOCOL_NAME,
-    .alloc = (NfcProtocolAlloc)iso14443_3a_alloc,
-    .free = (NfcProtocolFree)iso14443_3a_free,
-    .reset = (NfcProtocolReset)iso14443_3a_reset,
-    .copy = (NfcProtocolCopy)iso14443_3a_copy,
-    .verify = (NfcProtocolVerify)iso14443_3a_verify,
-    .load = (NfcProtocolLoad)iso14443_3a_load,
-    .save = (NfcProtocolSave)iso14443_3a_save,
-    .is_equal = (NfcProtocolEqual)iso14443_3a_is_equal,
-    .get_device_name = (NfcProtocolGetDeviceName)iso14443_3a_get_device_name,
-    .get_uid = (NfcProtocolGetUid)iso14443_3a_get_uid,
+    .alloc = (NfcDeviceAlloc)iso14443_3a_alloc,
+    .free = (NfcDeviceFree)iso14443_3a_free,
+    .reset = (NfcDeviceReset)iso14443_3a_reset,
+    .copy = (NfcDeviceCopy)iso14443_3a_copy,
+    .verify = (NfcDeviceVerify)iso14443_3a_verify,
+    .load = (NfcDeviceLoad)iso14443_3a_load,
+    .save = (NfcDeviceSave)iso14443_3a_save,
+    .is_equal = (NfcDeviceEqual)iso14443_3a_is_equal,
+    .get_name = (NfcDeviceGetName)iso14443_3a_get_device_name,
+    .get_uid = (NfcDeviceGetUid)iso14443_3a_get_uid,
 };
 
 Iso14443_3aData* iso14443_3a_alloc() {
@@ -73,8 +73,7 @@ bool iso14443_3a_is_equal(const Iso14443_3aData* data, const Iso14443_3aData* ot
     return memcmp(data, other, sizeof(Iso14443_3aData)) == 0;
 }
 
-const char*
-    iso14443_3a_get_device_name(const Iso14443_3aData* data, NfcProtocolNameType name_type) {
+const char* iso14443_3a_get_device_name(const Iso14443_3aData* data, NfcDeviceNameType name_type) {
     UNUSED(data);
     UNUSED(name_type);
     return ISO14443_3A_DEVICE_NAME;

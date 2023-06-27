@@ -19,7 +19,7 @@ void nfc_scene_read_on_enter(void* context) {
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
-    const NfcProtocolType protocol_type =
+    const NfcProtocol protocol_type =
         instance->protocols_detected[instance->protocols_detected_idx];
     instance->poller = nfc_poller_alloc(instance->nfc, protocol_type);
     nfc_poller_start(instance->poller, nfc_scene_read_poller_callback, instance);

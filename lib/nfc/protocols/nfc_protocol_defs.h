@@ -7,19 +7,19 @@ extern "C" {
 #endif
 
 typedef enum {
-    NfcProtocolTypeIso14443_3a,
-    NfcProtocolTypeIso14443_4a,
-    NfcProtocolTypeMfUltralight,
-    NfcProtocolTypeMfClassic,
-    NfcProtocolTypeMfDesfire,
+    NfcProtocolIso14443_3a,
+    NfcProtocolIso14443_4a,
+    NfcProtocolMfUltralight,
+    NfcProtocolMfClassic,
+    NfcProtocolMfDesfire,
     /* Add new protocols here */
 
-    NfcProtocolTypeMax,
+    NfcProtocolNum,
 
-    NfcProtocolTypeInvalid,
-} NfcProtocolType;
+    NfcProtocolInvalid,
+} NfcProtocol;
 
-extern const NfcProtocolBase* nfc_protocols[];
+extern const NfcProtocolBase* nfc_devices[];
 
 #ifdef __cplusplus
 }

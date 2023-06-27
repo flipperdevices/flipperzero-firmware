@@ -7,36 +7,35 @@ extern "C" {
 #endif
 
 typedef enum {
-    NfcProtocolNameTypeFull,
-    NfcProtocolNameTypeShort,
-} NfcProtocolNameType;
+    NfcDeviceNameTypeFull,
+    NfcDeviceNameTypeShort,
+} NfcDeviceNameType;
 
-typedef void NfcProtocolData;
+typedef void NfcDeviceData;
 
-typedef NfcProtocolData* (*NfcProtocolAlloc)();
-typedef void (*NfcProtocolFree)(NfcProtocolData* data);
-typedef void (*NfcProtocolReset)(NfcProtocolData* data);
-typedef void (*NfcProtocolCopy)(NfcProtocolData* data, const NfcProtocolData* other);
-typedef bool (*NfcProtocolVerify)(NfcProtocolData* data, const FuriString* device_type);
-typedef bool (*NfcProtocolLoad)(NfcProtocolData* data, FlipperFormat* ff, uint32_t version);
-typedef bool (*NfcProtocolSave)(const NfcProtocolData* data, FlipperFormat* ff, uint32_t version);
-typedef bool (*NfcProtocolEqual)(const NfcProtocolData* data, const NfcProtocolData* other);
-typedef const char* (
-    *NfcProtocolGetDeviceName)(const NfcProtocolData* data, NfcProtocolNameType name_type);
-typedef const uint8_t* (*NfcProtocolGetUid)(const NfcProtocolData* data, size_t* uid_len);
+typedef NfcDeviceData* (*NfcDeviceAlloc)();
+typedef void (*NfcDeviceFree)(NfcDeviceData* data);
+typedef void (*NfcDeviceReset)(NfcDeviceData* data);
+typedef void (*NfcDeviceCopy)(NfcDeviceData* data, const NfcDeviceData* other);
+typedef bool (*NfcDeviceVerify)(NfcDeviceData* data, const FuriString* device_type);
+typedef bool (*NfcDeviceLoad)(NfcDeviceData* data, FlipperFormat* ff, uint32_t version);
+typedef bool (*NfcDeviceSave)(const NfcDeviceData* data, FlipperFormat* ff, uint32_t version);
+typedef bool (*NfcDeviceEqual)(const NfcDeviceData* data, const NfcDeviceData* other);
+typedef const char* (*NfcDeviceGetName)(const NfcDeviceData* data, NfcDeviceNameType name_type);
+typedef const uint8_t* (*NfcDeviceGetUid)(const NfcDeviceData* data, size_t* uid_len);
 
 typedef struct {
     const char* protocol_name;
-    NfcProtocolAlloc alloc;
-    NfcProtocolFree free;
-    NfcProtocolReset reset;
-    NfcProtocolCopy copy;
-    NfcProtocolVerify verify;
-    NfcProtocolLoad load;
-    NfcProtocolSave save;
-    NfcProtocolEqual is_equal;
-    NfcProtocolGetDeviceName get_device_name;
-    NfcProtocolGetUid get_uid;
+    NfcDeviceAlloc alloc;
+    NfcDeviceFree free;
+    NfcDeviceReset reset;
+    NfcDeviceCopy copy;
+    NfcDeviceVerify verify;
+    NfcDeviceLoad load;
+    NfcDeviceSave save;
+    NfcDeviceEqual is_equal;
+    NfcDeviceGetName get_name;
+    NfcDeviceGetUid get_uid;
 } NfcProtocolBase;
 
 #ifdef __cplusplus

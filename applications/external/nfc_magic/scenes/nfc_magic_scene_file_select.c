@@ -1,14 +1,14 @@
 #include "../nfc_magic_i.h"
 
 static bool nfc_magic_scene_file_select_is_file_suitable(NfcMagic* nfc_magic) {
-    NfcDevice* nfc_dev = nfc_magic->source_dev;
-    if(nfc_dev->format == NfcDeviceSaveFormatMifareClassic) {
+    NfcDevice* nfc_device = nfc_magic->source_dev;
+    if(nfc_device->format == NfcDeviceSaveFormatMifareClassic) {
         switch(nfc_magic->dev->type) {
         case MagicTypeClassicGen1:
         case MagicTypeClassicDirectWrite:
         case MagicTypeClassicAPDU:
-            if((nfc_dev->dev_data.mf_classic_data.type != MfClassicType1k) ||
-               (nfc_dev->dev_data.nfc_data.uid_len != 4)) {
+            if((nfc_device->dev_data.mf_classic_data.type != MfClassicType1k) ||
+               (nfc_device->dev_data.nfc_data.uid_len != 4)) {
                 return false;
             }
             return true;
@@ -19,15 +19,15 @@ static bool nfc_magic_scene_file_select_is_file_suitable(NfcMagic* nfc_magic) {
             return false;
         }
     } else if(
-        (nfc_dev->format == NfcDeviceSaveFormatMifareUl) &&
-        (nfc_dev->dev_data.nfc_data.uid_len == 7)) {
+        (nfc_device->format == NfcDeviceSaveFormatMifareUl) &&
+        (nfc_device->dev_data.nfc_data.uid_len == 7)) {
         switch(nfc_magic->dev->type) {
         case MagicTypeUltralightGen1:
         case MagicTypeUltralightDirectWrite:
         case MagicTypeUltralightC_Gen1:
         case MagicTypeUltralightC_DirectWrite:
         case MagicTypeGen4:
-            switch(nfc_dev->dev_data.mf_ul_data.type) {
+            switch(nfc_device->dev_data.mf_ul_data.type) {
             case MfUltralightTypeNTAGI2C1K:
             case MfUltralightTypeNTAGI2C2K:
             case MfUltralightTypeNTAGI2CPlus1K:
@@ -47,7 +47,7 @@ static bool nfc_magic_scene_file_select_is_file_suitable(NfcMagic* nfc_magic) {
 void nfc_magic_scene_file_select_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
     // Process file_select return
-    nfc_device_set_loading_callback(
+    nfc_deviceice_set_loading_callback(
         nfc_magic->source_dev, nfc_magic_show_loading_popup, nfc_magic);
 
     if(!furi_string_size(nfc_magic->source_dev->load_path)) {
@@ -72,5 +72,5 @@ bool nfc_magic_scene_file_select_on_event(void* context, SceneManagerEvent event
 
 void nfc_magic_scene_file_select_on_exit(void* context) {
     NfcMagic* nfc_magic = context;
-    nfc_device_set_loading_callback(nfc_magic->source_dev, NULL, nfc_magic);
+    nfc_deviceice_set_loading_callback(nfc_magic->source_dev, NULL, nfc_magic);
 }

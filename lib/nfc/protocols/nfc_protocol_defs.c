@@ -6,11 +6,11 @@
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include <nfc/protocols/mf_desfire/mf_desfire.h>
 
-const NfcProtocolBase* nfc_protocols[NfcProtocolTypeMax] = {
-    [NfcProtocolTypeIso14443_3a] = &nfc_protocol_iso14443_3a,
-    [NfcProtocolTypeIso14443_4a] = &nfc_protocol_iso14443_4a,
-    [NfcProtocolTypeMfUltralight] = &nfc_protocol_mf_ultralight,
-    [NfcProtocolTypeMfClassic] = &nfc_protocol_mf_classic,
-    [NfcProtocolTypeMfDesfire] = &nfc_protocol_mf_desfire,
+const NfcProtocolBase* nfc_devices[NfcProtocolNum] = {
+    [NfcProtocolIso14443_3a] = &nfc_protocol_iso14443_3a,
+    [NfcProtocolIso14443_4a] = &nfc_protocol_iso14443_4a,
+    [NfcProtocolMfUltralight] = &nfc_protocol_mf_ultralight,
+    [NfcProtocolMfClassic] = &nfc_protocol_mf_classic,
+    [NfcProtocolMfDesfire] = &nfc_protocol_mf_desfire,
     /* Add new protocols here */
 };

@@ -56,8 +56,8 @@ NfcApp* nfc_app_alloc() {
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
 
     // Nfc device
-    instance->nfc_dev = nfc_dev_alloc();
-    nfc_dev_set_loading_callback(instance->nfc_dev, nfc_show_loading_popup, instance);
+    instance->nfc_device = nfc_device_alloc();
+    nfc_device_set_loading_callback(instance->nfc_device, nfc_show_loading_popup, instance);
 
     // Open GUI record
     instance->gui = furi_record_open(RECORD_GUI);
@@ -161,7 +161,7 @@ void nfc_app_free(NfcApp* instance) {
     mf_ultralight_auth_free(instance->mf_ul_auth);
 
     // Nfc device
-    nfc_dev_free(instance->nfc_dev);
+    nfc_device_free(instance->nfc_device);
 
     // Submenu
     view_dispatcher_remove_view(instance->view_dispatcher, NfcViewMenu);
@@ -267,7 +267,7 @@ bool nfc_save_file(NfcApp* instance, FuriString* path) {
     furi_assert(instance);
     furi_assert(path);
 
-    bool result = nfc_dev_save(instance->nfc_dev, furi_string_get_cstr(instance->file_path));
+    bool result = nfc_device_save(instance->nfc_device, furi_string_get_cstr(instance->file_path));
 
     if(!result) {
         dialog_message_show_storage_error(instance->dialogs, "Cannot save\nkey file");
@@ -360,7 +360,7 @@ bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {
         furi_string_set(load_path, path);
     }
 
-    result = nfc_dev_load(instance->nfc_dev, furi_string_get_cstr(load_path));
+    result = nfc_device_load(instance->nfc_device, furi_string_get_cstr(load_path));
 
     if(result) {
         path_extract_filename(load_path, instance->file_name, true);
@@ -426,10 +426,10 @@ void nfc_show_loading_popup(void* context, bool show) {
     }
 }
 
-void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocolType* types, uint32_t count) {
+void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocol* types, uint32_t count) {
     furi_assert(instance);
     furi_assert(types);
-    furi_assert(count < NfcProtocolTypeMax);
+    furi_assert(count < NfcProtocolNum);
 
     memcpy(instance->protocols_detected, types, count);
     instance->protocols_detected_num = count;

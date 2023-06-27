@@ -15,7 +15,7 @@ typedef enum {
 
 typedef struct {
     size_t protocol_num;
-    NfcProtocolType* protocols;
+    NfcProtocol* protocols;
 } NfcScannerEventData;
 
 typedef struct {

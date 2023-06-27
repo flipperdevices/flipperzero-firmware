@@ -119,16 +119,16 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
 
 const NfcProtocolBase nfc_protocol_mf_ultralight = {
     .protocol_name = MF_ULTRALIGHT_PROTOCOL_NAME,
-    .alloc = (NfcProtocolAlloc)mf_ultralight_alloc,
-    .free = (NfcProtocolFree)mf_ultralight_free,
-    .reset = (NfcProtocolReset)mf_ultralight_reset,
-    .copy = (NfcProtocolCopy)mf_ultralight_copy,
-    .verify = (NfcProtocolVerify)mf_ultralight_verify,
-    .load = (NfcProtocolLoad)mf_ultralight_load,
-    .save = (NfcProtocolSave)mf_ultralight_save,
-    .is_equal = (NfcProtocolEqual)mf_ultralight_is_equal,
-    .get_device_name = (NfcProtocolGetDeviceName)mf_ultralight_get_device_name,
-    .get_uid = (NfcProtocolGetUid)mf_ultralight_get_uid,
+    .alloc = (NfcDeviceAlloc)mf_ultralight_alloc,
+    .free = (NfcDeviceFree)mf_ultralight_free,
+    .reset = (NfcDeviceReset)mf_ultralight_reset,
+    .copy = (NfcDeviceCopy)mf_ultralight_copy,
+    .verify = (NfcDeviceVerify)mf_ultralight_verify,
+    .load = (NfcDeviceLoad)mf_ultralight_load,
+    .save = (NfcDeviceSave)mf_ultralight_save,
+    .is_equal = (NfcDeviceEqual)mf_ultralight_is_equal,
+    .get_name = (NfcDeviceGetName)mf_ultralight_get_device_name,
+    .get_uid = (NfcDeviceGetUid)mf_ultralight_get_uid,
 };
 
 MfUltralightData* mf_ultralight_alloc() {
@@ -376,11 +376,11 @@ bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData
 
 // TODO: Improve this function
 const char*
-    mf_ultralight_get_device_name(const MfUltralightData* data, NfcProtocolNameType name_type) {
+    mf_ultralight_get_device_name(const MfUltralightData* data, NfcDeviceNameType name_type) {
     furi_assert(data);
     furi_assert(data->type < MfUltralightTypeNum);
 
-    return mf_ultralight_get_device_name_by_type(data->type, name_type == NfcProtocolNameTypeFull);
+    return mf_ultralight_get_device_name_by_type(data->type, name_type == NfcDeviceNameTypeFull);
 }
 
 const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_len) {

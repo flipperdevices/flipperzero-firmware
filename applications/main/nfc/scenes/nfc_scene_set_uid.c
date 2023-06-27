@@ -12,8 +12,8 @@ void nfc_scene_set_uid_on_enter(void* context) {
     // Setup view
     ByteInput* byte_input = nfc->byte_input;
     byte_input_set_header_text(byte_input, "Enter UID in hex");
-    nfc_dev_copy_protocol_data(
-        nfc->nfc_dev, NfcProtocolTypeIso14443_3a, nfc->iso14443_3a_edit_data);
+    nfc_device_copy_protocol_data(
+        nfc->nfc_device, NfcProtocolIso14443_3a, nfc->iso14443_3a_edit_data);
     byte_input_set_result_callback(
         byte_input,
         nfc_scene_set_uid_byte_input_callback,
@@ -30,8 +30,8 @@ bool nfc_scene_set_uid_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventByteInputDone) {
-            nfc_dev_set_protocol_data(
-                nfc->nfc_dev, NfcProtocolTypeIso14443_3a, nfc->iso14443_3a_edit_data);
+            nfc_device_set_protocol_data(
+                nfc->nfc_device, NfcProtocolIso14443_3a, nfc->iso14443_3a_edit_data);
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSavedMenu)) {
                 if(nfc_save(nfc)) {
                     scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveSuccess);
