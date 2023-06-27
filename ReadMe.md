@@ -45,6 +45,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fixes for FAP in Loader and Other areas #674 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/674)
 - [Added dynamically generating app list for Desktop Settings App #676 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/676)
 - [More fixes #680 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/680)
+- [Fix fr-FR-mac keylayout #681 (By FelixLgr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/681)
+- OFW: [Actions: unit_test and updater timeouts #2807 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2807)
 
 <a name="release">
 
