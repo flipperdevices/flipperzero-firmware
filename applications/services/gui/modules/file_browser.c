@@ -621,7 +621,6 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                         model->button_held_for_ticks += 1;
                     } else if(event->key == InputKeyDown) {
                         int32_t count = model->item_cnt;
-
                         if(model->item_idx + scroll_speed >= count) {
                             scroll_speed = count - model->item_idx - 1;
                         }
