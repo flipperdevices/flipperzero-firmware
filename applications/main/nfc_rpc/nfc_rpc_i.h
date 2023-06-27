@@ -54,7 +54,6 @@ struct NfcRpc {
     NfcRpcHandlerDict_t handlers;
 
     Nfc* nfc;
-    NfcaPoller* nfca_poller;
     NfcaListener* nfca_listener;
     MfUltralightListener* mf_ul_listener;
 };
