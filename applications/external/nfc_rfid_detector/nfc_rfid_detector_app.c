@@ -62,9 +62,6 @@ NfcRfidDetectorApp* nfc_rfid_detector_app_alloc() {
         NfcRfidDetectorViewFieldPresence,
         nfc_rfid_detector_view_field_presence_get_view(app->nfc_rfid_detector_field_presence));
 
-    // Start detection of field presence
-    nfc_rfid_detector_app_field_presence_start(app);
-
     scene_manager_next_scene(app->scene_manager, NfcRfidDetectorSceneStart);
 
     return app;
@@ -72,9 +69,6 @@ NfcRfidDetectorApp* nfc_rfid_detector_app_alloc() {
 
 void nfc_rfid_detector_app_free(NfcRfidDetectorApp* app) {
     furi_assert(app);
-
-    // Stop detection of field presence
-    nfc_rfid_detector_app_field_presence_stop(app);
 
     // Submenu
     view_dispatcher_remove_view(app->view_dispatcher, NfcRfidDetectorViewSubmenu);

@@ -21,11 +21,17 @@ static void nfc_rfid_detector_scene_field_presence_update(void* context) {
 }
 
 void nfc_rfid_detector_scene_field_presence_on_enter(void* context) {
+    furi_assert(context);
     NfcRfidDetectorApp* app = context;
+
+    // Start detection of field presence
+    nfc_rfid_detector_app_field_presence_start(app);
+
     view_dispatcher_switch_to_view(app->view_dispatcher, NfcRfidDetectorViewFieldPresence);
 }
 
 bool nfc_rfid_detector_scene_field_presence_on_event(void* context, SceneManagerEvent event) {
+    furi_assert(context);
     NfcRfidDetectorApp* app = context;
     bool consumed = false;
 
@@ -37,5 +43,8 @@ bool nfc_rfid_detector_scene_field_presence_on_event(void* context, SceneManager
 }
 
 void nfc_rfid_detector_scene_field_presence_on_exit(void* context) {
-    UNUSED(context);
+    furi_assert(context);
+    NfcRfidDetectorApp* app = context;
+    // Stop detection of field presence
+    nfc_rfid_detector_app_field_presence_stop(app);
 }

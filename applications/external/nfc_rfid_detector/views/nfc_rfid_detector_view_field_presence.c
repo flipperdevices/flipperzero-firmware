@@ -5,6 +5,8 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
+#define FIELD_FOUND_WEIGHT 5
+
 typedef enum {
     NfcRfidDetectorTypeFieldPresenceNfc,
     NfcRfidDetectorTypeFieldPresenceRfid,
@@ -20,8 +22,8 @@ struct NfcRfidDetectorFieldPresence {
 };
 
 typedef struct {
-    bool nfc_field;
-    bool rfid_field;
+    uint8_t nfc_field;
+    uint8_t rfid_field;
     uint32_t rfid_frequncy;
 } NfcRfidDetectorFieldPresenceModel;
 
@@ -35,9 +37,17 @@ void nfc_rfid_detector_view_field_presence_update(
         instance->view,
         NfcRfidDetectorFieldPresenceModel * model,
         {
-            model->nfc_field = nfc_field;
-            model->rfid_field = rfid_field;
-            model->rfid_frequncy = rfid_frequncy;
+            if(nfc_field) {
+                model->nfc_field = FIELD_FOUND_WEIGHT;
+            } else if(model->nfc_field) {
+                model->nfc_field--;
+            }
+            if(rfid_field) {
+                model->rfid_field = FIELD_FOUND_WEIGHT;
+                model->rfid_frequncy = rfid_frequncy;
+            } else if(model->rfid_field) {
+                model->rfid_field--;
+            }
         },
         true);
 }
@@ -47,25 +57,38 @@ void nfc_rfid_detector_view_field_presence_draw(
     NfcRfidDetectorFieldPresenceModel* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
-    canvas_set_font(canvas, FontSecondary);
 
-    if(model->nfc_field) {
-        canvas_draw_str(canvas, 10, 8, "NFC");
-        canvas_draw_icon(
-            canvas, 4, 16, NfcRfidDetectorFieldPresenceIcons[NfcRfidDetectorTypeFieldPresenceNfc]);
-        canvas_draw_str(canvas, 10, 64, "13,56 MHz");
-    }
+    if(!model->nfc_field && !model->rfid_field) {
+        canvas_draw_icon(canvas, 0, 16, &I_Modern_reader_18x34);
+        canvas_draw_icon(canvas, 22, 12, &I_Move_flipper_26x39);
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str(canvas, 56, 36, "Touch the reader");
+    } else {
+        if(model->nfc_field) {
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str(canvas, 21, 10, "NFC");
+            canvas_draw_icon(
+                canvas,
+                9,
+                17,
+                NfcRfidDetectorFieldPresenceIcons[NfcRfidDetectorTypeFieldPresenceNfc]);
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str(canvas, 9, 62, "13,56 MHz");
+        }
 
-    if(model->rfid_field) {
-        char str[16];
-        snprintf(str, sizeof(str), "%.02f kHz", (double)model->rfid_frequncy / 1000);
-        canvas_draw_str(canvas, 70, 8, "RFID");
-        canvas_draw_icon(
-            canvas,
-            60,
-            16,
-            NfcRfidDetectorFieldPresenceIcons[NfcRfidDetectorTypeFieldPresenceRfid]);
-        canvas_draw_str(canvas, 70, 64, str);
+        if(model->rfid_field) {
+            char str[16];
+            snprintf(str, sizeof(str), "%.02f KHz", (double)model->rfid_frequncy / 1000);
+            canvas_set_font(canvas, FontPrimary);
+            canvas_draw_str(canvas, 76, 10, "LF RFID");
+            canvas_draw_icon(
+                canvas,
+                71,
+                17,
+                NfcRfidDetectorFieldPresenceIcons[NfcRfidDetectorTypeFieldPresenceRfid]);
+            canvas_set_font(canvas, FontSecondary);
+            canvas_draw_str(canvas, 69, 62, str);
+        }
     }
 }
 
@@ -88,8 +111,8 @@ void nfc_rfid_detector_view_field_presence_enter(void* context) {
         instance->view,
         NfcRfidDetectorFieldPresenceModel * model,
         {
-            model->nfc_field = false;
-            model->rfid_field = false;
+            model->nfc_field = 0;
+            model->rfid_field = 0;
             model->rfid_frequncy = 0;
         },
         true);
@@ -120,8 +143,8 @@ NfcRfidDetectorFieldPresence* nfc_rfid_detector_view_field_presence_alloc() {
         instance->view,
         NfcRfidDetectorFieldPresenceModel * model,
         {
-            model->nfc_field = false;
-            model->rfid_field = false;
+            model->nfc_field = 0;
+            model->rfid_field = 0;
             model->rfid_frequncy = 0;
         },
         true);
