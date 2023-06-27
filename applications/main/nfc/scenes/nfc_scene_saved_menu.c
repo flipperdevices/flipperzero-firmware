@@ -150,20 +150,7 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneDelete);
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
-            // bool application_info_present = false;
-            // if(
-            //     dev_data->protocol == NfcDeviceProtocolMifareClassic ||
-            //     dev_data->protocol == NfcDeviceProtocolMifareUl) {
-            //     application_info_present = nfc_supported_card_verify_and_parse(dev_data);
-            // }
-
-            // FURI_LOG_I("nfc", "application_info_present: %d", application_info_present);
-
-            // if(application_info_present) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
-            // } else {
-            // scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
-            // }
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneInfo);
             consumed = true;
         } else if(event.event == SubmenuIndexRestoreOriginal) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
