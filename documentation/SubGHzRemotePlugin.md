@@ -2,16 +2,16 @@
 
 
 # UPDATE!!!!!!
-## Now you can create and edit map files directly on flipper, go into Applications->Sub-GHz->Remote Maker
+## Now you can create and edit map files directly on the FlipperZero using the Sub-GHz Remote app.
 
 <br>
 <br>
 <br>
 
 
-### The SubGHz Remote Tool *requires* the creation of custom user map with `.txt` extension in the `subghz_remote` folder on the sdcard. 
+### The Sub-GHz Remote *requires* the creation of custom user map with `.txt` extension in the `/subghz/subghz_remote` folder on the SD card. 
 
-#### If these files are not exist or not configured properly, **you will receive an error each time you try to select wrong file in the UniRF Tool**.
+#### If the mapped capture files do not exist or the parameters within are not configured properly, **you will receive an error each time you try to select wrong file**.
 
 ## You can add as many `.txt` map files as you want, file name doesn't matter!
 
