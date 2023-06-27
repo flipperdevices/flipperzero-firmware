@@ -3,7 +3,6 @@
 #include "nfca_poller.h"
 
 #include <nfc/helpers/bit_buffer.h>
-#include <nfc/protocols/nfc_poller_base.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,12 +40,6 @@ typedef enum {
 } NfcaPollerState;
 
 typedef enum {
-    NfcaPollerSessionStateIdle,
-    NfcaPollerSessionStateActive,
-    NfcaPollerSessionStateStopRequest,
-} NfcaPollerSessionState;
-
-typedef enum {
     NfcaPollerConfigStateIdle,
     NfcaPollerConfigStateDone,
 } NfcaPollerConfigState;
@@ -54,19 +47,20 @@ typedef enum {
 struct NfcaPoller {
     Nfc* nfc;
     NfcaPollerState state;
-    NfcaPollerSessionState session_state;
     NfcaPollerConfigState config_state;
     NfcaPollerColRes col_res;
     NfcaData* data;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
-    NfcaPollerEventCallback callback;
-    void* context;
 
-    NfcaPollerEvent* event;
-    NfcPollerCallback callback_new;
-    void* context_new;
+    NfcPollerEvent general_event;
+    NfcaPollerEvent nfca_event;
+    NfcaPollerEventData nfca_event_data;
+    NfcPollerCallback callback;
+    void* context;
 };
+
+const NfcaData* nfca_poller_get_data(NfcaPoller* instance);
 
 NfcaError nfca_poller_config(NfcaPoller* instance);
 

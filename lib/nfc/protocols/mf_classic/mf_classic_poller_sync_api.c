@@ -1,126 +1,151 @@
 #include "mf_classic_poller_i.h"
 
+#include <nfc/nfc_poller.h>
+
 #include <furi.h>
 
 #define MF_CLASSIC_POLLER_COMPLETE_EVENT (1UL << 0)
 
+typedef enum {
+    MfClassicPollerCmdTypeAuth,
+    MfClassicPollerCmdTypeReadBlock,
+
+    MfClassicPollerCmdTypeNum,
+} MfClassicPollerCmdType;
+
 typedef struct {
-    MfClassicPoller* instance;
+    MfClassicPollerCmdType cmd_type;
     FuriThreadId thread_id;
     MfClassicError error;
     MfClassicPollerContextData data;
 } MfClassicPollerContext;
 
-NfcaPollerCommand mf_classic_auth_callback(NfcaPollerEvent event, void* context) {
+typedef MfClassicError (
+    *MfClassicPollerCmdHandler)(MfClassicPoller* poller, MfClassicPollerContextData* data);
+
+static MfClassicError
+    mf_classic_poller_auth_handler(MfClassicPoller* poller, MfClassicPollerContextData* data) {
+    return mf_classic_async_auth(
+        poller,
+        data->auth_context.block_num,
+        &data->auth_context.key,
+        data->auth_context.key_type,
+        &data->auth_context);
+}
+
+static MfClassicError mf_classic_poller_read_block_handler(
+    MfClassicPoller* poller,
+    MfClassicPollerContextData* data) {
+    MfClassicError error = MfClassicErrorNone;
+
+    error = mf_classic_async_auth(
+        poller,
+        data->read_block_context.block_num,
+        &data->read_block_context.key,
+        data->read_block_context.key_type,
+        NULL);
+    if(error == MfClassicErrorNone) {
+        error = mf_classic_async_read_block(
+            poller, data->read_block_context.block_num, &data->read_block_context.block);
+    }
+
+    return error;
+}
+
+static const MfClassicPollerCmdHandler mf_classic_poller_cmd_handlers[MfClassicPollerCmdTypeNum] = {
+    [MfClassicPollerCmdTypeAuth] = mf_classic_poller_auth_handler,
+    [MfClassicPollerCmdTypeReadBlock] = mf_classic_poller_read_block_handler,
+};
+
+static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* context) {
+    furi_assert(event.poller);
+    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
+    furi_assert(event.data);
     furi_assert(context);
 
     MfClassicPollerContext* poller_context = context;
-    MfClassicAuthContext* auth_context = &poller_context->data.auth_context;
-    if(event.type == NfcaPollerEventTypeReady) {
-        poller_context->error = mf_classic_async_auth(
-            poller_context->instance,
-            auth_context->block_num,
-            &auth_context->key,
-            auth_context->key_type,
-            auth_context);
-    } else if(event.type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_classic_process_error(event.data.error);
+    NfcaPollerEvent* nfca_event = event.data;
+    NfcaPoller* nfca_poller = event.poller;
+    MfClassicPoller* mfc_poller = mf_classic_poller_alloc(nfca_poller);
+
+    if(nfca_event->type == NfcaPollerEventTypeReady) {
+        poller_context->error = mf_classic_poller_cmd_handlers[poller_context->cmd_type](
+            mfc_poller, &poller_context->data);
+    } else if(nfca_event->type == NfcaPollerEventTypeError) {
+        poller_context->error = mf_classic_process_error(nfca_event->data->error);
     }
+
     furi_thread_flags_set(poller_context->thread_id, MF_CLASSIC_POLLER_COMPLETE_EVENT);
 
-    return NfcaPollerCommandStop;
+    mf_classic_poller_free(mfc_poller);
+
+    return NfcCommandStop;
+}
+
+static MfClassicError mf_classic_poller_cmd_execute(Nfc* nfc, MfClassicPollerContext* poller_ctx) {
+    furi_assert(poller_ctx->cmd_type < MfClassicPollerCmdTypeNum);
+
+    poller_ctx->thread_id = furi_thread_get_current_id();
+
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolTypeIso14443_3a);
+    nfc_poller_start(poller, mf_ultralgiht_poller_cmd_callback, poller_ctx);
+    furi_thread_flags_wait(MF_CLASSIC_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
+    furi_thread_flags_clear(MF_CLASSIC_POLLER_COMPLETE_EVENT);
+
+    nfc_poller_stop(poller);
+    nfc_poller_free(poller);
+
+    return poller_ctx->error;
 }
 
 MfClassicError mf_classic_poller_auth(
-    MfClassicPoller* instance,
+    Nfc* nfc,
     uint8_t block_num,
     MfClassicKey* key,
     MfClassicKeyType key_type,
     MfClassicAuthContext* data) {
-    furi_assert(instance);
+    furi_assert(nfc);
     furi_assert(key);
     furi_assert(data);
 
-    MfClassicPollerContext poller_context = {};
-    poller_context.data.auth_context.block_num = block_num;
-    poller_context.data.auth_context.key = *key;
-    poller_context.data.auth_context.key_type = key_type;
-    poller_context.instance = instance;
-    poller_context.thread_id = furi_thread_get_current_id();
+    MfClassicPollerContext poller_context = {
+        .cmd_type = MfClassicPollerCmdTypeAuth,
+        .data.auth_context.block_num = block_num,
+        .data.auth_context.key = *key,
+        .data.auth_context.key_type = key_type,
+    };
 
-    mf_classic_poller_start(instance, mf_classic_auth_callback, &poller_context);
-    furi_thread_flags_wait(MF_CLASSIC_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
-    furi_thread_flags_clear(MF_CLASSIC_POLLER_COMPLETE_EVENT);
+    MfClassicError error = mf_classic_poller_cmd_execute(nfc, &poller_context);
 
-    if(poller_context.error == MfClassicErrorNone) {
+    if(error == MfClassicErrorNone) {
         *data = poller_context.data.auth_context;
     }
-    mf_classic_poller_stop(instance);
 
-    return poller_context.error;
-}
-
-NfcaPollerCommand mf_classic_read_block_callback(NfcaPollerEvent event, void* context) {
-    furi_assert(context);
-
-    MfClassicPollerContext* poller_context = context;
-    MfClassicReadBlockContext* read_block_context = &poller_context->data.read_block_context;
-    NfcaPollerCommand command = NfcaPollerCommandContinue;
-
-    if(event.type == NfcaPollerEventTypeReady) {
-        if(poller_context->instance->auth_state == MfClassicAuthStateIdle) {
-            poller_context->error = mf_classic_async_auth(
-                poller_context->instance,
-                read_block_context->block_num,
-                &read_block_context->key,
-                read_block_context->key_type,
-                NULL);
-            if(poller_context->error != MfClassicErrorNone) {
-                command = NfcaPollerCommandStop;
-            }
-        } else {
-            poller_context->error = mf_classic_async_read_block(
-                poller_context->instance,
-                read_block_context->block_num,
-                &read_block_context->block);
-            command = NfcaPollerCommandStop;
-        }
-    } else if(event.type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_classic_process_error(event.data.error);
-        command = NfcaPollerCommandStop;
-    }
-    if(command == NfcaPollerCommandStop) {
-        furi_thread_flags_set(poller_context->thread_id, MF_CLASSIC_POLLER_COMPLETE_EVENT);
-    }
-
-    return command;
+    return error;
 }
 
 MfClassicError mf_classic_poller_read_block(
-    MfClassicPoller* instance,
+    Nfc* nfc,
     uint8_t block_num,
     MfClassicKey* key,
     MfClassicKeyType key_type,
     MfClassicBlock* data) {
-    furi_assert(instance);
+    furi_assert(nfc);
     furi_assert(key);
     furi_assert(data);
 
-    MfClassicPollerContext poller_context = {};
-    poller_context.data.read_block_context.block_num = block_num;
-    poller_context.data.read_block_context.key = *key;
-    poller_context.data.read_block_context.key_type = key_type;
-    poller_context.instance = instance;
-    poller_context.thread_id = furi_thread_get_current_id();
+    MfClassicPollerContext poller_context = {
+        .cmd_type = MfClassicPollerCmdTypeReadBlock,
+        .data.read_block_context.block_num = block_num,
+        .data.read_block_context.key = *key,
+        .data.read_block_context.key_type = key_type,
+    };
 
-    mf_classic_poller_start(instance, mf_classic_read_block_callback, &poller_context);
-    furi_thread_flags_wait(MF_CLASSIC_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
-    furi_thread_flags_clear(MF_CLASSIC_POLLER_COMPLETE_EVENT);
+    MfClassicError error = mf_classic_poller_cmd_execute(nfc, &poller_context);
 
-    if(poller_context.error == MfClassicErrorNone) {
+    if(error == MfClassicErrorNone) {
         *data = poller_context.data.read_block_context.block;
     }
-    mf_classic_poller_stop(instance);
 
-    return poller_context.error;
+    return error;
 }

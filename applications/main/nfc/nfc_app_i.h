@@ -46,7 +46,7 @@
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 
-#include <nfc/nfc_poller_manager.h>
+#include <nfc/nfc_poller.h>
 #include <nfc/nfc_scanner.h>
 
 #include <lib/nfc/nfc_dev.h>
@@ -108,12 +108,10 @@ struct NfcApp {
     DetectReader* detect_reader;
 
     Nfc* nfc;
-    NfcaPoller* nfca_poller;
     NfcaListener* nfca_listener;
     MfUltralightListener* mf_ul_listener;
-    MfClassicPoller* mf_classic_poller;
 
-    NfcPollerManager* poller_manager;
+    NfcPoller* poller;
     NfcScanner* scanner;
 
     MfUltralightAuth* mf_ul_auth;

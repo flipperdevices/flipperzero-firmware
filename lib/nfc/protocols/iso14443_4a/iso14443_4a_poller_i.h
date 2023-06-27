@@ -47,6 +47,8 @@ struct Iso14443_4aPoller {
 
 Iso14443_4aError iso14443_4a_poller_process_error(NfcaError error);
 
+const Iso14443_4aData* iso14443_4a_poller_get_data(Iso14443_4aPoller* instance);
+
 Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance);
 
 Iso14443_4aError

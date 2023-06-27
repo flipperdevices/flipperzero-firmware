@@ -49,6 +49,8 @@ struct MfDesfirePoller {
 
 MfDesfireError mf_desfire_process_error(Iso14443_4aError error);
 
+const MfDesfireData* mf_desfire_poller_get_data(MfDesfirePoller* instance);
+
 MfDesfireError mf_desfire_send_chunks(
     MfDesfirePoller* instance,
     const BitBuffer* tx_buffer,

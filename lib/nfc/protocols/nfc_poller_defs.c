@@ -3,6 +3,7 @@
 #include <nfc/protocols/nfca/nfca_poller_defs.h>
 #include <nfc/protocols/iso14443_4a/iso14443_4a_poller_defs.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_defs.h>
+#include <nfc/protocols/mf_classic/mf_classic_poller_defs.h>
 #include <nfc/protocols/mf_desfire/mf_desfire_poller_defs.h>
 
 #include <furi/core/core_defines.h>
@@ -11,7 +12,7 @@ const NfcPollerBase* nfc_pollers_api[NfcProtocolTypeMax] = {
     [NfcProtocolTypeIso14443_3a] = &nfc_poller_iso14443_3a,
     [NfcProtocolTypeIso14443_4a] = &nfc_poller_iso14443_4a,
     [NfcProtocolTypeMfUltralight] = &mf_ultralight_poller,
-    [NfcProtocolTypeMfClassic] = NULL,
+    [NfcProtocolTypeMfClassic] = &mf_classic_poller,
     [NfcProtocolTypeMfDesfire] = &mf_desfire_poller,
 };
 

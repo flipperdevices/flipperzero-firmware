@@ -24,8 +24,6 @@ typedef struct {
     Iso14443_4aPollerEventData* data;
 } Iso14443_4aPollerEvent;
 
-const Iso14443_4aData* iso14443_4a_poller_get_data(Iso14443_4aPoller* instance);
-
 #ifdef __cplusplus
 }
 #endif

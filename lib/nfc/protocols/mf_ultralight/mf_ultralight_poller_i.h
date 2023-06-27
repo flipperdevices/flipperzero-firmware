@@ -93,6 +93,8 @@ MfUltralightPoller* mf_ultralight_poller_alloc(NfcaPoller* nfca_poller);
 
 void mf_ultralight_poller_free(MfUltralightPoller* instance);
 
+const MfUltralightData* mf_ultralight_poller_get_data(MfUltralightPoller* instance);
+
 bool mf_ultralight_poller_ntag_i2c_addr_lin_to_tag(
     MfUltralightPoller* instance,
     uint16_t lin_addr,

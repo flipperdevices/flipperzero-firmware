@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,30.1,,
+Version,+,33.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2008,16 +2008,6 @@ Function,+,mf_classic_is_key_found,_Bool,"const MfClassicData*, uint8_t, MfClass
 Function,+,mf_classic_is_sector_read,_Bool,"const MfClassicData*, uint8_t"
 Function,-,mf_classic_is_sector_trailer,_Bool,uint8_t
 Function,+,mf_classic_load,_Bool,"MfClassicData*, FlipperFormat*, uint32_t"
-Function,-,mf_classic_poller_alloc,MfClassicPoller*,NfcaPoller*
-Function,+,mf_classic_poller_auth,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
-Function,-,mf_classic_poller_dict_attack,MfClassicError,"MfClassicPoller*, MfClassicPollerCallback, void*"
-Function,-,mf_classic_poller_free,void,MfClassicPoller*
-Function,+,mf_classic_poller_get_data,const MfClassicData*,MfClassicPoller*
-Function,-,mf_classic_poller_read,MfClassicError,"MfClassicPoller*, MfClassicDeviceKeys*, MfClassicData*"
-Function,-,mf_classic_poller_read_block,MfClassicError,"MfClassicPoller*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicBlock*"
-Function,-,mf_classic_poller_reset,MfClassicError,MfClassicPoller*
-Function,-,mf_classic_poller_start,MfClassicError,"MfClassicPoller*, NfcaPollerEventCallback, void*"
-Function,-,mf_classic_poller_stop,MfClassicError,MfClassicPoller*
 Function,+,mf_classic_reset,void,MfClassicData*
 Function,+,mf_classic_save,_Bool,"const MfClassicData*, FlipperFormat*, uint32_t"
 Function,-,mf_classic_set_block_read,void,"MfClassicData*, uint8_t, MfClassicBlock*"
@@ -2056,10 +2046,12 @@ Function,-,nfc_listener_abort,void,Nfc*
 Function,-,nfc_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
 Function,-,nfc_listener_sleep,NfcError,Nfc*
 Function,-,nfc_listener_tx,NfcError,"Nfc*, const BitBuffer*"
-Function,-,nfc_poller_manager_alloc,NfcPollerManager*,Nfc*
-Function,-,nfc_poller_manager_free,void,NfcPollerManager*
-Function,-,nfc_poller_manager_start,void,"NfcPollerManager*, NfcProtocolType, NfcPollerCallback, void*"
-Function,-,nfc_poller_manager_stop,void,NfcPollerManager*
+Function,-,nfc_poller_alloc,NfcPoller*,"Nfc*, NfcProtocolType"
+Function,-,nfc_poller_detect,_Bool,NfcPoller*
+Function,-,nfc_poller_free,void,NfcPoller*
+Function,-,nfc_poller_get_data,const NfcProtocolData*,NfcPoller*
+Function,-,nfc_poller_start,void,"NfcPoller*, NfcPollerCallback, void*"
+Function,-,nfc_poller_stop,void,NfcPoller*
 Function,-,nfc_set_fdt_listen_fc,void,"Nfc*, uint32_t"
 Function,-,nfc_set_fdt_poll_fc,void,"Nfc*, uint32_t"
 Function,-,nfc_set_fdt_poll_poll_us,void,"Nfc*, uint32_t"
@@ -2084,13 +2076,6 @@ Function,+,nfca_get_uid,const uint8_t*,"const NfcaData*, size_t*"
 Function,+,nfca_is_equal,_Bool,"const NfcaData*, const NfcaData*"
 Function,+,nfca_load,_Bool,"NfcaData*, FlipperFormat*, uint32_t"
 Function,+,nfca_load_data,_Bool,"NfcaData*, FlipperFormat*, uint32_t"
-Function,-,nfca_poller_alloc,NfcaPoller*,Nfc*
-Function,-,nfca_poller_free,void,NfcaPoller*
-Function,+,nfca_poller_get_data,const NfcaData*,NfcaPoller*
-Function,-,nfca_poller_read,NfcaError,"NfcaPoller*, NfcaData*"
-Function,-,nfca_poller_read_new,NfcaError,"NfcPollerManager*, NfcaData*"
-Function,-,nfca_poller_start,NfcaError,"NfcaPoller*, NfcaPollerEventCallback, void*"
-Function,-,nfca_poller_stop,NfcaError,NfcaPoller*
 Function,+,nfca_reset,void,NfcaData*
 Function,+,nfca_save,_Bool,"const NfcaData*, FlipperFormat*, uint32_t"
 Function,+,nfca_save_data,_Bool,"const NfcaData*, FlipperFormat*, uint32_t"

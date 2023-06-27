@@ -10,12 +10,6 @@ extern "C" {
 #endif
 
 typedef enum {
-    MfClassicPollerSessionStateIdle,
-    MfClassicPollerSessionStateActive,
-    MfClassicPollerSessionStateStopRequest,
-} MfClassicPollerSessionState;
-
-typedef enum {
     MfClassicAuthStateIdle,
     MfClassicAuthStatePassed,
 } MfClassicAuthState;
@@ -45,14 +39,14 @@ typedef enum {
 
 struct MfClassicPoller {
     NfcaPoller* nfca_poller;
+
     MfClassicPollerState state;
     MfClassicPollerState prev_state;
-    MfClassicPollerSessionState session_state;
     MfClassicAuthState auth_state;
     MfClassicCardState card_state;
+
     MfClassicReadMode read_mode;
     MfClassicKey current_key;
-    MfClassicPollerEventData event_data;
     uint8_t sectors_read;
     uint8_t key_reuse_sector;
     uint8_t sectors_total;
@@ -62,7 +56,11 @@ struct MfClassicPoller {
     BitBuffer* rx_plain_buffer;
     BitBuffer* rx_encrypted_buffer;
     MfClassicData* data;
-    MfClassicPollerCallback callback;
+
+    NfcPollerEvent general_event;
+    MfClassicPollerEvent mfc_event;
+    MfClassicPollerEventData mfc_event_data;
+    NfcPollerCallback callback;
     void* context;
 };
 
@@ -79,6 +77,10 @@ typedef union {
 } MfClassicPollerContextData;
 
 MfClassicError mf_classic_process_error(NfcaError error);
+
+MfClassicPoller* mf_classic_poller_alloc(NfcaPoller* nfca_poller);
+
+void mf_classic_poller_free(MfClassicPoller* instance);
 
 MfClassicError mf_classic_async_auth(
     MfClassicPoller* instance,

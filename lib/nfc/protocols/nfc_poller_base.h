@@ -1,31 +1,19 @@
 #pragma once
 
-#include "nfc_protocol_defs.h"
-#include "nfc.h"
+#include "nfc_poller_common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef void NfcPoller;
+typedef NfcPollerInstance* (*NfcPollerAlloc)(NfcPollerInstance* base_poller);
+typedef void (*NfcPollerFree)(NfcPollerInstance* instance);
 
-typedef void NfcPollerEventData;
-
-typedef struct {
-    NfcProtocolType protocol_type;
-    NfcPoller* poller;
-    NfcPollerEventData* data;
-} NfcPollerEvent;
-
-typedef NfcCommand (*NfcPollerCallback)(NfcPollerEvent event, void* context);
-
-typedef NfcPoller* (*NfcPollerAlloc)(NfcPoller* base_poller);
-typedef void (*NfcPollerFree)(NfcPoller* instance);
-
-typedef void (*NfcPollerSetCallback)(NfcPoller* poller, NfcPollerCallback callback, void* context);
+typedef void (
+    *NfcPollerSetCallback)(NfcPollerInstance* poller, NfcPollerCallback callback, void* context);
 typedef NfcCommand (*NfcPollerRun)(NfcPollerEvent event, void* context);
 typedef bool (*NfcPollerDetect)(NfcPollerEvent event, void* context);
-typedef const NfcProtocolData* (*NfcPollerGetData)(const NfcPoller* instance);
+typedef const NfcProtocolData* (*NfcPollerGetData)(const NfcPollerInstance* instance);
 
 typedef struct {
     NfcPollerAlloc alloc;

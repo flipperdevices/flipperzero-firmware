@@ -3,7 +3,7 @@
 #include "nfca.h"
 #include <lib/nfc/nfc.h>
 
-#include <nfc/nfc_poller_manager.h>
+#include <nfc/nfc_poller.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,31 +22,8 @@ typedef struct {
 
 typedef struct {
     NfcaPollerEventType type;
-    NfcaPollerEventData data;
+    NfcaPollerEventData* data;
 } NfcaPollerEvent;
-
-typedef enum {
-    NfcaPollerCommandContinue = NfcCommandContinue,
-    NfcaPollerCommandReset = NfcCommandReset,
-    NfcaPollerCommandStop = NfcCommandStop,
-} NfcaPollerCommand;
-
-typedef NfcaPollerCommand (*NfcaPollerEventCallback)(NfcaPollerEvent event, void* context);
-
-NfcaPoller* nfca_poller_alloc(Nfc* nfc);
-
-void nfca_poller_free(NfcaPoller* instance);
-
-const NfcaData* nfca_poller_get_data(NfcaPoller* instance);
-
-NfcaError nfca_poller_start(NfcaPoller* instance, NfcaPollerEventCallback callback, void* context);
-
-NfcaError nfca_poller_stop(NfcaPoller* instance);
-
-// Sync call
-NfcaError nfca_poller_read(NfcaPoller* instance, NfcaData* nfca_data);
-
-NfcaError nfca_poller_read_new(NfcPollerManager* poller_manager, NfcaData* nfca_data);
 
 #ifdef __cplusplus
 }
