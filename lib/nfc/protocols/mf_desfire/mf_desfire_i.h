@@ -2,6 +2,9 @@
 
 #include "mf_desfire.h"
 
+#define MF_DESFIRE_FFF_PICC_PREFIX "PICC "
+#define MF_DESFIRE_FFF_APP_PREFIX "Application "
+
 // SimpleArray configurations
 
 extern const SimpleArrayConfig mf_desfire_key_version_array_config;
@@ -50,3 +53,48 @@ void mf_desfire_application_reset(MfDesfireApplication* data);
 void mf_desfire_file_data_copy(MfDesfireFileData* data, const MfDesfireFileData* other);
 
 void mf_desfire_application_copy(MfDesfireApplication* data, const MfDesfireApplication* other);
+
+// Load internal MfDesfire structures
+
+bool mf_desfire_version_load(MfDesfireVersion* data, FlipperFormat* ff);
+
+bool mf_desfire_free_memory_load(MfDesfireFreeMemory* data, FlipperFormat* ff);
+
+bool mf_desfire_key_settings_load(
+    MfDesfireKeySettings* data,
+    const char* prefix,
+    FlipperFormat* ff);
+
+bool mf_desfire_key_version_load(
+    MfDesfireKeyVersion* data,
+    const char* prefix,
+    uint32_t index,
+    FlipperFormat* ff);
+
+bool mf_desfire_file_count_load(uint32_t* data, const char* prefix, FlipperFormat* ff);
+
+bool mf_desfire_file_ids_load(
+    MfDesfireFileId* data,
+    uint32_t count,
+    const char* prefix,
+    FlipperFormat* ff);
+
+bool mf_desfire_file_settings_load(
+    MfDesfireFileSettings* data,
+    const MfDesfireFileId* id,
+    const char* prefix,
+    FlipperFormat* ff);
+
+bool mf_desfire_file_data_load(MfDesfireFileData* data, const char* prefix, FlipperFormat* ff);
+
+bool mf_desfire_application_count_load(uint32_t* data, FlipperFormat* ff);
+
+bool mf_desfire_application_ids_load(
+    MfDesfireApplicationId* data,
+    uint32_t count,
+    FlipperFormat* ff);
+
+bool mf_desfire_application_load(
+    MfDesfireApplication* data,
+    const MfDesfireApplicationId* id,
+    FlipperFormat* ff);

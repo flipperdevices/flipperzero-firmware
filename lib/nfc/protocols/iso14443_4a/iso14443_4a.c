@@ -57,12 +57,9 @@ bool iso14443_4a_verify(Iso14443_4aData* data, const FuriString* device_type) {
 }
 
 bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version) {
-    UNUSED(data);
-    UNUSED(ff);
-    UNUSED(version);
-
-    // TODO: implementation
-    return false;
+    furi_assert(data);
+    // TODO: handle additional fields
+    return nfca_load(data->iso14443_3a_data, ff, version);
 }
 
 bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff, uint32_t version) {

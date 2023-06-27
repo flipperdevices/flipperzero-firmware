@@ -2,8 +2,7 @@
 
 #include <furi.h>
 
-#define MF_DESFIRE_PROTOCOL_NAME "Mifare DESfire"
-#define MF_DESFIRE_DEVICE_NAME "Mifare DESfire"
+#define MF_DESFIRE_PROTOCOL_NAME "Mifare DESFire"
 
 const NfcProtocolBase nfc_protocol_mf_desfire = {
     .protocol_name = MF_DESFIRE_PROTOCOL_NAME,
@@ -72,16 +71,61 @@ void mf_desfire_copy(MfDesfireData* data, const MfDesfireData* other) {
 
 bool mf_desfire_verify(MfDesfireData* data, const FuriString* device_type) {
     UNUSED(data);
-    return furi_string_equal_str(device_type, "Mifare Desfire");
+    return furi_string_equal_str(device_type, MF_DESFIRE_PROTOCOL_NAME);
 }
 
 bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
-    UNUSED(data);
-    UNUSED(ff);
-    UNUSED(version);
+    furi_assert(data);
 
-    // TODO: Implementation
-    return false;
+    bool is_loaded = false;
+
+    do {
+        if(!iso14443_4a_load(data->iso14443_4a_data, ff, version)) break;
+
+        if(!mf_desfire_version_load(&data->version, ff)) break;
+        if(!mf_desfire_free_memory_load(&data->free_memory, ff)) break;
+        if(!mf_desfire_key_settings_load(
+               &data->master_key_settings, MF_DESFIRE_FFF_PICC_PREFIX, ff))
+            break;
+
+        const uint32_t master_key_version_count = data->master_key_settings.max_keys;
+        simple_array_init(data->master_key_versions, master_key_version_count);
+
+        uint32_t i;
+        for(i = 0; i < master_key_version_count; ++i) {
+            if(!mf_desfire_key_version_load(
+                   simple_array_get(data->master_key_versions, i),
+                   MF_DESFIRE_FFF_PICC_PREFIX,
+                   i,
+                   ff))
+                break;
+        }
+
+        if(i != master_key_version_count) break;
+
+        uint32_t application_count;
+        if(!mf_desfire_application_count_load(&application_count, ff)) break;
+
+        simple_array_init(data->application_ids, application_count);
+        if(!mf_desfire_application_ids_load(
+               simple_array_get(data->application_ids, 0), application_count, ff))
+            break;
+
+        simple_array_init(data->applications, application_count);
+        for(i = 0; i < application_count; ++i) {
+            if(!mf_desfire_application_load(
+                   simple_array_get(data->applications, i),
+                   simple_array_get(data->application_ids, i),
+                   ff))
+                break;
+        }
+
+        if(i != application_count) break;
+
+        is_loaded = true;
+    } while(false);
+
+    return is_loaded;
 }
 
 bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
@@ -104,7 +148,7 @@ bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other) 
 const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcProtocolNameType name_type) {
     UNUSED(data);
     UNUSED(name_type);
-    return MF_DESFIRE_DEVICE_NAME;
+    return MF_DESFIRE_PROTOCOL_NAME;
 }
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len) {

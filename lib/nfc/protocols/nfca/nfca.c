@@ -52,7 +52,6 @@ bool nfca_verify(NfcaData* data, const FuriString* device_type) {
 
 bool nfca_load(NfcaData* data, FlipperFormat* ff, uint32_t version) {
     return nfca_load_data(data, ff, version);
-    return true;
 }
 
 bool nfca_save(const NfcaData* data, FlipperFormat* ff, uint32_t version) {
