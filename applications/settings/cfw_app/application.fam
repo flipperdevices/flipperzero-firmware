@@ -7,7 +7,25 @@ App(
         "gui",
         "dolphin",
     ],
-    stack_size=2 * 1024,
+    stack_size=3 * 1024,
+    icon="A_RM_14",
+    order=90,
+    fap_libs=["assets"],
+    fap_category="Settings",
+    fap_icon="cfw_app_10px.png",
+    link="/ext/apps/Settings/CFW.fap",
+)
+
+App(
+    appid="CFW_Settings",
+    name="CFW",
+    apptype=FlipperAppType.EXTSETTINGSAPP,
+    entry_point="cfw_app",
+    requires=[
+        "gui",
+        "dolphin",
+    ],
+    stack_size=3 * 1024,
     icon="A_RM_14",
     order=90,
     fap_libs=["assets"],

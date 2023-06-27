@@ -18,8 +18,9 @@ static bool
 
     for(; *text; ++text) {
         const char c = *text;
-        if((c < '0' || c > '9') && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z')) {
-            furi_string_printf(error, "Please only\nenter letters\nand numbers!");
+        if((c < '0' || c > '9') && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z') && (c != '?') &&
+           (c != '_')) {
+            furi_string_printf(error, "Invalid\ncharacter\ndetected!");
             return false;
         }
     }

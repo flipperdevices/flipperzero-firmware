@@ -22,6 +22,7 @@ static void loader_cli_list() {
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_SETTINGS_APPS[i].name);
     }
+    printf("For External Apps, specify full path to .fap file");
 }
 
 static void loader_cli_info(Loader* loader) {
@@ -33,12 +34,36 @@ static void loader_cli_info(Loader* loader) {
     }
 }
 
+static const char* loader_cli_check_link(const char* name) {
+    for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_SETTINGS_APPS[i].name, name) == 0) {
+            if(strcmp(FLIPPER_SETTINGS_APPS[i].appid, "NULL") != 0) {
+                return FLIPPER_SETTINGS_APPS[i].appid;
+            } else {
+                return FLIPPER_SETTINGS_APPS[i].name;
+            }
+        }
+    }
+
+    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_APPS[i].name, name) == 0) {
+            if(strcmp(FLIPPER_APPS[i].appid, "NULL") != 0) {
+                return FLIPPER_APPS[i].appid;
+            } else {
+                return FLIPPER_APPS[i].appid;
+            }
+        }
+    }
+
+    return name;
+}
+
 static void loader_cli_open(FuriString* args, Loader* loader) {
     FuriString* app_name = furi_string_alloc();
 
     do {
         if(!args_read_probably_quoted_string_and_trim(args, app_name)) {
-            printf("No application provided\r\n");
+            printf("No application provided.\r\n");
             break;
         }
         furi_string_trim(args);
@@ -48,23 +73,14 @@ static void loader_cli_open(FuriString* args, Loader* loader) {
             args_str = NULL;
         }
 
-        const char* app_name_str = furi_string_get_cstr(app_name);
+        const char* app_name_str = loader_cli_check_link(furi_string_get_cstr(app_name));
+        FuriString* error_message = furi_string_alloc();
 
-        LoaderStatus status = loader_start(loader, app_name_str, args_str);
-
-        switch(status) {
-        case LoaderStatusOk:
-            break;
-        case LoaderStatusErrorAppStarted:
-            printf("Can't start, application is running");
-            break;
-        case LoaderStatusErrorUnknownApp:
-            printf("%s doesn't exists\r\n", app_name_str);
-            break;
-        case LoaderStatusErrorInternal:
-            printf("Internal error\r\n");
-            break;
+        if(loader_start(loader, app_name_str, args_str, error_message) != LoaderStatusOk) {
+            printf("%s\r\n", furi_string_get_cstr(error_message));
         }
+
+        furi_string_free(error_message);
     } while(false);
 
     furi_string_free(app_name);

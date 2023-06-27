@@ -41,7 +41,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [fix: make dialog_file_browser_set_basic_options initialize all fields #2756 (By JarvisCraft)](https://github.com/flipperdevices/flipperzero-firmware/pull/2756)
 - OFW: [Scroll acceleration #2784 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2784)
 - Added: [Continuity Tester (By benallen-dev)](https://github.com/benallen-dev/flipper-zero-apps/tree/main/continuity)
-- OFW: Loader Refactor Coming Soon (Working on qFlipper bug)
+- OFW: [Loader refaptoring: second encounter #2779 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2779)
+- [Fixes for FAP in Loader and Other areas #674 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/674)
+- [Added dynamically generating app list for Desktop Settings App #676 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/676)
+- [More fixes #680 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/680)
 
 <a name="release">
 

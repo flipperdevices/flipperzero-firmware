@@ -7,23 +7,32 @@
 #include "archive/scenes/archive_scene.h"
 
 #define TAG "ArchiveSceneBrowser"
-#define FAP_LOADER_APP_NAME "Applications"
 
 #define SCENE_STATE_DEFAULT (0)
 #define SCENE_STATE_NEED_REFRESH (1)
 
-static const char* flipper_app_name[] = {
-    [ArchiveFileTypeIButton] = "iButton",
-    [ArchiveFileTypeNFC] = "NFC",
-    [ArchiveFileTypeSubGhz] = "Sub-GHz",
-    [ArchiveFileTypeLFRFID] = "125 kHz RFID",
-    [ArchiveFileTypeInfrared] = "Infrared",
-    [ArchiveFileTypeBadUsb] = "Bad USB",
-    [ArchiveFileTypeU2f] = "U2F",
-    [ArchiveFileTypeApplication] = FAP_LOADER_APP_NAME,
-    [ArchiveFileTypeUpdateManifest] = "UpdaterApp",
-    [ArchiveFileTypeFolder] = "Archive",
-};
+const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
+    switch(file_type) {
+    case ArchiveFileTypeIButton:
+        return "iButton";
+    case ArchiveFileTypeNFC:
+        return "NFC";
+    case ArchiveFileTypeSubGhz:
+        return "Sub-GHz";
+    case ArchiveFileTypeLFRFID:
+        return "125 kHz RFID";
+    case ArchiveFileTypeInfrared:
+        return "Infrared";
+    case ArchiveFileTypeBadUsb:
+        return "Bad USB";
+    case ArchiveFileTypeU2f:
+        return "U2F";
+    case ArchiveFileTypeUpdateManifest:
+        return "UpdaterApp";
+    default:
+        return NULL;
+    }
+}
 
 static void archive_loader_callback(const void* message, void* context) {
     furi_assert(message);
@@ -41,65 +50,45 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
     UNUSED(browser);
     Loader* loader = furi_record_open(RECORD_LOADER);
 
-    LoaderStatus status;
-    if(selected->is_app) {
-        char* param = strrchr(furi_string_get_cstr(selected->path), '/');
-        if(param != NULL) {
-            param++;
-        }
+    const char* app_name = archive_get_flipper_app_name(selected->type);
 
-        if(strcmp(flipper_app_name[selected->type], "U2F") == 0) {
-            char* tmpType = "/ext/apps/Main/U2F.fap¯";
-            char* result =
-                malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
+    if(app_name) {
+        if(selected->is_app) {
+            char* param = strrchr(furi_string_get_cstr(selected->path), '/');
+            if(param != NULL) {
+                param++;
+            }
 
-            strcpy(result, tmpType);
-            strcat(result, furi_string_get_cstr(selected->path));
-            status = loader_start(loader, FAP_LOADER_APP_NAME, result);
+            if(strcmp(app_name, "U2F") == 0) {
+                loader_start_with_gui_error(
+                    loader, "/ext/apps/Main/U2F.fap", furi_string_get_cstr(selected->path));
+            } else {
+                loader_start_with_gui_error(loader, app_name, param);
+            }
         } else {
-            status = loader_start(loader, flipper_app_name[selected->type], param);
+            if(strcmp(app_name, "iButton") == 0) {
+                loader_start_with_gui_error(
+                    loader, "/ext/apps/Main/iButton.fap", furi_string_get_cstr(selected->path));
+            } else if(strcmp(app_name, "Bad USB") == 0) {
+                loader_start_with_gui_error(
+                    loader, "/ext/apps/Main/bad_usb.fap", furi_string_get_cstr(selected->path));
+            } else if(strcmp(app_name, "Infrared") == 0) {
+                loader_start_with_gui_error(
+                    loader, "/ext/apps/Main/infrared.fap", furi_string_get_cstr(selected->path));
+            }
+            /* Uncomment if 125 KHz RFID becomes a FAP again to make launching work
+			*else if(strcmp(app_name, "125 kHz RFID") == 0)
+			*{
+			*	loader_start_with_gui_error(loader, "/ext/apps/Main/lfrfid.fap", furi_string_get_cstr(selected->path));
+			*}
+			*/
+            else {
+                loader_start_with_gui_error(
+                    loader, app_name, furi_string_get_cstr(selected->path));
+            }
         }
     } else {
-        if(strcmp(flipper_app_name[selected->type], "iButton") == 0) {
-            char* tmpType = "/ext/apps/Main/iButton.fap¯";
-            char* result =
-                malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
-
-            strcpy(result, tmpType);
-            strcat(result, furi_string_get_cstr(selected->path));
-            status = loader_start(loader, FAP_LOADER_APP_NAME, result);
-        } else if(strcmp(flipper_app_name[selected->type], "Bad USB") == 0) {
-            char* tmpType = "/ext/apps/Main/bad_usb.fap¯";
-            char* result =
-                malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
-
-            strcpy(result, tmpType);
-            strcat(result, furi_string_get_cstr(selected->path));
-            status = loader_start(loader, FAP_LOADER_APP_NAME, result);
-            // } else if(strcmp(flipper_app_name[selected->type], "125 kHz RFID") == 0) {
-            // char* tmpType = "/ext/apps/Main/lfrfid.fap¯";
-            // char* result =
-            // malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
-
-            // strcpy(result, tmpType);
-            // strcat(result, furi_string_get_cstr(selected->path));
-            // status = loader_start(loader, FAP_LOADER_APP_NAME, result);
-        } else if(strcmp(flipper_app_name[selected->type], "Infrared") == 0) {
-            char* tmpType = "/ext/apps/Main/infrared.fap¯";
-            char* result =
-                malloc(strlen(tmpType) + strlen(furi_string_get_cstr(selected->path)) + 1);
-
-            strcpy(result, tmpType);
-            strcat(result, furi_string_get_cstr(selected->path));
-            status = loader_start(loader, FAP_LOADER_APP_NAME, result);
-        } else {
-            status = loader_start(
-                loader, flipper_app_name[selected->type], furi_string_get_cstr(selected->path));
-        }
-    }
-
-    if(status != LoaderStatusOk) {
-        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+        loader_start_with_gui_error(loader, furi_string_get_cstr(selected->path), NULL);
     }
 
     furi_record_close(RECORD_LOADER);

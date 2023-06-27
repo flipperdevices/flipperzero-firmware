@@ -4,7 +4,6 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "Dab_Timer",
-        "fap_loader",
         "subghz",
         "Subghz_Remote_Refactored",
         "SubGHz_Playlist",
@@ -35,7 +34,6 @@ App(
         "subghz",
         "bad_usb",
         #"u2f",
-        "fap_loader",
         "archive",
     ],
 )

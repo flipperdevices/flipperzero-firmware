@@ -110,14 +110,14 @@ static const TextInputKey symbol_keyboard_keys_row_1[] = {
     {'&', 62, 8},
     {'(', 71, 8},
     {')', 81, 8},
-    {'0', 91, 8},
+    {'~', 91, 8},
     {'1', 100, 8},
     {'2', 110, 8},
     {'3', 120, 8},
 };
 
 static const TextInputKey symbol_keyboard_keys_row_2[] = {
-    {'~', 2, 20},
+    {'?', 2, 20},
     {'+', 12, 20},
     {'-', 22, 20},
     {'=', 32, 20},

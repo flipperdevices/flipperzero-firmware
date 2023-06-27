@@ -1,12 +1,12 @@
 #include "../desktop_settings_app.h"
-#include "../ext/services/applications.h"
 #include "desktop_settings_scene.h"
+#include "../helpers/desktop_settings_applications.h"
 #include <storage/storage.h>
 #include <dialogs/dialogs.h>
-#include <fap_loader/fap_loader_app.h>
+#include <flipper_application/flipper_application.h>
 
 #define NONE_APPLICATION_NAME ("None (disable)")
-#define NONE_APPLICATION_INDEX (FLIPPER_APPS_COUNT2 + 1)
+#define NONE_APPLICATION_INDEX (FLIPPER_APPS2_COUNT + 1)
 
 static bool favorite_fap_selector_item_callback(
     FuriString* file_path,
@@ -16,7 +16,7 @@ static bool favorite_fap_selector_item_callback(
     UNUSED(context);
 #ifdef APP_FAP_LOADER
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    bool success = fap_loader_load_name_and_icon(file_path, storage, icon_ptr, item_name);
+    bool success = flipper_application_load_name_and_icon(file_path, storage, icon_ptr, item_name);
     furi_record_close(RECORD_STORAGE);
 #else
     UNUSED(file_path);
@@ -69,7 +69,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         return;
     }
 
-    for(size_t i = 0; i < FLIPPER_APPS_COUNT2; i++) {
+    for(size_t i = 0; i < FLIPPER_APPS2_COUNT; i++) {
         submenu_add_item(
             submenu,
             FLIPPER_APPS2[i].name,
@@ -81,9 +81,11 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         if(!curr_favorite_app->is_external &&
            !strcmp(FLIPPER_APPS2[i].name, curr_favorite_app->name_or_path)) {
             pre_select_item = i;
-        } else if(
-            curr_favorite_app->is_external &&
-            (strcmp(FLIPPER_APPS2[i].name, "Applications") == 0)) {
+        } else if(!curr_favorite_app->is_external && strcmp(FLIPPER_APPS2[i].appid, "NULL")) {
+            if(!strcmp(FLIPPER_APPS2[i].appid, curr_favorite_app->name_or_path)) {
+                pre_select_item = i;
+            }
+        } else if(curr_favorite_app->is_external && !strcmp(FLIPPER_APPS2[i].name, "Applications")) {
             pre_select_item = i;
         }
     }
@@ -182,6 +184,15 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                     MAX_APP_LENGTH);
                 consumed = true;
             }
+        } else if(strcmp(FLIPPER_APPS2[event.event].appid, "NULL") != 0) {
+            if(strstr(FLIPPER_APPS2[event.event].appid, ".fap")) {
+                curr_favorite_app->is_external = false;
+                strncpy(
+                    curr_favorite_app->name_or_path,
+                    FLIPPER_APPS2[event.event].appid,
+                    MAX_APP_LENGTH);
+            }
+            consumed = true;
         } else {
             curr_favorite_app->is_external = false;
             strncpy(
@@ -190,7 +201,7 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
         }
         if(consumed) {
             scene_manager_previous_scene(app->scene_manager);
-        };
+        }
         consumed = true;
     }
 

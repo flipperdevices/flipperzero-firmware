@@ -166,8 +166,10 @@ CfwApp* cfw_app_alloc() {
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, CfwAppViewPopup, popup_get_view(app->popup));
 
-    // Settings init
-    CfwSettings* cfw_settings = CFW_SETTINGS();
+    /**
+	* Commenting out cfw_settings for now to reduce error/warnings.
+	* CfwSettings* cfw_settings = CFW_SETTINGS();
+	**/
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
@@ -175,15 +177,27 @@ CfwApp* cfw_app_alloc() {
     CharList_init(app->mainmenu_app_paths);
     Stream* stream = file_stream_alloc(storage);
     FuriString* line = furi_string_alloc();
+    FuriString* filename = furi_string_alloc();
     if(file_stream_open(stream, CFW_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
         while(stream_read_line(stream, line)) {
             furi_string_replace_all(line, "\r", "");
             furi_string_replace_all(line, "\n", "");
-            CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(line)));
-            fap_loader_load_name_and_icon(line, storage, NULL, line);
-            CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(line)));
+            uint8_t* icon_buf = malloc(MENU_ICON_MAX_SIZE);
+
+            path_extract_filename(line, filename, true);
+            if(!flipper_application_load_name_and_icon(line, storage, &icon_buf, filename)) {
+                free(icon_buf);
+                icon_buf = NULL;
+            } else {
+                free(icon_buf);
+                icon_buf = NULL;
+                CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(line)));
+                CharList_push_back(
+                    app->mainmenu_app_names, strdup(furi_string_get_cstr(filename)));
+            }
         }
     }
+    furi_string_free(filename);
     furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);

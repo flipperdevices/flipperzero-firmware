@@ -1,3 +1,4 @@
+import shutil
 from ansi.color import fg
 from fbt.appmanifest import (
     ApplicationsCGenerator,
@@ -60,11 +61,15 @@ def DumpApplicationConfig(target, source, env):
 
 def build_apps_c(target, source, env):
     target_file_name = target[0].path
+    mod_file_name = target[0].path.replace(str(env["BUILD_DIR"])+"\\","").replace("applications.c","settings\\desktop_settings\\helpers\\desktop_settings_applications.c")
 
     gen = ApplicationsCGenerator(env["APPBUILD"], env.subst("$LOADER_AUTOSTART"))
     with open(target_file_name, "w") as file:
         file.write(gen.generate())
-
+    if "main_apps" in str(source[0]):
+        gen = ApplicationsCGenerator(env["APPBUILD"])
+        with open(mod_file_name, "w") as file:
+            file.write(gen.generate_desktop_settings())
 
 def generate(env):
     env.AddMethod(LoadAppManifest)

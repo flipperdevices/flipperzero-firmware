@@ -1,7 +1,7 @@
 App(
-    appid="Passport_Settings",
-    name="Passport Settings",
-    apptype=FlipperAppType.EXTERNAL,
+    appid="passport_settings",
+    name="Passport",
+    apptype=FlipperAppType.EXTSETTINGSAPP,
     entry_point="passport_settings_app",
     requires=[
         "desktop",
@@ -11,4 +11,5 @@ App(
     order=50,
     fap_icon="passport_10px.png",
     fap_category="Settings",
+    link="/ext/apps/Settings/Passport_Settings.fap",
 )

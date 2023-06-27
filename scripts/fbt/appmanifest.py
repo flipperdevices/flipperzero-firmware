@@ -20,6 +20,7 @@ class FlipperAppType(Enum):
     METAPACKAGE = "Package"
     PLUGIN = "Plugin"
     EXTMAINAPP = "ExtMainApp"
+    EXTSETTINGSAPP = "ExtSettingsApp"
 
 
 @dataclass
@@ -343,12 +344,21 @@ class AppBuildset:
 
 class ApplicationsCGenerator:
     APP_TYPE_MAP = {
-        FlipperAppType.SERVICE: ("FlipperApplication", "FLIPPER_SERVICES"),
-        FlipperAppType.SYSTEM: ("FlipperApplication", "FLIPPER_SYSTEM_APPS"),
-        FlipperAppType.APP: ("FlipperApplication", "FLIPPER_APPS"),
-        FlipperAppType.DEBUG: ("FlipperApplication", "FLIPPER_DEBUG_APPS"),
-        FlipperAppType.SETTINGS: ("FlipperApplication", "FLIPPER_SETTINGS_APPS"),
-        FlipperAppType.STARTUP: ("FlipperOnStartHook", "FLIPPER_ON_SYSTEM_START"),
+        FlipperAppType.SERVICE: ("FlipperInternalApplication", "FLIPPER_SERVICES"),
+        FlipperAppType.SYSTEM: ("FlipperInternalApplication", "FLIPPER_SYSTEM_APPS"),
+        FlipperAppType.APP: ("FlipperInternalApplication", "FLIPPER_APPS"),
+        FlipperAppType.DEBUG: ("FlipperInternalApplication", "FLIPPER_DEBUG_APPS"),
+        FlipperAppType.SETTINGS: (
+            "FlipperInternalApplication",
+            "FLIPPER_SETTINGS_APPS",
+        ),
+        FlipperAppType.STARTUP: (
+            "FlipperInternalOnStartHook",
+            "FLIPPER_ON_SYSTEM_START",
+        ),
+    }
+    APP_TYPE_MAP_DESKTOP_SETTINGS = {
+        FlipperAppType.APP: ("DesktopSettingsApplication", "FLIPPER_APPS2")
     }
 
     def __init__(self, buildset: AppBuildset, autorun_app: str = ""):
@@ -367,21 +377,36 @@ class ApplicationsCGenerator:
             return f"""
     {{.app = NULL,
      .name = "{app.name}",
-     .appid = "{app.link}",
+     .appid = "{f"{app.link}" if app.link else "NULL"}",
      .stack_size = 0,
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .link = "{f"{app.link}" if app.link else "NULL"}",
-     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)}}}"""
-     # .appid = "/ext/apps/.Main/{app.link}.fap",
+     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)}}}"""
+        if app.apptype == FlipperAppType.EXTSETTINGSAPP:
+            return f"""
+    {{.app = NULL,
+     .name = "{app.name}",
+     .appid = "{f"{app.link}" if app.link else "NULL"}",
+     .stack_size = 0,
+     .icon = {f"&{app.icon}" if app.icon else "NULL"},
+     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)}}}"""
         return f"""
     {{.app = {app.entry_point},
      .name = "{app.name}",
      .appid = "{app.appid}",
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .link = "{f"{app.link}" if app.link else "NULL"}",
-     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)}}}"""
-
+     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)} }}"""
+     
+    def get_app_descr_desktop_settings(self, app: FlipperApplication):
+        if app.apptype == FlipperAppType.EXTMAINAPP:
+            return f"""
+    {{.name = "{app.name}",
+     .appid = "{f"{app.link}" if app.link else "NULL"}" }}"""
+        else:
+            return f"""
+    {{.name = "{app.name}",
+     .appid = "NULL" }}"""
+     
     def generate(self):
         contents = [
             '#include "applications.h"',
@@ -397,6 +422,8 @@ class ApplicationsCGenerator:
             apps = self.buildset.get_apps_of_type(apptype)
             if apptype is FlipperAppType.APP:
                 apps += self.buildset.get_apps_of_type(FlipperAppType.EXTMAINAPP)
+            if apptype is FlipperAppType.SETTINGS:
+                apps += self.buildset.get_apps_of_type(FlipperAppType.EXTSETTINGSAPP)
             apps.sort(key=lambda app: app.order)
             contents.append(",\n".join(map(self.get_app_descr, apps)))
             contents.append("};")
@@ -409,8 +436,25 @@ class ApplicationsCGenerator:
             contents.extend(
                 [
                     self.get_app_ep_forward(archive_app[0]),
-                    f"const FlipperApplication FLIPPER_ARCHIVE = {self.get_app_descr(archive_app[0])};",
+                    f"const FlipperInternalApplication FLIPPER_ARCHIVE = {self.get_app_descr(archive_app[0])};",
                 ]
             )
+
+        return "\n".join(contents)
+
+    def generate_desktop_settings(self):
+        contents = [
+            '#include "desktop_settings_applications.h"',
+            " "
+        ]
+        for apptype in self.APP_TYPE_MAP_DESKTOP_SETTINGS:
+            entry_type, entry_block = self.APP_TYPE_MAP_DESKTOP_SETTINGS[apptype]
+            apps = self.buildset.get_apps_of_type(FlipperAppType.APP) + self.buildset.get_apps_of_type(FlipperAppType.EXTMAINAPP)
+            contents.append(f"const {entry_type} {entry_block}[] = {{")
+            apps.sort(key=lambda app: app.order)
+            contents.append('\n\t{.name = "Applications",\n\t .appid = "NULL" },')
+            contents.append(",\n".join(map(self.get_app_descr_desktop_settings, apps)))
+            contents.append("};")
+            contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
 
         return "\n".join(contents)

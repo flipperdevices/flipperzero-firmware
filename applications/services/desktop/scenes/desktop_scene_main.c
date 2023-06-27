@@ -13,18 +13,16 @@
 
 #define TAG "DesktopSrv"
 
+#define ARKANOID_APP EXT_PATH("apps/Games/Arkanoid.fap")
 #define CLOCK_APP EXT_PATH("apps/Main/Dab_Timer.fap")
+#define DICE_APP EXT_PATH("apps/Games/Dice.fap")
+#define DOOM_APP EXT_PATH("apps/Games/DOOM.fap")
+#define HEAP_DEFENCE_APP EXT_PATH("apps/Games/Heap_Defence.fap")
+#define IMPROVED_2048_APP EXT_PATH("apps/Games/2048_improved.fap")
 #define PASSPORT_APP EXT_PATH("apps/Settings/Passport.fap")
 #define SNAKE_APP EXT_PATH("apps/Games/Snake.fap")
-#define IMPROVED_2048_APP EXT_PATH("apps/Games/2048_improved.fap")
-#define ZOMBIEZ_APP EXT_PATH("apps/Games/Zombiez.fap")
 #define TETRIS_APP EXT_PATH("apps/Games/Tetris.fap")
-#define DOOM_APP EXT_PATH("apps/Games/DOOM.fap")
-#define DICE_APP EXT_PATH("apps/Games/Dice.fap")
-#define ARKANOID_APP EXT_PATH("apps/Games/Arkanoid.fap")
-#define HEAP_DEFENCE_APP EXT_PATH("apps/Games/Heap_Defence.fap")
-
-#define FAP_LOADER_APP_NAME "Applications"
+#define ZOMBIEZ_APP EXT_PATH("apps/Games/Zombiez.fap")
 
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
@@ -48,7 +46,8 @@ static void desktop_scene_main_interact_animation_callback(void* context) {
 }
 
 #ifdef APP_ARCHIVE
-static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* flipper_app) {
+static void
+    desktop_switch_to_app(Desktop* desktop, const FlipperInternalApplication* flipper_app) {
     furi_assert(desktop);
     furi_assert(flipper_app);
     furi_assert(flipper_app->app);
@@ -75,41 +74,16 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
 #endif
 
 static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char* path) {
-    do {
-        LoaderStatus status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, path);
-        if(status == LoaderStatusOk) break;
-        FURI_LOG_E(TAG, "loader_start failed: %d", status);
-
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        if(storage_file_exists(storage, PASSPORT_APP)) {
-            furi_record_close(RECORD_STORAGE);
-            LoaderStatus status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, PASSPORT_APP);
-
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
-        }
-    } while(false);
+    if(loader_start_with_gui_error(desktop->loader, path, NULL) != LoaderStatusOk) {
+        loader_start(desktop->loader, PASSPORT_APP, NULL, NULL);
+    }
 }
 
 static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* application) {
-    LoaderStatus status = LoaderStatusErrorInternal;
-    if(application->is_external) {
-        status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, application->name_or_path);
-    } else if(strlen(application->name_or_path) > 0) {
-        if(strcmp(application->name_or_path, "None (disable)") != 0) {
-            status = loader_start(desktop->loader, application->name_or_path, NULL);
-        } else {
-            return;
-        }
+    if(application->name_or_path) {
+        loader_start(desktop->loader, application->name_or_path, NULL, NULL);
     } else {
-        // No favourite app is set! So we skipping this part
-        return;
-        //status = loader_start(desktop->loader, FAP_LOADER_APP_NAME, NULL);
-    }
-
-    if(status != LoaderStatusOk) {
-        FURI_LOG_E(TAG, "loader_start failed: %d", status);
+        loader_start(desktop->loader, LOADER_APPLICATIONS_NAME, NULL, NULL);
     }
 }
 
@@ -173,10 +147,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenPowerOff: {
-            LoaderStatus status = loader_start(desktop->loader, "Power", "off");
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+            loader_start(desktop->loader, "Power", "off", NULL);
             consumed = true;
             break;
         }
@@ -210,30 +181,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopAnimationEventInteractAnimation:
             if(!animation_manager_interact_process(desktop->animation_manager)) {
-                Storage* storage = furi_record_open(RECORD_STORAGE);
-                if(storage_file_exists(storage, PASSPORT_APP)) {
-                    furi_record_close(RECORD_STORAGE);
-                    LoaderStatus status =
-                        loader_start(desktop->loader, FAP_LOADER_APP_NAME, PASSPORT_APP);
-
-                    if(status != LoaderStatusOk) {
-                        FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                    }
-                }
+                desktop_scene_main_open_app_or_profile(desktop, PASSPORT_APP);
             }
             consumed = true;
             break;
         case DesktopMainEventOpenPassport: {
-            Storage* storage = furi_record_open(RECORD_STORAGE);
-            if(storage_file_exists(storage, PASSPORT_APP)) {
-                furi_record_close(RECORD_STORAGE);
-                LoaderStatus status =
-                    loader_start(desktop->loader, FAP_LOADER_APP_NAME, PASSPORT_APP);
-
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+            desktop_scene_main_open_app_or_profile(desktop, PASSPORT_APP);
             break;
         }
         case DesktopMainEventOpenSnake: {
@@ -272,12 +225,7 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             Storage* storage = furi_record_open(RECORD_STORAGE);
             if(storage_file_exists(storage, CLOCK_APP)) {
                 furi_record_close(RECORD_STORAGE);
-                LoaderStatus status =
-                    loader_start(desktop->loader, FAP_LOADER_APP_NAME, CLOCK_APP);
-
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
+                desktop_scene_main_open_app_or_profile(desktop, CLOCK_APP);
             } else {
                 furi_record_close(RECORD_STORAGE);
                 scene_manager_next_scene(desktop->scene_manager, DesktopSceneDebug);

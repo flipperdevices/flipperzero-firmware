@@ -4,9 +4,9 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         # "dolphin_passport",
-        # "passport_settings",
-        "desktop_settings_loader",
-        "passport_settings_loader",
+        "desktop_settings",
+        "passport_settings",
+        "CFW_Settings",
         "system_settings",
         "about",
     ],

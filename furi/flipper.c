@@ -28,7 +28,7 @@ static void flipper_print_version(const char* target, const Version* version) {
     }
 }
 
-void flipper_start_service(const FlipperApplication* service) {
+void flipper_start_service(const FlipperInternalApplication* service) {
     FURI_LOG_D(TAG, "Starting service %s", service->name);
 
     FuriThread* thread =

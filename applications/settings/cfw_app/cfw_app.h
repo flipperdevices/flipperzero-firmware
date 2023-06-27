@@ -10,21 +10,24 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/popup.h>
-#include <lib/toolbox/value_index.h>
+#include <storage/storage.h>
+#include <toolbox/path.h>
 #include <toolbox/stream/file_stream.h>
+#include <toolbox/value_index.h>
 #include "scenes/cfw_app_scene.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include "dolphin/dolphin.h"
 #include "dolphin/dolphin_i.h"
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/subghz/subghz_setting.h>
-#include <applications/main/fap_loader/fap_loader_app.h>
+#include <flipper_application/flipper_application.h>
 #include <notification/notification_app.h>
 #include <rgb_backlight.h>
 #include <m-array.h>
 #include "namespoof.h"
 #include <cfw.h>
 
+#define MENU_ICON_MAX_SIZE 14
 #define CFW_SUBGHZ_FREQ_BUFFER_SIZE 6
 
 ARRAY_DEF(CharList, char*)

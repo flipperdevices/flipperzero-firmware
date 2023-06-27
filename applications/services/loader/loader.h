@@ -1,14 +1,13 @@
 #pragma once
 #include <furi.h>
-#include "loader_extmainapp.h"
+#include "loader_extapps.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define RECORD_LOADER "loader"
-
-#define FAP_LOADER_APP_NAME "Applications"
+#define LOADER_APPLICATIONS_NAME "Applications"
 
 typedef struct Loader Loader;
 
@@ -28,29 +27,73 @@ typedef struct {
     LoaderEventType type;
 } LoaderEvent;
 
-/** Start application
- * @param name - application name
- * @param args - application arguments
- * @retval true on success
+/**
+ * @brief Start application
+ * @param[in] instance loader instance
+ * @param[in] name application name
+ * @param[in] args application arguments
+ * @param[out] error_message detailed error message, can be NULL
+ * @return LoaderStatus 
  */
-LoaderStatus loader_start(Loader* instance, const char* name, const char* args);
+LoaderStatus
+    loader_start(Loader* instance, const char* name, const char* args, FuriString* error_message);
 
-/** Lock application start
- * @retval true on success
+/**
+ * @brief Start application with GUI error message
+ * @param[in] instance loader instance
+ * @param[in] name application name
+ * @param[in] args application arguments
+ * @return LoaderStatus 
+ */
+LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const char* args);
+
+/** 
+ * @brief Lock application start
+ * @param[in] instance loader instance
+ * @return true on success
  */
 bool loader_lock(Loader* instance);
 
-/** Unlock application start */
+/**
+ * @brief Unlock application start
+ * @param[in] instance loader instance
+ */
 void loader_unlock(Loader* instance);
 
-/** Get loader lock status */
+/**
+ * @brief Check if loader is locked
+ * @param[in] instance loader instance
+ * @return true if locked
+ */
 bool loader_is_locked(Loader* instance);
 
-/** Show primary loader */
+/**
+ * @brief Show loader menu
+ * @param[in] instance loader instance
+ */
 void loader_show_menu(Loader* instance);
 
-/** Show primary loader */
+/**
+ * @brief Get loader pubsub
+ * @param[in] instance loader instance
+ * @return FuriPubSub* 
+ */
 FuriPubSub* loader_get_pubsub(Loader* instance);
+
+/**
+* @brief Get ExtMainApp item
+* @param[in] instance loader instance
+* @param[in] size_t of item
+* @return ExtMainApp*
+*/
+ExtMainApp* loader_get_ext_main_app_item(Loader* instance, size_t x);
+
+/**
+* @brief Get ExtMainAppList_t size
+* @param[in] instance loader instance
+* @return size_t of ExtMainAppList_t size
+*/
+size_t loader_get_ext_main_app_list_size(Loader* loader);
 
 #ifdef __cplusplus
 }

@@ -136,7 +136,7 @@ static bool bubble_animation_input_callback(InputEvent* event, void* context) {
     } else if(event->key == InputKeyRight && event->type == InputTypeLong) {
         consumed = true;
         Loader* loader = furi_record_open(RECORD_LOADER);
-        loader_start(loader, "About", "batt");
+        loader_start(loader, "About", "batt", NULL);
         furi_record_close(RECORD_LOADER);
     }
 
