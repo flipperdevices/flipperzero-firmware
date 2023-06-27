@@ -334,10 +334,14 @@ static bool archive_view_input(InputEvent* event, void* context) {
                 browser->view,
                 ArchiveBrowserViewModel * model,
                 {
-                    int32_t scroll_speed = (model->button_held_for_ticks / 5) + 1;
+                    int32_t scroll_speed = 1;
 
-                    if(scroll_speed > 5) {
-                        scroll_speed = 5;
+                    if(model->button_held_for_ticks > 5) {
+                        if(model->button_held_for_ticks % 2) {
+                            scroll_speed = 0;
+                        } else {
+                            scroll_speed = model->button_held_for_ticks > 9 ? 5 : 3;
+                        }
                     }
 
                     if(event->key == InputKeyUp) {
