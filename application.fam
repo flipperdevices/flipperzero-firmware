@@ -1,6 +1,6 @@
 App(
 	appid="finik_eth",
-	name="[ETH]finik",
+	name="finik[eth]",
 	apptype=FlipperAppType.EXTERNAL,
 	entry_point="finik_eth_app",
 	cdefines=["FINIK_ETH"],
@@ -9,7 +9,7 @@ App(
 	],
 	stack_size=1 * 1024,
 	order=90,
-	fap_icon="ethernet_icon.png",
+	fap_icon="ehternet_icon_10x10px.png",
 	fap_category="Misc",
 	fap_icon_assets="images",
 )
