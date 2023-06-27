@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0627-1003-0.85.3-a1b461a](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-27 10:03 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-27 10:03 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-27 19:25 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-27 19:25 EST`
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - OFW PR: [LF-RFID debug: make it work #2793 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2793)
 - Added: [NFC Seader (By bettse)](https://github.com/bettse/seader)
@@ -47,6 +47,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [More fixes #680 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/680)
 - [Fix fr-FR-mac keylayout #681 (By FelixLgr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/681)
 - OFW: [Actions: unit_test and updater timeouts #2807 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2807)
+- Removed: [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) (Too much of a WIP)
+- Updated readme "COMMENTED OUT" section to include $25, $50 and $100 USD bounties!
 
 <a name="release">
 
@@ -411,7 +413,6 @@ $ ./fbt dolphin_ext
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
-- [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b)
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
 - [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate) with fixes for NFC (By RogueMaster)
 - [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
@@ -429,8 +430,10 @@ $ ./fbt dolphin_ext
 
 - If you can fix any of these, DM me on Discord for a surprise reward.
 - [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple)
-- [Chess (By okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess)
+- [Chess (By okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) (Bounty: $50 USD in ETH or BTC)
 - [Dolphin SOS (By arha)](https://github.com/arha/dolphin-sos)
+- [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) (Bounty: $25 USD in ETH or BTC)
+- $100 USD Bounty IN ETH or BTC for working [Fast FAP Loading](https://github.com/flipperdevices/flipperzero-firmware/pull/2790)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
 
 # Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0625-1154-0.85.3-4f7f5a5.tgz&channel=RM0625-1154-0.85.3-4f7f5a5&version=0.85.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0625-1154-0.85.3-4f7f5a5-NoAnim.tgz&channel=RM0625-1154-0.85.3-4f7f5a5-NoAnim&version=0.85.3)
