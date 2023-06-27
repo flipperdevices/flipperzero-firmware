@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lib/nfc/helpers/bit_buffer.h>
-#include <nfc/protocols/nfc_protocol_base.h>
+#include <nfc/protocols/nfc_device_base.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,7 +64,7 @@ typedef struct {
     Iso14443_3aRats rats;
 } Iso14443_3aData;
 
-extern const NfcProtocolBase nfc_protocol_iso14443_3a;
+extern const NfcDeviceBase nfc_device_iso14443_3a;
 
 Iso14443_3aData* iso14443_3a_alloc();
 

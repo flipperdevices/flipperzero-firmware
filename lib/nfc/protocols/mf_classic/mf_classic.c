@@ -40,7 +40,7 @@ static const MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
         },
 };
 
-const NfcProtocolBase nfc_protocol_mf_classic = {
+const NfcDeviceBase nfc_device_mf_classic = {
     .protocol_name = MF_CLASSIC_PROTOCOL_NAME,
     .alloc = (NfcDeviceAlloc)mf_classic_alloc,
     .free = (NfcDeviceFree)mf_classic_free,

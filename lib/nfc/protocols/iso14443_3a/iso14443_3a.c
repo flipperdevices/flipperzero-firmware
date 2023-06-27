@@ -7,7 +7,7 @@
 #define ISO14443_3A_PROTOCOL_NAME "ISO14443-3A"
 #define ISO14443_3A_DEVICE_NAME "Unknown ISO14443-3A Tag"
 
-const NfcProtocolBase nfc_protocol_iso14443_3a = {
+const NfcDeviceBase nfc_device_iso14443_3a = {
     .protocol_name = ISO14443_3A_PROTOCOL_NAME,
     .alloc = (NfcDeviceAlloc)iso14443_3a_alloc,
     .free = (NfcDeviceFree)iso14443_3a_free,

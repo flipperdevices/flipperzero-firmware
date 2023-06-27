@@ -165,7 +165,7 @@ typedef struct {
     uint32_t auth_attempts;
 } MfUltralightData;
 
-extern const NfcProtocolBase nfc_protocol_mf_ultralight;
+extern const NfcDeviceBase nfc_device_mf_ultralight;
 
 MfUltralightData* mf_ultralight_alloc();
 

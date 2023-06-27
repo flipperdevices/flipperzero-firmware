@@ -36,7 +36,7 @@ typedef struct {
     NfcDeviceEqual is_equal;
     NfcDeviceGetName get_name;
     NfcDeviceGetUid get_uid;
-} NfcProtocolBase;
+} NfcDeviceBase;
 
 #ifdef __cplusplus
 }

@@ -119,7 +119,7 @@ typedef struct {
     MfClassicBlock block[MF_CLASSIC_TOTAL_BLOCKS_MAX];
 } MfClassicData;
 
-extern const NfcProtocolBase nfc_protocol_mf_classic;
+extern const NfcDeviceBase nfc_device_mf_classic;
 
 MfClassicData* mf_classic_alloc();
 

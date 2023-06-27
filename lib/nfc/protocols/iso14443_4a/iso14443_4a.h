@@ -29,7 +29,7 @@ typedef struct {
     Iso14443_4aAtsData ats_data;
 } Iso14443_4aData;
 
-extern const NfcProtocolBase nfc_protocol_iso14443_4a;
+extern const NfcDeviceBase nfc_device_iso14443_4a;
 
 // Virtual methods
 

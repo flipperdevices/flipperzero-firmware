@@ -6,7 +6,7 @@
 #define ISO14443_4A_DEVICE_NAME "Unknown ISO14443-4A Tag"
 #define ISO14443_4A_ATS_BIT (1 << 5)
 
-const NfcProtocolBase nfc_protocol_iso14443_4a = {
+const NfcDeviceBase nfc_device_iso14443_4a = {
     .protocol_name = ISO14443_4A_PROTOCOL_NAME,
     .alloc = (NfcDeviceAlloc)iso14443_4a_alloc,
     .free = (NfcDeviceFree)iso14443_4a_free,

@@ -147,7 +147,7 @@ typedef struct {
     SimpleArray* applications;
 } MfDesfireData;
 
-extern const NfcProtocolBase nfc_protocol_mf_desfire;
+extern const NfcDeviceBase nfc_device_mf_desfire;
 
 // Virtual methods
 

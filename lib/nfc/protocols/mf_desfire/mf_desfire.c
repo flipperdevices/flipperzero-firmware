@@ -5,7 +5,7 @@
 #define MF_DESFIRE_PROTOCOL_NAME "Mifare DESfire"
 #define MF_DESFIRE_DEVICE_NAME "Mifare DESfire"
 
-const NfcProtocolBase nfc_protocol_mf_desfire = {
+const NfcDeviceBase nfc_device_mf_desfire = {
     .protocol_name = MF_DESFIRE_PROTOCOL_NAME,
     .alloc = (NfcDeviceAlloc)mf_desfire_alloc,
     .free = (NfcDeviceFree)mf_desfire_free,

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nfc_protocol_base.h"
+#include "nfc_device_base.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,7 +19,7 @@ typedef enum {
     NfcProtocolInvalid,
 } NfcProtocol;
 
-extern const NfcProtocolBase* nfc_devices[];
+extern const NfcDeviceBase* nfc_devices[];
 
 #ifdef __cplusplus
 }

@@ -117,7 +117,7 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
         },
 };
 
-const NfcProtocolBase nfc_protocol_mf_ultralight = {
+const NfcDeviceBase nfc_device_mf_ultralight = {
     .protocol_name = MF_ULTRALIGHT_PROTOCOL_NAME,
     .alloc = (NfcDeviceAlloc)mf_ultralight_alloc,
     .free = (NfcDeviceFree)mf_ultralight_free,
