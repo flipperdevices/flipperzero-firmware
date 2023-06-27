@@ -137,9 +137,9 @@ void t5577_write_page_block_pass(
     //else
     // opcode for page 0 or 1
     if(!page)
-	t5577_write_opcode(T5577_OPCODE_PAGE_0);
+        t5577_write_opcode(T5577_OPCODE_PAGE_0);
     else
-	t5577_write_opcode(T5577_OPCODE_PAGE_1);
+        t5577_write_opcode(T5577_OPCODE_PAGE_1);
 
     // password
     if(with_pass) {
@@ -175,11 +175,9 @@ void t5577_write_page_block_pass_with_start_and_stop(
     bool with_pass,
     uint32_t password/*,
     bool testmode*/) {
-
     t5577_start();
     FURI_CRITICAL_ENTER();
-    t5577_write_page_block_pass(page, block, lock_bit,
-		    data, with_pass, password/*, testmode*/);
+    t5577_write_page_block_pass(page, block, lock_bit, data, with_pass, password /*, testmode*/);
     t5577_write_reset();
     FURI_CRITICAL_EXIT();
     t5577_stop();
@@ -191,11 +189,9 @@ void t5577_write_page_block_simple_with_start_and_stop(
     bool lock_bit,
     uint32_t data/*,
     bool testmode*/) {
-
     t5577_start();
     FURI_CRITICAL_ENTER();
-    t5577_write_page_block_pass(page, block, lock_bit,
-		    data, false, 0/*, testmode*/);
+    t5577_write_page_block_pass(page, block, lock_bit, data, false, 0 /*, testmode*/);
     t5577_write_reset();
     FURI_CRITICAL_EXIT();
     t5577_stop();

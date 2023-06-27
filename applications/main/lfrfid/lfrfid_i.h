@@ -84,7 +84,7 @@ typedef enum {
     LfRfidWriteBlockLockBit = 1 << 6,
     LfRfidReadBlockMode = 1 << 7,
     LfRfidTestModeAccess = 1 << 8
- } LfRfidExtraOptions;
+} LfRfidExtraOptions;
 
 typedef enum {
     LfRfidSettingHexGeneric = 1 << 0,
