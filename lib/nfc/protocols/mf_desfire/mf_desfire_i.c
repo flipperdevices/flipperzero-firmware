@@ -22,7 +22,16 @@
 #define MF_DESFIRE_FFF_FILE_TYPE_KEY "Type"
 #define MF_DESFIRE_FFF_FILE_COMM_SETTINGS_KEY "Communication Settings"
 #define MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY "Access Rights"
+
 #define MF_DESFIRE_FFF_FILE_SIZE_KEY "Size"
+
+#define MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY "Hi Limit"
+#define MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY "Lo Limit"
+#define MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY "Limited Credit Value"
+#define MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_ENABLED_KEY "Limited Credit Enabled"
+
+#define MF_DESFIRE_FFF_FILE_MAX_KEY "Max"
+#define MF_DESFIRE_FFF_FILE_CUR_KEY "Cur"
 
 typedef struct {
     bool is_master_key_changeable : 1;
@@ -227,8 +236,6 @@ bool mf_desfire_file_settings_load(
         furi_string_alloc_printf("%s%s%u ", prefix, MF_DESFIRE_FFF_FILE_PREFIX, *id);
     FuriString* key = furi_string_alloc();
 
-    FURI_LOG_D("!!!!", "%s", furi_string_get_cstr(file_prefix));
-
     do {
         furi_string_printf(
             key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_TYPE_KEY);
@@ -256,9 +263,50 @@ bool mf_desfire_file_settings_load(
                 break;
 
         } else if(data->type == MfDesfireFileTypeValue) {
+            furi_string_printf(
+                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY);
+            if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->value.hi_limit, 1))
+                break;
+
+            furi_string_printf(
+                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY);
+            if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->value.lo_limit, 1))
+                break;
+
+            furi_string_printf(
+                key,
+                "%s%s",
+                furi_string_get_cstr(file_prefix),
+                MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY);
+            if(!flipper_format_read_uint32(
+                   ff, furi_string_get_cstr(key), &data->value.limited_credit_value, 1))
+                break;
+
+            furi_string_printf(
+                key,
+                "%s%s",
+                furi_string_get_cstr(file_prefix),
+                MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_ENABLED_KEY);
+            if(!flipper_format_read_bool(
+                   ff, furi_string_get_cstr(key), &data->value.limited_credit_enabled, 1))
+                break;
         } else if(
             data->type == MfDesfireFileTypeLinearRecord ||
             data->type == MfDesfireFileTypeCyclicRecord) {
+            furi_string_printf(
+                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_SIZE_KEY);
+            if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->record.size, 1))
+                break;
+
+            furi_string_printf(
+                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_MAX_KEY);
+            if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->record.max, 1))
+                break;
+
+            furi_string_printf(
+                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_CUR_KEY);
+            if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->record.cur, 1))
+                break;
         }
 
         is_loaded = true;
