@@ -1,11 +1,11 @@
 #pragma once
 
+#include <nfc/protocols/nfc_generic_event.h>
+#include <nfc/protocols/nfc_device_base.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <nfc/protocols/nfc_generic_event.h>
-#include <nfc/protocols/nfc_device_base.h>
 
 typedef struct NfcPoller NfcPoller;
 

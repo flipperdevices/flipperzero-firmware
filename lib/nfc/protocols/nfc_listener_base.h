@@ -1,13 +1,14 @@
 #pragma once
 
 #include "nfc_generic_event.h"
+#include "nfc_device_base.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef NfcGenericInstance* (
-    *NfcListenerAlloc)(NfcGenericInstance* base_poller, NfcDeviceData* data);
+    *NfcListenerAlloc)(NfcGenericInstance* base_poller, NfcProtocol protocol, NfcDeviceData* data);
 typedef void (*NfcListenerFree)(NfcGenericInstance* instance);
 
 typedef void (*NfcListenerSetCallback)(
