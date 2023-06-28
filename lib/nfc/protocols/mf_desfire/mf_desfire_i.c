@@ -311,6 +311,27 @@ bool mf_desfire_file_settings_load(
     return is_loaded;
 }
 
+bool mf_desfire_file_data_load(MfDesfireFileData* data, const char* prefix, FlipperFormat* ff) {
+    bool is_loaded = false;
+    do {
+        if(!flipper_format_key_exist(ff, prefix)) {
+            is_loaded = true;
+            break;
+        }
+
+        uint32_t data_size;
+        if(!flipper_format_get_value_count(ff, prefix, &data_size)) break;
+
+        simple_array_init(data->data, data_size);
+
+        if(!flipper_format_read_hex(ff, prefix, simple_array_get(data->data, 0), data_size)) break;
+
+        is_loaded = true;
+    } while(false);
+
+    return is_loaded;
+}
+
 bool mf_desfire_application_count_load(uint32_t* data, FlipperFormat* ff) {
     return flipper_format_read_uint32(ff, MF_DESFIRE_FFF_APPLICATION_COUNT_KEY, data, 1);
 }
@@ -364,11 +385,13 @@ bool mf_desfire_application_load(MfDesfireApplication* data, const char* prefix,
                 sub_prefix, "%s %s %u", prefix, MF_DESFIRE_FFF_FILE_SUB_PREFIX, *file_id);
 
             // Load file settings
-            if(!mf_desfire_file_settings_load(
-                   simple_array_get(data->file_settings, i), furi_string_get_cstr(sub_prefix), ff))
+            MfDesfireFileSettings* file_settings = simple_array_get(data->file_settings, i);
+            if(!mf_desfire_file_settings_load(file_settings, furi_string_get_cstr(sub_prefix), ff))
                 break;
 
             // Load file data
+            MfDesfireFileData* file_data = simple_array_get(data->file_data, i);
+            if(!mf_desfire_file_data_load(file_data, furi_string_get_cstr(sub_prefix), ff)) break;
         }
 
         if(i != file_count) break;
