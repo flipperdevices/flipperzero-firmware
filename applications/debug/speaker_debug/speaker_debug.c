@@ -4,7 +4,8 @@
 #include <cli/cli.h>
 #include <toolbox/args.h>
 
-#define TAG "speaker_debug"
+#define TAG "SpeakerDebug"
+#define CLI_COMMAND "speaker_debug"
 
 typedef enum {
     SpeakerDebugAppMessageTypeStop,
@@ -45,7 +46,7 @@ static void speaker_app_cli(Cli* cli, FuriString* args, void* context) {
     if(!args_read_string_and_trim(args, cmd)) {
         furi_string_free(cmd);
         printf("Usage:\r\n");
-        printf("\tspeaker_debug stop\r\n");
+        printf("\t" CLI_COMMAND " stop\r\n");
         return;
     }
 
@@ -59,7 +60,7 @@ static void speaker_app_cli(Cli* cli, FuriString* args, void* context) {
         }
     } else {
         printf("Usage:\r\n");
-        printf("\tspeaker_debug stop\r\n");
+        printf("\t" CLI_COMMAND " stop\r\n");
     }
 
     furi_string_free(cmd);
@@ -93,7 +94,7 @@ static void speaker_app_run(SpeakerDebugApp* app, const char* arg) {
         return;
     }
 
-    cli_add_command(app->cli, "speaker_debug", CliCommandFlagParallelSafe, speaker_app_cli, app);
+    cli_add_command(app->cli, CLI_COMMAND, CliCommandFlagParallelSafe, speaker_app_cli, app);
 
     SpeakerDebugAppMessage message;
     FuriStatus status;
@@ -108,7 +109,7 @@ static void speaker_app_run(SpeakerDebugApp* app, const char* arg) {
         }
     }
 
-    cli_delete_command(app->cli, "music_player");
+    cli_delete_command(app->cli, CLI_COMMAND);
 }
 
 int32_t speaker_debug_app(void* arg) {
