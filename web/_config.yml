@@ -39,6 +39,11 @@ theme: minima
 plugins:
   - jekyll-feed
   - jekyll-responsive-image
+  - jekyll-clicky
+
+jekyll_clicky:              #Add this if you want to track with Clicky analytics
+  site:
+    id: 101415968
 
 # Exclude from processing.
 # The following items will not be processed, by default.

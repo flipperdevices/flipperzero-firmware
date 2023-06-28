@@ -31,6 +31,7 @@ GEM
       safe_yaml (~> 1.0)
       terminal-table (>= 1.8, < 4.0)
       webrick (~> 1.7)
+    jekyll-clicky (0.1.5)
     jekyll-feed (0.17.0)
       jekyll (>= 3.7, < 5.0)
     jekyll-responsive-image (1.6.0)
@@ -78,6 +79,7 @@ PLATFORMS
 DEPENDENCIES
   http_parser.rb (~> 0.6.0)
   jekyll (~> 4.3.2)
+  jekyll-clicky
   jekyll-feed (~> 0.12)
   jekyll-responsive-image
   minima (~> 2.5)
