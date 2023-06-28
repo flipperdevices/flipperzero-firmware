@@ -944,7 +944,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                         mf_classic_get_sector_trailer_by_sector(data, i);
 
                     uint8_t current_key[6];
-                    nfc_util_num2bytes(key, current_key, 6);
+                    nfc_util_num2bytes(key, 6, current_key);
 
                     if(mf_classic_is_key_found(data, i, MfClassicKeyA) &&
                        memcmp(sec_trailer->key_a, current_key, 6) == 0) {
@@ -970,7 +970,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                         mf_classic_get_sector_trailer_by_sector(data, i);
 
                     uint8_t current_key[6];
-                    nfc_util_num2bytes(key, current_key, 6);
+                    nfc_util_num2bytes(key, 6, current_key);
 
                     if(mf_classic_is_key_found(data, i, MfClassicKeyB) &&
                        memcmp(sec_trailer->key_b, current_key, 6) == 0) {
