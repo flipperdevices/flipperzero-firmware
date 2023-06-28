@@ -433,7 +433,6 @@ $ ./fbt dolphin_ext
 - [Chess (By okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) (Bounty: $50 USD in ETH or BTC)
 - [Dolphin SOS (By arha)](https://github.com/arha/dolphin-sos)
 - [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) (Bounty: $25 USD in ETH or BTC)
-- $100 USD Bounty IN ETH or BTC for working [Fast FAP Loading](https://github.com/flipperdevices/flipperzero-firmware/pull/2790)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
 
 # Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0625-1154-0.85.3-4f7f5a5.tgz&channel=RM0625-1154-0.85.3-4f7f5a5&version=0.85.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0625-1154-0.85.3-4f7f5a5-NoAnim.tgz&channel=RM0625-1154-0.85.3-4f7f5a5-NoAnim&version=0.85.3)
