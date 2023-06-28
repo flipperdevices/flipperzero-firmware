@@ -659,7 +659,10 @@ bool slix2_protocol_filter( // -V524
                     }
 
                     if(allowed) {
-                        memcpy(&nfcv_data->data[nfcv_data->block_size * block_num], &ctr_new, 4);//-V1086
+                        memcpy( //-V1086
+                            &nfcv_data->data[nfcv_data->block_size * block_num],
+                            &ctr_new,
+                            4);
                     } else {
                         /* incorrect read or write password */
                         ctx->response_buffer[0] = NFCV_RES_FLAG_ERROR;
