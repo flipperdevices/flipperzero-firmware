@@ -278,7 +278,7 @@ static const MfClassicPollerReadHandler
         [MfClassicPollerStateReadComplete] = mf_classic_poller_handler_read_complete,
 };
 
-NfcCommand mf_classsic_poller_run(NfcPollerEvent event, void* context) {
+NfcCommand mf_classsic_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(event.data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(context);
@@ -303,7 +303,7 @@ NfcCommand mf_classsic_poller_run(NfcPollerEvent event, void* context) {
     return command;
 }
 
-bool mf_classsic_poller_detect(NfcPollerEvent event, void* context) {
+bool mf_classsic_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(event.data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(context);
@@ -313,7 +313,7 @@ bool mf_classsic_poller_detect(NfcPollerEvent event, void* context) {
 
 void mf_classic_poller_set_callback(
     MfClassicPoller* instance,
-    NfcPollerCallback callback,
+    NfcGenericCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);

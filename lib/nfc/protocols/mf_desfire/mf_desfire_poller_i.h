@@ -42,8 +42,8 @@ struct MfDesfirePoller {
     BitBuffer* result_buffer;
     MfDesfirePollerEventData mf_desfire_event_data;
     MfDesfirePollerEvent mf_desfire_event;
-    NfcPollerEvent general_event;
-    NfcPollerCallback callback;
+    NfcGenericEvent general_event;
+    NfcGenericCallback callback;
     void* context;
 };
 

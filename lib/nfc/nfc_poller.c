@@ -12,7 +12,7 @@ typedef enum {
 
 typedef struct NfcPollerListElement {
     NfcProtocol protocol;
-    NfcPollerInstance* poller;
+    NfcGenericInstance* poller;
     const NfcPollerBase* poller_api;
     struct NfcPollerListElement* child;
 } NfcPollerListElement;
@@ -97,7 +97,7 @@ static NfcCommand nfc_poller_start_callback(NfcEvent event, void* context) {
     NfcPoller* instance = context;
 
     NfcCommand command = NfcCommandContinue;
-    NfcPollerEvent poller_event = {
+    NfcGenericEvent poller_event = {
         .protocol = NfcProtocolInvalid,
         .poller = instance->nfc,
         .data = &event,
@@ -115,7 +115,7 @@ static NfcCommand nfc_poller_start_callback(NfcEvent event, void* context) {
     return command;
 }
 
-void nfc_poller_start(NfcPoller* instance, NfcPollerCallback callback, void* context) {
+void nfc_poller_start(NfcPoller* instance, NfcGenericCallback callback, void* context) {
     furi_assert(instance);
     furi_assert(callback);
     furi_assert(instance->session_state == NfcPollerSessionStateIdle);
@@ -137,7 +137,7 @@ void nfc_poller_stop(NfcPoller* instance) {
 }
 
 // TODO change name
-static NfcCommand nfc_poller_detect_tail_callback(NfcPollerEvent event, void* context) {
+static NfcCommand nfc_poller_detect_tail_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
 
     NfcPoller* instance = context;
@@ -155,7 +155,7 @@ static NfcCommand nfc_poller_detect_callback(NfcEvent event, void* context) {
     NfcPollerListElement* head_poller = instance->list.head;
 
     NfcCommand command = NfcCommandContinue;
-    NfcPollerEvent poller_event = {
+    NfcGenericEvent poller_event = {
         .protocol = NfcProtocolInvalid,
         .poller = instance->nfc,
         .data = &event,

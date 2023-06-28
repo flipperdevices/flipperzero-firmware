@@ -9,7 +9,7 @@ typedef enum {
     DictAttackStateFlipperDictInProgress,
 } DictAttackState;
 
-NfcCommand nfc_dict_attack_worker_callback(NfcPollerEvent event, void* context) {
+NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.poller);
