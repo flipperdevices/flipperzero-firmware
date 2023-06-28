@@ -48,6 +48,8 @@ bool fuzzer_worker_start(FuzzerWorker* instance, uint8_t idle_time, uint8_t emu_
  */
 void fuzzer_worker_stop(FuzzerWorker* instance);
 
+void fuzzer_worker_start_emulate(FuzzerWorker* instance);
+
 /**
  * Suspend emulation
  * 
@@ -99,6 +101,9 @@ bool fuzzer_worker_init_attack_bf_byte(
  * @param output_key Pointer to a FuzzerPayload
  */
 void fuzzer_worker_get_current_key(FuzzerWorker* instance, FuzzerPayload* output_key);
+
+bool fuzzer_worker_next_key(FuzzerWorker* instance);
+bool fuzzer_worker_previous_key(FuzzerWorker* instance);
 
 /**
  * Load UID from Flipper Format Key file

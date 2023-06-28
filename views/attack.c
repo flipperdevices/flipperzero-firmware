@@ -6,7 +6,12 @@
 
 #define ATTACK_SCENE_MAX_UID_LENGTH 25
 #define UID_MAX_DISPLAYED_LEN (8U)
-#define LIFT_RIGHT_OFFSET (3)
+#define LEFT_RIGHT_OFFSET (3U)
+
+#define LINE_1_Y (12U)
+#define LINE_2_Y (24U)
+#define LINE_3_Y (36U)
+#define LINE_4_Y (48U)
 
 struct FuzzerViewAttack {
     View* view;
@@ -60,54 +65,11 @@ void fuzzer_view_attack_set_uid(FuzzerViewAttack* view, const FuzzerPayload* uid
         true);
 }
 
-void fuzzer_view_attack_start(FuzzerViewAttack* view) {
+void fuzzer_view_update_state(FuzzerViewAttack* view, FuzzerAttackState state) {
     furi_assert(view);
 
     with_view_model(
-        view->view,
-        FuzzerViewAttackModel * model,
-        { model->attack_state = FuzzerAttackStateRunning; },
-        true);
-}
-
-void fuzzer_view_attack_stop(FuzzerViewAttack* view) {
-    furi_assert(view);
-
-    with_view_model(
-        view->view,
-        FuzzerViewAttackModel * model,
-        { model->attack_state = FuzzerAttackStateOff; },
-        true);
-}
-
-void fuzzer_view_attack_pause(FuzzerViewAttack* view) {
-    furi_assert(view);
-
-    with_view_model(
-        view->view,
-        FuzzerViewAttackModel * model,
-        { model->attack_state = FuzzerAttackStatePause; },
-        true);
-}
-
-void fuzzer_view_attack_idle(FuzzerViewAttack* view) {
-    furi_assert(view);
-
-    with_view_model(
-        view->view,
-        FuzzerViewAttackModel * model,
-        { model->attack_state = FuzzerAttackStateIdle; },
-        true);
-}
-
-void fuzzer_view_attack_end(FuzzerViewAttack* view) {
-    furi_assert(view);
-
-    with_view_model(
-        view->view,
-        FuzzerViewAttackModel * model,
-        { model->attack_state = FuzzerAttackStateEnd; },
-        true);
+        view->view, FuzzerViewAttackModel * model, { model->attack_state = state; }, true);
 }
 
 void fuzzer_view_attack_set_callback(
@@ -118,6 +80,76 @@ void fuzzer_view_attack_set_callback(
 
     view_attack->callback = callback;
     view_attack->context = context;
+}
+
+static void
+    fuzzer_view_attack_draw_time_delays_line(Canvas* canvas, FuzzerViewAttackModel* model) {
+    char temp_str[25];
+    uint16_t crt;
+    const uint16_t y = LINE_2_Y;
+
+    canvas_set_font(canvas, FontPrimary);
+
+    if(!model->td_emt_cursor) {
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(temp_str, sizeof(temp_str), "Time delay:");
+        canvas_draw_str_aligned(canvas, LEFT_RIGHT_OFFSET, y, AlignLeft, AlignBottom, temp_str);
+        crt = canvas_string_width(canvas, temp_str);
+
+        canvas_set_font(canvas, FontPrimary);
+        snprintf(
+            temp_str, sizeof(temp_str), "%d.%d", model->time_delay / 10, model->time_delay % 10);
+        canvas_draw_str_aligned(
+            canvas, crt + LEFT_RIGHT_OFFSET + 3, y, AlignLeft, AlignBottom, temp_str);
+
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(
+            temp_str, sizeof(temp_str), "EmT: %d.%d", model->emu_time / 10, model->emu_time % 10);
+        canvas_draw_str_aligned(
+            canvas, 128 - LEFT_RIGHT_OFFSET, y, AlignRight, AlignBottom, temp_str);
+    } else {
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(
+            temp_str,
+            sizeof(temp_str),
+            "TD: %d.%d",
+            model->time_delay / 10,
+            model->time_delay % 10);
+
+        canvas_draw_str_aligned(canvas, LEFT_RIGHT_OFFSET, y, AlignLeft, AlignBottom, temp_str);
+
+        canvas_set_font(canvas, FontPrimary);
+        snprintf(temp_str, sizeof(temp_str), "%d.%d", model->emu_time / 10, model->emu_time % 10);
+        canvas_draw_str_aligned(
+            canvas, 128 - LEFT_RIGHT_OFFSET, y, AlignRight, AlignBottom, temp_str);
+        crt = canvas_string_width(canvas, temp_str);
+
+        canvas_set_font(canvas, FontSecondary);
+        snprintf(temp_str, sizeof(temp_str), "Emulation time:");
+        canvas_draw_str_aligned(
+            canvas, 128 - LEFT_RIGHT_OFFSET - crt - 3, y, AlignRight, AlignBottom, temp_str);
+    }
+}
+
+static void fuzzer_view_attack_draw_time_delays_str(Canvas* canvas, FuzzerViewAttackModel* model) {
+    char temp_str[20];
+    uint16_t crt;
+    const uint16_t y = LINE_2_Y;
+
+    canvas_set_font(canvas, FontSecondary);
+    snprintf(
+        temp_str,
+        sizeof(temp_str),
+        "TD: %d.%d Emt: %d.%d",
+        model->time_delay / 10,
+        model->time_delay % 10,
+        model->emu_time / 10,
+        model->emu_time % 10);
+
+    crt = canvas_string_width(canvas, temp_str);
+
+    canvas_draw_str_aligned(
+        canvas, 128 - LEFT_RIGHT_OFFSET - crt, y, AlignLeft, AlignBottom, temp_str);
 }
 
 static void fuzzer_view_attack_draw_idle(Canvas* canvas, FuzzerViewAttackModel* model) {
@@ -134,7 +166,8 @@ static void fuzzer_view_attack_draw_idle(Canvas* canvas, FuzzerViewAttackModel* 
 
 static void fuzzer_view_attack_draw_running(Canvas* canvas, FuzzerViewAttackModel* model) {
     UNUSED(model);
-    elements_button_center(canvas, "Stop");
+    elements_button_left(canvas, "Stop");
+    elements_button_center(canvas, "Pause");
 }
 
 static void fuzzer_view_attack_draw_end(Canvas* canvas, FuzzerViewAttackModel* model) {
@@ -144,76 +177,75 @@ static void fuzzer_view_attack_draw_end(Canvas* canvas, FuzzerViewAttackModel* m
 }
 
 void fuzzer_view_attack_draw(Canvas* canvas, FuzzerViewAttackModel* model) {
-    char temp_str[50];
-
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
+    // Header - Attack name
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, model->attack_name);
+    canvas_draw_str_aligned(canvas, 64, LINE_1_Y, AlignCenter, AlignBottom, model->attack_name);
 
-    uint16_t crt;
-    canvas_set_font(canvas, FontPrimary);
+    // Time delays line or Status line
+    switch(model->attack_state) {
+    case FuzzerAttackStateIdle:
+        fuzzer_view_attack_draw_time_delays_line(canvas, model);
+        break;
 
-    if(!model->td_emt_cursor) {
-        canvas_set_font(canvas, FontSecondary);
-        snprintf(temp_str, sizeof(temp_str), "Time delay:");
-        canvas_draw_str_aligned(canvas, LIFT_RIGHT_OFFSET, 21, AlignLeft, AlignBottom, temp_str);
-        crt = canvas_string_width(canvas, temp_str);
-
+    case FuzzerAttackStateAttacking:
         canvas_set_font(canvas, FontPrimary);
-        snprintf(
-            temp_str, sizeof(temp_str), "%d.%d", model->time_delay / 10, model->time_delay % 10);
-        canvas_draw_str_aligned(
-            canvas, crt + LIFT_RIGHT_OFFSET + 3, 21, AlignLeft, AlignBottom, temp_str);
+        canvas_draw_str(canvas, LEFT_RIGHT_OFFSET, LINE_2_Y, "Attacking");
+        fuzzer_view_attack_draw_time_delays_str(canvas, model);
 
-        canvas_set_font(canvas, FontSecondary);
-        snprintf(
-            temp_str, sizeof(temp_str), "EmT: %d.%d", model->emu_time / 10, model->emu_time % 10);
-        canvas_draw_str_aligned(
-            canvas, 128 - LIFT_RIGHT_OFFSET, 21, AlignRight, AlignBottom, temp_str);
-    } else {
-        canvas_set_font(canvas, FontSecondary);
-        snprintf(
-            temp_str,
-            sizeof(temp_str),
-            "TD: %d.%d",
-            model->time_delay / 10,
-            model->time_delay % 10);
+        break;
 
-        canvas_draw_str_aligned(canvas, LIFT_RIGHT_OFFSET, 21, AlignLeft, AlignBottom, temp_str);
-
+    case FuzzerAttackStateEmulating:
         canvas_set_font(canvas, FontPrimary);
-        snprintf(temp_str, sizeof(temp_str), "%d.%d", model->emu_time / 10, model->emu_time % 10);
-        canvas_draw_str_aligned(
-            canvas, 128 - LIFT_RIGHT_OFFSET, 21, AlignRight, AlignBottom, temp_str);
-        crt = canvas_string_width(canvas, temp_str);
+        canvas_draw_str_aligned(canvas, 64, LINE_2_Y, AlignCenter, AlignBottom, "Emulating:");
+
+        break;
+
+    case FuzzerAttackStatePause:
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str(canvas, LEFT_RIGHT_OFFSET, LINE_2_Y, "Paused");
 
         canvas_set_font(canvas, FontSecondary);
-        snprintf(temp_str, sizeof(temp_str), "Emulation time:");
-        canvas_draw_str_aligned(
-            canvas, 128 - LIFT_RIGHT_OFFSET - crt - 3, 21, AlignRight, AlignBottom, temp_str);
+        canvas_draw_icon_ex(canvas, 62, LINE_2_Y - 9, &I_Pin_arrow_up_7x9, IconRotation180);
+        canvas_draw_icon(canvas, 69, LINE_2_Y - 9, &I_Pin_arrow_up_7x9);
+        canvas_draw_str(canvas, 79, LINE_2_Y, "Change UID");
+        break;
+
+    case FuzzerAttackStateEnd:
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, LINE_2_Y, AlignCenter, AlignBottom, "Attack is over");
+
+        break;
+
+    default:
+        break;
     }
 
+    // Protocol name
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 26, AlignCenter, AlignTop, model->protocol_name);
+    canvas_draw_str_aligned(canvas, 64, LINE_3_Y, AlignCenter, AlignBottom, model->protocol_name);
 
+    // Current UID
     canvas_set_font(canvas, FontPrimary);
     if(128 < canvas_string_width(canvas, furi_string_get_cstr(model->uid_str))) {
         canvas_set_font(canvas, FontSecondary);
     }
     canvas_draw_str_aligned(
-        canvas, 64, 38, AlignCenter, AlignTop, furi_string_get_cstr(model->uid_str));
+        canvas, 64, LINE_4_Y, AlignCenter, AlignBottom, furi_string_get_cstr(model->uid_str));
 
+    // Btns
     canvas_set_font(canvas, FontSecondary);
-    if(model->attack_state == FuzzerAttackStateRunning) {
+    if(model->attack_state == FuzzerAttackStateAttacking ||
+       model->attack_state == FuzzerAttackStateEmulating) {
         fuzzer_view_attack_draw_running(canvas, model);
     } else if(model->attack_state == FuzzerAttackStateIdle) {
         fuzzer_view_attack_draw_idle(canvas, model);
     } else if(model->attack_state == FuzzerAttackStatePause) {
-        elements_button_left(canvas, "Prev");
-        elements_button_right(canvas, "Next");
-        elements_button_center(canvas, "Try"); // XXX
+        elements_button_left(canvas, "Back");
+        // elements_button_right(canvas, "Save"); // XXX
+        elements_button_center(canvas, "Emu");
     } else if(model->attack_state == FuzzerAttackStateEnd) {
         fuzzer_view_attack_draw_end(canvas, model);
     }
@@ -236,7 +268,7 @@ static bool fuzzer_view_attack_input_idle(
                 if(model->time_delay > model->time_delay_min) {
                     model->time_delay--;
                 }
-            } else if(event->type == InputTypeLong) {
+            } else if(event->type == InputTypeLong || event->type == InputTypeRepeat) {
                 if((model->time_delay - 10) >= model->time_delay_min) {
                     model->time_delay -= 10;
                 } else {
@@ -249,7 +281,7 @@ static bool fuzzer_view_attack_input_idle(
                 if(model->emu_time > model->emu_time_min) {
                     model->emu_time--;
                 }
-            } else if(event->type == InputTypeLong) {
+            } else if(event->type == InputTypeLong || event->type == InputTypeRepeat) {
                 if((model->emu_time - 10) >= model->emu_time_min) {
                     model->emu_time -= 10;
                 } else {
@@ -265,7 +297,7 @@ static bool fuzzer_view_attack_input_idle(
                 if(model->time_delay < FUZZ_TIME_DELAY_MAX) {
                     model->time_delay++;
                 }
-            } else if(event->type == InputTypeLong) {
+            } else if(event->type == InputTypeLong || event->type == InputTypeRepeat) {
                 model->time_delay += 10;
                 if(model->time_delay > FUZZ_TIME_DELAY_MAX) {
                     model->time_delay = FUZZ_TIME_DELAY_MAX;
@@ -277,7 +309,7 @@ static bool fuzzer_view_attack_input_idle(
                 if(model->emu_time < FUZZ_TIME_DELAY_MAX) {
                     model->emu_time++;
                 }
-            } else if(event->type == InputTypeLong) {
+            } else if(event->type == InputTypeLong || event->type == InputTypeRepeat) {
                 model->emu_time += 10;
                 if(model->emu_time > FUZZ_TIME_DELAY_MAX) {
                     model->emu_time = FUZZ_TIME_DELAY_MAX;
@@ -303,13 +335,8 @@ static bool fuzzer_view_attack_input_end(
     InputEvent* event,
     FuzzerViewAttackModel* model) {
     UNUSED(model);
-    if(event->key == InputKeyBack && event->type == InputTypeShort) {
-        view_attack->callback(FuzzerCustomEventViewAttackExit, view_attack->context);
-        return true;
-        // } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-        //     view_attack->callback(FuzzerCustomEventViewAttackOk, view_attack->context);
-        //     return true;
-    } else if(event->key == InputKeyLeft && event->type == InputTypeShort) {
+    if((event->key == InputKeyBack || event->key == InputKeyLeft) &&
+       event->type == InputTypeShort) {
         // Exit if Ended
         view_attack->callback(FuzzerCustomEventViewAttackExit, view_attack->context);
     }
@@ -341,18 +368,29 @@ bool fuzzer_view_attack_input(InputEvent* event, void* context) {
                 fuzzer_view_attack_input_end(view_attack, event, model);
                 break;
 
-            case FuzzerAttackStateRunning:
-                if(event->key == InputKeyBack && event->type == InputTypeShort) {
+            case FuzzerAttackStateAttacking:
+            case FuzzerAttackStateEmulating:
+                if((event->key == InputKeyBack || event->key == InputKeyLeft) &&
+                   event->type == InputTypeShort) {
                     view_attack->callback(FuzzerCustomEventViewAttackIdle, view_attack->context);
                 } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
-                    view_attack->callback(FuzzerCustomEventViewAttackIdle, view_attack->context);
-                    // view_attack->callback(FuzzerCustomEventViewAttackPause, view_attack->context);
+                    view_attack->callback(FuzzerCustomEventViewAttackPause, view_attack->context);
                 }
                 break;
 
             case FuzzerAttackStatePause:
-                if(event->key == InputKeyBack && event->type == InputTypeShort) {
+                if((event->key == InputKeyBack || event->key == InputKeyLeft) &&
+                   event->type == InputTypeShort) {
                     view_attack->callback(FuzzerCustomEventViewAttackIdle, view_attack->context);
+                } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
+                    view_attack->callback(
+                        FuzzerCustomEventViewAttackEmulateCurrent, view_attack->context);
+                } else if(event->key == InputKeyUp && event->type == InputTypeShort) {
+                    view_attack->callback(
+                        FuzzerCustomEventViewAttackPrevUid, view_attack->context);
+                } else if(event->key == InputKeyDown && event->type == InputTypeShort) {
+                    view_attack->callback(
+                        FuzzerCustomEventViewAttackNextUid, view_attack->context);
                 }
                 break;
 

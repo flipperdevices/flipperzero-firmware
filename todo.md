@@ -4,7 +4,7 @@
 
 - [ ] Make the "Load File" independent of the current protocol
 - [x] Add pause
-    - [ ] Switching  UIDs if possible
+    - [X] Switching  UIDs if possible
 - [x] Led and sound Notification
     - [x] Led
     - [x] Vibro
@@ -36,9 +36,9 @@
     - [x] `UID_MAX_SIZE`
 - [x] Add pause
     - [x] Fix `Custom dict` attack when ended
-- [ ] Pause V2
+- [X] Pause V2
     - [ ] Save logic
-    - [ ] Switching  UIDs if possible
+    - [X] Switching  UIDs if possible
 - [ ] Worker
     - [ ] Use `prtocol_id` instead of protocol name
     - [x] this can be simplified `fuzzer_proto_items`

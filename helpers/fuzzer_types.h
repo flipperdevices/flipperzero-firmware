@@ -10,7 +10,8 @@ typedef struct {
 typedef enum {
     FuzzerAttackStateOff = 0,
     FuzzerAttackStateIdle,
-    FuzzerAttackStateRunning,
+    FuzzerAttackStateAttacking,
+    FuzzerAttackStateEmulating,
     FuzzerAttackStatePause,
     FuzzerAttackStateEnd,
 

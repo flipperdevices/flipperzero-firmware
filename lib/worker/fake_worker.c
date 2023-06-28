@@ -213,7 +213,11 @@ static bool fuzzer_worker_load_key(FuzzerWorker* instance, bool next) {
     switch(instance->attack_type) {
     case FuzzerWorkerAttackTypeDefaultDict:
         if(next) {
-            instance->index++;
+            if(instance->index < (protocol->dict.len - 1)) {
+                instance->index++;
+            } else {
+                break;
+            }
         }
         if(instance->index < protocol->dict.len) {
             memcpy(
@@ -275,7 +279,47 @@ static bool fuzzer_worker_load_key(FuzzerWorker* instance, bool next) {
         break;
     }
 
-    hardware_worker_set_protocol_data(instance, instance->payload);
+    if(res) {
+        hardware_worker_set_protocol_data(instance, instance->payload);
+    }
+
+    return res;
+}
+
+static bool fuzzer_worker_load_previous_key(FuzzerWorker* instance) {
+    furi_assert(instance);
+    furi_assert(instance->protocol);
+    bool res = false;
+
+    const FuzzerProtocol* protocol = instance->protocol;
+
+    switch(instance->attack_type) {
+    case FuzzerWorkerAttackTypeDefaultDict:
+        if(instance->index > 0) {
+            instance->index--;
+            memcpy(
+                instance->payload,
+                &protocol->dict.val[instance->index * protocol->data_size],
+                protocol->data_size);
+            res = true;
+        }
+        break;
+
+    case FuzzerWorkerAttackTypeLoadFile:
+        if(instance->payload[instance->index] != 0x00) {
+            instance->payload[instance->index]--;
+            res = true;
+        }
+
+        break;
+
+    default:
+        break;
+    }
+
+    if(res) {
+        hardware_worker_set_protocol_data(instance, instance->payload);
+    }
 
     return res;
 }
@@ -317,6 +361,20 @@ void fuzzer_worker_get_current_key(FuzzerWorker* instance, FuzzerPayload* output
 
     output_key->data_size = instance->protocol->data_size;
     memcpy(output_key->data, instance->payload, instance->protocol->data_size);
+}
+
+bool fuzzer_worker_next_key(FuzzerWorker* instance) {
+    furi_assert(instance);
+    furi_assert(instance->protocol);
+
+    return fuzzer_worker_load_key(instance, true);
+}
+
+bool fuzzer_worker_previous_key(FuzzerWorker* instance) {
+    furi_assert(instance);
+    furi_assert(instance->protocol);
+
+    return fuzzer_worker_load_previous_key(instance);
 }
 
 bool fuzzer_worker_init_attack_dict(FuzzerWorker* instance, FuzzerProtocolsID protocol_index) {
@@ -460,6 +518,21 @@ bool fuzzer_worker_start(FuzzerWorker* instance, uint8_t idle_time, uint8_t emu_
         return true;
     }
     return false;
+}
+
+void fuzzer_worker_start_emulate(FuzzerWorker* instance) {
+    furi_assert(instance);
+
+    if(!instance->treead_running) {
+        hardware_worker_start_thread(instance);
+
+        FURI_LOG_D(TAG, "Worker Starting");
+        instance->treead_running = true;
+    } else {
+        FURI_LOG_D(TAG, "Worker UnPaused");
+    }
+
+    hardware_worker_emulate_start(instance);
 }
 
 void fuzzer_worker_pause(FuzzerWorker* instance) {

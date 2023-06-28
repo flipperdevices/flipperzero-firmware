@@ -1,7 +1,7 @@
 #include "../fuzzer_i.h"
 #include "../helpers/fuzzer_custom_event.h"
 
-const NotificationSequence sequence_one_green_50_on_blink_blue = {
+const NotificationSequence sequence_one_red_50_on_blink_blue = {
     &message_red_255,
     &message_delay_50,
     &message_red_0,
@@ -28,37 +28,37 @@ static void fuzzer_scene_attack_set_state(PacsFuzzerApp* app, FuzzerAttackState 
     switch(state) {
     case FuzzerAttackStateIdle:
         notification_message(app->notifications, &sequence_blink_stop);
-        fuzzer_view_attack_idle(app->attack_view);
         break;
 
-    case FuzzerAttackStateRunning:
+    case FuzzerAttackStateAttacking:
         notification_message(app->notifications, &sequence_blink_start_blue);
-        fuzzer_view_attack_start(app->attack_view);
+        break;
+    case FuzzerAttackStateEmulating:
+        notification_message(app->notifications, &sequence_blink_start_blue);
         break;
 
     case FuzzerAttackStateEnd:
         notification_message(app->notifications, &sequence_blink_stop);
         notification_message(app->notifications, &sequence_single_vibro);
-        fuzzer_view_attack_end(app->attack_view);
         break;
 
     case FuzzerAttackStateOff:
         notification_message(app->notifications, &sequence_blink_stop);
-        fuzzer_view_attack_stop(app->attack_view);
         break;
 
     case FuzzerAttackStatePause:
         notification_message(app->notifications, &sequence_blink_stop);
-        fuzzer_view_attack_pause(app->attack_view);
         break;
     }
+
+    fuzzer_view_update_state(app->attack_view, state);
 }
 
 void fuzzer_scene_attack_worker_tick_callback(void* context) {
     furi_assert(context);
     PacsFuzzerApp* app = context;
 
-    notification_message(app->notifications, &sequence_one_green_50_on_blink_blue);
+    notification_message(app->notifications, &sequence_one_red_50_on_blink_blue);
     fuzzer_scene_attack_update_uid(app);
 }
 
@@ -117,10 +117,14 @@ bool fuzzer_scene_attack_on_event(void* context, SceneManagerEvent event) {
                    app->worker,
                    fuzzer_view_attack_get_time_delay(app->attack_view),
                    fuzzer_view_attack_get_emu_time(app->attack_view))) {
-                fuzzer_scene_attack_set_state(app, FuzzerAttackStateRunning);
+                fuzzer_scene_attack_set_state(app, FuzzerAttackStateAttacking);
             } else {
                 // Error?
             }
+        } else if(event.event == FuzzerCustomEventViewAttackEmulateCurrent) {
+            fuzzer_worker_start_emulate(app->worker);
+
+            fuzzer_scene_attack_set_state(app, FuzzerAttackStateEmulating);
         } else if(event.event == FuzzerCustomEventViewAttackPause) {
             fuzzer_worker_pause(app->worker);
 
@@ -129,8 +133,20 @@ bool fuzzer_scene_attack_on_event(void* context, SceneManagerEvent event) {
             fuzzer_worker_pause(app->worker);
 
             fuzzer_scene_attack_set_state(app, FuzzerAttackStateIdle);
+        } else if(event.event == FuzzerCustomEventViewAttackNextUid) {
+            if(fuzzer_worker_next_key(app->worker)) {
+                fuzzer_scene_attack_update_uid(app);
+            } else {
+                notification_message(app->notifications, &sequence_blink_red_100);
+            }
+        } else if(event.event == FuzzerCustomEventViewAttackPrevUid) {
+            if(fuzzer_worker_previous_key(app->worker)) {
+                fuzzer_scene_attack_update_uid(app);
+            } else {
+                notification_message(app->notifications, &sequence_blink_red_100);
+            }
         }
-        // OLD
+        // Callback from worker
         else if(event.event == FuzzerCustomEventViewAttackEnd) {
             fuzzer_scene_attack_set_state(app, FuzzerAttackStateEnd);
             consumed = true;
