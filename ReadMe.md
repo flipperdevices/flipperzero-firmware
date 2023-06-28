@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0627-1003-0.85.3-a1b461a](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-27 19:25 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-27 19:25 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-27 23:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-27 23:00 EST`
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - OFW PR: [LF-RFID debug: make it work #2793 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2793)
 - Added: [NFC Seader (By bettse)](https://github.com/bettse/seader)
@@ -48,7 +48,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix fr-FR-mac keylayout #681 (By FelixLgr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/681)
 - OFW: [Actions: unit_test and updater timeouts #2807 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2807)
 - Removed: [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) (Too much of a WIP)
-- Updated readme "COMMENTED OUT" section to include $25, $50 and $100 USD bounties!
+- [Fast FAP Loader #2790 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2790)
+- [Fixed up to reach bottom on file browsers (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d37ccacfda1337798a786c972f6a4c4229646382)
+- Updated readme "COMMENTED OUT" section to include $25 and $50 USD bounties!
 
 <a name="release">
 

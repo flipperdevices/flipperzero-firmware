@@ -12,7 +12,7 @@ const DesktopSettingsApplication FLIPPER_APPS2[] = {
 
     {.name = "Sub-GHz Playlist", .appid = "/ext/apps/Sub-GHz/SubGHz_Playlist.fap"},
 
-    {.name = "125 kHz RFID", .appid = "NULL"},
+    {.name = "125 kHz RFID", .appid = "/ext/apps/Main/lfrfid.fap"},
 
     {.name = "NFC", .appid = "NULL"},
 

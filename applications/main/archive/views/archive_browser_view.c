@@ -479,9 +479,9 @@ static bool archive_view_input(InputEvent* event, void* context) {
                     }
 
                     if(event->key == InputKeyUp) {
-                        if(model->item_idx < scroll_speed) {
-                            scroll_speed = model->item_idx;
-                        }
+                        // if(model->item_idx < scroll_speed) {
+                        // scroll_speed = model->item_idx;
+                        // }
 
                         model->item_idx =
                             ((model->item_idx - scroll_speed) + model->item_cnt) % model->item_cnt;

@@ -673,9 +673,9 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                     }
 
                     if(event->key == InputKeyUp) {
-                        if(model->item_idx < scroll_speed) {
-                            scroll_speed = model->item_idx;
-                        }
+                        // if(model->item_idx < scroll_speed) {
+                        // scroll_speed = model->item_idx;
+                        // }
 
                         model->item_idx =
                             ((model->item_idx - scroll_speed) + model->item_cnt) % model->item_cnt;
