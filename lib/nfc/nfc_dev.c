@@ -174,7 +174,7 @@ bool nfc_dev_load(NfcDev* instance, const char* path) {
 
     bool loaded = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = flipper_format_file_alloc(storage);
+    FlipperFormat* file = flipper_format_buffered_file_alloc(storage);
 
     FuriString* temp_str;
     temp_str = furi_string_alloc();
@@ -184,7 +184,7 @@ bool nfc_dev_load(NfcDev* instance, const char* path) {
     }
 
     do {
-        if(!flipper_format_file_open_existing(file, path)) break;
+        if(!flipper_format_buffered_file_open_existing(file, path)) break;
 
         // Read and verify file header
         uint32_t version = 0;
