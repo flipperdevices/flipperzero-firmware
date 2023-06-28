@@ -29,10 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0628-0726-0.85.3-b754ec1](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0628-1716-0.85.3-233176b](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-28 07:26 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-28 07:26 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-28 17:16 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-28 17:16 EST`
 - OFW: [Fix roll-over in file browser and archive #2811 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2811)
 - OFW: [SLIX2 emulation support / practical use for Dymo printers #2783 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/2783)
 - OFW: [Keynote with vertical layout #2794 (By Kami-no)](https://github.com/flipperdevices/flipperzero-firmware/pull/2794)
