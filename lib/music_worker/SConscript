@@ -4,6 +4,9 @@ env.Append(
     CPPPATH=[
         "#/lib/music_worker",
     ],
+    SDK_HEADERS=[
+        File("music_worker.h"),
+    ],
 )
 
 libenv = env.Clone(FW_LIB_NAME="music_worker")
