@@ -131,7 +131,7 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
 
     bool saved = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = flipper_format_file_alloc(storage);
+    FlipperFormat* file = flipper_format_buffered_file_alloc(storage);
 
     FuriString* temp_str;
     temp_str = furi_string_alloc();
@@ -142,7 +142,7 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
 
     do {
         // Open file
-        if(!flipper_format_file_open_always(file, path)) break;
+        if(!flipper_format_buffered_file_open_always(file, path)) break;
 
         // Write header
         if(!flipper_format_write_header_cstr(file, NFC_FILE_HEADER, NFC_CURRENT_FORMAT_VERSION))
