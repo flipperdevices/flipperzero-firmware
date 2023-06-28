@@ -2,7 +2,10 @@
 
 #include <gui/view.h>
 
-typedef struct BatteryInfo BatteryInfo;
+typedef struct {
+    View* view;
+    bool exit_to_about;
+} BatteryInfo;
 
 typedef struct {
     float vbus_voltage;
@@ -12,6 +15,7 @@ typedef struct {
     float charge_voltage_limit;
     uint8_t charge;
     uint8_t health;
+    bool alt;
 } BatteryInfoModel;
 
 BatteryInfo* battery_info_alloc();

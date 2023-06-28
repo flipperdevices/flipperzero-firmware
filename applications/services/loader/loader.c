@@ -360,7 +360,8 @@ static LoaderStatus loader_start_external_app(
                 32,
                 AlignCenter,
                 AlignCenter);
-            DialogMessageButton res = dialog_message_show(furi_record_open(RECORD_DIALOGS), message);
+            DialogMessageButton res =
+                dialog_message_show(furi_record_open(RECORD_DIALOGS), message);
             dialog_message_free(message);
             furi_record_close(RECORD_DIALOGS);
             if(res != DialogMessageButtonRight) {

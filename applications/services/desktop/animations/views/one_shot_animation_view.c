@@ -1,4 +1,3 @@
-
 #include "one_shot_animation_view.h"
 #include <furi.h>
 #include <portmacro.h>
@@ -6,7 +5,6 @@
 #include <gui/view.h>
 #include <gui/icon_i.h>
 #include <stdint.h>
-#include <loader/loader.h>
 
 typedef void (*OneShotInteractCallback)(void*);
 
@@ -66,15 +64,11 @@ static bool one_shot_view_input(InputEvent* event, void* context) {
     if(!consumed) {
         if(event->key == InputKeyRight) {
             /* Right button reserved for animation activation, so consume */
-            consumed = true;
             if(event->type == InputTypeShort) {
                 if(view->interact_callback) {
+                    consumed = true;
                     view->interact_callback(view->interact_callback_context);
                 }
-            } else if(event->type == InputTypeLong) {
-                Loader* loader = furi_record_open(RECORD_LOADER);
-                loader_start(loader, "About", "batt", NULL);
-                furi_record_close(RECORD_LOADER);
             }
         }
     }

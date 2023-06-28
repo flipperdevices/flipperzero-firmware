@@ -28,6 +28,7 @@ typedef struct {
     VariableItemList* variable_item_list;
     uint32_t shutdown_idle_delay_ms;
     FuriPubSub* settings_events;
+    bool about_battery;
 } PowerSettingsApp;
 
 typedef enum {

@@ -10,6 +10,7 @@ static void power_settings_scene_battery_info_update_model(PowerSettingsApp* app
         .charge_voltage_limit = app->info.voltage_battery_charge_limit,
         .charge = app->info.charge,
         .health = app->info.health,
+        .alt = app->about_battery,
     };
     battery_info_set_data(app->battery_info, &battery_info_data);
 }

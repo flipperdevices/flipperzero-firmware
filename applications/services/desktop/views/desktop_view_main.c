@@ -64,9 +64,6 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
                 main_view->callback(
                     DesktopMainEventOpenFavoritePrimary, main_view->context); // LEFT FOR PRIMARY
             } else if(event->key == InputKeyRight) {
-                // Right key is handled by animation manager
-                // GOES TO PASSPORT NO MATTER WHAT
-                // THIS DOESNT WORK, PASSPORT WILL ONLY OPEN ON REGULAR RIGHT, NOTHING CAN GET ASSIGNED HERE
                 main_view->callback(DesktopMainEventOpenPassport, main_view->context);
             }
         } else if(event->type == InputTypeLong) {
@@ -84,20 +81,24 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
                 main_view->callback(
                     DesktopMainEventOpenFavoriteSecondary,
                     main_view->context); // HOLD LEFT FOR SECONDARY
+            } else if(event->key == InputKeyRight) {
+                Loader* loader = furi_record_open(RECORD_LOADER);
+                loader_start(loader, "Power", "about_battery", NULL);
+                furi_record_close(RECORD_LOADER);
             }
         }
     } else if(main_view->is_gamemode == true) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                main_view->callback(DesktopMainEventOpenDice, main_view->context); // OPENS Dice
-            } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenSnake, main_view->context); // OPENS SNAKE
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(
+                    DesktopMainEventOpenArkanoid, main_view->context); // OPENS Arkanoid
             } else if(event->key == InputKeyDown) {
-                // PREFER TO OPEN GAMES MENU
-                main_view->callback(DesktopMainEventOpen2048, main_view->context); // OPENS 2048
-            } else if(event->key == InputKeyLeft) {
                 main_view->callback(
                     DesktopMainEventOpenTetris, main_view->context); // OPENS TETRIS
+            } else if(event->key == InputKeyLeft) {
+                main_view->callback(DesktopMainEventOpenDice, main_view->context); // OPENS Dice
             }
         } else if(event->type == InputTypeLong) {
             if(event->key == InputKeyOk) {
@@ -109,6 +110,8 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
                     DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(DesktopMainEventOpenClock, main_view->context); // OPENS CLOCK
+            } else if(event->key == InputKeyRight) {
+                main_view->callback(DesktopMainEventOpen2048, main_view->context); // OPENS 2048
             }
         }
     } else {
@@ -121,8 +124,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
                 main_view->callback(
                     DesktopMainEventOpenTetris, main_view->context); // OPENS Tetris
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(
-                    DesktopMainEventOpenArkanoid, main_view->context); // OPENS Arkanoid
+                main_view->callback(DesktopMainEventOpenDice, main_view->context); // OPENS Dice
             }
         } else if(event->type == InputTypeLong) {
             if(event->key == InputKeyOk) {
@@ -134,7 +136,9 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
                     DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
             } else if(event->key == InputKeyLeft) {
                 main_view->callback(
-                    DesktopMainEventOpenHeap, main_view->context); // OPENS Heap Defence
+                    DesktopMainEventOpenArkanoid, main_view->context); // OPENS Arkanoid
+            } else if(event->key == InputKeyRight) {
+                main_view->callback(DesktopMainEventOpen2048, main_view->context); // OPENS 2048
             }
         }
     }

@@ -1,4 +1,3 @@
-
 #include "../animation_manager.h"
 #include "../animation_storage.h"
 #include "bubble_animation_view.h"
@@ -12,7 +11,6 @@
 #include <input/input.h>
 #include <stdint.h>
 #include <core/dangerous_defines.h>
-#include <loader/loader.h>
 
 #define ACTIVE_SHIFT 2
 
@@ -129,15 +127,10 @@ static bool bubble_animation_input_callback(InputEvent* event, void* context) {
 
     if(event->key == InputKeyRight && event->type == InputTypeShort) {
         /* Right button reserved for animation activation, so consume */
-        consumed = true;
         if(animation_view->interact_callback) {
+            consumed = true;
             animation_view->interact_callback(animation_view->interact_callback_context);
         }
-    } else if(event->key == InputKeyRight && event->type == InputTypeLong) {
-        consumed = true;
-        Loader* loader = furi_record_open(RECORD_LOADER);
-        loader_start(loader, "About", "batt", NULL);
-        furi_record_close(RECORD_LOADER);
     }
 
     return consumed;

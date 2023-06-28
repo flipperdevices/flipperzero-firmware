@@ -51,6 +51,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fast FAP Loader #2790 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2790)
 - [Fixed up to reach bottom on file browsers (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d37ccacfda1337798a786c972f6a4c4229646382)
 - [Add back API mismatch ignore dialog (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/15430e09281e3062383275bc842a94d37bf8d0bc)
+- [Hold Right goes to Battery status & Some Include Cleanup (By Willy-JL)]
 - Updated readme "COMMENTED OUT" section to include $25 and $50 USD bounties!
 
 <a name="release">
