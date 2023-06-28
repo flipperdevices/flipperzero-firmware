@@ -20,12 +20,15 @@ typedef enum {
     BtSateLost
 } BtState;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
     uint8_t cpu_usage;
-    uint8_t gpu_usage;
     uint16_t ram_max;
-    uint16_t ram_used;
-    char ram_unit[8];
+    uint8_t ram_usage;
+    char ram_unit[4];
+    uint8_t gpu_usage;
+    uint16_t vram_max;
+    uint8_t vram_usage;
+    char vram_unit[4];
 } DataStruct;
 
 typedef struct {

@@ -22,17 +22,29 @@ static void render_callback(Canvas* canvas, void* ctx) {
             str,
             32,
             "%.1f/%.1f %s",
-            app->data.ram_used / (double)10,
-            app->data.ram_max / (double)10,
+            (double)(app->data.ram_max * 0.1f * app->data.ram_usage * 0.01f),
+            (double)(app->data.ram_max * 0.1f),
             app->data.ram_unit);
         elements_progress_bar_with_text(
-            canvas, 20, 1 + 14 * line, 108, app->data.ram_used / (float)app->data.ram_max, str);
+            canvas, 20, 1 + 14 * line, 108, app->data.ram_usage * 0.01f, str);
 
         line = 2;
         canvas_draw_str(canvas, 0, 10 + 14 * line, "GPU");
         snprintf(str, 32, "%d%%", app->data.gpu_usage);
         elements_progress_bar_with_text(
             canvas, 20, 1 + 14 * line, 108, app->data.gpu_usage / 100.0f, str);
+
+        line = 3;
+        canvas_draw_str(canvas, 0, 10 + 14 * line, "VRAM");
+        snprintf(
+            str,
+            32,
+            "%.1f/%.1f %s",
+            (double)(app->data.vram_max * 0.1f * app->data.vram_usage * 0.01f),
+            (double)(app->data.vram_max * 0.1f),
+            app->data.vram_unit);
+        elements_progress_bar_with_text(
+            canvas, 20, 1 + 14 * line, 108, app->data.vram_usage * 0.01f, str);
     } else {
         canvas_draw_str_aligned(
             canvas,
@@ -58,36 +70,16 @@ static uint16_t bt_serial_callback(SerialServiceEvent event, void* ctx) {
     PcMonitorApp* app = ctx;
 
     if(event.event == SerialServiceEventTypeDataReceived) {
-        app->bt_state = BtStateRecieving;
         FURI_LOG_D(
             TAG,
-            "SerialServiceEventTypeDataReceived. Size: %u. Data: %s",
+            "SerialServiceEventTypeDataReceived. Size: %u/%u. Data: %s",
             event.data.size,
+            sizeof(DataStruct),
             (char*)event.data.buffer);
 
-        uint8_t step = 0;
-
-        // strtok is not in the API
-        char temp_str[32] = {0};
-        uint8_t lastIndex = 0;
-        for(size_t i = 0; i <= strlen((char*)event.data.buffer); i++) {
-            if(event.data.buffer[i] == ':' || event.data.buffer[i] == '\0') {
-                char* sub_str = temp_str + lastIndex;
-                printf("step: %d, sub_str: %s\r\n", step, sub_str);
-
-                if(step == 0) app->data.cpu_usage = atoi(sub_str);
-                if(step == 1) app->data.gpu_usage = atoi(sub_str);
-                if(step == 2) app->data.ram_used = atoi(sub_str);
-                if(step == 3) app->data.ram_max = atoi(sub_str);
-                if(step == 4) strcpy(app->data.ram_unit, sub_str);
-
-                step++;
-                lastIndex = i + 1;
-                //memset(temp_str, 0, 32);
-                //for(size_t j = 0; j < 32; j++) temp_str[j] = 0;
-            }
-
-            temp_str[i] = event.data.buffer[i];
+        if(event.data.size == sizeof(DataStruct)) {
+            app->bt_state = BtStateRecieving;
+            memcpy(&app->data, event.data.buffer, sizeof(DataStruct));
         }
     }
 
