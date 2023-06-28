@@ -43,16 +43,6 @@
 #define MF_DESFIRE_FFF_FILE_MAX_KEY "Max"
 #define MF_DESFIRE_FFF_FILE_CUR_KEY "Cur"
 
-typedef struct {
-    bool is_master_key_changeable : 1;
-    bool is_free_directory_list : 1;
-    bool is_free_create_delete : 1;
-    bool is_config_changeable : 1;
-    uint8_t change_key_id : 4;
-    uint8_t max_keys : 4;
-    uint8_t flags : 4;
-} MfDesfireKeySettingsLayout;
-
 void mf_desfire_version_parse(MfDesfireVersion* data, const BitBuffer* buf) {
     bit_buffer_write_bytes(buf, data, sizeof(MfDesfireVersion));
 }
@@ -64,6 +54,16 @@ void mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* bu
 }
 
 void mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf) {
+    typedef struct {
+        bool is_master_key_changeable : 1;
+        bool is_free_directory_list : 1;
+        bool is_free_create_delete : 1;
+        bool is_config_changeable : 1;
+        uint8_t change_key_id : 4;
+        uint8_t max_keys : 4;
+        uint8_t flags : 4;
+    } MfDesfireKeySettingsLayout;
+
     MfDesfireKeySettingsLayout layout;
     bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireKeySettingsLayout));
 
