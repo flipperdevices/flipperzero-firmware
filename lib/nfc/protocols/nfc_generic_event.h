@@ -1,7 +1,7 @@
 #pragma once
 
-#include "nfc_device_defs.h"
-#include "nfc.h"
+#include "nfc_protocol.h"
+#include <nfc/nfc.h>
 
 #ifdef __cplusplus
 extern "C" {

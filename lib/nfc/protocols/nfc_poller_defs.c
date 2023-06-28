@@ -6,7 +6,11 @@
 #include <nfc/protocols/mf_classic/mf_classic_poller_defs.h>
 #include <nfc/protocols/mf_desfire/mf_desfire_poller_defs.h>
 
+// TODO <furi/furi.h>
 #include <furi/core/core_defines.h>
+
+// TODO remove
+#include "nfc_protocol.h"
 
 const NfcPollerBase* nfc_pollers_api[NfcProtocolNum] = {
     [NfcProtocolIso14443_3a] = &nfc_poller_iso14443_3a,

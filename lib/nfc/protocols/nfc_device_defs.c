@@ -1,5 +1,7 @@
 #include "nfc_device_defs.h"
 
+#include "nfc_protocol.h"
+
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/iso14443_4a/iso14443_4a.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
