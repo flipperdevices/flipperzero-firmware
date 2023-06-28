@@ -1,19 +1,13 @@
 #pragma once
 
 #include "mf_classic_poller.h"
-#include <lib/nfc/protocols/nfca/nfca_poller_i.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller_i.h>
 #include <lib/nfc/helpers/nfc_util.h>
 #include "crypto1.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef enum {
-    MfClassicPollerSessionStateIdle,
-    MfClassicPollerSessionStateActive,
-    MfClassicPollerSessionStateStopRequest,
-} MfClassicPollerSessionState;
 
 typedef enum {
     MfClassicAuthStateIdle,
@@ -44,15 +38,15 @@ typedef enum {
 } MfClassicPollerState;
 
 struct MfClassicPoller {
-    NfcaPoller* nfca_poller;
+    Iso14443_3aPoller* iso14443_3a_poller;
+
     MfClassicPollerState state;
     MfClassicPollerState prev_state;
-    MfClassicPollerSessionState session_state;
     MfClassicAuthState auth_state;
     MfClassicCardState card_state;
+
     MfClassicReadMode read_mode;
     MfClassicKey current_key;
-    MfClassicPollerEventData event_data;
     uint8_t sectors_read;
     uint8_t key_reuse_sector;
     uint8_t sectors_total;
@@ -62,7 +56,11 @@ struct MfClassicPoller {
     BitBuffer* rx_plain_buffer;
     BitBuffer* rx_encrypted_buffer;
     MfClassicData* data;
-    MfClassicPollerCallback callback;
+
+    NfcPollerEvent general_event;
+    MfClassicPollerEvent mfc_event;
+    MfClassicPollerEventData mfc_event_data;
+    NfcPollerCallback callback;
     void* context;
 };
 
@@ -78,7 +76,11 @@ typedef union {
     MfClassicReadBlockContext read_block_context;
 } MfClassicPollerContextData;
 
-MfClassicError mf_classic_process_error(NfcaError error);
+MfClassicError mf_classic_process_error(Iso14443_3aError error);
+
+MfClassicPoller* mf_classic_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller);
+
+void mf_classic_poller_free(MfClassicPoller* instance);
 
 MfClassicError mf_classic_async_auth(
     MfClassicPoller* instance,

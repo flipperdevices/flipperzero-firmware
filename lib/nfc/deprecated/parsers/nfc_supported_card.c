@@ -11,49 +11,49 @@
 NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
     [NfcSupportedCardTypePlantain] =
         {
-            .protocol = NfcDeviceProtocolMifareClassic,
+            .protocol = NfcDeviceOldProtocolMifareClassic,
             .verify = plantain_parser_verify,
             .read = plantain_parser_read,
             .parse = plantain_parser_parse,
         },
     [NfcSupportedCardTypeTroika] =
         {
-            .protocol = NfcDeviceProtocolMifareClassic,
+            .protocol = NfcDeviceOldProtocolMifareClassic,
             .verify = troika_parser_verify,
             .read = troika_parser_read,
             .parse = troika_parser_parse,
         },
     [NfcSupportedCardTypePlantain4K] =
         {
-            .protocol = NfcDeviceProtocolMifareClassic,
+            .protocol = NfcDeviceOldProtocolMifareClassic,
             .verify = plantain_4k_parser_verify,
             .read = plantain_4k_parser_read,
             .parse = plantain_4k_parser_parse,
         },
     [NfcSupportedCardTypeTroika4K] =
         {
-            .protocol = NfcDeviceProtocolMifareClassic,
+            .protocol = NfcDeviceOldProtocolMifareClassic,
             .verify = troika_4k_parser_verify,
             .read = troika_4k_parser_read,
             .parse = troika_4k_parser_parse,
         },
     [NfcSupportedCardTypeTwoCities] =
         {
-            .protocol = NfcDeviceProtocolMifareClassic,
+            .protocol = NfcDeviceOldProtocolMifareClassic,
             .verify = two_cities_parser_verify,
             .read = two_cities_parser_read,
             .parse = two_cities_parser_parse,
         },
     [NfcSupportedCardTypeAllInOne] =
         {
-            .protocol = NfcDeviceProtocolMifareUl,
+            .protocol = NfcDeviceOldProtocolMifareUl,
             .verify = all_in_one_parser_verify,
             .read = all_in_one_parser_read,
             .parse = all_in_one_parser_parse,
         },
     [NfcSupportedCardTypeOpal] =
         {
-            .protocol = NfcDeviceProtocolMifareDesfire,
+            .protocol = NfcDeviceOldProtocolMifareDesfire,
             .verify = stub_parser_verify_read,
             .read = stub_parser_verify_read,
             .parse = opal_parser_parse,
@@ -61,7 +61,7 @@ NfcSupportedCard nfc_supported_card[NfcSupportedCardTypeEnd] = {
 
 };
 
-bool nfc_supported_card_verify_and_parse(NfcDeviceData* dev_data) {
+bool nfc_supported_card_verify_and_parse(NfcDeviceOldDataOld* dev_data) {
     furi_assert(dev_data);
 
     bool card_parsed = false;

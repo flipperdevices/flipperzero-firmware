@@ -1,18 +1,19 @@
 #include "nfc_poller_defs.h"
 
-#include <nfc/protocols/nfca/nfca_poller_defs.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a_poller_defs.h>
 #include <nfc/protocols/iso14443_4a/iso14443_4a_poller_defs.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_defs.h>
+#include <nfc/protocols/mf_classic/mf_classic_poller_defs.h>
 #include <nfc/protocols/mf_desfire/mf_desfire_poller_defs.h>
 
 #include <furi/core/core_defines.h>
 
-const NfcPollerBase* nfc_pollers_api[NfcProtocolTypeMax] = {
-    [NfcProtocolTypeIso14443_3a] = &nfc_poller_iso14443_3a,
-    [NfcProtocolTypeIso14443_4a] = &nfc_poller_iso14443_4a,
-    [NfcProtocolTypeMfUltralight] = &mf_ultralight_poller,
-    [NfcProtocolTypeMfClassic] = NULL,
-    [NfcProtocolTypeMfDesfire] = &mf_desfire_poller,
+const NfcPollerBase* nfc_pollers_api[NfcProtocolNum] = {
+    [NfcProtocolIso14443_3a] = &nfc_poller_iso14443_3a,
+    [NfcProtocolIso14443_4a] = &nfc_poller_iso14443_4a,
+    [NfcProtocolMfUltralight] = &mf_ultralight_poller,
+    [NfcProtocolMfClassic] = &mf_classic_poller,
+    [NfcProtocolMfDesfire] = &mf_desfire_poller,
 };
 
 /**************************** Poller tree structure ****************************
@@ -25,43 +26,43 @@ const NfcPollerBase* nfc_pollers_api[NfcProtocolTypeMax] = {
  *   mf desfire  bank card
  */
 
-static const NfcProtocolType nfc_poller_iso14443_3a_children_protocol[] = {
-    NfcProtocolTypeIso14443_4a,
-    NfcProtocolTypeMfUltralight,
+static const NfcProtocol nfc_poller_iso14443_3a_children_protocol[] = {
+    NfcProtocolIso14443_4a,
+    NfcProtocolMfUltralight,
 };
 
-static const NfcProtocolType nfc_poller_iso14443_4a_children_protocol[] = {
-    NfcProtocolTypeMfDesfire,
+static const NfcProtocol nfc_poller_iso14443_4a_children_protocol[] = {
+    NfcProtocolMfDesfire,
 };
 
-const NfcPollerTreeNode nfc_poller_nodes[NfcProtocolTypeMax] = {
-    [NfcProtocolTypeIso14443_3a] =
+const NfcPollerTreeNode nfc_poller_nodes[NfcProtocolNum] = {
+    [NfcProtocolIso14443_3a] =
         {
-            .parent_protocol = NfcProtocolTypeInvalid,
+            .parent_protocol = NfcProtocolInvalid,
             .children_num = COUNT_OF(nfc_poller_iso14443_3a_children_protocol),
             .children_protocol = nfc_poller_iso14443_3a_children_protocol,
         },
-    [NfcProtocolTypeIso14443_4a] =
+    [NfcProtocolIso14443_4a] =
         {
-            .parent_protocol = NfcProtocolTypeIso14443_3a,
+            .parent_protocol = NfcProtocolIso14443_3a,
             .children_num = COUNT_OF(nfc_poller_iso14443_4a_children_protocol),
             .children_protocol = nfc_poller_iso14443_4a_children_protocol,
         },
-    [NfcProtocolTypeMfUltralight] =
+    [NfcProtocolMfUltralight] =
         {
-            .parent_protocol = NfcProtocolTypeIso14443_3a,
+            .parent_protocol = NfcProtocolIso14443_3a,
             .children_num = 0,
             .children_protocol = NULL,
         },
-    [NfcProtocolTypeMfClassic] =
+    [NfcProtocolMfClassic] =
         {
-            .parent_protocol = NfcProtocolTypeIso14443_3a,
+            .parent_protocol = NfcProtocolIso14443_3a,
             .children_num = 0,
             .children_protocol = NULL,
         },
-    [NfcProtocolTypeMfDesfire] =
+    [NfcProtocolMfDesfire] =
         {
-            .parent_protocol = NfcProtocolTypeIso14443_4a,
+            .parent_protocol = NfcProtocolIso14443_4a,
             .children_num = 0,
             .children_protocol = NULL,
         },

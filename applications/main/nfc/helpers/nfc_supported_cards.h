@@ -1,7 +1,7 @@
 #pragma once
 
 #include <furi/core/string.h>
-#include <nfc/protocols/nfc_protocol_defs.h>
+#include <nfc/protocols/nfc_device_defs.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,13 +16,13 @@ void nfc_supported_cards_free(NfcSupportedCards* instance);
 //FIXME: Make it compile
 // bool nfc_supported_cards_read(
 //     NfcSupportedCards* instance,
-//     NfcProtocolType protocol,
+//     NfcProtocol protocol,
 //     void* poller,
 //     void* data);
 //
 // bool nfc_supported_cards_parse(
 //     NfcSupportedCards* instance,
-//     NfcProtocolType protocol,
+//     NfcProtocol protocol,
 //     void* data,
 //     FuriString* parsed_data);
 

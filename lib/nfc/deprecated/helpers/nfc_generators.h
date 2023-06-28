@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../nfc_device.h"
+#include "../nfc_device_old.h"
 
-typedef void (*NfcGeneratorFunc)(NfcDeviceData* data);
+typedef void (*NfcGeneratorFunc)(NfcDeviceOldDataOld* data);
 
 typedef struct {
     const char* name;
@@ -11,4 +11,4 @@ typedef struct {
 
 extern const NfcGenerator* const nfc_generators[];
 
-void nfc_generate_mf_classic(NfcDeviceData* data, uint8_t uid_len, MfClassicType type);
+void nfc_generate_mf_classic(NfcDeviceOldDataOld* data, uint8_t uid_len, MfClassicType type);

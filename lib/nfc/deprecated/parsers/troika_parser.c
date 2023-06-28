@@ -55,7 +55,7 @@ bool troika_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx) {
     return mifare_classic_read_card(tx_rx, &reader, &nfc_worker->dev_data->mf_classic_data) == 16;
 }
 
-bool troika_parser_parse(NfcDeviceData* dev_data) {
+bool troika_parser_parse(NfcDeviceOldDataOld* dev_data) {
     MfClassicData* data = &dev_data->mf_classic_data;
     bool troika_parsed = false;
 

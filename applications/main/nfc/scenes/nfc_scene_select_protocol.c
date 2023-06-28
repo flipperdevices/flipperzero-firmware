@@ -14,8 +14,8 @@ void nfc_scene_select_protocol_on_enter(void* context) {
     const char* prefix;
     if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneExtraActions)) {
         prefix = "Read";
-        instance->protocols_detected_num = NfcProtocolTypeMax;
-        for(size_t i = 0; i < NfcProtocolTypeMax; i++) {
+        instance->protocols_detected_num = NfcProtocolNum;
+        for(size_t i = 0; i < NfcProtocolNum; i++) {
             instance->protocols_detected[i] = i;
         }
     } else {
@@ -25,7 +25,10 @@ void nfc_scene_select_protocol_on_enter(void* context) {
 
     for(size_t i = 0; i < instance->protocols_detected_num; i++) {
         furi_string_printf(
-            temp_str, "%s %s", prefix, nfc_dev_get_protocol_name(instance->protocols_detected[i]));
+            temp_str,
+            "%s %s",
+            prefix,
+            nfc_device_get_protocol_name(instance->protocols_detected[i]));
         submenu_add_item(
             submenu,
             furi_string_get_cstr(temp_str),

@@ -17,11 +17,12 @@ typedef enum {
     NfcEventTypeRxStart,
     NfcEventTypeRxEnd,
 
+    // TODO delete
     NfcEventTypeConfigureRequest,
+    NfcEventTypeReset,
 
     NfcEventTypeListenerActivated,
     NfcEventTypePollerReady,
-    NfcEventTypeReset,
 } NfcEventType;
 
 typedef struct {
@@ -43,8 +44,8 @@ typedef NfcCommand (*NfcEventCallback)(NfcEvent event, void* context);
 
 typedef enum {
     NfcModeIdle,
-    NfcModeNfcaPoller,
-    NfcModeNfcaListener,
+    NfcModeIso14443_3aPoller,
+    NfcModeIso14443_3aListener,
     NfcModeNfcbPoller,
     NfcModeNfcbListener,
     NfcModeNfcfPoller,

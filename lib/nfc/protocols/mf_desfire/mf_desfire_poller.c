@@ -1,5 +1,7 @@
 #include "mf_desfire_poller_i.h"
 
+#include <nfc/protocols/nfc_poller_base.h>
+
 #include <furi.h>
 
 #define TAG "MfDesfirePoller"
@@ -25,7 +27,7 @@ static MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_p
 
     instance->mf_desfire_event.data = &instance->mf_desfire_event_data;
 
-    instance->general_event.protocol_type = NfcProtocolTypeMfDesfire;
+    instance->general_event.protocol = NfcProtocolMfDesfire;
     instance->general_event.data = &instance->mf_desfire_event;
     instance->general_event.poller = instance;
 
@@ -190,7 +192,7 @@ static void mf_desfire_poller_set_callback(
 }
 
 static NfcCommand mf_desfire_poller_run(NfcPollerEvent event, void* context) {
-    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_4a);
+    furi_assert(event.protocol == NfcProtocolIso14443_4a);
 
     MfDesfirePoller* instance = context;
     furi_assert(instance);
@@ -212,7 +214,7 @@ static NfcCommand mf_desfire_poller_run(NfcPollerEvent event, void* context) {
 }
 
 static bool mf_desfire_poller_detect(NfcPollerEvent event, void* context) {
-    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_4a);
+    furi_assert(event.protocol == NfcProtocolIso14443_4a);
 
     MfDesfirePoller* instance = context;
     furi_assert(instance);

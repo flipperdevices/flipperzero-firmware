@@ -39,17 +39,17 @@
 #include <m-array.h>
 
 #include <lib/nfc/nfc.h>
-#include <lib/nfc/protocols/nfca/nfca_poller.h>
-#include <lib/nfc/protocols/nfca/nfca_listener.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h>
 #include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
 #include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 
-#include <nfc/nfc_poller_manager.h>
+#include <nfc/nfc_poller.h>
 #include <nfc/nfc_scanner.h>
 
-#include <lib/nfc/nfc_dev.h>
+#include <lib/nfc/nfc_device.h>
 #include <lib/nfc/helpers/nfc_data_generator.h>
 
 #include <gui/modules/validators.h>
@@ -90,7 +90,7 @@ struct NfcApp {
 
     size_t protocols_detected_num;
     size_t protocols_detected_idx;
-    NfcProtocolType protocols_detected[NfcProtocolTypeMax];
+    NfcProtocol protocols_detected[NfcProtocolNum];
 
     void* rpc_ctx;
     NfcRpcState rpc_state;
@@ -108,12 +108,10 @@ struct NfcApp {
     DetectReader* detect_reader;
 
     Nfc* nfc;
-    NfcaPoller* nfca_poller;
-    NfcaListener* nfca_listener;
+    Iso14443_3aListener* iso14443_3a_listener;
     MfUltralightListener* mf_ul_listener;
-    MfClassicPoller* mf_classic_poller;
 
-    NfcPollerManager* poller_manager;
+    NfcPoller* poller;
     NfcScanner* scanner;
 
     MfUltralightAuth* mf_ul_auth;
@@ -121,8 +119,8 @@ struct NfcApp {
     FuriString* parsed_data;
     NfcSupportedCards* supported_cards;
 
-    NfcDev* nfc_dev;
-    NfcaData* nfca_edit_data;
+    NfcDevice* nfc_device;
+    Iso14443_3aData* iso14443_3a_edit_data;
     FuriString* file_path;
     FuriString* file_name;
 };
@@ -172,6 +170,6 @@ bool nfc_save_file(NfcApp* instance, FuriString* path);
 
 void nfc_make_app_folder(NfcApp* instance);
 
-void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocolType* types, uint32_t count);
+void nfc_app_set_detected_protocols(NfcApp* instance, const NfcProtocol* types, uint32_t count);
 
 void nfc_app_reset_detected_protocols(NfcApp* instance);

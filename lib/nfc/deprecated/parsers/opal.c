@@ -112,8 +112,8 @@ void opal_date_time_to_furi(uint16_t days, uint16_t minutes, FuriHalRtcDateTime*
     out->day = days;
 }
 
-bool opal_parser_parse(NfcDeviceData* dev_data) {
-    if(dev_data->protocol != NfcDeviceProtocolMifareDesfire) {
+bool opal_parser_parse(NfcDeviceOldDataOld* dev_data) {
+    if(dev_data->protocol != NfcDeviceOldProtocolMifareDesfire) {
         return false;
     }
 

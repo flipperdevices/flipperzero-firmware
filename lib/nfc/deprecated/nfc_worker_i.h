@@ -19,7 +19,7 @@ struct NfcWorker {
     Storage* storage;
     Stream* dict_stream;
 
-    NfcDeviceData* dev_data;
+    NfcDeviceOldDataOld* dev_data;
 
     NfcWorkerCallback callback;
     void* context;

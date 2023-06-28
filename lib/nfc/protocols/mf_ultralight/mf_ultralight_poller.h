@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mf_ultralight.h"
-#include <lib/nfc/protocols/nfca/nfca_poller.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,8 +35,6 @@ typedef struct {
     MfUltralightPollerEventType type;
     MfUltralightPollerEventData* data;
 } MfUltralightPollerEvent;
-
-const MfUltralightData* mf_ultralight_poller_get_data(MfUltralightPoller* instance);
 
 #ifdef __cplusplus
 }

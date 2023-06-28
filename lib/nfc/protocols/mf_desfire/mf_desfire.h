@@ -147,7 +147,7 @@ typedef struct {
     SimpleArray* applications;
 } MfDesfireData;
 
-extern const NfcProtocolBase nfc_protocol_mf_desfire;
+extern const NfcDeviceBase nfc_device_mf_desfire;
 
 // Virtual methods
 
@@ -167,7 +167,7 @@ bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff, uint32_t vers
 
 bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other);
 
-const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcProtocolNameType name_type);
+const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcDeviceNameType name_type);
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len);
 

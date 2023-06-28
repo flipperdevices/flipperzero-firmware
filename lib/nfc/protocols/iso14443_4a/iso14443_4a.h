@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nfc/protocols/nfca/nfca.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,11 +25,11 @@ typedef struct {
 } Iso14443_4aAtsData;
 
 typedef struct {
-    NfcaData* iso14443_3a_data;
+    Iso14443_3aData* iso14443_3a_data;
     Iso14443_4aAtsData ats_data;
 } Iso14443_4aData;
 
-extern const NfcProtocolBase nfc_protocol_iso14443_4a;
+extern const NfcDeviceBase nfc_device_iso14443_4a;
 
 // Virtual methods
 
@@ -49,8 +49,7 @@ bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff, uint32_t v
 
 bool iso14443_4a_is_equal(const Iso14443_4aData* data, const Iso14443_4aData* other);
 
-const char*
-    iso14443_4a_get_device_name(const Iso14443_4aData* data, NfcProtocolNameType name_type);
+const char* iso14443_4a_get_device_name(const Iso14443_4aData* data, NfcDeviceNameType name_type);
 
 const uint8_t* iso14443_4a_get_uid(const Iso14443_4aData* data, size_t* uid_len);
 

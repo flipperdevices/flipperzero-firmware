@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mf_ultralight.h"
-#include <lib/nfc/protocols/nfca/nfca_listener.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,14 +25,14 @@ typedef struct {
 } MfUltralightListenerEvent;
 
 typedef enum {
-    MfUltralightListenerCommandContinue = NfcaListenerCommandContinue,
-    MfUltralightListenerCommandReset = NfcaListenerCommandReset,
+    MfUltralightListenerCommandContinue = Iso14443_3aListenerCommandContinue,
+    MfUltralightListenerCommandReset = Iso14443_3aListenerCommandReset,
 } MfUltralightListenerCommand;
 
 typedef MfUltralightListenerCommand (
     *MfUltralightListenerEventCallback)(MfUltralightListenerEvent event, void* context);
 
-MfUltralightListener* mf_ultralight_listener_alloc(NfcaListener* nfca_listener);
+MfUltralightListener* mf_ultralight_listener_alloc(Iso14443_3aListener* iso14443_3a_listener);
 
 void mf_ultralight_listener_free(MfUltralightListener* instance);
 

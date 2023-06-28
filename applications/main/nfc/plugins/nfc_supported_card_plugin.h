@@ -1,7 +1,7 @@
 #pragma once
 
 #include <furi/core/string.h>
-#include <nfc/protocols/nfc_protocol_defs.h>
+#include <nfc/protocols/nfc_device_defs.h>
 
 #define NFC_SUPPORTED_CARD_PLUGIN_APP_ID "NfcSupportedCardPlugin"
 #define NFC_SUPPORTED_CARD_PLUGIN_API_VERSION 1
@@ -13,7 +13,7 @@ typedef bool (*NfcSupportedCardPluginRead)(void* poller, void* data);
 typedef bool (*NfcSupportedCardPluginParse)(void* data, FuriString* parsed_data);
 
 typedef struct {
-    NfcProtocolType protocol;
+    NfcProtocol protocol;
     NfcSupportedCardPluginVerify verify;
     NfcSupportedCardPluginRead read;
     NfcSupportedCardPluginParse parse;

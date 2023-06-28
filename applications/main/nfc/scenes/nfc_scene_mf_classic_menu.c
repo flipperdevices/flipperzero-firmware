@@ -23,8 +23,7 @@ void nfc_scene_mf_classic_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_mf_classic_menu_submenu_callback, nfc);
 
-    const MfClassicData* mfc_data =
-        nfc_dev_get_protocol_data(nfc->nfc_dev, NfcProtocolTypeMfClassic);
+    const MfClassicData* mfc_data = nfc_device_get_data(nfc->nfc_device, NfcProtocolMfClassic);
     if(!mf_classic_is_card_read(mfc_data)) {
         submenu_add_item(
             submenu,
