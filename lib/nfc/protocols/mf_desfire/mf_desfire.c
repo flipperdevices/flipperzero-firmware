@@ -79,7 +79,7 @@ bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
 
     FuriString* prefix = furi_string_alloc();
 
-    bool is_loaded = false;
+    bool success = false;
 
     do {
         if(!iso14443_4a_load(data->iso14443_4a_data, ff, version)) break;
@@ -131,20 +131,76 @@ bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
 
         if(i != application_count) break;
 
-        is_loaded = true;
+        success = true;
     } while(false);
 
     furi_string_free(prefix);
-    return is_loaded;
+    return success;
 }
 
 bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
-    UNUSED(data);
-    UNUSED(ff);
+    furi_assert(data);
     UNUSED(version);
 
-    // TODO: Implementation
-    return false;
+    FuriString* prefix = furi_string_alloc();
+
+    bool success = false;
+
+    do {
+        if(!flipper_format_write_string_cstr(ff, "Device type", MF_DESFIRE_PROTOCOL_NAME)) break;
+
+        if(!iso14443_4a_save(data->iso14443_4a_data, ff, version)) break;
+
+        if(!flipper_format_write_comment_cstr(ff, MF_DESFIRE_PROTOCOL_NAME " specific data"))
+            break;
+        if(!mf_desfire_version_save(&data->version, ff)) break;
+        if(!mf_desfire_free_memory_save(&data->free_memory, ff)) break;
+        if(!mf_desfire_key_settings_save(
+               &data->master_key_settings, MF_DESFIRE_FFF_PICC_PREFIX, ff))
+            break;
+
+        const uint32_t master_key_version_count =
+            simple_array_get_count(data->master_key_versions);
+
+        uint32_t i;
+        for(i = 0; i < master_key_version_count; ++i) {
+            if(!mf_desfire_key_version_save(
+                   simple_array_cget(data->master_key_versions, i),
+                   MF_DESFIRE_FFF_PICC_PREFIX,
+                   i,
+                   ff))
+                break;
+        }
+
+        if(i != master_key_version_count) break;
+
+        const uint32_t application_count = simple_array_get_count(data->application_ids);
+        if(!mf_desfire_application_count_save(&application_count, ff)) break;
+        if(!mf_desfire_application_ids_save(
+               simple_array_cget(data->application_ids, 0), application_count, ff))
+            break;
+
+        for(i = 0; i < application_count; ++i) {
+            const MfDesfireApplicationId* app_id = simple_array_cget(data->application_ids, i);
+            furi_string_printf(
+                prefix,
+                "%s %02x%02x%02x",
+                MF_DESFIRE_FFF_APP_PREFIX,
+                app_id->data[0],
+                app_id->data[1],
+                app_id->data[2]);
+
+            const MfDesfireApplication* app = simple_array_cget(data->applications, i);
+            if(!mf_desfire_application_save(app, furi_string_get_cstr(prefix), ff)) break;
+        }
+
+        if(i != application_count) break;
+
+        success = true;
+    } while(false);
+
+    furi_string_free(prefix);
+    return success;
 }
 
 bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other) {

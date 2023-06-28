@@ -94,3 +94,48 @@ bool mf_desfire_application_ids_load(
     FlipperFormat* ff);
 
 bool mf_desfire_application_load(MfDesfireApplication* data, const char* prefix, FlipperFormat* ff);
+
+// Save internal MFDesfire structures
+
+bool mf_desfire_version_save(const MfDesfireVersion* data, FlipperFormat* ff);
+
+bool mf_desfire_free_memory_save(const MfDesfireFreeMemory* data, FlipperFormat* ff);
+
+bool mf_desfire_key_settings_save(
+    const MfDesfireKeySettings* data,
+    const char* prefix,
+    FlipperFormat* ff);
+
+bool mf_desfire_key_version_save(
+    const MfDesfireKeyVersion* data,
+    const char* prefix,
+    uint32_t index,
+    FlipperFormat* ff);
+
+bool mf_desfire_file_ids_save(
+    const MfDesfireFileId* data,
+    uint32_t count,
+    const char* prefix,
+    FlipperFormat* ff);
+
+bool mf_desfire_file_settings_save(
+    const MfDesfireFileSettings* data,
+    const char* prefix,
+    FlipperFormat* ff);
+
+bool mf_desfire_file_data_save(
+    const MfDesfireFileData* data,
+    const char* prefix,
+    FlipperFormat* ff);
+
+bool mf_desfire_application_count_save(const uint32_t* data, FlipperFormat* ff);
+
+bool mf_desfire_application_ids_save(
+    const MfDesfireApplicationId* data,
+    uint32_t count,
+    FlipperFormat* ff);
+
+bool mf_desfire_application_save(
+    const MfDesfireApplication* data,
+    const char* prefix,
+    FlipperFormat* ff);

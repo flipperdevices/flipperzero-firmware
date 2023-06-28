@@ -40,8 +40,7 @@ bool nfc_scene_mf_desfire_menu_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexSave) {
-            // TODO: Implement saving
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneSaveName);
             consumed = true;
         } else if(event.event == SubmenuIndexEmulateUid) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcaEmulate);
