@@ -23,7 +23,7 @@ void nfc_scene_delete_on_enter(void* context) {
         nfc->widget, GuiButtonTypeRight, "Delete", nfc_scene_delete_widget_callback, nfc);
 
     size_t uid_len;
-    const uint8_t* uid = nfc_dev_get_uid(nfc->nfc_dev, &uid_len);
+    const uint8_t* uid = nfc_device_get_uid(nfc->nfc_device, &uid_len);
 
     furi_string_set(temp_str, "UID:");
     for(size_t i = 0; i < uid_len; i++) {
@@ -32,7 +32,7 @@ void nfc_scene_delete_on_enter(void* context) {
     widget_add_string_element(
         nfc->widget, 64, 24, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));
 
-    furi_string_set_str(temp_str, nfc_dev_get_device_name(nfc->nfc_dev, NfcProtocolNameTypeFull));
+    furi_string_set_str(temp_str, nfc_device_get_name(nfc->nfc_device, NfcDeviceNameTypeFull));
     widget_add_string_element(
         nfc->widget, 64, 34, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));
     widget_add_string_element(nfc->widget, 64, 44, AlignCenter, AlignTop, FontSecondary, "NFC-A");

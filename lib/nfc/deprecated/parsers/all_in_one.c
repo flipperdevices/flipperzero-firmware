@@ -14,7 +14,7 @@
 #define ALL_IN_ONE_LAYOUT_E5 5
 #define ALL_IN_ONE_LAYOUT_2 6
 
-uint8_t all_in_one_get_layout(NfcDeviceData* dev_data) {
+uint8_t all_in_one_get_layout(NfcDeviceOldDataOld* dev_data) {
     // I absolutely hate what's about to happen here.
 
     // Switch on the second half of the third byte of page 5
@@ -67,7 +67,7 @@ bool all_in_one_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx)
     }
 }
 
-bool all_in_one_parser_parse(NfcDeviceData* dev_data) {
+bool all_in_one_parser_parse(NfcDeviceOldDataOld* dev_data) {
     if(dev_data->mf_ul_data.data[4 * 4] != 0x45 || dev_data->mf_ul_data.data[4 * 4 + 1] != 0xD9) {
         FURI_LOG_I("all_in_one", "Pass not verified");
         return false;

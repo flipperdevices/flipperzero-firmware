@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mf_classic.h"
-#include <lib/nfc/protocols/nfca/nfca_poller.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 
 #ifdef __cplusplus
 extern "C" {

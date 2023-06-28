@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/nfc/protocols/nfca/nfca.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -111,7 +111,7 @@ typedef struct {
 } MfClassicDeviceKeys;
 
 typedef struct {
-    NfcaData* nfca_data;
+    Iso14443_3aData* iso14443_3a_data;
     MfClassicType type;
     uint32_t block_read_mask[MF_CLASSIC_READ_MASK_SIZE];
     uint64_t key_a_mask;
@@ -119,7 +119,7 @@ typedef struct {
     MfClassicBlock block[MF_CLASSIC_TOTAL_BLOCKS_MAX];
 } MfClassicData;
 
-extern const NfcProtocolBase nfc_protocol_mf_classic;
+extern const NfcDeviceBase nfc_device_mf_classic;
 
 MfClassicData* mf_classic_alloc();
 
@@ -137,11 +137,11 @@ bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff, uint32_t vers
 
 bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other);
 
-const char* mf_classic_get_device_name(const MfClassicData* data, NfcProtocolNameType name_type);
+const char* mf_classic_get_device_name(const MfClassicData* data, NfcDeviceNameType name_type);
 
 const uint8_t* mf_classic_get_uid(const MfClassicData* data, size_t* uid_len);
 
-bool mf_classic_detect_protocol(NfcaData* data, MfClassicType* type);
+bool mf_classic_detect_protocol(Iso14443_3aData* data, MfClassicType* type);
 
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type);
 

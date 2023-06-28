@@ -59,20 +59,20 @@ static const MfClassicPollerCmdHandler mf_classic_poller_cmd_handlers[MfClassicP
 
 static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* context) {
     furi_assert(event.poller);
-    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(event.data);
     furi_assert(context);
 
     MfClassicPollerContext* poller_context = context;
-    NfcaPollerEvent* nfca_event = event.data;
-    NfcaPoller* nfca_poller = event.poller;
-    MfClassicPoller* mfc_poller = mf_classic_poller_alloc(nfca_poller);
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    Iso14443_3aPoller* iso14443_3a_poller = event.poller;
+    MfClassicPoller* mfc_poller = mf_classic_poller_alloc(iso14443_3a_poller);
 
-    if(nfca_event->type == NfcaPollerEventTypeReady) {
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         poller_context->error = mf_classic_poller_cmd_handlers[poller_context->cmd_type](
             mfc_poller, &poller_context->data);
-    } else if(nfca_event->type == NfcaPollerEventTypeError) {
-        poller_context->error = mf_classic_process_error(nfca_event->data->error);
+    } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
+        poller_context->error = mf_classic_process_error(iso14443_3a_event->data->error);
     }
 
     furi_thread_flags_set(poller_context->thread_id, MF_CLASSIC_POLLER_COMPLETE_EVENT);
@@ -87,7 +87,7 @@ static MfClassicError mf_classic_poller_cmd_execute(Nfc* nfc, MfClassicPollerCon
 
     poller_ctx->thread_id = furi_thread_get_current_id();
 
-    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolTypeIso14443_3a);
+    NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolIso14443_3a);
     nfc_poller_start(poller, mf_ultralgiht_poller_cmd_callback, poller_ctx);
     furi_thread_flags_wait(MF_CLASSIC_POLLER_COMPLETE_EVENT, FuriFlagWaitAny, FuriWaitForever);
     furi_thread_flags_clear(MF_CLASSIC_POLLER_COMPLETE_EVENT);

@@ -44,8 +44,8 @@ typedef NfcCommand (*NfcEventCallback)(NfcEvent event, void* context);
 
 typedef enum {
     NfcModeIdle,
-    NfcModeNfcaPoller,
-    NfcModeNfcaListener,
+    NfcModeIso14443_3aPoller,
+    NfcModeIso14443_3aListener,
     NfcModeNfcbPoller,
     NfcModeNfcbListener,
     NfcModeNfcfPoller,

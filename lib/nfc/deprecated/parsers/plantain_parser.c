@@ -62,7 +62,7 @@ uint8_t plantain_calculate_luhn(uint64_t number) {
     return 0;
 }
 
-bool plantain_parser_parse(NfcDeviceData* dev_data) {
+bool plantain_parser_parse(NfcDeviceOldDataOld* dev_data) {
     MfClassicData* data = &dev_data->mf_classic_data;
 
     // Verify key

@@ -11,7 +11,7 @@ typedef enum {
 } NfcPollerSessionState;
 
 typedef struct NfcPollerListElement {
-    NfcProtocolType protocol;
+    NfcProtocol protocol;
     NfcPollerInstance* poller;
     const NfcPollerBase* poller_api;
     struct NfcPollerListElement* child;
@@ -23,7 +23,7 @@ typedef struct {
 } NfcPollerList;
 
 struct NfcPoller {
-    NfcProtocolType protocol;
+    NfcProtocol protocol;
     Nfc* nfc;
     NfcPollerList list;
     NfcPollerSessionState session_state;
@@ -39,7 +39,7 @@ static void nfc_poller_list_alloc(NfcPoller* instance) {
 
     do {
         const NfcPollerTreeNode* node = &nfc_poller_nodes[instance->list.head->protocol];
-        if(node->parent_protocol == NfcProtocolTypeInvalid) break;
+        if(node->parent_protocol == NfcProtocolInvalid) break;
 
         NfcPollerListElement* parent = malloc(sizeof(NfcPollerListElement));
         parent->protocol = node->parent_protocol;
@@ -71,9 +71,9 @@ static void nfc_poller_list_free(NfcPoller* instance) {
     } while(true);
 }
 
-NfcPoller* nfc_poller_alloc(Nfc* nfc, NfcProtocolType protocol) {
+NfcPoller* nfc_poller_alloc(Nfc* nfc, NfcProtocol protocol) {
     furi_assert(nfc);
-    furi_assert(protocol < NfcProtocolTypeMax);
+    furi_assert(protocol < NfcProtocolNum);
 
     NfcPoller* instance = malloc(sizeof(NfcPoller));
     instance->session_state = NfcPollerSessionStateIdle;
@@ -98,7 +98,7 @@ static NfcCommand nfc_poller_start_callback(NfcEvent event, void* context) {
 
     NfcCommand command = NfcCommandContinue;
     NfcPollerEvent poller_event = {
-        .protocol_type = NfcProtocolTypeInvalid,
+        .protocol = NfcProtocolInvalid,
         .poller = instance->nfc,
         .data = &event,
     };
@@ -156,7 +156,7 @@ static NfcCommand nfc_poller_detect_callback(NfcEvent event, void* context) {
 
     NfcCommand command = NfcCommandContinue;
     NfcPollerEvent poller_event = {
-        .protocol_type = NfcProtocolTypeInvalid,
+        .protocol = NfcProtocolInvalid,
         .poller = instance->nfc,
         .data = &event,
     };
@@ -201,7 +201,7 @@ bool nfc_poller_detect(NfcPoller* instance) {
     return instance->protocol_detected;
 }
 
-const NfcProtocolData* nfc_poller_get_data(NfcPoller* instance) {
+const NfcDeviceData* nfc_poller_get_data(NfcPoller* instance) {
     furi_assert(instance);
 
     NfcPollerListElement* tail_poller = instance->list.tail;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <nfc/nfc.h>
-#include <nfc/protocols/nfc_protocol_defs.h>
+#include <nfc/protocols/nfc_device_defs.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,7 +15,7 @@ typedef enum {
 
 typedef struct {
     size_t protocol_num;
-    NfcProtocolType* protocols;
+    NfcProtocol* protocols;
 } NfcScannerEventData;
 
 typedef struct {

@@ -1,12 +1,12 @@
 #include "nfc_protocol_format.h"
 
-#include <nfc/protocols/nfca/nfca.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <nfc/protocols/mf_classic/mf_classic.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
 #include <nfc/protocols/mf_desfire/mf_desfire.h>
 
 typedef void (*NfcProtocolFormatRenderInfo)(
-    const NfcDev* device,
+    const NfcDevice* device,
     NfcProtocolFormatType type,
     FuriString* str);
 
@@ -16,7 +16,7 @@ typedef struct {
 } NfcProtocolFormatBase;
 
 static void nfc_protocol_format_info_iso14443_3a_common(
-    const NfcaData* nfc_data,
+    const Iso14443_3aData* nfc_data,
     NfcProtocolFormatType type,
     FuriString* str) {
     if(type == NfcProtocolFormatTypeFull) {
@@ -37,30 +37,30 @@ static void nfc_protocol_format_info_iso14443_3a_common(
 }
 
 static void nfc_protocol_format_info_iso14443_3a(
-    const NfcDev* device,
+    const NfcDevice* device,
     NfcProtocolFormatType type,
     FuriString* str) {
     UNUSED(type);
-    const NfcaData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeIso14443_3a);
+    const Iso14443_3aData* data = nfc_device_get_data(device, NfcProtocolIso14443_3a);
     nfc_protocol_format_info_iso14443_3a_common(data, NfcProtocolFormatTypeFull, str);
 }
 
 static void nfc_protocol_format_info_iso14443_4a(
-    const NfcDev* device,
+    const NfcDevice* device,
     NfcProtocolFormatType type,
     FuriString* str) {
     UNUSED(type);
-    const Iso14443_4aData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeIso14443_4a);
+    const Iso14443_4aData* data = nfc_device_get_data(device, NfcProtocolIso14443_4a);
     nfc_protocol_format_info_iso14443_3a_common(
         data->iso14443_3a_data, NfcProtocolFormatTypeFull, str);
 }
 
 static void nfc_protocol_format_info_mf_ultralight(
-    const NfcDev* device,
+    const NfcDevice* device,
     NfcProtocolFormatType type,
     FuriString* str) {
-    const MfUltralightData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeMfUltralight);
-    nfc_protocol_format_info_iso14443_3a_common(data->nfca_data, type, str);
+    const MfUltralightData* data = nfc_device_get_data(device, NfcProtocolMfUltralight);
+    nfc_protocol_format_info_iso14443_3a_common(data->iso14443_3a_data, type, str);
 
     furi_string_cat_printf(str, "\nPages Read: %u/%u", data->pages_read, data->pages_total);
     if(data->pages_read != data->pages_total) {
@@ -69,11 +69,11 @@ static void nfc_protocol_format_info_mf_ultralight(
 }
 
 static void nfc_protocol_format_info_mf_classic(
-    const NfcDev* device,
+    const NfcDevice* device,
     NfcProtocolFormatType type,
     FuriString* str) {
-    const MfClassicData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeMfClassic);
-    nfc_protocol_format_info_iso14443_3a_common(data->nfca_data, type, str);
+    const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
+    nfc_protocol_format_info_iso14443_3a_common(data->iso14443_3a_data, type, str);
 
     uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
     uint8_t keys_total = sectors_total * 2;
@@ -87,10 +87,10 @@ static void nfc_protocol_format_info_mf_classic(
 
 // TODO: use proper type getters
 static void nfc_protocol_format_info_mf_desfire(
-    const NfcDev* device,
+    const NfcDevice* device,
     NfcProtocolFormatType type,
     FuriString* str) {
-    const MfDesfireData* data = nfc_dev_get_protocol_data(device, NfcProtocolTypeMfDesfire);
+    const MfDesfireData* data = nfc_device_get_data(device, NfcProtocolMfDesfire);
     nfc_protocol_format_info_iso14443_3a_common(
         data->iso14443_4a_data->iso14443_3a_data, type, str);
 
@@ -117,40 +117,39 @@ static void nfc_protocol_format_info_mf_desfire(
     furi_string_cat_printf(str, ", %lu File%s", file_count, file_count != 1 ? "s" : "");
 }
 
-static const NfcProtocolFormatBase nfc_protocol_format[NfcProtocolTypeMax] = {
-    [NfcProtocolTypeIso14443_3a] =
+static const NfcProtocolFormatBase nfc_protocol_format[NfcProtocolNum] = {
+    [NfcProtocolIso14443_3a] =
         {
             .flags = NfcProtocolFormatFeatureNone,
             .render_info = nfc_protocol_format_info_iso14443_3a,
         },
-    [NfcProtocolTypeIso14443_4a] =
+    [NfcProtocolIso14443_4a] =
         {
             .flags = NfcProtocolFormatFeatureNone,
             .render_info = nfc_protocol_format_info_iso14443_4a,
         },
-    [NfcProtocolTypeMfUltralight] =
+    [NfcProtocolMfUltralight] =
         {
             .flags = NfcProtocolFormatFeatureMoreData,
             .render_info = nfc_protocol_format_info_mf_ultralight,
         },
-    [NfcProtocolTypeMfClassic] =
+    [NfcProtocolMfClassic] =
         {
             .flags = NfcProtocolFormatFeatureMoreData,
             .render_info = nfc_protocol_format_info_mf_classic,
         },
-    [NfcProtocolTypeMfDesfire] =
+    [NfcProtocolMfDesfire] =
         {
             .flags = NfcProtocolFormatFeatureMoreData,
             .render_info = nfc_protocol_format_info_mf_desfire,
         },
 };
 
-NfcProtocolFormatFeature nfc_protocol_format_get_features(const NfcDev* device) {
-    return nfc_protocol_format[nfc_dev_get_protocol_type(device)].flags;
+NfcProtocolFormatFeature nfc_protocol_format_get_features(const NfcDevice* device) {
+    return nfc_protocol_format[nfc_device_get_protocol(device)].flags;
 }
 
-void nfc_protocol_format_info(const NfcDev* device, NfcProtocolFormatType type, FuriString* str) {
-    furi_string_cat_printf(
-        str, "\e#%s\n", nfc_dev_get_device_name(device, NfcProtocolNameTypeFull));
-    nfc_protocol_format[nfc_dev_get_protocol_type(device)].render_info(device, type, str);
+void nfc_protocol_format_info(const NfcDevice* device, NfcProtocolFormatType type, FuriString* str) {
+    furi_string_cat_printf(str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+    nfc_protocol_format[nfc_device_get_protocol(device)].render_info(device, type, str);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/nfc/protocols/nfca/nfca.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -153,7 +153,7 @@ typedef struct __attribute__((packed)) {
 } MfUltralightConfigPages;
 
 typedef struct {
-    NfcaData* nfca_data;
+    Iso14443_3aData* iso14443_3a_data;
     MfUltralightType type;
     MfUltralightVersion version;
     MfUltralightSignature signature;
@@ -165,7 +165,7 @@ typedef struct {
     uint32_t auth_attempts;
 } MfUltralightData;
 
-extern const NfcProtocolBase nfc_protocol_mf_ultralight;
+extern const NfcDeviceBase nfc_device_mf_ultralight;
 
 MfUltralightData* mf_ultralight_alloc();
 
@@ -184,7 +184,7 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_
 bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData* other);
 
 const char*
-    mf_ultralight_get_device_name(const MfUltralightData* data, NfcProtocolNameType name_type);
+    mf_ultralight_get_device_name(const MfUltralightData* data, NfcDeviceNameType name_type);
 
 const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_len);
 
@@ -200,7 +200,7 @@ bool mf_ultralight_get_config_page(const MfUltralightData* data, MfUltralightCon
 
 bool mf_ultralight_is_all_data_read(const MfUltralightData* data);
 
-bool mf_ultralight_detect_protocol(const NfcaData* nfca_data);
+bool mf_ultralight_detect_protocol(const Iso14443_3aData* iso14443_3a_data);
 
 bool mf_ultralight_is_counter_configured(const MfUltralightData* data);
 

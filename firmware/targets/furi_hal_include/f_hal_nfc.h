@@ -41,8 +41,8 @@ typedef enum {
 } FHalNfcError;
 
 typedef enum {
-    FHalNfcModeNfcaPoller,
-    FHalNfcModeNfcaListener,
+    FHalNfcModeIso14443_3aPoller,
+    FHalNfcModeIso14443_3aListener,
 
     FHalNfcModeNfcbPoller,
     FHalNfcModeNfcbListener,

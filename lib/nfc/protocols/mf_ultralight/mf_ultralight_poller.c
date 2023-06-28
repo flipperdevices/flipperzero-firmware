@@ -166,18 +166,18 @@ bool mf_ultralight_poller_ntag_i2c_addr_lin_to_tag(
     return tag_calculated;
 }
 
-MfUltralightPoller* mf_ultralight_poller_alloc(NfcaPoller* nfca_poller) {
-    furi_assert(nfca_poller);
+MfUltralightPoller* mf_ultralight_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller) {
+    furi_assert(iso14443_3a_poller);
 
     MfUltralightPoller* instance = malloc(sizeof(MfUltralightPoller));
-    instance->nfca_poller = nfca_poller;
+    instance->iso14443_3a_poller = iso14443_3a_poller;
     instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
     instance->rx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_MAX_BUFF_SIZE);
     instance->data = mf_ultralight_alloc();
 
     instance->mfu_event.data = &instance->mfu_event_data;
 
-    instance->general_event.protocol_type = NfcProtocolTypeMfUltralight;
+    instance->general_event.protocol = NfcProtocolMfUltralight;
     instance->general_event.data = &instance->mfu_event;
     instance->general_event.poller = instance;
 
@@ -216,7 +216,9 @@ const MfUltralightData* mf_ultralight_poller_get_data(MfUltralightPoller* instan
 static NfcCommand mf_ultralight_poller_handler_idle(MfUltralightPoller* instance) {
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
-    nfca_copy(instance->data->nfca_data, nfca_poller_get_data(instance->nfca_poller));
+    iso14443_3a_copy(
+        instance->data->iso14443_3a_data,
+        iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
     instance->counters_read = 0;
     instance->counters_total = 3;
     instance->tearing_flag_read = 0;
@@ -235,7 +237,7 @@ static NfcCommand mf_ultralight_poller_handler_read_version(MfUltralightPoller* 
         instance->state = MfUltralightPollerStateGetFeatureSet;
     } else {
         FURI_LOG_D(TAG, "Didn't response. Check NTAG 203");
-        nfca_poller_halt(instance->nfca_poller);
+        iso14443_3a_poller_halt(instance->iso14443_3a_poller);
         instance->state = MfUltralightPollerStateDetectNtag203;
     }
 
@@ -250,7 +252,7 @@ static NfcCommand mf_ultralight_poller_handler_check_ntag_203(MfUltralightPoller
         instance->data->type = MfUltralightTypeNTAG203;
     } else {
         FURI_LOG_D(TAG, "Original Ultralight detected");
-        nfca_poller_halt(instance->nfca_poller);
+        iso14443_3a_poller_halt(instance->iso14443_3a_poller);
         instance->data->type = MfUltralightTypeUnknown;
     }
     instance->state = MfUltralightPollerStateGetFeatureSet;
@@ -265,7 +267,7 @@ static NfcCommand mf_ultralight_poller_handler_get_feature_set(MfUltralightPolle
     FURI_LOG_D(
         TAG,
         "%s detected. Total pages: %d",
-        mf_ultralight_get_device_name(instance->data, NfcProtocolNameTypeFull),
+        mf_ultralight_get_device_name(instance->data, NfcDeviceNameTypeFull),
         instance->pages_total);
 
     instance->state = MfUltralightPollerStateReadSignature;
@@ -371,7 +373,7 @@ static NfcCommand mf_ultralight_poller_handler_auth(MfUltralightPoller* instance
                 instance->auth_context.auth_success = false;
                 instance->mfu_event.type = MfUltralightPollerEventTypeAuthFailed;
                 command = instance->callback(instance->general_event, instance->context);
-                nfca_poller_halt(instance->nfca_poller);
+                iso14443_3a_poller_halt(instance->iso14443_3a_poller);
             }
         }
     }
@@ -456,7 +458,7 @@ static NfcCommand mf_ultralight_poller_handler_try_default_pass(MfUltralightPoll
 
 static NfcCommand mf_ultralight_poller_handler_read_fail(MfUltralightPoller* instance) {
     FURI_LOG_D(TAG, "Read Failed");
-    nfca_poller_halt(instance->nfca_poller);
+    iso14443_3a_poller_halt(instance->iso14443_3a_poller);
     instance->mfu_event.data->error = instance->error;
     NfcCommand command = instance->callback(instance->general_event, instance->context);
     instance->state = MfUltralightPollerStateIdle;
@@ -465,7 +467,7 @@ static NfcCommand mf_ultralight_poller_handler_read_fail(MfUltralightPoller* ins
 
 static NfcCommand mf_ultralight_poller_handler_read_success(MfUltralightPoller* instance) {
     FURI_LOG_D(TAG, "Read success");
-    nfca_poller_halt(instance->nfca_poller);
+    iso14443_3a_poller_halt(instance->iso14443_3a_poller);
     instance->mfu_event.type = MfUltralightPollerEventTypeReadSuccess;
     NfcCommand command = instance->callback(instance->general_event, instance->context);
     return command;
@@ -492,18 +494,18 @@ static const MfUltralightPollerReadHandler
 static NfcCommand mf_ultralight_poller_run(NfcPollerEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
-    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     MfUltralightPoller* instance = context;
     furi_assert(instance->callback);
 
-    const NfcaPollerEvent* nfca_event = event.data;
+    const Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
 
     NfcCommand command = NfcCommandContinue;
 
-    if(nfca_event->type == NfcaPollerEventTypeReady) {
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         command = mf_ultralight_poller_read_handler[instance->state](instance);
-    } else if(nfca_event->type == NfcaPollerEventTypeError) {
+    } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
         instance->mfu_event.type = MfUltralightPollerEventTypeReadFailed;
         command = instance->callback(instance->general_event, instance->context);
     }
@@ -514,18 +516,18 @@ static NfcCommand mf_ultralight_poller_run(NfcPollerEvent event, void* context) 
 static bool mf_ultralight_poller_detect(NfcPollerEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
-    furi_assert(event.protocol_type == NfcProtocolTypeIso14443_3a);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     bool protocol_detected = false;
     MfUltralightPoller* instance = context;
-    const NfcaPollerEvent* nfca_event = event.data;
+    const Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
 
-    if(nfca_event->type == NfcaPollerEventTypeReady) {
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         MfUltralightPageReadCommandData read_page_cmd_data = {};
         MfUltralightError error =
             mf_ultralight_poller_async_read_page(instance, 0, &read_page_cmd_data);
         protocol_detected = (error == MfUltralightErrorNone);
-        nfca_poller_halt(instance->nfca_poller);
+        iso14443_3a_poller_halt(instance->iso14443_3a_poller);
     }
 
     return protocol_detected;

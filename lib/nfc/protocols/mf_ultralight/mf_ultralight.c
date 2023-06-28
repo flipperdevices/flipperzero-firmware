@@ -117,44 +117,44 @@ static const MfUltralightFeatures mf_ultralight_features[MfUltralightTypeNum] = 
         },
 };
 
-const NfcProtocolBase nfc_protocol_mf_ultralight = {
+const NfcDeviceBase nfc_device_mf_ultralight = {
     .protocol_name = MF_ULTRALIGHT_PROTOCOL_NAME,
-    .alloc = (NfcProtocolAlloc)mf_ultralight_alloc,
-    .free = (NfcProtocolFree)mf_ultralight_free,
-    .reset = (NfcProtocolReset)mf_ultralight_reset,
-    .copy = (NfcProtocolCopy)mf_ultralight_copy,
-    .verify = (NfcProtocolVerify)mf_ultralight_verify,
-    .load = (NfcProtocolLoad)mf_ultralight_load,
-    .save = (NfcProtocolSave)mf_ultralight_save,
-    .is_equal = (NfcProtocolEqual)mf_ultralight_is_equal,
-    .get_device_name = (NfcProtocolGetDeviceName)mf_ultralight_get_device_name,
-    .get_uid = (NfcProtocolGetUid)mf_ultralight_get_uid,
+    .alloc = (NfcDeviceAlloc)mf_ultralight_alloc,
+    .free = (NfcDeviceFree)mf_ultralight_free,
+    .reset = (NfcDeviceReset)mf_ultralight_reset,
+    .copy = (NfcDeviceCopy)mf_ultralight_copy,
+    .verify = (NfcDeviceVerify)mf_ultralight_verify,
+    .load = (NfcDeviceLoad)mf_ultralight_load,
+    .save = (NfcDeviceSave)mf_ultralight_save,
+    .is_equal = (NfcDeviceEqual)mf_ultralight_is_equal,
+    .get_name = (NfcDeviceGetName)mf_ultralight_get_device_name,
+    .get_uid = (NfcDeviceGetUid)mf_ultralight_get_uid,
 };
 
 MfUltralightData* mf_ultralight_alloc() {
     MfUltralightData* data = malloc(sizeof(MfUltralightData));
-    data->nfca_data = nfca_alloc();
+    data->iso14443_3a_data = iso14443_3a_alloc();
     return data;
 }
 
 void mf_ultralight_free(MfUltralightData* data) {
     furi_assert(data);
 
-    nfca_free(data->nfca_data);
+    iso14443_3a_free(data->iso14443_3a_data);
     free(data);
 }
 
 void mf_ultralight_reset(MfUltralightData* data) {
     furi_assert(data);
 
-    nfca_reset(data->nfca_data);
+    iso14443_3a_reset(data->iso14443_3a_data);
 }
 
 void mf_ultralight_copy(MfUltralightData* data, const MfUltralightData* other) {
     furi_assert(data);
     furi_assert(other);
 
-    nfca_copy(data->nfca_data, other->nfca_data);
+    iso14443_3a_copy(data->iso14443_3a_data, other->iso14443_3a_data);
     memcpy(data->counter, other->counter, MF_ULTRALIGHT_COUNTER_NUM);
     memcpy(data->tearing_flag, other->tearing_flag, MF_ULTRALIGHT_TEARING_FLAG_NUM);
     memcpy(data->page, other->page, MF_ULTRALIGHT_MAX_PAGE_NUM);
@@ -220,8 +220,8 @@ bool mf_ultralight_load(MfUltralightData* data, FlipperFormat* ff, uint32_t vers
     bool parsed = false;
 
     do {
-        // Read NFCA data
-        if(!nfca_load_data(data->nfca_data, ff, version)) break;
+        // Read ISO14443_3A data
+        if(!iso14443_3a_load_data(data->iso14443_3a_data, ff, version)) break;
 
         // Read Ultralight specific data
         // Read Mifare Ultralight format version
@@ -307,7 +307,7 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_
     do {
         const char* device_type_name = mf_ultralight_get_device_name_by_type(data->type, true);
         if(!flipper_format_write_string_cstr(ff, "Device type", device_type_name)) break;
-        if(!nfca_save_data(data->nfca_data, ff, version)) break;
+        if(!iso14443_3a_save_data(data->iso14443_3a_data, ff, version)) break;
         if(!flipper_format_write_comment_cstr(ff, "Mifare Ultralight specific data")) break;
         if(!flipper_format_write_uint32(
                ff, "Data format version", &mf_ultralight_data_format_version, 1))
@@ -371,22 +371,22 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_
 
 bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData* other) {
     // TODO: Complete equality method
-    return nfca_is_equal(data->nfca_data, other->nfca_data);
+    return iso14443_3a_is_equal(data->iso14443_3a_data, other->iso14443_3a_data);
 }
 
 // TODO: Improve this function
 const char*
-    mf_ultralight_get_device_name(const MfUltralightData* data, NfcProtocolNameType name_type) {
+    mf_ultralight_get_device_name(const MfUltralightData* data, NfcDeviceNameType name_type) {
     furi_assert(data);
     furi_assert(data->type < MfUltralightTypeNum);
 
-    return mf_ultralight_get_device_name_by_type(data->type, name_type == NfcProtocolNameTypeFull);
+    return mf_ultralight_get_device_name_by_type(data->type, name_type == NfcDeviceNameTypeFull);
 }
 
 const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_len) {
     furi_assert(data);
 
-    return nfca_get_uid(data->nfca_data, uid_len);
+    return iso14443_3a_get_uid(data->iso14443_3a_data, uid_len);
 }
 
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version) {
@@ -431,11 +431,11 @@ uint32_t mf_ultralight_get_feature_support_set(MfUltralightType type) {
     return mf_ultralight_features[type].feature_set;
 }
 
-bool mf_ultralight_detect_protocol(const NfcaData* nfca_data) {
-    furi_assert(nfca_data);
+bool mf_ultralight_detect_protocol(const Iso14443_3aData* iso14443_3a_data) {
+    furi_assert(iso14443_3a_data);
 
-    bool mfu_detected = (nfca_data->atqa[0] == 0x44) && (nfca_data->atqa[1] == 0x00) &&
-                        (nfca_data->sak == 0x00);
+    bool mfu_detected = (iso14443_3a_data->atqa[0] == 0x44) &&
+                        (iso14443_3a_data->atqa[1] == 0x00) && (iso14443_3a_data->sak == 0x00);
 
     return mfu_detected;
 }

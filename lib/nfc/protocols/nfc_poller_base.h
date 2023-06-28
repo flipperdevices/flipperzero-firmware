@@ -13,7 +13,7 @@ typedef void (
     *NfcPollerSetCallback)(NfcPollerInstance* poller, NfcPollerCallback callback, void* context);
 typedef NfcCommand (*NfcPollerRun)(NfcPollerEvent event, void* context);
 typedef bool (*NfcPollerDetect)(NfcPollerEvent event, void* context);
-typedef const NfcProtocolData* (*NfcPollerGetData)(const NfcPollerInstance* instance);
+typedef const NfcDeviceData* (*NfcPollerGetData)(const NfcPollerInstance* instance);
 
 typedef struct {
     NfcPollerAlloc alloc;

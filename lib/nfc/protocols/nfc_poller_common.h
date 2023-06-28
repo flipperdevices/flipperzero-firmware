@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nfc_protocol_defs.h"
+#include "nfc_device_defs.h"
 #include "nfc.h"
 
 #ifdef __cplusplus
@@ -12,7 +12,7 @@ typedef void NfcPollerInstance;
 typedef void NfcPollerEventData;
 
 typedef struct {
-    NfcProtocolType protocol_type;
+    NfcProtocol protocol;
     NfcPollerInstance* poller;
     NfcPollerEventData* data;
 } NfcPollerEvent;

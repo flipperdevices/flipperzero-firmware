@@ -1,35 +1,35 @@
 #include "nfc_rpc_i.h"
 
 #include "assets/compiled/nfca.pb.h"
-#include <nfc/protocols/nfca/nfca_poller_sync_api.h>
+#include <nfc/protocols/iso14443_3a/iso14443_3a_poller_sync_api.h>
 
-#define TAG "NfcRpcNfca"
+#define TAG "NfcRpcIso14443_3a"
 
-static PB_Nfca_Error nfc_rpc_nfca_process_error(NfcaError error) {
+static PB_Nfca_Error nfc_rpc_nfca_process_error(Iso14443_3aError error) {
     PB_Nfca_Error ret = PB_Nfca_Error_None;
     switch(error) {
-    case NfcaErrorNone:
+    case Iso14443_3aErrorNone:
         ret = PB_Nfca_Error_None;
         break;
-    case NfcaErrorNotPresent:
+    case Iso14443_3aErrorNotPresent:
         ret = PB_Nfca_Error_NotPresent;
         break;
-    case NfcaErrorColResFailed:
+    case Iso14443_3aErrorColResFailed:
         ret = PB_Nfca_Error_ColResFailed;
         break;
-    case NfcaErrorBufferOverflow:
+    case Iso14443_3aErrorBufferOverflow:
         ret = PB_Nfca_Error_BufferOverflow;
         break;
-    case NfcaErrorCommunication:
+    case Iso14443_3aErrorCommunication:
         ret = PB_Nfca_Error_Communication;
         break;
-    case NfcaErrorFieldOff:
+    case Iso14443_3aErrorFieldOff:
         ret = PB_Nfca_Error_FieldOff;
         break;
-    case NfcaErrorWrongCrc:
+    case Iso14443_3aErrorWrongCrc:
         ret = PB_Nfca_Error_WrongCrc;
         break;
-    case NfcaErrorTimeout:
+    case Iso14443_3aErrorTimeout:
         ret = PB_Nfca_Error_Timeout;
         break;
 
@@ -48,20 +48,20 @@ static void nfc_rpc_nfca_read(Nfc_Main* cmd, void* context) {
     NfcRpc* instance = context;
     PB_Nfca_ReadResponse pb_nfca_read_resp = PB_Nfca_ReadResponse_init_default;
 
-    NfcaData nfca_data = {};
-    NfcaError error = nfca_poller_read(instance->nfc, &nfca_data);
+    Iso14443_3aData iso14443_3a_data = {};
+    Iso14443_3aError error = iso14443_3a_poller_read(instance->nfc, &iso14443_3a_data);
 
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_read_resp_tag;
     pb_nfca_read_resp.error = nfc_rpc_nfca_process_error(error);
     if(pb_nfca_read_resp.error == PB_Nfca_Error_None) {
-        pb_nfca_read_resp.uid_len = nfca_data.uid_len;
-        memcpy(pb_nfca_read_resp.uid.bytes, nfca_data.uid, nfca_data.uid_len);
-        pb_nfca_read_resp.uid.size = nfca_data.uid_len;
-        memcpy(pb_nfca_read_resp.sak.bytes, &nfca_data.sak, sizeof(nfca_data.sak));
-        pb_nfca_read_resp.sak.size = sizeof(nfca_data.sak);
-        memcpy(pb_nfca_read_resp.atqa.bytes, nfca_data.atqa, sizeof(nfca_data.atqa));
-        pb_nfca_read_resp.atqa.size = sizeof(nfca_data.atqa);
+        pb_nfca_read_resp.uid_len = iso14443_3a_data.uid_len;
+        memcpy(pb_nfca_read_resp.uid.bytes, iso14443_3a_data.uid, iso14443_3a_data.uid_len);
+        pb_nfca_read_resp.uid.size = iso14443_3a_data.uid_len;
+        memcpy(pb_nfca_read_resp.sak.bytes, &iso14443_3a_data.sak, sizeof(iso14443_3a_data.sak));
+        pb_nfca_read_resp.sak.size = sizeof(iso14443_3a_data.sak);
+        memcpy(pb_nfca_read_resp.atqa.bytes, iso14443_3a_data.atqa, sizeof(iso14443_3a_data.atqa));
+        pb_nfca_read_resp.atqa.size = sizeof(iso14443_3a_data.atqa);
     }
     cmd->content.nfca_read_resp = pb_nfca_read_resp;
 }
@@ -75,14 +75,17 @@ static void nfc_rpc_nfca_emulate_start(Nfc_Main* cmd, void* context) {
         PB_Nfca_EmulateStartResponse_init_default;
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_emulate_start_resp_tag;
-    if(instance->nfca_listener == NULL) {
-        NfcaData nfca_data = {};
-        nfca_data.uid_len = cmd->content.nfca_emulate_start_req.uid_len;
-        memcpy(nfca_data.uid, cmd->content.nfca_emulate_start_req.uid.bytes, nfca_data.uid_len);
-        memcpy(nfca_data.atqa, cmd->content.nfca_emulate_start_req.atqa.bytes, 2);
-        memcpy(&nfca_data.sak, cmd->content.nfca_emulate_start_req.sak.bytes, 1);
+    if(instance->iso14443_3a_listener == NULL) {
+        Iso14443_3aData iso14443_3a_data = {};
+        iso14443_3a_data.uid_len = cmd->content.nfca_emulate_start_req.uid_len;
+        memcpy(
+            iso14443_3a_data.uid,
+            cmd->content.nfca_emulate_start_req.uid.bytes,
+            iso14443_3a_data.uid_len);
+        memcpy(iso14443_3a_data.atqa, cmd->content.nfca_emulate_start_req.atqa.bytes, 2);
+        memcpy(&iso14443_3a_data.sak, cmd->content.nfca_emulate_start_req.sak.bytes, 1);
 
-        nfca_listener_start(instance->nfca_listener, &nfca_data, NULL, NULL);
+        iso14443_3a_listener_start(instance->iso14443_3a_listener, &iso14443_3a_data, NULL, NULL);
         pb_nfca_emulate_start_resp.error = PB_Nfca_Error_None;
     } else {
         // TODO add Busy error
@@ -100,9 +103,9 @@ static void nfc_rpc_nfca_emulate_stop(Nfc_Main* cmd, void* context) {
         PB_Nfca_EmulateStopResponse_init_default;
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_emulate_stop_resp_tag;
-    if(instance->nfca_listener) {
-        nfca_listener_stop(instance->nfca_listener);
-        instance->nfca_listener = NULL;
+    if(instance->iso14443_3a_listener) {
+        iso14443_3a_listener_stop(instance->iso14443_3a_listener);
+        instance->iso14443_3a_listener = NULL;
         pb_nfca_emulate_stop_resp.error = PB_Nfca_Error_None;
     } else {
         // TODO add Busy error

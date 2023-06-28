@@ -317,7 +317,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
     furi_hal_spi_acquire(handle);
 
-    if(mode == FHalNfcModeNfcaPoller) {
+    if(mode == FHalNfcModeIso14443_3aPoller) {
         f_hal_nfc_configure_poller_common(handle);
         // Disable wake up
         st25r3916_clear_reg_bits(handle, ST25R3916_REG_OP_CONTROL, ST25R3916_REG_OP_CONTROL_wu);
@@ -332,7 +332,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
         st25r3916_change_reg_bits(handle, ST25R3916_REG_OVERSHOOT_CONF2, 0xff, 0x03);
         st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF1, 0xff, 0x40);
         st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF2, 0xff, 0x03);
-    } else if(mode == FHalNfcModeNfcaListener) {
+    } else if(mode == FHalNfcModeIso14443_3aListener) {
         st25r3916_write_reg(
             handle,
             ST25R3916_REG_OP_CONTROL,

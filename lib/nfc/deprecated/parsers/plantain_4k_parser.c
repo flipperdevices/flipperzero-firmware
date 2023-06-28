@@ -90,7 +90,7 @@ bool plantain_4k_parser_read(NfcWorker* nfc_worker, FuriHalNfcTxRxContext* tx_rx
     return false;
 }
 
-bool plantain_4k_parser_parse(NfcDeviceData* dev_data) {
+bool plantain_4k_parser_parse(NfcDeviceOldDataOld* dev_data) {
     MfClassicData* data = &dev_data->mf_classic_data;
 
     // Verify key

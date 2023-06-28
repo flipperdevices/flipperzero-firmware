@@ -1,33 +1,33 @@
-#include "nfca_poller_i.h"
+#include "iso14443_3a_poller_i.h"
 
 #include <furi.h>
 
-#define TAG "NFCA"
+#define TAG "ISO14443_3A"
 
-static NfcaError nfca_poller_process_error(NfcError error) {
-    NfcaError ret = NfcaErrorNone;
+static Iso14443_3aError iso14443_3a_poller_process_error(NfcError error) {
+    Iso14443_3aError ret = Iso14443_3aErrorNone;
     if(error == NfcErrorNone) {
-        ret = NfcaErrorNone;
+        ret = Iso14443_3aErrorNone;
     } else if(error == NfcErrorTimeout) {
-        ret = NfcaErrorTimeout;
+        ret = Iso14443_3aErrorTimeout;
     } else {
-        ret = NfcaErrorNotPresent;
+        ret = Iso14443_3aErrorNotPresent;
     }
     return ret;
 }
 
-static NfcaError nfca_poller_prepare_trx(NfcaPoller* instance) {
-    NfcaError ret = NfcaErrorNone;
+static Iso14443_3aError iso14443_3a_poller_prepare_trx(Iso14443_3aPoller* instance) {
+    Iso14443_3aError ret = Iso14443_3aErrorNone;
 
-    if(instance->state == NfcaPollerStateIdle) {
-        ret = nfca_poller_async_activate(instance, NULL);
+    if(instance->state == Iso14443_3aPollerStateIdle) {
+        ret = iso14443_3a_poller_async_activate(instance, NULL);
     }
 
     return ret;
 }
 
-static NfcaError nfca_poller_standart_frame_exchange(
-    NfcaPoller* instance,
+static Iso14443_3aError iso14443_3a_poller_standart_frame_exchange(
+    Iso14443_3aPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
@@ -39,80 +39,46 @@ static NfcaError nfca_poller_standart_frame_exchange(
     furi_assert(tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - 2);
 
     bit_buffer_copy(instance->tx_buffer, tx_buffer);
-    nfca_append_crc(instance->tx_buffer);
-    NfcaError ret = NfcaErrorNone;
+    iso14443_3a_append_crc(instance->tx_buffer);
+    Iso14443_3aError ret = Iso14443_3aErrorNone;
 
     do {
         NfcError error = nfc_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
         if(error != NfcErrorNone) {
-            ret = nfca_poller_process_error(error);
+            ret = iso14443_3a_poller_process_error(error);
             break;
         }
 
         bit_buffer_copy(rx_buffer, instance->rx_buffer);
-        if(!nfca_check_crc(instance->rx_buffer)) {
-            ret = NfcaErrorWrongCrc;
+        if(!iso14443_3a_check_crc(instance->rx_buffer)) {
+            ret = Iso14443_3aErrorWrongCrc;
             break;
         }
 
-        nfca_trim_crc(rx_buffer);
+        iso14443_3a_trim_crc(rx_buffer);
     } while(false);
 
     return ret;
 }
 
-NfcaError nfca_poller_config(NfcaPoller* instance) {
-    furi_assert(instance);
-    furi_assert(instance->tx_buffer == NULL);
-    furi_assert(instance->rx_buffer == NULL);
-
-    instance->tx_buffer = bit_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE);
-    instance->rx_buffer = bit_buffer_alloc(NFCA_POLLER_MAX_BUFFER_SIZE);
-
-    nfc_config(instance->nfc, NfcModeNfcaPoller);
-    nfc_set_guard_time_us(instance->nfc, NFCA_GUARD_TIME_US);
-    nfc_set_fdt_poll_fc(instance->nfc, NFCA_FDT_POLL_FC);
-    nfc_set_fdt_poll_poll_us(instance->nfc, NFCA_POLL_POLL_MIN_US);
-    instance->config_state = NfcaPollerConfigStateDone;
-
-    return NfcaErrorNone;
-}
-
-NfcaError nfca_poller_reset(NfcaPoller* instance) {
-    furi_assert(instance);
-    furi_assert(instance->tx_buffer);
-    furi_assert(instance->rx_buffer);
-
-    instance->callback = NULL;
-    instance->context = NULL;
-    memset(&instance->col_res, 0, sizeof(NfcaPollerColRes));
-
-    bit_buffer_free(instance->tx_buffer);
-    instance->tx_buffer = NULL;
-    bit_buffer_free(instance->rx_buffer);
-    instance->rx_buffer = NULL;
-
-    instance->config_state = NfcaPollerConfigStateIdle;
-    instance->state = NfcaPollerStateIdle;
-
-    return NfcaErrorNone;
-}
-
-NfcaError nfca_poller_check_presence(NfcaPoller* instance) {
+Iso14443_3aError iso14443_3a_poller_check_presence(Iso14443_3aPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->nfc);
 
     NfcError error = NfcErrorNone;
-    NfcaError ret = NfcaErrorNone;
+    Iso14443_3aError ret = Iso14443_3aErrorNone;
     do {
         error = nfc_iso13444a_short_frame(
-            instance->nfc, NfcIso14443aShortFrameSensReq, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
+            instance->nfc,
+            NfcIso14443aShortFrameSensReq,
+            instance->rx_buffer,
+            ISO14443_3A_FDT_LISTEN_FC);
         if(error != NfcErrorNone) {
-            ret = nfca_poller_process_error(error);
+            ret = iso14443_3a_poller_process_error(error);
             break;
         }
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(instance->col_res.sens_resp)) {
-            ret = NfcaErrorCommunication;
+            ret = Iso14443_3aErrorCommunication;
             break;
         }
     } while(false);
@@ -120,7 +86,7 @@ NfcaError nfca_poller_check_presence(NfcaPoller* instance) {
     return ret;
 }
 
-NfcaError nfca_poller_halt(NfcaPoller* instance) {
+Iso14443_3aError iso14443_3a_poller_halt(Iso14443_3aPoller* instance) {
     furi_assert(instance);
     furi_assert(instance->nfc);
     furi_assert(instance->tx_buffer);
@@ -128,45 +94,50 @@ NfcaError nfca_poller_halt(NfcaPoller* instance) {
     uint8_t halt_cmd[2] = {0x50, 0x00};
     bit_buffer_copy_bytes(instance->tx_buffer, halt_cmd, sizeof(halt_cmd));
 
-    nfca_poller_standart_frame_exchange(
-        instance, instance->tx_buffer, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
+    iso14443_3a_poller_standart_frame_exchange(
+        instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3A_FDT_LISTEN_FC);
 
-    instance->state = NfcaPollerStateIdle;
-    return NfcaErrorNone;
+    instance->state = Iso14443_3aPollerStateIdle;
+    return Iso14443_3aErrorNone;
 }
 
-NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) {
+Iso14443_3aError iso14443_3a_poller_async_activate(
+    Iso14443_3aPoller* instance,
+    Iso14443_3aData* iso14443_3a_data) {
     furi_assert(instance);
     furi_assert(instance->nfc);
     furi_assert(instance->tx_buffer);
     furi_assert(instance->rx_buffer);
 
-    // Reset Nfca poller state
+    // Reset Iso14443_3a poller state
     memset(&instance->col_res, 0, sizeof(instance->col_res));
-    memset(instance->data, 0, sizeof(NfcaData));
+    memset(instance->data, 0, sizeof(Iso14443_3aData));
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
 
     // Halt if necessary
-    if(instance->state != NfcaPollerStateIdle) {
-        nfca_poller_halt(instance);
-        instance->state = NfcaPollerStateIdle;
+    if(instance->state != Iso14443_3aPollerStateIdle) {
+        iso14443_3a_poller_halt(instance);
+        instance->state = Iso14443_3aPollerStateIdle;
     }
 
     NfcError error = NfcErrorNone;
-    NfcaError ret = NfcaErrorNone;
+    Iso14443_3aError ret = Iso14443_3aErrorNone;
 
     bool activated = false;
     do {
         error = nfc_iso13444a_short_frame(
-            instance->nfc, NfcIso14443aShortFrameSensReq, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
+            instance->nfc,
+            NfcIso14443aShortFrameSensReq,
+            instance->rx_buffer,
+            ISO14443_3A_FDT_LISTEN_FC);
         if(error != NfcErrorNone) {
-            ret = NfcaErrorNotPresent;
+            ret = Iso14443_3aErrorNotPresent;
             break;
         }
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(instance->col_res.sens_resp)) {
             FURI_LOG_W(TAG, "Wrong sens response size");
-            ret = NfcaErrorCommunication;
+            ret = Iso14443_3aErrorCommunication;
             break;
         }
         bit_buffer_write_bytes(
@@ -178,38 +149,43 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
             &instance->col_res.sens_resp,
             sizeof(instance->col_res.sel_resp));
 
-        instance->state = NfcaPollerStateColResInProgress;
+        instance->state = Iso14443_3aPollerStateColResInProgress;
         instance->col_res.cascade_level = 0;
-        instance->col_res.state = NfcaPollerColResStateStateNewCascade;
+        instance->col_res.state = Iso14443_3aPollerColResStateStateNewCascade;
 
-        while(instance->state == NfcaPollerStateColResInProgress) {
-            if(instance->col_res.state == NfcaPollerColResStateStateNewCascade) {
+        while(instance->state == Iso14443_3aPollerStateColResInProgress) {
+            if(instance->col_res.state == Iso14443_3aPollerColResStateStateNewCascade) {
                 bit_buffer_set_size_bytes(instance->tx_buffer, 2);
                 bit_buffer_set_byte(
-                    instance->tx_buffer, 0, NFCA_POLLER_SEL_CMD(instance->col_res.cascade_level));
-                bit_buffer_set_byte(instance->tx_buffer, 1, NFCA_POLLER_SEL_PAR(2, 0));
+                    instance->tx_buffer,
+                    0,
+                    ISO14443_3A_POLLER_SEL_CMD(instance->col_res.cascade_level));
+                bit_buffer_set_byte(instance->tx_buffer, 1, ISO14443_3A_POLLER_SEL_PAR(2, 0));
                 error = nfc_iso13444a_sdd_frame(
-                    instance->nfc, instance->tx_buffer, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
+                    instance->nfc,
+                    instance->tx_buffer,
+                    instance->rx_buffer,
+                    ISO14443_3A_FDT_LISTEN_FC);
                 if(error != NfcErrorNone) {
                     FURI_LOG_E(TAG, "Sdd request failed: %d", error);
-                    instance->state = NfcaPollerStateColResFailed;
-                    ret = NfcaErrorColResFailed;
+                    instance->state = Iso14443_3aPollerStateColResFailed;
+                    ret = Iso14443_3aErrorColResFailed;
                     break;
                 }
                 if(bit_buffer_get_size_bytes(instance->rx_buffer) != 5) {
                     FURI_LOG_E(TAG, "Sdd response wrong length");
-                    instance->state = NfcaPollerStateColResFailed;
-                    ret = NfcaErrorColResFailed;
+                    instance->state = Iso14443_3aPollerStateColResFailed;
+                    ret = Iso14443_3aErrorColResFailed;
                     break;
                 }
                 // TODO BCC check here
                 bit_buffer_write_bytes(
-                    instance->rx_buffer, &instance->col_res.sdd_resp, sizeof(NfcaSddResp));
-                instance->col_res.state = NfcaPollerColResStateStateSelectCascade;
-            } else if(instance->col_res.state == NfcaPollerColResStateStateSelectCascade) {
+                    instance->rx_buffer, &instance->col_res.sdd_resp, sizeof(Iso14443_3aSddResp));
+                instance->col_res.state = Iso14443_3aPollerColResStateStateSelectCascade;
+            } else if(instance->col_res.state == Iso14443_3aPollerColResStateStateSelectCascade) {
                 instance->col_res.sel_req.sel_cmd =
-                    NFCA_POLLER_SEL_CMD(instance->col_res.cascade_level);
-                instance->col_res.sel_req.sel_par = NFCA_POLLER_SEL_PAR(7, 0);
+                    ISO14443_3A_POLLER_SEL_CMD(instance->col_res.cascade_level);
+                instance->col_res.sel_req.sel_par = ISO14443_3A_POLLER_SEL_PAR(7, 0);
                 memcpy(
                     instance->col_res.sel_req.nfcid,
                     instance->col_res.sdd_resp.nfcid,
@@ -219,19 +195,19 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                     instance->tx_buffer,
                     (uint8_t*)&instance->col_res.sel_req,
                     sizeof(instance->col_res.sel_req));
-                ret = nfca_poller_send_standart_frame(
-                    instance, instance->tx_buffer, instance->rx_buffer, NFCA_FDT_LISTEN_FC);
-                if(ret != NfcaErrorNone) {
+                ret = iso14443_3a_poller_send_standart_frame(
+                    instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3A_FDT_LISTEN_FC);
+                if(ret != Iso14443_3aErrorNone) {
                     FURI_LOG_E(TAG, "Sel request failed: %d", ret);
-                    instance->state = NfcaPollerStateColResFailed;
-                    ret = NfcaErrorColResFailed;
+                    instance->state = Iso14443_3aPollerStateColResFailed;
+                    ret = Iso14443_3aErrorColResFailed;
                     break;
                 }
                 if(bit_buffer_get_size_bytes(instance->rx_buffer) !=
                    sizeof(instance->col_res.sel_resp)) {
                     FURI_LOG_E(TAG, "Sel response wrong length");
-                    instance->state = NfcaPollerStateColResFailed;
-                    ret = NfcaErrorColResFailed;
+                    instance->state = Iso14443_3aPollerStateColResFailed;
+                    ret = Iso14443_3aErrorColResFailed;
                     break;
                 }
                 bit_buffer_write_bytes(
@@ -239,7 +215,7 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                     &instance->col_res.sel_resp,
                     sizeof(instance->col_res.sel_resp));
                 FURI_LOG_T(TAG, "Sel resp: %02X", instance->col_res.sel_resp.sak);
-                if(instance->col_res.sel_req.nfcid[0] == NFCA_POLLER_SDD_CL) {
+                if(instance->col_res.sel_req.nfcid[0] == ISO14443_3A_POLLER_SDD_CL) {
                     // Copy part of UID
                     memcpy(
                         &instance->data->uid[instance->data->uid_len],
@@ -247,7 +223,7 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                         3);
                     instance->data->uid_len += 3;
                     instance->col_res.cascade_level++;
-                    instance->col_res.state = NfcaPollerColResStateStateNewCascade;
+                    instance->col_res.state = Iso14443_3aPollerColResStateStateNewCascade;
                 } else {
                     FURI_LOG_T(TAG, "Col resolution complete");
                     instance->data->sak = instance->col_res.sel_resp.sak;
@@ -256,24 +232,24 @@ NfcaError nfca_poller_async_activate(NfcaPoller* instance, NfcaData* nfca_data) 
                         &instance->col_res.sel_req.nfcid[0],
                         4);
                     instance->data->uid_len += 4;
-                    instance->col_res.state = NfcaPollerColResStateStateSuccess;
-                    instance->state = NfcaPollerStateActivated;
+                    instance->col_res.state = Iso14443_3aPollerColResStateStateSuccess;
+                    instance->state = Iso14443_3aPollerStateActivated;
                 }
             }
         }
 
-        activated = (instance->state == NfcaPollerStateActivated);
+        activated = (instance->state == Iso14443_3aPollerStateActivated);
     } while(false);
 
-    if(activated && nfca_data) {
-        *nfca_data = *instance->data;
+    if(activated && iso14443_3a_data) {
+        *iso14443_3a_data = *instance->data;
     }
 
     return ret;
 }
 
-NfcaError nfca_poller_txrx_custom_parity(
-    NfcaPoller* instance,
+Iso14443_3aError iso14443_3a_poller_txrx_custom_parity(
+    Iso14443_3aPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
@@ -281,16 +257,16 @@ NfcaError nfca_poller_txrx_custom_parity(
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
 
-    NfcaError ret = NfcaErrorNone;
+    Iso14443_3aError ret = Iso14443_3aErrorNone;
     NfcError error = NfcErrorNone;
 
     do {
-        ret = nfca_poller_prepare_trx(instance);
-        if(ret != NfcaErrorNone) break;
+        ret = iso14443_3a_poller_prepare_trx(instance);
+        if(ret != Iso14443_3aErrorNone) break;
 
         error = nfc_trx_custom_parity(instance->nfc, tx_buffer, rx_buffer, fwt);
         if(error != NfcErrorNone) {
-            ret = nfca_poller_process_error(error);
+            ret = iso14443_3a_poller_process_error(error);
             break;
         }
     } while(false);
@@ -298,8 +274,8 @@ NfcaError nfca_poller_txrx_custom_parity(
     return ret;
 }
 
-NfcaError nfca_poller_txrx(
-    NfcaPoller* instance,
+Iso14443_3aError iso14443_3a_poller_txrx(
+    Iso14443_3aPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
@@ -307,16 +283,16 @@ NfcaError nfca_poller_txrx(
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
 
-    NfcaError ret = NfcaErrorNone;
+    Iso14443_3aError ret = Iso14443_3aErrorNone;
     NfcError error = NfcErrorNone;
 
     do {
-        ret = nfca_poller_prepare_trx(instance);
-        if(ret != NfcaErrorNone) break;
+        ret = iso14443_3a_poller_prepare_trx(instance);
+        if(ret != Iso14443_3aErrorNone) break;
 
         error = nfc_trx(instance->nfc, tx_buffer, rx_buffer, fwt);
         if(error != NfcErrorNone) {
-            ret = nfca_poller_process_error(error);
+            ret = iso14443_3a_poller_process_error(error);
             break;
         }
     } while(false);
@@ -324,8 +300,8 @@ NfcaError nfca_poller_txrx(
     return ret;
 }
 
-NfcaError nfca_poller_send_standart_frame(
-    NfcaPoller* instance,
+Iso14443_3aError iso14443_3a_poller_send_standart_frame(
+    Iso14443_3aPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
     uint32_t fwt) {
@@ -333,14 +309,14 @@ NfcaError nfca_poller_send_standart_frame(
     furi_assert(tx_buffer);
     furi_assert(rx_buffer);
 
-    NfcaError ret = NfcaErrorNone;
+    Iso14443_3aError ret = Iso14443_3aErrorNone;
 
     do {
-        ret = nfca_poller_prepare_trx(instance);
-        if(ret != NfcaErrorNone) break;
+        ret = iso14443_3a_poller_prepare_trx(instance);
+        if(ret != Iso14443_3aErrorNone) break;
 
-        ret = nfca_poller_standart_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
-        if(ret != NfcaErrorNone) break;
+        ret = iso14443_3a_poller_standart_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
+        if(ret != Iso14443_3aErrorNone) break;
     } while(false);
 
     return ret;

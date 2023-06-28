@@ -5,7 +5,7 @@
 #include <lib/toolbox/hex.h>
 
 #include <lib/nfc/deprecated/nfc_types.h>
-#include <lib/nfc/deprecated/nfc_device.h>
+#include <lib/nfc/deprecated/nfc_device_old.h>
 
 static void nfc_cli_print_usage() {
     printf("Usage:\r\n");

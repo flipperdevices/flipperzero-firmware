@@ -2,4 +2,4 @@
 
 #include "nfc_supported_card.h"
 
-bool opal_parser_parse(NfcDeviceData* dev_data);
+bool opal_parser_parse(NfcDeviceOldDataOld* dev_data);

@@ -1,4 +1,4 @@
-#include "nfc_dev.h"
+#include "nfc_device.h"
 
 #include <nfc/nfc_common.h>
 #include <storage/storage.h>
@@ -7,115 +7,116 @@
 #define NFC_FILE_HEADER "Flipper NFC device"
 #define NFC_DEV_TYPE_ERROR "Protocol type mismatch"
 
-struct NfcDev {
-    NfcProtocolType protocol_type;
-    NfcProtocolData* protocol_data;
+struct NfcDevice {
+    NfcProtocol protocol;
+    NfcDeviceData* protocol_data;
 
     NfcLoadingCallback loading_callback;
     void* loading_callback_context;
 };
 
-NfcDev* nfc_dev_alloc() {
-    NfcDev* instance = malloc(sizeof(NfcDev));
+NfcDevice* nfc_device_alloc() {
+    NfcDevice* instance = malloc(sizeof(NfcDevice));
 
     return instance;
 }
 
-void nfc_dev_free(NfcDev* instance) {
+void nfc_device_free(NfcDevice* instance) {
     furi_assert(instance);
 
-    nfc_dev_clear(instance);
+    nfc_device_clear(instance);
     free(instance);
 }
 
-void nfc_dev_clear(NfcDev* instance) {
+void nfc_device_clear(NfcDevice* instance) {
     furi_assert(instance);
-    furi_assert(instance->protocol_type < NfcProtocolTypeMax);
+    furi_assert(instance->protocol < NfcProtocolNum);
 
     if(instance->protocol_data) {
-        nfc_protocols[instance->protocol_type]->free(instance->protocol_data);
+        nfc_devices[instance->protocol]->free(instance->protocol_data);
         instance->protocol_data = NULL;
     }
 }
 
-void nfc_dev_reset(NfcDev* instance) {
+void nfc_device_reset(NfcDevice* instance) {
     furi_assert(instance);
-    furi_assert(instance->protocol_type < NfcProtocolTypeMax);
+    furi_assert(instance->protocol < NfcProtocolNum);
 
     if(instance->protocol_data) {
-        nfc_protocols[instance->protocol_type]->reset(instance->protocol_data);
+        nfc_devices[instance->protocol]->reset(instance->protocol_data);
     }
 }
 
-NfcProtocolType nfc_dev_get_protocol_type(const NfcDev* instance) {
+NfcProtocol nfc_device_get_protocol(const NfcDevice* instance) {
     furi_assert(instance);
-    return instance->protocol_type;
+    return instance->protocol;
 }
 
-const NfcProtocolData*
-    nfc_dev_get_protocol_data(const NfcDev* instance, NfcProtocolType protocol_type) {
+const NfcDeviceData* nfc_device_get_data(const NfcDevice* instance, NfcProtocol protocol) {
     furi_assert(instance);
-    furi_assert(protocol_type < NfcProtocolTypeMax);
+    furi_assert(protocol < NfcProtocolNum);
 
-    if(instance->protocol_type != protocol_type) {
+    if(instance->protocol != protocol) {
         furi_crash(NFC_DEV_TYPE_ERROR);
     }
 
     return instance->protocol_data;
 }
 
-const char* nfc_dev_get_protocol_name(NfcProtocolType protocol) {
-    furi_assert(protocol < NfcProtocolTypeMax);
+const char* nfc_device_get_protocol_name(NfcProtocol protocol) {
+    furi_assert(protocol < NfcProtocolNum);
 
-    return nfc_protocols[protocol]->protocol_name;
+    return nfc_devices[protocol]->protocol_name;
 }
 
-const char* nfc_dev_get_device_name(const NfcDev* instance, NfcProtocolNameType name_type) {
+const char* nfc_device_get_name(const NfcDevice* instance, NfcDeviceNameType name_type) {
     furi_assert(instance);
-    furi_assert(instance->protocol_type < NfcProtocolTypeMax);
+    furi_assert(instance->protocol < NfcProtocolNum);
 
-    return nfc_protocols[instance->protocol_type]->get_device_name(
-        instance->protocol_data, name_type);
+    return nfc_devices[instance->protocol]->get_name(instance->protocol_data, name_type);
 }
 
-const uint8_t* nfc_dev_get_uid(const NfcDev* instance, size_t* uid_len) {
+const uint8_t* nfc_device_get_uid(const NfcDevice* instance, size_t* uid_len) {
     furi_assert(instance);
-    furi_assert(instance->protocol_type < NfcProtocolTypeMax);
+    furi_assert(instance->protocol < NfcProtocolNum);
 
-    return nfc_protocols[instance->protocol_type]->get_uid(instance->protocol_data, uid_len);
+    return nfc_devices[instance->protocol]->get_uid(instance->protocol_data, uid_len);
 }
 
-void nfc_dev_set_protocol_data(
-    NfcDev* instance,
-    NfcProtocolType protocol_type,
-    const NfcProtocolData* protocol_data) {
+void nfc_device_set_data(
+    NfcDevice* instance,
+    NfcProtocol protocol,
+    const NfcDeviceData* protocol_data) {
     furi_assert(instance);
-    furi_assert(protocol_type < NfcProtocolTypeMax);
+    furi_assert(protocol < NfcProtocolNum);
 
-    nfc_dev_clear(instance);
+    nfc_device_clear(instance);
 
-    instance->protocol_type = protocol_type;
-    instance->protocol_data = nfc_protocols[protocol_type]->alloc();
+    instance->protocol = protocol;
+    instance->protocol_data = nfc_devices[protocol]->alloc();
 
-    nfc_protocols[protocol_type]->copy(instance->protocol_data, protocol_data);
+    nfc_devices[protocol]->copy(instance->protocol_data, protocol_data);
 }
 
-void nfc_dev_copy_protocol_data(
-    const NfcDev* instance,
-    NfcProtocolType protocol_type,
-    NfcProtocolData* protocol_data) {
+void nfc_device_copy_data(
+    const NfcDevice* instance,
+    NfcProtocol protocol,
+    NfcDeviceData* protocol_data) {
     furi_assert(instance);
-    furi_assert(protocol_type < NfcProtocolTypeMax);
+    furi_assert(protocol < NfcProtocolNum);
     furi_assert(protocol_data);
 
-    if(instance->protocol_type != protocol_type) {
+    if(instance->protocol != protocol) {
         furi_crash(NFC_DEV_TYPE_ERROR);
     }
 
-    nfc_protocols[protocol_type]->copy(protocol_data, instance->protocol_data);
+    nfc_devices[protocol]->copy(protocol_data, instance->protocol_data);
 }
 
-void nfc_dev_set_loading_callback(NfcDev* instance, NfcLoadingCallback callback, void* context) {
+void nfc_device_set_loading_callback(
+    NfcDevice* instance,
+    NfcLoadingCallback callback,
+    void* context) {
     furi_assert(instance);
     furi_assert(callback);
 
@@ -123,9 +124,9 @@ void nfc_dev_set_loading_callback(NfcDev* instance, NfcLoadingCallback callback,
     instance->loading_callback_context = context;
 }
 
-bool nfc_dev_save(NfcDev* instance, const char* path) {
+bool nfc_device_save(NfcDevice* instance, const char* path) {
     furi_assert(instance);
-    furi_assert(instance->protocol_type < NfcProtocolTypeMax);
+    furi_assert(instance->protocol < NfcProtocolNum);
     furi_assert(path);
 
     bool saved = false;
@@ -152,7 +153,7 @@ bool nfc_dev_save(NfcDev* instance, const char* path) {
                file, "Nfc device type can be UID, Mifare Ultralight, Mifare Classic"))
             break;
 
-        saved = nfc_protocols[instance->protocol_type]->save(
+        saved = nfc_devices[instance->protocol]->save(
             instance->protocol_data, file, NFC_CURRENT_FORMAT_VERSION);
 
     } while(false);
@@ -168,7 +169,7 @@ bool nfc_dev_save(NfcDev* instance, const char* path) {
     return saved;
 }
 
-bool nfc_dev_load(NfcDev* instance, const char* path) {
+bool nfc_device_load(NfcDevice* instance, const char* path) {
     furi_assert(instance);
     furi_assert(path);
 
@@ -195,20 +196,20 @@ bool nfc_dev_load(NfcDev* instance, const char* path) {
         // Read Nfc device type
         if(!flipper_format_read_string(file, "Device type", temp_str)) break;
 
-        nfc_dev_clear(instance);
+        nfc_device_clear(instance);
 
-        for(NfcProtocolType i = 0; i < NfcProtocolTypeMax; i++) {
-            instance->protocol_type = i;
-            instance->protocol_data = nfc_protocols[i]->alloc();
+        for(NfcProtocol i = 0; i < NfcProtocolNum; i++) {
+            instance->protocol = i;
+            instance->protocol_data = nfc_devices[i]->alloc();
 
-            if(nfc_protocols[i]->verify(instance->protocol_data, temp_str)) {
-                loaded = nfc_protocols[i]->load(instance->protocol_data, file, version);
+            if(nfc_devices[i]->verify(instance->protocol_data, temp_str)) {
+                loaded = nfc_devices[i]->load(instance->protocol_data, file, version);
             }
 
             if(loaded) {
                 break;
             } else {
-                nfc_protocols[i]->free(instance->protocol_data);
+                nfc_devices[i]->free(instance->protocol_data);
                 instance->protocol_data = NULL;
             }
         }

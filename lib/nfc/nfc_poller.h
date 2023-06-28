@@ -8,7 +8,7 @@ extern "C" {
 
 typedef struct NfcPoller NfcPoller;
 
-NfcPoller* nfc_poller_alloc(Nfc* nfc, NfcProtocolType protocol);
+NfcPoller* nfc_poller_alloc(Nfc* nfc, NfcProtocol protocol);
 
 void nfc_poller_free(NfcPoller* instance);
 
@@ -18,7 +18,7 @@ void nfc_poller_stop(NfcPoller* instance);
 
 bool nfc_poller_detect(NfcPoller* instance);
 
-const NfcProtocolData* nfc_poller_get_data(NfcPoller* instance);
+const NfcDeviceData* nfc_poller_get_data(NfcPoller* instance);
 
 #ifdef __cplusplus
 }

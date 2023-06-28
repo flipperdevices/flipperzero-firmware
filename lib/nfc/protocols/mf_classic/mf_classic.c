@@ -40,44 +40,44 @@ static const MfClassicFeatures mf_classic_features[MfClassicTypeNum] = {
         },
 };
 
-const NfcProtocolBase nfc_protocol_mf_classic = {
+const NfcDeviceBase nfc_device_mf_classic = {
     .protocol_name = MF_CLASSIC_PROTOCOL_NAME,
-    .alloc = (NfcProtocolAlloc)mf_classic_alloc,
-    .free = (NfcProtocolFree)mf_classic_free,
-    .reset = (NfcProtocolReset)mf_classic_reset,
-    .copy = (NfcProtocolCopy)mf_classic_copy,
-    .verify = (NfcProtocolVerify)mf_classic_verify,
-    .load = (NfcProtocolLoad)mf_classic_load,
-    .save = (NfcProtocolSave)mf_classic_save,
-    .is_equal = (NfcProtocolEqual)mf_classic_is_equal,
-    .get_device_name = (NfcProtocolGetDeviceName)mf_classic_get_device_name,
-    .get_uid = (NfcProtocolGetUid)mf_classic_get_uid,
+    .alloc = (NfcDeviceAlloc)mf_classic_alloc,
+    .free = (NfcDeviceFree)mf_classic_free,
+    .reset = (NfcDeviceReset)mf_classic_reset,
+    .copy = (NfcDeviceCopy)mf_classic_copy,
+    .verify = (NfcDeviceVerify)mf_classic_verify,
+    .load = (NfcDeviceLoad)mf_classic_load,
+    .save = (NfcDeviceSave)mf_classic_save,
+    .is_equal = (NfcDeviceEqual)mf_classic_is_equal,
+    .get_name = (NfcDeviceGetName)mf_classic_get_device_name,
+    .get_uid = (NfcDeviceGetUid)mf_classic_get_uid,
 };
 
 MfClassicData* mf_classic_alloc() {
     MfClassicData* data = malloc(sizeof(MfClassicData));
-    data->nfca_data = nfca_alloc();
+    data->iso14443_3a_data = iso14443_3a_alloc();
     return data;
 }
 
 void mf_classic_free(MfClassicData* data) {
     furi_assert(data);
 
-    nfca_free(data->nfca_data);
+    iso14443_3a_free(data->iso14443_3a_data);
     free(data);
 }
 
 void mf_classic_reset(MfClassicData* data) {
     furi_assert(data);
 
-    nfca_reset(data->nfca_data);
+    iso14443_3a_reset(data->iso14443_3a_data);
 }
 
 void mf_classic_copy(MfClassicData* data, const MfClassicData* other) {
     furi_assert(data);
     furi_assert(other);
 
-    nfca_copy(data->nfca_data, other->nfca_data);
+    iso14443_3a_copy(data->iso14443_3a_data, other->iso14443_3a_data);
     memcpy(data->block, other->block, MF_CLASSIC_TOTAL_BLOCKS_MAX);
     memcpy(data->block_read_mask, other->block_read_mask, MF_CLASSIC_READ_MASK_SIZE);
 
@@ -145,8 +145,8 @@ bool mf_classic_load(MfClassicData* data, FlipperFormat* ff, uint32_t version) {
     bool parsed = false;
 
     do {
-        // Read NFCA data
-        if(!nfca_load_data(data->nfca_data, ff, version)) break;
+        // Read ISO14443_3A data
+        if(!iso14443_3a_load_data(data->iso14443_3a_data, ff, version)) break;
 
         // Read Mifare Classic type
         if(!flipper_format_read_string(ff, "Mifare Classic type", temp_str)) break;
@@ -256,7 +256,7 @@ bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff, uint32_t vers
 
     do {
         if(!flipper_format_write_string_cstr(ff, "Device type", "Mifare Classic")) break;
-        if(!nfca_save_data(data->nfca_data, ff, version)) break;
+        if(!iso14443_3a_save_data(data->iso14443_3a_data, ff, version)) break;
         if(!flipper_format_write_string_cstr(ff, "Device type", "")) break;
         if(!flipper_format_write_comment_cstr(ff, "Mifare Classic specific data")) break;
         if(!flipper_format_write_string_cstr(
@@ -293,14 +293,14 @@ bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff, uint32_t vers
 
 bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other) {
     // TODO: Complete equality method
-    return nfca_is_equal(data->nfca_data, other->nfca_data);
+    return iso14443_3a_is_equal(data->iso14443_3a_data, other->iso14443_3a_data);
 }
 
-const char* mf_classic_get_device_name(const MfClassicData* data, NfcProtocolNameType name_type) {
+const char* mf_classic_get_device_name(const MfClassicData* data, NfcDeviceNameType name_type) {
     furi_assert(data);
     furi_assert(data->type < MfClassicTypeNum);
 
-    if(name_type == NfcProtocolNameTypeFull) {
+    if(name_type == NfcDeviceNameTypeFull) {
         return mf_classic_features[data->type].full_name;
     } else {
         return mf_classic_features[data->type].type_name;
@@ -310,7 +310,7 @@ const char* mf_classic_get_device_name(const MfClassicData* data, NfcProtocolNam
 const uint8_t* mf_classic_get_uid(const MfClassicData* data, size_t* uid_len) {
     furi_assert(data);
 
-    return nfca_get_uid(data->nfca_data, uid_len);
+    return iso14443_3a_get_uid(data->iso14443_3a_data, uid_len);
 }
 
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type) {
@@ -321,7 +321,7 @@ uint16_t mf_classic_get_total_block_num(MfClassicType type) {
     return mf_classic_features[type].blocks_total;
 }
 
-bool mf_classic_detect_protocol(NfcaData* data, MfClassicType* type) {
+bool mf_classic_detect_protocol(Iso14443_3aData* data, MfClassicType* type) {
     furi_assert(data);
 
     uint8_t atqa0 = data->atqa[0];

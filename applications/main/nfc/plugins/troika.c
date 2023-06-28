@@ -64,7 +64,7 @@ bool troika_parse(void* data, FuriString* parsed_data) {
 
 /* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin troika_plugin = {
-    .protocol = NfcProtocolTypeMfClassic,
+    .protocol = NfcProtocolMfClassic,
     .verify = troika_verify,
     .read = troika_read,
     .parse = troika_parse,

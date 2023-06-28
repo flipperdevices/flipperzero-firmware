@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nfc_device.h"
+#include "nfc_device_old.h"
 
 typedef struct NfcWorker NfcWorker;
 
@@ -90,7 +90,7 @@ void nfc_worker_free(NfcWorker* nfc_worker);
 void nfc_worker_start(
     NfcWorker* nfc_worker,
     NfcWorkerState state,
-    NfcDeviceData* dev_data,
+    NfcDeviceOldDataOld* dev_data,
     NfcWorkerCallback callback,
     void* context);
 
