@@ -24,14 +24,14 @@ struct NfcRfidDetectorFieldPresence {
 typedef struct {
     uint8_t nfc_field;
     uint8_t rfid_field;
-    uint32_t rfid_frequncy;
+    uint32_t rfid_frequency;
 } NfcRfidDetectorFieldPresenceModel;
 
 void nfc_rfid_detector_view_field_presence_update(
     NfcRfidDetectorFieldPresence* instance,
     bool nfc_field,
     bool rfid_field,
-    uint32_t rfid_frequncy) {
+    uint32_t rfid_frequency) {
     furi_assert(instance);
     with_view_model(
         instance->view,
@@ -44,7 +44,7 @@ void nfc_rfid_detector_view_field_presence_update(
             }
             if(rfid_field) {
                 model->rfid_field = FIELD_FOUND_WEIGHT;
-                model->rfid_frequncy = rfid_frequncy;
+                model->rfid_frequency = rfid_frequency;
             } else if(model->rfid_field) {
                 model->rfid_field--;
             }
@@ -78,7 +78,7 @@ void nfc_rfid_detector_view_field_presence_draw(
 
         if(model->rfid_field) {
             char str[16];
-            snprintf(str, sizeof(str), "%.02f KHz", (double)model->rfid_frequncy / 1000);
+            snprintf(str, sizeof(str), "%.02f KHz", (double)model->rfid_frequency / 1000);
             canvas_set_font(canvas, FontPrimary);
             canvas_draw_str(canvas, 76, 10, "LF RFID");
             canvas_draw_icon(
@@ -113,7 +113,7 @@ void nfc_rfid_detector_view_field_presence_enter(void* context) {
         {
             model->nfc_field = 0;
             model->rfid_field = 0;
-            model->rfid_frequncy = 0;
+            model->rfid_frequency = 0;
         },
         true);
 }
@@ -145,7 +145,7 @@ NfcRfidDetectorFieldPresence* nfc_rfid_detector_view_field_presence_alloc() {
         {
             model->nfc_field = 0;
             model->rfid_field = 0;
-            model->rfid_frequncy = 0;
+            model->rfid_frequency = 0;
         },
         true);
     return instance;

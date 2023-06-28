@@ -10,7 +10,7 @@ void nfc_rfid_detector_view_field_presence_update(
     NfcRfidDetectorFieldPresence* instance,
     bool nfc_field,
     bool rfid_field,
-    uint32_t rfid_frequncy);
+    uint32_t rfid_frequency);
 
 NfcRfidDetectorFieldPresence* nfc_rfid_detector_view_field_presence_alloc();
 
