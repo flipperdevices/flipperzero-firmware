@@ -559,7 +559,6 @@ static SectionType elf_preload_section(
         name = name + strlen(".fast.rel");
         ELFSection* section_p = elf_file_get_or_put_section(elf, name);
         section_p->fast_rel = malloc(sizeof(ELFSection));
-        FURI_LOG_I(TAG, "Fast rel section size: %ld", section_header->sh_size);
 
         if(!elf_load_section_data(elf, section_p->fast_rel, section_header)) {
             FURI_LOG_E(TAG, "Error loading section '%s'", name);
