@@ -47,7 +47,7 @@ static bool nfc_magic_scene_file_select_is_file_suitable(NfcMagic* nfc_magic) {
 void nfc_magic_scene_file_select_on_enter(void* context) {
     NfcMagic* nfc_magic = context;
     // Process file_select return
-    nfc_deviceice_set_loading_callback(
+    nfc_device_set_loading_callback(
         nfc_magic->source_dev, nfc_magic_show_loading_popup, nfc_magic);
 
     if(!furi_string_size(nfc_magic->source_dev->load_path)) {
@@ -72,5 +72,5 @@ bool nfc_magic_scene_file_select_on_event(void* context, SceneManagerEvent event
 
 void nfc_magic_scene_file_select_on_exit(void* context) {
     NfcMagic* nfc_magic = context;
-    nfc_deviceice_set_loading_callback(nfc_magic->source_dev, NULL, nfc_magic);
+    nfc_device_set_loading_callback(nfc_magic->source_dev, NULL, nfc_magic);
 }

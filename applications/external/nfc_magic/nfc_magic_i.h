@@ -28,7 +28,7 @@
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 
-#include <lib/nfc/nfc_deviceice.h>
+#include <lib/nfc/nfc_device.h>
 #include "nfc_magic_icons.h"
 
 #define NFC_APP_FOLDER ANY_PATH("nfc")

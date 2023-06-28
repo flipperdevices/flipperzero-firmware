@@ -1,6 +1,6 @@
 #pragma once
 
-#include <lib/nfc/nfc_deviceice.h>
+#include <lib/nfc/nfc_device.h>
 #include "nfc_magic.h"
 
 typedef struct NfcMagicWorker NfcMagicWorker;

@@ -49,7 +49,7 @@ NfcMagic* nfc_magic_alloc() {
 
     // Nfc device
     nfc_magic->dev = malloc(sizeof(NfcMagicDevice));
-    nfc_magic->source_dev = nfc_deviceice_alloc();
+    nfc_magic->source_dev = nfc_device_alloc();
     furi_string_set(nfc_magic->source_dev->folder, NFC_APP_FOLDER);
 
     // Open GUI record
@@ -102,7 +102,7 @@ void nfc_magic_free(NfcMagic* nfc_magic) {
 
     // Nfc device
     free(nfc_magic->dev);
-    nfc_deviceice_free(nfc_magic->source_dev);
+    nfc_device_free(nfc_magic->source_dev);
 
     // Submenu
     view_dispatcher_remove_view(nfc_magic->view_dispatcher, NfcMagicViewMenu);

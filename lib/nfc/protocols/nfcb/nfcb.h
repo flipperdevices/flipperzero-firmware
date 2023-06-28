@@ -10,7 +10,7 @@ extern "C" {
 #define NFCB_GUARD_TIME_US (5000)
 #define NFCB_FDT_POLL_FC (1620)
 #define NFCB_FDT_LISTEN_FC (1172)
-#define NFCB_POLLER_MASK_RX_FS ((ISO14443_3A_FDT_LISTEN_FC) / 2)
+#define NFCB_POLLER_MASK_RX_FS ((NFCB_FDT_LISTEN_FC) / 2)
 #define NFCB_POLL_POLL_MIN_US (1100)
 
 typedef enum {
