@@ -21,7 +21,8 @@ static void subghz_scene_radio_settings_set_device(VariableItem* item) {
     SubGhz* subghz = variable_item_get_context(item);
     uint8_t index = variable_item_get_current_value_index(item);
 
-    if(!subghz_txrx_radio_device_is_external_connected(subghz->txrx, SUBGHZ_DEVICE_CC1101_EXT_NAME) &&
+    if(!subghz_txrx_radio_device_is_external_connected(
+           subghz->txrx, SUBGHZ_DEVICE_CC1101_EXT_NAME) &&
        radio_device_value[index] == SubGhzRadioDeviceTypeExternalCC1101) {
         //ToDo correct if there is more than 1 module
         index = 0;
