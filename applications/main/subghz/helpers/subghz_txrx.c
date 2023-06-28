@@ -541,7 +541,7 @@ void subghz_txrx_set_raw_file_encoder_worker_callback_end(
         context);
 }
 
-bool subghz_txrx_radio_device_is_connect_external(SubGhzTxRx* instance, const char* name) {
+bool subghz_txrx_radio_device_is_external_connected(SubGhzTxRx* instance, const char* name) {
     furi_assert(instance);
 
     bool is_connect = false;
@@ -564,7 +564,7 @@ SubGhzRadioDeviceType
     furi_assert(instance);
 
     if(radio_device_type == SubGhzRadioDeviceTypeExternalCC1101 &&
-       subghz_txrx_radio_device_is_connect_external(instance, SUBGHZ_DEVICE_CC1101_EXT_NAME)) {
+       subghz_txrx_radio_device_is_external_connected(instance, SUBGHZ_DEVICE_CC1101_EXT_NAME)) {
         subghz_txrx_radio_device_power_on(instance);
         instance->radio_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_EXT_NAME);
         subghz_devices_begin(instance->radio_device);
