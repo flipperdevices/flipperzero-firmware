@@ -1,8 +1,8 @@
 App(
-    appid="nfc_rfid_detector",
+    appid="NFC_RFID_detector",
     name="NFC/RFID detector",
     apptype=FlipperAppType.EXTERNAL,
-    targets=["f7"],
+    # targets=["f7"],
     entry_point="nfc_rfid_detector_app",
     requires=["gui"],
     stack_size=4 * 1024,
@@ -10,4 +10,5 @@ App(
     fap_icon="nfc_rfid_detector_10px.png",
     fap_category="Tools",
     fap_icon_assets="images",
+    fap_icon_assets_symbol="nfc_rfid_detector",
 )

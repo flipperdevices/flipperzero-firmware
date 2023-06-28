@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0628-0136-0.85.3-9cbe7da](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-28 01:40 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-28 01:40 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-28 07:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-28 07:00 EST`
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - OFW PR: [LF-RFID debug: make it work #2793 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2793)
 - Added: [NFC Seader (By bettse)](https://github.com/bettse/seader)
@@ -53,6 +53,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Add back API mismatch ignore dialog (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/15430e09281e3062383275bc842a94d37bf8d0bc)
 - [Hold Right goes to Battery status & Some Include Cleanup (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a660c731a5bd0a39c6c67a83c20fc9060221fccd)
 - Updated readme 'COMMENTED OUT' section to include $25 and $50 USD bounties!
+- OFW/Already In RM: [Fix fr-FR-mac keylayout #2809 (By FelixLgr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2809)
+- OFW/Already In RM: [Fix furi_hal_bus related crashes in plugins #2799 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/2799)
+- OFW/Already In RM: [Fast FAP Loader #2790 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2790)
+- OFW/Already In RM: [LF-RFID debug: make it work #2793 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2793)
+- OFW: [NFC/RFID detector #2795 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 
 <a name="release">
 
@@ -367,6 +372,7 @@ $ ./fbt dolphin_ext
 - [Music Player (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1189)
 - [Mx2125 Dual-Axis Accelerometer (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [Name Changer (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/488) (Change Flipper name)
+- [NFC/RFID Detector #2795 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 - [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
 - [NFC Magic Gen1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Magic Gen4 app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack)
