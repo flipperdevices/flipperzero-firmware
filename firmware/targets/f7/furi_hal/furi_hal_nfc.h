@@ -423,9 +423,9 @@ FuriHalNfcReturn furi_hal_nfc_ll_txrx_bits(
 
 void furi_hal_nfc_ll_poll();
 
-void furi_hal_nfc_check_vield_start();
+void furi_hal_nfc_field_detect_start();
 
-bool furi_hal_nfc_check_is_field();
+bool furi_hal_nfc_field_is_present();
 
 #ifdef __cplusplus
 }

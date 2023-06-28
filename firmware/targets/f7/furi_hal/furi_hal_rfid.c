@@ -515,7 +515,7 @@ static void furi_hal_rfid_field_tim_setup() {
     LL_TIM_GenerateEvent_UPDATE(FURI_HAL_RFID_FIELD_TIMEOUT_TIMER);
 }
 
-void furi_hal_rfid_field_dma_start(void) {
+void furi_hal_rfid_field_detect_start(void) {
     // setup pins
     furi_hal_rfid_pins_field();
 
@@ -561,7 +561,7 @@ void furi_hal_rfid_field_dma_start(void) {
     LL_TIM_EnableIT_UPDATE(FURI_HAL_RFID_FIELD_TIMEOUT_TIMER);
 }
 
-void furi_hal_rfid_field_dma_stop(void) {
+void furi_hal_rfid_field_detect_stop(void) {
     LL_TIM_DisableCounter(FURI_HAL_RFID_FIELD_COUNTER_TIMER);
     LL_TIM_DisableAllOutputs(FURI_HAL_RFID_FIELD_COUNTER_TIMER);
 
@@ -580,7 +580,7 @@ void furi_hal_rfid_field_dma_stop(void) {
     FURI_CRITICAL_EXIT();
 }
 
-bool furi_hal_rfid_field_check(uint32_t* frequency) {
+bool furi_hal_rfid_field_is_present(uint32_t* frequency) {
     *frequency = furi_hal_rfid->field.counter * 10;
     return (
         (*frequency >= FURI_HAL_RFID_FIELD_FREQUENCY_MIN) &&
