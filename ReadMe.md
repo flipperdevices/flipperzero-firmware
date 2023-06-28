@@ -29,10 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0627-1003-0.85.3-a1b461a](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0628-0136-0.85.3-9cbe7da](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-27 23:00 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-27 23:00 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-28 01:40 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-28 01:40 EST`
 - Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
 - OFW PR: [LF-RFID debug: make it work #2793 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2793)
 - Added: [NFC Seader (By bettse)](https://github.com/bettse/seader)
@@ -48,11 +48,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix fr-FR-mac keylayout #681 (By FelixLgr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/681)
 - OFW: [Actions: unit_test and updater timeouts #2807 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2807)
 - Removed: [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) (Too much of a WIP)
-- [Fast FAP Loader #2790 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2790)
+- OFW PR: [Fast FAP Loader #2790 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2790)
 - [Fixed up to reach bottom on file browsers (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d37ccacfda1337798a786c972f6a4c4229646382)
 - [Add back API mismatch ignore dialog (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/15430e09281e3062383275bc842a94d37bf8d0bc)
 - [Hold Right goes to Battery status & Some Include Cleanup (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a660c731a5bd0a39c6c67a83c20fc9060221fccd)
-- Updated readme "COMMENTED OUT" section to include $25 and $50 USD bounties!
+- Updated readme 'COMMENTED OUT' section to include $25 and $50 USD bounties!
 
 <a name="release">
 
