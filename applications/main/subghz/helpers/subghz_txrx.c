@@ -208,7 +208,7 @@ static bool subghz_txrx_tx(SubGhzTxRx* instance, uint32_t frequency) {
     furi_assert(instance->txrx_state != SubGhzTxRxStateSleep);
     subghz_devices_idle(instance->radio_device);
     subghz_devices_set_frequency(instance->radio_device, frequency);
- 
+
     bool ret = subghz_devices_set_tx(instance->radio_device);
     if(ret) {
         subghz_txrx_speaker_on(instance);
