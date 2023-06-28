@@ -38,12 +38,12 @@ static void nfc_poller_list_alloc(NfcPoller* instance) {
     instance->list.tail = instance->list.head;
 
     do {
-        const NfcPollerTreeNode* node = &nfc_poller_nodes[instance->list.head->protocol];
-        if(node->parent_protocol == NfcProtocolInvalid) break;
+        NfcProtocol parent_protocol = nfc_protocol_get_parent(instance->list.head->protocol);
+        if(parent_protocol == NfcProtocolInvalid) break;
 
         NfcPollerListElement* parent = malloc(sizeof(NfcPollerListElement));
-        parent->protocol = node->parent_protocol;
-        parent->poller_api = nfc_pollers_api[node->parent_protocol];
+        parent->protocol = parent_protocol;
+        parent->poller_api = nfc_pollers_api[parent_protocol];
         parent->child = instance->list.head;
         instance->list.head = parent;
     } while(true);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,6 +18,10 @@ typedef enum {
 
     NfcProtocolInvalid,
 } NfcProtocol;
+
+NfcProtocol nfc_protocol_get_parent(NfcProtocol protocol);
+
+bool nfc_protocol_has_parent(NfcProtocol protocol, NfcProtocol parent_protocol);
 
 #ifdef __cplusplus
 }
