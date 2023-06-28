@@ -33,31 +33,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-28 07:26 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-28 07:26 EST`
-- Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
-- OFW PR: [LF-RFID debug: make it work #2793 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2793)
-- Added: [NFC Seader (By bettse)](https://github.com/bettse/seader)
-- RFID: [3 new T5577 extra actions: Set/clear custom pw; write block; wipe #678 (By plgcoder)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/678)
-- OFW: [Fix MLIB usage #2762 (By P-p-H-d)](https://github.com/flipperdevices/flipperzero-firmware/pull/2762)
-- OFW: [fix: make dialog_file_browser_set_basic_options initialize all fields #2756 (By JarvisCraft)](https://github.com/flipperdevices/flipperzero-firmware/pull/2756)
-- OFW: [Scroll acceleration #2784 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2784)
-- Added: [Continuity Tester (By benallen-dev)](https://github.com/benallen-dev/flipper-zero-apps/tree/main/continuity)
-- OFW: [Loader refaptoring: second encounter #2779 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2779)
-- [Fixes for FAP in Loader and Other areas #674 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/674)
-- [Added dynamically generating app list for Desktop Settings App #676 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/676)
-- [More fixes #680 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/680)
-- [Fix fr-FR-mac keylayout #681 (By FelixLgr)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/681)
-- OFW: [Actions: unit_test and updater timeouts #2807 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2807)
-- Removed: [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) (Too much of a WIP)
-- OFW PR: [Fast FAP Loader #2790 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2790)
-- [Fixed up to reach bottom on file browsers (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d37ccacfda1337798a786c972f6a4c4229646382)
-- [Add back API mismatch ignore dialog (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/15430e09281e3062383275bc842a94d37bf8d0bc)
-- [Hold Right goes to Battery status & Some Include Cleanup (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a660c731a5bd0a39c6c67a83c20fc9060221fccd)
-- Updated readme 'COMMENTED OUT' section to include $25 and $50 USD bounties!
-- OFW/Already In RM: [Fix fr-FR-mac keylayout #2809 (By FelixLgr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2809)
-- OFW/Already In RM: [Fix furi_hal_bus related crashes in plugins #2799 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/2799)
-- OFW/Already In RM: [Fast FAP Loader #2790 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2790)
-- OFW/Already In RM: [LF-RFID debug: make it work #2793 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2793)
-- OFW: [NFC/RFID detector #2795 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2795)
 
 <a name="release">
 
