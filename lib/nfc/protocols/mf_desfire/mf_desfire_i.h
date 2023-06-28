@@ -2,8 +2,8 @@
 
 #include "mf_desfire.h"
 
-#define MF_DESFIRE_FFF_PICC_PREFIX "PICC "
-#define MF_DESFIRE_FFF_APP_PREFIX "Application "
+#define MF_DESFIRE_FFF_PICC_PREFIX "PICC"
+#define MF_DESFIRE_FFF_APP_PREFIX "Application"
 
 // SimpleArray configurations
 
@@ -81,7 +81,6 @@ bool mf_desfire_file_ids_load(
 
 bool mf_desfire_file_settings_load(
     MfDesfireFileSettings* data,
-    const MfDesfireFileId* id,
     const char* prefix,
     FlipperFormat* ff);
 
@@ -94,7 +93,4 @@ bool mf_desfire_application_ids_load(
     uint32_t count,
     FlipperFormat* ff);
 
-bool mf_desfire_application_load(
-    MfDesfireApplication* data,
-    const MfDesfireApplicationId* id,
-    FlipperFormat* ff);
+bool mf_desfire_application_load(MfDesfireApplication* data, const char* prefix, FlipperFormat* ff);

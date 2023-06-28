@@ -77,6 +77,8 @@ bool mf_desfire_verify(MfDesfireData* data, const FuriString* device_type) {
 bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
     furi_assert(data);
 
+    FuriString* prefix = furi_string_alloc();
+
     bool is_loaded = false;
 
     do {
@@ -113,10 +115,17 @@ bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
 
         simple_array_init(data->applications, application_count);
         for(i = 0; i < application_count; ++i) {
+            const MfDesfireApplicationId* app_id = simple_array_cget(data->application_ids, i);
+            furi_string_printf(
+                prefix,
+                "%s %02x%02x%02x",
+                MF_DESFIRE_FFF_APP_PREFIX,
+                app_id->data[0],
+                app_id->data[1],
+                app_id->data[2]);
+
             if(!mf_desfire_application_load(
-                   simple_array_get(data->applications, i),
-                   simple_array_get(data->application_ids, i),
-                   ff))
+                   simple_array_get(data->applications, i), furi_string_get_cstr(prefix), ff))
                 break;
         }
 
@@ -125,6 +134,7 @@ bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
         is_loaded = true;
     } while(false);
 
+    furi_string_free(prefix);
     return is_loaded;
 }
 

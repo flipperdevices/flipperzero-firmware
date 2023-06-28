@@ -1,7 +1,11 @@
 #include "mf_desfire_i.h"
 
-#define MF_DESFIRE_FFF_VERSION_KEY MF_DESFIRE_FFF_PICC_PREFIX "Version"
-#define MF_DESFIRE_FFF_FREE_MEM_KEY MF_DESFIRE_FFF_PICC_PREFIX "Free Memory"
+#define MF_DESFIRE_FFF_VERSION_KEY \
+    MF_DESFIRE_FFF_PICC_PREFIX " " \
+                               "Version"
+#define MF_DESFIRE_FFF_FREE_MEM_KEY \
+    MF_DESFIRE_FFF_PICC_PREFIX " "  \
+                               "Free Memory"
 
 #define MF_DESFIRE_FFF_CHANGE_KEY_ID_KEY "Change Key ID"
 #define MF_DESFIRE_FFF_CONFIG_CHANGEABLE_KEY "Config Changeable"
@@ -11,14 +15,20 @@
 #define MF_DESFIRE_FFF_FLAGS_KEY "Flags"
 #define MF_DESFIRE_FFF_MAX_KEYS_KEY "Max Keys"
 
-#define MF_DESFIRE_FFF_KEY_KEY "Key"
+#define MF_DESFIRE_FFF_KEY_SUB_PREFIX "Key"
 #define MF_DESFIRE_FFF_KEY_VERSION_KEY "Version"
 
-#define MF_DESFIRE_FFF_APPLICATION_COUNT_KEY MF_DESFIRE_FFF_APP_PREFIX "Count"
-#define MF_DESFIRE_FFF_APPLICATION_IDS_KEY MF_DESFIRE_FFF_APP_PREFIX "IDs"
+#define MF_DESFIRE_FFF_APPLICATION_COUNT_KEY \
+    MF_DESFIRE_FFF_APP_PREFIX " "            \
+                              "Count"
+#define MF_DESFIRE_FFF_APPLICATION_IDS_KEY \
+    MF_DESFIRE_FFF_APP_PREFIX " "          \
+                              "IDs"
 
-#define MF_DESFIRE_FFF_FILE_PREFIX "File "
-#define MF_DESFIRE_FFF_FILE_IDS_KEY MF_DESFIRE_FFF_FILE_PREFIX "IDs"
+#define MF_DESFIRE_FFF_FILE_SUB_PREFIX "File"
+#define MF_DESFIRE_FFF_FILE_IDS_KEY    \
+    MF_DESFIRE_FFF_FILE_SUB_PREFIX " " \
+                                   "IDs"
 #define MF_DESFIRE_FFF_FILE_TYPE_KEY "Type"
 #define MF_DESFIRE_FFF_FILE_COMM_SETTINGS_KEY "Communication Settings"
 #define MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY "Access Rights"
@@ -154,34 +164,34 @@ bool mf_desfire_key_settings_load(
     FuriString* key = furi_string_alloc();
 
     do {
-        furi_string_printf(key, "%s%s", prefix, MF_DESFIRE_FFF_CHANGE_KEY_ID_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_CHANGE_KEY_ID_KEY);
         if(!flipper_format_read_hex(ff, furi_string_get_cstr(key), &data->change_key_id, 1)) break;
 
-        furi_string_printf(key, "%s%s", prefix, MF_DESFIRE_FFF_CONFIG_CHANGEABLE_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_CONFIG_CHANGEABLE_KEY);
         if(!flipper_format_read_bool(ff, furi_string_get_cstr(key), &data->is_config_changeable, 1))
             break;
 
-        furi_string_printf(key, "%s%s", prefix, MF_DESFIRE_FFF_FREE_CREATE_DELETE_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FREE_CREATE_DELETE_KEY);
         if(!flipper_format_read_bool(
                ff, furi_string_get_cstr(key), &data->is_free_create_delete, 1))
             break;
 
-        furi_string_printf(key, "%s%s", prefix, MF_DESFIRE_FFF_FREE_DIR_LIST_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FREE_DIR_LIST_KEY);
         if(!flipper_format_read_bool(
                ff, furi_string_get_cstr(key), &data->is_free_directory_list, 1))
             break;
 
-        furi_string_printf(key, "%s%s", prefix, MF_DESFIRE_FFF_KEY_CHANGEABLE_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_KEY_CHANGEABLE_KEY);
         if(!flipper_format_read_bool(
                ff, furi_string_get_cstr(key), &data->is_master_key_changeable, 1))
             break;
 
-        furi_string_printf(key, "%s%s", prefix, MF_DESFIRE_FFF_FLAGS_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FLAGS_KEY);
         if(flipper_format_key_exist(ff, furi_string_get_cstr(key))) {
             if(!flipper_format_read_hex(ff, furi_string_get_cstr(key), &data->flags, 1)) break;
         }
 
-        furi_string_printf(key, "%s%s", prefix, MF_DESFIRE_FFF_MAX_KEYS_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_MAX_KEYS_KEY);
         if(!flipper_format_read_hex(ff, furi_string_get_cstr(key), &data->max_keys, 1)) break;
 
         // TODO: Whaaa
@@ -201,14 +211,18 @@ bool mf_desfire_key_version_load(
     uint32_t index,
     FlipperFormat* ff) {
     FuriString* key = furi_string_alloc_printf(
-        "%s%s %lu %s", prefix, MF_DESFIRE_FFF_KEY_KEY, index, MF_DESFIRE_FFF_KEY_VERSION_KEY);
+        "%s %s %lu %s",
+        prefix,
+        MF_DESFIRE_FFF_KEY_SUB_PREFIX,
+        index,
+        MF_DESFIRE_FFF_KEY_VERSION_KEY);
     const bool is_loaded = flipper_format_read_hex(ff, furi_string_get_cstr(key), data, 1);
     furi_string_free(key);
     return is_loaded;
 }
 
 bool mf_desfire_file_count_load(uint32_t* data, const char* prefix, FlipperFormat* ff) {
-    FuriString* key = furi_string_alloc_printf("%s%s", prefix, MF_DESFIRE_FFF_FILE_IDS_KEY);
+    FuriString* key = furi_string_alloc_printf("%s %s", prefix, MF_DESFIRE_FFF_FILE_IDS_KEY);
     const bool is_loaded = flipper_format_get_value_count(ff, furi_string_get_cstr(key), data);
     furi_string_free(key);
     return is_loaded;
@@ -219,7 +233,7 @@ bool mf_desfire_file_ids_load(
     uint32_t count,
     const char* prefix,
     FlipperFormat* ff) {
-    FuriString* key = furi_string_alloc_printf("%s%s", prefix, MF_DESFIRE_FFF_FILE_IDS_KEY);
+    FuriString* key = furi_string_alloc_printf("%s %s", prefix, MF_DESFIRE_FFF_FILE_IDS_KEY);
     const bool is_loaded = flipper_format_read_hex(ff, furi_string_get_cstr(key), data, count);
     furi_string_free(key);
     return is_loaded;
@@ -227,28 +241,22 @@ bool mf_desfire_file_ids_load(
 
 bool mf_desfire_file_settings_load(
     MfDesfireFileSettings* data,
-    const MfDesfireFileId* id,
     const char* prefix,
     FlipperFormat* ff) {
     bool is_loaded = false;
 
-    FuriString* file_prefix =
-        furi_string_alloc_printf("%s%s%u ", prefix, MF_DESFIRE_FFF_FILE_PREFIX, *id);
     FuriString* key = furi_string_alloc();
 
     do {
-        furi_string_printf(
-            key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_TYPE_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_TYPE_KEY);
         if(!flipper_format_read_hex(ff, furi_string_get_cstr(key), (uint8_t*)&data->type, 1))
             break;
 
-        furi_string_printf(
-            key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_COMM_SETTINGS_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_COMM_SETTINGS_KEY);
         if(!flipper_format_read_hex(ff, furi_string_get_cstr(key), (uint8_t*)&data->comm, 1))
             break;
 
-        furi_string_printf(
-            key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY);
+        furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_ACCESS_RIGHTS_KEY);
         if(!flipper_format_read_hex(
                ff,
                furi_string_get_cstr(key),
@@ -257,54 +265,40 @@ bool mf_desfire_file_settings_load(
             break;
 
         if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
-            furi_string_printf(
-                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_SIZE_KEY);
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_SIZE_KEY);
             if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->data.size, 1))
                 break;
 
         } else if(data->type == MfDesfireFileTypeValue) {
-            furi_string_printf(
-                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY);
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_HI_LIMIT_KEY);
             if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->value.hi_limit, 1))
                 break;
 
-            furi_string_printf(
-                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY);
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_LO_LIMIT_KEY);
             if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->value.lo_limit, 1))
                 break;
 
-            furi_string_printf(
-                key,
-                "%s%s",
-                furi_string_get_cstr(file_prefix),
-                MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY);
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_VALUE_KEY);
             if(!flipper_format_read_uint32(
                    ff, furi_string_get_cstr(key), &data->value.limited_credit_value, 1))
                 break;
 
-            furi_string_printf(
-                key,
-                "%s%s",
-                furi_string_get_cstr(file_prefix),
-                MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_ENABLED_KEY);
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_LIMIT_CREDIT_ENABLED_KEY);
             if(!flipper_format_read_bool(
                    ff, furi_string_get_cstr(key), &data->value.limited_credit_enabled, 1))
                 break;
         } else if(
             data->type == MfDesfireFileTypeLinearRecord ||
             data->type == MfDesfireFileTypeCyclicRecord) {
-            furi_string_printf(
-                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_SIZE_KEY);
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_SIZE_KEY);
             if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->record.size, 1))
                 break;
 
-            furi_string_printf(
-                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_MAX_KEY);
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_MAX_KEY);
             if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->record.max, 1))
                 break;
 
-            furi_string_printf(
-                key, "%s%s", furi_string_get_cstr(file_prefix), MF_DESFIRE_FFF_FILE_CUR_KEY);
+            furi_string_printf(key, "%s %s", prefix, MF_DESFIRE_FFF_FILE_CUR_KEY);
             if(!flipper_format_read_uint32(ff, furi_string_get_cstr(key), &data->record.cur, 1))
                 break;
         }
@@ -312,7 +306,6 @@ bool mf_desfire_file_settings_load(
         is_loaded = true;
     } while(false);
 
-    furi_string_free(file_prefix);
     furi_string_free(key);
 
     return is_loaded;
@@ -333,27 +326,20 @@ bool mf_desfire_application_ids_load(
         count * sizeof(MfDesfireApplicationId));
 }
 
-bool mf_desfire_application_load(
-    MfDesfireApplication* data,
-    const MfDesfireApplicationId* id,
-    FlipperFormat* ff) {
+bool mf_desfire_application_load(MfDesfireApplication* data, const char* prefix, FlipperFormat* ff) {
+    FuriString* sub_prefix = furi_string_alloc();
     bool is_loaded = false;
-
-    FuriString* prefix = furi_string_alloc_printf(
-        "%s%02x%02x%02x ", MF_DESFIRE_FFF_APP_PREFIX, id->data[0], id->data[1], id->data[2]);
 
     do {
         // Load key settings
-        if(!mf_desfire_key_settings_load(&data->key_settings, furi_string_get_cstr(prefix), ff))
-            break;
+        if(!mf_desfire_key_settings_load(&data->key_settings, prefix, ff)) break;
         // Load key versions
         const uint32_t key_version_count = data->key_settings.max_keys;
         simple_array_init(data->key_versions, key_version_count);
 
         uint32_t i;
         for(i = 0; i < key_version_count; ++i) {
-            if(!mf_desfire_key_version_load(
-                   simple_array_get(data->key_versions, i), furi_string_get_cstr(prefix), i, ff))
+            if(!mf_desfire_key_version_load(simple_array_get(data->key_versions, i), prefix, i, ff))
                 break;
         }
 
@@ -361,12 +347,11 @@ bool mf_desfire_application_load(
 
         // Load file id count
         uint32_t file_count;
-        if(!mf_desfire_file_count_load(&file_count, furi_string_get_cstr(prefix), ff)) break;
+        if(!mf_desfire_file_count_load(&file_count, prefix, ff)) break;
 
         // Load file ids
         simple_array_init(data->file_ids, file_count);
-        if(!mf_desfire_file_ids_load(
-               simple_array_get(data->file_ids, 0), file_count, furi_string_get_cstr(prefix), ff))
+        if(!mf_desfire_file_ids_load(simple_array_get(data->file_ids, 0), file_count, prefix, ff))
             break;
 
         simple_array_init(data->file_settings, file_count);
@@ -374,12 +359,13 @@ bool mf_desfire_application_load(
 
         // For all files
         for(i = 0; i < file_count; ++i) {
+            const MfDesfireFileId* file_id = simple_array_cget(data->file_ids, i);
+            furi_string_printf(
+                sub_prefix, "%s %s %u", prefix, MF_DESFIRE_FFF_FILE_SUB_PREFIX, *file_id);
+
             // Load file settings
             if(!mf_desfire_file_settings_load(
-                   simple_array_get(data->file_settings, i),
-                   simple_array_get(data->file_ids, i),
-                   furi_string_get_cstr(prefix),
-                   ff))
+                   simple_array_get(data->file_settings, i), furi_string_get_cstr(sub_prefix), ff))
                 break;
 
             // Load file data
@@ -390,7 +376,7 @@ bool mf_desfire_application_load(
         is_loaded = true;
     } while(false);
 
-    furi_string_free(prefix);
+    furi_string_free(sub_prefix);
     return is_loaded;
 }
 
