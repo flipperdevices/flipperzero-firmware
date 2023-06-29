@@ -52,7 +52,7 @@ static void loader_menu_start(const char* name) {
     furi_record_close(RECORD_LOADER);
 }
 
-static bool loader_menu_check_appid(uint32_t index, bool settings) {
+static bool loader_menu_check_appid(size_t index, bool settings) {
     if(settings) {
         if(strstr(FLIPPER_SETTINGS_APPS[index].appid, ".fap")) {
             return true;
@@ -69,11 +69,11 @@ static bool loader_menu_check_appid(uint32_t index, bool settings) {
 static void loader_menu_callback(void* context, uint32_t index) {
     UNUSED(context);
 
-    if(loader_menu_check_appid(index, false)) {
-        const char* name = FLIPPER_APPS[index].appid;
+    if(loader_menu_check_appid(index - 1, false)) {
+        const char* name = FLIPPER_APPS[index - 1].appid;
         loader_menu_start(name);
     } else {
-        const char* name = FLIPPER_APPS[index].name;
+        const char* name = FLIPPER_APPS[index - 1].name;
         loader_menu_start(name);
     }
 }
@@ -121,38 +121,50 @@ static uint32_t loader_menu_exit(void* context) {
 
 static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
     Loader* loader = furi_record_open(RECORD_LOADER);
-
     size_t i;
-    menu_add_item(
-        app->primary_menu,
-        LOADER_APPLICATIONS_NAME,
-        &A_Plugins_14,
-        0,
-        loader_menu_applications_callback,
-        (void*)menu);
+    size_t x = 0;
+    size_t ext_apps_size = loader_get_ext_main_app_list_size(loader);
 
-    for(i = 1; i < FLIPPER_APPS_COUNT + 1; i++) {
-        menu_add_item(
-            app->primary_menu,
-            FLIPPER_APPS[i - 1].name,
-            FLIPPER_APPS[i - 1].icon,
-            i,
-            loader_menu_callback,
-            (void*)menu);
-    }
-    menu_add_item(
-        app->primary_menu, "Settings", &A_Settings_14, i++, loader_menu_switch_to_settings, app);
+    for(i = 0; i < (FLIPPER_APPS_COUNT + ext_apps_size + MANUALLY_ADDED_ITEMS_COUNT); i++) {
+        if(i == 0) {
+            menu_add_item(
+                app->primary_menu,
+                LOADER_APPLICATIONS_NAME,
+                &A_Plugins_14,
+                i,
+                loader_menu_applications_callback,
+                (void*)menu);
+        } else if(i <= FLIPPER_APPS_COUNT) {
+            menu_add_item(
+                app->primary_menu,
+                FLIPPER_APPS[i - 1].name,
+                FLIPPER_APPS[i - 1].icon,
+                i,
+                loader_menu_callback,
+                (void*)menu);
+        } else if(i > FLIPPER_APPS_COUNT) {
+            if(i == (FLIPPER_APPS_COUNT + 1)) {
+                menu_add_item(
+                    app->primary_menu,
+                    "Settings",
+                    &A_Settings_14,
+                    i,
+                    loader_menu_switch_to_settings,
+                    app);
+            } else {
+                const ExtMainApp* ext_app = loader_get_ext_main_app_item(loader, x);
 
-    size_t x;
-    for(x = 0; x < loader_get_ext_main_app_list_size(loader); x++) {
-        const ExtMainApp* ext_app = loader_get_ext_main_app_item(loader, x);
-        menu_add_item(
-            app->primary_menu,
-            ext_app->name,
-            ext_app->icon,
-            (uint32_t)ext_app->path,
-            loader_menu_external_apps_callback,
-            (void*)menu);
+                menu_add_item(
+                    app->primary_menu,
+                    ext_app->name,
+                    ext_app->icon,
+                    (uint32_t)ext_app->path,
+                    loader_menu_external_apps_callback,
+                    (void*)menu);
+
+                x++;
+            }
+        }
     }
     furi_record_close(RECORD_LOADER);
 };
@@ -173,7 +185,7 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
     LoaderMenuApp* app = malloc(sizeof(LoaderMenuApp));
     app->gui = furi_record_open(RECORD_GUI);
     app->view_dispatcher = view_dispatcher_alloc();
-    app->primary_menu = menu_pos_alloc(1);
+    app->primary_menu = menu_alloc();
     app->settings_menu = submenu_alloc();
 
     loader_menu_build_menu(app, loader_menu);
