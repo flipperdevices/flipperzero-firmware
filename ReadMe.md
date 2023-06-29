@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0628-1716-0.85.3-233176b](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-29 16:00 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-29 16:00 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-06-29 17:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-29 17:50 EST`
 - OFW: [Fix roll-over in file browser and archive #2811 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2811)
 - OFW: [SLIX2 emulation support / practical use for Dymo printers #2783 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/2783)
 - OFW: [Keynote with vertical layout #2794 (By Kami-no)](https://github.com/flipperdevices/flipperzero-firmware/pull/2794)
@@ -45,6 +45,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [A few improvements from Unleashed (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/359bace0272d906ed711de53b6a1386b1d07e0c1)
 - [App Manifest Updates for App Credits (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b51f0b2c784d3c6eb3de2dc08f2ed119a7c320b0)
 - OFW (Nothing Applied): [increased timeouts #2816 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2816)
+- OFW PR: [Furi,FuriHal: various improvements #2819 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2819)
 
 <a name="release">
 
@@ -431,5 +432,10 @@ $ ./fbt dolphin_ext
 - [Dolphin SOS (By arha)](https://github.com/arha/dolphin-sos)
 - [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) (Bounty: $25 USD in ETH or BTC)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
+- Bounty: All non-OFW desktop settings moved to CFW Settings (Bounty: $25 USD in ETH or BTC)
+- Bounty: `Notepad` APP to allow taking quick notes and saving to SD. Also can possibly open/edit .md,.txt,.fmf and other text friendly formats (Bounty: $50 USD in ETH or BTC)
+- Bounty: `Write URL to NFC` APP to allow creating URL NFC tags from only the flipper (Bounty: $25 USD in ETH or BTC)
+- Bounty: `Bluetooth OpenHayStack` bluetooth mode, only activates with special cloned key file present. Allows to operate like AirTag. (Bounty: $50 USD in ETH or BTC)
+- Bounty: `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback (Bounty: $200 USD in ETH or BTC) (Don't think this is possible)
 
 # Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0628-0738-0.85.3-b754ec1.tgz&channel=RM0628-0738-0.85.3-b754ec1&version=0.85.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0628-0738-0.85.3-b754ec1-NoAnim.tgz&channel=RM0628-0738-0.85.3-b754ec1-NoAnim&version=0.85.3)
