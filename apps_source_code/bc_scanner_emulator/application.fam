@@ -10,12 +10,11 @@ App(
     ],
     stack_size=2 * 1024,
     fap_icon="logo_bc.png",
-    fap_libs=["assets"],
     fap_description="Bar Code Emulator app for Evotor",
     fap_author="Igor Danilov",
     fap_version=(0, 5),
     order=70,
     fap_category="GPIO_Extra",
-    fap_icon_assets="icons"
+    fap_icon_assets="icons",
 )
 

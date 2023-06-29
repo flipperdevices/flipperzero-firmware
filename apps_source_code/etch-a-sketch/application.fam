@@ -9,4 +9,5 @@ App(
     order=175,
     fap_icon="etch-a-sketch-icon.png",
     fap_category="Misc_Extra",
+    fap_icon_assets="assets",
 )

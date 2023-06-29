@@ -1,5 +1,4 @@
 #include "../bc_scanner_app_i.h"
-#include <assets_icons.h>
 
 typedef enum {
     BarCodeCustomEventErrorBack,

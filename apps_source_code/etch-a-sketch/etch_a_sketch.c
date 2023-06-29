@@ -1,4 +1,3 @@
-#include <assets_icons.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>
@@ -10,6 +9,7 @@
 #include <stdbool.h> // Header-file for boolean data-type.
 #include <stdio.h>
 #include <string.h>
+#include "etch_icons.h"
 
 #define WIDTH 64
 #define HEIGHT 32
