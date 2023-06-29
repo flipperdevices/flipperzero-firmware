@@ -9,7 +9,7 @@
 #include <toolbox/stream/buffered_file_stream.h>
 
 #define TAG "Fuzzer worker"
-#define TOTAL_PROTOCOL_COUNT COUNT_OF(&fuzzer_proto_items)
+#define TOTAL_PROTOCOL_COUNT fuzzer_proto_get_count_of_protocols()
 
 typedef uint8_t FuzzerWorkerPayload[MAX_PAYLOAD_SIZE];
 
@@ -40,27 +40,53 @@ struct FuzzerWorker {
 };
 
 static bool fuzzer_worker_set_protocol(FuzzerWorker* instance, FuzzerProtocolsID protocol_index) {
-    furi_assert(protocol_index < TOTAL_PROTOCOL_COUNT);
+    if(!(protocol_index < TOTAL_PROTOCOL_COUNT)) {
+        return false;
+    }
 
     instance->protocol = &fuzzer_proto_items[protocol_index];
     return hardware_worker_set_protocol_id_by_name(
         instance->hw_worker, fuzzer_proto_items[protocol_index].name);
 }
 
-// TODO make it protocol independent
-bool fuzzer_worker_load_key_from_file(
+static FuzzerProtocolsID
+    fuzzer_worker_is_protocol_valid(FuzzerWorker* instance, HwProtocolID protocol_id) {
+    for(FuzzerProtocolsID i = 0; i < TOTAL_PROTOCOL_COUNT; i++) {
+        if(protocol_id == instance->suported_proto[i]) {
+            return i;
+        }
+    }
+    return TOTAL_PROTOCOL_COUNT;
+}
+
+FuzzerWorkerLoadKeyState fuzzer_worker_load_key_from_file(
     FuzzerWorker* instance,
-    FuzzerProtocolsID protocol_index,
+    FuzzerProtocolsID* protocol_index,
     const char* filename) {
     furi_assert(instance);
 
-    bool res = false;
-    fuzzer_worker_set_protocol(instance, protocol_index); // TODO add Check
-    if(!hardware_worker_load_key_from_file(instance->hw_worker, protocol_index, filename)) {
+    FuzzerWorkerLoadKeyState res = FuzzerWorkerLoadKeyStateUnsuportedProto;
+    if(!hardware_worker_load_key_from_file(instance->hw_worker, filename)) {
+        FURI_LOG_E(TAG, "Load key file: cant load file");
+        res = FuzzerWorkerLoadKeyStateBadFile;
     } else {
-        hardware_worker_get_protocol_data(
-            instance->hw_worker, &instance->payload[0], MAX_PAYLOAD_SIZE);
-        res = true;
+        FuzzerProtocolsID loaded_id = fuzzer_worker_is_protocol_valid(
+            instance, hardware_worker_get_protocol_id(instance->hw_worker));
+
+        if(!fuzzer_worker_set_protocol(instance, loaded_id)) {
+            FURI_LOG_E(TAG, "Load key file: Unsuported protocol");
+            res = FuzzerWorkerLoadKeyStateUnsuportedProto;
+        } else {
+            if(*protocol_index != loaded_id) {
+                res = FuzzerWorkerLoadKeyStateDifferentProto;
+            } else {
+                res = FuzzerWorkerLoadKeyStateOk;
+            }
+            *protocol_index = loaded_id;
+
+            hardware_worker_get_protocol_data(
+                instance->hw_worker, &instance->payload[0], MAX_PAYLOAD_SIZE);
+        }
     }
 
     return res;
@@ -319,9 +345,10 @@ bool fuzzer_worker_init_attack_bf_byte(
 
     memcpy(instance->payload, new_uid->data, instance->protocol->data_size);
 
-    res = true;
+    hardware_worker_set_protocol_data(
+        instance->hw_worker, &instance->payload[0], instance->protocol->data_size);
 
-    return res;
+    return true;
 }
 
 FuzzerWorker* fuzzer_worker_alloc() {
@@ -334,9 +361,16 @@ FuzzerWorker* fuzzer_worker_alloc() {
         if(!hardware_worker_set_protocol_id_by_name(
                instance->hw_worker, fuzzer_proto_items[i].name)) {
             // Check protocol support
+            FURI_LOG_E(TAG, "Not supported protocol name: %s", fuzzer_proto_items[i].name);
             furi_crash("Not supported protocol name");
         } else {
             instance->suported_proto[i] = hardware_worker_get_protocol_id(instance->hw_worker);
+            FURI_LOG_D(
+                TAG,
+                "%u: %15s Protocol_id: %lu",
+                i + 1,
+                fuzzer_proto_items[i].name,
+                instance->suported_proto[i]);
         }
     }
 

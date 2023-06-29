@@ -12,13 +12,13 @@ typedef enum {
     FuzzerWorkerAttackTypeMax,
 } FuzzerWorkerAttackType;
 
-// typedef enum {
-//     FuzzerWorkerLoadKeyStateBadFile = -2,
-//     FuzzerWorkerLoadKeyStateUnsuportedProto,
-//     FuzzerWorkerLoadKeyStateOk = 0,
-//     FuzzerWorkerLoadKeyStateDifferentProto,
+typedef enum {
+    FuzzerWorkerLoadKeyStateBadFile = -2,
+    FuzzerWorkerLoadKeyStateUnsuportedProto,
+    FuzzerWorkerLoadKeyStateOk = 0,
+    FuzzerWorkerLoadKeyStateDifferentProto,
 
-// } FuzzerWorkerLoadKeyState;
+} FuzzerWorkerLoadKeyState;
 
 typedef void (*FuzzerWorkerUidChagedCallback)(void* context);
 typedef void (*FuzzerWorkerEndCallback)(void* context);
@@ -121,9 +121,9 @@ bool fuzzer_worker_previous_key(FuzzerWorker* instance);
  * @param filename file path to the key file
  * @return bool True if loading is successful
  */
-bool fuzzer_worker_load_key_from_file(
+FuzzerWorkerLoadKeyState fuzzer_worker_load_key_from_file(
     FuzzerWorker* instance,
-    FuzzerProtocolsID protocol_index,
+    FuzzerProtocolsID* protocol_index,
     const char* filename);
 
 /**

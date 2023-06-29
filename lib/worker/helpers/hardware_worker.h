@@ -17,8 +17,6 @@ typedef iButtonProtocolId HwProtocolID;
 
 #endif
 
-#include "../protocol_i.h" // TODO DROP
-
 typedef struct HardwareWorker HardwareWorker;
 
 HardwareWorker* hardware_worker_alloc();
@@ -47,7 +45,4 @@ bool hardware_worker_set_protocol_id_by_name(HardwareWorker* instance, const cha
 
 HwProtocolID hardware_worker_get_protocol_id(HardwareWorker* instance);
 
-bool hardware_worker_load_key_from_file(
-    HardwareWorker* instance,
-    FuzzerProtocolsID protocol_index,
-    const char* filename);
+bool hardware_worker_load_key_from_file(HardwareWorker* instance, const char* filename);

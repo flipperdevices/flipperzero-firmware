@@ -22,7 +22,7 @@ struct HardwareWorker {
     ProtocolDict* protocols_items;
 #else
     iButtonWorker* proto_worker;
-    iButtonProtocolId protocol_id; // TODO
+    iButtonProtocolId protocol_id;
     iButtonProtocols* protocols_items;
     iButtonKey* key;
 #endif
@@ -156,11 +156,7 @@ HwProtocolID hardware_worker_get_protocol_id(HardwareWorker* instance) {
     return -1;
 }
 
-// TODO make it protocol independent
-bool hardware_worker_load_key_from_file(
-    HardwareWorker* instance,
-    FuzzerProtocolsID protocol_index,
-    const char* filename) {
+bool hardware_worker_load_key_from_file(HardwareWorker* instance, const char* filename) {
     bool res = false;
 
 #if defined(RFID_125_PROTOCOL)
@@ -169,34 +165,19 @@ bool hardware_worker_load_key_from_file(
         // Err Cant load file
         FURI_LOG_W(TAG, "Cant load file");
     } else {
-        res = true;
-    }
-    if(instance->protocol_id != loaded_proto_id) { // Err wrong protocol
-        FURI_LOG_W(TAG, "Wrong protocol");
-        FURI_LOG_W(
-            TAG,
-            "Selected: %s Loaded: %s",
-            fuzzer_proto_items[protocol_index].name,
-            protocol_dict_get_name(instance->protocols_items, loaded_proto_id));
-    } else {
+        instance->protocol_id = loaded_proto_id;
         res = true;
     }
 #else
+
     if(!ibutton_protocols_load(instance->protocols_items, instance->key, filename)) {
         // Err Cant load file
         FURI_LOG_W(TAG, "Cant load file");
-    } else if(instance->protocol_id != ibutton_key_get_protocol_id(instance->key)) {
-        // Err wrong protocol
-        FURI_LOG_W(TAG, "Wrong protocol");
-        FURI_LOG_W(
-            TAG,
-            "Selected: %s Loaded: %s",
-            fuzzer_proto_items[protocol_index].name,
-            ibutton_protocols_get_name(
-                instance->protocols_items, ibutton_key_get_protocol_id(instance->key)));
     } else {
+        instance->protocol_id = ibutton_key_get_protocol_id(instance->key);
         res = true;
     }
+
 #endif
 
     return res;
