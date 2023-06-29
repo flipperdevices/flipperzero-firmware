@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,31.2,,
+Version,+,31.3,,
 Header,+,applications/main/subghz/helpers/subghz_txrx.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
@@ -2062,6 +2062,7 @@ Function,+,menu_add_item,void,"Menu*, const char*, const Icon*, uint32_t, MenuIt
 Function,+,menu_alloc,Menu*,
 Function,+,menu_free,void,Menu*
 Function,+,menu_get_view,View*,Menu*
+Function,+,menu_pos_alloc,Menu*,size_t
 Function,+,menu_reset,void,Menu*
 Function,+,menu_set_selected_item,void,"Menu*, uint32_t"
 Function,-,mf_classic_auth_attempt,_Bool,"FuriHalNfcTxRxContext*, Crypto1*, MfClassicAuthContext*, uint64_t"

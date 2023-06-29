@@ -16,13 +16,21 @@ static void loader_cli_print_usage() {
 static void loader_cli_list() {
     printf("Applications:\r\n");
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        printf("\t%s\r\n", FLIPPER_APPS[i].name);
+        if(strstr(FLIPPER_APPS[i].name, " ")) {
+            printf("\t\"%s\"\r\n", FLIPPER_APPS[i].name);
+        } else {
+            printf("\t%s\r\n", FLIPPER_APPS[i].name);
+        }
     }
     printf("Settings:\r\n");
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
-        printf("\t%s\r\n", FLIPPER_SETTINGS_APPS[i].name);
+        if(strstr(FLIPPER_SETTINGS_APPS[i].name, " ")) {
+            printf("\t\"%s\"\r\n", FLIPPER_SETTINGS_APPS[i].name);
+        } else {
+            printf("\t%s\r\n", FLIPPER_SETTINGS_APPS[i].name);
+        }
     }
-    printf("For External Apps, specify full path to .fap file");
+    printf("For External Apps, specify full path to .fap file.");
 }
 
 static void loader_cli_info(Loader* loader) {
