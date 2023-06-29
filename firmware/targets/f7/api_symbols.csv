@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,36.0,,
+Version,+,36.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -2066,8 +2066,10 @@ Function,-,nfc_poller_alloc,NfcPoller*,"Nfc*, NfcProtocol"
 Function,-,nfc_poller_detect,_Bool,NfcPoller*
 Function,-,nfc_poller_free,void,NfcPoller*
 Function,-,nfc_poller_get_data,const NfcDeviceData*,NfcPoller*
-Function,-,nfc_poller_start,void,"NfcPoller*, NfcPollerCallback, void*"
+Function,-,nfc_poller_start,void,"NfcPoller*, NfcGenericCallback, void*"
 Function,-,nfc_poller_stop,void,NfcPoller*
+Function,-,nfc_protocol_get_parent,NfcProtocol,NfcProtocol
+Function,-,nfc_protocol_has_parent,_Bool,"NfcProtocol, NfcProtocol"
 Function,-,nfc_set_fdt_listen_fc,void,"Nfc*, uint32_t"
 Function,-,nfc_set_fdt_poll_fc,void,"Nfc*, uint32_t"
 Function,-,nfc_set_fdt_poll_poll_us,void,"Nfc*, uint32_t"
@@ -3334,7 +3336,6 @@ Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
 Variable,-,nfc_device_iso14443_3a,const NfcDeviceBase,
 Variable,-,nfc_device_mf_classic,const NfcDeviceBase,
-Variable,-,nfc_devices,const NfcDeviceBase*[],
 Variable,+,sequence_audiovisual_alert,const NotificationSequence,
 Variable,+,sequence_blink_blue_10,const NotificationSequence,
 Variable,+,sequence_blink_blue_100,const NotificationSequence,

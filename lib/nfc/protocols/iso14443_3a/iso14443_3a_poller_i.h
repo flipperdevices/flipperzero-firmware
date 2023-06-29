@@ -53,10 +53,10 @@ struct Iso14443_3aPoller {
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
 
-    NfcPollerEvent general_event;
+    NfcGenericEvent general_event;
     Iso14443_3aPollerEvent iso14443_3a_event;
     Iso14443_3aPollerEventData iso14443_3a_event_data;
-    NfcPollerCallback callback;
+    NfcGenericCallback callback;
     void* context;
 };
 

@@ -79,7 +79,7 @@ static const MfUltralightPollerCmdHandler
             mf_ultralight_poller_read_tearing_flag_handler,
 };
 
-static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* context) {
+static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcGenericEvent event, void* context) {
     furi_assert(event.poller);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(event.data);
@@ -232,7 +232,7 @@ MfUltralightError mf_ultralight_poller_read_tearing_flag(
     return error;
 }
 
-static NfcCommand mf_ultralight_poller_read_callback(NfcPollerEvent event, void* context) {
+static NfcCommand mf_ultralight_poller_read_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.poller);
     furi_assert(event.data);

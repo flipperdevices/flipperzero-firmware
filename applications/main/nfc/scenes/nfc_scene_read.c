@@ -2,7 +2,7 @@
 
 #include "../helpers/handlers/nfc_poller_handler.h"
 
-static NfcCommand nfc_scene_read_poller_callback(NfcPollerEvent event, void* context) {
+static NfcCommand nfc_scene_read_poller_callback(NfcGenericEvent event, void* context) {
     NfcApp* instance = context;
 
     const NfcCustomEvent custom_event = nfc_poller_handler_read(event, context);

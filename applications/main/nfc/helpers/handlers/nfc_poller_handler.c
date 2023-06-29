@@ -97,7 +97,7 @@ static const NfcPollerReadHandler nfc_poller_handlers_read[] = {
     [NfcProtocolMfClassic] = (NfcPollerReadHandler)nfc_poller_handler_read_mf_classic,
     [NfcProtocolMfDesfire] = (NfcPollerReadHandler)nfc_poller_handler_read_mf_desfire,
 };
-NfcCustomEvent nfc_poller_handler_read(NfcPollerEvent event, void* context) {
+NfcCustomEvent nfc_poller_handler_read(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.poller);
     furi_assert(event.data);

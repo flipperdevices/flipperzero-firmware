@@ -66,7 +66,8 @@ typedef void (*NfcScannerStateHandler)(NfcScanner* instance);
 
 void nfc_scanner_state_handler_idle(NfcScanner* instance) {
     for(size_t i = 0; i < NfcProtocolNum; i++) {
-        if(nfc_poller_nodes[i].parent_protocol == NfcProtocolInvalid) {
+        NfcProtocol parent_protocol = nfc_protocol_get_parent(i);
+        if(parent_protocol == NfcProtocolInvalid) {
             instance->base_protocols[instance->base_protocols_num] = i;
             instance->base_protocols_num++;
         }
@@ -98,24 +99,9 @@ void nfc_scanner_state_handler_try_base_pollers(NfcScanner* instance) {
     }
 }
 
-static bool nfc_scanner_check_parent_protocol(NfcProtocol child, NfcProtocol parent) {
-    bool parent_found = false;
-
-    const NfcPollerTreeNode* iter = &nfc_poller_nodes[child];
-    while(iter->parent_protocol != NfcProtocolInvalid) {
-        if(iter->parent_protocol == parent) {
-            parent_found = true;
-            break;
-        }
-        iter = &nfc_poller_nodes[iter->parent_protocol];
-    }
-
-    return parent_found;
-}
-
 void nfc_scanner_state_handler_find_children_protocols(NfcScanner* instance) {
     for(size_t i = 0; i < NfcProtocolNum; i++) {
-        if(nfc_scanner_check_parent_protocol(i, instance->current_protocol)) {
+        if(nfc_protocol_has_parent(i, instance->current_protocol)) {
             instance->children_protocols[instance->children_protocols_num] = i;
             instance->children_protocols_num++;
         }
@@ -157,7 +143,7 @@ static void nfc_scanner_filter_detected_protocols(NfcScanner* instance) {
     for(size_t i = 0; i < instance->detected_protocols_num; i++) {
         bool is_parent = false;
         for(size_t j = i; j < instance->detected_protocols_num; j++) {
-            is_parent = nfc_scanner_check_parent_protocol(
+            is_parent = nfc_protocol_has_parent(
                 instance->detected_protocols[j], instance->detected_protocols[i]);
             if(is_parent) break;
         }

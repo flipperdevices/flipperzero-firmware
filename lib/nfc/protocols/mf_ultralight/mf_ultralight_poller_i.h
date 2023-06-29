@@ -80,10 +80,10 @@ struct MfUltralightPoller {
     uint8_t tearing_flag_total;
     MfUltralightError error;
 
-    NfcPollerEvent general_event;
+    NfcGenericEvent general_event;
     MfUltralightPollerEvent mfu_event;
     MfUltralightPollerEventData mfu_event_data;
-    NfcPollerCallback callback;
+    NfcGenericCallback callback;
     void* context;
 };
 

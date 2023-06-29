@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "protocols/nfc_device_defs.h"
+#include "protocols/nfc_protocol.h"
 
 #ifdef __cplusplus
 extern "C" {

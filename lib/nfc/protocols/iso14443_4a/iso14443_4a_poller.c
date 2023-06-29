@@ -89,7 +89,7 @@ static const Iso14443_4aPollerStateHandler
 
 static void iso14443_4a_poller_set_callback(
     Iso14443_4aPoller* instance,
-    NfcPollerCallback callback,
+    NfcGenericCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -98,7 +98,7 @@ static void iso14443_4a_poller_set_callback(
     instance->context = context;
 }
 
-static NfcCommand iso14443_4a_poller_run(NfcPollerEvent event, void* context) {
+static NfcCommand iso14443_4a_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     Iso14443_4aPoller* instance = context;
@@ -120,7 +120,7 @@ static NfcCommand iso14443_4a_poller_run(NfcPollerEvent event, void* context) {
     return command;
 }
 
-static bool iso14443_4a_poller_detect(NfcPollerEvent event, void* context) {
+static bool iso14443_4a_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     const Iso14443_4aPoller* instance = context;

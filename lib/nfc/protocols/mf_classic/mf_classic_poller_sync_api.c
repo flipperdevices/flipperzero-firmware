@@ -57,7 +57,7 @@ static const MfClassicPollerCmdHandler mf_classic_poller_cmd_handlers[MfClassicP
     [MfClassicPollerCmdTypeReadBlock] = mf_classic_poller_read_block_handler,
 };
 
-static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcPollerEvent event, void* context) {
+static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcGenericEvent event, void* context) {
     furi_assert(event.poller);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(event.data);
