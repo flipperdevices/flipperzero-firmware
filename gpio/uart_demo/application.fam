@@ -1,0 +1,10 @@
+App(
+    appid="uart_demo",
+    name="UART Demo",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="uart_demo_main",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    fap_icon="uart_demo_10px.png",
+    fap_category="GPIO",
+)
