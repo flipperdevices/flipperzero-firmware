@@ -11,4 +11,7 @@ App(
     fap_category="Main",
     fap_icon_assets="icons",
     link="/ext/apps/Main/Dab_Timer.fap",
+    fap_author="@RogueMaster & @GMMan",
+    # fap_version="1.0",
+    fap_description="A clock with stopwatch and 80 seconds alarm. 80 second alarm can be changed at 5 second intervals and so can the sound options.",
 )
