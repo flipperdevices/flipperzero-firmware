@@ -37,7 +37,8 @@ jobs:
         id: device
         timeout-minutes: 0.5
         run: |
-          echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
+          echo "flipper=/dev/ttyACM1" >> $GITHUB_OUTPUT
+#         need proper way to name flipper, devices changed places and tests failed
           echo "stlink=49FF75065182575513201587" >> $GITHUB_OUTPUT
 
       - name: 'Flash firmware and upload all applications'

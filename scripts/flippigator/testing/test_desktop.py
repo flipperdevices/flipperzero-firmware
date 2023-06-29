@@ -36,6 +36,6 @@ class TestMain(BaseCase):
             "iButton",
             "BadUSB",
             "U2F",
-            "Apps",
             "Settings",
+            "Apps",
         ]

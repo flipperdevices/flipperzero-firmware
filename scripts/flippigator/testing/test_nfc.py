@@ -14,6 +14,9 @@ os.system("color")
 class TestNfc(BaseCase):
     @pytest.mark.smoke
     def test_nfc_menu(self, nav):
+        """
+        TODO: needs refactor
+        """
         nav.nfc.go_into()
         assert nav.nfc.check_menu() == 0, "NFC menu list differs from reference"
         nav.go_to_main_screen()
