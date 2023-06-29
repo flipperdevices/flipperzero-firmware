@@ -53,7 +53,7 @@ const char* iso14443_4a_get_device_name(const Iso14443_4aData* data, NfcDeviceNa
 
 const uint8_t* iso14443_4a_get_uid(const Iso14443_4aData* data, size_t* uid_len);
 
-const Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data);
+Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data);
 
 // Getters & Tests
 

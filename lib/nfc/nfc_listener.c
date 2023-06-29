@@ -1,15 +1,16 @@
 #include "nfc_listener.h"
 
 #include <nfc/protocols/nfc_listener_defs.h>
+#include <nfc/protocols/nfc_device_defs.h>
 
 #include <furi.h>
 
 typedef struct NfcListenerListElement {
     NfcProtocol protocol;
+    NfcDeviceData* data;
     NfcGenericInstance* listener;
     const NfcListenerBase* listener_api;
     struct NfcListenerListElement* child;
-    struct NfcListenerListElement* parent;
 } NfcListenerListElement;
 
 typedef struct {
@@ -26,6 +27,7 @@ struct NfcListener {
 static void nfc_listener_list_alloc(NfcListener* instance, NfcDeviceData* data) {
     instance->list.head = malloc(sizeof(NfcListenerListElement));
     instance->list.head->protocol = instance->protocol;
+    instance->list.head->data = data;
     instance->list.head->listener_api = nfc_listeners_api[instance->protocol];
     instance->list.head->child = NULL;
     instance->list.tail = instance->list.head;
@@ -37,37 +39,26 @@ static void nfc_listener_list_alloc(NfcListener* instance, NfcDeviceData* data) 
 
         NfcListenerListElement* parent = malloc(sizeof(NfcListenerListElement));
         parent->protocol = parent_protocol;
+        parent->data =
+            nfc_devices[instance->list.head->protocol]->get_base_data(instance->list.head->data);
         parent->listener_api = nfc_listeners_api[parent_protocol];
         parent->child = instance->list.head;
-        instance->list.head->parent = parent;
 
         instance->list.head = parent;
     } while(true);
 
     // Allocate listener instances
     NfcListenerListElement* iter = instance->list.head;
-    iter->listener = iter->listener_api->alloc(instance->nfc);
+    iter->listener = iter->listener_api->alloc(instance->nfc, iter->data);
 
     do {
         if(iter->child == NULL) break;
-        iter->child->listener = iter->child->listener_api->alloc(iter->listener);
+        iter->child->listener = iter->child->listener_api->alloc(iter->listener, iter->data);
         iter->listener_api->set_callback(
             iter->listener, iter->child->listener_api->run, iter->child->listener);
 
         iter = iter->child;
     } while(true);
-
-    // Set data for each listener
-    iter = instance->list.tail;
-    iter->listener_api->set_data(iter->listener, data);
-
-    do {
-        if(iter == instance->list.head) break;
-
-        const NfcDeviceData* base_data = iter->listener_api->get_base_data(iter->listener);
-        iter->parent->listener_api->set_data(iter->parent->listener, base_data);
-        iter = iter->parent;
-    } while(false);
 }
 
 static void nfc_listener_list_free(NfcListener* instance) {
@@ -135,5 +126,5 @@ const NfcDeviceData* nfc_listener_get_data(NfcListener* instance) {
     furi_assert(instance);
 
     NfcListenerListElement* tail_element = instance->list.tail;
-    return tail_element->listener_api->get_base_data(tail_element->listener);
+    return tail_element->listener_api->get_data(tail_element->listener);
 }
