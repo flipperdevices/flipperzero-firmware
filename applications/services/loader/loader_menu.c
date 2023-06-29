@@ -173,7 +173,7 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
     LoaderMenuApp* app = malloc(sizeof(LoaderMenuApp));
     app->gui = furi_record_open(RECORD_GUI);
     app->view_dispatcher = view_dispatcher_alloc();
-    app->primary_menu = menu_pos_alloc((size_t)1);
+    app->primary_menu = menu_pos_alloc(1);
     app->settings_menu = submenu_alloc();
 
     loader_menu_build_menu(app, loader_menu);
