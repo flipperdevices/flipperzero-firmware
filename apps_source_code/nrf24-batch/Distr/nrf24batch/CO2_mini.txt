@@ -1,0 +1,83 @@
+Info: CO2 sensor mini
+Address: C8C8CF
+Rate: 1
+Ch: 122
+CRC: 2
+DPL: 0
+RETR: 0x0F
+Resend: 3
+Delay_ms: 30
+ReadCmd repeat: 3
+
+Payload struct: 2,1,1
+ROM=0x41;ROM2=0x42;WROM=0x81;WROM2=0x82;RAM=0x51;RAM2=0x52;WRAM=0x91;WRAM2=0x92;PGM=0x61;SET=0xC0
+
+R default: ,,ROM
+W default: n,,WROM
+Write start: 0,0,0x2F
+
+Listen: C8C8C1=CO2,Alarm,-
+
+R: ID*=,0,0x65
+
+R: _CO2*2=0x6C,,RAM2
+R: _PORTA=0x39,,RAM
+W: _PORTA=,0x3B,WRAM
+R: _PORTB=0x36,,RAM
+W: _PORTB=,0x38,WRAM
+R: _OSCCAL=0x51,,RAM
+W: _OSCCAL=,0x51,WRAM
+R: OSCCAL_EMEM=0
+
+R: RxAddr=1#
+W: RxAddr=,1
+
+R: Ch=2
+W: Ch=,2
+
+R: nRF RETR=3#
+W: nRF RETR=,3
+
+R: Send period=4
+W: Send period=,4
+
+R: CO2 threshold*2=5,,ROM2
+W: CO2 threshold=,5,WROM2
+
+R: CO2 correct*2=7,,ROM2
+W: CO2 correct*2=,7,WROM2
+
+R: FanLSB[10]=i:9#
+W: FanLSB=,i:9
+
+R: Transmit pause=19
+W: Transmit pause=,19
+
+R: Flags=20#
+W: Flags=,20
+
+W: Reset=0xEEEE,14,SET
+
+R: _LED Warning=0x74,,RAM
+W: _LED Warning=,0x74,WRAM
+
+S: LED=,0,SET
+
+SBatch: LED On: LED=1
+SBatch: LED Off: LED=0
+
+RBatch: Settings: ID;RxAddr;Ch;Send period;CO2 threshold;CO2 correct;FanLSB;nRF RETR;Transmit pause;Flags
+
+WBatch: Default: RxAddr=0xCF;Ch=122;Send period=30;CO2 threshold=1000;CO2 correct=0;FanLSB={0xC1,0,0,0,0,0,0,0};nRF RETR=0x3;Transmit pause=1;Flags=0;Reset
+WBatch: CO2: Send period=60;CO2 threshold=1000;CO2 correct=0
+WBatch: Fan: FanLSB={0xC1,0,0,0,0,0,0,0,0,0};Reset
+WBatch: RETR: nRF RETR=0x2F;Reset
+WBatch: Transmit pause: Transmit pause=30
+WBatch: Flags: Flags=0x00
+
+WBatch: LED Warning: _LED Warning=0x30
+WBatch: PORTA: _PORTA=0x0C
+WBatch: PORTB: _PORTB=0xC
+WBatch: OSCCAL: _OSCCAL=128
+
+WBatch: Reset: Reset

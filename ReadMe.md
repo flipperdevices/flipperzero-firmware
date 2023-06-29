@@ -1,5 +1,5 @@
-# Flipper Application Files (FAPs) for Any Firmware with API v30.x
-## Apps from this pack should be compatible with OFW with API v30.x (dev branch) or any other firmware build with API 30.x
+# Flipper Application Files (FAPs) for Any Firmware with API v31.x
+## Apps from this pack should be compatible with OFW with API v31.x (dev branch) or any other firmware build with API 31.x
 
 ## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/all-the-plugins/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
@@ -22,7 +22,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `25 Jun 01:18 GMT +3`
+### Apps checked & updated at `29 Jun 06:28 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -121,7 +121,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
 - [Barcode Generator (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - [Brainfuck interpreter (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
-- [Flipper CLI-GUI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) - Fixes by [Willy-JL](https://github.com/Willy-JL)
 - [NightStand Clock (By nymda)](https://github.com/nymda/FlipperNightStand) - Fixes by [Willy-JL](https://github.com/Willy-JL)
 - [BT Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger)
 - [MagSpoof (WIP) (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)

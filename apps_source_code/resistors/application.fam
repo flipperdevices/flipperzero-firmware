@@ -1,0 +1,17 @@
+# For details & more options, see documentation/AppManifests.md in firmware repo
+
+App(
+    appid="resistors",  # Must be unique
+    name="Resistance calculator",  # Displayed in menus
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="resistors_app",
+    stack_size=2 * 1024,
+    fap_category="Misc_Extra",
+    # Optional values
+    fap_version=(1, 1),
+    fap_icon="resistors.png",
+    fap_description="Resistor calculations",
+    fap_author="Lewis Westbury",
+    fap_weburl="https://github.com/instantiator/flipper-zero-experimental-apps/tree/main/resistors",
+    fap_icon_assets="images",
+)
