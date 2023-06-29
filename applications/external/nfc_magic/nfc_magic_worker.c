@@ -340,23 +340,6 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
 
             nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
             break;
-        }
-
-        magic_deactivate();
-        furi_delay_ms(300);
-        magic_activate();
-
-        furi_hal_nfc_activate_nfca(200, &magic_dev->cuid);
-        if(magic_gen4_get_cfg(magic_dev->password, gen4_config)) {
-            FURI_LOG_D(TAG, "Card is gen4");
-            magic_dev->type = MagicTypeGen4;
-            if(!card_found_notified) {
-                nfc_magic_worker->callback(
-                    NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
-                card_found_notified = true;
-            }
-            nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
-            break;
         } else {
             magic_deactivate();
             magic_activate();
@@ -365,6 +348,7 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
                 magic_dev->uid_len = nfc_data.uid_len;
                 if(magic_gen4_get_cfg(magic_dev->password, gen4_config)) {
                     magic_dev->type = MagicTypeGen4;
+                    FURI_LOG_D(TAG, "Card is gen4");
                     if(!card_found_notified) {
                         nfc_magic_worker->callback(
                             NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
