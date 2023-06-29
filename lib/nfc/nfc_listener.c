@@ -110,9 +110,11 @@ NfcCommand nfc_listener_start_callback(NfcEvent event, void* context) {
     return command;
 }
 
-void nfc_listener_start(NfcListener* instance) {
+void nfc_listener_start(NfcListener* instance, NfcGenericCallback callback, void* context) {
     furi_assert(instance);
 
+    NfcListenerListElement* tail_element = instance->list.tail;
+    tail_element->listener_api->set_callback(tail_element->listener, callback, context);
     nfc_start_listener(instance->nfc, nfc_listener_start_callback, instance);
 }
 

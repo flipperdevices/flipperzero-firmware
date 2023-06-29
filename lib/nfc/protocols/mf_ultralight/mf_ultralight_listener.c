@@ -1,5 +1,7 @@
 #include "mf_ultralight_listener.h"
 
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener_i.h>
+
 #include <furi.h>
 
 #define TAG "MfUltralightListener"
@@ -341,7 +343,7 @@ static Iso14443_3aListenerCommand
     furi_assert(context);
 
     MfUltralightListener* instance = context;
-    BitBuffer* rx_buffer = event.data.buffer;
+    BitBuffer* rx_buffer = event.data->buffer;
 
     Iso14443_3aListenerCommand command = Iso14443_3aListenerCommandContinue;
     if(event.type == Iso14443_3aListenerEventTypeReceivedStandartFrame) {

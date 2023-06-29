@@ -20,6 +20,8 @@
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
 
+#include <nfc/nfc_listener.h>
+
 typedef void (*NfcRpcHandler)(Nfc_Main* cmd, void* context);
 
 DICT_DEF2(NfcRpcHandlerDict, pb_size_t, M_DEFAULT_OPLIST, NfcRpcHandler, M_POD_OPLIST)
@@ -54,6 +56,8 @@ struct NfcRpc {
     NfcRpcHandlerDict_t handlers;
 
     Nfc* nfc;
+    NfcListener* listener;
+
     Iso14443_3aListener* iso14443_3a_listener;
     MfUltralightListener* mf_ul_listener;
 };

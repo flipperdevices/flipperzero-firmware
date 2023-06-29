@@ -75,7 +75,7 @@ static void nfc_rpc_nfca_emulate_start(Nfc_Main* cmd, void* context) {
         PB_Nfca_EmulateStartResponse_init_default;
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_emulate_start_resp_tag;
-    if(instance->iso14443_3a_listener == NULL) {
+    if(instance->listener == NULL) {
         Iso14443_3aData iso14443_3a_data = {};
         iso14443_3a_data.uid_len = cmd->content.nfca_emulate_start_req.uid_len;
         memcpy(
@@ -85,7 +85,9 @@ static void nfc_rpc_nfca_emulate_start(Nfc_Main* cmd, void* context) {
         memcpy(iso14443_3a_data.atqa, cmd->content.nfca_emulate_start_req.atqa.bytes, 2);
         memcpy(&iso14443_3a_data.sak, cmd->content.nfca_emulate_start_req.sak.bytes, 1);
 
-        iso14443_3a_listener_start(instance->iso14443_3a_listener, &iso14443_3a_data, NULL, NULL);
+        instance->listener =
+            nfc_listener_alloc(instance->nfc, NfcProtocolIso14443_3a, &iso14443_3a_data);
+        nfc_listener_start(instance->listener, NULL, NULL);
         pb_nfca_emulate_start_resp.error = PB_Nfca_Error_None;
     } else {
         // TODO add Busy error
@@ -103,9 +105,10 @@ static void nfc_rpc_nfca_emulate_stop(Nfc_Main* cmd, void* context) {
         PB_Nfca_EmulateStopResponse_init_default;
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_nfca_emulate_stop_resp_tag;
-    if(instance->iso14443_3a_listener) {
-        iso14443_3a_listener_stop(instance->iso14443_3a_listener);
-        instance->iso14443_3a_listener = NULL;
+    if(instance->listener) {
+        nfc_listener_stop(instance->listener);
+        nfc_listener_free(instance->listener);
+        instance->listener = NULL;
         pb_nfca_emulate_stop_resp.error = PB_Nfca_Error_None;
     } else {
         // TODO add Busy error

@@ -10,14 +10,11 @@ extern "C" {
 typedef struct Iso14443_3aListener Iso14443_3aListener;
 
 typedef enum {
-    Iso14443_3aListenerEventConfigRequest,
-    Iso14443_3aListenerEventTypeAbort,
-    Iso14443_3aListenerEventTypeFieldOn,
     Iso14443_3aListenerEventTypeFieldOff,
     Iso14443_3aListenerEventTypeHalted,
+
     Iso14443_3aListenerEventTypeReceivedStandartFrame,
     Iso14443_3aListenerEventTypeReceivedData,
-    Iso14443_3aListenerEventTypeReset,
 } Iso14443_3aListenerEventType;
 
 typedef struct {
@@ -26,9 +23,10 @@ typedef struct {
 
 typedef struct {
     Iso14443_3aListenerEventType type;
-    Iso14443_3aListenerEventData data;
+    Iso14443_3aListenerEventData* data;
 } Iso14443_3aListenerEvent;
 
+// TODO delete
 typedef enum {
     Iso14443_3aListenerCommandContinue = NfcCommandContinue,
     Iso14443_3aListenerCommandReset = NfcCommandReset,
@@ -51,17 +49,6 @@ Iso14443_3aError
     iso14443_3a_listener_get_data(Iso14443_3aListener* instance, Iso14443_3aData* data);
 
 Iso14443_3aError iso14443_3a_listener_stop(Iso14443_3aListener* instance);
-
-// Called from NfcWorker thread
-
-Iso14443_3aError iso14443_3a_listener_sleep(Iso14443_3aListener* instance);
-
-Iso14443_3aError
-    iso14443_3a_listener_tx(Iso14443_3aListener* instance, const BitBuffer* tx_buffer);
-
-Iso14443_3aError iso14443_3a_listener_send_standart_frame(
-    Iso14443_3aListener* instance,
-    const BitBuffer* tx_buffer);
 
 #ifdef __cplusplus
 }

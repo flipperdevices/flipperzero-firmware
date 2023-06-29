@@ -13,7 +13,7 @@ NfcListener* nfc_listener_alloc(Nfc* nfc, NfcProtocol protocol, NfcDeviceData* d
 
 void nfc_listener_free(NfcListener* instance);
 
-void nfc_listener_start(NfcListener* instance);
+void nfc_listener_start(NfcListener* instance, NfcGenericCallback callback, void* context);
 
 void nfc_listener_stop(NfcListener* instance);
 
