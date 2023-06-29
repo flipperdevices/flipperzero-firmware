@@ -123,25 +123,25 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
     Loader* loader = furi_record_open(RECORD_LOADER);
 
     size_t i;
-    for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
+    menu_add_item(
+        app->primary_menu,
+        LOADER_APPLICATIONS_NAME,
+        &A_Plugins_14,
+        0,
+        loader_menu_applications_callback,
+        (void*)menu);
+
+    for(i = 1; i < FLIPPER_APPS_COUNT + 1; i++) {
         menu_add_item(
             app->primary_menu,
-            FLIPPER_APPS[i].name,
-            FLIPPER_APPS[i].icon,
+            FLIPPER_APPS[i - 1].name,
+            FLIPPER_APPS[i - 1].icon,
             i,
             loader_menu_callback,
             (void*)menu);
     }
     menu_add_item(
         app->primary_menu, "Settings", &A_Settings_14, i++, loader_menu_switch_to_settings, app);
-
-    menu_add_item(
-        app->primary_menu,
-        LOADER_APPLICATIONS_NAME,
-        &A_Plugins_14,
-        i++,
-        loader_menu_applications_callback,
-        (void*)menu);
 
     size_t x;
     for(x = 0; x < loader_get_ext_main_app_list_size(loader); x++) {
@@ -173,7 +173,7 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
     LoaderMenuApp* app = malloc(sizeof(LoaderMenuApp));
     app->gui = furi_record_open(RECORD_GUI);
     app->view_dispatcher = view_dispatcher_alloc();
-    app->primary_menu = menu_alloc();
+    app->primary_menu = menu_pos_alloc((size_t)1);
     app->settings_menu = submenu_alloc();
 
     loader_menu_build_menu(app, loader_menu);
