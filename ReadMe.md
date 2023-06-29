@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Added Power Button for an unknown Sharp Model #2787 (By m0veax)](https://github.com/flipperdevices/flipperzero-firmware/pull/2787)
 - OFW: [Add Mitsubishi MSZ-AP25VGK universal ac remote #2800 (By minchogaydarov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2800)
 - OFW PR: [NFC: Fix key invalidation logic #2782 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2782)
+- [Loader Menu Improvements (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/686)
 
 <a name="release">
 
