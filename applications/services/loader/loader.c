@@ -318,7 +318,8 @@ static LoaderStatus loader_start_external_app(
     Storage* storage,
     const char* path,
     const char* args,
-    FuriString* error_message) {
+    FuriString* error_message,
+    bool ignore_mismatch) {
     LoaderStatus status = loader_make_success_status(error_message);
 
     do {
@@ -329,46 +330,52 @@ static LoaderStatus loader_start_external_app(
 
         FlipperApplicationPreloadStatus preload_res =
             flipper_application_preload(loader->app.fap, path);
-        bool api_mismatch = false;
-        if(preload_res == FlipperApplicationPreloadStatusApiMismatch) {
-            api_mismatch = true;
-        } else if(preload_res != FlipperApplicationPreloadStatusSuccess) {
-            const char* err_msg = flipper_application_preload_status_to_string(preload_res);
-            status = loader_make_status_error(
-                LoaderStatusErrorInternal, error_message, "Preload failed %s: %s", path, err_msg);
-            break;
+        if(preload_res != FlipperApplicationPreloadStatusSuccess) {
+            if(preload_res == FlipperApplicationPreloadStatusApiMismatch) {
+                if(!ignore_mismatch) {
+                    DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+                    DialogMessage* message = dialog_message_alloc();
+                    dialog_message_set_header(
+                        message, "API Mismatch", 64, 0, AlignCenter, AlignTop);
+                    dialog_message_set_buttons(message, "Cancel", NULL, "Continue");
+                    dialog_message_set_text(
+                        message,
+                        "This app might not\nwork correctly\nContinue anyways?",
+                        64,
+                        32,
+                        AlignCenter,
+                        AlignCenter);
+                    if(dialog_message_show(dialogs, message) == DialogMessageButtonRight) {
+                        status = loader_make_status_error(
+                            LoaderStatusErrorApiMismatch, error_message, "API Mismatch");
+                    }
+                    dialog_message_free(message);
+                    furi_record_close(RECORD_DIALOGS);
+                    break;
+                }
+            } else {
+                const char* err_msg = flipper_application_preload_status_to_string(preload_res);
+                status = loader_make_status_error(
+                    LoaderStatusErrorInternal,
+                    error_message,
+                    "Preload failed %s: %s",
+                    path,
+                    err_msg);
+                break;
+            }
         }
 
         FURI_LOG_I(TAG, "Mapping");
         FlipperApplicationLoadStatus load_status =
             flipper_application_map_to_memory(loader->app.fap);
-        FURI_LOG_I(TAG, "Loaded in %zums", (size_t)(furi_get_tick() - start));
         if(load_status != FlipperApplicationLoadStatusSuccess) {
             const char* err_msg = flipper_application_load_status_to_string(load_status);
             status = loader_make_status_error(
                 LoaderStatusErrorInternal, error_message, "Load failed %s: %s", path, err_msg);
             break;
-        } else if(api_mismatch) {
-            // Successful map, but found api mismatch -> warn user
-            DialogMessage* message = dialog_message_alloc();
-            dialog_message_set_header(message, "API Mismatch", 64, 0, AlignCenter, AlignTop);
-            dialog_message_set_buttons(message, "Cancel", NULL, "Continue");
-            dialog_message_set_text(
-                message,
-                "This app might not\nwork correctly\nContinue anyways?",
-                64,
-                32,
-                AlignCenter,
-                AlignCenter);
-            DialogMessageButton res =
-                dialog_message_show(furi_record_open(RECORD_DIALOGS), message);
-            dialog_message_free(message);
-            furi_record_close(RECORD_DIALOGS);
-            if(res != DialogMessageButtonRight) {
-                break;
-            }
         }
 
+        FURI_LOG_I(TAG, "Loaded in %zums", (size_t)(furi_get_tick() - start));
         FURI_LOG_I(TAG, "Starting app");
 
         loader->app.thread = flipper_application_alloc_thread(loader->app.fap, args);
@@ -469,7 +476,12 @@ static LoaderStatus loader_do_start_by_name(
         {
             Storage* storage = furi_record_open(RECORD_STORAGE);
             if(storage_file_exists(storage, name)) {
-                status = loader_start_external_app(loader, storage, name, args, error_message);
+                status =
+                    loader_start_external_app(loader, storage, name, args, error_message, false);
+                if(status == LoaderStatusErrorApiMismatch) {
+                    status = loader_start_external_app(
+                        loader, storage, name, args, error_message, true);
+                }
                 furi_record_close(RECORD_STORAGE);
                 break;
             }

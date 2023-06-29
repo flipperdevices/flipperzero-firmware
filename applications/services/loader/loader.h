@@ -16,6 +16,7 @@ typedef enum {
     LoaderStatusErrorAppStarted,
     LoaderStatusErrorUnknownApp,
     LoaderStatusErrorInternal,
+    LoaderStatusErrorApiMismatch,
 } LoaderStatus;
 
 typedef enum {
