@@ -7,20 +7,25 @@
 extern "C" {
 #endif
 
-typedef NfcGenericInstance* (
-    *NfcListenerAlloc)(NfcGenericInstance* base_poller, NfcProtocol protocol, NfcDeviceData* data);
+typedef NfcGenericInstance* (*NfcListenerAlloc)(NfcGenericInstance* base_listener);
 typedef void (*NfcListenerFree)(NfcGenericInstance* instance);
 
+typedef const NfcDeviceData* (*NfcListenerGetBaseData)(const NfcGenericInstance* instance);
+typedef void (*NfcListenerSetData)(NfcGenericInstance* instance, const NfcDeviceData* data);
+
 typedef void (*NfcListenerSetCallback)(
-    NfcGenericInstance* poller,
+    NfcGenericInstance* listener,
     NfcGenericCallback callback,
     void* context);
 typedef NfcCommand (*NfcListenerRun)(NfcGenericEvent event, void* context);
+
 typedef const NfcDeviceData* (*NfcListenerGetData)(const NfcGenericInstance* instance);
 
 typedef struct {
     NfcListenerAlloc alloc;
     NfcListenerFree free;
+    NfcListenerGetBaseData get_base_data;
+    NfcListenerSetData set_data;
     NfcListenerSetCallback set_callback;
     NfcListenerRun run;
     NfcListenerGetData get_data;
