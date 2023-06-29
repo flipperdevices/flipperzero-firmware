@@ -2,7 +2,7 @@
 
 #### Quality of life
 
-- [ ] Make the "Load File" independent of the current protocol
+- [x] Make the "Load File" independent of the current protocol
 - [x] Add pause
     - [X] Switching  UIDs if possible
 - [x] Led and sound Notification
