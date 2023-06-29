@@ -301,7 +301,6 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
 void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
     FuriHalNfcDevData nfc_data = {};
     NfcMagicDevice* magic_dev = nfc_magic_worker->magic_dev;
-    FuriHalNfcDevData nfc_data = {};
     bool card_found_notified = false;
     uint8_t gen4_config[MAGIC_GEN4_CONFIG_LEN];
 
