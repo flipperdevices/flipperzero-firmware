@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Add Mitsubishi MSZ-AP25VGK universal ac remote #2800 (By minchogaydarov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2800)
 - OFW PR: [NFC: Fix key invalidation logic #2782 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2782)
 - [Loader Menu Improvements (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/686)
+- OFW: [Debug apps: speaker, uart_echo with baudrate #2812 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2812)
 
 <a name="release">
 
