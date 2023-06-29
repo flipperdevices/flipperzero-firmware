@@ -52,7 +52,7 @@ static void loader_menu_start(const char* name) {
     furi_record_close(RECORD_LOADER);
 }
 
-static bool loader_menu_check_appid(size_t index, bool settings) {
+static bool loader_menu_check_appid(uint32_t index, bool settings) {
     if(settings) {
         if(strstr(FLIPPER_SETTINGS_APPS[index].appid, ".fap")) {
             return true;
