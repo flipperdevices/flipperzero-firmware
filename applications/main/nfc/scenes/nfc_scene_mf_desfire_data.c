@@ -1,6 +1,6 @@
 #include "../nfc_app_i.h"
 
-#include "../helpers/format/nfc_mf_desfire_format.h"
+#include "../helpers/protocol_support/mf_desfire/mf_desfire_render.h"
 
 enum {
     MifareDesfireDataStateMenu,
@@ -74,7 +74,7 @@ bool nfc_scene_mf_desfire_data_on_event(void* context, SceneManagerEvent event) 
         furi_string_reset(nfc->text_box_store);
 
         if(event.event == SubmenuIndexCardInfo) {
-            nfc_mf_desfire_format_data(data, nfc->text_box_store);
+            nfc_mf_desfire_render_data(data, nfc->text_box_store);
             text_box_set_text(text_box, furi_string_get_cstr(nfc->text_box_store));
             view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewTextBox);
             scene_manager_set_scene_state(
