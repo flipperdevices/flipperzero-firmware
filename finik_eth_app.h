@@ -4,6 +4,7 @@
 #include <gui/gui.h>
 #include <notification/notification_messages.h>
 
+#include "eth_worker.h"
 #include "finik_eth_icons.h"
 
 typedef enum {
@@ -18,6 +19,7 @@ struct FinikEthApp {
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
     NotificationApp* notifications;
+    EthWorker* eth_worker;
 
     DrawMode draw_mode;
 };

@@ -7,6 +7,10 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 
+#include "eth_worker.h"
+
+#define TAG "FinikEthApp"
+
 static void finik_eth_app_draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
     FinikEthApp* app = ctx;
@@ -51,6 +55,8 @@ FinikEthApp* finik_eth_app_alloc() {
 
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
+    //app->eth_worker =
+
     return app;
 }
 
@@ -78,13 +84,16 @@ int32_t finik_eth_app(void* p) {
             if(event.type == InputTypePress) {
                 if(event.key == InputKeyBack)
                     break;
-                else if(event.key == InputKeyUp)
+                else if(event.key == InputKeyUp) {
+                    FURI_LOG_I(TAG, "example_led_sequence");
                     notification_message(app->notifications, &example_led_sequence);
-                else if(event.key == InputKeyDown)
+                } else if(event.key == InputKeyDown) {
+                    FURI_LOG_I(TAG, "example_vibro_sequence");
                     notification_message(app->notifications, &example_vibro_sequence);
-                else if(event.key == InputKeyOk)
+                } else if(event.key == InputKeyOk) {
+                    FURI_LOG_I(TAG, "example_sound_sequence");
                     notification_message(app->notifications, &example_sound_sequence);
-
+                }
             } else if(event.type == InputTypeLong) {
                 DrawMode mode = app->draw_mode;
                 if(event.key == InputKeyLeft)
