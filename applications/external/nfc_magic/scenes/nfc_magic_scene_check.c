@@ -13,7 +13,7 @@ static bool nfc_magic_scene_check_is_file_suitable(NfcMagic* nfc_magic) {
         case MagicTypeClassicDirectWrite:
         case MagicTypeClassicAPDU:
             if((nfc_dev->dev_data.mf_classic_data.type != MfClassicType1k) ||
-               (nfc_dev->dev_data.nfc_data.uid_len != 4)) {
+               (nfc_dev->dev_data.nfc_data.uid_len != nfc_magic->dev->uid_len)) {
                 return false;
             }
             return true;
