@@ -7,6 +7,7 @@
 
 enum HidDebugSubmenuIndex {
     HidSubmenuIndexKeynote,
+    HidSubmenuIndexKeynoteVertical,
     HidSubmenuIndexKeyboard,
     HidSubmenuIndexMedia,
     HidSubmenuIndexTikTok,
@@ -20,6 +21,11 @@ static void hid_submenu_callback(void* context, uint32_t index) {
     Hid* app = context;
     if(index == HidSubmenuIndexKeynote) {
         app->view_id = HidViewKeynote;
+        hid_keynote_set_orientation(app->hid_keynote, false);
+        view_dispatcher_switch_to_view(app->view_dispatcher, HidViewKeynote);
+    } else if(index == HidSubmenuIndexKeynoteVertical) {
+        app->view_id = HidViewKeynote;
+        hid_keynote_set_orientation(app->hid_keynote, true);
         view_dispatcher_switch_to_view(app->view_dispatcher, HidViewKeynote);
     } else if(index == HidSubmenuIndexKeyboard) {
         app->view_id = HidViewKeyboard;
@@ -105,6 +111,12 @@ Hid* hid_alloc(HidTransport transport) {
     app->device_type_submenu = submenu_alloc();
     submenu_add_item(
         app->device_type_submenu, "Keynote", HidSubmenuIndexKeynote, hid_submenu_callback, app);
+    submenu_add_item(
+        app->device_type_submenu,
+        "Keynote Vertical",
+        HidSubmenuIndexKeynoteVertical,
+        hid_submenu_callback,
+        app);
     submenu_add_item(
         app->device_type_submenu, "Keyboard", HidSubmenuIndexKeyboard, hid_submenu_callback, app);
     submenu_add_item(
@@ -377,7 +389,7 @@ int32_t hid_usb_app(void* p) {
 
     bt_hid_connection_status_changed_callback(BtStatusConnected, app);
 
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     view_dispatcher_run(app->view_dispatcher);
 
@@ -417,7 +429,7 @@ int32_t hid_ble_app(void* p) {
     furi_hal_bt_start_advertising();
     bt_set_status_changed_callback(app->bt, bt_hid_connection_status_changed_callback, app);
 
-    DOLPHIN_DEED(DolphinDeedPluginStart);
+    dolphin_deed(DolphinDeedPluginStart);
 
     view_dispatcher_run(app->view_dispatcher);
 
