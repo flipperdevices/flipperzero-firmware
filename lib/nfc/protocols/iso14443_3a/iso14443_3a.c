@@ -19,6 +19,7 @@ const NfcDeviceBase nfc_device_iso14443_3a = {
     .is_equal = (NfcDeviceEqual)iso14443_3a_is_equal,
     .get_name = (NfcDeviceGetName)iso14443_3a_get_device_name,
     .get_uid = (NfcDeviceGetUid)iso14443_3a_get_uid,
+    .get_base_data = NULL,
 };
 
 Iso14443_3aData* iso14443_3a_alloc() {

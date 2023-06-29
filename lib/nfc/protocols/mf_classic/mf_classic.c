@@ -52,6 +52,7 @@ const NfcDeviceBase nfc_device_mf_classic = {
     .is_equal = (NfcDeviceEqual)mf_classic_is_equal,
     .get_name = (NfcDeviceGetName)mf_classic_get_device_name,
     .get_uid = (NfcDeviceGetUid)mf_classic_get_uid,
+    .get_base_data = (NfcDeviceGetBaseData)mf_classic_get_base_data,
 };
 
 MfClassicData* mf_classic_alloc() {
@@ -311,6 +312,12 @@ const uint8_t* mf_classic_get_uid(const MfClassicData* data, size_t* uid_len) {
     furi_assert(data);
 
     return iso14443_3a_get_uid(data->iso14443_3a_data, uid_len);
+}
+
+const Iso14443_3aData* mf_classic_get_base_data(const MfClassicData* data) {
+    furi_assert(data);
+
+    return data->iso14443_3a_data;
 }
 
 uint8_t mf_classic_get_total_sectors_num(MfClassicType type) {
