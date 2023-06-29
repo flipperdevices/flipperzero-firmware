@@ -2,8 +2,6 @@
 #include <furi.h>
 #include "loader_extapps.h"
 
-#define MANUALLY_ADDED_ITEMS_COUNT 2
-
 #ifdef __cplusplus
 extern "C" {
 #endif

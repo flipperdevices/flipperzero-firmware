@@ -122,51 +122,39 @@ static uint32_t loader_menu_exit(void* context) {
 static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
     Loader* loader = furi_record_open(RECORD_LOADER);
     size_t i;
-    size_t x = 0;
-    size_t ext_apps_size = loader_get_ext_main_app_list_size(loader);
-    size_t total_items = FLIPPER_APPS_COUNT + ext_apps_size + MANUALLY_ADDED_ITEMS_COUNT;
 
-    for(i = 0; i < total_items; i++) {
-        if(i < FLIPPER_APPS_COUNT) {
-            menu_add_item(
-                app->primary_menu,
-                FLIPPER_APPS[i].name,
-                FLIPPER_APPS[i].icon,
-                i,
-                loader_menu_callback,
-                (void*)menu);
-        } else if(i > FLIPPER_APPS_COUNT) {
-            if(i == FLIPPER_APPS_COUNT) {
-                menu_add_item(
-                    app->primary_menu,
-                    "Settings",
-                    &A_Settings_14,
-                    i,
-                    loader_menu_switch_to_settings,
-                    app);
-            } else if(i <= (FLIPPER_APPS_COUNT + ext_apps_size)) {
-                const ExtMainApp* ext_app = loader_get_ext_main_app_item(loader, x);
-
-                menu_add_item(
-                    app->primary_menu,
-                    ext_app->name,
-                    ext_app->icon,
-                    (uint32_t)ext_app->path,
-                    loader_menu_external_apps_callback,
-                    (void*)menu);
-
-                x++;
-            } else {
-                menu_add_item(
-                    app->primary_menu,
-                    LOADER_APPLICATIONS_NAME,
-                    &A_Plugins_14,
-                    i,
-                    loader_menu_applications_callback,
-                    (void*)menu);
-            }
-        }
+    for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
+        menu_add_item(
+            app->primary_menu,
+            FLIPPER_APPS[i].name,
+            FLIPPER_APPS[i].icon,
+            i,
+            loader_menu_callback,
+            (void*)menu);
     }
+    menu_add_item(
+        app->primary_menu, "Settings", &A_Settings_14, i++, loader_menu_switch_to_settings, app);
+
+    menu_add_item(
+        app->primary_menu,
+        LOADER_APPLICATIONS_NAME,
+        &A_Plugins_14,
+        i++,
+        loader_menu_applications_callback,
+        (void*)menu);
+
+    size_t x;
+    for(x = 0; x < loader_get_ext_main_app_list_size(loader); x++) {
+        const ExtMainApp* ext_app = loader_get_ext_main_app_item(loader, x);
+        menu_add_item(
+            app->primary_menu,
+            ext_app->name,
+            ext_app->icon,
+            (uint32_t)ext_app->path,
+            loader_menu_external_apps_callback,
+            (void*)menu);
+    }
+
     furi_record_close(RECORD_LOADER);
 };
 
