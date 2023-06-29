@@ -11,4 +11,7 @@ App(
     fap_category="Sub-GHz",
     fap_icon_assets="images",
     link="/ext/apps/Sub-GHz/SubGHz_Playlist.fap",
+    fap_author="@darmiel",
+    # fap_version="1.0",
+    fap_description="App works with list of sub-ghz files from .txt file that contains paths to target files.",
 )

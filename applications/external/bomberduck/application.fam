@@ -12,4 +12,7 @@ App(
     fap_category="Games",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="bomberduck",
+    fap_author="@leo-need-more-coffee & @xMasterX",
+    # fap_version="1.0",
+    fap_description="Bomberduck(Bomberman) Game",
 )

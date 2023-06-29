@@ -10,4 +10,7 @@ App(
     fap_category="GPIO",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="swd_probe",
+    fap_author="@g3gg0 & (fixes by @xMasterX)",
+    # fap_version="1.0",
+    fap_description="ARM SWD (Single Wire Debug) Probe",
 )

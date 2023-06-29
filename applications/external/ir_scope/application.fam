@@ -9,4 +9,7 @@ App(
     fap_icon="ir_scope.png",
     fap_category="Infrared",
     fap_icon_assets_symbol="ir_scope",
+    fap_author="@kallanreed",
+    # fap_version="1.0",
+    fap_description="App allows to see incoming IR signals.",
 )

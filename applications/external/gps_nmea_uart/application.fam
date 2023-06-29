@@ -15,4 +15,7 @@ App(
             cdefines=["timegm=mktime"],
         ),
     ],
+    fap_author="@ezod & @xMasterX",
+    # fap_version="1.0",
+    fap_description="Works with GPS modules via UART, using NMEA protocol.",
 )

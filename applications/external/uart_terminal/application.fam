@@ -10,4 +10,7 @@ App(
     fap_category="GPIO",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="uart_terminal",
+    fap_author="@cool4uma & (some fixes by @xMasterX)",
+    # fap_version="1.0",
+    fap_description="App to control various devices via UART interface.",
 )
