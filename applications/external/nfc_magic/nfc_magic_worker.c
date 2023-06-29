@@ -112,14 +112,7 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
                 }
                 magic_activate();
                 if(magic_gen1_wupa()) {
-                    if(!magic_gen1_data_access_cmd()) {
-                        FURI_LOG_E(
-                            TAG, "No card response to data access command (not a magic card)");
-                        nfc_magic_worker->callback(
-                            NfcMagicWorkerEventWrongCard, nfc_magic_worker->context);
-                        done = true;
-                        break;
-                    }
+                    magic_gen1_data_access_cmd();
 
                     MfClassicData* mfc_data = &dev_data->mf_classic_data;
                     for(size_t i = 0; i < 64; i++) {
@@ -306,6 +299,7 @@ void nfc_magic_worker_write(NfcMagicWorker* nfc_magic_worker) {
 }
 
 void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
+    FuriHalNfcDevData nfc_data = {};
     NfcMagicDevice* magic_dev = nfc_magic_worker->magic_dev;
     FuriHalNfcDevData nfc_data = {};
     bool card_found_notified = false;
@@ -337,8 +331,14 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
                     NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
                 card_found_notified = true;
             }
+            if(furi_hal_nfc_detect(&nfc_data, 200)) {
+                magic_dev->cuid = nfc_data.cuid;
+                magic_dev->uid_len = nfc_data.uid_len;
+            } else {
+                // wrong BCC
+                magic_dev->uid_len = 4;
+            }
 
-            furi_hal_nfc_activate_nfca(200, &magic_dev->cuid);
             nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
             break;
         }
@@ -356,27 +356,37 @@ void nfc_magic_worker_check(NfcMagicWorker* nfc_magic_worker) {
                     NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
                 card_found_notified = true;
             }
-
             nfc_magic_worker->callback(NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
             break;
-        }
-
-        if(furi_hal_nfc_detect(&nfc_data, 200)) {
-            if(!card_found_notified) {
-                nfc_magic_worker->callback(
-                    NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
-                card_found_notified = true;
-            }
-            FURI_LOG_D(TAG, "Card detected");
-            FURI_LOG_D(TAG, "Card is not magic");
-            nfc_magic_worker->callback(NfcMagicWorkerEventNotMagic, nfc_magic_worker->context);
-            furi_hal_nfc_sleep();
-            break;
         } else {
-            if(card_found_notified) {
-                nfc_magic_worker->callback(
-                    NfcMagicWorkerEventNoCardDetected, nfc_magic_worker->context);
-                card_found_notified = false;
+            magic_deactivate();
+            magic_activate();
+            if(furi_hal_nfc_detect(&nfc_data, 200)) {
+                magic_dev->cuid = nfc_data.cuid;
+                magic_dev->uid_len = nfc_data.uid_len;
+                if(magic_gen4_get_cfg(magic_dev->password, gen4_config)) {
+                    magic_dev->type = MagicTypeGen4;
+                    if(!card_found_notified) {
+                        nfc_magic_worker->callback(
+                            NfcMagicWorkerEventCardDetected, nfc_magic_worker->context);
+                        card_found_notified = true;
+                    }
+                    nfc_magic_worker->callback(
+                        NfcMagicWorkerEventSuccess, nfc_magic_worker->context);
+                } else {
+                    FURI_LOG_D(TAG, "Card detected");
+                    FURI_LOG_D(TAG, "Card is not magic");
+                    nfc_magic_worker->callback(
+                        NfcMagicWorkerEventNotMagic, nfc_magic_worker->context);
+                    card_found_notified = true;
+                }
+                break;
+            } else {
+                if(card_found_notified) {
+                    nfc_magic_worker->callback(
+                        NfcMagicWorkerEventNoCardDetected, nfc_magic_worker->context);
+                    card_found_notified = false;
+                }
             }
         }
 
