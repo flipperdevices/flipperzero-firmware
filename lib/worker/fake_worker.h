@@ -12,6 +12,14 @@ typedef enum {
     FuzzerWorkerAttackTypeMax,
 } FuzzerWorkerAttackType;
 
+// typedef enum {
+//     FuzzerWorkerLoadKeyStateBadFile = -2,
+//     FuzzerWorkerLoadKeyStateUnsuportedProto,
+//     FuzzerWorkerLoadKeyStateOk = 0,
+//     FuzzerWorkerLoadKeyStateDifferentProto,
+
+// } FuzzerWorkerLoadKeyState;
+
 typedef void (*FuzzerWorkerUidChagedCallback)(void* context);
 typedef void (*FuzzerWorkerEndCallback)(void* context);
 

@@ -6,18 +6,7 @@
 
 typedef struct FuzzerPayload FuzzerPayload;
 
-typedef enum {
-#if defined(RFID_125_PROTOCOL)
-    EM4100,
-    HIDProx,
-    PAC,
-    H10301,
-#else
-    DS1990,
-    Metakom,
-    Cyfral,
-#endif
-} FuzzerProtocolsID;
+typedef uint8_t FuzzerProtocolsID;
 
 typedef enum {
     FuzzerAttackIdDefaultValues = 0,
