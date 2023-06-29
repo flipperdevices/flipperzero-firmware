@@ -147,7 +147,7 @@ Iso14443_3aError iso14443_3a_poller_async_activate(
         memcpy(
             instance->data->atqa,
             &instance->col_res.sens_resp,
-            sizeof(instance->col_res.sel_resp));
+            sizeof(instance->col_res.sens_resp));
 
         instance->state = Iso14443_3aPollerStateColResInProgress;
         instance->col_res.cascade_level = 0;
