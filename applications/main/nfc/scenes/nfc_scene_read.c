@@ -1,11 +1,11 @@
 #include "../nfc_app_i.h"
 
-#include "../helpers/handlers/nfc_poller_handler.h"
+#include "../helpers/protocol_support/nfc_protocol_support.h"
 
 static NfcCommand nfc_scene_read_poller_callback(NfcGenericEvent event, void* context) {
     NfcApp* instance = context;
 
-    const NfcCustomEvent custom_event = nfc_poller_handler_read(event, context);
+    const NfcCustomEvent custom_event = nfc_protocol_support_handle_read(event, context);
     view_dispatcher_send_custom_event(instance->view_dispatcher, custom_event);
     return custom_event != NfcCustomEventReadHandlerIgnore ? NfcCommandStop : NfcCommandContinue;
 }

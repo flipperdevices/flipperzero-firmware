@@ -1,6 +1,6 @@
 #include "../nfc_app_i.h"
 
-#include "../helpers/format/nfc_protocol_format.h"
+#include "../helpers/protocol_support/nfc_protocol_support.h"
 
 static void
     nfc_scene_nfc_info_widget_callback(GuiButtonType result, InputType type, void* context) {
@@ -15,7 +15,7 @@ void nfc_scene_info_on_enter(void* context) {
     Widget* widget = nfc->widget;
 
     uint8_t text_scroll_height = 0;
-    if(nfc_protocol_format_get_features(nfc->nfc_device) & NfcProtocolFormatFeatureMoreData) {
+    if(nfc_protocol_support_get_features(nfc->nfc_device) & NfcProtocolFeatureMoreData) {
         widget_add_button_element(
             widget, GuiButtonTypeRight, "More", nfc_scene_nfc_info_widget_callback, nfc);
         text_scroll_height = 52;
@@ -26,7 +26,7 @@ void nfc_scene_info_on_enter(void* context) {
     FuriString* temp_str;
     temp_str = furi_string_alloc();
 
-    nfc_protocol_format_info(nfc->nfc_device, NfcProtocolFormatTypeFull, temp_str);
+    nfc_protocol_support_render_info(nfc->nfc_device, NfcProtocolFormatTypeFull, temp_str);
 
     widget_add_text_scroll_element(
         widget, 0, 0, 128, text_scroll_height, furi_string_get_cstr(temp_str));
