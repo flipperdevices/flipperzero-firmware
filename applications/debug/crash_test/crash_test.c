@@ -30,7 +30,7 @@ static void crash_test_submenu_callback(void* context, uint32_t index) {
     CrashTest* instance = (CrashTest*)context;
     UNUSED(instance);
 
-    switch (index){
+    switch(index) {
     case CrashTestSubmenuCheck:
         furi_check(false);
         break;
@@ -76,11 +76,7 @@ CrashTest* crash_test_alloc() {
     view_set_previous_callback(view, crash_test_exit_callback);
     view_dispatcher_add_view(instance->view_dispatcher, CrashTestViewSubmenu, view);
     submenu_add_item(
-        instance->submenu,
-        "Check",
-        CrashTestSubmenuCheck,
-        crash_test_submenu_callback,
-        instance);
+        instance->submenu, "Check", CrashTestSubmenuCheck, crash_test_submenu_callback, instance);
     submenu_add_item(
         instance->submenu,
         "Check with message",
@@ -88,11 +84,7 @@ CrashTest* crash_test_alloc() {
         crash_test_submenu_callback,
         instance);
     submenu_add_item(
-        instance->submenu,
-        "Assert",
-        CrashTestSubmenuAssert,
-        crash_test_submenu_callback,
-        instance);
+        instance->submenu, "Assert", CrashTestSubmenuAssert, crash_test_submenu_callback, instance);
     submenu_add_item(
         instance->submenu,
         "Assert with message",
@@ -100,17 +92,9 @@ CrashTest* crash_test_alloc() {
         crash_test_submenu_callback,
         instance);
     submenu_add_item(
-        instance->submenu,
-        "Crash",
-        CrashTestSubmenuCrash,
-        crash_test_submenu_callback,
-        instance);
+        instance->submenu, "Crash", CrashTestSubmenuCrash, crash_test_submenu_callback, instance);
     submenu_add_item(
-        instance->submenu,
-        "Halt",
-        CrashTestSubmenuHalt,
-        crash_test_submenu_callback,
-        instance);
+        instance->submenu, "Halt", CrashTestSubmenuHalt, crash_test_submenu_callback, instance);
 
     return instance;
 }
