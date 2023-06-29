@@ -40,8 +40,8 @@ struct Iso14443_4aPoller {
     BitBuffer* rx_buffer;
     Iso14443_4aPollerEventData iso14443_4a_event_data;
     Iso14443_4aPollerEvent iso14443_4a_event;
-    NfcPollerEvent general_event;
-    NfcPollerCallback callback;
+    NfcGenericEvent general_event;
+    NfcGenericCallback callback;
     void* context;
 };
 

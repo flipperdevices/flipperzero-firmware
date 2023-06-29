@@ -198,7 +198,7 @@ void mf_ultralight_poller_free(MfUltralightPoller* instance) {
 
 static void mf_ultralight_poller_set_callback(
     MfUltralightPoller* instance,
-    NfcPollerCallback callback,
+    NfcGenericCallback callback,
     void* context) {
     furi_assert(instance);
     furi_assert(callback);
@@ -491,7 +491,7 @@ static const MfUltralightPollerReadHandler
 
 };
 
-static NfcCommand mf_ultralight_poller_run(NfcPollerEvent event, void* context) {
+static NfcCommand mf_ultralight_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
@@ -513,7 +513,7 @@ static NfcCommand mf_ultralight_poller_run(NfcPollerEvent event, void* context) 
     return command;
 }
 
-static bool mf_ultralight_poller_detect(NfcPollerEvent event, void* context) {
+static bool mf_ultralight_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);

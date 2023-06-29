@@ -14,7 +14,7 @@ typedef struct {
     Iso14443_3aData data;
 } Iso14443_3aPollerContext;
 
-NfcCommand iso14443_3a_poller_read_callback(NfcPollerEvent event, void* context) {
+NfcCommand iso14443_3a_poller_read_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
     furi_assert(event.poller);

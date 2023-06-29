@@ -57,10 +57,10 @@ struct MfClassicPoller {
     BitBuffer* rx_encrypted_buffer;
     MfClassicData* data;
 
-    NfcPollerEvent general_event;
+    NfcGenericEvent general_event;
     MfClassicPollerEvent mfc_event;
     MfClassicPollerEventData mfc_event_data;
-    NfcPollerCallback callback;
+    NfcGenericCallback callback;
     void* context;
 };
 
