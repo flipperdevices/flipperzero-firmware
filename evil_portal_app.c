@@ -64,14 +64,6 @@ Evil_PortalApp *evil_portal_app_alloc() {
   app->text_box_store = furi_string_alloc();
   furi_string_reserve(app->text_box_store, EVIL_PORTAL_TEXT_BOX_STORE_SIZE);
 
-  app->text_input = uart_text_input_alloc();
-  view_dispatcher_add_view(app->view_dispatcher, Evil_PortalAppViewTextInput,
-                           uart_text_input_get_view(app->text_input));
-
-  app->text_input = uart_text_input_alloc();
-  view_dispatcher_add_view(app->view_dispatcher, Evil_PortalAppViewStartPortal,
-                           uart_text_input_get_view(app->text_input));
-
   scene_manager_next_scene(app->scene_manager, Evil_PortalSceneStart);
 
   return app;
@@ -101,7 +93,6 @@ void evil_portal_app_free(Evil_PortalApp *app) {
 
   text_box_free(app->text_box);
   furi_string_free(app->text_box_store);
-  uart_text_input_free(app->text_input);
 
   // View dispatcher
   view_dispatcher_free(app->view_dispatcher);
