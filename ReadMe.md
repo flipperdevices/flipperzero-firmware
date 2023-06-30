@@ -199,6 +199,7 @@ $ ./fbt dolphin_ext
 - Settings: Actual PIN Lock [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/desktop/desktop.c)
 - Settings: Auto-Lock Options Added: 10s+15s+90s [(By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/desktop/desktop_settings/scenes/desktop_settings_scene_start.c)
 - Settings: Battery Meter on Desktop [Thanks to McAzzaMan](https://github.com/McAzzaMan/flipperzero-firmware/tree/BatteryPercentageView)
+- Settings: [CFW Settings for Main Menu Start Point (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2be53b18c8508371c6b7f408c4661c37670c424)
 - Settings: [Dark Mode & Wii Menu (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/83e836fc797ce9ce8998a5d9b1fde6a172480bf2)
 - Settings: Desktop => [Games Only Mode (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
 - - [UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT FROM CLOCK](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md) (FULL LIST OF GAMES ONLY CONTROLS)
@@ -430,14 +431,17 @@ $ ./fbt dolphin_ext
 
 - If you can fix any of these, DM me on Discord for a surprise reward.
 - [Bad Apple (By GMMan)](https://github.com/GMMan/flipperzero-badapple)
-- [Chess (By okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) (Bounty: $50 USD in ETH or BTC)
 - [Dolphin SOS (By arha)](https://github.com/arha/dolphin-sos)
-- [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) (Bounty: $25 USD in ETH or BTC)
 - Have a new app? Submit GitHub link to me on Discord for a special reward (if I add it to RM Firmware).
-- Bounty: All non-OFW desktop settings moved to CFW Settings (Bounty: $25 USD in ETH or BTC)
-- Bounty: `Notepad` APP to allow taking quick notes and saving to SD. Also can possibly open/edit .md,.txt,.fmf and other text friendly formats (Bounty: $50 USD in ETH or BTC)
-- Bounty: `Write URL to NFC` APP to allow creating URL NFC tags from only the flipper (Bounty: $25 USD in ETH or BTC)
-- Bounty: `Bluetooth OpenHayStack` bluetooth mode, only activates with special cloned key file present. Allows to operate like AirTag. (Bounty: $50 USD in ETH or BTC)
-- Bounty: `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback (Bounty: $200 USD in ETH or BTC) (Don't think this is possible)
+
+## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)
+
+- All non-OFW desktop settings moved to CFW Settings ($25 USD in ETH or BTC)
+- `Notepad` APP to allow taking quick notes and saving to SD. Also can possibly open/edit .md,.txt,.fmf and other text friendly formats ($50 USD in ETH or BTC)
+- `Write URL to NFC` APP to allow creating URL NFC tags from only the flipper ($25 USD in ETH or BTC)
+- `Bluetooth OpenHayStack` bluetooth mode, only activates with special cloned key file present. Allows to operate like AirTag. ($50 USD in ETH or BTC)
+- [Chess (By okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) ($50 USD in ETH or BTC)
+- [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) ($25 USD in ETH or BTC)
+- `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
 # Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0628-0738-0.85.3-b754ec1.tgz&channel=RM0628-0738-0.85.3-b754ec1&version=0.85.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0628-0738-0.85.3-b754ec1-NoAnim.tgz&channel=RM0628-0738-0.85.3-b754ec1-NoAnim&version=0.85.3)
