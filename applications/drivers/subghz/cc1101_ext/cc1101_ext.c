@@ -215,7 +215,6 @@ void subghz_device_cc1101_ext_sleep() {
     cc1101_shutdown(subghz_device_cc1101_ext->spi_bus_handle);
 
     furi_hal_spi_release(subghz_device_cc1101_ext->spi_bus_handle);
-
 }
 
 void subghz_device_cc1101_ext_dump_state() {
