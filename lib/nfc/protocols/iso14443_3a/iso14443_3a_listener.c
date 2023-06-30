@@ -75,7 +75,7 @@ const Iso14443_3aData* iso14443_3a_listener_get_data(Iso14443_3aListener* instan
     return instance->data;
 }
 
-NfcCommand iso14443_3a_run(NfcGenericEvent event, void* context) {
+NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolInvalid);
     furi_assert(event.data);
@@ -98,7 +98,7 @@ NfcCommand iso14443_3a_run(NfcGenericEvent event, void* context) {
             } else {
                 if(iso14443_3a_check_crc(nfc_event->data.buffer)) {
                     instance->iso14443_3a_event.type =
-                        Iso14443_3aListenerEventTypeReceivedStandartFrame;
+                        Iso14443_3aListenerEventTypeReceivedStandardFrame;
                     iso14443_3a_trim_crc(nfc_event->data.buffer);
                 } else {
                     instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeReceivedData;
@@ -119,5 +119,5 @@ const NfcListenerBase nfc_listener_iso14443_3a = {
     .free = (NfcListenerFree)iso14443_3a_listener_free,
     .set_callback = (NfcListenerSetCallback)iso14443_3a_listener_set_callback,
     .get_data = (NfcListenerGetData)iso14443_3a_listener_get_data,
-    .run = (NfcListenerRun)iso14443_3a_run,
+    .run = (NfcListenerRun)iso14443_3a_listener_run,
 };

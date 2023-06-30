@@ -15,7 +15,7 @@ NfcCommand nfc_scene_nfca_emulate_worker_callback(NfcGenericEvent event, void* c
     NfcApp* nfc = context;
     Iso14443_3aListenerEvent* iso14443_3a_event = event.data;
 
-    if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandartFrame) {
+    if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame) {
         furi_string_cat_printf(nfc->text_box_store, "R:");
         for(size_t i = 0; i < bit_buffer_get_size_bytes(iso14443_3a_event->data->buffer); i++) {
             furi_string_cat_printf(

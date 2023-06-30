@@ -40,7 +40,7 @@ Iso14443_3aError
     return ret;
 }
 
-Iso14443_3aError iso14443_3a_listener_send_standart_frame(
+Iso14443_3aError iso14443_3a_listener_send_standard_frame(
     Iso14443_3aListener* instance,
     const BitBuffer* tx_buffer) {
     furi_assert(instance);

@@ -82,7 +82,7 @@ Iso14443_3aError iso14443_3a_poller_txrx(
     BitBuffer* rx_buffer,
     uint32_t fwt);
 
-Iso14443_3aError iso14443_3a_poller_send_standart_frame(
+Iso14443_3aError iso14443_3a_poller_send_standard_frame(
     Iso14443_3aPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,

@@ -35,7 +35,7 @@ bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent e
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeBack) {
-        // MfUltralightData* mfu_data_after_emulation = nfc_listener_get_data(nfc->listener);
+        // MfUltralightData* mfu_data_after_emulation = nfc_listener_get_data(nfc->listener, NfcProtocolMfUltralight);
         // Check if data changed and save in shadow file
         // FIXME: A comparison method?
         // if(memcmp(

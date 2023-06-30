@@ -92,7 +92,7 @@ static bool
             instance->tx_buffer,
             (uint8_t*)&read_cmd_data,
             sizeof(MfUltralightPageReadCommandData));
-        iso14443_3a_listener_send_standart_frame(
+        iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
     }
     command_processed = true;
@@ -134,7 +134,7 @@ static bool
     if((instance->features & MfUltralightFeatureSupportReadVersion)) {
         bit_buffer_copy_bytes(
             instance->tx_buffer, (uint8_t*)&instance->data->version, sizeof(MfUltralightVersion));
-        iso14443_3a_listener_send_standart_frame(
+        iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
     } else {
         iso14443_3a_listener_sleep(instance->iso14443_3a_listener);
@@ -155,7 +155,7 @@ static bool mf_ultralight_listener_read_signature_handler(
     if((instance->features & MfUltralightFeatureSupportReadSignature)) {
         bit_buffer_copy_bytes(
             instance->tx_buffer, instance->data->signature.data, sizeof(MfUltralightSignature));
-        iso14443_3a_listener_send_standart_frame(
+        iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
     } else {
         iso14443_3a_listener_sleep(instance->iso14443_3a_listener);
@@ -195,7 +195,7 @@ static bool
             (instance->data->counter[counter_num].counter >> 16) & 0xff,
         };
         bit_buffer_copy_bytes(instance->tx_buffer, cnt_value, sizeof(cnt_value));
-        iso14443_3a_listener_send_standart_frame(
+        iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
         command_processed = true;
     } while(false);
@@ -214,7 +214,7 @@ static bool mf_ultralight_listener_check_tearing_handler(
         if(tearing_flag_num > 2) break;
         bit_buffer_set_size_bytes(instance->tx_buffer, 1);
         bit_buffer_set_byte(instance->tx_buffer, 0, instance->data->tearing_flag->data[0]);
-        iso14443_3a_listener_send_standart_frame(
+        iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
         command_processed = true;
     } while(false);
@@ -242,7 +242,7 @@ static bool
         bit_buffer_copy_bytes(
             instance->tx_buffer, instance->config->pack.data, sizeof(MfUltralightAuthPack));
         instance->auth_state = MfUltralightListenerAuthStateSuccess;
-        iso14443_3a_listener_send_standart_frame(
+        iso14443_3a_listener_send_standard_frame(
             instance->iso14443_3a_listener, instance->tx_buffer);
 
         command_processed = true;
@@ -352,7 +352,7 @@ NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
     BitBuffer* rx_buffer = iso14443_3a_event->data->buffer;
     NfcCommand command = NfcCommandContinue;
 
-    if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandartFrame) {
+    if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame) {
         bool cmd_processed = false;
         for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
             if(bit_buffer_get_size(rx_buffer) != mf_ultralight_command[i].cmd_len_bits) continue;

@@ -12,7 +12,7 @@ typedef struct Iso14443_3aListener Iso14443_3aListener;
 typedef enum {
     Iso14443_3aListenerEventTypeHalted,
 
-    Iso14443_3aListenerEventTypeReceivedStandartFrame,
+    Iso14443_3aListenerEventTypeReceivedStandardFrame,
     Iso14443_3aListenerEventTypeReceivedData,
 } Iso14443_3aListenerEventType;
 
