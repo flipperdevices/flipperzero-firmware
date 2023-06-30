@@ -64,12 +64,7 @@ static void submenu_view_draw_callback(Canvas* canvas, void* _model) {
     SubmenuModel* model = _model;
 
     const uint8_t item_height = 16;
-    uint8_t item_width = 123;
-
-    if(canvas->orientation == CanvasOrientationVertical ||
-       canvas->orientation == CanvasOrientationVerticalFlip) {
-        item_width = 60;
-    }
+    uint8_t item_width = canvas_width(canvas) - 5;
 
     canvas_clear(canvas);
 
