@@ -16,7 +16,7 @@ void cfw_app_scene_interface_on_enter(void* context) {
     CfwApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
 
-    variable_item_list_add(var_item_list, "Mainmenu", 0, NULL, app);
+    variable_item_list_add(var_item_list, "Main Menu", 0, NULL, app);
     // variable_item_list_add(var_item_list, "Lockscreen", 0, NULL, app);
     // variable_item_list_add(var_item_list, "Statusbar", 0, NULL, app);
     variable_item_list_add(var_item_list, "Common", 0, NULL, app);

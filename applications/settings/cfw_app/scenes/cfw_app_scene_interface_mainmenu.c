@@ -1,7 +1,28 @@
 #include "../cfw_app.h"
 
+#define START_POINT_COUNT 15
+const char* const start_point_text[START_POINT_COUNT] = {
+    "Clock",
+    "Sub-GHz",
+    "Sub-GHz Remote",
+    "Sub-GHz Playlist",
+    "125 kHz RFID",
+    "NFC",
+    "Infrared",
+    "IR Remote",
+    "GPIO",
+    "iButton",
+    "Bad USB",
+    "U2F",
+    "CFW Settings",
+    "Settings",
+    "Applications"};
+const uint32_t start_point_value[START_POINT_COUNT] =
+    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+
 enum VarItemListIndex {
     VarItemListIndexWiiMenu,
+    VarItemListIndexStartPoint,
     VarItemListIndexApp,
     VarItemListIndexRemoveApp,
     VarItemListIndexAddApp,
@@ -20,6 +41,14 @@ static void cfw_app_scene_interface_mainmenu_wii_menu_changed(VariableItem* item
     app->save_settings = true;
 }
 
+static void cfw_app_scene_interface_mainmenu_start_point_changed(VariableItem* item) {
+    CfwApp* app = variable_item_get_context(item);
+    uint32_t value = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, start_point_text[value]);
+    CFW_SETTINGS()->start_point = value;
+    app->save_settings = true;
+}
+
 static void cfw_app_scene_interface_mainmenu_app_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
     app->mainmenu_app_index = variable_item_get_current_value_index(item);
@@ -32,11 +61,24 @@ void cfw_app_scene_interface_mainmenu_on_enter(void* context) {
     CfwSettings* cfw_settings = CFW_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
     VariableItem* item;
+    uint32_t value_index;
 
     item = variable_item_list_add(
         var_item_list, "Menu Style", 2, cfw_app_scene_interface_mainmenu_wii_menu_changed, app);
     variable_item_set_current_value_index(item, cfw_settings->wii_menu);
     variable_item_set_current_value_text(item, cfw_settings->wii_menu ? "Wii Grid" : "App List");
+
+    item = variable_item_list_add(
+        var_item_list,
+        "Start Point",
+        START_POINT_COUNT,
+        cfw_app_scene_interface_mainmenu_start_point_changed,
+        app);
+
+    value_index =
+        value_index_uint32(cfw_settings->start_point, start_point_value, START_POINT_COUNT);
+    variable_item_set_current_value_index(item, value_index);
+    variable_item_set_current_value_text(item, start_point_text[value_index]);
 
     item = variable_item_list_add(
         var_item_list,

@@ -4,6 +4,7 @@
 #include <gui/modules/submenu.h>
 #include <assets_icons.h>
 #include <applications.h>
+#include <cfw.h>
 
 #include "loader.h"
 #include "loader_menu.h"
@@ -190,7 +191,9 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
     LoaderMenuApp* app = malloc(sizeof(LoaderMenuApp));
     app->gui = furi_record_open(RECORD_GUI);
     app->view_dispatcher = view_dispatcher_alloc();
-    app->primary_menu = menu_pos_alloc(0);
+    size_t my_start_point = (size_t)CFW_SETTINGS()->start_point;
+    if(my_start_point < 0 || my_start_point > 14) my_start_point = 0;
+    app->primary_menu = menu_pos_alloc(my_start_point);
     app->settings_menu = submenu_alloc();
 
     loader_menu_build_menu(app, loader_menu);

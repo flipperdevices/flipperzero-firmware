@@ -15,6 +15,7 @@ extern "C" {
 
 typedef struct {
     bool wii_menu;
+    uint32_t start_point;
     bool bad_pins_format;
     // bool lockscreen_time;
     // bool lockscreen_seconds;

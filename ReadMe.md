@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW (Nothing Applied): [increased timeouts #2816 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2816)
 - OFW PR: [Furi,FuriHal: various improvements #2819 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2819)
 - [Loader Menu Reorder - Third time's a charm #687 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/687)
+- CFW Settings for Main Menu Start Point (By RogueMaster) Needs fixes to set added favorites.
 
 <a name="release">
 
