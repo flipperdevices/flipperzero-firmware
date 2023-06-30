@@ -26,7 +26,7 @@ MfClassicPoller* mf_classic_poller_alloc(Iso14443_3aPoller* iso14443_3a_poller) 
 
     instance->general_event.protocol = NfcProtocolMfClassic;
     instance->general_event.data = &instance->mfc_event;
-    instance->general_event.poller = instance;
+    instance->general_event.instance = instance;
 
     return instance;
 }

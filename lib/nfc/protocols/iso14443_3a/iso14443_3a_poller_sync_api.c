@@ -17,11 +17,11 @@ typedef struct {
 NfcCommand iso14443_3a_poller_read_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
-    furi_assert(event.poller);
+    furi_assert(event.instance);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
     Iso14443_3aPollerContext* poller_context = context;
-    Iso14443_3aPoller* iso14443_3a_poller = event.poller;
+    Iso14443_3aPoller* iso14443_3a_poller = event.instance;
     Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
 
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {

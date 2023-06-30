@@ -80,11 +80,7 @@ static int32_t nfc_worker_listener(void* context) {
 
     Nfc* instance = context;
     furi_assert(instance->callback);
-
-    f_hal_nfc_low_power_mode_stop();
-
-    NfcEvent nfc_event = {.type = NfcEventTypeConfigureRequest};
-    instance->callback(nfc_event, instance->context);
+    furi_assert(instance->config_state == NfcConfigurationStateDone);
 
     f_hal_nfc_listen_start();
     instance->state = NfcStateListenStarted;
@@ -93,6 +89,7 @@ static int32_t nfc_worker_listener(void* context) {
 
     NfcEventData event_data = {};
     event_data.buffer = bit_buffer_alloc(NFC_MAX_BUFFER_SIZE);
+    NfcEvent nfc_event = {.data = event_data};
 
     while(true) {
         FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
@@ -126,8 +123,6 @@ static int32_t nfc_worker_listener(void* context) {
         }
     }
 
-    nfc_event.type = NfcEventTypeReset;
-    instance->callback(nfc_event, instance->context);
     nfc_config(instance, NfcModeIdle);
     bit_buffer_free(event_data.buffer);
     f_hal_nfc_low_power_mode_start();
@@ -252,6 +247,7 @@ void nfc_config(Nfc* instance, NfcMode mode) {
         f_hal_nfc_set_mode(FHalNfcModeIso14443_3aPoller, FHalNfcBitrate106);
         instance->config_state = NfcConfigurationStateDone;
     } else if(mode == NfcModeIso14443_3aListener) {
+        f_hal_nfc_low_power_mode_stop();
         f_hal_nfc_set_mode(FHalNfcModeIso14443_3aListener, FHalNfcBitrate106);
         instance->config_state = NfcConfigurationStateDone;
     }

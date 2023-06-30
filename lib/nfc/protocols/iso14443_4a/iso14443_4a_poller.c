@@ -27,7 +27,7 @@ static Iso14443_4aPoller* iso14443_4a_poller_alloc(Iso14443_3aPoller* iso14443_3
 
     instance->general_event.protocol = NfcProtocolIso14443_4a;
     instance->general_event.data = &instance->iso14443_4a_event;
-    instance->general_event.poller = instance;
+    instance->general_event.instance = instance;
 
     return instance;
 }

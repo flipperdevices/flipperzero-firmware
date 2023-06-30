@@ -217,7 +217,9 @@ const uint8_t* bit_buffer_get_data(const BitBuffer* buf) {
 
 void bit_buffer_set_byte(BitBuffer* buf, size_t index, uint8_t byte) {
     furi_assert(buf);
-    furi_assert(buf->size_bits / BITS_IN_BYTE > index);
+
+    size_t size_byted = bit_buffer_get_size_bytes(buf);
+    furi_assert(size_byted > index);
 
     buf->data[index] = byte;
 }

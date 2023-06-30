@@ -23,19 +23,19 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
 
     // Setup and start worker
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
-    mf_ultralight_listener_start(nfc->mf_ul_listener, data, NULL, NULL);
+    nfc->listener = nfc_listener_alloc(nfc->nfc, NfcProtocolMfUltralight, data);
+    nfc_listener_start(nfc->listener, NULL, NULL);
 
     nfc_blink_emulate_start(nfc);
 }
 
 bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent event) {
     NfcApp* nfc = context;
+    UNUSED(nfc);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeBack) {
-        MfUltralightData* mfu_data_after_emulation = mf_ultralight_alloc();
-        mf_ultralight_listener_get_data(nfc->mf_ul_listener, mfu_data_after_emulation);
-        mf_ultralight_listener_stop(nfc->mf_ul_listener);
+        // MfUltralightData* mfu_data_after_emulation = nfc_listener_get_data(nfc->listener, NfcProtocolMfUltralight);
         // Check if data changed and save in shadow file
         // FIXME: A comparison method?
         // if(memcmp(
@@ -47,7 +47,7 @@ bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent e
         //         nfc_save_shadow_file(nfc);
         //     }
         // }
-        mf_ultralight_free(mfu_data_after_emulation);
+        // mf_ultralight_free(mfu_data_after_emulation);
         consumed = false;
     }
     return consumed;
@@ -55,6 +55,9 @@ bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent e
 
 void nfc_scene_mf_ultralight_emulate_on_exit(void* context) {
     NfcApp* nfc = context;
+
+    nfc_listener_stop(nfc->listener);
+    nfc_listener_free(nfc->listener);
 
     // Clear view
     popup_reset(nfc->popup);

@@ -34,12 +34,10 @@ void nfcb_poller_free(NfcbPoller* instance) {
 
 static NfcCommand nfcb_poller_event_callback(NfcEvent event, void* context) {
     furi_assert(context);
+    UNUSED(event);
 
     NfcbPoller* instance = context;
     furi_assert(instance->callback);
-    if(event.type == NfcEventTypeConfigureRequest) {
-        nfcb_poller_config(instance);
-    }
 
     return NfcCommandContinue;
 }
