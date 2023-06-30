@@ -119,11 +119,6 @@ class AppManager:
                 raise FlipperManifestException(
                     f"Plugin {kw.get('appid')} must have 'requires' in manifest"
                 )
-        # Harmless - cdefines for external apps are meaningless
-        # if apptype == FlipperAppType.EXTERNAL and kw.get("cdefines"):
-        #     raise FlipperManifestException(
-        #         f"External app {kw.get('appid')} must not have 'cdefines' in manifest"
-        #     )
 
     def load_manifest(self, app_manifest_path: str, app_dir_node: object):
         if not os.path.exists(app_manifest_path):
