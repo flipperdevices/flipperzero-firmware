@@ -338,7 +338,7 @@ void sendCardDetected(SeaderUartBridge* seader_uart, CardDetails_t* cardDetails)
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
 }
 
-bool unpack_pacs(SeaderCredential* seader_credential, uint8_t* buf, size_t size) {
+bool unpack_pacs(SeaderWorker* seader_worker, SeaderCredential* seader_credential, uint8_t* buf, size_t size) {
     PAC_t* pac = 0;
     pac = calloc(1, sizeof *pac);
     assert(pac);
@@ -354,14 +354,19 @@ bool unpack_pacs(SeaderCredential* seader_credential, uint8_t* buf, size_t size)
         }
 
         if(pac->size <= sizeof(seader_credential->credential)) {
+            // TODO: make credential into a 12 byte array
             seader_credential->bit_length = pac->size * 8 - pac->bits_unused;
             memcpy(&seader_credential->credential, pac->buf, pac->size);
             seader_credential->credential = __builtin_bswap64(seader_credential->credential);
             seader_credential->credential = seader_credential->credential >>
                                             (64 - seader_credential->bit_length);
             rtn = true;
+        } else {
+            // PACS too big (probably bad data)
+            if(seader_worker->callback) {
+                seader_worker->callback(SeaderWorkerEventFail, seader_worker->context);
+            }
         }
-        // TODO: make credential into a 12 byte array
     }
 
     ASN_STRUCT_FREE(asn_DEF_PAC, pac);
@@ -383,7 +388,7 @@ bool parseSamResponse(SeaderWorker* seader_worker, SamResponse_t* samResponse) {
                 seader_worker->callback(SeaderWorkerEventFail, seader_worker->context);
             }
         }
-    } else if(unpack_pacs(credential, samResponse->buf, samResponse->size)) {
+    } else if(unpack_pacs(seader_worker, credential, samResponse->buf, samResponse->size)) {
         if(seader_worker->callback) {
             seader_worker->callback(SeaderWorkerEventSuccess, seader_worker->context);
         }
