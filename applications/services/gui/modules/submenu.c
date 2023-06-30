@@ -1,5 +1,4 @@
 #include "submenu.h"
-#include <gui/canvas_i.h>
 
 #include <gui/elements.h>
 #include <furi.h>
