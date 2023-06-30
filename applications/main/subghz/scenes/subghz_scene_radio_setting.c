@@ -36,14 +36,18 @@ void subghz_scene_radio_settings_on_enter(void* context) {
     VariableItem* item;
     uint8_t value_index;
 
+    uint8_t value_count_device = RADIO_DEVICE_COUNT;
+    if(subghz_txrx_radio_device_get(subghz->txrx) == SubGhzRadioDeviceTypeInternal &&
+       !subghz_txrx_radio_device_is_external_connected(subghz->txrx, SUBGHZ_DEVICE_CC1101_EXT_NAME))
+        value_count_device = 1;
     item = variable_item_list_add(
         subghz->variable_item_list,
         "Module",
-        RADIO_DEVICE_COUNT,
+        value_count_device,
         subghz_scene_radio_settings_set_device,
         subghz);
     value_index = value_index_uint32(
-        subghz_txrx_radio_device_get(subghz->txrx), radio_device_value, RADIO_DEVICE_COUNT);
+        subghz_txrx_radio_device_get(subghz->txrx), radio_device_value, value_count_device);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, radio_device_text[value_index]);
 
