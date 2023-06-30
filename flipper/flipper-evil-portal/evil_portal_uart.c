@@ -52,14 +52,11 @@ static int32_t uart_worker(void *context) {
           uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
 
           if (uart->app->has_command_queue) {         
-            if (uart->app->command_index < 1) {
-              
-              // check the current command
-              // if command x do x
+            if (uart->app->command_index < 1) {            
               if (0 ==
-                  strncmp("setap",
+                  strncmp(SET_AP_CMD,
                           uart->app->command_queue[uart->app->command_index],
-                          strlen("setap"))) {                
+                          strlen(SET_AP_CMD))) {                
                 char *out_data =
                     malloc((size_t)(strlen((char *)uart->app->ap_name) +
                                     strlen("setap=")));

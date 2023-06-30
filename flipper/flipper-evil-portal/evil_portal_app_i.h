@@ -16,26 +16,30 @@
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
 #define UART_CH (FuriHalUartIdUSART1)
 
+#define SET_HTML_CMD "sethtml"
+#define SET_AP_CMD "setap"
+#define RESET_CMD "reset"
+
 struct Evil_PortalApp {
   Gui *gui;
   ViewDispatcher *view_dispatcher;
   SceneManager *scene_manager;
 
   char* portal_logs;
+  const char *command_queue[1];
+  int command_index;
+  bool has_command_queue;
 
   FuriString *text_box_store;
   size_t text_box_store_strlen;
   TextBox *text_box;
 
   VariableItemList *var_item_list;
-
   Evil_PortalUart *uart;
+
   int selected_menu_index;
   int selected_option_index[NUM_MENU_ITEMS];
   const char *selected_tx_string;
-  const char *command_queue[1];
-  int command_index;
-  bool has_command_queue;
   bool is_command;
   bool is_custom_tx_string;
   bool focus_console_start;
