@@ -4,7 +4,6 @@
 #include "evil_portal_custom_event.h"
 #include "evil_portal_uart.h"
 #include "scenes/evil_portal_scene.h"
-// #include "uart_text_input.h"
 
 #include <gui/gui.h>
 #include <gui/modules/text_box.h>
@@ -15,7 +14,6 @@
 #define NUM_MENU_ITEMS (4)
 
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
-#define EVIL_PORTAL_TEXT_INPUT_STORE_SIZE (512)
 #define UART_CH (FuriHalUartIdUSART1)
 
 struct Evil_PortalApp {
@@ -25,7 +23,6 @@ struct Evil_PortalApp {
 
   char* portal_logs;
 
-  char text_input_store[EVIL_PORTAL_TEXT_INPUT_STORE_SIZE + 1];
   FuriString *text_box_store;
   size_t text_box_store_strlen;
   TextBox *text_box;
@@ -55,6 +52,5 @@ struct Evil_PortalApp {
 typedef enum {
   Evil_PortalAppViewVarItemList,
   Evil_PortalAppViewConsoleOutput,
-  Evil_PortalAppViewTextInput,
   Evil_PortalAppViewStartPortal,
 } Evil_PortalAppView;

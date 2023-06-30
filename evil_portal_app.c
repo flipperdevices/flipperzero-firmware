@@ -1,4 +1,5 @@
 #include "evil_portal_app_i.h"
+#include "helpers/evil_portal_speaker.h"
 #include "helpers/evil_portal_storage.h"
 
 #include <furi.h>
@@ -69,7 +70,8 @@ Evil_PortalApp *evil_portal_app_alloc() {
   return app;
 }
 
-void evil_portal_app_free(Evil_PortalApp *app) {
+void evil_portal_app_free(Evil_PortalApp *app) {  
+
   // save latest logs
   if (strlen(app->portal_logs) > 0) {
     write_logs(app->portal_logs);
@@ -86,10 +88,6 @@ void evil_portal_app_free(Evil_PortalApp *app) {
                               Evil_PortalAppViewVarItemList);
   view_dispatcher_remove_view(app->view_dispatcher,
                               Evil_PortalAppViewConsoleOutput);
-  view_dispatcher_remove_view(app->view_dispatcher,
-                              Evil_PortalAppViewTextInput);
-  view_dispatcher_remove_view(app->view_dispatcher,
-                              Evil_PortalAppViewStartPortal);
 
   text_box_free(app->text_box);
   furi_string_free(app->text_box_store);
@@ -106,14 +104,15 @@ void evil_portal_app_free(Evil_PortalApp *app) {
   free(app);
 }
 
-int32_t evil_portal_app(void *p) {
+int32_t evil_portal_app(void *p) {  
   UNUSED(p);
   Evil_PortalApp *evil_portal_app = evil_portal_app_alloc();
 
   evil_portal_app->uart = evil_portal_uart_init(evil_portal_app);
 
-  view_dispatcher_run(evil_portal_app->view_dispatcher);
+  view_dispatcher_run(evil_portal_app->view_dispatcher);  
 
+  // crashing here
   evil_portal_app_free(evil_portal_app);
 
   return 0;

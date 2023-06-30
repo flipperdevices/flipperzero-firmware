@@ -1,4 +1,5 @@
 #include "../evil_portal_app_i.h"
+#include "../helpers/evil_portal_speaker.h"
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -72,17 +73,17 @@ static void evil_portal_scene_start_var_list_enter_callback(void *context,
                                  : item->focus_console;
   app->show_stopscan_tip = item->show_stopscan_tip;
 
-  bool needs_keyboard = (item->needs_keyboard == TOGGLE_ARGS)
-                            ? (selected_option_index != 0)
-                            : item->needs_keyboard;
+  // bool needs_keyboard = (item->needs_keyboard == TOGGLE_ARGS)
+  //                           ? (selected_option_index != 0)
+  //                           : item->needs_keyboard;
                             
-  if (needs_keyboard) {
-    view_dispatcher_send_custom_event(app->view_dispatcher,
-                                      Evil_PortalEventStartKeyboard);
-  } else {
+  // if (needs_keyboard) {
+  //   view_dispatcher_send_custom_event(app->view_dispatcher,
+  //                                     Evil_PortalEventStartKeyboard);
+  // } else {
     view_dispatcher_send_custom_event(app->view_dispatcher,
                                       Evil_PortalEventStartConsole);
-  }
+  // }
 }
 
 static void
@@ -138,7 +139,6 @@ bool evil_portal_scene_start_on_event(void *context, SceneManagerEvent event) {
     } else if (event.event == Evil_PortalEventStartKeyboard) {
       scene_manager_set_scene_state(app->scene_manager, Evil_PortalSceneStart,
                                     app->selected_menu_index);
-      scene_manager_next_scene(app->scene_manager, Evil_PortalAppViewTextInput);
     } else if (event.event == Evil_PortalEventStartConsole) {
       scene_manager_set_scene_state(app->scene_manager, Evil_PortalSceneStart,
                                     app->selected_menu_index);
