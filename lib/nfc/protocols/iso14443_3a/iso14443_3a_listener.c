@@ -22,44 +22,7 @@ static bool iso14443_3a_listener_halt_received(BitBuffer* buf) {
     return halt_cmd_received;
 }
 
-Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc) {
-    furi_assert(nfc);
-
-    return NULL;
-}
-
-void iso14443_3a_listener_free(Iso14443_3aListener* instance) {
-    furi_assert(instance);
-}
-
-Iso14443_3aError iso14443_3a_listener_start(
-    Iso14443_3aListener* instance,
-    const Iso14443_3aData* data,
-    Iso14443_3aListenerEventCallback callback,
-    void* context) {
-    UNUSED(instance);
-    UNUSED(data);
-    UNUSED(callback);
-    UNUSED(context);
-
-    return Iso14443_3aErrorNone;
-}
-
-Iso14443_3aError iso14443_3a_listener_stop(Iso14443_3aListener* instance) {
-    UNUSED(instance);
-
-    return Iso14443_3aErrorNone;
-}
-
-Iso14443_3aError
-    iso14443_3a_listener_get_data(Iso14443_3aListener* instance, Iso14443_3aData* data) {
-    UNUSED(instance);
-    UNUSED(data);
-
-    return Iso14443_3aErrorNone;
-}
-
-Iso14443_3aListener* iso14443_3a_listener_alloc_new(Nfc* nfc, const Iso14443_3aData* data) {
+Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc, const Iso14443_3aData* data) {
     furi_assert(nfc);
 
     Iso14443_3aListener* instance = malloc(sizeof(Iso14443_3aListener));
@@ -85,7 +48,7 @@ Iso14443_3aListener* iso14443_3a_listener_alloc_new(Nfc* nfc, const Iso14443_3aD
     return instance;
 }
 
-void iso14443_3a_listener_free_new(Iso14443_3aListener* instance) {
+void iso14443_3a_listener_free(Iso14443_3aListener* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
     furi_assert(instance->tx_buffer);
@@ -95,7 +58,7 @@ void iso14443_3a_listener_free_new(Iso14443_3aListener* instance) {
     free(instance);
 }
 
-void iso14443_3a_listener_set_callback_new(
+void iso14443_3a_listener_set_callback(
     Iso14443_3aListener* instance,
     NfcGenericCallback callback,
     void* context) {
@@ -105,7 +68,7 @@ void iso14443_3a_listener_set_callback_new(
     instance->context = context;
 }
 
-const Iso14443_3aData* iso14443_3a_listener_get_data_new(Iso14443_3aListener* instance) {
+const Iso14443_3aData* iso14443_3a_listener_get_data(Iso14443_3aListener* instance) {
     furi_assert(instance);
     furi_assert(instance->data);
 
@@ -152,9 +115,9 @@ NfcCommand iso14443_3a_run(NfcGenericEvent event, void* context) {
 }
 
 const NfcListenerBase nfc_listener_iso14443_3a = {
-    .alloc = (NfcListenerAlloc)iso14443_3a_listener_alloc_new,
-    .free = (NfcListenerFree)iso14443_3a_listener_free_new,
-    .set_callback = (NfcListenerSetCallback)iso14443_3a_listener_set_callback_new,
-    .get_data = (NfcListenerGetData)iso14443_3a_listener_get_data_new,
+    .alloc = (NfcListenerAlloc)iso14443_3a_listener_alloc,
+    .free = (NfcListenerFree)iso14443_3a_listener_free,
+    .set_callback = (NfcListenerSetCallback)iso14443_3a_listener_set_callback,
+    .get_data = (NfcListenerGetData)iso14443_3a_listener_get_data,
     .run = (NfcListenerRun)iso14443_3a_run,
 };

@@ -135,8 +135,6 @@ static NfcRpc* nfc_rpc_app_alloc() {
     NfcRpc* instance = malloc(sizeof(NfcRpc));
 
     instance->nfc = nfc_alloc();
-    // instance->iso14443_3a_listener = iso14443_3a_listener_alloc(instance->nfc);
-    // instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->iso14443_3a_listener);
 
     NfcRpcHandlerDict_init(instance->handlers);
     for(size_t i = 0; i < COUNT_OF(nfc_rpc_callbacks); i++) {
@@ -171,8 +169,6 @@ static NfcRpc* nfc_rpc_app_alloc() {
 void nfc_rpc_app_free(NfcRpc* instance) {
     furi_assert(instance);
 
-    // mf_ultralight_listener_free(instance->mf_ul_listener);
-    // iso14443_3a_listener_free(instance->iso14443_3a_listener);
     nfc_free(instance->nfc);
 
     for(size_t i = 0; i < COUNT_OF(nfc_rpc_callbacks); i++) {

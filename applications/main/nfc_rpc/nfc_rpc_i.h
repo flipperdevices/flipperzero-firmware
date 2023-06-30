@@ -57,9 +57,6 @@ struct NfcRpc {
 
     Nfc* nfc;
     NfcListener* listener;
-
-    Iso14443_3aListener* iso14443_3a_listener;
-    MfUltralightListener* mf_ul_listener;
 };
 
 typedef struct {
