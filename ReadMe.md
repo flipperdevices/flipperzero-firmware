@@ -15,6 +15,13 @@ Requires a connected dev board running Marauder FW. [See install instructions fr
 
 From a local clone of this repo, you can also build the app yourself using ufbt.
 
+## In-app ESP32 flasher (WIP)
+The app now contains a work-in-progress of an ESP32 flasher (close to the bottom of the menu). Use at your own risk. This hardcodes addresses for non-S3 ESP32 chips, and you'll need to source your own bootloader, partition table, and application bin files.
+
+If you use it, make sure you put your board into reflash mode first (generally by pressing RESET while holding BOOT).
+
+This process will improve with future updates! :)
+
 ## Support
 
 For app feedback, bugs, and feature requests, please [create an issue here](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion/issues).
