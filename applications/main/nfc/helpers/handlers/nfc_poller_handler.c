@@ -99,7 +99,7 @@ static const NfcPollerReadHandler nfc_poller_handlers_read[] = {
 };
 NfcCustomEvent nfc_poller_handler_read(NfcGenericEvent event, void* context) {
     furi_assert(context);
-    furi_assert(event.poller);
+    furi_assert(event.instance);
     furi_assert(event.data);
     furi_assert(event.protocol < COUNT_OF(nfc_poller_handlers_read));
 

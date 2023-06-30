@@ -33,7 +33,7 @@ Iso14443_3aListener* iso14443_3a_listener_alloc(Nfc* nfc, const Iso14443_3aData*
 
     instance->iso14443_3a_event.data = &instance->iso14443_3a_event_data;
     instance->generic_event.protocol = NfcProtocolIso14443_3a;
-    instance->generic_event.poller = instance;
+    instance->generic_event.instance = instance;
     instance->generic_event.data = &instance->iso14443_3a_event;
 
     nfc_set_fdt_listen_fc(instance->nfc, ISO14443_3A_FDT_LISTEN_FC);

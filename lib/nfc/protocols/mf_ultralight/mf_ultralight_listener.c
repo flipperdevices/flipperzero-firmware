@@ -309,7 +309,7 @@ MfUltralightListener* mf_ultralight_listener_alloc(
 
     instance->mfu_event.data = &instance->mfu_event_data;
     instance->generic_event.protocol = NfcProtocolMfUltralight;
-    instance->generic_event.poller = instance;
+    instance->generic_event.instance = instance;
     instance->generic_event.data = &instance->mfu_event;
 
     return instance;
