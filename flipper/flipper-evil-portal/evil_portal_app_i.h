@@ -43,7 +43,6 @@ struct Evil_PortalApp {
   bool sent_ap;
   bool sent_html;
   int BAUDRATE;
-  int TERMINAL_MODE; // 1=AT mode, 0=other mode
 
   uint8_t *index_html;
   uint8_t *ap_name;

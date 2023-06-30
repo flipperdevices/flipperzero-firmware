@@ -102,63 +102,57 @@ void evil_portal_scene_console_output_on_enter(void *context) {
   // Send command with CR+LF or newline '\n'
   // it is sent here
   if (app->is_command && app->selected_tx_string) {
-    if (app->TERMINAL_MODE == 1) {
+
+    // handle special commands here
+    if (0 == strncmp("sethtml", app->selected_tx_string, strlen("sethtml"))) {
+      evil_portal_read_index_html(context);
+
+      char *data = malloc(
+          (size_t)(strlen((char *)app->index_html) + strlen("sethtml=")));
+      strcat(data, "sethtml=");
+      strcat(data, (char *)app->index_html);
+
+      evil_portal_uart_tx((uint8_t *)(data), strlen(data));
+      evil_portal_uart_tx((uint8_t *)("\n"), 1);
+
+      app->sent_html = true;
+
+      free(data);
+      free(app->index_html);
+
+      evil_portal_read_ap_name(context);
+    } else if (0 ==
+               strncmp("setap", app->selected_tx_string, strlen("setap"))) {
+
+      evil_portal_read_ap_name(context);
+
+      char *data =
+          malloc((size_t)(strlen((char *)app->ap_name) + strlen("setap=")));
+      strcat(data, "setap=");
+      strcat(data, (char *)app->ap_name);
+
+      evil_portal_uart_tx((uint8_t *)(data), strlen(data));
+      evil_portal_uart_tx((uint8_t *)("\n"), 1);
+
+      app->sent_ap = true;
+
+      free(data);
+      free(app->ap_name);
+    } else if (0 ==
+               strncmp("reset", app->selected_tx_string, strlen("reset"))) {
+      app->sent_html = false;
+      app->sent_ap = false;
       evil_portal_uart_tx((uint8_t *)(app->selected_tx_string),
                           strlen(app->selected_tx_string));
-      evil_portal_uart_tx((uint8_t *)("\r\n"), 2);
+      evil_portal_uart_tx((uint8_t *)("\n"), 1);
+    } else if (0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
+      // nothing to do
     } else {
-      // handle special commands here
-      if (0 == strncmp("sethtml", app->selected_tx_string, strlen("sethtml"))) {
-        evil_portal_read_index_html(context);
-
-        char *data = malloc(
-            (size_t)(strlen((char *)app->index_html) + strlen("sethtml=")));
-        strcat(data, "sethtml=");
-        strcat(data, (char *)app->index_html);
-
-        evil_portal_uart_tx((uint8_t *)(data), strlen(data));
-        evil_portal_uart_tx((uint8_t *)("\n"), 1);
-
-        app->sent_html = true;
-
-        free(data);
-        free(app->index_html);
-
-        evil_portal_read_ap_name(context);
-      } else if (0 ==
-                 strncmp("setap", app->selected_tx_string, strlen("setap"))) {
-
-        evil_portal_read_ap_name(context);
-
-        char *data =
-            malloc((size_t)(strlen((char *)app->ap_name) + strlen("setap=")));
-        strcat(data, "setap=");
-        strcat(data, (char *)app->ap_name);
-
-        evil_portal_uart_tx((uint8_t *)(data), strlen(data));
-        evil_portal_uart_tx((uint8_t *)("\n"), 1);
-
-        app->sent_ap = true;
-
-        free(data);
-        free(app->ap_name);
-      } else if (0 ==
-                 strncmp("reset", app->selected_tx_string, strlen("reset"))) {
-        app->sent_html = false;
-        app->sent_ap = false;
-        evil_portal_uart_tx((uint8_t *)(app->selected_tx_string),
-                            strlen(app->selected_tx_string));
-        evil_portal_uart_tx((uint8_t *)("\n"), 1);
-      } else if (0 ==
-                 strncmp("help", app->selected_tx_string, strlen("help"))) {
-        // do nothing?
-      } else {
-        evil_portal_uart_tx((uint8_t *)(app->selected_tx_string),
-                            strlen(app->selected_tx_string));
-        evil_portal_uart_tx((uint8_t *)("\n"), 1);
-      }
+      evil_portal_uart_tx((uint8_t *)(app->selected_tx_string),
+                          strlen(app->selected_tx_string));
+      evil_portal_uart_tx((uint8_t *)("\n"), 1);
     }
-  }   
+  }
 }
 
 bool evil_portal_scene_console_output_on_event(void *context,
