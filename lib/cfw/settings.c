@@ -8,7 +8,7 @@
 CfwSettings cfw_settings = {
     .wii_menu = false, // OFF
     .start_point = 0, // First Item
-    .lock_menu_type = true, // ADVANCED VS FALSE=BASIC
+    .lock_menu_type = true, // Adv Grid VS FALSE=LIST
     .sort_dirs_first = true, // ON
     .dark_mode = false, // OFF
     .charge_cap = 100, // 100%

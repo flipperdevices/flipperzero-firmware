@@ -64,7 +64,7 @@ void cfw_app_scene_interface_mainmenu_on_enter(void* context) {
     uint32_t value_index;
 
     item = variable_item_list_add(
-        var_item_list, "Menu Style", 2, cfw_app_scene_interface_mainmenu_wii_menu_changed, app);
+        var_item_list, "Style", 2, cfw_app_scene_interface_mainmenu_wii_menu_changed, app);
     variable_item_set_current_value_index(item, cfw_settings->wii_menu);
     variable_item_set_current_value_text(item, cfw_settings->wii_menu ? "Wii Grid" : "App List");
 
