@@ -55,6 +55,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger) (By xMasterX)
 - OFW: [fix width of submenu items on Vertical orientation #2306 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2306)
 - Updated: [WiFi (Marauder) v0.5.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) (Now With ESP32 Flasher)
+- [CFW Settings for Lock Menu Type (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fe3d1ccac0d2058769a0e8f1076b348ef59eaa29)
 
 <a name="release">
 
