@@ -68,7 +68,7 @@ void evil_portal_scene_console_output_on_enter(void *context) {
       app->command_index = 0;
       if (app->show_stopscan_tip) {
         const char *msg =
-            "Starting portal\nIf no response\nPress BACK to return\n";
+            "Starting portal\nIf no response press\nBACK to return\n";
         furi_string_cat_str(app->text_box_store, msg);
         app->text_box_store_strlen += strlen(msg);
       }
@@ -76,7 +76,7 @@ void evil_portal_scene_console_output_on_enter(void *context) {
 
     if (0 == strncmp(RESET_CMD, app->selected_tx_string, strlen(RESET_CMD))) {
       if (app->show_stopscan_tip) {
-        const char *msg = "Reseting portal\nPress BACK to return\n";
+        const char *msg = "Reseting portal\nPress BACK to return\n\n\n\n";
         furi_string_cat_str(app->text_box_store, msg);
         app->text_box_store_strlen += strlen(msg);
       }
