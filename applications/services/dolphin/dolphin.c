@@ -13,12 +13,13 @@
 
 static void dolphin_update_clear_limits_timer_period(Dolphin* dolphin);
 
-void dolphin_deed(Dolphin* dolphin, DolphinDeed deed) {
-    furi_assert(dolphin);
+void dolphin_deed(DolphinDeed deed) {
+    Dolphin* dolphin = (Dolphin*)furi_record_open(RECORD_DOLPHIN);
     DolphinEvent event;
     event.type = DolphinEventTypeDeed;
     event.deed = deed;
     dolphin_event_send_async(dolphin, &event);
+    furi_record_close(RECORD_DOLPHIN);
 }
 
 DolphinStats dolphin_stats(Dolphin* dolphin) {
@@ -89,15 +90,6 @@ Dolphin* dolphin_alloc() {
     return dolphin;
 }
 
-void dolphin_free(Dolphin* dolphin) {
-    furi_assert(dolphin);
-
-    dolphin_state_free(dolphin->state);
-    furi_message_queue_free(dolphin->event_queue);
-
-    free(dolphin);
-}
-
 void dolphin_event_send_async(Dolphin* dolphin, DolphinEvent* event) {
     furi_assert(dolphin);
     furi_assert(event);
@@ -154,6 +146,12 @@ static void dolphin_update_clear_limits_timer_period(Dolphin* dolphin) {
 
 int32_t dolphin_srv(void* p) {
     UNUSED(p);
+
+    if(furi_hal_rtc_get_boot_mode() != FuriHalRtcBootModeNormal) {
+        FURI_LOG_W(TAG, "Skipping start in special boot mode");
+        return 0;
+    }
+
     Dolphin* dolphin = dolphin_alloc();
     furi_record_create(RECORD_DOLPHIN, dolphin);
 
@@ -198,7 +196,7 @@ int32_t dolphin_srv(void* p) {
         }
     }
 
-    dolphin_free(dolphin);
+    furi_crash("That was unexpected");
 
     return 0;
 }

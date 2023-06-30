@@ -12,6 +12,7 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
 
     SDInfo sd_info;
     FS_Error sd_status = storage_sd_info(app->fs_api, &sd_info);
+
     scene_manager_set_scene_state(app->scene_manager, StorageSettingsSDInfo, sd_status);
 
     dialog_ex_set_context(dialog_ex, app);
@@ -26,13 +27,22 @@ void storage_settings_scene_sd_info_on_enter(void* context) {
     } else {
         furi_string_printf(
             app->text_string,
-            "Label: %s\nType: %s\n%lu KiB total\n%lu KiB free",
+            "Label: %s\nType: %s\n%lu KiB total\n%lu KiB free\n"
+            "%02X%s %s v%i.%i\nSN:%04lX %02i/%i",
             sd_info.label,
             sd_api_get_fs_type_text(sd_info.fs_type),
             sd_info.kb_total,
-            sd_info.kb_free);
+            sd_info.kb_free,
+            sd_info.manufacturer_id,
+            sd_info.oem_id,
+            sd_info.product_name,
+            sd_info.product_revision_major,
+            sd_info.product_revision_minor,
+            sd_info.product_serial_number,
+            sd_info.manufacturing_month,
+            sd_info.manufacturing_year);
         dialog_ex_set_text(
-            dialog_ex, furi_string_get_cstr(app->text_string), 4, 4, AlignLeft, AlignTop);
+            dialog_ex, furi_string_get_cstr(app->text_string), 4, 1, AlignLeft, AlignTop);
     }
 
     view_dispatcher_switch_to_view(app->view_dispatcher, StorageSettingsViewDialogEx);

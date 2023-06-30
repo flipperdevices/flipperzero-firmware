@@ -1,6 +1,7 @@
 #pragma once
 
 #include <furi.h>
+#include "registry.h"
 
 #include "subghz_keystore.h"
 
@@ -9,6 +10,7 @@ extern "C" {
 #endif
 
 typedef struct SubGhzEnvironment SubGhzEnvironment;
+typedef struct SubGhzProtocolRegistry SubGhzProtocolRegistry;
 
 /**
  * Allocate SubGhzEnvironment.
@@ -53,6 +55,23 @@ void subghz_environment_set_came_atomo_rainbow_table_file_name(
 const char* subghz_environment_get_came_atomo_rainbow_table_file_name(SubGhzEnvironment* instance);
 
 /**
+ * Set filename to work with Alutech at-4n.
+ * @param instance Pointer to a SubGhzEnvironment instance
+ * @param filename Full path to the file
+ */
+void subghz_environment_set_alutech_at_4n_rainbow_table_file_name(
+    SubGhzEnvironment* instance,
+    const char* filename);
+
+/**
+ * Get filename to work with Alutech at-4n.
+ * @param instance Pointer to a SubGhzEnvironment instance
+ * @return Full path to the file
+ */
+const char*
+    subghz_environment_get_alutech_at_4n_rainbow_table_file_name(SubGhzEnvironment* instance);
+
+/**
  * Set filename to work with Nice Flor-S.
  * @param instance Pointer to a SubGhzEnvironment instance
  * @param filename Full path to the file
@@ -76,14 +95,15 @@ const char*
  */
 void subghz_environment_set_protocol_registry(
     SubGhzEnvironment* instance,
-    void* protocol_registry_items);
+    const SubGhzProtocolRegistry* protocol_registry_items);
 
 /**
  * Get list of protocols to work.
  * @param instance Pointer to a SubGhzEnvironment instance
  * @return Pointer to a SubGhzProtocolRegistry
  */
-void* subghz_environment_get_protocol_registry(SubGhzEnvironment* instance);
+const SubGhzProtocolRegistry*
+    subghz_environment_get_protocol_registry(SubGhzEnvironment* instance);
 
 /**
  * Get list of protocols names.

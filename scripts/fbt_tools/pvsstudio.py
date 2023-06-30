@@ -1,11 +1,12 @@
-from SCons.Builder import Builder
-from SCons.Action import Action
-from SCons.Script import Delete, Mkdir, GetBuildFailures
-import multiprocessing
-import webbrowser
 import atexit
-import sys
+import multiprocessing
 import subprocess
+import sys
+import webbrowser
+
+from SCons.Action import Action
+from SCons.Builder import Builder
+from SCons.Script import Delete, Flatten, GetBuildFailures, Mkdir
 
 __no_browser = False
 
@@ -30,13 +31,14 @@ def atexist_handler():
         return
 
     for bf in GetBuildFailures():
-        if bf.node.exists and bf.node.name.endswith(".html"):
-            # macOS
-            if sys.platform == "darwin":
-                subprocess.run(["open", bf.node.abspath])
-            else:
-                webbrowser.open(bf.node.abspath)
-            break
+        for node in Flatten(bf.node):
+            if node.exists and node.name.endswith(".html"):
+                # macOS
+                if sys.platform == "darwin":
+                    subprocess.run(["open", node.abspath])
+                else:
+                    webbrowser.open(node.abspath)
+                break
 
 
 def generate(env):

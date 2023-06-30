@@ -79,7 +79,6 @@ void subghz_frequency_analyzer_draw_rssi(Canvas* canvas, uint8_t rssi, uint8_t x
 void subghz_frequency_analyzer_draw_log_rssi(Canvas* canvas, uint8_t rssi, uint8_t x, uint8_t y) {
     uint8_t column_height = 6;
     if(rssi) {
-        //rssi = rssi
         if(rssi > 54) rssi = 54;
         for(uint8_t i = 1; i < rssi; i++) {
             if(i % 5) {
@@ -178,7 +177,8 @@ void subghz_frequency_analyzer_draw(Canvas* canvas, SubGhzFrequencyAnalyzerModel
         }
         subghz_frequency_analyzer_log_frequency_draw(canvas, model);
     } else {
-        canvas_draw_str(canvas, 20, 8, "Frequency Analyzer");
+        canvas_draw_str(canvas, 0, 8, "Frequency Analyzer");
+        canvas_draw_icon(canvas, 108, 0, &I_Internal_antenna_20x12);
         canvas_draw_str(canvas, 0, 64, "RSSI");
         subghz_frequency_analyzer_draw_rssi(canvas, model->rssi, 20, 64);
 

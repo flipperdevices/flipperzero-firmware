@@ -13,7 +13,7 @@ FAPs are created and developed the same way as internal applications that are pa
 To build your application as a FAP, create a folder with your app's source code in `applications_user`, then write its code the way you'd do when creating a regular built-in application. Then configure its `application.fam` manifest, and set its _apptype_ to FlipperAppType.EXTERNAL. See [Application Manifests](./AppManifests.md#application-definition) for more details.
 
 - To build your application, run `./fbt fap_{APPID}`, where APPID is your application's ID in its manifest.
-- To build your app and upload it over USB to run on Flipper, use `./fbt launch_app APPSRC=applications/path/to/app`. This command is configured in the default [VS Code profile](../.vscode/ReadMe.md) as a "Launch App on Flipper" build action (Ctrl+Shift+B menu).
+- To build your app and upload it over USB to run on Flipper, use `./fbt launch_app APPSRC=applications_user/path/to/app`. This command is configured in the default [VS Code profile](../.vscode/ReadMe.md) as a "Launch App on Flipper" build action (Ctrl+Shift+B menu).
 - To build all FAPs, run `./fbt faps` or `./fbt fap_dist`.
 
 ## FAP assets
@@ -31,6 +31,8 @@ Images and animated icons should follow the same [naming convention](../assets/R
 **`fbt`** includes a script for gdb-py to provide debugging support for FAPs, `debug/flipperapps.py`. It is loaded in default debugging configurations by **`fbt`** and stock VS Code configurations.
 
 With it, you can debug FAPs as if they were a part of the main firmware — inspect variables, set breakpoints, step through the code, etc.
+
+If debugging session is active, firmware will trigger a breakpoint after loading a FAP it into memory, but before running any code from it. This allows you to set breakpoints in the FAP's code. Note that any breakpoints set before the FAP is loaded may need re-setting after the FAP is actually loaded, since before loading it debugger cannot know the exact address of the FAP's code.
 
 ### Setting up debugging environment
 

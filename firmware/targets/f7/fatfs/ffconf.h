@@ -164,7 +164,7 @@
 
 /* USER CODE BEGIN Volumes */
 #define _STR_VOLUME_ID 0 /* 0:Use only 0-9 for drive ID, 1:Use strings for drive ID */
-#define _VOLUME_STRS "RAM", "NAND", "CF", "SD1", "SD2", "USB1", "USB2", "USB3"
+#define _VOLUME_STRS "SD"
 /* _STR_VOLUME_ID switches string support of volume ID.
 /  When _STR_VOLUME_ID is set to 1, also pre-defined strings can be used as drive
 /  number in the path name. _VOLUME_STRS defines the drive ID strings for each
@@ -219,10 +219,7 @@
 /  When enable exFAT, also LFN needs to be enabled. (_USE_LFN >= 1)
 /  Note that enabling exFAT discards C89 compatibility. */
 
-#define _FS_NORTC 1
-#define _NORTC_MON 7
-#define _NORTC_MDAY 20
-#define _NORTC_YEAR 2021
+#define _FS_NORTC 0
 /* The option _FS_NORTC switches timestamp functiton. If the system does not have
 /  any RTC function or valid timestamp is not needed, set _FS_NORTC = 1 to disable
 /  the timestamp function. All objects modified by FatFs will have a fixed timestamp

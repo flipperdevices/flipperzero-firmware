@@ -48,11 +48,11 @@ Almost everything in flipper firmware is built around this concept.
 # C coding style
 
 - Tab is 4 spaces
-- Use `fbt format` to reformat source code and check style guide before commit
+- Use `./fbt format` to reformat source code and check style guide before commit
 
 ## Naming
 
-### Type names are CamelCase
+### Type names are PascalCase
 
 Examples:
 

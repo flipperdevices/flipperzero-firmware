@@ -37,9 +37,11 @@ char cli_getc(Cli* cli) {
     if(cli->session != NULL) {
         if(cli->session->rx((uint8_t*)&c, 1, FuriWaitForever) == 0) {
             cli_reset(cli);
+            furi_delay_tick(10);
         }
     } else {
         cli_reset(cli);
+        furi_delay_tick(10);
     }
     return c;
 }
@@ -461,7 +463,7 @@ int32_t cli_srv(void* p) {
     if(furi_hal_rtc_get_boot_mode() == FuriHalRtcBootModeNormal) {
         cli_session_open(cli, &cli_vcp);
     } else {
-        FURI_LOG_W(TAG, "Skipped CLI session open: device in special startup mode");
+        FURI_LOG_W(TAG, "Skipping start in special boot mode");
     }
 
     while(1) {

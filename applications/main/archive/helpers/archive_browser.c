@@ -1,11 +1,12 @@
-#include <archive/views/archive_browser_view.h>
 #include "archive_files.h"
 #include "archive_apps.h"
 #include "archive_browser.h"
+#include "../views/archive_browser_view.h"
+
 #include <core/common_defines.h>
 #include <core/log.h>
-#include "gui/modules/file_browser_worker.h"
-#include <fap_loader/fap_loader_app.h>
+#include <gui/modules/file_browser_worker.h>
+#include <flipper_application/flipper_application.h>
 #include <math.h>
 
 static void
@@ -366,7 +367,7 @@ void archive_add_app_item(ArchiveBrowserView* browser, const char* name) {
 static bool archive_get_fap_meta(FuriString* file_path, FuriString* fap_name, uint8_t** icon_ptr) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     bool success = false;
-    if(fap_loader_load_name_and_icon(file_path, storage, icon_ptr, fap_name)) {
+    if(flipper_application_load_name_and_icon(file_path, storage, icon_ptr, fap_name)) {
         success = true;
     }
     furi_record_close(RECORD_STORAGE);
@@ -435,7 +436,7 @@ static bool archive_is_dir_exists(FuriString* path) {
     FileInfo file_info;
     Storage* storage = furi_record_open(RECORD_STORAGE);
     if(storage_common_stat(storage, furi_string_get_cstr(path), &file_info) == FSE_OK) {
-        if(file_info.flags & FSF_DIRECTORY) {
+        if(file_info_is_dir(&file_info)) {
             state = true;
         }
     }
@@ -509,11 +510,15 @@ void archive_enter_dir(ArchiveBrowserView* browser, FuriString* path) {
         browser->view, ArchiveBrowserViewModel * model, { idx_temp = model->item_idx; }, false);
 
     furi_string_set(browser->path, path);
+
     file_browser_worker_folder_enter(browser->worker, path, idx_temp);
 }
 
 void archive_leave_dir(ArchiveBrowserView* browser) {
     furi_assert(browser);
+
+    size_t dirname_start = furi_string_search_rchar(browser->path, '/');
+    furi_string_left(browser->path, dirname_start);
 
     file_browser_worker_folder_exit(browser->worker);
 }

@@ -21,6 +21,15 @@
 #define SUBGHZ_RAW_FILE_VERSION 1
 #define SUBGHZ_RAW_FILE_TYPE "Flipper SubGhz RAW File"
 
+#define SUBGHZ_KEYSTORE_DIR_NAME EXT_PATH("subghz/assets/keeloq_mfcodes")
+#define SUBGHZ_KEYSTORE_DIR_USER_NAME EXT_PATH("subghz/assets/keeloq_mfcodes_user")
+#define SUBGHZ_CAME_ATOMO_DIR_NAME EXT_PATH("subghz/assets/came_atomo")
+#define SUBGHZ_NICE_FLOR_S_DIR_NAME EXT_PATH("subghz/assets/nice_flor_s")
+#define SUBGHZ_ALUTECH_AT_4N_DIR_NAME EXT_PATH("subghz/assets/alutech_at_4n")
+
+typedef struct SubGhzProtocolRegistry SubGhzProtocolRegistry;
+typedef struct SubGhzEnvironment SubGhzEnvironment;
+
 // Radio Preset
 typedef struct {
     FuriString* name;
@@ -29,14 +38,36 @@ typedef struct {
     size_t data_size;
 } SubGhzRadioPreset;
 
+typedef enum {
+    SubGhzProtocolStatusOk = 0,
+    // Errors
+    SubGhzProtocolStatusError = (-1), ///< General unclassified error
+    // Serialize/De-serialize
+    SubGhzProtocolStatusErrorParserHeader = (-2), ///< Missing or invalid file header
+    SubGhzProtocolStatusErrorParserFrequency = (-3), ///< Missing `Frequency`
+    SubGhzProtocolStatusErrorParserPreset = (-4), ///< Missing `Preset`
+    SubGhzProtocolStatusErrorParserCustomPreset = (-5), ///< Missing `Custom_preset_module`
+    SubGhzProtocolStatusErrorParserProtocolName = (-6), ///< Missing `Protocol` name
+    SubGhzProtocolStatusErrorParserBitCount = (-7), ///< Missing `Bit`
+    SubGhzProtocolStatusErrorParserKey = (-8), ///< Missing `Key`
+    SubGhzProtocolStatusErrorParserTe = (-9), ///< Missing `Te`
+    SubGhzProtocolStatusErrorParserOthers = (-10), ///< Missing some other mandatory keys
+    // Invalid data
+    SubGhzProtocolStatusErrorValueBitCount = (-11), ///< Invalid bit count value
+    // Encoder issue
+    SubGhzProtocolStatusErrorEncoderGetUpload = (-12), ///< Payload encoder failure
+    // Special Values
+    SubGhzProtocolStatusReserved = 0x7FFFFFFF, ///< Prevents enum down-size compiler optimization.
+} SubGhzProtocolStatus;
+
 // Allocator and Deallocator
 typedef void* (*SubGhzAlloc)(SubGhzEnvironment* environment);
 typedef void (*SubGhzFree)(void* context);
 
 // Serialize and Deserialize
-typedef bool (
+typedef SubGhzProtocolStatus (
     *SubGhzSerialize)(void* context, FlipperFormat* flipper_format, SubGhzRadioPreset* preset);
-typedef bool (*SubGhzDeserialize)(void* context, FlipperFormat* flipper_format);
+typedef SubGhzProtocolStatus (*SubGhzDeserialize)(void* context, FlipperFormat* flipper_format);
 
 // Decoder specific
 typedef void (*SubGhzDecoderFeed)(void* decoder, bool level, uint32_t duration);
@@ -90,13 +121,14 @@ typedef enum {
     SubGhzProtocolFlag_Save = (1 << 7),
     SubGhzProtocolFlag_Load = (1 << 8),
     SubGhzProtocolFlag_Send = (1 << 9),
+    SubGhzProtocolFlag_BinRAW = (1 << 10),
 } SubGhzProtocolFlag;
 
-typedef struct {
+struct SubGhzProtocol {
     const char* name;
     SubGhzProtocolType type;
     SubGhzProtocolFlag flag;
 
     const SubGhzProtocolEncoder* encoder;
     const SubGhzProtocolDecoder* decoder;
-} SubGhzProtocol;
+};

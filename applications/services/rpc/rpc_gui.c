@@ -2,6 +2,7 @@
 #include "rpc_i.h"
 #include "gui.pb.h"
 #include <gui/gui_i.h>
+#include <assets_icons.h>
 
 #define TAG "RpcGui"
 
@@ -11,6 +12,8 @@ typedef enum {
 } RpcGuiWorkerFlag;
 
 #define RpcGuiWorkerFlagAny (RpcGuiWorkerFlagTransmit | RpcGuiWorkerFlagExit)
+
+#define RPC_GUI_INPUT_RESET (0u)
 
 typedef struct {
     RpcSession* session;
@@ -26,10 +29,25 @@ typedef struct {
 
     bool virtual_display_not_empty;
     bool is_streaming;
+
+    uint32_t input_key_counter[InputKeyMAX];
+    uint32_t input_counter;
+
+    ViewPort* rpc_session_active_viewport;
 } RpcGuiSystem;
 
-static void
-    rpc_system_gui_screen_stream_frame_callback(uint8_t* data, size_t size, void* context) {
+static const PB_Gui_ScreenOrientation rpc_system_gui_screen_orientation_map[] = {
+    [CanvasOrientationHorizontal] = PB_Gui_ScreenOrientation_HORIZONTAL,
+    [CanvasOrientationHorizontalFlip] = PB_Gui_ScreenOrientation_HORIZONTAL_FLIP,
+    [CanvasOrientationVertical] = PB_Gui_ScreenOrientation_VERTICAL,
+    [CanvasOrientationVerticalFlip] = PB_Gui_ScreenOrientation_VERTICAL_FLIP,
+};
+
+static void rpc_system_gui_screen_stream_frame_callback(
+    uint8_t* data,
+    size_t size,
+    CanvasOrientation orientation,
+    void* context) {
     furi_assert(data);
     furi_assert(context);
 
@@ -39,6 +57,8 @@ static void
     furi_assert(size == rpc_gui->transmit_frame->content.gui_screen_frame.data->size);
 
     memcpy(buffer, data, size);
+    rpc_gui->transmit_frame->content.gui_screen_frame.orientation =
+        rpc_system_gui_screen_orientation_map[orientation];
 
     furi_thread_flags_set(furi_thread_get_id(rpc_gui->transmit_thread), RpcGuiWorkerFlagTransmit);
 }
@@ -48,12 +68,22 @@ static int32_t rpc_system_gui_screen_stream_frame_transmit_thread(void* context)
 
     RpcGuiSystem* rpc_gui = (RpcGuiSystem*)context;
 
+    uint32_t transmit_time = 0;
     while(true) {
         uint32_t flags =
             furi_thread_flags_wait(RpcGuiWorkerFlagAny, FuriFlagWaitAny, FuriWaitForever);
+
         if(flags & RpcGuiWorkerFlagTransmit) {
+            transmit_time = furi_get_tick();
             rpc_send(rpc_gui->session, rpc_gui->transmit_frame);
+            transmit_time = furi_get_tick() - transmit_time;
+
+            // Guaranteed bandwidth reserve
+            uint32_t extra_delay = transmit_time / 20;
+            if(extra_delay > 500) extra_delay = 500;
+            if(extra_delay) furi_delay_tick(extra_delay);
         }
+
         if(flags & RpcGuiWorkerFlagExit) {
             break;
         }
@@ -194,6 +224,22 @@ static void
         return;
     }
 
+    // Event sequence shenanigans
+    event.sequence_source = INPUT_SEQUENCE_SOURCE_SOFTWARE;
+    if(event.type == InputTypePress) {
+        rpc_gui->input_counter++;
+        if(rpc_gui->input_counter == RPC_GUI_INPUT_RESET) rpc_gui->input_counter++;
+        rpc_gui->input_key_counter[event.key] = rpc_gui->input_counter;
+    }
+    if(rpc_gui->input_key_counter[event.key] == RPC_GUI_INPUT_RESET) {
+        FURI_LOG_W(TAG, "Out of sequence input event: key %d, type %d,", event.key, event.type);
+    }
+    event.sequence_counter = rpc_gui->input_key_counter[event.key];
+    if(event.type == InputTypeRelease) {
+        rpc_gui->input_key_counter[event.key] = RPC_GUI_INPUT_RESET;
+    }
+
+    // Submit event
     FuriPubSub* input_events = furi_record_open(RECORD_INPUT_EVENTS);
     furi_check(input_events);
     furi_pubsub_publish(input_events, &event);
@@ -309,12 +355,30 @@ static void rpc_system_gui_virtual_display_frame_process(const PB_Main* request,
     (void)session;
 }
 
+static void rpc_active_session_icon_draw_callback(Canvas* canvas, void* context) {
+    UNUSED(context);
+    furi_assert(canvas);
+    canvas_draw_icon(canvas, 0, 0, &I_Rpc_active_7x8);
+}
+
 void* rpc_system_gui_alloc(RpcSession* session) {
     furi_assert(session);
 
     RpcGuiSystem* rpc_gui = malloc(sizeof(RpcGuiSystem));
     rpc_gui->gui = furi_record_open(RECORD_GUI);
     rpc_gui->session = session;
+
+    // Active session icon
+    rpc_gui->rpc_session_active_viewport = view_port_alloc();
+    view_port_set_width(rpc_gui->rpc_session_active_viewport, icon_get_width(&I_Rpc_active_7x8));
+    view_port_draw_callback_set(
+        rpc_gui->rpc_session_active_viewport, rpc_active_session_icon_draw_callback, session);
+    if(rpc_session_get_owner(rpc_gui->session) != RpcOwnerBle) {
+        view_port_enabled_set(rpc_gui->rpc_session_active_viewport, true);
+    } else {
+        view_port_enabled_set(rpc_gui->rpc_session_active_viewport, false);
+    }
+    gui_add_view_port(rpc_gui->gui, rpc_gui->rpc_session_active_viewport, GuiLayerStatusBarLeft);
 
     RpcHandler rpc_handler = {
         .message_handler = NULL,
@@ -355,6 +419,9 @@ void rpc_system_gui_free(void* context) {
         rpc_gui->virtual_display_view_port = NULL;
         rpc_gui->virtual_display_not_empty = false;
     }
+
+    gui_remove_view_port(rpc_gui->gui, rpc_gui->rpc_session_active_viewport);
+    view_port_free(rpc_gui->rpc_session_active_viewport);
 
     if(rpc_gui->is_streaming) {
         rpc_gui->is_streaming = false;

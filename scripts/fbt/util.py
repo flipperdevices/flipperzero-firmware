@@ -1,12 +1,15 @@
-import SCons
-from SCons.Subst import quote_spaces
-from SCons.Errors import StopError
-
-import re
 import os
+import re
 
+import SCons
+from SCons.Errors import StopError
+from SCons.Subst import quote_spaces
 
 WINPATHSEP_RE = re.compile(r"\\([^\"'\\]|$)")
+
+# Used by default when globbing for files with GlobRecursive
+# Excludes all files ending with ~, usually created by editors as backup files
+GLOB_FILE_EXCLUSION = ["*~"]
 
 
 def tempfile_arg_esc_func(arg):

@@ -1,9 +1,9 @@
 #include "submenu.h"
 #include <gui/canvas_i.h>
 
-#include <m-array.h>
 #include <gui/elements.h>
 #include <furi.h>
+#include <m-array.h>
 
 struct Submenu {
     View* view;
@@ -104,7 +104,7 @@ static void submenu_view_draw_callback(Canvas* canvas, void* _model) {
 
             FuriString* disp_str;
             disp_str = furi_string_alloc_set(SubmenuItemArray_cref(it)->label);
-            elements_string_fit_width(canvas, disp_str, item_width - 20);
+            elements_string_fit_width(canvas, disp_str, item_width - (6 * 2));
 
             canvas_draw_str(
                 canvas,

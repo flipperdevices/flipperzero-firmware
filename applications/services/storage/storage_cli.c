@@ -66,11 +66,20 @@ static void storage_cli_info(Cli* cli, FuriString* path) {
             storage_cli_print_error(error);
         } else {
             printf(
-                "Label: %s\r\nType: %s\r\n%luKiB total\r\n%luKiB free\r\n",
+                "Label: %s\r\nType: %s\r\n%luKiB total\r\n%luKiB free\r\n"
+                "%02x%s %s v%i.%i\r\nSN:%04lx %02i/%i\r\n",
                 sd_info.label,
                 sd_api_get_fs_type_text(sd_info.fs_type),
                 sd_info.kb_total,
-                sd_info.kb_free);
+                sd_info.kb_free,
+                sd_info.manufacturer_id,
+                sd_info.oem_id,
+                sd_info.product_name,
+                sd_info.product_revision_major,
+                sd_info.product_revision_minor,
+                sd_info.product_serial_number,
+                sd_info.manufacturing_month,
+                sd_info.manufacturing_year);
         }
     } else {
         storage_cli_print_usage();
@@ -122,7 +131,7 @@ static void storage_cli_list(Cli* cli, FuriString* path) {
 
             while(storage_dir_read(file, &fileinfo, name, MAX_NAME_LENGTH)) {
                 read_done = true;
-                if(fileinfo.flags & FSF_DIRECTORY) {
+                if(file_info_is_dir(&fileinfo)) {
                     printf("\t[D] %s\r\n", name);
                 } else {
                     printf("\t[F] %s %lub\r\n", name, (uint32_t)(fileinfo.size));
@@ -160,7 +169,7 @@ static void storage_cli_tree(Cli* cli, FuriString* path) {
 
             while(dir_walk_read(dir_walk, name, &fileinfo) == DirWalkOK) {
                 read_done = true;
-                if(fileinfo.flags & FSF_DIRECTORY) {
+                if(file_info_is_dir(&fileinfo)) {
                     printf("\t[D] %s\r\n", furi_string_get_cstr(name));
                 } else {
                     printf(
@@ -374,7 +383,7 @@ static void storage_cli_stat(Cli* cli, FuriString* path) {
         FS_Error error = storage_common_stat(api, furi_string_get_cstr(path), &fileinfo);
 
         if(error == FSE_OK) {
-            if(fileinfo.flags & FSF_DIRECTORY) {
+            if(file_info_is_dir(&fileinfo)) {
                 printf("Directory\r\n");
             } else {
                 printf("File, size: %lub\r\n", (uint32_t)(fileinfo.size));

@@ -1,14 +1,15 @@
-from SCons.Builder import Builder
-from SCons.Action import Action
-from SCons.Warnings import warn, WarningOnByDefault
 from ansi.color import fg
-
 from fbt.appmanifest import (
-    FlipperAppType,
-    AppManager,
     ApplicationsCGenerator,
+    AppManager,
+    FlipperAppType,
     FlipperManifestException,
 )
+from SCons.Action import Action
+from SCons.Builder import Builder
+from SCons.Errors import StopError
+from SCons.Warnings import WarningOnByDefault, warn
+from SCons.Script import GetOption
 
 # Adding objects for application management to env
 #  AppManager env["APPMGR"] - loads all manifests; manages list of known apps
@@ -28,13 +29,18 @@ def LoadAppManifest(env, entry):
         env["APPMGR"].load_manifest(app_manifest_file_path, entry)
         env.Append(PY_LINT_SOURCES=[app_manifest_file_path])
     except FlipperManifestException as e:
-        warn(WarningOnByDefault, str(e))
+        if not GetOption("silent"):
+            warn(WarningOnByDefault, str(e))
 
 
 def PrepareApplicationsBuild(env):
-    appbuild = env["APPBUILD"] = env["APPMGR"].filter_apps(
-        env["APPS"], env.subst("f${TARGET_HW}")
-    )
+    try:
+        appbuild = env["APPBUILD"] = env["APPMGR"].filter_apps(
+            env["APPS"], env.subst("f${TARGET_HW}")
+        )
+    except Exception as e:
+        raise StopError(e)
+
     env.Append(
         SDK_HEADERS=appbuild.get_sdk_headers(),
     )
