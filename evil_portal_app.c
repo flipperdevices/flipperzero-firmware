@@ -1,5 +1,4 @@
 #include "evil_portal_app_i.h"
-#include "helpers/evil_portal_speaker.h"
 #include "helpers/evil_portal_storage.h"
 
 #include <furi.h>

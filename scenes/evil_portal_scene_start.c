@@ -1,5 +1,4 @@
 #include "../evil_portal_app_i.h"
-#include "../helpers/evil_portal_speaker.h"
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
