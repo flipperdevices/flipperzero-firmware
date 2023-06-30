@@ -64,27 +64,20 @@ Evil_PortalApp *evil_portal_app_alloc() {
   app->text_box_store = furi_string_alloc();
   furi_string_reserve(app->text_box_store, EVIL_PORTAL_TEXT_BOX_STORE_SIZE);
 
-  app->text_input = uart_text_input_alloc();
-  view_dispatcher_add_view(app->view_dispatcher, Evil_PortalAppViewTextInput,
-                           uart_text_input_get_view(app->text_input));
-
-  app->text_input = uart_text_input_alloc();
-  view_dispatcher_add_view(app->view_dispatcher, Evil_PortalAppViewStartPortal,
-                           uart_text_input_get_view(app->text_input));
-
   scene_manager_next_scene(app->scene_manager, Evil_PortalSceneStart);
 
   return app;
 }
 
-void evil_portal_app_free(Evil_PortalApp *app) {
+void evil_portal_app_free(Evil_PortalApp *app) {  
+
   // save latest logs
   if (strlen(app->portal_logs) > 0) {
     write_logs(app->portal_logs);
   }
 
   // Send reset event to dev board
-  evil_portal_uart_tx((uint8_t *)("reset"), strlen("reset"));
+  evil_portal_uart_tx((uint8_t *)(RESET_CMD), strlen(RESET_CMD));
   evil_portal_uart_tx((uint8_t *)("\n"), 1);
 
   furi_assert(app);
@@ -94,14 +87,9 @@ void evil_portal_app_free(Evil_PortalApp *app) {
                               Evil_PortalAppViewVarItemList);
   view_dispatcher_remove_view(app->view_dispatcher,
                               Evil_PortalAppViewConsoleOutput);
-  view_dispatcher_remove_view(app->view_dispatcher,
-                              Evil_PortalAppViewTextInput);
-  view_dispatcher_remove_view(app->view_dispatcher,
-                              Evil_PortalAppViewStartPortal);
 
   text_box_free(app->text_box);
   furi_string_free(app->text_box_store);
-  uart_text_input_free(app->text_input);
 
   // View dispatcher
   view_dispatcher_free(app->view_dispatcher);
@@ -115,14 +103,15 @@ void evil_portal_app_free(Evil_PortalApp *app) {
   free(app);
 }
 
-int32_t evil_portal_app(void *p) {
+int32_t evil_portal_app(void *p) {  
   UNUSED(p);
   Evil_PortalApp *evil_portal_app = evil_portal_app_alloc();
 
   evil_portal_app->uart = evil_portal_uart_init(evil_portal_app);
 
-  view_dispatcher_run(evil_portal_app->view_dispatcher);
+  view_dispatcher_run(evil_portal_app->view_dispatcher);  
 
+  // crashing here
   evil_portal_app_free(evil_portal_app);
 
   return 0;

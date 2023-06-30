@@ -2,9 +2,6 @@
 #include "evil_portal_uart.h"
 #include "helpers/evil_portal_storage.h"
 
-// #define UART_CH (FuriHalUartIdUSART1)
-// #define BAUDRATE (115200)
-
 struct Evil_PortalUart {
   Evil_PortalApp *app;
   FuriThread *rx_thread;
@@ -39,38 +36,27 @@ void evil_portal_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void *context) {
 static int32_t uart_worker(void *context) {
   Evil_PortalUart *uart = (void *)context;
 
-
-  // FURI_LOG_I("EP", "in worker");
   while (1) {
 
     uint32_t events = furi_thread_flags_wait(WORKER_ALL_RX_EVENTS,
                                              FuriFlagWaitAny, FuriWaitForever);
     furi_check((events & FuriFlagError) == 0);
     if (events & WorkerEvtStop)
-    // FURI_LOG_I("EP", "event 1");
       break;
     if (events & WorkerEvtRxDone) {
-      // FURI_LOG_I("EP", "event 2");
       size_t len = furi_stream_buffer_receive(uart->rx_stream, uart->rx_buf,
                                               RX_BUF_SIZE, 0);
 
-      // FURI_LOG_I("EP", "comp len");
       if (len > 0) {
-        // FURI_LOG_I("EP", "check cb");
         if (uart->handle_rx_data_cb) {
           uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
 
-          if (uart->app->has_command_queue) {
-            // FURI_LOG_I("EP", "Has command queue");
-            // FURI_LOG_I("EP", (char *)uart->rx_buf);            
-            if (uart->app->command_index < 1) {
-              
-              // check the current command
-              // if command x do x
+          if (uart->app->has_command_queue) {         
+            if (uart->app->command_index < 1) {            
               if (0 ==
-                  strncmp("setap",
+                  strncmp(SET_AP_CMD,
                           uart->app->command_queue[uart->app->command_index],
-                          strlen("setap"))) {                
+                          strlen(SET_AP_CMD))) {                
                 char *out_data =
                     malloc((size_t)(strlen((char *)uart->app->ap_name) +
                                     strlen("setap=")));
@@ -90,23 +76,7 @@ static int32_t uart_worker(void *context) {
               uart->app->has_command_queue = false;
               uart->app->command_queue[0] = "";
             }
-
-            // if(0 == strncmp("ack", (char *)uart->rx_buf, strlen("ack"))) {
-
-            //   } else {
-            //     uart->app->command_index = 0;
-            //     uart->app->has_command_queue = false;
-            //     uart->app->command_queue[0] = "";
-            //   }
-            // }
           }
-
-          // rx_buf has response
-          // wait for ack
-          // if response is ack
-          // check for commands
-          // if has commands
-          // send next command
 
           strcat(uart->app->portal_logs, (char *)uart->rx_buf);
           if (strlen(uart->app->portal_logs) > 4000) {

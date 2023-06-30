@@ -28,11 +28,17 @@ typedef struct {
 // NUM_MENU_ITEMS defined in evil_portal_app_i.h - if you add an entry here,
 // increment it!
 const Evil_PortalItem items[NUM_MENU_ITEMS] = {
-     // send command
-    {"Start portal", {""}, 1, {"sethtml"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP},
+    // send command
+    {"Start portal",
+     {""},
+     1,
+     {SET_HTML_CMD},
+     NO_ARGS,
+     FOCUS_CONSOLE_START,
+     SHOW_STOPSCAN_TIP},
 
     // stop portal
-    {"Stop portal", {""}, 1, {"reset"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP},
+    {"Stop portal", {""}, 1, {RESET_CMD}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
 
     // console
     {"Save logs",
@@ -43,7 +49,7 @@ const Evil_PortalItem items[NUM_MENU_ITEMS] = {
      FOCUS_CONSOLE_START,
      SHOW_STOPSCAN_TIP},
 
-     // help
+    // help
     {"Help",
      {""},
      1,
@@ -72,17 +78,8 @@ static void evil_portal_scene_start_var_list_enter_callback(void *context,
                                  : item->focus_console;
   app->show_stopscan_tip = item->show_stopscan_tip;
 
-  bool needs_keyboard = (item->needs_keyboard == TOGGLE_ARGS)
-                            ? (selected_option_index != 0)
-                            : item->needs_keyboard;
-                            
-  if (needs_keyboard) {
-    view_dispatcher_send_custom_event(app->view_dispatcher,
-                                      Evil_PortalEventStartKeyboard);
-  } else {
-    view_dispatcher_send_custom_event(app->view_dispatcher,
-                                      Evil_PortalEventStartConsole);
-  }
+  view_dispatcher_send_custom_event(app->view_dispatcher,
+                                    Evil_PortalEventStartConsole);
 }
 
 static void
@@ -134,11 +131,11 @@ bool evil_portal_scene_start_on_event(void *context, SceneManagerEvent event) {
     if (event.event == Evil_PortalEventStartPortal) {
       scene_manager_set_scene_state(app->scene_manager, Evil_PortalSceneStart,
                                     app->selected_menu_index);
-      scene_manager_next_scene(app->scene_manager, Evil_PortalAppViewStartPortal);
+      scene_manager_next_scene(app->scene_manager,
+                               Evil_PortalAppViewStartPortal);
     } else if (event.event == Evil_PortalEventStartKeyboard) {
       scene_manager_set_scene_state(app->scene_manager, Evil_PortalSceneStart,
                                     app->selected_menu_index);
-      scene_manager_next_scene(app->scene_manager, Evil_PortalAppViewTextInput);
     } else if (event.event == Evil_PortalEventStartConsole) {
       scene_manager_set_scene_state(app->scene_manager, Evil_PortalSceneStart,
                                     app->selected_menu_index);
