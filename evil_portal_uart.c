@@ -2,9 +2,6 @@
 #include "evil_portal_uart.h"
 #include "helpers/evil_portal_storage.h"
 
-// #define UART_CH (FuriHalUartIdUSART1)
-// #define BAUDRATE (115200)
-
 struct Evil_PortalUart {
   Evil_PortalApp *app;
   FuriThread *rx_thread;
@@ -82,23 +79,7 @@ static int32_t uart_worker(void *context) {
               uart->app->has_command_queue = false;
               uart->app->command_queue[0] = "";
             }
-
-            // if(0 == strncmp("ack", (char *)uart->rx_buf, strlen("ack"))) {
-
-            //   } else {
-            //     uart->app->command_index = 0;
-            //     uart->app->has_command_queue = false;
-            //     uart->app->command_queue[0] = "";
-            //   }
-            // }
           }
-
-          // rx_buf has response
-          // wait for ack
-          // if response is ack
-          // check for commands
-          // if has commands
-          // send next command
 
           strcat(uart->app->portal_logs, (char *)uart->rx_buf);
           if (strlen(uart->app->portal_logs) > 4000) {
