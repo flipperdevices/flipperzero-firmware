@@ -187,6 +187,7 @@ static void init_mf_ul_data(MfUltralightData* data) {
     iso14443_3a_data->sak = 0x00;
 
     data->type = MfUltralightTypeUnknown;
+    data->pages_total = 16;
     MfUltralightVersion version = {
         .header = 1,
         .protocol_type = 228,
@@ -208,11 +209,13 @@ void nfc_rpc_mf_ultralight_emulate_start(Nfc_Main* cmd, void* context) {
         PB_MfUltralight_EmulateStartResponse_init_default;
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_mf_ultralight_emulate_start_resp_tag;
-    if(instance->mf_ul_listener == NULL) {
-        MfUltralightData mf_ul_data = {};
+    if(instance->listener == NULL) {
+        MfUltralightData* mf_ul_data = mf_ultralight_alloc();
         // TODO initialize data from rpc message
-        init_mf_ul_data(&mf_ul_data);
-        mf_ultralight_listener_start(instance->mf_ul_listener, &mf_ul_data, NULL, NULL);
+        init_mf_ul_data(mf_ul_data);
+        instance->listener =
+            nfc_listener_alloc(instance->nfc, NfcProtocolMfUltralight, mf_ul_data);
+        nfc_listener_start(instance->listener, NULL, NULL);
         pb_mf_ultralight_emulate_start_resp.error = PB_MfUltralight_Error_None;
     } else {
         // TODO add Busy error
@@ -230,10 +233,11 @@ void nfc_rpc_mf_ultralight_emulate_stop(Nfc_Main* cmd, void* context) {
         PB_MfUltralight_EmulateStopResponse_init_default;
     cmd->command_status = Nfc_CommandStatus_OK;
     cmd->which_content = Nfc_Main_mf_ultralight_emulate_stop_resp_tag;
-    if(instance->mf_ul_listener) {
+    if(instance->listener) {
         // Stop before free
-        mf_ultralight_listener_stop(instance->mf_ul_listener);
-        instance->mf_ul_listener = NULL;
+        nfc_listener_stop(instance->listener);
+        nfc_listener_free(instance->listener);
+        instance->listener = NULL;
         pb_mf_ultralight_emulate_stop_resp.error = PB_MfUltralight_Error_None;
     } else {
         // TODO emulation not started error

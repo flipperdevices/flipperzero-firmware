@@ -29,7 +29,7 @@ static MfDesfirePoller* mf_desfire_poller_alloc(Iso14443_4aPoller* iso14443_4a_p
 
     instance->general_event.protocol = NfcProtocolMfDesfire;
     instance->general_event.data = &instance->mf_desfire_event;
-    instance->general_event.poller = instance;
+    instance->general_event.instance = instance;
 
     return instance;
 }

@@ -13,7 +13,7 @@ typedef void NfcGenericEventData;
 
 typedef struct {
     NfcProtocol protocol;
-    NfcGenericInstance* poller;
+    NfcGenericInstance* instance;
     NfcGenericEventData* data;
 } NfcGenericEvent;
 

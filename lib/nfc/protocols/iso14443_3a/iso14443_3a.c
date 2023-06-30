@@ -19,6 +19,7 @@ const NfcDeviceBase nfc_device_iso14443_3a = {
     .is_equal = (NfcDeviceEqual)iso14443_3a_is_equal,
     .get_name = (NfcDeviceGetName)iso14443_3a_get_device_name,
     .get_uid = (NfcDeviceGetUid)iso14443_3a_get_uid,
+    .get_base_data = (NfcDeviceGetBaseData)iso14443_3a_get_base_data,
 };
 
 Iso14443_3aData* iso14443_3a_alloc() {
@@ -86,6 +87,11 @@ const uint8_t* iso14443_3a_get_uid(const Iso14443_3aData* data, size_t* uid_len)
     }
 
     return data->uid;
+}
+
+const Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data) {
+    UNUSED(data);
+    furi_crash("No base data");
 }
 
 bool iso14443_3a_load_data(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {

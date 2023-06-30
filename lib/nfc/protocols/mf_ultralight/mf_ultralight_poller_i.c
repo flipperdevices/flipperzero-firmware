@@ -40,7 +40,7 @@ MfUltralightError mf_ultralight_poller_async_auth(
     MfUltralightError ret = MfUltralightErrorNone;
     Iso14443_3aError error = Iso14443_3aErrorNone;
     do {
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
@@ -70,7 +70,7 @@ MfUltralightError mf_ultralight_poller_async_read_page_from_sector(
     do {
         const uint8_t select_sector_cmd[2] = {MF_ULTRALIGHT_CMD_SECTOR_SELECT, 0xff};
         bit_buffer_copy_bytes(instance->tx_buffer, select_sector_cmd, sizeof(select_sector_cmd));
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
@@ -83,7 +83,7 @@ MfUltralightError mf_ultralight_poller_async_read_page_from_sector(
 
         const uint8_t read_sector_cmd[4] = {sector, 0x00, 0x00, 0x00};
         bit_buffer_copy_bytes(instance->tx_buffer, read_sector_cmd, sizeof(read_sector_cmd));
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
@@ -111,7 +111,7 @@ MfUltralightError mf_ultralight_poller_async_read_page(
     do {
         uint8_t read_page_cmd[2] = {MF_ULTRALIGHT_CMD_READ_PAGE, start_page};
         bit_buffer_copy_bytes(instance->tx_buffer, read_page_cmd, sizeof(read_page_cmd));
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
@@ -142,7 +142,7 @@ MfUltralightError mf_ultralight_poller_async_write_page(
         uint8_t write_page_cmd[MF_ULTRALIGHT_PAGE_SIZE + 2] = {MF_ULTRALIGHT_CMD_WRITE_PAGE, page};
         memcpy(&write_page_cmd[2], data->data, MF_ULTRALIGHT_PAGE_SIZE);
         bit_buffer_copy_bytes(instance->tx_buffer, write_page_cmd, sizeof(write_page_cmd));
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
@@ -173,7 +173,7 @@ MfUltralightError mf_ultralight_poller_async_read_version(
     do {
         const uint8_t get_version_cmd = MF_ULTRALIGHT_CMD_GET_VERSION;
         bit_buffer_copy_bytes(instance->tx_buffer, &get_version_cmd, sizeof(get_version_cmd));
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
@@ -203,7 +203,7 @@ MfUltralightError mf_ultralight_poller_async_read_signature(
     do {
         const uint8_t read_signature_cmd[2] = {MF_ULTRALIGTH_CMD_READ_SIG, 0x00};
         bit_buffer_copy_bytes(instance->tx_buffer, read_signature_cmd, sizeof(read_signature_cmd));
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
@@ -232,7 +232,7 @@ MfUltralightError mf_ultralight_poller_async_read_counter(
     do {
         uint8_t read_counter_cmd[2] = {MF_ULTRALIGHT_CMD_READ_CNT, counter_num};
         bit_buffer_copy_bytes(instance->tx_buffer, read_counter_cmd, sizeof(read_counter_cmd));
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
@@ -261,7 +261,7 @@ MfUltralightError mf_ultralight_poller_async_read_tearing_flag(
     do {
         uint8_t check_tearing_cmd[2] = {MF_ULTRALIGHT_CMD_CHECK_TEARING, tearing_falg_num};
         bit_buffer_copy_bytes(instance->tx_buffer, check_tearing_cmd, sizeof(check_tearing_cmd));
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,

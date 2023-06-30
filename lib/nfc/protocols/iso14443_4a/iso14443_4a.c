@@ -18,6 +18,7 @@ const NfcDeviceBase nfc_device_iso14443_4a = {
     .is_equal = (NfcDeviceEqual)iso14443_4a_is_equal,
     .get_name = (NfcDeviceGetName)iso14443_4a_get_device_name,
     .get_uid = (NfcDeviceGetUid)iso14443_4a_get_uid,
+    .get_base_data = (NfcDeviceGetBaseData)iso14443_4a_get_base_data,
 };
 
 Iso14443_4aData* iso14443_4a_alloc() {
@@ -80,6 +81,12 @@ const char* iso14443_4a_get_device_name(const Iso14443_4aData* data, NfcDeviceNa
 
 const uint8_t* iso14443_4a_get_uid(const Iso14443_4aData* data, size_t* uid_len) {
     return iso14443_3a_get_uid(data->iso14443_3a_data, uid_len);
+}
+
+const Iso14443_3aData* iso14443_4a_get_base_data(const Iso14443_4aData* data) {
+    furi_assert(data);
+
+    return data->iso14443_3a_data;
 }
 
 bool iso14443_4a_is_ats_supported(const Iso14443_4aData* data) {

@@ -45,7 +45,7 @@ Iso14443_4aError
     Iso14443_4aError error = Iso14443_4aErrorNone;
 
     do {
-        const Iso14443_3aError iso14443_3a_error = iso14443_3a_poller_send_standart_frame(
+        const Iso14443_3aError iso14443_3a_error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_buffer,
             instance->rx_buffer,
@@ -84,7 +84,7 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     Iso14443_4aError error = Iso14443_4aErrorNone;
 
     do {
-        Iso14443_3aError iso14443_3a_error = iso14443_3a_poller_send_standart_frame(
+        Iso14443_3aError iso14443_3a_error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller, instance->tx_buffer, instance->rx_buffer, fwt);
 
         if(iso14443_3a_error != Iso14443_3aErrorNone) {

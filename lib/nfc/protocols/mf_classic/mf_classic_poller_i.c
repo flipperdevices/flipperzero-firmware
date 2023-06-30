@@ -51,7 +51,7 @@ MfClassicError mf_classic_async_auth(
         uint8_t auth_cmd[2] = {auth_type, block_num};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, auth_cmd, sizeof(auth_cmd));
 
-        error = iso14443_3a_poller_send_standart_frame(
+        error = iso14443_3a_poller_send_standard_frame(
             instance->iso14443_3a_poller,
             instance->tx_plain_buffer,
             instance->rx_plain_buffer,

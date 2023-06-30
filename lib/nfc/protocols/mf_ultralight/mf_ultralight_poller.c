@@ -179,7 +179,7 @@ MfUltralightPoller* mf_ultralight_poller_alloc(Iso14443_3aPoller* iso14443_3a_po
 
     instance->general_event.protocol = NfcProtocolMfUltralight;
     instance->general_event.data = &instance->mfu_event;
-    instance->general_event.poller = instance;
+    instance->general_event.instance = instance;
 
     return instance;
 }

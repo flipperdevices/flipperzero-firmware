@@ -14,7 +14,7 @@ typedef enum {
 NfcCommand nfc_dict_attack_worker_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
-    furi_assert(event.poller);
+    furi_assert(event.instance);
     furi_assert(event.protocol == NfcProtocolMfClassic);
 
     NfcCommand command = NfcCommandContinue;

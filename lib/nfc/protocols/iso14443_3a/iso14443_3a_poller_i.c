@@ -26,7 +26,7 @@ static Iso14443_3aError iso14443_3a_poller_prepare_trx(Iso14443_3aPoller* instan
     return ret;
 }
 
-static Iso14443_3aError iso14443_3a_poller_standart_frame_exchange(
+static Iso14443_3aError iso14443_3a_poller_standard_frame_exchange(
     Iso14443_3aPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
@@ -94,7 +94,7 @@ Iso14443_3aError iso14443_3a_poller_halt(Iso14443_3aPoller* instance) {
     uint8_t halt_cmd[2] = {0x50, 0x00};
     bit_buffer_copy_bytes(instance->tx_buffer, halt_cmd, sizeof(halt_cmd));
 
-    iso14443_3a_poller_standart_frame_exchange(
+    iso14443_3a_poller_standard_frame_exchange(
         instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3A_FDT_LISTEN_FC);
 
     instance->state = Iso14443_3aPollerStateIdle;
@@ -195,7 +195,7 @@ Iso14443_3aError iso14443_3a_poller_async_activate(
                     instance->tx_buffer,
                     (uint8_t*)&instance->col_res.sel_req,
                     sizeof(instance->col_res.sel_req));
-                ret = iso14443_3a_poller_send_standart_frame(
+                ret = iso14443_3a_poller_send_standard_frame(
                     instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3A_FDT_LISTEN_FC);
                 if(ret != Iso14443_3aErrorNone) {
                     FURI_LOG_E(TAG, "Sel request failed: %d", ret);
@@ -300,7 +300,7 @@ Iso14443_3aError iso14443_3a_poller_txrx(
     return ret;
 }
 
-Iso14443_3aError iso14443_3a_poller_send_standart_frame(
+Iso14443_3aError iso14443_3a_poller_send_standard_frame(
     Iso14443_3aPoller* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,
@@ -315,7 +315,7 @@ Iso14443_3aError iso14443_3a_poller_send_standart_frame(
         ret = iso14443_3a_poller_prepare_trx(instance);
         if(ret != Iso14443_3aErrorNone) break;
 
-        ret = iso14443_3a_poller_standart_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
+        ret = iso14443_3a_poller_standard_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
         if(ret != Iso14443_3aErrorNone) break;
     } while(false);
 
