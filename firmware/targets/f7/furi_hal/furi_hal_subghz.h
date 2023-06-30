@@ -59,11 +59,11 @@ void furi_hal_subghz_sleep();
  */
 void furi_hal_subghz_dump_state();
 
-/** Load registers from preset by preset name
- *
- * @param      preset  to load
- */
-void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset);
+// /** Load registers from preset by preset name
+//  *
+//  * @param      preset  to load
+//  */
+// void furi_hal_subghz_load_preset(FuriHalSubGhzPreset preset);
 
 /** Load custom registers from preset
  *
