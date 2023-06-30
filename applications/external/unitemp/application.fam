@@ -1,3 +1,4 @@
+# List of supported sensors DHT11, DHT12, DHT21/AM2301, DHT22/AM2302, DHT20/AM2108, AM2320, AHT10, AHT20, SHT30/GXHT30, SHT31/GXHT31, SHT35/GXHT35, LM75, BMP180, BMP280, BME280, BME680, HTU21D(F), HDC1080, DS18B20, DS18S20 (DS1820), DS1822, MAX31855, MAX6675
 App(
     appid="Temp_Sensors_Reader",
     name="Temp Sensors Reader",
@@ -8,7 +9,7 @@ App(
     ],
     stack_size=2 * 1024,
     order=100,
-    fap_description = "Universal temperature sensors reader",
+    fap_description = "Application for reading temperature, humidity and pressure sensors like a DHT11/22, DS18B20, BMP280, HTU21 and more",
     # fap_version="1.4",
     fap_author = "@quen0n & (fixes by @xMasterX)",
     fap_weburl = "https://github.com/quen0n/unitemp-flipperzero",
