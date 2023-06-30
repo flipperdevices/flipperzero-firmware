@@ -22,9 +22,11 @@ You will need to manually flash the Wi-Fi dev board.
 
 ### Install pre-built app on the flipper
 
-Go to the releases section on this repo and download the `evil_portal.fap` file as well as the `evil_portal` folder. 
+Go to the releases section on this repo and download and extract either the `ofw-evil_portal.zip` file or the `unleashed-evil_portal` file depending on if you are using the official firmware (ofw) or the unleashed firmware. These files will contain the `evil_portal.fap` file for your firmware.
 
-Put the `evil_portal.fap` file into the `apps/GPIO/` folder on your Flipper SD card. 
+You will also need to download and extract the `evil_portal.zip` folder. This will contain necessary files for the app to run.
+
+Put the `evil_portal.fap` found file into the `apps/GPIO/` folder on your Flipper SD card. 
 
 Put the `evil_portal` folder into the `apps_data` foler.
 This is an example of your Flipper SD card if done correctly.
