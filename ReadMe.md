@@ -53,6 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck) (By xMasterX)
 - Updated: [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch) (By xMasterX)
 - Updated: [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger) (By xMasterX)
+- OFW: [fix width of submenu items on Vertical orientation #2306 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2306)
 
 <a name="release">
 
