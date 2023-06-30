@@ -76,6 +76,7 @@ NfcListener* nfc_listener_alloc(Nfc* nfc, NfcProtocol protocol, const NfcDeviceD
     furi_assert(nfc);
     furi_assert(protocol < NfcProtocolNum);
     furi_assert(data);
+    furi_assert(nfc_listeners_api[protocol]);
 
     NfcListener* instance = malloc(sizeof(NfcListener));
     instance->nfc = nfc;
