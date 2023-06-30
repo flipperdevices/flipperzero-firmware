@@ -9,7 +9,7 @@ extern "C" {
 
 typedef struct NfcListener NfcListener;
 
-NfcListener* nfc_listener_alloc(Nfc* nfc, NfcProtocol protocol, NfcDeviceData* data);
+NfcListener* nfc_listener_alloc(Nfc* nfc, NfcProtocol protocol, const NfcDeviceData* data);
 
 void nfc_listener_free(NfcListener* instance);
 

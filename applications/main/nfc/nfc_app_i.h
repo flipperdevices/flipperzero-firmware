@@ -48,6 +48,7 @@
 
 #include <nfc/nfc_poller.h>
 #include <nfc/nfc_scanner.h>
+#include <nfc/nfc_listener.h>
 
 #include <lib/nfc/nfc_device.h>
 #include <lib/nfc/helpers/nfc_data_generator.h>
@@ -113,6 +114,7 @@ struct NfcApp {
 
     NfcPoller* poller;
     NfcScanner* scanner;
+    NfcListener* listener;
 
     MfUltralightAuth* mf_ul_auth;
     NfcMfClassicDictAttackContext mf_dict_context;

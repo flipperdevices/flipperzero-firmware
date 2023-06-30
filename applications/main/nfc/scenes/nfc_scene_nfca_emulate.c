@@ -7,22 +7,27 @@ enum {
     NfcSceneNfcaEmulateStateTextBox,
 };
 
-Iso14443_3aListenerCommand
-    nfc_scene_nfca_emulate_worker_callback(Iso14443_3aListenerEvent event, void* context) {
+NfcCommand nfc_scene_nfca_emulate_worker_callback(NfcGenericEvent event, void* context) {
     furi_assert(context);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
+    furi_assert(event.data);
 
     NfcApp* nfc = context;
-    if(event.type == Iso14443_3aListenerEventTypeReceivedStandartFrame) {
+    Iso14443_3aListenerEvent* iso14443_3a_event = event.data;
+
+    if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandartFrame) {
         furi_string_cat_printf(nfc->text_box_store, "R:");
-        for(size_t i = 0; i < bit_buffer_get_size_bytes(event.data->buffer); i++) {
+        for(size_t i = 0; i < bit_buffer_get_size_bytes(iso14443_3a_event->data->buffer); i++) {
             furi_string_cat_printf(
-                nfc->text_box_store, " %02X", bit_buffer_get_byte(event.data->buffer, i));
+                nfc->text_box_store,
+                " %02X",
+                bit_buffer_get_byte(iso14443_3a_event->data->buffer, i));
         }
         furi_string_cat_printf(nfc->text_box_store, "\n");
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventWorkerUpdate);
     }
 
-    return Iso14443_3aListenerCommandContinue;
+    return NfcCommandContinue;
 }
 
 void nfc_scene_nfca_emulate_widget_callback(GuiButtonType result, InputType type, void* context) {
@@ -73,11 +78,9 @@ void nfc_scene_nfca_emulate_on_enter(void* context) {
     text_box_set_focus(text_box, TextBoxFocusEnd);
     furi_string_reset(nfc->text_box_store);
 
-    iso14443_3a_listener_start(
-        nfc->iso14443_3a_listener,
-        nfc_device_get_data(nfc->nfc_device, NfcProtocolIso14443_3a),
-        nfc_scene_nfca_emulate_worker_callback,
-        nfc);
+    const NfcDeviceData* data = nfc_device_get_data(nfc->nfc_device, NfcProtocolIso14443_3a);
+    nfc->listener = nfc_listener_alloc(nfc->nfc, NfcProtocolIso14443_3a, data);
+    nfc_listener_start(nfc->listener, nfc_scene_nfca_emulate_worker_callback, nfc);
 
     // Set Widget state and view
     scene_manager_set_scene_state(
@@ -127,7 +130,8 @@ bool nfc_scene_nfca_emulate_on_event(void* context, SceneManagerEvent event) {
 void nfc_scene_nfca_emulate_on_exit(void* context) {
     NfcApp* nfc = context;
 
-    iso14443_3a_listener_stop(nfc->iso14443_3a_listener);
+    nfc_listener_stop(nfc->listener);
+    nfc_listener_free(nfc->listener);
 
     // Clear view
     widget_reset(nfc->widget);

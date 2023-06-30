@@ -114,7 +114,7 @@ const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len) {
     return iso14443_4a_get_uid(data->iso14443_4a_data, uid_len);
 }
 
-Iso14443_4aData* mf_desfire_get_base_data(const MfDesfireData* data) {
+const Iso14443_4aData* mf_desfire_get_base_data(const MfDesfireData* data) {
     furi_assert(data);
 
     return data->iso14443_4a_data;

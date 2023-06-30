@@ -46,8 +46,6 @@ NfcApp* nfc_app_alloc() {
         instance->view_dispatcher, nfc_back_event_callback);
 
     instance->nfc = nfc_alloc();
-    instance->iso14443_3a_listener = iso14443_3a_listener_alloc(instance->nfc);
-    instance->mf_ul_listener = mf_ultralight_listener_alloc(instance->iso14443_3a_listener);
 
     instance->parsed_data = furi_string_alloc();
 
@@ -153,8 +151,6 @@ void nfc_app_free(NfcApp* instance) {
 
     furi_string_free(instance->parsed_data);
 
-    mf_ultralight_listener_free(instance->mf_ul_listener);
-    iso14443_3a_listener_free(instance->iso14443_3a_listener);
     nfc_free(instance->nfc);
     nfc_scanner_free(instance->scanner);
 
