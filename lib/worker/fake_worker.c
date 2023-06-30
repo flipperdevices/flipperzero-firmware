@@ -24,9 +24,7 @@ struct FuzzerWorker {
     FuzzerWorkerAttackType attack_type;
     uint16_t index;
     Stream* uids_stream;
-    uint8_t chusen_byte;
 
-    bool treead_running;
     bool in_emu_phase;
     FuriTimer* timer;
     uint16_t timer_idle_time_ms;
@@ -152,6 +150,7 @@ static bool fuzzer_worker_load_key(FuzzerWorker* instance, bool next) {
             }
             break;
         }
+        furi_string_free(data_str);
     }
 
     break;
@@ -221,9 +220,7 @@ static void fuzzer_worker_on_tick_callback(void* context) {
     FuzzerWorker* instance = context;
 
     if(instance->in_emu_phase) {
-        if(instance->treead_running) {
-            hardware_worker_stop(instance->hw_worker);
-        }
+        hardware_worker_stop(instance->hw_worker);
         instance->in_emu_phase = false;
         furi_timer_start(instance->timer, furi_ms_to_ticks(instance->timer_idle_time_ms));
     } else {
@@ -233,9 +230,7 @@ static void fuzzer_worker_on_tick_callback(void* context) {
                 instance->end_callback(instance->end_context);
             }
         } else {
-            if(instance->treead_running) {
-                hardware_worker_emulate_start(instance->hw_worker);
-            }
+            hardware_worker_emulate_start(instance->hw_worker);
             instance->in_emu_phase = true;
             furi_timer_start(instance->timer, furi_ms_to_ticks(instance->timer_emu_time_ms));
             if(instance->tick_callback) {
@@ -319,6 +314,7 @@ bool fuzzer_worker_init_attack_file_dict(
     if(!fuzzer_worker_load_key(instance, false)) {
         instance->attack_type = FuzzerWorkerAttackTypeMax;
         buffered_file_stream_close(instance->uids_stream);
+        stream_free(instance->uids_stream);
         furi_record_close(RECORD_STORAGE);
     } else {
         res = true;
@@ -355,6 +351,8 @@ FuzzerWorker* fuzzer_worker_alloc() {
     FuzzerWorker* instance = malloc(sizeof(FuzzerWorker));
 
     instance->hw_worker = hardware_worker_alloc();
+    hardware_worker_start_thread(instance->hw_worker);
+
     instance->suported_proto = malloc(sizeof(HwProtocolID) * TOTAL_PROTOCOL_COUNT);
 
     for(uint8_t i = 0; i < TOTAL_PROTOCOL_COUNT; i++) {
@@ -376,7 +374,6 @@ FuzzerWorker* fuzzer_worker_alloc() {
 
     instance->attack_type = FuzzerWorkerAttackTypeMax;
     instance->index = 0;
-    instance->treead_running = false;
     instance->in_emu_phase = false;
 
     memset(instance->payload, 0x00, sizeof(instance->payload));
@@ -398,6 +395,8 @@ void fuzzer_worker_free(FuzzerWorker* instance) {
     furi_timer_free(instance->timer);
 
     free(instance->suported_proto);
+
+    hardware_worker_stop_thread(instance->hw_worker);
     hardware_worker_free(instance->hw_worker);
 
     free(instance);
@@ -424,15 +423,6 @@ bool fuzzer_worker_start(FuzzerWorker* instance, uint8_t idle_time, uint8_t emu_
             instance->timer_emu_time_ms,
             instance->timer_idle_time_ms);
 
-        if(!instance->treead_running) {
-            hardware_worker_start_thread(instance->hw_worker);
-
-            FURI_LOG_D(TAG, "Worker Starting");
-            instance->treead_running = true;
-        } else {
-            FURI_LOG_D(TAG, "Worker UnPaused");
-        }
-
         hardware_worker_emulate_start(instance->hw_worker);
 
         instance->in_emu_phase = true;
@@ -445,15 +435,6 @@ bool fuzzer_worker_start(FuzzerWorker* instance, uint8_t idle_time, uint8_t emu_
 void fuzzer_worker_start_emulate(FuzzerWorker* instance) {
     furi_assert(instance);
 
-    if(!instance->treead_running) {
-        hardware_worker_start_thread(instance->hw_worker);
-
-        FURI_LOG_D(TAG, "Worker Starting");
-        instance->treead_running = true;
-    } else {
-        FURI_LOG_D(TAG, "Worker UnPaused");
-    }
-
     hardware_worker_emulate_start(instance->hw_worker);
 }
 
@@ -462,11 +443,7 @@ void fuzzer_worker_pause(FuzzerWorker* instance) {
 
     furi_timer_stop(instance->timer);
 
-    if(instance->treead_running) {
-        hardware_worker_stop(instance->hw_worker);
-
-        FURI_LOG_D(TAG, "Worker Paused");
-    }
+    hardware_worker_stop(instance->hw_worker);
 }
 
 void fuzzer_worker_stop(FuzzerWorker* instance) {
@@ -474,15 +451,11 @@ void fuzzer_worker_stop(FuzzerWorker* instance) {
 
     furi_timer_stop(instance->timer);
 
-    if(instance->treead_running) {
-        hardware_worker_stop_thread(instance->hw_worker);
-
-        FURI_LOG_D(TAG, "Worker Stopping");
-        instance->treead_running = false;
-    }
+    hardware_worker_stop(instance->hw_worker);
 
     if(instance->attack_type == FuzzerWorkerAttackTypeLoadFileCustomUids) {
         buffered_file_stream_close(instance->uids_stream);
+        stream_free(instance->uids_stream);
         furi_record_close(RECORD_STORAGE);
         instance->attack_type = FuzzerWorkerAttackTypeMax;
     }
