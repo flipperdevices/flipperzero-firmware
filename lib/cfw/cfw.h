@@ -16,15 +16,9 @@ extern "C" {
 typedef struct {
     bool wii_menu;
     uint32_t start_point;
-    bool bad_pins_format;
-    // bool lockscreen_time;
-    // bool lockscreen_seconds;
-    // bool lockscreen_date;
-    // bool lockscreen_statusbar;
-    // bool lockscreen_prompt;
+    bool lock_menu_type;
     bool sort_dirs_first;
     bool dark_mode;
-    // uint32_t favorite_timeout;
     uint32_t charge_cap;
     bool rgb_backlight;
 } CfwSettings;
