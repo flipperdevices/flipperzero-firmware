@@ -48,6 +48,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [Furi,FuriHal: various improvements #2819 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2819)
 - [Loader Menu Reorder - Third time's a charm #687 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/687)
 - [CFW Settings for Main Menu Start Point (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2be53b18c8508371c6b7f408c4661c37670c424) Needs fixes to set added favorites.
+- Updated: [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77) (By xMasterX)
+- Updated: [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) `Uses: COM-port` (By xMasterX)
+- Updated: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck) (By xMasterX)
+- Updated: [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch) (By xMasterX)
+- Updated: [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger) (By xMasterX)
 
 <a name="release">
 

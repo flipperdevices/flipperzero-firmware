@@ -8,4 +8,6 @@ App(
     order=175,
     fap_icon="etch_a_sketch_icon.png",
     fap_category="Games",
+    fap_icon_assets_symbol="etch",
+    fap_icon_assets="assets",
 )

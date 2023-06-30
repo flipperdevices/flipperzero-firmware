@@ -9,4 +9,8 @@ App(
     fap_category="GPIO",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="airmon",
+    fap_author="3cky",
+    fap_weburl="https://github.com/3cky/flipperzero-airmon",
+    # fap_version="1.0.0",
+    fap_description="Plantower PMSx003 sensor reader",
 )

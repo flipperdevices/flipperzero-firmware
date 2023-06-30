@@ -6,9 +6,9 @@ App(
     requires=["gui"],
     stack_size=8*1024,
     order=1,
-	fap_icon="icon.png",
+    fap_icon="icon.png",
     fap_category="GPIO",
     fap_description="ESP32-CAM Motion detection. It generates a beep when motion is detected. Can be extended to trigger more stuff in the code. [Unplug the USB cable to test with Mayhem]",
-	fap_author="eried",
-	fap_weburl="https://flipper.ried.cl"
+    fap_author="eried",
+    fap_weburl="https://flipper.ried.cl"
 )

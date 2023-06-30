@@ -116,11 +116,14 @@ void dcf77_lf_init(int freq, AppFSM* app_fsm) {
     furi_hal_gpio_init_simple(&gpio_ext_pa7, GpioModeOutputPushPull);
     furi_hal_rfid_comp_set_callback(comparator_trigger_callback, app_fsm);
     furi_hal_rfid_tim_read_start(freq, 0.5);
+    furi_hal_rfid_pin_pull_release();
 }
 
 void dcf77_mark(int freq) {
+    UNUSED(freq);
     furi_hal_rfid_comp_start();
     furi_hal_rfid_tim_read_continue();
+    //furi_hal_rfid_tim_read_start(freq, 0.5);
     /* --- */
     furi_hal_rfid_comp_stop();
     furi_hal_rfid_tim_read_pause();
@@ -358,7 +361,7 @@ int32_t dcf77_app_main(void* p) {
         if(event_status == FuriStatusOk) {
             // kepress events
             if(event.type == EventKeyPress) {
-                if(event.input.type == InputTypePress) {
+                if(event.input.type == InputTypeShort) {
                     switch(event.input.key) {
                     case InputKeyUp:
                         app_fsm->last_key = KeyUp;
