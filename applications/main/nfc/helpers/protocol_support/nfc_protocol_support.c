@@ -18,16 +18,64 @@ void nfc_protocol_support_render_info(
     nfc_protocol_support[protocol]->render_info(data, format_type, str);
 }
 
-NfcCustomEvent nfc_protocol_support_handle_read(NfcGenericEvent event, void* context) {
+NfcCustomEvent nfc_protocol_support_handle_poller(NfcGenericEvent event, void* context) {
     furi_assert(context);
     NfcApp* nfc_app = context;
 
     NfcCustomEvent custom_event =
-        nfc_protocol_support[event.protocol]->handle_read(event.data, context);
+        nfc_protocol_support[event.protocol]->handle_poller(event.data, context);
     if(custom_event == NfcCustomEventReadHandlerSuccess) {
         nfc_device_set_data(
             nfc_app->nfc_device, event.protocol, nfc_poller_get_data(nfc_app->poller));
     }
 
     return custom_event;
+}
+
+void nfc_protocol_support_build_scene_saved_menu(NfcApp* instance) {
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+    nfc_protocol_support[protocol]->build_scene_saved_menu(instance);
+
+    Submenu* submenu = instance->submenu;
+
+    // TODO: Implement restore from shadow file
+
+    submenu_add_item(
+        submenu,
+        "Info",
+        SubmenuIndexCommonInfo,
+        nfc_protocol_support_common_submenu_callback,
+        instance);
+    submenu_add_item(
+        submenu,
+        "Rename",
+        SubmenuIndexCommonRename,
+        nfc_protocol_support_common_submenu_callback,
+        instance);
+    submenu_add_item(
+        submenu,
+        "Delete",
+        SubmenuIndexCommonDelete,
+        nfc_protocol_support_common_submenu_callback,
+        instance);
+}
+
+bool nfc_protocol_support_handle_scene_saved_menu(NfcApp* instance, uint32_t event) {
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+
+    // TODO: Implement restore from shadow file
+
+    switch(event) {
+    case SubmenuIndexCommonInfo:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneInfo);
+        return true;
+    case SubmenuIndexCommonRename:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneSaveName);
+        return true;
+    case SubmenuIndexCommonDelete:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneDelete);
+        return true;
+    default:
+        return nfc_protocol_support[protocol]->handle_scene_saved_menu(instance, event);
+    }
 }

@@ -5,7 +5,7 @@
 static NfcCommand nfc_scene_read_poller_callback(NfcGenericEvent event, void* context) {
     NfcApp* instance = context;
 
-    const NfcCustomEvent custom_event = nfc_protocol_support_handle_read(event, context);
+    const NfcCustomEvent custom_event = nfc_protocol_support_handle_poller(event, context);
     view_dispatcher_send_custom_event(instance->view_dispatcher, custom_event);
     return custom_event != NfcCustomEventReadHandlerIgnore ? NfcCommandStop : NfcCommandContinue;
 }

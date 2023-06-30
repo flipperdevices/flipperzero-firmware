@@ -1,11 +1,7 @@
 #pragma once
 
-#include <nfc/nfc_device.h>
-#include <nfc/protocols/nfc_generic_event.h>
-
-#include "../nfc_custom_event.h"
-
 #include "nfc_protocol_support_common.h"
+#include "../../nfc_app.h"
 
 NfcProtocolFeature nfc_protocol_support_get_features(const NfcDevice* device);
 
@@ -14,4 +10,14 @@ void nfc_protocol_support_render_info(
     NfcProtocolFormatType format_type,
     FuriString* str);
 
-NfcCustomEvent nfc_protocol_support_handle_read(NfcGenericEvent event, void* context);
+// Poller handler
+NfcCustomEvent nfc_protocol_support_handle_poller(NfcGenericEvent event, void* context);
+
+// Listener handler
+// TODO
+
+// Scene builders
+void nfc_protocol_support_build_scene_saved_menu(NfcApp* instance);
+
+// Scene handlers
+bool nfc_protocol_support_handle_scene_saved_menu(NfcApp* instance, uint32_t event);

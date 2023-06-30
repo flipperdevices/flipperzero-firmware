@@ -1,6 +1,7 @@
 #include <nfc/protocols/iso14443_4a/iso14443_4a_poller.h>
 
 #include "../iso14443_3a/iso14443_3a_i.h"
+#include "../../../nfc_app_i.h"
 
 static void nfc_protocol_support_render_info_iso14443_4a(
     const Iso14443_4aData* data,
@@ -13,7 +14,7 @@ static void nfc_protocol_support_render_info_iso14443_4a(
 }
 
 static NfcCustomEvent
-    nfc_protocol_support_handle_read_iso14443_4a(Iso14443_4aPollerEvent* event, void* context) {
+    nfc_protocol_support_handle_poller_iso14443_4a(Iso14443_4aPollerEvent* event, void* context) {
     UNUSED(context);
     NfcCustomEvent custom_event = NfcCustomEventReadHandlerIgnore;
 
@@ -24,8 +25,22 @@ static NfcCustomEvent
     return custom_event;
 }
 
+static void nfc_protocol_support_build_scene_saved_menu_iso14443_4a(NfcApp* instance) {
+    nfc_protocol_support_build_scene_saved_menu_iso14443_3a_common(instance);
+}
+
+static bool
+    nfc_protocol_support_handle_scene_saved_menu_iso14443_4a(NfcApp* instance, uint32_t event) {
+    return nfc_protocol_support_handle_scene_saved_menu_iso14443_3a_common(instance, event);
+}
+
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_4a = {
     .features = NfcProtocolFeatureNone,
     .render_info = (NfcProtocolSupportRenderInfo)nfc_protocol_support_render_info_iso14443_4a,
-    .handle_read = (NfcProtocolSupportReadHandler)nfc_protocol_support_handle_read_iso14443_4a,
+    .handle_poller =
+        (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_iso14443_4a,
+    .build_scene_saved_menu =
+        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_iso14443_4a,
+    .handle_scene_saved_menu =
+        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_iso14443_4a,
 };
