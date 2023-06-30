@@ -1,6 +1,6 @@
 # Flipper Zero Evil Portal
 
-An evil captive portal AP using the Flipper Zero and Wi-Fi dev board
+An evil captive portal Wi-Fi access point using the Flipper Zero and Wi-Fi dev board
 
 ## About
 
