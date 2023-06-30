@@ -53,7 +53,8 @@ static void nfc_listener_list_alloc(NfcListener* instance, const NfcDeviceData* 
 
     do {
         if(iter->child == NULL) break;
-        iter->child->listener = iter->child->listener_api->alloc(iter->listener, iter->data);
+        iter->child->listener =
+            iter->child->listener_api->alloc(iter->listener, iter->child->data);
         iter->listener_api->set_callback(
             iter->listener, iter->child->listener_api->run, iter->child->listener);
 

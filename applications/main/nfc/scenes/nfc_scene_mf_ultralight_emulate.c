@@ -23,7 +23,8 @@ void nfc_scene_mf_ultralight_emulate_on_enter(void* context) {
 
     // Setup and start worker
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewPopup);
-    mf_ultralight_listener_start(nfc->mf_ul_listener, data, NULL, NULL);
+    nfc->listener = nfc_listener_alloc(nfc->nfc, NfcProtocolMfUltralight, data);
+    nfc_listener_start(nfc->listener, NULL, NULL);
 
     nfc_blink_emulate_start(nfc);
 }
@@ -55,6 +56,9 @@ bool nfc_scene_mf_ultralight_emulate_on_event(void* context, SceneManagerEvent e
 
 void nfc_scene_mf_ultralight_emulate_on_exit(void* context) {
     NfcApp* nfc = context;
+
+    nfc_listener_stop(nfc->listener);
+    nfc_listener_free(nfc->listener);
 
     // Clear view
     popup_reset(nfc->popup);

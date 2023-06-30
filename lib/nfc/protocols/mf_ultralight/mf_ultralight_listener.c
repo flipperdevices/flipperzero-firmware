@@ -1,4 +1,5 @@
-#include "mf_ultralight_listener.h"
+#include "mf_ultralight_listener_i.h"
+#include "mf_ultralight_listener_defs.h"
 
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener_i.h>
 
@@ -13,28 +14,6 @@ typedef enum {
     MfUltralightListenerAccessTypeWrite,
 } MfUltralightListenerAccessType;
 
-typedef enum {
-    MfUltralightListenerAuthStateIdle,
-    MfUltralightListenerAuthStateSuccess,
-} MfUltralightListenerAuthState;
-
-typedef enum {
-    MfUltraligthListenerStateIdle,
-} MfUltraligthListenerState;
-
-struct MfUltralightListener {
-    Iso14443_3aListener* iso14443_3a_listener;
-    MfUltralightListenerAuthState auth_state;
-    MfUltraligthListenerState state;
-    MfUltralightData* data;
-    BitBuffer* tx_buffer;
-    MfUltralightFeatureSupport features;
-    MfUltralightConfigPages* config;
-
-    MfUltralightListenerEventCallback callback;
-    void* context;
-};
-
 typedef bool (*MfUltralightListenerCommandCallback)(MfUltralightListener* instance, BitBuffer* buf);
 
 typedef struct {
@@ -43,31 +22,31 @@ typedef struct {
     MfUltralightListenerCommandCallback callback;
 } MfUltralightListenerCmdHandler;
 
-static MfUltralightError mf_ultralight_process_error(Iso14443_3aError error) {
-    MfUltralightError ret = MfUltralightErrorNone;
+// MfUltralightError mf_ultralight_process_error(Iso14443_3aError error) {
+//     MfUltralightError ret = MfUltralightErrorNone;
 
-    switch(error) {
-    case Iso14443_3aErrorNone:
-        ret = MfUltralightErrorNone;
-        break;
-    case Iso14443_3aErrorNotPresent:
-        ret = MfUltralightErrorNotPresent;
-        break;
-    case Iso14443_3aErrorColResFailed:
-    case Iso14443_3aErrorCommunication:
-    case Iso14443_3aErrorWrongCrc:
-        ret = MfUltralightErrorProtocol;
-        break;
-    case Iso14443_3aErrorTimeout:
-        ret = MfUltralightErrorTimeout;
-        break;
-    default:
-        ret = MfUltralightErrorProtocol;
-        break;
-    }
+//     switch(error) {
+//     case Iso14443_3aErrorNone:
+//         ret = MfUltralightErrorNone;
+//         break;
+//     case Iso14443_3aErrorNotPresent:
+//         ret = MfUltralightErrorNotPresent;
+//         break;
+//     case Iso14443_3aErrorColResFailed:
+//     case Iso14443_3aErrorCommunication:
+//     case Iso14443_3aErrorWrongCrc:
+//         ret = MfUltralightErrorProtocol;
+//         break;
+//     case Iso14443_3aErrorTimeout:
+//         ret = MfUltralightErrorTimeout;
+//         break;
+//     default:
+//         ret = MfUltralightErrorProtocol;
+//         break;
+//     }
 
-    return ret;
-}
+//     return ret;
+// }
 
 static bool mf_ultralight_listener_check_access(
     MfUltralightListener* instance,
@@ -280,12 +259,9 @@ static bool
         MfUltralightAuthPassword password = {};
         memcpy(password.data, &rx_data[1], sizeof(MfUltralightAuthPassword));
         if(instance->callback) {
-            MfUltralightListenerEventData data = {.password = password};
-            MfUltralightListenerEvent event = {
-                .type = MfUltralightListenerEventTypeAuth,
-                .data = &data,
-            };
-            instance->callback(event, instance->context);
+            instance->mfu_event_data.password = password;
+            instance->mfu_event.type = MfUltralightListenerEventTypeAuth;
+            instance->callback(instance->generic_event, instance->context);
         }
         if(password.pass != instance->config->password.pass) break;
 
@@ -338,15 +314,159 @@ static const MfUltralightListenerCmdHandler mf_ultralight_command[] = {
         .callback = mf_ultralight_listener_auth_handler,
     }};
 
-static Iso14443_3aListenerCommand
-    mf_ultralight_listener_event_handler(Iso14443_3aListenerEvent event, void* context) {
+// static Iso14443_3aListenerCommand
+//     mf_ultralight_listener_event_handler(Iso14443_3aListenerEvent event, void* context) {
+//     furi_assert(context);
+
+//     MfUltralightListener* instance = context;
+//     BitBuffer* rx_buffer = event.data->buffer;
+
+//     Iso14443_3aListenerCommand command = Iso14443_3aListenerCommandContinue;
+//     if(event.type == Iso14443_3aListenerEventTypeReceivedStandartFrame) {
+//         bool cmd_processed = false;
+//         for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
+//             if(bit_buffer_get_size(rx_buffer) != mf_ultralight_command[i].cmd_len_bits) continue;
+//             if(bit_buffer_get_byte(rx_buffer, 0) != mf_ultralight_command[i].cmd) continue;
+//             cmd_processed = mf_ultralight_command[i].callback(instance, rx_buffer);
+//             if(cmd_processed) break;
+//         }
+//         if(!cmd_processed) {
+//             mf_ultralight_listener_send_short_resp(instance, MF_ULTRALIGHT_CMD_NACK);
+//             instance->state = MfUltraligthListenerStateIdle;
+//             instance->auth_state = MfUltralightListenerAuthStateIdle;
+//         }
+//     }
+
+//     return command;
+// }
+
+static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* instance) {
+    MfUltralightData* data = instance->data;
+    instance->features = mf_ultralight_get_feature_support_set(data->type);
+    mf_ultralight_get_config_page(data, &instance->config);
+}
+
+MfUltralightListener* mf_ultralight_listener_alloc(Iso14443_3aListener* iso14443_3a_listener) {
+    UNUSED(iso14443_3a_listener);
+    return NULL;
+}
+
+MfUltralightError mf_ultralight_listener_start(
+    MfUltralightListener* instance,
+    const MfUltralightData* data,
+    MfUltralightListenerEventCallback callback,
+    void* context) {
+    UNUSED(instance);
+    UNUSED(data);
+    UNUSED(callback);
+    UNUSED(context);
+    // furi_assert(instance);
+    // furi_assert(data);
+
+    // instance->data = mf_ultralight_alloc();
+    // mf_ultralight_copy(instance->data, data);
+    // instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE);
+    // mf_ultralight_listener_prepare_emulation(instance);
+
+    // instance->callback = callback;
+    // instance->context = context;
+
+    // Iso14443_3aError error = iso14443_3a_listener_start(
+    //     instance->iso14443_3a_listener,
+    //     instance->data->iso14443_3a_data,
+    //     mf_ultralight_listener_event_handler,
+    //     instance);
+
+    // return mf_ultralight_process_error(error);
+    return MfUltralightErrorNone;
+}
+
+void mf_ultralight_listener_free(MfUltralightListener* instance) {
+    UNUSED(instance);
+}
+
+MfUltralightError
+    mf_ultralight_listener_get_data(MfUltralightListener* instance, MfUltralightData* data) {
+    UNUSED(instance);
+    UNUSED(data);
+
+    // mf_ultralight_copy(data, instance->data);
+
+    return MfUltralightErrorNone;
+}
+
+MfUltralightError mf_ultralight_listener_stop(MfUltralightListener* instance) {
+    UNUSED(instance);
+
+    // Iso14443_3aError error = iso14443_3a_listener_stop(instance->iso14443_3a_listener);
+    // instance->state = MfUltraligthListenerStateIdle;
+
+    // bit_buffer_free(instance->tx_buffer);
+    // mf_ultralight_free(instance->data);
+
+    // return mf_ultralight_process_error(error);
+
+    return MfUltralightErrorNone;
+}
+
+MfUltralightListener* mf_ultralight_listener_alloc_new(
+    Iso14443_3aListener* iso14443_3a_listener,
+    const MfUltralightData* data) {
+    furi_assert(iso14443_3a_listener);
+
+    MfUltralightListener* instance = malloc(sizeof(MfUltralightListener));
+    instance->iso14443_3a_listener = iso14443_3a_listener;
+    instance->data = mf_ultralight_alloc();
+    mf_ultralight_copy(instance->data, data);
+    mf_ultralight_listener_prepare_emulation(instance);
+    instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE);
+
+    instance->mfu_event.data = &instance->mfu_event_data;
+    instance->generic_event.protocol = NfcProtocolMfUltralight;
+    instance->generic_event.poller = instance;
+    instance->generic_event.data = &instance->mfu_event;
+
+    return instance;
+}
+
+void mf_ultralight_listener_free_new(MfUltralightListener* instance) {
+    furi_assert(instance);
+    furi_assert(instance->data);
+    furi_assert(instance->tx_buffer);
+
+    bit_buffer_free(instance->tx_buffer);
+    mf_ultralight_free(instance->data);
+    free(instance);
+}
+
+const MfUltralightData* mf_ultralight_listener_get_data_new(MfUltralightListener* instance) {
+    furi_assert(instance);
+    furi_assert(instance->data);
+
+    return instance->data;
+}
+
+void mf_ultralight_listener_set_callback(
+    MfUltralightListener* instance,
+    NfcGenericCallback callback,
+    void* context) {
+    furi_assert(instance);
+
+    instance->callback = callback;
+    instance->context = context;
+}
+
+NfcCommand mf_ultralight_listener_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
+    furi_assert(event.data);
 
     MfUltralightListener* instance = context;
-    BitBuffer* rx_buffer = event.data->buffer;
+    Iso14443_3aListenerEvent* iso14443_3a_event = event.data;
+    BitBuffer* rx_buffer = iso14443_3a_event->data->buffer;
+    NfcCommand command = NfcCommandContinue;
 
-    Iso14443_3aListenerCommand command = Iso14443_3aListenerCommandContinue;
-    if(event.type == Iso14443_3aListenerEventTypeReceivedStandartFrame) {
+    if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandartFrame) {
         bool cmd_processed = false;
         for(size_t i = 0; i < COUNT_OF(mf_ultralight_command); i++) {
             if(bit_buffer_get_size(rx_buffer) != mf_ultralight_command[i].cmd_len_bits) continue;
@@ -364,73 +484,10 @@ static Iso14443_3aListenerCommand
     return command;
 }
 
-static void mf_ultralight_listener_prepare_emulation(MfUltralightListener* instance) {
-    MfUltralightData* data = instance->data;
-    instance->features = mf_ultralight_get_feature_support_set(data->type);
-    mf_ultralight_get_config_page(data, &instance->config);
-}
-
-MfUltralightListener* mf_ultralight_listener_alloc(Iso14443_3aListener* iso14443_3a_listener) {
-    furi_assert(iso14443_3a_listener);
-
-    MfUltralightListener* instance = malloc(sizeof(MfUltralightListener));
-    instance->iso14443_3a_listener = iso14443_3a_listener;
-
-    return instance;
-}
-
-MfUltralightError mf_ultralight_listener_start(
-    MfUltralightListener* instance,
-    const MfUltralightData* data,
-    MfUltralightListenerEventCallback callback,
-    void* context) {
-    furi_assert(instance);
-    furi_assert(data);
-
-    instance->data = mf_ultralight_alloc();
-    mf_ultralight_copy(instance->data, data);
-    instance->tx_buffer = bit_buffer_alloc(MF_ULTRALIGHT_LISTENER_MAX_TX_BUFF_SIZE);
-    mf_ultralight_listener_prepare_emulation(instance);
-
-    instance->callback = callback;
-    instance->context = context;
-
-    Iso14443_3aError error = iso14443_3a_listener_start(
-        instance->iso14443_3a_listener,
-        instance->data->iso14443_3a_data,
-        mf_ultralight_listener_event_handler,
-        instance);
-
-    return mf_ultralight_process_error(error);
-}
-
-void mf_ultralight_listener_free(MfUltralightListener* instance) {
-    furi_assert(instance);
-
-    free(instance);
-}
-
-MfUltralightError
-    mf_ultralight_listener_get_data(MfUltralightListener* instance, MfUltralightData* data) {
-    furi_assert(instance);
-    furi_assert(instance->data);
-    furi_assert(data);
-
-    mf_ultralight_copy(data, instance->data);
-
-    return MfUltralightErrorNone;
-}
-
-MfUltralightError mf_ultralight_listener_stop(MfUltralightListener* instance) {
-    furi_assert(instance);
-    furi_assert(instance->data);
-    furi_assert(instance->tx_buffer);
-
-    Iso14443_3aError error = iso14443_3a_listener_stop(instance->iso14443_3a_listener);
-    instance->state = MfUltraligthListenerStateIdle;
-
-    bit_buffer_free(instance->tx_buffer);
-    mf_ultralight_free(instance->data);
-
-    return mf_ultralight_process_error(error);
-}
+const NfcListenerBase mf_ultralight_listener = {
+    .alloc = (NfcListenerAlloc)mf_ultralight_listener_alloc_new,
+    .free = (NfcListenerFree)mf_ultralight_listener_free_new,
+    .get_data = (NfcListenerGetData)mf_ultralight_listener_get_data_new,
+    .set_callback = (NfcListenerSetCallback)mf_ultralight_listener_set_callback,
+    .run = (NfcListenerRun)mf_ultralight_listener_run,
+};
