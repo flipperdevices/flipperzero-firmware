@@ -1,6 +1,5 @@
 #include "wifi_marauder_text_input.h"
 #include <gui/elements.h>
-#include "ESP32_WiFi_Marauder_icons.h"
 #include "wifi_marauder_app_i.h"
 #include <furi.h>
 
@@ -300,7 +299,7 @@ static void wifi_text_input_view_draw_callback(Canvas* canvas, void* _model) {
         while(len && canvas_string_width(canvas, str) > needed_string_width) {
             str[len--] = '\0';
         }
-        strcat(str, "...");
+        //strcat(str, "..."); // TODO - find replacement
     }
 
     canvas_draw_str(canvas, start_pos, 22, str);

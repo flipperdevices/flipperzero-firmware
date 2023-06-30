@@ -25,65 +25,65 @@ typedef struct {
 
 // NUM_MENU_ITEMS defined in wifi_marauder_app_i.h - if you add an entry here, increment it!
 const WifiMarauderItem items[NUM_MENU_ITEMS] = {
-    {"View Log From", {"Start", "End"}, 2, {"", ""}, NO_ARGS, FOCUS_CONSOLE_TOGGLE, NO_TIP},
+    {"View Log from", {"start", "end"}, 2, {"", ""}, NO_ARGS, FOCUS_CONSOLE_TOGGLE, NO_TIP},
     {"Scan",
-     {"AP", "Station"},
+     {"ap", "station"},
      2,
      {"scanap", "scansta"},
      NO_ARGS,
      FOCUS_CONSOLE_END,
      SHOW_STOPSCAN_TIP},
     {"SSID",
-     {"Add Random", "Add Name", "Remove"},
+     {"add rand", "add name", "remove"},
      3,
      {"ssid -a -g", "ssid -a -n", "ssid -r"},
      INPUT_ARGS,
      FOCUS_CONSOLE_START,
      NO_TIP},
     {"List",
-     {"AP", "SSID", "Station"},
+     {"ap", "ssid", "station"},
      3,
      {"list -a", "list -s", "list -c"},
      NO_ARGS,
      FOCUS_CONSOLE_START,
      NO_TIP},
     {"Select",
-     {"AP", "SSID", "Station"},
+     {"ap", "ssid", "station"},
      3,
      {"select -a", "select -s", "select -c"},
      INPUT_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
     {"Clear List",
-     {"AP", "SSID", "Station"},
+     {"ap", "ssid", "station"},
      3,
      {"clearlist -a", "clearlist -s", "clearlist -c"},
      NO_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
     {"Attack",
-     {"Deauth", "Probe", "Rick Roll"},
+     {"deauth", "probe", "rickroll"},
      3,
      {"attack -t deauth", "attack -t probe", "attack -t rickroll"},
      NO_ARGS,
      FOCUS_CONSOLE_END,
      SHOW_STOPSCAN_TIP},
     {"Targeted Deauth",
-     {"Station", "Manual"},
+     {"station", "manual"},
      2,
      {"attack -t deauth -c", "attack -t deauth -s"},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_END,
      SHOW_STOPSCAN_TIP},
     {"Beacon Spam",
-     {"AP List", "SSID list", "Random"},
+     {"ap list", "ssid list", "random"},
      3,
      {"attack -t beacon -a", "attack -t beacon -l", "attack -t beacon -r"},
      NO_ARGS,
      FOCUS_CONSOLE_END,
      SHOW_STOPSCAN_TIP},
     {"Sniff",
-     {"Beacon", "Deauth", "ESP", "PMKID", "Probe", "Pwn", "Raw", "BT", "Skim"},
+     {"beacon", "deauth", "esp", "pmkid", "probe", "pwn", "raw", "bt", "skim"},
      9,
      {"sniffbeacon",
       "sniffdeauth",
@@ -99,14 +99,14 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
      SHOW_STOPSCAN_TIP},
     {"Signal Monitor", {""}, 1, {"sigmon"}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP},
     {"Channel",
-     {"Get", "Set"},
+     {"get", "set"},
      2,
      {"channel", "channel -s"},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
     {"Settings",
-     {"Display", "Restore", "Force PMKID", "Force Probe", "Save PCAP", "Enable LED", "Other"},
+     {"display", "restore", "ForcePMKID", "ForceProbe", "SavePCAP", "EnableLED", "other"},
      7,
      {"settings",
       "settings -r",
@@ -118,11 +118,12 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
      TOGGLE_ARGS,
      FOCUS_CONSOLE_START,
      NO_TIP},
-    {"Update", {"OTA", "SD"}, 2, {"update -w", "update -s"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
+    {"Update", {"ota", "sd"}, 2, {"update -w", "update -s"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
+    {"Reflash ESP32 (WIP)", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Scripts", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
-    {"Save To Flipper SD Card", // keep as last entry or change logic in callback below
+    {"Save to flipper sdcard", // keep as last entry or change logic in callback below
      {""},
      1,
      {""},
@@ -148,6 +149,17 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
                                    (selected_option_index == 0) :
                                    item->focus_console;
     app->show_stopscan_tip = item->show_stopscan_tip;
+
+    // TODO cleanup
+    if(index == NUM_MENU_ITEMS - 3) {
+        // flasher
+        app->is_command = false;
+        app->flash_mode = true;
+        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartFlasher);
+        return;
+    }
+
+    app->flash_mode = false;
 
     if(!app->is_command && selected_option_index == 0) {
         // View Log from start
@@ -260,6 +272,10 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
             scene_manager_set_scene_state(
                 app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, WifiMarauderSceneSniffPmkidOptions);
+        } else if(event.event == WifiMarauderEventStartFlasher) {
+            scene_manager_set_scene_state(
+                app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
+            scene_manager_next_scene(app->scene_manager, WifiMarauderSceneFlasher);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
