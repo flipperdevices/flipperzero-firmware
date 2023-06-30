@@ -94,6 +94,22 @@ bool furi_hal_power_gauge_is_ok() {
     return ret;
 }
 
+bool furi_hal_power_is_shutdown_requested() {
+    bool ret = false;
+
+    BatteryStatus battery_status;
+
+    furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
+
+    if(bq27220_get_battery_status(&furi_hal_i2c_handle_power, &battery_status) != BQ27220_ERROR) {
+        ret = battery_status.SYSDWN;
+    }
+
+    furi_hal_i2c_release(&furi_hal_i2c_handle_power);
+
+    return ret;
+}
+
 uint16_t furi_hal_power_insomnia_level() {
     return furi_hal_power.insomnia;
 }
