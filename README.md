@@ -78,6 +78,12 @@ You can manually save logs using the `Save logs` command. Logs will be stored in
 
 Logs will automatically be saved when exiting the app or when the current log reaches 4000 characters.
 
+## Building for different firmware
+
+If you are not using the official flipper zero firmware or the unleashed firmware you can build the .fap file yourself by following [these instructions](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md).
+
+Note that you will need to use the firmware repo that you wish to build for. 
+
 ## Issues
 
 If you run into any issues make sure that you have the required files set up on the Flipper `apps_data` folder on the Flipper SD card.
