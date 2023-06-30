@@ -4,7 +4,7 @@
 #include "evil_portal_custom_event.h"
 #include "evil_portal_uart.h"
 #include "scenes/evil_portal_scene.h"
-#include "uart_text_input.h"
+// #include "uart_text_input.h"
 
 #include <gui/gui.h>
 #include <gui/modules/text_box.h>
@@ -29,7 +29,6 @@ struct Evil_PortalApp {
   FuriString *text_box_store;
   size_t text_box_store_strlen;
   TextBox *text_box;
-  UART_TextInput *text_input;
 
   VariableItemList *var_item_list;
 
