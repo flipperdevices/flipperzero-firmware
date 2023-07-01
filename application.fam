@@ -1,5 +1,5 @@
 App(
-    appid="flipbip",
+    appid="flip-bip",
     name="FlipBIP Crypto Tool",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipbip_app",
