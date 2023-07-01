@@ -30,14 +30,12 @@ void nfc_scene_mf_ultralight_menu_on_enter(void* context) {
     }
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, nfc_scene_mf_ultralight_menu_submenu_callback, nfc);
-    if(mf_ul_emulation_supported(data)) {
-        submenu_add_item(
-            submenu,
-            "Emulate",
-            SubmenuIndexEmulate,
-            nfc_scene_mf_ultralight_menu_submenu_callback,
-            nfc);
-    }
+    submenu_add_item(
+        submenu,
+        "Emulate",
+        SubmenuIndexEmulate,
+        nfc_scene_mf_ultralight_menu_submenu_callback,
+        nfc);
     submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, nfc_scene_mf_ultralight_menu_submenu_callback, nfc);
 
