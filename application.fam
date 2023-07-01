@@ -4,11 +4,13 @@ App(
     name="BT Trigger",
     entry_point="bt_trigger_app",
     cdefines=["APP_BT_TRIGGER"],
-    requires=[
-        "gui"
-    ],
+    requires=["gui"],
     stack_size=1 * 1024,
-	fap_icon="bt_trigger_logo.png",
+    fap_icon="bt_trigger_logo.png",
     fap_category="Tools_Extra",
-    fap_icon_assets="assets"
+    fap_icon_assets="assets",
+    fap_author="@Nem0oo",
+    fap_weburl="https://github.com/Nem0oo/flipper-zero-bluetooth-trigger",
+    fap_version="1.0",
+    fap_description="App allows you to control your smartphone camera via flipper",
 )
