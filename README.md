@@ -163,3 +163,12 @@ I was only able to create this using the following apps as examples
 ## Contact me
 
 You can message me on my reddit account bigbrodude6119
+
+<!-- LINKS -->
+
+[link-arduino]: https://www.arduino.cc/en/software
+[link-asynctcp]: https://github.com/me-no-dev/AsyncTCP
+[link-espasyncwebserver]: https://github.com/me-no-dev/ESPAsyncWebServer
+[link-esptool]: https://pypi.org/project/esptool/
+[link-python]: https://www.python.org/downloads/
+[link-setuptools]: https://pypi.org/project/setuptools/
