@@ -1,6 +1,6 @@
 # flipperzero-lightmeter
 
-[![Build FAP](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build.yml)
+[![FAP: Build and lint](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build-and-lint.yml/badge.svg)](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build-and-lint.yml)
 
 Download: [![FAP Factory](https://flipc.org/api/v1/oleksiikutuzov/flipperzero-lightmeter/badge?root=application)](https://flipc.org/oleksiikutuzov/flipperzero-lightmeter?root=application)
 
