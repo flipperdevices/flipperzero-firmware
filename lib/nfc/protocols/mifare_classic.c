@@ -884,7 +884,6 @@ bool mf_classic_emulator(
 
         if(cmd == 0x50 && plain_data[1] == 0x00) {
             FURI_LOG_T(TAG, "Halt received");
-            furi_hal_nfc_listen_sleep();
             return false;
         }
         if(cmd == 0xE0) {
