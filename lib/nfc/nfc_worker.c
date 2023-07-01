@@ -1018,7 +1018,9 @@ void nfc_worker_emulate_mf_classic(NfcWorker* nfc_worker) {
     furi_hal_nfc_listen_start(nfc_data);
     while(nfc_worker->state == NfcWorkerStateMfClassicEmulate) { //-V1044
         if(furi_hal_nfc_listen_rx(&tx_rx, 300)) {
-            mf_classic_emulator(&emulator, &tx_rx, false);
+            if(!mf_classic_emulator(&emulator, &tx_rx, false)) {
+                furi_hal_nfc_listen_start(nfc_data);
+            }
         }
     }
     if(emulator.data_changed) {

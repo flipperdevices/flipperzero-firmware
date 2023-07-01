@@ -868,7 +868,7 @@ bool mf_classic_emulator(
             if(!furi_hal_nfc_tx_rx(tx_rx, 300)) {
                 FURI_LOG_D(
                     TAG,
-                    "Error in tx rx. Tx :%d bits, Rx: %d bits",
+                    "Error in tx rx. Tx: %d bits, Rx: %d bits",
                     tx_rx->tx_bits,
                     tx_rx->rx_bits);
                 break;
@@ -885,7 +885,11 @@ bool mf_classic_emulator(
         if(cmd == 0x50 && plain_data[1] == 0x00) {
             FURI_LOG_T(TAG, "Halt received");
             furi_hal_nfc_listen_sleep();
-            command_processed = true;
+            return false;
+        }
+        if(cmd == 0xE0) {
+            // Mifare Classic doesn't support ATS, NACK it and start listening again
+            FURI_LOG_T(TAG, "RATS received");
             break;
         }
         if(cmd == MF_CLASSIC_AUTH_KEY_A_CMD || cmd == MF_CLASSIC_AUTH_KEY_B_CMD) {
@@ -944,14 +948,12 @@ bool mf_classic_emulator(
             }
             if(!furi_hal_nfc_tx_rx(tx_rx, 500)) {
                 FURI_LOG_E(TAG, "Error in NT exchange");
-                command_processed = true;
-                break;
+                return false;
             }
 
             if(tx_rx->rx_bits != 64) {
                 FURI_LOG_W(TAG, "Incorrect nr + ar length: %d", tx_rx->rx_bits);
-                command_processed = true;
-                break;
+                return false;
             }
 
             uint32_t nr = nfc_util_bytes2num(tx_rx->rx_data, 4);
@@ -962,8 +964,7 @@ bool mf_classic_emulator(
             if(cardRr != prng_successor(nonce, 64)) {
                 FURI_LOG_T(TAG, "Wrong AUTH! %08lX != %08lX", cardRr, prng_successor(nonce, 64));
                 // Don't send NACK, as the tag doesn't send it
-                command_processed = true;
-                break;
+                return false;
             }
 
             uint32_t ans = prng_successor(nonce, 96);
@@ -1155,6 +1156,7 @@ bool mf_classic_emulator(
         tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
         tx_rx->tx_bits = 4;
         furi_hal_nfc_tx_rx(tx_rx, 300);
+        return false;
     }
 
     return true;
