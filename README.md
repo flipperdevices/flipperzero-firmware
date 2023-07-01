@@ -16,7 +16,7 @@ This program is for educational purposes only.
 
 ## Getting Started
 
-There are pre-built .fap files for the official FW as well as unleashed FW.
+There are pre-built .fap files for the official FW (untested) as well as unleashed FW (tested).
 
 You will need to manually flash the Wi-Fi dev board.
 
@@ -26,7 +26,7 @@ Go to the releases section on this repo and download and extract either the `ofw
 
 You will also need to download and extract the `evil_portal_sd_folder.zip` folder. This will contain necessary files for the app to run.
 
-Put the `evil_portal.fap` found file into the `apps/GPIO/` folder on your Flipper SD card. 
+Put the `evil_portal.fap` file into the `apps/GPIO/` folder on your Flipper SD card. 
 
 Put the `evil_portal` folder into the `apps_data` folder.
 This is an example of your Flipper SD card if done correctly.
@@ -70,9 +70,9 @@ Plug in the Wi-Fi Dev board to the flipper.
 
 Open the app on the Flipper and press `Start portal` on the main menu. After a few seconds you should start to see logs coming in from your Wi-Fi dev board and the AP will start and the LED will turn green.
 
-The AP will take the name that is in the `ap.config.txt` file located on your Flipper in the `apps_data` folder.
+The AP will take the name that is in the `ap.config.txt` file located on your Flipper in the `apps_data/evil_portal/` folder.
 
-When you connect to the AP a web page will open after a few seconds. This web page contains the HTML located in the `index.html` file located on your Flipper in the `apps_data` folder.
+When you connect to the AP a web page will open after a few seconds. This web page contains the HTML located in the `index.html` file located on your Flipper in the `apps_data/evil_portal/` folder.
 
 You can stop the portal by pressing `Stop portal` on the main menu. The LED should turn blue.
 
@@ -90,7 +90,11 @@ Note that you will need to use the firmware repo that you wish to build for.
 
 If you run into any issues make sure that you have the required files set up on the Flipper `apps_data` folder on the Flipper SD card.
 
+Logs will not be saved if there is no `logs` folder in `apps_data/evil_portal/`.
+
 If the AP won't start or you have other issues try pressing reset on the Wi-Fi dev board, waiting a few seconds, and pressing `Start portal` on the main menu.
+
+It is important to give the devboard some time to load the html files from the Flipper.
 
 ## Todo
 
@@ -98,6 +102,8 @@ I plan on working on this in my free time. Here is my todo list.
 
 * Support for multiple portals
 * Enter AP name on the Flipper
+* Add a config file for general app settings
+* Clean up code & implement best practices
 
 ## License
 
