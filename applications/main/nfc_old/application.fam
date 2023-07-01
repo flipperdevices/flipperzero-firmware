@@ -1,5 +1,5 @@
 App(
-    appid="nfc",
+    appid="nfc_app",
     name="NFC",
     apptype=FlipperAppType.APP,
     targets=["f7"],

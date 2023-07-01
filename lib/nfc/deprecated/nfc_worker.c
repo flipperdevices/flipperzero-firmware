@@ -989,7 +989,7 @@ void nfc_worker_mf_classic_dict_attack(NfcWorker* nfc_worker) {
                 }
                 if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
             }
-            prev_key = key;
+            memcpy(&prev_key, &key, sizeof(key));
         }
         if(nfc_worker->state != NfcWorkerStateMfClassicDictAttack) break;
         mifare_classic_read_sector(&tx_rx, data, i);
