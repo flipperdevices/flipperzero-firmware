@@ -28,7 +28,7 @@ You will also need to download and extract the `evil_portal_sd_folder.zip` folde
 
 Put the `evil_portal.fap` found file into the `apps/GPIO/` folder on your Flipper SD card. 
 
-Put the `evil_portal` folder into the `apps_data` foler.
+Put the `evil_portal` folder into the `apps_data` folder.
 This is an example of your Flipper SD card if done correctly.
 
 ```
@@ -48,7 +48,7 @@ If you want to create your own `index.html` file keep in mind that there is a li
 
 ### Install on the Wi-Fi dev board
 
-There is no pre-built file for the Wi-Fi dev board. You will need to download the [Arduino IDE](https://www.arduino.cc/en/software) and flash the board mannually.
+There is no pre-built file for the Wi-Fi dev board. You will need to download the [Arduino IDE](https://www.arduino.cc/en/software) and flash the board manually.
 
 If you have never programmed an ESP32 using arduino before you can follow [this guide](https://lastminuteengineers.com/esp32-arduino-ide-tutorial/) to get started.
 
@@ -68,7 +68,7 @@ After flashing the board and pressing the reset button you should see a solid bl
 
 Plug in the Wi-Fi Dev board to the flipper.
 
-Open the app on the Flipper and press `Start portal` on the main menu. After a few seconds you should start to see logs comming in from your Wi-Fi dev board and the AP will start and the LED will turn green.
+Open the app on the Flipper and press `Start portal` on the main menu. After a few seconds you should start to see logs coming in from your Wi-Fi dev board and the AP will start and the LED will turn green.
 
 The AP will take the name that is in the `ap.config.txt` file located on your Flipper in the `apps_data` folder.
 
