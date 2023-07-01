@@ -76,7 +76,9 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
         // The order is reversed for storage and for the user opening the file
         uint64_t swapped = __builtin_bswap64(cred->credential);
         cred->credential = swapped;
-
+        // Optional SIO/Diversifier
+        flipper_format_read_hex(file, "SIO", cred->sio, sizeof(cred->sio));
+        flipper_format_read_hex(file, "Diversifier", cred->diversifier, sizeof(cred->diversifier));
         parsed = true;
     } while(false);
 
@@ -127,6 +129,12 @@ bool seader_credential_save_agnostic(SeaderCredential* cred, const char* name) {
         if(!flipper_format_write_hex(
                file, "Credential", (uint8_t*)&swapped, sizeof(cred->credential)))
             break;
+        if(cred->sio[0] == 0x30) {
+            if(!flipper_format_write_hex(file, "SIO", cred->sio, sizeof(cred->sio))) break;
+            if(!flipper_format_write_hex(
+                   file, "Diversifier", cred->diversifier, sizeof(cred->diversifier)))
+                break;
+        }
 
         saved = true;
     } while(false);
