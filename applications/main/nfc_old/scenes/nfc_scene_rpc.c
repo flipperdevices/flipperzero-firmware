@@ -1,7 +1,7 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 
 void nfc_scene_rpc_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     Popup* popup = nfc->popup;
 
     popup_set_header(popup, "NFC", 89, 42, AlignCenter, AlignBottom);
@@ -16,14 +16,14 @@ void nfc_scene_rpc_on_enter(void* context) {
 
 static bool nfc_scene_rpc_emulate_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     nfc->rpc_state = NfcRpcStateEmulated;
     return true;
 }
 
 bool nfc_scene_rpc_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     Popup* popup = nfc->popup;
     bool consumed = false;
 
@@ -82,7 +82,7 @@ bool nfc_scene_rpc_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_rpc_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     Popup* popup = nfc->popup;
 
     nfc_blink_stop(nfc);

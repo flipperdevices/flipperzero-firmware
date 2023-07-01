@@ -1,17 +1,17 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 
 void nfc_scene_mf_classic_wrong_card_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
     }
 }
 
 void nfc_scene_mf_classic_wrong_card_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     Widget* widget = nfc->widget;
 
     notification_message(nfc->notifications, &sequence_error);
@@ -35,7 +35,7 @@ void nfc_scene_mf_classic_wrong_card_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_wrong_card_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -47,7 +47,7 @@ bool nfc_scene_mf_classic_wrong_card_on_event(void* context, SceneManagerEvent e
 }
 
 void nfc_scene_mf_classic_wrong_card_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     widget_reset(nfc->widget);
 }

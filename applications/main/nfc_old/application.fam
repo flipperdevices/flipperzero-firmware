@@ -1,5 +1,5 @@
 App(
-    appid="nfc_old",
+    appid="nfc_app",
     name="NFC",
     apptype=FlipperAppType.APP,
     targets=["f7"],
@@ -16,7 +16,7 @@ App(
 )
 
 App(
-    appid="nfc_old_start",
+    appid="nfc_start",
     apptype=FlipperAppType.STARTUP,
     entry_point="nfc_on_system_start",
     requires=["nfc"],

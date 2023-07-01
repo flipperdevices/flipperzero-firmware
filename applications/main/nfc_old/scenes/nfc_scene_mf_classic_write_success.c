@@ -1,13 +1,13 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
 void nfc_scene_mf_classic_write_success_popup_callback(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
 }
 
 void nfc_scene_mf_classic_write_success_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     dolphin_deed(DolphinDeedNfcSave);
 
     notification_message(nfc->notifications, &sequence_success);
@@ -24,7 +24,7 @@ void nfc_scene_mf_classic_write_success_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_write_success_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -37,7 +37,7 @@ bool nfc_scene_mf_classic_write_success_on_event(void* context, SceneManagerEven
 }
 
 void nfc_scene_mf_classic_write_success_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     // Clear view
     popup_reset(nfc->popup);
