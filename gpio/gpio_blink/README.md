@@ -1,5 +1,5 @@
 # GPIO_BLINK
-This is the classic "Hello World" of GPIO, where we blink an LED.  You will need an LED (any color is fine) and a resistor (220 ohms - 1 kiliohm should be fine).  Connect the long side of the LED into pin A7.  Connect the short size of the LED to one side of the resistor (doesn't matter which side).  Connect the other side of the resistor to any of the pin GND.
+This is the classic "Hello World" of GPIO, where we blink an LED.  You will need an LED (any color is fine) and a resistor (220 ohms - 1 kilohm should be fine).  Connect the long side of the LED into pin A7.  Connect the short size of the LED to one side of the resistor (doesn't matter which side).  Connect the other side of the resistor to any of the pin GND.
 
 Run the application and the LED should start blinking.  Hold the back button to exit.
 
