@@ -103,6 +103,7 @@ I plan on working on this in my free time. Here is my todo list.
 * Support for multiple portals
 * Enter AP name on the Flipper
 * Add a config file for general app settings
+* Create cleaner log files that are easier to read
 * Clean up code & implement best practices
 
 ## License
