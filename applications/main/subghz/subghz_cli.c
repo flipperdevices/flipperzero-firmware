@@ -236,7 +236,6 @@ void subghz_cli_command_tx(Cli* cli, FuriString* args, void* context) {
     subghz_devices_deinit();
     subghz_cli_radio_device_power_off();
 
-    furi_hal_subghz_sleep();
     furi_hal_power_suppress_charge_exit();
 
     flipper_format_free(flipper_format);
