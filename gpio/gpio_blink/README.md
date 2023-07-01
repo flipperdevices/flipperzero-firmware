@@ -42,3 +42,9 @@ Run the application and the LED should start blinking.  Hold the back button to 
   ```c
   while(furi_hal_gpio_read(pin_back))
   ```
+
+- Typically when a pin is no longer in use, it is set to analog mode.  This causes the pin to be a floating input.
+  ```c
+  furi_hal_gpio_init_simple(pin_led, GpioModeAnalog);
+  ```
+
