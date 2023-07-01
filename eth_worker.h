@@ -1,7 +1,5 @@
 #pragma once
 
-#include "eth_device.h"
-
 typedef struct EthWorker EthWorker;
 
 typedef enum {
@@ -25,6 +23,7 @@ typedef enum {
 typedef enum {
     EthCustomEventUpdate = 0,
     EthCustomEventModuleInit,
+    EthCustomEventModuleError,
     EthCustomEventModulePowerOn,
     EthCustomEventModuleConnect,
     EthCustomEventMACInit,
@@ -51,3 +50,5 @@ void eth_worker_start(
     void* context);
 
 void eth_worker_stop(EthWorker* eth_worker);
+void eth_worker_dhcp(EthWorker* eth_worker);
+void eth_worker_w5500(EthWorker* eth_worker);

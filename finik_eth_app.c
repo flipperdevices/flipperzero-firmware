@@ -55,7 +55,9 @@ FinikEthApp* finik_eth_app_alloc() {
 
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
-    //app->eth_worker =
+    app->eth_worker = eth_worker_alloc();
+    
+    eth_worker_task(app->eth_worker);
 
     return app;
 }

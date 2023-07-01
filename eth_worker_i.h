@@ -1,5 +1,6 @@
 #pragma once
 
+#include <furi.h>
 #include "eth_worker.h"
 
 struct EthWorker {

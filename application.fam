@@ -14,6 +14,12 @@ App(
 	fap_icon_assets="images",
 	fap_private_libs=[
 		Lib(
+			cflags=[
+                "-Wunused-parameter",
+                "-Wunused-function",
+                "-Wredundant-decls",
+                "-Wunused-parameter",
+			],
 			name="ioLibrary_Driver",
 			fap_include_paths=[
                 "Ethernet/W5500",
