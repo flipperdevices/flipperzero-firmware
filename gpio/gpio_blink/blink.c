@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <gui/gui.h>
 
-// For list of pins see \firmware\targets\f18\furi_hal\furi_hal_resources.c
+// For list of pins see https://github.com/flipperdevices/flipperzero-firmware/blob/dev/firmware/targets/f7/furi_hal/furi_hal_resources.c
 const GpioPin* const pin_led = &gpio_ext_pa7;
 const GpioPin* const pin_back = &gpio_button_back;
 
@@ -26,8 +26,8 @@ int gpio_blink_app(void* p) {
     gui_add_view_port(gui, view_port, GuiLayerFullscreen);
 
     // Initialize the LED pin as output.
-    // GpioModeOutputPushPull means true = +3.3V, false = 0V.
-    // GpioModeOutputOpenDrain means true = floating, false = 0V.
+    // GpioModeOutputPushPull means true = 3.3 volts, false = 0 volts.
+    // GpioModeOutputOpenDrain means true = floating, false = 0 volts.
     furi_hal_gpio_init_simple(pin_led, GpioModeOutputOpenDrain);
     do {
         furi_hal_gpio_write(pin_led, true);
