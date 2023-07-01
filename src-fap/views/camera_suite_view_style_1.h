@@ -53,12 +53,11 @@
 typedef struct UartDumpModel UartDumpModel;
 
 struct UartDumpModel {
-    uint8_t pixels[FRAME_BUFFER_LENGTH];
-
     bool initialized;
-
-    uint8_t row_ringbuffer[RING_BUFFER_LENGTH];
+    int rotation_angle;
+    uint8_t pixels[FRAME_BUFFER_LENGTH];
     uint8_t ringbuffer_index;
+    uint8_t row_ringbuffer[RING_BUFFER_LENGTH];
 };
 
 typedef struct CameraSuiteViewStyle1 CameraSuiteViewStyle1;
