@@ -60,8 +60,8 @@ This section is coming soon...
 ## Attributions <a name="attributions"></a>
 
 This project is based on/forked from the [Fliper Zero Camera Application][flipperzero-camera]
-by [Z4urce][z4urce] combined with the [Flipper Zero Boilerplate Application][boilerplate-app]
-by [Dave Lee][leedave].
+by [Z4urce][github-profile-z4urce] combined with the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate]
+by [Dave Lee][github-profile-leedave].
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
