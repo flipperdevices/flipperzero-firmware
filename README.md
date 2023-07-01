@@ -16,12 +16,25 @@
 
 ## Table of Contents <a name="index"></a>
 
+- [Previews](#previews)
 - [Hardware Requirements](#hardware-requirements)
 - [Hardware Installation](#hardware-installation)
 - [Firmware Installation](#firmware-installation)
 - [Software Installation](#software-installation)
 - [Software Guide](#software-guide)
 - [Attributions](#attributions)
+
+## Previews <a name="previews"></a>
+
+<img align="center" src=".github/images/app-preview-cam-01.png" />
+
+---
+
+Early stage rotation:
+
+<img align="center" src=".github/images/rotation-demo.gif" />
+
+<p align="right">[ <a href="#index">Back to top</a> ]</p>
 
 ## Hardware Requirements <a name="hardware-requirements"></a>
 
