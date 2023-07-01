@@ -26,8 +26,7 @@ void cfw_app_scene_interface_lockmenu_on_enter(void* context) {
     item = variable_item_list_add(
         var_item_list, "Style", 2, cfw_app_scene_interface_lockmenu_type_changed, app);
     variable_item_set_current_value_index(item, cfw_settings->lock_menu_type);
-    variable_item_set_current_value_text(
-        item, cfw_settings->lock_menu_type ? "Adv Grid" : "List");
+    variable_item_set_current_value_text(item, cfw_settings->lock_menu_type ? "Adv Grid" : "List");
 
     variable_item_list_set_enter_callback(
         var_item_list, cfw_app_scene_interface_lockmenu_var_item_list_callback, app);

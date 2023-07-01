@@ -31,7 +31,7 @@
 #include <lib/nfc/nfc_device.h>
 #include "nfc_magic_icons.h"
 
-#define NFC_APP_FOLDER ANY_PATH("nfc")
+#define NFC_APP_FOLDER EXT_PATH("nfc")
 
 enum NfcMagicCustomEvent {
     // Reserve first 100 events for button types and indexes, starting from 0

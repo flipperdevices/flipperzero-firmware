@@ -13,7 +13,7 @@
 
 #define TAG "HexViewer"
 
-#define HEX_VIEWER_APP_PATH_FOLDER "/any"
+#define HEX_VIEWER_APP_PATH_FOLDER EXT_PATH("")
 #define HEX_VIEWER_APP_EXTENSION "*"
 
 #define HEX_VIEWER_BYTES_PER_LINE 4u

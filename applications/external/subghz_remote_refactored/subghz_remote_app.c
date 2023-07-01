@@ -23,6 +23,7 @@ SubGhzRemoteApp* subghz_remote_app_alloc() {
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     storage_common_migrate(storage, EXT_PATH("unirf"), SUBREM_APP_FOLDER);
+    storage_common_migrate(storage, EXT_PATH("subghz/unirf"), SUBREM_APP_FOLDER);
 
     if(!storage_simply_mkdir(storage, SUBREM_APP_FOLDER)) {
         //FURI_LOG_E(TAG, "Could not create folder %s", SUBREM_APP_FOLDER);

@@ -38,7 +38,7 @@
 // Read Access, 1 meanns anonymous read enabled, 0 means must auth to read applicaion
 #define PICOPASS_FUSE_RA 0x01
 
-#define PICOPASS_APP_FOLDER ANY_PATH("picopass")
+#define PICOPASS_APP_FOLDER EXT_PATH("picopass")
 #define PICOPASS_APP_EXTENSION ".picopass"
 #define PICOPASS_APP_SHADOW_EXTENSION ".pas"
 

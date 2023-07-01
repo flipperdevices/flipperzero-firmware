@@ -53,6 +53,11 @@ uint32_t air_mouse_exit(void* context) {
 AirMouse* air_mouse_app_alloc() {
     AirMouse* app = malloc(sizeof(AirMouse));
 
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_copy(storage, CALIBRATION_OLD_DATA_PATH, CALIBRATION_DATA_PATH);
+    storage_common_remove(storage, CALIBRATION_OLD_DATA_PATH);
+    furi_record_close(RECORD_STORAGE);
+
     // Gui
     app->gui = furi_record_open(RECORD_GUI);
 

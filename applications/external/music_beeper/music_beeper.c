@@ -10,7 +10,7 @@
 
 #define TAG "MusicBeeper"
 
-#define MUSIC_BEEPER_APP_PATH_FOLDER ANY_PATH("apps_data/music_player")
+#define MUSIC_BEEPER_APP_PATH_FOLDER EXT_PATH("apps_data/music_player")
 #define MUSIC_BEEPER_APP_EXTENSION "*"
 
 #define MUSIC_BEEPER_SEMITONE_HISTORY_SIZE 4

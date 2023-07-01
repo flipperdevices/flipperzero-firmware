@@ -17,7 +17,7 @@
 
 #define TAG "WavPlayer"
 
-#define WAVPLAYER_FOLDER "/ext/apps_data/wav_player"
+#define WAVPLAYER_FOLDER EXT_PATH("apps_data/wav_player")
 
 static bool open_wav_stream(Stream* stream) {
     DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);

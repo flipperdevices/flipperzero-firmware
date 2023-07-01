@@ -194,7 +194,7 @@ int32_t hex_editor_app(void* p) {
         if(p && strlen(p)) {
             furi_string_set(file_path, (const char*)p);
         } else {
-            furi_string_set(file_path, "/any");
+            furi_string_set(file_path, EXT_PATH(""));
 
             DialogsFileBrowserOptions browser_options;
             dialog_file_browser_set_basic_options(&browser_options, "*", &I_edit_10px);

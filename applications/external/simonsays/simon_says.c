@@ -21,7 +21,7 @@
 #define BOARD_X 72 // Used for board placement
 #define BOARD_Y 8
 #define GAME_START_LIVES 3
-#define SAVING_DIRECTORY "/ext/apps/Games"
+#define SAVING_DIRECTORY EXT_PATH("apps_data/simonsays")
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_simon_says.save"
 
 // Define Notes
@@ -371,6 +371,8 @@ void simon_input_callback(InputEvent* input_event, void* ctx) {
 
 bool load_game(SimonData* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_copy(storage, EXT_PATH("apps/Games/game_simon_says.save"), SAVING_FILENAME);
+    storage_common_remove(storage, EXT_PATH("apps/Games/game_simon_says.save"));
 
     File* file = storage_file_alloc(storage);
 

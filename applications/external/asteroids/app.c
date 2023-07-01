@@ -28,7 +28,8 @@
 #define MAXPOWERUPS 3 /* Max powerups allowed on screen */
 #define POWERUPSTTL 400 /* Max powerup time to live, in ticks. */
 #define SHIP_HIT_ANIMATION_LEN 15
-#define SAVING_DIRECTORY "/ext/apps/Games"
+// Tick runs in thread, cant use APP_DATA_PATH()
+#define SAVING_DIRECTORY EXT_PATH("apps_data/asteroids")
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_asteroids.save"
 #ifndef PI
 #define PI 3.14159265358979f
@@ -1146,6 +1147,9 @@ void game_tick(void* ctx) {
 
 bool load_game(AsteroidsApp* app) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_mkdir(storage, SAVING_DIRECTORY);
+    storage_common_copy(storage, EXT_PATH("apps/Games/game_asteroids.save"), SAVING_FILENAME);
+    storage_common_remove(storage, EXT_PATH("apps/Games/game_asteroids.save"));
 
     File* file = storage_file_alloc(storage);
     uint16_t bytes_readed = 0;

@@ -12,7 +12,7 @@
 #define FRAME_TOP 3
 #define FRAME_CELL_SIZE 7
 
-#define SAVING_DIRECTORY "/ext/apps_data/reversi"
+#define SAVING_DIRECTORY EXT_PATH("apps_data/reversi")
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_reversi.save"
 
 typedef enum { AppScreenGame, AppScreenMenu } AppScreen;

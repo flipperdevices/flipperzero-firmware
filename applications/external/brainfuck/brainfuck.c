@@ -137,7 +137,9 @@ int32_t brainfuck_app(void* p) {
     }
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    storage_simply_mkdir(storage, "/ext/brainfuck");
+    storage_simply_mkdir(storage, EXT_PATH("apps_data/brainfuck"));
+    storage_common_copy(storage, EXT_PATH("brainfuck"), EXT_PATH("apps_data/brainfuck"));
+    storage_common_remove(storage, EXT_PATH("brainfuck"));
 
     scene_manager_next_scene(brainfuck->scene_manager, brainfuckSceneStart);
 

@@ -15,10 +15,10 @@
 
 #define TAG "mousejacker"
 #define LOGITECH_MAX_CHANNEL 85
-#define NRFSNIFF_APP_PATH_FOLDER "/ext/apps_data/nrfsniff"
+#define NRFSNIFF_APP_PATH_FOLDER EXT_PATH("apps_data/nrfsniff")
 #define NRFSNIFF_APP_PATH_EXTENSION ".txt"
 #define NRFSNIFF_APP_FILENAME "addresses.txt"
-#define MOUSEJACKER_APP_PATH_FOLDER "/ext/apps_data/mousejacker"
+#define MOUSEJACKER_APP_PATH_FOLDER EXT_PATH("apps_data/mousejacker")
 #define MOUSEJACKER_APP_PATH_EXTENSION ".txt"
 #define MAX_ADDRS 100
 

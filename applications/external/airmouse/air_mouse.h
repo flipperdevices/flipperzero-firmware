@@ -5,10 +5,13 @@
 #include <gui/view_dispatcher.h>
 #include <gui/modules/submenu.h>
 #include <gui/modules/dialog_ex.h>
+#include <storage/storage.h>
 
 #include "views/bt_mouse.h"
 #include "views/usb_mouse.h"
 #include "views/calibration.h"
+#define CALIBRATION_OLD_DATA_PATH EXT_PATH(".calibration.data")
+#define CALIBRATION_DATA_PATH EXT_PATH("apps_data/BMI160_Air_Mouse/.calibration.data")
 
 typedef struct {
     Gui* gui;

@@ -24,7 +24,7 @@
 #define FRAME_TOP 1
 #define FRAME_SIZE 61
 
-#define SAVING_DIRECTORY "/ext/apps/Games"
+#define SAVING_DIRECTORY EXT_PATH("apps_data/game_2048")
 #define SAVING_FILENAME SAVING_DIRECTORY "/game_2048.save"
 
 typedef enum {
@@ -301,6 +301,8 @@ void init_game(GameState* const game_state, bool clear_top_score) {
 
 bool load_game(GameState* game_state) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_copy(storage, EXT_PATH("apps/Games/game_2048.save"), SAVING_FILENAME);
+    storage_common_remove(storage, EXT_PATH("apps/Games/game_2048.save"));
 
     File* file = storage_file_alloc(storage);
     uint16_t bytes_readed = 0;

@@ -2926,10 +2926,10 @@ static bool swd_message_process(AppFSM* ctx) {
                     break;
 
                 case ModePageScan: {
-                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                    FuriString* result_path = furi_string_alloc_printf(EXT_PATH("swd"));
                     FuriString* preselected = furi_string_alloc_printf(
                         (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                             ANY_PATH("swd"));
+                                                             EXT_PATH("swd"));
                     DialogsFileBrowserOptions options;
 
                     dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
@@ -2999,10 +2999,10 @@ static bool swd_message_process(AppFSM* ctx) {
                     }
                 } else if((ctx->mode_page == ModePageScan) || (ctx->mode_page == ModePageFound)) {
                     uint32_t mode_page = ctx->mode_page;
-                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd"));
+                    FuriString* result_path = furi_string_alloc_printf(EXT_PATH("swd"));
                     FuriString* preselected = furi_string_alloc_printf(
                         (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                             ANY_PATH("swd"));
+                                                             EXT_PATH("swd"));
                     DialogsFileBrowserOptions options;
 
                     dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
@@ -3128,7 +3128,7 @@ int32_t swd_probe_app_main(void* p) {
     notification_message(app->notification, &sequence_display_backlight_enforce_on);
 
     DBGS("swd_execute_script");
-    swd_execute_script(app, ANY_PATH("swd/startup.swd"));
+    swd_execute_script(app, EXT_PATH("swd/startup.swd"));
 
     dolphin_deed(DolphinDeedPluginGameStart);
 

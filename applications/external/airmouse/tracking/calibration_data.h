@@ -7,8 +7,8 @@
 #include "util/vector.h"
 
 #define CALIBRATION_DATA_VER (1)
-#define CALIBRATION_DATA_FILE_NAME ".calibration.data"
-#define CALIBRATION_DATA_PATH EXT_PATH(CALIBRATION_DATA_FILE_NAME)
+#define CALIBRATION_OLD_DATA_PATH EXT_PATH(".calibration.data")
+#define CALIBRATION_DATA_PATH EXT_PATH("apps_data/BMI160_Air_Mouse/.calibration.data")
 #define CALIBRATION_DATA_MAGIC (0x23)
 
 #define CALIBRATION_DATA_SAVE(x)   \

@@ -11,7 +11,7 @@
 #include "qrcode.h"
 
 #define TAG "qrcode"
-#define QRCODE_FOLDER ANY_PATH("app_data/qrcodes")
+#define QRCODE_FOLDER EXT_PATH("app_data/qrcodes")
 #define QRCODE_EXTENSION ".qrcode"
 #define QRCODE_FILETYPE "QRCode"
 #define QRCODE_FILE_VERSION 0

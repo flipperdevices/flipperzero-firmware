@@ -15,7 +15,7 @@
 #define MAX_ADDRS 100
 #define MAX_CONFIRMED 32
 
-#define NRFSNIFF_APP_PATH_FOLDER "/ext/apps_data/nrfsniff"
+#define NRFSNIFF_APP_PATH_FOLDER EXT_PATH("apps_data/nrfsniff")
 #define NRFSNIFF_APP_FILENAME "addresses.txt"
 #define TAG "nrfsniff"
 
