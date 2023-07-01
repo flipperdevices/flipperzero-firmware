@@ -8,7 +8,10 @@ App(
     ],
     stack_size=1 * 1024,
     order=90,
-	fap_icon="servotester.png",
+    fap_icon="servotester.png",
     fap_category="GPIO_Extra",
-    fap_author="Alexander Semion"
+    fap_author="Alexander Semion",
+    fap_weburl="https://github.com/spin7ion/flipper-servotester",
+    fap_version="1.0",
+    fap_description="Application uses A7 pin for servo PWM output. Has different modes: Manual, Center, Auto.",
 )

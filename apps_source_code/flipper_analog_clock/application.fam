@@ -10,8 +10,8 @@ App(
     # Optional values
     # fap_version=(0, 1),  # (major, minor)
     fap_icon="analog_clock.png",  # 10x10 1-bit PNG
-    # fap_description="A simple app",
-    # fap_author="J. Doe",
-    # fap_weburl="https://github.com/user/analog_clock",
-    # fap_icon_assets="images",  # Image assets to compile for this application
+    fap_author="@scrolltex",
+    fap_weburl="https://github.com/scrolltex/flipper_analog_clock",
+    fap_version="1.0",
+    fap_description="Shows analog clock on Flipper screen",
 )

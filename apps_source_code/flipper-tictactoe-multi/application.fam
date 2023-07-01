@@ -8,5 +8,9 @@ App(
     order=40,
     fap_icon="assets/tictactoe_10px.png",
     fap_category="Games_Extra",
-    fap_icon_assets="assets"
+    fap_icon_assets="assets",
+    fap_author="@RouNNdeL",
+    fap_weburl="https://github.com/RouNNdeL/flipper-tictactoe-multi",
+    fap_version="1.0",
+    fap_description="Multiplayer Tic-Tac-Toe game",
 )

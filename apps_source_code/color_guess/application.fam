@@ -13,5 +13,6 @@ App(
     fap_icon_assets="icons",
     fap_category="Games_Extra",
     fap_author="Leed",
+    fap_version="1.0",
     fap_weburl="https://github.com/leedave/Leeds-Flipper-Zero-Applications",
 )

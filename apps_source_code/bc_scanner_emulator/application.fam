@@ -12,9 +12,9 @@ App(
     fap_icon="logo_bc.png",
     fap_description="Bar Code Emulator app for Evotor",
     fap_author="Igor Danilov",
+    fap_weburl="https://github.com/polarikus/flipper-zero_bc_scanner_emulator",
     fap_version=(0, 5),
     order=70,
     fap_category="GPIO_Extra",
     fap_icon_assets="icons",
 )
-

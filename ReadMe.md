@@ -1,18 +1,16 @@
 # Flipper Application Files (FAPs) for Any Firmware with API v31.x
 ## Apps from this pack should be compatible with OFW with API v31.x (dev branch) or any other firmware build with API 31.x
 
-## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/all-the-plugins/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
-
----
-
-#### [Visit UberGuidoZ original applications page](https://github.com/UberGuidoZ/Flipper/tree/main/Applications)
+## [Download all files by using this link, and copy only apps folder onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/all-the-plugins/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
 
 ---
 
-Apps contains changes needed to compile them on latest firmware, some fixes has been done by @xMasterX
+Apps contains changes needed to compile them on latest firmware, fixes has been done by @xMasterX
 
 I have decided to not include the "integrated/bundled" FAP files that come with a fresh install of Unleashed. If you need to grab a copy of them for whatever reason, you can do so right from the Unleashed repo.
+
+Sources of "integrated/bundled" apps are added now in this repo too, to allow publishing them in the official catalog :)
 
 * Visit the [Releases page](https://github.com/DarkFlippers/unleashed-firmware) of the Unleashed repo.
 * Scroll down and download the linked ZIP file from the Assets drop down, under the big install from web link.
@@ -22,7 +20,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `29 Jun 06:28 GMT +3`
+### Apps checked & updated at `1 Jul 16:09 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -32,7 +30,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Asteroids (By antirez & SimplyMinimal)](https://github.com/antirez/flipper-asteroids) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Asteroids) all changes can be found by clicking on [this link](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
-- [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [TAMA P1 (By GMMan & DroomOne)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` folder on SD renamed as `rom.bin` to make it work. - Modified to allow saving game state by [DroomOne](https://github.com/DroomOne/flipperzero-tamagotch-p1) - Mute mode & settings by [Round-Pi](https://github.com/Round-Pi/flipperzero-tamagotch-p1)
@@ -134,4 +131,5 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 
 --- 
 
+Useful source of files for flipper, also has apps pack:
 ## [UberGuidoZ Playground - Large collection of files - Github](https://github.com/UberGuidoZ/Flipper)

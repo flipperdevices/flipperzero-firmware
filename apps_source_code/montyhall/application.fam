@@ -9,4 +9,7 @@ App(
     order=185,
     fap_icon="Monty.png",
     fap_category="Games_Extra",
+    fap_author="@DevMilanIan",
+    fap_version="1.0",
+    fap_description="Monty Hall asks you to guess which closed door a prize is behind.",
 )
