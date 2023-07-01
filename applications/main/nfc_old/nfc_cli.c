@@ -7,16 +7,6 @@
 #include <lib/nfc/nfc_types.h>
 #include <lib/nfc/nfc_device.h>
 
-#include <lib/nfc/protocols/nfca_poller.h>
-#include <lib/drivers/st25r3916_reg.h>
-
-#include <lib/nfc/protocols/nfca.h>
-
-#include <lib/nfc/nfc.h>
-#include <lib/nfc/protocols/nfca_listener.h>
-#include <furi_hal_gpio.h>
-#include <furi_hal_resources.h>
-
 static void nfc_cli_print_usage() {
     printf("Usage:\r\n");
     printf("nfc <cmd>\r\n");
@@ -27,11 +17,6 @@ static void nfc_cli_print_usage() {
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
         printf("\tfield\t - turn field on\r\n");
     }
-}
-
-static void nfc_cli_check(Cli* cli, FuriString* args) {
-    UNUSED(args);
-    UNUSED(cli);
 }
 
 static void nfc_cli_detect(Cli* cli, FuriString* args) {
@@ -159,6 +144,10 @@ static void nfc_cli_apdu(Cli* cli, FuriString* args) {
                 break;
             }
             resp_size = (tx_rx.rx_bits / 8) * 2;
+            if(!resp_size) {
+                printf("No response\r\n");
+                break;
+            }
             resp_buffer = malloc(resp_size);
             uint8_to_hex_chars(tx_rx.rx_data, resp_buffer, resp_size);
             resp_buffer[resp_size] = 0;
@@ -184,10 +173,6 @@ static void nfc_cli(Cli* cli, FuriString* args, void* context) {
     do {
         if(!args_read_string_and_trim(args, cmd)) {
             nfc_cli_print_usage();
-            break;
-        }
-        if(furi_string_cmp_str(cmd, "c") == 0) {
-            nfc_cli_check(cli, args);
             break;
         }
         if(furi_string_cmp_str(cmd, "detect") == 0) {

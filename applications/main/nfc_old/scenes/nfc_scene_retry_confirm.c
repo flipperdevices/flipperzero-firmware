@@ -1,13 +1,13 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 
 void nfc_scene_retry_confirm_dialog_callback(DialogExResult result, void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
 }
 
 void nfc_scene_retry_confirm_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     DialogEx* dialog_ex = nfc->dialog_ex;
 
     dialog_ex_set_left_button_text(dialog_ex, "Retry");
@@ -22,7 +22,7 @@ void nfc_scene_retry_confirm_on_enter(void* context) {
 }
 
 bool nfc_scene_retry_confirm_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -40,7 +40,7 @@ bool nfc_scene_retry_confirm_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_retry_confirm_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     // Clean view
     dialog_ex_reset(nfc->dialog_ex);

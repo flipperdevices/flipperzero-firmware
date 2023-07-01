@@ -169,7 +169,7 @@ void dict_attack_set_card_detected(DictAttack* dict_attack, MfClassicType type) 
         DictAttackViewModel * model,
         {
             model->state = DictAttackStateRead;
-            model->sectors_total = mifare_classic_get_total_sectors_num(type);
+            model->sectors_total = mf_classic_get_total_sectors_num(type);
             model->keys_total = model->sectors_total * 2;
         },
         true);

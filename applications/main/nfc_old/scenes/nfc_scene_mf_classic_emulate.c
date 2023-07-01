@@ -1,11 +1,11 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 
 #define NFC_MF_CLASSIC_DATA_NOT_CHANGED (0UL)
 #define NFC_MF_CLASSIC_DATA_CHANGED (1UL)
 
 bool nfc_mf_classic_emulate_worker_callback(NfcWorkerEvent event, void* context) {
     UNUSED(event);
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     scene_manager_set_scene_state(
         nfc->scene_manager, NfcSceneMfClassicEmulate, NFC_MF_CLASSIC_DATA_CHANGED);
@@ -13,7 +13,7 @@ bool nfc_mf_classic_emulate_worker_callback(NfcWorkerEvent event, void* context)
 }
 
 void nfc_scene_mf_classic_emulate_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     // Setup view
     Popup* popup = nfc->popup;
@@ -38,7 +38,7 @@ void nfc_scene_mf_classic_emulate_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_emulate_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeBack) {
@@ -60,7 +60,7 @@ bool nfc_scene_mf_classic_emulate_on_event(void* context, SceneManagerEvent even
 }
 
 void nfc_scene_mf_classic_emulate_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     // Clear view
     popup_reset(nfc->popup);

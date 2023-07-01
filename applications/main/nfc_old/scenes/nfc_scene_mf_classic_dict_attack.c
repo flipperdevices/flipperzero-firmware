@@ -1,4 +1,4 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
 #define TAG "NfcMfClassicDictAttack"
@@ -11,29 +11,29 @@ typedef enum {
 
 bool nfc_dict_attack_worker_callback(NfcWorkerEvent event, void* context) {
     furi_assert(context);
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
     return true;
 }
 
 void nfc_dict_attack_dict_attack_result_callback(void* context) {
     furi_assert(context);
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventDictAttackSkip);
 }
 
-static void nfc_scene_mf_classic_dict_attack_update_view(NfcApp* nfc) {
+static void nfc_scene_mf_classic_dict_attack_update_view(Nfc* nfc) {
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
     uint8_t sectors_read = 0;
     uint8_t keys_found = 0;
 
     // Calculate found keys and read sectors
-    mifare_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
+    mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
     dict_attack_set_keys_found(nfc->dict_attack, keys_found);
     dict_attack_set_sector_read(nfc->dict_attack, sectors_read);
 }
 
-static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* nfc, DictAttackState state) {
+static void nfc_scene_mf_classic_dict_attack_prepare_view(Nfc* nfc, DictAttackState state) {
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
     NfcMfClassicDictAttackData* dict_attack_data = &nfc->dev->dev_data.mf_classic_dict_attack_data;
     NfcWorkerState worker_state = NfcWorkerStateReady;
@@ -88,7 +88,7 @@ static void nfc_scene_mf_classic_dict_attack_prepare_view(NfcApp* nfc, DictAttac
 }
 
 void nfc_scene_mf_classic_dict_attack_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     nfc_scene_mf_classic_dict_attack_prepare_view(nfc, DictAttackStateIdle);
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewDictAttack);
     nfc_blink_read_start(nfc);
@@ -96,7 +96,7 @@ void nfc_scene_mf_classic_dict_attack_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     MfClassicData* data = &nfc->dev->dev_data.mf_classic_data;
     bool consumed = false;
 
@@ -111,7 +111,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
             } else {
                 notification_message(nfc->notifications, &sequence_success);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
-                DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+                dolphin_deed(DolphinDeedNfcReadSuccess);
                 consumed = true;
             }
         } else if(event.event == NfcWorkerEventAborted) {
@@ -123,7 +123,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
                 notification_message(nfc->notifications, &sequence_success);
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicReadSuccess);
                 // Counting failed attempts too
-                DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
+                dolphin_deed(DolphinDeedNfcReadSuccess);
                 consumed = true;
             }
         } else if(event.event == NfcWorkerEventCardDetected) {
@@ -172,7 +172,7 @@ bool nfc_scene_mf_classic_dict_attack_on_event(void* context, SceneManagerEvent 
 }
 
 void nfc_scene_mf_classic_dict_attack_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     NfcMfClassicDictAttackData* dict_attack_data = &nfc->dev->dev_data.mf_classic_dict_attack_data;
     // Stop worker
     nfc_worker_stop(nfc->worker);

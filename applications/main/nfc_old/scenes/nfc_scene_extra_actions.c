@@ -1,19 +1,21 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 
 enum SubmenuIndex {
     SubmenuIndexReadCardType,
     SubmenuIndexMfClassicKeys,
     SubmenuIndexMfUltralightUnlock,
+    SubmenuIndexNfcVUnlock,
+    SubmenuIndexNfcVSniff,
 };
 
 void nfc_scene_extra_actions_submenu_callback(void* context, uint32_t index) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
 void nfc_scene_extra_actions_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
     submenu_add_item(
@@ -34,13 +36,25 @@ void nfc_scene_extra_actions_on_enter(void* context) {
         SubmenuIndexMfUltralightUnlock,
         nfc_scene_extra_actions_submenu_callback,
         nfc);
+    submenu_add_item(
+        submenu,
+        "Unlock SLIX-L",
+        SubmenuIndexNfcVUnlock,
+        nfc_scene_extra_actions_submenu_callback,
+        nfc);
+    submenu_add_item(
+        submenu,
+        "Listen NfcV Reader",
+        SubmenuIndexNfcVSniff,
+        nfc_scene_extra_actions_submenu_callback,
+        nfc);
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneExtraActions));
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
 
 bool nfc_scene_extra_actions_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -58,6 +72,12 @@ bool nfc_scene_extra_actions_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(nfc->scene_manager, NfcSceneReadCardType, 0);
             scene_manager_next_scene(nfc->scene_manager, NfcSceneReadCardType);
             consumed = true;
+        } else if(event.event == SubmenuIndexNfcVUnlock) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVUnlockMenu);
+            consumed = true;
+        } else if(event.event == SubmenuIndexNfcVSniff) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcVSniff);
+            consumed = true;
         }
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneExtraActions, event.event);
     }
@@ -66,7 +86,7 @@ bool nfc_scene_extra_actions_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_extra_actions_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     submenu_reset(nfc->submenu);
 }

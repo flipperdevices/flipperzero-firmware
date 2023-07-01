@@ -150,7 +150,7 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
 
         // Write nfc device type
         if(!flipper_format_write_comment_cstr(
-               file, "Nfc device type can be UID, Mifare Ultralight, Mifare Classic"))
+               file, "Nfc device type can be UID, Mifare Ultralight, Mifare Classic or ISO15693"))
             break;
 
         saved = nfc_devices[instance->protocol]->save(

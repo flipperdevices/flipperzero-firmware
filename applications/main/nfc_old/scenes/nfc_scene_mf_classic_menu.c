@@ -1,4 +1,4 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
 enum SubmenuIndex {
@@ -9,20 +9,20 @@ enum SubmenuIndex {
 };
 
 void nfc_scene_mf_classic_menu_submenu_callback(void* context, uint32_t index) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
 }
 
 void nfc_scene_mf_classic_menu_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     Submenu* submenu = nfc->submenu;
 
     submenu_add_item(
         submenu, "Save", SubmenuIndexSave, nfc_scene_mf_classic_menu_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Emulate", SubmenuIndexEmulate, nfc_scene_mf_classic_menu_submenu_callback, nfc);
-    if(!mifare_classic_is_card_read(&nfc->dev->dev_data.mf_classic_data)) {
+    if(!mf_classic_is_card_read(&nfc->dev->dev_data.mf_classic_data)) {
         submenu_add_item(
             submenu,
             "Detect Reader",
@@ -40,7 +40,7 @@ void nfc_scene_mf_classic_menu_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_menu_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -54,14 +54,14 @@ bool nfc_scene_mf_classic_menu_on_event(void* context, SceneManagerEvent event) 
         } else if(event.event == SubmenuIndexEmulate) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
             if(scene_manager_has_previous_scene(nfc->scene_manager, NfcSceneSetType)) {
-                DOLPHIN_DEED(DolphinDeedNfcAddEmulate);
+                dolphin_deed(DolphinDeedNfcAddEmulate);
             } else {
-                DOLPHIN_DEED(DolphinDeedNfcEmulate);
+                dolphin_deed(DolphinDeedNfcEmulate);
             }
             consumed = true;
         } else if(event.event == SubmenuIndexDetectReader) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneDetectReader);
-            DOLPHIN_DEED(DolphinDeedNfcDetectReader);
+            dolphin_deed(DolphinDeedNfcDetectReader);
             consumed = true;
         } else if(event.event == SubmenuIndexInfo) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneNfcDataInfo);
@@ -75,7 +75,7 @@ bool nfc_scene_mf_classic_menu_on_event(void* context, SceneManagerEvent event) 
 }
 
 void nfc_scene_mf_classic_menu_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     // Clear view
     submenu_reset(nfc->submenu);

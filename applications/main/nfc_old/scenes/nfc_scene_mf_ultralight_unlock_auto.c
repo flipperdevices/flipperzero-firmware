@@ -1,14 +1,14 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 
 bool nfc_scene_mf_ultralight_unlock_auto_worker_callback(NfcWorkerEvent event, void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     view_dispatcher_send_custom_event(nfc->view_dispatcher, event);
     return true;
 }
 
 void nfc_scene_mf_ultralight_unlock_auto_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     // Setup view
     widget_add_string_multiline_element(
@@ -35,7 +35,7 @@ void nfc_scene_mf_ultralight_unlock_auto_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_ultralight_unlock_auto_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -53,7 +53,7 @@ bool nfc_scene_mf_ultralight_unlock_auto_on_event(void* context, SceneManagerEve
 }
 
 void nfc_scene_mf_ultralight_unlock_auto_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     // Stop worker
     nfc_worker_stop(nfc->worker);
