@@ -338,7 +338,11 @@ void sendCardDetected(SeaderUartBridge* seader_uart, CardDetails_t* cardDetails)
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
 }
 
-bool unpack_pacs(SeaderWorker* seader_worker, SeaderCredential* seader_credential, uint8_t* buf, size_t size) {
+bool unpack_pacs(
+    SeaderWorker* seader_worker,
+    SeaderCredential* seader_credential,
+    uint8_t* buf,
+    size_t size) {
     PAC_t* pac = 0;
     pac = calloc(1, sizeof *pac);
     assert(pac);
@@ -351,6 +355,12 @@ bool unpack_pacs(SeaderWorker* seader_worker, SeaderCredential* seader_credentia
         (&asn_DEF_PAC)->op->print_struct(&asn_DEF_PAC, pac, 1, toString, pacDebug);
         if(strlen(pacDebug) > 0) {
             FURI_LOG_D(TAG, "Received pac: %s", pacDebug);
+
+            memset(display, 0, sizeof(display));
+            for(uint8_t i = 0; i < sizeof(seader_credential->sio); i++) {
+                snprintf(display + (i * 2), sizeof(display), "%02x", seader_credential->sio[i]);
+            }
+            FURI_LOG_D(TAG, "SIO %s", display);
         }
 
         if(pac->size <= sizeof(seader_credential->credential)) {
@@ -472,8 +482,12 @@ bool iso14443aTransmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len)
     return false;
 }
 
+uint8_t readBlock6[] = {0x06, 0x06, 0x45, 0x56};
+uint8_t readBlock9[] = {0x06, 0x09, 0xB2, 0xAE};
+
 bool iso15693Transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
+    SeaderCredential* credential = seader_worker->credential;
     char display[SEADER_UART_RX_BUF_SIZE * 2 + 1] = {0};
     FuriHalNfcReturn ret;
     uint16_t recvLen = 0;
@@ -489,6 +503,11 @@ bool iso15693Transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) 
             snprintf(display + (i * 2), sizeof(display), "%02x", rxBuffer[i]);
         }
         // FURI_LOG_D(TAG, "Result %d %s", recvLen, display);
+        if(memcmp(buffer, readBlock6, len) == 0) {
+            memcpy(credential->sio, rxBuffer, 32);
+        } else if(memcmp(buffer, readBlock9, len) == 0) {
+            memcpy(credential->sio + 32, rxBuffer + 8, 24);
+        }
 
         sendNFCRx(seader_uart, rxBuffer, recvLen);
     } else if(ret == FuriHalNfcReturnCrc) {
@@ -497,6 +516,11 @@ bool iso15693Transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) 
             snprintf(display + (i * 2), sizeof(display), "%02x", rxBuffer[i]);
         }
         // FURI_LOG_D(TAG, "[CRC error] Result %d %s", recvLen, display);
+        if(memcmp(buffer, readBlock6, len) == 0) {
+            memcpy(credential->sio, rxBuffer, 32);
+        } else if(memcmp(buffer, readBlock9, len) == 0) {
+            memcpy(credential->sio + 32, rxBuffer + 8, 24);
+        }
 
         sendNFCRx(seader_uart, rxBuffer, recvLen);
 
@@ -669,7 +693,9 @@ bool processAPDU(SeaderWorker* seader_worker, uint8_t* apdu, size_t len) {
     return false;
 }
 
-ReturnCode picopass_card_init(SeaderUartBridge* seader_uart) {
+ReturnCode picopass_card_init(SeaderWorker* seader_worker) {
+    SeaderUartBridge* seader_uart = seader_worker->uart;
+    SeaderCredential* credential = seader_worker->credential;
     rfalPicoPassIdentifyRes idRes;
     rfalPicoPassSelectRes selRes;
 
@@ -702,6 +728,8 @@ ReturnCode picopass_card_init(SeaderUartBridge* seader_uart) {
     OCTET_STRING_fromBuf(
         &cardDetails->protocol, (const char*)protocolBytes, sizeof(protocolBytes));
     OCTET_STRING_fromBuf(&cardDetails->csn, (const char*)selRes.CSN, RFAL_PICOPASS_MAX_BLOCK_LEN);
+
+    memcpy(credential->diversifier, selRes.CSN, RFAL_PICOPASS_MAX_BLOCK_LEN);
 
     sendCardDetected(seader_uart, cardDetails);
 
@@ -736,13 +764,12 @@ ReturnCode picopass_card_detect() {
 }
 
 ReturnCode picopass_card_read(SeaderWorker* seader_worker) {
-    SeaderUartBridge* seader_uart = seader_worker->uart;
     ReturnCode err = ERR_TIMEOUT;
 
     while(seader_worker->state == SeaderWorkerStateReadPicopass) {
         // Card found
         if(picopass_card_detect() == ERR_NONE) {
-            err = picopass_card_init(seader_uart);
+            err = picopass_card_init(seader_worker);
             if(err != ERR_NONE) {
                 FURI_LOG_E(TAG, "picopass_card_init error %d", err);
             }
