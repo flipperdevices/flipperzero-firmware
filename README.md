@@ -66,6 +66,8 @@ After flashing the board and pressing the reset button you should see a solid bl
 
 ## Usage
 
+Plug in the Wi-Fi Dev board to the flipper.
+
 Open the app on the Flipper and press `Start portal` on the main menu. After a few seconds you should start to see logs comming in from your Wi-Fi dev board and the AP will start and the LED will turn green.
 
 The AP will take the name that is in the `ap.config.txt` file located on your Flipper in the `apps_data` folder.
