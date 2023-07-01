@@ -5,7 +5,6 @@
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 #include <gui/elements.h>
-#include "assets_icons.h"
 #include <gui/icon_i.h>
 
 /* Core game logic from
