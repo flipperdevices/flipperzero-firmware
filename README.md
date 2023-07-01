@@ -117,3 +117,7 @@ I was only able to create this using the following apps as examples
 * [UART_Terminal](https://github.com/cool4uma/UART_Terminal)
 * [flipper-zero-fap-boilerplate](https://github.com/leedave/flipper-zero-fap-boilerplate)
 * [Create Captive Portal Using ESP32](https://iotespresso.com/create-captive-portal-using-esp32/)
+
+## Contact me
+
+You can message me on my reddit account bigbrodude6119
