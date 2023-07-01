@@ -1,0 +1,36 @@
+<svg 
+  aria-label="BUY NOW: FLIPPER ZERO"
+  height="28" 
+  role="img" 
+  width="201.75" 
+  xmlns:xlink="http://www.w3.org/1999/xlink" 
+  xmlns="http://www.w3.org/2000/svg" 
+>
+  <title>BUY NOW: FLIPPER ZERO</title>
+  <g shape-rendering="crispEdges">
+    <rect width="81.75" height="28" fill="#555"/>
+    <rect x="81.75" width="120" height="28" fill="#ee6e00"/>
+  </g>
+  <g 
+    fill="#fff" 
+    font-family="Verdana,Geneva,DejaVu Sans,sans-serif" 
+    font-size="100"
+    text-anchor="middle" 
+    text-rendering="geometricPrecision" 
+  >
+    <text 
+      fill="#fff"
+      textLength="577.5" 
+      transform="scale(.1)" 
+      x="408.75" 
+      y="175" 
+    >BUY NOW</text>
+    <text 
+      fill="#fff" 
+      font-weight="bold"
+      textLength="960" 
+      transform="scale(.1)" 
+      x="1417.5" y="175" 
+    >FLIPPER ZERO</text>
+  </g>
+</svg>
