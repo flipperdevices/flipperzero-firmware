@@ -33,6 +33,10 @@ void evil_portal_read_index_html(void *context) {
     }
     storage_file_close(index_html);
     storage_file_free(index_html);
+  } else {
+    char * html_error =  "Something went wrong with reading the html file.\n"
+                      "Is the SD Card set up correctly?";
+    app->index_html = (uint8_t *)html_error;
   }
 
   evil_portal_close_storage();
@@ -63,48 +67,46 @@ void evil_portal_read_ap_name(void *context) {
     }
     storage_file_close(ap_name);
     storage_file_free(ap_name);
+  } else {
+    char * app_default =  "Evil Portal";
+    app->ap_name = (uint8_t *)app_default;
   }
   evil_portal_close_storage();
 }
 
-char* sequential_file_resolve_path(
-    Storage* storage,
-    const char* dir,
-    const char* prefix,
-    const char* extension) {
-    if(storage == NULL || dir == NULL || prefix == NULL || extension == NULL) {
-        return NULL;
+char *sequential_file_resolve_path(Storage *storage, const char *dir,
+                                   const char *prefix, const char *extension) {
+  if (storage == NULL || dir == NULL || prefix == NULL || extension == NULL) {
+    return NULL;
+  }
+
+  char file_path[256];
+  int file_index = 0;
+
+  do {
+    if (snprintf(file_path, sizeof(file_path), "%s/%s_%d.%s", dir, prefix,
+                 file_index, extension) < 0) {
+      return NULL;
     }
+    file_index++;
+  } while (storage_file_exists(storage, file_path));
 
-    char file_path[256];
-    int file_index = 0;
-
-    do {
-        if(snprintf(
-               file_path, sizeof(file_path), "%s/%s_%d.%s", dir, prefix, file_index, extension) <
-           0) {
-            return NULL;
-        }
-        file_index++;
-    } while(storage_file_exists(storage, file_path));
-
-    return strdup(file_path);
+  return strdup(file_path);
 }
 
-
-void write_logs(char* portal_logs) {
+void write_logs(char *portal_logs) {
   Storage *storage = evil_portal_open_storage();
 
-  char* seq_file_path = sequential_file_resolve_path(storage, EVIL_PORTAL_LOG_SAVE_PATH, "log", "txt");
-  
-  File* file = storage_file_alloc(storage);
+  char *seq_file_path = sequential_file_resolve_path(
+      storage, EVIL_PORTAL_LOG_SAVE_PATH, "log", "txt");
 
-  if (storage_file_open(file, seq_file_path, FSAM_WRITE,
-                          FSOM_CREATE_ALWAYS)) {
-       storage_file_write(file, portal_logs, strlen(portal_logs));
-    }
-    storage_file_close(file);
-    storage_file_free(file);
+  File *file = storage_file_alloc(storage);
+
+  if (storage_file_open(file, seq_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+    storage_file_write(file, portal_logs, strlen(portal_logs));
+  }
+  storage_file_close(file);
+  storage_file_free(file);
   evil_portal_close_storage();
 
   portal_logs = "";
