@@ -96,6 +96,8 @@ If the AP won't start or you have other issues try pressing reset on the Wi-Fi d
 
 It is important to give the devboard some time to load the html files from the Flipper.
 
+If you have the Marauder firmware on your dev board you may need to enable `Erase All Flash Before Sketch Upload` before flashing.
+
 ## Todo
 
 I plan on working on this in my free time. Here is my todo list.
