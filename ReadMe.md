@@ -65,6 +65,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Fixed odd file name length check for desktop (By xMasterX)
 - Updated: [i2c Tools v1.1 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
 - Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/) README updates only.
+- Updated: [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) README updates only.
+- Updated: [WiFi (Marauder) v0.5.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) README updates only.
 
 <a name="release">
 

@@ -10,13 +10,15 @@ Requires a connected dev board running Marauder FW. [See install instructions fr
    GitHub action workflow, and select the most recent run, scroll down to artifacts.
 3. The FAP is built for the `dev` and `release` channels of both official and unleashed
    firmware. Download the artifact corresponding to your firmware version.
-4. (Optional step to avoid confusion) Go to "Apps/GPIO" on the Flipper SD Card, delete any existing Marauder app, on some firmwares there will be a `ESP32CAM_Marauder.fap` or similar.
-5. Extract `esp32_wifi_marauder.fap` from the ZIP file downloaded in step 3 to your Flipper Zero SD card, preferably under Apps/GPIO along with the rest of the GPIO apps. (If you're using qFlipper to transfer files you need to extract the content of the ZIP file to your computer before you drag it to qFlipper, as qFlipper does not support direct dragging from a ZIP file (at least on Windows).
+4. Extract `ESP32_WiFi_Marauder.fap` from the ZIP file to your Flipper
+   Zero SD card, preferably under Apps/GPIO along with the rest of the GPIO apps.
 
 From a local clone of this repo, you can also build the app yourself using ufbt.
 
 ## In-app ESP32 flasher (WIP)
-The app now contains a work-in-progress of an ESP32 flasher (close to the bottom of the marauder menu). Use at your own risk. This hardcodes addresses for non-S3 ESP32 chips.
+The app now contains a work-in-progress of an ESP32 flasher (close to the bottom of the marauder menu). Use at your own risk. This hardcodes addresses for non-S3 ESP32 chip, and you'll need to source your own bootloader, partition table, and application bin files (as described below).
+
+If you use it, make sure you put your board into reflash mode first (generally by pressing RESET while holding BOOT).
 
 To use this method:
 1. Make sure you follow the instructions for how to get the Marauder app on your Flipper Zero, they can be found on the top of this page. Latest release needs to be downloaded and installed.
