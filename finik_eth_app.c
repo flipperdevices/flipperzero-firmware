@@ -19,13 +19,19 @@ static void draw_process_selector(Canvas* canvas, DrawProcess selector, CursorPo
     if(selector == PROCESS_PING) y = 44;
     if(selector == PROCESS_RESET) y = 55;
 
-    if(cursor != CURSOR_INSIDE_PROCESS) {
+    if(cursor == CURSOR_INSIDE_PROCESS) {
+        canvas_invert_color(canvas);
+        canvas_draw_line(canvas, 25, y + 1, 25, y + 7);
+        canvas_invert_color(canvas);
+        canvas_draw_line(canvas, 0, y + 1, 0, y + 7);
+        canvas_draw_line(canvas, 1, y, 25, y);
+        canvas_draw_line(canvas, 1, y + 8, 25, y + 8);
+    } else {
         canvas_draw_line(canvas, 0, y + 1, 0, y + 7);
         canvas_draw_line(canvas, 23, y + 1, 23, y + 7);
+        canvas_draw_line(canvas, 1, y, 22, y);
+        canvas_draw_line(canvas, 1, y + 8, 22, y + 8);
     }
-
-    canvas_draw_line(canvas, 1, y, 22, y);
-    canvas_draw_line(canvas, 1, y + 8, 22, y + 8);
 
     if(cursor == CURSOR_CLICK_PROCESS) {
         canvas_draw_box(canvas, 1, y, 22, 9);
