@@ -10,4 +10,8 @@ App(
     fap_category="GPIO",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="logic_analyzer",
+    fap_author="@g3gg0",
+    fap_weburl="https://github.com/g3gg0/flipper-logic_analyzer",
+    # fap_version="1.0",
+    fap_description="Use flipper as Openbench Logic Sniffer (ols) logic analyzer in PulseView",
 )

@@ -1,14 +1,3 @@
-# COMPILE ISTRUCTIONS:
-
-# Clean the code and remove old binaries/compilation artefact 
-# ./fbt -c fap_rubiks_cube_scrambler
-
-# Compile FAP
-# ./fbt fap_rubiks_cube_scrambler
-
-# Run application directly inside the Flip.x0
-# ./fbt launch_app APPSRC=rubiks_cube_scrambler
-
 App(
     appid="Rubiks_Cube_Scrambler",
     name="Rubik's Cube Scrambler",
@@ -17,4 +6,8 @@ App(
     stack_size=1 * 1024,
     fap_category="Misc",
     fap_icon="cube.png",
+    fap_author="@RaZeSloth",
+    fap_weburl="https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler",
+    # fap_version="1.0",
+    fap_description="App generates random moves to scramble a Rubik's cube.",
 )

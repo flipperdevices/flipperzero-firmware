@@ -7,4 +7,8 @@ App(
     stack_size=1 * 1024,
     fap_category="Games",
     fap_icon="icon.png",
+    fap_author="@Milk-Cool",
+    fap_weburl="https://github.com/Milk-Cool/fz-reaction-game",
+    # fap_version="1.0",
+    fap_description="A simple reaction test game",
 )

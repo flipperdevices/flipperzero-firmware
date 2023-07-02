@@ -11,4 +11,8 @@ App(
     fap_icon="game_reversi.png",
     fap_category="Games",
     fap_icon_assets_symbol="game_reversi",
+    fap_author="@dimat",
+    fap_weburl="https://github.com/zyuhel/flipperzero-racegame",
+    # fap_version="1.0",
+    fap_description="Reversi game, the game controls should be intuitive. Longs press on OK opens the menu to start a new game.",
 )

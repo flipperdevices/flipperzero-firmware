@@ -9,4 +9,8 @@ App(
     fap_icon_assets="icons",
     fap_category="Media",
     order=35,
+    fap_author="@panki27",
+    fap_weburl="https://github.com/panki27/bpm-tapper",
+    # fap_version="1.0",
+    fap_description="Tap center button to measure BPM",
 )

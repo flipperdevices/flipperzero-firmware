@@ -14,4 +14,8 @@ App(
     fap_category="Infrared",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="xc",
+    fap_author="@gebeto",
+    fap_weburl="https://github.com/gebeto/flipper-xbox-controller",
+    # fap_version="1.0",
+    fap_description="Infrared remote control for Xbox One",
 )

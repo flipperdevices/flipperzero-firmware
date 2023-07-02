@@ -9,4 +9,8 @@ App(
     fap_category="Misc",
     fap_icon="icons/counter_icon.png",
     fap_icon_assets="icons",
+    fap_author="@Krulknul",
+    fap_weburl="https://github.com/Krulknul/dolphin-counter",
+    # fap_version="1.0",
+    fap_description="Simple counter",
 )

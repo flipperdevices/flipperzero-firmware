@@ -57,6 +57,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [WiFi (Marauder) v0.5.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) (Now With ESP32 Flasher)
 - [CFW Settings for Lock Menu Style (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fe3d1ccac0d2058769a0e8f1076b348ef59eaa29)
 - Directory TidyUp (By Willy-JL with some changes by RogueMaster)
+- UL: Add new ACs and TVs in universal remote, Hitachi taken from OFW PR 2826 (by minchogaydarov) & Thomson TV from OFW PR 2818 (by eze-kiel)
+- UL: [Subghz fixes #527 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/527)
+- Updated: Marauder [Update ReadMe.md #23 (By francis2054)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/23)
 
 <a name="release">
 

@@ -8,4 +8,8 @@ App(
     fap_category="Games",
     fap_icon="icon.png",
     fap_icon_assets_symbol="schip",
+    fap_author="@Milk-Cool",
+    fap_weburl="https://github.com/Milk-Cool/fz-schip",
+    # fap_version="1.0",
+    fap_description="SUPER-CHIP (Chip8) emulator for the Flipper Zero",
 )

@@ -8,4 +8,8 @@ App(
     order=30,
     fap_icon="wifi_10px.png",
     fap_category="GPIO",
+    fap_author="@jamisonderek",
+    fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio",
+    # fap_version="1.0",
+    fap_description="This application can be used to test Wiegand readers and keypads",
 )

@@ -13,4 +13,8 @@ App(
     fap_category="Misc",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="hex_editor",
+    fap_author="@dunaevai135",
+    fap_weburl="https://github.com/dunaevai135/flipper-zero-hex_editor",
+    # fap_version="1.0",
+    fap_description="Read any file line by line, and use Ok to edit char. Useful for NFC file - Edit Dump feature without PC/Phone.",
 )

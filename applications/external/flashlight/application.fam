@@ -10,4 +10,8 @@ App(
     order=20,
     fap_icon="flash10px.png",
     fap_category="GPIO",
+    fap_author="@xMasterX",
+    fap_weburl="https://github.com/xMasterX/flipper-flashlight",
+    # fap_version="1.0",
+    fap_description="Enables 3.3v on pin 7/C3 when you press Ok and leaves it on when you exit app",
 )

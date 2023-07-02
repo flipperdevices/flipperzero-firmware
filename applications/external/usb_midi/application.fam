@@ -11,4 +11,8 @@ App(
     fap_icon="usb_midi.png",
     fap_category="USB",
     # fap_icon_assets="icons",
+    fap_author="@DrZlo13",
+    fap_weburl="https://github.com/DrZlo13/flipper-zero-usb-midi",
+    # fap_version="1.0",
+    fap_description="This app makes Flipper Zero a USB MIDI device, plays notes via Flippers speaker.",
 )

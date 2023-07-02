@@ -10,4 +10,8 @@ App(
     fap_category="Games",
     fap_icon_assets_symbol="etch",
     fap_icon_assets="assets",
+    fap_author="@SimplyMinimal",
+    fap_weburl="https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch",
+    # fap_version="1.0",
+    fap_description="Turn the Flipper Zero into an Etch A Sketch",
 )

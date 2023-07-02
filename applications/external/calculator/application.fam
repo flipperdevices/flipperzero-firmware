@@ -8,4 +8,8 @@ App(
     order=45,
     fap_icon="calcIcon.png",
     fap_category="Misc",
+    fap_author="@n-o-T-I-n-s-a-n-e",
+    fap_weburl="https://github.com/n-o-T-I-n-s-a-n-e",
+    # fap_version="1.0",
+    fap_description="Calculator, that can calculate simple expressions",
 )

@@ -9,4 +9,8 @@ App(
     fap_icon_assets="images",
     fap_icon="icon.png",
     fap_icon_assets_symbol="key_generator",
+    fap_author="@Milk-Cool",
+    fap_weburl="https://github.com/Milk-Cool/fz-em4100-generator",
+    # fap_version="1.0",
+    fap_description="Generates EM4100 key lists from selected rfid key file for RFID fuzzer app",
 )

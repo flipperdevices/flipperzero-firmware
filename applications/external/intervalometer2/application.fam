@@ -10,4 +10,8 @@ App(
     fap_category="Infrared",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="intervalometer",
+    fap_author="@Nitepone",
+    fap_weburl="https://github.com/Nitepone/flipper-intervalometer",
+    # fap_version="1.0",
+    fap_description="This is a simple configurable valometer app for Sony cameras. Works via Infrared port.",
 )

@@ -10,7 +10,7 @@ App(
     fap_icon_assets_symbol="simon_says",
     fap_icon="simon_says.png",  # 10x10 1-bit PNG
     fap_description="A Simon Says Game",
-    fap_author="SimplyMinimal,ShehabAttia96",
+    fap_author="@SimplyMinimal & @ShehabAttia96",
     fap_weburl="https://github.com/SimplyMinimal/FlipperZero-SimonSays",
     fap_icon_assets="images",  # Image assets to compile for this application
 )

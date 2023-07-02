@@ -12,4 +12,8 @@ App(
     fap_category="Misc",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="brainfuck",
+    fap_author="@nymda",
+    fap_weburl="https://github.com/nymda/FlipperZeroBrainfuck",
+    # fap_version="1.0",
+    fap_description="Brainfuck language interpreter",
 )

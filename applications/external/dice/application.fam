@@ -11,5 +11,5 @@ App(
     fap_icon_assets="images",
     fap_author="@RogueMaster",
     # fap_version="1.0",
-    fap_description="Roll multi-sided dice for RolePlaying/D&D games. Including SEX/WAR/8BALL/WEED/DRINK DICE.",
+    fap_description="Roll multi-sided dice for RolePlaying/D&D games. d2, d3, d4, d6, d8, d10, d12, d20, d100. Including SEX/WAR/8BALL/WEED/DRINK DICE.",
 )

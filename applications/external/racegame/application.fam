@@ -10,4 +10,8 @@ App(
     order=90,
     fap_icon="icon.png",
     fap_category="Games",
+    fap_author="@zyuhel",
+    fap_weburl="https://github.com/zyuhel/flipperzero-racegame",
+    # fap_version="1.0",
+    fap_description="Race game inspired by Race game in BrickGame 9999 in 1.",
 )

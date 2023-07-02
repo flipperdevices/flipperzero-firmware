@@ -11,4 +11,8 @@ App(
     fap_icon="dist_sensor10px.png",
     fap_category="GPIO",
     fap_icon_assets_symbol="usping",
+    fap_author="@privet971",
+    fap_weburl="https://github.com/privet971/FlipperZeroApps/tree/main/usping",
+    # fap_version="1.0",
+    fap_description="Ultrasound measurments with PING))) Parallax sensor SKU 28015 (3 wires)",
 )

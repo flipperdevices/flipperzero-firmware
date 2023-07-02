@@ -13,4 +13,8 @@ App(
     fap_category="NFC",
     fap_icon_assets="images",
     fap_icon_assets_symbol="mifare_fuzzer",
+    fap_author="@spheeere98",
+    fap_weburl="https://github.com/spheeere98/mifare_fuzzer",
+    # fap_version="1.0",
+    fap_description="App emulates Mifare Classic cards with various UIDs to check how reader reacts on them",
 )

@@ -10,4 +10,8 @@ App(
     order=20,
     fap_icon="cntdown_timer.png",
     fap_category="Tools",
+    fap_author="@0w0mewo",
+    fap_weburl="https://github.com/0w0mewo/fpz_cntdown_timer",
+    # fap_version="1.0",
+    fap_description="Simple count down timer",
 )

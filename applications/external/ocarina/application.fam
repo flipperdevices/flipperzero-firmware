@@ -9,4 +9,8 @@ App(
     fap_icon="icons/music_10px.png",
     fap_category="Media",
     fap_icon_assets="icons",
+    fap_author="@invalidna-me",
+    fap_weburl="https://github.com/invalidna-me/flipperzero-ocarina",
+    # fap_version="1.0",
+    fap_description="A basic Ocarina (of Time), Controls are the same as the N64 version of the Ocarina of Time",
 )

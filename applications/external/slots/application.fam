@@ -10,4 +10,8 @@ App(
     fap_category="Games",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="slotmachine",
+    fap_author="@Daniel-dev-s",
+    fap_weburl="https://github.com/Daniel-dev-s/flipperzero-slots",
+    # fap_version="1.0",
+    fap_description="Simple Slots simulator game",
 )

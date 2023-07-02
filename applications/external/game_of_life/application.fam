@@ -8,4 +8,8 @@ App(
     order=110,
     fap_icon="golIcon.png",
     fap_category="Games",
+    fap_author="@tgxn (original by @itsyourbedtime)",
+    fap_weburl="https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c",
+    # fap_version="1.0",
+    fap_description="Life, is a cellular automaton devised by the British mathematician John Horton Conway in 1970.",
 )

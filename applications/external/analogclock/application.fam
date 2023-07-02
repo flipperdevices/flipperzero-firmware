@@ -6,4 +6,8 @@ App(
     stack_size=2 * 1024,
     fap_category="Misc",
     fap_icon="analog_clock.png",
+    fap_author="@scrolltex",
+    fap_weburl="https://github.com/scrolltex/flipper_analog_clock",
+    # fap_version="1.0",
+    fap_description="Shows analog clock on Flipper screen",
 )

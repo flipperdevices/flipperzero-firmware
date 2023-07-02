@@ -8,8 +8,12 @@ App(
     ],
     stack_size=1 * 1024,
     order=90,
-	fap_icon="nupogodi.png",
+    fap_icon="nupogodi.png",
     fap_category="Games",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="nupogodi",
+    fap_author="@sionyx",
+    fap_weburl="https://github.com/sionyx/flipper_nupogodi",
+    # fap_version="1.0",
+    fap_description="Elektronika IM-02 - Nu, Pogodi! / (Game & Watch - Egg) - Soviet retro game",
 )

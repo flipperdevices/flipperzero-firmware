@@ -8,4 +8,8 @@ App(
     order=270,
     fap_icon="pokerIcon.png",
     fap_category="Games",
+    fap_author="@PixlEmly",
+    fap_weburl="https://github.com/PixlEmly",
+    # fap_version="1.0",
+    fap_description="Video poker is a casino game based on five-card draw poker",
 )
