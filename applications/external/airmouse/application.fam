@@ -10,6 +10,6 @@ App(
     fap_icon_assets_symbol="air_mouse",
     fap_author="@ginkage",
     fap_weburl="https://github.com/ginkage/FlippAirMouse",
-    # fap_version="0.5",
+    # fap_version="0.6",
     fap_description="Allows you to turn your Flipper into a USB or Bluetooth air mouse (you do need an extra module)",
 )
