@@ -886,7 +886,7 @@ bool mf_classic_emulator(
             FURI_LOG_T(TAG, "Halt received");
             return false;
         }
-        if(cmd == 0xE0) {
+        if(cmd == 0xE0 && !is_encrypted) {
             // Mifare Classic doesn't support ATS, NACK it and start listening again
             FURI_LOG_T(TAG, "RATS received");
             break;
@@ -951,7 +951,6 @@ bool mf_classic_emulator(
             }
 
             if(tx_rx->rx_bits != 64) {
-                FURI_LOG_W(TAG, "Incorrect nr + ar length: %d", tx_rx->rx_bits);
                 return false;
             }
 
