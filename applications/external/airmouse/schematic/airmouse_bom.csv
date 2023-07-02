@@ -1,0 +1,5 @@
+ID	Name	Designator	Footprint	Quantity	Manufacturer Part	Manufacturer	Supplier	Supplier Part	Price
+"1"	"100nF"	"C1"	"C0603"	"1"	"CC0603KRX7R9BB104"	"YAGEO"	"LCSC"	"C14663"	""
+"2"	"Header-Male-2.54_1x10"	"H1"	"HDR-TH_10P-P2.54-V-M-1"	"1"	"Headers  Pins2.54mm1*10P"	""	"LCSC"	"C57369"	""
+"3"	"3.9kΩ"	"R1,R2,R3,R4"	"R0603"	"4"	"0603WAF3901T5E"	"UNI-ROYAL(Uniroyal Elec)"	"LCSC"	"C23018"	""
+"4"	"BMI160"	"U1"	"LGA-14_L3.0-W2.5-P0.50-BL"	"1"	"BMI160"	"Bosch"	"LCSC"	"C94021"	""

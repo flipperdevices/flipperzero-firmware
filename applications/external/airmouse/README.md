@@ -1,5 +1,7 @@
 # Flipper Air Mouse
 
+[![FlipC.org](https://flipc.org/ginkage/FlippAirMouse/badge)](https://flipc.org/ginkage/FlippAirMouse)
+
 ## Brief
 
 > "You can turn anything into an air mouse if you're brave enough"

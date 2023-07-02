@@ -34,4 +34,4 @@ private:
 
 } // namespace cardboard
 
-#endif // CARDBOARD_SDK_UTIL_MATRIX_4X4_H_
+#endif // CARDBOARD_SDK_UTIL_MATRIX4X4_H_

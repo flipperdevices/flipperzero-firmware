@@ -64,6 +64,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Updated infrared assets #529 (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/pull/529)
 - UL: Fixed odd file name length check for desktop (By xMasterX)
 - Updated: [i2c Tools v1.1 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
+- Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/) README updates only.
 
 <a name="release">
 

@@ -4,7 +4,12 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="air_mouse_app",
     stack_size=10 * 1024,
-    fap_icon="mouse_10px.png",
     fap_category="GPIO",
+    fap_icon="icon.png",
     sources=["*.c", "*.cc"],
+    fap_icon_assets_symbol="air_mouse",
+    fap_author="@ginkage",
+    fap_weburl="https://github.com/ginkage/FlippAirMouse",
+    # fap_version="0.5",
+    fap_description="Allows you to turn your Flipper into a USB or Bluetooth air mouse (you do need an extra module)",
 )
