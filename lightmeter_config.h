@@ -1,6 +1,6 @@
 #pragma once
 
-#define LM_VERSION_APP "0.7"
+#define LM_VERSION_APP "1.0"
 #define LM_DEVELOPED "Oleksii Kutuzov"
 #define LM_GITHUB "https://github.com/oleksiikutuzov/flipperzero-lightmeter"
 
