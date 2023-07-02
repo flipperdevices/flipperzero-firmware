@@ -4,7 +4,7 @@ An evil captive portal Wi-Fi access point using the Flipper Zero and Wi-Fi dev b
 
 ## About
 
-**This project is a work in progress.** 
+**This project is a work in progress.**
 
 This project will turn your Wi-Fi dev board into an open access point. When users try to connect to this access point they will be served a fake login screen. User credentials are sent to the Flipper and logged on the SD card.
 
@@ -26,7 +26,7 @@ Go to the releases section on this repo and download and extract either the `ofw
 
 You will also need to download and extract the `evil_portal_sd_folder.zip` folder. This will contain necessary files for the app to run.
 
-Put the `evil_portal.fap` file into the `apps/GPIO/` folder on your Flipper SD card. 
+Put the `evil_portal.fap` file into the `apps/GPIO/` folder on your Flipper SD card.
 
 Put the `evil_portal` folder into the `apps_data` folder.
 This is an example of your Flipper SD card if done correctly.
@@ -42,27 +42,41 @@ apps_data/
     logs/
       <empty>
 ```
+
 You should be able to see the `[ESP32] Evil Portal` app on your flipper zero now.
 
 If you want to create your own `index.html` file keep in mind that there is a limit of 4000 characters for the file. I plan to increase this later but I ran into some issues with larger files.
 
-### Install on the Wi-Fi dev board
+## Installing/flashing the Wi-Fi dev board
 
-There is no pre-built file for the Wi-Fi dev board. You will need to download the [Arduino IDE](https://www.arduino.cc/en/software) and flash the board manually.
+If you've already flashed your Wi-Fi dev board with the Marauder firmware or something else you will need to erase it before installing the new firmware here. Follow [the guide here](#erasing-firmware) for that.
 
-If you have never programmed an ESP32 using arduino before you can follow [this guide](https://lastminuteengineers.com/esp32-arduino-ide-tutorial/) to get started.
+Follow the steps below to flash the Wi-Fi dev board with the evil portal firmware via Windows. The instructions below are for the Flipper Zero Wi-Fi Wrover Development Module (**ESP32-S2**), you may have to adjust the steps for your specific board:
 
-You will need to download these two libraries and move them to your Arduino library folder.
-
-[AsyncTCP](https://github.com/me-no-dev/AsyncTCP)
-
-[ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
-
-Go to the releases section on this repo and download the `EvilPortal.ino` file and open this in the Arduino IDE and upload this to your Wi-Fi dev board.
-
-**Remember** you must hold down the boot button when plugging in your Wi-Fi dev board in order to flash it. 
-
-After flashing the board and pressing the reset button you should see a solid blue light.
+1. Download and install the Arduino IDE from [here][link-arduino].
+2. Download zip/clone dependency [AsyncTCP][link-asynctcp] to file.
+3. Download zip/clone dependency [ESPAsyncWebServer][link-espasyncwebserver] to file.
+4. Unzip both dependencies to your Arduino library folder.
+   - On Windows this is usually `C:\Users\<username>\Documents\Arduino\libraries`.
+5. Go to the releases section on this repo and download the `EvilPortal.ino` file, open it with Arduino IDE.
+6. Go to `File > Preferences` and paste the following two URL's into the `Additional Boards Manager URLs` field:
+   ```
+   https://dl.espressif.com/dl/package_esp32_index.json
+   https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
+   ```
+7. Go to `Tools > Board > Boards Manager...` and search for `esp32` and install `esp32 by Espressif Systems`.
+8. Go to `Tools > Board` and select `ESP32S2 Dev Module`.
+9. On your ESP32-S2 Wi-Fi module, hold the BOOT button.
+10. Connect your ESP32-S2 to your computer, keep holding the BOOT button (holding for just 3-5 seconds and releasing may be fine, continuously holding worked better for me).
+11. Go to `Tools > Port` and select the port that appeared when you connected your ESP32-S2.
+12. Click the "Upload" button in the top left corner of the Arduino IDE.
+13. On success, you will see:
+    ```
+    Hash of data verified.
+    Leaving...
+    WARNING: ESP32-S2 (revision v0.0) chip was placed into download mode...
+    ```
+14. Plug in the Wi-Fi Dev board to the flipper, press the reset button on the Wi-Fi dev board and you should now see a solid blue light.
 
 ## Usage
 
@@ -84,7 +98,32 @@ Logs will automatically be saved when exiting the app or when the current log re
 
 If you are not using the official flipper zero firmware or the unleashed firmware you can build the .fap file yourself by following [these instructions](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md).
 
-Note that you will need to use the firmware repo that you wish to build for. 
+Note that you will need to use the firmware repo that you wish to build for.
+
+## Erasing firmware <a name="erasing-firmware"></a>
+
+Assuming you have the Flipper Zero Wi-Fi Wrover Development Module (**ESP32-S2**):
+
+1. Install [Python][link-python].
+2. Open a command terminal as an administrator:
+   - On Windows press ⊞Win+R, type "cmd", and press CTRL+SHIFT+ENTER.
+3. In the terminal type the following to install [esptool][link-esptool] via Python package manager:
+   ```
+   pip install esptool
+   ```
+4. Install [setuptools][link-setuptools] dependencies:
+   ```
+   pip install setuptools
+   ```
+5. Enter the following command into your terminal, do not run it yet:
+   ```
+   python -m esptool --chip esp32s2 erase_flash
+   ```
+6. On your ESP32-S2 Wi-Fi module, hold the BOOT button.
+7. Connect your ESP32-S2 to your computer, keep holding the BOOT button.
+8. In your terminal press enter to run the command from step 5.
+9. When successful you will get the message `Chip erase completed successfully in ___s` (time in seconds suffixed with "s").
+10. Unplug/reset your board.
 
 ## Issues
 
@@ -102,11 +141,11 @@ If you have the Marauder firmware on your dev board you may need to enable `Eras
 
 I plan on working on this in my free time. Here is my todo list.
 
-* Support for multiple portals
-* Enter AP name on the Flipper
-* Add a config file for general app settings
-* Create cleaner log files that are easier to read
-* Clean up code & implement best practices
+- Support for multiple portals
+- Enter AP name on the Flipper
+- Add a config file for general app settings
+- Create cleaner log files that are easier to read
+- Clean up code & implement best practices
 
 ## License
 
@@ -116,11 +155,20 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 I was only able to create this using the following apps as examples
 
-* [flipperzero-wifi-marauder](https://github.com/0xchocolate/flipperzero-wifi-marauder)
-* [UART_Terminal](https://github.com/cool4uma/UART_Terminal)
-* [flipper-zero-fap-boilerplate](https://github.com/leedave/flipper-zero-fap-boilerplate)
-* [Create Captive Portal Using ESP32](https://iotespresso.com/create-captive-portal-using-esp32/)
+- [flipperzero-wifi-marauder](https://github.com/0xchocolate/flipperzero-wifi-marauder)
+- [UART_Terminal](https://github.com/cool4uma/UART_Terminal)
+- [flipper-zero-fap-boilerplate](https://github.com/leedave/flipper-zero-fap-boilerplate)
+- [Create Captive Portal Using ESP32](https://iotespresso.com/create-captive-portal-using-esp32/)
 
 ## Contact me
 
 You can message me on my reddit account bigbrodude6119
+
+<!-- LINKS -->
+
+[link-arduino]: https://www.arduino.cc/en/software
+[link-asynctcp]: https://github.com/me-no-dev/AsyncTCP
+[link-espasyncwebserver]: https://github.com/me-no-dev/ESPAsyncWebServer
+[link-esptool]: https://pypi.org/project/esptool/
+[link-python]: https://www.python.org/downloads/
+[link-setuptools]: https://pypi.org/project/setuptools/
