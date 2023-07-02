@@ -3,7 +3,7 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
-#include "FlipBIP_icons.h"
+#include "flipbip_icons.h"
 
 struct FlipBipStartscreen {
     View* view;
