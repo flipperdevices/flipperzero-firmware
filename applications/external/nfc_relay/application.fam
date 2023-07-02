@@ -8,7 +8,7 @@ App(
     ],
     stack_size=4 * 1024,
     order=30,
-    fap_icon="../../../assets/icons/Archive/Nfc_10px.png",
+    fap_icon="Nfc_10px.png",
     fap_category="NFC",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="nfc_relay",
