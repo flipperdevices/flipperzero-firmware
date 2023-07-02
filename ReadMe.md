@@ -60,6 +60,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Add new ACs and TVs in universal remote, Hitachi taken from OFW PR 2826 (by minchogaydarov) & Thomson TV from OFW PR 2818 (by eze-kiel)
 - UL: [Subghz fixes #527 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/527)
 - Updated: Marauder [Update ReadMe.md #23 (By francis2054)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/23)
+- UL: [SubGhz App #516 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/516)
+- UL: [Updated infrared assets #529 (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/pull/529)
+- UL: Fixed odd file name length check for desktop (By xMasterX)
 
 <a name="release">
 
