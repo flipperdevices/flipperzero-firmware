@@ -27,4 +27,4 @@ jobs:
       - name: Build FAPs
         run: ./fbt COMPACT=1 DEBUG=0 faps
       - name: Check FlipBIP Built
-        run: test -f build/f7-firmware-C/.extapps/FlipBIP.fap
+        run: test -f build/f7-firmware-C/.extapps/flipbip.fap
