@@ -6,15 +6,19 @@
 
 #define SCAN_MENU_TEXT "Scan"
 #define SCAN_MENU_X 90
-#define SCAN_MENU_Y 13
+#define SCAN_MENU_Y 7
 
 #define SNIFF_MENU_TEXT "Sniff"
 #define SNIFF_MENU_X 90
-#define SNIFF_MENU_Y 27
+#define SNIFF_MENU_Y 21
 
 #define SEND_MENU_TEXT "Send"
 #define SEND_MENU_X 90
-#define SEND_MENU_Y 41
+#define SEND_MENU_Y 35
+
+#define INFOS_MENU_TEXT "Infos"
+#define INFOS_MENU_X 90
+#define INFOS_MENU_Y 49
 
 // Menu
 typedef enum {
@@ -22,6 +26,7 @@ typedef enum {
     SCAN_VIEW,
     SNIFF_VIEW,
     SEND_VIEW,
+    INFOS_VIEW,
 
     /* Know menu Size*/
     MENU_SIZE
