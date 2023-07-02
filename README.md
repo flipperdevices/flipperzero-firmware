@@ -78,6 +78,22 @@ Follow the steps below to flash the Wi-Fi dev board with the evil portal firmwar
     ```
 14. Plug in the Wi-Fi Dev board to the flipper, press the reset button on the Wi-Fi dev board and you should now see a solid blue light.
 
+## Installing/flashing an ESP32 Wroom board
+
+Reddit user dellycem [compiled binaries](https://old.reddit.com/r/flipperzero/comments/14ni93r/i_made_a_evil_portal_app_for_the_fz_wifi_dev_board/jqd42fi/?context=3) for the ESP32 Wroom board if you would like to use that instead of the Wi-Fi devboard.
+
+1. Download the bin files from [this link](https://wetransfer.com/downloads/4d3dd914f2df43dc6c84efa452043f4220230702094742/33a478)
+2. Go to [ESPWebTool](https://esp.huhn.me/) and get your board connected.
+3. Add each of the bin files at the following locations
+   ```
+   EvilPortal.bootloader.bin - 0x1000
+   EvilPortal.partitions.bin - 0x8000
+   boot_app0.bin - 0xe000
+   EvilPortal.bin - 0x10000
+   ```
+4. Press the program button and wait while your board is flashed.
+5. Once complete, hook up the 3.3v, GND, RX0, and TX0 pins to the flipper zero. Remember that the RX/TX pins should go to the opposite pins on the flipper zero. RX -> TX, TX -> RX.
+
 ## Usage
 
 Plug in the Wi-Fi Dev board to the flipper.
@@ -99,6 +115,8 @@ Logs will automatically be saved when exiting the app or when the current log re
 If you are not using the official flipper zero firmware or the unleashed firmware you can build the .fap file yourself by following [these instructions](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md).
 
 Note that you will need to use the firmware repo that you wish to build for.
+
+You can also download builds for each firmware via [flipc](https://flipc.org/bigbrodude6119/flipper-zero-evil-portal?branch=main&root=flipper%2Fflipper-evil-portal).
 
 ## Erasing firmware <a name="erasing-firmware"></a>
 
