@@ -6,6 +6,7 @@ App(
 	cdefines=["FINIK_ETH"],
 	requires=[
 		"gui",
+        "power",
 	],
 	stack_size=10 * 1024,
 	order=90,
