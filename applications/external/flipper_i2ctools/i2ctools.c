@@ -23,6 +23,10 @@ void i2ctools_draw_callback(Canvas* canvas, void* ctx) {
         draw_sender_view(canvas, i2ctools->sender);
         break;
 
+    case INFOS_VIEW:
+        draw_infos_view(canvas);
+        break;
+
     default:
         break;
     }
@@ -42,11 +46,6 @@ int32_t i2ctools_app(void* p) {
     // Alloc i2ctools
     i2cTools* i2ctools = malloc(sizeof(i2cTools));
     i2ctools->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
-    if(!i2ctools->mutex) {
-        FURI_LOG_E(APP_NAME, "cannot create mutex\r\n");
-        free(i2ctools);
-        return -1;
-    }
 
     // Alloc viewport
     i2ctools->view_port = view_port_alloc();
@@ -219,7 +218,6 @@ int32_t i2ctools_app(void* p) {
     i2c_scanner_free(i2ctools->scanner);
     i2c_sender_free(i2ctools->sender);
     i2c_main_view_free(i2ctools->main_view);
-    furi_mutex_free(i2ctools->mutex);
     free(i2ctools);
     furi_record_close(RECORD_GUI);
     return 0;
