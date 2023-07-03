@@ -37,20 +37,20 @@ jobs:
         id: device
         timeout-minutes: 0.5
         run: |
-          echo "flipper=/dev/ttyACM0" >> $GITHUB_OUTPUT
+          echo "flipper=/dev/ttyACM1" >> $GITHUB_OUTPUT
           echo "stlink=49FF75065182575513201587" >> $GITHUB_OUTPUT
 
       - name: 'Flash firmware and upload all applications'
         id: flashing
         if: success()
-        timeout-minutes: 2
+        timeout-minutes: 7
         run: |                               
           ./fbt flash_usb_full PORT=${{steps.device.outputs.flipper}} FORCE=1
 
       - name: 'Wait for flipper'
         id: await_flipper
         if: steps.flashing.outcome == 'success'
-        timeout-minutes: 2
+        timeout-minutes: 3
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
@@ -81,7 +81,7 @@ jobs:
       - name: 'Wait for flipper and format ext after tests'
         id: format_ext
         if: always()
-        timeout-minutes: 2
+        timeout-minutes: 3
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}
@@ -113,7 +113,7 @@ jobs:
 
       - name: 'Wait for flipper and format ext'
         if: steps.format_ext.outcome == 'failure'
-        timeout-minutes: 2
+        timeout-minutes: 3
         run: |
           source scripts/toolchain/fbtenv.sh
           python3 scripts/testing/await_flipper.py ${{steps.device.outputs.flipper}}

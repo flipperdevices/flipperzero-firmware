@@ -27,7 +27,7 @@ class TestMain(BaseCase):
         """
         nav.go_to_main_screen()
         nav.press_ok()
-        assert [
+        assert nav.get_menu_list() == [
             "Sub-GHz",
             "RFID",
             "NFC",
@@ -38,4 +38,4 @@ class TestMain(BaseCase):
             "U2F",
             "Settings",
             "Apps",
-        ] == nav.get_menu_list()
+        ]

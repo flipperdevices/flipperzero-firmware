@@ -267,9 +267,9 @@ class Navigator:
         self.get_current_state(timeout = 1)
 
         while True:
-            cur = self.get_current_state(timeout = 1)
+            cur = self.get_current_state(timeout=1)
             if not (cur == []):
-                if (cur[0] in menus):
+                if cur[0] in menus:
                     break
                 else:
                     menus.append(cur[0])
