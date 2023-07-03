@@ -61,10 +61,7 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context);
 LFRFIDRawWorker* lfrfid_raw_worker_alloc() {
     LFRFIDRawWorker* worker = malloc(sizeof(LFRFIDRawWorker));
 
-    worker->thread = furi_thread_alloc();
-    furi_thread_set_name(worker->thread, "lfrfid_raw_worker");
-    furi_thread_set_context(worker->thread, worker);
-    furi_thread_set_stack_size(worker->thread, 2048);
+    worker->thread = furi_thread_alloc_ex("LfrfidRawWorker", 2048, NULL, worker);
 
     worker->events = furi_event_flag_alloc(NULL);
 
@@ -117,7 +114,6 @@ void lfrfid_raw_worker_stop(LFRFIDRawWorker* worker) {
     worker->emulate_callback = NULL;
     worker->context = NULL;
     worker->read_callback = NULL;
-    worker->context = NULL;
     furi_event_flag_set(worker->events, 1 << LFRFIDRawWorkerEventStop);
     furi_thread_join(worker->thread);
 }
@@ -155,9 +151,7 @@ static int32_t lfrfid_raw_read_worker_thread(void* thread_context) {
 
     if(file_valid) {
         // setup carrier
-        furi_hal_rfid_pins_read();
-        furi_hal_rfid_tim_read(worker->frequency, worker->duty_cycle);
-        furi_hal_rfid_tim_read_start();
+        furi_hal_rfid_tim_read_start(worker->frequency, worker->duty_cycle);
 
         // stabilize detector
         furi_delay_ms(1500);
@@ -338,7 +332,7 @@ static int32_t lfrfid_raw_emulate_worker_thread(void* thread_context) {
     }
 
     if(data->ctx.overrun_count) {
-        FURI_LOG_E(TAG_EMULATE, "overruns: %u", data->ctx.overrun_count);
+        FURI_LOG_E(TAG_EMULATE, "overruns: %zu", data->ctx.overrun_count);
     }
 
     furi_stream_buffer_free(data->ctx.stream);

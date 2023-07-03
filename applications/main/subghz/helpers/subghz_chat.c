@@ -59,11 +59,8 @@ SubGhzChatWorker* subghz_chat_worker_alloc(Cli* cli) {
 
     instance->cli = cli;
 
-    instance->thread = furi_thread_alloc();
-    furi_thread_set_name(instance->thread, "SubGhzChat");
-    furi_thread_set_stack_size(instance->thread, 2048);
-    furi_thread_set_context(instance->thread, instance);
-    furi_thread_set_callback(instance->thread, subghz_chat_worker_thread);
+    instance->thread =
+        furi_thread_alloc_ex("SubGhzChat", 2048, subghz_chat_worker_thread, instance);
     instance->subghz_txrx = subghz_tx_rx_worker_alloc();
     instance->event_queue = furi_message_queue_alloc(80, sizeof(SubGhzChatEvent));
     return instance;
@@ -79,12 +76,15 @@ void subghz_chat_worker_free(SubGhzChatWorker* instance) {
     free(instance);
 }
 
-bool subghz_chat_worker_start(SubGhzChatWorker* instance, uint32_t frequency) {
+bool subghz_chat_worker_start(
+    SubGhzChatWorker* instance,
+    const SubGhzDevice* device,
+    uint32_t frequency) {
     furi_assert(instance);
     furi_assert(!instance->worker_running);
     bool res = false;
 
-    if(subghz_tx_rx_worker_start(instance->subghz_txrx, frequency)) {
+    if(subghz_tx_rx_worker_start(instance->subghz_txrx, device, frequency)) {
         furi_message_queue_reset(instance->event_queue);
         subghz_tx_rx_worker_set_callback_have_read(
             instance->subghz_txrx, subghz_chat_worker_update_rx_event_chat, instance);

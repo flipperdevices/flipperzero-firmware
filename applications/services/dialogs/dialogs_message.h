@@ -1,7 +1,7 @@
 #pragma once
 #include <furi.h>
 #include "dialogs_i.h"
-#include "dialogs_api_lock.h"
+#include <toolbox/api_lock.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -11,11 +11,13 @@ typedef struct {
     const char* extension;
     bool skip_assets;
     bool hide_ext;
+    bool hide_dot_files;
     const Icon* file_icon;
     FuriString* result_path;
     FuriString* preselected_filename;
     FileBrowserLoadItemCallback item_callback;
     void* item_callback_context;
+    const char* base_path;
 } DialogsAppMessageDataFileBrowser;
 
 typedef struct {

@@ -45,6 +45,8 @@ const char* nfc_mf_ul_type(MfUltralightType type, bool full_name) {
         return "NTAG I2C Plus 2K";
     } else if(type == MfUltralightTypeNTAG203) {
         return "NTAG203";
+    } else if(type == MfUltralightTypeULC) {
+        return "Mifare Ultralight C";
     } else if(type == MfUltralightTypeUL11 && full_name) {
         return "Mifare Ultralight 11";
     } else if(type == MfUltralightTypeUL21 && full_name) {
@@ -55,7 +57,9 @@ const char* nfc_mf_ul_type(MfUltralightType type, bool full_name) {
 }
 
 const char* nfc_mf_classic_type(MfClassicType type) {
-    if(type == MfClassicType1k) {
+    if(type == MfClassicTypeMini) {
+        return "Mifare Mini 0.3K";
+    } else if(type == MfClassicType1k) {
         return "Mifare Classic 1K";
     } else if(type == MfClassicType4k) {
         return "Mifare Classic 4K";

@@ -29,16 +29,16 @@ FuriString* furi_string_alloc() {
 }
 
 FuriString* furi_string_alloc_set(const FuriString* s) {
-    FuriString* string = malloc(sizeof(FuriString));
+    FuriString* string = malloc(sizeof(FuriString)); //-V799
     string_init_set(string->string, s->string);
     return string;
-}
+} //-V773
 
 FuriString* furi_string_alloc_set_str(const char cstr[]) {
-    FuriString* string = malloc(sizeof(FuriString));
+    FuriString* string = malloc(sizeof(FuriString)); //-V799
     string_init_set(string->string, cstr);
     return string;
-}
+} //-V773
 
 FuriString* furi_string_alloc_printf(const char format[], ...) {
     va_list args;
@@ -296,7 +296,9 @@ static FuriStringUTF8State state_to_furi_state(m_str1ng_utf8_state_e state) {
 }
 
 void furi_string_utf8_decode(char c, FuriStringUTF8State* state, FuriStringUnicodeValue* unicode) {
+    string_unicode_t m_u = *unicode;
     m_str1ng_utf8_state_e m_state = furi_state_to_state(*state);
-    m_str1ng_utf8_decode(c, &m_state, unicode);
+    m_str1ng_utf8_decode(c, &m_state, &m_u);
     *state = state_to_furi_state(m_state);
+    *unicode = m_u;
 }

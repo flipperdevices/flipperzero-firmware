@@ -37,9 +37,11 @@ char cli_getc(Cli* cli) {
     if(cli->session != NULL) {
         if(cli->session->rx((uint8_t*)&c, 1, FuriWaitForever) == 0) {
             cli_reset(cli);
+            furi_delay_tick(10);
         }
     } else {
         cli_reset(cli);
+        furi_delay_tick(10);
     }
     return c;
 }
@@ -225,7 +227,7 @@ static void cli_handle_enter(Cli* cli) {
     furi_check(furi_mutex_acquire(cli->mutex, FuriWaitForever) == FuriStatusOk);
     CliCommand* cli_command_ptr = CliCommandTree_get(cli->commands, command);
 
-    if(cli_command_ptr) {
+    if(cli_command_ptr) { //-V547
         CliCommand cli_command;
         memcpy(&cli_command, cli_command_ptr, sizeof(CliCommand));
         furi_check(furi_mutex_release(cli->mutex) == FuriStatusOk);
@@ -353,7 +355,7 @@ void cli_process_input(Cli* cli) {
         cli_handle_backspace(cli);
     } else if(in_chr == CliSymbolAsciiCR) {
         cli_handle_enter(cli);
-    } else if(in_chr >= 0x20 && in_chr < 0x7F) {
+    } else if(in_chr >= 0x20 && in_chr < 0x7F) { //-V560
         if(cli->cursor_position == furi_string_size(cli->line)) {
             furi_string_push_back(cli->line, in_chr);
             cli_putc(cli, in_chr);
@@ -461,7 +463,7 @@ int32_t cli_srv(void* p) {
     if(furi_hal_rtc_get_boot_mode() == FuriHalRtcBootModeNormal) {
         cli_session_open(cli, &cli_vcp);
     } else {
-        FURI_LOG_W(TAG, "Skipped CLI session open: device in special startup mode");
+        FURI_LOG_W(TAG, "Skipping start in special boot mode");
     }
 
     while(1) {

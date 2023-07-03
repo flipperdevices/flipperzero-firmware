@@ -23,10 +23,13 @@ typedef struct {
     FuriString* sample_write;
     FuriString* file_name;
     uint8_t* rssi_history;
+    uint8_t rssi_curret;
     bool rssi_history_end;
     uint8_t ind_write;
     uint8_t ind_sin;
     SubGhzReadRAWStatus status;
+    float raw_threshold_rssi;
+    SubGhzRadioDeviceType device_type;
 } SubGhzReadRAWModel;
 
 void subghz_read_raw_set_callback(
@@ -54,21 +57,35 @@ void subghz_read_raw_add_data_statusbar(
         true);
 }
 
-void subghz_read_raw_add_data_rssi(SubGhzReadRAW* instance, float rssi) {
+void subghz_read_raw_set_radio_device_type(
+    SubGhzReadRAW* instance,
+    SubGhzRadioDeviceType device_type) {
+    furi_assert(instance);
+    with_view_model(
+        instance->view, SubGhzReadRAWModel * model, { model->device_type = device_type; }, true);
+}
+
+void subghz_read_raw_add_data_rssi(SubGhzReadRAW* instance, float rssi, bool trace) {
     furi_assert(instance);
     uint8_t u_rssi = 0;
 
-    if(rssi < -90) {
+    if(rssi < SUBGHZ_RAW_THRESHOLD_MIN) {
         u_rssi = 0;
     } else {
-        u_rssi = (uint8_t)((rssi + 90) / 2.7);
+        u_rssi = (uint8_t)((rssi - SUBGHZ_RAW_THRESHOLD_MIN) / 2.7);
     }
 
     with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
         {
-            model->rssi_history[model->ind_write++] = u_rssi;
+            model->rssi_curret = u_rssi;
+            if(trace) {
+                model->rssi_history[model->ind_write++] = u_rssi;
+            } else {
+                model->rssi_history[model->ind_write] = u_rssi;
+            }
+
             if(model->ind_write > SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE) {
                 model->rssi_history_end = true;
                 model->ind_write = 0;
@@ -83,7 +100,7 @@ void subghz_read_raw_update_sample_write(SubGhzReadRAW* instance, size_t sample)
     with_view_model(
         instance->view,
         SubGhzReadRAWModel * model,
-        { furi_string_printf(model->sample_write, "%d spl.", sample); },
+        { furi_string_printf(model->sample_write, "%zu spl.", sample); },
         false);
 }
 
@@ -153,7 +170,7 @@ void subghz_read_raw_draw_sin(Canvas* canvas, SubGhzReadRAWModel* model) {
         canvas_draw_line(
             canvas,
             i + 1,
-            32 - subghz_read_raw_tab_sin((i + model->ind_sin * 16)) / SUBGHZ_RAW_SIN_AMPLITUDE,
+            32 - subghz_read_raw_tab_sin(i + model->ind_sin * 16) / SUBGHZ_RAW_SIN_AMPLITUDE,
             i + 2,
             32 + subghz_read_raw_tab_sin((i + model->ind_sin * 16 + 1) * 2) /
                      SUBGHZ_RAW_SIN_AMPLITUDE);
@@ -187,24 +204,53 @@ void subghz_read_raw_draw_scale(Canvas* canvas, SubGhzReadRAWModel* model) {
 void subghz_read_raw_draw_rssi(Canvas* canvas, SubGhzReadRAWModel* model) {
     int ind = 0;
     int base = 0;
+    uint8_t width = 2;
     if(model->rssi_history_end == false) {
         for(int i = model->ind_write; i >= 0; i--) {
             canvas_draw_line(canvas, i, 47, i, 47 - model->rssi_history[i]);
         }
+        canvas_draw_line(
+            canvas, model->ind_write + 1, 47, model->ind_write + 1, 47 - model->rssi_curret);
         if(model->ind_write > 3) {
-            canvas_draw_line(canvas, model->ind_write, 47, model->ind_write, 13);
+            canvas_draw_line(
+                canvas, model->ind_write - 1, 47, model->ind_write - 1, 47 - model->rssi_curret);
+
+            for(uint8_t i = 13; i < 47; i += width * 2) {
+                canvas_draw_line(canvas, model->ind_write, i, model->ind_write, i + width);
+            }
             canvas_draw_line(canvas, model->ind_write - 2, 12, model->ind_write + 2, 12);
             canvas_draw_line(canvas, model->ind_write - 1, 13, model->ind_write + 1, 13);
         }
     } else {
+        int i = 0;
         base = SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE - model->ind_write;
-        for(int i = SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE; i >= 0; i--) {
+        for(i = SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE; i > 0; i--) {
             ind = i - base;
             if(ind < 0) ind += SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE;
             canvas_draw_line(canvas, i, 47, i, 47 - model->rssi_history[ind]);
         }
+
         canvas_draw_line(
-            canvas, SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE, 47, SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE, 13);
+            canvas,
+            SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE - 1,
+            47,
+            SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE - 1,
+            47 - model->rssi_curret);
+        canvas_draw_line(
+            canvas,
+            SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE + 1,
+            47,
+            SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE + 1,
+            47 - model->rssi_curret);
+
+        for(uint8_t i = 13; i < 47; i += width * 2) {
+            canvas_draw_line(
+                canvas,
+                SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE,
+                i,
+                SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE,
+                i + width);
+        }
         canvas_draw_line(
             canvas,
             SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE - 2,
@@ -220,15 +266,38 @@ void subghz_read_raw_draw_rssi(Canvas* canvas, SubGhzReadRAWModel* model) {
     }
 }
 
+void subghz_read_raw_draw_threshold_rssi(Canvas* canvas, SubGhzReadRAWModel* model) {
+    uint8_t x = 118;
+    uint8_t y = 48;
+
+    if(model->raw_threshold_rssi > SUBGHZ_RAW_THRESHOLD_MIN) {
+        uint8_t x = 118;
+        y -= (uint8_t)((model->raw_threshold_rssi - SUBGHZ_RAW_THRESHOLD_MIN) / 2.7);
+
+        uint8_t width = 3;
+        for(uint8_t i = 0; i < x; i += width * 2) {
+            canvas_draw_line(canvas, i, y, i + width, y);
+        }
+    }
+    canvas_draw_line(canvas, x, y - 2, x, y + 2);
+    canvas_draw_line(canvas, x - 1, y - 1, x - 1, y + 1);
+    canvas_draw_dot(canvas, x - 2, y);
+}
+
 void subghz_read_raw_draw(Canvas* canvas, SubGhzReadRAWModel* model) {
     uint8_t graphics_mode = 1;
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 5, 7, furi_string_get_cstr(model->frequency_str));
-    canvas_draw_str(canvas, 40, 7, furi_string_get_cstr(model->preset_str));
+    canvas_draw_str(canvas, 0, 9, furi_string_get_cstr(model->frequency_str));
+    canvas_draw_str(canvas, 35, 9, furi_string_get_cstr(model->preset_str));
     canvas_draw_str_aligned(
-        canvas, 126, 0, AlignRight, AlignTop, furi_string_get_cstr(model->sample_write));
+        canvas, 106, 2, AlignRight, AlignTop, furi_string_get_cstr(model->sample_write));
 
+    if(model->device_type == SubGhzRadioDeviceTypeInternal) {
+        canvas_draw_icon(canvas, 108, 0, &I_Internal_antenna_20x12);
+    } else {
+        canvas_draw_icon(canvas, 108, 0, &I_External_antenna_20x12);
+    }
     canvas_draw_line(canvas, 0, 14, 115, 14);
     canvas_draw_line(canvas, 0, 48, 115, 48);
     canvas_draw_line(canvas, 115, 14, 115, 48);
@@ -278,8 +347,9 @@ void subghz_read_raw_draw(Canvas* canvas, SubGhzReadRAWModel* model) {
     } else {
         subghz_read_raw_draw_rssi(canvas, model);
         subghz_read_raw_draw_scale(canvas, model);
+        subghz_read_raw_draw_threshold_rssi(canvas, model);
         canvas_set_font_direction(canvas, CanvasDirectionBottomToTop);
-        canvas_draw_str(canvas, 126, 40, "RSSI");
+        canvas_draw_str(canvas, 128, 40, "RSSI");
         canvas_set_font_direction(canvas, CanvasDirectionLeftToRight);
     }
 }
@@ -433,7 +503,8 @@ bool subghz_read_raw_input(InputEvent* event, void* context) {
 void subghz_read_raw_set_status(
     SubGhzReadRAW* instance,
     SubGhzReadRAWStatus status,
-    const char* file_name) {
+    const char* file_name,
+    float raw_threshold_rssi) {
     furi_assert(instance);
 
     switch(status) {
@@ -447,6 +518,7 @@ void subghz_read_raw_set_status(
                 model->ind_write = 0;
                 furi_string_reset(model->file_name);
                 furi_string_set(model->sample_write, "0 spl.");
+                model->raw_threshold_rssi = raw_threshold_rssi;
             },
             true);
         break;
@@ -536,6 +608,7 @@ SubGhzReadRAW* subghz_read_raw_alloc() {
             model->sample_write = furi_string_alloc();
             model->file_name = furi_string_alloc();
             model->rssi_history = malloc(SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE * sizeof(uint8_t));
+            model->raw_threshold_rssi = -127.0f;
         },
         true);
 

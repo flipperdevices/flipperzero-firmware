@@ -100,23 +100,20 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
     uint32_t timeout,
     ProtocolId* result_protocol) {
     LFRFIDWorkerReadState state = LFRFIDWorkerReadTimeout;
-    furi_hal_rfid_pins_read();
 
     if(feature & LFRFIDFeatureASK) {
-        furi_hal_rfid_tim_read(125000, 0.5);
+        furi_hal_rfid_tim_read_start(125000, 0.5);
         FURI_LOG_D(TAG, "Start ASK");
         if(worker->read_cb) {
             worker->read_cb(LFRFIDWorkerReadStartASK, PROTOCOL_NO, worker->cb_ctx);
         }
     } else {
-        furi_hal_rfid_tim_read(62500, 0.25);
+        furi_hal_rfid_tim_read_start(62500, 0.25);
         FURI_LOG_D(TAG, "Start PSK");
         if(worker->read_cb) {
             worker->read_cb(LFRFIDWorkerReadStartPSK, PROTOCOL_NO, worker->cb_ctx);
         }
     }
-
-    furi_hal_rfid_tim_read_start();
 
     // stabilize detector
     lfrfid_worker_delay(worker, LFRFID_WORKER_READ_STABILIZE_TIME_MS);
@@ -205,7 +202,7 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
                     average_index = 0;
 
                     if(worker->read_cb) {
-                        if(average > 0.2 && average < 0.8) {
+                        if(average > 0.2f && average < 0.8f) {
                             if(!card_detected) {
                                 card_detected = true;
                                 worker->read_cb(
@@ -276,7 +273,7 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
 
                         FURI_LOG_D(
                             TAG,
-                            "%s, %d, [%s]",
+                            "%s, %zu, [%s]",
                             protocol_dict_get_name(worker->protocols, protocol),
                             last_read_count,
                             furi_string_get_cstr(string_info));
@@ -335,9 +332,9 @@ static LFRFIDWorkerReadState lfrfid_worker_read_internal(
 }
 
 static void lfrfid_worker_mode_read_process(LFRFIDWorker* worker) {
-    LFRFIDFeature feature = LFRFIDFeatureASK;
     ProtocolId read_result = PROTOCOL_NO;
     LFRFIDWorkerReadState state;
+    LFRFIDFeature feature;
 
     if(worker->read_type == LFRFIDWorkerReadTypePSKOnly) {
         feature = LFRFIDFeaturePSK;

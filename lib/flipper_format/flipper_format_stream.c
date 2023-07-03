@@ -298,7 +298,7 @@ bool flipper_format_stream_write_value_line(Stream* stream, FlipperStreamWriteDa
                 }; break;
                 case FlipperStreamValueUint32: {
                     const uint32_t* data = write_data->data;
-                    furi_string_printf(value, "%" PRId32, data[i]);
+                    furi_string_printf(value, "%" PRIu32, data[i]);
                 }; break;
                 case FlipperStreamValueHexUint64: {
                     const uint64_t* data = write_data->data;
@@ -313,7 +313,7 @@ bool flipper_format_stream_write_value_line(Stream* stream, FlipperStreamWriteDa
                     furi_crash("Unknown FF type");
                 }
 
-                if((size_t)(i + 1) < write_data->data_size) {
+                if(((size_t)i + 1) < write_data->data_size) {
                     furi_string_cat(value, " ");
                 }
 
@@ -396,7 +396,7 @@ bool flipper_format_stream_read_value_line(
                     }; break;
                     case FlipperStreamValueUint32: {
                         uint32_t* data = _data;
-                        scan_values = sscanf(furi_string_get_cstr(value), "%" PRId32, &data[i]);
+                        scan_values = sscanf(furi_string_get_cstr(value), "%" PRIu32, &data[i]);
                     }; break;
                     case FlipperStreamValueHexUint64: {
                         uint64_t* data = _data;

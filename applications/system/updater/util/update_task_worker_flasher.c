@@ -143,7 +143,6 @@ static void update_task_wait_for_restart(UpdateTask* update_task) {
 }
 
 static bool update_task_write_stack(UpdateTask* update_task) {
-    bool success = false;
     UpdateManifest* manifest = update_task->manifest;
     do {
         FURI_LOG_W(TAG, "Writing stack");
@@ -162,13 +161,11 @@ static bool update_task_write_stack(UpdateTask* update_task) {
         update_task_set_progress(update_task, UpdateTaskStageRadioInstall, 100);
         /* ...system will restart here. */
         update_task_wait_for_restart(update_task);
-        success = true;
     } while(false);
-    return success;
+    return false; /* will return only in the case of failure */
 }
 
 static bool update_task_remove_stack(UpdateTask* update_task) {
-    bool success = false;
     do {
         FURI_LOG_W(TAG, "Removing stack");
         update_task_set_progress(update_task, UpdateTaskStageRadioErase, 30);
@@ -178,9 +175,8 @@ static bool update_task_remove_stack(UpdateTask* update_task) {
         update_task_set_progress(update_task, UpdateTaskStageRadioErase, 100);
         /* ...system will restart here. */
         update_task_wait_for_restart(update_task);
-        success = true;
     } while(false);
-    return success;
+    return false; /* will return only in the case of failure */
 }
 
 static bool update_task_manage_radiostack(UpdateTask* update_task) {
@@ -350,7 +346,11 @@ int32_t update_task_worker_flash_writer(void* context) {
         furi_hal_rtc_set_boot_mode(FuriHalRtcBootModePostUpdate);
         // Format LFS before restoring backup on next boot
         furi_hal_rtc_set_flag(FuriHalRtcFlagFactoryReset);
-
+#ifdef FURI_NDEBUG
+        // Production
+        furi_hal_rtc_set_log_level(FuriLogLevelDefault);
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
+#endif
         update_task_set_progress(update_task, UpdateTaskStageCompleted, 100);
         success = true;
     } while(false);

@@ -1,5 +1,5 @@
 #include <limits.h>
-#include "furi_hal_nfc.h"
+#include <furi_hal_nfc.h>
 #include <st25r3916.h>
 #include <st25r3916_irq.h>
 #include <rfal_rf.h>
@@ -24,13 +24,29 @@ FuriEventFlag* event = NULL;
 #define FURI_HAL_NFC_UID_INCOMPLETE (0x04)
 
 void furi_hal_nfc_init() {
+    furi_assert(!event);
+    event = furi_event_flag_alloc();
+
     ReturnCode ret = rfalNfcInitialize();
     if(ret == ERR_NONE) {
         furi_hal_nfc_start_sleep();
-        event = furi_event_flag_alloc();
         FURI_LOG_I(TAG, "Init OK");
     } else {
-        FURI_LOG_W(TAG, "Initialization failed, RFAL returned: %d", ret);
+        FURI_LOG_W(TAG, "Init Failed, RFAL returned: %d", ret);
+    }
+}
+
+void furi_hal_nfc_deinit() {
+    ReturnCode ret = rfalDeinitialize();
+    if(ret == ERR_NONE) {
+        FURI_LOG_I(TAG, "Deinit OK");
+    } else {
+        FURI_LOG_W(TAG, "Deinit Failed, RFAL returned: %d", ret);
+    }
+
+    if(event) {
+        furi_event_flag_free(event);
+        event = NULL;
     }
 }
 
@@ -244,6 +260,9 @@ bool furi_hal_nfc_listen(
     params.lmConfigPA.SEL_RES = sak;
     rfalNfcDiscover(&params);
 
+    // Disable EMD suppression.
+    st25r3916ModifyRegister(ST25R3916_REG_EMD_SUP_CONF, ST25R3916_REG_EMD_SUP_CONF_emd_emv, 0);
+
     uint32_t start = DWT->CYCCNT;
     while(state != RFAL_NFC_STATE_ACTIVATED) {
         rfalNfcWorker();
@@ -422,7 +441,7 @@ bool furi_hal_nfc_emulate_nfca(
         buff_rx_len = 0;
         buff_tx_len = 0;
         uint32_t flag = furi_event_flag_wait(event, EVENT_FLAG_ALL, FuriFlagWaitAny, timeout);
-        if(flag == FuriFlagErrorTimeout || flag == EVENT_FLAG_STOP) {
+        if(flag == (unsigned)FuriFlagErrorTimeout || flag == EVENT_FLAG_STOP) {
             break;
         }
         bool data_received = false;
@@ -448,7 +467,7 @@ bool furi_hal_nfc_emulate_nfca(
                     buff_tx,
                     buff_tx_len,
                     buff_rx,
-                    sizeof(buff_rx),
+                    rfalConvBytesToBits(buff_rx_size),
                     &buff_rx_len,
                     data_type,
                     RFAL_FWT_NONE);
@@ -472,7 +491,7 @@ bool furi_hal_nfc_emulate_nfca(
                         buff_tx,
                         buff_tx_len,
                         buff_rx,
-                        sizeof(buff_rx),
+                        rfalConvBytesToBits(buff_rx_size),
                         &buff_rx_len,
                         data_type,
                         RFAL_FWT_NONE);
@@ -606,9 +625,9 @@ static uint16_t furi_hal_nfc_data_and_parity_to_bitstream(
             out[curr_bit_pos / 8] = next_par_bit;
             curr_bit_pos++;
         } else {
-            out[curr_bit_pos / 8] |= data[i] << curr_bit_pos % 8;
+            out[curr_bit_pos / 8] |= data[i] << (curr_bit_pos % 8);
             out[curr_bit_pos / 8 + 1] = data[i] >> (8 - curr_bit_pos % 8);
-            out[curr_bit_pos / 8 + 1] |= next_par_bit << curr_bit_pos % 8;
+            out[curr_bit_pos / 8 + 1] |= next_par_bit << (curr_bit_pos % 8);
             curr_bit_pos += 9;
         }
     }
@@ -620,6 +639,10 @@ uint16_t furi_hal_nfc_bitstream_to_data_and_parity(
     uint16_t in_buff_bits,
     uint8_t* out_data,
     uint8_t* out_parity) {
+    if(in_buff_bits < 8) {
+        out_data[0] = in_buff[0];
+        return in_buff_bits;
+    }
     if(in_buff_bits % 9 != 0) {
         return 0;
     }
@@ -628,14 +651,14 @@ uint16_t furi_hal_nfc_bitstream_to_data_and_parity(
     uint16_t bit_processed = 0;
     memset(out_parity, 0, in_buff_bits / 9);
     while(bit_processed < in_buff_bits) {
-        out_data[curr_byte] = in_buff[bit_processed / 8] >> bit_processed % 8;
+        out_data[curr_byte] = in_buff[bit_processed / 8] >> (bit_processed % 8);
         out_data[curr_byte] |= in_buff[bit_processed / 8 + 1] << (8 - bit_processed % 8);
         out_parity[curr_byte / 8] |= FURI_BIT(in_buff[bit_processed / 8 + 1], bit_processed % 8)
                                      << (7 - curr_byte % 8);
         bit_processed += 9;
         curr_byte++;
     }
-    return curr_byte;
+    return curr_byte * 8;
 }
 
 bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
@@ -692,8 +715,8 @@ bool furi_hal_nfc_tx_rx(FuriHalNfcTxRxContext* tx_rx, uint16_t timeout_ms) {
 
     if(tx_rx->tx_rx_type == FuriHalNfcTxRxTypeRaw ||
        tx_rx->tx_rx_type == FuriHalNfcTxRxTypeRxRaw) {
-        tx_rx->rx_bits = 8 * furi_hal_nfc_bitstream_to_data_and_parity(
-                                 temp_rx_buff, *temp_rx_bits, tx_rx->rx_data, tx_rx->rx_parity);
+        tx_rx->rx_bits = furi_hal_nfc_bitstream_to_data_and_parity(
+            temp_rx_buff, *temp_rx_bits, tx_rx->rx_data, tx_rx->rx_parity);
     } else {
         memcpy(tx_rx->rx_data, temp_rx_buff, MIN(*temp_rx_bits / 8, FURI_HAL_NFC_DATA_BUFF_SIZE));
         tx_rx->rx_bits = *temp_rx_bits;
@@ -782,6 +805,31 @@ FuriHalNfcReturn furi_hal_nfc_ll_txrx(
     return rfalTransceiveBlockingTxRx(txBuf, txBufLen, rxBuf, rxBufLen, actLen, flags, fwt);
 }
 
+FuriHalNfcReturn furi_hal_nfc_ll_txrx_bits(
+    uint8_t* txBuf,
+    uint16_t txBufLen,
+    uint8_t* rxBuf,
+    uint16_t rxBufLen,
+    uint16_t* actLen,
+    uint32_t flags,
+    uint32_t fwt) {
+    return rfalTransceiveBitsBlockingTxRx(txBuf, txBufLen, rxBuf, rxBufLen, actLen, flags, fwt);
+}
+
 void furi_hal_nfc_ll_poll() {
     rfalWorker();
+}
+
+void furi_hal_nfc_field_detect_start() {
+    st25r3916WriteRegister(
+        ST25R3916_REG_OP_CONTROL,
+        ST25R3916_REG_OP_CONTROL_en | ST25R3916_REG_OP_CONTROL_en_fd_mask);
+    st25r3916WriteRegister(ST25R3916_REG_MODE, ST25R3916_REG_MODE_targ | ST25R3916_REG_MODE_om0);
+}
+
+bool furi_hal_nfc_field_is_present() {
+    return st25r3916CheckReg(
+        ST25R3916_REG_AUX_DISPLAY,
+        ST25R3916_REG_AUX_DISPLAY_efd_o,
+        ST25R3916_REG_AUX_DISPLAY_efd_o);
 }

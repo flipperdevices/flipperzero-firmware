@@ -1,11 +1,11 @@
-#include "furi_hal_bt_hid.h"
-#include "furi_hal_usb_hid.h"
-#include "usb_hid.h"
-#include "dev_info_service.h"
-#include "battery_service.h"
-#include "hid_service.h"
+#include <furi_hal_bt_hid.h>
+#include <furi_hal_usb_hid.h>
+#include <services/dev_info_service.h>
+#include <services/battery_service.h>
+#include <services/hid_service.h>
 
 #include <furi.h>
+#include <usb_hid.h>
 
 #define FURI_HAL_BT_INFO_BASE_USB_SPECIFICATION (0x0101)
 #define FURI_HAL_BT_INFO_COUNTRY_CODE (0x00)
@@ -153,7 +153,7 @@ void furi_hal_bt_hid_start() {
         FURI_HAL_BT_HID_INFO_FLAG_REMOTE_WAKE_MSK |
             FURI_HAL_BT_HID_INFO_FLAG_NORMALLY_CONNECTABLE_MSK,
     };
-    hid_svc_update_info(hid_info_val, sizeof(hid_info_val));
+    hid_svc_update_info(hid_info_val);
 }
 
 void furi_hal_bt_hid_stop() {
@@ -216,7 +216,7 @@ bool furi_hal_bt_hid_kb_release_all() {
 
 bool furi_hal_bt_hid_consumer_key_press(uint16_t button) {
     furi_assert(consumer_report);
-    for(uint8_t i = 0; i < FURI_HAL_BT_HID_CONSUMER_MAX_KEYS; i++) {
+    for(uint8_t i = 0; i < FURI_HAL_BT_HID_CONSUMER_MAX_KEYS; i++) { //-V1008
         if(consumer_report->key[i] == 0) {
             consumer_report->key[i] = button;
             break;
@@ -228,7 +228,7 @@ bool furi_hal_bt_hid_consumer_key_press(uint16_t button) {
 
 bool furi_hal_bt_hid_consumer_key_release(uint16_t button) {
     furi_assert(consumer_report);
-    for(uint8_t i = 0; i < FURI_HAL_BT_HID_CONSUMER_MAX_KEYS; i++) {
+    for(uint8_t i = 0; i < FURI_HAL_BT_HID_CONSUMER_MAX_KEYS; i++) { //-V1008
         if(consumer_report->key[i] == button) {
             consumer_report->key[i] = 0;
             break;
@@ -240,7 +240,7 @@ bool furi_hal_bt_hid_consumer_key_release(uint16_t button) {
 
 bool furi_hal_bt_hid_consumer_key_release_all() {
     furi_assert(consumer_report);
-    for(uint8_t i = 0; i < FURI_HAL_BT_HID_CONSUMER_MAX_KEYS; i++) {
+    for(uint8_t i = 0; i < FURI_HAL_BT_HID_CONSUMER_MAX_KEYS; i++) { //-V1008
         consumer_report->key[i] = 0;
     }
     return hid_svc_update_input_report(

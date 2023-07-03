@@ -37,6 +37,8 @@ static bool
             line->horizontal = AlignRight;
         } else if(ctrl_symbol == '#') {
             line->font = FontPrimary;
+        } else if(ctrl_symbol == '*') {
+            line->font = FontKeyboard;
         }
         furi_string_right(text, 2);
         processed = true;
@@ -74,7 +76,7 @@ static void widget_element_text_scroll_fill_lines(Canvas* canvas, WidgetElement*
         }
         // Set canvas font
         canvas_set_font(canvas, line_tmp.font);
-        CanvasFontParameters* params = canvas_get_font_params(canvas, line_tmp.font);
+        const CanvasFontParameters* params = canvas_get_font_params(canvas, line_tmp.font);
         total_height += params->height;
         if(total_height > model->height) {
             model->scroll_pos_total++;
@@ -138,7 +140,7 @@ static void widget_element_text_scroll_draw(Canvas* canvas, WidgetElement* eleme
             TextScrollLineArray_next(it), curr_line++) {
             if(curr_line < model->scroll_pos_current) continue;
             TextScrollLineArray* line = TextScrollLineArray_ref(it);
-            CanvasFontParameters* params = canvas_get_font_params(canvas, line->font);
+            const CanvasFontParameters* params = canvas_get_font_params(canvas, line->font);
             if(y + params->descender > model->y + model->height) break;
             canvas_set_font(canvas, line->font);
             if(line->horizontal == AlignLeft) {
@@ -241,4 +243,4 @@ WidgetElement* widget_element_text_scroll_create(
     text_scroll->model_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     return text_scroll;
-}
+} //-V773

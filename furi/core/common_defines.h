@@ -11,6 +11,14 @@ extern "C" {
 
 #include <cmsis_compiler.h>
 
+#ifndef FURI_WARN_UNUSED
+#define FURI_WARN_UNUSED __attribute__((warn_unused_result))
+#endif
+
+#ifndef FURI_WEAK
+#define FURI_WEAK __attribute__((weak))
+#endif
+
 #ifndef FURI_IS_IRQ_MASKED
 #define FURI_IS_IRQ_MASKED() (__get_PRIMASK() != 0U)
 #endif
@@ -23,54 +31,23 @@ extern "C" {
 #define FURI_IS_ISR() (FURI_IS_IRQ_MODE() || FURI_IS_IRQ_MASKED())
 #endif
 
+typedef struct {
+    uint32_t isrm;
+    bool from_isr;
+    bool kernel_running;
+} __FuriCriticalInfo;
+
+__FuriCriticalInfo __furi_critical_enter(void);
+
+void __furi_critical_exit(__FuriCriticalInfo info);
+
 #ifndef FURI_CRITICAL_ENTER
-#define FURI_CRITICAL_ENTER()                                                    \
-    uint32_t __isrm = 0;                                                         \
-    bool __from_isr = FURI_IS_ISR();                                             \
-    bool __kernel_running = (xTaskGetSchedulerState() == taskSCHEDULER_RUNNING); \
-    if(__from_isr) {                                                             \
-        __isrm = taskENTER_CRITICAL_FROM_ISR();                                  \
-    } else if(__kernel_running) {                                                \
-        taskENTER_CRITICAL();                                                    \
-    } else {                                                                     \
-        __disable_irq();                                                         \
-    }
+#define FURI_CRITICAL_ENTER() __FuriCriticalInfo __furi_critical_info = __furi_critical_enter();
 #endif
 
 #ifndef FURI_CRITICAL_EXIT
-#define FURI_CRITICAL_EXIT()                \
-    if(__from_isr) {                        \
-        taskEXIT_CRITICAL_FROM_ISR(__isrm); \
-    } else if(__kernel_running) {           \
-        taskEXIT_CRITICAL();                \
-    } else {                                \
-        __enable_irq();                     \
-    }
+#define FURI_CRITICAL_EXIT() __furi_critical_exit(__furi_critical_info);
 #endif
-
-static inline bool furi_is_irq_context() {
-    bool irq = false;
-    BaseType_t state;
-
-    if(FURI_IS_IRQ_MODE()) {
-        /* Called from interrupt context */
-        irq = true;
-    } else {
-        /* Get FreeRTOS scheduler state */
-        state = xTaskGetSchedulerState();
-
-        if(state != taskSCHEDULER_NOT_STARTED) {
-            /* Scheduler was started */
-            if(FURI_IS_IRQ_MASKED()) {
-                /* Interrupts are masked */
-                irq = true;
-            }
-        }
-    }
-
-    /* Return context, 0: thread context, 1: IRQ context */
-    return (irq);
-}
 
 #ifdef __cplusplus
 }

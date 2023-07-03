@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,13 +26,13 @@ typedef enum {
 typedef enum {
     FSE_OK, /**< No error */
     FSE_NOT_READY, /**< FS not ready */
-    FSE_EXIST, /**< File/Dir alrady exist */
+    FSE_EXIST, /**< File/Dir already exist */
     FSE_NOT_EXIST, /**< File/Dir does not exist */
     FSE_INVALID_PARAMETER, /**< Invalid API parameter */
     FSE_DENIED, /**< Access denied */
     FSE_INVALID_NAME, /**< Invalid name/path */
     FSE_INTERNAL, /**< Internal error */
-    FSE_NOT_IMPLEMENTED, /**< Functon not implemented */
+    FSE_NOT_IMPLEMENTED, /**< Function not implemented */
     FSE_ALREADY_OPEN, /**< File/Dir already opened */
 } FS_Error;
 
@@ -40,10 +41,10 @@ typedef enum {
     FSF_DIRECTORY = (1 << 0), /**< Directory */
 } FS_Flags;
 
-/**  Structure that hold file index and returned api errors  */
+/** Structure that hold file index and returned api errors  */
 typedef struct File File;
 
-/**  Structure that hold file info */
+/** Structure that hold file info */
 typedef struct {
     uint8_t flags; /**< flags from FS_Flags enum */
     uint64_t size; /**< file size */
@@ -54,6 +55,12 @@ typedef struct {
  * @return const char* error text
  */
 const char* filesystem_api_error_get_desc(FS_Error error_id);
+
+/** Checks if file info is directory
+ * @param file_info file info pointer
+ * @return bool is directory
+ */
+bool file_info_is_dir(const FileInfo* file_info);
 
 #ifdef __cplusplus
 }

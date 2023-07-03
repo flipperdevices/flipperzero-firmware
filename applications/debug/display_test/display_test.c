@@ -91,7 +91,6 @@ static void display_test_reload_config(DisplayTest* instance) {
         instance->config_contrast,
         instance->config_regulation_ratio,
         instance->config_bias);
-    gui_update(instance->gui);
 }
 
 static void display_config_set_bias(VariableItem* item) {
@@ -145,7 +144,7 @@ DisplayTest* display_test_alloc() {
     view_set_previous_callback(view, display_test_previous_callback);
     view_dispatcher_add_view(instance->view_dispatcher, DisplayTestViewConfigure, view);
 
-    // Configurtion items
+    // Configuration items
     VariableItem* item;
     instance->config_bias = false;
     instance->config_contrast = 32;

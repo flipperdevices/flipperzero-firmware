@@ -72,8 +72,32 @@ MU_TEST_1(stream_composite_subtest, Stream* stream) {
     mu_check(stream_seek(stream, -3, StreamOffsetFromEnd));
     mu_check(stream_tell(stream) == 4);
 
-    // write string with replacemet
+    // test seeks to char. content: '1337_69'
+    stream_rewind(stream);
+    mu_check(stream_seek_to_char(stream, '3', StreamDirectionForward));
+    mu_check(stream_tell(stream) == 1);
+    mu_check(stream_seek_to_char(stream, '3', StreamDirectionForward));
+    mu_check(stream_tell(stream) == 2);
+    mu_check(stream_seek_to_char(stream, '_', StreamDirectionForward));
+    mu_check(stream_tell(stream) == 4);
+    mu_check(stream_seek_to_char(stream, '9', StreamDirectionForward));
+    mu_check(stream_tell(stream) == 6);
+    mu_check(!stream_seek_to_char(stream, '9', StreamDirectionForward));
+    mu_check(stream_tell(stream) == 6);
+    mu_check(stream_seek_to_char(stream, '_', StreamDirectionBackward));
+    mu_check(stream_tell(stream) == 4);
+    mu_check(stream_seek_to_char(stream, '3', StreamDirectionBackward));
+    mu_check(stream_tell(stream) == 2);
+    mu_check(stream_seek_to_char(stream, '3', StreamDirectionBackward));
+    mu_check(stream_tell(stream) == 1);
+    mu_check(!stream_seek_to_char(stream, '3', StreamDirectionBackward));
+    mu_check(stream_tell(stream) == 1);
+    mu_check(stream_seek_to_char(stream, '1', StreamDirectionBackward));
+    mu_check(stream_tell(stream) == 0);
+
+    // write string with replacement
     // "1337_69" -> "1337lee"
+    mu_check(stream_seek(stream, 4, StreamOffsetFromStart));
     mu_check(stream_write_string(stream, string_lee) == 3);
     mu_check(stream_size(stream) == 7);
     mu_check(stream_tell(stream) == 7);
@@ -219,21 +243,21 @@ MU_TEST_1(stream_composite_subtest, Stream* stream) {
     mu_check(stream_eof(stream));
     mu_assert_int_eq(0, stream_tell(stream));
 
-    // insert formated string at the end of stream
+    // insert formatted string at the end of stream
     // "" -> "dio666"
     mu_check(stream_insert_format(stream, "%s%d", "dio", 666));
     mu_assert_int_eq(6, stream_size(stream));
     mu_check(stream_eof(stream));
     mu_assert_int_eq(6, stream_tell(stream));
 
-    // insert formated string at the end of stream
+    // insert formatted string at the end of stream
     // "dio666" -> "dio666zlo555"
     mu_check(stream_insert_format(stream, "%s%d", "zlo", 555));
     mu_assert_int_eq(12, stream_size(stream));
     mu_check(stream_eof(stream));
     mu_assert_int_eq(12, stream_tell(stream));
 
-    // insert formated string at the 6 pos
+    // insert formatted string at the 6 pos
     // "dio666" -> "dio666baba13zlo555"
     mu_check(stream_seek(stream, 6, StreamOffsetFromStart));
     mu_check(stream_insert_format(stream, "%s%d", "baba", 13));

@@ -1,7 +1,7 @@
 #include "../u2f_app_i.h"
 #include "../views/u2f_view.h"
 #include <dolphin/dolphin.h>
-#include "furi_hal.h"
+#include <furi_hal.h>
 #include "../u2f.h"
 
 #define U2F_REQUEST_TIMEOUT 500
@@ -58,7 +58,7 @@ bool u2f_scene_main_on_event(void* context, SceneManagerEvent event) {
                 app->event_cur = event.event;
                 if(event.event == U2fCustomEventRegister)
                     u2f_view_set_state(app->u2f_view, U2fMsgRegister);
-                else if(event.event == U2fCustomEventAuth)
+                else if(event.event == U2fCustomEventAuth) //-V547
                     u2f_view_set_state(app->u2f_view, U2fMsgAuth);
                 notification_message(app->notifications, &sequence_display_backlight_on);
                 notification_message(app->notifications, &sequence_single_vibro);
@@ -68,7 +68,7 @@ bool u2f_scene_main_on_event(void* context, SceneManagerEvent event) {
             notification_message(app->notifications, &sequence_blink_magenta_10);
         } else if(event.event == U2fCustomEventAuthSuccess) {
             notification_message_block(app->notifications, &sequence_set_green_255);
-            DOLPHIN_DEED(DolphinDeedU2fAuthorized);
+            dolphin_deed(DolphinDeedU2fAuthorized);
             furi_timer_start(app->timer, U2F_SUCCESS_TIMEOUT);
             app->event_cur = U2fCustomEventNone;
             u2f_view_set_state(app->u2f_view, U2fMsgSuccess);

@@ -3,25 +3,39 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/modules/empty_screen.h>
+#include <assets_icons.h>
 #include <furi_hal_version.h>
 #include <furi_hal_region.h>
 #include <furi_hal_bt.h>
+#include <furi_hal_info.h>
 
 typedef DialogMessageButton (*AboutDialogScreen)(DialogsApp* dialogs, DialogMessage* message);
 
 static DialogMessageButton product_screen(DialogsApp* dialogs, DialogMessage* message) {
     DialogMessageButton result;
 
-    const char* screen_header = "Product: Flipper Zero\n"
-                                "Model: FZ.1\n";
-    const char* screen_text = "FCC ID: 2A2V6-FZ\n"
-                              "IC: 27624-FZ";
+    FuriString* screen_header = furi_string_alloc_printf(
+        "Product: %s\n"
+        "Model: %s",
+        furi_hal_version_get_model_name(),
+        furi_hal_version_get_model_code());
 
-    dialog_message_set_header(message, screen_header, 0, 0, AlignLeft, AlignTop);
-    dialog_message_set_text(message, screen_text, 0, 26, AlignLeft, AlignTop);
+    FuriString* screen_text = furi_string_alloc_printf(
+        "FCC ID: %s\n"
+        "IC: %s",
+        furi_hal_version_get_fcc_id(),
+        furi_hal_version_get_ic_id());
+
+    dialog_message_set_header(
+        message, furi_string_get_cstr(screen_header), 0, 0, AlignLeft, AlignTop);
+    dialog_message_set_text(
+        message, furi_string_get_cstr(screen_text), 0, 26, AlignLeft, AlignTop);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_header(message, NULL, 0, 0, AlignLeft, AlignTop);
     dialog_message_set_text(message, NULL, 0, 0, AlignLeft, AlignTop);
+
+    furi_string_free(screen_header);
+    furi_string_free(screen_text);
 
     return result;
 }
@@ -118,17 +132,20 @@ static DialogMessageButton fw_version_screen(DialogsApp* dialogs, DialogMessage*
     c2_ver = ble_glue_get_c2_info();
 #endif
 
-    if(!ver) {
+    if(!ver) { //-V1051
         furi_string_cat_printf(buffer, "No info\n");
     } else {
+        uint16_t api_major, api_minor;
+        furi_hal_info_get_api_version(&api_major, &api_minor);
         furi_string_cat_printf(
             buffer,
-            "%s [%s]\n%s%s [%s] %s\n[%d] %s",
+            "%s [%s]\n%s%s [%d.%d] %s\n[%d] %s",
             version_get_version(ver),
             version_get_builddate(ver),
             version_get_dirty_flag(ver) ? "[!] " : "",
             version_get_githash(ver),
-            version_get_gitbranchnum(ver),
+            api_major,
+            api_minor,
             c2_ver ? c2_ver->StackTypeString : "<none>",
             version_get_target(ver),
             version_get_gitbranch(ver));

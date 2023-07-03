@@ -69,8 +69,11 @@ static DirWalkResult
 
             if(dir_walk_filter(dir_walk, name, &info)) {
                 if(return_path != NULL) {
-                    furi_string_printf(
-                        return_path, "%s/%s", furi_string_get_cstr(dir_walk->path), name);
+                    furi_string_printf( //-V576
+                        return_path,
+                        "%s/%s",
+                        furi_string_get_cstr(dir_walk->path),
+                        name);
                 }
 
                 if(fileinfo != NULL) {
@@ -80,7 +83,7 @@ static DirWalkResult
                 end = true;
             }
 
-            if((info.flags & FSF_DIRECTORY) && dir_walk->recursive) {
+            if(file_info_is_dir(&info) && dir_walk->recursive) {
                 // step into
                 DirIndexList_push_back(dir_walk->index_list, dir_walk->current_index);
                 dir_walk->current_index = 0;

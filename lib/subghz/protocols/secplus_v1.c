@@ -224,7 +224,7 @@ static bool subghz_protocol_secplus_v1_encode(SubGhzProtocolEncoderSecPlus_v1* i
     instance->generic.data &= 0xFFFFFFFF00000000;
     instance->generic.data |= rolling;
 
-    if(rolling > 0xFFFFFFFF) {
+    if(rolling == 0xFFFFFFFF) {
         rolling = 0xE6000000;
     }
     if(fixed > 0xCFD41B90) {
@@ -264,18 +264,17 @@ static bool subghz_protocol_secplus_v1_encode(SubGhzProtocolEncoderSecPlus_v1* i
     return true;
 }
 
-bool subghz_protocol_encoder_secplus_v1_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_encoder_secplus_v1_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderSecPlus_v1* instance = context;
-    bool res = false;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            FURI_LOG_E(TAG, "Deserialize error");
-            break;
-        }
-        if(instance->generic.data_count_bit !=
-           2 * subghz_protocol_secplus_v1_const.min_count_bit_for_found) {
-            FURI_LOG_E(TAG, "Wrong number of bits in key");
+        ret = subghz_block_generic_deserialize_check_count_bit(
+            &instance->generic,
+            flipper_format,
+            2 * subghz_protocol_secplus_v1_const.min_count_bit_for_found);
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         //optional parameter parameter
@@ -283,27 +282,29 @@ bool subghz_protocol_encoder_secplus_v1_deserialize(void* context, FlipperFormat
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
         if(!subghz_protocol_secplus_v1_encode(instance)) {
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         if(!subghz_protocol_encoder_secplus_v1_get_upload(instance)) {
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
+            ;
             break;
         }
 
         uint8_t key_data[sizeof(uint64_t)] = {0};
         for(size_t i = 0; i < sizeof(uint64_t); i++) {
-            key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> i * 8) & 0xFF;
+            key_data[sizeof(uint64_t) - i - 1] = (instance->generic.data >> (i * 8)) & 0xFF;
         }
         if(!flipper_format_update_hex(flipper_format, "Key", key_data, sizeof(uint64_t))) {
             FURI_LOG_E(TAG, "Unable to add Key");
+            ret = SubGhzProtocolStatusErrorParserKey;
             break;
         }
 
         instance->encoder.is_running = true;
-
-        res = true;
     } while(false);
 
-    return res;
+    return ret;
 }
 
 void subghz_protocol_encoder_secplus_v1_stop(void* context) {
@@ -516,7 +517,7 @@ uint8_t subghz_protocol_decoder_secplus_v1_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_secplus_v1_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_secplus_v1_serialize(
     void* context,
     FlipperFormat* flipper_format,
     SubGhzRadioPreset* preset) {
@@ -525,22 +526,14 @@ bool subghz_protocol_decoder_secplus_v1_serialize(
     return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-bool subghz_protocol_decoder_secplus_v1_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_secplus_v1_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderSecPlus_v1* instance = context;
-    bool ret = false;
-    do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            break;
-        }
-        if(instance->generic.data_count_bit !=
-           2 * subghz_protocol_secplus_v1_const.min_count_bit_for_found) {
-            FURI_LOG_E(TAG, "Wrong number of bits in key");
-            break;
-        }
-        ret = true;
-    } while(false);
-    return ret;
+    return subghz_block_generic_deserialize_check_count_bit(
+        &instance->generic,
+        flipper_format,
+        2 * subghz_protocol_secplus_v1_const.min_count_bit_for_found);
 }
 
 bool subghz_protocol_secplus_v1_check_fixed(uint32_t fixed) {
@@ -550,7 +543,7 @@ bool subghz_protocol_secplus_v1_check_fixed(uint32_t fixed) {
 
     do {
         if(id1 == 0) return false;
-        if(!(btn == 0 || btn == 1 || btn == 2)) return false;
+        if(!(btn == 0 || btn == 1 || btn == 2)) return false; //-V560
     } while(false);
     return true;
 }
@@ -588,7 +581,7 @@ void subghz_protocol_decoder_secplus_v1_get_string(void* context, FuriString* ou
 
         if(pin <= 9999) {
             furi_string_cat_printf(output, " pin:%d", pin);
-        } else if(10000 <= pin && pin <= 11029) {
+        } else if(pin <= 11029) {
             furi_string_cat_printf(output, " pin:enter");
         }
 
@@ -618,7 +611,7 @@ void subghz_protocol_decoder_secplus_v1_get_string(void* context, FuriString* ou
             furi_string_cat_printf(output, " Btn:left\r\n");
         } else if(instance->generic.btn == 0) {
             furi_string_cat_printf(output, " Btn:middle\r\n");
-        } else if(instance->generic.btn == 2) {
+        } else if(instance->generic.btn == 2) { //-V547
             furi_string_cat_printf(output, " Btn:right\r\n");
         }
 

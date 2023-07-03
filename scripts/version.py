@@ -1,19 +1,24 @@
 #!/usb/bin/env python3
 
-from flipper.app import App
-
-import subprocess
-import os
 import json
+import os
+import subprocess
 from datetime import date, datetime
+
+from flipper.app import App
 
 
 class GitVersion:
+    REVISION_SUFFIX_LENGTH = 8
+
     def __init__(self, source_dir):
         self.source_dir = source_dir
 
     def get_version_info(self):
-        commit = self._exec_git("rev-parse --short HEAD") or "unknown"
+        commit = (
+            self._exec_git(f"rev-parse --short={self.REVISION_SUFFIX_LENGTH} HEAD")
+            or "unknown"
+        )
 
         dirty = False
         try:
@@ -30,20 +35,43 @@ class GitVersion:
             or "unknown"
         )
 
-        branch_num = self._exec_git("rev-list --count HEAD") or "n/a"
-
         try:
             version = self._exec_git("describe --tags --abbrev=0 --exact-match")
         except subprocess.CalledProcessError:
             version = "unknown"
 
+        if "SOURCE_DATE_EPOCH" in os.environ:
+            commit_date = datetime.utcfromtimestamp(
+                int(os.environ["SOURCE_DATE_EPOCH"])
+            )
+        else:
+            commit_date = datetime.strptime(
+                self._exec_git("log -1 --format=%cd").strip(),
+                "%a %b %d %H:%M:%S %Y %z",
+            )
+
         return {
             "GIT_COMMIT": commit,
             "GIT_BRANCH": branch,
-            "GIT_BRANCH_NUM": branch_num,
             "VERSION": version,
             "BUILD_DIRTY": dirty and 1 or 0,
+            "GIT_ORIGIN": ",".join(self._get_git_origins()),
+            "GIT_COMMIT_DATE": commit_date,
         }
+
+    def _get_git_origins(self):
+        try:
+            remotes = self._exec_git("remote -v")
+        except subprocess.CalledProcessError:
+            return set()
+        origins = set()
+        for line in remotes.split("\n"):
+            if not line:
+                continue
+            _, destination = line.split("\t")
+            url, _ = destination.split(" ")
+            origins.add(url)
+        return origins
 
     def _exec_git(self, args):
         cmd = ["git"]
@@ -72,23 +100,34 @@ class Main(App):
             help="hardware target",
             required=True,
         )
+        self.parser_generate.add_argument(
+            "-fw-origin",
+            dest="firmware_origin",
+            type=str,
+            help="firmware origin",
+            required=True,
+        )
         self.parser_generate.add_argument("--dir", dest="sourcedir", required=True)
         self.parser_generate.set_defaults(func=self.generate)
 
     def generate(self):
         current_info = GitVersion(self.args.sourcedir).get_version_info()
 
-        if "SOURCE_DATE_EPOCH" in os.environ:
-            build_date = datetime.utcfromtimestamp(int(os.environ["SOURCE_DATE_EPOCH"]))
-        else:
-            build_date = date.today()
+        build_date = (
+            date.today()
+            if current_info["BUILD_DIRTY"]
+            else current_info["GIT_COMMIT_DATE"]
+        )
 
         current_info.update(
             {
                 "BUILD_DATE": build_date.strftime("%d-%m-%Y"),
                 "TARGET": self.args.target,
+                "FIRMWARE_ORIGIN": self.args.firmware_origin,
             }
         )
+
+        del current_info["GIT_COMMIT_DATE"]
 
         version_values = []
         for key in current_info:

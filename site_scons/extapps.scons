@@ -1,27 +1,24 @@
-from SCons.Errors import UserError
+from dataclasses import dataclass, field
+from fbt.appmanifest import FlipperAppType
+
+from SCons.Node import NodeList
+from SCons.Warnings import warn, WarningOnByDefault
 
 
 Import("ENV")
 
 
-from fbt.appmanifest import FlipperAppType
-
-appenv = ENV.Clone(
+appenv = ENV["APPENV"] = ENV.Clone(
     tools=[
-        (
-            "fbt_extapps",
-            {
-                "EXT_APPS_WORK_DIR": ENV.subst(
-                    "${BUILD_DIR}/.extapps",
-                )
-            },
-        ),
+        "fbt_extapps",
         "fbt_assets",
-    ]
+        "fbt_sdk",
+    ],
+    RESOURCES_ROOT=ENV.Dir("#/assets/resources"),
 )
 
 appenv.Replace(
-    LINKER_SCRIPT="application_ext",
+    LINKER_SCRIPT_PATH=appenv["APP_LINKER_SCRIPT_PATH"],
 )
 
 appenv.AppendUnique(
@@ -60,62 +57,102 @@ appenv.AppendUnique(
 )
 
 
-extapps = appenv["_extapps"] = {
-    "compact": {},
-    "debug": {},
-    "validators": {},
-    "dist": {},
-}
-
-
-def build_app_as_external(env, appdef):
-    compact_elf, debug_elf, validator = env.BuildAppElf(appdef)
-    extapps["compact"][appdef.appid] = compact_elf
-    extapps["debug"][appdef.appid] = debug_elf
-    extapps["validators"][appdef.appid] = validator
-    extapps["dist"][appdef.appid] = (appdef.fap_category, compact_elf)
+@dataclass
+class FlipperExtAppBuildArtifacts:
+    application_map: dict = field(default_factory=dict)
+    resources_dist: NodeList = field(default_factory=NodeList)
+    sdk_tree: NodeList = field(default_factory=NodeList)
 
 
 apps_to_build_as_faps = [
     FlipperAppType.PLUGIN,
     FlipperAppType.EXTERNAL,
+    FlipperAppType.DEBUG,
 ]
-if appenv["DEBUG_TOOLS"]:
-    apps_to_build_as_faps.append(FlipperAppType.DEBUG)
 
-for apptype in apps_to_build_as_faps:
-    for app in appenv["APPBUILD"].get_apps_of_type(apptype, True):
-        build_app_as_external(appenv, app)
+known_extapps = [
+    app
+    for apptype in apps_to_build_as_faps
+    for app in appenv["APPBUILD"].get_apps_of_type(apptype, True)
+]
 
 # Ugly access to global option
 if extra_app_list := GetOption("extra_ext_apps"):
-    for extra_app in extra_app_list.split(","):
-        build_app_as_external(appenv, appenv["APPMGR"].get(extra_app))
+    known_extapps.extend(map(appenv["APPMGR"].get, extra_app_list.split(",")))
+
+incompatible_apps = []
+for app in known_extapps:
+    if not app.supports_hardware_target(appenv.subst("f${TARGET_HW}")):
+        incompatible_apps.append(app)
+        continue
+
+    appenv.BuildAppElf(app)
+
+extapps = FlipperExtAppBuildArtifacts()
+extapps.application_map = appenv["EXT_APPS"]
+
+if incompatible_apps:
+    warn(
+        WarningOnByDefault,
+        f"Skipping build of {len(incompatible_apps)} incompatible app(s): "
+        + ", ".join(f"'{app.name}' (id '{app.appid}')" for app in incompatible_apps),
+    )
+
+if appenv["FORCE"]:
+    appenv.AlwaysBuild(
+        list(app_artifact.compact for app_artifact in extapps.application_map.values())
+    )
+
+
+Alias(
+    "faps",
+    list(app_artifact.validator for app_artifact in extapps.application_map.values()),
+)
+
+extapps.resources_dist = appenv.FapDist(appenv["RESOURCES_ROOT"], [])
+
+
+if appsrc := appenv.subst("$APPSRC"):
+    appenv.AddAppLaunchTarget(appsrc, "launch_app")
+
+
+# SDK management
+
+amalgamated_api = "${BUILD_DIR}/sdk_origin"
+sdk_source = appenv.ApiAmalgamator(
+    amalgamated_api,
+    # Deps on root SDK headers and generated files
+    (appenv["SDK_HEADERS"], appenv["FW_ASSETS_HEADERS"]),
+)
+# Extra deps on headers included in deeper levels
+# Available on second and subsequent builds
+Depends(sdk_source, appenv.ProcessSdkDepends(f"{amalgamated_api}.d"))
+
+appenv["SDK_DIR"] = appenv.Dir("${BUILD_DIR}/sdk_headers")
+sdk_header_tree = appenv.SDKHeaderTreeExtractor(appenv["SDK_DIR"], amalgamated_api)
+Depends(sdk_header_tree, appenv["SDK_DEFINITION"])
+# AlwaysBuild(sdk_tree)
+Alias("sdk_tree", sdk_header_tree)
+extapps.sdk_tree = sdk_header_tree
+
+api_check = appenv.ApiTableValidator(appenv["SDK_DEFINITION"], amalgamated_api)
+Precious(api_check)
+NoClean(api_check)
+AlwaysBuild(api_check)
+Alias("api_check", api_check)
+
+firmware_apitable = appenv.ApiSymbolTable(
+    "${BUILD_DIR}/assets/compiled/firmware_api_table.h", appenv["SDK_DEFINITION"]
+)
+Alias("api_table", firmware_apitable)
+ENV.Replace(
+    FW_API_TABLE=firmware_apitable,
+    _APP_ICONS=appenv["_APP_ICONS"],
+)
 
 
 if appenv["FORCE"]:
-    appenv.AlwaysBuild(extapps["compact"].values())
+    appenv.AlwaysBuild(sdk_source, sdk_header_tree, api_check, firmware_apitable)
 
-
-# Deprecation stub
-def legacy_app_build_stub(**kw):
-    raise UserError(f"Target name 'firmware_extapps' is deprecated, use 'faps' instead")
-
-
-appenv.PhonyTarget("firmware_extapps", appenv.Action(legacy_app_build_stub, None))
-
-
-Alias("faps", extapps["compact"].values())
-Alias("faps", extapps["validators"].values())
-
-if appsrc := appenv.subst("$APPSRC"):
-    app_manifest, fap_file, app_validator = appenv.GetExtAppFromPath(appsrc)
-    appenv.PhonyTarget(
-        "launch_app",
-        '${PYTHON3} scripts/runfap.py ${SOURCE} --fap_dst_dir "/ext/apps/${FAP_CATEGORY}"',
-        source=fap_file,
-        FAP_CATEGORY=app_manifest.fap_category,
-    )
-    appenv.Alias("launch_app", app_validator)
 
 Return("extapps")

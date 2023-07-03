@@ -104,11 +104,8 @@ ReaderAnalyzer* reader_analyzer_alloc() {
     instance->stream =
         furi_stream_buffer_alloc(READER_ANALYZER_MAX_BUFF_SIZE, sizeof(ReaderAnalyzerHeader));
 
-    instance->thread = furi_thread_alloc();
-    furi_thread_set_name(instance->thread, "ReaderAnalyzerWorker");
-    furi_thread_set_stack_size(instance->thread, 2048);
-    furi_thread_set_callback(instance->thread, reader_analyzer_thread);
-    furi_thread_set_context(instance->thread, instance);
+    instance->thread =
+        furi_thread_alloc_ex("ReaderAnalyzerWorker", 2048, reader_analyzer_thread, instance);
     furi_thread_set_priority(instance->thread, FuriThreadPriorityLow);
 
     return instance;
@@ -162,6 +159,7 @@ void reader_analyzer_stop(ReaderAnalyzer* instance) {
     }
     if(instance->pcap) {
         nfc_debug_pcap_free(instance->pcap);
+        instance->pcap = NULL;
     }
 }
 
@@ -201,8 +199,15 @@ NfcProtocol
 
 FuriHalNfcDevData* reader_analyzer_get_nfc_data(ReaderAnalyzer* instance) {
     furi_assert(instance);
-
+    instance->nfc_data = reader_analyzer_nfc_data[ReaderAnalyzerNfcDataMfClassic];
     return &instance->nfc_data;
+}
+
+void reader_analyzer_set_nfc_data(ReaderAnalyzer* instance, FuriHalNfcDevData* nfc_data) {
+    furi_assert(instance);
+    furi_assert(nfc_data);
+
+    memcpy(&instance->nfc_data, nfc_data, sizeof(FuriHalNfcDevData));
 }
 
 static void reader_analyzer_write(
@@ -217,11 +222,11 @@ static void reader_analyzer_write(
     data_sent = furi_stream_buffer_send(
         instance->stream, &header, sizeof(ReaderAnalyzerHeader), FuriWaitForever);
     if(data_sent != sizeof(ReaderAnalyzerHeader)) {
-        FURI_LOG_W(TAG, "Sent %d out of %d bytes", data_sent, sizeof(ReaderAnalyzerHeader));
+        FURI_LOG_W(TAG, "Sent %zu out of %zu bytes", data_sent, sizeof(ReaderAnalyzerHeader));
     }
     data_sent = furi_stream_buffer_send(instance->stream, data, len, FuriWaitForever);
     if(data_sent != len) {
-        FURI_LOG_W(TAG, "Sent %d out of %d bytes", data_sent, len);
+        FURI_LOG_W(TAG, "Sent %zu out of %u bytes", data_sent, len);
     }
 }
 

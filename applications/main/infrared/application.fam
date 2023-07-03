@@ -3,6 +3,7 @@ App(
     name="Infrared",
     apptype=FlipperAppType.APP,
     entry_point="infrared_app",
+    targets=["f7"],
     cdefines=["APP_INFRARED"],
     requires=[
         "gui",
@@ -12,6 +13,7 @@ App(
     icon="A_Infrared_14",
     stack_size=3 * 1024,
     order=40,
+    fap_libs=["assets"],
 )
 
 App(

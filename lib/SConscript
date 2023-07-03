@@ -2,29 +2,23 @@ Import("env")
 
 env.Append(
     LINT_SOURCES=[
-        "lib/app-scened-template",
-        "lib/digital_signal",
-        "lib/drivers",
-        "lib/flipper_format",
-        "lib/infrared",
-        "lib/nfc",
-        "lib/one_wire",
-        "lib/ST25RFAL002",
-        "lib/subghz",
-        "lib/toolbox",
-        "lib/u8g2",
-        "lib/update_util",
-        "lib/print",
-    ],
-    SDK_HEADERS=[
-        File("#/lib/one_wire/one_wire_host_timing.h"),
-        File("#/lib/one_wire/one_wire_host.h"),
-        File("#/lib/one_wire/one_wire_slave.h"),
-        File("#/lib/one_wire/one_wire_device.h"),
-        File("#/lib/one_wire/ibutton/ibutton_worker.h"),
-        File("#/lib/one_wire/maxim_crc.h"),
+        Dir("app-scened-template"),
+        Dir("digital_signal"),
+        Dir("pulse_reader"),
+        Dir("drivers"),
+        Dir("flipper_format"),
+        Dir("infrared"),
+        Dir("nfc"),
+        Dir("ST25RFAL002"),
+        Dir("subghz"),
+        Dir("toolbox"),
+        Dir("u8g2"),
+        Dir("update_util"),
+        Dir("print"),
+        Dir("music_worker"),
     ],
 )
+
 
 env.Append(
     CPPPATH=[
@@ -33,6 +27,23 @@ env.Append(
         "#/lib/mlib",
         # Ugly hack
         Dir("../assets/compiled"),
+    ],
+    SDK_HEADERS=[
+        *(
+            File(f"#/lib/mlib/m-{name}.h")
+            for name in (
+                "algo",
+                "array",
+                "bptree",
+                "core",
+                "deque",
+                "dict",
+                "list",
+                "rbtree",
+                "tuple",
+                "variant",
+            )
+        ),
     ],
     CPPDEFINES=[
         '"M_MEMORY_FULL(x)=abort()"',
@@ -47,13 +58,13 @@ env.Append(
 # littlefs
 # subghz
 # toolbox
+# one_wire
+# micro-ecc
 # misc
 #    digital_signal
-#    fnv1a-hash
-#    micro-ecc
+#    fnv1a_hash
 #    microtar
 #    nfc
-#    one_wire
 #    qrcode
 #    u8g2
 #    update_util
@@ -67,7 +78,7 @@ env.Append(
 
 libs = env.BuildModules(
     [
-        "STM32CubeWB",
+        "stm32wb",
         "freertos",
         "print",
         "microtar",
@@ -77,15 +88,20 @@ libs = env.BuildModules(
         "drivers",
         "fatfs",
         "flipper_format",
+        "one_wire",
+        "ibutton",
         "infrared",
         "littlefs",
         "mbedtls",
         "subghz",
         "nfc",
+        "digital_signal",
+        "pulse_reader",
         "appframe",
         "misc",
         "lfrfid",
         "flipper_application",
+        "music_worker",
     ],
 )
 

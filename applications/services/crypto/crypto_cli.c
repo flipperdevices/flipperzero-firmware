@@ -142,7 +142,7 @@ void crypto_cli_decrypt(Cli* cli, FuriString* args) {
             if(args_read_hex_bytes(hex_input, input, size)) {
                 if(furi_hal_crypto_decrypt(input, output, size)) {
                     printf("Decrypted data:\r\n");
-                    printf("%s\r\n", output);
+                    printf("%s\r\n", output); //-V576
                 } else {
                     printf("Failed to decrypt\r\n");
                 }
@@ -167,7 +167,7 @@ void crypto_cli_decrypt(Cli* cli, FuriString* args) {
 void crypto_cli_has_key(Cli* cli, FuriString* args) {
     UNUSED(cli);
     int key_slot = 0;
-    uint8_t iv[16];
+    uint8_t iv[16] = {0};
 
     do {
         if(!args_read_int_and_trim(args, &key_slot) || !(key_slot > 0 && key_slot <= 100)) {
@@ -249,7 +249,7 @@ void crypto_cli_store_key(Cli* cli, FuriString* args) {
         }
 
         if(key_slot > 0) {
-            uint8_t iv[16];
+            uint8_t iv[16] = {0};
             if(key_slot > 1) {
                 if(!furi_hal_crypto_store_load_key(key_slot - 1, iv)) {
                     printf(

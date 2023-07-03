@@ -1,11 +1,8 @@
+#include "infrared_common_i.h"
+
+#include <stdlib.h>
 #include <core/check.h>
 #include <core/common_defines.h>
-#include "infrared.h"
-#include "infrared_common_i.h"
-#include <stdbool.h>
-#include <furi.h>
-#include "infrared_i.h"
-#include <stdint.h>
 
 static void infrared_common_decoder_reset_state(InfraredCommonDecoder* decoder);
 
@@ -85,8 +82,8 @@ static InfraredStatus infrared_common_decode_bits(InfraredCommonDecoder* decoder
         if(timings->min_split_time && !level) {
             if(timing > timings->min_split_time) {
                 /* long low timing - check if we're ready for any of protocol modification */
-                for(size_t i = 0; decoder->protocol->databit_len[i] &&
-                                  (i < COUNT_OF(decoder->protocol->databit_len));
+                for(size_t i = 0; i < COUNT_OF(decoder->protocol->databit_len) &&
+                                  decoder->protocol->databit_len[i];
                     ++i) {
                     if(decoder->protocol->databit_len[i] == decoder->databit_cnt) {
                         return InfraredStatusReady;
@@ -107,7 +104,7 @@ static InfraredStatus infrared_common_decode_bits(InfraredCommonDecoder* decoder
         decoder->timings_cnt = consume_samples(decoder->timings, decoder->timings_cnt, 1);
 
         /* check if largest protocol version can be decoded */
-        if(level && (decoder->protocol->databit_len[0] == decoder->databit_cnt) &&
+        if(level && (decoder->protocol->databit_len[0] == decoder->databit_cnt) && //-V1051
            !timings->min_split_time) {
             status = InfraredStatusReady;
             break;
@@ -199,7 +196,7 @@ InfraredMessage* infrared_common_decoder_check_ready(InfraredCommonDecoder* deco
     bool found_length = false;
 
     for(size_t i = 0;
-        decoder->protocol->databit_len[i] && (i < COUNT_OF(decoder->protocol->databit_len));
+        i < COUNT_OF(decoder->protocol->databit_len) && decoder->protocol->databit_len[i];
         ++i) {
         if(decoder->protocol->databit_len[i] == decoder->databit_cnt) {
             found_length = true;

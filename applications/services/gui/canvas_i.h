@@ -7,6 +7,7 @@
 
 #include "canvas.h"
 #include <u8g2.h>
+#include <toolbox/compress.h>
 
 /** Canvas structure
  */
@@ -17,6 +18,7 @@ struct Canvas {
     uint8_t offset_y;
     uint8_t width;
     uint8_t height;
+    CompressIcon* compress_icon;
 };
 
 /** Allocate memory and initialize canvas
@@ -30,18 +32,6 @@ Canvas* canvas_init();
  * @param      canvas  Canvas instance
  */
 void canvas_free(Canvas* canvas);
-
-/** Reset canvas drawing tools configuration
- *
- * @param      canvas  Canvas instance
- */
-void canvas_reset(Canvas* canvas);
-
-/** Commit canvas. Send buffer to display
- *
- * @param      canvas  Canvas instance
- */
-void canvas_commit(Canvas* canvas);
 
 /** Get canvas buffer.
  *
@@ -57,7 +47,7 @@ uint8_t* canvas_get_buffer(Canvas* canvas);
  *
  * @return     size of canvas in bytes
  */
-size_t canvas_get_buffer_size(Canvas* canvas);
+size_t canvas_get_buffer_size(const Canvas* canvas);
 
 /** Set drawing region relative to real screen buffer
  *
@@ -88,3 +78,22 @@ void canvas_set_orientation(Canvas* canvas, CanvasOrientation orientation);
  * @return     CanvasOrientation
  */
 CanvasOrientation canvas_get_orientation(const Canvas* canvas);
+
+/** Draw a u8g2 bitmap
+ *
+ * @param      canvas   Canvas instance
+ * @param      x        x coordinate
+ * @param      y        y coordinate
+ * @param      width    width
+ * @param      height   height
+ * @param      bitmap   bitmap
+ * @param      rotation rotation
+ */
+void canvas_draw_u8g2_bitmap(
+    u8g2_t* u8g2,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint8_t height,
+    const uint8_t* bitmap,
+    uint8_t rotation);

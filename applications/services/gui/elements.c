@@ -1,16 +1,17 @@
 #include "elements.h"
-#include "m-core.h"
+#include <m-core.h>
 #include <assets_icons.h>
-#include "furi_hal_resources.h"
+#include <furi_hal_resources.h>
 #include <furi_hal.h>
-#include "gui/canvas.h"
 
+#include <gui/canvas.h>
 #include <gui/icon_i.h>
 #include <gui/icon_animation_i.h>
 
 #include <furi.h>
 #include "canvas_i.h"
 
+#include <math.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -39,6 +40,31 @@ void elements_progress_bar(Canvas* canvas, uint8_t x, uint8_t y, uint8_t width, 
     canvas_draw_rframe(canvas, x, y, width, height, 3);
 
     canvas_draw_box(canvas, x + 1, y + 1, progress_length, height - 2);
+}
+
+void elements_progress_bar_with_text(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    float progress,
+    const char* text) {
+    furi_assert(canvas);
+    furi_assert((progress >= 0.0f) && (progress <= 1.0f));
+    uint8_t height = 11;
+
+    uint8_t progress_length = roundf(progress * (width - 2));
+
+    canvas_set_color(canvas, ColorWhite);
+    canvas_draw_box(canvas, x + 1, y + 1, width - 2, height - 2);
+    canvas_set_color(canvas, ColorBlack);
+    canvas_draw_rframe(canvas, x, y, width, height, 3);
+
+    canvas_draw_box(canvas, x + 1, y + 1, progress_length, height - 2);
+
+    canvas_set_color(canvas, ColorXOR);
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str_aligned(canvas, x + width / 2, y + 2, AlignCenter, AlignTop, text);
 }
 
 void elements_scrollbar_pos(
@@ -291,11 +317,11 @@ void elements_multiline_text(Canvas* canvas, uint8_t x, uint8_t y, const char* t
         end = strchr(start, '\n');
         if(end) {
             furi_string_set_strn(str, start, end - start);
+            start = end + 1;
         } else {
             furi_string_set(str, start);
         }
         canvas_draw_str(canvas, x, y, furi_string_get_cstr(str));
-        start = end + 1;
         y += font_height;
     } while(end && y < 64);
     furi_string_free(str);
@@ -547,6 +573,53 @@ void elements_string_fit_width(Canvas* canvas, FuriString* string, uint8_t width
     }
 }
 
+void elements_scrollable_text_line(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    FuriString* string,
+    size_t scroll,
+    bool ellipsis) {
+    FuriString* line = furi_string_alloc_set(string);
+
+    size_t len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
+    if(len_px > width) {
+        if(ellipsis) {
+            width -= canvas_string_width(canvas, "...");
+        }
+
+        // Calculate scroll size
+        size_t scroll_size = furi_string_size(line);
+        size_t right_width = 0;
+        for(size_t i = scroll_size; i > 0; i--) {
+            right_width += canvas_glyph_width(canvas, furi_string_get_char(line, i));
+            if(right_width > width) break;
+            scroll_size--;
+            if(!scroll_size) break;
+        }
+        // Ensure that we have something to scroll
+        if(scroll_size) {
+            scroll_size += 3;
+            scroll = scroll % scroll_size;
+            furi_string_right(line, scroll);
+        }
+
+        len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
+        while(len_px > width) {
+            furi_string_left(line, furi_string_size(line) - 1);
+            len_px = canvas_string_width(canvas, furi_string_get_cstr(line));
+        }
+
+        if(ellipsis) {
+            furi_string_cat(line, "...");
+        }
+    }
+
+    canvas_draw_str(canvas, x, y, furi_string_get_cstr(line));
+    furi_string_free(line);
+}
+
 void elements_text_box(
     Canvas* canvas,
     uint8_t x,
@@ -566,7 +639,7 @@ void elements_text_box(
     bool inversed_present = false;
     Font current_font = FontSecondary;
     Font prev_font = FontSecondary;
-    CanvasFontParameters* font_params = canvas_get_font_params(canvas, current_font);
+    const CanvasFontParameters* font_params = canvas_get_font_params(canvas, current_font);
 
     // Fill line parameters
     uint8_t line_leading_min = font_params->leading_min;

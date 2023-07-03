@@ -1,6 +1,5 @@
-from SCons.Builder import Builder
 from SCons.Action import Action
-from SCons.Script import Mkdir
+from SCons.Builder import Builder
 from SCons.Defaults import Touch
 
 
@@ -22,7 +21,7 @@ def GetProjetDirName(env, project=None):
 
 def create_fw_build_targets(env, configuration_name):
     flavor = GetProjetDirName(env, configuration_name)
-    build_dir = env.Dir("build").Dir(flavor).abspath
+    build_dir = env.Dir("build").Dir(flavor)
     return env.SConscript(
         "firmware.scons",
         variant_dir=build_dir,
@@ -103,7 +102,7 @@ def DistCommand(env, name, source, **kw):
     command = env.Command(
         target,
         source,
-        '@${PYTHON3} "${ROOT_DIR.abspath}/scripts/sconsdist.py" copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}" ${DIST_EXTRA}',
+        '@${PYTHON3} "${DIST_SCRIPT}" copy -p ${DIST_PROJECTS} -s "${DIST_SUFFIX}" ${DIST_EXTRA}',
         **kw,
     )
     env.Pseudo(target)
@@ -112,6 +111,8 @@ def DistCommand(env, name, source, **kw):
 
 
 def generate(env):
+    if not env["VERBOSE"]:
+        env.SetDefault(COPROCOMSTR="\tCOPRO\t${TARGET}")
     env.AddMethod(AddFwProject)
     env.AddMethod(DistCommand)
     env.AddMethod(AddOpenOCDFlashTarget)
@@ -121,6 +122,9 @@ def generate(env):
 
     env.SetDefault(
         COPRO_MCU_FAMILY="STM32WB5x",
+        SELFUPDATE_SCRIPT="${FBT_SCRIPT_DIR}/selfupdate.py",
+        DIST_SCRIPT="${FBT_SCRIPT_DIR}/sconsdist.py",
+        COPRO_ASSETS_SCRIPT="${FBT_SCRIPT_DIR}/assets.py",
     )
 
     env.Append(
@@ -128,7 +132,7 @@ def generate(env):
             "UsbInstall": Builder(
                 action=[
                     Action(
-                        '${PYTHON3} "${ROOT_DIR.abspath}/scripts/selfupdate.py" dist/${DIST_DIR}/f${TARGET_HW}-update-${DIST_SUFFIX}/update.fuf'
+                        '${PYTHON3} "${SELFUPDATE_SCRIPT}" -p ${FLIP_PORT} ${UPDATE_BUNDLE_DIR}/update.fuf'
                     ),
                     Touch("${TARGET}"),
                 ]
@@ -136,7 +140,7 @@ def generate(env):
             "CoproBuilder": Builder(
                 action=Action(
                     [
-                        '${PYTHON3} "${ROOT_DIR.abspath}/scripts/assets.py" '
+                        '${PYTHON3} "${COPRO_ASSETS_SCRIPT}" '
                         "copro ${COPRO_CUBE_DIR} "
                         "${TARGET} ${COPRO_MCU_FAMILY} "
                         "--cube_ver=${COPRO_CUBE_VERSION} "
@@ -144,7 +148,7 @@ def generate(env):
                         '--stack_file="${COPRO_STACK_BIN}" '
                         "--stack_addr=${COPRO_STACK_ADDR} ",
                     ],
-                    "\tCOPRO\t${TARGET}",
+                    "$COPROCOMSTR",
                 )
             ),
         }

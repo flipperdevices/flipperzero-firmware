@@ -9,9 +9,12 @@
 extern "C" {
 #endif
 
+/** Max number of simultaneously pressed keys (keyboard) */
+#define HID_KB_MAX_KEYS 6
+/** Max number of simultaneously pressed keys (consumer control) */
+#define HID_CONSUMER_MAX_KEYS 2
+
 #define HID_KEYBOARD_NONE 0x00
-// Remapping the colon key which is shift + ; to comma
-#define HID_KEYBOARD_COMMA HID_KEYBOARD_COLON
 
 /** HID keyboard modifier keys */
 enum HidKeyboardMods {

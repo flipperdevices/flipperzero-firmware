@@ -1,8 +1,9 @@
+from fbt.util import GLOB_FILE_EXCLUSION
+
 Import("env")
 
 env.Append(
     CPPPATH=[
-        "#/lib/digital_signal",
         "#/lib/fnv1a_hash",
         "#/lib/heatshrink",
         "#/lib/micro-ecc",
@@ -13,7 +14,7 @@ env.Append(
         "PB_ENABLE_MALLOC",
     ],
     SDK_HEADERS=[
-        File("#/lib/micro-ecc/uECC.h"),
+        File("micro-ecc/uECC.h"),
     ],
 )
 
@@ -24,9 +25,7 @@ libenv.ApplyLibFlags()
 sources = []
 
 libs_recurse = [
-    "digital_signal",
     "micro-ecc",
-    "one_wire",
     "u8g2",
     "update_util",
 ]
@@ -35,12 +34,21 @@ for lib in libs_recurse:
     sources += libenv.GlobRecursive("*.c*", lib)
 
 libs_plain = [
-    "heatshrink",
     "nanopb",
 ]
 
 for lib in libs_plain:
-    sources += Glob(lib + "/*.c*", source=True)
+    sources += Glob(
+        lib + "/*.c*",
+        exclude=GLOB_FILE_EXCLUSION,
+        source=True,
+    )
+
+sources += Glob(
+    "heatshrink/heatshrink_*.c*",
+    exclude=GLOB_FILE_EXCLUSION,
+    source=True,
+)
 
 lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
 libenv.Install("${LIB_DIST_DIR}", lib)

@@ -15,7 +15,7 @@ AddOption(
     nargs=1,
     action="store",
     default="fbt_options.py",
-    help="Enviroment option file",
+    help="Environment option file",
 )
 
 AddOption(
@@ -23,7 +23,15 @@ AddOption(
     action="store",
     dest="extra_int_apps",
     default="",
-    help="List of applications to add to firmare's built-ins. Also see FIRMWARE_APP_SET and FIRMWARE_APPS",
+    help="List of applications to add to firmware's built-ins. Also see FIRMWARE_APP_SET and FIRMWARE_APPS",
+)
+
+AddOption(
+    "--extra-define",
+    action="append",
+    dest="extra_defines",
+    default=[],
+    help="Extra global define that will be passed to C/C++ compiler, can be specified multiple times",
 )
 
 AddOption(
@@ -64,6 +72,11 @@ vars.AddVariables(
         default=True,
     ),
     BoolVariable(
+        "LIB_DEBUG",
+        help="Enable debug build for libraries",
+        default=False,
+    ),
+    BoolVariable(
         "COMPACT",
         help="Optimize for size",
         default=False,
@@ -74,17 +87,8 @@ vars.AddVariables(
         default="7",
         allowed_values=[
             "7",
+            "18",
         ],
-    ),
-    BoolVariable(
-        "DEBUG_TOOLS",
-        help="Enable debug tools to be built",
-        default=False,
-    ),
-    BoolVariable(
-        "FAP_EXAMPLES",
-        help="Enable example applications to be built",
-        default=False,
     ),
     (
         "DIST_SUFFIX",
@@ -147,7 +151,7 @@ vars.AddVariables(
     PathVariable(
         "SVD_FILE",
         help="Path to SVD file",
-        validator=PathVariable.PathIsFile,
+        validator=PathVariable.PathAccept,
         default="",
     ),
     PathVariable(
@@ -172,6 +176,11 @@ vars.AddVariables(
         "auto",
     ),
     (
+        "OPENOCD_ADAPTER_SERIAL",
+        "OpenOCD adapter serial number",
+        "auto",
+    ),
+    (
         "UPDATE_SPLASH",
         "Directory name with slideshow frames to render after installing update package",
         "update_default",
@@ -193,11 +202,7 @@ vars.AddVariables(
                 "system_apps",
                 # Settings
                 "settings_apps",
-                # Plugins
-                # "basic_plugins",
-                # Debug
-                # "debug_apps",
-            )
+            ),
         },
     ),
     (
@@ -221,9 +226,28 @@ vars.AddVariables(
             ("applications/settings", False),
             ("applications/system", False),
             ("applications/debug", False),
-            ("applications/plugins", False),
+            ("applications/external", False),
+            ("applications/examples", False),
+            ("applications/drivers", False),
             ("applications_user", False),
         ],
+    ),
+    BoolVariable(
+        "PVSNOBROWSER",
+        help="Don't open browser after generating error repots",
+        default=False,
+    ),
+    (
+        "FIRMWARE_ORIGIN",
+        "Firmware origin. 'Official' if follows upstream's API structure, otherwise fork name. "
+        " This will also create a C define FW_ORIGIN_<origin> so that "
+        " app can check what version it is being built for.",
+        "Official",
+    ),
+    (
+        "FLIP_PORT",
+        "Full port name of Flipper to use, if multiple Flippers are connected",
+        "auto",
     ),
 )
 

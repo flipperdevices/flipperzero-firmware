@@ -1,11 +1,10 @@
-from dataclasses import dataclass
 import os
-
 import struct
 from dataclasses import dataclass, field
 
-from .appmanifest import FlipperApplication
+from flipper.assets.icon import file2image
 
+from .appmanifest import FlipperApplication
 
 _MANIFEST_MAGIC = 0x52474448
 
@@ -53,8 +52,6 @@ def assemble_manifest_data(
 ):
     image_data = b""
     if app_manifest.fap_icon:
-        from flipper.assets.icon import file2image
-
         image = file2image(os.path.join(app_manifest._apppath, app_manifest.fap_icon))
         if (image.width, image.height) != (10, 10):
             raise ValueError(

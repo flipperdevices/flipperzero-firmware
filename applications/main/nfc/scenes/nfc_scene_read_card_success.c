@@ -1,5 +1,4 @@
 #include "../nfc_i.h"
-#include <dolphin/dolphin.h>
 
 void nfc_scene_read_card_success_widget_callback(
     GuiButtonType result,
@@ -18,7 +17,6 @@ void nfc_scene_read_card_success_on_enter(void* context) {
 
     FuriString* temp_str;
     temp_str = furi_string_alloc();
-    DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
 
     // Setup view
     FuriHalNfcDevData* data = &nfc->dev->dev_data.nfc_data;
@@ -48,6 +46,9 @@ bool nfc_scene_read_card_success_on_event(void* context, SceneManagerEvent event
         if(event.event == GuiButtonTypeLeft) {
             consumed = scene_manager_previous_scene(nfc->scene_manager);
         }
+    } else if(event.type == SceneManagerEventTypeBack) {
+        consumed =
+            scene_manager_search_and_switch_to_previous_scene(nfc->scene_manager, NfcSceneStart);
     }
     return consumed;
 }

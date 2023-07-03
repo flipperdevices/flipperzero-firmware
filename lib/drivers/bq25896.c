@@ -132,6 +132,30 @@ bool bq25896_is_otg_enabled(FuriHalI2cBusHandle* handle) {
     return bq25896_regs.r03.OTG_CONFIG;
 }
 
+uint16_t bq25896_get_vreg_voltage(FuriHalI2cBusHandle* handle) {
+    furi_hal_i2c_read_reg_8(
+        handle, BQ25896_ADDRESS, 0x06, (uint8_t*)&bq25896_regs.r06, BQ25896_I2C_TIMEOUT);
+    return (uint16_t)bq25896_regs.r06.VREG * 16 + 3840;
+}
+
+void bq25896_set_vreg_voltage(FuriHalI2cBusHandle* handle, uint16_t vreg_voltage) {
+    if(vreg_voltage < 3840) {
+        // Minimum valid value is 3840 mV
+        vreg_voltage = 3840;
+    } else if(vreg_voltage > 4208) {
+        // Maximum safe value is 4208 mV
+        vreg_voltage = 4208;
+    }
+
+    // Find the nearest voltage value (subtract offset, divide into sections)
+    // Values are truncated downward as needed (e.g. 4200mV -> 4192 mV)
+    bq25896_regs.r06.VREG = (uint8_t)((vreg_voltage - 3840) / 16);
+
+    // Apply changes
+    furi_hal_i2c_write_reg_8(
+        handle, BQ25896_ADDRESS, 0x06, *(uint8_t*)&bq25896_regs.r06, BQ25896_I2C_TIMEOUT);
+}
+
 bool bq25896_check_otg_fault(FuriHalI2cBusHandle* handle) {
     furi_hal_i2c_read_reg_8(
         handle, BQ25896_ADDRESS, 0x0C, (uint8_t*)&bq25896_regs.r0C, BQ25896_I2C_TIMEOUT);

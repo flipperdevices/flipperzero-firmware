@@ -1,6 +1,7 @@
 #include "subghz_test_packet.h"
 #include "../subghz_i.h"
 #include "../helpers/subghz_testing.h"
+#include <lib/subghz/devices/cc1101_configs.h>
 
 #include <math.h>
 #include <furi.h>
@@ -114,7 +115,7 @@ static void subghz_test_packet_draw(Canvas* canvas, SubGhzTestPacketModel* model
     snprintf(buffer, sizeof(buffer), "Path: %d - %s", model->path, path_name);
     canvas_draw_str(canvas, 0, 31, buffer);
 
-    snprintf(buffer, sizeof(buffer), "Packets: %d", model->packets);
+    snprintf(buffer, sizeof(buffer), "Packets: %zu", model->packets);
     canvas_draw_str(canvas, 0, 42, buffer);
 
     if(model->status == SubGhzTestPacketModelStatusRx) {
@@ -194,7 +195,7 @@ void subghz_test_packet_enter(void* context) {
     SubGhzTestPacket* instance = context;
 
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    furi_hal_subghz_load_custom_preset(subghz_device_cc1101_preset_ook_650khz_async_regs);
 
     with_view_model(
         instance->view,

@@ -12,6 +12,10 @@
 
 #define TAG "DesktopSrv"
 
+#define MUSIC_PLAYER_APP EXT_PATH("/apps/Media/music_player.fap")
+#define SNAKE_GAME_APP EXT_PATH("/apps/Games/snake_game.fap")
+#define CLOCK_APP EXT_PATH("/apps/Tools/clock.fap")
+
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
     Desktop* desktop = context;
@@ -34,7 +38,8 @@ static void desktop_scene_main_interact_animation_callback(void* context) {
 }
 
 #ifdef APP_ARCHIVE
-static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* flipper_app) {
+static void
+    desktop_switch_to_app(Desktop* desktop, const FlipperInternalApplication* flipper_app) {
     furi_assert(desktop);
     furi_assert(flipper_app);
     furi_assert(flipper_app->app);
@@ -45,6 +50,13 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
         return;
     }
 
+    FuriHalRtcHeapTrackMode mode = furi_hal_rtc_get_heap_track_mode();
+    if(mode > FuriHalRtcHeapTrackModeNone) {
+        furi_thread_enable_heap_trace(desktop->scene_thread);
+    } else {
+        furi_thread_disable_heap_trace(desktop->scene_thread);
+    }
+
     furi_thread_set_name(desktop->scene_thread, flipper_app->name);
     furi_thread_set_stack_size(desktop->scene_thread, flipper_app->stack_size);
     furi_thread_set_callback(desktop->scene_thread, flipper_app->app);
@@ -53,8 +65,23 @@ static void desktop_switch_to_app(Desktop* desktop, const FlipperApplication* fl
 }
 #endif
 
+static void desktop_scene_main_open_app_or_profile(Desktop* desktop, const char* path) {
+    if(loader_start_with_gui_error(desktop->loader, path, NULL) != LoaderStatusOk) {
+        loader_start(desktop->loader, "Passport", NULL, NULL);
+    }
+}
+
+static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* application) {
+    if(strlen(application->name_or_path) > 0) {
+        loader_start_with_gui_error(desktop->loader, application->name_or_path, NULL);
+    } else {
+        loader_start(desktop->loader, LOADER_APPLICATIONS_NAME, NULL, NULL);
+    }
+}
+
 void desktop_scene_main_callback(DesktopEvent event, void* context) {
     Desktop* desktop = (Desktop*)context;
+    if(desktop->in_transition) return;
     view_dispatcher_send_custom_event(desktop->view_dispatcher, event);
 }
 
@@ -81,10 +108,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case DesktopMainEventOpenMenu:
-            loader_show_menu();
+        case DesktopMainEventOpenMenu: {
+            Loader* loader = furi_record_open(RECORD_LOADER);
+            loader_show_menu(loader);
+            furi_record_close(RECORD_LOADER);
             consumed = true;
-            break;
+        } break;
 
         case DesktopMainEventOpenLockMenu:
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
@@ -104,50 +133,19 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
 
         case DesktopMainEventOpenPowerOff: {
-            LoaderStatus status = loader_start(desktop->loader, "Power", "off");
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+            loader_start(desktop->loader, "Power", "off", NULL);
             consumed = true;
             break;
         }
 
         case DesktopMainEventOpenFavoritePrimary:
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.favorite_primary.is_external) {
-                LoaderStatus status = loader_start(
-                    desktop->loader,
-                    FAP_LOADER_APP_NAME,
-                    desktop->settings.favorite_primary.name_or_path);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            } else {
-                LoaderStatus status = loader_start(
-                    desktop->loader, desktop->settings.favorite_primary.name_or_path, NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_primary);
             consumed = true;
             break;
         case DesktopMainEventOpenFavoriteSecondary:
             DESKTOP_SETTINGS_LOAD(&desktop->settings);
-            if(desktop->settings.favorite_secondary.is_external) {
-                LoaderStatus status = loader_start(
-                    desktop->loader,
-                    FAP_LOADER_APP_NAME,
-                    desktop->settings.favorite_secondary.name_or_path);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            } else {
-                LoaderStatus status = loader_start(
-                    desktop->loader, desktop->settings.favorite_secondary.name_or_path, NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
-            }
+            desktop_scene_main_start_favorite(desktop, &desktop->settings.favorite_secondary);
             consumed = true;
             break;
         case DesktopAnimationEventCheckAnimation:
@@ -160,26 +158,24 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             break;
         case DesktopAnimationEventInteractAnimation:
             if(!animation_manager_interact_process(desktop->animation_manager)) {
-                LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
-                if(status != LoaderStatusOk) {
-                    FURI_LOG_E(TAG, "loader_start failed: %d", status);
-                }
+                loader_start(desktop->loader, "Passport", NULL, NULL);
             }
             consumed = true;
             break;
         case DesktopMainEventOpenPassport: {
-            LoaderStatus status = loader_start(desktop->loader, "Passport", NULL);
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+            loader_start(desktop->loader, "Passport", NULL, NULL);
             break;
         }
-        case DesktopMainEventOpenGameMenu: {
-            LoaderStatus status = loader_start(
-                desktop->loader, FAP_LOADER_APP_NAME, EXT_PATH("/apps/Games/snake_game.fap"));
-            if(status != LoaderStatusOk) {
-                FURI_LOG_E(TAG, "loader_start failed: %d", status);
-            }
+        case DesktopMainEventOpenGame: {
+            desktop_scene_main_open_app_or_profile(desktop, SNAKE_GAME_APP);
+            break;
+        }
+        case DesktopMainEventOpenClock: {
+            desktop_scene_main_open_app_or_profile(desktop, CLOCK_APP);
+            break;
+        }
+        case DesktopMainEventOpenMusicPlayer: {
+            desktop_scene_main_open_app_or_profile(desktop, MUSIC_PLAYER_APP);
             break;
         }
         case DesktopLockedEventUpdate:

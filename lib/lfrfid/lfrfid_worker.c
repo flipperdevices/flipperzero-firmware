@@ -29,11 +29,7 @@ LFRFIDWorker* lfrfid_worker_alloc(ProtocolDict* dict) {
     worker->raw_filename = NULL;
     worker->mode_storage = NULL;
 
-    worker->thread = furi_thread_alloc();
-    furi_thread_set_name(worker->thread, "lfrfid_worker");
-    furi_thread_set_callback(worker->thread, lfrfid_worker_thread);
-    furi_thread_set_context(worker->thread, worker);
-    furi_thread_set_stack_size(worker->thread, 2048);
+    worker->thread = furi_thread_alloc_ex("LfrfidWorker", 2048, lfrfid_worker_thread, worker);
 
     worker->protocols = dict;
 
@@ -140,11 +136,10 @@ size_t lfrfid_worker_dict_get_data_size(LFRFIDWorker* worker, LFRFIDProtocol pro
 
 static int32_t lfrfid_worker_thread(void* thread_context) {
     LFRFIDWorker* worker = thread_context;
-    bool running = true;
 
-    while(running) {
+    while(true) {
         uint32_t flags = furi_thread_flags_wait(LFRFIDEventAll, FuriFlagWaitAny, FuriWaitForever);
-        if(flags != FuriFlagErrorTimeout) {
+        if(flags != (unsigned)FuriFlagErrorTimeout) {
             // stop thread
             if(flags & LFRFIDEventStopThread) break;
 

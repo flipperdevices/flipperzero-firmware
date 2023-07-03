@@ -1,11 +1,10 @@
-import SCons
-
-from SCons.Builder import Builder
-from SCons.Action import Action
-from SCons.Node.FS import File
-
 import os
 import subprocess
+
+from ansi.color import fg
+from SCons.Action import Action
+from SCons.Builder import Builder
+from SCons.Errors import StopError
 
 
 def icons_emitter(target, source, env):
@@ -13,7 +12,6 @@ def icons_emitter(target, source, env):
         target[0].File(env.subst("${ICON_FILE_NAME}.c")),
         target[0].File(env.subst("${ICON_FILE_NAME}.h")),
     ]
-    source = env.GlobRecursive("*.*", env["ICON_SRC_DIR"])
     return target, source
 
 
@@ -29,23 +27,24 @@ def proto_emitter(target, source, env):
 def dolphin_emitter(target, source, env):
     res_root_dir = source[0].Dir(env["DOLPHIN_RES_TYPE"])
     source = [res_root_dir]
-    source.extend(
-        env.GlobRecursive("*.*", res_root_dir),
-    )
+    source.extend(env.GlobRecursive("*.*", res_root_dir.srcnode()))
 
     target_base_dir = target[0]
     env.Replace(_DOLPHIN_OUT_DIR=target[0])
 
     if env["DOLPHIN_RES_TYPE"] == "external":
-        target = []
-        target.extend(
-            map(
-                lambda node: target_base_dir.File(
-                    res_root_dir.rel_path(node).replace(".png", ".bm")
-                ),
-                filter(lambda node: isinstance(node, SCons.Node.FS.File), source),
-            )
-        )
+        target = [target_base_dir.File("manifest.txt")]
+        ## A detailed list of files to be generated
+        ## works better if we just leave target the folder
+        # target = []
+        # target.extend(
+        #     map(
+        #         lambda node: target_base_dir.File(
+        #             res_root_dir.rel_path(node).replace(".png", ".bm")
+        #         ),
+        #         filter(lambda node: isinstance(node, SCons.Node.FS.File), source),
+        #     )
+        # )
     else:
         asset_basename = f"assets_dolphin_{env['DOLPHIN_RES_TYPE']}"
         target = [
@@ -53,6 +52,13 @@ def dolphin_emitter(target, source, env):
             target_base_dir.File(asset_basename + ".h"),
         ]
 
+    # Debug output
+    # print(
+    #     f"Dolphin res type: {env['DOLPHIN_RES_TYPE']},\ntarget files:",
+    #     list(f.path for f in target),
+    #     f"\nsource files:",
+    #     list(f.path for f in source),
+    # )
     return target, source
 
 
@@ -70,24 +76,22 @@ def proto_ver_generator(target, source, env):
     target_file = target[0]
     src_dir = source[0].dir.abspath
     try:
-        git_fetch = _invoke_git(
+        _invoke_git(
             ["fetch", "--tags"],
             source_dir=src_dir,
         )
-    except (subprocess.CalledProcessError, EnvironmentError) as e:
+    except (subprocess.CalledProcessError, EnvironmentError):
         # Not great, not terrible
-        print("Git: fetch failed")
+        print(fg.boldred("Git: fetch failed"))
 
     try:
         git_describe = _invoke_git(
             ["describe", "--tags", "--abbrev=0"],
             source_dir=src_dir,
         )
-    except (subprocess.CalledProcessError, EnvironmentError) as e:
-        print("Git: describe failed")
-        Exit("git error")
+    except (subprocess.CalledProcessError, EnvironmentError):
+        raise StopError("Git: describe failed")
 
-    # print("describe=", git_describe)
     git_major, git_minor = git_describe.split(".")
     version_file_data = (
         "#pragma once",
@@ -106,7 +110,7 @@ def CompileIcons(env, target_dir, source_dir, *, icon_bundle_name="assets_icons"
 
     icons = env.IconBuilder(
         target_dir,
-        ICON_SRC_DIR=source_dir,
+        source_dir,
         ICON_FILE_NAME=icon_bundle_name,
     )
     env.Depends(icons, icons_src)
@@ -115,8 +119,8 @@ def CompileIcons(env, target_dir, source_dir, *, icon_bundle_name="assets_icons"
 
 def generate(env):
     env.SetDefault(
-        ASSETS_COMPILER="${ROOT_DIR.abspath}/scripts/assets.py",
-        NANOPB_COMPILER="${ROOT_DIR.abspath}/lib/nanopb/generator/nanopb_generator.py",
+        ASSETS_COMPILER="${FBT_SCRIPT_DIR}/assets.py",
+        NANOPB_COMPILER="${ROOT_DIR}/lib/nanopb/generator/nanopb_generator.py",
     )
     env.AddMethod(CompileIcons)
 
@@ -133,7 +137,7 @@ def generate(env):
         BUILDERS={
             "IconBuilder": Builder(
                 action=Action(
-                    '${PYTHON3} "${ASSETS_COMPILER}" icons ${ICON_SRC_DIR} ${TARGET.dir} --filename ${ICON_FILE_NAME}',
+                    '${PYTHON3} "${ASSETS_COMPILER}" icons "${ABSPATHGETTERFUNC(SOURCE)}" "${TARGET.dir}" --filename ${ICON_FILE_NAME}',
                     "${ICONSCOMSTR}",
                 ),
                 emitter=icons_emitter,

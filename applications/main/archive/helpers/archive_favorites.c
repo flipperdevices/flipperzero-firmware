@@ -160,7 +160,7 @@ bool archive_favorites_read(void* context) {
                 if(storage_file_exists(storage, furi_string_get_cstr(buffer))) {
                     storage_common_stat(storage, furi_string_get_cstr(buffer), &file_info);
                     archive_add_file_item(
-                        browser, (file_info.flags & FSF_DIRECTORY), furi_string_get_cstr(buffer));
+                        browser, file_info_is_dir(&file_info), furi_string_get_cstr(buffer));
                     file_count++;
                 } else {
                     need_refresh = true;
@@ -177,7 +177,7 @@ bool archive_favorites_read(void* context) {
 
     archive_set_item_count(browser, file_count);
 
-    if(need_refresh) {
+    if(need_refresh) { //-V547
         archive_favourites_rescan();
     }
 

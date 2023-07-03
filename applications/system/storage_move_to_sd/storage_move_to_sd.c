@@ -13,7 +13,7 @@
 
 static bool storage_move_to_sd_check_entry(const char* name, FileInfo* fileinfo, void* ctx) {
     UNUSED(ctx);
-    if((fileinfo->flags & FSF_DIRECTORY) != 0) {
+    if(file_info_is_dir(fileinfo)) {
         return true;
     }
 
@@ -172,7 +172,7 @@ static void storage_move_to_sd_mount_callback(const void* message, void* context
 
     if(storage_event->type == StorageEventTypeCardMount) {
         Loader* loader = furi_record_open(RECORD_LOADER);
-        loader_start(loader, "StorageMoveToSd", NULL);
+        loader_start(loader, "StorageMoveToSd", NULL, NULL);
         furi_record_close(RECORD_LOADER);
     }
 }

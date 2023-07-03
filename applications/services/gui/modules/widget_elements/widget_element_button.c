@@ -75,4 +75,4 @@ WidgetElement* widget_element_button_create(
     gui_button->model = model;
 
     return gui_button;
-}
+} //-V773

@@ -1,12 +1,15 @@
 #include "../subghz_i.h"
+#include <dolphin/dolphin.h>
 
 enum SubmenuIndex {
     SubmenuIndexRead = 10,
     SubmenuIndexSaved,
     SubmenuIndexTest,
-    SubmenuIndexAddManualy,
+    SubmenuIndexAddManually,
     SubmenuIndexFrequencyAnalyzer,
     SubmenuIndexReadRAW,
+    SubmenuIndexShowRegionInfo,
+    SubmenuIndexRadioSetting,
 };
 
 void subghz_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -32,13 +35,25 @@ void subghz_scene_start_on_enter(void* context) {
     submenu_add_item(
         subghz->submenu,
         "Add Manually",
-        SubmenuIndexAddManualy,
+        SubmenuIndexAddManually,
         subghz_scene_start_submenu_callback,
         subghz);
     submenu_add_item(
         subghz->submenu,
         "Frequency Analyzer",
         SubmenuIndexFrequencyAnalyzer,
+        subghz_scene_start_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Region Information",
+        SubmenuIndexShowRegionInfo,
+        subghz_scene_start_submenu_callback,
+        subghz);
+    submenu_add_item(
+        subghz->submenu,
+        "Radio Settings",
+        SubmenuIndexRadioSetting,
         subghz_scene_start_submenu_callback,
         subghz);
     if(furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug)) {
@@ -62,7 +77,7 @@ bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexReadRAW) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexReadRAW);
-            subghz->txrx->rx_key_state = SubGhzRxKeyStateIDLE;
+            subghz_rx_key_state_set(subghz, SubGhzRxKeyStateIDLE);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneReadRAW);
             return true;
         } else if(event.event == SubmenuIndexRead) {
@@ -75,20 +90,31 @@ bool subghz_scene_start_on_event(void* context, SceneManagerEvent event) {
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexSaved);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSaved);
             return true;
-        } else if(event.event == SubmenuIndexAddManualy) {
+        } else if(event.event == SubmenuIndexAddManually) {
             scene_manager_set_scene_state(
-                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexAddManualy);
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexAddManually);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneSetType);
             return true;
         } else if(event.event == SubmenuIndexFrequencyAnalyzer) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexFrequencyAnalyzer);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneFrequencyAnalyzer);
+            dolphin_deed(DolphinDeedSubGhzFrequencyAnalyzer);
             return true;
         } else if(event.event == SubmenuIndexTest) {
             scene_manager_set_scene_state(
                 subghz->scene_manager, SubGhzSceneStart, SubmenuIndexTest);
             scene_manager_next_scene(subghz->scene_manager, SubGhzSceneTest);
+            return true;
+        } else if(event.event == SubmenuIndexShowRegionInfo) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexShowRegionInfo);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneRegionInfo);
+            return true;
+        } else if(event.event == SubmenuIndexRadioSetting) {
+            scene_manager_set_scene_state(
+                subghz->scene_manager, SubGhzSceneStart, SubmenuIndexRadioSetting);
+            scene_manager_next_scene(subghz->scene_manager, SubGhzSceneRadioSettings);
             return true;
         }
     }

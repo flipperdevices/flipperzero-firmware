@@ -10,7 +10,9 @@ typedef enum {
     DesktopMainEventOpenPassport,
     DesktopMainEventOpenPowerOff,
 
-    DesktopMainEventOpenGameMenu,
+    DesktopMainEventOpenGame,
+    DesktopMainEventOpenClock,
+    DesktopMainEventOpenMusicPlayer,
 
     DesktopLockedEventUnlocked,
     DesktopLockedEventUpdate,
@@ -29,9 +31,10 @@ typedef enum {
     DesktopDebugEventExit,
 
     DesktopLockMenuEventLock,
-    DesktopLockMenuEventPinLock,
     DesktopLockMenuEventDummyModeOn,
     DesktopLockMenuEventDummyModeOff,
+    DesktopLockMenuEventStealthModeOn,
+    DesktopLockMenuEventStealthModeOff,
 
     DesktopAnimationEventCheckAnimation,
     DesktopAnimationEventNewIdleAnimation,

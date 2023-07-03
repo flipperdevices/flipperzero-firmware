@@ -2,6 +2,7 @@
 
 #include <gui/gui.h>
 #include <gui/view.h>
+#include <assets_icons.h>
 #include <gui/view_stack.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
@@ -68,6 +69,7 @@ typedef struct {
     InfraredEditTarget edit_target : 8;
     InfraredEditMode edit_mode : 8;
     int32_t current_button_index;
+    uint32_t last_transmit_time;
 } InfraredAppState;
 
 struct Infrared {

@@ -3,7 +3,7 @@
 #include "mifare_ultralight.h"
 #include "nfc_util.h"
 #include <furi.h>
-#include "furi_hal_nfc.h"
+#include <furi_hal_nfc.h>
 
 #define TAG "MfUltralight"
 
@@ -51,7 +51,7 @@ void mf_ul_reset(MfUltralightData* data) {
     data->data_size = 0;
     data->data_read = 0;
     data->curr_authlim = 0;
-    data->has_auth = false;
+    data->auth_success = false;
 }
 
 static MfUltralightFeatures mf_ul_get_features(MfUltralightType type) {
@@ -79,6 +79,8 @@ static MfUltralightFeatures mf_ul_get_features(MfUltralightType type) {
                MfUltralightSupportSectorSelect;
     case MfUltralightTypeNTAG203:
         return MfUltralightSupportCompatWrite | MfUltralightSupportCounterInMemory;
+    case MfUltralightTypeULC:
+        return MfUltralightSupportCompatWrite | MfUltralightSupport3DesAuth;
     default:
         // Assumed original MFUL 512-bit
         return MfUltralightSupportCompatWrite;
@@ -93,6 +95,11 @@ static void mf_ul_set_default_version(MfUltralightReader* reader, MfUltralightDa
 static void mf_ul_set_version_ntag203(MfUltralightReader* reader, MfUltralightData* data) {
     data->type = MfUltralightTypeNTAG203;
     reader->pages_to_read = 42;
+}
+
+static void mf_ul_set_version_ulc(MfUltralightReader* reader, MfUltralightData* data) {
+    data->type = MfUltralightTypeULC;
+    reader->pages_to_read = 48;
 }
 
 bool mf_ultralight_read_version(
@@ -170,11 +177,12 @@ bool mf_ultralight_read_version(
 }
 
 bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint16_t* pack) {
+    furi_assert(pack);
     bool authenticated = false;
 
     do {
         FURI_LOG_D(TAG, "Authenticating");
-        tx_rx->tx_data[0] = MF_UL_AUTH;
+        tx_rx->tx_data[0] = MF_UL_PWD_AUTH;
         nfc_util_num2bytes(key, 4, &tx_rx->tx_data[1]);
         tx_rx->tx_bits = 40;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
@@ -189,9 +197,7 @@ bool mf_ultralight_authenticate(FuriHalNfcTxRxContext* tx_rx, uint32_t key, uint
             break;
         }
 
-        if(pack != NULL) {
-            *pack = (tx_rx->rx_data[1] << 8) | tx_rx->rx_data[0];
-        }
+        *pack = (tx_rx->rx_data[1] << 8) | tx_rx->rx_data[0];
 
         FURI_LOG_I(TAG, "Auth success. Password: %08lX. PACK: %04X", key, *pack);
         authenticated = true;
@@ -492,7 +498,7 @@ MfUltralightConfigPages* mf_ultralight_get_config_pages(MfUltralightData* data) 
     } else if(
         data->type >= MfUltralightTypeNTAGI2CPlus1K &&
         data->type <= MfUltralightTypeNTAGI2CPlus2K) {
-        return (MfUltralightConfigPages*)&data->data[0xe3 * 4];
+        return (MfUltralightConfigPages*)&data->data[0xe3 * 4]; //-V641
     } else {
         return NULL;
     }
@@ -561,7 +567,7 @@ bool mf_ultralight_read_pages_direct(
         FURI_LOG_D(TAG, "Failed to read pages %d - %d", start_index, start_index + 3);
         return false;
     }
-    memcpy(data, tx_rx->rx_data, 16);
+    memcpy(data, tx_rx->rx_data, 16); //-V1086
     return true;
 }
 
@@ -584,7 +590,8 @@ bool mf_ultralight_read_pages(
             curr_sector_index = tag_sector;
         }
 
-        FURI_LOG_D(TAG, "Reading pages %d - %d", i, i + (valid_pages > 4 ? 4 : valid_pages) - 1);
+        FURI_LOG_D(
+            TAG, "Reading pages %zu - %zu", i, i + (valid_pages > 4 ? 4 : valid_pages) - 1U);
         tx_rx->tx_data[0] = MF_UL_READ_CMD;
         tx_rx->tx_data[1] = tag_page;
         tx_rx->tx_bits = 16;
@@ -593,9 +600,9 @@ bool mf_ultralight_read_pages(
         if(!furi_hal_nfc_tx_rx(tx_rx, 50) || tx_rx->rx_bits < 16 * 8) {
             FURI_LOG_D(
                 TAG,
-                "Failed to read pages %d - %d",
+                "Failed to read pages %zu - %zu",
                 i,
-                i + (valid_pages > 4 ? 4 : valid_pages) - 1);
+                i + (valid_pages > 4 ? 4 : valid_pages) - 1U);
             break;
         }
 
@@ -702,7 +709,7 @@ bool mf_ultralight_read_tearing_flags(FuriHalNfcTxRxContext* tx_rx, MfUltralight
     FURI_LOG_D(TAG, "Reading tearing flags");
     for(size_t i = 0; i < 3; i++) {
         tx_rx->tx_data[0] = MF_UL_CHECK_TEARING;
-        tx_rx->rx_data[1] = i;
+        tx_rx->tx_data[1] = i;
         tx_rx->tx_bits = 16;
         tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
         if(!furi_hal_nfc_tx_rx(tx_rx, 50)) {
@@ -714,6 +721,21 @@ bool mf_ultralight_read_tearing_flags(FuriHalNfcTxRxContext* tx_rx, MfUltralight
     }
 
     return flag_read == 2;
+}
+
+static bool mf_ul_probe_3des_auth(FuriHalNfcTxRxContext* tx_rx) {
+    tx_rx->tx_data[0] = MF_UL_AUTHENTICATE_1;
+    tx_rx->tx_data[1] = 0;
+    tx_rx->tx_bits = 16;
+    tx_rx->tx_rx_type = FuriHalNfcTxRxTypeDefault;
+    bool rc = furi_hal_nfc_tx_rx(tx_rx, 50) && tx_rx->rx_bits == 9 * 8 &&
+              tx_rx->rx_data[0] == 0xAF;
+
+    // Reset just in case, we're not going to finish authenticating and need to if tag doesn't support auth
+    furi_hal_nfc_sleep();
+    furi_hal_nfc_activate_nfca(300, NULL);
+
+    return rc;
 }
 
 bool mf_ul_read_card(
@@ -733,16 +755,20 @@ bool mf_ul_read_card(
             mf_ultralight_read_signature(tx_rx, data);
         }
     } else {
-        // No GET_VERSION command, check for NTAG203 by reading last page (41)
         uint8_t dummy[16];
-        if(mf_ultralight_read_pages_direct(tx_rx, 41, dummy)) {
+        // No GET_VERSION command, check if AUTHENTICATE command available (detect UL C).
+        if(mf_ul_probe_3des_auth(tx_rx)) {
+            mf_ul_set_version_ulc(reader, data);
+        } else if(mf_ultralight_read_pages_direct(tx_rx, 41, dummy)) {
+            // No AUTHENTICATE, check for NTAG203 by reading last page (41)
             mf_ul_set_version_ntag203(reader, data);
-            reader->supported_features = mf_ul_get_features(data->type);
         } else {
             // We're really an original Mifare Ultralight, reset tag for safety
             furi_hal_nfc_sleep();
             furi_hal_nfc_activate_nfca(300, NULL);
         }
+
+        reader->supported_features = mf_ul_get_features(data->type);
     }
 
     card_read = mf_ultralight_read_pages(tx_rx, reader, data);
@@ -756,6 +782,34 @@ bool mf_ul_read_card(
             mf_ultralight_read_tearing_flags(tx_rx, data);
         }
         data->curr_authlim = 0;
+
+        if(reader->pages_read == reader->pages_to_read &&
+           reader->supported_features & MfUltralightSupportAuth && !data->auth_success) {
+            MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
+            if(config->access.authlim == 0) {
+                // Attempt to auth with default PWD
+                uint16_t pack;
+                data->auth_success = mf_ultralight_authenticate(tx_rx, MF_UL_DEFAULT_PWD, &pack);
+                if(data->auth_success) {
+                    config->auth_data.pwd.value = MF_UL_DEFAULT_PWD;
+                    config->auth_data.pack.value = pack;
+                } else {
+                    furi_hal_nfc_sleep();
+                    furi_hal_nfc_activate_nfca(300, NULL);
+                }
+            }
+        }
+    }
+
+    if(reader->pages_read != reader->pages_to_read) {
+        if(reader->supported_features & MfUltralightSupportAuth) {
+            // Probably password protected, fix AUTH0 and PROT so before AUTH0
+            // can be written and since AUTH0 won't be readable, like on the
+            // original card
+            MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
+            config->auth0 = reader->pages_read;
+            config->access.prot = true;
+        }
     }
 
     return card_read;
@@ -829,7 +883,7 @@ static void mf_ul_ntag_i2c_fill_cross_area_read(
     }
 
     if(apply) {
-        while(tx_page_offset < 0 && page_length > 0) {
+        while(tx_page_offset < 0 && page_length > 0) { //-V614
             ++tx_page_offset;
             ++data_page_offset;
             --page_length;
@@ -959,9 +1013,9 @@ static bool mf_ul_check_lock(MfUltralightEmulator* emulator, int16_t write_page)
     switch(emulator->data.type) {
     // low byte LSB range, MSB range
     case MfUltralightTypeNTAG203:
-        if(write_page >= 16 && write_page <= 27)
+        if(write_page >= 16 && write_page <= 27) //-V560
             shift = (write_page - 16) / 4 + 1;
-        else if(write_page >= 28 && write_page <= 39)
+        else if(write_page >= 28 && write_page <= 39) //-V560
             shift = (write_page - 28) / 4 + 5;
         else if(write_page == 41)
             shift = 12;
@@ -1188,7 +1242,7 @@ static void mf_ul_emulate_write(
             page_buff[0] = new_locks & 0xff;
             page_buff[1] = new_locks >> 8;
             page_buff[2] = new_block_locks;
-            if(emulator->data.type >= MfUltralightTypeUL21 &&
+            if(emulator->data.type >= MfUltralightTypeUL21 && //-V1016
                emulator->data.type <= MfUltralightTypeNTAG216)
                 page_buff[3] = MF_UL_TEARING_FLAG_DEFAULT;
             else
@@ -1200,7 +1254,13 @@ static void mf_ul_emulate_write(
     emulator->data_changed = true;
 }
 
+bool mf_ul_emulation_supported(MfUltralightData* data) {
+    return data->type != MfUltralightTypeULC;
+}
+
 void mf_ul_reset_emulation(MfUltralightEmulator* emulator, bool is_power_cycle) {
+    emulator->comp_write_cmd_started = false;
+    emulator->sector_select_cmd_started = false;
     emulator->curr_sector = 0;
     emulator->ntag_i2c_plus_sector3_lockout = false;
     emulator->auth_success = false;
@@ -1244,8 +1304,7 @@ void mf_ul_prepare_emulation(MfUltralightEmulator* emulator, MfUltralightData* d
     emulator->config = mf_ultralight_get_config_pages(&emulator->data);
     emulator->page_num = emulator->data.data_size / 4;
     emulator->data_changed = false;
-    emulator->comp_write_cmd_started = false;
-    emulator->sector_select_cmd_started = false;
+    memset(&emulator->auth_attempt, 0, sizeof(MfUltralightAuth));
     mf_ul_reset_emulation(emulator, true);
 }
 
@@ -1703,9 +1762,20 @@ bool mf_ul_prepare_emulation_response(
                     }
                 }
             }
-        } else if(cmd == MF_UL_AUTH) {
+        } else if(cmd == MF_UL_PWD_AUTH) {
             if(emulator->supported_features & MfUltralightSupportAuth) {
                 if(buff_rx_len == (1 + 4) * 8) {
+                    // Record password sent by PCD
+                    memcpy(
+                        emulator->auth_attempt.pwd.raw,
+                        &buff_rx[1],
+                        sizeof(emulator->auth_attempt.pwd.raw));
+                    emulator->auth_attempted = true;
+                    if(emulator->auth_received_callback) {
+                        emulator->auth_received_callback(
+                            emulator->auth_attempt, emulator->context);
+                    }
+
                     uint16_t scaled_authlim = mf_ultralight_calc_auth_count(&emulator->data);
                     if(scaled_authlim != 0 && emulator->data.curr_authlim >= scaled_authlim) {
                         if(emulator->data.curr_authlim != UINT16_MAX) {
@@ -1862,4 +1932,15 @@ bool mf_ul_prepare_emulation_response(
 #endif
 
     return tx_bits > 0;
+}
+
+bool mf_ul_is_full_capture(MfUltralightData* data) {
+    if(data->data_read != data->data_size) return false;
+
+    // Having read all the pages doesn't mean that we've got everything.
+    // By default PWD is 0xFFFFFFFF, but if read back it is always 0x00000000,
+    // so a default read on an auth-supported NTAG is never complete.
+    if(!(mf_ul_get_features(data->type) & MfUltralightSupportAuth)) return true;
+    MfUltralightConfigPages* config = mf_ultralight_get_config_pages(data);
+    return config->auth_data.pwd.value != 0 || config->auth_data.pack.value != 0;
 }

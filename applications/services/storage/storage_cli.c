@@ -32,6 +32,7 @@ static void storage_cli_print_usage() {
     printf("\tmkdir\t - creates a new directory\r\n");
     printf("\tmd5\t - md5 hash of the file\r\n");
     printf("\tstat\t - info about file or dir\r\n");
+    printf("\ttimestamp\t - last modification timestamp\r\n");
 };
 
 static void storage_cli_print_error(FS_Error error) {
@@ -65,11 +66,20 @@ static void storage_cli_info(Cli* cli, FuriString* path) {
             storage_cli_print_error(error);
         } else {
             printf(
-                "Label: %s\r\nType: %s\r\n%luKiB total\r\n%luKiB free\r\n",
+                "Label: %s\r\nType: %s\r\n%luKiB total\r\n%luKiB free\r\n"
+                "%02x%s %s v%i.%i\r\nSN:%04lx %02i/%i\r\n",
                 sd_info.label,
                 sd_api_get_fs_type_text(sd_info.fs_type),
                 sd_info.kb_total,
-                sd_info.kb_free);
+                sd_info.kb_free,
+                sd_info.manufacturer_id,
+                sd_info.oem_id,
+                sd_info.product_name,
+                sd_info.product_revision_major,
+                sd_info.product_revision_minor,
+                sd_info.product_serial_number,
+                sd_info.manufacturing_month,
+                sd_info.manufacturing_year);
         }
     } else {
         storage_cli_print_usage();
@@ -121,7 +131,7 @@ static void storage_cli_list(Cli* cli, FuriString* path) {
 
             while(storage_dir_read(file, &fileinfo, name, MAX_NAME_LENGTH)) {
                 read_done = true;
-                if(fileinfo.flags & FSF_DIRECTORY) {
+                if(file_info_is_dir(&fileinfo)) {
                     printf("\t[D] %s\r\n", name);
                 } else {
                     printf("\t[F] %s %lub\r\n", name, (uint32_t)(fileinfo.size));
@@ -159,7 +169,7 @@ static void storage_cli_tree(Cli* cli, FuriString* path) {
 
             while(dir_walk_read(dir_walk, name, &fileinfo) == DirWalkOK) {
                 read_done = true;
-                if(fileinfo.flags & FSF_DIRECTORY) {
+                if(file_info_is_dir(&fileinfo)) {
                     printf("\t[D] %s\r\n", furi_string_get_cstr(name));
                 } else {
                     printf(
@@ -274,7 +284,7 @@ static void storage_cli_read_chunks(Cli* cli, FuriString* path, FuriString* args
     uint32_t buffer_size;
     int parsed_count = sscanf(furi_string_get_cstr(args), "%lu", &buffer_size);
 
-    if(parsed_count == EOF || parsed_count != 1) {
+    if(parsed_count != 1) {
         storage_cli_print_usage();
     } else if(storage_file_open(file, furi_string_get_cstr(path), FSAM_READ, FSOM_OPEN_EXISTING)) {
         uint64_t file_size = storage_file_size(file);
@@ -314,7 +324,7 @@ static void storage_cli_write_chunk(Cli* cli, FuriString* path, FuriString* args
     uint32_t buffer_size;
     int parsed_count = sscanf(furi_string_get_cstr(args), "%lu", &buffer_size);
 
-    if(parsed_count == EOF || parsed_count != 1) {
+    if(parsed_count != 1) {
         storage_cli_print_usage();
     } else {
         if(storage_file_open(file, furi_string_get_cstr(path), FSAM_WRITE, FSOM_OPEN_APPEND)) {
@@ -373,7 +383,7 @@ static void storage_cli_stat(Cli* cli, FuriString* path) {
         FS_Error error = storage_common_stat(api, furi_string_get_cstr(path), &fileinfo);
 
         if(error == FSE_OK) {
-            if(fileinfo.flags & FSF_DIRECTORY) {
+            if(file_info_is_dir(&fileinfo)) {
                 printf("Directory\r\n");
             } else {
                 printf("File, size: %lub\r\n", (uint32_t)(fileinfo.size));
@@ -381,6 +391,22 @@ static void storage_cli_stat(Cli* cli, FuriString* path) {
         } else {
             storage_cli_print_error(error);
         }
+    }
+
+    furi_record_close(RECORD_STORAGE);
+}
+
+static void storage_cli_timestamp(Cli* cli, FuriString* path) {
+    UNUSED(cli);
+    Storage* api = furi_record_open(RECORD_STORAGE);
+
+    uint32_t timestamp = 0;
+    FS_Error error = storage_common_timestamp(api, furi_string_get_cstr(path), &timestamp);
+
+    if(error != FSE_OK) {
+        printf("Invalid arguments\r\n");
+    } else {
+        printf("Timestamp %lu\r\n", timestamp);
     }
 
     furi_record_close(RECORD_STORAGE);
@@ -575,6 +601,11 @@ void storage_cli(Cli* cli, FuriString* args, void* context) {
 
         if(furi_string_cmp_str(cmd, "stat") == 0) {
             storage_cli_stat(cli, path);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "timestamp") == 0) {
+            storage_cli_timestamp(cli, path);
             break;
         }
 

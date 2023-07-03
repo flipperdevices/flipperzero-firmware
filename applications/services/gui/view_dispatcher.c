@@ -23,7 +23,7 @@ void view_dispatcher_free(ViewDispatcher* view_dispatcher) {
         gui_remove_view_port(view_dispatcher->gui, view_dispatcher->view_port);
     }
     // Crash if not all views were freed
-    furi_assert(ViewDict_size(view_dispatcher->views) == 0);
+    furi_assert(!ViewDict_size(view_dispatcher->views));
 
     ViewDict_clear(view_dispatcher->views);
     // Free ViewPort
@@ -152,12 +152,12 @@ void view_dispatcher_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_
     if(view_dispatcher->current_view == view) {
         view_dispatcher_set_current_view(view_dispatcher, NULL);
     }
-    // Check if view is recieving input
+    // Check if view is receiving input
     if(view_dispatcher->ongoing_input_view == view) {
         view_dispatcher->ongoing_input_view = NULL;
     }
     // Remove view
-    ViewDict_erase(view_dispatcher->views, view_id);
+    furi_check(ViewDict_erase(view_dispatcher->views, view_id));
 
     view_set_update_callback(view, NULL);
     view_set_update_callback_context(view, NULL);
@@ -304,8 +304,7 @@ void view_dispatcher_handle_custom_event(ViewDispatcher* view_dispatcher, uint32
     }
     // If custom event is not consumed in View, call callback
     if(!is_consumed && view_dispatcher->custom_event_callback) {
-        is_consumed =
-            view_dispatcher->custom_event_callback(view_dispatcher->event_context, event);
+        view_dispatcher->custom_event_callback(view_dispatcher->event_context, event);
     }
 }
 
@@ -321,6 +320,13 @@ void view_dispatcher_send_custom_event(ViewDispatcher* view_dispatcher, uint32_t
         furi_message_queue_put(view_dispatcher->queue, &message, FuriWaitForever) == FuriStatusOk);
 }
 
+static const ViewPortOrientation view_dispatcher_view_port_orientation_table[] = {
+    [ViewOrientationVertical] = ViewPortOrientationVertical,
+    [ViewOrientationVerticalFlip] = ViewPortOrientationVerticalFlip,
+    [ViewOrientationHorizontal] = ViewPortOrientationHorizontal,
+    [ViewOrientationHorizontalFlip] = ViewPortOrientationHorizontalFlip,
+};
+
 void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* view) {
     furi_assert(view_dispatcher);
     // Dispatch view exit event
@@ -331,10 +337,13 @@ void view_dispatcher_set_current_view(ViewDispatcher* view_dispatcher, View* vie
     view_dispatcher->current_view = view;
     // Dispatch view enter event
     if(view_dispatcher->current_view) {
-        if(view->orientation == ViewOrientationVertical)
-            view_port_set_orientation(view_dispatcher->view_port, ViewPortOrientationVertical);
-        else if(view->orientation == ViewOrientationHorizontal)
-            view_port_set_orientation(view_dispatcher->view_port, ViewPortOrientationHorizontal);
+        ViewPortOrientation orientation =
+            view_dispatcher_view_port_orientation_table[view->orientation];
+        if(view_port_get_orientation(view_dispatcher->view_port) != orientation) {
+            view_port_set_orientation(view_dispatcher->view_port, orientation);
+            // we just rotated input keys, now it's time to sacrifice some input
+            view_dispatcher->ongoing_input = 0;
+        }
         view_enter(view_dispatcher->current_view);
         view_port_enabled_set(view_dispatcher->view_port, true);
         view_port_update(view_dispatcher->view_port);

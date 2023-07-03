@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 
-from flipper.app import App
-from os.path import join, exists, relpath
-from os import makedirs, walk
-from update import Main as UpdateMain
+import json
 import shutil
-import zipfile
 import tarfile
+import zipfile
+from os import makedirs, walk
+from os.path import basename, exists, join, relpath
+
+from ansi.color import fg
+from flipper.app import App
+from update import Main as UpdateMain
 
 
 class ProjectDir:
@@ -47,49 +50,43 @@ class Main(App):
         )
         self.parser_copy.set_defaults(func=self.copy)
 
-    def get_project_filename(self, project, filetype):
+    def get_project_file_name(self, project: ProjectDir, filetype: str) -> str:
         #  Temporary fix
         project_name = project.project
-        if project_name == "firmware":
-            if filetype == "zip":
-                project_name = "sdk"
-            elif filetype != "elf":
-                project_name = "full"
+        if project_name == "firmware" and filetype != "elf":
+            project_name = "full"
 
-        return f"{self.DIST_FILE_PREFIX}{self.target}-{project_name}-{self.args.suffix}.{filetype}"
+        dist_target_path = self.get_dist_file_name(project_name, filetype)
+        self.note_dist_component(
+            project_name, filetype, self.get_dist_path(dist_target_path)
+        )
+        return dist_target_path
 
-    def get_dist_filepath(self, filename):
+    def note_dist_component(self, component: str, extension: str, srcpath: str) -> None:
+        self._dist_components[f"{component}.{extension}"] = srcpath
+
+    def get_dist_file_name(self, dist_artifact_type: str, filetype: str) -> str:
+        return f"{self.DIST_FILE_PREFIX}{self.target}-{dist_artifact_type}-{self.args.suffix}.{filetype}"
+
+    def get_dist_path(self, filename: str) -> str:
         return join(self.output_dir_path, filename)
 
-    def copy_single_project(self, project):
+    def copy_single_project(self, project: ProjectDir) -> None:
         obj_directory = join("build", project.dir)
 
         for filetype in ("elf", "bin", "dfu", "json"):
             if exists(src_file := join(obj_directory, f"{project.project}.{filetype}")):
                 shutil.copyfile(
                     src_file,
-                    self.get_dist_filepath(
-                        self.get_project_filename(project, filetype)
-                    ),
+                    self.get_dist_path(self.get_project_file_name(project, filetype)),
                 )
-            if exists(sdk_folder := join(obj_directory, "sdk")):
-                with zipfile.ZipFile(
-                    self.get_dist_filepath(self.get_project_filename(project, "zip")),
-                    "w",
-                    zipfile.ZIP_DEFLATED,
-                ) as zf:
-                    for root, dirs, files in walk(sdk_folder):
-                        for file in files:
-                            zf.write(
-                                join(root, file),
-                                relpath(
-                                    join(root, file),
-                                    sdk_folder,
-                                ),
-                            )
+        for foldertype in ("sdk_headers", "lib"):
+            if exists(sdk_folder := join(obj_directory, foldertype)):
+                self.note_dist_component(foldertype, "dir", sdk_folder)
 
-    def copy(self):
-        self.projects = dict(
+    def copy(self) -> int:
+        self._dist_components: dict[str, str] = dict()
+        self.projects: dict[str, ProjectDir] = dict(
             map(
                 lambda pd: (pd.project, pd),
                 map(ProjectDir, self.args.project),
@@ -117,69 +114,162 @@ class Main(App):
             try:
                 shutil.rmtree(self.output_dir_path)
             except Exception as ex:
-                pass
+                self.logger.warn(f"Failed to clean output directory: {ex}")
 
         if not exists(self.output_dir_path):
+            self.logger.debug(f"Creating output directory {self.output_dir_path}")
             makedirs(self.output_dir_path)
 
+        for folder in ("debug", "scripts"):
+            if exists(folder):
+                self.note_dist_component(folder, "dir", folder)
+
         for project in self.projects.values():
+            self.logger.debug(f"Copying {project.project} for {project.target}")
             self.copy_single_project(project)
 
         self.logger.info(
-            f"Firmware binaries can be found at:\n\t{self.output_dir_path}"
+            fg.boldgreen(
+                f"Firmware binaries can be found at:\n\t{self.output_dir_path}"
+            )
         )
 
         if self.args.version:
-            bundle_dir_name = f"{self.target}-update-{self.args.suffix}"[
-                : self.DIST_FOLDER_MAX_NAME_LENGTH
-            ]
-            bundle_dir = join(self.output_dir_path, bundle_dir_name)
-            bundle_args = [
-                "generate",
-                "-d",
-                bundle_dir,
-                "-v",
-                self.args.version,
-                "-t",
-                self.target,
-                "--dfu",
-                self.get_dist_filepath(
-                    self.get_project_filename(self.projects["firmware"], "dfu")
-                ),
-                "--stage",
-                self.get_dist_filepath(
-                    self.get_project_filename(self.projects["updater"], "bin")
-                ),
-            ]
-            if self.args.resources:
-                bundle_args.extend(
-                    (
-                        "-r",
-                        self.args.resources,
-                    )
-                )
-            bundle_args.extend(self.other_args)
+            if bundle_result := self.bundle_update_package():
+                return bundle_result
 
-            if (bundle_result := UpdateMain(no_exit=True)(bundle_args)) == 0:
-                self.logger.info(
-                    f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
-                )
-
-                # Create tgz archive
-                with tarfile.open(
-                    join(
-                        self.output_dir_path,
-                        f"{self.DIST_FILE_PREFIX}{bundle_dir_name}.tgz",
-                    ),
-                    "w:gz",
-                    compresslevel=9,
-                    format=tarfile.USTAR_FORMAT,
-                ) as tar:
-                    tar.add(bundle_dir, arcname=bundle_dir_name)
-
-            return bundle_result
+        required_components = ("firmware.elf", "full.bin", "update.dir")
+        if all(
+            map(
+                lambda c: c in self._dist_components,
+                required_components,
+            )
+        ):
+            self.bundle_sdk()
 
         return 0
+
+    def bundle_sdk(self):
+        self.logger.info("Bundling SDK")
+        components_paths = dict()
+
+        sdk_components_keys = (
+            "full.bin",
+            "firmware.elf",
+            "update.dir",
+            "sdk_headers.dir",
+            "lib.dir",
+            "scripts.dir",
+        )
+
+        with zipfile.ZipFile(
+            self.get_dist_path(self.get_dist_file_name("sdk", "zip")),
+            "w",
+            zipfile.ZIP_DEFLATED,
+        ) as zf:
+            for component_key in sdk_components_keys:
+                component_path = self._dist_components.get(component_key)
+
+                if component_key.endswith(".dir"):
+                    components_paths[component_key] = basename(component_path)
+                    for root, dirnames, files in walk(component_path):
+                        if "__pycache__" in dirnames:
+                            dirnames.remove("__pycache__")
+                        for file in files:
+                            zf.write(
+                                join(root, file),
+                                join(
+                                    components_paths[component_key],
+                                    relpath(
+                                        join(root, file),
+                                        component_path,
+                                    ),
+                                ),
+                            )
+                else:
+                    # We use fixed names for files to avoid having to regenerate VSCode project
+                    components_paths[component_key] = component_key
+                    zf.write(component_path, component_key)
+
+            zf.writestr(
+                "components.json",
+                json.dumps(
+                    {
+                        "meta": {
+                            "hw_target": self.target,
+                            "flavor": self.flavor,
+                            "version": self.args.version,
+                        },
+                        "components": components_paths,
+                    }
+                ),
+            )
+
+    def bundle_update_package(self):
+        self.logger.debug(
+            f"Generating update bundle with version {self.args.version} for {self.target}"
+        )
+        bundle_dir_name = f"{self.target}-update-{self.args.suffix}"[
+            : self.DIST_FOLDER_MAX_NAME_LENGTH
+        ]
+        bundle_dir = self.get_dist_path(bundle_dir_name)
+        bundle_args = [
+            "generate",
+            "-d",
+            bundle_dir,
+            "-v",
+            self.args.version,
+            "-t",
+            self.target,
+            "--dfu",
+            self.get_dist_path(
+                self.get_project_file_name(self.projects["firmware"], "dfu")
+            ),
+            "--stage",
+            self.get_dist_path(
+                self.get_project_file_name(self.projects["updater"], "bin")
+            ),
+        ]
+        if self.args.resources:
+            bundle_args.extend(
+                (
+                    "-r",
+                    self.args.resources,
+                )
+            )
+        bundle_args.extend(self.other_args)
+
+        if (bundle_result := UpdateMain(no_exit=True)(bundle_args)) == 0:
+            self.note_dist_component("update", "dir", bundle_dir)
+            self.logger.info(
+                fg.boldgreen(
+                    f"Use this directory to self-update your Flipper:\n\t{bundle_dir}"
+                )
+            )
+
+            # Create tgz archive
+            with tarfile.open(
+                join(
+                    self.output_dir_path,
+                    bundle_tgz := f"{self.DIST_FILE_PREFIX}{bundle_dir_name}.tgz",
+                ),
+                "w:gz",
+                compresslevel=9,
+                format=tarfile.USTAR_FORMAT,
+            ) as tar:
+                self.note_dist_component(
+                    "update", "tgz", self.get_dist_path(bundle_tgz)
+                )
+
+                # Strip uid and gid in case of overflow
+                def tar_filter(tarinfo):
+                    tarinfo.uid = tarinfo.gid = 0
+                    tarinfo.mtime = 0
+                    tarinfo.uname = tarinfo.gname = "furippa"
+                    return tarinfo
+
+                tar.add(bundle_dir, arcname=bundle_dir_name, filter=tar_filter)
+        return bundle_result
 
 
 if __name__ == "__main__":

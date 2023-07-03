@@ -138,6 +138,41 @@ static void rpc_system_storage_info_process(const PB_Main* request, void* contex
     furi_record_close(RECORD_STORAGE);
 }
 
+static void rpc_system_storage_timestamp_process(const PB_Main* request, void* context) {
+    furi_assert(request);
+    furi_assert(context);
+    furi_assert(request->which_content == PB_Main_storage_timestamp_request_tag);
+
+    FURI_LOG_D(TAG, "Timestamp");
+
+    RpcStorageSystem* rpc_storage = context;
+    RpcSession* session = rpc_storage->session;
+    furi_assert(session);
+
+    rpc_system_storage_reset_state(rpc_storage, session, true);
+
+    PB_Main* response = malloc(sizeof(PB_Main));
+    response->command_id = request->command_id;
+
+    Storage* fs_api = furi_record_open(RECORD_STORAGE);
+
+    const char* path = request->content.storage_timestamp_request.path;
+    uint32_t timestamp = 0;
+    FS_Error error = storage_common_timestamp(fs_api, path, &timestamp);
+
+    response->command_status = rpc_system_storage_get_error(error);
+    response->which_content = PB_Main_empty_tag;
+
+    if(error == FSE_OK) {
+        response->which_content = PB_Main_storage_timestamp_response_tag;
+        response->content.storage_timestamp_response.timestamp = timestamp;
+    }
+
+    rpc_send_and_release(session, response);
+    free(response);
+    furi_record_close(RECORD_STORAGE);
+}
+
 static void rpc_system_storage_stat_process(const PB_Main* request, void* context) {
     furi_assert(request);
     furi_assert(context);
@@ -166,7 +201,7 @@ static void rpc_system_storage_stat_process(const PB_Main* request, void* contex
     if(error == FSE_OK) {
         response->which_content = PB_Main_storage_stat_response_tag;
         response->content.storage_stat_response.has_file = true;
-        response->content.storage_stat_response.file.type = (fileinfo.flags & FSF_DIRECTORY) ?
+        response->content.storage_stat_response.file.type = file_info_is_dir(&fileinfo) ?
                                                                 PB_Storage_File_FileType_DIR :
                                                                 PB_Storage_File_FileType_FILE;
         response->content.storage_stat_response.file.size = fileinfo.size;
@@ -256,9 +291,8 @@ static void rpc_system_storage_list_process(const PB_Main* request, void* contex
                     rpc_send_and_release(session, &response);
                     i = 0;
                 }
-                list->file[i].type = (fileinfo.flags & FSF_DIRECTORY) ?
-                                         PB_Storage_File_FileType_DIR :
-                                         PB_Storage_File_FileType_FILE;
+                list->file[i].type = file_info_is_dir(&fileinfo) ? PB_Storage_File_FileType_DIR :
+                                                                   PB_Storage_File_FileType_FILE;
                 list->file[i].size = fileinfo.size;
                 list->file[i].data = NULL;
                 list->file[i].name = name;
@@ -295,7 +329,7 @@ static void rpc_system_storage_read_process(const PB_Main* request, void* contex
 
     rpc_system_storage_reset_state(rpc_storage, session, true);
 
-    /* use same message memory to send reponse */
+    /* use same message memory to send response */
     PB_Main* response = malloc(sizeof(PB_Main));
     const char* path = request->content.storage_read_request.path;
     Storage* fs_api = furi_record_open(RECORD_STORAGE);
@@ -405,6 +439,10 @@ static void rpc_system_storage_write_process(const PB_Main* request, void* conte
     if(!fs_operation_success) {
         send_response = true;
         command_status = rpc_system_storage_get_file_error(file);
+        if(command_status == PB_CommandStatus_OK) {
+            // Report errors not handled by underlying APIs
+            command_status = PB_CommandStatus_ERROR_STORAGE_INTERNAL;
+        }
     }
 
     if(send_response) {
@@ -419,7 +457,7 @@ static bool rpc_system_storage_is_dir_is_empty(Storage* fs_api, const char* path
     FileInfo fileinfo;
     bool is_dir_is_empty = true;
     FS_Error error = storage_common_stat(fs_api, path, &fileinfo);
-    if((error == FSE_OK) && (fileinfo.flags & FSF_DIRECTORY)) {
+    if((error == FSE_OK) && file_info_is_dir(&fileinfo)) {
         File* dir = storage_file_alloc(fs_api);
         if(storage_dir_open(dir, path)) {
             char* name = malloc(MAX_NAME_LENGTH);
@@ -558,7 +596,7 @@ static void rpc_system_storage_md5sum_process(const PB_Main* request, void* cont
         char* md5sum = response.content.storage_md5sum_response.md5sum;
         size_t md5sum_size = sizeof(response.content.storage_md5sum_response.md5sum);
         (void)md5sum_size;
-        furi_assert(hash_size <= ((md5sum_size - 1) / 2));
+        furi_assert(hash_size <= ((md5sum_size - 1) / 2)); //-V547
         for(uint8_t i = 0; i < hash_size; i++) {
             md5sum += snprintf(md5sum, md5sum_size, "%02x", hash[i]);
         }
@@ -667,6 +705,9 @@ void* rpc_system_storage_alloc(RpcSession* session) {
 
     rpc_handler.message_handler = rpc_system_storage_info_process;
     rpc_add_handler(session, PB_Main_storage_info_request_tag, &rpc_handler);
+
+    rpc_handler.message_handler = rpc_system_storage_timestamp_process;
+    rpc_add_handler(session, PB_Main_storage_timestamp_request_tag, &rpc_handler);
 
     rpc_handler.message_handler = rpc_system_storage_stat_process;
     rpc_add_handler(session, PB_Main_storage_stat_request_tag, &rpc_handler);

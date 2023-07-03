@@ -8,7 +8,9 @@ typedef struct SubGhzViewReceiver SubGhzViewReceiver;
 
 typedef void (*SubGhzViewReceiverCallback)(SubGhzCustomEvent event, void* context);
 
-void subghz_view_receiver_set_lock(SubGhzViewReceiver* subghz_receiver, SubGhzLock keyboard);
+void subghz_receiver_rssi(SubGhzViewReceiver* instance, float rssi);
+
+void subghz_view_receiver_set_lock(SubGhzViewReceiver* subghz_receiver, bool keyboard);
 
 void subghz_view_receiver_set_callback(
     SubGhzViewReceiver* subghz_receiver,
@@ -26,6 +28,10 @@ void subghz_view_receiver_add_data_statusbar(
     const char* frequency_str,
     const char* preset_str,
     const char* history_stat_str);
+
+void subghz_view_receiver_set_radio_device_type(
+    SubGhzViewReceiver* subghz_receiver,
+    SubGhzRadioDeviceType device_type);
 
 void subghz_view_receiver_add_item_to_menu(
     SubGhzViewReceiver* subghz_receiver,

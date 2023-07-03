@@ -1,6 +1,7 @@
 #include "power_off.h"
 #include <furi.h>
 #include <gui/elements.h>
+#include <assets_icons.h>
 
 struct PowerOff {
     View* view;
@@ -25,7 +26,7 @@ static void power_off_draw_callback(Canvas* canvas, void* _model) {
 
     canvas_set_font(canvas, FontSecondary);
     if(model->response == PowerOffResponseDefault) {
-        snprintf(buff, sizeof(buff), "Charge me!\nOff in %lds!", model->time_left_sec);
+        snprintf(buff, sizeof(buff), "Charge me!\nOff in %lus!", model->time_left_sec);
         elements_multiline_text_aligned(canvas, 70, 23, AlignLeft, AlignTop, buff);
 
         elements_button_left(canvas, "Cancel");

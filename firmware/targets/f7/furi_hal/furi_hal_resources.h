@@ -10,7 +10,7 @@ extern "C" {
 #endif
 
 /* Input Related Constants */
-#define INPUT_DEBOUNCE_TICKS 30
+#define INPUT_DEBOUNCE_TICKS 4
 
 /* Input Keys */
 typedef enum {
@@ -20,6 +20,7 @@ typedef enum {
     InputKeyLeft,
     InputKeyOk,
     InputKeyBack,
+    InputKeyMAX, /**< Special value */
 } InputKey;
 
 /* Light */
@@ -37,11 +38,23 @@ typedef struct {
     const char* name;
 } InputPin;
 
+typedef struct {
+    const GpioPin* pin;
+    const char* name;
+    const bool debug;
+} GpioPinRecord;
+
 extern const InputPin input_pins[];
 extern const size_t input_pins_count;
 
-extern const GpioPin vibro_gpio;
-extern const GpioPin ibutton_gpio;
+extern const GpioPinRecord gpio_pins[];
+extern const size_t gpio_pins_count;
+
+extern const GpioPin gpio_swdio;
+extern const GpioPin gpio_swclk;
+
+extern const GpioPin gpio_vibro;
+extern const GpioPin gpio_ibutton;
 
 extern const GpioPin gpio_cc1101_g0;
 extern const GpioPin gpio_rf_sw_0;
@@ -92,7 +105,7 @@ extern const GpioPin gpio_i2c_power_scl;
 
 extern const GpioPin gpio_speaker;
 
-extern const GpioPin periph_power;
+extern const GpioPin gpio_periph_power;
 
 extern const GpioPin gpio_usb_dm;
 extern const GpioPin gpio_usb_dp;
@@ -205,6 +218,13 @@ void furi_hal_resources_init_early();
 void furi_hal_resources_deinit_early();
 
 void furi_hal_resources_init();
+
+/**
+ * Get a corresponding external connector pin number for a gpio
+ * @param gpio GpioPin
+ * @return pin number or -1 if gpio is not on the external connector
+ */
+int32_t furi_hal_resources_get_ext_pin_number(const GpioPin* gpio);
 
 #ifdef __cplusplus
 }

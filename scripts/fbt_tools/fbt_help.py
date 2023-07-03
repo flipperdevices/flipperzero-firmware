@@ -11,6 +11,8 @@ Building:
         Build all FAP apps
     fap_{APPID}, launch_app APPSRC={APPID}:
         Build FAP app with appid={APPID}; upload & start it over USB
+    fap_deploy:
+        Build and upload all FAP apps over USB
 
 Flashing & debugging:
     flash, flash_blackmagic, jflash:
@@ -29,6 +31,11 @@ Other:
         run linters
     format, format_py:
         run code formatters
+    firmware_pvs:
+        generate a PVS-Studio report
+
+How to open a shell with toolchain environment and other build tools:
+    In your shell, type "source `./fbt -s env`". You can also use "." instead of "source".
 
 For more targets & info, see documentation/fbt.md
 """

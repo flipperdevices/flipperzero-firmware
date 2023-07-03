@@ -1,5 +1,7 @@
 #include "input_i.h"
 
+// #define INPUT_DEBUG
+
 #define GPIO_Read(input_pin) (furi_hal_gpio_read(input_pin.pin->gpio) ^ (input_pin.pin->inverted))
 
 static Input* input = NULL;
@@ -21,7 +23,8 @@ inline static void input_timer_stop(FuriTimer* timer_id) {
 void input_press_timer_callback(void* arg) {
     InputPinState* input_pin = arg;
     InputEvent event;
-    event.sequence = input_pin->counter;
+    event.sequence_source = INPUT_SEQUENCE_SOURCE_HARDWARE;
+    event.sequence_counter = input_pin->counter;
     event.key = input_pin->pin->key;
     input_pin->press_counter++;
     if(input_pin->press_counter == INPUT_LONG_PRESS_COUNTS) {
@@ -60,8 +63,9 @@ const char* input_get_type_name(InputType type) {
         return "Long";
     case InputTypeRepeat:
         return "Repeat";
+    default:
+        return "Unknown";
     }
-    return "Unknown";
 }
 
 int32_t input_srv(void* p) {
@@ -71,11 +75,13 @@ int32_t input_srv(void* p) {
     input->event_pubsub = furi_pubsub_alloc();
     furi_record_create(RECORD_INPUT_EVENTS, input->event_pubsub);
 
+#if INPUT_DEBUG
+    furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
+#endif
+
 #ifdef SRV_CLI
     input->cli = furi_record_open(RECORD_CLI);
-    if(input->cli) {
-        cli_add_command(input->cli, "input", CliCommandFlagParallelSafe, input_cli, input);
-    }
+    cli_add_command(input->cli, "input", CliCommandFlagParallelSafe, input_cli, input);
 #endif
 
     input->pin_states = malloc(input_pins_count * sizeof(InputPinState));
@@ -94,25 +100,32 @@ int32_t input_srv(void* p) {
         bool is_changing = false;
         for(size_t i = 0; i < input_pins_count; i++) {
             bool state = GPIO_Read(input->pin_states[i]);
+            if(state) {
+                if(input->pin_states[i].debounce < INPUT_DEBOUNCE_TICKS)
+                    input->pin_states[i].debounce += 1;
+            } else {
+                if(input->pin_states[i].debounce > 0) input->pin_states[i].debounce -= 1;
+            }
+
             if(input->pin_states[i].debounce > 0 &&
                input->pin_states[i].debounce < INPUT_DEBOUNCE_TICKS) {
                 is_changing = true;
-                input->pin_states[i].debounce += (state ? 1 : -1);
             } else if(input->pin_states[i].state != state) {
                 input->pin_states[i].state = state;
 
                 // Common state info
                 InputEvent event;
+                event.sequence_source = INPUT_SEQUENCE_SOURCE_HARDWARE;
                 event.key = input->pin_states[i].pin->key;
 
                 // Short / Long / Repeat timer routine
                 if(state) {
                     input->counter++;
                     input->pin_states[i].counter = input->counter;
-                    event.sequence = input->pin_states[i].counter;
+                    event.sequence_counter = input->pin_states[i].counter;
                     input_timer_start(input->pin_states[i].press_timer, INPUT_PRESS_TICKS);
                 } else {
-                    event.sequence = input->pin_states[i].counter;
+                    event.sequence_counter = input->pin_states[i].counter;
                     input_timer_stop(input->pin_states[i].press_timer);
                     if(input->pin_states[i].press_counter < INPUT_LONG_PRESS_COUNTS) {
                         event.type = InputTypeShort;
@@ -128,8 +141,14 @@ int32_t input_srv(void* p) {
         }
 
         if(is_changing) {
+#if INPUT_DEBUG
+            furi_hal_gpio_write(&gpio_ext_pa4, 1);
+#endif
             furi_delay_tick(1);
         } else {
+#if INPUT_DEBUG
+            furi_hal_gpio_write(&gpio_ext_pa4, 0);
+#endif
             furi_thread_flags_wait(INPUT_THREAD_FLAG_ISR, FuriFlagWaitAny, FuriWaitForever);
         }
     }

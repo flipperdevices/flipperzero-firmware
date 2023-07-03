@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-from flipper.app import App
-import subprocess
-import os
 import math
+import os
+import subprocess
+
+from ansi.color import fg
+from flipper.app import App
 
 
 class Main(App):
@@ -43,7 +45,9 @@ class Main(App):
         pages = math.ceil(binsize / PAGE_SIZE)
         last_page_state = (binsize % PAGE_SIZE) * 100 / PAGE_SIZE
         print(
-            f"{os.path.basename(self.args.binname):<11}: {pages:>4} flash pages (last page {last_page_state:.02f}% full)"
+            fg.yellow(
+                f"{os.path.basename(self.args.binname):<11}: {pages:>4} flash pages (last page {last_page_state:.02f}% full)"
+            )
         )
         return 0
 

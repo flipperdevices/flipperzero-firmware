@@ -7,30 +7,53 @@
 #include <time.h>
 #include <notification/notification_messages.h>
 #include <loader/loader.h>
+#include <lib/toolbox/args.h>
 
 // Close to ISO, `date +'%Y-%m-%d %H:%M:%S %u'`
 #define CLI_DATE_FORMAT "%.4d-%.2d-%.2d %.2d:%.2d:%.2d %d"
 
-void cli_command_device_info_callback(const char* key, const char* value, bool last, void* context) {
-    UNUSED(context);
+void cli_command_info_callback(const char* key, const char* value, bool last, void* context) {
     UNUSED(last);
+    UNUSED(context);
     printf("%-30s: %s\r\n", key, value);
 }
 
-/* 
- * Device Info Command
+/** Info Command
+ *
  * This command is intended to be used by humans
+ *
+ * Arguments:
+ * - device - print device info
+ * - power - print power info
+ * - power_debug - print power debug info
+ *
+ * @param      cli      The cli instance
+ * @param      args     The arguments
+ * @param      context  The context
  */
-void cli_command_device_info(Cli* cli, FuriString* args, void* context) {
+void cli_command_info(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
-    UNUSED(args);
-    furi_hal_info_get(cli_command_device_info_callback, context);
+
+    if(context) {
+        furi_hal_info_get(cli_command_info_callback, '_', NULL);
+        return;
+    }
+
+    if(!furi_string_cmp(args, "device")) {
+        furi_hal_info_get(cli_command_info_callback, '.', NULL);
+    } else if(!furi_string_cmp(args, "power")) {
+        furi_hal_power_info_get(cli_command_info_callback, '.', NULL);
+    } else if(!furi_string_cmp(args, "power_debug")) {
+        furi_hal_power_debug_get(cli_command_info_callback, NULL);
+    } else {
+        cli_print_usage("info", "<device|power|power_debug>", furi_string_get_cstr(args));
+    }
 }
 
 void cli_command_help(Cli* cli, FuriString* args, void* context) {
     UNUSED(args);
     UNUSED(context);
-    printf("Commands we have:");
+    printf("Commands available:");
 
     // Command count
     const size_t commands_count = CliCommandTree_size(cli->commands);
@@ -60,9 +83,9 @@ void cli_command_help(Cli* cli, FuriString* args, void* context) {
 
     if(furi_string_size(args) > 0) {
         cli_nl();
-        printf("Also I have no clue what '");
+        printf("`");
         printf("%s", furi_string_get_cstr(args));
-        printf("' is.");
+        printf("` command not found");
     }
 }
 
@@ -192,6 +215,81 @@ void cli_command_log(Cli* cli, FuriString* args, void* context) {
     furi_stream_buffer_free(ring);
 }
 
+void cli_command_sysctl_debug(Cli* cli, FuriString* args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
+    if(!furi_string_cmp(args, "0")) {
+        furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
+        printf("Debug disabled.");
+    } else if(!furi_string_cmp(args, "1")) {
+        furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
+        printf("Debug enabled.");
+    } else {
+        cli_print_usage("sysctl debug", "<1|0>", furi_string_get_cstr(args));
+    }
+}
+
+void cli_command_sysctl_heap_track(Cli* cli, FuriString* args, void* context) {
+    UNUSED(cli);
+    UNUSED(context);
+    if(!furi_string_cmp(args, "none")) {
+        furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeNone);
+        printf("Heap tracking disabled");
+    } else if(!furi_string_cmp(args, "main")) {
+        furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeMain);
+        printf("Heap tracking enabled for application main thread");
+#if FURI_DEBUG
+    } else if(!furi_string_cmp(args, "tree")) {
+        furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeTree);
+        printf("Heap tracking enabled for application main and child threads");
+    } else if(!furi_string_cmp(args, "all")) {
+        furi_hal_rtc_set_heap_track_mode(FuriHalRtcHeapTrackModeAll);
+        printf("Heap tracking enabled for all threads");
+#endif
+    } else {
+        cli_print_usage("sysctl heap_track", "<none|main|tree|all>", furi_string_get_cstr(args));
+    }
+}
+
+void cli_command_sysctl_print_usage() {
+    printf("Usage:\r\n");
+    printf("sysctl <cmd> <args>\r\n");
+    printf("Cmd list:\r\n");
+
+    printf("\tdebug <0|1>\t - Enable or disable system debug\r\n");
+#if FURI_DEBUG
+    printf("\theap_track <none|main|tree|all>\t - Set heap allocation tracking mode\r\n");
+#else
+    printf("\theap_track <none|main>\t - Set heap allocation tracking mode\r\n");
+#endif
+}
+
+void cli_command_sysctl(Cli* cli, FuriString* args, void* context) {
+    FuriString* cmd;
+    cmd = furi_string_alloc();
+
+    do {
+        if(!args_read_string_and_trim(args, cmd)) {
+            cli_command_sysctl_print_usage();
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "debug") == 0) {
+            cli_command_sysctl_debug(cli, args, context);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "heap_track") == 0) {
+            cli_command_sysctl_heap_track(cli, args, context);
+            break;
+        }
+
+        cli_command_sysctl_print_usage();
+    } while(false);
+
+    furi_string_free(cmd);
+}
+
 void cli_command_vibro(Cli* cli, FuriString* args, void* context) {
     UNUSED(cli);
     UNUSED(context);
@@ -205,22 +303,6 @@ void cli_command_vibro(Cli* cli, FuriString* args, void* context) {
         furi_record_close(RECORD_NOTIFICATION);
     } else {
         cli_print_usage("vibro", "<1|0>", furi_string_get_cstr(args));
-    }
-}
-
-void cli_command_debug(Cli* cli, FuriString* args, void* context) {
-    UNUSED(cli);
-    UNUSED(context);
-    if(!furi_string_cmp(args, "0")) {
-        furi_hal_rtc_reset_flag(FuriHalRtcFlagDebug);
-        loader_update_menu();
-        printf("Debug disabled.");
-    } else if(!furi_string_cmp(args, "1")) {
-        furi_hal_rtc_set_flag(FuriHalRtcFlagDebug);
-        loader_update_menu();
-        printf("Debug enabled.");
-    } else {
-        cli_print_usage("debug", "<1|0>", furi_string_get_cstr(args));
     }
 }
 
@@ -288,11 +370,18 @@ void cli_command_ps(Cli* cli, FuriString* args, void* context) {
     FuriThreadId threads_ids[threads_num_max];
     uint8_t thread_num = furi_thread_enumerate(threads_ids, threads_num_max);
     printf(
-        "%-20s %-14s %-8s %-8s %s\r\n", "Name", "Stack start", "Heap", "Stack", "Stack min free");
+        "%-20s %-20s %-14s %-8s %-8s %s\r\n",
+        "AppID",
+        "Name",
+        "Stack start",
+        "Heap",
+        "Stack",
+        "Stack min free");
     for(uint8_t i = 0; i < thread_num; i++) {
         TaskControlBlock* tcb = (TaskControlBlock*)threads_ids[i];
         printf(
-            "%-20s 0x%-12lx %-8d %-8ld %-8ld\r\n",
+            "%-20s %-20s 0x%-12lx %-8zu %-8lu %-8lu\r\n",
+            furi_thread_get_appid(threads_ids[i]),
             furi_thread_get_name(threads_ids[i]),
             (uint32_t)tcb->pxStack,
             memmgr_heap_get_thread_memory(threads_ids[i]),
@@ -307,13 +396,13 @@ void cli_command_free(Cli* cli, FuriString* args, void* context) {
     UNUSED(args);
     UNUSED(context);
 
-    printf("Free heap size: %d\r\n", memmgr_get_free_heap());
-    printf("Total heap size: %d\r\n", memmgr_get_total_heap());
-    printf("Minimum heap size: %d\r\n", memmgr_get_minimum_free_heap());
-    printf("Maximum heap block: %d\r\n", memmgr_heap_get_max_free_block());
+    printf("Free heap size: %zu\r\n", memmgr_get_free_heap());
+    printf("Total heap size: %zu\r\n", memmgr_get_total_heap());
+    printf("Minimum heap size: %zu\r\n", memmgr_get_minimum_free_heap());
+    printf("Maximum heap block: %zu\r\n", memmgr_heap_get_max_free_block());
 
-    printf("Pool free: %d\r\n", memmgr_pool_get_free());
-    printf("Maximum pool block: %d\r\n", memmgr_pool_get_max_block());
+    printf("Pool free: %zu\r\n", memmgr_pool_get_free());
+    printf("Maximum pool block: %zu\r\n", memmgr_pool_get_max_block());
 }
 
 void cli_command_free_blocks(Cli* cli, FuriString* args, void* context) {
@@ -348,15 +437,16 @@ void cli_command_i2c(Cli* cli, FuriString* args, void* context) {
 }
 
 void cli_commands_init(Cli* cli) {
-    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
-    cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_device_info, NULL);
+    cli_add_command(cli, "!", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
+    cli_add_command(cli, "info", CliCommandFlagParallelSafe, cli_command_info, NULL);
+    cli_add_command(cli, "device_info", CliCommandFlagParallelSafe, cli_command_info, (void*)true);
 
     cli_add_command(cli, "?", CliCommandFlagParallelSafe, cli_command_help, NULL);
     cli_add_command(cli, "help", CliCommandFlagParallelSafe, cli_command_help, NULL);
 
     cli_add_command(cli, "date", CliCommandFlagParallelSafe, cli_command_date, NULL);
     cli_add_command(cli, "log", CliCommandFlagParallelSafe, cli_command_log, NULL);
-    cli_add_command(cli, "debug", CliCommandFlagDefault, cli_command_debug, NULL);
+    cli_add_command(cli, "sysctl", CliCommandFlagDefault, cli_command_sysctl, NULL);
     cli_add_command(cli, "ps", CliCommandFlagParallelSafe, cli_command_ps, NULL);
     cli_add_command(cli, "free", CliCommandFlagParallelSafe, cli_command_free, NULL);
     cli_add_command(cli, "free_blocks", CliCommandFlagParallelSafe, cli_command_free_blocks, NULL);

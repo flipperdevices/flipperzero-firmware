@@ -69,7 +69,7 @@ View* animation_manager_get_animation_view(AnimationManager* animation_manager);
 void animation_manager_set_context(AnimationManager* animation_manager, void* context);
 
 /**
- * Set callback for Animation Manager for defered calls
+ * Set callback for Animation Manager for deferred calls
  * for animation_manager_new_idle_process().
  * Animation Manager doesn't have it's own thread, so main thread gives
  * callbacks to A.M. to call when it should perform some inner manipulations.
@@ -96,7 +96,7 @@ void animation_manager_set_new_idle_callback(
 void animation_manager_new_idle_process(AnimationManager* animation_manager);
 
 /**
- * Set callback for Animation Manager for defered calls
+ * Set callback for Animation Manager for deferred calls
  * for animation_manager_check_blocking_process().
  *
  * @animation_manager   instance
@@ -115,7 +115,7 @@ void animation_manager_set_check_callback(
 void animation_manager_check_blocking_process(AnimationManager* animation_manager);
 
 /**
- * Set callback for Animation Manager for defered calls
+ * Set callback for Animation Manager for deferred calls
  * for animation_manager_interact_process().
  *
  * @animation_manager   instance
@@ -157,3 +157,11 @@ void animation_manager_unload_and_stall_animation(AnimationManager* animation_ma
  * @animation_manager   instance
  */
 void animation_manager_load_and_continue_animation(AnimationManager* animation_manager);
+
+/**
+ * Enable or disable dummy mode backgrounds of animation manager.
+ *
+ * @animation_manager    instance
+ * @enabled              bool
+ */
+void animation_manager_set_dummy_mode_state(AnimationManager* animation_manager, bool enabled);

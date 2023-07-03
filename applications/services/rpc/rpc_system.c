@@ -30,7 +30,6 @@ static void rpc_system_system_ping_process(const PB_Main* request, void* context
     }
 
     PB_Main response = PB_Main_init_default;
-    response.has_next = false;
     response.command_status = PB_CommandStatus_OK;
     response.command_id = request->command_id;
     response.which_content = PB_Main_system_ping_response_tag;
@@ -109,7 +108,7 @@ static void rpc_system_system_device_info_process(const PB_Main* request, void* 
         .session = session,
         .response = response,
     };
-    furi_hal_info_get(rpc_system_system_device_info_callback, &device_info_context);
+    furi_hal_info_get(rpc_system_system_device_info_callback, '_', &device_info_context);
 
     free(response);
 }
@@ -266,7 +265,7 @@ static void rpc_system_system_get_power_info_process(const PB_Main* request, voi
         .session = session,
         .response = response,
     };
-    furi_hal_power_info_get(rpc_system_system_power_info_callback, &power_info_context);
+    furi_hal_power_info_get(rpc_system_system_power_info_callback, '_', &power_info_context);
 
     free(response);
 }

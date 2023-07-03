@@ -30,6 +30,8 @@ FuriMutex* furi_mutex_alloc(FuriMutexType type) {
 
 void furi_mutex_free(FuriMutex* instance) {
     furi_assert(!FURI_IS_IRQ_MODE());
+    furi_assert(instance);
+
     vSemaphoreDelete((SemaphoreHandle_t)((uint32_t)instance & ~1U));
 }
 
@@ -45,7 +47,7 @@ FuriStatus furi_mutex_acquire(FuriMutex* instance, uint32_t timeout) {
 
     stat = FuriStatusOk;
 
-    if(FURI_IS_IRQ_MODE() != 0U) {
+    if(FURI_IS_IRQ_MODE()) {
         stat = FuriStatusErrorISR;
     } else if(hMutex == NULL) {
         stat = FuriStatusErrorParameter;
@@ -85,7 +87,7 @@ FuriStatus furi_mutex_release(FuriMutex* instance) {
 
     stat = FuriStatusOk;
 
-    if(FURI_IS_IRQ_MODE() != 0U) {
+    if(FURI_IS_IRQ_MODE()) {
         stat = FuriStatusErrorISR;
     } else if(hMutex == NULL) {
         stat = FuriStatusErrorParameter;
@@ -111,7 +113,7 @@ FuriThreadId furi_mutex_get_owner(FuriMutex* instance) {
 
     hMutex = (SemaphoreHandle_t)((uint32_t)instance & ~1U);
 
-    if((FURI_IS_IRQ_MODE() != 0U) || (hMutex == NULL)) {
+    if((FURI_IS_IRQ_MODE()) || (hMutex == NULL)) {
         owner = 0;
     } else {
         owner = (FuriThreadId)xSemaphoreGetMutexHolder(hMutex);
