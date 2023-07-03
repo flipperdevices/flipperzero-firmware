@@ -25,6 +25,10 @@ static NfcCustomEvent
     return custom_event;
 }
 
+static void nfc_protocol_support_build_scene_read_menu_mf_desfire(NfcApp* instance) {
+    UNUSED(instance);
+}
+
 static void nfc_protocol_support_build_scene_saved_menu_mf_desfire(NfcApp* instance) {
     UNUSED(instance);
 }
@@ -39,9 +43,9 @@ static bool nfc_protocol_support_handle_scene_info_mf_desfire(NfcApp* instance, 
 }
 
 static bool
-    nfc_protocol_support_handle_scene_read_success_mf_desfire(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneMfDesfireMenu);
+    nfc_protocol_support_handle_scene_read_menu_mf_desfire(NfcApp* instance, uint32_t event) {
+    if(event == SubmenuIndexCommonEmulate) {
+        scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
         return true;
     }
 
@@ -50,13 +54,12 @@ static bool
 
 static bool
     nfc_protocol_support_handle_scene_saved_menu_mf_desfire(NfcApp* instance, uint32_t event) {
-    switch(event) {
-    case SubmenuIndexCommonEmulate:
+    if(event == SubmenuIndexCommonEmulate) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
         return true;
-    default:
-        return false;
     }
+
+    return false;
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
@@ -67,13 +70,15 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
     .handle_poller =
         (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_mf_desfire,
 
+    .build_scene_read_menu =
+        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_read_menu_mf_desfire,
     .build_scene_saved_menu =
         (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_mf_desfire,
 
     .handle_scene_info =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_mf_desfire,
-    .handle_scene_read_success =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_success_mf_desfire,
+    .handle_scene_read_menu =
+        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_menu_mf_desfire,
     .handle_scene_saved_menu =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_mf_desfire,
 };

@@ -7,7 +7,8 @@
 #include "../../../nfc_app_i.h"
 
 enum {
-    SubmenuIndexUnlockByReader = SubmenuIndexCommonMax,
+    SubmenuIndexUnlock = SubmenuIndexCommonMax,
+    SubmenuIndexUnlockByReader,
     SubmenuIndexUnlockByPassword,
 };
 
@@ -59,6 +60,22 @@ static NfcCustomEvent nfc_protocol_support_handle_poller_mf_ultralight(
     return custom_event;
 }
 
+static void nfc_protocol_support_build_scene_read_menu_mf_ultralight(NfcApp* instance) {
+    Submenu* submenu = instance->submenu;
+
+    const MfUltralightData* data =
+        nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
+
+    if(!mf_ultralight_is_all_data_read(data)) {
+        submenu_add_item(
+            submenu,
+            "Unlock",
+            SubmenuIndexUnlock,
+            nfc_protocol_support_common_submenu_callback,
+            instance);
+    }
+}
+
 static void nfc_protocol_support_build_scene_saved_menu_mf_ultralight(NfcApp* instance) {
     Submenu* submenu = instance->submenu;
     const MfUltralightData* data =
@@ -92,13 +109,17 @@ static bool
 }
 
 static bool
-    nfc_protocol_support_handle_scene_read_success_mf_ultralight(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightMenu);
+    nfc_protocol_support_handle_scene_read_menu_mf_ultralight(NfcApp* instance, uint32_t event) {
+    switch(event) {
+    case SubmenuIndexCommonEmulate:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightEmulate);
         return true;
+    case SubmenuIndexUnlock:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
+        return true;
+    default:
+        return false;
     }
-
-    return false;
 }
 
 static bool
@@ -126,13 +147,15 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
     .handle_poller =
         (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_mf_ultralight,
 
+    .build_scene_read_menu =
+        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_read_menu_mf_ultralight,
     .build_scene_saved_menu =
         (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_mf_ultralight,
 
     .handle_scene_info =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_mf_ultralight,
-    .handle_scene_read_success = (NfcProtocolSupportSceneHandler)
-        nfc_protocol_support_handle_scene_read_success_mf_ultralight,
+    .handle_scene_read_menu =
+        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_menu_mf_ultralight,
     .handle_scene_saved_menu =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_mf_ultralight,
 };

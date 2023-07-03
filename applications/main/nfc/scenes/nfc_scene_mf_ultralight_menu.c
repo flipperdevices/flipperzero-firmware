@@ -39,8 +39,8 @@ void nfc_scene_mf_ultralight_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Info", SubmenuIndexInfo, nfc_scene_mf_ultralight_menu_submenu_callback, nfc);
 
-    submenu_set_selected_item(
-        nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightMenu));
+    // submenu_set_selected_item(
+    //     nfc->submenu, scene_manager_get_scene_state(nfc->scene_manager, NfcSceneMfUltralightMenu));
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewMenu);
 }
@@ -68,7 +68,7 @@ bool nfc_scene_mf_ultralight_menu_on_event(void* context, SceneManagerEvent even
             scene_manager_next_scene(nfc->scene_manager, NfcSceneInfo);
             consumed = true;
         }
-        scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfUltralightMenu, event.event);
+        // scene_manager_set_scene_state(nfc->scene_manager, NfcSceneMfUltralightMenu, event.event);
 
     } else if(event.type == SceneManagerEventTypeBack) {
         consumed = scene_manager_previous_scene(nfc->scene_manager);

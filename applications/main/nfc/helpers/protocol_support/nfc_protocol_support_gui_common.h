@@ -6,6 +6,7 @@ enum {
     SubmenuIndexCommonEmulate,
     SubmenuIndexCommonEdit,
     SubmenuIndexCommonInfo,
+    SubmenuIndexCommonSave,
     SubmenuIndexCommonRename,
     SubmenuIndexCommonDelete,
     SubmenuIndexCommonMax,

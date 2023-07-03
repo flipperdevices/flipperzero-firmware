@@ -29,6 +29,20 @@ static NfcCustomEvent
     return custom_event;
 }
 
+static void nfc_protocol_support_build_scene_read_menu_mf_classic(NfcApp* instance) {
+    Submenu* submenu = instance->submenu;
+    const MfClassicData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
+
+    if(!mf_classic_is_card_read(data)) {
+        submenu_add_item(
+            submenu,
+            "Detect Reader",
+            SubmenuIndexDetectReader,
+            nfc_protocol_support_common_submenu_callback,
+            instance);
+    }
+}
+
 static void nfc_protocol_support_build_scene_saved_menu_mf_classic(NfcApp* instance) {
     Submenu* submenu = instance->submenu;
     const MfClassicData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
@@ -65,13 +79,18 @@ static bool nfc_protocol_support_handle_scene_info_mf_classic(NfcApp* instance, 
 }
 
 static bool
-    nfc_protocol_support_handle_scene_read_success_mf_classic(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicMenu);
+    nfc_protocol_support_handle_scene_read_menu_mf_classic(NfcApp* instance, uint32_t event) {
+    switch(event) {
+    case SubmenuIndexCommonEmulate:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
         return true;
+    case SubmenuIndexDetectReader:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        dolphin_deed(DolphinDeedNfcDetectReader);
+        return true;
+    default:
+        return false;
     }
-
-    return false;
 }
 
 static bool
@@ -102,13 +121,15 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
     .handle_poller =
         (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_mf_classic,
 
+    .build_scene_read_menu =
+        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_read_menu_mf_classic,
     .build_scene_saved_menu =
         (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_mf_classic,
 
     .handle_scene_info =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_mf_classic,
-    .handle_scene_read_success =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_success_mf_classic,
+    .handle_scene_read_menu =
+        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_menu_mf_classic,
     .handle_scene_saved_menu =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_mf_classic,
 };

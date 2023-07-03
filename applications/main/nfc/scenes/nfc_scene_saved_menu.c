@@ -1,4 +1,5 @@
 #include "../nfc_app_i.h"
+
 #include "../helpers/protocol_support/nfc_protocol_support.h"
 
 void nfc_scene_saved_menu_on_enter(void* context) {
@@ -19,7 +20,6 @@ bool nfc_scene_saved_menu_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneSavedMenu, event.event);
-        // TODO: Dolphin deed nfc emulate
         consumed = nfc_protocol_support_handle_scene_saved_menu(nfc, event.event);
     }
 

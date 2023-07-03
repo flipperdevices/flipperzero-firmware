@@ -61,6 +61,46 @@ void nfc_protocol_support_build_scene_info(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
+void nfc_protocol_support_build_scene_read_menu(NfcApp* instance) {
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+
+    Submenu* submenu = instance->submenu;
+
+    submenu_add_item(
+        submenu,
+        "Save",
+        SubmenuIndexCommonSave,
+        nfc_protocol_support_common_submenu_callback,
+        instance);
+
+    if(nfc_protocol_support_has_feature(protocol, NfcProtocolFeatureEmulateUid)) {
+        submenu_add_item(
+            submenu,
+            "Emulate UID",
+            SubmenuIndexCommonEmulate,
+            nfc_protocol_support_common_submenu_callback,
+            instance);
+    }
+
+    if(nfc_protocol_support_has_feature(protocol, NfcProtocolFeatureEmulateFull)) {
+        submenu_add_item(
+            submenu,
+            "Emulate",
+            SubmenuIndexCommonEmulate,
+            nfc_protocol_support_common_submenu_callback,
+            instance);
+    }
+
+    nfc_protocol_support[protocol]->build_scene_read_menu(instance);
+
+    submenu_add_item(
+        submenu,
+        "Info",
+        SubmenuIndexCommonInfo,
+        nfc_protocol_support_common_submenu_callback,
+        instance);
+}
+
 void nfc_protocol_support_build_scene_read_success(NfcApp* instance) {
     Widget* widget = instance->widget;
 
@@ -142,13 +182,34 @@ bool nfc_protocol_support_handle_scene_info(NfcApp* instance, uint32_t event) {
     return nfc_protocol_support[protocol]->handle_scene_info(instance, event);
 }
 
+bool nfc_protocol_support_handle_scene_read_menu(NfcApp* instance, uint32_t event) {
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+
+    switch(event) {
+    case SubmenuIndexCommonSave:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        return true;
+    case SubmenuIndexCommonInfo:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneInfo);
+        return true;
+    case SubmenuIndexCommonEmulate:
+        dolphin_deed(DolphinDeedNfcEmulate);
+        // FALLTHRU
+    default:
+        return nfc_protocol_support[protocol]->handle_scene_read_menu(instance, event);
+    }
+}
+
 bool nfc_protocol_support_handle_scene_read_success(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeLeft) {
+    switch(event) {
+    case GuiButtonTypeLeft:
         scene_manager_next_scene(instance->scene_manager, NfcSceneRetryConfirm);
         return true;
-    } else {
-        const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
-        return nfc_protocol_support[protocol]->handle_scene_read_success(instance, event);
+    case GuiButtonTypeRight:
+        scene_manager_next_scene(instance->scene_manager, NfcSceneReadMenu);
+        return true;
+    default:
+        return false;
     }
 }
 
@@ -167,6 +228,13 @@ bool nfc_protocol_support_handle_scene_saved_menu(NfcApp* instance, uint32_t eve
     case SubmenuIndexCommonDelete:
         scene_manager_next_scene(instance->scene_manager, NfcSceneDelete);
         return true;
+    case SubmenuIndexCommonEmulate:
+        if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneSetType)) {
+            dolphin_deed(DolphinDeedNfcAddEmulate);
+        } else {
+            dolphin_deed(DolphinDeedNfcEmulate);
+        }
+        // FALLTHRU
     default:
         return nfc_protocol_support[protocol]->handle_scene_saved_menu(instance, event);
     }

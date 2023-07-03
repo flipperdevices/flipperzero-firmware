@@ -26,6 +26,10 @@ static NfcCustomEvent
     return custom_event;
 }
 
+static void nfc_protocol_support_build_scene_read_menu_iso14443_4a(NfcApp* instance) {
+    UNUSED(instance);
+}
+
 static void nfc_protocol_support_build_scene_saved_menu_iso14443_4a(NfcApp* instance) {
     UNUSED(instance);
 }
@@ -40,9 +44,9 @@ static bool nfc_protocol_support_handle_scene_info_iso14443_4a(NfcApp* instance,
 }
 
 static bool
-    nfc_protocol_support_handle_scene_read_success_iso14443_4a(NfcApp* instance, uint32_t event) {
-    if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaMenu);
+    nfc_protocol_support_handle_scene_read_menu_iso14443_4a(NfcApp* instance, uint32_t event) {
+    if(event == SubmenuIndexCommonEmulate) {
+        scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
         return true;
     }
 
@@ -62,13 +66,15 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_4a = {
     .handle_poller =
         (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_iso14443_4a,
 
+    .build_scene_read_menu =
+        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_read_menu_iso14443_4a,
     .build_scene_saved_menu =
         (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_iso14443_4a,
 
     .handle_scene_info =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_iso14443_4a,
-    .handle_scene_read_success =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_success_iso14443_4a,
+    .handle_scene_read_menu =
+        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_menu_iso14443_4a,
     .handle_scene_saved_menu =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_iso14443_4a,
 };

@@ -55,7 +55,7 @@ bool nfc_scene_generate_info_on_event(void* context, SceneManagerEvent event) {
         if(event.event == GuiButtonTypeRight) {
             // Switch either to NfcSceneMfClassicMenu or NfcSceneMfUltralightMenu
             if(nfc_device_get_protocol(nfc->nfc_device) == NfcProtocolMfUltralight) {
-                scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightMenu);
+                // scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightMenu);
             } else {
                 // TODO add classic
             }
