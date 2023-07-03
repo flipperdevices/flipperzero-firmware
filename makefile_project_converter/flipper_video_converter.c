@@ -10,14 +10,6 @@
 #define BUNDLE_SIGNATURE "BND!VID"
 #define VERSION 1
 
-// USER SETTINGS:
-
-//#define FOLDER_PATH "C:/Users/Georg/Desktop/bad_apple_flipper"
-//#define SAMPLE_RATE 44100
-//#define FPS 30
-//#define HEIGHT 64
-//#define WIDTH 96 /*width of your video, determined by ffmpeg. Here it is for 4:3 aspect ratio*/
-
 uint32_t count_files(const char* path)
 {
 	uint32_t file_count = 0;
