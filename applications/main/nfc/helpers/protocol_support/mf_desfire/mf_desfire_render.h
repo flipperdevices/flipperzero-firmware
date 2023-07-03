@@ -2,8 +2,7 @@
 
 #include <nfc/protocols/mf_desfire/mf_desfire.h>
 
-// TODO: Move NfcProtocolFormatType to another file and rename it
-#include "../nfc_protocol_support_common.h"
+#include "../nfc_protocol_support_render_common.h"
 
 void nfc_render_mf_desfire_info(
     const MfDesfireData* data,
