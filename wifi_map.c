@@ -15,9 +15,10 @@
 #include <gui/modules/dialog_ex.h>
 #include <locale/locale.h>
 
-#define LINES_ON_SCREEN 20
-#define COLUMNS_ON_SCREEN 21
+#define MAX_AP_LIST 20
 #define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
+
+const char *apc = "#@!<>$|^&*()-=+{}[]";
 
 typedef struct {
     Gui* gui;
@@ -31,13 +32,19 @@ typedef struct {
 
 typedef struct WifiMapModel WifiMapModel;
 
-struct WifiMapModel {
+typedef struct {
         FuriString* line;
+} StringList;
+
+struct WifiMapModel {
+        StringList* lines[MAX_AP_LIST];
         int lnrdy;
+        int rdy;
+        int cntr;
 };
 
 typedef enum {
-    WorkerEventReserved = (1 << 0), // Reserved for StreamBuffer internal event
+    WorkerEventReserved = (1 << 0), 
     WorkerEventStop = (1 << 1),
     WorkerEventRx = (1 << 2),
 } WorkerEventFlags;
@@ -78,47 +85,51 @@ int32_t close_file(File *file) {
 
 static void retrieve_ap_ssid_distance(const char *data, char *apssid, char *dst)
 {
-        for (size_t i = 0; i < 8; i++) {
+        for (size_t i = 0; i < 2; i++) {
                 apssid[i] = data[i];
-                FURI_LOG_D(TAG, "apssid %c", apssid[i]);
         }
+        int cntr = 0;
         for (size_t i = 9; i < strlen(data); i++) {
-               if (data[i] != ';') {
-                       dst[i] = data[i];
-                    FURI_LOG_D(TAG, "dst %c", dst[i]);
-                } else {
+                if (data[i] == '.')
                     break;
-                }
+                else
+                    dst[cntr] = data[i];
+            cntr++;
         }
 }
+
+static void retrieve_character_for_ap(char *ap, int index) {
+    ap[0] = apc[index];
+} 
 
 static void uart_echo_view_draw_callback(Canvas* canvas, void* _model) 
 {
         WifiMapModel* model = _model;
-
-        // Prepare canvas
-        // canvas_clear(canvas);
-        // canvas_set_color(canvas, ColorBlack);
-        // canvas_set_font(canvas, FontKeyboard);
-        canvas_draw_dot(canvas, 50, 50);
-
-
-        if (model->lnrdy) {
-            const char *line = furi_string_get_cstr(model->line);
-            char apssid[8], dst[6];
+        canvas_clear(canvas);
+        canvas_set_color(canvas, ColorBlack);
+        canvas_set_font(canvas, FontSecondary);
+        for (size_t i = 0; i < MAX_AP_LIST; i++) {
+            const char *line = furi_string_get_cstr(model->lines[i]->line);
+            char apssid[2], dst[4];
+            char ap[1];
+            retrieve_character_for_ap(ap, i);
             retrieve_ap_ssid_distance(line, apssid, dst);
-            canvas_draw_str(canvas, 10, 10, line);
-            canvas_draw_str(canvas, 10, 20, apssid);
-            canvas_draw_str(canvas, 10, 30, dst);
-            canvas_draw_str(canvas, 10, 40, line);
-            canvas_draw_str(canvas, 10, 50, line);
-            FURI_LOG_D(TAG, "tha line: %s", line);
+            if (strlen(line) > 0)
+                // canvas_draw_str(canvas, (uint8_t)atoi(dst), (i+2)*6, apssid);
+                canvas_draw_str(canvas, (uint8_t)atoi(dst), (i+2)*5, ap);
+            else
+                canvas_draw_str(canvas, (uint8_t)atoi(dst), (i+2)*5, ap);
             FURI_LOG_D(TAG, "tha ssid: %s", apssid);
             FURI_LOG_D(TAG, "tha dst: %s", dst);
-            canvas_draw_dot(canvas, 20, 20);
-            canvas_draw_dot(canvas, 30, 30);
-            model->lnrdy = 0;
-            furi_string_reset(model->line);
+
+        }
+        
+        if (model->rdy) {
+            for (size_t i = 0; i < MAX_AP_LIST; i++) {
+                furi_string_reset(model->lines[i]->line);
+            }
+            model->rdy = 0;
+            model->cntr = 0;
         }
 }
 
@@ -145,15 +156,16 @@ static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 
 static void uart_push_to_list(WifiMapModel* model, const char data , WiFiMapApp* app) {
         write_to_file((char) data,  app->file);
-        if (!model->lnrdy) {
-            furi_string_push_back(model->line, data);
-
-        } 
-        // FURI_LOG_D(TAG,"that line was: %s", furi_string_get_cstr(model->line));
-        if (data == '\n') {
-            // FURI_LOG_D(TAG, "R E S E T /e");
-            model->lnrdy = 1;
-            // furi_string_reset(model->line);
+        if (!model->rdy) {
+                if (data != '\n') {
+                    FURI_LOG_D(TAG,"The counter: %d", model->cntr);
+                    furi_string_push_back(model->lines[model->cntr]->line, data);
+                } else {
+                    model->cntr++;
+                }
+                if (model->cntr == MAX_AP_LIST) {
+                    model->rdy = 1;
+                } 
         } 
 }
 
@@ -219,11 +231,16 @@ static WiFiMapApp* wifi_map_app_alloc() {
         app->view,
         WifiMapModel* model,
         {
-                model->line = furi_string_alloc();
+                for (size_t i = 0; i < MAX_AP_LIST; i++) {
+                    model->lines[i] = malloc(sizeof(StringList));
+                    model->lines[i]->line = furi_string_alloc();
+                }
                 model->lnrdy = 0;
+                model->rdy = 0;
+                model->cntr = 0;
         },
         true);
-
+    
     view_set_previous_callback(app->view, uart_echo_exit);
     view_dispatcher_add_view(app->view_dispatcher, 0, app->view);
     view_dispatcher_switch_to_view(app->view_dispatcher, 0);
@@ -232,7 +249,7 @@ static WiFiMapApp* wifi_map_app_alloc() {
     furi_thread_start(app->worker_thread);
 
     // Enable uart listener
-    // furi_hal_console_disable();
+    furi_hal_console_disable();
     furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_echo_on_irq_cb, app);
 
@@ -242,7 +259,7 @@ static WiFiMapApp* wifi_map_app_alloc() {
 static void wifi_map_app_free(WiFiMapApp* app) {
     furi_assert(app);
 
-    furi_hal_console_enable(); // this will also clear IRQ callback so thread is no longer referenced
+    furi_hal_console_enable(); 
 
     furi_thread_flags_set(furi_thread_get_id(app->worker_thread), WorkerEventStop);
     furi_thread_join(app->worker_thread);
@@ -255,10 +272,10 @@ static void wifi_map_app_free(WiFiMapApp* app) {
         app->view,
         WifiMapModel * model,
         {
-            // for (size_t i = 0; i < LINES_ON_SCREEN; i++) {
-                furi_string_free(model->line);
-                // free(model->list[i]);
-            // }
+            for (size_t i = 0; i < MAX_AP_LIST; i++) {
+                free(model->lines[i]);
+            }
+            free(model);
         },
         true);
     view_free(app->view);
@@ -280,17 +297,9 @@ static void wifi_map_app_free(WiFiMapApp* app) {
 int32_t wifi_map_app(void *p){
 	UNUSED(p);
 	FURI_LOG_I(TAG, "wifi_map_app starting...");
-        FURI_LOG_D(TAG, "foobarLOL");
-        FURI_LOG_I(TAG, "foobarLOL");
 	    WiFiMapApp* app = wifi_map_app_alloc();
         FuriHalRtcDateTime* rtc = malloc(sizeof(FuriHalRtcDateTime));
         furi_hal_rtc_get_datetime(rtc);
-        FURI_LOG_D(TAG, "h: %d", rtc->hour);
-        FURI_LOG_D(TAG, "m: %d", rtc->minute);
-        FURI_LOG_D(TAG, "s: %d", rtc->second);
-        FURI_LOG_D(TAG, "d: %d", rtc->day);
-        FURI_LOG_D(TAG, "o: %d", rtc->month);
-        FURI_LOG_D(TAG, "y: %d", rtc->year);
         FuriString *datetime = furi_string_alloc();
         furi_string_printf(datetime, "##### %d-%d-%d_%d:%d:%d #####\n", rtc->day, rtc->month, rtc->year, rtc->hour, rtc->minute, rtc->second);
         if (!storage_file_write(app->file, furi_string_get_cstr(datetime), furi_string_size(datetime))) {
