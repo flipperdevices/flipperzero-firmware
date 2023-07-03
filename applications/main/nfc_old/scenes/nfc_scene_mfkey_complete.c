@@ -1,14 +1,14 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 
 void nfc_scene_mfkey_complete_callback(GuiButtonType result, InputType type, void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
     }
 }
 
 void nfc_scene_mfkey_complete_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     widget_add_string_element(nfc->widget, 64, 0, AlignCenter, AlignTop, FontPrimary, "Complete!");
     widget_add_string_multiline_element(
@@ -26,7 +26,7 @@ void nfc_scene_mfkey_complete_on_enter(void* context) {
 }
 
 bool nfc_scene_mfkey_complete_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -43,7 +43,7 @@ bool nfc_scene_mfkey_complete_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_mfkey_complete_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     widget_reset(nfc->widget);
 }

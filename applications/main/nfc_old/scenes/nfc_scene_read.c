@@ -1,4 +1,4 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 #include <dolphin/dolphin.h>
 
 typedef enum {
@@ -8,7 +8,7 @@ typedef enum {
 } NfcSceneReadState;
 
 bool nfc_scene_read_worker_callback(NfcWorkerEvent event, void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
     if(event == NfcWorkerEventReadMfClassicLoadKeyCache) {
         consumed = nfc_device_load_key_cache(nfc->dev);
@@ -19,7 +19,7 @@ bool nfc_scene_read_worker_callback(NfcWorkerEvent event, void* context) {
     return consumed;
 }
 
-void nfc_scene_read_set_state(NfcApp* nfc, NfcSceneReadState state) {
+void nfc_scene_read_set_state(Nfc* nfc, NfcSceneReadState state) {
     uint32_t curr_state = scene_manager_get_scene_state(nfc->scene_manager, NfcSceneRead);
     if(curr_state != state) {
         if(state == NfcSceneReadStateDetecting) {
@@ -38,7 +38,7 @@ void nfc_scene_read_set_state(NfcApp* nfc, NfcSceneReadState state) {
 }
 
 void nfc_scene_read_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     nfc_device_clear(nfc->dev);
     // Setup view
@@ -52,7 +52,7 @@ void nfc_scene_read_on_enter(void* context) {
 }
 
 bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -90,11 +90,6 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(nfc->scene_manager, NfcSceneMfDesfireReadSuccess);
             dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
-        } else if(event.event == NfcWorkerEventReadBankCard) {
-            notification_message(nfc->notifications, &sequence_success);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmvReadSuccess);
-            DOLPHIN_DEED(DolphinDeedNfcReadSuccess);
-            consumed = true;
         } else if(event.event == NfcWorkerEventReadMfClassicDictAttackRequired) {
             if(mf_classic_dict_check_presence(MfClassicDictTypeSystem)) {
                 scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicDictAttack);
@@ -116,7 +111,7 @@ bool nfc_scene_read_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_read_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     // Stop worker
     nfc_worker_stop(nfc->worker);

@@ -1,11 +1,11 @@
-#include "../nfc_app_i.h"
+#include "../nfc_i.h"
 
 void nfc_scene_mf_classic_read_success_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context) {
     furi_assert(context);
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
@@ -13,7 +13,7 @@ void nfc_scene_mf_classic_read_success_widget_callback(
 }
 
 void nfc_scene_mf_classic_read_success_on_enter(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     NfcDeviceData* dev_data = &nfc->dev->dev_data;
     MfClassicData* mf_data = &dev_data->mf_classic_data;
 
@@ -33,11 +33,11 @@ void nfc_scene_mf_classic_read_success_on_enter(void* context) {
         for(size_t i = 0; i < dev_data->nfc_data.uid_len; i++) {
             furi_string_cat_printf(temp_str, " %02X", dev_data->nfc_data.uid[i]);
         }
-        uint8_t sectors_total = mifare_classic_get_total_sectors_num(mf_data->type);
+        uint8_t sectors_total = mf_classic_get_total_sectors_num(mf_data->type);
         uint8_t keys_total = sectors_total * 2;
         uint8_t keys_found = 0;
         uint8_t sectors_read = 0;
-        mifare_classic_get_read_sectors_and_keys(mf_data, &sectors_read, &keys_found);
+        mf_classic_get_read_sectors_and_keys(mf_data, &sectors_read, &keys_found);
         furi_string_cat_printf(temp_str, "\nKeys Found: %d/%d", keys_found, keys_total);
         furi_string_cat_printf(temp_str, "\nSectors Read: %d/%d", sectors_read, sectors_total);
     }
@@ -51,7 +51,7 @@ void nfc_scene_mf_classic_read_success_on_enter(void* context) {
 }
 
 bool nfc_scene_mf_classic_read_success_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -73,7 +73,7 @@ bool nfc_scene_mf_classic_read_success_on_event(void* context, SceneManagerEvent
 }
 
 void nfc_scene_mf_classic_read_success_on_exit(void* context) {
-    NfcApp* nfc = context;
+    Nfc* nfc = context;
 
     notification_message_block(nfc->notifications, &sequence_reset_green);
 
