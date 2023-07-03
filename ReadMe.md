@@ -67,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/) README updates only.
 - Updated: [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) README updates only.
 - Updated: [WiFi (Marauder) v0.5.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) README updates only.
+- [Make the settings more delicate #689 (By colyrain)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/689)
 
 <a name="release">
 
