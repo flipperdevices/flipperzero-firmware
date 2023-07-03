@@ -118,13 +118,14 @@ Output **CSV** files are stored at the root of SD card. Date & time are set in t
 
 Data sample :
 
-epoch,cps
-0,3587
-1,3604
-2,2943
-3,1771
-4,1559
-5,998
+epoch  | cps
+------------- | -------------
+0  | 3587
+1  | 3604
+2  | 3583
+3  | 3547
+4  | 3598
+
 
 ## User gallery
 
