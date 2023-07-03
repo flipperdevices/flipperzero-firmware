@@ -1,6 +1,7 @@
 #pragma once
 
 typedef struct EthWorker EthWorker;
+typedef struct EthViewProcess EthViewProcess;
 
 typedef enum {
     EthWorkerStateNotInited = 0,
@@ -52,3 +53,4 @@ void eth_worker_start(
 void eth_worker_stop(EthWorker* eth_worker);
 void eth_worker_dhcp(EthWorker* eth_worker);
 void eth_worker_w5500(EthWorker* eth_worker);
+void eth_worker_init_process(EthWorker* eth_worker);

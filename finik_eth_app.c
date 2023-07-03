@@ -8,6 +8,8 @@
 #include <notification/notification_messages.h>
 
 #include "eth_worker.h"
+#include "eth_worker_i.h"
+#include "eth_view_process.h"
 
 #define TAG "FinikEthApp"
 
@@ -71,6 +73,7 @@ static void finik_eth_app_draw_callback(Canvas* canvas, void* ctx) {
         canvas_draw_icon(canvas, 0, 0, &I_main_128x64px);
         draw_process_selector(canvas, process, cursor);
         draw_battery_cunsumption(canvas, (double)consumption);
+        ethernet_view_process_draw(app->eth_worker->init_process, canvas);
     }
 }
 
@@ -102,7 +105,8 @@ FinikEthApp* finik_eth_app_alloc() {
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     app->power = furi_record_open(RECORD_POWER);
-    //app->eth_worker = eth_worker_alloc();
+
+    app->eth_worker = eth_worker_alloc();
 
     //eth_worker_task(app->eth_worker);
 
@@ -120,15 +124,13 @@ void finik_eth_app_free(FinikEthApp* app) {
 
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);
-}
-
-void finik_eth_update_consumtion(FinikEthApp* app) {
-    furi_assert(app);
+    furi_record_close(RECORD_POWER);
 }
 
 int32_t finik_eth_app(void* p) {
     UNUSED(p);
     FinikEthApp* app = finik_eth_app_alloc();
+    uint8_t cnt = 0;
 
     InputEvent event;
 
@@ -149,13 +151,22 @@ int32_t finik_eth_app(void* p) {
                         app->cursor_position = CURSOR_CLICK_PROCESS;
                         view_port_update(app->view_port);
                         furi_delay_ms(150);
+                        char str[] = "test string 0 test long string for flipper";
+                        str[12] += cnt % 10;
+                        cnt += 1;
+                        ethernet_view_process_print(app->eth_worker->init_process, str);
                         app->cursor_position = CURSOR_INSIDE_PROCESS;
                     } else if(event.key == InputKeyBack) {
                         app->cursor_position = CURSOR_EXIT_APP;
                     }
                 } else if(app->cursor_position == CURSOR_INSIDE_PROCESS) {
                     if(event.key == InputKeyLeft || event.key == InputKeyBack) {
+                        ethernet_view_process_move(app->eth_worker->init_process, 0);
                         app->cursor_position = CURSOR_CHOOSE_PROCESS;
+                    } else if(event.key == InputKeyUp) {
+                        ethernet_view_process_move(app->eth_worker->init_process, -1);
+                    } else if(event.key == InputKeyDown) {
+                        ethernet_view_process_move(app->eth_worker->init_process, 1);
                     }
                 } else if(app->cursor_position == CURSOR_EXIT_APP) {
                     if(event.key == InputKeyBack) {

@@ -21,6 +21,15 @@ EthWorker* eth_worker_alloc() {
 
     eth_worker_change_state(eth_worker, EthWorkerStateModuleInit);
 
+    eth_worker->init_process = malloc(sizeof(EthViewProcess));
+    memset(eth_worker->init_process, 0, sizeof(EthViewProcess));
+
+    eth_worker->init_process->autofill = 1;
+    eth_worker->init_process->carriage = 0;
+    eth_worker->init_process->position = 0;
+    eth_worker->init_process->x = 27;
+    eth_worker->init_process->y = 6;
+
     //eth_worker->callback = eth_worker_change_state;
 
     return eth_worker;
@@ -29,6 +38,7 @@ EthWorker* eth_worker_alloc() {
 void eth_worker_free(EthWorker* eth_worker) {
     furi_assert(eth_worker);
     furi_thread_free(eth_worker->thread);
+    free(eth_worker->init_process);
     free(eth_worker);
 }
 
