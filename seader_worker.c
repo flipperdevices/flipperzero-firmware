@@ -310,6 +310,27 @@ void sendRequestPacs(SeaderUartBridge* seader_uart) {
     ASN_STRUCT_FREE(asn_DEF_Payload, payload);
 }
 
+void seader_worker_send_version(SeaderWorker* seader_worker) {
+    SeaderUartBridge* seader_uart = seader_worker->uart;
+    SamCommand_t* samCommand = 0;
+    samCommand = calloc(1, sizeof *samCommand);
+    assert(samCommand);
+
+    samCommand->present = SamCommand_PR_version;
+
+    Payload_t* payload = 0;
+    payload = calloc(1, sizeof *payload);
+    assert(payload);
+
+    payload->present = Payload_PR_samCommand;
+    payload->choice.samCommand = *samCommand;
+
+    sendPayload(seader_uart, payload, 0x44, 0x0a, 0x44);
+
+    ASN_STRUCT_FREE(asn_DEF_SamCommand, samCommand);
+    ASN_STRUCT_FREE(asn_DEF_Payload, payload);
+}
+
 void sendCardDetected(SeaderUartBridge* seader_uart, CardDetails_t* cardDetails) {
     CardDetected_t* cardDetected = 0;
     cardDetected = calloc(1, sizeof *cardDetected);
