@@ -22,5 +22,8 @@ typedef struct {
     NfcProtocolSupportPollerHandler handle_poller;
 
     NfcProtocolSupportSceneBuilder build_scene_saved_menu;
+
+    NfcProtocolSupportSceneHandler handle_scene_info;
+    NfcProtocolSupportSceneHandler handle_scene_read_success;
     NfcProtocolSupportSceneHandler handle_scene_saved_menu;
 } NfcProtocolSupportBase;

@@ -4,11 +4,6 @@
 
 #include "../../../nfc_app_i.h"
 
-enum {
-    SubmenuIndexEmulate = SubmenuIndexCommonMax,
-    SubmenuIndexEdit,
-};
-
 void nfc_protocol_support_render_info_iso14443_3a_common(
     const Iso14443_3aData* data,
     NfcProtocolFormatType format_type,
@@ -50,34 +45,36 @@ static NfcCustomEvent
     return custom_event;
 }
 
-void nfc_protocol_support_build_scene_saved_menu_iso14443_3a_common(NfcApp* instance) {
-    Submenu* submenu = instance->submenu;
-    submenu_add_item(
-        submenu,
-        "Emulate UID",
-        SubmenuIndexEmulate,
-        nfc_protocol_support_common_submenu_callback,
-        instance);
-    submenu_add_item(
-        submenu,
-        "Edit UID",
-        SubmenuIndexEdit,
-        nfc_protocol_support_common_submenu_callback,
-        instance);
+static void nfc_protocol_support_build_scene_saved_menu_iso14443_3a(NfcApp* instance) {
+    UNUSED(instance);
 }
 
-static void nfc_protocol_support_build_scene_saved_menu_iso14443_3a(NfcApp* instance) {
-    nfc_protocol_support_build_scene_saved_menu_iso14443_3a_common(instance);
+static bool nfc_protocol_support_handle_scene_info_iso14443_3a(NfcApp* instance, uint32_t event) {
+    if(event == GuiButtonTypeRight) {
+        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        return true;
+    }
+
+    return false;
+}
+
+static bool nfc_protocol_support_handle_scene_read_success_iso14443_3a(NfcApp* instance, uint32_t event) {
+    if(event == GuiButtonTypeRight) {
+        scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaMenu);
+        return true;
+    }
+
+    return false;
 }
 
 bool nfc_protocol_support_handle_scene_saved_menu_iso14443_3a_common(
     NfcApp* instance,
     uint32_t event) {
     switch(event) {
-    case SubmenuIndexEmulate:
+    case SubmenuIndexCommonEmulate:
         scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
         return true;
-    case SubmenuIndexEdit:
+    case SubmenuIndexCommonEdit:
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
         return true;
     default:
@@ -91,12 +88,16 @@ static bool
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
-    .features = NfcProtocolFeatureNone,
+    .features = NfcProtocolFeatureEmulateUid | NfcProtocolFeatureEditUid,
     .render_info = (NfcProtocolSupportRenderInfo)nfc_protocol_support_render_info_iso14443_3a,
     .handle_poller =
         (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_iso14443_3a,
     .build_scene_saved_menu =
         (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_iso14443_3a,
+    .handle_scene_info =
+        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_iso14443_3a,
+    .handle_scene_read_success =
+        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_success_iso14443_3a,
     .handle_scene_saved_menu =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_iso14443_3a,
 };

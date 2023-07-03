@@ -9,8 +9,6 @@ void nfc_protocol_support_render_info_iso14443_3a_common(
     NfcProtocolFormatType format_type,
     FuriString* str);
 
-void nfc_protocol_support_build_scene_saved_menu_iso14443_3a_common(NfcApp* instance);
-
 bool nfc_protocol_support_handle_scene_saved_menu_iso14443_3a_common(
     NfcApp* instance,
     uint32_t event);
