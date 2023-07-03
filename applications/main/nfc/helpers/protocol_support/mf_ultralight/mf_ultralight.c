@@ -3,7 +3,7 @@
 
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 
-#include "../nfc_protocol_support_gui_handlers.h"
+#include "../nfc_protocol_support_gui_common.h"
 #include "../../../nfc_app_i.h"
 
 enum {

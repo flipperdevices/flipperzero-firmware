@@ -3,7 +3,7 @@
 
 #include <nfc/protocols/iso14443_4a/iso14443_4a_poller.h>
 
-#include "../nfc_protocol_support_gui_handlers.h"
+#include "../nfc_protocol_support_gui_common.h"
 #include "../iso14443_3a/iso14443_3a_i.h"
 #include "../../../nfc_app_i.h"
 

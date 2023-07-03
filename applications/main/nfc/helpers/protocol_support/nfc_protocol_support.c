@@ -1,7 +1,7 @@
 #include "nfc_protocol_support.h"
 
 #include "nfc_protocol_support_defs.h"
-#include "nfc_protocol_support_gui_handlers.h"
+#include "nfc_protocol_support_gui_common.h"
 
 #include "../../nfc_app_i.h"
 
