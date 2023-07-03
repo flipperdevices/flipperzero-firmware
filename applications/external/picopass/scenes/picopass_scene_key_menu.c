@@ -70,13 +70,13 @@ bool picopass_scene_key_menu_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == SubmenuIndexWriteiCL) {
             scene_manager_set_scene_state(
-                picopass->scene_manager, PicopassSceneKeyMenu, SubmenuIndexWriteiCE);
+                picopass->scene_manager, PicopassSceneKeyMenu, SubmenuIndexWriteiCL);
             memcpy(picopass->dev->dev_data.pacs.key, picopass_xicl_key, PICOPASS_BLOCK_LEN);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteKey);
             consumed = true;
         } else if(event.event == SubmenuIndexWriteiCS) {
             scene_manager_set_scene_state(
-                picopass->scene_manager, PicopassSceneKeyMenu, SubmenuIndexWriteiCE);
+                picopass->scene_manager, PicopassSceneKeyMenu, SubmenuIndexWriteiCS);
             memcpy(picopass->dev->dev_data.pacs.key, picopass_xics_key, PICOPASS_BLOCK_LEN);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneWriteKey);
             consumed = true;
