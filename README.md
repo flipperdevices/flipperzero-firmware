@@ -145,7 +145,7 @@ epoch  | cps
 
 Here are some nice ideas to improve this app :
 
-* ~~Save output data in XML / JSON file~~ **DONE !**, output data are stored in CSV (lighter than XML / JSON and easy to parse)
+* ~~Save output data in XML / JSON file~~ **DONE !** Output data are stored in CSV (lighter than XML / JSON and easy to parse)
 * Use the geiger board as random number generator
 * Send data on the air in real time to monitor remotly
 * Buzz when it gets dangerous like a dosimeter
