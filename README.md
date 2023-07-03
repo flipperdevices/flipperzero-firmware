@@ -57,15 +57,15 @@ The program will automatically be launched after compilation
 
 **Button assignments** : 
 
-**Ok** [long press] : clear the graph
+**Ok** *[long press]* : clear the graph
 
-**Left/Right** [short press] : choose right unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** on the left is always displayed
+**Left/Right** *[short press]* : choose right unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** on the left is always displayed
 
-**Up** [long press] : enable/disable recording, led of **Flipper Zero** is colored in red when recording
+**Up** *[long press]* : enable/disable recording, led of **Flipper Zero** is colored in red when recording
 
-**Up/Down** [short press] : zoom/unzoom 
+**Up/Down** *[short press]* : zoom/unzoom 
 
-**Back** [long press] : exit
+**Back** *[long press]* : exit
 
 
 If you don't want to build this application, just simply copy **flipper_geiger.fap** on your **Flipper Zero** 
