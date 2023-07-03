@@ -11,7 +11,7 @@ static asn_oer_constraints_t asn_OER_type_SamCommand_constr_1 CC_NOTUSED = {
 	{ 0, 0 },
 	-1};
 asn_per_constraints_t asn_PER_type_SamCommand_constr_1 CC_NOTUSED = {
-	{ APC_CONSTRAINED,	 1,  1,  0,  1 }	/* (0..1) */,
+	{ APC_CONSTRAINED,	 2,  2,  0,  2 }	/* (0..2) */,
 	{ APC_UNCONSTRAINED,	-1, -1,  0,  0 },
 	0, 0	/* No PER value map */
 };
@@ -25,6 +25,15 @@ asn_TYPE_member_t asn_MBR_SamCommand_1[] = {
 		0, 0, /* No default value */
 		"requestPacs"
 		},
+	{ ATF_NOFLAGS, 0, offsetof(struct SamCommand, choice.version),
+		(ASN_TAG_CLASS_CONTEXT | (2 << 2)),
+		-1,	/* IMPLICIT tag at current level */
+		&asn_DEF_NULL,
+		0,
+		{ 0, 0, 0 },
+		0, 0, /* No default value */
+		"version"
+		},
 	{ ATF_NOFLAGS, 0, offsetof(struct SamCommand, choice.cardDetected),
 		(ASN_TAG_CLASS_CONTEXT | (13 << 2)),
 		-1,	/* IMPLICIT tag at current level */
@@ -37,7 +46,8 @@ asn_TYPE_member_t asn_MBR_SamCommand_1[] = {
 };
 static const asn_TYPE_tag2member_t asn_MAP_SamCommand_tag2el_1[] = {
     { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 0, 0, 0 }, /* requestPacs */
-    { (ASN_TAG_CLASS_CONTEXT | (13 << 2)), 1, 0, 0 } /* cardDetected */
+    { (ASN_TAG_CLASS_CONTEXT | (2 << 2)), 1, 0, 0 }, /* version */
+    { (ASN_TAG_CLASS_CONTEXT | (13 << 2)), 2, 0, 0 } /* cardDetected */
 };
 asn_CHOICE_specifics_t asn_SPC_SamCommand_specs_1 = {
 	sizeof(struct SamCommand),
@@ -45,7 +55,7 @@ asn_CHOICE_specifics_t asn_SPC_SamCommand_specs_1 = {
 	offsetof(struct SamCommand, present),
 	sizeof(((struct SamCommand *)0)->present),
 	asn_MAP_SamCommand_tag2el_1,
-	2,	/* Count of tags in the map */
+	3,	/* Count of tags in the map */
 	0, 0,
 	-1	/* Extensions start */
 };
@@ -59,7 +69,7 @@ asn_TYPE_descriptor_t asn_DEF_SamCommand = {
 	0,	/* No tags (count) */
 	{ &asn_OER_type_SamCommand_constr_1, &asn_PER_type_SamCommand_constr_1, CHOICE_constraint },
 	asn_MBR_SamCommand_1,
-	2,	/* Elements count */
+	3,	/* Elements count */
 	&asn_SPC_SamCommand_specs_1	/* Additional specs */
 };
 

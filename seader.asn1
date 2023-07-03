@@ -22,6 +22,7 @@ ErrorResponse ::= SEQUENCE {
 
 SamCommand ::= CHOICE {
   requestPacs [1] IMPLICIT RequestPacs,
+  version [2] IMPLICIT NULL,
   cardDetected [13] IMPLICIT CardDetected
 }
 
@@ -77,6 +78,11 @@ ContentElementTag ::= ENUMERATED {
 FrameProtocol ::= ENUMERATED {
   nfc (2),
   iclass (4)
+}
+
+Version ::= SEQUENCE {
+  v [0] IMPLICIT OCTET STRING,
+  f [1] IMPLICIT OCTET STRING
 }
 
 END
