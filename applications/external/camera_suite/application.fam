@@ -1,0 +1,18 @@
+App(
+    appid="ESP32_Camera_Suite",
+    name="[ESP32] Camera Suite",
+    apptype=FlipperAppType.EXTERNAL,
+    # cdefines=["APP_CAMERA_SUITE"],
+    entry_point="camera_suite_app",
+    requires=["gui", "storage"],
+    order=51,
+    stack_size=8 * 1024,
+    fap_icon="icons/camera-suite.png",
+    fap_category="GPIO",
+    fap_libs=["assets"],
+    fap_icon_assets_symbol="camerasuite",
+    fap_author="Cody Tolene",
+    fap_weburl="https://github.com/CodyTolene/Flipper-Zero-Cam",
+    # fap_version="0.1",
+    fap_description="A camera suite application for the Flipper Zero ESP32-CAM module.",
+)
