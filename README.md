@@ -153,8 +153,7 @@ Here are some nice ideas to improve this app :
 ## Changelog
 
 * 2023-07-03
-  * Add zoom levels
-  * User gallery has been added
+  * Data recording function has been added
 
 * 2023-06-25
   * Add zoom levels
