@@ -1,12 +1,6 @@
 #pragma once
 
 #include "nfc_protocol_support_common.h"
-#include "../../nfc_app.h"
-
-void nfc_protocol_support_render_info(
-    const NfcDevice* device,
-    NfcProtocolFormatType format_type,
-    FuriString* str);
 
 // Poller handler
 NfcCustomEvent nfc_protocol_support_handle_poller(NfcGenericEvent event, void* context);

@@ -1,16 +1,47 @@
 #include "mf_desfire_render.h"
 
-void nfc_mf_desfire_render_data(const MfDesfireData* data, FuriString* str) {
-    nfc_mf_desfire_render_version(&data->version, str);
-    nfc_mf_desfire_render_free_memory(&data->free_memory, str);
-    nfc_mf_desfire_render_key_settings(&data->master_key_settings, str);
+#include "../iso14443_3a/iso14443_3a_render.h"
+
+void nfc_render_mf_desfire_info(
+    const MfDesfireData* data,
+    NfcProtocolFormatType format_type,
+    FuriString* str) {
+    nfc_render_iso14443_3a_info(data->iso14443_4a_data->iso14443_3a_data, format_type, str);
+
+    const uint32_t bytes_total = 1UL << (data->version.sw_storage >> 1);
+    const uint32_t bytes_free = data->free_memory.is_present ? data->free_memory.bytes_free : 0;
+
+    furi_string_cat_printf(str, "\n%lu", bytes_total);
+
+    if(data->version.sw_storage & 1) {
+        furi_string_push_back(str, '+');
+    }
+
+    furi_string_cat_printf(str, " bytes, %lu bytes free\n", bytes_free);
+
+    const uint32_t app_count = simple_array_get_count(data->applications);
+    uint32_t file_count = 0;
+
+    for(uint32_t i = 0; i < app_count; ++i) {
+        const MfDesfireApplication* app = simple_array_cget(data->applications, i);
+        file_count += simple_array_get_count(app->file_ids);
+    }
+
+    furi_string_cat_printf(str, "%lu Application%s", app_count, app_count != 1 ? "s" : "");
+    furi_string_cat_printf(str, ", %lu File%s", file_count, file_count != 1 ? "s" : "");
+}
+
+void nfc_render_mf_desfire_data(const MfDesfireData* data, FuriString* str) {
+    nfc_render_mf_desfire_version(&data->version, str);
+    nfc_render_mf_desfire_free_memory(&data->free_memory, str);
+    nfc_render_mf_desfire_key_settings(&data->master_key_settings, str);
 
     for(uint32_t i = 0; i < simple_array_get_count(data->master_key_versions); ++i) {
-        nfc_mf_desfire_render_key_version(simple_array_cget(data->master_key_versions, i), i, str);
+        nfc_render_mf_desfire_key_version(simple_array_cget(data->master_key_versions, i), i, str);
     }
 }
 
-void nfc_mf_desfire_render_version(const MfDesfireVersion* data, FuriString* str) {
+void nfc_render_mf_desfire_version(const MfDesfireVersion* data, FuriString* str) {
     furi_string_cat_printf(
         str,
         "%02x:%02x:%02x:%02x:%02x:%02x:%02x\n",
@@ -58,13 +89,13 @@ void nfc_mf_desfire_render_version(const MfDesfireVersion* data, FuriString* str
         data->prod_year);
 }
 
-void nfc_mf_desfire_render_free_memory(const MfDesfireFreeMemory* data, FuriString* str) {
+void nfc_render_mf_desfire_free_memory(const MfDesfireFreeMemory* data, FuriString* str) {
     if(data->is_present) {
         furi_string_cat_printf(str, "freeMem %lu\n", data->bytes_free);
     }
 }
 
-void nfc_mf_desfire_render_key_settings(const MfDesfireKeySettings* data, FuriString* str) {
+void nfc_render_mf_desfire_key_settings(const MfDesfireKeySettings* data, FuriString* str) {
     furi_string_cat_printf(str, "changeKeyID %d\n", data->change_key_id);
     furi_string_cat_printf(str, "configChangeable %d\n", data->is_config_changeable);
     furi_string_cat_printf(str, "freeCreateDelete %d\n", data->is_free_create_delete);
@@ -78,31 +109,31 @@ void nfc_mf_desfire_render_key_settings(const MfDesfireKeySettings* data, FuriSt
     furi_string_cat_printf(str, "maxKeys %d\n", data->max_keys);
 }
 
-void nfc_mf_desfire_render_key_version(
+void nfc_render_mf_desfire_key_version(
     const MfDesfireKeyVersion* data,
     uint32_t index,
     FuriString* str) {
     furi_string_cat_printf(str, "key %lu version %u\n", index, *data);
 }
 
-void nfc_mf_desfire_render_application_id(const MfDesfireApplicationId* data, FuriString* str) {
+void nfc_render_mf_desfire_application_id(const MfDesfireApplicationId* data, FuriString* str) {
     const uint8_t* app_id = data->data;
     furi_string_cat_printf(str, "Application %02x%02x%02x\n", app_id[0], app_id[1], app_id[2]);
 }
 
-void nfc_mf_desfire_render_application(const MfDesfireApplication* data, FuriString* str) {
-    nfc_mf_desfire_render_key_settings(&data->key_settings, str);
+void nfc_render_mf_desfire_application(const MfDesfireApplication* data, FuriString* str) {
+    nfc_render_mf_desfire_key_settings(&data->key_settings, str);
 
     for(uint32_t i = 0; i < simple_array_get_count(data->key_versions); ++i) {
-        nfc_mf_desfire_render_key_version(simple_array_cget(data->key_versions, i), i, str);
+        nfc_render_mf_desfire_key_version(simple_array_cget(data->key_versions, i), i, str);
     }
 }
 
-void nfc_mf_desfire_render_file_id(const MfDesfireFileId* data, FuriString* str) {
+void nfc_render_mf_desfire_file_id(const MfDesfireFileId* data, FuriString* str) {
     furi_string_cat_printf(str, "File %d\n", *data);
 }
 
-void nfc_mf_desfire_render_file_settings_data(
+void nfc_render_mf_desfire_file_settings_data(
     const MfDesfireFileSettings* settings,
     const MfDesfireFileData* data,
     FuriString* str) {

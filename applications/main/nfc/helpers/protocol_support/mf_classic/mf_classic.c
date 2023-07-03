@@ -1,6 +1,9 @@
+#include "mf_classic.h"
+#include "mf_classic_render.h"
+
 #include <nfc/protocols/mf_classic/mf_classic_poller.h>
 
-#include "../iso14443_3a/iso14443_3a_i.h"
+#include "../nfc_protocol_support_gui_handlers.h"
 #include "../../../nfc_app_i.h"
 
 enum {
@@ -13,18 +16,7 @@ static void nfc_protocol_support_render_info_mf_classic(
     const MfClassicData* data,
     NfcProtocolFormatType type,
     FuriString* str) {
-    nfc_protocol_support_render_info_iso14443_3a_common(data->iso14443_3a_data, type, str);
-
-    uint8_t sectors_total = mf_classic_get_total_sectors_num(data->type);
-    uint8_t keys_total = sectors_total * 2;
-    uint8_t keys_found = 0;
-    uint8_t sectors_read = 0;
-    mf_classic_get_read_sectors_and_keys(data, &sectors_read, &keys_found);
-
-    furi_string_cat_printf(str, "\nKeys Found: %u/%u", keys_found, keys_total);
-    furi_string_cat_printf(str, "\nSectors Read: %u/%u", sectors_read, sectors_total);
-
-    // TODO: Something else?
+    nfc_render_mf_classic_info(data, type, str);
 }
 
 static NfcCustomEvent
@@ -72,7 +64,8 @@ static bool nfc_protocol_support_handle_scene_info_mf_classic(NfcApp* instance, 
     return false;
 }
 
-static bool nfc_protocol_support_handle_scene_read_success_mf_classic(NfcApp* instance, uint32_t event) {
+static bool
+    nfc_protocol_support_handle_scene_read_success_mf_classic(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicMenu);
         return true;
@@ -103,11 +96,15 @@ static bool
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
     .features = NfcProtocolFeatureMoreData | NfcProtocolFeatureEmulateFull,
-    .render_info = (NfcProtocolSupportRenderInfo)nfc_protocol_support_render_info_mf_classic,
+
+    .render_info = (NfcProtocolSupportRenderData)nfc_protocol_support_render_info_mf_classic,
+
     .handle_poller =
         (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_mf_classic,
+
     .build_scene_saved_menu =
         (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_mf_classic,
+
     .handle_scene_info =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_mf_classic,
     .handle_scene_read_success =

@@ -1,16 +1,17 @@
+#include "iso14443_4a.h"
+#include "iso14443_4a_render.h"
+
 #include <nfc/protocols/iso14443_4a/iso14443_4a_poller.h>
 
+#include "../nfc_protocol_support_gui_handlers.h"
 #include "../iso14443_3a/iso14443_3a_i.h"
 #include "../../../nfc_app_i.h"
 
 static void nfc_protocol_support_render_info_iso14443_4a(
     const Iso14443_4aData* data,
-    NfcProtocolFormatType type,
+    NfcProtocolFormatType format_type,
     FuriString* str) {
-    UNUSED(type);
-    nfc_protocol_support_render_info_iso14443_3a_common(
-        data->iso14443_3a_data, NfcProtocolFormatTypeFull, str);
-    // TODO: Add RATS info?
+    nfc_render_iso14443_4a_info(data, format_type, str);
 }
 
 static NfcCustomEvent
@@ -38,7 +39,8 @@ static bool nfc_protocol_support_handle_scene_info_iso14443_4a(NfcApp* instance,
     return false;
 }
 
-static bool nfc_protocol_support_handle_scene_read_success_iso14443_4a(NfcApp* instance, uint32_t event) {
+static bool
+    nfc_protocol_support_handle_scene_read_success_iso14443_4a(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaMenu);
         return true;
@@ -54,11 +56,15 @@ static bool
 
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_4a = {
     .features = NfcProtocolFeatureEmulateUid | NfcProtocolFeatureEditUid,
-    .render_info = (NfcProtocolSupportRenderInfo)nfc_protocol_support_render_info_iso14443_4a,
+
+    .render_info = (NfcProtocolSupportRenderData)nfc_protocol_support_render_info_iso14443_4a,
+
     .handle_poller =
         (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_iso14443_4a,
+
     .build_scene_saved_menu =
         (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_iso14443_4a,
+
     .handle_scene_info =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_iso14443_4a,
     .handle_scene_read_success =

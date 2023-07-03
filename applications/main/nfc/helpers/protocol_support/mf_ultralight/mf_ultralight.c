@@ -1,6 +1,9 @@
+#include "mf_ultralight.h"
+#include "mf_ultralight_render.h"
+
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 
-#include "../iso14443_3a/iso14443_3a_i.h"
+#include "../nfc_protocol_support_gui_handlers.h"
 #include "../../../nfc_app_i.h"
 
 enum {
@@ -10,16 +13,9 @@ enum {
 
 static void nfc_protocol_support_render_info_mf_ultralight(
     const MfUltralightData* data,
-    NfcProtocolFormatType type,
+    NfcProtocolFormatType format_type,
     FuriString* str) {
-    nfc_protocol_support_render_info_iso14443_3a_common(data->iso14443_3a_data, type, str);
-
-    furi_string_cat_printf(str, "\nPages Read: %u/%u", data->pages_read, data->pages_total);
-    if(data->pages_read != data->pages_total) {
-        furi_string_cat_printf(str, "\nPassword-protected pages!");
-    }
-
-    //TODO: Something else?
+    nfc_render_mf_ultralight_info(data, format_type, str);
 }
 
 static NfcCustomEvent nfc_protocol_support_handle_poller_mf_ultralight(
@@ -85,7 +81,8 @@ static void nfc_protocol_support_build_scene_saved_menu_mf_ultralight(NfcApp* in
     }
 }
 
-static bool nfc_protocol_support_handle_scene_info_mf_ultralight(NfcApp* instance, uint32_t event) {
+static bool
+    nfc_protocol_support_handle_scene_info_mf_ultralight(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
         return true;
@@ -94,7 +91,8 @@ static bool nfc_protocol_support_handle_scene_info_mf_ultralight(NfcApp* instanc
     return false;
 }
 
-static bool nfc_protocol_support_handle_scene_read_success_mf_ultralight(NfcApp* instance, uint32_t event) {
+static bool
+    nfc_protocol_support_handle_scene_read_success_mf_ultralight(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightMenu);
         return true;
@@ -122,15 +120,19 @@ static bool
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
     .features = NfcProtocolFeatureMoreData | NfcProtocolFeatureEmulateFull,
-    .render_info = (NfcProtocolSupportRenderInfo)nfc_protocol_support_render_info_mf_ultralight,
+
+    .render_info = (NfcProtocolSupportRenderData)nfc_protocol_support_render_info_mf_ultralight,
+
     .handle_poller =
         (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_mf_ultralight,
+
     .build_scene_saved_menu =
         (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_mf_ultralight,
+
     .handle_scene_info =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_mf_ultralight,
-    .handle_scene_read_success =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_success_mf_ultralight,
+    .handle_scene_read_success = (NfcProtocolSupportSceneHandler)
+        nfc_protocol_support_handle_scene_read_success_mf_ultralight,
     .handle_scene_saved_menu =
         (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_mf_ultralight,
 };
