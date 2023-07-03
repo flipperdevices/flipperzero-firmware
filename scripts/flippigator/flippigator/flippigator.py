@@ -264,6 +264,7 @@ class Navigator:
         time.sleep(0.2)
         self.logger.info("Scanning menu list")
         menus = list()
+        self.get_current_state(timeout = 1)
 
         while True:
             cur = self.get_current_state(timeout = 1)

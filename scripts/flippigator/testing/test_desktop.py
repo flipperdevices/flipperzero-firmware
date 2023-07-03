@@ -27,7 +27,7 @@ class TestMain(BaseCase):
         """
         nav.go_to_main_screen()
         nav.press_ok()
-        assert nav.get_menu_list() == [
+        assert [
             "Sub-GHz",
             "RFID",
             "NFC",
@@ -36,6 +36,6 @@ class TestMain(BaseCase):
             "iButton",
             "BadUSB",
             "U2F",
-            "Apps",
             "Settings",
-        ]
+            "Apps",
+        ] == nav.get_menu_list()

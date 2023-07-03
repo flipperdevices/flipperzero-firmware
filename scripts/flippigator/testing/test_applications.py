@@ -143,6 +143,7 @@ class TestApplications(BaseCase):
             menu_ref = [
                 "FileBrowserLevelUp",
                 "app_Clock",
+                "NFC⁄RFID detector",
             ]
 
             assert menu, "Tool folder is empty"
