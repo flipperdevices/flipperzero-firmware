@@ -230,6 +230,76 @@ bool mag_device_delete(MagDevice* mag_dev, bool use_load_path) {
     return deleted;
 }
 
+bool mag_device_parse_card_string(MagDevice* mag_dev, FuriString* f_card_str) {
+    furi_assert(mag_dev);
+    FURI_LOG_D(TAG, "mag_device_parse_card_string");
+
+    const char* card_str = furi_string_get_cstr(f_card_str);
+
+    FURI_LOG_D(TAG, "Parsing card string: %s", card_str);
+
+    // Track 1
+    const char* track1_start = strchr(card_str, '%');
+    if(!track1_start) {
+        FURI_LOG_D(TAG, "Could not find track 1 start");
+        return false;
+    }
+    track1_start++;
+    const char* track1_end = strchr(track1_start, '?');
+    if(!track1_end) {
+        FURI_LOG_D(TAG, "Could not find track 1 end");
+        return false;
+    }
+    size_t track1_len = track1_end - track1_start;
+
+    FURI_LOG_D(TAG, "Track 1: %.*s", track1_len, track1_start);
+
+    mag_dev->dev_data.track[0].len = track1_len;
+    furi_string_printf(mag_dev->dev_data.track[0].str, "%%%.*s?", track1_len, track1_start);
+
+    // Track 2
+    const char* track2_start = strchr(track1_end, ';');
+    if(!track2_start) {
+        FURI_LOG_D(TAG, "Could not find track 2 start");
+        return true;
+    }
+
+    track2_start++;
+    const char* track2_end = strchr(track2_start, '?');
+    if(!track2_end) {
+        FURI_LOG_D(TAG, "Could not find track 2 end");
+        return true;
+    }
+    size_t track2_len = track2_end - track2_start;
+
+    FURI_LOG_D(TAG, "Track 2: %.*s", track2_len, track2_start);
+
+    mag_dev->dev_data.track[1].len = track2_len;
+    furi_string_printf(mag_dev->dev_data.track[1].str, "%%%.*s?", track2_len, track2_start);
+
+    // Track 3
+    const char* track3_start = strchr(track2_end, ';');
+    if(!track3_start) {
+        FURI_LOG_D(TAG, "Could not find track 3 start");
+        return true;
+    }
+
+    track3_start++;
+    const char* track3_end = strchr(track3_start, '?');
+    if(!track3_end) {
+        FURI_LOG_D(TAG, "Could not find track 3 end");
+        return true;
+    }
+    size_t track3_len = track3_end - track3_start;
+
+    FURI_LOG_D(TAG, "Track 3: %.*s", track3_len, track3_start);
+
+    mag_dev->dev_data.track[2].len = track3_len;
+    furi_string_printf(mag_dev->dev_data.track[2].str, "%%%.*s?", track3_len, track3_start);
+
+    return true;
+}
+
 void mag_device_set_loading_callback(
     MagDevice* mag_dev,
     MagLoadingCallback callback,

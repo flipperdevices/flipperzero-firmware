@@ -2,8 +2,9 @@
 
 #define TAG "MagHelpers"
 
-#define GPIO_PIN_A &gpio_ext_pa6
-#define GPIO_PIN_B &gpio_ext_pa7
+// Haviv Board - pins gpio_ext_pa7 & gpio_ext_pa6 was swapped.
+#define GPIO_PIN_A &gpio_ext_pa7
+#define GPIO_PIN_B &gpio_ext_pa6
 #define GPIO_PIN_ENABLE &gpio_ext_pa4
 #define RFID_PIN_OUT &gpio_rfid_carrier_out
 
@@ -126,9 +127,10 @@ void tx_init_rfid() {
     // initialize RFID system for TX
 
     // OTG needed for RFID? Or just legacy from GPIO?
-    furi_hal_power_enable_otg();
-
+    // furi_hal_power_enable_otg();
     furi_hal_ibutton_pin_configure();
+
+    // furi_hal_ibutton_start_drive();
     furi_hal_ibutton_pin_write(false);
 
     // Initializing at GpioSpeedLow seems sufficient for our needs; no improvements seen by increasing speed setting

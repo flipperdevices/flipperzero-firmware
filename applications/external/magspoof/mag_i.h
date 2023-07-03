@@ -33,6 +33,7 @@
 #include <toolbox/value_index.h>
 
 #include "scenes/mag_scene.h"
+#include "scenes/mag_scene_read.h"
 
 #define MAG_TEXT_STORE_SIZE 150
 
@@ -76,6 +77,17 @@ typedef struct {
 
     // Custom views
     Mag_TextInput* mag_text_input;
+
+    // UART
+    FuriThread* uart_rx_thread;
+    FuriStreamBuffer* uart_rx_stream;
+    uint8_t uart_rx_buf[UART_RX_BUF_SIZE + 1];
+    void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context);
+
+    char uart_text_input_store[UART_TERMINAL_TEXT_INPUT_STORE_SIZE + 1];
+    FuriString* uart_text_box_store;
+    size_t uart_text_box_store_strlen;
+    // UART_TextInput* text_input;
 } Mag;
 
 void mag_text_store_set(Mag* mag, const char* text, ...);
