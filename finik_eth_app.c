@@ -134,6 +134,9 @@ int32_t finik_eth_app(void* p) {
 
     InputEvent event;
 
+    uint8_t long_press = 0;
+    int8_t long_press_dir = 0;
+
     while(1) {
         finik_eth_battery_info_update_model(app);
         if(furi_message_queue_get(app->event_queue, &event, 300) == FuriStatusOk) {
@@ -176,7 +179,21 @@ int32_t finik_eth_app(void* p) {
                     }
                 }
                 view_port_update(app->view_port);
+            } else if(event.type == InputTypeLong) {
+                if(event.key == InputKeyUp) {
+                    long_press = 1;
+                    long_press_dir = -1;
+                } else if(event.key == InputKeyDown) {
+                    long_press = 1;
+                    long_press_dir = 1;
+                }
+            } else if(event.type == InputTypeRelease) {
+                long_press = 0;
+                long_press_dir = 0;
             }
+        }
+        if(long_press) {
+            ethernet_view_process_move(app->eth_worker->init_process, long_press_dir);
         }
     }
 
