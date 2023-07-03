@@ -61,7 +61,9 @@ The program will automatically be launched after compilation
 
 **Left/Right** [short press] : choose right unit (cpm, μSv/h, mSv/y, Rad/h, mRad/h, uRad/h), **cps** on the left is always displayed
 
-**Up/Down** [short press] : zoom / unzoom 
+**Up** [long press] : enable/disable recording, led of **Flipper Zero** is colored in red when recording
+
+**Up/Down** [short press] : zoom/unzoom 
 
 **Back** [long press] : exit
 
@@ -128,12 +130,16 @@ Zoom levels (the third picture is the default zoom) :
 
 Here are some nice ideas to improve this app :
 
-* Save output data in XML / JSON file
+~~* Save output data in XML / JSON file~~ done, output data are stored in CSV
 * Use the geiger board as random number generator
 * Send data on the air in real time to monitor remotly
 * Buzz when it gets dangerous like a dosimeter
 
 ## Changelog
+
+* 2023-07-03
+  * Add zoom levels
+  * User gallery has been added
 
 * 2023-06-25
   * Add zoom levels
