@@ -21,14 +21,12 @@ EthWorker* eth_worker_alloc() {
 
     eth_worker_change_state(eth_worker, EthWorkerStateModuleInit);
 
-    eth_worker->init_process = malloc(sizeof(EthViewProcess));
-    memset(eth_worker->init_process, 0, sizeof(EthViewProcess));
-
-    eth_worker->init_process->autofill = 1;
-    eth_worker->init_process->carriage = 0;
-    eth_worker->init_process->position = 0;
-    eth_worker->init_process->x = 27;
-    eth_worker->init_process->y = 6;
+    eth_worker->init_process = ethernet_view_process_malloc();
+    eth_worker->dhcp_process = ethernet_view_process_malloc();
+    eth_worker->stat_process = ethernet_view_process_malloc();
+    eth_worker->ping_process = ethernet_view_process_malloc();
+    eth_worker->reset_process = ethernet_view_process_malloc();
+    eth_worker->active_process = eth_worker->init_process;
 
     //eth_worker->callback = eth_worker_change_state;
 
@@ -38,13 +36,38 @@ EthWorker* eth_worker_alloc() {
 void eth_worker_free(EthWorker* eth_worker) {
     furi_assert(eth_worker);
     furi_thread_free(eth_worker->thread);
-    free(eth_worker->init_process);
+    ethernet_view_process_free(eth_worker->init_process);
+    ethernet_view_process_free(eth_worker->dhcp_process);
+    ethernet_view_process_free(eth_worker->stat_process);
+    ethernet_view_process_free(eth_worker->ping_process);
+    ethernet_view_process_free(eth_worker->reset_process);
     free(eth_worker);
 }
 
 void eth_worker_change_state(EthWorker* eth_worker, EthWorkerState state) {
     furi_assert(eth_worker);
     eth_worker->state = state;
+}
+
+void eth_worker_set_active_process(EthWorker* eth_worker, EthWorkerProcess state) {
+    furi_assert(eth_worker);
+    switch(state) {
+    case EthWorkerProcessInit:
+        eth_worker->active_process = eth_worker->init_process;
+        break;
+    case EthWorkerProcessDHCP:
+        eth_worker->active_process = eth_worker->dhcp_process;
+        break;
+    case EthWorkerProcessStatic:
+        eth_worker->active_process = eth_worker->stat_process;
+        break;
+    case EthWorkerProcessPing:
+        eth_worker->active_process = eth_worker->ping_process;
+        break;
+    case EthWorkerProcessReset:
+        eth_worker->active_process = eth_worker->reset_process;
+        break;
+    }
 }
 
 /************************** Ethernet Worker Thread *****************************/
@@ -169,8 +192,7 @@ void eth_worker_dhcp(EthWorker* eth_worker) {
 
     uint8_t dhcp_buffer[2000];
 
-    FURI_LOG_I(TAG, "Ehtping_Init\r\n");
-    FURI_LOG_I(TAG, "Registering W5500 callbacks\r\n");
+    FURI_LOG_I(TAG, "registering W5500 callbacks\r\n");
     FURI_LOG_I(TAG, "sizeof %d", sizeof(gWIZNETINFO));
 
     reg_wizchip_spi_cbfunc(W5500_ReadByte, W5500_WriteByte);

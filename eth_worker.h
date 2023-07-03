@@ -16,6 +16,14 @@ typedef enum {
 } EthWorkerState;
 
 typedef enum {
+    EthWorkerProcessInit,
+    EthWorkerProcessDHCP,
+    EthWorkerProcessStatic,
+    EthWorkerProcessPing,
+    EthWorkerProcessReset,
+} EthWorkerProcess;
+
+typedef enum {
     EthWorkerSubstateInProcess = 0,
     EthWorkerSubStateSuccess,
     EthWorkerSubStateError,
@@ -41,6 +49,7 @@ typedef void (*EthWorkerCallback)(EthCustomEvent event, void* context);
 EthWorker* eth_worker_alloc();
 
 EthWorkerState eth_worker_get_state(EthWorker* eth_worker);
+void eth_worker_set_active_process(EthWorker* eth_worker, EthWorkerProcess state);
 
 void eth_worker_free(EthWorker* eth_worker);
 

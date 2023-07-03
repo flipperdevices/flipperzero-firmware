@@ -11,6 +11,20 @@
 
 #define TAG "EthView"
 
+EthViewProcess* ethernet_view_process_malloc() {
+    EthViewProcess* evp = malloc(sizeof(EthViewProcess));
+    evp->autofill = 1;
+    evp->carriage = 0;
+    evp->position = 0;
+    evp->x = 27;
+    evp->y = 6;
+    return evp;
+}
+
+void ethernet_view_process_free(EthViewProcess* evp) {
+    free(evp);
+}
+
 void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
     furi_assert(canvas);
     furi_assert(process);
@@ -92,6 +106,7 @@ void ethernet_view_process_print(EthViewProcess* process, const char* str) {
         uint8_t carriage = process->carriage;
         uint8_t carriage1 = (carriage + 1) % SCREEN_STRINGS_COUNT;
         uint8_t carriage2 = (carriage + 2) % SCREEN_STRINGS_COUNT;
+        FURI_LOG_I(TAG, "print %d %d %d %d %d", max_width, len, start, carriage, carriage1);
         memset(process->fifo[carriage], 0, SCREEN_SYMBOLS_WIDTH);
         memset(process->fifo[carriage1], 0, SCREEN_SYMBOLS_WIDTH);
         memset(process->fifo[carriage2], 0, SCREEN_SYMBOLS_WIDTH);

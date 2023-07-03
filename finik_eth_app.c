@@ -73,7 +73,7 @@ static void finik_eth_app_draw_callback(Canvas* canvas, void* ctx) {
         canvas_draw_icon(canvas, 0, 0, &I_main_128x64px);
         draw_process_selector(canvas, process, cursor);
         draw_battery_cunsumption(canvas, (double)consumption);
-        ethernet_view_process_draw(app->eth_worker->init_process, canvas);
+        ethernet_view_process_draw(app->eth_worker->active_process, canvas);
     }
 }
 
@@ -140,61 +140,60 @@ int32_t finik_eth_app(void* p) {
     while(1) {
         finik_eth_battery_info_update_model(app);
         if(furi_message_queue_get(app->event_queue, &event, 300) == FuriStatusOk) {
-            if(event.type == InputTypePress) {
-                if(app->cursor_position == CURSOR_CHOOSE_PROCESS) {
-                    if(event.key == InputKeyUp) {
-                        app->draw_process =
-                            (app->draw_process + PROCESS_RESET) % (PROCESS_RESET + 1);
-                    } else if(event.key == InputKeyDown) {
-                        app->draw_process =
-                            (app->draw_process + PROCESS_RESET + 2) % (PROCESS_RESET + 1);
-                    } else if(event.key == InputKeyRight) {
-                        app->cursor_position = CURSOR_INSIDE_PROCESS;
-                    } else if(event.key == InputKeyOk) {
-                        app->cursor_position = CURSOR_CLICK_PROCESS;
-                        view_port_update(app->view_port);
-                        furi_delay_ms(150);
-                        char str[] = "test string 0 test long string for flipper";
-                        str[12] += cnt % 10;
-                        cnt += 1;
-                        ethernet_view_process_print(app->eth_worker->init_process, str);
-                        app->cursor_position = CURSOR_INSIDE_PROCESS;
-                    } else if(event.key == InputKeyBack) {
-                        app->cursor_position = CURSOR_EXIT_APP;
-                    }
-                } else if(app->cursor_position == CURSOR_INSIDE_PROCESS) {
-                    if(event.key == InputKeyLeft || event.key == InputKeyBack) {
-                        ethernet_view_process_move(app->eth_worker->init_process, 0);
-                        app->cursor_position = CURSOR_CHOOSE_PROCESS;
-                    } else if(event.key == InputKeyUp) {
-                        ethernet_view_process_move(app->eth_worker->init_process, -1);
-                    } else if(event.key == InputKeyDown) {
-                        ethernet_view_process_move(app->eth_worker->init_process, 1);
-                    }
-                } else if(app->cursor_position == CURSOR_EXIT_APP) {
-                    if(event.key == InputKeyBack) {
-                        break;
-                    } else if(event.key == InputKeyOk) {
-                        app->cursor_position = CURSOR_CHOOSE_PROCESS;
-                    }
+            if(event.type == InputTypePress && app->cursor_position == CURSOR_CHOOSE_PROCESS) {
+                if(event.key == InputKeyUp || event.key == InputKeyDown) {
+                    app->draw_process =
+                        (app->draw_process + PROCESS_RESET + (event.key == InputKeyDown ? 2 : 0)) %
+                        (PROCESS_RESET + 1);
+                    eth_worker_set_active_process(
+                        app->eth_worker, (EthWorkerProcess)app->draw_process);
+                } else if(event.key == InputKeyOk) {
+                    ethernet_view_process_move(app->eth_worker->active_process, 0);
+                    app->cursor_position = CURSOR_CLICK_PROCESS;
+                    view_port_update(app->view_port);
+                    furi_delay_ms(150);
+                    char str[] = "test string 0 W5500 Test BIG CHARACTERS AND long string";
+                    str[12] += cnt % 10;
+                    cnt += 1;
+                    ethernet_view_process_print(app->eth_worker->init_process, str);
+                    app->cursor_position = CURSOR_INSIDE_PROCESS;
+                } else if(event.key == InputKeyRight) {
+                    app->cursor_position = CURSOR_INSIDE_PROCESS;
+                } else if(event.key == InputKeyBack) {
+                    app->cursor_position = CURSOR_EXIT_APP;
                 }
-                view_port_update(app->view_port);
-            } else if(event.type == InputTypeLong) {
-                if(event.key == InputKeyUp) {
-                    long_press = 1;
-                    long_press_dir = -1;
+            } else if(event.type == InputTypePress && app->cursor_position == CURSOR_INSIDE_PROCESS) {
+                if(event.key == InputKeyLeft) {
+                    app->cursor_position = CURSOR_CHOOSE_PROCESS;
+                } else if(event.key == InputKeyBack) {
+                    ethernet_view_process_move(app->eth_worker->active_process, 0);
+                    app->cursor_position = CURSOR_CHOOSE_PROCESS;
+                } else if(event.key == InputKeyUp) {
+                    ethernet_view_process_move(app->eth_worker->active_process, -1);
                 } else if(event.key == InputKeyDown) {
-                    long_press = 1;
-                    long_press_dir = 1;
+                    ethernet_view_process_move(app->eth_worker->active_process, 1);
                 }
+            } else if(event.type == InputTypePress && app->cursor_position == CURSOR_EXIT_APP) {
+                if(event.key == InputKeyBack) {
+                    break;
+                } else if(event.key == InputKeyOk) {
+                    app->cursor_position = CURSOR_CHOOSE_PROCESS;
+                }
+            } else if(event.type == InputTypeLong && event.key == InputKeyUp) {
+                long_press = 1;
+                long_press_dir = -1;
+            } else if(event.type == InputTypeLong && event.key == InputKeyDown) {
+                long_press = 1;
+                long_press_dir = 1;
             } else if(event.type == InputTypeRelease) {
                 long_press = 0;
                 long_press_dir = 0;
             }
         }
         if(long_press) {
-            ethernet_view_process_move(app->eth_worker->init_process, long_press_dir);
+            ethernet_view_process_move(app->eth_worker->active_process, long_press_dir);
         }
+        view_port_update(app->view_port);
     }
 
     finik_eth_app_free(app);

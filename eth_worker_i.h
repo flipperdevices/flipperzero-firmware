@@ -27,6 +27,11 @@ struct EthWorker {
     FuriThread* thread;
     void* context;
     EthViewProcess* init_process;
+    EthViewProcess* dhcp_process;
+    EthViewProcess* stat_process;
+    EthViewProcess* ping_process;
+    EthViewProcess* reset_process;
+    EthViewProcess* active_process;
 
     EthWorkerState state;
     EthWorkerSubState sub_state;
