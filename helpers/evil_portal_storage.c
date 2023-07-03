@@ -97,6 +97,10 @@ char *sequential_file_resolve_path(Storage *storage, const char *dir,
 void write_logs(char *portal_logs) {
   Storage *storage = evil_portal_open_storage();
 
+  if(!storage_file_exists(storage, EVIL_PORTAL_LOG_SAVE_PATH)) {
+    storage_simply_mkdir(storage, EVIL_PORTAL_LOG_SAVE_PATH);
+  }
+
   char *seq_file_path = sequential_file_resolve_path(
       storage, EVIL_PORTAL_LOG_SAVE_PATH, "log", "txt");
 
