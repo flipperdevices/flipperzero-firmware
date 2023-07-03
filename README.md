@@ -112,6 +112,20 @@ Zoom levels (the third picture is the default zoom) :
 
 <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom0.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom1.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-geigercounter/blob/main/img/zoom3.png" width=25% height=25%>
 
+## Recording function
+
+Output **CSV** files are stored at the root of SD card. Date & time are set in the name file (example : **geiger-2023-07-03--23-48-15.csv**)
+
+Data sample :
+
+epoch,cps
+0,3587
+1,3604
+2,2943
+3,1771
+4,1559
+5,998
+
 ## User gallery
 
 [BRD8 [Reddit]](https://www.reddit.com/user/BRD8/) https://www.reddit.com/r/flipperzero/comments/110062z/am_i_a_hacker_now_mom/ : 
@@ -130,7 +144,7 @@ Zoom levels (the third picture is the default zoom) :
 
 Here are some nice ideas to improve this app :
 
-~~* Save output data in XML / JSON file~~ done, output data are stored in CSV
+* ~~Save output data in XML / JSON file~~ done, output data are stored in CSV
 * Use the geiger board as random number generator
 * Send data on the air in real time to monitor remotly
 * Buzz when it gets dangerous like a dosimeter
