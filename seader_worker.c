@@ -459,9 +459,7 @@ bool parseSamResponse(SeaderWorker* seader_worker, SamResponse_t* samResponse) {
             }
         }
     } else if(parseVersion(seader_worker, samResponse->buf, samResponse->size)) {
-        if(seader_worker->callback) {
-            seader_worker->callback(SeaderWorkerEventSamPresent, seader_worker->context);
-        }
+        // no-op
     } else if(unpack_pacs(seader_worker, credential, samResponse->buf, samResponse->size)) {
         if(seader_worker->callback) {
             seader_worker->callback(SeaderWorkerEventSuccess, seader_worker->context);

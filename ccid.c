@@ -229,10 +229,16 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
                     FURI_LOG_I(TAG, "SAM ATR!");
                     hasSAM = true;
                     seader_worker_send_version(seader_worker);
+                    if(seader_worker->callback) {
+                        seader_worker->callback(SeaderWorkerEventSamPresent, seader_worker->context);
+                    }
                 } else if(memcmp(SAM_ATR2, message.payload, sizeof(SAM_ATR2)) == 0) {
                     FURI_LOG_I(TAG, "SAM ATR2!");
                     hasSAM = true;
                     seader_worker_send_version(seader_worker);
+                    if(seader_worker->callback) {
+                        seader_worker->callback(SeaderWorkerEventSamPresent, seader_worker->context);
+                    }
                 } else {
                     FURI_LOG_W(TAG, "Unknown ATR");
                     if(seader_worker->callback) {
