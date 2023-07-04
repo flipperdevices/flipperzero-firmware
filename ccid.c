@@ -41,6 +41,7 @@ void PC_to_RDR_IccPowerOn(SeaderUartBridge* seader_uart) {
 }
 
 void PC_to_RDR_GetSlotStatus(SeaderUartBridge* seader_uart) {
+    hasSAM = false; // If someone is calling this, reset sam state
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
