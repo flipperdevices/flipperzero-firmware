@@ -18,8 +18,9 @@ void seader_scene_credential_info_on_enter(void* context) {
     SeaderCredential* credential = seader->credential;
     Widget* widget = seader->widget;
 
-    FuriString* credential_str = furi_string_alloc();
     FuriString* type_str = furi_string_alloc();
+    FuriString* bitlength_str = furi_string_alloc();
+    FuriString* credential_str = furi_string_alloc();
 
     dolphin_deed(DolphinDeedNfcReadSuccess);
 
@@ -27,9 +28,10 @@ void seader_scene_credential_info_on_enter(void* context) {
     notification_message(seader->notifications, &sequence_success);
 
     furi_string_set(credential_str, "");
+    furi_string_set(bitlength_str, "");
     if(credential->bit_length > 0) {
-        furi_string_cat_printf(
-            credential_str, "(%d)  %016llx", credential->bit_length, credential->credential);
+        furi_string_cat_printf(bitlength_str, "%d bit", credential->bit_length);
+        furi_string_cat_printf(credential_str, "0x%llX", credential->credential);
 
         if(credential->type == SeaderCredentialType14A) {
             furi_string_set(type_str, "14443A");
@@ -48,7 +50,15 @@ void seader_scene_credential_info_on_enter(void* context) {
         seader);
 
     widget_add_string_element(
-        widget, 64, 5, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(type_str));
+        widget, 64, 5, AlignCenter, AlignCenter, FontPrimary, furi_string_get_cstr(type_str));
+    widget_add_string_element(
+        widget,
+        64,
+        24,
+        AlignCenter,
+        AlignCenter,
+        FontSecondary,
+        furi_string_get_cstr(bitlength_str));
     widget_add_string_element(
         widget,
         64,
@@ -58,6 +68,7 @@ void seader_scene_credential_info_on_enter(void* context) {
         FontSecondary,
         furi_string_get_cstr(credential_str));
 
+    furi_string_free(bitlength_str);
     furi_string_free(credential_str);
     furi_string_free(type_str);
 
