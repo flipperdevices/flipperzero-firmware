@@ -155,6 +155,8 @@ It is important to give the devboard some time to load the html files from the F
 
 If you have the Marauder firmware on your dev board you may need to enable `Erase All Flash Before Sketch Upload` before flashing.
 
+Some users are reporting that the captive portal login does not open on some Android phones.
+
 ## Todo
 
 I plan on working on this in my free time. Here is my todo list.
