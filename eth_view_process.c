@@ -1,6 +1,7 @@
 #include "eth_view_process.h"
 #include "eth_worker.h"
 #include "eth_worker_i.h"
+#include "finik_eth_icons.h"
 
 #include <furi_hal.h>
 #include <gui/gui.h>
@@ -11,18 +12,42 @@
 
 #define TAG "EthView"
 
-EthViewProcess* ethernet_view_process_malloc() {
+EthViewProcess* ethernet_view_process_malloc(EthWorkerProcess type) {
     EthViewProcess* evp = malloc(sizeof(EthViewProcess));
+    evp->type = type;
     evp->autofill = 1;
     evp->carriage = 0;
     evp->position = 0;
     evp->x = 27;
     evp->y = 6;
+
+    if(type == EthWorkerProcessInit) {
+        evp->y += 22;
+        evp->draw_struct = malloc(sizeof(EthViewDrawInit));
+        memset(evp->draw_struct, 0, sizeof(EthViewDrawInit));
+    }
     return evp;
 }
 
 void ethernet_view_process_free(EthViewProcess* evp) {
+    if(evp->type == EthWorkerProcessInit) {
+        free(evp->draw_struct);
+    }
     free(evp);
+}
+
+static void draw_hex_digit(Canvas* canvas, uint8_t x, uint8_t y, uint8_t digit) {
+    char digit_str[] = "0";
+    if(digit < 0xA) {
+        digit_str[0] += digit;
+    } else if(digit < 0x10) {
+        digit_str[0] = 'A';
+        digit_str[0] += digit - 0xA;
+    } else {
+        return;
+    }
+
+    canvas_draw_str(canvas, x, y, digit_str);
 }
 
 void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
@@ -45,6 +70,51 @@ void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
     for(uint8_t i = 0; i < str_count; ++i) {
         uint8_t y1 = y + (i + 1) * str_height;
         canvas_draw_str(canvas, x, y1, process->fifo[(position + i) % SCREEN_STRINGS_COUNT]);
+    }
+
+    if(process->type == EthWorkerProcessInit) {
+        uint8_t editing = process->editing;
+        canvas_draw_icon(canvas, 27, 10, &I_init_100x19px);
+        for(uint8_t i = 0; i < 6; ++i) {
+            uint8_t x1 = 29 + i * 17;
+            uint8_t x2 = x1 + 6;
+            uint8_t mac = ((EthViewDrawInit*)process->draw_struct)->mac[i];
+            uint8_t octet = ((EthViewDrawInit*)process->draw_struct)->current_octet;
+            draw_hex_digit(canvas, x1, 25, (mac & 0x0F));
+            draw_hex_digit(canvas, x2, 25, (mac & 0xF0) >> 4);
+            if(editing && (octet / 2 == i)) {
+                uint8_t x = octet & 1 ? x2 : x1;
+                canvas_draw_line(canvas, x, 26, x + 4, 26);
+                canvas_draw_line(canvas, x, 27, x + 4, 27);
+            }
+        }
+    }
+}
+
+static void mac_change_hex_digit(uint8_t* mac, uint8_t octet, int8_t diff) {
+    uint8_t digit = (octet & 1) ? (mac[octet / 2] >> 4) : (mac[octet / 2]);
+    digit = (digit + diff) & 0xF;
+    mac[octet / 2] = (mac[octet / 2] & ((octet & 1) ? 0x0F : 0xF0)) |
+                     (digit << ((octet & 1) ? 4 : 0));
+}
+
+void ethernet_view_process_keyevent(EthViewProcess* process, InputKey key) {
+    furi_assert(process);
+    if(process->type == EthWorkerProcessInit) {
+        uint8_t octet = ((EthViewDrawInit*)process->draw_struct)->current_octet;
+        uint8_t* mac = ((EthViewDrawInit*)process->draw_struct)->mac;
+        if(key == InputKeyLeft) {
+            if(octet > 0) octet -= 1;
+        } else if(key == InputKeyRight) {
+            if(octet < 12) octet += 1;
+        } else if(key == InputKeyUp) {
+            mac_change_hex_digit(mac, octet, 1);
+        } else if(key == InputKeyDown) {
+            mac_change_hex_digit(mac, octet, -1);
+        } else if(key == InputKeyOk) {
+            process->editing = 0;
+        }
+        ((EthViewDrawInit*)process->draw_struct)->current_octet = octet;
     }
 }
 
@@ -69,7 +139,7 @@ void ethernet_view_process_autofill(EthViewProcess* process, uint8_t state) {
 
 static uint16_t get_string_with_width(const char* str, uint16_t width) {
     u8g2_t canvas_memory;
-    Canvas* canvas = &canvas_memory; // grazniy hack
+    Canvas* canvas = (Canvas*)&canvas_memory; // grazniy hack
     canvas_set_font(canvas, FontSecondary);
 
     uint8_t end = 0;

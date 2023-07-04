@@ -152,26 +152,39 @@ int32_t finik_eth_app(void* p) {
                     app->cursor_position = CURSOR_CLICK_PROCESS;
                     view_port_update(app->view_port);
                     furi_delay_ms(150);
+                    app->eth_worker->active_process->editing = 1;
                     char str[] = "test string 0 W5500 Test BIG CHARACTERS AND long string";
                     str[12] += cnt % 10;
                     cnt += 1;
                     ethernet_view_process_print(app->eth_worker->init_process, str);
                     app->cursor_position = CURSOR_INSIDE_PROCESS;
                 } else if(event.key == InputKeyRight) {
+                    eth_worker_set_active_process(
+                        app->eth_worker, (EthWorkerProcess)app->draw_process);
                     app->cursor_position = CURSOR_INSIDE_PROCESS;
                 } else if(event.key == InputKeyBack) {
                     app->cursor_position = CURSOR_EXIT_APP;
                 }
             } else if(event.type == InputTypePress && app->cursor_position == CURSOR_INSIDE_PROCESS) {
-                if(event.key == InputKeyLeft) {
+                if(app->eth_worker->active_process->editing) {
+                    if(event.key == InputKeyBack) {
+                        app->eth_worker->active_process->editing = 0;
+                    } else {
+                        ethernet_view_process_keyevent(app->eth_worker->active_process, event.key);
+                    }
+                } else if(event.key == InputKeyLeft) {
+                    app->eth_worker->active_process->editing = 0;
                     app->cursor_position = CURSOR_CHOOSE_PROCESS;
                 } else if(event.key == InputKeyBack) {
                     ethernet_view_process_move(app->eth_worker->active_process, 0);
+                    app->eth_worker->active_process->editing = 0;
                     app->cursor_position = CURSOR_CHOOSE_PROCESS;
                 } else if(event.key == InputKeyUp) {
                     ethernet_view_process_move(app->eth_worker->active_process, -1);
                 } else if(event.key == InputKeyDown) {
                     ethernet_view_process_move(app->eth_worker->active_process, 1);
+                } else if(event.key == InputKeyOk) {
+                    app->eth_worker->active_process->editing = 1;
                 }
             } else if(event.type == InputTypePress && app->cursor_position == CURSOR_EXIT_APP) {
                 if(event.key == InputKeyBack) {

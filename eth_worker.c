@@ -21,11 +21,11 @@ EthWorker* eth_worker_alloc() {
 
     eth_worker_change_state(eth_worker, EthWorkerStateModuleInit);
 
-    eth_worker->init_process = ethernet_view_process_malloc();
-    eth_worker->dhcp_process = ethernet_view_process_malloc();
-    eth_worker->stat_process = ethernet_view_process_malloc();
-    eth_worker->ping_process = ethernet_view_process_malloc();
-    eth_worker->reset_process = ethernet_view_process_malloc();
+    eth_worker->init_process = ethernet_view_process_malloc(EthWorkerProcessInit);
+    eth_worker->dhcp_process = ethernet_view_process_malloc(EthWorkerProcessDHCP);
+    eth_worker->stat_process = ethernet_view_process_malloc(EthWorkerProcessStatic);
+    eth_worker->ping_process = ethernet_view_process_malloc(EthWorkerProcessPing);
+    eth_worker->reset_process = ethernet_view_process_malloc(EthWorkerProcessReset);
     eth_worker->active_process = eth_worker->init_process;
 
     //eth_worker->callback = eth_worker_change_state;

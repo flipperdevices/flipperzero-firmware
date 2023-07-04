@@ -21,6 +21,9 @@ struct EthViewProcess {
     uint8_t carriage;
     uint8_t position;
     uint8_t autofill;
+    uint8_t editing;
+    EthWorkerProcess type;
+    void* draw_struct;
 };
 
 struct EthWorker {
