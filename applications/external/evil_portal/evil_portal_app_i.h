@@ -46,6 +46,7 @@ struct Evil_PortalApp {
     bool show_stopscan_tip;
     bool sent_ap;
     bool sent_html;
+    bool sent_reset;
     int BAUDRATE;
 
     uint8_t* index_html;

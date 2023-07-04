@@ -27,6 +27,7 @@ Evil_PortalApp* evil_portal_app_alloc() {
 
     app->sent_html = false;
     app->sent_ap = false;
+    app->sent_reset = false;
     app->has_command_queue = false;
     app->command_index = 0;
     app->portal_logs = malloc(5000);
@@ -72,6 +73,7 @@ void evil_portal_app_free(Evil_PortalApp* app) {
     // save latest logs
     if(strlen(app->portal_logs) > 0) {
         write_logs(app->portal_logs);
+        free(app->portal_logs);
     }
 
     // Send reset event to dev board

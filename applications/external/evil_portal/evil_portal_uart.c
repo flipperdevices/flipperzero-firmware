@@ -74,9 +74,14 @@ static int32_t uart_worker(void* context) {
                         }
                     }
 
-                    strcat(uart->app->portal_logs, (char*)uart->rx_buf);
+                    if(uart->app->sent_reset == false) {
+                        strcat(uart->app->portal_logs, (char*)uart->rx_buf);
+                    }
+
                     if(strlen(uart->app->portal_logs) > 4000) {
                         write_logs(uart->app->portal_logs);
+                        free(uart->app->portal_logs);
+                        strcpy(uart->app->portal_logs, "");
                     }
                 }
             }

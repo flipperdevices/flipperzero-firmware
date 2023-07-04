@@ -75,6 +75,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW PR: [Picopass fix ice #2836 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/2836)
 - OFW: [Desktop settings: show icon and name for external applications #2837 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2837)
 - [SWD Probe fix (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/706f6c906f7bb8bb9a93835e6f7b282fea8eff07)
+- Updated: [ESP32 Evil Portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
+
 <a name="release">
 
 ## Install Latest Release
