@@ -1319,6 +1319,7 @@ void nfc_worker_analyze_reader(NfcWorker* nfc_worker) {
             FURI_LOG_D(TAG, "No data from reader");
             continue;
         }
+        furi_delay_ms(1);
     }
 
     rfal_platform_spi_release();
