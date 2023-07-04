@@ -41,6 +41,8 @@ void nfc_device_copy_data(
     NfcProtocol protocol,
     NfcDeviceData* protocol_data);
 
+bool nfc_device_is_equal(const NfcDevice* instance, const NfcDevice* other);
+
 void nfc_device_set_loading_callback(
     NfcDevice* instance,
     NfcLoadingCallback callback,
