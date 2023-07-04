@@ -19,3 +19,7 @@ const char* furi_hal_version_get_fcc_id() {
 const char* furi_hal_version_get_ic_id() {
     return "Pending";
 }
+
+const char* furi_hal_version_get_mic_id() {
+    return "Pending";
+}
