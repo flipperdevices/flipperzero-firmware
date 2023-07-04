@@ -21,8 +21,6 @@ bool nfc_scene_read_menu_on_event(void* context, SceneManagerEvent event) {
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(nfc->scene_manager, NfcSceneReadMenu, event.event);
         consumed = nfc_protocol_support_handle_scene_read_menu(nfc, event.event);
-    } else if(event.type == SceneManagerEventTypeBack) {
-        consumed = scene_manager_previous_scene(nfc->scene_manager);
     }
 
     return consumed;
