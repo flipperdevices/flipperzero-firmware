@@ -33,6 +33,9 @@ bool password_received = false;
 char apName[30] = "PORTAL";
 char index_html[MAX_HTML_SIZE] = "TEST";
 
+// RESET
+void (*resetFunction)(void) = 0;
+
 // AP FUNCTIONS
 class CaptiveRequestHandler : public AsyncWebHandler {
 public:
@@ -128,30 +131,24 @@ void getInitInput() {
   bool has_ap = false;
   bool has_html = false;
   while (!has_html || !has_ap) {
-    if (Serial.available() > 0) {
-      if(!has_html) {
-         String flipperMessage = Serial.readString();
-          const char *serialMessage = flipperMessage.c_str();
-          int compare = strncmp(serialMessage, SET_HTML_CMD, strlen(SET_HTML_CMD));
-          if (compare == 0) {
-            serialMessage += strlen(SET_HTML_CMD);
-            strncpy(index_html, serialMessage, strlen(serialMessage) - 1);
-            has_html = true;
-            Serial.println("html set");
-          }
-      } else if(!has_ap) {
+      if (Serial.available() > 0) {
         String flipperMessage = Serial.readString();
         const char *serialMessage = flipperMessage.c_str();
-        int compare = strncmp(serialMessage, SET_AP_CMD, strlen(SET_AP_CMD));
-        if (compare == 0) {
+        if (strncmp(serialMessage, SET_HTML_CMD, strlen(SET_HTML_CMD)) == 0) {
+          serialMessage += strlen(SET_HTML_CMD);
+          strncpy(index_html, serialMessage, strlen(serialMessage) - 1);
+          has_html = true;
+          Serial.println("html set");
+        } else if (strncmp(serialMessage, SET_AP_CMD, strlen(SET_AP_CMD)) ==
+                   0) {
           serialMessage += strlen(SET_AP_CMD);
           strncpy(apName, serialMessage, strlen(serialMessage) - 1);
-          has_ap = true;  
+          has_ap = true;
           Serial.println("ap set");
+        } else if (strncmp(serialMessage, RESET_CMD, strlen(RESET_CMD)) == 0) {
+          resetFunction();
         }
       }
-      
-    }
   }
   Serial.println("all set");
 }
@@ -164,8 +161,6 @@ void startPortal() {
 }
 
 // MAIN FUNCTIONS
-void (*resetFunction)(void) = 0;
-
 void setup() {
 
   // init LED pins
