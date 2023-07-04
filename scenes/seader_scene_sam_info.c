@@ -3,10 +3,7 @@
 
 #define TAG "SeaderSamInfoScene"
 
-void seader_scene_sam_info_widget_callback(
-    GuiButtonType result,
-    InputType type,
-    void* context) {
+void seader_scene_sam_info_widget_callback(GuiButtonType result, InputType type, void* context) {
     Seader* seader = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(seader->view_dispatcher, result);
@@ -20,14 +17,11 @@ void seader_scene_sam_info_on_enter(void* context) {
 
     FuriString* fw_str = furi_string_alloc();
 
-    furi_string_cat_printf(fw_str, "FW %d.%d", seader_worker->sam_version[0], seader_worker->sam_version[1]);
+    furi_string_cat_printf(
+        fw_str, "FW %d.%d", seader_worker->sam_version[0], seader_worker->sam_version[1]);
 
     widget_add_button_element(
-        seader->widget,
-        GuiButtonTypeLeft,
-        "Back",
-        seader_scene_sam_info_widget_callback,
-        seader);
+        seader->widget, GuiButtonTypeLeft, "Back", seader_scene_sam_info_widget_callback, seader);
 
     widget_add_string_element(
         widget, 64, 5, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(fw_str));
