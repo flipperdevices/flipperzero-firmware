@@ -80,30 +80,25 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
         {
             .on_enter = NULL,
             .on_event = nfc_scene_info_on_event_iso14443_3a,
-            .on_exit = NULL,
         },
     .scene_read =
         {
             .on_enter = NULL,
             .on_event = NULL,
-            .on_exit = NULL,
         },
     .scene_read_menu =
         {
             .on_enter = nfc_scene_read_menu_on_enter_iso14443_3a,
             .on_event = nfc_scene_read_menu_on_event_iso14443_3a,
-            .on_exit = NULL,
         },
     .scene_read_success =
         {
             .on_enter = NULL,
             .on_event = NULL,
-            .on_exit = NULL,
         },
     .scene_saved_menu =
         {
             .on_enter = nfc_scene_saved_menu_on_enter_iso14443_3a,
             .on_event = nfc_scene_saved_menu_on_event_iso14443_3a,
-            .on_exit = NULL,
         },
 };

@@ -23,7 +23,7 @@ typedef void (*NfcProtocolSupportOnExit)(NfcApp* instance);
 typedef struct {
     NfcProtocolSupportOnEnter on_enter;
     NfcProtocolSupportOnEvent on_event;
-    NfcProtocolSupportOnExit on_exit;
+    /*NfcProtocolSupportOnExit on_exit; is not necessary */
 } NfcProtocolSupportSceneBase;
 
 typedef struct {
