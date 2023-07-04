@@ -408,13 +408,14 @@ bool unpack_pacs(
 //    800201298106683d052026b6820101
 //300F800201298106683D052026B6820101
 bool parseVersion(SeaderWorker* seader_worker, uint8_t* buf, size_t size) {
-    UNUSED(seader_worker); // TODO: add either a SAM struct or the firmware to the worker or something
+    UNUSED(
+        seader_worker); // TODO: add either a SAM struct or the firmware to the worker or something
     SamVersion_t* version = 0;
     version = calloc(1, sizeof *version);
     assert(version);
 
     bool rtn = false;
-    if (size > 30) {
+    if(size > 30) {
         // Too large to handle now
         FURI_LOG_W(TAG, "Version of %d is to long to parse", size);
         return false;
@@ -422,17 +423,19 @@ bool parseVersion(SeaderWorker* seader_worker, uint8_t* buf, size_t size) {
     // Add sequence prefix
     uint8_t seq[32] = {0x30};
     seq[1] = (uint8_t)size;
-    memcpy(seq+2, buf, size);
+    memcpy(seq + 2, buf, size);
 
-    asn_dec_rval_t rval = asn_decode(0, ATS_DER, &asn_DEF_SamVersion, (void**)&version, seq, size+2);
+    asn_dec_rval_t rval =
+        asn_decode(0, ATS_DER, &asn_DEF_SamVersion, (void**)&version, seq, size + 2);
 
     if(rval.code == RC_OK) {
         char versionDebug[128] = {0};
-        (&asn_DEF_SamVersion)->op->print_struct(&asn_DEF_SamVersion, version, 1, toString, versionDebug);
+        (&asn_DEF_SamVersion)
+            ->op->print_struct(&asn_DEF_SamVersion, version, 1, toString, versionDebug);
         if(strlen(versionDebug) > 0) {
             FURI_LOG_D(TAG, "Received version: %s", versionDebug);
         }
-        if (version->version.size == 2) {
+        if(version->version.size == 2) {
             memcpy(seader_worker->sam_version, version->version.buf, version->version.size);
         }
 

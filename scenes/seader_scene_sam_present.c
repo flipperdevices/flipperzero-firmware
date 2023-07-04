@@ -32,12 +32,16 @@ void seader_scene_sam_present_on_enter(void* context) {
     submenu_add_item(
         submenu, "Load", SubmenuIndexSaved, seader_scene_sam_present_submenu_callback, seader);
 
-    if (seader_worker->sam_version[0] != 0 && seader_worker->sam_version[1] != 0) {
+    if(seader_worker->sam_version[0] != 0 && seader_worker->sam_version[1] != 0) {
         FuriString* fw_str = furi_string_alloc();
         furi_string_cat_printf(
             fw_str, "FW %d.%d", seader_worker->sam_version[0], seader_worker->sam_version[1]);
         submenu_add_item(
-            submenu, furi_string_get_cstr(fw_str), SubmenuIndexFwVersion, seader_scene_sam_present_submenu_callback, seader);
+            submenu,
+            furi_string_get_cstr(fw_str),
+            SubmenuIndexFwVersion,
+            seader_scene_sam_present_submenu_callback,
+            seader);
         furi_string_free(fw_str);
     }
 
