@@ -5,8 +5,8 @@
  * 	`asn1c -D ./lib/asn1 -no-gen-example -pdu=all`
  */
 
-#ifndef	_Version_H_
-#define	_Version_H_
+#ifndef	_SamVersion_H_
+#define	_SamVersion_H_
 
 
 #include <asn_application.h>
@@ -19,21 +19,21 @@
 extern "C" {
 #endif
 
-/* Version */
-typedef struct Version {
+/* SamVersion */
+typedef struct SamVersion {
 	OCTET_STRING_t	 v;
 	OCTET_STRING_t	 f;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;
-} Version_t;
+} SamVersion_t;
 
 /* Implementation */
-extern asn_TYPE_descriptor_t asn_DEF_Version;
+extern asn_TYPE_descriptor_t asn_DEF_SamVersion;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif	/* _Version_H_ */
+#endif	/* _SamVersion_H_ */
 #include <asn_internal.h>

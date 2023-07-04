@@ -5,10 +5,10 @@
  * 	`asn1c -D ./lib/asn1 -no-gen-example -pdu=all`
  */
 
-#include "Version.h"
+#include "SamVersion.h"
 
-static asn_TYPE_member_t asn_MBR_Version_1[] = {
-	{ ATF_NOFLAGS, 0, offsetof(struct Version, v),
+static asn_TYPE_member_t asn_MBR_SamVersion_1[] = {
+	{ ATF_NOFLAGS, 0, offsetof(struct SamVersion, v),
 		(ASN_TAG_CLASS_CONTEXT | (0 << 2)),
 		-1,	/* IMPLICIT tag at current level */
 		&asn_DEF_OCTET_STRING,
@@ -17,7 +17,7 @@ static asn_TYPE_member_t asn_MBR_Version_1[] = {
 		0, 0, /* No default value */
 		"v"
 		},
-	{ ATF_NOFLAGS, 0, offsetof(struct Version, f),
+	{ ATF_NOFLAGS, 0, offsetof(struct SamVersion, f),
 		(ASN_TAG_CLASS_CONTEXT | (1 << 2)),
 		-1,	/* IMPLICIT tag at current level */
 		&asn_DEF_OCTET_STRING,
@@ -27,34 +27,34 @@ static asn_TYPE_member_t asn_MBR_Version_1[] = {
 		"f"
 		},
 };
-static const ber_tlv_tag_t asn_DEF_Version_tags_1[] = {
+static const ber_tlv_tag_t asn_DEF_SamVersion_tags_1[] = {
 	(ASN_TAG_CLASS_UNIVERSAL | (16 << 2))
 };
-static const asn_TYPE_tag2member_t asn_MAP_Version_tag2el_1[] = {
+static const asn_TYPE_tag2member_t asn_MAP_SamVersion_tag2el_1[] = {
     { (ASN_TAG_CLASS_CONTEXT | (0 << 2)), 0, 0, 0 }, /* v */
     { (ASN_TAG_CLASS_CONTEXT | (1 << 2)), 1, 0, 0 } /* f */
 };
-static asn_SEQUENCE_specifics_t asn_SPC_Version_specs_1 = {
-	sizeof(struct Version),
-	offsetof(struct Version, _asn_ctx),
-	asn_MAP_Version_tag2el_1,
+static asn_SEQUENCE_specifics_t asn_SPC_SamVersion_specs_1 = {
+	sizeof(struct SamVersion),
+	offsetof(struct SamVersion, _asn_ctx),
+	asn_MAP_SamVersion_tag2el_1,
 	2,	/* Count of tags in the map */
 	0, 0, 0,	/* Optional elements (not needed) */
 	-1,	/* First extension addition */
 };
-asn_TYPE_descriptor_t asn_DEF_Version = {
-	"Version",
-	"Version",
+asn_TYPE_descriptor_t asn_DEF_SamVersion = {
+	"SamVersion",
+	"SamVersion",
 	&asn_OP_SEQUENCE,
-	asn_DEF_Version_tags_1,
-	sizeof(asn_DEF_Version_tags_1)
-		/sizeof(asn_DEF_Version_tags_1[0]), /* 1 */
-	asn_DEF_Version_tags_1,	/* Same as above */
-	sizeof(asn_DEF_Version_tags_1)
-		/sizeof(asn_DEF_Version_tags_1[0]), /* 1 */
+	asn_DEF_SamVersion_tags_1,
+	sizeof(asn_DEF_SamVersion_tags_1)
+		/sizeof(asn_DEF_SamVersion_tags_1[0]), /* 1 */
+	asn_DEF_SamVersion_tags_1,	/* Same as above */
+	sizeof(asn_DEF_SamVersion_tags_1)
+		/sizeof(asn_DEF_SamVersion_tags_1[0]), /* 1 */
 	{ 0, 0, SEQUENCE_constraint },
-	asn_MBR_Version_1,
+	asn_MBR_SamVersion_1,
 	2,	/* Elements count */
-	&asn_SPC_Version_specs_1	/* Additional specs */
+	&asn_SPC_SamVersion_specs_1	/* Additional specs */
 };
 

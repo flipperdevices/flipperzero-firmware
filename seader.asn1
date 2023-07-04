@@ -80,7 +80,7 @@ FrameProtocol ::= ENUMERATED {
   iclass (4)
 }
 
-Version ::= SEQUENCE {
+SamVersion ::= SEQUENCE {
   v [0] IMPLICIT OCTET STRING,
   f [1] IMPLICIT OCTET STRING
 }
