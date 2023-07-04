@@ -882,15 +882,17 @@ bool mf_classic_emulator(
             break;
         }
 
-        if(cmd == 0x50 && plain_data[1] == 0x00) {
+        if(cmd == NFCA_CMD_HALT && plain_data[1] == 0x00) {
             FURI_LOG_T(TAG, "Halt received");
             return false;
         }
-        if(cmd == 0xE0 && !is_encrypted) {
+
+        if(cmd == NFCA_CMD_RATS && !is_encrypted) {
             // Mifare Classic doesn't support ATS, NACK it and start listening again
             FURI_LOG_T(TAG, "RATS received");
             break;
         }
+
         if(cmd == MF_CLASSIC_AUTH_KEY_A_CMD || cmd == MF_CLASSIC_AUTH_KEY_B_CMD) {
             uint8_t block = plain_data[1];
             uint64_t key = 0;
@@ -905,8 +907,7 @@ bool mf_classic_emulator(
                     access_key = MfClassicKeyA;
                 } else {
                     FURI_LOG_D(TAG, "Key not known");
-                    command_processed = true;
-                    break;
+                    return false;
                 }
             } else {
                 if(mf_classic_is_key_found(
@@ -916,8 +917,7 @@ bool mf_classic_emulator(
                     access_key = MfClassicKeyB;
                 } else {
                     FURI_LOG_D(TAG, "Key not known");
-                    command_processed = true;
-                    break;
+                    return false;
                 }
             }
 
@@ -945,6 +945,7 @@ bool mf_classic_emulator(
                 tx_rx->tx_bits = sizeof(nt) * 8;
                 tx_rx->tx_rx_type = FuriHalNfcTxRxTransparent;
             }
+
             if(!furi_hal_nfc_tx_rx(tx_rx, 500)) {
                 FURI_LOG_E(TAG, "Error in NT exchange");
                 return false;
@@ -1163,7 +1164,7 @@ bool mf_classic_emulator(
 void mf_classic_halt(FuriHalNfcTxRxContext* tx_rx, Crypto1* crypto) {
     furi_assert(tx_rx);
 
-    uint8_t plain_data[4] = {0x50, 0x00, 0x00, 0x00};
+    uint8_t plain_data[4] = {NFCA_CMD_HALT, 0x00, 0x00, 0x00};
 
     nfca_append_crc16(plain_data, 2);
     if(crypto) {
