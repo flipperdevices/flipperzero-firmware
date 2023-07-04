@@ -39,12 +39,9 @@
 #include <m-array.h>
 
 #include <lib/nfc/nfc.h>
-#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h>
-#include <lib/nfc/protocols/mf_desfire/mf_desfire_poller.h>
-#include <lib/nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 #include <lib/nfc/protocols/mf_ultralight/mf_ultralight_listener.h>
-#include <lib/nfc/protocols/mf_classic/mf_classic_poller.h>
 
 #include <nfc/nfc_poller.h>
 #include <nfc/nfc_scanner.h>

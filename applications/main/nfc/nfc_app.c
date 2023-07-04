@@ -334,13 +334,13 @@ static bool nfc_save_internal(NfcApp* instance, const char* extension) {
 bool nfc_save_shadow_file(NfcApp* instance) {
     furi_assert(instance);
 
-    return nfc_save_internal(instance, NFC_APP_EXTENSION);
+    return nfc_save_internal(instance, NFC_APP_SHADOW_EXTENSION);
 }
 
 bool nfc_save(NfcApp* instance) {
     furi_assert(instance);
 
-    return nfc_save_internal(instance, NFC_APP_SHADOW_EXTENSION);
+    return nfc_save_internal(instance, NFC_APP_EXTENSION);
 }
 
 bool nfc_load_file(NfcApp* instance, FuriString* path, bool show_dialog) {

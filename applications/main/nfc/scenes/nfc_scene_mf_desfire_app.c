@@ -1,6 +1,6 @@
 #include "../nfc_app_i.h"
 
-#include "../helpers/format/nfc_mf_desfire_format.h"
+#include "../helpers/protocol_support/mf_desfire/mf_desfire_render.h"
 
 enum SubmenuIndex {
     SubmenuIndexAppInfo,
@@ -70,16 +70,16 @@ bool nfc_scene_mf_desfire_app_on_event(void* context, SceneManagerEvent event) {
             if(event.event == SubmenuIndexAppInfo) {
                 const MfDesfireApplicationId* app_id =
                     simple_array_cget(data->application_ids, app_index);
-                nfc_mf_desfire_format_application_id(app_id, nfc->text_box_store);
-                nfc_mf_desfire_format_application(app, nfc->text_box_store);
+                nfc_render_mf_desfire_application_id(app_id, nfc->text_box_store);
+                nfc_render_mf_desfire_application(app, nfc->text_box_store);
             } else {
                 const uint32_t file_index = event.event - SubmenuIndexDynamic;
                 const MfDesfireFileId* file_id = simple_array_cget(app->file_ids, file_index);
                 const MfDesfireFileSettings* file_settings =
                     simple_array_cget(app->file_settings, file_index);
                 const MfDesfireFileData* file_data = simple_array_cget(app->file_data, file_index);
-                nfc_mf_desfire_format_file_id(file_id, nfc->text_box_store);
-                nfc_mf_desfire_format_file_settings_data(
+                nfc_render_mf_desfire_file_id(file_id, nfc->text_box_store);
+                nfc_render_mf_desfire_file_settings_data(
                     file_settings, file_data, nfc->text_box_store);
             }
             text_box_set_text(text_box, furi_string_get_cstr(nfc->text_box_store));

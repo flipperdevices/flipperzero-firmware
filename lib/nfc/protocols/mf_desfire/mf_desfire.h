@@ -59,13 +59,13 @@ typedef struct {
 } MfDesfireFreeMemory; // EV1+ only
 
 typedef struct {
-    bool is_master_key_changeable : 1;
-    bool is_free_directory_list : 1;
-    bool is_free_create_delete : 1;
-    bool is_config_changeable : 1;
-    uint8_t change_key_id : 4;
-    uint8_t max_keys : 4;
-    uint8_t flags : 4;
+    bool is_master_key_changeable;
+    bool is_free_directory_list;
+    bool is_free_create_delete;
+    bool is_config_changeable;
+    uint8_t change_key_id;
+    uint8_t max_keys;
+    uint8_t flags;
 } MfDesfireKeySettings;
 
 typedef uint8_t MfDesfireKeyVersion;
