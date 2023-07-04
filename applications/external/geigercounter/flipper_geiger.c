@@ -11,6 +11,11 @@
 #include <furi_hal_pwm.h>
 #include <furi_hal_power.h>
 
+#include <storage/storage.h>
+#include <stream/buffered_file_stream.h>
+
+#include <locale/locale.h>
+
 #define SCREEN_SIZE_X 128
 #define SCREEN_SIZE_Y 64
 
@@ -184,6 +189,14 @@ int32_t flipper_geiger_app() {
         furi_delay_ms(10);
     }
 
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    Stream* file_stream = buffered_file_stream_alloc(storage);
+    FuriString* dataString = furi_string_alloc();
+    uint32_t epoch = 0;
+    uint8_t recordData = 0;
+
+    NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
+
     while(1) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, FuriWaitForever);
 
@@ -203,6 +216,36 @@ int32_t flipper_geiger_app() {
 
                     screenRefresh = 1;
                     furi_mutex_release(mutexVal.mutex);
+                } else if(event.input.key == InputKeyUp && event.input.type == InputTypeLong) {
+                    if(recordData == 0) {
+                        notification_message(notification, &sequence_set_only_red_255);
+
+                        FuriHalRtcDateTime datetime;
+                        furi_hal_rtc_get_datetime(&datetime);
+
+                        char path[64];
+                        snprintf(
+                            path,
+                            sizeof(path),
+                            EXT_PATH("/geiger-%.4d-%.2d-%.2d--%.2d-%.2d-%.2d.csv"),
+                            datetime.year,
+                            datetime.month,
+                            datetime.day,
+                            datetime.hour,
+                            datetime.minute,
+                            datetime.second);
+
+                        buffered_file_stream_open(
+                            file_stream, path, FSAM_WRITE, FSOM_CREATE_ALWAYS);
+                        furi_string_printf(dataString, "epoch,cps\n");
+                        stream_write_string(file_stream, dataString);
+                        epoch = 0;
+                        recordData = 1;
+                    } else {
+                        buffered_file_stream_close(file_stream);
+                        notification_message(notification, &sequence_reset_red);
+                        recordData = 0;
+                    }
                 } else if((event.input.key == InputKeyLeft &&
                            event.input.type == InputTypeShort)) {
                     furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
@@ -243,6 +286,11 @@ int32_t flipper_geiger_app() {
             } else if(event.type == ClockEventTypeTick) {
                 furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
+                if(recordData == 1) {
+                    furi_string_printf(dataString, "%lu,%lu\n", epoch++, counter);
+                    stream_write_string(file_stream, dataString);
+                }
+
                 for(int i = 0; i < lineArraySize - 1; i++)
                     mutexVal.line[lineArraySize - 1 - i] = mutexVal.line[lineArraySize - 2 - i];
 
@@ -276,6 +324,18 @@ int32_t flipper_geiger_app() {
     if(furi_hal_power_is_otg_enabled()) {
         furi_hal_power_disable_otg();
     }
+
+    if(recordData == 1) {
+        buffered_file_stream_close(file_stream);
+        notification_message(notification, &sequence_reset_red);
+    }
+
+    furi_string_free(dataString);
+    furi_record_close(RECORD_NOTIFICATION);
+    stream_free(file_stream);
+    furi_record_close(RECORD_STORAGE);
+
+    furi_hal_power_disable_otg();
 
     furi_hal_gpio_disable_int_callback(&gpio_ext_pa7);
     furi_hal_gpio_remove_int_callback(&gpio_ext_pa7);
