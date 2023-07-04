@@ -47,6 +47,7 @@ SeaderWorker* seader_worker_alloc() {
     seader_worker->callback = NULL;
     seader_worker->context = NULL;
     seader_worker->storage = furi_record_open(RECORD_STORAGE);
+    memset(seader_worker->sam_version, 0, sizeof(seader_worker->sam_version));
 
     seader_worker_change_state(seader_worker, SeaderWorkerStateReady);
 
@@ -404,6 +405,44 @@ bool unpack_pacs(
     return rtn;
 }
 
+//    800201298106683d052026b6820101
+//300F800201298106683D052026B6820101
+bool parseVersion(SeaderWorker* seader_worker, uint8_t* buf, size_t size) {
+    UNUSED(seader_worker); // TODO: add either a SAM struct or the firmware to the worker or something
+    SamVersion_t* version = 0;
+    version = calloc(1, sizeof *version);
+    assert(version);
+
+    bool rtn = false;
+    if (size > 30) {
+        // Too large to handle now
+        FURI_LOG_W(TAG, "Version of %d is to long to parse", size);
+        return false;
+    }
+    // Add sequence prefix
+    uint8_t seq[32] = {0x30};
+    seq[1] = (uint8_t)size;
+    memcpy(seq+2, buf, size);
+
+    asn_dec_rval_t rval = asn_decode(0, ATS_DER, &asn_DEF_SamVersion, (void**)&version, seq, size+2);
+
+    if(rval.code == RC_OK) {
+        char versionDebug[128] = {0};
+        (&asn_DEF_SamVersion)->op->print_struct(&asn_DEF_SamVersion, version, 1, toString, versionDebug);
+        if(strlen(versionDebug) > 0) {
+            FURI_LOG_D(TAG, "Received version: %s", versionDebug);
+        }
+        if (version->version.size == 2) {
+            memcpy(seader_worker->sam_version, version->version.buf, version->version.size);
+        }
+
+        rtn = true;
+    }
+
+    ASN_STRUCT_FREE(asn_DEF_SamVersion, version);
+    return rtn;
+}
+
 bool parseSamResponse(SeaderWorker* seader_worker, SamResponse_t* samResponse) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
     SeaderCredential* credential = seader_worker->credential;
@@ -418,6 +457,10 @@ bool parseSamResponse(SeaderWorker* seader_worker, SamResponse_t* samResponse) {
             if(seader_worker->callback) {
                 seader_worker->callback(SeaderWorkerEventFail, seader_worker->context);
             }
+        }
+    } else if(parseVersion(seader_worker, samResponse->buf, samResponse->size)) {
+        if(seader_worker->callback) {
+            seader_worker->callback(SeaderWorkerEventSamPresent, seader_worker->context);
         }
     } else if(unpack_pacs(seader_worker, credential, samResponse->buf, samResponse->size)) {
         if(seader_worker->callback) {
