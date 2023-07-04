@@ -171,14 +171,15 @@ bool cli_command_log_level_set_from_string(FuriString* level) {
         furi_log_set_level(log_level);
         return true;
     } else {
-        printf("<log> — start logging using current level from system settings\r\n");
+        printf("<log> — start logging using the current level from the system settings\r\n");
         printf("<log error> — only critical errors and other important messages\r\n");
         printf("<log warn> — non-critical errors and warnings including <log error>\r\n");
         printf("<log info> — non-critical information including <log warn>\r\n");
-        printf("<log default> — default system log level (equal to <log info>)\r\n");
+        printf("<log default> — the default system log level (equivalent to <log info>)\r\n");
         printf(
-            "<log debug> — debug information including <log info> (may slow down the system)\r\n");
-        printf("<log trace> — system traces including <log debug> (may slow down the system)\r\n");
+            "<log debug> — debug information including <log info> (may impact system performance)\r\n");
+        printf(
+            "<log trace> — system traces including <log debug> (may impact system performance)\r\n");
     }
     return false;
 }
