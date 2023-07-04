@@ -214,6 +214,8 @@ static void nfc_generate_ntag_i2c_common(
     MfUltralightData* mfu_data,
     MfUltralightType type,
     uint16_t num_pages) {
+    nfc_generate_mf_ul_common(mfu_data);
+
     mfu_data->type = type;
     memcpy(&mfu_data->version, version_bytes_ntag_i2c, sizeof(version_bytes_ntag_i2c));
     mfu_data->pages_total = num_pages;

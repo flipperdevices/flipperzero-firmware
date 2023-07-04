@@ -244,7 +244,7 @@ static NfcCommand mf_ultralight_poller_read_callback(NfcGenericEvent event, void
     MfUltralightPollerEvent* mfu_event = event.data;
 
     if(mfu_event->type == MfUltralightPollerEventTypeReadSuccess) {
-        mf_ultralight_copy(&poller_context->data.data, mf_ultralight_poller_get_data(mfu_poller));
+        mf_ultralight_copy(poller_context->data.data, mf_ultralight_poller_get_data(mfu_poller));
         poller_context->error = MfUltralightErrorNone;
         command = NfcCommandStop;
     } else if(mfu_event->type == MfUltralightPollerEventTypeReadFailed) {
@@ -267,6 +267,7 @@ MfUltralightError mf_ultralight_poller_read_card(Nfc* nfc, MfUltralightData* dat
 
     MfUltralightPollerContext poller_context = {};
     poller_context.thread_id = furi_thread_get_current_id();
+    poller_context.data.data = mf_ultralight_alloc();
 
     NfcPoller* poller = nfc_poller_alloc(nfc, NfcProtocolMfUltralight);
     nfc_poller_start(poller, mf_ultralight_poller_read_callback, &poller_context);
@@ -277,8 +278,10 @@ MfUltralightError mf_ultralight_poller_read_card(Nfc* nfc, MfUltralightData* dat
     nfc_poller_free(poller);
 
     if(poller_context.error == MfUltralightErrorNone) {
-        mf_ultralight_copy(data, &poller_context.data.data);
+        mf_ultralight_copy(data, poller_context.data.data);
     }
+
+    mf_ultralight_free(poller_context.data.data);
 
     return poller_context.error;
 }

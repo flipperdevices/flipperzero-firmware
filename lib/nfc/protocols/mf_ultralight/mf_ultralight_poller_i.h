@@ -44,7 +44,7 @@ typedef union {
     MfUltralightSignature signature;
     MfUltralightPollerReadCounterCommand counter_cmd;
     MfUltralightPollerReadTearingFlagCommand tearing_flag_cmd;
-    MfUltralightData data;
+    MfUltralightData* data;
 } MfUltralightPollerContextData;
 
 typedef enum {
