@@ -16,3 +16,13 @@ typedef enum {
     NfcProtocolFeatureEmulateFull = 1UL << 2,
     NfcProtocolFeatureEditUid = 1UL << 3,
 } NfcProtocolFeature;
+
+typedef enum {
+    NfcProtocolSupportSceneInfo = 0,
+    NfcProtocolSupportSceneRead,
+    NfcProtocolSupportSceneReadMenu,
+    NfcProtocolSupportSceneReadSuccess,
+    NfcProtocolSupportSceneSavedMenu,
+
+    NfcProtocolSupportSceneCount,
+} NfcProtocolSupportScene;

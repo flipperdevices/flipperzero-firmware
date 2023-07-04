@@ -25,15 +25,15 @@ static NfcCustomEvent
     return custom_event;
 }
 
-static void nfc_protocol_support_build_scene_read_menu_iso14443_3a(NfcApp* instance) {
+static void nfc_scene_read_menu_on_enter_iso14443_3a(NfcApp* instance) {
     UNUSED(instance);
 }
 
-static void nfc_protocol_support_build_scene_saved_menu_iso14443_3a(NfcApp* instance) {
+static void nfc_scene_saved_menu_on_enter_iso14443_3a(NfcApp* instance) {
     UNUSED(instance);
 }
 
-static bool nfc_protocol_support_handle_scene_info_iso14443_3a(NfcApp* instance, uint32_t event) {
+static bool nfc_scene_info_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
         return true;
@@ -42,8 +42,7 @@ static bool nfc_protocol_support_handle_scene_info_iso14443_3a(NfcApp* instance,
     return false;
 }
 
-static bool
-    nfc_protocol_support_handle_scene_read_menu_iso14443_3a(NfcApp* instance, uint32_t event) {
+static bool nfc_scene_read_menu_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEmulate) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
         return true;
@@ -52,9 +51,7 @@ static bool
     return false;
 }
 
-bool nfc_protocol_support_handle_scene_saved_menu_iso14443_3a_common(
-    NfcApp* instance,
-    uint32_t event) {
+bool nfc_scene_saved_menu_on_event_iso14443_3a_common(NfcApp* instance, uint32_t event) {
     switch(event) {
     case SubmenuIndexCommonEmulate:
         scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
@@ -67,9 +64,8 @@ bool nfc_protocol_support_handle_scene_saved_menu_iso14443_3a_common(
     }
 }
 
-static bool
-    nfc_protocol_support_handle_scene_saved_menu_iso14443_3a(NfcApp* instance, uint32_t event) {
-    return nfc_protocol_support_handle_scene_saved_menu_iso14443_3a_common(instance, event);
+static bool nfc_scene_saved_menu_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
+    return nfc_scene_saved_menu_on_event_iso14443_3a_common(instance, event);
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
@@ -80,15 +76,34 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
     .handle_poller =
         (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_iso14443_3a,
 
-    .build_scene_read_menu =
-        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_read_menu_iso14443_3a,
-    .build_scene_saved_menu =
-        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_iso14443_3a,
-
-    .handle_scene_info =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_iso14443_3a,
-    .handle_scene_read_menu =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_menu_iso14443_3a,
-    .handle_scene_saved_menu =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_iso14443_3a,
+    .scene_info =
+        {
+            .on_enter = NULL,
+            .on_event = nfc_scene_info_on_event_iso14443_3a,
+            .on_exit = NULL,
+        },
+    .scene_read =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
+            .on_exit = NULL,
+        },
+    .scene_read_menu =
+        {
+            .on_enter = nfc_scene_read_menu_on_enter_iso14443_3a,
+            .on_event = nfc_scene_read_menu_on_event_iso14443_3a,
+            .on_exit = NULL,
+        },
+    .scene_read_success =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
+            .on_exit = NULL,
+        },
+    .scene_saved_menu =
+        {
+            .on_enter = nfc_scene_saved_menu_on_enter_iso14443_3a,
+            .on_event = nfc_scene_saved_menu_on_event_iso14443_3a,
+            .on_exit = NULL,
+        },
 };

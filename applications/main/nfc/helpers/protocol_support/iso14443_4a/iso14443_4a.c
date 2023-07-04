@@ -55,7 +55,7 @@ static bool
 
 static bool
     nfc_protocol_support_handle_scene_saved_menu_iso14443_4a(NfcApp* instance, uint32_t event) {
-    return nfc_protocol_support_handle_scene_saved_menu_iso14443_3a_common(instance, event);
+    return nfc_scene_saved_menu_on_event_iso14443_3a_common(instance, event);
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_4a = {
