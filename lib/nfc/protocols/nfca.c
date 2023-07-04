@@ -20,7 +20,7 @@ typedef struct {
 
 static uint8_t nfca_default_ats[] = {0x05, 0x78, 0x80, 0x80, 0x00};
 
-static uint8_t nfca_half_req[] = {NFCA_CMD_HALT, 0x00};
+static uint8_t nfca_halt_req[] = {NFCA_CMD_HALT, 0x00};
 
 uint16_t nfca_get_crc16(uint8_t* buff, uint16_t len) {
     uint16_t crc = NFCA_CRC_INIT;
@@ -48,17 +48,17 @@ bool nfca_emulation_handler(
     uint16_t buff_rx_len,
     uint8_t* buff_tx,
     uint16_t* buff_tx_len) {
-    bool half = false;
+    bool halt = false;
     uint8_t rx_bytes = buff_rx_len / 8;
 
-    if(rx_bytes == sizeof(nfca_half_req) && !memcmp(buff_rx, nfca_half_req, rx_bytes)) {
-        half = true;
+    if(rx_bytes == sizeof(nfca_halt_req) && !memcmp(buff_rx, nfca_halt_req, rx_bytes)) {
+        halt = true;
     } else if(rx_bytes == sizeof(nfca_cmd_rats) && buff_rx[0] == NFCA_CMD_RATS) {
         memcpy(buff_tx, nfca_default_ats, sizeof(nfca_default_ats));
         *buff_tx_len = sizeof(nfca_default_ats) * 8;
     }
 
-    return half;
+    return halt;
 }
 
 static void nfca_add_bit(DigitalSignal* signal, bool bit) {
