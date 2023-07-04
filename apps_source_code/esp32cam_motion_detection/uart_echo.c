@@ -52,7 +52,7 @@ static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 
 static void uart_echo_push_to_list(UartDumpModel* model, void* context, const char data) {
     // Alarm sound
-    if(data == '!'){
+    if(data == '!') {
         UartEchoApp* app = context;
         notification_message(app->notification, &sequence_alarm);
     }
@@ -185,9 +185,8 @@ static UartEchoApp* uart_echo_app_alloc() {
     furi_delay_ms(200);
     furi_hal_power_enable_external_3_3v();
     furi_hal_power_enable_otg();
-    for(int i=0;i<2;i++)
-    {
-        furi_delay_ms(500); 
+    for(int i = 0; i < 2; i++) {
+        furi_delay_ms(500);
         furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'m'}, 1);
     }
     furi_delay_ms(1);

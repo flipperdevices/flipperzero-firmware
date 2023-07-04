@@ -65,16 +65,16 @@ seg:
 #define TAG "gpio_7segment_app"
 
 bool digits[70] = {
-    /* 0 */ false,  true,  true,  true,  true,  true,  true,
-    /* 1 */ false,  true, false, false, false, false,  true,
-    /* 2 */ true, false,  true,  true, false,  true,  true,
-    /* 3 */ true,  true,  true, false, false,  true,  true,
-    /* 4 */ true,  true, false, false,  true, false,  true,
-    /* 5 */ true,  true,  true, false,  true,  true, false,
-    /* 6 */ true,  true,  true,  true,  true,  true, false,
-    /* 7 */ false,  true, false, false, false,  true,  true,
+    /* 0 */ false, true,  true,  true,  true,  true,  true,
+    /* 1 */ false, true,  false, false, false, false, true,
+    /* 2 */ true,  false, true,  true,  false, true,  true,
+    /* 3 */ true,  true,  true,  false, false, true,  true,
+    /* 4 */ true,  true,  false, false, true,  false, true,
+    /* 5 */ true,  true,  true,  false, true,  true,  false,
+    /* 6 */ true,  true,  true,  true,  true,  true,  false,
+    /* 7 */ false, true,  false, false, false, true,  true,
     /* 8 */ true,  true,  true,  true,  true,  true,  true,
-    /* 9 */ true,  true,  true, false,  true,  true,  true,
+    /* 9 */ true,  true,  true,  false, true,  true,  true,
 };
 
 typedef enum {
@@ -83,7 +83,7 @@ typedef enum {
 
 typedef struct {
     GpioEventType type; // The reason for this event.
-    InputEvent input;   // This data is specific to keypress data.
+    InputEvent input; // This data is specific to keypress data.
 } GpioEvent;
 
 typedef struct {
@@ -107,7 +107,7 @@ static void gpio_7segment_input_callback(InputEvent* input_event, FuriMessageQue
     furi_message_queue_put(queue, &event, FuriWaitForever);
 }
 
-// Invoked by the draw callback to render the screen. 
+// Invoked by the draw callback to render the screen.
 // @param canvas surface to draw on.
 // @param ctx a pointer to the application GpioContext.
 static void gpio_7segment_render_callback(Canvas* canvas, void* ctx) {
@@ -138,11 +138,12 @@ static void gpio_7segment_render_callback(Canvas* canvas, void* ctx) {
     canvas_draw_str_aligned(canvas, 66, 26, AlignLeft, AlignTop, digits[index++] ? "C1" : "c1");
 
     // Tell user if GPIO pins are GND or 3.3v to glow.
-    canvas_draw_str_aligned(canvas, 90, 40, AlignLeft, AlignTop, data->invert?"GND":"3.3v");
+    canvas_draw_str_aligned(canvas, 90, 40, AlignLeft, AlignTop, data->invert ? "GND" : "3.3v");
 
     // Display the current number.
     furi_string_printf(data->buffer, "Digit: %d", data->digit);
-    canvas_draw_str_aligned(canvas, 90, 50, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
+    canvas_draw_str_aligned(
+        canvas, 90, 50, AlignLeft, AlignTop, furi_string_get_cstr(data->buffer));
 
     // Release the context, so other threads can update the data.
     furi_mutex_release(context->mutex);
@@ -150,7 +151,7 @@ static void gpio_7segment_render_callback(Canvas* canvas, void* ctx) {
 
 // Sets the GPIO pin output to display a number.
 // @param digit a value between 0-9 to display.
-// @param invert use true if your 7-segment LED display is common anode 
+// @param invert use true if your 7-segment LED display is common anode
 // (and all the output pins go to cathode side of LEDs).  use false if
 // your display is common cathode.
 void gpio_7segment_show(int digit, bool invert) {
@@ -214,35 +215,35 @@ int32_t gpio_7segment_app(void* p) {
     GpioEvent event;
     bool processing = true;
     do {
-        if (furi_message_queue_get(context->queue, &event, FuriWaitForever) == FuriStatusOk) {
+        if(furi_message_queue_get(context->queue, &event, FuriWaitForever) == FuriStatusOk) {
             FURI_LOG_T(TAG, "Got event type: %d", event.type);
-            switch (event.type) {
-                case GpioEventTypeKey:
-                    // Short press of back button exits the program.
-                    if (event.input.type == InputTypeShort && event.input.key == InputKeyBack) {
-                        FURI_LOG_I(TAG, "Short-Back pressed. Exiting program.");
-                        processing = false;
-                    } else if (event.input.type == InputTypeShort && event.input.key == InputKeyOk) {
-                        FURI_LOG_I(TAG, "OK pressed.");
-                        if (furi_mutex_acquire(context->mutex, FuriWaitForever) == FuriStatusOk) {
-                            // Pick a random number between 1 and 6...
-                            context->data->digit = (furi_hal_random_get() % 6) + 1;
-                            
-                            gpio_7segment_show(context->data->digit, context->data->invert);
-                            furi_mutex_release(context->mutex);
-                        }
-                    } else if (event.input.type == InputTypeShort && event.input.key == InputKeyUp) {
-                        FURI_LOG_I(TAG, "UP pressed.");
-                        if (furi_mutex_acquire(context->mutex, FuriWaitForever) == FuriStatusOk) {
-                            // Invert our output (switch between common anode/cathode 7-segment LEDs)
-                            context->data->invert = !context->data->invert;
-                            gpio_7segment_show(context->data->digit, context->data->invert);
-                            furi_mutex_release(context->mutex);
-                        }
+            switch(event.type) {
+            case GpioEventTypeKey:
+                // Short press of back button exits the program.
+                if(event.input.type == InputTypeShort && event.input.key == InputKeyBack) {
+                    FURI_LOG_I(TAG, "Short-Back pressed. Exiting program.");
+                    processing = false;
+                } else if(event.input.type == InputTypeShort && event.input.key == InputKeyOk) {
+                    FURI_LOG_I(TAG, "OK pressed.");
+                    if(furi_mutex_acquire(context->mutex, FuriWaitForever) == FuriStatusOk) {
+                        // Pick a random number between 1 and 6...
+                        context->data->digit = (furi_hal_random_get() % 6) + 1;
+
+                        gpio_7segment_show(context->data->digit, context->data->invert);
+                        furi_mutex_release(context->mutex);
                     }
-                    break;
-                default:
-                    break;
+                } else if(event.input.type == InputTypeShort && event.input.key == InputKeyUp) {
+                    FURI_LOG_I(TAG, "UP pressed.");
+                    if(furi_mutex_acquire(context->mutex, FuriWaitForever) == FuriStatusOk) {
+                        // Invert our output (switch between common anode/cathode 7-segment LEDs)
+                        context->data->invert = !context->data->invert;
+                        gpio_7segment_show(context->data->digit, context->data->invert);
+                        furi_mutex_release(context->mutex);
+                    }
+                }
+                break;
+            default:
+                break;
             }
 
             // Send signal to update the screen (callback will get invoked at some point later.)
@@ -251,7 +252,7 @@ int32_t gpio_7segment_app(void* p) {
             // We had an issue getting message from the queue, so exit application.
             processing = false;
         }
-    } while (processing);
+    } while(processing);
 
     // Disconnect the GPIO pins.
     gpio_7segment_disconnect_pin(&gpio_ext_pa7);

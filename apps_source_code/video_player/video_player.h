@@ -70,7 +70,7 @@ typedef struct {
     uint32_t frames_played;
 
     bool playing;
-    
+
     bool quit;
 } VideoPlayerApp;
 

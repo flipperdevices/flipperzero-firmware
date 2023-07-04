@@ -111,7 +111,7 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
      TOGGLE_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
-     {"Camera",
+    {"Camera",
      {"photo", "flashlight"},
      2,
      {"photo", "flashlight"},

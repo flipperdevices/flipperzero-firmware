@@ -16,9 +16,9 @@
 #define TAG "Pokemon"
 
 struct pokemon_lut {
-	const char *name;
-	const Icon *icon;
-	const uint8_t hex;
+    const char* name;
+    const Icon* icon;
+    const uint8_t hex;
 };
 
 typedef struct App App;

@@ -86,7 +86,6 @@ BarcodeTypeObj* get_type(FuriString* type_string) {
         return barcode_type_objs[CODABAR];
     }
 
-
     return barcode_type_objs[UNKNOWN];
 }
 

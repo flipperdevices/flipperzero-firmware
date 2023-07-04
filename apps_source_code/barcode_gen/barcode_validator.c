@@ -345,7 +345,7 @@ void code_128_loader(BarcodeData* barcode_data) {
     furi_string_free(barcode_bits);
 }
 
-void codabar_loader(BarcodeData* barcode_data){
+void codabar_loader(BarcodeData* barcode_data) {
     int barcode_length = furi_string_size(barcode_data->raw_data);
 
     int min_digits = barcode_data->type_obj->min_digits;

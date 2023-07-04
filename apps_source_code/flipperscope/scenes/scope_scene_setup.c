@@ -1,9 +1,6 @@
 #include "../scope_app_i.h"
 
-void scope_scene_setup_widget_callback(
-    GuiButtonType result,
-    InputType type,
-    void* context) {
+void scope_scene_setup_widget_callback(GuiButtonType result, InputType type, void* context) {
     ScopeApp* app = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(app->view_dispatcher, result);
@@ -31,14 +28,10 @@ void scope_scene_setup_on_enter(void* context) {
     VariableItemList* var_item_list = app->variable_item_list;
     VariableItem* item;
     item = variable_item_list_add(
-        var_item_list,
-        "Time period",
-        COUNT_OF(time_list),
-        timeperiod_cb,
-        app);
+        var_item_list, "Time period", COUNT_OF(time_list), timeperiod_cb, app);
 
-    for (uint32_t i = 0; i < COUNT_OF(time_list); i++){
-        if(time_list[i].time == app->time){
+    for(uint32_t i = 0; i < COUNT_OF(time_list); i++) {
+        if(time_list[i].time == app->time) {
             variable_item_set_current_value_index(item, i);
             variable_item_set_current_value_text(item, time_list[i].str);
             break;
@@ -46,14 +39,10 @@ void scope_scene_setup_on_enter(void* context) {
     }
 
     item = variable_item_list_add(
-        var_item_list,
-        "Measurement",
-        COUNT_OF(measurement_list),
-        measurement_cb,
-        app);
+        var_item_list, "Measurement", COUNT_OF(measurement_list), measurement_cb, app);
 
-    for (uint32_t i = 0; i < COUNT_OF(measurement_list); i++){
-        if(measurement_list[i].type == app->measurement){
+    for(uint32_t i = 0; i < COUNT_OF(measurement_list); i++) {
+        if(measurement_list[i].type == app->measurement) {
             variable_item_set_current_value_index(item, i);
             variable_item_set_current_value_text(item, measurement_list[i].str);
             break;

@@ -12,4 +12,3 @@ typedef enum {
     ScopeViewSubmenu,
     ScopeViewWidget,
 } ScopeView;
-

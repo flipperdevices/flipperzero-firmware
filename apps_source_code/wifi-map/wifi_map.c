@@ -56,7 +56,7 @@ const NotificationSequence sequence_notification = {
     NULL,
 };
 
-File* open_file(){
+File* open_file() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     File* file = storage_file_alloc(storage);
 
@@ -66,8 +66,8 @@ File* open_file(){
     return file;
 }
 
-int32_t write_to_file(char data_line, File *file) {
-    char *data = (char *)malloc(sizeof(char) + 1);
+int32_t write_to_file(char data_line, File* file) {
+    char* data = (char*)malloc(sizeof(char) + 1);
     data[0] = data_line;
     if(!storage_file_write(file, data, (uint16_t)strlen(data))) {
         FURI_LOG_E(TAG, "Failed to write to file");
@@ -76,7 +76,7 @@ int32_t write_to_file(char data_line, File *file) {
     return 0;
 }
 
-int32_t close_file(File *file) {
+int32_t close_file(File* file) {
     storage_file_close(file);
     storage_file_free(file);
     furi_record_close(RECORD_STORAGE);
@@ -133,7 +133,7 @@ static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
     }
 }
 
-static void uart_echo_push_to_list(UartDumpModel* model, const char data , WiFiMapApp* app) {
+static void uart_echo_push_to_list(UartDumpModel* model, const char data, WiFiMapApp* app) {
     if(model->escape) {
         // escape code end with letter
         if((data >= 'a' && data <= 'z') || (data >= 'A' && data <= 'Z')) {
@@ -143,7 +143,7 @@ static void uart_echo_push_to_list(UartDumpModel* model, const char data , WiFiM
         // "Esc[" is a escape code
         model->escape = true;
     } else if((data >= ' ' && data <= '~') || (data == '\n' || data == '\r')) {
-        write_to_file((char) data,  app->file);
+        write_to_file((char)data, app->file);
         bool new_string_needed = false;
         if(furi_string_size(model->list[model->line]->text) >= COLUMNS_ON_SCREEN) {
             new_string_needed = true;
@@ -301,11 +301,11 @@ static void uart_echo_app_free(WiFiMapApp* app) {
     free(app);
 }
 
-int32_t wifi_map_app(void *p){
-	UNUSED(p);
-	FURI_LOG_D(TAG, "wifi_map_app");
-	WiFiMapApp* app = uart_echo_app_alloc();
+int32_t wifi_map_app(void* p) {
+    UNUSED(p);
+    FURI_LOG_D(TAG, "wifi_map_app");
+    WiFiMapApp* app = uart_echo_app_alloc();
     view_dispatcher_run(app->view_dispatcher);
     uart_echo_app_free(app);
-	return 0;
+    return 0;
 }

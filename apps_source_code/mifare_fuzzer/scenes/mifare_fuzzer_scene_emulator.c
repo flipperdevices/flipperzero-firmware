@@ -16,8 +16,8 @@ uint8_t id_uid_test[9][7] = {
 };
 
 /// @brief mifare_fuzzer_scene_emulator_callback()
-/// @param event 
-/// @param context 
+/// @param event
+/// @param context
 static void mifare_fuzzer_scene_emulator_callback(MifareFuzzerEvent event, void* context) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_callback()");
     furi_assert(context);
@@ -26,7 +26,7 @@ static void mifare_fuzzer_scene_emulator_callback(MifareFuzzerEvent event, void*
 }
 
 /// @brief mifare_fuzzer_scene_emulator_on_enter()
-/// @param context 
+/// @param context
 void mifare_fuzzer_scene_emulator_on_enter(void* context) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_enter()");
     MifareFuzzerApp* app = context;
@@ -38,13 +38,14 @@ void mifare_fuzzer_scene_emulator_on_enter(void* context) {
     tick_counter = 0;
     mifare_fuzzer_emulator_set_tick_num(app->emulator_view, tick_counter);
     emulator->ticks_between_cards = MIFARE_FUZZER_DEFAULT_TICKS_BETWEEN_CARDS;
-    mifare_fuzzer_emulator_set_ticks_between_cards(app->emulator_view, emulator->ticks_between_cards);
+    mifare_fuzzer_emulator_set_ticks_between_cards(
+        app->emulator_view, emulator->ticks_between_cards);
     // init default card data
     FuriHalNfcDevData nfc_dev_data;
     nfc_dev_data.atqa[0] = 0x00;
     nfc_dev_data.atqa[1] = 0x00;
     nfc_dev_data.sak = 0x00;
-    if (app->card == MifareCardUltralight) {
+    if(app->card == MifareCardUltralight) {
         nfc_dev_data.uid_len = 0x07;
     } else {
         nfc_dev_data.uid_len = 0x04;
@@ -57,16 +58,13 @@ void mifare_fuzzer_scene_emulator_on_enter(void* context) {
     attack_step = 0;
 
     // switch to view
-    view_dispatcher_switch_to_view(
-        app->view_dispatcher,
-        MifareFuzzerViewEmulator
-    );
+    view_dispatcher_switch_to_view(app->view_dispatcher, MifareFuzzerViewEmulator);
 }
 
 /// @brief mifare_fuzzer_scene_emulator_on_event()
-/// @param context 
-/// @param event 
-/// @return 
+/// @param context
+/// @param event
+/// @return
 bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent event) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_event()");
     FuriHalNfcDevData nfc_dev_data;
@@ -76,8 +74,8 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
 
     bool consumed = false;
 
-    if (event.type == SceneManagerEventTypeCustom) {
-        if (event.event == MifareFuzzerEventStartAttack) {
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == MifareFuzzerEventStartAttack) {
             //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_event() :: MifareFuzzerEventStartAttack");
 
             // Stop worker
@@ -85,17 +83,17 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
 
             // Set card type
             // TODO: Move somewhere else, I do not like this to be there
-            if (app->card == MifareCardClassic1k) {
+            if(app->card == MifareCardClassic1k) {
                 nfc_dev_data.atqa[0] = 0x04;
                 nfc_dev_data.atqa[1] = 0x00;
                 nfc_dev_data.sak = 0x08;
                 nfc_dev_data.uid_len = 0x04;
-            } else if (app->card == MifareCardClassic4k) {
+            } else if(app->card == MifareCardClassic4k) {
                 nfc_dev_data.atqa[0] = 0x02;
                 nfc_dev_data.atqa[1] = 0x00;
                 nfc_dev_data.sak = 0x18;
                 nfc_dev_data.uid_len = 0x04;
-            } else if (app->card == MifareCardUltralight) {
+            } else if(app->card == MifareCardUltralight) {
                 nfc_dev_data.atqa[0] = 0x44;
                 nfc_dev_data.atqa[1] = 0x00;
                 nfc_dev_data.sak = 0x00;
@@ -103,19 +101,19 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
             }
 
             // Set UIDs
-            if (app->attack == MifareFuzzerAttackTestValues) {
+            if(app->attack == MifareFuzzerAttackTestValues) {
                 // Load test UIDs
                 for(uint8_t i = 0; i < nfc_dev_data.uid_len; i++) {
                     nfc_dev_data.uid[i] = id_uid_test[attack_step][i];
                 }
                 // Next UIDs on next loop
-                if (attack_step >= 8) {
+                if(attack_step >= 8) {
                     attack_step = 0;
                 } else {
                     attack_step++;
                 }
-            } else if (app->attack == MifareFuzzerAttackRandomValues) {
-                if (app->card == MifareCardUltralight) {
+            } else if(app->attack == MifareFuzzerAttackRandomValues) {
+                if(app->card == MifareCardUltralight) {
                     // First byte of a 7 byte UID is the manufacturer-code
                     // https://github.com/Proxmark/proxmark3/blob/master/client/taginfo.c
                     // https://stackoverflow.com/questions/37837730/mifare-cards-distinguish-between-4-byte-and-7-byte-uids
@@ -132,10 +130,10 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
                         nfc_dev_data.uid[i] = (furi_hal_random_get() & 0xFF);
                     }
                 }
-            } else if (app->attack == MifareFuzzerAttackLoadUidsFromFile) {
+            } else if(app->attack == MifareFuzzerAttackLoadUidsFromFile) {
                 //bool end_of_list = false;
                 // read stream
-                while(true){
+                while(true) {
                     furi_string_reset(app->uid_str);
                     if(!stream_read_line(app->uids_stream, app->uid_str)) {
                         // restart from beginning on empty line
@@ -146,7 +144,9 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
                     // Skip comments
                     if(furi_string_get_char(app->uid_str, 0) == '#') continue;
                     // Skip lines with invalid length
-                    if((furi_string_size(app->uid_str) != 9) && (furi_string_size(app->uid_str) != 15)) continue;
+                    if((furi_string_size(app->uid_str) != 9) &&
+                       (furi_string_size(app->uid_str) != 15))
+                        continue;
                     break;
                 }
 
@@ -156,7 +156,7 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
                 // parse string to UID
                 // TODO: a better validation on input?
                 for(uint8_t i = 0; i < nfc_dev_data.uid_len; i++) {
-                    if (i <= ((furi_string_size(app->uid_str) - 1) / 2)) {
+                    if(i <= ((furi_string_size(app->uid_str) - 1) / 2)) {
                         char temp_str[3];
                         temp_str[0] = furi_string_get_cstr(app->uid_str)[i * 2];
                         temp_str[1] = furi_string_get_cstr(app->uid_str)[i * 2 + 1];
@@ -166,7 +166,6 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
                         nfc_dev_data.uid[i] = 0x00;
                     }
                 }
-
             }
 
             mifare_fuzzer_worker_set_nfc_dev_data(app->worker, nfc_dev_data);
@@ -179,27 +178,29 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
             // Start worker
             mifare_fuzzer_worker_start(app->worker);
 
-        } else if (event.event == MifareFuzzerEventStopAttack) {
+        } else if(event.event == MifareFuzzerEventStopAttack) {
             //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_event() :: MifareFuzzerEventStopAttack");
             // Stop worker
             mifare_fuzzer_worker_stop(app->worker);
-        } else if (event.event == MifareFuzzerEventIncrementTicks) {
-            if (!emulator->is_attacking) {
-                if (emulator->ticks_between_cards < MIFARE_FUZZER_MAX_TICKS_BETWEEN_CARDS) {
+        } else if(event.event == MifareFuzzerEventIncrementTicks) {
+            if(!emulator->is_attacking) {
+                if(emulator->ticks_between_cards < MIFARE_FUZZER_MAX_TICKS_BETWEEN_CARDS) {
                     emulator->ticks_between_cards++;
-                    mifare_fuzzer_emulator_set_ticks_between_cards(app->emulator_view, emulator->ticks_between_cards);
+                    mifare_fuzzer_emulator_set_ticks_between_cards(
+                        app->emulator_view, emulator->ticks_between_cards);
                 };
             };
-        } else if (event.event == MifareFuzzerEventDecrementTicks) {
-            if (!emulator->is_attacking) {
-                if (emulator->ticks_between_cards > MIFARE_FUZZER_MIN_TICKS_BETWEEN_CARDS) {
+        } else if(event.event == MifareFuzzerEventDecrementTicks) {
+            if(!emulator->is_attacking) {
+                if(emulator->ticks_between_cards > MIFARE_FUZZER_MIN_TICKS_BETWEEN_CARDS) {
                     emulator->ticks_between_cards--;
-                    mifare_fuzzer_emulator_set_ticks_between_cards(app->emulator_view, emulator->ticks_between_cards);
+                    mifare_fuzzer_emulator_set_ticks_between_cards(
+                        app->emulator_view, emulator->ticks_between_cards);
                 };
             };
         }
         consumed = true;
-    } else if (event.type == SceneManagerEventTypeTick) {
+    } else if(event.type == SceneManagerEventTypeTick) {
         //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_event() :: SceneManagerEventTypeTick");
 
         // Used to check tick length (not perfect but enough)
@@ -208,14 +209,15 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
         //FURI_LOG_D(TAG, "Time is: %.2d:%.2d:%.2d", curr_dt.hour, curr_dt.minute, curr_dt.second);
 
         // If emulator is attacking
-        if (emulator->is_attacking) {
+        if(emulator->is_attacking) {
             // increment tick_counter
             tick_counter++;
             mifare_fuzzer_emulator_set_tick_num(app->emulator_view, tick_counter);
             //FURI_LOG_D(TAG, "tick_counter is: %.2d", tick_counter);
-            if (tick_counter >= emulator->ticks_between_cards) {
+            if(tick_counter >= emulator->ticks_between_cards) {
                 // Queue event for changing UID
-                view_dispatcher_send_custom_event(app->view_dispatcher, MifareFuzzerEventStartAttack);
+                view_dispatcher_send_custom_event(
+                    app->view_dispatcher, MifareFuzzerEventStartAttack);
             }
         }
 
@@ -226,7 +228,7 @@ bool mifare_fuzzer_scene_emulator_on_event(void* context, SceneManagerEvent even
 }
 
 /// @brief mifare_fuzzer_scene_emulator_on_exit()
-/// @param context 
+/// @param context
 void mifare_fuzzer_scene_emulator_on_exit(void* context) {
     //FURI_LOG_D(TAG, "mifare_fuzzer_scene_emulator_on_exit()");
     MifareFuzzerApp* app = context;
@@ -237,5 +239,4 @@ void mifare_fuzzer_scene_emulator_on_exit(void* context) {
         stream_rewind(app->uids_stream);
         buffered_file_stream_close(app->uids_stream);
     }
-
 }

@@ -71,7 +71,7 @@ UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
     furi_hal_uart_set_irq_cb(UART_CH, uart_terminal_uart_on_irq_cb, uart);*/
 
     uart->app = app;
-	uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
+    uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
     uart->rx_thread = furi_thread_alloc();
     furi_thread_set_name(uart->rx_thread, "UART_TerminalUartRxThread");
     furi_thread_set_stack_size(uart->rx_thread, 1024);

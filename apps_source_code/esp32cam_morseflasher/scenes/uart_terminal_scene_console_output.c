@@ -35,8 +35,9 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         furi_string_reset(app->text_box_store);
         app->text_box_store_strlen = 0;
 
-        // app->show_stopscan_tip in the if is just a hack to get the help displayed since there is no commands in this app 
-        if(app->show_stopscan_tip || 0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
+        // app->show_stopscan_tip in the if is just a hack to get the help displayed since there is no commands in this app
+        if(app->show_stopscan_tip ||
+           0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
             const char* help_msg =
                 "Morse Flasher for\nMayhem Fin\n\nBased on UART terminal by\ncool4uma, which is a\nmodified WiFi Marauder\ncompanion by 0xchocolate\n\n";
             furi_string_cat_str(app->text_box_store, help_msg);

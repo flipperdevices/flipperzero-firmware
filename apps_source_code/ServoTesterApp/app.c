@@ -16,18 +16,16 @@
 #define MAX_ANGLE 180
 #define FREQ 50
 
-typedef enum Mode
-{
+typedef enum Mode {
     Manual = 1,
     Center = 2,
     Sweep = 3,
 } Mode;
 
-typedef struct App
-{
-    Gui *gui;
-    ViewPort *view_port;
-    FuriMessageQueue *event_queue;
+typedef struct App {
+    Gui* gui;
+    ViewPort* view_port;
+    FuriMessageQueue* event_queue;
 
     int running;
     Mode mode;
@@ -37,14 +35,12 @@ typedef struct App
     FuriHalPwmOutputId ch;
 } App;
 
-void input_callback(InputEvent *input_event, void *ctx)
-{
-    App *app = ctx;
+void input_callback(InputEvent* input_event, void* ctx) {
+    App* app = ctx;
     furi_message_queue_put(app->event_queue, input_event, FuriWaitForever);
 }
 
-uint32_t angle_to_compare(uint8_t angle)
-{
+uint32_t angle_to_compare(uint8_t angle) {
     /*
         1%:   freq_div: 1280000, prescaler: 19, period: 64000, compare: 640
         3%:   freq_div: 1280000, prescaler: 19, period: 64000, compare: 1920
@@ -60,17 +56,14 @@ uint32_t angle_to_compare(uint8_t angle)
     uint32_t min_compare = 1920;
     uint32_t max_compare = 8320;
 
-    if (angle == MIN_ANGLE)
-        return min_compare;
-    if (angle == MAX_ANGLE)
-        return max_compare;
+    if(angle == MIN_ANGLE) return min_compare;
+    if(angle == MAX_ANGLE) return max_compare;
 
     return min_compare + floor(((float)angle / (float)MAX_ANGLE) * (max_compare - min_compare));
 }
 
-void render_callback(Canvas *const canvas, void *ctx)
-{
-    App *app = ctx;
+void render_callback(Canvas* const canvas, void* ctx) {
+    App* app = ctx;
 
     canvas_set_color(canvas, ColorWhite);
     canvas_draw_box(canvas, 0, 0, SCREEN_XRES - 1, SCREEN_YRES - 1);
@@ -86,30 +79,21 @@ void render_callback(Canvas *const canvas, void *ctx)
     uint8_t selector_base_x = 5;
     uint8_t r = 4;
     uint8_t correction = r;
-    if (app->mode == Manual)
-    {
+    if(app->mode == Manual) {
         canvas_draw_disc(canvas, selector_base_x, 30 - correction, r);
-    }
-    else
-    {
+    } else {
         canvas_draw_circle(canvas, selector_base_x, 30 - correction, r);
     }
 
-    if (app->mode == Center)
-    {
+    if(app->mode == Center) {
         canvas_draw_disc(canvas, selector_base_x, 45 - correction, r);
-    }
-    else
-    {
+    } else {
         canvas_draw_circle(canvas, selector_base_x, 45 - correction, r);
     }
 
-    if (app->mode == Sweep)
-    {
+    if(app->mode == Sweep) {
         canvas_draw_disc(canvas, selector_base_x, 60 - correction, r);
-    }
-    else
-    {
+    } else {
         canvas_draw_circle(canvas, selector_base_x, 60 - correction, r);
     }
 
@@ -122,9 +106,8 @@ void render_callback(Canvas *const canvas, void *ctx)
     canvas_draw_str(canvas, angle_base_x, 30, angle_str);
 }
 
-App *app_alloc()
-{
-    App *app = malloc(sizeof(App));
+App* app_alloc() {
+    App* app = malloc(sizeof(App));
 
     app->gui = furi_record_open(RECORD_GUI);
     app->view_port = view_port_alloc();
@@ -141,8 +124,7 @@ App *app_alloc()
     return app;
 }
 
-void app_free(App *app)
-{
+void app_free(App* app) {
     furi_assert(app);
 
     furi_hal_pwm_stop(app->ch);
@@ -157,64 +139,45 @@ void app_free(App *app)
     free(app);
 }
 
-void update_state(App *app, InputKey key)
-{
-    if (key == InputKeyUp)
-    {
-        if (app->mode == Manual)
-        {
+void update_state(App* app, InputKey key) {
+    if(key == InputKeyUp) {
+        if(app->mode == Manual) {
             app->angle = MIN_ANGLE;
             app->mode = Sweep;
-        }
-        else if (app->mode == Center)
-        {
+        } else if(app->mode == Center) {
             app->mode = Manual;
-        }
-        else if (app->mode == Sweep)
-        {
+        } else if(app->mode == Sweep) {
             app->mode = Center;
         }
     }
 
-    if (key == InputKeyDown)
-    {
-        if (app->mode == Manual)
-        {
+    if(key == InputKeyDown) {
+        if(app->mode == Manual) {
             app->mode = Center;
-        }
-        else if (app->mode == Center)
-        {
+        } else if(app->mode == Center) {
             app->angle = MIN_ANGLE;
             app->mode = Sweep;
-        }
-        else if (app->mode == Sweep)
-        {
+        } else if(app->mode == Sweep) {
             app->mode = Manual;
         }
     }
 
-    if (app->mode == Manual)
-    {
-        if (key == InputKeyRight)
-        {
-            if (app->angle < MAX_ANGLE)
-            {
+    if(app->mode == Manual) {
+        if(key == InputKeyRight) {
+            if(app->angle < MAX_ANGLE) {
                 app->angle = app->angle + 10;
             }
         }
 
-        if (key == InputKeyLeft)
-        {
-            if (app->angle > MIN_ANGLE)
-            {
+        if(key == InputKeyLeft) {
+            if(app->angle > MIN_ANGLE) {
                 app->angle = app->angle - 10;
             }
         }
     }
 }
 
-void custom_pwm_set_params(uint32_t freq, uint32_t compare)
-{
+void custom_pwm_set_params(uint32_t freq, uint32_t compare) {
     furi_assert(freq > 0);
     uint32_t freq_div = 64000000LU / freq;
 
@@ -227,61 +190,47 @@ void custom_pwm_set_params(uint32_t freq, uint32_t compare)
     LL_TIM_OC_SetCompareCH1(TIM1, compare);
 }
 
-void tick(void *ctx)
-{
-    App *app = ctx;
+void tick(void* ctx) {
+    App* app = ctx;
 
-    if (!app->running)
-        return;
-    if (app->mode != Sweep)
-        return;
+    if(!app->running) return;
+    if(app->mode != Sweep) return;
 
-    if (app->angle == MAX_ANGLE)
-    {
+    if(app->angle == MAX_ANGLE) {
         app->angle = MIN_ANGLE;
-    }
-    else if (app->angle == MIN_ANGLE)
-    {
+    } else if(app->angle == MIN_ANGLE) {
         app->angle = MAX_ANGLE;
     }
 
     custom_pwm_set_params(FREQ, angle_to_compare(app->angle));
 }
 
-int32_t servotester_app_entry(void *p)
-{
+int32_t servotester_app_entry(void* p) {
     UNUSED(p);
 
-    App *app = app_alloc();
+    App* app = app_alloc();
 
     furi_hal_pwm_start(app->ch, FREQ, angle_to_compare(app->angle));
     custom_pwm_set_params(FREQ, angle_to_compare(app->angle));
 
-    FuriTimer *timer = furi_timer_alloc(tick, FuriTimerTypePeriodic, app);
+    FuriTimer* timer = furi_timer_alloc(tick, FuriTimerTypePeriodic, app);
     furi_timer_start(timer, furi_kernel_get_tick_frequency() / 1);
 
     InputEvent input;
-    while (app->running)
-    {
+    while(app->running) {
         FuriStatus qstat = furi_message_queue_get(app->event_queue, &input, 100);
-        if (qstat == FuriStatusOk)
-        {
-            if (input.key == InputKeyBack)
-            {
+        if(qstat == FuriStatusOk) {
+            if(input.key == InputKeyBack) {
                 app->running = 0;
                 // TODO: handle InputTypeLong
-            }
-            else if (input.type == InputTypePress)
-            {
+            } else if(input.type == InputTypePress) {
                 update_state(app, input.key);
 
-                if (!app->running)
-                {
+                if(!app->running) {
                     break;
                 }
 
-                switch (app->mode)
-                {
+                switch(app->mode) {
                 case Manual:
                     custom_pwm_set_params(FREQ, angle_to_compare(app->angle));
                     break;

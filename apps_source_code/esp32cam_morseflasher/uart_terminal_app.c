@@ -58,7 +58,9 @@ UART_TerminalApp* uart_terminal_app_alloc() {
 
     app->text_input = uart_text_input_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, UART_TerminalAppViewTextInput, uart_text_input_get_view(app->text_input));
+        app->view_dispatcher,
+        UART_TerminalAppViewTextInput,
+        uart_text_input_get_view(app->text_input));
 
     scene_manager_next_scene(app->scene_manager, UART_TerminalSceneStart);
 
@@ -95,9 +97,8 @@ int32_t uart_terminal_app(void* p) {
     furi_delay_ms(200);
     furi_hal_power_enable_external_3_3v();
     furi_hal_power_enable_otg();
-    for(int i=0;i<2;i++)
-    {
-        furi_delay_ms(500); 
+    for(int i = 0; i < 2; i++) {
+        furi_delay_ms(500);
         furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'.'}, 1);
     }
     furi_delay_ms(1);

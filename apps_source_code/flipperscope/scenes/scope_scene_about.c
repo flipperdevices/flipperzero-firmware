@@ -1,9 +1,6 @@
 #include "../scope_app_i.h"
 
-void scope_scene_about_widget_callback(
-    GuiButtonType result,
-    InputType type,
-    void* context) {
+void scope_scene_about_widget_callback(GuiButtonType result, InputType type, void* context) {
     ScopeApp* app = context;
     if(type == InputTypeShort) {
         view_dispatcher_send_custom_event(app->view_dispatcher, result);

@@ -17,25 +17,13 @@ void scope_scene_start_on_enter(void* context) {
     Submenu* submenu = app->submenu;
 
     submenu_add_item(
-        submenu,
-        "Run",
-        SubmenuIndexScopeRun,
-        scope_scene_start_submenu_callback,
-        app);
+        submenu, "Run", SubmenuIndexScopeRun, scope_scene_start_submenu_callback, app);
 
     submenu_add_item(
-        submenu,
-        "Setup",
-        SubmenuIndexScopeSetup,
-        scope_scene_start_submenu_callback,
-        app);
+        submenu, "Setup", SubmenuIndexScopeSetup, scope_scene_start_submenu_callback, app);
 
     submenu_add_item(
-        submenu,
-        "About",
-        SubmenuIndexScopeAbout,
-        scope_scene_start_submenu_callback,
-        app);
+        submenu, "About", SubmenuIndexScopeAbout, scope_scene_start_submenu_callback, app);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(app->scene_manager, ScopeSceneStart));

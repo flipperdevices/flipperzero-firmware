@@ -82,7 +82,8 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
         }
 
         // If it is a sniff function, open the pcap file for recording
-        if(app->ok_to_save_pcaps && strncmp("sniff", app->selected_tx_string, strlen("sniff")) == 0) {
+        if(app->ok_to_save_pcaps &&
+           strncmp("sniff", app->selected_tx_string, strlen("sniff")) == 0) {
             app->is_writing_pcap = true;
             wifi_marauder_create_pcap_file(app);
         }

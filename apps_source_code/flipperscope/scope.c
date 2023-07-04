@@ -10,11 +10,10 @@
 
 #include "scope_app_i.h"
 
-void assert_failed(uint8_t * file, uint32_t line)
-{
+void assert_failed(uint8_t* file, uint32_t line) {
     UNUSED(file);
     UNUSED(line);
-    while (1) {
+    while(1) {
     }
 }
 
@@ -74,8 +73,7 @@ ScopeApp* scope_app_alloc() {
 
     // Widget
     app->widget = widget_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, ScopeViewWidget, widget_get_view(app->widget));
+    view_dispatcher_add_view(app->view_dispatcher, ScopeViewWidget, widget_get_view(app->widget));
 
     app->time = 0.001;
     app->measurement = m_time;
@@ -113,8 +111,7 @@ void scope_app_free(ScopeApp* app) {
     free(app);
 }
 
-int32_t scope_main(void *p)
-{
+int32_t scope_main(void* p) {
     UNUSED(p);
     ScopeApp* scope_app = scope_app_alloc();
     view_dispatcher_run(scope_app->view_dispatcher);

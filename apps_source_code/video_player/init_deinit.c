@@ -57,8 +57,7 @@ void deinit_player(VideoPlayerApp* player) {
     stream_free(player->stream);
     furi_record_close(RECORD_STORAGE);
 
-    if(player->buffer)
-    {
+    if(player->buffer) {
         free(player->buffer);
     }
 
