@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,32.0,,
+Version,+,33.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1548,7 +1548,6 @@ Function,+,furi_thread_alloc_ex,FuriThread*,"const char*, uint32_t, FuriThreadCa
 Function,+,furi_thread_catch,void,
 Function,-,furi_thread_disable_heap_trace,void,FuriThread*
 Function,+,furi_thread_enable_heap_trace,void,FuriThread*
-Function,+,furi_thread_enumerate,uint32_t,"FuriThreadId*, uint32_t"
 Function,+,furi_thread_flags_clear,uint32_t,uint32_t
 Function,+,furi_thread_flags_get,uint32_t,
 Function,+,furi_thread_flags_set,uint32_t,"FuriThreadId, uint32_t"
@@ -1565,6 +1564,8 @@ Function,+,furi_thread_get_return_code,int32_t,FuriThread*
 Function,+,furi_thread_get_stack_space,uint32_t,FuriThreadId
 Function,+,furi_thread_get_state,FuriThreadState,FuriThread*
 Function,+,furi_thread_get_stdout_callback,FuriThreadStdoutWriteCallback,
+Function,+,furi_thread_info_alloc_and_fill,FuriThreadsInfo*,
+Function,+,furi_thread_info_free,void,FuriThreadsInfo*
 Function,+,furi_thread_is_suspended,_Bool,FuriThreadId
 Function,+,furi_thread_join,_Bool,FuriThread*
 Function,+,furi_thread_mark_as_service,void,FuriThread*

@@ -3,7 +3,6 @@
 
 #include <furi_hal.h>
 #include <furi_hal_info.h>
-#include <task_control_block.h>
 #include <time.h>
 #include <notification/notification_messages.h>
 #include <loader/loader.h>
@@ -366,29 +365,44 @@ void cli_command_ps(Cli* cli, FuriString* args, void* context) {
     UNUSED(args);
     UNUSED(context);
 
-    const uint8_t threads_num_max = 32;
-    FuriThreadId threads_ids[threads_num_max];
-    uint8_t thread_num = furi_thread_enumerate(threads_ids, threads_num_max);
+    FuriThreadsInfo* info = furi_thread_info_alloc_and_fill();
+
     printf(
-        "%-20s %-20s %-14s %-8s %-8s %s\r\n",
+        "%-20s %-20s %-14s %-8s %-8s %s %s\r\n",
         "AppID",
         "Name",
         "Stack start",
         "Heap",
         "Stack",
-        "Stack min free");
-    for(uint8_t i = 0; i < thread_num; i++) {
-        TaskControlBlock* tcb = (TaskControlBlock*)threads_ids[i];
+        "Stack min free",
+        "Runtime");
+
+    for(uint8_t i = 0; i < info->thread_count; i++) {
+        FuriThreadInfo* thread_info = &info->thread_info_array[i];
+
+        float runtime_percent = 0;
+        if(info->total_runtime != 0) {
+            runtime_percent = (float)thread_info->runtime / info->total_runtime * 100;
+            runtime_percent = ceilf(runtime_percent * 1000) / 1000;
+        }
+
+        FuriThreadId thread_id = thread_info->thread_id;
+        uint32_t stack_start = (uint32_t)thread_info->stack_start;
+        uint32_t stack_watermark = (uint32_t)thread_info->stack_high_water_mark;
+
         printf(
-            "%-20s %-20s 0x%-12lx %-8zu %-8lu %-8lu\r\n",
-            furi_thread_get_appid(threads_ids[i]),
-            furi_thread_get_name(threads_ids[i]),
-            (uint32_t)tcb->pxStack,
-            memmgr_heap_get_thread_memory(threads_ids[i]),
-            (uint32_t)(tcb->pxEndOfStack - tcb->pxStack + 1) * sizeof(StackType_t),
-            furi_thread_get_stack_space(threads_ids[i]));
+            "%-20s %-20s 0x%-12lx %-8zu %-8lu %-8lu %02.3f%%\r\n",
+            furi_thread_get_appid(thread_id),
+            furi_thread_get_name(thread_id),
+            stack_start,
+            memmgr_heap_get_thread_memory(thread_id),
+            furi_thread_get_stack_space(thread_id),
+            stack_watermark,
+            (double)runtime_percent);
     }
-    printf("\r\nTotal: %d", thread_num);
+    printf("\r\nTotal: %lu", info->thread_count);
+
+    furi_thread_info_free(info);
 }
 
 void cli_command_free(Cli* cli, FuriString* args, void* context) {

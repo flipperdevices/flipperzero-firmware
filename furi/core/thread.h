@@ -248,14 +248,23 @@ uint32_t furi_thread_flags_get(void);
 
 uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeout);
 
-/**
- * @brief Enumerate threads
- * 
- * @param thread_array array of FuriThreadId, where thread ids will be stored
- * @param array_items array size
- * @return uint32_t threads count
- */
-uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_items);
+typedef struct {
+    FuriThreadId thread_id;
+    uint32_t runtime;
+    void* stack_start;
+    size_t stack_size;
+    uint32_t stack_high_water_mark;
+} FuriThreadInfo;
+
+typedef struct {
+    FuriThreadInfo* thread_info_array;
+    uint32_t thread_count;
+    uint32_t total_runtime;
+} FuriThreadsInfo;
+
+FuriThreadsInfo* furi_thread_info_alloc_and_fill(void);
+
+void furi_thread_info_free(FuriThreadsInfo* info);
 
 /**
  * @brief Get thread name

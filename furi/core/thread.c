@@ -11,6 +11,7 @@
 #include "log.h"
 #include <furi_hal_rtc.h>
 #include <furi_hal_console.h>
+#include <FreeRTOS-glue/additions.h>
 
 #define TAG "FuriThread"
 
@@ -496,32 +497,48 @@ uint32_t furi_thread_flags_wait(uint32_t flags, uint32_t options, uint32_t timeo
     return (rflags);
 }
 
-uint32_t furi_thread_enumerate(FuriThreadId* thread_array, uint32_t array_items) {
-    uint32_t i, count;
-    TaskStatus_t* task;
-
-    if(FURI_IS_IRQ_MODE() || (thread_array == NULL) || (array_items == 0U)) {
-        count = 0U;
+FuriThreadsInfo* furi_thread_info_alloc_and_fill(void) {
+    FuriThreadsInfo* info = malloc(sizeof(FuriThreadsInfo));
+    if(FURI_IS_IRQ_MODE()) {
+        info->thread_count = 0U;
     } else {
         vTaskSuspendAll();
+        info->thread_count = uxTaskGetNumberOfTasks();
+        info->thread_info_array = malloc(info->thread_count * sizeof(FuriThreadInfo));
 
-        count = uxTaskGetNumberOfTasks();
-        task = pvPortMalloc(count * sizeof(TaskStatus_t));
+        TaskStatus_t* tasks_info = malloc(info->thread_count * sizeof(TaskStatus_t));
+        info->thread_count =
+            uxTaskGetSystemState(tasks_info, info->thread_count, &info->total_runtime);
 
-        if(task != NULL) {
-            count = uxTaskGetSystemState(task, count, NULL);
+        for(uint32_t i = 0; i < info->thread_count; i++) {
+            info->thread_info_array[i].thread_id = (FuriThreadId)tasks_info[i].xHandle;
+            info->thread_info_array[i].runtime = tasks_info[i].ulRunTimeCounter;
+            info->thread_info_array[i].stack_start = tasks_info[i].pxStackBase;
+            info->thread_info_array[i].stack_high_water_mark = tasks_info[i].usStackHighWaterMark;
 
-            for(i = 0U; (i < count) && (i < array_items); i++) {
-                thread_array[i] = (FuriThreadId)task[i].xHandle;
+            FuriThread* thread =
+                pvTaskGetThreadLocalStoragePointer((FuriThreadId)tasks_info[i].xHandle, 0);
+            if(thread) {
+                info->thread_info_array[i].stack_size = thread->stack_size;
             }
-            count = i;
-        }
-        (void)xTaskResumeAll();
 
-        vPortFree(task);
+            vTaskClearRunTimeStats(tasks_info[i].xHandle);
+        }
+
+        vTaskClearTotalRunTimeStats();
+        free(tasks_info);
+        (void)xTaskResumeAll();
     }
 
-    return (count);
+    return (info);
+}
+
+void furi_thread_info_free(FuriThreadsInfo* info) {
+    furi_assert(info != NULL);
+    if(info->thread_info_array != NULL) {
+        free(info->thread_info_array);
+    }
+    free(info);
 }
 
 const char* furi_thread_get_name(FuriThreadId thread_id) {
