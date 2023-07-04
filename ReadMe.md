@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0628-0738-0.85.3-b754ec1.tgz&channel=RM0628-0738-0.85.3-b754ec1&version=0.85.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0628-0738-0.85.3-b754ec1-NoAnim.tgz&channel=RM0628-0738-0.85.3-b754ec1-NoAnim&version=0.85.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0704-1145-0.86.1-0721ed2.tgz&channel=RM0704-1145-0.86.1-0721ed2&version=0.85.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0704-1145-0.86.1-0721ed2-NoAnim.tgz&channel=RM0704-1145-0.86.1-0721ed2-NoAnim&version=0.85.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -33,49 +33,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-04 11:30 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-06-30 09:45 EST`
-- OFW: [Fix roll-over in file browser and archive #2811 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2811)
-- OFW: [SLIX2 emulation support / practical use for Dymo printers #2783 (By g3gg0)](https://github.com/flipperdevices/flipperzero-firmware/pull/2783)
-- OFW: [Keynote with vertical layout #2794 (By Kami-no)](https://github.com/flipperdevices/flipperzero-firmware/pull/2794)
-- OFW: [NFC: Improvements to NFC Magic app #2760 (By Aloneliberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2760)
-- OFW: [Added Power Button for an unknown Sharp Model #2787 (By m0veax)](https://github.com/flipperdevices/flipperzero-firmware/pull/2787)
-- OFW: [Add Mitsubishi MSZ-AP25VGK universal ac remote #2800 (By minchogaydarov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2800)
-- OFW PR: [NFC: Fix key invalidation logic #2782 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2782)
-- [Loader Menu Improvements (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/686)
-- OFW: [Debug apps: speaker, uart_echo with baudrate #2812 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2812)
-- [A few improvements from Unleashed (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/359bace0272d906ed711de53b6a1386b1d07e0c1)
-- [App Manifest Updates for App Credits (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/b51f0b2c784d3c6eb3de2dc08f2ed119a7c320b0)
-- OFW (Nothing Applied): [increased timeouts #2816 (By doomwastaken)](https://github.com/flipperdevices/flipperzero-firmware/pull/2816)
-- OFW PR: [Furi,FuriHal: various improvements #2819 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2819)
-- [Loader Menu Reorder - Third time's a charm #687 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/687)
-- [CFW Settings for Main Menu Start Point (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/f2be53b18c8508371c6b7f408c4661c37670c424) Needs fixes to set added favorites.
-- Updated: [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77) (By xMasterX)
-- Updated: [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) `Uses: COM-port` (By xMasterX)
-- Updated: [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck) (By xMasterX)
-- Updated: [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch) (By xMasterX)
-- Updated: [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger) (By xMasterX)
-- OFW: [fix width of submenu items on Vertical orientation #2306 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2306)
-- Updated: [WiFi (Marauder) v0.5.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) (Now With ESP32 Flasher)
-- [CFW Settings for Lock Menu Style (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fe3d1ccac0d2058769a0e8f1076b348ef59eaa29)
-- Directory TidyUp (By Willy-JL with some changes by RogueMaster)
-- UL: Add new ACs and TVs in universal remote, Hitachi taken from OFW PR 2826 (by minchogaydarov) & Thomson TV from OFW PR 2818 (by eze-kiel)
-- UL: [Subghz fixes #527 (By wosk)](https://github.com/DarkFlippers/unleashed-firmware/pull/527)
-- Updated: Marauder [Update ReadMe.md #23 (By francis2054)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/23)
-- UL: [SubGhz App #516 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/516)
-- UL: [Updated infrared assets #529 (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/pull/529)
-- UL: Fixed odd file name length check for desktop (By xMasterX)
-- Updated: [i2c Tools v1.1 (By NaejEL)](https://github.com/NaejEL/flipperzero-i2ctools)
-- Updated: [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/) README updates only.
-- Updated: [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) README updates only.
-- Updated: [WiFi (Marauder) v0.5.0 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) README updates only.
-- [Make the settings more delicate #689 (By colyrain)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/689)
-- Updated: [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
-- Added: [ESP32 Evil Portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
-- Added: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
-- Updated: [J305 Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter)
-- OFW PR: [Picopass fix ice #2836 (By bettse)](https://github.com/flipperdevices/flipperzero-firmware/pull/2836)
-- OFW: [Desktop settings: show icon and name for external applications #2837 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2837)
-- [SWD Probe fix (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/706f6c906f7bb8bb9a93835e6f7b282fea8eff07)
-- Updated: [ESP32 Evil Portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 
 <a name="release">
 
@@ -465,4 +422,4 @@ $ ./fbt dolphin_ext
 - [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) ($25 USD in ETH or BTC)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0628-0738-0.85.3-b754ec1.tgz&channel=RM0628-0738-0.85.3-b754ec1&version=0.85.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0628-0738-0.85.3-b754ec1-NoAnim.tgz&channel=RM0628-0738-0.85.3-b754ec1-NoAnim&version=0.85.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0704-1145-0.86.1-0721ed2.tgz&channel=RM0704-1145-0.86.1-0721ed2&version=0.85.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0704-1145-0.86.1-0721ed2-NoAnim.tgz&channel=RM0704-1145-0.86.1-0721ed2-NoAnim&version=0.85.3)
