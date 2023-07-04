@@ -3,6 +3,8 @@
 #include <DNSServer.h>
 #include <WiFi.h>
 
+#define MAX_HTML_SIZE 20000
+
 #define B_PIN 4
 #define G_PIN 5
 #define R_PIN 6
@@ -29,7 +31,7 @@ bool name_received = false;
 bool password_received = false;
 
 char apName[30] = "PORTAL";
-char index_html[5000] = "TEST";
+char index_html[MAX_HTML_SIZE] = "TEST";
 
 // AP FUNCTIONS
 class CaptiveRequestHandler : public AsyncWebHandler {
