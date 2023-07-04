@@ -34,8 +34,11 @@ void evil_portal_read_index_html(void *context) {
     storage_file_close(index_html);
     storage_file_free(index_html);
   } else {
-    char * html_error =  "Something went wrong with reading the html file.\n"
-                      "Is the SD Card set up correctly?";
+    char *html_error =
+        "<b>Evil portal</b><br>Unable to read the html file.<br>"
+        "Is the SD Card set up correctly? <br>See instructions @ "
+        "github.com/bigbrodude6119/flipper-zero-evil-portal<br>"
+        "Under the 'Install pre-built app on the flipper' section.";
     app->index_html = (uint8_t *)html_error;
   }
 
@@ -68,7 +71,7 @@ void evil_portal_read_ap_name(void *context) {
     storage_file_close(ap_name);
     storage_file_free(ap_name);
   } else {
-    char * app_default =  "Evil Portal";
+    char *app_default = "Evil Portal";
     app->ap_name = (uint8_t *)app_default;
   }
   evil_portal_close_storage();
@@ -96,6 +99,10 @@ char *sequential_file_resolve_path(Storage *storage, const char *dir,
 
 void write_logs(char *portal_logs) {
   Storage *storage = evil_portal_open_storage();
+
+  if (!storage_file_exists(storage, EVIL_PORTAL_LOG_SAVE_PATH)) {
+    storage_simply_mkdir(storage, EVIL_PORTAL_LOG_SAVE_PATH);
+  }
 
   char *seq_file_path = sequential_file_resolve_path(
       storage, EVIL_PORTAL_LOG_SAVE_PATH, "log", "txt");

@@ -36,11 +36,13 @@ void evil_portal_scene_console_output_on_enter(void *context) {
   if (app->is_command) {
     furi_string_reset(app->text_box_store);
     app->text_box_store_strlen = 0;
+    app->sent_reset = false;
 
     if (0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
       const char *help_msg =
           "BLUE = Waiting\nGREEN = Good\nRED = Bad\n\nThis project is a "
-          "WIP.\ngithub.com/bigbrodude6119/flipper-zero-evil-portal\n\n";
+          "WIP.\ngithub.com/bigbrodude6119/flipper-zero-evil-portal\n\n"
+          "Version 0.0.2\n\n";
       furi_string_cat_str(app->text_box_store, help_msg);
       app->text_box_store_strlen += strlen(help_msg);
       if (app->show_stopscan_tip) {
@@ -55,6 +57,8 @@ void evil_portal_scene_console_output_on_enter(void *context) {
       furi_string_cat_str(app->text_box_store, help_msg);
       app->text_box_store_strlen += strlen(help_msg);
       write_logs(app->portal_logs);
+      free(app->portal_logs);
+      strcpy(app->portal_logs, "");
       if (app->show_stopscan_tip) {
         const char *msg = "Press BACK to return\n";
         furi_string_cat_str(app->text_box_store, msg);
@@ -62,7 +66,8 @@ void evil_portal_scene_console_output_on_enter(void *context) {
       }
     }
 
-    if (0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
+    if (0 ==
+        strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
       app->command_queue[0] = SET_AP_CMD;
       app->has_command_queue = true;
       app->command_index = 0;
@@ -75,6 +80,7 @@ void evil_portal_scene_console_output_on_enter(void *context) {
     }
 
     if (0 == strncmp(RESET_CMD, app->selected_tx_string, strlen(RESET_CMD))) {
+      app->sent_reset = true;
       if (app->show_stopscan_tip) {
         const char *msg = "Reseting portal\nPress BACK to return\n\n\n\n";
         furi_string_cat_str(app->text_box_store, msg);
@@ -95,7 +101,8 @@ void evil_portal_scene_console_output_on_enter(void *context) {
       app->uart, evil_portal_console_output_handle_rx_data_cb);
 
   if (app->is_command && app->selected_tx_string) {
-    if (0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
+    if (0 ==
+        strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
       evil_portal_read_index_html(context);
 
       char *data = malloc(

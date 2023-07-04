@@ -34,7 +34,7 @@ const Evil_PortalItem items[NUM_MENU_ITEMS] = {
      1,
      {SET_HTML_CMD},
      NO_ARGS,
-     FOCUS_CONSOLE_START,
+     FOCUS_CONSOLE_END,
      SHOW_STOPSCAN_TIP},
 
     // stop portal

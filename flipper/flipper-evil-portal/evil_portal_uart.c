@@ -51,12 +51,12 @@ static int32_t uart_worker(void *context) {
         if (uart->handle_rx_data_cb) {
           uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
 
-          if (uart->app->has_command_queue) {         
-            if (uart->app->command_index < 1) {            
+          if (uart->app->has_command_queue) {
+            if (uart->app->command_index < 1) {
               if (0 ==
                   strncmp(SET_AP_CMD,
                           uart->app->command_queue[uart->app->command_index],
-                          strlen(SET_AP_CMD))) {                
+                          strlen(SET_AP_CMD))) {
                 char *out_data =
                     malloc((size_t)(strlen((char *)uart->app->ap_name) +
                                     strlen("setap=")));
@@ -78,9 +78,14 @@ static int32_t uart_worker(void *context) {
             }
           }
 
-          strcat(uart->app->portal_logs, (char *)uart->rx_buf);
+          if (uart->app->sent_reset == false) {
+            strcat(uart->app->portal_logs, (char *)uart->rx_buf);
+          }
+
           if (strlen(uart->app->portal_logs) > 4000) {
             write_logs(uart->app->portal_logs);
+            free(uart->app->portal_logs);
+            strcpy(uart->app->portal_logs, "");
           }
         }
       }
