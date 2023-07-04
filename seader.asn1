@@ -81,8 +81,9 @@ FrameProtocol ::= ENUMERATED {
 }
 
 SamVersion ::= SEQUENCE {
-  v [0] IMPLICIT OCTET STRING,
-  f [1] IMPLICIT OCTET STRING
+  version [0] IMPLICIT OCTET STRING,
+  firmware [1] IMPLICIT OCTET STRING,
+  type [2] IMPLICIT OCTET STRING
 }
 
 END

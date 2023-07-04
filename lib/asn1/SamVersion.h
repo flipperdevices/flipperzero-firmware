@@ -21,8 +21,9 @@ extern "C" {
 
 /* SamVersion */
 typedef struct SamVersion {
-	OCTET_STRING_t	 v;
-	OCTET_STRING_t	 f;
+	OCTET_STRING_t	 version;
+	OCTET_STRING_t	 firmware;
+	OCTET_STRING_t	 type;
 	
 	/* Context for parsing across buffer boundaries */
 	asn_struct_ctx_t _asn_ctx;
