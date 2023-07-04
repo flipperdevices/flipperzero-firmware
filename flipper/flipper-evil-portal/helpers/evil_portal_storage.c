@@ -71,7 +71,7 @@ void evil_portal_read_ap_name(void *context) {
     storage_file_close(ap_name);
     storage_file_free(ap_name);
   } else {
-    char * app_default =  "Evil Portal";
+    char *app_default = "Evil Portal";
     app->ap_name = (uint8_t *)app_default;
   }
   evil_portal_close_storage();
@@ -100,7 +100,7 @@ char *sequential_file_resolve_path(Storage *storage, const char *dir,
 void write_logs(char *portal_logs) {
   Storage *storage = evil_portal_open_storage();
 
-  if(!storage_file_exists(storage, EVIL_PORTAL_LOG_SAVE_PATH)) {
+  if (!storage_file_exists(storage, EVIL_PORTAL_LOG_SAVE_PATH)) {
     storage_simply_mkdir(storage, EVIL_PORTAL_LOG_SAVE_PATH);
   }
 
