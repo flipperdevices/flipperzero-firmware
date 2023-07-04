@@ -1,6 +1,6 @@
 App(
     appid="Wii_EC_Analyzer",
-    name="Wii EC Analyser",
+    name="Wii EC Analyzer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wii_ec_anal",
     requires=[
