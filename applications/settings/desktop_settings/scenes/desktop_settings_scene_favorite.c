@@ -78,7 +78,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         app);
 
     if(curr_favorite_app->is_external) {
-        if (curr_favorite_app->name_or_path[0] == '\0') {
+        if(curr_favorite_app->name_or_path[0] == '\0') {
             pre_select_item = EXTERNAL_BROWSER_INDEX;
         } else {
             pre_select_item = EXTERNAL_APPLICATION_INDEX;
