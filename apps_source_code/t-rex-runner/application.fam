@@ -6,7 +6,7 @@ App(
     cdefines=["APP_TREXRUNNER"],
     requires=["gui"],
     stack_size=8 * 1024,
-    fap_category="Games_Extra",
+    fap_category="Games",
     fap_icon="trexrunner_icon.png",
     fap_icon_assets="assets",
     order=36,

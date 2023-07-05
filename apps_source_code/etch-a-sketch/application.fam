@@ -8,7 +8,7 @@ App(
     stack_size=2 * 1024,
     order=175,
     fap_icon="etch-a-sketch-icon.png",
-    fap_category="Misc_Extra",
+    fap_category="Tools",
     fap_icon_assets="assets",
     fap_author="@SimplyMinimal",
     fap_weburl="https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch",

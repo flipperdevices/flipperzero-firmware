@@ -13,5 +13,5 @@ App(
     order=45,
     fap_icon="music_10px.png",
     fap_icon_assets="icons",
-    fap_category="Media_Extra",
+    fap_category="Media",
 )

@@ -9,7 +9,7 @@ App(
     ],
     stack_size=1 * 1024,
     fap_icon="usb_hid_autofire.png",
-    fap_category="Tools_Extra",
+    fap_category="USB",
     fap_author="@pbek",
     fap_weburl="https://github.com/pbek/usb_hid_autofire",
     fap_version="1.0",

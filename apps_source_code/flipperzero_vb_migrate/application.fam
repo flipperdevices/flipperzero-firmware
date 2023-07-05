@@ -23,7 +23,7 @@ App(
     entry_point="vb_migrate_app",
     requires=["gui", "storage"],
     stack_size=2 * 1024,
-    fap_version=(1,1),
+    fap_version=(1, 1),
     fap_libs=[],
     fap_private_libs=[
         Lib(
@@ -31,7 +31,7 @@ App(
         ),
     ],
     fap_icon="vb_migrate_10px.png",
-    fap_category="Misc_Extra",
+    fap_category="NFC",
     fap_description="Makes transferring characters with VB Lab less cumbersome",
     fap_author="cyanic",
     fap_weburl="https://github.com/GMMan/flipperzero-vb-migrate",

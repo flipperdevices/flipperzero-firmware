@@ -5,7 +5,7 @@ App(
     entry_point="GPIO_reader_app",
     requires=["gui"],
     stack_size=1 * 1024,
-    fap_category="GPIO_Extra",
+    fap_category="GPIO",
     fap_icon="icon.png",
     fap_author="@aureli1c",
     fap_weburl="https://github.com/aureli1c/flipperzero_GPIO_read",

@@ -1,7 +1,7 @@
 App(
     appid="qrcode",
     name="QR Code",
-    fap_version=(1,1),
+    fap_version=(1, 1),
     fap_description="Display qrcodes",
     fap_author="Bob Matcuk",
     fap_weburl="https://github.com/bmatcuk/flipperzero-qrcode",
@@ -13,7 +13,7 @@ App(
         "gui",
         "dialogs",
     ],
-    fap_category="Misc_Extra",
+    fap_category="Tools",
     fap_icon="icons/qrcode_10px.png",
     fap_icon_assets="icons",
 )

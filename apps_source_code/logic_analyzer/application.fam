@@ -8,7 +8,7 @@ App(
     stack_size=2 * 1024,
     order=10,
     fap_icon="icons/app.png",
-    fap_category="GPIO_Extra",
+    fap_category="GPIO",
     fap_icon_assets="icons",
     fap_author="@g3gg0",
     fap_weburl="https://github.com/g3gg0/flipper-logic_analyzer",

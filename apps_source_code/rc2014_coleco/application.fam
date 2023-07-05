@@ -9,5 +9,5 @@ App(
     order=35,
     fap_icon="coleco_10px.png",
     fap_icon_assets="icons",
-    fap_category="GPIO_Extra",
+    fap_category="GPIO",
 )

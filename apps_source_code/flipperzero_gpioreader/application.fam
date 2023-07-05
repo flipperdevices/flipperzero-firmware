@@ -6,7 +6,7 @@ App(
     requires=["gui"],
     stack_size=1 * 1024,
     order=50,
-    fap_category="GPIO_Extra",
+    fap_category="GPIO",
     fap_icon="icon.png",
     fap_icon_assets="icons",
 )

@@ -9,7 +9,7 @@ App(
     stack_size=4 * 1024,
     order=20,
     fap_icon="usb_midi.png",
-    fap_category="Media_Extra",
+    fap_category="Media",
     fap_author="@DrZlo13",
     fap_weburl="https://github.com/DrZlo13/flipper-zero-usb-midi",
     fap_version="1.0",

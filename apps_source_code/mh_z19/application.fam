@@ -7,6 +7,6 @@ App(
     stack_size=1 * 1024,
     order=20,
     fap_icon="co2_icon_10x10.png",
-    fap_category="GPIO_Extra",
+    fap_category="GPIO",
     fap_icon_assets="media",
 )

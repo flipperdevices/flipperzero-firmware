@@ -6,7 +6,7 @@ App(
     requires=["gui"],
     stack_size=2 * 1024,
     fap_icon="wiegand.png",
-    fap_category="GPIO_Extra",
+    fap_category="GPIO",
     fap_author="@jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio",
     fap_version="1.0",

@@ -10,7 +10,7 @@ App(
     stack_size=2 * 1024,
     order=20,
     fap_icon="dist_sensor10px.png",
-    fap_category="GPIO_Extra",
+    fap_category="GPIO",
     fap_author="@privet971",
     fap_weburl="https://github.com/privet971/FlipperZeroApps/tree/main/usping",
     fap_version="1.0",

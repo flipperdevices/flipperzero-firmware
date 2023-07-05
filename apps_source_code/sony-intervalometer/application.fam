@@ -8,7 +8,7 @@ App(
     order=20,
     fap_icon="intervalometer_10x.png",
     fap_icon_assets="icons",
-    fap_category="Tools_Extra",
+    fap_category="Infrared",
     fap_author="@Nitepone",
     fap_weburl="https://github.com/Nitepone/flipper-intervalometer",
     fap_version="1.0",

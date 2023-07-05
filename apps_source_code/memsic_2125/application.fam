@@ -6,5 +6,5 @@ App(
     requires=["gui"],
     stack_size=2 * 1024,
     fap_icon="memsic_2125.png",
-    fap_category="GPIO_Extra",
+    fap_category="GPIO",
 )
