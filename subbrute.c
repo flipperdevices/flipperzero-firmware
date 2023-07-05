@@ -103,7 +103,6 @@ SubBruteState* subbrute_alloc() {
     //instance->environment = subghz_environment_alloc();
 
     // Uncomment to enable Debug pin output on PIN 17(1W)
-    // //furi_hal_subghz_set_async_mirror_pin(&gpio_ibutton);
     // subghz_devices_set_async_mirror_pin(instance->radio_device, &gpio_ibutton);
 
     return instance;
@@ -113,7 +112,6 @@ void subbrute_free(SubBruteState* instance) {
     furi_assert(instance);
 
     // Uncomment to enable Debug pin output on PIN 17(1W)
-    // //furi_hal_subghz_set_async_mirror_pin(NULL);
     // subghz_devices_set_async_mirror_pin(instance->radio_device, NULL);
 
     // SubBruteWorker

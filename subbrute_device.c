@@ -154,7 +154,7 @@ SubBruteFileResult subbrute_device_attack_set(
     // For non-file types we didn't set SubGhzProtocolDecoderBase
     instance->receiver = subghz_receiver_alloc_init(instance->environment);
     subghz_receiver_set_filter(instance->receiver, SubGhzProtocolFlag_Decodable);
-    // furi_hal_subghz_reset(); // XXX
+    // furi_hal_subghz_reset(); // TODO Is this necessary?
 
     uint8_t protocol_check_result = SubBruteFileResultProtocolNotFound;
 #ifdef FURI_DEBUG
@@ -243,7 +243,7 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
 
     instance->receiver = subghz_receiver_alloc_init(instance->environment);
     subghz_receiver_set_filter(instance->receiver, SubGhzProtocolFlag_Decodable);
-    // furi_hal_subghz_reset(); // XXX
+    // furi_hal_subghz_reset(); // TODO Is this necessary?
 
     do {
         if(!flipper_format_file_open_existing(fff_data_file, file_path)) {
@@ -263,11 +263,7 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
             result = SubBruteFileResultMissingOrIncorrectFrequency;
             break;
         }
-        // instance->file_protocol_info->frequency = temp_data32;
-        // if(!furi_hal_subghz_is_tx_allowed(instance->file_protocol_info->frequency)) {
-        //     result = SubBruteFileResultFrequencyNotAllowed;
-        //     break;
-        // }
+      
 
         if(!subghz_devices_is_frequency_valid(instance->radio_device, temp_data32)) {
             FURI_LOG_E(TAG, "Unsupported radio device frequency");
