@@ -10,7 +10,7 @@
 #include <nupogodi_icons.h>
 #include "notifications.h"
 
-typedef struct NuPogodiModel NuPogodiModel;
+#define TAG "NuPogodi"
 
 typedef struct {
     Gui* gui;
@@ -19,7 +19,6 @@ typedef struct {
     View* view;
     FuriThread* worker_thread;
     FuriTimer* timer;
-    NuPogodiModel* model;
 } NuPogodiApp;
 
 typedef enum {
@@ -31,7 +30,7 @@ typedef enum {
     Over,
 } NuPogodiMode;
 
-struct NuPogodiModel {
+typedef struct {
     bool sound;
     NuPogodiMode mode;
     uint8_t tick;
@@ -40,7 +39,7 @@ struct NuPogodiModel {
     uint8_t missed;
     uint16_t scores;
     uint8_t eggs[4];
-};
+} NuPogodiModel;
 
 typedef enum {
     WorkerEventReserved = (1 << 0),
@@ -238,51 +237,58 @@ static bool nupogodi_view_input_callback(InputEvent* event, void* context) {
     furi_assert(app);
     bool consumed = false;
 
-    if(app->model->mode == Fail) {
-        return false;
-    }
+    FURI_LOG_D(TAG, "Input %u %u", event->type, event->key);
 
-    if(event->type == InputTypeShort) {
-        switch(event->key) {
-        case InputKeyUp:
-            consumed = true;
-            app->model->top = true;
-            break;
-        case InputKeyDown:
-            consumed = true;
-            app->model->top = false;
-            break;
-        case InputKeyLeft:
-            consumed = true;
-            app->model->left = true;
-            break;
-        case InputKeyRight:
-            consumed = true;
-            app->model->left = false;
-            break;
-        case InputKeyOk:
-            consumed = true;
-            if(app->model->mode == Play) {
-                app->model->mode = Pause;
-            } else if(app->model->mode == Pause) {
-                app->model->mode = Play;
-            } else if(app->model->mode == Over) {
-                app->model->mode = Ready;
+    with_view_model(
+        app->view,
+        NuPogodiModel * model,
+        {
+            if(model->mode == Fail) {
+                return false;
             }
-            break;
-        default:
-            break;
-        }
-    } else if(event->type == InputTypeLong) {
-        switch(event->key) {
-        case InputKeyOk:
-            consumed = true;
-            app->model->sound = !app->model->sound;
-            break;
-        default:
-            break;
-        }
-    }
+
+            if(event->type == InputTypeShort) {
+                switch(event->key) {
+                case InputKeyUp:
+                    consumed = true;
+                    model->top = true;
+                    break;
+                case InputKeyDown:
+                    consumed = true;
+                    model->top = false;
+                    break;
+                case InputKeyLeft:
+                    consumed = true;
+                    model->left = true;
+                    break;
+                case InputKeyRight:
+                    consumed = true;
+                    model->left = false;
+                    break;
+                case InputKeyOk:
+                    consumed = true;
+                    if(model->mode == Play) {
+                        model->mode = Pause;
+                    } else if(model->mode == Pause) {
+                        model->mode = Play;
+                    } else if(model->mode == Over) {
+                        model->mode = Ready;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            } else if(event->type == InputTypeLong) {
+                switch(event->key) {
+                case InputKeyOk:
+                    consumed = true;
+                    model->sound = !model->sound;
+                    break;
+                default:
+                    break;
+                }
+            }
+    }, consumed);
 
     return consumed;
 }
@@ -303,6 +309,8 @@ static int32_t nupogodi_worker(void* context) {
         uint32_t events =
             furi_thread_flags_wait(WORKER_EVENTS_MASK, FuriFlagWaitAny, FuriWaitForever);
         furi_check((events & FuriFlagError) == 0);
+
+        FURI_LOG_D(TAG, "Worker %lu", events);
 
         if(events & WorkerEventStop) break;
         if(events & WorkerEventTick) {
@@ -436,7 +444,6 @@ static NuPogodiApp* nupogodi_app_alloc() {
         app->view,
         NuPogodiModel * model,
         {
-            app->model = model;
             model->mode = Logo;
             model->tick = 1;
             model->top = false;
