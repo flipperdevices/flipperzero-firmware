@@ -1,5 +1,5 @@
-# Flipper Application Files (FAPs) for Any Firmware with API v31.x
-## Apps from this pack should be compatible with OFW with API v31.x (dev branch) or any other firmware build with API 31.x
+# Flipper Application Files (FAPs) for Any Firmware with API v33.x
+## Apps from this pack should be compatible with OFW with API v33.x (dev branch) or any other firmware build with API 33.x
 
 ## [Download all files by using this link, and copy only apps folder onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/all-the-plugins/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
