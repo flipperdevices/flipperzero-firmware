@@ -156,9 +156,15 @@ void mf_ultralight_copy(MfUltralightData* data, const MfUltralightData* other) {
     furi_assert(other);
 
     iso14443_3a_copy(data->iso14443_3a_data, other->iso14443_3a_data);
-    memcpy(data->counter, other->counter, MF_ULTRALIGHT_COUNTER_NUM);
-    memcpy(data->tearing_flag, other->tearing_flag, MF_ULTRALIGHT_TEARING_FLAG_NUM);
-    memcpy(data->page, other->page, MF_ULTRALIGHT_MAX_PAGE_NUM);
+    for(size_t i = 0; i < COUNT_OF(data->counter); i++) {
+        data->counter[i] = other->counter[i];
+    }
+    for(size_t i = 0; i < COUNT_OF(data->tearing_flag); i++) {
+        data->tearing_flag[i] = other->tearing_flag[i];
+    }
+    for(size_t i = 0; i < COUNT_OF(data->page); i++) {
+        data->page[i] = other->page[i];
+    }
 
     data->type = other->type;
     data->version = other->version;

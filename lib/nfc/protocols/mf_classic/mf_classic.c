@@ -79,9 +79,12 @@ void mf_classic_copy(MfClassicData* data, const MfClassicData* other) {
     furi_assert(other);
 
     iso14443_3a_copy(data->iso14443_3a_data, other->iso14443_3a_data);
-    memcpy(data->block, other->block, MF_CLASSIC_TOTAL_BLOCKS_MAX);
-    memcpy(data->block_read_mask, other->block_read_mask, MF_CLASSIC_READ_MASK_SIZE);
-
+    for(size_t i = 0; i < COUNT_OF(data->block); i++) {
+        data->block[i] = other->block[i];
+    }
+    for(size_t i = 0; i < COUNT_OF(data->block_read_mask); i++) {
+        data->block_read_mask[i] = other->block_read_mask[i];
+    }
     data->type = other->type;
     data->key_a_mask = other->key_a_mask;
     data->key_b_mask = other->key_b_mask;

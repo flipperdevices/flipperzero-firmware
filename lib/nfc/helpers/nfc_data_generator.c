@@ -397,7 +397,7 @@ static void nfc_generate_mf_classic(NfcDevice* nfc_device, uint8_t uid_len, MfCl
     uint16_t block_num = mf_classic_get_total_block_num(type);
     if(type == MfClassicType4k) {
         // Set every block to 0xFF
-        for(uint16_t i = 1; i < block_num; i += 1) {
+        for(uint16_t i = 1; i < block_num; i++) {
             if(mf_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc_data, i);
             } else {
@@ -409,7 +409,7 @@ static void nfc_generate_mf_classic(NfcDevice* nfc_device, uint8_t uid_len, MfCl
         mfc_data->iso14443_3a_data->sak = 0x18;
     } else if(type == MfClassicType1k) {
         // Set every block to 0xFF
-        for(uint16_t i = 1; i < block_num; i += 1) {
+        for(uint16_t i = 1; i < block_num; i++) {
             if(mf_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc_data, i);
             } else {
@@ -421,7 +421,7 @@ static void nfc_generate_mf_classic(NfcDevice* nfc_device, uint8_t uid_len, MfCl
         mfc_data->iso14443_3a_data->sak = 0x08;
     } else if(type == MfClassicTypeMini) {
         // Set every block to 0xFF
-        for(uint16_t i = 1; i < block_num; i += 1) {
+        for(uint16_t i = 1; i < block_num; i++) {
             if(mf_classic_is_sector_trailer(i)) {
                 nfc_generate_mf_classic_sector_trailer(mfc_data, i);
             } else {
