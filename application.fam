@@ -9,7 +9,7 @@ App(
     ],
     stack_size=8 * 1024,
     fap_icon="bfico.png",
-    fap_category="Misc_Extra",
+    fap_category="Tools",
     fap_icon_assets="icons",
     fap_author="@nymda",
     fap_weburl="https://github.com/nymda/FlipperZeroBrainfuck",
