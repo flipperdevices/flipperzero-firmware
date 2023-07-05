@@ -17,7 +17,7 @@ Download release versions via the Flipper App Catalog (when released)
 
 ### Beta/Dev
 
-Download builds of based off git at flipc: https://flipc.org/bettse/seader?branch=main
+Download builds based off git at [flipc](https://flipc.org/bettse/seader?branch=main)
 
 ### Old builds
 
