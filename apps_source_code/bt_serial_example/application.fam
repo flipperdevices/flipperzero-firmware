@@ -8,6 +8,6 @@ App(
         "bt",
         "gui",
     ],
-    fap_category="Tools",
+    fap_category="Bluetooth",
     fap_icon="uart_10px.png",
 )
