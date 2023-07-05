@@ -17,6 +17,7 @@ typedef void (*MagLoadingCallback)(void* context, bool state);
 
 typedef struct {
     FuriString* str;
+    size_t len;
 } MagTrack;
 
 typedef struct {
@@ -48,6 +49,8 @@ void mag_device_data_clear(MagDeviceData* dev_data);
 void mag_device_clear(MagDevice* mag_dev);
 
 bool mag_device_delete(MagDevice* mag_dev, bool use_load_path);
+
+bool mag_device_parse_card_string(MagDevice* mag_dev, FuriString* card_str);
 
 void mag_device_set_loading_callback(
     MagDevice* mag_dev,

@@ -20,7 +20,7 @@ Sources of "integrated/bundled" apps are added now in this repo too, to allow pu
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `5 Jul 19:55 GMT +3`
+### Apps checked & updated at `6 Jul 01:40 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -72,6 +72,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 - [GPIO Reader (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 - [GPIO Reader 2 (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
+- [MagSpoof (WIP) (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) - Read mode [(by hummusec)](https://github.com/hummusec/magspoof_flipper) - + GPIO & Power fixes
 - [Timelapse (zeitraffer) (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) - works with external module!
 - [Pwnagotchi->Flipper interface (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
@@ -121,7 +122,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Brainfuck interpreter (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - [NightStand Clock (By nymda)](https://github.com/nymda/FlipperNightStand) - Fixes by [Willy-JL](https://github.com/Willy-JL)
 - [BT Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger)
-- [MagSpoof (WIP) (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - [EM4100 universal keys generator (for RFID Fuzzer) (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - [FlipBIP Crypto Tool (By xtruan)](https://github.com/xtruan/FlipBIP)
