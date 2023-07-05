@@ -1,7 +1,6 @@
 #include "bc_scanner_view.h"
 #include "../bc_scanner_app_i.h"
 #include <gui/elements.h>
-#include <assets_icons.h>
 
 #define MAX_NAME_LEN 64
 #define TAG "BcScanner"
