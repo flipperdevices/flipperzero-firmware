@@ -7,7 +7,7 @@ App(
     stack_size=1 * 1024,
     order=45,
     fap_icon="calcIcon.png",
-    fap_category="Misc",
+    fap_category="Tools",
     fap_author="@n-o-T-I-n-s-a-n-e",
     fap_weburl="https://github.com/n-o-T-I-n-s-a-n-e",
     # fap_version="1.0",

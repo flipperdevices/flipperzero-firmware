@@ -4,7 +4,7 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="resistors_app",
     stack_size=2 * 1024,
-    fap_category="Misc",
+    fap_category="Tools",
     fap_version=(1, 1),
     fap_icon="resistors.png",
     fap_description="Resistor calculations",

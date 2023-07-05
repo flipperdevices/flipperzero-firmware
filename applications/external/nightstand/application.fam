@@ -7,7 +7,7 @@ App(
     icon="A_Clock_14",
     stack_size=2 * 1024,
     fap_icon="ClockIcon.png",
-    fap_category="Misc",
+    fap_category="Tools",
     order=81,
     fap_author="@nymda & @Willy-JL",
     fap_weburl="https://github.com/nymda/FlipperNightStand",

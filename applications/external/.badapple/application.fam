@@ -6,7 +6,7 @@ App(
     requires=["gui"],
     stack_size=1 * 1024,
     fap_icon="bad_apple_10px.png",
-    fap_category="Misc",
+    fap_category="Tools",
     fap_author="cyanic",
     fap_weburl="https://github.com/GMMan/flipperzero-badapple",
 )

@@ -15,7 +15,7 @@ App(
             name="crypto",
         ),
     ],
-    fap_category="Misc",
+    fap_category="Tools",
     fap_description="Crypto toolkit for Flipper",
     fap_author="Struan Clark (xtruan)",
     fap_weburl="https://github.com/xtruan/FlipBIP",

@@ -7,7 +7,7 @@ App(
     stack_size=1 * 1024,
     order=10,
     fap_icon="icons/app.png",
-    fap_category="125khz",
+    fap_category="RFID 125",
     fap_author="@arha & @xMasterX",
     fap_weburl="https://github.com/arha/flipper-dcf77",
     # fap_version="1.0",

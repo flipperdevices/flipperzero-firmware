@@ -7,7 +7,7 @@ App(
     stack_size=2 * 1024,
     order=175,
     fap_icon="paintIcon.png",
-    fap_category="Misc",
+    fap_category="Games",
 	fap_author="@n-o-T-I-n-s-a-n-e",
     fap_weburl="https://github.com/n-o-T-I-n-s-a-n-e",
     # fap_version="1.0",

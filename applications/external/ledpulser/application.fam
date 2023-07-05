@@ -10,7 +10,7 @@ App(
     order=30,
     fap_icon_assets="icons",
     fap_icon="ledpulser_10px.png",
-    fap_category="Misc",
+    fap_category="Tools",
     fap_icon_assets_symbol="ledpulser",
     fap_author="Leed",
     fap_weburl="https://github.com/leedave/Leeds-Flipper-Zero-Applications",

@@ -12,6 +12,6 @@ App(
     fap_libs=["assets"],
     fap_icon="icons/boilerplate_10px.png",
     fap_icon_assets="icons",
-    fap_category="Misc",
+    fap_category="Tools",
     fap_icon_assets_symbol="boilerplate",
 )

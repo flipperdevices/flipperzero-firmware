@@ -6,5 +6,5 @@ App(
     requires=["gui"],
     stack_size=2 * 1024,
     fap_icon="clock.png",
-    fap_category="Misc",
+    fap_category="Tools",
 )

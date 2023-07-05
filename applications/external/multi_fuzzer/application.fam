@@ -45,7 +45,7 @@ App(
     # fap_version="1.0.0",
     fap_description="Fuzzer for lfrfid readers",
     fap_icon="icons/rfid_10px.png",
-    fap_category="125khz",
+    fap_category="RFID 125",
     fap_private_libs=[
             Lib(
                 name="worker",
