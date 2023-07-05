@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nfc/protocols/nfc_device_defs.h>
+#include <nfc/nfc_device.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -33,7 +33,7 @@ typedef enum {
 
 const char* nfc_data_generator_get_name(NfcDataGeneratorType type);
 
-void nfc_data_generator_fill_data(NfcDataGeneratorType type, NfcDeviceData* data);
+void nfc_data_generator_fill_data(NfcDataGeneratorType type, NfcDevice* nfc_device);
 
 #ifdef __cplusplus
 }
