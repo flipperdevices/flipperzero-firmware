@@ -1,4 +1,4 @@
-#include "type-code-common.h"
+#include "type_code_common.h"
 #include <furi_hal_usb_hid.h>
 #include <furi/core/kernel.h>
 #include "../../services/convert/convert.h"

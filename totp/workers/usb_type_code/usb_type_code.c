@@ -6,7 +6,7 @@
 #include <furi/core/check.h>
 #include "../../services/convert/convert.h"
 #include "../../types/token_info.h"
-#include "../type-code-common.h"
+#include "../type_code_common.h"
 
 struct TotpUsbTypeCodeWorkerContext {
     char* code_buffer;
