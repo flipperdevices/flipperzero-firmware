@@ -7,7 +7,7 @@ App(
     requires=["gui"],
     stack_size=1 * 1024,
     fap_icon="bt_trigger_logo.png",
-    fap_category="Tools_Extra",
+    fap_category="Tools",
     fap_icon_assets="assets",
     fap_author="@Nem0oo",
     fap_weburl="https://github.com/Nem0oo/flipper-zero-bluetooth-trigger",
