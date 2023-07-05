@@ -377,8 +377,48 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_
 }
 
 bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData* other) {
-    // TODO: Complete equality method
-    return iso14443_3a_is_equal(data->iso14443_3a_data, other->iso14443_3a_data);
+    bool is_equal = false;
+    bool data_array_is_equal = true;
+
+    do {
+        if(!iso14443_3a_is_equal(data->iso14443_3a_data, other->iso14443_3a_data)) break;
+        if(data->type != other->type) break;
+        if(data->pages_read != other->pages_read) break;
+        if(data->pages_total != other->pages_total) break;
+        if(data->auth_attempts != other->auth_attempts) break;
+
+        if(memcmp(&data->version, &other->version, sizeof(data->version))) break;
+        if(memcmp(&data->signature, &other->signature, sizeof(data->signature))) break;
+
+        for(size_t i = 0; i < COUNT_OF(data->counter); i++) {
+            if(memcmp(&data->counter[i], &other->counter[i], sizeof(data->counter[i]))) {
+                data_array_is_equal = false;
+                break;
+            }
+        }
+        if(!data_array_is_equal) break;
+
+        for(size_t i = 0; i < COUNT_OF(data->tearing_flag); i++) {
+            if(memcmp(
+                   &data->tearing_flag[i], &other->tearing_flag[i], sizeof(data->tearing_flag[i]))) {
+                data_array_is_equal = false;
+                break;
+            }
+        }
+        if(!data_array_is_equal) break;
+
+        for(size_t i = 0; i < COUNT_OF(data->page); i++) {
+            if(memcmp(&data->page[i], &other->page[i], sizeof(data->page[i]))) {
+                data_array_is_equal = false;
+                break;
+            }
+        }
+        if(!data_array_is_equal) break;
+
+        is_equal = true;
+    } while(false);
+
+    return is_equal;
 }
 
 // TODO: Improve this function

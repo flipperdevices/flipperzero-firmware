@@ -296,8 +296,35 @@ bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff, uint32_t vers
 }
 
 bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other) {
-    // TODO: Complete equality method
-    return iso14443_3a_is_equal(data->iso14443_3a_data, other->iso14443_3a_data);
+    bool is_equal = false;
+    bool data_array_is_equal = true;
+
+    do {
+        if(!iso14443_3a_is_equal(data->iso14443_3a_data, other->iso14443_3a_data)) break;
+        if(data->type != other->type) break;
+        if(data->key_a_mask != other->key_a_mask) break;
+        if(data->key_b_mask != other->key_b_mask) break;
+
+        for(size_t i = 0; i < COUNT_OF(data->block_read_mask); i++) {
+            if(data->block_read_mask[i] != other->block_read_mask[i]) {
+                data_array_is_equal = false;
+                break;
+            }
+        }
+        if(!data_array_is_equal) break;
+
+        for(size_t i = 0; i < COUNT_OF(data->block); i++) {
+            if(memcmp(&data->block[i], &other->block[i], sizeof(data->block[i]))) {
+                data_array_is_equal = false;
+                break;
+            }
+        }
+        if(!data_array_is_equal) break;
+
+        is_equal = true;
+    } while(false);
+
+    return is_equal;
 }
 
 const char* mf_classic_get_device_name(const MfClassicData* data, NfcDeviceNameType name_type) {
