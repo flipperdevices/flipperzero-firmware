@@ -64,7 +64,9 @@ static void storage_move_to_sd_remove_region() {
     }
     if(storage_common_exists(storage, EXT_PATH("apps/Misc/totp.conf"))) {
         storage_common_rename(
-            storage, EXT_PATH("apps/Misc/totp.conf"), EXT_PATH("apps_data/authenticator/totp.conf"));
+            storage,
+            EXT_PATH("apps/Misc/totp.conf"),
+            EXT_PATH("apps_data/authenticator/totp.conf"));
     }
     if(storage_common_exists(storage, EXT_PATH("apps/Misc/barcodegen.save"))) {
         storage_common_remove(storage, EXT_PATH("apps/Misc/barcodegen.save"));
