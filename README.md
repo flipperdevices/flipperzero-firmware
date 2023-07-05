@@ -49,8 +49,6 @@ If you want to create your own `index.html` file keep in mind that there is a li
 
 ## Installing/flashing the Wi-Fi dev board
 
-If you've already flashed your Wi-Fi dev board with the Marauder firmware or something else you will need to erase it before installing the new firmware here. Follow [the guide here](#erasing-firmware) for that.
-
 Follow the steps below to flash the Wi-Fi dev board with the evil portal firmware via Windows. The instructions below are for the Flipper Zero Wi-Fi Wrover Development Module (**ESP32-S2**), you may have to adjust the steps for your specific board:
 
 1. Download and install the Arduino IDE from [here][link-arduino].
@@ -77,6 +75,8 @@ Follow the steps below to flash the Wi-Fi dev board with the evil portal firmwar
     WARNING: ESP32-S2 (revision v0.0) chip was placed into download mode...
     ```
 14. Plug in the Wi-Fi Dev board to the flipper, press the reset button on the Wi-Fi dev board and you should now see a solid blue light.
+
+Some users reported that if you've already flashed your Wi-Fi dev board with the Marauder firmware or something else you **might** need to erase it before installing the new firmware here. Follow [the guide here](#erasing-firmware) or the `Erasing firmware` section below if you run into issues. 
 
 ## Installing/flashing an ESP32 Wroom board
 
