@@ -107,7 +107,7 @@ static bool totp_activate_initial_scene(PluginState* const plugin_state) {
 static bool on_user_idle(void* context) {
     PluginState* plugin_state = context;
     if(plugin_state->current_scene != TotpSceneAuthentication &&
-        plugin_state->current_scene != TotpSceneStandby) {
+       plugin_state->current_scene != TotpSceneStandby) {
         totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication);
         return true;
     }
@@ -136,8 +136,9 @@ static bool totp_plugin_state_init(PluginState* const plugin_state) {
     }
 #endif
 
-    if (plugin_state->pin_set) {
-        plugin_state->idle_timeout_context = idle_timeout_alloc(TOTP_AUTO_LOCK_IDLE_TIMEOUT_SEC, &on_user_idle, plugin_state);
+    if(plugin_state->pin_set) {
+        plugin_state->idle_timeout_context =
+            idle_timeout_alloc(TOTP_AUTO_LOCK_IDLE_TIMEOUT_SEC, &on_user_idle, plugin_state);
         idle_timeout_start(plugin_state->idle_timeout_context);
     } else {
         plugin_state->idle_timeout_context = NULL;
@@ -147,7 +148,7 @@ static bool totp_plugin_state_init(PluginState* const plugin_state) {
 }
 
 static void totp_plugin_state_free(PluginState* plugin_state) {
-    if (plugin_state->idle_timeout_context != NULL) {
+    if(plugin_state->idle_timeout_context != NULL) {
         idle_timeout_stop(plugin_state->idle_timeout_context);
         idle_timeout_free(plugin_state->idle_timeout_context);
     }

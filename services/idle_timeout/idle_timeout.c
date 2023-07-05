@@ -3,7 +3,7 @@
 #include <furi/core/timer.h>
 
 #define IDLE_TIMER_CHECK_PERIODICITY_SEC (1)
-#define SEC_TO_TICKS(sec) ((sec) * 1000)
+#define SEC_TO_TICKS(sec) ((sec)*1000)
 
 struct IdleTimeoutContext {
     FuriTimer* timer;
@@ -17,25 +17,29 @@ struct IdleTimeoutContext {
 
 static void idle_timer_callback(void* context) {
     IdleTimeoutContext* instance = context;
-    if (instance->activity_reported) {
+    if(instance->activity_reported) {
         instance->idle_period_sec = 0;
         instance->idle_handled = false;
         instance->activity_reported = false;
-    } else if (!instance->idle_handled) {
-        if (instance->idle_period_sec >= instance->timeout_sec) {
-            instance->idle_handled = instance->on_idle_callback(instance->on_idle_callback_context);
+    } else if(!instance->idle_handled) {
+        if(instance->idle_period_sec >= instance->timeout_sec) {
+            instance->idle_handled =
+                instance->on_idle_callback(instance->on_idle_callback_context);
         } else {
             instance->idle_period_sec += IDLE_TIMER_CHECK_PERIODICITY_SEC;
         }
-    }   
+    }
 }
 
-IdleTimeoutContext* idle_timeout_alloc(uint16_t timeout_sec, IDLE_TIMEOUT_CALLBACK on_idle_callback, void* on_idle_callback_context) {
+IdleTimeoutContext* idle_timeout_alloc(
+    uint16_t timeout_sec,
+    IDLE_TIMEOUT_CALLBACK on_idle_callback,
+    void* on_idle_callback_context) {
     IdleTimeoutContext* instance = malloc(sizeof(IdleTimeoutContext));
-    if (instance == NULL) return NULL;
+    if(instance == NULL) return NULL;
 
     instance->timer = furi_timer_alloc(&idle_timer_callback, FuriTimerTypePeriodic, instance);
-    if (instance->timer == NULL) return NULL;
+    if(instance->timer == NULL) return NULL;
 
     instance->timeout_sec = timeout_sec;
     instance->on_idle_callback = on_idle_callback;

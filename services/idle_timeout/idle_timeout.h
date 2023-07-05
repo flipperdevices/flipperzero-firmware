@@ -14,7 +14,10 @@ typedef bool (*IDLE_TIMEOUT_CALLBACK)(void* context);
  * @param on_idle_callback_context callback function context
  * @return IDLE timeout context
  */
-IdleTimeoutContext* idle_timeout_alloc(uint16_t timeout_sec, IDLE_TIMEOUT_CALLBACK on_idle_callback, void* on_idle_callback_context);
+IdleTimeoutContext* idle_timeout_alloc(
+    uint16_t timeout_sec,
+    IDLE_TIMEOUT_CALLBACK on_idle_callback,
+    void* on_idle_callback_context);
 
 /**
  * @brief Starts IDLE timeout
