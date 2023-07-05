@@ -135,7 +135,6 @@ void furi_hal_interrupt_set_isr_ex(
         furi_check(furi_hal_interrupt_isr[index].isr == NULL);
     } else {
         // Pre ISR clear
-        furi_check(furi_hal_interrupt_isr[index].isr != NULL);
         furi_hal_interrupt_disable(index);
         furi_hal_interrupt_clear_pending(index);
     }
