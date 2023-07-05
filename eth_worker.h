@@ -4,7 +4,6 @@
 
 typedef struct EthWorker EthWorker;
 typedef struct EthViewProcess EthViewProcess;
-typedef struct EthViewDrawInit EthViewDrawInit;
 
 typedef enum {
     EthWorkerStateNotInited = 0,
