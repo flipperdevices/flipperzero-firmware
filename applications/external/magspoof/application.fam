@@ -1,6 +1,6 @@
 App(
     appid="MagSpoof",
-    name="MagSpoof WIP",
+    name="MagSpoof",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mag_app",
     requires=[
@@ -10,14 +10,16 @@ App(
         "dialogs",
     ],
     provides=[],
-    stack_size=5 * 1024,
+    stack_size=6 * 1024,
     order=64,
     fap_icon="icons/mag_10px.png",
     fap_category="GPIO",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="mag",
-    fap_version=(0, 5),  # major, minor
+    fap_version=(0, 5),
     fap_description="WIP MagSpoof port using the RFID subsystem",
     fap_author="Zachary Weiss",
     fap_weburl="https://github.com/zacharyweiss/magspoof_flipper",
+    # Read By hummusec
+    # fap_weburl="https://github.com/hummusec/magspoof_flipper", # READ mode
 )

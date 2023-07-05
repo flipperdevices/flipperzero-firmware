@@ -126,8 +126,6 @@ void play_track(uint8_t* bits_manchester, uint16_t n_bits, MagSetting* setting, 
 void tx_init_rfid() {
     // initialize RFID system for TX
 
-    // OTG needed for RFID? Or just legacy from GPIO?
-    // furi_hal_power_enable_otg();
     furi_hal_ibutton_pin_configure();
 
     // furi_hal_ibutton_start_drive();
@@ -155,7 +153,6 @@ void tx_deinit_rfid() {
     furi_hal_gpio_write(RFID_PIN_OUT, 0);
 
     furi_hal_rfid_pins_reset();
-    furi_hal_power_disable_otg();
 }
 
 void tx_init_rf(int hz) {
@@ -189,7 +186,6 @@ bool tx_init(MagSetting* setting) {
         tx_init_rfid();
         break;
     case MagTxStateGPIO:
-        furi_hal_power_enable_otg();
         // gpio_item_configure_all_pins(GpioModeOutputPushPull);
         furi_hal_gpio_init(GPIO_PIN_A, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
         furi_hal_gpio_init(GPIO_PIN_B, GpioModeOutputPushPull, GpioPullNo, GpioSpeedLow);
@@ -234,9 +230,12 @@ bool tx_deinit(MagSetting* setting) {
         furi_hal_gpio_write(GPIO_PIN_B, 0);
         furi_hal_gpio_write(GPIO_PIN_ENABLE, 0);
 
-        // set back to analog output mode?
+        // set back to analog output mode? - YES
+        furi_hal_gpio_init(GPIO_PIN_A, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(GPIO_PIN_B, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(GPIO_PIN_ENABLE, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+
         //gpio_item_configure_all_pins(GpioModeAnalog);
-        furi_hal_power_disable_otg();
         break;
     case MagTxStatePiezo:
         tx_deinit_piezo();

@@ -1,6 +1,6 @@
 App(
-    appid="GPIO_Reader_A",
-    name="[GPIO] Reader (Aurelilc)",
+    appid="GPIO_Pins_Reader",
+    name="[GPIO] Pins Reader",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="GPIO_reader_app",
     requires=["gui"],

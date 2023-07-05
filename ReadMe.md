@@ -48,6 +48,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Keeloq: Centurion Nova (thanks Carlos !)
 - UL: RCA Protocol Unit Tests (By xMasterX)
 - UL: OFW PR: [Decode only supported Oregon 3 sensor #2829 (By wosk)](https://github.com/flipperdevices/flipperzero-firmware/pull/2829)
+- UL: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper) (Updates by xMasterX)
 
 <a name="release">
 
@@ -344,7 +345,7 @@ $ ./fbt dolphin_ext
 - [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750`
 - [Logic Analyzer (By g3gg0)](https://github.com/g3gg0/flipper-logic_analyzer)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
-- [MagSpoof WIP (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
+- [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
 - [Metronome (By panki27)](https://github.com/panki27/Metronome)
 - [Mfkey32 (By noproto)](https://github.com/noproto/FlipperMfkey)
 - [MH-Z19 CO2 Sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
