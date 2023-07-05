@@ -400,7 +400,9 @@ bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData
 
         for(size_t i = 0; i < COUNT_OF(data->tearing_flag); i++) {
             if(memcmp(
-                   &data->tearing_flag[i], &other->tearing_flag[i], sizeof(data->tearing_flag[i]))) {
+                   &data->tearing_flag[i],
+                   &other->tearing_flag[i],
+                   sizeof(data->tearing_flag[i]))) {
                 data_array_is_equal = false;
                 break;
             }
