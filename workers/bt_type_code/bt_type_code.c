@@ -10,7 +10,7 @@
 #include <storage/storage.h>
 #include "../../types/common.h"
 #include "../../types/token_info.h"
-#include "../type-code-common.h"
+#include "../type_code_common.h"
 #include "../../features_config.h"
 
 #if TOTP_TARGET_FIRMWARE == TOTP_FIRMWARE_XTREME_UL
