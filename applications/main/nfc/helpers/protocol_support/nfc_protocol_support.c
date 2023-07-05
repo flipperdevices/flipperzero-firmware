@@ -144,9 +144,8 @@ static void nfc_protocol_support_scene_read_menu_on_enter(NfcApp* instance) {
             SubmenuIndexCommonEmulate,
             nfc_protocol_support_common_submenu_callback,
             instance);
-    }
 
-    if(nfc_protocol_support_has_feature(protocol, NfcProtocolFeatureEmulateFull)) {
+    } else if(nfc_protocol_support_has_feature(protocol, NfcProtocolFeatureEmulateFull)) {
         submenu_add_item(
             submenu,
             "Emulate",
@@ -191,6 +190,9 @@ static bool
         default:
             return nfc_protocol_support[protocol]->scene_read_menu.on_event(instance, event.event);
         }
+
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_set_scene_state(instance->scene_manager, NfcSceneSavedMenu, 0);
     }
 
     return false;
@@ -256,9 +258,8 @@ static void nfc_protocol_support_scene_saved_menu_on_enter(NfcApp* instance) {
             SubmenuIndexCommonEmulate,
             nfc_protocol_support_common_submenu_callback,
             instance);
-    }
 
-    if(nfc_protocol_support_has_feature(protocol, NfcProtocolFeatureEmulateFull)) {
+    } else if(nfc_protocol_support_has_feature(protocol, NfcProtocolFeatureEmulateFull)) {
         submenu_add_item(
             submenu,
             "Emulate",
@@ -338,7 +339,11 @@ static bool
             return nfc_protocol_support[protocol]->scene_saved_menu.on_event(
                 instance, event.event);
         }
+
+    } else if(event.type == SceneManagerEventTypeBack) {
+        scene_manager_set_scene_state(instance->scene_manager, NfcSceneSavedMenu, 0);
     }
+
     return false;
 }
 

@@ -3,10 +3,10 @@
 #include <gui/modules/widget.h>
 
 enum {
+    SubmenuIndexCommonSave,
     SubmenuIndexCommonEmulate,
     SubmenuIndexCommonEdit,
     SubmenuIndexCommonInfo,
-    SubmenuIndexCommonSave,
     SubmenuIndexCommonRename,
     SubmenuIndexCommonDelete,
     SubmenuIndexCommonMax,
