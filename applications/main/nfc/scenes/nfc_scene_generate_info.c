@@ -1,36 +1,32 @@
 #include "../nfc_app_i.h"
 
 void nfc_scene_generate_info_widget_callback(GuiButtonType result, InputType type, void* context) {
-    NfcApp* nfc = context;
+    NfcApp* instance = context;
 
     if(type == InputTypeShort) {
         if(result == GuiButtonTypeRight) {
-            view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
+            view_dispatcher_send_custom_event(instance->view_dispatcher, result);
         }
     }
 }
 
 void nfc_scene_generate_info_on_enter(void* context) {
-    NfcApp* nfc = context;
+    NfcApp* instance = context;
 
-    Iso14443_3aData* iso14443_3a_data = NULL;
-    if(nfc_device_get_protocol(nfc->nfc_device) == NfcProtocolMfUltralight) {
-        const MfUltralightData* mfu_data =
-            nfc_device_get_data(nfc->nfc_device, NfcProtocolMfUltralight);
-        iso14443_3a_data = mfu_data->iso14443_3a_data;
-    } else {
-        // TODO add Mf Classic
-        furi_crash("Not supported protocol");
-    }
+    NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+    furi_assert((protocol == NfcProtocolMfUltralight) || (protocol == NfcProtocolMfClassic));
+
+    const Iso14443_3aData* iso14443_3a_data =
+        nfc_device_get_base_data(instance->nfc_device, protocol);
 
     // Setup dialog view
-    Widget* widget = nfc->widget;
+    Widget* widget = instance->widget;
     widget_add_button_element(
-        widget, GuiButtonTypeRight, "More", nfc_scene_generate_info_widget_callback, nfc);
+        widget, GuiButtonTypeRight, "More", nfc_scene_generate_info_widget_callback, instance);
 
     // Create info text
     NfcDataGeneratorType type =
-        scene_manager_get_scene_state(nfc->scene_manager, NfcSceneGenerateInfo);
+        scene_manager_get_scene_state(instance->scene_manager, NfcSceneGenerateInfo);
     const char* name = nfc_data_generator_get_name(type);
     widget_add_string_element(widget, 0, 0, AlignLeft, AlignTop, FontPrimary, name);
     widget_add_string_element(widget, 0, 13, AlignLeft, AlignTop, FontSecondary, "NFC-A");
@@ -44,21 +40,16 @@ void nfc_scene_generate_info_on_enter(void* context) {
         widget, 0, 25, AlignLeft, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));
     furi_string_free(temp_str);
 
-    view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);
+    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
 }
 
 bool nfc_scene_generate_info_on_event(void* context, SceneManagerEvent event) {
-    NfcApp* nfc = context;
+    NfcApp* instance = context;
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeRight) {
-            // Switch either to NfcSceneMfClassicMenu or NfcSceneMfUltralightMenu
-            if(nfc_device_get_protocol(nfc->nfc_device) == NfcProtocolMfUltralight) {
-                // scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightMenu);
-            } else {
-                // TODO add classic
-            }
+            scene_manager_next_scene(instance->scene_manager, NfcSceneReadMenu);
             consumed = true;
         }
     }
@@ -67,8 +58,8 @@ bool nfc_scene_generate_info_on_event(void* context, SceneManagerEvent event) {
 }
 
 void nfc_scene_generate_info_on_exit(void* context) {
-    NfcApp* nfc = context;
+    NfcApp* instance = context;
 
     // Clean views
-    widget_reset(nfc->widget);
+    widget_reset(instance->widget);
 }

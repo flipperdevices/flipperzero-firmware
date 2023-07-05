@@ -53,15 +53,10 @@ typedef struct {
 } Iso14443_3aSelResp;
 
 typedef struct {
-    uint8_t sak;
-} Iso14443_3aRats;
-
-typedef struct {
     uint8_t uid[ISO14443_3A_MAX_UID_SIZE];
     uint8_t uid_len;
     uint8_t atqa[2];
     uint8_t sak;
-    Iso14443_3aRats rats;
 } Iso14443_3aData;
 
 extern const NfcDeviceBase nfc_device_iso14443_3a;

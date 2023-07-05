@@ -63,6 +63,17 @@ const NfcDeviceData* nfc_device_get_data(const NfcDevice* instance, NfcProtocol 
     return instance->protocol_data;
 }
 
+const NfcDeviceData* nfc_device_get_base_data(const NfcDevice* instance, NfcProtocol protocol) {
+    furi_assert(instance);
+    furi_assert(protocol < NfcProtocolNum);
+
+    if(instance->protocol != protocol) {
+        furi_crash(NFC_DEV_TYPE_ERROR);
+    }
+
+    return nfc_devices[protocol]->get_base_data(instance->protocol_data);
+}
+
 const char* nfc_device_get_protocol_name(NfcProtocol protocol) {
     furi_assert(protocol < NfcProtocolNum);
 
