@@ -180,7 +180,7 @@ static bool
 
         switch(event.event) {
         case SubmenuIndexCommonSave:
-            scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(instance->scene_manager, NfcSceneSaveName);
             return true;
         case SubmenuIndexCommonInfo:
             scene_manager_next_scene(instance->scene_manager, NfcSceneInfo);
