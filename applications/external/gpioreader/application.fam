@@ -1,13 +1,14 @@
 App(
     appid="GPIO_Reader_B",
-    name="[GPIO] Reader (biotinker)",
+    name="[GPIO] Input Reader 2",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gpio_app",
     requires=["gui"],
     stack_size=1 * 1024,
     order=50,
-    fap_libs=["assets"],
     fap_category="GPIO",
     fap_icon="icon.png",
-    fap_icon_assets="assets",
+    fap_icon_assets="icons",
+    fap_icon_assets_symbol="gpioreader2",
+    fap_author="biotinker",
 )

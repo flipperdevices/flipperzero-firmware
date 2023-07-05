@@ -4,15 +4,15 @@
 #include <input/input.h>
 #include <notification/notification_messages.h>
 #include <stdlib.h>
-#include <Password_Generator_icons.h>
+#include <passgen_icons.h>
+#include <core/string.h>
 
 #define PASSGEN_MAX_LENGTH 16
-#define PASSGEN_CHARACTERS_LENGTH (26 * 4)
 
 #define PASSGEN_DIGITS "0123456789"
 #define PASSGEN_LETTERS_LOW "abcdefghijklmnopqrstuvwxyz"
 #define PASSGEN_LETTERS_UP "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#define PASSGEN_SPECIAL "!#$%^&*.-_"
+#define PASSGEN_SPECIAL "!#$%%^&*.-_"
 
 typedef enum PassGen_Alphabet {
     Digits = 1,
@@ -45,7 +45,8 @@ typedef struct {
     FuriMutex** mutex;
     NotificationApp* notify;
     char password[PASSGEN_MAX_LENGTH + 1];
-    char alphabet[PASSGEN_CHARACTERS_LENGTH + 1];
+    // char alphabet[PASSGEN_CHARACTERS_LENGTH + 1];
+    FuriString* alphabet;
     int length;
     int level;
 } PassGen;
@@ -57,6 +58,7 @@ void state_free(PassGen* app) {
     furi_message_queue_free(app->input_queue);
     furi_mutex_free(app->mutex);
     furi_record_close(RECORD_NOTIFICATION);
+    furi_string_free(app->alphabet);
     free(app);
 }
 
@@ -98,17 +100,17 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
 void build_alphabet(PassGen* app) {
     PassGen_Alphabet mode = AlphabetLevels[app->level];
-    app->alphabet[0] = '\0';
-    if((mode & Digits) != 0) strcat(app->alphabet, PASSGEN_DIGITS);
-    if((mode & Lowercase) != 0) strcat(app->alphabet, PASSGEN_LETTERS_LOW);
-    if((mode & Uppercase) != 0) strcat(app->alphabet, PASSGEN_LETTERS_UP);
-    if((mode & Special) != 0) strcat(app->alphabet, PASSGEN_SPECIAL);
+    if((mode & Digits) != 0) furi_string_cat(app->alphabet, PASSGEN_DIGITS);
+    if((mode & Lowercase) != 0) furi_string_cat(app->alphabet, PASSGEN_LETTERS_LOW);
+    if((mode & Uppercase) != 0) furi_string_cat(app->alphabet, PASSGEN_LETTERS_UP);
+    if((mode & Special) != 0) furi_string_cat(app->alphabet, PASSGEN_SPECIAL);
 }
 
 PassGen* state_init() {
     PassGen* app = malloc(sizeof(PassGen));
     app->length = 8;
     app->level = 2;
+    app->alphabet = furi_string_alloc();
     build_alphabet(app);
     app->input_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
     app->view_port = view_port_alloc();
@@ -124,10 +126,10 @@ PassGen* state_init() {
 }
 
 void generate(PassGen* app) {
-    int hi = strlen(app->alphabet);
+    int hi = furi_string_size(app->alphabet);
     for(int i = 0; i < app->length; i++) {
         int x = rand() % hi;
-        app->password[i] = app->alphabet[x];
+        app->password[i] = furi_string_get_char(app->alphabet, x);
     }
     app->password[app->length] = '\0';
 }

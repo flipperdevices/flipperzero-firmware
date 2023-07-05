@@ -16,8 +16,7 @@
 #include "views/gpio_test.h"
 #include "views/gpio_reader.h"
 #include "views/gpio_usb_uart.h"
-#include <assets_icons.h>
-#include <GPIO_Reader_B_icons.h>
+#include <gpioreader2_icons.h>
 
 struct GpioApp {
     Gui* gui;

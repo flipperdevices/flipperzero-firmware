@@ -12,4 +12,5 @@ App(
     fap_author="@DroomOne & @xMasterX",
     # fap_version="1.0",
     fap_description="Flappy Bird Game",
+    fap_icon_assets_symbol="flappy_bird",
 )
