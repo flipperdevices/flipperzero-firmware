@@ -7,7 +7,7 @@ App(
     requires=[
         "gui",
     ],
-    stack_size=1 * 1024,
+    stack_size=2 * 1024,
     fap_icon="geiger.png",
     fap_category="GPIO",
     fap_author="@nmrr",
