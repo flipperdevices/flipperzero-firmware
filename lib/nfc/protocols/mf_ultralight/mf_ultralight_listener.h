@@ -1,7 +1,6 @@
 #pragma once
 
 #include "mf_ultralight.h"
-#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h>
 
 #ifdef __cplusplus
 extern "C" {
