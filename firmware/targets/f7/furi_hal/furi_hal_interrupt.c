@@ -129,7 +129,6 @@ void furi_hal_interrupt_set_isr_ex(
     void* context) {
     furi_check(index < FuriHalInterruptIdMax);
     furi_check(priority < 15);
-    furi_check(furi_hal_interrupt_irqn[index]);
 
     if(isr) {
         // Pre ISR set
