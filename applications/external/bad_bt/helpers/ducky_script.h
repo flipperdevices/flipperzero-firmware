@@ -14,7 +14,6 @@ extern "C" {
 #include <gui/modules/text_input.h>
 #include <gui/modules/byte_input.h>
 #include "../views/bad_bt_view.h"
-#include "../bad_bt_paths.h"
 
 #define FILE_BUFFER_LEN 16
 
@@ -41,7 +40,6 @@ typedef enum {
     BadBtStateDelay,
     BadBtStateStringDelay,
     BadBtStateWaitForBtn,
-    BadBtStatePaused,
     BadBtStateDone,
     BadBtStateScriptError,
     BadBtStateFileError,
@@ -60,6 +58,7 @@ struct BadBtState {
 typedef struct BadBtApp BadBtApp;
 
 typedef struct {
+    FuriHalUsbHidConfig hid_cfg;
     FuriThread* thread;
     BadBtState st;
 
@@ -79,6 +78,11 @@ typedef struct {
     uint32_t repeat_cnt;
     uint8_t key_hold_nb;
 
+    bool set_usb_id;
+    bool set_bt_id;
+    bool has_usb_id;
+    bool has_bt_id;
+
     FuriString* string_print;
     size_t string_print_pos;
 
@@ -92,32 +96,31 @@ void bad_bt_script_close(BadBtScript* bad_bt);
 
 void bad_bt_script_set_keyboard_layout(BadBtScript* bad_bt, FuriString* layout_path);
 
-void bad_bt_script_start_stop(BadBtScript* bad_bt);
+void bad_bt_script_start(BadBtScript* bad_bt);
 
-void bad_bt_script_pause_resume(BadBtScript* bad_bt);
+void bad_bt_script_stop(BadBtScript* bad_bt);
+
+void bad_bt_script_toggle(BadBtScript* bad_bt);
 
 BadBtState* bad_bt_script_get_state(BadBtScript* bad_bt);
 
-#define BAD_BT_NAME_LEN FURI_HAL_BT_ADV_NAME_LENGTH
-#define BAD_BT_MAC_LEN GAP_MAC_ADDR_SIZE
-#define BAD_BT_USB_LEN HID_MANUF_PRODUCT_NAME_LEN
+#define BAD_BT_ADV_NAME_MAX_LEN FURI_HAL_BT_ADV_NAME_LENGTH
+#define BAD_BT_MAC_ADDRESS_LEN GAP_MAC_ADDR_SIZE
 
-extern const uint8_t BAD_BT_EMPTY_MAC[BAD_BT_MAC_LEN];
-extern uint8_t BAD_BT_BOUND_MAC[BAD_BT_MAC_LEN]; // For remember mode
+// this is the MAC address used when we do not forget paired device (BOUND STATE)
+extern const uint8_t BAD_BT_BOUND_MAC_ADDRESS[BAD_BT_MAC_ADDRESS_LEN];
+extern const uint8_t BAD_BT_EMPTY_MAC_ADDRESS[BAD_BT_MAC_ADDRESS_LEN];
 
 typedef enum {
     BadBtAppErrorNoFiles,
+    BadBtAppErrorCloseRpc,
 } BadBtAppError;
 
 typedef struct {
-    char bt_name[BAD_BT_NAME_LEN];
-    uint8_t bt_mac[BAD_BT_MAC_LEN];
+    char bt_name[BAD_BT_ADV_NAME_MAX_LEN];
+    uint8_t bt_mac[BAD_BT_MAC_ADDRESS_LEN];
+    GapPairing bt_mode;
 } BadBtConfig;
-
-typedef enum {
-    BadBtConnModeNone,
-    BadBtConnModeBt,
-} BadBtConnMode;
 
 struct BadBtApp {
     Gui* gui;
@@ -130,9 +133,6 @@ struct BadBtApp {
     TextInput* text_input;
     ByteInput* byte_input;
 
-    char bt_name_buf[BAD_BT_NAME_LEN];
-    uint8_t bt_mac_buf[BAD_BT_MAC_LEN];
-
     BadBtAppError error;
     FuriString* file_path;
     FuriString* keyboard_layout;
@@ -141,27 +141,13 @@ struct BadBtApp {
 
     Bt* bt;
     bool bt_remember;
-    BadBtConfig config; // User options
-    BadBtConfig id_config; // BT_ID values
-
-    bool set_bt_id;
-    bool has_bt_id;
-
-    GapPairing prev_bt_mode;
-    char prev_bt_name[BAD_BT_NAME_LEN];
-    uint8_t prev_bt_mac[BAD_BT_MAC_LEN];
-
-    BadBtConnMode conn_mode;
+    BadBtConfig config;
+    BadBtConfig prev_config;
     FuriThread* conn_init_thread;
+    FuriThread* switch_mode_thread;
 };
 
-int32_t bad_bt_conn_apply(BadBtApp* app);
-
-void bad_bt_conn_reset(BadBtApp* app);
-
-void bad_bt_config_refresh(BadBtApp* app);
-
-void bad_bt_config_adjust(BadBtConfig* cfg);
+int32_t bad_bt_config_switch_mode(BadBtApp* app);
 
 #ifdef __cplusplus
 }

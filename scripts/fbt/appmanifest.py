@@ -447,7 +447,7 @@ class ApplicationsCGenerator:
             apps = self.buildset.get_apps_of_type(FlipperAppType.APP) + self.buildset.get_apps_of_type(FlipperAppType.EXTMAINAPP)
             contents.append(f"const {entry_type} {entry_block}[] = {{")
             apps.sort(key=lambda app: app.order)
-            contents.append('\n\t{.name = "Applications",\n\t .appid = "NULL" },')
+            # contents.append('\n\t{.name = "Applications",\n\t .appid = "NULL" },')
             contents.append(",\n".join(map(self.get_app_descr_desktop_settings, apps)))
             contents.append("};")
             contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")

@@ -11,15 +11,14 @@ typedef struct {
     char file_name[MAX_NAME_LEN];
     char layout[MAX_NAME_LEN];
     BadBtState state;
-    bool pause_wait;
     uint8_t anim_frame;
 } BadBtModel;
 
 static void bad_bt_draw_callback(Canvas* canvas, void* _model) {
     BadBtModel* model = _model;
-    BadBtWorkerState state = model->state.state;
 
-    FuriString* disp_str = furi_string_alloc_set(state == BadBtStateInit ? "( . . . )" : "(BT) ");
+    FuriString* disp_str;
+    disp_str = furi_string_alloc_set("(BT) ");
     furi_string_cat_str(disp_str, model->file_name);
     elements_string_fit_width(canvas, disp_str, 128 - 2);
     canvas_set_font(canvas, FontSecondary);
@@ -28,7 +27,11 @@ static void bad_bt_draw_callback(Canvas* canvas, void* _model) {
     if(strlen(model->layout) == 0) {
         furi_string_set(disp_str, "(default)");
     } else {
-        furi_string_printf(disp_str, "(%s)", model->layout);
+        furi_string_reset(disp_str);
+        furi_string_push_back(disp_str, '(');
+        for(size_t i = 0; i < strlen(model->layout); i++)
+            furi_string_push_back(disp_str, model->layout[i]);
+        furi_string_push_back(disp_str, ')');
     }
     if(model->state.pin) {
         furi_string_cat_printf(disp_str, "  PIN: %ld", model->state.pin);
@@ -39,43 +42,37 @@ static void bad_bt_draw_callback(Canvas* canvas, void* _model) {
 
     furi_string_reset(disp_str);
 
-    if((state == BadBtStateIdle) || (state == BadBtStateDone) ||
-       (state == BadBtStateNotConnected)) {
+    if((model->state.state == BadBtStateIdle) || (model->state.state == BadBtStateDone) ||
+       (model->state.state == BadBtStateNotConnected)) {
         elements_button_center(canvas, "Run");
         elements_button_left(canvas, "Config");
-    } else if((state == BadBtStateRunning) || (state == BadBtStateDelay)) {
+    } else if((model->state.state == BadBtStateRunning) || (model->state.state == BadBtStateDelay)) {
         elements_button_center(canvas, "Stop");
-        if(!model->pause_wait) {
-            elements_button_right(canvas, "Pause");
-        }
-    } else if(state == BadBtStatePaused) {
-        elements_button_center(canvas, "End");
-        elements_button_right(canvas, "Resume");
-    } else if(state == BadBtStateWaitForBtn) {
+    } else if(model->state.state == BadBtStateWaitForBtn) {
         elements_button_center(canvas, "Press to continue");
-    } else if(state == BadBtStateWillRun) {
+    } else if(model->state.state == BadBtStateWillRun) {
         elements_button_center(canvas, "Cancel");
     }
 
-    if(state == BadBtStateNotConnected) {
+    if(model->state.state == BadBtStateNotConnected) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Connect to");
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "a device");
-    } else if(state == BadBtStateWillRun) {
+    } else if(model->state.state == BadBtStateWillRun) {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "Will run");
         canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "on connect");
-    } else if(state == BadBtStateFileError) {
+    } else if(model->state.state == BadBtStateFileError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);
         canvas_set_font(canvas, FontPrimary);
         canvas_draw_str_aligned(canvas, 127, 31, AlignRight, AlignBottom, "File");
-        canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "Error");
-    } else if(state == BadBtStateScriptError) {
+        canvas_draw_str_aligned(canvas, 127, 43, AlignRight, AlignBottom, "ERROR");
+    } else if(model->state.state == BadBtStateScriptError) {
         canvas_draw_icon(canvas, 4, 26, &I_Error_18x18);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 127, 33, AlignRight, AlignBottom, "Error:");
+        canvas_draw_str_aligned(canvas, 127, 33, AlignRight, AlignBottom, "ERROR:");
         canvas_set_font(canvas, FontSecondary);
         furi_string_printf(disp_str, "line %u", model->state.error_line);
         canvas_draw_str_aligned(
@@ -86,12 +83,12 @@ static void bad_bt_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(
             canvas, 127, 56, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
-    } else if(state == BadBtStateIdle) {
+    } else if(model->state.state == BadBtStateIdle) {
         canvas_draw_icon(canvas, 4, 26, &I_Smile_18x18);
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, 114, 40, AlignRight, AlignBottom, "0");
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-    } else if(state == BadBtStateRunning) {
+    } else if(model->state.state == BadBtStateRunning) {
         if(model->anim_frame == 0) {
             canvas_draw_icon(canvas, 4, 23, &I_EviSmile1_18x21);
         } else {
@@ -104,13 +101,13 @@ static void bad_bt_draw_callback(Canvas* canvas, void* _model) {
             canvas, 114, 40, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-    } else if(state == BadBtStateDone) {
+    } else if(model->state.state == BadBtStateDone) {
         canvas_draw_icon(canvas, 4, 23, &I_EviSmile1_18x21);
         canvas_set_font(canvas, FontBigNumbers);
         canvas_draw_str_aligned(canvas, 114, 40, AlignRight, AlignBottom, "100");
         furi_string_reset(disp_str);
         canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-    } else if(state == BadBtStateDelay) {
+    } else if(model->state.state == BadBtStateDelay) {
         if(model->anim_frame == 0) {
             canvas_draw_icon(canvas, 4, 23, &I_EviWaiting1_18x21);
         } else {
@@ -128,22 +125,6 @@ static void bad_bt_draw_callback(Canvas* canvas, void* _model) {
         canvas_draw_str_aligned(
             canvas, 127, 50, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
         furi_string_reset(disp_str);
-    } else if((state == BadBtStatePaused) || (state == BadBtStateWaitForBtn)) {
-        if(model->anim_frame == 0) {
-            canvas_draw_icon(canvas, 4, 23, &I_EviWaiting1_18x21);
-        } else {
-            canvas_draw_icon(canvas, 4, 23, &I_EviWaiting2_18x21);
-        }
-        canvas_set_font(canvas, FontBigNumbers);
-        furi_string_printf(
-            disp_str, "%u", ((model->state.line_cur - 1) * 100) / model->state.line_nb);
-        canvas_draw_str_aligned(
-            canvas, 114, 40, AlignRight, AlignBottom, furi_string_get_cstr(disp_str));
-        furi_string_reset(disp_str);
-        canvas_draw_icon(canvas, 117, 26, &I_Percent_10x14);
-        canvas_set_font(canvas, FontSecondary);
-        canvas_draw_str_aligned(canvas, 127, 50, AlignRight, AlignBottom, "Paused");
-        furi_string_reset(disp_str);
     } else {
         canvas_draw_icon(canvas, 4, 26, &I_Clock_18x18);
     }
@@ -157,27 +138,7 @@ static bool bad_bt_input_callback(InputEvent* event, void* context) {
     bool consumed = false;
 
     if(event->type == InputTypeShort) {
-        if(event->key == InputKeyLeft) {
-            consumed = true;
-            furi_assert(bad_bt->callback);
-            bad_bt->callback(event->key, bad_bt->context);
-        } else if(event->key == InputKeyOk) {
-            with_view_model(
-                bad_bt->view, BadBtModel * model, { model->pause_wait = false; }, true);
-            consumed = true;
-            furi_assert(bad_bt->callback);
-            bad_bt->callback(event->key, bad_bt->context);
-        } else if(event->key == InputKeyRight) {
-            with_view_model(
-                bad_bt->view,
-                BadBtModel * model,
-                {
-                    if((model->state.state == BadBtStateRunning) ||
-                       (model->state.state == BadBtStateDelay)) {
-                        model->pause_wait = true;
-                    }
-                },
-                true);
+        if((event->key == InputKeyLeft) || (event->key == InputKeyOk)) {
             consumed = true;
             furi_assert(bad_bt->callback);
             bad_bt->callback(event->key, bad_bt->context);
@@ -252,9 +213,6 @@ void bad_bt_set_state(BadBt* bad_bt, BadBtState* st) {
         {
             memcpy(&(model->state), st, sizeof(BadBtState));
             model->anim_frame ^= 1;
-            if(model->state.state == BadBtStatePaused) {
-                model->pause_wait = false;
-            }
         },
         true);
 }

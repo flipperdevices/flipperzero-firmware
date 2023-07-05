@@ -39,9 +39,11 @@ void bad_bt_scene_file_select_on_enter(void* context) {
 bool bad_bt_scene_file_select_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UNUSED(event);
+    // BadBtApp* bad_bt = context;
     return false;
 }
 
 void bad_bt_scene_file_select_on_exit(void* context) {
     UNUSED(context);
+    // BadBtApp* bad_bt = context;
 }

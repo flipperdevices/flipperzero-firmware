@@ -3,25 +3,24 @@
 static void bad_bt_scene_config_name_text_input_callback(void* context) {
     BadBtApp* bad_bt = context;
 
-    view_dispatcher_send_custom_event(bad_bt->view_dispatcher, BadBtAppCustomEventTextInputDone);
+    view_dispatcher_send_custom_event(bad_bt->view_dispatcher, BadBtAppCustomEventTextEditResult);
 }
 
 void bad_bt_scene_config_name_on_enter(void* context) {
     BadBtApp* bad_bt = context;
     TextInput* text_input = bad_bt->text_input;
 
-    strlcpy(bad_bt->bt_name_buf, bad_bt->config.bt_name, BAD_BT_NAME_LEN);
     text_input_set_header_text(text_input, "Set BT device name");
 
     text_input_set_result_callback(
         text_input,
         bad_bt_scene_config_name_text_input_callback,
         bad_bt,
-        bad_bt->bt_name_buf,
-        BAD_BT_NAME_LEN,
+        bad_bt->config.bt_name,
+        BAD_BT_ADV_NAME_MAX_LEN,
         true);
 
-    view_dispatcher_switch_to_view(bad_bt->view_dispatcher, BadBtAppViewTextInput);
+    view_dispatcher_switch_to_view(bad_bt->view_dispatcher, BadBtAppViewConfigName);
 }
 
 bool bad_bt_scene_config_name_on_event(void* context, SceneManagerEvent event) {
@@ -30,9 +29,8 @@ bool bad_bt_scene_config_name_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
-        if(event.event == BadBtAppCustomEventTextInputDone) {
-            strlcpy(bad_bt->config.bt_name, bad_bt->bt_name_buf, BAD_BT_NAME_LEN);
-            bad_bt_config_refresh(bad_bt);
+        if(event.event == BadBtAppCustomEventTextEditResult) {
+            bt_set_profile_adv_name(bad_bt->bt, bad_bt->config.bt_name);
         }
         scene_manager_previous_scene(bad_bt->scene_manager);
     }

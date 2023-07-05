@@ -2,8 +2,6 @@
 
 const DesktopSettingsApplication FLIPPER_APPS2[] = {
 
-    {.name = "Applications", .appid = "NULL"},
-
     {.name = "Clock", .appid = "/ext/apps/Main/Dab_Timer.fap"},
 
     {.name = "Sub-GHz", .appid = "NULL"},

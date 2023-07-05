@@ -81,10 +81,12 @@ static int32_t ducky_fnc_sysrq(BadBtScript* bad_bt, const char* line, int32_t pa
 
     line = &line[ducky_get_command_len(line) + 1];
     uint16_t key = ducky_get_keycode(bad_bt, line, true);
+
     furi_hal_bt_hid_kb_press(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
     furi_hal_bt_hid_kb_press(key);
     furi_delay_ms(bt_timeout);
-    furi_hal_bt_hid_kb_release_all();
+    furi_hal_bt_hid_kb_release(key);
+    furi_hal_bt_hid_kb_release(KEY_MOD_LEFT_ALT | HID_KEYBOARD_PRINT_SCREEN);
     return 0;
 }
 
@@ -142,7 +144,6 @@ static int32_t ducky_fnc_release(BadBtScript* bad_bt, const char* line, int32_t 
     }
     bad_bt->key_hold_nb--;
     furi_hal_bt_hid_kb_release(key);
-
     return 0;
 }
 
@@ -156,6 +157,7 @@ static int32_t ducky_fnc_waitforbutton(BadBtScript* bad_bt, const char* line, in
 
 static const DuckyCmd ducky_commands[] = {
     {"REM", NULL, -1},
+    {"ID", NULL, -1},
     {"BT_ID", NULL, -1},
     {"DELAY", ducky_fnc_delay, -1},
     {"STRING", ducky_fnc_string, 0},
