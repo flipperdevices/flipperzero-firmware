@@ -32,10 +32,10 @@ void evil_portal_read_index_html(void* context) {
         storage_file_close(index_html);
         storage_file_free(index_html);
     } else {
-        char* html_error = "<b>Evil portal</b>\nUnable to read the html file.\n"
-                           "Is the SD Card set up correctly? See instructions\n"
-                           "github.com/bigbrodude6119/flipper-zero-evil-portal\n"
-                           "'Install pre-built app on the flipper'";
+        char* html_error = "<b>Evil portal</b><br>Unable to read the html file.<br>"
+                           "Is the SD Card set up correctly? <br>See instructions @ "
+                           "github.com/bigbrodude6119/flipper-zero-evil-portal<br>"
+                           "Under the 'Install pre-built app on the flipper' section.";
         app->index_html = (uint8_t*)html_error;
     }
 

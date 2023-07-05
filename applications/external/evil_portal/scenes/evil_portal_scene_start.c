@@ -25,7 +25,7 @@ typedef struct {
 // increment it!
 const Evil_PortalItem items[NUM_MENU_ITEMS] = {
     // send command
-    {"Start portal", {""}, 1, {SET_HTML_CMD}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
+    {"Start portal", {""}, 1, {SET_HTML_CMD}, NO_ARGS, FOCUS_CONSOLE_END, SHOW_STOPSCAN_TIP},
 
     // stop portal
     {"Stop portal", {""}, 1, {RESET_CMD}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},

@@ -1,116 +1,145 @@
 #include "evil_portal_app_i.h"
+#include "evil_portal_uart.h"
 #include "helpers/evil_portal_storage.h"
 
-#include <furi.h>
-#include <furi_hal.h>
+struct Evil_PortalUart {
+    Evil_PortalApp* app;
+    FuriThread* rx_thread;
+    FuriStreamBuffer* rx_stream;
+    uint8_t rx_buf[RX_BUF_SIZE + 1];
+    void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context);
+};
 
-static bool evil_portal_app_custom_event_callback(void* context, uint32_t event) {
-    furi_assert(context);
-    Evil_PortalApp* app = context;
-    return scene_manager_handle_custom_event(app->scene_manager, event);
+typedef enum {
+    WorkerEvtStop = (1 << 0),
+    WorkerEvtRxDone = (1 << 1),
+} WorkerEvtFlags;
+
+void evil_portal_uart_set_handle_rx_data_cb(
+    Evil_PortalUart* uart,
+    void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context)) {
+    furi_assert(uart);
+    uart->handle_rx_data_cb = handle_rx_data_cb;
 }
 
-static bool evil_portal_app_back_event_callback(void* context) {
-    furi_assert(context);
-    Evil_PortalApp* app = context;
-    return scene_manager_handle_back_event(app->scene_manager);
+#define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
+
+void evil_portal_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+    Evil_PortalUart* uart = (Evil_PortalUart*)context;
+
+    if(ev == UartIrqEventRXNE) {
+        furi_stream_buffer_send(uart->rx_stream, &data, 1, 0);
+        furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtRxDone);
+    }
 }
 
-static void evil_portal_app_tick_event_callback(void* context) {
-    furi_assert(context);
-    Evil_PortalApp* app = context;
-    scene_manager_handle_tick_event(app->scene_manager);
-}
+static int32_t uart_worker(void* context) {
+    Evil_PortalUart* uart = (void*)context;
 
-Evil_PortalApp* evil_portal_app_alloc() {
-    Evil_PortalApp* app = malloc(sizeof(Evil_PortalApp));
+    while(1) {
+        uint32_t events =
+            furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
+        furi_check((events & FuriFlagError) == 0);
+        if(events & WorkerEvtStop) break;
+        if(events & WorkerEvtRxDone) {
+            size_t len = furi_stream_buffer_receive(uart->rx_stream, uart->rx_buf, RX_BUF_SIZE, 0);
 
-    app->sent_html = false;
-    app->sent_ap = false;
-    app->sent_reset = false;
-    app->has_command_queue = false;
-    app->command_index = 0;
-    app->portal_logs = malloc(5000);
+            if(len > 0) {
+                if(uart->handle_rx_data_cb) {
+                    uart->handle_rx_data_cb(uart->rx_buf, len, uart->app);
 
-    app->gui = furi_record_open(RECORD_GUI);
+                    if(uart->app->has_command_queue) {
+                        if(uart->app->command_index < 1) {
+                            if(0 == strncmp(
+                                        SET_AP_CMD,
+                                        uart->app->command_queue[uart->app->command_index],
+                                        strlen(SET_AP_CMD))) {
+                                char* out_data = malloc((
+                                    size_t)(strlen((char*)uart->app->ap_name) + strlen("setap=")));
+                                strcat(out_data, "setap=");
+                                strcat(out_data, (char*)uart->app->ap_name);
 
-    app->view_dispatcher = view_dispatcher_alloc();
-    app->scene_manager = scene_manager_alloc(&evil_portal_scene_handlers, app);
-    view_dispatcher_enable_queue(app->view_dispatcher);
-    view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
+                                evil_portal_uart_tx((uint8_t*)(out_data), strlen(out_data));
+                                evil_portal_uart_tx((uint8_t*)("\n"), 1);
 
-    view_dispatcher_set_custom_event_callback(
-        app->view_dispatcher, evil_portal_app_custom_event_callback);
-    view_dispatcher_set_navigation_event_callback(
-        app->view_dispatcher, evil_portal_app_back_event_callback);
-    view_dispatcher_set_tick_event_callback(
-        app->view_dispatcher, evil_portal_app_tick_event_callback, 100);
+                                uart->app->sent_ap = true;
 
-    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+                                free(out_data);
+                                free(uart->app->ap_name);
+                            }
 
-    app->var_item_list = variable_item_list_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        Evil_PortalAppViewVarItemList,
-        variable_item_list_get_view(app->var_item_list));
+                            uart->app->command_index = 0;
+                            uart->app->has_command_queue = false;
+                            uart->app->command_queue[0] = "";
+                        }
+                    }
 
-    for(int i = 0; i < NUM_MENU_ITEMS; ++i) {
-        app->selected_option_index[i] = 0;
+                    if(uart->app->sent_reset == false) {
+                        strcat(uart->app->portal_logs, (char*)uart->rx_buf);
+                    }
+
+                    if(strlen(uart->app->portal_logs) > 4000) {
+                        write_logs(uart->app->portal_logs);
+                        free(uart->app->portal_logs);
+                        strcpy(uart->app->portal_logs, "");
+                    }
+                } else {
+                    uart->rx_buf[len] = '\0';
+                    if(uart->app->sent_reset == false) {
+                        strcat(uart->app->portal_logs, (char*)uart->rx_buf);
+                    }
+
+                    if(strlen(uart->app->portal_logs) > 4000) {
+                        write_logs(uart->app->portal_logs);
+                        free(uart->app->portal_logs);
+                        strcpy(uart->app->portal_logs, "");
+                    }
+                }
+            }
+        }
     }
 
-    app->text_box = text_box_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher, Evil_PortalAppViewConsoleOutput, text_box_get_view(app->text_box));
-    app->text_box_store = furi_string_alloc();
-    furi_string_reserve(app->text_box_store, EVIL_PORTAL_TEXT_BOX_STORE_SIZE);
-
-    scene_manager_next_scene(app->scene_manager, Evil_PortalSceneStart);
-
-    return app;
-}
-
-void evil_portal_app_free(Evil_PortalApp* app) {
-    // save latest logs
-    if(strlen(app->portal_logs) > 0) {
-        write_logs(app->portal_logs);
-        free(app->portal_logs);
-    }
-
-    // Send reset event to dev board
-    evil_portal_uart_tx((uint8_t*)(RESET_CMD), strlen(RESET_CMD));
-    evil_portal_uart_tx((uint8_t*)("\n"), 1);
-
-    furi_assert(app);
-
-    // Views
-    view_dispatcher_remove_view(app->view_dispatcher, Evil_PortalAppViewVarItemList);
-    view_dispatcher_remove_view(app->view_dispatcher, Evil_PortalAppViewConsoleOutput);
-
-    text_box_free(app->text_box);
-    furi_string_free(app->text_box_store);
-
-    // View dispatcher
-    view_dispatcher_free(app->view_dispatcher);
-    scene_manager_free(app->scene_manager);
-
-    evil_portal_uart_free(app->uart);
-
-    // Close records
-    furi_record_close(RECORD_GUI);
-
-    free(app);
-}
-
-int32_t evil_portal_app(void* p) {
-    UNUSED(p);
-    Evil_PortalApp* evil_portal_app = evil_portal_app_alloc();
-
-    evil_portal_app->uart = evil_portal_uart_init(evil_portal_app);
-
-    view_dispatcher_run(evil_portal_app->view_dispatcher);
-
-    // crashing here
-    evil_portal_app_free(evil_portal_app);
+    furi_stream_buffer_free(uart->rx_stream);
 
     return 0;
+}
+
+void evil_portal_uart_tx(uint8_t* data, size_t len) {
+    furi_hal_uart_tx(UART_CH, data, len);
+}
+
+Evil_PortalUart* evil_portal_uart_init(Evil_PortalApp* app) {
+    Evil_PortalUart* uart = malloc(sizeof(Evil_PortalUart));
+    uart->app = app;
+    // Init all rx stream and thread early to avoid crashes
+    uart->rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
+    uart->rx_thread = furi_thread_alloc();
+    furi_thread_set_name(uart->rx_thread, "Evil_PortalUartRxThread");
+    furi_thread_set_stack_size(uart->rx_thread, 1024);
+    furi_thread_set_context(uart->rx_thread, uart);
+    furi_thread_set_callback(uart->rx_thread, uart_worker);
+
+    furi_thread_start(uart->rx_thread);
+
+    furi_hal_console_disable();
+    if(app->BAUDRATE == 0) {
+        app->BAUDRATE = 115200;
+    }
+    furi_hal_uart_set_br(UART_CH, app->BAUDRATE);
+    furi_hal_uart_set_irq_cb(UART_CH, evil_portal_uart_on_irq_cb, uart);
+
+    return uart;
+}
+
+void evil_portal_uart_free(Evil_PortalUart* uart) {
+    furi_assert(uart);
+
+    furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtStop);
+    furi_thread_join(uart->rx_thread);
+    furi_thread_free(uart->rx_thread);
+
+    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
+    furi_hal_console_enable();
+
+    free(uart);
 }

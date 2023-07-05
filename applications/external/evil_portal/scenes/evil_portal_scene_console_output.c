@@ -38,7 +38,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
 
         if(0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
             const char* help_msg = "BLUE = Waiting\nGREEN = Good\nRED = Bad\n\nThis project is a "
-                                   "WIP.\ngithub.com/bigbrodude6119/flipper-zero-evil-portal\n"
+                                   "WIP.\ngithub.com/bigbrodude6119/flipper-zero-evil-portal\n\n"
                                    "Version 0.0.2\n\n";
             furi_string_cat_str(app->text_box_store, help_msg);
             app->text_box_store_strlen += strlen(help_msg);
