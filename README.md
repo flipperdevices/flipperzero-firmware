@@ -52,7 +52,13 @@ the hardware setup.
 If you have verified this application working with a module not listed here,
 please submit a PR adding it to the list.
 
+## Building
+
+This application can be compiled using [uFBT]. Run `ufbt` in the root directory
+of the repository.
+
 [Adafruit Ultimate GPS Breakout]: https://www.adafruit.com/product/746
 [minmea]: https://github.com/kosma/minmea
 [qFlipper]: https://flipperzero.one/update
 [u-blox NEO-6M]: https://www.u-blox.com/en/product/neo-6-series
+[uFBT]: https://github.com/flipperdevices/flipperzero-ufbt
