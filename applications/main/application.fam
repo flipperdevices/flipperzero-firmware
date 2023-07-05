@@ -21,6 +21,7 @@ App(
     ],
 )
 
+# Enable apps that you need in DEBUG firmware here:
 App(
     appid="main_apps_default",
     name="Basic applications for main menu",
@@ -30,7 +31,7 @@ App(
         #"iButton",
         #"infrared",
         "lfrfid",
-        "nfc",
+        # "nfc",
         "subghz",
         "bad_usb",
         #"u2f",
