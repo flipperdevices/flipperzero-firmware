@@ -6,11 +6,26 @@
 #include "../nfc_protocol_support_gui_common.h"
 #include "../../../nfc_app_i.h"
 
-static void nfc_protocol_support_render_info_mf_desfire(
-    const MfDesfireData* data,
-    NfcProtocolFormatType format_type,
-    FuriString* str) {
-    nfc_render_mf_desfire_info(data, format_type, str);
+static void nfc_scene_info_on_enter_mf_desfire(NfcApp* instance) {
+    const NfcDevice* device = instance->nfc_device;
+    const MfDesfireData* data = nfc_device_get_data(device, NfcProtocolMfDesfire);
+
+    FuriString* temp_str = furi_string_alloc();
+    furi_string_cat_printf(
+        temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+    nfc_render_mf_desfire_info(data, NfcProtocolFormatTypeFull, temp_str);
+
+    widget_add_text_scroll_element(
+        instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+
+    widget_add_button_element(
+        instance->widget,
+        GuiButtonTypeRight,
+        "More",
+        nfc_protocol_support_common_widget_callback,
+        instance);
+
+    furi_string_free(temp_str);
 }
 
 static NfcCommand nfc_scene_read_poller_callback_mf_desfire(NfcGenericEvent event, void* context) {
@@ -36,6 +51,21 @@ static void nfc_scene_read_on_enter_mf_desfire(NfcApp* instance) {
 
 static void nfc_scene_read_menu_on_enter_mf_desfire(NfcApp* instance) {
     UNUSED(instance);
+}
+
+static void nfc_scene_read_success_on_enter_mf_desfire(NfcApp* instance) {
+    const NfcDevice* device = instance->nfc_device;
+    const MfDesfireData* data = nfc_device_get_data(device, NfcProtocolMfDesfire);
+
+    FuriString* temp_str = furi_string_alloc();
+    furi_string_cat_printf(
+        temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+    nfc_render_mf_desfire_info(data, NfcProtocolFormatTypeShort, temp_str);
+
+    widget_add_text_scroll_element(
+        instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+
+    furi_string_free(temp_str);
 }
 
 static void nfc_scene_saved_menu_on_enter_mf_desfire(NfcApp* instance) {
@@ -70,13 +100,11 @@ static bool nfc_scene_saved_menu_on_event_mf_desfire(NfcApp* instance, uint32_t 
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
-    .features = NfcProtocolFeatureMoreData | NfcProtocolFeatureEmulateUid,
-
-    .render_info = (NfcProtocolSupportRenderData)nfc_protocol_support_render_info_mf_desfire,
+    .features = NfcProtocolFeatureEmulateUid,
 
     .scene_info =
         {
-            .on_enter = NULL,
+            .on_enter = nfc_scene_info_on_enter_mf_desfire,
             .on_event = nfc_scene_info_on_event_mf_desfire,
         },
     .scene_read =
@@ -91,7 +119,7 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
         },
     .scene_read_success =
         {
-            .on_enter = NULL,
+            .on_enter = nfc_scene_read_success_on_enter_mf_desfire,
             .on_event = NULL,
         },
     .scene_saved_menu =

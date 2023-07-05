@@ -4,13 +4,10 @@
 
 #include "nfc_protocol_support_common.h"
 
-typedef void (*NfcProtocolSupportRenderData)(
-    const NfcDeviceData* data,
-    NfcProtocolFormatType format_type,
-    FuriString* str);
-
 typedef void (*NfcProtocolSupportOnEnter)(NfcApp* instance);
+
 typedef bool (*NfcProtocolSupportOnEvent)(NfcApp* instance, uint32_t event);
+
 typedef void (*NfcProtocolSupportOnExit)(NfcApp* instance);
 
 typedef struct {
@@ -21,8 +18,6 @@ typedef struct {
 
 typedef struct {
     const uint32_t features;
-
-    NfcProtocolSupportRenderData render_info;
 
     NfcProtocolSupportSceneBase scene_info;
     NfcProtocolSupportSceneBase scene_read;

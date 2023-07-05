@@ -17,10 +17,7 @@ typedef struct {
 
 static const NfcProtocolSupportCommonSceneBase nfc_protocol_support_scenes[];
 
-static bool nfc_protocol_support_has_feature(NfcProtocol protocol, NfcProtocolFeature feature) {
-    return nfc_protocol_support[protocol]->features & feature;
-}
-
+// Interface functions
 void nfc_protocol_support_on_enter(NfcProtocolSupportScene scene, void* context) {
     furi_assert(scene < NfcProtocolSupportSceneCount);
     furi_assert(context);
@@ -48,43 +45,15 @@ void nfc_protocol_support_on_exit(NfcProtocolSupportScene scene, void* context) 
     nfc_protocol_support_scenes[scene].on_exit(instance);
 }
 
-// TODO: Move to separate files?
-// Info
-static void nfc_protocol_support_render_info(
-    const NfcDevice* device,
-    NfcProtocolFormatType format_type,
-    FuriString* str) {
-    const NfcProtocol protocol = nfc_device_get_protocol(device);
-    const NfcDeviceData* data = nfc_device_get_data(device, protocol);
-    furi_string_cat_printf(str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
-    nfc_protocol_support[protocol]->render_info(data, format_type, str);
+static bool nfc_protocol_support_has_feature(NfcProtocol protocol, NfcProtocolFeature feature) {
+    return nfc_protocol_support[protocol]->features & feature;
 }
 
+// Common scene handlers
+// SceneInfo
 static void nfc_protocol_support_scene_info_on_enter(NfcApp* instance) {
     const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
-    Widget* widget = instance->widget;
-
-    FuriString* temp_str = furi_string_alloc();
-    nfc_protocol_support_render_info(instance->nfc_device, NfcProtocolFormatTypeFull, temp_str);
-
-    uint8_t text_scroll_height;
-
-    if(nfc_protocol_support_has_feature(protocol, NfcProtocolFeatureMoreData)) {
-        widget_add_button_element(
-            widget,
-            GuiButtonTypeRight,
-            "More",
-            nfc_protocol_support_common_widget_callback,
-            instance);
-        text_scroll_height = 52;
-    } else {
-        text_scroll_height = 64;
-    }
-
-    widget_add_text_scroll_element(
-        widget, 0, 0, 128, text_scroll_height, furi_string_get_cstr(temp_str));
-    furi_string_free(temp_str);
-
+    nfc_protocol_support[protocol]->scene_info.on_enter(instance);
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
 }
 
@@ -92,7 +61,7 @@ static bool nfc_protocol_support_scene_info_on_event(NfcApp* instance, SceneMana
     bool consumed = false;
     const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
 
-    if(event.event == SceneManagerEventTypeCustom) {
+    if(event.type == SceneManagerEventTypeCustom) {
         consumed = nfc_protocol_support[protocol]->scene_info.on_event(instance, event.event);
     }
 
@@ -103,7 +72,7 @@ static void nfc_protocol_support_scene_info_on_exit(NfcApp* instance) {
     widget_reset(instance->widget);
 }
 
-// Read
+// SceneRead
 static void nfc_protocol_support_scene_read_on_enter(NfcApp* instance) {
     popup_set_header(
         instance->popup, "Reading card\nDon't move...", 85, 24, AlignCenter, AlignTop);
@@ -116,6 +85,7 @@ static void nfc_protocol_support_scene_read_on_enter(NfcApp* instance) {
 
     // Start poller with the appropriate callback
     nfc_protocol_support[protocol]->scene_read.on_enter(instance);
+    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewPopup);
 
     nfc_blink_detect_start(instance);
 }
@@ -154,7 +124,7 @@ static void nfc_protocol_support_scene_read_on_exit(NfcApp* instance) {
     nfc_blink_stop(instance);
 }
 
-// ReadMenu
+// SceneReadMenu
 static void nfc_protocol_support_scene_read_menu_on_enter(NfcApp* instance) {
     const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
 
@@ -230,15 +200,12 @@ static void nfc_protocol_support_scene_read_menu_on_exit(NfcApp* instance) {
     submenu_reset(instance->submenu);
 }
 
-// ReadSuccess
+// SceneReadSuccess
 static void nfc_protocol_support_scene_read_success_on_enter(NfcApp* instance) {
     Widget* widget = instance->widget;
 
-    FuriString* temp_str = furi_string_alloc();
-    nfc_protocol_support_render_info(instance->nfc_device, NfcProtocolFormatTypeShort, temp_str);
-
-    widget_add_text_scroll_element(widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
-    furi_string_free(temp_str);
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+    nfc_protocol_support[protocol]->scene_read_success.on_enter(instance);
 
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_protocol_support_common_widget_callback, instance);
@@ -275,7 +242,7 @@ static void nfc_protocol_support_scene_read_success_on_exit(NfcApp* instance) {
     widget_reset(instance->widget);
 }
 
-// SavedMenu
+// SceneSavedMenu
 static void nfc_protocol_support_scene_saved_menu_on_enter(NfcApp* instance) {
     const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
 
