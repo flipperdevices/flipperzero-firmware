@@ -7,7 +7,7 @@
 #include <storage/storage.h>
 #include <toolbox/saved_struct.h>
 
-#define BARCODE_SETTINGS_FILE_NAME "apps/Misc/barcodegen.save"
+#define BARCODE_SETTINGS_FILE_NAME "apps/Tools/barcodegen.save"
 
 #define BARCODE_SETTINGS_VER (1)
 #define BARCODE_SETTINGS_PATH EXT_PATH(BARCODE_SETTINGS_FILE_NAME)
@@ -39,53 +39,61 @@
 #define MENU_INDEX_PARITY 2
 #define MENU_INDEX_TYPE 3
 
-typedef enum {
+typedef enum
+{
     EventTypeTick,
     EventTypeKey,
 } EventType;
 
-typedef struct {
+typedef struct
+{
     EventType type;
     InputEvent input;
 } PluginEvent;
 
-typedef enum {
+typedef enum
+{
     ViewMode,
     EditMode,
     MenuMode,
 } Mode;
 
-typedef enum {
+typedef enum
+{
     BarEncodingTypeLeft,
     BarEncodingTypeRight,
     BarEncodingTypeG,
 } BarEncodingType;
 
-typedef enum {
+typedef enum
+{
     BarTypeEAN8,
     BarTypeUPCA,
     BarTypeEAN13,
 } BarType;
 
-typedef struct {
-    char* name;
+typedef struct
+{
+    char *name;
     int numberOfDigits;
     int startPos;
     BarType bartype;
 } BarcodeType;
 
-typedef struct {
-    int barcodeNumeral[BARCODE_MAX_LENS]; //The current barcode number
-    bool doParityCalculation; //Should do parity check?
+typedef struct
+{
+    int barcodeNumeral[BARCODE_MAX_LENS]; // The current barcode number
+    bool doParityCalculation;             // Should do parity check?
     int barcodeTypeIndex;
 } BarcodeState;
 
-typedef struct {
-    FuriMutex* mutex;
+typedef struct
+{
+    FuriMutex *mutex;
     BarcodeState barcode_state;
-    int editingIndex; //The index of the editing symbol
-    int menuIndex; //The index of the menu cursor
-    Mode mode; //View, edit or menu
+    int editingIndex; // The index of the editing symbol
+    int menuIndex;    // The index of the menu cursor
+    Mode mode;        // View, edit or menu
 } PluginState;
 
 static const int DIGITS[10][4] = {
