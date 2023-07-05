@@ -9,13 +9,6 @@ typedef void (*NfcProtocolSupportRenderData)(
     NfcProtocolFormatType format_type,
     FuriString* str);
 
-typedef NfcCustomEvent (
-    *NfcProtocolSupportPollerHandler)(NfcGenericEventData* event_data, void* context);
-
-typedef void (*NfcProtocolSupportSceneBuilder)(NfcApp* instance);
-
-typedef bool (*NfcProtocolSupportSceneHandler)(NfcApp* instance, uint32_t event);
-
 typedef void (*NfcProtocolSupportOnEnter)(NfcApp* instance);
 typedef bool (*NfcProtocolSupportOnEvent)(NfcApp* instance, uint32_t event);
 typedef void (*NfcProtocolSupportOnExit)(NfcApp* instance);
@@ -30,15 +23,6 @@ typedef struct {
     const uint32_t features;
 
     NfcProtocolSupportRenderData render_info;
-
-    NfcProtocolSupportPollerHandler handle_poller;
-
-    NfcProtocolSupportSceneBuilder build_scene_read_menu;
-    NfcProtocolSupportSceneBuilder build_scene_saved_menu;
-
-    NfcProtocolSupportSceneHandler handle_scene_info;
-    NfcProtocolSupportSceneHandler handle_scene_read_menu;
-    NfcProtocolSupportSceneHandler handle_scene_saved_menu;
 
     NfcProtocolSupportSceneBase scene_info;
     NfcProtocolSupportSceneBase scene_read;

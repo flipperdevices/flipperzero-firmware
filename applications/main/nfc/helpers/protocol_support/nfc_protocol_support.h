@@ -10,8 +10,3 @@ bool nfc_protocol_support_on_event(
     SceneManagerEvent event);
 
 void nfc_protocol_support_on_exit(NfcProtocolSupportScene scene, void* context);
-
-// -------------------- Deprecated methods --------------------------------------
-
-// Poller handler
-NfcCustomEvent nfc_protocol_support_handle_poller(NfcGenericEvent event, void* context);

@@ -13,16 +13,26 @@ static void nfc_protocol_support_render_info_iso14443_3a(
     nfc_render_iso14443_3a_info(data, format_type, str);
 }
 
-static NfcCustomEvent
-    nfc_protocol_support_handle_poller_iso14443_3a(Iso14443_3aPollerEvent* event, void* context) {
-    UNUSED(context);
-    NfcCustomEvent custom_event = NfcCustomEventReadHandlerIgnore;
+static NfcCommand
+    nfc_scene_read_poller_callback_iso14443_3a(NfcGenericEvent event, void* context) {
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
 
-    if(event->type == Iso14443_3aPollerEventTypeReady) {
-        custom_event = NfcCustomEventReadHandlerSuccess;
+    NfcApp* instance = context;
+    const Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
+        nfc_device_set_data(
+            instance->nfc_device, NfcProtocolIso14443_3a, nfc_poller_get_data(instance->poller));
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcCustomEventReadHandlerSuccess);
+        return NfcCommandStop;
     }
 
-    return custom_event;
+    return NfcCommandContinue;
+}
+
+static void nfc_scene_read_on_enter_iso14443_3a(NfcApp* instance) {
+    nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_iso14443_3a, instance);
 }
 
 static void nfc_scene_read_menu_on_enter_iso14443_3a(NfcApp* instance) {
@@ -73,9 +83,6 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
 
     .render_info = (NfcProtocolSupportRenderData)nfc_protocol_support_render_info_iso14443_3a,
 
-    .handle_poller =
-        (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_iso14443_3a,
-
     .scene_info =
         {
             .on_enter = NULL,
@@ -83,7 +90,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
         },
     .scene_read =
         {
-            .on_enter = NULL,
+            .on_enter = nfc_scene_read_on_enter_iso14443_3a,
             .on_event = NULL,
         },
     .scene_read_menu =

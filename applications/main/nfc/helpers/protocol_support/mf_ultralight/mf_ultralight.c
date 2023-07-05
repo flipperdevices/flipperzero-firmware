@@ -19,48 +19,58 @@ static void nfc_protocol_support_render_info_mf_ultralight(
     nfc_render_mf_ultralight_info(data, format_type, str);
 }
 
-static NfcCustomEvent nfc_protocol_support_handle_poller_mf_ultralight(
-    MfUltralightPollerEvent* event,
-    NfcApp* nfc_app) {
-    NfcCustomEvent custom_event = NfcCustomEventReadHandlerIgnore;
+static NfcCommand
+    nfc_scene_read_poller_callback_mf_ultralight(NfcGenericEvent event, void* context) {
+    furi_assert(event.protocol == NfcProtocolMfUltralight);
 
-    if(event->type == MfUltralightPollerEventTypeReadSuccess) {
-        custom_event = NfcCustomEventReadHandlerSuccess;
-    } else if(event->type == MfUltralightPollerEventTypeAuthRequest) {
+    NfcApp* instance = context;
+    const MfUltralightPollerEvent* mf_ultralight_event = event.data;
+
+    if(mf_ultralight_event->type == MfUltralightPollerEventTypeReadSuccess) {
         nfc_device_set_data(
-            nfc_app->nfc_device, NfcProtocolMfUltralight, nfc_poller_get_data(nfc_app->poller));
+            instance->nfc_device, NfcProtocolMfUltralight, nfc_poller_get_data(instance->poller));
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcCustomEventReadHandlerSuccess);
+        return NfcCommandStop;
+    } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeAuthRequest) {
+        nfc_device_set_data(
+            instance->nfc_device, NfcProtocolMfUltralight, nfc_poller_get_data(instance->poller));
         const MfUltralightData* data =
-            nfc_device_get_data(nfc_app->nfc_device, NfcProtocolMfUltralight);
-        if(nfc_app->mf_ul_auth->type == MfUltralightAuthTypeXiaomii) {
+            nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
+        if(instance->mf_ul_auth->type == MfUltralightAuthTypeXiaomii) {
             if(mf_ultralight_generate_xiaomi_pass(
-                   nfc_app->mf_ul_auth,
+                   instance->mf_ul_auth,
                    data->iso14443_3a_data->uid,
                    data->iso14443_3a_data->uid_len)) {
-                event->data->auth_context.skip_auth = false;
+                mf_ultralight_event->data->auth_context.skip_auth = false;
             }
-        } else if(nfc_app->mf_ul_auth->type == MfUltralightAuthTypeAmiibo) {
+        } else if(instance->mf_ul_auth->type == MfUltralightAuthTypeAmiibo) {
             if(mf_ultralight_generate_amiibo_pass(
-                   nfc_app->mf_ul_auth,
+                   instance->mf_ul_auth,
                    data->iso14443_3a_data->uid,
                    data->iso14443_3a_data->uid_len)) {
-                event->data->auth_context.skip_auth = false;
+                mf_ultralight_event->data->auth_context.skip_auth = false;
             }
-        } else if(nfc_app->mf_ul_auth->type == MfUltralightAuthTypeManual) {
-            event->data->auth_context.skip_auth = false;
+        } else if(instance->mf_ul_auth->type == MfUltralightAuthTypeManual) {
+            mf_ultralight_event->data->auth_context.skip_auth = false;
         } else {
-            event->data->auth_context.skip_auth = true;
+            mf_ultralight_event->data->auth_context.skip_auth = true;
         }
-        if(!event->data->auth_context.skip_auth) {
-            event->data->auth_context.password = nfc_app->mf_ul_auth->password;
+        if(!mf_ultralight_event->data->auth_context.skip_auth) {
+            mf_ultralight_event->data->auth_context.password = instance->mf_ul_auth->password;
         }
-    } else if(event->type == MfUltralightPollerEventTypeAuthSuccess) {
-        nfc_app->mf_ul_auth->pack = event->data->auth_context.pack;
+    } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeAuthSuccess) {
+        instance->mf_ul_auth->pack = mf_ultralight_event->data->auth_context.pack;
     }
 
-    return custom_event;
+    return NfcCommandContinue;
 }
 
-static void nfc_protocol_support_build_scene_read_menu_mf_ultralight(NfcApp* instance) {
+static void nfc_scene_read_on_enter_mf_ultralight(NfcApp* instance) {
+    nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_mf_ultralight, instance);
+}
+
+static void nfc_scene_read_menu_on_enter_mf_ultralight(NfcApp* instance) {
     Submenu* submenu = instance->submenu;
 
     const MfUltralightData* data =
@@ -76,7 +86,7 @@ static void nfc_protocol_support_build_scene_read_menu_mf_ultralight(NfcApp* ins
     }
 }
 
-static void nfc_protocol_support_build_scene_saved_menu_mf_ultralight(NfcApp* instance) {
+static void nfc_scene_saved_menu_on_enter_mf_ultralight(NfcApp* instance) {
     Submenu* submenu = instance->submenu;
     const MfUltralightData* data =
         nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
@@ -98,8 +108,7 @@ static void nfc_protocol_support_build_scene_saved_menu_mf_ultralight(NfcApp* in
     }
 }
 
-static bool
-    nfc_protocol_support_handle_scene_info_mf_ultralight(NfcApp* instance, uint32_t event) {
+static bool nfc_scene_info_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
         return true;
@@ -108,8 +117,7 @@ static bool
     return false;
 }
 
-static bool
-    nfc_protocol_support_handle_scene_read_menu_mf_ultralight(NfcApp* instance, uint32_t event) {
+static bool nfc_scene_read_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
     switch(event) {
     case SubmenuIndexCommonEmulate:
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightEmulate);
@@ -122,8 +130,7 @@ static bool
     }
 }
 
-static bool
-    nfc_protocol_support_handle_scene_saved_menu_mf_ultralight(NfcApp* instance, uint32_t event) {
+static bool nfc_scene_saved_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
     switch(event) {
     case SubmenuIndexCommonEmulate:
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightEmulate);
@@ -144,18 +151,29 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
 
     .render_info = (NfcProtocolSupportRenderData)nfc_protocol_support_render_info_mf_ultralight,
 
-    .handle_poller =
-        (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_mf_ultralight,
-
-    .build_scene_read_menu =
-        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_read_menu_mf_ultralight,
-    .build_scene_saved_menu =
-        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_mf_ultralight,
-
-    .handle_scene_info =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_mf_ultralight,
-    .handle_scene_read_menu =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_menu_mf_ultralight,
-    .handle_scene_saved_menu =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_mf_ultralight,
+    .scene_info =
+        {
+            .on_enter = NULL,
+            .on_event = nfc_scene_info_on_event_mf_ultralight,
+        },
+    .scene_read =
+        {
+            .on_enter = nfc_scene_read_on_enter_mf_ultralight,
+            .on_event = NULL,
+        },
+    .scene_read_menu =
+        {
+            .on_enter = nfc_scene_read_menu_on_enter_mf_ultralight,
+            .on_event = nfc_scene_read_menu_on_event_mf_ultralight,
+        },
+    .scene_read_success =
+        {
+            .on_enter = NULL,
+            .on_event = NULL,
+        },
+    .scene_saved_menu =
+        {
+            .on_enter = nfc_scene_saved_menu_on_enter_mf_ultralight,
+            .on_event = nfc_scene_saved_menu_on_event_mf_ultralight,
+        },
 };
