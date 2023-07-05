@@ -72,10 +72,10 @@ static void draw_dec_number(Canvas* canvas, uint8_t x, uint8_t y, uint8_t num) {
 
 static void draw_static_mode(Canvas* canvas, uint8_t mode) {
     const uint8_t s1 = 13;
-    const uint8_t s2 = 30;
-    const uint8_t s3 = 17;
-    const uint8_t s4 = 20;
-    const uint8_t s = 40;
+    const uint8_t s2 = 31;
+    const uint8_t s3 = 19;
+    const uint8_t s4 = 21;
+    const uint8_t s = 35;
     const uint8_t h = 7;
     const uint8_t y = 10;
     const uint8_t y1 = 15;
@@ -84,25 +84,25 @@ static void draw_static_mode(Canvas* canvas, uint8_t mode) {
         canvas_invert_color(canvas);
         canvas_draw_box(canvas, s, y, s1, h);
         canvas_invert_color(canvas);
-        canvas_draw_str(canvas, 43, y1, "ip");
+        canvas_draw_str(canvas, 38, y1, "ip");
     }
     if(mode == EthViewDrawStaticModeMask) {
         canvas_invert_color(canvas);
         canvas_draw_box(canvas, s + s1, y, s2, h);
         canvas_invert_color(canvas);
-        canvas_draw_str(canvas, 57, y1, "mask");
+        canvas_draw_str(canvas, 53, y1, "mask");
     }
     if(mode == EthViewDrawStaticModeGateway) {
         canvas_invert_color(canvas);
         canvas_draw_box(canvas, s + s1 + s2, y, s3, h);
         canvas_invert_color(canvas);
-        canvas_draw_str(canvas, 85, y1, "gw");
+        canvas_draw_str(canvas, 82, y1, "gw");
     }
     if(mode == EthViewDrawStaticModeDNS) {
         canvas_invert_color(canvas);
         canvas_draw_box(canvas, s + s1 + s2 + s3, y, s4, h);
         canvas_invert_color(canvas);
-        canvas_draw_str(canvas, 104, y1, "dns");
+        canvas_draw_str(canvas, 102, y1, "dns");
     }
 }
 
@@ -154,17 +154,17 @@ void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
             }
         }
     } else if(process->type == EthWorkerProcessStatic) {
-        canvas_draw_frame(canvas, 36, 18, 21, 13);
-        canvas_draw_frame(canvas, 59, 18, 21, 13);
-        canvas_draw_frame(canvas, 82, 18, 21, 13);
-        canvas_draw_frame(canvas, 105, 18, 21, 13);
-        canvas_draw_box(canvas, 36, 10, 90, 7);
+        canvas_draw_frame(canvas, 31, 18, 21, 13);
+        canvas_draw_frame(canvas, 55, 18, 21, 13);
+        canvas_draw_frame(canvas, 79, 18, 21, 13);
+        canvas_draw_frame(canvas, 103, 18, 21, 13);
+        canvas_draw_box(canvas, 29, 10, 97, 7);
         uint8_t mode = ((EthViewDrawStatic*)process->draw_struct)->current_mode;
         uint8_t current_digit = ((EthViewDrawStatic*)process->draw_struct)->current_digit;
         uint8_t* adress = draw_static_get_current_adress((EthViewDrawStatic*)process->draw_struct);
         uint8_t editing = ((EthViewDrawStatic*)process->draw_struct)->editing;
         for(uint8_t i = 0; i < 4; ++i) {
-            if(i == mode) {
+            if(i == mode && process->editing) {
                 draw_static_mode(canvas, mode);
             } else {
                 canvas_invert_color(canvas);
@@ -173,7 +173,7 @@ void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
             }
         }
         for(uint8_t i = 0; i < 4; ++i) {
-            uint8_t x = 38 + i * 23;
+            uint8_t x = 33 + i * 24;
             draw_dec_number(canvas, x, 27, adress[i]);
             if(editing && (current_digit / 3 == i)) {
                 uint8_t x1 = x + 6 * (current_digit % 3);
@@ -213,7 +213,11 @@ void ethernet_view_process_keyevent(EthViewProcess* process, InputKey key) {
         uint8_t octet = ((EthViewDrawInit*)process->draw_struct)->current_octet;
         uint8_t* mac = ((EthViewDrawInit*)process->draw_struct)->mac;
         if(key == InputKeyLeft) {
-            if(octet > 0) octet -= 1;
+            if(octet > 0) {
+                octet -= 1;
+            } else {
+                process->editing = 0;
+            }
         } else if(key == InputKeyRight) {
             if(octet < 11) octet += 1;
         } else if(key == InputKeyUp) {
@@ -231,7 +235,11 @@ void ethernet_view_process_keyevent(EthViewProcess* process, InputKey key) {
         uint8_t editing = ((EthViewDrawStatic*)process->draw_struct)->editing;
         if(editing) {
             if(key == InputKeyLeft) {
-                if(digit > 0) digit -= 1;
+                if(digit > 0) {
+                    digit -= 1;
+                } else {
+                    ((EthViewDrawStatic*)process->draw_struct)->editing = 0;
+                }
             } else if(key == InputKeyRight) {
                 if(digit < 11) digit += 1;
             } else if(key == InputKeyUp) {
@@ -239,6 +247,9 @@ void ethernet_view_process_keyevent(EthViewProcess* process, InputKey key) {
             } else if(key == InputKeyDown) {
                 adress_change_dec_digit(adress, digit, -1);
             } else if(key == InputKeyOk) {
+                ((EthViewDrawStatic*)process->draw_struct)->editing = 0;
+            } else if(key == InputKeyBack) {
+                mode = 0;
                 ((EthViewDrawStatic*)process->draw_struct)->editing = 0;
             }
         } else {
@@ -252,12 +263,18 @@ void ethernet_view_process_keyevent(EthViewProcess* process, InputKey key) {
                 if(mode < 3) {
                     mode += 1;
                 }
-            } else if(key == InputKeyUp || key == InputKeyDown) {
+            } else if(key == InputKeyDown || key == InputKeyOk) {
                 ((EthViewDrawStatic*)process->draw_struct)->editing = 1;
+            } else if(key == InputKeyBack || key == InputKeyUp) {
+                process->editing = 0;
             }
         }
         ((EthViewDrawStatic*)process->draw_struct)->current_mode = mode;
         ((EthViewDrawStatic*)process->draw_struct)->current_digit = digit;
+    } else {
+        if(key == InputKeyBack || key == InputKeyLeft) {
+            process->editing = 0;
+        }
     }
 }
 

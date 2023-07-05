@@ -152,7 +152,6 @@ int32_t finik_eth_app(void* p) {
                     app->cursor_position = CURSOR_CLICK_PROCESS;
                     view_port_update(app->view_port);
                     furi_delay_ms(150);
-                    app->eth_worker->active_process->editing = 1;
                     char str[] = "test string 0 with some parameters";
                     str[12] += cnt % 10;
                     cnt += 1;
@@ -161,7 +160,7 @@ int32_t finik_eth_app(void* p) {
                     ethernet_view_process_print(
                         app->eth_worker->dhcp_process,
                         "test dhcp process string. loooooong world");
-                    app->cursor_position = CURSOR_INSIDE_PROCESS;
+                    app->cursor_position = CURSOR_CHOOSE_PROCESS;
                 } else if(event.key == InputKeyRight) {
                     eth_worker_set_active_process(
                         app->eth_worker, (EthWorkerProcess)app->draw_process);
@@ -171,11 +170,7 @@ int32_t finik_eth_app(void* p) {
                 }
             } else if(event.type == InputTypePress && app->cursor_position == CURSOR_INSIDE_PROCESS) {
                 if(app->eth_worker->active_process->editing) {
-                    if(event.key == InputKeyBack) {
-                        app->eth_worker->active_process->editing = 0;
-                    } else {
-                        ethernet_view_process_keyevent(app->eth_worker->active_process, event.key);
-                    }
+                    ethernet_view_process_keyevent(app->eth_worker->active_process, event.key);
                 } else if(event.key == InputKeyLeft) {
                     app->eth_worker->active_process->editing = 0;
                     app->cursor_position = CURSOR_CHOOSE_PROCESS;
