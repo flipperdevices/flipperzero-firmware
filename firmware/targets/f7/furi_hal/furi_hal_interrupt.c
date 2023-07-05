@@ -62,7 +62,7 @@ const IRQn_Type furi_hal_interrupt_irqn[FuriHalInterruptIdMax] = {
 
 __attribute__((always_inline)) static inline void
     furi_hal_interrupt_call(FuriHalInterruptId index) {
-    furi_assert(furi_hal_interrupt_isr[index].isr);
+    furi_check(furi_hal_interrupt_isr[index].isr);
     furi_hal_interrupt_isr[index].isr(furi_hal_interrupt_isr[index].context);
 }
 
