@@ -47,6 +47,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [4 in row (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-4inrow)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 - [T-rex game (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
+- [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
+- [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
+- [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 
 ## Media
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/44023851f7349b6ae9ca9f9bd9228d795a7e04c0)
@@ -98,7 +101,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon)
 
 ## Tools / Misc
-- [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
@@ -112,8 +114,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [T-Code BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [BT Serial Example (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [VB Lab Migration Assistant (By GMMan (cyanic))](https://github.com/GMMan/flipperzero-vb-migrate)
-- [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
-- [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
 - [Barcode Generator (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
