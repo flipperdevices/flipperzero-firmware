@@ -83,6 +83,15 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         }
     }
 
+    // Special case: Application browser
+    submenu_add_item(
+        submenu,
+        EXTERNAL_BROWSER_NAME,
+        EXTERNAL_BROWSER_INDEX,
+        desktop_settings_scene_favorite_submenu_callback,
+        app);
+
+    // Special case: Specific application
     submenu_add_item(
         submenu,
         NONE_APPLICATION_NAME,
