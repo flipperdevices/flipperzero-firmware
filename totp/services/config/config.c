@@ -15,9 +15,6 @@
 #define CONFIG_FILE_PATH CONFIG_FILE_DIRECTORY_PATH "/totp.conf"
 #define CONFIG_FILE_BACKUP_DIR CONFIG_FILE_DIRECTORY_PATH "/backups"
 #define CONFIG_FILE_BACKUP_BASE_PATH CONFIG_FILE_BACKUP_DIR "/totp.conf"
-#define CONFIG_FILE_TEMP_PATH CONFIG_FILE_PATH ".tmp"
-#define CONFIG_FILE_ORIG_PATH CONFIG_FILE_PATH ".orig"
-#define CONFIG_FILE_PATH_PREVIOUS EXT_PATH("apps/Misc") "/totp.conf"
 
 struct ConfigFileContext {
     /**
@@ -120,26 +117,6 @@ static bool totp_open_config_file(Storage* storage, FlipperFormat** file) {
             totp_close_config_file(fff_data_file);
             return false;
         }
-    } else if(storage_common_stat(storage, CONFIG_FILE_PATH_PREVIOUS, NULL) == FSE_OK) {
-        FURI_LOG_D(LOGGING_TAG, "Old config file %s found", CONFIG_FILE_PATH_PREVIOUS);
-        if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
-            FURI_LOG_D(
-                LOGGING_TAG,
-                "Directory %s doesn't exist. Will create new.",
-                CONFIG_FILE_DIRECTORY_PATH);
-            if(!storage_simply_mkdir(storage, CONFIG_FILE_DIRECTORY_PATH)) {
-                FURI_LOG_E(LOGGING_TAG, "Error creating directory %s", CONFIG_FILE_DIRECTORY_PATH);
-                totp_close_config_file(fff_data_file);
-                return false;
-            }
-        }
-        if(storage_common_rename(storage, CONFIG_FILE_PATH_PREVIOUS, CONFIG_FILE_PATH) != FSE_OK) {
-            FURI_LOG_E(LOGGING_TAG, "Error moving config to %s", CONFIG_FILE_PATH);
-            totp_close_config_file(fff_data_file);
-            return false;
-        }
-        FURI_LOG_I(LOGGING_TAG, "Applied config file path migration");
-        return totp_open_config_file(storage, file);
     } else {
         FURI_LOG_D(LOGGING_TAG, "Config file %s is not found. Will create new.", CONFIG_FILE_PATH);
         if(storage_common_stat(storage, CONFIG_FILE_DIRECTORY_PATH, NULL) == FSE_NOT_EXIST) {
