@@ -76,7 +76,7 @@ env = ENV.Clone(
                 "NDEBUG",
                 "FURI_DEBUG",
             ],
-        }
+        },
     },
     FW_API_TABLE=None,
     _APP_ICONS=None,

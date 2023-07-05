@@ -25,6 +25,8 @@ NfcProtocol nfc_device_get_protocol(const NfcDevice* instance);
 
 const NfcDeviceData* nfc_device_get_data(const NfcDevice* instance, NfcProtocol protocol);
 
+const NfcDeviceData* nfc_device_get_base_data(const NfcDevice* instance, NfcProtocol protocol);
+
 const char* nfc_device_get_protocol_name(NfcProtocol protocol);
 
 const char* nfc_device_get_name(const NfcDevice* instance, NfcDeviceNameType name_type);
@@ -40,6 +42,8 @@ void nfc_device_copy_data(
     const NfcDevice* instance,
     NfcProtocol protocol,
     NfcDeviceData* protocol_data);
+
+bool nfc_device_is_equal(const NfcDevice* instance, const NfcDevice* other);
 
 void nfc_device_set_loading_callback(
     NfcDevice* instance,
