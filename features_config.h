@@ -29,9 +29,10 @@
 #endif
 // End of FlipC.org definition checks
 
-// If target firmware is not yet set, default it to Xtreme\Unleashed as I'm using it, and it is cool :)
+// If target firmware is not yet set, default it to OFW because there is no chance to force Flipper Devices to update their build pipelines :angry:. 
+// I'm still using Xtreme firmware, it is still the best one and I highly recommend it to everybody.
 #ifndef TOTP_TARGET_FIRMWARE
-#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_XTREME_UL
+#define TOTP_TARGET_FIRMWARE TOTP_FIRMWARE_OFFICIAL_STABLE
 #endif
 
 // List of available font for TOTP code
