@@ -10,8 +10,11 @@
 #define EVIL_PORTAL_AP_SAVE_PATH PORTAL_FILE_DIRECTORY_PATH "/ap.config.txt"
 #define EVIL_PORTAL_LOG_SAVE_PATH PORTAL_FILE_DIRECTORY_PATH "/logs"
 
-void evil_portal_read_index_html(void *context);
-void evil_portal_read_ap_name(void *context);
+void evil_portal_read_index_html(void* context);
+void evil_portal_read_ap_name(void* context);
 void write_logs(char* portal_logs);
-char *sequential_file_resolve_path(Storage *storage, const char *dir,
-                                   const char *prefix, const char *extension);
+char* sequential_file_resolve_path(
+    Storage* storage,
+    const char* dir,
+    const char* prefix,
+    const char* extension);

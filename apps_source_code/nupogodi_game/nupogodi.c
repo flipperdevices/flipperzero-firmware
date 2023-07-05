@@ -288,7 +288,8 @@ static bool nupogodi_view_input_callback(InputEvent* event, void* context) {
                     break;
                 }
             }
-    }, consumed);
+        },
+        consumed);
 
     return consumed;
 }
