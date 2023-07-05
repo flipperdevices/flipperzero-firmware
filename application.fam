@@ -9,7 +9,7 @@ App(
     order=90,
     fap_icon_assets="icons",
     fap_icon="zeitraffer.png",
-    fap_category="GPIO_Extra",
+    fap_category="GPIO",
     fap_version="1.0",
     fap_description="Simple intervalometer app, works via GPIO pins.",
     fap_author="Aurelius Rosenbaum",
