@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0705-1349-0.86.1-38cc4fe](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-05 13:49 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-05 12:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-05 18:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-05 18:50 EST`
 - Updated: [ESP32 Evil Portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 - OFW: [FuriHal, Infrared, Protobuf: various fixes and improvements #2845 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2845)
 - UL: Bluetooth Fixes (By Willy-JL)
@@ -40,6 +40,14 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [App Fixes (By hedger)](https://github.com/xMasterX/all-the-plugins/pull/4)
 - Misc apps moved to Tools and other apps had category fixes (By xMasterX)
+- OFW: [NFC: Mf Ultralight emulation optimization #2847 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2847)
+- OFW: [Furi_Power: fix furi_hal_power_enable_otg #2842 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2842)
+- OFW: [FuriHal: allow nulling null isr #2846 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2846)
+- UL: FAAC SubGhz Protocol Fixes (By xMasterX)
+- UL: Mifare Classic Dictionary Fixes To Fix UL Issue#532 (By xMasterX)
+- UL: Keeloq: Centurion Nova (thanks Carlos !)
+- UL: RCA Protocol Unit Tests (By xMasterX)
+- UL: OFW PR: [Decode only supported Oregon 3 sensor #2829 (By wosk)](https://github.com/flipperdevices/flipperzero-firmware/pull/2829)
 
 <a name="release">
 
