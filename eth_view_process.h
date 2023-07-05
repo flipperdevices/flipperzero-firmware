@@ -34,3 +34,8 @@ typedef struct EthViewDrawStatic {
     uint8_t current_digit;
     uint8_t editing;
 } EthViewDrawStatic;
+
+typedef struct EthViewDrawPing {
+    uint8_t ip[4];
+    uint8_t current_digit;
+} EthViewDrawPing;

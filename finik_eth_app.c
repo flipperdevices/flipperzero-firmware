@@ -160,6 +160,7 @@ int32_t finik_eth_app(void* p) {
                     ethernet_view_process_print(
                         app->eth_worker->dhcp_process,
                         "test dhcp process string. loooooong world");
+                    ethernet_view_process_print(app->eth_worker->ping_process, "ping");
                     app->cursor_position = CURSOR_CHOOSE_PROCESS;
                 } else if(event.key == InputKeyRight) {
                     eth_worker_set_active_process(
