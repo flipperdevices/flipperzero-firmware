@@ -67,7 +67,7 @@ static void finik_eth_app_draw_callback(Canvas* canvas, void* ctx) {
 
     canvas_set_font(canvas, FontSecondary);
 
-    if(cursor == CURSOR_EXIT_APP) {
+    if(cursor == CURSOR_EXIT_ICON) {
         canvas_draw_icon(canvas, 0, 0, &I_exit_128x64px);
     } else {
         canvas_draw_icon(canvas, 0, 0, &I_main_128x64px);
@@ -127,84 +127,83 @@ void finik_eth_app_free(FinikEthApp* app) {
     furi_record_close(RECORD_POWER);
 }
 
+void finit_eth_app_key_handler(FinikEthApp* app, InputKey key) {
+    if(app->cursor_position == CURSOR_CHOOSE_PROCESS) {
+        if(key == InputKeyUp || key == InputKeyDown) {
+            app->draw_process =
+                (app->draw_process + PROCESS_RESET + (key == InputKeyDown ? 2 : 0)) %
+                (PROCESS_RESET + 1);
+            eth_worker_set_active_process(app->eth_worker, (EthWorkerProcess)app->draw_process);
+        } else if(key == InputKeyOk) {
+            ethernet_view_process_move(app->eth_worker->active_process, 0);
+            app->cursor_position = CURSOR_CLICK_PROCESS;
+            view_port_update(app->view_port);
+            furi_delay_ms(150);
+            char str[] = "test string 0 with some parameters";
+            ethernet_view_process_print(app->eth_worker->init_process, str);
+            ethernet_view_process_print(app->eth_worker->stat_process, str);
+            ethernet_view_process_print(
+                app->eth_worker->dhcp_process, "test dhcp process string. loooooong world");
+            ethernet_view_process_print(app->eth_worker->ping_process, "ping");
+            app->cursor_position = CURSOR_CHOOSE_PROCESS;
+        } else if(key == InputKeyRight) {
+            eth_worker_set_active_process(app->eth_worker, (EthWorkerProcess)app->draw_process);
+            app->cursor_position = CURSOR_INSIDE_PROCESS;
+        } else if(key == InputKeyBack) {
+            app->cursor_position = CURSOR_EXIT_ICON;
+        }
+    } else if(app->cursor_position == CURSOR_INSIDE_PROCESS) {
+        if(app->eth_worker->active_process->editing) {
+            ethernet_view_process_keyevent(app->eth_worker->active_process, key);
+        } else if(key == InputKeyLeft) {
+            app->eth_worker->active_process->editing = 0;
+            app->cursor_position = CURSOR_CHOOSE_PROCESS;
+        } else if(key == InputKeyBack) {
+            ethernet_view_process_move(app->eth_worker->active_process, 0);
+            app->eth_worker->active_process->editing = 0;
+            app->cursor_position = CURSOR_CHOOSE_PROCESS;
+        } else if(key == InputKeyUp) {
+            ethernet_view_process_move(app->eth_worker->active_process, -1);
+        } else if(key == InputKeyDown) {
+            ethernet_view_process_move(app->eth_worker->active_process, 1);
+        } else if(key == InputKeyOk || key == InputKeyRight) {
+            app->eth_worker->active_process->editing = 1;
+        }
+    } else if(app->cursor_position == CURSOR_EXIT_ICON) {
+        if(key == InputKeyBack) {
+            app->cursor_position = CURSOR_EXIT;
+        } else if(key == InputKeyOk) {
+            app->cursor_position = CURSOR_CHOOSE_PROCESS;
+        }
+    }
+}
+
 int32_t finik_eth_app(void* p) {
     UNUSED(p);
     FinikEthApp* app = finik_eth_app_alloc();
-    uint8_t cnt = 0;
 
     InputEvent event;
-
     uint8_t long_press = 0;
-    int8_t long_press_dir = 0;
+    InputKey long_press_key = 0;
 
     while(1) {
         finik_eth_battery_info_update_model(app);
-        if(furi_message_queue_get(app->event_queue, &event, 300) == FuriStatusOk) {
-            if(event.type == InputTypePress && app->cursor_position == CURSOR_CHOOSE_PROCESS) {
-                if(event.key == InputKeyUp || event.key == InputKeyDown) {
-                    app->draw_process =
-                        (app->draw_process + PROCESS_RESET + (event.key == InputKeyDown ? 2 : 0)) %
-                        (PROCESS_RESET + 1);
-                    eth_worker_set_active_process(
-                        app->eth_worker, (EthWorkerProcess)app->draw_process);
-                } else if(event.key == InputKeyOk) {
-                    ethernet_view_process_move(app->eth_worker->active_process, 0);
-                    app->cursor_position = CURSOR_CLICK_PROCESS;
-                    view_port_update(app->view_port);
-                    furi_delay_ms(150);
-                    char str[] = "test string 0 with some parameters";
-                    str[12] += cnt % 10;
-                    cnt += 1;
-                    ethernet_view_process_print(app->eth_worker->init_process, str);
-                    ethernet_view_process_print(app->eth_worker->stat_process, str);
-                    ethernet_view_process_print(
-                        app->eth_worker->dhcp_process,
-                        "test dhcp process string. loooooong world");
-                    ethernet_view_process_print(app->eth_worker->ping_process, "ping");
-                    app->cursor_position = CURSOR_CHOOSE_PROCESS;
-                } else if(event.key == InputKeyRight) {
-                    eth_worker_set_active_process(
-                        app->eth_worker, (EthWorkerProcess)app->draw_process);
-                    app->cursor_position = CURSOR_INSIDE_PROCESS;
-                } else if(event.key == InputKeyBack) {
-                    app->cursor_position = CURSOR_EXIT_APP;
-                }
-            } else if(event.type == InputTypePress && app->cursor_position == CURSOR_INSIDE_PROCESS) {
-                if(app->eth_worker->active_process->editing) {
-                    ethernet_view_process_keyevent(app->eth_worker->active_process, event.key);
-                } else if(event.key == InputKeyLeft) {
-                    app->eth_worker->active_process->editing = 0;
-                    app->cursor_position = CURSOR_CHOOSE_PROCESS;
-                } else if(event.key == InputKeyBack) {
-                    ethernet_view_process_move(app->eth_worker->active_process, 0);
-                    app->eth_worker->active_process->editing = 0;
-                    app->cursor_position = CURSOR_CHOOSE_PROCESS;
-                } else if(event.key == InputKeyUp) {
-                    ethernet_view_process_move(app->eth_worker->active_process, -1);
-                } else if(event.key == InputKeyDown) {
-                    ethernet_view_process_move(app->eth_worker->active_process, 1);
-                } else if(event.key == InputKeyOk || event.key == InputKeyRight) {
-                    app->eth_worker->active_process->editing = 1;
-                }
-            } else if(event.type == InputTypePress && app->cursor_position == CURSOR_EXIT_APP) {
-                if(event.key == InputKeyBack) {
-                    break;
-                } else if(event.key == InputKeyOk) {
-                    app->cursor_position = CURSOR_CHOOSE_PROCESS;
-                }
-            } else if(event.type == InputTypeLong && event.key == InputKeyUp) {
+        if(furi_message_queue_get(app->event_queue, &event, 200) == FuriStatusOk) {
+            if(event.type == InputTypePress) {
+                finit_eth_app_key_handler(app, event.key);
+            } else if(event.type == InputTypeLong) {
                 long_press = 1;
-                long_press_dir = -1;
-            } else if(event.type == InputTypeLong && event.key == InputKeyDown) {
-                long_press = 1;
-                long_press_dir = 1;
+                long_press_key = event.key;
             } else if(event.type == InputTypeRelease) {
                 long_press = 0;
-                long_press_dir = 0;
+                long_press_key = 0;
             }
         }
-        if(long_press) {
-            ethernet_view_process_move(app->eth_worker->active_process, long_press_dir);
+        if(long_press && long_press_key != InputKeyBack) {
+            finit_eth_app_key_handler(app, long_press_key);
+        }
+        if(app->cursor_position == CURSOR_EXIT) {
+            break;
         }
         view_port_update(app->view_port);
     }

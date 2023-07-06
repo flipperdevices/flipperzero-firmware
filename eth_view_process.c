@@ -279,10 +279,15 @@ void ethernet_view_process_keyevent(EthViewProcess* process, InputKey key) {
             mac_change_hex_digit(mac, octet, 1);
         } else if(key == InputKeyDown) {
             mac_change_hex_digit(mac, octet, -1);
-        } else if(key == InputKeyOk) {
+        } else if(key == InputKeyOk || key == InputKeyBack) {
             process->editing = 0;
         }
         ((EthViewDrawInit*)process->draw_struct)->current_octet = octet;
+    } else if(process->type == EthWorkerProcessDHCP) {
+        process->editing = 0;
+        if(key == InputKeyUp || key == InputKeyDown) {
+            ethernet_view_process_move(process, (key == InputKeyDown) ? 1 : -1);
+        }
     } else if(process->type == EthWorkerProcessStatic) {
         uint8_t digit = ((EthViewDrawStatic*)process->draw_struct)->current_digit;
         uint8_t mode = ((EthViewDrawStatic*)process->draw_struct)->current_mode;

@@ -27,7 +27,8 @@ typedef enum {
     CURSOR_CHOOSE_PROCESS,
     CURSOR_CLICK_PROCESS,
     CURSOR_INSIDE_PROCESS,
-    CURSOR_EXIT_APP,
+    CURSOR_EXIT_ICON,
+    CURSOR_EXIT,
 } CursorPosition;
 
 struct FinikEthApp {
