@@ -13,5 +13,7 @@ App(
         "bad_usb",
         "u2f",
         "archive",
+        "lfrfid_start",
+        "infrared_start",
     ],
 )
