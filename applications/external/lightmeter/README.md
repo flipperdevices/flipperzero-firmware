@@ -1,10 +1,10 @@
-# flipperzero-lightmeter
+## Lightmeter for Flipper Zero
 
-[![Build FAP](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/oleksiikutuzov/flipperzero-lightmeter/actions/workflows/build.yml)
+Lightmeter app for photography based on BH1750/MAX44009 sensor
 
-<img src="images/framed_gui_main.png" width="500px">
+## Support
 
-<img src="images/framed_gui_lux_meter.png" width="500px">
+For app feedback, bugs, and feature requests, please create an issue here: https://github.com/oleksiikutuzov/flipperzero-lightmeter/issues
 
 ## Wiring
 
@@ -27,9 +27,9 @@ SDA -> C1
 5. 2x M3 threaded inserts (max diameter 5.3 mm, max height 4 mm)
 6. 2x M3x5 screws
 
-
 ## TODO
 - [ ] Save settings to sd card
 
 ## References
+
 App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project for Arduino by [vpominchuk](https://github.com/vpominchuk).
