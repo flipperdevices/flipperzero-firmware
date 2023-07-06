@@ -324,10 +324,11 @@ static bool storage_sorted_dir_prepare(SortedDir* dir, StorageData* storage, Fil
             break;
         }
 
-        if(dir->count == 0) {
+        if(dir->count == 0) { //-V547
             dir->sorted = malloc(sizeof(SortedFileRecord));
         } else {
-            dir->sorted = realloc(dir->sorted, sizeof(SortedFileRecord) * (dir->count + 1));
+            dir->sorted =
+                realloc(dir->sorted, sizeof(SortedFileRecord) * (dir->count + 1)); //-V701
         }
 
         dir->sorted[dir->count].name = furi_string_alloc_set(name);
