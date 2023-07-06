@@ -327,8 +327,16 @@ static bool storage_sorted_dir_prepare(SortedDir* dir, StorageData* storage, Fil
         if(dir->count == 0) { //-V547
             dir->sorted = malloc(sizeof(SortedFileRecord));
         } else {
-            dir->sorted =
-                realloc(dir->sorted, sizeof(SortedFileRecord) * (dir->count + 1)); //-V701
+            // Our realloc actually mallocs a new block and copies the data over,
+            // so we need to check if we have enough memory for the new block
+            size_t size = sizeof(SortedFileRecord) * (dir->count + 1);
+            if(memmgr_heap_get_max_free_block() >= size) {
+                dir->sorted =
+                    realloc(dir->sorted, sizeof(SortedFileRecord) * (dir->count + 1)); //-V701
+            } else {
+                ret = false;
+                break;
+            }
         }
 
         dir->sorted[dir->count].name = furi_string_alloc_set(name);
