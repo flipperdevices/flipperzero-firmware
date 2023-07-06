@@ -40,6 +40,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Added: [NFC Maker (by Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/nfc_maker) 
 - Adopt External Menu app naming used by OFW in [PR 2849 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2849)
 - UL: Fix loader hangup on exit if api mismatch happened (By xMasterX)
+- UL: [BT Toy Serial Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/3a59636e28af723a350509894526589ba60a6ba7)
 
 <a name="release">
 
@@ -277,6 +278,7 @@ $ ./fbt dolphin_ext
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
 - [BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
+- [BT Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [BT Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero_ios-bluetooth-trigger)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Camera (By Z4urce)](https://github.com/Z4urce/flipper-camera) `Req: ESP32-CAM`
@@ -395,7 +397,6 @@ $ ./fbt dolphin_ext
 - [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
 - [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
 - [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer)
-- [Toy Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp) WIP
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)

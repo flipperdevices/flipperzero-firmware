@@ -32,9 +32,13 @@ static void process_general_command(TCodeCommand command, GPIOSimpleMotor* motor
         // using Pulse-Widht Modulation to control a motor via a transistor
         // just google for a typical arduino + PWM + motor scheme
         if(new_duty == 0) {
-            furi_hal_pwm_stop(DEFAULT_PWM_OUTPUT_ID);
+            if(furi_hal_pwm_is_running(DEFAULT_PWM_OUTPUT_ID)) {
+                furi_hal_pwm_stop(DEFAULT_PWM_OUTPUT_ID);
+            }
         } else if(motor->current_pwm_duty == 0) {
-            furi_hal_pwm_start(DEFAULT_PWM_OUTPUT_ID, DEFAULT_FREQ, new_duty);
+            if(!furi_hal_pwm_is_running(DEFAULT_PWM_OUTPUT_ID)) {
+                furi_hal_pwm_start(DEFAULT_PWM_OUTPUT_ID, DEFAULT_FREQ, new_duty);
+            }
         } else {
             furi_hal_pwm_set_params(DEFAULT_PWM_OUTPUT_ID, DEFAULT_FREQ, new_duty);
         }
@@ -140,7 +144,9 @@ GPIOSimpleMotor* gpio_simple_motor_alloc(FBP* fbp) {
 
 void gpio_simple_motor_free(GPIOSimpleMotor* motor) {
     furi_assert(motor);
-    furi_hal_pwm_stop(DEFAULT_PWM_OUTPUT_ID);
+    if(furi_hal_pwm_is_running(DEFAULT_PWM_OUTPUT_ID)) {
+        furi_hal_pwm_stop(DEFAULT_PWM_OUTPUT_ID);
+    }
     view_free(motor->view);
     free(motor);
 }
