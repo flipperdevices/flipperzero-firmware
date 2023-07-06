@@ -150,7 +150,7 @@ bool mf_classic_load(MfClassicData* data, FlipperFormat* ff, uint32_t version) {
 
     do {
         // Read ISO14443_3A data
-        if(!iso14443_3a_load_data(data->iso14443_3a_data, ff, version)) break;
+        if(!iso14443_3a_load(data->iso14443_3a_data, ff, version)) break;
 
         // Read Mifare Classic type
         if(!flipper_format_read_string(ff, "Mifare Classic type", temp_str)) break;

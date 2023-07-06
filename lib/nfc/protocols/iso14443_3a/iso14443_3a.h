@@ -91,9 +91,6 @@ bool iso14443_3a_check_crc(const BitBuffer* buf);
 
 void iso14443_3a_trim_crc(BitBuffer* buf);
 
-// TODO: Decide where should these methods go (*_i file?)
-bool iso14443_3a_load_data(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version);
-
 #ifdef __cplusplus
 }
 #endif

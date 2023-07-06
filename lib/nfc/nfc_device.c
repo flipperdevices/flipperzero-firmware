@@ -198,8 +198,9 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
         if(!flipper_format_write_hex(ff, NFC_DEVICE_UID_KEY, uid, uid_len)) break;
 
         // Write protocol-dependent data
-        saved = nfc_devices[instance->protocol]->save(instance->protocol_data, ff);
+        if(!nfc_devices[instance->protocol]->save(instance->protocol_data, ff)) break;
 
+        saved = true;
     } while(false);
 
     if(instance->loading_callback) {
@@ -213,13 +214,84 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
     return saved;
 }
 
+static bool nfc_device_load_unified(NfcDevice* instance, FlipperFormat* ff, uint32_t version) {
+    bool loaded = false;
+
+    FuriString* temp_str = furi_string_alloc();
+
+    do {
+        // Read Nfc device type
+        if(!flipper_format_read_string(ff, NFC_DEVICE_TYPE_KEY, temp_str)) break;
+
+        // Detect protocol
+        NfcProtocol protocol;
+        for(protocol = 0; protocol < NfcProtocolNum; ++protocol) {
+            if(furi_string_equal(temp_str, nfc_devices[protocol]->protocol_name)) {
+                break;
+            }
+        }
+
+        if(protocol == NfcProtocolNum) break;
+
+        nfc_device_clear(instance);
+
+        instance->protocol = protocol;
+        instance->protocol_data = nfc_devices[protocol]->alloc();
+
+        // Load UID
+        // TODO: figure out how to do it here
+
+        // Load data
+        if(!nfc_devices[protocol]->load(instance->protocol_data, ff, version)) {
+            nfc_device_clear(instance);
+            break;
+        }
+
+        loaded = true;
+    } while(false);
+
+    furi_string_free(temp_str);
+    return loaded;
+}
+
+static bool nfc_device_load_legacy(NfcDevice* instance, FlipperFormat* ff, uint32_t version) {
+    bool loaded = false;
+
+    FuriString* temp_str = furi_string_alloc();
+
+    do {
+        // Read Nfc device type
+        if(!flipper_format_read_string(ff, NFC_DEVICE_TYPE_KEY, temp_str)) break;
+
+        nfc_device_clear(instance);
+
+        for(NfcProtocol protocol = 0; protocol < NfcProtocolNum; protocol++) {
+            instance->protocol = protocol;
+            instance->protocol_data = nfc_devices[protocol]->alloc();
+
+            if(nfc_devices[protocol]->verify(instance->protocol_data, temp_str)) {
+                if(nfc_devices[protocol]->load(instance->protocol_data, ff, version)) {
+                    loaded = true;
+                    break;
+                }
+            }
+
+            nfc_device_clear(instance);
+        }
+
+    } while(false);
+
+    furi_string_free(temp_str);
+    return loaded;
+}
+
 bool nfc_device_load(NfcDevice* instance, const char* path) {
     furi_assert(instance);
     furi_assert(path);
 
     bool loaded = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = flipper_format_buffered_file_alloc(storage);
+    FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
 
     FuriString* temp_str;
     temp_str = furi_string_alloc();
@@ -229,34 +301,20 @@ bool nfc_device_load(NfcDevice* instance, const char* path) {
     }
 
     do {
-        if(!flipper_format_buffered_file_open_existing(file, path)) break;
+        if(!flipper_format_buffered_file_open_existing(ff, path)) break;
 
         // Read and verify file header
         uint32_t version = 0;
-        if(!flipper_format_read_header(file, temp_str, &version)) break;
+        if(!flipper_format_read_header(ff, temp_str, &version)) break;
+
         if(furi_string_cmp_str(temp_str, NFC_FILE_HEADER)) break;
-        if(version < NFC_LSB_ATQA_FORMAT_VERSION) break;
+        if(version < NFC_MINIMUM_SUPPORTED_FORMAT_VERSION) break;
 
-        // Read Nfc device type
-        if(!flipper_format_read_string(file, NFC_DEVICE_TYPE_KEY, temp_str)) break;
+        // Select loading method
+        loaded = (version < NFC_UNIFIED_FORMAT_VERSION) ?
+                     nfc_device_load_legacy(instance, ff, version) :
+                     nfc_device_load_unified(instance, ff, version);
 
-        nfc_device_clear(instance);
-
-        for(NfcProtocol i = 0; i < NfcProtocolNum; i++) {
-            instance->protocol = i;
-            instance->protocol_data = nfc_devices[i]->alloc();
-
-            if(nfc_devices[i]->verify(instance->protocol_data, temp_str)) {
-                loaded = nfc_devices[i]->load(instance->protocol_data, file, version);
-            }
-
-            if(loaded) {
-                break;
-            } else {
-                nfc_devices[i]->free(instance->protocol_data);
-                instance->protocol_data = NULL;
-            }
-        }
     } while(false);
 
     if(instance->loading_callback) {
@@ -264,7 +322,7 @@ bool nfc_device_load(NfcDevice* instance, const char* path) {
     }
 
     furi_string_free(temp_str);
-    flipper_format_free(file);
+    flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
 
     return loaded;

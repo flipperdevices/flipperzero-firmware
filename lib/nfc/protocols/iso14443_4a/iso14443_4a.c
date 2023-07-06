@@ -4,7 +4,7 @@
 
 #define ISO14443_4A_PROTOCOL_NAME "ISO14443-4A"
 #define ISO14443_4A_DEVICE_NAME "Unknown ISO14443-4A Tag"
-#define ISO14443_4A_ATS_BIT (1 << 5)
+#define ISO14443_4A_ATS_BIT (1U << 5)
 
 const NfcDeviceBase nfc_device_iso14443_4a = {
     .protocol_name = ISO14443_4A_PROTOCOL_NAME,
@@ -63,7 +63,7 @@ bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version
     bool parsed = false;
 
     do {
-        if(!iso14443_3a_load_data(data->iso14443_3a_data, ff, version)) break;
+        if(!iso14443_3a_load(data->iso14443_3a_data, ff, version)) break;
         // TODO: handle additional fields
         parsed = true;
     } while(false);
@@ -78,12 +78,13 @@ bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff) {
 
     do {
         if(!iso14443_3a_save(data->iso14443_3a_data, ff)) break;
-        if(!flipper_format_write_comment_cstr(ff, ISO14443_4A_PROTOCOL_NAME " specific data")) break;
+        if(!flipper_format_write_comment_cstr(ff, ISO14443_4A_PROTOCOL_NAME " specific data"))
+            break;
         // TODO: handle additional fields
         saved = true;
     } while(false);
 
-   return saved;
+    return saved;
 }
 
 bool iso14443_4a_is_equal(const Iso14443_4aData* data, const Iso14443_4aData* other) {
