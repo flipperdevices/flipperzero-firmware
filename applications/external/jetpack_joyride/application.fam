@@ -1,15 +1,18 @@
-# For details & more options, see documentation/AppManifests.md in firmware repo
-
 App(
-    appid="jetpack_joyride",
+    appid="Jetpack_Joyride",
     name="Jetpack Joyride",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="jetpack_game_app",
-    cdefines=["APP_JETPACK_GAME"],
+    # cdefines=["APP_JETPACK_GAME"],
     requires=["gui"],
     stack_size=4 * 1024,
     order=100,
     fap_icon="icon.png",
     fap_category="Games",
     fap_icon_assets="assets",
+    fap_icon_assets_symbol="jetpack_joyride",
+    fap_author="timstrasser",
+    fap_weburl="https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/jetpack_joyride",
+    # fap_version="1.0",
+    fap_description="Fun jetpack game... make it the longest, collect the most money...",
 )
