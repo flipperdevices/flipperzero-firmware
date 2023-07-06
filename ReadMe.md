@@ -43,15 +43,16 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [NFC: Mf Ultralight emulation optimization #2847 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2847)
 - OFW: [Furi_Power: fix furi_hal_power_enable_otg #2842 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2842)
 - OFW: [FuriHal: allow nulling null isr #2846 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2846)
-- UL: FAAC SubGhz Protocol Fixes (By xMasterX)
-- UL: Mifare Classic Dictionary Fixes To Fix UL Issue#532 (By xMasterX)
-- UL: Keeloq: Centurion Nova (thanks Carlos !)
+- UL: SubGHz: FAAC SLH: UI Fixes, Fix sending signals with no seed (By xMasterX)
+- UL: NFC: Fixed issue #532 (Mifare classic user dict delete removes more than selected key) (By xMasterX)
+- UL: SubGHz: Keeloq: Centurion Nova read and emulate support (+ add manually) (thanks Carlos)
 - UL: RCA Protocol Unit Tests (By xMasterX)
 - UL: OFW PR: [Decode only supported Oregon 3 sensor #2829 (By wosk)](https://github.com/flipperdevices/flipperzero-firmware/pull/2829)
 - UL: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper) (Updates by xMasterX)
 - UL: Removed: [Barcode Generator (By McAzzaMan)](https://github.com/McAzzaMan/flipperzero-firmware/tree/UPC-A_Barcode_Generator/applications/barcode_generator) (Dupe App)
 - UL: Authenticator save migrate if old save present (By xMasterX)
 - Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009`
+- UL: OFW PR: [NFC: Improved MFC emulation on some readers #2825 (By AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2825)
 
 <a name="release">
 
