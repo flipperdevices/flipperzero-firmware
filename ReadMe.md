@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Added: [JetPack Joyride (by timstrasser)](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/jetpack_joyride)
 - UL: Added: [NFC Maker (by Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/nfc_maker) 
 - Adopt External Menu app naming used by OFW in [PR 2849 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2849)
+- UL: Fix loader hangup on exit if api mismatch happened (By xMasterX)
 
 <a name="release">
 
