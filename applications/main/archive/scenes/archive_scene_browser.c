@@ -5,13 +5,24 @@
 #include "../helpers/archive_browser.h"
 #include "../views/archive_browser_view.h"
 #include "archive/scenes/archive_scene.h"
+#include <applications.h>
 
 #define TAG "ArchiveSceneBrowser"
 
 #define SCENE_STATE_DEFAULT (0)
 #define SCENE_STATE_NEED_REFRESH (1)
 
-const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
+static const char* archive_get_flipper_app_path(const char* app_name) {
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
+            return FLIPPER_EXTERNAL_APPS[i].path;
+        }
+    }
+
+    return NULL;
+}
+
+static const char* archive_get_flipper_app_name(ArchiveFileTypeEnum file_type) {
     switch(file_type) {
     case ArchiveFileTypeIButton:
         return "iButton";
@@ -51,6 +62,10 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
     Loader* loader = furi_record_open(RECORD_LOADER);
 
     const char* app_name = archive_get_flipper_app_name(selected->type);
+    const char* app_path = archive_get_flipper_app_path(app_name);
+    if(app_path) {
+        app_name = app_path;
+    }
 
     if(app_name) {
         if(selected->is_app) {
