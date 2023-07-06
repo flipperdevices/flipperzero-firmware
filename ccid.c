@@ -7,6 +7,7 @@ const uint8_t SAM_ATR[] =
     {0x3b, 0x95, 0x96, 0x80, 0xb1, 0xfe, 0x55, 0x1f, 0xc7, 0x47, 0x72, 0x61, 0x63, 0x65, 0x13};
 const uint8_t SAM_ATR2[] = {0x3b, 0x90, 0x96, 0x91, 0x81, 0xb1, 0xfe, 0x55, 0x1f, 0xc7, 0xd4};
 
+bool powered = false;
 uint8_t slot = 0;
 uint8_t sequence = 0;
 uint8_t retries = 3;
@@ -27,6 +28,10 @@ size_t addLRC(uint8_t* data, size_t len) {
 }
 
 void PC_to_RDR_IccPowerOn(SeaderUartBridge* seader_uart) {
+    if(powered) {
+        return;
+    }
+    powered = true;
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
@@ -123,19 +128,22 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
             switch(cmd[1]) {
             case CARD_OUT:
                 FURI_LOG_D(TAG, "Card removed");
+                retries = 3;
                 break;
             case CARD_IN_1:
                 FURI_LOG_D(TAG, "Card Inserted (1)");
+                retries = 0;
                 slot = 0;
                 sequence = 0;
-                FURI_LOG_D(TAG, "Sending Power On");
+                FURI_LOG_D(TAG, "Sending Power On (1)");
                 PC_to_RDR_IccPowerOn(seader_uart);
                 break;
             case CARD_IN_2:
                 FURI_LOG_D(TAG, "Card Inserted (2)");
+                retries = 0;
                 slot = 1;
                 sequence = 0;
-                FURI_LOG_D(TAG, "Sending Power On");
+                FURI_LOG_D(TAG, "Sending Power On (2)");
                 PC_to_RDR_IccPowerOn(seader_uart);
                 break;
             case CARD_IN_BOTH:
@@ -155,7 +163,7 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
     }
 
     while(cmd_len > 2 && (cmd[0] != SYNC || cmd[1] != CTRL)) {
-        FURI_LOG_W(TAG, "invalid start");
+        FURI_LOG_W(TAG, "invalid start: %02x", cmd[0]);
         cmd += 1;
         cmd_len -= 1;
         message.consumed += 1;
@@ -184,7 +192,7 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
                 return message.consumed;
             } else if(status == 2) {
                 FURI_LOG_W(TAG, "No ICC is present [retries %d]", retries);
-                if(retries-- > 1) {
+                if(retries-- > 1 && hasSAM == false) {
                     furi_delay_ms(100);
                     PC_to_RDR_GetSlotStatus(seader_uart);
                 } else {
