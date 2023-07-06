@@ -177,8 +177,7 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
                file, "Nfc device type can be UID, Mifare Ultralight, Mifare Classic"))
             break;
 
-        saved = nfc_devices[instance->protocol]->save(
-            instance->protocol_data, file, NFC_CURRENT_FORMAT_VERSION);
+        saved = nfc_devices[instance->protocol]->save(instance->protocol_data, file);
 
     } while(false);
 

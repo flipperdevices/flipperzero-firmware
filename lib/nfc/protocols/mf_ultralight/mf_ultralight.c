@@ -305,7 +305,7 @@ bool mf_ultralight_load(MfUltralightData* data, FlipperFormat* ff, uint32_t vers
     return parsed;
 }
 
-bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_t version) {
+bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff) {
     furi_assert(data);
 
     FuriString* temp_str = furi_string_alloc();
@@ -314,7 +314,7 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_
     do {
         const char* device_type_name = mf_ultralight_get_device_name_by_type(data->type, true);
         if(!flipper_format_write_string_cstr(ff, "Device type", device_type_name)) break;
-        if(!iso14443_3a_save_data(data->iso14443_3a_data, ff, version)) break;
+        if(!iso14443_3a_save_data(data->iso14443_3a_data, ff)) break;
         if(!flipper_format_write_comment_cstr(ff, "Mifare Ultralight specific data")) break;
         if(!flipper_format_write_uint32(
                ff, "Data format version", &mf_ultralight_data_format_version, 1))

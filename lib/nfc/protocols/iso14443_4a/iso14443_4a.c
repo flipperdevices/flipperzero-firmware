@@ -63,10 +63,10 @@ bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version
     return iso14443_3a_load_data(data->iso14443_3a_data, ff, version);
 }
 
-bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff, uint32_t version) {
+bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff) {
     furi_assert(data);
     // TODO: handle additional fields
-    return iso14443_3a_save_data(data->iso14443_3a_data, ff, version);
+    return iso14443_3a_save_data(data->iso14443_3a_data, ff);
 }
 
 bool iso14443_4a_is_equal(const Iso14443_4aData* data, const Iso14443_4aData* other) {

@@ -55,11 +55,11 @@ bool iso14443_3a_load(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version
     return iso14443_3a_load_data(data, ff, version);
 }
 
-bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
+bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff) {
     bool saved = false;
     do {
         if(!flipper_format_write_string_cstr(ff, "Device type", "UID")) break;
-        if(!iso14443_3a_save_data(data, ff, version)) break;
+        if(!iso14443_3a_save_data(data, ff)) break;
         saved = true;
     } while(false);
 
@@ -121,12 +121,11 @@ bool iso14443_3a_load_data(Iso14443_3aData* data, FlipperFormat* ff, uint32_t ve
     return parsed;
 }
 
-bool iso14443_3a_save_data(const Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
+bool iso14443_3a_save_data(const Iso14443_3aData* data, FlipperFormat* ff) {
     furi_assert(data);
 
-    UNUSED(version);
-
     bool saved = false;
+
     do {
         // Write UID, ATQA, SAK
         if(!flipper_format_write_comment_cstr(ff, "UID is common for all formats")) break;

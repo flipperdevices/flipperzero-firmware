@@ -73,7 +73,7 @@ bool iso14443_3a_verify(Iso14443_3aData* data, const FuriString* device_type);
 
 bool iso14443_3a_load(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version);
 
-bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff, uint32_t version);
+bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff);
 
 bool iso14443_3a_is_equal(const Iso14443_3aData* data, const Iso14443_3aData* other);
 
@@ -94,7 +94,7 @@ void iso14443_3a_trim_crc(BitBuffer* buf);
 // TODO: Decide where should these methods go (*_i file?)
 bool iso14443_3a_load_data(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version);
 
-bool iso14443_3a_save_data(const Iso14443_3aData* data, FlipperFormat* ff, uint32_t version);
+bool iso14443_3a_save_data(const Iso14443_3aData* data, FlipperFormat* ff);
 
 #ifdef __cplusplus
 }

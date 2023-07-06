@@ -139,9 +139,8 @@ bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
     return success;
 }
 
-bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
+bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff) {
     furi_assert(data);
-    UNUSED(version);
 
     FuriString* prefix = furi_string_alloc();
 
@@ -150,7 +149,7 @@ bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff, uint32_t vers
     do {
         if(!flipper_format_write_string_cstr(ff, "Device type", MF_DESFIRE_PROTOCOL_NAME)) break;
 
-        if(!iso14443_4a_save(data->iso14443_4a_data, ff, version)) break;
+        if(!iso14443_4a_save(data->iso14443_4a_data, ff)) break;
 
         if(!flipper_format_write_comment_cstr(ff, MF_DESFIRE_PROTOCOL_NAME " specific data"))
             break;

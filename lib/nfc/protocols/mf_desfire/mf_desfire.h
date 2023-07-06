@@ -163,7 +163,7 @@ bool mf_desfire_verify(MfDesfireData* data, const FuriString* device_type);
 
 bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version);
 
-bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff, uint32_t version);
+bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff);
 
 bool mf_desfire_is_equal(const MfDesfireData* data, const MfDesfireData* other);
 

@@ -133,7 +133,7 @@ bool mf_classic_verify(MfClassicData* data, const FuriString* device_type);
 
 bool mf_classic_load(MfClassicData* data, FlipperFormat* ff, uint32_t version);
 
-bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff, uint32_t version);
+bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff);
 
 bool mf_classic_is_equal(const MfClassicData* data, const MfClassicData* other);
 

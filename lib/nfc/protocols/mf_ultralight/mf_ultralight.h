@@ -179,7 +179,7 @@ bool mf_ultralight_verify(MfUltralightData* data, const FuriString* device_type)
 
 bool mf_ultralight_load(MfUltralightData* data, FlipperFormat* ff, uint32_t version);
 
-bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff, uint32_t version);
+bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff);
 
 bool mf_ultralight_is_equal(const MfUltralightData* data, const MfUltralightData* other);
 
