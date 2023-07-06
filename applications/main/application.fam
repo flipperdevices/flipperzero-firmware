@@ -4,7 +4,6 @@ App(
     apptype=FlipperAppType.METAPACKAGE,
     provides=[
         "gpio",
-        "onewire",
         "ibutton",
         "infrared",
         "lfrfid",
@@ -13,6 +12,8 @@ App(
         "bad_usb",
         "u2f",
         "archive",
+        "ibutton_start",
+        "onewire_start",
         "lfrfid_start",
         "infrared_start",
     ],
