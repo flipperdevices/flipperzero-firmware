@@ -437,12 +437,9 @@ class ApplicationsCGenerator:
 
         entry_type, entry_block = self.APP_EXTERNAL_TYPE
         external_apps = self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
-        if external_apps:
-            contents.append(f"const {entry_type} {entry_block}[] = {{")
-            contents.append(",\n".join(map(self.get_external_app_descr, external_apps)))
-            contents.append("};")
-            contents.append(
-                f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});"
-            )
+        contents.append(f"const {entry_type} {entry_block}[] = {{")
+        contents.append(",\n".join(map(self.get_external_app_descr, external_apps)))
+        contents.append("};")
+        contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
 
         return "\n".join(contents)
