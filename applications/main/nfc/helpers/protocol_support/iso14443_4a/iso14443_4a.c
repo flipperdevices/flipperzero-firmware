@@ -7,34 +7,67 @@
 #include "../iso14443_3a/iso14443_3a_i.h"
 #include "../../../nfc_app_i.h"
 
-static void nfc_protocol_support_render_info_iso14443_4a(
-    const Iso14443_4aData* data,
-    NfcProtocolFormatType format_type,
-    FuriString* str) {
-    nfc_render_iso14443_4a_info(data, format_type, str);
+static void nfc_scene_info_on_enter_iso14443_4a(NfcApp* instance) {
+    const NfcDevice* device = instance->nfc_device;
+    const Iso14443_4aData* data = nfc_device_get_data(device, NfcProtocolIso14443_4a);
+
+    FuriString* temp_str = furi_string_alloc();
+    furi_string_cat_printf(
+        temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+    nfc_render_iso14443_4a_info(data, NfcProtocolFormatTypeFull, temp_str);
+
+    widget_add_text_scroll_element(
+        instance->widget, 0, 0, 128, 64, furi_string_get_cstr(temp_str));
+
+    furi_string_free(temp_str);
 }
 
-static NfcCustomEvent
-    nfc_protocol_support_handle_poller_iso14443_4a(Iso14443_4aPollerEvent* event, void* context) {
-    UNUSED(context);
-    NfcCustomEvent custom_event = NfcCustomEventReadHandlerIgnore;
+static NfcCommand
+    nfc_scene_read_poller_callback_iso14443_4a(NfcGenericEvent event, void* context) {
+    furi_assert(event.protocol == NfcProtocolIso14443_4a);
 
-    if(event->type == Iso14443_4aPollerEventTypeReady) {
-        custom_event = NfcCustomEventReadHandlerSuccess;
+    NfcApp* instance = context;
+    const Iso14443_4aPollerEvent* iso14443_4a_event = event.data;
+
+    if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
+        nfc_device_set_data(
+            instance->nfc_device, NfcProtocolIso14443_4a, nfc_poller_get_data(instance->poller));
+        view_dispatcher_send_custom_event(
+            instance->view_dispatcher, NfcCustomEventReadHandlerSuccess);
+        return NfcCommandStop;
     }
 
-    return custom_event;
+    return NfcCommandContinue;
 }
 
-static void nfc_protocol_support_build_scene_read_menu_iso14443_4a(NfcApp* instance) {
+static void nfc_scene_read_on_enter_iso14443_4a(NfcApp* instance) {
+    nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_iso14443_4a, instance);
+}
+
+static void nfc_scene_read_menu_on_enter_iso14443_4a(NfcApp* instance) {
     UNUSED(instance);
 }
 
-static void nfc_protocol_support_build_scene_saved_menu_iso14443_4a(NfcApp* instance) {
+static void nfc_scene_read_success_on_enter_iso14443_4a(NfcApp* instance) {
+    const NfcDevice* device = instance->nfc_device;
+    const Iso14443_4aData* data = nfc_device_get_data(device, NfcProtocolIso14443_4a);
+
+    FuriString* temp_str = furi_string_alloc();
+    furi_string_cat_printf(
+        temp_str, "\e#%s\n", nfc_device_get_name(device, NfcDeviceNameTypeFull));
+    nfc_render_iso14443_4a_info(data, NfcProtocolFormatTypeShort, temp_str);
+
+    widget_add_text_scroll_element(
+        instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+
+    furi_string_free(temp_str);
+}
+
+static void nfc_scene_saved_menu_on_enter_iso14443_4a(NfcApp* instance) {
     UNUSED(instance);
 }
 
-static bool nfc_protocol_support_handle_scene_info_iso14443_4a(NfcApp* instance, uint32_t event) {
+static bool nfc_scene_info_on_event_iso14443_4a(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
         return true;
@@ -43,8 +76,7 @@ static bool nfc_protocol_support_handle_scene_info_iso14443_4a(NfcApp* instance,
     return false;
 }
 
-static bool
-    nfc_protocol_support_handle_scene_read_menu_iso14443_4a(NfcApp* instance, uint32_t event) {
+static bool nfc_scene_read_menu_on_event_iso14443_4a(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEmulate) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
         return true;
@@ -53,28 +85,36 @@ static bool
     return false;
 }
 
-static bool
-    nfc_protocol_support_handle_scene_saved_menu_iso14443_4a(NfcApp* instance, uint32_t event) {
-    return nfc_protocol_support_handle_scene_saved_menu_iso14443_3a_common(instance, event);
+static bool nfc_scene_saved_menu_on_event_iso14443_4a(NfcApp* instance, uint32_t event) {
+    return nfc_scene_saved_menu_on_event_iso14443_3a_common(instance, event);
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_iso14443_4a = {
     .features = NfcProtocolFeatureEmulateUid | NfcProtocolFeatureEditUid,
 
-    .render_info = (NfcProtocolSupportRenderData)nfc_protocol_support_render_info_iso14443_4a,
-
-    .handle_poller =
-        (NfcProtocolSupportPollerHandler)nfc_protocol_support_handle_poller_iso14443_4a,
-
-    .build_scene_read_menu =
-        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_read_menu_iso14443_4a,
-    .build_scene_saved_menu =
-        (NfcProtocolSupportSceneBuilder)nfc_protocol_support_build_scene_saved_menu_iso14443_4a,
-
-    .handle_scene_info =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_info_iso14443_4a,
-    .handle_scene_read_menu =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_read_menu_iso14443_4a,
-    .handle_scene_saved_menu =
-        (NfcProtocolSupportSceneHandler)nfc_protocol_support_handle_scene_saved_menu_iso14443_4a,
+    .scene_info =
+        {
+            .on_enter = nfc_scene_info_on_enter_iso14443_4a,
+            .on_event = nfc_scene_info_on_event_iso14443_4a,
+        },
+    .scene_read =
+        {
+            .on_enter = nfc_scene_read_on_enter_iso14443_4a,
+            .on_event = NULL,
+        },
+    .scene_read_menu =
+        {
+            .on_enter = nfc_scene_read_menu_on_enter_iso14443_4a,
+            .on_event = nfc_scene_read_menu_on_event_iso14443_4a,
+        },
+    .scene_read_success =
+        {
+            .on_enter = nfc_scene_read_success_on_enter_iso14443_4a,
+            .on_event = NULL,
+        },
+    .scene_saved_menu =
+        {
+            .on_enter = nfc_scene_saved_menu_on_enter_iso14443_4a,
+            .on_event = nfc_scene_saved_menu_on_event_iso14443_4a,
+        },
 };

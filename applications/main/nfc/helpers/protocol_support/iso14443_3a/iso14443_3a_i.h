@@ -4,6 +4,4 @@
 
 #include "iso14443_3a.h"
 
-bool nfc_protocol_support_handle_scene_saved_menu_iso14443_3a_common(
-    NfcApp* instance,
-    uint32_t event);
+bool nfc_scene_saved_menu_on_event_iso14443_3a_common(NfcApp* instance, uint32_t event);

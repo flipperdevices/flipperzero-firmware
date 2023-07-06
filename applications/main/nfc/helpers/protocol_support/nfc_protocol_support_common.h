@@ -11,8 +11,17 @@
 
 typedef enum {
     NfcProtocolFeatureNone = 0,
-    NfcProtocolFeatureMoreData = 1UL << 0,
-    NfcProtocolFeatureEmulateUid = 1UL << 1,
-    NfcProtocolFeatureEmulateFull = 1UL << 2,
-    NfcProtocolFeatureEditUid = 1UL << 3,
+    NfcProtocolFeatureEmulateUid = 1UL << 0,
+    NfcProtocolFeatureEmulateFull = 1UL << 1,
+    NfcProtocolFeatureEditUid = 1UL << 2,
 } NfcProtocolFeature;
+
+typedef enum {
+    NfcProtocolSupportSceneInfo = 0,
+    NfcProtocolSupportSceneRead,
+    NfcProtocolSupportSceneReadMenu,
+    NfcProtocolSupportSceneReadSuccess,
+    NfcProtocolSupportSceneSavedMenu,
+
+    NfcProtocolSupportSceneCount,
+} NfcProtocolSupportScene;
