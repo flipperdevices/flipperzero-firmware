@@ -22,6 +22,7 @@
 #include <lib/subghz/subghz_setting.h>
 #include <flipper_application/flipper_application.h>
 #include <notification/notification_app.h>
+#include <power/power_service/power.h>
 #include <rgb_backlight.h>
 #include <m-array.h>
 #include "namespoof.h"

@@ -1,4 +1,5 @@
 #include "thread.h"
+#include "thread_i.h"
 #include "kernel.h"
 #include "memmgr.h"
 #include "memmgr_heap.h"
@@ -15,41 +16,6 @@
 #define TAG "FuriThread"
 
 #define THREAD_NOTIFY_INDEX 1 // Index 0 is used for stream buffers
-
-typedef struct FuriThreadStdout FuriThreadStdout;
-
-struct FuriThreadStdout {
-    FuriThreadStdoutWriteCallback write_callback;
-    FuriString* buffer;
-};
-
-struct FuriThread {
-    FuriThreadState state;
-    int32_t ret;
-
-    FuriThreadCallback callback;
-    void* context;
-
-    FuriThreadStateCallback state_callback;
-    void* state_context;
-
-    char* name;
-    char* appid;
-
-    FuriThreadPriority priority;
-
-    TaskHandle_t task_handle;
-    size_t heap_size;
-
-    FuriThreadStdout output;
-
-    // Keep all non-alignable byte types in one place,
-    // this ensures that the size of this structure is minimal
-    bool is_service;
-    bool heap_trace_enabled;
-
-    configSTACK_DEPTH_TYPE stack_size;
-};
 
 static size_t __furi_thread_stdout_write(FuriThread* thread, const char* data, size_t size);
 static int32_t __furi_thread_stdout_flush(FuriThread* thread);

@@ -4,6 +4,7 @@
 #include <storage/storage.h>
 #include <furi_hal.h>
 #include <core/dangerous_defines.h>
+#include <gui/icon_i.h>
 #include <gui/modules/file_browser.h>
 #include <toolbox/stream/file_stream.h>
 #include <cfw.h>
