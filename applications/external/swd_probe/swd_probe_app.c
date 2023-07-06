@@ -3,6 +3,8 @@
 #include "jep106.h"
 #include "adi.h"
 
+#define SWD_PATH EXT_PATH("apps_data/swd")
+
 static void render_callback(Canvas* const canvas, void* cb_ctx);
 static bool swd_message_process(AppFSM* ctx);
 static uint8_t swd_transfer(AppFSM* const ctx, bool ap, bool write, uint8_t a23, uint32_t* data);
@@ -2929,10 +2931,9 @@ static bool swd_message_process(AppFSM* ctx) {
                     break;
 
                 case ModePageScan: {
-                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd_scripts"));
+                    FuriString* result_path = furi_string_alloc_printf(SWD_PATH);
                     FuriString* preselected = furi_string_alloc_printf(
-                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                             ANY_PATH("swd_scripts"));
+                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected : SWD_PATH);
                     DialogsFileBrowserOptions options;
 
                     dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
@@ -3002,10 +3003,9 @@ static bool swd_message_process(AppFSM* ctx) {
                     }
                 } else if((ctx->mode_page == ModePageScan) || (ctx->mode_page == ModePageFound)) {
                     uint32_t mode_page = ctx->mode_page;
-                    FuriString* result_path = furi_string_alloc_printf(ANY_PATH("swd_scripts"));
+                    FuriString* result_path = furi_string_alloc_printf(SWD_PATH);
                     FuriString* preselected = furi_string_alloc_printf(
-                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected :
-                                                             ANY_PATH("swd_scripts"));
+                        (strlen(ctx->script_detected) > 0) ? ctx->script_detected : SWD_PATH);
                     DialogsFileBrowserOptions options;
 
                     dialog_file_browser_set_basic_options(&options, "swd", &I_swd);
@@ -3104,6 +3104,7 @@ int32_t swd_probe_app_main(void* p) {
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(app->storage, EXT_PATH("swd_scripts"), SWD_PATH);
 
     DBGS("furi_mutex_alloc");
     app->swd_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
@@ -3131,7 +3132,7 @@ int32_t swd_probe_app_main(void* p) {
     notification_message(app->notification, &sequence_display_backlight_enforce_on);
 
     DBGS("swd_execute_script");
-    swd_execute_script(app, ANY_PATH("swd_scripts/startup.swd"));
+    swd_execute_script(app, SWD_PATH "/startup.swd");
 
     dolphin_deed(DolphinDeedPluginGameStart);
 

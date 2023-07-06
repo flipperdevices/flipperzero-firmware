@@ -41,6 +41,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Adopt External Menu app naming used by OFW in [PR 2849 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2849)
 - UL: Fix loader hangup on exit if api mismatch happened (By xMasterX)
 - UL: [BT Toy Serial Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/3a59636e28af723a350509894526589ba60a6ba7)
+- SWD Path Change (By Willy-JL)
 
 <a name="release">
 
