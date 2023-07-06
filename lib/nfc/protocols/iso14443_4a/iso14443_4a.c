@@ -59,14 +59,31 @@ bool iso14443_4a_verify(Iso14443_4aData* data, const FuriString* device_type) {
 
 bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version) {
     furi_assert(data);
-    // TODO: handle additional fields
-    return iso14443_3a_load_data(data->iso14443_3a_data, ff, version);
+
+    bool parsed = false;
+
+    do {
+        if(!iso14443_3a_load_data(data->iso14443_3a_data, ff, version)) break;
+        // TODO: handle additional fields
+        parsed = true;
+    } while(false);
+
+    return parsed;
 }
 
 bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff) {
     furi_assert(data);
-    // TODO: handle additional fields
-    return iso14443_3a_save_data(data->iso14443_3a_data, ff);
+
+    bool saved = false;
+
+    do {
+        if(!iso14443_3a_save(data->iso14443_3a_data, ff)) break;
+        if(!flipper_format_write_comment_cstr(ff, ISO14443_4A_PROTOCOL_NAME " specific data")) break;
+        // TODO: handle additional fields
+        saved = true;
+    } while(false);
+
+   return saved;
 }
 
 bool iso14443_4a_is_equal(const Iso14443_4aData* data, const Iso14443_4aData* other) {

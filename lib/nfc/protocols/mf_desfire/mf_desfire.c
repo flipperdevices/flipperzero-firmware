@@ -147,8 +147,6 @@ bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff) {
     bool success = false;
 
     do {
-        if(!flipper_format_write_string_cstr(ff, "Device type", MF_DESFIRE_PROTOCOL_NAME)) break;
-
         if(!iso14443_4a_save(data->iso14443_4a_data, ff)) break;
 
         if(!flipper_format_write_comment_cstr(ff, MF_DESFIRE_PROTOCOL_NAME " specific data"))

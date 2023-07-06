@@ -2,7 +2,7 @@
 
 #include <furi.h>
 
-#define MF_ULTRALIGHT_PROTOCOL_NAME "NTAG/Ultralight"
+#define MF_ULTRALIGHT_PROTOCOL_NAME "Mifare Ultralight"
 
 typedef struct {
     uint16_t total_pages;
@@ -312,13 +312,15 @@ bool mf_ultralight_save(const MfUltralightData* data, FlipperFormat* ff) {
     bool saved = false;
 
     do {
-        const char* device_type_name = mf_ultralight_get_device_name_by_type(data->type, true);
-        if(!flipper_format_write_string_cstr(ff, "Device type", device_type_name)) break;
-        if(!iso14443_3a_save_data(data->iso14443_3a_data, ff)) break;
+        if(!iso14443_3a_save(data->iso14443_3a_data, ff)) break;
+
         if(!flipper_format_write_comment_cstr(ff, "Mifare Ultralight specific data")) break;
         if(!flipper_format_write_uint32(
                ff, "Data format version", &mf_ultralight_data_format_version, 1))
             break;
+
+        const char* device_type_name = mf_ultralight_get_device_name_by_type(data->type, true);
+        if(!flipper_format_write_string_cstr(ff, "Mifare Ultralight type", device_type_name)) break;
         if(!flipper_format_write_hex(
                ff, "Signature", data->signature.data, sizeof(MfUltralightSignature)))
             break;

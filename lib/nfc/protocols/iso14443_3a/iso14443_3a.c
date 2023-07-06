@@ -56,10 +56,18 @@ bool iso14443_3a_load(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version
 }
 
 bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff) {
+    furi_assert(data);
+
     bool saved = false;
+
     do {
-        if(!flipper_format_write_string_cstr(ff, "Device type", "UID")) break;
-        if(!iso14443_3a_save_data(data, ff)) break;
+        // Write ATQA and SAK
+        // Save ATQA in MSB order for correct companion apps display
+        uint8_t atqa[2] = {data->atqa[1], data->atqa[0]};
+        if(!flipper_format_write_comment_cstr(ff, ISO14443_3A_PROTOCOL_NAME " specific data"))
+            break;
+        if(!flipper_format_write_hex(ff, "ATQA", atqa, 2)) break;
+        if(!flipper_format_write_hex(ff, "SAK", &data->sak, 1)) break;
         saved = true;
     } while(false);
 
@@ -119,27 +127,6 @@ bool iso14443_3a_load_data(Iso14443_3aData* data, FlipperFormat* ff, uint32_t ve
     } while(false);
 
     return parsed;
-}
-
-bool iso14443_3a_save_data(const Iso14443_3aData* data, FlipperFormat* ff) {
-    furi_assert(data);
-
-    bool saved = false;
-
-    do {
-        // Write UID, ATQA, SAK
-        if(!flipper_format_write_comment_cstr(ff, "UID is common for all formats")) break;
-        if(!flipper_format_write_hex(ff, "UID", data->uid, data->uid_len)) break;
-        // Save ATQA in MSB order for correct companion apps display
-        uint8_t atqa[2] = {data->atqa[1], data->atqa[0]};
-        if(!flipper_format_write_comment_cstr(ff, ISO14443_3A_PROTOCOL_NAME " specific fields"))
-            break;
-        if(!flipper_format_write_hex(ff, "ATQA", atqa, 2)) break;
-        if(!flipper_format_write_hex(ff, "SAK", &data->sak, 1)) break;
-        saved = true;
-    } while(false);
-
-    return saved;
 }
 
 static uint16_t iso14443_3a_get_crc(const uint8_t* buff, uint16_t len) {

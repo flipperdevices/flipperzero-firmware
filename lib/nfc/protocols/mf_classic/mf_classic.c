@@ -258,9 +258,8 @@ bool mf_classic_save(const MfClassicData* data, FlipperFormat* ff) {
     bool saved = false;
 
     do {
-        if(!flipper_format_write_string_cstr(ff, "Device type", "Mifare Classic")) break;
-        if(!iso14443_3a_save_data(data->iso14443_3a_data, ff)) break;
-        if(!flipper_format_write_string_cstr(ff, "Device type", "")) break;
+        if(!iso14443_3a_save(data->iso14443_3a_data, ff)) break;
+
         if(!flipper_format_write_comment_cstr(ff, "Mifare Classic specific data")) break;
         if(!flipper_format_write_string_cstr(
                ff, "Mifare Classic type", mf_classic_features[data->type].type_name))

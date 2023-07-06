@@ -7,6 +7,9 @@
 #define NFC_FILE_HEADER "Flipper NFC device"
 #define NFC_DEV_TYPE_ERROR "Protocol type mismatch"
 
+#define NFC_DEVICE_UID_KEY "UID"
+#define NFC_DEVICE_TYPE_KEY "Device type"
+
 struct NfcDevice {
     NfcProtocol protocol;
     NfcDeviceData* protocol_data;
@@ -155,10 +158,8 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
 
     bool saved = false;
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FlipperFormat* file = flipper_format_buffered_file_alloc(storage);
-
-    FuriString* temp_str;
-    temp_str = furi_string_alloc();
+    FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
+    FuriString* temp_str = furi_string_alloc();
 
     if(instance->loading_callback) {
         instance->loading_callback(instance->loading_callback_context, true);
@@ -166,18 +167,38 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
 
     do {
         // Open file
-        if(!flipper_format_buffered_file_open_always(file, path)) break;
+        if(!flipper_format_buffered_file_open_always(ff, path)) break;
 
         // Write header
-        if(!flipper_format_write_header_cstr(file, NFC_FILE_HEADER, NFC_CURRENT_FORMAT_VERSION))
+        if(!flipper_format_write_header_cstr(ff, NFC_FILE_HEADER, NFC_CURRENT_FORMAT_VERSION))
             break;
 
-        // Write nfc device type
-        if(!flipper_format_write_comment_cstr(
-               file, "Nfc device type can be UID, Mifare Ultralight, Mifare Classic"))
+        // Write allowed device types
+        furi_string_printf(temp_str, "%s can be ", NFC_DEVICE_TYPE_KEY);
+        for(NfcProtocol protocol = 0; protocol < NfcProtocolNum; ++protocol) {
+            furi_string_cat(temp_str, nfc_devices[protocol]->protocol_name);
+            if(protocol < NfcProtocolNum - 1) {
+                furi_string_cat(temp_str, ", ");
+            }
+        }
+
+        if(!flipper_format_write_comment(ff, temp_str)) break;
+
+        // Write device type
+        if(!flipper_format_write_string_cstr(
+               ff, NFC_DEVICE_TYPE_KEY, nfc_devices[instance->protocol]->protocol_name))
             break;
 
-        saved = nfc_devices[instance->protocol]->save(instance->protocol_data, file);
+        // Write UID
+        furi_string_printf(temp_str, "%s is common for all formats", NFC_DEVICE_UID_KEY);
+        if(!flipper_format_write_comment(ff, temp_str)) break;
+
+        size_t uid_len;
+        const uint8_t* uid = nfc_device_get_uid(instance, &uid_len);
+        if(!flipper_format_write_hex(ff, NFC_DEVICE_UID_KEY, uid, uid_len)) break;
+
+        // Write protocol-dependent data
+        saved = nfc_devices[instance->protocol]->save(instance->protocol_data, ff);
 
     } while(false);
 
@@ -186,7 +207,7 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
     }
 
     furi_string_free(temp_str);
-    flipper_format_free(file);
+    flipper_format_free(ff);
     furi_record_close(RECORD_STORAGE);
 
     return saved;
@@ -217,7 +238,7 @@ bool nfc_device_load(NfcDevice* instance, const char* path) {
         if(version < NFC_LSB_ATQA_FORMAT_VERSION) break;
 
         // Read Nfc device type
-        if(!flipper_format_read_string(file, "Device type", temp_str)) break;
+        if(!flipper_format_read_string(file, NFC_DEVICE_TYPE_KEY, temp_str)) break;
 
         nfc_device_clear(instance);
 
