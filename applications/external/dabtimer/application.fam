@@ -1,7 +1,7 @@
 App(
     appid="Dab_Timer",
     name="Clock",
-    apptype=FlipperAppType.EXTMAINAPP,
+    apptype=FlipperAppType.MENUEXTERNAL,
     entry_point="clock_app",
     requires=["gui"],
     stack_size=2 * 1024,

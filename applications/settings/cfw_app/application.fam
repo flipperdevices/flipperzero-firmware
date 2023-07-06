@@ -1,7 +1,7 @@
 App(
     appid="CFW",
     name="CFW Settings",
-    apptype=FlipperAppType.EXTMAINAPP,
+    apptype=FlipperAppType.MENUEXTERNAL,
     entry_point="cfw_app",
     requires=[
         "gui",

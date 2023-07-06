@@ -423,7 +423,11 @@ def AddAppLaunchTarget(env, appname, launch_target_name):
         host_app = env["APPMGR"].get(artifacts_app_to_run.app.requires[0])
 
         if host_app:
-            if host_app.apptype == FlipperAppType.EXTERNAL:
+            if host_app.apptype in [
+                FlipperAppType.EXTERNAL,
+                FlipperAppType.MENUEXTERNAL,
+                FlipperAppType.EXTSETTINGSAPP,
+            ]:
                 _add_host_app_to_targets(host_app)
             else:
                 # host app is a built-in app

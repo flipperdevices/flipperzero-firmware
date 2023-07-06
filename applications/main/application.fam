@@ -17,24 +17,5 @@ App(
         "u2f",
         "CFW",
         "archive",
-        # "Spectrum_Analyzer",
-    ],
-)
-
-# Enable apps that you need in DEBUG firmware here:
-App(
-    appid="main_apps_default",
-    name="Basic applications for main menu",
-    apptype=FlipperAppType.METAPACKAGE,
-    provides=[
-        #"gpio",
-        #"iButton",
-        #"infrared",
-        "lfrfid",
-        # "nfc",
-        "subghz",
-        "bad_usb",
-        #"u2f",
-        "archive",
     ],
 )

@@ -17,10 +17,10 @@ class FlipperAppType(Enum):
     SETTINGS = "Settings"
     STARTUP = "StartupHook"
     EXTERNAL = "External"
+    MENUEXTERNAL = "MenuExternal"
+    EXTSETTINGSAPP = "ExtSettingsApp"
     METAPACKAGE = "Package"
     PLUGIN = "Plugin"
-    EXTMAINAPP = "ExtMainApp"
-    EXTSETTINGSAPP = "ExtSettingsApp"
 
 
 @dataclass
@@ -198,7 +198,7 @@ class AppBuildset:
         appmgr: AppManager,
         appnames: List[str],
         hw_target: str,
-        message_writer: Callable = None,
+        message_writer: Callable | None = None,
     ):
         self.appmgr = appmgr
         self.appnames = set(appnames)
@@ -352,6 +352,10 @@ class ApplicationsCGenerator:
             "FLIPPER_ON_SYSTEM_START",
         ),
     }
+    APP_EXTERNAL_TYPE = (
+        "FlipperExternalApplication",
+        "FLIPPER_EXTERNAL_APPS",
+    )
     APP_TYPE_MAP_DESKTOP_SETTINGS = {
         FlipperAppType.APP: ("DesktopSettingsApplication", "FLIPPER_APPS2")
     }
@@ -368,7 +372,7 @@ class ApplicationsCGenerator:
     def get_app_descr(self, app: FlipperApplication):
         if app.apptype == FlipperAppType.STARTUP:
             return app.entry_point
-        if app.apptype == FlipperAppType.EXTMAINAPP:
+        if app.apptype == FlipperAppType.MENUEXTERNAL:
             return f"""
     {{.app = NULL,
      .name = "{app.name}",
@@ -393,7 +397,7 @@ class ApplicationsCGenerator:
      .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)} }}"""
      
     def get_app_descr_desktop_settings(self, app: FlipperApplication):
-        if app.apptype == FlipperAppType.EXTMAINAPP:
+        if app.apptype == FlipperAppType.MENUEXTERNAL:
             return f"""
     {{.name = "{app.name}",
      .appid = "{f"{app.link}" if app.link else "NULL"}" }}"""
@@ -401,7 +405,18 @@ class ApplicationsCGenerator:
             return f"""
     {{.name = "{app.name}",
      .appid = "NULL" }}"""
-     
+
+    def get_external_app_descr(self, app: FlipperApplication):
+        app_path = "/ext/apps"
+        if app.fap_category:
+            app_path += f"/{app.fap_category}"
+        app_path += f"/{app.appid}.fap"
+        return f"""
+    {{
+     .name = "{app.name}",
+     .icon = {f"&{app.icon}" if app.icon else "NULL"},
+     .path = "{app_path}" }}"""
+
     def generate(self):
         contents = [
             '#include "applications.h"',
@@ -416,7 +431,7 @@ class ApplicationsCGenerator:
             contents.append(f"const {entry_type} {entry_block}[] = {{")
             apps = self.buildset.get_apps_of_type(apptype)
             if apptype is FlipperAppType.APP:
-                apps += self.buildset.get_apps_of_type(FlipperAppType.EXTMAINAPP)
+                apps += self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
             if apptype is FlipperAppType.SETTINGS:
                 apps += self.buildset.get_apps_of_type(FlipperAppType.EXTSETTINGSAPP)
             apps.sort(key=lambda app: app.order)
@@ -435,6 +450,13 @@ class ApplicationsCGenerator:
                 ]
             )
 
+        # entry_type, entry_block = self.APP_EXTERNAL_TYPE
+        # external_apps = self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
+        # contents.append(f"const {entry_type} {entry_block}[] = {{")
+        # contents.append(",\n".join(map(self.get_external_app_descr, external_apps)))
+        # contents.append("};")
+        # contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
+
         return "\n".join(contents)
 
     def generate_desktop_settings(self):
@@ -444,7 +466,7 @@ class ApplicationsCGenerator:
         ]
         for apptype in self.APP_TYPE_MAP_DESKTOP_SETTINGS:
             entry_type, entry_block = self.APP_TYPE_MAP_DESKTOP_SETTINGS[apptype]
-            apps = self.buildset.get_apps_of_type(FlipperAppType.APP) + self.buildset.get_apps_of_type(FlipperAppType.EXTMAINAPP)
+            apps = self.buildset.get_apps_of_type(FlipperAppType.APP) + self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
             contents.append(f"const {entry_type} {entry_block}[] = {{")
             apps.sort(key=lambda app: app.order)
             # contents.append('\n\t{.name = "Applications",\n\t .appid = "NULL" },')

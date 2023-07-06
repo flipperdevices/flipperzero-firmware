@@ -5,6 +5,7 @@
 #include "../helpers/archive_browser.h"
 #include "../views/archive_browser_view.h"
 #include "archive/scenes/archive_scene.h"
+// #include <applications.h>
 
 #define TAG "ArchiveSceneBrowser"
 

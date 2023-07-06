@@ -262,6 +262,8 @@ apps_artifacts = appenv["EXT_APPS"]
 apps_to_build_as_faps = [
     FlipperAppType.PLUGIN,
     FlipperAppType.EXTERNAL,
+    FlipperAppType.MENUEXTERNAL,
+    FlipperAppType.EXTSETTINGSAPP,
 ]
 
 known_extapps = [

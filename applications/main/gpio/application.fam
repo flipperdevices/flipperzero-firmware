@@ -1,7 +1,7 @@
 App(
     appid="GPIO",
     name="GPIO",
-    apptype=FlipperAppType.EXTMAINAPP,
+    apptype=FlipperAppType.MENUEXTERNAL,
     entry_point="gpio_app",
     # cdefines=["APP_GPIO"],
     requires=["gui"],
