@@ -40,6 +40,13 @@ Iso14443_3aError
     return ret;
 }
 
+Iso14443_3aError iso14443_3a_listener_tx_with_custom_parity(
+    Iso14443_3aListener* instance,
+    const BitBuffer* tx_buffer) {
+    // TODO change
+    return iso14443_3a_listener_tx(instance, tx_buffer);
+};
+
 Iso14443_3aError iso14443_3a_listener_send_standard_frame(
     Iso14443_3aListener* instance,
     const BitBuffer* tx_buffer) {
