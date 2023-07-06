@@ -216,6 +216,11 @@ void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
             }
         }
     } else if(process->type == EthWorkerProcessPing) {
+        canvas_draw_box(canvas, 26, 8, 5, 13);
+        canvas_draw_box(canvas, 52, 8, 3, 13);
+        canvas_draw_box(canvas, 76, 8, 3, 13);
+        canvas_draw_box(canvas, 100, 8, 3, 13);
+        canvas_draw_box(canvas, 124, 8, 4, 13);
         canvas_draw_frame(canvas, 31, 8, 21, 13);
         canvas_draw_frame(canvas, 55, 8, 21, 13);
         canvas_draw_frame(canvas, 79, 8, 21, 13);
@@ -310,9 +315,11 @@ void ethernet_view_process_keyevent(EthViewProcess* process, InputKey key) {
                 if(mode < 3) {
                     mode += 1;
                 }
-            } else if(key == InputKeyDown || key == InputKeyOk) {
+            } else if(key == InputKeyUp || key == InputKeyDown) {
+                ethernet_view_process_move(process, (key == InputKeyDown) ? 1 : -1);
+            } else if(key == InputKeyOk) {
                 ((EthViewDrawStatic*)process->draw_struct)->editing = 1;
-            } else if(key == InputKeyBack || key == InputKeyUp) {
+            } else if(key == InputKeyBack) {
                 mode = 0;
                 process->editing = 0;
             }
