@@ -32,6 +32,7 @@ void PC_to_RDR_IccPowerOn(SeaderUartBridge* seader_uart) {
         return;
     }
     powered = true;
+    FURI_LOG_D(TAG, "Sending Power On");
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
@@ -45,8 +46,14 @@ void PC_to_RDR_IccPowerOn(SeaderUartBridge* seader_uart) {
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
 }
 
-void PC_to_RDR_GetSlotStatus(SeaderUartBridge* seader_uart) {
+void check_for_sam(SeaderUartBridge* seader_uart) {
     hasSAM = false; // If someone is calling this, reset sam state
+    powered = false;
+    PC_to_RDR_GetSlotStatus(seader_uart);
+}
+
+void PC_to_RDR_GetSlotStatus(SeaderUartBridge* seader_uart) {
+    FURI_LOG_D(TAG, "PC_to_RDR_GetSlotStatus");
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
@@ -135,7 +142,6 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
                 retries = 0;
                 slot = 0;
                 sequence = 0;
-                FURI_LOG_D(TAG, "Sending Power On (1)");
                 PC_to_RDR_IccPowerOn(seader_uart);
                 break;
             case CARD_IN_2:
@@ -143,7 +149,6 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
                 retries = 0;
                 slot = 1;
                 sequence = 0;
-                FURI_LOG_D(TAG, "Sending Power On (2)");
                 PC_to_RDR_IccPowerOn(seader_uart);
                 break;
             case CARD_IN_BOTH:
@@ -187,7 +192,6 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
         if(message.bMessageType == CCID_MESSAGE_TYPE_RDR_to_PC_SlotStatus) {
             uint8_t status = (message.bStatus & BMICCSTATUS_MASK);
             if(status == 0 || status == 1) {
-                FURI_LOG_D(TAG, "Sending Power On");
                 PC_to_RDR_IccPowerOn(seader_uart);
                 return message.consumed;
             } else if(status == 2) {

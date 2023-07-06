@@ -866,8 +866,7 @@ int32_t seader_worker_task(void* context) {
 
     if(seader_worker->state == SeaderWorkerStateCheckSam) {
         furi_delay_ms(1000);
-        FURI_LOG_D(TAG, "PC_to_RDR_GetSlotStatus");
-        PC_to_RDR_GetSlotStatus(seader_uart);
+        check_for_sam(seader_uart);
     } else if(seader_worker->state == SeaderWorkerStateReadPicopass) {
         FURI_LOG_D(TAG, "Read Picopass");
         requestPacs = true;
