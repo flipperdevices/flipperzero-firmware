@@ -22,6 +22,7 @@ typedef enum {
     SeaderCredentialSaveFormatAgnostic,
     SeaderCredentialSaveFormatPicopass,
     SeaderCredentialSaveFormatRFID,
+    SeaderCredentialSaveFormatSR,
 } SeaderCredentialSaveFormat;
 
 typedef struct {
