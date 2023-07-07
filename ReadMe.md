@@ -46,6 +46,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [ESP32 Evil Portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 - Updated: [WiFi (Marauder) v0.5.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion)
+- [Fix for BT Remote crash #698 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/698)
 
 <a name="release">
 
