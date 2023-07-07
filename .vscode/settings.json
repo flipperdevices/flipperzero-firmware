@@ -1,0 +1,11 @@
+{
+    "githubPullRequests.ignoredPullRequestBranches": [
+        "master"
+    ],
+    "workbench.colorCustomizations": {
+        "list.errorForeground": "#00AA00",
+        "list.warningForeground": "#00d9ff",
+        "gitDecoration.modifiedResourceForeground": "#00ffb3",
+        "gitDecoration.untrackedResourceForeground": "#f7aeae"
+    }
+}
