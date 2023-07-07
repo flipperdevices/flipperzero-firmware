@@ -1,4 +1,5 @@
 #include "camera_suite.h"
+#include <stdlib.h>
 
 bool camera_suite_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -105,6 +106,14 @@ void camera_suite_app_free(CameraSuite* app) {
 
     view_dispatcher_free(app->view_dispatcher);
     furi_record_close(RECORD_GUI);
+
+    // Free remaining resources
+    camera_suite_view_start_free(app->camera_suite_view_start);
+    camera_suite_view_style_1_free(app->camera_suite_view_style_1);
+    camera_suite_view_style_2_free(app->camera_suite_view_style_2);
+    camera_suite_view_guide_free(app->camera_suite_view_guide);
+    button_menu_free(app->button_menu);
+    variable_item_list_free(app->variable_item_list);
 
     app->gui = NULL;
     app->notification = NULL;

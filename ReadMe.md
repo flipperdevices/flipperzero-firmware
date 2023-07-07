@@ -33,15 +33,18 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-06 14:45 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-06 14:45 EST`
-- Revert BadBT updates to better version that was there yesterday
+- [Revert BadBT updates to better version that was there yesterday](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf7c4c3568083213129f62c5fc9933bb548e2cdb)
 - OFW: [SubGhz: add "SubGhz test" external application and the ability to work "SubGhz" as an external application #2851 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2851)
 - OFW: [API: explicitly add math.h #2852 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2852)
-- UL: Added: [JetPack Joyride (by timstrasser)](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/jetpack_joyride)
-- UL: Added: [NFC Maker (by Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/nfc_maker) 
+- UL: Added: [JetPack Joyride (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)
+- UL: Added: [NFC Maker (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366) 
 - Adopt External Menu app naming used by OFW in [PR 2849 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2849)
-- UL: Fix loader hangup on exit if api mismatch happened (By xMasterX)
+- UL: [Fix loader hangup on exit if api mismatch happened (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)
 - UL: [BT Toy Serial Fixes (By xMasterX)](https://github.com/xMasterX/all-the-plugins/commit/3a59636e28af723a350509894526589ba60a6ba7)
-- SWD Path Change (By Willy-JL)
+- [SWD Path Change (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/e8d7a30836a6548ed5bcaa634ad41bedb2129396)
+- [Fix up/down on last odd wii menu item (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/275645bb224eb4531900e5e1a64e64f86c2d43d9)
+- Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- Updated: [ESP32 Evil Portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 
 <a name="release">
 
@@ -236,7 +239,7 @@ $ ./fbt dolphin_ext
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Game of Tag WIP (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [Heap Defence (By xMasterX)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc776446de9fdd553b221c02668b925b689378d8) [(original by wquinoa & Vedmein)](https://github.com/Vedmein/flipperzero-firmware/tree/hd/svisto-perdelki)
-- [JetPack Joyride (by timstrasser)](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/jetpack_joyride)
+- [JetPack Joyride (by timstrasser)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366)
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [Minesweeper (By panki27)](https://github.com/panki27/minesweeper) [Fix minesweeper freeze bug, do some refactoring (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/56c11c70b3617764b6d2ea7b008c67dce517fa25)
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
@@ -357,7 +360,7 @@ $ ./fbt dolphin_ext
 - [NFC Magic (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966) with [NFC Magic Gen4 Support #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238)
 - [NFC Magic Gen1 (By gornekich)](https://github.com/flipperdevices/flipperzero-firmware/pull/1966)
 - [NFC Magic Gen4 app #2238 (By nullableVoidPtr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2238) [(Updates By xMasterX)](https://github.com/xMasterX/unleashed-extra-pack)
-- [NFC Maker (by Willy-JL)](https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/nfc_maker) 
+- [NFC Maker (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366) 
 - [NFC Relay WIP (By leommxj)](https://github.com/leommxj/nfc_relay)
 - [NFC Seader (By bettse)](https://github.com/bettse/seader)
 - [Nightstand Clock (By nymda)](https://github.com/nymda/FlipperNightStand)

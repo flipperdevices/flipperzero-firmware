@@ -9,9 +9,6 @@
 - Battery Type moved to Power Settings
 - `Notepad` APP to allow taking quick notes and saving to SD.
 - - Also can possibly open/edit .md,.txt,.fmf and other text friendly formats
-- `Write URL to NFC` APP to allow creating URL NFC tags from only the flipper
-- - Also can possibly support larger URLs than the ones in samples (due to length limits on NFC types)
-- - Also can possibly create other types of tags, like WIFI configurations
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for mp3 playback
 - - Also can possible pair to speaker via NFC tap, here are some possible resources:
 - - - https://github.com/urish/circuitpython-mp3-ble
