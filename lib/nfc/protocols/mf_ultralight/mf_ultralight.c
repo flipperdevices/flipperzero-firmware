@@ -2,10 +2,10 @@
 
 #include <furi.h>
 
-#define MF_ULTRALIGHT_PROTOCOL_NAME "Mifare Ultralight"
+#define MF_ULTRALIGHT_PROTOCOL_NAME "NTAG/Ultralight"
 
 #define MF_ULTRALIGHT_FORMAT_VERSION_KEY "Data format version"
-#define MF_ULTRALIGHT_TYPE_KEY "Mifare Ultralight type"
+#define MF_ULTRALIGHT_TYPE_KEY MF_ULTRALIGHT_PROTOCOL_NAME " type"
 #define MF_ULTRALIGHT_SIGNATURE_KEY "Signature"
 #define MF_ULTRALIGHT_MIFARE_VERSION_KEY "Mifare version"
 #define MF_ULTRALIGHT_COUNTER_KEY "Counter"

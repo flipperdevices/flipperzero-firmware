@@ -239,7 +239,7 @@ static bool nfc_device_load_unified(NfcDevice* instance, FlipperFormat* ff, uint
         instance->protocol_data = nfc_devices[protocol]->alloc();
 
         // Load UID
-        // TODO: figure out how to do it here
+        // TODO: move the respective code from ISO14443-3A to here
 
         // Load data
         if(!nfc_devices[protocol]->load(instance->protocol_data, ff, version)) {
@@ -265,6 +265,7 @@ static bool nfc_device_load_legacy(NfcDevice* instance, FlipperFormat* ff, uint3
 
         nfc_device_clear(instance);
 
+        // Detect protocol
         for(NfcProtocol protocol = 0; protocol < NfcProtocolNum; protocol++) {
             instance->protocol = protocol;
             instance->protocol_data = nfc_devices[protocol]->alloc();

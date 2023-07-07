@@ -6,7 +6,7 @@
 
     Filetype: Flipper NFC device
     Version: 4
-    # Device type can be ISO14443-3A, ISO14443-4A, Mifare Ultralight, Mifare Classic, Mifare DESFire
+    # Device type can be ISO14443-3A, ISO14443-4A, NTAG/Ultralight, Mifare Classic, Mifare DESFire
     Device type: ISO14443-4A
     # UID is common for all formats
     UID: 04 48 6A 32 33 58 80
@@ -28,7 +28,7 @@ Version differences:
 
     Filetype: Flipper NFC device
     Version: 4
-    # Device type can be ISO14443-3A, ISO14443-4A, Mifare Ultralight, Mifare Classic, Mifare DESFire
+    # Device type can be ISO14443-3A, ISO14443-4A, NTAG/Ultralight, Mifare Classic, Mifare DESFire
     Device type: ISO14443-3A
     # UID is common for all formats
     UID: 34 19 6D 41 14 56 E6
@@ -50,7 +50,7 @@ None, there are no versions yet.
 
     Filetype: Flipper NFC device
     Version: 4
-    # Device type can be ISO14443-3A, ISO14443-4A, Mifare Ultralight, Mifare Classic, Mifare DESFire
+    # Device type can be ISO14443-3A, ISO14443-4A, NTAG/Ultralight, Mifare Classic, Mifare DESFire
     Device type: ISO14443-4A
     # UID is common for all formats
     UID: 04 48 6A 32 33 58 80
@@ -68,22 +68,22 @@ ATS must be 6 bytes long.
 Version differences:
 None, there are no versions yet.
 
-## Mifare Ultralight
+## NTAG/Ultralight
 
 ### Example
 
     Filetype: Flipper NFC device
     Version: 4
-    # Device type can be ISO14443-3A, ISO14443-4A, Mifare Ultralight, Mifare Classic, Mifare DESFire
-    Device type: Mifare Ultralight
+    # Device type can be ISO14443-3A, ISO14443-4A, NTAG/Ultralight, Mifare Classic, Mifare DESFire
+    Device type: NTAG/Ultralight
     # UID is common for all formats
     UID: 04 85 90 54 12 98 23
     # ISO14443-3A specific data
     ATQA: 00 44
     SAK: 00
-    # Mifare Ultralight specific data
+    # NTAG/Ultralight specific data
     Data format version: 2
-    Mifare Ultralight type: NTAG216
+    NTAG/Ultralight type: NTAG216
     Signature: 1B 84 EB 70 BD 4C BD 1B 1D E4 98 0B 18 58 BD 7C 72 85 B4 E4 7B 38 8E 96 CF 88 6B EE A3 43 AD 90
     Mifare version: 00 04 04 02 01 00 13 03
     Counter 0: 0
@@ -111,7 +111,7 @@ None, there are no versions yet.
 
 This file format is used to store the UID, SAK and ATQA of a Mifare Ultralight/NTAG device. It also stores the internal data of the card, the signature, the version, and the counters. The data is stored in pages, just like on the card itself.
 
-The "Mifare Ultralight type" field contains the device's subtype. It must be one of: Mifare Ultralight, Mifare Ultralight 11, Mifare Ultralight 21, NTAG203, NTAG213, NTAG215, NTAG216, NTAG I2C 1K, NTAG I2C 2K, NTAG I2C Plus 1K, NTAG I2C Plus 2K.
+The "NTAG/Ultralight type" field contains the concrete device type. It must be one of: Mifare Ultralight, Mifare Ultralight 11, Mifare Ultralight 21, NTAG203, NTAG213, NTAG215, NTAG216, NTAG I2C 1K, NTAG I2C 2K, NTAG I2C Plus 1K, NTAG I2C Plus 2K.
 
 The "Signature" field contains the reply of the tag to the READ_SIG command. More on that can be found here: <https://www.nxp.com/docs/en/data-sheet/MF0ULX1.pdf> (page 31)
 
@@ -130,7 +130,7 @@ Version differences:
 
     Filetype: Flipper NFC device
     Version: 4
-    # Device type can be ISO14443-3A, ISO14443-4A, Mifare Ultralight, Mifare Classic, Mifare DESFire
+    # Device type can be ISO14443-3A, ISO14443-4A, NTAG/Ultralight, Mifare Classic, Mifare DESFire
     Device type: Mifare Classic
     # UID is common for all formats
     UID: BA E2 7C 9D
@@ -195,7 +195,7 @@ Example:
 
     Filetype: Flipper NFC device
     Version: 4
-    # Device type can be ISO14443-3A, ISO14443-4A, Mifare Ultralight, Mifare Classic, Mifare DESFire
+    # Device type can be ISO14443-3A, ISO14443-4A, NTAG/Ultralight, Mifare Classic, Mifare DESFire
     Device type: Mifare DESFire
     # UID is common for all formats
     UID: 04 2F 19 0A CD 66 80
