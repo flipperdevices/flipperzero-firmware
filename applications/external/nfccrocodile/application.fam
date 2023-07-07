@@ -1,0 +1,20 @@
+App(
+    appid="NFC_Crocodile",
+    name="NFC Crocodile",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="nfc_crocodile_main",
+    stack_size=1 * 1024,
+    order=90,
+    fap_category="Games",
+    requires=[
+        "storage",
+        "gui",
+        "dialogs"
+    ],
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="nfc_crocodile",
+    fap_author="@Firemoon777",
+    fap_weburl="https://github.com/Firemoon777/NfcCrocodile",
+    # fap_version="1.0",
+    fap_description="Simple 'Guess the word' game based on NFC technology and Flipper Zero.",
+)
