@@ -244,7 +244,7 @@ bool mf_ultralight_load(MfUltralightData* data, FlipperFormat* ff, uint32_t vers
         }
 
         // Read Mifare Ultralight type
-        if(mf_ultralight_data_format_version > 1) {
+        if(data_format_version > 1) {
             if(!flipper_format_read_string(ff, MF_ULTRALIGHT_TYPE_KEY, temp_str)) break;
             if(!mf_ultralight_verify(data, temp_str)) break;
         }
