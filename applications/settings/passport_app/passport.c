@@ -225,6 +225,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case PIMG_FSOCIETY:
             canvas_draw_icon(canvas, 11, 2, &I_FSociety_Mask);
             break;
+        case PIMG_FSOCIETY2:
+            canvas_draw_icon(canvas, 11, 2, &I_fsoc_pass);
+            break;
         case PIMG_GOKUSET:
             canvas_draw_icon(canvas, 11, 2, portrait[passport->tmpLvl]);
             break;

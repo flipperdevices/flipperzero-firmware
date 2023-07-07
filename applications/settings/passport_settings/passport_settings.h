@@ -38,7 +38,7 @@ extern "C" {
 #define BG_SCROLL 8
 #define BG_SLUT 9
 
-#define PROFILE_IMG_COUNT 30
+#define PROFILE_IMG_COUNT 31
 
 #define PIMG_NONE 0
 #define PIMG_BRIAREOS 1
@@ -48,28 +48,29 @@ extern "C" {
 #define PIMG_DOLPHINMOODY 5
 #define PIMG_ED209 6
 #define PIMG_FSOCIETY 7
-#define PIMG_GOKUSET 8
-#define PIMG_GOKUKID 9
-#define PIMG_GOKUADULT 10
-#define PIMG_GOKUSSJ 11
-#define PIMG_GOKUSSJ3 12
-#define PIMG_GUYFAWKES 13
-#define PIMG_LAIN 14
-#define PIMG_MARIO 15
-#define PIMG_MARVIN 16
-#define PIMG_MORELEELLOO 17
-#define PIMG_NEUROMANCER 18
-#define PIMG_PIKASLEEPY 19
-#define PIMG_RABBIT 20
-#define PIMG_SHINKAI 21
-#define PIMG_SLIME 22
-#define PIMG_SONIC 23
-#define PIMG_SPIDER 24
-#define PIMG_TANKGIRL 25
-#define PIMG_TOTORO 26
-#define PIMG_WAIFU1 27
-#define PIMG_WAIFU2 28
-#define PIMG_WAIFU3 29
+#define PIMG_FSOCIETY2 8
+#define PIMG_GOKUSET 9
+#define PIMG_GOKUKID 10
+#define PIMG_GOKUADULT 11
+#define PIMG_GOKUSSJ 12
+#define PIMG_GOKUSSJ3 13
+#define PIMG_GUYFAWKES 14
+#define PIMG_LAIN 15
+#define PIMG_MARIO 16
+#define PIMG_MARVIN 17
+#define PIMG_MORELEELLOO 18
+#define PIMG_NEUROMANCER 19
+#define PIMG_PIKASLEEPY 20
+#define PIMG_RABBIT 21
+#define PIMG_SHINKAI 22
+#define PIMG_SLIME 23
+#define PIMG_SONIC 24
+#define PIMG_SPIDER 25
+#define PIMG_TANKGIRL 26
+#define PIMG_TOTORO 27
+#define PIMG_WAIFU1 28
+#define PIMG_WAIFU2 29
+#define PIMG_WAIFU3 30
 
 typedef struct {
     uint8_t background;
