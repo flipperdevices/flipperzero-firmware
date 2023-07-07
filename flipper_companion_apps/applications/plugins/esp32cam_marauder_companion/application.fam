@@ -1,5 +1,5 @@
 App(
-    appid="MAYHEM_Marauder",
+    appid="mayhem_marauder",
     name="[MAYHEM] Marauder",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_marauder_app",

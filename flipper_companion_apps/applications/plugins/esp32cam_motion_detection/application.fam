@@ -1,5 +1,5 @@
 App(
-    appid="MAYHEM_Motion",
+    appid="mayhem_motion",
     name="[MAYHEM] Motion detection",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",

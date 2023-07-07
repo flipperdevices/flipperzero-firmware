@@ -1,5 +1,5 @@
 App(
-    appid="MAYHEM_NannyCam",
+    appid="mayhem_nannycam",
     name="[MAYHEM] Nanny Cam",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",

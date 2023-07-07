@@ -1,5 +1,5 @@
 App(
-    appid="MAYHEM_Camera",
+    appid="mayhem_camera",
     name="[MAYHEM] Camera",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="camera_app",

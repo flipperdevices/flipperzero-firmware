@@ -1,5 +1,5 @@
 App(
-    appid="MAYHEM_MorseFlash",
+    appid="mayhem_morseflash",
     name="[MAYHEM] Morse Flasher",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_terminal_app",
