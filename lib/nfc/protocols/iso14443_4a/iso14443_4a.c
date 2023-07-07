@@ -6,6 +6,8 @@
 #define ISO14443_4A_DEVICE_NAME "Unknown ISO14443-4A Tag"
 #define ISO14443_4A_ATS_BIT (1U << 5)
 
+#define ISO14443_4A_ATS_KEY "ATS"
+
 const NfcDeviceBase nfc_device_iso14443_4a = {
     .protocol_name = ISO14443_4A_PROTOCOL_NAME,
     .alloc = (NfcDeviceAlloc)iso14443_4a_alloc,
@@ -39,6 +41,7 @@ void iso14443_4a_reset(Iso14443_4aData* data) {
     furi_assert(data);
 
     iso14443_3a_reset(data->iso14443_3a_data);
+    memset(&data->ats_data, 0, sizeof(Iso14443_4aAtsData));
 }
 
 void iso14443_4a_copy(Iso14443_4aData* data, const Iso14443_4aData* other) {
@@ -53,7 +56,7 @@ bool iso14443_4a_verify(Iso14443_4aData* data, const FuriString* device_type) {
     UNUSED(data);
     UNUSED(device_type);
 
-    // TODO: implementation
+    // Empty, unified file format only
     return false;
 }
 
@@ -64,7 +67,13 @@ bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version
 
     do {
         if(!iso14443_3a_load(data->iso14443_3a_data, ff, version)) break;
-        // TODO: handle additional fields
+        if(flipper_format_key_exist(ff, ISO14443_4A_ATS_KEY)) {
+            if(!flipper_format_read_hex(
+                   ff, ISO14443_4A_ATS_KEY, (uint8_t*)&data->ats_data, sizeof(Iso14443_4aAtsData)))
+                break;
+        } else {
+            iso14443_4a_ats_fill_default(&data->ats_data);
+        }
         parsed = true;
     } while(false);
 
@@ -80,7 +89,12 @@ bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff) {
         if(!iso14443_3a_save(data->iso14443_3a_data, ff)) break;
         if(!flipper_format_write_comment_cstr(ff, ISO14443_4A_PROTOCOL_NAME " specific data"))
             break;
-        // TODO: handle additional fields
+        if(!flipper_format_write_hex(
+               ff,
+               ISO14443_4A_ATS_KEY,
+               (const uint8_t*)&data->ats_data,
+               sizeof(Iso14443_4aAtsData)))
+            break;
         saved = true;
     } while(false);
 
