@@ -499,13 +499,13 @@ void furi_hal_bt_set_profile_adv_name(
     furi_assert(name);
 
     if(strlen(name) == 0) {
-        memset(&(profile_config[profile].config.adv_name[1]), 0, FURI_HAL_BT_ADV_NAME_LENGTH - 1);
+        memset(
+            &(profile_config[profile].config.adv_name[1]),
+            0,
+            strlen(&(profile_config[profile].config.adv_name[1])));
     } else {
         profile_config[profile].config.adv_name[0] = AD_TYPE_COMPLETE_LOCAL_NAME;
-        strlcpy(
-            &(profile_config[profile].config.adv_name[1]),
-            name,
-            FURI_HAL_BT_ADV_NAME_LENGTH - 1 /* BLE symbol */);
+        memcpy(&(profile_config[profile].config.adv_name[1]), name, FURI_HAL_BT_ADV_NAME_LENGTH);
     }
 }
 
