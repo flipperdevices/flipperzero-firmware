@@ -280,7 +280,7 @@ static int storage_sorted_file_record_compare(const void* sorted_a, const void* 
     else if(!(a->info.flags & FSF_DIRECTORY) && b->info.flags & FSF_DIRECTORY)
         return 1;
     else
-        return furi_string_cmp(a->name, b->name);
+        return furi_string_cmpi(a->name, b->name);
 }
 
 static bool storage_sorted_dir_read_next(
