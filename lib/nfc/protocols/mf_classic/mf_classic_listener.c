@@ -22,7 +22,7 @@ static void mf_classic_listener_prepare_emulation(MfClassicListener* instance) {
     instance->total_block_num = mf_classic_get_total_block_num(instance->data->type);
 }
 
-static MfClassicListenerCommand mf_classic_listnener_auth_handler(
+static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
     MfClassicListener* instance,
     MfClassicKeyType key_type,
     uint8_t block_num) {
@@ -72,6 +72,8 @@ static MfClassicListenerCommand mf_classic_listnener_auth_handler(
         }
 
         instance->auth_state = MfClassicListenerAuthStateStarted;
+        instance->cmd_type = MfClassicListenerCommandTypeTwoParts;
+        instance->second_part = MfClassicListenerCommandSecondPartAuth;
     } while(false);
 
     return command;
@@ -79,7 +81,7 @@ static MfClassicListenerCommand mf_classic_listnener_auth_handler(
 
 MfClassicListenerCommand
     mf_classic_listener_auth_key_a_handler(MfClassicListener* instance, BitBuffer* buff) {
-    MfClassicListenerCommand command = mf_classic_listnener_auth_handler(
+    MfClassicListenerCommand command = mf_classic_listnener_auth_first_part_handler(
         instance, MfClassicKeyTypeA, bit_buffer_get_byte(buff, 1));
 
     return command;
@@ -87,13 +89,55 @@ MfClassicListenerCommand
 
 MfClassicListenerCommand
     mf_classic_listener_auth_key_b_handler(MfClassicListener* instance, BitBuffer* buff) {
-    MfClassicListenerCommand command = mf_classic_listnener_auth_handler(
+    MfClassicListenerCommand command = mf_classic_listnener_auth_first_part_handler(
         instance, MfClassicKeyTypeB, bit_buffer_get_byte(buff, 1));
 
     return command;
 }
 
-static const MfClassicListenerCmdHandler mf_classic_command[] = {
+MfClassicListenerCommand
+    mf_classic_listener_auth_second_part_handler(MfClassicListener* instance, BitBuffer* buff) {
+    MfClassicListenerCommand command = MfClassicListenerCommandSilent;
+
+    do {
+        if(bit_buffer_get_size_bytes(buff) != (sizeof(MfClassicNr) + sizeof(MfClassicAr))) break;
+        bit_buffer_write_bytes(buff, instance->auth_context.nr.data, sizeof(MfClassicNr));
+        bit_buffer_write_bytes_mid(
+            buff, instance->auth_context.ar.data, sizeof(MfClassicNr), sizeof(MfClassicAr));
+        uint32_t nr_num = nfc_util_bytes2num(instance->auth_context.nr.data, sizeof(MfClassicNr));
+        uint32_t ar_num = nfc_util_bytes2num(instance->auth_context.ar.data, sizeof(MfClassicAr));
+
+        crypto1_word(instance->crypto, nr_num, 1);
+        uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nr.data, sizeof(MfClassicNt));
+        uint32_t secret_poller = ar_num ^ crypto1_word(instance->crypto, 0, 0);
+        if(secret_poller != prng_successor(nt_num, 64)) {
+            FURI_LOG_D(TAG, "Wrong reader key");
+            break;
+        }
+
+        uint32_t at_num = prng_successor(nt_num, 96);
+        nfc_util_num2bytes(at_num, sizeof(uint32_t), instance->auth_context.at.data);
+        bit_buffer_copy_bytes(
+            instance->tx_plain_buffer, instance->auth_context.at.data, sizeof(MfClassicAr));
+        crypto1_encrypt(
+            instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
+        iso14443_3a_listener_tx_with_custom_parity(
+            instance->iso14443_3a_listener, instance->tx_encrypted_buffer);
+
+        instance->auth_state = MfClassicListenerAuthStateIdle;
+        instance->state = MfClassicListenerStateAuthComplete;
+        instance->comm_state = MfClassicListenerCommStateEncrypted;
+
+        if(instance->callback) {
+            instance->mfc_event_data.auth_context = instance->auth_context;
+            instance->callback(instance->generic_event, instance->context);
+        }
+    } while(false);
+
+    return command;
+}
+
+static const MfClassicListenerCmdHandler mf_classic_cmd_first_part[] = {
     {
         .cmd = MF_CLASSIC_CMD_AUTH_KEY_A,
         .cmd_len_bits = 2 * 8,
@@ -104,6 +148,14 @@ static const MfClassicListenerCmdHandler mf_classic_command[] = {
         .cmd_len_bits = 2 * 8,
         .callback = mf_classic_listener_auth_key_b_handler,
     },
+};
+
+static const MfClassicListenerCmdHandler
+    mf_classic_cmd_second_part[MfClassicListenerCommandSecondPartNum] = {
+        [MfClassicListenerCommandSecondPartAuth] =
+            {
+                .callback = mf_classic_listener_auth_second_part_handler,
+            },
 };
 
 MfClassicListener*
@@ -203,13 +255,21 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
         }
 
         MfClassicListenerCommand mfc_command = MfClassicListenerCommandNack;
-        for(size_t i = 0; i < COUNT_OF(mf_classic_command); i++) {
-            if(bit_buffer_get_size(rx_buffer_plain) != mf_classic_command[i].cmd_len_bits)
-                continue;
-            if(bit_buffer_get_byte(rx_buffer_plain, 0) != mf_classic_command[i].cmd) continue;
-            mfc_command = mf_classic_command[i].callback(instance, rx_buffer_plain);
-            break;
+        if(instance->cmd_type == MfClassicListenerCommandTypeOnePart) {
+            for(size_t i = 0; i < COUNT_OF(mf_classic_cmd_first_part); i++) {
+                if(bit_buffer_get_size(rx_buffer_plain) !=
+                   mf_classic_cmd_first_part[i].cmd_len_bits)
+                    continue;
+                if(bit_buffer_get_byte(rx_buffer_plain, 0) != mf_classic_cmd_first_part[i].cmd)
+                    continue;
+                mfc_command = mf_classic_cmd_first_part[i].callback(instance, rx_buffer_plain);
+                break;
+            }
+        } else {
+            mfc_command = mf_classic_cmd_second_part[instance->second_part].callback(
+                instance, rx_buffer_plain);
         }
+
         if(mfc_command == MfClassicListenerCommandAck) {
             mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_ACK);
         } else if(mfc_command == MfClassicListenerCommandNack) {
