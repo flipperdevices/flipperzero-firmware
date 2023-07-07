@@ -428,7 +428,7 @@ $ ./fbt dolphin_ext
 ## Current Bounties $$ (Sorted By Difficulty - Easiest to Hardest)
 
 - All non-OFW desktop settings moved to CFW Settings ($25 USD in ETH or BTC)
-- `Notepad` APP to allow taking quick notes and saving to SD. Also can possibly open/edit .md,.txt,.fmf and other text friendly formats ($50 USD in ETH or BTC)
+- `Notepad` APP to allow taking quick notes and saving to SD. Also can possibly open/edit .md,.txt,.fmf and other text friendly formats ($25 USD in ETH or BTC)
 - `Bluetooth OpenHayStack` bluetooth mode, only activates with special cloned key file present. Allows to operate like AirTag. ($50 USD in ETH or BTC)
 - [Chess (By okalachev)](https://github.com/okalachev/flipperzero-firmware/tree/chess) ($50 USD in ETH or BTC)
 - [USB Mass Storage WIP (By Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bda38c401219e27dff6ad8aa8f8f3e3109b1ca1b) ($25 USD in ETH or BTC)
