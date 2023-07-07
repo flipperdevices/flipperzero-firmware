@@ -15,7 +15,7 @@ env:
 
 jobs:
   lint_sources_check_submodules:
-    runs-on: [self-hosted,FlipperZeroShell]
+    runs-on: [self-hosted,FlipperZeroShellTest]
     steps:
       - name: 'Wipe workspace'
         run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
