@@ -111,7 +111,7 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
         switch(event->key) {
         case InputKeyBack:
             // Stop the camera stream.
-            data[0] = 'S';
+            data[0] = 's';
             // Go back to the main menu.
             with_view_model(
                 instance->view,
@@ -207,6 +207,11 @@ static void camera_suite_view_style_1_enter(void* context) {
 
     // Assign the current instance to the global variable
     current_instance = instance;
+
+    uint8_t data[1];
+    data[0] = 'S'; // Uppercase `S` to start the camera
+    // Send `data` to the ESP32-CAM
+    furi_hal_uart_tx(FuriHalUartIdUSART1, data, 1);
 
     with_view_model(
         instance->view,
