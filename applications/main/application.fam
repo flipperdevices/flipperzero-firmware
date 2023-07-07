@@ -16,5 +16,6 @@ App(
         "onewire_start",
         "lfrfid_start",
         "infrared_start",
+        "subghz_start",
     ],
 )
