@@ -75,6 +75,7 @@ typedef enum {
 
 struct Seader {
     bool revert_power;
+    bool is_debug_enabled;
     SeaderWorker* worker;
     ViewDispatcher* view_dispatcher;
     Gui* gui;
