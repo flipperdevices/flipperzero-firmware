@@ -44,8 +44,7 @@ static NfcCommand
     if(mf_ultralight_event->type == MfUltralightPollerEventTypeReadSuccess) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolMfUltralight, nfc_poller_get_data(instance->poller));
-        view_dispatcher_send_custom_event(
-            instance->view_dispatcher, NfcCustomEventReadHandlerSuccess);
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         return NfcCommandStop;
     } else if(mf_ultralight_event->type == MfUltralightPollerEventTypeAuthRequest) {
         nfc_device_set_data(

@@ -32,8 +32,7 @@ static NfcCommand
     if(iso14443_4a_event->type == Iso14443_4aPollerEventTypeReady) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolIso14443_4a, nfc_poller_get_data(instance->poller));
-        view_dispatcher_send_custom_event(
-            instance->view_dispatcher, NfcCustomEventReadHandlerSuccess);
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         return NfcCommandStop;
     }
 

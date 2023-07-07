@@ -31,8 +31,7 @@ static NfcCommand
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolIso14443_3a, nfc_poller_get_data(instance->poller));
-        view_dispatcher_send_custom_event(
-            instance->view_dispatcher, NfcCustomEventReadHandlerSuccess);
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         return NfcCommandStop;
     }
 
@@ -64,6 +63,33 @@ static void nfc_scene_read_success_on_enter_iso14443_3a(NfcApp* instance) {
 
 static void nfc_scene_saved_menu_on_enter_iso14443_3a(NfcApp* instance) {
     UNUSED(instance);
+}
+
+NfcCommand nfc_scene_emulate_listener_callback_iso14443_3a(NfcGenericEvent event, void* context) {
+    furi_assert(context);
+    furi_assert(event.protocol == NfcProtocolIso14443_3a);
+    furi_assert(event.data);
+
+    NfcApp* nfc = context;
+    Iso14443_3aListenerEvent* iso14443_3a_event = event.data;
+
+    if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame) {
+        furi_string_cat_printf(nfc->text_box_store, "R:");
+        for(size_t i = 0; i < bit_buffer_get_size_bytes(iso14443_3a_event->data->buffer); i++) {
+            furi_string_cat_printf(
+                nfc->text_box_store,
+                " %02X",
+                bit_buffer_get_byte(iso14443_3a_event->data->buffer, i));
+        }
+        furi_string_cat_printf(nfc->text_box_store, "\n");
+        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventListenerUpdate);
+    }
+
+    return NfcCommandContinue;
+}
+
+static void nfc_scene_emulate_on_enter_iso14443_3a(NfcApp* instance) {
+    nfc_listener_start(instance->listener, nfc_scene_emulate_listener_callback_iso14443_3a, instance);
 }
 
 static bool nfc_scene_info_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
@@ -128,5 +154,9 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
         {
             .on_enter = nfc_scene_saved_menu_on_enter_iso14443_3a,
             .on_event = nfc_scene_saved_menu_on_event_iso14443_3a,
+        },
+    .scene_emulate = {
+            .on_enter = nfc_scene_emulate_on_enter_iso14443_3a,
+            .on_event = NULL,
         },
 };

@@ -24,4 +24,5 @@ typedef struct {
     NfcProtocolSupportSceneBase scene_read_menu;
     NfcProtocolSupportSceneBase scene_read_success;
     NfcProtocolSupportSceneBase scene_saved_menu;
+    NfcProtocolSupportSceneBase scene_emulate;
 } NfcProtocolSupportBase;

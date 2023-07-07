@@ -7,7 +7,9 @@
 
 #define ISO14443_4A_LISTENER_MAX_BUFFER_SIZE (512U)
 
-static Iso14443_4aListener* iso14443_4a_listener_alloc(Iso14443_3aListener* iso14443_3a_listener, const Iso14443_4aData* data) {
+static Iso14443_4aListener* iso14443_4a_listener_alloc(
+    Iso14443_3aListener* iso14443_3a_listener,
+    const Iso14443_4aData* data) {
     furi_assert(iso14443_3a_listener);
 
     Iso14443_4aListener* instance = malloc(sizeof(Iso14443_4aListener));
@@ -64,7 +66,10 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
 
     if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame) {
         UNUSED(instance);
-        FURI_LOG_D(TAG, "Standard frame recieived with length of %zu", bit_buffer_get_size_bytes(rx_buffer));
+        FURI_LOG_D(
+            TAG,
+            "Standard frame recieived with length of %zu",
+            bit_buffer_get_size_bytes(rx_buffer));
     }
 
     return command;

@@ -27,9 +27,8 @@ struct Iso14443_4aListener {
     void* context;
 };
 
-Iso14443_4aError iso14443_4a_listener_send_block(
-    Iso14443_4aListener* instance,
-    const BitBuffer* tx_buffer);
+Iso14443_4aError
+    iso14443_4a_listener_send_block(Iso14443_4aListener* instance, const BitBuffer* tx_buffer);
 
 #ifdef __cplusplus
 }
