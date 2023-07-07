@@ -29,10 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0706-1426-0.86.2-6f6b616](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0707-0251-0.86.2-032036d](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-06 22:25 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-06 22:25 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-07 02:51 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-07 02:51 EST`
 - [Revert BadBT updates to better version that was there yesterday](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/bf7c4c3568083213129f62c5fc9933bb548e2cdb)
 - OFW: [SubGhz: add "SubGhz test" external application and the ability to work "SubGhz" as an external application #2851 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2851)
 - OFW: [API: explicitly add math.h #2852 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2852)
