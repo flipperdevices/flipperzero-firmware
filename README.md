@@ -73,7 +73,7 @@ Starting with version `0.0.2` I will include pre-compiled `.bin` files for the o
 
 ## Option Two - Other compatible boards
 
-Follow the steps below toflash the other compatible ESP32 boards. You may have to adjust the steps below for your specific board:
+Follow the steps below to flash the other compatible ESP32 boards. You may have to adjust the steps below for your specific board:
 
 1. Download and install the Arduino IDE from [here][link-arduino].
 2. Download zip/clone dependency [AsyncTCP][link-asynctcp] to file.
@@ -126,7 +126,7 @@ Logs will automatically be saved when exiting the app or when the current log re
 
 - If the AP won't start or you have other issues try pressing reset on the Wi-Fi dev board, waiting a few seconds, and pressing `Start portal` on the main menu.
 
-- It is important to give the devboard some time to load the html files from the Flipper.
+- It is important to give the dev board some time to load the html files from the Flipper.
 
 - If you have the Marauder firmware on your dev board you **might** need to enable `Erase All Flash Before Sketch Upload` before flashing or follow the `Erasing firmware` instructions below. If you are using the web flasher there is an erase function on the website.
 
