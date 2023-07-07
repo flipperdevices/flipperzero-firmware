@@ -4,8 +4,13 @@
 #include <nfc/nfc_common.h>
 
 #define ISO14443_3A_CRC_INIT (0x6363)
+#define ISO14443_3A_PROTOCOL_NAME_LEGACY "UID"
 #define ISO14443_3A_PROTOCOL_NAME "ISO14443-3A"
 #define ISO14443_3A_DEVICE_NAME "Unknown ISO14443-3A Tag"
+
+#define ISO14443_3A_UID_KEY "UID"
+#define ISO14443_3A_ATQA_KEY "ATQA"
+#define ISO14443_3A_SAK_KEY "SAK"
 
 const NfcDeviceBase nfc_device_iso14443_3a = {
     .protocol_name = ISO14443_3A_PROTOCOL_NAME,
@@ -48,18 +53,57 @@ void iso14443_3a_copy(Iso14443_3aData* data, const Iso14443_3aData* other) {
 
 bool iso14443_3a_verify(Iso14443_3aData* data, const FuriString* device_type) {
     UNUSED(data);
-    return furi_string_equal(device_type, "UID");
+    return furi_string_equal(device_type, ISO14443_3A_PROTOCOL_NAME_LEGACY);
 }
 
 bool iso14443_3a_load(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
-    return iso14443_3a_load_data(data, ff, version);
+    furi_assert(data);
+
+    bool parsed = false;
+
+    do {
+        // TODO: Load UID in nfc_device.c
+        // if(version < NFC_UNIFIED_FORMAT_VERSION) {
+        uint32_t uid_len = 0;
+        if(!flipper_format_get_value_count(ff, ISO14443_3A_UID_KEY, &uid_len)) break;
+        if(!(uid_len == 4 || uid_len == 7)) break;
+
+        data->uid_len = uid_len;
+
+        if(!flipper_format_read_hex(ff, ISO14443_3A_UID_KEY, data->uid, data->uid_len)) break;
+        // }
+
+        // Common to all format versions
+        if(!flipper_format_read_hex(ff, ISO14443_3A_ATQA_KEY, data->atqa, 2)) break;
+        if(!flipper_format_read_hex(ff, ISO14443_3A_SAK_KEY, &data->sak, 1)) break;
+
+        if(version > NFC_LSB_ATQA_FORMAT_VERSION) {
+            // Swap ATQA bytes for newer versions
+            const uint8_t tmp = data->atqa[0];
+            data->atqa[0] = data->atqa[1];
+            data->atqa[1] = tmp;
+        }
+
+        parsed = true;
+    } while(false);
+
+    return parsed;
 }
 
-bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
+bool iso14443_3a_save(const Iso14443_3aData* data, FlipperFormat* ff) {
+    furi_assert(data);
+
     bool saved = false;
+
     do {
-        if(!flipper_format_write_string_cstr(ff, "Device type", "UID")) break;
-        if(!iso14443_3a_save_data(data, ff, version)) break;
+        // Save ATQA in MSB order for correct companion apps display
+        const uint8_t atqa[2] = {data->atqa[1], data->atqa[0]};
+        if(!flipper_format_write_comment_cstr(ff, ISO14443_3A_PROTOCOL_NAME " specific data"))
+            break;
+
+        // Write ATQA and SAK
+        if(!flipper_format_write_hex(ff, ISO14443_3A_ATQA_KEY, atqa, 2)) break;
+        if(!flipper_format_write_hex(ff, ISO14443_3A_SAK_KEY, &data->sak, 1)) break;
         saved = true;
     } while(false);
 
@@ -92,55 +136,6 @@ const uint8_t* iso14443_3a_get_uid(const Iso14443_3aData* data, size_t* uid_len)
 const Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data) {
     UNUSED(data);
     furi_crash("No base data");
-}
-
-bool iso14443_3a_load_data(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
-    furi_assert(data);
-
-    uint32_t data_cnt = 0;
-    bool parsed = false;
-
-    do {
-        if(!flipper_format_get_value_count(ff, "UID", &data_cnt)) break;
-        if(!(data_cnt == 4 || data_cnt == 7)) break;
-        data->uid_len = data_cnt;
-        if(!flipper_format_read_hex(ff, "UID", data->uid, data->uid_len)) break;
-        if(version == NFC_LSB_ATQA_FORMAT_VERSION) {
-            if(!flipper_format_read_hex(ff, "ATQA", data->atqa, 2)) break;
-        } else {
-            uint8_t atqa[2] = {};
-            if(!flipper_format_read_hex(ff, "ATQA", atqa, 2)) break;
-            data->atqa[0] = atqa[1];
-            data->atqa[1] = atqa[0];
-        }
-        if(!flipper_format_read_hex(ff, "SAK", &data->sak, 1)) break;
-
-        parsed = true;
-    } while(false);
-
-    return parsed;
-}
-
-bool iso14443_3a_save_data(const Iso14443_3aData* data, FlipperFormat* ff, uint32_t version) {
-    furi_assert(data);
-
-    UNUSED(version);
-
-    bool saved = false;
-    do {
-        // Write UID, ATQA, SAK
-        if(!flipper_format_write_comment_cstr(ff, "UID is common for all formats")) break;
-        if(!flipper_format_write_hex(ff, "UID", data->uid, data->uid_len)) break;
-        // Save ATQA in MSB order for correct companion apps display
-        uint8_t atqa[2] = {data->atqa[1], data->atqa[0]};
-        if(!flipper_format_write_comment_cstr(ff, ISO14443_3A_PROTOCOL_NAME " specific fields"))
-            break;
-        if(!flipper_format_write_hex(ff, "ATQA", atqa, 2)) break;
-        if(!flipper_format_write_hex(ff, "SAK", &data->sak, 1)) break;
-        saved = true;
-    } while(false);
-
-    return saved;
 }
 
 static uint16_t iso14443_3a_get_crc(const uint8_t* buff, uint16_t len) {
