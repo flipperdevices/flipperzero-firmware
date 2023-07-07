@@ -93,11 +93,17 @@ SubBruteState* subbrute_alloc() {
     //instance->flipper_format = flipper_format_string_alloc();
     //instance->environment = subghz_environment_alloc();
 
+    // Uncomment to enable Debug pin output on PIN 17(1W)
+    //furi_hal_subghz_set_async_mirror_pin(&gpio_ibutton);
+
     return instance;
 }
 
 void subbrute_free(SubBruteState* instance) {
     furi_assert(instance);
+
+    // Uncomment to enable Debug pin output on PIN 17(1W)
+    //furi_hal_subghz_set_async_mirror_pin(NULL);
 
     // SubBruteWorker
     subbrute_worker_stop(instance->worker);
@@ -183,7 +189,8 @@ int32_t subbrute_app(void* p) {
     // Auto switch to internal radio if external radio is not available
     furi_delay_ms(15);
     if(!furi_hal_subghz_check_radio()) {
-        furi_hal_subghz_set_radio_type(SubGhzRadioInternal);
+        furi_hal_subghz_select_radio_type(SubGhzRadioInternal);
+        furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
     }
 
     furi_hal_power_suppress_charge_enter();
@@ -193,6 +200,8 @@ int32_t subbrute_app(void* p) {
     furi_hal_power_suppress_charge_exit();
     // Disable power for External CC1101 if it was enabled and module is connected
     furi_hal_subghz_disable_ext_power();
+    // Reinit SPI handles for internal radio / nfc
+    furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
 
     subbrute_free(instance);
 

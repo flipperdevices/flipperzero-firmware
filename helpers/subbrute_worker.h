@@ -40,3 +40,9 @@ void subbrute_worker_set_callback(
     SubBruteWorker* instance,
     SubBruteWorkerCallback callback,
     void* context);
+
+uint8_t subbrute_worker_get_timeout(SubBruteWorker* instance);
+
+void subbrute_worker_timeout_inc(SubBruteWorker* instance);
+
+void subbrute_worker_timeout_dec(SubBruteWorker* instance);

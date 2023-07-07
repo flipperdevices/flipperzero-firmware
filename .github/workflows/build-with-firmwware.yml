@@ -157,8 +157,8 @@ jobs:
         if: ${{ success() }}
         shell: pwsh
         env:
-          ZIP_NAME: "SubGHz_Bruteforcer_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.zip"
-          TGZ_NAME: "SubGHz_Bruteforcer_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.tgz"
+          ZIP_NAME: "subghz_bruteforcer_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.zip"
+          TGZ_NAME: "subghz_bruteforcer_${{ env.RELEASE_VERSION }}_${{ matrix.firmware }}.tgz"
         run: |
           function Format-Bytes {
             param(

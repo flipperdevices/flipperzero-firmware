@@ -167,7 +167,7 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
                 if(model->index == position) {
                     canvas_draw_str_aligned(
                         canvas,
-                        4,
+                        3,
                         9 + (item_position * item_height) + STATUS_BAR_Y_SHIFT,
                         AlignLeft,
                         AlignCenter,
@@ -181,9 +181,14 @@ void subbrute_main_view_draw(Canvas* canvas, SubBruteMainViewModel* model) {
                             sizeof(buffer),
                             "x%d",
                             model->extra_repeats + subbrute_protocol_repeats_count(model->index));
+                        uint8_t temp_x_offset_repeats = 18;
+                        if(model->extra_repeats + subbrute_protocol_repeats_count(model->index) <
+                           10) {
+                            temp_x_offset_repeats = 15;
+                        }
                         canvas_draw_str_aligned(
                             canvas,
-                            screen_width - 15,
+                            screen_width - temp_x_offset_repeats,
                             9 + (item_position * item_height) + STATUS_BAR_Y_SHIFT,
                             AlignLeft,
                             AlignCenter,
@@ -232,7 +237,7 @@ bool subbrute_main_view_input(InputEvent* event, void* context) {
 #endif
     const uint8_t min_value = 0;
     const uint8_t correct_total = SubBruteAttackTotalCount - 1;
-    uint8_t max_repeats = 9 - subbrute_protocol_repeats_count(instance->index);
+    uint8_t max_repeats = 14 - subbrute_protocol_repeats_count(instance->index);
 
     bool updated = false;
     bool consumed = false;
