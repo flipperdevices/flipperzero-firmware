@@ -1,0 +1,16 @@
+{
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/../unleashed-firmware/**"
+    ],
+    "files.associations": {
+        "docker-compose*.yml": "dockercompose",
+        "Dockerfile*": "dockerfile",
+        "docker-compose.*.yml": "dockercompose",
+        "Caddyfile*": "caddyfile",
+        "filelogger.h": "c",
+        "file_stream.h": "c",
+        "usbif.h": "c",
+        "elements.h": "c",
+        "menu.h": "c"
+    }
+}
