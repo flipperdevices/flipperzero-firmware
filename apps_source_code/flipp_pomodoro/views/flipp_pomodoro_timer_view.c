@@ -156,7 +156,10 @@ FlippPomodoroTimerView* flipp_pomodoro_view_timer_alloc() {
     FlippPomodoroTimerView* timer = malloc(sizeof(FlippPomodoroTimerView));
     timer->view = view_alloc();
 
-    view_allocate_model(timer->view, ViewModelTypeLockFree, sizeof(FlippPomodoroTimerViewModel));
+    view_allocate_model(
+        flipp_pomodoro_view_timer_get_view(timer),
+        ViewModelTypeLockFree,
+        sizeof(FlippPomodoroTimerViewModel));
     view_set_context(flipp_pomodoro_view_timer_get_view(timer), timer);
     view_set_draw_callback(timer->view, flipp_pomodoro_view_timer_draw_callback);
     view_set_input_callback(timer->view, flipp_pomodoro_view_timer_input_callback);

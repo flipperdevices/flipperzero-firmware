@@ -55,6 +55,11 @@ char* flipp_pomodoro__next_stage_label(FlippPomodoroState* state) {
     return next_stage_label[flipp_pomodoro__stage_by_index(state->current_stage_index + 1)];
 };
 
+void flipp_pomodoro__destroy(FlippPomodoroState* state) {
+    furi_assert(state);
+    free(state);
+};
+
 uint32_t flipp_pomodoro__current_stage_total_duration(FlippPomodoroState* state) {
     const int32_t stage_duration_seconds_map[] = {
         [FlippPomodoroStageFocus] = 25 * TIME_SECONDS_IN_MINUTE,
