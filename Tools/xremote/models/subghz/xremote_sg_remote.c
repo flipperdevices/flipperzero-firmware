@@ -50,6 +50,11 @@ void subghz_preset_init(
     remote->txrx->preset->data_size = preset_data_size;
 }
 
+const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance) {
+    furi_assert(instance);
+    return subghz_devices_get_name(instance->radio_device);
+}
+
 SubGhzRemote* xremote_sg_remote_alloc() {
     SubGhzRemote* remote = malloc(sizeof(SubGhzRemote));
     remote->name = furi_string_alloc();
@@ -181,7 +186,7 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
         }
 
         if(!strcmp(furi_string_get_cstr(buf), "RAW")) {
-            subghz_protocol_raw_gen_fff_data(remote->txrx->fff_data, furi_string_get_cstr(path));
+            subghz_protocol_raw_gen_fff_data(remote->txrx->fff_data, furi_string_get_cstr(path), subghz_txrx_radio_device_get_name(remote->txrx));
         } else {
             stream_copy_full(
                 flipper_format_get_raw_stream(ff),
