@@ -20,7 +20,7 @@ Sources of "integrated/bundled" apps are added now in this repo too, to allow pu
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `6 Jul 01:40 GMT +3`
+### Apps checked & updated at `8 Jul 20:59 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -107,7 +107,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [Flipp Pomodoro Timer (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
-- [T-Code BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [BT Serial Example (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [VB Lab Migration Assistant (By GMMan (cyanic))](https://github.com/GMMan/flipperzero-vb-migrate)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
