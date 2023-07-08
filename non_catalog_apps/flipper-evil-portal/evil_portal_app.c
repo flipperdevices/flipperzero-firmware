@@ -109,7 +109,6 @@ int32_t evil_portal_app(void* p) {
 
     view_dispatcher_run(evil_portal_app->view_dispatcher);
 
-    // crashing here
     evil_portal_app_free(evil_portal_app);
 
     return 0;
