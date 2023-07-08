@@ -54,5 +54,6 @@ int32_t sound_engine_cycle_and_output_adsr(
     }
     }
 
-    return (int32_t)((int32_t)input * (int32_t)(adsr->envelope >> 10) / (int32_t)(MAX_ADSR >> 10) * (int32_t)adsr->volume / (int32_t)MAX_ADSR_VOLUME);
+    return (int32_t)((int32_t)input * (int32_t)(adsr->envelope >> 10) / (int32_t)(MAX_ADSR >> 10) *
+                     (int32_t)adsr->volume / (int32_t)MAX_ADSR_VOLUME);
 }
