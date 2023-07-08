@@ -159,7 +159,9 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
 
     if(cred->save_format == SeaderCredentialSaveFormatAgnostic) {
         return seader_credential_save_agnostic(cred, name);
-    } else if(cred->save_format == SeaderCredentialSaveFormatPicopass || cred->save_format == SeaderCredentialSaveFormatSR) {
+    } else if(
+        cred->save_format == SeaderCredentialSaveFormatPicopass ||
+        cred->save_format == SeaderCredentialSaveFormatSR) {
         bool use_load_path = true;
         bool saved = false;
         bool withSIO = cred->save_format == SeaderCredentialSaveFormatSR;
@@ -222,7 +224,7 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
                     }
                     break;
                 case PACS_CFG_INDEX:
-                    if (withSIO) {
+                    if(withSIO) {
                         pacs_cfg[0] = 0xA3;
                     }
                     if(!flipper_format_write_hex(
@@ -247,9 +249,12 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
                 case SR_SIO_INDEX + 5:
                 case SR_SIO_INDEX + 6:
                 case SR_SIO_INDEX + 7:
-                    if (withSIO) {
+                    if(withSIO) {
                         if(!flipper_format_write_hex(
-                               file, furi_string_get_cstr(temp_str), cred->sio + ((i - SR_SIO_INDEX) * PICOPASS_BLOCK_LEN), PICOPASS_BLOCK_LEN)) {
+                               file,
+                               furi_string_get_cstr(temp_str),
+                               cred->sio + ((i - SR_SIO_INDEX) * PICOPASS_BLOCK_LEN),
+                               PICOPASS_BLOCK_LEN)) {
                             block_saved = false;
                         }
                     } else {
@@ -257,7 +262,6 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
                                file, furi_string_get_cstr(temp_str), zero, sizeof(zero))) {
                             block_saved = false;
                         }
-
                     }
                     break;
                 default:

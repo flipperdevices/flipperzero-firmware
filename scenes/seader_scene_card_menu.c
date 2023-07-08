@@ -33,14 +33,14 @@ void seader_scene_card_menu_on_enter(void* context) {
         SubmenuIndexSaveRFID,
         seader_scene_card_menu_submenu_callback,
         seader);
-    if (seader->is_debug_enabled) {
-        if (credential->sio[0] != 0) {
-    submenu_add_item(
-        submenu,
-        "Save SR",
-        SubmenuIndexSaveSR,
-        seader_scene_card_menu_submenu_callback,
-        seader);
+    if(seader->is_debug_enabled) {
+        if(credential->sio[0] != 0) {
+            submenu_add_item(
+                submenu,
+                "Save SR",
+                SubmenuIndexSaveSR,
+                seader_scene_card_menu_submenu_callback,
+                seader);
         }
     }
 
