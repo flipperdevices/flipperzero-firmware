@@ -12,7 +12,6 @@ struct CameraSuiteViewStyle1 {
     FuriStreamBuffer* rx_stream;
     FuriThread* worker_thread;
     View* view;
-    int rotation_angle;
     void* context;
 };
 
@@ -33,6 +32,8 @@ static void camera_suite_view_style_1_draw(Canvas* canvas, UartDumpModel* model)
     // Draw the frame.
     canvas_draw_frame(canvas, 0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 
+    CameraSuite* app = current_instance->context;
+
     // Draw the pixels with rotation.
     for(size_t p = 0; p < FRAME_BUFFER_LENGTH; ++p) {
         uint8_t x = p % ROW_BUFFER_LENGTH; // 0 .. 15
@@ -40,19 +41,20 @@ static void camera_suite_view_style_1_draw(Canvas* canvas, UartDumpModel* model)
 
         // Apply rotation
         int16_t rotated_x, rotated_y;
-        switch(current_instance->rotation_angle) {
-        case 90:
+        switch(app->orientation) {
+        case 1: // 90 degrees
             rotated_x = y;
             rotated_y = FRAME_WIDTH - 1 - x;
             break;
-        case 180:
+        case 2: // 180 degrees
             rotated_x = FRAME_WIDTH - 1 - x;
             rotated_y = FRAME_HEIGHT - 1 - y;
             break;
-        case 270:
+        case 3: // 270 degrees
             rotated_x = FRAME_HEIGHT - 1 - y;
             rotated_y = x;
             break;
+        case 0: // 0 degrees
         default:
             rotated_x = x;
             rotated_y = y;
@@ -63,19 +65,20 @@ static void camera_suite_view_style_1_draw(Canvas* canvas, UartDumpModel* model)
             if((model->pixels[p] & (1 << i)) != 0) {
                 // Adjust the coordinates based on the new screen dimensions
                 uint16_t screen_x, screen_y;
-                switch(current_instance->rotation_angle) {
-                case 90:
+                switch(app->orientation) {
+                case 1: // 90 degrees
                     screen_x = rotated_x;
                     screen_y = FRAME_HEIGHT - 8 + (rotated_y * 8) + i;
                     break;
-                case 180:
+                case 2: // 180 degrees
                     screen_x = FRAME_WIDTH - 8 + (rotated_x * 8) + i;
                     screen_y = FRAME_HEIGHT - 1 - rotated_y;
                     break;
-                case 270:
+                case 3: // 270 degrees
                     screen_x = FRAME_WIDTH - 1 - rotated_x;
                     screen_y = rotated_y * 8 + i;
                     break;
+                case 0: // 0 degrees
                 default:
                     screen_x = rotated_x * 8 + i;
                     screen_y = rotated_y;
@@ -171,11 +174,7 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
                 true);
             break;
         case InputKeyOk:
-            // Rotate the camera image 90 degrees
-            instance->rotation_angle += 90;
-            if(instance->rotation_angle >= 360) {
-                instance->rotation_angle = 0;
-            }
+            // TODO: Take picture.
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
