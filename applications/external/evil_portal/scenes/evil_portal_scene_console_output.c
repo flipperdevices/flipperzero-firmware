@@ -98,8 +98,8 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             evil_portal_read_index_html(context);
 
             char* data = malloc((size_t)(strlen((char*)app->index_html) + strlen("sethtml=")));
-            strcat(data, "sethtml=");
-            strcat(data, (char*)app->index_html);
+            furi_string_cat((FuriString*)data, "sethtml=");
+            furi_string_cat((FuriString*)data, (char*)app->index_html);
 
             evil_portal_uart_tx((uint8_t*)(data), strlen(data));
             evil_portal_uart_tx((uint8_t*)("\n"), 1);

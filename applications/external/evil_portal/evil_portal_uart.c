@@ -56,8 +56,8 @@ static int32_t uart_worker(void* context) {
                                         strlen(SET_AP_CMD))) {
                                 char* out_data = malloc((
                                     size_t)(strlen((char*)uart->app->ap_name) + strlen("setap=")));
-                                strcat(out_data, "setap=");
-                                strcat(out_data, (char*)uart->app->ap_name);
+                                furi_string_cat((FuriString*)out_data, "setap=");
+                                furi_string_cat((FuriString*)out_data, (char*)uart->app->ap_name);
 
                                 evil_portal_uart_tx((uint8_t*)(out_data), strlen(out_data));
                                 evil_portal_uart_tx((uint8_t*)("\n"), 1);
@@ -75,7 +75,7 @@ static int32_t uart_worker(void* context) {
                     }
 
                     if(uart->app->sent_reset == false) {
-                        strcat(uart->app->portal_logs, (char*)uart->rx_buf);
+                        furi_string_cat((FuriString*)uart->app->portal_logs, (char*)uart->rx_buf);
                     }
 
                     if(strlen(uart->app->portal_logs) > 4000) {
@@ -86,7 +86,7 @@ static int32_t uart_worker(void* context) {
                 } else {
                     uart->rx_buf[len] = '\0';
                     if(uart->app->sent_reset == false) {
-                        strcat(uart->app->portal_logs, (char*)uart->rx_buf);
+                        furi_string_cat((FuriString*)uart->app->portal_logs, (char*)uart->rx_buf);
                     }
 
                     if(strlen(uart->app->portal_logs) > 4000) {

@@ -4,15 +4,21 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
+#include "../helpers/camera_suite_haptic.h"
+#include "../helpers/camera_suite_speaker.h"
+#include "../helpers/camera_suite_led.h"
 
 static CameraSuiteViewStyle1* current_instance = NULL;
+// Dithering type:
+//    0 = Floyd Steinberg (default)
+//    1 = Atkinson
+static int current_dithering = 0;
 
 struct CameraSuiteViewStyle1 {
     CameraSuiteViewStyle1Callback callback;
     FuriStreamBuffer* rx_stream;
     FuriThread* worker_thread;
     View* view;
-    int rotation_angle;
     void* context;
 };
 
@@ -33,6 +39,8 @@ static void camera_suite_view_style_1_draw(Canvas* canvas, UartDumpModel* model)
     // Draw the frame.
     canvas_draw_frame(canvas, 0, 0, FRAME_WIDTH, FRAME_HEIGHT);
 
+    CameraSuite* app = current_instance->context;
+
     // Draw the pixels with rotation.
     for(size_t p = 0; p < FRAME_BUFFER_LENGTH; ++p) {
         uint8_t x = p % ROW_BUFFER_LENGTH; // 0 .. 15
@@ -40,19 +48,20 @@ static void camera_suite_view_style_1_draw(Canvas* canvas, UartDumpModel* model)
 
         // Apply rotation
         int16_t rotated_x, rotated_y;
-        switch(current_instance->rotation_angle) {
-        case 90:
+        switch(app->orientation) {
+        case 1: // 90 degrees
             rotated_x = y;
             rotated_y = FRAME_WIDTH - 1 - x;
             break;
-        case 180:
+        case 2: // 180 degrees
             rotated_x = FRAME_WIDTH - 1 - x;
             rotated_y = FRAME_HEIGHT - 1 - y;
             break;
-        case 270:
+        case 3: // 270 degrees
             rotated_x = FRAME_HEIGHT - 1 - y;
             rotated_y = x;
             break;
+        case 0: // 0 degrees
         default:
             rotated_x = x;
             rotated_y = y;
@@ -63,19 +72,20 @@ static void camera_suite_view_style_1_draw(Canvas* canvas, UartDumpModel* model)
             if((model->pixels[p] & (1 << i)) != 0) {
                 // Adjust the coordinates based on the new screen dimensions
                 uint16_t screen_x, screen_y;
-                switch(current_instance->rotation_angle) {
-                case 90:
+                switch(app->orientation) {
+                case 1: // 90 degrees
                     screen_x = rotated_x;
                     screen_y = FRAME_HEIGHT - 8 + (rotated_y * 8) + i;
                     break;
-                case 180:
+                case 2: // 180 degrees
                     screen_x = FRAME_WIDTH - 8 + (rotated_x * 8) + i;
                     screen_y = FRAME_HEIGHT - 1 - rotated_y;
                     break;
-                case 270:
+                case 3: // 270 degrees
                     screen_x = FRAME_WIDTH - 1 - rotated_x;
                     screen_y = rotated_y * 8 + i;
                     break;
+                case 0: // 0 degrees
                 default:
                     screen_x = rotated_x * 8 + i;
                     screen_y = rotated_y;
@@ -107,6 +117,22 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
     furi_assert(context);
     CameraSuiteViewStyle1* instance = context;
     if(event->type == InputTypeRelease) {
+        switch(event->key) {
+        default: // Stop all sounds, reset the LED.
+            with_view_model(
+                instance->view,
+                UartDumpModel * model,
+                {
+                    UNUSED(model);
+                    camera_suite_play_bad_bump(instance->context);
+                    camera_suite_stop_all_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 0);
+                },
+                true);
+            break;
+        }
+        // Send `data` to the ESP32-CAM
+    } else if(event->type == InputTypePress) {
         uint8_t data[1];
         switch(event->key) {
         case InputKeyBack:
@@ -130,6 +156,9 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Left, instance->context);
                 },
                 true);
@@ -142,6 +171,9 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Right, instance->context);
                 },
                 true);
@@ -154,6 +186,9 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Up, instance->context);
                 },
                 true);
@@ -166,21 +201,29 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Down, instance->context);
                 },
                 true);
             break;
         case InputKeyOk:
-            // Rotate the camera image 90 degrees
-            instance->rotation_angle += 90;
-            if(instance->rotation_angle >= 360) {
-                instance->rotation_angle = 0;
+            if(current_dithering == 0) {
+                data[0] = 'd'; // Update to Floyd Steinberg dithering.
+                current_dithering = 1;
+            } else {
+                data[0] = 'D'; // Update to Atkinson dithering.
+                current_dithering = 0;
             }
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Ok, instance->context);
                 },
                 true);
