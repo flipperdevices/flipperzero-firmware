@@ -137,7 +137,7 @@ static bool nfc_scene_read_menu_on_event_mf_classic(NfcApp* instance, uint32_t e
 static bool nfc_scene_saved_menu_on_event_mf_classic(NfcApp* instance, uint32_t event) {
     switch(event) {
     case SubmenuIndexCommonEmulate:
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicEmulate);
         return true;
     case SubmenuIndexDetectReader:
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);

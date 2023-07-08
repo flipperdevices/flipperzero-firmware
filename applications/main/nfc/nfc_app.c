@@ -14,24 +14,24 @@ bool nfc_back_event_callback(void* context) {
     return scene_manager_handle_back_event(nfc->scene_manager);
 }
 
-static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
-    furi_assert(context);
-    NfcApp* nfc = context;
+// static void nfc_rpc_command_callback(RpcAppSystemEvent event, void* context) {
+//     furi_assert(context);
+//     NfcApp* nfc = context;
 
-    furi_assert(nfc->rpc_ctx);
+//     furi_assert(nfc->rpc_ctx);
 
-    if(event == RpcAppEventSessionClose) {
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcSessionClose);
-        rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
-        nfc->rpc_ctx = NULL;
-    } else if(event == RpcAppEventAppExit) {
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
-    } else if(event == RpcAppEventLoadFile) {
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcLoad);
-    } else {
-        rpc_system_app_confirm(nfc->rpc_ctx, event, false);
-    }
-}
+//     if(event == RpcAppEventSessionClose) {
+//         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcSessionClose);
+//         rpc_system_app_set_callback(nfc->rpc_ctx, NULL, NULL);
+//         nfc->rpc_ctx = NULL;
+//     } else if(event == RpcAppEventAppExit) {
+//         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventViewExit);
+//     } else if(event == RpcAppEventLoadFile) {
+//         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventRpcLoad);
+//     } else {
+//         rpc_system_app_confirm(nfc->rpc_ctx, event, false);
+//     }
+// }
 
 NfcApp* nfc_app_alloc() {
     NfcApp* instance = malloc(sizeof(NfcApp));
@@ -460,44 +460,25 @@ static bool nfc_is_hal_ready() {
 }
 
 int32_t nfc_app(void* p) {
+    UNUSED(p);
     if(!nfc_is_hal_ready()) return 0;
 
     NfcApp* nfc = nfc_app_alloc();
-    char* args = p;
+    // char* args = p;
+    const char* args = "/ext/nfc/4.nfc";
 
     // Check argument and run corresponding scene
     if(args && strlen(args)) {
-        // nfc_device_set_loading_callback(nfc->dev, nfc_show_loading_popup, nfc);
-        uint32_t rpc_ctx = 0;
-        if(sscanf(p, "RPC %lX", &rpc_ctx) == 1) {
-            nfc->rpc_ctx = (void*)rpc_ctx;
-            rpc_system_app_set_callback(nfc->rpc_ctx, nfc_rpc_command_callback, nfc);
-            rpc_system_app_send_started(nfc->rpc_ctx);
-            view_dispatcher_attach_to_gui(
-                nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeDesktop);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+        nfc_device_set_loading_callback(nfc->nfc_device, nfc_show_loading_popup, nfc);
+        view_dispatcher_attach_to_gui(
+            nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
+        if(nfc_device_load(nfc->nfc_device, args)) {
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
+
         } else {
-            view_dispatcher_attach_to_gui(
-                nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
-            // if(nfc_device_load(nfc->dev, p, true)) {
-            //     if(nfc->dev->format == NfcDeviceSaveFormatMifareUl) {
-            //         scene_manager_next_scene(nfc->scene_manager, NfcSceneMfUltralightEmulate);
-            //         dolphin_deed(DolphinDeedNfcEmulate);
-            //     } else if(nfc->dev->format == NfcDeviceSaveFormatMifareClassic) {
-            //         scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
-            //         dolphin_deed(DolphinDeedNfcEmulate);
-            //     } else if(nfc->dev->format == NfcDeviceSaveFormatBankCard) {
-            //         scene_manager_next_scene(nfc->scene_manager, NfcSceneDeviceInfo);
-            //     } else {
-            //         scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulateUid);
-            //         dolphin_deed(DolphinDeedNfcEmulate);
-            //     }
-            // } else {
-            //     // Exit app
-            //     view_dispatcher_stop(nfc->view_dispatcher);
-            // }
+            // Exit app
+            view_dispatcher_stop(nfc->view_dispatcher);
         }
-        // nfc_device_set_loading_callback(nfc->dev, NULL, nfc);
     } else {
         view_dispatcher_attach_to_gui(
             nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
