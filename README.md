@@ -45,14 +45,14 @@ Therefore, multiple stages are required to be able to exchange data.
     1. Extract the `.zip` file.
 
 ### Receive Data on the target system
-1. Launch `HIDFullClient -receive` on the target system.
+1. Launch `HIDFullClient receive` on the target system.
 1. Start the HIDTransfer application on the Flipper and select `Send file`.
 1. Select a file from the SD-Card.
 
 ### Send Data from the target system
 1. Start the HIDTransfer application on the Flipper and select `Receive file`.
-1. Launch `HIDFullClient -send [file path]` on the target system. The file is stored on the Flipper SD Card inside the `HIDTransfer` folder.
-1. The stored file is in a `raw` format that must be post processed. This can also be done by using `HIDFullClient -decompress [.raw file]`.
+1. Launch `HIDFullClient send -path [file path]` on the target system. The file is stored on the Flipper SD Card inside the `HIDTransfer` folder.
+1. The stored file is in a `raw` format that must be post processed. This can also be done by using `HIDFullClient decompress [.raw file]`.
 
 
 
