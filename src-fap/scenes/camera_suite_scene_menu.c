@@ -21,14 +21,14 @@ void camera_suite_scene_menu_on_enter(void* context) {
 
     submenu_add_item(
         app->submenu,
-        "Open Camera", // Style: Atkinson
+        "Open Camera",
         SubmenuIndexSceneStyle1,
         camera_suite_scene_menu_submenu_callback,
         app);
-    // TODO: Uncomment when style 2 is implemented
+    // Staged view for the future.
     // submenu_add_item(
     //     app->submenu,
-    //     "Style: Floyd-Steinberg",
+    //     "Test",
     //     SubmenuIndexSceneStyle2,
     //     camera_suite_scene_menu_submenu_callback,
     //     app);

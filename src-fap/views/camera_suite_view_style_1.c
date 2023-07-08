@@ -4,8 +4,15 @@
 #include <input/input.h>
 #include <gui/elements.h>
 #include <dolphin/dolphin.h>
+#include "../helpers/camera_suite_haptic.h"
+#include "../helpers/camera_suite_speaker.h"
+#include "../helpers/camera_suite_led.h"
 
 static CameraSuiteViewStyle1* current_instance = NULL;
+// Dithering type:
+//    0 = Floyd Steinberg (default)
+//    1 = Atkinson
+static int current_dithering = 0;
 
 struct CameraSuiteViewStyle1 {
     CameraSuiteViewStyle1Callback callback;
@@ -110,6 +117,22 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
     furi_assert(context);
     CameraSuiteViewStyle1* instance = context;
     if(event->type == InputTypeRelease) {
+        switch(event->key) {
+        default: // Stop all sounds, reset the LED.
+            with_view_model(
+                instance->view,
+                UartDumpModel * model,
+                {
+                    UNUSED(model);
+                    camera_suite_play_bad_bump(instance->context);
+                    camera_suite_stop_all_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 0);
+                },
+                true);
+            break;
+        }
+        // Send `data` to the ESP32-CAM
+    } else if(event->type == InputTypePress) {
         uint8_t data[1];
         switch(event->key) {
         case InputKeyBack:
@@ -133,6 +156,9 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Left, instance->context);
                 },
                 true);
@@ -145,6 +171,9 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Right, instance->context);
                 },
                 true);
@@ -157,6 +186,9 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Up, instance->context);
                 },
                 true);
@@ -169,17 +201,29 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Down, instance->context);
                 },
                 true);
             break;
         case InputKeyOk:
-            // TODO: Take picture.
+            if(current_dithering == 0) {
+                data[0] = 'd'; // Update to Floyd Steinberg dithering.
+                current_dithering = 1;
+            } else {
+                data[0] = 'D'; // Update to Atkinson dithering.
+                current_dithering = 0;
+            }
             with_view_model(
                 instance->view,
                 UartDumpModel * model,
                 {
                     UNUSED(model);
+                    camera_suite_play_happy_bump(instance->context);
+                    camera_suite_play_input_sound(instance->context);
+                    camera_suite_led_set_rgb(instance->context, 0, 0, 255);
                     instance->callback(CameraSuiteCustomEventSceneStyle1Ok, instance->context);
                 },
                 true);
