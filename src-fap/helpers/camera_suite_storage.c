@@ -49,6 +49,8 @@ void camera_suite_save_settings(void* context) {
     // Store Settings
     flipper_format_write_header_cstr(
         fff_file, BOILERPLATE_SETTINGS_HEADER, BOILERPLATE_SETTINGS_FILE_VERSION);
+    flipper_format_write_uint32(
+        fff_file, BOILERPLATE_SETTINGS_KEY_ORIENTATION, &app->orientation, 1);
     flipper_format_write_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
     flipper_format_write_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
     flipper_format_write_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_LED, &app->led, 1);
@@ -98,6 +100,8 @@ void camera_suite_read_settings(void* context) {
         return;
     }
 
+    flipper_format_read_uint32(
+        fff_file, BOILERPLATE_SETTINGS_KEY_ORIENTATION, &app->orientation, 1);
     flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_HAPTIC, &app->haptic, 1);
     flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_SPEAKER, &app->speaker, 1);
     flipper_format_read_uint32(fff_file, BOILERPLATE_SETTINGS_KEY_LED, &app->led, 1);
