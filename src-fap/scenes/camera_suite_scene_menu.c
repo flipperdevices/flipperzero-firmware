@@ -21,16 +21,17 @@ void camera_suite_scene_menu_on_enter(void* context) {
 
     submenu_add_item(
         app->submenu,
-        "Style 1: Atkinson",
+        "Open Camera", // Style: Atkinson
         SubmenuIndexSceneStyle1,
         camera_suite_scene_menu_submenu_callback,
         app);
-    submenu_add_item(
-        app->submenu,
-        "Style 2: Floyd-Steinberg",
-        SubmenuIndexSceneStyle2,
-        camera_suite_scene_menu_submenu_callback,
-        app);
+    // TODO: Uncomment when style 2 is implemented
+    // submenu_add_item(
+    //     app->submenu,
+    //     "Style: Floyd-Steinberg",
+    //     SubmenuIndexSceneStyle2,
+    //     camera_suite_scene_menu_submenu_callback,
+    //     app);
     submenu_add_item(
         app->submenu, "Guide", SubmenuIndexGuide, camera_suite_scene_menu_submenu_callback, app);
     submenu_add_item(
