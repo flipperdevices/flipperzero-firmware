@@ -22,13 +22,21 @@ static void mf_classic_listener_prepare_emulation(MfClassicListener* instance) {
     instance->total_block_num = mf_classic_get_total_block_num(instance->data->type);
 }
 
+static void mf_classic_listener_reset_state(MfClassicListener* instance) {
+    crypto1_reset(instance->crypto);
+    instance->comm_state = MfClassicListenerCommStatePlain;
+    instance->state = MfClassicListenerStateIdle;
+    instance->auth_state = MfClassicListenerAuthStateIdle;
+    instance->cmd_type = MfClassicListenerCommandTypeOnePart;
+}
+
 static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
     MfClassicListener* instance,
     MfClassicKeyType key_type,
     uint8_t block_num) {
     MfClassicListenerCommand command = MfClassicListenerCommandNack;
     do {
-        if(block_num < instance->total_block_num) break;
+        if(block_num >= instance->total_block_num) break;
 
         uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
         if(!mf_classic_is_key_found(instance->data, sector_num, key_type)) {
@@ -44,6 +52,7 @@ static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
 
         instance->auth_context.key_type = key_type;
         instance->auth_context.block_num = block_num;
+
         furi_hal_random_fill_buf(instance->auth_context.nt.data, sizeof(MfClassicNt));
         uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nt.data, sizeof(MfClassicNt));
 
@@ -100,18 +109,23 @@ MfClassicListenerCommand
     MfClassicListenerCommand command = MfClassicListenerCommandSilent;
 
     do {
-        if(bit_buffer_get_size_bytes(buff) != (sizeof(MfClassicNr) + sizeof(MfClassicAr))) break;
-        bit_buffer_write_bytes(buff, instance->auth_context.nr.data, sizeof(MfClassicNr));
+        if(bit_buffer_get_size_bytes(buff) != (sizeof(MfClassicNr) + sizeof(MfClassicAr))) {
+            mf_classic_listener_reset_state(instance);
+            break;
+        }
+        bit_buffer_write_bytes_mid(buff, instance->auth_context.nr.data, 0, sizeof(MfClassicNr));
         bit_buffer_write_bytes_mid(
             buff, instance->auth_context.ar.data, sizeof(MfClassicNr), sizeof(MfClassicAr));
         uint32_t nr_num = nfc_util_bytes2num(instance->auth_context.nr.data, sizeof(MfClassicNr));
         uint32_t ar_num = nfc_util_bytes2num(instance->auth_context.ar.data, sizeof(MfClassicAr));
 
         crypto1_word(instance->crypto, nr_num, 1);
-        uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nr.data, sizeof(MfClassicNt));
+        uint32_t nt_num = nfc_util_bytes2num(instance->auth_context.nt.data, sizeof(MfClassicNt));
         uint32_t secret_poller = ar_num ^ crypto1_word(instance->crypto, 0, 0);
         if(secret_poller != prng_successor(nt_num, 64)) {
-            FURI_LOG_D(TAG, "Wrong reader key");
+            FURI_LOG_D(
+                TAG, "Wrong reader key: %08lX != %08lX", secret_poller, prng_successor(nt_num, 64));
+            mf_classic_listener_reset_state(instance);
             break;
         }
 
@@ -227,13 +241,6 @@ static void mf_classic_listener_send_short_frame(MfClassicListener* instance, ui
     iso14443_3a_listener_tx(instance->iso14443_3a_listener, tx_buffer);
 }
 
-static void mf_classic_listener_reset_state(MfClassicListener* instance) {
-    crypto1_reset(instance->crypto);
-    instance->comm_state = MfClassicListenerCommStatePlain;
-    instance->state = MfClassicListenerStateIdle;
-    instance->auth_state = MfClassicListenerAuthStateIdle;
-}
-
 NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.data);
@@ -250,7 +257,6 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
             crypto1_decrypt(instance->crypto, iso3_event->data->buffer, instance->rx_plain_buffer);
             rx_buffer_plain = instance->rx_plain_buffer;
         } else {
-            crypto1_reset(instance->crypto);
             rx_buffer_plain = iso3_event->data->buffer;
         }
 
