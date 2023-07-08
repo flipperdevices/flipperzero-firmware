@@ -14,18 +14,6 @@ struct EthWorkerNetConf {
     uint8_t is_dhcp;
 };
 
-struct EthViewProcess {
-    char fifo[SCREEN_STRINGS_COUNT][SCREEN_SYMBOLS_WIDTH];
-    uint8_t x;
-    uint8_t y;
-    uint8_t carriage;
-    uint8_t position;
-    uint8_t autofill;
-    uint8_t editing;
-    EthWorkerProcess type;
-    void* draw_struct;
-};
-
 struct EthWorker {
     FuriThread* thread;
     void* context;

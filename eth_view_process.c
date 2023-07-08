@@ -20,6 +20,7 @@ EthViewProcess* ethernet_view_process_malloc(EthWorkerProcess type) {
     evp->position = 0;
     evp->x = 27;
     evp->y = 6;
+    evp->strings_cnt = 10;
 
     if(type == EthWorkerProcessInit) {
         evp->y += 22;
@@ -53,6 +54,9 @@ EthViewProcess* ethernet_view_process_malloc(EthWorkerProcess type) {
         stat->dns[2] = 0;
         stat->dns[3] = 1;
         evp->draw_struct = stat;
+        evp->strings_cnt = 20;
+    } else if(type == EthWorkerProcessDHCP) {
+        evp->strings_cnt = 20;
     } else if(type == EthWorkerProcessPing) {
         evp->y += 11;
         EthViewDrawPing* ping = malloc(sizeof(EthViewDrawPing));
@@ -62,11 +66,15 @@ EthViewProcess* ethernet_view_process_malloc(EthWorkerProcess type) {
         ping->ip[2] = 8;
         ping->ip[3] = 8;
         evp->draw_struct = ping;
+        evp->strings_cnt = 20;
     }
+
+    evp->fifo = malloc(sizeof(EthViewProcessLine) * evp->strings_cnt);
     return evp;
 }
 
 void ethernet_view_process_free(EthViewProcess* evp) {
+    free(evp->fifo);
     if(evp->type == EthWorkerProcessInit || evp->type == EthWorkerProcessStatic ||
        evp->type == EthWorkerProcessPing) {
         free(evp->draw_struct);
@@ -162,13 +170,13 @@ void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
     uint8_t position = process->position;
 
     if(process->autofill) {
-        position = (carriage + SCREEN_STRINGS_COUNT - str_count) % SCREEN_STRINGS_COUNT;
+        position = (carriage + process->strings_cnt - str_count) % process->strings_cnt;
         process->position = position;
     }
 
     for(uint8_t i = 0; i < str_count; ++i) {
         uint8_t y1 = y + (i + 1) * str_height;
-        canvas_draw_str(canvas, x, y1, process->fifo[(position + i) % SCREEN_STRINGS_COUNT]);
+        canvas_draw_str(canvas, x, y1, process->fifo[(position + i) % process->strings_cnt].data);
     }
 
     if(process->type == EthWorkerProcessInit) {
@@ -360,12 +368,12 @@ void ethernet_view_process_keyevent(EthViewProcess* process, InputKey key) {
 void ethernet_view_process_move(EthViewProcess* process, int8_t shift) {
     furi_assert(process);
     uint8_t position = process->position;
-    if(shift <= -SCREEN_STRINGS_COUNT) {
+    if(shift <= -process->strings_cnt) {
         position = 0;
-    } else if(shift >= SCREEN_STRINGS_COUNT) {
+    } else if(shift >= process->strings_cnt) {
         position = process->carriage - 1;
     } else {
-        position = (position + (SCREEN_STRINGS_COUNT + shift)) % SCREEN_STRINGS_COUNT;
+        position = (position + (process->strings_cnt + shift)) % process->strings_cnt;
     }
     process->position = position;
     process->autofill = !shift;
@@ -402,6 +410,15 @@ static uint16_t get_string_with_width(const char* str, uint16_t width) {
     return end;
 }
 
+void evp_printf(EthViewProcess* process, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    FuriString* fstring = furi_string_alloc_vprintf(format, args);
+    va_end(args);
+    ethernet_view_process_print(process, furi_string_get_cstr(fstring));
+    furi_string_free(fstring);
+}
+
 void ethernet_view_process_print(EthViewProcess* process, const char* str) {
     furi_assert(process);
 
@@ -413,13 +430,13 @@ void ethernet_view_process_print(EthViewProcess* process, const char* str) {
         uint16_t start = ptr;
         ptr += get_string_with_width(str + ptr, max_width);
         uint8_t carriage = process->carriage;
-        uint8_t carriage1 = (carriage + 1) % SCREEN_STRINGS_COUNT;
-        uint8_t carriage2 = (carriage + 2) % SCREEN_STRINGS_COUNT;
+        uint8_t carriage1 = (carriage + 1) % process->strings_cnt;
+        uint8_t carriage2 = (carriage + 2) % process->strings_cnt;
         FURI_LOG_I(TAG, "print %d %d %d %d %d", max_width, len, start, carriage, carriage1);
-        memset(process->fifo[carriage], 0, SCREEN_SYMBOLS_WIDTH);
-        memset(process->fifo[carriage1], 0, SCREEN_SYMBOLS_WIDTH);
-        memset(process->fifo[carriage2], 0, SCREEN_SYMBOLS_WIDTH);
-        memcpy(process->fifo[carriage], str + start, ptr - start);
+        memset(process->fifo[carriage].data, 0, SCREEN_SYMBOLS_WIDTH);
+        memset(process->fifo[carriage1].data, 0, SCREEN_SYMBOLS_WIDTH);
+        memset(process->fifo[carriage2].data, 0, SCREEN_SYMBOLS_WIDTH);
+        memcpy(process->fifo[carriage].data, str + start, ptr - start);
         process->carriage = carriage1;
     }
 }
