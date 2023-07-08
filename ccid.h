@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "sub.h"
+#include "seader_bridge.h"
 #include "seader_worker_i.h"
 
 #define SYNC (0x03)

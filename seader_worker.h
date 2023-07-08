@@ -1,7 +1,7 @@
 #pragma once
 
 #include "seader_credential.h"
-#include "sub.h"
+#include "seader_bridge.h"
 
 typedef struct SeaderWorker SeaderWorker;
 typedef struct CCID_Message CCID_Message;
