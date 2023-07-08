@@ -18,6 +18,7 @@
 #include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
+#include <lib/subghz/devices/devices.h>
 //#include <lib/subghz/blocks/custom_btn.h>
 
 #include <flipper_format/flipper_format_i.h>
@@ -48,6 +49,7 @@ struct SubGhzTxRx {
 
     //float raw_threshold_rssi;
     //uint8_t raw_threshold_rssi_low_count;
+    const SubGhzDevice* radio_device;
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;
