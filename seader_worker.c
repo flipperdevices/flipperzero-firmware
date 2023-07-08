@@ -871,6 +871,7 @@ int32_t seader_worker_task(void* context) {
         FURI_LOG_D(TAG, "Read Picopass");
         requestPacs = true;
         seader_credential_clear(seader_worker->credential);
+        seader_worker->credential->type = SeaderCredentialTypePicopass;
         seader_worker_enable_field();
         if(picopass_card_read(seader_worker) != ERR_NONE) {
             // Turn off if cancelled / no card found
@@ -880,6 +881,7 @@ int32_t seader_worker_task(void* context) {
         FURI_LOG_D(TAG, "Read 14a");
         requestPacs = true;
         seader_credential_clear(seader_worker->credential);
+        seader_worker->credential->type = SeaderCredentialType14A;
         nfc_scene_field_on_enter();
         if(!detect_nfc(seader_worker)) {
             // Turn off if cancelled / no card found

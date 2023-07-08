@@ -66,14 +66,28 @@ bool seader_scene_sam_present_on_event(void* context, SceneManagerEvent event) {
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexReadPicopass) {
-            scene_manager_set_scene_state(
-                seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexReadPicopass);
-            scene_manager_next_scene(seader->scene_manager, SeaderSceneReadPicopass);
+            if(seader->is_debug_enabled) {
+                seader->credential->type = SeaderCredentialTypePicopass;
+                scene_manager_set_scene_state(
+                    seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexReadPicopass);
+                scene_manager_next_scene(seader->scene_manager, SeaderSceneUart);
+            } else {
+                scene_manager_set_scene_state(
+                    seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexReadPicopass);
+                scene_manager_next_scene(seader->scene_manager, SeaderSceneReadPicopass);
+            }
             consumed = true;
         } else if(event.event == SubmenuIndexRead14a) {
-            scene_manager_set_scene_state(
-                seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexRead14a);
-            scene_manager_next_scene(seader->scene_manager, SeaderSceneRead14a);
+            if(seader->is_debug_enabled) {
+                seader->credential->type = SeaderCredentialType14A;
+                scene_manager_set_scene_state(
+                    seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexRead14a);
+                scene_manager_next_scene(seader->scene_manager, SeaderSceneUart);
+            } else {
+                scene_manager_set_scene_state(
+                    seader->scene_manager, SeaderSceneSamPresent, SubmenuIndexRead14a);
+                scene_manager_next_scene(seader->scene_manager, SeaderSceneRead14a);
+            }
             consumed = true;
         } else if(event.event == SubmenuIndexSamInfo) {
             scene_manager_set_scene_state(
