@@ -1,0 +1,14 @@
+App(
+    appid="wifi_map",
+    name="WIFI Mapping",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="wifi_map_app",
+    cdefines=["APP_WIFI_MAP"],
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="CS.png",
+    fap_category="GPIO",
+)

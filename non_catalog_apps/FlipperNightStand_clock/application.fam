@@ -1,0 +1,16 @@
+App(
+    appid="nightstand",
+    name="Nightstand Clock",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="clock_app",
+    requires=["gui"],
+    icon="A_Clock_14",
+    stack_size=2 * 1024,
+    fap_icon="clock.png",
+    fap_category="Tools",
+    order=81,
+    fap_author="@nymda & @Willy-JL",
+    fap_weburl="https://github.com/nymda/FlipperNightStand",
+    fap_version="1.0",
+    fap_description="Clock with screen brightness controls",
+)

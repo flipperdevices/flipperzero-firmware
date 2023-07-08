@@ -1,0 +1,15 @@
+App(
+    appid="simon_says",  # Must be unique
+    name="Simon Says",  # Displayed in UI
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="simon_says_app_entry",
+    stack_size=2 * 1024,
+    fap_category="Games",
+    # Optional values
+    # fap_version=(0, 1),  # (major, minor)
+    fap_icon="simon_says.png",  # 10x10 1-bit PNG
+    fap_description="A Simon Says Game",
+    fap_author="@SimplyMinimal & @ShehabAttia96",
+    fap_weburl="https://github.com/SimplyMinimal/FlipperZero-SimonSays",
+    fap_icon_assets="images",  # Image assets to compile for this application
+)

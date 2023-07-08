@@ -1,0 +1,17 @@
+App(
+    appid="usb_midi",
+    name="USB Midi",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="usb_midi_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=4 * 1024,
+    order=20,
+    fap_icon="usb_midi.png",
+    fap_category="Media",
+    fap_author="@DrZlo13",
+    fap_weburl="https://github.com/DrZlo13/flipper-zero-usb-midi",
+    fap_version="1.0",
+    fap_description="This app makes Flipper Zero a USB MIDI device, plays notes via Flippers speaker.",
+)

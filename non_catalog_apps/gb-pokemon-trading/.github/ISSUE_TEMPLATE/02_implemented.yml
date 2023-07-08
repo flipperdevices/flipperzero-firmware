@@ -1,0 +1,21 @@
+name: I implemented it
+description: Share your process.
+labels: ["implemented"]
+body:
+- type: markdown
+  attributes:
+    value: |
+      Thank you for taking the time to fill out. If you have already implemented the application, could you share which Flipper Zero framework you have used? Additionally, could you specify the required type of Game Boy and cartridge? Lastly, it would be great if you could share some images of the process.
+- type: textarea
+  id: desc
+  attributes:
+    label: "Describe the process."
+    description: |
+      Feel free to describe in as much detail as you wish.
+  validations:
+    required: true
+- type: input
+  id: type
+  attributes:
+    label: Game boy
+    description: (Color, Pocket, Advance)

@@ -1,18 +1,16 @@
-# Flipper Application Files (FAPs) for Any Firmware with API v30.x
-## Apps from this pack should be compatible with OFW with API v30.x (dev branch) or any other firmware build with API 30.x
+# Flipper Application Files (FAPs) for Any Firmware with API v33.x
+## Apps from this pack should be compatible with OFW with API v33.x (dev branch) or any other firmware build with API 33.x
 
-## [Download all files by using this link, and copy them onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/all-the-plugins/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
-
----
-
-#### [Visit UberGuidoZ original applications page](https://github.com/UberGuidoZ/Flipper/tree/main/Applications)
+## [Download all files by using this link, and copy only apps folder onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/all-the-plugins/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
 
 ---
 
-Apps contains changes needed to compile them on latest firmware, some fixes has been done by @xMasterX
+Apps contains changes needed to compile them on latest firmware, fixes has been done by @xMasterX
 
 I have decided to not include the "integrated/bundled" FAP files that come with a fresh install of Unleashed. If you need to grab a copy of them for whatever reason, you can do so right from the Unleashed repo.
+
+Sources of "integrated/bundled" apps are added now in this repo too, to allow publishing them in the official catalog :)
 
 * Visit the [Releases page](https://github.com/DarkFlippers/unleashed-firmware) of the Unleashed repo.
 * Scroll down and download the linked ZIP file from the Assets drop down, under the big install from web link.
@@ -22,7 +20,7 @@ I have decided to not include the "integrated/bundled" FAP files that come with 
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `25 Jun 01:18 GMT +3`
+### Apps checked & updated at `8 Jul 20:59 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -32,7 +30,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Video Poker (By PixlEmly)](https://github.com/PixlEmly/flipperzero-firmware-testing/blob/420/applications/VideoPoker/poker.c)
 - [Asteroids (By antirez & SimplyMinimal)](https://github.com/antirez/flipper-asteroids) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Asteroids) all changes can be found by clicking on [this link](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
-- [Dice Roller Including SEX/WAR/8BALL/WEED DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/dice/dice.c)
 - [Game of Life (Updated to work by tgxn) (By itsyourbedtime)](https://github.com/tgxn/flipperzero-firmware/blob/dev/applications/game_of_life/game_of_life.c)
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [TAMA P1 (By GMMan & DroomOne)](https://github.com/GMMan/flipperzero-tamagotch-p1) requires [this rom](https://tinyurl.com/tamap1) IN `tama_p1` folder on SD renamed as `rom.bin` to make it work. - Modified to allow saving game state by [DroomOne](https://github.com/DroomOne/flipperzero-tamagotch-p1) - Mute mode & settings by [Round-Pi](https://github.com/Round-Pi/flipperzero-tamagotch-p1)
@@ -50,6 +47,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [4 in row (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-4inrow)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 - [T-rex game (By Rrycbarm)](https://github.com/Rrycbarm/t-rex-runner)
+- [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
+- [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
+- [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 
 ## Media
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/44023851f7349b6ae9ca9f9bd9228d795a7e04c0)
@@ -72,6 +72,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [NRF24 Scanner (By vad7)](https://github.com/vad7/nrf24scan)
 - [GPIO Reader (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
 - [GPIO Reader 2 (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
+- [MagSpoof (WIP) (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) - Read mode [(by hummusec)](https://github.com/hummusec/magspoof_flipper) - + GPIO & Power fixes
 - [Timelapse (zeitraffer) (By theageoflove)](https://github.com/theageoflove/flipperzero-zeitraffer)
 - [Geiger Counter (By nmrr)](https://github.com/nmrr/flipperzero-geigercounter) - works with external module!
 - [Pwnagotchi->Flipper interface (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
@@ -80,12 +81,6 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Oscilloscope (By anfractuosity)](https://github.com/anfractuosity/flipperscope) -> (Fixed furi_bus issues by @xMasterX)
 - [LORA Terminal (By aafksab)](https://github.com/aafksab/LORA-Term)
 - [NRF24 Batch Read/Send (WIP) (By vad7)](https://github.com/vad7/nRF24-Batch)
-- [ESP32CAM Camera (By Z4urce & eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Marauder (By 0xchocolate & eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Motion Detection (By eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM QR Code (By eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Morse Flasher (By eried)](https://github.com/eried/flipperzero-mayhem)
-- [ESP32CAM Nanny Cam (By eried)](https://github.com/eried/flipperzero-mayhem)
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Logic analyzer (By g3gg0)](https://github.com/g3gg0/flipper-logic_analyzer) -> [How to use](https://github.com/g3gg0/flipper-logic_analyzer#readme)
 - [ServoTester (By spin7ion)](https://github.com/spin7ion/flipper-servotester)
@@ -99,9 +94,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Wiegand Reader (By jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio)
 - [MH-Z19 - CO2 sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon)
+- [Evil captive portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - WIP
 
 ## Tools / Misc
-- [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
@@ -112,19 +107,13 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [Flipp Pomodoro Timer (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
-- [T-Code BT Serial (By maybe-hello-world)](https://github.com/maybe-hello-world/flipper-bp)
 - [BT Serial Example (By maybe-hello-world)](https://github.com/maybe-hello-world/fbs)
 - [VB Lab Migration Assistant (By GMMan (cyanic))](https://github.com/GMMan/flipperzero-vb-migrate)
-- [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
-- [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [DCF77 Transmitter (By arha)](https://github.com/arha/flipper-dcf77)
-- [Barcode Generator (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - [Brainfuck interpreter (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
-- [Flipper CLI-GUI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) - Fixes by [Willy-JL](https://github.com/Willy-JL)
 - [NightStand Clock (By nymda)](https://github.com/nymda/FlipperNightStand) - Fixes by [Willy-JL](https://github.com/Willy-JL)
 - [BT Camera Trigger (By Nem0oo)](https://github.com/Nem0oo/flipper-zero-bluetooth-trigger)
-- [MagSpoof (WIP) (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper)
 - [IR Xbox Controller (By gebeto)](https://github.com/gebeto/flipper-xbox-controller)
 - [EM4100 universal keys generator (for RFID Fuzzer) (By Milk-Cool)](https://github.com/Milk-Cool/fz-em4100-generator)
 - [FlipBIP Crypto Tool (By xtruan)](https://github.com/xtruan/FlipBIP)
@@ -132,7 +121,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [HEX Editor (By dunaevai135)](https://github.com/dunaevai135/flipper-zero-hex_editor)
 - [Resistance calculator (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [IR Intervalometer for Sony Cameras (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer)
+- [CLI-GUI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) -> (Fixed by @Willy-JL)
 
 --- 
 
+Useful source of files for flipper, also has apps pack:
 ## [UberGuidoZ Playground - Large collection of files - Github](https://github.com/UberGuidoZ/Flipper)
