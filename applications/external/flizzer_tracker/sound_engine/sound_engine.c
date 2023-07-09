@@ -34,6 +34,8 @@ void sound_engine_init(
         sound_engine->sine_lut[i] = (uint8_t)((sinf(i / 64.0 * PI) + 1.0) * 127.0);
     }
 
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
+
     furi_hal_interrupt_set_isr_ex(
         FuriHalInterruptIdDma1Ch1, 15, sound_engine_dma_isr, sound_engine);
 
@@ -54,7 +56,7 @@ void sound_engine_deinit(SoundEngine* sound_engine) {
         furi_hal_gpio_init(&gpio_ext_pa6, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
 
-    furi_hal_interrupt_set_isr_ex(FuriHalInterruptIdDma1Ch1, 13, NULL, NULL);
+    furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
     sound_engine_stop();
     sound_engine_deinit_timer();
 }

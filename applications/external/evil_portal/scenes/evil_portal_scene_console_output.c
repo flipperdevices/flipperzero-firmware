@@ -101,7 +101,9 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             furi_string_cat((FuriString*)data, "sethtml=");
             furi_string_cat((FuriString*)data, (char*)app->index_html);
 
-            evil_portal_uart_tx((uint8_t*)(data), strlen(data));
+            evil_portal_uart_tx(
+                (uint8_t*)(furi_string_get_cstr((FuriString*)data)),
+                strlen(furi_string_get_cstr((FuriString*)data)));
             evil_portal_uart_tx((uint8_t*)("\n"), 1);
 
             app->sent_html = true;

@@ -59,7 +59,9 @@ static int32_t uart_worker(void* context) {
                                 furi_string_cat((FuriString*)out_data, "setap=");
                                 furi_string_cat((FuriString*)out_data, (char*)uart->app->ap_name);
 
-                                evil_portal_uart_tx((uint8_t*)(out_data), strlen(out_data));
+                                evil_portal_uart_tx(
+                                    (uint8_t*)(furi_string_get_cstr((FuriString*)out_data)),
+                                    strlen(furi_string_get_cstr((FuriString*)out_data)));
                                 evil_portal_uart_tx((uint8_t*)("\n"), 1);
 
                                 uart->app->sent_ap = true;
