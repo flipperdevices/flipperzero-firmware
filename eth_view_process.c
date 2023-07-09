@@ -1,4 +1,5 @@
 #include "eth_view_process.h"
+
 #include "eth_worker.h"
 #include "eth_worker_i.h"
 #include "finik_eth_icons.h"
@@ -12,7 +13,7 @@
 
 #define TAG "EthView"
 
-EthViewProcess* ethernet_view_process_malloc(EthWorkerProcess type) {
+EthViewProcess* ethernet_view_process_malloc(EthWorkerProcess type, EthernetSaveConfig* config) {
     EthViewProcess* evp = malloc(sizeof(EthViewProcess));
     evp->type = type;
     evp->autofill = 1;
@@ -26,33 +27,16 @@ EthViewProcess* ethernet_view_process_malloc(EthWorkerProcess type) {
         evp->y += 22;
         EthViewDrawInit* init = malloc(sizeof(EthViewDrawInit));
         memset(init, 0, sizeof(EthViewDrawInit));
-        init->mac[0] = 0x10;
-        init->mac[1] = 0x08;
-        init->mac[2] = 0xDC;
-        init->mac[3] = 0x47;
-        init->mac[4] = 0x47;
-        init->mac[5] = 0x54;
+        init->mac = (uint8_t*)config->mac;
         evp->draw_struct = init;
     } else if(type == EthWorkerProcessStatic) {
         evp->y += 22;
         EthViewDrawStatic* stat = malloc(sizeof(EthViewDrawStatic));
         memset(stat, 0, sizeof(EthViewDrawStatic));
-        stat->ip[0] = 192;
-        stat->ip[1] = 168;
-        stat->ip[2] = 0;
-        stat->ip[3] = 101;
-        stat->mask[0] = 255;
-        stat->mask[1] = 255;
-        stat->mask[2] = 255;
-        stat->mask[3] = 0;
-        stat->gateway[0] = 192;
-        stat->gateway[1] = 168;
-        stat->gateway[2] = 0;
-        stat->gateway[3] = 1;
-        stat->dns[0] = 192;
-        stat->dns[1] = 168;
-        stat->dns[2] = 0;
-        stat->dns[3] = 1;
+        stat->ip = config->ip;
+        stat->mask = config->mask;
+        stat->gateway = config->gateway;
+        stat->dns = config->dns;
         evp->draw_struct = stat;
         evp->strings_cnt = 20;
     } else if(type == EthWorkerProcessDHCP) {
@@ -61,10 +45,7 @@ EthViewProcess* ethernet_view_process_malloc(EthWorkerProcess type) {
         evp->y += 11;
         EthViewDrawPing* ping = malloc(sizeof(EthViewDrawPing));
         memset(ping, 0, sizeof(EthViewDrawPing));
-        ping->ip[0] = 8;
-        ping->ip[1] = 8;
-        ping->ip[2] = 8;
-        ping->ip[3] = 8;
+        ping->ip = config->ping_ip;
         evp->draw_struct = ping;
         evp->strings_cnt = 20;
     }

@@ -95,6 +95,7 @@ FinikEthApp* finik_eth_app_alloc() {
 
     app->view_port = view_port_alloc();
     app->event_queue = furi_message_queue_alloc(8, sizeof(InputEvent));
+    app->eth_worker = eth_worker_alloc();
 
     view_port_draw_callback_set(app->view_port, finik_eth_app_draw_callback, app);
     view_port_input_callback_set(app->view_port, finik_eth_app_input_callback, app->event_queue);
@@ -105,8 +106,6 @@ FinikEthApp* finik_eth_app_alloc() {
     app->notifications = furi_record_open(RECORD_NOTIFICATION);
 
     app->power = furi_record_open(RECORD_POWER);
-
-    app->eth_worker = eth_worker_alloc();
 
     //eth_worker_task(app->eth_worker);
 
@@ -121,6 +120,7 @@ void finik_eth_app_free(FinikEthApp* app) {
     view_port_free(app->view_port);
 
     furi_message_queue_free(app->event_queue);
+    eth_worker_free(app->eth_worker);
 
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_NOTIFICATION);

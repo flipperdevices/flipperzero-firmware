@@ -3,6 +3,7 @@
 #include <furi.h>
 #include "eth_worker.h"
 #include "eth_view_process.h"
+#include "eth_save_process.h"
 
 struct EthWorkerNetConf {
     uint8_t mac[6];
@@ -17,6 +18,7 @@ struct EthWorkerNetConf {
 struct EthWorker {
     FuriThread* thread;
     void* context;
+    EthernetSaveConfig* config;
     EthViewProcess* init_process;
     EthViewProcess* dhcp_process;
     EthViewProcess* stat_process;

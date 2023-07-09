@@ -1,5 +1,6 @@
 #include "eth_worker_i.h"
 #include "eth_worker.h"
+#include "eth_save_process.h"
 
 #include <furi_hal.h>
 #include "socket.h"
@@ -21,26 +22,35 @@ EthWorker* eth_worker_alloc() {
 
     eth_worker_change_state(eth_worker, EthWorkerStateModuleInit);
 
-    eth_worker->init_process = ethernet_view_process_malloc(EthWorkerProcessInit);
-    eth_worker->dhcp_process = ethernet_view_process_malloc(EthWorkerProcessDHCP);
-    eth_worker->stat_process = ethernet_view_process_malloc(EthWorkerProcessStatic);
-    eth_worker->ping_process = ethernet_view_process_malloc(EthWorkerProcessPing);
-    eth_worker->reset_process = ethernet_view_process_malloc(EthWorkerProcessReset);
-    eth_worker->active_process = eth_worker->init_process;
+    eth_worker->config = malloc(sizeof(EthernetSaveConfig));
 
-    //eth_worker->callback = eth_worker_change_state;
+    ethernet_save_process_read(eth_worker->config);
+
+    eth_worker->init_process =
+        ethernet_view_process_malloc(EthWorkerProcessInit, eth_worker->config);
+    eth_worker->dhcp_process =
+        ethernet_view_process_malloc(EthWorkerProcessDHCP, eth_worker->config);
+    eth_worker->stat_process =
+        ethernet_view_process_malloc(EthWorkerProcessStatic, eth_worker->config);
+    eth_worker->ping_process =
+        ethernet_view_process_malloc(EthWorkerProcessPing, eth_worker->config);
+    eth_worker->reset_process =
+        ethernet_view_process_malloc(EthWorkerProcessReset, eth_worker->config);
+    eth_worker->active_process = eth_worker->init_process;
 
     return eth_worker;
 }
 
 void eth_worker_free(EthWorker* eth_worker) {
     furi_assert(eth_worker);
+    ethernet_save_process_write(eth_worker->config);
     furi_thread_free(eth_worker->thread);
     ethernet_view_process_free(eth_worker->init_process);
     ethernet_view_process_free(eth_worker->dhcp_process);
     ethernet_view_process_free(eth_worker->stat_process);
     ethernet_view_process_free(eth_worker->ping_process);
     ethernet_view_process_free(eth_worker->reset_process);
+    free(eth_worker->config);
     free(eth_worker);
 }
 
