@@ -36,5 +36,6 @@ App(
             cflags=["-Wno-error"],
         ),
     ],
+    fap_weburl="https://seader.ericbetts.dev",
     fap_icon_assets="icons",
 )
