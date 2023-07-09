@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.5.1
+
+Fix wrong invalid/skipped keys count
 
 ## 1.5.0 
 
