@@ -11,11 +11,11 @@ Menu of the application:
 
 **A** letter:
 
-<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/a.png" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/a.png" width=50% height=50%>
 
 **3** number:
 
-<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/3.png" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/3.png" width=50% height=50%>
 
 ## Build the program
 
