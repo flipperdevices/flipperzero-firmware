@@ -56,9 +56,8 @@ void seader_scene_sam_present_on_update(void* context) {
     view_dispatcher_switch_to_view(seader->view_dispatcher, SeaderViewMenu);
 }
 
-
 void seader_scene_sam_present_on_enter(void* context) {
-  seader_scene_sam_present_on_update(context);
+    seader_scene_sam_present_on_update(context);
 }
 
 bool seader_scene_sam_present_on_event(void* context, SceneManagerEvent event) {
@@ -92,11 +91,12 @@ bool seader_scene_sam_present_on_event(void* context, SceneManagerEvent event) {
         view_dispatcher_stop(seader->view_dispatcher);
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {
-      SeaderWorker* seader_worker = seader->worker;
-      if(fwChecks > 0 && seader_worker->sam_version[0] != 0 && seader_worker->sam_version[1] != 0) {
-        fwChecks--;
-        seader_scene_sam_present_on_update(context);
-      }
+        SeaderWorker* seader_worker = seader->worker;
+        if(fwChecks > 0 && seader_worker->sam_version[0] != 0 &&
+           seader_worker->sam_version[1] != 0) {
+            fwChecks--;
+            seader_scene_sam_present_on_update(context);
+        }
     }
 
     return consumed;
