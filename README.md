@@ -18,7 +18,7 @@ This program is for educational purposes only.
 
 The pre-built fap file is made for the unleashed custom firmware. If you are on a different firmware you can download the `evil_portal.fap` file [at flipc.org](https://flipc.org/bigbrodude6119/flipper-zero-evil-portal?branch=main&root=flipper/flipper-evil-portal&firmware=unleashed) or you can build the `.fap` file yourself by following [these instructions](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md).
 
-**Note** The official Flipper Zero firmware is unfortunately not supported. Some of the functions used in this app are not compatible.
+**Note** The official Flipper Zero firmware is now supported again thanks to @sboger.
 
 ## Install the pre-built app on the flipper
 
@@ -165,8 +165,10 @@ I plan on working on this in my free time. Here is my todo list.
 
 - Support for multiple portals
 - Enter AP name on the Flipper
+- Scan nearby APs and clone their SSID (good idea leedave!)
 - Add a config file for general app settings
 - Create cleaner log files that are easier to read
+- Randomize mac address so that the network shows up as a new network each time
 - Clean up code & implement best practices
 
 ## License
