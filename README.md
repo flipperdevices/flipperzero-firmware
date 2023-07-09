@@ -2,7 +2,7 @@
 A letter/number [morse]([https://en.wikipedia.org/wiki/Letter_beacon](https://fr.wikipedia.org/wiki/Code_Morse_international)) beacon on **125 kHz** using **RFID** interface of the **Flipper Zero**
 
 ![banner](https://raw.githubusercontent.com/nmrr/flipperzero-rfidbeacon/main/img/banner-rfid.jpg)
-(banner has been made with **DALL-.E 2**)
+(banner has been made with **DALL.E 2**)
 
 
 Like Russia with their HF [letter beacons](https://en.wikipedia.org/wiki/Letter_beacon), it's possible to use the **Flipper Zero** as a letter/number morse bacon. **Flipper Zero** has multiple RF interfaces (RFID, NFC and UHF) and it's possible to transmit raw data over these interfaces.
@@ -38,8 +38,8 @@ The program will automatically be launched after compilation
 
 button  | function
 ------------- | -------------
-**Left/Right** *[short press]* | Choose the letter/number to transmit 
-**Up** *[long press]*  | Enable/disable transmitting on 125 kHz
+**Left/Right** *[short press]* | Select the letter/number to transmit 
+**Up** *[long press]*  | Enable/disable the transmitter (125 kHz)
 **Back** *[long press]*  | Exit
 
 If you don't want to build this application, just simply copy **flipper_rfidbeacon.fap** on your **Flipper Zero** 
