@@ -47,9 +47,19 @@ You should be able to see the `[ESP32] Evil Portal` app on your flipper zero now
 
 # Installing/flashing the Wi-Fi dev board
 
-There is now an easier method (Option One) of flashing the **official Wi-Fi dev board**. Thank you to reddit user dellycem for showing me how to do this.
+There is now an easier method (Option One) of flashing your ESP32 dev board. Thank you to reddit user dellycem for showing me how to do this.
 
-**If you are not using the official Wi-Fi dev board you will have to go with option two.**
+**Note:** the following boards are supported via this method
+
+1. [The official Wifi dev board](https://shop.flipperzero.one/products/wifi-devboard)
+2. Alternative ESP32-S2 boards like [this one from AWOK Dynamics](https://www.awokdynamics.com/product/esp32-v4-w-case/20?cp=true&sa=true&sbp=false&q=false)
+3. ESP32-WROOM boards
+
+The alternative ESP32-S2 boards can use the same `.bin` files as the official dev board.
+
+The esp32 wroom board has it's own pre-compiled `.bin` files provided in the 0.0.2 release. Please check out the required pin connections bellow.
+
+**If you are not using one of these boards you will have to go with option two.**
 
 ## Option One - Official Wi-Fi Dev Board
 
@@ -117,6 +127,20 @@ You can stop the portal by pressing `Stop portal` on the main menu. The LED shou
 You can manually save logs using the `Save logs` command. Logs will be stored in the `logs` folder that is in your `apps_data/evil_portal/` folder.
 
 Logs will automatically be saved when exiting the app or when the current log reaches 4000 characters.
+
+## Alternative boards
+
+The ESP32 wroom boards will not have the LED indicators in the 0.0.2 release and if you are compiling for a Wroom board you will have to comment out the code dealing with the LEDs.
+The pre-compiled `.bin` files for that board already have this change. I plan on making this process easier in the next release.
+
+The following pins are required for the board to work:
+
+- 3.3v
+- GND
+- TX
+- RX
+
+Keep in mind that the TX/RX pins go to the opposite pins on the flipper. So TX on your ESP32 goes to RX on the flipper. For my Wroom board I had to use RX0/TX0, your board may be a little different.
 
 ## Troubleshooting
 
