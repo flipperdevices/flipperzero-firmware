@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0708-0255-0.86.2-42123f1](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-09 02:05 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-09 02:05 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-09 13:15 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-09 13:15 EST`
 - Added: [NFC Crocodile (By Firemoon777)](https://github.com/Firemoon777/NfcCrocodile)
 - [New FSociety Profile Image (By jmath3912)](https://github.com/jmath3912/flipperzero-firmware-fsocietyTheme)
 - Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
@@ -44,6 +44,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 - Games Only Mode and Dummy Mode changed for OK to go to Jetpack Joyride. For all Keymappings see [GAMES_ONLY](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md).
 - Undo: Updated: [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
+- Undo: Updated: [ESP32 Evil Portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 
 <a name="release">
 
