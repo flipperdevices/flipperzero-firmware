@@ -18,8 +18,6 @@
 #define MAX_AP_LIST 20
 #define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
-const char *apc = "#@!<>$|^&*()-=+{}[]";
-
 typedef struct {
     Gui* gui;
     NotificationApp* notification;
@@ -98,38 +96,29 @@ static void retrieve_ap_ssid_distance(const char *data, char *apssid, char *dst)
         }
 }
 
-static void retrieve_character_for_ap(char *ap, int index) {
-    ap[0] = apc[index];
-} 
-
 static void uart_echo_view_draw_callback(Canvas* canvas, void* _model) 
 {
         WifiMapModel* model = _model;
-        canvas_clear(canvas);
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontSecondary);
         for (size_t i = 0; i < MAX_AP_LIST; i++) {
             const char *line = furi_string_get_cstr(model->lines[i]->line);
             char apssid[2], dst[4];
-            char ap[1];
-            retrieve_character_for_ap(ap, i);
             retrieve_ap_ssid_distance(line, apssid, dst);
-            if (strlen(line) > 0)
-                // canvas_draw_str(canvas, (uint8_t)atoi(dst), (i+2)*6, apssid);
-                canvas_draw_str(canvas, (uint8_t)atoi(dst), (i+2)*5, ap);
-            else
-                canvas_draw_str(canvas, (uint8_t)atoi(dst), (i+2)*5, ap);
-            FURI_LOG_D(TAG, "tha ssid: %s", apssid);
-            FURI_LOG_D(TAG, "tha dst: %s", dst);
-
+            if (strlen(line) > 0) {
+                    uint8_t d = (uint8_t)atoi(dst);
+                    canvas_draw_box(canvas, d < 1 ? d+5 : d , (i+3)*2, 5, 3);
+                    canvas_draw_str(canvas, d+6, (i+3)*2, dst);
+            }
         }
         
         if (model->rdy) {
-            for (size_t i = 0; i < MAX_AP_LIST; i++) {
-                furi_string_reset(model->lines[i]->line);
-            }
-            model->rdy = 0;
-            model->cntr = 0;
+                canvas_clear(canvas);
+                for (size_t i = 0; i < MAX_AP_LIST; i++) {
+                        furi_string_reset(model->lines[i]->line);
+                }
+                model->rdy = 0;
+                model->cntr = 0;
         }
 }
 
@@ -157,15 +146,13 @@ static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 static void uart_push_to_list(WifiMapModel* model, const char data , WiFiMapApp* app) {
         write_to_file((char) data,  app->file);
         if (!model->rdy) {
-                if (data != '\n') {
-                    FURI_LOG_D(TAG,"The counter: %d", model->cntr);
+                if (data != '\n') 
                     furi_string_push_back(model->lines[model->cntr]->line, data);
-                } else {
+                else 
                     model->cntr++;
-                }
-                if (model->cntr == MAX_AP_LIST) {
+
+                if (model->cntr == MAX_AP_LIST) 
                     model->rdy = 1;
-                } 
         } 
 }
 
@@ -311,3 +298,10 @@ int32_t wifi_map_app(void *p){
         wifi_map_app_free(app);
 	return 0;
 }
+
+// Screen is 128x64 px
+// x -->
+// y
+// |
+// |
+//
