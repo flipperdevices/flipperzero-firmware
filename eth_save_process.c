@@ -126,6 +126,34 @@ static void read_02X(const char* str, uint8_t* byte) {
     *byte = b[1] + (b[0] << 4);
 }
 
+static void read_ip(const char* str, uint8_t* ip) {
+    uint8_t ip_i = 0;
+    uint8_t i = 0;
+    uint16_t tmp = 0;
+    for(;;) {
+        if('0' <= str[i] && str[i] <= '9') {
+            tmp = tmp * 10 + str[i] - '0';
+        } else if(str[i] == '.' || str[i] != '\n' || str[i] != '\0') {
+            if(tmp <= 0xFF && ip_i < 4) {
+                ip[ip_i] = tmp;
+                ip_i += 1;
+                tmp = 0;
+            } else {
+                break;
+            }
+            if(str[i] != '\n' && ip_i == 4) {
+                return;
+            }
+        } else {
+            break;
+        }
+        i += 1;
+    }
+    FURI_LOG_E(TAG, "cannot parse as ip string [%s]", str);
+    ip[0] = ip[1] = ip[2] = ip[3] = 0;
+    return;
+}
+
 static void set_default_config(EthernetSaveConfig* cfg) {
     const uint8_t def_mac[6] = ETHERNET_SAVE_DEFAULT_MAC;
     const uint8_t def_ip[4] = ETHERNET_SAVE_DEFAULT_IP;
@@ -155,10 +183,15 @@ bool storage_read_config(File* file, EthernetSaveConfig* cfg) {
             read_02X(str + strlen("mac: XX-XX-XX-XX-"), &cfg->mac[4]);
             read_02X(str + strlen("mac: XX-XX-XX-XX-XX-"), &cfg->mac[5]);
         } else if(!strncmp(str, "ip: ", 4)) {
+            read_ip(str + strlen("ip: "), cfg->ip);
         } else if(!strncmp(str, "mask: ", 6)) {
+            read_ip(str + strlen("mask: "), cfg->mask);
         } else if(!strncmp(str, "gateway: ", 9)) {
+            read_ip(str + strlen("gateway: "), cfg->gateway);
         } else if(!strncmp(str, "dns: ", 5)) {
+            read_ip(str + strlen("dns: "), cfg->dns);
         } else if(!strncmp(str, "ping_ip: ", 9)) {
+            read_ip(str + strlen("ping_ip: "), cfg->ping_ip);
         }
     }
 
