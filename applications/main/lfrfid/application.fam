@@ -16,6 +16,6 @@ App(
     fap_category="Main",
     fap_icon="125_10px.png",
     fap_icon_assets="images",
-    fap_libs=["assets"],
+    # fap_libs=["assets"],
     link="/ext/apps/Main/lfrfid.fap",
 )
