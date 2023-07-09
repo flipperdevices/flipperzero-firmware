@@ -9,7 +9,7 @@ on:
         required: false
         type: string
   release:
-    types: [created]
+    types: [created,prereleased]
   push:
     paths:
       - .github/workflows/build-with-firmware.yml
@@ -31,6 +31,10 @@ jobs:
       RELATIVE_PATH: "applications/external/subbrute"
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
+      ZIP_NAME: ''
+      ZIP_TAG: ''
+      TGZ_NAME: ''
+      TGZ_TAG: ''
     strategy:
       fail-fast: false
       matrix:
@@ -53,7 +57,7 @@ jobs:
           $ReleaseVersion = ([string]::IsNullOrWhitespace($env:INPUT_VERSION) ? $env:CURRENT_VERSION : $env:INPUT_VERSION)
           Write-Output ('RELEASE_VERSION={0}' -f $ReleaseVersion) >> $env:GITHUB_ENV
 
-      - name: Copy Repo Files
+      - name: Copy Firmware Files
         uses: actions/checkout@v3
         with:
           repository: "${{ matrix.url }}"
@@ -132,6 +136,19 @@ jobs:
       #        # An explicit key for restoring and saving the cache
       #        key: 'fbt=${{ env.FIRMWARE_VERSION }}'
       #
+      - name: Remove other apps
+        shell: bash
+        if: ${{ success() }}
+        # rm to remove problem FAP which includes non existent files
+        run: |
+          rm -Rf ./applications/debug ./applications/examples
+          mkdir ./tmp
+          mv ./applications/external/application.fam ./tmp/
+          mv -f ./applications/external/subbrute/ ./tmp/
+          rm -Rf ./applications/external/*
+          mv -f ./tmp/* ./applications/external/
+          rm -Rf ./tmp/
+
       - name: Build Firmware
         shell: bash
         if: ${{ success() }}
@@ -140,7 +157,18 @@ jobs:
           DIST_SUFFIX: ${{ matrix.version }}
           WORKFLOW_BRANCH_OR_TAG: release-cfw
         run: |
-          ./fbt COMPACT=1 DEBUG=0 fap_dist
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0
+
+      - name: Build FAPs
+        shell: bash
+        if: ${{ success() }}
+        env:
+          FBT_NO_SYNC: 0
+          DIST_SUFFIX: ${{ matrix.version }}
+          WORKFLOW_BRANCH_OR_TAG: release-cfw
+          # rm to remove problem FAP which includes non existent files
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
 
       #    - name: Save FBT
       #      id: cache-save
@@ -180,20 +208,21 @@ jobs:
           }
           $ZipName = $env:ZIP_NAME
           $TgzName = $env:TGZ_NAME
-          $FapNamme = 'SubGHz_Bruteforcer.fap'
+          $FapNamme = 'subghz_bruteforcer.fap'
           $DstFap = "./$FapNamme"
+          $AppDir = "dist/f7-C/apps/Sub-GHz"
 
-          if (!(Test-Path -Path "dist/f7-C/apps/Sub-GHz/$FapNamme" -PathType Leaf)) {
+          if (!(Test-Path -Path "$AppDir/$FapNamme" -PathType Leaf)) {
               Write-Error '::error title=Files not found::Cannot find files in location'
               exit 1
           }
 
-          $Size = (Get-Item -Path "dist/f7-C/apps/Sub-GHz/$FapNamme" | Get-ItemPropertyValue -Name Length)
+          $Size = (Get-Item -Path "$AppDir/$FapNamme" | Get-ItemPropertyValue -Name Length)
           Write-Output ('Filesize: {0}' -f (Format-Bytes $Size))
-          Copy-Item -Force -Path "dist/f7-C/apps/Sub-GHz/$FapNamme" -Destination $DstFap
+          Copy-Item -Force -Verbose -Path "$AppDir/$FapNamme" -Destination $DstFap
 
           zip -r -qq $ZipName $DstFap
-          tar zcf $TgzName  $DstFap
+          tar zcf $TgzName $DstFap
 
           if ( !(Test-Path -Path $ZipName -PathType Leaf) -or !(Test-Path -Path $TgzName -PathType Leaf) ) {
               Write-Error '::error title=Files not found::Cannot find files in location'
@@ -207,13 +236,15 @@ jobs:
           Write-Output ('TGZ_NAME={0}' -f $TgzName ) >> $env:GITHUB_ENV
           Write-Output ('ZIP_TAG={0} ({1})' -f $ZipName, $ZipSize) >> $env:GITHUB_ENV
           Write-Output ('TGZ_TAG={0} ({1})' -f $TgzName , $TgzSize) >> $env:GITHUB_ENV
-      - name: Create assets
+
+      - name: Upload assets
         if: ${{ success() && env.ZIP_NAME != '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
         run: |
-          gh release upload 'v${{ env.RELEASE_VERSION }}' --clobber \
-            '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' -R ${{ env.REPO_SELF }}
+          gh release create v${{ env.RELEASE_VERSION }} --generate-notes --draft -R ${{ env.REPO_SELF }}
+          gh release upload 'v${{ env.RELEASE_VERSION }}' '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' \
+            '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' --clobber -R ${{ env.REPO_SELF }}
           gh release edit 'v${{ env.RELEASE_VERSION }}' --draft=false -R ${{ env.REPO_SELF }}
 
 #EOF
