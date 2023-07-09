@@ -90,10 +90,11 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
     } else if(main_view->is_gamemode == true) {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                main_view->callback(DesktopMainEventOpenSnake, main_view->context); // OPENS SNAKE
-            } else if(event->key == InputKeyUp) {
                 main_view->callback(
-                    DesktopMainEventOpenArkanoid, main_view->context); // OPENS Arkanoid
+                    DesktopMainEventOpenJetPackJoyRide,
+                    main_view->context); // OPENS JETPACK JOYRIDE
+            } else if(event->key == InputKeyUp) {
+                main_view->callback(DesktopMainEventOpenSnake, main_view->context); // OPENS SNAKE
             } else if(event->key == InputKeyDown) {
                 main_view->callback(
                     DesktopMainEventOpenTetris, main_view->context); // OPENS TETRIS
@@ -117,7 +118,9 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
     } else {
         if(event->type == InputTypeShort) {
             if(event->key == InputKeyOk) {
-                main_view->callback(DesktopMainEventOpenSnake, main_view->context); // OPENS SNAKE
+                main_view->callback(
+                    DesktopMainEventOpenJetPackJoyRide,
+                    main_view->context); // OPENS JETPACK JOYRIDE
             } else if(event->key == InputKeyUp) {
                 main_view->callback(DesktopMainEventOpenLockMenu, main_view->context);
             } else if(event->key == InputKeyDown) {
@@ -135,8 +138,7 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
                 main_view->callback(
                     DesktopMainEventOpenZombiez, main_view->context); // OPENS Zombiez
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(
-                    DesktopMainEventOpenArkanoid, main_view->context); // OPENS Arkanoid
+                main_view->callback(DesktopMainEventOpenSnake, main_view->context); // OPENS Snake
             } else if(event->key == InputKeyRight) {
                 main_view->callback(DesktopMainEventOpen2048, main_view->context); // OPENS 2048
             }

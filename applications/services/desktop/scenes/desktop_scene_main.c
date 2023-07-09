@@ -13,7 +13,6 @@
 
 #define TAG "DesktopSrv"
 
-#define ARKANOID_APP EXT_PATH("apps/Games/Arkanoid.fap")
 #define CLOCK_APP EXT_PATH("apps/Main/Dab_Timer.fap")
 #define DICE_APP EXT_PATH("apps/Games/Dice.fap")
 #define DOOM_APP EXT_PATH("apps/Games/DOOM.fap")
@@ -23,6 +22,7 @@
 #define SNAKE_APP EXT_PATH("apps/Games/Snake.fap")
 #define TETRIS_APP EXT_PATH("apps/Games/Tetris.fap")
 #define ZOMBIEZ_APP EXT_PATH("apps/Games/Zombiez.fap")
+#define JETPACK_JOYRIDE_APP EXT_PATH("apps/Games/Jetpack_Joyride.fap")
 
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
@@ -216,12 +216,12 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             desktop_scene_main_open_app_or_profile(desktop, DICE_APP);
             break;
         }
-        case DesktopMainEventOpenArkanoid: {
-            desktop_scene_main_open_app_or_profile(desktop, ARKANOID_APP);
-            break;
-        }
         case DesktopMainEventOpenHeap: {
             desktop_scene_main_open_app_or_profile(desktop, HEAP_DEFENCE_APP);
+            break;
+        }
+        case DesktopMainEventOpenJetPackJoyRide: {
+            desktop_scene_main_open_app_or_profile(desktop, JETPACK_JOYRIDE_APP);
             break;
         }
         case DesktopMainEventOpenClock: {

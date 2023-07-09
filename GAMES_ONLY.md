@@ -3,14 +3,23 @@
 - - EXIT OF GAMES OR LOCK GOES BACK TO GAMES ONLY MODE
 - - RESTARTING REMEMBERS YOU ARE IN GAMES ONLY MODE
 - - HOLD BACK TO TURN OFF FLIPPER
-- - UP FOR SNAKE
-- - LEFT FOR TETRIS 
-- - CENTER FOR DICE
-- - DOWN FOR 2048
-- - HOLD UP FOR DOOM
-- - HOLD LEFT FOR CLOCK
-- - HOLD CENTER TO CHANGE IDLE ANIMATION
-- - HOLD DOWN FOR ZOMBIEZ
-- - RIGHT ALWAYS WILL GO TO PASSPORT
+
+# KEY MAPS FOR DUMMY MODE
+        Short        Long
+OK:     Jetpack Joy  Animation Change
+UP:     Menu         Doom
+DOWN:   Tetris       Zombiez
+LEFT:   Dice         Snake
+RIGHT:  Passport     2048
+
+# KEY MAPS FOR GAMES ONLY MODE 
+        Short        Long
+OK:     Jetpack Joy  Animation Change
+UP:     Snake        Doom
+DOWN:   Tetris       Zombiez
+LEFT:   Dice         Clock
+RIGHT:  Passport     2048
+
+
 - - Enter Games Only mode from Settings=>Desktop OR:
 ### FROM CLOCK: UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT - ENTER/EXIT GAME MODE

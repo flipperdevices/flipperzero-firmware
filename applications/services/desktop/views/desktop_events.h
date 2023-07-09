@@ -20,8 +20,8 @@ typedef enum {
     DesktopMainEventOpenTetris,
     DesktopMainEventOpenDOOM,
     DesktopMainEventOpenDice,
-    DesktopMainEventOpenArkanoid,
     DesktopMainEventOpenHeap,
+    DesktopMainEventOpenJetPackJoyRide,
     DesktopMainEventOpenClock,
 
     DesktopLockedEventOpenPowerOff,
