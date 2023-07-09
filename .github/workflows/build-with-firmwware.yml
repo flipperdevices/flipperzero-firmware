@@ -151,7 +151,9 @@ jobs:
           FBT_NO_SYNC: 0
           DIST_SUFFIX: ${{ matrix.version }}
           WORKFLOW_BRANCH_OR_TAG: release-cfw
+          # rm to remove problem FAP which includes non existent files
         run: |
+          rm -Rf ./applications/debug/subghz_test
           ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
 
       #    - name: Save FBT
