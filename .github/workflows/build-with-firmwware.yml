@@ -146,6 +146,19 @@ jobs:
         run: |
           ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0
 
+      - name: Remove other apps
+        shell: bash
+        if: ${{ success() }}
+        # rm to remove problem FAP which includes non existent files
+        run: |
+          rm -Rf ./applications/debug/subghz_test
+          mkdir ./tmp
+          mv ./applications/external/application.fam ./tmp/
+          mv -f ./applications/external/subbrute/ ./tmp/
+          rm -Rf ./applications/external/*
+          mv -f ./tmp/* ./applications/external/
+          rm -Rf ./tmp/
+
       - name: Build FAPs
         shell: bash
         if: ${{ success() }}
@@ -155,7 +168,6 @@ jobs:
           WORKFLOW_BRANCH_OR_TAG: release-cfw
           # rm to remove problem FAP which includes non existent files
         run: |
-          rm -Rf ./applications/debug/subghz_test
           ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
 
       #    - name: Save FBT
