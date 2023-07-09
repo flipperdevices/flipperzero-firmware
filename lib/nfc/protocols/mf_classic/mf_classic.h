@@ -195,6 +195,12 @@ void mf_classic_get_read_sectors_and_keys(
 
 bool mf_classic_is_card_read(const MfClassicData* data);
 
+bool mf_classic_is_allowed_access(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicKeyType key_type,
+    MfClassicAction action);
+
 #ifdef __cplusplus
 }
 #endif

@@ -10,6 +10,7 @@ extern "C" {
 typedef struct Iso14443_3aListener Iso14443_3aListener;
 
 typedef enum {
+    Iso14443_3aListenerEventTypeFieldOff,
     Iso14443_3aListenerEventTypeHalted,
 
     Iso14443_3aListenerEventTypeReceivedStandardFrame,
