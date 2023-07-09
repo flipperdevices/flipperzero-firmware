@@ -5,13 +5,19 @@ A letter/number [morse]([https://en.wikipedia.org/wiki/Letter_beacon](https://fr
 (banner has been made with **DALL.E 2**)
 
 
-Like Russia with their HF [letter beacons](https://en.wikipedia.org/wiki/Letter_beacon), it's possible to use the **Flipper Zero** as a letter/number morse bacon. **Flipper Zero** has multiple RF interfaces (RFID, NFC and UHF) and it's possible to transmit raw data over these interfaces.
+Like Russia with their HF [letter beacons](https://en.wikipedia.org/wiki/Letter_beacon), it's possible to use the **Flipper Zero** as a letter/number morse beacon. **Flipper Zero** has multiple RF interfaces (RFID, NFC and UHF) and it's possible to transmit raw data over these interfaces.
 
 This application can transmit the whole alphabet (A to Z) and numbers (0 to 9) in morse on **RFID** interface. Range is about 5m.
+
+## Gallery
 
 Menu of the application:
 
 <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/off.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/onair.png" width=25% height=25%>
+
+Led of the **Flipper Zero** turns in red when transmitting.
+
+**Airspy Discovery HF+** SDR bas been used during these tests with a small loop antenna.
 
 **A** letter:
 
