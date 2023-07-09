@@ -31,6 +31,8 @@ jobs:
       RELATIVE_PATH: "applications/external/subbrute"
       CURRENT_VERSION: ${{ vars.RELEASE_VERSION }}
       RELEASE_VERSION: ${{ vars.RELEASE_VERSION }}
+      ZIP_NAME: ''
+      ZIP_TAG: ''
     strategy:
       fail-fast: false
       matrix:
@@ -141,6 +143,15 @@ jobs:
           WORKFLOW_BRANCH_OR_TAG: release-cfw
         run: |
           ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0
+
+      - name: Build FAPs
+        shell: bash
+        if: ${{ success() }}
+        env:
+          FBT_NO_SYNC: 0
+          DIST_SUFFIX: ${{ matrix.version }}
+          WORKFLOW_BRANCH_OR_TAG: release-cfw
+        run: |
           ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0 fap_dist
 
       #    - name: Save FBT
