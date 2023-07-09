@@ -1,8 +1,9 @@
 # flipperzero-rfidbeacon
 A letter/number [morse]([https://en.wikipedia.org/wiki/Letter_beacon](https://fr.wikipedia.org/wiki/Code_Morse_international)) beacon on **125 kHz** using **RFID** interface of the **Flipper Zero**
 
-![banner](https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/banner-rfid.jpg)
+![banner](https://raw.githubusercontent.com/nmrr/flipperzero-rfidbeacon/main/img/banner-rfid.jpg)
 (banner has been made with **DALL-.E 2**)
+
 
 Like Russia with their HF [letter beacons](https://en.wikipedia.org/wiki/Letter_beacon), it's possible to use the **Flipper Zero** as a letter/number morse bacon. **Flipper Zero** has multiple RF interfaces (RFID, NFC and UHF) and it's possible to transmit raw data over these interfaces.
 
