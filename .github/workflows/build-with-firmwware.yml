@@ -136,16 +136,6 @@ jobs:
       #        # An explicit key for restoring and saving the cache
       #        key: 'fbt=${{ env.FIRMWARE_VERSION }}'
       #
-      - name: Build Firmware
-        shell: bash
-        if: ${{ success() }}
-        env:
-          FBT_NO_SYNC: 0
-          DIST_SUFFIX: ${{ matrix.version }}
-          WORKFLOW_BRANCH_OR_TAG: release-cfw
-        run: |
-          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0
-
       - name: Remove other apps
         shell: bash
         if: ${{ success() }}
@@ -158,6 +148,16 @@ jobs:
           rm -Rf ./applications/external/*
           mv -f ./tmp/* ./applications/external/
           rm -Rf ./tmp/
+
+      - name: Build Firmware
+        shell: bash
+        if: ${{ success() }}
+        env:
+          FBT_NO_SYNC: 0
+          DIST_SUFFIX: ${{ matrix.version }}
+          WORKFLOW_BRANCH_OR_TAG: release-cfw
+        run: |
+          ./fbt COMPACT=1 DEBUG=0 FBT_NO_SYNC=0
 
       - name: Build FAPs
         shell: bash
