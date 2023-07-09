@@ -133,7 +133,7 @@ CC1101Status cc1101_flush_rx(FuriHalSpiBusHandle* handle);
  *
  * @param      handle  - pointer to FuriHalSpiHandle
  */
-CC1101Status cc1101_flush_tx(FuriHalSpiBusHandle * handle);
+CC1101Status cc1101_flush_tx(FuriHalSpiBusHandle* handle);
 
 /** Set Frequency
  *
