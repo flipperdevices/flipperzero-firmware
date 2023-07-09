@@ -230,7 +230,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
         run: |
-          gh release create v${{ env.RELEASE_VERSION }} --generate-notes --draft
+          gh release create v${{ env.RELEASE_VERSION }} --generate-notes --draft -R ${{ env.REPO_SELF }}
           gh release upload 'v${{ env.RELEASE_VERSION }}' '${{ env.ZIP_NAME }}#${{ env.ZIP_TAG }}' \
             '${{ env.TGZ_NAME }}#${{ env.TGZ_TAG }}' --clobber -R ${{ env.REPO_SELF }}
           gh release edit 'v${{ env.RELEASE_VERSION }}' --draft=false -R ${{ env.REPO_SELF }}
