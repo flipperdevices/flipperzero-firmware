@@ -57,7 +57,7 @@ jobs:
           $ReleaseVersion = ([string]::IsNullOrWhitespace($env:INPUT_VERSION) ? $env:CURRENT_VERSION : $env:INPUT_VERSION)
           Write-Output ('RELEASE_VERSION={0}' -f $ReleaseVersion) >> $env:GITHUB_ENV
 
-      - name: Copy Repo Files
+      - name: Copy Firmware Files
         uses: actions/checkout@v3
         with:
           repository: "${{ matrix.url }}"
