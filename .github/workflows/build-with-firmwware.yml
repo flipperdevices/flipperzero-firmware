@@ -141,7 +141,7 @@ jobs:
         if: ${{ success() }}
         # rm to remove problem FAP which includes non existent files
         run: |
-          rm -Rf ./applications/debug/subghz_test
+          rm -Rf ./applications/debug ./applications/examples
           mkdir ./tmp
           mv ./applications/external/application.fam ./tmp/
           mv -f ./applications/external/subbrute/ ./tmp/
