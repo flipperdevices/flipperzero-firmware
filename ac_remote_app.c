@@ -101,6 +101,7 @@ void ac_remote_app_free(AC_RemoteApp* app) {
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
+    variable_item_list_free(app->var_item_list);
     scene_manager_free(app->scene_manager);
     
     // Close records
