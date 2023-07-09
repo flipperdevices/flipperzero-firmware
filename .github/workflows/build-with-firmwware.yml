@@ -224,7 +224,8 @@ jobs:
           Write-Output ('TGZ_NAME={0}' -f $TgzName ) >> $env:GITHUB_ENV
           Write-Output ('ZIP_TAG={0} ({1})' -f $ZipName, $ZipSize) >> $env:GITHUB_ENV
           Write-Output ('TGZ_TAG={0} ({1})' -f $TgzName , $TgzSize) >> $env:GITHUB_ENV
-      - name: Create assets
+
+      - name: Upload assets
         if: ${{ success() && env.ZIP_NAME != '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.FLIPPER_TOKEN }}
