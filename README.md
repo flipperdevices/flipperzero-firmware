@@ -46,7 +46,8 @@ If you don't want to build this application, just simply copy **flipper_rfidbeac
 
 Build has been made with official toolchain, **API Mismatch** error may appear if you are using custom firmware. You can bypass this error but the program may crash.
 
-##What's next ?##
+## What's next ?
 * Choose the speed morse code 
 * Transmit on NFC interface (13.56 MHz), range is wider than **NFC**
 * Transmit on UHF interface (433 MHz, etc)
+* Transmit personalized text message over the air
