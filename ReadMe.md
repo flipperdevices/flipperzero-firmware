@@ -53,6 +53,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Mifare Nested 1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
 - Updated: [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477)
 - Fixed issues with Protoview, Weather Station and Cross Remote grabbing SubGHz settings (By RogueMaster)
+- Updated Bad USB and Bad BT to use only modifier keys by themselves (By Willy-JL)
 
 <a name="release">
 
