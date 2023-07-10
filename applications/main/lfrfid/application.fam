@@ -13,9 +13,9 @@ App(
     # icon="A_125khz_14",
     stack_size=2 * 1024,
     order=20,
-    fap_category="Main",
+    fap_category="RFID",
     fap_icon="icon.png",
     fap_icon_assets="images",
     # fap_libs=["assets"],
-    link="/ext/apps/Main/lfrfid.fap",
+    link="/ext/apps/RFID/lfrfid.fap",
 )

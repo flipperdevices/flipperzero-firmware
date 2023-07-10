@@ -13,8 +13,8 @@ App(
     icon="A_iButton_14",
     order=60,
     fap_icon="iBIcon.png",
-    fap_category="Main",
+    fap_category="iButton",
     fap_icon_assets="images",
     # fap_libs=["assets"],
-    link="/ext/apps/Main/iButton.fap",
+    link="/ext/apps/iButton/iButton.fap",
 )

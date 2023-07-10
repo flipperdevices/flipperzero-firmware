@@ -13,11 +13,11 @@ App(
     icon="A_Infrared_14",
     stack_size=3 * 1024,
     order=40,
-    fap_category="Main",
+    fap_category="Infrared",
     fap_icon="icon.png",
     fap_icon_assets="images",
     # fap_libs=["assets"],
-    link="/ext/apps/Main/infrared.fap",
+    link="/ext/apps/Infrared/infrared.fap",
 )
 
 # App(
