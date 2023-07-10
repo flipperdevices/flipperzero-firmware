@@ -127,7 +127,7 @@ ProtoViewApp* protoview_app_alloc() {
 
     //init setting
     app->setting = subghz_setting_alloc();
-    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user"));
+    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user.txt"));
 
     // GUI
     app->gui = furi_record_open(RECORD_GUI);
