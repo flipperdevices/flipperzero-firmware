@@ -54,6 +54,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477)
 - Fixed issues with Protoview, Weather Station and Cross Remote grabbing SubGHz settings (By RogueMaster)
 - Updated Bad USB and Bad BT to use only modifier keys by themselves (By Willy-JL)
+- UL: [Cc1101 ext #534 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/534)
+- UL: [PPOCSAG Pager: cc1101 ext #535 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/535)
+- UL: [ProtoView: cc1101 ext #536 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/536)
+- UL: [Fix merge external main #537 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/537)
+- UL: [SubRem app: UPD txrx #539 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/539)
+- UL: Updated: [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) (By gid9798)
 
 <a name="release">
 
