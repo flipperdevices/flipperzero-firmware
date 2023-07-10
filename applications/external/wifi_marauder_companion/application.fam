@@ -3,10 +3,13 @@ App(
     name="[ESP32] WiFi Marauder",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_marauder_app",
+    cdefines=["SERIAL_FLASHER_INTERFACE_UART=1"],
     requires=["gui"],
     stack_size=4 * 1024,
     order=90,
     fap_icon="wifi_10px.png",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="esp32_wifi_marauder",
     fap_category="GPIO",
     fap_private_libs=[
             Lib(
@@ -24,7 +27,8 @@ App(
                 cdefines=["SERIAL_FLASHER_INTERFACE_UART=1", "MD5_ENABLED=1"],
             ),
         ],
-    cdefines=["SERIAL_FLASHER_INTERFACE_UART=1"],
-    fap_icon_assets="assets",
-    fap_icon_assets_symbol="esp32_wifi_marauder",
+    fap_author="@0xchocolate & @tcpassos",
+    fap_weburl="https://github.com/0xchocolate/flipperzero-wifi-marauder",
+    # fap_version="0.5.1",
+    fap_description="WiFi Marauder companion app for Flipper Zero. Requires a connected dev board running Marauder FW.",
 )

@@ -1,0 +1,34 @@
+App(
+    appid="ESP_Flasher",
+    name="ESP Flasher",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="esp_flasher_app",
+    cdefines=["SERIAL_FLASHER_INTERFACE_UART=1"],
+    requires=["gui"],
+    stack_size=4 * 1024,
+    order=90,
+    fap_icon="wifi_10px.png",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="esp_flasher",
+    fap_category="GPIO",
+    fap_private_libs=[
+            Lib(
+                name="esp-serial-flasher",
+                fap_include_paths=["include"],
+                sources=[
+                    "src/esp_loader.c",
+                    "src/esp_targets.c",
+                    "src/md5_hash.c",
+                    "src/protocol_common.c",
+                    "src/protocol_uart.c",
+                    "src/slip.c"
+                ],
+                cincludes=["lib/esp-serial-flasher/private_include"],
+                cdefines=["SERIAL_FLASHER_INTERFACE_UART=1", "MD5_ENABLED=1"],
+            ),
+        ],
+    fap_author="@0xchocolate",
+    fap_weburl="https://github.com/0xchocolate/flipperzero-esp-flasher",
+    # fap_version="1.0",
+    fap_description="ESP Flasher app for Flipper Zero. Flipper Zero app to flash ESP chips from the device (no computer connection needed!). Uses espressif's esp-serial-flasher library. Requires an ESP chip connected to the flipper's UART pins (e.g. Wi-Fi devboard).",
+)
