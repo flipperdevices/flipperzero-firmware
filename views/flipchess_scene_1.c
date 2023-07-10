@@ -197,7 +197,8 @@ uint8_t flipchess_round(FlipChessScene1Model* model) {
     //     // }
     // }
 
-    if(model->game.state != SCL_GAME_STATE_PLAYING || model->paramExit) break;
+    if(model->game.state != SCL_GAME_STATE_PLAYING || model->paramExit)
+        return FlipChessStatusSuccess;
 
     //uint8_t squareFrom = 0;
     //uint8_t squareTo = 0;
@@ -233,7 +234,8 @@ uint8_t flipchess_round(FlipChessScene1Model* model) {
         }
         // }
     } else {
-        flipchess_makeAIMove(model->game.board, &(model->squareFrom), &(model->squareTo), &movePromote, model);
+        flipchess_makeAIMove(
+            model->game.board, &(model->squareFrom), &(model->squareTo), &movePromote, model);
         moveType = 2;
     }
 
@@ -335,7 +337,6 @@ static int flipchess_scene_1_model_init(
     FlipChessScene1Model* const model,
     const int white_mode,
     const int black_mode) {
-
     model->paramPlayerW = white_mode;
     model->paramPlayerB = black_mode;
 
@@ -347,20 +348,19 @@ static int flipchess_scene_1_model_init(
     model->paramStep = 0;
     model->paramFEN = NULL;
     model->paramPGN = NULL;
-    
+
     model->clockSeconds = -1;
     SCL_Board emptyStartState = SCL_BOARD_START_STATE;
-    model->startState = &emptyStartState;
+    memcpy(model->startState, &emptyStartState, sizeof(SCL_Board));
     model->random960PosNumber = -1;
 
     model->selected = 255;
     model->msg = "Flip Chess";
 
     SCL_SquareSet emptySquareSet = SCL_SQUARE_SET_EMPTY;
-    model->squareSet = &emptySquareSet;
+    memcpy(model->squareSet, &emptySquareSet, sizeof(SCL_SquareSet));
     model->moveString[0] = '\0';
-    SCL_SquareSet emptyMoveHighlight = SCL_SQUARE_SET_EMPTY;
-    model->moveHighlight = &emptyMoveHighlight;
+    memcpy(model->moveHighlight, &emptySquareSet, sizeof(SCL_SquareSet));
     model->squareFrom = 255;
     model->squareTo = 255;
 
@@ -395,7 +395,8 @@ static int flipchess_scene_1_model_init(
         model->paramPlayerW = model->paramAnalyze;
         model->paramPlayerB = model->paramAnalyze;
 
-        int16_t evaluation = flipchess_makeAIMove(model->game.board, &(move[0]), &(move[1]), &p, model);
+        int16_t evaluation =
+            flipchess_makeAIMove(model->game.board, &(move[0]), &(move[1]), &p, model);
 
         if(model->paramAnalyze == 0) evaluation = SCL_boardEvaluateStatic(model->game.board);
 
@@ -408,7 +409,7 @@ static int flipchess_scene_1_model_init(
         //printf("%lf (%d)\n", ((double)evaluation) / ((double)SCL_VALUE_PAWN), evaluation);
         //puts(moveStr);
 
-        return FlipChessStatusReturn;
+        return evaluation;
     }
 
     if(model->paramMoves) {
@@ -521,12 +522,7 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
             break;
         case InputKeyOk:
             with_view_model(
-                instance->view,
-                FlipChessScene1Model * model,
-                {
-                    flipchess_round(model);
-                },
-                true);
+                instance->view, FlipChessScene1Model * model, { flipchess_round(model); }, true);
             break;
         case InputKeyMAX:
             break;
