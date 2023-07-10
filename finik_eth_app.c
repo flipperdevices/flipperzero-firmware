@@ -140,6 +140,7 @@ void finit_eth_app_key_handler(FinikEthApp* app, InputKey key) {
             view_port_update(app->view_port);
             furi_delay_ms(150);
             char str[] = "test string 0 with some parameters";
+            eth_worker_log(app->eth_worker, str);
             evp_printf(app->eth_worker->init_process, "test promt %d %s", 112, "ivan");
             ethernet_view_process_print(app->eth_worker->stat_process, str);
             ethernet_view_process_print(
