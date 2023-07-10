@@ -82,7 +82,7 @@ static bool nfc_scene_info_on_event_mf_desfire(NfcApp* instance, uint32_t event)
 
 static bool nfc_scene_read_menu_on_event_mf_desfire(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEmulate) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneEmulate);
         return true;
     }
 
@@ -91,7 +91,7 @@ static bool nfc_scene_read_menu_on_event_mf_desfire(NfcApp* instance, uint32_t e
 
 static bool nfc_scene_saved_menu_on_event_mf_desfire(NfcApp* instance, uint32_t event) {
     if(event == SubmenuIndexCommonEmulate) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneEmulate);
         return true;
     }
 
