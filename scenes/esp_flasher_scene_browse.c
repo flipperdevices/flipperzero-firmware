@@ -1,5 +1,5 @@
-#include "../wifi_marauder_app_i.h"
-#include "../wifi_marauder_flasher.h"
+#include "../esp_flasher_app_i.h"
+#include "../esp_flasher_worker.h"
 
 enum SubmenuIndex {
     SubmenuIndexS3Mode,
@@ -12,13 +12,13 @@ enum SubmenuIndex {
     SubmenuIndexFlash,
 };
 
-static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) {
-    WifiMarauderApp* app = context;
+static void esp_flasher_scene_browse_callback(void* context, uint32_t index) {
+    EspFlasherApp* app = context;
 
-    scene_manager_set_scene_state(app->scene_manager, WifiMarauderSceneFlasher, index);
+    scene_manager_set_scene_state(app->scene_manager, EspFlasherSceneBrowse, index);
 
     // browse for files
-    FuriString* predefined_filepath = furi_string_alloc_set_str(MARAUDER_APP_FOLDER);
+    FuriString* predefined_filepath = furi_string_alloc_set_str(ESP_APP_FOLDER);
     FuriString* selected_filepath = furi_string_alloc();
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, ".bin", &I_Text_10x10);
@@ -28,7 +28,7 @@ static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) 
     case SubmenuIndexS3Mode:
         // toggle S3 mode
         app->selected_flash_options[SelectedFlashS3Mode] = !app->selected_flash_options[SelectedFlashS3Mode];
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshSubmenu);
+        view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
     case SubmenuIndexBoot:
         app->selected_flash_options[SelectedFlashBoot] = !app->selected_flash_options[SelectedFlashBoot];
@@ -45,7 +45,7 @@ static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) 
             // if user didn't select a file, leave unselected
             app->selected_flash_options[SelectedFlashBoot] = false;
         }
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshSubmenu);
+        view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
     case SubmenuIndexPart:
         app->selected_flash_options[SelectedFlashPart] = !app->selected_flash_options[SelectedFlashPart];
@@ -60,7 +60,7 @@ static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) 
             // if user didn't select a file, leave unselected
             app->selected_flash_options[SelectedFlashPart] = false;
         }
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshSubmenu);
+        view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
     case SubmenuIndexNvs:
         app->selected_flash_options[SelectedFlashNvs] = !app->selected_flash_options[SelectedFlashNvs];
@@ -75,7 +75,7 @@ static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) 
             // if user didn't select a file, leave unselected
             app->selected_flash_options[SelectedFlashNvs] = false;
         }
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshSubmenu);
+        view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
     case SubmenuIndexBootApp0:
         app->selected_flash_options[SelectedFlashBootApp0] = !app->selected_flash_options[SelectedFlashBootApp0];
@@ -90,7 +90,7 @@ static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) 
             // if user didn't select a file, leave unselected
             app->selected_flash_options[SelectedFlashBootApp0] = false;
         }
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshSubmenu);
+        view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
     case SubmenuIndexApp:
         app->selected_flash_options[SelectedFlashApp] = !app->selected_flash_options[SelectedFlashApp];
@@ -105,7 +105,7 @@ static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) 
             // if user didn't select a file, leave unselected
             app->selected_flash_options[SelectedFlashApp] = false;
         }
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshSubmenu);
+        view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
     case SubmenuIndexCustom:
         app->selected_flash_options[SelectedFlashCustom] = !app->selected_flash_options[SelectedFlashCustom];
@@ -120,7 +120,7 @@ static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) 
             // if user didn't select a file, leave unselected
             app->selected_flash_options[SelectedFlashCustom] = false;
         }
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventRefreshSubmenu);
+        view_dispatcher_send_custom_event(app->view_dispatcher, EspFlasherEventRefreshSubmenu);
         break;
     case SubmenuIndexFlash:
         // count how many options are selected
@@ -132,7 +132,7 @@ static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) 
         }
         if (app->num_selected_flash_options) {
             // only start next scene if at least one option is selected
-            scene_manager_next_scene(app->scene_manager, WifiMarauderSceneConsoleOutput);
+            scene_manager_next_scene(app->scene_manager, EspFlasherSceneConsoleOutput);
         }
         break;
     }
@@ -152,14 +152,14 @@ static void wifi_marauder_scene_flasher_callback(void* context, uint32_t index) 
 #define STR_CUSTOM         "Custom"
 #define STR_FLASH_S3       "[>] FLASH (ESP32-S3)"
 #define STR_FLASH          "[>] FLASH"
-static void _refresh_submenu(WifiMarauderApp* app) {
+static void _refresh_submenu(EspFlasherApp* app) {
     Submenu* submenu = app->submenu;
 
     submenu_reset(app->submenu);
 
     submenu_set_header(submenu, "Browse for files to flash");
     submenu_add_item(
-        submenu, app->selected_flash_options[SelectedFlashS3Mode] ? "[x] Using ESP32-S3" : "[ ] Check if using S3", SubmenuIndexS3Mode, wifi_marauder_scene_flasher_callback, app);
+        submenu, app->selected_flash_options[SelectedFlashS3Mode] ? "[x] Using ESP32-S3" : "[ ] Select if using S3", SubmenuIndexS3Mode, esp_flasher_scene_browse_callback, app);
     const char* strSelectBootloader = STR_UNSELECT " " STR_BOOT;
     if (app->selected_flash_options[SelectedFlashS3Mode]) {
         if (app->selected_flash_options[SelectedFlashBoot]) {
@@ -175,28 +175,28 @@ static void _refresh_submenu(WifiMarauderApp* app) {
         }
     }
     submenu_add_item(
-        submenu, strSelectBootloader, SubmenuIndexBoot, wifi_marauder_scene_flasher_callback, app);
+        submenu, strSelectBootloader, SubmenuIndexBoot, esp_flasher_scene_browse_callback, app);
     submenu_add_item(
-        submenu, app->selected_flash_options[SelectedFlashPart] ? STR_SELECT " " STR_PART : STR_UNSELECT " " STR_PART, SubmenuIndexPart, wifi_marauder_scene_flasher_callback, app);
+        submenu, app->selected_flash_options[SelectedFlashPart] ? STR_SELECT " " STR_PART : STR_UNSELECT " " STR_PART, SubmenuIndexPart, esp_flasher_scene_browse_callback, app);
     submenu_add_item(
-        submenu, app->selected_flash_options[SelectedFlashNvs] ? STR_SELECT " " STR_NVS : STR_UNSELECT " " STR_NVS, SubmenuIndexNvs, wifi_marauder_scene_flasher_callback, app);
+        submenu, app->selected_flash_options[SelectedFlashNvs] ? STR_SELECT " " STR_NVS : STR_UNSELECT " " STR_NVS, SubmenuIndexNvs, esp_flasher_scene_browse_callback, app);
     submenu_add_item(
-        submenu, app->selected_flash_options[SelectedFlashBootApp0] ? STR_SELECT " " STR_BOOT_APP0 : STR_UNSELECT " " STR_BOOT_APP0, SubmenuIndexBootApp0, wifi_marauder_scene_flasher_callback, app);
+        submenu, app->selected_flash_options[SelectedFlashBootApp0] ? STR_SELECT " " STR_BOOT_APP0 : STR_UNSELECT " " STR_BOOT_APP0, SubmenuIndexBootApp0, esp_flasher_scene_browse_callback, app);
     submenu_add_item(
-        submenu, app->selected_flash_options[SelectedFlashApp] ? STR_SELECT " " STR_APP : STR_UNSELECT " " STR_APP, SubmenuIndexApp, wifi_marauder_scene_flasher_callback, app);
+        submenu, app->selected_flash_options[SelectedFlashApp] ? STR_SELECT " " STR_APP : STR_UNSELECT " " STR_APP, SubmenuIndexApp, esp_flasher_scene_browse_callback, app);
     // TODO: custom addr
     //submenu_add_item(
-    //    submenu, app->selected_flash_options[SelectedFlashCustom] ? STR_SELECT " " STR_CUSTOM : STR_UNSELECT " " STR_CUSTOM, SubmenuIndexCustom, wifi_marauder_scene_flasher_callback, app);
+    //    submenu, app->selected_flash_options[SelectedFlashCustom] ? STR_SELECT " " STR_CUSTOM : STR_UNSELECT " " STR_CUSTOM, SubmenuIndexCustom, esp_flasher_scene_browse_callback, app);
     submenu_add_item(
-        submenu, app->selected_flash_options[SelectedFlashS3Mode] ? STR_FLASH_S3 : STR_FLASH, SubmenuIndexFlash, wifi_marauder_scene_flasher_callback, app);
+        submenu, app->selected_flash_options[SelectedFlashS3Mode] ? STR_FLASH_S3 : STR_FLASH, SubmenuIndexFlash, esp_flasher_scene_browse_callback, app);
 
     submenu_set_selected_item(
-        submenu, scene_manager_get_scene_state(app->scene_manager, WifiMarauderSceneFlasher));
-    view_dispatcher_switch_to_view(app->view_dispatcher, WifiMarauderAppViewSubmenu);
+        submenu, scene_manager_get_scene_state(app->scene_manager, EspFlasherSceneBrowse));
+    view_dispatcher_switch_to_view(app->view_dispatcher, EspFlasherAppViewSubmenu);
 }
 
-void wifi_marauder_scene_flasher_on_enter(void* context) {
-    WifiMarauderApp* app = context;
+void esp_flasher_scene_browse_on_enter(void* context) {
+    EspFlasherApp* app = context;
 
     memset(app->selected_flash_options, 0, sizeof(app->selected_flash_options));
     app->bin_file_path_boot[0] = '\0';
@@ -209,11 +209,11 @@ void wifi_marauder_scene_flasher_on_enter(void* context) {
     _refresh_submenu(app);
 }
 
-bool wifi_marauder_scene_flasher_on_event(void* context, SceneManagerEvent event) {
-    WifiMarauderApp* app = context;
+bool esp_flasher_scene_browse_on_event(void* context, SceneManagerEvent event) {
+    EspFlasherApp* app = context;
     bool consumed = false;
     if (event.type == SceneManagerEventTypeCustom) {
-        if (event.event == WifiMarauderEventRefreshSubmenu) {
+        if (event.event == EspFlasherEventRefreshSubmenu) {
             _refresh_submenu(app);
             consumed = true;
         }
@@ -222,7 +222,7 @@ bool wifi_marauder_scene_flasher_on_event(void* context, SceneManagerEvent event
     return consumed;
 }
 
-void wifi_marauder_scene_flasher_on_exit(void* context) {
-    WifiMarauderApp* app = context;
+void esp_flasher_scene_browse_on_exit(void* context) {
+    EspFlasherApp* app = context;
     submenu_reset(app->submenu);
 }

@@ -1,7 +1,7 @@
-#include "wifi_marauder_flasher.h"
+#include "esp_flasher_worker.h"
 
 FuriStreamBuffer* flash_rx_stream; // TODO make safe
-WifiMarauderApp* global_app; // TODO make safe
+EspFlasherApp* global_app; // TODO make safe
 FuriTimer* timer; // TODO make
 
 static uint32_t _remaining_time = 0;
@@ -12,7 +12,7 @@ static void _timer_callback(void* context) {
     }
 }
 
-static esp_loader_error_t _flash_file(WifiMarauderApp* app, char* filepath, uint32_t addr) {
+static esp_loader_error_t _flash_file(EspFlasherApp* app, char* filepath, uint32_t addr) {
     // TODO cleanup
     esp_loader_error_t err;
     static uint8_t payload[1024];
@@ -81,7 +81,7 @@ typedef struct {
     uint32_t addr;
 } FlashItem;
 
-static void _flash_all_files(WifiMarauderApp* app) {
+static void _flash_all_files(EspFlasherApp* app) {
     esp_loader_error_t err;
     const int num_steps = app->num_selected_flash_options;
 
@@ -111,8 +111,8 @@ static void _flash_all_files(WifiMarauderApp* app) {
     }
 }
 
-static int32_t wifi_marauder_flash_bin(void* context) {
-    WifiMarauderApp* app = (void*)context;
+static int32_t esp_flasher_flash_bin(void* context) {
+    EspFlasherApp* app = (void*)context;
     esp_loader_error_t err;
 
     app->flash_worker_busy = true;
@@ -126,7 +126,7 @@ static int32_t wifi_marauder_flash_bin(void* context) {
     err = esp_loader_connect(&connect_config);
     if(err != ESP_LOADER_SUCCESS) {
         char err_msg[256];
-        snprintf(err_msg, sizeof(err_msg), "Cannot connect to target. Error: %u\n", err);
+        snprintf(err_msg, sizeof(err_msg), "Cannot connect to target. Error: %u\nMake sure the device is in bootloader/reflash mode, then try again.\n", err);
         loader_port_debug_print(err_msg);
     }
 
@@ -168,18 +168,18 @@ static int32_t wifi_marauder_flash_bin(void* context) {
     return 0;
 }
 
-void wifi_marauder_flash_start_thread(WifiMarauderApp* app) {
+void esp_flasher_worker_start_thread(EspFlasherApp* app) {
     global_app = app;
 
     app->flash_worker = furi_thread_alloc();
-    furi_thread_set_name(app->flash_worker, "WifiMarauderFlashWorker");
+    furi_thread_set_name(app->flash_worker, "EspFlasherFlashWorker");
     furi_thread_set_stack_size(app->flash_worker, 2048);
     furi_thread_set_context(app->flash_worker, app);
-    furi_thread_set_callback(app->flash_worker, wifi_marauder_flash_bin);
+    furi_thread_set_callback(app->flash_worker, esp_flasher_flash_bin);
     furi_thread_start(app->flash_worker);
 }
 
-void wifi_marauder_flash_stop_thread(WifiMarauderApp* app) {
+void esp_flasher_worker_stop_thread(EspFlasherApp* app) {
     furi_thread_join(app->flash_worker);
     furi_thread_free(app->flash_worker);
 }
@@ -195,7 +195,7 @@ esp_loader_error_t loader_port_read(uint8_t* data, uint16_t size, uint32_t timeo
 
 esp_loader_error_t loader_port_write(const uint8_t* data, uint16_t size, uint32_t timeout) {
     UNUSED(timeout);
-    wifi_marauder_uart_tx((uint8_t*)data, size);
+    esp_flasher_uart_tx((uint8_t*)data, size);
     return ESP_LOADER_SUCCESS;
 }
 
@@ -216,13 +216,13 @@ uint32_t loader_port_remaining_time(void) {
     return _remaining_time;
 }
 
-extern void wifi_marauder_console_output_handle_rx_data_cb(
+extern void esp_flasher_console_output_handle_rx_data_cb(
     uint8_t* buf,
     size_t len,
     void* context); // TODO cleanup
 void loader_port_debug_print(const char* str) {
     if(global_app)
-        wifi_marauder_console_output_handle_rx_data_cb((uint8_t*)str, strlen(str), global_app);
+        esp_flasher_console_output_handle_rx_data_cb((uint8_t*)str, strlen(str), global_app);
 }
 
 void loader_port_spi_set_cs(uint32_t level) {
@@ -230,12 +230,12 @@ void loader_port_spi_set_cs(uint32_t level) {
     // unimplemented
 }
 
-void wifi_marauder_flash_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
+void esp_flasher_worker_handle_rx_data_cb(uint8_t* buf, size_t len, void* context) {
     UNUSED(context);
     if(flash_rx_stream) {
         furi_stream_buffer_send(flash_rx_stream, buf, len, 0);
     } else {
         // done flashing
-        if(global_app) wifi_marauder_console_output_handle_rx_data_cb(buf, len, global_app);
+        if(global_app) esp_flasher_console_output_handle_rx_data_cb(buf, len, global_app);
     }
 }

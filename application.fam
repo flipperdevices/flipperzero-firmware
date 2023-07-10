@@ -1,8 +1,8 @@
 App(
-    appid="esp32_wifi_marauder",
-    name="[ESP32] WiFi Marauder",
+    appid="esp_flasher",
+    name="ESP Flasher",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="wifi_marauder_app",
+    entry_point="esp_flasher_app",
     requires=["gui"],
     stack_size=4 * 1024,
     order=90,

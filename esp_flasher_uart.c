@@ -1,12 +1,11 @@
-#include "wifi_marauder_app_i.h"
-#include "wifi_marauder_uart.h"
+#include "esp_flasher_app_i.h"
+#include "esp_flasher_uart.h"
 
 #define UART_CH (FuriHalUartIdUSART1)
-#define LP_UART_CH (FuriHalUartIdLPUART1)
 #define BAUDRATE (115200)
 
-struct WifiMarauderUart {
-    WifiMarauderApp* app;
+struct EspFlasherUart {
+    EspFlasherApp* app;
     FuriHalUartId channel;
     FuriThread* rx_thread;
     FuriStreamBuffer* rx_stream;
@@ -19,8 +18,8 @@ typedef enum {
     WorkerEvtRxDone = (1 << 1),
 } WorkerEvtFlags;
 
-void wifi_marauder_uart_set_handle_rx_data_cb(
-    WifiMarauderUart* uart,
+void esp_flasher_uart_set_handle_rx_data_cb(
+    EspFlasherUart* uart,
     void (*handle_rx_data_cb)(uint8_t* buf, size_t len, void* context)) {
     furi_assert(uart);
     uart->handle_rx_data_cb = handle_rx_data_cb;
@@ -28,8 +27,8 @@ void wifi_marauder_uart_set_handle_rx_data_cb(
 
 #define WORKER_ALL_RX_EVENTS (WorkerEvtStop | WorkerEvtRxDone)
 
-void wifi_marauder_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
-    WifiMarauderUart* uart = (WifiMarauderUart*)context;
+void esp_flasher_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
+    EspFlasherUart* uart = (EspFlasherUart*)context;
 
     if(ev == UartIrqEventRXNE) {
         furi_stream_buffer_send(uart->rx_stream, &data, 1, 0);
@@ -38,7 +37,7 @@ void wifi_marauder_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) 
 }
 
 static int32_t uart_worker(void* context) {
-    WifiMarauderUart* uart = (void*)context;
+    EspFlasherUart* uart = (void*)context;
 
     while(1) {
         uint32_t events =
@@ -58,17 +57,13 @@ static int32_t uart_worker(void* context) {
     return 0;
 }
 
-void wifi_marauder_uart_tx(uint8_t* data, size_t len) {
+void esp_flasher_uart_tx(uint8_t* data, size_t len) {
     furi_hal_uart_tx(UART_CH, data, len);
 }
 
-void wifi_marauder_lp_uart_tx(uint8_t* data, size_t len) {
-    furi_hal_uart_tx(LP_UART_CH, data, len);
-}
-
-WifiMarauderUart*
-    wifi_marauder_uart_init(WifiMarauderApp* app, FuriHalUartId channel, const char* thread_name) {
-    WifiMarauderUart* uart = malloc(sizeof(WifiMarauderUart));
+EspFlasherUart*
+    esp_flasher_uart_init(EspFlasherApp* app, FuriHalUartId channel, const char* thread_name) {
+    EspFlasherUart* uart = malloc(sizeof(EspFlasherUart));
 
     uart->app = app;
     uart->channel = channel;
@@ -85,20 +80,16 @@ WifiMarauderUart*
         furi_hal_uart_init(channel, BAUDRATE);
     }
     furi_hal_uart_set_br(channel, BAUDRATE);
-    furi_hal_uart_set_irq_cb(channel, wifi_marauder_uart_on_irq_cb, uart);
+    furi_hal_uart_set_irq_cb(channel, esp_flasher_uart_on_irq_cb, uart);
 
     return uart;
 }
 
-WifiMarauderUart* wifi_marauder_usart_init(WifiMarauderApp* app) {
-    return wifi_marauder_uart_init(app, UART_CH, "WifiMarauderUartRxThread");
+EspFlasherUart* esp_flasher_usart_init(EspFlasherApp* app) {
+    return esp_flasher_uart_init(app, UART_CH, "EspFlasherUartRxThread");
 }
 
-WifiMarauderUart* wifi_marauder_lp_uart_init(WifiMarauderApp* app) {
-    return wifi_marauder_uart_init(app, LP_UART_CH, "WifiMarauderLPUartRxThread");
-}
-
-void wifi_marauder_uart_free(WifiMarauderUart* uart) {
+void esp_flasher_uart_free(EspFlasherUart* uart) {
     furi_assert(uart);
 
     furi_thread_flags_set(furi_thread_get_id(uart->rx_thread), WorkerEvtStop);
