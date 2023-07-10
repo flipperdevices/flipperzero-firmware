@@ -176,7 +176,9 @@ void update_screen_y_offset(SceneState* scene_state) {
     }
 }
 
-bool totp_scene_add_new_token_handle_event(const PluginEvent* const event, PluginState* plugin_state) {
+bool totp_scene_add_new_token_handle_event(
+    const PluginEvent* const event,
+    PluginState* plugin_state) {
     if(event->type != EventTypeKey) {
         return true;
     }
