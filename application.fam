@@ -4,8 +4,8 @@ App(
     apptype=FlipperAppType.EXTERNAL,
     entry_point="air_mouse_app",
     stack_size=10 * 1024,
-    fap_category="Tools",
+    fap_category="GPIO",
     fap_icon="icon.png",
-    fap_version="0.6",
+    fap_version="0.7",
     sources=["*.c", "*.cc"],
 )
