@@ -11,7 +11,7 @@ App(
     stack_size=2 * 1024,
     icon="A_U2F_14",
     order=80,
-    fap_icon="U2FIcon.png",
+    fap_icon="icon.png",
     fap_category="Main",
     fap_icon_assets="images",
     fap_libs=["assets"],

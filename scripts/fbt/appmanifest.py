@@ -422,17 +422,6 @@ class ApplicationsCGenerator:
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
      .path = "{app_path}" }}"""
 
-    def get_external_app_descr(self, app: FlipperApplication):
-        app_path = "/ext/apps"
-        if app.fap_category:
-            app_path += f"/{app.fap_category}"
-        app_path += f"/{app.appid}.fap"
-        return f"""
-    {{
-     .name = "{app.name}",
-     .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .path = "{app_path}" }}"""
-
     def generate(self):
         contents = [
             '#include "applications.h"',

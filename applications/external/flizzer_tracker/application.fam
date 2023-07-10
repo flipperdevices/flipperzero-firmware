@@ -5,7 +5,7 @@ App(
     entry_point="flizzer_tracker_app",
     stack_size=2 * 1024,
     order=90,
-    fap_version=(0, 2),
+    fap_version=(0, 3),
     fap_description="An advanced Flipper Zero chiptune tracker with 4 channels",
     fap_author="LTVA",
     fap_weburl="https://github.com/LTVA1/flizzer_tracker",

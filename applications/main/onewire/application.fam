@@ -1,3 +1,10 @@
+# App(
+#     appid="onewire",
+#     name="1-Wire",
+#     apptype=FlipperAppType.METAPACKAGE,
+#     provides=["onewire_start"],
+# )
+
 App(
     appid="onewire_start",
     apptype=FlipperAppType.STARTUP,

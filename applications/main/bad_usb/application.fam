@@ -12,8 +12,8 @@ App(
     icon="A_BadUsb_14",
     order=70,
     fap_category="USB",
-    fap_icon="badusb_10px.png",
+    fap_icon="icon.png",
     fap_icon_assets="images",
     # fap_libs=["assets"],
-    link="/ext/apps/Main/bad_usb.fap",
+    link="/ext/apps/USB/bad_usb.fap",
 )
