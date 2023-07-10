@@ -1,5 +1,6 @@
 #include "flipbip_file.h"
 #include <storage/storage.h>
+#include <applications.h>
 #include <loader/loader.h>
 #include "../helpers/flipbip_string.h"
 // From: lib/crypto
