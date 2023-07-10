@@ -1,7 +1,7 @@
 #include "bt_type_code.h"
+#include <furi_hal_bt.h>
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_version.h>
-#include <bt/bt_service/bt_i.h>
 #include <furi/core/thread.h>
 #include <furi/core/mutex.h>
 #include <furi/core/string.h>
