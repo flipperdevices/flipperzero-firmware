@@ -36,7 +36,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            build/f7-firmware-C/.extapps/FlipBIP.fap
+            build/f7-firmware-C/.extapps/flipbip.fap
             applications_user/FlipBIP/README.md
           name: ${{steps.tag.outputs.tag}}
           body: Built against Flipper Zero firmware v${{ env.firmware_version }}
