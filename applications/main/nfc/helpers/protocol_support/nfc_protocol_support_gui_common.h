@@ -2,6 +2,8 @@
 
 #include <gui/modules/widget.h>
 
+#include "nfc/nfc_app.h"
+
 enum {
     SubmenuIndexCommonSave,
     SubmenuIndexCommonEmulate,
@@ -18,3 +20,7 @@ void nfc_protocol_support_common_widget_callback(
     GuiButtonType result,
     InputType type,
     void* context);
+
+void nfc_protocol_support_common_on_enter_empty(NfcApp* instance);
+
+bool nfc_protocol_support_common_on_event_empty(NfcApp* instance, uint32_t event);

@@ -3,8 +3,9 @@
 
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller.h>
 
+#include "nfc/nfc_app_i.h"
+
 #include "../nfc_protocol_support_gui_common.h"
-#include "../../../nfc_app_i.h"
 
 static void nfc_scene_info_on_enter_iso14443_3a(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
@@ -42,10 +43,6 @@ static void nfc_scene_read_on_enter_iso14443_3a(NfcApp* instance) {
     nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_iso14443_3a, instance);
 }
 
-static void nfc_scene_read_menu_on_enter_iso14443_3a(NfcApp* instance) {
-    UNUSED(instance);
-}
-
 static void nfc_scene_read_success_on_enter_iso14443_3a(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
     const Iso14443_3aData* data = nfc_device_get_data(device, NfcProtocolIso14443_3a);
@@ -59,10 +56,6 @@ static void nfc_scene_read_success_on_enter_iso14443_3a(NfcApp* instance) {
         instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
 
     furi_string_free(temp_str);
-}
-
-static void nfc_scene_saved_menu_on_enter_iso14443_3a(NfcApp* instance) {
-    UNUSED(instance);
 }
 
 static NfcCommand
@@ -118,9 +111,6 @@ static bool nfc_scene_read_menu_on_event_iso14443_3a(NfcApp* instance, uint32_t 
 
 bool nfc_scene_saved_menu_on_event_iso14443_3a_common(NfcApp* instance, uint32_t event) {
     switch(event) {
-    case SubmenuIndexCommonEmulate:
-        scene_manager_next_scene(instance->scene_manager, NfcSceneEmulate);
-        return true;
     case SubmenuIndexCommonEdit:
         scene_manager_next_scene(instance->scene_manager, NfcSceneSetUid);
         return true;
@@ -148,7 +138,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
         },
     .scene_read_menu =
         {
-            .on_enter = nfc_scene_read_menu_on_enter_iso14443_3a,
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
             .on_event = nfc_scene_read_menu_on_event_iso14443_3a,
         },
     .scene_read_success =
@@ -158,7 +148,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
         },
     .scene_saved_menu =
         {
-            .on_enter = nfc_scene_saved_menu_on_enter_iso14443_3a,
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
             .on_event = nfc_scene_saved_menu_on_event_iso14443_3a,
         },
     .scene_emulate =

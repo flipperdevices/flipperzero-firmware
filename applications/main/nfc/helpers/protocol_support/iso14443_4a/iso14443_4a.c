@@ -4,9 +4,10 @@
 #include <nfc/protocols/iso14443_4a/iso14443_4a_poller.h>
 #include <nfc/protocols/iso14443_4a/iso14443_4a_listener.h>
 
+#include "nfc/nfc_app_i.h"
+
 #include "../nfc_protocol_support_gui_common.h"
 #include "../iso14443_3a/iso14443_3a_i.h"
-#include "../../../nfc_app_i.h"
 
 static void nfc_scene_info_on_enter_iso14443_4a(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
@@ -42,10 +43,6 @@ static NfcCommand
 
 static void nfc_scene_read_on_enter_iso14443_4a(NfcApp* instance) {
     nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_iso14443_4a, instance);
-}
-
-static void nfc_scene_read_menu_on_enter_iso14443_4a(NfcApp* instance) {
-    UNUSED(instance);
 }
 
 static void nfc_scene_read_success_on_enter_iso14443_4a(NfcApp* instance) {
@@ -136,7 +133,7 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_4a = {
         },
     .scene_read_menu =
         {
-            .on_enter = nfc_scene_read_menu_on_enter_iso14443_4a,
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
             .on_event = nfc_scene_read_menu_on_event_iso14443_4a,
         },
     .scene_read_success =

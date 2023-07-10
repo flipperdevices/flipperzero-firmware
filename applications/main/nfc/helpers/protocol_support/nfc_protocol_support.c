@@ -1,9 +1,9 @@
 #include "nfc_protocol_support.h"
 
+#include "nfc/nfc_app_i.h"
+
 #include "nfc_protocol_support_defs.h"
 #include "nfc_protocol_support_gui_common.h"
-
-#include "../../nfc_app_i.h"
 
 typedef void (*NfcProtocolSupportCommonOnEnter)(NfcApp* instance);
 typedef bool (*NfcProtocolSupportCommonOnEvent)(NfcApp* instance, SceneManagerEvent event);
@@ -369,7 +369,8 @@ static void nfc_protocol_support_scene_emulate_on_enter(NfcApp* instance) {
     widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61);
 
     if(nfc_protocol_support_has_feature(protocol, NfcProtocolFeatureEmulateUid)) {
-        widget_add_string_element(widget, 90, 13, AlignCenter, AlignTop, FontPrimary, "Emulating UID");
+        widget_add_string_element(
+            widget, 90, 13, AlignCenter, AlignTop, FontPrimary, "Emulating UID");
 
         size_t uid_len;
         const uint8_t* uid = nfc_device_get_uid(instance->nfc_device, &uid_len);
@@ -382,7 +383,8 @@ static void nfc_protocol_support_scene_emulate_on_enter(NfcApp* instance) {
 
     } else {
         widget_add_string_element(widget, 90, 13, AlignCenter, AlignTop, FontPrimary, "Emulating");
-        furi_string_set(temp_str, nfc_device_get_name(instance->nfc_device, NfcDeviceNameTypeFull));
+        furi_string_set(
+            temp_str, nfc_device_get_name(instance->nfc_device, NfcDeviceNameTypeFull));
     }
 
     widget_add_text_box_element(

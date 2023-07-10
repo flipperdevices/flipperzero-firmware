@@ -3,8 +3,9 @@
 
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller.h>
 
+#include "nfc/nfc_app_i.h"
+
 #include "../nfc_protocol_support_gui_common.h"
-#include "../../../nfc_app_i.h"
 
 enum {
     SubmenuIndexUnlock = SubmenuIndexCommonMax,
@@ -138,7 +139,8 @@ static void nfc_scene_saved_menu_on_enter_mf_ultralight(NfcApp* instance) {
 }
 
 static void nfc_scene_emulate_on_enter_mf_ultralight(NfcApp* instance) {
-    const MfUltralightData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
+    const MfUltralightData* data =
+        nfc_device_get_data(instance->nfc_device, NfcProtocolMfUltralight);
     instance->listener = nfc_listener_alloc(instance->nfc, NfcProtocolMfUltralight, data);
     nfc_listener_start(instance->listener, NULL, NULL);
 }
@@ -154,9 +156,6 @@ static bool nfc_scene_info_on_event_mf_ultralight(NfcApp* instance, uint32_t eve
 
 static bool nfc_scene_read_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
     switch(event) {
-    case SubmenuIndexCommonEmulate:
-        scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightEmulate);
-        return true;
     case SubmenuIndexUnlock:
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
         return true;
@@ -167,9 +166,6 @@ static bool nfc_scene_read_menu_on_event_mf_ultralight(NfcApp* instance, uint32_
 
 static bool nfc_scene_saved_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
     switch(event) {
-    case SubmenuIndexCommonEmulate:
-        scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightEmulate);
-        return true;
     case SubmenuIndexUnlockByReader:
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
         return true;
