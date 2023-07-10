@@ -43,8 +43,17 @@ Iso14443_3aError
 Iso14443_3aError iso14443_3a_listener_tx_with_custom_parity(
     Iso14443_3aListener* instance,
     const BitBuffer* tx_buffer) {
-    // TODO change
-    return iso14443_3a_listener_tx(instance, tx_buffer);
+    furi_assert(instance);
+    furi_assert(tx_buffer);
+
+    Iso14443_3aError ret = Iso14443_3aErrorNone;
+    NfcError error = nfc_listener_tx_custom_parity(instance->nfc, tx_buffer);
+    if(error != NfcErrorNone) {
+        FURI_LOG_W(TAG, "Tx error: %d", error);
+        ret = iso14443_3a_listener_process_nfc_error(error);
+    }
+
+    return ret;
 };
 
 Iso14443_3aError iso14443_3a_listener_send_standard_frame(

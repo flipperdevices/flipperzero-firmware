@@ -351,6 +351,11 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
     return ret;
 }
 
+NfcError nfc_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
+    // TODO change
+    return nfc_listener_tx(instance, tx_buffer);
+}
+
 static NfcError nfc_poller_trx_state_machine(Nfc* instance, uint32_t fwt_fc) {
     FHalNfcEvent event = 0;
     NfcError error = NfcErrorNone;

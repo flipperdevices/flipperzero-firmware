@@ -102,6 +102,8 @@ void nfc_stop(Nfc* instance);
 
 NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer);
 
+NfcError nfc_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer);
+
 NfcError nfc_trx_custom_parity(
     Nfc* instance,
     const BitBuffer* tx_buffer,

@@ -390,6 +390,10 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
     return NfcErrorNone;
 }
 
+NfcError nfc_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
+    return nfc_listener_tx(instance, tx_buffer);
+}
+
 NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer, uint32_t fwt) {
     furi_assert(instance);
     furi_assert(tx_buffer);
