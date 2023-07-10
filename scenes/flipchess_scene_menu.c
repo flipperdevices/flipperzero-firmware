@@ -59,7 +59,7 @@ bool flipchess_scene_menu_on_event(void* context, SceneManagerEvent event) {
             return true;
         } else if(event.event == SubmenuIndexScene1Import) {
             app->import_game = 1;
-            app->input_state = FlipChessTextInputMnemonic;
+            app->input_state = FlipChessTextInputGame;
             text_input_set_header_text(app->text_input, "Enter game phrase");
             view_dispatcher_switch_to_view(app->view_dispatcher, FlipChessViewIdTextInput);
             return true;
