@@ -390,7 +390,7 @@ static void nfc_protocol_support_scene_emulate_on_enter(NfcApp* instance) {
     nfc_protocol_support[protocol]->scene_emulate.on_enter(instance);
 
     scene_manager_set_scene_state(
-        instance->scene_manager, NfcSceneNfcaEmulate, NfcSceneEmulateStateWidget);
+        instance->scene_manager, NfcSceneEmulate, NfcSceneEmulateStateWidget);
 
     view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
     nfc_blink_emulate_start(instance);
@@ -416,22 +416,19 @@ static bool
             // Update TextBox data
             text_box_set_text(instance->text_box, furi_string_get_cstr(instance->text_box_store));
             consumed = true;
-        } else if(event.event == GuiButtonTypeCenter && state == NfcSceneEmulateStateWidget) {
-            view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewTextBox);
-            scene_manager_set_scene_state(
-                instance->scene_manager, NfcSceneNfcaEmulate, NfcSceneEmulateStateTextBox);
-            consumed = true;
-        } else if(event.event == NfcCustomEventViewExit && state == NfcSceneEmulateStateTextBox) {
-            view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
-            scene_manager_set_scene_state(
-                instance->scene_manager, NfcSceneNfcaEmulate, NfcSceneEmulateStateWidget);
-            consumed = true;
+        } else if(event.event == GuiButtonTypeCenter) {
+            if(state == NfcSceneEmulateStateWidget) {
+                view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewTextBox);
+                scene_manager_set_scene_state(
+                    instance->scene_manager, NfcSceneEmulate, NfcSceneEmulateStateTextBox);
+                consumed = true;
+            }
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         if(state == NfcSceneEmulateStateTextBox) {
             view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
             scene_manager_set_scene_state(
-                instance->scene_manager, NfcSceneNfcaEmulate, NfcSceneEmulateStateWidget);
+                instance->scene_manager, NfcSceneEmulate, NfcSceneEmulateStateWidget);
             consumed = true;
         }
     }

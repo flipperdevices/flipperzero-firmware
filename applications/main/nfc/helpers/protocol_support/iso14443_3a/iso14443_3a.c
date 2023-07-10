@@ -89,7 +89,8 @@ NfcCommand nfc_scene_emulate_listener_callback_iso14443_3a(NfcGenericEvent event
 }
 
 static void nfc_scene_emulate_on_enter_iso14443_3a(NfcApp* instance) {
-    nfc_listener_start(instance->listener, nfc_scene_emulate_listener_callback_iso14443_3a, instance);
+    nfc_listener_start(
+        instance->listener, nfc_scene_emulate_listener_callback_iso14443_3a, instance);
 }
 
 static bool nfc_scene_info_on_event_iso14443_3a(NfcApp* instance, uint32_t event) {
@@ -155,7 +156,8 @@ const NfcProtocolSupportBase nfc_protocol_support_iso14443_3a = {
             .on_enter = nfc_scene_saved_menu_on_enter_iso14443_3a,
             .on_event = nfc_scene_saved_menu_on_event_iso14443_3a,
         },
-    .scene_emulate = {
+    .scene_emulate =
+        {
             .on_enter = nfc_scene_emulate_on_enter_iso14443_3a,
             .on_event = NULL,
         },
