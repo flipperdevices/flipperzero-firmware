@@ -6,6 +6,14 @@ Flipper Zero app to flash ESP chips from the device (no computer connection need
 
 <img src="https://github.com/0xchocolate/flipperzero-esp-flasher/blob/main/screenshots/esp-flasher-browse.png?raw=true" width=30% height=30% /> <img src="https://github.com/0xchocolate/flipperzero-esp-flasher/blob/main/screenshots/esp-flasher-flashing.png?raw=true" width=30% height=30% />
 
+Supported targets: ESP32
+ESP8266
+ESP32-S2
+ESP32-S3
+ESP32-C3
+ESP32-C2
+ESP32-H2
+
 ## Get the app
 1. Make sure you're logged in with  github account (otherwise the downloads in step 2 won't work)
 2. Navigate to the [FAP Build](https://github.com/0xchocolate/flipperzero-esp-flasher/actions/workflows/build.yml)
