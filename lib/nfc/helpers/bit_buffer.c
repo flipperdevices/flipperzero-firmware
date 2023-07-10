@@ -215,6 +215,12 @@ const uint8_t* bit_buffer_get_data(const BitBuffer* buf) {
     return buf->data;
 }
 
+const bool* bit_buffer_get_parity(const BitBuffer* buf) {
+    furi_assert(buf);
+
+    return buf->parity;
+}
+
 void bit_buffer_set_byte(BitBuffer* buf, size_t index, uint8_t byte) {
     furi_assert(buf);
 

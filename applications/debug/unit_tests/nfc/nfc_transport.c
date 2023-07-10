@@ -390,7 +390,7 @@ NfcError nfc_listener_tx(Nfc* instance, const BitBuffer* tx_buffer) {
     return NfcErrorNone;
 }
 
-NfcError nfc_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
+NfcError nfc_iso14443_3a_listener_tx_custom_parity(Nfc* instance, const BitBuffer* tx_buffer) {
     return nfc_listener_tx(instance, tx_buffer);
 }
 
@@ -434,7 +434,7 @@ NfcError nfc_trx_custom_parity(
 
 // Technology specific API
 
-NfcError nfc_iso13444a_short_frame(
+NfcError nfc_iso14443_3a_short_frame(
     Nfc* instance,
     NfcIso14443aShortFrame frame,
     BitBuffer* rx_buffer,
@@ -452,7 +452,7 @@ NfcError nfc_iso13444a_short_frame(
     return error;
 }
 
-NfcError nfc_iso13444a_sdd_frame(
+NfcError nfc_iso14443_3a_sdd_frame(
     Nfc* instance,
     const BitBuffer* tx_buffer,
     BitBuffer* rx_buffer,

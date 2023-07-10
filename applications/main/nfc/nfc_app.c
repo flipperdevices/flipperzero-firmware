@@ -464,8 +464,8 @@ int32_t nfc_app(void* p) {
     if(!nfc_is_hal_ready()) return 0;
 
     NfcApp* nfc = nfc_app_alloc();
-    // char* args = p;
-    const char* args = "/ext/nfc/4.nfc";
+    char* args = p;
+    // const char* args = "/ext/nfc/4.nfc";
 
     // Check argument and run corresponding scene
     if(args && strlen(args)) {

@@ -18,7 +18,7 @@ void iso14443_3a_signal_free(Iso14443_3aSignal* instance);
 void iso14443_3a_signal_tx(
     Iso14443_3aSignal* instance,
     const uint8_t* tx_data,
-    const uint8_t* tx_parity,
+    const bool* tx_parity,
     size_t tx_bits);
 
 #ifdef __cplusplus

@@ -31,13 +31,28 @@ static void mf_classic_listener_reset_state(MfClassicListener* instance) {
     instance->cmd_type = MfClassicListenerCommandTypeOnePart;
 }
 
+static MfClassicListenerCommand
+    mf_classic_listener_halt_handler(MfClassicListener* instance, BitBuffer* buff) {
+    MfClassicListenerCommand command = MfClassicListenerCommandNack;
+
+    if(bit_buffer_get_byte(buff, 1) == MF_CLASSIC_CMD_HALT_LSB) {
+        mf_classic_listener_reset_state(instance);
+        command = MfClassicListenerCommandSilent;
+    }
+
+    return command;
+}
+
 static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
     MfClassicListener* instance,
     MfClassicKeyType key_type,
     uint8_t block_num) {
     MfClassicListenerCommand command = MfClassicListenerCommandNack;
     do {
-        if(block_num >= instance->total_block_num) break;
+        if(block_num >= instance->total_block_num) {
+            mf_classic_listener_reset_state(instance);
+            break;
+        }
 
         uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
         if(!mf_classic_is_key_found(instance->data, sector_num, key_type)) {
@@ -76,8 +91,9 @@ static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
                 key_stream,
                 instance->tx_plain_buffer,
                 instance->tx_encrypted_buffer);
-            iso14443_3a_listener_tx_with_custom_parity(
-                instance->iso14443_3a_listener, instance->tx_encrypted_buffer);
+
+            iso14443_3a_listener_tx(instance->iso14443_3a_listener, instance->tx_encrypted_buffer);
+
             command = MfClassicListenerCommandProcessed;
         }
 
@@ -180,9 +196,8 @@ static MfClassicListenerCommand
                    instance->data, block_num, auth_ctx->key_type, MfClassicActionACRead)) {
                 memset(access_sec_tr->access_bits.data, 0, sizeof(MfClassicAccessBits));
             }
-        }
-        if(!mf_classic_is_allowed_access(
-               instance->data, block_num, auth_ctx->key_type, MfClassicActionDataRead)) {
+        } else if(!mf_classic_is_allowed_access(
+                      instance->data, block_num, auth_ctx->key_type, MfClassicActionDataRead)) {
             break;
         }
 
@@ -200,6 +215,11 @@ static MfClassicListenerCommand
 }
 
 static const MfClassicListenerCmdHandler mf_classic_cmd_first_part[] = {
+    {
+        .cmd = MF_CLASSIC_CMD_HALT_MSB,
+        .cmd_len_bits = 4 * 8,
+        .callback = mf_classic_listener_halt_handler,
+    },
     {
         .cmd = MF_CLASSIC_CMD_AUTH_KEY_A,
         .cmd_len_bits = 2 * 8,

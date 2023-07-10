@@ -90,8 +90,7 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
             command = instance->callback(instance->generic_event, instance->context);
         }
         iso14443_3a_listener_sleep(instance);
-    }
-    if(nfc_event->type == NfcEventTypeListenerActivated) {
+    } else if(nfc_event->type == NfcEventTypeListenerActivated) {
         instance->state = Iso14443_3aListenerStateActive;
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
         if(instance->state == Iso14443_3aListenerStateActive) {
