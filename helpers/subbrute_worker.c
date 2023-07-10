@@ -9,7 +9,7 @@
 #define SUBBRUTE_TX_TIMEOUT 6
 #define SUBBRUTE_MANUAL_TRANSMIT_INTERVAL 250
 
-SubBruteWorker* subbrute_worker_alloc() {
+SubBruteWorker* subbrute_worker_alloc(const SubGhzDevice* radio_device) {
     SubBruteWorker* instance = malloc(sizeof(SubBruteWorker));
 
     instance->state = SubBruteWorkerStateIDLE;
@@ -37,6 +37,8 @@ SubBruteWorker* subbrute_worker_alloc() {
 
     instance->transmit_mode = false;
 
+    instance->radio_device = radio_device;
+
     return instance;
 }
 
@@ -55,6 +57,9 @@ void subbrute_worker_free(SubBruteWorker* instance) {
     instance->environment = NULL;
 
     furi_thread_free(instance->thread);
+
+    subghz_devices_sleep(instance->radio_device);
+    radio_device_loader_end(instance->radio_device);
 
     free(instance);
 }
@@ -206,9 +211,7 @@ void subbrute_worker_stop(SubBruteWorker* instance) {
     instance->worker_running = false;
     furi_thread_join(instance->thread);
 
-    furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
-    furi_hal_subghz_idle();
-    furi_hal_subghz_sleep();
+    subghz_devices_idle(instance->radio_device);
 }
 
 bool subbrute_worker_transmit_current_key(SubBruteWorker* instance, uint64_t step) {
@@ -320,20 +323,24 @@ void subbrute_worker_subghz_transmit(SubBruteWorker* instance, FlipperFormat* fl
     instance->transmitter =
         subghz_transmitter_alloc_init(instance->environment, instance->protocol_name);
     subghz_transmitter_deserialize(instance->transmitter, flipper_format);
-    furi_hal_subghz_reset();
-    furi_hal_subghz_idle();
-    furi_hal_subghz_load_preset(instance->preset);
-    furi_hal_subghz_set_frequency_and_path(instance->frequency);
-    furi_hal_subghz_start_async_tx(subghz_transmitter_yield, instance->transmitter);
 
-    while(!furi_hal_subghz_is_async_tx_complete()) {
-        furi_delay_ms(timeout);
+    subghz_devices_reset(instance->radio_device);
+    subghz_devices_idle(instance->radio_device);
+    subghz_devices_load_preset(instance->radio_device, instance->preset, NULL);
+    subghz_devices_set_frequency(
+        instance->radio_device, instance->frequency); // TODO is freq valid check
+
+    if(subghz_devices_set_tx(instance->radio_device)) {
+        subghz_devices_start_async_tx(
+            instance->radio_device, subghz_transmitter_yield, instance->transmitter);
+        while(!subghz_devices_is_async_complete_tx(instance->radio_device)) {
+            furi_delay_ms(timeout);
+        }
+        subghz_devices_stop_async_tx(instance->radio_device);
     }
-    furi_hal_subghz_stop_async_tx();
 
-    //furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
-    furi_hal_subghz_idle();
-    //furi_hal_subghz_sleep();
+    subghz_devices_idle(instance->radio_device);
+
     subghz_transmitter_stop(instance->transmitter);
     subghz_transmitter_free(instance->transmitter);
     instance->transmitter = NULL;
@@ -456,4 +463,18 @@ void subbrute_worker_timeout_dec(SubBruteWorker* instance) {
     if(instance->tx_timeout_ms > 0) {
         instance->tx_timeout_ms--;
     }
+}
+
+bool subbrute_worker_is_tx_allowed(SubBruteWorker* instance, uint32_t value) {
+    furi_assert(instance);
+    bool res = false;
+
+    if(!subghz_devices_is_frequency_valid(instance->radio_device, value)) {
+    } else {
+        subghz_devices_set_frequency(instance->radio_device, value);
+        res = subghz_devices_set_tx(instance->radio_device);
+        subghz_devices_idle(instance->radio_device);
+    }
+
+    return res;
 }
