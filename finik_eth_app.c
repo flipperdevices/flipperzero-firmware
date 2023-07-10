@@ -2,6 +2,7 @@
 #include "finik_eth_app.h"
 
 #include <furi.h>
+#include <furi_hal_power.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <input/input.h>
@@ -74,6 +75,11 @@ static void finik_eth_app_draw_callback(Canvas* canvas, void* ctx) {
         draw_process_selector(canvas, process, cursor);
         draw_battery_cunsumption(canvas, (double)consumption);
         ethernet_view_process_draw(app->eth_worker->active_process, canvas);
+        if(furi_hal_power_is_otg_enabled()) {
+            canvas_draw_str(canvas, 22, 6, "+");
+        } else {
+            canvas_draw_str(canvas, 22, 6, "-");
+        }
     }
 }
 
