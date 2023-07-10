@@ -4,8 +4,7 @@
 
 Flipper Zero app to flash ESP chips from the device (no computer connection needed!). Requires an ESP chip connected to the flipper's UART pins (e.g. Wi-Fi devboard).
 
-<img src="https://github.com/0xchocolate/flipperzero-esp-flasher/blob/main/screenshots/esp-flasher-browse.png?raw=true" width=30% height=30% />
-<img src="https://github.com/0xchocolate/flipperzero-esp-flasher/blob/main/screenshots/esp-flasher-flashing.png?raw=true" width=30% height=30% />
+<img src="https://github.com/0xchocolate/flipperzero-esp-flasher/blob/main/screenshots/esp-flasher-browse.png?raw=true" width=30% height=30% /> <img src="https://github.com/0xchocolate/flipperzero-esp-flasher/blob/main/screenshots/esp-flasher-flashing.png?raw=true" width=30% height=30% />
 
 ## Get the app
 1. Make sure you're logged in with  github account (otherwise the downloads in step 2 won't work)
