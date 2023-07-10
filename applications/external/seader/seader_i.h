@@ -34,7 +34,7 @@
 
 #include "scenes/seader_scene.h"
 
-#include "sub.h"
+#include "seader_bridge.h"
 #include "seader.h"
 #include "ccid.h"
 #include "uart.h"
@@ -75,6 +75,7 @@ typedef enum {
 
 struct Seader {
     bool revert_power;
+    bool is_debug_enabled;
     SeaderWorker* worker;
     ViewDispatcher* view_dispatcher;
     Gui* gui;

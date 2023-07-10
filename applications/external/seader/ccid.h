@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "sub.h"
+#include "seader_bridge.h"
 #include "seader_worker_i.h"
 
 #define SYNC (0x03)
@@ -82,6 +82,7 @@ struct CCID_Message {
     size_t consumed;
 };
 
+void check_for_sam(SeaderUartBridge* seader_uart);
 void PC_to_RDR_IccPowerOn(SeaderUartBridge* seader_uart);
 void PC_to_RDR_GetSlotStatus(SeaderUartBridge* seader_uart);
 void PC_to_RDR_SetParameters(SeaderUartBridge* seader_uart);

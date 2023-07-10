@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sub.h"
+#include "seader_bridge.h"
 
 int32_t seader_uart_tx_thread(void* context);
 void seader_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context);

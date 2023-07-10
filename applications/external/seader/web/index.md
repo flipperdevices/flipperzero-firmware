@@ -11,7 +11,15 @@ layout: home
 
 ## Download
 
-Versioning TBD.
+### Relaese
+
+Download release versions via the Flipper App Catalog (when released)
+
+### Beta/Dev
+
+Download builds based off git at [flipc](https://flipc.org/bettse/seader?branch=main)
+
+### Old builds
 
 - [seader](seader-API30.1.zip) (API 30.1, FW 0.85.2)
 - [seader](seader-API28.2.zip) (API 28.2)

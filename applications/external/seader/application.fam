@@ -34,5 +34,6 @@ App(
         ),
     ],
     fap_icon_assets="icons",
+    fap_weburl="https://seader.ericbetts.dev",
     fap_icon_assets_symbol="seader",
 )

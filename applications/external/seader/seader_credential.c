@@ -19,6 +19,7 @@
 #define AIA_INDEX 5
 #define PACS_CFG_INDEX 6
 #define PACS_INDEX 7
+#define SR_SIO_INDEX 10
 
 static const char* seader_file_header = "Flipper Seader Credential";
 static const uint32_t seader_file_version = 1;
@@ -76,7 +77,9 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
         // The order is reversed for storage and for the user opening the file
         uint64_t swapped = __builtin_bswap64(cred->credential);
         cred->credential = swapped;
-
+        // Optional SIO/Diversifier
+        flipper_format_read_hex(file, "SIO", cred->sio, sizeof(cred->sio));
+        flipper_format_read_hex(file, "Diversifier", cred->diversifier, sizeof(cred->diversifier));
         parsed = true;
     } while(false);
 
@@ -127,6 +130,12 @@ bool seader_credential_save_agnostic(SeaderCredential* cred, const char* name) {
         if(!flipper_format_write_hex(
                file, "Credential", (uint8_t*)&swapped, sizeof(cred->credential)))
             break;
+        if(cred->sio[0] == 0x30) {
+            if(!flipper_format_write_hex(file, "SIO", cred->sio, sizeof(cred->sio))) break;
+            if(!flipper_format_write_hex(
+                   file, "Diversifier", cred->diversifier, sizeof(cred->diversifier)))
+                break;
+        }
 
         saved = true;
     } while(false);
@@ -150,9 +159,12 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
 
     if(cred->save_format == SeaderCredentialSaveFormatAgnostic) {
         return seader_credential_save_agnostic(cred, name);
-    } else if(cred->save_format == SeaderCredentialSaveFormatPicopass) {
+    } else if(
+        cred->save_format == SeaderCredentialSaveFormatPicopass ||
+        cred->save_format == SeaderCredentialSaveFormatSR) {
         bool use_load_path = true;
         bool saved = false;
+        bool withSIO = cred->save_format == SeaderCredentialSaveFormatSR;
         FlipperFormat* file = flipper_format_file_alloc(cred->storage);
         FuriString* temp_str = furi_string_alloc();
 
@@ -212,6 +224,9 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
                     }
                     break;
                 case PACS_CFG_INDEX:
+                    if(withSIO) {
+                        pacs_cfg[0] = 0xA3;
+                    }
                     if(!flipper_format_write_hex(
                            file, furi_string_get_cstr(temp_str), pacs_cfg, sizeof(pacs_cfg))) {
                         block_saved = false;
@@ -224,6 +239,29 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
                            (uint8_t*)&swapped,
                            PICOPASS_BLOCK_LEN)) {
                         block_saved = false;
+                    }
+                    break;
+                case SR_SIO_INDEX:
+                case SR_SIO_INDEX + 1:
+                case SR_SIO_INDEX + 2:
+                case SR_SIO_INDEX + 3:
+                case SR_SIO_INDEX + 4:
+                case SR_SIO_INDEX + 5:
+                case SR_SIO_INDEX + 6:
+                case SR_SIO_INDEX + 7:
+                    if(withSIO) {
+                        if(!flipper_format_write_hex(
+                               file,
+                               furi_string_get_cstr(temp_str),
+                               cred->sio + ((i - SR_SIO_INDEX) * PICOPASS_BLOCK_LEN),
+                               PICOPASS_BLOCK_LEN)) {
+                            block_saved = false;
+                        }
+                    } else {
+                        if(!flipper_format_write_hex(
+                               file, furi_string_get_cstr(temp_str), zero, sizeof(zero))) {
+                            block_saved = false;
+                        }
                     }
                     break;
                 default:
