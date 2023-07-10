@@ -360,6 +360,11 @@ class ApplicationsCGenerator:
         FlipperAppType.APP: ("DesktopSettingsApplication", "FLIPPER_APPS2")
     }
 
+    APP_EXTERNAL_TYPE = (
+        "FlipperExternalApplication",
+        "FLIPPER_EXTERNAL_APPS",
+    )
+
     def __init__(self, buildset: AppBuildset, autorun_app: str = ""):
         self.buildset = buildset
         self.autorun = autorun_app
@@ -405,6 +410,17 @@ class ApplicationsCGenerator:
             return f"""
     {{.name = "{app.name}",
      .appid = "NULL" }}"""
+
+    def get_external_app_descr(self, app: FlipperApplication):
+        app_path = "/ext/apps"
+        if app.fap_category:
+            app_path += f"/{app.fap_category}"
+        app_path += f"/{app.appid}.fap"
+        return f"""
+    {{
+     .name = "{app.name}",
+     .icon = {f"&{app.icon}" if app.icon else "NULL"},
+     .path = "{app_path}" }}"""
 
     def get_external_app_descr(self, app: FlipperApplication):
         app_path = "/ext/apps"
