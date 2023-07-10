@@ -25,7 +25,7 @@ struct Evil_PortalApp {
     ViewDispatcher* view_dispatcher;
     SceneManager* scene_manager;
 
-    char* portal_logs;
+    FuriString* portal_logs;
     const char* command_queue[1];
     int command_index;
     bool has_command_queue;

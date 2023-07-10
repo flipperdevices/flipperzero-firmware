@@ -95,7 +95,7 @@ char* sequential_file_resolve_path(
     return strdup(file_path);
 }
 
-void write_logs(char* portal_logs) {
+void write_logs(FuriString* portal_logs) {
     Storage* storage = evil_portal_open_storage();
 
     if(!storage_file_exists(storage, EVIL_PORTAL_LOG_SAVE_PATH)) {
@@ -108,11 +108,10 @@ void write_logs(char* portal_logs) {
     File* file = storage_file_alloc(storage);
 
     if(storage_file_open(file, seq_file_path, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-        storage_file_write(file, portal_logs, strlen(portal_logs));
+        storage_file_write(
+            file, furi_string_get_cstr(portal_logs), furi_string_utf8_length(portal_logs));
     }
     storage_file_close(file);
     storage_file_free(file);
     evil_portal_close_storage();
-
-    portal_logs = "";
 }

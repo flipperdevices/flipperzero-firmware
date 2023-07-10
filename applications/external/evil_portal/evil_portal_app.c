@@ -30,7 +30,7 @@ Evil_PortalApp* evil_portal_app_alloc() {
     app->sent_reset = false;
     app->has_command_queue = false;
     app->command_index = 0;
-    app->portal_logs = malloc(5000);
+    app->portal_logs = furi_string_alloc();
 
     app->gui = furi_record_open(RECORD_GUI);
 
@@ -71,9 +71,9 @@ Evil_PortalApp* evil_portal_app_alloc() {
 
 void evil_portal_app_free(Evil_PortalApp* app) {
     // save latest logs
-    if(strlen(app->portal_logs) > 0) {
+    if(furi_string_utf8_length(app->portal_logs) > 0) {
         write_logs(app->portal_logs);
-        free(app->portal_logs);
+        furi_string_free(app->portal_logs);
     }
 
     // Send reset event to dev board

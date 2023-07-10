@@ -18,7 +18,7 @@ This program is for educational purposes only.
 
 The pre-built fap file is made for the unleashed custom firmware. If you are on a different firmware you can download the `evil_portal.fap` file [at flipc.org](https://flipc.org/bigbrodude6119/flipper-zero-evil-portal?branch=main&root=flipper/flipper-evil-portal&firmware=unleashed) or you can build the `.fap` file yourself by following [these instructions](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/AppsOnSDCard.md).
 
-**Note** The official Flipper Zero firmware is unfortunately not supported. Some of the functions used in this app are not compatible.
+**Note** The official Flipper Zero firmware is now supported again thanks to @sboger.
 
 ## Install the pre-built app on the flipper
 
@@ -47,9 +47,19 @@ You should be able to see the `[ESP32] Evil Portal` app on your flipper zero now
 
 # Installing/flashing the Wi-Fi dev board
 
-There is now an easier method (Option One) of flashing the **official Wi-Fi dev board**. Thank you to reddit user dellycem for showing me how to do this.
+There is now an easier method (Option One) of flashing your ESP32 dev board. Thank you to reddit user dellycem for showing me how to do this.
 
-**If you are not using the official Wi-Fi dev board you will have to go with option two.**
+**Note:** the following boards are supported via this method
+
+1. [The official Wifi dev board](https://shop.flipperzero.one/products/wifi-devboard)
+2. Alternative ESP32-S2 boards like [this one from AWOK Dynamics](https://www.awokdynamics.com/product/esp32-v4-w-case/20?cp=true&sa=true&sbp=false&q=false)
+3. ESP32-WROOM boards
+
+The alternative ESP32-S2 boards can use the same `.bin` files as the official dev board.
+
+The esp32 wroom board has it's own pre-compiled `.bin` files provided in the 0.0.2 release. Please check out the required pin connections bellow.
+
+**If you are not using one of these boards you will have to go with option two.**
 
 ## Option One - Official Wi-Fi Dev Board
 
@@ -118,6 +128,20 @@ You can manually save logs using the `Save logs` command. Logs will be stored in
 
 Logs will automatically be saved when exiting the app or when the current log reaches 4000 characters.
 
+## Alternative boards
+
+The ESP32 wroom boards will not have the LED indicators in the 0.0.2 release and if you are compiling for a Wroom board you will have to comment out the code dealing with the LEDs.
+The pre-compiled `.bin` files for that board already have this change. I plan on making this process easier in the next release.
+
+The following pins are required for the board to work:
+
+- 3.3v
+- GND
+- TX
+- RX
+
+Keep in mind that the TX/RX pins go to the opposite pins on the flipper. So TX on your ESP32 goes to RX on the flipper. For my Wroom board I had to use RX0/TX0, your board may be a little different.
+
 ## Troubleshooting
 
 - If you run into any issues make sure that you have the required files set up on the Flipper `apps_data` folder on the Flipper SD card.
@@ -165,8 +189,10 @@ I plan on working on this in my free time. Here is my todo list.
 
 - Support for multiple portals
 - Enter AP name on the Flipper
+- Scan nearby APs and clone their SSID (good idea leedave!)
 - Add a config file for general app settings
 - Create cleaner log files that are easier to read
+- Randomize mac address so that the network shows up as a new network each time
 - Clean up code & implement best practices
 
 ## License
