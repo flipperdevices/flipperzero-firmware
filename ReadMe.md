@@ -45,11 +45,14 @@ This software is for experimental purposes only and is not meant for any illegal
 - Games Only Mode and Dummy Mode changed for OK to go to Jetpack Joyride. For all Keymappings see [GAMES_ONLY](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md).
 - Undo: Updated: [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 - Undo: Updated: [ESP32 Evil Portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
-
+- OFW: [Device Info update #2840 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2840)
+- OFW: [External menu apps #2849 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2849) DrZlo13 copied this work from community sources with no credits.
 - Updated: [FlipBIP Crypto Wallet v1.0 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - Updated: [ESP32 Evil Portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 - Added: [ESP Flasher (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - Updated: [Mifare Nested 1.5.2 (By AloneLiberty)](https://github.com/AloneLiberty/FlipperNested)
+- Updated: [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477)
+- Fixed issues with Protoview, Weather Station and Cross Remote grabbing SubGHz settings (By RogueMaster)
 
 <a name="release">
 
