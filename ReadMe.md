@@ -1,6 +1,8 @@
+[![FAP Build](https://github.com/0xchocolate/flipperzero-esp-flasher/actions/workflows/build.yml/badge.svg)](https://github.com/0xchocolate/flipperzero-esp-flasher/actions/workflows/build.yml)
+
 # ESP Flasher app for Flipper Zero
 
-Requires a connected ESP chip.
+Flipper Zero app to flash ESP chips from the device (no computer connection needed!). Requires an ESP chip connected to the flipper's UART pins (e.g. Wi-Fi devboard).
 
 ## Get the app
 1. Make sure you're logged in with a github account (otherwise the downloads in step 2 won't work)
