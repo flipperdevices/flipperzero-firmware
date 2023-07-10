@@ -364,19 +364,29 @@ static void nfc_protocol_support_scene_emulate_on_enter(NfcApp* instance) {
     TextBox* text_box = instance->text_box;
 
     FuriString* temp_str = furi_string_alloc();
-
-    size_t uid_len;
-    const uint8_t* uid = nfc_device_get_uid(instance->nfc_device, &uid_len);
-
-    for(size_t i = 0; i < uid_len; ++i) {
-        furi_string_cat_printf(temp_str, "%02X ", uid[i]);
-    }
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
 
     widget_add_icon_element(widget, 0, 3, &I_NFC_dolphin_emulation_47x61);
-    widget_add_string_element(widget, 57, 13, AlignLeft, AlignTop, FontPrimary, "Emulating UID");
+
+    if(nfc_protocol_support_has_feature(protocol, NfcProtocolFeatureEmulateUid)) {
+        widget_add_string_element(widget, 90, 13, AlignCenter, AlignTop, FontPrimary, "Emulating UID");
+
+        size_t uid_len;
+        const uint8_t* uid = nfc_device_get_uid(instance->nfc_device, &uid_len);
+
+        for(size_t i = 0; i < uid_len; ++i) {
+            furi_string_cat_printf(temp_str, "%02X ", uid[i]);
+        }
+
+        furi_string_trim(temp_str);
+
+    } else {
+        widget_add_string_element(widget, 90, 13, AlignCenter, AlignTop, FontPrimary, "Emulating");
+        furi_string_set(temp_str, nfc_device_get_name(instance->nfc_device, NfcDeviceNameTypeFull));
+    }
 
     widget_add_text_box_element(
-        widget, 57, 28, 67, 25, AlignCenter, AlignTop, furi_string_get_cstr(temp_str), true);
+        widget, 56, 28, 68, 25, AlignCenter, AlignTop, furi_string_get_cstr(temp_str), true);
 
     furi_string_free(temp_str);
 
@@ -384,7 +394,6 @@ static void nfc_protocol_support_scene_emulate_on_enter(NfcApp* instance) {
     text_box_set_focus(text_box, TextBoxFocusEnd);
     furi_string_reset(instance->text_box_store);
 
-    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
     // instance->listener is allocated in the respective on_enter() handler
     nfc_protocol_support[protocol]->scene_emulate.on_enter(instance);
 
