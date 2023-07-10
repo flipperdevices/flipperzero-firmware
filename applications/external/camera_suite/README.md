@@ -26,23 +26,13 @@
 
 ## Previews <a name="previews"></a>
 
-<img align="center" src=".github/images/app-preview-cam-01.png" />
-
----
-
-Early stage rotation:
-
-<img align="center" src=".github/images/rotation-demo.gif" />
+This section is coming soon...
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
 ## Hardware Requirements <a name="hardware-requirements"></a>
 
-Requires an ESP32-CAM module. Here's a few on Amazon that I've personally used:
-
-- https://amzn.to/3NCoQUq
-
-- https://amzn.to/46IuAF9
+Requires an ESP32-CAM module (I've personally used these: [Amazon link 1][amazon-esp32-cam-link-1] | [Amazon link 2][amazon-esp32-cam-link-2] ).
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -60,7 +50,23 @@ This section is coming soon...
 
 ## Software Installation <a name="software-installation"></a>
 
-This section is coming soon...
+1. Connect your Flipper Zero via USB, or insert your MicroSD.
+2. Download "camerasuite.fap" from the release section.
+3. Move "camerasuite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
+   ```
+   .                            # The Flipper Zero MicroSD root.
+   ├── apps                     # The Flipper Zero Applications folder.
+   |   ├── gpio                 # The Flipper Zero General Purpose Input/Output folder.
+   |   |   ├── camerasuite.fap  # The Camera Suite application.
+   ```
+4. Reinsert your MicroSD into your Flipper Zero if you took it out.
+5. Plug in your ESP32-CAM module to your Flipper Zero.
+6. Press the "Power" button on your Flipper Zero to turn it on.
+7. Open the application "[ESP32-CAM] Camera Suite":
+   ```
+   Applications > GPIO > [ESP32-CAM] Camera Suite
+   ```
+8. That's it! Follow the on screen instructions to continue.
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -84,6 +90,8 @@ Cody
 
 <!-- LINKS -->
 
+[amazon-esp32-cam-link-1]: https://amzn.to/3NCoQUq
+[amazon-esp32-cam-link-2]: https://amzn.to/46IuAF9
 [flipper-zero-fap-boilerplate]: https://github.com/leedave/flipper-zero-fap-boilerplate
 [flipperzero-camera]: https://github.com/Z4urce/flipperzero-camera
 [github-profile-z4urce]: https://github.com/Z4urce
