@@ -65,7 +65,8 @@ static void nfc_scene_saved_menu_on_enter_iso14443_3a(NfcApp* instance) {
     UNUSED(instance);
 }
 
-NfcCommand nfc_scene_emulate_listener_callback_iso14443_3a(NfcGenericEvent event, void* context) {
+static NfcCommand
+    nfc_scene_emulate_listener_callback_iso14443_3a(NfcGenericEvent event, void* context) {
     furi_assert(context);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(event.data);
@@ -81,7 +82,7 @@ NfcCommand nfc_scene_emulate_listener_callback_iso14443_3a(NfcGenericEvent event
                 " %02X",
                 bit_buffer_get_byte(iso14443_3a_event->data->buffer, i));
         }
-        furi_string_cat_printf(nfc->text_box_store, "\n");
+        furi_string_push_back(nfc->text_box_store, '\n');
         view_dispatcher_send_custom_event(nfc->view_dispatcher, NfcCustomEventListenerUpdate);
     }
 
@@ -89,6 +90,10 @@ NfcCommand nfc_scene_emulate_listener_callback_iso14443_3a(NfcGenericEvent event
 }
 
 static void nfc_scene_emulate_on_enter_iso14443_3a(NfcApp* instance) {
+    const Iso14443_3aData* data =
+        nfc_device_get_data(instance->nfc_device, NfcProtocolIso14443_3a);
+
+    instance->listener = nfc_listener_alloc(instance->nfc, NfcProtocolIso14443_3a, data);
     nfc_listener_start(
         instance->listener, nfc_scene_emulate_listener_callback_iso14443_3a, instance);
 }

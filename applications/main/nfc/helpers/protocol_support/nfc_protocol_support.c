@@ -385,8 +385,7 @@ static void nfc_protocol_support_scene_emulate_on_enter(NfcApp* instance) {
     furi_string_reset(instance->text_box_store);
 
     const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
-    const NfcDeviceData* data = nfc_device_get_data(instance->nfc_device, protocol);
-    instance->listener = nfc_listener_alloc(instance->nfc, protocol, data);
+    // instance->listener is allocated in the respective on_enter() handler
     nfc_protocol_support[protocol]->scene_emulate.on_enter(instance);
 
     scene_manager_set_scene_state(
