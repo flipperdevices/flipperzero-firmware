@@ -61,6 +61,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [SubRem app: UPD txrx #539 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/539)
 - UL: Updated: [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) (By gid9798)
 - Added: [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
+- Added: [Reaction Time (By ihatecsv)](https://github.com/ihatecsv/flipper_reaction_time)
 
 <a name="release">
 
