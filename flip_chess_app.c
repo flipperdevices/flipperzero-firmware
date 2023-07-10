@@ -31,6 +31,7 @@ typedef struct {
 
 uint8_t paramPlayerW = 0;
 uint8_t paramPlayerB = 0;
+
 // uint8_t paramBoard = 1;
 uint8_t paramAnalyze = 255; // depth of analysis
 uint8_t paramMoves = 0;
@@ -38,17 +39,17 @@ uint8_t paramMoves = 0;
 uint8_t paramInfo = 1;
 //uint8_t paramDraw = 1;
 uint8_t paramFlipBoard = 0;
-uint8_t paramHelp = 0;
+//uint8_t paramHelp = 0;
 uint8_t paramExit = 0;
 uint16_t paramStep = 0;
 char* paramFEN = NULL;
 char* paramPGN = NULL;
-uint16_t paramRandom = 0;
-uint8_t paramBlind = 0;
+//uint16_t paramRandom = 0;
+//uint8_t paramBlind = 0;
+
 int clockSeconds = -1;
 SCL_Game game;
 SCL_Board startState = SCL_BOARD_START_STATE;
-
 int16_t random960PosNumber = -1;
 
 uint8_t picture[SCL_BOARD_PICTURE_WIDTH * SCL_BOARD_PICTURE_WIDTH];
