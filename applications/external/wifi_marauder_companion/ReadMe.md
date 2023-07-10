@@ -4,6 +4,8 @@
 
 Requires a connected dev board running Marauder FW. [See install instructions from UberGuidoZ here.](https://github.com/UberGuidoZ/Flipper/tree/main/Wifi_DevBoard#marauder-install-information)
 
+<img src="https://github.com/0xchocolate/flipperzero-wifi-marauder/blob/feature_wifi_marauder_app/screenshots/marauder-topmenu.png?raw=true" width=20% height=20% /> <img src="https://github.com/0xchocolate/flipperzero-wifi-marauder/blob/feature_wifi_marauder_app/screenshots/marauder-script-demo.png?raw=true" width=20% height=20% /> <img src="https://github.com/0xchocolate/flipperzero-wifi-marauder/blob/feature_wifi_marauder_app/screenshots/marauder-save-pcaps.png?raw=true" width=20% height=20% />
+
 ## Get the app
 1. Make sure you're logged in with a github account (otherwise the downloads in step 2 won't work)
 2. Navigate to the [FAP Build](https://github.com/0xchocolate/flipperzero-wifi-marauder/actions/workflows/build.yml)
@@ -16,6 +18,8 @@ Requires a connected dev board running Marauder FW. [See install instructions fr
 From a local clone of this repo, you can also build the app yourself using ufbt.
 
 ## In-app ESP32 flasher (WIP)
+### FYI - the ESP flasher is now its own app and will be removed from here soon! Going forward, use this flasher app: https://github.com/0xchocolate/flipperzero-esp-flasher
+
 Guide by [@francis2054](https://github.com/francis2054)
 
 The app now contains a work-in-progress of an ESP32 flasher (close to the bottom of the marauder menu). Use at your own risk. This hardcodes addresses for non-S3 ESP32 chips.
