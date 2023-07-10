@@ -3,6 +3,8 @@
 #include <furi.h>
 #include <lib/drivers/st25r3916_reg.h>
 #include <lib/drivers/st25r3916.h>
+#include <nfc/deprecated/protocols/nfca_utils.h>
+#include <furi_hal_resources.h>
 
 #define TAG "FuriHalNfcA"
 
@@ -102,4 +104,31 @@ FHalNfcError
     furi_hal_spi_release(handle);
 
     return error;
+}
+
+FHalNfcError f_hal_nfca_listener_tx_custom_parity(
+    const uint8_t* tx_data,
+    const uint8_t* tx_parity,
+    size_t tx_bits) {
+    NfcaSignal* nfca_signal = nfca_signal_alloc();
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+    furi_hal_spi_acquire(handle);
+
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSPARENT_MODE);
+    // Reconfigure gpio for Transparent mode
+    furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
+
+    // Send signal
+    FURI_CRITICAL_ENTER();
+    nfca_signal_encode(nfca_signal, tx_data, tx_bits, tx_parity);
+    digital_signal_send(nfca_signal->tx_signal, &gpio_spi_r_mosi);
+    FURI_CRITICAL_EXIT();
+    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
+
+    // Configure gpio back to SPI and exit transparent
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
+
+    furi_hal_spi_release(handle);
+    nfca_signal_free(nfca_signal);
 }
