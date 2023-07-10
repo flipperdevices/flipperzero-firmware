@@ -1,0 +1,11 @@
+App(
+    appid="flip_chess",
+    name="Chess",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flip_chess_app",
+    requires=["gui"],
+    stack_size=2 * 1024,
+    order=40,
+    fap_icon="keycard_10px.png",
+    fap_category="Games",
+)
