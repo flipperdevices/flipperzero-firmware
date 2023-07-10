@@ -478,11 +478,11 @@ SaveNoncesResult_t* mifare_nested_worker_write_nonces(
         for(uint8_t sector = 0; sector < sector_count; sector++) {
             for(uint8_t key_type = 0; key_type < 2; key_type++) {
                 if(nonces->nonces[sector][key_type][tries]->invalid) {
-                    if (tries == 0) {
+                    if(tries == 0) {
                         result->invalid++;
                     }
                 } else if(nonces->nonces[sector][key_type][tries]->skipped) {
-                    if (tries == 0) {
+                    if(tries == 0) {
                         result->skipped++;
                     }
                 } else if(nonces->nonces[sector][key_type][tries]->collected) {
@@ -578,6 +578,7 @@ bool mifare_nested_worker_check_initial_keys(
                 info->block = mifare_nested_worker_get_block_by_sector(sector);
                 info->collected = false;
                 info->skipped = true;
+                info->from_start = false;
 
                 nonces->nonces[sector][key_type][tries] = info;
             }
@@ -595,6 +596,7 @@ bool mifare_nested_worker_check_initial_keys(
                 Nonces* info = nonces->nonces[sector][0][tries];
                 info->collected = true;
                 info->skipped = true;
+                info->from_start = true;
 
                 nonces->nonces[sector][0][tries] = info;
             }
@@ -616,6 +618,7 @@ bool mifare_nested_worker_check_initial_keys(
                 Nonces* info = nonces->nonces[sector][1][tries];
                 info->collected = true;
                 info->skipped = true;
+                info->from_start = true;
 
                 nonces->nonces[sector][1][tries] = info;
             }
