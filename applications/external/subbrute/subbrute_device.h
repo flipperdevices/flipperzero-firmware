@@ -5,6 +5,7 @@
 #include <lib/subghz/transmitter.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/environment.h>
+#include "helpers/radio_device_loader.h"
 
 #define SUBBRUTE_TEXT_STORE_SIZE 256
 
@@ -42,6 +43,7 @@ typedef struct {
     SubGhzReceiver* receiver;
     SubGhzProtocolDecoderBase* decoder_result;
     SubGhzEnvironment* environment;
+    const SubGhzDevice* radio_device;
 
     // Attack state
     SubBruteAttacks attack;
@@ -56,7 +58,7 @@ typedef struct {
     uint8_t bit_index;
 } SubBruteDevice;
 
-SubBruteDevice* subbrute_device_alloc();
+SubBruteDevice* subbrute_device_alloc(const SubGhzDevice* radio_device;);
 void subbrute_device_free(SubBruteDevice* instance);
 
 bool subbrute_device_save_file(SubBruteDevice* instance, const char* key_name);

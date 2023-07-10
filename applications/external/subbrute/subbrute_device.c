@@ -9,7 +9,7 @@
 
 #define TAG "SubBruteDevice"
 
-SubBruteDevice* subbrute_device_alloc() {
+SubBruteDevice* subbrute_device_alloc(const SubGhzDevice* radio_device) {
     SubBruteDevice* instance = malloc(sizeof(SubBruteDevice));
 
     instance->current_step = 0;
@@ -21,6 +21,8 @@ SubBruteDevice* subbrute_device_alloc() {
     instance->environment = subghz_environment_alloc();
     subghz_environment_set_protocol_registry(
         instance->environment, (void*)&subghz_protocol_registry);
+
+    instance->radio_device = radio_device;
 
 #ifdef FURI_DEBUG
     subbrute_device_attack_set_default_values(instance, SubBruteAttackLoadFile);
@@ -152,7 +154,7 @@ SubBruteFileResult subbrute_device_attack_set(
     // For non-file types we didn't set SubGhzProtocolDecoderBase
     instance->receiver = subghz_receiver_alloc_init(instance->environment);
     subghz_receiver_set_filter(instance->receiver, SubGhzProtocolFlag_Decodable);
-    furi_hal_subghz_reset();
+    // furi_hal_subghz_reset(); // TODO Is this necessary?
 
     uint8_t protocol_check_result = SubBruteFileResultProtocolNotFound;
 #ifdef FURI_DEBUG
@@ -241,7 +243,7 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
 
     instance->receiver = subghz_receiver_alloc_init(instance->environment);
     subghz_receiver_set_filter(instance->receiver, SubGhzProtocolFlag_Decodable);
-    furi_hal_subghz_reset();
+    // furi_hal_subghz_reset(); // TODO Is this necessary?
 
     do {
         if(!flipper_format_file_open_existing(fff_data_file, file_path)) {
@@ -261,11 +263,22 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
             result = SubBruteFileResultMissingOrIncorrectFrequency;
             break;
         }
-        instance->file_protocol_info->frequency = temp_data32;
-        if(!furi_hal_subghz_is_tx_allowed(instance->file_protocol_info->frequency)) {
+
+        if(!subghz_devices_is_frequency_valid(instance->radio_device, temp_data32)) {
+            FURI_LOG_E(TAG, "Unsupported radio device frequency");
+            result = SubBruteFileResultMissingOrIncorrectFrequency;
+            break;
+        }
+
+        instance->file_protocol_info->frequency =
+            subghz_devices_set_frequency(instance->radio_device, temp_data32);
+
+        if(!subghz_devices_set_tx(instance->radio_device)) {
+            subghz_devices_idle(instance->radio_device);
             result = SubBruteFileResultFrequencyNotAllowed;
             break;
         }
+        subghz_devices_idle(instance->radio_device);
 
         // Preset
         if(!flipper_format_read_string(fff_data_file, "Preset", temp_str)) {

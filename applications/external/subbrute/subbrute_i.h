@@ -56,6 +56,7 @@ struct SubBruteState {
     Popup* popup;
     Widget* widget;
     DialogsApp* dialogs;
+    const SubGhzDevice* radio_device;
 
     // Text store
     char text_store[SUBBRUTE_MAX_LEN_NAME];

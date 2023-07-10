@@ -49,11 +49,20 @@ SubBruteState* subbrute_alloc() {
     // Notifications
     instance->notifications = furi_record_open(RECORD_NOTIFICATION);
 
+    subghz_devices_init();
+
+    // init radio device
+    instance->radio_device =
+        radio_device_loader_set(instance->radio_device, SubGhzRadioDeviceTypeExternalCC1101);
+
+    subghz_devices_reset(instance->radio_device);
+    subghz_devices_idle(instance->radio_device);
+
     // Devices
-    instance->device = subbrute_device_alloc();
+    instance->device = subbrute_device_alloc(instance->radio_device);
 
     // SubBruteWorker
-    instance->worker = subbrute_worker_alloc();
+    instance->worker = subbrute_worker_alloc(instance->radio_device);
 
     // TextInput
     instance->text_input = text_input_alloc();
@@ -95,7 +104,7 @@ SubBruteState* subbrute_alloc() {
     //instance->environment = subghz_environment_alloc();
 
     // Uncomment to enable Debug pin output on PIN 17(1W)
-    //furi_hal_subghz_set_async_mirror_pin(&gpio_ibutton);
+    // subghz_devices_set_async_mirror_pin(instance->radio_device, &gpio_ibutton);
 
     return instance;
 }
@@ -104,7 +113,7 @@ void subbrute_free(SubBruteState* instance) {
     furi_assert(instance);
 
     // Uncomment to enable Debug pin output on PIN 17(1W)
-    //furi_hal_subghz_set_async_mirror_pin(NULL);
+    // subghz_devices_set_async_mirror_pin(instance->radio_device, NULL);
 
     // SubBruteWorker
     subbrute_worker_stop(instance->worker);
@@ -112,6 +121,8 @@ void subbrute_free(SubBruteState* instance) {
 
     // SubBruteDevice
     subbrute_device_free(instance->device);
+
+    subghz_devices_deinit();
 
     // Notifications
     notification_message(instance->notifications, &sequence_blink_stop);
@@ -179,6 +190,7 @@ void subbrute_popup_closed_callback(void* context) {
 // ENTRYPOINT
 int32_t subbrute_app(void* p) {
     UNUSED(p);
+    furi_hal_power_suppress_charge_enter();
 
     dolphin_deed(DolphinDeedPluginStart);
     SubBruteState* instance = subbrute_alloc();
@@ -186,26 +198,11 @@ int32_t subbrute_app(void* p) {
         instance->view_dispatcher, instance->gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(instance->scene_manager, SubBruteSceneStart);
 
-    // Enable power for External CC1101 if it is connected
-    furi_hal_subghz_enable_ext_power();
-    // Auto switch to internal radio if external radio is not available
-    furi_delay_ms(15);
-    if(!furi_hal_subghz_check_radio()) {
-        furi_hal_subghz_select_radio_type(SubGhzRadioInternal);
-        furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
-    }
-
-    furi_hal_power_suppress_charge_enter();
-
     notification_message(instance->notifications, &sequence_display_backlight_on);
     view_dispatcher_run(instance->view_dispatcher);
-    furi_hal_power_suppress_charge_exit();
-    // Disable power for External CC1101 if it was enabled and module is connected
-    furi_hal_subghz_disable_ext_power();
-    // Reinit SPI handles for internal radio / nfc
-    furi_hal_subghz_init_radio_type(SubGhzRadioInternal);
 
     subbrute_free(instance);
 
+    furi_hal_power_suppress_charge_exit();
     return 0;
 }
