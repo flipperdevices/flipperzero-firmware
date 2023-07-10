@@ -18,9 +18,17 @@ void esp_flasher_scene_start_on_enter(void* context) {
     EspFlasherApp* app = context;
     Submenu* submenu = app->submenu;
     submenu_add_item(
-        submenu, "Flash ESP", SubmenuIndexEspFlasherFlash, esp_flasher_scene_start_submenu_callback, app);
+        submenu,
+        "Flash ESP",
+        SubmenuIndexEspFlasherFlash,
+        esp_flasher_scene_start_submenu_callback,
+        app);
     submenu_add_item(
-        submenu, "About", SubmenuIndexEspFlasherAbout, esp_flasher_scene_start_submenu_callback, app);
+        submenu,
+        "About",
+        SubmenuIndexEspFlasherAbout,
+        esp_flasher_scene_start_submenu_callback,
+        app);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(app->scene_manager, EspFlasherSceneStart));
