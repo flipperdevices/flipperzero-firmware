@@ -27,28 +27,12 @@ static void text_input_callback(void* context) {
 
     // check that there is text in the input
     if(strlen(app->input_text) > 0) {
-        if(app->input_state == FlipChessTextInputPassphrase) {
-            if(app->passphrase == FlipChessPassphraseOn) {
-                strcpy(app->passphrase_text, app->input_text);
-            }
-            // clear input text
-            memzero(app->input_text, TEXT_BUFFER_SIZE);
-            // reset input state
-            app->input_state = FlipChessTextInputDefault;
-            handled = true;
-            view_dispatcher_switch_to_view(app->view_dispatcher, FlipChessViewIdSettings);
-        } else if(app->input_state == FlipChessTextInputMnemonic) {
-            if(app->import_from_mnemonic == 1) {
-                strcpy(app->import_mnemonic_text, app->input_text);
+        if(app->input_state == FlipChessTextInputGame) {
+            if(app->import_game == 1) {
+                strcpy(app->import_game_text, app->input_text);
 
                 int status = FlipChessStatusSuccess;
-                // Check if the mnemonic is valid
-                if(mnemonic_check(app->import_mnemonic_text) == 0)
-                    status = FlipChessStatusMnemonicCheckError; // 13 = mnemonic check error
-                // Save the mnemonic to persistent storage
-                else if(!flipchess_save_file_secure(app->import_mnemonic_text))
-                    status = FlipChessStatusSaveError; // 12 = save error
-
+                
                 if(status == FlipChessStatusSuccess) {
                     //notification_message(app->notification, &sequence_blink_cyan_100);
                     flipchess_play_happy_bump(app);
@@ -56,11 +40,7 @@ static void text_input_callback(void* context) {
                     //notification_message(app->notification, &sequence_blink_red_100);
                     flipchess_play_long_bump(app);
                 }
-
-                memzero(app->import_mnemonic_text, TEXT_BUFFER_SIZE);
             }
-            // clear input text
-            memzero(app->input_text, TEXT_BUFFER_SIZE);
             // reset input state
             app->input_state = FlipChessTextInputDefault;
             handled = true;
@@ -69,8 +49,6 @@ static void text_input_callback(void* context) {
     }
 
     if(!handled) {
-        // clear input text
-        memzero(app->input_text, TEXT_BUFFER_SIZE);
         // reset input state
         app->input_state = FlipChessTextInputDefault;
         view_dispatcher_switch_to_view(app->view_dispatcher, FlipChessViewIdMenu);
@@ -100,14 +78,11 @@ FlipChess* flipchess_app_alloc() {
 
     // Settings
     app->haptic = FlipChessHapticOn;
-    app->led = FlipChessLedOn;
-    app->bip39_strength = FlipChessStrength256; // 256 bits (24 words)
-    app->passphrase = FlipChessPassphraseOff;
+    app->white_mode = FlipChessPlayerHuman;
+    app->black_mode = FlipChessPlayerAI1;
 
     // Main menu
-    app->bip44_coin = FlipChessCoinBTC0; // 0 (BTC)
-    app->overwrite_saved_seed = 0;
-    app->import_from_mnemonic = 0;
+    app->import_game = 0;
 
     // Text input
     app->input_state = FlipChessTextInputDefault;

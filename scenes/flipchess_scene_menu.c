@@ -1,5 +1,4 @@
 #include "../flipchess.h"
-#include "../helpers/flipchess_file.h"
 
 enum SubmenuIndex {
     SubmenuIndexScene1New = 10,

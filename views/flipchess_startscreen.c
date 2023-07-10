@@ -3,7 +3,7 @@
 #include <furi_hal.h>
 #include <input/input.h>
 #include <gui/elements.h>
-#include "flipchess_icons.h"
+//#include "flipchess_icons.h"
 
 struct FlipChessStartscreen {
     View* view;
@@ -30,7 +30,7 @@ void flipchess_startscreen_draw(Canvas* canvas, FlipChessStartscreenModel* model
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    canvas_draw_icon(canvas, 1, 33, &I_Auth_62x31);
+    //canvas_draw_icon(canvas, 1, 33, &I_Auth_62x31);
 
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 18, 11, "Chess");
