@@ -337,7 +337,8 @@ FuriHalSpiBusHandle furi_hal_spi_bus_handle_nfc = {
 static void furi_hal_spi_bus_handle_external_event_callback(
     FuriHalSpiBusHandle* handle,
     FuriHalSpiBusHandleEvent event) {
-    furi_hal_spi_bus_external_handle_event_callback(handle, event, &furi_hal_spi_preset_1edge_low_2m);
+    furi_hal_spi_bus_external_handle_event_callback(
+        handle, event, &furi_hal_spi_preset_1edge_low_2m);
 }
 
 FuriHalSpiBusHandle furi_hal_spi_bus_handle_external = {
