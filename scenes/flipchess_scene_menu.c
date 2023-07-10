@@ -52,13 +52,13 @@ bool flipchess_scene_menu_on_event(void* context, SceneManagerEvent event) {
         return true;
     } else if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == SubmenuIndexScene1New) {
-            app->import = 0;
+            app->import_game = 0;
             scene_manager_set_scene_state(
                 app->scene_manager, FlipChessSceneMenu, SubmenuIndexScene1New);
             scene_manager_next_scene(app->scene_manager, FlipChessSceneScene_1);
             return true;
         } else if(event.event == SubmenuIndexScene1Import) {
-            app->import = 1;
+            app->import_game = 1;
             app->input_state = FlipChessTextInputMnemonic;
             text_input_set_header_text(app->text_input, "Enter game phrase");
             view_dispatcher_switch_to_view(app->view_dispatcher, FlipChessViewIdTextInput);
