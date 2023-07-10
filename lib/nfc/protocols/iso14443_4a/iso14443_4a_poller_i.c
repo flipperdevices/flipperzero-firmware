@@ -8,23 +8,6 @@
 
 #define ISO14443_4A_PCB_I (0x02)
 
-Iso14443_4aError iso14443_4a_poller_process_error(Iso14443_3aError error) {
-    switch(error) {
-    case Iso14443_3aErrorNone:
-        return Iso14443_4aErrorNone;
-    case Iso14443_3aErrorNotPresent:
-        return Iso14443_4aErrorNotPresent;
-    case Iso14443_3aErrorColResFailed:
-    case Iso14443_3aErrorCommunication:
-    case Iso14443_3aErrorWrongCrc:
-        return Iso14443_4aErrorProtocol;
-    case Iso14443_3aErrorTimeout:
-        return Iso14443_4aErrorTimeout;
-    default:
-        return Iso14443_4aErrorProtocol;
-    }
-}
-
 Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance) {
     furi_assert(instance);
 
@@ -53,7 +36,7 @@ Iso14443_4aError
 
         if(iso14443_3a_error != Iso14443_3aErrorNone) {
             FURI_LOG_E(TAG, "ATS request failed");
-            error = iso14443_4a_poller_process_error(iso14443_3a_error);
+            error = iso14443_4a_process_error(iso14443_3a_error);
             break;
 
         } else if(!iso14443_4a_ats_parse(data, instance->rx_buffer)) {
@@ -88,7 +71,7 @@ Iso14443_4aError iso14443_4a_poller_send_block(
             instance->iso14443_3a_poller, instance->tx_buffer, instance->rx_buffer, fwt);
 
         if(iso14443_3a_error != Iso14443_3aErrorNone) {
-            error = iso14443_4a_poller_process_error(iso14443_3a_error);
+            error = iso14443_4a_process_error(iso14443_3a_error);
             break;
 
         } else if(!bit_buffer_starts_with_byte(instance->rx_buffer, pcb)) {

@@ -36,3 +36,20 @@ void iso14443_4a_ats_fill_default(Iso14443_4aAtsData* data) {
     data->tc_1 = ISO14443_4A_ATS_TC1_CID_FLAG;
     data->t1 = 0;
 }
+
+Iso14443_4aError iso14443_4a_process_error(Iso14443_3aError error) {
+    switch(error) {
+    case Iso14443_3aErrorNone:
+        return Iso14443_4aErrorNone;
+    case Iso14443_3aErrorNotPresent:
+        return Iso14443_4aErrorNotPresent;
+    case Iso14443_3aErrorColResFailed:
+    case Iso14443_3aErrorCommunication:
+    case Iso14443_3aErrorWrongCrc:
+        return Iso14443_4aErrorProtocol;
+    case Iso14443_3aErrorTimeout:
+        return Iso14443_4aErrorTimeout;
+    default:
+        return Iso14443_4aErrorProtocol;
+    }
+}

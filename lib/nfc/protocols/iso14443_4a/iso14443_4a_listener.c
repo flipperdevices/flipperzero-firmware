@@ -65,11 +65,12 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
     NfcCommand command = NfcCommandContinue;
 
     if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame) {
-        UNUSED(instance);
-        FURI_LOG_D(
-            TAG,
-            "Standard frame recieived with length of %zu",
-            bit_buffer_get_size_bytes(rx_buffer));
+        const size_t buffer_size = bit_buffer_get_size_bytes(rx_buffer);
+        const uint8_t first_byte = bit_buffer_get_byte(rx_buffer, 0);
+
+        if(buffer_size == 2 && first_byte == ISO14443_4A_CMD_READ_ATS) {
+            iso14443_4a_listener_send_ats(instance, &instance->data->ats_data);
+        }
     }
 
     return command;
