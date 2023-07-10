@@ -32,5 +32,6 @@ struct EthWorker {
 };
 
 void eth_worker_change_state(EthWorker* eth_worker, EthWorkerState state);
+void eth_worker_log(EthWorker* eth_worker, const char* str);
 
 int32_t eth_worker_task(void* context);

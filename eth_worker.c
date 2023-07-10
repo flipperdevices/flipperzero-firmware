@@ -13,7 +13,7 @@
 
 EthWorker* eth_worker_alloc() {
     EthWorker* eth_worker = malloc(sizeof(EthWorker));
-    // Worker thread attributes
+
     eth_worker->thread = furi_thread_alloc();
     furi_thread_set_name(eth_worker->thread, "EthWorker");
     furi_thread_set_stack_size(eth_worker->thread, 8192);
@@ -22,9 +22,8 @@ EthWorker* eth_worker_alloc() {
 
     eth_worker_change_state(eth_worker, EthWorkerStateModuleInit);
 
-    eth_worker->config = malloc(sizeof(EthernetSaveConfig));
-
-    ethernet_save_process_read(eth_worker->config);
+    eth_worker->config = ehternet_save_process_malloc();
+    furi_assert(eth_worker->config);
 
     eth_worker->init_process =
         ethernet_view_process_malloc(EthWorkerProcessInit, eth_worker->config);
@@ -43,14 +42,13 @@ EthWorker* eth_worker_alloc() {
 
 void eth_worker_free(EthWorker* eth_worker) {
     furi_assert(eth_worker);
-    ethernet_save_process_write(eth_worker->config);
     furi_thread_free(eth_worker->thread);
     ethernet_view_process_free(eth_worker->init_process);
     ethernet_view_process_free(eth_worker->dhcp_process);
     ethernet_view_process_free(eth_worker->stat_process);
     ethernet_view_process_free(eth_worker->ping_process);
     ethernet_view_process_free(eth_worker->reset_process);
-    free(eth_worker->config);
+    ehternet_save_process_free(eth_worker->config);
     free(eth_worker);
 }
 
@@ -78,6 +76,11 @@ void eth_worker_set_active_process(EthWorker* eth_worker, EthWorkerProcess state
         eth_worker->active_process = eth_worker->reset_process;
         break;
     }
+}
+
+void eth_worker_log(EthWorker* eth_worker, const char* str) {
+    furi_assert(eth_worker);
+    ehternet_save_process_print(eth_worker->config, str);
 }
 
 /************************** Ethernet Worker Thread *****************************/

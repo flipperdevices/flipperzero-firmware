@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <storage/storage.h>
 
 typedef struct EthernetSaveConfig {
     uint8_t mac[6];
@@ -9,6 +10,7 @@ typedef struct EthernetSaveConfig {
     uint8_t gateway[4];
     uint8_t dns[4];
     uint8_t ping_ip[4];
+    File* log_file;
 } EthernetSaveConfig;
 
 #define ETHERNET_SAVE_DEFAULT_MAC \
@@ -24,7 +26,6 @@ typedef struct EthernetSaveConfig {
 #define ETHERNET_SAVE_DEFAULT_PING_IP \
     { 8, 8, 8, 8 }
 
-void ethernet_save_process_write(const EthernetSaveConfig* config);
-void ethernet_save_process_read(EthernetSaveConfig* config);
-
-void ehternet_save_process_print(char* str);
+EthernetSaveConfig* ehternet_save_process_malloc();
+void ehternet_save_process_free(EthernetSaveConfig* config);
+void ehternet_save_process_print(EthernetSaveConfig* config, const char* str);

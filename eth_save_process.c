@@ -1,7 +1,9 @@
 #include "eth_save_process.h"
 
 #include <furi.h>
+#include <furi_hal.h>
 #include <storage/storage.h>
+#include <locale/locale.h>
 
 #define TAG "EthSave"
 
@@ -195,6 +197,7 @@ bool storage_read_config(File* file, EthernetSaveConfig* cfg) {
         }
     }
 
+    furi_string_free(fstring);
     return true;
 }
 
@@ -223,8 +226,6 @@ void ethernet_save_process_write(const EthernetSaveConfig* config) {
 }
 
 void ethernet_save_process_read(EthernetSaveConfig* config) {
-    set_default_config(config);
-
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
     File* file = storage_file_alloc(storage);
@@ -249,5 +250,57 @@ void ethernet_save_process_read(EthernetSaveConfig* config) {
     furi_record_close(RECORD_STORAGE);
 }
 
-void ehternet_save_process_print(char* str) {
+EthernetSaveConfig* ehternet_save_process_malloc() {
+    EthernetSaveConfig* config = malloc(sizeof(EthernetSaveConfig));
+
+    set_default_config(config);
+
+    ethernet_save_process_read(config);
+
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    FURI_LOG_E(TAG, "ehternet_save_process_malloc");
+
+    File* file = storage_file_alloc(storage);
+
+    FURI_LOG_E(TAG, "storage_file_alloc");
+
+    if(!storage_file_open(file, APP_DATA_PATH("log.txt"), FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        FURI_LOG_E(TAG, "Failed to open file or file not exists");
+        storage_file_free(file);
+        furi_record_close(RECORD_STORAGE);
+        return NULL;
+    }
+
+    config->log_file = file;
+
+    ehternet_save_process_print(config, "Finik Ethernet [RUN]");
+    FURI_LOG_E(TAG, "storage_file_alloc after print");
+
+    return config;
+}
+
+void ehternet_save_process_print(EthernetSaveConfig* config, const char* str) {
+    furi_assert(config);
+    FuriHalRtcDateTime datetime = {0};
+    furi_hal_rtc_get_datetime(&datetime);
+    bool res = storage_printf(
+        config->log_file,
+        "%4d.%02d.%02d-%02d:%2d:%02d || %s",
+        datetime.year,
+        datetime.month,
+        datetime.day,
+        datetime.hour,
+        datetime.minute,
+        datetime.second,
+        str);
+}
+
+void ehternet_save_process_free(EthernetSaveConfig* config) {
+    ehternet_save_process_print(config, "Finik Ethernet [STOP]");
+    ethernet_save_process_write(config);
+    storage_file_close(config->log_file);
+    storage_file_free(config->log_file);
+    furi_record_close(RECORD_STORAGE);
+    free(config);
 }
