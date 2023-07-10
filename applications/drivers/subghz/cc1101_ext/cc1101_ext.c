@@ -95,6 +95,12 @@ static bool subghz_device_cc1101_ext_check_init() {
         // Reset
         furi_hal_gpio_init(
             subghz_device_cc1101_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(
+            subghz_device_cc1101_ext->spi_bus_handle->miso,
+            GpioModeInput,
+            GpioPullUp,
+            GpioSpeedLow);
+
         cc1101_status = cc1101_reset(subghz_device_cc1101_ext->spi_bus_handle);
         if(cc1101_status.CHIP_RDYn != 0) {
             //timeout or error
@@ -108,7 +114,7 @@ static bool subghz_device_cc1101_ext_check_init() {
         }
         // Prepare GD0 for power on self test
         furi_hal_gpio_init(
-            subghz_device_cc1101_ext->g0_pin, GpioModeInput, GpioPullNo, GpioSpeedLow);
+            subghz_device_cc1101_ext->g0_pin, GpioModeInput, GpioPullUp, GpioSpeedLow);
 
         // GD0 low
         cc1101_status = cc1101_write_reg(
@@ -129,6 +135,8 @@ static bool subghz_device_cc1101_ext_check_init() {
         }
 
         // GD0 high
+        furi_hal_gpio_init(
+            subghz_device_cc1101_ext->g0_pin, GpioModeInput, GpioPullDown, GpioSpeedLow);
         cc1101_status = cc1101_write_reg(
             subghz_device_cc1101_ext->spi_bus_handle,
             CC1101_IOCFG0,
