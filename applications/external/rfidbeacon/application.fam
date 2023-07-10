@@ -1,0 +1,17 @@
+App(
+    appid="RFID_Beacon",
+    name="RFID Beacon",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="flipper_rfidbeacon_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=2 * 1024,
+    fap_icon="rfidbeacon.png",
+    fap_category="Tools",
+    fap_icon_assets_symbol="flipper_rfidbeacon",
+    fap_author="@nmrr",
+    fap_weburl="https://github.com/nmrr/flipperzero-rfidbeacon",
+    # fap_version="1.0",
+    fap_description="A letter/number morse beacon on 125 kHz using RFID interface of the Flipper Zero",
+)

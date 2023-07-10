@@ -60,6 +60,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Fix merge external main #537 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/537)
 - UL: [SubRem app: UPD txrx #539 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/539)
 - UL: Updated: [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) (By gid9798)
+- Added: [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 
 <a name="release">
 
@@ -401,6 +402,7 @@ $ ./fbt dolphin_ext
 - [RCWL-516 Motion Sensor (By ahmedafe1)](https://github.com/ahmedafe1/rcwl_0516-Flipperzero)
 - [Remote Maker (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/487)
 - [Resistance Calculator (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
+- [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 - [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507) [(Original By Ganapati)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/245)
 - [RGB LED (By flyandi)](https://github.com/flyandi/flipper_zero_rgb_led)
 - [SAM (By Unknown)][Original?](https://github.com/ctoth/SAM)
