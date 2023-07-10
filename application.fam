@@ -15,7 +15,7 @@ App(
 	fap_icon_assets="icons",
 	fap_icon="zeitraffer.png",
     fap_category="GPIO",
-	fap_description="Simple intervalometer app",
+	fap_description="Simple intervalometer/timelapse app",
     fap_author="Aurelius Rosenbaum",
 	fap_weburl="https://github.com/theageoflove/flipperzero-zeitraffer",
 )
