@@ -13,6 +13,7 @@ class TestSubGhz(BaseCase):
     @pytest.mark.smoke
     def test_subghz_menu(self, nav):
         nav.subghz.go_into()
+        
         menu = nav.get_menu_list()
         menu_ref = [
             "Read",
@@ -22,7 +23,6 @@ class TestSubGhz(BaseCase):
             "Frequency Analyzer",
             "Region Information",
             "Radio Settings",
-            "Test",
         ]
         assert menu == menu_ref, "Sub-GHz menu list is wrong"
         nav.go_to_main_screen()

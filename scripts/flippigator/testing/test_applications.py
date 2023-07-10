@@ -20,12 +20,15 @@ class TestApplications(BaseCase):
             "folder_Bluetooth",
             "folder_GPIO",
             "folder_Games",
+            "folder_Infrared",
             "folder_Debug",
             "folder_Media",
             "folder_NFC",
+            "folder_RFID",
             "folder_Sub-GHz",
             "folder_Tools",
             "folder_USB",
+            "folder_iButton",
         ]
         for i in menu:
             if i in menu_ref:
@@ -92,6 +95,18 @@ class TestApplications(BaseCase):
             ), "Some of Games apps are missed"
             nav.press_back()
 
+        with allure.step("Infrared apps"):
+            nav.go_to("folder_Infrared")
+            nav.press_ok()
+            menu = nav.get_menu_list()
+            menu_ref = ["FileBrowserLevelUp", "app_Infrared"]
+
+            assert menu, "Infrared folder is empty"
+            assert all(
+                [item in menu for item in menu_ref]
+            ), "Some of Infrared apps are missed"
+            nav.press_back()
+
         with allure.step("Media apps"):
             nav.go_to("folder_Media")
             nav.press_ok()
@@ -110,6 +125,7 @@ class TestApplications(BaseCase):
             menu = nav.get_menu_list()
             menu_ref = [
                 "FileBrowserLevelUp",
+                "app_NFC",
                 "app_Nfc Magic",
                 "app_PicoPass",
                 "app_MfKey32",
@@ -121,12 +137,25 @@ class TestApplications(BaseCase):
             ), "Some of NFC apps are missed"
             nav.press_back()
 
+        with allure.step("RFID apps"):
+            nav.go_to("folder_RFID")
+            nav.press_ok()
+            menu = nav.get_menu_list()
+            menu_ref = ["FileBrowserLevelUp", "app_125 kHz RFID"]
+
+            assert menu, "RFID folder is empty"
+            assert all(
+                [item in menu for item in menu_ref]
+            ), "Some of RFID apps are missed"
+            nav.press_back()
+
         with allure.step("Sub-GHz apps"):
             nav.go_to("folder_Sub-GHz")
             nav.press_ok()
             menu = nav.get_menu_list()
             menu_ref = [
                 "FileBrowserLevelUp",
+                "app_Sub-GHz",
                 "app_Weather Station",
             ]
 
@@ -158,13 +187,27 @@ class TestApplications(BaseCase):
             menu = nav.get_menu_list()
             menu_ref = [
                 "FileBrowserLevelUp",
+                "app_Bad USB",
                 "app_UsbRemote",
+                "app_U2F",
             ]
 
             assert menu, "USB folder is empty"
             assert all(
                 [item in menu for item in menu_ref]
             ), "Some of USB apps are missed"
+            nav.press_back()
+
+        with allure.step("iButton apps"):
+            nav.go_to("folder_iButton")
+            nav.press_ok()
+            menu = nav.get_menu_list()
+            menu_ref = ["FileBrowserLevelUp", "app_iButton"]
+
+            assert menu, "iButton folder is empty"
+            assert all(
+                [item in menu for item in menu_ref]
+            ), "Some of iButton apps are missed"
             nav.press_back()
 
         nav.go_to_main_screen()
