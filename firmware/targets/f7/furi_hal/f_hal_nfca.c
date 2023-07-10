@@ -8,6 +8,8 @@
 
 #define TAG "FuriHalNfcA"
 
+static Iso14443_3aSignal* iso14443_3a_signal = NULL;
+
 FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
     FHalNfcError error = FHalNfcErrorNone;
 
@@ -103,6 +105,8 @@ FHalNfcError
     st25r3916_write_pta_mem(handle, pt_memory, sizeof(pt_memory));
     furi_hal_spi_release(handle);
 
+    iso14443_3a_signal = iso14443_3a_signal_alloc(&gpio_spi_r_mosi);
+
     return error;
 }
 
@@ -113,9 +117,7 @@ FHalNfcError f_hal_nfca_listener_tx_custom_parity(
     furi_assert(tx_data);
     furi_assert(tx_parity);
 
-    Iso14443_3aSignal* iso14443_3a_signal = iso14443_3a_signal_alloc(&gpio_spi_r_mosi);
-
-    f_hal_nfc_timers_deinit();
+    furi_assert(iso14443_3a_signal);
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
     furi_hal_spi_acquire(handle);
@@ -135,9 +137,6 @@ FHalNfcError f_hal_nfca_listener_tx_custom_parity(
     st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 
     furi_hal_spi_release(handle);
-    iso14443_3a_signal_free(iso14443_3a_signal);
-
-    f_hal_nfc_timers_init();
 
     // TODO handle field off
     return FHalNfcErrorNone;
