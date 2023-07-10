@@ -1215,7 +1215,7 @@ int32_t tanks_game_app(void* p) {
     size_t message_max_len = 180;
     uint8_t incomingMessage[180] = {0};
     SubGhzTxRxWorker* subghz_txrx = subghz_tx_rx_worker_alloc();
-    subghz_tx_rx_worker_start(subghz_txrx, frequency);
+    // subghz_tx_rx_worker_start(subghz_txrx, frequency);
     furi_hal_power_suppress_charge_enter();
 
     for(bool processing = true; processing;) {
