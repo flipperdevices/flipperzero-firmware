@@ -60,6 +60,7 @@ Header,+,firmware/targets/f7/furi_hal/furi_hal_rfid.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_spi_config.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_spi_types.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_subghz.h,,
+Header,+,firmware/targets/f7/furi_hal/furi_hal_subghz_configs.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_target_hw.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_uart.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_usb_cdc.h,,
@@ -1467,9 +1468,8 @@ Function,+,furi_hal_spi_release,void,FuriHalSpiBusHandle*
 Function,-,furi_hal_subghz_dump_state,void,
 Function,+,furi_hal_subghz_flush_rx,void,
 Function,+,furi_hal_subghz_flush_tx,void,
-Function,+,furi_hal_subghz_get_extend_settings,void,"_Bool*, _Bool*"
-Function,+,furi_hal_subghz_get_external_power_disable,_Bool,
 Function,+,furi_hal_subghz_get_data_gpio,const GpioPin*,
+Function,+,furi_hal_subghz_get_extend_settings,void,"_Bool*, _Bool*"
 Function,+,furi_hal_subghz_get_lqi,uint8_t,
 Function,+,furi_hal_subghz_get_rolling_counter_mult,uint8_t,
 Function,+,furi_hal_subghz_get_rssi,float,
@@ -1488,7 +1488,6 @@ Function,+,furi_hal_subghz_rx,void,
 Function,+,furi_hal_subghz_rx_pipe_not_empty,_Bool,
 Function,+,furi_hal_subghz_set_async_mirror_pin,void,const GpioPin*
 Function,+,furi_hal_subghz_set_extend_settings,void,"_Bool, _Bool"
-Function,+,furi_hal_subghz_set_external_power_disable,void,_Bool
 Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
@@ -3373,6 +3372,7 @@ Variable,+,furi_hal_spi_preset_1edge_low_2m,const LL_SPI_InitTypeDef,
 Variable,+,furi_hal_spi_preset_1edge_low_4m,const LL_SPI_InitTypeDef,
 Variable,+,furi_hal_spi_preset_1edge_low_8m,const LL_SPI_InitTypeDef,
 Variable,+,furi_hal_spi_preset_2edge_low_8m,const LL_SPI_InitTypeDef,
+Variable,+,furi_hal_subghz,volatile FuriHalSubGhz,
 Variable,+,gpio_button_back,const GpioPin,
 Variable,+,gpio_button_down,const GpioPin,
 Variable,+,gpio_button_left,const GpioPin,

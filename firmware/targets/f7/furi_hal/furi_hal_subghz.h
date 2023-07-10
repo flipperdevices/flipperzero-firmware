@@ -65,7 +65,7 @@ typedef struct {
     volatile FuriHalSubGhzPreset preset;
     const GpioPin* async_mirror_pin;
     SubGhzRadioType radio_type;
-    FuriHalSpiBusHandle* spi_bus_handle;
+
     const GpioPin* cc1101_g0_pin;
     uint8_t rolling_counter_mult;
     bool ext_module_power_disabled : 1;
