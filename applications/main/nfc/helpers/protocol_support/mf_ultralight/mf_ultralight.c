@@ -155,26 +155,26 @@ static bool nfc_scene_info_on_event_mf_ultralight(NfcApp* instance, uint32_t eve
 }
 
 static bool nfc_scene_read_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
-    switch(event) {
-    case SubmenuIndexUnlock:
+    if(event == SubmenuIndexUnlock) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
         return true;
-    default:
-        return false;
     }
+
+    return false;
 }
 
 static bool nfc_scene_saved_menu_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
-    switch(event) {
-    case SubmenuIndexUnlockByReader:
+    bool consumed = false;
+
+    if(event == SubmenuIndexUnlockByReader) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    case SubmenuIndexUnlockByPassword:
+        consumed = true;
+    } else if(event == SubmenuIndexUnlockByPassword) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfUltralightUnlockMenu);
-        return true;
-    default:
-        return false;
+        consumed = true;
     }
+
+    return consumed;
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
