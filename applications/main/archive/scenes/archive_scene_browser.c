@@ -75,7 +75,9 @@ static void archive_run_in_app(ArchiveBrowserView* browser, ArchiveFile_t* selec
                     loader, "/ext/apps/USB/bad_usb.fap", furi_string_get_cstr(selected->path));
             } else if(strcmp(app_name, "Infrared") == 0) {
                 loader_start_with_gui_error(
-                    loader, "/ext/apps/Infrared/infrared.fap", furi_string_get_cstr(selected->path));
+                    loader,
+                    "/ext/apps/Infrared/infrared.fap",
+                    furi_string_get_cstr(selected->path));
             } else if(strcmp(app_name, "125 kHz RFID") == 0) {
                 loader_start_with_gui_error(
                     loader, "/ext/apps/RFID/lfrfid.fap", furi_string_get_cstr(selected->path));

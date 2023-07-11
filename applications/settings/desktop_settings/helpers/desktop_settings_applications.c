@@ -4,25 +4,25 @@ const DesktopSettingsApplication FLIPPER_APPS2[] = {
 
     {.name = "Clock", .appid = "/ext/apps/Main/Dab_Timer.fap"},
 
-    {.name = "Sub-GHz", .appid = "NULL"},
+    {.name = "Sub-GHz", .appid = "/ext/apps/Sub-GHz/subghz.fap"},
 
     {.name = "Sub-GHz Remote", .appid = "/ext/apps/Sub-GHz/Subghz_Remote_Refactored.fap"},
 
     {.name = "Sub-GHz Playlist", .appid = "/ext/apps/Sub-GHz/SubGHz_Playlist.fap"},
 
-    {.name = "125 kHz RFID", .appid = "/ext/apps/Main/lfrfid.fap"},
+    {.name = "125 kHz RFID", .appid = "/ext/apps/RFID/lfrfid.fap"},
 
     {.name = "NFC", .appid = "NULL"},
 
-    {.name = "Infrared", .appid = "/ext/apps/Main/infrared.fap"},
+    {.name = "Infrared", .appid = "/ext/apps/Infrared/infrared.fap"},
 
     {.name = "IR Remote", .appid = "/ext/apps/Infrared/IR_Remote.fap"},
 
-    {.name = "GPIO", .appid = "/ext/apps/Main/gpio.fap"},
+    {.name = "GPIO", .appid = "/ext/apps/GPIO/gpio.fap"},
 
-    {.name = "iButton", .appid = "/ext/apps/Main/iButton.fap"},
+    {.name = "iButton", .appid = "/ext/apps/iButton/iButton.fap"},
 
-    {.name = "Bad USB", .appid = "/ext/apps/Main/bad_usb.fap"},
+    {.name = "Bad USB", .appid = "/ext/apps/USB/bad_usb.fap"},
 
     {.name = "U2F", .appid = "/ext/apps/Main/u2f.fap"},
 
