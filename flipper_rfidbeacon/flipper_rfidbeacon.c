@@ -38,7 +38,7 @@ static void draw_callback(Canvas* canvas, void* ctx)
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "RFID Beacon");
 
-    char buffer[16];
+    char buffer[24];
     uint8_t positionBuffer = 0;
     buffer[positionBuffer++] = CW_char[mutexVal->status];
     buffer[positionBuffer++] = ' ';
