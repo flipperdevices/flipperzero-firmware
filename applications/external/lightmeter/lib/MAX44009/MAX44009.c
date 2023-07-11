@@ -21,7 +21,7 @@ int max44009_read_light(float* result) {
     status = furi_hal_i2c_read_reg_8(I2C_BUS, MAX44009_ADDR, MAX44009_REG_LUX_LO, &data_one, I2C_TIMEOUT);
     mantissa |= (data_one & MAX44009_REG_LUX_LO_MANT_LO_MASK);
     furi_hal_i2c_release(I2C_BUS);
-    *result = (float)pow(2, exp) * mantissa * 0.72;
+    *result = (float)pow(2, exp) * mantissa * 0.045;
     FURI_LOG_D("MAX44009", "exp %d, mant %d, lux %f", exp, mantissa, (double)*result);
     return status;
 }
