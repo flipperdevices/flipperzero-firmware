@@ -1,4 +1,4 @@
-name: Get latest release version
+name: Get latest release version of Flipper Zero Firmware
 on:
   schedule:
     - cron:  '0 10 * * *'
