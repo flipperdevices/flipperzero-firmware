@@ -14,7 +14,7 @@ This application can transmit the whole alphabet (A to Z), numbers (0 to 9) and 
 
 Menu of the application:
 
-<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/off.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/onair.png" width=25% height=25%>
+<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen1.png" width=50% height=50%> <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen2.png" width=50% height=50%> <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen3.png" width=50% height=50%>
 
 Led of the **Flipper Zero** turns in red when transmitting. 
 
@@ -22,15 +22,11 @@ Led of the **Flipper Zero** turns in red when transmitting.
 
 **A** letter:
 
-<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen1.png" width=50% height=50%>
+<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/a.png" width=50% height=50%>
 
-**5** number:
+**3** number:
 
-<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen2.png" width=50% height=50%>
-
-**+** symbol (on the air):
-
-<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen3.png" width=50% height=50%>
+<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/3.png" width=50% height=50%>
 
 ## Build the program
 
@@ -70,5 +66,5 @@ Build has been made with official toolchain, **API Mismatch** error may appear i
   * Symbols have been added
   * Morse code view has been added
 
-* 2023-07-10
+* 2023-07-09
   * Initial release
