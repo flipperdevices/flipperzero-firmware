@@ -10,6 +10,7 @@
 #define APPLICATION_NAME "ESubGhzChat"
 
 #define DEFAULT_FREQ 433920000
+#define KEY_BITS 256
 
 #define CHAT_BOX_STORE_SIZE 4096
 #define TEXT_INPUT_STORE_SIZE 512
@@ -25,7 +26,7 @@ typedef struct {
 	FuriString *msg_input;
 	bool encrypted;
 	uint32_t frequency;
-	unsigned char key[32];
+	unsigned char key[KEY_BITS / 8];
 } ESubGhzChatState;
 
 typedef enum {
@@ -110,7 +111,7 @@ static void pass_input_cb(void *context)
 		// TODO: remove this
 		furi_string_cat_printf(state->chat_box_store, "Key:");
 		int i;
-		for (i = 0; i < 32; i++) {
+		for (i = 0; i < KEY_BITS / 8; i++) {
 			furi_string_cat_printf(state->chat_box_store, " %02x",
 					state->key[i]);
 		}
