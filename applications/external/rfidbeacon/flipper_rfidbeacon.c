@@ -1,7 +1,3 @@
-// CC0 1.0 Universal (CC0 1.0)
-// Public Domain Dedication
-// https://github.com/nmrr
-
 #include <stdio.h>
 #include <furi.h>
 #include <gui/gui.h>
@@ -19,17 +15,21 @@ typedef struct {
     InputEvent input;
 } EventApp;
 
-const char CW_char[36] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-                          'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-                          'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-const uint8_t CW_size[36] = {2, 4, 4, 3, 1, 4, 3, 4, 2, 4, 3, 4, 2, 2, 3, 4, 4, 3,
-                             3, 1, 3, 4, 3, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5};
-const uint8_t CW_value[36] = {
+const char CW_char[54] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',  'M', 'N',
+                          'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',  '0', '1',
+                          '2', '3', '4', '5', '6', '7', '8', '9', '.', ',', '?', '\'', '!', '/',
+                          '(', ')', '&', ':', ';', '=', '+', '-', '_', '"', '$', '@'};
+const uint8_t CW_size[54] = {2, 4, 4, 3, 1, 4, 3, 4, 2, 4, 3, 4, 2, 2, 3, 4, 4, 3,
+                             3, 1, 3, 4, 3, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5,
+                             6, 6, 6, 6, 6, 5, 5, 6, 5, 6, 6, 5, 5, 6, 6, 6, 7, 6};
+const uint8_t CW_value[54] = {
     0b01000000, 0b10000000, 0b10100000, 0b10000000, 0b00000000, 0b00100000, 0b11000000, 0b00000000,
     0b00000000, 0b01110000, 0b10100000, 0b01000000, 0b11000000, 0b10000000, 0b11100000, 0b01100000,
     0b11010000, 0b01000000, 0b00000000, 0b10000000, 0b00100000, 0b00010000, 0b01100000, 0b10010000,
     0b10110000, 0b11000000, 0b11111000, 0b01111000, 0b00111000, 0b00011000, 0b00001000, 0b00000000,
-    0b10000000, 0b11000000, 0b11100000, 0b11110000};
+    0b10000000, 0b11000000, 0b11100000, 0b11110000, 0b01010100, 0b11001100, 0b00110000, 0b01111000,
+    0b10101100, 0b10010000, 0b10110000, 0b10110100, 0b01000000, 0b11100000, 0b10101000, 0b10001000,
+    0b01010000, 0b10000100, 0b00110100, 0b01001000, 0b00010010, 0b01101000};
 
 typedef struct {
     FuriMutex* mutex;
@@ -49,8 +49,30 @@ static void draw_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignCenter, "RFID Beacon");
 
-    char buffer[8];
-    snprintf(buffer, sizeof(buffer), "%c", CW_char[mutexVal->status]);
+    char buffer[16];
+    uint8_t positionBuffer = 0;
+    buffer[positionBuffer++] = CW_char[mutexVal->status];
+    buffer[positionBuffer++] = ' ';
+    buffer[positionBuffer++] = ' ';
+    buffer[positionBuffer++] = ' ';
+    buffer[positionBuffer++] = ' ';
+
+    uint8_t maskMorse = 0b10000000;
+    for(uint8_t i = 0; i < CW_size[mutexVal->status]; i++) {
+        if(i != 0) {
+            buffer[positionBuffer++] = ' ';
+            maskMorse >>= 1;
+        }
+
+        if((CW_value[mutexVal->status] & maskMorse) != 0) {
+            buffer[positionBuffer++] = '_';
+        } else {
+            buffer[positionBuffer++] = '.';
+        }
+    }
+
+    buffer[positionBuffer++] = '\0';
+
     canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, buffer);
 
     if(mutexVal->enableCW_mutex == 0)
@@ -137,8 +159,10 @@ int32_t flipper_rfidbeacon_app() {
                     enableCW = 1;
                     letterPosition = 0;
                     draw = 0;
-                } else
+                } else {
+                    RFID_OFF(notification);
                     enableCW = 0;
+                }
 
                 mutexVal.enableCW_mutex = enableCW;
                 screenRefresh = 1;
@@ -149,14 +173,14 @@ int32_t flipper_rfidbeacon_app() {
                 if(mutexVal.status != 0)
                     mutexVal.status--;
                 else
-                    mutexVal.status = 35;
+                    mutexVal.status = 53;
 
                 screenRefresh = 1;
                 furi_mutex_release(mutexVal.mutex);
             } else if(event.input.key == InputKeyRight && event.input.type == InputTypeShort) {
                 furi_mutex_acquire(mutexVal.mutex, FuriWaitForever);
 
-                if(mutexVal.status != 35)
+                if(mutexVal.status != 53)
                     mutexVal.status++;
                 else
                     mutexVal.status = 0;

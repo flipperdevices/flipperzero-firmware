@@ -75,6 +75,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: OFW: [Decode only supported Oregon 3 sensor #2829 (By wosk)](https://github.com/flipperdevices/flipperzero-firmware/pull/2829) Was Previously Added
 - OFW: [More descriptive error messages for the log command #2835 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2835)
 - OFW: [Update toolchain to v23 #2824 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2824)
+- Updated: [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 
 <a name="release">
 
