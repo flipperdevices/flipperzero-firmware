@@ -263,7 +263,6 @@ uint8_t subbrute_device_load_from_file(SubBruteDevice* instance, const char* fil
             result = SubBruteFileResultMissingOrIncorrectFrequency;
             break;
         }
-      
 
         if(!subghz_devices_is_frequency_valid(instance->radio_device, temp_data32)) {
             FURI_LOG_E(TAG, "Unsupported radio device frequency");
