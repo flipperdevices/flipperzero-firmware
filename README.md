@@ -1,6 +1,6 @@
 ## Lightmeter for Flipper Zero
 
-Lightmeter app for photography based on BH1750 sensor
+Lightmeter app for photography based on BH1750/MAX44009 sensor
 
 ## Support
 

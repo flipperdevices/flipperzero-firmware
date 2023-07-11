@@ -105,4 +105,9 @@ typedef enum {
     LUX_ONLY_ON,
 } LightMeterLuxOnlyMode;
 
+typedef enum {
+    SENSOR_BH1750,
+    SENSOR_MAX44009,
+} LightMeterSensorType;
+
 typedef enum { BACKLIGHT_AUTO, BACKLIGHT_ON } LightMeterBacklight;
