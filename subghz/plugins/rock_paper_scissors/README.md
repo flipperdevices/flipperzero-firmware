@@ -1,21 +1,29 @@
 # Rock Papper Scissors
 ![Flipper Zero Game](./prebuilt/win.png)
 
+## Working builds
+
+This multi-player application relies on a SubGHz API that was recently changed.  Older firmware will get a build error, due to not supporting the new API definitions.
+
+It should build successfully on the following versions:
+- Official firmware - RC 33.0
+- Official firmware - Release 33.0
+- Official firmware - DEV 34.1
+- Unleashed firmware - DEV 34.0
+- RogueMaster firmware - DEV 34.1
+
+If you get error ``unknown type name 'SubGhzDevice'`` trying to build, then you need a newer firmware version.
+
+
 ## Introduction
 
-This is a multi-player game of Rock, Paper, Scissors! In version 1, we use the [Flipper Zero](https://flipperzero.one/) Sub-GHz radio to find other players, communicate moves, and exchange contact information.
+This is a multi-player game of Rock, Paper, Scissors! In version 1.2, we use the [Flipper Zero](https://flipperzero.one/) Sub-GHz radio to find other players, communicate moves, and exchange contact information.
 
 Watch on [YouTube](https://youtu.be/eGOv6Gbar7I).
 
 
 ## Quick install directions for Flipper Zero running Official Firmware!
-
-- Download the latest FAP file matching your firmware version.  Copy the downloaded FAP file to the SD Card/apps/Games folder (using qFlipper or by ejecting the SD Card and inserting it into your PC).
-
-  - Official Firmware [Release 0.80.1](https://github.com/jamisonderek/flipper-zero-tutorials/raw/main/subghz/plugins/rock_paper_scissors/prebuilt/v1.0/official-firmware/release-0.80.1/Rock_Paper_Scissors.fap)
-  - Official Firmware [RC 0.80.0](https://github.com/jamisonderek/flipper-zero-tutorials/raw/main/subghz/plugins/rock_paper_scissors/prebuilt/v1.0/official-firmware/rc-0.80.0/Rock_Paper_Scissors.fap)
-  - Official Firmware [Release 0.79.1](https://github.com/jamisonderek/flipper-zero-tutorials/raw/main/subghz/plugins/rock_paper_scissors/prebuilt/v1.0/official-firmware/release-0.79.1/Rock_Paper_Scissors.fap)
-  - [Archived releases](./prebuilt/v1.0/official-firmware)   _(games may not have latest fixes & features)_
+I recommend [FlipC.org](https://flipc.org/jamisonderek/flipper-zero-tutorials?branch=main&root=subghz/plugins/rock_paper_scissors&firmware=official) as the easiest way to install the game on your Flipper Zero.
 
 - If you have a different firmware, see the [installation directions](#installation-directions) below.
 
@@ -84,7 +92,7 @@ V1 completed features:
 - Play again from one Flipper Zero auto-starts/exit other Flipper Zero.
 
 
-Planed work for V1.1:
+Planed work for V2.0:
 
 - Wrap user content to two lines on Past Games screen.
 - Allow for replacement of keyboard layout/keys.
@@ -96,9 +104,9 @@ Future ideas:
 
 - Add game ending animations.
 - Create stand-alone hardware badges that can play the game too.
-- Uses Princeton signals for second player.
-- Instead of subghz, use IR.
+- Uses Princeton signals for communication.
 - Instead of subghz, use GPIO.
+- Instead of subghz, use IR.
 
 
 ## Installation Directions
