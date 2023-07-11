@@ -43,7 +43,7 @@ Requires an ESP32-CAM module (I've personally used these: [Amazon Link 1][amazon
 
 ## Hardware Installation <a name="hardware-installation"></a>
 
-Below is the pinout guide and digram for the ESP32-CAM module to the Flipper Zero. From the ESP32-CAM module to the Flipper Zero:
+Below is the pinout guide and diagram for the ESP32-CAM module to the Flipper Zero. From the ESP32-CAM module to the Flipper Zero:
 
 ```
 VCC to 3V3
@@ -62,7 +62,7 @@ On the ESP32-CAM module itself you'll also need to connect the `IO0` pin to `GND
 
 1. Download and install the Arduino IDE from [here][arduino-ide].
 2. Go to the [releases section][flipper-zero-camera-suite-releases] for this repo and download the `esp32_cam_uart_stream.zip` file.
-3. Extract contents of `esp32_cam_uart_stream.zip` to disk. Be sure to keep the `.ino` file nested in the folder with the same name.
+3. Extract the contents of `esp32_cam_uart_stream.zip` to disk. Be sure to keep the `.ino` file nested in the folder with the same name.
 4. Open `~\esp32_cam_uart_stream\esp32_cam_uart_stream.ino` with your Arduino IDE.
 5. In the Arduino IDE, go to `File > Preferences`.
 6. In the `Settings` tab, add the following URL to the `Additional Boards Manager URLs` field:
