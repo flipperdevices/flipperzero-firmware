@@ -22,7 +22,7 @@ static void app_draw_callback(Canvas* canvas, void* ctx) {
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 25, 15, "Connect battery");
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 25, 30, "to GND and PC3");
+    canvas_draw_str(canvas, 9, 30, "to GND (-) and PC3 (+)");
 
     FuriString* tmp_string = furi_string_alloc();
     float voltage = app->voltage;
