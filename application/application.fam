@@ -20,8 +20,15 @@ App(
                 "BH1750.c",
             ],
         ),
+        Lib(
+            name="MAX44009",
+            cincludes=["."],
+            sources=[
+                "MAX44009.c",
+            ],
+        ),
     ],
-    fap_description="Lightmeter app for photography based on BH1750 sensor",
+    fap_description="Lightmeter app for photography based on BH1750/MAX44009 sensor",
     fap_author="Oleksii Kutuzov",
     fap_weburl="https://github.com/oleksiikutuzov/flipperzero-lightmeter",
     fap_icon_assets="icons",
