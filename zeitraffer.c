@@ -401,12 +401,15 @@ int32_t zeitraffer_app(void* p) {
      if(!flipper_format_write_int32(save, "Time", &Time, 1)) {notification_message(notifications, &sequence_error); break;}
      if(!flipper_format_write_int32(save, "Count", &Count, 1)) {notification_message(notifications, &sequence_error); break;}
      if(!flipper_format_write_int32(save, "Backlight", &Backlight, 1)) {notification_message(notifications, &sequence_error); break;}
-     if(!flipper_format_write_int32(save, "Delay", &Delay, 1)) {notification_message(notifications, &sequence_error); break;}
+     if(!flipper_format_write_int32(save, "Delay", &Delay, 1)) {
+		notification_message(notifications, &sequence_error); 
+		break;
+		}
      
     } while(0);
-
+	
+	
     flipper_format_free(save);
-
     furi_record_close(RECORD_STORAGE);
 
     // Очищаем таймер
