@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <furi_hal.h>
 #include <gui/gui.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
@@ -17,6 +18,8 @@ typedef struct {
 	FuriString *chat_box_store;
 	TextInput *text_input;
 	char text_input_store[TEXT_INPUT_STORE_SIZE + 1];
+	bool encrypted;
+	uint32_t frequency;
 } ESubGhzChatState;
 
 typedef enum {
@@ -43,6 +46,9 @@ static void freq_input_cb(void *context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+	furi_string_cat_printf(state->chat_box_store, "Frequency: %lu\n",
+			state->frequency);
+
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_FreqEntered);
 }
@@ -50,11 +56,30 @@ static void freq_input_cb(void *context)
 static bool freq_input_validator(const char *text, FuriString *error,
 		void *context)
 {
-	UNUSED(text);
-	UNUSED(error);
-	UNUSED(context);
+	furi_assert(text);
+	furi_assert(error);
 
-	// TODO
+	furi_assert(context);
+	ESubGhzChatState* state = context;
+
+        int ret = sscanf(text, "%lu", &(state->frequency));
+	if (ret != 1) {
+		furi_string_printf(error, "Please enter\nfrequency\nin Hz!");
+		return false;
+	}
+
+	if (!furi_hal_subghz_is_frequency_valid(state->frequency)) {
+		furi_string_printf(error, "Frequency\n%lu\n is invalid!",
+				state->frequency);
+		return false;
+	}
+
+	if (!furi_hal_subghz_is_tx_allowed(state->frequency)) {
+		furi_string_printf(error, "TX forbidden\non frequency\n%lu!",
+				state->frequency);
+		return false;
+	}
+
 	return true;
 }
 
@@ -63,19 +88,18 @@ static void pass_input_cb(void *context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+	if (strlen(state->text_input_store) == 0) {
+		state->encrypted = false;
+	} else {
+		state->encrypted = true;
+		// TODO
+	}
+
+	furi_string_cat_printf(state->chat_box_store, "Encrypted: %s\n",
+			(state->encrypted ? "true" : "false"));
+
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_PassEntered);
-}
-
-static bool pass_input_validator(const char *text, FuriString *error,
-		void *context)
-{
-	UNUSED(text);
-	UNUSED(error);
-	UNUSED(context);
-
-	// TODO
-	return true;
 }
 
 static void chat_input_cb(void *context)
@@ -175,8 +199,8 @@ static void scene_on_enter_pass_input(void* context)
 			true);
 	text_input_set_validator(
 			state->text_input,
-			pass_input_validator,
-			state);
+			NULL,
+			NULL);
 	text_input_set_header_text(
 			state->text_input,
 			"Password (empty for no encr.)");
@@ -419,6 +443,7 @@ int32_t esubghz_chat(void)
 	if (state == NULL) {
 		goto err_alloc;
 	}
+	memset(state, 0, sizeof(*state));
 
 	state->scene_manager = scene_manager_alloc(
 			&esubghz_chat_scene_event_handlers, state);

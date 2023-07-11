@@ -5,6 +5,7 @@ App(
     entry_point="esubghz_chat",
     requires=[
         "gui",
+        "subghz",
     ],
     stack_size=2 * 1024,
     fap_category="Examples",
