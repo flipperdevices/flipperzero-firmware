@@ -273,6 +273,7 @@ typedef struct {
     int keyboard_row;
     int keyboard_col;
     int social_line;
+    int echo_duration;
 } GameData;
 
 // This is our application context.

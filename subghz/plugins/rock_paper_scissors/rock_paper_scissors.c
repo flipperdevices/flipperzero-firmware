@@ -990,6 +990,18 @@ static void rps_broadcast(GameContext* game_context, FuriString* buffer) {
         // Wait a few milliseconds on failure before trying to send again.
         furi_delay_ms(20);
     }
+
+    // Try to handle the case that *sometimes* a signal might not get through.
+    for(int i = 0; i < 3; i++) {
+        if(game_context->data->echo_duration > 0 && game_context->data->echo_duration < 50) {
+            furi_delay_ms(game_context->data->echo_duration + i * 5);
+            FURI_LOG_I(TAG, "Echoing message");
+            while(!subghz_tx_rx_worker_write(game_context->subghz_txrx, message, length)) {
+                // Wait a few milliseconds on failure before trying to send again.
+                furi_delay_ms(7);
+            }
+        }
+    }
 }
 
 // Our GameEventSendCounter handler invokes this method.
@@ -1088,6 +1100,7 @@ static void rps_broadcast_quit(GameContext* game_context) {
 // @param game_context pointer to a GameContext.
 static void rps_broadcast_join(GameContext* game_context) {
     GameData* data = game_context->data;
+    data->echo_duration = 42;
     unsigned int gameNumber = data->game_number;
     FURI_LOG_I(TAG, "Joining game %d.", gameNumber);
 
@@ -1109,6 +1122,7 @@ static void rps_broadcast_join(GameContext* game_context) {
 // @param game_context pointer to a GameContext.
 static void rps_broadcast_join_acknowledge(GameContext* game_context) {
     GameData* data = game_context->data;
+    data->echo_duration = 12;
     unsigned int gameNumber = data->game_number;
     FURI_LOG_I(TAG, "Acknowledge joining game %d.", gameNumber);
 
