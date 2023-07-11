@@ -9,7 +9,7 @@ App(
     ],
     stack_size=1 * 1024,
     order=90,
-    fap_version=(1, 0),
+    fap_version=(1, 1),
     fap_icon="lightmeter.png",
     fap_category="GPIO",
     fap_private_libs=[
@@ -28,7 +28,7 @@ App(
             ],
         ),
     ],
-    fap_description="Lightmeter app for photography based on BH1750/MAX44009 sensor",
+    fap_description="Lightmeter app for photography",
     fap_author="Oleksii Kutuzov",
     fap_weburl="https://github.com/oleksiikutuzov/flipperzero-lightmeter",
     fap_icon_assets="icons",
