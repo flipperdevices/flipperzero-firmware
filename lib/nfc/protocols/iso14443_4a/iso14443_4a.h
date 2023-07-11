@@ -8,8 +8,6 @@
 extern "C" {
 #endif
 
-#define ISO14443_4A_CMD_READ_ATS (0xE0)
-
 typedef enum {
     Iso14443_4aErrorNone,
     Iso14443_4aErrorNotPresent,

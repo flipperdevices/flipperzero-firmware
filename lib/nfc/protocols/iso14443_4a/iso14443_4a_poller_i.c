@@ -6,8 +6,6 @@
 
 #define TAG "Iso14443_4aPoller"
 
-#define ISO14443_4A_PCB_I (0x02)
-
 Iso14443_4aError iso14443_4a_poller_halt(Iso14443_4aPoller* instance) {
     furi_assert(instance);
 
@@ -23,7 +21,7 @@ Iso14443_4aError
 
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_append_byte(instance->tx_buffer, ISO14443_4A_CMD_READ_ATS);
-    bit_buffer_append_byte(instance->tx_buffer, 0x80);
+    bit_buffer_append_byte(instance->tx_buffer, ISO14443_4A_FSDI_256 << 4);
 
     Iso14443_4aError error = Iso14443_4aErrorNone;
 
@@ -57,7 +55,8 @@ Iso14443_4aError iso14443_4a_poller_send_block(
     uint32_t fwt) {
     furi_assert(instance);
 
-    const uint8_t pcb = ISO14443_4A_PCB_I | instance->protocol_state.block_number;
+    const uint8_t pcb = ISO14443_4A_BLOCK_PCB_I | ISO14443_4A_BLOCK_PCB |
+                        instance->protocol_state.block_number;
     instance->protocol_state.block_number ^= 1;
 
     bit_buffer_reset(instance->tx_buffer);

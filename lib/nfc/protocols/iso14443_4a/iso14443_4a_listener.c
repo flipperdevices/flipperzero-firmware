@@ -5,7 +5,7 @@
 
 #define TAG "Iso14443_4aListener"
 
-#define ISO14443_4A_LISTENER_MAX_BUFFER_SIZE (512U)
+#define ISO14443_4A_LISTENER_BUF_SIZE (256U)
 
 static Iso14443_4aListener* iso14443_4a_listener_alloc(
     Iso14443_3aListener* iso14443_3a_listener,
@@ -17,7 +17,7 @@ static Iso14443_4aListener* iso14443_4a_listener_alloc(
     instance->data = iso14443_4a_alloc();
     iso14443_4a_copy(instance->data, data);
 
-    instance->tx_buffer = bit_buffer_alloc(ISO14443_4A_LISTENER_MAX_BUFFER_SIZE);
+    instance->tx_buffer = bit_buffer_alloc(ISO14443_4A_LISTENER_BUF_SIZE);
 
     instance->iso14443_4a_event.data = &instance->iso14443_4a_event_data;
     instance->generic_event.protocol = NfcProtocolIso14443_4a;
