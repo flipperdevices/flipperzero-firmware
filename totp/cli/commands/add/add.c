@@ -110,7 +110,7 @@ void totp_cli_command_add_docopt_options() {
     TOTP_CLI_PRINTF("  " DOCOPT_OPTION(
         TOTP_CLI_COMMAND_ARG_DIGITS_PREFIX,
         DOCOPT_ARGUMENT(
-            TOTP_CLI_COMMAND_ARG_DIGITS)) "    Number of digits to generate, one of: 5, 6, 8 " DOCOPT_DEFAULT("6") "\r\n");
+            TOTP_CLI_COMMAND_ARG_DIGITS)) "    Number of digits to generate, one of: %" PRIu8 ", %" PRIu8 ", %" PRIu8 " " DOCOPT_DEFAULT("%" PRIu8) "\r\n", TotpFiveDigitsCount, TotpSixDigitsCount, TotpEightDigitsCount, TotpSixDigitsCount);
 
     TOTP_CLI_PRINTF("  " DOCOPT_OPTION(
         TOTP_CLI_COMMAND_ARG_SECRET_ENCODING_PREFIX,
@@ -123,7 +123,7 @@ void totp_cli_command_add_docopt_options() {
     TOTP_CLI_PRINTF("  " DOCOPT_OPTION(
         TOTP_CLI_COMMAND_ARG_DURATION_PREFIX,
         DOCOPT_ARGUMENT(
-            TOTP_CLI_COMMAND_ARG_DURATION)) "  Token lifetime duration in seconds, between: 15 and 255 " DOCOPT_DEFAULT("30") "\r\n");
+            TOTP_CLI_COMMAND_ARG_DURATION)) "  Token lifetime duration in seconds, between: %" PRIu8 " and %" PRIu8 " " DOCOPT_DEFAULT("%" PRIu8) "\r\n", TOTP_TOKEN_DURATION_MIN, TOTP_TOKEN_DURATION_MAX, TOTP_TOKEN_DURATION_DEFAULT);
     TOTP_CLI_PRINTF("  " DOCOPT_SWITCH(
         TOTP_CLI_COMMAND_ARG_UNSECURE_PREFIX) "             Show console user input as-is without masking\r\n");
     TOTP_CLI_PRINTF("  " DOCOPT_OPTION(
