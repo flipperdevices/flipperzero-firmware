@@ -11,7 +11,9 @@ This project will turn your Wi-Fi dev board into an open access point. When user
 ## Portals
 
 The portal I initially provided is just an (ugly) example, please check out the [community portals folder](https://github.com/bigbrodude6119/flipper-zero-evil-portal/tree/main/portals) for more portals. 
-Contributors are welcome and very much needed! Remember to rename the new portal as `index.html` when you put it on the flipper.
+Contributors are welcome and very much needed!
+
+Users, remember to rename the new portal as `index.html` when you drag it on the flipper SD card.
 
 ## Disclaimer
 
