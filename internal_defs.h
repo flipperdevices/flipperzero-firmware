@@ -68,24 +68,18 @@ typedef struct {
 } ViewPort_internal;
 
 typedef struct {
-    FuriThreadId loader_thread;
+    char* args;
+    FuriThread* thread;
+    bool insomniac;
+    void* fap;
+} LoaderAppData_internal;
 
-    const void* application;
-    FuriThread* application_thread;
-    char* application_arguments;
-
-    void* cli;
-    void* gui;
-
-    void* view_dispatcher;
-    void* primary_menu;
-    // void* plugins_menu;
-    // void* debug_menu;
-    void* settings_menu;
-
-    volatile uint8_t lock_count;
-
+typedef struct {
     void* pubsub;
+    void* queue;
+    void* loader_menu;
+    void* loader_applications;
+    LoaderAppData_internal app;
 } Loader_internal;
 
 
