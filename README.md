@@ -16,9 +16,9 @@ clear: sta ap
 get/set: <variables>
 deauth: off, frame sta, device sta, spoof sta, frame broadcast, device broadcast, spoof broadcast
 mana: on off clear
-mana: verbose on off
-mana: loud on off
-commands
+mana verbose: on off
+mana loud: on off
+help: commands help
 
 # UART Terminal for Flipper Zero
 [Flipper Zero](https://flipperzero.one/) app to control various devices via UART interface.
