@@ -1,65 +1,6 @@
+#Simple timelapse/intervalometer app for Flipper Zero, works via GPIO pins.
 
-# zeitraffer
-
-[![Build FAP](https://github.com/theageoflove/flipperzero-zeitraffer/actions/workflows/build.yml/badge.svg?branch=main)](https://nightly.link/theageoflove/flipperzero-zeitraffer/workflows/build/main)
-
-[![FlipC.org](https://flipc.org/theageoflove/flipperzero-zeitraffer/badge)](https://flipc.org/theageoflove/flipperzero-zeitraffer)
-
-english version [below](#eng)
-
-
-Blog post: [theageoflove.ru](https://theageoflove.ru/2022/11/26/fap-fap-fap/)
-
-TG: [t.me/scuko_bled](https://t.me/scuko_bled)
-
-
-![zeitraffer for flipper zero](https://theageoflove.ru/uploads/2022/11/photo_2022-11-10_15-54-25.jpg)
-Видео работы: https://youtu.be/VPSpRLJXYAc
-
-Готовый фап можно скачать [с nightly.link](https://nightly.link/theageoflove/flipperzero-zeitraffer/workflows/build/main). Или [с flipc.org](https://flipc.org/theageoflove/flipperzero-zeitraffer).
-
-Я ненастоящий сварщик, не обессудьте. Делал для своей Sony DSLR A100, подходит для любых камер, поддерживающих проводной пульт с тремя контактами.
-
-Основано на хелловорлде https://github.com/zmactep/flipperzero-hello-world
-
-### Управление: 
-
- - **вверх-вниз** - время.
- - **влево-вправо** - количество кадров
- - **зажатие стрелок** - ±10 кадров/секунд
- - **ОК** - пуск/пауза
- - Длинное нажатие **ОК** - включить/выключить подсветку
- - **назад** - сброс
- - длинное нажатие **назад** - выход
-
-Особые режимы: 0 кадров - бесконечная съёмка, -1 кадров - BULB, 1 кадр - простой одиночный таймер.
-
-При работающем таймере блокируются все кнопки кроме ОК.
-
-При запуске даётся три секунды на отскочить.
-
-## Чо надо
- - две оптопары типа EL817C
- - кусок гребёнки на три пина
- - немного провода
- - термоусадка
- - разъём пульта от камеры. Где взять или из чего сделать - думайте
-
-## Как собрать
-Берём оптопары, соединяем по схеме. 
-![](https://theageoflove.ru/uploads/2022/11/camera_cable.jpg)
-Где какой пин у камеры, можно узнать например тут: https://www.doc-diy.net/photo/remote_pinout/
-
-# <a name="eng"></a>English
-Simple timelapse app for Flipper Zero.
-
-[Get latest release](https://nightly.link/theageoflove/flipperzero-zeitraffer/workflows/build/main)
-
-[Or install from flipc.org](https://flipc.org/theageoflove/flipperzero-zeitraffer)
-
-based on https://github.com/zmactep/flipperzero-hello-world
-
-### Control:
+## Control:
  - Up and down - time. 
  - Left and right - number of frames 
  - Long press arrows - ±10 frames/seconds 
@@ -78,7 +19,7 @@ When the timer is running, all buttons are blocked except OK.
   - some wire
   - heat shrink
   - camera remote connector
+  
 ## How to assemble
-Take optocouplers, connect according to the scheme.
-![](https://theageoflove.ru/uploads/2022/11/camera_cable_en.jpg)
+Take optocouplers, connect according to the scheme: https://theageoflove.ru/uploads/2022/11/camera_cable_en.jpg
 Camera pinout can be found here: https://www.doc-diy.net/photo/remote_pinout/

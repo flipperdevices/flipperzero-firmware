@@ -26,7 +26,8 @@ void text_input_input_handler(CliguiApp* app, InputEvent* event) {
         app->text_input_store[len] = ' ';
         app->text_input_store[len + 1] = 0;
     }
-    if(event->type == InputTypeLong && (event->key == InputKeyLeft || event->key == InputKeyRight)) {
+    if(event->type == InputTypeLong &&
+       (event->key == InputKeyLeft || event->key == InputKeyRight)) {
         view_dispatcher_switch_to_view(app->view_dispatcher, ViewConsoleOutput);
         app->data->state = ViewConsoleOutput;
     }

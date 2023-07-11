@@ -82,7 +82,6 @@ typedef struct {
     LoaderAppData_internal app;
 } Loader_internal;
 
-
 typedef struct {
     CliCallback callback;
     void* context;
