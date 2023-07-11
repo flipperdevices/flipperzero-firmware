@@ -60,14 +60,14 @@ void flipchess_scene_settings_on_enter(void* context) {
     // White mode
     item = variable_item_list_add(
         app->variable_item_list, "White:", 4, flipchess_scene_settings_set_white_mode, app);
-    value_index = value_index_uint32(app->white_mode, player_mode_value, 0);
+    value_index = value_index_uint32(app->white_mode, player_mode_value, 4);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, player_mode_text[value_index]);
 
     // Black mode
     item = variable_item_list_add(
         app->variable_item_list, "Black:", 4, flipchess_scene_settings_set_black_mode, app);
-    value_index = value_index_uint32(app->black_mode, player_mode_value, 1);
+    value_index = value_index_uint32(app->black_mode, player_mode_value, 4);
     variable_item_set_current_value_index(item, value_index);
     variable_item_set_current_value_text(item, player_mode_text[value_index]);
 

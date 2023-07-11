@@ -143,7 +143,7 @@ void flipchess_app_free(FlipChess* app) {
     app->notification = NULL;
 
     //Remove whatever is left
-    memzero(app, sizeof(FlipChess));
+    //memzero(app, sizeof(FlipChess));
     free(app);
 }
 
