@@ -1910,7 +1910,9 @@ int32_t rock_paper_scissors_app(void* p) {
                 if((event.input.type == InputTypeLong) && (event.input.key == InputKeyBack)) {
                     // Long press back to exit.
                     processing = false;
-                } else if((event.input.type == InputTypeShort) && (event.input.key == InputKeyBack)) {
+                } else if(
+                    (event.input.type == InputTypeShort) && (event.input.key == InputKeyBack) &&
+                    game_context->data->screen_state != ScreenFinishedGame) {
                     if(game_context->data->local_player == StateHostingLookingForPlayer) {
                         rps_broadcast_not_beacon(game_context);
                     }
@@ -2315,6 +2317,13 @@ int32_t rock_paper_scissors_app(void* p) {
                         break;
                     case InputKeyRight:
                         game_context->data->keyboard_col = 1; // NO - Back to main menu
+                        break;
+                    case InputKeyBack:
+                        game_context->data->keyboard_col = 1; // NO - Back to main menu
+                        rps_broadcast_quit(game_context);
+                        game_context->data->local_player = StateMainMenuHost;
+                        game_context->data->remote_player = StateUnknown;
+                        game_context->data->screen_state = ScreenMainMenu;
                         break;
                     case InputKeyOk:
                         if(game_context->data->keyboard_col == 1) {
