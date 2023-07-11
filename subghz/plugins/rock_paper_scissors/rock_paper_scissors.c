@@ -1339,7 +1339,9 @@ static bool update_frequency(GameContext* game_context) {
 
     // Try to start the TX/RX on the frequency and configure our callback
     // whenever new data is received.
-    if(subghz_tx_rx_worker_start(game_context->subghz_txrx, frequency)) {
+    const SubGhzDevice* device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+    furi_assert(device);
+    if(subghz_tx_rx_worker_start(game_context->subghz_txrx, device, frequency)) {
         subghz_tx_rx_worker_set_callback_have_read(
             game_context->subghz_txrx, rps_worker_update_rx_event_callback, game_context);
     } else {
@@ -1879,6 +1881,7 @@ int32_t rock_paper_scissors_app(void* p) {
 
     // Subghz worker.
     game_context->subghz_txrx = subghz_tx_rx_worker_alloc();
+    subghz_devices_init();
 
     // All the subghz CLI apps disable charging; so our game does it too.
     furi_hal_power_suppress_charge_enter();
@@ -2520,6 +2523,7 @@ int32_t rock_paper_scissors_app(void* p) {
         subghz_tx_rx_worker_stop(game_context->subghz_txrx);
     }
     subghz_tx_rx_worker_free(game_context->subghz_txrx);
+    subghz_devices_deinit();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     view_port_free(view_port);
