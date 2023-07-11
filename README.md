@@ -14,7 +14,7 @@ This application can transmit the whole alphabet (A to Z), numbers (0 to 9) and 
 
 Menu of the application:
 
-<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen1.png" width=50% height=50%> <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen2.png" width=50% height=50%> <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen3.png" width=50% height=50%>
+<img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen1.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen2.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/screen3.png" width=25% height=25%>
 
 Led of the **Flipper Zero** turns in red when transmitting. 
 
