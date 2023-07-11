@@ -20,7 +20,7 @@ void subbrute_scene_load_file_on_enter(void* context) {
     // TODO: DELETE IT
 #ifdef SUBBRUTE_FAST_TRACK
     bool res = true;
-    furi_string_printf(load_path, "%s", EXT_PATH("subghz/princeton.sub"));
+    furi_string_printf(load_path, "%s", "/ext/subghz/princeton.sub");
 #else
     bool res =
         dialog_file_browser_show(instance->dialogs, load_path, app_folder, &browser_options);

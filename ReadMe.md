@@ -69,6 +69,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Evil Portal Updated index.html for Modern Captive Portal Login (By roshanravan)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/18)
 - Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009` [Update By oleksiikutuzov](https://github.com/wosk/flipperzero-lightmeter/commit/2d9db2661598f0166175e569bdb1fb028220652d)
 - Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
+- UL: Updated: [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 
 <a name="release">
 
