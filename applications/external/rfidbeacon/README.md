@@ -1,11 +1,11 @@
 # flipperzero-rfidbeacon
-A letter/number [morse]([https://en.wikipedia.org/wiki/Letter_beacon](https://fr.wikipedia.org/wiki/Code_Morse_international)) beacon on **125 kHz** using **RFID** interface of the **Flipper Zero**
+A letter/number [Morse]([https://en.wikipedia.org/wiki/Letter_beacon](https://fr.wikipedia.org/wiki/Code_Morse_international)) beacon on **125 kHz** using **RFID** interface of the **Flipper Zero**
 
 ![banner](https://raw.githubusercontent.com/nmrr/flipperzero-rfidbeacon/main/img/banner-rfid.jpg)
 (banner has been made with **DALL.E 2**)
 
 
-Like Russia with their HF [letter beacons](https://en.wikipedia.org/wiki/Letter_beacon), it's possible to use the **Flipper Zero** as a letter/number morse beacon. **Flipper Zero** has multiple RF interfaces (RFID, NFC and UHF) and it's possible to transmit raw data over these interfaces.
+Like Russia with their HF [letter beacons](https://en.wikipedia.org/wiki/Letter_beacon), it's possible to use the **Flipper Zero** as a letter/number [Morse]([https://en.wikipedia.org/wiki/Letter_beacon](https://fr.wikipedia.org/wiki/Code_Morse_international)) beacon. **Flipper Zero** has multiple RF interfaces (RFID, NFC and UHF) and it's possible to transmit raw data over these interfaces.
 
 This application can transmit the whole alphabet (A to Z) and numbers (0 to 9) in morse on **RFID** interface. Range is about 5m.
 
@@ -15,9 +15,9 @@ Menu of the application:
 
 <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/off.png" width=25% height=25%> <img src="https://github.com/nmrr/flipperzero-rfidbeacon/blob/main/img/onair.png" width=25% height=25%>
 
-Led of the **Flipper Zero** turns in red when transmitting.
+Led of the **Flipper Zero** turns in red when transmitting. 
 
-**Airspy Discovery HF+** SDR bas been used during these tests with a small loop antenna.
+**Airspy Discovery HF+** SDR bas been used during these tests with a small loop antenna. Following measures have been made at a distance of 2m.
 
 **A** letter:
 
@@ -44,7 +44,7 @@ The program will automatically be launched after compilation
 
 button  | function
 ------------- | -------------
-**Left/Right** *[short press]* | Select the letter/number to transmit 
+**Left/Right** *[short press]* | Select the letter/number to transmit. It's possible to change letter/number during transmitting. 
 **Up** *[long press]*  | Enable/disable the transmitter (125 kHz)
 **Back** *[long press]*  | Exit
 
@@ -54,6 +54,6 @@ Build has been made with official toolchain, **API Mismatch** error may appear i
 
 ## What's next ?
 * Choose the speed morse code 
-* Transmit on NFC interface (13.56 MHz), range is wider than **NFC**
+* Transmit on NFC interface (13.56 MHz), range is wider than **RFID**
 * Transmit on UHF interface (433 MHz, etc)
 * Transmit personalized text message over the air
