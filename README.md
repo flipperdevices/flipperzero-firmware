@@ -1,5 +1,5 @@
 # flipperzero-rfidbeacon
-A letter/number [Morse](https://fr.wikipedia.org/wiki/Code_Morse_international) beacon on **125 kHz** using **RFID** interface of the **Flipper Zero**
+A letter/number/symbol [Morse](https://fr.wikipedia.org/wiki/Code_Morse_international) beacon on **125 kHz** using **RFID** interface of the **Flipper Zero**
 
 ![banner](https://raw.githubusercontent.com/nmrr/flipperzero-rfidbeacon/main/img/banner-rfid.jpg)
 (banner has been made with **Dall.E 2**)
