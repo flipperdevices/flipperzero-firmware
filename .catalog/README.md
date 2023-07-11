@@ -1,7 +1,5 @@
 #Simple timelapse/intervalometer app for Flipper Zero, works via GPIO pins.
 
-![zeitraffer for flipper zero](https://theageoflove.ru/uploads/2022/11/photo_2022-11-10_15-54-25.jpg)
-
 ## Control:
  - Up and down - time. 
  - Left and right - number of frames 
@@ -21,7 +19,7 @@ When the timer is running, all buttons are blocked except OK.
   - some wire
   - heat shrink
   - camera remote connector
+  
 ## How to assemble
-Take optocouplers, connect according to the scheme.
-![](https://theageoflove.ru/uploads/2022/11/camera_cable_en.jpg)
+Take optocouplers, connect according to the scheme: https://theageoflove.ru/uploads/2022/11/camera_cable_en.jpg
 Camera pinout can be found here: https://www.doc-diy.net/photo/remote_pinout/
