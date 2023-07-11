@@ -325,7 +325,6 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
     BitBuffer* rx_buffer_plain;
 
     if(iso3_event->type == Iso14443_3aListenerEventTypeFieldOff) {
-        FURI_LOG_W(TAG, "Field off");
         mf_classic_listener_reset_state(instance);
     } else if(
         (iso3_event->type == Iso14443_3aListenerEventTypeReceivedData) ||

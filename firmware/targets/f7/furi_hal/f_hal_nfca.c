@@ -14,7 +14,6 @@ FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
     FHalNfcError error = FHalNfcErrorNone;
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-    furi_hal_spi_acquire(handle);
 
     // Disable crc check
     st25r3916_set_reg_bits(handle, ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
@@ -38,8 +37,6 @@ FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
     } else {
         st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSMIT_WUPA);
     }
-
-    furi_hal_spi_release(handle);
 
     return error;
 }
@@ -73,7 +70,6 @@ FHalNfcError
     FHalNfcError error = FHalNfcErrorNone;
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-    furi_hal_spi_acquire(handle);
 
     // Set 4 or 7 bytes UID
     if(uid_len == 4) {
@@ -103,7 +99,6 @@ FHalNfcError
     pt_memory[14] = sak & ~0x04;
 
     st25r3916_write_pta_mem(handle, pt_memory, sizeof(pt_memory));
-    furi_hal_spi_release(handle);
 
     iso14443_3a_signal = iso14443_3a_signal_alloc(&gpio_spi_r_mosi);
 
@@ -120,7 +115,6 @@ FHalNfcError f_hal_nfca_listener_tx_custom_parity(
     furi_assert(iso14443_3a_signal);
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-    furi_hal_spi_acquire(handle);
 
     st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSPARENT_MODE);
     // Reconfigure gpio for Transparent mode
@@ -135,8 +129,6 @@ FHalNfcError f_hal_nfca_listener_tx_custom_parity(
     // Configure gpio back to SPI and exit transparent
     furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
     st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
-
-    furi_hal_spi_release(handle);
 
     // TODO handle field off
     return FHalNfcErrorNone;

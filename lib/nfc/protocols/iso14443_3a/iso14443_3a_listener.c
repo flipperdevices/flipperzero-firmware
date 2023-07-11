@@ -93,26 +93,24 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
     } else if(nfc_event->type == NfcEventTypeListenerActivated) {
         instance->state = Iso14443_3aListenerStateActive;
     } else if(nfc_event->type == NfcEventTypeRxEnd) {
-        if(instance->state == Iso14443_3aListenerStateActive) {
-            if(iso14443_3a_listener_halt_received(nfc_event->data.buffer)) {
-                iso14443_3a_listener_sleep(instance);
-                instance->state = Iso14443_3aListenerStateIdle;
-                if(instance->callback) {
-                    instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeHalted;
-                    command = instance->callback(instance->generic_event, instance->context);
-                }
+        if(iso14443_3a_listener_halt_received(nfc_event->data.buffer)) {
+            iso14443_3a_listener_sleep(instance);
+            instance->state = Iso14443_3aListenerStateIdle;
+            if(instance->callback) {
+                instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeHalted;
+                command = instance->callback(instance->generic_event, instance->context);
+            }
+        } else {
+            if(iso14443_3a_check_crc(nfc_event->data.buffer)) {
+                instance->iso14443_3a_event.type =
+                    Iso14443_3aListenerEventTypeReceivedStandardFrame;
+                iso14443_3a_trim_crc(nfc_event->data.buffer);
             } else {
-                if(iso14443_3a_check_crc(nfc_event->data.buffer)) {
-                    instance->iso14443_3a_event.type =
-                        Iso14443_3aListenerEventTypeReceivedStandardFrame;
-                    iso14443_3a_trim_crc(nfc_event->data.buffer);
-                } else {
-                    instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeReceivedData;
-                }
-                instance->iso14443_3a_event_data.buffer = nfc_event->data.buffer;
-                if(instance->callback) {
-                    command = instance->callback(instance->generic_event, instance->context);
-                }
+                instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeReceivedData;
+            }
+            instance->iso14443_3a_event_data.buffer = nfc_event->data.buffer;
+            if(instance->callback) {
+                command = instance->callback(instance->generic_event, instance->context);
             }
         }
     }
