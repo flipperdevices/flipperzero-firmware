@@ -108,7 +108,7 @@ void mf_desfire_file_data_parse(MfDesfireFileData* data, const BitBuffer* buf) {
 }
 
 void mf_desfire_file_data_init(MfDesfireFileData* data) {
-    data->data = simple_array_alloc(&mf_desfire_file_data_element_array_config);
+    data->data = simple_array_alloc(&simple_array_config_uint8_t);
 }
 
 void mf_desfire_application_init(MfDesfireApplication* data) {
@@ -653,13 +653,6 @@ const SimpleArrayConfig mf_desfire_file_data_array_config = {
     .copy = (SimpleArrayCopy)mf_desfire_file_data_copy,
     .reset = (SimpleArrayReset)mf_desfire_file_data_reset,
     .type_size = sizeof(MfDesfireData),
-};
-
-const SimpleArrayConfig mf_desfire_file_data_element_array_config = {
-    .init = NULL,
-    .copy = NULL,
-    .reset = NULL,
-    .type_size = sizeof(uint8_t),
 };
 
 const SimpleArrayConfig mf_desfire_application_array_config = {

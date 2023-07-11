@@ -33,3 +33,5 @@ uint32_t simple_array_get_count(const SimpleArray* instance);
 SimpleArrayElement* simple_array_get(SimpleArray* instance, uint32_t index);
 
 const SimpleArrayElement* simple_array_cget(const SimpleArray* instance, uint32_t index);
+
+extern const SimpleArrayConfig simple_array_config_uint8_t;

@@ -25,7 +25,9 @@ const NfcDeviceBase nfc_device_iso14443_4a = {
 
 Iso14443_4aData* iso14443_4a_alloc() {
     Iso14443_4aData* data = malloc(sizeof(Iso14443_4aData));
+
     data->iso14443_3a_data = iso14443_3a_alloc();
+    data->ats_data = simple_array_alloc(&simple_array_config_uint8_t);
 
     return data;
 }
@@ -33,7 +35,9 @@ Iso14443_4aData* iso14443_4a_alloc() {
 void iso14443_4a_free(Iso14443_4aData* data) {
     furi_assert(data);
 
+    simple_array_free(data->ats_data);
     iso14443_3a_free(data->iso14443_3a_data);
+
     free(data);
 }
 
@@ -41,7 +45,7 @@ void iso14443_4a_reset(Iso14443_4aData* data) {
     furi_assert(data);
 
     iso14443_3a_reset(data->iso14443_3a_data);
-    memset(&data->ats_data, 0, sizeof(Iso14443_4aAtsData));
+    simple_array_reset(data->ats_data);
 }
 
 void iso14443_4a_copy(Iso14443_4aData* data, const Iso14443_4aData* other) {
@@ -49,7 +53,7 @@ void iso14443_4a_copy(Iso14443_4aData* data, const Iso14443_4aData* other) {
     furi_assert(other);
 
     iso14443_3a_copy(data->iso14443_3a_data, other->iso14443_3a_data);
-    data->ats_data = other->ats_data;
+    simple_array_copy(data->ats_data, other->ats_data);
 }
 
 bool iso14443_4a_verify(Iso14443_4aData* data, const FuriString* device_type) {
@@ -68,11 +72,17 @@ bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version
     do {
         if(!iso14443_3a_load(data->iso14443_3a_data, ff, version)) break;
         if(flipper_format_key_exist(ff, ISO14443_4A_ATS_KEY)) {
+            uint32_t ats_size = 0;
+            if(!flipper_format_get_value_count(ff, ISO14443_4A_ATS_KEY, &ats_size)) break;
+
+            if(ats_size < sizeof(Iso14443_4aAtsData)) break;
+            simple_array_init(data->ats_data, ats_size);
+
             if(!flipper_format_read_hex(
-                   ff, ISO14443_4A_ATS_KEY, (uint8_t*)&data->ats_data, sizeof(Iso14443_4aAtsData)))
+                   ff, ISO14443_4A_ATS_KEY, simple_array_get(data->ats_data, 0), ats_size))
                 break;
         } else {
-            iso14443_4a_ats_fill_default(&data->ats_data);
+            iso14443_4a_ats_fill_default(data->ats_data);
         }
         parsed = true;
     } while(false);
@@ -92,8 +102,8 @@ bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff) {
         if(!flipper_format_write_hex(
                ff,
                ISO14443_4A_ATS_KEY,
-               (const uint8_t*)&data->ats_data,
-               sizeof(Iso14443_4aAtsData)))
+               simple_array_cget(data->ats_data, 0),
+               simple_array_get_count(data->ats_data)))
             break;
         saved = true;
     } while(false);

@@ -12,7 +12,6 @@ extern const SimpleArrayConfig mf_desfire_app_id_array_config;
 extern const SimpleArrayConfig mf_desfire_file_id_array_config;
 extern const SimpleArrayConfig mf_desfire_file_settings_array_config;
 extern const SimpleArrayConfig mf_desfire_file_data_array_config;
-extern const SimpleArrayConfig mf_desfire_file_data_element_array_config;
 extern const SimpleArrayConfig mf_desfire_application_array_config;
 
 // Parse internal MfDesfire structures

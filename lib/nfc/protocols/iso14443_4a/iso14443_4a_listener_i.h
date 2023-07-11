@@ -34,7 +34,7 @@ struct Iso14443_4aListener {
 };
 
 Iso14443_4aError
-    iso14443_4a_listener_send_ats(Iso14443_4aListener* instance, const Iso14443_4aAtsData* data);
+    iso14443_4a_listener_send_ats(Iso14443_4aListener* instance, const SimpleArray* data);
 
 Iso14443_4aError
     iso14443_4a_listener_send_block(Iso14443_4aListener* instance, const BitBuffer* tx_buffer);
