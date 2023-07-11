@@ -12,7 +12,7 @@
 #include <gui/modules/variable_item_list.h>
 #include "uart_text_input.h"
 
-#define NUM_MENU_ITEMS (5)
+#define NUM_MENU_ITEMS (16)
 
 #define UART_TERMINAL_TEXT_BOX_STORE_SIZE (4096)
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)

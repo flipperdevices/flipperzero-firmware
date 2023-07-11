@@ -1,3 +1,25 @@
+# Gravity Companion for Flipper Zero
+
+## TODO
+* Add dolphin_deed(DolphinDeedGpioUartBridge); to Gravity
+
+## Menu Structure
+Beacon: RickRoll Random Infinite target-ssids (APs)
+Probe: Any target-ssids
+Sniff: On Off
+target-ssids: add remove list
+scan: on off
+hop: on off default
+view: sta ap sta+ap
+select: sta ap
+clear: sta ap
+get/set: <variables>
+deauth: off, frame sta, device sta, spoof sta, frame broadcast, device broadcast, spoof broadcast
+mana: on off clear
+mana: verbose on off
+mana: loud on off
+commands
+
 # UART Terminal for Flipper Zero
 [Flipper Zero](https://flipperzero.one/) app to control various devices via UART interface.
 ## Download fap
