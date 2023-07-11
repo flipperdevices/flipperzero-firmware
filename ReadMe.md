@@ -20,7 +20,7 @@ Sources of "integrated/bundled" apps are added now in this repo too, to allow pu
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `8 Jul 20:59 GMT +3`
+### Apps checked & updated at `11 Jul 03:47 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -95,6 +95,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [MH-Z19 - CO2 sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon)
 - [Evil captive portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - WIP
+- [ESP Flasher (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 
 ## Tools / Misc
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
