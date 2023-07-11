@@ -7,7 +7,7 @@ App(
     requires=["gui", "storage"],
     order=51,
     stack_size=8 * 1024,
-    fap_icon="icons/camera-suite.png",
+    fap_icon="icons/camera_suite.png",
     fap_category="GPIO",
     fap_libs=["assets"],
     fap_icon_assets_symbol="camerasuite",
