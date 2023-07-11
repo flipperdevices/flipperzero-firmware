@@ -5,8 +5,11 @@
 #include <gui/modules/text_input.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
+#include <toolbox/sha256.h>
 
 #define APPLICATION_NAME "ESubGhzChat"
+
+#define DEFAULT_FREQ 433920000
 
 #define CHAT_BOX_STORE_SIZE 4096
 #define TEXT_INPUT_STORE_SIZE 512
@@ -18,8 +21,11 @@ typedef struct {
 	FuriString *chat_box_store;
 	TextInput *text_input;
 	char text_input_store[TEXT_INPUT_STORE_SIZE + 1];
+	FuriString *name_prefix;
+	FuriString *msg_input;
 	bool encrypted;
 	uint32_t frequency;
+	unsigned char key[32];
 } ESubGhzChatState;
 
 typedef enum {
@@ -40,6 +46,12 @@ typedef enum {
 	ESubGhzChatEvent_PassEntered,
 	ESubGhzChatEvent_MsgEntered
 } ESubGhzChatEvent;
+
+static void esubghz_chat_explicit_bzero(void *s, size_t len)
+{
+	memset(s, 0, len);
+	asm volatile("" ::: "memory");
+}
 
 static void freq_input_cb(void *context)
 {
@@ -92,7 +104,17 @@ static void pass_input_cb(void *context)
 		state->encrypted = false;
 	} else {
 		state->encrypted = true;
-		// TODO
+		sha256((unsigned char *) state->text_input_store,
+				strlen(state->text_input_store), state->key);
+
+		// TODO: remove this
+		furi_string_cat_printf(state->chat_box_store, "Key:");
+		int i;
+		for (i = 0; i < 32; i++) {
+			furi_string_cat_printf(state->chat_box_store, " %02x",
+					state->key[i]);
+		}
+		furi_string_cat_printf(state->chat_box_store, "\n");
 	}
 
 	furi_string_cat_printf(state->chat_box_store, "Encrypted: %s\n",
@@ -107,6 +129,18 @@ static void chat_input_cb(void *context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+	if (strlen(state->text_input_store) > 0) {
+		furi_string_set(state->msg_input, state->name_prefix);
+		furi_string_cat_str(state->msg_input, state->text_input_store);
+
+		furi_string_cat_printf(state->chat_box_store, "%s\n",
+			furi_string_get_cstr(state->msg_input));
+
+		// TODO: actually transmit
+
+		furi_string_set_char(state->msg_input, 0, 0);
+	}
+
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_MsgEntered);
 }
@@ -118,7 +152,8 @@ static void scene_on_enter_freq_input(void* context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
-	state->text_input_store[0] = 0;
+	snprintf(state->text_input_store, TEXT_INPUT_STORE_SIZE, "%lu",
+			(uint32_t) DEFAULT_FREQ);
 	text_input_reset(state->text_input);
 	text_input_set_result_callback(
 			state->text_input,
@@ -401,6 +436,32 @@ static bool esubghz_chat_navigation_event_callback(void* context)
 	return scene_manager_handle_back_event(state->scene_manager);
 }
 
+static bool helper_strings_alloc(ESubGhzChatState *state)
+{
+	furi_assert(state);
+
+	state->name_prefix = furi_string_alloc();
+	if (state->name_prefix == NULL) {
+		return false;
+	}
+
+	state->msg_input = furi_string_alloc();
+	if (state->msg_input == NULL) {
+		furi_string_free(state->name_prefix);
+		return false;
+	}
+
+	return true;
+}
+
+static void helper_strings_free(ESubGhzChatState *state)
+{
+	furi_assert(state);
+
+	furi_string_free(state->name_prefix);
+	furi_string_free(state->msg_input);
+}
+
 static bool chat_box_alloc(ESubGhzChatState *state)
 {
 	furi_assert(state);
@@ -456,6 +517,10 @@ int32_t esubghz_chat(void)
 		goto err_alloc_vd;
 	}
 
+	if (!helper_strings_alloc(state)) {
+		goto err_alloc_hs;
+	}
+
 	state->text_input = text_input_alloc();
 	if (state->text_input == NULL) {
 		goto err_alloc_ti;
@@ -464,6 +529,11 @@ int32_t esubghz_chat(void)
 	if (!chat_box_alloc(state)) {
 		goto err_alloc_cb;
 	}
+
+	// set chat name prefix
+	// TODO: handle escape chars here somehow
+	furi_string_printf(state->name_prefix, "\033[0;33m%s\033[0m: ",
+			furi_hal_version_get_name_ptr());
 
 	view_dispatcher_enable_queue(state->view_dispatcher);
 
@@ -493,12 +563,20 @@ int32_t esubghz_chat(void)
 	view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_Input);
 	view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_ChatBox);
 
+	// clear the key and potential password
+	esubghz_chat_explicit_bzero(state->key, sizeof(state->key));
+	esubghz_chat_explicit_bzero(state->text_input_store,
+			sizeof(state->text_input_store));
+
 	chat_box_free(state);
 
 err_alloc_cb:
 	text_input_free(state->text_input);
 
 err_alloc_ti:
+	helper_strings_free(state);
+
+err_alloc_hs:
 	view_dispatcher_free(state->view_dispatcher);
 
 err_alloc_vd:
