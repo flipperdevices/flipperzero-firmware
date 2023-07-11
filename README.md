@@ -4,11 +4,16 @@
 
 Download: [![FAP Factory](https://flipc.org/api/v1/oleksiikutuzov/flipperzero-lightmeter/badge?root=application)](https://flipc.org/oleksiikutuzov/flipperzero-lightmeter?root=application)
 
-Repository for source code and hardware files for Lightmeter app for Flipper Zero based on BH1750 sensor
+Repository for source code and hardware files for Lightmeter app for Flipper Zero
 
 <img src="images/framed_gui_main.png" width="500px">
 
 <img src="images/framed_gui_lux_meter.png" width="500px">
+
+## Supported sensors
+
+- BH1750
+- MAX44009
 
 ## Wiring
 
