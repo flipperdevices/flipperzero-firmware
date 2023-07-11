@@ -29,10 +29,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 <a name="latest">
 
-## Latest Updates - [PATREON: Latest Release RM0710-1835-0.86.2-abdd774](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
+## Latest Updates - [PATREON: Latest Release RM0711-1551-0.86.2-e864e04](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-11 13:53 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-11 13:53 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-11 15:55 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-11 15:55 EST`
 - Added: [NFC Crocodile (By Firemoon777)](https://github.com/Firemoon777/NfcCrocodile)
 - [New FSociety Profile Image (By jmath3912)](https://github.com/jmath3912/flipperzero-firmware-fsocietyTheme)
 - Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
@@ -71,8 +71,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
 - UL: Updated: [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - UL: OFW: [Storage: directory sort #2850 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2850)
-- UL: OFW: [Infrared: RCA protocol support #2823 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/2823) Was Previousssly Added
-- UL: OFW: [Decode only supported Oregon 3 sensor #2829 (By wosk)](https://github.com/flipperdevices/flipperzero-firmware/pull/2829) Was Previousssly Added
+- UL: OFW: [Infrared: RCA protocol support #2823 (By xMasterX)](https://github.com/flipperdevices/flipperzero-firmware/pull/2823) Was Previously Added
+- UL: OFW: [Decode only supported Oregon 3 sensor #2829 (By wosk)](https://github.com/flipperdevices/flipperzero-firmware/pull/2829) Was Previously Added
 - OFW: [More descriptive error messages for the log command #2835 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2835)
 - OFW: [Update toolchain to v23 #2824 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2824)
 
