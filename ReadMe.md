@@ -20,7 +20,7 @@ Sources of "integrated/bundled" apps are added now in this repo too, to allow pu
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `11 Jul 03:47 GMT +3`
+### Apps checked & updated at `11 Jul 14:06 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -97,7 +97,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Evil captive portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - WIP
 - [ESP Flasher (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 
-## Tools / Misc
+## Tools / Misc / NFC / RFID / Infrared / etc..
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
@@ -123,6 +123,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Resistance calculator (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [IR Intervalometer for Sony Cameras (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer)
 - [CLI-GUI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) -> (Fixed by @Willy-JL)
+- [Seader (By bettse)](https://github.com/bettse/seader/tree/main) - `Interface with a SAM from the Flipper Zero over UART`
+- [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon) - `A letter/number Morse beacon on 125 kHz`
 
 --- 
 
