@@ -72,7 +72,7 @@ NfcCommand nfc_scene_emulate_listener_callback_iso14443_4a(NfcGenericEvent event
     NfcApp* nfc = context;
     Iso14443_4aListenerEvent* iso14443_4a_event = event.data;
 
-    if(iso14443_4a_event->type == Iso14443_4aListenerEventTypeReceivedBlock) {
+    if(iso14443_4a_event->type == Iso14443_4aListenerEventTypeReceivedData) {
         furi_string_cat_printf(nfc->text_box_store, "R:");
         for(size_t i = 0; i < bit_buffer_get_size_bytes(iso14443_4a_event->data->buffer); i++) {
             furi_string_cat_printf(
