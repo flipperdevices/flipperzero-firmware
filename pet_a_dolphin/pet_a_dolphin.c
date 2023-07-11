@@ -18,7 +18,7 @@ static int32_t decrease_butthurt(void* ctx) {
         furi_check(
             furi_message_queue_put(app->data->dolphin->event_queue, &event, FuriWaitForever) ==
             FuriStatusOk);
-        DOLPHIN_DEED(DolphinDeedPluginGameWin);
+        dolphin_deed(DolphinDeedPluginGameWin);
     }
 
     app->data->pet_feeder.active = false;
