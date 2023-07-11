@@ -69,7 +69,8 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
         const uint8_t first_byte = bit_buffer_get_byte(rx_buffer, 0);
 
         if(buffer_size == 2 && first_byte == ISO14443_4A_CMD_READ_ATS) {
-            if(iso14443_4a_listener_send_ats(instance, instance->data->ats_data) != Iso14443_4aErrorNone) {
+            if(iso14443_4a_listener_send_ats(instance, instance->data->ats_data) !=
+               Iso14443_4aErrorNone) {
                 command = NfcCommandStop;
             }
         } else {

@@ -1,5 +1,7 @@
 #include "mf_desfire_i.h"
 
+#define BITS_IN_BYTE (8U)
+
 #define MF_DESFIRE_FFF_VERSION_KEY \
     MF_DESFIRE_FFF_PICC_PREFIX " " \
                                "Version"
@@ -43,18 +45,36 @@
 #define MF_DESFIRE_FFF_FILE_MAX_KEY "Max"
 #define MF_DESFIRE_FFF_FILE_CUR_KEY "Cur"
 
-void mf_desfire_version_parse(MfDesfireVersion* data, const BitBuffer* buf) {
-    bit_buffer_write_bytes(buf, data, sizeof(MfDesfireVersion));
+bool mf_desfire_version_parse(MfDesfireVersion* data, const BitBuffer* buf) {
+    const bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireVersion);
+
+    if(can_parse) {
+        bit_buffer_write_bytes(buf, data, sizeof(MfDesfireVersion));
+    }
+
+    return can_parse;
 }
 
-void mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* buf) {
-    bit_buffer_write_bytes(buf, &data->bytes_free, sizeof(data->bytes_free) - 1);
-    data->bytes_free &= 0x00ffffff;
-    data->is_present = true;
+bool mf_desfire_free_memory_parse(MfDesfireFreeMemory* data, const BitBuffer* buf) {
+    typedef struct __attribute__((packed)) {
+        uint32_t bytes_free : 3 * BITS_IN_BYTE;
+    } MfDesfireFreeMemoryLayout;
+
+    const bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireFreeMemoryLayout);
+
+    if(can_parse) {
+        MfDesfireFreeMemoryLayout layout;
+        bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFreeMemoryLayout));
+        data->bytes_free = layout.bytes_free;
+    }
+
+    data->is_present = can_parse;
+
+    return can_parse;
 }
 
-void mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf) {
-    typedef struct {
+bool mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* buf) {
+    typedef struct __attribute__((packed)) {
         bool is_master_key_changeable : 1;
         bool is_free_directory_list : 1;
         bool is_free_create_delete : 1;
@@ -64,47 +84,157 @@ void mf_desfire_key_settings_parse(MfDesfireKeySettings* data, const BitBuffer* 
         uint8_t flags : 4;
     } MfDesfireKeySettingsLayout;
 
-    MfDesfireKeySettingsLayout layout;
-    bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireKeySettingsLayout));
+    const bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireKeySettingsLayout);
 
-    data->is_master_key_changeable = layout.is_master_key_changeable;
-    data->is_free_directory_list = layout.is_free_directory_list;
-    data->is_free_create_delete = layout.is_free_create_delete;
-    data->is_config_changeable = layout.is_config_changeable;
+    if(can_parse) {
+        MfDesfireKeySettingsLayout layout;
+        bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireKeySettingsLayout));
 
-    data->change_key_id = layout.change_key_id;
-    data->max_keys = layout.max_keys;
-    data->flags = layout.flags;
+        data->is_master_key_changeable = layout.is_master_key_changeable;
+        data->is_free_directory_list = layout.is_free_directory_list;
+        data->is_free_create_delete = layout.is_free_create_delete;
+        data->is_config_changeable = layout.is_config_changeable;
+
+        data->change_key_id = layout.change_key_id;
+        data->max_keys = layout.max_keys;
+        data->flags = layout.flags;
+    }
+
+    return can_parse;
 }
 
-void mf_desfire_key_version_parse(MfDesfireKeyVersion* data, const BitBuffer* buf) {
-    bit_buffer_write_bytes(buf, data, sizeof(MfDesfireKeyVersion));
+bool mf_desfire_key_version_parse(MfDesfireKeyVersion* data, const BitBuffer* buf) {
+    const bool can_parse = bit_buffer_get_size_bytes(buf) == sizeof(MfDesfireKeyVersion);
+
+    if(can_parse) {
+        bit_buffer_write_bytes(buf, data, sizeof(MfDesfireKeyVersion));
+    }
+
+    return can_parse;
 }
 
-void mf_desfire_application_id_parse(
+bool mf_desfire_application_id_parse(
     MfDesfireApplicationId* data,
     uint32_t index,
     const BitBuffer* buf) {
-    bit_buffer_write_bytes_mid(
-        buf, data, index * sizeof(MfDesfireApplicationId), sizeof(MfDesfireApplicationId));
+    const bool can_parse =
+        bit_buffer_get_size_bytes(buf) >=
+        (index * sizeof(MfDesfireApplicationId) + sizeof(MfDesfireApplicationId));
+
+    if(can_parse) {
+        bit_buffer_write_bytes_mid(
+            buf, data, index * sizeof(MfDesfireApplicationId), sizeof(MfDesfireApplicationId));
+    }
+
+    return can_parse;
 }
 
-void mf_desfire_file_id_parse(MfDesfireFileId* data, uint32_t index, const BitBuffer* buf) {
-    bit_buffer_write_bytes_mid(
-        buf, data, index * sizeof(MfDesfireFileId), sizeof(MfDesfireFileId));
+bool mf_desfire_file_id_parse(MfDesfireFileId* data, uint32_t index, const BitBuffer* buf) {
+    const bool can_parse = bit_buffer_get_size_bytes(buf) >=
+                           (index * sizeof(MfDesfireFileId) + sizeof(MfDesfireFileId));
+    if(can_parse) {
+        bit_buffer_write_bytes_mid(
+            buf, data, index * sizeof(MfDesfireFileId), sizeof(MfDesfireFileId));
+    }
+
+    return can_parse;
 }
 
-void mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer* buf) {
-    bit_buffer_write_bytes(buf, data, sizeof(MfDesfireFileSettings));
+bool mf_desfire_file_settings_parse(MfDesfireFileSettings* data, const BitBuffer* buf) {
+    bool parsed = false;
+
+    typedef struct __attribute__((packed)) {
+        uint8_t type;
+        uint8_t comm;
+        uint16_t access_rights;
+    } MfDesfireFileSettingsHeader;
+
+    typedef struct __attribute__((packed)) {
+        uint32_t size : 3 * BITS_IN_BYTE;
+    } MfDesfireFileSettingsData;
+
+    typedef struct __attribute__((packed)) {
+        uint32_t lo_limit;
+        uint32_t hi_limit;
+        uint32_t limited_credit_value;
+        uint8_t limited_credit_enabled;
+    } MfDesfireFileSettingsValue;
+
+    typedef struct __attribute__((packed)) {
+        uint32_t size : 3 * BITS_IN_BYTE;
+        uint32_t max : 3 * BITS_IN_BYTE;
+        uint32_t cur : 3 * BITS_IN_BYTE;
+    } MfDesfireFileSettingsRecord;
+
+    typedef struct __attribute__((packed)) {
+        MfDesfireFileSettingsHeader header;
+        union {
+            MfDesfireFileSettingsData data;
+            MfDesfireFileSettingsValue value;
+            MfDesfireFileSettingsRecord record;
+        };
+    } MfDesfireFileSettingsLayout;
+
+    do {
+        const size_t data_size = bit_buffer_get_size_bytes(buf);
+        const size_t min_data_size =
+            sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsData);
+
+        if(data_size < min_data_size) break;
+
+        MfDesfireFileSettingsLayout layout;
+        bit_buffer_write_bytes(buf, &layout, sizeof(MfDesfireFileSettingsLayout));
+
+        data->type = layout.header.type;
+        data->comm = layout.header.comm;
+        data->access_rights = layout.header.access_rights;
+
+        if(data->type == MfDesfireFileTypeStandard || data->type == MfDesfireFileTypeBackup) {
+            if(data_size != min_data_size) break;
+
+            data->data.size = layout.data.size;
+
+        } else if(data->type == MfDesfireFileTypeValue) {
+            if(data_size !=
+               sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsValue))
+                break;
+
+            data->value.lo_limit = layout.value.lo_limit;
+            data->value.hi_limit = layout.value.hi_limit;
+            data->value.limited_credit_value = layout.value.hi_limit;
+            data->value.limited_credit_enabled = layout.value.limited_credit_enabled;
+
+        } else if(
+            data->type == MfDesfireFileTypeLinearRecord ||
+            data->type == MfDesfireFileTypeCyclicRecord) {
+            if(data_size !=
+               sizeof(MfDesfireFileSettingsHeader) + sizeof(MfDesfireFileSettingsRecord))
+                break;
+
+            data->record.size = layout.record.size;
+            data->record.max = layout.record.max;
+            data->record.cur = layout.record.cur;
+
+        } else {
+            break;
+        }
+
+        parsed = true;
+    } while(false);
+
+    return parsed;
 }
 
-void mf_desfire_file_data_parse(MfDesfireFileData* data, const BitBuffer* buf) {
+bool mf_desfire_file_data_parse(MfDesfireFileData* data, const BitBuffer* buf) {
     const size_t data_size = bit_buffer_get_size_bytes(buf);
 
     if(data_size > 0) {
         simple_array_init(data->data, data_size);
         bit_buffer_write_bytes(buf, simple_array_get(data->data, 0), data_size);
     }
+
+    // Success no matter whether there is data or not
+    return true;
 }
 
 void mf_desfire_file_data_init(MfDesfireFileData* data) {
