@@ -17,6 +17,6 @@ App(
     fap_icon_assets_symbol="zeitraffer",
     fap_description="Simple intervalometer/timelapse app, works via GPIO pins.",
     fap_author="Aurelius Rosenbaum",
-    # fap_version="1.0",
+    # fap_version="1.1",
     fap_weburl="https://github.com/theageoflove/flipperzero-zeitraffer",
 )

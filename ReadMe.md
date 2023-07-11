@@ -68,6 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [NFC Maker (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366) Fixes to NTAG215 (By WillyJL)
 - [Evil Portal Updated index.html for Modern Captive Portal Login (By roshanravan)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/18)
 - Updated: [Lightmeter (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009` [Update By oleksiikutuzov](https://github.com/wosk/flipperzero-lightmeter/commit/2d9db2661598f0166175e569bdb1fb028220652d)
+- Updated: [MagSpoof (By zacharyweiss)](https://github.com/zacharyweiss/magspoof_flipper) [(Updates By hummusec)](https://github.com/hummusec/magspoof_flipper)
 
 <a name="release">
 

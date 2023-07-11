@@ -158,7 +158,7 @@ void tx_deinit_rfid() {
 void tx_init_rf(int hz) {
     // presets and frequency will need some experimenting
     furi_hal_subghz_reset();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
+    // furi_hal_subghz_load_preset(FuriHalSubGhzPresetOok650Async);
     // furi_hal_subghz_load_preset(FuriHalSubGhzPresetGFSK9_99KbAsync);
     // furi_hal_subghz_load_preset(FuriHalSubGhzPresetMSK99_97KbAsync);
     // furi_hal_subghz_load_preset(FuriHalSubGhzPreset2FSKDev238Async);
