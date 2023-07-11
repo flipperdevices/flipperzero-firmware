@@ -24,7 +24,7 @@
 - [Software Guide](#software-guide)
 - [Attributions](#attributions)
 
-## Preview <a name="previews"></a>
+## Previews <a name="previews"></a>
 
 <img align="center" src=".github/images/preview.png" />
 
@@ -110,17 +110,17 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 
 ### Flipper Zero button mappings:
 
-⨀ = Toggle between Floyd–Steinberg and Atkinson dithering.
+🔼 = Contrast Up
 
-▲ = Contrast Up
+🔽 = Contrast Down
 
-▼ = Contrast Down
+◀️ = Toggle invert.
 
-◀ = Toggle invert.
+▶️ = Toggle dithering on/off.
 
-▶ = Toggle dithering on/off.
+⚪ = Toggle between Floyd–Steinberg and Atkinson dithering.
 
-↩ = Go back.
+↩️ = Go back.
 
 ### Camera Suite settings:
 
