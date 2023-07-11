@@ -1,0 +1,12 @@
+sourcecode:
+  type: git
+  location:
+    origin: <https://github.com/Programistich/battery_checker.git>
+    commit_sha:
+short_description: External battery checker
+description: "@README.md"
+changelog: "@CHNAGELOG.md"
+screenshots:
+
+- screenshots/first.png
+- screenshots/second.png
