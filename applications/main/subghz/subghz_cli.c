@@ -28,12 +28,20 @@
 
 #define SUBGHZ_REGION_FILENAME "/int/.region_data"
 
+#define TAG "SubGhz CLI"
+
 static void subghz_cli_radio_device_power_on() {
-    uint8_t attempts = 0;
-    while(!furi_hal_power_is_otg_enabled() && attempts++ < 5) {
-        furi_hal_power_enable_otg();
-        //CC1101 power-up time
-        furi_delay_ms(10);
+    uint8_t attempts = 5;
+    while(--attempts > 0) {
+        if(furi_hal_power_enable_otg()) break;
+    }
+    if(attempts == 0) {
+        if(furi_hal_power_get_usb_voltage() < 4.5f) {
+            FURI_LOG_E(
+                "TAG",
+                "Error power otg enable. BQ2589 check otg fault = %d",
+                furi_hal_power_check_otg_fault() ? 1 : 0);
+        }
     }
 }
 
@@ -137,6 +145,11 @@ static const SubGhzDevice* subghz_cli_command_get_device(uint32_t device_ind) {
     default:
         device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
         break;
+    }
+    //check if the device is connected
+    if(!subghz_devices_is_connect(device)) {
+        subghz_cli_radio_device_power_off();
+        device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
     }
     return device;
 }
