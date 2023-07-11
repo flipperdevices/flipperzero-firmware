@@ -5,7 +5,7 @@
 #include "../camera_suite.h"
 
 #define BOILERPLATE_SETTINGS_FILE_VERSION 1
-#define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/camera-suite")
+#define CONFIG_FILE_DIRECTORY_PATH EXT_PATH("apps_data/camera_suite")
 #define BOILERPLATE_SETTINGS_SAVE_PATH CONFIG_FILE_DIRECTORY_PATH "/camera_suite.conf"
 #define BOILERPLATE_SETTINGS_SAVE_PATH_TMP BOILERPLATE_SETTINGS_SAVE_PATH ".tmp"
 #define BOILERPLATE_SETTINGS_HEADER "Camera Suite Config File"

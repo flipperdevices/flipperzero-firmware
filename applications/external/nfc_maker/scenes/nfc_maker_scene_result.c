@@ -125,6 +125,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneHttps: {
             uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+
             buf[i++] = 0xD1;
             buf[i++] = 0x01;
             buf[i++] = data_len + 1;
@@ -137,6 +138,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneMail: {
             uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+
             buf[i++] = 0xD1;
             buf[i++] = 0x01;
             buf[i++] = data_len + 1;
@@ -149,6 +151,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerScenePhone: {
             uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+
             buf[i++] = 0xD1;
             buf[i++] = 0x01;
             buf[i++] = data_len + 1;
@@ -161,6 +164,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneText: {
             uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+
             buf[i++] = 0xD1;
             buf[i++] = 0x01;
             buf[i++] = data_len + 3;
@@ -175,6 +179,7 @@ void nfc_maker_scene_result_on_enter(void* context) {
         }
         case NfcMakerSceneUrl: {
             uint8_t data_len = strnlen(app->text_buf, TEXT_INPUT_LEN);
+
             buf[i++] = 0xD1;
             buf[i++] = 0x01;
             buf[i++] = data_len + 1;
