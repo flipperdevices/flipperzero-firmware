@@ -13,7 +13,6 @@
 #include <storage/storage.h>
 
 #include <lib/subghz/subghz_tx_rx_worker.h>
-#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
 
 #define RPS_APPS_DATA_FOLDER EXT_PATH("apps_data")
 #define RPS_GAME_FOLDER      \

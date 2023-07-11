@@ -1339,7 +1339,10 @@ static bool update_frequency(GameContext* game_context) {
 
     // Try to start the TX/RX on the frequency and configure our callback
     // whenever new data is received.
-    const SubGhzDevice* device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
+
+    // TODO: This is a hack. We should be able to get the device without
+    // hardcoding the name.
+    const SubGhzDevice* device = subghz_devices_get_by_name("cc1101_int");
     furi_assert(device);
     if(subghz_tx_rx_worker_start(game_context->subghz_txrx, device, frequency)) {
         subghz_tx_rx_worker_set_callback_have_read(
