@@ -1,7 +1,6 @@
 #include "totp_input_text.h"
 
 #include <gui/view_dispatcher.h>
-#include <gui/view.h>
 #include <gui/modules/text_input.h>
 
 typedef struct {
