@@ -31,7 +31,7 @@ typedef struct {
 } UiPrecalculatedDimensions;
 
 typedef struct {
-    char last_code[TOTP_TOKEN_DIGITS_MAX_COUNT + 1];
+    char last_code[TokenDigitsCountMax + 1];
     TotpUsbTypeCodeWorkerContext* usb_type_code_worker_context;
     NotificationMessage const** notification_sequence_new_token;
     NotificationMessage const** notification_sequence_automation;
@@ -210,9 +210,7 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
     scene_state->last_code_update_sync = furi_mutex_alloc(FuriMutexTypeNormal);
     if(plugin_state->automation_method & AutomationMethodBadUsb) {
         scene_state->usb_type_code_worker_context = totp_usb_type_code_worker_start(
-            scene_state->last_code,
-            TOTP_TOKEN_DIGITS_MAX_COUNT + 1,
-            scene_state->last_code_update_sync);
+            scene_state->last_code, TokenDigitsCountMax + 1, scene_state->last_code_update_sync);
     }
 
 #ifdef TOTP_BADBT_TYPE_ENABLED
@@ -224,7 +222,7 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
         totp_bt_type_code_worker_start(
             plugin_state->bt_type_code_worker_context,
             scene_state->last_code,
-            TOTP_TOKEN_DIGITS_MAX_COUNT + 1,
+            TokenDigitsCountMax + 1,
             scene_state->last_code_update_sync);
     }
 #endif
