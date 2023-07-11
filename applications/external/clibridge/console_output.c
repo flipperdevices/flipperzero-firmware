@@ -9,4 +9,5 @@ void console_output_input_handler(CliguiApp* app, InputEvent* event) {
         char eot = 0x03;
         furi_stream_buffer_send(app->data->streams.app_tx, &eot, 1, FuriWaitForever);
     }
+    
 }
