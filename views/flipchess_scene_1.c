@@ -555,7 +555,7 @@ void flipchess_scene_1_enter(void* context) {
         FlipChessScene1Model * model,
         {
             const int status =
-                flipchess_scene_1_model_init(model, app->white_mode, app->white_mode);
+                flipchess_scene_1_model_init(model, app->white_mode, app->black_mode);
 
             // nonzero status
             if(status == FlipChessStatusSuccess) {
