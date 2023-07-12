@@ -228,7 +228,7 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
             model->squareTo = model->squareSelected;
             model->turnState = 2;
             model->squareSelectedLast = model->squareSelected;
-            model->squareSelected = 255;
+            //model->squareSelected = 255;
         }
 
         if(model->turnState == 1 && model->squareFrom != 255) {
@@ -246,6 +246,7 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
         }
         
     } else {
+        model->squareSelected = 255;
         flipchess_makeAIMove(
             model->game.board, &(model->squareFrom), &(model->squareTo), &movePromote, model);
         moveType = 2;
@@ -377,7 +378,7 @@ static int flipchess_scene_1_model_init(
     model->random960PosNumber = -1;
 
     model->squareSelected = 255;
-    model->squareSelectedLast = 255;
+    model->squareSelectedLast = 28; // start selector near middle
 
     model->msg = "init";
     model->moveString[0] = '\0';
