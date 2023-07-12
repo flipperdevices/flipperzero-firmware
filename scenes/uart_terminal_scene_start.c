@@ -57,10 +57,10 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Scan",
-    {"Status", "On", "Off"},
-    3,
-    {"scan", "scan on", "scan off"},
-    NO_ARGS,
+    {"Status", "On", "Off", "<ssid>"},
+    4,
+    {"scan", "scan on", "scan off", "scan "},
+    TOGGLE_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Hop",
@@ -155,7 +155,8 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     const int selected_option_index = app->selected_option_index[index];
     furi_assert(selected_option_index < item->num_options_menu);
     app->selected_tx_string = item->actual_commands[selected_option_index];
-    app->is_command = (0 <= index); // was 1 to ignore the first row
+    /* Don't clear screen if command is an empty string */
+    app->is_command = (strlen(app->selected_tx_string) > 0);
     app->is_custom_tx_string = false;
     app->selected_menu_index = index;
     app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?

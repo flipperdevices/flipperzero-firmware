@@ -1,8 +1,9 @@
 # Gravity Companion for Flipper Zero
 
 ## TODO
-* Console clearscreen
 * Command-specific tooltips
+* Bug: Console scrolls to top mid-scroll when text is added to it
+    * Replicate: Start scan, Run help and try to read it
 
 ## Menu Structure
 Beacon: RickRoll Random Infinite target-ssids (APs)

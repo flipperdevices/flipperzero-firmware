@@ -84,7 +84,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
     /////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if(app->is_command) {
-        furi_string_reset(app->text_box_store);
+        furi_string_reset(app->text_box_store); /* GRAVITY If this callback is called each time the view is displayed, I think this will clear the screen */
         app->text_box_store_strlen = 0;
 
         if(0 == strncmp("help", app->selected_tx_string, strlen("help"))) {
@@ -112,7 +112,8 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
         app->uart, uart_terminal_console_output_handle_rx_data_cb); // setup callback for rx thread
 
     // Send command with CR+LF or newline '\n'
-    if(app->is_command && app->selected_tx_string) {
+    /* GRAVITY: Ignore the "cls" command */
+    if(app->is_command && app->selected_tx_string && strcmp(app->selected_tx_string, "cls")) {
         if(app->TERMINAL_MODE == 1) {
             uart_terminal_uart_tx(
                 (uint8_t*)(app->selected_tx_string), strlen(app->selected_tx_string));

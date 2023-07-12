@@ -18,6 +18,9 @@
 #define UART_TERMINAL_TEXT_INPUT_STORE_SIZE (512)
 #define UART_CH (FuriHalUartIdUSART1)
 
+/* GRAVITY: Import GravityMode etc. */
+#include "esp_flip_struct.h"
+
 struct UART_TerminalApp {
     Gui* gui;
     ViewDispatcher* view_dispatcher;
@@ -41,6 +44,8 @@ struct UART_TerminalApp {
     bool show_stopscan_tip;
     int BAUDRATE;
     int TERMINAL_MODE; //1=AT mode, 0=other mode
+
+    GravityCommand gravityCommand; /* Gravity command */
 };
 
 typedef enum {
