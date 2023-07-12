@@ -145,6 +145,8 @@ bool fuzzer_scene_attack_on_event(void* context, SceneManagerEvent event) {
             } else {
                 notification_message(app->notifications, &sequence_blink_red_100);
             }
+        } else if(event.event == FuzzerCustomEventViewAttackSave) {
+            scene_manager_next_scene(app->scene_manager, FuzzerSceneSaveName);
         }
         // Callback from worker
         else if(event.event == FuzzerCustomEventViewAttackEnd) {

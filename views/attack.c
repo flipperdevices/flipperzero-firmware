@@ -244,7 +244,7 @@ void fuzzer_view_attack_draw(Canvas* canvas, FuzzerViewAttackModel* model) {
         fuzzer_view_attack_draw_idle(canvas, model);
     } else if(model->attack_state == FuzzerAttackStatePause) {
         elements_button_left(canvas, "Back");
-        // elements_button_right(canvas, "Save"); // XXX
+        elements_button_right(canvas, "Save");
         elements_button_center(canvas, "Emu");
     } else if(model->attack_state == FuzzerAttackStateEnd) {
         fuzzer_view_attack_draw_end(canvas, model);
@@ -382,6 +382,8 @@ bool fuzzer_view_attack_input(InputEvent* event, void* context) {
                 if((event->key == InputKeyBack || event->key == InputKeyLeft) &&
                    event->type == InputTypeShort) {
                     view_attack->callback(FuzzerCustomEventViewAttackIdle, view_attack->context);
+                } else if(event->key == InputKeyRight && event->type == InputTypeShort) {
+                    view_attack->callback(FuzzerCustomEventViewAttackSave, view_attack->context);
                 } else if(event->key == InputKeyOk && event->type == InputTypeShort) {
                     view_attack->callback(
                         FuzzerCustomEventViewAttackEmulateCurrent, view_attack->context);

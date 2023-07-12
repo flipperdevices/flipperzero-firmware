@@ -14,10 +14,14 @@ typedef enum {
     FuzzerCustomEventViewAttackPause,
     FuzzerCustomEventViewAttackIdle, // Setup
     FuzzerCustomEventViewAttackEmulateCurrent,
-    // FuzzerCustomEventViewAttackSave,
+    FuzzerCustomEventViewAttackSave,
     FuzzerCustomEventViewAttackNextUid,
     FuzzerCustomEventViewAttackPrevUid,
 
     FuzzerCustomEventViewFieldEditorBack,
     FuzzerCustomEventViewFieldEditorOk,
+
+    FuzzerCustomEventTextEditResult,
+
+    FuzzerCustomEventPopupClosed,
 } FuzzerCustomEvent;

@@ -126,6 +126,8 @@ FuzzerWorkerLoadKeyState fuzzer_worker_load_key_from_file(
     FuzzerProtocolsID* protocol_index,
     const char* filename);
 
+bool fuzzer_worker_save_key(FuzzerWorker* instance, const char* path);
+
 /**
  * Set callback for uid changed
  * 

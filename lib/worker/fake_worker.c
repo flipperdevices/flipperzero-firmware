@@ -10,6 +10,7 @@
 
 #define TAG "Fuzzer worker"
 #define TOTAL_PROTOCOL_COUNT fuzzer_proto_get_count_of_protocols()
+#define PROTOCOL_KEY_FOLDER EXT_PATH(PROTOCOL_KEY_FOLDER_NAME)
 
 typedef uint8_t FuzzerWorkerPayload[MAX_PAYLOAD_SIZE];
 
@@ -85,6 +86,32 @@ FuzzerWorkerLoadKeyState fuzzer_worker_load_key_from_file(
             hardware_worker_get_protocol_data(
                 instance->hw_worker, &instance->payload[0], MAX_PAYLOAD_SIZE);
         }
+    }
+
+    return res;
+}
+
+static bool fuzer_worker_make_key_folder() {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+
+    const bool res = storage_simply_mkdir(storage, PROTOCOL_KEY_FOLDER);
+
+    furi_record_close(RECORD_STORAGE);
+
+    return res;
+}
+
+bool fuzzer_worker_save_key(FuzzerWorker* instance, const char* path) {
+    furi_assert(instance);
+    bool res = false;
+
+    if(!fuzer_worker_make_key_folder()) {
+        FURI_LOG_E(TAG, "Cannot create key folder");
+    } else if(!hardware_worker_save_key(instance->hw_worker, path)) {
+        FURI_LOG_E(TAG, "Cannot save key file");
+    } else {
+        FURI_LOG_D(TAG, "Save key Success");
+        res = true;
     }
 
     return res;
@@ -301,6 +328,7 @@ bool fuzzer_worker_init_attack_file_dict(
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
     instance->uids_stream = buffered_file_stream_alloc(storage);
+    furi_record_close(RECORD_STORAGE);
 
     if(!buffered_file_stream_open(
            instance->uids_stream, furi_string_get_cstr(file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
@@ -315,7 +343,6 @@ bool fuzzer_worker_init_attack_file_dict(
         instance->attack_type = FuzzerWorkerAttackTypeMax;
         buffered_file_stream_close(instance->uids_stream);
         stream_free(instance->uids_stream);
-        furi_record_close(RECORD_STORAGE);
     } else {
         res = true;
     }
@@ -456,11 +483,10 @@ void fuzzer_worker_stop(FuzzerWorker* instance) {
     if(instance->attack_type == FuzzerWorkerAttackTypeLoadFileCustomUids) {
         buffered_file_stream_close(instance->uids_stream);
         stream_free(instance->uids_stream);
-        furi_record_close(RECORD_STORAGE);
         instance->attack_type = FuzzerWorkerAttackTypeMax;
     }
 
-    // TODO  anything else
+    // TODO anything else
 }
 
 void fuzzer_worker_set_uid_chaged_callback(

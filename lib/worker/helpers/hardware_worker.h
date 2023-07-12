@@ -1,7 +1,5 @@
 #pragma once
 
-// typedef HwProtocolID HwProtocolID;
-
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -46,3 +44,5 @@ bool hardware_worker_set_protocol_id_by_name(HardwareWorker* instance, const cha
 HwProtocolID hardware_worker_get_protocol_id(HardwareWorker* instance);
 
 bool hardware_worker_load_key_from_file(HardwareWorker* instance, const char* filename);
+
+bool hardware_worker_save_key(HardwareWorker* instance, const char* path);

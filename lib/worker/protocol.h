@@ -40,8 +40,16 @@ void fuzzer_payload_free(FuzzerPayload*);
  */
 uint8_t fuzzer_proto_get_max_data_size();
 
-// TODO add description
+/**
+ * Get recomended/default emulation time
+ * @return Default emulation time
+ */
 uint8_t fuzzer_proto_get_def_emu_time();
+
+/**
+ * Get recomended/default idle time
+ * @return Default idle time
+ */
 uint8_t fuzzer_proto_get_def_idle_time();
 
 /**

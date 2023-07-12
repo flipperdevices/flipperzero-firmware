@@ -182,3 +182,17 @@ bool hardware_worker_load_key_from_file(HardwareWorker* instance, const char* fi
 
     return res;
 }
+
+bool hardware_worker_save_key(HardwareWorker* instance, const char* path) {
+    furi_assert(instance);
+    bool res;
+
+#if defined(RFID_125_PROTOCOL)
+    res = lfrfid_dict_file_save(instance->protocols_items, instance->protocol_id, path);
+#else
+
+    res = ibutton_protocols_save(instance->protocols_items, instance->key, path);
+#endif
+
+    return res;
+}
