@@ -49,7 +49,8 @@ typedef struct {
     int16_t random960PosNumber;
 
     //uint8_t picture[SCL_BOARD_PICTURE_WIDTH * SCL_BOARD_PICTURE_WIDTH];
-    uint8_t selected;
+    uint8_t squareSelected;
+    uint8_t squareSelectedLast;
     char* msg;
 
     SCL_SquareSet squareSet;
@@ -135,7 +136,7 @@ void flipchess_drawBoard(FlipChessScene1Model* model) {
     SCL_drawBoard(
         model->game.board,
         flipchess_putImagePixel,
-        model->selected,
+        model->squareSelected,
         model->moveHighlight,
         model->paramFlipBoard);
 }
@@ -208,7 +209,7 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
     // }
 
     if(model->game.state != SCL_GAME_STATE_PLAYING || model->paramExit)
-        return 4;
+        return FlipChessStatusReturn;
 
     //uint8_t squareFrom = 0;
     //uint8_t squareTo = 0;
@@ -225,19 +226,20 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
         // else if(stringsEqual(string, "quit", 5))
         //     break;
         // else {
-        //squareFrom = selected; //SCL_stringToSquare(string);
-        //squareTo = selected; //SCL_stringToSquare(string + 2);
+        //squareFrom = squareSelected; //SCL_stringToSquare(string);
+        //squareTo = squareSelected; //SCL_stringToSquare(string + 2);
 
         //uint8_t r =
         //    SCL_stringToMove(string, &squareFrom, &squareTo, &movePromote);
 
-        if (model->turnState == 0 && model->selected != 255) {
-            model->squareFrom = model->selected;
+        if (model->turnState == 0 && model->squareSelected != 255) {
+            model->squareFrom = model->squareSelected;
             model->turnState = 1;
-        } else if (model->turnState == 1 && model->selected != 255) {
-            model->squareTo = model->selected;
+        } else if (model->turnState == 1 && model->squareSelected != 255) {
+            model->squareTo = model->squareSelected;
             model->turnState = 2;
-            model->selected = 255;
+            model->squareSelectedLast = model->squareSelected;
+            model->squareSelected = 255;
         }
 
         if(model->turnState == 1 && model->squareFrom != 255) {
@@ -380,8 +382,9 @@ static int flipchess_scene_1_model_init(
     memcpy(model->startState, &emptyStartState, sizeof(SCL_Board));
     model->random960PosNumber = -1;
 
-    model->selected = 255;
-    model->msg = "Flip Chess";
+    model->squareSelected = 255;
+    model->squareSelectedLast = 255;
+    model->msg = "init";
 
     SCL_SquareSet emptySquareSet = SCL_SQUARE_SET_EMPTY;
     memcpy(model->moveHighlight, &emptySquareSet, sizeof(SCL_SquareSet));
@@ -457,6 +460,8 @@ static int flipchess_scene_1_model_init(
         return FlipChessStatusReturn;
     }
 
+    model->msg = (SCL_boardWhitesTurn(model->game.board) ? "white to move" : "black to move");
+
     // 0 = success
     return FlipChessStatusSuccess;
 }
@@ -482,7 +487,11 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 instance->view,
                 FlipChessScene1Model * model,
                 {
-                    model->selected = (model->selected + 1) % 64;
+                    if (model->squareSelectedLast != 255 && model->squareSelected == 255) {
+                        model->squareSelected = model->squareSelectedLast;
+                    } else {
+                        model->squareSelected = (model->squareSelected + 1) % 64;
+                    }
                     flipchess_drawBoard(model);
                 },
                 true);
@@ -492,7 +501,11 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 instance->view,
                 FlipChessScene1Model * model,
                 {
-                    model->selected = (model->selected + 56) % 64;
+                    if (model->squareSelectedLast != 255 && model->squareSelected == 255) {
+                        model->squareSelected = model->squareSelectedLast;
+                    } else {
+                        model->squareSelected = (model->squareSelected + 56) % 64;
+                    }
                     flipchess_drawBoard(model);
                 },
                 true);
@@ -502,7 +515,11 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 instance->view,
                 FlipChessScene1Model * model,
                 {
-                    model->selected = (model->selected + 63) % 64;
+                    if (model->squareSelectedLast != 255 && model->squareSelected == 255) {
+                        model->squareSelected = model->squareSelectedLast;
+                    } else {
+                        model->squareSelected = (model->squareSelected + 63) % 64;
+                    }
                     flipchess_drawBoard(model);
                 },
                 true);
@@ -511,8 +528,11 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
             with_view_model(
                 instance->view,
                 FlipChessScene1Model * model,
-                {
-                    model->selected = (model->selected + 8) % 64;
+                {if (model->squareSelectedLast != 255 && model->squareSelected == 255) {
+                        model->squareSelected = model->squareSelectedLast;
+                    } else {
+                        model->squareSelected = (model->squareSelected + 8) % 64;
+                    }
                     flipchess_drawBoard(model);
                 },
                 true);
@@ -521,8 +541,12 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
             with_view_model(
                 instance->view, FlipChessScene1Model * model, 
                 { 
-                    flipchess_turn(model);
-                    flipchess_drawBoard(model);
+                    uint8_t status = flipchess_turn(model);
+                    if(status == FlipChessStatusReturn) {
+                        instance->callback(FlipChessCustomEventScene1Back, instance->context);
+                    } else {
+                        flipchess_drawBoard(model);
+                    }
                 }, 
                 true);
             break;
@@ -538,7 +562,7 @@ void flipchess_scene_1_exit(void* context) {
     FlipChessScene1* instance = (FlipChessScene1*)context;
 
     with_view_model(
-        instance->view, FlipChessScene1Model * model, { model->selected = 255; }, true);
+        instance->view, FlipChessScene1Model * model, { model->squareSelected = 255; }, true);
 }
 
 void flipchess_scene_1_enter(void* context) {
