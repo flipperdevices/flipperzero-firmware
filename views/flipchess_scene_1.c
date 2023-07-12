@@ -136,7 +136,7 @@ void flipchess_drawBoard(FlipChessScene1Model* model) {
         model->game.board,
         flipchess_putImagePixel,
         model->selected,
-        model->squareSet,
+        model->moveHighlight,
         model->paramFlipBoard);
 }
 
@@ -244,10 +244,10 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
             if((model->game.board[model->squareFrom] != '.') &&
                (SCL_pieceIsWhite(model->game.board[model->squareFrom]) ==
                 SCL_boardWhitesTurn(model->game.board))) {
-                SCL_boardGetMoves(model->game.board, model->squareFrom, model->squareSet);
+                SCL_boardGetMoves(model->game.board, model->squareFrom, model->moveHighlight);
             }
         } else if (model->turnState == 2) {
-            if(SCL_squareSetContains(model->squareSet, model->squareTo)) {
+            if(SCL_squareSetContains(model->moveHighlight, model->squareTo)) {
                 moveType = 1;
             }
             model->turnState = 0;
@@ -384,9 +384,8 @@ static int flipchess_scene_1_model_init(
     model->msg = "Flip Chess";
 
     SCL_SquareSet emptySquareSet = SCL_SQUARE_SET_EMPTY;
-    memcpy(model->squareSet, &emptySquareSet, sizeof(SCL_SquareSet));
-    model->moveString[0] = '\0';
     memcpy(model->moveHighlight, &emptySquareSet, sizeof(SCL_SquareSet));
+    model->moveString[0] = '\0';
     model->squareFrom = 255;
     model->squareTo = 255;
     model->turnState = 0;
