@@ -1,26 +1,25 @@
 # Gravity Companion for Flipper Zero
 
 ## TODO
-* Command-specific tooltips
 * Bug: Console scrolls to top mid-scroll when text is added to it
     * Replicate: Start scan, Run help and try to read it
 
 ## Menu Structure
-Beacon: RickRoll Random Infinite target-ssids (APs)
-Probe: Any target-ssids
-Sniff: On Off
-target-ssids: add remove list
-scan: on off
-hop: on off default
-view: sta ap sta+ap
-select: sta ap
-clear: sta ap
-get/set: <variables>
-deauth: off, frame sta, device sta, spoof sta, frame broadcast, device broadcast, spoof broadcast
-mana: on off clear
-mana verbose: on off
-mana loud: on off
-help: commands help
+* Beacon: RickRoll Random Infinite target-ssids (APs)
+* Probe: Any target-ssids
+* Sniff: On Off
+* target-ssids: add remove list
+* scan: on off
+* hop: on off default
+* view: sta ap sta+ap
+* select: sta ap
+* clear: sta ap
+* get/set: <variables>
+* deauth: off, frame sta, device sta, spoof sta, frame broadcast, device broadcast, spoof broadcast
+* mana: on off clear
+* mana verbose: on off
+* mana loud: on off
+* help: commands help
 
 # UART Terminal for Flipper Zero
 [Flipper Zero](https://flipperzero.one/) app to control various devices via UART interface.
