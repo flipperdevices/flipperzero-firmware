@@ -46,6 +46,11 @@ PacsFuzzerApp* fuzzer_app_alloc() {
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, FuzzerViewIDPopup, popup_get_view(app->popup));
 
+    // TextInput
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, FuzzerViewIDTextInput, text_input_get_view(app->text_input));
+
     // Main view
     app->main_view = fuzzer_view_main_alloc();
     view_dispatcher_add_view(
@@ -100,6 +105,10 @@ void fuzzer_app_free(PacsFuzzerApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, FuzzerViewIDPopup);
     popup_free(app->popup);
 
+    // TextInput
+    view_dispatcher_remove_view(app->view_dispatcher, FuzzerViewIDTextInput);
+    text_input_free(app->text_input);
+
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
 
@@ -126,10 +135,10 @@ int32_t fuzzer_start_ibtn(void* p) {
     PacsFuzzerApp* fuzzer_app = fuzzer_app_alloc();
 
     FuzzerConsts app_const = {
-        .custom_dict_folder = EXT_PATH("ibutton/ibtnfuzzer"),
+        .custom_dict_folder = "/ext/ibutton/ibtnfuzzer",
         .custom_dict_extension = ".txt",
         .key_extension = ".ibtn",
-        .path_key_folder = EXT_PATH("ibutton"),
+        .path_key_folder = "/ext/ibutton",
         .key_icon = &I_ibutt_10px,
     };
     fuzzer_app->fuzzer_const = &app_const;
@@ -145,10 +154,10 @@ int32_t fuzzer_start_rfid(void* p) {
     PacsFuzzerApp* fuzzer_app = fuzzer_app_alloc();
 
     FuzzerConsts app_const = {
-        .custom_dict_folder = EXT_PATH("lfrfid/rfidfuzzer"),
+        .custom_dict_folder = "/ext/lfrfid/rfidfuzzer",
         .custom_dict_extension = ".txt",
         .key_extension = ".rfid",
-        .path_key_folder = EXT_PATH("lfrfid"),
+        .path_key_folder = "/ext/lfrfid",
         .key_icon = &I_125_10px,
     };
     fuzzer_app->fuzzer_const = &app_const;

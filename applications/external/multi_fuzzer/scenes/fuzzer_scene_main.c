@@ -2,6 +2,7 @@
 #include "../helpers/fuzzer_custom_event.h"
 
 #include "../lib/worker/protocol.h"
+#define TAG "Fuzzer main menu"
 
 void fuzzer_scene_main_callback(FuzzerCustomEvent event, void* context) {
     furi_assert(context);
@@ -35,7 +36,7 @@ static bool fuzzer_scene_main_load_custom_dict(void* context) {
     return res;
 }
 
-static bool fuzzer_scene_main_load_key(void* context) {
+static bool fuzzer_scene_main_load_key_dialog(void* context) {
     furi_assert(context);
     PacsFuzzerApp* app = context;
 
@@ -134,22 +135,32 @@ bool fuzzer_scene_main_on_event(void* context, SceneManagerEvent event) {
                 break;
 
             case FuzzerAttackIdLoadFile:
-                if(!fuzzer_scene_main_load_key(app)) {
+                if(!fuzzer_scene_main_load_key_dialog(app)) {
                     break;
                 } else {
-                    if(fuzzer_worker_load_key_from_file(
-                           app->worker,
-                           app->fuzzer_state.proto_index,
-                           furi_string_get_cstr(app->file_path))) {
+                    switch(fuzzer_worker_load_key_from_file(
+                        app->worker,
+                        &app->fuzzer_state.proto_index,
+                        furi_string_get_cstr(app->file_path))) {
+                    case FuzzerWorkerLoadKeyStateOk:
+                    case FuzzerWorkerLoadKeyStateDifferentProto:
                         scene_manager_set_scene_state(
                             app->scene_manager,
                             FuzzerSceneFieldEditor,
                             FuzzerFieldEditorStateEditingOn);
                         scene_manager_next_scene(app->scene_manager, FuzzerSceneFieldEditor);
-                        FURI_LOG_I("Scene", "Load ok");
-                    } else {
-                        fuzzer_scene_main_show_error(app, "Unsupported protocol\nor broken file");
-                        FURI_LOG_W("Scene", "Load err");
+                        FURI_LOG_I(TAG, "Load ok");
+                        break;
+
+                    case FuzzerWorkerLoadKeyStateBadFile:
+                        fuzzer_scene_main_show_error(app, "Cant load\nor broken file");
+                        FURI_LOG_E(TAG, "Cant load or broken file");
+                        break;
+
+                    case FuzzerWorkerLoadKeyStateUnsuportedProto:
+                        fuzzer_scene_main_show_error(app, "Unsupported protocol");
+                        FURI_LOG_E(TAG, "Unsupported protocol");
+                        break;
                     }
                 }
                 break;

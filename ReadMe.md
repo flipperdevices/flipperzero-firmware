@@ -82,6 +82,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [SubGhz: fix check connect cc1101_ext #2857 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2857)
 - OFW: [NFC: Improved MFC emulation on some readers #2825 (By AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2825)
 - OFW: [Dolphin: add new animation #2865 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2865)
+- Updated: [iButton Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
+- Updated: [RFID Fuzzer (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/507)
 
 <a name="release">
 
