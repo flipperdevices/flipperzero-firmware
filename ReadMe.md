@@ -76,6 +76,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [More descriptive error messages for the log command #2835 (By Astrrra)](https://github.com/flipperdevices/flipperzero-firmware/pull/2835)
 - OFW: [Update toolchain to v23 #2824 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2824)
 - Updated: [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
+- OFW: [Archive and file browser fixes #2862 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2862)
+- OFW: [Storage: directory sort #2850 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2850)
+- OFW: [Loader: exit animation fix #2860 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2860)
+- OFW: [SubGhz: fix check connect cc1101_ext #2857 (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2857)
+- OFW: [NFC: Improved MFC emulation on some readers #2825 (By AloneLiberty)](https://github.com/flipperdevices/flipperzero-firmware/pull/2825)
+- OFW: [Dolphin: add new animation #2865 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2865)
 
 <a name="release">
 
