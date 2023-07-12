@@ -21,12 +21,12 @@ void flipchess_scene_menu_on_enter(void* context) {
         flipchess_scene_menu_submenu_callback,
         app);
 
-    submenu_add_item(
-        app->submenu,
-        "Import game",
-        SubmenuIndexScene1Import,
-        flipchess_scene_menu_submenu_callback,
-        app);
+    // submenu_add_item(
+    //     app->submenu,
+    //     "Import game",
+    //     SubmenuIndexScene1Import,
+    //     flipchess_scene_menu_submenu_callback,
+    //     app);
 
     submenu_add_item(
         app->submenu, 
