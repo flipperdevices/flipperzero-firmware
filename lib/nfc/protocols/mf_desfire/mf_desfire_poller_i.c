@@ -74,17 +74,21 @@ MfDesfireError
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_VERSION);
 
-    MfDesfireError error = mf_desfire_send_chunks(
-        instance,
-        instance->input_buffer,
-        instance->result_buffer,
-        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+    MfDesfireError error;
 
-    if(error == MfDesfireErrorNone) {
-        mf_desfire_version_parse(data, instance->result_buffer);
-    } else {
-        FURI_LOG_D(TAG, "Read version error: %d", error);
-    }
+    do {
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        if(!mf_desfire_version_parse(data, instance->result_buffer)) {
+            error = MfDesfireErrorProtocol;
+        }
+    } while(false);
 
     return error;
 }
@@ -96,15 +100,21 @@ MfDesfireError
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_FREE_MEMORY);
 
-    MfDesfireError error = mf_desfire_send_chunks(
-        instance,
-        instance->input_buffer,
-        instance->result_buffer,
-        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+    MfDesfireError error;
 
-    if(error == MfDesfireErrorNone) {
-        mf_desfire_free_memory_parse(data, instance->result_buffer);
-    }
+    do {
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        if(!mf_desfire_free_memory_parse(data, instance->result_buffer)) {
+            error = MfDesfireErrorProtocol;
+        }
+    } while(false);
 
     return error;
 }
@@ -117,15 +127,21 @@ MfDesfireError mf_desfire_poller_async_read_key_settings(
     bit_buffer_reset(instance->input_buffer);
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_KEY_SETTINGS);
 
-    MfDesfireError error = mf_desfire_send_chunks(
-        instance,
-        instance->input_buffer,
-        instance->result_buffer,
-        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+    MfDesfireError error;
 
-    if(error == MfDesfireErrorNone) {
-        mf_desfire_key_settings_parse(data, instance->result_buffer);
-    }
+    do {
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        if(!mf_desfire_key_settings_parse(data, instance->result_buffer)) {
+            error = MfDesfireErrorProtocol;
+        }
+    } while(false);
 
     return error;
 }
@@ -155,7 +171,10 @@ MfDesfireError mf_desfire_poller_async_read_key_versions(
 
         if(error != MfDesfireErrorNone) break;
 
-        mf_desfire_key_version_parse(simple_array_get(data, i), instance->result_buffer);
+        if(!mf_desfire_key_version_parse(simple_array_get(data, i), instance->result_buffer)) {
+            error = MfDesfireErrorProtocol;
+            break;
+        }
     }
 
     return error;
@@ -186,7 +205,11 @@ MfDesfireError
         simple_array_init(data, app_id_count);
 
         for(uint32_t i = 0; i < app_id_count; ++i) {
-            mf_desfire_application_id_parse(simple_array_get(data, i), i, instance->result_buffer);
+            if(!mf_desfire_application_id_parse(
+                   simple_array_get(data, i), i, instance->result_buffer)) {
+                error = MfDesfireErrorProtocol;
+                break;
+            }
         }
     } while(false);
 
@@ -237,7 +260,10 @@ MfDesfireError
         simple_array_init(data, id_count);
 
         for(uint32_t i = 0; i < id_count; ++i) {
-            mf_desfire_file_id_parse(simple_array_get(data, i), i, instance->result_buffer);
+            if(!mf_desfire_file_id_parse(simple_array_get(data, i), i, instance->result_buffer)) {
+                error = MfDesfireErrorProtocol;
+                break;
+            }
         }
     } while(false);
 
@@ -254,15 +280,21 @@ MfDesfireError mf_desfire_poller_async_read_file_settings(
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_FILE_SETTINGS);
     bit_buffer_append_byte(instance->input_buffer, id);
 
-    MfDesfireError error = mf_desfire_send_chunks(
-        instance,
-        instance->input_buffer,
-        instance->result_buffer,
-        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+    MfDesfireError error;
 
-    if(error == MfDesfireErrorNone) {
-        mf_desfire_file_settings_parse(data, instance->result_buffer);
-    }
+    do {
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        if(!mf_desfire_file_settings_parse(data, instance->result_buffer)) {
+            error = MfDesfireErrorProtocol;
+        }
+    } while(false);
 
     return error;
 }
@@ -304,15 +336,21 @@ MfDesfireError mf_desfire_poller_async_read_file_data(
     bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&offset, 3);
     bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&size, 3);
 
-    MfDesfireError error = mf_desfire_send_chunks(
-        instance,
-        instance->input_buffer,
-        instance->result_buffer,
-        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+    MfDesfireError error;
 
-    if(error == MfDesfireErrorNone) {
-        mf_desfire_file_data_parse(data, instance->result_buffer);
-    }
+    do {
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        if(!mf_desfire_file_data_parse(data, instance->result_buffer)) {
+            error = MfDesfireErrorProtocol;
+        }
+    } while(false);
 
     return error;
 }
@@ -327,15 +365,21 @@ MfDesfireError mf_desfire_poller_async_read_file_value(
     bit_buffer_append_byte(instance->input_buffer, MF_DESFIRE_CMD_GET_VALUE);
     bit_buffer_append_byte(instance->input_buffer, id);
 
-    MfDesfireError error = mf_desfire_send_chunks(
-        instance,
-        instance->input_buffer,
-        instance->result_buffer,
-        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+    MfDesfireError error;
 
-    if(error == MfDesfireErrorNone) {
-        mf_desfire_file_data_parse(data, instance->result_buffer);
-    }
+    do {
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        if(!mf_desfire_file_data_parse(data, instance->result_buffer)) {
+            error = MfDesfireErrorProtocol;
+        }
+    } while(false);
 
     return error;
 }
@@ -354,15 +398,21 @@ MfDesfireError mf_desfire_poller_async_read_file_records(
     bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&offset, 3);
     bit_buffer_append_bytes(instance->input_buffer, (const uint8_t*)&size, 3);
 
-    MfDesfireError error = mf_desfire_send_chunks(
-        instance,
-        instance->input_buffer,
-        instance->result_buffer,
-        MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+    MfDesfireError error;
 
-    if(error == MfDesfireErrorNone) {
-        mf_desfire_file_data_parse(data, instance->result_buffer);
-    }
+    do {
+        error = mf_desfire_send_chunks(
+            instance,
+            instance->input_buffer,
+            instance->result_buffer,
+            MF_DESFIRE_POLLER_STANDARD_FWT_FC);
+
+        if(error != MfDesfireErrorNone) break;
+
+        if(!mf_desfire_file_data_parse(data, instance->result_buffer)) {
+            error = MfDesfireErrorProtocol;
+        }
+    } while(false);
 
     return error;
 }
