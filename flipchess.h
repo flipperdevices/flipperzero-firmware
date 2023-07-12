@@ -55,10 +55,10 @@ typedef enum {
 } FlipChessHapticState;
 
 typedef enum {
-    FlipChessPlayerHuman,
-    FlipChessPlayerAI1,
-    FlipChessPlayerAI2,
-    FlipChessPlayerAI3,
+    FlipChessPlayerHuman = 0,
+    FlipChessPlayerAI1 = 1,
+    FlipChessPlayerAI2 = 2,
+    FlipChessPlayerAI3 = 3,
 } FlipChessPlayerMode;
 
 typedef enum {
