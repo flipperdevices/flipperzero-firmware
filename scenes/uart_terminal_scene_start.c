@@ -27,12 +27,12 @@ typedef struct {
         ** If actual_commands[i] ends with space, display a keyboard to fill in the blank ***
 */
 const UART_TerminalItem items[NUM_MENU_ITEMS] = {
-    {"Console", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
+    {"Console", {"View", "Clear"}, 2, {"", "cls"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Beacon",
     {"Status", "RickRoll", "Random", "Infinite", "target-ssids", "Off"},
     6,
     {"beacon", "beacon rickroll", "beacon random ", "beacon infinite", "beacon user", "beacon off"},
-    INPUT_ARGS,
+    TOGGLE_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Probe",
@@ -52,8 +52,8 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     {"target-ssids",
     {"Add", "Remove", "List"},
     3,
-    {"target-ssids add ", "target-ssids remove ", "target-ssids "},
-    INPUT_ARGS,
+    {"target-ssids add ", "target-ssids remove ", "target-ssids"},
+    TOGGLE_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Scan",
@@ -64,10 +64,10 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Hop",
-    {"Status", "On", "Off", "Default"},
-    4,
-    {"hop", "hop on", "hop off", "hop default"},
-    NO_ARGS,
+    {"Status", "On", "Off", "Default", "Set "},
+    5,
+    {"hop", "hop on", "hop off", "hop default", "hop "},
+    TOGGLE_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"View",
@@ -92,24 +92,24 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Get",
-    {"SSID_LEN_MIN", "SSID_LEN_MAX", "DEFAULT_SSID_COUNT", "Channel", "MAC", "ATTACK_PKTS", "ATTACK_MILLIS", "MAC_RAND"},
-    8,
-    {"get ssid_len_min", "get ssid_len_max", "get default_ssid_count", "get channel", "get mac", "get attack_pkts", "get attack_millis", "get mac_rand"},
+    {"SSID_LEN_MIN", "SSID_LEN_MAX", "DEFAULT_SSID_COUNT", "Channel", "MAC", "MAC_RAND"},
+    6,
+    {"get ssid_len_min", "get ssid_len_max", "get default_ssid_count", "get channel", "get mac", "get mac_rand"},
     NO_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Set",
-    {"SSID_LEN_MIN", "SSID_LEN_MAX", "DEFAULT_SSID_COUNT", "Channel", "MAC", "ATTACK_PKTS", "ATTACK_MILLIS", "MAC_RAND"},
-    8,
-    {"set ssid_len_min ", "set ssid_len_max ", "set default_ssid_count ", "set channel ", "set mac ", "set attack_pkts ", "set attack_millis ", "set mac_rand "},
+    {"SSID_LEN_MIN", "SSID_LEN_MAX", "DEFAULT_SSID_COUNT", "Channel", "MAC", "MAC_RAND"},
+    6,
+    {"set ssid_len_min ", "set ssid_len_max ", "set default_ssid_count ", "set channel ", "set mac ", "set mac_rand "},
     INPUT_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Deauth",
-    {"Status", "Off", "Frame STA", "Device STA", "Spoof STA", "Frame B'Cast", "Device B'Cast", "Spoof B'Cast"},
-    8,
-    {"deauth", "deauth off", "deauth frame sta", "deauth device sta", "deauth spoof sta", "deauth frame broadcast", "deauth device broadcast", "deauth spoof broadcast"},
-    NO_ARGS,
+    {"Status", "Set Delay", "Off", "Frame STA", "Device STA", "Spoof STA", "Frame B'Cast", "Device B'Cast", "Spoof B'Cast"},
+    9,
+    {"deauth", "deauth ", "deauth off", "deauth frame sta", "deauth device sta", "deauth spoof sta", "deauth frame broadcast", "deauth device broadcast", "deauth spoof broadcast"},
+    TOGGLE_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Mana",
@@ -163,8 +163,11 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
                                    item->focus_console;
     app->show_stopscan_tip = item->show_stopscan_tip;
 
-    bool needs_keyboard = (item->needs_keyboard == TOGGLE_ARGS) ? (selected_option_index != 0) :
-                                                                  item->needs_keyboard;
+    /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
+    int cmdLen = strlen(app->selected_tx_string);
+    bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
+                            (item->needs_keyboard == TOGGLE_ARGS &&
+                                (app->selected_tx_string[cmdLen-1] == ' ')));
     if(needs_keyboard) {
         view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
     } else {

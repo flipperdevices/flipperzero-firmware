@@ -2,6 +2,7 @@
 
 ## TODO
 * Console clearscreen
+* Command-specific tooltips
 
 ## Menu Structure
 Beacon: RickRoll Random Infinite target-ssids (APs)
