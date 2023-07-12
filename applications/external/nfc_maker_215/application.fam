@@ -1,0 +1,20 @@
+App(
+    appid="NFC_Maker_NTAG215",
+    name="NFC Maker NTAG215",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="nfc_maker",
+    # cdefines=["APP_NFC_MAKER"],
+    requires=[
+        "storage",
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    fap_icon="nfc_maker_10px.png",
+    fap_category="NFC",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="nfc_maker2",
+    fap_author="Willy-JL",
+    fap_weburl="https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/nfc_maker",
+    # fap_version="1.0",
+    fap_description="make tags with URLs, Wifi and other things",
+)
