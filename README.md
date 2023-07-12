@@ -155,8 +155,6 @@ Keep in mind that the TX/RX pins go to the opposite pins on the flipper. So TX o
 
 - If you run into any issues make sure that you have the required files set up on the Flipper `apps_data` folder on the Flipper SD card.
 
-- Logs will not be saved if there is no `logs` folder in `apps_data/evil_portal/`.
-
 - If the AP won't start or you have other issues try pressing reset on the Wi-Fi dev board, waiting a few seconds, and pressing `Start portal` on the main menu.
 
 - It is important to give the dev board some time to load the html files from the Flipper.
