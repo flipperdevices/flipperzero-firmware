@@ -473,7 +473,7 @@ int32_t nfc_app(void* p) {
         view_dispatcher_attach_to_gui(
             nfc->view_dispatcher, nfc->gui, ViewDispatcherTypeFullscreen);
         if(nfc_device_load(nfc->nfc_device, args)) {
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneMfClassicEmulate);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneEmulate);
 
         } else {
             // Exit app
