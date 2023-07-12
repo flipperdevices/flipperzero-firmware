@@ -32,12 +32,12 @@
 #define ENCRYPT         1       // specify whether we're encrypting
 #define DECRYPT         0       // or decrypting
 
-#if defined(_MSC_VER)
+/*#if defined(_MSC_VER)
     #include <basetsd.h>
     typedef UINT32 uint32_t;
 #else
     #include <inttypes.h>
-#endif
+#endif*/
 
 typedef unsigned char uchar;    // add some convienent shorter types
 typedef unsigned int uint;
