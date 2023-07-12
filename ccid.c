@@ -135,6 +135,8 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
             switch(cmd[1]) {
             case CARD_OUT:
                 FURI_LOG_D(TAG, "Card removed");
+                powered = false;
+                hasSAM = false;
                 retries = 3;
                 break;
             case CARD_IN_1:
