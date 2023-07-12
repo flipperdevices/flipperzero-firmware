@@ -10,6 +10,11 @@ All HTML/CSS/JS must be in a single HTML file. This is due to the fact that the 
 
 There is a 20k character limit for each HTML file.
 
+The form data must be sent to the `/get` endpoint as a GET request with the params `email` & `password`. You can put any information you want in these two fields. For example the `email` param can contain a username instead, just keep the param name as `email`.
+
+Please check the example `index.html` to get an idea of what this has to look like. 
+
+
 ## Contributors
 
 Thank you so much to the following contributors for providing awesome portals. 
