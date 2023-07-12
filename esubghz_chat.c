@@ -7,6 +7,8 @@
 #include <gui/scene_manager.h>
 #include <toolbox/sha256.h>
 
+#include "crypto/aes-gcm.h"
+
 #define APPLICATION_NAME "ESubGhzChat"
 
 #define DEFAULT_FREQ 433920000
@@ -497,6 +499,8 @@ static void chat_box_free(ESubGhzChatState *state)
 
 int32_t esubghz_chat(void)
 {
+	gcm_initialize();
+
 	int32_t err = -1;
 
 	FURI_LOG_I(APPLICATION_NAME, "Starting...");
