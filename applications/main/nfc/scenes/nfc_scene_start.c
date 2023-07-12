@@ -20,6 +20,10 @@ void nfc_scene_start_on_enter(void* context) {
     NfcApp* nfc = context;
     Submenu* submenu = nfc->submenu;
 
+    // Clear file name and device contents
+    furi_string_reset(nfc->file_name);
+    nfc_device_clear(nfc->nfc_device);
+
     submenu_add_item(submenu, "Read", SubmenuIndexRead, nfc_scene_start_submenu_callback, nfc);
     submenu_add_item(
         submenu, "Detect Reader", SubmenuIndexDetectReader, nfc_scene_start_submenu_callback, nfc);

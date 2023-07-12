@@ -16,8 +16,6 @@ void nfc_scene_set_type_on_enter(void* context) {
     NfcApp* instance = context;
 
     Submenu* submenu = instance->submenu;
-    // Clear device name
-    furi_string_reset(instance->file_name);
     submenu_add_item(
         submenu,
         "NFC-A 7-bytes UID",
