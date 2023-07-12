@@ -28,14 +28,14 @@
 
 #include "aes.h"                        // gcm_context includes aes_context
 
-/*#if defined(_MSC_VER)
+#if defined(_MSC_VER)
     #include <basetsd.h>
     typedef unsigned int size_t;// use the right type for length declarations
     typedef UINT32 uint32_t;
     typedef UINT64 uint64_t;
 #else
     #include <stdint.h>
-#endif*/
+#endif
 
 
 /******************************************************************************
