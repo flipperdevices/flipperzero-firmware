@@ -1,5 +1,14 @@
 # Gravity Companion for Flipper Zero
 
+This Flipper Zero application (FAP) is a companion application to ESP32-Gravity.
+
+ESP32-Gravity is a wireless exploration framework written for the ESP32-C6. It
+supports a variety of wireless exploration, offensive and defensive features.
+
+ESP32-Gravity can be used without a Flipper, but Flipper-Gravity can't be used
+without ESP32-Gravity. You can download it from:
+(https://github.com/chris-bc/esp32c6-gravity|https://github.com/chris-bc/esp32c6-gravity)
+
 ## TODO
 * Bug: Console scrolls to top mid-scroll when text is added to it
     * Replicate: Start scan, Run help and try to read it
