@@ -1,7 +1,7 @@
 # Gravity Companion for Flipper Zero
 
 ## TODO
-* Add dolphin_deed(DolphinDeedGpioUartBridge); to Gravity
+* Console clearscreen
 
 ## Menu Structure
 Beacon: RickRoll Random Infinite target-ssids (APs)

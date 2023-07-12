@@ -1,4 +1,5 @@
 #include "../uart_terminal_app_i.h"
+#include <dolphin/dolphin.h>
 
 // For each command, define whether additional arguments are needed
 // (enabling text input to fill them out), and whether the console
@@ -22,25 +23,29 @@ typedef struct {
 } UART_TerminalItem;
 
 // NUM_MENU_ITEMS defined in uart_terminal_app_i.h - if you add an entry here, increment it!
+/* CBC: Looking for a way to best use TOGGLE_ARGS, how's this:
+        ** If actual_commands[i] ends with space, display a keyboard to fill in the blank ***
+*/
 const UART_TerminalItem items[NUM_MENU_ITEMS] = {
+    {"Console", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Beacon",
     {"Status", "RickRoll", "Random", "Infinite", "target-ssids", "Off"},
     6,
-    {"Beacon", "Beacon RickRoll", "Beacon Random ", "Beacon Infinite", "Beacon User", "Beacon Off"},
-    TOGGLE_ARGS,
+    {"beacon", "beacon rickroll", "beacon random ", "beacon infinite", "beacon user", "beacon off"},
+    INPUT_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Probe",
     {"Status", "Any", "target-ssids", "Off"},
     4,
-    {"Probe", "Probe Any", "Probe SSIDs", "Probe Off"},
+    {"probe", "probe any", "probe ssids", "probe off"},
     NO_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Sniff",
     {"Status", "On", "Off"},
     3,
-    {"Sniff", "Sniff On", "Sniff Off"},
+    {"sniff", "sniff on", "sniff off"},
     NO_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
@@ -134,9 +139,10 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     {"commands", "help"},
     NO_ARGS,
     FOCUS_CONSOLE_START,
-    SHOW_STOPSCAN_TIP},
+    NO_TIP},
 };
 
+/* Callback when an option is selected */
 static void uart_terminal_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
     UART_TerminalApp* app = context;
@@ -144,10 +150,12 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     furi_assert(index < NUM_MENU_ITEMS);
     const UART_TerminalItem* item = &items[index];
 
+    dolphin_deed(DolphinDeedGpioUartBridge);
+
     const int selected_option_index = app->selected_option_index[index];
     furi_assert(selected_option_index < item->num_options_menu);
     app->selected_tx_string = item->actual_commands[selected_option_index];
-    app->is_command = (1 <= index);
+    app->is_command = (0 <= index); // was 1 to ignore the first row
     app->is_custom_tx_string = false;
     app->selected_menu_index = index;
     app->focus_console_start = (item->focus_console == FOCUS_CONSOLE_TOGGLE) ?
@@ -164,6 +172,7 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     }
 }
 
+/* Callback when a selected option is changed (I Think) */
 static void uart_terminal_scene_start_var_list_change_callback(VariableItem* item) {
     furi_assert(item);
 
@@ -177,6 +186,7 @@ static void uart_terminal_scene_start_var_list_change_callback(VariableItem* ite
     app->selected_option_index[app->selected_menu_index] = item_index;
 }
 
+/* Callback on entering the scene (initialisation) */
 void uart_terminal_scene_start_on_enter(void* context) {
     UART_TerminalApp* app = context;
     VariableItemList* var_item_list = app->var_item_list;
@@ -203,6 +213,7 @@ void uart_terminal_scene_start_on_enter(void* context) {
     view_dispatcher_switch_to_view(app->view_dispatcher, UART_TerminalAppViewVarItemList);
 }
 
+/* Event handler callback - Handle scene change and tick events */
 bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) {
     UNUSED(context);
     UART_TerminalApp* app = context;
@@ -223,10 +234,10 @@ bool uart_terminal_scene_start_on_event(void* context, SceneManagerEvent event) 
         app->selected_menu_index = variable_item_list_get_selected_item_index(app->var_item_list);
         consumed = true;
     }
-
     return consumed;
 }
 
+/* Clean up on exit */
 void uart_terminal_scene_start_on_exit(void* context) {
     UART_TerminalApp* app = context;
     variable_item_list_reset(app->var_item_list);

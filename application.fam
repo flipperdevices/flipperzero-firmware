@@ -1,6 +1,6 @@
 App(
     appid="Gravity_Companion",
-    name="Gravity Companion",
+    name="Gravity",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_terminal_app",
     requires=["gui"],
