@@ -45,6 +45,7 @@
         "flipper_application",
         "flipperformat",
         "toolbox",
-        "flipper7"
+        "flipper7",
+        "nfc"
     ]
 }

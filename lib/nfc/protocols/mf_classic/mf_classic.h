@@ -6,11 +6,13 @@
 extern "C" {
 #endif
 
-#define MF_CLASSIC_AUTH_KEY_A_CMD (0x60U)
-#define MF_CLASSIC_AUTH_KEY_B_CMD (0x61U)
-#define MF_CLASSIC_READ_BLOCK_CMD (0x30U)
-#define MF_CLASSIC_HALT_MSB_CMD (0x50)
-#define MF_CLASSIC_HALT_LSB_CMD (0x00)
+#define MF_CLASSIC_CMD_AUTH_KEY_A (0x60U)
+#define MF_CLASSIC_CMD_AUTH_KEY_B (0x61U)
+#define MF_CLASSIC_CMD_READ_BLOCK (0x30U)
+#define MF_CLASSIC_CMD_HALT_MSB (0x50)
+#define MF_CLASSIC_CMD_HALT_LSB (0x00)
+#define MF_CLASSIC_CMD_ACK (0x0A)
+#define MF_CLASSIC_CMD_NACK (0x00)
 
 #define MF_CLASSIC_TOTAL_SECTORS_MAX (40)
 #define MF_CLASSIC_TOTAL_BLOCKS_MAX (256)
@@ -192,6 +194,12 @@ void mf_classic_get_read_sectors_and_keys(
     uint8_t* keys_found);
 
 bool mf_classic_is_card_read(const MfClassicData* data);
+
+bool mf_classic_is_allowed_access(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicKeyType key_type,
+    MfClassicAction action);
 
 #ifdef __cplusplus
 }

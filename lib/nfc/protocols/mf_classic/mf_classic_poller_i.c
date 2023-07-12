@@ -46,8 +46,8 @@ MfClassicError mf_classic_async_auth(
         iso14443_3a_copy(
             instance->data->iso14443_3a_data,
             iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
-        uint8_t auth_type = (key_type == MfClassicKeyTypeB) ? MF_CLASSIC_AUTH_KEY_B_CMD :
-                                                              MF_CLASSIC_AUTH_KEY_A_CMD;
+        uint8_t auth_type = (key_type == MfClassicKeyTypeB) ? MF_CLASSIC_CMD_AUTH_KEY_B :
+                                                              MF_CLASSIC_CMD_AUTH_KEY_A;
         uint8_t auth_cmd[2] = {auth_type, block_num};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, auth_cmd, sizeof(auth_cmd));
 
@@ -115,7 +115,7 @@ MfClassicError mf_classic_aync_halt(MfClassicPoller* instance) {
     Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
-        uint8_t halt_cmd[2] = {MF_CLASSIC_HALT_MSB_CMD, MF_CLASSIC_HALT_LSB_CMD};
+        uint8_t halt_cmd[2] = {MF_CLASSIC_CMD_HALT_MSB, MF_CLASSIC_CMD_HALT_LSB};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, halt_cmd, sizeof(halt_cmd));
         iso14443_3a_append_crc(instance->tx_plain_buffer);
 
@@ -146,7 +146,7 @@ MfClassicError mf_classic_async_read_block(
     Iso14443_3aError error = Iso14443_3aErrorNone;
 
     do {
-        uint8_t read_block_cmd[2] = {MF_CLASSIC_READ_BLOCK_CMD, block_num};
+        uint8_t read_block_cmd[2] = {MF_CLASSIC_CMD_READ_BLOCK, block_num};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, read_block_cmd, sizeof(read_block_cmd));
         iso14443_3a_append_crc(instance->tx_plain_buffer);
 

@@ -210,6 +210,14 @@ uint8_t bit_buffer_get_byte(const BitBuffer* buf, size_t index);
  */
 const uint8_t* bit_buffer_get_data(const BitBuffer* buf);
 
+/**
+ * Get the pointer to a BitBuffer instance's underlying data.
+ *
+ * @param [in] buf pointer to a BitBuffer instance to be queried
+ * @return pointer to the underlying data
+ */
+const bool* bit_buffer_get_parity(const BitBuffer* buf);
+
 // Setters
 
 /**

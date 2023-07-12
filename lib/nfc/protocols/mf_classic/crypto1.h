@@ -37,6 +37,8 @@ void crypto1_encrypt_reader_nonce(
     uint8_t* nr,
     BitBuffer* out);
 
+uint32_t prng_successor(uint32_t x, uint32_t n);
+
 #ifdef __cplusplus
 }
 #endif

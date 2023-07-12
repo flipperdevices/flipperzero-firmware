@@ -3,14 +3,17 @@
 #include <furi.h>
 #include <lib/drivers/st25r3916_reg.h>
 #include <lib/drivers/st25r3916.h>
+#include <nfc/helpers/iso14443_3a_signal.h>
+#include <furi_hal_resources.h>
 
 #define TAG "FuriHalNfcA"
+
+static Iso14443_3aSignal* iso14443_3a_signal = NULL;
 
 FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
     FHalNfcError error = FHalNfcErrorNone;
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-    furi_hal_spi_acquire(handle);
 
     // Disable crc check
     st25r3916_set_reg_bits(handle, ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
@@ -34,8 +37,6 @@ FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame) {
     } else {
         st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSMIT_WUPA);
     }
-
-    furi_hal_spi_release(handle);
 
     return error;
 }
@@ -69,7 +70,6 @@ FHalNfcError
     FHalNfcError error = FHalNfcErrorNone;
 
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-    furi_hal_spi_acquire(handle);
 
     // Set 4 or 7 bytes UID
     if(uid_len == 4) {
@@ -99,7 +99,37 @@ FHalNfcError
     pt_memory[14] = sak & ~0x04;
 
     st25r3916_write_pta_mem(handle, pt_memory, sizeof(pt_memory));
-    furi_hal_spi_release(handle);
+
+    iso14443_3a_signal = iso14443_3a_signal_alloc(&gpio_spi_r_mosi);
 
     return error;
+}
+
+FHalNfcError f_hal_nfca_listener_tx_custom_parity(
+    const uint8_t* tx_data,
+    const bool* tx_parity,
+    size_t tx_bits) {
+    furi_assert(tx_data);
+    furi_assert(tx_parity);
+
+    furi_assert(iso14443_3a_signal);
+
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_TRANSPARENT_MODE);
+    // Reconfigure gpio for Transparent mode
+    furi_hal_spi_bus_handle_deinit(&furi_hal_spi_bus_handle_nfc);
+
+    // Send signal
+    iso14443_3a_signal_tx(iso14443_3a_signal, tx_data, tx_parity, tx_bits);
+
+    // Exit transparent mode
+    furi_hal_gpio_write(&gpio_spi_r_mosi, false);
+
+    // Configure gpio back to SPI and exit transparent
+    furi_hal_spi_bus_handle_init(&furi_hal_spi_bus_handle_nfc);
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
+
+    // TODO handle field off
+    return FHalNfcErrorNone;
 }

@@ -590,3 +590,132 @@ bool mf_classic_is_sector_read(const MfClassicData* data, uint8_t sector_num) {
 
     return sector_read;
 }
+
+static bool mf_classic_is_allowed_access_sector_trailer(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicKeyType key_type,
+    MfClassicAction action) {
+    uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
+    uint8_t* access_bits_arr = sec_tr->access_bits.data;
+    uint8_t AC = ((access_bits_arr[1] >> 5) & 0x04) | ((access_bits_arr[2] >> 2) & 0x02) |
+                 ((access_bits_arr[2] >> 7) & 0x01);
+
+    switch(action) {
+    case MfClassicActionKeyARead: {
+        return false;
+    }
+    case MfClassicActionKeyAWrite:
+    case MfClassicActionKeyBWrite: {
+        return (
+            (key_type == MfClassicKeyTypeA && (AC == 0x00 || AC == 0x01)) ||
+            (key_type == MfClassicKeyTypeB && (AC == 0x04 || AC == 0x03)));
+    }
+    case MfClassicActionKeyBRead: {
+        return (key_type == MfClassicKeyTypeA && (AC == 0x00 || AC == 0x02 || AC == 0x01));
+    }
+    case MfClassicActionACRead: {
+        return (
+            (key_type == MfClassicKeyTypeA) ||
+            (key_type == MfClassicKeyTypeB && !(AC == 0x00 || AC == 0x02 || AC == 0x01)));
+    }
+    case MfClassicActionACWrite: {
+        return (
+            (key_type == MfClassicKeyTypeA && (AC == 0x01)) ||
+            (key_type == MfClassicKeyTypeB && (AC == 0x03 || AC == 0x05)));
+    }
+    default:
+        return false;
+    }
+    return true;
+}
+
+static bool mifare_classic_is_allowed_access_data_block(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicKeyType key_type,
+    MfClassicAction action) {
+    uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+    MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, sector_num);
+    uint8_t* access_bits_arr = sec_tr->access_bits.data;
+
+    if(block_num == 0 && action == MfClassicActionDataWrite) {
+        return false;
+    }
+
+    uint8_t sector_block = 0;
+    if(block_num <= 128) {
+        sector_block = block_num & 0x03;
+    } else {
+        sector_block = (block_num & 0x0f) / 5;
+    }
+
+    uint8_t AC;
+    switch(sector_block) {
+    case 0x00: {
+        AC = ((access_bits_arr[1] >> 2) & 0x04) | ((access_bits_arr[2] << 1) & 0x02) |
+             ((access_bits_arr[2] >> 4) & 0x01);
+        break;
+    }
+    case 0x01: {
+        AC = ((access_bits_arr[1] >> 3) & 0x04) | ((access_bits_arr[2] >> 0) & 0x02) |
+             ((access_bits_arr[2] >> 5) & 0x01);
+        break;
+    }
+    case 0x02: {
+        AC = ((access_bits_arr[1] >> 4) & 0x04) | ((access_bits_arr[2] >> 1) & 0x02) |
+             ((access_bits_arr[2] >> 6) & 0x01);
+        break;
+    }
+    default:
+        return false;
+    }
+
+    switch(action) {
+    case MfClassicActionDataRead: {
+        return (
+            (key_type == MfClassicKeyTypeA && !(AC == 0x03 || AC == 0x05 || AC == 0x07)) ||
+            (key_type == MfClassicKeyTypeB && !(AC == 0x07)));
+    }
+    case MfClassicActionDataWrite: {
+        return (
+            (key_type == MfClassicKeyTypeA && (AC == 0x00)) ||
+            (key_type == MfClassicKeyTypeB &&
+             (AC == 0x00 || AC == 0x04 || AC == 0x06 || AC == 0x03)));
+    }
+    case MfClassicActionDataInc: {
+        return (
+            (key_type == MfClassicKeyTypeA && (AC == 0x00)) ||
+            (key_type == MfClassicKeyTypeB && (AC == 0x00 || AC == 0x06)));
+    }
+    case MfClassicActionDataDec: {
+        return (
+            (key_type == MfClassicKeyTypeA && (AC == 0x00 || AC == 0x06 || AC == 0x01)) ||
+            (key_type == MfClassicKeyTypeB && (AC == 0x00 || AC == 0x06 || AC == 0x01)));
+    }
+    default:
+        return false;
+    }
+
+    return false;
+}
+
+bool mf_classic_is_allowed_access(
+    MfClassicData* data,
+    uint8_t block_num,
+    MfClassicKeyType key_type,
+    MfClassicAction action) {
+    furi_assert(data);
+
+    bool access_allowed = false;
+    if(mf_classic_is_sector_trailer(block_num)) {
+        access_allowed =
+            mf_classic_is_allowed_access_sector_trailer(data, block_num, key_type, action);
+    } else {
+        access_allowed =
+            mifare_classic_is_allowed_access_data_block(data, block_num, key_type, action);
+    }
+
+    return access_allowed;
+}

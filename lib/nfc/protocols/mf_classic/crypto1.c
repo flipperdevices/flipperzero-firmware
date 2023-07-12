@@ -81,7 +81,7 @@ uint32_t crypto1_word(Crypto1* crypto1, uint32_t in, int is_encrypted) {
     return out;
 }
 
-static uint32_t prng_successor(uint32_t x, uint32_t n) {
+uint32_t prng_successor(uint32_t x, uint32_t n) {
     SWAPENDIAN(x);
     while(n--) x = x >> 1 | (x >> 16 ^ x >> 18 ^ x >> 19 ^ x >> 21) << 31;
 
@@ -127,7 +127,7 @@ void crypto1_encrypt(Crypto1* crypto, uint8_t* keystream, const BitBuffer* buff,
         }
         bit_buffer_set_byte(out, 0, encrypted_byte);
     } else {
-        for(uint8_t i = 0; i < bits / 8; i++) {
+        for(size_t i = 0; i < bits / 8; i++) {
             uint8_t encrypted_byte = crypto1_byte(crypto, keystream ? keystream[i] : 0, 0) ^
                                      plain_data[i];
             bool parity_bit =
