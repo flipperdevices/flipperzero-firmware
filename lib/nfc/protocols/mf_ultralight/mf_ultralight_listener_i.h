@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mf_ultralight_listener.h"
+#include <lib/nfc/protocols/iso14443_3a/iso14443_3a_listener.h>
 #include <nfc/protocols/nfc_generic_event.h>
 
 #ifdef __cplusplus

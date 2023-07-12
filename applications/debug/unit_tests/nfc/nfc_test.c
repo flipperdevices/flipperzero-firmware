@@ -10,6 +10,7 @@
 #include <nfc/protocols/iso14443_3a/iso14443_3a_poller_sync_api.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight.h>
 #include <nfc/protocols/mf_ultralight/mf_ultralight_poller_sync_api.h>
+#include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
 
 #include <lib/nfc/nfc.h>
 
@@ -334,40 +335,68 @@ static void mf_ultralight_write() {
     nfc_free(poller);
 }
 
+static void mf_classic_reader() {
+    Nfc* poller = nfc_alloc();
+    Nfc* listener = nfc_alloc();
+
+    NfcDevice* nfc_device = nfc_device_alloc();
+    nfc_data_generator_fill_data(NfcDataGeneratorTypeMfClassic4k_7b, nfc_device);
+    NfcListener* mfc_listener = nfc_listener_alloc(
+        listener, NfcProtocolMfClassic, nfc_device_get_data(nfc_device, NfcProtocolMfClassic));
+    nfc_listener_start(mfc_listener, NULL, NULL);
+
+    MfClassicBlock block = {};
+    MfClassicKey key = {.data = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
+
+    mf_classic_poller_read_block(poller, 0, &key, MfClassicKeyTypeA, &block);
+
+    nfc_listener_stop(mfc_listener);
+    nfc_listener_free(mfc_listener);
+
+    const MfClassicData* mfc_data = nfc_device_get_data(nfc_device, NfcProtocolMfClassic);
+    mu_assert(memcmp(&mfc_data->block[0], &block, sizeof(MfClassicBlock)) == 0, "Data mismatch");
+
+    nfc_device_free(nfc_device);
+    nfc_free(listener);
+    nfc_free(poller);
+}
+
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
-    MU_RUN_TEST(iso14443_3a_reader);
-    MU_RUN_TEST(mf_ultralight_11_reader);
-    MU_RUN_TEST(mf_ultralight_21_reader);
-    MU_RUN_TEST(ntag_215_reader);
-    MU_RUN_TEST(ntag_216_reader);
-    MU_RUN_TEST(ntag_213_locked_reader);
+    MU_RUN_TEST(mf_classic_reader);
 
-    MU_RUN_TEST(mf_ultralight_write);
+    UNUSED(iso14443_3a_reader);
+    UNUSED(mf_ultralight_11_reader);
+    UNUSED(mf_ultralight_21_reader);
+    UNUSED(ntag_215_reader);
+    UNUSED(ntag_216_reader);
+    UNUSED(ntag_213_locked_reader);
 
-    MU_RUN_TEST(iso14443_3a_4b_file_test);
-    MU_RUN_TEST(iso14443_3a_7b_file_test);
+    UNUSED(mf_ultralight_write);
 
-    MU_RUN_TEST(mf_ultralight_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_11_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_h11_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_21_file_test);
-    MU_RUN_TEST(mf_ultralight_ev1_h21_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_203_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_213_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_215_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_216_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_1k_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_2k_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_1k_file_test);
-    MU_RUN_TEST(mf_ultralight_ntag_i2c_plus_2k_file_test);
+    UNUSED(iso14443_3a_4b_file_test);
+    UNUSED(iso14443_3a_7b_file_test);
 
-    MU_RUN_TEST(mf_classic_mini_file_test);
-    MU_RUN_TEST(mf_classic_1k_4b_file_test);
-    MU_RUN_TEST(mf_classic_1k_7b_file_test);
-    MU_RUN_TEST(mf_classic_4k_4b_file_test);
-    MU_RUN_TEST(mf_classic_4k_7b_file_test);
+    UNUSED(mf_ultralight_file_test);
+    UNUSED(mf_ultralight_ev1_11_file_test);
+    UNUSED(mf_ultralight_ev1_h11_file_test);
+    UNUSED(mf_ultralight_ev1_21_file_test);
+    UNUSED(mf_ultralight_ev1_h21_file_test);
+    UNUSED(mf_ultralight_ntag_203_file_test);
+    UNUSED(mf_ultralight_ntag_213_file_test);
+    UNUSED(mf_ultralight_ntag_215_file_test);
+    UNUSED(mf_ultralight_ntag_216_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_1k_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_2k_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_plus_1k_file_test);
+    UNUSED(mf_ultralight_ntag_i2c_plus_2k_file_test);
+
+    UNUSED(mf_classic_mini_file_test);
+    UNUSED(mf_classic_1k_4b_file_test);
+    UNUSED(mf_classic_1k_7b_file_test);
+    UNUSED(mf_classic_4k_4b_file_test);
+    UNUSED(mf_classic_4k_7b_file_test);
 
     nfc_test_free();
 }

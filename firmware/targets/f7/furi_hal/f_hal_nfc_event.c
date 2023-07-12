@@ -40,9 +40,7 @@ FHalNfcEvent f_hal_nfc_wait_event(uint32_t timeout_ms) {
         if(event_flag & FHalNfcEventInternalTypeIrq) {
             furi_thread_flags_clear(FHalNfcEventInternalTypeIrq);
             FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
-            furi_hal_spi_acquire(handle);
             uint32_t irq = f_hal_nfc_get_irq(handle);
-            furi_hal_spi_release(handle);
             if(irq & ST25R3916_IRQ_MASK_OSC) {
                 event |= FHalNfcEventOscOn;
             }
