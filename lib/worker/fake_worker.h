@@ -12,6 +12,14 @@ typedef enum {
     FuzzerWorkerAttackTypeMax,
 } FuzzerWorkerAttackType;
 
+typedef enum {
+    FuzzerWorkerLoadKeyStateBadFile = -2,
+    FuzzerWorkerLoadKeyStateUnsuportedProto,
+    FuzzerWorkerLoadKeyStateOk = 0,
+    FuzzerWorkerLoadKeyStateDifferentProto,
+
+} FuzzerWorkerLoadKeyState;
+
 typedef void (*FuzzerWorkerUidChagedCallback)(void* context);
 typedef void (*FuzzerWorkerEndCallback)(void* context);
 
@@ -47,6 +55,8 @@ bool fuzzer_worker_start(FuzzerWorker* instance, uint8_t idle_time, uint8_t emu_
  * @param instance Pointer to a FuzzerWorker
  */
 void fuzzer_worker_stop(FuzzerWorker* instance);
+
+void fuzzer_worker_start_emulate(FuzzerWorker* instance);
 
 /**
  * Suspend emulation
@@ -100,6 +110,9 @@ bool fuzzer_worker_init_attack_bf_byte(
  */
 void fuzzer_worker_get_current_key(FuzzerWorker* instance, FuzzerPayload* output_key);
 
+bool fuzzer_worker_next_key(FuzzerWorker* instance);
+bool fuzzer_worker_previous_key(FuzzerWorker* instance);
+
 /**
  * Load UID from Flipper Format Key file
  * 
@@ -108,10 +121,12 @@ void fuzzer_worker_get_current_key(FuzzerWorker* instance, FuzzerPayload* output
  * @param filename file path to the key file
  * @return bool True if loading is successful
  */
-bool fuzzer_worker_load_key_from_file(
+FuzzerWorkerLoadKeyState fuzzer_worker_load_key_from_file(
     FuzzerWorker* instance,
-    FuzzerProtocolsID protocol_index,
+    FuzzerProtocolsID* protocol_index,
     const char* filename);
+
+bool fuzzer_worker_save_key(FuzzerWorker* instance, const char* path);
 
 /**
  * Set callback for uid changed

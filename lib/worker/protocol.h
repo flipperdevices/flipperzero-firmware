@@ -6,18 +6,7 @@
 
 typedef struct FuzzerPayload FuzzerPayload;
 
-typedef enum {
-#if defined(RFID_125_PROTOCOL)
-    EM4100,
-    HIDProx,
-    PAC,
-    H10301,
-#else
-    DS1990,
-    Metakom,
-    Cyfral,
-#endif
-} FuzzerProtocolsID;
+typedef uint8_t FuzzerProtocolsID;
 
 typedef enum {
     FuzzerAttackIdDefaultValues = 0,
@@ -51,8 +40,16 @@ void fuzzer_payload_free(FuzzerPayload*);
  */
 uint8_t fuzzer_proto_get_max_data_size();
 
-// TODO add description
+/**
+ * Get recomended/default emulation time
+ * @return Default emulation time
+ */
 uint8_t fuzzer_proto_get_def_emu_time();
+
+/**
+ * Get recomended/default idle time
+ * @return Default idle time
+ */
 uint8_t fuzzer_proto_get_def_idle_time();
 
 /**

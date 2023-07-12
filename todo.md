@@ -2,9 +2,9 @@
 
 #### Quality of life
 
-- [ ] Make the "Load File" independent of the current protocol
+- [x] Make the "Load File" independent of the current protocol
 - [x] Add pause
-    - [ ] Switching  UIDs if possible
+    - [x] Switching  UIDs if possible
 - [x] Led and sound Notification
     - [x] Led
     - [x] Vibro
@@ -18,7 +18,7 @@
 
 - [x] Add `BFCustomerID` attack
     - [x] Add the ability to select index
-- [ ] Save key logic
+- [x] Save key logic
 
 ## Code Improvement
 
@@ -36,9 +36,9 @@
     - [x] `UID_MAX_SIZE`
 - [x] Add pause
     - [x] Fix `Custom dict` attack when ended
-- [ ] Pause V2
-    - [ ] Save logic
-    - [ ] Switching  UIDs if possible
+- [x] Pause V2
+    - [x] Save logic
+    - [x] Switching  UIDs if possible
 - [ ] Worker
     - [ ] Use `prtocol_id` instead of protocol name
     - [x] this can be simplified `fuzzer_proto_items`

@@ -152,79 +152,79 @@ const uint8_t uid_list_h10301[][H10301_DATA_SIZE] = {
 
 #if defined(RFID_125_PROTOCOL)
 const FuzzerProtocol fuzzer_proto_items[] = {
-    [EM4100] =
-        {
-            .name = "EM4100",
-            .data_size = EM4100_DATA_SIZE,
-            .dict =
-                {
-                    .val = (const uint8_t*)&uid_list_em4100,
-                    .len = COUNT_OF(uid_list_em4100),
-                },
-        },
-    [HIDProx] =
-        {
-            .name = "HIDProx",
-            .data_size = HIDProx_DATA_SIZE,
-            .dict =
-                {
-                    .val = (const uint8_t*)&uid_list_hid,
-                    .len = COUNT_OF(uid_list_hid),
-                },
-        },
-    [PAC] =
-        {
-            .name = "PAC/Stanley",
-            .data_size = PAC_DATA_SIZE,
-            .dict =
-                {
-                    .val = (const uint8_t*)&uid_list_pac,
-                    .len = COUNT_OF(uid_list_pac),
-                },
-        },
-    [H10301] =
-        {
-            .name = "H10301",
-            .data_size = H10301_DATA_SIZE,
-            .dict =
-                {
-                    .val = (const uint8_t*)&uid_list_h10301,
-                    .len = COUNT_OF(uid_list_h10301),
-                },
-        },
+    // EM4100
+    {
+        .name = "EM4100",
+        .data_size = EM4100_DATA_SIZE,
+        .dict =
+            {
+                .val = (const uint8_t*)&uid_list_em4100,
+                .len = COUNT_OF(uid_list_em4100),
+            },
+    },
+    // HIDProx
+    {
+        .name = "HIDProx",
+        .data_size = HIDProx_DATA_SIZE,
+        .dict =
+            {
+                .val = (const uint8_t*)&uid_list_hid,
+                .len = COUNT_OF(uid_list_hid),
+            },
+    },
+    // PAC
+    {
+        .name = "PAC/Stanley",
+        .data_size = PAC_DATA_SIZE,
+        .dict =
+            {
+                .val = (const uint8_t*)&uid_list_pac,
+                .len = COUNT_OF(uid_list_pac),
+            },
+    },
+    // H10301
+    {
+        .name = "H10301",
+        .data_size = H10301_DATA_SIZE,
+        .dict =
+            {
+                .val = (const uint8_t*)&uid_list_h10301,
+                .len = COUNT_OF(uid_list_h10301),
+            },
+    },
 };
 #else
 const FuzzerProtocol fuzzer_proto_items[] = {
-    [DS1990] =
-        {
-            .name = "DS1990",
-            .data_size = DS1990_DATA_SIZE,
-            .dict =
-                {
-                    .val = (const uint8_t*)&uid_list_ds1990,
-                    .len = COUNT_OF(uid_list_ds1990),
-                },
-        },
-    [Metakom] =
-        {
-            .name = "Metakom",
-            .data_size = Metakom_DATA_SIZE,
-            .dict =
-                {
-                    .val = (const uint8_t*)&uid_list_metakom,
-                    .len = COUNT_OF(uid_list_metakom),
-                },
-        },
-    [Cyfral] =
-        {
-            .name = "Cyfral",
-            .data_size = Cyfral_DATA_SIZE,
-            .dict =
-                {
-                    .val = (const uint8_t*)&uid_list_cyfral,
-                    .len = COUNT_OF(uid_list_cyfral),
-                },
-        },
+    // DS1990
+    {
+        .name = "DS1990",
+        .data_size = DS1990_DATA_SIZE,
+        .dict =
+            {
+                .val = (const uint8_t*)&uid_list_ds1990,
+                .len = COUNT_OF(uid_list_ds1990),
+            },
+    },
+    // Metakom
+    {
+        .name = "Metakom",
+        .data_size = Metakom_DATA_SIZE,
+        .dict =
+            {
+                .val = (const uint8_t*)&uid_list_metakom,
+                .len = COUNT_OF(uid_list_metakom),
+            },
+    },
+    // Cyfral
+    {
+        .name = "Cyfral",
+        .data_size = Cyfral_DATA_SIZE,
+        .dict =
+            {
+                .val = (const uint8_t*)&uid_list_cyfral,
+                .len = COUNT_OF(uid_list_cyfral),
+            },
+    },
 };
 #endif
 

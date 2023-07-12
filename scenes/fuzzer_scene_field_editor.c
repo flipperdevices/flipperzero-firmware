@@ -22,6 +22,7 @@ void fuzzer_scene_field_editor_on_enter(void* context) {
         break;
 
     case FuzzerFieldEditorStateEditingOff:
+        memset(app->payload->data, 0x00, app->payload->data_size);
         fuzzer_view_field_editor_reset_data(app->field_editor_view, app->payload, false);
         break;
 

@@ -46,6 +46,11 @@ PacsFuzzerApp* fuzzer_app_alloc() {
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, FuzzerViewIDPopup, popup_get_view(app->popup));
 
+    // TextInput
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, FuzzerViewIDTextInput, text_input_get_view(app->text_input));
+
     // Main view
     app->main_view = fuzzer_view_main_alloc();
     view_dispatcher_add_view(
@@ -99,6 +104,10 @@ void fuzzer_app_free(PacsFuzzerApp* app) {
     // Popup
     view_dispatcher_remove_view(app->view_dispatcher, FuzzerViewIDPopup);
     popup_free(app->popup);
+
+    // TextInput
+    view_dispatcher_remove_view(app->view_dispatcher, FuzzerViewIDTextInput);
+    text_input_free(app->text_input);
 
     scene_manager_free(app->scene_manager);
     view_dispatcher_free(app->view_dispatcher);
