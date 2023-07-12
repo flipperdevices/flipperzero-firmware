@@ -16,14 +16,14 @@ void flipchess_scene_menu_on_enter(void* context) {
 
     submenu_add_item(
         app->submenu,
-        "New game",
+        "New Game",
         SubmenuIndexScene1New,
         flipchess_scene_menu_submenu_callback,
         app);
 
     // submenu_add_item(
     //     app->submenu,
-    //     "Import game",
+    //     "Import Game",
     //     SubmenuIndexScene1Import,
     //     flipchess_scene_menu_submenu_callback,
     //     app);
