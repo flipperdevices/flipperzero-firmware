@@ -17,6 +17,7 @@ enum AttackMode {
 typedef enum AttackMode AttackMode;
 
 enum GravityCommand {
+    GRAVITY_NONE,
     GRAVITY_BEACON,
     GRAVITY_TARGET_SSIDS,
     GRAVITY_PROBE,

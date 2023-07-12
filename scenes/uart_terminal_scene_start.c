@@ -142,6 +142,39 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     NO_TIP},
 };
 
+
+char *strToken(char *cmdLine, char sep, int tokenNum) {
+    int i;
+    int tokenCount = 0;
+    for (i = 0; i < strlen(cmdLine) && tokenCount != tokenNum; ++i) {
+        if (cmdLine[i] == sep) {
+            ++tokenCount;
+        }
+    }
+    if (cmdLine[i - 1] == sep || cmdLine[i - 1] == '\0') {
+        /* Found the end of the token, now find the beginning */
+        int j;
+        for (j = (i - 2); j > 0 && cmdLine[j] != sep; --j) { }
+        /* Token runs from index j to (i - 2) */
+        char *retVal = malloc(sizeof(char) * (i - j));
+        if (retVal == NULL) {
+            printf("GRAVITY: Failed to malloc token\n");
+            return NULL;
+        }
+        strncpy(retVal, cmdLine, (i - j - 1));
+        retVal[i - j - 1] = '\0';
+        return retVal;
+    } else {
+        /* No token */
+        if (tokenNum == 1) {
+            return cmdLine;
+        } else {
+            return NULL;
+        }
+    }
+    return NULL;
+}
+
 /* Callback when an option is selected */
 static void uart_terminal_scene_start_var_list_enter_callback(void* context, uint32_t index) {
     furi_assert(context);
@@ -163,6 +196,53 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
                                    (selected_option_index == 0) :
                                    item->focus_console;
     app->show_stopscan_tip = item->show_stopscan_tip;
+
+    /* GRAVITY: Set app->gravityMode based on first word in command */
+    
+    //char *cmd = strsep(&origCmd, " ");
+    /* GRAVITY: strsep is disabled by Flipper's SDK. RYO */
+    char *cmd = strToken((char *)app->selected_tx_string, ' ', 1);
+    if (!strcmp(cmd, "beacon")) {
+        app->gravityCommand = GRAVITY_BEACON;
+    } else if (!strcmp(cmd, "target-ssids")) {
+        app->gravityCommand = GRAVITY_TARGET_SSIDS;
+    } else if (!strcmp(cmd, "probe")) {
+        app->gravityCommand = GRAVITY_PROBE;
+    } else if (!strcmp(cmd, "sniff")) {
+        app->gravityCommand = GRAVITY_SNIFF;
+    } else if (!strcmp(cmd, "deauth")) {
+        app->gravityCommand = GRAVITY_DEAUTH;
+    } else if (!strcmp(cmd, "mana")) {
+        app->gravityCommand = GRAVITY_MANA;
+    } else if (!strcmp(cmd, "stalk")) {
+        app->gravityCommand = GRAVITY_STALK;
+    } else if (!strcmp(cmd, "ap-dos")) {
+        app->gravityCommand = GRAVITY_AP_DOS;
+    } else if (!strcmp(cmd, "ap-clone")) {
+        app->gravityCommand = GRAVITY_AP_CLONE;
+    } else if (!strcmp(cmd, "scan")) {
+        app->gravityCommand = GRAVITY_SCAN;
+    } else if (!strcmp(cmd, "hop")) {
+        app->gravityCommand = GRAVITY_HOP;
+    } else if (!strcmp(cmd, "set")) {
+        app->gravityCommand = GRAVITY_SET;
+    } else if (!strcmp(cmd, "get")) {
+        app->gravityCommand = GRAVITY_GET;
+    } else if (!strcmp(cmd, "view")) {
+        app->gravityCommand = GRAVITY_VIEW;
+    } else if (!strcmp(cmd, "select")) {
+        app->gravityCommand = GRAVITY_SELECT;
+    } else if (!strcmp(cmd, "clear")) {
+        app->gravityCommand = GRAVITY_CLEAR;
+    } else if (!strcmp(cmd, "handshake")) {
+        app->gravityCommand = GRAVITY_HANDSHAKE;
+    } else if (!strcmp(cmd, "commands")) {
+        app->gravityCommand = GRAVITY_COMMANDS;
+    } else {
+        app->gravityCommand = GRAVITY_NONE;
+    }
+
+    free(cmd);
 
     /* GRAVITY: For TOGGLE_ARGS display a keyboard if actual_command ends with ' ' */
     int cmdLen = strlen(app->selected_tx_string);
