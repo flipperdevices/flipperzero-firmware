@@ -19,7 +19,7 @@ const char USAGE_HANDSHAKE[] = "Toggle monitoring for encryption material. Usage
 const char USAGE_COMMANDS[] = "Display a *brief* summary of Gravity commands";
 
 const char SHORT_BEACON[] = "beacon RANDOM <count>";
-const char SHORT_TARGET_SSIDS[] = "(ADD|REMOVE) <apName>";
+const char SHORT_TARGET_SSIDS[] = "(ADD | REMOVE) <apName>";
 const char SHORT_PROBE[] = "probe ANY | SSIDS | OFF";
 const char SHORT_SNIFF[] = "sniff [ ON | OFF ]";
 const char SHORT_DEAUTH[] = "deauth <millis>";
