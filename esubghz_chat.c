@@ -7,12 +7,15 @@
 #include <gui/scene_manager.h>
 #include <toolbox/sha256.h>
 
-#include "crypto/aes-gcm.h"
+#include "crypto/gcm.h"
 
 #define APPLICATION_NAME "ESubGhzChat"
 
 #define DEFAULT_FREQ 433920000
 #define KEY_BITS 256
+#define IV_BYTES 12
+#define TAG_BYTES 16
+#define RX_TX_BUFFER_SIZE 1024
 
 #define CHAT_BOX_STORE_SIZE 4096
 #define TEXT_INPUT_STORE_SIZE 512
@@ -28,7 +31,8 @@ typedef struct {
 	FuriString *msg_input;
 	bool encrypted;
 	uint32_t frequency;
-	unsigned char key[KEY_BITS / 8];
+	gcm_context gcm_ctx;
+	uint8_t tx_buffer[RX_TX_BUFFER_SIZE];
 } ESubGhzChatState;
 
 typedef enum {
@@ -61,7 +65,7 @@ static void freq_input_cb(void *context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
-	furi_string_cat_printf(state->chat_box_store, "Frequency: %lu\n",
+	furi_string_cat_printf(state->chat_box_store, "Frequency: %lu",
 			state->frequency);
 
 	scene_manager_handle_custom_event(state->scene_manager,
@@ -103,28 +107,50 @@ static void pass_input_cb(void *context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
-	if (strlen(state->text_input_store) == 0) {
-		state->encrypted = false;
-	} else {
-		state->encrypted = true;
-		sha256((unsigned char *) state->text_input_store,
-				strlen(state->text_input_store), state->key);
-
-		// TODO: remove this
-		furi_string_cat_printf(state->chat_box_store, "Key:");
-		int i;
-		for (i = 0; i < KEY_BITS / 8; i++) {
-			furi_string_cat_printf(state->chat_box_store, " %02x",
-					state->key[i]);
-		}
-		furi_string_cat_printf(state->chat_box_store, "\n");
-	}
-
-	furi_string_cat_printf(state->chat_box_store, "Encrypted: %s\n",
+	furi_string_cat_printf(state->chat_box_store, "\nEncrypted: %s",
 			(state->encrypted ? "true" : "false"));
 
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_PassEntered);
+}
+
+static bool pass_input_validator(const char *text, FuriString *error,
+		void *context)
+{
+	furi_assert(text);
+	furi_assert(error);
+
+	furi_assert(context);
+	ESubGhzChatState* state = context;
+
+	if (strlen(text) == 0) {
+		state->encrypted = false;
+		return true;
+	}
+
+	unsigned char key[KEY_BITS / 8];
+
+	state->encrypted = true;
+	sha256((unsigned char *) text, strlen(text), key);
+
+	// TODO: remove this
+	furi_string_cat_printf(state->chat_box_store, "\nKey:");
+	int i;
+	for (i = 0; i < KEY_BITS / 8; i++) {
+		furi_string_cat_printf(state->chat_box_store, " %02x", key[i]);
+	}
+
+	int ret = gcm_setkey(&(state->gcm_ctx), key, KEY_BITS / 8);
+
+	esubghz_chat_explicit_bzero(key, sizeof(key));
+
+	if (ret != 0) {
+		gcm_zero_ctx(&(state->gcm_ctx));
+		furi_string_printf(error, "Failed to\nset key!");
+		return false;
+	}
+
+	return true;
 }
 
 static void chat_input_cb(void *context)
@@ -132,17 +158,52 @@ static void chat_input_cb(void *context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
-	if (strlen(state->text_input_store) > 0) {
-		furi_string_set(state->msg_input, state->name_prefix);
-		furi_string_cat_str(state->msg_input, state->text_input_store);
-
-		furi_string_cat_printf(state->chat_box_store, "%s\n",
-			furi_string_get_cstr(state->msg_input));
-
-		// TODO: actually transmit
-
-		furi_string_set_char(state->msg_input, 0, 0);
+	if (strlen(state->text_input_store) == 0) {
+		scene_manager_handle_custom_event(state->scene_manager,
+				ESubGhzChatEvent_MsgEntered);
+		return;
 	}
+
+	furi_string_set(state->msg_input, state->name_prefix);
+	furi_string_cat_str(state->msg_input, state->text_input_store);
+
+	furi_string_cat_printf(state->chat_box_store, "\n%s",
+		furi_string_get_cstr(state->msg_input));
+
+	size_t msg_len = strlen(furi_string_get_cstr(state->msg_input));
+	size_t tx_size = msg_len;
+	if (state->encrypted) {
+		tx_size += IV_BYTES + TAG_BYTES;
+		furi_check(tx_size <= sizeof(state->tx_buffer));
+
+		furi_hal_random_fill_buf(state->tx_buffer, IV_BYTES);
+		gcm_crypt_and_tag(&(state->gcm_ctx), ENCRYPT,
+				state->tx_buffer, IV_BYTES,
+				NULL, 0,
+				(unsigned char *)
+				furi_string_get_cstr(state->msg_input),
+				state->tx_buffer + IV_BYTES,
+				msg_len,
+				state->tx_buffer + IV_BYTES + msg_len,
+				TAG_BYTES);
+	} else {
+		furi_check(tx_size <= sizeof(state->tx_buffer));
+		memcpy(state->tx_buffer,
+				furi_string_get_cstr(state->msg_input),
+				tx_size);
+	}
+
+	furi_string_set_char(state->msg_input, 0, 0);
+
+	// TODO: remove this
+	furi_string_cat_printf(state->chat_box_store, "\nTXed (HEX):");
+	size_t i;
+	for (i = 0; i < tx_size; i++) {
+		furi_string_cat_printf(state->chat_box_store, " %02x",
+				state->tx_buffer[i]);
+	}
+
+	// TODO: actually transmit
 
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_MsgEntered);
@@ -237,8 +298,8 @@ static void scene_on_enter_pass_input(void* context)
 			true);
 	text_input_set_validator(
 			state->text_input,
-			NULL,
-			NULL);
+			pass_input_validator,
+			state);
 	text_input_set_header_text(
 			state->text_input,
 			"Password (empty for no encr.)");
@@ -569,9 +630,9 @@ int32_t esubghz_chat(void)
 	view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_ChatBox);
 
 	// clear the key and potential password
-	esubghz_chat_explicit_bzero(state->key, sizeof(state->key));
 	esubghz_chat_explicit_bzero(state->text_input_store,
 			sizeof(state->text_input_store));
+	gcm_zero_ctx(&(state->gcm_ctx));
 
 	chat_box_free(state);
 
