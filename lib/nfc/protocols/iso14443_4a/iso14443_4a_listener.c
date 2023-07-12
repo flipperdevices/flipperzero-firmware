@@ -65,13 +65,15 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
     NfcCommand command = NfcCommandContinue;
 
     if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeReceivedStandardFrame) {
-        const size_t buffer_size = bit_buffer_get_size_bytes(rx_buffer);
-        const uint8_t first_byte = bit_buffer_get_byte(rx_buffer, 0);
-
-        if(buffer_size == 2 && first_byte == ISO14443_4A_CMD_READ_ATS) {
-            if(iso14443_4a_listener_send_ats(instance, instance->data->ats_data) !=
-               Iso14443_4aErrorNone) {
-                command = NfcCommandStop;
+        if(instance->state == Iso14443_4aListenerStateIdle) {
+            if(bit_buffer_get_size_bytes(rx_buffer) == 2 &&
+               bit_buffer_get_byte(rx_buffer, 0) == ISO14443_4A_CMD_READ_ATS) {
+                if(iso14443_4a_listener_send_ats(instance, instance->data->ats_data) !=
+                   Iso14443_4aErrorNone) {
+                    command = NfcCommandStop;
+                } else {
+                    instance->state = Iso14443_4aListenerStateActive;
+                }
             }
         } else {
             instance->iso14443_4a_event.type = Iso14443_4aListenerEventTypeReceivedData;
@@ -81,6 +83,9 @@ static NfcCommand iso14443_4a_listener_run(NfcGenericEvent event, void* context)
                 command = instance->callback(instance->generic_event, instance->context);
             }
         }
+    } else if(iso14443_3a_event->type == Iso14443_3aListenerEventTypeHalted) {
+        instance->state = Iso14443_4aListenerStateIdle;
+        command = NfcCommandStop;
     }
 
     return command;

@@ -14,15 +14,10 @@ typedef enum {
     Iso14443_4aListenerStateActive,
 } Iso14443_4aListenerState;
 
-typedef struct {
-    uint32_t block_number;
-} Iso14443_4aListenerProtocolState;
-
 struct Iso14443_4aListener {
     Iso14443_3aListener* iso14443_3a_listener;
     Iso14443_4aData* data;
     Iso14443_4aListenerState state;
-    Iso14443_4aListenerProtocolState protocol_state;
 
     BitBuffer* tx_buffer;
 
