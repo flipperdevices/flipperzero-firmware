@@ -147,18 +147,18 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
     //for(int i = 0; i < 40; ++i) putchar('\n');
     //putchar('\n');
 
-    if(model->game.ply > 0) {
-        model->msg = (SCL_boardWhitesTurn(model->game.board) ? "black played" : "white  played");
-        // printf(" played ");
+    // if(model->game.ply > 0) {
+    //     model->msg = (SCL_boardWhitesTurn(model->game.board) ? "black played" : "white  played");
+    //     // printf(" played ");
 
-        uint8_t s0, s1;
-        char p;
+    //     uint8_t s0, s1;
+    //     char p;
 
-        SCL_recordGetMove(model->game.record, model->game.ply - 1, &s0, &s1, &p);
-        SCL_moveToString(model->game.board, s0, s1, p, model->moveString);
-        model->msg = model->moveString;
-        //printf("%s\n", moveString);
-    }
+    //     SCL_recordGetMove(model->game.record, model->game.ply - 1, &s0, &s1, &p);
+    //     SCL_moveToString(model->game.board, s0, s1, p, model->moveString);
+    //     model->msg = model->moveString;
+    //     //printf("%s\n", moveString);
+    // }
 
     model->msg = (SCL_boardWhitesTurn(model->game.board) ? "white to move" : "black to move");
     //printf(" to move\n");
@@ -308,6 +308,18 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
         break;
 
     default:
+        if(model->game.ply > 0) {
+            model->msg = (SCL_boardWhitesTurn(model->game.board) ? "black played" : "white  played");
+            // printf(" played ");
+
+            uint8_t s0, s1;
+            char p;
+
+            SCL_recordGetMove(model->game.record, model->game.ply - 1, &s0, &s1, &p);
+            SCL_moveToString(model->game.board, s0, s1, p, model->moveString);
+            model->msg = model->moveString;
+            //printf("%s\n", moveString);
+        }
         //model->msg = "game over";
         break;
     }
@@ -340,7 +352,7 @@ void flipchess_scene_1_draw(Canvas* canvas, FlipChessScene1Model* model) {
     // Board
     for(uint16_t y = 0; y < SCL_BOARD_PICTURE_WIDTH; y++) {
         for(uint16_t x = 0; x < SCL_BOARD_PICTURE_WIDTH; x++) {
-            if(picture[x + (y * SCL_BOARD_PICTURE_WIDTH)]) {
+            if(!picture[x + (y * SCL_BOARD_PICTURE_WIDTH)]) {
                 canvas_draw_dot(canvas, x, y);
             }
         }
