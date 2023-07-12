@@ -8,9 +8,18 @@ An evil captive portal Wi-Fi access point using the Flipper Zero and Wi-Fi dev b
 
 This project will turn your Wi-Fi dev board into an open access point. When users try to connect to this access point they will be served a fake login screen. User credentials are sent to the Flipper and logged on the SD card.
 
+## Portals
+
+The portal I initially provided is just an (ugly) example, please check out the [community portals folder](https://github.com/bigbrodude6119/flipper-zero-evil-portal/tree/main/portals) for more portals. 
+Contributors are welcome and very much needed!
+
+Users, remember to rename the new portal as `index.html` when you drag it on the flipper SD card.
+
 ## Disclaimer
 
 I am not a C developer and I am using this project as a way to learn more about esp32, flipper zero and, C programming.
+
+**Contributors are welcome!** Please feel free to open a PR at any time.
 
 This program is for educational purposes only.
 
