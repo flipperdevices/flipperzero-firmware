@@ -63,7 +63,7 @@ None, there are no versions yet.
 ### Description 
 
 This file format is used to store the UID, SAK and ATQA of a ISO14443-4A device. It also stores the Answer to Select (ATS) data of the card.
-ATS must be 6 bytes long.
+ATS must be no less than 5 bytes long.
 
 Version differences:
 None, there are no versions yet.

@@ -26,8 +26,8 @@ typedef enum {
     NfcCustomEventRpcLoad,
     NfcCustomEventRpcSessionClose,
 
-    NfcCustomEventReadHandlerIgnore,
-    NfcCustomEventReadHandlerSuccess,
-    NfcCustomEventReadHandlerFailure,
-    NfcCustomEventReadHandlerAltRead,
+    NfcCustomEventPollerSuccess,
+    NfcCustomEventPollerFailure,
+
+    NfcCustomEventListenerUpdate,
 } NfcCustomEvent;

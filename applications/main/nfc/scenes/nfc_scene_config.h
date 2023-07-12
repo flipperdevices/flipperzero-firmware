@@ -13,13 +13,11 @@ ADD_SCENE(nfc, select_protocol, SelectProtocol)
 ADD_SCENE(nfc, extra_actions, ExtraActions)
 ADD_SCENE(nfc, read_success, ReadSuccess)
 ADD_SCENE(nfc, read_menu, ReadMenu)
+ADD_SCENE(nfc, emulate, Emulate)
 ADD_SCENE(nfc, debug, Debug)
 ADD_SCENE(nfc, retry_confirm, RetryConfirm)
 ADD_SCENE(nfc, exit_confirm, ExitConfirm)
 
-ADD_SCENE(nfc, nfca_emulate, NfcaEmulate)
-
-ADD_SCENE(nfc, mf_ultralight_emulate, MfUltralightEmulate)
 ADD_SCENE(nfc, mf_ultralight_unlock_menu, MfUltralightUnlockMenu)
 ADD_SCENE(nfc, mf_ultralight_unlock_warn, MfUltralightUnlockWarn)
 ADD_SCENE(nfc, mf_ultralight_key_input, MfUltralightKeyInput)
@@ -30,7 +28,6 @@ ADD_SCENE(nfc, mf_desfire_app, MfDesfireApp)
 
 ADD_SCENE(nfc, mf_classic_read_supported_card, MfClassicReadSupportedCard)
 ADD_SCENE(nfc, mf_classic_dict_attack, MfClassicDictAttack)
-ADD_SCENE(nfc, mf_classic_emulate, MfClassicEmulate)
 
 ADD_SCENE(nfc, set_type, SetType)
 ADD_SCENE(nfc, set_sak, SetSak)

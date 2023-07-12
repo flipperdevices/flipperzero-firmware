@@ -95,3 +95,10 @@ SimpleArrayElement* simple_array_get(SimpleArray* instance, uint32_t index) {
 const SimpleArrayElement* simple_array_cget(const SimpleArray* instance, uint32_t index) {
     return simple_array_get((SimpleArrayElement*)instance, index);
 }
+
+const SimpleArrayConfig simple_array_config_uint8_t = {
+    .init = NULL,
+    .copy = NULL,
+    .reset = NULL,
+    .type_size = sizeof(uint8_t),
+};

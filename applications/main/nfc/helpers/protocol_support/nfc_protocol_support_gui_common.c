@@ -1,11 +1,11 @@
 #include "nfc_protocol_support_gui_common.h"
 
-#include "../../nfc_app_i.h"
+#include "nfc/nfc_app_i.h"
 
 void nfc_protocol_support_common_submenu_callback(void* context, uint32_t index) {
     furi_assert(context);
-    NfcApp* nfc = context;
-    view_dispatcher_send_custom_event(nfc->view_dispatcher, index);
+    NfcApp* instance = context;
+    view_dispatcher_send_custom_event(instance->view_dispatcher, index);
 }
 
 void nfc_protocol_support_common_widget_callback(
@@ -13,8 +13,18 @@ void nfc_protocol_support_common_widget_callback(
     InputType type,
     void* context) {
     furi_assert(context);
-    NfcApp* nfc = context;
+    NfcApp* instance = context;
     if(type == InputTypeShort) {
-        view_dispatcher_send_custom_event(nfc->view_dispatcher, result);
+        view_dispatcher_send_custom_event(instance->view_dispatcher, result);
     }
+}
+
+void nfc_protocol_support_common_on_enter_empty(NfcApp* instance) {
+    UNUSED(instance);
+}
+
+bool nfc_protocol_support_common_on_event_empty(NfcApp* instance, uint32_t event) {
+    UNUSED(instance);
+    UNUSED(event);
+    return false;
 }

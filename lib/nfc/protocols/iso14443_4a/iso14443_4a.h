@@ -2,11 +2,11 @@
 
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 
+#include "helpers/simple_array.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define ISO14443_4A_CMD_READ_ATS (0xE0)
 
 typedef enum {
     Iso14443_4aErrorNone,
@@ -16,17 +16,8 @@ typedef enum {
 } Iso14443_4aError;
 
 typedef struct {
-    uint8_t tl;
-    uint8_t t0;
-    uint8_t ta_1;
-    uint8_t tb_1;
-    uint8_t tc_1;
-    uint8_t t1;
-} Iso14443_4aAtsData;
-
-typedef struct {
     Iso14443_3aData* iso14443_3a_data;
-    Iso14443_4aAtsData ats_data;
+    SimpleArray* ats_data;
 } Iso14443_4aData;
 
 extern const NfcDeviceBase nfc_device_iso14443_4a;

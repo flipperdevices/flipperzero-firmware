@@ -6,7 +6,7 @@
 
 #define TAG "Iso14443_4aPoller"
 
-#define ISO14443_4A_BUF_SIZE_MAX (512U)
+#define ISO14443_4A_POLLER_BUF_SIZE (256U)
 
 typedef NfcCommand (*Iso14443_4aPollerStateHandler)(Iso14443_4aPoller* instance);
 
@@ -20,8 +20,8 @@ static Iso14443_4aPoller* iso14443_4a_poller_alloc(Iso14443_3aPoller* iso14443_3
     Iso14443_4aPoller* instance = malloc(sizeof(Iso14443_4aPoller));
     instance->iso14443_3a_poller = iso14443_3a_poller;
     instance->data = iso14443_4a_alloc();
-    instance->tx_buffer = bit_buffer_alloc(ISO14443_4A_BUF_SIZE_MAX);
-    instance->rx_buffer = bit_buffer_alloc(ISO14443_4A_BUF_SIZE_MAX);
+    instance->tx_buffer = bit_buffer_alloc(ISO14443_4A_POLLER_BUF_SIZE);
+    instance->rx_buffer = bit_buffer_alloc(ISO14443_4A_POLLER_BUF_SIZE);
 
     instance->iso14443_4a_event.data = &instance->iso14443_4a_event_data;
 
@@ -52,8 +52,7 @@ static NfcCommand iso14443_4a_poller_handler_idle(Iso14443_4aPoller* instance) {
 }
 
 static NfcCommand iso14443_4a_poller_handler_read_ats(Iso14443_4aPoller* instance) {
-    Iso14443_4aError error =
-        iso14443_4a_poller_async_read_ats(instance, &instance->data->ats_data);
+    Iso14443_4aError error = iso14443_4a_poller_async_read_ats(instance, instance->data->ats_data);
     if(error == Iso14443_4aErrorNone) {
         FURI_LOG_D(TAG, "Read ATS success");
         instance->poller_state = Iso14443_4aPollerStateReady;

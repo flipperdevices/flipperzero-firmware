@@ -3,8 +3,9 @@
 
 #include <nfc/protocols/mf_classic/mf_classic_poller.h>
 
+#include "nfc/nfc_app_i.h"
+
 #include "../nfc_protocol_support_gui_common.h"
-#include "../../../nfc_app_i.h"
 
 enum {
     SubmenuIndexDetectReader = SubmenuIndexCommonMax,
@@ -44,8 +45,7 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
     if(mf_classic_event->type == MfClassicPollerEventTypeReadComplete) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolMfClassic, nfc_poller_get_data(instance->poller));
-        view_dispatcher_send_custom_event(
-            instance->view_dispatcher, NfcCustomEventReadHandlerSuccess);
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         return NfcCommandStop;
     }
 
@@ -111,6 +111,12 @@ static void nfc_scene_saved_menu_on_enter_mf_classic(NfcApp* instance) {
         instance);
 }
 
+static void nfc_scene_emulate_on_enter_mf_classic(NfcApp* instance) {
+    const MfClassicData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolMfClassic);
+    instance->listener = nfc_listener_alloc(instance->nfc, NfcProtocolMfClassic, data);
+    nfc_listener_start(instance->listener, NULL, NULL);
+}
+
 static bool nfc_scene_info_on_event_mf_classic(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
@@ -121,36 +127,30 @@ static bool nfc_scene_info_on_event_mf_classic(NfcApp* instance, uint32_t event)
 }
 
 static bool nfc_scene_read_menu_on_event_mf_classic(NfcApp* instance, uint32_t event) {
-    switch(event) {
-    case SubmenuIndexCommonEmulate:
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    case SubmenuIndexDetectReader:
+    if(event == SubmenuIndexDetectReader) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
         dolphin_deed(DolphinDeedNfcDetectReader);
         return true;
-    default:
-        return false;
     }
+
+    return false;
 }
 
 static bool nfc_scene_saved_menu_on_event_mf_classic(NfcApp* instance, uint32_t event) {
-    switch(event) {
-    case SubmenuIndexCommonEmulate:
-        scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicEmulate);
-        return true;
-    case SubmenuIndexDetectReader:
+    bool consumed = false;
+
+    if(event == SubmenuIndexDetectReader) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    case SubmenuIndexWrite:
+        consumed = true;
+    } else if(event == SubmenuIndexWrite) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    case SubmenuIndexUpdate:
+        consumed = true;
+    } else if(event == SubmenuIndexUpdate) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
-        return true;
-    default:
-        return false;
+        consumed = true;
     }
+
+    return consumed;
 }
 
 const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
@@ -181,4 +181,7 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_classic = {
             .on_enter = nfc_scene_saved_menu_on_enter_mf_classic,
             .on_event = nfc_scene_saved_menu_on_event_mf_classic,
         },
-};
+    .scene_emulate = {
+        .on_enter = nfc_scene_emulate_on_enter_mf_classic,
+        .on_event = NULL,
+    }};

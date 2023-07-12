@@ -3,8 +3,10 @@
 
 #include <nfc/protocols/mf_desfire/mf_desfire_poller.h>
 
+#include "nfc/nfc_app_i.h"
+
 #include "../nfc_protocol_support_gui_common.h"
-#include "../../../nfc_app_i.h"
+#include "../iso14443_4a/iso14443_4a_i.h"
 
 static void nfc_scene_info_on_enter_mf_desfire(NfcApp* instance) {
     const NfcDevice* device = instance->nfc_device;
@@ -37,8 +39,7 @@ static NfcCommand nfc_scene_read_poller_callback_mf_desfire(NfcGenericEvent even
     if(mf_desfire_event->type == MfDesfirePollerEventTypeReadSuccess) {
         nfc_device_set_data(
             instance->nfc_device, NfcProtocolMfDesfire, nfc_poller_get_data(instance->poller));
-        view_dispatcher_send_custom_event(
-            instance->view_dispatcher, NfcCustomEventReadHandlerSuccess);
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
         return NfcCommandStop;
     }
 
@@ -47,10 +48,6 @@ static NfcCommand nfc_scene_read_poller_callback_mf_desfire(NfcGenericEvent even
 
 static void nfc_scene_read_on_enter_mf_desfire(NfcApp* instance) {
     nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_mf_desfire, instance);
-}
-
-static void nfc_scene_read_menu_on_enter_mf_desfire(NfcApp* instance) {
-    UNUSED(instance);
 }
 
 static void nfc_scene_read_success_on_enter_mf_desfire(NfcApp* instance) {
@@ -68,31 +65,19 @@ static void nfc_scene_read_success_on_enter_mf_desfire(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static void nfc_scene_saved_menu_on_enter_mf_desfire(NfcApp* instance) {
-    UNUSED(instance);
+static void nfc_scene_emulate_on_enter_mf_desfire(NfcApp* instance) {
+    const MfDesfireData* data = nfc_device_get_data(instance->nfc_device, NfcProtocolMfDesfire);
+    const Iso14443_4aData* iso14443_4a_data = data->iso14443_4a_data;
+
+    instance->listener =
+        nfc_listener_alloc(instance->nfc, NfcProtocolIso14443_4a, iso14443_4a_data);
+    nfc_listener_start(
+        instance->listener, nfc_scene_emulate_listener_callback_iso14443_4a, instance);
 }
 
 static bool nfc_scene_info_on_event_mf_desfire(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
         scene_manager_next_scene(instance->scene_manager, NfcSceneMfDesfireData);
-        return true;
-    }
-
-    return false;
-}
-
-static bool nfc_scene_read_menu_on_event_mf_desfire(NfcApp* instance, uint32_t event) {
-    if(event == SubmenuIndexCommonEmulate) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
-        return true;
-    }
-
-    return false;
-}
-
-static bool nfc_scene_saved_menu_on_event_mf_desfire(NfcApp* instance, uint32_t event) {
-    if(event == SubmenuIndexCommonEmulate) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNfcaEmulate);
         return true;
     }
 
@@ -114,8 +99,8 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
         },
     .scene_read_menu =
         {
-            .on_enter = nfc_scene_read_menu_on_enter_mf_desfire,
-            .on_event = nfc_scene_read_menu_on_event_mf_desfire,
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
+            .on_event = nfc_protocol_support_common_on_event_empty,
         },
     .scene_read_success =
         {
@@ -124,7 +109,12 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_desfire = {
         },
     .scene_saved_menu =
         {
-            .on_enter = nfc_scene_saved_menu_on_enter_mf_desfire,
-            .on_event = nfc_scene_saved_menu_on_event_mf_desfire,
+            .on_enter = nfc_protocol_support_common_on_enter_empty,
+            .on_event = nfc_protocol_support_common_on_event_empty,
+        },
+    .scene_emulate =
+        {
+            .on_enter = nfc_scene_emulate_on_enter_mf_desfire,
+            .on_event = NULL,
         },
 };
