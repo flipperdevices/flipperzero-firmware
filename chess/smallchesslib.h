@@ -1717,6 +1717,7 @@ void SCL_boardGetPseudoMoves(
   {
     case 'P':
       pawnOffset = 8;
+      /* FALLTHROUGH */
     case 'p':
     {
       uint8_t square = pieceSquare + pawnOffset;
@@ -2446,6 +2447,7 @@ int16_t SCL_boardEvaluateStatic(SCL_Board board)
 
     case SCL_POSITION_CHECK:
       total += SCL_boardWhitesTurn(board) ? -1 * CHECK_BONUS : CHECK_BONUS;
+      /* FALLTHROUGH */
     case SCL_POSITION_NORMAL:
     default:
     {
