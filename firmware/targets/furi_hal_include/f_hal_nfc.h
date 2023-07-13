@@ -52,6 +52,8 @@ typedef enum {
 
     FHalNfcModeNfcvPoller,
     FHalNfcModeNfcvListener,
+
+    FHalNfcModeNum,
 } FHalNfcMode;
 
 typedef enum {
@@ -152,6 +154,11 @@ FHalNfcError f_hal_nfca_send_short_frame(FHalNfcaShortFrame frame);
 FHalNfcError f_hal_nfca_send_sdd_frame(const uint8_t* tx_data, size_t tx_bits);
 
 FHalNfcError f_hal_nfca_receive_sdd_frame(uint8_t* rx_data, size_t rx_data_size, size_t* rx_bits);
+
+// TODO virtual methods?
+FHalNfcError f_hal_nfca_listener_init();
+
+FHalNfcError f_hal_nfca_listener_deinit();
 
 FHalNfcError
     furi_hal_nfca_set_col_res_data(uint8_t* uid, uint8_t uid_len, uint8_t* atqa, uint8_t sak);

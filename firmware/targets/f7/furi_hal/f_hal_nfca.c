@@ -100,9 +100,26 @@ FHalNfcError
 
     st25r3916_write_pta_mem(handle, pt_memory, sizeof(pt_memory));
 
+    return error;
+}
+
+// TODO change this
+
+FHalNfcError f_hal_nfca_listener_init() {
+    furi_check(iso14443_3a_signal == NULL);
+
     iso14443_3a_signal = iso14443_3a_signal_alloc(&gpio_spi_r_mosi);
 
-    return error;
+    return FHalNfcErrorNone;
+}
+
+FHalNfcError f_hal_nfca_listener_deinit() {
+    if(iso14443_3a_signal) {
+        iso14443_3a_signal_free(iso14443_3a_signal);
+        iso14443_3a_signal = NULL;
+    }
+
+    return FHalNfcErrorNone;
 }
 
 FHalNfcError f_hal_nfca_listener_tx_custom_parity(
