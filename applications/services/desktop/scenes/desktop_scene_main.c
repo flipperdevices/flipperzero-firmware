@@ -85,7 +85,8 @@ static void desktop_scene_main_start_favorite(Desktop* desktop, FavoriteApp* app
            LoaderStatusOk) {
             loader_start(desktop->loader, LOADER_APPLICATIONS_NAME, NULL, NULL);
         }
-    } else {
+    } else if(
+        (strlen(application->name_or_path) < 2) && (strcmp(application->name_or_path, "d") != 0)) {
         loader_start(desktop->loader, LOADER_APPLICATIONS_NAME, NULL, NULL);
     }
 }

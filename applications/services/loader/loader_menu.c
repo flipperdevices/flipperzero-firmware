@@ -69,14 +69,8 @@ static bool loader_menu_check_appid(uint32_t index, bool settings) {
 
 static void loader_menu_callback(void* context, uint32_t index) {
     UNUSED(context);
-
-    if(loader_menu_check_appid(index, false)) {
-        const char* name = FLIPPER_APPS[index].appid;
-        loader_menu_start(name);
-    } else {
-        const char* name = FLIPPER_APPS[index].name;
-        loader_menu_start(name);
-    }
+    const char* path = FLIPPER_EXTERNAL_APPS[index].name;
+    loader_menu_start(path);
 }
 
 static void loader_menu_applications_callback(void* context, uint32_t index) {
