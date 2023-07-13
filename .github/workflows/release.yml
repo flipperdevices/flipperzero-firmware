@@ -32,12 +32,12 @@ jobs:
         uses: dawidd6/action-get-tag@v1
         with:
           strip_v: false
-      - name: Publish flip-chess
+      - name: Publish flipper-chess
         uses: softprops/action-gh-release@v1
         with:
           files: |
             build/f7-firmware-C/.extapps/flipchess.fap
-            applications_user/flip-chess/README.md
+            applications_user/flipper-chess/README.md
           name: ${{steps.tag.outputs.tag}}
           body: Built against Flipper Zero firmware v${{ env.firmware_version }}
           generate_release_notes: true
