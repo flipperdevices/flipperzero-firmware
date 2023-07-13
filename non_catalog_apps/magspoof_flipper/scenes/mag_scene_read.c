@@ -7,7 +7,7 @@
 
 #define TAG "MagSceneRead"
 
-void uart_callback(UartIrqEvent event, uint8_t data, void *context) {
+void uart_callback(UartIrqEvent event, uint8_t data, void* context) {
     Mag* mag = context;
     if(event == UartIrqEventRXNE) {
         furi_stream_buffer_send(mag->uart_rx_stream, &data, 1, 0);
@@ -20,24 +20,28 @@ static int32_t uart_worker(void* context) {
     mag->uart_rx_stream = furi_stream_buffer_alloc(UART_RX_BUF_SIZE, 1);
     mag->uart_text_box_store_strlen = 0;
 
-    while (1) {
-        uint32_t events = furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
+    while(1) {
+        uint32_t events =
+            furi_thread_flags_wait(WORKER_ALL_RX_EVENTS, FuriFlagWaitAny, FuriWaitForever);
         // furi_check((events & FuriFlagError) == 0);
-        
+
         if(events & WorkerEvtStop) break;
         if(events & WorkerEvtRxDone) {
             FURI_LOG_D(TAG, "WorkerEvtRxDone");
             // notification_message(mag->notifications, &sequence_success);
-            size_t len = furi_stream_buffer_receive(mag->uart_rx_stream, mag->uart_rx_buf, UART_RX_BUF_SIZE, 200);
+            size_t len = furi_stream_buffer_receive(
+                mag->uart_rx_stream, mag->uart_rx_buf, UART_RX_BUF_SIZE, 200);
             FURI_LOG_D(TAG, "UART RX len: %d", len);
-            
-            if (len > 0) {
+
+            if(len > 0) {
                 // If text box store gets too big, then truncate it
                 mag->uart_text_box_store_strlen += len;
 
                 if(mag->uart_text_box_store_strlen >= UART_TERMINAL_TEXT_BOX_STORE_SIZE - 1) {
-                    furi_string_right(mag->uart_text_box_store, mag->uart_text_box_store_strlen / 2);
-                    mag->uart_text_box_store_strlen = furi_string_size(mag->uart_text_box_store) + len;
+                    furi_string_right(
+                        mag->uart_text_box_store, mag->uart_text_box_store_strlen / 2);
+                    mag->uart_text_box_store_strlen =
+                        furi_string_size(mag->uart_text_box_store) + len;
                 }
 
                 // Add '\0' to the end of the string, and then add the new data
@@ -45,18 +49,16 @@ static int32_t uart_worker(void* context) {
                 furi_string_cat_printf(mag->uart_text_box_store, "%s", mag->uart_rx_buf);
 
                 FURI_LOG_D(TAG, "UART RX buf: %*.s", len, mag->uart_rx_buf);
-                FURI_LOG_D(TAG, "UART RX store: %s", furi_string_get_cstr(mag->uart_text_box_store));
-
+                FURI_LOG_D(
+                    TAG, "UART RX store: %s", furi_string_get_cstr(mag->uart_text_box_store));
             }
 
             FURI_LOG_D(TAG, "UARTEventRxData");
-            
-            view_dispatcher_send_custom_event(
-                mag->view_dispatcher, UARTEventRxData);
-            
+
+            view_dispatcher_send_custom_event(mag->view_dispatcher, UARTEventRxData);
         }
     }
-    
+
     furi_stream_buffer_free(mag->uart_rx_stream);
 
     return 0;
@@ -72,7 +74,8 @@ void update_widgets(Mag* mag) {
     widget_add_icon_element(mag->widget, 81, -1, &I_mag_file_10px);
 
     // Text box
-    widget_add_text_scroll_element(mag->widget, 0, 10, 128, 40, furi_string_get_cstr(mag->uart_text_box_store));
+    widget_add_text_scroll_element(
+        mag->widget, 0, 10, 128, 40, furi_string_get_cstr(mag->uart_text_box_store));
 
     // Buttons
     widget_add_button_element(mag->widget, GuiButtonTypeLeft, "Clear", mag_widget_callback, mag);
@@ -84,12 +87,11 @@ void mag_scene_read_on_enter(void* context) {
     FuriString* message = furi_string_alloc();
     furi_string_printf(message, "Please swipe a card!\n");
     mag->uart_text_box_store = message;
-    furi_string_free(message);
+
     view_dispatcher_switch_to_view(mag->view_dispatcher, MagViewWidget);
-    
+
     update_widgets(mag);
-    
-    
+
     // Initialize UART
     // furi_hal_console_disable();
     furi_hal_uart_deinit(FuriHalUartIdUSART1);
@@ -109,7 +111,7 @@ void mag_scene_read_on_enter(void* context) {
 
 bool mag_scene_read_on_event(void* context, SceneManagerEvent event) {
     Mag* mag = context;
-    
+
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
@@ -132,11 +134,16 @@ bool mag_scene_read_on_event(void* context, SceneManagerEvent event) {
             furi_string_reset(mag->uart_text_box_store);
             if(res) {
                 notification_message(mag->notifications, &sequence_success);
-                
-                furi_string_printf(mag->uart_text_box_store, "Track 1: %.*s\nTrack 2: %.*s\nTrack 3: %.*s",
-                    mag_dev->dev_data.track[0].len, furi_string_get_cstr(mag_dev->dev_data.track[0].str),
-                    mag_dev->dev_data.track[1].len, furi_string_get_cstr(mag_dev->dev_data.track[1].str),
-                    mag_dev->dev_data.track[2].len, furi_string_get_cstr(mag_dev->dev_data.track[2].str));
+
+                furi_string_printf(
+                    mag->uart_text_box_store,
+                    "Track 1: %.*s\nTrack 2: %.*s\nTrack 3: %.*s",
+                    mag_dev->dev_data.track[0].len,
+                    furi_string_get_cstr(mag_dev->dev_data.track[0].str),
+                    mag_dev->dev_data.track[1].len,
+                    furi_string_get_cstr(mag_dev->dev_data.track[1].str),
+                    mag_dev->dev_data.track[2].len,
+                    furi_string_get_cstr(mag_dev->dev_data.track[2].str));
 
                 // Switch to saved menu scene
                 scene_manager_next_scene(mag->scene_manager, MagSceneSavedMenu);
@@ -160,7 +167,7 @@ void mag_scene_read_on_exit(void* context) {
     // notification_message(mag->notifications, &sequence_blink_stop);
     widget_reset(mag->widget);
     // view_dispatcher_remove_view(mag->view_dispatcher, MagViewWidget);
-    
+
     // Stop UART worker
     FURI_LOG_D(TAG, "Stopping UART worker");
     furi_thread_flags_set(furi_thread_get_id(mag->uart_rx_thread), WorkerEvtStop);
@@ -173,6 +180,6 @@ void mag_scene_read_on_exit(void* context) {
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
     furi_hal_uart_deinit(FuriHalUartIdUSART1);
     // furi_hal_console_enable();
-    
+
     notification_message(mag->notifications, &sequence_blink_stop);
 }
