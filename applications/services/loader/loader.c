@@ -68,9 +68,12 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
         dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
         dialog_message_set_buttons(message, NULL, NULL, NULL);
 
-        furi_string_replace(error_message, ":", "\n");
+        furi_string_replace(error_message, "/ext/apps/", "");
+        furi_string_replace(error_message, ", ", "\n");
+        furi_string_replace(error_message, ": ", "\n");
+
         dialog_message_set_text(
-            message, furi_string_get_cstr(error_message), 64, 32, AlignCenter, AlignCenter);
+            message, furi_string_get_cstr(error_message), 64, 37, AlignCenter, AlignCenter);
 
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
@@ -295,22 +298,20 @@ static LoaderStatus loader_start_external_app(
         if(preload_res != FlipperApplicationPreloadStatusSuccess) {
             const char* err_msg = flipper_application_preload_status_to_string(preload_res);
             status = loader_make_status_error(
-                LoaderStatusErrorInternal, error_message, "Preload failed %s: %s", path, err_msg);
+                LoaderStatusErrorInternal, error_message, "Preload failed, %s: %s", path, err_msg);
             break;
         }
 
-        FURI_LOG_I(TAG, "Mapping");
         FlipperApplicationLoadStatus load_status =
             flipper_application_map_to_memory(loader->app.fap);
         if(load_status != FlipperApplicationLoadStatusSuccess) {
             const char* err_msg = flipper_application_load_status_to_string(load_status);
             status = loader_make_status_error(
-                LoaderStatusErrorInternal, error_message, "Load failed %s: %s", path, err_msg);
+                LoaderStatusErrorInternal, error_message, "Load failed, %s: %s", path, err_msg);
             break;
         }
 
         FURI_LOG_I(TAG, "Loaded in %zums", (size_t)(furi_get_tick() - start));
-        FURI_LOG_I(TAG, "Starting app");
 
         loader->app.thread = flipper_application_alloc_thread(loader->app.fap, args);
         FuriString* app_name = furi_string_alloc();
