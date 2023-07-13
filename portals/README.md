@@ -20,3 +20,4 @@ Please check the example `index.html` to get an idea of what this has to look li
 Thank you so much to the following contributors for providing awesome portals. 
 
 - `Google_Modern.html` by [roshanravan](https://github.com/roshanravan)
+- `Twitter.html` by [roshanravan](https://github.com/roshanravan)
