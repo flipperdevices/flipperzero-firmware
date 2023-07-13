@@ -78,8 +78,23 @@ static void post_rx(ESubGhzChatState *state, size_t rx_size)
 		memcpy(state->rx_str_buffer, state->rx_buffer, rx_size);
 		state->rx_str_buffer[rx_size] = 0;
 	} else {
-		// TODO
-		return;
+		if (rx_size < IV_BYTES + TAG_BYTES + 1) {
+			return;
+		}
+
+		int ret = gcm_auth_decrypt(&(state->gcm_ctx),
+				state->rx_buffer, IV_BYTES,
+				NULL, 0,
+				state->rx_buffer + IV_BYTES,
+				(uint8_t *) state->rx_str_buffer,
+				rx_size - (IV_BYTES + TAG_BYTES),
+				state->rx_buffer + rx_size - TAG_BYTES,
+				TAG_BYTES);
+		state->rx_str_buffer[rx_size - (IV_BYTES + TAG_BYTES)] = 0;
+
+		if (ret != 0) {
+			strcpy(state->rx_str_buffer, "ERR: Decryption failed!");
+		}
 	}
 
 	furi_string_cat_printf(state->chat_box_store, "\n%s",
