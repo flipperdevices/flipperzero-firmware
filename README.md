@@ -1,6 +1,8 @@
 # flipper-chess
 
-Flipper Zero Chess game.
+Chess game for Flipper Zero.
+
+Uses [smallchesslib](https://codeberg.org/drummyfish/smallchesslib).
 
 ### Installation
 
@@ -19,3 +21,7 @@ Flipper Zero Chess game.
 - Retrieve build fap in dist subfolders
 
 (More info about build tool [here](https://github.com/flipperdevices/flipperzero-firmware/blob/dev/documentation/fbt.md))
+
+### 
+
+
