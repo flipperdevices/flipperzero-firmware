@@ -73,7 +73,7 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
         furi_string_replace(error_message, ": ", "\n");
 
         dialog_message_set_text(
-            message, furi_string_get_cstr(error_message), 64, 37, AlignCenter, AlignCenter);
+            message, furi_string_get_cstr(error_message), 64, 35, AlignCenter, AlignCenter);
 
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
