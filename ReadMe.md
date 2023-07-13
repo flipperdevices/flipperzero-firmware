@@ -62,7 +62,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Updated: [Sub-GHz Bruteforcer v3.6 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master) (By gid9798)
 - Added: [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon)
 - Added: [Reaction Time (By ihatecsv)](https://github.com/ihatecsv/flipper_reaction_time)
-- Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 - Main FAP recategorization (By RogueMaster)
 - Temporary Archive Browser Fixes (By RogueMaster)
 - [NFC Maker (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1164e4d214efa38847e08c6387bf53578bc0d366) Fixes to NTAG215 (By WillyJL)
@@ -88,6 +87,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - Added: [Chess (By xtruan)](https://github.com/xtruan/flipper-chess)
 - UL: Merge Fixes for File Sorting (By xMasterX)
+- Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
