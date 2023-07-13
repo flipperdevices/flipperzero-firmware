@@ -54,7 +54,7 @@ bool troika_read(void* poller, void* data) {
     return true;
 }
 
-bool troika_parse(void* data, FuriString* parsed_data) {
+bool troika_parse(const void* data, FuriString* parsed_data) {
     furi_assert(data);
 
     furi_string_printf(parsed_data, "%s", "Hello Troika");

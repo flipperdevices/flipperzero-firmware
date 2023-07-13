@@ -10,7 +10,7 @@ typedef bool (*NfcSupportedCardPluginVerify)(void* poller);
 
 typedef bool (*NfcSupportedCardPluginRead)(void* poller, void* data);
 
-typedef bool (*NfcSupportedCardPluginParse)(void* data, FuriString* parsed_data);
+typedef bool (*NfcSupportedCardPluginParse)(const void* data, FuriString* parsed_data);
 
 typedef struct {
     NfcProtocol protocol;

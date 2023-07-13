@@ -28,7 +28,6 @@
 #include "helpers/nfc_custom_event.h"
 #include "helpers/mf_ultralight_auth.h"
 #include "helpers/mf_dict.h"
-#include "helpers/nfc_supported_cards.h"
 
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -113,7 +112,6 @@ struct NfcApp {
     MfUltralightAuth* mf_ul_auth;
     NfcMfClassicDictAttackContext mf_dict_context;
     FuriString* parsed_data;
-    NfcSupportedCards* supported_cards;
 
     NfcDevice* nfc_device;
     Iso14443_3aData* iso14443_3a_edit_data;

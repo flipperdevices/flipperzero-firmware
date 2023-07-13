@@ -1,0 +1,53 @@
+#include "nfc/nfc_app_i.h"
+
+#include "nfc/helpers/nfc_supported_cards.h"
+#include "nfc/helpers/protocol_support/nfc_protocol_support_gui_common.h"
+
+void nfc_scene_supported_card_on_enter(void* context) {
+    NfcApp* instance = context;
+
+    NfcSupportedCards* supported_cards = nfc_supported_cards_alloc();
+    FuriString* temp_str = furi_string_alloc();
+
+    if(nfc_supported_cards_parse(supported_cards, instance->nfc_device, temp_str)) {
+        widget_add_text_scroll_element(
+            instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+        widget_add_button_element(
+            instance->widget,
+            GuiButtonTypeRight,
+            "More",
+            nfc_protocol_support_common_widget_callback,
+            instance);
+
+        view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
+
+    } else {
+        scene_manager_next_scene(instance->scene_manager, NfcSceneInfo);
+    }
+
+    furi_string_free(temp_str);
+    nfc_supported_cards_free(supported_cards);
+}
+
+bool nfc_scene_supported_card_on_event(void* context, SceneManagerEvent event) {
+    NfcApp* instance = context;
+
+    bool consumed = false;
+
+    if(event.type == SceneManagerEventTypeCustom) {
+        if(event.event == GuiButtonTypeRight) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneInfo);
+            consumed = true;
+        }
+
+    } else if(event.type == SceneManagerEventTypeBack) {
+        //TODO: Any special handling for Back button?
+    }
+
+    return consumed;
+}
+
+void nfc_scene_supported_card_on_exit(void* context) {
+    NfcApp* instance = context;
+    widget_reset(instance->widget);
+}

@@ -80,30 +80,30 @@ void nfc_supported_cards_free(NfcSupportedCards* instance) {
 //
 //     return card_read;
 // }
-//
-// bool nfc_supported_cards_parse(
-//     NfcSupportedCards* instance,
-//     NfcDevProtocol protocol,
-//     void* data,
-//     FuriString* parsed_data) {
-//     furi_assert(instance);
-//     furi_assert(data);
-//     furi_assert(parsed_data);
-//
-//     bool parsed = false;
-//
-//     do {
-//         if(instance->status != NfcSupportCardsStatusLoadSuccess) break;
-//
-//         for(size_t i = 0; i < instance->plugin_cnt; i++) {
-//             const NfcSupportedCardsPlugin* plugin = plugin_manager_get_ep(instance->manager, i);
-//             if(plugin->protocol != protocol) continue;
-//             if(plugin->parse) {
-//                 parsed = plugin->parse(data, parsed_data);
-//             }
-//             if(parsed) break;
-//         }
-//     } while(false);
-//
-//     return parsed;
-// }
+
+bool nfc_supported_cards_parse(
+    NfcSupportedCards* instance,
+    const NfcDevice* device,
+    FuriString* parsed_data) {
+    furi_assert(instance);
+    furi_assert(device);
+    furi_assert(parsed_data);
+
+    bool parsed = false;
+
+    do {
+        if(instance->status != NfcSupportCardsStatusLoadSuccess) break;
+
+        for(uint32_t i = 0; i < instance->plugin_cnt; i++) {
+            const NfcSupportedCardsPlugin* plugin = plugin_manager_get_ep(instance->manager, i);
+            const NfcProtocol protocol = nfc_device_get_protocol(device);
+            if(plugin->protocol != protocol) continue;
+            if(plugin->parse) {
+                parsed = plugin->parse(nfc_device_get_data(device, protocol), parsed_data);
+            }
+            if(parsed) break;
+        }
+    } while(false);
+
+    return parsed;
+}

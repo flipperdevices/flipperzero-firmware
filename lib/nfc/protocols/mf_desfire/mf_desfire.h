@@ -2,7 +2,7 @@
 
 #include <lib/nfc/protocols/iso14443_4a/iso14443_4a.h>
 
-#include "helpers/simple_array.h"
+#include <lib/toolbox/simple_array.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -172,6 +172,17 @@ const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcDeviceNameT
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len);
 
 const Iso14443_4aData* mf_desfire_get_base_data(const MfDesfireData* data);
+
+// Getters and tests
+
+const MfDesfireApplication*
+    mf_desfire_get_application(const MfDesfireData* data, const MfDesfireApplicationId* app_id);
+
+const MfDesfireFileSettings*
+    mf_desfire_get_file_settings(const MfDesfireApplication* data, const MfDesfireFileId* file_id);
+
+const MfDesfireFileData*
+    mf_desfire_get_file_data(const MfDesfireApplication* data, const MfDesfireFileId* file_id);
 
 #ifdef __cplusplus
 }

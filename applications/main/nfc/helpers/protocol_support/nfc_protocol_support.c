@@ -322,7 +322,7 @@ static bool
         // TODO: Implement restore from shadow file
 
         if(event.event == SubmenuIndexCommonInfo) {
-            scene_manager_next_scene(instance->scene_manager, NfcSceneInfo);
+            scene_manager_next_scene(instance->scene_manager, NfcSceneSupportedCard);
             consumed = true;
         } else if(event.event == SubmenuIndexCommonRename) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneSaveName);

@@ -2,7 +2,7 @@
 
 #include <nfc/protocols/iso14443_3a/iso14443_3a.h>
 
-#include "helpers/simple_array.h"
+#include <lib/toolbox/simple_array.h>
 
 #ifdef __cplusplus
 extern "C" {

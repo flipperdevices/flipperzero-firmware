@@ -3,6 +3,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct SimpleArray SimpleArray;
 
 typedef void SimpleArrayElement;
@@ -35,3 +39,7 @@ SimpleArrayElement* simple_array_get(SimpleArray* instance, uint32_t index);
 const SimpleArrayElement* simple_array_cget(const SimpleArray* instance, uint32_t index);
 
 extern const SimpleArrayConfig simple_array_config_uint8_t;
+
+#ifdef __cplusplus
+}
+#endif
