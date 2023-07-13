@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <lib/drivers/st25r3916_reg.h>
 #include <lib/drivers/st25r3916.h>
-#include <nfc/helpers/iso14443_3a_signal.h>
+#include <digital_signal/presets/nfc/iso14443_3a_signal.h>
 #include <furi_hal_resources.h>
 
 #define TAG "FuriHalNfcA"
