@@ -61,10 +61,7 @@ typedef enum {
     FlipChessPlayerAI3 = 3,
 } FlipChessPlayerMode;
 
-typedef enum {
-    FlipChessTextInputDefault,
-    FlipChessTextInputGame
-} FlipChessTextInputState;
+typedef enum { FlipChessTextInputDefault, FlipChessTextInputGame } FlipChessTextInputState;
 
 typedef enum {
     FlipChessStatusSuccess = 0,
