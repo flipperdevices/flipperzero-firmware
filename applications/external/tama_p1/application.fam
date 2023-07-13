@@ -1,5 +1,5 @@
 App(
-    appid="TAMA_P1",
+    appid="tama_p1",
     name="TAMA P1",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tama_p1_app",

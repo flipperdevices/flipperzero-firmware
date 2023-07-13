@@ -1,5 +1,5 @@
 App(
-    appid="Servotester",
+    appid="servotester",
     name="Servotester",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="servotester_app",

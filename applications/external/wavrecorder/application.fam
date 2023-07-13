@@ -1,5 +1,5 @@
 App(
-    appid="WAV_Recorder",
+    appid="wav_recorder",
     name="WAV Recorder",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wav_recorder_app",

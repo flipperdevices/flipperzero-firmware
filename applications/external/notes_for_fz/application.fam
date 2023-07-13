@@ -1,5 +1,5 @@
 App(
-    appid="Notes",
+    appid="notes",
     name="Notes for FZ (WIP)",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="note_entry_point",

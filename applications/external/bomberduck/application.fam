@@ -1,5 +1,5 @@
 App(
-    appid="Bomberduck",
+    appid="bomberduck",
     name="Bomberduck",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bomberduck_app",

@@ -1,5 +1,5 @@
 App(
-    appid="DAP_Link",
+    appid="dap_link",
     name="DAP Link",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="dap_link_app",

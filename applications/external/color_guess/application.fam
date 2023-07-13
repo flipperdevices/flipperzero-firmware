@@ -1,5 +1,5 @@
 App(
-    appid="Color_Guess",
+    appid="color_guess",
     name="Color Guess",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="color_guess_app",

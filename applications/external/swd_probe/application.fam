@@ -1,5 +1,5 @@
 App(
-    appid="SWD_Probe",
+    appid="swd_probe",
     name="SWD Probe",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="swd_probe_app_main",

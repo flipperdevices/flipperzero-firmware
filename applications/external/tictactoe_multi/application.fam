@@ -1,5 +1,5 @@
 App(
-    appid="Tic_Tac_Toe_Multi",
+    appid="tic_tac_toe_multi",
     name="Tic-Tac-Toe Multi",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ttt_multi_app",

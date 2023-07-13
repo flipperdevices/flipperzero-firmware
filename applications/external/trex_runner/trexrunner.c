@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <dolphin/dolphin.h>
 
-#include "TRex_Runner_icons.h"
+#include "trex_runner_icons.h"
 
 #define DINO_START_X 10
 #define DINO_START_Y 34 // 64 - 22 - BACKGROUND_H / 2 - 2

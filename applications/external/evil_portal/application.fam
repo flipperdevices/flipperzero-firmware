@@ -1,5 +1,5 @@
 App(
-    appid="ESP32_Evil_Portal",
+    appid="esp32_evil_portal",
     name="[ESP32] Evil Portal",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="evil_portal_app",

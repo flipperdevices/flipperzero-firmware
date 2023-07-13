@@ -1,5 +1,5 @@
 App(
-    appid="Dab_Timer",
+    appid="dab_timer",
     name="Clock",
     apptype=FlipperAppType.MENUEXTERNAL,
     entry_point="clock_app",
@@ -10,7 +10,7 @@ App(
     fap_icon="ClockIcon.png",
     fap_category="Main",
     fap_icon_assets="icons",
-    link="/ext/apps/Main/Dab_Timer.fap",
+    link="/ext/apps/Main/dab_timer.fap",
     fap_author="@RogueMaster & @GMMan",
     # fap_version="1.0",
     fap_description="A clock with stopwatch and 80 seconds alarm. 80 second alarm can be changed at 5 second intervals and so can the sound options.",

@@ -2,6 +2,6 @@ App(
     appid="ibuttonsrv",
     apptype=FlipperAppType.STARTUP,
     entry_point="ibutton_on_system_start",
-    requires=["iButton"],
+    requires=["ibutton"],
     order=60,
 )

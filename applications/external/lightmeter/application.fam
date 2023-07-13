@@ -1,5 +1,5 @@
 App(
-    appid="BH1750_Lightmeter",
+    appid="bh1750_lightmeter",
     name="[BH1750] Lightmeter",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="lightmeter_app",

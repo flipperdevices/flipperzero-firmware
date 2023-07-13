@@ -1,5 +1,5 @@
 App(
-    appid="USPING_Dist_Sensor",
+    appid="usping_dist_sensor",
     name="[USPING] Dist. Sensor",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="usping_app",

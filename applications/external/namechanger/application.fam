@@ -1,5 +1,5 @@
 App(
-    appid="NameChanger",
+    appid="namechanger",
     name="Name Changer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="namechanger_app",

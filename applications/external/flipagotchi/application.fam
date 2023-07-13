@@ -1,5 +1,5 @@
 App(
-    appid="Flipagotchi",
+    appid="flipagotchi",
     name="Flipagotchi WIP",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipagotchi_app",

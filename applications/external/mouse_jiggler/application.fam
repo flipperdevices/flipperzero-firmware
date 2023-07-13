@@ -1,5 +1,5 @@
 App(
-    appid="MouseJiggler",
+    appid="mousejiggler",
     name="Mouse Jiggler",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mouse_jiggler_app",

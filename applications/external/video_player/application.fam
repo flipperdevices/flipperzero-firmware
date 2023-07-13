@@ -1,5 +1,5 @@
 App(
-    appid="Video_Player",
+    appid="video_player",
     name="Video Player",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="video_player_app",

@@ -3,7 +3,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include "Dolphin_Trainer_icons.h"
+#include "dolphin_trainer_icons.h"
 #include "dolphin/helpers/dolphin_state.h"
 #include <toolbox/saved_struct.h>
 #include <power/power_service/power.h>

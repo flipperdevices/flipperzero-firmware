@@ -1,5 +1,5 @@
 App(
-    appid="RCWL_0516_Motion_Sensor",
+    appid="rcwl_0516_motion_sensor",
     name="[RCWL-516] Motion Sensor",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rcwl_0516",

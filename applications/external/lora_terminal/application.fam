@@ -1,5 +1,5 @@
 App(
-    appid="LoRA_Terminal",
+    appid="lora_terminal",
     name="LoRA_Terminal",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_terminal_app",

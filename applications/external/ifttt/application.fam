@@ -1,5 +1,5 @@
 App(
-    appid="ESP8266_IFTTT_Button",
+    appid="esp8266_ifttt_button",
     name="[ESP8266] IFTTT Button",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ifttt_virtual_button_app",

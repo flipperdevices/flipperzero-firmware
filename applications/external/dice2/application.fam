@@ -1,5 +1,5 @@
 App(
-    appid="DND_Dice_app",
+    appid="dnd_dice_app",
     name="DnD Dice [Ka3u6y6a]",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="dice_dnd_app",

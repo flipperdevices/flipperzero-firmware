@@ -1,5 +1,5 @@
 App(
-    appid="Paint",
+    appid="paint",
     name="Paint",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="paint_app",

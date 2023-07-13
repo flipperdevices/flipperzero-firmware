@@ -1,5 +1,5 @@
 App(
-    appid="Caesar_Cipher",
+    appid="caesar_cipher",
     name="Caesar Cipher",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="caesar_cipher_app",

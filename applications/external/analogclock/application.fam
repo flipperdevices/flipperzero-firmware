@@ -1,5 +1,5 @@
 App(
-    appid="Analog_Clock",
+    appid="analog_clock",
     name="Analog Clock",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="analog_clock_app",

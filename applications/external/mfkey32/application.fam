@@ -1,5 +1,5 @@
 App(
-    appid="Mfkey32",
+    appid="mfkey32",
     name="Mfkey32",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],

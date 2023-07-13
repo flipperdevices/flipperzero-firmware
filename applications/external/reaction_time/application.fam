@@ -1,5 +1,5 @@
 App(
-    appid="Reaction_Time",
+    appid="reaction_time",
     name="Reaction Time",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="reaction_time_app",

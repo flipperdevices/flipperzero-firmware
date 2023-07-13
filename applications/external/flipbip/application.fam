@@ -1,5 +1,5 @@
 App(
-    appid="FlipBIP",
+    appid="flipbip",
     name="FlipBIP Crypto Wallet",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipbip_app",

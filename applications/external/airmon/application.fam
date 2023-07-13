@@ -1,5 +1,5 @@
 App(
-    appid="Plantower_PMSx003_Sensor_Reader",
+    appid="plantower_pmsx003_sensor_reader",
     name="Plantower PMSx003 sensor reader",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="airmon_app",

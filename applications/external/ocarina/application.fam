@@ -1,5 +1,5 @@
 App(
-    appid="Ocarina",
+    appid="ocarina",
     name="Ocarina",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ocarina_app",

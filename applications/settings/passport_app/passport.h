@@ -14,7 +14,7 @@
 #include <dolphin/dolphin.h>
 #include "applications/settings/desktop_settings/desktop_settings_app.h"
 #include "passport_settings/passport_settings.h"
-#include "Passport_icons.h"
+#include "passport_icons.h"
 
 #define MOODS_TOTAL 1
 #define BUTTHURT_MAX 14

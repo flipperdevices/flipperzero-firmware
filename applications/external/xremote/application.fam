@@ -1,5 +1,5 @@
 App(
-    appid="Cross_Remote",
+    appid="cross_remote",
     name="Cross Remote",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="xremote_app",

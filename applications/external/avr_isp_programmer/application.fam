@@ -1,5 +1,5 @@
 App(
-    appid="AVR_Flasher",
+    appid="avr_flasher",
     name="AVR Flasher",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="avr_isp_app",

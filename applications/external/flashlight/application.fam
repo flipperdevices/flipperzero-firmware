@@ -1,5 +1,5 @@
 App(
-    appid="Flashlight",
+    appid="flashlight",
     name="Flashlight",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flashlight_app",

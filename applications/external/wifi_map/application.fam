@@ -1,5 +1,5 @@
 App(
-    appid="ESP32_WIFI_Mapping",
+    appid="esp32_wifi_mapping",
     name="[ESP32] WIFI Mapping",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_map_app",

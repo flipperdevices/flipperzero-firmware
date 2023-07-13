@@ -1,5 +1,5 @@
 App(
-    appid="Subghz_Remote_Refactored",
+    appid="subghz_remote_refactored",
     name="Sub-GHz Remote",
     apptype=FlipperAppType.MENUEXTERNAL,
     entry_point="subghz_remote_app",
@@ -23,5 +23,5 @@ App(
     fap_weburl="https://github.com/DarkFlippers/unleashed-firmware/pull/477",
     # fap_version="1.0",
     fap_description="Allows SubGHz signals to be sent using key bind shortcuts. Rewritten concept from app by ESurge and jimilinuxguy. Remote creator and app merged by ESurge",
-    link="/ext/apps/Sub-GHz/Subghz_Remote_Refactored.fap",
+    link="/ext/apps/Sub-GHz/subghz_remote_refactored.fap",
 )

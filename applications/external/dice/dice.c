@@ -5,7 +5,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dolphin/dolphin.h>
-#include "DICE_icons.h"
+#include "dice_icons.h"
 #include "applications/settings/desktop_settings/desktop_settings_app.h"
 
 #define TAG "Dice Roller"

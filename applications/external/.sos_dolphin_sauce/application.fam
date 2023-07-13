@@ -1,5 +1,5 @@
 App(
-    appid="SOS",
+    appid="sos",
     name="SOS Dolphin Sauce",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="sos_app",

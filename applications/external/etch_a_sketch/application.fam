@@ -1,5 +1,5 @@
 App(
-    appid="EtchASketch",
+    appid="etchasketch",
     name="Etch A Sketch",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="etch_a_sketch_app",

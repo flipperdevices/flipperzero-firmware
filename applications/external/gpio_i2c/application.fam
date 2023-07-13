@@ -1,5 +1,5 @@
 App(
-    appid="GPIO_wI2C",
+    appid="gpio_wi2c",
     name="GPIO with I2C",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gpio_i2c_app",

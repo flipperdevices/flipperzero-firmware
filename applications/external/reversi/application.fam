@@ -1,5 +1,5 @@
 App(
-    appid="Reversi",
+    appid="reversi",
     name="Reversi",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="game_reversi_app",

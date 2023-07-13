@@ -6,7 +6,7 @@
 #include <gui/view.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
-#include "iButton_icons.h"
+#include "ibutton_icons.h"
 
 #include <ibutton/ibutton_worker.h>
 #include <ibutton/ibutton_protocols.h>

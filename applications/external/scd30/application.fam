@@ -1,5 +1,5 @@
 App(
-    appid="SCD30",
+    appid="scd30",
     name="SCD30 Reader",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="scd30_main",

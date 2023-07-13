@@ -1,5 +1,5 @@
 App(
-    appid="Weather_Station",
+    appid="weather_station",
     name="Weather Station",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],

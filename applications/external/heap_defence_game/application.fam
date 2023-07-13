@@ -1,5 +1,5 @@
 App(
-    appid="Heap_Defence",
+    appid="heap_defence",
     name="Heap Defence",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="heap_defence_app",

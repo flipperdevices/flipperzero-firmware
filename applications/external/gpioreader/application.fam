@@ -1,5 +1,5 @@
 App(
-    appid="GPIO_Reader_B",
+    appid="gpio_reader_b",
     name="[GPIO] Input Reader 2",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gpio_app",

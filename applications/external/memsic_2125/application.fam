@@ -1,5 +1,5 @@
 App(
-    appid="Mx2125_Accelerometer",
+    appid="mx2125_accelerometer",
     name="[Mx2125] Accelerometer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="memsic_2125_app",

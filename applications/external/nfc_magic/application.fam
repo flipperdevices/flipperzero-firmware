@@ -1,5 +1,5 @@
 App(
-    appid="NFC_Magic",
+    appid="nfc_magic",
     name="NFC Magic",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],

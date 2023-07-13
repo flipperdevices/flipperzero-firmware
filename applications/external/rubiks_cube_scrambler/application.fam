@@ -1,5 +1,5 @@
 App(
-    appid="Rubiks_Cube_Scrambler",
+    appid="rubiks_cube_scrambler",
     name="Rubik's Cube Scrambler",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rubiks_cube_scrambler_main",

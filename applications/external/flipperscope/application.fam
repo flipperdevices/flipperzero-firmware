@@ -1,5 +1,5 @@
 App(
-    appid="Scope",
+    appid="scope",
     name="Scope",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="scope_main",

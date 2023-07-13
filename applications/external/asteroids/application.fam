@@ -1,5 +1,5 @@
 App(
-    appid="Asteroids",
+    appid="asteroids",
     name="Asteroids",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="asteroids_app_entry",

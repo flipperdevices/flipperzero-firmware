@@ -1,5 +1,5 @@
 App(
-    appid="Zero_Tracker",
+    appid="zero_tracker",
     name="Zero Tracker",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="zero_tracker_app",

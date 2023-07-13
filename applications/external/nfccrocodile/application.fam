@@ -1,5 +1,5 @@
 App(
-    appid="NFC_Crocodile",
+    appid="nfc_crocodile",
     name="NFC Crocodile",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="nfc_crocodile_main",

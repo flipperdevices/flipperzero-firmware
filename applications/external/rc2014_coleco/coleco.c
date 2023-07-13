@@ -2,7 +2,7 @@
 #include <furi_hal_gpio.h>
 #include <furi_hal_power.h>
 #include <gui/gui.h>
-#include "RC2014_Coleco_icons.h"
+#include "rc2014_coleco_icons.h"
 
 #define CODE_0 0x0A
 #define CODE_1 0x0D

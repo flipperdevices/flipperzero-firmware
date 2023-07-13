@@ -1,5 +1,5 @@
 App(
-    appid="IR_IntervalometerSony",
+    appid="ir_intervalometersony",
     name="IR Intervalometer for Sony Cameras",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipvalo_app",

@@ -1,5 +1,5 @@
 App(
-    appid="GPIO_7Segment_Output",
+    appid="gpio_7segment_output",
     name="[GPIO] 7-Segment Output",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="gpio_7segment_app",

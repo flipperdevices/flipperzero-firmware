@@ -1,5 +1,5 @@
 App(
-    appid="ESP32CAM_Morse_Flasher",
+    appid="esp32cam_morse_flasher",
     name="[ESP32CAM] Morse Flasher",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_terminal_app",

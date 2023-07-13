@@ -1,5 +1,5 @@
 App(
-    appid="MontyHall",
+    appid="montyhall",
     name="Monty Hall",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="montyhall_game_app",

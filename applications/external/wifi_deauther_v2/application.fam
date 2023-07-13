@@ -1,5 +1,5 @@
 App(
-    appid="ESP8266_Wifi_Deauther_v2",
+    appid="esp8266_wifi_deauther_v2",
     name="[ESP8266] Deauther v2",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_deauther_app",

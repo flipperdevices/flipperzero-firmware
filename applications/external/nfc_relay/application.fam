@@ -1,5 +1,5 @@
 App(
-    appid="NFC_Relay",
+    appid="nfc_relay",
     name="NFC Relay",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="nfc_relay_app",

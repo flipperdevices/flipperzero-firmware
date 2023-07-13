@@ -1,5 +1,5 @@
 App(
-    appid="Continuity",
+    appid="continuity",
     name="Continuity Tester",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="continuity_app",

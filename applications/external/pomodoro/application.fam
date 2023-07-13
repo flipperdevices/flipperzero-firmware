@@ -1,5 +1,5 @@
 App(
-    appid="Pomodoro_Timer",
+    appid="pomodoro_timer",
     name="Pomodoro Timer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="pomodoro_app",

@@ -1,5 +1,5 @@
 App(
-    appid="GPIO_Intervalometer",
+    appid="gpio_intervalometer",
     name="[GPIO] Intervalometer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="zeitraffer_app",

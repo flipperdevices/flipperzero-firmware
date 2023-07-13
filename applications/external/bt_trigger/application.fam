@@ -1,5 +1,5 @@
 App(
-    appid="BT_Trigger",
+    appid="bt_trigger",
     name="BT Trigger",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bt_trigger_app",

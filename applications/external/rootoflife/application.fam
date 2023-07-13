@@ -1,5 +1,5 @@
 App(
-    appid="Roots_of_Life",
+    appid="roots_of_life",
     name="Roots of Life",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="roots_of_life_game_app",

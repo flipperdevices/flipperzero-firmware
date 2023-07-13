@@ -1,5 +1,5 @@
 App(
-    appid="NightstandClock",
+    appid="nightstandclock",
     name="Nightstand Clock",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="clock_app",

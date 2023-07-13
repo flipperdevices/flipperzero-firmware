@@ -1,5 +1,5 @@
 App(
-    appid="NFC_Maker_NTAG203",
+    appid="nfc_maker_ntag203",
     name="NFC Maker NTAG203",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="nfc_maker",

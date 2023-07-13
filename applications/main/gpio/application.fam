@@ -1,5 +1,5 @@
 App(
-    appid="GPIO",
+    appid="gpio",
     name="GPIO",
     apptype=FlipperAppType.MENUEXTERNAL,
     entry_point="gpio_app",

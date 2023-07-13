@@ -1,5 +1,5 @@
 App(
-    appid="ESP32_Camera",
+    appid="esp32_camera",
     name="[ESP32] Camera",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="camera_app",

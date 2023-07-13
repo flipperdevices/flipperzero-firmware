@@ -1,5 +1,5 @@
 App(
-    appid="Barcode_App",
+    appid="barcode_app",
     name="Barcode App",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="barcode_main",

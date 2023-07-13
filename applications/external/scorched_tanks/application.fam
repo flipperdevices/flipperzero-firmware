@@ -1,5 +1,5 @@
 App(
-    appid="Scorched_Tanks",
+    appid="scorched_tanks",
     name="Scorched Tanks",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="scorched_tanks_game_app",

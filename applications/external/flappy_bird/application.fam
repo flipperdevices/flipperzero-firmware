@@ -1,5 +1,5 @@
 App(
-    appid="FlappyBird",
+    appid="flappybird",
     name="Flappy Bird",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flappy_game_app",

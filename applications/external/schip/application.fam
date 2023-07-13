@@ -1,5 +1,5 @@
 App(
-    appid="SUPER_CHIP",
+    appid="super_chip",
     name="SUPER-CHIP",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="schip_main",

@@ -1,5 +1,5 @@
 App(
-    appid="Radiation_Sensor",
+    appid="radiation_sensor",
     name="Radiation Sensor",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rad_sens_app",

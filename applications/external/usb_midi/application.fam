@@ -1,5 +1,5 @@
 App(
-    appid="USB_Midi",
+    appid="usb_midi",
     name="USB Midi",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="usb_midi_app",

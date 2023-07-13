@@ -1,5 +1,5 @@
 App(
-    appid="POCSAG_Pager",
+    appid="pocsag_pager",
     name="POCSAG Pager",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="pocsag_pager_app",

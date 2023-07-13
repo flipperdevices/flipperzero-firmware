@@ -1,5 +1,5 @@
 App(
-    appid="BT_Serial",
+    appid="bt_serial",
     name="BT Serial",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="fbs_app",

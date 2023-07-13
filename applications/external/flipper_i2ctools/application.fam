@@ -1,5 +1,5 @@
 App(
-    appid="I2C_Tools",
+    appid="i2c_tools",
     name="i2c Tools",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="i2ctools_app",

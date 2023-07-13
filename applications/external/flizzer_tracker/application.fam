@@ -1,5 +1,5 @@
 App(
-    appid="Flizzer_Tracker",
+    appid="flizzer_tracker",
     name="Flizzer Tracker",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flizzer_tracker_app",

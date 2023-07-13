@@ -1,5 +1,5 @@
 App(
-    appid="Device_Info",
+    appid="device_info",
     name="Device Info",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="devdump_app",

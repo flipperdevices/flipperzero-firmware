@@ -1,5 +1,5 @@
 App(
-    appid="iButton_Fuzzer",
+    appid="ibutton_fuzzer",
     name="iButton Fuzzer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="fuzzer_start_ibtn",
@@ -29,7 +29,7 @@ App(
 )
 
 App(
-    appid="RFID_Fuzzer",
+    appid="rfid_fuzzer",
     name="RFID Fuzzer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="fuzzer_start_rfid",

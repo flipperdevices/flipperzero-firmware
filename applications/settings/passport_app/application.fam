@@ -1,5 +1,5 @@
 App(
-    appid="Passport",
+    appid="passport",
     name="Passport",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="passport_app",

@@ -1,5 +1,5 @@
 App(
-    appid="NFC_RFID_detector",
+    appid="nfc_rfid_detector",
     name="NFC/RFID detector",
     apptype=FlipperAppType.EXTERNAL,
     # targets=["f7"],

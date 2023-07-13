@@ -1,5 +1,5 @@
 App(
-    appid="MandelbrotSet",
+    appid="mandelbrotset",
     name="Mandelbrot Set",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mandelbrot_app",

@@ -1,5 +1,5 @@
 App(
-    appid="QRCode",
+    appid="qrcode",
     name="QR Code",
     fap_version=(1,1),
     fap_description="Display qrcodes",

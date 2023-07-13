@@ -1,5 +1,5 @@
 App(
-    appid="DVD_Bouncer",
+    appid="dvd_bouncer",
     name="DVD Bouncer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="bounce_moment",

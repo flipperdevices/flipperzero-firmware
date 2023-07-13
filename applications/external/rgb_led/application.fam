@@ -1,6 +1,6 @@
 # A simple application to control RGB LED's (WS2812, etc) via GPIO
 App(
-    appid="GPIO_RGB_LED",
+    appid="gpio_rgb_led",
     name="[GPIO] RGB LED",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="rgb_led_app",

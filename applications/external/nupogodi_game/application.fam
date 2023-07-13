@@ -1,5 +1,5 @@
 App(
-    appid="Nu_Pogodi",
+    appid="nu_pogodi",
     name="Nu pogodi",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="nupogodi_app",

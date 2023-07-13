@@ -1,5 +1,5 @@
 App(
-    appid="iButton",
+    appid="ibutton",
     name="iButton",
     apptype=FlipperAppType.MENUEXTERNAL,
     # targets=["f7"],
@@ -16,5 +16,5 @@ App(
     fap_category="iButton",
     fap_icon_assets="images",
     # fap_libs=["assets"],
-    link="/ext/apps/iButton/iButton.fap",
+    link="/ext/apps/iButton/ibutton.fap",
 )

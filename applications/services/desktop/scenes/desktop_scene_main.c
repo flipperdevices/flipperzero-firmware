@@ -13,16 +13,16 @@
 
 #define TAG "DesktopSrv"
 
-#define CLOCK_APP EXT_PATH("apps/Main/Dab_Timer.fap")
-#define DICE_APP EXT_PATH("apps/Games/Dice.fap")
-#define DOOM_APP EXT_PATH("apps/Games/DOOM.fap")
-#define HEAP_DEFENCE_APP EXT_PATH("apps/Games/Heap_Defence.fap")
+#define CLOCK_APP EXT_PATH("apps/Main/dab_timer.fap")
+#define DICE_APP EXT_PATH("apps/Games/dice.fap")
+#define DOOM_APP EXT_PATH("apps/Games/doom.fap")
+#define HEAP_DEFENCE_APP EXT_PATH("apps/Games/heap_defence.fap")
 #define IMPROVED_2048_APP EXT_PATH("apps/Games/2048_improved.fap")
-#define PASSPORT_APP EXT_PATH("apps/Settings/Passport.fap")
-#define SNAKE_APP EXT_PATH("apps/Games/Snake.fap")
-#define TETRIS_APP EXT_PATH("apps/Games/Tetris.fap")
-#define ZOMBIEZ_APP EXT_PATH("apps/Games/Zombiez.fap")
-#define JETPACK_JOYRIDE_APP EXT_PATH("apps/Games/Jetpack_Joyride.fap")
+#define PASSPORT_APP EXT_PATH("apps/Settings/passport.fap")
+#define SNAKE_APP EXT_PATH("apps/Games/snake.fap")
+#define TETRIS_APP EXT_PATH("apps/Games/tetris.fap")
+#define ZOMBIEZ_APP EXT_PATH("apps/Games/zombiez.fap")
+#define JETPACK_JOYRIDE_APP EXT_PATH("apps/Games/jetpack_joyride.fap")
 
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);

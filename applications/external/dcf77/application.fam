@@ -1,5 +1,5 @@
 App(
-    appid="DCF77",
+    appid="dcf77",
     name="DCF77 Transmitter",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="dcf77_app_main",

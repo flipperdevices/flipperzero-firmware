@@ -1,5 +1,5 @@
 App(
-    appid="Simon_Says",  # Must be unique
+    appid="simon_says",  # Must be unique
     name="Simon Says",  # Displayed in UI
     apptype=FlipperAppType.EXTERNAL,
     entry_point="simon_says_app_entry",

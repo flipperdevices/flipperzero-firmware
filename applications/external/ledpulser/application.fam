@@ -1,5 +1,5 @@
 App(
-    appid="LED_Pulsator",
+    appid="led_pulsator",
     name="LED Pulsator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="ledpulser_app",

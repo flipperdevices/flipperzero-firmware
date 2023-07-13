@@ -1,5 +1,5 @@
 App(
-    appid="Count_Down_Timer",
+    appid="count_down_timer",
     name="Count Down Timer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="app_main",

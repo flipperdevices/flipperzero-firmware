@@ -1,5 +1,5 @@
 App(
-    appid="Tuning_Fork",
+    appid="tuning_fork",
     name="Tuning Fork",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tuning_fork_app",

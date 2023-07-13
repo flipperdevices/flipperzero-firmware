@@ -1,5 +1,5 @@
 App(
-    appid="CFW",
+    appid="cfw",
     name="CFW Settings",
     apptype=FlipperAppType.MENUEXTERNAL,
     entry_point="cfw_app",
@@ -13,5 +13,5 @@ App(
     fap_libs=["assets"],
     fap_category="Settings",
     fap_icon="cfw_app_10px.png",
-    link="/ext/apps/Settings/CFW.fap",
+    link="/ext/apps/Settings/cfw.fap",
 )

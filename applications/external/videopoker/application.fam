@@ -1,5 +1,5 @@
 App(
-    appid="VideoPoker",
+    appid="videopoker",
     name="Video Poker",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="video_poker_app",

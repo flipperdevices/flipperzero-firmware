@@ -1,5 +1,5 @@
 App(
-    appid="FAP_Boilerplate",
+    appid="fap_boilerplate",
     name="FAP Boilerplate",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="boilerplate_app",

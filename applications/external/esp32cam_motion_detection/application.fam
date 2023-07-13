@@ -1,5 +1,5 @@
 App(
-    appid="ESP32CAM_Motion",
+    appid="esp32cam_motion",
     name="[ESP32CAM] Motion Detection",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_echo_app",

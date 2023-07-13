@@ -1,5 +1,5 @@
 App(
-    appid="Hex_Editor",
+    appid="hex_editor",
     name="Hex Editor",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="hex_editor_app",

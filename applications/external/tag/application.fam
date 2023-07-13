@@ -1,5 +1,5 @@
 App(
-    appid="Game_of_Tag",
+    appid="game_of_tag",
     name="Game of Tag WIP",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="tag_game_app",

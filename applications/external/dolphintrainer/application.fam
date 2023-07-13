@@ -1,5 +1,5 @@
 App(
-    appid="Dolphin_Trainer",
+    appid="dolphin_trainer",
     # OLD name="Antidepressants",
     name="Dolphin Trainer",
     apptype=FlipperAppType.EXTERNAL,

@@ -1,5 +1,5 @@
 App(
-    appid="Resistance_Calculator",
+    appid="resistance_calculator",
     name="Resistance Calculator",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="resistors_app",

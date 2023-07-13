@@ -1,5 +1,5 @@
 App(
-    appid="Text_Viewer",
+    appid="text_viewer",
     name="Text Viewer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="text_viewer_app",

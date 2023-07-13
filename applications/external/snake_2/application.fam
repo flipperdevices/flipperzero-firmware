@@ -1,5 +1,5 @@
 App(
-    appid="Snake20",
+    appid="snake20",
     name="Snake 2.0",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="snake_20_app",

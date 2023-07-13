@@ -1,5 +1,5 @@
 App(
-    appid="Mifare_Fuzzer",
+    appid="mifare_fuzzer",
     name="Mifare Fuzzer",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mifare_fuzzer_app",

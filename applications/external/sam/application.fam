@@ -1,5 +1,5 @@
 App(
-    appid="SAM",
+    appid="sam",
     name="SAM AYBABTU",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="sam_app",
@@ -14,7 +14,7 @@ App(
     fap_icon_assets="icons",
 )
 App(
-    appid="SAM_YES",
+    appid="sam_yes",
     name="SAM YES",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="sam_app_yes",
@@ -29,7 +29,7 @@ App(
     fap_icon_assets="icons",
 )
 App(
-    appid="SAM_NO",
+    appid="sam_no",
     name="SAM NO",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="sam_app_no",
@@ -44,7 +44,7 @@ App(
     fap_icon_assets="icons",
 )
 App(
-    appid="SAM_WTF",
+    appid="sam_wtf",
     name="SAM WTF",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="sam_app_wtf",

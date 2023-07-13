@@ -1,5 +1,5 @@
 App(
-    appid="Xbox_Controller",
+    appid="xbox_controller",
     name="Xbox Controller",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="xbox_controller_app",

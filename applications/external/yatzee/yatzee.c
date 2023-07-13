@@ -1,4 +1,4 @@
-#include "Yatzee_icons.h"
+#include "yatzee_icons.h"
 
 #include <furi.h>
 #include <furi_hal.h>

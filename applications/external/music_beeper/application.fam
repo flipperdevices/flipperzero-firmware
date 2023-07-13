@@ -1,5 +1,5 @@
 App(
-    appid="Music_Beeper",
+    appid="music_beeper",
     name="Music Beeper",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="music_beeper_app",

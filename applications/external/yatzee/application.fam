@@ -1,5 +1,5 @@
 App(
-    appid="Yatzee",
+    appid="yatzee",
     name="Yatzee",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="yatzee_main",

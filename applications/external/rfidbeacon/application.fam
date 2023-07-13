@@ -1,5 +1,5 @@
 App(
-    appid="RFID_Beacon",
+    appid="rfid_beacon",
     name="RFID Beacon",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="flipper_rfidbeacon_app",

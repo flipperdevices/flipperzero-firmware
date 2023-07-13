@@ -1,5 +1,5 @@
 App(
-    appid="USB_Mass_Storage",
+    appid="usb_mass_storage",
     name="USB Mass Storage",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="mass_storage_app",
