@@ -32,27 +32,11 @@ typedef enum {
     MfClassicListenerCommStateEncrypted,
 } MfClassicListenerCommState;
 
-typedef enum {
-    MfClassicListenerCommandTypeOnePart,
-    MfClassicListenerCommandTypeTwoParts,
-} MfClassicListenerCommandType;
-
-typedef enum {
-    MfClassicListenerCommandSecondPartAuth,
-    MfClassicListenerCommandSecondPartWrite,
-    MfClassicListenerCommandSecondPartInc,
-    MfClassicListenerCommandSecondPartDec,
-
-    MfClassicListenerCommandSecondPartNum,
-} MfClassicListenerCommandSecondPart;
-
 struct MfClassicListener {
     Iso14443_3aListener* iso14443_3a_listener;
     MfClassicListenerState state;
     MfClassicListenerAuthState auth_state;
     MfClassicListenerCommState comm_state;
-    MfClassicListenerCommandType cmd_type;
-    MfClassicListenerCommandSecondPart second_part;
 
     MfClassicData* data;
     BitBuffer* tx_plain_buffer;
@@ -67,6 +51,10 @@ struct MfClassicListener {
     MfClassicListenerEventData mfc_event_data;
     NfcGenericCallback callback;
     void* context;
+
+    bool cmd_in_progress;
+    size_t current_cmd_idx;
+    size_t current_cmd_handler_idx;
 
     size_t total_block_num;
 };
