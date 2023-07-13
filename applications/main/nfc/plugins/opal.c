@@ -48,9 +48,9 @@ static const char* opal_usages[14] = {
     "Tap on: new journey",
     "Tap on: transfer from same mode",
     "Tap on: transfer from other mode",
-    "", // Manly Ferry: new journey
-    "", // Manly Ferry: transfer from ferry
-    "", // Manly Ferry: transfer from other
+    NULL, // Manly Ferry: new journey
+    NULL, // Manly Ferry: transfer from ferry
+    NULL, // Manly Ferry: transfer from other
     "Tap off: distance fare",
     "Tap off: flat fare",
     "Automated tap off: failed to tap off",
@@ -83,8 +83,6 @@ static_assert(sizeof(OpalFile) == 16, "OpalFile");
 // Opal measures days since 1980-01-01 and minutes since midnight, and presumes
 // all days are 1440 minutes.
 static void opal_date_time_to_furi(uint16_t days, uint16_t minutes, FuriHalRtcDateTime* out) {
-    uint16_t diy;
-
     out->year = 1980;
     out->month = 1;
     // 1980-01-01 is a Tuesday
@@ -95,21 +93,21 @@ static void opal_date_time_to_furi(uint16_t days, uint16_t minutes, FuriHalRtcDa
 
     // What year is it?
     for(;;) {
-        diy = furi_hal_rtc_get_days_per_year(out->year);
-        if(days < diy) break;
-        days -= diy;
+        const uint16_t num_days_in_year = furi_hal_rtc_get_days_per_year(out->year);
+        if(days < num_days_in_year) break;
+        days -= num_days_in_year;
         out->year++;
     }
 
     // 1-index the day of the year
     days++;
-    // What month is it?
-    bool is_leap = furi_hal_rtc_is_leap_year(out->year);
 
     for(;;) {
-        uint8_t dim = furi_hal_rtc_get_days_per_month(is_leap, out->month);
-        if(days <= dim) break;
-        days -= dim;
+        // What month is it?
+        const bool is_leap = furi_hal_rtc_is_leap_year(out->year);
+        const uint8_t num_days_in_month = furi_hal_rtc_get_days_per_month(is_leap, out->month);
+        if(days <= num_days_in_month) break;
+        days -= num_days_in_month;
         out->month++;
     }
 
@@ -168,7 +166,6 @@ static bool opal_parse(const void* data, FuriString* parsed_data) {
         const char* sign = is_negative_balance ? "-" : "";
         const int32_t balance = is_negative_balance ? labs(opal_file->balance) :
                                                       opal_file->balance;
-
         const uint8_t balance_cents = balance % 100;
         const int32_t balance_dollars = balance / 100;
 
