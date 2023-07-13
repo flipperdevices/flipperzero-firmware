@@ -87,6 +87,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - Added: [Chess (By xtruan)](https://github.com/xtruan/flipper-chess)
+- UL: Merge Fixes for File Sorting (By xMasterX)
 
 <a name="release">
 
