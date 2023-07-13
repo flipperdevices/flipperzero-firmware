@@ -13,13 +13,19 @@
 #define APPLICATION_NAME "ESubGhzChat"
 
 #define DEFAULT_FREQ 433920000
+
 #define KEY_BITS 256
 #define IV_BYTES 12
 #define TAG_BYTES 16
+
 #define RX_TX_BUFFER_SIZE 1024
 
 #define CHAT_BOX_STORE_SIZE 4096
 #define TEXT_INPUT_STORE_SIZE 512
+
+#define TICK_INTERVAL 50
+#define MESSAGE_COMPLETION_TIMEOUT 200
+#define TIMEOUT_BETWEEN_MESSAGES 500
 
 typedef struct {
 	SceneManager *scene_manager;
@@ -37,6 +43,8 @@ typedef struct {
 	uint8_t rx_buffer[RX_TX_BUFFER_SIZE];
 	uint8_t tx_buffer[RX_TX_BUFFER_SIZE];
 	char rx_str_buffer[RX_TX_BUFFER_SIZE + 1];
+	FuriStreamBuffer *rx_collection_buffer;
+	uint32_t last_time_rx_data;
 } ESubGhzChatState;
 
 typedef enum {
@@ -101,6 +109,11 @@ static void post_rx(ESubGhzChatState *state, size_t rx_size)
 			state->rx_str_buffer);
 
 	notification_message(state->notification, &sequence_single_vibro);
+
+	// Reset Text Box contents and focus
+	text_box_set_text(state->chat_box,
+			furi_string_get_cstr(state->chat_box_store));
+	text_box_set_focus(state->chat_box, TextBoxFocusEnd);
 }
 
 static void freq_input_cb(void *context)
@@ -247,8 +260,9 @@ static void chat_input_cb(void *context)
 	}
 
 	// TODO: remove this
-	memcpy(state->rx_buffer, state->tx_buffer, tx_size);
-	post_rx(state, tx_size);
+	state->last_time_rx_data = furi_get_tick();
+	furi_stream_buffer_send(state->rx_collection_buffer,
+			state->tx_buffer, tx_size, 0);
 
 	// TODO: actually transmit
 
@@ -489,8 +503,9 @@ static bool scene_on_event_chat_box(void* context, SceneManagerEvent event)
 	UNUSED(event);
 
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_event_chat_box");
+
 	furi_assert(context);
-	// TODO
+
 	return false;
 }
 
@@ -545,6 +560,32 @@ static bool esubghz_chat_navigation_event_callback(void* context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 	return scene_manager_handle_back_event(state->scene_manager);
+}
+
+static void esubghz_chat_tick_event_callback(void* context)
+{
+	FURI_LOG_T(APPLICATION_NAME, "esubghz_chat_tick_event_callback");
+
+	furi_assert(context);
+	ESubGhzChatState* state = context;
+
+	size_t avail = furi_stream_buffer_bytes_available(
+			state->rx_collection_buffer);
+	if (avail > 0) {
+		uint32_t since_last_rx = furi_get_tick() -
+			state->last_time_rx_data;
+		if (avail == RX_TX_BUFFER_SIZE || since_last_rx >
+				MESSAGE_COMPLETION_TIMEOUT) {
+			size_t rx_size = furi_stream_buffer_receive(
+					state->rx_collection_buffer,
+					state->rx_buffer,
+					avail, 0);
+			post_rx(state, rx_size);
+			furi_stream_buffer_reset(state->rx_collection_buffer);
+		}
+	}
+
+	scene_manager_handle_tick_event(state->scene_manager);
 }
 
 static bool helper_strings_alloc(ESubGhzChatState *state)
@@ -643,6 +684,13 @@ int32_t esubghz_chat(void)
 		goto err_alloc_cb;
 	}
 
+	state->rx_collection_buffer = furi_stream_buffer_alloc(
+			RX_TX_BUFFER_SIZE,
+			RX_TX_BUFFER_SIZE);
+	if (state->rx_collection_buffer == NULL) {
+		goto err_alloc_rcb;
+	}
+
 	// set chat name prefix
 	// TODO: handle escape chars here somehow
 	furi_string_printf(state->name_prefix, "\033[0;33m%s\033[0m: ",
@@ -657,6 +705,10 @@ int32_t esubghz_chat(void)
 	view_dispatcher_set_navigation_event_callback(
 			state->view_dispatcher,
 			esubghz_chat_navigation_event_callback);
+	view_dispatcher_set_tick_event_callback(
+			state->view_dispatcher,
+			esubghz_chat_tick_event_callback,
+			TICK_INTERVAL);
 
 	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_Input,
 			text_input_get_view(state->text_input));
@@ -686,6 +738,9 @@ int32_t esubghz_chat(void)
 			sizeof(state->text_input_store));
 	gcm_zero_ctx(&(state->gcm_ctx));
 
+	furi_stream_buffer_free(state->rx_collection_buffer);
+
+err_alloc_rcb:
 	chat_box_free(state);
 
 err_alloc_cb:
