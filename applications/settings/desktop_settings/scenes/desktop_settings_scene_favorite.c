@@ -13,6 +13,8 @@
 #define EXTERNAL_APPLICATION_NAME ("[External Application]")
 #define EXTERNAL_APPLICATION_INDEX (APPS_COUNT + 2)
 
+#define PRESELECTED_SPECIAL 0xffffffff
+
 static const char* favorite_fap_get_app_name(size_t i) {
     const char* name;
     if(i < FLIPPER_APPS_COUNT) {
@@ -55,7 +57,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
 
     uint32_t primary_favorite =
         scene_manager_get_scene_state(app->scene_manager, DesktopSettingsAppSceneFavorite);
-    uint32_t pre_select_item = 0;
+    uint32_t pre_select_item = PRESELECTED_SPECIAL;
     FavoriteApp* curr_favorite_app = primary_favorite ? &app->settings.favorite_primary :
                                                         &app->settings.favorite_secondary;
 
@@ -65,7 +67,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         submenu_add_item(submenu, name, i, desktop_settings_scene_favorite_submenu_callback, app);
 
         // Select favorite item in submenu
-        if(!curr_favorite_app->is_external && !strcmp(name, curr_favorite_app->name_or_path)) {
+        if(!strcmp(name, curr_favorite_app->name_or_path)) {
             pre_select_item = i;
         }
     }
@@ -86,7 +88,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         desktop_settings_scene_favorite_submenu_callback,
         app);
 
-    if(curr_favorite_app->is_external) {
+    if(pre_select_item == PRESELECTED_SPECIAL) {
         if(curr_favorite_app->name_or_path[0] == '\0') {
             pre_select_item = EXTERNAL_BROWSER_INDEX;
         } else {
@@ -113,7 +115,6 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == EXTERNAL_BROWSER_INDEX) {
-            curr_favorite_app->is_external = true;
             curr_favorite_app->name_or_path[0] = '\0';
             consumed = true;
         } else if(event.event == EXTERNAL_APPLICATION_INDEX) {
@@ -134,7 +135,6 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
 
             if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
                 submenu_reset(app->submenu); // Prevent menu from being shown when we exiting scene
-                curr_favorite_app->is_external = true;
                 strncpy(
                     curr_favorite_app->name_or_path,
                     furi_string_get_cstr(temp_path),
@@ -142,9 +142,8 @@ bool desktop_settings_scene_favorite_on_event(void* context, SceneManagerEvent e
                 consumed = true;
             }
         } else {
-            curr_favorite_app->is_external = false;
             const char* name = favorite_fap_get_app_name(event.event);
-            if(event.event) strncpy(curr_favorite_app->name_or_path, name, MAX_APP_LENGTH);
+            if(name) strncpy(curr_favorite_app->name_or_path, name, MAX_APP_LENGTH);
             consumed = true;
         }
         if(consumed) {
