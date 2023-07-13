@@ -494,9 +494,30 @@ static void browser_list_item_cb(
                     int32_t load_offset = CLAMP(
                         model->item_idx - ITEM_LIST_LEN_MAX / 2, (int32_t)model->item_cnt, 0);
                     file_browser_worker_load(browser->worker, load_offset, ITEM_LIST_LEN_MAX);
+
+                    if(model->item_cnt <= BROWSER_SORT_THRESHOLD) {
+                        FuriString* selected = NULL;
+                        if(model->item_idx > 0) {
+                            selected = furi_string_alloc_set(
+                                items_array_get(model->items, model->item_idx)->path);
+                        }
+
+                        items_array_sort(model->items);
+
+                        if(selected != NULL) {
+                            for(uint32_t i = 0; i < model->item_cnt; i++) {
+                                if(!furi_string_cmp(
+                                       items_array_get(model->items, i)->path, selected)) {
+                                    model->item_idx = i;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             },
-            true);
+            false);
+        browser_update_offset(browser);
     }
 }
 

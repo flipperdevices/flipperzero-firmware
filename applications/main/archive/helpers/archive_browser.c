@@ -76,6 +76,9 @@ static void archive_list_item_cb(
             ArchiveBrowserViewModel * model,
             {
                 model->list_loading = false;
+                if(model->item_cnt <= BROWSER_SORT_THRESHOLD) {
+                    files_array_sort(model->files);
+                }
                 if(archive_is_file_list_load_required(model)) {
                     load_again = true;
                 }
