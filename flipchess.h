@@ -15,7 +15,7 @@
 #include "views/flipchess_startscreen.h"
 #include "views/flipchess_scene_1.h"
 
-#define FLIPCHESS_VERSION "v0.0.1"
+#define FLIPCHESS_VERSION "v0.1.0"
 
 #define TEXT_BUFFER_SIZE 256
 
