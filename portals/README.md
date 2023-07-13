@@ -23,3 +23,4 @@ Thank you so much to the following contributors for providing awesome portals.
 - `Twitter.html` by [roshanravan](https://github.com/roshanravan)
 - `Facebook.html` by [roshanravan](https://github.com/roshanravan)
 - `CoxWifi.html` by [qqmajikpp](https://github.com/qqmajikpp)
+- `Starlink.html` by [roshanravan](https://github.com/roshanravan)
