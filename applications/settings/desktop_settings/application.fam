@@ -1,7 +1,7 @@
 App(
     appid="desktop_settings",
     name="Desktop",
-    apptype=FlipperAppType.EXTSETTINGSAPP,
+    apptype=FlipperAppType.SETTINGS,
     entry_point="desktop_settings_app",
     requires=[
         "desktop",
@@ -9,8 +9,8 @@ App(
     ],
     stack_size=1 * 1024,
     order=50,
-    fap_icon="desktopsettings_10px.png",
-    fap_category="Settings",
-    fap_icon_assets="assets_images",
-    link="/ext/apps/Settings/desktop_settings.fap",
+    # fap_icon="desktopsettings_10px.png",
+    # fap_category="Settings",
+    # fap_icon_assets="assets_images",
+    # link="/ext/apps/Settings/desktop_settings.fap",
 )
