@@ -163,28 +163,25 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
     // 0: none, 1: player, 2: AI, 3: undo
     uint8_t moveType = 0;
 
-    //model->msg = (SCL_boardWhitesTurn(model->game.board) ? "white to move" : "black to move");
+    // if(model->paramInfo) {
+        
+    //     if(model->random960PosNumber >= 0)
+    //         printf("960 random position number: %d\n", model->random960PosNumber);
 
-    // if(paramInfo) {
-    //     //putchar('\n');
+    //     printf("ply number: %d\n", model->game.ply);
 
-    //     if(random960PosNumber >= 0)
-    //         printf("960 random position number: %d\n", random960PosNumber);
+    //     SCL_boardToFEN(model->game.board, string);
+    //     printf("FEN: %s\n", string);
 
-    //     printf("ply number: %d\n", game.ply);
-
-    //     //SCL_boardToFEN(game.board, string);
-    //     //printf("FEN: %s\n", string);
-
-    //     int16_t eval = SCL_boardEvaluateStatic(game.board);
+    //     int16_t eval = SCL_boardEvaluateStatic(model->game.board);
     //     printf(
     //         "board static evaluation: %lf (%d)\n",
     //         ((double)eval) / ((double)SCL_VALUE_PAWN),
     //         eval);
-    //     printf("board hash: %u\n", SCL_boardHash32(game.board));
+    //     printf("board hash: %u\n", SCL_boardHash32(model->game.board));
     //     printf("phase: ");
 
-    //     switch(SCL_boardEstimatePhase(game.board)) {
+    //     switch(SCL_boardEstimatePhase(model->game.board)) {
     //     case SCL_PHASE_OPENING:
     //         puts("opening");
     //         break;
@@ -198,15 +195,15 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
 
     //     printf(
     //         "en passant: %d\n",
-    //         ((game.board[SCL_BOARD_ENPASSANT_CASTLE_BYTE] & 0x0f) + 1) % 16);
+    //         ((model->game.board[SCL_BOARD_ENPASSANT_CASTLE_BYTE] & 0x0f) + 1) % 16);
     //     printf(
-    //         "50 move rule count: %d\n", game.board[SCL_BOARD_MOVE_COUNT_BYTE]);
+    //         "50 move rule count: %d\n", model->game.board[SCL_BOARD_MOVE_COUNT_BYTE]);
 
-    //     // if(paramFEN == NULL && paramPGN == NULL) {
-    //     //     //printf("PGN: ");
-    //     //     //SCL_printPGN(game.record, putCharacter, startState);
-    //     //     //putchar('\n');
-    //     // }
+    //     if(model->paramFEN == NULL && model->paramPGN == NULL) {
+    //         printf("PGN: ");
+    //         SCL_printPGN(model->game.record, putCharacter, startState);
+    //         putchar('\n');
+    //     }
     // }
 
     if(model->game.state != SCL_GAME_STATE_PLAYING || model->paramExit)
@@ -311,7 +308,6 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
 
             SCL_recordGetMove(model->game.record, model->game.ply - 1, &s0, &s1, &p);
             SCL_moveToString(model->game.board, s0, s1, p, model->moveString);
-            //model->msg = model->moveString;
         }
         break;
     }
@@ -335,22 +331,22 @@ void flipchess_scene_1_draw(Canvas* canvas, FlipChessScene1Model* model) {
     canvas_set_color(canvas, ColorBlack);
 
     // Frame
-    canvas_draw_frame(canvas, 0, 0, 128, 64);
+    canvas_draw_frame(canvas, 0, 0, 66, 64);
 
     // Message
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 66, 10, model->msg);
-    canvas_draw_str(canvas, 66, 19, model->moveString);
-    canvas_draw_str(canvas, 66, 31, model->msg2);
-    canvas_draw_str(canvas, 66, 40, model->moveString2);
-    canvas_draw_str(canvas, 66, 52, model->msg3);
-    canvas_draw_str(canvas, 66, 61, model->moveString3);
+    canvas_draw_str(canvas, 68, 10, model->msg);
+    canvas_draw_str(canvas, 68, 19, model->moveString);
+    canvas_draw_str(canvas, 68, 31, model->msg2);
+    canvas_draw_str(canvas, 68, 40, model->moveString2);
+    canvas_draw_str(canvas, 68, 52, model->msg3);
+    canvas_draw_str(canvas, 68, 61, model->moveString3);
 
     // Board
     for(uint16_t y = 0; y < SCL_BOARD_PICTURE_WIDTH; y++) {
         for(uint16_t x = 0; x < SCL_BOARD_PICTURE_WIDTH; x++) {
             if(!picture[x + (y * SCL_BOARD_PICTURE_WIDTH)]) {
-                canvas_draw_dot(canvas, x, y);
+                canvas_draw_dot(canvas, x + 1, y);
             }
         }
     }
