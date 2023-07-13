@@ -47,7 +47,6 @@ appenv.AppendUnique(
         "-Map=${TARGET}.map",
         "-specs=nano.specs",
         "-specs=nosys.specs",
-        "-O3",
     ],
     LIBS=[
         "m",
