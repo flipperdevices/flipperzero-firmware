@@ -6,6 +6,7 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <toolbox/sha256.h>
+#include <notification/notification_messages.h>
 
 #include "crypto/gcm.h"
 
@@ -23,6 +24,7 @@
 typedef struct {
 	SceneManager *scene_manager;
 	ViewDispatcher *view_dispatcher;
+	NotificationApp *notification;
 	TextBox *chat_box;
 	FuriString *chat_box_store;
 	TextInput *text_input;
@@ -32,7 +34,9 @@ typedef struct {
 	bool encrypted;
 	uint32_t frequency;
 	gcm_context gcm_ctx;
+	uint8_t rx_buffer[RX_TX_BUFFER_SIZE];
 	uint8_t tx_buffer[RX_TX_BUFFER_SIZE];
+	char rx_str_buffer[RX_TX_BUFFER_SIZE + 1];
 } ESubGhzChatState;
 
 typedef enum {
@@ -58,6 +62,30 @@ static void esubghz_chat_explicit_bzero(void *s, size_t len)
 {
 	memset(s, 0, len);
 	asm volatile("" ::: "memory");
+}
+
+static void post_rx(ESubGhzChatState *state, size_t rx_size)
+{
+	furi_assert(state);
+
+	if (rx_size == 0) {
+		return;
+	}
+
+	furi_check(rx_size <= RX_TX_BUFFER_SIZE);
+
+	if (!state->encrypted) {
+		memcpy(state->rx_str_buffer, state->rx_buffer, rx_size);
+		state->rx_str_buffer[rx_size] = 0;
+	} else {
+		// TODO
+		return;
+	}
+
+	furi_string_cat_printf(state->chat_box_store, "\n%s",
+			state->rx_str_buffer);
+
+	notification_message(state->notification, &sequence_single_vibro);
 }
 
 static void freq_input_cb(void *context)
@@ -202,6 +230,10 @@ static void chat_input_cb(void *context)
 		furi_string_cat_printf(state->chat_box_store, " %02x",
 				state->tx_buffer[i]);
 	}
+
+	// TODO: remove this
+	memcpy(state->rx_buffer, state->tx_buffer, tx_size);
+	post_rx(state, tx_size);
 
 	// TODO: actually transmit
 
@@ -620,12 +652,17 @@ int32_t esubghz_chat(void)
 	Gui *gui = furi_record_open(RECORD_GUI);
 	view_dispatcher_attach_to_gui(state->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
+	/* no error handling here, don't know how */
+	state->notification = furi_record_open(RECORD_NOTIFICATION);
+
 	scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_FreqInput);
 	view_dispatcher_run(state->view_dispatcher);
 
 	err = 0;
 
-    	furi_record_close(RECORD_GUI);
+	furi_record_close(RECORD_NOTIFICATION);
+
+	furi_record_close(RECORD_GUI);
 	view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_Input);
 	view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_ChatBox);
 
