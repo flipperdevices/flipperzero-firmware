@@ -1,4 +1,5 @@
 #include <furi_hal_resources.h>
+#include <furi_hal_bus.h>
 #include <furi.h>
 
 #include <stm32wbxx_ll_rcc.h>
@@ -80,6 +81,7 @@ const GpioPinRecord gpio_pins[] = {
     /* Dangerous pins, may damage hardware */
     {.pin = &gpio_usart_rx, .name = "PB7", .debug = true},
     {.pin = &gpio_speaker, .name = "PB8", .debug = true},
+    {.pin = &gpio_infrared_tx, .name = "PB9", .debug = true},
 };
 
 const size_t gpio_pins_count = sizeof(gpio_pins) / sizeof(GpioPinRecord);
@@ -106,6 +108,13 @@ static void furi_hal_resources_init_input_pins(GpioMode mode) {
 }
 
 void furi_hal_resources_init_early() {
+    furi_hal_bus_enable(FuriHalBusGPIOA);
+    furi_hal_bus_enable(FuriHalBusGPIOB);
+    furi_hal_bus_enable(FuriHalBusGPIOC);
+    furi_hal_bus_enable(FuriHalBusGPIOD);
+    furi_hal_bus_enable(FuriHalBusGPIOE);
+    furi_hal_bus_enable(FuriHalBusGPIOH);
+
     furi_hal_resources_init_input_pins(GpioModeInput);
 
     // SD Card stepdown control
@@ -150,6 +159,12 @@ void furi_hal_resources_init_early() {
 
 void furi_hal_resources_deinit_early() {
     furi_hal_resources_init_input_pins(GpioModeAnalog);
+    furi_hal_bus_disable(FuriHalBusGPIOA);
+    furi_hal_bus_disable(FuriHalBusGPIOB);
+    furi_hal_bus_disable(FuriHalBusGPIOC);
+    furi_hal_bus_disable(FuriHalBusGPIOD);
+    furi_hal_bus_disable(FuriHalBusGPIOE);
+    furi_hal_bus_disable(FuriHalBusGPIOH);
 }
 
 void furi_hal_resources_init() {

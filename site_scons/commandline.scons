@@ -228,6 +228,7 @@ vars.AddVariables(
             ("applications/debug", False),
             ("applications/external", False),
             ("applications/examples", False),
+            ("applications/drivers", False),
             ("applications_user", False),
         ],
     ),
@@ -235,6 +236,18 @@ vars.AddVariables(
         "PVSNOBROWSER",
         help="Don't open browser after generating error repots",
         default=False,
+    ),
+    (
+        "FIRMWARE_ORIGIN",
+        "Firmware origin. 'Official' if follows upstream's API structure, otherwise fork name. "
+        " This will also create a C define FW_ORIGIN_<origin> so that "
+        " app can check what version it is being built for.",
+        "Official",
+    ),
+    (
+        "FLIP_PORT",
+        "Full port name of Flipper to use, if multiple Flippers are connected",
+        "auto",
     ),
 )
 
