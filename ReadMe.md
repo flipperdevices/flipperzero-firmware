@@ -88,6 +88,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Chess (By xtruan)](https://github.com/xtruan/flipper-chess)
 - UL: Merge Fixes for File Sorting (By xMasterX)
 - Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
+- OFW: [Loader: good looking error messages #2873 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2873) With Reverts For Now
+- OFW: [Desktop,Cli: add uptime info #2874 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2874)
+- UL: [Updated Infrared Assets #544 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/544
 
 <a name="release">
 
