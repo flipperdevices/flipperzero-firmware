@@ -76,8 +76,7 @@ void nfc_maker_free(NfcMaker* app) {
 extern int32_t nfc_maker(void* p) {
     UNUSED(p);
     NfcMaker* app = nfc_maker_alloc();
-    scene_manager_set_scene_state(app->scene_manager, NfcMakerSceneStart, NfcMakerSceneHttps);
-    scene_manager_next_scene(app->scene_manager, NfcMakerSceneStart);
+    scene_manager_next_scene(app->scene_manager, NfcMakerSceneMenu);
     view_dispatcher_run(app->view_dispatcher);
     nfc_maker_free(app);
     return 0;
