@@ -8,7 +8,7 @@
 #include <gui/scene_manager.h>
 #include "nfc_maker2_icons.h"
 #include <gui/modules/submenu.h>
-#include <gui/modules/text_input.h>
+#include "nfc_maker_text_input.h"
 #include <gui/modules/byte_input.h>
 #include <gui/modules/popup.h>
 #include "scenes/nfc_maker_scene.h"
@@ -16,6 +16,7 @@
 #include <lib/toolbox/random_name.h>
 #include <applications/main/nfc/nfc_i.h>
 #include <furi_hal_bt.h>
+#include "strnlen.h"
 
 #define MAC_INPUT_LEN GAP_MAC_ADDR_SIZE
 #define MAIL_INPUT_LEN 128
@@ -45,7 +46,7 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     Submenu* submenu;
-    TextInput* text_input;
+    NFCMaker_TextInput* text_input;
     ByteInput* byte_input;
     Popup* popup;
 
