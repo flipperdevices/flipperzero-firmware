@@ -4,10 +4,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable, ClassVar, List, Optional, Tuple
 
-
 class FlipperManifestException(Exception):
     pass
-
 
 class FlipperAppType(Enum):
     SERVICE = "Service"
@@ -22,7 +20,6 @@ class FlipperAppType(Enum):
     EXTSETTINGSAPP = "ExtSettingsApp"
     METAPACKAGE = "Package"
     PLUGIN = "Plugin"
-
 
 @dataclass
 class FlipperApplication:
@@ -94,14 +91,6 @@ class FlipperApplication:
             raise FlipperManifestException(
                 f"Invalid appid '{self.appid}'. Must match regex '{self.APP_ID_REGEX}'"
             )
-        # if isinstance(self.fap_version, str):
-            # try:
-                # self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
-            # except ValueError:
-                # raise FlipperManifestException(
-                    # f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
-                # )
-
 
 class AppManager:
     def __init__(self):
@@ -132,11 +121,6 @@ class AppManager:
                 raise FlipperManifestException(
                     f"Plugin {kw.get('appid')} must have 'requires' in manifest"
                 )
-        # Harmless - cdefines for external apps are meaningless
-        # if apptype == FlipperAppType.EXTERNAL and kw.get("cdefines"):
-        #     raise FlipperManifestException(
-        #         f"External app {kw.get('appid')} must not have 'cdefines' in manifest"
-        #     )
 
     def load_manifest(self, app_manifest_path: str, app_dir_node: object):
         if not os.path.exists(app_manifest_path):
