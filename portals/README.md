@@ -25,3 +25,5 @@ Thank you so much to the following contributors for providing awesome portals.
 - `CoxWifi.html` by [qqmajikpp](https://github.com/qqmajikpp)
 - `Starlink.html` by [roshanravan](https://github.com/roshanravan)
 - `Spectrum.html` by [roshanravan](https://github.com/roshanravan)
+- `T_Mobile.html` by [roshanravan](https://github.com/roshanravan)
+- `Verizon.html` by [roshanravan](https://github.com/roshanravan)

