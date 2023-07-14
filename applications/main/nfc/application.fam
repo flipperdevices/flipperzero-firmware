@@ -9,18 +9,10 @@ App(
         "gui",
         "dialogs",
     ],
-    provides=["nfc_start"],
     icon="A_NFC_14",
     stack_size=5 * 1024,
     order=30,
     # fap_category="NFC",
     # fap_icon="icon.png",
     # fap_libs=["assets"],
-)
-App(
-    appid="nfc_start",
-    targets=["f7"],
-    apptype=FlipperAppType.STARTUP,
-    entry_point="nfc_on_system_start",
-    order=30,
 )
