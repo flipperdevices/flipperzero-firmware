@@ -495,8 +495,13 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 instance->view,
                 FlipChessScene1Model * model,
                 {
-                    UNUSED(model);
-                    instance->callback(FlipChessCustomEventScene1Back, instance->context);
+                    if(model->turnState == 1) {
+                        model->turnState = 0;
+                        SCL_squareSetClear(model->moveHighlight);
+                        flipchess_drawBoard(model);
+                    } else {
+                        instance->callback(FlipChessCustomEventScene1Back, instance->context);
+                    }
                 },
                 true);
             break;
