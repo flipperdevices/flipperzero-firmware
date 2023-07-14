@@ -39,3 +39,9 @@ This code is open-source and may be used for whatever you want to do with it.
 - [Flipc](flipc.org) for distributing the boilerplate
 - [Nikita Vostokov](https://github.com/wosk) for code contributions
 
+## Some cool projects I found using this 
+(let me know if you want yours added)<br>
+
+- [Flipper Zero Evil Portal](https://github.com/bigbrodude6119/flipper-zero-evil-portal) by [bigbrodude6110](https://github.com/bigbrodude6119)
+- [Flipper Chess](https://github.com/xtruan/flipper-chess) by [xtruan](https://github.com/xtruan)
+- [Crypto toolkit for Flipper Zero](https://github.com/xtruan/FlipBIP) by [xtruan](https://github.com/xtruan)
