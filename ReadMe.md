@@ -94,6 +94,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed duplicate WifiMap and CFW Settings fap file (By RogueMaster)
 - Changed all FAP file names, appids and associated references to be all lowercase like OFW/UL (By ESurge)
 - Removed unused Passport Settings and Dolphin SOS (By RogueMaster)
+- Extra Desktop Settings & Passport Settings are now set in CFW Settings app (By ESurge)
 - Loader updates (By ESurge)
 - UL: Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - UL: Revert Archive fixes temporarily (By xMasterX)
