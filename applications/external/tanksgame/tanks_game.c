@@ -10,7 +10,7 @@
 #include <lib/subghz/protocols/raw.h>
 #include <lib/subghz/protocols/princeton.h>
 #include <lib/subghz/subghz_tx_rx_worker.h>
-#include <Tanks_icons.h>
+#include "tanks_icons.h"
 
 #include "constants.h"
 

@@ -29,7 +29,7 @@ typedef unsigned char byte;
 
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
-#include <brainfuck_icons.h>
+#include "brainfuck_icons.h"
 
 #include <storage/storage.h>
 #include <stream/stream.h>

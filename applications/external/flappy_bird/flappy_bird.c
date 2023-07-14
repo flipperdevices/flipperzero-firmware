@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <dolphin/dolphin.h>
 
-#include <flappy_bird_icons.h>
+#include "flappy_bird_icons.h"
 #include <furi.h>
 #include <gui/gui.h>
 #include <input/input.h>

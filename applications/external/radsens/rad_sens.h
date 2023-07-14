@@ -6,7 +6,7 @@
 #include <storage/storage.h>
 #include <stdlib.h>
 #include <power/power_service/power.h>
-#include <rad_sens_icons.h>
+#include "rad_sens_icons.h"
 #include <notification/notification.h>
 
 typedef struct RadSensModel RadSensModel;

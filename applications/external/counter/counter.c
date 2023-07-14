@@ -4,7 +4,7 @@
 #include <notification/notification_messages.h>
 #include <input/input.h>
 #include <stdlib.h>
-#include <Counter_icons.h>
+#include "counter_icons.h"
 
 #define MAX_COUNT 999
 #define BOXTIME 2

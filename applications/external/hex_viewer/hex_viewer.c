@@ -1,10 +1,10 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <hex_viewer_icons.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <dialogs/dialogs.h>
+#include "hex_viewer_icons.h"
 
 #include <storage/storage.h>
 #include <stream/stream.h>

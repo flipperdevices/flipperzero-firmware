@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <input/input.h>
 #include <furi_hal.h>
-#include <slotmachine_icons.h>
+#include "slotmachine_icons.h"
 
 const Icon* slot_frames[] = {&I_x2, &I_x3, &I_x4, &I_x2_2, &I_x5};
 

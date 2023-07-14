@@ -12,7 +12,7 @@ App(
         "ibutton_srv",
         "infrared_srv",
         "lfrfid_srv",
-        "nfc_srv",
+        # "nfc_srv",
         "namechanger_srv",
         "onewire_srv",
     ],

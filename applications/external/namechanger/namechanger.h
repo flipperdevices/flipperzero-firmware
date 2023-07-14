@@ -7,7 +7,7 @@
 #include <gui/scene_manager.h>
 #include <storage/storage.h>
 
-#include <NameChanger_icons.h>
+#include "namechanger_icons.h"
 
 #include <gui/modules/submenu.h>
 #include <gui/modules/popup.h>

@@ -13,7 +13,7 @@
 #include <math.h>
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
-#include <asteroids_icons.h>
+#include "asteroids_icons.h"
 
 #define TAG "Asteroids" // Used for logging
 #define DEBUG_MSG 0

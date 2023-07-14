@@ -2,7 +2,7 @@
 #include "video_player_hal.h"
 #include "init_deinit.h"
 
-#include <video_player_icons.h>
+#include "video_player_icons.h"
 #include <furi.h>
 #include <furi_hal.h>
 #include <cli/cli.h>

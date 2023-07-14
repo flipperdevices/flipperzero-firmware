@@ -17,7 +17,7 @@
 #include "views/gpio_usb_uart.h"
 #include "views/gpio_i2c_scanner.h"
 #include "views/gpio_i2c_sfp.h"
-#include <gpio_icons.h>
+#include "gpio_icons.h"
 
 struct GpioApp {
     Gui* gui;

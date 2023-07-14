@@ -2,7 +2,7 @@
 #include <furi.h>
 #include <furi_hal_usb_hid.h>
 #include <gui/elements.h>
-#include <RGB_LED_icons.h>
+#include <rgb_led_icons.h>
 
 struct RgbLedDefault {
     View* view;

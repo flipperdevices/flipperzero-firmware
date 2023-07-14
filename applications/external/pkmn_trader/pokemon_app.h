@@ -8,7 +8,7 @@
 #include <gui/view.h>
 #include <gui/view_dispatcher.h>
 #include <gui/icon.h>
-#include <pokemon_icons.h>
+#include "pokemon_icons.h"
 
 #include "views/select_pokemon.hpp"
 #include "views/trade.hpp"

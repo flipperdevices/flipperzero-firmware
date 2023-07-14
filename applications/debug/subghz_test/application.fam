@@ -10,5 +10,5 @@ App(
     fap_icon="subghz_test_10px.png",
     fap_category="Debug",
     fap_icon_assets="images",
-    fap_version="0.1",
+    # fap_version="0.1",
 )

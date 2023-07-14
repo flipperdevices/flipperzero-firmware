@@ -11,8 +11,7 @@
 #include <stream/buffered_file_stream.h>
 #include <toolbox/stream/file_stream.h>
 
-#include <hex_editor_icons.h>
-// #include <assets_icons.h>
+#include "hex_editor_icons.h"
 
 #define TAG "HexEditor"
 

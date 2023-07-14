@@ -9,7 +9,7 @@
 
 #include "helpers/txrx/subghz_txrx.h"
 
-#include <subghz_remote_icons.h>
+#include "subghz_remote_icons.h"
 
 #include "views/remote.h"
 #include "views/edit_menu.h"

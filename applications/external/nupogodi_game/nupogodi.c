@@ -7,7 +7,7 @@
 #include <storage/storage.h>
 #include <stdlib.h>
 #include <power/power_service/power.h>
-#include <nupogodi_icons.h>
+#include "nupogodi_icons.h"
 #include "notifications.h"
 
 #define TAG "NuPogodi"

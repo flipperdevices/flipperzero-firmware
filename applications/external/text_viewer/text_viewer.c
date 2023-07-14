@@ -1,7 +1,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <text_viewer_icons.h>
+#include "text_viewer_icons.h"
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <dialogs/dialogs.h>

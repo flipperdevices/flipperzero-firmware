@@ -16,7 +16,7 @@
 #include <gui/modules/variable_item_list.h>
 #include <gui/modules/widget.h>
 
-#include <esp_flasher_icons.h>
+#include "esp_flasher_icons.h"
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>

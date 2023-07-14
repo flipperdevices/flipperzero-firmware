@@ -1,6 +1,5 @@
 #include "subghz_i.h"
 
-#include "assets_icons.h"
 #include "subghz/types.h"
 #include <math.h>
 #include <furi.h>

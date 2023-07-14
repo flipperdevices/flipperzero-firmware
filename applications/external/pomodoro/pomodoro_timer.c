@@ -3,7 +3,7 @@
 #include <furi_hal.h>
 #include <gui/elements.h>
 #include <notification/notification_messages.h>
-#include <Pomodoro_Timer_icons.h>
+#include "pomodoro_timer_icons.h"
 
 const NotificationSequence sequence_finish = {
     &message_display_backlight_on,

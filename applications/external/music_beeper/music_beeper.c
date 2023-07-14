@@ -3,7 +3,7 @@
 #include <furi.h>
 #include <furi_hal.h>
 
-#include <Music_Beeper_icons.h>
+#include "music_beeper_icons.h"
 #include <gui/gui.h>
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>

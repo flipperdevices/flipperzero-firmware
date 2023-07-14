@@ -5,8 +5,7 @@
 #include "helpers/ducky_script.h"
 
 #include <gui/gui.h>
-// #include <assets_icons.h>
-#include <bad_usb_icons.h>
+#include "bad_usb_icons.h"
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/submenu.h>

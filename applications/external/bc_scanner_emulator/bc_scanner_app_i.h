@@ -5,7 +5,7 @@
 
 #include <gui/gui.h>
 #include <gui/icon_i.h>
-#include <bc_scanner_icons.h>
+#include "bc_scanner_icons.h"
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <gui/modules/submenu.h>

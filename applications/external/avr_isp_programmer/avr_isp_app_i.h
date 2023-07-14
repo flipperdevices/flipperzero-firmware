@@ -1,7 +1,7 @@
 #pragma once
 
 #include "helpers/avr_isp_types.h"
-#include <avr_isp_icons.h>
+#include "avr_isp_icons.h"
 
 #include "scenes/avr_isp_scene.h"
 #include <gui/gui.h>

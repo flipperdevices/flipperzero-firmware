@@ -4,11 +4,10 @@
 #include "helpers/ducky_script.h"
 
 #include <gui/gui.h>
-#include <assets_icons.h>
+#include "bad_bt_icons.h"
 #include <gui/scene_manager.h>
 #include <dialogs/dialogs.h>
 #include <notification/notification_messages.h>
-#include "bad_bt_icons.h"
 
 #define BAD_BT_APP_SCRIPT_EXTENSION ".txt"
 #define BAD_BT_APP_LAYOUT_EXTENSION ".kl"
