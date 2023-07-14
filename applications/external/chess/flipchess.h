@@ -2,6 +2,7 @@
 
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_random.h>
 #include <gui/gui.h>
 #include <input/input.h>
 #include <stdlib.h>
@@ -15,7 +16,7 @@
 #include "views/flipchess_startscreen.h"
 #include "views/flipchess_scene_1.h"
 
-#define FLIPCHESS_VERSION "v0.1.0"
+#define FLIPCHESS_VERSION "v0.1.2"
 
 #define TEXT_BUFFER_SIZE 256
 

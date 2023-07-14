@@ -37,7 +37,7 @@ class GitVersion:
 
         version = (
             os.environ.get("DIST_SUFFIX", None)
-            or "0.86.2"
+            or "0.86.3"
         )
 
         force_no_dirty = (

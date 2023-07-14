@@ -6,7 +6,7 @@ App(
         requires=[
         "gui",
     ],
-    stack_size=2 * 1024,
+    stack_size=4 * 1024,
     order=40,
     fap_icon="flipchess_10px.png",
     fap_icon_assets="icons",
