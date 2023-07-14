@@ -299,7 +299,6 @@ void update_task_set_progress(UpdateTask* update_task, UpdateTaskStage stage, ui
                 "%s\n#[%d-%d]",
                 update_task_get_error_message(
                     update_task->state.stage, update_task->state.stage_progress),
-                // update_task_stage_descr[stage],
                 update_task->state.stage,
                 update_task->state.stage_progress);
         } else {
