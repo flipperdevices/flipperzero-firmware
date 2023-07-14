@@ -1,0 +1,16 @@
+App(
+    appid="esp32c6_gravity",
+    name="[ESP32C6] Gravity",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="uart_terminal_app",
+    requires=["gui"],
+    stack_size=1 * 1024,
+    order=90,
+    fap_icon="uart_terminal.png",
+    fap_category="GPIO",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="uart_terminal",
+    fap_author="https://github.com/chris-bc",
+    # fap_version="1.0",
+    fap_description="App to control ESP32-C6 Gravity wireless exploration platform.",
+)
