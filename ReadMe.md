@@ -20,7 +20,7 @@ Sources of "integrated/bundled" apps are added now in this repo too, to allow pu
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `13 Jul 23:51 GMT +3`
+### Apps checked & updated at `14 Jul 17:04 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -51,6 +51,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Chess (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 
 ## Media
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/44023851f7349b6ae9ca9f9bd9228d795a7e04c0)
@@ -97,6 +98,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon)
 - [Evil captive portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - WIP
 - [ESP Flasher (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
+- [ESP32-C6 Gravity terminal (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 
 ## Tools / Misc / NFC / RFID / Infrared / etc..
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
