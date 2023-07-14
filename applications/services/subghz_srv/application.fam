@@ -1,0 +1,7 @@
+App(
+    appid="subghz_srv",
+    targets=["f7"],
+    apptype=FlipperAppType.STARTUP,
+    entry_point="subghz_on_system_start",
+    order=40,
+)

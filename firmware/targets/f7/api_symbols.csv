@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,34.1,,
+Version,+,34.2,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -1933,8 +1933,8 @@ Function,-,llrintl,long long int,long double
 Function,-,llround,long long int,double
 Function,-,llroundf,long long int,float
 Function,-,llroundl,long long int,long double
-Function,+,loader_get_ext_main_app_item,ExtMainApp*,"Loader*, size_t"
-Function,+,loader_get_ext_main_app_list_size,size_t,Loader*
+Function,+,loader_get_menu_fap_item,MenuFap*,"Loader*, size_t"
+Function,+,loader_get_menu_faps_list_size,size_t,Loader*
 Function,+,loader_get_pubsub,FuriPubSub*,Loader*
 Function,+,loader_is_locked,_Bool,Loader*
 Function,+,loader_lock,_Bool,Loader*
@@ -3343,6 +3343,20 @@ Variable,-,AHBPrescTable,const uint32_t[16],
 Variable,-,AID,AIDSet,
 Variable,-,APBPrescTable,const uint32_t[8],
 Variable,-,EF,const EFFormat,
+Variable,+,FLIPPER_APPS,const FlipperInternalApplication[],
+Variable,+,FLIPPER_APPS_COUNT,const size_t,
+Variable,+,FLIPPER_ARCHIVE,const FlipperInternalApplication,
+Variable,+,FLIPPER_AUTORUN_APP_NAME,const char*,
+Variable,+,FLIPPER_EXTERNAL_APPS,const FlipperExternalApplication[],
+Variable,+,FLIPPER_EXTERNAL_APPS_COUNT,const size_t,
+Variable,+,FLIPPER_ON_SYSTEM_START,const FlipperInternalOnStartHook[],
+Variable,+,FLIPPER_ON_SYSTEM_START_COUNT,const size_t,
+Variable,+,FLIPPER_SERVICES,const FlipperInternalApplication[],
+Variable,+,FLIPPER_SERVICES_COUNT,const size_t,
+Variable,+,FLIPPER_SETTINGS_APPS,const FlipperInternalApplication[],
+Variable,+,FLIPPER_SETTINGS_APPS_COUNT,const size_t,
+Variable,+,FLIPPER_SYSTEM_APPS,const FlipperInternalApplication[],
+Variable,+,FLIPPER_SYSTEM_APPS_COUNT,const size_t,
 Variable,-,ITM_RxBuffer,volatile int32_t,
 Variable,-,MSIRangeTable,const uint32_t[16],
 Variable,-,SmpsPrescalerTable,const uint32_t[4][6],

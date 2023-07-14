@@ -52,7 +52,6 @@ class FlipperApplication:
     stack_size: int = 2048
     icon: Optional[str] = None
     order: int = 0
-    link: Optional[str] = ""
     sdk_headers: List[str] = field(default_factory=list)
     targets: List[str] = field(default_factory=lambda: ["all"])
 
@@ -224,6 +223,7 @@ class AppBuildset:
 
     def _get_app_depends(self, app_name: str) -> List[str]:
         app_def = self.appmgr.get(app_name)
+
         # Skip app if its target is not supported by the target we are building for
         if not self._check_if_app_target_supported(app_name):
             self._writer(
@@ -352,7 +352,6 @@ class ApplicationsCGenerator:
             "FLIPPER_ON_SYSTEM_START",
         ),
     }
-
     APP_EXTERNAL_TYPE = (
         "FlipperExternalApplication",
         "FLIPPER_EXTERNAL_APPS",
@@ -370,14 +369,6 @@ class ApplicationsCGenerator:
     def get_app_descr(self, app: FlipperApplication):
         if app.apptype == FlipperAppType.STARTUP:
             return app.entry_point
-        if app.apptype == FlipperAppType.MENUEXTERNAL:
-            return f"""
-    {{.app = NULL,
-     .name = "{app.name}",
-     .appid = "{f"{app.link}" if app.link else "NULL"}",
-     .stack_size = 0,
-     .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)}}}"""
         return f"""
     {{.app = {app.entry_point},
      .name = "{app.name}",
@@ -385,16 +376,6 @@ class ApplicationsCGenerator:
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
      .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)} }}"""
-     
-    def get_app_descr_desktop_settings(self, app: FlipperApplication):
-        if app.apptype == FlipperAppType.MENUEXTERNAL:
-            return f"""
-    {{.name = "{app.name}",
-     .appid = "{f"{app.link}" if app.link else "NULL"}" }}"""
-        else:
-            return f"""
-    {{.name = "{app.name}",
-     .appid = "NULL" }}"""
 
     def get_external_app_descr(self, app: FlipperApplication):
         app_path = "/ext/apps"
@@ -414,20 +395,12 @@ class ApplicationsCGenerator:
             f'const char* FLIPPER_AUTORUN_APP_NAME = "{self.autorun}";',
         ]
         for apptype in self.APP_TYPE_MAP:
-            contents.extend(
-                map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype))
-            )
+            contents.extend(map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype)))
             entry_type, entry_block = self.APP_TYPE_MAP[apptype]
             contents.append(f"const {entry_type} {entry_block}[] = {{")
-            apps = self.buildset.get_apps_of_type(apptype)
-            if apptype is FlipperAppType.APP:
-                apps += self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
-            apps.sort(key=lambda app: app.order)
-            contents.append(",\n".join(map(self.get_app_descr, apps)))
+            contents.append(",\n".join(map(self.get_app_descr, self.buildset.get_apps_of_type(apptype))))
             contents.append("};")
-            contents.append(
-                f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});"
-            )
+            contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
 
         archive_app = self.buildset.get_apps_of_type(FlipperAppType.ARCHIVE)
         if archive_app:
@@ -438,11 +411,11 @@ class ApplicationsCGenerator:
                 ]
             )
 
-        # entry_type, entry_block = self.APP_EXTERNAL_TYPE
-        # external_apps = self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
-        # contents.append(f"const {entry_type} {entry_block}[] = {{")
-        # contents.append(",\n".join(map(self.get_external_app_descr, external_apps)))
-        # contents.append("};")
-        # contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
+        entry_type, entry_block = self.APP_EXTERNAL_TYPE
+        external_apps = self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
+        contents.append(f"const {entry_type} {entry_block}[] = {{")
+        contents.append(",\n".join(map(self.get_external_app_descr, external_apps)))
+        contents.append("};")
+        contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
 
         return "\n".join(contents)

@@ -6,7 +6,6 @@
 #include <gui/view.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
-#include "ibutton_icons.h"
 
 #include <ibutton/ibutton_worker.h>
 #include <ibutton/ibutton_protocols.h>
@@ -24,8 +23,7 @@
 #include <gui/modules/widget.h>
 #include <gui/modules/loading.h>
 
-// #include <assets_icons.h>
-#include <iButton_icons.h>
+#include "ibutton_icons.h"
 
 #include "ibutton_custom_event.h"
 #include "scenes/ibutton_scene.h"

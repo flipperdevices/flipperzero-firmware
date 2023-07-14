@@ -1,0 +1,6 @@
+App(
+    appid="onewire_srv",
+    apptype=FlipperAppType.STARTUP,
+    entry_point="onewire_on_system_start",
+    order=60,
+)

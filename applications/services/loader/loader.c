@@ -172,16 +172,16 @@ static Loader* loader_alloc() {
     FuriString* path = furi_string_alloc();
     FuriString* name = furi_string_alloc();
     Stream* stream = file_stream_alloc(storage);
-    ExtMainAppList_init(loader->ext_main_apps);
+    MenuFapsList_init(loader->menu_faps);
     if(file_stream_open(stream, CFW_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
         while(stream_read_line(stream, path)) {
             furi_string_replace_all(path, "\r", "");
             furi_string_replace_all(path, "\n", "");
             const Icon* icon;
             if(!loader_menu_load_fap_meta(storage, path, name, &icon)) continue;
-            ExtMainAppList_push_back(
-                loader->ext_main_apps,
-                (ExtMainApp){
+            MenuFapsList_push_back(
+                loader->menu_faps,
+                (MenuFap){
                     .name = strdup(furi_string_get_cstr(name)),
                     .path = strdup(furi_string_get_cstr(path)),
                     .icon = icon});
@@ -196,16 +196,32 @@ static Loader* loader_alloc() {
     return loader;
 }
 
-size_t loader_get_ext_main_app_list_size(Loader* loader) {
+//app lists return list size
+
+size_t loader_get_menu_faps_list_size(Loader* loader) {
     furi_assert(loader);
-    size_t ext_size = ExtMainAppList_size(loader->ext_main_apps);
-    return ext_size;
+    size_t menu_fap_list_size = MenuFapsList_size(loader->menu_faps);
+    return menu_fap_list_size;
+}
+/*
+size_t loader_get_flipper_apps_count(Loader* loader) {
+	furi_assert(loader);
+	size_t flip_apps_count = FLIPPER_APPS_COUNT;
+	return flip_apps_count;
 }
 
-ExtMainApp* loader_get_ext_main_app_item(Loader* loader, size_t x) {
+size_t loader_get_flipper_external_apps_count(Loader* loader) {
+	furi_assert(loader);
+	size_t flip_ext_apps_count = FLIPPER_EXTERNAL_APPS_COUNT;
+	return flip_ext_apps_count;
+}
+*/
+// app list return single item
+
+MenuFap* loader_get_menu_fap_item(Loader* loader, size_t x) {
     furi_assert(loader);
-    ExtMainApp* ext_app = ExtMainAppList_get(loader->ext_main_apps, x);
-    return ext_app;
+    MenuFap* menu_fap = MenuFapsList_get(loader->menu_faps, x);
+    return menu_fap;
 }
 
 static FlipperInternalApplication const* loader_find_application_by_name_in_list(
@@ -220,7 +236,7 @@ static FlipperInternalApplication const* loader_find_application_by_name_in_list
     return NULL;
 }
 
-static const FlipperInternalApplication* loader_find_application_by_name(const char* name) {
+const FlipperInternalApplication* loader_find_application_by_name(const char* name) {
     const FlipperInternalApplication* application = NULL;
     application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
     if(!application) {
@@ -233,6 +249,16 @@ static const FlipperInternalApplication* loader_find_application_by_name(const c
     }
 
     return application;
+}
+
+const char* loader_find_external_application_by_name(const char* app_name) {
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
+            return FLIPPER_EXTERNAL_APPS[i].path;
+        }
+    }
+
+    return NULL;
 }
 
 static void loader_start_app_thread(Loader* loader, FlipperInternalApplicationFlag flags) {
@@ -397,12 +423,12 @@ static LoaderStatus loader_start_external_app(
         }
 
         loader_start_app_thread(loader, FlipperInternalApplicationFlagDefault);
-
-        return status;
     } while(0);
 
-    flipper_application_free(loader->app.fap);
-    loader->app.fap = NULL;
+    if(status != LoaderStatusOk) {
+        flipper_application_free(loader->app.fap);
+        loader->app.fap = NULL;
+    }
 
     return status;
 }
@@ -474,6 +500,14 @@ static LoaderStatus loader_do_start_by_name(
             loader_do_applications_show(loader);
             status = loader_make_success_status(error_message);
             break;
+        }
+
+        // check External Applications
+        {
+            const char* path = loader_find_external_application_by_name(name);
+            if(path) {
+                name = path;
+            }
         }
 
         // check external apps

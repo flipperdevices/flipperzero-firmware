@@ -20,7 +20,7 @@ struct Loader {
     LoaderMenu* loader_menu;
     LoaderApplications* loader_applications;
     LoaderAppData app;
-    ExtMainAppList_t ext_main_apps;
+    MenuFapsList_t menu_faps;
 };
 
 typedef enum {

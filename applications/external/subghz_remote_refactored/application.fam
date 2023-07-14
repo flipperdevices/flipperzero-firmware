@@ -3,18 +3,9 @@ App(
     name="Sub-GHz Remote",
     apptype=FlipperAppType.MENUEXTERNAL,
     entry_point="subghz_remote_app",
-    # cdefines=[
-    #     "APP_SUBGHZREMOTE",
-    #     "SUBREM_LIGHT",
-    # ],
-    requires=[
-        "gui",
-        "dialogs",
-    ],
     icon="A_SubGHzRemote_14",
     stack_size=2 * 1024,
     order=11,
-    # fap_libs=["assets"],
     fap_category="Sub-GHz",
     fap_icon="subghz_remote_10px.png",
     fap_icon_assets="icons",
@@ -23,5 +14,4 @@ App(
     fap_weburl="https://github.com/DarkFlippers/unleashed-firmware/pull/477",
     # fap_version="1.0",
     fap_description="Allows SubGHz signals to be sent using key bind shortcuts. Rewritten concept from app by ESurge and jimilinuxguy. Remote creator and app merged by ESurge",
-    link="/ext/apps/Sub-GHz/subghz_remote_refactored.fap",
 )

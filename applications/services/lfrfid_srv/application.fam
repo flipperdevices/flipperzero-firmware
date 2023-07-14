@@ -1,5 +1,5 @@
 App(
-    appid="lfrfidsrv",
+    appid="lfrfid_srv",
     apptype=FlipperAppType.STARTUP,
     entry_point="lfrfid_on_system_start",
     requires=["lfrfid"],
