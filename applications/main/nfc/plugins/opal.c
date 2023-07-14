@@ -129,16 +129,14 @@ static bool opal_read(void* poller, void* data) {
     return is_read;
 }
 
-static bool opal_parse(const void* data, FuriString* parsed_data) {
+static bool opal_parse(const MfDesfireData* data , FuriString* parsed_data) {
     furi_assert(data);
-
-    const MfDesfireData* mf_desfire_data = data;
 
     bool parsed = false;
 
     do {
         const MfDesfireApplication* app =
-            mf_desfire_get_application(mf_desfire_data, &opal_app_id);
+            mf_desfire_get_application(data, &opal_app_id);
         if(app == NULL) break;
 
         const MfDesfireFileSettings* file_settings =
@@ -232,7 +230,7 @@ static const NfcSupportedCardsPlugin opal_plugin = {
     .protocol = NfcProtocolMfDesfire,
     .verify = opal_verify,
     .read = opal_read,
-    .parse = opal_parse,
+    .parse = (NfcSupportedCardPluginParse)opal_parse,
 };
 
 /* Plugin descriptor to comply with basic plugin specification */
