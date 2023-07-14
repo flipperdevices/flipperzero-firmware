@@ -1,6 +1,7 @@
 #include "nfc_protocol_support.h"
 
 #include "nfc/nfc_app_i.h"
+#include "nfc/helpers/nfc_supported_cards.h"
 
 #include "nfc_protocol_support_defs.h"
 #include "nfc_protocol_support_gui_common.h"
@@ -106,6 +107,13 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
             notification_message(instance->notifications, &sequence_success);
             scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
             dolphin_deed(DolphinDeedNfcReadSuccess);
+            consumed = true;
+        } else if(event.event == NfcCustomEventPollerIncomplete) {
+            NfcSupportedCards* supported_cards = nfc_supported_cards_alloc();
+            nfc_supported_cards_read(supported_cards, instance->nfc_device, instance->nfc);
+            nfc_supported_cards_free(supported_cards);
+
+            view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
             consumed = true;
         } else if(event.event == NfcCustomEventPollerFailure) {
             if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneDetect)) {

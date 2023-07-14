@@ -284,14 +284,18 @@ NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(context);
 
     MfClassicPoller* instance = context;
-    // Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
-    NfcCommand command = NfcCommandStop;
-
-    instance->mfc_event.type = MfClassicPollerEventTypeReadComplete;
-    command = instance->callback(instance->general_event, instance->context);
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    NfcCommand command = NfcCommandContinue;
 
     UNUSED(mf_classic_poller_dict_attack_handler);
-    // if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
+        // TODO: Temporary measure
+        iso14443_3a_copy(
+            instance->data->iso14443_3a_data,
+            iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
+        instance->mfc_event.type = MfClassicPollerEventTypeReadComplete;
+        command = instance->callback(instance->general_event, instance->context);
+
     //     command = mf_classic_poller_dict_attack_handler[instance->state](instance);
     // } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
     //     if(iso14443_3a_event->data->error == Iso14443_3aErrorNotPresent) {
@@ -302,7 +306,8 @@ NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
     //             instance->state = MfClassicPollerStateIdle;
     //         }
     //     }
-    // }
+    }
+
 
     return command;
 }

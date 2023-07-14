@@ -2,87 +2,114 @@
 
 #include <flipper_application/flipper_application.h>
 
-// #include <nfc/helpers/nfc_util.h>
+#include <nfc/nfc_device.h>
+#include <nfc/helpers/nfc_util.h>
 #include <nfc/protocols/mf_classic/mf_classic_poller_sync_api.h>
 
 #define TAG "Troika"
 
-// TODO: Use a proper data structure ?
 typedef struct {
-    uint8_t sector;
-    uint64_t key_a;
-    uint64_t key_b;
-} MfClassicKeySet;
+    uint64_t a;
+    uint64_t b;
+} MfClassicKeyPair;
 
-static const MfClassicKeySet troika_keys[] = {
-    {.sector = 0, .key_a = 0xa0a1a2a3a4a5, .key_b = 0xfbf225dc5d58},
-    {.sector = 1, .key_a = 0xa82607b01c0d, .key_b = 0x2910989b6880},
-    {.sector = 2, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
-    {.sector = 3, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
-    {.sector = 4, .key_a = 0x73068f118c13, .key_b = 0x2b7f3253fac5},
-    {.sector = 5, .key_a = 0xfbc2793d540b, .key_b = 0xd3a297dc2698},
-    {.sector = 6, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
-    {.sector = 7, .key_a = 0xae3d65a3dad4, .key_b = 0x0f1c63013dba},
-    {.sector = 8, .key_a = 0xa73f5dc1d333, .key_b = 0xe35173494a81},
-    {.sector = 9, .key_a = 0x69a32f1c2f19, .key_b = 0x6b8bd9860763},
-    {.sector = 10, .key_a = 0x9becdf3d9273, .key_b = 0xf8493407799d},
-    {.sector = 11, .key_a = 0x08b386463229, .key_b = 0x5efbaecef46b},
-    {.sector = 12, .key_a = 0xcd4c61c26e3d, .key_b = 0x31c7610de3b0},
-    {.sector = 13, .key_a = 0xa82607b01c0d, .key_b = 0x2910989b6880},
-    {.sector = 14, .key_a = 0x0e8f64340ba4, .key_b = 0x4acec1205d75},
-    {.sector = 15, .key_a = 0x2aa05ed1856f, .key_b = 0xeaac88e5dc99},
+static const MfClassicKeyPair troika_keys[] = {
+    {.a = 0xa0a1a2a3a4a5, .b = 0xfbf225dc5d58},
+    {.a = 0xa82607b01c0d, .b = 0x2910989b6880},
+    {.a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
+    {.a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
+    {.a = 0x73068f118c13, .b = 0x2b7f3253fac5},
+    {.a = 0xfbc2793d540b, .b = 0xd3a297dc2698},
+    {.a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
+    {.a = 0xae3d65a3dad4, .b = 0x0f1c63013dba},
+    {.a = 0xa73f5dc1d333, .b = 0xe35173494a81},
+    {.a = 0x69a32f1c2f19, .b = 0x6b8bd9860763},
+    {.a = 0x9becdf3d9273, .b = 0xf8493407799d},
+    {.a = 0x08b386463229, .b = 0x5efbaecef46b},
+    {.a = 0xcd4c61c26e3d, .b = 0x31c7610de3b0},
+    {.a = 0xa82607b01c0d, .b = 0x2910989b6880},
+    {.a = 0x0e8f64340ba4, .b = 0x4acec1205d75},
+    {.a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
 };
 
-static bool troika_verify(void* poller) {
-    furi_assert(poller);
+// static bool troika_verify(void* poller) {
+//     furi_assert(poller);
+//
+//     bool verified = true;
+//
+//     // MfClassicPoller* mfc_poller = poller;
+//     // uint8_t sector = 11;
+//     // uint8_t block = mf_classic_get_sector_trailer_num_by_sector(sector);
+//     // MfClassicKey key = {.data = {0x08, 0xb3, 0x86, 0x46, 0x32, 0x29}};
+//     // MfClassicAuthContext auth_context = {};
+//
+//     // FURI_LOG_D("Troika", "Verifying sector %d", sector);
+//     // if(mf_classic_poller_auth(mfc_poller, block, &key, MfClassicKeyTypeA, &auth_context) ==
+//     //    MfClassicErrorNone) {
+//     //     FURI_LOG_D(TAG, "Sector %d verified", sector);
+//     //     verified = true;
+//     // }
+//
+//     return verified;
+// }
 
-    bool verified = false;
-    // MfClassicPoller* mfc_poller = poller;
-    // uint8_t sector = 11;
-    // uint8_t block = mf_classic_get_sector_trailer_num_by_sector(sector);
-    // MfClassicKey key = {.data = {0x08, 0xb3, 0x86, 0x46, 0x32, 0x29}};
-    // MfClassicAuthContext auth_context = {};
+static bool troika_read(Nfc* nfc, NfcDevice* device) {
+    furi_assert(nfc);
+    furi_assert(device);
 
-    // FURI_LOG_D("Troika", "Verifying sector %d", sector);
-    // if(mf_classic_poller_auth(mfc_poller, block, &key, MfClassicKeyTypeA, &auth_context) ==
-    //    MfClassicErrorNone) {
-    //     FURI_LOG_D(TAG, "Sector %d verified", sector);
-    //     verified = true;
-    // }
+    bool is_read = false;
 
-    return verified;
-}
+    MfClassicData* mf_classic_data = mf_classic_alloc();
+    nfc_device_copy_data(device, NfcProtocolMfClassic, mf_classic_data);
 
-static bool troika_read(void* poller, void* data) {
-    furi_assert(poller);
-    furi_assert(data);
+    do {
+        if(!mf_classic_detect_protocol(mf_classic_data->iso14443_3a_data, &mf_classic_data->type)) break;
+        if(mf_classic_data->type != MfClassicType1k) break;
 
-    return true;
-}
+        MfClassicKey key = {0};
+        nfc_util_num2bytes(troika_keys[8].a, COUNT_OF(key.data), key.data);
 
-static uint64_t nfc_util_bytes2num(const uint8_t* src, uint8_t len) {
-    furi_assert(src);
-    furi_assert(len <= 8);
+        const uint8_t block_num_start = mf_classic_get_first_block_num_of_sector(8);
+        const uint8_t block_num_end = block_num_start + 2;
 
-    uint64_t res = 0;
-    while(len--) {
-        res = (res << 8) | (*src);
-        src++;
-    }
-    return res;
+        uint8_t block_num;
+        for(block_num = block_num_start; block_num < block_num_end; ++block_num) {
+            MfClassicBlock block;
+            MfClassicError error;
+
+            error = mf_classic_poller_read_block(nfc, block_num, &key, MfClassicKeyTypeA, &block);
+
+            if(error != MfClassicErrorNone) {
+                FURI_LOG_D(TAG, "Failed to read block %u: %d", block_num, error);
+                break;
+            }
+
+            mf_classic_set_block_read(mf_classic_data, block_num, &block);
+        }
+
+        if(block_num != block_num_end) break;
+
+        mf_classic_set_key_found(mf_classic_data, 8, MfClassicKeyTypeA, troika_keys[8].a);
+        nfc_device_set_data(device, NfcProtocolMfClassic, mf_classic_data);
+
+        is_read = true;
+    } while(false);
+
+    mf_classic_free(mf_classic_data);
+
+    return is_read;
 }
 
 static bool troika_parse(const MfClassicData* data, FuriString* parsed_data) {
     furi_assert(data);
-    bool troika_parsed = false;
+    bool parsed = false;
 
     do {
         // Verify key
         const MfClassicSectorTrailer* sec_tr = mf_classic_get_sector_trailer_by_sector(data, 8);
 
-        // TODO: Add nfc_util to API?
         const uint64_t key = nfc_util_bytes2num(sec_tr->key_a.data, 6);
-        if(key != troika_keys[8].key_a) break;
+        if(key != troika_keys[8].a) break;
 
         // Verify card type
         if(data->type != MfClassicType1k) break;
@@ -100,17 +127,17 @@ static bool troika_parse(const MfClassicData* data, FuriString* parsed_data) {
         number |= (temp_ptr[0] & 0xf) << 28;
 
         furi_string_printf(parsed_data, "\e#Troika\nNum: %lu\nBalance: %u RUR.", number, balance);
-        troika_parsed = true;
+        parsed = true;
     } while(false);
 
-    return troika_parsed;
+    return parsed;
 }
 
 /* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin troika_plugin = {
     .protocol = NfcProtocolMfClassic,
-    .verify = troika_verify,
-    .read = troika_read,
+    .verify = NULL,//troika_verify,
+    .read = (NfcSupportedCardPluginRead)troika_read,
     .parse = (NfcSupportedCardPluginParse)troika_parse,
 };
 

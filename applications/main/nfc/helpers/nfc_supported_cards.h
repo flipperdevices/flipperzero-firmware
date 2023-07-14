@@ -1,5 +1,6 @@
 #pragma once
 
+#include <nfc/nfc.h>
 #include <nfc/nfc_device.h>
 
 #ifdef __cplusplus
@@ -12,12 +13,7 @@ NfcSupportedCards* nfc_supported_cards_alloc();
 
 void nfc_supported_cards_free(NfcSupportedCards* instance);
 
-// TODO: Implement read
-// bool nfc_supported_cards_read(
-//     NfcSupportedCards* instance,
-//     NfcProtocol protocol,
-//     void* poller,
-//     void* data);
+bool nfc_supported_cards_read(NfcSupportedCards* instance, NfcDevice* device, Nfc* nfc);
 
 bool nfc_supported_cards_parse(
     NfcSupportedCards* instance,
