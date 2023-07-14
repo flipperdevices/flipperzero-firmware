@@ -91,6 +91,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [Loader: good looking error messages #2873 (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/pull/2873) With Reverts For Now
 - OFW: [Desktop,Cli: add uptime info #2874 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2874)
 - UL: [Updated Infrared Assets #544 (By amec0e)](https://github.com/DarkFlippers/unleashed-firmware/pull/544
+- Changed all FAP file names, appids and associated references to be all lowercase like OFW/UL (By RogueMaster)
+- Removed duplicate WifiMap and CFW Settings fap file (By RogueMaster)
+- [Added more Captive Portal assets for Evil Portal (By roshanravan)](https://github.com/roshanravan)
 
 <a name="release">
 
