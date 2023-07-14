@@ -20,5 +20,5 @@ App(
             ],
         ),
     ],
-    fap_icon_assets_symbol="NRF24_Mouse_Jacker",
+    fap_icon_assets_symbol="nrf24_azerty_mouse_jacker",
 )

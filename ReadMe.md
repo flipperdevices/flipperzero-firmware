@@ -101,6 +101,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Increment FW Version to 0.82.3 with OFW 0.82.2
 - Added: [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - Added: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
+- OFW: [Storage: explosive rename fix #2876 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2876)
 
 <a name="release">
 

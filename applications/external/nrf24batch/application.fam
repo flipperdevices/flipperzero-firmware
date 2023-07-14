@@ -16,5 +16,5 @@ App(
             ],
         ),
     ],
-    fap_icon_assets_symbol="nRF24_Batch",
+    fap_icon_assets_symbol="nrf24_batch",
 )

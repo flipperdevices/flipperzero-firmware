@@ -11,5 +11,5 @@ App(
     fap_description="ESP32-CAM simple app to start a remote camera. [Unplug the USB cable to test with Mayhem]",
     fap_author="eried",
     fap_weburl="https://flipper.ried.cl",
-    fap_icon_assets_symbol="MAYHEM_NannyCam",
+    fap_icon_assets_symbol="mayhem_nannycam",
 )

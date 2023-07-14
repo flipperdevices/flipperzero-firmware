@@ -7,5 +7,5 @@ App(
     stack_size=2 * 1024,
     fap_icon="memsic_2125.png",
     fap_category="GPIO",
-    fap_icon_assets_symbol="Memsic_2125",
+    fap_icon_assets_symbol="memsic_2125",
 )
