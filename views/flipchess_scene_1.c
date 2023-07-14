@@ -1,7 +1,7 @@
 #include "../flipchess.h"
 #include <furi.h>
-#include <furi_hal.h>
-#include <furi_hal_random.h>
+// #include <furi_hal.h>
+// #include <furi_hal_random.h>
 #include <input/input.h>
 #include <gui/elements.h>
 //#include <dolphin/dolphin.h>
@@ -16,7 +16,8 @@
 
 #include "../chess/smallchesslib.h"
 
-#define MAX_TEXT_LEN 30 // 30 = max length of text
+#define ENABLE_960 0 // setting to 1 enables 960 chess
+#define MAX_TEXT_LEN 15 // 15 = max length of text
 #define MAX_TEXT_BUF (MAX_TEXT_LEN + 1) // max length of text + null terminator
 
 struct FlipChessScene1 {
@@ -28,25 +29,22 @@ typedef struct {
     uint8_t paramPlayerW;
     uint8_t paramPlayerB;
 
-    // uint8_t paramBoard = 1;
     uint8_t paramAnalyze; // depth of analysis
     uint8_t paramMoves;
-    //uint8_t paramXboard = 0;
     uint8_t paramInfo;
-    //uint8_t paramDraw = 1;
     uint8_t paramFlipBoard;
-    //uint8_t paramHelp = 0;
     uint8_t paramExit;
     uint16_t paramStep;
     char* paramFEN;
     char* paramPGN;
-    //uint16_t paramRandom = 0;
-    //uint8_t paramBlind = 0;
 
     int clockSeconds;
     SCL_Game game;
     SCL_Board startState;
+
+#if ENABLE_960
     int16_t random960PosNumber;
+#endif
 
     //uint8_t picture[SCL_BOARD_PICTURE_WIDTH * SCL_BOARD_PICTURE_WIDTH];
     uint8_t squareSelected;
@@ -55,9 +53,9 @@ typedef struct {
     char* msg;
     char* msg2;
     char* msg3;
-    char moveString[16];
-    char moveString2[16];
-    char moveString3[16];
+    char moveString[MAX_TEXT_BUF];
+    char moveString2[MAX_TEXT_BUF];
+    char moveString3[MAX_TEXT_BUF];
 
     SCL_SquareSet moveHighlight;
     uint8_t squareFrom;
@@ -66,7 +64,7 @@ typedef struct {
 
 } FlipChessScene1Model;
 
-uint8_t picture[SCL_BOARD_PICTURE_WIDTH * SCL_BOARD_PICTURE_WIDTH];
+static uint8_t picture[SCL_BOARD_PICTURE_WIDTH * SCL_BOARD_PICTURE_WIDTH];
 
 void flipchess_putImagePixel(uint8_t pixel, uint16_t index) {
     picture[index] = pixel;
@@ -145,8 +143,8 @@ void flipchess_shiftMessages(FlipChessScene1Model* model) {
     // shift messages
     model->msg3 = model->msg2;
     model->msg2 = model->msg;
-    strncpy(model->moveString3, model->moveString2, 15);
-    strncpy(model->moveString2, model->moveString, 15);
+    strncpy(model->moveString3, model->moveString2, MAX_TEXT_LEN);
+    strncpy(model->moveString2, model->moveString, MAX_TEXT_LEN);
 }
 
 void flipchess_drawBoard(FlipChessScene1Model* model) {
@@ -319,9 +317,9 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
             SCL_moveToString(model->game.board, s0, s1, p, model->moveString);
         }
         break;
+        model->paramExit = moveType;
     }
 
-    model->paramExit = moveType;
     return model->paramExit;
 }
 
@@ -377,11 +375,14 @@ static int flipchess_scene_1_model_init(
     model->paramStep = 0;
     model->paramFEN = NULL;
     model->paramPGN = NULL;
-
     model->clockSeconds = -1;
+
     SCL_Board emptyStartState = SCL_BOARD_START_STATE;
     memcpy(model->startState, &emptyStartState, sizeof(SCL_Board));
+
+#if ENABLE_960
     model->random960PosNumber = -1;
+#endif
 
     model->squareSelected = 255;
     model->squareSelectedLast = 28; // start selector near middle
@@ -399,14 +400,14 @@ static int flipchess_scene_1_model_init(
     model->squareTo = 255;
     model->turnState = 0;
 
-    furi_hal_random_init();
     SCL_randomBetterSeed(furi_hal_random_get());
 
+#if ENABLE_960
 #if SCL_960_CASTLING
     if(model->random960PosNumber < 0) model->random960PosNumber = SCL_randomBetter();
 #endif
-
     if(model->random960PosNumber >= 0) model->random960PosNumber %= 960;
+#endif
 
     if(model->paramFEN != NULL)
         SCL_boardFromFEN(model->startState, model->paramFEN);
@@ -416,9 +417,12 @@ static int flipchess_scene_1_model_init(
         SCL_boardInit(model->startState);
         SCL_recordApply(record, model->startState, model->paramStep);
     }
+
+#if ENABLE_960
 #if SCL_960_CASTLING
     else
         SCL_boardInit960(model->startState, model->random960PosNumber);
+#endif
 #endif
 
     SCL_gameInit(&(model->game), model->startState);
@@ -577,7 +581,7 @@ void flipchess_scene_1_exit(void* context) {
     FlipChessScene1* instance = (FlipChessScene1*)context;
 
     with_view_model(
-        instance->view, FlipChessScene1Model * model, { model->squareSelected = 255; }, true);
+        instance->view, FlipChessScene1Model * model, { model->paramExit = 0; }, true);
 }
 
 void flipchess_scene_1_enter(void* context) {

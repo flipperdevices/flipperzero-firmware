@@ -166,11 +166,12 @@ int32_t flipchess_app(void* p) {
         app->scene_manager, FlipChessSceneStartscreen); //Start with start screen
     //scene_manager_next_scene(app->scene_manager, FlipChessSceneMenu); //if you want to directly start with Menu
 
-    furi_hal_power_suppress_charge_enter();
+    furi_hal_random_init();
+    // furi_hal_power_suppress_charge_enter();
 
     view_dispatcher_run(app->view_dispatcher);
 
-    furi_hal_power_suppress_charge_exit();
+    // furi_hal_power_suppress_charge_exit();
     flipchess_app_free(app);
 
     return 0;
