@@ -10,5 +10,5 @@ I express my great gratitude to the authors of these works.
 
 You can read more about using this code in my articles:
 
-https://habr.com/ru/articles/747152/ (in English)
-https://habr.com/ru/articles/742428/ (in Russian)
+1. https://habr.com/ru/articles/747152/ (in English)
+2. https://habr.com/ru/articles/742428/ (in Russian)
