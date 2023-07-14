@@ -104,6 +104,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - Added: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - OFW: [Storage: explosive rename fix #2876 (By nminaylov)](https://github.com/flipperdevices/flipperzero-firmware/pull/2876)
+- OFW: [Update error code descriptions #2875 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2875)
+- OFW: [Badusb: Ducky script to auto install qFlipper #2346 (By DXVVAY)](https://github.com/flipperdevices/flipperzero-firmware/pull/2346)
+- UL: Keyboard fixes for NFC Maker & Marauder (By xMasterX)
+- UL: Update AC Assets (By amec0e)
+- UL: Archive Browser changes for SubGhz Remote support & File Browser Fixes (By gid9798)
+- Updated: [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477)
 
 <a name="release">
 

@@ -84,7 +84,7 @@ bool subrem_scene_edit_menu_on_event(void* context, SceneManagerEvent event) {
             if(app->map_not_saved) {
                 view_dispatcher_switch_to_view(app->view_dispatcher, SubRemViewIDWidget);
             } else if(!scene_manager_search_and_switch_to_previous_scene(
-                          app->scene_manager, SubRemSceneOpenMapFile)) {
+                          app->scene_manager, SubRemSceneStart)) {
                 scene_manager_stop(app->scene_manager);
                 view_dispatcher_stop(app->view_dispatcher);
             }
