@@ -1,7 +1,7 @@
 #pragma once
 
 #include <lib/nfc/helpers/bit_buffer.h>
-#include <nfc/protocols/nfc_device_base.h>
+#include <nfc/protocols/nfc_device_base_i.h>
 
 #ifdef __cplusplus
 extern "C" {

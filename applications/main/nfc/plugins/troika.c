@@ -34,27 +34,6 @@ static const MfClassicKeyPair troika_keys[] = {
     {.a = 0x2aa05ed1856f, .b = 0xeaac88e5dc99},
 };
 
-// static bool troika_verify(void* poller) {
-//     furi_assert(poller);
-//
-//     bool verified = true;
-//
-//     // MfClassicPoller* mfc_poller = poller;
-//     // uint8_t sector = 11;
-//     // uint8_t block = mf_classic_get_sector_trailer_num_by_sector(sector);
-//     // MfClassicKey key = {.data = {0x08, 0xb3, 0x86, 0x46, 0x32, 0x29}};
-//     // MfClassicAuthContext auth_context = {};
-//
-//     // FURI_LOG_D("Troika", "Verifying sector %d", sector);
-//     // if(mf_classic_poller_auth(mfc_poller, block, &key, MfClassicKeyTypeA, &auth_context) ==
-//     //    MfClassicErrorNone) {
-//     //     FURI_LOG_D(TAG, "Sector %d verified", sector);
-//     //     verified = true;
-//     // }
-//
-//     return verified;
-// }
-
 static bool troika_read(Nfc* nfc, NfcDevice* device) {
     furi_assert(nfc);
     furi_assert(device);
@@ -108,8 +87,11 @@ static bool troika_read(Nfc* nfc, NfcDevice* device) {
     return is_read;
 }
 
-static bool troika_parse(const MfClassicData* data, FuriString* parsed_data) {
-    furi_assert(data);
+static bool troika_parse(const NfcDevice* device, FuriString* parsed_data) {
+    furi_assert(device);
+
+    const MfClassicData* data = nfc_device_get_data(device, NfcProtocolMfClassic);
+
     bool parsed = false;
 
     do {
@@ -150,8 +132,8 @@ static bool troika_parse(const MfClassicData* data, FuriString* parsed_data) {
 static const NfcSupportedCardsPlugin troika_plugin = {
     .protocol = NfcProtocolMfClassic,
     .verify = NULL,
-    .read = (NfcSupportedCardPluginRead)troika_read,
-    .parse = (NfcSupportedCardPluginParse)troika_parse,
+    .read = troika_read,
+    .parse = troika_parse,
 };
 
 /* Plugin descriptor to comply with basic plugin specification */

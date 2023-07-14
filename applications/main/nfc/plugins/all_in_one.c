@@ -37,18 +37,12 @@ static AllInOneLayoutType all_in_one_get_layout(const MfUltralightData* data) {
     }
 }
 
-static bool all_in_one_verify(void* poller) {
-    UNUSED(poller);
-    return false;
-}
+static bool all_in_one_parse(const NfcDevice* device, FuriString* parsed_data) {
+    furi_assert(device);
+    furi_assert(parsed_data);
 
-static bool all_in_one_read(void* poller, void* data) {
-    UNUSED(poller);
-    UNUSED(data);
-    return true;
-}
+    const MfUltralightData* data = nfc_device_get_data(device, NfcProtocolMfUltralight);
 
-static bool all_in_one_parse(const MfUltralightData* data, FuriString* parsed_data) {
     bool parsed = false;
 
     do {
@@ -95,9 +89,9 @@ static bool all_in_one_parse(const MfUltralightData* data, FuriString* parsed_da
 /* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin all_in_one_plugin = {
     .protocol = NfcProtocolMfUltralight,
-    .verify = all_in_one_verify,
-    .read = all_in_one_read,
-    .parse = (NfcSupportedCardPluginParse)all_in_one_parse,
+    .verify = NULL,
+    .read = NULL,
+    .parse = all_in_one_parse,
 };
 
 /* Plugin descriptor to comply with basic plugin specification */

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <core/string.h>
+
 #include <nfc/nfc.h>
 #include <nfc/nfc_device.h>
 

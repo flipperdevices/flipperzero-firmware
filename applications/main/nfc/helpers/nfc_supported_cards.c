@@ -98,7 +98,7 @@ bool nfc_supported_cards_parse(
             const NfcProtocol protocol = nfc_device_get_protocol(device);
             if(plugin->protocol != protocol) continue;
             if(plugin->parse) {
-                parsed = plugin->parse(nfc_device_get_data(device, protocol), parsed_data);
+                parsed = plugin->parse(device, parsed_data);
             }
             if(parsed) break;
         }

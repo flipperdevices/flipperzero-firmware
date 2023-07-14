@@ -1,8 +1,10 @@
 #include "nfc_device.h"
 
-#include <nfc/nfc_common.h>
 #include <storage/storage.h>
 #include <flipper_format/flipper_format.h>
+
+#include "nfc_common.h"
+#include "protocols/nfc_device_defs.h"
 
 #define NFC_FILE_HEADER "Flipper NFC device"
 #define NFC_DEV_TYPE_ERROR "Protocol type mismatch"

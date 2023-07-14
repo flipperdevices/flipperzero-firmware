@@ -114,23 +114,12 @@ static void opal_date_time_to_furi(uint16_t days, uint16_t minutes, FuriHalRtcDa
     out->day = days;
 }
 
-static bool opal_verify(void* poller) {
-    furi_assert(poller);
 
-    bool verified = false;
-    return verified;
-}
+static bool opal_parse(const NfcDevice* device, FuriString* parsed_data) {
+    furi_assert(device);
+    furi_assert(parsed_data);
 
-static bool opal_read(void* poller, void* data) {
-    furi_assert(poller);
-    furi_assert(data);
-
-    bool is_read = true;
-    return is_read;
-}
-
-static bool opal_parse(const MfDesfireData* data, FuriString* parsed_data) {
-    furi_assert(data);
+    const MfDesfireData* data = nfc_device_get_data(device, NfcProtocolMfDesfire);
 
     bool parsed = false;
 
@@ -227,9 +216,9 @@ static bool opal_parse(const MfDesfireData* data, FuriString* parsed_data) {
 /* Actual implementation of app<>plugin interface */
 static const NfcSupportedCardsPlugin opal_plugin = {
     .protocol = NfcProtocolMfDesfire,
-    .verify = opal_verify,
-    .read = opal_read,
-    .parse = (NfcSupportedCardPluginParse)opal_parse,
+    .verify = NULL,
+    .read = NULL,
+    .parse = opal_parse,
 };
 
 /* Plugin descriptor to comply with basic plugin specification */
