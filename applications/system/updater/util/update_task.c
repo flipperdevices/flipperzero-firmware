@@ -77,12 +77,14 @@ static const struct {
         .percent_max = 80,
         .descr = "No Radio file",
     },
+#ifndef FURI_RAM_EXEC
     {
         .stage = UpdateTaskStageLfsBackup,
         .percent_min = 0,
         .percent_max = 100,
         .descr = "FS R/W error",
     },
+#else
     {
         .stage = UpdateTaskStageRadioImageValidate,
         .percent_min = 0,
@@ -185,6 +187,8 @@ static const struct {
         .percent_max = 100,
         .descr = "Flash compare error",
     },
+#endif
+#ifndef FURI_RAM_EXEC
     {
         .stage = UpdateTaskStageLfsRestore,
         .percent_min = 0,
@@ -197,12 +201,7 @@ static const struct {
         .percent_max = 100,
         .descr = "SD card I/O error",
     },
-    {
-        .stage = UpdateTaskStageSplashscreenInstall,
-        .percent_min = 0,
-        .percent_max = 100,
-        .descr = "",
-    },
+#endif
 };
 
 static const char* update_task_get_error_message(UpdateTaskStage stage, uint8_t percent) {
