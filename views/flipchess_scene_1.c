@@ -561,6 +561,10 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 instance->view,
                 FlipChessScene1Model * model,
                 {
+                    // if(model->paramExit == FlipChessStatusReturn) {
+                    //     instance->callback(FlipChessCustomEventScene1Back, instance->context);
+                    //     break;
+                    // }
                     if(!flipchess_isPlayerTurn(model)) {
                         model->thinking = 1;
                     }
@@ -572,10 +576,6 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 instance->view,
                 FlipChessScene1Model * model,
                 {
-                    if(model->paramExit == FlipChessStatusReturn) {
-                        instance->callback(FlipChessCustomEventScene1Back, instance->context);
-                        break;
-                    }
                     // first turn of round, probably player but could be AI
                     flipchess_turn(model);
                     flipchess_drawBoard(model);
