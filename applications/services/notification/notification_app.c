@@ -5,7 +5,7 @@
 #include <input/input.h>
 #include <gui/gui_i.h>
 #include <u8g2_glue.h>
-
+#include <lib/toolbox/float_tools.h>
 #include "notification.h"
 #include "notification_messages.h"
 #include "notification_app.h"
@@ -127,7 +127,7 @@ static void notification_reset_notification_layer(
         notification_sound_off();
     }
     if(reset_mask & reset_display_mask) {
-        if(display_brightness_set != app->settings.display_brightness) {
+        if(!float_is_equal(display_brightness_set, app->settings.display_brightness)) {
             furi_hal_light_set(LightBacklight, app->settings.display_brightness * 0xFF);
         }
         furi_timer_start(app->display_timer, notification_settings_display_off_delay_ticks(app));
