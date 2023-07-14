@@ -15,10 +15,12 @@ App(
     order=30,
 )
 
+# Parser plugins
+
 App(
-    appid="troika_parser",
+    appid="all_in_one_parser",
     apptype=FlipperAppType.PLUGIN,
-    entry_point="troika_plugin_ep",
+    entry_point="all_in_one_plugin_ep",
     requires=["nfc"],
 )
 
@@ -26,6 +28,13 @@ App(
     appid="opal_parser",
     apptype=FlipperAppType.PLUGIN,
     entry_point="opal_plugin_ep",
+    requires=["nfc"],
+)
+
+App(
+    appid="troika_parser",
+    apptype=FlipperAppType.PLUGIN,
+    entry_point="troika_plugin_ep",
     requires=["nfc"],
 )
 
