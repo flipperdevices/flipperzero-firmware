@@ -296,18 +296,17 @@ NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
         instance->mfc_event.type = MfClassicPollerEventTypeReadComplete;
         command = instance->callback(instance->general_event, instance->context);
 
-    //     command = mf_classic_poller_dict_attack_handler[instance->state](instance);
-    // } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
-    //     if(iso14443_3a_event->data->error == Iso14443_3aErrorNotPresent) {
-    //         if(instance->card_state == MfClassicCardStateDetected) {
-    //             instance->card_state = MfClassicCardStateNotDetected;
-    //             instance->mfc_event.type = MfClassicPollerEventTypeCardNotDetected;
-    //             command = instance->callback(instance->general_event, instance->context);
-    //             instance->state = MfClassicPollerStateIdle;
-    //         }
-    //     }
+        //     command = mf_classic_poller_dict_attack_handler[instance->state](instance);
+        // } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
+        //     if(iso14443_3a_event->data->error == Iso14443_3aErrorNotPresent) {
+        //         if(instance->card_state == MfClassicCardStateDetected) {
+        //             instance->card_state = MfClassicCardStateNotDetected;
+        //             instance->mfc_event.type = MfClassicPollerEventTypeCardNotDetected;
+        //             command = instance->callback(instance->general_event, instance->context);
+        //             instance->state = MfClassicPollerStateIdle;
+        //         }
+        //     }
     }
-
 
     return command;
 }

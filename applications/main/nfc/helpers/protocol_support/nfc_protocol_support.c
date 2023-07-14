@@ -113,7 +113,8 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
             nfc_supported_cards_read(supported_cards, instance->nfc_device, instance->nfc);
             nfc_supported_cards_free(supported_cards);
 
-            view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventPollerSuccess);
             consumed = true;
         } else if(event.event == NfcCustomEventPollerFailure) {
             if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneDetect)) {
@@ -223,7 +224,6 @@ static void nfc_protocol_support_scene_read_menu_on_exit(NfcApp* instance) {
 // SceneReadSuccess
 static void nfc_protocol_support_scene_read_success_on_enter(NfcApp* instance) {
     Widget* widget = instance->widget;
-
 
     FuriString* temp_str = furi_string_alloc();
     NfcSupportedCards* supported_cards = nfc_supported_cards_alloc();
