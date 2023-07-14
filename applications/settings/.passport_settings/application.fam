@@ -1,0 +1,11 @@
+App(
+    appid="passport_settings",
+    name="Passport",
+    apptype=FlipperAppType.EXTSETTINGSAPP,
+    entry_point="passport_settings_app",
+    stack_size=1 * 1024,
+    order=50,
+    fap_libs=["assets"],
+    fap_category="Settings",
+    fap_icon="passport_10px.png",
+)

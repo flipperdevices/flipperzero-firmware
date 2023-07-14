@@ -27,6 +27,9 @@
 #include <m-array.h>
 #include "namespoof.h"
 #include <cfw.h>
+#include <applications.h>
+#include <desktop/desktop_settings.h>
+#include "helpers/passport_settings.h"
 
 #define MENU_ICON_MAX_SIZE 14
 #define CFW_SUBGHZ_FREQ_BUFFER_SIZE 6
@@ -43,9 +46,16 @@ typedef struct {
     TextInput* text_input;
     Popup* popup;
 
+    DesktopSettings desktop;
+    PassportSettings passport;
+
     CharList_t mainmenu_app_names;
     CharList_t mainmenu_app_paths;
     uint8_t mainmenu_app_index;
+
+    CharList_t start_point_names;
+    uint32_t start_point_index;
+
     bool subghz_use_defaults;
     FrequencyList_t subghz_static_freqs;
     uint8_t subghz_static_index;

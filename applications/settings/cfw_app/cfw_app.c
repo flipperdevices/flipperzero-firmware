@@ -166,10 +166,9 @@ CfwApp* cfw_app_alloc() {
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, CfwAppViewPopup, popup_get_view(app->popup));
 
-    /**
-	* Commenting out cfw_settings for now to reduce error/warnings.
-	* CfwSettings* cfw_settings = CFW_SETTINGS();
-	**/
+    CfwSettings* cfw_settings = CFW_SETTINGS();
+
+    //Main Menu Add/Remove list
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
 
@@ -201,6 +200,26 @@ CfwApp* cfw_app_alloc() {
     furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);
+
+    // Start Point list
+    CharList_init(app->start_point_names);
+
+    CharList_push_back(app->start_point_names, "Applications");
+
+    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+        CharList_push_back(app->start_point_names, strdup(FLIPPER_APPS[i].name));
+    }
+
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        CharList_push_back(app->start_point_names, strdup(FLIPPER_EXTERNAL_APPS[i].name));
+    }
+
+    for(size_t i = 0; i < CharList_size(app->mainmenu_app_names); i++) {
+        CharList_push_back(
+            app->start_point_names, strdup(*CharList_get(app->mainmenu_app_names, i)));
+    }
+
+    CharList_push_back(app->start_point_names, "Settings");
 
     FlipperFormat* file = flipper_format_file_alloc(storage);
     FrequencyList_init(app->subghz_static_freqs);
@@ -283,6 +302,8 @@ void cfw_app_free(CfwApp* app) {
 extern int32_t cfw_app(void* p) {
     UNUSED(p);
     CfwApp* app = cfw_app_alloc();
+    DESKTOP_SETTINGS_LOAD(&app->desktop);
+    passport_settings_load(&app->passport);
     scene_manager_next_scene(app->scene_manager, CfwAppSceneStart);
     view_dispatcher_run(app->view_dispatcher);
     cfw_app_free(app);
