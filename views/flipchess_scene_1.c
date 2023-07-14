@@ -19,6 +19,7 @@
 #define ENABLE_960 0 // setting to 1 enables 960 chess
 #define MAX_TEXT_LEN 15 // 15 = max length of text
 #define MAX_TEXT_BUF (MAX_TEXT_LEN + 1) // max length of text + null terminator
+#define THREAD_WAIT_TIME 20 // time to wait for draw thread to finish
 
 struct FlipChessScene1 {
     View* view;
@@ -56,6 +57,7 @@ typedef struct {
     char moveString[MAX_TEXT_BUF];
     char moveString2[MAX_TEXT_BUF];
     char moveString3[MAX_TEXT_BUF];
+    uint8_t thinking;
 
     SCL_SquareSet moveHighlight;
     uint8_t squareFrom;
@@ -320,6 +322,7 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
         model->paramExit = moveType;
     }
 
+    model->thinking = 0;
     return model->paramExit;
 }
 
@@ -343,7 +346,11 @@ void flipchess_scene_1_draw(Canvas* canvas, FlipChessScene1Model* model) {
 
     // Message
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 68, 10, model->msg);
+    if(model->thinking) {
+        canvas_draw_str(canvas, 68, 10, "thinking...");
+    } else {
+        canvas_draw_str(canvas, 68, 10, model->msg);
+    }
     canvas_draw_str(canvas, 68, 19, model->moveString);
     canvas_draw_str(canvas, 68, 31, model->msg2);
     canvas_draw_str(canvas, 68, 40, model->moveString2);
@@ -393,6 +400,7 @@ static int flipchess_scene_1_model_init(
     model->moveString2[0] = '\0';
     model->msg3 = "";
     model->moveString3[0] = '\0';
+    model->thinking = 0;
 
     SCL_SquareSet emptySquareSet = SCL_SQUARE_SET_EMPTY;
     memcpy(model->moveHighlight, &emptySquareSet, sizeof(SCL_SquareSet));
@@ -553,6 +561,17 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 instance->view,
                 FlipChessScene1Model * model,
                 {
+                    if(!flipchess_isPlayerTurn(model)) {
+                        model->thinking = 1;
+                    }
+                },
+                true);
+            furi_thread_flags_wait(0, FuriFlagWaitAny, THREAD_WAIT_TIME);
+
+            with_view_model(
+                instance->view,
+                FlipChessScene1Model * model,
+                {
                     if(model->paramExit == FlipChessStatusReturn) {
                         instance->callback(FlipChessCustomEventScene1Back, instance->context);
                         break;
@@ -560,7 +579,24 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                     // first turn of round, probably player but could be AI
                     flipchess_turn(model);
                     flipchess_drawBoard(model);
+                },
+                true);
 
+            with_view_model(
+                instance->view,
+                FlipChessScene1Model * model,
+                {
+                    if(!flipchess_isPlayerTurn(model)) {
+                        model->thinking = 1;
+                    }
+                },
+                true);
+            furi_thread_flags_wait(0, FuriFlagWaitAny, THREAD_WAIT_TIME);
+
+            with_view_model(
+                instance->view,
+                FlipChessScene1Model * model,
+                {
                     // if player played, let AI play
                     if(!flipchess_isPlayerTurn(model)) {
                         flipchess_turn(model);
