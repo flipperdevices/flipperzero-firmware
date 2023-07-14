@@ -129,14 +129,13 @@ static bool opal_read(void* poller, void* data) {
     return is_read;
 }
 
-static bool opal_parse(const MfDesfireData* data , FuriString* parsed_data) {
+static bool opal_parse(const MfDesfireData* data, FuriString* parsed_data) {
     furi_assert(data);
 
     bool parsed = false;
 
     do {
-        const MfDesfireApplication* app =
-            mf_desfire_get_application(data, &opal_app_id);
+        const MfDesfireApplication* app = mf_desfire_get_application(data, &opal_app_id);
         if(app == NULL) break;
 
         const MfDesfireFileSettings* file_settings =

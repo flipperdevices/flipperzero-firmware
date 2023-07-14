@@ -19,9 +19,11 @@ void nfc_scene_supported_card_on_enter(void* context) {
             nfc_protocol_support_common_widget_callback,
             instance);
 
+        scene_manager_set_scene_state(instance->scene_manager, NfcSceneSupportedCard, true);
         view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewWidget);
 
     } else {
+        scene_manager_set_scene_state(instance->scene_manager, NfcSceneSupportedCard, false);
         scene_manager_next_scene(instance->scene_manager, NfcSceneInfo);
     }
 
@@ -39,9 +41,6 @@ bool nfc_scene_supported_card_on_event(void* context, SceneManagerEvent event) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneInfo);
             consumed = true;
         }
-
-    } else if(event.type == SceneManagerEventTypeBack) {
-        //TODO: Any special handling for Back button?
     }
 
     return consumed;

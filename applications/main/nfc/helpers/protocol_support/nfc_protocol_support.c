@@ -63,6 +63,14 @@ static bool nfc_protocol_support_scene_info_on_event(NfcApp* instance, SceneMana
     if(event.type == SceneManagerEventTypeCustom) {
         const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
         consumed = nfc_protocol_support[protocol]->scene_info.on_event(instance, event.event);
+    } else if(event.type == SceneManagerEventTypeBack) {
+        // If the card could not be parsed, return to the respective menu
+        if(!scene_manager_get_scene_state(instance->scene_manager, NfcSceneSupportedCard)) {
+            const uint32_t scenes[] = {NfcSceneSavedMenu, NfcSceneReadMenu};
+            scene_manager_search_and_switch_to_previous_scene_one_of(
+                instance->scene_manager, scenes, COUNT_OF(scenes));
+            consumed = true;
+        }
     }
 
     return consumed;
