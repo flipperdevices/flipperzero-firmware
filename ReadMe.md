@@ -98,7 +98,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - Loader updates (By ESurge)
 - UL: Updated: [NFC Maker NTAG215 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d)
 - UL: Revert Archive fixes temporarily (By xMasterX)
-- [Added more Captive Portal assets for Evil Portal (By roshanravan)](https://github.com/roshanravan)
 - Updated: [Chess v1.2 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Increment FW Version to 0.86.3 with OFW 0.86.2
 - Added: [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
@@ -110,6 +109,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Update AC Assets (By amec0e)
 - UL: Archive Browser changes for SubGhz Remote support & File Browser Fixes (By gid9798)
 - Updated: [Sub-GHz Remote (Refactored) + Configurator (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/477)
+- [Added more Captive Portal assets for Evil Portal (By roshanravan)](https://github.com/roshanravan)
 
 <a name="release">
 
