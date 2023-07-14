@@ -4,6 +4,7 @@
 #include <input/input.h>
 
 #include "i2csniffer.h"
+#include "i2csaver.h"
 #include "i2cscanner.h"
 #include "i2csender.h"
 #include "views/main_view.h"
@@ -21,4 +22,5 @@ typedef struct {
     i2cScanner* scanner;
     i2cSniffer* sniffer;
     i2cSender* sender;
+    i2cSaver* saver;
 } i2cTools;

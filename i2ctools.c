@@ -66,6 +66,9 @@ int32_t i2ctools_app(void* p) {
     i2ctools->scanner = i2c_scanner_alloc();
 
     i2ctools->sender = i2c_sender_alloc();
+
+    i2ctools->saver = i2c_saver_alloc();
+    i2c_save_file();
     // Share scanner with sender
     i2ctools->sender->scanner = i2ctools->scanner;
 
@@ -215,6 +218,7 @@ int32_t i2ctools_app(void* p) {
     view_port_free(i2ctools->view_port);
     furi_message_queue_free(event_queue);
     i2c_sniffer_free(i2ctools->sniffer);
+    i2c_saver_free(i2ctools->saver);
     i2c_scanner_free(i2ctools->scanner);
     i2c_sender_free(i2ctools->sender);
     i2c_main_view_free(i2ctools->main_view);
