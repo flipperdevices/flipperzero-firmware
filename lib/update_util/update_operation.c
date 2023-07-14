@@ -194,7 +194,7 @@ UpdatePrepareResult update_operation_prepare(const char* manifest_file_path) {
         }
 
         if(!update_operation_get_current_package_manifest_path(storage, manifest_path_check) ||
-           !furi_string_cmpi_str(manifest_path_check, manifest_file_path)) {
+           (furi_string_cmpi_str(manifest_path_check, manifest_file_path) != 0)) {
             result = UpdatePrepareResultManifestPointerCheckError;
             break;
         }
