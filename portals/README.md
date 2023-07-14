@@ -31,3 +31,4 @@ Thank you so much to the following contributors for providing awesome portals.
 - `southwest_airline.html` by [roshanravan](https://github.com/roshanravan)
 - `delta_airline.html` by [roshanravan](https://github.com/roshanravan)
 - `united_airline.html` by [roshanravan](https://github.com/roshanravan)
+- `american_airline.html` by [roshanravan](https://github.com/roshanravan)
