@@ -1,19 +1,26 @@
 ## Lightmeter for Flipper Zero
 
 Lightmeter app for photography based on BH1750/MAX44009 sensor
+An application that suggests settings for your manual camera based on the reading of the ambient light sensor. Can also be used in a pure lux meter mode.
 
 ## Support
 
 For app feedback, bugs, and feature requests, please create an issue here: https://github.com/oleksiikutuzov/flipperzero-lightmeter/issues
 
+
+## Supported sensors
+
+- BH1750
+- MAX44009
+
 ## Wiring
 
-```
-VCC -> 3.3V
-GND -> GND
-SCL -> C0
-SDA -> C1
-```
+| Sensor | Flipper Zero |
+| ------ | ------------ |
+| VCC    | 3.3V         |
+| GND    | GND          |
+| SCL    | C0           |
+| SDA    | C1           |
 
 ## Sensor module
 
@@ -33,3 +40,4 @@ SDA -> C1
 ## References
 
 App inspired by [lightmeter](https://github.com/vpominchuk/lightmeter) project for Arduino by [vpominchuk](https://github.com/vpominchuk).
+
