@@ -32,7 +32,7 @@ static void text_input_callback(void* context) {
                 strcpy(app->import_game_text, app->input_text);
 
                 int status = FlipChessStatusSuccess;
-                
+
                 if(status == FlipChessStatusSuccess) {
                     //notification_message(app->notification, &sequence_blink_cyan_100);
                     flipchess_play_happy_bump(app);
@@ -73,7 +73,8 @@ FlipChess* flipchess_app_alloc() {
         app->view_dispatcher, flipchess_navigation_event_callback);
     view_dispatcher_set_tick_event_callback(
         app->view_dispatcher, flipchess_tick_event_callback, 100);
-    view_dispatcher_set_custom_event_callback(app->view_dispatcher, flipchess_custom_event_callback);
+    view_dispatcher_set_custom_event_callback(
+        app->view_dispatcher, flipchess_custom_event_callback);
     app->submenu = submenu_alloc();
 
     // Settings
@@ -96,7 +97,9 @@ FlipChess* flipchess_app_alloc() {
         flipchess_startscreen_get_view(app->flipchess_startscreen));
     app->flipchess_scene_1 = flipchess_scene_1_alloc();
     view_dispatcher_add_view(
-        app->view_dispatcher, FlipChessViewIdScene1, flipchess_scene_1_get_view(app->flipchess_scene_1));
+        app->view_dispatcher,
+        FlipChessViewIdScene1,
+        flipchess_scene_1_get_view(app->flipchess_scene_1));
     app->variable_item_list = variable_item_list_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -163,11 +166,12 @@ int32_t flipchess_app(void* p) {
         app->scene_manager, FlipChessSceneStartscreen); //Start with start screen
     //scene_manager_next_scene(app->scene_manager, FlipChessSceneMenu); //if you want to directly start with Menu
 
-    furi_hal_power_suppress_charge_enter();
+    furi_hal_random_init();
+    // furi_hal_power_suppress_charge_enter();
 
     view_dispatcher_run(app->view_dispatcher);
 
-    furi_hal_power_suppress_charge_exit();
+    // furi_hal_power_suppress_charge_exit();
     flipchess_app_free(app);
 
     return 0;

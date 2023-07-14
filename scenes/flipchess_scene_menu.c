@@ -29,11 +29,7 @@ void flipchess_scene_menu_on_enter(void* context) {
     //     app);
 
     submenu_add_item(
-        app->submenu, 
-        "Settings", 
-        SubmenuIndexSettings, 
-        flipchess_scene_menu_submenu_callback, 
-        app);
+        app->submenu, "Settings", SubmenuIndexSettings, flipchess_scene_menu_submenu_callback, app);
 
     submenu_set_selected_item(
         app->submenu, scene_manager_get_scene_state(app->scene_manager, FlipChessSceneMenu));
