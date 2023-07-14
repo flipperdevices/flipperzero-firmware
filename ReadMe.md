@@ -99,6 +99,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Added more Captive Portal assets for Evil Portal (By roshanravan)](https://github.com/roshanravan)
 - Updated: [Chess v1.2 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Increment FW Version to 0.82.3 with OFW 0.82.2
+- Added: [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 
 <a name="release">
 
@@ -284,6 +285,7 @@ $ ./fbt dolphin_ext
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Bomberduck (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
 - [Chess v1.2 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
 - [DnD Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
