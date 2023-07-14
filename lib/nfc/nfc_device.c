@@ -20,6 +20,7 @@ struct NfcDevice {
 
 NfcDevice* nfc_device_alloc() {
     NfcDevice* instance = malloc(sizeof(NfcDevice));
+    instance->protocol = NfcProtocolInvalid;
 
     return instance;
 }
@@ -39,6 +40,7 @@ void nfc_device_clear(NfcDevice* instance) {
         nfc_devices[instance->protocol]->free(instance->protocol_data);
         instance->protocol_data = NULL;
     }
+    instance->protocol = NfcProtocolInvalid;
 }
 
 void nfc_device_reset(NfcDevice* instance) {
