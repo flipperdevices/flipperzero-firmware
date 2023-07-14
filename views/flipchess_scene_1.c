@@ -206,8 +206,10 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
     //     }
     // }
 
-    if(model->game.state != SCL_GAME_STATE_PLAYING || model->paramExit)
-        return FlipChessStatusReturn;
+    if(model->game.state != SCL_GAME_STATE_PLAYING) {
+        model->paramExit = FlipChessStatusReturn;
+        return model->paramExit;
+    }
 
     char movePromote = 'q';
 
@@ -273,30 +275,37 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
     switch(model->game.state) {
     case SCL_GAME_STATE_WHITE_WIN:
         model->msg = "white wins";
+        model->paramExit = FlipChessStatusReturn;
         break;
 
     case SCL_GAME_STATE_BLACK_WIN:
         model->msg = "black wins";
+        model->paramExit = FlipChessStatusReturn;
         break;
 
     case SCL_GAME_STATE_DRAW_STALEMATE:
         model->msg = "draw (stalemate)";
+        model->paramExit = FlipChessStatusReturn;
         break;
 
     case SCL_GAME_STATE_DRAW_REPETITION:
         model->msg = "draw (repetition)";
+        model->paramExit = FlipChessStatusReturn;
         break;
 
     case SCL_GAME_STATE_DRAW_DEAD:
         model->msg = "draw (dead pos.)";
+        model->paramExit = FlipChessStatusReturn;
         break;
 
     case SCL_GAME_STATE_DRAW:
         model->msg = "draw";
+        model->paramExit = FlipChessStatusReturn;
         break;
 
     case SCL_GAME_STATE_DRAW_50:
         model->msg = "draw (50 moves)";
+        model->paramExit = FlipChessStatusReturn;
         break;
 
     default:
@@ -312,7 +321,8 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
         break;
     }
 
-    return moveType;
+    model->paramExit = moveType;
+    return model->paramExit;
 }
 
 void flipchess_scene_1_set_callback(
@@ -363,7 +373,7 @@ static int flipchess_scene_1_model_init(
     model->paramMoves = 0;
     model->paramInfo = 1;
     model->paramFlipBoard = 0;
-    model->paramExit = 0;
+    model->paramExit = FlipChessStatusSuccess;
     model->paramStep = 0;
     model->paramFEN = NULL;
     model->paramPGN = NULL;
@@ -536,25 +546,21 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
         case InputKeyOk:
             with_view_model(
                 instance->view, FlipChessScene1Model * model, 
-                { 
-                    // first turn of round, probably player but could be AI
-                    uint8_t turn = flipchess_turn(model);
-                    if(turn == FlipChessStatusReturn) {
+                {
+                    if (model->paramExit == FlipChessStatusReturn) {
                         instance->callback(FlipChessCustomEventScene1Back, instance->context);
-                    } else {
-                        flipchess_drawBoard(model);
+                        break;
                     }
- 
+                    // first turn of round, probably player but could be AI
+                    flipchess_turn(model);
+                    flipchess_drawBoard(model);
+                    
                     // if player played, let AI play
                     if (!flipchess_isPlayerTurn(model))
                     {
-                        turn = flipchess_turn(model);
-                        if(turn == FlipChessStatusReturn) {
-                            instance->callback(FlipChessCustomEventScene1Back, instance->context);
-                        } else {
-                            flipchess_drawBoard(model);
-                        }
-                    }
+                        flipchess_turn(model);
+                        flipchess_drawBoard(model);
+                                            }
                 }, 
                 true);
             break;
