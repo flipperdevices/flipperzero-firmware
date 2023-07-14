@@ -68,7 +68,6 @@ apps_to_build_as_faps = [
     FlipperAppType.PLUGIN,
     FlipperAppType.EXTERNAL,
     FlipperAppType.MENUEXTERNAL,
-    FlipperAppType.EXTSETTINGSAPP,
     FlipperAppType.DEBUG,
 ]
 

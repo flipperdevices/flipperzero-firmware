@@ -116,7 +116,7 @@ void desktop_settings_scene_favorite_on_enter(void* context) {
         submenu_set_header(submenu, "Secondary favorite app:");
     } else if(primary_favorite == 2) {
         submenu_set_header(submenu, "Tertiary favorite app:");
-    } else if(primary_favorite == 4) {
+    } else if(primary_favorite == 3) {
         submenu_set_header(submenu, "Quaternary favorite app:");
     }
     submenu_set_selected_item(submenu, pre_select_item); // If set during loop, visual glitch.

@@ -17,7 +17,6 @@ class FlipperAppType(Enum):
     STARTUP = "StartupHook"
     EXTERNAL = "External"
     MENUEXTERNAL = "MenuExternal"
-    EXTSETTINGSAPP = "ExtSettingsApp"
     METAPACKAGE = "Package"
     PLUGIN = "Plugin"
 
@@ -379,14 +378,6 @@ class ApplicationsCGenerator:
      .stack_size = 0,
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
      .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)}}}"""
-        if app.apptype == FlipperAppType.EXTSETTINGSAPP:
-            return f"""
-    {{.app = NULL,
-     .name = "{app.name}",
-     .appid = "{f"{app.link}" if app.link else "NULL"}",
-     .stack_size = 0,
-     .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)}}}"""
         return f"""
     {{.app = {app.entry_point},
      .name = "{app.name}",
@@ -431,8 +422,6 @@ class ApplicationsCGenerator:
             apps = self.buildset.get_apps_of_type(apptype)
             if apptype is FlipperAppType.APP:
                 apps += self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
-            if apptype is FlipperAppType.SETTINGS:
-                apps += self.buildset.get_apps_of_type(FlipperAppType.EXTSETTINGSAPP)
             apps.sort(key=lambda app: app.order)
             contents.append(",\n".join(map(self.get_app_descr, apps)))
             contents.append("};")
