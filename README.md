@@ -1,6 +1,6 @@
 # flipper-chess
 
-## Chess game for Flipper Zero.
+## Chess game for Flipper Zero
 - Built against `0.86.1` Flipper Zero firmware release
 - Uses [smallchesslib](https://codeberg.org/drummyfish/smallchesslib)
 
