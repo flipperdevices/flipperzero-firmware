@@ -656,6 +656,11 @@ static void esubghz_hooked_draw_callback(Canvas* canvas, void* context)
 
 	state->orig_draw_cb(canvas, state->view_dispatcher);
 
+	if (state->kbd_locked) {
+		canvas_set_font(canvas, FontPrimary);
+		elements_multiline_text_framed(canvas, 42, 30, "Locked");
+	}
+
 	if (kbd_lock_msg_display(state)) {
 		canvas_set_font(canvas, FontSecondary);
 		elements_bold_rounded_frame(canvas, 14, 8, 99, 48);
