@@ -9,4 +9,6 @@ App(
     ],
     stack_size=8 * 1024,
     fap_category="Examples",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="esubghz_chat",
 )

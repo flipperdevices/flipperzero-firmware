@@ -1,12 +1,16 @@
 #include <furi.h>
 #include <furi_hal.h>
+#include <gui/elements.h>
 #include <gui/gui.h>
 #include <gui/modules/text_box.h>
 #include <gui/modules/text_input.h>
-#include <gui/view_dispatcher.h>
+#include <gui/view_dispatcher_i.h>
+#include <gui/view_port_i.h>
 #include <gui/scene_manager.h>
 #include <toolbox/sha256.h>
 #include <notification/notification_messages.h>
+
+#include "esubghz_chat_icons.h"
 
 #include "crypto/gcm.h"
 
@@ -27,6 +31,9 @@
 #define MESSAGE_COMPLETION_TIMEOUT 200
 #define TIMEOUT_BETWEEN_MESSAGES 500
 
+#define KBD_UNLOCK_CNT 3
+#define KBD_UNLOCK_TIMEOUT 1000
+
 typedef struct {
 	SceneManager *scene_manager;
 	ViewDispatcher *view_dispatcher;
@@ -45,6 +52,13 @@ typedef struct {
 	char rx_str_buffer[RX_TX_BUFFER_SIZE + 1];
 	FuriStreamBuffer *rx_collection_buffer;
 	uint32_t last_time_rx_data;
+
+	// for locking
+	ViewPortDrawCallback orig_draw_cb;
+	ViewPortInputCallback orig_input_cb;
+	bool kbd_locked;
+	uint32_t kbd_lock_msg_ticks;
+	uint8_t kbd_lock_count;
 } ESubGhzChatState;
 
 typedef enum {
@@ -546,6 +560,47 @@ static const SceneManagerHandlers esubghz_chat_scene_event_handlers = {
 	.on_exit_handlers = esubghz_chat_scene_on_exit_handlers,
 	.scene_num = ESubGhzChatScene_MAX};
 
+static bool kbd_lock_msg_display(ESubGhzChatState *state)
+{
+	return (state->kbd_lock_msg_ticks != 0);
+}
+
+static bool kbd_lock_msg_reset_timeout(ESubGhzChatState *state)
+{
+	if (state->kbd_lock_msg_ticks == 0) {
+		return false;
+	}
+
+	if (furi_get_tick() - state->kbd_lock_msg_ticks > KBD_UNLOCK_TIMEOUT) {
+		return true;
+	}
+
+	return false;
+}
+
+static void kbd_lock_msg_reset(ESubGhzChatState *state, bool backlight_off)
+{
+	state->kbd_lock_msg_ticks = 0;
+	state->kbd_lock_count = 0;
+
+	if (backlight_off) {
+		notification_message(state->notification,
+				&sequence_display_backlight_off);
+	}
+}
+
+static void kbd_lock(ESubGhzChatState *state)
+{
+	state->kbd_locked = true;
+	kbd_lock_msg_reset(state, true);
+}
+
+static void kbd_unlock(ESubGhzChatState *state)
+{
+	state->kbd_locked = false;
+	kbd_lock_msg_reset(state, false);
+}
+
 static bool esubghz_chat_custom_event_callback(void* context, uint32_t event)
 {
 	FURI_LOG_T(APPLICATION_NAME, "esubghz_chat_custom_event_callback");
@@ -569,6 +624,10 @@ static void esubghz_chat_tick_event_callback(void* context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+	if (kbd_lock_msg_reset_timeout(state)) {
+		kbd_lock_msg_reset(state, true);
+	}
+
 	size_t avail = furi_stream_buffer_bytes_available(
 			state->rx_collection_buffer);
 	if (avail > 0) {
@@ -586,6 +645,63 @@ static void esubghz_chat_tick_event_callback(void* context)
 	}
 
 	scene_manager_handle_tick_event(state->scene_manager);
+}
+
+static void esubghz_hooked_draw_callback(Canvas* canvas, void* context)
+{
+	FURI_LOG_T(APPLICATION_NAME, "esubghz_hooked_draw_callback");
+
+	furi_assert(context);
+	ESubGhzChatState* state = context;
+
+	state->orig_draw_cb(canvas, state->view_dispatcher);
+
+	if (kbd_lock_msg_display(state)) {
+		canvas_set_font(canvas, FontSecondary);
+		elements_bold_rounded_frame(canvas, 14, 8, 99, 48);
+		elements_multiline_text(canvas, 65, 26, "To unlock\npress:");
+		canvas_draw_icon(canvas, 65, 42, &I_Pin_back_arrow_10x8);
+		canvas_draw_icon(canvas, 80, 42, &I_Pin_back_arrow_10x8);
+		canvas_draw_icon(canvas, 95, 42, &I_Pin_back_arrow_10x8);
+		canvas_draw_icon(canvas, 16, 13, &I_WarningDolphin_45x42);
+	}
+}
+
+static void esubghz_hooked_input_callback(InputEvent* event, void* context)
+{
+	FURI_LOG_T(APPLICATION_NAME, "esubghz_hooked_input_callback");
+
+	furi_assert(context);
+	ESubGhzChatState* state = context;
+
+	if (state->kbd_locked) {
+		if (state->kbd_lock_count == 0) {
+			state->kbd_lock_msg_ticks = furi_get_tick();
+		}
+
+		if (event->key == InputKeyBack && event->type ==
+				InputTypeShort) {
+			state->kbd_lock_count++;
+		}
+
+		if (state->kbd_lock_count >= KBD_UNLOCK_CNT) {
+			kbd_unlock(state);
+		}
+
+		// do not handle the event
+		return;
+	}
+
+	// if we are in the chat view, allow locking
+	if (state->view_dispatcher->current_view ==
+			text_box_get_view(state->chat_box)) {
+		if (event->key == InputKeyOk && event->type == InputTypeLong) {
+			kbd_lock(state);
+			return;
+		}
+	}
+
+	state->orig_input_cb(event, state->view_dispatcher);
 }
 
 static bool helper_strings_alloc(ESubGhzChatState *state)
@@ -696,6 +812,16 @@ int32_t esubghz_chat(void)
 	furi_string_printf(state->name_prefix, "\033[0;33m%s\033[0m: ",
 			furi_hal_version_get_name_ptr());
 
+	/* no error handling here, don't know how */
+	state->notification = furi_record_open(RECORD_NOTIFICATION);
+
+	state->orig_draw_cb = state->view_dispatcher->view_port->draw_callback;
+	state->orig_input_cb = state->view_dispatcher->view_port->input_callback;
+	view_port_draw_callback_set(state->view_dispatcher->view_port,
+			esubghz_hooked_draw_callback, state);
+	view_port_input_callback_set(state->view_dispatcher->view_port,
+			esubghz_hooked_input_callback, state);
+
 	view_dispatcher_enable_queue(state->view_dispatcher);
 
 	view_dispatcher_set_event_callback_context(state->view_dispatcher, state);
@@ -719,19 +845,16 @@ int32_t esubghz_chat(void)
 	Gui *gui = furi_record_open(RECORD_GUI);
 	view_dispatcher_attach_to_gui(state->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
 
-	/* no error handling here, don't know how */
-	state->notification = furi_record_open(RECORD_NOTIFICATION);
-
 	scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_FreqInput);
 	view_dispatcher_run(state->view_dispatcher);
 
 	err = 0;
 
-	furi_record_close(RECORD_NOTIFICATION);
-
 	furi_record_close(RECORD_GUI);
 	view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_Input);
 	view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_ChatBox);
+
+	furi_record_close(RECORD_NOTIFICATION);
 
 	// clear the key and potential password
 	esubghz_chat_explicit_bzero(state->text_input_store,
