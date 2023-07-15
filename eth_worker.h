@@ -23,6 +23,7 @@ typedef enum {
     EthWorkerProcessStatic,
     EthWorkerProcessPing,
     EthWorkerProcessReset,
+    EthWorkerProcessActive,
 } EthWorkerProcess;
 
 typedef enum {

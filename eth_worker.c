@@ -11,6 +11,8 @@
 
 #define TAG "EthWorker"
 
+static EthWorker* static_worker = NULL;
+
 EthWorker* eth_worker_alloc() {
     EthWorker* eth_worker = malloc(sizeof(EthWorker));
 
@@ -37,10 +39,17 @@ EthWorker* eth_worker_alloc() {
         ethernet_view_process_malloc(EthWorkerProcessReset, eth_worker->config);
     eth_worker->active_process = eth_worker->init_process;
 
+    static_worker = eth_worker;
+
+    eth_log(EthWorkerProcessReset, "Finik Ethernet [START]");
+
     return eth_worker;
 }
 
 void eth_worker_free(EthWorker* eth_worker) {
+    eth_log(EthWorkerProcessReset, "Finik Ethernet [STOP]");
+
+    static_worker = NULL;
     furi_assert(eth_worker);
     furi_thread_free(eth_worker->thread);
     ethernet_view_process_free(eth_worker->init_process);
@@ -81,6 +90,41 @@ void eth_worker_set_active_process(EthWorker* eth_worker, EthWorkerProcess state
 void eth_worker_log(EthWorker* eth_worker, const char* str) {
     furi_assert(eth_worker);
     ehternet_save_process_print(eth_worker->config, str);
+}
+
+static EthViewProcess* get_process(EthWorker* worker, EthWorkerProcess process) {
+    furi_assert(worker);
+    switch(process) {
+    case EthWorkerProcessInit:
+        return worker->init_process;
+    case EthWorkerProcessDHCP:
+        return worker->dhcp_process;
+    case EthWorkerProcessStatic:
+        return worker->stat_process;
+    case EthWorkerProcessPing:
+        return worker->ping_process;
+    case EthWorkerProcessReset:
+        return worker->reset_process;
+    case EthWorkerProcessActive:
+        return worker->active_process;
+    default:
+        NULL;
+    }
+}
+
+void eth_log(EthWorkerProcess process, const char* format, ...) {
+    furi_assert(static_worker);
+    va_list args;
+    va_start(args, format);
+    FuriString* fstring = furi_string_alloc_vprintf(format, args);
+    const char* string = furi_string_get_cstr(fstring);
+    va_end(args);
+
+    FURI_LOG_I(TAG, "%s", string);
+    ehternet_save_process_print(static_worker->config, string);
+    ethernet_view_process_print(get_process(static_worker, process), string);
+
+    furi_string_free(fstring);
 }
 
 /************************** Ethernet Worker Thread *****************************/

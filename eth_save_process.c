@@ -263,8 +263,6 @@ EthernetSaveConfig* ehternet_save_process_malloc() {
 
     File* file = storage_file_alloc(storage);
 
-    FURI_LOG_E(TAG, "storage_file_alloc");
-
     if(!storage_file_open(file, APP_DATA_PATH("log.txt"), FSAM_WRITE, FSOM_OPEN_APPEND)) {
         FURI_LOG_E(TAG, "Failed to open file or file not exists");
         storage_file_free(file);
@@ -273,9 +271,6 @@ EthernetSaveConfig* ehternet_save_process_malloc() {
     }
 
     config->log_file = file;
-
-    ehternet_save_process_print(config, "Finik Ethernet [RUN]");
-    FURI_LOG_E(TAG, "storage_file_alloc after print");
 
     return config;
 }
@@ -297,7 +292,6 @@ void ehternet_save_process_print(EthernetSaveConfig* config, const char* str) {
 }
 
 void ehternet_save_process_free(EthernetSaveConfig* config) {
-    ehternet_save_process_print(config, "Finik Ethernet [STOP]");
     ethernet_save_process_write(config);
     storage_file_close(config->log_file);
     storage_file_free(config->log_file);
