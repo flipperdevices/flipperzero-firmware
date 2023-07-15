@@ -2,6 +2,8 @@
 #include "cli_control.h"
 #include "text_input.h"
 #include "console_output.h"
+#include <loader/loader_i.h>
+#include <gui/view_dispatcher_i.h>
 
 static bool cligui_custom_event_cb(void* context, uint32_t event) {
     UNUSED(event);
@@ -65,6 +67,14 @@ static void input_callback_wrapper(InputEvent* event, void* context) {
 
 int32_t cligui_main(void* p) {
     UNUSED(p);
+
+    // Unlock loader-lock and save app thread
+    FuriThread* temp_save_appthr;
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    temp_save_appthr = loader->app.thread;
+    loader->app.thread = NULL;
+    furi_record_close(RECORD_LOADER);
+
     CliguiApp* cligui = malloc(sizeof(CliguiApp));
     cligui->data = malloc(sizeof(CliguiData));
 
@@ -74,11 +84,9 @@ int32_t cligui_main(void* p) {
 
     cligui->gui = furi_record_open(RECORD_GUI);
     cligui->view_dispatcher = view_dispatcher_alloc();
-    cligui->view_dispatcher_i = (ViewDispatcher_internal*)(cligui->view_dispatcher);
-    prev_input_callback =
-        ((ViewPort_internal*)cligui->view_dispatcher_i->view_port)->input_callback;
+    prev_input_callback = cligui->view_dispatcher->view_port->input_callback;
     view_port_input_callback_set(
-        cligui->view_dispatcher_i->view_port, input_callback_wrapper, cligui);
+        cligui->view_dispatcher->view_port, input_callback_wrapper, cligui);
     view_dispatcher_enable_queue(cligui->view_dispatcher);
     view_dispatcher_set_event_callback_context(cligui->view_dispatcher, cligui);
     view_dispatcher_set_custom_event_callback(cligui->view_dispatcher, cligui_custom_event_cb);
@@ -128,6 +136,11 @@ int32_t cligui_main(void* p) {
 
     free(cligui->data);
     free(cligui);
+
+    // We restoring previous app thread here, we love kostily and velosipedy, bydlo kod forever!
+    loader = furi_record_open(RECORD_LOADER);
+    loader->app.thread = temp_save_appthr;
+    furi_record_close(RECORD_LOADER);
 
     return 0;
 }
