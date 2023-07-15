@@ -5,6 +5,10 @@
 #include <stddef.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <mbedtls/des.h>
 
 #include "../helpers/iso7816.h"
@@ -226,3 +230,7 @@ size_t mrtd_protect_apdu(
 int tlv_number(TlvInfo tlv);
 
 const EFFile* mrtd_tag_to_file(uint8_t tag);
+
+#ifdef __cplusplus
+}
+#endif

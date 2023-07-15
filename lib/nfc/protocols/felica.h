@@ -4,6 +4,10 @@
 #include <m-array.h>
 #include <m-dict.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define NFCF_F_SIG (13560000.0)
 #define MRT_T_SIG 302064.89 //ns, 256 * 16 / NFC_F_SIG * 1e9
 #define MRT_T_SIG_x4 1208259.56 //ns, MRT_T_SIG * (4 ** 1)
@@ -318,3 +322,7 @@ bool felica_read_card(
     uint8_t* polled_idm,
     uint8_t* polled_pmm);
 void felica_clear(FelicaData* data);
+
+#ifdef __cplusplus
+}
+#endif

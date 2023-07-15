@@ -5,6 +5,10 @@
 #include <stddef.h>
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define BER_CLASS_UNIVERSAL 0x0
 #define BER_CLASS_APPLICATION 0x1
 #define BER_CLASS_CONTEXT 0x2
@@ -29,3 +33,7 @@ TlvInfo iso7816_tlv_parse(const uint8_t* data);
 
 TlvInfo
     iso7816_tlv_select(const uint8_t* data, size_t length, const uint16_t tags[], size_t num_tags);
+
+#ifdef __cplusplus
+}
+#endif

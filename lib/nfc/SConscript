@@ -11,6 +11,11 @@ env.Append(
         File("helpers/mfkey32.h"),
         File("parsers/nfc_supported_card.h"),
         File("helpers/nfc_generators.h"),
+        File("helpers/iso7816.h"),
+        File("helpers/mrtd_helpers.h"),
+        File("protocols/felica.h"),
+        File("protocols/felica_util.h"),
+        File("protocols/mrtd.h"),
         File("protocols/nfc_util.h"),
     ],
 )

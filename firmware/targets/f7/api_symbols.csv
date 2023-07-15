@@ -154,12 +154,17 @@ Header,+,lib/mlib/m-rbtree.h,,
 Header,+,lib/mlib/m-tuple.h,,
 Header,+,lib/mlib/m-variant.h,,
 Header,+,lib/music_worker/music_worker.h,,
+Header,+,lib/nfc/helpers/iso7816.h,,
 Header,+,lib/nfc/helpers/mfkey32.h,,
+Header,+,lib/nfc/helpers/mrtd_helpers.h,,
 Header,+,lib/nfc/helpers/nfc_generators.h,,
 Header,+,lib/nfc/nfc_device.h,,
 Header,+,lib/nfc/nfc_types.h,,
 Header,+,lib/nfc/nfc_worker.h,,
 Header,+,lib/nfc/parsers/nfc_supported_card.h,,
+Header,+,lib/nfc/protocols/felica.h,,
+Header,+,lib/nfc/protocols/felica_util.h,,
+Header,+,lib/nfc/protocols/mrtd.h,,
 Header,+,lib/nfc/protocols/nfc_util.h,,
 Header,+,lib/one_wire/maxim_crc.h,,
 Header,+,lib/one_wire/one_wire_host.h,,
@@ -901,10 +906,10 @@ Function,-,fdopen,FILE*,"int, const char*"
 Function,-,felica_check_ic_type,_Bool,uint8_t*
 Function,-,felica_clear,void,FelicaData*
 Function,-,felica_define_normal_block,void,"FelicaService*, uint16_t, uint8_t*"
-Function,-,felica_estimate_timing_us,uint_least32_t,"uint_least8_t, uint_least8_t"
+Function,+,felica_estimate_timing_us,uint_least32_t,"uint_least8_t, uint_least8_t"
 Function,-,felica_get_ic_type,FelicaICType,uint8_t*
 Function,-,felica_get_service_name,FuriString*,FelicaService*
-Function,-,felica_get_system_name,FuriString*,FelicaSystem*
+Function,+,felica_get_system_name,FuriString*,FelicaSystem*
 Function,-,felica_lite_dump_data,_Bool,"FuriHalNfcTxRxContext*, FelicaReader*, FelicaData*, FelicaSystem*"
 Function,-,felica_lite_is_issued,_Bool,FelicaLiteInfo*
 Function,-,felica_lite_prepare_unencrypted_read,uint8_t,"uint8_t*, const FelicaReader*, _Bool, const uint8_t*, uint8_t"
@@ -2176,9 +2181,9 @@ Function,-,modfl,long double,"long double, long double*"
 Function,-,mrand48,long,
 Function,-,mrtd_alloc_init,MrtdApplication*,"FuriHalNfcTxRxContext*, MrtdData*"
 Function,-,mrtd_auth_method_parse_string,_Bool,"MrtdAuthMethod*, const char*"
-Function,-,mrtd_auth_method_string,const char*,MrtdAuthMethod
-Function,-,mrtd_auth_params_load,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*, _Bool"
-Function,-,mrtd_auth_params_save,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*"
+Function,+,mrtd_auth_method_string,const char*,MrtdAuthMethod
+Function,+,mrtd_auth_params_load,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*, _Bool"
+Function,+,mrtd_auth_params_save,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*"
 Function,-,mrtd_auth_params_save_file,_Bool,"Storage*, DialogsApp*, MrtdAuthData*, const char*, const char*, const char*"
 Function,-,mrtd_authenticate,_Bool,MrtdApplication*
 Function,-,mrtd_bac_check_digit,uint8_t,"const char*, const uint8_t"
@@ -2200,7 +2205,7 @@ Function,-,mrtd_print_date,void,"char*, MrtdDate*"
 Function,-,mrtd_protect_apdu,size_t,"uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, const void*, int16_t, const uint8_t*, const uint8_t*, uint64_t, uint8_t*"
 Function,-,mrtd_read_parse_file,_Bool,"MrtdApplication*, EFFile"
 Function,-,mrtd_select_app,_Bool,"MrtdApplication*, AIDValue"
-Function,-,mrtd_tag_to_file,const EFFile*,uint8_t
+Function,+,mrtd_tag_to_file,const EFFile*,uint8_t
 Function,-,music_worker_alloc,MusicWorker*,
 Function,-,music_worker_clear,void,MusicWorker*
 Function,-,music_worker_free,void,MusicWorker*

@@ -3,6 +3,10 @@
 #include <furi_hal_nfc.h>
 #include <helpers/mrtd_helpers.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define MRTD_APP_FOLDER "/any/nfc/mrtd"
 #define MRTD_APP_EXTENSION ".mrtd"
 
@@ -42,3 +46,7 @@ bool mrtd_auth_params_load(
     MrtdAuthData* auth_data,
     const char* file_path,
     bool show_dialog);
+
+#ifdef __cplusplus
+}
+#endif
