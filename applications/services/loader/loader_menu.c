@@ -53,23 +53,10 @@ static void loader_menu_start(const char* name) {
     furi_record_close(RECORD_LOADER);
 }
 
-static void loader_menu_apps_callback(void* context, uint32_t index) {
-    UNUSED(context);
-    const char* name = FLIPPER_APPS[index].name;
-    loader_menu_start(name);
-}
-
 static void loader_menu_callback(void* context, uint32_t index) {
     UNUSED(context);
     const char* path = (const char*)index;
     loader_menu_start(path);
-}
-
-static void loader_menu_nfc_callback(void* context, uint32_t index) {
-    UNUSED(index);
-    UNUSED(context);
-    const char* name = "NFC";
-    loader_menu_start(name);
 }
 
 static void loader_menu_applications_callback(void* context, uint32_t index) {
@@ -126,7 +113,7 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
             FLIPPER_APPS[i].name,
             FLIPPER_APPS[i].icon,
             (uint32_t)FLIPPER_APPS[i].appid,
-            loader_menu_nfc_callback,
+            loader_menu_callback,
             (void*)menu);
         count++;
     }
