@@ -370,7 +370,8 @@ void flipchess_scene_1_draw(Canvas* canvas, FlipChessScene1Model* model) {
 static int flipchess_scene_1_model_init(
     FlipChessScene1Model* const model,
     const int white_mode,
-    const int black_mode) {
+    const int black_mode,
+    char* import_game_text) {
     model->paramPlayerW = white_mode;
     model->paramPlayerB = black_mode;
 
@@ -380,7 +381,7 @@ static int flipchess_scene_1_model_init(
     model->paramFlipBoard = 0;
     model->paramExit = FlipChessStatusSuccess;
     model->paramStep = 0;
-    model->paramFEN = NULL;
+    model->paramFEN = import_game_text;
     model->paramPGN = NULL;
     model->clockSeconds = -1;
 
@@ -487,6 +488,7 @@ static int flipchess_scene_1_model_init(
 bool flipchess_scene_1_input(InputEvent* event, void* context) {
     furi_assert(context);
     FlipChessScene1* instance = context;
+    FlipChess* app = instance->context;
 
     if(event->type == InputTypeRelease) {
         switch(event->key) {
@@ -583,6 +585,8 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 {
                     // first turn of round, probably player but could be AI
                     flipchess_turn(model);
+                    SCL_boardToFEN(model->game.board, app->import_game_text);
+                    app->import_game = 1;
                     flipchess_drawBoard(model);
                 },
                 true);
@@ -605,6 +609,8 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                     // if player played, let AI play
                     if(!flipchess_isPlayerTurn(model)) {
                         flipchess_turn(model);
+                        SCL_boardToFEN(model->game.board, app->import_game_text);
+                        app->import_game = 1;
                         flipchess_drawBoard(model);
                     }
                 },
@@ -628,7 +634,6 @@ void flipchess_scene_1_exit(void* context) {
 void flipchess_scene_1_enter(void* context) {
     furi_assert(context);
     FlipChessScene1* instance = (FlipChessScene1*)context;
-
     FlipChess* app = instance->context;
 
     flipchess_play_happy_bump(app);
@@ -637,7 +642,14 @@ void flipchess_scene_1_enter(void* context) {
         instance->view,
         FlipChessScene1Model * model,
         {
-            int init = flipchess_scene_1_model_init(model, app->white_mode, app->black_mode);
+            // load imported game if applicable
+            char* import_game_text = NULL;
+            if(app->import_game == 1 && strlen(app->import_game_text) > 0) {
+                import_game_text = app->import_game_text;
+            }
+
+            int init = flipchess_scene_1_model_init(
+                model, app->white_mode, app->black_mode, import_game_text);
 
             // nonzero status
             if(init == FlipChessStatusSuccess) {
@@ -647,6 +659,8 @@ void flipchess_scene_1_enter(void* context) {
                 if(turn == FlipChessStatusReturn) {
                     init = turn;
                 } else {
+                    SCL_boardToFEN(model->game.board, app->import_game_text);
+                    app->import_game = 1;
                     flipchess_drawBoard(model);
                 }
             }

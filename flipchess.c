@@ -29,10 +29,9 @@ static void text_input_callback(void* context) {
     if(strlen(app->input_text) > 0) {
         if(app->input_state == FlipChessTextInputGame) {
             if(app->import_game == 1) {
-                strcpy(app->import_game_text, app->input_text);
+                strncpy(app->import_game_text, app->input_text, TEXT_SIZE);
 
-                int status = FlipChessStatusSuccess;
-
+                uint8_t status = FlipChessStatusSuccess;
                 if(status == FlipChessStatusSuccess) {
                     //notification_message(app->notification, &sequence_blink_cyan_100);
                     flipchess_play_happy_bump(app);

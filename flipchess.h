@@ -18,7 +18,8 @@
 
 #define FLIPCHESS_VERSION "v0.1.2"
 
-#define TEXT_BUFFER_SIZE 256
+#define TEXT_BUFFER_SIZE 96
+#define TEXT_SIZE (TEXT_BUFFER_SIZE - 1)
 
 typedef struct {
     Gui* gui;
@@ -35,9 +36,9 @@ typedef struct {
     int white_mode;
     int black_mode;
     // Main menu options
-    int import_game;
+    uint8_t import_game;
     // Text input
-    int input_state;
+    uint8_t input_state;
     char import_game_text[TEXT_BUFFER_SIZE];
     char input_text[TEXT_BUFFER_SIZE];
 } FlipChess;
