@@ -123,12 +123,29 @@ void view_dispatcher_stop(ViewDispatcher* view_dispatcher);
  */
 void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view);
 
+/** Try to add view to ViewDispatcher
+ *
+ * @param      view_dispatcher  ViewDispatcher instance
+ * @param      view_id          View id to register
+ * @param      view             View instance
+ * @return     {@code true} if there is no view by this ID and {@code false} otherwise
+ */
+bool view_dispatcher_try_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view);
+
 /** Remove view from ViewDispatcher
  *
  * @param      view_dispatcher  ViewDispatcher instance
  * @param      view_id          View id to remove
  */
 void view_dispatcher_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_id);
+
+/** Try to remove view from ViewDispatcher
+ *
+ * @param      view_dispatcher  ViewDispatcher instance
+ * @param      view_id          View id to remove
+*  @return     {@code true} if there was a view by this ID and {@code false} otherwise
+ */
+bool view_dispatcher_try_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_id);
 
 /** Switch to View
  *
@@ -138,6 +155,16 @@ void view_dispatcher_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_
  *             reached
  */
 void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t view_id);
+
+/** Switch to View
+ *
+ * @param      view_dispatcher  ViewDispatcher instance
+ * @param      view_id          View id to register
+*  @return     {@code true} if there is a view by this ID and {@code false} otherwise
+ * @warning    switching may be delayed till input events complementarity
+ *             reached
+ */
+bool view_dispatcher_try_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t view_id);
 
 /** Send ViewPort of this ViewDispatcher instance to front
  *

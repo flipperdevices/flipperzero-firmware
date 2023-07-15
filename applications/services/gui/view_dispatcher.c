@@ -118,10 +118,13 @@ void view_dispatcher_stop(ViewDispatcher* view_dispatcher) {
 }
 
 void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view) {
+    furi_check(view_dispatcher_try_add_view(view_dispatcher, view_id, view));
+}
+bool view_dispatcher_try_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id, View* view) {
     furi_assert(view_dispatcher);
     furi_assert(view);
     // Check if view id is not used and register view
-    furi_check(ViewDict_get(view_dispatcher->views, view_id) == NULL);
+    if(ViewDict_get(view_dispatcher->views, view_id) != NULL) return false;
 
     // Lock gui
     if(view_dispatcher->gui) {
@@ -136,9 +139,14 @@ void view_dispatcher_add_view(ViewDispatcher* view_dispatcher, uint32_t view_id,
     if(view_dispatcher->gui) {
         gui_unlock(view_dispatcher->gui);
     }
+
+    return true;
 }
 
 void view_dispatcher_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_id) {
+    furi_check(view_dispatcher_try_remove_view(view_dispatcher, view_id));
+}
+bool view_dispatcher_try_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_id) {
     furi_assert(view_dispatcher);
 
     // Lock gui
@@ -147,37 +155,45 @@ void view_dispatcher_remove_view(ViewDispatcher* view_dispatcher, uint32_t view_
     }
     // Get View by ID
     View* view = *ViewDict_get(view_dispatcher->views, view_id);
-
-    // Disable the view if it is active
-    if(view_dispatcher->current_view == view) {
-        view_dispatcher_set_current_view(view_dispatcher, NULL);
-    }
-    // Check if view is receiving input
-    if(view_dispatcher->ongoing_input_view == view) {
-        view_dispatcher->ongoing_input_view = NULL;
-    }
     // Remove view
-    furi_check(ViewDict_erase(view_dispatcher->views, view_id));
+    bool had_effect;
+    if(ViewDict_erase(view_dispatcher->views, view_id)) {
+        had_effect = true;
+        // Disable the view if it is active
+        if(view_dispatcher->current_view == view) {
+            view_dispatcher_set_current_view(view_dispatcher, NULL);
+        }
+        // Check if view is receiving input
+        if(view_dispatcher->ongoing_input_view == view) {
+            view_dispatcher->ongoing_input_view = NULL;
+        }
 
-    view_set_update_callback(view, NULL);
-    view_set_update_callback_context(view, NULL);
+        view_set_update_callback(view, NULL);
+        view_set_update_callback_context(view, NULL);
+    } else
+        had_effect = false;
 
     // Unlock gui
     if(view_dispatcher->gui) {
         gui_unlock(view_dispatcher->gui);
     }
+    return had_effect;
 }
 
 void view_dispatcher_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t view_id) {
+    furi_check(view_dispatcher_try_switch_to_view(view_dispatcher, view_id));
+}
+bool view_dispatcher_try_switch_to_view(ViewDispatcher* view_dispatcher, uint32_t view_id) {
     furi_assert(view_dispatcher);
     if(view_id == VIEW_NONE) {
         view_dispatcher_set_current_view(view_dispatcher, NULL);
     } else if(view_id == VIEW_IGNORE) {
     } else {
         View** view_pp = ViewDict_get(view_dispatcher->views, view_id);
-        furi_check(view_pp != NULL);
+        if(view_pp == NULL) return false;
         view_dispatcher_set_current_view(view_dispatcher, *view_pp);
     }
+    return true;
 }
 
 void view_dispatcher_send_to_front(ViewDispatcher* view_dispatcher) {
