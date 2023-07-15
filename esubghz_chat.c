@@ -178,7 +178,7 @@ static void pass_input_cb(void *context)
 	ESubGhzChatState* state = context;
 
 	furi_string_cat_printf(state->chat_box_store, "\nEncrypted: %s",
-			(state->encrypted ? "true" : "false"));
+			(state->encrypted ? "yes" : "no"));
 
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_PassEntered);
@@ -651,6 +651,8 @@ static void esubghz_hooked_draw_callback(Canvas* canvas, void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "esubghz_hooked_draw_callback");
 
+	furi_assert(canvas);
+
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
@@ -675,6 +677,8 @@ static void esubghz_hooked_draw_callback(Canvas* canvas, void* context)
 static void esubghz_hooked_input_callback(InputEvent* event, void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "esubghz_hooked_input_callback");
+
+	furi_assert(event);
 
 	furi_assert(context);
 	ESubGhzChatState* state = context;
