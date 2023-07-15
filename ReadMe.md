@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0714-1651-0.86.3-744fe0c.tgz&channel=RM0714-1651-0.86.3-744fe0c&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0714-1651-0.86.3-744fe0c-NoAnim.tgz&channel=RM0714-1651-0.86.3-744fe0c-NoAnim&version=0.86.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0715-1518-0.86.3-c7d2ab6.tgz&channel=RM0715-1518-0.86.3-c7d2ab6&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0715-1518-0.86.3-c7d2ab6-NoAnim.tgz&channel=RM0715-1518-0.86.3-c7d2ab6-NoAnim&version=0.86.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -33,14 +33,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-15 14:55 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-15 14:55 EST`
-- Updated: [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) [(By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b5a877ab3b09046c77d6ea28d6f33f39d4c13fff)
-- Updated: [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
-- [SubGHz Chat CLI Fix #708 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/708)
-- [Set up FAP versions to match OFW formatting (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/20112f030fcb8048482d41d30b701f1fcf250783)
-- [Fix for CFW Settings Start Point Order (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/212ac908965b394b08f5689aba5b05ba97359557)
-- [NFC as a FAP (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fa9447f6d43528840f84828273c32dad0ce2954e)
-- [Loader Fixes to work more like OFW (By RogueMaster & ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/439360b887ca7ab9872bd04a53c255538cfae182)
-- [CLI Bridge Fix](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a1a92b7d1a7b8e6019ef3adb7d425389a15b3140)
 
 <a name="release">
 
@@ -436,4 +428,4 @@ $ ./fbt dolphin_ext
 - [USB Mass Storage ($25 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/697)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0714-1651-0.86.3-744fe0c.tgz&channel=RM0714-1651-0.86.3-744fe0c&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0714-1651-0.86.3-744fe0c-NoAnim.tgz&channel=RM0714-1651-0.86.3-744fe0c-NoAnim&version=0.86.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0715-1518-0.86.3-c7d2ab6.tgz&channel=RM0715-1518-0.86.3-c7d2ab6&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0715-1518-0.86.3-c7d2ab6-NoAnim.tgz&channel=RM0715-1518-0.86.3-c7d2ab6-NoAnim&version=0.86.3)
