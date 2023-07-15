@@ -1,4 +1,5 @@
 #include "../flipchess.h"
+#include "../helpers/flipchess_voice.h"
 
 enum SubmenuIndex {
     SubmenuIndexScene1New = 10,
@@ -14,6 +15,10 @@ void flipchess_scene_menu_submenu_callback(void* context, uint32_t index) {
 
 void flipchess_scene_menu_on_enter(void* context) {
     FlipChess* app = context;
+
+    if(app->haptic == 1) {
+        flipchess_voice_game(NULL);
+    }
 
     submenu_add_item(
         app->submenu,
