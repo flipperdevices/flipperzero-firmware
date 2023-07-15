@@ -6,8 +6,10 @@ typedef struct EthWorker EthWorker;
 typedef struct EthViewProcess EthViewProcess;
 
 typedef enum {
-    EthWorkerStateNotInited = 0,
-    EthWorkerStateModuleInit,
+    EthWorkerStateNotAllocated = 0,
+    EthWorkerStateNotInited,
+    EthWorkerStateInited,
+    EthWorkerStateInit,
     EthWorkerStateModulePowerOn,
     EthWorkerStateModuleConnect,
     EthWorkerStateMACInit,
@@ -24,6 +26,7 @@ typedef enum {
     EthWorkerProcessPing,
     EthWorkerProcessReset,
     EthWorkerProcessActive,
+    EthWorkerProcessExit,
 } EthWorkerProcess;
 
 typedef enum {

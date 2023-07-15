@@ -113,8 +113,6 @@ FinikEthApp* finik_eth_app_alloc() {
 
     app->power = furi_record_open(RECORD_POWER);
 
-    //eth_worker_task(app->eth_worker);
-
     return app;
 }
 
@@ -145,13 +143,7 @@ void finit_eth_app_key_handler(FinikEthApp* app, InputKey key) {
             app->cursor_position = CURSOR_CLICK_PROCESS;
             view_port_update(app->view_port);
             furi_delay_ms(150);
-            char str[] = "test string 0 with some parameters";
-            eth_worker_log(app->eth_worker, str);
-            evp_printf(app->eth_worker->init_process, "test promt %d %s", 112, "ivan");
-            ethernet_view_process_print(app->eth_worker->stat_process, str);
-            ethernet_view_process_print(
-                app->eth_worker->dhcp_process, "test dhcp process string. loooooong world");
-            ethernet_view_process_print(app->eth_worker->ping_process, "ping");
+            eth_run(app->eth_worker, (EthWorkerProcess)app->draw_process);
             app->cursor_position = CURSOR_CHOOSE_PROCESS;
         } else if(key == InputKeyRight) {
             eth_worker_set_active_process(app->eth_worker, (EthWorkerProcess)app->draw_process);
@@ -210,6 +202,7 @@ int32_t finik_eth_app(void* p) {
             finit_eth_app_key_handler(app, long_press_key);
         }
         if(app->cursor_position == CURSOR_EXIT) {
+            eth_run(app->eth_worker, EthWorkerProcessExit);
             break;
         }
         view_port_update(app->view_port);

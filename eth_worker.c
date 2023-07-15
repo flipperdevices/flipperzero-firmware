@@ -14,82 +14,73 @@
 static EthWorker* static_worker = NULL;
 
 EthWorker* eth_worker_alloc() {
-    EthWorker* eth_worker = malloc(sizeof(EthWorker));
+    EthWorker* worker = malloc(sizeof(EthWorker));
 
-    eth_worker->thread = furi_thread_alloc();
-    furi_thread_set_name(eth_worker->thread, "EthWorker");
-    furi_thread_set_stack_size(eth_worker->thread, 8192);
-    furi_thread_set_callback(eth_worker->thread, eth_worker_task);
-    furi_thread_set_context(eth_worker->thread, eth_worker);
+    worker->config = ehternet_save_process_malloc();
+    furi_assert(worker->config);
 
-    eth_worker_change_state(eth_worker, EthWorkerStateModuleInit);
+    worker->init_process = ethernet_view_process_malloc(EthWorkerProcessInit, worker->config);
+    worker->dhcp_process = ethernet_view_process_malloc(EthWorkerProcessDHCP, worker->config);
+    worker->stat_process = ethernet_view_process_malloc(EthWorkerProcessStatic, worker->config);
+    worker->ping_process = ethernet_view_process_malloc(EthWorkerProcessPing, worker->config);
+    worker->reset_process = ethernet_view_process_malloc(EthWorkerProcessReset, worker->config);
+    worker->active_process = worker->init_process;
 
-    eth_worker->config = ehternet_save_process_malloc();
-    furi_assert(eth_worker->config);
+    static_worker = worker;
 
-    eth_worker->init_process =
-        ethernet_view_process_malloc(EthWorkerProcessInit, eth_worker->config);
-    eth_worker->dhcp_process =
-        ethernet_view_process_malloc(EthWorkerProcessDHCP, eth_worker->config);
-    eth_worker->stat_process =
-        ethernet_view_process_malloc(EthWorkerProcessStatic, eth_worker->config);
-    eth_worker->ping_process =
-        ethernet_view_process_malloc(EthWorkerProcessPing, eth_worker->config);
-    eth_worker->reset_process =
-        ethernet_view_process_malloc(EthWorkerProcessReset, eth_worker->config);
-    eth_worker->active_process = eth_worker->init_process;
-
-    static_worker = eth_worker;
+    worker->state = worker->next_state = EthWorkerStateNotAllocated;
 
     eth_log(EthWorkerProcessReset, "Finik Ethernet [START]");
 
-    return eth_worker;
+    return worker;
 }
 
-void eth_worker_free(EthWorker* eth_worker) {
+void eth_worker_free(EthWorker* worker) {
     eth_log(EthWorkerProcessReset, "Finik Ethernet [STOP]");
 
+    eth_run(worker, EthWorkerProcessExit);
+
     static_worker = NULL;
-    furi_assert(eth_worker);
-    furi_thread_free(eth_worker->thread);
-    ethernet_view_process_free(eth_worker->init_process);
-    ethernet_view_process_free(eth_worker->dhcp_process);
-    ethernet_view_process_free(eth_worker->stat_process);
-    ethernet_view_process_free(eth_worker->ping_process);
-    ethernet_view_process_free(eth_worker->reset_process);
-    ehternet_save_process_free(eth_worker->config);
-    free(eth_worker);
+    furi_assert(worker);
+
+    ethernet_view_process_free(worker->init_process);
+    ethernet_view_process_free(worker->dhcp_process);
+    ethernet_view_process_free(worker->stat_process);
+    ethernet_view_process_free(worker->ping_process);
+    ethernet_view_process_free(worker->reset_process);
+    ehternet_save_process_free(worker->config);
+    free(worker);
 }
 
-void eth_worker_change_state(EthWorker* eth_worker, EthWorkerState state) {
-    furi_assert(eth_worker);
-    eth_worker->state = state;
+void eth_worker_change_state(EthWorker* worker, EthWorkerState state) {
+    furi_assert(worker);
+    worker->state = state;
 }
 
-void eth_worker_set_active_process(EthWorker* eth_worker, EthWorkerProcess state) {
-    furi_assert(eth_worker);
+void eth_worker_set_active_process(EthWorker* worker, EthWorkerProcess state) {
+    furi_assert(worker);
     switch(state) {
     case EthWorkerProcessInit:
-        eth_worker->active_process = eth_worker->init_process;
+        worker->active_process = worker->init_process;
         break;
     case EthWorkerProcessDHCP:
-        eth_worker->active_process = eth_worker->dhcp_process;
+        worker->active_process = worker->dhcp_process;
         break;
     case EthWorkerProcessStatic:
-        eth_worker->active_process = eth_worker->stat_process;
+        worker->active_process = worker->stat_process;
         break;
     case EthWorkerProcessPing:
-        eth_worker->active_process = eth_worker->ping_process;
+        worker->active_process = worker->ping_process;
         break;
     case EthWorkerProcessReset:
-        eth_worker->active_process = eth_worker->reset_process;
+        worker->active_process = worker->reset_process;
         break;
     }
 }
 
-void eth_worker_log(EthWorker* eth_worker, const char* str) {
-    furi_assert(eth_worker);
-    ehternet_save_process_print(eth_worker->config, str);
+void eth_worker_log(EthWorker* worker, const char* str) {
+    furi_assert(worker);
+    ehternet_save_process_print(worker->config, str);
 }
 
 static EthViewProcess* get_process(EthWorker* worker, EthWorkerProcess process) {
@@ -123,29 +114,197 @@ void eth_log(EthWorkerProcess process, const char* format, ...) {
     FURI_LOG_I(TAG, "%s", string);
     ehternet_save_process_print(static_worker->config, string);
     ethernet_view_process_print(get_process(static_worker, process), string);
-
+    if(process != EthWorkerProcessReset) {
+        ethernet_view_process_print(get_process(static_worker, EthWorkerProcessReset), string);
+    }
     furi_string_free(fstring);
+}
+
+void eth_run(EthWorker* worker, EthWorkerProcess process) {
+    furi_assert(worker);
+    switch(process) {
+    case EthWorkerProcessInit:
+        if(worker->state == EthWorkerStateNotAllocated) {
+            worker->thread = furi_thread_alloc();
+            furi_thread_set_name(worker->thread, "EthWorker");
+            furi_thread_set_stack_size(worker->thread, 8192);
+            furi_thread_set_callback(worker->thread, eth_worker_task);
+            furi_thread_set_context(worker->thread, worker);
+            worker->state = EthWorkerStateNotInited;
+            worker->next_state = EthWorkerStateInit;
+            furi_thread_start(worker->thread);
+        }
+        worker->state = EthWorkerStateNotInited;
+        worker->next_state = EthWorkerStateInit;
+        break;
+    case EthWorkerProcessDHCP:
+        if((uint8_t)worker->state < EthWorkerStateInited) {
+            eth_log(EthWorkerProcessDHCP, "[error] module not inited");
+            break;
+        }
+        worker->next_state = EthWorkerStateDHCP;
+        eth_log(EthWorkerProcessDHCP, "Fuck you");
+        break;
+    case EthWorkerProcessStatic:
+        if((uint8_t)worker->state < EthWorkerStateInited) {
+            eth_log(EthWorkerProcessStatic, "[error] module not inited");
+            break;
+        }
+        worker->next_state = EthWorkerStateStaticIp;
+        eth_log(EthWorkerProcessStatic, "Fuck you");
+        break;
+    case EthWorkerProcessPing:
+        if((uint8_t)worker->state < EthWorkerStateInited) {
+            eth_log(EthWorkerProcessPing, "[error] module not inited");
+            break;
+        }
+        worker->next_state = EthWorkerStatePing;
+        eth_log(EthWorkerProcessPing, "Fuck you");
+        break;
+    case EthWorkerProcessReset:
+        worker->state = worker->next_state = EthWorkerStateNotInited;
+        eth_log(EthWorkerProcessReset, "reset module");
+        break;
+    case EthWorkerProcessExit:
+        if(worker->state != EthWorkerStateNotAllocated) {
+            worker->next_state = EthWorkerStateStop;
+            furi_thread_join(worker->thread);
+            furi_thread_free(worker->thread);
+            worker->state = EthWorkerStateNotAllocated;
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 /************************** Ethernet Worker Thread *****************************/
 
+static uint8_t ip_assigned = 0;
+static GpioPin cspin = {.port = GPIOA, .pin = GPIO_PIN_4};
+static GpioPin resetpin = {.port = GPIOC, .pin = GPIO_PIN_3};
+
+static void W5500_Select(void) {
+    furi_hal_gpio_write(&cspin, false);
+}
+
+static void W5500_Unselect(void) {
+    furi_hal_gpio_write(&cspin, true);
+}
+
+static void Callback_IPAssigned(void) {
+    eth_log(
+        EthWorkerProcessDHCP, "Callback: IP assigned! Leased time: %d sec", getDHCPLeasetime());
+    ip_assigned = 1;
+}
+
+static void Callback_IPConflict(void) {
+    eth_log(EthWorkerProcessDHCP, "Callback: IP conflict!");
+}
+
+static void W5500_ReadBuff(uint8_t* buff, uint16_t len) {
+    furi_hal_spi_bus_rx(&furi_hal_spi_bus_handle_external, buff, len, 1000);
+}
+
+static void W5500_WriteBuff(uint8_t* buff, uint16_t len) {
+    furi_hal_spi_bus_tx(&furi_hal_spi_bus_handle_external, buff, len, 1000);
+}
+
+static uint8_t W5500_ReadByte(void) {
+    uint8_t byte;
+    W5500_ReadBuff(&byte, sizeof(byte));
+    return byte;
+}
+
+static void W5500_WriteByte(uint8_t byte) {
+    W5500_WriteBuff(&byte, sizeof(byte));
+}
+
+static void wait_ms(int ms) {
+    furi_delay_ms(ms);
+}
+
+static wiz_NetInfo gWIZNETINFO;
+void update_WIZNETINFO() {
+    furi_assert(static_worker);
+    memcpy(gWIZNETINFO.mac, static_worker->config->mac, 6);
+    memcpy(gWIZNETINFO.ip, static_worker->config->ip, 4);
+    memcpy(gWIZNETINFO.sn, static_worker->config->mask, 4);
+    memcpy(gWIZNETINFO.gw, static_worker->config->gateway, 4);
+    memcpy(gWIZNETINFO.dns, static_worker->config->dns, 4);
+    gWIZNETINFO.dhcp = NETINFO_STATIC;
+}
+
 int32_t eth_worker_task(void* context) {
     furi_assert(context);
-    EthWorker* eth_worker = (EthWorker*)context;
+    EthWorker* worker = (EthWorker*)context;
     furi_hal_power_insomnia_enter();
 
-    while(eth_worker->state != EthWorkerStateStop) {
-        if(eth_worker->state == EthWorkerStateModuleInit) {
-            eth_worker_w5500(eth_worker);
-            eth_worker_dhcp(eth_worker);
+    furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
+    uint8_t W5500FifoSize[2][8] = {{2, 2, 2, 2, 2, 2, 2, 2}, {2, 2, 2, 2, 2, 2, 2, 2}};
+    uint8_t dhcp_buffer[2000];
+
+    reg_wizchip_spi_cbfunc(W5500_ReadByte, W5500_WriteByte);
+    reg_wizchip_spiburst_cbfunc(W5500_ReadBuff, W5500_WriteBuff);
+    reg_wizchip_cs_cbfunc(W5500_Select, W5500_Unselect);
+
+    furi_hal_gpio_write(&resetpin, true);
+    furi_hal_gpio_write(&cspin, true);
+    furi_hal_gpio_init(&resetpin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
+    furi_hal_gpio_init(&cspin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
+
+    while(worker->next_state != EthWorkerStateStop) {
+        if(worker->state == EthWorkerStateNotInited) {
+            if(worker->next_state != EthWorkerStateInit &&
+               worker->next_state != EthWorkerStateNotInited) {
+                eth_log(EthWorkerProcessActive, "[error] try using not inited module");
+                worker->next_state = EthWorkerStateNotInited;
+            }
+            if(worker->next_state == EthWorkerStateInit) {
+                worker->state = EthWorkerStateInit;
+                furi_hal_power_enable_otg();
+                furi_delay_ms(300);
+                furi_hal_gpio_write(&resetpin, false);
+                furi_delay_ms(50);
+                furi_hal_gpio_write(&resetpin, true);
+                if(ctlwizchip(CW_INIT_WIZCHIP, (void*)W5500FifoSize) == -1) {
+                    eth_log(EthWorkerProcessInit, "[error] W5500 init fail");
+                    worker->state = worker->next_state = EthWorkerStateNotInited;
+                    continue;
+                }
+                eth_log(EthWorkerProcessInit, "W5500 inited");
+                furi_delay_ms(50);
+                update_WIZNETINFO();
+                wizchip_setnetinfo(&gWIZNETINFO);
+                setSHAR(gWIZNETINFO.mac);
+                wiz_PhyConf conf;
+                wizphy_getphyconf(&conf);
+                eth_log(
+                    EthWorkerProcessInit,
+                    "conf %d %d %d %d",
+                    conf.by,
+                    conf.mode,
+                    conf.speed,
+                    conf.duplex);
+                eth_log(EthWorkerProcessInit, "net info setted");
+                eth_log(
+                    EthWorkerProcessInit,
+                    "mac: %02X-%02X-%02X-%02X-%02X-%02X",
+                    gWIZNETINFO.mac[0],
+                    gWIZNETINFO.mac[1],
+                    gWIZNETINFO.mac[2],
+                    gWIZNETINFO.mac[3],
+                    gWIZNETINFO.mac[4],
+                    gWIZNETINFO.mac[5]);
+                worker->state = EthWorkerStateInited;
+                continue;
+            }
+        } else if(worker->state == EthWorkerStateInited) {
         }
-        if(eth_worker->state == EthWorkerStateDHCP) {
-            eth_worker_dhcp(eth_worker);
-        }
+        furi_delay_ms(50);
     }
 
-    FURI_LOG_I(TAG, "eth_worker_task exit \r\n");
-    eth_worker_change_state(eth_worker, EthWorkerStateStop);
+    furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
     furi_hal_power_insomnia_exit();
 
     return 0;
@@ -175,59 +334,14 @@ int32_t eth_worker_task(void* context) {
 #define DRIPADDR2 1 // The third octet of the IP address of the default router
 #define DRIPADDR3 1 // The fourth octet of the IP address of the default router
 
-static uint8_t ip_assigned = 0;
-static GpioPin cspin = {.port = GPIOA, .pin = GPIO_PIN_4};
-
-void W5500_Select(void) {
-    furi_hal_gpio_write(&cspin, false);
-}
-
-void W5500_Unselect(void) {
-    furi_hal_gpio_write(&cspin, true);
-}
-
-void Callback_IPAssigned(void) {
-    FURI_LOG_I(TAG, "Callback: IP assigned! Leased time: %d sec\r\n", getDHCPLeasetime());
-    ip_assigned = 1;
-}
-
-void Callback_IPConflict(void) {
-    FURI_LOG_I(TAG, "Callback: IP conflict!\r\n");
-}
-
-void W5500_ReadBuff(uint8_t* buff, uint16_t len) {
-    furi_hal_spi_bus_rx(&furi_hal_spi_bus_handle_external, buff, len, 1000);
-
-    //if(buff[0] != 0)
-    //    FURI_LOG_I(TAG, "spirx[%d]", buff[0]);
-}
-
-void W5500_WriteBuff(uint8_t* buff, uint16_t len) {
-    furi_hal_spi_bus_tx(&furi_hal_spi_bus_handle_external, buff, len, 1000);
-}
-
-uint8_t W5500_ReadByte(void) {
-    uint8_t byte;
-    W5500_ReadBuff(&byte, sizeof(byte));
-    return byte;
-}
-
-void W5500_WriteByte(uint8_t byte) {
-    W5500_WriteBuff(&byte, sizeof(byte));
-}
-
-void wait_ms(int ms) {
-    furi_delay_ms(ms);
-}
-
-wiz_NetInfo gWIZNETINFO = {
-    .mac = {ETHADDR0, ETHADDR1, ETHADDR2, ETHADDR3, ETHADDR4, ETHADDR5},
-    .ip = {IPADDR0, IPADDR1, IPADDR2, IPADDR3},
-    .sn = {NETMASK0, NETMASK1, NETMASK2, NETMASK3},
-    .gw = {DRIPADDR0, DRIPADDR1, DRIPADDR2, DRIPADDR3},
-    .dns = {DRIPADDR0, DRIPADDR1, DRIPADDR2, DRIPADDR3},
-    .dhcp = NETINFO_DHCP // NETINFO_STATIC
-};
+// wiz_NetInfo gWIZNETINFO = {
+//     .mac = {ETHADDR0, ETHADDR1, ETHADDR2, ETHADDR3, ETHADDR4, ETHADDR5},
+//     .ip = {IPADDR0, IPADDR1, IPADDR2, IPADDR3},
+//     .sn = {NETMASK0, NETMASK1, NETMASK2, NETMASK3},
+//     .gw = {DRIPADDR0, DRIPADDR1, DRIPADDR2, DRIPADDR3},
+//     .dns = {DRIPADDR0, DRIPADDR1, DRIPADDR2, DRIPADDR3},
+//     .dhcp = NETINFO_DHCP // NETINFO_STATIC
+// };
 
 void eth_worker_dhcp(EthWorker* eth_worker) {
     furi_assert(eth_worker);
@@ -256,7 +370,6 @@ void eth_worker_dhcp(EthWorker* eth_worker) {
     reg_wizchip_spiburst_cbfunc(W5500_ReadBuff, W5500_WriteBuff);
     reg_wizchip_cs_cbfunc(W5500_Select, W5500_Unselect);
 
-    GpioPin resetpin = {.port = GPIOC, .pin = GPIO_PIN_3};
     furi_hal_gpio_write(&resetpin, true);
     furi_hal_gpio_write(&cspin, true);
     furi_hal_gpio_init(&resetpin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
