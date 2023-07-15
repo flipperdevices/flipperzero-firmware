@@ -11,6 +11,7 @@
 #include <lib/subghz/protocols/princeton.h>
 #include <lib/subghz/subghz_tx_rx_worker.h>
 #include "tanks_icons.h"
+#include "helpers/radio_device_loader.h"
 
 #include "constants.h"
 
@@ -1215,7 +1216,15 @@ int32_t tanks_game_app(void* p) {
     size_t message_max_len = 180;
     uint8_t incomingMessage[180] = {0};
     SubGhzTxRxWorker* subghz_txrx = subghz_tx_rx_worker_alloc();
-    // subghz_tx_rx_worker_start(subghz_txrx, frequency);
+
+    subghz_devices_init();
+    const SubGhzDevice* subghz_device =
+        radio_device_loader_set(NULL, SubGhzRadioDeviceTypeExternalCC1101);
+
+    subghz_devices_reset(subghz_device);
+    subghz_devices_load_preset(subghz_device, FuriHalSubGhzPresetOok650Async, NULL);
+
+    subghz_tx_rx_worker_start(subghz_txrx, subghz_device, frequency);
     furi_hal_power_suppress_charge_enter();
 
     for(bool processing = true; processing;) {
@@ -1277,39 +1286,43 @@ int32_t tanks_game_app(void* p) {
                         }
                         break;
                     case InputKeyRight:
-                        if(tanks_state->state == GameStateCooperativeClient) {
-                            FuriString* goesRight = furi_string_alloc();
-                            char arr[2];
-                            arr[0] = GoesRight;
-                            arr[1] = 0;
-                            furi_string_set(goesRight, (char*)&arr);
+                        if(!(tanks_state->state == GameStateMenu)) {
+                            if(tanks_state->state == GameStateCooperativeClient) {
+                                FuriString* goesRight = furi_string_alloc();
+                                char arr[2];
+                                arr[0] = GoesRight;
+                                arr[1] = 0;
+                                furi_string_set(goesRight, (char*)&arr);
 
-                            subghz_tx_rx_worker_write(
-                                subghz_txrx,
-                                (uint8_t*)furi_string_get_cstr(goesRight),
-                                strlen(furi_string_get_cstr(goesRight)));
-                            furi_string_free(goesRight);
-                        } else {
-                            tanks_state->p1->moving = true;
-                            tanks_state->p1->direction = DirectionRight;
+                                subghz_tx_rx_worker_write(
+                                    subghz_txrx,
+                                    (uint8_t*)furi_string_get_cstr(goesRight),
+                                    strlen(furi_string_get_cstr(goesRight)));
+                                furi_string_free(goesRight);
+                            } else {
+                                tanks_state->p1->moving = true;
+                                tanks_state->p1->direction = DirectionRight;
+                            }
                         }
                         break;
                     case InputKeyLeft:
-                        if(tanks_state->state == GameStateCooperativeClient) {
-                            FuriString* goesLeft = furi_string_alloc();
-                            char arr[2];
-                            arr[0] = GoesLeft;
-                            arr[1] = 0;
-                            furi_string_set(goesLeft, (char*)&arr);
+                        if(!(tanks_state->state == GameStateMenu)) {
+                            if(tanks_state->state == GameStateCooperativeClient) {
+                                FuriString* goesLeft = furi_string_alloc();
+                                char arr[2];
+                                arr[0] = GoesLeft;
+                                arr[1] = 0;
+                                furi_string_set(goesLeft, (char*)&arr);
 
-                            subghz_tx_rx_worker_write(
-                                subghz_txrx,
-                                (uint8_t*)furi_string_get_cstr(goesLeft),
-                                strlen(furi_string_get_cstr(goesLeft)));
-                            furi_string_free(goesLeft);
-                        } else {
-                            tanks_state->p1->moving = true;
-                            tanks_state->p1->direction = DirectionLeft;
+                                subghz_tx_rx_worker_write(
+                                    subghz_txrx,
+                                    (uint8_t*)furi_string_get_cstr(goesLeft),
+                                    strlen(furi_string_get_cstr(goesLeft)));
+                                furi_string_free(goesLeft);
+                            } else {
+                                tanks_state->p1->moving = true;
+                                tanks_state->p1->direction = DirectionLeft;
+                            }
                         }
                         break;
                     case InputKeyOk:
@@ -1437,6 +1450,8 @@ int32_t tanks_game_app(void* p) {
         subghz_tx_rx_worker_stop(subghz_txrx);
         subghz_tx_rx_worker_free(subghz_txrx);
     }
+
+    subghz_devices_deinit();
 
     furi_timer_free(timer);
     view_port_enabled_set(view_port, false);
