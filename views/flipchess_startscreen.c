@@ -35,7 +35,7 @@ void flipchess_startscreen_draw(Canvas* canvas, FlipChessStartscreenModel* model
     canvas_set_font(canvas, FontPrimary);
     canvas_draw_str(canvas, 4, 11, "Chess");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 64, 11, FLIPCHESS_VERSION);
+    canvas_draw_str(canvas, 62, 11, FLIPCHESS_VERSION);
 
     //canvas_set_font(canvas, FontSecondary);
     //canvas_draw_str(canvas, 10, 11, "How about a nice game of...");
