@@ -8,6 +8,7 @@
 #include <gui/modules/file_browser.h>
 #include <toolbox/stream/file_stream.h>
 #include <cfw.h>
+#include <assets_icons.h>
 
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
@@ -16,7 +17,20 @@
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
-// api
+
+// helpers
+
+static const char* loader_find_external_application_by_name(const char* app_name) {
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
+            return FLIPPER_EXTERNAL_APPS[i].path;
+        }
+    }
+
+    return NULL;
+}
+
+// API
 
 LoaderStatus
     loader_start(Loader* loader, const char* name, const char* args, FuriString* error_message) {
@@ -38,17 +52,33 @@ LoaderStatus loader_start_with_gui_error(Loader* loader, const char* name, const
     FuriString* error_message = furi_string_alloc();
     LoaderStatus status = loader_start(loader, name, args, error_message);
 
-    // TODO: we have many places where we can emit a double start, ex: desktop, menu
-    // so i prefer to not show LoaderStatusErrorAppStarted error message for now
-    if(status == LoaderStatusErrorUnknownApp || status == LoaderStatusErrorInternal) {
+    if(status == LoaderStatusErrorUnknownApp &&
+       loader_find_external_application_by_name(name) != NULL) {
+        // Special case for external apps
+        DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
+        DialogMessage* message = dialog_message_alloc();
+        dialog_message_set_header(message, "Update needed", 64, 3, AlignCenter, AlignTop);
+        dialog_message_set_buttons(message, NULL, NULL, NULL);
+        dialog_message_set_icon(message, &I_DolphinCommon_56x48, 72, 17);
+        dialog_message_set_text(
+            message, "Update firmware\nto run this app", 3, 26, AlignLeft, AlignTop);
+        dialog_message_show(dialogs, message);
+        dialog_message_free(message);
+        furi_record_close(RECORD_DIALOGS);
+    } else if(status == LoaderStatusErrorUnknownApp || status == LoaderStatusErrorInternal) {
+        // TODO: we have many places where we can emit a double start, ex: desktop, menu
+        // so i prefer to not show LoaderStatusErrorAppStarted error message for now
         DialogsApp* dialogs = furi_record_open(RECORD_DIALOGS);
         DialogMessage* message = dialog_message_alloc();
         dialog_message_set_header(message, "Error", 64, 0, AlignCenter, AlignTop);
         dialog_message_set_buttons(message, NULL, NULL, NULL);
 
-        furi_string_replace(error_message, ":", "\n");
+        furi_string_replace(error_message, "/ext/apps/", "");
+        furi_string_replace(error_message, ", ", "\n");
+        furi_string_replace(error_message, ": ", "\n");
+
         dialog_message_set_text(
-            message, furi_string_get_cstr(error_message), 64, 32, AlignCenter, AlignCenter);
+            message, furi_string_get_cstr(error_message), 64, 35, AlignCenter, AlignCenter);
 
         dialog_message_show(dialogs, message);
         dialog_message_free(message);
@@ -172,16 +202,16 @@ static Loader* loader_alloc() {
     FuriString* path = furi_string_alloc();
     FuriString* name = furi_string_alloc();
     Stream* stream = file_stream_alloc(storage);
-    MenuFapsList_init(loader->menu_faps);
+    ExtMainAppList_init(loader->ext_main_apps);
     if(file_stream_open(stream, CFW_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
         while(stream_read_line(stream, path)) {
             furi_string_replace_all(path, "\r", "");
             furi_string_replace_all(path, "\n", "");
             const Icon* icon;
             if(!loader_menu_load_fap_meta(storage, path, name, &icon)) continue;
-            MenuFapsList_push_back(
-                loader->menu_faps,
-                (MenuFap){
+            ExtMainAppList_push_back(
+                loader->ext_main_apps,
+                (ExtMainApp){
                     .name = strdup(furi_string_get_cstr(name)),
                     .path = strdup(furi_string_get_cstr(path)),
                     .icon = icon});
@@ -196,32 +226,16 @@ static Loader* loader_alloc() {
     return loader;
 }
 
-//app lists return list size
-
-size_t loader_get_menu_faps_list_size(Loader* loader) {
+size_t loader_get_ext_main_app_list_size(Loader* loader) {
     furi_assert(loader);
-    size_t menu_fap_list_size = MenuFapsList_size(loader->menu_faps);
-    return menu_fap_list_size;
-}
-/*
-size_t loader_get_flipper_apps_count(Loader* loader) {
-	furi_assert(loader);
-	size_t flip_apps_count = FLIPPER_APPS_COUNT;
-	return flip_apps_count;
+    size_t ext_size = ExtMainAppList_size(loader->ext_main_apps);
+    return ext_size;
 }
 
-size_t loader_get_flipper_external_apps_count(Loader* loader) {
-	furi_assert(loader);
-	size_t flip_ext_apps_count = FLIPPER_EXTERNAL_APPS_COUNT;
-	return flip_ext_apps_count;
-}
-*/
-// app list return single item
-
-MenuFap* loader_get_menu_fap_item(Loader* loader, size_t x) {
+ExtMainApp* loader_get_ext_main_app_item(Loader* loader, size_t x) {
     furi_assert(loader);
-    MenuFap* menu_fap = MenuFapsList_get(loader->menu_faps, x);
-    return menu_fap;
+    ExtMainApp* ext_app = ExtMainAppList_get(loader->ext_main_apps, x);
+    return ext_app;
 }
 
 static FlipperInternalApplication const* loader_find_application_by_name_in_list(
@@ -236,7 +250,7 @@ static FlipperInternalApplication const* loader_find_application_by_name_in_list
     return NULL;
 }
 
-const FlipperInternalApplication* loader_find_application_by_name(const char* name) {
+static const FlipperInternalApplication* loader_find_application_by_name(const char* name) {
     const FlipperInternalApplication* application = NULL;
     application = loader_find_application_by_name_in_list(name, FLIPPER_APPS, FLIPPER_APPS_COUNT);
     if(!application) {
@@ -249,16 +263,6 @@ const FlipperInternalApplication* loader_find_application_by_name(const char* na
     }
 
     return application;
-}
-
-const char* loader_find_external_application_by_name(const char* app_name) {
-    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-        if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
-            return FLIPPER_EXTERNAL_APPS[i].path;
-        }
-    }
-
-    return NULL;
 }
 
 static void loader_start_app_thread(Loader* loader, FlipperInternalApplicationFlag flags) {
@@ -395,18 +399,16 @@ static LoaderStatus loader_start_external_app(
             }
         }
 
-        FURI_LOG_I(TAG, "Mapping");
         FlipperApplicationLoadStatus load_status =
             flipper_application_map_to_memory(loader->app.fap);
         if(load_status != FlipperApplicationLoadStatusSuccess) {
             const char* err_msg = flipper_application_load_status_to_string(load_status);
             status = loader_make_status_error(
-                LoaderStatusErrorInternal, error_message, "Load failed %s: %s", path, err_msg);
+                LoaderStatusErrorInternal, error_message, "Load failed, %s: %s", path, err_msg);
             break;
         }
 
         FURI_LOG_I(TAG, "Loaded in %zums", (size_t)(furi_get_tick() - start));
-        FURI_LOG_I(TAG, "Starting app");
 
         loader->app.thread = flipper_application_alloc_thread(loader->app.fap, args);
         FuriString* app_name = furi_string_alloc();
@@ -510,7 +512,7 @@ static LoaderStatus loader_do_start_by_name(
             }
         }
 
-        // check external apps
+        // check Faps
         {
             Storage* storage = furi_record_open(RECORD_STORAGE);
             if(storage_file_exists(storage, name)) {

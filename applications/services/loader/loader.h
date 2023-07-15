@@ -1,7 +1,7 @@
 #pragma once
 #include <furi.h>
 #include <applications.h>
-#include "loader_menufaps.h"
+#include "loader_extapps.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,23 +84,19 @@ void loader_show_menu(Loader* instance);
 FuriPubSub* loader_get_pubsub(Loader* instance);
 
 /**
-* @brief Get MenuFap item
+* @brief Get ExtMainApp item
 * @param[in] instance loader instance
 * @param[in] size_t of item
-* @return MenuFap*
+* @return ExtMainApp*
 */
-MenuFap* loader_get_menu_fap_item(Loader* instance, size_t x);
+ExtMainApp* loader_get_ext_main_app_item(Loader* instance, size_t x);
 
 /**
-* @brief Get MenuFapsList_t size
+* @brief Get ExtMainAppList_t size
 * @param[in] instance loader instance
-* @return size_t of MenuFapsList_t size
+* @return size_t of ExtMainAppList_t size
 */
-size_t loader_get_menu_faps_list_size(Loader* instance);
-
-//const FlipperInternalApplication* loader_find_application_by_name(const char* name);
-
-//const char* loader_find_external_application_by_name(const char* app_name);
+size_t loader_get_ext_main_app_list_size(Loader* loader);
 
 #ifdef __cplusplus
 }

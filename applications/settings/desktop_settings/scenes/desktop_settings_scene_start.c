@@ -3,7 +3,6 @@
 
 #include "../desktop_settings_app.h"
 #include "desktop_settings_scene.h"
-#include <power/power_service/power.h>
 
 #define SCENE_EVENT_SELECT_FAVORITE_PRIMARY 0
 #define SCENE_EVENT_SELECT_FAVORITE_SECONDARY 1

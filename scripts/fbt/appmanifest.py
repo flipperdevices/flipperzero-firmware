@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable, ClassVar, List, Optional, Tuple, Union
 
+
 class FlipperManifestException(Exception):
     pass
 
@@ -126,6 +127,11 @@ class AppManager:
                 raise FlipperManifestException(
                     f"Plugin {kw.get('appid')} must have 'requires' in manifest"
                 )
+        # Harmless - cdefines for external apps are meaningless
+        # if apptype == FlipperAppType.EXTERNAL and kw.get("cdefines"):
+        #     raise FlipperManifestException(
+        #         f"External app {kw.get('appid')} must not have 'cdefines' in manifest"
+        #     )
 
     def load_manifest(self, app_manifest_path: str, app_dir_node: object):
         if not os.path.exists(app_manifest_path):
@@ -230,7 +236,6 @@ class AppBuildset:
 
     def _get_app_depends(self, app_name: str) -> List[str]:
         app_def = self.appmgr.get(app_name)
-
         # Skip app if its target is not supported by the target we are building for
         if not self._check_if_app_target_supported(app_name):
             self._writer(
@@ -363,7 +368,6 @@ class ApplicationsCGenerator:
         "FlipperExternalApplication",
         "FLIPPER_EXTERNAL_APPS",
     )
-
     def __init__(self, buildset: AppBuildset, autorun_app: str = ""):
         self.buildset = buildset
         self.autorun = autorun_app
@@ -379,7 +383,7 @@ class ApplicationsCGenerator:
         return f"""
     {{.app = {app.entry_point},
      .name = "{app.name}",
-     .appid = "{app.appid}",
+     .appid = "{app.appid}", 
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
      .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)} }}"""
@@ -405,7 +409,11 @@ class ApplicationsCGenerator:
             contents.extend(map(self.get_app_ep_forward, self.buildset.get_apps_of_type(apptype)))
             entry_type, entry_block = self.APP_TYPE_MAP[apptype]
             contents.append(f"const {entry_type} {entry_block}[] = {{")
-            contents.append(",\n".join(map(self.get_app_descr, self.buildset.get_apps_of_type(apptype))))
+            contents.append(
+                ",\n".join(
+                    map(self.get_app_descr, self.buildset.get_apps_of_type(apptype))
+                )
+            )
             contents.append("};")
             contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
 

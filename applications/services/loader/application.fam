@@ -7,7 +7,7 @@ App(
     requires=["gui"],
     provides=["loader_start"],
     stack_size=2 * 1024,
-    order=80,
+    order=90,
     sdk_headers=[
         "loader.h",
         "firmware_api/firmware_api.h",

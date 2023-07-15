@@ -9,28 +9,25 @@ static void loader_cli_print_usage() {
     printf("loader <cmd> <args>\r\n");
     printf("Cmd list:\r\n");
     printf("\tlist\t - List available applications\r\n");
-    printf("\topen <Application Name:string>\t - Open application by name\r\n");
+    printf(
+        "\topen \"<Application Name:string>\" \"<parameter:string>\"\t - Open application by name with (optional) parameter\r\n");
     printf("\tinfo\t - Show loader state\r\n");
 }
 
 static void loader_cli_list() {
     printf("Applications:\r\n");
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        printf("\t%s\r\n", FLIPPER_EXTERNAL_APPS[i].name);
+    }
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        if(strstr(FLIPPER_APPS[i].name, " ")) {
-            printf("\t\"%s\"\r\n", FLIPPER_APPS[i].name);
-        } else {
-            printf("\t%s\r\n", FLIPPER_APPS[i].name);
-        }
+        printf("\t%s\r\n", FLIPPER_APPS[i].name);
     }
     printf("Settings:\r\n");
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
-        if(strstr(FLIPPER_SETTINGS_APPS[i].name, " ")) {
-            printf("\t\"%s\"\r\n", FLIPPER_SETTINGS_APPS[i].name);
-        } else {
-            printf("\t%s\r\n", FLIPPER_SETTINGS_APPS[i].name);
-        }
+        printf("\t%s\r\n", FLIPPER_SETTINGS_APPS[i].name);
     }
-    printf("For External Apps, specify full path to .fap file.");
+    printf(
+        "For external applications, specify full path to '.fap' file.\r\nExample: \"/ext/apps/Main/clock.fap\"");
 }
 
 static void loader_cli_info(Loader* loader) {
@@ -42,53 +39,52 @@ static void loader_cli_info(Loader* loader) {
     }
 }
 
-static const char* loader_cli_check_link(const char* name) {
-    for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
-        if(strcmp(FLIPPER_SETTINGS_APPS[i].name, name) == 0) {
-            if(strcmp(FLIPPER_SETTINGS_APPS[i].appid, "NULL") != 0) {
-                return FLIPPER_SETTINGS_APPS[i].appid;
-            } else {
-                return FLIPPER_SETTINGS_APPS[i].name;
-            }
+static const char* loader_cli_check_external_app_by_name(const char* app_name) {
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
+            return FLIPPER_EXTERNAL_APPS[i].path;
         }
     }
 
-    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        if(strcmp(FLIPPER_APPS[i].name, name) == 0) {
-            if(strcmp(FLIPPER_APPS[i].appid, "NULL") != 0) {
-                return FLIPPER_APPS[i].appid;
-            } else {
-                return FLIPPER_APPS[i].appid;
-            }
-        }
-    }
-
-    return name;
+    return NULL;
 }
 
 static void loader_cli_open(FuriString* args, Loader* loader) {
     FuriString* app_name = furi_string_alloc();
+    FuriString* param = furi_string_alloc();
 
     do {
         if(!args_read_probably_quoted_string_and_trim(args, app_name)) {
-            printf("No application provided.\r\n");
+            printf("No application provided\r\n");
             break;
         }
-        furi_string_trim(args);
+        args_read_probably_quoted_string_and_trim(args, param);
 
-        const char* args_str = furi_string_get_cstr(args);
+        furi_string_trim(param);
+
+        const char* args_str = furi_string_get_cstr(param);
         if(strlen(args_str) == 0) {
             args_str = NULL;
         }
 
-        const char* app_name_str = loader_cli_check_link(furi_string_get_cstr(app_name));
-        FuriString* error_message = furi_string_alloc();
+        const char* app_name_ext =
+            loader_cli_check_external_app_by_name(furi_string_get_cstr(app_name));
 
-        if(loader_start(loader, app_name_str, args_str, error_message) != LoaderStatusOk) {
-            printf("%s\r\n", furi_string_get_cstr(error_message));
+        if(app_name_ext) {
+            FuriString* error_message = furi_string_alloc();
+            if(loader_start(loader, app_name_ext, args_str, error_message) != LoaderStatusOk) {
+                printf("%s\r\n", furi_string_get_cstr(error_message));
+            }
+            furi_string_free(error_message);
+        } else {
+            const char* app_name_str = furi_string_get_cstr(app_name);
+
+            FuriString* error_message = furi_string_alloc();
+            if(loader_start(loader, app_name_str, args_str, error_message) != LoaderStatusOk) {
+                printf("%s\r\n", furi_string_get_cstr(error_message));
+            }
+            furi_string_free(error_message);
         }
-
-        furi_string_free(error_message);
     } while(false);
 
     furi_string_free(app_name);

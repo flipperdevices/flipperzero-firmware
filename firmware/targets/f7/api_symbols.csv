@@ -1938,8 +1938,8 @@ Function,-,llrintl,long long int,long double
 Function,-,llround,long long int,double
 Function,-,llroundf,long long int,float
 Function,-,llroundl,long long int,long double
-Function,+,loader_get_menu_fap_item,MenuFap*,"Loader*, size_t"
-Function,+,loader_get_menu_faps_list_size,size_t,Loader*
+Function,+,loader_get_ext_main_app_item,ExtMainApp*,"Loader*, size_t"
+Function,+,loader_get_ext_main_app_list_size,size_t,Loader*
 Function,+,loader_get_pubsub,FuriPubSub*,Loader*
 Function,+,loader_is_locked,_Bool,Loader*
 Function,+,loader_lock,_Bool,Loader*
