@@ -31,14 +31,16 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0714-1623-0.86.3-e6ef4a4](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-15 03:06 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-15 03:06 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-15 14:50 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-15 14:50 EST`
 - Updated: [Tanks (By Alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) [(By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/b5a877ab3b09046c77d6ea28d6f33f39d4c13fff)
 - Updated: [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 - [SubGHz Chat CLI Fix #708 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/708)
 - [Set up FAP versions to match OFW formatting (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/20112f030fcb8048482d41d30b701f1fcf250783)
 - [Fix for CFW Settings Start Point Order (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/212ac908965b394b08f5689aba5b05ba97359557)
 - [NFC as a FAP (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fa9447f6d43528840f84828273c32dad0ce2954e)
+- [Loader Fixes to work more like OFW (By RogueMaster & ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/439360b887ca7ab9872bd04a53c255538cfae182)
+- [CLI Bridge Fix](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/a1a92b7d1a7b8e6019ef3adb7d425389a15b3140)
 
 <a name="release">
 
