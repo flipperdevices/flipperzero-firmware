@@ -22,7 +22,7 @@
 
 #include <flipper_format/flipper_format_i.h>
 
-#include "subghz_types.h"
+#include "subrem_types.h"
 
 extern const SubGhzProtocolRegistry subghz_protocol_registry;
 

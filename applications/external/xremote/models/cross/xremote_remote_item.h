@@ -2,7 +2,7 @@
 
 #include "../infrared/xremote_ir_signal.h"
 #include "../subghz/xremote_sg_remote.h"
-#include "../subghz/subghz_i.h"
+#include "../subghz/helpers/subghz_i.h"
 #include "../../xremote_i.h"
 
 bool xremote_remote_item_read(CrossRemoteItem* item, FlipperFormat* ff);
