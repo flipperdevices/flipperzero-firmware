@@ -873,7 +873,7 @@ int32_t esubghz_chat(void)
 	// clear the key and potential password
 	esubghz_chat_explicit_bzero(state->text_input_store,
 			sizeof(state->text_input_store));
-	gcm_zero_ctx(&(state->gcm_ctx));
+	esubghz_chat_explicit_bzero(&(state->gcm_ctx), sizeof(state->gcm_ctx));
 
 	furi_stream_buffer_free(state->rx_collection_buffer);
 
