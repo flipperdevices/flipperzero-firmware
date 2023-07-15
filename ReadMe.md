@@ -38,7 +38,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [SubGHz Chat CLI Fix #708 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/708)
 - [Set up FAP versions to match OFW formatting (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/20112f030fcb8048482d41d30b701f1fcf250783)
 - [Fix for CFW Settings Start Point Order (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/212ac908965b394b08f5689aba5b05ba97359557)
-- NFC as a FAP (By RogueMaster)
+- [NFC as a FAP (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fa9447f6d43528840f84828273c32dad0ce2954e)
 
 <a name="release">
 
