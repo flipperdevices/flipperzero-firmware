@@ -2,7 +2,7 @@ import os
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, ClassVar, List, Optional, Tuple
+from typing import Callable, ClassVar, List, Optional, Tuple, Union
 
 class FlipperManifestException(Exception):
     pass
@@ -57,7 +57,7 @@ class FlipperApplication:
 
     # .fap-specific
     sources: List[str] = field(default_factory=lambda: ["*.c*"])
-    fap_version: Tuple[int] = field(default_factory=lambda: (0, 1))
+    fap_version: Union[str, Tuple[int]] = "0.1"
     fap_icon: Optional[str] = None
     fap_libs: List[str] = field(default_factory=list)
     fap_category: str = ""
@@ -89,6 +89,13 @@ class FlipperApplication:
             raise FlipperManifestException(
                 f"Invalid appid '{self.appid}'. Must match regex '{self.APP_ID_REGEX}'"
             )
+        if isinstance(self.fap_version, str):
+            try:
+                self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
+            except ValueError:
+                raise FlipperManifestException(
+                    f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
+                )
 
 class AppManager:
     def __init__(self):
