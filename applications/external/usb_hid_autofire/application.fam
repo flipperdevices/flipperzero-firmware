@@ -11,6 +11,6 @@ App(
     fap_category="USB",
     fap_author="@pbek",
     fap_weburl="https://github.com/pbek/usb_hid_autofire",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="This is a simple Flipper Zero application to send left-clicks as a USB HID device.",
 )

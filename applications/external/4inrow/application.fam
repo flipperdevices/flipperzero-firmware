@@ -12,6 +12,6 @@ App(
     fap_category="Games",
     fap_author="leo-need-more-coffee",
     fap_weburl="https://github.com/leo-need-more-coffee/flipperzero-4inrow",
-    # fap_version="1.0.0",
+    fap_version=(1, 0),
     fap_description="4 in row Game",
 )

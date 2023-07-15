@@ -11,6 +11,6 @@ App(
     fap_icon_assets="images",
     fap_author="@Hong5489 & @friebel & @d4ve10",
     fap_weburl="https://github.com/Hong5489/ir_remote",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Bind any IR remote button to each button on flipper d-pad, provides another way to use flipper as IR remote.",
 )

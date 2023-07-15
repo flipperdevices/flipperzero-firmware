@@ -12,6 +12,6 @@ App(
     fap_icon_assets_symbol="ttt_multi",
     fap_author="@RouNNdeL",
     fap_weburl="https://github.com/RouNNdeL/flipper-tictactoe-multi",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Multiplayer Tic-Tac-Toe game",
 )

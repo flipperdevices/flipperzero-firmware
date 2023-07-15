@@ -9,6 +9,6 @@ App(
     fap_category="Games",
     fap_author="@ihatecsv",
     fap_weburl="https://github.com/ihatecsv/flipper_chess_clock",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="A simple chess clock",
 )

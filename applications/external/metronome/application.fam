@@ -12,6 +12,6 @@ App(
     stack_size=2 * 1024,
     order=20,
     fap_author="@panki27 & @xMasterX",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Metronome app",
 )

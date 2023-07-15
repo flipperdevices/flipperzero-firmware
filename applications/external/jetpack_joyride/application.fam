@@ -13,6 +13,6 @@ App(
     fap_icon_assets_symbol="jetpack_joyride",
     fap_author="timstrasser",
     fap_weburl="https://github.com/DarkFlippers/unleashed-firmware/tree/dev/applications/external/jetpack_joyride",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Fun jetpack game... make it the longest, collect the most money...",
 )

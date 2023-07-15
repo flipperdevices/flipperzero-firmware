@@ -12,6 +12,6 @@ App(
     fap_icon_assets_symbol="subghz_remote",
     fap_author="@gid9798",
     fap_weburl="https://github.com/DarkFlippers/unleashed-firmware/pull/477",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Allows SubGHz signals to be sent using key bind shortcuts. Rewritten concept from app by ESurge and jimilinuxguy. Remote creator and app merged by ESurge",
 )

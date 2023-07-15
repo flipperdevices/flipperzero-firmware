@@ -13,6 +13,6 @@ App(
     fap_icon_assets_symbol="camerasuite",
     fap_author="Cody Tolene",
     fap_weburl="https://github.com/CodyTolene/Flipper-Zero-Cam",
-    # fap_version="0.1",
+    fap_version=(0, 1),
     fap_description="A camera suite application for the Flipper Zero ESP32-CAM module.",
 )

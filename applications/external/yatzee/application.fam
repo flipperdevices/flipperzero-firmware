@@ -11,6 +11,6 @@ App(
     fap_icon_assets="images",
     fap_author="@emfleak",
     fap_weburl="https://github.com/emfleak/flipperzero-yatzee",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Yahtzee game",
 )

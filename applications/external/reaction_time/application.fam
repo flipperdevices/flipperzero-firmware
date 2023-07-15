@@ -13,6 +13,6 @@ App(
     fap_icon="box.png",
     fap_author="ihatecsv",
     fap_weburl="https://github.com/ihatecsv/flipper_reaction_time",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="A simple reaction time game",
 )

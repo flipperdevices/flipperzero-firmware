@@ -10,6 +10,6 @@ App(
     fap_icon="ClockIcon.png",
     fap_icon_assets="icons",
     fap_author="@RogueMaster & @GMMan",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="A clock with stopwatch and 80 seconds alarm. 80 second alarm can be changed at 5 second intervals and so can the sound options.",
 )

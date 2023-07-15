@@ -12,6 +12,6 @@ App(
     order=20,
     fap_author="@panki27",
     fap_weburl="https://github.com/panki27/caesar-cipher",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Encrypt and decrypt text using Caesar Cipher",
 )

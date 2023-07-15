@@ -9,7 +9,7 @@ App(
     stack_size=2 * 1024,
     order=20,
     sources=["wii_*.c", "gfx/*.c"],
-    # 	fap_version=(1,0),
+    fap_version=(1, 0),
     fap_icon="WiiEC.png",
     fap_icon_assets_symbol="wii_ec_anal",
     fap_category="GPIO",

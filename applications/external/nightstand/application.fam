@@ -11,7 +11,7 @@ App(
     order=81,
     fap_author="@nymda & @Willy-JL",
     fap_weburl="https://github.com/nymda/FlipperNightStand",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Clock with screen brightness controls",
 )
 

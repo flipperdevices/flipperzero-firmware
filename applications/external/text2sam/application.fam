@@ -15,6 +15,6 @@ App(
     order=20,
     fap_author="@Round-Pi & (Fixes by @Willy-JL)",
     fap_weburl="https://github.com/Round-Pi/flipperzero-text2sam",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Enter text and hear it spoken by SAM (Software Automatic Mouth)",
 )

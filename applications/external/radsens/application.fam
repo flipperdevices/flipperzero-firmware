@@ -16,6 +16,6 @@ App(
     fap_icon_assets_symbol="rad_sens",
     fap_author="@sionyx",
     fap_weburl="https://github.com/sionyx/flipper_radsens",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Works with RadSens external module",
 )

@@ -11,6 +11,6 @@ App(
     order=36,
     fap_author="@Rrycbarm",
     fap_weburl="https://github.com/Rrycbarm/t-rex-runner",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="Port of Chrome browser running T-rex game",
 )

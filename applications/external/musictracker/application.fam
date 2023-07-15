@@ -13,6 +13,6 @@ App(
     fap_icon_assets="icons",
     fap_author="@DrZlo13",
     fap_weburl="https://github.com/DrZlo13/flipper-zero-music-tracker",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="App plays hardcoded tracker song",
 )

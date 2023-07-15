@@ -10,6 +10,6 @@ App(
     fap_category="Games",
     fap_author="@jasniec",
     fap_weburl="https://github.com/jasniec/flipper-scorched-tanks-game",
-    # fap_version="1.1",
+    fap_version=(1, 1),
     fap_description="A Flipper Zero game inspired by scorched earth",
 )

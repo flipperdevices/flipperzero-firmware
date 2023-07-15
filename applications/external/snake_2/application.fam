@@ -10,6 +10,6 @@ App(
     fap_category="Games",
     fap_author="@Willzvul",
     fap_weburl="https://github.com/Willzvul/Snake_2.0",
-    # fap_version="2.0",
+    fap_version=(2, 0),
     fap_description="Advanced Snake Game (Remake of original Snake)",
 )

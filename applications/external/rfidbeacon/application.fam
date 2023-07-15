@@ -12,6 +12,6 @@ App(
     fap_icon_assets_symbol="flipper_rfidbeacon",
     fap_author="@nmrr",
     fap_weburl="https://github.com/nmrr/flipperzero-rfidbeacon",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="A letter/number morse beacon on 125 kHz using RFID interface of the Flipper Zero",
 )

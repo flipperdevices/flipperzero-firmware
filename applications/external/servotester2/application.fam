@@ -11,6 +11,6 @@ App(
     fap_icon_assets_symbol="servotester2",
     fap_author="@mhasbini",
     fap_weburl="https://github.com/mhasbini/ServoTesterApp/tree/master",
-    # fap_version="1.0",
+    fap_version=(1, 0),
     fap_description="App uses A7 pin for servo PWM output.",
 )

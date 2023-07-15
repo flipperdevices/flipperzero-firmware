@@ -20,6 +20,6 @@ App(
     fap_icon_assets="assets",
     fap_author="AloneLiberty",
     fap_description="Recover Mifare Classic keys",
-    # fap_version="1.5.2",
+    fap_version=(1, 5),
     fap_weburl="https://github.com/AloneLiberty/FlipperNested",
 )

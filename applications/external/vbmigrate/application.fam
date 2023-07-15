@@ -23,7 +23,7 @@ App(
     entry_point="vb_migrate_app",
     requires=["gui", "storage"],
     stack_size=2 * 1024,
-    fap_version=(1,1),
+    fap_version=(1, 1),
     fap_libs=[],
     fap_private_libs=[
         Lib(

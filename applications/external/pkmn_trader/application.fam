@@ -5,7 +5,7 @@ App(
     entry_point="pokemon_app",
     requires=["gui"],
     stack_size=2 * 1024,
-    fap_version=[1,2],
+    fap_version=(1, 2),
     fap_category="GPIO",
     fap_icon="pokemon_10px.png",
     fap_icon_assets="assets",
