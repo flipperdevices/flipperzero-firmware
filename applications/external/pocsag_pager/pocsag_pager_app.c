@@ -5,6 +5,7 @@
 #include <lib/flipper_format/flipper_format.h>
 #include "protocols/protocol_items.h"
 #include <dolphin/dolphin.h>
+#include <storage/storage.h>
 
 static bool pocsag_pager_app_custom_event_callback(void* context, uint32_t event) {
     furi_assert(context);
@@ -84,7 +85,7 @@ POCSAGPagerApp* pocsag_pager_app_alloc() {
 
     //ToDo FIX  file name setting
 
-    subghz_setting_load(app->setting, EXT_PATH("pocsag/settings.txt"));
+    subghz_setting_load(app->setting, EXT_PATH("subghz/assets/setting_user.pocsag"));
 
     //init Worker & Protocol & History
     app->lock = PCSGLockOff;
