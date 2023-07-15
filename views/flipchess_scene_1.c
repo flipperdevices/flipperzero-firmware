@@ -341,6 +341,8 @@ void flipchess_scene_1_draw(Canvas* canvas, FlipChessScene1Model* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
+    //canvas_draw_icon(canvas, 0, 0, &I_FLIPR_128x64);
+
     // Frame
     canvas_draw_frame(canvas, 0, 0, 66, 64);
 
