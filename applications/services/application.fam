@@ -15,5 +15,6 @@ App(
         "nfc_srv",
         "namechanger_srv",
         "onewire_srv",
+        "subghz_srv",
     ],
 )
