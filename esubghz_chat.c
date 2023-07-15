@@ -695,8 +695,13 @@ static void esubghz_hooked_input_callback(InputEvent* event, void* context)
 	// if we are in the chat view, allow locking
 	if (state->view_dispatcher->current_view ==
 			text_box_get_view(state->chat_box)) {
-		if (event->key == InputKeyOk && event->type == InputTypeLong) {
-			kbd_lock(state);
+		if (event->key == InputKeyOk) {
+			if (event->type == InputTypeLong) {
+				kbd_lock(state);
+			}
+
+			/* do not handle any Ok key events to prevent blocking
+			 * of other keys */
 			return;
 		}
 	}
