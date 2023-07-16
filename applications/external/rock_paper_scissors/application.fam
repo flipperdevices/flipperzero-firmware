@@ -1,0 +1,16 @@
+App(
+    appid="rock_paper_scissors",
+    name="Rock Paper Scissors",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="rock_paper_scissors_app",
+    requires=["gui", "subghz"],
+    stack_size=2 * 1024,
+    fap_version=(1, 3),
+    fap_icon="rock_paper_scissors.png",
+    fap_icon_assets="images",
+    fap_icon_assets_symbol="rock_paper_scissors",
+    fap_category="Games",
+    fap_author="jamisonderek",
+    fap_description="Play rock paper scissors with your friends using the Flipper Zero SubGHz radio!",
+    fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/blob/main/subghz/plugins/rock_paper_scissors/README.md"
+)
