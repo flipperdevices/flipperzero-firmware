@@ -30,7 +30,7 @@ String password;
 bool name_received = false;
 bool password_received = false;
 
-char apName[30] = "PORTAL";
+char apName[30] = "";
 char index_html[MAX_HTML_SIZE] = "TEST";
 
 // RESET
