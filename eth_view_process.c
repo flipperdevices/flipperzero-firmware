@@ -225,6 +225,8 @@ void ethernet_view_process_draw(EthViewProcess* process, Canvas* canvas) {
                 canvas_draw_line(canvas, x1, 19, x1 + 4, 19);
             }
         }
+    } else if(process->type == EthWorkerProcessReset) {
+        process->editing = 0;
     }
 }
 

@@ -305,6 +305,7 @@ int32_t eth_worker_task(void* context) {
     }
 
     furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
+    furi_hal_power_disable_otg();
     furi_hal_power_insomnia_exit();
 
     return 0;
