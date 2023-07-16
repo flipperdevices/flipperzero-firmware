@@ -183,3 +183,82 @@ MfClassicError mf_classic_async_read_block(
 
     return ret;
 }
+
+MfClassicError mf_classic_async_write_block(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicBlock* data) {
+    MfClassicError ret = MfClassicErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
+
+    do {
+        uint8_t write_block_cmd[2] = {MF_CLASSIC_CMD_WRITE_BLOCK, block_num};
+        bit_buffer_copy_bytes(instance->tx_plain_buffer, write_block_cmd, sizeof(write_block_cmd));
+        iso14443_3a_append_crc(instance->tx_plain_buffer);
+
+        crypto1_encrypt(
+            instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
+
+        error = iso14443_3a_poller_txrx_custom_parity(
+            instance->iso14443_3a_poller,
+            instance->tx_encrypted_buffer,
+            instance->rx_encrypted_buffer,
+            MF_CLASSIC_FWT_FC);
+        if(error != Iso14443_3aErrorNone) {
+            ret = mf_classic_process_error(error);
+            break;
+        }
+        if(bit_buffer_get_size(instance->rx_encrypted_buffer) != 4) {
+            ret = MfClassicErrorProtocol;
+            break;
+        }
+
+        crypto1_decrypt(
+            instance->crypto, instance->rx_encrypted_buffer, instance->rx_plain_buffer);
+
+        if(bit_buffer_get_byte(instance->rx_plain_buffer, 0) != MF_CLASSIC_CMD_ACK) {
+            FURI_LOG_D(TAG, "Not ACK received");
+            ret = MfClassicErrorProtocol;
+            break;
+        }
+
+        bit_buffer_copy_bytes(instance->tx_plain_buffer, data->data, sizeof(MfClassicBlock));
+        iso14443_3a_append_crc(instance->tx_plain_buffer);
+
+        crypto1_encrypt(
+            instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
+
+        error = iso14443_3a_poller_txrx_custom_parity(
+            instance->iso14443_3a_poller,
+            instance->tx_encrypted_buffer,
+            instance->rx_encrypted_buffer,
+            MF_CLASSIC_FWT_FC);
+        if(error != Iso14443_3aErrorNone) {
+            ret = mf_classic_process_error(error);
+            break;
+        }
+        if(bit_buffer_get_size(instance->rx_encrypted_buffer) != 4) {
+            ret = MfClassicErrorProtocol;
+            break;
+        }
+
+        crypto1_decrypt(
+            instance->crypto, instance->rx_encrypted_buffer, instance->rx_plain_buffer);
+
+        if(bit_buffer_get_byte(instance->rx_plain_buffer, 0) != MF_CLASSIC_CMD_ACK) {
+            FURI_LOG_D(TAG, "Not ACK received");
+            ret = MfClassicErrorProtocol;
+            break;
+        }
+    } while(false);
+
+    return ret;
+}
+
+MfClassicError mf_classic_async_value_cmd(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicValueCommand cmd,
+    int32_t data);
+
+MfClassicError mf_classic_async_value_transfer(MfClassicPoller* instance, uint8_t block_num);

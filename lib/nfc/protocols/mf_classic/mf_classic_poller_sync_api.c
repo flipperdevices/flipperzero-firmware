@@ -11,6 +11,7 @@
 typedef enum {
     MfClassicPollerCmdTypeAuth,
     MfClassicPollerCmdTypeReadBlock,
+    MfClassicPollerCmdTypeWriteBlock,
 
     MfClassicPollerCmdTypeNum,
 } MfClassicPollerCmdType;
@@ -54,9 +55,29 @@ static MfClassicError mf_classic_poller_read_block_handler(
     return error;
 }
 
+static MfClassicError mf_classic_poller_write_block_handler(
+    MfClassicPoller* poller,
+    MfClassicPollerContextData* data) {
+    MfClassicError error = MfClassicErrorNone;
+
+    error = mf_classic_async_auth(
+        poller,
+        data->write_block_context.block_num,
+        &data->write_block_context.key,
+        data->write_block_context.key_type,
+        NULL);
+    if(error == MfClassicErrorNone) {
+        error = mf_classic_async_write_block(
+            poller, data->write_block_context.block_num, &data->write_block_context.block);
+    }
+
+    return error;
+}
+
 static const MfClassicPollerCmdHandler mf_classic_poller_cmd_handlers[MfClassicPollerCmdTypeNum] = {
     [MfClassicPollerCmdTypeAuth] = mf_classic_poller_auth_handler,
     [MfClassicPollerCmdTypeReadBlock] = mf_classic_poller_read_block_handler,
+    [MfClassicPollerCmdTypeWriteBlock] = mf_classic_poller_write_block_handler,
 };
 
 static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcGenericEvent event, void* context) {
@@ -158,15 +179,21 @@ MfClassicError mf_classic_poller_write_block(
     MfClassicKey* key,
     MfClassicKeyType key_type,
     MfClassicBlock* data) {
-    UNUSED(nfc);
-    UNUSED(block_num);
-    UNUSED(key);
-    UNUSED(key_type);
-    UNUSED(data);
+    furi_assert(nfc);
+    furi_assert(key);
+    furi_assert(data);
 
-    FURI_LOG_I(TAG, "Write block");
+    MfClassicPollerContext poller_context = {
+        .cmd_type = MfClassicPollerCmdTypeWriteBlock,
+        .data.write_block_context.block_num = block_num,
+        .data.write_block_context.key = *key,
+        .data.write_block_context.key_type = key_type,
+        .data.write_block_context.block = *data,
+    };
 
-    return MfClassicErrorNone;
+    MfClassicError error = mf_classic_poller_cmd_execute(nfc, &poller_context);
+
+    return error;
 }
 
 MfClassicError mf_classic_poller_read_value(
