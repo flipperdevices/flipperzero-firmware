@@ -31,10 +31,10 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0715-1455-0.86.3-70919cb](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-15 14:55 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-15 14:55 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-16 03:08 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-16 03:08 EST`
 - Updated: [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) to use `subghz/assets/setting_user.pocsag`
-- Fixed many external app references to internal assets (By RogueMaster)
+- [Fixed many external app references to internal assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d758c8d7ce4b4b7a16ecf167d02528aa1571965d)
 
 <a name="release">
 
