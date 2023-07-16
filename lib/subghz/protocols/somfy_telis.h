@@ -2,10 +2,6 @@
 
 #include "base.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define SUBGHZ_PROTOCOL_SOMFY_TELIS_NAME "Somfy Telis"
 
 typedef struct SubGhzProtocolDecoderSomfyTelis SubGhzProtocolDecoderSomfyTelis;
@@ -129,7 +125,3 @@ SubGhzProtocolStatus
  * @param output Resulting text
  */
 void subghz_protocol_decoder_somfy_telis_get_string(void* context, FuriString* output);
-
-#ifdef __cplusplus
-}
-#endif

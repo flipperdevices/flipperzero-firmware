@@ -1,10 +1,6 @@
 #pragma once
 #include "base.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define SUBGHZ_PROTOCOL_ALUTECH_AT_4N_NAME "Alutech AT-4N"
 
 typedef struct SubGhzProtocolDecoderAlutech_at_4n SubGhzProtocolDecoderAlutech_at_4n;
@@ -128,7 +124,3 @@ SubGhzProtocolStatus
  * @param output Resulting text
  */
 void subghz_protocol_decoder_alutech_at_4n_get_string(void* context, FuriString* output);
-
-#ifdef __cplusplus
-}
-#endif

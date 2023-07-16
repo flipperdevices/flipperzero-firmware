@@ -1,10 +1,6 @@
 #pragma once
 #include "base.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define SUBGHZ_PROTOCOL_SECPLUS_V2_NAME "Security+ 2.0"
 
 typedef struct SubGhzProtocolDecoderSecPlus_v2 SubGhzProtocolDecoderSecPlus_v2;
@@ -129,7 +125,3 @@ SubGhzProtocolStatus
  * @param output Resulting text
  */
 void subghz_protocol_decoder_secplus_v2_get_string(void* context, FuriString* output);
-
-#ifdef __cplusplus
-}
-#endif
