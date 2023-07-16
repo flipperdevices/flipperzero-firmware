@@ -7,7 +7,6 @@
 #include <gui/elements.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
-#include <assets_icons.h>
 
 typedef enum {
     GreenStatus,

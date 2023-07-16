@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <nfc_icons.h>
 
 typedef enum {
     NfcSceneMfUlReadStateIdle,

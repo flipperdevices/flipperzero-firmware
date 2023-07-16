@@ -7,7 +7,6 @@ App(
     stack_size=3 * 1024,
     icon="A_RM_14",
     order=90,
-    fap_libs=["assets"],
     fap_category="Settings",
     fap_icon="cfw_app_10px.png",
 )

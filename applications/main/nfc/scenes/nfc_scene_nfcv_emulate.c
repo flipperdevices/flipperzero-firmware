@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <nfc_icons.h>
 
 #define NFC_SCENE_EMULATE_NFCV_LOG_SIZE_MAX (200)
 

@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <nfc_icons.h>
 #include <dolphin/dolphin.h>
 
 void nfc_scene_mf_ultralight_unlock_warn_dialog_callback(DialogExResult result, void* context) {

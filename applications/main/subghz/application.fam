@@ -7,7 +7,8 @@ App(
     icon="A_Sub1ghz_14",
     stack_size=3 * 1024,
     order=10,
-    fap_libs=["assets", "hwdrivers"],
-    fap_icon="icon.png",
+    fap_libs=["hwdrivers"],
     fap_category="Sub-GHz",
+    fap_icon_assets="images",
+    fap_icon="icon.png",
 )

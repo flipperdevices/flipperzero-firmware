@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <nfc_icons.h>
 
 bool nfc_scene_mf_ultralight_unlock_auto_worker_callback(NfcWorkerEvent event, void* context) {
     Nfc* nfc = context;

@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <nfc_icons.h>
 #include <dolphin/dolphin.h>
 
 void nfc_scene_mf_classic_write_success_popup_callback(void* context) {

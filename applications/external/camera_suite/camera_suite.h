@@ -6,7 +6,7 @@
 #include "views/camera_suite_view_start.h"
 #include "views/camera_suite_view_style_1.h"
 #include "views/camera_suite_view_style_2.h"
-#include <assets_icons.h>
+#include <camerasuite_icons.h>
 #include <furi.h>
 #include <furi_hal.h>
 #include <gui/gui.h>

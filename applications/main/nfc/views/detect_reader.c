@@ -1,5 +1,5 @@
 #include "detect_reader.h"
-#include <assets_icons.h>
+#include <nfc_icons.h>
 #include <gui/elements.h>
 
 #define DETECT_READER_UID_MAX_LEN (10)

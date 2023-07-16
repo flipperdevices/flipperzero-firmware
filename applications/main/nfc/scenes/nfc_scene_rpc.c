@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <nfc_icons.h>
 
 void nfc_scene_rpc_on_enter(void* context) {
     Nfc* nfc = context;

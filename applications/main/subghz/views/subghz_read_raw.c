@@ -7,7 +7,7 @@
 #include <input/input.h>
 #include <gui/elements.h>
 
-#include <assets_icons.h>
+#include <subghz_icons.h>
 #define SUBGHZ_READ_RAW_RSSI_HISTORY_SIZE 100
 #define TAG "SubGhzReadRAW"
 

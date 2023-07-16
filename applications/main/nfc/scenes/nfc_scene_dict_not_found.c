@@ -1,4 +1,5 @@
 #include "../nfc_i.h"
+#include <nfc_icons.h>
 
 void nfc_scene_dict_not_found_popup_callback(void* context) {
     Nfc* nfc = context;

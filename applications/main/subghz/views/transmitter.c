@@ -1,5 +1,6 @@
 #include "transmitter.h"
 #include "../subghz_i.h"
+#include <subghz_icons.h>
 
 #include <input/input.h>
 #include <gui/elements.h>

@@ -10,7 +10,6 @@
 #include "views/subghz_read_raw.h"
 
 #include <gui/gui.h>
-#include <assets_icons.h>
 #include <dialogs/dialogs.h>
 #include <gui/scene_manager.h>
 #include <notification/notification_messages.h>
