@@ -62,6 +62,14 @@ typedef enum {
     MfClassicActionACWrite,
 } MfClassicAction;
 
+typedef enum {
+    MfClassicValueCommandIncrement,
+    MfClassicValueCommandDecrement,
+    MfClassicValueCommandRestore,
+
+    MfClassicValueCommandInvalid,
+} MfClassicValueCommand;
+
 typedef struct {
     uint8_t data[MF_CLASSIC_BLOCK_SIZE];
 } MfClassicBlock;

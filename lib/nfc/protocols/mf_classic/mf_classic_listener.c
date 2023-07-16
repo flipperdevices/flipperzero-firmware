@@ -31,6 +31,8 @@ static void mf_classic_listener_reset_state(MfClassicListener* instance) {
     instance->auth_state = MfClassicListenerAuthStateIdle;
     instance->cmd_in_progress = false;
     instance->current_cmd_handler_idx = 0;
+    instance->transfer_value = 0;
+    instance->value_cmd = MfClassicValueCommandInvalid;
 }
 
 static MfClassicListenerCommand
@@ -292,6 +294,123 @@ static MfClassicListenerCommand mf_classic_listener_write_block_second_part_hand
     return command;
 }
 
+static MfClassicListenerCommand
+    mf_classic_listener_value_cmd_handler(MfClassicListener* instance, BitBuffer* buff) {
+    MfClassicListenerCommand command = MfClassicListenerCommandNack;
+    MfClassicAuthContext* auth_ctx = &instance->auth_context;
+
+    do {
+        if(instance->state != MfClassicListenerStateAuthComplete) break;
+
+        uint8_t block_num = bit_buffer_get_byte(buff, 1);
+        if(block_num >= instance->total_block_num) break;
+
+        uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+        uint8_t auth_sector_num = mf_classic_get_sector_by_block(auth_ctx->block_num);
+        if(sector_num != auth_sector_num) break;
+
+        uint8_t cmd = bit_buffer_get_byte(buff, 0);
+        MfClassicAction action = MfClassicActionDataDec;
+        if(cmd == MF_CLASSIC_CMD_VALUE_DEC) {
+            instance->value_cmd = MfClassicValueCommandDecrement;
+            action = MfClassicActionDataDec;
+        } else if(cmd == MF_CLASSIC_CMD_VALUE_INC) {
+            instance->value_cmd = MfClassicValueCommandIncrement;
+            action = MfClassicActionDataInc;
+        } else if(cmd == MF_CLASSIC_CMD_VALUE_RESTORE) {
+            instance->value_cmd = MfClassicValueCommandRestore;
+        } else {
+            break;
+        }
+
+        if(!mf_classic_is_allowed_access(instance->data, block_num, auth_ctx->key_type, action)) {
+            break;
+        }
+
+        if(!mf_classic_block_to_value(
+               &instance->data->block[block_num], &instance->transfer_value, NULL)) {
+            break;
+        }
+
+        instance->cmd_in_progress = true;
+        instance->current_cmd_handler_idx++;
+        command = MfClassicListenerCommandAck;
+    } while(false);
+
+    return command;
+}
+
+static MfClassicListenerCommand
+    mf_classic_listener_value_dec_handler(MfClassicListener* instance, BitBuffer* buff) {
+    return mf_classic_listener_value_cmd_handler(instance, buff);
+}
+
+static MfClassicListenerCommand
+    mf_classic_listener_value_inc_handler(MfClassicListener* instance, BitBuffer* buff) {
+    return mf_classic_listener_value_cmd_handler(instance, buff);
+}
+
+static MfClassicListenerCommand
+    mf_classic_listener_value_restore_handler(MfClassicListener* instance, BitBuffer* buff) {
+    return mf_classic_listener_value_cmd_handler(instance, buff);
+}
+
+static MfClassicListenerCommand
+    mf_classic_listener_value_data_receive_handler(MfClassicListener* instance, BitBuffer* buff) {
+    MfClassicListenerCommand command = MfClassicListenerCommandNack;
+
+    do {
+        if(bit_buffer_get_size_bytes(buff) != 6) break;
+        uint8_t data_arr[4] = {};
+        bit_buffer_write_bytes_mid(buff, data_arr, 0, sizeof(data_arr));
+        int32_t data = *(int32_t*)data_arr;
+        if(data < 0) {
+            data = -data;
+        }
+
+        if(instance->value_cmd == MfClassicValueCommandDecrement) {
+            data = -data;
+        } else if(instance->value_cmd == MfClassicValueCommandRestore) {
+            data = 0;
+        }
+
+        instance->transfer_value += data;
+
+        instance->cmd_in_progress = true;
+        instance->current_cmd_handler_idx++;
+        command = MfClassicListenerCommandSilent;
+    } while(false);
+
+    return command;
+}
+
+static MfClassicListenerCommand
+    mf_classic_listener_value_transfer_handler(MfClassicListener* instance, BitBuffer* buff) {
+    MfClassicListenerCommand command = MfClassicListenerCommandNack;
+    MfClassicAuthContext* auth_ctx = &instance->auth_context;
+
+    do {
+        instance->cmd_in_progress = false;
+
+        if(bit_buffer_get_size_bytes(buff) != 4) break;
+        if(bit_buffer_get_byte(buff, 0) != MF_CLASSIC_CMD_VALUE_TRANSFER) break;
+
+        uint8_t block_num = bit_buffer_get_byte(buff, 1);
+        if(!mf_classic_is_allowed_access(
+               instance->data, block_num, auth_ctx->key_type, MfClassicActionDataDec)) {
+            break;
+        }
+
+        mf_classic_value_to_block(
+            instance->transfer_value, block_num, &instance->data->block[block_num]);
+        instance->transfer_value = 0;
+
+        command = MfClassicListenerCommandAck;
+    } while(false);
+
+    return command;
+}
+
 static MfClassicListenerCommandHandler mf_classic_listener_halt_handlers[] = {
     mf_classic_listener_halt_handler,
 };
@@ -313,6 +432,24 @@ static MfClassicListenerCommandHandler mf_classic_listener_read_block_handlers[]
 static MfClassicListenerCommandHandler mf_classic_listener_write_block_handlers[] = {
     mf_classic_listener_write_block_first_part_handler,
     mf_classic_listener_write_block_second_part_handler,
+};
+
+static MfClassicListenerCommandHandler mf_classic_listener_value_dec_handlers[] = {
+    mf_classic_listener_value_dec_handler,
+    mf_classic_listener_value_data_receive_handler,
+    mf_classic_listener_value_transfer_handler,
+};
+
+static MfClassicListenerCommandHandler mf_classic_listener_value_inc_handlers[] = {
+    mf_classic_listener_value_inc_handler,
+    mf_classic_listener_value_data_receive_handler,
+    mf_classic_listener_value_transfer_handler,
+};
+
+static MfClassicListenerCommandHandler mf_classic_listener_value_restore_handlers[] = {
+    mf_classic_listener_value_restore_handler,
+    mf_classic_listener_value_data_receive_handler,
+    mf_classic_listener_value_transfer_handler,
 };
 
 static const MfClassicListenerCmd mf_classic_listener_cmd_handlers[] = {
@@ -345,6 +482,24 @@ static const MfClassicListenerCmd mf_classic_listener_cmd_handlers[] = {
         .cmd_len_bits = 4 * 8,
         .command_num = COUNT_OF(mf_classic_listener_write_block_handlers),
         .handler = mf_classic_listener_write_block_handlers,
+    },
+    {
+        .cmd_start_byte = MF_CLASSIC_CMD_VALUE_DEC,
+        .cmd_len_bits = 4 * 8,
+        .command_num = COUNT_OF(mf_classic_listener_value_dec_handlers),
+        .handler = mf_classic_listener_value_dec_handlers,
+    },
+    {
+        .cmd_start_byte = MF_CLASSIC_CMD_VALUE_INC,
+        .cmd_len_bits = 4 * 8,
+        .command_num = COUNT_OF(mf_classic_listener_value_inc_handlers),
+        .handler = mf_classic_listener_value_inc_handlers,
+    },
+    {
+        .cmd_start_byte = MF_CLASSIC_CMD_VALUE_RESTORE,
+        .cmd_len_bits = 4 * 8,
+        .command_num = COUNT_OF(mf_classic_listener_value_restore_handlers),
+        .handler = mf_classic_listener_value_restore_handlers,
     },
 };
 

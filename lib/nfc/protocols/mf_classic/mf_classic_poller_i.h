@@ -37,12 +37,6 @@ typedef enum {
     MfClassicPollerStateNum,
 } MfClassicPollerState;
 
-typedef enum {
-    MfClassicValueCommandIncrement,
-    MfClassicValueCommandDecrement,
-    MfClassicValueCommandRestore,
-} MfClassicValueCommand;
-
 struct MfClassicPoller {
     Iso14443_3aPoller* iso14443_3a_poller;
 

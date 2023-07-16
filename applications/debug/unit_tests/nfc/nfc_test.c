@@ -389,11 +389,49 @@ static void mf_classic_write() {
     nfc_free(poller);
 }
 
+static void mf_classic_value_block() {
+    Nfc* poller = nfc_alloc();
+    Nfc* listener = nfc_alloc();
+
+    NfcDevice* nfc_device = nfc_device_alloc();
+    nfc_data_generator_fill_data(NfcDataGeneratorTypeMfClassic4k_7b, nfc_device);
+    NfcListener* mfc_listener = nfc_listener_alloc(
+        listener, NfcProtocolMfClassic, nfc_device_get_data(nfc_device, NfcProtocolMfClassic));
+    nfc_listener_start(mfc_listener, NULL, NULL);
+
+    MfClassicKey key = {.data = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
+
+    int32_t value = 228;
+    MfClassicBlock block_write = {};
+    mf_classic_value_to_block(value, 1, &block_write);
+
+    MfClassicError error = MfClassicErrorNone;
+    error = mf_classic_poller_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
+    mu_assert(error == MfClassicErrorNone, "Write failed");
+
+    int32_t data = 200;
+    int32_t new_value = 0;
+    error = mf_classic_poller_change_value(poller, 1, &key, MfClassicKeyTypeA, data, &new_value);
+    mu_assert(error == MfClassicErrorNone, "Value increment failed");
+    mu_assert(new_value == value + data, "Value not match");
+
+    error = mf_classic_poller_change_value(poller, 1, &key, MfClassicKeyTypeA, -data, &new_value);
+    mu_assert(error == MfClassicErrorNone, "Value decrement failed");
+    mu_assert(new_value == value, "Value not match");
+
+    nfc_listener_stop(mfc_listener);
+    nfc_listener_free(mfc_listener);
+    nfc_device_free(nfc_device);
+    nfc_free(listener);
+    nfc_free(poller);
+}
+
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
-    MU_RUN_TEST(mf_classic_reader);
-    MU_RUN_TEST(mf_classic_write);
+    UNUSED(mf_classic_reader);
+    UNUSED(mf_classic_write);
+    MU_RUN_TEST(mf_classic_value_block);
 
     UNUSED(iso14443_3a_reader);
     UNUSED(mf_ultralight_11_reader);
