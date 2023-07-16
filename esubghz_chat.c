@@ -59,6 +59,7 @@ typedef struct {
 	bool kbd_locked;
 	uint32_t kbd_lock_msg_ticks;
 	uint8_t kbd_lock_count;
+	bool kbd_ok_input_ongoing;
 } ESubGhzChatState;
 
 typedef enum {
@@ -701,10 +702,12 @@ static void esubghz_hooked_input_callback(InputEvent* event, void* context)
 		return;
 	}
 
-	// if we are in the chat view, allow locking
-	if (state->view_dispatcher->current_view ==
-			text_box_get_view(state->chat_box)) {
-		if (event->key == InputKeyOk) {
+	if (event->key == InputKeyOk) {
+		/* if we are in the chat view and no input is ongoing, allow
+		 * locking */
+		if (state->view_dispatcher->current_view ==
+				text_box_get_view(state->chat_box) &&
+				!(state->kbd_ok_input_ongoing)) {
 			if (event->type == InputTypeLong) {
 				kbd_lock(state);
 			}
@@ -712,6 +715,13 @@ static void esubghz_hooked_input_callback(InputEvent* event, void* context)
 			/* do not handle any Ok key events to prevent blocking
 			 * of other keys */
 			return;
+		}
+
+		/* handle ongoing inputs when chaning to chat view */
+		if (event->type == InputTypePress) {
+			state->kbd_ok_input_ongoing = true;
+		} else if (event->type == InputTypeRelease) {
+			state->kbd_ok_input_ongoing = false;
 		}
 	}
 
