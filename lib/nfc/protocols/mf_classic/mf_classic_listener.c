@@ -57,10 +57,6 @@ static MfClassicListenerCommand mf_classic_listnener_auth_first_part_handler(
         }
 
         uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
-        if(!mf_classic_is_key_found(instance->data, sector_num, key_type)) {
-            command = MfClassicListenerCommandSilent;
-            break;
-        }
 
         MfClassicSectorTrailer* sec_tr =
             mf_classic_get_sector_trailer_by_sector(instance->data, sector_num);
@@ -136,6 +132,13 @@ static MfClassicListenerCommand
         bit_buffer_write_bytes_mid(buff, instance->auth_context.nr.data, 0, sizeof(MfClassicNr));
         bit_buffer_write_bytes_mid(
             buff, instance->auth_context.ar.data, sizeof(MfClassicNr), sizeof(MfClassicAr));
+
+        if(instance->callback) {
+            instance->mfc_event.type = MfClassicListenerEventTypeAuthContextPartCollected,
+            instance->mfc_event_data.auth_context = instance->auth_context;
+            instance->callback(instance->generic_event, instance->context);
+        }
+
         uint32_t nr_num = nfc_util_bytes2num(instance->auth_context.nr.data, sizeof(MfClassicNr));
         uint32_t ar_num = nfc_util_bytes2num(instance->auth_context.ar.data, sizeof(MfClassicAr));
 
@@ -163,6 +166,7 @@ static MfClassicListenerCommand
         instance->comm_state = MfClassicListenerCommStateEncrypted;
 
         if(instance->callback) {
+            instance->mfc_event.type = MfClassicListenerEventTypeAuthContextFullCollected,
             instance->mfc_event_data.auth_context = instance->auth_context;
             instance->callback(instance->generic_event, instance->context);
         }
