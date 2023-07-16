@@ -123,7 +123,8 @@
         "cwctype": "c",
         "dolphin_deed.h": "c",
         "flipp_pomodoro_info_view.h": "c",
-        "scene_manager.h": "c"
+        "scene_manager.h": "c",
+        "unordered_set": "c"
     },
     "chatgpt-helper.model": "gpt-4"
 }

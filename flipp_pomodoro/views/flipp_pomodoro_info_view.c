@@ -30,7 +30,7 @@ static void flipp_pomodoro_info_view_draw_statistics(Canvas *canvas, FlippPomodo
 {
     FuriString *stats_string = furi_string_alloc();
 
-    furi_string_printf(stats_string, "So Long,\nand Thanks for All the Focus...\nand for completing\n%i pomodoro(s)", model->pomodoros_completed);
+    furi_string_printf(stats_string, "So Long,\nand Thanks for All the Focus...\nand for completing\n\e#%i\e# pomodoro(s)", model->pomodoros_completed);
     const char *stats_string_formatted = furi_string_get_cstr(stats_string);
 
     elements_text_box(
@@ -107,14 +107,14 @@ bool flipp_pomodoro_info_view_input_callback(InputEvent *event, void *ctx)
 {
     FlippPomodoroInfoView *info_view = ctx;
 
-    if (event->type == InputTypePress) 
+    if (event->type == InputTypePress)
     {
         if (event->key == InputKeyRight && info_view->resume_timer_cb != NULL)
         {
             info_view->resume_timer_cb(info_view->user_action_cb_ctx);
             return ViewInputConsumed;
         }
-        else if (event->key == InputKeyLeft) 
+        else if (event->key == InputKeyLeft)
         {
             flipp_pomodoro_info_view_toggle_mode(info_view);
             return ViewInputConsumed;
