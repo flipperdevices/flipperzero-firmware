@@ -122,9 +122,10 @@ static MfClassicListenerCommand
 static MfClassicListenerCommand
     mf_classic_listener_auth_second_part_handler(MfClassicListener* instance, BitBuffer* buff) {
     MfClassicListenerCommand command = MfClassicListenerCommandSilent;
-    instance->cmd_in_progress = false;
 
     do {
+        instance->cmd_in_progress = false;
+
         if(bit_buffer_get_size_bytes(buff) != (sizeof(MfClassicNr) + sizeof(MfClassicAr))) {
             mf_classic_listener_reset_state(instance);
             break;
@@ -181,6 +182,8 @@ static MfClassicListenerCommand
     MfClassicAuthContext* auth_ctx = &instance->auth_context;
 
     do {
+        if(instance->state != MfClassicListenerStateAuthComplete) break;
+
         uint8_t block_num = bit_buffer_get_byte(buff, 1);
         uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
         uint8_t auth_sector_num = mf_classic_get_sector_by_block(auth_ctx->block_num);
@@ -220,6 +223,75 @@ static MfClassicListenerCommand
     return command;
 }
 
+static MfClassicListenerCommand mf_classic_listener_write_block_first_part_handler(
+    MfClassicListener* instance,
+    BitBuffer* buff) {
+    MfClassicListenerCommand command = MfClassicListenerCommandNack;
+    MfClassicAuthContext* auth_ctx = &instance->auth_context;
+
+    do {
+        if(instance->state != MfClassicListenerStateAuthComplete) break;
+
+        uint8_t block_num = bit_buffer_get_byte(buff, 1);
+        if(block_num >= instance->total_block_num) break;
+
+        uint8_t sector_num = mf_classic_get_sector_by_block(block_num);
+        uint8_t auth_sector_num = mf_classic_get_sector_by_block(auth_ctx->block_num);
+        if(sector_num != auth_sector_num) break;
+
+        instance->cmd_in_progress = true;
+        instance->current_cmd_handler_idx++;
+        command = MfClassicListenerCommandAck;
+    } while(false);
+
+    return command;
+}
+
+static MfClassicListenerCommand mf_classic_listener_write_block_second_part_handler(
+    MfClassicListener* instance,
+    BitBuffer* buff) {
+    MfClassicListenerCommand command = MfClassicListenerCommandNack;
+    MfClassicAuthContext* auth_ctx = &instance->auth_context;
+
+    do {
+        instance->cmd_in_progress = false;
+
+        size_t buff_size = bit_buffer_get_size_bytes(buff);
+        if(buff_size != sizeof(MfClassicBlock) + sizeof(uint16_t)) break;
+
+        uint8_t block_num = auth_ctx->block_num;
+        MfClassicKeyType key_type = auth_ctx->key_type;
+        MfClassicBlock block = instance->data->block[block_num];
+
+        if(mf_classic_is_sector_trailer(block_num)) {
+            if(mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionKeyAWrite)) {
+                bit_buffer_write_bytes_mid(buff, block.data, 0, sizeof(MfClassicKey));
+            }
+            if(mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionKeyBWrite)) {
+                bit_buffer_write_bytes_mid(buff, block.data, 10, sizeof(MfClassicKey));
+            }
+            if(mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionACWrite)) {
+                bit_buffer_write_bytes_mid(buff, block.data, 6, sizeof(MfClassicAccessBits));
+            }
+        } else {
+            if(mf_classic_is_allowed_access(
+                   instance->data, block_num, key_type, MfClassicActionDataWrite)) {
+                bit_buffer_write_bytes_mid(buff, block.data, 0, sizeof(MfClassicBlock));
+            } else {
+                break;
+            }
+        }
+
+        instance->data->block[block_num] = block;
+        command = MfClassicListenerCommandAck;
+    } while(false);
+
+    return command;
+}
+
 static MfClassicListenerCommandHandler mf_classic_listener_halt_handlers[] = {
     mf_classic_listener_halt_handler,
 };
@@ -236,6 +308,11 @@ static MfClassicListenerCommandHandler mf_classic_listener_auth_key_b_handlers[]
 
 static MfClassicListenerCommandHandler mf_classic_listener_read_block_handlers[] = {
     mf_classic_listener_read_block_handler,
+};
+
+static MfClassicListenerCommandHandler mf_classic_listener_write_block_handlers[] = {
+    mf_classic_listener_write_block_first_part_handler,
+    mf_classic_listener_write_block_second_part_handler,
 };
 
 static const MfClassicListenerCmd mf_classic_listener_cmd_handlers[] = {
@@ -262,6 +339,12 @@ static const MfClassicListenerCmd mf_classic_listener_cmd_handlers[] = {
         .cmd_len_bits = 4 * 8,
         .command_num = COUNT_OF(mf_classic_listener_read_block_handlers),
         .handler = mf_classic_listener_read_block_handlers,
+    },
+    {
+        .cmd_start_byte = MF_CLASSIC_CMD_WRITE_BLOCK,
+        .cmd_len_bits = 4 * 8,
+        .command_num = COUNT_OF(mf_classic_listener_write_block_handlers),
+        .handler = mf_classic_listener_write_block_handlers,
     },
 };
 
@@ -317,6 +400,7 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
                     continue;
                 }
                 instance->current_cmd_idx = i;
+                instance->current_cmd_handler_idx = 0;
                 mfc_command =
                     mf_classic_listener_cmd_handlers[i].handler[0](instance, rx_buffer_plain);
                 break;

@@ -46,6 +46,9 @@ struct MfClassicListener {
     Crypto1* crypto;
     MfClassicAuthContext auth_context;
 
+    // Value operation data
+    int32_t transfer_value;
+
     NfcGenericEvent generic_event;
     MfClassicListenerEvent mfc_event;
     MfClassicListenerEventData mfc_event_data;

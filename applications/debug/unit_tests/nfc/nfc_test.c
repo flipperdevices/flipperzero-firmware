@@ -361,10 +361,39 @@ static void mf_classic_reader() {
     nfc_free(poller);
 }
 
+static void mf_classic_write() {
+    Nfc* poller = nfc_alloc();
+    Nfc* listener = nfc_alloc();
+
+    NfcDevice* nfc_device = nfc_device_alloc();
+    nfc_data_generator_fill_data(NfcDataGeneratorTypeMfClassic4k_7b, nfc_device);
+    NfcListener* mfc_listener = nfc_listener_alloc(
+        listener, NfcProtocolMfClassic, nfc_device_get_data(nfc_device, NfcProtocolMfClassic));
+    nfc_listener_start(mfc_listener, NULL, NULL);
+
+    MfClassicBlock block_write = {};
+    MfClassicBlock block_read = {};
+    furi_hal_random_fill_buf(block_write.data, sizeof(MfClassicBlock));
+    MfClassicKey key = {.data = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
+
+    mf_classic_poller_write_block(poller, 1, &key, MfClassicKeyTypeA, &block_write);
+    mf_classic_poller_read_block(poller, 1, &key, MfClassicKeyTypeA, &block_read);
+
+    nfc_listener_stop(mfc_listener);
+    nfc_listener_free(mfc_listener);
+
+    mu_assert(memcmp(&block_read, &block_write, sizeof(MfClassicBlock)) == 0, "Data mismatch");
+
+    nfc_device_free(nfc_device);
+    nfc_free(listener);
+    nfc_free(poller);
+}
+
 MU_TEST_SUITE(nfc) {
     nfc_test_alloc();
 
     MU_RUN_TEST(mf_classic_reader);
+    MU_RUN_TEST(mf_classic_write);
 
     UNUSED(iso14443_3a_reader);
     UNUSED(mf_ultralight_11_reader);
