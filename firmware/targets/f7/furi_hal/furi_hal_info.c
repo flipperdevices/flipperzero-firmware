@@ -298,6 +298,7 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
         property_value_out(&property_context, NULL, 2, "radio", "alive", "false");
     }
 
+    // RTC flags
     property_value_out(
         &property_context,
         "%u",
@@ -306,7 +307,53 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
         "debug",
         furi_hal_rtc_is_flag_set(FuriHalRtcFlagDebug));
     property_value_out(
+        &property_context, "%u", 2, "system", "lock", furi_hal_rtc_is_flag_set(FuriHalRtcFlagLock));
+    property_value_out(
+        &property_context,
+        "%u",
+        3,
+        "system",
+        "hand",
+        "orient",
+        furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient));
+    property_value_out(
+        &property_context,
+        "%u",
+        3,
+        "system",
+        "legacy",
+        "sleep",
+        furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep));
+    property_value_out(
+        &property_context,
+        "%u",
+        3,
+        "system",
+        "stealth",
+        "mode",
+        furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
+
+    property_value_out(
         &property_context, "%u", 3, "system", "heap", "track", furi_hal_rtc_get_heap_track_mode());
+    property_value_out(&property_context, "%u", 2, "system", "boot", furi_hal_rtc_get_boot_mode());
+    property_value_out(
+        &property_context,
+        "%u",
+        3,
+        "system",
+        "local",
+        "time",
+        furi_hal_rtc_get_locale_timeformat());
+    property_value_out(
+        &property_context,
+        "%u",
+        3,
+        "system",
+        "local",
+        "date",
+        furi_hal_rtc_get_locale_dateformat());
+    property_value_out(
+        &property_context, "%u", 3, "system", "local", "unit", furi_hal_rtc_get_locale_units());
     property_value_out(
         &property_context, "%u", 3, "system", "log", "level", furi_hal_rtc_get_log_level());
 
