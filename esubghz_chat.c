@@ -194,7 +194,8 @@ static bool freq_input_validator(const char *text, FuriString *error,
 }
 
 /* Sends PassEntered event to scene manager and displays whether or not
- * encryption has been enabled in the text box. */
+ * encryption has been enabled in the text box. Also clears the text input
+ * buffer to remove the password. */
 static void pass_input_cb(void *context)
 {
 	furi_assert(context);
@@ -202,6 +203,10 @@ static void pass_input_cb(void *context)
 
 	furi_string_cat_printf(state->chat_box_store, "\nEncrypted: %s",
 			(state->encrypted ? "yes" : "no"));
+
+	/* clear the text input buffer to remove the password */
+	esubghz_chat_explicit_bzero(state->text_input_store,
+			sizeof(state->text_input_store));
 
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_PassEntered);
