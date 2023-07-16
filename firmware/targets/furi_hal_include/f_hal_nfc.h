@@ -125,6 +125,8 @@ FHalNfcError f_hal_nfc_trx_reset();
 
 FHalNfcError f_hal_nfc_listen_start();
 
+FHalNfcError f_hal_nfc_listen_reset();
+
 FHalNfcError f_hal_nfc_listener_sleep();
 
 FHalNfcError f_hal_nfc_listener_disable_auto_col_res();

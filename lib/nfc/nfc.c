@@ -90,6 +90,7 @@ static int32_t nfc_worker_listener(void* context) {
     NfcEventData event_data = {};
     event_data.buffer = bit_buffer_alloc(NFC_MAX_BUFFER_SIZE);
     NfcEvent nfc_event = {.data = event_data};
+    NfcCommand command = NfcCommandContinue;
 
     while(true) {
         FHalNfcEvent event = f_hal_nfc_wait_event(F_HAL_NFC_EVENT_WAIT_FOREVER);
@@ -119,7 +120,12 @@ static int32_t nfc_worker_listener(void* context) {
             f_hal_nfc_poller_rx(
                 instance->rx_buffer, sizeof(instance->rx_buffer), &instance->rx_bits);
             bit_buffer_copy_bits(event_data.buffer, instance->rx_buffer, instance->rx_bits);
-            instance->callback(nfc_event, instance->context);
+            command = instance->callback(nfc_event, instance->context);
+            if(command == NfcCommandStop) {
+                break;
+            } else if(command == NfcCommandReset) {
+                f_hal_nfc_listen_reset();
+            }
         }
     }
 

@@ -523,6 +523,14 @@ FHalNfcError f_hal_nfc_listen_start() {
     return FHalNfcErrorNone;
 }
 
+FHalNfcError f_hal_nfc_listen_reset() {
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
+
+    return FHalNfcErrorNone;
+}
+
 FHalNfcError f_hal_nfc_listener_sleep() {
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 

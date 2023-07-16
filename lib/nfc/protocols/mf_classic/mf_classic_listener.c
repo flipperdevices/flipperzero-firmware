@@ -514,7 +514,7 @@ static void mf_classic_listener_send_short_frame(MfClassicListener* instance, ui
         tx_buffer = instance->tx_encrypted_buffer;
     }
 
-    iso14443_3a_listener_tx(instance->iso14443_3a_listener, tx_buffer);
+    iso14443_3a_listener_tx_with_custom_parity(instance->iso14443_3a_listener, tx_buffer);
 }
 
 NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
@@ -566,6 +566,8 @@ NfcCommand mf_classic_listener_run(NfcGenericEvent event, void* context) {
             mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_ACK);
         } else if(mfc_command == MfClassicListenerCommandNack) {
             mf_classic_listener_send_short_frame(instance, MF_CLASSIC_CMD_NACK);
+        } else if(mfc_command == MfClassicListenerCommandSilent) {
+            command = NfcCommandReset;
         }
     } else if(iso3_event->type == Iso14443_3aListenerEventTypeHalted) {
         mf_classic_listener_reset_state(instance);
