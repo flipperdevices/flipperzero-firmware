@@ -18,9 +18,9 @@ PomodoroStage stages_sequence[] = {
 };
 
 char* current_stage_label[] = {
-    [FlippPomodoroStageFocus] = "Continue focus for:",
-    [FlippPomodoroStageRest] = "Keep rest for:",
-    [FlippPomodoroStageLongBreak] = "Long Break for:",
+    [FlippPomodoroStageFocus] = "Focusing...",
+    [FlippPomodoroStageRest] = "Short Break...",
+    [FlippPomodoroStageLongBreak] = "Long Break...",
 };
 
 char* next_stage_label[] = {
@@ -58,7 +58,7 @@ char* flipp_pomodoro__next_stage_label(FlippPomodoroState* state) {
 void flipp_pomodoro__destroy(FlippPomodoroState* state) {
     furi_assert(state);
     free(state);
-};
+}
 
 uint32_t flipp_pomodoro__current_stage_total_duration(FlippPomodoroState* state) {
     const int32_t stage_duration_seconds_map[] = {
