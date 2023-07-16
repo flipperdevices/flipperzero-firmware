@@ -444,6 +444,41 @@ uint8_t mf_classic_get_sector_by_block(uint8_t block) {
     return sector;
 }
 
+bool mf_classic_block_to_value(const MfClassicBlock* block, int32_t* value, uint8_t* addr) {
+    furi_assert(block);
+    furi_assert(value);
+
+    uint32_t v = *(uint32_t*)&block->data[0];
+    uint32_t v_inv = *(uint32_t*)&block->data[4];
+    uint32_t v1 = *(uint32_t*)&block->data[8];
+
+    bool val_checks =
+        ((v == v1) && (v == ~v_inv) && (block->data[12] == (~block->data[13] & 0xFF)) &&
+         (block->data[14] == (~block->data[15] & 0xFF)) && (block->data[12] == block->data[14]));
+    if(value) {
+        *value = (int32_t)v;
+    }
+    if(addr) {
+        *addr = block->data[12];
+    }
+    return val_checks;
+}
+
+void mf_classic_value_to_block(int32_t value, uint8_t addr, MfClassicBlock* block) {
+    furi_assert(block);
+
+    uint32_t v_inv = ~((uint32_t)value);
+
+    memcpy(&block->data[0], &value, 4); //-V1086
+    memcpy(&block->data[4], &v_inv, 4); //-V1086
+    memcpy(&block->data[8], &value, 4); //-V1086
+
+    block->data[12] = addr;
+    block->data[13] = ~addr & 0xFF;
+    block->data[14] = addr;
+    block->data[15] = ~addr & 0xFF;
+}
+
 bool mf_classic_is_key_found(
     const MfClassicData* data,
     uint8_t sector_num,
@@ -631,7 +666,7 @@ static bool mf_classic_is_allowed_access_sector_trailer(
     return true;
 }
 
-static bool mifare_classic_is_allowed_access_data_block(
+static bool mf_classic_is_allowed_access_data_block(
     MfClassicData* data,
     uint8_t block_num,
     MfClassicKeyType key_type,
@@ -714,8 +749,20 @@ bool mf_classic_is_allowed_access(
             mf_classic_is_allowed_access_sector_trailer(data, block_num, key_type, action);
     } else {
         access_allowed =
-            mifare_classic_is_allowed_access_data_block(data, block_num, key_type, action);
+            mf_classic_is_allowed_access_data_block(data, block_num, key_type, action);
     }
 
     return access_allowed;
+}
+
+bool mf_classic_is_value_block(MfClassicData* data, uint8_t block_num) {
+    furi_assert(data);
+
+    // Check if key A can write, if it can, it's transport configuration, not data block
+    return !mf_classic_is_allowed_access_data_block(
+               data, block_num, MfClassicKeyTypeA, MfClassicActionDataWrite) &&
+           (mf_classic_is_allowed_access_data_block(
+                data, block_num, MfClassicKeyTypeB, MfClassicActionDataInc) ||
+            mf_classic_is_allowed_access_data_block(
+                data, block_num, MfClassicKeyTypeB, MfClassicActionDataDec));
 }

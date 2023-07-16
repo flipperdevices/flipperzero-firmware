@@ -12,6 +12,8 @@ typedef enum {
     MfClassicPollerCmdTypeAuth,
     MfClassicPollerCmdTypeReadBlock,
     MfClassicPollerCmdTypeWriteBlock,
+    MfClassicPollerCmdTypeReadValue,
+    MfClassicPollerCmdTypeChangeValue,
 
     MfClassicPollerCmdTypeNum,
 } MfClassicPollerCmdType;
@@ -74,10 +76,39 @@ static MfClassicError mf_classic_poller_write_block_handler(
     return error;
 }
 
+static MfClassicError mf_classic_poller_read_value_handler(
+    MfClassicPoller* poller,
+    MfClassicPollerContextData* data) {
+    MfClassicError error = MfClassicErrorNone;
+
+    do {
+        error = mf_classic_async_auth(
+            poller,
+            data->read_value_context.block_num,
+            &data->read_value_context.key,
+            data->read_value_context.key_type,
+            NULL);
+        if(error != MfClassicErrorNone) break;
+
+        MfClassicBlock block = {};
+        error = mf_classic_async_read_block(poller, data->read_value_context.block_num, &block);
+        if(error != MfClassicErrorNone) break;
+
+        if(!mf_classic_block_to_value(&block, &data->read_value_context.value, NULL)) {
+            error = MfClassicErrorProtocol;
+            break;
+        }
+
+    } while(false);
+
+    return error;
+}
+
 static const MfClassicPollerCmdHandler mf_classic_poller_cmd_handlers[MfClassicPollerCmdTypeNum] = {
     [MfClassicPollerCmdTypeAuth] = mf_classic_poller_auth_handler,
     [MfClassicPollerCmdTypeReadBlock] = mf_classic_poller_read_block_handler,
     [MfClassicPollerCmdTypeWriteBlock] = mf_classic_poller_write_block_handler,
+    [MfClassicPollerCmdTypeReadValue] = mf_classic_poller_read_value_handler,
 };
 
 static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcGenericEvent event, void* context) {
@@ -202,15 +233,24 @@ MfClassicError mf_classic_poller_read_value(
     MfClassicKey* key,
     MfClassicKeyType key_type,
     int32_t* value) {
-    UNUSED(nfc);
-    UNUSED(block_num);
-    UNUSED(key);
-    UNUSED(key_type);
-    UNUSED(value);
+    furi_assert(nfc);
+    furi_assert(key);
+    furi_assert(value);
 
-    FURI_LOG_I(TAG, "Read value");
+    MfClassicPollerContext poller_context = {
+        .cmd_type = MfClassicPollerCmdTypeReadValue,
+        .data.write_block_context.block_num = block_num,
+        .data.write_block_context.key = *key,
+        .data.write_block_context.key_type = key_type,
+    };
 
-    return MfClassicErrorNone;
+    MfClassicError error = mf_classic_poller_cmd_execute(nfc, &poller_context);
+
+    if(error == MfClassicErrorNone) {
+        *value = poller_context.data.read_value_context.value;
+    }
+
+    return error;
 }
 
 MfClassicError mf_classic_poller_change_value(

@@ -57,7 +57,6 @@ struct MfClassicPoller {
     uint8_t key_reuse_sector;
     uint8_t sectors_total;
     Crypto1* crypto;
-    MfClassicBlock transfer_buffer;
     BitBuffer* tx_plain_buffer;
     BitBuffer* tx_encrypted_buffer;
     BitBuffer* rx_plain_buffer;
@@ -85,10 +84,26 @@ typedef struct {
     MfClassicBlock block;
 } MfClassicWriteBlockContext;
 
+typedef struct {
+    uint8_t block_num;
+    MfClassicKey key;
+    MfClassicKeyType key_type;
+    int32_t value;
+} MfClassicReadValueContext;
+
+typedef struct {
+    uint8_t block_num;
+    MfClassicKey key;
+    MfClassicKeyType key_type;
+    int32_t value;
+} MfClassicChangeValueContext;
+
 typedef union {
     MfClassicAuthContext auth_context;
     MfClassicReadBlockContext read_block_context;
     MfClassicWriteBlockContext write_block_context;
+    MfClassicReadValueContext read_value_context;
+    MfClassicChangeValueContext change_value_context;
 } MfClassicPollerContextData;
 
 MfClassicError mf_classic_process_error(Iso14443_3aError error);

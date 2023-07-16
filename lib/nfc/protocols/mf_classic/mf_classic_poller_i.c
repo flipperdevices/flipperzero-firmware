@@ -259,6 +259,110 @@ MfClassicError mf_classic_async_value_cmd(
     MfClassicPoller* instance,
     uint8_t block_num,
     MfClassicValueCommand cmd,
-    int32_t data);
+    int32_t data) {
+    MfClassicError ret = MfClassicErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
 
-MfClassicError mf_classic_async_value_transfer(MfClassicPoller* instance, uint8_t block_num);
+    do {
+        uint8_t cmd_value = 0;
+        if(cmd == MfClassicValueCommandDecrement) {
+            cmd_value = MF_CLASSIC_CMD_VALUE_DEC;
+        } else if(cmd == MfClassicValueCommandIncrement) {
+            cmd_value = MF_CLASSIC_CMD_VALUE_INC;
+        } else {
+            cmd_value = MF_CLASSIC_CMD_VALUE_RESTORE;
+        }
+        uint8_t value_cmd[2] = {cmd_value, block_num};
+        bit_buffer_copy_bytes(instance->tx_plain_buffer, value_cmd, sizeof(value_cmd));
+        iso14443_3a_append_crc(instance->tx_plain_buffer);
+
+        crypto1_encrypt(
+            instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
+
+        error = iso14443_3a_poller_txrx_custom_parity(
+            instance->iso14443_3a_poller,
+            instance->tx_encrypted_buffer,
+            instance->rx_encrypted_buffer,
+            MF_CLASSIC_FWT_FC);
+        if(error != Iso14443_3aErrorNone) {
+            ret = mf_classic_process_error(error);
+            break;
+        }
+        if(bit_buffer_get_size(instance->rx_encrypted_buffer) != 4) {
+            ret = MfClassicErrorProtocol;
+            break;
+        }
+
+        crypto1_decrypt(
+            instance->crypto, instance->rx_encrypted_buffer, instance->rx_plain_buffer);
+
+        if(bit_buffer_get_byte(instance->rx_plain_buffer, 0) != MF_CLASSIC_CMD_ACK) {
+            FURI_LOG_D(TAG, "Not ACK received");
+            ret = MfClassicErrorProtocol;
+            break;
+        }
+
+        uint8_t data_arr[4] = {};
+        nfc_util_num2bytes(data, sizeof(int32_t), data_arr);
+        bit_buffer_copy_bytes(instance->tx_plain_buffer, data_arr, sizeof(data_arr));
+        iso14443_3a_append_crc(instance->tx_plain_buffer);
+
+        crypto1_encrypt(
+            instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
+
+        error = iso14443_3a_poller_txrx_custom_parity(
+            instance->iso14443_3a_poller,
+            instance->tx_encrypted_buffer,
+            instance->rx_encrypted_buffer,
+            MF_CLASSIC_FWT_FC);
+
+        // Command processed if tag doesn't respond
+        if(error != Iso14443_3aErrorTimeout) {
+            ret = MfClassicErrorProtocol;
+            break;
+        }
+        ret = MfClassicErrorNone;
+    } while(false);
+
+    return ret;
+}
+
+MfClassicError mf_classic_async_value_transfer(MfClassicPoller* instance, uint8_t block_num) {
+    MfClassicError ret = MfClassicErrorNone;
+    Iso14443_3aError error = Iso14443_3aErrorNone;
+
+    do {
+        uint8_t transfer_cmd[2] = {MF_CLASSIC_CMD_VALUE_TRANSFER, block_num};
+        bit_buffer_copy_bytes(instance->tx_plain_buffer, transfer_cmd, sizeof(transfer_cmd));
+        iso14443_3a_append_crc(instance->tx_plain_buffer);
+
+        crypto1_encrypt(
+            instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
+
+        error = iso14443_3a_poller_txrx_custom_parity(
+            instance->iso14443_3a_poller,
+            instance->tx_encrypted_buffer,
+            instance->rx_encrypted_buffer,
+            MF_CLASSIC_FWT_FC);
+        if(error != Iso14443_3aErrorNone) {
+            ret = mf_classic_process_error(error);
+            break;
+        }
+        if(bit_buffer_get_size(instance->rx_encrypted_buffer) != 4) {
+            ret = MfClassicErrorProtocol;
+            break;
+        }
+
+        crypto1_decrypt(
+            instance->crypto, instance->rx_encrypted_buffer, instance->rx_plain_buffer);
+
+        if(bit_buffer_get_byte(instance->rx_plain_buffer, 0) != MF_CLASSIC_CMD_ACK) {
+            FURI_LOG_D(TAG, "Not ACK received");
+            ret = MfClassicErrorProtocol;
+            break;
+        }
+
+    } while(false);
+
+    return ret;
+}
