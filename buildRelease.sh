@@ -9,8 +9,8 @@ mv dist/f7-C/f7-update-RM420FAP "RM$DATE_VAR-$TIME_VAR"
 zip -rq "RM$DATE_VAR-$TIME_VAR-$VER_VAR-$HASH_VAR.zip" "RM$DATE_VAR-$TIME_VAR"
 tar -czf "RM$DATE_VAR-$TIME_VAR-$VER_VAR-$HASH_VAR.tgz" "RM$DATE_VAR-$TIME_VAR"
 rm -rf assets/dolphin/internal/*
-cp -rf ../dolphinIntBlank/* assets/dolphin/internal/
-cp -rf ../animation_managerBLANK.c applications/services/desktop/animations/animation_manager.c
+cp -rf .blank_files/dolphinIntBlank/* assets/dolphin/internal/
+cp -rf .blank_files/animation_managerBLANK.c applications/services/desktop/animations/animation_manager.c
 ./fbt updater_package
 mv dist/f7-C/f7-update-RM420FAP "RM$DATE_VAR-$TIME_VAR-NoAnim"
 rm -rf assets/resources/dolphin/*
