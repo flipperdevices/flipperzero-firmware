@@ -32,3 +32,5 @@ Thank you so much to the following contributors for providing awesome portals.
 - `delta_airline.html` by [roshanravan](https://github.com/roshanravan)
 - `united_airline.html` by [roshanravan](https://github.com/roshanravan)
 - `american_airline.html` by [roshanravan](https://github.com/roshanravan)
+- `Jet_Blue.html` by [roshanravan](https://github.com/roshanravan)
+- `Better_Google_Mobile.html` by [breaching](https://github.com/breaching)

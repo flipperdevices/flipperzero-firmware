@@ -37,6 +37,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fixed many external app references to internal assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d758c8d7ce4b4b7a16ecf167d02528aa1571965d)
 - Added: [Rock Paper Scissors (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/plugins/rock_paper_scissors)
 - SubGHz: [X10 Protocol Decoder (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/protocols/x10)
+- [Evil Portal Updated index.html for a better looking Google Login Page (By breaching)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/36)
 
 <a name="release">
 
