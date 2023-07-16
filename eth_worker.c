@@ -162,7 +162,10 @@ void eth_run(EthWorker* worker, EthWorkerProcess process) {
         eth_log(EthWorkerProcessPing, "Fuck you");
         break;
     case EthWorkerProcessReset:
-        worker->state = worker->next_state = EthWorkerStateNotInited;
+        worker->next_state = EthWorkerStateNotInited;
+        if((uint8_t)worker->state > EthWorkerStateNotAllocated) {
+            worker->state = EthWorkerStateNotInited;
+        }
         eth_log(EthWorkerProcessReset, "reset module");
         break;
     case EthWorkerProcessExit:
