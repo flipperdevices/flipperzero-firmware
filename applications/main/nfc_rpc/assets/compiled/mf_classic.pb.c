@@ -8,8 +8,34 @@
 
 PB_BIND(PB_MfClassic_AuthRequest, PB_MfClassic_AuthRequest, AUTO)
 
+
 PB_BIND(PB_MfClassic_AuthResponse, PB_MfClassic_AuthResponse, AUTO)
+
 
 PB_BIND(PB_MfClassic_ReadBlockRequest, PB_MfClassic_ReadBlockRequest, AUTO)
 
+
 PB_BIND(PB_MfClassic_ReadBlockResponse, PB_MfClassic_ReadBlockResponse, AUTO)
+
+
+PB_BIND(PB_MfClassic_WriteBlockRequest, PB_MfClassic_WriteBlockRequest, AUTO)
+
+
+PB_BIND(PB_MfClassic_WriteBlockResponse, PB_MfClassic_WriteBlockResponse, AUTO)
+
+
+PB_BIND(PB_MfClassic_ReadValueRequest, PB_MfClassic_ReadValueRequest, AUTO)
+
+
+PB_BIND(PB_MfClassic_ReadValueResponse, PB_MfClassic_ReadValueResponse, AUTO)
+
+
+PB_BIND(PB_MfClassic_ChangeValueRequest, PB_MfClassic_ChangeValueRequest, AUTO)
+
+
+PB_BIND(PB_MfClassic_ChangeValueResponse, PB_MfClassic_ChangeValueResponse, AUTO)
+
+
+
+
+

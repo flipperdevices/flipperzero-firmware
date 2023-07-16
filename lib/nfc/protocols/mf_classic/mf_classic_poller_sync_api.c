@@ -4,6 +4,8 @@
 
 #include <furi.h>
 
+#define TAG "MfClassicPoller"
+
 #define MF_CLASSIC_POLLER_COMPLETE_EVENT (1UL << 0)
 
 typedef enum {
@@ -148,4 +150,57 @@ MfClassicError mf_classic_poller_read_block(
     }
 
     return error;
+}
+
+MfClassicError mf_classic_poller_write_block(
+    Nfc* nfc,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    MfClassicBlock* data) {
+    UNUSED(nfc);
+    UNUSED(block_num);
+    UNUSED(key);
+    UNUSED(key_type);
+    UNUSED(data);
+
+    FURI_LOG_I(TAG, "Write block");
+
+    return MfClassicErrorNone;
+}
+
+MfClassicError mf_classic_poller_read_value(
+    Nfc* nfc,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    int32_t* value) {
+    UNUSED(nfc);
+    UNUSED(block_num);
+    UNUSED(key);
+    UNUSED(key_type);
+    UNUSED(value);
+
+    FURI_LOG_I(TAG, "Read value");
+
+    return MfClassicErrorNone;
+}
+
+MfClassicError mf_classic_poller_change_value(
+    Nfc* nfc,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    int32_t data,
+    int32_t* new_value) {
+    UNUSED(nfc);
+    UNUSED(block_num);
+    UNUSED(key);
+    UNUSED(key_type);
+    UNUSED(data);
+    UNUSED(new_value);
+
+    FURI_LOG_I(TAG, "Change value");
+
+    return MfClassicErrorNone;
 }

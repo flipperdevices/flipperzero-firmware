@@ -100,6 +100,86 @@ static void nfc_rpc_mf_classic_read_block(Nfc_Main* cmd, void* context) {
     cmd->content.mf_classic_read_block_resp = pb_mf_classic_read_block_resp;
 }
 
+static void nfc_rpc_mf_classic_write_block(Nfc_Main* cmd, void* context) {
+    furi_assert(cmd);
+    furi_assert(context);
+
+    NfcRpc* instance = context;
+    PB_MfClassic_WriteBlockResponse pb_mf_classic_write_block_resp =
+        PB_MfClassic_WriteBlockResponse_init_default;
+
+    PB_MfClassic_WriteBlockRequest* req = &cmd->content.mf_classic_write_block_req;
+    MfClassicKey key = {};
+    memcpy(key.data, req->key.bytes, sizeof(MfClassicKey));
+    MfClassicKeyType key_type =
+        (req->key_type == PB_MfClassic_KeyType_KeyTypeB) ? MfClassicKeyTypeB : MfClassicKeyTypeA;
+    MfClassicBlock block = {};
+    memcpy(block.data, req->data.bytes, sizeof(MfClassicBlock));
+    MfClassicError error =
+        mf_classic_poller_write_block(instance->nfc, req->block, &key, key_type, &block);
+
+    cmd->command_status = Nfc_CommandStatus_OK;
+    cmd->which_content = Nfc_Main_mf_classic_write_block_resp_tag;
+
+    pb_mf_classic_write_block_resp.error = nfc_rpc_mf_classic_process_error(error);
+    cmd->content.mf_classic_write_block_resp = pb_mf_classic_write_block_resp;
+}
+
+static void nfc_rpc_mf_classic_read_value(Nfc_Main* cmd, void* context) {
+    furi_assert(cmd);
+    furi_assert(context);
+
+    NfcRpc* instance = context;
+    PB_MfClassic_ReadValueResponse pb_mf_classic_read_value_resp =
+        PB_MfClassic_ReadValueResponse_init_default;
+
+    PB_MfClassic_ReadValueRequest* req = &cmd->content.mf_classic_read_value_req;
+    MfClassicKey key = {};
+    memcpy(key.data, req->key.bytes, sizeof(MfClassicKey));
+    MfClassicKeyType key_type =
+        (req->key_type == PB_MfClassic_KeyType_KeyTypeB) ? MfClassicKeyTypeB : MfClassicKeyTypeA;
+    int32_t value = 0;
+    MfClassicError error =
+        mf_classic_poller_read_value(instance->nfc, req->block, &key, key_type, &value);
+
+    cmd->command_status = Nfc_CommandStatus_OK;
+    cmd->which_content = Nfc_Main_mf_classic_read_value_resp_tag;
+
+    pb_mf_classic_read_value_resp.error = nfc_rpc_mf_classic_process_error(error);
+    if(pb_mf_classic_read_value_resp.error == PB_MfClassic_Error_None) {
+        pb_mf_classic_read_value_resp.value = value;
+    }
+    cmd->content.mf_classic_read_value_resp = pb_mf_classic_read_value_resp;
+}
+
+static void nfc_rpc_mf_classic_change_value(Nfc_Main* cmd, void* context) {
+    furi_assert(cmd);
+    furi_assert(context);
+
+    NfcRpc* instance = context;
+    PB_MfClassic_ChangeValueResponse pb_mf_classic_change_value_resp =
+        PB_MfClassic_ChangeValueResponse_init_default;
+
+    PB_MfClassic_ChangeValueRequest* req = &cmd->content.mf_classic_change_value_req;
+    MfClassicKey key = {};
+    memcpy(key.data, req->key.bytes, sizeof(MfClassicKey));
+    MfClassicKeyType key_type =
+        (req->key_type == PB_MfClassic_KeyType_KeyTypeB) ? MfClassicKeyTypeB : MfClassicKeyTypeA;
+    int32_t data = req->data;
+    int32_t new_value = 0;
+    MfClassicError error = mf_classic_poller_change_value(
+        instance->nfc, req->block, &key, key_type, data, &new_value);
+
+    cmd->command_status = Nfc_CommandStatus_OK;
+    cmd->which_content = Nfc_Main_mf_classic_change_value_resp_tag;
+
+    pb_mf_classic_change_value_resp.error = nfc_rpc_mf_classic_process_error(error);
+    if(pb_mf_classic_change_value_resp.error == PB_MfClassic_Error_None) {
+        pb_mf_classic_change_value_resp.value = new_value;
+    }
+    cmd->content.mf_classic_change_value_resp = pb_mf_classic_change_value_resp;
+}
+
 void nfc_rpc_mf_classic_alloc(void* context) {
     furi_assert(context);
 
@@ -107,4 +187,10 @@ void nfc_rpc_mf_classic_alloc(void* context) {
     nfc_rpc_add_handler(instance, Nfc_Main_mf_classic_auth_req_tag, nfc_rpc_mf_classic_auth);
     nfc_rpc_add_handler(
         instance, Nfc_Main_mf_classic_read_block_req_tag, nfc_rpc_mf_classic_read_block);
+    nfc_rpc_add_handler(
+        instance, Nfc_Main_mf_classic_write_block_req_tag, nfc_rpc_mf_classic_write_block);
+    nfc_rpc_add_handler(
+        instance, Nfc_Main_mf_classic_read_value_req_tag, nfc_rpc_mf_classic_read_value);
+    nfc_rpc_add_handler(
+        instance, Nfc_Main_mf_classic_change_value_req_tag, nfc_rpc_mf_classic_change_value);
 }
