@@ -38,15 +38,25 @@ typedef struct {
 	SceneManager *scene_manager;
 	ViewDispatcher *view_dispatcher;
 	NotificationApp *notification;
+
+	// UI elements
 	TextBox *chat_box;
 	FuriString *chat_box_store;
 	TextInput *text_input;
 	char text_input_store[TEXT_INPUT_STORE_SIZE + 1];
+
+	// selected frequency
+	uint32_t frequency;
+
+	// message assembly before TX
 	FuriString *name_prefix;
 	FuriString *msg_input;
+
+	// encryption
 	bool encrypted;
-	uint32_t frequency;
 	gcm_context gcm_ctx;
+
+	// RX and TX buffers
 	uint8_t rx_buffer[RX_TX_BUFFER_SIZE];
 	uint8_t tx_buffer[RX_TX_BUFFER_SIZE];
 	char rx_str_buffer[RX_TX_BUFFER_SIZE + 1];
@@ -81,12 +91,15 @@ typedef enum {
 	ESubGhzChatEvent_MsgEntered
 } ESubGhzChatEvent;
 
+/* Function to clear sensitive memory. */
 static void esubghz_chat_explicit_bzero(void *s, size_t len)
 {
 	memset(s, 0, len);
 	asm volatile("" ::: "memory");
 }
 
+/* Post RX handler, decrypts received messages, displays them in the text box
+ * and sends a notification. */
 static void post_rx(ESubGhzChatState *state, size_t rx_size)
 {
 	furi_assert(state);
@@ -97,6 +110,7 @@ static void post_rx(ESubGhzChatState *state, size_t rx_size)
 
 	furi_check(rx_size <= RX_TX_BUFFER_SIZE);
 
+	/* decrypt if necessary */
 	if (!state->encrypted) {
 		memcpy(state->rx_str_buffer, state->rx_buffer, rx_size);
 		state->rx_str_buffer[rx_size] = 0;
@@ -115,22 +129,27 @@ static void post_rx(ESubGhzChatState *state, size_t rx_size)
 				TAG_BYTES);
 		state->rx_str_buffer[rx_size - (IV_BYTES + TAG_BYTES)] = 0;
 
+		/* if decryption fails output an error message */
 		if (ret != 0) {
 			strcpy(state->rx_str_buffer, "ERR: Decryption failed!");
 		}
 	}
 
+	/* append message to text box */
 	furi_string_cat_printf(state->chat_box_store, "\n%s",
 			state->rx_str_buffer);
 
+	/* send notification (make the flipper vibrate) */
 	notification_message(state->notification, &sequence_single_vibro);
 
-	// Reset Text Box contents and focus
+	/* reset text box contents and focus */
 	text_box_set_text(state->chat_box,
 			furi_string_get_cstr(state->chat_box_store));
 	text_box_set_focus(state->chat_box, TextBoxFocusEnd);
 }
 
+/* Sends FreqEntered event to scene manager and displays the frequency in the
+ * text box. */
 static void freq_input_cb(void *context)
 {
 	furi_assert(context);
@@ -143,6 +162,7 @@ static void freq_input_cb(void *context)
 			ESubGhzChatEvent_FreqEntered);
 }
 
+/* Validates the entered frequency. */
 static bool freq_input_validator(const char *text, FuriString *error,
 		void *context)
 {
@@ -173,6 +193,8 @@ static bool freq_input_validator(const char *text, FuriString *error,
 	return true;
 }
 
+/* Sends PassEntered event to scene manager and displays whether or not
+ * encryption has been enabled in the text box. */
 static void pass_input_cb(void *context)
 {
 	furi_assert(context);
@@ -185,6 +207,9 @@ static void pass_input_cb(void *context)
 			ESubGhzChatEvent_PassEntered);
 }
 
+/* If a password was entered this derives a key from the password using a
+ * single pass of SHA256 and initiates the AES-GCM context for encryption. If
+ * the initiation fails, the password is rejected. */
 static bool pass_input_validator(const char *text, FuriString *error,
 		void *context)
 {
@@ -202,6 +227,8 @@ static bool pass_input_validator(const char *text, FuriString *error,
 	unsigned char key[KEY_BITS / 8];
 
 	state->encrypted = true;
+
+	/* derive a key from the password */
 	sha256((unsigned char *) text, strlen(text), key);
 
 	// TODO: remove this
@@ -211,12 +238,15 @@ static bool pass_input_validator(const char *text, FuriString *error,
 		furi_string_cat_printf(state->chat_box_store, " %02x", key[i]);
 	}
 
+	/* initiate the AES-GCM context */
 	int ret = gcm_setkey(&(state->gcm_ctx), key, KEY_BITS / 8);
 
+	/* cleanup */
 	esubghz_chat_explicit_bzero(key, sizeof(key));
 
 	if (ret != 0) {
-		gcm_zero_ctx(&(state->gcm_ctx));
+		esubghz_chat_explicit_bzero(&(state->gcm_ctx),
+				sizeof(state->gcm_ctx));
 		furi_string_printf(error, "Failed to\nset key!");
 		return false;
 	}
@@ -224,23 +254,33 @@ static bool pass_input_validator(const char *text, FuriString *error,
 	return true;
 }
 
+/* If no message was entred this simply emits a MsgEntered event to the scene
+ * manager to switch to the text box. If a message was entered it is appended
+ * to the name string. The result is encrypted, if encryption is enabled, and
+ * then copied into the TX buffer. The contents of the TX buffer are then
+ * transmitted. The sent message is appended to the text box and a MsgEntered
+ * event is sent to the scene manager to switch to the text box view. */
 static void chat_input_cb(void *context)
 {
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+	/* no message, just switch to the text box view */
 	if (strlen(state->text_input_store) == 0) {
 		scene_manager_handle_custom_event(state->scene_manager,
 				ESubGhzChatEvent_MsgEntered);
 		return;
 	}
 
+	/* concatenate the name prefix and the actual message */
 	furi_string_set(state->msg_input, state->name_prefix);
 	furi_string_cat_str(state->msg_input, state->text_input_store);
 
+	/* append the message to the chat box */
 	furi_string_cat_printf(state->chat_box_store, "\n%s",
 		furi_string_get_cstr(state->msg_input));
 
+	/* encrypt message if necessary */
 	size_t msg_len = strlen(furi_string_get_cstr(state->msg_input));
 	size_t tx_size = msg_len;
 	if (state->encrypted) {
@@ -264,6 +304,7 @@ static void chat_input_cb(void *context)
 				tx_size);
 	}
 
+	/* clear message input buffer */
 	furi_string_set_char(state->msg_input, 0, 0);
 
 	// TODO: remove this
@@ -281,10 +322,12 @@ static void chat_input_cb(void *context)
 
 	// TODO: actually transmit
 
+	/* switch to text box view */
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_MsgEntered);
 }
 
+/* Prepares the frequency input scene. */
 static void scene_on_enter_freq_input(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_enter_freq_input");
@@ -313,6 +356,7 @@ static void scene_on_enter_freq_input(void* context)
 	view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Input);
 }
 
+/* Handles scene manager events for the frequency input scene. */
 static bool scene_on_event_freq_input(void* context, SceneManagerEvent event)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_event_freq_input");
@@ -325,6 +369,7 @@ static bool scene_on_event_freq_input(void* context, SceneManagerEvent event)
 	switch(event.type) {
 	case SceneManagerEventTypeCustom:
 		switch(event.event) {
+		/* switch to password input scene */
 		case ESubGhzChatEvent_FreqEntered:
 			scene_manager_next_scene(state->scene_manager,
 					ESubGhzChatScene_PassInput);
@@ -334,6 +379,7 @@ static bool scene_on_event_freq_input(void* context, SceneManagerEvent event)
 		break;
 
 	case SceneManagerEventTypeBack:
+		/* stop the application if the user presses back here */
 		view_dispatcher_stop(state->view_dispatcher);
 		consumed = true;
 		break;
@@ -346,6 +392,7 @@ static bool scene_on_event_freq_input(void* context, SceneManagerEvent event)
 	return consumed;
 }
 
+/* Cleans up the frequency input scene. */
 static void scene_on_exit_freq_input(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_exit_freq_input");
@@ -356,6 +403,7 @@ static void scene_on_exit_freq_input(void* context)
 	text_input_reset(state->text_input);
 }
 
+/* Prepares the password input scene. */
 static void scene_on_enter_pass_input(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_enter_pass_input");
@@ -384,6 +432,7 @@ static void scene_on_enter_pass_input(void* context)
 	view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Input);
 }
 
+/* Handles scene manager events for the password input scene. */
 static bool scene_on_event_pass_input(void* context, SceneManagerEvent event)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_event_pass_input");
@@ -396,6 +445,7 @@ static bool scene_on_event_pass_input(void* context, SceneManagerEvent event)
 	switch(event.type) {
 	case SceneManagerEventTypeCustom:
 		switch(event.event) {
+		/* switch to message input scene */
 		case ESubGhzChatEvent_PassEntered:
 			scene_manager_next_scene(state->scene_manager,
 					ESubGhzChatScene_ChatInput);
@@ -405,6 +455,7 @@ static bool scene_on_event_pass_input(void* context, SceneManagerEvent event)
 		break;
 
 	case SceneManagerEventTypeBack:
+		/* stop the application if the user presses back here */
 		view_dispatcher_stop(state->view_dispatcher);
 		consumed = true;
 		break;
@@ -417,6 +468,7 @@ static bool scene_on_event_pass_input(void* context, SceneManagerEvent event)
 	return consumed;
 }
 
+/* Cleans up the password input scene. */
 static void scene_on_exit_pass_input(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_exit_pass_input");
@@ -427,6 +479,7 @@ static void scene_on_exit_pass_input(void* context)
 	text_input_reset(state->text_input);
 }
 
+/* Prepares the message input scene. */
 static void scene_on_enter_chat_input(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_enter_chat_input");
@@ -455,6 +508,7 @@ static void scene_on_enter_chat_input(void* context)
 	view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Input);
 }
 
+/* Handles scene manager events for the message input scene. */
 static bool scene_on_event_chat_input(void* context, SceneManagerEvent event)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_event_chat_input");
@@ -467,6 +521,7 @@ static bool scene_on_event_chat_input(void* context, SceneManagerEvent event)
 	switch(event.type) {
 	case SceneManagerEventTypeCustom:
 		switch(event.event) {
+		/* switch to text box scene */
 		case ESubGhzChatEvent_MsgEntered:
 			scene_manager_next_scene(state->scene_manager,
 					ESubGhzChatScene_ChatBox);
@@ -476,6 +531,7 @@ static bool scene_on_event_chat_input(void* context, SceneManagerEvent event)
 		break;
 
 	case SceneManagerEventTypeBack:
+		/* stop the application if the user presses back here */
 		view_dispatcher_stop(state->view_dispatcher);
 		consumed = true;
 		break;
@@ -488,6 +544,7 @@ static bool scene_on_event_chat_input(void* context, SceneManagerEvent event)
 	return consumed;
 }
 
+/* Cleans up the password input scene. */
 static void scene_on_exit_chat_input(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_exit_chat_input");
@@ -498,6 +555,7 @@ static void scene_on_exit_chat_input(void* context)
 	text_input_reset(state->text_input);
 }
 
+/* Prepares the text box scene. */
 static void scene_on_enter_chat_box(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_enter_chat_box");
@@ -513,6 +571,8 @@ static void scene_on_enter_chat_box(void* context)
 	view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_ChatBox);
 }
 
+/* Handles scene manager events for the text box scene. No events are handled
+ * here. */
 static bool scene_on_event_chat_box(void* context, SceneManagerEvent event)
 {
 	UNUSED(event);
@@ -524,6 +584,7 @@ static bool scene_on_event_chat_box(void* context, SceneManagerEvent event)
 	return false;
 }
 
+/* Cleans up the text box scene. */
 static void scene_on_exit_chat_box(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "scene_on_exit_chat_box");
@@ -534,6 +595,7 @@ static void scene_on_exit_chat_box(void* context)
 	text_box_reset(state->chat_box);
 }
 
+/* Scene entry handlers. */
 static void (*const esubghz_chat_scene_on_enter_handlers[])(void*) = {
 	scene_on_enter_freq_input,
 	scene_on_enter_pass_input,
@@ -541,6 +603,7 @@ static void (*const esubghz_chat_scene_on_enter_handlers[])(void*) = {
 	scene_on_enter_chat_box
 };
 
+/* Scene event handlers. */
 static bool (*const esubghz_chat_scene_on_event_handlers[])(void*, SceneManagerEvent) = {
 	scene_on_event_freq_input,
 	scene_on_event_pass_input,
@@ -548,6 +611,7 @@ static bool (*const esubghz_chat_scene_on_event_handlers[])(void*, SceneManagerE
 	scene_on_event_chat_box
 };
 
+/* Scene exit handlers. */
 static void (*const esubghz_chat_scene_on_exit_handlers[])(void*) = {
 	scene_on_exit_freq_input,
 	scene_on_exit_pass_input,
@@ -555,17 +619,20 @@ static void (*const esubghz_chat_scene_on_exit_handlers[])(void*) = {
 	scene_on_exit_chat_box
 };
 
+/* Handlers for the scene manager. */
 static const SceneManagerHandlers esubghz_chat_scene_event_handlers = {
 	.on_enter_handlers = esubghz_chat_scene_on_enter_handlers,
 	.on_event_handlers = esubghz_chat_scene_on_event_handlers,
 	.on_exit_handlers = esubghz_chat_scene_on_exit_handlers,
 	.scene_num = ESubGhzChatScene_MAX};
 
+/* Whether or not to display the locked message. */
 static bool kbd_lock_msg_display(ESubGhzChatState *state)
 {
 	return (state->kbd_lock_msg_ticks != 0);
 }
 
+/* Whether or not to hide the locked message again. */
 static bool kbd_lock_msg_reset_timeout(ESubGhzChatState *state)
 {
 	if (state->kbd_lock_msg_ticks == 0) {
@@ -579,6 +646,8 @@ static bool kbd_lock_msg_reset_timeout(ESubGhzChatState *state)
 	return false;
 }
 
+/* Resets the timeout for the locked message and turns off the backlight if
+ * specified. */
 static void kbd_lock_msg_reset(ESubGhzChatState *state, bool backlight_off)
 {
 	state->kbd_lock_msg_ticks = 0;
@@ -590,18 +659,21 @@ static void kbd_lock_msg_reset(ESubGhzChatState *state, bool backlight_off)
 	}
 }
 
+/* Locks the keyboard. */
 static void kbd_lock(ESubGhzChatState *state)
 {
 	state->kbd_locked = true;
 	kbd_lock_msg_reset(state, true);
 }
 
+/* Unlocks the keyboard. */
 static void kbd_unlock(ESubGhzChatState *state)
 {
 	state->kbd_locked = false;
 	kbd_lock_msg_reset(state, false);
 }
 
+/* Custom event callback for view dispatcher. Just calls scene manager. */
 static bool esubghz_chat_custom_event_callback(void* context, uint32_t event)
 {
 	FURI_LOG_T(APPLICATION_NAME, "esubghz_chat_custom_event_callback");
@@ -610,6 +682,7 @@ static bool esubghz_chat_custom_event_callback(void* context, uint32_t event)
 	return scene_manager_handle_custom_event(state->scene_manager, event);
 }
 
+/* Navigation event callback for view dispatcher. Just calls scene manager. */
 static bool esubghz_chat_navigation_event_callback(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "esubghz_chat_navigation_event_callback");
@@ -618,6 +691,9 @@ static bool esubghz_chat_navigation_event_callback(void* context)
 	return scene_manager_handle_back_event(state->scene_manager);
 }
 
+/* Tick event callback for view dispatcher. Called every TICK_INTERVAL. Resets
+ * the locked message if necessary. Retrieves a received message from the
+ * rx_collection_buffer and calls post_rx(). Then calls the scene manager. */
 static void esubghz_chat_tick_event_callback(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "esubghz_chat_tick_event_callback");
@@ -625,10 +701,14 @@ static void esubghz_chat_tick_event_callback(void* context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+	/* reset locked message if necessary */
 	if (kbd_lock_msg_reset_timeout(state)) {
 		kbd_lock_msg_reset(state, true);
 	}
 
+	/* if the maximum message size was reached or the
+	 * MESSAGE_COMPLETION_TIMEOUT has expired, retrieve a message and call
+	 * post_rx() */
 	size_t avail = furi_stream_buffer_bytes_available(
 			state->rx_collection_buffer);
 	if (avail > 0) {
@@ -645,9 +725,12 @@ static void esubghz_chat_tick_event_callback(void* context)
 		}
 	}
 
+	/* call scene manager */
 	scene_manager_handle_tick_event(state->scene_manager);
 }
 
+/* Hooks into the view port's draw callback to overlay the keyboard locked
+ * message. */
 static void esubghz_hooked_draw_callback(Canvas* canvas, void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "esubghz_hooked_draw_callback");
@@ -657,13 +740,16 @@ static void esubghz_hooked_draw_callback(Canvas* canvas, void* context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+	/* call original callback */
 	state->orig_draw_cb(canvas, state->view_dispatcher);
 
+	/* display if the keyboard is locked */
 	if (state->kbd_locked) {
 		canvas_set_font(canvas, FontPrimary);
 		elements_multiline_text_framed(canvas, 42, 30, "Locked");
 	}
 
+	/* display the unlock message if necessary */
 	if (kbd_lock_msg_display(state)) {
 		canvas_set_font(canvas, FontSecondary);
 		elements_bold_rounded_frame(canvas, 14, 8, 99, 48);
@@ -675,6 +761,8 @@ static void esubghz_hooked_draw_callback(Canvas* canvas, void* context)
 	}
 }
 
+/* Hooks into the view port's input callback to handle the user locking the
+ * keyboard. */
 static void esubghz_hooked_input_callback(InputEvent* event, void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "esubghz_hooked_input_callback");
@@ -684,21 +772,26 @@ static void esubghz_hooked_input_callback(InputEvent* event, void* context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+	/* if the keyboard is locked no key presses are forwarded */
 	if (state->kbd_locked) {
+		/* key has been pressed, display the unlock message and
+		 * initiate the timer */
 		if (state->kbd_lock_count == 0) {
 			state->kbd_lock_msg_ticks = furi_get_tick();
 		}
 
+		/* back button has been pressed, increase the lock counter */
 		if (event->key == InputKeyBack && event->type ==
 				InputTypeShort) {
 			state->kbd_lock_count++;
 		}
 
+		/* unlock the keyboard */
 		if (state->kbd_lock_count >= KBD_UNLOCK_CNT) {
 			kbd_unlock(state);
 		}
 
-		// do not handle the event
+		/* do not handle the event */
 		return;
 	}
 
@@ -708,6 +801,7 @@ static void esubghz_hooked_input_callback(InputEvent* event, void* context)
 		if (state->view_dispatcher->current_view ==
 				text_box_get_view(state->chat_box) &&
 				!(state->kbd_ok_input_ongoing)) {
+			/* lock keyboard upon long press of Ok button */
 			if (event->type == InputTypeLong) {
 				kbd_lock(state);
 			}
@@ -725,6 +819,7 @@ static void esubghz_hooked_input_callback(InputEvent* event, void* context)
 		}
 	}
 
+	/* call original callback */
 	state->orig_input_cb(event, state->view_dispatcher);
 }
 
@@ -788,11 +883,14 @@ static void chat_box_free(ESubGhzChatState *state)
 
 int32_t esubghz_chat(void)
 {
+	/* init the GCM and AES tables */
 	gcm_initialize();
 
 	int32_t err = -1;
 
 	FURI_LOG_I(APPLICATION_NAME, "Starting...");
+
+	/* allocate necessary structs and buffers */
 
 	ESubGhzChatState *state = malloc(sizeof(ESubGhzChatState));
 	if (state == NULL) {
@@ -831,14 +929,16 @@ int32_t esubghz_chat(void)
 		goto err_alloc_rcb;
 	}
 
-	// set chat name prefix
+	/* set chat name prefix */
 	// TODO: handle escape chars here somehow
 	furi_string_printf(state->name_prefix, "\033[0;33m%s\033[0m: ",
 			furi_hal_version_get_name_ptr());
 
+	/* get notification record, we use this to make the flipper vibrate */
 	/* no error handling here, don't know how */
 	state->notification = furi_record_open(RECORD_NOTIFICATION);
 
+	/* hook into the view port's draw and input callbacks */
 	state->orig_draw_cb = state->view_dispatcher->view_port->draw_callback;
 	state->orig_input_cb = state->view_dispatcher->view_port->input_callback;
 	view_port_draw_callback_set(state->view_dispatcher->view_port,
@@ -848,6 +948,7 @@ int32_t esubghz_chat(void)
 
 	view_dispatcher_enable_queue(state->view_dispatcher);
 
+	/* set callbacks for view dispatcher */
 	view_dispatcher_set_event_callback_context(state->view_dispatcher, state);
 	view_dispatcher_set_custom_event_callback(
 			state->view_dispatcher,
@@ -860,30 +961,45 @@ int32_t esubghz_chat(void)
 			esubghz_chat_tick_event_callback,
 			TICK_INTERVAL);
 
+	/* add our two views to the view dispatcher */
 	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_Input,
 			text_input_get_view(state->text_input));
 	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_ChatBox,
 			text_box_get_view(state->chat_box));
 
+	/* get the GUI record and attach the view dispatcher to the GUI */
 	/* no error handling here, don't know how */
 	Gui *gui = furi_record_open(RECORD_GUI);
-	view_dispatcher_attach_to_gui(state->view_dispatcher, gui, ViewDispatcherTypeFullscreen);
+	view_dispatcher_attach_to_gui(state->view_dispatcher, gui,
+			ViewDispatcherTypeFullscreen);
 
+	/* switch to the frequency input scene */
 	scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_FreqInput);
+
+	/* run the view dispatcher, this call only returns when we close the
+	 * application */
 	view_dispatcher_run(state->view_dispatcher);
 
 	err = 0;
 
+	/* close GUI record */
 	furi_record_close(RECORD_GUI);
-	view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_Input);
-	view_dispatcher_remove_view(state->view_dispatcher, ESubGhzChatView_ChatBox);
 
+	/* remove our two views from the view dispatcher */
+	view_dispatcher_remove_view(state->view_dispatcher,
+			ESubGhzChatView_Input);
+	view_dispatcher_remove_view(state->view_dispatcher,
+			ESubGhzChatView_ChatBox);
+
+	/* close notification record */
 	furi_record_close(RECORD_NOTIFICATION);
 
-	// clear the key and potential password
+	/* clear the key and potential password */
 	esubghz_chat_explicit_bzero(state->text_input_store,
 			sizeof(state->text_input_store));
 	esubghz_chat_explicit_bzero(&(state->gcm_ctx), sizeof(state->gcm_ctx));
+
+	/* free everything we allocated*/
 
 	furi_stream_buffer_free(state->rx_collection_buffer);
 
