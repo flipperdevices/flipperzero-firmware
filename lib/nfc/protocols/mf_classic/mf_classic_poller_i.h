@@ -95,7 +95,9 @@ typedef struct {
     uint8_t block_num;
     MfClassicKey key;
     MfClassicKeyType key_type;
-    int32_t value;
+    MfClassicValueCommand value_cmd;
+    int32_t data;
+    int32_t new_value;
 } MfClassicChangeValueContext;
 
 typedef union {

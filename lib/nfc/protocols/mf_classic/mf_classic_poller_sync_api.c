@@ -104,11 +104,49 @@ static MfClassicError mf_classic_poller_read_value_handler(
     return error;
 }
 
+static MfClassicError mf_classic_poller_change_value_handler(
+    MfClassicPoller* poller,
+    MfClassicPollerContextData* data) {
+    MfClassicError error = MfClassicErrorNone;
+
+    do {
+        error = mf_classic_async_auth(
+            poller,
+            data->change_value_context.block_num,
+            &data->change_value_context.key,
+            data->change_value_context.key_type,
+            NULL);
+        if(error != MfClassicErrorNone) break;
+
+        error = mf_classic_async_value_cmd(
+            poller,
+            data->change_value_context.block_num,
+            data->change_value_context.value_cmd,
+            data->change_value_context.data);
+        if(error != MfClassicErrorNone) break;
+
+        error = mf_classic_async_value_transfer(poller, data->change_value_context.block_num);
+        if(error != MfClassicErrorNone) break;
+
+        MfClassicBlock block = {};
+        error = mf_classic_async_read_block(poller, data->change_value_context.block_num, &block);
+        if(error != MfClassicErrorNone) break;
+
+        if(!mf_classic_block_to_value(&block, &data->change_value_context.new_value, NULL)) {
+            error = MfClassicErrorProtocol;
+            break;
+        }
+    } while(false);
+
+    return error;
+}
+
 static const MfClassicPollerCmdHandler mf_classic_poller_cmd_handlers[MfClassicPollerCmdTypeNum] = {
     [MfClassicPollerCmdTypeAuth] = mf_classic_poller_auth_handler,
     [MfClassicPollerCmdTypeReadBlock] = mf_classic_poller_read_block_handler,
     [MfClassicPollerCmdTypeWriteBlock] = mf_classic_poller_write_block_handler,
     [MfClassicPollerCmdTypeReadValue] = mf_classic_poller_read_value_handler,
+    [MfClassicPollerCmdTypeChangeValue] = mf_classic_poller_change_value_handler,
 };
 
 static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcGenericEvent event, void* context) {
@@ -260,14 +298,34 @@ MfClassicError mf_classic_poller_change_value(
     MfClassicKeyType key_type,
     int32_t data,
     int32_t* new_value) {
-    UNUSED(nfc);
-    UNUSED(block_num);
-    UNUSED(key);
-    UNUSED(key_type);
-    UNUSED(data);
-    UNUSED(new_value);
+    furi_assert(nfc);
+    furi_assert(key);
+    furi_assert(new_value);
 
-    FURI_LOG_I(TAG, "Change value");
+    MfClassicValueCommand command = MfClassicValueCommandRestore;
+    int32_t command_data = 0;
+    if(data > 0) {
+        command = MfClassicValueCommandIncrement;
+        command_data = data;
+    } else if(data < 0) {
+        command = MfClassicValueCommandDecrement;
+        command_data = -data;
+    }
 
-    return MfClassicErrorNone;
+    MfClassicPollerContext poller_context = {
+        .cmd_type = MfClassicPollerCmdTypeChangeValue,
+        .data.change_value_context.block_num = block_num,
+        .data.change_value_context.key = *key,
+        .data.change_value_context.key_type = key_type,
+        .data.change_value_context.value_cmd = command,
+        .data.change_value_context.data = command_data,
+    };
+
+    MfClassicError error = mf_classic_poller_cmd_execute(nfc, &poller_context);
+
+    if(error == MfClassicErrorNone) {
+        *new_value = poller_context.data.change_value_context.new_value;
+    }
+
+    return error;
 }

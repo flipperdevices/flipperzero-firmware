@@ -303,7 +303,7 @@ MfClassicError mf_classic_async_value_cmd(
         }
 
         uint8_t data_arr[4] = {};
-        nfc_util_num2bytes(data, sizeof(int32_t), data_arr);
+        memcpy(data_arr, &data, sizeof(int32_t));
         bit_buffer_copy_bytes(instance->tx_plain_buffer, data_arr, sizeof(data_arr));
         iso14443_3a_append_crc(instance->tx_plain_buffer);
 
