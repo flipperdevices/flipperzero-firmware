@@ -67,8 +67,6 @@ int32_t i2ctools_app(void* p) {
 
     i2ctools->sender = i2c_sender_alloc();
 
-    i2ctools->saver = i2c_saver_alloc();
-    i2c_save_file();
     // Share scanner with sender
     i2ctools->sender->scanner = i2ctools->scanner;
 
@@ -169,14 +167,17 @@ int32_t i2ctools_app(void* p) {
                 }
             }
 
-        } else if(event.key == InputKeyOk && event.type == InputTypeRelease) {
+        }
+        // OK
+        else if(event.key == InputKeyOk && event.type == InputTypeRelease) {
             if(i2ctools->main_view->current_view == MAIN_VIEW) {
                 i2ctools->main_view->current_view = i2ctools->main_view->menu_index;
             } else if(i2ctools->main_view->current_view == SCAN_VIEW) {
                 scan_i2c_bus(i2ctools->scanner);
             } else if(i2ctools->main_view->current_view == SEND_VIEW) {
                 i2ctools->sender->must_send = true;
-            } else if(i2ctools->main_view->current_view == SNIFF_VIEW) {
+            } else if(
+                i2ctools->main_view->current_view == SNIFF_VIEW && !i2ctools->sniffer->must_save) {
                 if(i2ctools->sniffer->started) {
                     stop_interrupts();
                     i2ctools->sniffer->started = false;
@@ -187,7 +188,17 @@ int32_t i2ctools_app(void* p) {
                     i2ctools->sniffer->state = I2C_BUS_FREE;
                 }
             }
-        } else if(event.key == InputKeyRight && event.type == InputTypeRelease) {
+        }
+        // Long OK
+        else if(
+            event.key == InputKeyOk &&
+            (event.type == InputTypeLong && event.type != InputTypeRepeat)) {
+            if(i2ctools->main_view->current_view == SNIFF_VIEW) {
+                i2ctools->sniffer->must_save = true;
+            }
+        }
+        // Right
+        else if(event.key == InputKeyRight && event.type == InputTypeRelease) {
             if(i2ctools->main_view->current_view == SEND_VIEW) {
                 if(i2ctools->sender->address_idx < (i2ctools->scanner->nb_found - 1)) {
                     i2ctools->sender->address_idx++;
@@ -199,7 +210,9 @@ int32_t i2ctools_app(void* p) {
                     i2ctools->sniffer->row_index = 0;
                 }
             }
-        } else if(event.key == InputKeyLeft && event.type == InputTypeRelease) {
+        }
+        // Left
+        else if(event.key == InputKeyLeft && event.type == InputTypeRelease) {
             if(i2ctools->main_view->current_view == SEND_VIEW) {
                 if(i2ctools->sender->address_idx > 0) {
                     i2ctools->sender->address_idx--;
@@ -218,7 +231,6 @@ int32_t i2ctools_app(void* p) {
     view_port_free(i2ctools->view_port);
     furi_message_queue_free(event_queue);
     i2c_sniffer_free(i2ctools->sniffer);
-    i2c_saver_free(i2ctools->saver);
     i2c_scanner_free(i2ctools->scanner);
     i2c_sender_free(i2ctools->sender);
     i2c_main_view_free(i2ctools->main_view);

@@ -16,6 +16,7 @@ void draw_sniffer_view(Canvas* canvas, i2cSniffer* i2c_sniffer) {
         canvas_draw_str_aligned(canvas, 57, 51, AlignLeft, AlignTop, "Stop");
     }
     canvas_set_color(canvas, ColorBlack);
+
     if(i2c_sniffer->first) {
         canvas_draw_str_aligned(canvas, 30, 3, AlignLeft, AlignTop, "Nothing Recorded");
         return;
@@ -30,6 +31,10 @@ void draw_sniffer_view(Canvas* canvas, i2cSniffer* i2c_sniffer) {
         (int)i2c_sniffer->menu_index + 1,
         (int)i2c_sniffer->frame_index + 1);
     canvas_draw_str_aligned(canvas, 38, 3, AlignLeft, AlignTop, text_buffer);
+    // Is Saved?
+    if(i2c_sniffer->saved) {
+        canvas_draw_str_aligned(canvas, 90, 3, AlignLeft, AlignTop, "Saved");
+    }
     // Address text
     snprintf(
         text_buffer,
@@ -88,5 +93,13 @@ void draw_sniffer_view(Canvas* canvas, i2cSniffer* i2c_sniffer) {
         if(row > 2) {
             break;
         }
+    }
+    if(i2c_sniffer->must_save) {
+        if(save_sniffer_data(i2c_sniffer)) {
+            canvas_draw_str_aligned(canvas, 3, 45, AlignLeft, AlignTop, "Save Ok");
+        } else {
+            canvas_draw_str_aligned(canvas, 3, 45, AlignLeft, AlignTop, "Save Error");
+        }
+        i2c_sniffer->must_save = false;
     }
 }
