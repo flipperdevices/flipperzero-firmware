@@ -45,6 +45,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [New Passport Profile Pic - Deer (Added By RogueMaster, Image By wrenchathome)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6fdcbe99ce63cc3a4cce8275281fd9b9e9db6578)
 - [Evil Portal Asset: Twitch & PornHub Login Pages (By roshanravan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3431fe56893c69463f6a36e1dc8c996dd358420d)
 - Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
+- Added: [YRM100 UHF RFID (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`  Not Tested
+- Added: [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
 
 <a name="release">
 
@@ -266,6 +268,7 @@ $ ./fbt dolphin_ext
 - [Bad BT (By Willy-JL)(Imported By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/620)
 - [Barcode App (By Kingal1337)](https://github.com/Kingal1337/flipper-barcode-generator)
 - [BarCode Scanner Emulator (By polarikus)](https://github.com/polarikus/flipper-zero_bc_scanner_emulator) `Uses: COM-port`
+- [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
 - [Bluetooth Remote (By Cutch)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/1330)
 - [BPM Tapper (By panki27)](https://github.com/panki27/bpm-tapper)
 - [Brainfuck (By nymda)](https://github.com/nymda/FlipperZeroBrainfuck)
@@ -408,6 +411,7 @@ $ ./fbt dolphin_ext
 - [WiFi (Marauder) v0.5.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) `Req: ESP32 WITH MARAUDER FLASHED` [ESP32 MARAUDER Firmware](https://github.com/tcpassos/ESP32Marauder)
 - [Wifi Mapping (By carvilsi)](https://github.com/carvilsi/flipper0-wifi-map/tree/main) `Req: ESP32`
 - [Wii EC Analyzer (By csBlueChip)](https://github.com/csBlueChip/FlipperZero_WiiEC)
+- [YRM100 UHF RFID (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - [Zero Tracker (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-music-tracker)
 
 ## COMMENTED OUT / NOT COMPILED DUE TO ISSUES
