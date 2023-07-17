@@ -368,6 +368,7 @@ bool seader_file_select(SeaderCredential* cred) {
 
 void seader_credential_clear(SeaderCredential* cred) {
     furi_assert(cred);
+    memset(cred->name, 0, sizeof(cred->name));
     cred->credential = 0;
     cred->bit_length = 0;
     cred->type = SeaderCredentialTypeNone;
