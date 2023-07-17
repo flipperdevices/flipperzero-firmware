@@ -2,6 +2,8 @@
 
 [![Build](https://github.com/xtruan/flipper-chess/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xtruan/flipper-chess/actions/workflows/build.yml)
 
+`HOW ABOUT A NICE GAME OF CHESS?`
+
 ![FLIPR](https://github.com/xtruan/flipper-chess/blob/main/icons/FLIPR_128x64.png)
 
 ## Chess game for Flipper Zero
