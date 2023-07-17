@@ -11,9 +11,6 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 
-#include <assets_icons.h>
-#include <dialogs/dialogs.h>
-
 #define NUM_MENU_ITEMS (4)
 
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
@@ -23,16 +20,12 @@
 #define SET_AP_CMD "setap"
 #define RESET_CMD "reset"
 
-#define EVIL_PORTAL_INDEX_EXTENSION ".html"
-#define EVIL_PORTAL_BASE_FOLDER "/apps_data/evil_portal/"
-
 struct Evil_PortalApp {
   Gui *gui;
   ViewDispatcher *view_dispatcher;
   SceneManager *scene_manager;
-  DialogsApp *dialogs;
 
-  FuriString *portal_logs;
+  FuriString* portal_logs;
   const char *command_queue[1];
   int command_index;
   bool has_command_queue;
