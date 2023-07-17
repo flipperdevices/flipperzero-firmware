@@ -2,8 +2,10 @@
 #include <furi.h>
 #include <furi_hal.h>
 #include <furi_hal_rfid.h>
+#include <furi_hal_ibutton.h>
 #include <furi_hal_interrupt.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_bus.h>
 #include <flipper_format/flipper_format.h>
 //#include <toolbox/protocols/protocol_dict.h>
 #include "protocols/lfrfid_protocols.h"
@@ -32,16 +34,15 @@
 extern "C" {
 #endif
 
-
 typedef enum {
-	LFRFIDHitagWorkerSettingRead,
-	LFRFIDHitagWorkerSettingEmulate,
+    LFRFIDHitagWorkerSettingRead,
+    LFRFIDHitagWorkerSettingEmulate,
 } LFRFIDHitagWorkerSetting;
 
 typedef enum {
-	LFRFIDHitagStatusScanning,
-	LFRFIDHitagStatusDetected,
-	LFRFIDHitagStatusRead,
+    LFRFIDHitagStatusScanning,
+    LFRFIDHitagStatusDetected,
+    LFRFIDHitagStatusRead,
 } LFRFIDHitagStatus;
 
 typedef struct LFRFIDHitagWorker LFRFIDHitagWorker;
@@ -53,14 +54,12 @@ typedef struct LFRFIDHitagWorker LFRFIDHitagWorker;
  */
 LFRFIDHitagStatus lfrfid_hitag_worker_get_status(LFRFIDHitagWorker* worker);
 
-
 /**
  * @brief Allocate a new LFRFIDHitagWorker instance
  * 
  * @return LFRFIDHitagWorker* 
  */
 LFRFIDHitagWorker* lfrfid_hitag_worker_alloc(ProtocolDict* dict);
-
 
 /**
  * @brief Free a LFRFIDHitagWorker instance
@@ -75,9 +74,7 @@ void lfrfid_hitag_worker_free(LFRFIDHitagWorker* worker);
  * @param worker LFRFIDHitagWorker instance
  * @param setting read/emulate
  */
-void lfrfid_hitag_worker_start(
-    LFRFIDHitagWorker* worker,
-    LFRFIDHitagWorkerSetting setting);
+void lfrfid_hitag_worker_start(LFRFIDHitagWorker* worker, LFRFIDHitagWorkerSetting setting);
 
 /**
  * @brief Stop worker
@@ -85,7 +82,6 @@ void lfrfid_hitag_worker_start(
  * @param worker 
  */
 void lfrfid_hitag_worker_stop(LFRFIDHitagWorker* worker);
-
 
 #ifdef __cplusplus
 }

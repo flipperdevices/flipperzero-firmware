@@ -16,7 +16,8 @@ static const NotificationSequence sequence_blink_set_cyan = {
     NULL,
 };
 
-static void lfrfid_read_callback(LFRFIDWorkerReadResult result, ProtocolId protocol, void* context) {
+static void
+    lfrfid_read_callback(LFRFIDWorkerReadResult result, ProtocolId protocol, void* context) {
     LfRfid* app = context;
     uint32_t event = 0;
 
@@ -37,7 +38,7 @@ static void lfrfid_read_callback(LFRFIDWorkerReadResult result, ProtocolId proto
         event = LfRfidEventReadStartPSK;
     } else if(result == LFRFIDWorkerReadStartRTF) {
         event = LfRfidEventReadStartRTF;
-    } else if(result == LFRFIDWorkerReadSenseHitag) {	//TODO combine with sensecardstart?
+    } else if(result == LFRFIDWorkerReadSenseHitag) { //TODO combine with sensecardstart?
         event = LfRfidEventReadSenseHitag;
     } else {
         return;
@@ -54,7 +55,7 @@ void lfrfid_scene_read_on_enter(void* context) {
     } else if(app->read_type == LFRFIDWorkerReadTypeASKOnly) {
         lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadAskOnly);
     } else if(app->read_type == LFRFIDWorkerReadTypeRTFOnly) {
-		lfrfid_view_read_set_read_state(app->read_view, LfRfidReadScanning);
+        lfrfid_view_read_set_read_state(app->read_view, LfRfidReadScanning);
         lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadRtfOnly);
     }
 
@@ -101,17 +102,16 @@ bool lfrfid_scene_read_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } else if(event.event == LfRfidEventReadStartRTF) {
             if(app->read_type == LFRFIDWorkerReadTypeAuto) {
-				lfrfid_view_read_set_read_state(app->read_view, LfRfidReadScanning);
+                lfrfid_view_read_set_read_state(app->read_view, LfRfidReadScanning);
                 lfrfid_view_read_set_read_mode(app->read_view, LfRfidReadHitag);
             }
             consumed = true;
-        } else if(event.event == LfRfidEventReadSenseHitag) {	//TODO combine with sensecardstart?
-			if(
-				app->read_type == LFRFIDWorkerReadTypeAuto ||
-				app->read_type == LFRFIDWorkerReadTypeRTFOnly) {
-				lfrfid_view_read_set_read_state(app->read_view, LfRfidReadTagDetected);
-			}
-		}
+        } else if(event.event == LfRfidEventReadSenseHitag) { //TODO combine with sensecardstart?
+            if(app->read_type == LFRFIDWorkerReadTypeAuto ||
+               app->read_type == LFRFIDWorkerReadTypeRTFOnly) {
+                lfrfid_view_read_set_read_state(app->read_view, LfRfidReadTagDetected);
+            }
+        }
     }
 
     return consumed;

@@ -11,7 +11,7 @@ typedef enum {
     LFRFIDEventEmulate = (1 << 4),
     LFRFIDEventReadRaw = (1 << 5),
     LFRFIDEventEmulateRaw = (1 << 6),
-	LFRFIDEventAll =
+    LFRFIDEventAll =
         (LFRFIDEventStopThread | LFRFIDEventStopMode | LFRFIDEventRead | LFRFIDEventWrite |
          LFRFIDEventEmulate | LFRFIDEventReadRaw | LFRFIDEventEmulateRaw),
 } LFRFIDEventType;
@@ -149,7 +149,7 @@ static int32_t lfrfid_worker_thread(void* thread_context) {
             if(flags & LFRFIDEventEmulate) worker->mode_index = LFRFIDWorkerEmulate;
             if(flags & LFRFIDEventReadRaw) worker->mode_index = LFRFIDWorkerReadRaw;
             if(flags & LFRFIDEventEmulateRaw) worker->mode_index = LFRFIDWorkerEmulateRaw;
-			
+
             // do mode, if it exists
             if(lfrfid_worker_modes[worker->mode_index].process) {
                 lfrfid_worker_modes[worker->mode_index].process(worker);

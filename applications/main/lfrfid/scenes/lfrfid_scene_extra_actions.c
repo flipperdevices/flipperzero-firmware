@@ -4,7 +4,7 @@
 typedef enum {
     SubmenuIndexASK,
     SubmenuIndexPSK,
-	SubmenuIndexHitag,
+    SubmenuIndexHitag,
     SubmenuIndexRAW,
 } SubmenuIndex;
 
@@ -30,7 +30,7 @@ void lfrfid_scene_extra_actions_on_enter(void* context) {
         SubmenuIndexPSK,
         lfrfid_scene_extra_actions_submenu_callback,
         app);
-	submenu_add_item(
+    submenu_add_item(
         submenu,
         "Read RTF (Reader Talks First)",
         SubmenuIndexHitag,
@@ -75,7 +75,7 @@ bool lfrfid_scene_extra_actions_on_event(void* context, SceneManagerEvent event)
         } else if(event.event == SubmenuIndexHitag) {
             app->read_type = LFRFIDWorkerReadTypeRTFOnly;
             scene_manager_next_scene(app->scene_manager, LfRfidSceneRead);
-            DOLPHIN_DEED(DolphinDeedRfidRead);
+            dolphin_deed(DolphinDeedRfidRead);
             consumed = true;
         } else if(event.event == SubmenuIndexRAW) {
             scene_manager_next_scene(app->scene_manager, LfRfidSceneRawName);

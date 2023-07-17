@@ -4,15 +4,15 @@
 typedef enum {
     LfRfidReadAsk,
     LfRfidReadPsk,
-	LfRfidReadHitag,
+    LfRfidReadHitag,
     LfRfidReadAskOnly,
     LfRfidReadPskOnly,
-	LfRfidReadRtfOnly,
+    LfRfidReadRtfOnly,
 } LfRfidReadViewMode;
 
 typedef enum {
     LfRfidReadScanning,
-	LfRfidReadTagDetected,
+    LfRfidReadTagDetected,
 } LfRfidReadViewState;
 
 typedef struct LfRfidReadView LfRfidReadView;

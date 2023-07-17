@@ -5,37 +5,40 @@
 
 #define LFRFID_DICT_FILETYPE "Flipper RFID key"
 
-bool lfrfid_dict_file_save_hitag1_data(FlipperFormat* file, uint8_t* data){
-	FuriString* string = furi_string_alloc();
-	bool result = false;
-	uint8_t pageSize = 4;
+bool lfrfid_dict_file_save_hitag1_data(FlipperFormat* file, uint8_t* data) {
+    FuriString* string = furi_string_alloc();
+    bool result = false;
+    uint8_t pageSize = 4;
 
-	do {
-		//write shortened data (tag ID)
-		if(!flipper_format_write_hex(file, "Data", data, pageSize)) break;
-		
-		if(!flipper_format_write_comment_cstr(file, "Hitag1 specific data")) break;
-		
-		//write pages
-		for (uint8_t p=0;p<64;p++){
-			furi_string_printf(string, "Page %2u", p);
-			if (data[64*pageSize+p]){
-				//write page data
-				if(!flipper_format_write_hex(file, furi_string_get_cstr(string), data+p*pageSize, pageSize)) break;
-			} else {
-				//write ?? ?? ?? ??
-				if(!flipper_format_write_string_cstr(file, furi_string_get_cstr(string), "?? ?? ?? ??")) break;
-			}
-			if (p==64-1){
-				result = true;
-			}
-		}
-	}
-	while (false);
-	
-	furi_string_free(string);
-	
-	return result;
+    do {
+        //write shortened data (tag ID)
+        if(!flipper_format_write_hex(file, "Data", data, pageSize)) break;
+
+        if(!flipper_format_write_comment_cstr(file, "Hitag1 specific data")) break;
+
+        //write pages
+        for(uint8_t p = 0; p < 64; p++) {
+            furi_string_printf(string, "Page %2u", p);
+            if(data[64 * pageSize + p]) {
+                //write page data
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(string), data + p * pageSize, pageSize))
+                    break;
+            } else {
+                //write ?? ?? ?? ??
+                if(!flipper_format_write_string_cstr(
+                       file, furi_string_get_cstr(string), "?? ?? ?? ??"))
+                    break;
+            }
+            if(p == 64 - 1) {
+                result = true;
+            }
+        }
+    } while(false);
+
+    furi_string_free(string);
+
+    return result;
 }
 
 bool lfrfid_dict_file_save(ProtocolDict* dict, ProtocolId protocol, const char* filename) {
@@ -58,12 +61,12 @@ bool lfrfid_dict_file_save(ProtocolDict* dict, ProtocolId protocol, const char* 
 
         // TODO: write comment about protocol sizes into file
 
-		protocol_dict_get_data(dict, protocol, data, data_size);
-		if (protocol == LFRFIDProtocolHitag1){
-			if(!lfrfid_dict_file_save_hitag1_data(file, data)) break;
-		} else {
-			if(!flipper_format_write_hex(file, "Data", data, data_size)) break;
-		}
+        protocol_dict_get_data(dict, protocol, data, data_size);
+        if(protocol == LFRFIDProtocolHitag1) {
+            if(!lfrfid_dict_file_save_hitag1_data(file, data)) break;
+        } else {
+            if(!flipper_format_write_hex(file, "Data", data, data_size)) break;
+        }
 
         result = true;
     } while(false);
@@ -175,39 +178,39 @@ static ProtocolId lfrfid_dict_protocol_fallback(
     return result;
 }
 
-bool lfrfid_dict_file_load_hitag1_data(FlipperFormat* file, uint8_t* data){
-	FuriString* string = furi_string_alloc();
-	bool result = false;
-	uint8_t tagID[4];
-	uint8_t pageSize = 4;
-	
-	do {
-		//read shortened data (tag ID)
-		if(!flipper_format_read_hex(file, "Data", tagID, 4)) break;
-		
-		//read pages
-		for (uint8_t p=0;p<64;p++){
-			furi_string_printf(string, "Page %2u", p);
-			if (flipper_format_read_hex(file, furi_string_get_cstr(string), data+p*pageSize, pageSize)){
-				data[64*pageSize+p]=1;
-			} else {
-				data[64*pageSize+p]=0;
-			}
-		}
-		
-		//check data consistency
-		if (memcmp(tagID, data, pageSize)!=0) break;
-		
-		//check if tag ID & config page are succesfully read
-		if (data[64*pageSize+0] && data[64*pageSize+1]){
-			result = true;
-		}
-	}
-	while (false);
-	
-	furi_string_free(string);
-	
-	return result;
+bool lfrfid_dict_file_load_hitag1_data(FlipperFormat* file, uint8_t* data) {
+    FuriString* string = furi_string_alloc();
+    bool result = false;
+    uint8_t tagID[4];
+    uint8_t pageSize = 4;
+
+    do {
+        //read shortened data (tag ID)
+        if(!flipper_format_read_hex(file, "Data", tagID, 4)) break;
+
+        //read pages
+        for(uint8_t p = 0; p < 64; p++) {
+            furi_string_printf(string, "Page %2u", p);
+            if(flipper_format_read_hex(
+                   file, furi_string_get_cstr(string), data + p * pageSize, pageSize)) {
+                data[64 * pageSize + p] = 1;
+            } else {
+                data[64 * pageSize + p] = 0;
+            }
+        }
+
+        //check data consistency
+        if(memcmp(tagID, data, pageSize) != 0) break;
+
+        //check if tag ID & config page are succesfully read
+        if(data[64 * pageSize + 0] && data[64 * pageSize + 1]) {
+            result = true;
+        }
+    } while(false);
+
+    furi_string_free(string);
+
+    return result;
 }
 
 ProtocolId lfrfid_dict_file_load(ProtocolDict* dict, const char* filename) {
@@ -235,12 +238,12 @@ ProtocolId lfrfid_dict_file_load(ProtocolDict* dict, const char* filename) {
         if(protocol == PROTOCOL_NO) {
             protocol = lfrfid_dict_protocol_fallback(dict, furi_string_get_cstr(str_result), file);
             if(protocol == PROTOCOL_NO) break;
-        } else if(protocol == LFRFIDProtocolHitag1){
-			// Hitag1 data
-			size_t data_size = protocol_dict_get_data_size(dict, protocol);
+        } else if(protocol == LFRFIDProtocolHitag1) {
+            // Hitag1 data
+            size_t data_size = protocol_dict_get_data_size(dict, protocol);
             if(!lfrfid_dict_file_load_hitag1_data(file, data)) break;
             protocol_dict_set_data(dict, protocol, data, data_size);
-		} else {
+        } else {
             // data
             size_t data_size = protocol_dict_get_data_size(dict, protocol);
             if(!flipper_format_read_hex(file, "Data", data, data_size)) break;

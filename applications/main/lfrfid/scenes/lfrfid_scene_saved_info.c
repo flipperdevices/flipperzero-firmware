@@ -26,7 +26,7 @@ void lfrfid_scene_saved_info_on_enter(void* context) {
             }
             furi_string_cat_printf(tmp_string, "%02X", data[i]);
         }
-	}
+    }
     free(data);
 
     FuriString* render_data;
