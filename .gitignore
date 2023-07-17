@@ -1,0 +1,71 @@
+*~
+*.swp
+*.swo
+*.gdb_history
+*.old
+
+
+# LSP
+.cache
+compile_commands.json
+
+# JetBrains IDEs
+.idea/
+
+# Python VirtEnvironments
+.env
+.venv
+env/
+venv/
+
+# Python Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pickle
+
+.obj/
+bindings/
+.DS_Store
+.mxproject
+Brewfile.lock.json
+
+# Kate
+.kateproject
+.kateconfig
+
+# kde
+.directory
+null.d
+
+# SCons
+.sconsign.dblite
+
+
+# Visual Studio Code
+/.vscode
+
+# bundle output
+/dist
+/artifacts-default
+/artifacts-ofw-anims
+/artifacts-rgb-patch
+/artifacts-extra-apps
+
+# SCons build dir
+/build
+
+# Toolchain
+/toolchain
+
+# openocd output file
+openocd.log
+
+# PVS Studio temporary files
+.PVS-Studio/
+PVS-Studio.log
+*.PVS-Studio.*
+
+.gdbinit
+
+/fbt_options_local.py
