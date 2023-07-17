@@ -1,8 +1,11 @@
 # flipper-chess
 
+[![Build](https://github.com/xtruan/flipper-chess/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xtruan/flipper-chess/actions/workflows/build.yml)
+
 ## Chess game for Flipper Zero
 - Built against `0.86.1` Flipper Zero firmware release
 - Uses [smallchesslib](https://codeberg.org/drummyfish/smallchesslib)
+- Included in [RogueMaster Custom Firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins)
 
 ### Installation
 
