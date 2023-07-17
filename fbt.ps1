@@ -23,7 +23,7 @@ else {
 
 Write-Host "Using $firmware_name firmware to run FBT"
 
-$commandline_scons = "$firmware_path\site_scons\commandline.scons"
+$commandline_scons = "$firmware_path/site_scons/commandline.scons"
 ((Get-Content -Path $commandline_scons -Raw) -replace 'applications_user','..') | Set-Content -Path $commandline_scons -NoNewline
 
 $i = 1
@@ -39,9 +39,9 @@ while ($i -lt $args.Count) {
         }
         $i = $i + 2
     } elseif ($args[$i] -eq '--clean') {
-        $build_path = "$firmware_path\build"
+        $build_path = "$firmware_path/build"
         if (Test-Path -PathType Container $build_path) {
-            Remove-Item "$build_path\*" -Recurse -Force
+            Remove-Item "$build_path/*" -Recurse -Force
         }
         $i = $i + 1
     } else {
@@ -51,11 +51,11 @@ while ($i -lt $args.Count) {
 }
 
 if ($cpp_defines.Length -gt 0) {
-    $cc_scons = "$firmware_path\site_scons\cc.scons"
+    $cc_scons = "$firmware_path/site_scons/cc.scons"
     (Get-Content -Path $cc_scons -Raw) -replace "(CPPDEFINES\s*=\s*\[)(([^]]\r?\n?)*)(\])", "`$1`"_GNU_SOURCE`", $($cpp_defines -join ", ")`$4" | Set-Content -Path $cc_scons -NoNewline
 }
 
-$builtin_totp_path = "$firmware_path\applications\external\totp"
+$builtin_totp_path = "$firmware_path/applications/external/totp"
 if ((Test-Path -Path $builtin_totp_path) -eq $True) {
     Remove-Item $builtin_totp_path -Recurse
 }

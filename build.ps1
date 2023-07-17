@@ -37,7 +37,7 @@ Push-Location $PSScriptRoot
 if (!(Test-Path -PathType Container "build")) {
     New-Item -ItemType Directory -Path "build"
 } else {
-    Remove-Item "build\*" -Recurse -Force
+    Remove-Item "build/*" -Recurse -Force
 }
 
 function Build-Run {
@@ -72,7 +72,7 @@ function Build-Run {
 
         $build_output_artifact = Join-Path $build_output_folder "$($build_command.ArtifactName -replace '{FEATURES_SUFFIX}',$FeaturesSuffix)"
 
-        Copy-Item "$build_path\$latest_dir\.extapps\totp.fap" -Destination $build_output_artifact
+        Copy-Item "$build_path/$latest_dir/.extapps/totp.fap" -Destination $build_output_artifact
 
         Write-Host "Artifacts for $($build_command.Name) stored at $build_output_artifact"
     }
