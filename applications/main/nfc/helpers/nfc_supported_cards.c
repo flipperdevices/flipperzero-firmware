@@ -9,7 +9,7 @@
 
 #define TAG "NfcSupportedCards"
 
-#define NFC_SUPPORTED_CARDS_PLUGINS_PATH EXT_PATH("nfc/plugins")
+#define NFC_SUPPORTED_CARDS_PLUGINS_PATH APP_DATA_PATH("plugins")
 
 typedef enum {
     NfcSupportCardsStatusIdle,
