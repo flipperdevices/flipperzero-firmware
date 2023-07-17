@@ -36,6 +36,8 @@ ADD_SCENE(nfc, mf_classic_detect_reader, MfClassicDetectReader)
 ADD_SCENE(nfc, mf_classic_mfkey_nonces_info, MfClassicMfkeyNoncesInfo)
 ADD_SCENE(nfc, mf_classic_mfkey_complete, MfClassicMfkeyComplete)
 
+ADD_SCENE(nfc, mf_classic_keys, MfClassicKeys)
+
 ADD_SCENE(nfc, set_type, SetType)
 ADD_SCENE(nfc, set_sak, SetSak)
 ADD_SCENE(nfc, set_atqa, SetAtqa)

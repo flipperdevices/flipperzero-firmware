@@ -29,6 +29,7 @@
 #include "helpers/mf_ultralight_auth.h"
 #include "helpers/mf_dict.h"
 #include "helpers/mfkey32_logger.h"
+#include "helpers/mf_user_dict.h"
 
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -116,6 +117,7 @@ struct NfcApp {
     MfUltralightAuth* mf_ul_auth;
     NfcMfClassicDictAttackContext mf_dict_context;
     Mfkey32Logger* mfkey32_logger;
+    MfUserDict* mf_user_dict;
 
     NfcDevice* nfc_device;
     Iso14443_3aData* iso14443_3a_edit_data;
