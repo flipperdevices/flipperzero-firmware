@@ -655,6 +655,8 @@ void flipchess_scene_1_enter(void* context) {
             char* import_game_text = NULL;
             if(app->import_game == 1 && strlen(app->import_game_text) > 0) {
                 import_game_text = app->import_game_text;
+            } else {
+                if(app->sound == 1) flipchess_voice_how_about_chess();
             }
 
             int init = flipchess_scene_1_model_init(
