@@ -1,4 +1,6 @@
 #include "../flipchess.h"
+#include "../helpers/flipchess_voice.h"
+#include "../helpers/flipchess_file.h"
 #include "../helpers/flipchess_custom_event.h"
 #include "../views/flipchess_startscreen.h"
 
@@ -11,6 +13,13 @@ void flipchess_scene_startscreen_callback(FlipChessCustomEvent event, void* cont
 void flipchess_scene_startscreen_on_enter(void* context) {
     furi_assert(context);
     FlipChess* app = context;
+
+    if(flipchess_has_file(FlipChessFileBoard, NULL, false)) {
+        if(flipchess_load_file(app->import_game_text, FlipChessFileBoard, NULL)) {
+            app->import_game = 1;
+        }
+    }
+
     flipchess_startscreen_set_callback(
         app->flipchess_startscreen, flipchess_scene_startscreen_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, FlipChessViewIdStartscreen);
@@ -51,5 +60,8 @@ bool flipchess_scene_startscreen_on_event(void* context, SceneManagerEvent event
 
 void flipchess_scene_startscreen_on_exit(void* context) {
     FlipChess* app = context;
-    UNUSED(app);
+
+    if(app->sound == 1) {
+        flipchess_voice_shall_we_play();
+    }
 }

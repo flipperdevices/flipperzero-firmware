@@ -52,6 +52,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Chess (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
+- [Tanks Game (By alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) - Fixes for latest subghz changes by @Sil333033
 
 ## Media
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/44023851f7349b6ae9ca9f9bd9228d795a7e04c0)

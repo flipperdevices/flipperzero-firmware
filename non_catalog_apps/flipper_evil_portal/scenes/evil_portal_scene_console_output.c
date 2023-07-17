@@ -54,8 +54,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             furi_string_cat_str(app->text_box_store, help_msg);
             app->text_box_store_strlen += strlen(help_msg);
             write_logs(app->portal_logs);
-            free(app->portal_logs);
-            strcpy(app->portal_logs, "");
+            furi_string_reset(app->portal_logs);
             if(app->show_stopscan_tip) {
                 const char* msg = "Press BACK to return\n";
                 furi_string_cat_str(app->text_box_store, msg);
@@ -97,11 +96,12 @@ void evil_portal_scene_console_output_on_enter(void* context) {
         if(0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
             evil_portal_read_index_html(context);
 
-            char* data = malloc((size_t)(strlen((char*)app->index_html) + strlen("sethtml=")));
-            strcat(data, "sethtml=");
-            strcat(data, (char*)app->index_html);
+            FuriString* data = furi_string_alloc();
+            furi_string_cat(data, "sethtml=");
+            furi_string_cat(data, (char*)app->index_html);
 
-            evil_portal_uart_tx((uint8_t*)(data), strlen(data));
+            evil_portal_uart_tx(
+                (uint8_t*)(furi_string_get_cstr(data)), strlen(furi_string_get_cstr(data)));
             evil_portal_uart_tx((uint8_t*)("\n"), 1);
 
             app->sent_html = true;
