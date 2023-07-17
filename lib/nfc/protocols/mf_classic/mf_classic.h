@@ -9,6 +9,12 @@ extern "C" {
 #define MF_CLASSIC_CMD_AUTH_KEY_A (0x60U)
 #define MF_CLASSIC_CMD_AUTH_KEY_B (0x61U)
 #define MF_CLASSIC_CMD_READ_BLOCK (0x30U)
+#define MF_CLASSIC_CMD_WRITE_BLOCK (0xA0U)
+#define MF_CLASSIC_CMD_VALUE_DEC (0xC0U)
+#define MF_CLASSIC_CMD_VALUE_INC (0xC1U)
+#define MF_CLASSIC_CMD_VALUE_RESTORE (0xC2U)
+#define MF_CLASSIC_CMD_VALUE_TRANSFER (0xB0U)
+
 #define MF_CLASSIC_CMD_HALT_MSB (0x50)
 #define MF_CLASSIC_CMD_HALT_LSB (0x00)
 #define MF_CLASSIC_CMD_ACK (0x0A)
@@ -55,6 +61,14 @@ typedef enum {
     MfClassicActionACRead,
     MfClassicActionACWrite,
 } MfClassicAction;
+
+typedef enum {
+    MfClassicValueCommandIncrement,
+    MfClassicValueCommandDecrement,
+    MfClassicValueCommandRestore,
+
+    MfClassicValueCommandInvalid,
+} MfClassicValueCommand;
 
 typedef struct {
     uint8_t data[MF_CLASSIC_BLOCK_SIZE];
@@ -165,6 +179,12 @@ MfClassicSectorTrailer*
 bool mf_classic_is_sector_trailer(uint8_t block);
 
 uint8_t mf_classic_get_sector_by_block(uint8_t block);
+
+bool mf_classic_is_value_block(MfClassicData* data, uint8_t block_num);
+
+bool mf_classic_block_to_value(const MfClassicBlock* block, int32_t* value, uint8_t* addr);
+
+void mf_classic_value_to_block(int32_t value, uint8_t addr, MfClassicBlock* block);
 
 bool mf_classic_is_key_found(
     const MfClassicData* data,

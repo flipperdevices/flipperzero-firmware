@@ -156,11 +156,11 @@ static uint16_t iso14443_3a_get_crc(const uint8_t* buff, uint16_t len) {
     return crc;
 }
 
-uint32_t iso14443_3a_get_cuid(Iso14443_3aData* iso14443_3a_data) {
+uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* iso14443_3a_data) {
     furi_assert(iso14443_3a_data);
 
     uint32_t cuid = 0;
-    uint8_t* cuid_start = iso14443_3a_data->uid;
+    const uint8_t* cuid_start = iso14443_3a_data->uid;
     if(iso14443_3a_data->uid_len == 7) {
         cuid_start = &iso14443_3a_data->uid[3];
     }

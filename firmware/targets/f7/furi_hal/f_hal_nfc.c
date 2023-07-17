@@ -339,6 +339,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
         st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF1, 0xff, 0x40);
         st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF2, 0xff, 0x03);
     } else if(mode == FHalNfcModeIso14443_3aListener) {
+        f_hal_nfca_listener_init();
         st25r3916_write_reg(
             handle,
             ST25R3916_REG_OP_CONTROL,
@@ -376,6 +377,7 @@ FHalNfcError f_hal_nfc_reset_mode() {
     // Set default value in mode register
     st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_om0);
     st25r3916_clear_reg_bits(handle, ST25R3916_REG_AUX, ST25R3916_REG_AUX_no_crc_rx);
+    f_hal_nfca_listener_deinit();
 
     return error;
 }
@@ -517,6 +519,14 @@ FHalNfcError f_hal_nfc_listen_start() {
     st25r3916_clear_reg_bits(
         handle, ST25R3916_REG_PASSIVE_TARGET, ST25R3916_REG_PASSIVE_TARGET_d_106_ac_a);
     st25r3916_direct_cmd(handle, ST25R3916_CMD_GOTO_SENSE);
+
+    return FHalNfcErrorNone;
+}
+
+FHalNfcError f_hal_nfc_listen_reset() {
+    FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
+
+    st25r3916_direct_cmd(handle, ST25R3916_CMD_UNMASK_RECEIVE_DATA);
 
     return FHalNfcErrorNone;
 }

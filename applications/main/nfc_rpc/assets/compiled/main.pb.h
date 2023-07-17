@@ -18,8 +18,7 @@ typedef enum _Nfc_CommandStatus {
     Nfc_CommandStatus_ERROR = 1, /* *< Unknown error */
     Nfc_CommandStatus_ERROR_NOT_IMPLEMENTED = 3, /* *< Command succesfully decoded, but not
 implemented (deprecated or not yet implemented) */
-    Nfc_CommandStatus_ERROR_BUSY =
-        4 /* *< Somebody took global lock, so not all commands are available */
+    Nfc_CommandStatus_ERROR_BUSY = 4 /* *< Somebody took global lock, so not all commands are available */
 } Nfc_CommandStatus;
 
 /* Struct definitions */
@@ -59,8 +58,15 @@ typedef struct _Nfc_Main {
         PB_MfClassic_AuthResponse mf_classic_auth_resp;
         PB_MfClassic_ReadBlockRequest mf_classic_read_block_req;
         PB_MfClassic_ReadBlockResponse mf_classic_read_block_resp;
+        PB_MfClassic_WriteBlockRequest mf_classic_write_block_req;
+        PB_MfClassic_WriteBlockResponse mf_classic_write_block_resp;
+        PB_MfClassic_ReadValueRequest mf_classic_read_value_req;
+        PB_MfClassic_ReadValueResponse mf_classic_read_value_resp;
+        PB_MfClassic_ChangeValueRequest mf_classic_change_value_req;
+        PB_MfClassic_ChangeValueResponse mf_classic_change_value_resp;
     } content;
 } Nfc_Main;
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,37 +75,27 @@ extern "C" {
 /* Helper constants for enums */
 #define _Nfc_CommandStatus_MIN Nfc_CommandStatus_OK
 #define _Nfc_CommandStatus_MAX Nfc_CommandStatus_ERROR_BUSY
-#define _Nfc_CommandStatus_ARRAYSIZE ((Nfc_CommandStatus)(Nfc_CommandStatus_ERROR_BUSY + 1))
+#define _Nfc_CommandStatus_ARRAYSIZE ((Nfc_CommandStatus)(Nfc_CommandStatus_ERROR_BUSY+1))
+
 
 #define Nfc_Main_command_status_ENUMTYPE Nfc_CommandStatus
 
+
 /* Initializer values for message structs */
-#define Nfc_Empty_init_default \
-    { 0 }
-#define Nfc_Main_init_default                        \
-    {                                                \
-        _Nfc_CommandStatus_MIN, {{NULL}, NULL}, 0, { \
-            Nfc_Empty_init_default                   \
-        }                                            \
-    }
-#define Nfc_Empty_init_zero \
-    { 0 }
-#define Nfc_Main_init_zero                           \
-    {                                                \
-        _Nfc_CommandStatus_MIN, {{NULL}, NULL}, 0, { \
-            Nfc_Empty_init_zero                      \
-        }                                            \
-    }
+#define Nfc_Empty_init_default                   {0}
+#define Nfc_Main_init_default                    {_Nfc_CommandStatus_MIN, {{NULL}, NULL}, 0, {Nfc_Empty_init_default}}
+#define Nfc_Empty_init_zero                      {0}
+#define Nfc_Main_init_zero                       {_Nfc_CommandStatus_MIN, {{NULL}, NULL}, 0, {Nfc_Empty_init_zero}}
 
 /* Field tags (for use in manual encoding/decoding) */
-#define Nfc_Main_command_status_tag 1
-#define Nfc_Main_empty_tag 2
-#define Nfc_Main_nfca_read_req_tag 3
-#define Nfc_Main_nfca_read_resp_tag 4
-#define Nfc_Main_nfca_emulate_start_req_tag 5
-#define Nfc_Main_nfca_emulate_start_resp_tag 6
-#define Nfc_Main_nfca_emulate_stop_req_tag 7
-#define Nfc_Main_nfca_emulate_stop_resp_tag 8
+#define Nfc_Main_command_status_tag              1
+#define Nfc_Main_empty_tag                       2
+#define Nfc_Main_nfca_read_req_tag               3
+#define Nfc_Main_nfca_read_resp_tag              4
+#define Nfc_Main_nfca_emulate_start_req_tag      5
+#define Nfc_Main_nfca_emulate_start_resp_tag     6
+#define Nfc_Main_nfca_emulate_stop_req_tag       7
+#define Nfc_Main_nfca_emulate_stop_resp_tag      8
 #define Nfc_Main_mf_ultralight_read_page_req_tag 9
 #define Nfc_Main_mf_ultralight_read_page_resp_tag 10
 #define Nfc_Main_mf_ultralight_read_version_req_tag 11
@@ -116,163 +112,58 @@ extern "C" {
 #define Nfc_Main_mf_ultralight_emulate_start_resp_tag 22
 #define Nfc_Main_mf_ultralight_emulate_stop_req_tag 23
 #define Nfc_Main_mf_ultralight_emulate_stop_resp_tag 24
-#define Nfc_Main_mf_classic_auth_req_tag 25
-#define Nfc_Main_mf_classic_auth_resp_tag 26
-#define Nfc_Main_mf_classic_read_block_req_tag 27
-#define Nfc_Main_mf_classic_read_block_resp_tag 28
+#define Nfc_Main_mf_classic_auth_req_tag         25
+#define Nfc_Main_mf_classic_auth_resp_tag        26
+#define Nfc_Main_mf_classic_read_block_req_tag   27
+#define Nfc_Main_mf_classic_read_block_resp_tag  28
+#define Nfc_Main_mf_classic_write_block_req_tag  29
+#define Nfc_Main_mf_classic_write_block_resp_tag 30
+#define Nfc_Main_mf_classic_read_value_req_tag   31
+#define Nfc_Main_mf_classic_read_value_resp_tag  32
+#define Nfc_Main_mf_classic_change_value_req_tag 33
+#define Nfc_Main_mf_classic_change_value_resp_tag 34
 
 /* Struct field encoding specification for nanopb */
-#define Nfc_Empty_FIELDLIST(X, a)
+#define Nfc_Empty_FIELDLIST(X, a) \
 
 #define Nfc_Empty_CALLBACK NULL
 #define Nfc_Empty_DEFAULT NULL
 
-#define Nfc_Main_FIELDLIST(X, a)                                                                   \
-    X(a, STATIC, SINGULAR, UENUM, command_status, 1)                                               \
-    X(a, STATIC, ONEOF, MSG_W_CB, (content, empty, content.empty), 2)                              \
-    X(a, STATIC, ONEOF, MSG_W_CB, (content, nfca_read_req, content.nfca_read_req), 3)              \
-    X(a, STATIC, ONEOF, MSG_W_CB, (content, nfca_read_resp, content.nfca_read_resp), 4)            \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, nfca_emulate_start_req, content.nfca_emulate_start_req),                           \
-      5)                                                                                           \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, nfca_emulate_start_resp, content.nfca_emulate_start_resp),                         \
-      6)                                                                                           \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, nfca_emulate_stop_req, content.nfca_emulate_stop_req),                             \
-      7)                                                                                           \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, nfca_emulate_stop_resp, content.nfca_emulate_stop_resp),                           \
-      8)                                                                                           \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_read_page_req, content.mf_ultralight_read_page_req),                 \
-      9)                                                                                           \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_read_page_resp, content.mf_ultralight_read_page_resp),               \
-      10)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_read_version_req, content.mf_ultralight_read_version_req),           \
-      11)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_read_version_resp, content.mf_ultralight_read_version_resp),         \
-      12)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_write_page_req, content.mf_ultralight_write_page_req),               \
-      13)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_write_page_resp, content.mf_ultralight_write_page_resp),             \
-      14)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_read_signature_req, content.mf_ultralight_read_signature_req),       \
-      15)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_read_signature_resp, content.mf_ultralight_read_signature_resp),     \
-      16)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_read_counter_req, content.mf_ultralight_read_counter_req),           \
-      17)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_read_counter_resp, content.mf_ultralight_read_counter_resp),         \
-      18)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_read_tearing_flag_req, content.mf_ultralight_read_tearing_flag_req), \
-      19)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content,                                                                                    \
-       mf_ultralight_read_tearing_flag_resp,                                                       \
-       content.mf_ultralight_read_tearing_flag_resp),                                              \
-      20)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_emulate_start_req, content.mf_ultralight_emulate_start_req),         \
-      21)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_emulate_start_resp, content.mf_ultralight_emulate_start_resp),       \
-      22)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_emulate_stop_req, content.mf_ultralight_emulate_stop_req),           \
-      23)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_ultralight_emulate_stop_resp, content.mf_ultralight_emulate_stop_resp),         \
-      24)                                                                                          \
-    X(a, STATIC, ONEOF, MSG_W_CB, (content, mf_classic_auth_req, content.mf_classic_auth_req), 25) \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_classic_auth_resp, content.mf_classic_auth_resp),                               \
-      26)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_classic_read_block_req, content.mf_classic_read_block_req),                     \
-      27)                                                                                          \
-    X(a,                                                                                           \
-      STATIC,                                                                                      \
-      ONEOF,                                                                                       \
-      MSG_W_CB,                                                                                    \
-      (content, mf_classic_read_block_resp, content.mf_classic_read_block_resp),                   \
-      28)
+#define Nfc_Main_FIELDLIST(X, a) \
+X(a, STATIC,   SINGULAR, UENUM,    command_status,    1) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,empty,content.empty),   2) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,nfca_read_req,content.nfca_read_req),   3) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,nfca_read_resp,content.nfca_read_resp),   4) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,nfca_emulate_start_req,content.nfca_emulate_start_req),   5) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,nfca_emulate_start_resp,content.nfca_emulate_start_resp),   6) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,nfca_emulate_stop_req,content.nfca_emulate_stop_req),   7) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,nfca_emulate_stop_resp,content.nfca_emulate_stop_resp),   8) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_page_req,content.mf_ultralight_read_page_req),   9) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_page_resp,content.mf_ultralight_read_page_resp),  10) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_version_req,content.mf_ultralight_read_version_req),  11) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_version_resp,content.mf_ultralight_read_version_resp),  12) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_write_page_req,content.mf_ultralight_write_page_req),  13) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_write_page_resp,content.mf_ultralight_write_page_resp),  14) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_signature_req,content.mf_ultralight_read_signature_req),  15) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_signature_resp,content.mf_ultralight_read_signature_resp),  16) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_counter_req,content.mf_ultralight_read_counter_req),  17) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_counter_resp,content.mf_ultralight_read_counter_resp),  18) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_tearing_flag_req,content.mf_ultralight_read_tearing_flag_req),  19) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_read_tearing_flag_resp,content.mf_ultralight_read_tearing_flag_resp),  20) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_start_req,content.mf_ultralight_emulate_start_req),  21) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_start_resp,content.mf_ultralight_emulate_start_resp),  22) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_stop_req,content.mf_ultralight_emulate_stop_req),  23) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_ultralight_emulate_stop_resp,content.mf_ultralight_emulate_stop_resp),  24) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_auth_req,content.mf_classic_auth_req),  25) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_auth_resp,content.mf_classic_auth_resp),  26) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_read_block_req,content.mf_classic_read_block_req),  27) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_read_block_resp,content.mf_classic_read_block_resp),  28) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_write_block_req,content.mf_classic_write_block_req),  29) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_write_block_resp,content.mf_classic_write_block_resp),  30) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_read_value_req,content.mf_classic_read_value_req),  31) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_read_value_resp,content.mf_classic_read_value_resp),  32) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_change_value_req,content.mf_classic_change_value_req),  33) \
+X(a, STATIC,   ONEOF,    MSG_W_CB, (content,mf_classic_change_value_resp,content.mf_classic_change_value_resp),  34)
 #define Nfc_Main_CALLBACK NULL
 #define Nfc_Main_DEFAULT NULL
 #define Nfc_Main_content_empty_MSGTYPE Nfc_Empty
@@ -285,32 +176,29 @@ extern "C" {
 #define Nfc_Main_content_mf_ultralight_read_page_req_MSGTYPE PB_MfUltralight_ReadPageRequest
 #define Nfc_Main_content_mf_ultralight_read_page_resp_MSGTYPE PB_MfUltralight_ReadPageResponse
 #define Nfc_Main_content_mf_ultralight_read_version_req_MSGTYPE PB_MfUltralight_ReadVersionRequest
-#define Nfc_Main_content_mf_ultralight_read_version_resp_MSGTYPE \
-    PB_MfUltralight_ReadVersionResponse
+#define Nfc_Main_content_mf_ultralight_read_version_resp_MSGTYPE PB_MfUltralight_ReadVersionResponse
 #define Nfc_Main_content_mf_ultralight_write_page_req_MSGTYPE PB_MfUltralight_WritePageRequest
 #define Nfc_Main_content_mf_ultralight_write_page_resp_MSGTYPE PB_MfUltralight_WritePageResponse
-#define Nfc_Main_content_mf_ultralight_read_signature_req_MSGTYPE \
-    PB_MfUltralight_ReadSignatureRequest
-#define Nfc_Main_content_mf_ultralight_read_signature_resp_MSGTYPE \
-    PB_MfUltralight_ReadSignatureResponse
+#define Nfc_Main_content_mf_ultralight_read_signature_req_MSGTYPE PB_MfUltralight_ReadSignatureRequest
+#define Nfc_Main_content_mf_ultralight_read_signature_resp_MSGTYPE PB_MfUltralight_ReadSignatureResponse
 #define Nfc_Main_content_mf_ultralight_read_counter_req_MSGTYPE PB_MfUltralight_ReadCounterRequest
-#define Nfc_Main_content_mf_ultralight_read_counter_resp_MSGTYPE \
-    PB_MfUltralight_ReadCounterResponse
-#define Nfc_Main_content_mf_ultralight_read_tearing_flag_req_MSGTYPE \
-    PB_MfUltralight_ReadTearingFlagRequest
-#define Nfc_Main_content_mf_ultralight_read_tearing_flag_resp_MSGTYPE \
-    PB_MfUltralight_ReadTearingFlagResponse
-#define Nfc_Main_content_mf_ultralight_emulate_start_req_MSGTYPE \
-    PB_MfUltralight_EmulateStartRequest
-#define Nfc_Main_content_mf_ultralight_emulate_start_resp_MSGTYPE \
-    PB_MfUltralight_EmulateStartResponse
+#define Nfc_Main_content_mf_ultralight_read_counter_resp_MSGTYPE PB_MfUltralight_ReadCounterResponse
+#define Nfc_Main_content_mf_ultralight_read_tearing_flag_req_MSGTYPE PB_MfUltralight_ReadTearingFlagRequest
+#define Nfc_Main_content_mf_ultralight_read_tearing_flag_resp_MSGTYPE PB_MfUltralight_ReadTearingFlagResponse
+#define Nfc_Main_content_mf_ultralight_emulate_start_req_MSGTYPE PB_MfUltralight_EmulateStartRequest
+#define Nfc_Main_content_mf_ultralight_emulate_start_resp_MSGTYPE PB_MfUltralight_EmulateStartResponse
 #define Nfc_Main_content_mf_ultralight_emulate_stop_req_MSGTYPE PB_MfUltralight_EmulateStopRequest
-#define Nfc_Main_content_mf_ultralight_emulate_stop_resp_MSGTYPE \
-    PB_MfUltralight_EmulateStopResponse
+#define Nfc_Main_content_mf_ultralight_emulate_stop_resp_MSGTYPE PB_MfUltralight_EmulateStopResponse
 #define Nfc_Main_content_mf_classic_auth_req_MSGTYPE PB_MfClassic_AuthRequest
 #define Nfc_Main_content_mf_classic_auth_resp_MSGTYPE PB_MfClassic_AuthResponse
 #define Nfc_Main_content_mf_classic_read_block_req_MSGTYPE PB_MfClassic_ReadBlockRequest
 #define Nfc_Main_content_mf_classic_read_block_resp_MSGTYPE PB_MfClassic_ReadBlockResponse
+#define Nfc_Main_content_mf_classic_write_block_req_MSGTYPE PB_MfClassic_WriteBlockRequest
+#define Nfc_Main_content_mf_classic_write_block_resp_MSGTYPE PB_MfClassic_WriteBlockResponse
+#define Nfc_Main_content_mf_classic_read_value_req_MSGTYPE PB_MfClassic_ReadValueRequest
+#define Nfc_Main_content_mf_classic_read_value_resp_MSGTYPE PB_MfClassic_ReadValueResponse
+#define Nfc_Main_content_mf_classic_change_value_req_MSGTYPE PB_MfClassic_ChangeValueRequest
+#define Nfc_Main_content_mf_classic_change_value_resp_MSGTYPE PB_MfClassic_ChangeValueResponse
 
 extern const pb_msgdesc_t Nfc_Empty_msg;
 extern const pb_msgdesc_t Nfc_Main_msg;
@@ -320,8 +208,8 @@ extern const pb_msgdesc_t Nfc_Main_msg;
 #define Nfc_Main_fields &Nfc_Main_msg
 
 /* Maximum encoded size of messages (where known) */
-#define Nfc_Empty_size 0
-#define Nfc_Main_size 2057
+#define Nfc_Empty_size                           0
+#define Nfc_Main_size                            2057
 
 #ifdef __cplusplus
 } /* extern "C" */

@@ -54,5 +54,12 @@ message Main {
     .PB_MfClassic.AuthResponse mf_classic_auth_resp = 26;
     .PB_MfClassic.ReadBlockRequest mf_classic_read_block_req = 27;
     .PB_MfClassic.ReadBlockResponse mf_classic_read_block_resp = 28;
+    .PB_MfClassic.WriteBlockRequest mf_classic_write_block_req = 29;
+    .PB_MfClassic.WriteBlockResponse mf_classic_write_block_resp = 30;
+    .PB_MfClassic.ReadValueRequest mf_classic_read_value_req = 31;
+    .PB_MfClassic.ReadValueResponse mf_classic_read_value_resp = 32;
+    .PB_MfClassic.ChangeValueRequest mf_classic_change_value_req = 33;
+    .PB_MfClassic.ChangeValueResponse mf_classic_change_value_resp = 34;
+    
   }
 }
