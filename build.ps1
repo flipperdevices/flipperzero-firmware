@@ -1,6 +1,7 @@
 param (
     [switch]$doNotBuildBaseFap = $false,
-    [switch]$buildCustomFontFap = $false
+    [switch]$buildCustomFontFap = $false,
+    [switch]$doNotClearBuildFolder = $false
 )
 
 function Get-LatestDirectory {
@@ -36,7 +37,7 @@ Push-Location $PSScriptRoot
 
 if (!(Test-Path -PathType Container "build")) {
     New-Item -ItemType Directory -Path "build"
-} else {
+} elseif (!$doNotClearBuildFolder) {
     Remove-Item "build/*" -Recurse -Force
 }
 
@@ -139,6 +140,14 @@ if ($buildCustomFontFap -eq $true) {
         Write-Information "Custom font ($($custom_font.Subfolder)): Building without BadBT"
         Build-Run -FeaturesSuffix '_no-badbt' -CppDefine TOTP_NO_BADBT_TYPE,TOTP_NO_AUTOMATION_ICONS,TOTP_FONT=$($custom_font.CDEF) -Subfolder $($custom_font.Subfolder)
     }
+}
+
+$checksum_file = 'build/checksums.sha256'
+New-Item $checksum_file -ItemType File -Force
+Get-ChildItem -Path 'build/*.fap' | ForEach-Object {
+    $checksum = (Get-FileHash $_ -Algorithm SHA256).Hash.ToLower()
+    $filename = $_.Name
+    "$checksum  $filename" >> $checksum_file
 }
 
 Pop-Location
