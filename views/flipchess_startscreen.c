@@ -30,16 +30,24 @@ void flipchess_startscreen_draw(Canvas* canvas, FlipChessStartscreenModel* model
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
-    canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 10, 11, "How about a nice game of...");
-    canvas_draw_str(canvas, 99, 40, FLIPCHESS_VERSION);
+    canvas_draw_icon(canvas, 0, 0, &I_FLIPR_128x64);
 
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 10, 23, "Chess");
-    canvas_draw_icon(canvas, 0, 40, &I_Background_128x11);
-    canvas_draw_str(canvas, 10, 61, "FLIPR");
+    canvas_draw_str(canvas, 4, 11, "Chess");
+    canvas_set_font(canvas, FontSecondary);
+    canvas_draw_str(canvas, 62, 11, FLIPCHESS_VERSION);
 
-    elements_button_right(canvas, "Start");
+    //canvas_set_font(canvas, FontSecondary);
+    //canvas_draw_str(canvas, 10, 11, "How about a nice game of...");
+    //canvas_draw_str(canvas, 99, 40, FLIPCHESS_VERSION);
+
+    //canvas_set_font(canvas, FontPrimary);
+    //canvas_draw_str(canvas, 10, 23, "Chess");
+    //canvas_draw_icon(canvas, 0, 40, &I_Background_128x11);
+    //canvas_draw_str(canvas, 10, 61, "FLIPR");
+
+    elements_button_left(canvas, "Sound");
+    elements_button_right(canvas, "Silent");
 }
 
 static void flipchess_startscreen_model_init(FlipChessStartscreenModel* const model) {
@@ -49,6 +57,8 @@ static void flipchess_startscreen_model_init(FlipChessStartscreenModel* const mo
 bool flipchess_startscreen_input(InputEvent* event, void* context) {
     furi_assert(context);
     FlipChessStartscreen* instance = context;
+    FlipChess* app = instance->context;
+
     if(event->type == InputTypeRelease) {
         switch(event->key) {
         case InputKeyBack:
@@ -62,10 +72,9 @@ bool flipchess_startscreen_input(InputEvent* event, void* context) {
                 true);
             break;
         case InputKeyLeft:
-        case InputKeyRight:
-        case InputKeyUp:
-        case InputKeyDown:
-        case InputKeyOk:
+            // sound on, haptic off
+            app->sound = 1;
+            app->haptic = FlipChessHapticOff;
             with_view_model(
                 instance->view,
                 FlipChessStartscreenModel * model,
@@ -75,6 +84,22 @@ bool flipchess_startscreen_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
+        case InputKeyRight:
+            // sound off, haptic on
+            app->sound = 0;
+            app->haptic = FlipChessHapticOn;
+            with_view_model(
+                instance->view,
+                FlipChessStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(FlipChessCustomEventStartscreenOk, instance->context);
+                },
+                true);
+            break;
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyOk:
         case InputKeyMAX:
             break;
         }
