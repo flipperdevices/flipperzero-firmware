@@ -1,9 +1,9 @@
 App(
     appid="subghz",
     name="Sub-GHz",
-    apptype=FlipperAppType.APP,
+    apptype=FlipperAppType.MENUEXTERNAL,
     targets=["f7"],
-    cdefines=["APP_SUBGHZ"],
+    # cdefines=["APP_SUBGHZ"],
     entry_point="subghz_app",
     icon="A_Sub1ghz_14",
     stack_size=3 * 1024,

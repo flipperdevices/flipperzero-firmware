@@ -48,6 +48,9 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [YRM100 UHF RFID (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`  Not Tested
 - Added: [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
 - Updated: [Chess v1.4 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- UL: OFW: [Radio headers in SDK #2881 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2881)
+- UL: OFW: [iButton: delete key text overflow #2882 (By Programistich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2882)
+- Keeping Sub-GHz as External like OFW
 
 <a name="release">
 
