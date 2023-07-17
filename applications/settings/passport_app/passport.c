@@ -213,6 +213,9 @@ static void render_callback(Canvas* const canvas, void* ctx) {
         case PIMG_DALI:
             canvas_draw_icon(canvas, 11, 2, &I_Dali_Mask);
             break;
+        case PIMG_DEER:
+            canvas_draw_icon(canvas, 11, 2, &I_Deer);
+            break;
         case PIMG_DOLPHIN:
             canvas_draw_icon(canvas, 11, 2, portrait[passport->tmpLvl]);
             break;
