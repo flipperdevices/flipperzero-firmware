@@ -5,6 +5,7 @@ env.Append(
         "#/lib/drivers",
     ],
     SDK_HEADERS=[
+        File("cc1101_regs.h"),
         File("rgb_backlight.h"),
     ],
 )
