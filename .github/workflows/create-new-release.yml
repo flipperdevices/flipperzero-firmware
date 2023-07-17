@@ -1,0 +1,56 @@
+name: Create new release
+
+on:
+  workflow_dispatch:
+    inputs:
+      new_version:
+        description: 'New version'
+        required: true
+        type: string
+      
+      ref:
+        description: 'Commit hash (optional)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  test-new-version:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Verify new version format
+        run: |
+          if [[ "${{ inputs.new_version }}" =~ ^(\d+)\.(\d+)\.(\d+)$ ]]; 
+          then 
+            echo "New version looks okay";
+            exit 1
+          else 
+            echo "Invalid version format"; 
+          fi
+
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: "${{inputs.ref}}"
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Build
+        run: ./build.ps1
+        shell: pwsh
+
+      - uses: ncipollo/release-action@v1.12.0
+        with:
+          artifacts: "build/*.fap"
+          bodyFile: ".github/release-body.md"
+          artifactErrorsFailBuild: true
+          updateOnlyUnreleased: true
+          allowUpdates: true
+          removeArtifacts: true
+          draft: true
+          tag: "v${{ inputs.new_version }}"
+          commit: "${{inputs.ref}}"
