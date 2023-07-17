@@ -87,8 +87,6 @@ void nfc_scene_mf_classic_detect_reader_on_enter(void* context) {
 bool nfc_scene_mf_classic_detect_reader_on_event(void* context, SceneManagerEvent event) {
     NfcApp* instance = context;
     bool consumed = false;
-    UNUSED(instance);
-    UNUSED(event);
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == NfcCustomEventWorkerUpdate) {
