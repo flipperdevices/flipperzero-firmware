@@ -39,10 +39,11 @@ This software is for experimental purposes only and is not meant for any illegal
 - SubGHz: [X10 Protocol Decoder (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/protocols/x10)
 - [Evil Portal Updated index.html for a better looking Google Login Page (By breaching)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/36)
 - Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
+- [Allow NoAnim Build Creation with buildRelease.sh (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89f023b1039c836a0938d436f24f2a000eee8f14)
 - Removed: [Game of Tag WIP (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [Evil Portal Asset: Microsoft Login Page (By roshanravan) and Renames for Evil Portal Assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75876e84dc5deb130210da8283f36ef1b1858019
-- [New Passport Profile Pic - Deer (By wrenchathome)]
-- Evil Portal Asset: Twitch & PornHub Login Pages (By roshanravan)
+- [New Passport Profile Pic - Deer (Added By RogueMaster, Image By wrenchathome)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6fdcbe99ce63cc3a4cce8275281fd9b9e9db6578)
+- [Evil Portal Asset: Twitch & PornHub Login Pages (By roshanravan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3431fe56893c69463f6a36e1dc8c996dd358420d)
 - Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
