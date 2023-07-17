@@ -378,10 +378,13 @@ bool unpack_pacs(
             FURI_LOG_D(TAG, "Received pac: %s", pacDebug);
 
             memset(display, 0, sizeof(display));
-            for(uint8_t i = 0; i < sizeof(seader_credential->sio); i++) {
-                snprintf(display + (i * 2), sizeof(display), "%02x", seader_credential->sio[i]);
+            if(seader_credential->sio[0] == 0x30) {
+                for(uint8_t i = 0; i < sizeof(seader_credential->sio); i++) {
+                    snprintf(
+                        display + (i * 2), sizeof(display), "%02x", seader_credential->sio[i]);
+                }
+                FURI_LOG_D(TAG, "SIO %s", display);
             }
-            FURI_LOG_D(TAG, "SIO %s", display);
         }
 
         if(pac->size <= sizeof(seader_credential->credential)) {
@@ -565,7 +568,7 @@ bool iso15693Transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) 
             snprintf(display + (i * 2), sizeof(display), "%02x", rxBuffer[i]);
         }
         // FURI_LOG_D(TAG, "Result %d %s", recvLen, display);
-        if(memcmp(buffer, readBlock6, len) == 0) {
+        if(memcmp(buffer, readBlock6, len) == 0 && rxBuffer[0] == 0x30) {
             memcpy(credential->sio, rxBuffer, 32);
         } else if(memcmp(buffer, readBlock9, len) == 0) {
             memcpy(credential->sio + 32, rxBuffer + 8, 24);
