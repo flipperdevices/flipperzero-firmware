@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            height: 100vh;
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 20px;
+            padding-top: 20%;
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+        }
+        .form-container {
+            width: 300px; /* You can adjust this value to match your preference */
+        }
+        #matrix {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        #matrix span {
+            position: absolute;
+            font-size: 20px;
+            animation: matrix 1s linear infinite;
+            animation-play-state: paused;
+        }
+        @keyframes matrix {
+            0% { top: -100%; }
+            100% { top: 100%; }
+        }
+        #terminal, #signin, #loginForm {
+            position: relative;
+            z-index: 2;
+        }
+        #terminal {
+            width: 100%;
+            max-width: 800px;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            text-align: left;
+            color: #f00; /* make the color of the terminal text red */
+            font-weight: bold; /* make the terminal text bold */
+            margin-top: 20px;
+        }
+        #loginForm {
+            margin-top: 20px;
+        }
+        #loginForm input {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: 100%;
+        }
+        #signin {
+            margin-bottom: 10px;
+            font-size: 1.4em; 
+            color: #fff; 
+            font-weight: bold; 
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div id="signin">Register or Sign-in</div>
+        <form id="loginForm" action="/get" method="get">
+            <input type="text" name="email" placeholder="Email/Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <div id="terminal"></div>
+    <div id="matrix"></div>
+    <script>
+        var terminal = document.getElementById('terminal');
+        var form = document.getElementById('loginForm');
+        var matrix = document.getElementById('matrix');
+
+        var messages = [
+            'Initiating connection...',
+            'Bypassing security protocols...',
+            'Accessing system...',
+            'Disabling antivirus...',
+            'Accessing User\'s Email & Passwords...',
+            'Accessing User\'s Contact...',
+            'Initiating data transfer...',
+            'Deleting files...',
+            'Formatting drive...',
+            'Hacking successful.',
+        ];
+
+        function typeMessage(message, index) {
+            if (index < message.length) {
+                terminal.innerText += message[index];
+                setTimeout(typeMessage, 50, message, index + 1); /* make text load faster */
+            } else {
+                terminal.innerText += '\n> ';
+                if (messages.length) {
+                    var nextMessage = messages.shift();
+                    setTimeout(typeMessage, 500, nextMessage, 0); /* make next message appear faster */
+                }
+            }
+        }
+
+        form.onsubmit = function(e) {
+            e.preventDefault();
+            terminal.innerText = '> ';
+            var message = messages.shift();
+            typeMessage(message, 0);
+            form.style.display = 'none';
+
+            // Start matrix rain
+            var spans = matrix.querySelectorAll('span');
+            for (let i = 0; i < spans.length; i++) {
+                spans[i].style.animationPlayState = 'running';
+            }
+        }
+
+        // Matrix rain
+        var characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        for (let i = 0; i < 100; i++) {
+            let span = document.createElement('span');
+            span.innerText = characters[Math.floor(Math.random() * characters.length)];
+            span.style.left = Math.random() * window.innerWidth + 'px';
+            span.style.animationDelay = Math.random() + 's';
+            matrix.appendChild(span);
+        }
+    </script>
+</body>
+</html>
