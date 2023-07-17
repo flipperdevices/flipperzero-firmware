@@ -7,6 +7,7 @@
 //#include <dolphin/dolphin.h>
 #include <string.h>
 //#include "flipchess_icons.h"
+#include "../helpers/flipchess_voice.h"
 #include "../helpers/flipchess_haptic.h"
 
 #define SCL_960_CASTLING 0 // setting to 1 compiles a 960 version of smolchess
@@ -159,9 +160,20 @@ void flipchess_drawBoard(FlipChessScene1Model* model) {
         model->paramFlipBoard);
 }
 
+uint8_t flipchess_saveState(FlipChess* app, FlipChessScene1Model* model) {
+    for(uint8_t i = 0; i < SCL_FEN_MAX_LENGTH; i++) {
+        app->import_game_text[i] = '\0';
+    }
+    const uint8_t res = SCL_boardToFEN(model->game.board, app->import_game_text);
+    if(res > 0) {
+        app->import_game = 1;
+    }
+    return res;
+}
+
 uint8_t flipchess_turn(FlipChessScene1Model* model) {
     // 0: none, 1: player, 2: AI, 3: undo
-    uint8_t moveType = 0;
+    uint8_t moveType = FlipChessStatusNone;
 
     // if(model->paramInfo) {
 
@@ -169,9 +181,6 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
     //         printf("960 random position number: %d\n", model->random960PosNumber);
 
     //     printf("ply number: %d\n", model->game.ply);
-
-    //     SCL_boardToFEN(model->game.board, string);
-    //     printf("FEN: %s\n", string);
 
     //     int16_t eval = SCL_boardEvaluateStatic(model->game.board);
     //     printf(
@@ -207,7 +216,7 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
     // }
 
     if(model->game.state != SCL_GAME_STATE_PLAYING) {
-        model->paramExit = FlipChessStatusReturn;
+        model->paramExit = FlipChessStatusNone;
         return model->paramExit;
     }
 
@@ -215,7 +224,7 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
 
     if(flipchess_isPlayerTurn(model)) {
         // if(stringsEqual(string, "undo", 5))
-        //     moveType = 3;
+        //     moveType = FlipChessStatusMoveUndo;
         // else if(stringsEqual(string, "quit", 5))
         //     break;
 
@@ -237,7 +246,7 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
             }
         } else if(model->turnState == 2) {
             if(SCL_squareSetContains(model->moveHighlight, model->squareTo)) {
-                moveType = 1;
+                moveType = FlipChessStatusMovePlayer;
             }
             model->turnState = 0;
             SCL_squareSetClear(model->moveHighlight);
@@ -247,11 +256,11 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
         model->squareSelected = 255;
         flipchess_makeAIMove(
             model->game.board, &(model->squareFrom), &(model->squareTo), &movePromote, model);
-        moveType = 2;
+        moveType = FlipChessStatusMoveAI;
         model->turnState = 0;
     }
 
-    if(moveType == 1 || moveType == 2) {
+    if(moveType == FlipChessStatusMovePlayer || moveType == FlipChessStatusMoveAI) {
         flipchess_shiftMessages(model);
 
         SCL_moveToString(
@@ -262,7 +271,7 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
         SCL_squareSetClear(model->moveHighlight);
         SCL_squareSetAdd(model->moveHighlight, model->squareFrom);
         SCL_squareSetAdd(model->moveHighlight, model->squareTo);
-    } else if(moveType == 3) {
+    } else if(moveType == FlipChessStatusMoveUndo) {
         flipchess_shiftMessages(model);
 
         if(model->paramPlayerW != 0 || model->paramPlayerB != 0) SCL_gameUndoMove(&(model->game));
@@ -341,6 +350,8 @@ void flipchess_scene_1_draw(Canvas* canvas, FlipChessScene1Model* model) {
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
 
+    //canvas_draw_icon(canvas, 0, 0, &I_FLIPR_128x64);
+
     // Frame
     canvas_draw_frame(canvas, 0, 0, 66, 64);
 
@@ -370,7 +381,8 @@ void flipchess_scene_1_draw(Canvas* canvas, FlipChessScene1Model* model) {
 static int flipchess_scene_1_model_init(
     FlipChessScene1Model* const model,
     const int white_mode,
-    const int black_mode) {
+    const int black_mode,
+    char* import_game_text) {
     model->paramPlayerW = white_mode;
     model->paramPlayerB = black_mode;
 
@@ -378,9 +390,9 @@ static int flipchess_scene_1_model_init(
     model->paramMoves = 0;
     model->paramInfo = 1;
     model->paramFlipBoard = 0;
-    model->paramExit = FlipChessStatusSuccess;
+    model->paramExit = FlipChessStatusNone;
     model->paramStep = 0;
-    model->paramFEN = NULL;
+    model->paramFEN = import_game_text;
     model->paramPGN = NULL;
     model->clockSeconds = -1;
 
@@ -481,12 +493,13 @@ static int flipchess_scene_1_model_init(
     model->msg = (SCL_boardWhitesTurn(model->game.board) ? "white to move" : "black to move");
 
     // 0 = success
-    return FlipChessStatusSuccess;
+    return FlipChessStatusNone;
 }
 
 bool flipchess_scene_1_input(InputEvent* event, void* context) {
     furi_assert(context);
     FlipChessScene1* instance = context;
+    FlipChess* app = instance->context;
 
     if(event->type == InputTypeRelease) {
         switch(event->key) {
@@ -582,7 +595,11 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 FlipChessScene1Model * model,
                 {
                     // first turn of round, probably player but could be AI
-                    flipchess_turn(model);
+                    if(flipchess_turn(model) == FlipChessStatusReturn) {
+                        if(app->sound == 1) flipchess_voice_a_strange_game();
+                        flipchess_play_long_bump(app);
+                    }
+                    flipchess_saveState(app, model);
                     flipchess_drawBoard(model);
                 },
                 true);
@@ -604,7 +621,11 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                 {
                     // if player played, let AI play
                     if(!flipchess_isPlayerTurn(model)) {
-                        flipchess_turn(model);
+                        if(flipchess_turn(model) == FlipChessStatusReturn) {
+                            if(app->sound == 1) flipchess_voice_a_strange_game();
+                            flipchess_play_long_bump(app);
+                        }
+                        flipchess_saveState(app, model);
                         flipchess_drawBoard(model);
                     }
                 },
@@ -628,7 +649,6 @@ void flipchess_scene_1_exit(void* context) {
 void flipchess_scene_1_enter(void* context) {
     furi_assert(context);
     FlipChessScene1* instance = (FlipChessScene1*)context;
-
     FlipChess* app = instance->context;
 
     flipchess_play_happy_bump(app);
@@ -637,16 +657,25 @@ void flipchess_scene_1_enter(void* context) {
         instance->view,
         FlipChessScene1Model * model,
         {
-            int init = flipchess_scene_1_model_init(model, app->white_mode, app->black_mode);
+            // load imported game if applicable
+            char* import_game_text = NULL;
+            if(app->import_game == 1 && strlen(app->import_game_text) > 0) {
+                import_game_text = app->import_game_text;
+            } else {
+                if(app->sound == 1) flipchess_voice_how_about_chess();
+            }
 
-            // nonzero status
-            if(init == FlipChessStatusSuccess) {
+            int init = flipchess_scene_1_model_init(
+                model, app->white_mode, app->black_mode, import_game_text);
+
+            if(init == FlipChessStatusNone) {
                 // perform initial turn, sets up and lets white
                 // AI play if applicable
                 const uint8_t turn = flipchess_turn(model);
                 if(turn == FlipChessStatusReturn) {
                     init = turn;
                 } else {
+                    flipchess_saveState(app, model);
                     flipchess_drawBoard(model);
                 }
             }

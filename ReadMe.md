@@ -47,6 +47,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 - Added: [YRM100 UHF RFID (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`  Not Tested
 - Added: [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
+- Updated: [Chess v1.4 (By xtruan)](https://github.com/xtruan/flipper-chess)
 
 <a name="release">
 
@@ -215,7 +216,7 @@ $ ./fbt dolphin_ext
 - [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Bomberduck (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
-- [Chess v1.2 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess v1.4 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)

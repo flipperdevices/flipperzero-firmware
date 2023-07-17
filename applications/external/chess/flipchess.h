@@ -16,9 +16,10 @@
 #include "views/flipchess_startscreen.h"
 #include "views/flipchess_scene_1.h"
 
-#define FLIPCHESS_VERSION "v0.1.2"
+#define FLIPCHESS_VERSION "v0.1.4"
 
-#define TEXT_BUFFER_SIZE 256
+#define TEXT_BUFFER_SIZE 96
+#define TEXT_SIZE (TEXT_BUFFER_SIZE - 1)
 
 typedef struct {
     Gui* gui;
@@ -34,10 +35,12 @@ typedef struct {
     int haptic;
     int white_mode;
     int black_mode;
+    // Startscreen options
+    uint8_t sound;
     // Main menu options
-    int import_game;
+    uint8_t import_game;
     // Text input
-    int input_state;
+    uint8_t input_state;
     char import_game_text[TEXT_BUFFER_SIZE];
     char input_text[TEXT_BUFFER_SIZE];
 } FlipChess;
@@ -65,7 +68,10 @@ typedef enum {
 typedef enum { FlipChessTextInputDefault, FlipChessTextInputGame } FlipChessTextInputState;
 
 typedef enum {
-    FlipChessStatusSuccess = 0,
+    FlipChessStatusNone = 0,
+    FlipChessStatusMovePlayer = 1,
+    FlipChessStatusMoveAI = 2,
+    FlipChessStatusMoveUndo = 3,
     FlipChessStatusReturn = 10,
     FlipChessStatusLoadError = 11,
     FlipChessStatusSaveError = 12,
