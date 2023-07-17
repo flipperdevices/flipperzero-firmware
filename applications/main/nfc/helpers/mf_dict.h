@@ -51,7 +51,7 @@ uint32_t mf_dict_get_total_keys(MfDict* dict);
  */
 bool mf_dict_rewind(MfDict* dict);
 
-bool mf_dict_is_key_present(MfDict* dict, uint8_t* key);
+bool mf_dict_is_key_present(MfDict* dict, const MfClassicKey* key);
 
 bool mf_dict_is_key_present_str(MfDict* dict, FuriString* key);
 
@@ -79,7 +79,7 @@ bool mf_dict_get_key_at_index(MfDict* dict, uint64_t* key, uint32_t target);
  */
 bool mf_dict_get_key_at_index_str(MfDict* dict, FuriString* key, uint32_t target);
 
-bool mf_dict_add_key(MfDict* dict, uint8_t* key);
+bool mf_dict_add_key(MfDict* dict, const MfClassicKey* key);
 
 /** Add string representation of the key
  *
@@ -102,6 +102,8 @@ bool mf_dict_find_index_str(MfDict* dict, FuriString* key, uint32_t* target);
  * @return     true on success
  */
 bool mf_dict_delete_index(MfDict* dict, uint32_t target);
+
+bool mf_dict_delete_key(MfDict* dict, const MfClassicKey* key);
 
 #ifdef __cplusplus
 }

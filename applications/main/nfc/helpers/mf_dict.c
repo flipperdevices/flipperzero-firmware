@@ -124,7 +124,7 @@ void mf_dict_free(MfDict* dict) {
     free(dict);
 }
 
-static void mf_dict_int_to_str(uint8_t* key_int, FuriString* key_str) {
+static void mf_dict_int_to_str(const uint8_t* key_int, FuriString* key_str) {
     furi_string_reset(key_str);
     for(size_t i = 0; i < 6; i++) {
         furi_string_cat_printf(key_str, "%02X", key_int[i]);
@@ -210,11 +210,11 @@ bool mf_dict_is_key_present_str(MfDict* dict, FuriString* key) {
     return key_found;
 }
 
-bool mf_dict_is_key_present(MfDict* dict, uint8_t* key) {
+bool mf_dict_is_key_present(MfDict* dict, const MfClassicKey* key) {
     FuriString* temp_key;
 
     temp_key = furi_string_alloc();
-    mf_dict_int_to_str(key, temp_key);
+    mf_dict_int_to_str(key->data, temp_key);
     bool key_found = mf_dict_is_key_present_str(dict, temp_key);
     furi_string_free(temp_key);
     return key_found;
@@ -238,13 +238,13 @@ bool mf_dict_add_key_str(MfDict* dict, FuriString* key) {
     return key_added;
 }
 
-bool mf_dict_add_key(MfDict* dict, uint8_t* key) {
+bool mf_dict_add_key(MfDict* dict, const MfClassicKey* key) {
     furi_assert(dict);
     furi_assert(dict->stream);
 
     FuriString* temp_key;
     temp_key = furi_string_alloc();
-    mf_dict_int_to_str(key, temp_key);
+    mf_dict_int_to_str(key->data, temp_key);
     bool key_added = mf_dict_add_key_str(dict, temp_key);
 
     furi_string_free(temp_key);
@@ -346,5 +346,22 @@ bool mf_dict_delete_index(MfDict* dict, uint32_t target) {
     }
 
     furi_string_free(next_line);
+    return key_removed;
+}
+
+bool mf_dict_delete_key(MfDict* dict, const MfClassicKey* key) {
+    furi_assert(dict);
+    furi_assert(dict->stream);
+
+    bool key_removed = false;
+    MfClassicKey temp_key = {};
+    while(!key_removed) {
+        if(!mf_dict_get_next_key(dict, &temp_key)) break;
+        if(memcmp(temp_key.data, key->data, sizeof(MfClassicKey)) == 0) {
+            key_removed = true;
+        }
+    }
+    mf_dict_rewind(dict);
+
     return key_removed;
 }
