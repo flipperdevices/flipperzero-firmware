@@ -1,4 +1,5 @@
 #include "../flipchess.h"
+#include "../helpers/flipchess_voice.h"
 #include "../helpers/flipchess_file.h"
 #include "../helpers/flipchess_custom_event.h"
 #include "../views/flipchess_startscreen.h"
@@ -59,5 +60,8 @@ bool flipchess_scene_startscreen_on_event(void* context, SceneManagerEvent event
 
 void flipchess_scene_startscreen_on_exit(void* context) {
     FlipChess* app = context;
-    UNUSED(app);
+
+    if(app->sound == 1) {
+        flipchess_voice_shall_we_play();
+    }
 }

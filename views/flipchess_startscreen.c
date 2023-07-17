@@ -46,7 +46,7 @@ void flipchess_startscreen_draw(Canvas* canvas, FlipChessStartscreenModel* model
     //canvas_draw_icon(canvas, 0, 40, &I_Background_128x11);
     //canvas_draw_str(canvas, 10, 61, "FLIPR");
 
-    elements_button_center(canvas, "Sound");
+    elements_button_left(canvas, "Sound");
     elements_button_right(canvas, "Silent");
 }
 
@@ -72,11 +72,9 @@ bool flipchess_startscreen_input(InputEvent* event, void* context) {
                 true);
             break;
         case InputKeyLeft:
-        case InputKeyUp:
-        case InputKeyDown:
-        case InputKeyOk:
-            // sound on
+            // sound on, haptic off
             app->sound = 1;
+            app->haptic = FlipChessHapticOff;
             with_view_model(
                 instance->view,
                 FlipChessStartscreenModel * model,
@@ -87,8 +85,9 @@ bool flipchess_startscreen_input(InputEvent* event, void* context) {
                 true);
             break;
         case InputKeyRight:
-            // sound off
+            // sound off, haptic on
             app->sound = 0;
+            app->haptic = FlipChessHapticOn;
             with_view_model(
                 instance->view,
                 FlipChessStartscreenModel * model,
@@ -98,6 +97,9 @@ bool flipchess_startscreen_input(InputEvent* event, void* context) {
                 },
                 true);
             break;
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyOk:
         case InputKeyMAX:
             break;
         }

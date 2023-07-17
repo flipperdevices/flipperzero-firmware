@@ -68,7 +68,10 @@ typedef enum {
 typedef enum { FlipChessTextInputDefault, FlipChessTextInputGame } FlipChessTextInputState;
 
 typedef enum {
-    FlipChessStatusSuccess = 0,
+    FlipChessStatusNone = 0,
+    FlipChessStatusMovePlayer = 1,
+    FlipChessStatusMoveAI = 2,
+    FlipChessStatusMoveUndo = 3,
     FlipChessStatusReturn = 10,
     FlipChessStatusLoadError = 11,
     FlipChessStatusSaveError = 12,
