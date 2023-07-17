@@ -40,6 +40,9 @@ bool seader_scene_sam_missing_on_event(void* context, SceneManagerEvent event) {
         } else if(event.event == SubmenuIndexSaved) {
             scene_manager_next_scene(seader->scene_manager, SeaderSceneFileSelect);
             consumed = true;
+        } else if(event.event == SeaderWorkerEventSamPresent) {
+            scene_manager_next_scene(seader->scene_manager, SeaderSceneSamPresent);
+            consumed = true;
         }
     } else if(event.type == SceneManagerEventTypeBack) {
         scene_manager_stop(seader->scene_manager);

@@ -78,6 +78,12 @@ Seader* seader_alloc() {
     view_dispatcher_add_view(
         seader->view_dispatcher, SeaderViewWidget, widget_get_view(seader->widget));
 
+    seader->seader_uart_view = seader_uart_view_alloc();
+    view_dispatcher_add_view(
+        seader->view_dispatcher,
+        SeaderViewUart,
+        seader_uart_view_get_view(seader->seader_uart_view));
+
     return seader;
 }
 
@@ -113,6 +119,9 @@ void seader_free(Seader* seader) {
     // Custom Widget
     view_dispatcher_remove_view(seader->view_dispatcher, SeaderViewWidget);
     widget_free(seader->widget);
+
+    view_dispatcher_remove_view(seader->view_dispatcher, SeaderViewUart);
+    seader_uart_view_free(seader->seader_uart_view);
 
     // Worker
     seader_worker_stop(seader->worker);

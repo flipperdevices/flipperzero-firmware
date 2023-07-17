@@ -33,6 +33,7 @@
 #include <FrameProtocol.h>
 
 #include "scenes/seader_scene.h"
+#include "views/seader_uart_view.h"
 
 #include "seader_bridge.h"
 #include "seader.h"
@@ -93,6 +94,9 @@ struct Seader {
     Loading* loading;
     TextInput* text_input;
     Widget* widget;
+
+    //Custom views
+    SeaderUartView* seader_uart_view;
 };
 
 typedef enum {
@@ -101,6 +105,7 @@ typedef enum {
     SeaderViewLoading,
     SeaderViewTextInput,
     SeaderViewWidget,
+    SeaderViewUart,
 } SeaderView;
 
 void seader_text_store_set(Seader* seader, const char* text, ...);

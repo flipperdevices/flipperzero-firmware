@@ -33,7 +33,6 @@ void seader_uart_serial_deinit(SeaderUartBridge* seader_uart, uint8_t uart_ch) {
 void seader_uart_set_baudrate(SeaderUartBridge* seader_uart, uint32_t baudrate) {
     if(baudrate != 0) {
         furi_hal_uart_set_br(seader_uart->cfg.uart_ch, baudrate);
-        seader_uart->st.baudrate_cur = baudrate;
     } else {
         FURI_LOG_I(TAG, "No baudrate specified");
     }
