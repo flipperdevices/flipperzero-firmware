@@ -9,7 +9,8 @@ extern "C" {
 typedef struct MfClassicListener MfClassicListener;
 
 typedef enum {
-    MfClassicListenerEventTypeAuthContextGathered,
+    MfClassicListenerEventTypeAuthContextPartCollected,
+    MfClassicListenerEventTypeAuthContextFullCollected,
 } MfClassicListenerEventType;
 
 typedef union {

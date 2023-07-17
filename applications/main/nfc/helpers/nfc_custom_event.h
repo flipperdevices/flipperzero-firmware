@@ -20,6 +20,7 @@ typedef enum {
     NfcCustomEventViewExit,
     NfcCustomEventWorkerExit,
     NfcCustomEventWorkerUpdate,
+    NfcCustomEventTimerExpired,
     NfcCustomEventByteInputDone,
     NfcCustomEventTextInputDone,
     NfcCustomEventDictAttackDone,

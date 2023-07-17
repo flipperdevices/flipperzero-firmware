@@ -43,3 +43,37 @@ message ReadBlockResponse {
     Error error = 1;
     bytes data = 2;
 }
+
+message WriteBlockRequest {
+  uint32 block = 1;
+  bytes key = 2;
+  KeyType key_type = 3;
+  bytes data = 4;
+}
+
+message WriteBlockResponse {
+  Error error = 1;
+}
+
+message ReadValueRequest {
+  uint32 block = 1;
+  bytes key = 2;
+  KeyType key_type = 3;
+}
+
+message ReadValueResponse {
+  Error error = 1;
+  int32 value = 2;
+}
+
+message ChangeValueRequest {
+  uint32 block = 1;
+  bytes key = 2;
+  KeyType key_type = 3;
+  int32 data = 4;
+}
+
+message ChangeValueResponse {
+  Error error = 1;
+  int32 value = 2;
+}

@@ -28,6 +28,9 @@ ADD_SCENE(nfc, mf_desfire_data, MfDesfireData)
 ADD_SCENE(nfc, mf_desfire_app, MfDesfireApp)
 
 ADD_SCENE(nfc, mf_classic_dict_attack, MfClassicDictAttack)
+ADD_SCENE(nfc, mf_classic_detect_reader, MfClassicDetectReader)
+ADD_SCENE(nfc, mf_classic_mfkey_nonces_info, MfClassicMfkeyNoncesInfo)
+ADD_SCENE(nfc, mf_classic_mfkey_complete, MfClassicMfkeyComplete)
 
 ADD_SCENE(nfc, set_type, SetType)
 ADD_SCENE(nfc, set_sak, SetSak)

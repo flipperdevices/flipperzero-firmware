@@ -71,9 +71,35 @@ typedef struct {
     MfClassicBlock block;
 } MfClassicReadBlockContext;
 
+typedef struct {
+    uint8_t block_num;
+    MfClassicKey key;
+    MfClassicKeyType key_type;
+    MfClassicBlock block;
+} MfClassicWriteBlockContext;
+
+typedef struct {
+    uint8_t block_num;
+    MfClassicKey key;
+    MfClassicKeyType key_type;
+    int32_t value;
+} MfClassicReadValueContext;
+
+typedef struct {
+    uint8_t block_num;
+    MfClassicKey key;
+    MfClassicKeyType key_type;
+    MfClassicValueCommand value_cmd;
+    int32_t data;
+    int32_t new_value;
+} MfClassicChangeValueContext;
+
 typedef union {
     MfClassicAuthContext auth_context;
     MfClassicReadBlockContext read_block_context;
+    MfClassicWriteBlockContext write_block_context;
+    MfClassicReadValueContext read_value_context;
+    MfClassicChangeValueContext change_value_context;
 } MfClassicPollerContextData;
 
 MfClassicError mf_classic_process_error(Iso14443_3aError error);
@@ -93,6 +119,19 @@ MfClassicError mf_classic_aync_halt(MfClassicPoller* instance);
 
 MfClassicError
     mf_classic_async_read_block(MfClassicPoller* instance, uint8_t block_num, MfClassicBlock* data);
+
+MfClassicError mf_classic_async_write_block(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicBlock* data);
+
+MfClassicError mf_classic_async_value_cmd(
+    MfClassicPoller* instance,
+    uint8_t block_num,
+    MfClassicValueCommand cmd,
+    int32_t data);
+
+MfClassicError mf_classic_async_value_transfer(MfClassicPoller* instance, uint8_t block_num);
 
 #ifdef __cplusplus
 }

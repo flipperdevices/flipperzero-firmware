@@ -411,9 +411,11 @@ NfcError nfc_trx(Nfc* instance, const BitBuffer* tx_buffer, BitBuffer* rx_buffer
     // Tx
     furi_assert(furi_message_queue_put(listener_queue, &message, FuriWaitForever) == FuriStatusOk);
     // Rx
-    furi_assert(furi_message_queue_get(poller_queue, &message, FuriWaitForever) == FuriStatusOk);
+    FuriStatus status = furi_message_queue_get(poller_queue, &message, 50);
 
-    if(message.type == NfcMessageTypeTx) {
+    if(status == FuriStatusErrorTimeout) {
+        error = NfcErrorTimeout;
+    } else if(message.type == NfcMessageTypeTx) {
         bit_buffer_copy_bits(rx_buffer, message.data.data, message.data.data_bits);
         nfc_test_print(
             NfcTransportLogLevelWarning, "TAG", message.data.data, message.data.data_bits);

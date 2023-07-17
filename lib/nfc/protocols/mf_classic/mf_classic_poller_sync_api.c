@@ -4,11 +4,16 @@
 
 #include <furi.h>
 
+#define TAG "MfClassicPoller"
+
 #define MF_CLASSIC_POLLER_COMPLETE_EVENT (1UL << 0)
 
 typedef enum {
     MfClassicPollerCmdTypeAuth,
     MfClassicPollerCmdTypeReadBlock,
+    MfClassicPollerCmdTypeWriteBlock,
+    MfClassicPollerCmdTypeReadValue,
+    MfClassicPollerCmdTypeChangeValue,
 
     MfClassicPollerCmdTypeNum,
 } MfClassicPollerCmdType;
@@ -38,16 +43,121 @@ static MfClassicError mf_classic_poller_read_block_handler(
     MfClassicPollerContextData* data) {
     MfClassicError error = MfClassicErrorNone;
 
-    error = mf_classic_async_auth(
-        poller,
-        data->read_block_context.block_num,
-        &data->read_block_context.key,
-        data->read_block_context.key_type,
-        NULL);
-    if(error == MfClassicErrorNone) {
+    do {
+        error = mf_classic_async_auth(
+            poller,
+            data->read_block_context.block_num,
+            &data->read_block_context.key,
+            data->read_block_context.key_type,
+            NULL);
+        if(error != MfClassicErrorNone) break;
+
         error = mf_classic_async_read_block(
             poller, data->read_block_context.block_num, &data->read_block_context.block);
-    }
+        if(error != MfClassicErrorNone) break;
+
+        error = mf_classic_aync_halt(poller);
+        if(error != MfClassicErrorNone) break;
+
+    } while(false);
+
+    return error;
+}
+
+static MfClassicError mf_classic_poller_write_block_handler(
+    MfClassicPoller* poller,
+    MfClassicPollerContextData* data) {
+    MfClassicError error = MfClassicErrorNone;
+
+    do {
+        error = mf_classic_async_auth(
+            poller,
+            data->read_block_context.block_num,
+            &data->read_block_context.key,
+            data->read_block_context.key_type,
+            NULL);
+        if(error != MfClassicErrorNone) break;
+
+        error = mf_classic_async_write_block(
+            poller, data->write_block_context.block_num, &data->write_block_context.block);
+        if(error != MfClassicErrorNone) break;
+
+        error = mf_classic_aync_halt(poller);
+        if(error != MfClassicErrorNone) break;
+
+    } while(false);
+
+    return error;
+}
+
+static MfClassicError mf_classic_poller_read_value_handler(
+    MfClassicPoller* poller,
+    MfClassicPollerContextData* data) {
+    MfClassicError error = MfClassicErrorNone;
+
+    do {
+        error = mf_classic_async_auth(
+            poller,
+            data->read_value_context.block_num,
+            &data->read_value_context.key,
+            data->read_value_context.key_type,
+            NULL);
+        if(error != MfClassicErrorNone) break;
+
+        MfClassicBlock block = {};
+        error = mf_classic_async_read_block(poller, data->read_value_context.block_num, &block);
+        if(error != MfClassicErrorNone) break;
+
+        if(!mf_classic_block_to_value(&block, &data->read_value_context.value, NULL)) {
+            error = MfClassicErrorProtocol;
+            break;
+        }
+
+        error = mf_classic_aync_halt(poller);
+        if(error != MfClassicErrorNone) break;
+
+    } while(false);
+
+    return error;
+}
+
+static MfClassicError mf_classic_poller_change_value_handler(
+    MfClassicPoller* poller,
+    MfClassicPollerContextData* data) {
+    MfClassicError error = MfClassicErrorNone;
+
+    do {
+        error = mf_classic_async_auth(
+            poller,
+            data->change_value_context.block_num,
+            &data->change_value_context.key,
+            data->change_value_context.key_type,
+            NULL);
+        if(error != MfClassicErrorNone) break;
+
+        error = mf_classic_async_value_cmd(
+            poller,
+            data->change_value_context.block_num,
+            data->change_value_context.value_cmd,
+            data->change_value_context.data);
+        if(error != MfClassicErrorNone) break;
+
+        error = mf_classic_async_value_transfer(poller, data->change_value_context.block_num);
+        if(error != MfClassicErrorNone) break;
+
+        MfClassicBlock block = {};
+        error = mf_classic_async_read_block(poller, data->change_value_context.block_num, &block);
+        if(error != MfClassicErrorNone) break;
+
+        error = mf_classic_aync_halt(poller);
+        if(error != MfClassicErrorNone) break;
+
+        if(!mf_classic_block_to_value(&block, &data->change_value_context.new_value, NULL)) {
+            error = MfClassicErrorProtocol;
+            break;
+        }
+
+    } while(false);
 
     return error;
 }
@@ -55,6 +165,9 @@ static MfClassicError mf_classic_poller_read_block_handler(
 static const MfClassicPollerCmdHandler mf_classic_poller_cmd_handlers[MfClassicPollerCmdTypeNum] = {
     [MfClassicPollerCmdTypeAuth] = mf_classic_poller_auth_handler,
     [MfClassicPollerCmdTypeReadBlock] = mf_classic_poller_read_block_handler,
+    [MfClassicPollerCmdTypeWriteBlock] = mf_classic_poller_write_block_handler,
+    [MfClassicPollerCmdTypeReadValue] = mf_classic_poller_read_value_handler,
+    [MfClassicPollerCmdTypeChangeValue] = mf_classic_poller_change_value_handler,
 };
 
 static NfcCommand mf_ultralgiht_poller_cmd_callback(NfcGenericEvent event, void* context) {
@@ -145,6 +258,94 @@ MfClassicError mf_classic_poller_read_block(
 
     if(error == MfClassicErrorNone) {
         *data = poller_context.data.read_block_context.block;
+    }
+
+    return error;
+}
+
+MfClassicError mf_classic_poller_write_block(
+    Nfc* nfc,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    MfClassicBlock* data) {
+    furi_assert(nfc);
+    furi_assert(key);
+    furi_assert(data);
+
+    MfClassicPollerContext poller_context = {
+        .cmd_type = MfClassicPollerCmdTypeWriteBlock,
+        .data.write_block_context.block_num = block_num,
+        .data.write_block_context.key = *key,
+        .data.write_block_context.key_type = key_type,
+        .data.write_block_context.block = *data,
+    };
+
+    MfClassicError error = mf_classic_poller_cmd_execute(nfc, &poller_context);
+
+    return error;
+}
+
+MfClassicError mf_classic_poller_read_value(
+    Nfc* nfc,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    int32_t* value) {
+    furi_assert(nfc);
+    furi_assert(key);
+    furi_assert(value);
+
+    MfClassicPollerContext poller_context = {
+        .cmd_type = MfClassicPollerCmdTypeReadValue,
+        .data.write_block_context.block_num = block_num,
+        .data.write_block_context.key = *key,
+        .data.write_block_context.key_type = key_type,
+    };
+
+    MfClassicError error = mf_classic_poller_cmd_execute(nfc, &poller_context);
+
+    if(error == MfClassicErrorNone) {
+        *value = poller_context.data.read_value_context.value;
+    }
+
+    return error;
+}
+
+MfClassicError mf_classic_poller_change_value(
+    Nfc* nfc,
+    uint8_t block_num,
+    MfClassicKey* key,
+    MfClassicKeyType key_type,
+    int32_t data,
+    int32_t* new_value) {
+    furi_assert(nfc);
+    furi_assert(key);
+    furi_assert(new_value);
+
+    MfClassicValueCommand command = MfClassicValueCommandRestore;
+    int32_t command_data = 0;
+    if(data > 0) {
+        command = MfClassicValueCommandIncrement;
+        command_data = data;
+    } else if(data < 0) {
+        command = MfClassicValueCommandDecrement;
+        command_data = -data;
+    }
+
+    MfClassicPollerContext poller_context = {
+        .cmd_type = MfClassicPollerCmdTypeChangeValue,
+        .data.change_value_context.block_num = block_num,
+        .data.change_value_context.key = *key,
+        .data.change_value_context.key_type = key_type,
+        .data.change_value_context.value_cmd = command,
+        .data.change_value_context.data = command_data,
+    };
+
+    MfClassicError error = mf_classic_poller_cmd_execute(nfc, &poller_context);
+
+    if(error == MfClassicErrorNone) {
+        *new_value = poller_context.data.change_value_context.new_value;
     }
 
     return error;

@@ -28,6 +28,7 @@
 #include "helpers/nfc_custom_event.h"
 #include "helpers/mf_ultralight_auth.h"
 #include "helpers/mf_dict.h"
+#include "helpers/mfkey32_logger.h"
 
 #include <dialogs/dialogs.h>
 #include <storage/storage.h>
@@ -58,6 +59,9 @@
 #define NFC_APP_FOLDER ANY_PATH("nfc")
 #define NFC_APP_EXTENSION ".nfc"
 #define NFC_APP_SHADOW_EXTENSION ".shd"
+
+#define NFC_APP_MFKEY32_LOGS_FILE_NAME ".mfkey32.log"
+#define NFC_APP_MFKEY32_LOGS_FILE_PATH NFC_APP_FOLDER "/" NFC_APP_MFKEY32_LOGS_FILE_NAME
 
 typedef enum {
     NfcRpcStateIdle,
@@ -111,11 +115,13 @@ struct NfcApp {
 
     MfUltralightAuth* mf_ul_auth;
     NfcMfClassicDictAttackContext mf_dict_context;
+    Mfkey32Logger* mfkey32_logger;
 
     NfcDevice* nfc_device;
     Iso14443_3aData* iso14443_3a_edit_data;
     FuriString* file_path;
     FuriString* file_name;
+    FuriTimer* timer;
 };
 
 typedef enum {
