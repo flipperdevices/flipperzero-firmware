@@ -1,4 +1,5 @@
 #include "../flipchess.h"
+#include "../helpers/flipchess_file.h"
 #include "../helpers/flipchess_voice.h"
 #include "../helpers/flipchess_custom_event.h"
 #include "../views/flipchess_scene_1.h"
@@ -52,5 +53,8 @@ bool flipchess_scene_scene_1_on_event(void* context, SceneManagerEvent event) {
 
 void flipchess_scene_scene_1_on_exit(void* context) {
     FlipChess* app = context;
-    UNUSED(app);
+
+    if(app->import_game == 1 && strlen(app->import_game_text) > 0) {
+        flipchess_save_file(app->import_game_text, FlipChessFileBoard, NULL, false);
+    }
 }
