@@ -35,13 +35,15 @@ void nfc_device_free(NfcDevice* instance) {
 void nfc_device_clear(NfcDevice* instance) {
     furi_assert(instance);
 
-    if(instance->protocol < NfcProtocolNum) {
+    if(instance->protocol == NfcProtocolInvalid) {
+        furi_assert(instance->protocol_data == NULL);
+    } else if(instance->protocol < NfcProtocolNum) {
         if(instance->protocol_data) {
             nfc_devices[instance->protocol]->free(instance->protocol_data);
             instance->protocol_data = NULL;
         }
+        instance->protocol = NfcProtocolInvalid;
     }
-    instance->protocol = NfcProtocolInvalid;
 }
 
 void nfc_device_reset(NfcDevice* instance) {
