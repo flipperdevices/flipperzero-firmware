@@ -6,10 +6,9 @@
 void nfc_scene_supported_card_on_enter(void* context) {
     NfcApp* instance = context;
 
-    NfcSupportedCards* supported_cards = nfc_supported_cards_alloc();
     FuriString* temp_str = furi_string_alloc();
 
-    if(nfc_supported_cards_parse(supported_cards, instance->nfc_device, temp_str)) {
+    if(nfc_supported_cards_parse(instance->nfc_device, temp_str)) {
         widget_add_text_scroll_element(
             instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
         widget_add_button_element(
@@ -28,7 +27,6 @@ void nfc_scene_supported_card_on_enter(void* context) {
     }
 
     furi_string_free(temp_str);
-    nfc_supported_cards_free(supported_cards);
 }
 
 bool nfc_scene_supported_card_on_event(void* context, SceneManagerEvent event) {

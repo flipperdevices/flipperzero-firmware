@@ -109,9 +109,7 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
             dolphin_deed(DolphinDeedNfcReadSuccess);
             consumed = true;
         } else if(event.event == NfcCustomEventPollerIncomplete) {
-            NfcSupportedCards* supported_cards = nfc_supported_cards_alloc();
-            nfc_supported_cards_read(supported_cards, instance->nfc_device, instance->nfc);
-            nfc_supported_cards_free(supported_cards);
+            nfc_supported_cards_read(instance->nfc_device, instance->nfc);
 
             view_dispatcher_send_custom_event(
                 instance->view_dispatcher, NfcCustomEventPollerSuccess);
@@ -226,9 +224,7 @@ static void nfc_protocol_support_scene_read_success_on_enter(NfcApp* instance) {
     Widget* widget = instance->widget;
 
     FuriString* temp_str = furi_string_alloc();
-    NfcSupportedCards* supported_cards = nfc_supported_cards_alloc();
-
-    if(nfc_supported_cards_parse(supported_cards, instance->nfc_device, temp_str)) {
+    if(nfc_supported_cards_parse(instance->nfc_device, temp_str)) {
         widget_add_text_scroll_element(
             instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
     } else {
@@ -236,7 +232,6 @@ static void nfc_protocol_support_scene_read_success_on_enter(NfcApp* instance) {
         nfc_protocol_support[protocol]->scene_read_success.on_enter(instance);
     }
 
-    nfc_supported_cards_free(supported_cards);
     furi_string_free(temp_str);
 
     widget_add_button_element(

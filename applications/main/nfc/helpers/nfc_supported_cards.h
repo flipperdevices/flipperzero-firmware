@@ -9,18 +9,9 @@
 extern "C" {
 #endif
 
-typedef struct NfcSupportedCards NfcSupportedCards;
+bool nfc_supported_cards_read(NfcDevice* device, Nfc* nfc);
 
-NfcSupportedCards* nfc_supported_cards_alloc();
-
-void nfc_supported_cards_free(NfcSupportedCards* instance);
-
-bool nfc_supported_cards_read(NfcSupportedCards* instance, NfcDevice* device, Nfc* nfc);
-
-bool nfc_supported_cards_parse(
-    NfcSupportedCards* instance,
-    const NfcDevice* device,
-    FuriString* parsed_data);
+bool nfc_supported_cards_parse(const NfcDevice* device, FuriString* parsed_data);
 
 #ifdef __cplusplus
 }
