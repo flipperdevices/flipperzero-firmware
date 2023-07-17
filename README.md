@@ -2,6 +2,8 @@
 
 [![Build](https://github.com/xtruan/flipper-chess/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/xtruan/flipper-chess/actions/workflows/build.yml)
 
+![FLIPR](https://github.com/xtruan/flipper-chess/blob/main/icons/FLIPR_128x64.png)
+
 ## Chess game for Flipper Zero
 - Built against `0.86.1` Flipper Zero firmware release
 - Uses [smallchesslib](https://codeberg.org/drummyfish/smallchesslib)
