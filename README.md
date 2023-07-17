@@ -19,7 +19,7 @@ Users, remember to rename the new portal as `index.html` when you drag it on the
 
 I am not a C developer and I am using this project as a way to learn more about esp32, flipper zero and, C programming.
 
-**Contributors are welcome!** Please feel free to open a PR at any time.
+**Contributors are welcome!** Please feel free to open a PR at any time in the `dev` branch.
 
 This program is for educational purposes only.
 
