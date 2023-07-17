@@ -1,5 +1,5 @@
 #include "nfc_supported_cards.h"
-#include "../plugins/nfc_supported_card_plugin.h"
+#include "../plugins/supported_cards/nfc_supported_card_plugin.h"
 
 #include <flipper_application/flipper_application.h>
 #include <flipper_application/plugins/plugin_manager.h>
