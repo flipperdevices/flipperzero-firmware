@@ -11,4 +11,5 @@ bool flipchess_save_file(
     const char* contents,
     const FlipChessFile file_type,
     const char* file_name,
-    const bool append);
+    const bool append,
+    const bool overwrite);

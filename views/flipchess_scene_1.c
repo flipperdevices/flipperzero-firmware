@@ -160,6 +160,17 @@ void flipchess_drawBoard(FlipChessScene1Model* model) {
         model->paramFlipBoard);
 }
 
+uint8_t flipchess_saveState(FlipChess* app, FlipChessScene1Model* model) {
+    for(uint8_t i = 0; i < SCL_FEN_MAX_LENGTH; i++) {
+        app->import_game_text[i] = '\0';
+    }
+    const uint8_t res = SCL_boardToFEN(model->game.board, app->import_game_text);
+    if(res > 0) {
+        app->import_game = 1;
+    }
+    return res;
+}
+
 uint8_t flipchess_turn(FlipChessScene1Model* model) {
     // 0: none, 1: player, 2: AI, 3: undo
     uint8_t moveType = FlipChessStatusNone;
@@ -170,9 +181,6 @@ uint8_t flipchess_turn(FlipChessScene1Model* model) {
     //         printf("960 random position number: %d\n", model->random960PosNumber);
 
     //     printf("ply number: %d\n", model->game.ply);
-
-    //     SCL_boardToFEN(model->game.board, string);
-    //     printf("FEN: %s\n", string);
 
     //     int16_t eval = SCL_boardEvaluateStatic(model->game.board);
     //     printf(
@@ -591,8 +599,7 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                         if(app->sound == 1) flipchess_voice_a_strange_game();
                         flipchess_play_long_bump(app);
                     }
-                    SCL_boardToFEN(model->game.board, app->import_game_text);
-                    app->import_game = 1;
+                    flipchess_saveState(app, model);
                     flipchess_drawBoard(model);
                 },
                 true);
@@ -618,8 +625,7 @@ bool flipchess_scene_1_input(InputEvent* event, void* context) {
                             if(app->sound == 1) flipchess_voice_a_strange_game();
                             flipchess_play_long_bump(app);
                         }
-                        SCL_boardToFEN(model->game.board, app->import_game_text);
-                        app->import_game = 1;
+                        flipchess_saveState(app, model);
                         flipchess_drawBoard(model);
                     }
                 },
@@ -669,8 +675,7 @@ void flipchess_scene_1_enter(void* context) {
                 if(turn == FlipChessStatusReturn) {
                     init = turn;
                 } else {
-                    SCL_boardToFEN(model->game.board, app->import_game_text);
-                    app->import_game = 1;
+                    flipchess_saveState(app, model);
                     flipchess_drawBoard(model);
                 }
             }

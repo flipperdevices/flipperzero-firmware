@@ -58,7 +58,7 @@ bool flipchess_load_file(char* contents, const FlipChessFile file_type, const ch
         char chr;
         int i = 0;
         while((storage_file_read(settings_file, &chr, 1) == 1) &&
-              !storage_file_eof(settings_file) && !isspace(chr)) {
+              !storage_file_eof(settings_file)) {
             if(i < FILE_MAX_CHARS) {
                 contents[i] = chr;
             }
@@ -95,7 +95,8 @@ bool flipchess_save_file(
     const char* settings,
     const FlipChessFile file_type,
     const char* file_name,
-    const bool append) {
+    const bool append,
+    const bool overwrite) {
     bool ret = false;
     const char* path;
     const char* path_bak;
@@ -120,6 +121,10 @@ bool flipchess_save_file(
     // try to create the folder
     storage_simply_mkdir(fs_api, FLIPCHESS_APP_BASE_FOLDER);
 
+    if(overwrite) {
+        storage_simply_remove(fs_api, path);
+    }
+
     File* settings_file = storage_file_alloc(fs_api);
     if(storage_file_open(settings_file, path, FSAM_WRITE, open_mode)) {
         storage_file_write(settings_file, settings, strlen(settings));
@@ -130,6 +135,10 @@ bool flipchess_save_file(
     storage_file_free(settings_file);
 
     if(path_bak != NULL) {
+        if(overwrite) {
+            storage_simply_remove(fs_api, path_bak);
+        }
+
         File* settings_file_bak = storage_file_alloc(fs_api);
         if(storage_file_open(settings_file_bak, path_bak, FSAM_WRITE, open_mode)) {
             storage_file_write(settings_file_bak, settings, strlen(settings));

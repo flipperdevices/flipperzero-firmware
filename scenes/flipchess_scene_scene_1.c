@@ -50,6 +50,6 @@ void flipchess_scene_scene_1_on_exit(void* context) {
     FlipChess* app = context;
 
     if(app->import_game == 1 && strlen(app->import_game_text) > 0) {
-        flipchess_save_file(app->import_game_text, FlipChessFileBoard, NULL, false);
+        flipchess_save_file(app->import_game_text, FlipChessFileBoard, NULL, false, true);
     }
 }
