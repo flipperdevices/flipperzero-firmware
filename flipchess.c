@@ -81,6 +81,8 @@ FlipChess* flipchess_app_alloc() {
     app->white_mode = FlipChessPlayerHuman;
     app->black_mode = FlipChessPlayerAI1;
 
+    // Startscreen
+    app->sound = 0;
     // Main menu
     app->import_game = 0;
 

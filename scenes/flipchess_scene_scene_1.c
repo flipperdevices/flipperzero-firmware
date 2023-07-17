@@ -1,4 +1,5 @@
 #include "../flipchess.h"
+#include "../helpers/flipchess_voice.h"
 #include "../helpers/flipchess_custom_event.h"
 #include "../views/flipchess_scene_1.h"
 
@@ -11,6 +12,11 @@ void flipchess_scene_1_callback(FlipChessCustomEvent event, void* context) {
 void flipchess_scene_scene_1_on_enter(void* context) {
     furi_assert(context);
     FlipChess* app = context;
+
+    if(app->sound == 1) {
+        flipchess_voice_how_about_chess();
+    }
+
     flipchess_scene_1_set_callback(app->flipchess_scene_1, flipchess_scene_1_callback, app);
     view_dispatcher_switch_to_view(app->view_dispatcher, FlipChessViewIdScene1);
 }

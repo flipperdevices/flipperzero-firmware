@@ -1,4 +1,5 @@
 #include "../flipchess.h"
+#include "../helpers/flipchess_voice.h"
 #include <lib/toolbox/value_index.h>
 
 #define TEXT_LABEL_ON "ON"
@@ -56,6 +57,10 @@ void flipchess_scene_settings_on_enter(void* context) {
     FlipChess* app = context;
     VariableItem* item;
     uint8_t value_index;
+
+    if(app->sound == 1) {
+        flipchess_voice_which_side();
+    }
 
     // White mode
     item = variable_item_list_add(

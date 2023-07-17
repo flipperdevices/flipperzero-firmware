@@ -46,7 +46,8 @@ void flipchess_startscreen_draw(Canvas* canvas, FlipChessStartscreenModel* model
     //canvas_draw_icon(canvas, 0, 40, &I_Background_128x11);
     //canvas_draw_str(canvas, 10, 61, "FLIPR");
 
-    elements_button_center(canvas, "Start");
+    elements_button_center(canvas, "Sound");
+    elements_button_right(canvas, "Silent");
 }
 
 static void flipchess_startscreen_model_init(FlipChessStartscreenModel* const model) {
@@ -56,6 +57,8 @@ static void flipchess_startscreen_model_init(FlipChessStartscreenModel* const mo
 bool flipchess_startscreen_input(InputEvent* event, void* context) {
     furi_assert(context);
     FlipChessStartscreen* instance = context;
+    FlipChess* app = instance->context;
+
     if(event->type == InputTypeRelease) {
         switch(event->key) {
         case InputKeyBack:
@@ -69,10 +72,23 @@ bool flipchess_startscreen_input(InputEvent* event, void* context) {
                 true);
             break;
         case InputKeyLeft:
-        case InputKeyRight:
         case InputKeyUp:
         case InputKeyDown:
         case InputKeyOk:
+            // sound on
+            app->sound = 1;
+            with_view_model(
+                instance->view,
+                FlipChessStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(FlipChessCustomEventStartscreenOk, instance->context);
+                },
+                true);
+            break;
+        case InputKeyRight:
+            // sound off
+            app->sound = 0;
             with_view_model(
                 instance->view,
                 FlipChessStartscreenModel * model,

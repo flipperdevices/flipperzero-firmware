@@ -35,6 +35,8 @@ typedef struct {
     int haptic;
     int white_mode;
     int black_mode;
+    // Startscreen options
+    uint8_t sound;
     // Main menu options
     uint8_t import_game;
     // Text input

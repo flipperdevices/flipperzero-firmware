@@ -16,8 +16,8 @@ void flipchess_scene_menu_submenu_callback(void* context, uint32_t index) {
 void flipchess_scene_menu_on_enter(void* context) {
     FlipChess* app = context;
 
-    if(app->haptic == 1) {
-        flipchess_voice_game(NULL);
+    if(app->sound == 1) {
+        flipchess_voice_shall_we_play();
     }
 
     submenu_add_item(
