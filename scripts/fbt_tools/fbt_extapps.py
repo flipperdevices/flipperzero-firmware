@@ -414,12 +414,6 @@ class AppDeploymentComponents:
 
 def _gather_app_components(env, appname) -> AppDeploymentComponents:
     components = AppDeploymentComponents()
-    # deploy_sources, flipp_dist_paths, validators = [], [], []
-
-    def _add_dist_targets(app_artifacts):
-        components.validators.append(app_artifacts.validator)
-        for _, ext_path in app_artifacts.dist_entries:
-            components.deploy_sources[f"/ext/{ext_path}"] = app_artifacts.compact
 
     def _add_host_app_to_targets(host_app):
         artifacts_app_to_run = env["EXT_APPS"].get(host_app.appid, None)
@@ -446,7 +440,6 @@ def _gather_app_components(env, appname) -> AppDeploymentComponents:
             raise UserError("Host app is unknown")
     else:
         _add_host_app_to_targets(artifacts_app_to_run.app)
-    # print(components)
     return components
 
 
