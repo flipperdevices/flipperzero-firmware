@@ -40,7 +40,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Evil Portal Updated index.html for a better looking Google Login Page (By breaching)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/36)
 - Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
 - Removed: [Game of Tag WIP (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
-- [New Passport Profile Pic - Deer (By astrosoftpaws)]
+- [Evil Portal Asset: Microsoft Login Page (By roshanravan) and Renames for Evil Portal Assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75876e84dc5deb130210da8283f36ef1b1858019
+- [New Passport Profile Pic - Deer (By wrenchathome)]
 
 <a name="release">
 
