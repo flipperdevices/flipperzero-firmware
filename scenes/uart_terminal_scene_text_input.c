@@ -50,6 +50,7 @@ void uart_terminal_scene_text_input_on_enter(void* context) {
             break;
         case GRAVITY_STALK:
             helpStr = (char *)SHORT_STALK;
+            break;
         case GRAVITY_AP_DOS:
             helpStr = (char *)SHORT_AP_DOS;
             break;

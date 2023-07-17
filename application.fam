@@ -1,5 +1,5 @@
 App(
-    appid="ESP32_Gravity",
+    appid="esp32_gravity",
     name="[ESP32] Gravity",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="uart_terminal_app",
