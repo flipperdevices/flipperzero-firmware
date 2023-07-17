@@ -43,3 +43,4 @@ Thank you so much to the following contributors for providing awesome portals.
 - `Prank_Game.html` by [roshanravan](https://github.com/roshanravan)
 - `SpiritAirlines.html` by [roshanravan](https://github.com/roshanravan)
 - `Twitch.html` by [roshanravan](https://github.com/roshanravan)
+- `apple.html` by [Jules](https://github.com/jules0835)
