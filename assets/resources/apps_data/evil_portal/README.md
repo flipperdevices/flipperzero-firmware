@@ -35,3 +35,5 @@ Thank you so much to the following contributors for providing awesome portals.
 - `Jet_Blue.html` by [roshanravan](https://github.com/roshanravan)
 - `Google_Mobile.html` by [breaching](https://github.com/breaching)
 - `Microsoft.html` by [roshanravan](https://github.com/roshanravan)
+- `Twitch.html` by [roshanravan](https://github.com/roshanravan)
+- `PornHub.html` by [roshanravan](https://github.com/roshanravan)

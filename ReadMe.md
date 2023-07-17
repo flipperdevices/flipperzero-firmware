@@ -42,6 +42,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Removed: [Game of Tag WIP (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [Evil Portal Asset: Microsoft Login Page (By roshanravan) and Renames for Evil Portal Assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75876e84dc5deb130210da8283f36ef1b1858019
 - [New Passport Profile Pic - Deer (By wrenchathome)]
+- Evil Portal Asset: Twitch & PornHub Login Pages (By roshanravan)
 
 <a name="release">
 
