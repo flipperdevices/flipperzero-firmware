@@ -341,7 +341,7 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
         "%u",
         3,
         "system",
-        "local",
+        "locale",
         "time",
         furi_hal_rtc_get_locale_timeformat());
     property_value_out(
@@ -349,11 +349,11 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
         "%u",
         3,
         "system",
-        "local",
+        "locale",
         "date",
         furi_hal_rtc_get_locale_dateformat());
     property_value_out(
-        &property_context, "%u", 3, "system", "local", "unit", furi_hal_rtc_get_locale_units());
+        &property_context, "%u", 3, "system", "locale", "unit", furi_hal_rtc_get_locale_units());
     property_value_out(
         &property_context, "%u", 3, "system", "log", "level", furi_hal_rtc_get_log_level());
 
