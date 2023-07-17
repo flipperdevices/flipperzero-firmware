@@ -29,12 +29,11 @@ Evil_PortalApp *evil_portal_app_alloc() {
   app->sent_html = false;
   app->sent_ap = false;
   app->sent_reset = false;
-  app->has_command_queue = false;
+  app->has_command_queue = false;  
   app->command_index = 0;
   app->portal_logs = furi_string_alloc();
 
   app->gui = furi_record_open(RECORD_GUI);
-  app->dialogs = furi_record_open(RECORD_DIALOGS);
 
   app->view_dispatcher = view_dispatcher_alloc();
   app->scene_manager = scene_manager_alloc(&evil_portal_scene_handlers, app);
@@ -71,7 +70,8 @@ Evil_PortalApp *evil_portal_app_alloc() {
   return app;
 }
 
-void evil_portal_app_free(Evil_PortalApp *app) {
+void evil_portal_app_free(Evil_PortalApp *app) {  
+
   // save latest logs
   if (furi_string_utf8_length(app->portal_logs) > 0) {
     write_logs(app->portal_logs);
@@ -101,18 +101,17 @@ void evil_portal_app_free(Evil_PortalApp *app) {
 
   // Close records
   furi_record_close(RECORD_GUI);
-  furi_record_close(RECORD_DIALOGS);
 
   free(app);
 }
 
-int32_t evil_portal_app(void *p) {
+int32_t evil_portal_app(void *p) {  
   UNUSED(p);
   Evil_PortalApp *evil_portal_app = evil_portal_app_alloc();
 
   evil_portal_app->uart = evil_portal_uart_init(evil_portal_app);
 
-  view_dispatcher_run(evil_portal_app->view_dispatcher);
+  view_dispatcher_run(evil_portal_app->view_dispatcher);  
 
   evil_portal_app_free(evil_portal_app);
 
