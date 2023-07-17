@@ -1,6 +1,5 @@
 #include "subghz_tx_rx_worker.h"
 
-#include <stream_buffer.h>
 #include <furi.h>
 
 #define TAG "SubGhzTxRxWorker"
@@ -13,8 +12,8 @@
 
 struct SubGhzTxRxWorker {
     FuriThread* thread;
-    StreamBufferHandle_t stream_tx;
-    StreamBufferHandle_t stream_rx;
+    FuriStreamBuffer* stream_tx;
+    FuriStreamBuffer* stream_rx;
 
     volatile bool worker_running;
     volatile bool worker_stoping;
@@ -22,6 +21,8 @@ struct SubGhzTxRxWorker {
     SubGhzTxRxWorkerStatus status;
 
     uint32_t frequency;
+    const SubGhzDevice* device;
+    const GpioPin* device_data_gpio;
 
     SubGhzTxRxWorkerCallbackHaveRead callback_have_read;
     void* context_have_read;
@@ -30,9 +31,9 @@ struct SubGhzTxRxWorker {
 bool subghz_tx_rx_worker_write(SubGhzTxRxWorker* instance, uint8_t* data, size_t size) {
     furi_assert(instance);
     bool ret = false;
-    size_t stream_tx_free_byte = xStreamBufferSpacesAvailable(instance->stream_tx);
+    size_t stream_tx_free_byte = furi_stream_buffer_spaces_available(instance->stream_tx);
     if(size && (stream_tx_free_byte >= size)) {
-        if(xStreamBufferSend(
+        if(furi_stream_buffer_send(
                instance->stream_tx, data, size, SUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF) ==
            size) {
             ret = true;
@@ -43,12 +44,12 @@ bool subghz_tx_rx_worker_write(SubGhzTxRxWorker* instance, uint8_t* data, size_t
 
 size_t subghz_tx_rx_worker_available(SubGhzTxRxWorker* instance) {
     furi_assert(instance);
-    return xStreamBufferBytesAvailable(instance->stream_rx);
+    return furi_stream_buffer_bytes_available(instance->stream_rx);
 }
 
 size_t subghz_tx_rx_worker_read(SubGhzTxRxWorker* instance, uint8_t* data, size_t size) {
     furi_assert(instance);
-    return xStreamBufferReceive(instance->stream_rx, data, size, 0);
+    return furi_stream_buffer_receive(instance->stream_rx, data, size, 0);
 }
 
 void subghz_tx_rx_worker_set_callback_have_read(
@@ -66,30 +67,33 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
     uint8_t timeout = 100;
     bool ret = false;
     if(instance->status != SubGhzTxRxWorkerStatusRx) {
-        furi_hal_subghz_rx();
+        subghz_devices_set_rx(instance->device);
         instance->status = SubGhzTxRxWorkerStatusRx;
-        osDelay(1);
+        furi_delay_tick(1);
     }
     //waiting for reception to complete
-    while(hal_gpio_read(&gpio_cc1101_g0)) {
-        osDelay(1);
+    while(furi_hal_gpio_read(instance->device_data_gpio)) {
+        furi_delay_tick(1);
         if(!--timeout) {
             FURI_LOG_W(TAG, "RX cc1101_g0 timeout");
-            furi_hal_subghz_flush_rx();
-            furi_hal_subghz_rx();
+            subghz_devices_flush_rx(instance->device);
+            subghz_devices_set_rx(instance->device);
             break;
         }
     }
 
-    if(furi_hal_subghz_rx_pipe_not_empty()) {
+    if(subghz_devices_rx_pipe_not_empty(instance->device)) {
         FURI_LOG_I(
-            TAG, "RSSI: %03.1fdbm LQI: %d", furi_hal_subghz_get_rssi(), furi_hal_subghz_get_lqi());
-        if(furi_hal_subghz_is_rx_data_crc_valid()) {
-            furi_hal_subghz_read_packet(data, size);
+            TAG,
+            "RSSI: %03.1fdbm LQI: %d",
+            (double)subghz_devices_get_rssi(instance->device),
+            subghz_devices_get_lqi(instance->device));
+        if(subghz_devices_is_rx_data_crc_valid(instance->device)) {
+            subghz_devices_read_packet(instance->device, data, size);
             ret = true;
         }
-        furi_hal_subghz_flush_rx();
-        furi_hal_subghz_rx();
+        subghz_devices_flush_rx(instance->device);
+        subghz_devices_set_rx(instance->device);
     }
     return ret;
 }
@@ -97,26 +101,28 @@ bool subghz_tx_rx_worker_rx(SubGhzTxRxWorker* instance, uint8_t* data, uint8_t* 
 void subghz_tx_rx_worker_tx(SubGhzTxRxWorker* instance, uint8_t* data, size_t size) {
     uint8_t timeout = 200;
     if(instance->status != SubGhzTxRxWorkerStatusIDLE) {
-        furi_hal_subghz_idle();
+        subghz_devices_idle(instance->device);
     }
-    furi_hal_subghz_write_packet(data, size);
-    furi_hal_subghz_tx(); //start send
+    subghz_devices_write_packet(instance->device, data, size);
+    subghz_devices_set_tx(instance->device); //start send
     instance->status = SubGhzTxRxWorkerStatusTx;
-    while(!hal_gpio_read(&gpio_cc1101_g0)) { // Wait for GDO0 to be set -> sync transmitted
-        osDelay(1);
+    while(!furi_hal_gpio_read(
+        instance->device_data_gpio)) { // Wait for GDO0 to be set -> sync transmitted
+        furi_delay_tick(1);
         if(!--timeout) {
             FURI_LOG_W(TAG, "TX !cc1101_g0 timeout");
             break;
         }
     }
-    while(hal_gpio_read(&gpio_cc1101_g0)) { // Wait for GDO0 to be cleared -> end of packet
-        osDelay(1);
+    while(furi_hal_gpio_read(
+        instance->device_data_gpio)) { // Wait for GDO0 to be cleared -> end of packet
+        furi_delay_tick(1);
         if(!--timeout) {
             FURI_LOG_W(TAG, "TX cc1101_g0 timeout");
             break;
         }
     }
-    furi_hal_subghz_idle();
+    subghz_devices_idle(instance->device);
     instance->status = SubGhzTxRxWorkerStatusIDLE;
 }
 /** Worker thread
@@ -126,16 +132,19 @@ void subghz_tx_rx_worker_tx(SubGhzTxRxWorker* instance, uint8_t* data, size_t si
  */
 static int32_t subghz_tx_rx_worker_thread(void* context) {
     SubGhzTxRxWorker* instance = context;
+    furi_assert(instance->device);
     FURI_LOG_I(TAG, "Worker start");
 
-    furi_hal_subghz_reset();
-    furi_hal_subghz_idle();
-    furi_hal_subghz_load_preset(FuriHalSubGhzPresetGFSK9_99KbAsync);
-    //furi_hal_subghz_load_preset(FuriHalSubGhzPresetMSK99_97KbAsync);
-    hal_gpio_init(&gpio_cc1101_g0, GpioModeInput, GpioPullNo, GpioSpeedLow);
+    subghz_devices_begin(instance->device);
+    instance->device_data_gpio = subghz_devices_get_data_gpio(instance->device);
+    subghz_devices_reset(instance->device);
+    subghz_devices_idle(instance->device);
+    subghz_devices_load_preset(instance->device, FuriHalSubGhzPresetGFSK9_99KbAsync, NULL);
 
-    furi_hal_subghz_set_frequency_and_path(instance->frequency);
-    furi_hal_subghz_flush_rx();
+    furi_hal_gpio_init(instance->device_data_gpio, GpioModeInput, GpioPullNo, GpioSpeedLow);
+
+    subghz_devices_set_frequency(instance->device, instance->frequency);
+    subghz_devices_flush_rx(instance->device);
 
     uint8_t data[SUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE + 1] = {0};
     size_t size_tx = 0;
@@ -145,11 +154,11 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
 
     while(instance->worker_running) {
         //transmit
-        size_tx = xStreamBufferBytesAvailable(instance->stream_tx);
+        size_tx = furi_stream_buffer_bytes_available(instance->stream_tx);
         if(size_tx > 0 && !timeout_tx) {
             timeout_tx = 10; //20ms
             if(size_tx > SUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE) {
-                xStreamBufferReceive(
+                furi_stream_buffer_receive(
                     instance->stream_tx,
                     &data,
                     SUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE,
@@ -157,20 +166,20 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
                 subghz_tx_rx_worker_tx(instance, data, SUBGHZ_TXRX_WORKER_MAX_TXRX_SIZE);
             } else {
                 //todo checking that he managed to write all the data to the TX buffer
-                xStreamBufferReceive(
+                furi_stream_buffer_receive(
                     instance->stream_tx, &data, size_tx, SUBGHZ_TXRX_WORKER_TIMEOUT_READ_WRITE_BUF);
                 subghz_tx_rx_worker_tx(instance, data, size_tx);
             }
         } else {
             //recive
             if(subghz_tx_rx_worker_rx(instance, data, size_rx)) {
-                if(xStreamBufferSpacesAvailable(instance->stream_rx) >= size_rx[0]) {
+                if(furi_stream_buffer_spaces_available(instance->stream_rx) >= size_rx[0]) {
                     if(instance->callback_have_read &&
-                       xStreamBufferBytesAvailable(instance->stream_rx) == 0) {
+                       furi_stream_buffer_bytes_available(instance->stream_rx) == 0) {
                         callback_rx = true;
                     }
                     //todo checking that he managed to write all the data to the RX buffer
-                    xStreamBufferSend(
+                    furi_stream_buffer_send(
                         instance->stream_rx,
                         &data,
                         size_rx[0],
@@ -186,11 +195,11 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
         }
 
         if(timeout_tx) timeout_tx--;
-        osDelay(1);
+        furi_delay_tick(1);
     }
 
-    furi_hal_subghz_set_path(FuriHalSubGhzPathIsolate);
-    furi_hal_subghz_sleep();
+    subghz_devices_sleep(instance->device);
+    subghz_devices_end(instance->device);
 
     FURI_LOG_I(TAG, "Worker stop");
     return 0;
@@ -199,15 +208,12 @@ static int32_t subghz_tx_rx_worker_thread(void* context) {
 SubGhzTxRxWorker* subghz_tx_rx_worker_alloc() {
     SubGhzTxRxWorker* instance = malloc(sizeof(SubGhzTxRxWorker));
 
-    instance->thread = furi_thread_alloc();
-    furi_thread_set_name(instance->thread, "SubGhzTxRxWorker");
-    furi_thread_set_stack_size(instance->thread, 2048);
-    furi_thread_set_context(instance->thread, instance);
-    furi_thread_set_callback(instance->thread, subghz_tx_rx_worker_thread);
+    instance->thread =
+        furi_thread_alloc_ex("SubGhzTxRxWorker", 2048, subghz_tx_rx_worker_thread, instance);
     instance->stream_tx =
-        xStreamBufferCreate(sizeof(uint8_t) * SUBGHZ_TXRX_WORKER_BUF_SIZE, sizeof(uint8_t));
+        furi_stream_buffer_alloc(sizeof(uint8_t) * SUBGHZ_TXRX_WORKER_BUF_SIZE, sizeof(uint8_t));
     instance->stream_rx =
-        xStreamBufferCreate(sizeof(uint8_t) * SUBGHZ_TXRX_WORKER_BUF_SIZE, sizeof(uint8_t));
+        furi_stream_buffer_alloc(sizeof(uint8_t) * SUBGHZ_TXRX_WORKER_BUF_SIZE, sizeof(uint8_t));
 
     instance->status = SubGhzTxRxWorkerStatusIDLE;
     instance->worker_stoping = true;
@@ -218,28 +224,32 @@ SubGhzTxRxWorker* subghz_tx_rx_worker_alloc() {
 void subghz_tx_rx_worker_free(SubGhzTxRxWorker* instance) {
     furi_assert(instance);
     furi_assert(!instance->worker_running);
-    vStreamBufferDelete(instance->stream_tx);
-    vStreamBufferDelete(instance->stream_rx);
+    furi_stream_buffer_free(instance->stream_tx);
+    furi_stream_buffer_free(instance->stream_rx);
     furi_thread_free(instance->thread);
 
     free(instance);
 }
 
-bool subghz_tx_rx_worker_start(SubGhzTxRxWorker* instance, uint32_t frequency) {
+bool subghz_tx_rx_worker_start(
+    SubGhzTxRxWorker* instance,
+    const SubGhzDevice* device,
+    uint32_t frequency) {
     furi_assert(instance);
     furi_assert(!instance->worker_running);
     bool res = false;
-    xStreamBufferReset(instance->stream_tx);
-    xStreamBufferReset(instance->stream_rx);
+    furi_stream_buffer_reset(instance->stream_tx);
+    furi_stream_buffer_reset(instance->stream_rx);
 
     instance->worker_running = true;
 
-    furi_thread_start(instance->thread);
-
-    if(furi_hal_subghz_is_tx_allowed(frequency)) {
+    if(furi_hal_region_is_frequency_allowed(frequency)) {
         instance->frequency = frequency;
+        instance->device = device;
         res = true;
     }
+
+    furi_thread_start(instance->thread);
 
     return res;
 }

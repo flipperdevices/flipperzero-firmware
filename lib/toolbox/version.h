@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,7 +71,27 @@ const char* version_get_version(const Version* v);
  *
  * @return     build date
  */
-const uint8_t version_get_target(const Version* v);
+uint8_t version_get_target(const Version* v);
+
+/** Get flag indicating if this build is "dirty" (source code had uncommited changes)
+ *
+ * @param      v     pointer to Version data. NULL for currently running
+ *                   software.
+ *
+ * @return     build date
+ */
+bool version_get_dirty_flag(const Version* v);
+
+/** 
+ * Get firmware origin. "Official" for mainline firmware, fork name for forks.
+ * Set by FIRMWARE_ORIGIN fbt argument.
+*/
+const char* version_get_firmware_origin(const Version* v);
+
+/** 
+ * Get git repo origin
+*/
+const char* version_get_git_origin(const Version* v);
 
 #ifdef __cplusplus
 }

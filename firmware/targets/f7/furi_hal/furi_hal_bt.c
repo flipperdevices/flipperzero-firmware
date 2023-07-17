@@ -1,14 +1,14 @@
 #include <furi_hal_bt.h>
-#include <ble.h>
+
+#include <ble/ble.h>
+#include <interface/patterns/ble_thread/shci/shci.h>
 #include <stm32wbxx.h>
-#include <shci.h>
-#include <cmsis_os2.h>
 
 #include <furi_hal_version.h>
 #include <furi_hal_bt_hid.h>
 #include <furi_hal_bt_serial.h>
-#include "battery_service.h"
-
+#include <furi_hal_bus.c>
+#include <services/battery_service.h>
 #include <furi.h>
 
 #define TAG "FuriHalBt"
@@ -16,8 +16,22 @@
 #define FURI_HAL_BT_DEFAULT_MAC_ADDR \
     { 0x6c, 0x7a, 0xd8, 0xac, 0x57, 0x72 }
 
-osMutexId_t furi_hal_bt_core2_mtx = NULL;
-static FuriHalBtStack furi_hal_bt_stack = FuriHalBtStackUnknown;
+/* Time, in ms, to wait for mode transition before crashing */
+#define C2_MODE_SWITCH_TIMEOUT 10000
+
+#define FURI_HAL_BT_HARDFAULT_INFO_MAGIC 0x1170FD0F
+
+typedef struct {
+    FuriMutex* core2_mtx;
+    FuriTimer* hardfault_check_timer;
+    FuriHalBtStack stack;
+} FuriHalBt;
+
+static FuriHalBt furi_hal_bt = {
+    .core2_mtx = NULL,
+    .hardfault_check_timer = NULL,
+    .stack = FuriHalBtStackUnknown,
+};
 
 typedef void (*FuriHalBtProfileStart)(void);
 typedef void (*FuriHalBtProfileStop)(void);
@@ -44,8 +58,8 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                     .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
                     .conn_param =
                         {
-                            .conn_int_min = 0x08,
-                            .conn_int_max = 0x18,
+                            .conn_int_min = 0x18, // 30 ms
+                            .conn_int_max = 0x24, // 45 ms
                             .slave_latency = 0,
                             .supervisor_timeout = 0,
                         },
@@ -62,88 +76,105 @@ FuriHalBtProfileConfig profile_config[FuriHalBtProfileNumber] = {
                     .bonding_mode = true,
                     .pairing_method = GapPairingPinCodeVerifyYesNo,
                     .mac_address = FURI_HAL_BT_DEFAULT_MAC_ADDR,
-                    // TODO optimize
                     .conn_param =
                         {
-                            .conn_int_min = 0x12,
-                            .conn_int_max = 0x1e,
-                            .slave_latency = 6,
-                            .supervisor_timeout = 700,
+                            .conn_int_min = 0x18, // 30 ms
+                            .conn_int_max = 0x24, // 45 ms
+                            .slave_latency = 0,
+                            .supervisor_timeout = 0,
                         },
                 },
         },
 };
 FuriHalBtProfileConfig* current_profile = NULL;
 
+static void furi_hal_bt_hardfault_check(void* context) {
+    UNUSED(context);
+    if(furi_hal_bt_get_hardfault_info()) {
+        furi_crash("ST(R) Copro(R) HardFault");
+    }
+}
+
 void furi_hal_bt_init() {
-    if(!furi_hal_bt_core2_mtx) {
-        furi_hal_bt_core2_mtx = osMutexNew(NULL);
-        furi_assert(furi_hal_bt_core2_mtx);
+    furi_hal_bus_enable(FuriHalBusHSEM);
+    furi_hal_bus_enable(FuriHalBusIPCC);
+    furi_hal_bus_enable(FuriHalBusAES2);
+    furi_hal_bus_enable(FuriHalBusPKA);
+    furi_hal_bus_enable(FuriHalBusCRC);
+
+    if(!furi_hal_bt.core2_mtx) {
+        furi_hal_bt.core2_mtx = furi_mutex_alloc(FuriMutexTypeNormal);
+        furi_assert(furi_hal_bt.core2_mtx);
+    }
+
+    if(!furi_hal_bt.hardfault_check_timer) {
+        furi_hal_bt.hardfault_check_timer =
+            furi_timer_alloc(furi_hal_bt_hardfault_check, FuriTimerTypePeriodic, NULL);
+        furi_timer_start(furi_hal_bt.hardfault_check_timer, 5000);
     }
 
     // Explicitly tell that we are in charge of CLK48 domain
-    if(!HAL_HSEM_IsSemTaken(CFG_HW_CLK48_CONFIG_SEMID)) {
-        HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
-    }
+    furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
 
     // Start Core2
     ble_glue_init();
 }
 
 void furi_hal_bt_lock_core2() {
-    furi_assert(furi_hal_bt_core2_mtx);
-    furi_check(osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever) == osOK);
+    furi_assert(furi_hal_bt.core2_mtx);
+    furi_check(furi_mutex_acquire(furi_hal_bt.core2_mtx, FuriWaitForever) == FuriStatusOk);
 }
 
 void furi_hal_bt_unlock_core2() {
-    furi_assert(furi_hal_bt_core2_mtx);
-    furi_check(osMutexRelease(furi_hal_bt_core2_mtx) == osOK);
+    furi_assert(furi_hal_bt.core2_mtx);
+    furi_check(furi_mutex_release(furi_hal_bt.core2_mtx) == FuriStatusOk);
 }
 
-static bool furi_hal_bt_radio_stack_is_supported(WirelessFwInfo_t* info) {
+static bool furi_hal_bt_radio_stack_is_supported(const BleGlueC2Info* info) {
     bool supported = false;
-    if(info->StackType == INFO_STACK_TYPE_BLE_HCI) {
-        furi_hal_bt_stack = FuriHalBtStackHciLayer;
-        supported = true;
-    } else if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
+    if(info->StackType == INFO_STACK_TYPE_BLE_LIGHT) {
         if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
            info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
-            furi_hal_bt_stack = FuriHalBtStackLight;
+            furi_hal_bt.stack = FuriHalBtStackLight;
+            supported = true;
+        }
+    } else if(info->StackType == INFO_STACK_TYPE_BLE_FULL) {
+        if(info->VersionMajor >= FURI_HAL_BT_STACK_VERSION_MAJOR &&
+           info->VersionMinor >= FURI_HAL_BT_STACK_VERSION_MINOR) {
+            furi_hal_bt.stack = FuriHalBtStackFull;
             supported = true;
         }
     } else {
-        furi_hal_bt_stack = FuriHalBtStackUnknown;
+        furi_hal_bt.stack = FuriHalBtStackUnknown;
     }
     return supported;
 }
 
 bool furi_hal_bt_start_radio_stack() {
     bool res = false;
-    furi_assert(furi_hal_bt_core2_mtx);
+    furi_assert(furi_hal_bt.core2_mtx);
 
-    osMutexAcquire(furi_hal_bt_core2_mtx, osWaitForever);
+    furi_mutex_acquire(furi_hal_bt.core2_mtx, FuriWaitForever);
 
     // Explicitly tell that we are in charge of CLK48 domain
-    if(!HAL_HSEM_IsSemTaken(CFG_HW_CLK48_CONFIG_SEMID)) {
-        HAL_HSEM_FastTake(CFG_HW_CLK48_CONFIG_SEMID);
-    }
+    furi_check(LL_HSEM_1StepLock(HSEM, CFG_HW_CLK48_CONFIG_SEMID) == 0);
 
     do {
-        // Wait until FUS is started or timeout
-        WirelessFwInfo_t info = {};
-        if(!ble_glue_wait_for_fus_start(&info)) {
-            FURI_LOG_E(TAG, "FUS start failed");
-            LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
+        // Wait until C2 is started or timeout
+        if(!ble_glue_wait_for_c2_start(FURI_HAL_BT_C2_START_TIMEOUT)) {
+            FURI_LOG_E(TAG, "Core2 start failed");
             ble_glue_thread_stop();
             break;
         }
-        // If FUS is running, start radio stack fw
-        if(ble_glue_radio_stack_fw_launch_started()) {
-            // If FUS is running do nothing and wait for system reset
-            furi_crash("Waiting for FUS to launch radio stack firmware");
+
+        // If C2 is running, start radio stack fw
+        if(!furi_hal_bt_ensure_c2_mode(BleGlueC2ModeStack)) {
+            break;
         }
-        // Check weather we support radio stack
-        if(!furi_hal_bt_radio_stack_is_supported(&info)) {
+
+        // Check whether we support radio stack
+        const BleGlueC2Info* c2_info = ble_glue_get_c2_info();
+        if(!furi_hal_bt_radio_stack_is_supported(c2_info)) {
             FURI_LOG_E(TAG, "Unsupported radio stack");
             // Don't stop SHCI for crypto enclave support
             break;
@@ -151,20 +182,35 @@ bool furi_hal_bt_start_radio_stack() {
         // Starting radio stack
         if(!ble_glue_start()) {
             FURI_LOG_E(TAG, "Failed to start radio stack");
-            LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
             ble_glue_thread_stop();
             ble_app_thread_stop();
             break;
         }
         res = true;
     } while(false);
-    osMutexRelease(furi_hal_bt_core2_mtx);
+    furi_mutex_release(furi_hal_bt.core2_mtx);
 
     return res;
 }
 
 FuriHalBtStack furi_hal_bt_get_radio_stack() {
-    return furi_hal_bt_stack;
+    return furi_hal_bt.stack;
+}
+
+bool furi_hal_bt_is_ble_gatt_gap_supported() {
+    if(furi_hal_bt.stack == FuriHalBtStackLight || furi_hal_bt.stack == FuriHalBtStackFull) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool furi_hal_bt_is_testing_supported() {
+    if(furi_hal_bt.stack == FuriHalBtStackFull) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, void* context) {
@@ -177,7 +223,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             FURI_LOG_E(TAG, "Can't start BLE App - radio stack did not start");
             break;
         }
-        if(furi_hal_bt_stack != FuriHalBtStackLight) {
+        if(!furi_hal_bt_is_ble_gatt_gap_supported()) {
             FURI_LOG_E(TAG, "Can't start Ble App - unsupported radio stack");
             break;
         }
@@ -198,8 +244,8 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
         } else if(profile == FuriHalBtProfileHidKeyboard) {
             // Change MAC address for HID profile
             config->mac_address[2]++;
-            // Change name Flipper -> Keynote
-            const char* clicker_str = "Keynote";
+            // Change name Flipper -> Control
+            const char* clicker_str = "Control";
             memcpy(&config->adv_name[1], clicker_str, strlen(clicker_str));
         }
         if(!gap_init(config, event_cb, context)) {
@@ -208,7 +254,7 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
             break;
         }
         // Start selected profile services
-        if(furi_hal_bt_stack == FuriHalBtStackLight) {
+        if(furi_hal_bt_is_ble_gatt_gap_supported()) {
             profile_config[profile].start();
         }
         ret = true;
@@ -218,27 +264,45 @@ bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, 
     return ret;
 }
 
+void furi_hal_bt_reinit() {
+    FURI_LOG_I(TAG, "Disconnect and stop advertising");
+    furi_hal_bt_stop_advertising();
+
+    FURI_LOG_I(TAG, "Stop current profile services");
+    current_profile->stop();
+
+    // Magic happens here
+    hci_reset();
+
+    FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
+    ble_app_thread_stop();
+    gap_thread_stop();
+
+    FURI_LOG_I(TAG, "Reset SHCI");
+    furi_check(ble_glue_reinit_c2());
+
+    furi_delay_ms(100);
+    ble_glue_thread_stop();
+
+    furi_hal_bus_disable(FuriHalBusHSEM);
+    furi_hal_bus_disable(FuriHalBusIPCC);
+    furi_hal_bus_disable(FuriHalBusAES2);
+    furi_hal_bus_disable(FuriHalBusPKA);
+    furi_hal_bus_disable(FuriHalBusCRC);
+
+    FURI_LOG_I(TAG, "Start BT initialization");
+    furi_hal_bt_init();
+
+    furi_hal_bt_start_radio_stack();
+}
+
 bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb, void* context) {
     furi_assert(event_cb);
     furi_assert(profile < FuriHalBtProfileNumber);
     bool ret = true;
 
-    FURI_LOG_I(TAG, "Stop current profile services");
-    current_profile->stop();
-    FURI_LOG_I(TAG, "Disconnect and stop advertising");
-    furi_hal_bt_stop_advertising();
-    FURI_LOG_I(TAG, "Shutdow 2nd core");
-    LL_C2_PWR_SetPowerMode(LL_PWR_MODE_SHUTDOWN);
-    FURI_LOG_I(TAG, "Stop BLE related RTOS threads");
-    ble_app_thread_stop();
-    gap_thread_stop();
-    FURI_LOG_I(TAG, "Reset SHCI");
-    SHCI_C2_Reinit();
-    osDelay(100);
-    ble_glue_thread_stop();
-    FURI_LOG_I(TAG, "Start BT initialization");
-    furi_hal_bt_init();
-    furi_hal_bt_start_radio_stack();
+    furi_hal_bt_reinit();
+
     ret = furi_hal_bt_start_app(profile, event_cb, context);
     if(ret) {
         current_profile = &profile_config[profile];
@@ -260,7 +324,7 @@ void furi_hal_bt_stop_advertising() {
     if(furi_hal_bt_is_active()) {
         gap_stop_advertising();
         while(furi_hal_bt_is_active()) {
-            osDelay(1);
+            furi_delay_tick(1);
         }
     }
 }
@@ -268,6 +332,12 @@ void furi_hal_bt_stop_advertising() {
 void furi_hal_bt_update_battery_level(uint8_t battery_level) {
     if(battery_svc_is_started()) {
         battery_svc_update_level(battery_level);
+    }
+}
+
+void furi_hal_bt_update_power_state() {
+    if(battery_svc_is_started()) {
+        battery_svc_update_power_state();
     }
 }
 
@@ -283,13 +353,13 @@ void furi_hal_bt_set_key_storage_change_callback(
 }
 
 void furi_hal_bt_nvm_sram_sem_acquire() {
-    while(HAL_HSEM_FastTake(CFG_HW_BLE_NVM_SRAM_SEMID) != HAL_OK) {
-        osDelay(1);
+    while(LL_HSEM_1StepLock(HSEM, CFG_HW_BLE_NVM_SRAM_SEMID)) {
+        furi_thread_yield();
     }
 }
 
 void furi_hal_bt_nvm_sram_sem_release() {
-    HAL_HSEM_Release(CFG_HW_BLE_NVM_SRAM_SEMID, 0);
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_BLE_NVM_SRAM_SEMID, 0);
 }
 
 bool furi_hal_bt_clear_white_list() {
@@ -302,7 +372,7 @@ bool furi_hal_bt_clear_white_list() {
     return status != BLE_STATUS_SUCCESS;
 }
 
-void furi_hal_bt_dump_state(string_t buffer) {
+void furi_hal_bt_dump_state(FuriString* buffer) {
     if(furi_hal_bt_is_alive()) {
         uint8_t HCI_Version;
         uint16_t HCI_Revision;
@@ -313,7 +383,7 @@ void furi_hal_bt_dump_state(string_t buffer) {
         tBleStatus ret = hci_read_local_version_information(
             &HCI_Version, &HCI_Revision, &LMP_PAL_Version, &Manufacturer_Name, &LMP_PAL_Subversion);
 
-        string_cat_printf(
+        furi_string_cat_printf(
             buffer,
             "Ret: %d, HCI_Version: %d, HCI_Revision: %d, LMP_PAL_Version: %d, Manufacturer_Name: %d, LMP_PAL_Subversion: %d",
             ret,
@@ -323,7 +393,7 @@ void furi_hal_bt_dump_state(string_t buffer) {
             Manufacturer_Name,
             LMP_PAL_Subversion);
     } else {
-        string_cat_printf(buffer, "BLE not ready");
+        furi_string_cat_printf(buffer, "BLE not ready");
     }
 }
 
@@ -377,7 +447,7 @@ float furi_hal_bt_get_rssi() {
             val += 6.0;
             rssi >>= 1;
         }
-        val += (417 * rssi + 18080) >> 10;
+        val += (float)((417 * rssi + 18080) >> 10);
     }
     return val;
 }
@@ -392,16 +462,26 @@ void furi_hal_bt_stop_rx() {
     aci_hal_rx_stop();
 }
 
-bool furi_hal_bt_start_scan(GapScanCallback callback, void* context) {
-    if(furi_hal_bt_stack != FuriHalBtStackHciLayer) {
-        return false;
+bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode) {
+    BleGlueCommandResult fw_start_res = ble_glue_force_c2_mode(mode);
+    if(fw_start_res == BleGlueCommandResultOK) {
+        return true;
+    } else if(fw_start_res == BleGlueCommandResultRestartPending) {
+        // Do nothing and wait for system reset
+        furi_delay_ms(C2_MODE_SWITCH_TIMEOUT);
+        furi_crash("Waiting for FUS->radio stack transition");
+        return true;
     }
-    gap_start_scan(callback, context);
-    return true;
+
+    FURI_LOG_E(TAG, "Failed to switch C2 mode: %d", fw_start_res);
+    return false;
 }
 
-void furi_hal_bt_stop_scan() {
-    if(furi_hal_bt_stack == FuriHalBtStackHciLayer) {
-        gap_stop_scan();
+const FuriHalBtHardfaultInfo* furi_hal_bt_get_hardfault_info() {
+    /* AN5289, 4.8.2 */
+    const FuriHalBtHardfaultInfo* info = (FuriHalBtHardfaultInfo*)(SRAM2A_BASE);
+    if(info->magic != FURI_HAL_BT_HARDFAULT_INFO_MAGIC) {
+        return NULL;
     }
+    return info;
 }

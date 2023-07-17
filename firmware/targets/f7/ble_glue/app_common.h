@@ -32,7 +32,8 @@ extern "C" {
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include <furi/common_defines.h>
+#include <core/common_defines.h>
+#include <tl.h>
 
 #include "app_conf.h"
 

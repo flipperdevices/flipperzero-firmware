@@ -1,5 +1,8 @@
+*~
 *.swp
+*.swo
 *.gdb_history
+*.old
 
 
 # LSP
@@ -27,12 +30,37 @@ bindings/
 .mxproject
 Brewfile.lock.json
 
-# Visual Studio Code
-.vscode/
+# Kate
+.kateproject
+.kateconfig
 
-# legendary cmake's
-build
-CMakeLists.txt
+# kde
+.directory
+
+# SCons
+.sconsign.dblite
+
+
+# Visual Studio Code
+/.vscode
 
 # bundle output
-dist
+/dist
+
+# SCons build dir
+/build
+
+# Toolchain
+/toolchain
+
+# openocd output file
+openocd.log
+
+# PVS Studio temporary files
+.PVS-Studio/
+PVS-Studio.log
+*.PVS-Studio.*
+
+.gdbinit
+
+/fbt_options_local.py

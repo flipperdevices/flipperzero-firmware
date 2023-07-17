@@ -1,6 +1,11 @@
 #pragma once
 
 #include <furi_hal.h>
+#include <devices/devices.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef void (*SubGhzTxRxWorkerCallbackHaveRead)(void* context);
 
@@ -63,9 +68,13 @@ void subghz_tx_rx_worker_free(SubGhzTxRxWorker* instance);
 /** 
  * Start SubGhzTxRxWorker
  * @param instance Pointer to a SubGhzTxRxWorker instance
+ * @param device Pointer to a SubGhzDevice instance
  * @return bool - true if ok
  */
-bool subghz_tx_rx_worker_start(SubGhzTxRxWorker* instance, uint32_t frequency);
+bool subghz_tx_rx_worker_start(
+    SubGhzTxRxWorker* instance,
+    const SubGhzDevice* device,
+    uint32_t frequency);
 
 /** 
  * Stop SubGhzTxRxWorker
@@ -79,3 +88,7 @@ void subghz_tx_rx_worker_stop(SubGhzTxRxWorker* instance);
  * @return bool - true if running
  */
 bool subghz_tx_rx_worker_is_running(SubGhzTxRxWorker* instance);
+
+#ifdef __cplusplus
+}
+#endif

@@ -69,6 +69,7 @@ const SubGhzProtocol subghz_protocol_gate_tx = {
 };
 
 void* subghz_protocol_encoder_gate_tx_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolEncoderGateTx* instance = malloc(sizeof(SubGhzProtocolEncoderGateTx));
 
     instance->base.protocol = &subghz_protocol_gate_tx;
@@ -77,7 +78,7 @@ void* subghz_protocol_encoder_gate_tx_alloc(SubGhzEnvironment* environment) {
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
     return instance;
 }
 
@@ -128,39 +129,43 @@ static bool subghz_protocol_encoder_gate_tx_get_upload(SubGhzProtocolEncoderGate
     return true;
 }
 
-bool subghz_protocol_encoder_gate_tx_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_encoder_gate_tx_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderGateTx* instance = context;
-    bool res = false;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            FURI_LOG_E(TAG, "Deserialize error");
+        ret = subghz_block_generic_deserialize_check_count_bit(
+            &instance->generic,
+            flipper_format,
+            subghz_protocol_gate_tx_const.min_count_bit_for_found);
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
-
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_gate_tx_get_upload(instance);
-        instance->encoder.is_runing = true;
-
-        res = true;
+        if(!subghz_protocol_encoder_gate_tx_get_upload(instance)) {
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
+            break;
+        }
+        instance->encoder.is_running = true;
     } while(false);
 
-    return res;
+    return ret;
 }
 
 void subghz_protocol_encoder_gate_tx_stop(void* context) {
     SubGhzProtocolEncoderGateTx* instance = context;
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
 }
 
 LevelDuration subghz_protocol_encoder_gate_tx_yield(void* context) {
     SubGhzProtocolEncoderGateTx* instance = context;
 
-    if(instance->encoder.repeat == 0 || !instance->encoder.is_runing) {
-        instance->encoder.is_runing = false;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
         return level_duration_reset();
     }
 
@@ -175,6 +180,7 @@ LevelDuration subghz_protocol_encoder_gate_tx_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_gate_tx_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolDecoderGateTx* instance = malloc(sizeof(SubGhzProtocolDecoderGateTx));
     instance->base.protocol = &subghz_protocol_gate_tx;
     instance->generic.protocol_name = instance->base.protocol->name;
@@ -218,7 +224,7 @@ void subghz_protocol_decoder_gate_tx_feed(void* context, bool level, uint32_t du
         break;
     case GateTXDecoderStepSaveDuration:
         if(!level) {
-            if(duration >= (subghz_protocol_gate_tx_const.te_short * 10 +
+            if(duration >= ((uint32_t)subghz_protocol_gate_tx_const.te_short * 10 +
                             subghz_protocol_gate_tx_const.te_delta)) {
                 instance->decoder.parser_step = GateTXDecoderStepFoundStartBit;
                 if(instance->decoder.decode_count_bit >=
@@ -284,31 +290,32 @@ uint8_t subghz_protocol_decoder_gate_tx_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_gate_tx_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_gate_tx_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderGateTx* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-bool subghz_protocol_decoder_gate_tx_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_gate_tx_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderGateTx* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    return subghz_block_generic_deserialize_check_count_bit(
+        &instance->generic, flipper_format, subghz_protocol_gate_tx_const.min_count_bit_for_found);
 }
 
-void subghz_protocol_decoder_gate_tx_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_gate_tx_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderGateTx* instance = context;
     subghz_protocol_gate_tx_check_remote_controller(&instance->generic);
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:%06lX\r\n"
-        "Sn:%05lX  Btn:%lX\r\n",
+        "Sn:%05lX  Btn:%X\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
         (uint32_t)(instance->generic.data & 0xFFFFFF),

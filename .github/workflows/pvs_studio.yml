@@ -1,0 +1,89 @@
+name: 'Static C/C++ analysis with PVS-Studio'
+
+on:
+  push:
+    branches:
+      - dev
+    tags:
+      - '*'
+  pull_request:
+
+env:
+  TARGETS: f7
+  DEFAULT_TARGET: f7
+  FBT_TOOLCHAIN_PATH: /runner/_work
+
+jobs:
+  analyse_c_cpp:
+    if: ${{ !github.event.pull_request.head.repo.fork }}
+    runs-on: [self-hosted, FlipperZeroShell]
+    steps:
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
+
+      - name: 'Checkout code'
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: 'Get commit details'
+        id: names
+        run: |
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            TYPE="pull"
+          elif [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            TYPE="tag"
+          else
+            TYPE="other"
+          fi
+          python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE" || cat "${{ github.event_path }}"
+
+      - name: 'Supply PVS credentials'
+        run: |
+          pvs-studio-analyzer credentials ${{ secrets.PVS_STUDIO_CREDENTIALS }}
+
+      - name: 'Convert PVS-Studio output to html and detect warnings'
+        id: pvs-warn
+        run: |
+          WARNINGS=0
+          ./fbt COMPACT=1 PVSNOBROWSER=1 firmware_pvs || WARNINGS=1
+          echo "warnings=${WARNINGS}" >> $GITHUB_OUTPUT
+
+      - name: 'Upload report'
+        if: ${{ !github.event.pull_request.head.repo.fork && (steps.pvs-warn.outputs.warnings != 0) }}
+        uses: prewk/s3-cp-action@v2
+        with:
+          aws_s3_endpoint: "${{ secrets.PVS_AWS_ENDPOINT }}"
+          aws_access_key_id: "${{ secrets.PVS_AWS_ACCESS_KEY }}"
+          aws_secret_access_key: "${{ secrets.PVS_AWS_SECRET_KEY }}"
+          source: "./build/f7-firmware-DC/pvsreport"
+          dest: "s3://${{ secrets.PVS_AWS_BUCKET }}/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/"
+          flags: "--recursive --acl public-read"
+
+      - name: 'Find Previous Comment'
+        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request && (steps.pvs-warn.outputs.warnings != 0) }}
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'PVS-Studio report for commit'
+
+      - name: 'Create or update comment'
+        if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request && (steps.pvs-warn.outputs.warnings != 0) }}
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **PVS-Studio report for commit `${{steps.names.outputs.commit_sha}}`:**
+            - [Report](https://pvs.flipp.dev/${{steps.names.outputs.branch_name}}/${{steps.names.outputs.default_target}}-${{steps.names.outputs.suffix}}/index.html)
+          edit-mode: replace
+
+      - name: 'Raise exception'
+        if: ${{ steps.pvs-warn.outputs.warnings != 0 }}
+        run: |
+          echo "Please fix all PVS warnings before merge"
+          exit 1
+

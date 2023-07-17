@@ -61,6 +61,13 @@ bool file_stream_close(Stream* _stream) {
     return storage_file_close(stream->file);
 }
 
+FS_Error file_stream_get_error(Stream* _stream) {
+    furi_assert(_stream);
+    FileStream* stream = (FileStream*)_stream;
+    furi_check(stream->stream_base.vtable == &file_stream_vtable);
+    return storage_file_get_error(stream->file);
+}
+
 static void file_stream_free(FileStream* stream) {
     storage_file_free(stream->file);
     free(stream);
@@ -166,16 +173,20 @@ static bool file_stream_delete_and_insert(
     Stream* scratch_stream = file_stream_alloc(_stream->storage);
 
     // TODO: we need something like "storage_open_tmpfile and storage_close_tmpfile"
-    string_t scratch_name;
-    string_t tmp_name;
-    string_init(tmp_name);
-    storage_get_next_filename(_stream->storage, "/any", ".scratch", ".pad", tmp_name);
-    string_init_printf(scratch_name, "/any/%s.pad", string_get_cstr(tmp_name));
-    string_clear(tmp_name);
+    FuriString* scratch_name;
+    FuriString* tmp_name;
+    tmp_name = furi_string_alloc();
+    storage_get_next_filename(
+        _stream->storage, STORAGE_ANY_PATH_PREFIX, ".scratch", ".pad", tmp_name, 255);
+    scratch_name = furi_string_alloc_printf(ANY_PATH("%s.pad"), furi_string_get_cstr(tmp_name));
+    furi_string_free(tmp_name);
 
     do {
         if(!file_stream_open(
-               scratch_stream, string_get_cstr(scratch_name), FSAM_READ_WRITE, FSOM_CREATE_NEW))
+               scratch_stream,
+               furi_string_get_cstr(scratch_name),
+               FSAM_READ_WRITE,
+               FSOM_CREATE_NEW))
             break;
 
         size_t current_position = stream_tell(stream);
@@ -217,8 +228,8 @@ static bool file_stream_delete_and_insert(
     } while(false);
 
     stream_free(scratch_stream);
-    storage_common_remove(_stream->storage, string_get_cstr(scratch_name));
-    string_clear(scratch_name);
+    storage_common_remove(_stream->storage, furi_string_get_cstr(scratch_name));
+    furi_string_free(scratch_name);
 
     return result;
 }

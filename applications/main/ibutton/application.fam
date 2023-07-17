@@ -1,0 +1,21 @@
+App(
+    appid="ibutton",
+    name="iButton",
+    apptype=FlipperAppType.MENUEXTERNAL,
+    targets=["f7"],
+    entry_point="ibutton_app",
+    icon="A_iButton_14",
+    stack_size=2 * 1024,
+    order=60,
+    fap_libs=["assets"],
+    fap_icon="icon.png",
+    fap_category="iButton",
+)
+
+App(
+    appid="ibutton_start",
+    apptype=FlipperAppType.STARTUP,
+    targets=["f7"],
+    entry_point="ibutton_on_system_start",
+    order=60,
+)

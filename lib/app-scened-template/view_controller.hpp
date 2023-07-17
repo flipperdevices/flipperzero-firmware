@@ -1,7 +1,7 @@
 #pragma once
 #include "view_modules/generic_view_module.h"
 #include <map>
-#include <furi/check.h>
+#include <core/check.h>
 #include <gui/view_dispatcher.h>
 #include <callback-connector.h>
 #include "typeindex_no_rtti.hpp"
@@ -12,10 +12,11 @@
  * @tparam TApp application class
  * @tparam TViewModules variadic list of ViewModules
  */
-template <typename TApp, typename... TViewModules> class ViewController {
+template <typename TApp, typename... TViewModules>
+class ViewController {
 public:
     ViewController() {
-        event_queue = osMessageQueueNew(10, sizeof(typename TApp::Event), NULL);
+        event_queue = furi_message_queue_alloc(10, sizeof(typename TApp::Event));
 
         view_dispatcher = view_dispatcher_alloc();
         previous_view_callback_pointer = cbc::obtain_connector(
@@ -26,7 +27,6 @@ public:
            0)...);
 
         gui = static_cast<Gui*>(furi_record_open("gui"));
-        view_dispatcher_attach_to_gui(view_dispatcher, gui, ViewDispatcherTypeFullscreen);
     };
 
     ~ViewController() {
@@ -36,7 +36,7 @@ public:
         }
 
         view_dispatcher_free(view_dispatcher);
-        osMessageQueueDelete(event_queue);
+        furi_message_queue_free(event_queue);
     }
 
     /**
@@ -45,7 +45,8 @@ public:
      * @tparam T Concrete ViewModule class
      * @return T* ViewModule pointer
      */
-    template <typename T> T* get() {
+    template <typename T>
+    T* get() {
         uint32_t view_index = ext::make_type_index<T>().hash_code();
         furi_check(holder.count(view_index) != 0);
         return static_cast<T*>(holder[view_index]);
@@ -57,7 +58,8 @@ public:
      * @tparam T Concrete ViewModule class
      * @return T* ViewModule pointer
      */
-    template <typename T> operator T*() {
+    template <typename T>
+    operator T*() {
         uint32_t view_index = ext::make_type_index<T>().hash_code();
         furi_check(holder.count(view_index) != 0);
         return static_cast<T*>(holder[view_index]);
@@ -69,7 +71,8 @@ public:
      * @tparam T Concrete ViewModule class
      * @return T* ViewModule pointer
      */
-    template <typename T> void switch_to() {
+    template <typename T>
+    void switch_to() {
         uint32_t view_index = ext::make_type_index<T>().hash_code();
         furi_check(holder.count(view_index) != 0);
         view_dispatcher_switch_to_view(view_dispatcher, view_index);
@@ -81,7 +84,7 @@ public:
      * @param event event pointer
      */
     void receive_event(typename TApp::Event* event) {
-        if(osMessageQueueGet(event_queue, event, NULL, 100) != osOK) {
+        if(furi_message_queue_get(event_queue, event, 100) != FuriStatusOk) {
             event->type = TApp::EventType::Tick;
         }
     }
@@ -92,8 +95,12 @@ public:
      * @param event event pointer
      */
     void send_event(typename TApp::Event* event) {
-        osStatus_t result = osMessageQueuePut(event_queue, event, 0, osWaitForever);
-        furi_check(result == osOK);
+        FuriStatus result = furi_message_queue_put(event_queue, event, FuriWaitForever);
+        furi_check(result == FuriStatusOk);
+    }
+
+    void attach_to_gui(ViewDispatcherType type) {
+        view_dispatcher_attach_to_gui(view_dispatcher, gui, type);
     }
 
 private:
@@ -107,7 +114,7 @@ private:
      * @brief App event queue
      * 
      */
-    osMessageQueueId_t event_queue;
+    FuriMessageQueue* event_queue;
 
     /**
      * @brief Main ViewDispatcher pointer

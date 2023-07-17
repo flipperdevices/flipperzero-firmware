@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <toolbox/stream/stream.h>
-#include <mlib/m-string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -15,6 +14,7 @@ typedef enum {
     FlipperStreamValueFloat,
     FlipperStreamValueInt32,
     FlipperStreamValueUint32,
+    FlipperStreamValueHexUint64,
     FlipperStreamValueBool,
 } FlipperStreamValue;
 

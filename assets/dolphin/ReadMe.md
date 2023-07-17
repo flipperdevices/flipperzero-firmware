@@ -2,7 +2,7 @@
 
 Dolphin assets are split into 3 parts:
 
-- essential - Essential animations that are used for blocking system notifications. They are packed to `assets_dolphin_essential.[h,c]`.
+- blocking - Essential animations that are used for blocking system notifications. They are packed to `assets_dolphin_blocking.[h,c]`.
 - internal  - Internal animations that are used for idle dolphin animation. Converted to `assets_dolphin_internal.[h,c]`.
 - external  - External animations that are used for idle dolphin animation. Packed to resource folder and placed on SD card.
 
@@ -10,7 +10,7 @@ Dolphin assets are split into 3 parts:
 
 - `manifest.txt` - contains animations enumeration that is used for random animation selection. Starting point for Dolphin.
 - `meta.txt`     - contains data that describes how animation is drawn.
-- `frame_X.bm`   - Flipper Compressed Bitmap.
+- `frame_X.png`  - animation frame.
 
 ## File manifest.txt
 
@@ -26,7 +26,7 @@ Version: 1
 - `Name` - name of animation. Must be exact animation directory name.
 - `Min butthurt`, `Max butthurt` - range of dolphin's butthurt for this animation.
 - `Min level`, `Max level` - range of dolphin's level for this animation. If 0, this animation doesn't participate in random idle animation selection and can only be selected by exact name.
-- `Weight` - chance of this animation to be choosen at random animation selection.
+- `Weight` - chance of this animation to be chosen at random animation selection.
 
 Some animations can be excluded from participation in random animation selection, such as `L1_NoSd_128x49`.
 
@@ -52,7 +52,7 @@ Version: 1
 - `Active cooldown` - amount of seconds (after passive mode) to pass before entering next active mode.
 
 - `Bubble slots` - amount of bubble sequences.
-- Any bubble sequence plays whole sequence during active mode. There can be many bubble sequences and bubbles inside it. Bubbles in 1 bubble sequence have to reside in 1 slot. Bubbles order in 1 bubble sequence is determined by occurance in file. As soon as frame index goes out of EndFrame index of bubble - next animation bubble is choosen. There can also be free of bubbles frames between 2 bubbles.
+- Any bubble sequence plays whole sequence during active mode. There can be many bubble sequences and bubbles inside it. Bubbles in 1 bubble sequence have to reside in 1 slot. Bubbles order in 1 bubble sequence is determined by occurrence in file. As soon as frame index goes out of EndFrame index of bubble - next animation bubble is chosen. There can also be free of bubbles frames between 2 bubbles.
 
 - `Slot` - number to unite bubbles for same sequence.
 - `X`, `Y` - are coordinates of left top corner of bubble.

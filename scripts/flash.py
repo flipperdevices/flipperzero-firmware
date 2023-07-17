@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 
-import logging
-import argparse
-import sys
-import os
 
 from flipper.app import App
+from flipper.assets.coprobin import CoproBinary
 from flipper.cube import CubeProgrammer
 
-STATEMENT = "AGREE_TO_LOOSE_FLIPPER_FEATURES_THAT_USES_CRYPTO_ENCLAVE"
+STATEMENT = "AGREE_TO_LOSE_FLIPPER_FEATURES_THAT_USE_CRYPTO_ENCLAVE"
 
 
 class Main(App):
@@ -68,10 +65,15 @@ class Main(App):
         )
         self._addArgsSWD(self.parser_core2radio)
         self.parser_core2radio.add_argument(
-            "radio_address", type=str, help="Radio Stack Binary Address"
+            "radio", type=str, help="Radio Stack Binary"
         )
         self.parser_core2radio.add_argument(
-            "radio", type=str, help="Radio Stack Binary"
+            "--addr",
+            dest="radio_address",
+            help="Radio Stack Binary Address, as per release_notes",
+            type=lambda x: int(x, 16),
+            default=0,
+            required=False,
         )
         self.parser_core2radio.set_defaults(func=self.core2radio)
 
@@ -88,71 +90,84 @@ class Main(App):
         }
 
     def wipe(self):
-        self.logger.info(f"Wiping flash")
+        self.logger.info("Wiping flash")
         cp = CubeProgrammer(self._getCubeParams())
-        self.logger.info(f"Setting RDP to 0xBB")
+        self.logger.info("Setting RDP to 0xBB")
         cp.setOptionBytes({"RDP": ("0xBB", "rw")})
-        self.logger.info(f"Verifying RDP")
+        self.logger.info("Verifying RDP")
         r = cp.checkOptionBytes({"RDP": ("0xBB", "rw")})
-        assert r == True
+        assert r is True
         self.logger.info(f"Result: {r}")
-        self.logger.info(f"Setting RDP to 0xAA")
+        self.logger.info("Setting RDP to 0xAA")
         cp.setOptionBytes({"RDP": ("0xAA", "rw")})
-        self.logger.info(f"Verifying RDP")
+        self.logger.info("Verifying RDP")
         r = cp.checkOptionBytes({"RDP": ("0xAA", "rw")})
-        assert r == True
+        assert r is True
         self.logger.info(f"Result: {r}")
-        self.logger.info(f"Complete")
+        self.logger.info("Complete")
         return 0
 
     def core1bootloader(self):
-        self.logger.info(f"Flashing bootloader")
+        self.logger.info("Flashing bootloader")
         cp = CubeProgrammer(self._getCubeParams())
         cp.flashBin("0x08000000", self.args.bootloader)
-        self.logger.info(f"Complete")
+        self.logger.info("Complete")
         cp.resetTarget()
         return 0
 
     def core1firmware(self):
-        self.logger.info(f"Flashing firmware")
+        self.logger.info("Flashing firmware")
         cp = CubeProgrammer(self._getCubeParams())
         cp.flashBin("0x08008000", self.args.firmware)
-        self.logger.info(f"Complete")
+        self.logger.info("Complete")
         cp.resetTarget()
         return 0
 
     def core1(self):
-        self.logger.info(f"Flashing bootloader")
+        self.logger.info("Flashing bootloader")
         cp = CubeProgrammer(self._getCubeParams())
         cp.flashBin("0x08000000", self.args.bootloader)
-        self.logger.info(f"Flashing firmware")
+        self.logger.info("Flashing firmware")
         cp.flashBin("0x08008000", self.args.firmware)
         cp.resetTarget()
-        self.logger.info(f"Complete")
+        self.logger.info("Complete")
         return 0
 
     def core2fus(self):
         if self.args.statement != STATEMENT:
             self.logger.error(
-                f"PLEASE DON'T. THIS FEATURE INTENDED ONLY FOR FACTORY FLASHING"
+                "PLEASE DON'T. THIS FEATURE INTENDED ONLY FOR FACTORY FLASHING"
             )
             return 1
-        self.logger.info(f"Flashing Firmware Update Service")
+        self.logger.info("Flashing Firmware Update Service")
         cp = CubeProgrammer(self._getCubeParams())
         cp.flashCore2(self.args.fus_address, self.args.fus)
-        self.logger.info(f"Complete")
+        self.logger.info("Complete")
         return 0
 
     def core2radio(self):
-        if int(self.args.radio_address, 16) > 0x080E0000:
-            self.logger.error(f"I KNOW WHAT YOU DID LAST SUMMER")
+        stack_info = CoproBinary(self.args.radio)
+        if not stack_info.is_stack():
+            self.logger.error("Not a Radio Stack")
             return 1
+        self.logger.info(f"Will flash {stack_info.img_sig.get_version()}")
+
+        radio_address = self.args.radio_address
+        if not radio_address:
+            radio_address = stack_info.get_flash_load_addr()
+            self.logger.warning(
+                f"Radio address not provided, guessed as 0x{radio_address:X}"
+            )
+        if radio_address > 0x080E0000:
+            self.logger.error("I KNOW WHAT YOU DID LAST SUMMER")
+            return 1
+
         cp = CubeProgrammer(self._getCubeParams())
-        self.logger.info(f"Removing Current Radio Stack")
+        self.logger.info("Removing Current Radio Stack")
         cp.deleteCore2RadioStack()
-        self.logger.info(f"Flashing Radio Stack")
-        cp.flashCore2(self.args.radio_address, self.args.radio)
-        self.logger.info(f"Complete")
+        self.logger.info("Flashing Radio Stack")
+        cp.flashCore2(radio_address, self.args.radio)
+        self.logger.info("Complete")
         return 0
 
 

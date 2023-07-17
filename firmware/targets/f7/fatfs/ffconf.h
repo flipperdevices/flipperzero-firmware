@@ -24,14 +24,14 @@
 / Additional user header to be used  
 /-----------------------------------------------------------------------------*/
 
-#include "main.h"
-#include "stm32wbxx_hal.h"
-
 /*-----------------------------------------------------------------------------/
 / Function Configurations
 /-----------------------------------------------------------------------------*/
-
+#ifdef FURI_RAM_EXEC
+#define _FS_READONLY 1 /* 0:Read/Write or 1:Read only */
+#else
 #define _FS_READONLY 0 /* 0:Read/Write or 1:Read only */
+#endif
 /* This option switches read-only configuration. (0:Read/Write or 1:Read-only)
 /  Read-only configuration removes writing API functions, f_write(), f_sync(),
 /  f_unlink(), f_mkdir(), f_chmod(), f_rename(), f_truncate(), f_getfree()
@@ -58,7 +58,11 @@
 /* This option switches filtered directory read functions, f_findfirst() and
 /  f_findnext(). (0:Disable, 1:Enable 2:Enable with matching altname[] too) */
 
+#ifdef FURI_RAM_EXEC
+#define _USE_MKFS 0
+#else
 #define _USE_MKFS 1
+#endif
 /* This option switches f_mkfs() function. (0:Disable or 1:Enable) */
 
 #define _USE_FASTSEEK 1
@@ -160,7 +164,7 @@
 
 /* USER CODE BEGIN Volumes */
 #define _STR_VOLUME_ID 0 /* 0:Use only 0-9 for drive ID, 1:Use strings for drive ID */
-#define _VOLUME_STRS "RAM", "NAND", "CF", "SD1", "SD2", "USB1", "USB2", "USB3"
+#define _VOLUME_STRS "SD"
 /* _STR_VOLUME_ID switches string support of volume ID.
 /  When _STR_VOLUME_ID is set to 1, also pre-defined strings can be used as drive
 /  number in the path name. _VOLUME_STRS defines the drive ID strings for each
@@ -215,10 +219,7 @@
 /  When enable exFAT, also LFN needs to be enabled. (_USE_LFN >= 1)
 /  Note that enabling exFAT discards C89 compatibility. */
 
-#define _FS_NORTC 1
-#define _NORTC_MON 7
-#define _NORTC_MDAY 20
-#define _NORTC_YEAR 2021
+#define _FS_NORTC 0
 /* The option _FS_NORTC switches timestamp functiton. If the system does not have
 /  any RTC function or valid timestamp is not needed, set _FS_NORTC = 1 to disable
 /  the timestamp function. All objects modified by FatFs will have a fixed timestamp
@@ -241,7 +242,7 @@
 
 #define _FS_REENTRANT 0 /* 0:Disable or 1:Enable */
 #define _FS_TIMEOUT 1000 /* Timeout period in unit of time ticks */
-#define _SYNC_t osMutexId_t
+#define _SYNC_t FuriMutex*
 /* The option _FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
 /  module itself. Note that regardless of this option, file access to different
 /  volume is always re-entrant and volume control functions, f_mount(), f_mkfs()

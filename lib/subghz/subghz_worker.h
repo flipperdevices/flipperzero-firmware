@@ -2,6 +2,10 @@
 
 #include <furi_hal.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct SubGhzWorker SubGhzWorker;
 
 typedef void (*SubGhzWorkerOverrunCallback)(void* context);
@@ -62,3 +66,15 @@ void subghz_worker_stop(SubGhzWorker* instance);
  * @return bool - true if running
  */
 bool subghz_worker_is_running(SubGhzWorker* instance);
+
+/** 
+ * Short duration filter setting.
+ * glues short durations into 1. The default setting is 30 us, if set to 0 the filter will be disabled
+ * @param instance Pointer to a SubGhzWorker instance
+ * @param timeout time in us
+ */
+void subghz_worker_set_filter(SubGhzWorker* instance, uint16_t timeout);
+
+#ifdef __cplusplus
+}
+#endif

@@ -74,6 +74,7 @@ const SubGhzProtocol subghz_protocol_somfy_telis = {
 };
 
 void* subghz_protocol_decoder_somfy_telis_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolDecoderSomfyTelis* instance = malloc(sizeof(SubGhzProtocolDecoderSomfyTelis));
     instance->base.protocol = &subghz_protocol_somfy_telis;
     instance->generic.protocol_name = instance->base.protocol->name;
@@ -335,34 +336,37 @@ uint8_t subghz_protocol_decoder_somfy_telis_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_somfy_telis_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_somfy_telis_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyTelis* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-bool subghz_protocol_decoder_somfy_telis_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_somfy_telis_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyTelis* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    return subghz_block_generic_deserialize_check_count_bit(
+        &instance->generic,
+        flipper_format,
+        subghz_protocol_somfy_telis_const.min_count_bit_for_found);
 }
 
-void subghz_protocol_decoder_somfy_telis_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_somfy_telis_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderSomfyTelis* instance = context;
 
     subghz_protocol_somfy_telis_check_remote_controller(&instance->generic);
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %db\r\n"
         "Key:0x%lX%08lX\r\n"
         "Sn:0x%06lX \r\n"
-        "Cnt:0x%04X\r\n"
+        "Cnt:0x%04lX\r\n"
         "Btn:%s\r\n",
 
         instance->generic.protocol_name,

@@ -1059,7 +1059,7 @@ DWORD get_fat (	/* 0xFFFFFFFF:Disk error, 1:Internal error, 2..0x7FFFFFFF:Cluste
 					break;
 				}
 			}
-			/* go to default */
+			__attribute__ ((fallthrough));
 #endif
 		default:
 			val = 1;	/* Internal error */
@@ -3975,7 +3975,7 @@ FRESULT f_getcwd (
 #endif
 			if (i == len) {					/* Root-directory */
 				*tp++ = '/';
-			} else {						/* Sub-directroy */
+			} else {						/* Sub-directory */
 				do		/* Add stacked path str */
 					*tp++ = buff[i++];
 				while (i < len);
@@ -4673,7 +4673,7 @@ FRESULT f_mkdir (
 				}
 			}
 			if (res == FR_OK) {
-				res = dir_register(&dj);	/* Register the object to the directoy */
+				res = dir_register(&dj);	/* Register the object to the directory */
 			}
 			if (res == FR_OK) {
 #if _FS_EXFAT
@@ -5430,7 +5430,7 @@ FRESULT f_mkfs (
 					ch = 0xFFFF; st = 2; break;	/* Compress the no-case block if run is >= 128 */
 				}
 				st = 1;			/* Do not compress short run */
-				/* go to next case */
+				__attribute__ ((fallthrough));
 			case 1:
 				ch = si++;		/* Fill the short run */
 				if (--j == 0) st = 0;

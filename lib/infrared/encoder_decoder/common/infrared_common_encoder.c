@@ -1,10 +1,9 @@
-#include "furi/check.h"
-#include "infrared.h"
 #include "infrared_common_i.h"
-#include <stdbool.h>
-#include <furi.h>
-#include "infrared_i.h"
-#include <stdint.h>
+
+#include <stdlib.h>
+#include <string.h>
+#include <core/check.h>
+#include <core/common_defines.h>
 
 static InfraredStatus
     infrared_common_encode_bits(InfraredCommonEncoder* encoder, uint32_t* duration, bool* level) {
@@ -94,7 +93,6 @@ InfraredStatus
     case InfraredCommonEncoderStateSilence:
         *duration = encoder->protocol->timings.silence_time;
         *level = false;
-        status = InfraredStatusOk;
         encoder->state = InfraredCommonEncoderStatePreamble;
         ++encoder->timings_encoded;
         encoder->timings_sum = 0;
@@ -146,7 +144,7 @@ void* infrared_common_encoder_alloc(const InfraredCommonProtocolSpec* protocol) 
     }
 
     /* protocol->databit_len[0] has to contain biggest value of bits that can be decoded */
-    for(int i = 1; i < COUNT_OF(protocol->databit_len); ++i) {
+    for(size_t i = 1; i < COUNT_OF(protocol->databit_len); ++i) {
         furi_assert(protocol->databit_len[i] <= protocol->databit_len[0]);
     }
 
@@ -174,7 +172,7 @@ void infrared_common_encoder_reset(InfraredCommonEncoder* encoder) {
 
     uint8_t max_databit_len = 0;
 
-    for(int i = 0; i < COUNT_OF(encoder->protocol->databit_len); ++i) {
+    for(size_t i = 0; i < COUNT_OF(encoder->protocol->databit_len); ++i) {
         max_databit_len = MAX(max_databit_len, encoder->protocol->databit_len[i]);
     }
 

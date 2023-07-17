@@ -49,27 +49,26 @@ uint8_t subghz_protocol_decoder_kia_get_hash_data(void* context);
  * Serialize data SubGhzProtocolDecoderKIA.
  * @param context Pointer to a SubGhzProtocolDecoderKIA instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @param frequency The frequency at which the signal was received, Hz
- * @param preset The modulation on which the signal was received, FuriHalSubGhzPreset
- * @return true On success
+ * @param preset The modulation on which the signal was received, SubGhzRadioPreset
+ * @return status
  */
-bool subghz_protocol_decoder_kia_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_kia_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset);
+    SubGhzRadioPreset* preset);
 
 /**
  * Deserialize data SubGhzProtocolDecoderKIA.
  * @param context Pointer to a SubGhzProtocolDecoderKIA instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_protocol_decoder_kia_deserialize(void* context, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_protocol_decoder_kia_deserialize(void* context, FlipperFormat* flipper_format);
 
 /**
  * Getting a textual representation of the received data.
  * @param context Pointer to a SubGhzProtocolDecoderKIA instance
  * @param output Resulting text
  */
-void subghz_protocol_decoder_kia_get_string(void* context, string_t output);
+void subghz_protocol_decoder_kia_get_string(void* context, FuriString* output);

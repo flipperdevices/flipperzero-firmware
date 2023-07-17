@@ -1,7 +1,7 @@
-#include "furi_hal_bt_serial.h"
-#include "dev_info_service.h"
-#include "battery_service.h"
-#include "serial_service.h"
+#include <furi_hal_bt_serial.h>
+#include <services/dev_info_service.h>
+#include <services/battery_service.h>
+#include <services/serial_service.h>
 
 #include <furi.h>
 
@@ -29,6 +29,16 @@ void furi_hal_bt_serial_set_event_callback(
 
 void furi_hal_bt_serial_notify_buffer_is_empty() {
     serial_svc_notify_buffer_is_empty();
+}
+
+void furi_hal_bt_serial_set_rpc_status(FuriHalBtSerialRpcStatus status) {
+    SerialServiceRpcStatus st;
+    if(status == FuriHalBtSerialRpcStatusActive) {
+        st = SerialServiceRpcStatusActive;
+    } else {
+        st = SerialServiceRpcStatusNotActive;
+    }
+    serial_svc_set_rpc_status(st);
 }
 
 bool furi_hal_bt_serial_tx(uint8_t* data, uint16_t size) {

@@ -1,12 +1,13 @@
 #pragma once
-#include <furi/record.h>
+#include <core/record.h>
 
 /**
  * @brief Class for opening, casting, holding and closing records
  * 
  * @tparam TRecordClass record class
  */
-template <typename TRecordClass> class RecordController {
+template <typename TRecordClass>
+class RecordController {
 public:
     /**
      * @brief Construct a new Record Controller object for record with record name

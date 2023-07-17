@@ -1,13 +1,11 @@
 import multiprocessing
 import logging
 import os
-import sys
-import shutil
 from collections import Counter
 
-from flipper.utils.fff import *
-from flipper.utils.templite import *
-from .icon import *
+from flipper.utils.fff import FlipperFormatFile
+from flipper.utils.templite import Templite
+from .icon import ImageTools, file2image
 
 
 def _convert_image_to_bm(pair: set):
@@ -22,7 +20,6 @@ def _convert_image(source_filename: str):
 
 
 class DolphinBubbleAnimation:
-
     FILE_TYPE = "Flipper Animation"
     FILE_VERSION = 1
 
@@ -52,11 +49,11 @@ class DolphinBubbleAnimation:
 
     def load(self, animation_directory: str):
         if not os.path.isdir(animation_directory):
-            raise Exception(f"Animation folder doesn't exists: { animation_directory }")
+            raise Exception(f"Animation folder doesn't exist: { animation_directory }")
 
         meta_filename = os.path.join(animation_directory, "meta.txt")
         if not os.path.isfile(meta_filename):
-            raise Exception(f"Animation meta file doesn't exists: { meta_filename }")
+            raise Exception(f"Animation meta file doesn't exist: { meta_filename }")
 
         self.logger.info(f"Loading meta from {meta_filename}")
         file = FlipperFormatFile()
@@ -122,7 +119,7 @@ class DolphinBubbleAnimation:
                 self.meta["Passive frames"] + self.meta["Active frames"]
                 == ordered_frames_count
             )
-        except EOFError as e:
+        except EOFError:
             raise Exception("Invalid meta file: too short")
         except AssertionError as e:
             self.logger.exception(e)
@@ -159,7 +156,7 @@ class DolphinBubbleAnimation:
             except AssertionError as e:
                 self.logger.exception(e)
                 self.logger.error(
-                    f"Animation {self.name} bubble slot {bubble_slot} got incorrect data: {bubble}"
+                    f"Animation {self.name} bubble slot {bubble['Slot']} got incorrect data: {bubble}"
                 )
                 raise Exception("Meta file is invalid: incorrect bubble data")
             except EOFError:
@@ -227,16 +224,22 @@ class DolphinBubbleAnimation:
                 (frame, os.path.join(animation_directory, f"frame_{index}.bm"))
             )
 
-        pool = multiprocessing.Pool()
-        pool.map(_convert_image_to_bm, to_pack)
+        if ImageTools.is_processing_slow():
+            pool = multiprocessing.Pool()
+            pool.map(_convert_image_to_bm, to_pack)
+        else:
+            for image in to_pack:
+                _convert_image_to_bm(image)
 
     def process(self):
-        pool = multiprocessing.Pool()
-        self.frames = pool.map(_convert_image, self.frames)
+        if ImageTools.is_processing_slow():
+            pool = multiprocessing.Pool()
+            self.frames = pool.map(_convert_image, self.frames)
+        else:
+            self.frames = list(_convert_image(frame) for frame in self.frames)
 
 
 class DolphinManifest:
-
     FILE_TYPE = "Flipper Animation Manifest"
     FILE_VERSION = 1
 
@@ -295,7 +298,8 @@ class DolphinManifest:
     def _renderTemplate(self, template_filename: str, output_filename: str, **kwargs):
         template = Templite(filename=template_filename)
         output = template.render(**kwargs)
-        open(output_filename, "w").write(output)
+        with open(output_filename, "w", newline="\n") as file:
+            file.write(output)
 
     def save2code(self, output_directory: str, symbol_name: str):
         # Process frames

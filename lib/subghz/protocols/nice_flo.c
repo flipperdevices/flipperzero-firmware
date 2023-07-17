@@ -5,12 +5,6 @@
 #include "../blocks/generic.h"
 #include "../blocks/math.h"
 
-/*
- * Help
- * https://phreakerclub.com/447
- *
- */
-
 #define TAG "SubGhzProtocolNiceFLO"
 
 static const SubGhzBlockConst subghz_protocol_nice_flo_const = {
@@ -75,6 +69,7 @@ const SubGhzProtocol subghz_protocol_nice_flo = {
 };
 
 void* subghz_protocol_encoder_nice_flo_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolEncoderNiceFlo* instance = malloc(sizeof(SubGhzProtocolEncoderNiceFlo));
 
     instance->base.protocol = &subghz_protocol_nice_flo;
@@ -83,7 +78,7 @@ void* subghz_protocol_encoder_nice_flo_alloc(SubGhzEnvironment* environment) {
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
     return instance;
 }
 
@@ -134,39 +129,48 @@ static bool subghz_protocol_encoder_nice_flo_get_upload(SubGhzProtocolEncoderNic
     return true;
 }
 
-bool subghz_protocol_encoder_nice_flo_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_encoder_nice_flo_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderNiceFlo* instance = context;
-    bool res = false;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            FURI_LOG_E(TAG, "Deserialize error");
+        ret = subghz_block_generic_deserialize(&instance->generic, flipper_format);
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
-
+        if((instance->generic.data_count_bit <
+            subghz_protocol_nice_flo_const.min_count_bit_for_found) ||
+           (instance->generic.data_count_bit >
+            2 * subghz_protocol_nice_flo_const.min_count_bit_for_found)) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            ret = SubGhzProtocolStatusErrorValueBitCount;
+            break;
+        }
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_nice_flo_get_upload(instance);
-        instance->encoder.is_runing = true;
-
-        res = true;
+        if(!subghz_protocol_encoder_nice_flo_get_upload(instance)) {
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
+            break;
+        }
+        instance->encoder.is_running = true;
     } while(false);
 
-    return res;
+    return ret;
 }
 
 void subghz_protocol_encoder_nice_flo_stop(void* context) {
     SubGhzProtocolEncoderNiceFlo* instance = context;
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
 }
 
 LevelDuration subghz_protocol_encoder_nice_flo_yield(void* context) {
     SubGhzProtocolEncoderNiceFlo* instance = context;
 
-    if(instance->encoder.repeat == 0 || !instance->encoder.is_runing) {
-        instance->encoder.is_runing = false;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
         return level_duration_reset();
     }
 
@@ -181,6 +185,7 @@ LevelDuration subghz_protocol_encoder_nice_flo_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_nice_flo_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolDecoderNiceFlo* instance = malloc(sizeof(SubGhzProtocolDecoderNiceFlo));
     instance->base.protocol = &subghz_protocol_nice_flo;
     instance->generic.protocol_name = instance->base.protocol->name;
@@ -278,23 +283,38 @@ uint8_t subghz_protocol_decoder_nice_flo_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_nice_flo_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_nice_flo_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlo* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-bool subghz_protocol_decoder_nice_flo_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_nice_flo_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlo* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
+    do {
+        ret = subghz_block_generic_deserialize(&instance->generic, flipper_format);
+        if(ret != SubGhzProtocolStatusOk) {
+            break;
+        }
+        if((instance->generic.data_count_bit <
+            subghz_protocol_nice_flo_const.min_count_bit_for_found) ||
+           (instance->generic.data_count_bit >
+            2 * subghz_protocol_nice_flo_const.min_count_bit_for_found)) {
+            FURI_LOG_E(TAG, "Wrong number of bits in key");
+            ret = SubGhzProtocolStatusErrorValueBitCount;
+            break;
+        }
+    } while(false);
+    return ret;
 }
 
-void subghz_protocol_decoder_nice_flo_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_nice_flo_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderNiceFlo* instance = context;
 
@@ -303,7 +323,7 @@ void subghz_protocol_decoder_nice_flo_get_string(void* context, string_t output)
         instance->generic.data, instance->generic.data_count_bit);
     uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"

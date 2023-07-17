@@ -1,8 +1,17 @@
 #pragma once
 
-#include "serial_service.h"
+#include <services/serial_service.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define FURI_HAL_BT_SERIAL_PACKET_SIZE_MAX SERIAL_SVC_DATA_LEN_MAX
+
+typedef enum {
+    FuriHalBtSerialRpcStatusNotActive,
+    FuriHalBtSerialRpcStatusActive,
+} FuriHalBtSerialRpcStatus;
 
 /** Serial service callback type */
 typedef SerialServiceEventCallback FuriHalBtSerialCallback;
@@ -26,6 +35,12 @@ void furi_hal_bt_serial_set_event_callback(
     FuriHalBtSerialCallback callback,
     void* context);
 
+/** Set BLE RPC status
+ *
+ * @param status        FuriHalBtSerialRpcStatus instance
+ */
+void furi_hal_bt_serial_set_rpc_status(FuriHalBtSerialRpcStatus status);
+
 /** Notify that application buffer is empty
  */
 void furi_hal_bt_serial_notify_buffer_is_empty();
@@ -38,3 +53,7 @@ void furi_hal_bt_serial_notify_buffer_is_empty();
  * @return      true on success
  */
 bool furi_hal_bt_serial_tx(uint8_t* data, uint16_t size);
+
+#ifdef __cplusplus
+}
+#endif

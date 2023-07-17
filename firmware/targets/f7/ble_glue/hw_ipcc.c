@@ -19,14 +19,14 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "app_common.h"
-#include "mbox_def.h"
+#include <interface/patterns/ble_thread/tl/mbox_def.h>
 
 /* Global variables ---------------------------------------------------------*/
 /* Private defines -----------------------------------------------------------*/
 #define HW_IPCC_TX_PENDING(channel) \
-    (!(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, channel))) && (((~(IPCC->C1MR)) & (channel << 16U)))
+    (!(LL_C1_IPCC_IsActiveFlag_CHx(IPCC, channel))) && (((~(IPCC->C1MR)) & ((channel) << 16U)))
 #define HW_IPCC_RX_PENDING(channel) \
-    (LL_C2_IPCC_IsActiveFlag_CHx(IPCC, channel)) && (((~(IPCC->C1MR)) & (channel << 0U)))
+    (LL_C2_IPCC_IsActiveFlag_CHx(IPCC, channel)) && (((~(IPCC->C1MR)) & ((channel) << 0U)))
 
 /* Private macros ------------------------------------------------------------*/
 /* Private typedef -----------------------------------------------------------*/
@@ -185,10 +185,10 @@ void HW_IPCC_Init(void) {
     LL_C1_IPCC_EnableIT_RXO(IPCC);
     LL_C1_IPCC_EnableIT_TXF(IPCC);
 
-    HAL_NVIC_SetPriority(IPCC_C1_RX_IRQn, 6, 0);
-    HAL_NVIC_EnableIRQ(IPCC_C1_RX_IRQn);
-    HAL_NVIC_SetPriority(IPCC_C1_TX_IRQn, 6, 0);
-    HAL_NVIC_EnableIRQ(IPCC_C1_TX_IRQn);
+    NVIC_SetPriority(IPCC_C1_RX_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
+    NVIC_EnableIRQ(IPCC_C1_RX_IRQn);
+    NVIC_SetPriority(IPCC_C1_TX_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 6, 0));
+    NVIC_EnableIRQ(IPCC_C1_TX_IRQn);
 
     return;
 }

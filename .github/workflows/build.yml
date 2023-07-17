@@ -4,211 +4,215 @@ on:
   push:
     branches:
       - dev
-      - "release*"
     tags:
       - '*'
   pull_request:
 
 env:
-  TARGETS: f7
+  TARGETS: f7 f18
   DEFAULT_TARGET: f7
+  FBT_TOOLCHAIN_PATH: /runner/_work
 
 jobs:
   main:
-    runs-on: [self-hosted,Office]
+    runs-on: [self-hosted,FlipperZeroShell]
     steps:
-      - name: 'Cleanup workspace'
-        uses: AutoModality/action-clean@v1
-
-      - name: 'Decontaminate previous build leftovers'
-        run: |
-          if [ -d .git ]
-          then
-            git submodule status \
-              || git checkout `git rev-list --max-parents=0 HEAD | tail -n 1`
-          fi
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout code'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-          submodules: true
+          fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Build docker image'
-        uses: ./.github/actions/docker
+      - name: 'Get commit details'
+        id: names
+        run: |
+          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
+            TYPE="pull"
+          elif [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            TYPE="tag"
+          else
+            TYPE="other"
+          fi
+          python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE" || cat "${{ github.event_path }}"
+          echo random_hash=$(openssl rand -base64 40 | shasum -a 256 | awk '{print $1}') >> $GITHUB_OUTPUT
+          echo "event_type=$TYPE" >> $GITHUB_OUTPUT
+
+      - name: 'Check API versions'
+        run: |
+          set -e
+          N_API_HEADER_SIGNATURES=`ls -1 firmware/targets/f*/api_symbols.csv | xargs -I {} sh -c "head -n2 {} | md5sum" | sort -u | wc -l`
+          if [ $N_API_HEADER_SIGNATURES != 1 ] ; then
+            echo API versions aren\'t matching for available targets. Please update!
+            head -n2 firmware/targets/f*/api_symbols.csv
+            exit 1
+          fi
 
       - name: 'Make artifacts directory'
         run: |
-          test -d artifacts && rm -rf artifacts || true
-          mkdir artifacts
-      
-      - name: 'Generate suffix and folder name'
-        id: names
-        run: |
-          REF=${{ github.ref }}
-          if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            REF=${{ github.head_ref }}
-          fi
-          BRANCH_OR_TAG=${REF#refs/*/}
-          SHA=$(git rev-parse --short HEAD)
-          
-          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
-            SUFFIX=${BRANCH_OR_TAG//\//_}
-          else
-            SUFFIX=${BRANCH_OR_TAG//\//_}-$(date +'%d%m%Y')-${SHA}
-          fi
-          
-          echo "WORKFLOW_BRANCH_OR_TAG=${BRANCH_OR_TAG}" >> $GITHUB_ENV
-          echo "DIST_SUFFIX=${SUFFIX}" >> $GITHUB_ENV
-          echo "::set-output name=artifacts-path::${BRANCH_OR_TAG}"
-          echo "::set-output name=suffix::${SUFFIX}"
-          echo "::set-output name=short-hash::${SHA}"
-          echo "::set-output name=default-target::${DEFAULT_TARGET}"
+          rm -rf artifacts map_analyser_files
+          mkdir artifacts map_analyser_files
 
       - name: 'Bundle scripts'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
-          tar czpf artifacts/flipper-z-any-scripts-${{steps.names.outputs.suffix}}.tgz scripts
+          tar czpf artifacts/flipper-z-any-scripts-${SUFFIX}.tgz scripts
 
-      - name: 'Rebuild Assets'
-        uses: ./.github/actions/docker
-        with:
-          run: |
-            set -e
-            make -C assets clean
-            make -C assets
-
-      - name: 'Build the firmware in docker'
-        uses: ./.github/actions/docker
-        with:
-          run: |
-            set -e
-            for TARGET in ${TARGETS}
-            do
-              make TARGET=${TARGET} ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
-            done
-
-      - name: 'Move upload files'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: ./.github/actions/docker
-        with:
-          run: |
-            set -e
-            for TARGET in ${TARGETS}
-            do
-              mv dist/${TARGET}/* artifacts/
-            done
-
-      - name: 'Bundle resources'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
+      - name: 'Build the firmware'
         run: |
-          ./scripts/assets.py manifest assets/resources
-          tar czpf artifacts/flipper-z-any-resources-${{steps.names.outputs.suffix}}.tgz -C assets resources
+          set -e
+          for TARGET in ${TARGETS}; do
+            TARGET_HW="$(echo "${TARGET}" | sed 's/f//')"; \
+            ./fbt TARGET_HW=$TARGET_HW copro_dist updater_package \
+              ${{ startsWith(github.ref, 'refs/tags') && 'DEBUG=0 COMPACT=1' || '' }}
+            mv dist/${TARGET}-*/* artifacts/
+            tar czpf "artifacts/flipper-z-${TARGET}-resources-${SUFFIX}.tgz" \
+              -C assets resources
+            ./fbt TARGET_HW=$TARGET_HW fap_dist
+            tar czpf "artifacts/flipper-z-${TARGET}-debugapps-${SUFFIX}.tgz" \
+              -C dist/${TARGET}-*/apps/Debug .
+          done
+
+      - name: "Check for uncommitted changes"
+        run: |
+          git diff --exit-code
 
       - name: 'Bundle core2 firmware'
         if: ${{ !github.event.pull_request.head.repo.fork }}
         run: |
-          test -d core2_firmware && rm -rf core2_firmware || true
-          mkdir core2_firmware
-          ./scripts/assets.py copro lib/STM32CubeWB core2_firmware STM32WB5x
-          tar czpf artifacts/flipper-z-any-core2_firmware-${{steps.names.outputs.suffix}}.tgz core2_firmware
+          cp build/core2_firmware.tgz "artifacts/flipper-z-any-core2_firmware-${SUFFIX}.tgz"
+
+      - name: 'Copy map analyser files'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          cp build/${DEFAULT_TARGET}-firmware-*/firmware.elf.map map_analyser_files/firmware.elf.map
+          cp build/${DEFAULT_TARGET}-firmware-*/firmware.elf map_analyser_files/firmware.elf
+          cp ${{ github.event_path }} map_analyser_files/event.json
+
+      - name: 'Analyse map file'
+        if: ${{ !github.event.pull_request.head.repo.fork }}
+        run: |
+          source scripts/toolchain/fbtenv.sh
+          get_size()
+          {
+            SECTION="$1";
+            arm-none-eabi-size \
+              -A map_analyser_files/firmware.elf \
+              | grep "^$SECTION" | awk '{print $2}'
+          }
+          export BSS_SIZE="$(get_size ".bss")"
+          export TEXT_SIZE="$(get_size ".text")"
+          export RODATA_SIZE="$(get_size ".rodata")"
+          export DATA_SIZE="$(get_size ".data")"
+          export FREE_FLASH_SIZE="$(get_size ".free_flash")"
+          python3 -m pip install mariadb==1.1.6 cxxfilt==0.3.0
+          python3 scripts/map_parser.py map_analyser_files/firmware.elf.map map_analyser_files/firmware.elf.map.all
+          python3 scripts/map_mariadb_insert.py \
+              ${{ secrets.AMAP_MARIADB_USER }} \
+              ${{ secrets.AMAP_MARIADB_PASSWORD }} \
+              ${{ secrets.AMAP_MARIADB_HOST }} \
+              ${{ secrets.AMAP_MARIADB_PORT }} \
+              ${{ secrets.AMAP_MARIADB_DATABASE }} \
+              map_analyser_files/firmware.elf.map.all
 
       - name: 'Upload artifacts to update server'
         if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: burnett01/rsync-deployments@5.1
-        with:
-          switches: -avzP --delete --mkpath
-          path: artifacts/
-          remote_path: "${{ secrets.RSYNC_DEPLOY_BASE_PATH }}${{steps.names.outputs.artifacts-path}}/"
-          remote_host: ${{ secrets.RSYNC_DEPLOY_HOST }}
-          remote_port: ${{ secrets.RSYNC_DEPLOY_PORT }}
-          remote_user: ${{ secrets.RSYNC_DEPLOY_USER }}
-          remote_key: ${{ secrets.RSYNC_DEPLOY_KEY }}
-
-      - name: 'Trigger update server reindex'
-        if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: wei/curl@master
-        with:
-          args: -X POST -F 'key=${{ secrets.REINDEX_KEY }}' ${{ secrets.REINDEX_URL }}
+        run: |
+          FILES=$(for CUR in $(ls artifacts/); do echo "-F files=@artifacts/$CUR"; done)
+          curl --fail -L -H "Token: ${{ secrets.INDEXER_TOKEN }}" \
+              -F "branch=${BRANCH_NAME}" \
+              ${FILES[@]} \
+              "${{ secrets.INDEXER_URL }}"/firmware/uploadfiles
 
       - name: 'Find Previous Comment'
         if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request }}
-        uses: peter-evans/find-comment@v1
+        uses: peter-evans/find-comment@v2
         id: fc
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
-          body-includes: 'to flash the'
+          body-includes: 'Compiled firmware for commit'
 
       - name: 'Create or update comment'
         if: ${{ !github.event.pull_request.head.repo.fork && github.event.pull_request}}
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v3
         with:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            [Click here](https://update.flipperzero.one/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.artifacts-path}}/flipper-z-${{steps.names.outputs.default-target}}-full-${{steps.names.outputs.suffix}}.dfu&channel=${{steps.names.outputs.artifacts-path}}&version=${{steps.names.outputs.short-hash}}&target=${{steps.names.outputs.default-target}}) to flash the `${{steps.names.outputs.short-hash}}` version of this branch via WebUSB.
+            **Compiled firmware for commit `${{steps.names.outputs.commit_sha}}`:**
+            - [📦 Update package](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz)
+            - [📥 DFU file](https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-full-${{steps.names.outputs.suffix}}.dfu)
+            - [☁️ Web/App updater](https://lab.flipper.net/?url=https://update.flipperzero.one/builds/firmware/${{steps.names.outputs.branch_name}}/flipper-z-${{steps.names.outputs.default_target}}-update-${{steps.names.outputs.suffix}}.tgz&channel=${{steps.names.outputs.branch_name}}&version=${{steps.names.outputs.commit_sha}})
           edit-mode: replace
 
   compact:
     if: ${{ !startsWith(github.ref, 'refs/tags') }}
-    runs-on: [self-hosted,koteeq]
+    runs-on: [self-hosted,FlipperZeroShell]
+    strategy:
+      matrix:
+        target: [f7, f18]
     steps:
-      - name: 'Cleanup workspace'
-        uses: AutoModality/action-clean@v1
-
-      - name: 'Decontaminate previous build leftovers'
-        run: |
-          if [ -d .git ]
-          then
-            git submodule status \
-              || git checkout `git rev-list --max-parents=0 HEAD | tail -n 1`
-          fi
+      - name: 'Wipe workspace'
+        run: find ./ -mount -maxdepth 1 -exec rm -rf {} \;
 
       - name: 'Checkout code'
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 0
-          submodules: true
+          fetch-depth: 1
+          submodules: false
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: 'Build docker image'
-        uses: ./.github/actions/docker
-      
-      - name: 'Generate suffix and folder name'
-        id: names
+      - name: 'Get commit details'
         run: |
-          REF=${{ github.ref }}
           if [[ ${{ github.event_name }} == 'pull_request' ]]; then
-            REF=${{ github.head_ref }}
-          fi
-          BRANCH_OR_TAG=${REF#refs/*/}
-          SHA=$(git rev-parse --short HEAD)
-          
-          if [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
-            SUFFIX=${BRANCH_OR_TAG//\//_}
+            TYPE="pull"
+          elif [[ "${{ github.ref }}" == "refs/tags/"* ]]; then
+            TYPE="tag"
           else
-            SUFFIX=${BRANCH_OR_TAG//\//_}-$(date +'%d%m%Y')-${SHA}
+            TYPE="other"
           fi
-          
-          echo "WORKFLOW_BRANCH_OR_TAG=${BRANCH_OR_TAG}" >> $GITHUB_ENV
-          echo "DIST_SUFFIX=${SUFFIX}" >> $GITHUB_ENV
+          python3 scripts/get_env.py "--event_file=${{ github.event_path }}" "--type=$TYPE" || cat "${{ github.event_path }}"
 
-      - name: 'Rebuild Assets'
-        uses: ./.github/actions/docker
-        with:
-          run: |
-            set -e
-            make -C assets clean
-            make -C assets
+      - name: 'Build the firmware'
+        id: build-fw
+        run: |
+          set -e
+          TARGET="$(echo '${{ matrix.target }}' | sed 's/f//')"; \
+          ./fbt TARGET_HW=$TARGET DEBUG=0 COMPACT=1 fap_dist updater_package
+          echo "sdk-file=$(ls dist/${{ matrix.target }}-*/flipper-z-${{ matrix.target }}-sdk-*.zip)" >> $GITHUB_OUTPUT
+          echo "hw-target-code=$TARGET" >> $GITHUB_OUTPUT
 
-      - name: 'Build the firmware in docker'
-        uses: ./.github/actions/docker
+      - name: Deploy uFBT with SDK
+        uses: flipperdevices/flipperzero-ufbt-action@v0.1.0
         with:
-          run: |
-            set -e
-            for TARGET in ${TARGETS}
-            do
-              make TARGET=${TARGET} DEBUG=0 COMPACT=1
+          task: setup
+          sdk-file: ${{ steps.build-fw.outputs.sdk-file }}
+          sdk-hw-target: ${{ steps.build-fw.outputs.hw-target-code }}
+
+      - name: Build test app with SDK
+        run: |
+          mkdir testapp
+          cd testapp
+          ufbt create APPID=testapp
+          ufbt
+
+      - name: Build example & external apps with uFBT
+        run: |
+          for appdir in 'applications/external' 'applications/examples'; do
+            for app in $(find "$appdir" -maxdepth 1 -mindepth 1 -type d); do
+              pushd $app
+              TARGETS_FAM=$(grep "targets" application.fam || echo "${{ matrix.target }}")
+              if ! grep -q "${{ matrix.target }}" <<< $TARGETS_FAM ; then
+                  echo Skipping unsupported app: $app
+                  popd
+                  continue
+              fi
+              echo Building $app
+              ufbt
+              popd
             done
+          done
+

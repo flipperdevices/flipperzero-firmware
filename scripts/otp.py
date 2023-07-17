@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
+import datetime
 import logging
-import argparse
-import subprocess
 import os
-import sys
 import re
 import struct
-import datetime
+
+from flipper.app import App
+from flipper.utils.programmer_openocd import OpenOCDProgrammer, OpenOCDProgrammerResult
 
 OTP_MAGIC = 0xBABE
 OTP_VERSION = 0x02
@@ -24,6 +24,7 @@ OTP_REGIONS = {
     "eu_ru": 0x01,
     "us_ca_au": 0x02,
     "jp": 0x03,
+    "world": 0x04,
 }
 
 OTP_DISPLAYS = {
@@ -32,8 +33,14 @@ OTP_DISPLAYS = {
     "mgg": 0x02,
 }
 
-from flipper.app import App
-from flipper.cube import CubeProgrammer
+
+class OTPException(Exception):
+    def __init__(self, message: str, result: OpenOCDProgrammerResult):
+        self.message = message
+        self.result = result
+
+    def get_exit_code(self) -> int:
+        return int(self.result.value)
 
 
 class Main(App):
@@ -52,21 +59,21 @@ class Main(App):
         self.parser_flash_first = self.subparsers.add_parser(
             "flash_first", help="Flash first block of OTP to device"
         )
-        self._addArgsSWD(self.parser_flash_first)
+        self._addArgsOpenOCD(self.parser_flash_first)
         self._addFirstArgs(self.parser_flash_first)
         self.parser_flash_first.set_defaults(func=self.flash_first)
         # Flash Second
         self.parser_flash_second = self.subparsers.add_parser(
             "flash_second", help="Flash second block of OTP to device"
         )
-        self._addArgsSWD(self.parser_flash_second)
+        self._addArgsOpenOCD(self.parser_flash_second)
         self._addSecondArgs(self.parser_flash_second)
         self.parser_flash_second.set_defaults(func=self.flash_second)
         # Flash All
         self.parser_flash_all = self.subparsers.add_parser(
             "flash_all", help="Flash OTP to device"
         )
-        self._addArgsSWD(self.parser_flash_all)
+        self._addArgsOpenOCD(self.parser_flash_all)
         self._addFirstArgs(self.parser_flash_all)
         self._addSecondArgs(self.parser_flash_all)
         self.parser_flash_all.set_defaults(func=self.flash_all)
@@ -74,17 +81,19 @@ class Main(App):
         self.logger = logging.getLogger()
         self.timestamp = datetime.datetime.now().timestamp()
 
-    def _addArgsSWD(self, parser):
+    def _addArgsOpenOCD(self, parser):
         parser.add_argument(
-            "--port", type=str, help="Port to connect: swd or usb1", default="swd"
+            "--port-base", type=int, help="OpenOCD port base", default=3333
         )
-        parser.add_argument("--serial", type=str, help="ST-Link Serial Number")
-
-    def _getCubeParams(self):
-        return {
-            "port": self.args.port,
-            "serial": self.args.serial,
-        }
+        parser.add_argument(
+            "--interface",
+            type=str,
+            help="OpenOCD interface",
+            default="interface/cmsis-dap.cfg",
+        )
+        parser.add_argument(
+            "--serial", type=str, help="OpenOCD interface serial number"
+        )
 
     def _addFirstArgs(self, parser):
         parser.add_argument("--version", type=int, help="Version", required=True)
@@ -146,11 +155,13 @@ class Main(App):
         )
 
     def generate_all(self):
-        self.logger.info(f"Generating OTP")
+        self.logger.info("Generating OTP")
         self._processFirstArgs()
         self._processSecondArgs()
-        open(f"{self.args.file}_first.bin", "wb").write(self._packFirst())
-        open(f"{self.args.file}_second.bin", "wb").write(self._packSecond())
+        with open(f"{self.args.file}_first.bin", "wb") as file:
+            file.write(self._packFirst())
+        with open(f"{self.args.file}_second.bin", "wb") as file:
+            file.write(self._packSecond())
         self.logger.info(
             f"Generated files: {self.args.file}_first.bin and {self.args.file}_second.bin"
         )
@@ -158,55 +169,73 @@ class Main(App):
         return 0
 
     def flash_first(self):
-        self.logger.info(f"Flashing first block of OTP")
+        self.logger.info("Flashing first block of OTP")
 
         self._processFirstArgs()
 
         filename = f"otp_unknown_first_{self.timestamp}.bin"
 
         try:
-            self.logger.info(f"Packing binary data")
-            file = open(filename, "wb")
-            file.write(self._packFirst())
-            file.close()
-            self.logger.info(f"Flashing OTP")
-            cp = CubeProgrammer(self._getCubeParams())
-            cp.flashBin("0x1FFF7000", filename)
-            cp.resetTarget()
-            self.logger.info(f"Flashed Successfully")
-            os.remove(filename)
-        except Exception as e:
+            self.logger.info("Packing binary data")
+            with open(filename, "wb") as file:
+                file.write(self._packFirst())
+
+            self.logger.info("Flashing OTP")
+
+            openocd = OpenOCDProgrammer(
+                self.args.interface,
+                self.args.port_base,
+                self.args.serial,
+            )
+
+            programmer_result = openocd.otp_write(0x1FFF7000, filename)
+            if programmer_result != OpenOCDProgrammerResult.Success:
+                raise OTPException("Failed to flash OTP", programmer_result)
+
+            self.logger.info("Flashed Successfully")
+        except OTPException as e:
             self.logger.exception(e)
-            return 1
+            return e.get_exit_code()
+        finally:
+            os.remove(filename)
 
         return 0
 
     def flash_second(self):
-        self.logger.info(f"Flashing second block of OTP")
+        self.logger.info("Flashing second block of OTP")
 
         self._processSecondArgs()
 
         filename = f"otp_{self.args.name}_second_{self.timestamp}.bin"
 
         try:
-            self.logger.info(f"Packing binary data")
-            file = open(filename, "wb")
-            file.write(self._packSecond())
-            file.close()
-            self.logger.info(f"Flashing OTP")
-            cp = CubeProgrammer(self._getCubeParams())
-            cp.flashBin("0x1FFF7010", filename)
-            cp.resetTarget()
-            self.logger.info(f"Flashed Successfully")
-            os.remove(filename)
-        except Exception as e:
+            self.logger.info("Packing binary data")
+            with open(filename, "wb") as file:
+                file.write(self._packSecond())
+
+            self.logger.info("Flashing OTP")
+
+            openocd = OpenOCDProgrammer(
+                self.args.interface,
+                self.args.port_base,
+                self.args.serial,
+            )
+
+            programmer_result = openocd.otp_write(0x1FFF7010, filename)
+            if programmer_result != OpenOCDProgrammerResult.Success:
+                raise OTPException("Failed to flash OTP", programmer_result)
+
+            self.logger.info("Flashed Successfully")
+        except OTPException as e:
             self.logger.exception(e)
-            return 1
+            return e.get_exit_code()
+        finally:
+            os.remove(filename)
 
         return 0
 
     def flash_all(self):
-        self.logger.info(f"Flashing OTP")
+        self.logger.info("Flashing OTP")
 
         self._processFirstArgs()
         self._processSecondArgs()
@@ -214,20 +243,29 @@ class Main(App):
         filename = f"otp_{self.args.name}_whole_{self.timestamp}.bin"
 
         try:
-            self.logger.info(f"Packing binary data")
-            file = open(filename, "wb")
-            file.write(self._packFirst())
-            file.write(self._packSecond())
-            file.close()
-            self.logger.info(f"Flashing OTP")
-            cp = CubeProgrammer(self._getCubeParams())
-            cp.flashBin("0x1FFF7000", filename)
-            cp.resetTarget()
-            self.logger.info(f"Flashed Successfully")
-            os.remove(filename)
-        except Exception as e:
+            self.logger.info("Packing binary data")
+            with open(filename, "wb") as file:
+                file.write(self._packFirst())
+                file.write(self._packSecond())
+
+            self.logger.info("Flashing OTP")
+
+            openocd = OpenOCDProgrammer(
+                self.args.interface,
+                self.args.port_base,
+                self.args.serial,
+            )
+
+            programmer_result = openocd.otp_write(0x1FFF7000, filename)
+            if programmer_result != OpenOCDProgrammerResult.Success:
+                raise OTPException("Failed to flash OTP", programmer_result)
+
+            self.logger.info("Flashed Successfully")
+        except OTPException as e:
             self.logger.exception(e)
-            return 1
+            return e.get_exit_code()
+        finally:
+            os.remove(filename)
 
         return 0
 

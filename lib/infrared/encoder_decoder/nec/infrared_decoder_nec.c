@@ -1,10 +1,5 @@
-#include "common/infrared_common_i.h"
-#include "infrared.h"
-#include "infrared_protocol_defs_i.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <furi.h>
-#include "../infrared_i.h"
+#include "infrared_protocol_nec_i.h"
+#include <core/check.h>
 
 InfraredMessage* infrared_decoder_nec_check_ready(void* ctx) {
     return infrared_common_decoder_check_ready(ctx);
@@ -20,7 +15,9 @@ bool infrared_decoder_nec_interpret(InfraredCommonDecoder* decoder) {
         uint8_t address_inverse = decoder->data[1];
         uint8_t command = decoder->data[2];
         uint8_t command_inverse = decoder->data[3];
-        if((command == (uint8_t)~command_inverse) && (address == (uint8_t)~address_inverse)) {
+        uint8_t inverse_command_inverse = (uint8_t)~command_inverse;
+        uint8_t inverse_address_inverse = (uint8_t)~address_inverse;
+        if((command == inverse_command_inverse) && (address == inverse_address_inverse)) {
             decoder->message.protocol = InfraredProtocolNEC;
             decoder->message.address = address;
             decoder->message.command = command;
@@ -84,7 +81,7 @@ InfraredStatus infrared_decoder_nec_decode_repeat(InfraredCommonDecoder* decoder
 }
 
 void* infrared_decoder_nec_alloc(void) {
-    return infrared_common_decoder_alloc(&protocol_nec);
+    return infrared_common_decoder_alloc(&infrared_protocol_nec);
 }
 
 InfraredMessage* infrared_decoder_nec_decode(void* decoder, bool level, uint32_t duration) {

@@ -41,7 +41,7 @@
  * Writing:
  * 
  * ~~~~~~~~~~~~~~~~~~~~~
- * FlipperFormat format = flipper_format_file_alloc(storage);
+ * FlipperFormat* format = flipper_format_file_alloc(storage);
  * 
  * do {
  *     const uint32_t version = 1;
@@ -50,7 +50,7 @@
  *     const uint16_t array_size = 4;
  *     const uint8_t* array[array_size] = {0x00, 0x01, 0xFF, 0xA3};
  *     
- *     if(!flipper_format_file_open_new(format, "/ext/flipper_format_test")) break;
+ *     if(!flipper_format_file_open_new(format, EXT_PATH("flipper_format_test"))) break;
  *     if(!flipper_format_write_header_cstr(format, "Flipper Test File", version)) break;
  *     if(!flipper_format_write_comment_cstr(format, "Just test file")) break;
  *     if(!flipper_format_write_string_cstr(format, "String", string_value)) break;
@@ -66,19 +66,19 @@
  * Reading:
  * 
  * ~~~~~~~~~~~~~~~~~~~~~
- * FlipperFormat file = flipper_format_file_alloc(storage);
+ * FlipperFormat* file = flipper_format_file_alloc(storage);
  * 
  * do {
  *     uint32_t version = 1;
- *     string_t file_type;
- *     string_t string_value;
+ *     FuriString* file_type;
+ *     FuriString* string_value;
  *     uint32_t uint32_value = 1;
  *     uint16_t array_size = 4;
  *     uint8_t* array[array_size] = {0};
- *     string_init(file_type);
- *     string_init(string_value);
+ *     file_type = furi_string_alloc();
+ *     string_value = furi_string_alloc();
  *     
- *     if(!flipper_format_file_open_existing(file, "/ext/flipper_format_test")) break;
+ *     if(!flipper_format_file_open_existing(file, EXT_PATH("flipper_format_test"))) break;
  *     if(!flipper_format_read_header(file, file_type, &version)) break;
  *     if(!flipper_format_read_string(file, "String", string_value)) break;
  *     if(!flipper_format_read_uint32(file, "UINT", &uint32_value, 1)) break;
@@ -94,7 +94,6 @@
 
 #pragma once
 #include <stdint.h>
-#include <mlib/m-string.h>
 #include <storage/storage.h>
 
 #ifdef __cplusplus
@@ -116,6 +115,12 @@ FlipperFormat* flipper_format_string_alloc();
 FlipperFormat* flipper_format_file_alloc(Storage* storage);
 
 /**
+ * Allocate FlipperFormat as file, buffered mode.
+ * @return FlipperFormat* pointer to a FlipperFormat instance
+ */
+FlipperFormat* flipper_format_buffered_file_alloc(Storage* storage);
+
+/**
  * Open existing file. 
  * Use only if FlipperFormat allocated as a file.
  * @param flipper_format Pointer to a FlipperFormat instance
@@ -123,6 +128,15 @@ FlipperFormat* flipper_format_file_alloc(Storage* storage);
  * @return True on success
  */
 bool flipper_format_file_open_existing(FlipperFormat* flipper_format, const char* path);
+
+/**
+ * Open existing file, buffered mode.
+ * Use only if FlipperFormat allocated as a buffered file.
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param path File path
+ * @return True on success
+ */
+bool flipper_format_buffered_file_open_existing(FlipperFormat* flipper_format, const char* path);
 
 /**
  * Open existing file for writing and add values to the end of file. 
@@ -143,6 +157,15 @@ bool flipper_format_file_open_append(FlipperFormat* flipper_format, const char* 
 bool flipper_format_file_open_always(FlipperFormat* flipper_format, const char* path);
 
 /**
+ * Open file. Creates a new file, or deletes the contents of the file if it already exists, buffered mode.
+ * Use only if FlipperFormat allocated as a buffered file.
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param path File path
+ * @return True on success
+ */
+bool flipper_format_buffered_file_open_always(FlipperFormat* flipper_format, const char* path);
+
+/**
  * Open file. Creates a new file, fails if file already exists.
  * Use only if FlipperFormat allocated as a file.
  * @param flipper_format Pointer to a FlipperFormat instance
@@ -158,6 +181,14 @@ bool flipper_format_file_open_new(FlipperFormat* flipper_format, const char* pat
  * @return false 
  */
 bool flipper_format_file_close(FlipperFormat* flipper_format);
+
+/**
+ * Closes the file, use only if FlipperFormat allocated as a buffered file.
+ * @param flipper_format
+ * @return true
+ * @return false
+ */
+bool flipper_format_buffered_file_close(FlipperFormat* flipper_format);
 
 /**
  * Free FlipperFormat.
@@ -204,7 +235,7 @@ bool flipper_format_key_exist(FlipperFormat* flipper_format, const char* key);
  */
 bool flipper_format_read_header(
     FlipperFormat* flipper_format,
-    string_t filetype,
+    FuriString* filetype,
     uint32_t* version);
 
 /**
@@ -216,7 +247,7 @@ bool flipper_format_read_header(
  */
 bool flipper_format_write_header(
     FlipperFormat* flipper_format,
-    string_t filetype,
+    FuriString* filetype,
     const uint32_t version);
 
 /**
@@ -250,7 +281,7 @@ bool flipper_format_get_value_count(
  * @param data Value
  * @return True on success
  */
-bool flipper_format_read_string(FlipperFormat* flipper_format, const char* key, string_t data);
+bool flipper_format_read_string(FlipperFormat* flipper_format, const char* key, FuriString* data);
 
 /**
  * Write key and string
@@ -259,7 +290,7 @@ bool flipper_format_read_string(FlipperFormat* flipper_format, const char* key, 
  * @param data Value
  * @return True on success
  */
-bool flipper_format_write_string(FlipperFormat* flipper_format, const char* key, string_t data);
+bool flipper_format_write_string(FlipperFormat* flipper_format, const char* key, FuriString* data);
 
 /**
  * Write key and string. Plain C string version.
@@ -272,6 +303,34 @@ bool flipper_format_write_string_cstr(
     FlipperFormat* flipper_format,
     const char* key,
     const char* data);
+
+/**
+ * Read array of uint64 in hex format by key
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
+ * @return True on success
+ */
+bool flipper_format_read_hex_uint64(
+    FlipperFormat* flipper_format,
+    const char* key,
+    uint64_t* data,
+    const uint16_t data_size);
+
+/**
+ * Write key and array of uint64 in hex format
+ * @param flipper_format Pointer to a FlipperFormat instance
+ * @param key Key
+ * @param data Value
+ * @param data_size Values count
+ * @return True on success
+ */
+bool flipper_format_write_hex_uint64(
+    FlipperFormat* flipper_format,
+    const char* key,
+    const uint64_t* data,
+    const uint16_t data_size);
 
 /**
  * Read array of uint32 by key
@@ -419,7 +478,7 @@ bool flipper_format_write_hex(
  * @param data Comment text
  * @return True on success
  */
-bool flipper_format_write_comment(FlipperFormat* flipper_format, string_t data);
+bool flipper_format_write_comment(FlipperFormat* flipper_format, FuriString* data);
 
 /**
  * Write comment. Plain C string version.
@@ -444,7 +503,7 @@ bool flipper_format_delete_key(FlipperFormat* flipper_format, const char* key);
  * @param data Value
  * @return True on success
  */
-bool flipper_format_update_string(FlipperFormat* flipper_format, const char* key, string_t data);
+bool flipper_format_update_string(FlipperFormat* flipper_format, const char* key, FuriString* data);
 
 /**
  * Updates the value of the first matching key to a string value. Plain C version. Sets the RW pointer to a position at the end of inserted data.
@@ -534,7 +593,7 @@ bool flipper_format_update_hex(
 bool flipper_format_insert_or_update_string(
     FlipperFormat* flipper_format,
     const char* key,
-    string_t data);
+    FuriString* data);
 
 /**
  * Updates the value of the first matching key to a string value, or adds the key and value if the key did not exist.  

@@ -26,16 +26,15 @@ Also display type, region and etc...
 
 ## Core1 and Core2 firmware flashing
 
-Main flashing sequence can be found in root `Makefile`.
 Core2 goes first, then Core1.
-Never flash FUS or you will loose your job, girlfriend and keys in secure enclave.
+Never flash FUS or you will lose your job, girlfriend and keys in secure enclave.
 
 ## Option Bytes
 
 !!! Setting incorrect Option Bytes may brick your MCU !!!
 
 Defaults are mostly OK, but there are couple things that we'd like to tune.
-Also OB may be damaged, so we've made couple scripts to check and set option bytes.
+Also, OB may be damaged, so we've made couple scripts to check and set option bytes.
 
 !!! Setting incorrect Option Bytes may brick your MCU !!!
 
@@ -58,3 +57,16 @@ Run in the root folder of the repo:
 ```bash
 python scripts/storage.py -p <flipper_cli_port> send assets/resources /ext
 ```
+
+
+# Slideshow creation
+
+Put fullscreen slideshow frames in .png format into `assets/slideshow/my_show` folder, named frame_xx.png, where xx is zero-padded frame number, starting with #0.
+
+Then run 
+
+```bash
+python scripts/slideshow.py -i assets/slideshow/my_show/ -o assets/slideshow/my_show/.slideshow
+```
+
+Upload generated .slideshow file to Flipper's internal storage and restart it.

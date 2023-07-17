@@ -108,8 +108,8 @@ void subghz_protocol_decoder_came_atomo_feed(void* context, bool level, uint32_t
     ManchesterEvent event = ManchesterEventReset;
     switch(instance->decoder.parser_step) {
     case CameAtomoDecoderStepReset:
-        if((!level) && (DURATION_DIFF(duration, subghz_protocol_came_atomo_const.te_long * 65) <
-                        subghz_protocol_came_atomo_const.te_delta * 20)) {
+        if((!level) && (DURATION_DIFF(duration, subghz_protocol_came_atomo_const.te_long * 60) <
+                        subghz_protocol_came_atomo_const.te_delta * 40)) {
             //Found header CAME
             instance->decoder.parser_step = CameAtomoDecoderStepDecoderData;
             instance->decoder.decode_data = 0;
@@ -136,7 +136,7 @@ void subghz_protocol_decoder_came_atomo_feed(void* context, bool level, uint32_t
                 subghz_protocol_came_atomo_const.te_delta) {
                 event = ManchesterEventLongLow;
             } else if(
-                duration >= (subghz_protocol_came_atomo_const.te_long * 2 +
+                duration >= ((uint32_t)subghz_protocol_came_atomo_const.te_long * 2 +
                              subghz_protocol_came_atomo_const.te_delta)) {
                 if(instance->decoder.decode_count_bit ==
                    subghz_protocol_came_atomo_const.min_count_bit_for_found) {
@@ -189,7 +189,7 @@ void subghz_protocol_decoder_came_atomo_feed(void* context, bool level, uint32_t
 /** 
  * Read bytes from rainbow table
  * @param file_name Full path to rainbow table the file 
- * @param number_atomo_magic_xor Сell number in the array
+ * @param number_atomo_magic_xor number in the array
  * @return atomo_magic_xor
  */
 static uint64_t subghz_protocol_came_atomo_get_magic_xor_in_file(
@@ -298,23 +298,26 @@ uint8_t subghz_protocol_decoder_came_atomo_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_came_atomo_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_came_atomo_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
-    return subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
+    return subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
 }
 
-bool subghz_protocol_decoder_came_atomo_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_came_atomo_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
-    return subghz_block_generic_deserialize(&instance->generic, flipper_format);
+    return subghz_block_generic_deserialize_check_count_bit(
+        &instance->generic,
+        flipper_format,
+        subghz_protocol_came_atomo_const.min_count_bit_for_found);
 }
 
-void subghz_protocol_decoder_came_atomo_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_came_atomo_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderCameAtomo* instance = context;
     subghz_protocol_came_atomo_remote_controller(
@@ -322,12 +325,12 @@ void subghz_protocol_decoder_came_atomo_get_string(void* context, string_t outpu
     uint32_t code_found_hi = instance->generic.data >> 32;
     uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
 
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %db\r\n"
         "Key:0x%lX%08lX\r\n"
         "Sn:0x%08lX  Btn:0x%01X\r\n"
-        "Cnt:0x%03X\r\n",
+        "Cnt:0x%03lX\r\n",
 
         instance->generic.protocol_name,
         instance->generic.data_count_bit,

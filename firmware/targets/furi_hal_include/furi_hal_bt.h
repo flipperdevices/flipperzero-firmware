@@ -5,17 +5,18 @@
 
 #pragma once
 
-#include <m-string.h>
+#include <furi.h>
 #include <stdbool.h>
 #include <gap.h>
-#include <serial_service.h>
+#include <services/serial_service.h>
 #include <ble_glue.h>
 #include <ble_app.h>
 
-#include "furi_hal_bt_serial.h"
+#include <furi_hal_bt_serial.h>
 
 #define FURI_HAL_BT_STACK_VERSION_MAJOR (1)
-#define FURI_HAL_BT_STACK_VERSION_MINOR (13)
+#define FURI_HAL_BT_STACK_VERSION_MINOR (12)
+#define FURI_HAL_BT_C2_START_TIMEOUT 1000
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,8 +24,8 @@ extern "C" {
 
 typedef enum {
     FuriHalBtStackUnknown,
-    FuriHalBtStackHciLayer,
     FuriHalBtStackLight,
+    FuriHalBtStackFull,
 } FuriHalBtStack;
 
 typedef enum {
@@ -57,6 +58,18 @@ bool furi_hal_bt_start_radio_stack();
  */
 FuriHalBtStack furi_hal_bt_get_radio_stack();
 
+/** Check if radio stack supports BLE GAT/GAP
+ *
+ * @return  true if supported
+ */
+bool furi_hal_bt_is_ble_gatt_gap_supported();
+
+/** Check if radio stack supports testing
+ *
+ * @return  true if supported
+ */
+bool furi_hal_bt_is_testing_supported();
+
 /** Start BLE app
  *
  * @param profile   FuriHalBtProfile instance
@@ -66,6 +79,12 @@ FuriHalBtStack furi_hal_bt_get_radio_stack();
  * @return          true on success
 */
 bool furi_hal_bt_start_app(FuriHalBtProfile profile, GapEventCallback event_cb, void* context);
+
+/** Reinitialize core2
+ * 
+ * Also can be used to prepare core2 for stop modes
+ */
+void furi_hal_bt_reinit();
 
 /** Change BLE app
  * Restarts 2nd core
@@ -84,6 +103,9 @@ bool furi_hal_bt_change_app(FuriHalBtProfile profile, GapEventCallback event_cb,
  */
 void furi_hal_bt_update_battery_level(uint8_t battery_level);
 
+/** Update battery power state */
+void furi_hal_bt_update_power_state();
+
 /** Checks if BLE state is active
  *
  * @return          true if device is connected or advertising, false otherwise
@@ -100,9 +122,9 @@ void furi_hal_bt_stop_advertising();
 
 /** Get BT/BLE system component state
  *
- * @param[in]  buffer  string_t buffer to write to
+ * @param[in]  buffer  FuriString* buffer to write to
  */
-void furi_hal_bt_dump_state(string_t buffer);
+void furi_hal_bt_dump_state(FuriString* buffer);
 
 /** Get BT/BLE system component state
  *
@@ -196,16 +218,24 @@ float furi_hal_bt_get_rssi();
  */
 uint32_t furi_hal_bt_get_transmitted_packets();
 
-/** Start MAC addresses scan
- * @note Works only with HciLayer 2nd core firmware
+/** Check & switch C2 to given mode
  *
- * @param callback  GapScanCallback instance
- * @param context   pointer to context
+ * @param[in]  mode  mode to switch into
  */
-bool furi_hal_bt_start_scan(GapScanCallback callback, void* context);
+bool furi_hal_bt_ensure_c2_mode(BleGlueC2Mode mode);
 
-/** Stop MAC addresses scan */
-void furi_hal_bt_stop_scan();
+typedef struct {
+    uint32_t magic;
+    uint32_t source_pc;
+    uint32_t source_lr;
+    uint32_t source_sp;
+} FuriHalBtHardfaultInfo;
+
+/** Get hardfault info
+ *
+ * @return     hardfault info. NULL if no hardfault
+ */
+const FuriHalBtHardfaultInfo* furi_hal_bt_get_hardfault_info();
 
 #ifdef __cplusplus
 }

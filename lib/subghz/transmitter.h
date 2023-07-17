@@ -4,12 +4,11 @@
 #include "environment.h"
 #include "protocols/base.h"
 
-typedef struct SubGhzTransmitter SubGhzTransmitter;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-struct SubGhzTransmitter {
-    const SubGhzProtocol* protocol;
-    SubGhzProtocolEncoderBase* protocol_instance;
-};
+typedef struct SubGhzTransmitter SubGhzTransmitter;
 
 /**
  * Allocate and init SubGhzTransmitter.
@@ -25,6 +24,11 @@ SubGhzTransmitter*
  */
 void subghz_transmitter_free(SubGhzTransmitter* instance);
 
+/** Get protocol instance.
+ * @param instance Pointer to a SubGhzTransmitter instance
+ */
+SubGhzProtocolEncoderBase* subghz_transmitter_get_protocol_instance(SubGhzTransmitter* instance);
+
 /**
  * Forced transmission stop.
  * @param instance Pointer to a SubGhzTransmitter instance
@@ -35,9 +39,10 @@ bool subghz_transmitter_stop(SubGhzTransmitter* instance);
  * Deserialize and generating an upload to send.
  * @param instance Pointer to a SubGhzTransmitter instance
  * @param flipper_format Pointer to a FlipperFormat instance
- * @return true On success
+ * @return status
  */
-bool subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* flipper_format);
+SubGhzProtocolStatus
+    subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* flipper_format);
 
 /**
  * Getting the level and duration of the upload to be loaded into DMA.
@@ -45,3 +50,7 @@ bool subghz_transmitter_deserialize(SubGhzTransmitter* instance, FlipperFormat* 
  * @return LevelDuration 
  */
 LevelDuration subghz_transmitter_yield(void* context);
+
+#ifdef __cplusplus
+}
+#endif

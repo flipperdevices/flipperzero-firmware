@@ -1,0 +1,25 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/nfc",
+    ],
+    SDK_HEADERS=[
+        File("nfc_device.h"),
+        File("nfc_worker.h"),
+        File("nfc_types.h"),
+        File("helpers/mfkey32.h"),
+        File("parsers/nfc_supported_card.h"),
+        File("helpers/nfc_generators.h"),
+        File("protocols/nfc_util.h"),
+    ],
+)
+
+libenv = env.Clone(FW_LIB_NAME="nfc")
+libenv.ApplyLibFlags()
+
+sources = libenv.GlobRecursive("*.c*")
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")

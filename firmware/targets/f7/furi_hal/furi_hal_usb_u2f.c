@@ -1,7 +1,7 @@
-#include "furi_hal_version.h"
-#include "furi_hal_usb_i.h"
-#include "furi_hal_usb_hid_u2f.h"
-#include "furi_hal_usb.h"
+#include <furi_hal_version.h>
+#include <furi_hal_usb_i.h>
+#include <furi_hal_usb_hid_u2f.h>
+#include <furi_hal_usb.h>
 #include <furi.h>
 #include "usb.h"
 #include "usb_hid.h"
@@ -34,13 +34,13 @@ static const uint8_t hid_u2f_report_desc[] = {
     HID_COLLECTION(HID_APPLICATION_COLLECTION),
     HID_USAGE(HID_FIDO_INPUT),
     HID_LOGICAL_MINIMUM(0x00),
-    HID_LOGICAL_MAXIMUM(0xFF),
+    HID_RI_LOGICAL_MAXIMUM(16, 0xFF),
     HID_REPORT_SIZE(8),
     HID_REPORT_COUNT(HID_U2F_PACKET_LEN),
     HID_INPUT(HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
     HID_USAGE(HID_FIDO_OUTPUT),
     HID_LOGICAL_MINIMUM(0x00),
-    HID_LOGICAL_MAXIMUM(0xFF),
+    HID_RI_LOGICAL_MAXIMUM(16, 0xFF),
     HID_REPORT_SIZE(8),
     HID_REPORT_COUNT(HID_U2F_PACKET_LEN),
     HID_OUTPUT(HID_IOF_DATA | HID_IOF_VARIABLE | HID_IOF_ABSOLUTE),
@@ -147,7 +147,7 @@ static usbd_respond hid_u2f_ep_config(usbd_device* dev, uint8_t cfg);
 static usbd_respond
     hid_u2f_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback);
 static usbd_device* usb_dev;
-static osSemaphoreId_t hid_u2f_semaphore = NULL;
+static FuriSemaphore* hid_u2f_semaphore = NULL;
 static bool hid_u2f_connected = false;
 
 static HidU2fCallback callback;
@@ -159,14 +159,18 @@ bool furi_hal_hid_u2f_is_connected() {
 
 void furi_hal_hid_u2f_set_callback(HidU2fCallback cb, void* ctx) {
     if(callback != NULL) {
-        if(hid_u2f_connected == true) callback(HidU2fDisconnected, cb_ctx);
+        if(hid_u2f_connected == true) {
+            callback(HidU2fDisconnected, cb_ctx);
+        }
     }
 
     callback = cb;
     cb_ctx = ctx;
 
     if(callback != NULL) {
-        if(hid_u2f_connected == true) callback(HidU2fConnected, cb_ctx);
+        if(hid_u2f_connected == true) {
+            callback(HidU2fConnected, cb_ctx);
+        }
     }
 }
 
@@ -186,7 +190,11 @@ FuriHalUsbInterface usb_hid_u2f = {
 };
 
 static void hid_u2f_init(usbd_device* dev, FuriHalUsbInterface* intf, void* ctx) {
-    if(hid_u2f_semaphore == NULL) hid_u2f_semaphore = osSemaphoreNew(1, 1, NULL);
+    UNUSED(intf);
+    UNUSED(ctx);
+    if(hid_u2f_semaphore == NULL) {
+        hid_u2f_semaphore = furi_semaphore_alloc(1, 1);
+    }
     usb_dev = dev;
 
     usbd_reg_config(dev, hid_u2f_ep_config);
@@ -201,21 +209,27 @@ static void hid_u2f_deinit(usbd_device* dev) {
 }
 
 static void hid_u2f_on_wakeup(usbd_device* dev) {
+    UNUSED(dev);
     hid_u2f_connected = true;
-    if(callback != NULL) callback(HidU2fConnected, cb_ctx);
+    if(callback != NULL) {
+        callback(HidU2fConnected, cb_ctx);
+    }
 }
 
 static void hid_u2f_on_suspend(usbd_device* dev) {
-    if(hid_u2f_connected == true) {
+    UNUSED(dev);
+    if(hid_u2f_connected) {
         hid_u2f_connected = false;
-        osSemaphoreRelease(hid_u2f_semaphore);
-        if(callback != NULL) callback(HidU2fDisconnected, cb_ctx);
+        furi_semaphore_release(hid_u2f_semaphore);
+        if(callback != NULL) {
+            callback(HidU2fDisconnected, cb_ctx);
+        }
     }
 }
 
 void furi_hal_hid_u2f_send_response(uint8_t* data, uint8_t len) {
     if((hid_u2f_semaphore == NULL) || (hid_u2f_connected == false)) return;
-    furi_check(osSemaphoreAcquire(hid_u2f_semaphore, osWaitForever) == osOK);
+    furi_check(furi_semaphore_acquire(hid_u2f_semaphore, FuriWaitForever) == FuriStatusOk);
     if(hid_u2f_connected == true) {
         usbd_ep_write(usb_dev, HID_EP_OUT, data, len);
     }
@@ -227,11 +241,19 @@ uint32_t furi_hal_hid_u2f_get_request(uint8_t* data) {
 }
 
 static void hid_u2f_rx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
-    if(callback != NULL) callback(HidU2fRequest, cb_ctx);
+    UNUSED(dev);
+    UNUSED(event);
+    UNUSED(ep);
+    if(callback != NULL) {
+        callback(HidU2fRequest, cb_ctx);
+    }
 }
 
 static void hid_u2f_tx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
-    osSemaphoreRelease(hid_u2f_semaphore);
+    UNUSED(dev);
+    UNUSED(event);
+    UNUSED(ep);
+    furi_semaphore_release(hid_u2f_semaphore);
 }
 
 static void hid_u2f_txrx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
@@ -268,6 +290,7 @@ static usbd_respond hid_u2f_ep_config(usbd_device* dev, uint8_t cfg) {
 /* Control requests handler */
 static usbd_respond
     hid_u2f_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback) {
+    UNUSED(callback);
     /* HID control requests */
     if(((USB_REQ_RECIPIENT | USB_REQ_TYPE) & req->bmRequestType) ==
            (USB_REQ_INTERFACE | USB_REQ_CLASS) &&

@@ -7,7 +7,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <m-string.h>
+#include <core/string.h>
+#include <toolbox/property.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,9 +20,19 @@ typedef enum {
     FuriHalPowerICFuelGauge,
 } FuriHalPowerIC;
 
-/** Initialize drivers
- */
+/** Initialize drivers */
 void furi_hal_power_init();
+
+/** Check if gauge is ok
+ * 
+ * Verifies that:
+ * - gauge is alive
+ * - correct profile loaded
+ * - self diagnostic status is good
+ * 
+ * @return true if gauge is ok
+ */
+bool furi_hal_power_gauge_is_ok();
 
 /** Get current insomnia level
  *
@@ -47,12 +58,6 @@ void furi_hal_power_insomnia_exit();
  */
 bool furi_hal_power_sleep_available();
 
-/** Check if deep sleep availble
- *
- * @return     true if available
- */
-bool furi_hal_power_deep_sleep_available();
-
 /** Go to sleep
  */
 void furi_hal_power_sleep();
@@ -75,6 +80,15 @@ uint8_t furi_hal_power_get_bat_health_pct();
  */
 bool furi_hal_power_is_charging();
 
+/** Get charge complete status
+ *
+ * @return     true if done charging and connected to charger
+ */
+bool furi_hal_power_is_charging_done();
+
+/** Switch MCU to SHUTDOWN */
+void furi_hal_power_shutdown();
+
 /** Poweroff device
  */
 void furi_hal_power_off();
@@ -85,11 +99,15 @@ void furi_hal_power_reset();
 
 /** OTG enable
  */
-void furi_hal_power_enable_otg();
+bool furi_hal_power_enable_otg();
 
 /** OTG disable
  */
 void furi_hal_power_disable_otg();
+
+/** Check OTG status fault
+ */
+bool furi_hal_power_check_otg_fault();
 
 /** Check OTG status and disable it if falt happened
  */
@@ -100,6 +118,22 @@ void furi_hal_power_check_otg_status();
  * @return     true if enabled
  */
 bool furi_hal_power_is_otg_enabled();
+
+/** Get battery charge voltage limit in V
+ *
+ * @return     voltage in V
+ */
+float furi_hal_power_get_battery_charge_voltage_limit();
+
+/** Set battery charge voltage limit in V
+ *
+ * Invalid values will be clamped downward to the nearest valid value.
+ *
+ * @param      voltage[in]  voltage in V
+ *
+ * @return     voltage in V
+ */
+void furi_hal_power_set_battery_charge_voltage_limit(float voltage);
 
 /** Get remaining battery battery capacity in mAh
  *
@@ -112,6 +146,12 @@ uint32_t furi_hal_power_get_battery_remaining_capacity();
  * @return     capacity in mAh
  */
 uint32_t furi_hal_power_get_battery_full_capacity();
+
+/** Get battery capacity in mAh from battery profile
+ *
+ * @return     capacity in mAh
+ */
+uint32_t furi_hal_power_get_battery_design_capacity();
 
 /** Get battery voltage in V
  *
@@ -137,21 +177,11 @@ float furi_hal_power_get_battery_current(FuriHalPowerIC ic);
  */
 float furi_hal_power_get_battery_temperature(FuriHalPowerIC ic);
 
-/** Get System voltage in V
- *
- * @return     voltage in V
- */
-float furi_hal_power_get_system_voltage();
-
 /** Get USB voltage in V
  *
  * @return     voltage in V
  */
 float furi_hal_power_get_usb_voltage();
-
-/** Get power system component state
- */
-void furi_hal_power_dump_state();
 
 /** Enable 3.3v on external gpio and sd card
  */
@@ -170,6 +200,21 @@ void furi_hal_power_suppress_charge_enter();
 /** Exit supress charge mode
  */
 void furi_hal_power_suppress_charge_exit();
+
+/** Get power information
+ *
+ * @param[in]  callback     callback to provide with new data
+ * @param[in]  sep          category separator character
+ * @param[in]  context      context to pass to callback
+ */
+void furi_hal_power_info_get(PropertyValueCallback callback, char sep, void* context);
+
+/** Get power debug information
+ *
+ * @param[in]  callback     callback to provide with new data
+ * @param[in]  context      context to pass to callback
+ */
+void furi_hal_power_debug_get(PropertyValueCallback callback, void* context);
 
 #ifdef __cplusplus
 }

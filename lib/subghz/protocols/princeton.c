@@ -12,12 +12,12 @@
  *
  */
 
-#define TAG "SubGhzProtocolCAME"
+#define TAG "SubGhzProtocolPrinceton"
 
 static const SubGhzBlockConst subghz_protocol_princeton_const = {
-    .te_short = 400,
-    .te_long = 1200,
-    .te_delta = 250,
+    .te_short = 390,
+    .te_long = 1170,
+    .te_delta = 300,
     .min_count_bit_for_found = 24,
 };
 
@@ -28,6 +28,7 @@ struct SubGhzProtocolDecoderPrinceton {
     SubGhzBlockGeneric generic;
 
     uint32_t te;
+    uint32_t last_data;
 };
 
 struct SubGhzProtocolEncoderPrinceton {
@@ -79,6 +80,7 @@ const SubGhzProtocol subghz_protocol_princeton = {
 };
 
 void* subghz_protocol_encoder_princeton_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolEncoderPrinceton* instance = malloc(sizeof(SubGhzProtocolEncoderPrinceton));
 
     instance->base.protocol = &subghz_protocol_princeton;
@@ -87,7 +89,7 @@ void* subghz_protocol_encoder_princeton_alloc(SubGhzEnvironment* environment) {
     instance->encoder.repeat = 10;
     instance->encoder.size_upload = 52; //max 24bit*2 + 2 (start, stop)
     instance->encoder.upload = malloc(instance->encoder.size_upload * sizeof(LevelDuration));
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
     return instance;
 }
 
@@ -139,46 +141,53 @@ static bool
     return true;
 }
 
-bool subghz_protocol_encoder_princeton_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_encoder_princeton_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolEncoderPrinceton* instance = context;
-    bool res = false;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            FURI_LOG_E(TAG, "Deserialize error");
+        ret = subghz_block_generic_deserialize_check_count_bit(
+            &instance->generic,
+            flipper_format,
+            subghz_protocol_princeton_const.min_count_bit_for_found);
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         if(!flipper_format_read_uint32(flipper_format, "TE", (uint32_t*)&instance->te, 1)) {
             FURI_LOG_E(TAG, "Missing TE");
+            ret = SubGhzProtocolStatusErrorParserTe;
             break;
         }
         //optional parameter parameter
         flipper_format_read_uint32(
             flipper_format, "Repeat", (uint32_t*)&instance->encoder.repeat, 1);
 
-        subghz_protocol_encoder_princeton_get_upload(instance);
-        instance->encoder.is_runing = true;
-
-        res = true;
+        if(!subghz_protocol_encoder_princeton_get_upload(instance)) {
+            ret = SubGhzProtocolStatusErrorEncoderGetUpload;
+            break;
+        }
+        instance->encoder.is_running = true;
     } while(false);
 
-    return res;
+    return ret;
 }
 
 void subghz_protocol_encoder_princeton_stop(void* context) {
     SubGhzProtocolEncoderPrinceton* instance = context;
-    instance->encoder.is_runing = false;
+    instance->encoder.is_running = false;
 }
 
 LevelDuration subghz_protocol_encoder_princeton_yield(void* context) {
     SubGhzProtocolEncoderPrinceton* instance = context;
 
-    if(instance->encoder.repeat == 0 || !instance->encoder.is_runing) {
-        instance->encoder.is_runing = false;
+    if(instance->encoder.repeat == 0 || !instance->encoder.is_running) {
+        instance->encoder.is_running = false;
         return level_duration_reset();
     }
 
@@ -193,6 +202,7 @@ LevelDuration subghz_protocol_encoder_princeton_yield(void* context) {
 }
 
 void* subghz_protocol_decoder_princeton_alloc(SubGhzEnvironment* environment) {
+    UNUSED(environment);
     SubGhzProtocolDecoderPrinceton* instance = malloc(sizeof(SubGhzProtocolDecoderPrinceton));
     instance->base.protocol = &subghz_protocol_princeton;
     instance->generic.protocol_name = instance->base.protocol->name;
@@ -209,6 +219,7 @@ void subghz_protocol_decoder_princeton_reset(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
     instance->decoder.parser_step = PrincetonDecoderStepReset;
+    instance->last_data = 0;
 }
 
 void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t duration) {
@@ -236,20 +247,21 @@ void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t 
         break;
     case PrincetonDecoderStepCheckDuration:
         if(!level) {
-            if(duration >= (subghz_protocol_princeton_const.te_short * 10 +
-                            subghz_protocol_princeton_const.te_delta)) {
+            if(duration >= ((uint32_t)subghz_protocol_princeton_const.te_long * 2)) {
                 instance->decoder.parser_step = PrincetonDecoderStepSaveDuration;
                 if(instance->decoder.decode_count_bit ==
                    subghz_protocol_princeton_const.min_count_bit_for_found) {
-                    instance->te /= (instance->decoder.decode_count_bit * 4 + 1);
+                    if((instance->last_data == instance->decoder.decode_data) &&
+                       instance->last_data) {
+                        instance->te /= (instance->decoder.decode_count_bit * 4 + 1);
 
-                    instance->generic.data = instance->decoder.decode_data;
-                    instance->generic.data_count_bit = instance->decoder.decode_count_bit;
-                    instance->generic.serial = instance->decoder.decode_data >> 4;
-                    instance->generic.btn = (uint8_t)instance->decoder.decode_data & 0x00000F;
+                        instance->generic.data = instance->decoder.decode_data;
+                        instance->generic.data_count_bit = instance->decoder.decode_count_bit;
 
-                    if(instance->base.callback)
-                        instance->base.callback(&instance->base, instance->base.context);
+                        if(instance->base.callback)
+                            instance->base.callback(&instance->base, instance->base.context);
+                    }
+                    instance->last_data = instance->decoder.decode_data;
                 }
                 instance->decoder.decode_data = 0;
                 instance->decoder.decode_count_bit = 0;
@@ -282,6 +294,15 @@ void subghz_protocol_decoder_princeton_feed(void* context, bool level, uint32_t 
     }
 }
 
+/** 
+ * Analysis of received data
+ * @param instance Pointer to a SubGhzBlockGeneric* instance
+ */
+static void subghz_protocol_princeton_check_remote_controller(SubGhzBlockGeneric* instance) {
+    instance->serial = instance->data >> 4;
+    instance->btn = instance->data & 0xF;
+}
+
 uint8_t subghz_protocol_decoder_princeton_get_hash_data(void* context) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
@@ -289,67 +310,68 @@ uint8_t subghz_protocol_decoder_princeton_get_hash_data(void* context) {
         &instance->decoder, (instance->decoder.decode_count_bit / 8) + 1);
 }
 
-bool subghz_protocol_decoder_princeton_serialize(
+SubGhzProtocolStatus subghz_protocol_decoder_princeton_serialize(
     void* context,
     FlipperFormat* flipper_format,
-    uint32_t frequency,
-    FuriHalSubGhzPreset preset) {
+    SubGhzRadioPreset* preset) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
-    bool res =
-        subghz_block_generic_serialize(&instance->generic, flipper_format, frequency, preset);
-    if(res && !flipper_format_write_uint32(flipper_format, "TE", &instance->te, 1)) {
+    SubGhzProtocolStatus ret =
+        subghz_block_generic_serialize(&instance->generic, flipper_format, preset);
+    if((ret == SubGhzProtocolStatusOk) &&
+       !flipper_format_write_uint32(flipper_format, "TE", &instance->te, 1)) {
         FURI_LOG_E(TAG, "Unable to add TE");
-        res = false;
+        ret = SubGhzProtocolStatusErrorParserTe;
     }
-    return res;
+    return ret;
 }
 
-bool subghz_protocol_decoder_princeton_deserialize(void* context, FlipperFormat* flipper_format) {
+SubGhzProtocolStatus
+    subghz_protocol_decoder_princeton_deserialize(void* context, FlipperFormat* flipper_format) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
-    bool res = false;
+    SubGhzProtocolStatus ret = SubGhzProtocolStatusError;
     do {
-        if(!subghz_block_generic_deserialize(&instance->generic, flipper_format)) {
-            FURI_LOG_E(TAG, "Deserialize error");
+        ret = subghz_block_generic_deserialize_check_count_bit(
+            &instance->generic,
+            flipper_format,
+            subghz_protocol_princeton_const.min_count_bit_for_found);
+        if(ret != SubGhzProtocolStatusOk) {
             break;
         }
         if(!flipper_format_rewind(flipper_format)) {
             FURI_LOG_E(TAG, "Rewind error");
+            ret = SubGhzProtocolStatusErrorParserOthers;
             break;
         }
         if(!flipper_format_read_uint32(flipper_format, "TE", (uint32_t*)&instance->te, 1)) {
             FURI_LOG_E(TAG, "Missing TE");
+            ret = SubGhzProtocolStatusErrorParserTe;
             break;
         }
-        res = true;
     } while(false);
 
-    return res;
+    return ret;
 }
 
-void subghz_protocol_decoder_princeton_get_string(void* context, string_t output) {
+void subghz_protocol_decoder_princeton_get_string(void* context, FuriString* output) {
     furi_assert(context);
     SubGhzProtocolDecoderPrinceton* instance = context;
-
-    uint32_t code_found_lo = instance->generic.data & 0x00000000ffffffff;
-
-    uint64_t code_found_reverse = subghz_protocol_blocks_reverse_key(
+    subghz_protocol_princeton_check_remote_controller(&instance->generic);
+    uint32_t data_rev = subghz_protocol_blocks_reverse_key(
         instance->generic.data, instance->generic.data_count_bit);
 
-    uint32_t code_found_reverse_lo = code_found_reverse & 0x00000000ffffffff;
-
-    string_cat_printf(
+    furi_string_cat_printf(
         output,
         "%s %dbit\r\n"
         "Key:0x%08lX\r\n"
         "Yek:0x%08lX\r\n"
-        "Sn:0x%05lX BTN:%02X\r\n"
-        "Te:%dus\r\n",
+        "Sn:0x%05lX Btn:%01X\r\n"
+        "Te:%luus\r\n",
         instance->generic.protocol_name,
         instance->generic.data_count_bit,
-        code_found_lo,
-        code_found_reverse_lo,
+        (uint32_t)(instance->generic.data & 0xFFFFFF),
+        data_rev,
         instance->generic.serial,
         instance->generic.btn,
         instance->te);

@@ -2,29 +2,35 @@
 #include <stdbool.h>
 #include <stm32wbxx_ll_lpuart.h>
 #include <stm32wbxx_ll_usart.h>
+#include <stm32wbxx_ll_rcc.h>
 #include <furi_hal_resources.h>
+#include <furi_hal_bus.h>
 
 #include <furi.h>
-#include <furi_hal_delay.h>
+
+static bool furi_hal_usart_prev_enabled[2];
 
 static void (*irq_cb[2])(uint8_t ev, uint8_t data, void* context);
 static void* irq_ctx[2];
 
 static void furi_hal_usart_init(uint32_t baud) {
-    hal_gpio_init_ex(
+    furi_hal_bus_enable(FuriHalBusUSART1);
+    LL_RCC_SetUSARTClockSource(LL_RCC_USART1_CLKSOURCE_PCLK2);
+
+    furi_hal_gpio_init_ex(
         &gpio_usart_tx,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
         GpioSpeedVeryHigh,
         GpioAltFn7USART1);
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         &gpio_usart_rx,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
         GpioSpeedVeryHigh,
         GpioAltFn7USART1);
 
-    LL_USART_InitTypeDef USART_InitStruct = {0};
+    LL_USART_InitTypeDef USART_InitStruct;
     USART_InitStruct.PrescalerValue = LL_USART_PRESCALER_DIV1;
     USART_InitStruct.BaudRate = baud;
     USART_InitStruct.DataWidth = LL_USART_DATAWIDTH_8B;
@@ -42,26 +48,29 @@ static void furi_hal_usart_init(uint32_t baud) {
     while(!LL_USART_IsActiveFlag_TEACK(USART1) || !LL_USART_IsActiveFlag_REACK(USART1))
         ;
 
-    LL_USART_EnableIT_RXNE_RXFNE(USART1);
-    LL_USART_EnableIT_IDLE(USART1);
-    HAL_NVIC_SetPriority(USART1_IRQn, 5, 0);
+    LL_USART_DisableIT_ERROR(USART1);
+
+    NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
 }
 
 static void furi_hal_lpuart_init(uint32_t baud) {
-    hal_gpio_init_ex(
+    furi_hal_bus_enable(FuriHalBusLPUART1);
+    LL_RCC_SetLPUARTClockSource(LL_RCC_LPUART1_CLKSOURCE_PCLK1);
+
+    furi_hal_gpio_init_ex(
         &gpio_ext_pc0,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
         GpioSpeedVeryHigh,
         GpioAltFn8LPUART1);
-    hal_gpio_init_ex(
+    furi_hal_gpio_init_ex(
         &gpio_ext_pc1,
         GpioModeAltFunctionPushPull,
         GpioPullUp,
         GpioSpeedVeryHigh,
         GpioAltFn8LPUART1);
 
-    LL_LPUART_InitTypeDef LPUART_InitStruct = {0};
+    LL_LPUART_InitTypeDef LPUART_InitStruct;
     LPUART_InitStruct.PrescalerValue = LL_LPUART_PRESCALER_DIV1;
     LPUART_InitStruct.BaudRate = 115200;
     LPUART_InitStruct.DataWidth = LL_LPUART_DATAWIDTH_8B;
@@ -78,17 +87,17 @@ static void furi_hal_lpuart_init(uint32_t baud) {
         ;
 
     furi_hal_uart_set_br(FuriHalUartIdLPUART1, baud);
+    LL_LPUART_DisableIT_ERROR(LPUART1);
 
-    LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
-    LL_LPUART_EnableIT_IDLE(LPUART1);
-    HAL_NVIC_SetPriority(LPUART1_IRQn, 5, 0);
+    NVIC_SetPriority(LPUART1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 5, 0));
 }
 
 void furi_hal_uart_init(FuriHalUartId ch, uint32_t baud) {
-    if(ch == FuriHalUartIdLPUART1)
+    if(ch == FuriHalUartIdLPUART1) {
         furi_hal_lpuart_init(baud);
-    else if(ch == FuriHalUartIdUSART1)
+    } else if(ch == FuriHalUartIdUSART1) {
         furi_hal_usart_init(baud);
+    }
 }
 
 void furi_hal_uart_set_br(FuriHalUartId ch, uint32_t baud) {
@@ -125,14 +134,40 @@ void furi_hal_uart_set_br(FuriHalUartId ch, uint32_t baud) {
 void furi_hal_uart_deinit(FuriHalUartId ch) {
     furi_hal_uart_set_irq_cb(ch, NULL, NULL);
     if(ch == FuriHalUartIdUSART1) {
-        LL_USART_Disable(USART1);
-        hal_gpio_init(&gpio_usart_tx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        hal_gpio_init(&gpio_usart_rx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        if(furi_hal_bus_is_enabled(FuriHalBusUSART1)) {
+            furi_hal_bus_disable(FuriHalBusUSART1);
+        }
+        furi_hal_gpio_init(&gpio_usart_tx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(&gpio_usart_rx, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     } else if(ch == FuriHalUartIdLPUART1) {
-        LL_LPUART_Disable(LPUART1);
-        hal_gpio_init(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-        hal_gpio_init(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        if(furi_hal_bus_is_enabled(FuriHalBusLPUART1)) {
+            furi_hal_bus_disable(FuriHalBusLPUART1);
+        }
+        furi_hal_gpio_init(&gpio_ext_pc0, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+        furi_hal_gpio_init(&gpio_ext_pc1, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
     }
+}
+
+void furi_hal_uart_suspend(FuriHalUartId channel) {
+    if(channel == FuriHalUartIdLPUART1 && LL_LPUART_IsEnabled(LPUART1)) {
+        LL_LPUART_Disable(LPUART1);
+        furi_hal_usart_prev_enabled[channel] = true;
+    } else if(channel == FuriHalUartIdUSART1 && LL_USART_IsEnabled(USART1)) {
+        LL_USART_Disable(USART1);
+        furi_hal_usart_prev_enabled[channel] = true;
+    }
+}
+
+void furi_hal_uart_resume(FuriHalUartId channel) {
+    if(!furi_hal_usart_prev_enabled[channel]) {
+        return;
+    } else if(channel == FuriHalUartIdLPUART1) {
+        LL_LPUART_Enable(LPUART1);
+    } else if(channel == FuriHalUartIdUSART1) {
+        LL_USART_Enable(USART1);
+    }
+
+    furi_hal_usart_prev_enabled[channel] = false;
 }
 
 void furi_hal_uart_tx(FuriHalUartId ch, uint8_t* buffer, size_t buffer_size) {
@@ -168,19 +203,25 @@ void furi_hal_uart_set_irq_cb(
     void (*cb)(UartIrqEvent ev, uint8_t data, void* ctx),
     void* ctx) {
     if(cb == NULL) {
-        if(ch == FuriHalUartIdUSART1)
+        if(ch == FuriHalUartIdUSART1) {
             NVIC_DisableIRQ(USART1_IRQn);
-        else if(ch == FuriHalUartIdLPUART1)
+            LL_USART_DisableIT_RXNE_RXFNE(USART1);
+        } else if(ch == FuriHalUartIdLPUART1) {
             NVIC_DisableIRQ(LPUART1_IRQn);
+            LL_LPUART_DisableIT_RXNE_RXFNE(LPUART1);
+        }
         irq_cb[ch] = cb;
         irq_ctx[ch] = ctx;
     } else {
         irq_ctx[ch] = ctx;
         irq_cb[ch] = cb;
-        if(ch == FuriHalUartIdUSART1)
+        if(ch == FuriHalUartIdUSART1) {
             NVIC_EnableIRQ(USART1_IRQn);
-        else if(ch == FuriHalUartIdLPUART1)
+            LL_USART_EnableIT_RXNE_RXFNE(USART1);
+        } else if(ch == FuriHalUartIdLPUART1) {
             NVIC_EnableIRQ(LPUART1_IRQn);
+            LL_LPUART_EnableIT_RXNE_RXFNE(LPUART1);
+        }
     }
 }
 
@@ -188,22 +229,15 @@ void LPUART1_IRQHandler(void) {
     if(LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART1)) {
         uint8_t data = LL_LPUART_ReceiveData8(LPUART1);
         irq_cb[FuriHalUartIdLPUART1](UartIrqEventRXNE, data, irq_ctx[FuriHalUartIdLPUART1]);
-    } else if(LL_LPUART_IsActiveFlag_IDLE(LPUART1)) {
-        irq_cb[FuriHalUartIdLPUART1](UartIrqEventIDLE, 0, irq_ctx[FuriHalUartIdLPUART1]);
-        LL_LPUART_ClearFlag_IDLE(LPUART1);
     } else if(LL_LPUART_IsActiveFlag_ORE(LPUART1)) {
         LL_LPUART_ClearFlag_ORE(LPUART1);
     }
-    //TODO: more events
 }
 
 void USART1_IRQHandler(void) {
     if(LL_USART_IsActiveFlag_RXNE_RXFNE(USART1)) {
         uint8_t data = LL_USART_ReceiveData8(USART1);
         irq_cb[FuriHalUartIdUSART1](UartIrqEventRXNE, data, irq_ctx[FuriHalUartIdUSART1]);
-    } else if(LL_USART_IsActiveFlag_IDLE(USART1)) {
-        irq_cb[FuriHalUartIdUSART1](UartIrqEventIDLE, 0, irq_ctx[FuriHalUartIdUSART1]);
-        LL_USART_ClearFlag_IDLE(USART1);
     } else if(LL_USART_IsActiveFlag_ORE(USART1)) {
         LL_USART_ClearFlag_ORE(USART1);
     }

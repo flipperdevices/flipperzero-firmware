@@ -1,0 +1,34 @@
+Import("env")
+
+env.Append(
+    CPPPATH=[
+        "#/lib/subghz",
+    ],
+    SDK_HEADERS=[
+        File("environment.h"),
+        File("receiver.h"),
+        File("registry.h"),
+        File("subghz_worker.h"),
+        File("subghz_tx_rx_worker.h"),
+        File("transmitter.h"),
+        File("protocols/raw.h"),
+        File("blocks/const.h"),
+        File("blocks/decoder.h"),
+        File("blocks/encoder.h"),
+        File("blocks/generic.h"),
+        File("blocks/math.h"),
+        File("subghz_setting.h"),
+        File("subghz_protocol_registry.h"),
+        File("devices/cc1101_configs.h"),
+        File("devices/cc1101_int/cc1101_int_interconnect.h"),
+    ],
+)
+
+libenv = env.Clone(FW_LIB_NAME="subghz")
+libenv.ApplyLibFlags()
+
+sources = libenv.GlobRecursive("*.c*")
+
+lib = libenv.StaticLibrary("${FW_LIB_NAME}", sources)
+libenv.Install("${LIB_DIST_DIR}", lib)
+Return("lib")
