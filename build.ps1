@@ -61,7 +61,7 @@ function Build-Run {
 
         Invoke-Expression -Command "./fbt.ps1 $fbt_args"
 
-        $latest_dir = Get-LatestDirectory -Path $build_path
+        $latest_dir = (Get-LatestDirectory -Path $build_path).Name
         $build_output_folder = "build"
         if ($Subfolder -ne $null -and $Subfolder -ne '') {
             $build_output_folder = Join-Path $build_output_folder $Subfolder
