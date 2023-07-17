@@ -1,7 +1,11 @@
+#ifndef ESP_FLIP_STRUCT_H
+#define ESP_FLIP_STRUCT_H
+
 /*  Globals to track module status information */
 enum AttackMode {
     ATTACK_BEACON,
     ATTACK_PROBE,
+    ATTACK_FUZZ,
     ATTACK_SNIFF,
     ATTACK_DEAUTH,
     ATTACK_MANA,
@@ -17,8 +21,7 @@ enum AttackMode {
 typedef enum AttackMode AttackMode;
 
 enum GravityCommand {
-    GRAVITY_NONE,
-    GRAVITY_BEACON,
+    GRAVITY_BEACON = 0,
     GRAVITY_TARGET_SSIDS,
     GRAVITY_PROBE,
     GRAVITY_FUZZ,
@@ -34,8 +37,13 @@ enum GravityCommand {
     GRAVITY_GET,
     GRAVITY_VIEW,
     GRAVITY_SELECT,
+    GRAVITY_SELECTED,
     GRAVITY_CLEAR,
     GRAVITY_HANDSHAKE,
-    GRAVITY_COMMANDS
+    GRAVITY_COMMANDS,
+    GRAVITY_INFO,
+    GRAVITY_NONE = 99
 };
 typedef enum GravityCommand GravityCommand;
+
+#endif

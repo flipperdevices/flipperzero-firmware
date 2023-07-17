@@ -12,11 +12,6 @@ https://github.com/chris-bc/esp32c6-gravity
 ## TODO
 * Bug: Console scrolls to top mid-scroll when text is added to it
     * Replicate: Start scan, Run help and try to read it
-* Increase help content
-    * Getting Started
-        * Getting started, commands, about, help
-    * About
-    * Remove bonus help
 * First command always returns 'unrecognized command'
 * Add space to keyboard
 * add channel, mode, count STA+AP on console header

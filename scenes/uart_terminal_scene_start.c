@@ -45,7 +45,7 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     {"Fuzz",
     {"Status", "Off", "Overflow Beacon", "Overflow Request", "Overflow Response", "Malformed Beacon", "Malformed Request", "Malformed Response"},
     8,
-    ("fuzz", "fuzz off", "fuzz beacon overflow", "fuzz req overflow", "fuzz resp overflow", "fuzz beacon malformed", "fuzz req malformed", "fuzz resp malformed"),
+    {"fuzz", "fuzz off", "fuzz beacon overflow", "fuzz req overflow", "fuzz resp overflow", "fuzz beacon malformed", "fuzz req malformed", "fuzz resp malformed"},
     NO_ARGS,
     FOCUS_CONSOLE_END,
     NO_TIP},
@@ -148,10 +148,10 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     FOCUS_CONSOLE_END,
     NO_TIP},
     {"Help",
-    {"Commands", "Help"},
-    2,
-    {"commands", "help"},
-    NO_ARGS,
+    {"Info <cmd>", "Get Started", "Commands", "About", "Help"},
+    5,
+    {"info ", "GET_STARTED", "commands", "ABOUT", "help"},
+    TOGGLE_ARGS,
     FOCUS_CONSOLE_START,
     NO_TIP},
 };
@@ -254,6 +254,8 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
         app->gravityCommand = GRAVITY_HANDSHAKE;
     } else if (!strcmp(cmd, "commands")) {
         app->gravityCommand = GRAVITY_COMMANDS;
+    } else if (!strcmp(cmd, "info")) {
+        app->gravityCommand = GRAVITY_INFO;
     } else {
         app->gravityCommand = GRAVITY_NONE;
     }
