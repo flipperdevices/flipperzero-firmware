@@ -39,14 +39,34 @@ static bool bq27220_set_parameter(
     size_t size) {
     furi_assert(size == 1 || size == 2 || size == 4);
     bool ret = false;
-    uint8_t buffer[6];
+    uint8_t buffer[6] = {0};
+    uint8_t old_data[4] = {0};
 
     do {
         buffer[0] = address & 0xFF;
         buffer[1] = (address >> 8) & 0xFF;
+
         for(size_t i = 0; i < size; i++) {
-            buffer[1 + size - i] = (value >> i) & 0xFF;
+            buffer[1 + size - i] = (value >> i * 8) & 0xFF;
         }
+
+        if(!furi_hal_i2c_write_mem(
+               handle, BQ27220_ADDRESS, CommandSelectSubclass, buffer, 2, BQ27220_I2C_TIMEOUT)) {
+            FURI_LOG_I(TAG, "DM SelectSubclass for read failed");
+            break;
+        }
+
+        if(!furi_hal_i2c_rx(handle, BQ27220_ADDRESS, old_data, size, BQ27220_I2C_TIMEOUT)) {
+            FURI_LOG_I(TAG, "DM read failed");
+            break;
+        }
+
+        FURI_LOG_I(
+            TAG,
+            "Data at 0x%04x: 0x%08lx->0x%08lx",
+            address,
+            *(uint32_t*)&(old_data[0]),
+            *(uint32_t*)&(buffer[2]));
 
         if(!furi_hal_i2c_write_mem(
                handle,
@@ -84,17 +104,17 @@ bool bq27220_init(FuriHalI2cBusHandle* handle) {
         return false;
     };
 
-    uint16_t data=0;
+    uint16_t data = 0;
     data = bq27220_read_word(handle, CommandControl);
-    if(data != 0xFFA5) {
+    if(data != 0xFF00) {
         FURI_LOG_E(TAG, "Invalid control response: %x", data);
         return false;
     };
 
     data = bq27220_read_word(handle, CommandMACData);
-    FURI_LOG_I(TAG, "Device Number %x", data);
+    FURI_LOG_I(TAG, "Device Number %04x", data);
 
-    return true;
+    return data == 0x0220;
 }
 
 bool bq27220_apply_data_memory(FuriHalI2cBusHandle* handle, const BQ27220DMData* data_memory) {

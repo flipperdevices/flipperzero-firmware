@@ -34,9 +34,9 @@
 
 const BQ27220DMData furi_hal_power_gauge_data_memory[] = {
     {
-        .address=BQ27220DMAddressGasGaugingCEDVProfile1GaugingConfig,
-        .type=BQ27220DMTypeU16,
-        .value.u16=0b1011000010001100,
+        .address = BQ27220DMAddressGasGaugingCEDVProfile1GaugingConfig,
+        .type = BQ27220DMTypeU16,
+        .value.u16 = 0b1011000010001100,
     },
     {
         .address = BQ27220DMAddressGasGaugingCEDVProfile1FullChargeCapacity,
