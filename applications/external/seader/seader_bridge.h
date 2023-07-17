@@ -21,7 +21,7 @@ typedef struct {
 typedef struct {
     uint32_t rx_cnt;
     uint32_t tx_cnt;
-    uint32_t baudrate_cur;
+    uint8_t protocol;
 } SeaderUartState;
 
 struct SeaderUartBridge {

@@ -54,6 +54,7 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     bool deprecated_version = false;
+    cred->type = SeaderCredentialTypeNone;
 
     if(cred->loading_cb) {
         cred->loading_cb(cred->loading_cb_ctx, true);
@@ -367,9 +368,12 @@ bool seader_file_select(SeaderCredential* cred) {
 
 void seader_credential_clear(SeaderCredential* cred) {
     furi_assert(cred);
+    memset(cred->name, 0, sizeof(cred->name));
     cred->credential = 0;
     cred->bit_length = 0;
     cred->type = SeaderCredentialTypeNone;
+    memset(cred->sio, 0, sizeof(cred->sio));
+    memset(cred->diversifier, 0, sizeof(cred->diversifier));
     furi_string_reset(cred->load_path);
 }
 

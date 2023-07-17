@@ -16,6 +16,7 @@ App(
       "seader_worker.c",
       "seader_credential.c",
       "seader_icons.c",
+      "views/*.c",
     ],
     fap_icon="icons/logo.png",
     fap_category="NFC",
