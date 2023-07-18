@@ -6,7 +6,7 @@
 #include <lib/nfc/helpers/nfc_util.h>
 
 #define MF_CLASSIC_DICT_FLIPPER_PATH EXT_PATH("nfc/assets/mf_classic_dict.nfc")
-#define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_dict_user.nfc")
+#define MF_CLASSIC_DICT_USER_PATH EXT_PATH("nfc/assets/mf_classic_dict_user.nfc")
 #define MF_CLASSIC_DICT_UNIT_TEST_PATH EXT_PATH("unit_tests/mf_dict.nfc")
 
 #define TAG "MfDict"
