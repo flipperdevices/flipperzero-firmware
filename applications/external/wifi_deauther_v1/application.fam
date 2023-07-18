@@ -7,7 +7,7 @@ App(
     stack_size=2 * 1024,
     order=20,
     fap_icon="wifi_10px.png",
-    fap_category="GPIO",
+    fap_category="GPIO/ESP8266",
     fap_author="@SequoiaSan & @xMasterX",
     fap_version=(1, 0),
     fap_description="DSTIKE Deauther module interface, based on ESP8266",

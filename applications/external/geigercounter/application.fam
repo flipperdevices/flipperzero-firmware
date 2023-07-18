@@ -8,7 +8,7 @@ App(
     ],
     stack_size=2 * 1024,
     fap_icon="geiger.png",
-    fap_category="GPIO",
+    fap_category="GPIO/Sensors",
     fap_author="@nmrr",
     fap_weburl="https://github.com/nmrr/flipperzero-geigercounter",
     fap_version=(1, 0),

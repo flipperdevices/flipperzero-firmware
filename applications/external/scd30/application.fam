@@ -6,7 +6,7 @@ App(
     requires=[
         "gui",
     ],
-    fap_category="GPIO",
+    fap_category="GPIO/Sensors",
     stack_size=2 * 1024,
     order=65,
     fap_icon="scd30.png",
