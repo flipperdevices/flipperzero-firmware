@@ -312,10 +312,6 @@ int32_t mousejacker_app(void* p) {
     furi_thread_set_context(plugin_state->mjthread, plugin_state);
     furi_thread_set_callback(plugin_state->mjthread, mj_worker_thread);
 
-    while(!furi_hal_speaker_acquire(100)) {
-        furi_delay_ms(100);
-    }
-
     // spawn load file dialog to choose sniffed addresses file
     if(load_addrs_file(plugin_state->file_stream)) {
         addr_idx = 0;
@@ -389,7 +385,6 @@ int32_t mousejacker_app(void* p) {
 
     furi_thread_free(plugin_state->mjthread);
     nrf24_deinit();
-    furi_hal_speaker_release();
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(gui, view_port);
     furi_record_close(RECORD_GUI);

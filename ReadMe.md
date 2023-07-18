@@ -59,6 +59,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 - OFW: [Gauge initialization routine refactoring, new DataMemory layout, configuration update #2887 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2887)
 - OFW: [fbt: build target for faps #2888 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2888)
+- Updated: [[Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker)
+- Updated: [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)
 
 <a name="release">
 
