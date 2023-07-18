@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,35.2,,
+Version,+,35.0,,
 Header,+,applications/services/bt/bt_service/bt.h,,
 Header,+,applications/services/cli/cli.h,,
 Header,+,applications/services/cli/cli_vcp.h,,
@@ -49,7 +49,6 @@ Header,+,firmware/targets/f7/furi_hal/furi_hal_idle_timer.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_interrupt.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_nfc.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_os.h,,
-Header,-,firmware/targets/f7/furi_hal/furi_hal_power_calibration.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_pwm.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_resources.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_rfid.h,,
@@ -60,6 +59,7 @@ Header,+,firmware/targets/f7/furi_hal/furi_hal_target_hw.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_uart.h,,
 Header,+,firmware/targets/f7/furi_hal/furi_hal_usb_cdc.h,,
 Header,+,firmware/targets/f7/platform_specific/intrinsic_export.h,,
+Header,+,firmware/targets/f7/platform_specific/math_wrapper.h,,
 Header,+,firmware/targets/furi_hal_include/f_hal_nfc.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_bt.h,,
@@ -87,6 +87,7 @@ Header,+,firmware/targets/furi_hal_include/furi_hal_usb_hid_u2f.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_version.h,,
 Header,+,firmware/targets/furi_hal_include/furi_hal_vibro.h,,
 Header,+,lib/digital_signal/digital_signal.h,,
+Header,+,lib/drivers/cc1101_regs.h,,
 Header,+,lib/flipper_application/api_hashtable/api_hashtable.h,,
 Header,+,lib/flipper_application/api_hashtable/compilesort.hpp,,
 Header,+,lib/flipper_application/flipper_application.h,,
@@ -211,6 +212,7 @@ Header,+,lib/subghz/blocks/encoder.h,,
 Header,+,lib/subghz/blocks/generic.h,,
 Header,+,lib/subghz/blocks/math.h,,
 Header,+,lib/subghz/devices/cc1101_configs.h,,
+Header,+,lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h,,
 Header,+,lib/subghz/environment.h,,
 Header,+,lib/subghz/protocols/raw.h,,
 Header,+,lib/subghz/receiver.h,,
@@ -578,34 +580,34 @@ Function,-,atoll,long long,const char*
 Function,-,basename,char*,const char*
 Function,-,bcmp,int,"const void*, const void*, size_t"
 Function,-,bcopy,void,"const void*, void*, size_t"
-Function,-,bit_buffer_alloc,BitBuffer*,size_t
-Function,-,bit_buffer_append,void,"BitBuffer*, const BitBuffer*"
+Function,+,bit_buffer_alloc,BitBuffer*,size_t
+Function,+,bit_buffer_append,void,"BitBuffer*, const BitBuffer*"
 Function,+,bit_buffer_append_byte,void,"BitBuffer*, uint8_t"
-Function,-,bit_buffer_append_bytes,void,"BitBuffer*, const uint8_t*, size_t"
-Function,-,bit_buffer_append_right,void,"BitBuffer*, const BitBuffer*, size_t"
-Function,-,bit_buffer_copy,void,"BitBuffer*, const BitBuffer*"
-Function,-,bit_buffer_copy_bits,void,"BitBuffer*, const uint8_t*, size_t"
-Function,-,bit_buffer_copy_bytes,void,"BitBuffer*, const uint8_t*, size_t"
-Function,-,bit_buffer_copy_bytes_with_parity,void,"BitBuffer*, const uint8_t*, size_t"
-Function,-,bit_buffer_copy_left,void,"BitBuffer*, const BitBuffer*, size_t"
-Function,-,bit_buffer_copy_right,void,"BitBuffer*, const BitBuffer*, size_t"
-Function,-,bit_buffer_free,void,BitBuffer*
-Function,-,bit_buffer_get_byte,uint8_t,"const BitBuffer*, size_t"
-Function,-,bit_buffer_get_capacity_bytes,size_t,const BitBuffer*
-Function,-,bit_buffer_get_data,const uint8_t*,const BitBuffer*
-Function,-,bit_buffer_get_parity,const _Bool*,const BitBuffer*
-Function,-,bit_buffer_get_size,size_t,const BitBuffer*
-Function,-,bit_buffer_get_size_bytes,size_t,const BitBuffer*
-Function,-,bit_buffer_has_partial_byte,_Bool,const BitBuffer*
-Function,-,bit_buffer_reset,void,BitBuffer*
-Function,-,bit_buffer_set_byte,void,"BitBuffer*, size_t, uint8_t"
-Function,-,bit_buffer_set_byte_with_parity,void,"BitBuffer*, size_t, uint8_t, _Bool"
-Function,-,bit_buffer_set_size,void,"BitBuffer*, size_t"
-Function,-,bit_buffer_set_size_bytes,void,"BitBuffer*, size_t"
-Function,-,bit_buffer_starts_with_byte,_Bool,"const BitBuffer*, uint8_t"
-Function,-,bit_buffer_write_bytes,void,"const BitBuffer*, void*, size_t"
+Function,+,bit_buffer_append_bytes,void,"BitBuffer*, const uint8_t*, size_t"
+Function,+,bit_buffer_append_right,void,"BitBuffer*, const BitBuffer*, size_t"
+Function,+,bit_buffer_copy,void,"BitBuffer*, const BitBuffer*"
+Function,+,bit_buffer_copy_bits,void,"BitBuffer*, const uint8_t*, size_t"
+Function,+,bit_buffer_copy_bytes,void,"BitBuffer*, const uint8_t*, size_t"
+Function,+,bit_buffer_copy_bytes_with_parity,void,"BitBuffer*, const uint8_t*, size_t"
+Function,+,bit_buffer_copy_left,void,"BitBuffer*, const BitBuffer*, size_t"
+Function,+,bit_buffer_copy_right,void,"BitBuffer*, const BitBuffer*, size_t"
+Function,+,bit_buffer_free,void,BitBuffer*
+Function,+,bit_buffer_get_byte,uint8_t,"const BitBuffer*, size_t"
+Function,+,bit_buffer_get_capacity_bytes,size_t,const BitBuffer*
+Function,+,bit_buffer_get_data,const uint8_t*,const BitBuffer*
+Function,+,bit_buffer_get_parity,const _Bool*,const BitBuffer*
+Function,+,bit_buffer_get_size,size_t,const BitBuffer*
+Function,+,bit_buffer_get_size_bytes,size_t,const BitBuffer*
+Function,+,bit_buffer_has_partial_byte,_Bool,const BitBuffer*
+Function,+,bit_buffer_reset,void,BitBuffer*
+Function,+,bit_buffer_set_byte,void,"BitBuffer*, size_t, uint8_t"
+Function,+,bit_buffer_set_byte_with_parity,void,"BitBuffer*, size_t, uint8_t, _Bool"
+Function,+,bit_buffer_set_size,void,"BitBuffer*, size_t"
+Function,+,bit_buffer_set_size_bytes,void,"BitBuffer*, size_t"
+Function,+,bit_buffer_starts_with_byte,_Bool,"const BitBuffer*, uint8_t"
+Function,+,bit_buffer_write_bytes,void,"const BitBuffer*, void*, size_t"
 Function,+,bit_buffer_write_bytes_mid,void,"const BitBuffer*, void*, size_t, size_t"
-Function,-,bit_buffer_write_bytes_with_parity,void,"const BitBuffer*, void*, size_t, size_t*"
+Function,+,bit_buffer_write_bytes_with_parity,void,"const BitBuffer*, void*, size_t, size_t*"
 Function,+,bit_lib_add_parity,size_t,"const uint8_t*, size_t, uint8_t*, size_t, uint8_t, uint8_t, BitLibParity"
 Function,+,bit_lib_copy_bits,void,"uint8_t*, size_t, size_t, const uint8_t*, size_t"
 Function,+,bit_lib_crc16,uint16_t,"const uint8_t*, size_t, uint16_t, uint16_t, _Bool, _Bool, uint16_t"
@@ -1314,12 +1316,13 @@ Function,+,furi_hal_nfc_tx_rx_full,_Bool,FuriHalNfcTxRxContext*
 Function,-,furi_hal_nfca_set_col_res_data,FHalNfcError,"uint8_t*, uint8_t, uint8_t*, uint8_t"
 Function,-,furi_hal_os_init,void,
 Function,+,furi_hal_os_tick,void,
+Function,+,furi_hal_power_check_otg_fault,_Bool,
 Function,+,furi_hal_power_check_otg_status,void,
 Function,+,furi_hal_power_debug_get,void,"PropertyValueCallback, void*"
 Function,+,furi_hal_power_disable_external_3_3v,void,
 Function,+,furi_hal_power_disable_otg,void,
 Function,+,furi_hal_power_enable_external_3_3v,void,
-Function,+,furi_hal_power_enable_otg,void,
+Function,+,furi_hal_power_enable_otg,_Bool,
 Function,+,furi_hal_power_gauge_is_ok,_Bool,
 Function,+,furi_hal_power_get_bat_health_pct,uint8_t,
 Function,+,furi_hal_power_get_battery_charge_voltage_limit,float,
@@ -1339,6 +1342,7 @@ Function,-,furi_hal_power_insomnia_level,uint16_t,
 Function,+,furi_hal_power_is_charging,_Bool,
 Function,+,furi_hal_power_is_charging_done,_Bool,
 Function,+,furi_hal_power_is_otg_enabled,_Bool,
+Function,+,furi_hal_power_is_shutdown_requested,_Bool,
 Function,+,furi_hal_power_off,void,
 Function,+,furi_hal_power_reset,void,
 Function,+,furi_hal_power_set_battery_charge_voltage_limit,void,float
@@ -1461,8 +1465,8 @@ Function,+,furi_hal_subghz_rx_pipe_not_empty,_Bool,
 Function,+,furi_hal_subghz_set_async_mirror_pin,void,const GpioPin*
 Function,+,furi_hal_subghz_set_frequency,uint32_t,uint32_t
 Function,+,furi_hal_subghz_set_frequency_and_path,uint32_t,uint32_t
-Function,-,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
-Function,-,furi_hal_subghz_shutdown,void,
+Function,+,furi_hal_subghz_set_path,void,FuriHalSubGhzPath
+Function,+,furi_hal_subghz_shutdown,void,
 Function,+,furi_hal_subghz_sleep,void,
 Function,+,furi_hal_subghz_start_async_rx,void,"FuriHalSubGhzCaptureCallback, void*"
 Function,+,furi_hal_subghz_start_async_tx,_Bool,"FuriHalSubGhzAsyncTxCallback, void*"
@@ -1504,6 +1508,7 @@ Function,+,furi_hal_version_get_hw_target,uint8_t,
 Function,+,furi_hal_version_get_hw_timestamp,uint32_t,
 Function,+,furi_hal_version_get_hw_version,uint8_t,
 Function,+,furi_hal_version_get_ic_id,const char*,
+Function,+,furi_hal_version_get_mic_id,const char*,
 Function,+,furi_hal_version_get_model_code,const char*,
 Function,+,furi_hal_version_get_model_name,const char*,
 Function,+,furi_hal_version_get_name_ptr,const char*,
@@ -1521,6 +1526,8 @@ Function,+,furi_kernel_restore_lock,int32_t,int32_t
 Function,+,furi_kernel_unlock,int32_t,
 Function,+,furi_log_get_level,FuriLogLevel,
 Function,-,furi_log_init,void,
+Function,+,furi_log_level_from_string,_Bool,"const char*, FuriLogLevel*"
+Function,+,furi_log_level_to_string,_Bool,"FuriLogLevel, const char**"
 Function,+,furi_log_print_format,void,"FuriLogLevel, const char*, const char*, ..."
 Function,+,furi_log_print_raw_format,void,"FuriLogLevel, const char*, ..."
 Function,+,furi_log_set_level,void,FuriLogLevel
@@ -1827,22 +1834,22 @@ Function,-,islower,int,int
 Function,-,islower_l,int,"int, locale_t"
 Function,-,isnan,int,double
 Function,-,isnanf,int,float
-Function,-,iso14443_3a_alloc,Iso14443_3aData*,
-Function,-,iso14443_3a_append_crc,void,BitBuffer*
-Function,-,iso14443_3a_check_crc,_Bool,const BitBuffer*
-Function,-,iso14443_3a_copy,void,"Iso14443_3aData*, const Iso14443_3aData*"
-Function,-,iso14443_3a_free,void,Iso14443_3aData*
-Function,-,iso14443_3a_get_base_data,const Iso14443_3aData*,const Iso14443_3aData*
-Function,-,iso14443_3a_get_cuid,uint32_t,const Iso14443_3aData*
-Function,-,iso14443_3a_get_device_name,const char*,"const Iso14443_3aData*, NfcDeviceNameType"
-Function,-,iso14443_3a_get_uid,const uint8_t*,"const Iso14443_3aData*, size_t*"
-Function,-,iso14443_3a_is_equal,_Bool,"const Iso14443_3aData*, const Iso14443_3aData*"
-Function,-,iso14443_3a_load,_Bool,"Iso14443_3aData*, FlipperFormat*, uint32_t"
+Function,+,iso14443_3a_alloc,Iso14443_3aData*,
+Function,+,iso14443_3a_append_crc,void,BitBuffer*
+Function,+,iso14443_3a_check_crc,_Bool,const BitBuffer*
+Function,+,iso14443_3a_copy,void,"Iso14443_3aData*, const Iso14443_3aData*"
+Function,+,iso14443_3a_free,void,Iso14443_3aData*
+Function,+,iso14443_3a_get_base_data,const Iso14443_3aData*,const Iso14443_3aData*
+Function,+,iso14443_3a_get_cuid,uint32_t,const Iso14443_3aData*
+Function,+,iso14443_3a_get_device_name,const char*,"const Iso14443_3aData*, NfcDeviceNameType"
+Function,+,iso14443_3a_get_uid,const uint8_t*,"const Iso14443_3aData*, size_t*"
+Function,+,iso14443_3a_is_equal,_Bool,"const Iso14443_3aData*, const Iso14443_3aData*"
+Function,+,iso14443_3a_load,_Bool,"Iso14443_3aData*, FlipperFormat*, uint32_t"
 Function,+,iso14443_3a_poller_read,Iso14443_3aError,"Nfc*, Iso14443_3aData*"
-Function,-,iso14443_3a_reset,void,Iso14443_3aData*
+Function,+,iso14443_3a_reset,void,Iso14443_3aData*
 Function,+,iso14443_3a_save,_Bool,"const Iso14443_3aData*, FlipperFormat*"
-Function,-,iso14443_3a_trim_crc,void,BitBuffer*
-Function,-,iso14443_3a_verify,_Bool,"Iso14443_3aData*, const FuriString*"
+Function,+,iso14443_3a_trim_crc,void,BitBuffer*
+Function,+,iso14443_3a_verify,_Bool,"Iso14443_3aData*, const FuriString*"
 Function,+,iso14443_4a_alloc,Iso14443_4aData*,
 Function,+,iso14443_4a_copy,void,"Iso14443_4aData*, const Iso14443_4aData*"
 Function,+,iso14443_4a_free,void,Iso14443_4aData*
@@ -2046,7 +2053,7 @@ Function,+,mf_classic_get_sector_by_block,uint8_t,uint8_t
 Function,+,mf_classic_get_sector_trailer_by_sector,MfClassicSectorTrailer*,"const MfClassicData*, uint8_t"
 Function,+,mf_classic_get_sector_trailer_num_by_block,uint8_t,uint8_t
 Function,+,mf_classic_get_sector_trailer_num_by_sector,uint8_t,uint8_t
-Function,+,mf_classic_get_total_block_num,uint16_t,MfClassicType
+Function,-,mf_classic_get_total_block_num,uint16_t,MfClassicType
 Function,+,mf_classic_get_total_sectors_num,uint8_t,MfClassicType
 Function,+,mf_classic_get_uid,const uint8_t*,"const MfClassicData*, size_t*"
 Function,+,mf_classic_is_allowed_access,_Bool,"MfClassicData*, uint8_t, MfClassicKeyType, MfClassicAction"
@@ -2056,7 +2063,7 @@ Function,+,mf_classic_is_equal,_Bool,"const MfClassicData*, const MfClassicData*
 Function,+,mf_classic_is_key_found,_Bool,"const MfClassicData*, uint8_t, MfClassicKeyType"
 Function,+,mf_classic_is_sector_read,_Bool,"const MfClassicData*, uint8_t"
 Function,+,mf_classic_is_sector_trailer,_Bool,uint8_t
-Function,+,mf_classic_is_value_block,_Bool,"MfClassicData*, uint8_t"
+Function,-,mf_classic_is_value_block,_Bool,"MfClassicData*, uint8_t"
 Function,+,mf_classic_load,_Bool,"MfClassicData*, FlipperFormat*, uint32_t"
 Function,+,mf_classic_poller_auth,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicAuthContext*"
 Function,+,mf_classic_poller_change_value,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, int32_t, int32_t*"
@@ -2065,7 +2072,7 @@ Function,+,mf_classic_poller_read_value,MfClassicError,"Nfc*, uint8_t, MfClassic
 Function,+,mf_classic_poller_write_block,MfClassicError,"Nfc*, uint8_t, MfClassicKey*, MfClassicKeyType, MfClassicBlock*"
 Function,+,mf_classic_reset,void,MfClassicData*
 Function,+,mf_classic_save,_Bool,"const MfClassicData*, FlipperFormat*"
-Function,+,mf_classic_set_block_read,void,"MfClassicData*, uint8_t, MfClassicBlock*"
+Function,-,mf_classic_set_block_read,void,"MfClassicData*, uint8_t, MfClassicBlock*"
 Function,+,mf_classic_set_key_found,void,"MfClassicData*, uint8_t, MfClassicKeyType, uint64_t"
 Function,+,mf_classic_set_key_not_found,void,"MfClassicData*, uint8_t, MfClassicKeyType"
 Function,+,mf_classic_value_to_block,void,"int32_t, uint8_t, MfClassicBlock*"
@@ -2168,22 +2175,22 @@ Function,-,nfc_iso14443_3a_listener_tx_custom_parity,NfcError,"Nfc*, const BitBu
 Function,-,nfc_iso14443_3a_sdd_frame,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"
 Function,-,nfc_iso14443_3a_short_frame,NfcError,"Nfc*, NfcIso14443aShortFrame, BitBuffer*, uint32_t"
 Function,-,nfc_listener_abort,void,Nfc*
-Function,+,nfc_listener_alloc,NfcListener*,"Nfc*, NfcProtocol, const NfcDeviceData*"
-Function,+,nfc_listener_free,void,NfcListener*
-Function,+,nfc_listener_get_data,const NfcDeviceData*,"NfcListener*, NfcProtocol"
+Function,-,nfc_listener_alloc,NfcListener*,"Nfc*, NfcProtocol, const NfcDeviceData*"
+Function,-,nfc_listener_free,void,NfcListener*
+Function,-,nfc_listener_get_data,const NfcDeviceData*,"NfcListener*, NfcProtocol"
 Function,-,nfc_listener_set_col_res_data,NfcError,"Nfc*, uint8_t*, uint8_t, uint8_t*, uint8_t"
 Function,-,nfc_listener_sleep,NfcError,Nfc*
-Function,+,nfc_listener_start,void,"NfcListener*, NfcGenericCallback, void*"
-Function,+,nfc_listener_stop,void,NfcListener*
+Function,-,nfc_listener_start,void,"NfcListener*, NfcGenericCallback, void*"
+Function,-,nfc_listener_stop,void,NfcListener*
 Function,-,nfc_listener_tx,NfcError,"Nfc*, const BitBuffer*"
-Function,-,nfc_poller_alloc,NfcPoller*,"Nfc*, NfcProtocol"
-Function,-,nfc_poller_detect,_Bool,NfcPoller*
-Function,-,nfc_poller_free,void,NfcPoller*
-Function,-,nfc_poller_get_data,const NfcDeviceData*,NfcPoller*
-Function,-,nfc_poller_start,void,"NfcPoller*, NfcGenericCallback, void*"
-Function,-,nfc_poller_stop,void,NfcPoller*
-Function,-,nfc_protocol_get_parent,NfcProtocol,NfcProtocol
-Function,-,nfc_protocol_has_parent,_Bool,"NfcProtocol, NfcProtocol"
+Function,+,nfc_poller_alloc,NfcPoller*,"Nfc*, NfcProtocol"
+Function,+,nfc_poller_detect,_Bool,NfcPoller*
+Function,+,nfc_poller_free,void,NfcPoller*
+Function,+,nfc_poller_get_data,const NfcDeviceData*,NfcPoller*
+Function,+,nfc_poller_start,void,"NfcPoller*, NfcGenericCallback, void*"
+Function,+,nfc_poller_stop,void,NfcPoller*
+Function,+,nfc_protocol_get_parent,NfcProtocol,NfcProtocol
+Function,+,nfc_protocol_has_parent,_Bool,"NfcProtocol, NfcProtocol"
 Function,+,nfc_scanner_alloc,NfcScanner*,Nfc*
 Function,+,nfc_scanner_free,void,NfcScanner*
 Function,+,nfc_scanner_start,void,"NfcScanner*, NfcScannerCallback, void*"
@@ -2887,6 +2894,7 @@ Function,+,subghz_protocol_decoder_base_get_hash_data,uint8_t,SubGhzProtocolDeco
 Function,+,subghz_protocol_decoder_base_get_string,_Bool,"SubGhzProtocolDecoderBase*, FuriString*"
 Function,+,subghz_protocol_decoder_base_serialize,SubGhzProtocolStatus,"SubGhzProtocolDecoderBase*, FlipperFormat*, SubGhzRadioPreset*"
 Function,-,subghz_protocol_decoder_base_set_decoder_callback,void,"SubGhzProtocolDecoderBase*, SubGhzProtocolDecoderBaseRxCallback, void*"
+Function,+,subghz_protocol_decoder_bin_raw_data_input_rssi,void,"SubGhzProtocolDecoderBinRAW*, float"
 Function,+,subghz_protocol_decoder_raw_alloc,void*,SubGhzEnvironment*
 Function,+,subghz_protocol_decoder_raw_deserialize,SubGhzProtocolStatus,"void*, FlipperFormat*"
 Function,+,subghz_protocol_decoder_raw_feed,void,"void*, _Bool, uint32_t"
@@ -2898,6 +2906,7 @@ Function,+,subghz_protocol_encoder_raw_deserialize,SubGhzProtocolStatus,"void*, 
 Function,+,subghz_protocol_encoder_raw_free,void,void*
 Function,+,subghz_protocol_encoder_raw_stop,void,void*
 Function,+,subghz_protocol_encoder_raw_yield,LevelDuration,void*
+Function,+,subghz_protocol_keeloq_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint16_t, const char*, SubGhzRadioPreset*"
 Function,+,subghz_protocol_raw_file_encoder_worker_set_callback_end,void,"SubGhzProtocolEncoderRAW*, SubGhzProtocolEncoderRAWCallbackEnd, void*"
 Function,+,subghz_protocol_raw_gen_fff_data,void,"FlipperFormat*, const char*, const char*"
 Function,+,subghz_protocol_raw_get_sample_write,size_t,SubGhzProtocolDecoderRAW*
@@ -2907,6 +2916,8 @@ Function,+,subghz_protocol_raw_save_to_file_stop,void,SubGhzProtocolDecoderRAW*
 Function,+,subghz_protocol_registry_count,size_t,const SubGhzProtocolRegistry*
 Function,+,subghz_protocol_registry_get_by_index,const SubGhzProtocol*,"const SubGhzProtocolRegistry*, size_t"
 Function,+,subghz_protocol_registry_get_by_name,const SubGhzProtocol*,"const SubGhzProtocolRegistry*, const char*"
+Function,+,subghz_protocol_secplus_v1_check_fixed,_Bool,uint32_t
+Function,+,subghz_protocol_secplus_v2_create_data,_Bool,"void*, FlipperFormat*, uint32_t, uint8_t, uint32_t, SubGhzRadioPreset*"
 Function,+,subghz_receiver_alloc_init,SubGhzReceiver*,SubGhzEnvironment*
 Function,+,subghz_receiver_decode,void,"SubGhzReceiver*, _Bool, uint32_t"
 Function,+,subghz_receiver_free,void,SubGhzReceiver*
@@ -3496,10 +3507,10 @@ Variable,+,message_sound_off,const NotificationMessage,
 Variable,+,message_vibro_off,const NotificationMessage,
 Variable,+,message_vibro_on,const NotificationMessage,
 Variable,-,nfc_device_iso14443_3a,const NfcDeviceBase,
-Variable,+,nfc_device_iso14443_4a,const NfcDeviceBase,
+Variable,-,nfc_device_iso14443_4a,const NfcDeviceBase,
 Variable,-,nfc_device_mf_classic,const NfcDeviceBase,
-Variable,+,nfc_device_mf_desfire,const NfcDeviceBase,
-Variable,+,nfc_device_mf_ultralight,const NfcDeviceBase,
+Variable,-,nfc_device_mf_desfire,const NfcDeviceBase,
+Variable,-,nfc_device_mf_ultralight,const NfcDeviceBase,
 Variable,+,sequence_audiovisual_alert,const NotificationSequence,
 Variable,+,sequence_blink_blue_10,const NotificationSequence,
 Variable,+,sequence_blink_blue_100,const NotificationSequence,
@@ -3550,6 +3561,7 @@ Variable,+,sequence_single_vibro,const NotificationSequence,
 Variable,+,sequence_solid_yellow,const NotificationSequence,
 Variable,+,sequence_success,const NotificationSequence,
 Variable,+,simple_array_config_uint8_t,const SimpleArrayConfig,
+Variable,-,subghz_device_cc1101_int,const SubGhzDevice,
 Variable,+,subghz_device_cc1101_preset_2fsk_dev2_38khz_async_regs,const uint8_t[],
 Variable,+,subghz_device_cc1101_preset_2fsk_dev47_6khz_async_regs,const uint8_t[],
 Variable,+,subghz_device_cc1101_preset_gfsk_9_99kb_async_regs,const uint8_t[],
