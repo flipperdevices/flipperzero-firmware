@@ -628,6 +628,7 @@ static bool file_browser_view_input_callback(InputEvent* event, void* context) {
                                 ((model->item_idx - scroll_speed) + model->item_cnt) %
                                 model->item_cnt;
                         }
+
                         if(browser_is_list_load_required(model)) {
                             model->list_loading = true;
                             int32_t load_offset = CLAMP(
