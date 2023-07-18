@@ -38,13 +38,15 @@ typedef struct {
     volatile uint8_t insomnia;
     volatile uint8_t suppress_charge;
 
-    uint8_t gauge_initialized;
-    uint8_t charger_initialized;
+    bool gauge_ok;
+    bool charger_ok;
 } FuriHalPower;
 
 static volatile FuriHalPower furi_hal_power = {
     .insomnia = 0,
     .suppress_charge = 0,
+    .gauge_ok = false,
+    .charger_ok = false,
 };
 
 extern const BQ27220DMData furi_hal_power_gauge_data_memory[];
@@ -66,10 +68,11 @@ void furi_hal_power_init() {
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
     // Find and init gauge
     if(bq27220_init(&furi_hal_i2c_handle_power)) {
-        bq27220_apply_data_memory(&furi_hal_i2c_handle_power, furi_hal_power_gauge_data_memory);
+        furi_hal_power.gauge_ok = bq27220_apply_data_memory(
+            &furi_hal_i2c_handle_power, furi_hal_power_gauge_data_memory);
     }
     // Find and init charger
-    bq25896_init(&furi_hal_i2c_handle_power);
+    furi_hal_power.charger_ok = bq25896_init(&furi_hal_i2c_handle_power);
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 
     FURI_LOG_I(TAG, "Init OK");
@@ -89,7 +92,7 @@ bool furi_hal_power_gauge_is_ok() {
     } else {
         ret &= battery_status.BATTPRES;
         ret &= operation_status.INITCOMP;
-        // ret &= (cedv.design_cap == bq27220_get_design_capacity(&furi_hal_i2c_handle_power));
+        ret &= furi_hal_power.gauge_ok;
     }
 
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
