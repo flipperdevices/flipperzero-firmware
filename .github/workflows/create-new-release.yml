@@ -21,12 +21,12 @@ jobs:
     steps:
       - name: Verify new version format
         run: |
-          if [[ "${{ inputs.new_version }}" =~ ^(\d+)\.(\d+)\.(\d+)$ ]]; 
+          if [[ "${{ inputs.new_version }}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; 
           then 
             echo "New version looks okay";
-            exit 1
           else 
-            echo "Invalid version format"; 
+            echo "Invalid version format";
+            exit 1
           fi
 
   build:
