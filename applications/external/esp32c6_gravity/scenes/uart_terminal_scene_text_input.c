@@ -39,6 +39,9 @@ void uart_terminal_scene_text_input_on_enter(void* context) {
     case GRAVITY_PROBE:
         helpStr = (char*)SHORT_PROBE;
         break;
+    case GRAVITY_FUZZ:
+        helpStr = (char*)SHORT_FUZZ;
+        break;
     case GRAVITY_SNIFF:
         helpStr = (char*)SHORT_SNIFF;
         break;
@@ -50,6 +53,7 @@ void uart_terminal_scene_text_input_on_enter(void* context) {
         break;
     case GRAVITY_STALK:
         helpStr = (char*)SHORT_STALK;
+        break;
     case GRAVITY_AP_DOS:
         helpStr = (char*)SHORT_AP_DOS;
         break;
@@ -74,6 +78,9 @@ void uart_terminal_scene_text_input_on_enter(void* context) {
     case GRAVITY_SELECT:
         helpStr = (char*)SHORT_SELECT;
         break;
+    case GRAVITY_SELECTED:
+        helpStr = (char*)SHORT_SELECTED;
+        break;
     case GRAVITY_CLEAR:
         helpStr = (char*)SHORT_CLEAR;
         break;
@@ -82,6 +89,9 @@ void uart_terminal_scene_text_input_on_enter(void* context) {
         break;
     case GRAVITY_COMMANDS:
         helpStr = (char*)SHORT_COMMANDS;
+        break;
+    case GRAVITY_INFO:
+        helpStr = (char*)SHORT_INFO;
         break;
     default:
         helpStr = "Send command to UART";

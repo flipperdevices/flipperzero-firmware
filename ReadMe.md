@@ -53,7 +53,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Added more Captive Portal assets for Evil Portal (By roshanravan)](https://github.com/roshanravan)
 - Updated: SD Card Assets with Evil Portal/Marauder bin for ESP Flasher (From TalkingSasquach)
 - Updated: SD Card Assets with Black Magic bin for ESP Flasher (From TalkingSasquach)
-- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 - UL: Updated: [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) & [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) (Changes By Sil333033)
 - [Reorganized GPIO Apps #710 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/710)
 - Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
@@ -61,6 +60,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - OFW: [fbt: build target for faps #2888 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2888)
 - Updated: [[Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker)
 - Updated: [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)
+- Updated: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
+- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 
 <a name="release">
 
@@ -229,7 +230,7 @@ $ ./fbt dolphin_ext
 - [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Bomberduck (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
-- [Chess v1.4 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess v1.5 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)

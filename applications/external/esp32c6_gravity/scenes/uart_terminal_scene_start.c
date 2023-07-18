@@ -11,7 +11,7 @@ typedef enum { FOCUS_CONSOLE_END = 0, FOCUS_CONSOLE_START, FOCUS_CONSOLE_TOGGLE 
 #define SHOW_STOPSCAN_TIP (true)
 #define NO_TIP (false)
 
-#define MAX_OPTIONS (9)
+#define MAX_OPTIONS (12)
 typedef struct {
     const char* item_string;
     const char* options_menu[MAX_OPTIONS];
@@ -29,16 +29,43 @@ typedef struct {
 const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     {"Console", {"View", "Clear"}, 2, {"", "cls"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Beacon",
-     {"Status", "RickRoll", "Random", "Infinite", "target-ssids", "Off"},
+     {"Status", "target-ssids", "APs", "RickRoll", "Random", "Infinite", "Off"},
      6,
-     {"beacon", "beacon rickroll", "beacon random ", "beacon infinite", "beacon user", "beacon off"},
+     {"beacon",
+      "beacon target-ssids",
+      "beacon ap",
+      "beacon rickroll",
+      "beacon random ",
+      "beacon infinite",
+      "beacon off"},
      TOGGLE_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
     {"Probe",
-     {"Status", "Any", "target-ssids", "Off"},
+     {"Status", "Any", "target-ssids", "APs", "Off"},
      4,
-     {"probe", "probe any", "probe ssids", "probe off"},
+     {"probe", "probe any", "probe target-ssids", "probe ap", "probe off"},
+     NO_ARGS,
+     FOCUS_CONSOLE_END,
+     NO_TIP},
+    {"Fuzz",
+     {"Status",
+      "Off",
+      "Overflow Beacon",
+      "Overflow Request",
+      "Overflow Response",
+      "Malformed Beacon",
+      "Malformed Request",
+      "Malformed Response"},
+     8,
+     {"fuzz",
+      "fuzz off",
+      "fuzz beacon overflow",
+      "fuzz req overflow",
+      "fuzz resp overflow",
+      "fuzz beacon malformed",
+      "fuzz req malformed",
+      "fuzz resp malformed"},
      NO_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
@@ -84,11 +111,25 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
      INPUT_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
+    {"Selected",
+     {"STA", "AP", "STA+AP"},
+     3,
+     {"selected sta", "selected ap", "selected sta ap"},
+     NO_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP},
     {"Clear", {"STA", "AP"}, 2, {"clear sta", "clear ap"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Get",
-     {"SSID_LEN_MIN", "SSID_LEN_MAX", "DEFAULT_SSID_COUNT", "Channel", "MAC", "MAC_RAND"},
-     6,
-     {"get ssid_len_min",
+     {"PACKET_EXPIRY",
+      "SSID_LEN_MIN",
+      "SSID_LEN_MAX",
+      "DEFAULT_SSID_COUNT",
+      "Channel",
+      "MAC",
+      "MAC_RAND"},
+     7,
+     {"get expiry",
+      "get ssid_len_min",
       "get ssid_len_max",
       "get default_ssid_count",
       "get channel",
@@ -98,9 +139,18 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
      FOCUS_CONSOLE_END,
      NO_TIP},
     {"Set",
-     {"SSID_LEN_MIN", "SSID_LEN_MAX", "DEFAULT_SSID_COUNT", "Channel", "MAC", "MAC_RAND"},
-     6,
-     {"set ssid_len_min ",
+     {"PACKET_EXPIRY",
+      "ATTACK_MILLIS",
+      "SSID_LEN_MIN",
+      "SSID_LEN_MAX",
+      "DEFAULT_SSID_COUNT",
+      "Channel",
+      "MAC",
+      "MAC_RAND"},
+     8,
+     {"set expiry ",
+      "set attack_millis ",
+      "set ssid_len_min ",
       "set ssid_len_max ",
       "set default_ssid_count ",
       "set channel ",
@@ -116,16 +166,22 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
       "Frame STA",
       "Device STA",
       "Spoof STA",
+      "Frame APs",
+      "Device APs",
+      "Spoof APs",
       "Frame B'Cast",
       "Device B'Cast",
       "Spoof B'Cast"},
-     9,
+     12,
      {"deauth",
       "deauth ",
       "deauth off",
       "deauth frame sta",
       "deauth device sta",
       "deauth spoof sta",
+      "deauth frame ap",
+      "deauth device ap",
+      "deauth spoof ap",
       "deauth frame broadcast",
       "deauth device broadcast",
       "deauth spoof broadcast"},
@@ -153,13 +209,19 @@ const UART_TerminalItem items[NUM_MENU_ITEMS] = {
      NO_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
-    {"Help", {"Commands", "Help"}, 2, {"commands", "help"}, NO_ARGS, FOCUS_CONSOLE_START, NO_TIP},
+    {"Help",
+     {"Info <cmd>", "Get Started", "Commands", "About", "Help"},
+     5,
+     {"info ", "GET_STARTED", "commands", "ABOUT", "help"},
+     TOGGLE_ARGS,
+     FOCUS_CONSOLE_START,
+     NO_TIP},
 };
 
 char* strToken(char* cmdLine, char sep, int tokenNum) {
     int i;
     int tokenCount = 0;
-    for(i = 0; i < strlen(cmdLine) && tokenCount != tokenNum; ++i) {
+    for(i = 0; i < (int)strlen(cmdLine) && tokenCount != tokenNum; ++i) {
         if(cmdLine[i] == sep) {
             ++tokenCount;
         }
@@ -222,6 +284,8 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
         app->gravityCommand = GRAVITY_TARGET_SSIDS;
     } else if(!strcmp(cmd, "probe")) {
         app->gravityCommand = GRAVITY_PROBE;
+    } else if(!strcmp(cmd, "fuzz")) {
+        app->gravityCommand = GRAVITY_FUZZ;
     } else if(!strcmp(cmd, "sniff")) {
         app->gravityCommand = GRAVITY_SNIFF;
     } else if(!strcmp(cmd, "deauth")) {
@@ -252,6 +316,8 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
         app->gravityCommand = GRAVITY_HANDSHAKE;
     } else if(!strcmp(cmd, "commands")) {
         app->gravityCommand = GRAVITY_COMMANDS;
+    } else if(!strcmp(cmd, "info")) {
+        app->gravityCommand = GRAVITY_INFO;
     } else {
         app->gravityCommand = GRAVITY_NONE;
     }
