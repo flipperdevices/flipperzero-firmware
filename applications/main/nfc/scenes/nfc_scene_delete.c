@@ -31,6 +31,8 @@ void nfc_scene_delete_on_enter(void* context) {
         nfc->widget, 64, 24, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));
 
     NfcProtocol protocol = nfc->dev->dev_data.protocol;
+    const char* nfc_type = "NFC-A";
+
     if(protocol == NfcDeviceProtocolEMV) {
         furi_string_set(temp_str, "EMV bank card");
     } else if(protocol == NfcDeviceProtocolMifareUl) {
@@ -41,12 +43,15 @@ void nfc_scene_delete_on_enter(void* context) {
         furi_string_set(temp_str, "MIFARE DESFire");
     } else if(protocol == NfcDeviceProtocolFelica) {
         furi_string_set(temp_str, "FeliCa");
+    } else if(protocol == NfcDeviceProtocolNfcV) {
+        furi_string_set(temp_str, "ISO15693 tag");
+        nfc_type = "NFC-V";
     } else {
         furi_string_set(temp_str, "Unknown ISO tag");
     }
     widget_add_string_element(
         nfc->widget, 64, 34, AlignCenter, AlignTop, FontSecondary, furi_string_get_cstr(temp_str));
-    widget_add_string_element(nfc->widget, 64, 44, AlignCenter, AlignTop, FontSecondary, "NFC-A");
+    widget_add_string_element(nfc->widget, 64, 44, AlignCenter, AlignTop, FontSecondary, nfc_type);
     furi_string_free(temp_str);
 
     view_dispatcher_switch_to_view(nfc->view_dispatcher, NfcViewWidget);

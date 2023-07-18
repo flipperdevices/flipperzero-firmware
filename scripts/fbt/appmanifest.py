@@ -1,7 +1,8 @@
 import os
+import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, ClassVar, List, Optional, Tuple, Union
 
 
 class FlipperManifestException(Exception):
@@ -17,12 +18,15 @@ class FlipperAppType(Enum):
     SETTINGS = "Settings"
     STARTUP = "StartupHook"
     EXTERNAL = "External"
+    MENUEXTERNAL = "MenuExternal"
     METAPACKAGE = "Package"
     PLUGIN = "Plugin"
 
 
 @dataclass
 class FlipperApplication:
+    APP_ID_REGEX: ClassVar[re.Pattern] = re.compile(r"^[a-z0-9_]+$")
+
     @dataclass
     class ExternallyBuiltFile:
         path: str
@@ -56,7 +60,7 @@ class FlipperApplication:
 
     # .fap-specific
     sources: List[str] = field(default_factory=lambda: ["*.c*"])
-    fap_version: Tuple[int] = field(default_factory=lambda: (0, 1))
+    fap_version: Union[str, Tuple[int]] = "0.1"
     fap_icon: Optional[str] = None
     fap_libs: List[str] = field(default_factory=list)
     fap_category: str = ""
@@ -84,6 +88,17 @@ class FlipperApplication:
     def __post_init__(self):
         if self.apptype == FlipperAppType.PLUGIN:
             self.stack_size = 0
+        if not self.APP_ID_REGEX.match(self.appid):
+            raise FlipperManifestException(
+                f"Invalid appid '{self.appid}'. Must match regex '{self.APP_ID_REGEX}'"
+            )
+        if isinstance(self.fap_version, str):
+            try:
+                self.fap_version = tuple(int(v) for v in self.fap_version.split("."))
+            except ValueError:
+                raise FlipperManifestException(
+                    f"Invalid version string '{self.fap_version}'. Must be in the form 'major.minor'"
+                )
 
 
 class AppManager:
@@ -199,7 +214,7 @@ class AppBuildset:
         appmgr: AppManager,
         appnames: List[str],
         hw_target: str,
-        message_writer: Callable = None,
+        message_writer: Callable | None = None,
     ):
         self.appmgr = appmgr
         self.appnames = set(appnames)
@@ -310,7 +325,16 @@ class AppBuildset:
     def get_sdk_headers(self):
         sdk_headers = []
         for app in self.apps:
-            sdk_headers.extend([app._appdir.File(header) for header in app.sdk_headers])
+            sdk_headers.extend(
+                [
+                    src._appdir.File(header)
+                    for src in [
+                        app,
+                        *(plugin for plugin in app._plugins),
+                    ]
+                    for header in src.sdk_headers
+                ]
+            )
         return sdk_headers
 
     def get_apps_of_type(self, apptype: FlipperAppType, all_known: bool = False):
@@ -339,13 +363,24 @@ class AppBuildset:
 
 class ApplicationsCGenerator:
     APP_TYPE_MAP = {
-        FlipperAppType.SERVICE: ("FlipperApplication", "FLIPPER_SERVICES"),
-        FlipperAppType.SYSTEM: ("FlipperApplication", "FLIPPER_SYSTEM_APPS"),
-        FlipperAppType.APP: ("FlipperApplication", "FLIPPER_APPS"),
-        FlipperAppType.DEBUG: ("FlipperApplication", "FLIPPER_DEBUG_APPS"),
-        FlipperAppType.SETTINGS: ("FlipperApplication", "FLIPPER_SETTINGS_APPS"),
-        FlipperAppType.STARTUP: ("FlipperOnStartHook", "FLIPPER_ON_SYSTEM_START"),
+        FlipperAppType.SERVICE: ("FlipperInternalApplication", "FLIPPER_SERVICES"),
+        FlipperAppType.SYSTEM: ("FlipperInternalApplication", "FLIPPER_SYSTEM_APPS"),
+        FlipperAppType.APP: ("FlipperInternalApplication", "FLIPPER_APPS"),
+        FlipperAppType.DEBUG: ("FlipperInternalApplication", "FLIPPER_DEBUG_APPS"),
+        FlipperAppType.SETTINGS: (
+            "FlipperInternalApplication",
+            "FLIPPER_SETTINGS_APPS",
+        ),
+        FlipperAppType.STARTUP: (
+            "FlipperInternalOnStartHook",
+            "FLIPPER_ON_SYSTEM_START",
+        ),
     }
+
+    APP_EXTERNAL_TYPE = (
+        "FlipperExternalApplication",
+        "FLIPPER_EXTERNAL_APPS",
+    )
 
     def __init__(self, buildset: AppBuildset, autorun_app: str = ""):
         self.buildset = buildset
@@ -365,7 +400,18 @@ class ApplicationsCGenerator:
      .appid = "{app.appid}", 
      .stack_size = {app.stack_size},
      .icon = {f"&{app.icon}" if app.icon else "NULL"},
-     .flags = {'|'.join(f"FlipperApplicationFlag{flag}" for flag in app.flags)} }}"""
+     .flags = {'|'.join(f"FlipperInternalApplicationFlag{flag}" for flag in app.flags)} }}"""
+
+    def get_external_app_descr(self, app: FlipperApplication):
+        app_path = "/ext/apps"
+        if app.fap_category:
+            app_path += f"/{app.fap_category}"
+        app_path += f"/{app.appid}.fap"
+        return f"""
+    {{
+     .name = "{app.name}",
+     .icon = {f"&{app.icon}" if app.icon else "NULL"},
+     .path = "{app_path}" }}"""
 
     def generate(self):
         contents = [
@@ -394,8 +440,15 @@ class ApplicationsCGenerator:
             contents.extend(
                 [
                     self.get_app_ep_forward(archive_app[0]),
-                    f"const FlipperApplication FLIPPER_ARCHIVE = {self.get_app_descr(archive_app[0])};",
+                    f"const FlipperInternalApplication FLIPPER_ARCHIVE = {self.get_app_descr(archive_app[0])};",
                 ]
             )
+
+        entry_type, entry_block = self.APP_EXTERNAL_TYPE
+        external_apps = self.buildset.get_apps_of_type(FlipperAppType.MENUEXTERNAL)
+        contents.append(f"const {entry_type} {entry_block}[] = {{")
+        contents.append(",\n".join(map(self.get_external_app_descr, external_apps)))
+        contents.append("};")
+        contents.append(f"const size_t {entry_block}_COUNT = COUNT_OF({entry_block});")
 
         return "\n".join(contents)

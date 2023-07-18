@@ -4,6 +4,10 @@
 #include <m-array.h>
 #include <m-dict.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FELICA_MRT_TIME_CONSTANT_US 302
 #define FELICA_MRT_MIN_ALLOWED_MS 10
 
@@ -548,3 +552,7 @@ void felica_area_clear(FelicaArea* area);
 void felica_node_clear(FelicaNode* node);
 void felica_reset(FelicaData* data);
 void felica_clear(FelicaData* data);
+
+#ifdef __cplusplus
+}
+#endif

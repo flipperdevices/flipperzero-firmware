@@ -6,6 +6,7 @@
 #include <furi_hal_power.h>
 #include <furi_hal_rtc.h>
 #include <furi_hal_debug.h>
+#include <furi_hal_bt.h>
 #include <stdio.h>
 
 #include <FreeRTOS.h>
@@ -35,7 +36,7 @@ PLACE_IN_SECTION("MB_MEM2") uint32_t __furi_check_registers[13] = {0};
  * 
  */
 #define RESTORE_REGISTERS_AND_HALT_MCU(debug)           \
-    register const bool r0 asm("r0") = debug;           \
+    register bool r0 asm("r0") = debug;                 \
     asm volatile("cbnz  r0, with_debugger%=         \n" \
                  "ldr   r12, =__furi_check_registers\n" \
                  "ldm   r12, {r0-r11}               \n" \
@@ -87,6 +88,20 @@ static void __furi_print_stack_info() {
     __furi_put_uint32_as_text(uxTaskGetStackHighWaterMark(NULL) * 4);
 }
 
+static void __furi_print_bt_stack_info() {
+    const FuriHalBtHardfaultInfo* fault_info = furi_hal_bt_get_hardfault_info();
+    if(fault_info == NULL) {
+        furi_hal_console_puts("\r\n\tcore2: not faulted");
+    } else {
+        furi_hal_console_puts("\r\n\tcore2: hardfaulted.\r\n\tPC: ");
+        __furi_put_uint32_as_hex(fault_info->source_pc);
+        furi_hal_console_puts("\r\n\tLR: ");
+        __furi_put_uint32_as_hex(fault_info->source_lr);
+        furi_hal_console_puts("\r\n\tSP: ");
+        __furi_put_uint32_as_hex(fault_info->source_sp);
+    }
+}
+
 static void __furi_print_heap_info() {
     furi_hal_console_puts("\r\n\t     heap total: ");
     __furi_put_uint32_as_text(xPortGetTotalHeapSize());
@@ -136,6 +151,7 @@ FURI_NORETURN void __furi_crash() {
         __furi_print_stack_info();
     }
     __furi_print_heap_info();
+    __furi_print_bt_stack_info();
 
 #ifndef FURI_DEBUG
     // Check if debug enabled by DAP
@@ -150,7 +166,11 @@ FURI_NORETURN void __furi_crash() {
         RESTORE_REGISTERS_AND_HALT_MCU(true);
 #ifndef FURI_DEBUG
     } else {
-        furi_hal_rtc_set_fault_data((uint32_t)__furi_check_message);
+        uint32_t ptr = (uint32_t)__furi_check_message;
+        if(ptr < FLASH_BASE || ptr > (FLASH_BASE + FLASH_SIZE)) {
+            ptr = (uint32_t) "Check serial logs";
+        }
+        furi_hal_rtc_set_fault_data(ptr);
         furi_hal_console_puts("\r\nRebooting system.\r\n");
         furi_hal_console_puts("\033[0m\r\n");
         furi_hal_power_reset();
