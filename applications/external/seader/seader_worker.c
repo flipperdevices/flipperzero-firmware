@@ -378,10 +378,13 @@ bool unpack_pacs(
             FURI_LOG_D(TAG, "Received pac: %s", pacDebug);
 
             memset(display, 0, sizeof(display));
-            for(uint8_t i = 0; i < sizeof(seader_credential->sio); i++) {
-                snprintf(display + (i * 2), sizeof(display), "%02x", seader_credential->sio[i]);
+            if(seader_credential->sio[0] == 0x30) {
+                for(uint8_t i = 0; i < sizeof(seader_credential->sio); i++) {
+                    snprintf(
+                        display + (i * 2), sizeof(display), "%02x", seader_credential->sio[i]);
+                }
+                FURI_LOG_D(TAG, "SIO %s", display);
             }
-            FURI_LOG_D(TAG, "SIO %s", display);
         }
 
         if(pac->size <= sizeof(seader_credential->credential)) {
@@ -544,8 +547,22 @@ bool iso14443aTransmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len)
     return false;
 }
 
-uint8_t readBlock6[] = {0x06, 0x06, 0x45, 0x56};
-uint8_t readBlock9[] = {0x06, 0x09, 0xB2, 0xAE};
+uint8_t read4Block6[] = {0x06, 0x06, 0x45, 0x56};
+uint8_t read4Block9[] = {0x06, 0x09, 0xB2, 0xAE};
+uint8_t read4Block10[] = {0x06, 0x0A, 0x29, 0x9C};
+uint8_t read4Block13[] = {0x06, 0x0D, 0x96, 0xE8};
+
+void handleSIO(uint8_t* buffer, size_t len, uint8_t* rxBuffer, SeaderCredential* credential) {
+    if(memcmp(buffer, read4Block6, len) == 0 && rxBuffer[0] == 0x30) {
+        memcpy(credential->sio, rxBuffer, 32);
+    } else if(memcmp(buffer, read4Block10, len) == 0 && rxBuffer[0] == 0x30) {
+        memcpy(credential->sio, rxBuffer, 32);
+    } else if(memcmp(buffer, read4Block9, len) == 0) {
+        memcpy(credential->sio + 32, rxBuffer + 8, 24);
+    } else if(memcmp(buffer, read4Block13, len) == 0) {
+        memcpy(credential->sio + 32, rxBuffer + 8, 24);
+    }
+}
 
 bool iso15693Transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
@@ -565,11 +582,7 @@ bool iso15693Transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) 
             snprintf(display + (i * 2), sizeof(display), "%02x", rxBuffer[i]);
         }
         // FURI_LOG_D(TAG, "Result %d %s", recvLen, display);
-        if(memcmp(buffer, readBlock6, len) == 0) {
-            memcpy(credential->sio, rxBuffer, 32);
-        } else if(memcmp(buffer, readBlock9, len) == 0) {
-            memcpy(credential->sio + 32, rxBuffer + 8, 24);
-        }
+        handleSIO(buffer, len, rxBuffer, credential);
 
         sendNFCRx(seader_uart, rxBuffer, recvLen);
     } else if(ret == FuriHalNfcReturnCrc) {
@@ -578,14 +591,11 @@ bool iso15693Transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) 
             snprintf(display + (i * 2), sizeof(display), "%02x", rxBuffer[i]);
         }
         // FURI_LOG_D(TAG, "[CRC error] Result %d %s", recvLen, display);
-        if(memcmp(buffer, readBlock6, len) == 0) {
-            memcpy(credential->sio, rxBuffer, 32);
-        } else if(memcmp(buffer, readBlock9, len) == 0) {
-            memcpy(credential->sio + 32, rxBuffer + 8, 24);
-        }
+        handleSIO(buffer, len, rxBuffer, credential);
 
         sendNFCRx(seader_uart, rxBuffer, recvLen);
 
+        // Act as if it was OK
         return true;
     } else {
         FURI_LOG_E(TAG, "furi_hal_nfc_ll_txrx Error %d", ret);

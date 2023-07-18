@@ -34,7 +34,7 @@ void seader_scene_card_menu_on_enter(void* context) {
         seader_scene_card_menu_submenu_callback,
         seader);
     if(seader->is_debug_enabled) {
-        if(credential->sio[0] != 0) {
+        if(credential->sio[0] == 0x30) {
             submenu_add_item(
                 submenu,
                 "Save SR",

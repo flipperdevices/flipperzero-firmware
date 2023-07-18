@@ -44,7 +44,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Evil Portal Asset: Microsoft Login Page (By roshanravan) and Renames for Evil Portal Assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75876e84dc5deb130210da8283f36ef1b1858019
 - [New Passport Profile Pic - Deer (Added By RogueMaster, Image By wrenchathome)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6fdcbe99ce63cc3a4cce8275281fd9b9e9db6578)
 - [Evil Portal Asset: Twitch & PornHub Login Pages (By roshanravan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3431fe56893c69463f6a36e1dc8c996dd358420d)
-- Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 - Added: [YRM100 UHF RFID (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`  Not Tested
 - Added: [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
 - Updated: [Chess v1.4 (By xtruan)](https://github.com/xtruan/flipper-chess)
@@ -56,6 +55,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: SD Card Assets with Black Magic bin for ESP Flasher (From TalkingSasquach)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 - UL: Updated: [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) & [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) (Changes By Sil333033)
+- [Reorganized GPIO Apps #710 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/710)
+- Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 

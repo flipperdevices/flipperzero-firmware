@@ -72,7 +72,7 @@ void seader_scene_credential_info_on_enter(void* context) {
         FontSecondary,
         furi_string_get_cstr(credential_str));
 
-    if(credential->sio[0] != 0) {
+    if(credential->sio[0] == 0x30) {
         furi_string_set(sio_str, "+SIO");
         widget_add_string_element(
             widget, 64, 48, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(sio_str));

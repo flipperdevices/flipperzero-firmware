@@ -21,6 +21,7 @@ void seader_scene_read_card_success_on_enter(void* context) {
     FuriString* type_str = furi_string_alloc();
     FuriString* bitlength_str = furi_string_alloc();
     FuriString* credential_str = furi_string_alloc();
+    FuriString* sio_str = furi_string_alloc();
 
     dolphin_deed(DolphinDeedNfcReadSuccess);
 
@@ -29,11 +30,14 @@ void seader_scene_read_card_success_on_enter(void* context) {
 
     furi_string_set(credential_str, "");
     furi_string_set(bitlength_str, "");
+    furi_string_set(sio_str, "");
     if(credential->bit_length > 0) {
         furi_string_cat_printf(bitlength_str, "%d bit", credential->bit_length);
         furi_string_cat_printf(credential_str, "0x%llX", credential->credential);
 
-        if(credential->type == SeaderCredentialType14A) {
+        if(credential->type == SeaderCredentialTypeNone) {
+            furi_string_set(type_str, "None");
+        } else if(credential->type == SeaderCredentialType14A) {
             furi_string_set(type_str, "14443A");
         } else if(credential->type == SeaderCredentialTypePicopass) {
             furi_string_set(type_str, "Picopass");
@@ -68,10 +72,16 @@ void seader_scene_read_card_success_on_enter(void* context) {
         AlignCenter,
         FontSecondary,
         furi_string_get_cstr(credential_str));
+    if(credential->sio[0] == 0x30) {
+        furi_string_set(sio_str, "+SIO");
+        widget_add_string_element(
+            widget, 64, 48, AlignCenter, AlignCenter, FontSecondary, furi_string_get_cstr(sio_str));
+    }
 
     furi_string_free(credential_str);
     furi_string_free(bitlength_str);
     furi_string_free(type_str);
+    furi_string_free(sio_str);
 
     view_dispatcher_switch_to_view(seader->view_dispatcher, SeaderViewWidget);
 }
