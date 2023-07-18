@@ -33,9 +33,6 @@ void nfc_maker_scene_menu_on_enter(void* context) {
     submenu_add_item(
         submenu, "Plain URL", NfcMakerSceneUrl, nfc_maker_scene_menu_submenu_callback, app);
 
-    submenu_add_item(
-        submenu, "WiFi Login", NfcMakerSceneWifi, nfc_maker_scene_menu_submenu_callback, app);
-
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(app->scene_manager, NfcMakerSceneMenu));
 

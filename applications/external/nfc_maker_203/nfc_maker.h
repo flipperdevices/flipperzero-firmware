@@ -19,23 +19,6 @@
 #include "strnlen.h"
 
 #define TEXT_INPUT_LEN 248
-#define WIFI_INPUT_LEN 90
-
-typedef enum {
-    WifiAuthenticationOpen = 0x01,
-    WifiAuthenticationWpa2Personal = 0x20,
-    WifiAuthenticationWpa2Enterprise = 0x10,
-    WifiAuthenticationWpaPersonal = 0x02,
-    WifiAuthenticationWpaEnterprise = 0x08,
-    WifiAuthenticationShared = 0x04,
-} WifiAuthentication;
-
-typedef enum {
-    WifiEncryptionAes = 0x08,
-    WifiEncryptionWep = 0x02,
-    WifiEncryptionTkip = 0x04,
-    WifiEncryptionNone = 0x01,
-} WifiEncryption;
 
 typedef struct {
     Gui* gui;
@@ -48,7 +31,6 @@ typedef struct {
 
     uint8_t mac_buf[GAP_MAC_ADDR_SIZE];
     char text_buf[TEXT_INPUT_LEN];
-    char pass_buf[WIFI_INPUT_LEN];
     char name_buf[TEXT_INPUT_LEN];
 } NfcMaker;
 
