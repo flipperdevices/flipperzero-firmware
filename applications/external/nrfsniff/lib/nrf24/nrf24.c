@@ -519,12 +519,10 @@ uint8_t nrf24_find_channel(
     return ch;
 }
 
-bool nrf24_checkconnected(FuriHalSpiBusHandle* handle) {
+bool nrf24_check_connected(FuriHalSpiBusHandle* handle) {
     uint8_t status = nrf24_status(handle);
 
-    // FURI_LOG_I("aa", "status: %02x", status);
-
-    if(status == 0x0e || status == 0x40 || status == 0x42 || status == 0x02) {
+    if(status != 0x00) {
         return true;
     } else {
         return false;
