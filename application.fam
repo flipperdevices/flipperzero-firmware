@@ -11,4 +11,5 @@ App(
     fap_version="1.0",
     fap_description="Rock Paper Scissor app",
     fap_author="@benwoo1110",
+    fap_weburl="https://github.com/benwoo1110/rps-FlipperZero",
 )
