@@ -56,19 +56,6 @@ void mf_user_dict_get_key_str(MfUserDict* instance, uint32_t index, FuriString* 
     }
 }
 
-bool mf_user_dict_add_key(MfUserDict* instance, const MfClassicKey* key) {
-    furi_assert(instance);
-    furi_assert(key);
-
-    MfDict* dict = mf_dict_alloc(MfDictTypeUser);
-    furi_assert(dict);
-
-    bool key_add_success = mf_dict_add_key(dict, key);
-    mf_dict_free(dict);
-
-    return key_add_success;
-}
-
 bool mf_user_dict_delete_key(MfUserDict* instance, uint32_t index) {
     furi_assert(instance);
     furi_assert(index < instance->keys_num);
@@ -85,17 +72,4 @@ bool mf_user_dict_delete_key(MfUserDict* instance, uint32_t index) {
     }
 
     return key_delete_success;
-}
-
-bool mf_user_dict_is_key_present(MfUserDict* instance, const MfClassicKey* key) {
-    furi_assert(instance);
-    furi_assert(key);
-
-    MfDict* dict = mf_dict_alloc(MfDictTypeUser);
-    furi_assert(dict);
-
-    bool is_key_present = mf_dict_is_key_present(dict, key);
-    mf_dict_free(dict);
-
-    return is_key_present;
 }

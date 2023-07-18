@@ -15,6 +15,8 @@ typedef enum {
     MfDictTypeUser,
     MfDictTypeSystem,
     MfDictTypeUnitTest,
+
+    MfDictTypeNum,
 } MfDictType;
 
 typedef struct MfDict MfDict;
@@ -53,55 +55,9 @@ bool mf_dict_rewind(MfDict* dict);
 
 bool mf_dict_is_key_present(MfDict* dict, const MfClassicKey* key);
 
-bool mf_dict_is_key_present_str(MfDict* dict, FuriString* key);
-
 bool mf_dict_get_next_key(MfDict* dict, MfClassicKey* key);
 
-bool mf_dict_get_next_key_str(MfDict* dict, FuriString* key);
-
-/** Get key at target offset as uint64_t
- *
- * @param      dict    MfDict instance
- * @param[out] key     Pointer to the uint64_t key
- * @param[in]  target  Target offset from current position
- *
- * @return     true on success
- */
-bool mf_dict_get_key_at_index(MfDict* dict, uint64_t* key, uint32_t target);
-
-/** Get key at target offset as string_t
- *
- * @param      dict    MfDict instance
- * @param[out] key     Found key destination buffer
- * @param[in]  target  Target offset from current position
- *
- * @return     true on success
- */
-bool mf_dict_get_key_at_index_str(MfDict* dict, FuriString* key, uint32_t target);
-
 bool mf_dict_add_key(MfDict* dict, const MfClassicKey* key);
-
-/** Add string representation of the key
- *
- * @param      dict  MfDict instance
- * @param[in]  key   String representation of the key
- *
- * @return     true on success
- */
-bool mf_dict_add_key_str(MfDict* dict, FuriString* key);
-
-bool mf_dict_find_index(MfDict* dict, uint8_t* key, uint32_t* target);
-
-bool mf_dict_find_index_str(MfDict* dict, FuriString* key, uint32_t* target);
-
-/** Delete key at target offset
- *
- * @param      dict    MfDict instance
- * @param[in]  target  Target offset from current position
- *
- * @return     true on success
- */
-bool mf_dict_delete_index(MfDict* dict, uint32_t target);
 
 bool mf_dict_delete_key(MfDict* dict, const MfClassicKey* key);
 
