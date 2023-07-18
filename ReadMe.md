@@ -63,7 +63,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
 - Updated: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) (Removed Broken Wifi Elements (By RogueMaster))
-- SubGHz switched to internal to test RAM issues
+- Sub-GHz: [Switched to internal to test RAM issues; it is temporarily moved on main menu to after CFW Settings (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1cd6d2d61532ffe575a7e813640971ff5ff78d37)
 
 <a name="release">
 
