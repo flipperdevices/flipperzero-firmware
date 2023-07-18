@@ -3,6 +3,8 @@
 #include "bq27220_reg.h"
 #include "bq27220_data_memory.h"
 
+_Static_assert(sizeof(BQ27220GaugingConfig) == 2, "Incorrect structure size");
+
 #include <furi.h>
 #include <stdbool.h>
 
@@ -47,7 +49,7 @@ static bool bq27220_set_parameter(
         buffer[1] = (address >> 8) & 0xFF;
 
         for(size_t i = 0; i < size; i++) {
-            buffer[1 + size - i] = (value >> i * 8) & 0xFF;
+            buffer[1 + size - i] = (value >> (i * 8)) & 0xFF;
         }
 
         if(!furi_hal_i2c_write_mem(
@@ -61,12 +63,22 @@ static bool bq27220_set_parameter(
             break;
         }
 
-        FURI_LOG_I(
-            TAG,
-            "Data at 0x%04x: 0x%08lx->0x%08lx",
-            address,
-            *(uint32_t*)&(old_data[0]),
-            *(uint32_t*)&(buffer[2]));
+        if (*(uint32_t*)&(old_data[0]) == *(uint32_t*)&(buffer[2])) {
+            FURI_LOG_I( //-V641
+                TAG,
+                "Data at 0x%04x: 0x%08lx==0x%08lx",
+                address,
+                *(uint32_t*)&(old_data[0]),
+                *(uint32_t*)&(buffer[2]));
+            break;
+        } else {
+            FURI_LOG_W( //-V641
+                TAG,
+                "Data at 0x%04x: 0x%08lx!=0x%08lx",
+                address,
+                *(uint32_t*)&(old_data[0]),
+                *(uint32_t*)&(buffer[2]));
+        }
 
         if(!furi_hal_i2c_write_mem(
                handle,
@@ -135,6 +147,7 @@ bool bq27220_apply_data_memory(FuriHalI2cBusHandle* handle, const BQ27220DMData*
     // Process data memory records
     while(data_memory->type != BQ27220DMTypeEnd) {
         if(data_memory->type == BQ27220DMTypeWait) {
+            furi_delay_us(data_memory->value.u32);
         } else if(data_memory->type == BQ27220DMTypeU8) {
             bq27220_set_parameter(handle, data_memory->address, data_memory->value.u8, 1);
         } else if(data_memory->type == BQ27220DMTypeU16) {
@@ -143,6 +156,14 @@ bool bq27220_apply_data_memory(FuriHalI2cBusHandle* handle, const BQ27220DMData*
             bq27220_set_parameter(handle, data_memory->address, data_memory->value.u32, 4);
         } else if(data_memory->type == BQ27220DMTypeF32) {
             bq27220_set_parameter(handle, data_memory->address, data_memory->value.u32, 4);
+        } else if(data_memory->type == BQ27220DMTypePtrU8) {
+            bq27220_set_parameter(handle, data_memory->address, *(uint8_t*)data_memory->value.u32, 1);
+        } else if(data_memory->type == BQ27220DMTypePtrU16) {
+            bq27220_set_parameter(handle, data_memory->address, *(uint16_t*)data_memory->value.u32, 2);
+        } else if(data_memory->type == BQ27220DMTypePtrU32) {
+            bq27220_set_parameter(handle, data_memory->address, *(uint32_t*)data_memory->value.u32, 4);
+        } else if(data_memory->type == BQ27220DMTypePtrF32) {
+            bq27220_set_parameter(handle, data_memory->address, *(uint32_t*)data_memory->value.u32, 4);
         }
         data_memory++;
     }
