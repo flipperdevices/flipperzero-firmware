@@ -34,7 +34,11 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
 
     bool consumed = false;
     if(event.type == SceneManagerEventTypeCustom) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        scene_manager_set_scene_state(
+            instance->scene_manager, NfcSceneMfClassicKeysDelete, event.event);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicKeysDelete);
+    } else if(event.type == SceneManagerEventTypeBack) {
+        mf_user_dict_free(instance->mf_user_dict);
     }
 
     return consumed;
@@ -43,6 +47,5 @@ bool nfc_scene_mf_classic_keys_list_on_event(void* context, SceneManagerEvent ev
 void nfc_scene_mf_classic_keys_list_on_exit(void* context) {
     NfcApp* instance = context;
 
-    mf_user_dict_free(instance->mf_user_dict);
     submenu_reset(instance->submenu);
 }

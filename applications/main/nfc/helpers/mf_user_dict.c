@@ -50,8 +50,9 @@ void mf_user_dict_get_key_str(MfUserDict* instance, uint32_t index, FuriString* 
     furi_assert(instance->keys_arr);
 
     furi_string_reset(str);
-    for(size_t i = sizeof(MfClassicKey); i > 0; i--) {
-        furi_string_cat_printf(str, "%02X", instance->keys_arr[index].data[i]);
+    for(size_t i = 0; i < sizeof(MfClassicKey); i++) {
+        furi_string_cat_printf(
+            str, "%02X", instance->keys_arr[index].data[sizeof(MfClassicKey) - 1 - i]);
     }
 }
 
@@ -78,6 +79,10 @@ bool mf_user_dict_delete_key(MfUserDict* instance, uint32_t index) {
 
     bool key_delete_success = mf_dict_delete_key(dict, &instance->keys_arr[index]);
     mf_dict_free(dict);
+
+    if(key_delete_success) {
+        instance->keys_num--;
+    }
 
     return key_delete_success;
 }

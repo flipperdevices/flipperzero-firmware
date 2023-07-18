@@ -72,7 +72,7 @@ bool nfc_scene_mf_classic_keys_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         if(event.event == GuiButtonTypeCenter) {
-            scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicKeysAdd);
             consumed = true;
         } else if(event.event == GuiButtonTypeRight) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneMfClassicKeysList);

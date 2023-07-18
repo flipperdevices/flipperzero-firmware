@@ -358,6 +358,8 @@ bool mf_dict_delete_key(MfDict* dict, const MfClassicKey* key) {
     while(!key_removed) {
         if(!mf_dict_get_next_key(dict, &temp_key)) break;
         if(memcmp(temp_key.data, key->data, sizeof(MfClassicKey)) == 0) {
+            stream_seek(dict->stream, -NFC_MF_CLASSIC_KEY_LEN, StreamOffsetFromCurrent);
+            if(!stream_delete(dict->stream, NFC_MF_CLASSIC_KEY_LEN)) break;
             key_removed = true;
         }
     }

@@ -38,6 +38,9 @@ ADD_SCENE(nfc, mf_classic_mfkey_complete, MfClassicMfkeyComplete)
 
 ADD_SCENE(nfc, mf_classic_keys, MfClassicKeys)
 ADD_SCENE(nfc, mf_classic_keys_list, MfClassicKeysList)
+ADD_SCENE(nfc, mf_classic_keys_delete, MfClassicKeysDelete)
+ADD_SCENE(nfc, mf_classic_keys_add, MfClassicKeysAdd)
+ADD_SCENE(nfc, mf_classic_keys_warn_duplicate, MfClassicKeysWarnDuplicate)
 
 ADD_SCENE(nfc, set_type, SetType)
 ADD_SCENE(nfc, set_sak, SetSak)
