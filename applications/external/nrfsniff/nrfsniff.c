@@ -5,13 +5,14 @@
 #include <notification/notification_messages.h>
 #include <stdlib.h>
 #include <dolphin/dolphin.h>
+#include <storage/storage.h>
 
 #include <nrf24.h>
 #include <toolbox/stream/file_stream.h>
 
 #define LOGITECH_MAX_CHANNEL 85
 #define COUNT_THRESHOLD 2
-#define DEFAULT_SAMPLE_TIME 8000
+#define DEFAULT_SAMPLE_TIME 4000
 #define MAX_ADDRS 100
 #define MAX_CONFIRMED 32
 
@@ -348,6 +349,7 @@ int32_t nrfsniff_app(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("nrfsniff"), NRFSNIFF_APP_PATH_FOLDER);
     storage_common_mkdir(storage, NRFSNIFF_APP_PATH_FOLDER);
 
     PluginEvent event;
@@ -394,30 +396,19 @@ int32_t nrfsniff_app(void* p) {
                         break;
                     case InputKeyOk:
                         // toggle sniffing
-                        sniffing_state = !sniffing_state;
-
-                        if(sniffing_state) {
-                            if(nrf24_checkconnected(nrf24_HANDLE)) {
+                        if(nrf24_check_connected(nrf24_HANDLE)) {
+                            sniffing_state = !sniffing_state;
+                            if(sniffing_state) {
                                 clear_cache();
                                 start_sniffing();
                                 start = furi_get_tick();
                             } else {
-                                nrf24_flush_rx(nrf24_HANDLE);
-
-                                // check again
-                                if(nrf24_checkconnected(nrf24_HANDLE)) {
-                                    clear_cache();
-                                    start_sniffing();
-                                    start = furi_get_tick();
-                                } else {
-                                    sniffing_state = false;
-                                    furi_hal_speaker_start(100, 100);
-                                    furi_delay_ms(100);
-                                    furi_hal_speaker_stop();
-                                }
+                                wrap_up(storage, notification);
                             }
-                        } else
-                            wrap_up(storage, notification);
+                        } else {
+                            notification_message(notification, &sequence_error);
+                        }
+
                         break;
                     case InputKeyBack:
                         if(event.input.type == InputTypeLong) processing = false;
