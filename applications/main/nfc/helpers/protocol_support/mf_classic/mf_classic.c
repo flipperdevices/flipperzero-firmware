@@ -43,9 +43,13 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
 
     // TODO: Implement read mf_classic using key cache
     if(mf_classic_event->type == MfClassicPollerEventTypeReadComplete) {
-        nfc_device_set_data(
-            instance->nfc_device, NfcProtocolMfClassic, nfc_poller_get_data(instance->poller));
-        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
+        const MfClassicData* mf_classic_data = nfc_poller_get_data(instance->poller);
+        nfc_device_set_data(instance->nfc_device, NfcProtocolMfClassic, mf_classic_data);
+
+        const NfcCustomEvent custom_event = mf_classic_is_card_read(mf_classic_data) ?
+                                                NfcCustomEventPollerSuccess :
+                                                NfcCustomEventPollerIncomplete;
+        view_dispatcher_send_custom_event(instance->view_dispatcher, custom_event);
         return NfcCommandStop;
     }
 

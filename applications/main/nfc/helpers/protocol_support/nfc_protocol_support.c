@@ -1,6 +1,7 @@
 #include "nfc_protocol_support.h"
 
 #include "nfc/nfc_app_i.h"
+#include "nfc/helpers/nfc_supported_cards.h"
 
 #include "nfc_protocol_support_defs.h"
 #include "nfc_protocol_support_gui_common.h"
@@ -63,6 +64,14 @@ static bool nfc_protocol_support_scene_info_on_event(NfcApp* instance, SceneMana
     if(event.type == SceneManagerEventTypeCustom) {
         const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
         consumed = nfc_protocol_support[protocol]->scene_info.on_event(instance, event.event);
+    } else if(event.type == SceneManagerEventTypeBack) {
+        // If the card could not be parsed, return to the respective menu
+        if(!scene_manager_get_scene_state(instance->scene_manager, NfcSceneSupportedCard)) {
+            const uint32_t scenes[] = {NfcSceneSavedMenu, NfcSceneReadMenu};
+            scene_manager_search_and_switch_to_previous_scene_one_of(
+                instance->scene_manager, scenes, COUNT_OF(scenes));
+            consumed = true;
+        }
     }
 
     return consumed;
@@ -98,6 +107,12 @@ static bool nfc_protocol_support_scene_read_on_event(NfcApp* instance, SceneMana
             notification_message(instance->notifications, &sequence_success);
             scene_manager_next_scene(instance->scene_manager, NfcSceneReadSuccess);
             dolphin_deed(DolphinDeedNfcReadSuccess);
+            consumed = true;
+        } else if(event.event == NfcCustomEventPollerIncomplete) {
+            nfc_supported_cards_read(instance->nfc_device, instance->nfc);
+
+            view_dispatcher_send_custom_event(
+                instance->view_dispatcher, NfcCustomEventPollerSuccess);
             consumed = true;
         } else if(event.event == NfcCustomEventPollerFailure) {
             if(scene_manager_has_previous_scene(instance->scene_manager, NfcSceneDetect)) {
@@ -208,8 +223,16 @@ static void nfc_protocol_support_scene_read_menu_on_exit(NfcApp* instance) {
 static void nfc_protocol_support_scene_read_success_on_enter(NfcApp* instance) {
     Widget* widget = instance->widget;
 
-    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
-    nfc_protocol_support[protocol]->scene_read_success.on_enter(instance);
+    FuriString* temp_str = furi_string_alloc();
+    if(nfc_supported_cards_parse(instance->nfc_device, temp_str)) {
+        widget_add_text_scroll_element(
+            instance->widget, 0, 0, 128, 52, furi_string_get_cstr(temp_str));
+    } else {
+        const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+        nfc_protocol_support[protocol]->scene_read_success.on_enter(instance);
+    }
+
+    furi_string_free(temp_str);
 
     widget_add_button_element(
         widget, GuiButtonTypeLeft, "Retry", nfc_protocol_support_common_widget_callback, instance);
@@ -322,7 +345,7 @@ static bool
         // TODO: Implement restore from shadow file
 
         if(event.event == SubmenuIndexCommonInfo) {
-            scene_manager_next_scene(instance->scene_manager, NfcSceneInfo);
+            scene_manager_next_scene(instance->scene_manager, NfcSceneSupportedCard);
             consumed = true;
         } else if(event.event == SubmenuIndexCommonRename) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneSaveName);

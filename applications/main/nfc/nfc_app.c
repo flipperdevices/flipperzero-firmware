@@ -48,8 +48,6 @@ NfcApp* nfc_app_alloc() {
     instance->nfc = nfc_alloc();
     instance->scanner = nfc_scanner_alloc(instance->nfc);
 
-    instance->parsed_data = furi_string_alloc();
-
     instance->mf_ul_auth = mf_ultralight_auth_alloc();
 
     // Nfc device
@@ -147,8 +145,6 @@ void nfc_app_free(NfcApp* instance) {
         rpc_system_app_set_callback(instance->rpc_ctx, NULL, NULL);
         instance->rpc_ctx = NULL;
     }
-
-    furi_string_free(instance->parsed_data);
 
     nfc_free(instance->nfc);
     nfc_scanner_free(instance->scanner);

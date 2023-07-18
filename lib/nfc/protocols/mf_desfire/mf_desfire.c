@@ -231,3 +231,45 @@ const Iso14443_4aData* mf_desfire_get_base_data(const MfDesfireData* data) {
 
     return data->iso14443_4a_data;
 }
+
+const MfDesfireApplication*
+    mf_desfire_get_application(const MfDesfireData* data, const MfDesfireApplicationId* app_id) {
+    MfDesfireApplication* app = NULL;
+
+    for(uint32_t i = 0; i < simple_array_get_count(data->application_ids); ++i) {
+        const MfDesfireApplicationId* current_app_id = simple_array_cget(data->application_ids, i);
+        if(memcmp(app_id, current_app_id, sizeof(MfDesfireApplicationId)) == 0) {
+            app = simple_array_get(data->applications, i);
+        }
+    }
+
+    return app;
+}
+
+const MfDesfireFileSettings*
+    mf_desfire_get_file_settings(const MfDesfireApplication* data, const MfDesfireFileId* file_id) {
+    MfDesfireFileSettings* file_settings = NULL;
+
+    for(uint32_t i = 0; i < simple_array_get_count(data->file_ids); ++i) {
+        const MfDesfireFileId* current_file_id = simple_array_cget(data->file_ids, i);
+        if(*file_id == *current_file_id) {
+            file_settings = simple_array_get(data->file_settings, i);
+        }
+    }
+
+    return file_settings;
+}
+
+const MfDesfireFileData*
+    mf_desfire_get_file_data(const MfDesfireApplication* data, const MfDesfireFileId* file_id) {
+    MfDesfireFileData* file_data = NULL;
+
+    for(uint32_t i = 0; i < simple_array_get_count(data->file_ids); ++i) {
+        const MfDesfireFileId* current_file_id = simple_array_cget(data->file_ids, i);
+        if(*file_id == *current_file_id) {
+            file_data = simple_array_get(data->file_data, i);
+        }
+    }
+
+    return file_data;
+}

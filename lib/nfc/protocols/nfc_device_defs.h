@@ -1,6 +1,6 @@
 #pragma once
 
-#include "nfc_device_base.h"
+#include "nfc_device_base_i.h"
 
 #ifdef __cplusplus
 extern "C" {

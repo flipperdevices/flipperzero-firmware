@@ -1,30 +1,17 @@
 #pragma once
 
-#include <furi/core/string.h>
-#include <nfc/protocols/nfc_device_defs.h>
+#include <core/string.h>
+
+#include <nfc/nfc.h>
+#include <nfc/nfc_device.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct NfcSupportedCards NfcSupportedCards;
+bool nfc_supported_cards_read(NfcDevice* device, Nfc* nfc);
 
-NfcSupportedCards* nfc_supported_cards_alloc();
-
-void nfc_supported_cards_free(NfcSupportedCards* instance);
-
-//FIXME: Make it compile
-// bool nfc_supported_cards_read(
-//     NfcSupportedCards* instance,
-//     NfcProtocol protocol,
-//     void* poller,
-//     void* data);
-//
-// bool nfc_supported_cards_parse(
-//     NfcSupportedCards* instance,
-//     NfcProtocol protocol,
-//     void* data,
-//     FuriString* parsed_data);
+bool nfc_supported_cards_parse(const NfcDevice* device, FuriString* parsed_data);
 
 #ifdef __cplusplus
 }

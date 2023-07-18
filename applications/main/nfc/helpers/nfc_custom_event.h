@@ -28,6 +28,7 @@ typedef enum {
     NfcCustomEventRpcSessionClose,
 
     NfcCustomEventPollerSuccess,
+    NfcCustomEventPollerIncomplete,
     NfcCustomEventPollerFailure,
 
     NfcCustomEventListenerUpdate,

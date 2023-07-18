@@ -278,7 +278,7 @@ static const MfClassicPollerReadHandler
         [MfClassicPollerStateReadComplete] = mf_classic_poller_handler_read_complete,
 };
 
-NfcCommand mf_classsic_poller_run(NfcGenericEvent event, void* context) {
+NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
     furi_assert(event.data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(context);
@@ -287,28 +287,55 @@ NfcCommand mf_classsic_poller_run(NfcGenericEvent event, void* context) {
     Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
     NfcCommand command = NfcCommandContinue;
 
+    UNUSED(mf_classic_poller_dict_attack_handler);
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
-        command = mf_classic_poller_dict_attack_handler[instance->state](instance);
-    } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
-        if(iso14443_3a_event->data->error == Iso14443_3aErrorNotPresent) {
-            if(instance->card_state == MfClassicCardStateDetected) {
-                instance->card_state = MfClassicCardStateNotDetected;
-                instance->mfc_event.type = MfClassicPollerEventTypeCardNotDetected;
-                command = instance->callback(instance->general_event, instance->context);
-                instance->state = MfClassicPollerStateIdle;
-            }
-        }
+        // TODO: Temporary measure
+        iso14443_3a_copy(
+            instance->data->iso14443_3a_data,
+            iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
+        instance->mfc_event.type = MfClassicPollerEventTypeReadComplete;
+        command = instance->callback(instance->general_event, instance->context);
+
+        //     command = mf_classic_poller_dict_attack_handler[instance->state](instance);
+        // } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
+        //     if(iso14443_3a_event->data->error == Iso14443_3aErrorNotPresent) {
+        //         if(instance->card_state == MfClassicCardStateDetected) {
+        //             instance->card_state = MfClassicCardStateNotDetected;
+        //             instance->mfc_event.type = MfClassicPollerEventTypeCardNotDetected;
+        //             command = instance->callback(instance->general_event, instance->context);
+        //             instance->state = MfClassicPollerStateIdle;
+        //         }
+        //     }
     }
 
     return command;
 }
 
-bool mf_classsic_poller_detect(NfcGenericEvent event, void* context) {
+bool mf_classic_poller_detect(NfcGenericEvent event, void* context) {
     furi_assert(event.data);
     furi_assert(event.protocol == NfcProtocolIso14443_3a);
     furi_assert(context);
 
-    return false;
+    Iso14443_3aPoller* iso3_poller = event.instance;
+    Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
+    bool detected = false;
+
+    if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
+        const Iso14443_3aData* iso3_data = iso14443_3a_poller_get_data(iso3_poller);
+        uint8_t atqa0 = iso3_data->atqa[0];
+        uint8_t atqa1 = iso3_data->atqa[1];
+        uint8_t sak = iso3_data->sak;
+        if((atqa0 == 0x44 || atqa0 == 0x04) && (sak == 0x08 || sak == 0x88 || sak == 0x09)) {
+            detected = true;
+        } else if((atqa0 == 0x01) && (atqa1 == 0x0F) && (sak == 0x01)) {
+            //skylanders support
+            detected = true;
+        } else if((atqa0 == 0x42 || atqa0 == 0x02) && (sak == 0x18)) {
+            detected = true;
+        }
+    }
+
+    return detected;
 }
 
 void mf_classic_poller_set_callback(
@@ -333,7 +360,7 @@ const NfcPollerBase mf_classic_poller = {
     .alloc = (NfcPollerAlloc)mf_classic_poller_alloc,
     .free = (NfcPollerFree)mf_classic_poller_free,
     .set_callback = (NfcPollerSetCallback)mf_classic_poller_set_callback,
-    .run = (NfcPollerRun)mf_classsic_poller_run,
-    .detect = (NfcPollerDetect)mf_classsic_poller_detect,
+    .run = (NfcPollerRun)mf_classic_poller_run,
+    .detect = (NfcPollerDetect)mf_classic_poller_detect,
     .get_data = (NfcPollerGetData)mf_classic_poller_get_data,
 };

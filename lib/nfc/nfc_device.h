@@ -1,8 +1,10 @@
 #pragma once
 
+#include <stddef.h>
+#include <stdint.h>
 #include <stdbool.h>
 
-#include "protocols/nfc_device_defs.h"
+#include "protocols/nfc_device_base.h"
 #include "protocols/nfc_protocol.h"
 
 #ifdef __cplusplus
