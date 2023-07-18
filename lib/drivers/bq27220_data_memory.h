@@ -17,11 +17,6 @@ typedef enum {
 } BQ27220DMType;
 
 typedef enum {
-    BQ27220DMFlagConstant,
-    BQ27220DMFlagVariable,
-} BQ27220DMFlag;
-
-typedef enum {
     BQ27220DMAddressGasGaugingCEDVProfile1GaugingConfig = 0x929B,
     BQ27220DMAddressGasGaugingCEDVProfile1FullChargeCapacity = 0x929D,
     BQ27220DMAddressGasGaugingCEDVProfile1DesignCapacity = 0x929F,
@@ -54,8 +49,7 @@ typedef enum {
 typedef struct BQ27220DMData BQ27220DMData;
 
 struct BQ27220DMData {
-    uint8_t type;
-    uint8_t flags;
+    uint16_t type;
     uint16_t address;
     union {
         uint8_t u8;
@@ -81,4 +75,4 @@ typedef struct {
     const bool IGNORE_SD : 1;
     const bool SME0 : 1;
     const uint8_t RSVD3 : 3;
-} BQ27220GaugingConfig;
+} BQ27220DMGaugingConfig;

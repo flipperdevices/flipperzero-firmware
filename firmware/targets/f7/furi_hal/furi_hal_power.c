@@ -64,8 +64,11 @@ void furi_hal_power_init() {
     LL_C2_PWR_SetPowerMode(FURI_HAL_POWER_STOP_MODE);
 
     furi_hal_i2c_acquire(&furi_hal_i2c_handle_power);
-    bq27220_init(&furi_hal_i2c_handle_power);
-    bq27220_apply_data_memory(&furi_hal_i2c_handle_power, furi_hal_power_gauge_data_memory);
+    // Find and init gauge
+    if(bq27220_init(&furi_hal_i2c_handle_power)) {
+        bq27220_apply_data_memory(&furi_hal_i2c_handle_power, furi_hal_power_gauge_data_memory);
+    }
+    // Find and init charger
     bq25896_init(&furi_hal_i2c_handle_power);
     furi_hal_i2c_release(&furi_hal_i2c_handle_power);
 
