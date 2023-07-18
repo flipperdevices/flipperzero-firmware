@@ -105,4 +105,9 @@ typedef struct {
      * @brief IDLE timeout context
      */
     IdleTimeoutContext* idle_timeout_context;
+
+    /**
+     * @brief Font index to be used to draw TOTP token
+     */
+    uint8_t active_font_index;
 } PluginState;
