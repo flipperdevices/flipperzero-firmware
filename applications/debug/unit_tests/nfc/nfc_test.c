@@ -26,6 +26,12 @@
 #define NFC_TEST_4_BYTE_BUILD_SIGNAL_TIM_MAX (110)
 #define NFC_TEST_16_BYTE_BUILD_SIGNAL_TIM_MAX (440)
 
+// Maximum allowed time for buffer preparation to fit 500us nt message timeout
+#define NFC_TEST_4_BYTE_BUILD_BUFFER_TIM_MAX (150)
+#define NFC_TEST_16_BYTE_BUILD_BUFFER_TIM_MAX (640)
+#define NFC_TEST_4_BYTE_BUILD_SIGNAL_TIM_MAX (110)
+#define NFC_TEST_16_BYTE_BUILD_SIGNAL_TIM_MAX (440)
+
 typedef struct {
     Storage* storage;
 } NfcTest;

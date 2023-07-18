@@ -27,6 +27,12 @@
 // #define NFC_TEST_DATA_MAX_LEN 18
 // #define NFC_TETS_TIMINGS_MAX_LEN 1350
 
+// // Maximum allowed time for buffer preparation to fit 500us nt message timeout
+// #define NFC_TEST_4_BYTE_BUILD_BUFFER_TIM_MAX (150)
+// #define NFC_TEST_16_BYTE_BUILD_BUFFER_TIM_MAX (640)
+// #define NFC_TEST_4_BYTE_BUILD_SIGNAL_TIM_MAX (110)
+// #define NFC_TEST_16_BYTE_BUILD_SIGNAL_TIM_MAX (440)
+
 // typedef struct {
 //     Storage* storage;
 //     NfcaSignal* signal;
@@ -89,13 +95,13 @@
 
 // static bool nfc_test_digital_signal_test_encode(
 //     const char* file_name,
-//     uint32_t encode_max_time,
+//     uint32_t build_signal_max_time_us,
+//     uint32_t build_buffer_max_time_us,
 //     uint32_t timing_tolerance,
 //     uint32_t timings_sum_tolerance) {
 //     furi_assert(nfc_test);
 
 //     bool success = false;
-//     uint32_t time = 0;
 //     uint32_t dut_timings_sum = 0;
 //     uint32_t ref_timings_sum = 0;
 //     uint8_t parity[10] = {};
@@ -109,17 +115,37 @@
 
 //         // Encode signal
 //         FURI_CRITICAL_ENTER();
-//         time = DWT->CYCCNT;
+//         uint32_t time_start = DWT->CYCCNT;
+
 //         nfca_signal_encode(
 //             nfc_test->signal, nfc_test->test_data, nfc_test->test_data_len * 8, parity);
+
+//         uint32_t time_signal =
+//             (DWT->CYCCNT - time_start) / furi_hal_cortex_instructions_per_microsecond();
+
+//         time_start = DWT->CYCCNT;
+
 //         digital_signal_prepare_arr(nfc_test->signal->tx_signal);
-//         time = (DWT->CYCCNT - time) / furi_hal_cortex_instructions_per_microsecond();
+
+//         uint32_t time_buffer =
+//             (DWT->CYCCNT - time_start) / furi_hal_cortex_instructions_per_microsecond();
 //         FURI_CRITICAL_EXIT();
 
 //         // Check timings
-//         if(time > encode_max_time) {
+//         if(time_signal > build_signal_max_time_us) {
 //             FURI_LOG_E(
-//                 TAG, "Encoding time: %ld us while accepted value: %ld us", time, encode_max_time);
+//                 TAG,
+//                 "Build signal time: %ld us while accepted value: %ld us",
+//                 time_signal,
+//                 build_signal_max_time_us);
+//             break;
+//         }
+//         if(time_buffer > build_buffer_max_time_us) {
+//             FURI_LOG_E(
+//                 TAG,
+//                 "Build buffer time: %ld us while accepted value: %ld us",
+//                 time_buffer,
+//                 build_buffer_max_time_us);
 //             break;
 //         }
 
@@ -156,7 +182,16 @@
 //             break;
 //         }
 
-//         FURI_LOG_I(TAG, "Encoding time: %ld us. Acceptable time: %ld us", time, encode_max_time);
+//         FURI_LOG_I(
+//             TAG,
+//             "Build signal time: %ld us. Acceptable time: %ld us",
+//             time_signal,
+//             build_signal_max_time_us);
+//         FURI_LOG_I(
+//             TAG,
+//             "Build buffer time: %ld us. Acceptable time: %ld us",
+//             time_buffer,
+//             build_buffer_max_time_us);
 //         FURI_LOG_I(
 //             TAG,
 //             "Timings sum difference: %ld [1/64MHZ]. Acceptable difference: %ld [1/64MHz]",
@@ -171,11 +206,19 @@
 // MU_TEST(nfc_digital_signal_test) {
 //     mu_assert(
 //         nfc_test_digital_signal_test_encode(
-//             NFC_TEST_RESOURCES_DIR NFC_TEST_SIGNAL_SHORT_FILE, 500, 1, 37),
+//             NFC_TEST_RESOURCES_DIR NFC_TEST_SIGNAL_SHORT_FILE,
+//             NFC_TEST_4_BYTE_BUILD_SIGNAL_TIM_MAX,
+//             NFC_TEST_4_BYTE_BUILD_BUFFER_TIM_MAX,
+//             1,
+//             37),
 //         "NFC short digital signal test failed\r\n");
 //     mu_assert(
 //         nfc_test_digital_signal_test_encode(
-//             NFC_TEST_RESOURCES_DIR NFC_TEST_SIGNAL_LONG_FILE, 2000, 1, 37),
+//             NFC_TEST_RESOURCES_DIR NFC_TEST_SIGNAL_LONG_FILE,
+//             NFC_TEST_16_BYTE_BUILD_SIGNAL_TIM_MAX,
+//             NFC_TEST_16_BYTE_BUILD_BUFFER_TIM_MAX,
+//             1,
+//             37),
 //         "NFC long digital signal test failed\r\n");
 // }
 
@@ -404,9 +447,9 @@
 //     // Reference block data
 //     uint8_t block_data[16] = {};
 //     memset(block_data, 0xff, sizeof(block_data));
-//     uint16_t total_blocks = mifare_classic_get_total_block_num(type);
+//     uint16_t total_blocks = mf_classic_get_total_block_num(type);
 //     for(size_t i = 1; i < total_blocks; i++) {
-//         if(mifare_classic_is_sector_trailer(i)) {
+//         if(mf_classic_is_sector_trailer(i)) {
 //             mu_assert(
 //                 memcmp(mf_data->block[i].value, sector_trailer, 16) == 0,
 //                 "Failed sector trailer compare");
@@ -456,7 +499,7 @@
 //         "manufacturer_block assert failed\r\n");
 //     // Check other blocks
 //     for(size_t i = 1; i < total_blocks; i++) {
-//         if(mifare_classic_is_sector_trailer(i)) {
+//         if(mf_classic_is_sector_trailer(i)) {
 //             mu_assert(
 //                 memcmp(mf_data->block[i].value, sector_trailer, 16) == 0,
 //                 "Failed sector trailer compare");
@@ -472,12 +515,12 @@
 //     nfc_keys->dev_data.nfc_data.uid_len = uid_len;
 //     memcpy(nfc_keys->dev_data.nfc_data.uid, uid, uid_len);
 //     mu_assert(nfc_device_load_key_cache(nfc_keys), "Failed to load key cache");
-//     uint8_t total_sec = mifare_classic_get_total_sectors_num(type);
+//     uint8_t total_sec = mf_classic_get_total_sectors_num(type);
 //     uint8_t default_key[6] = {};
 //     memset(default_key, 0xff, 6);
 //     for(size_t i = 0; i < total_sec; i++) {
 //         MfClassicSectorTrailer* sec_tr =
-//             mifare_classic_get_sector_trailer_by_sector(&nfc_keys->dev_data.mf_classic_data, i);
+//             mf_classic_get_sector_trailer_by_sector(&nfc_keys->dev_data.mf_classic_data, i);
 //         mu_assert(memcmp(sec_tr->key_a, default_key, 6) == 0, "Failed key compare");
 //         mu_assert(memcmp(sec_tr->key_b, default_key, 6) == 0, "Failed key compare");
 //     }
