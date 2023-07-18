@@ -777,6 +777,7 @@ static bool nfc_device_save_mifare_classic_data(FlipperFormat* file, NfcDevice* 
         }
         furi_string_free(block_str);
         if(!block_saved) break;
+
         saved = true;
     } while(false);
 
@@ -786,71 +787,92 @@ static bool nfc_device_save_mifare_classic_data(FlipperFormat* file, NfcDevice* 
 
 static bool nfc_device_save_felica_lite(FlipperFormat* file, FelicaLiteInfo* info) {
     bool saved = false;
-    FuriString* key = furi_string_alloc();
+    FuriString* temp_str = furi_string_alloc();
 
     do {
-        flipper_format_write_comment_cstr(file, "Lite(-S) System");
-        flipper_format_write_hex(file, "Data Format Code", info->data_format_code, sizeof(uint16_t));
-        flipper_format_write_hex(file, "ID Arbitrary Value", info->ID_value, 6);
-        flipper_format_write_hex(file, "Memory Config", info->memory_config, FELICA_BLOCK_SIZE);
-        
+        if(!flipper_format_write_comment_cstr(file, "Lite(-S) System")) break;
+        if(!flipper_format_write_hex(
+               file, "Data Format Code", (uint8_t*)&info->data_format_code, sizeof(uint16_t)))
+            break;
+        if(!flipper_format_write_hex(file, "ID Arbitrary Value", info->ID_value, 6)) break;
+        if(!flipper_format_write_hex(file, "Memory Config", info->memory_config, FELICA_BLOCK_SIZE))
+            break;
+
+        bool block_saved = true;
+        FuriString* spad_str = furi_string_alloc();
         for(uint8_t block_num = 0; block_num < 14; block_num++) {
-            FuriString* spad_str = furi_string_alloc();
             for(size_t i = 0; i < FELICA_BLOCK_SIZE; i++) {
                 if(info->S_PAD[block_num] != NULL) {
                     furi_string_cat_printf(spad_str, "%02X ", info->S_PAD[block_num][i]);
                 } else {
-                    furi_string_cat_printf(spad_str, "?? ");
+                    furi_string_cat_str(spad_str, "?? ");
                 }
             }
 
-            furi_string_printf(key, "S_PAD%d", block_num);
-            flipper_format_write_string(file, furi_string_get_cstr(key), spad_str);
-        }
+            furi_string_printf(temp_str, "S_PAD%d", block_num);
+            if(!flipper_format_write_string(file, furi_string_get_cstr(temp_str), spad_str)) {
+                block_saved = false;
+                break;
+            }
 
-        FuriString* reg_str = furi_string_alloc();
+            furi_string_reset(spad_str);
+        }
+        furi_string_free(spad_str);
+
+        if(!block_saved) break;
+
+        furi_string_reset(temp_str);
         for(size_t i = 0; i < FELICA_BLOCK_SIZE; i++) {
             if(info->REG != NULL) {
-                furi_string_cat_printf(reg_str, "%02X ", info->REG[i]);
+                furi_string_cat_printf(temp_str, "%02X ", info->REG[i]);
             } else {
-                furi_string_cat_printf(reg_str, "?? ");
+                furi_string_cat_str(temp_str, "?? ");
             }
         }
-        flipper_format_write_string(file, "REG", reg_str);
 
-        flipper_format_write_hex(file, "Card Key Version", &info->card_key_version, sizeof(uint16_t));
-        FuriString* ck1_str = furi_string_alloc();
+        if(!flipper_format_write_string(file, "REG", temp_str)) break;
+        if(!flipper_format_write_hex(
+               file, "Card Key Version", (uint8_t*)&info->card_key_version, sizeof(uint16_t)))
+            break;
+
+        furi_string_reset(temp_str);
         for(size_t i = 0; i < FELICA_BLOCK_SIZE; i++) {
             if(info->REG != NULL) {
-                furi_string_cat_printf(ck1_str, "%02X ", info->card_key_1[i]);
+                furi_string_cat_printf(temp_str, "%02X ", info->card_key_1[i]);
             } else {
-                furi_string_cat_printf(ck1_str, "?? ");
+                furi_string_cat_str(temp_str, "?? ");
             }
         }
-        flipper_format_write_string(file, "Card Key 1", ck1_str);
-        
-        FuriString* ck2_str = furi_string_alloc();
+
+        if(!flipper_format_write_string(file, "Card Key 1", temp_str)) break;
+
+        furi_string_reset(temp_str);
         for(size_t i = 0; i < FELICA_BLOCK_SIZE; i++) {
             if(info->REG != NULL) {
-                furi_string_cat_printf(ck2_str, "%02X ", info->card_key_2[i]);
+                furi_string_cat_printf(temp_str, "%02X ", info->card_key_2[i]);
             } else {
-                furi_string_cat_printf(ck2_str, "?? ");
+                furi_string_cat_printf(temp_str, "?? ");
             }
         }
-        flipper_format_write_string(file, "Card Key 2", ck2_str);
+        if(!flipper_format_write_string(file, "Card Key 2", temp_str)) break;
 
-        flipper_format_write_hex(file, "Fixed Challenge MAC Response", info->MAC, 8);
+        if(!flipper_format_write_hex(file, "Fixed Challenge MAC Response", info->MAC, 8)) break;
 
-        flipper_format_write_bool(file, "Is Lite-S", &info->is_lite_s, 1);
-        if (info->is_lite_s) {
-            flipper_format_write_hex(file, "Fixed Challenge MAC-A Response", info->MAC_A, 8);
-            flipper_format_write_uint32(file, "Write Count", &info->write_count, 1);
+        if(!flipper_format_write_bool(file, "Is Lite-S", &info->is_lite_s, 1)) break;
+        if(info->is_lite_s) {
+            if(!flipper_format_write_hex(file, "Fixed Challenge MAC-A Response", info->MAC_A, 8))
+                break;
+            if(!flipper_format_write_uint32(file, "Write Count", &info->write_count, 1)) break;
         }
 
+        saved = true;
     } while(false);
 
+    furi_string_free(temp_str);
     return saved;
 }
+
+static bool nfc_device_save_felica_node(FlipperFormat* file, FelicaNode* node);
 
 static bool nfc_device_save_felica_area(FlipperFormat* file, FelicaArea* area) {
     bool saved = false;
@@ -858,24 +880,35 @@ static bool nfc_device_save_felica_area(FlipperFormat* file, FelicaArea* area) {
     FuriString* key = furi_string_alloc();
 
     do {
-        furi_string_printf(key, "%s Can Create Subareas", prefix);
-        flipper_format_write_bool(file, furi_string_get_cstr(key), &area->can_create_subareas, 1);
-        furi_string_printf(key, "%s End Service Code", prefix);
-        flipper_format_write_hex(file, furi_string_get_cstr(key), (uint8_t*)&area->end_service_code, sizeof(uint16_t));
+        furi_string_printf(key, "%s Can Create Subareas", furi_string_get_cstr(prefix));
+        if(!flipper_format_write_bool(
+               file, furi_string_get_cstr(key), &area->can_create_subareas, 1))
+            break;
+        furi_string_printf(key, "%s End Service Code", furi_string_get_cstr(prefix));
+        if(!flipper_format_write_hex(
+               file,
+               furi_string_get_cstr(key),
+               (uint8_t*)&area->end_service_code,
+               sizeof(uint16_t)))
+            break;
 
         bool node_saved = true;
         for
-            M_EACH(node, area->nodes, FelicaINodeArray_t) {
-                if (nfc_device_save_felica_node(file, node)) {
+            M_EACH(inode, area->nodes, FelicaINodeArray_t) {
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(key), (uint8_t*)&inode, sizeof(inode))) {
                     node_saved = false;
                     break;
                 }
             }
 
-        if (!node_saved) break;
+        if(!node_saved) break;
+
         saved = true;
     } while(false);
 
+    furi_string_free(prefix);
+    furi_string_free(key);
     return saved;
 }
 
@@ -883,60 +916,82 @@ static bool nfc_device_save_felica_service(FlipperFormat* file, FelicaService* s
     bool saved = false;
     FuriString* prefix = furi_string_alloc_printf("Service %d", service->number);
     FuriString* key = furi_string_alloc();
-    
-    do {
-        furi_string_printf(key, "%s Is Extended Overlap", prefix);
-        flipper_format_write_bool(file, furi_string_get_cstr(key), &service->is_extended_overlap, 1);
-        if (service->is_extended_overlap) {
-            furi_string_printf(key, "%s Overlap Target", prefix);
-            flipper_format_write_hex(file, furi_string_get_cstr(key), (uint8_t*)&service->overlap_target, sizeof(uint16_t));
 
-            furi_string_printf(key, "%s Block Start", prefix);
+    do {
+        furi_string_printf(key, "%s Is Extended Overlap", furi_string_get_cstr(prefix));
+        if(!flipper_format_write_bool(
+               file, furi_string_get_cstr(key), &service->is_extended_overlap, 1))
+            break;
+        if(service->is_extended_overlap) {
+            furi_string_printf(key, "%s Overlap Target", furi_string_get_cstr(prefix));
+            if(!flipper_format_write_hex(
+                   file,
+                   furi_string_get_cstr(key),
+                   (uint8_t*)&service->overlap_target,
+                   sizeof(uint16_t)))
+                break;
+
+            furi_string_printf(key, "%s Block Start", furi_string_get_cstr(prefix));
             const uint32_t block_start = service->block_start;
-            flipper_format_write_uint32(file, furi_string_get_cstr(key), &block_start, 1);
-            
-            furi_string_printf(key, "%s Block Count", prefix);
+            if(!flipper_format_write_uint32(file, furi_string_get_cstr(key), &block_start, 1))
+                break;
+
+            furi_string_printf(key, "%s Block Count", furi_string_get_cstr(prefix));
             const uint32_t block_count = service->block_count;
-            flipper_format_write_uint32(file, furi_string_get_cstr(key), &block_count, 1);
-            
+            if(!flipper_format_write_uint32(file, furi_string_get_cstr(key), &block_count, 1))
+                break;
+
+            bool block_saved = true;
             uint32_t i = 0;
             for
                 M_EACH(block, service->blocks, FelicaBlockArray_t) {
-                    furi_string_printf(key, "%s Block %d", prefix, i);
-                    flipper_format_write_hex(file, furi_string_get_cstr(key), block->data, FELICA_BLOCK_SIZE);
+                    furi_string_printf(key, "%s Block %lu", furi_string_get_cstr(prefix), i);
+                    if(!flipper_format_write_hex(
+                           file, furi_string_get_cstr(key), block->data, FELICA_BLOCK_SIZE)) {
+                        block_saved = false;
+                        break;
+                    }
+                    i++;
                 }
+
+            if(!block_saved) break;
         } else {
-            furi_string_printf(key, "%s Block Count", prefix);
+            furi_string_printf(key, "%s Block Count", furi_string_get_cstr(prefix));
             uint32_t block_count = FelicaBlockArray_size(service->blocks);
+
+            bool block_saved = true;
             flipper_format_write_uint32(file, furi_string_get_cstr(key), &block_count, 1);
             uint32_t i = 0;
             for
                 M_EACH(block, service->blocks, FelicaBlockArray_t) {
-                    furi_string_printf(key, "%s Block %d", prefix, i);
-                    flipper_format_write_hex(file, furi_string_get_cstr(key), block->data, FELICA_BLOCK_SIZE);
+                    furi_string_printf(key, "%s Block %lu", furi_string_get_cstr(prefix), i);
+                    if(!flipper_format_write_hex(
+                           file, furi_string_get_cstr(key), block->data, FELICA_BLOCK_SIZE)) {
+                        block_saved = false;
+                        break;
+                    }
+                    i++;
                 }
+
+            if(!block_saved) break;
         }
 
         saved = true;
     } while(false);
 
+    furi_string_free(prefix);
+    furi_string_free(key);
+    return saved;
 }
 
 static bool nfc_device_save_felica_node(FlipperFormat* file, FelicaNode* node) {
     bool saved = false;
-    FuriString* key = furi_string_alloc();
 
     do {
         if(node->type == FelicaNodeTypeArea) {
-            if(!nfc_device_save_felica_node(file, node->area)) {
-                saved = false;
-                break;
-            }
+            if(!nfc_device_save_felica_area(file, node->area)) break;
         } else if(node->type == FelicaNodeTypeService) {
-            if(!nfc_device_save_felica_service(file, node->area)) {
-                saved = false;
-                break;
-            }
+            if(!nfc_device_save_felica_service(file, node->service)) break;
         }
 
         saved = true;
@@ -948,23 +1003,48 @@ static bool nfc_device_save_felica_node(FlipperFormat* file, FelicaNode* node) {
 static bool nfc_device_save_felica_data(FlipperFormat* file, NfcDevice* dev) {
     bool saved = false;
     FelicaData* data = &dev->dev_data.felica_data;
+
     // Save FeliCa specific data
     do {
         if(!flipper_format_write_comment_cstr(file, "FeliCa specific data")) break;
         if(!flipper_format_write_uint32(
                file, "Data format version", &nfc_felica_data_format_version, 1))
             break;
-        
+
+        bool system_saved = true;
         for
             M_EACH(system, data->systems, FelicaSystemArray_t) {
-                flipper_format_write_hex(file, "System", &system->number, sizeof(uint8_t));
-                flipper_format_write_hex(file, "Code", (uint8_t*)&system->code, sizeof(uint16_t));
-                if (system->code == LITE_SYSTEM_CODE) {
-                    nfc_device_save_felica_lite(file, &system->lite_info);
+                if(!flipper_format_write_hex(file, "System", &system->number, sizeof(uint8_t))) {
+                    system_saved = false;
+                    break;
+                }
+                if(!flipper_format_write_hex(
+                       file, "Code", (uint8_t*)&system->code, sizeof(uint16_t))) {
+                    system_saved = false;
+                    break;
+                }
+                if(system->code == LITE_SYSTEM_CODE) {
+                    if(!nfc_device_save_felica_lite(file, &system->lite_info)) {
+                        system_saved = false;
+                        break;
+                    }
                 } else {
-                    nfc_device_save_felica_node(file, &system->root_area);
+                    bool node_saved = true;
+                    for
+                        M_EACH(node, system->nodes, FelicaNodeArray_t) {
+                            if(nfc_device_save_felica_node(file, node)) {
+                                node_saved = false;
+                                break;
+                            }
+                        }
+
+                    if(!node_saved) break;
                 }
             }
+
+        if(!system_saved) break;
+
+        saved = true;
     } while(false);
 
     return saved;

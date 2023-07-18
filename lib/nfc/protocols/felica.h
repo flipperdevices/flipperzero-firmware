@@ -239,9 +239,6 @@ ARRAY_DEF(FelicaNodeArray, FelicaNode, M_POD_OPLIST)
 ARRAY_DEF(FelicaINodeArray, FelicaINode)
 #define M_OPL_FelicaINodeArray_t() ARRAY_OPLIST(FelicaINodeArray)
 
-ARRAY_DEF(FelicaNodeRefArray, FelicaNode*, M_PTR_OPLIST)
-#define M_OPL_FelicaNodeRefArray_t() ARRAY_OPLIST(FelicaNodeRefArray, M_PTR_OPLIST)
-
 // { service_code: service_inode }
 DICT_DEF2(FelicaPublicServiceDict, uint16_t, M_DEFAULT_OPLIST, FelicaINode, M_POD_OPLIST)
 #define M_OPL_FelicaPublicServiceDict_t() \

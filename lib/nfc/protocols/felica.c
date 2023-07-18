@@ -172,6 +172,7 @@ FelicaICType felica_get_ic_type(uint8_t* PMm) {
     return FelicaICType2K;
 }
 
+/*
 static void felica_lite_diversify_key(uint8_t* id_block, uint8_t* master_key, uint8_t* card_key) {
     uint8_t ZERO[8] = {0};
     uint8_t L[8];
@@ -380,6 +381,7 @@ static void felica_lite_calculate_mac_a_for_read(
 
     felica_lite_calculate_mac_a(random_challenge, session_key, iv, block_data, block_count, MAC_A);
 }
+*/
 
 static void felica_parse_service_attrib(
     uint16_t node_attrib,
@@ -519,8 +521,8 @@ uint16_t felica_parse_unencrypted_read(
     FelicaReader* reader,
     uint8_t* out,
     uint16_t out_len) {
-    uint8_t consumed =
-        felica_consume_unencrypted_header(buf, len, reader, FELICA_UNENCRYPTED_READ_RES, false, false);
+    uint8_t consumed = felica_consume_unencrypted_header(
+        buf, len, reader, FELICA_UNENCRYPTED_READ_RES, false, false);
     if(!consumed || reader->status_flags[0] != 0 || reader->status_flags[1] != 0) {
         return 0;
     }
@@ -603,8 +605,8 @@ uint8_t felica_lite_prepare_unencrypted_write(
 }
 
 bool felica_parse_unencrypted_write(uint8_t* buf, uint8_t len, FelicaReader* reader) {
-    uint8_t consumed =
-        felica_consume_unencrypted_header(buf, len, reader, FELICA_UNENCRYPTED_WRITE_RES, false, false);
+    uint8_t consumed = felica_consume_unencrypted_header(
+        buf, len, reader, FELICA_UNENCRYPTED_WRITE_RES, false, false);
     if(!consumed || reader->status_flags[0] != 0 || reader->status_flags[1] != 0) {
         return false;
     }
@@ -622,8 +624,8 @@ bool felica_parse_request_system_code(
     uint8_t len,
     FelicaReader* reader,
     FelicaSystemArray_t systems) {
-    uint8_t consumed =
-        felica_consume_unencrypted_header(buf, len, reader, FELICA_REQUEST_SYSTEM_CODE_RES, true, false);
+    uint8_t consumed = felica_consume_unencrypted_header(
+        buf, len, reader, FELICA_REQUEST_SYSTEM_CODE_RES, true, false);
     if(consumed == 0) {
         return false;
     }
@@ -664,8 +666,8 @@ bool felica_parse_search_service_code(
     uint8_t len,
     FelicaReader* reader,
     FelicaSearchServiceCodeResult* result) {
-    uint8_t consumed =
-        felica_consume_unencrypted_header(buf, len, reader, FELICA_SEARCH_SERVICE_CODE_RES, true, false);
+    uint8_t consumed = felica_consume_unencrypted_header(
+        buf, len, reader, FELICA_SEARCH_SERVICE_CODE_RES, true, false);
     if(consumed == 0) {
         return false;
     }
@@ -739,8 +741,8 @@ bool felica_parse_request_spec_version(
     // Set all entries to invalid
     memset(out, 0, sizeof(*out));
 
-    uint8_t consumed =
-        felica_consume_unencrypted_header(buf, len, reader, FELICA_REQUEST_SPEC_VERSION_RES, false, false);
+    uint8_t consumed = felica_consume_unencrypted_header(
+        buf, len, reader, FELICA_REQUEST_SPEC_VERSION_RES, false, false);
     if(consumed == 0) {
         return false;
     }
@@ -1026,7 +1028,7 @@ bool felica_lite_dump_data(
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
                                  tx_rx->tx_data, reader, true, fixed_s_blocks, 2);
         if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout_double)) {
-            FURI_LOG_W(TAG, "Bad exchange reading ID with MAC_A");
+            FURI_LOG_W(TAG, "Bad exchange reading CK with MAC_A");
             return false;
         }
         if(felica_parse_unencrypted_read(
@@ -1040,7 +1042,7 @@ bool felica_lite_dump_data(
         tx_rx->tx_bits = 8 * felica_lite_prepare_unencrypted_read(
                                  tx_rx->tx_data, reader, true, &fixed_s_blocks[2], 2);
         if(!furi_hal_nfc_tx_rx(tx_rx, read_timeout_double)) {
-            FURI_LOG_W(TAG, "Bad exchange reading ID with MAC_A");
+            FURI_LOG_W(TAG, "Bad exchange reading WC and CRC_CHECK");
             return false;
         }
         if(felica_parse_unencrypted_read(
