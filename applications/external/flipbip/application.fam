@@ -10,13 +10,15 @@ App(
     order=10,
     fap_icon="flipbip_10px.png",
     fap_icon_assets="icons",
+    fap_icon_assets_symbol="flipbip",
     fap_private_libs=[
         Lib(
             name="crypto",
         ),
     ],
     fap_category="Tools",
-    fap_description="Crypto toolkit for Flipper",
     fap_author="Struan Clark (xtruan)",
     fap_weburl="https://github.com/xtruan/FlipBIP",
+    fap_version=(1, 10),
+    fap_description="Crypto toolkit for Flipper",
 )
