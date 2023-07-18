@@ -9,11 +9,13 @@ typedef enum {
     BQ27220DMTypeU8,
     BQ27220DMTypeU16,
     BQ27220DMTypeU32,
+    BQ27220DMTypeI8,
+    BQ27220DMTypeI16,
+    BQ27220DMTypeI32,
     BQ27220DMTypeF32,
-    BQ27220DMTypePtrU8,
-    BQ27220DMTypePtrU16,
-    BQ27220DMTypePtrU32,
-    BQ27220DMTypePtrF32,
+    BQ27220DMTypePtr8,
+    BQ27220DMTypePtr16,
+    BQ27220DMTypePtr32,
 } BQ27220DMType;
 
 typedef enum {
@@ -44,6 +46,7 @@ typedef enum {
     BQ27220DMAddressCalibrationCurrentDeadband = 0x91DE,
     BQ27220DMAddressConfigurationPowerSleepCurrent = 0x9217,
     BQ27220DMAddressConfigurationCurrentThresholdsDischargeDetectionThreshold = 0x9228,
+    BQ27220DMAddressConfigurationDataInitialStandby = 0x923C,
 } BQ27220DMAddress;
 
 typedef struct BQ27220DMData BQ27220DMData;
@@ -55,6 +58,9 @@ struct BQ27220DMData {
         uint8_t u8;
         uint16_t u16;
         uint32_t u32;
+        int8_t i8;
+        int16_t i16;
+        int32_t i32;
         float f32;
     } value;
 };

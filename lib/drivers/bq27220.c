@@ -93,7 +93,7 @@ static bool bq27220_parameter_check(
             if(*(uint32_t*)&(old_data[0]) != *(uint32_t*)&(buffer[2])) {
                 FURI_LOG_W( //-V641
                     TAG,
-                    "Data at 0x%04x(%u): 0x%08lx!=0x%08lx",
+                    "Data at 0x%04x(%zu): 0x%08lx!=0x%08lx",
                     address,
                     size,
                     *(uint32_t*)&(old_data[0]),
@@ -144,21 +144,29 @@ static bool bq27220_data_memory_check(
         } else if(data_memory->type == BQ27220DMTypeU32) {
             result &= bq27220_parameter_check(
                 handle, data_memory->address, data_memory->value.u32, 4, update);
+        } else if(data_memory->type == BQ27220DMTypeI8) {
+            result &= bq27220_parameter_check(
+                handle, data_memory->address, data_memory->value.i8, 1, update);
+        } else if(data_memory->type == BQ27220DMTypeI16) {
+            result &= bq27220_parameter_check(
+                handle, data_memory->address, data_memory->value.i16, 2, update);
+        } else if(data_memory->type == BQ27220DMTypeI32) {
+            result &= bq27220_parameter_check(
+                handle, data_memory->address, data_memory->value.i32, 4, update);
         } else if(data_memory->type == BQ27220DMTypeF32) {
             result &= bq27220_parameter_check(
                 handle, data_memory->address, data_memory->value.u32, 4, update);
-        } else if(data_memory->type == BQ27220DMTypePtrU8) {
+        } else if(data_memory->type == BQ27220DMTypePtr8) {
             result &= bq27220_parameter_check(
                 handle, data_memory->address, *(uint8_t*)data_memory->value.u32, 1, update);
-        } else if(data_memory->type == BQ27220DMTypePtrU16) {
+        } else if(data_memory->type == BQ27220DMTypePtr16) {
             result &= bq27220_parameter_check(
                 handle, data_memory->address, *(uint16_t*)data_memory->value.u32, 2, update);
-        } else if(data_memory->type == BQ27220DMTypePtrU32) {
+        } else if(data_memory->type == BQ27220DMTypePtr32) {
             result &= bq27220_parameter_check(
                 handle, data_memory->address, *(uint32_t*)data_memory->value.u32, 4, update);
-        } else if(data_memory->type == BQ27220DMTypePtrF32) {
-            result &= bq27220_parameter_check(
-                handle, data_memory->address, *(uint32_t*)data_memory->value.u32, 4, update);
+        } else {
+            furi_crash("Invalid DM Type");
         }
         data_memory++;
     }

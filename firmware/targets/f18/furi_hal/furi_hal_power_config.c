@@ -15,7 +15,7 @@ const BQ27220DMGaugingConfig furi_hal_power_gauge_data_memory_gauging_config = {
 const BQ27220DMData furi_hal_power_gauge_data_memory[] = {
     {
         .address = BQ27220DMAddressGasGaugingCEDVProfile1GaugingConfig,
-        .type = BQ27220DMTypePtrU16,
+        .type = BQ27220DMTypePtr16,
         .value.u32 = (uint32_t)&furi_hal_power_gauge_data_memory_gauging_config,
     },
     {
@@ -132,6 +132,16 @@ const BQ27220DMData furi_hal_power_gauge_data_memory[] = {
         .address = BQ27220DMAddressGasGaugingCEDVProfile1EDV2,
         .type = BQ27220DMTypeU16,
         .value.u16 = 3355,
+    },
+    {
+        .address = BQ27220DMAddressCalibrationCurrentDeadband,
+        .type = BQ27220DMTypeU8,
+        .value.u8 = 1,
+    },
+    {
+        .address = BQ27220DMAddressConfigurationPowerSleepCurrent,
+        .type = BQ27220DMTypeI16,
+        .value.i16 = 1,
     },
     {
         .type = BQ27220DMTypeEnd,
