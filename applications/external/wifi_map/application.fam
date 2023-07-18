@@ -1,6 +1,6 @@
 App(
     appid="esp32_wifi_mapping",
-    name="[ESP32] WIFI Mapping",
+    name="[ESP32] WiFi Mapping",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="wifi_map_app",
     requires=[
@@ -9,6 +9,6 @@ App(
     stack_size=2 * 1024,
     order=20,
     fap_icon="CS.png",
-    fap_category="GPIO",
+    fap_category="GPIO/ESP32",
     fap_icon_assets_symbol="wifi_map",
 )

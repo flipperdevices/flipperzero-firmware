@@ -11,7 +11,7 @@ App(
     stack_size=1 * 1024,
     order=90,
     fap_icon="rad_sens.png",
-    fap_category="GPIO",
+    fap_category="GPIO/Sensors",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="rad_sens",
     fap_author="@sionyx",

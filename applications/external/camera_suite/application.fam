@@ -8,7 +8,7 @@ App(
     order=51,
     stack_size=8 * 1024,
     fap_icon="icons/camera_suite.png",
-    fap_category="GPIO",
+    fap_category="GPIO/ESP32",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="camerasuite",
     fap_author="Cody Tolene",

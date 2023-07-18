@@ -8,7 +8,7 @@ App(
     order=90,
     fap_icon_assets="assets",
     fap_icon="icon.png",
-    fap_category="GPIO",
+    fap_category="GPIO/ESP32",
     fap_description="ESP32-CAM app to stream a message in morse using the powerful flashlight. [Unplug the USB cable to test with Mayhem]",
     fap_icon_assets_symbol="mayhem_morseflash",
 )
