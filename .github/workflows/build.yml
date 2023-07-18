@@ -28,3 +28,5 @@ jobs:
         run: ./fbt COMPACT=1 DEBUG=0 faps
       - name: Check FlipBIP Built
         run: test -f build/f7-firmware-C/.extapps/flipbip.fap
+      - name: Check FlipBIP Size
+        run: ls -l --block-size=K build/f7-firmware-C/.extapps/flipbip.fap
