@@ -1,6 +1,6 @@
 #include "mass_storage_scsi.h"
 
-#include <furi/log.h>
+#include <core/log.h>
 
 #define TAG "MassStorageSCSI"
 

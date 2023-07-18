@@ -1,6 +1,7 @@
 #include "../mass_storage_app_i.h"
 #include "../views/mass_storage_view.h"
 #include "../helpers/mass_storage_usb.h"
+#include <lib/toolbox/path.h>
 
 #define TAG "MassStorageSceneWork"
 
@@ -27,7 +28,7 @@ static bool file_write(void* ctx, uint32_t lba, uint16_t count, uint8_t* buf, ui
     MassStorageApp* app = ctx;
     // FURI_LOG_I(TAG, "file_write lba=%08lx count=%04x len=%04x", lba, count, len);
     if(len != count * SCSI_BLOCK_SIZE) {
-        FURI_LOG_W(TAG, "bad write params count=%d len=%d", count, len);
+        FURI_LOG_W(TAG, "bad write params count=%u len=%lu", count, len);
         return false;
     }
     if(!storage_file_seek(app->file, lba * SCSI_BLOCK_SIZE, true)) {
@@ -45,19 +46,19 @@ static uint32_t file_num_blocks(void* ctx) {
 static void file_eject(void* ctx) {
     MassStorageApp* app = ctx;
     FURI_LOG_I(TAG, "EJECT");
-    furi_check(osMutexAcquire(app->usb_mutex, osWaitForever) == osOK);
+    furi_check(furi_mutex_acquire(app->usb_mutex, FuriWaitForever) == FuriStatusOk);
     mass_storage_usb_stop(app->usb);
     app->usb = NULL;
-    furi_check(osMutexRelease(app->usb_mutex) == osOK);
+    furi_check(furi_mutex_release(app->usb_mutex) == FuriStatusOk);
 }
 
 bool mass_storage_scene_work_on_event(void* context, SceneManagerEvent event) {
     MassStorageApp* app = context;
     if(event.type == SceneManagerEventTypeTick) {
         bool ejected;
-        furi_check(osMutexAcquire(app->usb_mutex, osWaitForever) == osOK);
+        furi_check(furi_mutex_acquire(app->usb_mutex, FuriWaitForever) == FuriStatusOk);
         ejected = app->usb == NULL;
-        furi_check(osMutexRelease(app->usb_mutex) == osOK);
+        furi_check(furi_mutex_release(app->usb_mutex) == FuriStatusOk);
         if(ejected) scene_manager_previous_scene(app->scene_manager);
     }
     return false;
@@ -66,17 +67,18 @@ bool mass_storage_scene_work_on_event(void* context, SceneManagerEvent event) {
 void mass_storage_scene_work_on_enter(void* context) {
     MassStorageApp* app = context;
 
-    app->usb_mutex = osMutexNew(NULL);
+    app->usb_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
-    string_t file_name;
-    string_init(file_name);
+    FuriString* file_name = furi_string_alloc();
+    path_extract_filename(app->file_path, file_name, false);
 
-    mass_storage_set_file_name(app->mass_storage_view, app->file_name);
-    string_printf(file_name, "%s/%s", MASS_STORAGE_APP_PATH_FOLDER, app->file_name);
+    mass_storage_set_file_name(app->mass_storage_view, file_name);
     app->file = storage_file_alloc(app->fs_api);
     furi_assert(storage_file_open(
-        app->file, string_get_cstr(file_name), FSAM_READ | FSAM_WRITE, FSOM_OPEN_EXISTING));
-    string_clear(file_name);
+        app->file,
+        furi_string_get_cstr(app->file_path),
+        FSAM_READ | FSAM_WRITE,
+        FSOM_OPEN_EXISTING));
 
     SCSIDeviceFunc fn = {
         .ctx = app,
@@ -85,7 +87,11 @@ void mass_storage_scene_work_on_enter(void* context) {
         .num_blocks = file_num_blocks,
         .eject = file_eject,
     };
-    app->usb = mass_storage_usb_start(app->file_name, fn);
+
+    // TODO: Extract filename
+    app->usb = mass_storage_usb_start(furi_string_get_cstr(file_name), fn);
+
+    furi_string_free(file_name);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewWork);
 }
@@ -93,7 +99,7 @@ void mass_storage_scene_work_on_enter(void* context) {
 void mass_storage_scene_work_on_exit(void* context) {
     MassStorageApp* app = context;
 
-    furi_assert(osMutexDelete(app->usb_mutex) == osOK);
+    furi_mutex_free(app->usb_mutex);
     if(app->usb) {
         mass_storage_usb_stop(app->usb);
         app->usb = NULL;
