@@ -36,7 +36,7 @@ bool furi_hal_power_gauge_is_ok();
 
 /** Check if gauge requests system shutdown
  * 
- * @return true if gauge is ok
+ * @return true if system shutdown requested
  */
 bool furi_hal_power_is_shutdown_requested();
 
