@@ -22,7 +22,7 @@ void send_ac_mitsubishi(ACState* acstate)
         0b00100000, // mode_auto
         0b00001001, // 25
         0b00110000, // mode_auto
-        0b11000000, // fan_speed_auto + vanne_auto
+        0b11000000, // ac_fan_speed_auto + ac_vane_auto
         0x00,
         0x00,
         0x00,
@@ -34,24 +34,32 @@ void send_ac_mitsubishi(ACState* acstate)
     // data array is a valid trame, only byte to be chnaged will be updated.
 
     // Byte 6 - On / Off
-    if (acstate->ac_power)
+    switch (acstate->ac_power)
     {
-        data[5] = 0x20; // Tuen ON AC
+    case AC_ON:
+        data[5] = 0x20; // Turn ON AC
+        break;
+    case AC_OFF:
+        data[5] = 0x00; // Turn OFF AC
+        break;
+    default:
+        break;
     }
+
 
     // Byte 7 - Mode
     switch (acstate->ac_mode)
     {
-    case AC_HOT:
+    case AC_MODE_HEAT:
         data[6] = 0b00001000;
         break;
-    case AC_COLD:
+    case AC_MODE_COLD:
         data[6] = 0b00011000;
         break;
-    case AC_DRY:
+    case AC_MODE_DRY:
         data[6] = 0b00010000;
         break;
-    case AC_AUTO:
+    case AC_MODE_AUTO:
         data[6] = 0b00100000;
         break;
     default:
@@ -59,7 +67,7 @@ void send_ac_mitsubishi(ACState* acstate)
     }
 
     // Byte 8 - Temperature
-    // Check Min Max For Hot Mode
+    // Check Min Max For Heat Mode
     int temp;
     if (acstate->ac_temp > 31)
     {
@@ -77,71 +85,71 @@ void send_ac_mitsubishi(ACState* acstate)
 
     switch (acstate->ac_mode)
     {
-    case AC_HOT:
+    case AC_MODE_HEAT:
         data[8] = 0b00000000;
         break;
-    case AC_COLD:
+    case AC_MODE_COLD:
         data[8] = 0b00000110;
         break;
-    case AC_DRY:
+    case AC_MODE_DRY:
         data[8] = 0b00000010;
         break;
-    case AC_AUTO:
+    case AC_MODE_AUTO:
         data[8] = 0b00000000;
         break;
     default:
         break;
     }
 
-    // Byte 10 - FAN / VANNE
+    // Byte 10 - FAN / VANE
     switch (acstate->ac_fanmode)
     {
-    case FAN_SPEED_1:
+    case AC_FAN_SPEED_1:
         data[9] = 0b00000001;
         break;
-    case FAN_SPEED_2:
+    case AC_FAN_SPEED_2:
         data[9] = 0b00000010;
         break;
-    case FAN_SPEED_3:
+    case AC_FAN_SPEED_3:
         data[9] = 0b00000011;
         break;
-    case FAN_SPEED_4:
+    case AC_FAN_SPEED_4:
         data[9] = 0b00000100;
         break;
-    case FAN_SPEED_5:
+    case AC_FAN_SPEED_5:
         data[9] = 0b00000100;
         break; // No FAN speed 5 for MITSUBISHI so it is consider as Speed 4
-    case FAN_SPEED_AUTO:
+    case AC_FAN_SPEED_AUTO:
         data[9] = 0b10000000;
         break;
-    case FAN_SPEED_SILENT:
+    case AC_FAN_SPEED_SILENT:
         data[9] = 0b00000101;
         break;
     default:
         break;
     }
 
-    switch (acstate->ac_vannemode)
+    switch (acstate->ac_vanemode)
     {
-    case VANNE_AUTO:
+    case AC_VANE_AUTO:
         data[9] = data[9] | 0b01000000;
         break;
-    case VANNE_H1:
+    case AC_VANE_H1:
         data[9] = data[9] | 0b01001000;
         break;
-    case VANNE_H2:
+    case AC_VANE_H2:
         data[9] = data[9] | 0b01010000;
         break;
-    case VANNE_H3:
+    case AC_VANE_H3:
         data[9] = data[9] | 0b01011000;
         break;
-    case VANNE_H4:
+    case AC_VANE_H4:
         data[9] = data[9] | 0b01100000;
         break;
-    case VANNE_H5:
+    case AC_VANE_H5:
         data[9] = data[9] | 0b01101000;
         break;
-    case VANNE_AUTO_MOVE:
+    case AC_VANE_AUTO_MOVE:
         data[9] = data[9] | 0b01111000;
         break;
     default:

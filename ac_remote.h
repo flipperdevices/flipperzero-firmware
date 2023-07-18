@@ -5,26 +5,35 @@
 
 #include "furi_hal.h"
 
-#define AC_HOT 0
-#define AC_COLD 1
-#define AC_DRY 2
-#define AC_AUTO 3
+#define AC_ON 1
+#define AC_OFF 2
 
-#define FAN_SPEED_1 0
-#define FAN_SPEED_2 1
-#define FAN_SPEED_3 2
-#define FAN_SPEED_4 3
-#define FAN_SPEED_5 4
-#define FAN_SPEED_AUTO 5
-#define FAN_SPEED_SILENT 6
+#define AC_MODE_HEAT 3
+#define AC_MODE_COLD 4
+#define AC_MODE_DRY 5
+#define AC_MODE_AUTO 6
 
-#define VANNE_AUTO 0
-#define VANNE_H1 1
-#define VANNE_H2 2
-#define VANNE_H3 3
-#define VANNE_H4 4
-#define VANNE_H5 5
-#define VANNE_AUTO_MOVE 6
+#define AC_FAN_SPEED_1 7
+#define AC_FAN_SPEED_2 8
+#define AC_FAN_SPEED_3 9
+#define AC_FAN_SPEED_4 10
+#define AC_FAN_SPEED_5 11
+#define AC_FAN_SPEED_AUTO 12
+#define AC_FAN_SPEED_SILENT 13
+
+#define AC_VANE_AUTO 14
+#define AC_VANE_H1 15
+#define AC_VANE_H2 16
+#define AC_VANE_H3 17
+#define AC_VANE_H4 18
+#define AC_VANE_H5 19
+#define AC_VANE_AUTO_MOVE 20
+
+#define AC_TOO_COOL 21
+#define AC_TOO_WARM 22
+
+#define AC_MIN_TEMPERATURE 16
+#define AC_MAX_TEMPERATURE 31
 
 #define AC_MITSUBISHI_HDR_MARK 3400
 #define AC_MITSUBISHI_HDR_SPACE 1750
@@ -39,7 +48,7 @@ typedef struct {
     int ac_mode;
     int ac_temp;
     int ac_fanmode;
-    int ac_vannemode;
+    int ac_vanemode;
 } ACState;
 
 void send_ac_mitsubishi(ACState* acstate);
