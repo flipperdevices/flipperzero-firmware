@@ -26,7 +26,7 @@ jobs:
       - name: Build FAPs
         run: ./fbt COMPACT=1 DEBUG=0 faps
       - name: Check flipper-chess Built
-        run: test -f build/f7-firmware-C/.extapps/flipchess.fap
+        run: test -f build/f7-firmware-C/.extapps/chess.fap
       - name: Get Tag
         id: tag
         uses: dawidd6/action-get-tag@v1
@@ -36,7 +36,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            build/f7-firmware-C/.extapps/flipchess.fap
+            build/f7-firmware-C/.extapps/chess.fap
             applications_user/flipper-chess/README.md
           name: ${{steps.tag.outputs.tag}}
           body: Built against Flipper Zero firmware v${{ env.firmware_version }}
