@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0717-1841-0.86.3-2d716eb](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-17 20:28 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-17 20:28 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-18 13:09 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-18 13:09 EST`
 - Updated: [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) to use `subghz/assets/setting_user.pocsag`
 - [Fixed many external app references to internal assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d758c8d7ce4b4b7a16ecf167d02528aa1571965d)
 - Added: [Rock Paper Scissors (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/plugins/rock_paper_scissors)
@@ -57,6 +57,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Updated: [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) & [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) (Changes By Sil333033)
 - [Reorganized GPIO Apps #710 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/710)
 - Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
+- OFW: [Gauge initialization routine refactoring, new DataMemory layout, configuration update #2887 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2887)
+- OFW: [fbt: build target for faps #2888 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2888)
 
 <a name="release">
 
