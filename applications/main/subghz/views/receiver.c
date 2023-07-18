@@ -1,6 +1,6 @@
 #include "receiver.h"
 #include "../subghz_i.h"
-#include <subghz_icons.h>
+#include <assets_icons.h>
 #include <math.h>
 
 #include <input/input.h>

@@ -1,5 +1,5 @@
 #include "../subghz_i.h"
-#include <subghz_icons.h>
+#include <assets_icons.h>
 #include "../helpers/subghz_custom_event.h"
 
 #include <lib/subghz/blocks/custom_btn.h>

@@ -1,5 +1,5 @@
 #include "../subghz_i.h"
-#include <subghz_icons.h>
+#include <assets_icons.h>
 #include "../helpers/subghz_custom_event.h"
 
 void subghz_scene_delete_success_popup_callback(void* context) {
