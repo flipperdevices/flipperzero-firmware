@@ -2,7 +2,7 @@ With the BT Trigger app, you can remotely take pictures with the help of your Fl
 
 To take a picture remotely, do as follows:
 
-1. Run the BT Trigger app and connect to your smartphone. Your Flipper Zero will be displayed as Control <device name> in Bluetooth settings.
+1. Run the BT Trigger app and connect to your smartphone. Your Flipper Zero will be displayed as Control (device name) in Bluetooth settings.
 2. Run the Camera app on your smartphone.
 3. To take one picture, press the Right button.
 
