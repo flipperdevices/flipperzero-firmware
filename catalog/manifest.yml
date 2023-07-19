@@ -3,15 +3,15 @@ sourcecode:
   location:
     origin: https://github.com/xtruan/FlipBIP.git
     commit_sha: e19ecc0145e2e63035682209f84e5ffd4fa4b2a7
-short_description: "Crypto wallet for Flipper Zero"
-description: "@README.md"
+short_description: "Crypto wallet"
 changelog: "v1.10.0"
+author: "@xtruan"
 screenshots:
-  - catalog/startscreen.png
-  - catalog/menu1.png
-  - catalog/menu2.png
-  - catalog/input_mnemonic.png
-  - catalog/btc_loading.png
-  - catalog/wallet_info.png
-  - catalog/btc_receive.png
-  - catalog/settings.png
+  - "./catalog/startscreen.png"
+  - "./catalog/menu1.png"
+  - "./catalog/menu2.png"
+  - "./catalog/input_mnemonic.png"
+  - "./catalog/btc_loading.png"
+  - "./catalog/wallet_info.png"
+  - "./catalog/btc_receive.png"
+  - "./catalog/settings.png"
