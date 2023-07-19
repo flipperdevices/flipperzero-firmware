@@ -1,0 +1,5 @@
+(kicad_wks (version 20210606) (generator pl_editor)
+  (setup (textsize 1.5 1.5)(linewidth 0.15)(textlinewidth 0.15)
+  (left_margin 10)(right_margin 10)(top_margin 10)(bottom_margin 10))
+  (line (name "segm1:Line") (start 0 0) (end 0 0))
+)
