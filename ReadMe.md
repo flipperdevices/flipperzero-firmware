@@ -65,6 +65,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) (Removed Broken Wifi Elements (By RogueMaster))
 - Sub-GHz: [Switched to internal to test RAM issues; it is temporarily moved on main menu to after CFW Settings (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1cd6d2d61532ffe575a7e813640971ff5ff78d37)
 - UL: Archive (FileBrowser): Added Cut/Copy/Paste & NewDir options in new menu (original feature made by Willy-JL and ported by gid9798)
+- [Evil Portal Asset: Instagram Login Pages (By grugnoymeme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/713)
+- [Marauder Asset: Script to deauth and sniff EAPOL packets (By grugnoymeme )](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/714)
 
 <a name="release">
 
