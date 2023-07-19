@@ -3,8 +3,8 @@ sourcecode:
   location:
     origin: https://github.com/xtruan/flipper-chess.git
     commit_sha: e8848729111f51cf02469179e30211b6d9885a9a
-short_description: "Chess game"
-changelog: "v1.7.0 - Released for Flipper App Catalog"
+description: "How about a nice game of chess?"
+changelog: "v1.7.0 - Fixed icon"
 author: "@xtruan"
 screenshots:
   - "./catalog/startscreen.png"
