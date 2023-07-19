@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef enum {
     FlipBipFileDat,
@@ -7,7 +8,11 @@ typedef enum {
 } FlipBipFile;
 
 bool flipbip_has_file(const FlipBipFile file_type, const char* file_name, const bool remove);
-bool flipbip_load_file(char* settings, const FlipBipFile file_type, const char* file_name);
+bool flipbip_load_file(
+    char* settings,
+    size_t slen,
+    const FlipBipFile file_type,
+    const char* file_name);
 bool flipbip_save_file(
     const char* settings,
     const FlipBipFile file_type,

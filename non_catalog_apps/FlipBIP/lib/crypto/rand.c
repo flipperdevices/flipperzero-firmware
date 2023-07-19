@@ -52,8 +52,7 @@ void random_buffer(uint8_t* buf, size_t len) {
 
 #else /* PLATFORM INDEPENDENT */
 
-#pragma message( \
-        "NOT SUITABLE FOR PRODUCTION USE! Replace random32() function with your own secure code.")
+#pragma message("NOT SUITABLE FOR PRODUCTION USE! Replace random32() function with your own secure code.")
 
 // The following code is not supposed to be used in a production environment.
 // It's included only to make the library testable.
@@ -69,20 +68,20 @@ void random_buffer(uint8_t* buf, size_t len) {
 //
 
 uint32_t random32(void) {
-    // Linear congruential generator from Numerical Recipes
-    // https://en.wikipedia.org/wiki/Linear_congruential_generator
-    seed = 1664525 * seed + 1013904223;
-    return seed;
+  // Linear congruential generator from Numerical Recipes
+  // https://en.wikipedia.org/wiki/Linear_congruential_generator
+  seed = 1664525 * seed + 1013904223;
+  return seed;
 }
 
-void __attribute__((weak)) random_buffer(uint8_t* buf, size_t len) {
-    uint32_t r = 0;
-    for(size_t i = 0; i < len; i++) {
-        if(i % 4 == 0) {
-            r = random32();
-        }
-        buf[i] = (r >> ((i % 4) * 8)) & 0xFF;
+void __attribute__((weak)) random_buffer(uint8_t *buf, size_t len) {
+  uint32_t r = 0;
+  for (size_t i = 0; i < len; i++) {
+    if (i % 4 == 0) {
+      r = random32();
     }
+    buf[i] = (r >> ((i % 4) * 8)) & 0xFF;
+  }
 }
 
 #endif /* FLIPPER_HAL_RANDOM */
