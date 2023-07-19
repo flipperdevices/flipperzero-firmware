@@ -1,9 +1,16 @@
 # Changelog
 
+## [v2.3.0](https://github.com/akopachov/flipper-zero_authenticator/releases/tag/v2.3.0) - 18 Jul 2023
+
+* Implemented [#165](https://github.com/akopachov/flipper-zero_authenticator/issues/165)
+* Just a bit of refactoring
+
+
 ## [v2.2.3](https://github.com/akopachov/flipper-zero_authenticator/releases/tag/v2.2.3) - 10 Jul 2023
 
 * Refactoring [#162](https://github.com/akopachov/flipper-zero_authenticator/issues/158) 
 * Updated repo to match [OFW catalog](https://github.com/flipperdevices/flipper-application-catalog/) requirements
+
 
 ## [v2.2.2](https://github.com/akopachov/flipper-zero_authenticator/releases/tag/v2.2.2) - 19 Jun 2023
 
