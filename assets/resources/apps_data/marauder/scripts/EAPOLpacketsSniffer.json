@@ -1,0 +1,15 @@
+{
+	"meta":	{
+		"description":	"EAPOL Packets Sniffer",
+		"repeat":	1.0000000000000000
+	},
+	"stages":	[{
+			"deauth":	{
+				"timeout":	1.0000000000000000
+			}
+		}, {
+			"sniffRaw":	{
+				"timeout":	15.000000000000000
+			}
+		}]
+}
