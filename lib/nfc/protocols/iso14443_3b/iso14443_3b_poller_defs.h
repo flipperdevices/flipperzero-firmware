@@ -1,13 +1,12 @@
 #pragma once
 
-#include "nfcb_poller.h"
 #include <nfc/protocols/nfc_poller_base.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern const NfcPollerBase nfcb_protocol_base;
+extern const NfcPollerBase nfc_poller_iso14443_3b;
 
 #ifdef __cplusplus
 }

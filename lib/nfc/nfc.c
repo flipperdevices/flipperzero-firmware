@@ -256,6 +256,9 @@ void nfc_config(Nfc* instance, NfcMode mode) {
         f_hal_nfc_low_power_mode_stop();
         f_hal_nfc_set_mode(FHalNfcModeIso14443_3aListener, FHalNfcBitrate106);
         instance->config_state = NfcConfigurationStateDone;
+    } else if(mode == NfcModeIso14443_3bPoller) {
+        f_hal_nfc_set_mode(FHalNfcModeIso14443_3bPoller, FHalNfcBitrate106);
+        instance->config_state = NfcConfigurationStateDone;
     }
 }
 

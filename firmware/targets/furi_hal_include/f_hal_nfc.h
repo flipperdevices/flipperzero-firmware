@@ -44,8 +44,8 @@ typedef enum {
     FHalNfcModeIso14443_3aPoller,
     FHalNfcModeIso14443_3aListener,
 
-    FHalNfcModeNfcbPoller,
-    FHalNfcModeNfcbListener,
+    FHalNfcModeIso14443_3bPoller,
+    FHalNfcModeIso14443_3bListener,
 
     FHalNfcModeNfcfPoller,
     FHalNfcModeNfcfListener,
