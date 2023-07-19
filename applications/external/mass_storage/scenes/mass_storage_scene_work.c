@@ -88,7 +88,6 @@ void mass_storage_scene_work_on_enter(void* context) {
         .eject = file_eject,
     };
 
-    // TODO: Extract filename
     app->usb = mass_storage_usb_start(furi_string_get_cstr(file_name), fn);
 
     furi_string_free(file_name);

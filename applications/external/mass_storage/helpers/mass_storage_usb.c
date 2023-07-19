@@ -81,8 +81,7 @@ static int32_t mass_thread_worker(void* context) {
         uint32_t flags = furi_thread_flags_wait(EventAll, FuriFlagWaitAny, FuriWaitForever);
         if(flags & EventExit) {
             FURI_LOG_I(TAG, "exit");
-            free(buf);
-            return 0;
+            break;
         }
         if(flags & EventReset) {
             FURI_LOG_I(TAG, "reset");
@@ -177,7 +176,7 @@ static int32_t mass_thread_worker(void* context) {
                     uint32_t buf_clamp = MIN(cbw.len, USB_MSC_BUF_MAX);
                     if(buf_clamp > buf_cap) {
                         // FURI_LOG_I(TAG, "growing buf %d -> %d", buf_cap, buf_clamp);
-                        free(buf);
+                        free(buf); // TODO: realloc
                         buf_cap = buf_clamp;
                         buf = malloc(buf_cap);
                     }
@@ -247,6 +246,10 @@ static int32_t mass_thread_worker(void* context) {
                 break;
             } while(true);
     }
+    if(buf) {
+        free(buf);
+    }
+    return 0;
 }
 
 // needed in usb_deinit, usb_suspend, usb_rxtx_ep_callback, usb_control,
