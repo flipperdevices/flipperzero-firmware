@@ -21,7 +21,7 @@ jobs:
     - name: Get last commit on ${{ github.base_ref }} branch
       run: echo "BASE_HEAD_REF=$(git rev-parse origin/${{ github.base_ref }})" >> $GITHUB_ENV
 
-    - uses: akopachov/clang-format-action@main
+    - uses: akopachov/git-clang-format-diff-action@v1.0.0
       with:
         style: file
         commit: ${{ env.BASE_HEAD_REF }}
