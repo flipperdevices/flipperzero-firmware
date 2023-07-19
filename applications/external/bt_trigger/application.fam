@@ -12,6 +12,6 @@ App(
     fap_icon_assets_symbol="bt_trigger",
     fap_author="@Nem0oo",
     fap_weburl="https://github.com/Nem0oo/flipper-zero-bluetooth-trigger",
-    fap_version=(1, 0),
-    fap_description="App allows you to control your smartphone camera via flipper",
+    fap_version=(1, 1),
+    fap_description="Control your smartphone camera via your Flipper Zero",
 )

@@ -13,6 +13,6 @@ App(
     fap_icon_assets="icons",
     fap_author="@sbrin",
     fap_weburl="https://github.com/sbrin/flipperzero_pomodoro",
-    fap_version=(1, 0),
-    fap_description="Simple Pomodoro Timer app for Flipper Zero",
+    fap_version=(1, 1),
+    fap_description="Use your Flipper Zero as a Pomodoro Timer.",
 )

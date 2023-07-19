@@ -1,7 +1,3 @@
-# BT Trigger
-
-Control your smartphone camera via your Flipper Zero
-
 With the BT Trigger app, you can remotely take pictures with the help of your Flipper Zero via Bluetooth Low Energy.
 
 To take a picture remotely, do as follows:
