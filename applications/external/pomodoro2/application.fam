@@ -11,6 +11,6 @@ App(
     fap_icon_assets_symbol="flipp_pomodoro",
     fap_author="@Th3Un1q3",
     fap_weburl="https://github.com/Th3Un1q3/flipp_pomodoro",
-    fap_version=(1, 1),
+    fap_version=(1, 2),
     fap_description="Boost Your Productivity with the Pomodoro Timer",
 )
