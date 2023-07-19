@@ -72,7 +72,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Barcode app embed assets (encoding tables) in plugin (By xMasterX)
 - UL: SubGHz: Replace FM15k with AM_Q in default modulations (By xMasterX)
 - UL: OFW PR: faploader: always create app dir, even if it doesnt have subdirs (By hedger)
-- [Add One-Click Devboard flash to ESP Flasher (By ClaraCrazy)]
+- [Add One-Click Devboard flash to ESP Flasher (By ClaraCrazy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4b39deb02cadb19b161e9edf1f1f9fd15c85adff)
 
 <a name="release">
 
