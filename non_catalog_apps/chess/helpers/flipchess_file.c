@@ -1,6 +1,5 @@
 #include "flipchess_file.h"
 #include <storage/storage.h>
-#include <applications.h>
 #include <loader/loader.h>
 
 // #define FLIPCHESS_APP_BASE_FOLDER APP_BOARDA_PATH("flipchess")
