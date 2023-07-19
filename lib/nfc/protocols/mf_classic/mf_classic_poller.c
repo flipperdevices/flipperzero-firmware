@@ -51,11 +51,11 @@ void mf_classic_poller_free(MfClassicPoller* instance) {
 }
 
 NfcCommand mf_classic_poller_handler_idle(MfClassicPoller* instance) {
+    NfcCommand command = NfcCommandContinue;
+
     iso14443_3a_copy(
         instance->data->iso14443_3a_data,
         iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
-    NfcCommand command = NfcCommandContinue;
-
     if(mf_classic_detect_protocol(instance->data->iso14443_3a_data, &instance->data->type)) {
         if(instance->card_state == MfClassicCardStateNotDetected) {
             instance->card_state = MfClassicCardStateDetected;
@@ -71,14 +71,21 @@ NfcCommand mf_classic_poller_handler_idle(MfClassicPoller* instance) {
 NfcCommand mf_classic_poller_handler_start(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
 
+    iso14443_3a_copy(
+        instance->data->iso14443_3a_data,
+        iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
+    mf_classic_detect_protocol(instance->data->iso14443_3a_data, &instance->data->type);
     instance->sectors_read = 0;
     instance->sectors_total = mf_classic_get_total_sectors_num(instance->data->type);
 
-    instance->mfc_event_data.start_data.type = instance->data->type;
+    instance->mfc_event.type = MfClassicPollerEventTypeRequestMode;
     command = instance->callback(instance->general_event, instance->context);
 
+    if(instance->mfc_event_data.poller_mode.mode == MfClassicPollerModeDictAttack) {
+        instance->state = MfClassicPollerStateNewSector;
+    }
+
     instance->prev_state = MfClassicPollerStateStart;
-    instance->state = MfClassicPollerStateNewSector;
 
     return command;
 }
@@ -119,6 +126,7 @@ NfcCommand mf_classic_poller_handler_new_sector(MfClassicPoller* instance) {
 NfcCommand mf_classic_poller_handler_request_key(MfClassicPoller* instance) {
     NfcCommand command = NfcCommandContinue;
 
+    instance->mfc_event.type = MfClassicPollerEventTypeRequestKey;
     instance->mfc_event_data.key_request_data.sector_num = instance->sectors_read;
     command = instance->callback(instance->general_event, instance->context);
     if(instance->mfc_event_data.key_request_data.key_provided) {
@@ -287,25 +295,17 @@ NfcCommand mf_classic_poller_run(NfcGenericEvent event, void* context) {
     Iso14443_3aPollerEvent* iso14443_3a_event = event.data;
     NfcCommand command = NfcCommandContinue;
 
-    UNUSED(mf_classic_poller_dict_attack_handler);
     if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeReady) {
-        // TODO: Temporary measure
-        iso14443_3a_copy(
-            instance->data->iso14443_3a_data,
-            iso14443_3a_poller_get_data(instance->iso14443_3a_poller));
-        instance->mfc_event.type = MfClassicPollerEventTypeReadComplete;
-        command = instance->callback(instance->general_event, instance->context);
-
-        //     command = mf_classic_poller_dict_attack_handler[instance->state](instance);
-        // } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
-        //     if(iso14443_3a_event->data->error == Iso14443_3aErrorNotPresent) {
-        //         if(instance->card_state == MfClassicCardStateDetected) {
-        //             instance->card_state = MfClassicCardStateNotDetected;
-        //             instance->mfc_event.type = MfClassicPollerEventTypeCardNotDetected;
-        //             command = instance->callback(instance->general_event, instance->context);
-        //             instance->state = MfClassicPollerStateIdle;
-        //         }
-        //     }
+        command = mf_classic_poller_dict_attack_handler[instance->state](instance);
+    } else if(iso14443_3a_event->type == Iso14443_3aPollerEventTypeError) {
+        if(iso14443_3a_event->data->error == Iso14443_3aErrorNotPresent) {
+            if(instance->card_state == MfClassicCardStateDetected) {
+                instance->card_state = MfClassicCardStateNotDetected;
+                instance->mfc_event.type = MfClassicPollerEventTypeCardNotDetected;
+                command = instance->callback(instance->general_event, instance->context);
+                instance->state = MfClassicPollerStateIdle;
+            }
+        }
     }
 
     return command;

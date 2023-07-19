@@ -40,6 +40,9 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
 
     NfcApp* instance = context;
     const MfClassicPollerEvent* mf_classic_event = event.data;
+    NfcCommand command = NfcCommandStop;
+    view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerIncomplete);
+    return command;
 
     // TODO: Implement read mf_classic using key cache
     if(mf_classic_event->type == MfClassicPollerEventTypeReadComplete) {
@@ -53,7 +56,7 @@ static NfcCommand nfc_scene_read_poller_callback_mf_classic(NfcGenericEvent even
         return NfcCommandStop;
     }
 
-    return NfcCommandContinue;
+    return command;
 }
 
 static void nfc_scene_read_on_enter_mf_classic(NfcApp* instance) {
