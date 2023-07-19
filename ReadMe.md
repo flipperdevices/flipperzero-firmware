@@ -68,6 +68,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Marauder Asset: Script to deauth and sniff EAPOL packets (By grugnoymeme )](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/714)
 - Updated: [Sub-GHz Bruteforcer v3.7 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
 - Updated: [Chess v1.7 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- Zero Tracker renamed to Music Tracker
+- UL: Barcode app embed assets (encoding tables) in plugin (By xMasterX)
+- UL: SubGHz: Replace FM15k with AM_Q in default modulations (By xMasterX)
+- UL: OFW PR: faploader: always create app dir, even if it doesnt have subdirs (By hedger)
 
 <a name="release">
 
