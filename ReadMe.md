@@ -1,5 +1,5 @@
-# Flipper Application Files (FAPs) for Any Firmware with API v33.x
-## Apps from this pack should be compatible with OFW with API v33.x (dev branch) or any other firmware build with API 33.x
+# Flipper Application Files (FAPs) for Any Firmware with API v34.x
+## Apps from this pack should be compatible with OFW with API v34.x (dev branch) or any other firmware build with API 34.x
 
 ## [Download all files by using this link, and copy only apps folder onto your microSD](https://download-directory.github.io/?url=https://github.com/xMasterX/all-the-plugins/tree/main/apps) (does not include [bundled apps](https://github.com/DarkFlippers/unleashed-firmware#community-apps-included))
 
@@ -20,7 +20,7 @@ Sources of "integrated/bundled" apps are added now in this repo too, to allow pu
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `8 Jul 20:59 GMT +3`
+### Apps checked & updated at `18 Jul 02:22 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -50,6 +50,9 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
+- [Chess (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
+- [Tanks Game (By alexgr13)](https://github.com/alexgr13/flipperzero-firmware/tree/fork/dev/applications/tanks-game) - Fixes for latest subghz changes by @Sil333033
 
 ## Media
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork) - Fixes [(by Willy-JL)](https://github.com/ClaraCrazy/Flipper-Xtreme/commit/44023851f7349b6ae9ca9f9bd9228d795a7e04c0)
@@ -95,8 +98,10 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [MH-Z19 - CO2 sensor (By meshchaninov)](https://github.com/meshchaninov/flipper-zero-mh-z19)
 - [Plantower PMSx003 sensor reader (By 3cky)](https://github.com/3cky/flipperzero-airmon)
 - [Evil captive portal (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) - WIP
+- [ESP Flasher (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
+- [ESP32-C6 Gravity terminal (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
 
-## Tools / Misc
+## Tools / Misc / NFC / RFID / Infrared / etc..
 - [Calculator (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
 - [Ceasar Cipher (By panki27)](https://github.com/panki27/caesar-cipher)
 - [Pomodoro Timer (By sbrin)](https://github.com/sbrin/flipperzero_pomodoro)
@@ -122,6 +127,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Resistance calculator (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
 - [IR Intervalometer for Sony Cameras (By Nitepone)](https://github.com/Nitepone/flipper-intervalometer)
 - [CLI-GUI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) -> (Fixed by @Willy-JL)
+- [Seader (By bettse)](https://github.com/bettse/seader/tree/main) - `Interface with a SAM from the Flipper Zero over UART`
+- [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon) - `A letter/number Morse beacon on 125 kHz`
 
 --- 
 

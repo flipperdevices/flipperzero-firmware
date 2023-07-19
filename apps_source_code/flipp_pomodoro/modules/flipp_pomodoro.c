@@ -18,9 +18,9 @@ PomodoroStage stages_sequence[] = {
 };
 
 char* current_stage_label[] = {
-    [FlippPomodoroStageFocus] = "Continue focus for:",
-    [FlippPomodoroStageRest] = "Keep rest for:",
-    [FlippPomodoroStageLongBreak] = "Long Break for:",
+    [FlippPomodoroStageFocus] = "Focusing...",
+    [FlippPomodoroStageRest] = "Short Break...",
+    [FlippPomodoroStageLongBreak] = "Long Break...",
 };
 
 char* next_stage_label[] = {
