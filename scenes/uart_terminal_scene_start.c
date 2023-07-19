@@ -311,6 +311,9 @@ void uart_terminal_scene_start_on_enter(void* context) {
             item, items[i].options_menu[app->selected_option_index[i]]);
     }
 
+    /* Initialise the serial console */
+    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneStart));
 
