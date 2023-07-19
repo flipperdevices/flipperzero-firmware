@@ -19,7 +19,7 @@ struct SubBruteAttackView {
     uint64_t max_value;
     uint64_t current_step;
     bool is_attacking;
-    uint8_t extra_repeats;
+    // uint8_t extra_repeats;
 };
 
 typedef struct {
@@ -226,7 +226,7 @@ void subbrute_attack_view_init_values(
     instance->max_value = max_value;
     instance->current_step = current_step;
     instance->is_attacking = is_attacking;
-    instance->extra_repeats = extra_repeats;
+    // instance->extra_repeats = extra_repeats;
 
     with_view_model(
         instance->view,
@@ -308,7 +308,7 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
             buffer,
             sizeof(buffer),
             "x%d",
-            model->extra_repeats + subbrute_protocol_repeats_count(model->attack_type));
+            model->extra_repeats); // + subbrute_protocol_repeats_count(model->attack_type));
         canvas_draw_str_aligned(canvas, 60, 6, AlignCenter, AlignCenter, buffer);
 
         elements_button_left(canvas, "-1");
@@ -335,7 +335,7 @@ void subbrute_attack_view_draw(Canvas* canvas, void* context) {
             buffer,
             sizeof(buffer),
             "x%d",
-            model->extra_repeats + subbrute_protocol_repeats_count(model->attack_type));
+            model->extra_repeats); // + subbrute_protocol_repeats_count(model->attack_type));
         canvas_draw_str(canvas, 4, y - 8, buffer);
         canvas_draw_str(canvas, 4, y - 1, "repeats");
 

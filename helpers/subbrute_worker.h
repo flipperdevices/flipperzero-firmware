@@ -43,9 +43,14 @@ void subbrute_worker_set_callback(
     void* context);
 
 uint8_t subbrute_worker_get_timeout(SubBruteWorker* instance);
+void subbrute_worker_set_timeout(SubBruteWorker* instance, uint8_t timeout);
+uint8_t subbrute_worker_get_repeats(SubBruteWorker* instance);
+void subbrute_worker_set_repeats(SubBruteWorker* instance, uint8_t repeats);
+uint32_t subbrute_worker_get_te(SubBruteWorker* instance);
+void subbrute_worker_set_te(SubBruteWorker* instance, uint32_t te);
 
-void subbrute_worker_timeout_inc(SubBruteWorker* instance);
+// void subbrute_worker_timeout_inc(SubBruteWorker* instance);
 
-void subbrute_worker_timeout_dec(SubBruteWorker* instance);
+// void subbrute_worker_timeout_dec(SubBruteWorker* instance);
 
 bool subbrute_worker_is_tx_allowed(SubBruteWorker* instance, uint32_t value);
