@@ -1,0 +1,16 @@
+sourcecode:
+  type: git
+  location:
+    origin: https://github.com/xtruan/flipper-chess.git
+    commit_sha: 78e21aab8e7fa5ed68c1499380e6963a6d476d0c
+short_description: "Chess game for Flipper Zero"
+description: "@README.md"
+changelog: "v1.5.0"
+screenshots:
+  - catalog/startscreen.png
+  - catalog/menu.png
+  - catalog/game2.png
+  - catalog/game3.png
+  - catalog/game4.png
+  - catalog/game5.png
+  - catalog/settings.png
