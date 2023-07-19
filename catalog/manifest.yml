@@ -2,9 +2,9 @@ sourcecode:
   type: git
   location:
     origin: https://github.com/xtruan/flipper-chess.git
-    commit_sha: d599ac03427cec682ff5879793047d2bdb179bf0
+    commit_sha: e8848729111f51cf02469179e30211b6d9885a9a
 short_description: "Chess game"
-changelog: "v1.6.0 - Released for Flipper App Catalog"
+changelog: "v1.7.0 - Released for Flipper App Catalog"
 author: "@xtruan"
 screenshots:
   - "./catalog/startscreen.png"
