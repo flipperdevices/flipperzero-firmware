@@ -46,7 +46,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Evil Portal Asset: Twitch & PornHub Login Pages (By roshanravan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3431fe56893c69463f6a36e1dc8c996dd358420d)
 - Added: [YRM100 UHF RFID (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`  Not Tested
 - Added: [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
-- Updated: [Chess v1.4 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - UL: OFW: [Radio headers in SDK #2881 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2881)
 - UL: OFW: [iButton: delete key text overflow #2882 (By Programistich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2882)
 - Keeping Sub-GHz as External like OFW
@@ -68,6 +67,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Evil Portal Asset: Instagram Login Pages (By grugnoymeme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/713)
 - [Marauder Asset: Script to deauth and sniff EAPOL packets (By grugnoymeme )](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/714)
 - Updated: [Sub-GHz Bruteforcer v3.7 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
+- Updated: [Chess v1.7 (By xtruan)](https://github.com/xtruan/flipper-chess)
 
 <a name="release">
 
@@ -236,7 +236,7 @@ $ ./fbt dolphin_ext
 - [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Bomberduck (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
-- [Chess v1.5 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess v1.7 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
@@ -259,7 +259,7 @@ $ ./fbt dolphin_ext
 - [Reaction Test (By Milk-Cool)](https://github.com/Milk-Cool/fz-reaction-game)
 - [Reaction Time (By ihatecsv)](https://github.com/ihatecsv/flipper_reaction_time)
 - [Reversi (By dimat)](https://github.com/dimat/flipperzero-reversi)
-- [Rock Paper Scissors (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/plugins/rock_paper_scissors)
+- [Rock Paper Scissors v1.4 (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/plugins/rock_paper_scissors)
 - [Root of Life (By Xorboo)](https://github.com/Xorboo/root-of-life)
 - [Rubik's Cube Scrambler (By RaZeSloth)](https://github.com/RaZeSloth/flipperzero-rubiks-cube-scrambler)
 - [Scorched Tanks (By jasniec)](https://github.com/jasniec/flipper-scorched-tanks-game)
