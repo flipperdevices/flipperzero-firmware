@@ -1,7 +1,9 @@
 #include "iso14443_3b.h"
 
 #include <furi.h>
+
 #include <nfc/nfc_common.h>
+#include <nfc/helpers/iso14443_crc.h>
 
 #define ISO14443_3B_PROTOCOL_NAME_LEGACY "UID"
 #define ISO14443_3B_PROTOCOL_NAME "ISO14443-3B"
@@ -36,7 +38,7 @@ void iso14443_3b_free(Iso14443_3bData* data) {
 }
 
 void iso14443_3b_reset(Iso14443_3bData* data) {
-    UNUSED(data);
+    memset(data, 0, sizeof(Iso14443_3bData));
 }
 
 void iso14443_3b_copy(Iso14443_3bData* data, const Iso14443_3bData* other) {
@@ -86,7 +88,7 @@ const uint8_t* iso14443_3b_get_uid(const Iso14443_3bData* data, size_t* uid_len)
     furi_assert(data);
 
     if(uid_len) {
-        *uid_len = data->uid_len;
+        *uid_len = ISO14443_3B_UID_SIZE;
     }
 
     return data->uid;
@@ -95,4 +97,34 @@ const uint8_t* iso14443_3b_get_uid(const Iso14443_3bData* data, size_t* uid_len)
 const Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data) {
     UNUSED(data);
     furi_crash("No base data");
+}
+
+void iso14443_3b_append_crc(BitBuffer* buf) {
+    const uint8_t* data = bit_buffer_get_data(buf);
+    size_t bytes = bit_buffer_get_size_bytes(buf);
+
+    const uint16_t crc = iso14443_crc_calculate(Iso14443CrcTypeB, data, bytes);
+    bit_buffer_append_bytes(buf, (const uint8_t*)&crc, ISO14443_CRC_SIZE);
+}
+
+bool iso14443_3b_check_crc(const BitBuffer* buf) {
+    const size_t data_size = bit_buffer_get_size_bytes(buf);
+    if(data_size <= ISO14443_CRC_SIZE) return false;
+
+    uint16_t crc_received;
+    bit_buffer_write_bytes_mid(
+        buf, &crc_received, data_size - ISO14443_CRC_SIZE, ISO14443_CRC_SIZE);
+
+    const uint8_t* data = bit_buffer_get_data(buf);
+    const uint16_t crc_calc =
+        iso14443_crc_calculate(Iso14443CrcTypeB, data, data_size - ISO14443_CRC_SIZE);
+
+    return (crc_calc == crc_received);
+}
+
+void iso14443_3b_trim_crc(BitBuffer* buf) {
+    const size_t data_size = bit_buffer_get_size_bytes(buf);
+    furi_assert(data_size > ISO14443_CRC_SIZE);
+
+    bit_buffer_set_size_bytes(buf, data_size - ISO14443_CRC_SIZE);
 }

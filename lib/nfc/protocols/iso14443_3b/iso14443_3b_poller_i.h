@@ -20,8 +20,6 @@ typedef enum {
 struct Iso14443_3bPoller {
     Nfc* nfc;
     Iso14443_3bPollerState state;
-    // Iso14443_3aPollerConfigState config_state;
-    // Iso14443_3aPollerColRes col_res;
     Iso14443_3bData* data;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
@@ -37,6 +35,8 @@ const Iso14443_3bData* iso14443_3b_poller_get_data(Iso14443_3bPoller* instance);
 
 Iso14443_3bError
     iso14443_3b_poller_async_activate(Iso14443_3bPoller* instance, Iso14443_3bData* data);
+
+Iso14443_3bError iso14443_3b_poller_halt(Iso14443_3bPoller* instance);
 
 #ifdef __cplusplus
 }

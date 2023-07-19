@@ -10,7 +10,7 @@ void nfc_render_iso14443_3b_info(
 
     furi_string_cat_printf(str, "UID:");
 
-    for(size_t i = 0; i < data->uid_len; i++) {
+    for(size_t i = 0; i < ISO14443_3B_UID_SIZE; i++) {
         furi_string_cat_printf(str, " %02X", data->uid[i]);
     }
 

@@ -4,7 +4,7 @@
 
 #include <furi.h>
 
-#define TAG "ISO14443_3b"
+#define TAG "ISO14443_3bPoller"
 
 const Iso14443_3bData* iso14443_3b_poller_get_data(Iso14443_3bPoller* instance) {
     furi_assert(instance);
