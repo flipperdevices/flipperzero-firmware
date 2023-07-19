@@ -76,6 +76,13 @@ SubBruteState* subbrute_alloc() {
     view_dispatcher_add_view(
         instance->view_dispatcher, SubBruteViewWidget, widget_get_view(instance->widget));
 
+    // VarList
+    instance->var_list = variable_item_list_alloc();
+    view_dispatcher_add_view(
+        instance->view_dispatcher,
+        SubBruteViewVarList,
+        variable_item_list_get_view(instance->var_list));
+
     // Popup
     instance->popup = popup_alloc();
     view_dispatcher_add_view(
@@ -144,6 +151,10 @@ void subbrute_free(SubBruteState* instance) {
     // Custom Widget
     view_dispatcher_remove_view(instance->view_dispatcher, SubBruteViewWidget);
     widget_free(instance->widget);
+
+    // VarList
+    view_dispatcher_remove_view(instance->view_dispatcher, SubBruteViewVarList);
+    variable_item_list_free(instance->var_list);
 
     // Popup
     view_dispatcher_remove_view(instance->view_dispatcher, SubBruteViewPopup);

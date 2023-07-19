@@ -453,17 +453,37 @@ uint8_t subbrute_worker_get_timeout(SubBruteWorker* instance) {
     return instance->tx_timeout_ms;
 }
 
-void subbrute_worker_timeout_inc(SubBruteWorker* instance) {
-    if(instance->tx_timeout_ms < 255) {
-        instance->tx_timeout_ms++;
-    }
+void subbrute_worker_set_timeout(SubBruteWorker* instance, uint8_t timeout) {
+    instance->tx_timeout_ms = timeout;
 }
 
-void subbrute_worker_timeout_dec(SubBruteWorker* instance) {
-    if(instance->tx_timeout_ms > 0) {
-        instance->tx_timeout_ms--;
-    }
+uint8_t subbrute_worker_get_repeats(SubBruteWorker* instance) {
+    return instance->repeat;
 }
+
+void subbrute_worker_set_repeats(SubBruteWorker* instance, uint8_t repeats) {
+    instance->repeat = repeats;
+}
+
+uint32_t subbrute_worker_get_te(SubBruteWorker* instance) {
+    return instance->te;
+}
+
+void subbrute_worker_set_te(SubBruteWorker* instance, uint32_t te) {
+    instance->te = te;
+}
+
+// void subbrute_worker_timeout_inc(SubBruteWorker* instance) {
+//     if(instance->tx_timeout_ms < 255) {
+//         instance->tx_timeout_ms++;
+//     }
+// }
+
+// void subbrute_worker_timeout_dec(SubBruteWorker* instance) {
+//     if(instance->tx_timeout_ms > 0) {
+//         instance->tx_timeout_ms--;
+//     }
+// }
 
 bool subbrute_worker_is_tx_allowed(SubBruteWorker* instance, uint32_t value) {
     furi_assert(instance);
