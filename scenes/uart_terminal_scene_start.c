@@ -269,6 +269,9 @@ static void uart_terminal_scene_start_var_list_enter_callback(void* context, uin
     bool needs_keyboard = ((item->needs_keyboard == INPUT_ARGS) ||
                             (item->needs_keyboard == TOGGLE_ARGS &&
                                 (app->selected_tx_string[cmdLen-1] == ' ')));
+    /* Initialise the serial console */
+    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
+
     if(needs_keyboard) {
         view_dispatcher_send_custom_event(app->view_dispatcher, UART_TerminalEventStartKeyboard);
     } else {
@@ -310,9 +313,6 @@ void uart_terminal_scene_start_on_enter(void* context) {
         variable_item_set_current_value_text(
             item, items[i].options_menu[app->selected_option_index[i]]);
     }
-
-    /* Initialise the serial console */
-    uart_terminal_uart_tx((uint8_t*)("\n"), 1);
 
     variable_item_list_set_selected_item(
         var_item_list, scene_manager_get_scene_state(app->scene_manager, UART_TerminalSceneStart));
