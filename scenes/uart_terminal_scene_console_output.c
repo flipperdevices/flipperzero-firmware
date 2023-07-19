@@ -41,7 +41,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             /* Display detailed instructions on getting started */
             uart_text_input_set_header_text(app->text_input, "Getting Started");
             // TODO: See if the header works
-            char string[] = "         Flipper Gravity\nGETTING STARTED\nUnless you're doing a basic beacon spam or probe flood attack, or a Mana attack, the first thing to do is turn scanning on and let it run while you explore the menu. View found APs (you can leave scanning on or turn it off), select a few APs or STAs and run a DEAUTH attack against the selected APs or STAs. When an AP is specified for a DEAUTH attack Gravity will use all STAs it identifies as clients of the specified APs. Turn off scanning and deauth, and turn on MANA or LOUD MANA. This is still being developed, but you can watch Wireshark to see if any devices send you an association request.\n";
+            char string[] = "             Flipper Gravity\nGETTING STARTED\nUnless you're doing a basic beacon spam or probe flood attack, or a Mana attack, the first thing to do is turn scanning on and let it run while you explore the menu. View found APs (you can leave scanning on or turn it off), select a few APs or STAs and run a DEAUTH attack against the selected APs or STAs. When an AP is specified for a DEAUTH attack Gravity will use all STAs it identifies as clients of the specified APs. Turn off scanning and deauth, and turn on MANA or LOUD MANA. This is still being developed, but you can watch Wireshark to see if any devices send you an association request.\n";
             furi_string_cat_str(app->text_box_store, string);
             app->text_box_store_strlen += strlen(string);
         } else if (!strcmp(app->selected_tx_string, "ABOUT")) {
@@ -49,7 +49,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             /* Display a basic about screen */
             // TODO: See if the following works:
             uart_text_input_set_header_text(app->text_input, "About");
-            char aboutStr[] = "        Flipper Gravity\n\nBy Chris BC\n    https://github.com/chris-bc/flipper-gravity\n    https://github.com/esp32c6-gravity\nMost ideas and code stolen from ESP32 Marauder and UART Terminal.";
+            char aboutStr[] = "            Flipper Gravity\n\nBy Chris BC\n    https://github.com/chris-bc/flipper-gravity\n    https://github.com/esp32c6-gravity\n\n\nMost ideas and code stolen from ESP32 Marauder and UART Terminal.";
             furi_string_cat_str(app->text_box_store, aboutStr);
             app->text_box_store_strlen += strlen(aboutStr);
         }

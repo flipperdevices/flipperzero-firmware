@@ -7,7 +7,7 @@ App(
     stack_size=1 * 1024,
     order=90,
     fap_icon="uart_terminal.png",
-    fap_category="GPIO",
+    fap_category="GPIO/ESP32",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="uart_terminal",
     fap_author="https://github.com/chris-bc",
