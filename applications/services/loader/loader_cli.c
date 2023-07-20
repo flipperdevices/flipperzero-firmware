@@ -22,9 +22,6 @@ static void loader_cli_list() {
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_APPS[i].name);
     }
-    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-        printf("\t%s\r\n", FLIPPER_EXTERNAL_APPS[i].name);
-    }
     printf("Settings:\r\n");
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_SETTINGS_APPS[i].name);
