@@ -20,6 +20,7 @@ typedef struct {
     const uint32_t features;
 
     NfcProtocolSupportSceneBase scene_info;
+    NfcProtocolSupportSceneBase scene_card_dump;
     NfcProtocolSupportSceneBase scene_read;
     NfcProtocolSupportSceneBase scene_read_menu;
     NfcProtocolSupportSceneBase scene_read_success;

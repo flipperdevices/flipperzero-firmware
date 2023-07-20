@@ -8,3 +8,5 @@ void nfc_render_mf_ultralight_info(
     const MfUltralightData* data,
     NfcProtocolFormatType format_type,
     FuriString* str);
+
+void nfc_render_mf_ultralight_dump(const MfUltralightData* data, FuriString* str);

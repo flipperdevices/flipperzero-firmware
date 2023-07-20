@@ -35,6 +35,18 @@ static void nfc_scene_info_on_enter_mf_ultralight(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
+static void nfc_scene_card_dump_on_enter_mf_ultralight(NfcApp* instance) {
+    const NfcDevice* device = instance->nfc_device;
+    const MfUltralightData* mfu = nfc_device_get_data(device, NfcProtocolMfUltralight);
+
+    furi_string_reset(instance->text_box_store);
+    nfc_render_mf_ultralight_dump(mfu, instance->text_box_store);
+
+    text_box_set_font(instance->text_box, TextBoxFontHex);
+    text_box_set_text(instance->text_box, furi_string_get_cstr(instance->text_box_store));
+    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewTextBox);
+}
+
 static NfcCommand
     nfc_scene_read_poller_callback_mf_ultralight(NfcGenericEvent event, void* context) {
     furi_assert(event.protocol == NfcProtocolMfUltralight);
@@ -147,7 +159,7 @@ static void nfc_scene_emulate_on_enter_mf_ultralight(NfcApp* instance) {
 
 static bool nfc_scene_info_on_event_mf_ultralight(NfcApp* instance, uint32_t event) {
     if(event == GuiButtonTypeRight) {
-        scene_manager_next_scene(instance->scene_manager, NfcSceneNotImplemented);
+        scene_manager_next_scene(instance->scene_manager, NfcSceneCardDump);
         return true;
     }
 
@@ -184,6 +196,11 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
         {
             .on_enter = nfc_scene_info_on_enter_mf_ultralight,
             .on_event = nfc_scene_info_on_event_mf_ultralight,
+        },
+    .scene_card_dump =
+        {
+            .on_enter = nfc_scene_card_dump_on_enter_mf_ultralight,
+            .on_event = NULL,
         },
     .scene_read =
         {
