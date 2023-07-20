@@ -1,7 +1,6 @@
 #include "si4463_ext_interconnect.h"
 #include "si4463_ext.h"
 #include "config/si4463_config.h"
-#include "driver/si446x_regs.h"
 
 #define TAG "SubGhzDeviceSi4463Ext"
 
@@ -62,7 +61,8 @@ static void subghz_device_si4463_ext_interconnect_load_preset(
     //     break;
 
     default:
-        subghz_device_si4463_ext_load_custom_preset(preset_data);
+        furi_crash("Si4463. need to implement subghz_device_si4463_ext_mod_gpio_for_async");
+        subghz_device_si4463_ext_load_config(preset_data);
     }
     subghz_device_si4463_set_pa(SI446X_SET_MAX_PA);
 }

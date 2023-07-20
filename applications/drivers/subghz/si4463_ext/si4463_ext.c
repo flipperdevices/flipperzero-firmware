@@ -118,7 +118,7 @@ void subghz_device_si4463_ext_load_config(const uint8_t config[]) {
     si446x_clear_interrupt_status(subghz_device_si4463_ext->spi_bus_handle);
 }
 
-static void subghz_device_si4463_ext_mod_gpio_for_async(SI446X_Prop_Modem_Mod_Type_t modulation) {
+void subghz_device_si4463_ext_mod_gpio_for_async(SI446X_Prop_Modem_Mod_Type_t modulation) {
     //ASYNC	1	Direct mode operates in asynchronous mode, applies to TX only. GFSK is not supported.
     uint8_t modem_mod[1] = {0};
 
@@ -317,6 +317,7 @@ void subghz_device_si4463_ext_load_registers(const uint8_t data[][2]) {
 
 void subghz_device_si4463_set_pa(uint8_t pa) {
     si446x_set_pa(subghz_device_si4463_ext->spi_bus_handle, pa);
+    
 }
 
 

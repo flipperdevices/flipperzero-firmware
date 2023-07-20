@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <toolbox/level_duration.h>
 #include <furi_hal_gpio.h>
+#include "driver/si446x_regs.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -100,6 +101,8 @@ void subghz_device_si4463_ext_dump_state();
 //  * @param      preset  to load
 //  */
 // void subghz_device_si4463_ext_load_preset(FuriHalSubGhzPreset preset);
+
+void subghz_device_si4463_ext_mod_gpio_for_async(SI446X_Prop_Modem_Mod_Type_t modulation);
 
 /** Load registers
  *
