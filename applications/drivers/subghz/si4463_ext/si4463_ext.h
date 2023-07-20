@@ -9,57 +9,83 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <toolbox/level_duration.h>
+#include <furi_hal_gpio.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** Radio Presets */
-typedef enum {
-    FuriHalSubGhzPresetIDLE, /**< default configuration */
-    FuriHalSubGhzPresetOok270Async, /**< OOK, bandwidth 270kHz, asynchronous */
-    FuriHalSubGhzPresetOok650Async, /**< OOK, bandwidth 650kHz, asynchronous */
-    FuriHalSubGhzPresetOok650AsyncFreq, /**< OOK, bandwidth 650kHz, asynchronous, 500bps, for frequency analyzer */
-    FuriHalSubGhzPreset2FSKDev238Async, /**< FM, deviation 2.380371 kHz, asynchronous */
-    FuriHalSubGhzPreset2FSKDev476Async, /**< FM, deviation 4.760742 kHz, asynchronous */
-    FuriHalSubGhzPresetMSK99_97KbAsync, /**< MSK, deviation 47.60742 kHz, 99.97Kb/s, asynchronous */
-    FuriHalSubGhzPresetGFSK9_99KbAsync /**< GFSK, deviation 19.042969 kHz, 9.996Kb/s, asynchronous */
-} FuriHalSubGhzPreset;
+// /** Radio Presets */
+// typedef enum {
+//     FuriHalSubGhzPresetIDLE, /**< default configuration */
+//     FuriHalSubGhzPresetOok270Async, /**< OOK, bandwidth 270kHz, asynchronous */
+//     FuriHalSubGhzPresetOok650Async, /**< OOK, bandwidth 650kHz, asynchronous */
+//     FuriHalSubGhzPresetOok650AsyncFreq, /**< OOK, bandwidth 650kHz, asynchronous, 500bps, for frequency analyzer */
+//     FuriHalSubGhzPreset2FSKDev238Async, /**< FM, deviation 2.380371 kHz, asynchronous */
+//     FuriHalSubGhzPreset2FSKDev476Async, /**< FM, deviation 4.760742 kHz, asynchronous */
+//     FuriHalSubGhzPresetMSK99_97KbAsync, /**< MSK, deviation 47.60742 kHz, 99.97Kb/s, asynchronous */
+//     FuriHalSubGhzPresetGFSK9_99KbAsync /**< GFSK, deviation 19.042969 kHz, 9.996Kb/s, asynchronous */
+// } FuriHalSubGhzPreset;
+
+// /** SubGhz state */
+// typedef enum {
+//     SubGhzStateInit, /**< Init pending */
+
+//     SubGhzStateIdle, /**< Idle, energy save mode */
+
+//     SubGhzStateAsyncRx, /**< Async RX started */
+
+//     SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
+//     SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
+//     SubGhzStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
+
+// } SubGhzState;
+
+// /** SubGhz regulation, receive transmission on the current frequency for the
+//  * region */
+// typedef enum {
+//     SubGhzRegulationOnlyRx, /**only Rx*/
+//     SubGhzRegulationTxRx, /**TxRx*/
+// } SubGhzRegulation;
 
 /** Switchable Radio Paths */
 typedef enum {
-    FuriHalSubGhzPathIsolate, /**< Isolate Radio from antenna */
-    FuriHalSubGhzPath433, /**< Center Frquency: 433MHz. Path 1: SW1RF1-SW2RF2, LCLCL */
-    FuriHalSubGhzPath315, /**< Center Frquency: 315MHz. Path 2: SW1RF2-SW2RF1, LCLCLCL */
-    FuriHalSubGhzPath868, /**< Center Frquency: 868MHz. Path 3: SW1RF3-SW2RF3, LCLC */
-} FuriHalSubGhzPath;
+    SubGhzDeviceSi4463ExtPathIsolate, /**< Isolate Radio from antenna */
+    SubGhzDeviceSi4463ExtPath433, /**< Center Frquency: 433MHz. Path 1: SW1RF1-SW2RF2, LCLCL */
+    SubGhzDeviceSi4463ExtPath315, /**< Center Frquency: 315MHz. Path 2: SW1RF2-SW2RF1, LCLCLCL */
+    SubGhzDeviceSi4463ExtPath868, /**< Center Frquency: 868MHz. Path 3: SW1RF3-SW2RF3, LCLC */
+} SubGhzDeviceSi4463ExtPath;
 
-/** SubGhz state */
-typedef enum {
-    SubGhzStateInit, /**< Init pending */
+/* Mirror RX/TX async modulation signal to specified pin
+ *
+ * @warning    Configures pin to output mode. Make sure it is not connected
+ *             directly to power or ground.
+ *
+ * @param[in]  pin   pointer to the gpio pin structure or NULL to disable
+ */
+void subghz_device_si4463_ext_set_async_mirror_pin(const GpioPin* pin);
 
-    SubGhzStateIdle, /**< Idle, energy save mode */
+/** Get data GPIO
+ *
+ * @return     pointer to the gpio pin structure
+ */
+const GpioPin* subghz_device_si4463_ext_get_data_gpio();
 
-    SubGhzStateAsyncRx, /**< Async RX started */
+/** Initialize device
+ *
+ * @return     true if success
+ */
+bool subghz_device_si4463_ext_alloc();
 
-    SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
-    SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
-    SubGhzStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
+/** Deinitialize device
+ */
+void subghz_device_si4463_ext_free();
 
-} SubGhzState;
-
-/** SubGhz regulation, receive transmission on the current frequency for the
- * region */
-typedef enum {
-    SubGhzRegulationOnlyRx, /**only Rx*/
-    SubGhzRegulationTxRx, /**TxRx*/
-} SubGhzRegulation;
-
-/** Initialize and switch to power save mode Used by internal API-HAL
- * initalization routine Can be used to reinitialize device to safe state and
+/** Check and switch to power save mode Used by internal API-HAL
+ * initialization routine Can be used to reinitialize device to safe state and
  * send it to sleep
  */
-void subghz_device_si4463_ext_init();
+bool subghz_device_si4463_ext_is_connect();
 
 /** Send device to sleep mode
  */
@@ -69,24 +95,27 @@ void subghz_device_si4463_ext_sleep();
  */
 void subghz_device_si4463_ext_dump_state();
 
-/** Load registers from preset by preset name
- *
- * @param      preset  to load
- */
-void subghz_device_si4463_ext_load_preset(FuriHalSubGhzPreset preset);
+// /** Load registers from preset by preset name
+//  *
+//  * @param      preset  to load
+//  */
+// void subghz_device_si4463_ext_load_preset(FuriHalSubGhzPreset preset);
 
 /** Load registers
  *
  * @param      data  Registers data
  */
 void subghz_device_si4463_ext_load_registers(const uint8_t data[][2]);
+
 void subghz_device_si4463_ext_load_config(const uint8_t config[]);
 
-/** Load PATABLE
- *
- * @param      data  8 uint8_t values
- */
-void subghz_device_si4463_ext_load_patable(const uint8_t data[8]);
+void subghz_device_si4463_set_pa(uint8_t pa);
+
+// /** Load PATABLE
+//  *
+//  * @param      data  8 uint8_t values
+//  */
+// void subghz_device_si4463_ext_load_patable(const uint8_t data[8]);
 
 /** Write packet to FIFO
  *
@@ -195,19 +224,19 @@ uint32_t subghz_device_si4463_ext_set_frequency(uint32_t value);
  *
  * @param      path  path to use
  */
-void subghz_device_si4463_ext_set_path(FuriHalSubGhzPath path);
+void subghz_device_si4463_ext_set_path(SubGhzDeviceSi4463ExtPath path);
 
 /* High Level API */
 
 /** Signal Timings Capture callback */
-typedef void (*FuriHalSubGhzCaptureCallback)(bool level, uint32_t duration, void* context);
+typedef void (*SubGhzDeviceSi4463ExtCaptureCallback)(bool level, uint32_t duration, void* context);
 
 /** Enable signal timings capture Initializes GPIO and TIM2 for timings capture
  *
- * @param      callback  FuriHalSubGhzCaptureCallback
+ * @param      callback  SubGhzDeviceSi4463ExtCaptureCallback
  * @param      context   callback context
  */
-void subghz_device_si4463_ext_start_async_rx(FuriHalSubGhzCaptureCallback callback, void* context);
+void subghz_device_si4463_ext_start_async_rx(SubGhzDeviceSi4463ExtCaptureCallback callback, void* context);
 
 /** Disable signal timings capture Resets GPIO and TIM2
  */
@@ -217,16 +246,16 @@ void subghz_device_si4463_ext_stop_async_rx();
  * @param      context  callback context
  * @return     LevelDuration
  */
-typedef LevelDuration (*FuriHalSubGhzAsyncTxCallback)(void* context);
+typedef LevelDuration (*SubGhzDeviceSi4463ExtCallback)(void* context);
 
 /** Start async TX Initializes GPIO, TIM2 and DMA1 for signal output
  *
- * @param      callback  FuriHalSubGhzAsyncTxCallback
+ * @param      callback  SubGhzDeviceSi4463ExtCallback
  * @param      context   callback context
  *
  * @return     true if the transfer is allowed by belonging to the region
  */
-bool subghz_device_si4463_ext_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context);
+bool subghz_device_si4463_ext_start_async_tx(SubGhzDeviceSi4463ExtCallback callback, void* context);
 
 /** Wait for async transmission to complete
  *

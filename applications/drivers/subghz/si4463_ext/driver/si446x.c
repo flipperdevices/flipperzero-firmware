@@ -1,6 +1,5 @@
 #include "si446x.h"
-#include <cmsis_os2.h>
-#include <furi_hal_delay.h>
+#include <furi_hal_cortex.h>
 #include <furi.h>
 #include <assert.h>
 #include <string.h>
@@ -8,7 +7,7 @@
 bool si446x_wait_cts_spi(FuriHalSpiBusHandle* handle) {
     uint8_t buff_tx[2] = {SI446X_CMD_READ_CMD_BUFF, 0xFF};
     uint8_t buff_rx[2] = {0};
-    uint8_t timeout = 40;
+    FuriHalCortexTimer timer = furi_hal_cortex_timer_get(40 * 1000);
     do {
         furi_hal_spi_acquire(handle);
         furi_hal_spi_bus_trx(handle, buff_tx, (uint8_t*)buff_rx, 2, SI446X_TIMEOUT);
@@ -16,13 +15,11 @@ bool si446x_wait_cts_spi(FuriHalSpiBusHandle* handle) {
         if(buff_rx[1] == SI446X_CTS_OK) {
             return true;
         } else {
-            timeout--;
-            furi_hal_delay_ms(1);
-            if(!timeout) {
+            if(furi_hal_cortex_timer_is_expired(timer)) {
                 break;
             }
         }
-    } while((buff_rx[1] != SI446X_CTS_OK) && timeout);
+    } while((buff_rx[1] != SI446X_CTS_OK));
 
     return false;
 }

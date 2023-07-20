@@ -1,6 +1,7 @@
 #include "si4463_ext_interconnect.h"
 #include "si4463_ext.h"
 #include "config/si4463_config.h"
+#include "driver/si446x_regs.h"
 
 #define TAG "SubGhzDeviceSi4463Ext"
 
@@ -32,20 +33,24 @@ static void subghz_device_si4463_ext_interconnect_load_preset(
     uint8_t* preset_data) {
     switch(preset) {
     case FuriHalSubGhzPresetOok650Async:
-        subghz_device_si4463_ext_load_custom_preset(
+        subghz_device_si4463_ext_load_config(
             subghz_device_si4463_preset_ook_650khz_async_regs);
+        subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
         break;
     case FuriHalSubGhzPresetOok270Async:
-        subghz_device_si4463_ext_load_custom_preset(
+        subghz_device_si4463_ext_load_config(
             subghz_device_si4463_preset_ook_270khz_async_regs);
+        subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
         break;
     case FuriHalSubGhzPreset2FSKDev238Async:
-        subghz_device_si4463_ext_load_custom_preset(
+        subghz_device_si4463_ext_load_config(
             subghz_device_si4463_preset_2fsk_dev2_38khz_async_regs);
+        subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
         break;
     case FuriHalSubGhzPreset2FSKDev476Async:
-        subghz_device_si4463_ext_load_custom_preset(
+        subghz_device_si4463_ext_load_config(
             subghz_device_si4463_preset_2fsk_dev47_6khz_async_regs);
+        subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
         break;
     // case FuriHalSubGhzPresetMSK99_97KbAsync:
     //     subghz_device_si4463_ext_load_custom_preset(
@@ -59,6 +64,7 @@ static void subghz_device_si4463_ext_interconnect_load_preset(
     default:
         subghz_device_si4463_ext_load_custom_preset(preset_data);
     }
+    subghz_device_si4463_set_pa(SI446X_SET_MAX_PA);
 }
 
 const SubGhzDeviceInterconnect subghz_device_si4463_ext_interconnect = {
