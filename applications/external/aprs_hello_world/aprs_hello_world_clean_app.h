@@ -18,7 +18,7 @@ typedef struct {
     InputEvent input;
 } APRSHelloWorldCleanEvent;
 
-struct APRSHelloWorldCleanApp{
+struct APRSHelloWorldCleanApp {
     Gui* gui;
     ViewPort* view_port;
     FuriMessageQueue* event_queue;
@@ -35,7 +35,7 @@ struct APRSHelloWorldCleanApp{
 typedef struct APRSHelloWorldCleanApp APRSHelloWorldCleanApp;
 
 const NotificationSequence red_led_enable = {
-    
+
     &message_red_255,
     &message_delay_500,
 
@@ -43,14 +43,14 @@ const NotificationSequence red_led_enable = {
 };
 
 const NotificationSequence red_led_disable = {
-    
+
     &message_red_0,
 
     NULL,
 };
 
 const NotificationSequence blue_led_enable = {
-    
+
     &message_blue_255,
     &message_delay_250,
     &message_blue_0,
