@@ -20,9 +20,9 @@ Please check the example `index.html` to get an idea of what this has to look li
 Thank you so much to the following contributors for providing awesome portals. 
 
 - `Alaska_Airlines.html` by [roshanravan](https://github.com/roshanravan)
-- `Amazon.html` by [roshanravan](https://github.com/roshanravan)
+- `Amazon.html` by [jules0835](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/44)
 - `American_Airlines.html` by [roshanravan](https://github.com/roshanravan)
-- `Apple.html` by [Jules](https://github.com/jules0835)
+- `Apple.html` by [black28p](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/46)
 - `AT&T.html` by [roshanravan](https://github.com/roshanravan)
 - `CoxWifi.html` by [qqmajikpp](https://github.com/qqmajikpp)
 - `Delta_Airlines.html` by [roshanravan](https://github.com/roshanravan)
