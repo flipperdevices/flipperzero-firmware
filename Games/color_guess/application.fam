@@ -14,6 +14,6 @@ App(
     fap_version="1.0",
     fap_category="Games",
     fap_author="Leedave",
-    fap_description="Color Guessing Game"
+    fap_description="Color Guessing Game",
     fap_weburl="https://github.com/leedave/Leeds-Flipper-Zero-Applications",
 )
