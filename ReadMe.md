@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0719-2022-0.87.1-a212d22](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-19 20:22 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-19 20:22 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-20 14:12 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-20 14:12 EST`
 - Added POCSAG modulation to SubGHz modulations
 - Updated: [ESP Flasher (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
 - Updated: [Evil Portal Assets for Amazon (By jules0835) and Apple (By black28p)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/apps_data/evil_portal/README.md)
