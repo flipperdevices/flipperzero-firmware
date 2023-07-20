@@ -81,6 +81,17 @@ static void nfc_protocol_support_scene_info_on_exit(NfcApp* instance) {
     widget_reset(instance->widget);
 }
 
+static void nfc_protocol_support_scene_card_dump_on_enter(NfcApp* instance) {
+    const NfcProtocol protocol = nfc_device_get_protocol(instance->nfc_device);
+    nfc_protocol_support[protocol]->scene_card_dump.on_enter(instance);
+    view_dispatcher_switch_to_view(instance->view_dispatcher, NfcViewTextBox);
+}
+
+static void nfc_protocol_support_scene_card_dump_on_exit(NfcApp* instance) {
+    text_box_reset(instance->text_box);
+    furi_string_reset(instance->text_box_store);
+}
+
 // SceneRead
 static void nfc_protocol_support_scene_read_on_enter(NfcApp* instance) {
     popup_set_header(
@@ -489,6 +500,10 @@ static const NfcProtocolSupportCommonSceneBase
                 .on_event = nfc_protocol_support_scene_info_on_event,
                 .on_exit = nfc_protocol_support_scene_info_on_exit,
             },
+        [NfcProtocolSupportSceneCardDump] =
+            {.on_enter = nfc_protocol_support_scene_card_dump_on_enter,
+             .on_event = NULL,
+             .on_exit = nfc_protocol_support_scene_card_dump_on_exit},
         [NfcProtocolSupportSceneRead] =
             {
                 .on_enter = nfc_protocol_support_scene_read_on_enter,
