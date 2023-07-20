@@ -197,7 +197,11 @@ const NfcProtocolSupportBase nfc_protocol_support_mf_ultralight = {
             .on_enter = nfc_scene_info_on_enter_mf_ultralight,
             .on_event = nfc_scene_info_on_event_mf_ultralight,
         },
-    .scene_card_dump = {.on_enter = nfc_scene_card_dump_on_enter_mf_ultralight, .on_event = NULL},
+    .scene_card_dump =
+        {
+            .on_enter = nfc_scene_card_dump_on_enter_mf_ultralight,
+            .on_event = NULL,
+        },
     .scene_read =
         {
             .on_enter = nfc_scene_read_on_enter_mf_ultralight,

@@ -8,10 +8,7 @@ void nfc_scene_card_dump_on_enter(void* context) {
 }
 
 bool nfc_scene_card_dump_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    UNUSED(event);
-    return false;
-    //return nfc_protocol_support_on_event(NfcProtocolSupportSceneCardDump, context, event);
+    return nfc_protocol_support_on_event(NfcProtocolSupportSceneCardDump, context, event);
 }
 
 void nfc_scene_card_dump_on_exit(void* context) {
