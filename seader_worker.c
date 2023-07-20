@@ -553,6 +553,7 @@ uint8_t read4Block6[] = {0x06, 0x06, 0x45, 0x56};
 uint8_t read4Block9[] = {0x06, 0x09, 0xB2, 0xAE};
 uint8_t read4Block10[] = {0x06, 0x0A, 0x29, 0x9C};
 uint8_t read4Block13[] = {0x06, 0x0D, 0x96, 0xE8};
+uint8_t updateBlock2[] = {0x87, 0x02};
 
 void seader_capture_sio(
     uint8_t* buffer,
@@ -589,6 +590,9 @@ bool seader_iso15693_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size
         }
         // FURI_LOG_D(TAG, "Result %d %s", recvLen, display);
         seader_capture_sio(buffer, len, rxBuffer, credential);
+        if(memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
+            FURI_LOG_I(TAG, "Update E-Purse");
+        }
 
         seader_send_nfc_rx(seader_uart, rxBuffer, recvLen);
     } else if(ret == FuriHalNfcReturnCrc) {
@@ -598,6 +602,9 @@ bool seader_iso15693_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size
         }
         // FURI_LOG_D(TAG, "[CRC error] Result %d %s", recvLen, display);
         seader_capture_sio(buffer, len, rxBuffer, credential);
+        if(memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
+            FURI_LOG_D(TAG, "Update E-Purse");
+        }
 
         seader_send_nfc_rx(seader_uart, rxBuffer, recvLen);
 
