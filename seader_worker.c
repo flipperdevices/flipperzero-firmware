@@ -620,12 +620,13 @@ bool seader_parse_nfc_command_transmit(SeaderWorker* seader_worker, NFCSend_t* n
     FrameProtocol_t frameProtocol = protocol.buf[1];
 
 #ifdef ASN1_DEBUG
-    char display[SEADER_UART_RX_BUF_SIZE * 2 + 1] = {0};
+    memset(display, 0, sizeof(display));
     for(uint8_t i = 0; i < nfcSend->data.size; i++) {
         snprintf(display + (i * 2), sizeof(display), "%02x", nfcSend->data.buf[i]);
     }
 
     char protocolName[8] = {0};
+    memset(protocolName, 0, sizeof(protocolName));
     (&asn_DEF_FrameProtocol)
         ->op->print_struct(
             &asn_DEF_FrameProtocol, &frameProtocol, 1, seader_asn_to_string, protocolName);
