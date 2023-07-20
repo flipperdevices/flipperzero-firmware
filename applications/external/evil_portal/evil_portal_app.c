@@ -33,6 +33,7 @@ Evil_PortalApp* evil_portal_app_alloc() {
     app->portal_logs = furi_string_alloc();
 
     app->gui = furi_record_open(RECORD_GUI);
+    app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&evil_portal_scene_handlers, app);
@@ -97,6 +98,7 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 
     // Close records
     furi_record_close(RECORD_GUI);
+    furi_record_close(RECORD_DIALOGS);
 
     free(app);
 }

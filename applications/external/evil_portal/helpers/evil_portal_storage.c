@@ -8,15 +8,31 @@ static void evil_portal_close_storage() {
     furi_record_close(RECORD_STORAGE);
 }
 
-void evil_portal_read_index_html(void* context) {
+bool evil_portal_read_index_html(void* context) {
+    FuriString* file_path = furi_string_alloc_set(EVIL_PORTAL_BASE_FOLDER);
+
+    DialogsFileBrowserOptions browser_options;
+    dialog_file_browser_set_basic_options(
+        &browser_options,
+        EVIL_PORTAL_INDEX_EXTENSION,
+        NULL); // TODO configure icon
+    browser_options.base_path = EVIL_PORTAL_BASE_FOLDER;
+
     Evil_PortalApp* app = context;
+    bool res = dialog_file_browser_show(app->dialogs, file_path, file_path, &browser_options);
+
+    if(!res) {
+        furi_string_free(file_path);
+        return false;
+    }
+
     Storage* storage = evil_portal_open_storage();
     FileInfo fi;
 
-    if(storage_common_stat(storage, EVIL_PORTAL_INDEX_SAVE_PATH, &fi) == FSE_OK) {
+    if(storage_common_stat(storage, furi_string_get_cstr(file_path), &fi) == FSE_OK) {
         File* index_html = storage_file_alloc(storage);
         if(storage_file_open(
-               index_html, EVIL_PORTAL_INDEX_SAVE_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
+               index_html, furi_string_get_cstr(file_path), FSAM_READ, FSOM_OPEN_EXISTING)) {
             app->index_html = malloc((size_t)fi.size);
             uint8_t* buf_ptr = app->index_html;
             size_t read = 0;
@@ -29,6 +45,7 @@ void evil_portal_read_index_html(void* context) {
             }
             free(buf_ptr);
         }
+        furi_string_free(file_path);
         storage_file_close(index_html);
         storage_file_free(index_html);
     } else {
@@ -40,6 +57,7 @@ void evil_portal_read_index_html(void* context) {
     }
 
     evil_portal_close_storage();
+    return true;
 }
 
 void evil_portal_read_ap_name(void* context) {
