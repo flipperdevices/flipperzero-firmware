@@ -571,6 +571,26 @@ void seader_capture_sio(
     }
 }
 
+FuriHalNfcReturn
+    seader_worker_fake_epurse_update(uint8_t* buffer, uint8_t* rxBuffer, uint16_t* recvLen) {
+    uint8_t fake_response[10];
+    memset(fake_response, 0, sizeof(fake_response));
+    memcpy(fake_response + 4, buffer + 2, 4);
+    memcpy(fake_response + 0, buffer + 6, 4);
+
+    memcpy(rxBuffer, fake_response, sizeof(fake_response));
+    *recvLen = sizeof(fake_response);
+
+    memset(display, 0, sizeof(display));
+    for(uint8_t i = 0; i < sizeof(fake_response); i++) {
+        snprintf(display + (i * 2), sizeof(display), "%02x", fake_response[i]);
+    }
+    FURI_LOG_I(TAG, "Fake update E-Purse response: %s", display);
+    return FuriHalNfcReturnOk;
+}
+
+bool prevent_epurse_update = false;
+
 bool seader_iso15693_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
     SeaderCredential* credential = seader_worker->credential;
@@ -581,7 +601,12 @@ bool seader_iso15693_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size
     uint32_t fwt = furi_hal_nfc_ll_ms2fc(20);
 
     uint8_t rxBuffer[64] = {0};
-    ret = furi_hal_nfc_ll_txrx(buffer, len, rxBuffer, sizeof(rxBuffer), &recvLen, flags, fwt);
+
+    if(prevent_epurse_update && memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
+        ret = seader_worker_fake_epurse_update(buffer, rxBuffer, &recvLen);
+    } else {
+        ret = furi_hal_nfc_ll_txrx(buffer, len, rxBuffer, sizeof(rxBuffer), &recvLen, flags, fwt);
+    }
 
     if(ret == FuriHalNfcReturnOk) {
         memset(display, 0, sizeof(display));
@@ -590,10 +615,6 @@ bool seader_iso15693_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size
         }
         // FURI_LOG_D(TAG, "Result %d %s", recvLen, display);
         seader_capture_sio(buffer, len, rxBuffer, credential);
-        if(memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
-            FURI_LOG_I(TAG, "Update E-Purse");
-        }
-
         seader_send_nfc_rx(seader_uart, rxBuffer, recvLen);
     } else if(ret == FuriHalNfcReturnCrc) {
         memset(display, 0, sizeof(display));
@@ -602,10 +623,6 @@ bool seader_iso15693_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size
         }
         // FURI_LOG_D(TAG, "[CRC error] Result %d %s", recvLen, display);
         seader_capture_sio(buffer, len, rxBuffer, credential);
-        if(memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
-            FURI_LOG_D(TAG, "Update E-Purse");
-        }
-
         seader_send_nfc_rx(seader_uart, rxBuffer, recvLen);
 
         // Act as if it was OK
