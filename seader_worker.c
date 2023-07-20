@@ -140,7 +140,7 @@ bool seader_send_apdu(
     apdu[4] = length;
     memcpy(apdu + APDU_HEADER_LEN, payload, length);
 
-    PC_to_RDR_XfrBlock(seader_uart, apdu, APDU_HEADER_LEN + length);
+    seader_ccid_XfrBlock(seader_uart, apdu, APDU_HEADER_LEN + length);
     free(apdu);
     return true;
 }
@@ -757,7 +757,7 @@ bool seader_process_apdu(SeaderWorker* seader_worker, uint8_t* apdu, size_t len)
     case 0x61:
         // FURI_LOG_I(TAG, "Request %d bytes", SW2);
         GET_RESPONSE[4] = SW2;
-        PC_to_RDR_XfrBlock(seader_uart, GET_RESPONSE, sizeof(GET_RESPONSE));
+        seader_ccid_XfrBlock(seader_uart, GET_RESPONSE, sizeof(GET_RESPONSE));
         return true;
         break;
 
