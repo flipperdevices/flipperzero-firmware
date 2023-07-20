@@ -311,9 +311,8 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
     property_value_out(
         &property_context,
         "%u",
-        3,
+        2,
         "system",
-        "hand",
         "orient",
         furi_hal_rtc_is_flag_set(FuriHalRtcFlagHandOrient));
     property_value_out(
@@ -321,16 +320,15 @@ void furi_hal_info_get(PropertyValueCallback out, char sep, void* context) {
         "%u",
         3,
         "system",
-        "legacy",
         "sleep",
+        "legacy",
         furi_hal_rtc_is_flag_set(FuriHalRtcFlagLegacySleep));
     property_value_out(
         &property_context,
         "%u",
-        3,
+        2,
         "system",
         "stealth",
-        "mode",
         furi_hal_rtc_is_flag_set(FuriHalRtcFlagStealthMode));
 
     property_value_out(
