@@ -2,7 +2,9 @@
 
 #include "esp_flasher_app_i.h"
 #include "esp_flasher_uart.h"
+#ifndef SERIAL_FLASHER_INTERFACE_UART
 #define SERIAL_FLASHER_INTERFACE_UART /* TODO why is application.fam not passing this via cdefines */
+#endif
 #include "esp_loader_io.h"
 
 #define ESP_ADDR_BOOT_S3 0x0
