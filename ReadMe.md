@@ -4,7 +4,7 @@
 &nbsp;<a href='https://shop.rogue-master.net/' target='_blank'><img src='https://rogue-master.net/img/Merch.png' alt='RM Merch'' title='RM Merch'></a>
 &nbsp;<a href='https://github.com/RogueMaster/awesome-flipperzero-withModules' target='_blank'><img src='https://rogue-master.net/img/Resources.png' alt='More Research / Assets' title='More Research / Assets'></a></h1>
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0715-1518-0.86.3-c7d2ab6.tgz&channel=RM0715-1518-0.86.3-c7d2ab6&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0715-1518-0.86.3-c7d2ab6-NoAnim.tgz&channel=RM0715-1518-0.86.3-c7d2ab6-NoAnim&version=0.86.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0719-2040-0.87.1-801a674.tgz&channel=RM0719-2040-0.87.1-801a674&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0719-2040-0.87.1-801a674-NoAnim.tgz&channel=RM0719-2040-0.87.1-801a674-NoAnim&version=0.86.3)
 
 ## Thank you so much to our RM Pro/SUPER Patreon supporters! Because of people like you, we are able to offer the best and most up-to-date Flipper Zero Firmware!
 
@@ -33,48 +33,6 @@ This software is for experimental purposes only and is not meant for any illegal
 
 - Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-19 20:22 EST`
 - Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-19 20:22 EST`
-- Updated: [POCSAG Pager (By XMasterx & Shmuma)](https://github.com/xMasterX/flipper-pager) to use `subghz/assets/setting_user.pocsag`
-- [Fixed many external app references to internal assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/d758c8d7ce4b4b7a16ecf167d02528aa1571965d)
-- Added: [Rock Paper Scissors (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/plugins/rock_paper_scissors)
-- SubGHz: [X10 Protocol Decoder (By CodeAllNight/jamisonderek)](https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/subghz/protocols/x10)
-- [Evil Portal Updated index.html for a better looking Google Login Page (By breaching)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/36)
-- Updated: [Pomodoro 2 (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)
-- [Allow NoAnim Build Creation with buildRelease.sh (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/89f023b1039c836a0938d436f24f2a000eee8f14)
-- Removed: [Game of Tag WIP (By instantiator)](https://github.com/instantiator/flipper-zero-experimental-apps)
-- [Evil Portal Asset: Microsoft Login Page (By roshanravan) and Renames for Evil Portal Assets (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/75876e84dc5deb130210da8283f36ef1b1858019
-- [New Passport Profile Pic - Deer (Added By RogueMaster, Image By wrenchathome)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/6fdcbe99ce63cc3a4cce8275281fd9b9e9db6578)
-- [Evil Portal Asset: Twitch & PornHub Login Pages (By roshanravan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/3431fe56893c69463f6a36e1dc8c996dd358420d)
-- Added: [YRM100 UHF RFID (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`  Not Tested
-- Added: [Battery Checker (By Programistich)](https://github.com/Programistich/battery_checker)
-- UL: OFW: [Radio headers in SDK #2881 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2881)
-- UL: OFW: [iButton: delete key text overflow #2882 (By Programistich)](https://github.com/flipperdevices/flipperzero-firmware/pull/2882)
-- Keeping Sub-GHz as External like OFW
-- [Added more Captive Portal assets for Evil Portal (By roshanravan)](https://github.com/roshanravan)
-- Updated: SD Card Assets with Evil Portal/Marauder bin for ESP Flasher (From TalkingSasquach)
-- Updated: SD Card Assets with Black Magic bin for ESP Flasher (From TalkingSasquach)
-- UL: Updated: [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) & [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff) (Changes By Sil333033)
-- [Reorganized GPIO Apps #710 (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/710)
-- Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
-- OFW: [Gauge initialization routine refactoring, new DataMemory layout, configuration update #2887 (By skotopes)](https://github.com/flipperdevices/flipperzero-firmware/pull/2887)
-- OFW: [fbt: build target for faps #2888 (By hedger)](https://github.com/flipperdevices/flipperzero-firmware/pull/2888)
-- Updated: [Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker)
-- Updated: [NRF Sniff (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/nrfsniff)
-- Updated: [ESP32-C6 Gravity (By chris-bc)](https://github.com/chris-bc/Flipper-Gravity)
-- Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal)
-- Updated: [NFC Maker NTAG203 (by Willy-JL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/343cb39d08f60b75b537e1a31100707935cf6e9d) (Removed Broken Wifi Elements (By RogueMaster))
-- Sub-GHz: [Switched to internal to test RAM issues; it is temporarily moved on main menu to after CFW Settings (By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/1cd6d2d61532ffe575a7e813640971ff5ff78d37)
-- UL: Archive (FileBrowser): Added Cut/Copy/Paste & NewDir options in new menu (original feature made by Willy-JL and ported by gid9798)
-- [Evil Portal Asset: Instagram Login Pages (By grugnoymeme)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/713)
-- [Marauder Asset: Script to deauth and sniff EAPOL packets (By grugnoymeme )](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/714)
-- Updated: [Sub-GHz Bruteforcer v3.7 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
-- Updated: [Chess v1.7 (By xtruan)](https://github.com/xtruan/flipper-chess)
-- Zero Tracker renamed to Music Tracker
-- UL: Barcode app embed assets (encoding tables) in plugin (By xMasterX)
-- UL: SubGHz: Replace FM15k with AM_Q in default modulations (By xMasterX)
-- UL: OFW PR: faploader: always create app dir, even if it doesnt have subdirs (By hedger)
-- [Add One-Click Devboard flash to ESP Flasher (By ClaraCrazy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4b39deb02cadb19b161e9edf1f1f9fd15c85adff)
-- Added: [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
-- Version incremented to match OFW
 
 <a name="release">
 
@@ -457,4 +415,4 @@ $ ./fbt dolphin_ext
 - [USB Mass Storage ($25 USD in ETH or BTC)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/issues/697)
 - `Bluetooth Audio` APP to allow flipper to pair to external speaker or headphones for wav/mp3 playback ($200 USD in ETH or BTC) (Don't think this is possible)
 
-# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0715-1518-0.86.3-c7d2ab6.tgz&channel=RM0715-1518-0.86.3-c7d2ab6&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0715-1518-0.86.3-c7d2ab6-NoAnim.tgz&channel=RM0715-1518-0.86.3-c7d2ab6-NoAnim&version=0.86.3)
+# Install GitHub Version With [WEB INSTALLER](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0719-2040-0.87.1-801a674.tgz&channel=RM0719-2040-0.87.1-801a674&version=0.86.3) OR  [WITHOUT ANIMATIONS](https://lab.flipper.net/?url=https%3A%2F%2Frogue-master.net%2F%3Ffile%3DRM0719-2040-0.87.1-801a674-NoAnim.tgz&channel=RM0719-2040-0.87.1-801a674-NoAnim&version=0.86.3)
