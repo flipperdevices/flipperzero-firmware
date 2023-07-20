@@ -1,0 +1,17 @@
+App(
+    appid="aprs_hello_world_clean",
+    name="APRS Cln Hello World",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="aprs_hello_world_clean_app",
+    requires=[
+        "gui",
+    ],
+    stack_size=1 * 1024,
+    order=90,
+    fap_icon="APRS_10px_10px.png",
+    fap_category="GPIO",
+    fap_author="@NSV47",
+    fap_weburl="https://github.com/NSV47/APRS_hello_world_clean",
+    fap_version=(1, 0),
+    fap_description="Automatic Packet Reporting System with predefined message. Included to hopefully have it modfied in the future to have text input for transmitted message.",
+)

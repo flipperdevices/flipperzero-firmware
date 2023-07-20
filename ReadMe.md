@@ -73,6 +73,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: SubGHz: Replace FM15k with AM_Q in default modulations (By xMasterX)
 - UL: OFW PR: faploader: always create app dir, even if it doesnt have subdirs (By hedger)
 - [Add One-Click Devboard flash to ESP Flasher (By ClaraCrazy)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/4b39deb02cadb19b161e9edf1f1f9fd15c85adff)
+- Added: [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 
 <a name="release">
 
@@ -288,6 +289,7 @@ $ ./fbt dolphin_ext
 
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
+- [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
 - [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [AVR Flasher (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
