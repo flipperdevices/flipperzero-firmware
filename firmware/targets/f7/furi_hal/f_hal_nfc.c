@@ -367,47 +367,47 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
             ST25R3916_REG_AUX_dis_corr,
             ST25R3916_REG_AUX_dis_corr_correlator);
         /* Set the EGT, SOF, EOF and EOF */
-        st25r3916_change_reg_bits(
-            handle,
-            ST25R3916_REG_ISO14443B_1,
-            ST25R3916_REG_ISO14443B_1_egt_mask | ST25R3916_REG_ISO14443B_1_sof_mask |
-                ST25R3916_REG_ISO14443B_1_eof,
-            (0U << ST25R3916_REG_ISO14443B_1_egt_shift) | ST25R3916_REG_ISO14443B_1_sof_0_10etu |
-                ST25R3916_REG_ISO14443B_1_sof_1_2etu | ST25R3916_REG_ISO14443B_1_eof_10etu);
+        // st25r3916_change_reg_bits(
+        //     handle,
+        //     ST25R3916_REG_ISO14443B_1,
+        //     ST25R3916_REG_ISO14443B_1_egt_mask | ST25R3916_REG_ISO14443B_1_sof_mask |
+        //         ST25R3916_REG_ISO14443B_1_eof,
+        //     (0U << ST25R3916_REG_ISO14443B_1_egt_shift) | ST25R3916_REG_ISO14443B_1_sof_0_10etu |
+        //         ST25R3916_REG_ISO14443B_1_sof_1_2etu | ST25R3916_REG_ISO14443B_1_eof_10etu);
 
-        /* Set the minimum TR1, SOF, EOF and EOF12 */
-        st25r3916_change_reg_bits(
-            handle,
-            ST25R3916_REG_ISO14443B_2,
-            ST25R3916_REG_ISO14443B_2_tr1_mask | ST25R3916_REG_ISO14443B_2_no_sof |
-                ST25R3916_REG_ISO14443B_2_no_eof,
-            ST25R3916_REG_ISO14443B_2_tr1_80fs80fs);
+        // /* Set the minimum TR1, SOF, EOF and EOF12 */
+        // st25r3916_change_reg_bits(
+        //     handle,
+        //     ST25R3916_REG_ISO14443B_2,
+        //     ST25R3916_REG_ISO14443B_2_tr1_mask | ST25R3916_REG_ISO14443B_2_no_sof |
+        //         ST25R3916_REG_ISO14443B_2_no_eof,
+        //     ST25R3916_REG_ISO14443B_2_tr1_80fs80fs);
 
-        st25r3916_set_reg_bits(
-            handle,
-            ST25R3916_REG_CORR_CONF1,
-            ST25R3916_REG_CORR_CONF1_corr_s3); /* Ensure BPSK start to 33 pilot pulses */
-        st25r3916_change_reg_bits(
-            handle,
-            ST25R3916_REG_SUBC_START_TIME,
-            ST25R3916_REG_SUBC_START_TIME_sst_mask,
-            20U); /* Set sst                              */
+        // st25r3916_set_reg_bits(
+        //     handle,
+        //     ST25R3916_REG_CORR_CONF1,
+        //     ST25R3916_REG_CORR_CONF1_corr_s3); /* Ensure BPSK start to 33 pilot pulses */
+        // st25r3916_change_reg_bits(
+        //     handle,
+        //     ST25R3916_REG_SUBC_START_TIME,
+        //     ST25R3916_REG_SUBC_START_TIME_sst_mask,
+        //     20U);
     }
 
     if(bitrate == FHalNfcBitrate106) {
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF1, 0xff, 0x08);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF2, 0xff, 0x2d);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF3, 0xff, 0x00);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF4, 0xff, 0x00);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF1, 0xff, 0x51);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF2, 0xff, 0x00);
+        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF1, 0xff, 0x08);
+        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF2, 0xff, 0x2d);
+        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF3, 0xff, 0x00);
+        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF4, 0xff, 0x00);
+        // st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF1, 0xff, 0x51);
+        // st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF2, 0xff, 0x00);
 
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF1, 0xFF, 0x04);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF2, 0xFF, 0x3D);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF3, 0xFF, 0x00);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF4, 0xFF, 0x00);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF1, 0xFF, 0x1B);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF2, 0xFF, 0x00);
+        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF1, 0xFF, 0x04);
+        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF2, 0xFF, 0x3D);
+        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF3, 0xFF, 0x00);
+        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF4, 0xFF, 0x00);
+        st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF1, 0xFF, 0x1B);
+        st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF2, 0xFF, 0x00);
     }
 
     return error;
