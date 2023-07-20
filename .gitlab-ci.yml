@@ -27,7 +27,7 @@ variables:
     - build
     - internet
   variables:
-    PEDANTIC_FLAGS: "-Werror -Werror=deprecated-declarations -Werror=unused-variable -Werror=unused-but-set-variable -Werror=unused-function"
+    PEDANTIC_FLAGS: "-Werror=all -Werror=extra"
     EXTRA_CFLAGS: "${PEDANTIC_FLAGS}"
     EXTRA_CXXFLAGS: "${PEDANTIC_FLAGS}"
   script:
