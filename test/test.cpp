@@ -119,6 +119,7 @@ map<target_chip_t, uint32_t> chip_magic_value = {
     {ESP32S3_CHIP,  0x00000009},
     {ESP32H4_CHIP,  0xca26cc22},
     {ESP32H2_CHIP,  0xd7b73e80},
+    {ESP32C6_CHIP,  0x2ce0806f},
 };
 
 void queue_connect_response(target_chip_t target = ESP32_CHIP, uint32_t magic_value = 0)
