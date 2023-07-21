@@ -1,9 +1,6 @@
 #include "uart_terminal_app_i.h"
 #include "uart_terminal_uart.h"
 
-#define UART_CH (FuriHalUartIdUSART1)
-#define BAUDRATE (230400)
-
 struct UART_TerminalUart {
     UART_TerminalApp* app;
     FuriThread* rx_thread;
