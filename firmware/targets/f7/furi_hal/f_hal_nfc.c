@@ -299,24 +299,22 @@ FHalNfcError f_hal_nfc_low_power_mode_stop() {
 }
 
 static void f_hal_nfc_configure_poller_common(FuriHalSpiBusHandle* handle) {
-    st25r3916_change_reg_bits(
-        handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_tr_am, ST25R3916_REG_MODE_tr_am_am);
-    st25r3916_change_reg_bits(
-        handle,
-        ST25R3916_REG_TX_DRIVER,
-        ST25R3916_REG_TX_DRIVER_am_mod_mask,
-        ST25R3916_REG_TX_DRIVER_am_mod_12percent);
+    // Disable wake up
+    st25r3916_clear_reg_bits(handle, ST25R3916_REG_OP_CONTROL, ST25R3916_REG_OP_CONTROL_wu);
+    // Enable correlator
     st25r3916_change_reg_bits(
         handle,
-        ST25R3916_REG_AUX_MOD,
-        (ST25R3916_REG_AUX_MOD_dis_reg_am | ST25R3916_REG_AUX_MOD_res_am),
-        0x00);
+        ST25R3916_REG_AUX,
+        ST25R3916_REG_AUX_dis_corr,
+        ST25R3916_REG_AUX_dis_corr_correlator);
+
     st25r3916_change_reg_bits(handle, ST25R3916_REG_ANT_TUNE_A, 0xff, 0x82);
     st25r3916_change_reg_bits(handle, ST25R3916_REG_ANT_TUNE_B, 0xFF, 0x82);
-    st25r3916_change_reg_bits(handle, ST25R3916_REG_OVERSHOOT_CONF1, 0xff, 0x00);
-    st25r3916_change_reg_bits(handle, ST25R3916_REG_OVERSHOOT_CONF2, 0xff, 0x00);
-    st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF1, 0xff, 0x00);
-    st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF2, 0xff, 0x00);
+
+    st25r3916_write_reg(handle, ST25R3916_REG_OVERSHOOT_CONF1, 0x00);
+    st25r3916_write_reg(handle, ST25R3916_REG_OVERSHOOT_CONF2, 0x00);
+    st25r3916_write_reg(handle, ST25R3916_REG_UNDERSHOOT_CONF1, 0x00);
+    st25r3916_write_reg(handle, ST25R3916_REG_UNDERSHOOT_CONF2, 0x00);
 }
 
 FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
@@ -325,19 +323,19 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
 
     if(mode == FHalNfcModeIso14443_3aPoller) {
         f_hal_nfc_configure_poller_common(handle);
-        // Disable wake up
-        st25r3916_clear_reg_bits(handle, ST25R3916_REG_OP_CONTROL, ST25R3916_REG_OP_CONTROL_wu);
-        // Enable ISO14443A mode
-        st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_om_iso14443a);
+        // Enable ISO14443A mode, OOK modulation
         st25r3916_change_reg_bits(
             handle,
-            ST25R3916_REG_AUX,
-            ST25R3916_REG_AUX_dis_corr,
-            ST25R3916_REG_AUX_dis_corr_correlator);
+            ST25R3916_REG_MODE,
+            ST25R3916_REG_MODE_om_mask | ST25R3916_REG_MODE_tr_am,
+            ST25R3916_REG_MODE_om_iso14443a | ST25R3916_REG_MODE_tr_am_ook);
+
+        // Overshoot protection - is this necessary here?
         st25r3916_change_reg_bits(handle, ST25R3916_REG_OVERSHOOT_CONF1, 0xff, 0x40);
         st25r3916_change_reg_bits(handle, ST25R3916_REG_OVERSHOOT_CONF2, 0xff, 0x03);
         st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF1, 0xff, 0x40);
         st25r3916_change_reg_bits(handle, ST25R3916_REG_UNDERSHOOT_CONF2, 0xff, 0x03);
+
     } else if(mode == FHalNfcModeIso14443_3aListener) {
         f_hal_nfca_listener_init();
         st25r3916_write_reg(
@@ -355,19 +353,30 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
                 ST25R3916_REG_PASSIVE_TARGET_d_212_424_1r);
 
         st25r3916_write_reg(handle, ST25R3916_REG_MASK_RX_TIMER, 0x02);
+
     } else if(mode == FHalNfcModeIso14443_3bPoller) {
         f_hal_nfc_configure_poller_common(handle);
-        // Disable wake up
-        st25r3916_clear_reg_bits(handle, ST25R3916_REG_OP_CONTROL, ST25R3916_REG_OP_CONTROL_wu);
-        // Enable ISO14443B mode
-        st25r3916_write_reg(handle, ST25R3916_REG_MODE, ST25R3916_REG_MODE_om_iso14443b);
+        // Enable ISO14443B mode, AM modulation
         st25r3916_change_reg_bits(
             handle,
-            ST25R3916_REG_AUX,
-            ST25R3916_REG_AUX_dis_corr,
-            ST25R3916_REG_AUX_dis_corr_correlator);
+            ST25R3916_REG_MODE,
+            ST25R3916_REG_MODE_om_mask | ST25R3916_REG_MODE_tr_am,
+            ST25R3916_REG_MODE_om_iso14443b | ST25R3916_REG_MODE_tr_am_am);
 
-        // EGT = 2 etu
+        // 10% ASK modulation
+        st25r3916_change_reg_bits(
+            handle,
+            ST25R3916_REG_TX_DRIVER,
+            ST25R3916_REG_TX_DRIVER_am_mod_mask,
+            ST25R3916_REG_TX_DRIVER_am_mod_10percent);
+
+        // Use regulator AM, resistive AM disabled
+        st25r3916_clear_reg_bits(
+            handle,
+            ST25R3916_REG_AUX_MOD,
+            ST25R3916_REG_AUX_MOD_dis_reg_am | ST25R3916_REG_AUX_MOD_res_am);
+
+        // EGT = 0 etu
         // SOF = 10 etu LOW + 2 etu HIGH
         // EOF = 10 etu
         st25r3916_change_reg_bits(
@@ -375,7 +384,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
             ST25R3916_REG_ISO14443B_1,
             ST25R3916_REG_ISO14443B_1_egt_mask | ST25R3916_REG_ISO14443B_1_sof_mask |
                 ST25R3916_REG_ISO14443B_1_eof,
-            (2U << ST25R3916_REG_ISO14443B_1_egt_shift) | ST25R3916_REG_ISO14443B_1_sof_0_10etu |
+            (0U << ST25R3916_REG_ISO14443B_1_egt_shift) | ST25R3916_REG_ISO14443B_1_sof_0_10etu |
                 ST25R3916_REG_ISO14443B_1_sof_1_2etu | ST25R3916_REG_ISO14443B_1_eof_10etu);
 
         // TR1 = 80 / fs
@@ -385,7 +394,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
             ST25R3916_REG_ISO14443B_2,
             ST25R3916_REG_ISO14443B_2_tr1_mask | ST25R3916_REG_ISO14443B_2_no_sof |
                 ST25R3916_REG_ISO14443B_2_no_eof,
-            ST25R3916_REG_ISO14443B_2_tr1_80fs80fs | ST25R3916_REG_ISO14443B_2_no_sof);
+            ST25R3916_REG_ISO14443B_2_tr1_80fs80fs);
     }
 
     if(bitrate == FHalNfcBitrate106) {
@@ -401,7 +410,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
         st25r3916_write_reg(
             handle,
             ST25R3916_REG_RX_CONF2,
-            ST25R3916_REG_RX_CONF2_agc6_3 | //ST25R3916_REG_RX_CONF2_agc_alg |
+            ST25R3916_REG_RX_CONF2_agc6_3 | ST25R3916_REG_RX_CONF2_agc_alg |
                 ST25R3916_REG_RX_CONF2_agc_m | ST25R3916_REG_RX_CONF2_agc_en |
                 ST25R3916_REG_RX_CONF2_pulz_61 | ST25R3916_REG_RX_CONF2_sqm_dyn);
 

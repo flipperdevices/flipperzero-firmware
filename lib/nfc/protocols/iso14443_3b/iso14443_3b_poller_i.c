@@ -46,7 +46,7 @@ Iso14443_3bError
         }
 
         if(!iso14443_3b_check_crc(instance->rx_buffer)) {
-            FURI_LOG_D(TAG, "Wrong ATQB CRC");
+            FURI_LOG_D(TAG, "Wrong ATQB CRC: %zu bits", bit_buffer_get_size(instance->rx_buffer));
             ret = Iso14443_3bErrorWrongCrc;
             break;
         }
