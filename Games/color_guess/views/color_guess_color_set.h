@@ -15,7 +15,7 @@ typedef enum {
 void color_guess_color_set_set_callback(
     ColorGuessColorSet* instance,
     ColorGuessColorSetCallback callback,
-    void * context);
+    void* context);
 
 ColorGuessColorSet* color_guess_color_set_alloc();
 

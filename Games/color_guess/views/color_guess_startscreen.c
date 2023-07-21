@@ -30,11 +30,11 @@ void color_guess_startscreen_draw(Canvas* canvas, ColorGuessStartscreenModel* mo
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Color Guess"); 
+    canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignTop, "Color Guess");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Guess the color"); 
+    canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignTop, "Guess the color");
     canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignTop, "on Flipper's LED");
-    elements_button_center(canvas, "Start"); 
+    elements_button_center(canvas, "Start");
 }
 
 static void color_guess_startscreen_model_init(ColorGuessStartscreenModel* const model) {
@@ -42,36 +42,36 @@ static void color_guess_startscreen_model_init(ColorGuessStartscreenModel* const
 }
 
 bool color_guess_startscreen_input(InputEvent* event, void* context) {
-    furi_assert(context); 
+    furi_assert(context);
     ColorGuessStartscreen* instance = context;
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    ColorGuessStartscreenModel * model,
-                    {
-                        UNUSED(model);
-                        instance->callback(ColorGuessCustomEventStartscreenBack, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-            case InputKeyRight:
-            case InputKeyUp:
-            case InputKeyDown:
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    ColorGuessStartscreenModel* model,
-                    {
-                        UNUSED(model);
-                        instance->callback(ColorGuessCustomEventStartscreenOk, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                ColorGuessStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(ColorGuessCustomEventStartscreenBack, instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+        case InputKeyRight:
+        case InputKeyUp:
+        case InputKeyDown:
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                ColorGuessStartscreenModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(ColorGuessCustomEventStartscreenOk, instance->context);
+                },
+                true);
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
     return true;
@@ -87,11 +87,8 @@ void color_guess_startscreen_enter(void* context) {
     with_view_model(
         instance->view,
         ColorGuessStartscreenModel * model,
-        {
-            color_guess_startscreen_model_init(model);
-        },
-        true
-    );
+        { color_guess_startscreen_model_init(model); },
+        true);
 }
 
 ColorGuessStartscreen* color_guess_startscreen_alloc() {
@@ -107,12 +104,9 @@ ColorGuessStartscreen* color_guess_startscreen_alloc() {
     with_view_model(
         instance->view,
         ColorGuessStartscreenModel * model,
-        {
-            color_guess_startscreen_model_init(model);
-        },
-        true
-    );
-    
+        { color_guess_startscreen_model_init(model); },
+        true);
+
     return instance;
 }
 
@@ -120,12 +114,7 @@ void color_guess_startscreen_free(ColorGuessStartscreen* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        ColorGuessStartscreenModel * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, ColorGuessStartscreenModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }
@@ -134,4 +123,3 @@ View* color_guess_startscreen_get_view(ColorGuessStartscreen* instance) {
     furi_assert(instance);
     return instance->view;
 }
-

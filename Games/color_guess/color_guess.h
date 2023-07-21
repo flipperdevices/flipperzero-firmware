@@ -32,7 +32,7 @@ typedef struct {
     ColorGuessStartscreen* color_guess_startscreen;
     Submenu* color_guess_settings;
     bool error;
-    uint32_t haptic; 
+    uint32_t haptic;
     //uint32_t speaker;
     uint32_t led;
     uint32_t save_settings;

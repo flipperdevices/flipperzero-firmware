@@ -17,7 +17,6 @@ struct ColorGuessPlay {
     void* context;
 };
 
-
 typedef struct {
     ColorGuessPlayStatus status;
     int cursorpos;
@@ -43,11 +42,11 @@ void color_guess_play_set_callback(
 
 void play_haptic(void* context, ColorGuessPlayModel* model) {
     ColorGuess* app = context;
-    if (model->success == 1) {
+    if(model->success == 1) {
         color_guess_play_long_bump(app);
-    } else if (model->closeness > model->prev_closeness) {
+    } else if(model->closeness > model->prev_closeness) {
         color_guess_play_happy_bump(app);
-    } else if (model->closeness < model->prev_closeness) {
+    } else if(model->closeness < model->prev_closeness) {
         color_guess_play_bad_bump(app);
     }
 }
@@ -62,16 +61,17 @@ void color_guess_play_new_round(void* context, ColorGuessPlayModel* model) {
     model->success = 0;
     model->closeness = 0;
     model->prev_closeness = 0;
-    
-    if (model->difficulty == 0) {
+
+    if(model->difficulty == 0) {
         model->color = colorsEasy[rand() % ARR_SIZE(colorsEasy)];
-    } else if (model->difficulty == 1) {
+    } else if(model->difficulty == 1) {
         model->color = colorsNormal[rand() % ARR_SIZE(colorsNormal)];
-    } else if (model->difficulty == 2) {
+    } else if(model->difficulty == 2) {
         model->color = colorsHard[rand() % ARR_SIZE(colorsHard)];
     }
-    
-   color_guess_led_set_rgb(app, ((model->color >> 16) & 0xFF), ((model->color >> 8) & 0xFF), ((model->color) & 0xFF));
+
+    color_guess_led_set_rgb(
+        app, ((model->color >> 16) & 0xFF), ((model->color >> 8) & 0xFF), ((model->color) & 0xFF));
 }
 
 void color_guess_play_calculate_closeness(void* context, ColorGuessPlayModel* model) {
@@ -84,14 +84,15 @@ void color_guess_play_calculate_closeness(void* context, ColorGuessPlayModel* mo
     int ledRed = ((model->color >> 16) & 0xFF);
     int ledGreen = ((model->color >> 8) & 0xFF);
     int ledBlue = ((model->color) & 0xFF);
-    
+
     int distanceRed = abs(ledRed - userRed);
     int distanceGreen = abs(ledGreen - userGreen);
     int distanceBlue = abs(ledBlue - userBlue);
-    float percentageRed = 100 - ((distanceRed / 255.0) * 100); //make sure one number is float, otherwise C will calc wrong
+    float percentageRed = 100 - ((distanceRed / 255.0) *
+                                 100); //make sure one number is float, otherwise C will calc wrong
     float percentageGreen = 100 - ((distanceGreen / 255.0) * 100);
     float percentageBlue = 100 - ((distanceBlue / 255.0) * 100);
-    if (percentageRed == 100 && percentageGreen == 100 && percentageBlue == 100) {
+    if(percentageRed == 100 && percentageGreen == 100 && percentageBlue == 100) {
         model->success = 1;
         dolphin_deed(DolphinDeedPluginGameWin);
     }
@@ -111,18 +112,18 @@ void parse_time_str(char* buffer, int32_t sec) {
 
 void drawDifficulty(Canvas* canvas, ColorGuessPlayModel* model) {
     UNUSED(model);
-    char *strDifficulty = malloc(7);
-    if (model->difficulty == 0) {
+    char* strDifficulty = malloc(7);
+    if(model->difficulty == 0) {
         strcpy(strDifficulty, "Easy");
-    } else if (model->difficulty == 1) {
+    } else if(model->difficulty == 1) {
         strcpy(strDifficulty, "Medium");
-    } else if (model->difficulty == 2) {
+    } else if(model->difficulty == 2) {
         strcpy(strDifficulty, "Hard");
     }
     canvas_draw_box(canvas, 0, 52, 47, 12);
     canvas_invert_color(canvas);
     canvas_draw_icon(canvas, 2, 54, &I_ButtonCenter_7x7);
-    canvas_draw_str_aligned(canvas, 11, 54, AlignLeft, AlignTop, strDifficulty); 
+    canvas_draw_str_aligned(canvas, 11, 54, AlignLeft, AlignTop, strDifficulty);
     canvas_invert_color(canvas);
     free(strDifficulty);
     furi_thread_flags_wait(0, FuriFlagWaitAny, 10);
@@ -130,12 +131,12 @@ void drawDifficulty(Canvas* canvas, ColorGuessPlayModel* model) {
 
 void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
     char timer_string[TIMER_LENGHT];
-    if (model->success == 1) {
+    if(model->success == 1) {
         parse_time_str(timer_string, model->time_spent);
         canvas_clear(canvas);
         canvas_set_color(canvas, ColorBlack);
         canvas_set_font(canvas, FontPrimary);
-        canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, "You won!!"); 
+        canvas_draw_str_aligned(canvas, 64, 2, AlignCenter, AlignTop, "You won!!");
         canvas_set_font(canvas, FontSecondary);
         elements_button_center(canvas, "New Round");
         canvas_set_font(canvas, FontBigNumbers);
@@ -147,9 +148,9 @@ void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
         canvas_draw_icon(canvas, 54, 32, digits[model->digit[2]]);
         canvas_draw_icon(canvas, 66, 32, digits[model->digit[3]]);
         canvas_draw_icon(canvas, 78, 32, digits[model->digit[4]]);
-        canvas_draw_icon(canvas, 90, 32, digits[model->digit[5]]); 
-        
-        return; 
+        canvas_draw_icon(canvas, 90, 32, digits[model->digit[5]]);
+
+        return;
     }
     const int cursorOffset = 30;
     const int newCursorPos = (model->cursorpos * 12) + cursorOffset;
@@ -160,18 +161,18 @@ void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
     model->time_spent = time_elapsed;
 
     char closeness_string[4];
-    
+
     parse_time_str(timer_string, time_elapsed);
     snprintf(closeness_string, CLOSENESS_LENGTH, CLOSENESS_FORMAT, model->closeness);
 
     canvas_clear(canvas);
     canvas_set_color(canvas, ColorBlack);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "Time spent:"); 
+    canvas_draw_str_aligned(canvas, 0, 0, AlignLeft, AlignTop, "Time spent:");
     canvas_draw_str_aligned(canvas, 55, 0, AlignLeft, AlignTop, timer_string); // DRAW TIMER
-    canvas_draw_str_aligned(canvas, 0, 9, AlignLeft, AlignTop, "You are this close:"); 
-    canvas_draw_str_aligned(canvas, 105, 9, AlignLeft, AlignTop, closeness_string); 
-    
+    canvas_draw_str_aligned(canvas, 0, 9, AlignLeft, AlignTop, "You are this close:");
+    canvas_draw_str_aligned(canvas, 105, 9, AlignLeft, AlignTop, closeness_string);
+
     canvas_draw_icon(canvas, newCursorPos, 20, &I_ButtonUp_10x5);
     canvas_draw_icon(canvas, newCursorPos, 43, &I_ButtonDown_10x5);
     canvas_draw_icon(canvas, 18, 27, digits[16]);
@@ -187,7 +188,7 @@ void color_guess_play_draw(Canvas* canvas, ColorGuessPlayModel* model) {
 
 static void color_guess_play_model_init(ColorGuessPlayModel* const model) {
     model->cursorpos = 0;
-    for (int i = 0;i < 6; i++) {
+    for(int i = 0; i < 6; i++) {
         model->digit[i] = 0;
     }
     model->closeness = 0;
@@ -195,93 +196,91 @@ static void color_guess_play_model_init(ColorGuessPlayModel* const model) {
 }
 
 bool color_guess_play_input(InputEvent* event, void* context) {
-    furi_assert(context); 
+    furi_assert(context);
     ColorGuessPlay* instance = context;
-    if (event->type == InputTypeRelease) {
+    if(event->type == InputTypeRelease) {
         switch(event->key) {
-            case InputKeyBack:
-                with_view_model(
-                    instance->view,
-                    ColorGuessPlayModel * model,
-                    {
-                        UNUSED(model);
-                        instance->callback(ColorGuessCustomEventPlayBack, instance->context);
-                    },
-                    true);
-                break;
-            case InputKeyLeft:
-                with_view_model(
-                    instance->view,
-                    ColorGuessPlayModel* model,
-                    {
-                        model->cursorpos--;
-                        if (model->cursorpos < 0)
-                        {
-                            model->cursorpos = 5;
+        case InputKeyBack:
+            with_view_model(
+                instance->view,
+                ColorGuessPlayModel * model,
+                {
+                    UNUSED(model);
+                    instance->callback(ColorGuessCustomEventPlayBack, instance->context);
+                },
+                true);
+            break;
+        case InputKeyLeft:
+            with_view_model(
+                instance->view,
+                ColorGuessPlayModel * model,
+                {
+                    model->cursorpos--;
+                    if(model->cursorpos < 0) {
+                        model->cursorpos = 5;
+                    }
+                },
+                true);
+            break;
+        case InputKeyRight:
+            with_view_model(
+                instance->view,
+                ColorGuessPlayModel * model,
+                {
+                    model->cursorpos++;
+                    if(model->cursorpos > 5) {
+                        model->cursorpos = 0;
+                    }
+                },
+                true);
+            break;
+        case InputKeyUp:
+            with_view_model(
+                instance->view,
+                ColorGuessPlayModel * model,
+                {
+                    model->digit[model->cursorpos]++;
+                    if(model->digit[model->cursorpos] > 15) {
+                        model->digit[model->cursorpos] = 0;
+                    }
+                    color_guess_play_calculate_closeness(instance, model);
+                    play_haptic(instance->context, model);
+                },
+                true);
+            break;
+        case InputKeyDown:
+            with_view_model(
+                instance->view,
+                ColorGuessPlayModel * model,
+                {
+                    model->digit[model->cursorpos]--;
+                    if(model->digit[model->cursorpos] < 0) {
+                        model->digit[model->cursorpos] = 15;
+                    }
+                    color_guess_play_calculate_closeness(instance, model);
+                    play_haptic(instance->context, model);
+                },
+                true);
+            break;
+        case InputKeyOk:
+            with_view_model(
+                instance->view,
+                ColorGuessPlayModel * model,
+                {
+                    if(model->success == 1) {
+                        model->success = 0;
+                    } else {
+                        model->difficulty++;
+                        if(model->difficulty > 2) {
+                            model->difficulty = 0;
                         }
-                    },
-                    true);
-                break;
-            case InputKeyRight:
-                with_view_model(
-                    instance->view,
-                    ColorGuessPlayModel* model,
-                    {
-                        model->cursorpos++;
-                        if (model->cursorpos > 5)
-                        {
-                            model->cursorpos = 0;
-                        }
-                    },
-                    true);
-                break;
-            case InputKeyUp:
-                with_view_model(
-                    instance->view,
-                    ColorGuessPlayModel* model,
-                    {
-                        model->digit[model->cursorpos]++;
-                        if (model->digit[model->cursorpos] > 15) {
-                            model->digit[model->cursorpos] = 0;
-                        }
-                        color_guess_play_calculate_closeness(instance, model);
-                        play_haptic(instance->context, model);
-                    },
-                    true);
-                break;
-            case InputKeyDown:
-                with_view_model(
-                    instance->view,
-                    ColorGuessPlayModel* model,
-                    {
-                        model->digit[model->cursorpos]--;
-                        if (model->digit[model->cursorpos] < 0) {
-                            model->digit[model->cursorpos] = 15;
-                        }
-                        color_guess_play_calculate_closeness(instance, model);
-                        play_haptic(instance->context, model);
-                    },
-                    true);
-                break;
-            case InputKeyOk:
-                with_view_model(
-                    instance->view,
-                    ColorGuessPlayModel* model,
-                    {
-                        if (model->success == 1) {
-                            model->success = 0;
-                        } else {
-                            model->difficulty++;
-                            if (model->difficulty > 2) {
-                                model->difficulty = 0;
-                            }
-                        }
-                        color_guess_play_new_round(instance->context, model);
-                    },
-                    true);
-                break;
-            case InputKeyMAX:
-                break;
+                    }
+                    color_guess_play_new_round(instance->context, model);
+                },
+                true);
+            break;
+        case InputKeyMAX:
+            break;
         }
     }
     return true;
@@ -289,7 +288,6 @@ bool color_guess_play_input(InputEvent* event, void* context) {
 
 void color_guess_play_exit(void* context) {
     furi_assert(context);
-    
 }
 
 void color_guess_play_enter(void* context) {
@@ -303,8 +301,7 @@ void color_guess_play_enter(void* context) {
             color_guess_play_model_init(model);
             color_guess_play_new_round(instance->context, model);
         },
-        true
-    );
+        true);
 }
 
 ColorGuessPlay* color_guess_play_alloc() {
@@ -318,14 +315,8 @@ ColorGuessPlay* color_guess_play_alloc() {
     //view_set_exit_callback(instance->view, color_guess_play_exit);
 
     with_view_model(
-        instance->view,
-        ColorGuessPlayModel * model,
-        {
-            color_guess_play_model_init(model);
-        },
-        true
-    );
-    
+        instance->view, ColorGuessPlayModel * model, { color_guess_play_model_init(model); }, true);
+
     return instance;
 }
 
@@ -333,12 +324,7 @@ void color_guess_play_free(ColorGuessPlay* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        ColorGuessPlayModel * model,
-        {
-            free(model->digit);
-        },
-        true);
+        instance->view, ColorGuessPlayModel * model, { free(model->digit); }, true);
     view_free(instance->view);
     free(instance);
 }
@@ -347,4 +333,3 @@ View* color_guess_play_get_view(ColorGuessPlay* instance) {
     furi_assert(instance);
     return instance->view;
 }
-
