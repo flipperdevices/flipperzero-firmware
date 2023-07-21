@@ -103,6 +103,242 @@ static bool seader_credential_load(SeaderCredential* cred, FuriString* path, boo
     return parsed;
 }
 
+bool seader_credential_save_mfc(SeaderCredential* cred, const char* name) {
+    furi_assert(cred);
+
+    static const char* nfc_file_header = "Flipper NFC device";
+    static const uint32_t nfc_file_version = 3;
+    static const uint32_t nfc_mifare_classic_data_format_version = 2;
+
+    uint8_t uid[4] = {0xDF, 0xC6, 0x9C, 0x05};
+    uint8_t atqa[2] = {0x00, 0x04};
+    uint8_t sak = 0x08;
+    uint8_t manuf_block[16] = {
+        0xDF,
+        0xC6,
+        0x9C,
+        0x05,
+        0x80,
+        0x08,
+        0x04,
+        0x00,
+        0x00,
+        0x00,
+        0x73,
+        0x65,
+        0x61,
+        0x64,
+        0x65,
+        0x72};
+    uint8_t sector0_trailer[16] = {
+        0xa0,
+        0xa1,
+        0xa2,
+        0xa3,
+        0xa4,
+        0xa5,
+        0x78,
+        0x77,
+        0x88,
+        0xc1,
+        0x89,
+        0xec,
+        0xa9,
+        0x7f,
+        0x8c,
+        0x2a};
+    uint8_t sector1_trailer[16] = {
+        0x48,
+        0x49,
+        0x44,
+        0x20,
+        0x49,
+        0x53,
+        0x78,
+        0x77,
+        0x88,
+        0xaa,
+        0x20,
+        0x47,
+        0x52,
+        0x45,
+        0x41,
+        0x54};
+    uint8_t sectorn_trailer[16] = {
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0x07,
+        0x80,
+        0x69,
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0xff,
+        0xff};
+    uint8_t mad_block[16] = {
+        0x1b,
+        0x01,
+        0x4d,
+        0x48,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00};
+    uint8_t empty_block[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    uint8_t pacs_block[16] = {0x02, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    bool use_load_path = true;
+    bool saved = false;
+    FlipperFormat* file = flipper_format_file_alloc(cred->storage);
+    FuriString* temp_str;
+    temp_str = furi_string_alloc();
+
+    uint64_t sentinel = 1ULL << cred->bit_length;
+    uint64_t swapped = __builtin_bswap64(cred->credential | sentinel);
+    memcpy(pacs_block + 8, &swapped, sizeof(swapped));
+
+    do {
+        if(use_load_path && !furi_string_empty(cred->load_path)) {
+            // Get directory name
+            path_extract_dirname(furi_string_get_cstr(cred->load_path), temp_str);
+            // Make path to file to save
+            furi_string_cat_printf(temp_str, "/%s%s", name, SEADER_APP_MFC_EXTENSION);
+        } else {
+            furi_string_printf(
+                temp_str, "%s/%s%s", SEADER_APP_MFC_FOLDER, name, SEADER_APP_MFC_EXTENSION);
+        }
+
+        FURI_LOG_D(TAG, "Save as MFC [%s]", furi_string_get_cstr(temp_str));
+
+        // Open file
+        if(!flipper_format_file_open_always(file, furi_string_get_cstr(temp_str))) break;
+        if(!flipper_format_write_header_cstr(file, nfc_file_header, nfc_file_version)) break;
+        // Write nfc device type
+        if(!flipper_format_write_comment_cstr(
+               file, "Nfc device type can be UID, Mifare Ultralight, Mifare Classic or ISO15693"))
+            break;
+        furi_string_set(temp_str, "Mifare Classic");
+        if(!flipper_format_write_string(file, "Device type", temp_str)) break;
+        // Write UID
+        if(!flipper_format_write_comment_cstr(file, "UID is common for all formats")) break;
+        if(!flipper_format_write_hex(file, "UID", uid, 4)) break;
+        // Write ATQA, SAK
+        if(!flipper_format_write_comment_cstr(file, "ISO14443 specific fields")) break;
+        // Save ATQA in MSB order for correct companion apps display
+        if(!flipper_format_write_hex(file, "ATQA", atqa, 2)) break;
+        if(!flipper_format_write_hex(file, "SAK", &sak, 1)) break;
+        if(!flipper_format_write_comment_cstr(file, "Mifare Classic specific data")) break;
+        if(!flipper_format_write_comment_cstr(file, "Made with Seader")) break;
+        if(!flipper_format_write_string_cstr(file, "Mifare Classic type", "1K")) break;
+        uint8_t blocks = 64;
+
+        if(!flipper_format_write_uint32(
+               file, "Data format version", &nfc_mifare_classic_data_format_version, 1))
+            break;
+        if(!flipper_format_write_comment_cstr(
+               file, "Mifare Classic blocks, \'??\' means unknown data"))
+            break;
+        bool block_saved = true;
+        FuriString* block_str;
+        block_str = furi_string_alloc();
+        for(size_t i = 0; i < blocks; i++) {
+            furi_string_printf(temp_str, "Block %d", i);
+            switch(i) {
+            case 0:
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), manuf_block, sizeof(manuf_block))) {
+                    block_saved = false;
+                }
+                break;
+            case 1:
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), mad_block, sizeof(mad_block))) {
+                    block_saved = false;
+                }
+                break;
+            case 3:
+                if(!flipper_format_write_hex(
+                       file,
+                       furi_string_get_cstr(temp_str),
+                       sector0_trailer,
+                       sizeof(sector0_trailer))) {
+                    block_saved = false;
+                }
+                break;
+            case 5:
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), pacs_block, sizeof(pacs_block))) {
+                    block_saved = false;
+                }
+                break;
+            case 7:
+                if(!flipper_format_write_hex(
+                       file,
+                       furi_string_get_cstr(temp_str),
+                       sector1_trailer,
+                       sizeof(sector1_trailer))) {
+                    block_saved = false;
+                }
+                break;
+            // Trailers
+            case 11:
+            case 15:
+            case 19:
+            case 23:
+            case 27:
+            case 31:
+            case 35:
+            case 39:
+            case 43:
+            case 47:
+            case 51:
+            case 55:
+            case 59:
+            case 63:
+                if(!flipper_format_write_hex(
+                       file,
+                       furi_string_get_cstr(temp_str),
+                       sectorn_trailer,
+                       sizeof(sectorn_trailer))) {
+                    block_saved = false;
+                }
+                break;
+            default:
+                if(!flipper_format_write_hex(
+                       file, furi_string_get_cstr(temp_str), empty_block, sizeof(empty_block))) {
+                    block_saved = false;
+                }
+                break;
+            }
+        }
+        furi_string_free(block_str);
+        if(!block_saved) break;
+
+        saved = true;
+    } while(false);
+
+    if(!saved) {
+        dialog_message_show_storage_error(cred->dialogs, "Can not save\nfile");
+    }
+    furi_string_free(temp_str);
+    flipper_format_free(file);
+    return saved;
+}
+
 bool seader_credential_save_agnostic(SeaderCredential* cred, const char* name) {
     furi_assert(cred);
 
@@ -160,6 +396,8 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
 
     if(cred->save_format == SeaderCredentialSaveFormatAgnostic) {
         return seader_credential_save_agnostic(cred, name);
+    } else if(cred->save_format == SeaderCredentialSaveFormatMFC) {
+        return seader_credential_save_mfc(cred, name);
     } else if(
         cred->save_format == SeaderCredentialSaveFormatPicopass ||
         cred->save_format == SeaderCredentialSaveFormatSR) {
