@@ -93,7 +93,7 @@ int32_t uart_terminal_app(void* p) {
     
     // Enable uart listener
     furi_hal_console_disable();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400); // TODO: Clean this
+    furi_hal_uart_set_br(UART_CH, BAUDRATE); // TODO: Clean this
     //furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_echo_on_irq_cb, app);
   
     furi_hal_power_disable_external_3_3v();
@@ -104,7 +104,7 @@ int32_t uart_terminal_app(void* p) {
     for(int i=0;i<2;i++)
     {
         furi_delay_ms(500); 
-        furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'.'}, 1);
+        furi_hal_uart_tx(UART_CH, (uint8_t[1]){'.'}, 1);
     }
     furi_delay_ms(1);
     UART_TerminalApp* uart_terminal_app = uart_terminal_app_alloc();

