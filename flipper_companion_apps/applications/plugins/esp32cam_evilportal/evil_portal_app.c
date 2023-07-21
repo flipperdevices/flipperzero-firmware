@@ -111,7 +111,7 @@ int32_t evil_portal_app(void *p) {
   // Enable uart listener
   furi_hal_console_disable();
   furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400); // TODO: Clean this
-  furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_echo_on_irq_cb, app);
+  //furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, evil_portal_uart_on_irq_cb, app);
     
   furi_hal_power_disable_external_3_3v();
   furi_hal_power_disable_otg();
