@@ -115,7 +115,7 @@ int32_t evil_portal_app(void *p) {
   for(int i=0;i<2;i++)
   {
       furi_delay_ms(500); 
-      furi_hal_uart_tx(UART_CH, (uint8_t[1]){'e'}, 1);
+      furi_hal_uart_tx(FuriHalUartIdUSART1, (uint8_t[1]){'e'}, 1);
   }
   furi_delay_ms(1);       
   Evil_PortalApp *evil_portal_app = evil_portal_app_alloc();
