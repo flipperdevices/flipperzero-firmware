@@ -47,8 +47,10 @@ static uint16_t seader_worker_picopass_update_ccitt(uint16_t crcSeed, uint8_t da
     return crc;
 }
 
-static uint16_t
-    seader_worker_picopass_calculate_ccitt(uint16_t preloadValue, const uint8_t* buf, uint16_t length) {
+static uint16_t seader_worker_picopass_calculate_ccitt(
+    uint16_t preloadValue,
+    const uint8_t* buf,
+    uint16_t length) {
     uint16_t crc = preloadValue;
     uint16_t index;
 
