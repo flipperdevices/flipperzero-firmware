@@ -12,4 +12,5 @@ App(
     fap_weburl="https://github.com/eried/flipperzero-mayhem",
     fap_version=(1, 0),
     fap_description="ESP32-CAM app to broadcast Evil Portal",
+    fap_icon_assets_symbol="mayhem_evil_portal",
 )
