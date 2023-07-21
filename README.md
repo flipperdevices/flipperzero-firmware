@@ -37,7 +37,6 @@ SDA -> C1
 6. 2x M3 threaded inserts (max diameter 5.3 mm, max height 4 mm)
 7. 2x M3x5 screws
 
-
 ## TODO
 - [ ] Save settings to sd card
 - [ ] Color measurement with TCS34725 sensor
