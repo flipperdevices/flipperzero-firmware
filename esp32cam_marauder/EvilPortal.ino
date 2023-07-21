@@ -174,7 +174,7 @@ void evilportal_setup() {
 
   //setLed(WAITING);
 
-  Serial.begin(115200);
+  //Serial.begin(115200);
 
   // wait for init flipper input
   getInitInput();
