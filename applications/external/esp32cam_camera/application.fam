@@ -10,5 +10,6 @@ App(
     fap_category="GPIO/ESP32",
     fap_description="ESP32-CAM live feed and photo capture, use left/right for orientation/mode, up/down for brightness and center for saving a screenshot. [Unplug the USB cable to test with Mayhem]",
     fap_author="Z4urce",
+    fap_version=(1, 0),
     fap_weburl="https://github.com/Z4urce/flipper-camera"
 )

@@ -8,7 +8,8 @@ App(
     order=1,
     fap_icon="icon.png",
     fap_category="GPIO/ESP32",
-    fap_description="ESP32-CAM simple app to show a payload from QR codes. Can be extended to trigger more stuff in the code. [Unplug the USB cable to test with Mayhem]",
     fap_author="eried",
-    fap_weburl="https://flipper.ried.cl",
+    fap_weburl="https://github.com/eried/flipperzero-mayhem",
+    fap_version=(1, 0),
+    fap_description="ESP32-CAM simple app to show a payload from QR codes. Can be extended to trigger more stuff in the code. [Unplug the USB cable to test with Mayhem]",
 )

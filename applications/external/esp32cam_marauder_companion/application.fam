@@ -8,5 +8,8 @@ App(
     order=2,
     fap_icon="wifi_10px.png",
     fap_category="GPIO/ESP32",
-    fap_description="ESP32-CAM version of Marauder. Includes all functionality from the original plus some options to trigger the camera and flashlight. [Unplug the USB cable to test with Mayhem]"
+    fap_author="0xchocolate & eried",
+    fap_weburl="https://github.com/eried/flipperzero-mayhem",
+    fap_version=(1, 0),
+    fap_description="ESP32-CAM version of Marauder. Includes all functionality from the original plus some options to trigger the camera and flashlight. [Unplug the USB cable to test with Mayhem]",
 )
