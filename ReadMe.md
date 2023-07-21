@@ -43,6 +43,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Switched Main Menu app order to have Internal SubGHz app listed first (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/716)
 - Updated: [ESP32CAM Morse Flasher (By eried)](https://github.com/eried/flipperzero-mayhem)
 - Added: [ESP32CAM Evil Portal (By bigbrodude6119 & eried)](https://github.com/eried/flipperzero-mayhem)
+- UL PR: [SubGhz Analyzer PRECISE hstep fix #553 (By AKEEF02)](https://github.com/DarkFlippers/unleashed-firmware/pull/553)
 
 <a name="release">
 
