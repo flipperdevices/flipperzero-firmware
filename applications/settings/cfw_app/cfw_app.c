@@ -206,12 +206,12 @@ CfwApp* cfw_app_alloc() {
 
     CharList_push_back(app->start_point_names, "Applications");
 
-    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-        CharList_push_back(app->start_point_names, strdup(FLIPPER_EXTERNAL_APPS[i].name));
-    }
-
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         CharList_push_back(app->start_point_names, strdup(FLIPPER_APPS[i].name));
+    }
+
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        CharList_push_back(app->start_point_names, strdup(FLIPPER_EXTERNAL_APPS[i].name));
     }
 
     for(size_t i = 0; i < CharList_size(app->mainmenu_app_names); i++) {

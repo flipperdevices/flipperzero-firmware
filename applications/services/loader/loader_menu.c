@@ -103,18 +103,6 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
         loader_menu_applications_callback,
         (void*)menu);
 
-    //External Apps
-    for(i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-        menu_add_item(
-            app->primary_menu,
-            FLIPPER_EXTERNAL_APPS[i].name,
-            FLIPPER_EXTERNAL_APPS[i].icon,
-            (uint32_t)FLIPPER_EXTERNAL_APPS[i].path,
-            loader_menu_callback,
-            (void*)menu);
-        count++;
-    }
-
     //Internal Apps
     for(i = 0; i < FLIPPER_APPS_COUNT; i++) {
         menu_add_item(
@@ -122,6 +110,18 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
             FLIPPER_APPS[i].name,
             FLIPPER_APPS[i].icon,
             (uint32_t)FLIPPER_APPS[i].name,
+            loader_menu_callback,
+            (void*)menu);
+        count++;
+    }
+
+    //External Apps
+    for(i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        menu_add_item(
+            app->primary_menu,
+            FLIPPER_EXTERNAL_APPS[i].name,
+            FLIPPER_EXTERNAL_APPS[i].icon,
+            (uint32_t)FLIPPER_EXTERNAL_APPS[i].path,
             loader_menu_callback,
             (void*)menu);
         count++;
