@@ -366,48 +366,75 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
             ST25R3916_REG_AUX,
             ST25R3916_REG_AUX_dis_corr,
             ST25R3916_REG_AUX_dis_corr_correlator);
-        /* Set the EGT, SOF, EOF and EOF */
-        // st25r3916_change_reg_bits(
-        //     handle,
-        //     ST25R3916_REG_ISO14443B_1,
-        //     ST25R3916_REG_ISO14443B_1_egt_mask | ST25R3916_REG_ISO14443B_1_sof_mask |
-        //         ST25R3916_REG_ISO14443B_1_eof,
-        //     (0U << ST25R3916_REG_ISO14443B_1_egt_shift) | ST25R3916_REG_ISO14443B_1_sof_0_10etu |
-        //         ST25R3916_REG_ISO14443B_1_sof_1_2etu | ST25R3916_REG_ISO14443B_1_eof_10etu);
 
-        // /* Set the minimum TR1, SOF, EOF and EOF12 */
-        // st25r3916_change_reg_bits(
-        //     handle,
-        //     ST25R3916_REG_ISO14443B_2,
-        //     ST25R3916_REG_ISO14443B_2_tr1_mask | ST25R3916_REG_ISO14443B_2_no_sof |
-        //         ST25R3916_REG_ISO14443B_2_no_eof,
-        //     ST25R3916_REG_ISO14443B_2_tr1_80fs80fs);
+        // EGT = 2 etu
+        // SOF = 10 etu LOW + 2 etu HIGH
+        // EOF = 10 etu
+        st25r3916_change_reg_bits(
+            handle,
+            ST25R3916_REG_ISO14443B_1,
+            ST25R3916_REG_ISO14443B_1_egt_mask | ST25R3916_REG_ISO14443B_1_sof_mask |
+                ST25R3916_REG_ISO14443B_1_eof,
+            (2U << ST25R3916_REG_ISO14443B_1_egt_shift) | ST25R3916_REG_ISO14443B_1_sof_0_10etu |
+                ST25R3916_REG_ISO14443B_1_sof_1_2etu | ST25R3916_REG_ISO14443B_1_eof_10etu);
 
-        // st25r3916_set_reg_bits(
-        //     handle,
-        //     ST25R3916_REG_CORR_CONF1,
-        //     ST25R3916_REG_CORR_CONF1_corr_s3); /* Ensure BPSK start to 33 pilot pulses */
-        // st25r3916_change_reg_bits(
-        //     handle,
-        //     ST25R3916_REG_SUBC_START_TIME,
-        //     ST25R3916_REG_SUBC_START_TIME_sst_mask,
-        //     20U);
+        // TR1 = 80 / fs
+        // B' mode off (no_sof & no_eof = 0)
+        st25r3916_change_reg_bits(
+            handle,
+            ST25R3916_REG_ISO14443B_2,
+            ST25R3916_REG_ISO14443B_2_tr1_mask | ST25R3916_REG_ISO14443B_2_no_sof |
+                ST25R3916_REG_ISO14443B_2_no_eof,
+            ST25R3916_REG_ISO14443B_2_tr1_80fs80fs | ST25R3916_REG_ISO14443B_2_no_sof);
     }
 
     if(bitrate == FHalNfcBitrate106) {
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF1, 0xff, 0x08);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF2, 0xff, 0x2d);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF3, 0xff, 0x00);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF4, 0xff, 0x00);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF1, 0xff, 0x51);
-        // st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF2, 0xff, 0x00);
+        // Temp NFC-B settings
+        st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF1, ST25R3916_REG_RX_CONF1_h200);
 
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF1, 0xFF, 0x04);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF2, 0xFF, 0x3D);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF3, 0xFF, 0x00);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_RX_CONF4, 0xFF, 0x00);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF1, 0xFF, 0x1B);
-        st25r3916_change_reg_bits(handle, ST25R3916_REG_CORR_CONF2, 0xFF, 0x00);
+        // Enable AGC
+        // AGC Ratio 6
+        // AGC algorithm with RESET (recommended for ISO14443-B)
+        // AGC operation during complete receive period
+        // Squelch ratio 6/3 (recommended for ISO14443-B)
+        // Squelch automatic activation on TX end
+        st25r3916_write_reg(
+            handle,
+            ST25R3916_REG_RX_CONF2,
+            ST25R3916_REG_RX_CONF2_agc6_3 | //ST25R3916_REG_RX_CONF2_agc_alg |
+                ST25R3916_REG_RX_CONF2_agc_m | ST25R3916_REG_RX_CONF2_agc_en |
+                ST25R3916_REG_RX_CONF2_pulz_61 | ST25R3916_REG_RX_CONF2_sqm_dyn);
+
+        // Subcarrier end detector enabled
+        // Subcarrier end detection level = 66%
+        // BPSK start 33 pilot pulses
+        // AM & PM summation before digitizing on
+        st25r3916_write_reg(
+            handle,
+            ST25R3916_REG_CORR_CONF1,
+            ST25R3916_REG_CORR_CONF1_corr_s0 | ST25R3916_REG_CORR_CONF1_corr_s1 |
+                ST25R3916_REG_CORR_CONF1_corr_s3 | ST25R3916_REG_CORR_CONF1_corr_s4);
+
+        // Zero 600k setting
+        // st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF1, ST25R3916_REG_RX_CONF1_z600k);
+        // // AGC enabled, ratio 3:1, squelch after TX
+        // st25r3916_write_reg(
+        //     handle,
+        //     ST25R3916_REG_RX_CONF2,
+        //     ST25R3916_REG_RX_CONF2_agc6_3 | ST25R3916_REG_RX_CONF2_agc_m |
+        //         ST25R3916_REG_RX_CONF2_agc_en | ST25R3916_REG_RX_CONF2_sqm_dyn);
+        // HF operation, full gain on AM and PM channels
+        st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF3, 0x00);
+        // No gain reduction on AM and PM channels
+        st25r3916_write_reg(handle, ST25R3916_REG_RX_CONF4, 0x00);
+        // // Correlator config
+        // st25r3916_write_reg(
+        //     handle,
+        //     ST25R3916_REG_CORR_CONF1,
+        //     ST25R3916_REG_CORR_CONF1_corr_s0 | ST25R3916_REG_CORR_CONF1_corr_s4 |
+        //         ST25R3916_REG_CORR_CONF1_corr_s6);
+        // Sleep mode disable, 424kHz mode off
+        st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0x00);
     }
 
     return error;

@@ -31,7 +31,7 @@ Iso14443_3bError
 
     bit_buffer_append_byte(instance->tx_buffer, 0x05);
     bit_buffer_append_byte(instance->tx_buffer, 0x00);
-    bit_buffer_append_byte(instance->tx_buffer, 0x08);
+    bit_buffer_append_byte(instance->tx_buffer, 0x00);
 
     iso14443_3b_append_crc(instance->tx_buffer);
 
@@ -39,18 +39,14 @@ Iso14443_3bError
         NfcError error;
         error = nfc_trx(
             instance->nfc, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_POLL_FC);
+
         if(error != NfcErrorNone) {
-            FURI_LOG_D(TAG, "Failed to send/receive REQB: %d", error);
             ret = iso14443_3b_poller_process_error(error);
             break;
         }
 
         if(!iso14443_3b_check_crc(instance->rx_buffer)) {
-            const size_t rx_size = bit_buffer_get_size_bytes(instance->rx_buffer);
-            FURI_LOG_D(TAG, "Wrong ATQB CRC, bytes received: %zu, bits received: %zu", rx_size, bit_buffer_get_size(instance->rx_buffer));
-            for(size_t i = 0; i < rx_size; ++i) {
-                FURI_LOG_D(TAG, "0x%x", bit_buffer_get_byte(instance->rx_buffer, i));
-            }
+            FURI_LOG_D(TAG, "Wrong ATQB CRC");
             ret = Iso14443_3bErrorWrongCrc;
             break;
         }
@@ -66,13 +62,14 @@ Iso14443_3bError
         const Iso14443_3bAtqB* atqb =
             (const Iso14443_3bAtqB*)bit_buffer_get_data(instance->rx_buffer);
 
-        for(size_t i = 0; i < ISO14443_3B_UID_SIZE; ++i) {
-            FURI_LOG_D(TAG, "0x%x", atqb->uid[i]);
-        }
+        memcpy(instance->data->uid, atqb->uid, ISO14443_3B_UID_SIZE);
+        memcpy(instance->data->app_data, atqb->app_data, ISO14443_3B_APP_DATA_SIZE);
+        memcpy(instance->data->protocol_data, atqb->protocol_data, ISO14443_3B_PROTOCOL_DATA_SIZE);
 
-        memcpy(data->uid, atqb->uid, ISO14443_3B_UID_SIZE);
-        memcpy(data->app_data, atqb->app_data, ISO14443_3B_APP_DATA_SIZE);
-        memcpy(data->protocol_data, atqb->protocol_data, ISO14443_3B_PROTOCOL_DATA_SIZE);
+        // TODO: is this really necessary?
+        if(data) {
+            *data = *instance->data;
+        }
 
     } while(false);
 
