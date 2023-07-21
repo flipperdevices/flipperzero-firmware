@@ -184,7 +184,11 @@ static bool freq_input_validator(const char *text, FuriString *error,
 		return false;
 	}
 
+#ifdef FW_ORIGIN_Official
+	if (!furi_hal_region_is_frequency_allowed(state->frequency)) {
+#else /* FW_ORIGIN_Official */
 	if (!furi_hal_subghz_is_tx_allowed(state->frequency)) {
+#endif /* FW_ORIGIN_Official */
 		furi_string_printf(error, "TX forbidden\non frequency\n%lu!",
 				state->frequency);
 		return false;
@@ -224,7 +228,11 @@ static bool pass_input_validator(const char *text, FuriString *error,
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+#ifdef FW_ORIGIN_Official
+	if (strcmp(text, " ") == 0) {
+#else /* FW_ORIGIN_Official */
 	if (strlen(text) == 0) {
+#endif /* FW_ORIGIN_Official */
 		state->encrypted = false;
 		return true;
 	}
@@ -271,7 +279,11 @@ static void chat_input_cb(void *context)
 	ESubGhzChatState* state = context;
 
 	/* no message, just switch to the text box view */
+#ifdef FW_ORIGIN_Official
+	if (strcmp(state->text_input_store, " ") == 0) {
+#else /* FW_ORIGIN_Official */
 	if (strlen(state->text_input_store) == 0) {
+#endif /* FW_ORIGIN_Official */
 		scene_manager_handle_custom_event(state->scene_manager,
 				ESubGhzChatEvent_MsgEntered);
 		return;
@@ -431,8 +443,12 @@ static void scene_on_enter_pass_input(void* context)
 			state);
 	text_input_set_header_text(
 			state->text_input,
+#ifdef FW_ORIGIN_Official
+			"Password (space for no encr.)");
+#else /* FW_ORIGIN_Official */
 			"Password (empty for no encr.)");
 	text_input_set_minimum_length(state->text_input, 0);
+#endif /* FW_ORIGIN_Official */
 
 	view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Input);
 }
@@ -507,8 +523,12 @@ static void scene_on_enter_chat_input(void* context)
 			NULL);
 	text_input_set_header_text(
 			state->text_input,
+#ifdef FW_ORIGIN_Official
+			"Message (space for none)");
+#else /* FW_ORIGIN_Official */
 			"Message");
 	text_input_set_minimum_length(state->text_input, 0);
+#endif /* FW_ORIGIN_Official */
 
 	view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Input);
 }
