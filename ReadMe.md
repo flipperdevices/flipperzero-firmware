@@ -40,6 +40,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: [Spectrum Analyzer: Add a Precise mode #550 (By ALEED02)](https://github.com/DarkFlippers/unleashed-firmware/pull/550)
 - Updated: [ESP32 Evil Portal (By bigbrodude6119, Changes By Nycz-lab and WillyJL)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/41)
 - Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
+- [Switched Main Menu app order to have Internal SubGHz app listed first (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/716)
+- Updated: [ESP32CAM Morse Flasher (By eried)](https://github.com/eried/flipperzero-mayhem)
 
 <a name="release">
 
