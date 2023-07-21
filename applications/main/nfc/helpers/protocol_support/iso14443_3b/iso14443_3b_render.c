@@ -15,6 +15,13 @@ void nfc_render_iso14443_3b_info(
     }
 
     if(format_type == NfcProtocolFormatTypeFull) {
-        // TODO: ISO14443-3B specific fields
+        furi_string_cat_printf(str, "\nApp. data:");
+        for(size_t i = 0; i < ISO14443_3B_APP_DATA_SIZE; ++i) {
+            furi_string_cat_printf(str, " %02X", data->app_data[i]);
+        }
+        furi_string_cat_printf(str, "\nProtocol info:");
+        for(size_t i = 0; i < ISO14443_3B_PROTOCOL_DATA_SIZE; ++i) {
+            furi_string_cat_printf(str, " %02X", data->protocol_data[i]);
+        }
     }
 }

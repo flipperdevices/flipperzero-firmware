@@ -3,7 +3,7 @@
 #include <furi.h>
 
 #define ISO14443_4A_PROTOCOL_NAME "ISO14443-4A"
-#define ISO14443_4A_DEVICE_NAME "Unknown ISO14443-4A Tag"
+#define ISO14443_4A_DEVICE_NAME "ISO14443-4A (Unknown)"
 #define ISO14443_4A_ATS_BIT (1U << 5)
 
 #define ISO14443_4A_ATS_KEY "ATS"
