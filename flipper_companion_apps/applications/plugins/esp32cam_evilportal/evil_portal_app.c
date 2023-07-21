@@ -107,6 +107,17 @@ void evil_portal_app_free(Evil_PortalApp *app) {
 
 int32_t evil_portal_app(void *p) {  
   UNUSED(p);
+  furi_hal_power_disable_external_3_3v();
+  furi_hal_power_disable_otg();
+  furi_delay_ms(200);
+  furi_hal_power_enable_external_3_3v();
+  furi_hal_power_enable_otg();
+  for(int i=0;i<2;i++)
+  {
+      furi_delay_ms(500); 
+      furi_hal_uart_tx(UART_CH, (uint8_t[1]){'e'}, 1);
+  }
+  furi_delay_ms(1);       
   Evil_PortalApp *evil_portal_app = evil_portal_app_alloc();
 
   evil_portal_app->uart = evil_portal_uart_init(evil_portal_app);
@@ -114,6 +125,8 @@ int32_t evil_portal_app(void *p) {
   view_dispatcher_run(evil_portal_app->view_dispatcher);  
 
   evil_portal_app_free(evil_portal_app);
+
+  furi_hal_power_disable_otg();
 
   return 0;
 }

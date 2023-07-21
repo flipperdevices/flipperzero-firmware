@@ -15,6 +15,7 @@
 
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
 #define UART_CH (FuriHalUartIdUSART1)
+#define BAUDRATE (230400)
 
 #define SET_HTML_CMD "sethtml"
 #define SET_AP_CMD "setap"
@@ -47,7 +48,7 @@ struct Evil_PortalApp {
   bool sent_ap;
   bool sent_html;
   bool sent_reset;
-  int BAUDRATE;
+  //int BAUDRATE;
 
   uint8_t *index_html;
   uint8_t *ap_name;
