@@ -2,8 +2,8 @@
 #include "esp_camera.h"
 
 // Replace with your network credentials
-const char* ssid = "Flipper0";
-const char* password = "12345678";
+const char* nanny_ssid = "Flipper0";
+const char* nanny_password = "12345678";
 
 // Create an instance of the nannyServer
 WiFiServer nannyServer(80);
@@ -13,7 +13,7 @@ void nanny_cam_setup() {
 
   // Start access point
   WiFi.mode(WIFI_AP);
-  WiFi.softAP(ssid, password);
+  WiFi.softAP(nanny_ssid, nanny_password);
 
 
   // Print IP address
@@ -27,9 +27,9 @@ void nanny_cam_setup() {
   //Serial.println("Server started");
 
   Serial.print("SSID: ");
-  Serial.println(ssid);
+  Serial.println(nanny_ssid);
   Serial.print("PW: ");
-  Serial.println(password);
+  Serial.println(nanny_password);
   Serial.print("IP: ");
   Serial.println(IP);
 

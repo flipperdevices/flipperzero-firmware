@@ -164,10 +164,15 @@ void setup()
           for (;;)
             nanny_cam_loop();
 
-        case '.':  // Morse flas
+        case '.':  // Morse flasher
           morse_setup();
           for (;;)
             morse_loop();
+
+        case 'e':  // Evil portal
+          evilportal_setup();
+          for (;;)
+            evilportal_loop();
 
         case 'w':  // Marauder
           goto continue_to_marauder;
