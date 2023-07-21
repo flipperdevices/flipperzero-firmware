@@ -39,6 +39,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL PR: [Hid app kb assets #552 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/552)
 - UL: [Spectrum Analyzer: Add a Precise mode #550 (By ALEED02)](https://github.com/DarkFlippers/unleashed-firmware/pull/550)
 - Updated: [ESP32 Evil Portal (By bigbrodude6119, Changes By Nycz-lab and WillyJL)](https://github.com/bigbrodude6119/flipper-zero-evil-portal/pull/41)
+- Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
