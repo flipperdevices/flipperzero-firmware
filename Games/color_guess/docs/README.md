@@ -1,6 +1,6 @@
 ## Color Guessing Game 
 
-Targeted at Web Developers, Graphical Designers and other nerds. <br>
+Targeted at Web Developers, Graphical Designers and other nerds. 
 This app will let your devices LED glow in a random color. Your job is to guess the Hex Code of the color.
 
 ## Features
