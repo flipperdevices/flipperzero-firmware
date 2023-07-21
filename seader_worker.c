@@ -35,6 +35,30 @@ static ReturnCode seader_worker_disable_field(ReturnCode rc) {
     return rc;
 }
 
+static uint16_t seader_worker_picopass_update_ccitt(uint16_t crcSeed, uint8_t dataByte) {
+    uint16_t crc = crcSeed;
+    uint8_t dat = dataByte;
+
+    dat ^= (uint8_t)(crc & 0xFFU);
+    dat ^= (dat << 4);
+
+    crc = (crc >> 8) ^ (((uint16_t)dat) << 8) ^ (((uint16_t)dat) << 3) ^ (((uint16_t)dat) >> 4);
+
+    return crc;
+}
+
+static uint16_t
+    seader_worker_picopass_calculate_ccitt(uint16_t preloadValue, const uint8_t* buf, uint16_t length) {
+    uint16_t crc = preloadValue;
+    uint16_t index;
+
+    for(index = 0; index < length; index++) {
+        crc = seader_worker_picopass_update_ccitt(crc, buf[index]);
+    }
+
+    return crc;
+}
+
 /***************************** Seader Worker API *******************************/
 
 SeaderWorker* seader_worker_alloc() {
@@ -575,8 +599,11 @@ FuriHalNfcReturn
     seader_worker_fake_epurse_update(uint8_t* buffer, uint8_t* rxBuffer, uint16_t* recvLen) {
     uint8_t fake_response[10];
     memset(fake_response, 0, sizeof(fake_response));
-    memcpy(fake_response + 4, buffer + 2, 4);
     memcpy(fake_response + 0, buffer + 6, 4);
+    memcpy(fake_response + 4, buffer + 2, 4);
+
+    uint16_t crc = seader_worker_picopass_calculate_ccitt(0xE012, fake_response, 8);
+    memcpy(fake_response + 8, &crc, sizeof(uint16_t));
 
     memcpy(rxBuffer, fake_response, sizeof(fake_response));
     *recvLen = sizeof(fake_response);
@@ -589,8 +616,6 @@ FuriHalNfcReturn
     return FuriHalNfcReturnOk;
 }
 
-bool prevent_epurse_update = false;
-
 bool seader_iso15693_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size_t len) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
     SeaderCredential* credential = seader_worker->credential;
@@ -602,7 +627,7 @@ bool seader_iso15693_transmit(SeaderWorker* seader_worker, uint8_t* buffer, size
 
     uint8_t rxBuffer[64] = {0};
 
-    if(prevent_epurse_update && memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
+    if(memcmp(buffer, updateBlock2, sizeof(updateBlock2)) == 0) {
         ret = seader_worker_fake_epurse_update(buffer, rxBuffer, &recvLen);
     } else {
         ret = furi_hal_nfc_ll_txrx(buffer, len, rxBuffer, sizeof(rxBuffer), &recvLen, flags, fwt);
