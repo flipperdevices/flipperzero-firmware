@@ -130,6 +130,10 @@ Evil_PortalUart *evil_portal_uart_init(Evil_PortalApp *app) {
   furi_hal_uart_set_br(UART_CH, app->BAUDRATE);
   furi_hal_uart_set_irq_cb(UART_CH, evil_portal_uart_on_irq_cb, uart);*/
 
+  furi_hal_console_disable();
+  furi_hal_uart_set_br(UART_CH, BAUDRATE);
+  furi_hal_uart_set_irq_cb(UART_CH, uart_terminal_uart_on_irq_cb, uart);
+
   return uart;
 }
 

@@ -107,6 +107,12 @@ void evil_portal_app_free(Evil_PortalApp *app) {
 
 int32_t evil_portal_app(void *p) {  
   UNUSED(p);
+  
+  // Enable uart listener
+  furi_hal_console_disable();
+  furi_hal_uart_set_br(FuriHalUartIdUSART1, 230400); // TODO: Clean this
+  furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_echo_on_irq_cb, app);
+    
   furi_hal_power_disable_external_3_3v();
   furi_hal_power_disable_otg();
   furi_delay_ms(200);
