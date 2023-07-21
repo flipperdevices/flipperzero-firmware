@@ -114,6 +114,8 @@ int32_t uart_terminal_app(void* p) {
     view_dispatcher_run(uart_terminal_app->view_dispatcher);
 
     uart_terminal_app_free(uart_terminal_app);
+
     furi_hal_power_disable_otg();
+    
     return 0;
 }
