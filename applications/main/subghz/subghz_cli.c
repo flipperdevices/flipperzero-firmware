@@ -368,7 +368,7 @@ void subghz_cli_command_rx(Cli* cli, FuriString* args, void* context) {
             instance->stream, &level_duration, sizeof(LevelDuration), 10);
         if(ret == sizeof(LevelDuration)) {
             if(level_duration_is_reset(level_duration)) {
-                printf(".");
+                furi_hal_console_printf(".");
                 subghz_receiver_reset(receiver);
             } else {
                 bool level = level_duration_get_level(level_duration);

@@ -178,7 +178,7 @@ bool subghz_device_si4463_ext_check_init() {
     si446x_set_pa(subghz_device_si4463_ext->spi_bus_handle, SI446X_SET_MAX_PA);
     subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
 
-    subghz_device_si4463_ext_sleep();
+    //subghz_device_si4463_ext_sleep();
 
     FURI_LOG_I(TAG, "Init OK");
     return true;
@@ -219,6 +219,7 @@ bool subghz_device_si4463_ext_is_connect() {
 
     if(subghz_device_si4463_ext == NULL) { // not initialized
         ret = subghz_device_si4463_ext_alloc();
+        subghz_device_si4463_ext_sleep();
         subghz_device_si4463_ext_free();
     } else { // initialized
         furi_hal_spi_acquire(subghz_device_si4463_ext->spi_bus_handle);
