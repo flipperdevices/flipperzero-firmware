@@ -1,4 +1,8 @@
 # Flipper Zero Color Guessing Game
+ <div style="text-align:center">
+ <img src="assets/flipper_logo_orange.png"/>
+ <img src="assets/preview.jpg" />
+ </div>
 
 ## What this is?
 As a web developer I enjoy guessing colours by HEX Code. This game is targeted at other Devs and graphic designers<br>
