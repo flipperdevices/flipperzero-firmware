@@ -66,19 +66,14 @@ Iso14443_3bError
     furi_assert(instance->nfc);
 
     iso14443_3b_reset(instance->data);
-    bit_buffer_reset(instance->tx_buffer);
-    bit_buffer_reset(instance->rx_buffer);
 
     Iso14443_3bError ret;
 
     do {
-        // Halt if necessary
-        if(instance->state != Iso14443_3bPollerStateIdle) {
-            ret = iso14443_3b_poller_halt(instance);
-            if(ret != Iso14443_3bErrorNone) break;
-        }
-
         instance->state = Iso14443_3bPollerStateColResInProgress;
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_reset(instance->rx_buffer);
 
         // Send REQB
         bit_buffer_append_byte(instance->tx_buffer, 0x05);
@@ -88,15 +83,18 @@ Iso14443_3bError
         ret = iso14443_3b_poller_frame_exchange(
             instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_POLL_FC);
         if(ret != Iso14443_3bErrorNone) {
-            FURI_LOG_D(TAG, "REQB failed: %d", ret);
+            instance->state = Iso14443_3bPollerStateColResFailed;
             break;
         }
 
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(Iso14443_3bAtqB)) {
-            FURI_LOG_D(TAG, "Wrong ATQB data size");
+            FURI_LOG_D(TAG, "Unexpected REQB response");
+            instance->state = Iso14443_3bPollerStateColResFailed;
             ret = Iso14443_3bErrorCommunication;
             break;
         }
+
+        instance->state = Iso14443_3bPollerStateActivationInProgress;
 
         const Iso14443_3bAtqB* atqb =
             (const Iso14443_3bAtqB*)bit_buffer_get_data(instance->rx_buffer);
@@ -105,9 +103,36 @@ Iso14443_3bError
         memcpy(instance->data->app_data, atqb->app_data, ISO14443_3B_APP_DATA_SIZE);
         memcpy(instance->data->protocol_data, atqb->protocol_data, ISO14443_3B_PROTOCOL_DATA_SIZE);
 
-        // TODO: is this really necessary?
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_reset(instance->rx_buffer);
+
+        // Send ATTRIB
+        bit_buffer_append_byte(instance->tx_buffer, 0x1d);
+        bit_buffer_append_bytes(instance->tx_buffer, atqb->uid, ISO14443_3B_UID_SIZE);
+        bit_buffer_append_byte(instance->tx_buffer, (1U << 2) & (1U << 3));
+        bit_buffer_append_byte(instance->tx_buffer, 0x08);
+        bit_buffer_append_byte(instance->tx_buffer, 0x01);
+        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+
+        ret = iso14443_3b_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_POLLER_ATTRIB_FDT_FC);
+        if(ret != Iso14443_3bErrorNone) {
+            instance->state = Iso14443_3bPollerStateActivationFailed;
+            break;
+        }
+
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) != 1 ||
+           bit_buffer_get_byte(instance->rx_buffer, 0) != 0) {
+            FURI_LOG_D(TAG, "Unexpected ATTRIB response");
+            instance->state = Iso14443_3bPollerStateActivationFailed;
+            ret = Iso14443_3bErrorCommunication;
+            break;
+        }
+
+        instance->state = Iso14443_3bPollerStateActivated;
+
         if(data) {
-            *data = *instance->data;
+            iso14443_3b_copy(data, instance->data);
         }
 
     } while(false);
@@ -130,13 +155,11 @@ Iso14443_3bError iso14443_3b_poller_halt(Iso14443_3bPoller* instance) {
         ret = iso14443_3b_poller_frame_exchange(
             instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_POLL_FC);
         if(ret != Iso14443_3bErrorNone) {
-            FURI_LOG_D(TAG, "HALT failed: %d", ret);
             break;
         }
 
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(uint8_t) ||
            bit_buffer_get_byte(instance->rx_buffer, 0) != 0) {
-            FURI_LOG_D(TAG, "Unexpected HALT reply status");
             ret = Iso14443_3bErrorCommunication;
             break;
         }

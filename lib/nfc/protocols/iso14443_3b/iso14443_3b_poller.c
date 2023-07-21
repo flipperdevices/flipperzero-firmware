@@ -73,7 +73,6 @@ static NfcCommand iso14443_3b_poller_run(NfcGenericEvent event, void* context) {
             Iso14443_3bData data = {};
             Iso14443_3bError error = iso14443_3b_poller_async_activate(instance, &data);
             if(error == Iso14443_3bErrorNone) {
-                instance->state = Iso14443_3bPollerStateActivated;
                 instance->iso14443_3b_event.type = Iso14443_3bPollerEventTypeReady;
                 instance->iso14443_3b_event_data.error = error;
                 command = instance->callback(instance->general_event, instance->context);

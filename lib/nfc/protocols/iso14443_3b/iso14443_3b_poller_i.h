@@ -10,10 +10,14 @@ extern "C" {
 
 #define ISO14443_3B_POLLER_MAX_BUFFER_SIZE (512U)
 
+#define ISO14443_3B_POLLER_ATTRIB_FDT_FC (42000U)
+
 typedef enum {
     Iso14443_3bPollerStateIdle,
     Iso14443_3bPollerStateColResInProgress,
     Iso14443_3bPollerStateColResFailed,
+    Iso14443_3bPollerStateActivationInProgress,
+    Iso14443_3bPollerStateActivationFailed,
     Iso14443_3bPollerStateActivated,
 } Iso14443_3bPollerState;
 
