@@ -41,6 +41,9 @@ void bit_buffer_reset(BitBuffer* buf) {
 void bit_buffer_copy(BitBuffer* buf, const BitBuffer* other) {
     furi_assert(buf);
     furi_assert(other);
+
+    if(buf == other) return;
+
     furi_assert(buf->capacity_bytes * BITS_IN_BYTE >= other->size_bits);
 
     memcpy(buf->data, other->data, bit_buffer_get_size_bytes(other));

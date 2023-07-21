@@ -1,5 +1,7 @@
 #include "iso14443_3b_poller_i.h"
 
+#include <nfc/helpers/iso14443_crc.h>
+
 #define TAG "Iso14443_3bPoller"
 
 static Iso14443_3bError iso14443_3b_poller_process_error(NfcError error) {
@@ -13,6 +15,51 @@ static Iso14443_3bError iso14443_3b_poller_process_error(NfcError error) {
     }
 }
 
+static Iso14443_3bError iso14443_3b_poller_prepare_trx(Iso14443_3bPoller* instance) {
+    furi_assert(instance);
+
+    if(instance->state == Iso14443_3bPollerStateIdle) {
+        return iso14443_3b_poller_async_activate(instance, NULL);
+    }
+
+    return Iso14443_3bErrorNone;
+}
+
+static Iso14443_3bError iso14443_3b_poller_frame_exchange(
+    Iso14443_3bPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt) {
+    furi_assert(instance);
+
+    const size_t tx_bytes = bit_buffer_get_size_bytes(tx_buffer);
+    furi_assert(
+        tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - ISO14443_CRC_SIZE);
+
+    bit_buffer_copy(instance->tx_buffer, tx_buffer);
+    iso14443_3b_append_crc(instance->tx_buffer);
+
+    Iso14443_3bError ret = Iso14443_3bErrorNone;
+
+    do {
+        NfcError error = nfc_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
+        if(error != NfcErrorNone) {
+            ret = iso14443_3b_poller_process_error(error);
+            break;
+        }
+
+        bit_buffer_copy(rx_buffer, instance->rx_buffer);
+        if(!iso14443_3b_check_crc(instance->rx_buffer)) {
+            ret = Iso14443_3bErrorWrongCrc;
+            break;
+        }
+
+        iso14443_3b_trim_crc(rx_buffer);
+    } while(false);
+
+    return ret;
+}
+
 Iso14443_3bError
     iso14443_3b_poller_async_activate(Iso14443_3bPoller* instance, Iso14443_3bData* data) {
     furi_assert(instance);
@@ -22,39 +69,31 @@ Iso14443_3bError
     bit_buffer_reset(instance->tx_buffer);
     bit_buffer_reset(instance->rx_buffer);
 
-    // Halt if necessary
-    if(instance->state != Iso14443_3bPollerStateIdle) {
-        iso14443_3b_poller_halt(instance);
-    }
-
-    Iso14443_3bError ret = Iso14443_3bErrorNone;
-
-    bit_buffer_append_byte(instance->tx_buffer, 0x05);
-    bit_buffer_append_byte(instance->tx_buffer, 0x00);
-    bit_buffer_append_byte(instance->tx_buffer, 0x00);
-
-    iso14443_3b_append_crc(instance->tx_buffer);
+    Iso14443_3bError ret;
 
     do {
-        NfcError error;
-        error = nfc_trx(
-            instance->nfc, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_POLL_FC);
-
-        if(error != NfcErrorNone) {
-            ret = iso14443_3b_poller_process_error(error);
-            break;
+        // Halt if necessary
+        if(instance->state != Iso14443_3bPollerStateIdle) {
+            ret = iso14443_3b_poller_halt(instance);
+            if(ret != Iso14443_3bErrorNone) break;
         }
 
-        if(!iso14443_3b_check_crc(instance->rx_buffer)) {
-            FURI_LOG_D(TAG, "Wrong ATQB CRC: %zu bits", bit_buffer_get_size(instance->rx_buffer));
-            ret = Iso14443_3bErrorWrongCrc;
+        instance->state = Iso14443_3bPollerStateColResInProgress;
+
+        // Send REQB
+        bit_buffer_append_byte(instance->tx_buffer, 0x05);
+        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+        bit_buffer_append_byte(instance->tx_buffer, 0x08);
+
+        ret = iso14443_3b_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_POLL_FC);
+        if(ret != Iso14443_3bErrorNone) {
+            FURI_LOG_D(TAG, "REQB failed: %d", ret);
             break;
         }
-
-        iso14443_3b_trim_crc(instance->rx_buffer);
 
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(Iso14443_3bAtqB)) {
-            FURI_LOG_D(TAG, "Wrong ATQB size");
+            FURI_LOG_D(TAG, "Wrong ATQB data size");
             ret = Iso14443_3bErrorCommunication;
             break;
         }
@@ -85,26 +124,15 @@ Iso14443_3bError iso14443_3b_poller_halt(Iso14443_3bPoller* instance) {
     bit_buffer_append_byte(instance->tx_buffer, 0x50);
     bit_buffer_append_bytes(instance->tx_buffer, instance->data->uid, ISO14443_3B_UID_SIZE);
 
-    iso14443_3b_append_crc(instance->tx_buffer);
-
-    Iso14443_3bError ret = Iso14443_3bErrorNone;
+    Iso14443_3bError ret;
 
     do {
-        const NfcError error = nfc_trx(
-            instance->nfc, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_POLL_FC);
-        if(error != NfcErrorNone) {
-            FURI_LOG_D(TAG, "Failed to send/receive HALT: %d", error);
-            ret = iso14443_3b_poller_process_error(error);
+        ret = iso14443_3b_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_POLL_FC);
+        if(ret != Iso14443_3bErrorNone) {
+            FURI_LOG_D(TAG, "HALT failed: %d", ret);
             break;
         }
-
-        if(!iso14443_3b_check_crc(instance->rx_buffer)) {
-            FURI_LOG_D(TAG, "Wrong HALT reply CRC");
-            ret = Iso14443_3bErrorWrongCrc;
-            break;
-        }
-
-        iso14443_3b_trim_crc(instance->rx_buffer);
 
         if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(uint8_t) ||
            bit_buffer_get_byte(instance->rx_buffer, 0) != 0) {
@@ -114,6 +142,23 @@ Iso14443_3bError iso14443_3b_poller_halt(Iso14443_3bPoller* instance) {
         }
 
         instance->state = Iso14443_3bPollerStateIdle;
+    } while(false);
+
+    return ret;
+}
+
+Iso14443_3bError iso14443_3b_poller_send_frame(
+    Iso14443_3bPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt) {
+    Iso14443_3bError ret;
+
+    do {
+        ret = iso14443_3b_poller_prepare_trx(instance);
+        if(ret != Iso14443_3bErrorNone) break;
+
+        ret = iso14443_3b_poller_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
     } while(false);
 
     return ret;
