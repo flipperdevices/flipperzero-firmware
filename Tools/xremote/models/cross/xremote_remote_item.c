@@ -1,6 +1,5 @@
 #include "xremote_remote_item.h"
 
-
 CrossRemoteItem* xremote_remote_item_alloc() {
     CrossRemoteItem* item = malloc(sizeof(CrossRemoteItem));
     item->name = furi_string_alloc();
@@ -8,7 +7,7 @@ CrossRemoteItem* xremote_remote_item_alloc() {
     item->type = 0;
     item->ir_signal = xremote_ir_signal_alloc();
     item->sg_signal = xremote_sg_remote_alloc();
-    
+
     return item;
 }
 
@@ -92,7 +91,7 @@ bool xremote_remote_item_read_ir(CrossRemoteItem* item, FlipperFormat* ff) {
     buf = furi_string_alloc();
     item->type = XRemoteRemoteItemTypeInfrared;
     item->time = 0;
-    
+
     do {
         if(!flipper_format_read_string(ff, "name", item->name)) break;
         if(!flipper_format_read_string(ff, "type", buf)) break;
@@ -139,7 +138,8 @@ bool xremote_remote_item_read_ir_signal_raw(CrossRemoteItem* item, FlipperFormat
     success = flipper_format_read_uint32(ff, "data", timings, timings_size);
 
     if(success) {
-        xremote_ir_signal_set_raw_signal(item->ir_signal, timings, timings_size, frequency, duty_cycle);
+        xremote_ir_signal_set_raw_signal(
+            item->ir_signal, timings, timings_size, frequency, duty_cycle);
     }
 
     free(timings);
@@ -167,7 +167,6 @@ bool xremote_remote_item_read_message(CrossRemoteItem* item, FlipperFormat* ff) 
     furi_string_free(buf);
     return success;
 }
-
 
 void xremote_remote_item_free(CrossRemoteItem* item) {
     furi_string_free(item->name);
@@ -210,8 +209,8 @@ SubGhzRemote* xremote_remote_item_get_sg_signal(CrossRemoteItem* item) {
 }
 
 bool xremote_ir_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char* name) {
-    if(!flipper_format_write_comment_cstr(ff, "") || 
-       !flipper_format_write_string_cstr(ff, "remote_type", "IR") || 
+    if(!flipper_format_write_comment_cstr(ff, "") ||
+       !flipper_format_write_string_cstr(ff, "remote_type", "IR") ||
        !flipper_format_write_string_cstr(ff, "name", name)) {
         return false;
     } else if(signal->is_raw) {
@@ -224,16 +223,16 @@ bool xremote_ir_signal_save(InfraredSignal* signal, FlipperFormat* ff, const cha
 bool xremote_pause_save(FlipperFormat* ff, int32_t time, const char* name) {
     if(!flipper_format_write_comment_cstr(ff, "") ||
        !flipper_format_write_string_cstr(ff, "remote_type", "PAUSE") ||
-       !flipper_format_write_string_cstr(ff, "name", name) || 
+       !flipper_format_write_string_cstr(ff, "name", name) ||
        !flipper_format_write_int32(ff, "time", &time, 1)) {
-       return false;
+        return false;
     }
     return true;
 }
 
 bool xremote_sg_signal_save(SubGhzRemote* remote, FlipperFormat* ff, const char* name) {
-    if(!flipper_format_write_comment_cstr(ff, "") || 
-       !flipper_format_write_string_cstr(ff, "remote_type", "SG") || 
+    if(!flipper_format_write_comment_cstr(ff, "") ||
+       !flipper_format_write_string_cstr(ff, "remote_type", "SG") ||
        !flipper_format_write_string_cstr(ff, "name", name)) {
         return false;
     }

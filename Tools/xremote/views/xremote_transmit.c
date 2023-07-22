@@ -48,11 +48,11 @@ void xremote_transmit_draw_ir(Canvas* canvas, XRemoteTransmitModel* model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon(canvas, 0, 0, &I_ir_transmit_128x64);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 74, 5, AlignLeft, AlignTop, "Sending"); 
+    canvas_draw_str_aligned(canvas, 74, 5, AlignLeft, AlignTop, "Sending");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 74, 20, AlignLeft, AlignTop, "Infrared"); 
+    canvas_draw_str_aligned(canvas, 74, 20, AlignLeft, AlignTop, "Infrared");
     canvas_draw_str_aligned(canvas, 74, 30, AlignLeft, AlignTop, model->name);
-    
+
     char temp_str[18];
     snprintf(temp_str, 18, "%u", model->time);
     canvas_draw_str_aligned(canvas, 74, 40, AlignLeft, AlignTop, temp_str);
@@ -64,11 +64,11 @@ void xremote_transmit_draw_pause(Canvas* canvas, XRemoteTransmitModel* model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon(canvas, 0, 0, &I_pause_128x64);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 74, 5, AlignLeft, AlignTop, "Waiting"); 
+    canvas_draw_str_aligned(canvas, 74, 5, AlignLeft, AlignTop, "Waiting");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 74, 20, AlignLeft, AlignTop, "Sequence"); 
+    canvas_draw_str_aligned(canvas, 74, 20, AlignLeft, AlignTop, "Sequence");
     canvas_draw_str_aligned(canvas, 74, 30, AlignLeft, AlignTop, model->name);
-    
+
     char temp_str[18];
     snprintf(temp_str, 18, "%u", model->time);
     canvas_draw_str_aligned(canvas, 74, 40, AlignLeft, AlignTop, temp_str);
@@ -80,11 +80,11 @@ void xremote_transmit_draw_subghz(Canvas* canvas, XRemoteTransmitModel* model) {
     canvas_set_color(canvas, ColorBlack);
     canvas_draw_icon(canvas, 0, 0, &I_sg_transmit_128x64);
     canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str_aligned(canvas, 74, 5, AlignLeft, AlignTop, "Sending"); 
+    canvas_draw_str_aligned(canvas, 74, 5, AlignLeft, AlignTop, "Sending");
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str_aligned(canvas, 74, 20, AlignLeft, AlignTop, "SubGhz"); 
+    canvas_draw_str_aligned(canvas, 74, 20, AlignLeft, AlignTop, "SubGhz");
     canvas_draw_str_aligned(canvas, 74, 30, AlignLeft, AlignTop, model->name);
-    
+
     char temp_str[18];
     snprintf(temp_str, 18, "%u", model->time);
     canvas_draw_str_aligned(canvas, 74, 40, AlignLeft, AlignTop, temp_str);
@@ -109,38 +109,27 @@ XRemoteTransmit* xremote_transmit_alloc() {
     with_view_model(
         instance->view,
         XRemoteTransmitModel * model,
-        {
-            xremote_transmit_model_init(model);
-        },
-        true
-    );
+        { xremote_transmit_model_init(model); },
+        true);
 
     return instance;
 }
 
 void xremote_transmit_enter(void* context) {
     furi_assert(context);
-    XRemoteTransmit* instance = (XRemoteTransmit*) context;
+    XRemoteTransmit* instance = (XRemoteTransmit*)context;
     with_view_model(
         instance->view,
         XRemoteTransmitModel * model,
-        {
-            xremote_transmit_model_init(model);
-        },
-        true
-    );
+        { xremote_transmit_model_init(model); },
+        true);
 }
 
 void xremote_transmit_free(XRemoteTransmit* instance) {
     furi_assert(instance);
 
     with_view_model(
-        instance->view,
-        XRemoteTransmitModel * model,
-        {
-            UNUSED(model);
-        },
-        true);
+        instance->view, XRemoteTransmitModel * model, { UNUSED(model); }, true);
     view_free(instance->view);
     free(instance);
 }

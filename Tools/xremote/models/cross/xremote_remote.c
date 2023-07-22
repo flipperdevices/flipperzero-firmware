@@ -138,7 +138,6 @@ void cross_remote_rename_item(CrossRemote* remote, size_t index, const char* nam
     xremote_remote_item_set_name(item, name);
 }
 
-
 bool cross_remote_load(CrossRemote* remote, FuriString* path) {
     Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* ff = flipper_format_buffered_file_alloc(storage);
@@ -191,7 +190,7 @@ bool cross_remote_save_new(CrossRemote* remote, const char* name) {
     FuriString *new_name, *new_path;
     new_name = furi_string_alloc_set(name);
     new_path = furi_string_alloc_set(XREMOTE_APP_FOLDER);
-    
+
     cross_remote_find_vacant_remote_name(new_name, furi_string_get_cstr(new_path));
     furi_string_cat_printf(
         new_path, "/%s%s", furi_string_get_cstr(new_name), XREMOTE_APP_EXTENSION);
@@ -238,15 +237,13 @@ bool cross_remote_store(CrossRemote* remote) {
             CrossRemoteItemArray_next(it)) {
             CrossRemoteItem* item = *CrossRemoteItemArray_cref(it);
             success = false;
-            if (item->type == XRemoteRemoteItemTypeInfrared) {
+            if(item->type == XRemoteRemoteItemTypeInfrared) {
                 success = xremote_ir_signal_save(
                     xremote_remote_item_get_ir_signal(item),
                     ff,
                     xremote_remote_item_get_name(item));
             } else if(item->type == XRemoteRemoteItemTypePause) {
-                success = xremote_pause_save(ff, 
-                    item->time,
-                    xremote_remote_item_get_name(item));
+                success = xremote_pause_save(ff, item->time, xremote_remote_item_get_name(item));
             } else if(item->type == XRemoteRemoteItemTypeSubGhz) {
                 success = xremote_sg_signal_save(
                     xremote_remote_item_get_sg_signal(item),

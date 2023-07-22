@@ -53,5 +53,3 @@ struct SubGhzTxRx {
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;
-
-

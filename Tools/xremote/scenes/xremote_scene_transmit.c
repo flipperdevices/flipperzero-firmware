@@ -24,13 +24,13 @@ void xremote_transmit_callback(XRemoteCustomEvent event, void* context) {
 }
 
 void xremote_scene_ir_notification_message(XRemote* app, uint32_t message) {
-    if (app->led == 1) {
+    if(app->led == 1) {
         notification_message(app->notification, xremote_notification_sequences[message]);
     }
 }
 
 bool xremote_scene_ir_signal_is_raw(InfraredSignal* signal) {
-    if (signal->is_raw) {
+    if(signal->is_raw) {
         return true;
     }
     return false;
@@ -50,9 +50,10 @@ void xremote_scene_transmit_send_ir_signal(XRemote* app, CrossRemoteItem* item) 
     InfraredSignal* signal = xremote_remote_item_get_ir_signal(item);
     dolphin_deed(DolphinDeedIrSend);
     xremote_scene_ir_notification_message(app, InfraredNotificationMessageBlinkStartSend);
-    if (xremote_scene_ir_signal_is_raw(signal)) {
+    if(xremote_scene_ir_signal_is_raw(signal)) {
         InfraredRawSignal* raw = xremote_ir_signal_get_raw_signal(signal);
-        infrared_worker_set_raw_signal(app->ir_worker, raw->timings, raw->timings_size, raw->frequency, raw->duty_cycle);
+        infrared_worker_set_raw_signal(
+            app->ir_worker, raw->timings, raw->timings_size, raw->frequency, raw->duty_cycle);
     } else {
         InfraredMessage* message = xremote_ir_signal_get_message(signal);
         infrared_worker_set_decoded_signal(app->ir_worker, message);
@@ -60,7 +61,7 @@ void xremote_scene_transmit_send_ir_signal(XRemote* app, CrossRemoteItem* item) 
     infrared_worker_tx_set_get_signal_callback(
         app->ir_worker, infrared_worker_tx_get_signal_steady_callback, app);
     infrared_worker_tx_start(app->ir_worker);
-    app->transmitting = true;    
+    app->transmitting = true;
     furi_thread_flags_wait(0, FuriFlagWaitAny, 1000);
     xremote_scene_transmit_stop_ir_signal(app);
 }
@@ -77,7 +78,7 @@ void xremote_scene_transmit_send_subghz(XRemote* app, CrossRemoteItem* item) {
     UNUSED(item);
     app->transmitting = true;
     xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStartSend);
-    // ADD SEND METHOD HERE 
+    // ADD SEND METHOD HERE
     furi_thread_flags_wait(0, FuriFlagWaitAny, 2000); //Remove later
     app->transmitting = false;
     xremote_scene_ir_notification_message(app, SubGhzNotificationMessageBlinkStop);
@@ -91,12 +92,12 @@ void xremote_scene_transmit_send_signal(void* context, CrossRemoteItem* item) {
     if(app->transmitting) {
         return;
     }
-    
+
     xremote_transmit_model_set_name(app->xremote_transmit, xremote_remote_item_get_name(item));
     xremote_transmit_model_set_type(app->xremote_transmit, item->type);
     if(item->type == XRemoteRemoteItemTypeInfrared) {
         xremote_scene_transmit_send_ir_signal(app, item);
-    } else if(item->type == XRemoteRemoteItemTypePause) { 
+    } else if(item->type == XRemoteRemoteItemTypePause) {
         xremote_scene_transmit_send_pause(app, item);
     } else if(item->type == XRemoteRemoteItemTypeSubGhz) {
         xremote_scene_transmit_send_subghz(app, item);
@@ -112,7 +113,7 @@ void xremote_scene_transmit_run_remote(void* context) {
 
     size_t item_count = cross_remote_get_item_count(remote);
     for(size_t i = 0; i < item_count;) {
-        if (cross_remote_get_transmitting(remote) == XRemoteTransmittingIdle) {
+        if(cross_remote_get_transmitting(remote) == XRemoteTransmittingIdle) {
             cross_remote_set_transmitting(remote, XRemoteTransmittingStart);
             CrossRemoteItem* item = cross_remote_get_item(remote, i);
             xremote_scene_transmit_send_signal(app, item);
@@ -121,7 +122,7 @@ void xremote_scene_transmit_run_remote(void* context) {
         } else if(cross_remote_get_transmitting(remote) == XRemoteTransmittingStop) {
             i++;
             cross_remote_set_transmitting(remote, XRemoteTransmittingIdle);
-        } 
+        }
     }
     xremote_scene_ir_notification_message(app, InfraredNotificationMessageBlinkStop);
 
@@ -134,7 +135,7 @@ void xremote_scene_transmit_on_enter(void* context) {
     furi_assert(context);
     XRemote* app = context;
     xremote_transmit_set_callback(app->xremote_transmit, xremote_transmit_callback, app);
-    
+
     view_dispatcher_switch_to_view(app->view_dispatcher, XRemoteViewIdTransmit);
     xremote_scene_transmit_run_remote(app);
 }
