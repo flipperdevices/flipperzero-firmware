@@ -16,8 +16,8 @@
 #include <storage/storage.h>
 #include "views/mass_storage_view.h"
 
-#define MASS_STORAGE_APP_PATH_FOLDER "/any/mass_storage"
-// #define MASS_STORAGE_APP_EXTENSION ".iso"
+#define MASS_STORAGE_APP_PATH_FOLDER STORAGE_APP_DATA_PATH_PREFIX
+#define MASS_STORAGE_APP_EXTENSION ".img"
 #define MASS_STORAGE_FILE_NAME_LEN 40
 
 struct MassStorageApp {
@@ -29,7 +29,7 @@ struct MassStorageApp {
     DialogsApp* dialogs;
     Widget* widget;
 
-    char file_name[MASS_STORAGE_FILE_NAME_LEN];
+    FuriString* file_path;
     File* file;
     MassStorage* mass_storage_view;
 
@@ -39,6 +39,5 @@ struct MassStorageApp {
 
 typedef enum {
     MassStorageAppViewError,
-    MassStorageAppViewFileSelect,
     MassStorageAppViewWork,
 } MassStorageAppView;

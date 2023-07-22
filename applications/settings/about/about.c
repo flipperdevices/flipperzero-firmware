@@ -87,6 +87,7 @@ static DialogMessageButton icon2_screen(DialogsApp* dialogs, DialogMessage* mess
         message, furi_hal_version_get_mic_id(), 63, 27, AlignLeft, AlignCenter);
     result = dialog_message_show(dialogs, message);
     dialog_message_set_icon(message, NULL, 0, 0);
+    dialog_message_set_text(message, NULL, 0, 0, AlignLeft, AlignTop);
 
     return result;
 }

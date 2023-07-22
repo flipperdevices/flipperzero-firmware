@@ -1,5 +1,7 @@
 #include "mass_storage_scsi.h"
 
+#include <core/log.h>
+
 #define TAG "MassStorageSCSI"
 
 #define SCSI_TEST_UNIT_READY (0x00)
@@ -131,17 +133,17 @@ bool scsi_cmd_tx_data(SCSISession* scsi, uint8_t* data, uint32_t* len, uint32_t 
         data[0] = (n_blocks - 1) >> 24;
         data[1] = (n_blocks - 1) >> 16;
         data[2] = (n_blocks - 1) >> 8;
-        data[3] = (n_blocks - 1);
+        data[3] = (n_blocks - 1) & 0xFF;
         data[4] = block_size >> 24;
         data[5] = block_size >> 16;
         data[6] = block_size >> 8;
-        data[7] = block_size;
+        data[7] = block_size & 0xFF;
         *len = 8;
         scsi->tx_done = true;
         return true;
     }; break;
     case SCSI_MODE_SENSE_6: {
-        FURI_LOG_I(TAG, "SCSI_MODE_SENSE_6 %ld", cap);
+        FURI_LOG_I(TAG, "SCSI_MODE_SENSE_6 %lu", cap);
         if(cap < 4) return false;
         data[0] = 3; // mode data length (len - 1)
         data[1] = 0; // medium type

@@ -1,5 +1,4 @@
 #include "mass_storage_usb.h"
-
 #include <furi_hal.h>
 
 #define TAG "MassStorageUsb"
@@ -7,8 +6,8 @@
 #define USB_MSC_RX_EP (0x01)
 #define USB_MSC_TX_EP (0x82)
 
-#define USB_MSC_RX_EP_SIZE (64)
-#define USB_MSC_TX_EP_SIZE (64u)
+#define USB_MSC_RX_EP_SIZE (64UL)
+#define USB_MSC_TX_EP_SIZE (64UL)
 
 #define USB_MSC_BOT_GET_MAX_LUN (0xFE)
 #define USB_MSC_BOT_RESET (0xFF)
@@ -23,7 +22,7 @@
 
 // must be SCSI_BLOCK_SIZE aligned
 // larger than 0x10000 exceeds size_t, storage_file_* ops fail
-#define USB_MSC_BUF_MAX (0x10000u - SCSI_BLOCK_SIZE)
+#define USB_MSC_BUF_MAX (0x10000UL - SCSI_BLOCK_SIZE)
 
 static usbd_respond usb_ep_config(usbd_device* dev, uint8_t cfg);
 static usbd_respond usb_control(usbd_device* dev, usbd_ctlreq* req, usbd_rqc_callback* callback);
@@ -79,11 +78,10 @@ static int32_t mass_thread_worker(void* context) {
         StateWriteCSW,
     } state = StateReadCBW;
     while(true) {
-        uint32_t flags = furi_thread_flags_wait(EventAll, FuriFlagWaitAny, FuriFlagWaitAny);
+        uint32_t flags = furi_thread_flags_wait(EventAll, FuriFlagWaitAny, FuriWaitForever);
         if(flags & EventExit) {
             FURI_LOG_I(TAG, "exit");
-            free(buf);
-            return 0;
+            break;
         }
         if(flags & EventReset) {
             FURI_LOG_I(TAG, "reset");
@@ -91,8 +89,10 @@ static int32_t mass_thread_worker(void* context) {
             scsi.asc = 0;
             memset(&cbw, 0, sizeof(cbw));
             memset(&csw, 0, sizeof(csw));
-            free(buf);
-            buf = NULL;
+            if(buf) {
+                free(buf);
+                buf = NULL;
+            }
             buf_len = buf_cap = buf_sent = 0;
             state = StateReadCBW;
         }
@@ -138,8 +138,10 @@ static int32_t mass_thread_worker(void* context) {
                     }
                     uint32_t buf_clamp = MIN(cbw.len, USB_MSC_BUF_MAX);
                     if(buf_clamp > buf_cap) {
-                        // FURI_LOG_I(TAG, "growing buf %d -> %d", buf_cap, buf_clamp);
-                        free(buf);
+                        FURI_LOG_I(TAG, "growing buf %lu -> %lu", buf_cap, buf_clamp);
+                        if(buf) {
+                            free(buf);
+                        }
                         buf_cap = buf_clamp;
                         buf = malloc(buf_cap);
                     }
@@ -177,8 +179,10 @@ static int32_t mass_thread_worker(void* context) {
                     }
                     uint32_t buf_clamp = MIN(cbw.len, USB_MSC_BUF_MAX);
                     if(buf_clamp > buf_cap) {
-                        // FURI_LOG_I(TAG, "growing buf %d -> %d", buf_cap, buf_clamp);
-                        free(buf);
+                        FURI_LOG_I(TAG, "growing buf %lu -> %lu", buf_cap, buf_clamp);
+                        if(buf) {
+                            free(buf);
+                        }
                         buf_cap = buf_clamp;
                         buf = malloc(buf_cap);
                     }
@@ -248,6 +252,10 @@ static int32_t mass_thread_worker(void* context) {
                 break;
             } while(true);
     }
+    if(buf) {
+        free(buf);
+    }
+    return 0;
 }
 
 // needed in usb_deinit, usb_suspend, usb_rxtx_ep_callback, usb_control,
@@ -307,8 +315,8 @@ static void usb_suspend(usbd_device* dev) {
 }
 
 static void usb_rxtx_ep_callback(usbd_device* dev, uint8_t event, uint8_t ep) {
-    UNUSED(event);
     UNUSED(ep);
+    UNUSED(event);
     MassStorageUsb* mass = mass_cur;
     if(!mass || mass->dev != dev) return;
     furi_thread_flags_set(furi_thread_get_id(mass->thread), EventRxTx);

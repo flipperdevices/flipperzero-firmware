@@ -166,7 +166,7 @@ CfwApp* cfw_app_alloc() {
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, CfwAppViewPopup, popup_get_view(app->popup));
 
-    CfwSettings* cfw_settings = CFW_SETTINGS();
+    // CfwSettings* cfw_settings = CFW_SETTINGS();
 
     //Main Menu Add/Remove list
 

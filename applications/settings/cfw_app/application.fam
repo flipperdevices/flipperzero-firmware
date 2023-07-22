@@ -9,4 +9,6 @@ App(
     order=90,
     fap_category="Settings",
     fap_icon="cfw_app_10px.png",
+    fap_icon_assets="images",
+    fap_version=(1, 5),
 )

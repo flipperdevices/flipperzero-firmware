@@ -6,7 +6,10 @@
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
 #include <dialogs/dialogs.h>
+#include <gui/modules/dialog_ex.h>
+#include <applications.h>
 #include <gui/modules/variable_item_list.h>
+#include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 #include <gui/modules/popup.h>
 #include <storage/storage.h>
@@ -25,6 +28,7 @@
 #include <rgb_backlight.h>
 #include <m-array.h>
 #include "namespoof.h"
+#include "cfw_icons.h"
 #include <cfw.h>
 #include <applications.h>
 #include <desktop/desktop_settings.h>
@@ -42,8 +46,10 @@ typedef struct {
     SceneManager* scene_manager;
     ViewDispatcher* view_dispatcher;
     VariableItemList* var_item_list;
+    Submenu* submenu;
     TextInput* text_input;
     Popup* popup;
+    DialogEx* dialog_ex;
 
     DesktopSettings desktop;
     PassportSettings passport;
@@ -77,8 +83,10 @@ typedef struct {
 
 typedef enum {
     CfwAppViewVarItemList,
+    CfwAppViewSubmenu,
     CfwAppViewTextInput,
     CfwAppViewPopup,
+    CfwAppViewDialogEx,
 } CfwAppView;
 
 bool cfw_app_apply(CfwApp* app);

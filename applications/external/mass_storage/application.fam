@@ -1,0 +1,19 @@
+App(
+    appid="mass_storage",
+    name="Mass Storage",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="mass_storage_app",
+    requires=[
+        "gui",
+        "dialogs",
+    ],
+    stack_size=2 * 1024,
+    order=20,
+    fap_icon="assets/mass_storage_10px.png",
+    fap_icon_assets="assets",
+    fap_category="USB",
+    fap_icon_assets_symbol="mass_storage",
+    fap_author="Willy-JL",
+    fap_version=(1, 1),
+    fap_description="This is a plugin for USB Mass Storage access with Flipper Zero",
+)

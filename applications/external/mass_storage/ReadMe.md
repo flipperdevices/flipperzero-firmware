@@ -1,0 +1,1 @@
+## It needs to be a disk image with .img extension. iso seems to work too, just rename to .img, to make your own (on linux): mkisofs -RJ -o /path/to/file.img /path/to/folder

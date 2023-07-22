@@ -50,12 +50,14 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
         size_t shift_position;
         if(CFW_SETTINGS()->wii_menu) {
             FuriString* name = furi_string_alloc();
-            if(position < 2) {
-                shift_position = 0;
-            } else if(position >= items_count - 2 + (items_count % 2)) {
-                shift_position = position - (position % 2) - 4;
+            if(items_count > 6 && position >= 4) {
+                if(position >= items_count - 2 + (items_count % 2)) {
+                    shift_position = position - (position % 2) - 4;
+                } else {
+                    shift_position = position - (position % 2) - 2;
+                }
             } else {
-                shift_position = position - (position % 2) - 2;
+                shift_position = 0;
             }
             canvas_set_font(canvas, FontSecondary);
             size_t item_i;

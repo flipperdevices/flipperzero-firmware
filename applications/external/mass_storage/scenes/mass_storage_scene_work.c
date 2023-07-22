@@ -1,6 +1,7 @@
 #include "../mass_storage_app_i.h"
 #include "../views/mass_storage_view.h"
 #include "../helpers/mass_storage_usb.h"
+#include <lib/toolbox/path.h>
 
 #define TAG "MassStorageSceneWork"
 
@@ -27,7 +28,7 @@ static bool file_write(void* ctx, uint32_t lba, uint16_t count, uint8_t* buf, ui
     MassStorageApp* app = ctx;
     // FURI_LOG_I(TAG, "file_write lba=%08lx count=%04x len=%04x", lba, count, len);
     if(len != count * SCSI_BLOCK_SIZE) {
-        FURI_LOG_W(TAG, "bad write params count=%d len=%ld", count, len);
+        FURI_LOG_W(TAG, "bad write params count=%u len=%lu", count, len);
         return false;
     }
     if(!storage_file_seek(app->file, lba * SCSI_BLOCK_SIZE, true)) {
@@ -69,13 +70,15 @@ void mass_storage_scene_work_on_enter(void* context) {
     app->usb_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
 
     FuriString* file_name = furi_string_alloc();
+    path_extract_filename(app->file_path, file_name, true);
 
-    mass_storage_set_file_name(app->mass_storage_view, app->file_name);
-    furi_string_printf(file_name, "%s/%s", MASS_STORAGE_APP_PATH_FOLDER, app->file_name);
+    mass_storage_set_file_name(app->mass_storage_view, file_name);
     app->file = storage_file_alloc(app->fs_api);
     furi_assert(storage_file_open(
-        app->file, furi_string_get_cstr(file_name), FSAM_READ | FSAM_WRITE, FSOM_OPEN_EXISTING));
-    furi_string_free(file_name);
+        app->file,
+        furi_string_get_cstr(app->file_path),
+        FSAM_READ | FSAM_WRITE,
+        FSOM_OPEN_EXISTING));
 
     SCSIDeviceFunc fn = {
         .ctx = app,
@@ -84,7 +87,10 @@ void mass_storage_scene_work_on_enter(void* context) {
         .num_blocks = file_num_blocks,
         .eject = file_eject,
     };
-    app->usb = mass_storage_usb_start(app->file_name, fn);
+
+    app->usb = mass_storage_usb_start(furi_string_get_cstr(file_name), fn);
+
+    furi_string_free(file_name);
 
     view_dispatcher_switch_to_view(app->view_dispatcher, MassStorageAppViewWork);
 }

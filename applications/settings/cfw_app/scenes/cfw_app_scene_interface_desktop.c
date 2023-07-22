@@ -144,7 +144,7 @@ static void cfw_app_scene_interface_desktop_dumbmode_icon_changed(VariableItem* 
 
 void cfw_app_scene_interface_desktop_on_enter(void* context) {
     CfwApp* app = context;
-    CfwSettings* cfw_settings = CFW_SETTINGS();
+    // CfwSettings* cfw_settings = CFW_SETTINGS();
     VariableItemList* var_item_list = app->var_item_list;
 
     VariableItem* item;
