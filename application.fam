@@ -7,4 +7,5 @@ App(
     stack_size=1 * 1024,
     fap_category="GPIO",
     fap_icon="scope_10px.png",
+    fap_version="0.1"
 )
