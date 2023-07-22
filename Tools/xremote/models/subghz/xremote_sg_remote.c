@@ -16,7 +16,7 @@
 //#include <lib/subghz/protocols/protocol_items.h> //Not found
 //#include <lib/subghz/protocols/protocol_items.c>
 #include <lib/subghz/subghz_keystore.h>
-#include <lib/subghz/subghz_file_encoder_worker.h>
+//#include <lib/subghz/subghz_file_encoder_worker.h>
 #include <gui/modules/variable_item_list.h>
 #include "xremote_sg_remote.h"
 
