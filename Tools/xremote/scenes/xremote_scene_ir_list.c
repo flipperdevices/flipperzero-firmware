@@ -2,7 +2,7 @@
 
 void xremote_scene_ir_list_on_enter(void* context) {
     XRemote* app = context;
-    
+
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, INFRARED_APP_EXTENSION, &I_ir_10px);
     browser_options.base_path = INFRARED_APP_FOLDER;
@@ -10,8 +10,7 @@ void xremote_scene_ir_list_on_enter(void* context) {
     FuriString* path;
     path = furi_string_alloc();
     furi_string_set(path, INFRARED_APP_FOLDER);
-    bool success = dialog_file_browser_show(
-        app->dialogs, app->file_path, path, &browser_options);
+    bool success = dialog_file_browser_show(app->dialogs, app->file_path, path, &browser_options);
     furi_string_free(path);
 
     if(success) {

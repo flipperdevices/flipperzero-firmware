@@ -22,8 +22,6 @@
 
 #define TAG "Xremote"
 
-
-
 struct SubGhzRemote {
     FuriString* name;
     FuriString* path;
@@ -59,7 +57,7 @@ SubGhzRemote* xremote_sg_remote_alloc() {
     SubGhzRemote* remote = malloc(sizeof(SubGhzRemote));
     remote->name = furi_string_alloc();
     remote->path = furi_string_alloc();
-    
+
     // SubGhz Settings
     remote->setting = subghz_setting_alloc();
     subghz_setting_load(remote->setting, EXT_PATH("subghz/assets/setting_user"));
@@ -142,8 +140,8 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
         const char* fullPath = furi_string_get_cstr(path);
         char* fileName = strrchr(fullPath, '/') + 1;
         char* dotPosition = strrchr(fileName, '.');
-        if (dotPosition != NULL) {  // check if there is a dot in the file name
-            *dotPosition = '\0';     // set the dot position to NULL character to truncate the string
+        if(dotPosition != NULL) { // check if there is a dot in the file name
+            *dotPosition = '\0'; // set the dot position to NULL character to truncate the string
         }
         //remote->name = fileName;
         furi_string_set_str(remote->name, fileName);
@@ -172,9 +170,7 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
                 remote->setting, furi_string_get_cstr(remote->txrx->preset->name));
             //load custom preset from file
             if(!subghz_setting_load_custom_preset(
-                   remote->setting,
-                   furi_string_get_cstr(remote->txrx->preset->name),
-                   ff)) {
+                   remote->setting, furi_string_get_cstr(remote->txrx->preset->name), ff)) {
                 FURI_LOG_E(TAG, "Missing Custom preset");
                 break;
             }
@@ -186,7 +182,10 @@ bool xremote_sg_remote_load(SubGhzRemote* remote, FuriString* path) {
         }
 
         if(!strcmp(furi_string_get_cstr(buf), "RAW")) {
-            subghz_protocol_raw_gen_fff_data(remote->txrx->fff_data, furi_string_get_cstr(path), subghz_txrx_radio_device_get_name(remote->txrx));
+            subghz_protocol_raw_gen_fff_data(
+                remote->txrx->fff_data,
+                furi_string_get_cstr(path),
+                subghz_txrx_radio_device_get_name(remote->txrx));
         } else {
             stream_copy_full(
                 flipper_format_get_raw_stream(ff),

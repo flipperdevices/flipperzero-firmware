@@ -5,7 +5,6 @@
 #include "../subghz/subghz_i.h"
 #include "../../xremote_i.h"
 
-
 bool xremote_remote_item_read(CrossRemoteItem* item, FlipperFormat* ff);
 bool xremote_remote_item_read_ir(CrossRemoteItem* item, FlipperFormat* ff);
 bool xremote_remote_item_read_ir_signal_raw(CrossRemoteItem* item, FlipperFormat* ff);
@@ -30,5 +29,3 @@ void xremote_remote_item_set_sg_signal(CrossRemoteItem* item, SubGhzRemote* subg
 bool xremote_pause_save(FlipperFormat* ff, int32_t time, const char* name);
 bool xremote_ir_signal_save(InfraredSignal* signal, FlipperFormat* ff, const char* name);
 bool xremote_sg_signal_save(SubGhzRemote* remote, FlipperFormat* ff, const char* name);
-
-

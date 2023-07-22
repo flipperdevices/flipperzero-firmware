@@ -63,8 +63,9 @@ bool xremote_ir_remote_load(InfraredRemote* remote, FuriString* path) {
 
         for(bool can_read = true; can_read;) {
             InfraredRemoteButton* button = xremote_ir_remote_button_alloc();
-            can_read = xremote_ir_signal_read(xremote_ir_remote_button_get_signal(button), ff, buf);
-            if (can_read) {
+            can_read =
+                xremote_ir_signal_read(xremote_ir_remote_button_get_signal(button), ff, buf);
+            if(can_read) {
                 xremote_ir_remote_button_set_name(button, furi_string_get_cstr(buf));
                 InfraredButtonArray_push_back(remote->buttons, button);
             } else {

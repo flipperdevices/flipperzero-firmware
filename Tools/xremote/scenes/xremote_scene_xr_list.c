@@ -2,7 +2,7 @@
 
 void xremote_scene_xr_list_on_enter(void* context) {
     XRemote* app = context;
-    
+
     DialogsFileBrowserOptions browser_options;
     dialog_file_browser_set_basic_options(&browser_options, XREMOTE_APP_EXTENSION, &I_xr_10px);
     browser_options.base_path = XREMOTE_APP_FOLDER;
@@ -13,7 +13,10 @@ void xremote_scene_xr_list_on_enter(void* context) {
 
     bool success = dialog_file_browser_show(
         //app->dialogs, app->file_path, app->file_path, &browser_options);
-        app->dialogs, app->file_path, path, &browser_options);
+        app->dialogs,
+        app->file_path,
+        path,
+        &browser_options);
     furi_string_free(path);
 
     if(success) {

@@ -20,9 +20,7 @@ void xremote_scene_save_remote_on_enter(void* context) {
     //A lot missing here
 
     ValidatorIsFile* validator_is_file = validator_is_file_alloc_init(
-        furi_string_get_cstr(folder_path),
-        XREMOTE_APP_EXTENSION,
-        cross_remote_get_name(remote));
+        furi_string_get_cstr(folder_path), XREMOTE_APP_EXTENSION, cross_remote_get_name(remote));
     text_input_set_validator(text_input, validator_is_file_callback, validator_is_file);
 
     furi_string_free(folder_path);
@@ -43,7 +41,7 @@ bool xremote_scene_save_remote_on_event(void* context, SceneManagerEvent event) 
     CrossRemote* remote = app->cross_remote;
     SceneManager* scene_manager = app->scene_manager;
     bool consumed = false;
-    
+
     if(event.type == SceneManagerEventTypeCustom) {
         bool success = false;
 

@@ -9,7 +9,7 @@ typedef enum {
 
 static void xremote_create_callback(void* context, int32_t index, InputType type) {
     XRemote* app = context;
-    
+
     uint16_t custom_type;
     if(type == InputTypePress) {
         custom_type = XRemoteCustomEventMenuSelected;
@@ -22,7 +22,8 @@ static void xremote_create_callback(void* context, int32_t index, InputType type
         furi_crash("Unexpected Input Type");
     }
 
-    view_dispatcher_send_custom_event(app->view_dispatcher, xremote_custom_menu_event_pack(custom_type, index));
+    view_dispatcher_send_custom_event(
+        app->view_dispatcher, xremote_custom_menu_event_pack(custom_type, index));
 }
 
 void xremote_scene_create_on_enter(void* context) {
@@ -71,7 +72,7 @@ void xremote_scene_create_on_enter(void* context) {
 bool xremote_scene_create_on_event(void* context, SceneManagerEvent event) {
     XRemote* app = context;
     bool consumed = false;
-    
+
     if(event.type == SceneManagerEventTypeBack) {
         scene_manager_next_scene(app->scene_manager, XRemoteSceneMenu);
         consumed = true;
@@ -86,8 +87,8 @@ bool xremote_scene_create_on_event(void* context, SceneManagerEvent event) {
         const uint16_t custom_type = xremote_custom_menu_event_get_type(event.event);
         const int16_t button_index = xremote_custom_menu_event_get_value(event.event);
         scene_manager_set_scene_state(
-                app->scene_manager, XRemoteSceneCreate, (unsigned)button_index);
-        if (custom_type == XRemoteCustomEventMenuSelected && button_index < 0) {
+            app->scene_manager, XRemoteSceneCreate, (unsigned)button_index);
+        if(custom_type == XRemoteCustomEventMenuSelected && button_index < 0) {
             //scene_manager_set_scene_state(
             //    app->scene_manager, XRemoteSceneCreate, (unsigned)button_index);
             if(button_index == ButtonIndexPlus) {
@@ -120,7 +121,7 @@ bool xremote_scene_create_on_event(void* context, SceneManagerEvent event) {
                 break;
         }*/
     }
-    
+
     return consumed;
 }
 
