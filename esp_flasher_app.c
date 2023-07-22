@@ -27,6 +27,7 @@ EspFlasherApp* esp_flasher_app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->dialogs = furi_record_open(RECORD_DIALOGS);
     app->storage = furi_record_open(RECORD_STORAGE);
+    app->notification = furi_record_open(RECORD_NOTIFICATION);
 
     app->view_dispatcher = view_dispatcher_alloc();
     app->scene_manager = scene_manager_alloc(&esp_flasher_scene_handlers, app);
@@ -106,6 +107,7 @@ void esp_flasher_app_free(EspFlasherApp* app) {
     furi_record_close(RECORD_GUI);
     furi_record_close(RECORD_STORAGE);
     furi_record_close(RECORD_DIALOGS);
+    furi_record_close(RECORD_NOTIFICATION);
 
     free(app);
 }

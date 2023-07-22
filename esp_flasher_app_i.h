@@ -20,6 +20,7 @@
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
 #include <dialogs/dialogs.h>
+#include <notification/notification_messages.h>
 
 #define ESP_FLASHER_TEXT_BOX_STORE_SIZE (4096)
 
@@ -47,6 +48,7 @@ struct EspFlasherApp {
     TextBox* text_box;
     Storage* storage;
     DialogsApp* dialogs;
+    NotificationApp* notification;
 
     VariableItemList* var_item_list;
     Widget* widget;

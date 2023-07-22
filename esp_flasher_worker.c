@@ -131,6 +131,9 @@ static int32_t esp_flasher_flash_bin(void* context) {
     flash_rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
     timer = furi_timer_alloc(_timer_callback, FuriTimerTypePeriodic, app);
 
+    // turn on flipper blue LED for duration of flash
+    notification_message(app->notification, &sequence_set_only_blue_255);
+
     loader_port_debug_print("Connecting\n");
     esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
     err = esp_loader_connect(&connect_config);
@@ -169,9 +172,19 @@ static int32_t esp_flasher_flash_bin(void* context) {
         loader_port_debug_print("Restoring transmission rate\n");
         furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
 #endif
-        loader_port_debug_print("Done flashing. Please reset the board manually.\n");
+        loader_port_debug_print("Done flashing. Please reset the board manually if it doesn't auto-reset.\n");
+
+        // auto-reset for supported boards
         loader_port_reset_target();
+
+        // short buzz to alert user
+        notification_message(app->notification, &sequence_set_vibro_on);
+        loader_port_delay_ms(50);
+        notification_message(app->notification, &sequence_reset_vibro);
     }
+
+    // turn off flipper blue LED
+    notification_message(app->notification, &sequence_reset_blue);
 
     // done
     app->flash_worker_busy = false;
