@@ -8,14 +8,7 @@ App(
     order=35,
     fap_icon="gps_10px.png",
     fap_category="GPIO",
-    fap_private_libs=[
-        Lib(
-            name="minmea",
-            sources=["minmea.c"],
-            cdefines=["timegm=mktime"],
-        ),
-    ],
     fap_author="@ezod & @xMasterX",
-    fap_version=(1, 0),
+    fap_version=(1, 1),
     fap_description="Works with GPS modules via UART, using NMEA protocol.",
 )
