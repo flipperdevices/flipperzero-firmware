@@ -32,6 +32,7 @@
 #define TICK_INTERVAL 50
 #define MESSAGE_COMPLETION_TIMEOUT 500
 #define TIMEOUT_BETWEEN_MESSAGES 500
+#define CHAT_LEAVE_DELAY 10
 
 #define KBD_UNLOCK_CNT 3
 #define KBD_UNLOCK_TIMEOUT 1000
@@ -173,6 +174,44 @@ static void post_rx(ESubGhzChatState *state, size_t rx_size)
 	text_box_set_focus(state->chat_box, TextBoxFocusEnd);
 }
 
+/* Reads the message from msg_input, encrypts it if necessary and then
+ * transmits it. */
+static void tx_msg_input(ESubGhzChatState *state)
+{
+	/* encrypt message if necessary */
+	size_t msg_len = strlen(furi_string_get_cstr(state->msg_input));
+	size_t tx_size = msg_len;
+	if (state->encrypted) {
+		tx_size += IV_BYTES + TAG_BYTES;
+		furi_check(tx_size <= sizeof(state->tx_buffer));
+
+		furi_hal_random_fill_buf(state->tx_buffer, IV_BYTES);
+		gcm_crypt_and_tag(&(state->gcm_ctx), ENCRYPT,
+				state->tx_buffer, IV_BYTES,
+				NULL, 0,
+				(unsigned char *)
+				furi_string_get_cstr(state->msg_input),
+				state->tx_buffer + IV_BYTES,
+				msg_len,
+				state->tx_buffer + IV_BYTES + msg_len,
+				TAG_BYTES);
+	} else {
+		tx_size += 2;
+		furi_check(tx_size <= sizeof(state->tx_buffer));
+		memcpy(state->tx_buffer,
+				furi_string_get_cstr(state->msg_input),
+				msg_len);
+
+		/* append \r\n for compat with Sub-GHz CLI chat */
+		state->tx_buffer[msg_len] = '\r';
+		state->tx_buffer[msg_len + 1] = '\n';
+	}
+
+	/* transmit */
+	subghz_tx_rx_worker_write(state->subghz_worker, state->tx_buffer,
+			tx_size);
+}
+
 /* Sends FreqEntered event to scene manager and displays the frequency in the
  * text box. */
 static void freq_input_cb(void *context)
@@ -225,7 +264,8 @@ static bool freq_input_validator(const char *text, FuriString *error,
 
 /* Sends PassEntered event to scene manager and displays whether or not
  * encryption has been enabled in the text box. Also clears the text input
- * buffer to remove the password and starts the Sub-GHz worker. */
+ * buffer to remove the password and starts the Sub-GHz worker. After starting
+ * the worker a join message is transmitted. */
 static void pass_input_cb(void *context)
 {
 	furi_assert(context);
@@ -240,6 +280,16 @@ static void pass_input_cb(void *context)
 
 	subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device,
 			state->frequency);
+
+	/* concatenate the name prefix and join message */
+	furi_string_set(state->msg_input, state->name_prefix);
+	furi_string_cat_str(state->msg_input, " joined chat.");
+
+	/* encrypt and transmit message */
+	tx_msg_input(state);
+
+	/* clear message input buffer */
+	furi_string_set_char(state->msg_input, 0, 0);
 
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_PassEntered);
@@ -318,47 +368,18 @@ static void chat_input_cb(void *context)
 
 	/* concatenate the name prefix and the actual message */
 	furi_string_set(state->msg_input, state->name_prefix);
+	furi_string_cat_str(state->msg_input, ": ");
 	furi_string_cat_str(state->msg_input, state->text_input_store);
 
 	/* append the message to the chat box */
 	furi_string_cat_printf(state->chat_box_store, "\n%s",
 		furi_string_get_cstr(state->msg_input));
 
-	/* encrypt message if necessary */
-	size_t msg_len = strlen(furi_string_get_cstr(state->msg_input));
-	size_t tx_size = msg_len;
-	if (state->encrypted) {
-		tx_size += IV_BYTES + TAG_BYTES;
-		furi_check(tx_size <= sizeof(state->tx_buffer));
-
-		furi_hal_random_fill_buf(state->tx_buffer, IV_BYTES);
-		gcm_crypt_and_tag(&(state->gcm_ctx), ENCRYPT,
-				state->tx_buffer, IV_BYTES,
-				NULL, 0,
-				(unsigned char *)
-				furi_string_get_cstr(state->msg_input),
-				state->tx_buffer + IV_BYTES,
-				msg_len,
-				state->tx_buffer + IV_BYTES + msg_len,
-				TAG_BYTES);
-	} else {
-		tx_size += 2;
-		furi_check(tx_size <= sizeof(state->tx_buffer));
-		memcpy(state->tx_buffer,
-				furi_string_get_cstr(state->msg_input),
-				msg_len);
-
-		/* append \r\n for compat with Sub-GHz CLI chat */
-		state->tx_buffer[msg_len] = '\r';
-		state->tx_buffer[msg_len + 1] = '\n';
-	}
+	/* encrypt and transmit message */
+	tx_msg_input(state);
 
 	/* clear message input buffer */
 	furi_string_set_char(state->msg_input, 0, 0);
-
-	/* transmit */
-	subghz_tx_rx_worker_write(state->subghz_worker, state->tx_buffer,
-			tx_size);
 
 	/* switch to text box view */
 	scene_manager_handle_custom_event(state->scene_manager,
@@ -577,7 +598,22 @@ static bool scene_on_event_chat_input(void* context, SceneManagerEvent event)
 		break;
 
 	case SceneManagerEventTypeBack:
-		/* stop the application if the user presses back here */
+		/* stop the application and send a leave message if the user
+		 * presses back here */
+
+		/* concatenate the name prefix and leave message */
+		furi_string_set(state->msg_input, state->name_prefix);
+		furi_string_cat_str(state->msg_input, " left chat.");
+
+		/* encrypt and transmit message */
+		tx_msg_input(state);
+
+		/* clear message input buffer */
+		furi_string_set_char(state->msg_input, 0, 0);
+
+		/* wait for leave message to be delivered */
+                furi_delay_ms(CHAT_LEAVE_DELAY);
+
 		view_dispatcher_stop(state->view_dispatcher);
 		consumed = true;
 		break;
@@ -984,8 +1020,7 @@ int32_t esubghz_chat(void)
 	state->subghz_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
 
 	/* set chat name prefix */
-	// TODO: handle escape chars here somehow
-	furi_string_printf(state->name_prefix, "\033[0;33m%s\033[0m: ",
+	furi_string_printf(state->name_prefix, "%s",
 			furi_hal_version_get_name_ptr());
 
 	/* get notification record, we use this to make the flipper vibrate */
