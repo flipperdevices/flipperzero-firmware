@@ -1,0 +1,15 @@
+App(
+    appid="enhanced_subghz_chat",
+    name="Enhanced Sub-Ghz Chat",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="esubghz_chat",
+    stack_size=8 * 1024,
+    fap_icon="assets/sub1_10px.png",
+    fap_category="Sub-GHz",
+    fap_icon_assets="assets",
+    fap_icon_assets_symbol="esubghz_chat",
+    fap_author="twisted-pear",
+    fap_weburl="https://github.com/twisted-pear/esubghz_chat",
+    fap_version=(1, 0),
+    fap_description="This is a plugin for the Flipper Zero that reimplements the Sub-GHz chat feature that is available on the CLI. In addition it allows for basic encryption of messages.",
+)
