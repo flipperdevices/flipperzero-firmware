@@ -26,9 +26,7 @@
 #define BITMAP_SEEK_NOT_FOUND UINT32_MAX // Returned by function as sentinel
 #define PROTOVIEW_VIEW_PRIVDATA_LEN 64 // View specific private data len
 
-#define DEBUG_MSG 1
-
-/* Forward declarations. */
+#define DEBUG_MSG 0
 
 /* Forward declarations. */
 

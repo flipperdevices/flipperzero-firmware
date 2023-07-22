@@ -1,22 +1,9 @@
 # GPS for Flipper Zero
 
-[![FAP Build](https://github.com/ezod/flipperzero-gps/actions/workflows/build.yml/badge.svg)](https://github.com/ezod/flipperzero-gps/actions/workflows/build.yml)
-
 A simple Flipper Zero application for NMEA 0183 serial GPS modules, such as the
-[Adafruit Ultimate GPS Breakout].
+- Adafruit Ultimate GPS Breakout.
 
-![ui](ui.png)
-
-Heavy lifting (NMEA parsing) provided by [minmea].
-
-## Installation
-
-1. Navigate to the [FAP Build](https://github.com/ezod/flipperzero-gps/actions/workflows/build.yml)
-   GitHub action workflow, and select the most recent run.
-2. The FAP is built for both the `dev` and `release` channels of the official
-   firmware. Download the artifact corresponding to your firmware version.
-3. Extract `gps_nmea.fap` from the ZIP file to `apps/GPIO` on your Flipper
-   Zero SD card.
+Heavy lifting (NMEA parsing) provided by minmea.
 
 ## Usage
 
@@ -36,23 +23,24 @@ hardware buttons:
 Connect the GPS module to power and the USART using GPIO pins 9 (3.3V), 11
 (GND), 13 (TX), and 14 (RX), as appropriate.
 
-![wiring](wiring.png)
 
-See the [tutorial video](https://www.youtube.com/watch?v=5vSGFzEBp-k) from
-Lab401 by [RocketGod](https://github.com/RocketGod-git) for a visual guide to
+See the tutorial video - https://www.youtube.com/watch?v=5vSGFzEBp-k from
+Lab401 by RocketGod - https://github.com/RocketGod-git for a visual guide to
 the hardware setup.
 
 ### Confirmed Compatible Modules
 
-* [Adafruit Ultimate GPS Breakout]
+* Adafruit Ultimate GPS Breakout
 * Beitian BN-180
 * Royaltek RBT-2100LP
-* [u-blox NEO-6M]
+* u-blox NEO-6M
 
 If you have verified this application working with a module not listed here,
 please submit a PR adding it to the list.
 
-[Adafruit Ultimate GPS Breakout]: https://www.adafruit.com/product/746
-[minmea]: https://github.com/kosma/minmea
-[qFlipper]: https://flipperzero.one/update
-[u-blox NEO-6M]: https://www.u-blox.com/en/product/neo-6-series
+## Links
+
+Original repo link - https://github.com/ezod/flipperzero-gps
+Adafruit Ultimate GPS Breakout: https://www.adafruit.com/product/746
+minmea: https://github.com/kosma/minmea
+u-blox NEO-6M: https://www.u-blox.com/en/product/neo-6-series
