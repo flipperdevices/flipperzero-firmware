@@ -27,7 +27,7 @@
 #define RX_TX_BUFFER_SIZE 1024
 
 #define CHAT_BOX_STORE_SIZE 4096
-#define TEXT_INPUT_STORE_SIZE 512
+#define TEXT_INPUT_STORE_SIZE 256
 
 #define TICK_INTERVAL 50
 #define MESSAGE_COMPLETION_TIMEOUT 500
@@ -50,9 +50,7 @@ typedef struct {
 	// for Sub-GHz
 	uint32_t frequency;
 	SubGhzTxRxWorker *subghz_worker;
-#ifdef FW_ORIGIN_Official
 	const SubGhzDevice *subghz_device;
-#endif /* FW_ORIGIN_Official */
 
 	// message assembly before TX
 	FuriString *name_prefix;
@@ -149,6 +147,12 @@ static void post_rx(ESubGhzChatState *state, size_t rx_size)
 	if (!state->encrypted) {
 		memcpy(state->rx_str_buffer, state->rx_buffer, rx_size);
 		state->rx_str_buffer[rx_size] = 0;
+
+		/* remove trailing newline if it is there, for compat with CLI
+		 * Sub-GHz chat */
+		if (state->rx_str_buffer[rx_size - 1] == '\n') {
+			state->rx_str_buffer[rx_size - 1] = 0;
+		}
 	} else {
 		/* if decryption fails output an error message */
 		if (!post_rx_decrypt(state, rx_size)) {
@@ -157,8 +161,8 @@ static void post_rx(ESubGhzChatState *state, size_t rx_size)
 	}
 
 	/* append message to text box */
-	furi_string_cat_printf(state->chat_box_store, "\n%s [%u]",
-			state->rx_str_buffer, rx_size);
+	furi_string_cat_printf(state->chat_box_store, "\n%s",
+			state->rx_str_buffer);
 
 	/* send notification (make the flipper vibrate) */
 	notification_message(state->notification, &sequence_single_vibro);
@@ -345,10 +349,15 @@ static void chat_input_cb(void *context)
 				state->tx_buffer + IV_BYTES + msg_len,
 				TAG_BYTES);
 	} else {
+		tx_size += 2;
 		furi_check(tx_size <= sizeof(state->tx_buffer));
 		memcpy(state->tx_buffer,
 				furi_string_get_cstr(state->msg_input),
-				tx_size);
+				msg_len);
+
+		/* append \r\n for compat with Sub-GHz CLI chat */
+		state->tx_buffer[msg_len] = '\r';
+		state->tx_buffer[msg_len + 1] = '\n';
 	}
 
 	/* clear message input buffer */
