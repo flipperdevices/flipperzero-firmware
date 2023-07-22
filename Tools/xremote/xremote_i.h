@@ -8,7 +8,6 @@
 
 #include <furi.h>
 #include <furi_hal.h>
-#include <assets_icons.h>
 
 #include <gui/gui.h>
 #include <gui/elements.h>
