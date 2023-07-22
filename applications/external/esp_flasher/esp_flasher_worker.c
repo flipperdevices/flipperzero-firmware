@@ -131,6 +131,9 @@ static int32_t esp_flasher_flash_bin(void* context) {
     flash_rx_stream = furi_stream_buffer_alloc(RX_BUF_SIZE, 1);
     timer = furi_timer_alloc(_timer_callback, FuriTimerTypePeriodic, app);
 
+    // turn on flipper blue LED for duration of flash
+    notification_message(app->notification, &sequence_set_only_blue_255);
+
     loader_port_debug_print("Connecting\n");
     esp_loader_connect_args_t connect_config = ESP_LOADER_CONNECT_DEFAULT();
     err = esp_loader_connect(&connect_config);
@@ -169,8 +172,20 @@ static int32_t esp_flasher_flash_bin(void* context) {
         loader_port_debug_print("Restoring transmission rate\n");
         furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
 #endif
-        loader_port_debug_print("Done flashing. Please reset the board manually.\n");
+        loader_port_debug_print(
+            "Done flashing. Please reset the board manually if it doesn't auto-reset.\n");
+
+        // auto-reset for supported boards
+        loader_port_reset_target();
+
+        // short buzz to alert user
+        notification_message(app->notification, &sequence_set_vibro_on);
+        loader_port_delay_ms(50);
+        notification_message(app->notification, &sequence_reset_vibro);
     }
+
+    // turn off flipper blue LED
+    notification_message(app->notification, &sequence_reset_blue);
 
     // done
     app->flash_worker_busy = false;
@@ -182,6 +197,48 @@ static int32_t esp_flasher_flash_bin(void* context) {
     return 0;
 }
 
+static void _initDTR(void) {
+    furi_hal_gpio_init(&gpio_ext_pc3, GpioModeOutputPushPull, GpioPullDown, GpioSpeedVeryHigh);
+}
+
+static void _initRTS(void) {
+    furi_hal_gpio_init(&gpio_ext_pb2, GpioModeOutputPushPull, GpioPullDown, GpioSpeedVeryHigh);
+}
+
+static void _setDTR(bool state) {
+    furi_hal_gpio_write(&gpio_ext_pc3, state);
+}
+
+static void _setRTS(bool state) {
+    furi_hal_gpio_write(&gpio_ext_pb2, state);
+}
+
+static int32_t esp_flasher_reset(void* context) {
+    EspFlasherApp* app = (void*)context;
+
+    app->flash_worker_busy = true;
+
+    _setDTR(false);
+    _initDTR();
+    _setRTS(false);
+    _initRTS();
+
+    if(app->reset) {
+        loader_port_debug_print("Resetting board\n");
+        loader_port_reset_target();
+    } else if(app->boot) {
+        loader_port_debug_print("Entering bootloader\n");
+        loader_port_enter_bootloader();
+    }
+
+    // done
+    app->flash_worker_busy = false;
+    app->reset = false;
+    app->boot = false;
+
+    return 0;
+}
+
 void esp_flasher_worker_start_thread(EspFlasherApp* app) {
     global_app = app;
 
@@ -189,7 +246,11 @@ void esp_flasher_worker_start_thread(EspFlasherApp* app) {
     furi_thread_set_name(app->flash_worker, "EspFlasherFlashWorker");
     furi_thread_set_stack_size(app->flash_worker, 2048);
     furi_thread_set_context(app->flash_worker, app);
-    furi_thread_set_callback(app->flash_worker, esp_flasher_flash_bin);
+    if(app->reset || app->boot) {
+        furi_thread_set_callback(app->flash_worker, esp_flasher_reset);
+    } else {
+        furi_thread_set_callback(app->flash_worker, esp_flasher_flash_bin);
+    }
     furi_thread_start(app->flash_worker);
 }
 
@@ -213,8 +274,19 @@ esp_loader_error_t loader_port_write(const uint8_t* data, uint16_t size, uint32_
     return ESP_LOADER_SUCCESS;
 }
 
+void loader_port_reset_target(void) {
+    _setDTR(true);
+    loader_port_delay_ms(SERIAL_FLASHER_RESET_HOLD_TIME_MS);
+    _setDTR(false);
+}
+
 void loader_port_enter_bootloader(void) {
-    // unimplemented
+    _setDTR(true);
+    loader_port_delay_ms(SERIAL_FLASHER_RESET_HOLD_TIME_MS);
+    _setRTS(true);
+    _setDTR(false);
+    loader_port_delay_ms(SERIAL_FLASHER_BOOT_HOLD_TIME_MS);
+    _setRTS(false);
 }
 
 void loader_port_delay_ms(uint32_t ms) {
