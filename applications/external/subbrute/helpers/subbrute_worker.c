@@ -3,7 +3,7 @@
 #include <toolbox/stream/stream.h>
 #include <flipper_format.h>
 #include <flipper_format_i.h>
-#include <lib/subghz/protocols/protocol_items.h>
+#include <lib/subghz/subghz_protocol_registry.h>
 
 #define TAG "SubBruteWorker"
 #define SUBBRUTE_TX_TIMEOUT 6

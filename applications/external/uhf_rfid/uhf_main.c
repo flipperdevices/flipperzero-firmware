@@ -7,23 +7,96 @@
 #include <gui/modules/submenu.h>
 #include <gui/modules/text_input.h>
 #include <lib/toolbox/stream/file_stream.h>
-#include "arraylist.h"
 #include "cmd.h"
+#include <stdlib.h>
 
-#define SCENE_COUNT 1
+#define UHF_APPS_DATA_FOLDER EXT_PATH("apps_data")
+#define UHF_LOG_FOLDER       \
+    UHF_APPS_DATA_FOLDER "/" \
+                         "uhf"
+#define UHF_LOG_FILE_NAME "log.txt"
+#define UHF_LOG_PATH UHF_LOG_FOLDER "/" UHF_LOG_FILE_NAME
+#define SCENE_COUNT 2
+
+bool logged = false;
+// volatile int array_ptr = 0;
+// uint8_t array_log[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+//                        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+char* convertToHexString(const uint8_t* array, size_t length) {
+    if(array == NULL || length == 0) {
+        return NULL;
+    }
+
+    // Each byte takes 3 characters in the hex representation (2 characters + space), plus 1 for the null terminator
+    size_t hexLength = (length * 3) + 1;
+
+    char* hexArray = (char*)malloc(hexLength * sizeof(char));
+    if(hexArray == NULL) {
+        return NULL;
+    }
+
+    size_t index = 0;
+    for(size_t i = 0; i < length; i++) {
+        index += snprintf(&hexArray[index], hexLength - index, "%02x ", array[i]);
+    }
+
+    hexArray[hexLength - 1] = '\0';
+
+    return hexArray;
+}
+
+void store_message(char* message) {
+    Storage* storage = furi_record_open(RECORD_STORAGE);
+    if(!storage_dir_exists(storage, UHF_APPS_DATA_FOLDER)) {
+        storage_simply_mkdir(storage, UHF_APPS_DATA_FOLDER);
+    }
+
+    if(!storage_dir_exists(storage, UHF_LOG_FOLDER)) {
+        storage_simply_mkdir(storage, UHF_LOG_FOLDER);
+    }
+
+    File* file = storage_file_alloc(storage);
+    if(storage_file_open(file, UHF_LOG_PATH, FSAM_WRITE, FSOM_OPEN_APPEND)) {
+        if(!logged) {
+            storage_file_seek(file, 0, true);
+            storage_file_truncate(file);
+            logged = true;
+        }
+        storage_file_write(file, message, strlen(message));
+        storage_file_write(file, "\n", 1);
+        storage_file_close(file);
+        storage_file_free(file);
+    }
+    furi_record_close(RECORD_STORAGE);
+}
 
 typedef enum { STARTED, RUNNING, STOPPED } UHFRFIDWorkerState;
 typedef enum { SEND_READ_CMD, SEND_WRITE_CMD } UHFRFIDWorkerCMD;
 
 // typedef void (*UHFRFIDWorkerCallback)();
+typedef struct UHFReturnData {
+    uint8_t* data;
+    size_t length;
+} UHFReturnData;
+
+UHFReturnData* uhf_return_data_alloc() {
+    UHFReturnData* uhf_data = (UHFReturnData*)malloc(sizeof(UHFReturnData));
+    uhf_data->data = (uint8_t*)malloc(24 * sizeof(uint8_t));
+    uhf_data->length = 0;
+    return uhf_data;
+}
+
+void uhf_return_data_free(UHFReturnData* uhf_data) {
+    free(uhf_data->data);
+}
 
 typedef struct UHFRFIDWorker {
     FuriThread* thread;
-    UHFRFIDWorkerCMD cmd;
+    UHFReturnData* uhf_data;
+    // UHFRFIDWorkerCMD cmd;
     // Storage* storage;
     // UHFRFIDWorkerCallback callback;
-    void* context;
-    UHFRFIDWorkerState state;
 
 } UHFRFIDWorker;
 
@@ -40,80 +113,80 @@ void uhf_rfid_worker_disable_field() {
 //     return 0;
 // }
 
-void rx_callback(UartIrqEvent ev, uint8_t data, void* ctx) {
-    UNUSED(ev);
-    ArrayList* data_list = ctx;
-    array_list_append(data_list, data);
+void rx_callback(UartIrqEvent event, uint8_t data, void* ctx) {
+    UNUSED(event);
+    UHFReturnData* uhf_data = ctx;
+    uhf_data->data[uhf_data->length++] = data;
+    // UNUSED(ctx);
+    // UNUSED(data);
+    // array_log[array_ptr++] = data;
 }
 
 int32_t uhf_rfid_worker_task(void* ctx) {
     UHFRFIDWorker* worker = ctx;
+    // UHFRFIDWorker* worker = ctx;
     // uhf_rfid_worker_enable_field();
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, worker->context);
-    ArrayList* data_list = worker->context;
-    int prev_size = data_list->size;
+    // array_ptr = 0;
     furi_hal_console_disable();
-    switch(worker->cmd) {
-    case SEND_READ_CMD:
-        furi_hal_console_enable();
-        FURI_LOG_D("TAG", "SENDING DATA");
-        FURI_LOG_D(
-            "TAG",
-            "%02x%02x%02x%02x%02x%02x%02x",
-            CMD_SINGLE_POLLING.cmd[0],
-            CMD_SINGLE_POLLING.cmd[1],
-            CMD_SINGLE_POLLING.cmd[2],
-            CMD_SINGLE_POLLING.cmd[3],
-            CMD_SINGLE_POLLING.cmd[4],
-            CMD_SINGLE_POLLING.cmd[5],
-            CMD_SINGLE_POLLING.cmd[6]);
-        furi_hal_console_disable();
-        furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SINGLE_POLLING.cmd, CMD_SINGLE_POLLING.length);
-        break;
-    default:
-        break;
-    }
-    furi_hal_console_enable();
-    while(prev_size != data_list->size) {
-        furi_delay_ms(50);
-    }
-    FURI_LOG_D("TAG", "DATA READ %s", array_list_to_string(data_list));
+    furi_hal_uart_set_br(FuriHalUartIdUSART1, 115200);
+    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, rx_callback, worker->uhf_data);
+    // ArrayList* data_list = worker->context;
+    // int prev_size = data_list->size;
+    // switch(worker->cmd) {
+    // case SEND_READ_CMD:
+    //     // furi_hal_console_enable();
+    //     // FURI_LOG_E("TAG", "SENDING DATA");
+    //     // FURI_LOG_E(
+    //     //     "TAG",
+    //     //     "%02x%02x%02x%02x%02x%02x%02x",
+    //     //     CMD_SINGLE_POLLING.cmd[0],
+    //     //     CMD_SINGLE_POLLING.cmd[1],
+    //     //     CMD_SINGLE_POLLING.cmd[2],
+    //     //     CMD_SINGLE_POLLING.cmd[3],
+    //     //     CMD_SINGLE_POLLING.cmd[4],
+    //     //     CMD_SINGLE_POLLING.cmd[5],
+    //     //     CMD_SINGLE_POLLING.cmd[6]);
+    //     // furi_hal_console_disable();
+    //     break;
+    // default:
+    //     break;
+    // }
+    furi_hal_uart_tx(FuriHalUartIdUSART1, CMD_SINGLE_POLLING.cmd, CMD_SINGLE_POLLING.length);
+    // while(prev_size == 0 || !(prev_size != data_list->size)) {
+    //     furi_delay_ms(50);
+    // }
+    // furi_hal_console_enable();
+    // FURI_LOG_E("TAG", "DATA READ %s", array_list_to_string(data_list));
+    // furi_delay_ms(2000);
     return 0;
 }
 UHFRFIDWorker* uhf_rfid_worker_alloc() {
     UHFRFIDWorker* uhf_rfid_worker = malloc(sizeof(UHFRFIDWorker));
-
-    ArrayList* data_list = array_list_alloc();
-    uhf_rfid_worker->context = data_list;
-    // Worker thread attributes
     uhf_rfid_worker->thread =
         furi_thread_alloc_ex("UHFRFIDWorker", 8 * 1024, uhf_rfid_worker_task, uhf_rfid_worker);
-    // uhf_rfid_worker->storage = furi_record_open(RECORD_STORAGE);
-
-    // picopass_worker_change_state(picopass_worker, PicopassWorkerStateReady);
-
+    // uhf_rfid_worker->cmd = SEND_READ_CMD;
+    uhf_rfid_worker->uhf_data = uhf_return_data_alloc();
     return uhf_rfid_worker;
 }
 
 void uhf_rfid_worker_free(UHFRFIDWorker* uhf_rfid_worker) {
     furi_assert(uhf_rfid_worker);
-
     furi_thread_free(uhf_rfid_worker->thread);
-    ArrayList* data_list = uhf_rfid_worker->context;
-    array_list_free(data_list);
+    // ArrayList* data_list = uhf_rfid_worker->context;
+    // array_list_free(data_list);
 
     // furi_record_close(RECORD_STORAGE);
 
     free(uhf_rfid_worker);
 }
 
-void uhf_rfid_worker_change_state(UHFRFIDWorker* worker, UHFRFIDWorkerState state) {
-    worker->state = state;
-}
-void uhf_rfid_worker_start(UHFRFIDWorker* uhf_rfid_worker, UHFRFIDWorkerState state, void* context) {
-    uhf_rfid_worker->cmd = (UHFRFIDWorkerCMD)context;
-    uhf_rfid_worker_change_state(uhf_rfid_worker, state);
+// void uhf_rfid_worker_change_state(UHFRFIDWorker* worker, UHFRFIDWorkerState state) {
+//     worker->state = state;
+// }
+void uhf_rfid_worker_start(UHFRFIDWorker* uhf_rfid_worker, UHFRFIDWorkerState state, void* ctx) {
+    UNUSED(state);
+    UNUSED(ctx);
+    // uhf_rfid_worker_change_state(uhf_rfid_worker, state);
     furi_thread_start(uhf_rfid_worker->thread);
 }
 
@@ -122,7 +195,7 @@ void uhf_rfid_worker_stop(UHFRFIDWorker* uhf_rfid_worker) {
     furi_assert(uhf_rfid_worker->thread);
 
     if(furi_thread_get_state(uhf_rfid_worker->thread) != FuriThreadStateStopped) {
-        uhf_rfid_worker_change_state(uhf_rfid_worker, STOPPED);
+        // uhf_rfid_worker_change_state(uhf_rfid_worker, STOPPED);
         furi_thread_join(uhf_rfid_worker->thread);
     }
 }
@@ -148,7 +221,7 @@ void scenes_menu_callback(void* ctx, uint32_t index) {
     case MainMenuSaved:
         // not implemented yet
         furi_hal_console_enable();
-        FURI_LOG_D("TAG", "Saved was pressed");
+        FURI_LOG_E("TAG", "Saved was pressed");
         furi_hal_console_disable();
         break;
     }
@@ -192,16 +265,28 @@ void scene_read_on_enter(void* ctx) {
     UHFRFIDApp* app = ctx;
     widget_reset(app->widget);
     UHFRFIDWorker* worker = uhf_rfid_worker_alloc();
-    ArrayList* data_list = worker->context;
-    uhf_rfid_worker_start(worker, RUNNING, SEND_READ_CMD);
-    furi_delay_ms(2000);
-    furi_hal_console_enable();
-    FURI_LOG_D("TAG", "data %s", array_list_to_string(data_list));
-    widget_add_string_element(
-        app->widget, 5, 15, AlignCenter, AlignCenter, FontPrimary, array_list_to_string(data_list));
+    UHFReturnData* uhf_data = worker->uhf_data;
+    uhf_rfid_worker_start(worker, RUNNING, NULL);
+    furi_delay_ms(1000);
+    // UNUSED(uhf_data);
+    char* values = convertToHexString(uhf_data->data, uhf_data->length);
+    // UNUSED(values);
+    if(values != NULL) {
+        store_message(values);
+        widget_add_string_element(
+            app->widget, 25, 15, AlignCenter, AlignCenter, FontPrimary, values);
+    } else {
+        store_message("No data found");
+        widget_add_string_element(
+            app->widget, 25, 15, AlignCenter, AlignCenter, FontPrimary, "No data found");
+    }
+    // furi_hal_console_enable();
+    // FURI_LOG_E("TAG", "data %s", values);
+
     view_dispatcher_switch_to_view(app->view_dispatcher, WidgetView);
-    furi_delay_ms(2000);
+    // furi_delay_ms(2000);
     uhf_rfid_worker_stop(worker);
+    uhf_return_data_free(worker->uhf_data);
     uhf_rfid_worker_free(worker);
 }
 

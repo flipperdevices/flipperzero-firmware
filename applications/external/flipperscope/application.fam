@@ -7,15 +7,8 @@ App(
     stack_size=1 * 1024,
     fap_category="GPIO",
     fap_icon="scope_10px.png",
-    # fap_icon_assets="images",
     fap_icon_assets_symbol="scope",
-    fap_private_libs=[
-        Lib(name="adc",
-            fap_include_paths=["inc"],
-            sources=[
-                "stm32wbxx_hal_adc.c", "stm32wbxx_hal_adc_ex.c", "stm32wbxx_hal_rcc_ex.c", "stm32wbxx_hal_gpio.c",
-                "stm32wbxx_hal_pwr.c", "stm32wbxx_hal.c", "stm32wbxx_hal_tim.c", "stm32wbxx_hal_tim_ex.c",
-                "stm32wbxx_hal_cortex.c", "stm32wbxx_hal_dma.c", "stm32wbxx_hal_rcc.c"
-            ],
-    )]
+    fap_author="anfractuosity",
+    fap_version="0.1",
+    fap_description="Oscilloscope application - apply signal to pin 16/PC0, with a voltage ranging from 0V to 2.5V and ground to pin 18/GND"
 )

@@ -5,7 +5,7 @@
 #include <lib/toolbox/stream/stream.h>
 #include <lib/flipper_format/flipper_format.h>
 #include <lib/flipper_format/flipper_format_i.h>
-#include <lib/subghz/protocols/protocol_items.h>
+#include <lib/subghz/subghz_protocol_registry.h>
 
 #define TAG "SubBruteDevice"
 

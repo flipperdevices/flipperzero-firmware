@@ -1,10 +1,10 @@
 #pragma once
 
+#include <subghz_bruteforcer_icons.h>
 #include <input/input.h>
 #include <gui/elements.h>
 #include <gui/icon.h>
 #include <gui/icon_animation.h>
-#include <subghz_bruteforcer_icons.h>
 
 /**
  * Thanks to the author of metronome

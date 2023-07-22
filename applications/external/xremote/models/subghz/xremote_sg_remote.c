@@ -13,10 +13,10 @@
 //#include <lib/subghz/blocks/math.h>
 //#include <lib/subghz/protocols/raw.h>
 //#include <lib/subghz/protocols/bin_raw.h>
-#include <lib/subghz/protocols/protocol_items.h>
+//#include <lib/subghz/protocols/protocol_items.h> //Not found
 //#include <lib/subghz/protocols/protocol_items.c>
 #include <lib/subghz/subghz_keystore.h>
-#include <lib/subghz/subghz_file_encoder_worker.h>
+//#include <lib/subghz/subghz_file_encoder_worker.h>
 #include <gui/modules/variable_item_list.h>
 #include "xremote_sg_remote.h"
 
@@ -46,6 +46,11 @@ void subghz_preset_init(
     remote->txrx->preset->frequency = frequency;
     remote->txrx->preset->data = preset_data;
     remote->txrx->preset->data_size = preset_data_size;
+}
+
+const char* subghz_txrx_radio_device_get_name(SubGhzTxRx* instance) {
+    furi_assert(instance);
+    return subghz_devices_get_name(instance->radio_device);
 }
 
 SubGhzRemote* xremote_sg_remote_alloc() {

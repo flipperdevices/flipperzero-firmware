@@ -4,7 +4,7 @@ void xremote_scene_sg_list_on_enter(void* context) {
     XRemote* app = context;
 
     DialogsFileBrowserOptions browser_options;
-    dialog_file_browser_set_basic_options(&browser_options, SUBGHZ_APP_EXTENSION, &I_sub1_10px);
+    dialog_file_browser_set_basic_options(&browser_options, SUBGHZ_APP_EXTENSION, &I_sg_10px);
     browser_options.base_path = SUBGHZ_APP_FOLDER;
 
     FuriString* path;

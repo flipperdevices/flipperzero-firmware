@@ -6,7 +6,7 @@ void xremote_scene_wip_on_enter(void* context) {
     Popup* popup = app->popup;
 
     //popup_set_icon(popup, 0, 2, &I_DolphinMafia_115x62);
-    popup_set_header(popup, "Work in Progress", 10, 19, AlignLeft, AlignBottom);
+    popup_set_header(popup, "SubGhz coming soon", 10, 19, AlignLeft, AlignBottom);
     popup_set_text(popup, "Check back later", 10, 29, AlignLeft, AlignBottom);
     popup_set_text(popup, "Press back long", 10, 39, AlignLeft, AlignBottom);
 

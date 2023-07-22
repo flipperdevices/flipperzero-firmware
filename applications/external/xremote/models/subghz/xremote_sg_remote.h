@@ -1,8 +1,7 @@
 #pragma once
 
 //#include "../../xremote_i.h"
-#include "helpers/subghz_i.h"
-#include "helpers/txrx/subghz_txrx.h"
+#include "subghz_i.h"
 //#include <lib/subghz/protocols/protocol_items.h>
 
 //extern const SubGhzProtocolRegistry subghz_protocol_registry;

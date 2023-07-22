@@ -13,16 +13,17 @@
 //#include <lib/toolbox/path.h>
 //#include <flipper_format/flipper_format_i.h>
 #include <lib/toolbox/stream/stream.h>
-#include <lib/subghz/protocols/protocol_items.h>
+//#include <lib/subghz/protocols/protocol_items.h> //Not found
 #include <lib/subghz/subghz_worker.h>
 #include <lib/subghz/subghz_setting.h>
 #include <lib/subghz/receiver.h>
 #include <lib/subghz/transmitter.h>
+#include <lib/subghz/devices/devices.h>
 //#include <lib/subghz/blocks/custom_btn.h>
 
 #include <flipper_format/flipper_format_i.h>
 
-#include "subrem_types.h"
+#include "subghz_types.h"
 
 extern const SubGhzProtocolRegistry subghz_protocol_registry;
 
@@ -48,6 +49,7 @@ struct SubGhzTxRx {
 
     //float raw_threshold_rssi;
     //uint8_t raw_threshold_rssi_low_count;
+    const SubGhzDevice* radio_device;
 };
 
 typedef struct SubGhzTxRx SubGhzTxRx;

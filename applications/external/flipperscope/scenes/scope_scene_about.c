@@ -13,8 +13,9 @@ void scope_scene_about_on_enter(void* context) {
     FuriString* temp_str;
     temp_str = furi_string_alloc();
     furi_string_printf(temp_str, "\e#%s\n", "Information");
-
-    furi_string_cat_printf(temp_str, "Version: %s\n", S_VERSION_APP);
+    furi_string_cat_printf(
+        temp_str,
+        "Provide signal to pin 16/PC0, with a voltage ranging from 0V to 2.5V and ground to pin 18/GND.\n\n");
     furi_string_cat_printf(temp_str, "Developed by: %s\n", S_DEVELOPED);
     furi_string_cat_printf(temp_str, "Github: %s\n\n", S_GITHUB);
 

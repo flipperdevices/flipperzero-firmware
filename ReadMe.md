@@ -51,6 +51,12 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: Fixed By nminaylov: [USB Mass Storage (By Willy-JL)](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/762744eca3ed92794dcd044397faf9af0131a950)
 - Updated: [Lightmeter v1.2 (By oleksiikutuzov)](https://github.com/oleksiikutuzov/flipperzero-lightmeter) `Req: BH1750/MAX44009`
 - Updated: [ESP Flasher v1.1 (By 0xchocolate)](https://github.com/0xchocolate/flipperzero-esp-flasher)
+- UL: Updated: [Sub-GHz Bruteforcer v3.7 (By Ganapati/xMasterX/derskythe)](https://github.com/derskythe/flipperzero-subbrute/tree/master)
+- UL: Updated: [Protocol Visualizer (By antirez)](https://github.com/antirez/protoview)
+- UL: Updated: CC1101 Drivers
+- Updated: [YRM100 UHF RFID (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
+- Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
+- Updated: [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 
 <a name="release">
 
