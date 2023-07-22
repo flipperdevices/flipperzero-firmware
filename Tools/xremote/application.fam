@@ -14,5 +14,9 @@ App(
     fap_libs=["assets"],
     fap_icon="icons/xremote_10px.png",
     fap_icon_assets="icons",
-    fap_category="Tools",
+    fap_version="0.8",
+    fap_category="Infrared",
+    fap_author="Leedave",
+    fap_description="One-Click, sends multiple commands",
+    fap_weburl="https://github.com/leedave/Leeds-Flipper-Zero-Applications"
 )
