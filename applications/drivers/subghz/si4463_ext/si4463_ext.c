@@ -41,7 +41,7 @@
 #define SUBGHZ_DEVICE_SI4463_EXT_ASYNC_TX_BUFFER_FULL (256)
 #define SUBGHZ_DEVICE_SI4463_EXT_ASYNC_TX_BUFFER_HALF \
     (SUBGHZ_DEVICE_SI4463_EXT_ASYNC_TX_BUFFER_FULL / 2)
-#define SUBGHZ_DEVICE_SI4463_EXT_ASYNC_TX_GUARD_TIME 999
+#define SUBGHZ_DEVICE_SI4463_EXT_ASYNC_TX_GUARD_TIME 999 << 1
 
 /** SubGhz state */
 typedef enum {
@@ -232,14 +232,6 @@ bool subghz_device_si4463_ext_is_connect() {
 }
 
 void subghz_device_si4463_ext_sleep() {
-    //furi_assert(subghz_device_si4463_ext_state == SubGhzStateIdle);
-    //ToDo sometimes freezes when exiting sleep mode
-    // si446x_write_gpio(subghz_device_si4463_ext->spi_bus_handle, SI446X_GPIO1, SI446X_GPIO_MODE_INPUT);
-    // si446x_clear_interrupt_status(subghz_device_si4463_ext->spi_bus_handle);
-    // si446x_set_state(subghz_device_si4463_ext->spi_bus_handle, SI446X_STATE_SLEEP);
-    // furi_hal_gpio_init(subghz_device_si4463_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-    //subghz_device_si4463_ext_preset = FuriHalSubGhzPresetIDLE;
-
     subghz_device_si4463_ext_shutdown();
 }
 
@@ -251,83 +243,9 @@ void subghz_device_si4463_ext_dump_state() {
     si446x_clear_interrupt_status(subghz_device_si4463_ext->spi_bus_handle);
 }
 
-// void subghz_device_si4463_ext_load_preset(FuriHalSubGhzPreset preset) {
-//     //ToDo need Reset?
-//     //download with evaluation takes 200ms without calibration 20ms
-//     switch(preset) {
-//     case FuriHalSubGhzPresetOok650Async:
-//         subghz_device_si4463_ext_load_config(subghz_device_si4463_preset_ook_650khz_async_regs);
-//         subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
-//         break;
-//     case FuriHalSubGhzPresetOok270Async:
-//         subghz_device_si4463_ext_load_config(
-//             subghz_device_si4463_ext_preset_ook_270khz_async_regs);
-//         subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
-//         break;
-//     case FuriHalSubGhzPreset2FSKDev238Async:
-//         subghz_device_si4463_ext_load_config(
-//             subghz_device_si4463_ext_preset_2fsk_dev2_38khz_async_regs);
-//         subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
-//         break;
-//     case FuriHalSubGhzPreset2FSKDev476Async:
-//         subghz_device_si4463_ext_load_config(
-//             subghz_device_si4463_ext_preset_2fsk_dev4_76khz_async_regs);
-//         subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
-//         break;
-//     case FuriHalSubGhzPresetOok650AsyncFreq:
-//         subghz_device_si4463_ext_load_config(
-//             subghz_device_si4463_ext_preset_ook_650khz_async_for_freq_regs);
-//         //subghz_device_si4463_ext_load_config(subghz_device_si4463_preset_ook_650khz_async_regs);
-//         //subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
-//         break;
-//     // case FuriHalSubGhzPresetMSK99_97KbAsync:
-//     //     subghz_device_si4463_ext_load_config(subghz_device_si4463_ext_preset_msk_99_97kb_async_regs);
-//     //     //subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
-//     //     break;
-//     // case FuriHalSubGhzPresetGFSK9_99KbAsync:
-//     //     subghz_device_si4463_ext_load_config(subghz_device_si4463_ext_preset_gfsk_9_99kb_async_regs);
-//     //     //subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
-//     //     break;
-//     default:
-//         furi_crash(NULL);
-//         break;
-//     }
-
-//     si446x_set_pa(subghz_device_si4463_ext->spi_bus_handle, SI446X_SET_MAX_PA);
-//     // si446x_set_rssi_control(subghz_device_si4463_ext->spi_bus_handle);
-//     // uint8_t pa_mode[1] = {0x88};
-//     // si446x_set_properties(
-//     //     subghz_device_si4463_ext->spi_bus_handle, SI446X_PROP_PA_MODE, &pa_mode[0], sizeof(pa_mode));
-//     // si446x_set_bps(subghz_device_si4463_ext->spi_bus_handle, 100000);
-
-//     subghz_device_si4463_ext_preset = preset;
-//     subghz_device_si4463_ext_state = SubGhzStateIdle;
-// }
-
-void subghz_device_si4463_ext_load_registers(const uint8_t data[][2]) {
-    UNUSED(data);
-    // furi_hal_spi_acquire(subghz_device_si4463_ext->spi_bus_handle);
-    // Si4463_reset(subghz_device_si4463_ext->spi_bus_handle);
-    // uint32_t i = 0;
-    // while(data[i][0]) {
-    //     Si4463_write_reg(subghz_device_si4463_ext->spi_bus_handle, data[i][0], data[i][1]);
-    //     i++;
-    // }
-    // furi_hal_spi_release(subghz_device_si4463_ext->spi_bus_handle);
-}
-
 void subghz_device_si4463_set_pa(uint8_t pa) {
     si446x_set_pa(subghz_device_si4463_ext->spi_bus_handle, pa);
-    
 }
-
-
-// void subghz_device_si4463_ext_load_patable(const uint8_t data[8]) {
-//     UNUSED(data);
-//     // furi_hal_spi_acquire(subghz_device_si4463_ext->spi_bus_handle);
-//     // Si4463_set_pa_table(subghz_device_si4463_ext->spi_bus_handle, data);
-//     // furi_hal_spi_release(subghz_device_si4463_ext->spi_bus_handle);
-// }
 
 void subghz_device_si4463_ext_write_packet(const uint8_t* data, uint8_t size) {
     UNUSED(data);
@@ -565,7 +483,7 @@ static void subghz_device_si4463_ext_capture_ISR() {
 
             subghz_device_si4463_ext->async_rx.capture_callback(
                 true,
-                LL_TIM_GetCounter(TIM17),
+                LL_TIM_GetCounter(TIM17) << 1,
                 (void*)subghz_device_si4463_ext->async_rx.capture_callback_context);
         }
     } else {
@@ -575,11 +493,11 @@ static void subghz_device_si4463_ext_capture_ISR() {
 
             subghz_device_si4463_ext->async_rx.capture_callback(
                 false,
-                LL_TIM_GetCounter(TIM17),
+                LL_TIM_GetCounter(TIM17) << 1,
                 (void*)subghz_device_si4463_ext->async_rx.capture_callback_context);
         }
     }
-    LL_TIM_SetCounter(TIM17, 6);
+    LL_TIM_SetCounter(TIM17, 4); // 8>>1
 }
 
 void subghz_device_si4463_ext_start_async_rx(
@@ -594,7 +512,7 @@ void subghz_device_si4463_ext_start_async_rx(
     furi_hal_bus_enable(FuriHalBusTIM17);
 
     // Configure TIM
-    LL_TIM_SetPrescaler(TIM17, 64 - 1);
+    LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
     LL_TIM_SetCounterMode(TIM17, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetAutoReload(TIM17, 0xFFFF);
     LL_TIM_SetClockDivision(TIM17, LL_TIM_CLOCKDIVISION_DIV1);
@@ -688,7 +606,7 @@ static void subghz_device_si4463_ext_async_tx_refill(uint32_t* buffer, size_t sa
 
             uint32_t duration = level_duration_get_duration(ld);
             furi_assert(duration > 0);
-            *buffer = duration - 1;
+            *buffer = duration >> 1;
             buffer++;
             samples--;
         }
@@ -774,7 +692,7 @@ bool subghz_device_si4463_ext_start_async_tx(SubGhzDeviceSi4463ExtCallback callb
     furi_hal_bus_enable(FuriHalBusTIM17);
 
     // Configure TIM
-    LL_TIM_SetPrescaler(TIM17, 64 - 1);
+    LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
     LL_TIM_SetCounterMode(TIM17, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetAutoReload(TIM17, 0xFFFF);
     LL_TIM_SetClockDivision(TIM17, LL_TIM_CLOCKDIVISION_DIV1);
@@ -876,337 +794,3 @@ void subghz_device_si4463_ext_stop_async_tx() {
 
     subghz_device_si4463_ext->state = SubGhzDeviceSi4463ExtStateIdle;
 }
-
-// volatile uint32_t subghz_device_si4463_ext_capture_delta_duration = 0;
-// volatile FuriHalSubGhzCaptureCallback subghz_device_si4463_ext_capture_callback = NULL;
-// volatile void* subghz_device_si4463_ext_capture_callback_context = NULL;
-
-// static void subghz_device_si4463_ext_capture_ISR() {
-//     // Channel 1
-//     if(LL_TIM_IsActiveFlag_CC1(TIM2)) {
-//         LL_TIM_ClearFlag_CC1(TIM2);
-//         subghz_device_si4463_ext_capture_delta_duration = LL_TIM_IC_GetCaptureCH1(TIM2);
-//         if(subghz_device_si4463_ext_capture_callback) {
-//             subghz_device_si4463_ext_capture_callback(
-//                 true,
-//                 subghz_device_si4463_ext_capture_delta_duration,
-//                 (void*)subghz_device_si4463_ext_capture_callback_context);
-//         }
-//     }
-//     // Channel 2
-//     if(LL_TIM_IsActiveFlag_CC2(TIM2)) {
-//         LL_TIM_ClearFlag_CC2(TIM2);
-//         if(subghz_device_si4463_ext_capture_callback) {
-//             subghz_device_si4463_ext_capture_callback(
-//                 false,
-//                 LL_TIM_IC_GetCaptureCH2(TIM2) - subghz_device_si4463_ext_capture_delta_duration,
-//                 (void*)subghz_device_si4463_ext_capture_callback_context);
-//         }
-//     }
-// }
-
-// void subghz_device_si4463_ext_start_async_rx(FuriHalSubGhzCaptureCallback callback, void* context) {
-//     furi_assert(subghz_device_si4463_ext_state == SubGhzStateIdle);
-//     subghz_device_si4463_ext_state = SubGhzStateAsyncRx;
-
-//     subghz_device_si4463_ext_capture_callback = callback;
-//     subghz_device_si4463_ext_capture_callback_context = context;
-
-//     furi_hal_gpio_init_ex(
-//         subghz_device_si4463_ext->g0_pin,
-//         GpioModeAltFunctionPushPull,
-//         GpioPullNo,
-//         GpioSpeedLow,
-//         GpioAltFn1TIM2);
-
-//     // Timer: base
-//     LL_TIM_InitTypeDef TIM_InitStruct = {0};
-//     TIM_InitStruct.Prescaler = 64 - 1;
-//     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-//     TIM_InitStruct.Autoreload = 0x7FFFFFFE;
-//     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV4;
-//     LL_TIM_Init(TIM2, &TIM_InitStruct);
-
-//     // Timer: advanced
-//     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
-//     LL_TIM_DisableARRPreload(TIM2);
-//     LL_TIM_SetTriggerInput(TIM2, LL_TIM_TS_TI2FP2);
-//     LL_TIM_SetSlaveMode(TIM2, LL_TIM_SLAVEMODE_RESET);
-//     LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
-//     LL_TIM_EnableMasterSlaveMode(TIM2);
-//     LL_TIM_DisableDMAReq_TRIG(TIM2);
-//     LL_TIM_DisableIT_TRIG(TIM2);
-
-//     // Timer: channel 1 indirect
-//     LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ACTIVEINPUT_INDIRECTTI);
-//     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_ICPSC_DIV1);
-//     LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_POLARITY_FALLING);
-//     LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH1, LL_TIM_IC_FILTER_FDIV1);
-
-//     // Timer: channel 2 direct
-//     LL_TIM_IC_SetActiveInput(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ACTIVEINPUT_DIRECTTI);
-//     LL_TIM_IC_SetPrescaler(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_ICPSC_DIV1);
-//     LL_TIM_IC_SetPolarity(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_POLARITY_RISING);
-//     LL_TIM_IC_SetFilter(TIM2, LL_TIM_CHANNEL_CH2, LL_TIM_IC_FILTER_FDIV32_N8);
-
-//     // ISR setup
-//     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, subghz_device_si4463_ext_capture_ISR, NULL);
-
-//     // Interrupts and channels
-//     LL_TIM_EnableIT_CC1(TIM2);
-//     LL_TIM_EnableIT_CC2(TIM2);
-//     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH1);
-//     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
-
-//     // Start timer
-//     LL_TIM_SetCounter(TIM2, 0);
-//     LL_TIM_EnableCounter(TIM2);
-
-//     // Switch to RX
-//     subghz_device_si4463_ext_rx();
-// }
-
-// void subghz_device_si4463_ext_stop_async_rx() {
-//     furi_assert(subghz_device_si4463_ext_state == SubGhzStateAsyncRx);
-//     subghz_device_si4463_ext_state = SubGhzStateIdle;
-
-//     // Shutdown radio
-//     subghz_device_si4463_ext_idle();
-
-//     FURI_CRITICAL_ENTER();
-//     LL_TIM_DeInit(TIM2);
-//     FURI_CRITICAL_EXIT();
-//     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
-
-//     furi_hal_gpio_init(subghz_device_si4463_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-// }
-
-// #define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL (256)
-// #define API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF (API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL / 2)
-// #define API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME 333
-
-// typedef struct {
-//     uint32_t* buffer;
-//     bool flip_flop;
-//     FuriHalSubGhzAsyncTxCallback callback;
-//     void* callback_context;
-//     uint64_t duty_high;
-//     uint64_t duty_low;
-// } FuriHalSubGhzAsyncTx;
-
-// static FuriHalSubGhzAsyncTx subghz_device_si4463_ext_async_tx = {0};
-
-// static void subghz_device_si4463_ext_async_tx_refill(uint32_t* buffer, size_t samples) {
-//     while(samples > 0) {
-//         bool is_odd = samples % 2;
-//         LevelDuration ld = subghz_device_si4463_ext_async_tx.callback(
-//             subghz_device_si4463_ext_async_tx.callback_context);
-
-//         if(level_duration_is_wait(ld)) {
-//             return;
-//         } else if(level_duration_is_reset(ld)) {
-//             // One more even sample required to end at low level
-//             if(is_odd) {
-//                 *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-//                 buffer++;
-//                 samples--;
-//                 subghz_device_si4463_ext_async_tx.duty_low += API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-//             }
-//             break;
-//         } else {
-//             // Inject guard time if level is incorrect
-//             bool level = level_duration_get_level(ld);
-//             if(is_odd == level) {
-//                 *buffer = API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-//                 buffer++;
-//                 samples--;
-//                 if(!level) {
-//                     subghz_device_si4463_ext_async_tx.duty_high +=
-//                         API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-//                 } else {
-//                     subghz_device_si4463_ext_async_tx.duty_low +=
-//                         API_HAL_SUBGHZ_ASYNC_TX_GUARD_TIME;
-//                 }
-//             }
-
-//             uint32_t duration = level_duration_get_duration(ld);
-//             furi_assert(duration > 0);
-//             *buffer = duration;
-//             buffer++;
-//             samples--;
-
-//             if(level) {
-//                 subghz_device_si4463_ext_async_tx.duty_high += duration;
-//             } else {
-//                 subghz_device_si4463_ext_async_tx.duty_low += duration;
-//             }
-//         }
-//     }
-
-//     memset(buffer, 0, samples * sizeof(uint32_t));
-// }
-
-// static void subghz_device_si4463_ext_async_tx_dma_isr() {
-//     furi_assert(subghz_device_si4463_ext_state == SubGhzStateAsyncTx);
-//     if(LL_DMA_IsActiveFlag_HT1(DMA1)) {
-//         LL_DMA_ClearFlag_HT1(DMA1);
-//         subghz_device_si4463_ext_async_tx_refill(
-//             subghz_device_si4463_ext_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF);
-//     }
-//     if(LL_DMA_IsActiveFlag_TC1(DMA1)) {
-//         LL_DMA_ClearFlag_TC1(DMA1);
-//         subghz_device_si4463_ext_async_tx_refill(
-//             subghz_device_si4463_ext_async_tx.buffer + API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF,
-//             API_HAL_SUBGHZ_ASYNC_TX_BUFFER_HALF);
-//     }
-// }
-
-// static void subghz_device_si4463_ext_async_tx_timer_isr() {
-//     if(LL_TIM_IsActiveFlag_UPDATE(TIM2)) {
-//         LL_TIM_ClearFlag_UPDATE(TIM2);
-//         if(LL_TIM_GetAutoReload(TIM2) == 0) {
-//             if(subghz_device_si4463_ext_state == SubGhzStateAsyncTx) {
-//                 subghz_device_si4463_ext_state = SubGhzStateAsyncTxLast;
-//                 //forcibly pulls the pin to the ground so that there is no carrier
-//                 furi_hal_gpio_init(
-//                     subghz_device_si4463_ext->g0_pin, GpioModeInput, GpioPullDown, GpioSpeedLow);
-//             } else {
-//                 subghz_device_si4463_ext_state = SubGhzStateAsyncTxEnd;
-//                 LL_TIM_DisableCounter(TIM2);
-//             }
-//         }
-//     }
-// }
-
-// bool subghz_device_si4463_ext_start_async_tx(FuriHalSubGhzAsyncTxCallback callback, void* context) {
-//     furi_assert(subghz_device_si4463_ext_state == SubGhzStateIdle);
-//     furi_assert(callback);
-
-//     //If transmission is prohibited by regional settings
-//     if(subghz_device_si4463_ext_regulation != SubGhzRegulationTxRx) return false;
-
-//     subghz_device_si4463_ext_async_tx.callback = callback;
-//     subghz_device_si4463_ext_async_tx.callback_context = context;
-
-//     subghz_device_si4463_ext_state = SubGhzStateAsyncTx;
-
-//     subghz_device_si4463_ext_async_tx.duty_low = 0;
-//     subghz_device_si4463_ext_async_tx.duty_high = 0;
-
-//     subghz_device_si4463_ext_async_tx.buffer =
-//         malloc(API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL * sizeof(uint32_t));
-//     subghz_device_si4463_ext_async_tx_refill(
-//         subghz_device_si4463_ext_async_tx.buffer, API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL);
-
-//     // Connect Si4463_GD0 to TIM2 as output
-//     furi_hal_gpio_init_ex(
-//         subghz_device_si4463_ext->g0_pin,
-//         GpioModeAltFunctionPushPull,
-//         GpioPullDown,
-//         GpioSpeedLow,
-//         GpioAltFn1TIM2);
-
-//     // Configure DMA
-//     LL_DMA_InitTypeDef dma_config = {0};
-//     dma_config.PeriphOrM2MSrcAddress = (uint32_t) & (TIM2->ARR);
-//     dma_config.MemoryOrM2MDstAddress = (uint32_t)subghz_device_si4463_ext_async_tx.buffer;
-//     dma_config.Direction = LL_DMA_DIRECTION_MEMORY_TO_PERIPH;
-//     dma_config.Mode = LL_DMA_MODE_CIRCULAR;
-//     dma_config.PeriphOrM2MSrcIncMode = LL_DMA_PERIPH_NOINCREMENT;
-//     dma_config.MemoryOrM2MDstIncMode = LL_DMA_MEMORY_INCREMENT;
-//     dma_config.PeriphOrM2MSrcDataSize = LL_DMA_PDATAALIGN_WORD;
-//     dma_config.MemoryOrM2MDstDataSize = LL_DMA_MDATAALIGN_WORD;
-//     dma_config.NbData = API_HAL_SUBGHZ_ASYNC_TX_BUFFER_FULL;
-//     dma_config.PeriphRequest = LL_DMAMUX_REQ_TIM2_UP;
-//     dma_config.Priority = LL_DMA_MODE_NORMAL;
-//     LL_DMA_Init(DMA1, LL_DMA_CHANNEL_1, &dma_config);
-//     furi_hal_interrupt_set_isr(
-//         FuriHalInterruptIdDma1Ch1, subghz_device_si4463_ext_async_tx_dma_isr, NULL);
-//     LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_1);
-//     LL_DMA_EnableIT_HT(DMA1, LL_DMA_CHANNEL_1);
-//     LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-
-//     // Configure TIM2
-//     LL_TIM_InitTypeDef TIM_InitStruct = {0};
-//     TIM_InitStruct.Prescaler = 64 - 1;
-//     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-//     TIM_InitStruct.Autoreload = 1000;
-//     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
-//     LL_TIM_Init(TIM2, &TIM_InitStruct);
-//     LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
-//     LL_TIM_EnableARRPreload(TIM2);
-
-//     // Configure TIM2 CH2
-//     LL_TIM_OC_InitTypeDef TIM_OC_InitStruct = {0};
-//     TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_TOGGLE;
-//     TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
-//     TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
-//     TIM_OC_InitStruct.CompareValue = 0;
-//     TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_HIGH;
-//     LL_TIM_OC_Init(TIM2, LL_TIM_CHANNEL_CH2, &TIM_OC_InitStruct);
-//     LL_TIM_OC_DisableFast(TIM2, LL_TIM_CHANNEL_CH2);
-//     LL_TIM_DisableMasterSlaveMode(TIM2);
-
-//     furi_hal_interrupt_set_isr(
-//         FuriHalInterruptIdTIM2, subghz_device_si4463_ext_async_tx_timer_isr, NULL);
-
-//     LL_TIM_EnableIT_UPDATE(TIM2);
-//     LL_TIM_EnableDMAReq_UPDATE(TIM2);
-//     LL_TIM_CC_EnableChannel(TIM2, LL_TIM_CHANNEL_CH2);
-
-//     // Start counter
-//     LL_TIM_GenerateEvent_UPDATE(TIM2);
-// #ifdef SUBGHZ_DEVICE_SI4463_EXT_TX_GPIO
-//     furi_hal_gpio_write(&SUBGHZ_DEVICE_SI4463_EXT_TX_GPIO, true);
-// #endif
-//     subghz_device_si4463_ext_tx();
-
-//     LL_TIM_SetCounter(TIM2, 0);
-//     LL_TIM_EnableCounter(TIM2);
-//     return true;
-// }
-
-// bool subghz_device_si4463_ext_is_async_tx_complete() {
-//     return subghz_device_si4463_ext_state == SubGhzStateAsyncTxEnd;
-// }
-
-// void subghz_device_si4463_ext_stop_async_tx() {
-//     furi_assert(
-//         subghz_device_si4463_ext_state == SubGhzStateAsyncTx ||
-//         subghz_device_si4463_ext_state == SubGhzStateAsyncTxLast ||
-//         subghz_device_si4463_ext_state == SubGhzStateAsyncTxEnd);
-
-//     // Shutdown radio
-//     subghz_device_si4463_ext_idle();
-// #ifdef SUBGHZ_DEVICE_SI4463_EXT_TX_GPIO
-//     furi_hal_gpio_write(&SUBGHZ_DEVICE_SI4463_EXT_TX_GPIO, false);
-// #endif
-
-//     // Deinitialize Timer
-//     FURI_CRITICAL_ENTER();
-//     LL_TIM_DeInit(TIM2);
-//     furi_hal_interrupt_set_isr(FuriHalInterruptIdTIM2, NULL, NULL);
-
-//     // Deinitialize DMA
-//     LL_DMA_DeInit(DMA1, LL_DMA_CHANNEL_1);
-
-//     furi_hal_interrupt_set_isr(FuriHalInterruptIdDma1Ch1, NULL, NULL);
-
-//     // Deinitialize GPIO
-//     furi_hal_gpio_init(subghz_device_si4463_ext->g0_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
-//     FURI_CRITICAL_EXIT();
-
-//     free(subghz_device_si4463_ext_async_tx.buffer);
-
-//     float duty_cycle = 100.0f * (float)subghz_device_si4463_ext_async_tx.duty_high /
-//                        ((float)subghz_device_si4463_ext_async_tx.duty_low +
-//                         (float)subghz_device_si4463_ext_async_tx.duty_high);
-//     FURI_LOG_D(
-//         TAG,
-//         "Async TX Radio stats: on %0.0fus, off %0.0fus, DutyCycle: %0.0f%%",
-//         (double)subghz_device_si4463_ext_async_tx.duty_high,
-//         (double)subghz_device_si4463_ext_async_tx.duty_low,
-//         (double)duty_cycle);
-
-//     subghz_device_si4463_ext_state = SubGhzStateIdle;
-// }

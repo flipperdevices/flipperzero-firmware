@@ -14,7 +14,7 @@ static bool subghz_device_si4463_ext_interconnect_is_frequency_valid(uint32_t fr
 
 static uint32_t subghz_device_si4463_ext_interconnect_set_frequency(uint32_t frequency) {
     subghz_device_si4463_ext_interconnect_is_frequency_valid(frequency);
-    return subghz_device_si4463_ext_set_frequency(frequency);
+    return subghz_device_si4463_ext_set_frequency_and_path(frequency);
 }
 
 static bool subghz_device_si4463_ext_interconnect_start_async_tx(void* callback, void* context) {
@@ -61,8 +61,12 @@ static void subghz_device_si4463_ext_interconnect_load_preset(
     //     break;
 
     default:
-        furi_crash("Si4463. need to implement subghz_device_si4463_ext_mod_gpio_for_async");
-        subghz_device_si4463_ext_load_config(preset_data);
+        //furi_crash("Si4463. need to implement subghz_device_si4463_ext_mod_gpio_for_async");
+        //subghz_device_si4463_ext_load_config(preset_data);
+        UNUSED(preset_data);
+         subghz_device_si4463_ext_load_config(
+            subghz_device_si4463_preset_ook_650khz_async_regs);
+        subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
     }
     subghz_device_si4463_set_pa(SI446X_SET_MAX_PA);
 }

@@ -16,39 +16,6 @@
 extern "C" {
 #endif
 
-// /** Radio Presets */
-// typedef enum {
-//     FuriHalSubGhzPresetIDLE, /**< default configuration */
-//     FuriHalSubGhzPresetOok270Async, /**< OOK, bandwidth 270kHz, asynchronous */
-//     FuriHalSubGhzPresetOok650Async, /**< OOK, bandwidth 650kHz, asynchronous */
-//     FuriHalSubGhzPresetOok650AsyncFreq, /**< OOK, bandwidth 650kHz, asynchronous, 500bps, for frequency analyzer */
-//     FuriHalSubGhzPreset2FSKDev238Async, /**< FM, deviation 2.380371 kHz, asynchronous */
-//     FuriHalSubGhzPreset2FSKDev476Async, /**< FM, deviation 4.760742 kHz, asynchronous */
-//     FuriHalSubGhzPresetMSK99_97KbAsync, /**< MSK, deviation 47.60742 kHz, 99.97Kb/s, asynchronous */
-//     FuriHalSubGhzPresetGFSK9_99KbAsync /**< GFSK, deviation 19.042969 kHz, 9.996Kb/s, asynchronous */
-// } FuriHalSubGhzPreset;
-
-// /** SubGhz state */
-// typedef enum {
-//     SubGhzStateInit, /**< Init pending */
-
-//     SubGhzStateIdle, /**< Idle, energy save mode */
-
-//     SubGhzStateAsyncRx, /**< Async RX started */
-
-//     SubGhzStateAsyncTx, /**< Async TX started, DMA and timer is on */
-//     SubGhzStateAsyncTxLast, /**< Async TX continue, DMA completed and timer got last value to go */
-//     SubGhzStateAsyncTxEnd, /**< Async TX complete, cleanup needed */
-
-// } SubGhzState;
-
-// /** SubGhz regulation, receive transmission on the current frequency for the
-//  * region */
-// typedef enum {
-//     SubGhzRegulationOnlyRx, /**only Rx*/
-//     SubGhzRegulationTxRx, /**TxRx*/
-// } SubGhzRegulation;
-
 /** Switchable Radio Paths */
 typedef enum {
     SubGhzDeviceSi4463ExtPathIsolate, /**< Isolate Radio from antenna */
@@ -103,12 +70,6 @@ void subghz_device_si4463_ext_dump_state();
 // void subghz_device_si4463_ext_load_preset(FuriHalSubGhzPreset preset);
 
 void subghz_device_si4463_ext_mod_gpio_for_async(SI446X_Prop_Modem_Mod_Type_t modulation);
-
-/** Load registers
- *
- * @param      data  Registers data
- */
-void subghz_device_si4463_ext_load_registers(const uint8_t data[][2]);
 
 void subghz_device_si4463_ext_load_config(const uint8_t config[]);
 
