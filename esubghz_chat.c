@@ -276,13 +276,6 @@ static bool pass_input_validator(const char *text, FuriString *error,
 	/* derive a key from the password */
 	sha256((unsigned char *) text, strlen(text), key);
 
-	// TODO: remove this
-	furi_string_cat_printf(state->chat_box_store, "\nKey:");
-	int i;
-	for (i = 0; i < KEY_BITS / 8; i++) {
-		furi_string_cat_printf(state->chat_box_store, " %02x", key[i]);
-	}
-
 	/* initiate the AES-GCM context */
 	int ret = gcm_setkey(&(state->gcm_ctx), key, KEY_BITS / 8);
 
@@ -362,14 +355,6 @@ static void chat_input_cb(void *context)
 
 	/* clear message input buffer */
 	furi_string_set_char(state->msg_input, 0, 0);
-
-	// TODO: remove this
-	furi_string_cat_printf(state->chat_box_store, "\nTXed (HEX):");
-	size_t i;
-	for (i = 0; i < tx_size; i++) {
-		furi_string_cat_printf(state->chat_box_store, " %02x",
-				state->tx_buffer[i]);
-	}
 
 	/* transmit */
 	subghz_tx_rx_worker_write(state->subghz_worker, state->tx_buffer,
