@@ -9,6 +9,8 @@
 #include <gui/scene_manager.h>
 #include <toolbox/sha256.h>
 #include <notification/notification_messages.h>
+#include <lib/subghz/devices/cc1101_int/cc1101_int_interconnect.h>
+#include <lib/subghz/subghz_tx_rx_worker.h>
 
 #include "esubghz_chat_icons.h"
 
@@ -28,7 +30,7 @@
 #define TEXT_INPUT_STORE_SIZE 512
 
 #define TICK_INTERVAL 50
-#define MESSAGE_COMPLETION_TIMEOUT 200
+#define MESSAGE_COMPLETION_TIMEOUT 500
 #define TIMEOUT_BETWEEN_MESSAGES 500
 
 #define KBD_UNLOCK_CNT 3
@@ -45,8 +47,12 @@ typedef struct {
 	TextInput *text_input;
 	char text_input_store[TEXT_INPUT_STORE_SIZE + 1];
 
-	// selected frequency
+	// for Sub-GHz
 	uint32_t frequency;
+	SubGhzTxRxWorker *subghz_worker;
+#ifdef FW_ORIGIN_Official
+	const SubGhzDevice *subghz_device;
+#endif /* FW_ORIGIN_Official */
 
 	// message assembly before TX
 	FuriString *name_prefix;
@@ -60,8 +66,7 @@ typedef struct {
 	uint8_t rx_buffer[RX_TX_BUFFER_SIZE];
 	uint8_t tx_buffer[RX_TX_BUFFER_SIZE];
 	char rx_str_buffer[RX_TX_BUFFER_SIZE + 1];
-	FuriStreamBuffer *rx_collection_buffer;
-	uint32_t last_time_rx_data;
+	volatile uint32_t last_time_rx_data;
 
 	// for locking
 	ViewPortDrawCallback orig_draw_cb;
@@ -98,6 +103,36 @@ static void esubghz_chat_explicit_bzero(void *s, size_t len)
 	asm volatile("" ::: "memory");
 }
 
+/* Callback for RX events from the Sub-GHz worker. Records the current ticks as
+ * the time of the last reception. */
+static void have_read_cb(void* context)
+{
+	furi_assert(context);
+	ESubGhzChatState* state = context;
+
+	state->last_time_rx_data = furi_get_tick();
+}
+
+/* Decrypts a message for post_rx(). */
+static bool post_rx_decrypt(ESubGhzChatState *state, size_t rx_size)
+{
+	if (rx_size < IV_BYTES + TAG_BYTES + 1) {
+		return false;
+	}
+
+	int ret = gcm_auth_decrypt(&(state->gcm_ctx),
+			state->rx_buffer, IV_BYTES,
+			NULL, 0,
+			state->rx_buffer + IV_BYTES,
+			(uint8_t *) state->rx_str_buffer,
+			rx_size - (IV_BYTES + TAG_BYTES),
+			state->rx_buffer + rx_size - TAG_BYTES,
+			TAG_BYTES);
+	state->rx_str_buffer[rx_size - (IV_BYTES + TAG_BYTES)] = 0;
+
+	return (ret == 0);
+}
+
 /* Post RX handler, decrypts received messages, displays them in the text box
  * and sends a notification. */
 static void post_rx(ESubGhzChatState *state, size_t rx_size)
@@ -115,29 +150,15 @@ static void post_rx(ESubGhzChatState *state, size_t rx_size)
 		memcpy(state->rx_str_buffer, state->rx_buffer, rx_size);
 		state->rx_str_buffer[rx_size] = 0;
 	} else {
-		if (rx_size < IV_BYTES + TAG_BYTES + 1) {
-			return;
-		}
-
-		int ret = gcm_auth_decrypt(&(state->gcm_ctx),
-				state->rx_buffer, IV_BYTES,
-				NULL, 0,
-				state->rx_buffer + IV_BYTES,
-				(uint8_t *) state->rx_str_buffer,
-				rx_size - (IV_BYTES + TAG_BYTES),
-				state->rx_buffer + rx_size - TAG_BYTES,
-				TAG_BYTES);
-		state->rx_str_buffer[rx_size - (IV_BYTES + TAG_BYTES)] = 0;
-
 		/* if decryption fails output an error message */
-		if (ret != 0) {
+		if (!post_rx_decrypt(state, rx_size)) {
 			strcpy(state->rx_str_buffer, "ERR: Decryption failed!");
 		}
 	}
 
 	/* append message to text box */
-	furi_string_cat_printf(state->chat_box_store, "\n%s",
-			state->rx_str_buffer);
+	furi_string_cat_printf(state->chat_box_store, "\n%s [%u]",
+			state->rx_str_buffer, rx_size);
 
 	/* send notification (make the flipper vibrate) */
 	notification_message(state->notification, &sequence_single_vibro);
@@ -178,7 +199,8 @@ static bool freq_input_validator(const char *text, FuriString *error,
 		return false;
 	}
 
-	if (!furi_hal_subghz_is_frequency_valid(state->frequency)) {
+	if (!subghz_devices_is_frequency_valid(state->subghz_device,
+				state->frequency)) {
 		furi_string_printf(error, "Frequency\n%lu\n is invalid!",
 				state->frequency);
 		return false;
@@ -199,7 +221,7 @@ static bool freq_input_validator(const char *text, FuriString *error,
 
 /* Sends PassEntered event to scene manager and displays whether or not
  * encryption has been enabled in the text box. Also clears the text input
- * buffer to remove the password. */
+ * buffer to remove the password and starts the Sub-GHz worker. */
 static void pass_input_cb(void *context)
 {
 	furi_assert(context);
@@ -211,6 +233,9 @@ static void pass_input_cb(void *context)
 	/* clear the text input buffer to remove the password */
 	esubghz_chat_explicit_bzero(state->text_input_store,
 			sizeof(state->text_input_store));
+
+	subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device,
+			state->frequency);
 
 	scene_manager_handle_custom_event(state->scene_manager,
 			ESubGhzChatEvent_PassEntered);
@@ -229,6 +254,11 @@ static bool pass_input_validator(const char *text, FuriString *error,
 	ESubGhzChatState* state = context;
 
 #ifdef FW_ORIGIN_Official
+	if (strlen(text) == 0) {
+		furi_string_printf(error, "Enter a\npassword!");
+		return false;
+	}
+
 	if (strcmp(text, " ") == 0) {
 #else /* FW_ORIGIN_Official */
 	if (strlen(text) == 0) {
@@ -238,8 +268,6 @@ static bool pass_input_validator(const char *text, FuriString *error,
 	}
 
 	unsigned char key[KEY_BITS / 8];
-
-	state->encrypted = true;
 
 	/* derive a key from the password */
 	sha256((unsigned char *) text, strlen(text), key);
@@ -263,6 +291,8 @@ static bool pass_input_validator(const char *text, FuriString *error,
 		furi_string_printf(error, "Failed to\nset key!");
 		return false;
 	}
+
+	state->encrypted = true;
 
 	return true;
 }
@@ -332,12 +362,9 @@ static void chat_input_cb(void *context)
 				state->tx_buffer[i]);
 	}
 
-	// TODO: remove this
-	state->last_time_rx_data = furi_get_tick();
-	furi_stream_buffer_send(state->rx_collection_buffer,
-			state->tx_buffer, tx_size, 0);
-
-	// TODO: actually transmit
+	/* transmit */
+	subghz_tx_rx_worker_write(state->subghz_worker, state->tx_buffer,
+			tx_size);
 
 	/* switch to text box view */
 	scene_manager_handle_custom_event(state->scene_manager,
@@ -718,7 +745,7 @@ static bool esubghz_chat_navigation_event_callback(void* context)
 
 /* Tick event callback for view dispatcher. Called every TICK_INTERVAL. Resets
  * the locked message if necessary. Retrieves a received message from the
- * rx_collection_buffer and calls post_rx(). Then calls the scene manager. */
+ * Sub-GHz worker and calls post_rx(). Then calls the scene manager. */
 static void esubghz_chat_tick_event_callback(void* context)
 {
 	FURI_LOG_T(APPLICATION_NAME, "esubghz_chat_tick_event_callback");
@@ -734,20 +761,19 @@ static void esubghz_chat_tick_event_callback(void* context)
 	/* if the maximum message size was reached or the
 	 * MESSAGE_COMPLETION_TIMEOUT has expired, retrieve a message and call
 	 * post_rx() */
-	size_t avail = furi_stream_buffer_bytes_available(
-			state->rx_collection_buffer);
-	if (avail > 0) {
-		uint32_t since_last_rx = furi_get_tick() -
+	size_t avail = 0;
+	while ((avail = subghz_tx_rx_worker_available(state->subghz_worker)) >
+			0) {
+		volatile uint32_t since_last_rx = furi_get_tick() -
 			state->last_time_rx_data;
-		if (avail == RX_TX_BUFFER_SIZE || since_last_rx >
+		if (avail < RX_TX_BUFFER_SIZE && since_last_rx <
 				MESSAGE_COMPLETION_TIMEOUT) {
-			size_t rx_size = furi_stream_buffer_receive(
-					state->rx_collection_buffer,
-					state->rx_buffer,
-					avail, 0);
-			post_rx(state, rx_size);
-			furi_stream_buffer_reset(state->rx_collection_buffer);
+			break;
 		}
+
+		size_t rx_size = subghz_tx_rx_worker_read(state->subghz_worker,
+				state->rx_buffer, RX_TX_BUFFER_SIZE);
+		post_rx(state, rx_size);
 	}
 
 	/* call scene manager */
@@ -947,12 +973,21 @@ int32_t esubghz_chat(void)
 		goto err_alloc_cb;
 	}
 
-	state->rx_collection_buffer = furi_stream_buffer_alloc(
-			RX_TX_BUFFER_SIZE,
-			RX_TX_BUFFER_SIZE);
-	if (state->rx_collection_buffer == NULL) {
-		goto err_alloc_rcb;
+	state->subghz_worker = subghz_tx_rx_worker_alloc();
+	if (state->subghz_worker == NULL) {
+		goto err_alloc_worker;
 	}
+
+	/* set the have_read callback of the Sub-GHz worker */
+	subghz_tx_rx_worker_set_callback_have_read(state->subghz_worker,
+			have_read_cb, state);
+
+	/* enter suppress charge mode */
+	furi_hal_power_suppress_charge_enter();
+
+	/* init internal device */
+	subghz_devices_init();
+	state->subghz_device = subghz_devices_get_by_name(SUBGHZ_DEVICE_CC1101_INT_NAME);
 
 	/* set chat name prefix */
 	// TODO: handle escape chars here somehow
@@ -1005,6 +1040,11 @@ int32_t esubghz_chat(void)
 	 * application */
 	view_dispatcher_run(state->view_dispatcher);
 
+	/* if it is running, stop the Sub-GHz worker */
+	if (subghz_tx_rx_worker_is_running(state->subghz_worker)) {
+		subghz_tx_rx_worker_stop(state->subghz_worker);
+	}
+
 	err = 0;
 
 	/* close GUI record */
@@ -1024,11 +1064,17 @@ int32_t esubghz_chat(void)
 			sizeof(state->text_input_store));
 	esubghz_chat_explicit_bzero(&(state->gcm_ctx), sizeof(state->gcm_ctx));
 
-	/* free everything we allocated*/
+	/* deinit devices */
+	subghz_devices_deinit();
 
-	furi_stream_buffer_free(state->rx_collection_buffer);
+	/* exit suppress charge mode */
+	furi_hal_power_suppress_charge_exit();
 
-err_alloc_rcb:
+	/* free everything we allocated */
+
+	subghz_tx_rx_worker_free(state->subghz_worker);
+
+err_alloc_worker:
 	chat_box_free(state);
 
 err_alloc_cb:
