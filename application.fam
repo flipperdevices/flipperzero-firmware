@@ -1,6 +1,7 @@
 App(
-    appid="scope",
-    name="Scope",
+    appid="flipperscope",
+    name="flipperscope",
+    fap_author="anfractuosity",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="scope_main",
     requires=["gui"],
