@@ -41,5 +41,9 @@ Then run the command:
  ```
 The application will be compiled and copied onto your device. 
 
+## Special Thanks
+- [Roguemaster](https://github.com/RogueMaster) from [Roguemaster Firmware](https://github.com/RogueMaster/flipperzero-firmware-wPlugins) for code contributions<br>
+
+
 ## Licensing
 This code is open-source and may be used for whatever you want to do with it. 
