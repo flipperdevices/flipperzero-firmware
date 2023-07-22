@@ -33,7 +33,7 @@
     ((__ADC_DATA__) * (__VREFANALOG_VOLTAGE__) / DIGITAL_SCALE_12BITS)
 #define VDDA_APPLI ((uint32_t)2500)
 #define TIMER_FREQUENCY_RANGE_MIN (1UL)
-#define TIMER_PRESCALER_MAX_VALUE (0xFFFFFFFF - 1UL)
+#define TIMER_PRESCALER_MAX_VALUE (0xFFFF - 1UL)
 #define ADC_DELAY_CALIB_ENABLE_CPU_CYCLES (LL_ADC_DELAY_CALIB_ENABLE_ADC_CYCLES * 32)
 
 // ramVector found from - https://community.nxp.com/t5/i-MX-Processors/Relocate-vector-table-to-ITCM/m-p/1302304
@@ -195,14 +195,21 @@ static void MX_ADC1_Init(void) {
     LL_ADC_EnableIT_OVR(ADC1);
 }
 
+double abs_error(double num1, double num2){
+    return fabs((num1 - num2) / num1);
+}
+
 static void MX_TIM2_Init(int freq) {
+
     uint32_t timer_clock_frequency = 0; /* Timer clock frequency */
     uint32_t timer_prescaler =
         0; /* Time base prescaler to have timebase aligned on minimum frequency possible */
     uint32_t timer_reload =
         0; /* Timer reload value in function of timer prescaler to achieve time base period */
+
     LL_TIM_InitTypeDef TIM_InitStruct = {0};
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+
     if(LL_RCC_GetAPB1Prescaler() == LL_RCC_APB1_DIV_1) {
         timer_clock_frequency =
             __LL_RCC_CALC_PCLK1_FREQ(SystemCoreClock, LL_RCC_GetAPB1Prescaler());
@@ -210,13 +217,27 @@ static void MX_TIM2_Init(int freq) {
         timer_clock_frequency =
             (__LL_RCC_CALC_PCLK1_FREQ(SystemCoreClock, LL_RCC_GetAPB1Prescaler()) * 2);
     }
+    
+    //(PSC+1) * (ARR+1)
+    double calc = timer_clock_frequency / (1 / (1/(double)freq));
+    double PSC;
+    double ARR;
+    double minerr = 10000;
+    for(int i=1;i<65536;i++){
+        PSC = i - 1;
+        ARR = calc / (PSC+1);
+        double error = abs_error((int)(ARR), ARR);
+        if(error < (double)0.001 && error < minerr && ARR - 1 > 0){
+            timer_prescaler = PSC;
+            timer_reload = ARR - 1;
+            minerr = error;
+            break;
+        }
+    }
 
-    timer_prescaler =
-        ((timer_clock_frequency / (TIMER_PRESCALER_MAX_VALUE * TIMER_FREQUENCY_RANGE_MIN)) + 1);
-    timer_reload = (timer_clock_frequency / (timer_prescaler * freq));
-    TIM_InitStruct.Prescaler = (timer_prescaler - 1);
+    TIM_InitStruct.Prescaler = timer_prescaler;
     TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-    TIM_InitStruct.Autoreload = (timer_reload - 1);
+    TIM_InitStruct.Autoreload = timer_reload;
     TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
     LL_TIM_Init(TIM2, &TIM_InitStruct);
     LL_TIM_SetTriggerInput(TIM2, LL_TIM_TS_ITR0);
@@ -323,7 +344,6 @@ void Activate_ADC(void) {
 // Used to draw to display
 static void app_draw_callback(Canvas* canvas, void* ctx) {
     UNUSED(ctx);
-
     static int16_t index[ADC_CONVERTED_DATA_BUFFER_SIZE];
     static float data[ADC_CONVERTED_DATA_BUFFER_SIZE];
     static float crossings[ADC_CONVERTED_DATA_BUFFER_SIZE];
