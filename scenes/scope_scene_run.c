@@ -195,12 +195,11 @@ static void MX_ADC1_Init(void) {
     LL_ADC_EnableIT_OVR(ADC1);
 }
 
-double abs_error(double num1, double num2){
+double abs_error(double num1, double num2) {
     return fabs((num1 - num2) / num1);
 }
 
 static void MX_TIM2_Init(int freq) {
-
     uint32_t timer_clock_frequency = 0; /* Timer clock frequency */
     uint32_t timer_prescaler =
         0; /* Time base prescaler to have timebase aligned on minimum frequency possible */
@@ -217,17 +216,17 @@ static void MX_TIM2_Init(int freq) {
         timer_clock_frequency =
             (__LL_RCC_CALC_PCLK1_FREQ(SystemCoreClock, LL_RCC_GetAPB1Prescaler()) * 2);
     }
-    
+
     //(PSC+1) * (ARR+1)
-    double calc = timer_clock_frequency / (1 / (1/(double)freq));
+    double calc = timer_clock_frequency / (1 / (1 / (double)freq));
     double PSC;
     double ARR;
     double minerr = 10000;
-    for(int i=1;i<65536;i++){
+    for(int i = 1; i < 65536; i++) {
         PSC = i - 1;
-        ARR = calc / (PSC+1);
+        ARR = calc / (PSC + 1);
         double error = abs_error((int)(ARR), ARR);
-        if(error < (double)0.001 && error < minerr && ARR - 1 > 0){
+        if(error < (double)0.001 && error < minerr && ARR - 1 > 0) {
             timer_prescaler = PSC;
             timer_reload = ARR - 1;
             minerr = error;
