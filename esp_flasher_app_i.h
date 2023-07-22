@@ -54,6 +54,9 @@ struct EspFlasherApp {
 
     EspFlasherUart* uart;
 
+    bool reset;
+    bool boot;
+
     bool selected_flash_options[NUM_FLASH_OPTIONS];
     int num_selected_flash_options;
     char bin_file_path_boot[100];
