@@ -433,9 +433,19 @@ bool seader_credential_save(SeaderCredential* cred, const char* name) {
                 furi_string_printf(temp_str, "Block %d", i);
                 switch(i) {
                 case CSN_INDEX:
-                    if(!flipper_format_write_hex(
-                           file, furi_string_get_cstr(temp_str), csn, sizeof(csn))) {
-                        block_saved = false;
+                    if(withSIO) {
+                        if(!flipper_format_write_hex(
+                               file,
+                               furi_string_get_cstr(temp_str),
+                               cred->diversifier,
+                               PICOPASS_BLOCK_LEN)) {
+                            block_saved = false;
+                        }
+                    } else {
+                        if(!flipper_format_write_hex(
+                               file, furi_string_get_cstr(temp_str), csn, sizeof(csn))) {
+                            block_saved = false;
+                        }
                     }
                     break;
                 case EPURSE_INDEX:
