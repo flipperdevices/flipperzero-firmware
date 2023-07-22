@@ -8,6 +8,8 @@ The plugin has been tested on the official firmware (version 0.87.0) and on
 Unleashed (version unlshd-057). Due to limitations of the official firmware,
 the behavior is slightly different there.
 
+Currently the use of an external antenna is not supported.
+
 ## Warning
 
 This plugin is in the early stages of development. It will inevitably have
