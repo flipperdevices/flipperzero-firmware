@@ -18,8 +18,7 @@
 #include "includes/game_state.h"
 
 #define TAG "Jetpack Joyride"
-#define SAVING_DIRECTORY "/ext/apps/Games"
-#define SAVING_FILENAME SAVING_DIRECTORY "/jetpack.save"
+#define SAVING_FILENAME APP_DATA_PATH("jetpack.save")
 static GameState* global_state;
 
 typedef enum {
@@ -41,6 +40,7 @@ static SaveGame save_game;
 
 static bool storage_game_state_load() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
+    storage_common_migrate(storage, EXT_PATH("apps/Games/jetpack.save"), SAVING_FILENAME);
     File* file = storage_file_alloc(storage);
 
     uint16_t bytes_readed = 0;
@@ -54,12 +54,6 @@ static bool storage_game_state_load() {
 
 static void storage_game_state_save() {
     Storage* storage = furi_record_open(RECORD_STORAGE);
-
-    if(storage_common_stat(storage, SAVING_DIRECTORY, NULL) == FSE_NOT_EXIST) {
-        if(!storage_simply_mkdir(storage, SAVING_DIRECTORY)) {
-            return;
-        }
-    }
 
     File* file = storage_file_alloc(storage);
     if(storage_file_open(file, SAVING_FILENAME, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
