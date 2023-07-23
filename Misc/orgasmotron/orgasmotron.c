@@ -30,38 +30,37 @@ void vibro_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_icon(canvas, 38, 24, &I_center_7x7);
     furi_mutex_release(plugin_state->mutex);
 
-    if(plugin_state->mode == 0){
+    if(plugin_state->mode == 0) {
         canvas_draw_box(canvas, 36, 23, 15, 18);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 38, 39, "Off");
         canvas_draw_icon(canvas, 38, 24, &I_center_7x7);
         canvas_invert_color(canvas);
-    } else if(plugin_state->mode == 1){
+    } else if(plugin_state->mode == 1) {
         canvas_draw_box(canvas, 55, 36, 36, 10);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 61, 44, "Strong");
         canvas_draw_icon(canvas, 56, 37, &I_left_4x7);
         canvas_invert_color(canvas);
-    } else if(plugin_state->mode == 2){
+    } else if(plugin_state->mode == 2) {
         canvas_draw_box(canvas, 74, 20, 30, 16);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 76, 33, "Pulsed");
         canvas_draw_icon(canvas, 85, 21, &I_up_7x4);
         canvas_invert_color(canvas);
-    } else if(plugin_state->mode == 3){
+    } else if(plugin_state->mode == 3) {
         canvas_draw_box(canvas, 95, 36, 28, 10);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 97, 44, "Soft");
         canvas_draw_icon(canvas, 117, 37, &I_right_4x7);
         canvas_invert_color(canvas);
-    } else if(plugin_state->mode == 4){
+    } else if(plugin_state->mode == 4) {
         canvas_draw_box(canvas, 74, 47, 32, 16);
         canvas_invert_color(canvas);
         canvas_draw_str(canvas, 76, 56, "Combo");
         canvas_draw_icon(canvas, 85, 57, &I_down_7x4);
         canvas_invert_color(canvas);
     }
-
 }
 
 void vibro_input_callback(InputEvent* input_event, void* ctx) {
