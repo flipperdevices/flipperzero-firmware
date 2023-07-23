@@ -12,6 +12,8 @@ DELAY 1000
 ENTER
 DELAY 1000
 STRING curl -o ~/Downloads/qFlipper.dmg -L https://update.flipperzero.one/qFlipper/release/macos-amd64/dmg
+DELAY 500
+ENTER
 DELAY 6000
 STRING cd ~/Downloads
 DELAY 500
