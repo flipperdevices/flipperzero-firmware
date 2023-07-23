@@ -2,16 +2,11 @@
 
 `JETPACKS, ROCKETS, AND ADVENTURE AWAITS!`
 
-![JETRIDE](DOCS/screenshots/gameplay.png)
+![JETRIDE](docs/screenshots/gameplay.png)
 
 ## Jetpack Joyride Game Remake for Flipper Zero
 - Recreated based on the classic Jetpack Joyride game for Flipper Zero.
 - Get ready for a thrilling ride filled with obstacles, coins, and of course, jetpacks!
-
-### Installation
-
-- Download the [latest release fap file](https://github.com/timstrasser/flipper-jetpack-joyride/releases/latest).
-- Copy the fap file to the apps folder of your Flipper SD card.
 
 ### Usage
 
