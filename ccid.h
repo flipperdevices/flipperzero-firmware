@@ -82,10 +82,10 @@ struct CCID_Message {
     size_t consumed;
 };
 
-void check_for_sam(SeaderUartBridge* seader_uart);
-void PC_to_RDR_IccPowerOn(SeaderUartBridge* seader_uart);
-void PC_to_RDR_GetSlotStatus(SeaderUartBridge* seader_uart);
-void PC_to_RDR_SetParameters(SeaderUartBridge* seader_uart);
-void PC_to_RDR_GetParameters(SeaderUartBridge* seader_uart);
-void PC_to_RDR_XfrBlock(SeaderUartBridge* seader_uart, uint8_t* data, size_t len);
-size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len);
+void seader_ccid_check_for_sam(SeaderUartBridge* seader_uart);
+void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart);
+void seader_ccid_GetSlotStatus(SeaderUartBridge* seader_uart);
+void seader_ccid_SetParameters(SeaderUartBridge* seader_uart);
+void seader_ccid_GetParameters(SeaderUartBridge* seader_uart);
+void seader_ccid_XfrBlock(SeaderUartBridge* seader_uart, uint8_t* data, size_t len);
+size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len);
