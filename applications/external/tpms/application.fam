@@ -1,0 +1,18 @@
+App(
+    appid="tpms",
+    name="TPMS",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="tpms_app",
+    requires=["gui"],
+    stack_size=4 * 1024,
+    order=50,
+    fap_icon="tpms_10px.png",
+    fap_category="Sub-GHz",
+    fap_icon_assets="images",
+    fap_icon_assets_symbol="tpms",
+    fap_author="wosk",
+    fap_weburl="https://github.com/wosk/flipperzero-tpms",
+    fap_version=(0, 1),
+    fap_description="Tire Pressure Monintoring System application for Flipper Zero. Read TPMS sensors. Relearn by 125kHz signal",
+)
