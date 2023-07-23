@@ -8,8 +8,7 @@
 static const int gps_baudrates[5] = {9600, 19200, 38400, 57600, 115200};
 static int current_gps_baudrate = 0;
 
-typedef struct
-{
+typedef struct {
     bool valid;
     float latitude;
     float longitude;
@@ -24,14 +23,13 @@ typedef struct
     int time_seconds;
 } GpsStatus;
 
-typedef struct
-{
-    FuriMutex *mutex;
-    FuriThread *thread;
-    FuriStreamBuffer *rx_stream;
+typedef struct {
+    FuriMutex* mutex;
+    FuriThread* thread;
+    FuriStreamBuffer* rx_stream;
     uint8_t rx_buf[RX_BUF_SIZE];
 
-    NotificationApp *notifications;
+    NotificationApp* notifications;
     uint32_t baudrate;
     bool changing_baudrate;
     bool backlight_on;
@@ -40,9 +38,9 @@ typedef struct
     GpsStatus status;
 } GpsUart;
 
-void gps_uart_init_thread(GpsUart *gps_uart);
-void gps_uart_deinit_thread(GpsUart *gps_uart);
+void gps_uart_init_thread(GpsUart* gps_uart);
+void gps_uart_deinit_thread(GpsUart* gps_uart);
 
-GpsUart *gps_uart_enable();
+GpsUart* gps_uart_enable();
 
-void gps_uart_disable(GpsUart *gps_uart);
+void gps_uart_disable(GpsUart* gps_uart);
