@@ -20,7 +20,7 @@ Sources of "integrated/bundled" apps are added now in this repo too, to allow pu
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `18 Jul 02:22 GMT +3`
+### Apps checked & updated at `24 Jul 01:07 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -129,6 +129,8 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [CLI-GUI Bridge (By ranchordo)](https://github.com/ranchordo/flipperzero-cli-bridge) -> (Fixed by @Willy-JL)
 - [Seader (By bettse)](https://github.com/bettse/seader/tree/main) - `Interface with a SAM from the Flipper Zero over UART`
 - [RFID Beacon (By nmrr)](https://github.com/nmrr/flipperzero-rfidbeacon) - `A letter/number Morse beacon on 125 kHz`
+- [Enhanced Sub-GHz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
+- [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms/tree/main)
 
 --- 
 
