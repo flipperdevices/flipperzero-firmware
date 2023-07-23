@@ -47,7 +47,7 @@ size_t seader_uart_process_buffer(Seader* seader, uint8_t* cmd, size_t cmd_len) 
 
     size_t consumed = 0;
     do {
-        consumed = processCCID(seader_worker, cmd, cmd_len);
+        consumed = seader_ccid_process(seader_worker, cmd, cmd_len);
 
         if(consumed > 0) {
             memset(cmd, 0, consumed);

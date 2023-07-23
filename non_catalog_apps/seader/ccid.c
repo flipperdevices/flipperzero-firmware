@@ -18,7 +18,7 @@ uint8_t getSequence() {
     return sequence++;
 }
 
-size_t addLRC(uint8_t* data, size_t len) {
+size_t seader_ccid_add_lrc(uint8_t* data, size_t len) {
     uint8_t lrc = 0;
     for(size_t i = 0; i < len; i++) {
         lrc ^= data[i];
@@ -27,7 +27,7 @@ size_t addLRC(uint8_t* data, size_t len) {
     return len + 1;
 }
 
-void PC_to_RDR_IccPowerOn(SeaderUartBridge* seader_uart) {
+void seader_ccid_IccPowerOn(SeaderUartBridge* seader_uart) {
     if(powered) {
         return;
     }
@@ -42,18 +42,18 @@ void PC_to_RDR_IccPowerOn(SeaderUartBridge* seader_uart) {
     seader_uart->tx_buf[2 + 6] = getSequence();
     seader_uart->tx_buf[2 + 7] = 2; //power
 
-    seader_uart->tx_len = addLRC(seader_uart->tx_buf, 2 + 10);
+    seader_uart->tx_len = seader_ccid_add_lrc(seader_uart->tx_buf, 2 + 10);
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
 }
 
-void check_for_sam(SeaderUartBridge* seader_uart) {
+void seader_ccid_check_for_sam(SeaderUartBridge* seader_uart) {
     hasSAM = false; // If someone is calling this, reset sam state
     powered = false;
-    PC_to_RDR_GetSlotStatus(seader_uart);
+    seader_ccid_GetSlotStatus(seader_uart);
 }
 
-void PC_to_RDR_GetSlotStatus(SeaderUartBridge* seader_uart) {
-    FURI_LOG_D(TAG, "PC_to_RDR_GetSlotStatus");
+void seader_ccid_GetSlotStatus(SeaderUartBridge* seader_uart) {
+    FURI_LOG_D(TAG, "seader_ccid_GetSlotStatus");
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
@@ -61,11 +61,11 @@ void PC_to_RDR_GetSlotStatus(SeaderUartBridge* seader_uart) {
     seader_uart->tx_buf[2 + 5] = slot;
     seader_uart->tx_buf[2 + 6] = getSequence();
 
-    seader_uart->tx_len = addLRC(seader_uart->tx_buf, 2 + 10);
+    seader_uart->tx_len = seader_ccid_add_lrc(seader_uart->tx_buf, 2 + 10);
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
 }
 
-void PC_to_RDR_SetParameters(SeaderUartBridge* seader_uart) {
+void seader_ccid_SetParameters(SeaderUartBridge* seader_uart) {
     uint8_t T1 = 1;
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
@@ -78,12 +78,12 @@ void PC_to_RDR_SetParameters(SeaderUartBridge* seader_uart) {
     seader_uart->tx_buf[2 + 8] = 0;
     seader_uart->tx_buf[2 + 9] = 0;
 
-    seader_uart->tx_len = addLRC(seader_uart->tx_buf, 2 + 10);
+    seader_uart->tx_len = seader_ccid_add_lrc(seader_uart->tx_buf, 2 + 10);
 
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
 }
 
-void PC_to_RDR_GetParameters(SeaderUartBridge* seader_uart) {
+void seader_ccid_GetParameters(SeaderUartBridge* seader_uart) {
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
@@ -95,12 +95,12 @@ void PC_to_RDR_GetParameters(SeaderUartBridge* seader_uart) {
     seader_uart->tx_buf[2 + 8] = 0;
     seader_uart->tx_buf[2 + 9] = 0;
 
-    seader_uart->tx_len = addLRC(seader_uart->tx_buf, 2 + 10);
+    seader_uart->tx_len = seader_ccid_add_lrc(seader_uart->tx_buf, 2 + 10);
 
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
 }
 
-void PC_to_RDR_XfrBlock(SeaderUartBridge* seader_uart, uint8_t* data, size_t len) {
+void seader_ccid_XfrBlock(SeaderUartBridge* seader_uart, uint8_t* data, size_t len) {
     memset(seader_uart->tx_buf, 0, SEADER_UART_RX_BUF_SIZE);
     seader_uart->tx_buf[0] = SYNC;
     seader_uart->tx_buf[1] = CTRL;
@@ -113,13 +113,13 @@ void PC_to_RDR_XfrBlock(SeaderUartBridge* seader_uart, uint8_t* data, size_t len
     seader_uart->tx_buf[2 + 9] = 0;
 
     memcpy(seader_uart->tx_buf + 2 + 10, data, len);
-    seader_uart->tx_len = addLRC(seader_uart->tx_buf, 2 + 10 + len);
-    // FURI_LOG_I(TAG, "PC_to_RDR_XfrBlock %d bytes", seader_uart->tx_len);
+    seader_uart->tx_len = seader_ccid_add_lrc(seader_uart->tx_buf, 2 + 10 + len);
+    // FURI_LOG_I(TAG, "seader_ccid_XfrBlock %d bytes", seader_uart->tx_len);
 
     furi_thread_flags_set(furi_thread_get_id(seader_uart->tx_thread), WorkerEvtSamRx);
 }
 
-size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
+size_t seader_ccid_process(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
     SeaderUartBridge* seader_uart = seader_worker->uart;
     CCID_Message message;
     message.consumed = 0;
@@ -144,14 +144,14 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
                 retries = 0;
                 slot = 0;
                 sequence = 0;
-                PC_to_RDR_IccPowerOn(seader_uart);
+                seader_ccid_IccPowerOn(seader_uart);
                 break;
             case CARD_IN_2:
                 FURI_LOG_D(TAG, "Card Inserted (2)");
                 retries = 0;
                 slot = 1;
                 sequence = 0;
-                PC_to_RDR_IccPowerOn(seader_uart);
+                seader_ccid_IccPowerOn(seader_uart);
                 break;
             case CARD_IN_BOTH:
                 FURI_LOG_W(TAG, "Loading 2 cards not supported");
@@ -194,13 +194,13 @@ size_t processCCID(SeaderWorker* seader_worker, uint8_t* cmd, size_t cmd_len) {
         if(message.bMessageType == CCID_MESSAGE_TYPE_RDR_to_PC_SlotStatus) {
             uint8_t status = (message.bStatus & BMICCSTATUS_MASK);
             if(status == 0 || status == 1) {
-                PC_to_RDR_IccPowerOn(seader_uart);
+                seader_ccid_IccPowerOn(seader_uart);
                 return message.consumed;
             } else if(status == 2) {
                 FURI_LOG_W(TAG, "No ICC is present [retries %d]", retries);
                 if(retries-- > 1 && hasSAM == false) {
                     furi_delay_ms(100);
-                    PC_to_RDR_GetSlotStatus(seader_uart);
+                    seader_ccid_GetSlotStatus(seader_uart);
                 } else {
                     if(seader_worker->callback) {
                         seader_worker->callback(

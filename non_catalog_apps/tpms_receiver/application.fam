@@ -1,0 +1,13 @@
+App(
+    appid="tpms",
+    name="TPMS Reader",
+    apptype=FlipperAppType.EXTERNAL,
+    targets=["f7"],
+    entry_point="tpms_app",
+    requires=["gui"],
+    stack_size=4 * 1024,
+    order=50,
+    fap_icon="tpms_10px.png",
+    fap_category="Sub-GHz",
+    fap_icon_assets="images",
+)
