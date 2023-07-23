@@ -26,6 +26,10 @@ ENTER
 DELAY 7000
 GUI TAB
 DELAY 1000
+STRING rm /tmp/qFlipper.dmg
+DELAY 500
+ENTER
+DELAY 1000
 STRING cd /Volumes/qFlipper
 DELAY 500
 ENTER
@@ -36,6 +40,10 @@ STRING mv qFlipper.app /Applications
 DELAY 500
 ENTER
 DELAY 1000
+STRING diskutil eject /Volumes/qFlipper
+DELAY 500
+ENTER
+DELAY 2000
 STRING cd /Applications
 DELAY 200
 ENTER
