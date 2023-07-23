@@ -596,7 +596,8 @@ static void subghz_cli_command_print_usage() {
         "\tchat <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>\t - Chat with other Flippers\r\n");
     printf(
         "\ttx <3 byte Key: in hex> <frequency: in Hz> <te: us> <repeat: count> <device: 0 - CC1101_INT, 1 - CC1101_EXT>\t - Transmitting key\r\n");
-    printf("\trx <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>\t - Receive\r\n");
+    printf(
+        "\trx <frequency:in Hz> <device: 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT>\t - Receive\r\n");
     printf("\trx_raw <frequency:in Hz>\t - Receive RAW\r\n");
     printf("\tdecode_raw <file_name: path_RAW_file>\t - Testing\r\n");
 
@@ -991,15 +992,182 @@ static bool subghz_on_system_start_istream_decode_band(
     return true;
 }
 
+static void subghz_cli_command_si4463_print_usage() {
+    printf("Usage:\r\n");
+    printf("subghz_si4463 <cmd> <args>\r\n");
+    printf("Cmd list:\r\n");
+
+    printf(
+        "\tset - Set registers si4463 <2 Byte Prop: in hex> <1 Byte Data: in hex> [<1 Byte Data: in hex>] before 12 bytes\r\n");
+    printf(
+        "\tget - Get registers si4463 <2 Byte Prop: in hex> <1 Byte Size: in hex>\r\n");
+}
+
+#include <applications/drivers/subghz/si4463_ext/si4463_ext.h>
+#include <applications/drivers/subghz/si4463_ext/driver/si446x_regs.h>
+
+void subghz_cli_command_si4463_get(Cli* cli, FuriString* args, void* context) {
+    UNUSED(context);
+    UNUSED(cli);
+    UNUSED(args);
+
+    uint16_t prop = 0;
+    uint32_t size = 0;
+
+    if(furi_string_size(args)) {
+        int ret = sscanf(furi_string_get_cstr(args), "%hx %lx", &prop, &size);
+        if(ret != 2 || size > 16) {
+            printf("You must specify the prop address and from 1 to 16 bytes of size\r\n ");
+
+            cli_print_usage(
+                "subghz_si4463 get",
+                "<2 Byte Prop: in hex> <1 Byte Size: in hex>",
+                furi_string_get_cstr(args));
+            return;
+        }
+    }
+
+    uint32_t device_ind = 2; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
+    const SubGhzDevice* device = subghz_cli_command_get_device(&device_ind);
+
+    UNUSED(device);
+    if(device_ind != 2) {
+        printf("No connect Si4463\r\n");
+        return;
+    }
+
+    SubGhzDeviceIOCTL_SI4463GetPropertiesData get_properties_data = {.prop = prop, .size = size};
+
+    if(subghz_devices_io_control(
+           device, SubGhzDeviceIOCTL_SI4463GetProperties, &get_properties_data)) {
+        printf("SET SI446X_PROP 0x%X \033[0;32mOK\033[0m\r\n", prop);
+        printf("DATA: ");
+        for(size_t i = 0; i < get_properties_data.size; i++) {
+            printf("0x%02X ", get_properties_data.data[i]);
+        }
+        printf("\r\n");
+
+    } else {
+        printf("GET SI446X_PROP 0x%X \033[0;31mERR\033[0m\r\n", prop);
+    }
+}
+
+void subghz_cli_command_si4463_set(Cli* cli, FuriString* args, void* context) {
+    UNUSED(context);
+    UNUSED(cli);
+
+    uint32_t prop = 0;
+    uint8_t size = 0;
+    uint16_t data[12] = {0};
+    uint32_t device_ind = 2; // 0 - CC1101_INT, 1 - CC1101_EXT, 2 - SI4463_EXT
+
+    if(furi_string_size(args)) {
+        int ret = sscanf(
+            furi_string_get_cstr(args),
+            "%lx %hx %hx %hx %hx %hx %hx %hx %hx %hx %hx %hx %hx",
+            &prop,
+            &data[0],
+            &data[1],
+            &data[2],
+            &data[3],
+            &data[4],
+            &data[5],
+            &data[6],
+            &data[7],
+            &data[8],
+            &data[9],
+            &data[10],
+            &data[11]);
+        if(ret < 2) {
+            printf("You must specify the prop address and from 1 to 12 bytes of data\r\n ");
+
+            cli_print_usage(
+                "subghz_si4463 set",
+                "<2 Byte Prop: in hex> <1 Byte Data: in hex> [<1 Byte Data: in hex>] before 12 bytes",
+                furi_string_get_cstr(args));
+            return;
+        } else {
+            size = ret - 1;
+        }
+    }
+
+    const SubGhzDevice* device = subghz_cli_command_get_device(&device_ind);
+
+    UNUSED(device);
+    if(device_ind != 2) {
+        printf("No connect Si4463\r\n");
+        return;
+    }
+
+    SubGhzDeviceIOCTL_SI4463SetPropertiesData set_properties_data = {
+        .prop = (uint16_t)prop,
+        .size = size,
+        .data = {
+            data[0],
+            data[1],
+            data[2],
+            data[3],
+            data[4],
+            data[5],
+            data[6],
+            data[7],
+            data[8],
+            data[9],
+            data[10],
+            data[11]}};
+
+    if(subghz_devices_io_control(
+           device, SubGhzDeviceIOCTL_SI4463SetProperties, &set_properties_data)) {
+        printf("SET SI446X_PROP 0x%X \033[0;32mOK\033[0m\r\n", (uint16_t)prop);
+        printf("DATA: ");
+        for(size_t i = 0; i < size; i++) {
+            printf("0x%02X ", data[i]);
+        }
+        printf("\r\n");
+    } else {
+        printf("SET SI446X_PROP 0x%X \033[0;31mERR\033[0m\r\n", (uint16_t)prop);
+    }
+}
+
+static void subghz_cli_command_si4463(Cli* cli, FuriString* args, void* context) {
+    FuriString* cmd;
+    cmd = furi_string_alloc();
+
+    do {
+        if(!args_read_string_and_trim(args, cmd)) {
+            subghz_cli_command_si4463_print_usage();
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "set") == 0) {
+            subghz_cli_command_si4463_set(cli, args, context);
+            break;
+        }
+
+        if(furi_string_cmp_str(cmd, "get") == 0) {
+            subghz_cli_command_si4463_get(cli, args, context);
+            break;
+        }
+
+        subghz_cli_command_si4463_print_usage();
+    } while(false);
+
+    furi_string_free(cmd);
+}
+
 void subghz_on_system_start() {
 #ifdef SRV_CLI
     Cli* cli = furi_record_open(RECORD_CLI);
 
     cli_add_command(cli, "subghz", CliCommandFlagDefault, subghz_cli_command, NULL);
 
+    cli_add_command(
+        cli, "subghz_si4463", CliCommandFlagParallelSafe, subghz_cli_command_si4463, NULL);
+
     furi_record_close(RECORD_CLI);
 #else
     UNUSED(subghz_cli_command);
+    UNUSED(subghz_cli_command_si4463);
 #endif
 
 #ifdef SRV_STORAGE

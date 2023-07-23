@@ -32,13 +32,11 @@ static void subghz_device_si4463_ext_interconnect_load_preset(
     uint8_t* preset_data) {
     switch(preset) {
     case FuriHalSubGhzPresetOok650Async:
-        subghz_device_si4463_ext_load_config(
-            subghz_device_si4463_preset_ook_650khz_async_regs);
+        subghz_device_si4463_ext_load_config(subghz_device_si4463_preset_ook_650khz_async_regs);
         subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
         break;
     case FuriHalSubGhzPresetOok270Async:
-        subghz_device_si4463_ext_load_config(
-            subghz_device_si4463_preset_ook_270khz_async_regs);
+        subghz_device_si4463_ext_load_config(subghz_device_si4463_preset_ook_270khz_async_regs);
         subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
         break;
     case FuriHalSubGhzPreset2FSKDev238Async:
@@ -51,24 +49,40 @@ static void subghz_device_si4463_ext_interconnect_load_preset(
             subghz_device_si4463_preset_2fsk_dev47_6khz_async_regs);
         subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_2FSK);
         break;
-    // case FuriHalSubGhzPresetMSK99_97KbAsync:
-    //     subghz_device_si4463_ext_load_custom_preset(
-    //         subghz_device_si4463_preset_msk_99_97kb_async_regs);
-    //     break;
-    // case FuriHalSubGhzPresetGFSK9_99KbAsync:
-    //     subghz_device_si4463_ext_load_custom_preset(
-    //         subghz_device_si4463_preset_gfsk_9_99kb_async_regs);
-    //     break;
+        // case FuriHalSubGhzPresetMSK99_97KbAsync:
+        //     subghz_device_si4463_ext_load_custom_preset(
+        //         subghz_device_si4463_preset_msk_99_97kb_async_regs);
+        //     break;
+        // case FuriHalSubGhzPresetGFSK9_99KbAsync:
+        //     subghz_device_si4463_ext_load_custom_preset(
+        //         subghz_device_si4463_preset_gfsk_9_99kb_async_regs);
+        //     break;
 
     default:
         //furi_crash("Si4463. need to implement subghz_device_si4463_ext_mod_gpio_for_async");
         //subghz_device_si4463_ext_load_config(preset_data);
         UNUSED(preset_data);
-         subghz_device_si4463_ext_load_config(
-            subghz_device_si4463_preset_ook_650khz_async_regs);
+        subghz_device_si4463_ext_load_config(subghz_device_si4463_preset_ook_650khz_async_regs);
         subghz_device_si4463_ext_mod_gpio_for_async(SI446X_MODEM_MOD_TYPE_MOD_TYPE_OOK);
     }
     subghz_device_si4463_set_pa(SI446X_SET_MAX_PA);
+}
+
+static bool subghz_device_si4463_ext_io_control(uint32_t io_control_code, void* in_out_data) {
+    switch(io_control_code) {
+    case SubGhzDeviceIOCTL_SI4463GetProperties:;
+        SubGhzDeviceIOCTL_SI4463GetPropertiesData* get_data = in_out_data;
+        furi_assert(get_data->size <= sizeof(get_data->data));
+        return subghz_device_si4463_get_properties(get_data->prop, get_data->data, get_data->size);
+        break;
+    case SubGhzDeviceIOCTL_SI4463SetProperties:;
+        SubGhzDeviceIOCTL_SI4463SetPropertiesData* set_data = in_out_data;
+        furi_assert(set_data->size <= sizeof(set_data->data));
+        return subghz_device_si4463_set_properties(set_data->prop, set_data->data, set_data->size);
+        break;
+    default:
+        return false;
+    }
 }
 
 const SubGhzDeviceInterconnect subghz_device_si4463_ext_interconnect = {
@@ -102,6 +116,8 @@ const SubGhzDeviceInterconnect subghz_device_si4463_ext_interconnect = {
     .is_rx_data_crc_valid = subghz_device_si4463_ext_is_rx_data_crc_valid,
     .read_packet = subghz_device_si4463_ext_read_packet,
     .write_packet = subghz_device_si4463_ext_write_packet,
+
+    .device_io_control = subghz_device_si4463_ext_io_control,
 };
 
 const SubGhzDevice subghz_device_si4463_ext = {

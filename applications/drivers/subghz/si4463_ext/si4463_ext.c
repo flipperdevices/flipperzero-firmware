@@ -222,9 +222,7 @@ bool subghz_device_si4463_ext_is_connect() {
         subghz_device_si4463_ext_sleep();
         subghz_device_si4463_ext_free();
     } else { // initialized
-        furi_hal_spi_acquire(subghz_device_si4463_ext->spi_bus_handle);
         uint8_t partnumber = si446x_get_partnumber(subghz_device_si4463_ext->spi_bus_handle);
-        furi_hal_spi_release(subghz_device_si4463_ext->spi_bus_handle);
         ret = (partnumber != 0) && (partnumber != 0xFF);
     }
 
@@ -370,6 +368,14 @@ float subghz_device_si4463_ext_get_rssi() {
 
 uint8_t subghz_device_si4463_ext_get_lqi() {
     return si446x_get_lqi(subghz_device_si4463_ext->spi_bus_handle);
+}
+
+bool subghz_device_si4463_get_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size) {
+    return si446x_get_properties(subghz_device_si4463_ext->spi_bus_handle, prop, data, size);
+}
+
+bool subghz_device_si4463_set_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size) {
+    return si446x_set_properties(subghz_device_si4463_ext->spi_bus_handle, prop, data, size);
 }
 
 bool subghz_device_si4463_ext_is_frequency_valid(uint32_t value) {

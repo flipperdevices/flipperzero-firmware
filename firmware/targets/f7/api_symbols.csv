@@ -1,5 +1,5 @@
 entry,status,name,type,params
-Version,+,34.4,,
+Version,+,34.5,,
 Header,+,applications/drivers/subghz/cc1101_ext/cc1101_ext_interconnect.h,,
 Header,+,applications/drivers/subghz/si4463_ext/si4463_ext_interconnect.h,,
 Header,+,applications/services/bt/bt_service/bt.h,,
@@ -2715,6 +2715,7 @@ Function,+,subghz_devices_get_name,const char*,const SubGhzDevice*
 Function,+,subghz_devices_get_rssi,float,const SubGhzDevice*
 Function,+,subghz_devices_idle,void,const SubGhzDevice*
 Function,+,subghz_devices_init,void,
+Function,+,subghz_devices_io_control,_Bool,"const SubGhzDevice*, uint32_t, void*"
 Function,+,subghz_devices_is_async_complete_tx,_Bool,const SubGhzDevice*
 Function,+,subghz_devices_is_connect,_Bool,const SubGhzDevice*
 Function,+,subghz_devices_is_frequency_valid,_Bool,"const SubGhzDevice*, uint32_t"
