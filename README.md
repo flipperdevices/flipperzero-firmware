@@ -6,6 +6,10 @@
 This Flipper application ("FAP") cracks Mifare Classic 1K/4K keys on your Flipper Zero. No companion app/desktop needed.
 
 ## How
+Official guide: https://docs.flipperzero.one/nfc/mfkey32
+
+These are the general steps:
+
 1. Use the Detect Reader function to save nonces on your Flipper from the reader
 2. Use the Mfkey32 app to crack the keys
 3. Scan the Mifare Classic card
@@ -13,7 +17,8 @@ This Flipper application ("FAP") cracks Mifare Classic 1K/4K keys on your Flippe
 All cracked nonces are automatically added to your user dictionary, allowing you to clone Mifare Classic 1K/4K cards upon re-scanning them.
 
 ## Builds
-OFW: Included in 0.83.0-rc and up https://github.com/flipperdevices/flipperzero-firmware/releases/tag/0.83.0-rc
+OFW: Included in 0.83.0-rc and up https://github.com/flipperdevices/flipperzero-firmware/releases/tag/0.83.0-rc (if your firmware is at least newer than the May release, you already have it under your NFC menu!)
+
 Currently being migrated to the App Hub and distributed by Flipper Devices (https://github.com/flipperdevices/flipperzero-good-faps/tree/dev/mfkey32)
 
 Published (options):
