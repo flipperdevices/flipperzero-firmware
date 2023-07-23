@@ -1,16 +1,16 @@
-# flipper-jetpack-joyride
+# flipper-jetpack-game
 
 `JETPACKS, ROCKETS, AND ADVENTURE AWAITS!`
 
 ![JETRIDE](docs/screenshots/gameplay.png)
 
-## Jetpack Joyride Game Remake for Flipper Zero
+## Game Remake of Jetpack Joyride for Flipper Zero
 - Recreated based on the classic Jetpack Joyride game for Flipper Zero.
 - Get ready for a thrilling ride filled with obstacles, coins, and of course, jetpacks!
 
 ### Usage
 
-- Start the "Jetpack Joyride" plugin and navigate Barry through the lab with your jetpack.
+- Start the "Jetpack Game" plugin and navigate Barry through the lab with your jetpack.
 
 ### Build
 
