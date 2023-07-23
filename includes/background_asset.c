@@ -1,4 +1,4 @@
-#include <jetpack_joyride_icons.h>
+#include <jetpack_game_icons.h>
 
 #include "background_assets.h"
 

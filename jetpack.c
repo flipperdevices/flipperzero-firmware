@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-#include <jetpack_joyride_icons.h>
+#include <jetpack_game_icons.h>
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/icon_animation.h>
@@ -17,7 +17,7 @@
 
 #include "includes/game_state.h"
 
-#define TAG "Jetpack Joyride"
+#define TAG "Jetpack Game"
 #define SAVING_FILENAME APP_DATA_PATH("jetpack.save")
 static GameState* global_state;
 
