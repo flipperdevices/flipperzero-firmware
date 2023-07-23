@@ -8,8 +8,7 @@ typedef struct SubGhzDeviceSi4463Ext SubGhzDeviceSi4463Ext;
 
 const FlipperAppPluginDescriptor* subghz_device_si4463_ext_ep();
 
-
-typedef enum{
+typedef enum {
     SubGhzDeviceIOCTL_SI4463GetProperties = 0x10000000,
     SubGhzDeviceIOCTL_SI4463SetProperties,
 } SubGhzDeviceIOCTL_SI4463;

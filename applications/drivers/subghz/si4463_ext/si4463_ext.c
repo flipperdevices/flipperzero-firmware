@@ -370,11 +370,11 @@ uint8_t subghz_device_si4463_ext_get_lqi() {
     return si446x_get_lqi(subghz_device_si4463_ext->spi_bus_handle);
 }
 
-bool subghz_device_si4463_get_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size) {
+bool subghz_device_si4463_ext_get_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size) {
     return si446x_get_properties(subghz_device_si4463_ext->spi_bus_handle, prop, data, size);
 }
 
-bool subghz_device_si4463_set_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size) {
+bool subghz_device_si4463_ext_set_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size) {
     return si446x_set_properties(subghz_device_si4463_ext->spi_bus_handle, prop, data, size);
 }
 

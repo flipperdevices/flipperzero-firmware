@@ -1040,7 +1040,7 @@ void subghz_cli_command_si4463_get(Cli* cli, FuriString* args, void* context) {
 
     if(subghz_devices_io_control(
            device, SubGhzDeviceIOCTL_SI4463GetProperties, &get_properties_data)) {
-        printf("SET SI446X_PROP 0x%X \033[0;32mOK\033[0m\r\n", prop);
+        printf("GET SI446X_PROP 0x%X \033[0;32mOK\033[0m\r\n", prop);
         printf("DATA: ");
         for(size_t i = 0; i < get_properties_data.size; i++) {
             printf("0x%02X ", get_properties_data.data[i]);

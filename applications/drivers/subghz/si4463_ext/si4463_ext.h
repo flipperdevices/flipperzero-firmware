@@ -151,8 +151,8 @@ float subghz_device_si4463_ext_get_rssi();
  */
 uint8_t subghz_device_si4463_ext_get_lqi();
 
-bool subghz_device_si4463_get_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size);
-bool subghz_device_si4463_set_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size);
+bool subghz_device_si4463_ext_get_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size);
+bool subghz_device_si4463_ext_set_properties(SI446X_Prop_t prop, uint8_t* data, uint8_t size);
 
 /** Check if frequency is in valid range
  *

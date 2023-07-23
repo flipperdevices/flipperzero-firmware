@@ -73,12 +73,14 @@ static bool subghz_device_si4463_ext_io_control(uint32_t io_control_code, void* 
     case SubGhzDeviceIOCTL_SI4463GetProperties:;
         SubGhzDeviceIOCTL_SI4463GetPropertiesData* get_data = in_out_data;
         furi_assert(get_data->size <= sizeof(get_data->data));
-        return subghz_device_si4463_get_properties(get_data->prop, get_data->data, get_data->size);
+        return subghz_device_si4463_ext_get_properties(
+            get_data->prop, get_data->data, get_data->size);
         break;
     case SubGhzDeviceIOCTL_SI4463SetProperties:;
         SubGhzDeviceIOCTL_SI4463SetPropertiesData* set_data = in_out_data;
         furi_assert(set_data->size <= sizeof(set_data->data));
-        return subghz_device_si4463_set_properties(set_data->prop, set_data->data, set_data->size);
+        return subghz_device_si4463_ext_set_properties(
+            set_data->prop, set_data->data, set_data->size);
         break;
     default:
         return false;
