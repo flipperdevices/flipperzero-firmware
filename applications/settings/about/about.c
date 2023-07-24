@@ -211,7 +211,7 @@ int32_t about_settings_app(void* p) {
                 screen_index--;
             }
         } else if(screen_result == DialogMessageButtonRight) {
-            if(screen_index < about_screens_count) {
+            if(screen_index < about_screens_count - 1) {
                 screen_index++;
             }
         } else if(screen_result == DialogMessageButtonBack) {
