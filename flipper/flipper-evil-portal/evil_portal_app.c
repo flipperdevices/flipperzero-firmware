@@ -32,10 +32,12 @@ Evil_PortalApp *evil_portal_app_alloc() {
   app->has_command_queue = false;  
   app->command_index = 0;
   app->portal_logs = furi_string_alloc();
+  
 
   app->gui = furi_record_open(RECORD_GUI);
 
   app->view_dispatcher = view_dispatcher_alloc();
+  
   app->scene_manager = scene_manager_alloc(&evil_portal_scene_handlers, app);
   view_dispatcher_enable_queue(app->view_dispatcher);
   view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
@@ -54,6 +56,10 @@ Evil_PortalApp *evil_portal_app_alloc() {
   view_dispatcher_add_view(app->view_dispatcher, Evil_PortalAppViewVarItemList,
                            variable_item_list_get_view(app->var_item_list));
 
+  app->text_input = text_input_alloc();
+  view_dispatcher_add_view(app->view_dispatcher, Evil_PortalAppViewTextInput, text_input_get_view(app->text_input));
+                    
+
   for (int i = 0; i < NUM_MENU_ITEMS; ++i) {
     app->selected_option_index[i] = 0;
   }
@@ -65,6 +71,7 @@ Evil_PortalApp *evil_portal_app_alloc() {
   app->text_box_store = furi_string_alloc();
   furi_string_reserve(app->text_box_store, EVIL_PORTAL_TEXT_BOX_STORE_SIZE);
 
+//scene_manager_next_scene(app->scene_manager, Evil_PortalSceneRename);
   scene_manager_next_scene(app->scene_manager, Evil_PortalSceneStart);
 
   return app;
@@ -92,7 +99,8 @@ void evil_portal_app_free(Evil_PortalApp *app) {
 
   text_box_free(app->text_box);
   furi_string_free(app->text_box_store);
-
+  text_input_free(app->text_input);
+  
   // View dispatcher
   view_dispatcher_free(app->view_dispatcher);
   scene_manager_free(app->scene_manager);

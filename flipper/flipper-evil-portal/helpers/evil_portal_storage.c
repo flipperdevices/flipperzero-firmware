@@ -77,6 +77,11 @@ void evil_portal_read_ap_name(void *context) {
   evil_portal_close_storage();
 }
 
+void evil_portal_write_ap_name(void *context) {
+  Evil_PortalApp *app = context;
+  UNUSED(app);
+}
+
 char *sequential_file_resolve_path(Storage *storage, const char *dir,
                                    const char *prefix, const char *extension) {
   if (storage == NULL || dir == NULL || prefix == NULL || extension == NULL) {
