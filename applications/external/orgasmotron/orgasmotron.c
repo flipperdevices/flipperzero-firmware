@@ -4,28 +4,66 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <notification/notification_messages.h>
+#include "orgasmotron_icons.h"
 
 typedef struct {
     int mode;
     FuriMutex* mutex;
 } PluginState;
 
-void vibro_test_draw_callback(Canvas* canvas, void* ctx) {
+void vibro_draw_callback(Canvas* canvas, void* ctx) {
     furi_assert(ctx);
     const PluginState* plugin_state = ctx;
     furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
     canvas_clear(canvas);
-    canvas_set_font(canvas, FontPrimary);
-    canvas_draw_str(canvas, 2, 10, "Vibro Modes");
+    canvas_draw_icon(canvas, 0, 0, &I_ui_128x64);
     canvas_set_font(canvas, FontSecondary);
-    canvas_draw_str(canvas, 2, 34, "UP: Pulsed");
-    canvas_draw_str(canvas, 2, 22, "LEFT: strong / RIGHT: Soft");
-    canvas_draw_str(canvas, 2, 46, "DOWN Pleasure combo");
-    canvas_draw_str(canvas, 2, 58, "OK: Pause");
+    canvas_draw_icon(canvas, 56, 37, &I_left_4x7);
+    canvas_draw_str(canvas, 61, 44, "Strong");
+    canvas_draw_str(canvas, 97, 44, "Soft");
+    canvas_draw_icon(canvas, 117, 37, &I_right_4x7);
+    canvas_draw_str(canvas, 76, 33, "Pulsed");
+    canvas_draw_icon(canvas, 85, 21, &I_up_7x4);
+    canvas_draw_str(canvas, 76, 56, "Combo");
+    canvas_draw_icon(canvas, 85, 57, &I_down_7x4);
+    canvas_draw_str(canvas, 38, 39, "Off");
+    canvas_draw_icon(canvas, 38, 24, &I_center_7x7);
     furi_mutex_release(plugin_state->mutex);
+
+    if(plugin_state->mode == 0) {
+        canvas_draw_box(canvas, 36, 23, 15, 18);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 38, 39, "Off");
+        canvas_draw_icon(canvas, 38, 24, &I_center_7x7);
+        canvas_invert_color(canvas);
+    } else if(plugin_state->mode == 1) {
+        canvas_draw_box(canvas, 55, 36, 36, 10);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 61, 44, "Strong");
+        canvas_draw_icon(canvas, 56, 37, &I_left_4x7);
+        canvas_invert_color(canvas);
+    } else if(plugin_state->mode == 2) {
+        canvas_draw_box(canvas, 74, 20, 30, 16);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 76, 33, "Pulsed");
+        canvas_draw_icon(canvas, 85, 21, &I_up_7x4);
+        canvas_invert_color(canvas);
+    } else if(plugin_state->mode == 3) {
+        canvas_draw_box(canvas, 95, 36, 28, 10);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 97, 44, "Soft");
+        canvas_draw_icon(canvas, 117, 37, &I_right_4x7);
+        canvas_invert_color(canvas);
+    } else if(plugin_state->mode == 4) {
+        canvas_draw_box(canvas, 74, 47, 32, 16);
+        canvas_invert_color(canvas);
+        canvas_draw_str(canvas, 76, 56, "Combo");
+        canvas_draw_icon(canvas, 85, 57, &I_down_7x4);
+        canvas_invert_color(canvas);
+    }
 }
 
-void vibro_test_input_callback(InputEvent* input_event, void* ctx) {
+void vibro_input_callback(InputEvent* input_event, void* ctx) {
     furi_assert(ctx);
     FuriMessageQueue* event_queue = ctx;
     furi_message_queue_put(event_queue, input_event, FuriWaitForever);
@@ -49,8 +87,8 @@ int32_t orgasmotron_app(void* p) {
 
     // Configure view port
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, vibro_test_draw_callback, plugin_state);
-    view_port_input_callback_set(view_port, vibro_test_input_callback, event_queue);
+    view_port_draw_callback_set(view_port, vibro_draw_callback, plugin_state);
+    view_port_input_callback_set(view_port, vibro_input_callback, event_queue);
 
     // Register view port in GUI
     Gui* gui = furi_record_open(RECORD_GUI);
@@ -59,9 +97,8 @@ int32_t orgasmotron_app(void* p) {
     NotificationApp* notification = furi_record_open(RECORD_NOTIFICATION);
 
     InputEvent event;
-    //int mode = 0;
     bool processing = true;
-    //while(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk) {
+    notification_message(notification, &sequence_display_backlight_on);
     while(processing) {
         FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
         furi_mutex_acquire(plugin_state->mutex, FuriWaitForever);
@@ -107,27 +144,26 @@ int32_t orgasmotron_app(void* p) {
         } else if(plugin_state->mode == 2) {
             //Pulsed Vibration
             notification_message(notification, &sequence_set_vibro_on);
-            notification_message(notification, &sequence_set_green_255);
+            notification_message(notification, &sequence_set_red_255);
             delay(100);
             notification_message(notification, &sequence_reset_vibro);
         } else if(plugin_state->mode == 3) {
             //Soft power
             notification_message(notification, &sequence_set_vibro_on);
-            notification_message(notification, &sequence_set_green_255);
+            notification_message(notification, &sequence_set_blue_255);
             delay(50);
             notification_message(notification, &sequence_reset_vibro);
         } else if(plugin_state->mode == 4) {
             //Special Sequence
-            for(int i = 0; i < 15; i++) {
+            notification_message(notification, &sequence_solid_yellow);
+            for(int i = 0; i < 5; i++) {
                 notification_message(notification, &sequence_set_vibro_on);
-                notification_message(notification, &sequence_set_green_255);
                 delay(50);
                 notification_message(notification, &sequence_reset_vibro);
                 delay(50);
             }
             for(int i = 0; i < 2; i++) {
                 notification_message(notification, &sequence_set_vibro_on);
-                notification_message(notification, &sequence_set_green_255);
                 delay(400);
                 notification_message(notification, &sequence_reset_vibro);
                 delay(50);
