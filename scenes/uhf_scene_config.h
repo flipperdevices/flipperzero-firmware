@@ -1,5 +1,5 @@
 ADD_SCENE(uhf, start, Start)
-// ADD_SCENE(uhf, read_card, ReadCard)
+ADD_SCENE(uhf, read_tag, ReadTag)
 // ADD_SCENE(uhf, read_card_success, ReadCardSuccess)
 // ADD_SCENE(uhf, card_menu, CardMenu)
 // ADD_SCENE(uhf, save_name, SaveName)

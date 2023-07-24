@@ -1,8 +1,10 @@
-#include "uhf_data.h"
+
 #include "uhf_worker.h"
+#include "uhf_data.h"
 
 int32_t uhf_worker_task(void* ctx) {
     UNUSED(ctx);
+    FURI_LOG_E("uhf_worker", "worker callback has been called");
     return 0;
 }
 

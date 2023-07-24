@@ -1,5 +1,5 @@
 #include "uhf_data.h"
-
+#include <furi.h>
 UHFData* uhf_data_alloc() {
     UHFData* uhf_data = (UHFData*)malloc(sizeof(UHFData));
     uhf_data->length = 0;
@@ -14,12 +14,13 @@ int uhf_data_append(UHFData* uhf_data, uint8_t data) {
 }
 
 void uhf_data_free(UHFData* uhf_data) {
-    free(uhf_data->data);
-    if(uhf_data->next != NULL) {
+    if(uhf_data != NULL) {
+        FURI_LOG_E("LL", "Freeing linked list");
+        free(uhf_data->data);
         uhf_data_free((UHFData*)uhf_data->next);
+        free(uhf_data->next);
+        free(uhf_data);
     }
-    free(uhf_data->next);
-    free(uhf_data);
 }
 
 UHFResponseData* uhf_response_data_alloc() {
