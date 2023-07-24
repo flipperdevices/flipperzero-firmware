@@ -3,9 +3,9 @@
 #include "eth_save_process.h"
 
 #include <furi_hal.h>
-#include "socket.h"
 #include "dhcp.h"
 #include "ping.h"
+#include "socket.h"
 #include "stm32wbxx_hal_gpio.h"
 #include "wizchip_conf.h"
 
@@ -143,7 +143,6 @@ void eth_run(EthWorker* worker, EthWorkerProcess process) {
             break;
         }
         worker->next_state = EthWorkerStateDHCP;
-        eth_log(EthWorkerProcessDHCP, "Fuck you");
         break;
     case EthWorkerProcessStatic:
         if((uint8_t)worker->state < EthWorkerStateInited) {
@@ -231,12 +230,23 @@ static wiz_NetInfo gWIZNETINFO;
 void update_WIZNETINFO(uint8_t is_dhcp) {
     furi_assert(static_worker);
     memcpy(gWIZNETINFO.mac, static_worker->config->mac, 6);
-    memcpy(gWIZNETINFO.ip, static_worker->config->ip, 4);
-    memcpy(gWIZNETINFO.sn, static_worker->config->mask, 4);
-    memcpy(gWIZNETINFO.gw, static_worker->config->gateway, 4);
-    memcpy(gWIZNETINFO.dns, static_worker->config->dns, 4);
-    gWIZNETINFO.dhcp = is_dhcp ? NETINFO_DHCP : NETINFO_STATIC;
+    if(is_dhcp) {
+        memset(gWIZNETINFO.ip, 0, 4);
+        memset(gWIZNETINFO.sn, 0, 4);
+        memset(gWIZNETINFO.gw, 0, 4);
+        memset(gWIZNETINFO.dns, 0, 4);
+        gWIZNETINFO.dhcp = NETINFO_DHCP;
+    } else {
+        memcpy(gWIZNETINFO.ip, static_worker->config->ip, 4);
+        memcpy(gWIZNETINFO.sn, static_worker->config->mask, 4);
+        memcpy(gWIZNETINFO.gw, static_worker->config->gateway, 4);
+        memcpy(gWIZNETINFO.dns, static_worker->config->dns, 4);
+        gWIZNETINFO.dhcp = NETINFO_STATIC;
+    }
 }
+
+#define DHCP_SOCKET 0
+uint8_t ping_auto(uint8_t s, uint8_t* addr);
 
 int32_t eth_worker_task(void* context) {
     furi_assert(context);
@@ -256,7 +266,7 @@ int32_t eth_worker_task(void* context) {
     furi_hal_gpio_init(&resetpin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
     furi_hal_gpio_init(&cspin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
 
-    while(worker->next_state != EthWorkerStateStop) {
+    while(worker->next_state != EthWorkerStateStop && worker->state != EthWorkerStateStop) {
         if(worker->state == EthWorkerStateNotInited) {
             if(worker->next_state != EthWorkerStateInit &&
                worker->next_state != EthWorkerStateNotInited) {
@@ -283,6 +293,7 @@ int32_t eth_worker_task(void* context) {
                 wizchip_getnetinfo(&readed_net_info);
                 if(memcmp(&readed_net_info, &gWIZNETINFO, sizeof(wiz_NetInfo))) {
                     eth_log(EthWorkerProcessInit, "[error] module not detected");
+                    worker->state = EthWorkerStateNotInited;
                     continue;
                 }
                 setSHAR(gWIZNETINFO.mac);
@@ -310,6 +321,120 @@ int32_t eth_worker_task(void* context) {
             }
         } else if(worker->state == EthWorkerStateInited) {
             if(worker->next_state == EthWorkerStateDHCP) {
+                worker->state = EthWorkerStateDHCP;
+                uint8_t temp = PHY_LINK_OFF;
+                while(temp == PHY_LINK_OFF && worker->state == EthWorkerStateDHCP) {
+                    if(ctlwizchip(CW_GET_PHYLINK, (void*)&temp) == -1) {
+                        eth_log(EthWorkerProcessDHCP, "Unknown PHY link status");
+                    }
+                    furi_delay_ms(1);
+                }
+                if(worker->state != EthWorkerStateDHCP) {
+                    break;
+                }
+                reg_dhcp_cbfunc(Callback_IPAssigned, Callback_IPAssigned, Callback_IPConflict);
+                DHCP_init(DHCP_SOCKET, dhcp_buffer);
+                uint8_t dhcp_ret = DHCP_STOPPED;
+                uint8_t next_cycle = 1;
+                while(next_cycle && worker->state == EthWorkerStateDHCP) {
+                    dhcp_ret = DHCP_run();
+                    switch(dhcp_ret) {
+                    case DHCP_IP_ASSIGN:
+                    case DHCP_IP_CHANGED:
+                    case DHCP_IP_LEASED:
+                        getIPfromDHCP(gWIZNETINFO.ip);
+                        getGWfromDHCP(gWIZNETINFO.gw);
+                        getSNfromDHCP(gWIZNETINFO.sn);
+                        getDNSfromDHCP(gWIZNETINFO.dns);
+                        gWIZNETINFO.dhcp = NETINFO_DHCP;
+                        ctlnetwork(CN_SET_NETINFO, (void*)&gWIZNETINFO);
+                        eth_log(
+                            EthWorkerProcessDHCP,
+                            "DHCP IP Leased Time : %ld Sec",
+                            getDHCPLeasetime());
+                        break;
+                    case DHCP_FAILED:
+                        eth_log(EthWorkerProcessDHCP, "DHCP Failed");
+                        break;
+                    }
+                    furi_delay_ms(1);
+                    next_cycle = 0;
+                    next_cycle |= dhcp_ret == DHCP_IP_ASSIGN;
+                    next_cycle |= dhcp_ret == DHCP_IP_CHANGED;
+                    next_cycle |= dhcp_ret == DHCP_FAILED;
+                    next_cycle |= dhcp_ret == DHCP_IP_LEASED;
+                    next_cycle != next_cycle;
+                }
+                if(worker->state != EthWorkerStateDHCP) {
+                    break;
+                }
+                //wizchip_getnetinfo(&gWIZNETINFO);
+                eth_log(
+                    EthWorkerProcessDHCP,
+                    "IP address : %d.%d.%d.%d",
+                    gWIZNETINFO.ip[0],
+                    gWIZNETINFO.ip[1],
+                    gWIZNETINFO.ip[2],
+                    gWIZNETINFO.ip[3]);
+                eth_log(
+                    EthWorkerProcessDHCP,
+                    "SM Mask    : %d.%d.%d.%d",
+                    gWIZNETINFO.sn[0],
+                    gWIZNETINFO.sn[1],
+                    gWIZNETINFO.sn[2],
+                    gWIZNETINFO.sn[3]);
+                eth_log(
+                    EthWorkerProcessDHCP,
+                    "Gate way   : %d.%d.%d.%d",
+                    gWIZNETINFO.gw[0],
+                    gWIZNETINFO.gw[1],
+                    gWIZNETINFO.gw[2],
+                    gWIZNETINFO.gw[3]);
+                eth_log(
+                    EthWorkerProcessDHCP,
+                    "DNS Server : %d.%d.%d.%d",
+                    gWIZNETINFO.dns[0],
+                    gWIZNETINFO.dns[1],
+                    gWIZNETINFO.dns[2],
+                    gWIZNETINFO.dns[3]);
+                worker->state = EthWorkerStateOnline;
+            }
+        } else if(worker->state == EthWorkerStateOnline) {
+            if(worker->next_state == EthWorkerStatePing) {
+                worker->state = EthWorkerStatePing;
+                uint8_t* adress = static_worker->config->ping_ip;
+                eth_log(
+                    EthWorkerProcessDHCP,
+                    "ping %d.%d.%d.%d",
+                    adress[0],
+                    adress[1],
+                    adress[2],
+                    adress[3]);
+                const uint8_t tryes = 4;
+                uint8_t try = 0;
+                while(try < tryes && worker->state == EthWorkerStatePing) {
+                    try++;
+                    uint32_t start_time = furi_get_tick();
+                    uint8_t res = 3; //ping_auto(1, adress);
+                    uint32_t res_time = furi_get_tick();
+                    if(res == 3) {
+                        eth_log(
+                            EthWorkerProcessDHCP, "%d success %d ms", try, res_time - start_time);
+                    } else {
+                        eth_log(
+                            EthWorkerProcessDHCP,
+                            "%d error %d, %d",
+                            try,
+                            res,
+                            res_time - start_time);
+                        break;
+                    }
+                }
+                if(worker->state != EthWorkerStatePing) {
+                    break;
+                }
+                worker->state = EthWorkerStateOnline;
+            } else {
             }
         }
         furi_delay_ms(50);
@@ -321,174 +446,6 @@ int32_t eth_worker_task(void* context) {
 
     return 0;
 }
-
-// void eth_worker_dhcp(EthWorker* eth_worker) {
-//     furi_assert(eth_worker);
-//     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);
-
-//     uint8_t temp;
-//     uint8_t W5500FifoSize[2][8] = {
-//         {
-//             2,
-//             2,
-//             2,
-//             2,
-//             2,
-//             2,
-//             2,
-//             2,
-//         },
-//         {2, 2, 2, 2, 2, 2, 2, 2}};
-
-//     uint8_t dhcp_buffer[2000];
-
-//     FURI_LOG_I(TAG, "registering W5500 callbacks\r\n");
-//     FURI_LOG_I(TAG, "sizeof %d", sizeof(gWIZNETINFO));
-
-//     reg_wizchip_spi_cbfunc(W5500_ReadByte, W5500_WriteByte);
-//     reg_wizchip_spiburst_cbfunc(W5500_ReadBuff, W5500_WriteBuff);
-//     reg_wizchip_cs_cbfunc(W5500_Select, W5500_Unselect);
-
-//     furi_hal_gpio_write(&resetpin, true);
-//     furi_hal_gpio_write(&cspin, true);
-//     furi_hal_gpio_init(&resetpin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
-//     furi_hal_gpio_init(&cspin, GpioModeOutputOpenDrain, GpioPullNo, GpioSpeedVeryHigh);
-
-//     furi_hal_power_enable_otg();
-//     //eth_worker->callback(EthCustomEventModulePowerOn, eth_worker->context);
-//     furi_delay_ms(1000);
-//     furi_hal_gpio_write(&resetpin, false);
-//     furi_delay_ms(10);
-//     furi_hal_gpio_write(&resetpin, true);
-
-//     //eth_worker->callback(EthCustomEventModuleConnect, eth_worker->context);
-
-//     if(ctlwizchip(CW_INIT_WIZCHIP, (void*)W5500FifoSize) == -1) {
-//         FURI_LOG_I(TAG, "W5500 initialized fail");
-//         //eth_worker->callback(EthCustomEventModuleError, eth_worker->context);
-//         while(1)
-//             ;
-//         //break;
-//     }
-
-//     FURI_LOG_I(TAG, "W5500 initialized success");
-//     furi_delay_ms(200);
-
-//     wizchip_setnetinfo(&gWIZNETINFO);
-//     FURI_LOG_I(TAG, "W5500 info setted 1");
-
-//     setSHAR(gWIZNETINFO.mac);
-//     FURI_LOG_I(TAG, "W5500 info setted 2");
-
-//     //check phy status
-//     do {
-//         if(ctlwizchip(CW_GET_PHYLINK, (void*)&temp) == -1) {
-//             FURI_LOG_I(TAG, "Unknown PHY link status.\r\n");
-//         }
-//         furi_delay_ms(1);
-//     } while(temp == PHY_LINK_OFF);
-
-//     FURI_LOG_I(TAG, "W5500 gWIZNETINFO success.\r\n");
-//     ////eth_worker->callback(EthCustomEventPHYConnect, eth_worker->context);
-
-//     furi_delay_ms(1000);
-
-//     FURI_LOG_I(TAG, "Registering DHCP callbacks.\r\n");
-//     reg_dhcp_cbfunc(Callback_IPAssigned, Callback_IPAssigned, Callback_IPConflict);
-
-//     ////eth_worker->callback(EthCustomEventDHCPConnect, eth_worker->context);
-//     if(gWIZNETINFO.dhcp == NETINFO_DHCP) {
-//         DHCP_init(DHCP_SOCKET, dhcp_buffer);
-
-//         uint8_t dhcp_ret = DHCP_STOPPED;
-
-//         while(
-//             !((dhcp_ret == DHCP_IP_ASSIGN) || (dhcp_ret == DHCP_IP_CHANGED) ||
-//               (dhcp_ret == DHCP_FAILED) || (dhcp_ret == DHCP_IP_LEASED))) {
-//             dhcp_ret = DHCP_run();
-//             switch(dhcp_ret) {
-//             case DHCP_IP_ASSIGN:
-//             case DHCP_IP_CHANGED:
-//             case DHCP_IP_LEASED:
-//                 getIPfromDHCP(gWIZNETINFO.ip);
-//                 getGWfromDHCP(gWIZNETINFO.gw);
-//                 getSNfromDHCP(gWIZNETINFO.sn);
-//                 getDNSfromDHCP(gWIZNETINFO.dns);
-//                 gWIZNETINFO.dhcp = NETINFO_DHCP;
-//                 ctlnetwork(CN_SET_NETINFO, (void*)&gWIZNETINFO);
-//                 FURI_LOG_I(TAG, "\r\n>> DHCP IP Leased Time : %ld Sec\r\n", getDHCPLeasetime());
-//                 break;
-//             case DHCP_FAILED:
-//                 FURI_LOG_I(TAG, ">> DHCP Failed\r\n");
-//                 gWIZNETINFO.dhcp = NETINFO_STATIC;
-//                 break;
-//             }
-//             furi_delay_ms(1);
-//         }
-
-//         wizchip_getnetinfo(&gWIZNETINFO);
-//         FURI_LOG_I(
-//             TAG,
-//             "Mac address: %02x:%02x:%02x:%02x:%02x:%02x\n\r",
-//             gWIZNETINFO.mac[0],
-//             gWIZNETINFO.mac[1],
-//             gWIZNETINFO.mac[2],
-//             gWIZNETINFO.mac[3],
-//             gWIZNETINFO.mac[4],
-//             gWIZNETINFO.mac[5]);
-//         if(gWIZNETINFO.dhcp == NETINFO_DHCP)
-//             FURI_LOG_I(TAG, "DHCP\n\r");
-//         else
-//             FURI_LOG_I(TAG, "Static IP\n\r");
-//         FURI_LOG_I(
-//             TAG,
-//             "IP address : %d.%d.%d.%d\n\r",
-//             gWIZNETINFO.ip[0],
-//             gWIZNETINFO.ip[1],
-//             gWIZNETINFO.ip[2],
-//             gWIZNETINFO.ip[3]);
-//         FURI_LOG_I(
-//             TAG,
-//             "SM Mask    : %d.%d.%d.%d\n\r",
-//             gWIZNETINFO.sn[0],
-//             gWIZNETINFO.sn[1],
-//             gWIZNETINFO.sn[2],
-//             gWIZNETINFO.sn[3]);
-//         FURI_LOG_I(
-//             TAG,
-//             "Gate way   : %d.%d.%d.%d\n\r",
-//             gWIZNETINFO.gw[0],
-//             gWIZNETINFO.gw[1],
-//             gWIZNETINFO.gw[2],
-//             gWIZNETINFO.gw[3]);
-//         FURI_LOG_I(
-//             TAG,
-//             "DNS Server : %d.%d.%d.%d\n\r",
-//             gWIZNETINFO.dns[0],
-//             gWIZNETINFO.dns[1],
-//             gWIZNETINFO.dns[2],
-//             gWIZNETINFO.dns[3]);
-//         ////eth_worker->callback(EthCustomEventDHCPConnectSuccess, eth_worker->context);
-//         furi_delay_ms(20000);
-
-//         uint8_t pDestaddr[4] = {8, 8, 8, 8};
-//         uint8_t tmp = ping_auto(1, pDestaddr);
-//         //tmp = ping_count(0,3,pDestaddr);
-//         if(tmp == SUCCESS) {
-//             ////eth_worker->callback(EthCustomEventPingConnect, eth_worker->context);
-//             FURI_LOG_I(TAG, "-----------PING TEST OK----------\r\n");
-//         } else {
-//             ////eth_worker->callback(EthCustomEventPingError, eth_worker->context);
-//             FURI_LOG_I(TAG, "----------ERROR  = %d----------\r\n", tmp);
-//         }
-//         furi_delay_ms(3000);
-
-//         furi_delay_ms(2000);
-//         ////eth_worker->callback(EthCustomEventWellDone, eth_worker->context);
-//     }
-
-//     furi_hal_spi_release(&furi_hal_spi_bus_handle_external);
-// }
 
 static void w5500_init() {
     furi_hal_spi_acquire(&furi_hal_spi_bus_handle_external);

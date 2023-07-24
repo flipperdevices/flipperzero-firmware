@@ -15,6 +15,7 @@ typedef enum {
     EthWorkerStateMACInit,
     EthWorkerStateStaticIp,
     EthWorkerStateDHCP,
+    EthWorkerStateOnline,
     EthWorkerStatePing,
     EthWorkerStateStop,
 } EthWorkerState;
