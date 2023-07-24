@@ -12,7 +12,6 @@ enum {
     SubmenuIndexCommonRename,
     SubmenuIndexCommonDelete,
     SubmenuIndexCommonMax,
-    SubmenuIndexCommonField
 };
 
 void nfc_protocol_support_common_submenu_callback(void* context, uint32_t index);
