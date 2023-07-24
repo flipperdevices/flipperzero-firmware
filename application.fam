@@ -1,0 +1,11 @@
+App(appid="multi_counter",
+    name="Multi Counter",
+    apptype=FlipperAppType.EXTERNAL,
+    entry_point="counterapp",
+    requires=[
+        "gui",
+    ],
+    fap_category="Misc",
+    fap_icon="icons/counter_icon.png",
+    fap_icon_assets="icons",
+)
