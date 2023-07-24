@@ -22,7 +22,7 @@
 #define SNAKE_APP EXT_PATH("apps/Games/snake.fap")
 #define TETRIS_APP EXT_PATH("apps/Games/tetris.fap")
 #define ZOMBIEZ_APP EXT_PATH("apps/Games/zombiez.fap")
-#define JETPACK_JOYRIDE_APP EXT_PATH("apps/Games/jetpack_joyride.fap")
+#define JETPACK_APP EXT_PATH("apps/Games/jetpack.fap")
 
 static void desktop_scene_main_new_idle_animation_callback(void* context) {
     furi_assert(context);
@@ -220,8 +220,8 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             desktop_scene_main_open_app_or_profile(desktop, HEAP_DEFENCE_APP);
             break;
         }
-        case DesktopMainEventOpenJetPackJoyRide: {
-            desktop_scene_main_open_app_or_profile(desktop, JETPACK_JOYRIDE_APP);
+        case DesktopMainEventOpenJetPack: {
+            desktop_scene_main_open_app_or_profile(desktop, JETPACK_APP);
             break;
         }
         case DesktopMainEventOpenClock: {
