@@ -68,6 +68,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Updated: [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 - Updated: SD Card Assets: Includes NFC Assets: 67 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) (19 More Added)
+- Fix Evil Portal Assets folder
 
 <a name="release">
 
