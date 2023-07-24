@@ -27,6 +27,25 @@ typedef enum PassGen_Alphabet
 	Mixed = DigitsAllLetters | Special
 } PassGen_Alphabet;
 
+const char * const PassGen_AlphabetChars [16] = {
+	"0", // invalid value
+	/*    PASSGEN_SPECIAL    PASSGEN_LETTERS_UP    PASSGEN_LETTERS_LOW */ PASSGEN_DIGITS   ,
+	/*    PASSGEN_SPECIAL    PASSGEN_LETTERS_UP */ PASSGEN_LETTERS_LOW /* PASSGEN_DIGITS */,
+	/*    PASSGEN_SPECIAL    PASSGEN_LETTERS_UP */ PASSGEN_LETTERS_LOW    PASSGEN_DIGITS   ,
+	/*    PASSGEN_SPECIAL */ PASSGEN_LETTERS_UP /* PASSGEN_LETTERS_LOW    PASSGEN_DIGITS */,
+	/*    PASSGEN_SPECIAL */ PASSGEN_LETTERS_UP /* PASSGEN_LETTERS_LOW */ PASSGEN_DIGITS   ,
+	/*    PASSGEN_SPECIAL */ PASSGEN_LETTERS_UP    PASSGEN_LETTERS_LOW /* PASSGEN_DIGITS */,
+	/*    PASSGEN_SPECIAL */ PASSGEN_LETTERS_UP    PASSGEN_LETTERS_LOW    PASSGEN_DIGITS   ,
+	      PASSGEN_SPECIAL /* PASSGEN_LETTERS_UP    PASSGEN_LETTERS_LOW    PASSGEN_DIGITS */,
+	      PASSGEN_SPECIAL /* PASSGEN_LETTERS_UP    PASSGEN_LETTERS_LOW */ PASSGEN_DIGITS   ,
+	      PASSGEN_SPECIAL /* PASSGEN_LETTERS_UP */ PASSGEN_LETTERS_LOW /* PASSGEN_DIGITS */,
+	      PASSGEN_SPECIAL /* PASSGEN_LETTERS_UP */ PASSGEN_LETTERS_LOW    PASSGEN_DIGITS   ,
+	      PASSGEN_SPECIAL    PASSGEN_LETTERS_UP /* PASSGEN_LETTERS_LOW    PASSGEN_DIGITS */,
+	      PASSGEN_SPECIAL    PASSGEN_LETTERS_UP /* PASSGEN_LETTERS_LOW */ PASSGEN_DIGITS   ,
+	      PASSGEN_SPECIAL    PASSGEN_LETTERS_UP    PASSGEN_LETTERS_LOW /* PASSGEN_DIGITS */,
+	      PASSGEN_SPECIAL    PASSGEN_LETTERS_UP    PASSGEN_LETTERS_LOW    PASSGEN_DIGITS   ,
+};
+
 const int AlphabetLevels[] = { Digits, Lowercase, DigitsLower, DigitsAllLetters, Mixed };
 const char* AlphabetLevelNames[] = { "1234", "abcd", "ab12", "Ab12", "Ab1#" };
 const int AlphabetLevelsCount = sizeof(AlphabetLevels) / sizeof(int);
@@ -45,8 +64,8 @@ typedef struct {
     Gui* gui;
     FuriMutex** mutex;
 	NotificationApp* notify;
+	const char* alphabet;
 	char password[PASSGEN_MAX_LENGTH+1];
-	char alphabet[PASSGEN_CHARACTERS_LENGTH+1];
 	int length;
 	int level;
 } PassGen;
@@ -100,15 +119,11 @@ static void render_callback(Canvas* canvas, void* ctx) {
 void build_alphabet(PassGen* app)
 {
 	PassGen_Alphabet mode = AlphabetLevels[app->level];
-	app->alphabet[0] = '\0';
-	if ((mode & Digits) != 0)
-		strcat(app->alphabet, PASSGEN_DIGITS);
-	if ((mode & Lowercase) != 0)
-		strcat(app->alphabet, PASSGEN_LETTERS_LOW);
-	if ((mode & Uppercase) != 0)
-		strcat(app->alphabet, PASSGEN_LETTERS_UP);
-	if ((mode & Special) != 0)
-		strcat(app->alphabet, PASSGEN_SPECIAL);
+	if (mode > 0 && mode < 16) {
+		app->alphabet = PassGen_AlphabetChars[mode];
+	} else {
+		app->alphabet = PassGen_AlphabetChars[0]; // Invalid mode ... password will be all zero digits
+	}
 }
 
 PassGen* state_init() {
