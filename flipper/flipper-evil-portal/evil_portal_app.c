@@ -71,7 +71,6 @@ Evil_PortalApp *evil_portal_app_alloc() {
   app->text_box_store = furi_string_alloc();
   furi_string_reserve(app->text_box_store, EVIL_PORTAL_TEXT_BOX_STORE_SIZE);
 
-//scene_manager_next_scene(app->scene_manager, Evil_PortalSceneRename);
   scene_manager_next_scene(app->scene_manager, Evil_PortalSceneStart);
 
   return app;
