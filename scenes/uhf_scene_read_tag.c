@@ -2,12 +2,18 @@
 #include <dolphin/dolphin.h>
 
 void uhf_read_tag_worker_callback(UHFWorkerEvent event, void* ctx) {
-    FURI_LOG_E("read_callback", "%d", event);
-    UHFApp* uhf_app = ctx;
-    view_dispatcher_send_custom_event(uhf_app->view_dispatcher, UHFCustomEventWorkerExit);
+    UNUSED(event);
+    UNUSED(ctx);
+    // UHFApp* uhf_app = ctx;
+    // testing
+    FURI_LOG_E("THREAD", "uhf_read_tag_worker_callback %d", event);
+    // furi_delay_ms(3000);
+    // scene_manager_set_scene_state(uhf_app->scene_manager, UHFSceneReadTag, UHFSceneStart);
+    // view_dispatcher_send_custom_event(uhf_app->view_dispatcher, UHFCustomEventWorkerExit);
 }
 
 void uhf_scene_read_tag_on_enter(void* ctx) {
+    FURI_LOG_E("33", "uhf_scene_read_tag_on_enter was called!");
     UHFApp* uhf_app = ctx;
     dolphin_deed(DolphinDeedNfcRead);
 
@@ -21,21 +27,27 @@ void uhf_scene_read_tag_on_enter(void* ctx) {
     uhf_worker_start(uhf_app->worker, UHFWorkerStateDetect, uhf_read_tag_worker_callback, uhf_app);
 
     uhf_blink_start(uhf_app);
+
+    // furi_delay_ms(2000);
+    // view_dispatcher_send_custom_event(uhf_app->view_dispatcher, UHFCustomEventWorkerExit);
 }
 
 bool uhf_scene_read_tag_on_event(void* ctx, SceneManagerEvent event) {
-    UHFApp* uhf_app = ctx;
+    UNUSED(ctx);
+    // UHFApp* uhf_app = ctx;
     bool consumed = false;
-
+    FURI_LOG_E("33", "uhf_scene_read_tag_on_event was called! event.event: %lu", event.event);
     if(event.type == SceneManagerEventTypeCustom) {
+        FURI_LOG_E("36", "SceneManagerEventTypeCustom");
         if(event.event == UHFCustomEventWorkerExit) {
+            FURI_LOG_E("38", "UHFCustomEventWorkerExit");
             // if(memcmp(uhf_app->dev->dev_data.pacs.key, uhf_factory_debit_key, PICOPASS_BLOCK_LEN) ==
             //    0) {
             //     scene_manager_next_scene(uhf_app->scene_manager, PicopassSceneReadFactorySuccess);
             // } else {
             //     scene_manager_next_scene(uhf_app->scene_manager, PicopassSceneReadCardSuccess);
             // }
-            scene_manager_next_scene(uhf_app->scene_manager, UHFSceneStart);
+            // scene_manager_next_scene(uhf_app->scene_manager, UHFSceneStart);
             consumed = true;
         }
     }

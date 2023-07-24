@@ -6,6 +6,7 @@ void uhf_scene_start_submenu_callback(void* ctx, uint32_t index) {
     UHFApp* uhf_app = ctx;
     view_dispatcher_send_custom_event(uhf_app->view_dispatcher, index);
 }
+
 void uhf_scene_start_on_enter(void* ctx) {
     UHFApp* uhf_app = ctx;
 
@@ -27,7 +28,6 @@ bool uhf_scene_start_on_event(void* ctx, SceneManagerEvent event) {
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
-        FURI_LOG_E("EVENT", "%lu", event.event);
         if(event.event == SubmenuIndexRead) {
             scene_manager_set_scene_state(uhf_app->scene_manager, UHFSceneStart, SubmenuIndexRead);
             scene_manager_next_scene(uhf_app->scene_manager, UHFSceneReadTag);

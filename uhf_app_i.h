@@ -1,8 +1,5 @@
 #pragma once
 
-#include "uhf_app.h"
-#include "uhf_worker.h"
-
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
@@ -21,6 +18,9 @@
 
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
+
+#include "uhf_app.h"
+#include "uhf_worker.h"
 #include <uhf_rfid_icons.h>
 
 #define UHF_TEXT_STORE_SIZE 128
