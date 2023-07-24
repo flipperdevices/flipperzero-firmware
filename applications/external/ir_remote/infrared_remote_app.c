@@ -211,7 +211,8 @@ int32_t infrared_remote_app(void* p) {
     FuriString* map_file = furi_string_alloc();
     furi_string_set(map_file, EXT_PATH("infrared/ir_remote"));
     if(!storage_file_exists(storage, EXT_PATH("infrared/ir_remote"))) {
-        storage_common_mkdir(storage, EXT_PATH("infrared/ir_remote")); //Make Folder If dir not exist
+        storage_common_mkdir(
+            storage, EXT_PATH("infrared/ir_remote")); //Make Folder If dir not exist
     }
 
     bool res = dialog_file_browser_show(dialogs, map_file, map_file, &browser_options);

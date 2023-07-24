@@ -66,6 +66,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Bluetooth name fix to remove Flipper from the name. Only an idiont could have thought to give themselves away via BT. Hopefully, Android functionality is still working.
 - Updated: [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen) [(Updates By henrygab)](https://github.com/anakod/flipper_passgen/pull/6)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
+- Updated: [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) [Hold Option (By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
 
 <a name="release">
 
