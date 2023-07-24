@@ -6,16 +6,16 @@
 #include <gui/gui.h>
 #include <input/input.h>
 #include <dialogs/dialogs.h>
-#include "ir_remote_icons.h"
 #include <dolphin/dolphin.h>
 
 #include <notification/notification.h>
 #include <notification/notification_messages.h>
 
+#include "ir_remote_icons.h"
 #include "infrared_signal.h"
 #include "infrared_remote.h"
 #include "infrared_remote_button.h"
-#define TAG "IR_Remote"
+#define TAG "ir_remote"
 #define MENU_BTN_TXT_X 36
 
 #include <flipper_format/flipper_format.h>
@@ -42,6 +42,7 @@ typedef struct {
     FuriString* left_hold_button;
     FuriString* right_hold_button;
     FuriString* ok_hold_button;
+    bool repeat_signal;
     InfraredWorker* infrared_worker;
 } IRApp;
 
@@ -186,6 +187,8 @@ int32_t infrared_remote_app(void* p) {
     app->left_hold_button = furi_string_alloc();
     app->right_hold_button = furi_string_alloc();
     app->ok_hold_button = furi_string_alloc();
+    // Default repeat signal when hold
+    app->repeat_signal = true;
     app->view_port = view_port_alloc();
     app->infrared_worker = infrared_worker_alloc();
 
@@ -208,8 +211,7 @@ int32_t infrared_remote_app(void* p) {
     FuriString* map_file = furi_string_alloc();
     furi_string_set(map_file, EXT_PATH("infrared/ir_remote"));
     if(!storage_file_exists(storage, EXT_PATH("infrared/ir_remote"))) {
-        storage_common_mkdir(
-            storage, EXT_PATH("infrared/ir_remote")); //Make Folder If dir not exist
+        storage_common_mkdir(storage, EXT_PATH("infrared/ir_remote")); //Make Folder If dir not exist
     }
 
     bool res = dialog_file_browser_show(dialogs, map_file, map_file, &browser_options);
@@ -461,6 +463,19 @@ int32_t infrared_remote_app(void* p) {
                 ok_hold_enabled = true;
             }
         }
+
+        flipper_format_rewind(ff);
+        // Find REPEATSIGNAL in the txt file, else default set to true
+        if(!flipper_format_read_bool(ff, "REPEATSIGNAL", &app->repeat_signal, 1)) {
+            FURI_LOG_W(TAG, "Could not read REPEATSIGNAL string");
+        }
+
+        //Debug
+        if(app->repeat_signal) {
+            FURI_LOG_W(TAG, "repeat");
+        } else {
+            FURI_LOG_W(TAG, "not repeat");
+        }
     }
 
     furi_string_free(remote_path);
@@ -488,121 +503,225 @@ int32_t infrared_remote_app(void* p) {
         }
     } else {
         view_port_update(app->view_port);
-        while(running) {
-            if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
-                // short press signal
-                if(event.type == InputTypeShort) {
-                    switch(event.key) {
-                    case InputKeyUp:
-                        if(up_enabled) {
-                            active_signal = up_signal;
-                            FURI_LOG_I(TAG, "up");
+        if(app->repeat_signal) {
+            // Repeat signal when hold
+            while(running) {
+                if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
+                    // short press signal
+                    if(event.type == InputTypeShort) {
+                        switch(event.key) {
+                        case InputKeyUp:
+                            if(up_enabled) {
+                                active_signal = up_signal;
+                                FURI_LOG_I(TAG, "up");
+                            }
+                            break;
+                        case InputKeyDown:
+                            if(down_enabled) {
+                                active_signal = down_signal;
+                                FURI_LOG_I(TAG, "down");
+                            }
+                            break;
+                        case InputKeyRight:
+                            if(right_enabled) {
+                                active_signal = right_signal;
+                                FURI_LOG_I(TAG, "right");
+                            }
+                            break;
+                        case InputKeyLeft:
+                            if(left_enabled) {
+                                active_signal = left_signal;
+                                FURI_LOG_I(TAG, "left");
+                            }
+                            break;
+                        case InputKeyOk:
+                            if(ok_enabled) {
+                                active_signal = ok_signal;
+                                FURI_LOG_I(TAG, "ok");
+                            }
+                            break;
+                        case InputKeyBack:
+                            if(back_enabled) {
+                                active_signal = back_signal;
+                                FURI_LOG_I(TAG, "back");
+                            }
+                            break;
+                        default:
+                            running = false;
+                            break;
                         }
-                        break;
-                    case InputKeyDown:
-                        if(down_enabled) {
-                            active_signal = down_signal;
-                            FURI_LOG_I(TAG, "down");
+                        // long press signal
+                    } else if(event.type == InputTypeLong) {
+                        switch(event.key) {
+                        case InputKeyUp:
+                            if(up_hold_enabled) {
+                                active_signal = up_hold_signal;
+                                FURI_LOG_I(TAG, "up!");
+                            }
+                            break;
+                        case InputKeyDown:
+                            if(down_hold_enabled) {
+                                active_signal = down_hold_signal;
+                                FURI_LOG_I(TAG, "down!");
+                            }
+                            break;
+                        case InputKeyRight:
+                            if(right_hold_enabled) {
+                                active_signal = right_hold_signal;
+                                FURI_LOG_I(TAG, "right!");
+                            }
+                            break;
+                        case InputKeyLeft:
+                            if(left_hold_enabled) {
+                                active_signal = left_hold_signal;
+                                FURI_LOG_I(TAG, "left!");
+                            }
+                            break;
+                        case InputKeyOk:
+                            if(ok_hold_enabled) {
+                                active_signal = ok_hold_signal;
+                                FURI_LOG_I(TAG, "ok!");
+                            }
+                            break;
+                        default:
+                            running = false;
+                            break;
                         }
-                        break;
-                    case InputKeyRight:
-                        if(right_enabled) {
-                            active_signal = right_signal;
-                            FURI_LOG_I(TAG, "right");
-                        }
-                        break;
-                    case InputKeyLeft:
-                        if(left_enabled) {
-                            active_signal = left_signal;
-                            FURI_LOG_I(TAG, "left");
-                        }
-                        break;
-                    case InputKeyOk:
-                        if(ok_enabled) {
-                            active_signal = ok_signal;
-                            FURI_LOG_I(TAG, "ok");
-                        }
-                        break;
-                    case InputKeyBack:
-                        if(back_enabled) {
-                            active_signal = back_signal;
-                            FURI_LOG_I(TAG, "back");
-                        }
-                        break;
-                    default:
-                        running = false;
-                        break;
-                    }
-                    // long press signal
-                } else if(event.type == InputTypeLong) {
-                    switch(event.key) {
-                    case InputKeyUp:
-                        if(up_hold_enabled) {
-                            active_signal = up_hold_signal;
-                            FURI_LOG_I(TAG, "up!");
-                        }
-                        break;
-                    case InputKeyDown:
-                        if(down_hold_enabled) {
-                            active_signal = down_hold_signal;
-                            FURI_LOG_I(TAG, "down!");
-                        }
-                        break;
-                    case InputKeyRight:
-                        if(right_hold_enabled) {
-                            active_signal = right_hold_signal;
-                            FURI_LOG_I(TAG, "right!");
-                        }
-                        break;
-                    case InputKeyLeft:
-                        if(left_hold_enabled) {
-                            active_signal = left_hold_signal;
-                            FURI_LOG_I(TAG, "left!");
-                        }
-                        break;
-                    case InputKeyOk:
-                        if(ok_hold_enabled) {
-                            active_signal = ok_hold_signal;
-                            FURI_LOG_I(TAG, "ok!");
-                        }
-                        break;
-                    default:
-                        running = false;
-                        break;
-                    }
-                } else if(event.type == InputTypeRelease && is_transmitting) {
-                    notification_message(notification, &sequence_blink_stop);
-                    infrared_worker_tx_stop(app->infrared_worker);
-                    is_transmitting = false;
-                    active_signal = NULL;
-                }
-
-                if(active_signal != NULL &&
-                   (event.type == InputTypeShort || event.type == InputTypeLong)) {
-                    if(is_transmitting) {
+                    } else if(event.type == InputTypeRelease && is_transmitting) {
+                        notification_message(notification, &sequence_blink_stop);
                         infrared_worker_tx_stop(app->infrared_worker);
+                        is_transmitting = false;
+                        active_signal = NULL;
                     }
-                    // Check the signal is raw
-                    if(active_signal->is_raw) {
-                        InfraredRawSignal* raw_signal =
-                            infrared_signal_get_raw_signal(active_signal);
-                        infrared_worker_set_raw_signal(
+                    if(active_signal != NULL &&
+                       (event.type == InputTypeShort || event.type == InputTypeLong)) {
+                        if(is_transmitting) {
+                            infrared_worker_tx_stop(app->infrared_worker);
+                        }
+                        // Check the signal is raw
+                        if(active_signal->is_raw) {
+                            InfraredRawSignal* raw_signal =
+                                infrared_signal_get_raw_signal(active_signal);
+                            infrared_worker_set_raw_signal(
+                                app->infrared_worker,
+                                raw_signal->timings,
+                                raw_signal->timings_size,
+                                raw_signal->frequency,
+                                raw_signal->duty_cycle);
+                        } else {
+                            InfraredMessage* message = infrared_signal_get_message(active_signal);
+                            infrared_worker_set_decoded_signal(app->infrared_worker, message);
+                        }
+
+                        infrared_worker_tx_set_get_signal_callback(
                             app->infrared_worker,
-                            raw_signal->timings,
-                            raw_signal->timings_size,
-                            raw_signal->frequency,
-                            raw_signal->duty_cycle);
-                    } else {
-                        InfraredMessage* message = infrared_signal_get_message(active_signal);
-                        infrared_worker_set_decoded_signal(app->infrared_worker, message);
+                            infrared_worker_tx_get_signal_steady_callback,
+                            app);
+
+                        infrared_worker_tx_start(app->infrared_worker);
+                        notification_message(notification, &sequence_blink_start_magenta);
+                        is_transmitting = true;
                     }
-
-                    infrared_worker_tx_set_get_signal_callback(
-                        app->infrared_worker, infrared_worker_tx_get_signal_steady_callback, app);
-
-                    infrared_worker_tx_start(app->infrared_worker);
-                    notification_message(notification, &sequence_blink_start_magenta);
-                    is_transmitting = true;
+                }
+            }
+        } else {
+            // Not repeat signal when hold
+            while(running) {
+                if(furi_message_queue_get(event_queue, &event, 100) == FuriStatusOk) {
+                    // short press signal
+                    if(event.type == InputTypeShort) {
+                        switch(event.key) {
+                        case InputKeyUp:
+                            if(up_enabled) {
+                                infrared_signal_transmit(up_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "up");
+                            }
+                            break;
+                        case InputKeyDown:
+                            if(down_enabled) {
+                                infrared_signal_transmit(down_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "down");
+                            }
+                            break;
+                        case InputKeyRight:
+                            if(right_enabled) {
+                                infrared_signal_transmit(right_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "right");
+                            }
+                            break;
+                        case InputKeyLeft:
+                            if(left_enabled) {
+                                infrared_signal_transmit(left_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "left");
+                            }
+                            break;
+                        case InputKeyOk:
+                            if(ok_enabled) {
+                                infrared_signal_transmit(ok_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "ok");
+                            }
+                            break;
+                        case InputKeyBack:
+                            if(back_enabled) {
+                                infrared_signal_transmit(back_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "back");
+                            }
+                            break;
+                        default:
+                            running = false;
+                            break;
+                        }
+                        // long press signal
+                    } else if(event.type == InputTypeLong) {
+                        switch(event.key) {
+                        case InputKeyUp:
+                            if(up_hold_enabled) {
+                                infrared_signal_transmit(up_hold_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "up!");
+                            }
+                            break;
+                        case InputKeyDown:
+                            if(down_hold_enabled) {
+                                infrared_signal_transmit(down_hold_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "down!");
+                            }
+                            break;
+                        case InputKeyRight:
+                            if(right_hold_enabled) {
+                                infrared_signal_transmit(right_hold_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "right!");
+                            }
+                            break;
+                        case InputKeyLeft:
+                            if(left_hold_enabled) {
+                                infrared_signal_transmit(left_hold_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "left!");
+                            }
+                            break;
+                        case InputKeyOk:
+                            if(ok_hold_enabled) {
+                                infrared_signal_transmit(ok_hold_signal);
+                                notification_message(notification, &sequence_blink_start_magenta);
+                                FURI_LOG_I(TAG, "ok!");
+                            }
+                            break;
+                        default:
+                            running = false;
+                            break;
+                        }
+                    } else if(event.type == InputTypeRelease) {
+                        notification_message(notification, &sequence_blink_stop);
+                    }
                 }
             }
         }
