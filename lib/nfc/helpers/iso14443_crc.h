@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "bit_buffer.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -15,6 +17,12 @@ typedef enum {
 } Iso14443CrcType;
 
 uint16_t iso14443_crc_calculate(Iso14443CrcType type, const uint8_t* data, size_t data_size);
+
+void iso14443_crc_append(Iso14443CrcType type, BitBuffer* buf);
+
+bool iso14443_crc_check(Iso14443CrcType type, const BitBuffer* buf);
+
+void iso14443_crc_trim(BitBuffer* buf);
 
 #ifdef __cplusplus
 }

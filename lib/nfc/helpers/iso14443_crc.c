@@ -27,3 +27,32 @@ uint16_t iso14443_crc_calculate(Iso14443CrcType type, const uint8_t* data, size_
 
     return type == Iso14443CrcTypeA ? crc : ~crc;
 }
+
+void iso14443_crc_append(Iso14443CrcType type, BitBuffer* buf) {
+    const uint8_t* data = bit_buffer_get_data(buf);
+    const size_t data_size = bit_buffer_get_size_bytes(buf);
+
+    const uint16_t crc = iso14443_crc_calculate(type, data, data_size);
+    bit_buffer_append_bytes(buf, (const uint8_t*)&crc, ISO14443_CRC_SIZE);
+}
+
+bool iso14443_crc_check(Iso14443CrcType type, const BitBuffer* buf) {
+    const size_t data_size = bit_buffer_get_size_bytes(buf);
+    if(data_size <= ISO14443_CRC_SIZE) return false;
+
+    uint16_t crc_received;
+    bit_buffer_write_bytes_mid(
+        buf, &crc_received, data_size - ISO14443_CRC_SIZE, ISO14443_CRC_SIZE);
+
+    const uint8_t* data = bit_buffer_get_data(buf);
+    const uint16_t crc_calc = iso14443_crc_calculate(type, data, data_size - ISO14443_CRC_SIZE);
+
+    return (crc_calc == crc_received);
+}
+
+void iso14443_crc_trim(BitBuffer* buf) {
+    const size_t data_size = bit_buffer_get_size_bytes(buf);
+    furi_assert(data_size > ISO14443_CRC_SIZE);
+
+    bit_buffer_set_size_bytes(buf, data_size - ISO14443_CRC_SIZE);
+}

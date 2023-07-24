@@ -37,7 +37,7 @@ static Iso14443_3bError iso14443_3b_poller_frame_exchange(
         tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - ISO14443_CRC_SIZE);
 
     bit_buffer_copy(instance->tx_buffer, tx_buffer);
-    iso14443_3b_append_crc(instance->tx_buffer);
+    iso14443_crc_append(Iso14443CrcTypeB, instance->tx_buffer);
 
     Iso14443_3bError ret = Iso14443_3bErrorNone;
 
@@ -49,12 +49,12 @@ static Iso14443_3bError iso14443_3b_poller_frame_exchange(
         }
 
         bit_buffer_copy(rx_buffer, instance->rx_buffer);
-        if(!iso14443_3b_check_crc(instance->rx_buffer)) {
+        if(!iso14443_crc_check(Iso14443CrcTypeB, instance->rx_buffer)) {
             ret = Iso14443_3bErrorWrongCrc;
             break;
         }
 
-        iso14443_3b_trim_crc(rx_buffer);
+        iso14443_crc_trim(rx_buffer);
     } while(false);
 
     return ret;

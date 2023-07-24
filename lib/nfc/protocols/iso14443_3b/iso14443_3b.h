@@ -74,12 +74,6 @@ const uint8_t* iso14443_3b_get_uid(const Iso14443_3bData* data, size_t* uid_len)
 
 const Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data);
 
-void iso14443_3b_append_crc(BitBuffer* buf);
-
-bool iso14443_3b_check_crc(const BitBuffer* buf);
-
-void iso14443_3b_trim_crc(BitBuffer* buf);
-
 #ifdef __cplusplus
 }
 #endif
