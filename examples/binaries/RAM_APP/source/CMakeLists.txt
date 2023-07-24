@@ -11,5 +11,5 @@ project(hello_world)
 # This generates a binary file from the elf, as the RAM build doesn't do that automatically
 add_custom_command(TARGET ${PROJECT_NAME}.elf
     POST_BUILD
-    COMMAND esptool.py elf2image --output app.bin ${PROJECT_NAME}.elf
+    COMMAND esptool.py --chip ${IDF_TARGET} elf2image --output app.bin ${PROJECT_NAME}.elf
 )
