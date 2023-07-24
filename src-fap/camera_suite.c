@@ -66,12 +66,6 @@ CameraSuite* camera_suite_app_alloc() {
         CameraSuiteViewIdScene1,
         camera_suite_view_style_1_get_view(app->camera_suite_view_style_1));
 
-    app->camera_suite_view_style_2 = camera_suite_view_style_2_alloc();
-    view_dispatcher_add_view(
-        app->view_dispatcher,
-        CameraSuiteViewIdScene2,
-        camera_suite_view_style_2_get_view(app->camera_suite_view_style_2));
-
     app->camera_suite_view_guide = camera_suite_view_guide_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
@@ -111,7 +105,6 @@ void camera_suite_app_free(CameraSuite* app) {
     // Free remaining resources
     camera_suite_view_start_free(app->camera_suite_view_start);
     camera_suite_view_style_1_free(app->camera_suite_view_style_1);
-    camera_suite_view_style_2_free(app->camera_suite_view_style_2);
     camera_suite_view_guide_free(app->camera_suite_view_guide);
     button_menu_free(app->button_menu);
     variable_item_list_free(app->variable_item_list);
