@@ -70,6 +70,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [SD Card Assets: Includes NFC Assets: 67 RM Pro Trained Level 50 Sm@sh Amiib0 (By RogueMaster) (19 More Added)](https://www.patreon.com/RogueMaster/membership)
 - [Fix Evil Portal Assets folder](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/22e6c87e293121ba30a6243d69d018c4f8146aca)
 - [Wipe Device option from Lock Menu and Storage Settings (By ClaraCrazy Ported By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2fd060287c1067a0098a7241289da95623e5ab56)
+- Added: [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
 
 <a name="release">
 
@@ -254,6 +255,7 @@ $ ./fbt dolphin_ext
 - [Mandelbrot Set (By Possibly-Matt)](https://github.com/Possibly-Matt/flipperzero-firmware-wPlugins)
 - [Minesweeper (By panki27)](https://github.com/panki27/minesweeper) [Fix minesweeper freeze bug, do some refactoring (By xMasterX)](https://github.com/DarkFlippers/unleashed-firmware/commit/56c11c70b3617764b6d2ea7b008c67dce517fa25)
 - [Monty Hall (By DevMilanIan)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/203)
+- [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
 - [NFC Crocodile (By Firemoon777)](https://github.com/Firemoon777/NfcCrocodile)
 - [Nu Pogodi! (Ну, погоди!) (By sionyx)](https://github.com/sionyx/flipper_nupogodi)
 - [Paint (By n-o-T-I-n-s-a-n-e)](https://github.com/n-o-T-I-n-s-a-n-e)
