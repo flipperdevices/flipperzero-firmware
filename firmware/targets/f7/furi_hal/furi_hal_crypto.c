@@ -28,6 +28,13 @@
 #define CRYPTO_CTR_IV_LEN 12
 #define CRYPTO_CTR_CTR_LEN 4
 
+#define CRYPTO_AES_GCM (AES_CR_CHMOD_1 | AES_CR_CHMOD_0)
+#define CRYPTO_GCM_IV_LEN 12
+#define CRYPTO_GCM_CTR_LEN 4
+#define CRYPTO_GCM_PH_INIT 0U
+#define CRYPTO_GCM_PH_PAYLOAD (AES_CR_GCMPH_1)
+#define CRYPTO_GCM_PH_FINAL (AES_CR_GCMPH_1 | AES_CR_GCMPH_0)
+
 static FuriMutex* furi_hal_crypto_mutex = NULL;
 static bool furi_hal_crypto_mode_init_done = false;
 
@@ -476,6 +483,104 @@ bool furi_hal_crypto_ctr(const uint8_t *key, const uint8_t *iv, const uint8_t
                     last_block_bytes)) {
             goto out_enc_err;
         }
+    }
+
+    state = true;
+
+out_enc_err:
+    CLEAR_BIT(AES1->CR, AES_CR_EN);
+    furi_hal_crypto_unload_key();
+    return state;
+}
+
+static bool wait_for_crypto(void) {
+    uint32_t countdown = CRYPTO_TIMEOUT;
+    while(!READ_BIT(AES1->SR, AES_SR_CCF)) {
+        if(LL_SYSTICK_IsActiveCounterFlag()) {
+            countdown--;
+        }
+        if(countdown == 0) {
+            return false;
+        }
+    }
+
+    SET_BIT(AES1->CR, AES_CR_CCFC);
+
+    return true;
+}
+
+bool furi_hal_crypto_gcm(const uint8_t *key, const uint8_t *iv, const uint8_t
+        *input, uint8_t *output, size_t length, uint8_t *tag, bool decrypt) {
+    bool state = false;
+
+    /* GCM init phase */
+
+    /* prepare IV and counter */
+    uint8_t iv_and_counter[CRYPTO_GCM_IV_LEN + CRYPTO_GCM_CTR_LEN];
+    memcpy(iv_and_counter, iv, CRYPTO_GCM_IV_LEN);
+    iv_and_counter[12] = 0;
+    iv_and_counter[13] = 0;
+    iv_and_counter[14] = 0;
+    iv_and_counter[15] = 2;
+
+    /* load key and IV and set the mode to CTR */
+    if (!furi_hal_crypto_load_key_bswap(key, iv_and_counter, CRYPTO_AES_GCM)) {
+        furi_hal_crypto_unload_key();
+        return false;
+    }
+
+    MODIFY_REG(AES1->CR, AES_CR_GCMPH, CRYPTO_GCM_PH_INIT);
+    if (decrypt) {
+        MODIFY_REG(AES1->CR, AES_CR_MODE, CRYPTO_MODE_DECRYPT);
+    } else {
+        MODIFY_REG(AES1->CR, AES_CR_MODE, CRYPTO_MODE_ENCRYPT);
+    }
+
+    SET_BIT(AES1->CR, AES_CR_EN);
+
+    if (!wait_for_crypto()) {
+        goto out_enc_err;
+    }
+
+    /* no GCM header phase, we do not process authenticated data */
+
+    /* GCM payload phase */
+
+    MODIFY_REG(AES1->CR, AES_CR_GCMPH, CRYPTO_GCM_PH_PAYLOAD);
+    SET_BIT(AES1->CR, AES_CR_EN);
+
+    size_t last_block_bytes = length % CRYPTO_BLK_LEN;
+
+    size_t i;
+    for (i = 0; i < length - last_block_bytes; i += CRYPTO_BLK_LEN) {
+        if (!furi_hal_crypto_process_block_bswap(&input[i], &output[i],
+                    CRYPTO_BLK_LEN)) {
+            goto out_enc_err;
+        }
+    }
+
+    if (last_block_bytes > 0) {
+        if (!decrypt) {
+            MODIFY_REG(AES1->CR, AES_CR_NPBLB, (CRYPTO_BLK_LEN -
+                    last_block_bytes) << AES_CR_NPBLB_Pos);
+        }
+        if (!furi_hal_crypto_process_block_bswap(&input[i], &output[i],
+                    last_block_bytes)) {
+            goto out_enc_err;
+        }
+    }
+
+    /* GCM final phase */
+
+    MODIFY_REG(AES1->CR, AES_CR_GCMPH, CRYPTO_GCM_PH_FINAL);
+
+    uint32_t last_block[CRYPTO_BLK_LEN / 4];
+    memset(last_block, 0, sizeof(last_block));
+    last_block[3] = __builtin_bswap32((uint32_t) (length * 8));
+
+    if (!furi_hal_crypto_process_block_bswap((uint8_t*) &last_block[0], tag,
+                CRYPTO_BLK_LEN)) {
+        goto out_enc_err;
     }
 
     state = true;

@@ -98,6 +98,23 @@ bool furi_hal_crypto_unload_key(void);
 bool furi_hal_crypto_ctr(const uint8_t *key, const uint8_t *iv, const uint8_t
         *input, uint8_t *output, size_t length);
 
+/** Encrypt/decrypt the input using AES-GCM
+ * When decrypting the tag generated needs to be compared to the tag attached
+ * to the ciphertext in a constant-time fashion. If the tags are not equal, the
+ * decryption failed and the plaintext returned needs to be discarded.
+ * Inits and deinits the AES engine internally.
+ *
+ * @param[in]  key     pointer to 32 bytes key data
+ * @param[in]  iv      pointer to 12 bytes Initialization Vector data
+ * @param[in]  input   pointer to input data
+ * @param[out] output  pointer to output data
+ * @param      length  length of the input and output in bytes
+ * @param[out] tag     pointer to 16 bytes space for the tag
+ * @param      decrypt true for decryption, false otherwise
+ */
+bool furi_hal_crypto_gcm(const uint8_t *key, const uint8_t *iv, const uint8_t
+        *input, uint8_t *output, size_t length, uint8_t *tag, bool decrypt);
+
 /** Encrypt data
  *
  * @param      input   pointer to input data
