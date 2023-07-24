@@ -65,7 +65,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: DOOM (ported and fixed by xMasterX & Svarich & hedger) 
 - Bluetooth name fix to remove Flipper from the name. Only an idiont could have thought to give themselves away via BT. Hopefully, Android functionality is still working.
 - Updated: [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen) [(Updates By henrygab)](https://github.com/anakod/flipper_passgen/pull/6)
-- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 
 <a name="release">
