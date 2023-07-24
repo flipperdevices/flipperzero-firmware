@@ -32,7 +32,7 @@ bool nfc_scene_debug_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuDebugIndexField) {
             scene_manager_set_scene_state(
                 nfc->scene_manager, NfcSceneDebug, SubmenuDebugIndexField);
-            scene_manager_next_scene(nfc->scene_manager, NfcSceneNotImplemented);
+            scene_manager_next_scene(nfc->scene_manager, NfcSceneField);
             consumed = true;
         }
     }
