@@ -1,6 +1,6 @@
 App(
     appid="tpms",
-    name="TPMS",
+    name="TPMS Reader",
     apptype=FlipperAppType.EXTERNAL,
     targets=["f7"],
     entry_point="tpms_app",

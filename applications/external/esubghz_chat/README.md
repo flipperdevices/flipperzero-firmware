@@ -73,3 +73,5 @@ expect to gain any security by using encryption.
 The implementations of AES and GCM are taken directly from
 https://github.com/mko-x/SharedAES-GCM. They were released to the public domain
 by Markus Kosmal.
+
+The app icon was made by [xMasterX](https://github.com/xMasterX).

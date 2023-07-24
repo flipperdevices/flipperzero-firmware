@@ -21,7 +21,7 @@
 
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
-// #include <uhf_icons.h>
+#include "uhf_rfid_icons.h"
 
 #define UHF_TEXT_STORE_SIZE 128
 

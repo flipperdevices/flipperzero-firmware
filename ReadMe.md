@@ -57,14 +57,16 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Scope (By anfractuosity)](https://github.com/anfractuosity/flipperscope)
 - Updated: [Cross Remote WIP (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications/tree/feature/xremote)
 - Updated: [GPS (By ezod)](https://github.com/ezod/flipperzero-gps) `Req: NMEA 0183` (Changes from xMasterX)
-- Added: [TPMS (By wosk)](https://github.com/wosk/flipperzero-tpms)
-- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
+- Added: [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms)
 - [Added Dolphin UI to Orgasmotron #718 (By leedave)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/718)
 - UL: SubGHz: Temporatily revert new AM_Q in default modulations due to external CC1101 module issues
 - UL: Infrared: Universal remote assets - Add Xiaomi TV and (Daikin AC from OFW PR 2913 by minchogaydarov)
 - UL: OFW PR 2907: Fix about screen (By andzhr)
 - UL: DOOM (ported and fixed by xMasterX & Svarich & hedger) 
 - Bluetooth name fix to remove Flipper from the name. Only an idiont could have thought to give themselves away via BT. Hopefully, Android functionality is still working.
+- Updated: [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen) [(Updates By henrygab)](https://github.com/anakod/flipper_passgen/pull/6)
+- Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
+- Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 
 <a name="release">
 
@@ -418,7 +420,7 @@ $ ./fbt dolphin_ext
 - [Temp Sensors Reader 1.4 (By quen0n)](https://github.com/quen0n/Unitemp-Flipper-Zero-Plugin) `Req: BMP180/BMP280/BME280/BME680/DHT11/DHT22(AM2302)/AM2301/AM2320/HTU2XD/HTU21x/HDC1080/MAX31855/MAX6675/SCD30`
 - [Text To SAM (By RoundPi)](https://github.com/Round-Pi/flipperzero-text2sam)
 - [Text Viewer (By kowalski7cc)](https://github.com/kowalski7cc/flipper-zero-text-viewer)
-- [TPMS (By wosk)](https://github.com/wosk/flipperzero-tpms)
+- [TPMS Reader (By wosk)](https://github.com/wosk/flipperzero-tpms)
 - [Tuning Fork (By besya)](https://github.com/besya/flipperzero-tuning-fork)
 - [UART Echo (By DrZlo13)-OFW](https://github.com/flipperdevices/flipperzero-firmware/pull/831)
 - [UART Terminal (By cool4uma)](https://github.com/cool4uma/UART_Terminal)
