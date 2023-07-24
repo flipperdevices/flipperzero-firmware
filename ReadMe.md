@@ -60,6 +60,10 @@ This software is for experimental purposes only and is not meant for any illegal
 - Added: [TPMS (By wosk)](https://github.com/wosk/flipperzero-tpms)
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - [Added Dolphin UI to Orgasmotron #718 (By leedave)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/718)
+- UL: SubGHz: Temporatily revert new AM_Q in default modulations due to external CC1101 module issues
+- UL: Infrared: Universal remote assets - Add Xiaomi TV and (Daikin AC from OFW PR 2913 by minchogaydarov)
+- UL: OFW PR 2907: Fix about screen (By andzhr)
+- UL: DOOM (ported and fixed by xMasterX & Svarich & hedger) 
 
 <a name="release">
 
@@ -233,7 +237,7 @@ $ ./fbt dolphin_ext
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
 - [DnD Dice (By Ka3u6y6a)](https://github.com/Ka3u6y6a/flipper-zero-dice)
-- [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/)
+- [Doom (By p4nic4ttack)](https://github.com/p4nic4ttack/doom-flipper-zero/) (ported and fixed by xMasterX & Svarich & hedger)
 - [DVD Bounce (By schaene)](https://github.com/schaene/Flipper-DVD-Bounce)
 - [Etch-A-Sketch (By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Etch-A-Sketch)
 - [Flappy Bird (By DroomOne)](https://github.com/DroomOne/flipperzero-firmware/tree/dev/applications/flappy_bird) [Flappy: Border hitboxes, bigger Pilars (By TQMatvey)](https://github.com/DarkFlippers/unleashed-firmware/pull/114) [Increase pilars line width to improve visibility (By ahumeniy)](https://github.com/DarkFlippers/unleashed-firmware/pull/140)
