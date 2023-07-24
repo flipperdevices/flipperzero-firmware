@@ -44,6 +44,7 @@ bool storage_settings_scene_format_confirm_on_event(void* context, SceneManagerE
             consumed = scene_manager_previous_scene(app->scene_manager);
             break;
         case DialogExResultRight:
+            scene_manager_set_scene_state(app->scene_manager, StorageSettingsFormatting, false);
             scene_manager_next_scene(app->scene_manager, StorageSettingsFormatting);
             consumed = true;
             break;

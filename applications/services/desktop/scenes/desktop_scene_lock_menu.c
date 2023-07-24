@@ -81,6 +81,9 @@ bool desktop_scene_lock_menu_on_event(void* context, SceneManagerEvent event) {
             power_off(power);
             furi_record_close(RECORD_POWER);
             break;
+        case DesktopLockMenuEventWipe:
+            loader_start_with_gui_error(desktop->loader, "Storage", "wipe");
+            break;
         case DesktopLockMenuEventDummyModeOn:
             desktop_set_dummy_mode_state(desktop, true);
             scene_manager_search_and_switch_to_previous_scene(

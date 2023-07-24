@@ -41,8 +41,6 @@ static StorageSettings* storage_settings_alloc() {
     view_dispatcher_add_view(
         app->view_dispatcher, StorageSettingsViewDialogEx, dialog_ex_get_view(app->dialog_ex));
 
-    scene_manager_next_scene(app->scene_manager, StorageSettingsStart);
-
     return app;
 }
 
@@ -65,9 +63,14 @@ static void storage_settings_free(StorageSettings* app) {
     free(app);
 }
 
-int32_t storage_settings_app(void* p) {
-    UNUSED(p);
+int32_t storage_settings_app(char* p) {
     StorageSettings* app = storage_settings_alloc();
+
+    if(p && strlen(p) && strcmp(p, "wipe") == 0) {
+        scene_manager_next_scene(app->scene_manager, StorageSettingsWipeDevice);
+    } else {
+        scene_manager_next_scene(app->scene_manager, StorageSettingsStart);
+    }
 
     view_dispatcher_run(app->view_dispatcher);
 

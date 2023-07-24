@@ -42,6 +42,7 @@ typedef enum {
     DesktopLockMenuIndexBasicLock,
     DesktopLockMenuIndexBasicLockShutdown,
     DesktopLockMenuIndexBasicGameMode,
+    DesktopLockMenuIndexBasicWipe,
     DesktopLockMenuIndexBasicStealth,
     DesktopLockMenuIndexBasicDummy,
 
@@ -189,12 +190,13 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
         }
 
         if(m->show_lock_menu) {
-            canvas_set_font(canvas, FontSecondary);
-            elements_bold_rounded_frame(canvas, 24, 4, 80, 56);
-            canvas_draw_str_aligned(canvas, 64, 16, AlignCenter, AlignCenter, "Lock");
-            canvas_draw_str_aligned(canvas, 64, 32, AlignCenter, AlignCenter, "Lock + OFF");
-            canvas_draw_str_aligned(canvas, 64, 48, AlignCenter, AlignCenter, "Game Mode");
-            elements_frame(canvas, 28, 8 + m->pin_lock * 16, 72, 15);
+            canvas_set_font(canvas, FontBatteryPercent);
+            elements_bold_rounded_frame(canvas, 24, 2, 82, 56);
+            canvas_draw_str_aligned(canvas, 64, 10, AlignCenter, AlignCenter, "Lock");
+            canvas_draw_str_aligned(canvas, 64, 22, AlignCenter, AlignCenter, "Lock + OFF");
+            canvas_draw_str_aligned(canvas, 64, 34, AlignCenter, AlignCenter, "Game Mode");
+            canvas_draw_str_aligned(canvas, 64, 46, AlignCenter, AlignCenter, "Wipe Device");
+            elements_frame(canvas, 28, 4 + m->pin_lock * 12, 72, 13);
         }
     } else {
         canvas_set_color(canvas, ColorBlack);
@@ -214,6 +216,9 @@ void desktop_lock_menu_draw_callback(Canvas* canvas, void* model) {
                 break;
             case DesktopLockMenuIndexBasicGameMode:
                 str = "Game Mode";
+                break;
+            case DesktopLockMenuIndexBasicWipe:
+                str = "Wipe Device";
                 break;
             case DesktopLockMenuIndexBasicStealth:
                 if(m->stealth_mode) {
@@ -279,11 +284,11 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                         if(event->key == InputKeyUp) {
                             model->pin_lock--;
                             if(model->pin_lock < 0) {
-                                model->pin_lock = 2;
+                                model->pin_lock = 3;
                             }
                         } else if(event->key == InputKeyDown) {
                             model->pin_lock++;
-                            if(model->pin_lock > 2) {
+                            if(model->pin_lock > 3) {
                                 model->pin_lock = 0;
                             }
                         } else if(event->key == InputKeyBack || event->key == InputKeyOk) {
@@ -346,6 +351,10 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                     dolphin_deed(getRandomDeed());
                     desktop_view_lock_menu_dumbmode_changed(1);
                     desktop_event = DesktopLockMenuEventExit;
+                    break;
+                case 3:
+                    dolphin_deed(getRandomDeed());
+                    desktop_event = DesktopLockMenuEventWipe;
                     break;
                 default:
                     break;
@@ -481,6 +490,9 @@ bool desktop_lock_menu_input_callback(InputEvent* event, void* context) {
                 dolphin_deed(getRandomDeed());
                 desktop_view_lock_menu_dumbmode_changed(1);
                 lock_menu->callback(DesktopLockMenuEventExit, lock_menu->context);
+            } else if((idx == DesktopLockMenuIndexBasicWipe) && (event->type == InputTypeShort)) {
+                dolphin_deed(getRandomDeed());
+                lock_menu->callback(DesktopLockMenuEventWipe, lock_menu->context);
             } else if(idx == DesktopLockMenuIndexBasicStealth) {
                 if((stealth_mode == false) && (event->type == InputTypeShort)) {
                     lock_menu->callback(DesktopLockMenuEventStealthModeOn, lock_menu->context);
