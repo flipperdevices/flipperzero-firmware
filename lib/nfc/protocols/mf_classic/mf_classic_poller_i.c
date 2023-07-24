@@ -3,6 +3,8 @@
 #include <furi.h>
 #include <furi_hal_random.h>
 
+#include <nfc/helpers/iso14443_crc.h>
+
 #define TAG "MfCLassicPoller"
 
 #define MF_CLASSIC_FWT_FC (60000)
@@ -117,7 +119,7 @@ MfClassicError mf_classic_aync_halt(MfClassicPoller* instance) {
     do {
         uint8_t halt_cmd[2] = {MF_CLASSIC_CMD_HALT_MSB, MF_CLASSIC_CMD_HALT_LSB};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, halt_cmd, sizeof(halt_cmd));
-        iso14443_3a_append_crc(instance->tx_plain_buffer);
+        iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
 
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
@@ -148,7 +150,7 @@ MfClassicError mf_classic_async_read_block(
     do {
         uint8_t read_block_cmd[2] = {MF_CLASSIC_CMD_READ_BLOCK, block_num};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, read_block_cmd, sizeof(read_block_cmd));
-        iso14443_3a_append_crc(instance->tx_plain_buffer);
+        iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
 
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
@@ -171,13 +173,13 @@ MfClassicError mf_classic_async_read_block(
         crypto1_decrypt(
             instance->crypto, instance->rx_encrypted_buffer, instance->rx_plain_buffer);
 
-        if(!iso14443_3a_check_crc(instance->rx_plain_buffer)) {
+        if(!iso14443_crc_check(Iso14443CrcTypeA, instance->rx_plain_buffer)) {
             FURI_LOG_D(TAG, "CRC error");
             ret = MfClassicErrorProtocol;
             break;
         }
 
-        iso14443_3a_trim_crc(instance->rx_plain_buffer);
+        iso14443_crc_trim(instance->rx_plain_buffer);
         bit_buffer_write_bytes(instance->rx_plain_buffer, data->data, sizeof(MfClassicBlock));
     } while(false);
 
@@ -194,7 +196,7 @@ MfClassicError mf_classic_async_write_block(
     do {
         uint8_t write_block_cmd[2] = {MF_CLASSIC_CMD_WRITE_BLOCK, block_num};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, write_block_cmd, sizeof(write_block_cmd));
-        iso14443_3a_append_crc(instance->tx_plain_buffer);
+        iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
 
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
@@ -223,7 +225,7 @@ MfClassicError mf_classic_async_write_block(
         }
 
         bit_buffer_copy_bytes(instance->tx_plain_buffer, data->data, sizeof(MfClassicBlock));
-        iso14443_3a_append_crc(instance->tx_plain_buffer);
+        iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
 
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
@@ -274,7 +276,7 @@ MfClassicError mf_classic_async_value_cmd(
         }
         uint8_t value_cmd[2] = {cmd_value, block_num};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, value_cmd, sizeof(value_cmd));
-        iso14443_3a_append_crc(instance->tx_plain_buffer);
+        iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
 
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
@@ -305,7 +307,7 @@ MfClassicError mf_classic_async_value_cmd(
         uint8_t data_arr[4] = {};
         memcpy(data_arr, &data, sizeof(int32_t));
         bit_buffer_copy_bytes(instance->tx_plain_buffer, data_arr, sizeof(data_arr));
-        iso14443_3a_append_crc(instance->tx_plain_buffer);
+        iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
 
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
@@ -334,7 +336,7 @@ MfClassicError mf_classic_async_value_transfer(MfClassicPoller* instance, uint8_
     do {
         uint8_t transfer_cmd[2] = {MF_CLASSIC_CMD_VALUE_TRANSFER, block_num};
         bit_buffer_copy_bytes(instance->tx_plain_buffer, transfer_cmd, sizeof(transfer_cmd));
-        iso14443_3a_append_crc(instance->tx_plain_buffer);
+        iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
 
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);

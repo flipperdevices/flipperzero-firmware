@@ -2,6 +2,8 @@
 
 #include <furi.h>
 
+#include "nfc/helpers/iso14443_crc.h"
+
 #define TAG "ISO14443_3A"
 
 static Iso14443_3aError iso14443_3a_poller_process_error(NfcError error) {
@@ -39,7 +41,7 @@ static Iso14443_3aError iso14443_3a_poller_standard_frame_exchange(
     furi_assert(tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - 2);
 
     bit_buffer_copy(instance->tx_buffer, tx_buffer);
-    iso14443_3a_append_crc(instance->tx_buffer);
+    iso14443_crc_append(Iso14443CrcTypeA, instance->tx_buffer);
     Iso14443_3aError ret = Iso14443_3aErrorNone;
 
     do {
@@ -50,12 +52,12 @@ static Iso14443_3aError iso14443_3a_poller_standard_frame_exchange(
         }
 
         bit_buffer_copy(rx_buffer, instance->rx_buffer);
-        if(!iso14443_3a_check_crc(instance->rx_buffer)) {
+        if(!iso14443_crc_check(Iso14443CrcTypeA, instance->rx_buffer)) {
             ret = Iso14443_3aErrorWrongCrc;
             break;
         }
 
-        iso14443_3a_trim_crc(rx_buffer);
+        iso14443_crc_trim(rx_buffer);
     } while(false);
 
     return ret;

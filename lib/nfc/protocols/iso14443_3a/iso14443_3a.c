@@ -3,7 +3,6 @@
 #include <furi.h>
 #include <nfc/nfc_common.h>
 
-#define ISO14443_3A_CRC_INIT (0x6363)
 #define ISO14443_3A_PROTOCOL_NAME_LEGACY "UID"
 #define ISO14443_3A_PROTOCOL_NAME "ISO14443-3A"
 #define ISO14443_3A_DEVICE_NAME "ISO14443-3A (Unknown)"
@@ -138,24 +137,6 @@ const Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data) {
     furi_crash("No base data");
 }
 
-static uint16_t iso14443_3a_get_crc(const uint8_t* buff, uint16_t len) {
-    furi_assert(buff);
-    furi_assert(len);
-
-    uint16_t crc = ISO14443_3A_CRC_INIT;
-    uint8_t byte = 0;
-
-    for(uint8_t i = 0; i < len; i++) {
-        byte = buff[i];
-        byte ^= (uint8_t)(crc & 0xff);
-        byte ^= byte << 4;
-        crc = (crc >> 8) ^ (((uint16_t)byte) << 8) ^ (((uint16_t)byte) << 3) ^
-              (((uint16_t)byte) >> 4);
-    }
-
-    return crc;
-}
-
 uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* iso14443_3a_data) {
     furi_assert(iso14443_3a_data);
 
@@ -167,43 +148,4 @@ uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* iso14443_3a_data) {
     cuid = (cuid_start[0] << 24) | (cuid_start[1] << 16) | (cuid_start[2] << 8) | (cuid_start[3]);
 
     return cuid;
-}
-
-void iso14443_3a_append_crc(BitBuffer* buffer) {
-    furi_assert(buffer);
-
-    const uint8_t* data = bit_buffer_get_data(buffer);
-    size_t bytes = bit_buffer_get_size_bytes(buffer);
-
-    uint16_t crc = iso14443_3a_get_crc(data, bytes);
-    uint8_t crc_bytes[2] = {(uint8_t)crc, (uint8_t)(crc >> 8)};
-    bit_buffer_append_bytes(buffer, crc_bytes, sizeof(crc_bytes));
-}
-
-bool iso14443_3a_check_crc(const BitBuffer* buf) {
-    furi_assert(buf);
-
-    bool crc_ok = false;
-    do {
-        const uint8_t* data = bit_buffer_get_data(buf);
-        size_t bytes = bit_buffer_get_size_bytes(buf);
-        if(bytes < 3) break;
-
-        uint16_t crc_calc = iso14443_3a_get_crc(data, bytes - 2);
-        uint8_t crc_start = bit_buffer_get_byte(buf, bytes - 2);
-        uint8_t crc_end = bit_buffer_get_byte(buf, bytes - 1);
-        uint16_t crc_received = (crc_end << 8) | crc_start;
-        crc_ok = (crc_calc == crc_received);
-    } while(false);
-
-    return crc_ok;
-}
-
-void iso14443_3a_trim_crc(BitBuffer* buf) {
-    furi_assert(buf);
-
-    size_t bytes = bit_buffer_get_size_bytes(buf);
-    furi_assert(bytes > 2);
-
-    bit_buffer_set_size_bytes(buf, bytes - 2);
 }

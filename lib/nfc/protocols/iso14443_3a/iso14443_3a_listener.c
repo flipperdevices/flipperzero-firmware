@@ -1,5 +1,7 @@
 #include "iso14443_3a_listener_i.h"
-#include "iso14443_3a_listener_defs.h"
+
+#include "nfc/protocols/nfc_listener_base.h"
+#include "nfc/helpers/iso14443_crc.h"
 
 #include <furi.h>
 #include <lib/nfc/nfc.h>
@@ -13,7 +15,7 @@ static bool iso14443_3a_listener_halt_received(BitBuffer* buf) {
 
     do {
         if(bit_buffer_get_size_bytes(buf) != 4) break;
-        if(!iso14443_3a_check_crc(buf)) break;
+        if(!iso14443_crc_check(Iso14443CrcTypeA, buf)) break;
         if(bit_buffer_get_byte(buf, 0) != 0x50) break;
         if(bit_buffer_get_byte(buf, 1) != 0x00) break;
         halt_cmd_received = true;
@@ -101,10 +103,10 @@ NfcCommand iso14443_3a_listener_run(NfcGenericEvent event, void* context) {
                 command = instance->callback(instance->generic_event, instance->context);
             }
         } else {
-            if(iso14443_3a_check_crc(nfc_event->data.buffer)) {
+            if(iso14443_crc_check(Iso14443CrcTypeA, nfc_event->data.buffer)) {
                 instance->iso14443_3a_event.type =
                     Iso14443_3aListenerEventTypeReceivedStandardFrame;
-                iso14443_3a_trim_crc(nfc_event->data.buffer);
+                iso14443_crc_trim(nfc_event->data.buffer);
             } else {
                 instance->iso14443_3a_event.type = Iso14443_3aListenerEventTypeReceivedData;
             }

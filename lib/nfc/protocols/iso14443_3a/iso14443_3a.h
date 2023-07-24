@@ -85,12 +85,6 @@ const Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data);
 
 uint32_t iso14443_3a_get_cuid(const Iso14443_3aData* iso14443_3a_data);
 
-void iso14443_3a_append_crc(BitBuffer* buffer);
-
-bool iso14443_3a_check_crc(const BitBuffer* buf);
-
-void iso14443_3a_trim_crc(BitBuffer* buf);
-
 #ifdef __cplusplus
 }
 #endif

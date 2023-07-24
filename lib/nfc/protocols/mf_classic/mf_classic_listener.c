@@ -1,6 +1,9 @@
 #include "mf_classic_listener_i.h"
-#include "mf_classic_listener_defs.h"
-#include <lib/nfc/helpers/nfc_util.h>
+
+#include <nfc/protocols/nfc_listener_base.h>
+
+#include <nfc/helpers/iso14443_crc.h>
+#include <nfc/helpers/nfc_util.h>
 
 #include <furi.h>
 #include <furi_hal_random.h>
@@ -214,7 +217,7 @@ static MfClassicListenerCommand
 
         bit_buffer_copy_bytes(
             instance->tx_plain_buffer, access_block.data, sizeof(MfClassicBlock));
-        iso14443_3a_append_crc(instance->tx_plain_buffer);
+        iso14443_crc_append(Iso14443CrcTypeA, instance->tx_plain_buffer);
         crypto1_encrypt(
             instance->crypto, NULL, instance->tx_plain_buffer, instance->tx_encrypted_buffer);
         iso14443_3a_listener_tx_with_custom_parity(
