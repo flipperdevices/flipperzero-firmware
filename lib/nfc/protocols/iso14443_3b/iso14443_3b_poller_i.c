@@ -101,7 +101,7 @@ Iso14443_3bError
 
         memcpy(instance->data->uid, atqb->uid, ISO14443_3B_UID_SIZE);
         memcpy(instance->data->app_data, atqb->app_data, ISO14443_3B_APP_DATA_SIZE);
-        memcpy(instance->data->protocol_data, atqb->protocol_data, ISO14443_3B_PROTOCOL_DATA_SIZE);
+        memcpy(instance->data->protocol_info, atqb->protocol_info, ISO14443_3B_PROTOCOL_INFO_SIZE);
 
         bit_buffer_reset(instance->tx_buffer);
         bit_buffer_reset(instance->rx_buffer);
@@ -109,13 +109,13 @@ Iso14443_3bError
         // Send ATTRIB
         bit_buffer_append_byte(instance->tx_buffer, 0x1d);
         bit_buffer_append_bytes(instance->tx_buffer, atqb->uid, ISO14443_3B_UID_SIZE);
-        bit_buffer_append_byte(instance->tx_buffer, (1U << 2) & (1U << 3));
-        bit_buffer_append_byte(instance->tx_buffer, 0x08);
+        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+        bit_buffer_append_byte(instance->tx_buffer, ISO14443_3B_ATTRIB_FRAME_SIZE_256);
         bit_buffer_append_byte(instance->tx_buffer, 0x01);
         bit_buffer_append_byte(instance->tx_buffer, 0x00);
 
         ret = iso14443_3b_poller_frame_exchange(
-            instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_POLLER_ATTRIB_FDT_FC);
+            instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_ATTRIB_FC);
         if(ret != Iso14443_3bErrorNone) {
             instance->state = Iso14443_3bPollerStateActivationFailed;
             break;

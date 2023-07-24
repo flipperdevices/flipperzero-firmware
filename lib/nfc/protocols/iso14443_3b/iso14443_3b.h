@@ -9,11 +9,22 @@ extern "C" {
 
 #define ISO14443_3B_UID_SIZE (4U)
 #define ISO14443_3B_APP_DATA_SIZE (4U)
-#define ISO14443_3B_PROTOCOL_DATA_SIZE (3U)
+#define ISO14443_3B_PROTOCOL_INFO_SIZE (3U)
 
 #define ISO14443_3B_GUARD_TIME_US (5000U)
 #define ISO14443_3B_FDT_POLL_FC (9000U)
+#define ISO14443_3B_FDT_ATTRIB_FC (42000U)
 #define ISO14443_3B_POLL_POLL_MIN_US (1280U)
+
+#define ISO14443_3B_REQB_ALL (1U << 3)
+
+#define ISO14443_3B_ATTRIB_FRAME_SIZE_32 (0x02)
+#define ISO14443_3B_ATTRIB_FRAME_SIZE_40 (0x03)
+#define ISO14443_3B_ATTRIB_FRAME_SIZE_48 (0x04)
+#define ISO14443_3B_ATTRIB_FRAME_SIZE_64 (0x05)
+#define ISO14443_3B_ATTRIB_FRAME_SIZE_96 (0x06)
+#define ISO14443_3B_ATTRIB_FRAME_SIZE_128 (0x07)
+#define ISO14443_3B_ATTRIB_FRAME_SIZE_256 (0x08)
 
 typedef enum {
     Iso14443_3bErrorNone,
@@ -30,13 +41,13 @@ typedef struct {
     uint8_t flag;
     uint8_t uid[ISO14443_3B_UID_SIZE];
     uint8_t app_data[ISO14443_3B_APP_DATA_SIZE];
-    uint8_t protocol_data[ISO14443_3B_PROTOCOL_DATA_SIZE];
+    uint8_t protocol_info[ISO14443_3B_PROTOCOL_INFO_SIZE];
 } Iso14443_3bAtqB;
 
 typedef struct {
     uint8_t uid[ISO14443_3B_UID_SIZE];
     uint8_t app_data[ISO14443_3B_APP_DATA_SIZE];
-    uint8_t protocol_data[ISO14443_3B_PROTOCOL_DATA_SIZE];
+    uint8_t protocol_info[ISO14443_3B_PROTOCOL_INFO_SIZE];
 } Iso14443_3bData;
 
 extern const NfcDeviceBase nfc_device_iso14443_3b;

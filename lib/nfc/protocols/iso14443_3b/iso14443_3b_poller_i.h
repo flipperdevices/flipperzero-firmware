@@ -8,9 +8,7 @@
 extern "C" {
 #endif
 
-#define ISO14443_3B_POLLER_MAX_BUFFER_SIZE (512U)
-
-#define ISO14443_3B_POLLER_ATTRIB_FDT_FC (42000U)
+#define ISO14443_3B_POLLER_MAX_BUFFER_SIZE (256U)
 
 typedef enum {
     Iso14443_3bPollerStateIdle,
