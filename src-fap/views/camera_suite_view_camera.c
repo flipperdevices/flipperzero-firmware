@@ -22,7 +22,7 @@ struct CameraSuiteViewStyle1 {
     void* context;
 };
 
-void camera_suite_view_style_1_set_callback(
+void camera_suite_view_camera_set_callback(
     CameraSuiteViewStyle1* instance,
     CameraSuiteViewStyle1Callback callback,
     void* context) {
@@ -32,7 +32,7 @@ void camera_suite_view_style_1_set_callback(
     instance->context = context;
 }
 
-static void camera_suite_view_style_1_draw(Canvas* canvas, UartDumpModel* model) {
+static void camera_suite_view_camera_draw(Canvas* canvas, UartDumpModel* model) {
     // Clear the screen.
     canvas_set_color(canvas, ColorBlack);
 
@@ -107,13 +107,13 @@ static void camera_suite_view_style_1_draw(Canvas* canvas, UartDumpModel* model)
     }
 }
 
-static void camera_suite_view_style_1_model_init(UartDumpModel* const model) {
+static void camera_suite_view_camera_model_init(UartDumpModel* const model) {
     for(size_t i = 0; i < FRAME_BUFFER_LENGTH; i++) {
         model->pixels[i] = 0;
     }
 }
 
-static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
+static bool camera_suite_view_camera_input(InputEvent* event, void* context) {
     furi_assert(context);
     CameraSuiteViewStyle1* instance = context;
     if(event->type == InputTypeRelease) {
@@ -237,11 +237,11 @@ static bool camera_suite_view_style_1_input(InputEvent* event, void* context) {
     return true;
 }
 
-static void camera_suite_view_style_1_exit(void* context) {
+static void camera_suite_view_camera_exit(void* context) {
     furi_assert(context);
 }
 
-static void camera_suite_view_style_1_enter(void* context) {
+static void camera_suite_view_camera_enter(void* context) {
     // Check `context` for null. If it is null, abort program, else continue.
     furi_assert(context);
 
@@ -259,7 +259,7 @@ static void camera_suite_view_style_1_enter(void* context) {
     with_view_model(
         instance->view,
         UartDumpModel * model,
-        { camera_suite_view_style_1_model_init(model); },
+        { camera_suite_view_camera_model_init(model); },
         true);
 }
 
@@ -354,7 +354,7 @@ static int32_t camera_worker(void* context) {
     return 0;
 }
 
-CameraSuiteViewStyle1* camera_suite_view_style_1_alloc() {
+CameraSuiteViewStyle1* camera_suite_view_camera_alloc() {
     CameraSuiteViewStyle1* instance = malloc(sizeof(CameraSuiteViewStyle1));
 
     instance->view = view_alloc();
@@ -364,15 +364,15 @@ CameraSuiteViewStyle1* camera_suite_view_style_1_alloc() {
     // Set up views
     view_allocate_model(instance->view, ViewModelTypeLocking, sizeof(UartDumpModel));
     view_set_context(instance->view, instance); // furi_assert crashes in events without this
-    view_set_draw_callback(instance->view, (ViewDrawCallback)camera_suite_view_style_1_draw);
-    view_set_input_callback(instance->view, camera_suite_view_style_1_input);
-    view_set_enter_callback(instance->view, camera_suite_view_style_1_enter);
-    view_set_exit_callback(instance->view, camera_suite_view_style_1_exit);
+    view_set_draw_callback(instance->view, (ViewDrawCallback)camera_suite_view_camera_draw);
+    view_set_input_callback(instance->view, camera_suite_view_camera_input);
+    view_set_enter_callback(instance->view, camera_suite_view_camera_enter);
+    view_set_exit_callback(instance->view, camera_suite_view_camera_exit);
 
     with_view_model(
         instance->view,
         UartDumpModel * model,
-        { camera_suite_view_style_1_model_init(model); },
+        { camera_suite_view_camera_model_init(model); },
         true);
 
     instance->worker_thread = furi_thread_alloc_ex("UsbUartWorker", 2048, camera_worker, instance);
@@ -386,7 +386,7 @@ CameraSuiteViewStyle1* camera_suite_view_style_1_alloc() {
     return instance;
 }
 
-void camera_suite_view_style_1_free(CameraSuiteViewStyle1* instance) {
+void camera_suite_view_camera_free(CameraSuiteViewStyle1* instance) {
     furi_assert(instance);
 
     with_view_model(
@@ -395,7 +395,7 @@ void camera_suite_view_style_1_free(CameraSuiteViewStyle1* instance) {
     free(instance);
 }
 
-View* camera_suite_view_style_1_get_view(CameraSuiteViewStyle1* instance) {
+View* camera_suite_view_camera_get_view(CameraSuiteViewStyle1* instance) {
     furi_assert(instance);
     return instance->view;
 }

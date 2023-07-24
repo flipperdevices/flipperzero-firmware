@@ -50,7 +50,7 @@ bool camera_suite_scene_menu_on_event(void* context, SceneManagerEvent event) {
         if(event.event == SubmenuIndexSceneStyle1) {
             scene_manager_set_scene_state(
                 app->scene_manager, CameraSuiteSceneMenu, SubmenuIndexSceneStyle1);
-            scene_manager_next_scene(app->scene_manager, CameraSuiteSceneStyle_1);
+            scene_manager_next_scene(app->scene_manager, CameraSuiteSceneCamera);
             return true;
         } else if(event.event == SubmenuIndexGuide) {
             scene_manager_set_scene_state(

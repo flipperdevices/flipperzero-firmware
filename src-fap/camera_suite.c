@@ -60,11 +60,11 @@ CameraSuite* camera_suite_app_alloc() {
         CameraSuiteViewIdStartscreen,
         camera_suite_view_start_get_view(app->camera_suite_view_start));
 
-    app->camera_suite_view_style_1 = camera_suite_view_style_1_alloc();
+    app->camera_suite_view_camera = camera_suite_view_camera_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher,
-        CameraSuiteViewIdScene1,
-        camera_suite_view_style_1_get_view(app->camera_suite_view_style_1));
+        CameraSuiteViewIdCamera,
+        camera_suite_view_camera_get_view(app->camera_suite_view_camera));
 
     app->camera_suite_view_guide = camera_suite_view_guide_alloc();
     view_dispatcher_add_view(
@@ -93,8 +93,8 @@ void camera_suite_app_free(CameraSuite* app) {
 
     // View Dispatcher
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdScene1);
-    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdScene2);
+    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamera);
+    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamera);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdGuide);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdSettings);
     submenu_free(app->submenu);
@@ -104,7 +104,7 @@ void camera_suite_app_free(CameraSuite* app) {
 
     // Free remaining resources
     camera_suite_view_start_free(app->camera_suite_view_start);
-    camera_suite_view_style_1_free(app->camera_suite_view_style_1);
+    camera_suite_view_camera_free(app->camera_suite_view_camera);
     camera_suite_view_guide_free(app->camera_suite_view_guide);
     button_menu_free(app->button_menu);
     variable_item_list_free(app->variable_item_list);

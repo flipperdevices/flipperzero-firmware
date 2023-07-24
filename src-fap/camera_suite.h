@@ -4,7 +4,7 @@
 #include "scenes/camera_suite_scene.h"
 #include "views/camera_suite_view_guide.h"
 #include "views/camera_suite_view_start.h"
-#include "views/camera_suite_view_style_1.h"
+#include "views/camera_suite_view_camera.h"
 #include <assets_icons.h>
 #include <furi.h>
 #include <furi_hal.h>
@@ -28,7 +28,7 @@ typedef struct {
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     CameraSuiteViewStart* camera_suite_view_start;
-    CameraSuiteViewStyle1* camera_suite_view_style_1;
+    CameraSuiteViewStyle1* camera_suite_view_camera;
     CameraSuiteViewGuide* camera_suite_view_guide;
     uint32_t orientation;
     uint32_t haptic;
@@ -40,8 +40,7 @@ typedef struct {
 typedef enum {
     CameraSuiteViewIdStartscreen,
     CameraSuiteViewIdMenu,
-    CameraSuiteViewIdScene1,
-    CameraSuiteViewIdScene2,
+    CameraSuiteViewIdCamera,
     CameraSuiteViewIdGuide,
     CameraSuiteViewIdSettings,
 } CameraSuiteViewId;

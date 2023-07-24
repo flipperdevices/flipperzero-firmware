@@ -39,16 +39,16 @@ typedef struct CameraSuiteViewStyle1 CameraSuiteViewStyle1;
 
 typedef void (*CameraSuiteViewStyle1Callback)(CameraSuiteCustomEvent event, void* context);
 
-void camera_suite_view_style_1_set_callback(
-    CameraSuiteViewStyle1* camera_suite_view_style_1,
+void camera_suite_view_camera_set_callback(
+    CameraSuiteViewStyle1* camera_suite_view_camera,
     CameraSuiteViewStyle1Callback callback,
     void* context);
 
-CameraSuiteViewStyle1* camera_suite_view_style_1_alloc();
+CameraSuiteViewStyle1* camera_suite_view_camera_alloc();
 
-void camera_suite_view_style_1_free(CameraSuiteViewStyle1* camera_suite_static);
+void camera_suite_view_camera_free(CameraSuiteViewStyle1* camera_suite_static);
 
-View* camera_suite_view_style_1_get_view(CameraSuiteViewStyle1* camera_suite_static);
+View* camera_suite_view_camera_get_view(CameraSuiteViewStyle1* camera_suite_static);
 
 typedef enum {
     // Reserved for StreamBuffer internal event
