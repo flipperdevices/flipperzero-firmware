@@ -7,12 +7,7 @@
 
 #include <gui/gui.h>
 #include <gui/modules/text_box.h>
-
-#include <gui/modules/dialog_ex.h>
 #include <gui/modules/text_input.h>
-#include <gui/modules/button_menu.h>
-#include <gui/modules/button_panel.h>
-
 #include <gui/modules/variable_item_list.h>
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
