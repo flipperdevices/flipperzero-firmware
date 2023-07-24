@@ -64,6 +64,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Infrared: Universal remote assets - Add Xiaomi TV and (Daikin AC from OFW PR 2913 by minchogaydarov)
 - UL: OFW PR 2907: Fix about screen (By andzhr)
 - UL: DOOM (ported and fixed by xMasterX & Svarich & hedger) 
+- Bluetooth name fix to remove Flipper from the name. Only an idiont could have thought to give themselves away via BT. Hopefully, Android functionality is still working.
 
 <a name="release">
 
