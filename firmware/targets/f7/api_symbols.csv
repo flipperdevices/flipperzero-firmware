@@ -1849,6 +1849,7 @@ Function,+,iso14443_3a_load,_Bool,"Iso14443_3aData*, FlipperFormat*, uint32_t"
 Function,+,iso14443_3a_poller_read,Iso14443_3aError,"Nfc*, Iso14443_3aData*"
 Function,+,iso14443_3a_reset,void,Iso14443_3aData*
 Function,+,iso14443_3a_save,_Bool,"const Iso14443_3aData*, FlipperFormat*"
+Function,+,iso14443_3a_set_uid,void,"Iso14443_3aData*, const uint8_t*, size_t"
 Function,+,iso14443_3a_verify,_Bool,"Iso14443_3aData*, const FuriString*"
 Function,+,iso14443_3b_alloc,Iso14443_3bData*,
 Function,+,iso14443_3b_copy,void,"Iso14443_3bData*, const Iso14443_3bData*"
@@ -1860,6 +1861,7 @@ Function,+,iso14443_3b_is_equal,_Bool,"const Iso14443_3bData*, const Iso14443_3b
 Function,+,iso14443_3b_load,_Bool,"Iso14443_3bData*, FlipperFormat*, uint32_t"
 Function,+,iso14443_3b_reset,void,Iso14443_3bData*
 Function,+,iso14443_3b_save,_Bool,"const Iso14443_3bData*, FlipperFormat*"
+Function,+,iso14443_3b_set_uid,void,"Iso14443_3bData*, const uint8_t*, size_t"
 Function,+,iso14443_3b_verify,_Bool,"Iso14443_3bData*, const FuriString*"
 Function,+,iso14443_4a_alloc,Iso14443_4aData*,
 Function,+,iso14443_4a_copy,void,"Iso14443_4aData*, const Iso14443_4aData*"
@@ -1872,6 +1874,7 @@ Function,+,iso14443_4a_is_equal,_Bool,"const Iso14443_4aData*, const Iso14443_4a
 Function,+,iso14443_4a_load,_Bool,"Iso14443_4aData*, FlipperFormat*, uint32_t"
 Function,+,iso14443_4a_reset,void,Iso14443_4aData*
 Function,+,iso14443_4a_save,_Bool,"const Iso14443_4aData*, FlipperFormat*"
+Function,+,iso14443_4a_set_uid,void,"Iso14443_4aData*, const uint8_t*, size_t"
 Function,+,iso14443_4a_verify,_Bool,"Iso14443_4aData*, const FuriString*"
 Function,+,iso14443_crc_append,void,"Iso14443CrcType, BitBuffer*"
 Function,+,iso14443_crc_check,_Bool,"Iso14443CrcType, const BitBuffer*"
@@ -2089,6 +2092,7 @@ Function,+,mf_classic_save,_Bool,"const MfClassicData*, FlipperFormat*"
 Function,+,mf_classic_set_block_read,void,"MfClassicData*, uint8_t, MfClassicBlock*"
 Function,+,mf_classic_set_key_found,void,"MfClassicData*, uint8_t, MfClassicKeyType, uint64_t"
 Function,+,mf_classic_set_key_not_found,void,"MfClassicData*, uint8_t, MfClassicKeyType"
+Function,+,mf_classic_set_uid,void,"MfClassicData*, const uint8_t*, size_t"
 Function,+,mf_classic_value_to_block,void,"int32_t, uint8_t, MfClassicBlock*"
 Function,+,mf_classic_verify,_Bool,"MfClassicData*, const FuriString*"
 Function,+,mf_desfire_alloc,MfDesfireData*,
@@ -2104,6 +2108,7 @@ Function,+,mf_desfire_is_equal,_Bool,"const MfDesfireData*, const MfDesfireData*
 Function,+,mf_desfire_load,_Bool,"MfDesfireData*, FlipperFormat*, uint32_t"
 Function,+,mf_desfire_reset,void,MfDesfireData*
 Function,+,mf_desfire_save,_Bool,"const MfDesfireData*, FlipperFormat*"
+Function,+,mf_desfire_set_uid,void,"MfDesfireData*, const uint8_t*, size_t"
 Function,+,mf_desfire_verify,_Bool,"MfDesfireData*, const FuriString*"
 Function,+,mf_ultralight_alloc,MfUltralightData*,
 Function,+,mf_ultralight_copy,void,"MfUltralightData*, const MfUltralightData*"
@@ -2130,6 +2135,7 @@ Function,+,mf_ultralight_poller_read_version,MfUltralightError,"Nfc*, MfUltralig
 Function,+,mf_ultralight_poller_write_page,MfUltralightError,"Nfc*, uint16_t, MfUltralightPage*"
 Function,+,mf_ultralight_reset,void,MfUltralightData*
 Function,+,mf_ultralight_save,_Bool,"const MfUltralightData*, FlipperFormat*"
+Function,+,mf_ultralight_set_uid,void,"MfUltralightData*, const uint8_t*, size_t"
 Function,+,mf_ultralight_verify,_Bool,"MfUltralightData*, const FuriString*"
 Function,-,mkdtemp,char*,char*
 Function,-,mkostemp,int,"char*, int"
@@ -2184,6 +2190,7 @@ Function,+,nfc_device_reset,void,NfcDevice*
 Function,+,nfc_device_save,_Bool,"NfcDevice*, const char*"
 Function,+,nfc_device_set_data,void,"NfcDevice*, NfcProtocol, const NfcDeviceData*"
 Function,+,nfc_device_set_loading_callback,void,"NfcDevice*, NfcLoadingCallback, void*"
+Function,+,nfc_device_set_uid,void,"NfcDevice*, const uint8_t*, size_t"
 Function,-,nfc_free,void,Nfc*
 Function,-,nfc_iso14443_3a_listener_tx_custom_parity,NfcError,"Nfc*, const BitBuffer*"
 Function,-,nfc_iso14443_3a_sdd_frame,NfcError,"Nfc*, const BitBuffer*, BitBuffer*, uint32_t"

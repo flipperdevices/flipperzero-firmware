@@ -104,6 +104,13 @@ const uint8_t* nfc_device_get_uid(const NfcDevice* instance, size_t* uid_len) {
     return nfc_devices[instance->protocol]->get_uid(instance->protocol_data, uid_len);
 }
 
+void nfc_device_set_uid(NfcDevice* instance, const uint8_t* uid, size_t uid_len) {
+    furi_assert(instance);
+    furi_assert(instance->protocol < NfcProtocolNum);
+
+    nfc_devices[instance->protocol]->set_uid(instance->protocol_data, uid, uid_len);
+}
+
 void nfc_device_set_data(
     NfcDevice* instance,
     NfcProtocol protocol,

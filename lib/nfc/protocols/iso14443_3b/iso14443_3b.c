@@ -25,6 +25,7 @@ const NfcDeviceBase nfc_device_iso14443_3b = {
     .is_equal = (NfcDeviceEqual)iso14443_3b_is_equal,
     .get_name = (NfcDeviceGetName)iso14443_3b_get_device_name,
     .get_uid = (NfcDeviceGetUid)iso14443_3b_get_uid,
+    .set_uid = (NfcDeviceSetUid)iso14443_3b_set_uid,
     .get_base_data = (NfcDeviceGetBaseData)iso14443_3b_get_base_data,
 };
 
@@ -134,6 +135,13 @@ const uint8_t* iso14443_3b_get_uid(const Iso14443_3bData* data, size_t* uid_len)
     }
 
     return data->uid;
+}
+
+void iso14443_3b_set_uid(Iso14443_3bData* data, const uint8_t* uid, size_t uid_len) {
+    furi_assert(data);
+    furi_assert(uid_len == ISO14443_3B_UID_SIZE);
+
+    memcpy(data->uid, uid, uid_len);
 }
 
 const Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data) {

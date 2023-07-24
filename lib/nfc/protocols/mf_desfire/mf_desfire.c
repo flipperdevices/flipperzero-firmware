@@ -16,6 +16,7 @@ const NfcDeviceBase nfc_device_mf_desfire = {
     .is_equal = (NfcDeviceEqual)mf_desfire_is_equal,
     .get_name = (NfcDeviceGetName)mf_desfire_get_device_name,
     .get_uid = (NfcDeviceGetUid)mf_desfire_get_uid,
+    .set_uid = (NfcDeviceSetUid)mf_desfire_set_uid,
     .get_base_data = (NfcDeviceGetBaseData)mf_desfire_get_base_data,
 };
 
@@ -224,6 +225,12 @@ const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len) {
     furi_assert(data);
 
     return iso14443_4a_get_uid(data->iso14443_4a_data, uid_len);
+}
+
+void mf_desfire_set_uid(MfDesfireData* data, const uint8_t* uid, size_t uid_len) {
+    furi_assert(data);
+
+    iso14443_4a_set_uid(data->iso14443_4a_data, uid, uid_len);
 }
 
 const Iso14443_4aData* mf_desfire_get_base_data(const MfDesfireData* data) {

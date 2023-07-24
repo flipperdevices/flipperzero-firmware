@@ -152,6 +152,7 @@ const NfcDeviceBase nfc_device_mf_ultralight = {
     .is_equal = (NfcDeviceEqual)mf_ultralight_is_equal,
     .get_name = (NfcDeviceGetName)mf_ultralight_get_device_name,
     .get_uid = (NfcDeviceGetUid)mf_ultralight_get_uid,
+    .set_uid = (NfcDeviceSetUid)mf_ultralight_set_uid,
     .get_base_data = (NfcDeviceGetBaseData)mf_ultralight_get_base_data,
 };
 
@@ -465,6 +466,12 @@ const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_l
     furi_assert(data);
 
     return iso14443_3a_get_uid(data->iso14443_3a_data, uid_len);
+}
+
+void mf_ultralight_set_uid(MfUltralightData* data, const uint8_t* uid, size_t uid_len) {
+    furi_assert(data);
+
+    iso14443_3a_set_uid(data->iso14443_3a_data, uid, uid_len);
 }
 
 const Iso14443_3aData* mf_ultralight_get_base_data(const MfUltralightData* data) {

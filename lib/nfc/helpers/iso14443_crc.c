@@ -5,7 +5,8 @@
 #define ISO14443_3A_CRC_INIT (0x6363U)
 #define ISO14443_3B_CRC_INIT (0xFFFFU)
 
-static uint16_t iso14443_crc_calculate(Iso14443CrcType type, const uint8_t* data, size_t data_size) {
+static uint16_t
+    iso14443_crc_calculate(Iso14443CrcType type, const uint8_t* data, size_t data_size) {
     furi_assert(data);
 
     uint16_t crc;

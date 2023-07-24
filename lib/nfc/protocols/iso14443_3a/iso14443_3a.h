@@ -7,7 +7,10 @@
 extern "C" {
 #endif
 
-#define ISO14443_3A_MAX_UID_SIZE (10U)
+#define ISO14443_3A_UID_4_BYTES (4U)
+#define ISO14443_3A_UID_7_BYTES (7U)
+#define ISO14443_3A_UID_10_BYTES (10U)
+#define ISO14443_3A_MAX_UID_SIZE ISO14443_3A_UID_10_BYTES
 
 #define ISO14443_3A_GUARD_TIME_US (5000)
 #define ISO14443_3A_FDT_POLL_FC (1620)
@@ -80,6 +83,8 @@ bool iso14443_3a_is_equal(const Iso14443_3aData* data, const Iso14443_3aData* ot
 const char* iso14443_3a_get_device_name(const Iso14443_3aData* data, NfcDeviceNameType name_type);
 
 const uint8_t* iso14443_3a_get_uid(const Iso14443_3aData* data, size_t* uid_len);
+
+void iso14443_3a_set_uid(Iso14443_3aData* data, const uint8_t* uid, size_t uid_len);
 
 const Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data);
 
