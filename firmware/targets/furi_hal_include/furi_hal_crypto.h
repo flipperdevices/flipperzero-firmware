@@ -67,6 +67,37 @@ bool furi_hal_crypto_store_load_key(uint8_t slot, const uint8_t* iv);
  */
 bool furi_hal_crypto_store_unload_key(uint8_t slot);
 
+/** Init AES engine and load supplied key
+ * Use furi_hal_crypto_unload_key() to deinit the AES engine after using this.
+ *
+ * @param[in]  key   pointer to 32 bytes key data
+ * @param[in]  iv    pointer to 16 bytes Initialization Vector data
+ *
+ * @return     true on success
+ */
+bool furi_hal_crypto_load_key(const uint8_t *key, const uint8_t* iv);
+
+/** Deinit AES engine
+ * Only use this if you previously inited the AES engine using
+ * furi_hal_crypto_load_key().
+ *
+ * @return     true on success
+ */
+bool furi_hal_crypto_unload_key(void);
+
+/** Encrypt the input using AES-CTR
+ * Decryption can be performed by supplying the ciphertext as input.
+ * Inits and deinits the AES engine internally.
+ *
+ * @param[in]  key     pointer to 32 bytes key data
+ * @param[in]  iv      pointer to 12 bytes Initialization Vector data
+ * @param[in]  input   pointer to input data
+ * @param[out] output  pointer to output data
+ * @param      length  length of the input and output in bytes
+ */
+bool furi_hal_crypto_ctr(const uint8_t *key, const uint8_t *iv, const uint8_t
+        *input, uint8_t *output, size_t length);
+
 /** Encrypt data
  *
  * @param      input   pointer to input data

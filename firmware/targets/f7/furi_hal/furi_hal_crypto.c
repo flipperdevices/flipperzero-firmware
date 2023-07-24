@@ -24,6 +24,10 @@
 #define CRYPTO_KEYSIZE_256B (AES_CR_KEYSIZE)
 #define CRYPTO_AES_CBC (AES_CR_CHMOD_0)
 
+#define CRYPTO_AES_CTR (AES_CR_CHMOD_1)
+#define CRYPTO_CTR_IV_LEN 12
+#define CRYPTO_CTR_CTR_LEN 4
+
 static FuriMutex* furi_hal_crypto_mutex = NULL;
 static bool furi_hal_crypto_mode_init_done = false;
 
@@ -276,6 +280,35 @@ bool furi_hal_crypto_store_unload_key(uint8_t slot) {
     return (shci_state == SHCI_Success);
 }
 
+bool furi_hal_crypto_load_key(const uint8_t *key, const uint8_t* iv) {
+    furi_assert(furi_hal_crypto_mutex);
+    furi_check(furi_mutex_acquire(furi_hal_crypto_mutex, FuriWaitForever) == FuriStatusOk);
+
+    furi_hal_bus_enable(FuriHalBusAES1);
+
+    if(!furi_hal_bt_is_alive()) {
+        return false;
+    }
+
+    furi_hal_crypto_mode_init_done = false;
+    crypto_key_init((uint32_t*)key, (uint32_t*)iv);
+
+    return true;
+}
+
+bool furi_hal_crypto_unload_key(void) {
+    if(!furi_hal_bt_is_alive()) {
+        return false;
+    }
+
+    CLEAR_BIT(AES1->CR, AES_CR_EN);
+
+    furi_hal_bus_disable(FuriHalBusAES1);
+
+    furi_check(furi_mutex_release(furi_hal_crypto_mutex) == FuriStatusOk);
+    return true;
+}
+
 bool furi_hal_crypto_encrypt(const uint8_t* input, uint8_t* output, size_t size) {
     bool state = false;
 
@@ -338,5 +371,117 @@ bool furi_hal_crypto_decrypt(const uint8_t* input, uint8_t* output, size_t size)
 
     CLEAR_BIT(AES1->CR, AES_CR_EN);
 
+    return state;
+}
+
+static void crypto_key_init_bswap(uint32_t* key, uint32_t* iv,
+        uint32_t chaining_mode) {
+    CLEAR_BIT(AES1->CR, AES_CR_EN);
+    MODIFY_REG(
+        AES1->CR,
+        AES_CR_DATATYPE | AES_CR_KEYSIZE | AES_CR_CHMOD,
+        CRYPTO_DATATYPE_32B | CRYPTO_KEYSIZE_256B | chaining_mode);
+
+    if(key != NULL) {
+        AES1->KEYR7 = __builtin_bswap32(key[0]);
+        AES1->KEYR6 = __builtin_bswap32(key[1]);
+        AES1->KEYR5 = __builtin_bswap32(key[2]);
+        AES1->KEYR4 = __builtin_bswap32(key[3]);
+        AES1->KEYR3 = __builtin_bswap32(key[4]);
+        AES1->KEYR2 = __builtin_bswap32(key[5]);
+        AES1->KEYR1 = __builtin_bswap32(key[6]);
+        AES1->KEYR0 = __builtin_bswap32(key[7]);
+    }
+
+    AES1->IVR3 = __builtin_bswap32(iv[0]);
+    AES1->IVR2 = __builtin_bswap32(iv[1]);
+    AES1->IVR1 = __builtin_bswap32(iv[2]);
+    AES1->IVR0 = __builtin_bswap32(iv[3]);
+}
+
+static bool furi_hal_crypto_load_key_bswap(const uint8_t *key,
+        const uint8_t* iv, uint32_t chaining_mode) {
+    furi_assert(furi_hal_crypto_mutex);
+    furi_check(furi_mutex_acquire(furi_hal_crypto_mutex, FuriWaitForever) == FuriStatusOk);
+
+    furi_hal_bus_enable(FuriHalBusAES1);
+
+    if(!furi_hal_bt_is_alive()) {
+        return false;
+    }
+
+    crypto_key_init_bswap((uint32_t*)key, (uint32_t*)iv, chaining_mode);
+
+    return true;
+}
+
+static bool furi_hal_crypto_process_block_bswap(const uint8_t *in, uint8_t
+        *out, size_t bytes) {
+    uint32_t block[CRYPTO_BLK_LEN / 4];
+    memset(block, 0, sizeof(block));
+
+    memcpy(block, in, bytes);
+
+    block[0] = __builtin_bswap32(block[0]);
+    block[1] = __builtin_bswap32(block[1]);
+    block[2] = __builtin_bswap32(block[2]);
+    block[3] = __builtin_bswap32(block[3]);
+
+    if (!crypto_process_block(block, block, CRYPTO_BLK_LEN / 4)) {
+        return false;
+    }
+
+    block[0] = __builtin_bswap32(block[0]);
+    block[1] = __builtin_bswap32(block[1]);
+    block[2] = __builtin_bswap32(block[2]);
+    block[3] = __builtin_bswap32(block[3]);
+
+    memcpy(out, block, bytes);
+
+    return true;
+}
+
+bool furi_hal_crypto_ctr(const uint8_t *key, const uint8_t *iv, const uint8_t
+        *input, uint8_t *output, size_t length) {
+    /* prepare IV and counter */
+    uint8_t iv_and_counter[CRYPTO_CTR_IV_LEN + CRYPTO_CTR_CTR_LEN];
+    memcpy(iv_and_counter, iv, CRYPTO_CTR_IV_LEN);
+    iv_and_counter[12] = 0;
+    iv_and_counter[13] = 0;
+    iv_and_counter[14] = 0;
+    iv_and_counter[15] = 1;
+
+    /* load key and IV and set the mode to CTR */
+    if (!furi_hal_crypto_load_key_bswap(key, iv_and_counter, CRYPTO_AES_CTR)) {
+        furi_hal_crypto_unload_key();
+        return false;
+    }
+
+    SET_BIT(AES1->CR, AES_CR_EN);
+    MODIFY_REG(AES1->CR, AES_CR_MODE, CRYPTO_MODE_ENCRYPT);
+
+    bool state = false;
+    size_t last_block_bytes = length % CRYPTO_BLK_LEN;
+
+    size_t i;
+    for (i = 0; i < length - last_block_bytes; i += CRYPTO_BLK_LEN) {
+        if (!furi_hal_crypto_process_block_bswap(&input[i], &output[i],
+                    CRYPTO_BLK_LEN)) {
+            goto out_enc_err;
+        }
+    }
+
+    if (last_block_bytes > 0) {
+        if (!furi_hal_crypto_process_block_bswap(&input[i], &output[i],
+                    last_block_bytes)) {
+            goto out_enc_err;
+        }
+    }
+
+    state = true;
+
+out_enc_err:
+    CLEAR_BIT(AES1->CR, AES_CR_EN);
+    furi_hal_crypto_unload_key();
     return state;
 }
