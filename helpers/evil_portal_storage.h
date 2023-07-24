@@ -12,6 +12,7 @@
 
 void evil_portal_read_index_html(void *context);
 void evil_portal_read_ap_name(void *context);
+void evil_portal_write_ap_name(void *context);
 void write_logs(FuriString* portal_logs);
 char *sequential_file_resolve_path(Storage *storage, const char *dir,
                                    const char *prefix, const char *extension);
