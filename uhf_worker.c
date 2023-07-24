@@ -47,6 +47,6 @@ void uhf_worker_stop(UHFWorker* uhf_worker) {
 void uhf_worker_free(UHFWorker* uhf_worker) {
     furi_assert(uhf_worker);
     furi_thread_free(uhf_worker->thread);
-    uhf_data_free((UHFData*)uhf_worker->data);
+    uhf_response_data_free(uhf_worker->data);
     free(uhf_worker);
 }

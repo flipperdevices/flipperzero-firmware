@@ -16,10 +16,12 @@ int uhf_data_append(UHFData* uhf_data, uint8_t data) {
 void uhf_data_free(UHFData* uhf_data) {
     if(uhf_data != NULL) {
         FURI_LOG_E("LL", "Freeing linked list");
-        free(uhf_data->data);
-        uhf_data_free((UHFData*)uhf_data->next);
-        free(uhf_data->next);
-        free(uhf_data);
+        while(uhf_data != NULL) {
+            FURI_LOG_E("LL", "Freeing node in linked list");
+            UHFData* next = uhf_data->next;
+            free(uhf_data);
+            uhf_data = next;
+        }
     }
 }
 
