@@ -1,4 +1,5 @@
 #include <furi.h>
+#include <furi_hal_random.h>
 #include <gui/gui.h>
 #include <gui/elements.h>
 #include <input/input.h>
@@ -66,11 +67,16 @@ typedef struct {
 	NotificationApp* notify;
 	const char* alphabet;
 	char password[PASSGEN_MAX_LENGTH+1];
-	int length;
+	int length; // must be <= PASSGEN_MAX_LENGTH
 	int level;
 } PassGen;
 
 void state_free(PassGen* app) {
+	// NOTE: would have preferred if a "safe" memset() was available...
+	//       but, since cannot prevent optimization from removing
+	//       memset(), fill with random data instead.
+	furi_hal_random_fill_buf((void*)(app->password), PASSGEN_MAX_LENGTH);
+
     gui_remove_view_port(app->gui, app->view_port);
     furi_record_close(RECORD_GUI);
     view_port_free(app->view_port);
@@ -128,6 +134,7 @@ void build_alphabet(PassGen* app)
 
 PassGen* state_init() {
     PassGen* app = malloc(sizeof(PassGen));
+	_Static_assert(8 <= PASSGEN_MAX_LENGTH, "app->length must be set <= PASSGEN_MAX_LENGTH");
 	app->length = 8;
 	app->level = 2;
 	build_alphabet(app);
@@ -146,13 +153,46 @@ PassGen* state_init() {
 
 void generate(PassGen* app)
 {
-	int hi = strlen(app->alphabet);
-	for (int i=0; i<app->length; i++)
-	{
-		int x = rand() % hi;
-		app->password[i]=app->alphabet[x];
+	memset(app->password, 0, PASSGEN_MAX_LENGTH+1);
+
+	int char_option_count = strlen(app->alphabet);
+	if (char_option_count < 0) {
+		return;
 	}
-	app->password[app->length] = '\0';
+
+	// determine largest character value that avoids bias
+	char ceil = CHAR_MAX - (CHAR_MAX % char_option_count) - 1;
+
+	// iteratively fill the password buffer with random values
+	// then keep only values that are in-range (no bias)
+	void* remaining_buffer = app->password;
+	size_t remaining_length = (app->length * sizeof(char));
+
+	while (remaining_length != 0) {
+		// fewer calls to hardware TRNG is more efficient
+		furi_hal_random_fill_buf(remaining_buffer, remaining_length);
+
+		// keep only values that are in-range (no bias)
+		char* target = remaining_buffer;
+		char* source = remaining_buffer;
+		size_t valid_count = 0;
+
+		for (size_t i = 0; i < remaining_length; i++) {
+			int v = *source;
+			// if the generated random value is in range, keep it
+			if (v < ceil) {
+				v %= char_option_count;
+				*target = app->alphabet[v];
+				// increment target pointer and count of valid items found
+				target++;
+				valid_count++;
+			}
+			// always increment the source pointer
+			source++;
+		}
+		remaining_length -= valid_count;
+		remaining_buffer = target;
+	}
 }
 
 void update_password(PassGen* app, bool vibro)
