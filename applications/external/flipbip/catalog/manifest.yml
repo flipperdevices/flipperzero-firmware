@@ -1,0 +1,17 @@
+sourcecode:
+  type: git
+  location:
+    origin: https://github.com/xtruan/FlipBIP.git
+    commit_sha: 0073c32afb03e50a2957617bfd3cb1f4663ac2f9
+description: "Crypto wallet"
+changelog: "v1.11.0 - Code cleanup and updates for catalog"
+author: "@xtruan"
+screenshots:
+  - "./catalog/startscreen.png"
+  - "./catalog/menu1.png"
+  - "./catalog/menu2.png"
+  - "./catalog/input_mnemonic.png"
+  - "./catalog/btc_loading.png"
+  - "./catalog/wallet_info.png"
+  - "./catalog/btc_receive.png"
+  - "./catalog/settings.png"

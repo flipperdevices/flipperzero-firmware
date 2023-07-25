@@ -19,6 +19,6 @@ App(
     fap_category="Tools",
     fap_author="Struan Clark (xtruan)",
     fap_weburl="https://github.com/xtruan/FlipBIP",
-    fap_version=(1, 10),
-    fap_description="Crypto toolkit for Flipper",
+    fap_version=(1, 11),
+    fap_description="Crypto wallet tools for Flipper",
 )
