@@ -6,6 +6,7 @@ ADD_SCENE(nfc, save_success, SaveSuccess)
 ADD_SCENE(nfc, delete, Delete)
 ADD_SCENE(nfc, delete_success, DeleteSuccess)
 ADD_SCENE(nfc, restore_original_confirm, RestoreOriginalConfirm)
+ADD_SCENE(nfc, restore_original, RestoreOriginal)
 
 ADD_SCENE(nfc, detect, Detect)
 ADD_SCENE(nfc, read, Read)
