@@ -10,6 +10,7 @@ typedef enum {
     NfcProtocolIso14443_3a,
     NfcProtocolIso14443_3b,
     NfcProtocolIso14443_4a,
+    NfcProtocolIso15693_3,
     NfcProtocolMfUltralight,
     NfcProtocolMfClassic,
     NfcProtocolMfDesfire,
