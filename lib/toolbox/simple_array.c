@@ -96,6 +96,17 @@ const SimpleArrayElement* simple_array_cget(const SimpleArray* instance, uint32_
     return simple_array_get((SimpleArrayElement*)instance, index);
 }
 
+SimpleArrayData* simple_array_get_data(SimpleArray* instance) {
+    furi_assert(instance);
+    furi_assert(instance->data);
+
+    return instance->data;
+}
+
+const SimpleArrayData* simple_array_cget_data(const SimpleArray* instance) {
+    return simple_array_get_data((SimpleArray*)instance);
+}
+
 const SimpleArrayConfig simple_array_config_uint8_t = {
     .init = NULL,
     .copy = NULL,

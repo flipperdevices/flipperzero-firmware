@@ -230,7 +230,7 @@ bool mf_desfire_file_data_parse(MfDesfireFileData* data, const BitBuffer* buf) {
 
     if(data_size > 0) {
         simple_array_init(data->data, data_size);
-        bit_buffer_write_bytes(buf, simple_array_get(data->data, 0), data_size);
+        bit_buffer_write_bytes(buf, simple_array_get_data(data->data), data_size);
     }
 
     // Success no matter whether there is data or not
@@ -454,7 +454,8 @@ bool mf_desfire_file_data_load(MfDesfireFileData* data, const char* prefix, Flip
 
         simple_array_init(data->data, data_size);
 
-        if(!flipper_format_read_hex(ff, prefix, simple_array_get(data->data, 0), data_size)) break;
+        if(!flipper_format_read_hex(ff, prefix, simple_array_get_data(data->data), data_size))
+            break;
 
         success = true;
     } while(false);
@@ -496,7 +497,7 @@ bool mf_desfire_application_load(MfDesfireApplication* data, const char* prefix,
         if(!mf_desfire_file_count_load(&file_count, prefix, ff)) break;
 
         simple_array_init(data->file_ids, file_count);
-        if(!mf_desfire_file_ids_load(simple_array_get(data->file_ids, 0), file_count, prefix, ff))
+        if(!mf_desfire_file_ids_load(simple_array_get_data(data->file_ids), file_count, prefix, ff))
             break;
 
         simple_array_init(data->file_settings, file_count);
@@ -686,9 +687,9 @@ bool mf_desfire_file_data_save(
     const char* prefix,
     FlipperFormat* ff) {
     const uint32_t data_size = simple_array_get_count(data->data);
-    return data_size > 0 ?
-               flipper_format_write_hex(ff, prefix, simple_array_cget(data->data, 0), data_size) :
-               true;
+    return data_size > 0 ? flipper_format_write_hex(
+                               ff, prefix, simple_array_cget_data(data->data), data_size) :
+                           true;
 }
 
 bool mf_desfire_application_count_save(const uint32_t* data, FlipperFormat* ff) {
@@ -725,7 +726,7 @@ bool mf_desfire_application_save(
         if(i != key_version_count) break;
 
         const uint32_t file_count = simple_array_get_count(data->file_ids);
-        if(!mf_desfire_file_ids_save(simple_array_get(data->file_ids, 0), file_count, prefix, ff))
+        if(!mf_desfire_file_ids_save(simple_array_get_data(data->file_ids), file_count, prefix, ff))
             break;
 
         for(i = 0; i < file_count; ++i) {

@@ -113,7 +113,7 @@ bool mf_desfire_load(MfDesfireData* data, FlipperFormat* ff, uint32_t version) {
         if(application_count > 0) {
             simple_array_init(data->application_ids, application_count);
             if(!mf_desfire_application_ids_load(
-                   simple_array_get(data->application_ids, 0), application_count, ff))
+                   simple_array_get_data(data->application_ids), application_count, ff))
                 break;
 
             simple_array_init(data->applications, application_count);
@@ -180,7 +180,7 @@ bool mf_desfire_save(const MfDesfireData* data, FlipperFormat* ff) {
 
         if(application_count > 0) {
             if(!mf_desfire_application_ids_save(
-                   simple_array_cget(data->application_ids, 0), application_count, ff))
+                   simple_array_cget_data(data->application_ids), application_count, ff))
                 break;
 
             for(i = 0; i < application_count; ++i) {

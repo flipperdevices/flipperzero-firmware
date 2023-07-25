@@ -27,7 +27,7 @@ bool iso14443_4a_ats_parse(SimpleArray* data, const BitBuffer* buf) {
         if(ats_size != buf_size) break;
 
         simple_array_init(data, ats_size);
-        bit_buffer_write_bytes(buf, simple_array_get(data, 0), ats_size);
+        bit_buffer_write_bytes(buf, simple_array_get_data(data), ats_size);
 
         can_parse = true;
     } while(false);
@@ -38,7 +38,7 @@ bool iso14443_4a_ats_parse(SimpleArray* data, const BitBuffer* buf) {
 void iso14443_4a_ats_fill_default(SimpleArray* data) {
     simple_array_init(data, sizeof(Iso14443_4aAtsData));
 
-    Iso14443_4aAtsData* ats_data = simple_array_get(data, 0);
+    Iso14443_4aAtsData* ats_data = simple_array_get_data(data);
 
     ats_data->tl = sizeof(Iso14443_4aAtsData);
     ats_data->t0 = ISO14443_4A_ATS_T0_TA1_FLAG | ISO14443_4A_ATS_T0_TB1_FLAG |

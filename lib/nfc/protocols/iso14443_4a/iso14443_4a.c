@@ -80,7 +80,7 @@ bool iso14443_4a_load(Iso14443_4aData* data, FlipperFormat* ff, uint32_t version
             simple_array_init(data->ats_data, ats_size);
 
             if(!flipper_format_read_hex(
-                   ff, ISO14443_4A_ATS_KEY, simple_array_get(data->ats_data, 0), ats_size))
+                   ff, ISO14443_4A_ATS_KEY, simple_array_get_data(data->ats_data), ats_size))
                 break;
         } else {
             iso14443_4a_ats_fill_default(data->ats_data);
@@ -103,7 +103,7 @@ bool iso14443_4a_save(const Iso14443_4aData* data, FlipperFormat* ff) {
         if(!flipper_format_write_hex(
                ff,
                ISO14443_4A_ATS_KEY,
-               simple_array_cget(data->ats_data, 0),
+               simple_array_cget_data(data->ats_data),
                simple_array_get_count(data->ats_data)))
             break;
         saved = true;

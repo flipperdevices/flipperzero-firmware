@@ -2667,10 +2667,12 @@ Function,+,sha256_start,void,sha256_context*
 Function,+,sha256_update,void,"sha256_context*, const unsigned char*, unsigned int"
 Function,+,simple_array_alloc,SimpleArray*,const SimpleArrayConfig*
 Function,+,simple_array_cget,const SimpleArrayElement*,"const SimpleArray*, uint32_t"
+Function,+,simple_array_cget_data,const SimpleArrayData*,const SimpleArray*
 Function,+,simple_array_copy,void,"SimpleArray*, const SimpleArray*"
 Function,+,simple_array_free,void,SimpleArray*
 Function,+,simple_array_get,SimpleArrayElement*,"SimpleArray*, uint32_t"
 Function,+,simple_array_get_count,uint32_t,const SimpleArray*
+Function,+,simple_array_get_data,SimpleArrayData*,SimpleArray*
 Function,+,simple_array_init,void,"SimpleArray*, uint32_t"
 Function,+,simple_array_reset,void,SimpleArray*
 Function,-,sin,double,double
