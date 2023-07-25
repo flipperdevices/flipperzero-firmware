@@ -13,7 +13,7 @@ void camera_suite_tick_event_callback(void* context) {
     scene_manager_handle_tick_event(app->scene_manager);
 }
 
-//leave app if back button pressed
+// Leave app if back button pressed.
 bool camera_suite_navigation_event_callback(void* context) {
     furi_assert(context);
     CameraSuite* app = context;
@@ -25,10 +25,10 @@ CameraSuite* camera_suite_app_alloc() {
     app->gui = furi_record_open(RECORD_GUI);
     app->notification = furi_record_open(RECORD_NOTIFICATION);
 
-    //Turn backlight on, believe me this makes testing your app easier
+    // Turn backlight on.
     notification_message(app->notification, &sequence_display_backlight_on);
 
-    //Scene additions
+    // Scene additions
     app->view_dispatcher = view_dispatcher_alloc();
     view_dispatcher_enable_queue(app->view_dispatcher);
 
@@ -92,8 +92,8 @@ void camera_suite_app_free(CameraSuite* app) {
     scene_manager_free(app->scene_manager);
 
     // View Dispatcher
+    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdStartscreen);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdMenu);
-    view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamera);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdCamera);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdGuide);
     view_dispatcher_remove_view(app->view_dispatcher, CameraSuiteViewIdSettings);

@@ -2,7 +2,7 @@
 #include "../helpers/camera_suite_custom_event.h"
 #include "../views/camera_suite_view_camera.h"
 
-static void camera_suite_view_camera_callback(CameraSuiteCustomEvent event, void* context) {
+void camera_suite_view_camera_callback(CameraSuiteCustomEvent event, void* context) {
     furi_assert(context);
     CameraSuite* app = context;
     view_dispatcher_send_custom_event(app->view_dispatcher, event);
@@ -22,14 +22,14 @@ bool camera_suite_scene_camera_on_event(void* context, SceneManagerEvent event) 
 
     if(event.type == SceneManagerEventTypeCustom) {
         switch(event.event) {
-        case CameraSuiteCustomEventSceneStyle1Left:
-        case CameraSuiteCustomEventSceneStyle1Right:
-        case CameraSuiteCustomEventSceneStyle1Up:
-        case CameraSuiteCustomEventSceneStyle1Down:
-        case CameraSuiteCustomEventSceneStyle1Ok:
+        case CameraSuiteCustomEventSceneCameraLeft:
+        case CameraSuiteCustomEventSceneCameraRight:
+        case CameraSuiteCustomEventSceneCameraUp:
+        case CameraSuiteCustomEventSceneCameraDown:
+        case CameraSuiteCustomEventSceneCameraOk:
             // Do nothing.
             break;
-        case CameraSuiteCustomEventSceneStyle1Back:
+        case CameraSuiteCustomEventSceneCameraBack:
             notification_message(app->notification, &sequence_reset_red);
             notification_message(app->notification, &sequence_reset_green);
             notification_message(app->notification, &sequence_reset_blue);

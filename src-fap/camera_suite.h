@@ -27,7 +27,7 @@ typedef struct {
     SceneManager* scene_manager;
     VariableItemList* variable_item_list;
     CameraSuiteViewStart* camera_suite_view_start;
-    CameraSuiteViewStyle1* camera_suite_view_camera;
+    CameraSuiteViewCamera* camera_suite_view_camera;
     CameraSuiteViewGuide* camera_suite_view_guide;
     uint32_t orientation;
     uint32_t haptic;

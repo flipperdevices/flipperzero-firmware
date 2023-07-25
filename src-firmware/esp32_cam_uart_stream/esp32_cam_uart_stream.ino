@@ -26,19 +26,24 @@ camera_config_t config;
 void handleSerialInput();
 void initializeCamera();
 void processImage(camera_fb_t* fb);
-void ditherImage(camera_fb_t* fb, int dt);
+void ditherImage(camera_fb_t* fb);
 bool isDarkBit(uint8_t bit);
+
+// Dithering algorithm options
+enum DitheringAlgorithm {
+  FLOYD_STEINBERG,
+  JARVIS_JUDICE_NINKE,
+  STUCKI
+};
+
+// Default dithering algorithm
+DitheringAlgorithm ditherAlgorithm = FLOYD_STEINBERG;
 
 // Serial input flags
 bool disableDithering = false;
 bool invert = false;
 bool rotated = false;
 bool stopStream = false;
-// Dithering type:
-//    0 = Floyd Steinberg (default)
-//    1 = Atkinson
-int dtType = 0;
-
 
 void setup() {
   Serial.begin(230400);
@@ -46,24 +51,17 @@ void setup() {
 }
 
 void loop() {
-  handleSerialInput();
-
-  if (stopStream) {
-    return;
+  if (!stopStream) {
+    // Frame buffer capture and processing
+    camera_fb_t* fb = esp_camera_fb_get();
+    if (fb) {
+      processImage(fb);
+      esp_camera_fb_return(fb);
+    }
+    delay(50);
   }
 
-  // Frame buffer.
-  camera_fb_t* fb = esp_camera_fb_get();
-
-  if (!fb) {
-    return;
-  }
-
-  processImage(fb);
-
-  esp_camera_fb_return(fb);
-  fb = NULL;
-  delay(50);
+  handleSerialInput(); // Process serial input commands
 }
 
 void handleSerialInput() {
@@ -72,40 +70,37 @@ void handleSerialInput() {
     sensor_t* cameraSensor = esp_camera_sensor_get();
 
     switch (input) {
-      case '>': // Toggle dithering.
+      case '>': // Toggle dithering
         disableDithering = !disableDithering;
         break;
-      case '<': // Toggle invert.
+      case '<': // Toggle invert
         invert = !invert;
         break;
-      case 'B': // Add brightness.
+      case 'B': // Add brightness
         cameraSensor->set_contrast(cameraSensor, cameraSensor->status.brightness + 1);
         break;
-      case 'b': // Remove brightness.
+      case 'b': // Remove brightness
         cameraSensor->set_contrast(cameraSensor, cameraSensor->status.brightness - 1);
         break;
-      case 'C': // Add contrast.
+      case 'C': // Add contrast
         cameraSensor->set_contrast(cameraSensor, cameraSensor->status.contrast + 1);
         break;
-      case 'c': // Remove contrast.
+      case 'c': // Remove contrast
         cameraSensor->set_contrast(cameraSensor, cameraSensor->status.contrast - 1);
         break;
-      case 'D': // Use Floyd Steinberg dithering.
-        dtType = 0;
-        break;
-      case 'd': // Use Atkinson dithering.
-        dtType = 1;
+      case 'P': // TODO: Take a picture
         break;
       case 'M': // Toggle Mirror
         cameraSensor->set_hmirror(cameraSensor, !cameraSensor->status.hmirror);
         break;
-      case 'S': // Start stream.
+      case 'S': // Start stream
         stopStream = false;
         break;
-      case 's': // Stop stream.
+      case 's': // Stop stream
         stopStream = true;
         break;
-      default:
+      case 'D': // Change dithering algorithm.
+        ditherAlgorithm = static_cast<DitheringAlgorithm>((ditherAlgorithm + 1) % 3);
         break;
     }
   }
@@ -147,14 +142,14 @@ void initializeCamera() {
   sensor_t* s = esp_camera_sensor_get();
   s->set_contrast(s, 2);
 
-  // Set rotation (added lines)
+  // Set rotation
   s->set_vflip(s, true);  // Vertical flip
   s->set_hmirror(s, true);  // Horizontal mirror
 }
 
 void processImage(camera_fb_t* frameBuffer) {
   if (!disableDithering) {
-    ditherImage(frameBuffer, dtType);
+    ditherImage(frameBuffer);
   }
 
   uint8_t flipper_y = 0;
@@ -190,56 +185,55 @@ void processImage(camera_fb_t* frameBuffer) {
   }
 }
 
-// Dither image.
-// @param fb Frame buffer
-// @param dt Dithering type:
-//    0 = Floyd Steinberg (default)
-//    1 = Atkinson
-void ditherImage(camera_fb_t* fb, int dt) {
-  switch (dt) {
-    default:
-    case 0: // Floyd Steinberg dithering
-      for (int y = 0; y < fb->height - 1; ++y) {
-        for (int x = 1; x < fb->width - 1; ++x) {
-          int current = y * fb->width + x;
-          // Convert to black or white
-          uint8_t oldpixel = fb->buf[current];
-          uint8_t newpixel = oldpixel >= 128 ? 255 : 0;
-          fb->buf[current] = newpixel;
-          // Compute quantization error
-          int quant_error = oldpixel - newpixel;
-          // Propagate the error
-          fb->buf[current + 1] += quant_error * 7 / 16;
+void ditherImage(camera_fb_t* fb) {
+  for (uint8_t y = 0; y < fb->height; ++y) {
+    for (uint8_t x = 0; x < fb->width; ++x) {
+      size_t current = (y * fb->width) + x;
+      uint8_t oldpixel = fb->buf[current];
+      uint8_t newpixel = oldpixel >= 128 ? 255 : 0;
+      fb->buf[current] = newpixel;
+      int8_t quant_error = oldpixel - newpixel;
+
+      // Apply error diffusion based on the selected algorithm
+      switch (ditherAlgorithm) {
+        case JARVIS_JUDICE_NINKE:
+          fb->buf[(y * fb->width) + x + 1] += quant_error * 7 / 48;
+          fb->buf[(y * fb->width) + x + 2] += quant_error * 5 / 48;
+          fb->buf[(y + 1) * fb->width + x - 2] += quant_error * 3 / 48;
+          fb->buf[(y + 1) * fb->width + x - 1] += quant_error * 5 / 48;
+          fb->buf[(y + 1) * fb->width + x] += quant_error * 7 / 48;
+          fb->buf[(y + 1) * fb->width + x + 1] += quant_error * 5 / 48;
+          fb->buf[(y + 1) * fb->width + x + 2] += quant_error * 3 / 48;
+          fb->buf[(y + 2) * fb->width + x - 2] += quant_error * 1 / 48;
+          fb->buf[(y + 2) * fb->width + x - 1] += quant_error * 3 / 48;
+          fb->buf[(y + 2) * fb->width + x] += quant_error * 5 / 48;
+          fb->buf[(y + 2) * fb->width + x + 1] += quant_error * 3 / 48;
+          fb->buf[(y + 2) * fb->width + x + 2] += quant_error * 1 / 48;
+          break;
+        case STUCKI:
+          fb->buf[(y * fb->width) + x + 1] += quant_error * 8 / 42;
+          fb->buf[(y * fb->width) + x + 2] += quant_error * 4 / 42;
+          fb->buf[(y + 1) * fb->width + x - 2] += quant_error * 2 / 42;
+          fb->buf[(y + 1) * fb->width + x - 1] += quant_error * 4 / 42;
+          fb->buf[(y + 1) * fb->width + x] += quant_error * 8 / 42;
+          fb->buf[(y + 1) * fb->width + x + 1] += quant_error * 4 / 42;
+          fb->buf[(y + 1) * fb->width + x + 2] += quant_error * 2 / 42;
+          fb->buf[(y + 2) * fb->width + x - 2] += quant_error * 1 / 42;
+          fb->buf[(y + 2) * fb->width + x - 1] += quant_error * 2 / 42;
+          fb->buf[(y + 2) * fb->width + x] += quant_error * 4 / 42;
+          fb->buf[(y + 2) * fb->width + x + 1] += quant_error * 2 / 42;
+          fb->buf[(y + 2) * fb->width + x + 2] += quant_error * 1 / 42;
+          break;
+        case FLOYD_STEINBERG:
+        default:
+          // Default to Floyd-Steinberg dithering if an invalid algorithm is selected
+          fb->buf[(y * fb->width) + x + 1] += quant_error * 7 / 16;
           fb->buf[(y + 1) * fb->width + x - 1] += quant_error * 3 / 16;
           fb->buf[(y + 1) * fb->width + x] += quant_error * 5 / 16;
-          fb->buf[(y + 1) * fb->width + x + 1] += quant_error / 16;
-        }
+          fb->buf[(y + 1) * fb->width + x + 1] += quant_error * 1 / 16;
+          break;
       }
-      break;
-    case 1: // Atkinson dithering
-      for (int y = 0; y < fb->height; ++y) {
-        for (int x = 0; x < fb->width; ++x) {
-          int current = y * fb->width + x;
-          uint8_t oldpixel = fb->buf[current];
-          uint8_t newpixel = oldpixel >= 128 ? 255 : 0;
-          fb->buf[current] = newpixel;
-          int quant_error = oldpixel - newpixel;
-
-          if (x + 1 < fb->width)
-            fb->buf[current + 1] += quant_error * 1 / 8;
-          if (x + 2 < fb->width)
-            fb->buf[current + 2] += quant_error * 1 / 8;
-          if (x > 0 && y + 1 < fb->height)
-            fb->buf[(y + 1) * fb->width + x - 1] += quant_error * 1 / 8;
-          if (y + 1 < fb->height)
-            fb->buf[(y + 1) * fb->width + x] += quant_error * 1 / 8;
-          if (y + 1 < fb->height && x + 1 < fb->width)
-            fb->buf[(y + 1) * fb->width + x + 1] += quant_error * 1 / 8;
-          if (y + 2 < fb->height)
-            fb->buf[(y + 2) * fb->width + x] += quant_error * 1 / 8;
-        }
-      }
-      break;
+    }
   }
 }
 
