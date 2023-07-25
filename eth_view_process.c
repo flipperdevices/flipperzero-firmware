@@ -376,6 +376,9 @@ static uint16_t get_string_with_width(const char* str, uint16_t width) {
     char copy[SCREEN_SYMBOLS_WIDTH + 1] = {0};
 
     for(;;) {
+        if(str[end] == '\n') {
+            break;
+        }
         if(str[end] == '\0') {
             break;
         }
@@ -410,6 +413,7 @@ void ethernet_view_process_print(EthViewProcess* process, const char* str) {
     uint16_t len = strlen(str);
 
     while(ptr < len) {
+        if(str[ptr] == '\n') ptr += 1;
         uint16_t start = ptr;
         ptr += get_string_with_width(str + ptr, max_width);
         uint8_t carriage = process->carriage;

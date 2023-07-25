@@ -357,13 +357,8 @@ int32_t eth_worker_task(void* context) {
                         eth_log(EthWorkerProcessDHCP, "DHCP Failed");
                         break;
                     }
-                    furi_delay_ms(1);
-                    next_cycle = 0;
-                    next_cycle |= dhcp_ret == DHCP_IP_ASSIGN;
-                    next_cycle |= dhcp_ret == DHCP_IP_CHANGED;
-                    next_cycle |= dhcp_ret == DHCP_FAILED;
-                    next_cycle |= dhcp_ret == DHCP_IP_LEASED;
-                    next_cycle != next_cycle;
+                    furi_delay_ms(1000);
+                    next_cycle = (dhcp_ret == DHCP_RUNNING);
                 }
                 if(worker->state != EthWorkerStateDHCP) {
                     break;
@@ -371,28 +366,28 @@ int32_t eth_worker_task(void* context) {
                 //wizchip_getnetinfo(&gWIZNETINFO);
                 eth_log(
                     EthWorkerProcessDHCP,
-                    "IP address : %d.%d.%d.%d",
+                    "IP address:\n %d.%d.%d.%d",
                     gWIZNETINFO.ip[0],
                     gWIZNETINFO.ip[1],
                     gWIZNETINFO.ip[2],
                     gWIZNETINFO.ip[3]);
                 eth_log(
                     EthWorkerProcessDHCP,
-                    "SM Mask    : %d.%d.%d.%d",
+                    "SM Mask:\n %d.%d.%d.%d",
                     gWIZNETINFO.sn[0],
                     gWIZNETINFO.sn[1],
                     gWIZNETINFO.sn[2],
                     gWIZNETINFO.sn[3]);
                 eth_log(
                     EthWorkerProcessDHCP,
-                    "Gate way   : %d.%d.%d.%d",
+                    "Gate way:\n %d.%d.%d.%d",
                     gWIZNETINFO.gw[0],
                     gWIZNETINFO.gw[1],
                     gWIZNETINFO.gw[2],
                     gWIZNETINFO.gw[3]);
                 eth_log(
                     EthWorkerProcessDHCP,
-                    "DNS Server : %d.%d.%d.%d",
+                    "DNS Server:\n %d.%d.%d.%d",
                     gWIZNETINFO.dns[0],
                     gWIZNETINFO.dns[1],
                     gWIZNETINFO.dns[2],
