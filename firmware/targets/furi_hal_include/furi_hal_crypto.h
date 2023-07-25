@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#define FURI_HAL_CRYPTO_ADVANCED_AVAIL 1
+
 /** FuriHalCryptoKey Type */
 typedef enum {
     FuriHalCryptoKeyTypeMaster, /**< Master key */
