@@ -79,7 +79,16 @@ void evil_portal_read_ap_name(void *context) {
 
 void evil_portal_write_ap_name(void *context) {
   Evil_PortalApp *app = context;
-  UNUSED(app);
+  Storage *storage = evil_portal_open_storage();
+
+  File *ap_name = storage_file_alloc(storage);
+  if (storage_file_open(ap_name, EVIL_PORTAL_AP_SAVE_PATH, FSAM_WRITE,
+                          FSOM_CREATE_ALWAYS)) {
+      storage_file_write(ap_name, app->text_store[0], strlen(app->text_store[0]));
+  }
+  storage_file_close(ap_name);
+  storage_file_free(ap_name);
+  evil_portal_close_storage();
 }
 
 char *sequential_file_resolve_path(Storage *storage, const char *dir,
