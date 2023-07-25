@@ -322,7 +322,7 @@ int32_t game_reversi_app() {
            (app_state.game.current_player != app_state.game.human_color)) {
             computer_move(&app_state.game);
         }
-        FuriStatus event_status = furi_message_queue_get(event_queue, &input, FuriWaitForever);
+        FuriStatus event_status = furi_message_queue_get(event_queue, &input, 100);
         if(event_status == FuriStatusOk) {
             // handle only press event, ignore repeat/release events
 
@@ -342,6 +342,7 @@ int32_t game_reversi_app() {
             view_port_update(view_port);
             furi_mutex_release(app_state.mutex);
         }
+        view_port_update(view_port);
     }
 
     gui_remove_view_port(gui, view_port);

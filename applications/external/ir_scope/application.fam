@@ -1,4 +1,3 @@
-# Visualizes raw IR signals. It's useful for detecting and inspecting raw IR.
 App(
     appid="ir_scope",
     name="IR Scope",
@@ -10,6 +9,6 @@ App(
     fap_category="Infrared",
     fap_icon_assets_symbol="ir_scope",
     fap_author="@kallanreed",
-    fap_version=(1, 1),
-    fap_description="App allows to see incoming IR signals.",
+    fap_version=(1, 2),
+    fap_description="App allows to see incoming IR signals. Visualizes raw IR signals. It's useful for detecting and inspecting raw IR.",
 )

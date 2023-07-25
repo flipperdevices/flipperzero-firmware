@@ -9,6 +9,6 @@ App(
     fap_category="GPIO",
     fap_author="@jamisonderek",
     fap_weburl="https://github.com/jamisonderek/flipper-zero-tutorials/tree/main/gpio",
-    fap_version=(1, 0),
+    fap_version=(1, 1),
     fap_description="Control a 7-segment display with GPIO pins",
 )

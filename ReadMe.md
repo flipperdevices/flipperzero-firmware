@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0724-0305-0.87.1-8e10e88](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-24 22:45 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-24 22:45 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-24 23:22 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-24 23:22 EST`
 - Added POCSAG modulation to SubGHz modulations
 - Updated: [Evil Portal Assets for Amazon (By jules0835) and Apple (By black28p)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/apps_data/evil_portal/README.md)
 - UL PR: [Hid app kb assets #552 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/552)
@@ -71,7 +71,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix Evil Portal Assets folder](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/22e6c87e293121ba30a6243d69d018c4f8146aca)
 - [Wipe Device option from Lock Menu and Storage Settings (By ClaraCrazy Ported By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2fd060287c1067a0098a7241289da95623e5ab56)
 - Added: [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
-- UL: Plugins: **22+ plugins was fixed (UI update issues) in extra pack and in base firmware pack**
+- UL: Plugins: 22+ plugins was fixed (UI update issues) in extra pack and in base firmware pack
 - UL: Plugins: Spectrum Analyzer - Modulation switching (hold OK) (by ALEEF02 | PR #557)
 - UL: Plugins: BadBT -> Temp fix for macOS
 - UL: Plugins: Update TOTP (Authenticator) [(by akopachov)](https://github.com/akopachov/flipper-zero_authenticator) -> + added fix for UI update too

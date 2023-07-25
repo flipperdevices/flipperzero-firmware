@@ -227,7 +227,11 @@ int32_t gpio_7segment_app(void* p) {
                     FURI_LOG_I(TAG, "OK pressed.");
                     if(furi_mutex_acquire(context->mutex, FuriWaitForever) == FuriStatusOk) {
                         // Pick a random number between 1 and 6...
-                        context->data->digit = (furi_hal_random_get() % 6) + 1;
+                        if(context->data->digit >= 9) {
+                            context->data->digit = 0;
+                        } else {
+                            context->data->digit += 1;
+                        }
 
                         gpio_7segment_show(context->data->digit, context->data->invert);
                         furi_mutex_release(context->mutex);
@@ -252,6 +256,7 @@ int32_t gpio_7segment_app(void* p) {
             // We had an issue getting message from the queue, so exit application.
             processing = false;
         }
+        view_port_update(view_port);
     } while(processing);
 
     // Disconnect the GPIO pins.

@@ -10,16 +10,8 @@
 #define DEFAULT_FREQ 50
 #define DEFAULT_DUTY 1
 
-#define MIN_WIDTH 1000
-#define DEFAULT_WIDTH 1500
-#define MAX_WIDTH 2000
-
-#define WIDTH_STEP_SMALL 1
-#define WIDTH_STEP_BIG 10
-#define WIDTH_STEP_AUTO 1
-
-uint16_t pWidth = DEFAULT_WIDTH;
-bool dir = true;
+uint16_t pWidth = 1500;
+int8_t dir = 1;
 
 enum Modes {
     Center,
@@ -59,8 +51,7 @@ static void servotester_draw_callback(Canvas* canvas, void* ctx) {
     canvas_draw_line(canvas, 14, 30, 14, 20);
     canvas_draw_line(canvas, 114, 30, 114, 20);
 
-    // TODO if width range changes, adapt canvas
-    canvas_draw_frame(canvas, (pWidth - MIN_WIDTH) / 10.2 + 14, 20, 3, 10);
+    canvas_draw_frame(canvas, (pWidth - 1000) / 10.2 + 14, 20, 3, 10);
 
     snprintf(temp_str, sizeof(temp_str), "%i us", pWidth);
 
@@ -125,68 +116,51 @@ int32_t servotester_app(void* p) {
 
     while(1) {
         furi_check(furi_message_queue_get(event_queue, &event, FuriWaitForever) == FuriStatusOk);
-
-        uint16_t pWidthNew = pWidth;
-
         if(event.type == EventTypeInput) {
             if(event.input.key == InputKeyBack) {
                 break;
-            } else if(event.input.key == InputKeyOk && event.input.type == InputTypeRelease) {
-                if(mode == Auto) {
-                    mode = Center;
-                } else {
-                    mode++;
-                }
+            } else if(event.input.key == InputKeyOk) {
+                if(event.input.type == InputTypeRelease) {
+                    if(mode == Auto) {
+                        mode = Center;
+                    } else {
+                        mode++;
+                    }
 
-                if(mode == Center) {
-                    pWidthNew = DEFAULT_WIDTH;
+                    if(mode == Center) {
+                        pWidth = 1500;
+                        servotester_update_pwm();
+                    }
                 }
-
-                if(mode == Auto) {
-                    dir = true; // deterministic direction
-                }
-            } else if(
-                mode == Manual && event.input.key == InputKeyLeft &&
-                event.input.type == InputTypeRelease) {
-                // small step on release for precise setting
-                pWidthNew -= WIDTH_STEP_SMALL;
-            } else if(
-                mode == Manual && event.input.key == InputKeyRight &&
-                event.input.type == InputTypeRelease) {
-                // small step on release for precise setting
-                pWidthNew += WIDTH_STEP_SMALL;
-            } else if(mode == Manual && event.input.key == InputKeyDown) {
-                // big step on every event for fast scrolling
-                pWidthNew -= WIDTH_STEP_BIG;
-            } else if(mode == Manual && event.input.key == InputKeyUp) {
-                // big step on every event for fast scrolling
-                pWidthNew += WIDTH_STEP_BIG;
+            } else if(event.input.key == InputKeyLeft) {
+                if(pWidth > 1000) pWidth--;
+                servotester_update_pwm();
+            } else if(event.input.key == InputKeyRight) {
+                if(pWidth < 2000) pWidth++;
+                servotester_update_pwm();
+            } else if(event.input.key == InputKeyDown) {
+                if(pWidth >= 1010) pWidth -= 10;
+                servotester_update_pwm();
+            } else if(event.input.key == InputKeyUp) {
+                if(pWidth <= 1990) pWidth += 10;
+                servotester_update_pwm();
             }
+            view_port_update(view_port);
         } else if(event.type == EventTypeTick) {
             if(mode == Auto) {
-                if(dir) {
-                    pWidthNew += WIDTH_STEP_AUTO;
-                    if(pWidthNew >= MAX_WIDTH) dir = false;
-                } else {
-                    pWidthNew -= WIDTH_STEP_AUTO;
-                    if(pWidthNew <= MIN_WIDTH) dir = true;
+                pWidth += dir;
+                if(pWidth > 1990 || pWidth < 1010) {
+                    dir = dir * -1;
                 }
+                servotester_update_pwm();
             }
+            view_port_update(view_port);
         }
-
-        if(pWidthNew < MIN_WIDTH) pWidthNew = MIN_WIDTH;
-        if(pWidthNew > MAX_WIDTH) pWidthNew = MAX_WIDTH;
-
-        if(pWidthNew != pWidth) {
-            pWidth = pWidthNew;
-            servotester_update_pwm();
-        }
+        view_port_update(view_port);
     }
 
-    // first stop PWM on component
-    furi_hal_pwm_stop(FuriHalPwmOutputIdTim1PA7);
-    // second power off component
     furi_hal_power_disable_otg();
+    furi_hal_pwm_stop(FuriHalPwmOutputIdTim1PA7);
 
     furi_timer_free(timer);
     furi_message_queue_free(event_queue);

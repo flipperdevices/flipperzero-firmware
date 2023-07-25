@@ -15,17 +15,17 @@
 #include <dolphin/dolphin.h>
 #include "bt_trigger_icons.h"
 
-#define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps_data/bt_trigger/hid.keys")
+#define HID_BT_KEYS_STORAGE_PATH EXT_PATH("apps_data/hid_ble/.bt_hid.keys")
 #define TAG "bt_trigger"
 
-//Enum of allowed event types
+// Enum of allowed event types
 typedef enum {
     EventTypeTick,
     EventTypeInput,
 
 } EventType;
 
-//Struct to store an event and its type
+// Struct to store an event and its type
 typedef struct {
     EventType type;
     InputEvent input;
@@ -40,7 +40,7 @@ typedef struct {
     bool running;
     bool shooting;
     int shots;
-    int delay; //in ms
+    int delay; // in ms
 } AppStruct;
 
 static void draw_callback(Canvas* canvas, void* ctx);

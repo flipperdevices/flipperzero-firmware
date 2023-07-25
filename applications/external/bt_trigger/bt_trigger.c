@@ -5,10 +5,10 @@ __int32_t bt_trigger_app(void* p) {
     UNUSED(p);
     AppStruct* app = appStructAlloc();
 
-    bt_disconnect(app->bt);
+    // bt_disconnect(app->bt);
 
     // Wait 2nd core to update nvm storage
-    furi_delay_ms(200);
+    // furi_delay_ms(200);
 
     bt_keys_storage_set_storage_path(app->bt, HID_BT_KEYS_STORAGE_PATH);
 
@@ -97,6 +97,7 @@ __int32_t bt_trigger_app(void* p) {
                     break;
                 }
             }
+            view_port_update(app->view_port);
             break;
         case(EventTypeTick):
             if(app->shooting) {
@@ -106,6 +107,7 @@ __int32_t bt_trigger_app(void* p) {
                 notification_message(app->notifications, &sequence_blink_blue_100);
                 app->shots++;
             }
+            view_port_update(app->view_port);
             break;
         default:
             break;
@@ -208,6 +210,7 @@ static void bt_hid_connection_status_changed_callback(BtStatus status, void* con
     furi_assert(context);
     AppStruct* app = context;
     app->connected = (status == BtStatusConnected);
+    view_port_update(app->view_port);
 }
 
 AppStruct* appStructAlloc() {

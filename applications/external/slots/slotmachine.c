@@ -222,42 +222,46 @@ int32_t slotmachine_app(void* p) {
     InputEvent input;
 
     // endless input cycle
-    while(furi_message_queue_get(slotmachine->input_queue, &input, FuriWaitForever) ==
-          FuriStatusOk) {
-        // if thread idle - take it
-        furi_check(furi_mutex_acquire(slotmachine->model_mutex, FuriWaitForever) == FuriStatusOk);
+    while(1) {
+        if(furi_message_queue_get(slotmachine->input_queue, &input, 100) == FuriStatusOk) {
+            // if thread idle - take it
+            furi_check(
+                furi_mutex_acquire(slotmachine->model_mutex, FuriWaitForever) == FuriStatusOk);
 
-        if(!checkIsSpinning(slotmachine)) {
-            if(input.key == InputKeyBack) {
-                // exit on back button
-                furi_mutex_release(slotmachine->model_mutex);
-                break;
-            } else if(input.key == InputKeyOk && input.type == InputTypeShort && slotmachine->winview) {
-                slotmachine->winview = false;
-            } else if(
-                input.key == InputKeyOk && input.type == InputTypeShort &&
-                slotmachine->bet <= slotmachine->money) {
-                COLUMNS_COUNT = rand() % 3 + 2;
-                slotmachine->money -= slotmachine->bet;
-                slotmachine->columns[0]->spining = true;
+            if(!checkIsSpinning(slotmachine)) {
+                if(input.key == InputKeyBack) {
+                    // exit on back button
+                    furi_mutex_release(slotmachine->model_mutex);
+                    break;
+                } else if(
+                    input.key == InputKeyOk && input.type == InputTypeShort &&
+                    slotmachine->winview) {
+                    slotmachine->winview = false;
+                } else if(
+                    input.key == InputKeyOk && input.type == InputTypeShort &&
+                    slotmachine->bet <= slotmachine->money) {
+                    COLUMNS_COUNT = rand() % 3 + 2;
+                    slotmachine->money -= slotmachine->bet;
+                    slotmachine->columns[0]->spining = true;
 
-                for(int i = 0; i < COLUMNS_COUNT; i++) {
-                    slotmachine->columns[i]->times = DEFAULT_SPINNING_TIMES;
-                    slotmachine->columns[i]->speed = DEFAULT_SPEED;
-                }
-            } else if(input.key == InputKeyUp) {
-                if(slotmachine->bet + 10 < slotmachine->money) {
-                    slotmachine->bet += 10;
-                }
-            } else if(input.key == InputKeyDown) {
-                if(slotmachine->bet - 10 > 0) {
-                    slotmachine->bet -= 10;
+                    for(int i = 0; i < COLUMNS_COUNT; i++) {
+                        slotmachine->columns[i]->times = DEFAULT_SPINNING_TIMES;
+                        slotmachine->columns[i]->speed = DEFAULT_SPEED;
+                    }
+                } else if(input.key == InputKeyUp) {
+                    if(slotmachine->bet + 10 < slotmachine->money) {
+                        slotmachine->bet += 10;
+                    }
+                } else if(input.key == InputKeyDown) {
+                    if(slotmachine->bet - 10 > 0) {
+                        slotmachine->bet -= 10;
+                    }
                 }
             }
-        }
 
-        // release thread
-        furi_mutex_release(slotmachine->model_mutex);
+            // release thread
+            furi_mutex_release(slotmachine->model_mutex);
+        }
         // redraw viewport
         view_port_update(slotmachine->view_port);
     }
