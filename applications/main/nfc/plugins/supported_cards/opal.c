@@ -135,7 +135,7 @@ static bool opal_parse(const NfcDevice* device, FuriString* parsed_data) {
         const MfDesfireFileData* file_data = mf_desfire_get_file_data(app, &opal_file_id);
         if(file_data == NULL) break;
 
-        const OpalFile* opal_file = simple_array_cget(file_data->data, 0);
+        const OpalFile* opal_file = simple_array_cget_data(file_data->data);
 
         const uint8_t serial2 = opal_file->serial / 10000000;
         const uint16_t serial3 = (opal_file->serial / 1000) % 10000;
