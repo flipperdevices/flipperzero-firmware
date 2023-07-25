@@ -19,7 +19,6 @@ void evil_portal_scene_rename_on_enter(void *context) {
     evil_portal_text_input_callback,
     context,
     app->text_store[0],
-    //(char *)app->ap_name,
     enter_name_length,
     false);
     view_dispatcher_switch_to_view(app->view_dispatcher, Evil_PortalAppViewTextInput);
