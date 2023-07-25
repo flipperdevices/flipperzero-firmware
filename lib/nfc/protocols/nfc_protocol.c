@@ -9,13 +9,21 @@ typedef struct {
 } NfcProtocolTreeNode;
 
 /**************************** Protocol tree structure ****************************
- *                               _________ start ___________________________
- *                              /                         |        |        \
- *               _________ iso14443-3a _______          nfc-b    nfc-f     nfc-v
- *              /               |             \
- *        iso14443-4a     mf ultralight    mf classic
- *        /         \
- *   mf desfire  bank card
+ *
+ *                                                   (Start)
+ *                                                      |
+ *                             +------------------------+-----------+-------+
+ *                             |                        |           |       |
+ *                        ISO14443-3A              ISO14443-3B    NFC-F   NFC-V
+ *                             |
+ *             +---------------+-------------+
+ *             |               |             |
+ *        ISO14443-4A   Mf Ultralight   Mf Classic
+ *             |
+ *       +-----+-----+
+ *       |           |
+ *  Mf Desfire   Bank Card
+ *
  */
 
 static const NfcProtocol nfc_protocol_iso14443_3a_children_protocol[] = {
@@ -33,6 +41,12 @@ static const NfcProtocolTreeNode nfc_protocol_nodes[NfcProtocolNum] = {
             .parent_protocol = NfcProtocolInvalid,
             .children_num = COUNT_OF(nfc_protocol_iso14443_3a_children_protocol),
             .children_protocol = nfc_protocol_iso14443_3a_children_protocol,
+        },
+    [NfcProtocolIso14443_3b] =
+        {
+            .parent_protocol = NfcProtocolInvalid,
+            .children_num = 0,
+            .children_protocol = NULL,
         },
     [NfcProtocolIso14443_4a] =
         {

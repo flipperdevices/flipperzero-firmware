@@ -1,0 +1,188 @@
+#include "iso14443_3b_poller_i.h"
+
+#include <nfc/helpers/iso14443_crc.h>
+
+#define TAG "Iso14443_3bPoller"
+
+static Iso14443_3bError iso14443_3b_poller_process_error(NfcError error) {
+    switch(error) {
+    case NfcErrorNone:
+        return Iso14443_3bErrorNone;
+    case NfcErrorTimeout:
+        return Iso14443_3bErrorTimeout;
+    default:
+        return Iso14443_3bErrorNotPresent;
+    }
+}
+
+static Iso14443_3bError iso14443_3b_poller_prepare_trx(Iso14443_3bPoller* instance) {
+    furi_assert(instance);
+
+    if(instance->state == Iso14443_3bPollerStateIdle) {
+        return iso14443_3b_poller_async_activate(instance, NULL);
+    }
+
+    return Iso14443_3bErrorNone;
+}
+
+static Iso14443_3bError iso14443_3b_poller_frame_exchange(
+    Iso14443_3bPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt) {
+    furi_assert(instance);
+
+    const size_t tx_bytes = bit_buffer_get_size_bytes(tx_buffer);
+    furi_assert(
+        tx_bytes <= bit_buffer_get_capacity_bytes(instance->tx_buffer) - ISO14443_CRC_SIZE);
+
+    bit_buffer_copy(instance->tx_buffer, tx_buffer);
+    iso14443_crc_append(Iso14443CrcTypeB, instance->tx_buffer);
+
+    Iso14443_3bError ret = Iso14443_3bErrorNone;
+
+    do {
+        NfcError error = nfc_trx(instance->nfc, instance->tx_buffer, instance->rx_buffer, fwt);
+        if(error != NfcErrorNone) {
+            ret = iso14443_3b_poller_process_error(error);
+            break;
+        }
+
+        bit_buffer_copy(rx_buffer, instance->rx_buffer);
+        if(!iso14443_crc_check(Iso14443CrcTypeB, instance->rx_buffer)) {
+            ret = Iso14443_3bErrorWrongCrc;
+            break;
+        }
+
+        iso14443_crc_trim(rx_buffer);
+    } while(false);
+
+    return ret;
+}
+
+Iso14443_3bError
+    iso14443_3b_poller_async_activate(Iso14443_3bPoller* instance, Iso14443_3bData* data) {
+    furi_assert(instance);
+    furi_assert(instance->nfc);
+
+    iso14443_3b_reset(instance->data);
+
+    Iso14443_3bError ret;
+
+    do {
+        instance->state = Iso14443_3bPollerStateColResInProgress;
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_reset(instance->rx_buffer);
+
+        // Send REQB
+        bit_buffer_append_byte(instance->tx_buffer, 0x05);
+        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+        bit_buffer_append_byte(instance->tx_buffer, 0x08);
+
+        ret = iso14443_3b_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_POLL_FC);
+        if(ret != Iso14443_3bErrorNone) {
+            instance->state = Iso14443_3bPollerStateColResFailed;
+            break;
+        }
+
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(Iso14443_3bAtqB)) {
+            FURI_LOG_D(TAG, "Unexpected REQB response");
+            instance->state = Iso14443_3bPollerStateColResFailed;
+            ret = Iso14443_3bErrorCommunication;
+            break;
+        }
+
+        instance->state = Iso14443_3bPollerStateActivationInProgress;
+
+        const Iso14443_3bAtqB* atqb =
+            (const Iso14443_3bAtqB*)bit_buffer_get_data(instance->rx_buffer);
+
+        memcpy(instance->data->uid, atqb->uid, ISO14443_3B_UID_SIZE);
+        memcpy(instance->data->app_data, atqb->app_data, ISO14443_3B_APP_DATA_SIZE);
+        memcpy(instance->data->protocol_info, atqb->protocol_info, ISO14443_3B_PROTOCOL_INFO_SIZE);
+
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_reset(instance->rx_buffer);
+
+        // Send ATTRIB
+        bit_buffer_append_byte(instance->tx_buffer, 0x1d);
+        bit_buffer_append_bytes(instance->tx_buffer, atqb->uid, ISO14443_3B_UID_SIZE);
+        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+        bit_buffer_append_byte(instance->tx_buffer, ISO14443_3B_ATTRIB_FRAME_SIZE_256);
+        bit_buffer_append_byte(instance->tx_buffer, 0x01);
+        bit_buffer_append_byte(instance->tx_buffer, 0x00);
+
+        ret = iso14443_3b_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_ATTRIB_FC);
+        if(ret != Iso14443_3bErrorNone) {
+            instance->state = Iso14443_3bPollerStateActivationFailed;
+            break;
+        }
+
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) != 1 ||
+           bit_buffer_get_byte(instance->rx_buffer, 0) != 0) {
+            FURI_LOG_D(TAG, "Unexpected ATTRIB response");
+            instance->state = Iso14443_3bPollerStateActivationFailed;
+            ret = Iso14443_3bErrorCommunication;
+            break;
+        }
+
+        instance->state = Iso14443_3bPollerStateActivated;
+
+        if(data) {
+            iso14443_3b_copy(data, instance->data);
+        }
+
+    } while(false);
+
+    return ret;
+}
+
+Iso14443_3bError iso14443_3b_poller_halt(Iso14443_3bPoller* instance) {
+    furi_assert(instance);
+
+    bit_buffer_reset(instance->tx_buffer);
+    bit_buffer_reset(instance->rx_buffer);
+
+    bit_buffer_append_byte(instance->tx_buffer, 0x50);
+    bit_buffer_append_bytes(instance->tx_buffer, instance->data->uid, ISO14443_3B_UID_SIZE);
+
+    Iso14443_3bError ret;
+
+    do {
+        ret = iso14443_3b_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO14443_3B_FDT_POLL_FC);
+        if(ret != Iso14443_3bErrorNone) {
+            break;
+        }
+
+        if(bit_buffer_get_size_bytes(instance->rx_buffer) != sizeof(uint8_t) ||
+           bit_buffer_get_byte(instance->rx_buffer, 0) != 0) {
+            ret = Iso14443_3bErrorCommunication;
+            break;
+        }
+
+        instance->state = Iso14443_3bPollerStateIdle;
+    } while(false);
+
+    return ret;
+}
+
+Iso14443_3bError iso14443_3b_poller_send_frame(
+    Iso14443_3bPoller* instance,
+    const BitBuffer* tx_buffer,
+    BitBuffer* rx_buffer,
+    uint32_t fwt) {
+    Iso14443_3bError ret;
+
+    do {
+        ret = iso14443_3b_poller_prepare_trx(instance);
+        if(ret != Iso14443_3bErrorNone) break;
+
+        ret = iso14443_3b_poller_frame_exchange(instance, tx_buffer, rx_buffer, fwt);
+    } while(false);
+
+    return ret;
+}

@@ -13,12 +13,14 @@ env.Append(
         File("nfc_scanner.h"),
         # Protocols
         File("protocols/iso14443_3a/iso14443_3a.h"),
+        File("protocols/iso14443_3b/iso14443_3b.h"),
         File("protocols/iso14443_4a/iso14443_4a.h"),
         File("protocols/mf_ultralight/mf_ultralight.h"),
         File("protocols/mf_classic/mf_classic.h"),
         File("protocols/mf_desfire/mf_desfire.h"),
         # Pollers
         File("protocols/iso14443_3a/iso14443_3a_poller.h"),
+        File("protocols/iso14443_3b/iso14443_3b_poller.h"),
         File("protocols/iso14443_4a/iso14443_4a_poller.h"),
         File("protocols/mf_ultralight/mf_ultralight_poller.h"),
         File("protocols/mf_classic/mf_classic_poller.h"),
@@ -34,6 +36,7 @@ env.Append(
         File("protocols/mf_classic/mf_classic_poller_sync_api.h"),
         # Misc
         File("helpers/nfc_util.h"),
+        File("helpers/iso14443_crc.h"),
     ],
 )
 

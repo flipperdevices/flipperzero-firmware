@@ -171,6 +171,8 @@ const char* mf_desfire_get_device_name(const MfDesfireData* data, NfcDeviceNameT
 
 const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len);
 
+bool mf_desfire_set_uid(MfDesfireData* data, const uint8_t* uid, size_t uid_len);
+
 const Iso14443_4aData* mf_desfire_get_base_data(const MfDesfireData* data);
 
 // Getters and tests

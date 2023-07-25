@@ -188,6 +188,8 @@ const char*
 
 const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_len);
 
+bool mf_ultralight_set_uid(MfUltralightData* data, const uint8_t* uid, size_t uid_len);
+
 const Iso14443_3aData* mf_ultralight_get_base_data(const MfUltralightData* data);
 
 MfUltralightType mf_ultralight_get_type_by_version(MfUltralightVersion* version);

@@ -35,6 +35,8 @@ const char* nfc_device_get_name(const NfcDevice* instance, NfcDeviceNameType nam
 
 const uint8_t* nfc_device_get_uid(const NfcDevice* instance, size_t* uid_len);
 
+bool nfc_device_set_uid(NfcDevice* instance, const uint8_t* uid, size_t uid_len);
+
 void nfc_device_set_data(
     NfcDevice* instance,
     NfcProtocol protocol,
