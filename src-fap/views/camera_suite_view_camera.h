@@ -13,6 +13,7 @@
 #include <notification/notification_messages.h>
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
+#include <assets_icons.h>
 
 #pragma once
 
@@ -24,6 +25,8 @@
 #define ROW_BUFFER_LENGTH (FRAME_WIDTH / 8) // 128/8 = 16
 #define RING_BUFFER_LENGTH (ROW_BUFFER_LENGTH + 3) // ROW_BUFFER_LENGTH + Header => 16 + 3 = 19
 #define LAST_ROW_INDEX (FRAME_BUFFER_LENGTH - ROW_BUFFER_LENGTH) // 1024 - 16 = 1008
+
+extern const Icon I_DolphinCommon_56x48;
 
 typedef struct UartDumpModel UartDumpModel;
 
