@@ -51,6 +51,7 @@ void archive_browser_set_callback(
 }
 
 static void contex_menu_filemanager_init(ArchiveBrowserViewModel* model) {
+    ArchiveFile_t* selected = files_array_get(model->files, model->item_idx - model->array_offset);
     if(model->item_cnt > 0) {
         if(model->clipboard_mode == CLIPBOARD_MODE_OFF) {
             archive_menu_add_item(
@@ -69,8 +70,12 @@ static void contex_menu_filemanager_init(ArchiveBrowserViewModel* model) {
                 ArchiveBrowserEventFileMenuPaste_Copy);
         }
 
-        archive_menu_add_item(
-            menu_array_push_raw(model->context_menu), "NewDir", ArchiveBrowserEventFileMenuNewDir);
+        if(selected->type != ArchiveFileTypeFolder) {
+            archive_menu_add_item(
+                menu_array_push_raw(model->context_menu),
+                "NewDir",
+                ArchiveBrowserEventFileMenuNewDir);
+        }
         archive_menu_add_item(
             menu_array_push_raw(model->context_menu), "Rename", ArchiveBrowserEventFileMenuRename);
         archive_menu_add_item(
@@ -109,10 +114,15 @@ static void render_item_menu(Canvas* canvas, ArchiveBrowserViewModel* model) {
             // Folder
             //FURI_LOG_D(TAG, "Directory type");
 
-            // { Copy/Cut, Paste } NewDir, Rename, Delete
             model->menu_file_manage = true;
             model->menu_can_switch = false;
 
+            // Pin
+            archive_menu_add_item(
+                menu_array_push_raw(model->context_menu),
+                item_pin,
+                ArchiveBrowserEventFileMenuPin);
+            // { Copy/Cut, Paste } NewDir, Rename, Delete
             contex_menu_filemanager_init(model);
         } else if(!archive_is_known_app(selected->type)) {
             // UnKnown app type

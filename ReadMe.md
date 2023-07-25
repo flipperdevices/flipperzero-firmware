@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0724-2335-0.87.1-b626ed0](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-24 23:35 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-24 23:35 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-25 12:10 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-25 12:10 EST`
 - Added POCSAG modulation to SubGHz modulations
 - Updated: [Evil Portal Assets for Amazon (By jules0835) and Apple (By black28p)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/apps_data/evil_portal/README.md)
 - UL PR: [Hid app kb assets #552 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/552)
@@ -81,6 +81,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated:[WiFi (Marauder) v0.5.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add LED & Evil Portal Commands (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/25)
 - Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [ESP32 Evil Portal (By bigbrodude6119, Changes By leedave)](https://github.com/leedave/flipper-zero-evil-portal/tree/93d4887e9c7ea1244913084712399db4e9455b08)
+- Fix Archive folder options to include PIN
 
 <a name="release">
 
