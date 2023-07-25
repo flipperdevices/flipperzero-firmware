@@ -79,6 +79,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Infrared: Update Universal remote assets (By amec0e)
 - Updated:[Chess v1.8 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - Updated:[WiFi (Marauder) v0.5.1 (By 0xchocolate & tcpassos)](https://github.com/0xchocolate/flipperzero-firmware-with-wifi-marauder-companion) [Add LED & Evil Portal Commands (By justcallmekoko)](https://github.com/0xchocolate/flipperzero-wifi-marauder/pull/25)
+- Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
+- Updated: [ESP32 Evil Portal (By bigbrodude6119, Changes By leedave)](https://github.com/leedave/flipper-zero-evil-portal/tree/93d4887e9c7ea1244913084712399db4e9455b08)
 
 <a name="release">
 

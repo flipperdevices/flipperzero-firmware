@@ -33,9 +33,9 @@ Evil_PortalApp* evil_portal_app_alloc() {
     app->portal_logs = furi_string_alloc();
 
     app->gui = furi_record_open(RECORD_GUI);
-    app->dialogs = furi_record_open(RECORD_DIALOGS);
 
     app->view_dispatcher = view_dispatcher_alloc();
+
     app->scene_manager = scene_manager_alloc(&evil_portal_scene_handlers, app);
     view_dispatcher_enable_queue(app->view_dispatcher);
     view_dispatcher_set_event_callback_context(app->view_dispatcher, app);
@@ -54,6 +54,10 @@ Evil_PortalApp* evil_portal_app_alloc() {
         app->view_dispatcher,
         Evil_PortalAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
+
+    app->text_input = text_input_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, Evil_PortalAppViewTextInput, text_input_get_view(app->text_input));
 
     for(int i = 0; i < NUM_MENU_ITEMS; ++i) {
         app->selected_option_index[i] = 0;
@@ -89,6 +93,7 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 
     text_box_free(app->text_box);
     furi_string_free(app->text_box_store);
+    text_input_free(app->text_input);
 
     // View dispatcher
     view_dispatcher_free(app->view_dispatcher);
@@ -98,7 +103,6 @@ void evil_portal_app_free(Evil_PortalApp* app) {
 
     // Close records
     furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_DIALOGS);
 
     free(app);
 }

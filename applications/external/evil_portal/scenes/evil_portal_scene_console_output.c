@@ -22,8 +22,6 @@ void evil_portal_console_output_handle_rx_data_cb(uint8_t* buf, size_t len, void
 void evil_portal_scene_console_output_on_enter(void* context) {
     Evil_PortalApp* app = context;
 
-    bool portal_file_set = false;
-
     TextBox* text_box = app->text_box;
     text_box_reset(app->text_box);
     text_box_set_font(text_box, TextBoxFontText);
@@ -64,25 +62,19 @@ void evil_portal_scene_console_output_on_enter(void* context) {
             }
         }
 
-        if(0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
-            portal_file_set = evil_portal_read_index_html(context);
+        if(0 == strncmp("setapname", app->selected_tx_string, strlen("setapname"))) {
+            scene_manager_next_scene(app->scene_manager, Evil_PortalSceneRename);
+            return;
+        }
 
-            if(portal_file_set) {
-                app->command_queue[0] = SET_AP_CMD;
-                app->has_command_queue = true;
-                app->command_index = 0;
-                if(app->show_stopscan_tip) {
-                    const char* msg = "Starting portal\nIf no response press\nBACK to return\n";
-                    furi_string_cat_str(app->text_box_store, msg);
-                    app->text_box_store_strlen += strlen(msg);
-                }
-            } else {
-                if(app->show_stopscan_tip) {
-                    const char* msg = "No portal selected\nShowing current logs\nPress "
-                                      "BACK to return\n";
-                    furi_string_cat_str(app->text_box_store, msg);
-                    app->text_box_store_strlen += strlen(msg);
-                }
+        if(0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
+            app->command_queue[0] = SET_AP_CMD;
+            app->has_command_queue = true;
+            app->command_index = 0;
+            if(app->show_stopscan_tip) {
+                const char* msg = "Starting portal\nIf no response press\nBACK to return\n";
+                furi_string_cat_str(app->text_box_store, msg);
+                app->text_box_store_strlen += strlen(msg);
             }
         }
 
@@ -107,13 +99,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
 
     if(app->is_command && app->selected_tx_string) {
         if(0 == strncmp(SET_HTML_CMD, app->selected_tx_string, strlen(SET_HTML_CMD))) {
-            if(!portal_file_set) {
-                scene_manager_set_scene_state(
-                    app->scene_manager, Evil_PortalSceneConsoleOutput, 0);
-                view_dispatcher_switch_to_view(
-                    app->view_dispatcher, Evil_PortalAppViewConsoleOutput);
-                return;
-            }
+            evil_portal_read_index_html(context);
 
             FuriString* data = furi_string_alloc();
             furi_string_cat(data, "sethtml=");
