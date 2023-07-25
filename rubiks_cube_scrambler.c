@@ -103,6 +103,7 @@ int32_t rubiks_cube_scrambler_main(void* p) {
         if(event.key == InputKeyBack) {
             break;
         }
+        view_port_update(view_port);
     }
 
     furi_message_queue_free(event_queue);
