@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0725-1232-0.87.1-76df38c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-25 12:32 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-25 12:32 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-25 14:52 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-25 14:52 EST`
 - Added POCSAG modulation to SubGHz modulations
 - Updated: [Evil Portal Assets for Amazon (By jules0835) and Apple (By black28p)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/apps_data/evil_portal/README.md)
 - UL PR: [Hid app kb assets #552 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/552)
@@ -82,6 +82,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [ESP32 Evil Portal (By bigbrodude6119, Changes By leedave)](https://github.com/leedave/flipper-zero-evil-portal/tree/93d4887e9c7ea1244913084712399db4e9455b08)
 - Fix Archive folder options to include PIN
+- Updated: [FlipBIP Crypto Wallet v1.11 (By xtruan)](https://github.com/xtruan/FlipBIP)
 
 <a name="release">
 
@@ -354,7 +355,7 @@ $ ./fbt dolphin_ext
 - [FAP Boilerplate (By leedave)](https://github.com/leedave/flipper-zero-fap-boilerplate)
 - [Flashlight (By xMasterX)](https://github.com/xMasterX/flipper-flashlight)
 - [Flipagotchi WIP (By Matt-London)](https://github.com/Matt-London/pwnagotchi-flipper)
-- [FlipBIP Crypto Wallet v1.10 (By xtruan)](https://github.com/xtruan/FlipBIP)
+- [FlipBIP Crypto Wallet v1.11 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - [Flizzer Tracker (By LTVA1)](https://github.com/LTVA1/flizzer_tracker)
 - [GPIO Reader (biotinker) (By biotinker)](https://github.com/biotinker/flipperzero-gpioreader)
 - [GPIO Reader (Aurelilc) (By aureli1c)](https://github.com/aureli1c/flipperzero_GPIO_read)
