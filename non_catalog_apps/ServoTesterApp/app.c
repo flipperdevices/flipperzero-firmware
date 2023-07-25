@@ -244,6 +244,7 @@ int32_t servotester_app_entry(void* p) {
                 }
             }
         }
+        view_port_update(app->view_port);
     }
 
     furi_timer_free(timer);

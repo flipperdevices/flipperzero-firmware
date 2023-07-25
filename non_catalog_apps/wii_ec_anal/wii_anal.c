@@ -385,7 +385,7 @@ int32_t wii_ec_anal(void) {
     // ==================== Main event loop ====================
 
     if(state->run) do {
-            bool redraw = false;
+            //bool redraw = false;
             FuriStatus status = FuriStatusErrorTimeout;
 
             // Wait for a message
@@ -449,13 +449,13 @@ int32_t wii_ec_anal(void) {
 
             //---------------------------------------------
             case EVID_WIIEC: // WiiMote Perhipheral
-                if(evWiiEC(&msg, state)) redraw = true;
+                evWiiEC(&msg, state); //) redraw = true;
                 break;
 
             //---------------------------------------------
             case EVID_KEY: // Key events
                 patBacklight(state);
-                if(evKey(&msg, state)) redraw = true;
+                evKey(&msg, state); //) redraw = true;
                 break;
 
             //---------------------------------------------
@@ -469,7 +469,7 @@ int32_t wii_ec_anal(void) {
             }
 
             // *** Update the GUI screen via the viewport ***
-            if(redraw) view_port_update(vpp);
+            view_port_update(vpp);
 
             // *** Try to release the plugin state variables ***
             furi_mutex_release(state->mutex);

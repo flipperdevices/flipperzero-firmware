@@ -77,6 +77,9 @@ void rcwl_0516_free(Rcwl_0516* app) {
     furi_hal_light_set(LightBlue, 0);
     furi_hal_light_set(LightRed, 0);
     furi_hal_light_set(LightGreen, 0);
+
+    furi_hal_gpio_init(app->input_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+    furi_hal_gpio_init(app->output_pin, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
 }
 
 int32_t rcwl_0516(void* p) {
@@ -93,6 +96,7 @@ int32_t rcwl_0516(void* p) {
                 if(event.type == InputTypePress) break;
             }
         }
+        view_port_update(app->view_port);
     }
 
     rcwl_0516_free(app);

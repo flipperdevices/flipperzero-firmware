@@ -208,6 +208,7 @@ int32_t memsic_2125_app(void* p) {
             // We had an issue getting message from the queue, so exit application.
             processing = false;
         }
+        view_port_update(view_port);
     } while(processing);
 
     // Free resources
