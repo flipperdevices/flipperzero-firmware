@@ -1,6 +1,5 @@
 #include "flipbip_file.h"
 #include <storage/storage.h>
-#include <applications.h>
 #include <loader/loader.h>
 #include "../helpers/flipbip_string.h"
 // From: lib/crypto
@@ -33,7 +32,11 @@ const char* FILE_HSTR = "fb01";
 const char* FILE_K1 = "fb0131d5cf688221c109163908ebe51debb46227c6cc8b37641910833222772a"
                       "baefe6d9ceb651842260e0d1e05e3b90d15e7d5ffaaabc0207bf200a117793a2";
 
-bool flipbip_load_file(char* settings, const FlipBipFile file_type, const char* file_name) {
+bool flipbip_load_file(
+    char* settings,
+    size_t slen,
+    const FlipBipFile file_type,
+    const char* file_name) {
     bool ret = false;
     const char* path;
     if(file_type == FlipBipFileKey) {
@@ -53,10 +56,12 @@ bool flipbip_load_file(char* settings, const FlipBipFile file_type, const char* 
     File* settings_file = storage_file_alloc(fs_api);
     if(storage_file_open(settings_file, path, FSAM_READ, FSOM_OPEN_EXISTING)) {
         char chr;
-        int i = 0;
+        size_t i = 0;
         while((storage_file_read(settings_file, &chr, 1) == 1) &&
               !storage_file_eof(settings_file) && !isspace(chr)) {
-            settings[i] = chr;
+            if(i < slen) {
+                settings[i] = chr;
+            }
             i++;
         }
         ret = true;
@@ -194,7 +199,7 @@ bool flipbip_load_file_secure(char* settings) {
     memzero(data, dlen);
 
     // load k2 from file
-    if(!flipbip_load_file(data, FlipBipFileKey, NULL)) return false;
+    if(!flipbip_load_file(data, dlen, FlipBipFileKey, NULL)) return false;
 
     // check header
     if(data[0] != FILE_HSTR[0] || data[1] != FILE_HSTR[1] || data[2] != FILE_HSTR[2] ||
@@ -220,7 +225,7 @@ bool flipbip_load_file_secure(char* settings) {
     data -= FILE_HLEN;
 
     // load data from file
-    if(!flipbip_load_file(data, FlipBipFileDat, NULL)) return false;
+    if(!flipbip_load_file(data, dlen, FlipBipFileDat, NULL)) return false;
 
     // check header
     if(data[0] != FILE_HSTR[0] || data[1] != FILE_HSTR[1] || data[2] != FILE_HSTR[2] ||
