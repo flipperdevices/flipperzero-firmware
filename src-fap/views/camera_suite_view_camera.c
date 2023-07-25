@@ -65,7 +65,7 @@ static void camera_suite_view_camera_draw(Canvas* canvas, UartDumpModel* model) 
         }
 
         for(uint8_t i = 0; i < 8; ++i) {
-            if((model->pixels[p] & (1 << i)) != 0) {
+            if((model->pixels[p] & (1 << (7 - i))) != 0) {
                 // Adjust the coordinates based on the new screen dimensions
                 uint16_t screen_x, screen_y;
                 switch(app->orientation) {
