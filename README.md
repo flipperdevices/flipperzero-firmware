@@ -26,9 +26,9 @@
 
 ## Previews <a name="previews"></a>
 
-<img align="center" src=".github/images/preview.png" />
+<img align="center" src=".github/images/preview_01.png" />
 
-More previews coming soon!
+<img align="center" src=".github/images/preview_02.png" />
 
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
@@ -119,7 +119,7 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 
 ▶️ = Toggle dithering on/off.
 
-⚪ = Toggle between Floyd–Steinberg and Atkinson dithering.
+⚪ = Cycle Floyd–Steinberg/Jarvis-Judice-Ninke/Stucki dithering types.
 
 ↩️ = Go back.
 
