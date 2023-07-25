@@ -12,6 +12,8 @@
 #define NFC_DEVICE_UID_KEY "UID"
 #define NFC_DEVICE_TYPE_KEY "Device type"
 
+#define NFC_DEVICE_UID_MAX_LEN (10U)
+
 struct NfcDevice {
     NfcProtocol protocol;
     NfcDeviceData* protocol_data;
@@ -104,11 +106,11 @@ const uint8_t* nfc_device_get_uid(const NfcDevice* instance, size_t* uid_len) {
     return nfc_devices[instance->protocol]->get_uid(instance->protocol_data, uid_len);
 }
 
-void nfc_device_set_uid(NfcDevice* instance, const uint8_t* uid, size_t uid_len) {
+bool nfc_device_set_uid(NfcDevice* instance, const uint8_t* uid, size_t uid_len) {
     furi_assert(instance);
     furi_assert(instance->protocol < NfcProtocolNum);
 
-    nfc_devices[instance->protocol]->set_uid(instance->protocol_data, uid, uid_len);
+    return nfc_devices[instance->protocol]->set_uid(instance->protocol_data, uid, uid_len);
 }
 
 void nfc_device_set_data(
@@ -228,6 +230,26 @@ bool nfc_device_save(NfcDevice* instance, const char* path) {
     return saved;
 }
 
+static bool nfc_device_load_uid(
+    FlipperFormat* ff,
+    uint8_t* uid,
+    uint32_t* uid_len,
+    const uint32_t uid_maxlen) {
+    bool loaded = false;
+
+    do {
+        uint32_t uid_len_current;
+        if(!flipper_format_get_value_count(ff, NFC_DEVICE_UID_KEY, &uid_len_current)) break;
+        if(uid_len_current > uid_maxlen) break;
+        if(!flipper_format_read_hex(ff, NFC_DEVICE_UID_KEY, uid, uid_len_current)) break;
+
+        *uid_len = uid_len_current;
+        loaded = true;
+    } while(false);
+
+    return loaded;
+}
+
 static bool nfc_device_load_unified(NfcDevice* instance, FlipperFormat* ff, uint32_t version) {
     bool loaded = false;
 
@@ -253,16 +275,21 @@ static bool nfc_device_load_unified(NfcDevice* instance, FlipperFormat* ff, uint
         instance->protocol_data = nfc_devices[protocol]->alloc();
 
         // Load UID
-        // TODO: move the respective code from ISO14443-3A to here
+        uint8_t uid[NFC_DEVICE_UID_MAX_LEN];
+        uint32_t uid_len;
+
+        if(!nfc_device_load_uid(ff, uid, &uid_len, NFC_DEVICE_UID_MAX_LEN)) break;
+        if(!nfc_device_set_uid(instance, uid, uid_len)) break;
 
         // Load data
-        if(!nfc_devices[protocol]->load(instance->protocol_data, ff, version)) {
-            nfc_device_clear(instance);
-            break;
-        }
+        if(!nfc_devices[protocol]->load(instance->protocol_data, ff, version)) break;
 
         loaded = true;
     } while(false);
+
+    if(!loaded) {
+        nfc_device_clear(instance);
+    }
 
     furi_string_free(temp_str);
     return loaded;
@@ -284,11 +311,16 @@ static bool nfc_device_load_legacy(NfcDevice* instance, FlipperFormat* ff, uint3
             instance->protocol = protocol;
             instance->protocol_data = nfc_devices[protocol]->alloc();
 
+            // Verify protocol
             if(nfc_devices[protocol]->verify(instance->protocol_data, temp_str)) {
-                if(nfc_devices[protocol]->load(instance->protocol_data, ff, version)) {
-                    loaded = true;
-                    break;
-                }
+                uint8_t uid[NFC_DEVICE_UID_MAX_LEN];
+                uint32_t uid_len;
+
+                // Load data
+                loaded = nfc_device_load_uid(ff, uid, &uid_len, NFC_DEVICE_UID_MAX_LEN) &&
+                         nfc_device_set_uid(instance, uid, uid_len) &&
+                         nfc_devices[protocol]->load(instance->protocol_data, ff, version);
+                break;
             }
 
             nfc_device_clear(instance);

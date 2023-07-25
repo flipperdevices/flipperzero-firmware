@@ -227,10 +227,10 @@ const uint8_t* mf_desfire_get_uid(const MfDesfireData* data, size_t* uid_len) {
     return iso14443_4a_get_uid(data->iso14443_4a_data, uid_len);
 }
 
-void mf_desfire_set_uid(MfDesfireData* data, const uint8_t* uid, size_t uid_len) {
+bool mf_desfire_set_uid(MfDesfireData* data, const uint8_t* uid, size_t uid_len) {
     furi_assert(data);
 
-    iso14443_4a_set_uid(data->iso14443_4a_data, uid, uid_len);
+    return iso14443_4a_set_uid(data->iso14443_4a_data, uid, uid_len);
 }
 
 const Iso14443_4aData* mf_desfire_get_base_data(const MfDesfireData* data) {

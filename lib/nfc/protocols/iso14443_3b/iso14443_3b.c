@@ -5,11 +5,9 @@
 #include <nfc/nfc_common.h>
 #include <nfc/helpers/iso14443_crc.h>
 
-#define ISO14443_3B_PROTOCOL_NAME_LEGACY "UID"
 #define ISO14443_3B_PROTOCOL_NAME "ISO14443-3B"
 #define ISO14443_3B_DEVICE_NAME "ISO14443-3B (Unknown)"
 
-#define ISO14443_3B_UID_KEY "UID"
 #define ISO14443_3B_APP_DATA_KEY "Application data"
 #define ISO14443_3B_PROTOCOL_INFO_KEY "Protocol info"
 
@@ -65,14 +63,6 @@ bool iso14443_3b_load(Iso14443_3bData* data, FlipperFormat* ff, uint32_t version
 
     do {
         if(version < NFC_UNIFIED_FORMAT_VERSION) break;
-        // TODO: Load UID in nfc_device.c
-
-        uint32_t uid_len = 0;
-        if(!flipper_format_get_value_count(ff, ISO14443_3B_UID_KEY, &uid_len)) break;
-        if(uid_len != ISO14443_3B_UID_SIZE) break;
-
-        if(!flipper_format_read_hex(ff, ISO14443_3B_UID_KEY, data->uid, ISO14443_3B_UID_SIZE))
-            break;
 
         if(!flipper_format_read_hex(
                ff, ISO14443_3B_APP_DATA_KEY, data->app_data, ISO14443_3B_APP_DATA_SIZE))
@@ -137,11 +127,16 @@ const uint8_t* iso14443_3b_get_uid(const Iso14443_3bData* data, size_t* uid_len)
     return data->uid;
 }
 
-void iso14443_3b_set_uid(Iso14443_3bData* data, const uint8_t* uid, size_t uid_len) {
+bool iso14443_3b_set_uid(Iso14443_3bData* data, const uint8_t* uid, size_t uid_len) {
     furi_assert(data);
-    furi_assert(uid_len == ISO14443_3B_UID_SIZE);
 
-    memcpy(data->uid, uid, uid_len);
+    const bool uid_valid = uid_len == ISO14443_3B_UID_SIZE;
+
+    if(uid_valid) {
+        memcpy(data->uid, uid, uid_len);
+    }
+
+    return uid_valid;
 }
 
 const Iso14443_3bData* iso14443_3b_get_base_data(const Iso14443_3bData* data) {

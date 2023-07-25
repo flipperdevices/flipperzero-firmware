@@ -1,6 +1,7 @@
 #ifdef APP_UNIT_TESTS
 
 #include <lib/nfc/nfc.h>
+#include <lib/nfc/helpers/iso14443_crc.h>
 #include <lib/nfc/protocols/iso14443_3a/iso14443_3a.h>
 
 #include <furi/furi.h>
@@ -246,13 +247,13 @@ static void nfc_worker_listener_pass_col_res(Nfc* instance, uint8_t* rx_data, ui
         if((rx_data[0] == 0x93) && (rx_data[1] == 0x70)) {
             bit_buffer_set_size_bytes(tx_buffer, 1);
             bit_buffer_set_byte(tx_buffer, 0, instance->col_res_data.sel_resp[0].sak);
-            iso14443_3a_append_crc(tx_buffer);
+            iso14443_crc_append(Iso14443CrcTypeA, tx_buffer);
             nfc_listener_tx(instance, tx_buffer);
             processed = true;
         } else if((rx_data[0] == 0x95) && (rx_data[1] == 0x70)) {
             bit_buffer_set_size_bytes(tx_buffer, 1);
             bit_buffer_set_byte(tx_buffer, 0, instance->col_res_data.sel_resp[1].sak);
-            iso14443_3a_append_crc(tx_buffer);
+            iso14443_crc_append(Iso14443CrcTypeA, tx_buffer);
             nfc_listener_tx(instance, tx_buffer);
             instance->col_res_status = Iso14443_3aColResStatusDone;
             NfcEvent event = {.type = NfcEventTypeListenerActivated};

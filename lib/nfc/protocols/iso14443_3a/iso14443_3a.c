@@ -7,7 +7,6 @@
 #define ISO14443_3A_PROTOCOL_NAME "ISO14443-3A"
 #define ISO14443_3A_DEVICE_NAME "ISO14443-3A (Unknown)"
 
-#define ISO14443_3A_UID_KEY "UID"
 #define ISO14443_3A_ATQA_KEY "ATQA"
 #define ISO14443_3A_SAK_KEY "SAK"
 
@@ -62,17 +61,6 @@ bool iso14443_3a_load(Iso14443_3aData* data, FlipperFormat* ff, uint32_t version
     bool parsed = false;
 
     do {
-        // TODO: Load UID in nfc_device.c
-        // if(version < NFC_UNIFIED_FORMAT_VERSION) {
-        uint32_t uid_len = 0;
-        if(!flipper_format_get_value_count(ff, ISO14443_3A_UID_KEY, &uid_len)) break;
-        if(!(uid_len == 4 || uid_len == 7)) break;
-
-        data->uid_len = uid_len;
-
-        if(!flipper_format_read_hex(ff, ISO14443_3A_UID_KEY, data->uid, data->uid_len)) break;
-        // }
-
         // Common to all format versions
         if(!flipper_format_read_hex(ff, ISO14443_3A_ATQA_KEY, data->atqa, 2)) break;
         if(!flipper_format_read_hex(ff, ISO14443_3A_SAK_KEY, &data->sak, 1)) break;
@@ -133,14 +121,19 @@ const uint8_t* iso14443_3a_get_uid(const Iso14443_3aData* data, size_t* uid_len)
     return data->uid;
 }
 
-void iso14443_3a_set_uid(Iso14443_3aData* data, const uint8_t* uid, size_t uid_len) {
+bool iso14443_3a_set_uid(Iso14443_3aData* data, const uint8_t* uid, size_t uid_len) {
     furi_assert(data);
-    furi_assert(
-        uid_len == ISO14443_3A_UID_4_BYTES || uid_len == ISO14443_3A_UID_7_BYTES ||
-        uid_len == ISO14443_3A_UID_10_BYTES);
 
-    memcpy(data->uid, uid, uid_len);
-    data->uid_len = uid_len;
+    const bool uid_valid = uid_len == ISO14443_3A_UID_4_BYTES ||
+                           uid_len == ISO14443_3A_UID_7_BYTES ||
+                           uid_len == ISO14443_3A_UID_10_BYTES;
+
+    if(uid_valid) {
+        memcpy(data->uid, uid, uid_len);
+        data->uid_len = uid_len;
+    }
+
+    return uid_valid;
 }
 
 const Iso14443_3aData* iso14443_3a_get_base_data(const Iso14443_3aData* data) {

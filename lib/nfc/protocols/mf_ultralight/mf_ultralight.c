@@ -468,10 +468,10 @@ const uint8_t* mf_ultralight_get_uid(const MfUltralightData* data, size_t* uid_l
     return iso14443_3a_get_uid(data->iso14443_3a_data, uid_len);
 }
 
-void mf_ultralight_set_uid(MfUltralightData* data, const uint8_t* uid, size_t uid_len) {
+bool mf_ultralight_set_uid(MfUltralightData* data, const uint8_t* uid, size_t uid_len) {
     furi_assert(data);
 
-    iso14443_3a_set_uid(data->iso14443_3a_data, uid, uid_len);
+    return iso14443_3a_set_uid(data->iso14443_3a_data, uid, uid_len);
 }
 
 const Iso14443_3aData* mf_ultralight_get_base_data(const MfUltralightData* data) {
