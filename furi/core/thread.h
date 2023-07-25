@@ -28,7 +28,7 @@ typedef enum {
     FuriThreadPriorityNormal = 16, /**< Normal */
     FuriThreadPriorityHigh = 17, /**< High */
     FuriThreadPriorityHighest = 18, /**< Highest */
-    FuriThreadPriorityIsr = 32, /**< Deffered Isr (highest possible) */
+    FuriThreadPriorityIsr = 31, /**< Deffered Isr (highest possible) */
 } FuriThreadPriority;
 
 /** FuriThread anonymous structure */
