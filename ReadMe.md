@@ -71,6 +71,13 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Fix Evil Portal Assets folder](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/22e6c87e293121ba30a6243d69d018c4f8146aca)
 - [Wipe Device option from Lock Menu and Storage Settings (By ClaraCrazy Ported By RogueMaster)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/2fd060287c1067a0098a7241289da95623e5ab56)
 - Added: [Multi Counter (By JadePossible)](https://github.com/JadePossible/Flipper-Multi-Counter)
+- UL: Plugins: **22+ plugins was fixed (UI update issues) in extra pack and in base firmware pack**
+- UL: Plugins: Spectrum Analyzer - Modulation switching (hold OK) (by ALEEF02 | PR #557)
+- UL: Plugins: BadBT -> Temp fix for macOS
+- UL: Plugins: Update TOTP (Authenticator) [(by akopachov)](https://github.com/akopachov/flipper-zero_authenticator) -> + added fix for UI update too
+- UL: Infrared: Add Play / Pause in universal projector remote
+- UL: Infrared: Update Universal remote assets (By amec0e)
+- Updated:[Chess v1.8 (By xtruan)](https://github.com/xtruan/flipper-chess)
 
 <a name="release">
 
@@ -240,7 +247,7 @@ $ ./fbt dolphin_ext
 - [Asteroids (By antirez)](https://github.com/antirez/flipper-asteroids) [(Modified By SimplyMinimal)](https://github.com/SimplyMinimal/FlipperZero-Asteroids)
 - [BlackJack (By teeebor)](https://github.com/teeebor/flipper_games)
 - [Bomberduck (By leo-need-more-coffee)](https://github.com/leo-need-more-coffee/flipperzero-bomberduck)
-- [Chess v1.7 (By xtruan)](https://github.com/xtruan/flipper-chess)
+- [Chess v1.8 (By xtruan)](https://github.com/xtruan/flipper-chess)
 - [Chess Clock (By ihatecsv)](https://github.com/ihatecsv/flipper_chess_clock)
 - [Color Guess (By leedave)](https://github.com/leedave/Leeds-Flipper-Zero-Applications)
 - [Dice (RM) Including SEX/WAR/8BALL/WEED/DRINK DICE (By RogueMaster)](https://github.com/RogueMaster/flipperzero-dice)
