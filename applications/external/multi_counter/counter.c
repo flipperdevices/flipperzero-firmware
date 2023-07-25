@@ -45,10 +45,8 @@ typedef struct {
 
 } Counter;
 
-
-
 const NotificationSequence sequence_count = {
-    
+
     // Vibrate
     &message_vibro_on,
     &message_delay_10,
@@ -106,7 +104,6 @@ void state_free(Counter* c) {
     free(c);
 }
 
-
 static void input_callback(InputEvent* input_event, void* ctx) {
     Counter* c = ctx;
 
@@ -114,7 +111,6 @@ static void input_callback(InputEvent* input_event, void* ctx) {
         furi_message_queue_put(c->input_queue, input_event, 0);
     }
 }
-
 
 static void render_callback(Canvas* canvas, void* ctx) {
     Counter* c = ctx;
@@ -131,101 +127,140 @@ static void render_callback(Canvas* canvas, void* ctx) {
 
     char scount[5];
     uint16_t dynamicBoxWidth = BOXWIDTH;
-    uint16_t dynamicMiddleX = MIDDLE_X-45;
-    uint16_t dynamicMiddleX2 = MIDDLE_X-15;
-    uint16_t dynamicMiddleX3 = MIDDLE_X+15;
-    uint16_t dynamicMiddleX4 = MIDDLE_X+45;
+    uint16_t dynamicMiddleX = MIDDLE_X - 45;
+    uint16_t dynamicMiddleX2 = MIDDLE_X - 15;
+    uint16_t dynamicMiddleX3 = MIDDLE_X + 15;
+    uint16_t dynamicMiddleX4 = MIDDLE_X + 45;
     uint16_t dynamicArrowX = 0;
 
     if(c->player == 1) {
-                    dynamicArrowX = dynamicMiddleX+10 ;
-                    if(c->count > 0) {
-                        canvas_draw_icon(canvas, dynamicArrowX , 55, DOWN);
-                        }
-                    if(c->count < 99) {
-                        canvas_draw_icon(canvas, dynamicArrowX , 23, UP); 
-                        }
-                }
+        dynamicArrowX = dynamicMiddleX + 10;
+        if(c->count > 0) {
+            canvas_draw_icon(canvas, dynamicArrowX, 55, DOWN);
+        }
+        if(c->count < 99) {
+            canvas_draw_icon(canvas, dynamicArrowX, 23, UP);
+        }
+    }
     if(c->player == 2) {
-                    dynamicArrowX = dynamicMiddleX2+10 ;
-                    if(c->count2 > 0) {
-                        canvas_draw_icon(canvas, dynamicArrowX , 55, DOWN);
-                        }
-                    if(c->count2 < 99) {
-                        canvas_draw_icon(canvas, dynamicArrowX , 23, UP); 
-                        }
-                }
+        dynamicArrowX = dynamicMiddleX2 + 10;
+        if(c->count2 > 0) {
+            canvas_draw_icon(canvas, dynamicArrowX, 55, DOWN);
+        }
+        if(c->count2 < 99) {
+            canvas_draw_icon(canvas, dynamicArrowX, 23, UP);
+        }
+    }
     if(c->player == 3) {
-                    dynamicArrowX = dynamicMiddleX3+10 ;
-                    if(c->count3 > 0) {
-                        canvas_draw_icon(canvas, dynamicArrowX , 55, DOWN);
-                        }
-                    if(c->count3 < 99) {
-                        canvas_draw_icon(canvas, dynamicArrowX , 23, UP); 
-                        }
-                }
+        dynamicArrowX = dynamicMiddleX3 + 10;
+        if(c->count3 > 0) {
+            canvas_draw_icon(canvas, dynamicArrowX, 55, DOWN);
+        }
+        if(c->count3 < 99) {
+            canvas_draw_icon(canvas, dynamicArrowX, 23, UP);
+        }
+    }
     if(c->player == 4) {
-                    dynamicArrowX = dynamicMiddleX4+10 ;
-                    if(c->count4 > 0) {
-                        canvas_draw_icon(canvas, dynamicArrowX , 55, DOWN);
-                        }
-                    if(c->count4 < 99) {
-                        canvas_draw_icon(canvas, dynamicArrowX , 23, UP); 
-                        }
-                    
-                }
+        dynamicArrowX = dynamicMiddleX4 + 10;
+        if(c->count4 > 0) {
+            canvas_draw_icon(canvas, dynamicArrowX, 55, DOWN);
+        }
+        if(c->count4 < 99) {
+            canvas_draw_icon(canvas, dynamicArrowX, 23, UP);
+        }
+    }
 
     if(c->pressed == true || c->boxtimer > 0) {
-       canvas_draw_rframe(canvas, dynamicMiddleX, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
         canvas_draw_rframe(
-            canvas, dynamicMiddleX - 1, MIDDLE_Y + OFFSET_Y - 1, dynamicBoxWidth + 2, BOXHEIGHT + 2, 5);
+            canvas, dynamicMiddleX, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
         canvas_draw_rframe(
-            canvas, dynamicMiddleX - 2, MIDDLE_Y + OFFSET_Y - 2, dynamicBoxWidth + 4, BOXHEIGHT + 4, 5);
+            canvas,
+            dynamicMiddleX - 1,
+            MIDDLE_Y + OFFSET_Y - 1,
+            dynamicBoxWidth + 2,
+            BOXHEIGHT + 2,
+            5);
+        canvas_draw_rframe(
+            canvas,
+            dynamicMiddleX - 2,
+            MIDDLE_Y + OFFSET_Y - 2,
+            dynamicBoxWidth + 4,
+            BOXHEIGHT + 4,
+            5);
         c->pressed = false;
-        c->boxtimer--; }
-    else if(c->pressed2 == true || c->boxtimer2 > 0) {
-
-        canvas_draw_rframe(canvas, dynamicMiddleX2, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
+        c->boxtimer--;
+    } else if(c->pressed2 == true || c->boxtimer2 > 0) {
         canvas_draw_rframe(
-            canvas, dynamicMiddleX2 - 1, MIDDLE_Y + OFFSET_Y - 1, dynamicBoxWidth + 2, BOXHEIGHT + 2, 5);
+            canvas, dynamicMiddleX2, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
         canvas_draw_rframe(
-            canvas, dynamicMiddleX2 - 2, MIDDLE_Y + OFFSET_Y - 2, dynamicBoxWidth + 4, BOXHEIGHT + 4, 5);
+            canvas,
+            dynamicMiddleX2 - 1,
+            MIDDLE_Y + OFFSET_Y - 1,
+            dynamicBoxWidth + 2,
+            BOXHEIGHT + 2,
+            5);
+        canvas_draw_rframe(
+            canvas,
+            dynamicMiddleX2 - 2,
+            MIDDLE_Y + OFFSET_Y - 2,
+            dynamicBoxWidth + 4,
+            BOXHEIGHT + 4,
+            5);
         c->pressed2 = false;
         c->boxtimer2--;
-    } 
-     else if(c->pressed3 == true || c->boxtimer3 > 0) {
-
-        canvas_draw_rframe(canvas, dynamicMiddleX3, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
+    } else if(c->pressed3 == true || c->boxtimer3 > 0) {
         canvas_draw_rframe(
-            canvas, dynamicMiddleX3 - 1, MIDDLE_Y + OFFSET_Y - 1, dynamicBoxWidth + 2, BOXHEIGHT + 2, 5);
+            canvas, dynamicMiddleX3, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
         canvas_draw_rframe(
-            canvas, dynamicMiddleX3 - 2, MIDDLE_Y + OFFSET_Y - 2, dynamicBoxWidth + 4, BOXHEIGHT + 4, 5);
+            canvas,
+            dynamicMiddleX3 - 1,
+            MIDDLE_Y + OFFSET_Y - 1,
+            dynamicBoxWidth + 2,
+            BOXHEIGHT + 2,
+            5);
+        canvas_draw_rframe(
+            canvas,
+            dynamicMiddleX3 - 2,
+            MIDDLE_Y + OFFSET_Y - 2,
+            dynamicBoxWidth + 4,
+            BOXHEIGHT + 4,
+            5);
         c->pressed3 = false;
         c->boxtimer3--;
-    }
-     else if(c->pressed4 == true || c->boxtimer4 > 0) {
-
-        canvas_draw_rframe(canvas, dynamicMiddleX4, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
+    } else if(c->pressed4 == true || c->boxtimer4 > 0) {
         canvas_draw_rframe(
-            canvas, dynamicMiddleX4 - 1, MIDDLE_Y + OFFSET_Y - 1, dynamicBoxWidth + 2, BOXHEIGHT + 2, 5);
+            canvas, dynamicMiddleX4, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
         canvas_draw_rframe(
-            canvas, dynamicMiddleX4 - 2, MIDDLE_Y + OFFSET_Y - 2, dynamicBoxWidth + 4, BOXHEIGHT + 4, 5);
+            canvas,
+            dynamicMiddleX4 - 1,
+            MIDDLE_Y + OFFSET_Y - 1,
+            dynamicBoxWidth + 2,
+            BOXHEIGHT + 2,
+            5);
+        canvas_draw_rframe(
+            canvas,
+            dynamicMiddleX4 - 2,
+            MIDDLE_Y + OFFSET_Y - 2,
+            dynamicBoxWidth + 4,
+            BOXHEIGHT + 4,
+            5);
         c->pressed4 = false;
         c->boxtimer4--;
     }
     if(c->togglelight == true) {
-        canvas_draw_icon(canvas, 116, 0, S_ON); 
+        canvas_draw_icon(canvas, 116, 0, S_ON);
     }
     if(c->togglelight == false) {
-        canvas_draw_icon(canvas, 116, 0, S_OFF); 
+        canvas_draw_icon(canvas, 116, 0, S_OFF);
     }
 
-
-    
     canvas_draw_rframe(canvas, dynamicMiddleX, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
-    canvas_draw_rframe(canvas, dynamicMiddleX2, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
-    canvas_draw_rframe(canvas, dynamicMiddleX3, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
-    canvas_draw_rframe(canvas, dynamicMiddleX4, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
+    canvas_draw_rframe(
+        canvas, dynamicMiddleX2, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
+    canvas_draw_rframe(
+        canvas, dynamicMiddleX3, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
+    canvas_draw_rframe(
+        canvas, dynamicMiddleX4, MIDDLE_Y + OFFSET_Y, dynamicBoxWidth, BOXHEIGHT, 5);
 
     snprintf(scount, sizeof(scount), "%d", c->count);
     canvas_draw_str_aligned(canvas, 19, 32 + OFFSET_Y, AlignCenter, AlignCenter, scount);
@@ -244,7 +279,6 @@ static void render_callback(Canvas* canvas, void* ctx) {
     furi_mutex_release(c->mutex);
 }
 
-
 Counter* state_init() {
     Counter* c = malloc(sizeof(Counter));
 
@@ -254,7 +288,7 @@ Counter* state_init() {
     c->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
     c->notification = furi_record_open(RECORD_NOTIFICATION);
 
-    c->togglelight = false ;
+    c->togglelight = false;
     c->count = 0;
     c->count2 = 0;
     c->count3 = 0;
@@ -269,125 +303,118 @@ Counter* state_init() {
     return c;
 }
 
-
 int32_t counterapp(void) {
-    
     Counter* c = state_init();
 
     InputEvent input;
 
     while(furi_message_queue_get(c->input_queue, &input, FuriWaitForever) == FuriStatusOk) {
         furi_check(furi_mutex_acquire(c->mutex, FuriWaitForever) == FuriStatusOk);
-        
 
         switch(input.key) {
-            case InputKeyBack:
-                furi_mutex_release(c->mutex);
-                state_free(c);
-                return 0;
-            case InputKeyUp:
-                if(c->count < MAX_COUNT && c->player == 1) {
-                    c->pressed = true;
-                    c->boxtimer = BOXTIME;
-                    c->count++;
-                    notification_message(c->notification, &sequence_count);
-                    if (c->togglelight == true){
+        case InputKeyBack:
+            furi_mutex_release(c->mutex);
+            state_free(c);
+            return 0;
+        case InputKeyUp:
+            if(c->count < MAX_COUNT && c->player == 1) {
+                c->pressed = true;
+                c->boxtimer = BOXTIME;
+                c->count++;
+                notification_message(c->notification, &sequence_count);
+                if(c->togglelight == true) {
                     notification_message(c->notification, &sequence_count_buzz);
-                    }
                 }
-                if(c->count2 < MAX_COUNT && c->player == 2) {
-                    c->pressed2 = true;
-                    c->boxtimer2 = BOXTIME;
-                    c->count2++;
-                    notification_message(c->notification, &sequence_count);
-                    if (c->togglelight == true){
+            }
+            if(c->count2 < MAX_COUNT && c->player == 2) {
+                c->pressed2 = true;
+                c->boxtimer2 = BOXTIME;
+                c->count2++;
+                notification_message(c->notification, &sequence_count);
+                if(c->togglelight == true) {
                     notification_message(c->notification, &sequence_count_buzz);
-                    }
                 }
-                if(c->count3 < MAX_COUNT && c->player == 3) {
-                    c->pressed3 = true;
-                    c->boxtimer3 = BOXTIME;
-                    c->count3++;
-                    notification_message(c->notification, &sequence_count);
-                    if (c->togglelight == true){
+            }
+            if(c->count3 < MAX_COUNT && c->player == 3) {
+                c->pressed3 = true;
+                c->boxtimer3 = BOXTIME;
+                c->count3++;
+                notification_message(c->notification, &sequence_count);
+                if(c->togglelight == true) {
                     notification_message(c->notification, &sequence_count_buzz);
-                    }
                 }
-                if(c->count4 < MAX_COUNT && c->player == 4) {
-                    c->pressed4 = true;
-                    c->boxtimer4 = BOXTIME;
-                    c->count4++;
-                    notification_message(c->notification, &sequence_count);
-                    if (c->togglelight == true){
+            }
+            if(c->count4 < MAX_COUNT && c->player == 4) {
+                c->pressed4 = true;
+                c->boxtimer4 = BOXTIME;
+                c->count4++;
+                notification_message(c->notification, &sequence_count);
+                if(c->togglelight == true) {
                     notification_message(c->notification, &sequence_count_buzz);
-                    }
                 }
-                break;
-            case InputKeyDown:
-                if(c->count != 0 && c->player == 1) {
-                    c->pressed = true;
-                    c->boxtimer = BOXTIME;
-                    c->count--;
-                    notification_message(c->notification, &sequence_count);
-                    if (c->togglelight == true){
+            }
+            break;
+        case InputKeyDown:
+            if(c->count != 0 && c->player == 1) {
+                c->pressed = true;
+                c->boxtimer = BOXTIME;
+                c->count--;
+                notification_message(c->notification, &sequence_count);
+                if(c->togglelight == true) {
                     notification_message(c->notification, &sequence_count_buzz);
-                    }
                 }
-                else if(c->count2 != 0 && c->player == 2) {
-                    c->pressed2 = true;
-                    c->boxtimer2 = BOXTIME;
-                    c->count2--;
-                    notification_message(c->notification, &sequence_count);
-                    if (c->togglelight == true){
+            } else if(c->count2 != 0 && c->player == 2) {
+                c->pressed2 = true;
+                c->boxtimer2 = BOXTIME;
+                c->count2--;
+                notification_message(c->notification, &sequence_count);
+                if(c->togglelight == true) {
                     notification_message(c->notification, &sequence_count_buzz);
-                    }
                 }
-                else if(c->count3 != 0 && c->player == 3) {
-                    c->pressed3 = true;
-                    c->boxtimer3 = BOXTIME;
-                    c->count3--;
-                    notification_message(c->notification, &sequence_count);
-                    if (c->togglelight == true){
+            } else if(c->count3 != 0 && c->player == 3) {
+                c->pressed3 = true;
+                c->boxtimer3 = BOXTIME;
+                c->count3--;
+                notification_message(c->notification, &sequence_count);
+                if(c->togglelight == true) {
                     notification_message(c->notification, &sequence_count_buzz);
-                    }
                 }
-                else if(c->count4 != 0 && c->player == 4) {
-                    c->pressed4 = true;
-                    c->boxtimer4 = BOXTIME;
-                    c->count4--;
-                    notification_message(c->notification, &sequence_count);
-                    if (c->togglelight == true){
+            } else if(c->count4 != 0 && c->player == 4) {
+                c->pressed4 = true;
+                c->boxtimer4 = BOXTIME;
+                c->count4--;
+                notification_message(c->notification, &sequence_count);
+                if(c->togglelight == true) {
                     notification_message(c->notification, &sequence_count_buzz);
-                    }
                 }
-                break;
-            case InputKeyRight:
-                if(c->player == 4) {
-                    c->player = 0;
-                }
-                if(c->player < 4) {
-                    c->player++;
-                }
-                break;
-            case InputKeyLeft:
-                if(c->player == 1) {
-                    c->player = 4;
-                }
-                else {
-                    c->player--;
-                }
-                break;
-            case InputKeyOk:
-                c->togglelight = !c->togglelight; 
-                if (c->togglelight == true){
-                    notification_message(c->notification, &sequence_count_ok_buzz);
-                    }
-                if (c->togglelight == false){
-                    notification_message(c->notification, &sequence_count_ok);
-                    }
-                break;
-            default:
-                break;
+            }
+            break;
+        case InputKeyRight:
+            if(c->player == 4) {
+                c->player = 0;
+            }
+            if(c->player < 4) {
+                c->player++;
+            }
+            break;
+        case InputKeyLeft:
+            if(c->player == 1) {
+                c->player = 4;
+            } else {
+                c->player--;
+            }
+            break;
+        case InputKeyOk:
+            c->togglelight = !c->togglelight;
+            if(c->togglelight == true) {
+                notification_message(c->notification, &sequence_count_ok_buzz);
+            }
+            if(c->togglelight == false) {
+                notification_message(c->notification, &sequence_count_ok);
+            }
+            break;
+        default:
+            break;
         }
 
         furi_mutex_release(c->mutex);
