@@ -5,7 +5,7 @@ App(appid="multi_counter",
     requires=[
         "gui",
     ],
-    fap_category="Misc",
+    fap_category="Tools",
     fap_icon="icons/counter_icon.png",
     fap_icon_assets="icons",
 )
