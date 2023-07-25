@@ -344,7 +344,14 @@ static void nfc_protocol_support_scene_saved_menu_on_enter(NfcApp* instance) {
         nfc_protocol_support_common_submenu_callback,
         instance);
 
-    // TODO: Implement restore from shadow file
+    if(!nfc_has_shadow_file(instance)) {
+        submenu_add_item(
+            submenu,
+            "Restore Data Changes",
+            SubmenuIndexCommonRestore,
+            nfc_protocol_support_common_submenu_callback,
+            instance);
+    }
 
     submenu_set_selected_item(
         instance->submenu,
@@ -360,9 +367,10 @@ static bool
     if(event.type == SceneManagerEventTypeCustom) {
         scene_manager_set_scene_state(instance->scene_manager, NfcSceneSavedMenu, event.event);
 
-        // TODO: Implement restore from shadow file
-
-        if(event.event == SubmenuIndexCommonInfo) {
+        if(event.event == SubmenuIndexCommonRestore) {
+            scene_manager_next_scene(instance->scene_manager, NfcSceneRestoreOriginalConfirm);
+            consumed = true;
+        } else if(event.event == SubmenuIndexCommonInfo) {
             scene_manager_next_scene(instance->scene_manager, NfcSceneSupportedCard);
             consumed = true;
         } else if(event.event == SubmenuIndexCommonRename) {
