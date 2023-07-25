@@ -325,6 +325,7 @@ int32_t zeitraffer_app(void* p) {
                     }
                 }
             }
+            view_port_update(view_port);
         }
 
         // Наше событие — это сработавший таймер
@@ -378,6 +379,8 @@ int32_t zeitraffer_app(void* p) {
             default:
                 notification_message(notifications, &sequence_display_backlight_enforce_auto);
             }
+
+            view_port_update(view_port);
         }
         if(Time < 1) Time = 1; // Не даём открутить таймер меньше единицы
         if(Count < -1)

@@ -632,6 +632,8 @@ int32_t flipvalo_app() {
 
     next_event:
         furi_mutex_release(fv_priv->mutex);
+
+        view_port_update(view_port);
     }
 
 cleanup:

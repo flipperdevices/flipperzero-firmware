@@ -529,6 +529,7 @@ int32_t infrared_remote_app(void* p) {
                     is_transmitting = true;
                 }
             }
+            view_port_update(app->view_port);
         }
     }
 

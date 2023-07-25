@@ -20,7 +20,7 @@ Sources of "integrated/bundled" apps are added now in this repo too, to allow pu
 
 The Flipper and its community wouldn't be as rich as it is without your contributions and support. Thank you for all you have done.
 
-### Apps checked & updated at `24 Jul 01:07 GMT +3`
+### Apps checked & updated at `25 Jul 04:13 GMT +3`
 
 ## Games
 - [Pong (By nmrr)](https://github.com/nmrr/flipperzero-pong) - Modified by [SimplyMinimal](https://github.com/SimplyMinimal/FlipperZero-Pong)
@@ -108,7 +108,7 @@ The Flipper and its community wouldn't be as rich as it is without your contribu
 - [Counter (By Krulknul)](https://github.com/Krulknul/dolphin-counter)
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [IR Remote (By Hong5489)](https://github.com/Hong5489/ir_remote) - improvements [(By friebel)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/535) - Hold Option, RAW support [(By d4ve10)](https://github.com/d4ve10/ir_remote/tree/infrared_hold_option)
-- [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen)
+- [Password Generator (By anakod)](https://github.com/anakod/flipper_passgen) - Proper random by [henrygab](https://github.com/anakod/flipper_passgen/pull/6)
 - [Count Down Timer (By 0w0mewo)](https://github.com/0w0mewo/fpz_cntdown_timer)
 - [QR Code (By bmatcuk)](https://github.com/bmatcuk/flipperzero-qrcode)
 - [Flipp Pomodoro Timer (By Th3Un1q3)](https://github.com/Th3Un1q3/flipp_pomodoro)

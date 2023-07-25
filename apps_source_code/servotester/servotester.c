@@ -145,6 +145,7 @@ int32_t servotester_app(void* p) {
                 if(pWidth <= 1990) pWidth += 10;
                 servotester_update_pwm();
             }
+            view_port_update(view_port);
         } else if(event.type == EventTypeTick) {
             if(mode == Auto) {
                 pWidth += dir;
@@ -153,7 +154,9 @@ int32_t servotester_app(void* p) {
                 }
                 servotester_update_pwm();
             }
+            view_port_update(view_port);
         }
+        view_port_update(view_port);
     }
 
     furi_hal_power_disable_otg();
