@@ -13,7 +13,6 @@
 #include <notification/notification_messages.h>
 #include <storage/filesystem_api_defines.h>
 #include <storage/storage.h>
-#include <assets_icons.h>
 
 #pragma once
 
