@@ -7,7 +7,6 @@
 #include "../helpers/camera_suite_haptic.h"
 #include "../helpers/camera_suite_speaker.h"
 #include "../helpers/camera_suite_led.h"
-#include <assets_icons.h>
 
 static CameraSuiteViewStyle1* current_instance = NULL;
 // Dithering type:
