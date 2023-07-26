@@ -2,9 +2,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define MAX_DATA_SIZE 32
+
 typedef struct UHFData {
-    uint8_t data[32];
+    uint8_t data[MAX_DATA_SIZE];
     size_t length;
+    bool data_full;
     struct UHFData* next;
 } UHFData;
 

@@ -12,6 +12,9 @@
 
 #include "key_generator_icons.h"
 
+#define DIR_PATH "/ext/lfrfid/rfidfuzzer"
+#define FILE_PATH "/ext/lfrfid/rfidfuzzer/generated.txt"
+
 FuriString* file_path;
 FuriString* key;
 
@@ -74,9 +77,10 @@ int32_t key_generator_main(void* p) {
         flipper_format_file_close(format);
         flipper_format_free(format);
 
+        if(!storage_dir_exists(storage, DIR_PATH)) storage_simply_mkdir(storage, DIR_PATH);
+
         File* file = storage_file_alloc(storage);
-        bool ok = storage_file_open(
-            file, "/ext/lfrfid/rfidfuzzer/generated.txt", FSAM_WRITE, FSOM_OPEN_ALWAYS);
+        bool ok = storage_file_open(file, FILE_PATH, FSAM_WRITE, FSOM_OPEN_ALWAYS);
         if(ok) {
             storage_file_write(file, (uint8_t*)furi_string_get_cstr(key), 2);
             storage_file_write(file, (uint8_t*)"11111111\r\n", 10);

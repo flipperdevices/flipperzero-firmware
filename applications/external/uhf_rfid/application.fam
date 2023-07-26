@@ -2,7 +2,7 @@ App(
     appid="yrm100_uhf_rfid",
     name="[YRM100] UHF RFID",
     apptype=FlipperAppType.EXTERNAL,
-    entry_point="uhf_rfid_app2",
+    entry_point="uhf_app_main",
     stack_size=4 * 1024,
     order=30,
     fap_category="GPIO",

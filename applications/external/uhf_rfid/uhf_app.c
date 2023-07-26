@@ -1,24 +1,47 @@
 #include "uhf_app_i.h"
 
-bool uhf_custom_event_callback(void* context, uint32_t event) {
-    furi_assert(context);
-    UHFApp* uhf_app = context;
+char* convertToHexString(const uint8_t* array, size_t length) {
+    if(array == NULL || length == 0) {
+        return NULL;
+    }
+
+    // Each byte takes 3 characters in the hex representation (2 characters + space), plus 1 for the null terminator
+    size_t hexLength = (length * 3) + 1;
+
+    char* hexArray = (char*)malloc(hexLength * sizeof(char));
+    if(hexArray == NULL) {
+        return NULL;
+    }
+
+    size_t index = 0;
+    for(size_t i = 0; i < length; i++) {
+        index += snprintf(&hexArray[index], hexLength - index, "%02x ", array[i]);
+    }
+
+    hexArray[hexLength - 1] = '\0';
+
+    return hexArray;
+}
+
+bool uhf_custom_event_callback(void* ctx, uint32_t event) {
+    furi_assert(ctx);
+    UHFApp* uhf_app = ctx;
     return scene_manager_handle_custom_event(uhf_app->scene_manager, event);
 }
 
-bool uhf_back_event_callback(void* context) {
-    furi_assert(context);
-    UHFApp* uhf_app = context;
+bool uhf_back_event_callback(void* ctx) {
+    furi_assert(ctx);
+    UHFApp* uhf_app = ctx;
     return scene_manager_handle_back_event(uhf_app->scene_manager);
 }
 
-void uhf_tick_event_callback(void* context) {
-    furi_assert(context);
-    UHFApp* uhf_app = context;
+void uhf_tick_event_callback(void* ctx) {
+    furi_assert(ctx);
+    UHFApp* uhf_app = ctx;
     scene_manager_handle_tick_event(uhf_app->scene_manager);
 }
 
-UHFApp* uhf_app_alloc() {
+UHFApp* uhf_alloc() {
     UHFApp* uhf_app = (UHFApp*)malloc(sizeof(UHFApp));
     uhf_app->worker = (UHFWorker*)uhf_worker_alloc();
     uhf_app->view_dispatcher = view_dispatcher_alloc();
@@ -67,7 +90,7 @@ UHFApp* uhf_app_alloc() {
     return uhf_app;
 }
 
-void uhf_app_free(UHFApp* uhf_app) {
+void uhf_free(UHFApp* uhf_app) {
     furi_assert(uhf_app);
 
     // Submenu
@@ -111,14 +134,61 @@ void uhf_app_free(UHFApp* uhf_app) {
     free(uhf_app);
 }
 
+// void uhf_text_store_set(UHFApp* uhf_app, const char* text, ...) {
+//     va_list args;
+//     va_start(args, text);
+
+//     vsnprintf(uhf_app->text_store, sizeof(uhf_app->text_store), text, args);
+
+//     va_end(args);
+// }
+
+// void uhf_text_store_clear(UHFApp* uhf_app) {
+//     memset(uhf_app->text_store, 0, sizeof(uhf_app->text_store));
+// }
+//  ==================
+static const NotificationSequence uhf_sequence_blink_start_cyan = {
+    &message_blink_start_10,
+    &message_blink_set_color_cyan,
+    &message_do_not_reset,
+    NULL,
+};
+
+static const NotificationSequence uhf_sequence_blink_stop = {
+    &message_blink_stop,
+    NULL,
+};
+
+void uhf_blink_start(UHFApp* uhf_app) {
+    notification_message(uhf_app->notifications, &uhf_sequence_blink_start_cyan);
+}
+
+void uhf_blink_stop(UHFApp* uhf_app) {
+    notification_message(uhf_app->notifications, &uhf_sequence_blink_stop);
+}
+
+void uhf_show_loading_popup(void* ctx, bool show) {
+    UHFApp* uhf_app = ctx;
+    TaskHandle_t timer_task = xTaskGetHandle(configTIMER_SERVICE_TASK_NAME);
+
+    if(show) {
+        // Raise timer priority so that animations can play
+        vTaskPrioritySet(timer_task, configMAX_PRIORITIES - 1);
+        view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewLoading);
+    } else {
+        // Restore default timer priority
+        vTaskPrioritySet(timer_task, configTIMER_TASK_PRIORITY);
+    }
+}
+
 int32_t uhf_app_main(void* ctx) {
     UNUSED(ctx);
-    UHFApp* uhf_app = uhf_app_alloc();
+    UHFApp* uhf_app = uhf_alloc();
     view_dispatcher_attach_to_gui(
         uhf_app->view_dispatcher, uhf_app->gui, ViewDispatcherTypeFullscreen);
     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneStart);
     view_dispatcher_run(uhf_app->view_dispatcher);
 
-    uhf_app_free(uhf_app);
+    uhf_free(uhf_app);
     return 0;
 }

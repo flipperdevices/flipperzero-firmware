@@ -1,25 +1,32 @@
+#include <furi.h>
 #include "uhf_data.h"
+// #include "uhf_cmd.h"
 
 UHFData* uhf_data_alloc() {
     UHFData* uhf_data = (UHFData*)malloc(sizeof(UHFData));
     uhf_data->length = 0;
+    uhf_data->data_full = false;
     uhf_data->next = NULL;
     return uhf_data;
 }
 
 int uhf_data_append(UHFData* uhf_data, uint8_t data) {
-    if(uhf_data->length >= 32) return 0;
+    if(uhf_data->length >= MAX_DATA_SIZE || uhf_data->data_full) return 0;
     uhf_data->data[uhf_data->length++] = data;
+    if(data == 0x7E) {
+        uhf_data->data_full = true;
+    }
     return 1;
 }
 
 void uhf_data_free(UHFData* uhf_data) {
-    free(uhf_data->data);
-    if(uhf_data->next != NULL) {
-        uhf_data_free((UHFData*)uhf_data->next);
+    if(uhf_data != NULL) {
+        while(uhf_data != NULL) {
+            UHFData* next = uhf_data->next;
+            free(uhf_data);
+            uhf_data = next;
+        }
     }
-    free(uhf_data->next);
-    free(uhf_data);
 }
 
 UHFResponseData* uhf_response_data_alloc() {

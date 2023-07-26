@@ -1,12 +1,10 @@
 #pragma once
 
-#include "uhf_app.h"
-#include "uhf_worker.h"
-
 #include <furi.h>
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
+#include <gui/canvas_i.h>
 #include <notification/notification_messages.h>
 
 #include <gui/modules/submenu.h>
@@ -21,6 +19,9 @@
 
 #include <storage/storage.h>
 #include <lib/toolbox/path.h>
+
+#include "uhf_app.h"
+#include "uhf_worker.h"
 #include "uhf_rfid_icons.h"
 
 #define UHF_TEXT_STORE_SIZE 128
@@ -33,7 +34,6 @@ enum UHFCustomEvent {
     UHFCustomEventWorkerExit,
     UHFCustomEventByteInputDone,
     UHFCustomEventTextInputDone,
-    UHFCustomEventDictAttackSkip,
 };
 
 typedef enum {
@@ -91,3 +91,5 @@ void uhf_show_loading_popup(void* context, bool show);
  * @return     True if memory is set to pattern, false otherwise
  */
 bool uhf_is_memset(const uint8_t* data, const uint8_t pattern, size_t size);
+
+char* convertToHexString(const uint8_t* array, size_t length);

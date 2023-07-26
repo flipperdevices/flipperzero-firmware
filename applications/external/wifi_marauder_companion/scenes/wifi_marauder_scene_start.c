@@ -33,7 +33,6 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
      NO_ARGS,
      FOCUS_CONSOLE_END,
      SHOW_STOPSCAN_TIP},
-    {"Led", {"HEX", "Pattern"}, 2, {"led -s", "led -p"}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"SSID",
      {"add rand", "add name", "remove"},
      3,
@@ -70,7 +69,7 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
      FOCUS_CONSOLE_END,
      SHOW_STOPSCAN_TIP},
     {"Evil Portal",
-     {"Start"},
+     {"start"},
      1,
      {"evilportal -c start"},
      NO_ARGS,
@@ -95,7 +94,6 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
      8,
      {"sniffbeacon",
       "sniffdeauth",
-      "sniffesp",
       "sniffpmkid",
       "sniffprobe",
       "sniffpwn",
@@ -113,6 +111,7 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
      TOGGLE_ARGS,
      FOCUS_CONSOLE_END,
      NO_TIP},
+    {"LED", {"hex", "pattern"}, 2, {"led -s", "led -p"}, INPUT_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Settings",
      {"display", "restore", "ForcePMKID", "ForceProbe", "SavePCAP", "EnableLED", "other"},
      7,
@@ -129,7 +128,6 @@ const WifiMarauderItem items[NUM_MENU_ITEMS] = {
     {"Update", {"sd"}, 1, {"update -s"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Reboot", {""}, 1, {"reboot"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Help", {""}, 1, {"help"}, NO_ARGS, FOCUS_CONSOLE_START, SHOW_STOPSCAN_TIP},
-    {"Reflash ESP32 (WIP)", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Scripts", {""}, 1, {""}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
     {"Save to flipper sdcard", // keep as last entry or change logic in callback below
      {""},
@@ -157,17 +155,6 @@ static void wifi_marauder_scene_start_var_list_enter_callback(void* context, uin
                                    (selected_option_index == 0) :
                                    item->focus_console;
     app->show_stopscan_tip = item->show_stopscan_tip;
-
-    // TODO cleanup
-    if(index == NUM_MENU_ITEMS - 3) {
-        // flasher
-        app->is_command = false;
-        app->flash_mode = true;
-        view_dispatcher_send_custom_event(app->view_dispatcher, WifiMarauderEventStartFlasher);
-        return;
-    }
-
-    app->flash_mode = false;
 
     if(!app->is_command && selected_option_index == 0) {
         // View Log from start
@@ -251,6 +238,7 @@ void wifi_marauder_scene_start_on_enter(void* context) {
 }
 
 bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) {
+    UNUSED(context);
     WifiMarauderApp* app = context;
     bool consumed = false;
 
@@ -279,10 +267,6 @@ bool wifi_marauder_scene_start_on_event(void* context, SceneManagerEvent event) 
             scene_manager_set_scene_state(
                 app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
             scene_manager_next_scene(app->scene_manager, WifiMarauderSceneSniffPmkidOptions);
-        } else if(event.event == WifiMarauderEventStartFlasher) {
-            scene_manager_set_scene_state(
-                app->scene_manager, WifiMarauderSceneStart, app->selected_menu_index);
-            scene_manager_next_scene(app->scene_manager, WifiMarauderSceneFlasher);
         }
         consumed = true;
     } else if(event.type == SceneManagerEventTypeTick) {

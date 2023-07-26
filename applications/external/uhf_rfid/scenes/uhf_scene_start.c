@@ -2,12 +2,13 @@
 
 enum SubmenuIndex { SubmenuIndexRead, SubmenuIndexSaved, SubmenuIndexSettings };
 
-void uhf_scene_start_submenu_callback(void* context, uint32_t index) {
-    UHFApp* uhf_app = context;
+void uhf_scene_start_submenu_callback(void* ctx, uint32_t index) {
+    UHFApp* uhf_app = ctx;
     view_dispatcher_send_custom_event(uhf_app->view_dispatcher, index);
 }
-void uhf_scene_start_on_enter(void* context) {
-    UHFApp* uhf_app = context;
+
+void uhf_scene_start_on_enter(void* ctx) {
+    UHFApp* uhf_app = ctx;
 
     Submenu* submenu = uhf_app->submenu;
     submenu_add_item(
@@ -22,18 +23,17 @@ void uhf_scene_start_on_enter(void* context) {
     view_dispatcher_switch_to_view(uhf_app->view_dispatcher, UHFViewMenu);
 }
 
-bool uhf_scene_start_on_event(void* context, SceneManagerEvent event) {
-    UNUSED(context);
-    // UHFApp* uhf_app = context;
+bool uhf_scene_start_on_event(void* ctx, SceneManagerEvent event) {
+    UHFApp* uhf_app = ctx;
     bool consumed = false;
-
     if(event.type == SceneManagerEventTypeCustom) {
-        FURI_LOG_E("EVENT", "%lu", event.event);
-        // if(event.event == SubmenuIndexRead) {
-        //     scene_manager_set_scene_state(uhf_app->scene_manager, UHFSceneStart, SubmenuIndexRead);
-        //     scene_manager_next_scene(uhf_app->scene_manager, UHFSceneReadCard);
-        //     consumed = true;
-        // } else if(event.event == SubmenuIndexSaved) {
+        // FURI_LOG_E("scene_start_on_event", "%lu", event.event);
+        if(event.event == SubmenuIndexRead) {
+            scene_manager_set_scene_state(uhf_app->scene_manager, UHFSceneStart, SubmenuIndexRead);
+            scene_manager_next_scene(uhf_app->scene_manager, UHFSceneReadTag);
+            consumed = true;
+        }
+        //else if(event.event == SubmenuIndexSaved) {
         // Explicitly save state so that the correct item is
         // reselected if the user cancels loading a file.
         // scene_manager_set_scene_state(
@@ -51,7 +51,7 @@ bool uhf_scene_start_on_event(void* context, SceneManagerEvent event) {
     return consumed;
 }
 
-void uhf_scene_start_on_exit(void* context) {
-    UHFApp* uhf_app = context;
+void uhf_scene_start_on_exit(void* ctx) {
+    UHFApp* uhf_app = ctx;
     submenu_reset(uhf_app->submenu);
 }
