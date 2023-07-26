@@ -93,7 +93,7 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
    ```
    .                            # The Flipper Zero MicroSD root.
    ├── apps                     # The Flipper Zero Applications folder.
-   |   ├── gpio                 # The Flipper Zero General Purpose Input/Output folder.
+   |   ├── gpio                 # The Flipper Zero GPIO folder.
    |   |   ├── camerasuite.fap  # The Camera Suite application.
    ```
 5. Reinsert your MicroSD into your Flipper Zero if you took it out.
