@@ -85,7 +85,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Settings: [CFW Settings for More Customizable Main Menu #721 (By Willy-JL, Ported & Improved By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/721)
 - Updated: [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
-- More Amiibos Coming Soon!
+- [More Amiibos Coming Soon! With PATREON membership](https://www.patreon.com/RogueMaster/membership)
 
 <a name="release">
 
