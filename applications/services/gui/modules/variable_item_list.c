@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 struct VariableItem {
-    const char* label;
+    FuriString* label;
     uint8_t current_value_index;
     FuriString* current_value_text;
     uint8_t values_count;
@@ -81,10 +81,17 @@ static void variable_item_list_draw_callback(Canvas* canvas, void* _model) {
 
             if(item->current_value_index == 0 && furi_string_empty(item->current_value_text)) {
                 // Only left text, no right text
-                canvas_draw_str(canvas, 6, item_text_y, item->label);
+                canvas_draw_str(canvas, 6, item_text_y, furi_string_get_cstr(item->label));
             } else {
                 elements_scrollable_text_line_str(
-                    canvas, 6, item_text_y, 66, item->label, scroll_counter, false, false);
+                    canvas,
+                    6,
+                    item_text_y,
+                    66,
+                    furi_string_get_cstr(item->label),
+                    scroll_counter,
+                    false,
+                    false);
             }
 
             if(item->locked) {
@@ -420,6 +427,7 @@ void variable_item_list_free(VariableItemList* variable_item_list) {
             VariableItemArray_it_t it;
             for(VariableItemArray_it(it, model->items); !VariableItemArray_end_p(it);
                 VariableItemArray_next(it)) {
+                furi_string_free(VariableItemArray_ref(it)->label);
                 furi_string_free(VariableItemArray_ref(it)->current_value_text);
                 furi_string_free(VariableItemArray_ref(it)->locked_message);
             }
@@ -444,6 +452,7 @@ void variable_item_list_reset(VariableItemList* variable_item_list) {
             VariableItemArray_it_t it;
             for(VariableItemArray_it(it, model->items); !VariableItemArray_end_p(it);
                 VariableItemArray_next(it)) {
+                furi_string_free(VariableItemArray_ref(it)->label);
                 furi_string_free(VariableItemArray_ref(it)->current_value_text);
                 furi_string_free(VariableItemArray_ref(it)->locked_message);
             }
@@ -472,7 +481,7 @@ VariableItem* variable_item_list_add(
         VariableItemListModel * model,
         {
             item = VariableItemArray_push_new(model->items);
-            item->label = label;
+            item->label = furi_string_alloc_set(label);
             item->values_count = values_count;
             item->change_callback = change_callback;
             item->context = context;

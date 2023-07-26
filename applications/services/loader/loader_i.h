@@ -4,11 +4,11 @@
 #include <flipper_application/flipper_application.h>
 #include "loader.h"
 #include "loader_menu.h"
+#include "loader_mainmenu.h"
 #include "loader_applications.h"
 
 typedef struct {
     char* args;
-    char* name;
     FuriThread* thread;
     bool insomniac;
     FlipperApplication* fap;
@@ -20,7 +20,7 @@ struct Loader {
     LoaderMenu* loader_menu;
     LoaderApplications* loader_applications;
     LoaderAppData app;
-    ExtMainAppList_t ext_main_apps;
+    MainMenuList_t mainmenu_apps;
 };
 
 typedef enum {

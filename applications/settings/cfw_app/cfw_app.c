@@ -16,10 +16,11 @@ bool cfw_app_apply(CfwApp* app) {
 
     if(app->save_mainmenu_apps) {
         Stream* stream = file_stream_alloc(storage);
-        if(file_stream_open(stream, CFW_APPS_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+        if(file_stream_open(stream, CFW_MENU_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
+            stream_write_format(stream, "MenuAppList Version %u\n", 0);
             CharList_it_t it;
             CharList_it(it, app->mainmenu_app_paths);
-            for(uint i = 0; i < CharList_size(app->mainmenu_app_paths); i++) {
+            for(size_t i = 0; i < CharList_size(app->mainmenu_app_paths); i++) {
                 stream_write_format(stream, "%s\n", *CharList_get(app->mainmenu_app_paths, i));
             }
         }
@@ -159,6 +160,10 @@ CfwApp* cfw_app_alloc() {
         CfwAppViewVarItemList,
         variable_item_list_get_view(app->var_item_list));
 
+    app->submenu = submenu_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, CfwAppViewSubmenu, submenu_get_view(app->submenu));
+
     app->text_input = text_input_alloc();
     view_dispatcher_add_view(
         app->view_dispatcher, CfwAppViewTextInput, text_input_get_view(app->text_input));
@@ -166,61 +171,28 @@ CfwApp* cfw_app_alloc() {
     app->popup = popup_alloc();
     view_dispatcher_add_view(app->view_dispatcher, CfwAppViewPopup, popup_get_view(app->popup));
 
-    // CfwSettings* cfw_settings = CFW_SETTINGS();
+    app->dialog_ex = dialog_ex_alloc();
+    view_dispatcher_add_view(
+        app->view_dispatcher, CfwAppViewDialogEx, dialog_ex_get_view(app->dialog_ex));
 
-    //Main Menu Add/Remove list
+    CFW_SETTINGS();
 
-    Storage* storage = furi_record_open(RECORD_STORAGE);
+    //Main Menu Add/Remove list + Start Point
 
     CharList_init(app->mainmenu_app_names);
     CharList_init(app->mainmenu_app_paths);
-    Stream* stream = file_stream_alloc(storage);
-    FuriString* line = furi_string_alloc();
-    FuriString* filename = furi_string_alloc();
-    if(file_stream_open(stream, CFW_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        while(stream_read_line(stream, line)) {
-            furi_string_replace_all(line, "\r", "");
-            furi_string_replace_all(line, "\n", "");
-            uint8_t* icon_buf = malloc(MENU_ICON_MAX_SIZE);
 
-            path_extract_filename(line, filename, true);
-            if(!flipper_application_load_name_and_icon(line, storage, &icon_buf, filename)) {
-                free(icon_buf);
-                icon_buf = NULL;
-            } else {
-                free(icon_buf);
-                icon_buf = NULL;
-                CharList_push_back(app->mainmenu_app_paths, strdup(furi_string_get_cstr(line)));
-                CharList_push_back(
-                    app->mainmenu_app_names, strdup(furi_string_get_cstr(filename)));
-            }
-        }
-    }
-    furi_string_free(filename);
-    furi_string_free(line);
-    file_stream_close(stream);
-    stream_free(stream);
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    MainMenuList_t* mainmenu_apps = loader_get_mainmenu_apps(loader);
+    furi_record_close(RECORD_LOADER);
 
-    // Start Point list
-    CharList_init(app->start_point_names);
-
-    CharList_push_back(app->start_point_names, "Applications");
-
-    for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
-        CharList_push_back(app->start_point_names, strdup(FLIPPER_APPS[i].name));
+    for(size_t i = 0; i < MainMenuList_size(*mainmenu_apps); i++) {
+        const MainMenuApp* menu_item = MainMenuList_get(*mainmenu_apps, i);
+        CharList_push_back(app->mainmenu_app_names, (char*)menu_item->name);
+        CharList_push_back(app->mainmenu_app_paths, (char*)menu_item->path);
     }
 
-    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-        CharList_push_back(app->start_point_names, strdup(FLIPPER_EXTERNAL_APPS[i].name));
-    }
-
-    for(size_t i = 0; i < CharList_size(app->mainmenu_app_names); i++) {
-        CharList_push_back(
-            app->start_point_names, strdup(*CharList_get(app->mainmenu_app_names, i)));
-    }
-
-    CharList_push_back(app->start_point_names, "Settings");
-
+    Storage* storage = furi_record_open(RECORD_STORAGE);
     FlipperFormat* file = flipper_format_file_alloc(storage);
     FrequencyList_init(app->subghz_static_freqs);
     FrequencyList_init(app->subghz_hopper_freqs);
@@ -265,10 +237,14 @@ void cfw_app_free(CfwApp* app) {
     // Gui modules
     view_dispatcher_remove_view(app->view_dispatcher, CfwAppViewVarItemList);
     variable_item_list_free(app->var_item_list);
+    view_dispatcher_remove_view(app->view_dispatcher, CfwAppViewSubmenu);
+    submenu_free(app->submenu);
     view_dispatcher_remove_view(app->view_dispatcher, CfwAppViewTextInput);
     text_input_free(app->text_input);
     view_dispatcher_remove_view(app->view_dispatcher, CfwAppViewPopup);
     popup_free(app->popup);
+    view_dispatcher_remove_view(app->view_dispatcher, CfwAppViewDialogEx);
+    dialog_ex_free(app->dialog_ex);
 
     // View Dispatcher and Scene Manager
     view_dispatcher_free(app->view_dispatcher);

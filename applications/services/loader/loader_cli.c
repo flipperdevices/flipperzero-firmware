@@ -16,11 +16,11 @@ static void loader_cli_print_usage() {
 
 static void loader_cli_list() {
     printf("Applications:\r\n");
-    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-        printf("\t%s\r\n", FLIPPER_EXTERNAL_APPS[i].name);
-    }
     for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
         printf("\t%s\r\n", FLIPPER_APPS[i].name);
+    }
+    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+        printf("\t%s\r\n", FLIPPER_EXTERNAL_APPS[i].name);
     }
     printf("Settings:\r\n");
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
@@ -37,16 +37,6 @@ static void loader_cli_info(Loader* loader) {
         // TODO: print application name ???
         printf("Application is running\r\n");
     }
-}
-
-static const char* loader_cli_check_external_app_by_name(const char* app_name) {
-    for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
-        if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, app_name) == 0) {
-            return FLIPPER_EXTERNAL_APPS[i].path;
-        }
-    }
-
-    return NULL;
 }
 
 static void loader_cli_open(FuriString* args, Loader* loader) {
@@ -67,24 +57,14 @@ static void loader_cli_open(FuriString* args, Loader* loader) {
             args_str = NULL;
         }
 
-        const char* app_name_ext =
-            loader_cli_check_external_app_by_name(furi_string_get_cstr(app_name));
+        const char* app_name_str = furi_string_get_cstr(app_name);
 
-        if(app_name_ext) {
-            FuriString* error_message = furi_string_alloc();
-            if(loader_start(loader, app_name_ext, args_str, error_message) != LoaderStatusOk) {
-                printf("%s\r\n", furi_string_get_cstr(error_message));
-            }
-            furi_string_free(error_message);
-        } else {
-            const char* app_name_str = furi_string_get_cstr(app_name);
-
-            FuriString* error_message = furi_string_alloc();
-            if(loader_start(loader, app_name_str, args_str, error_message) != LoaderStatusOk) {
-                printf("%s\r\n", furi_string_get_cstr(error_message));
-            }
-            furi_string_free(error_message);
+        FuriString* error_message = furi_string_alloc();
+        if(loader_start(loader, app_name_str, args_str, error_message) != LoaderStatusOk) {
+            printf("%s\r\n", furi_string_get_cstr(error_message));
         }
+        furi_string_free(error_message);
+
     } while(false);
 
     furi_string_free(app_name);

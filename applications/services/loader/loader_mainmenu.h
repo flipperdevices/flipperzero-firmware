@@ -7,6 +7,6 @@ typedef struct {
     const char* name;
     const char* path;
     const Icon* icon;
-} ExtMainApp;
+} MainMenuApp;
 
-LIST_DEF(ExtMainAppList, ExtMainApp, M_POD_OPLIST)
+LIST_DEF(MainMenuList, MainMenuApp, M_POD_OPLIST)

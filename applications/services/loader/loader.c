@@ -3,17 +3,17 @@
 #include <applications.h>
 #include <storage/storage.h>
 #include <furi_hal.h>
-#include <core/dangerous_defines.h>
-#include <gui/icon_i.h>
-#include <gui/modules/file_browser.h>
-#include <toolbox/stream/file_stream.h>
 #include <cfw.h>
-#include <assets_icons.h>
 
 #include <dialogs/dialogs.h>
 #include <toolbox/path.h>
 #include <flipper_application/flipper_application.h>
 #include <loader/firmware_api/firmware_api.h>
+#include <toolbox/stream/file_stream.h>
+#include <core/dangerous_defines.h>
+#include <gui/icon_i.h>
+//#include <gui/modules/file_browser.h>
+#include <assets_icons.h>
 
 #define TAG "Loader"
 #define LOADER_MAGIC_THREAD_VALUE 0xDEADBEEF
@@ -131,6 +131,11 @@ FuriPubSub* loader_get_pubsub(Loader* loader) {
     return loader->pubsub;
 }
 
+MainMenuList_t* loader_get_mainmenu_apps(Loader* loader) {
+    furi_assert(loader);
+    return &loader->mainmenu_apps;
+}
+
 // callbacks
 
 static void loader_menu_closed_callback(void* context) {
@@ -185,7 +190,24 @@ bool loader_menu_load_fap_meta(
     return true;
 }
 
-// implementation
+static void loader_make_mainmenu_file(Storage* storage) {
+    Stream* new = file_stream_alloc(storage);
+    if(!storage_file_exists(storage, CFW_MENU_PATH)) {
+        if(file_stream_open(new, CFW_MENU_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
+            stream_write_format(new, "MenuAppList Version %u\n", 0);
+            stream_write_format(new, "Applications\n");
+            for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
+                stream_write_format(new, "%s\n", FLIPPER_APPS[i].name);
+            }
+            for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+                stream_write_format(new, "%s\n", FLIPPER_EXTERNAL_APPS[i].name);
+            }
+            stream_write_format(new, "Settings\n");
+        }
+    }
+    file_stream_close(new);
+    stream_free(new);
+}
 
 static Loader* loader_alloc() {
     Loader* loader = malloc(sizeof(Loader));
@@ -194,48 +216,109 @@ static Loader* loader_alloc() {
     loader->loader_menu = NULL;
     loader->loader_applications = NULL;
     loader->app.args = NULL;
-    loader->app.name = NULL;
     loader->app.thread = NULL;
     loader->app.insomniac = false;
+    loader->app.fap = NULL;
+    MainMenuList_init(loader->mainmenu_apps);
 
+    if(!furi_hal_is_normal_boot()) return loader;
+
+    //Populate main menu list from file
     Storage* storage = furi_record_open(RECORD_STORAGE);
-    FuriString* path = furi_string_alloc();
-    FuriString* name = furi_string_alloc();
     Stream* stream = file_stream_alloc(storage);
-    ExtMainAppList_init(loader->ext_main_apps);
-    if(file_stream_open(stream, CFW_APPS_PATH, FSAM_READ, FSOM_OPEN_EXISTING)) {
-        while(stream_read_line(stream, path)) {
-            furi_string_replace_all(path, "\r", "");
-            furi_string_replace_all(path, "\n", "");
-            const Icon* icon;
-            if(!loader_menu_load_fap_meta(storage, path, name, &icon)) continue;
-            ExtMainAppList_push_back(
-                loader->ext_main_apps,
-                (ExtMainApp){
-                    .name = strdup(furi_string_get_cstr(name)),
-                    .path = strdup(furi_string_get_cstr(path)),
-                    .icon = icon});
+    FuriString* line = furi_string_alloc();
+    FuriString* name = furi_string_alloc();
+    do {
+        if(!file_stream_open(stream, CFW_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING)) {
+            file_stream_close(stream);
+            loader_make_mainmenu_file(storage);
+            if(!file_stream_open(stream, CFW_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
+                break;
+        }
+
+        uint32_t version;
+        if(!stream_read_line(stream, line) ||
+           sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
+           version > 0) {
+            file_stream_close(stream);
+            storage_common_remove(storage, CFW_MENU_PATH);
+            loader_make_mainmenu_file(storage);
+            if(!file_stream_open(stream, CFW_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
+                break;
+            if(!stream_read_line(stream, line) ||
+               sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
+               version > 0)
+                break;
+        }
+
+        while(stream_read_line(stream, line)) {
+            furi_string_replace_all(line, "\r", "");
+            furi_string_replace_all(line, "\n", "");
+            const char* label = NULL;
+            const Icon* icon = NULL;
+            const char* path = NULL;
+            if(storage_file_exists(storage, furi_string_get_cstr(line))) {
+                if(loader_menu_load_fap_meta(storage, line, name, &icon)) {
+                    label = strdup(furi_string_get_cstr(name));
+                    path = strdup(furi_string_get_cstr(line));
+                }
+            } else {
+                for(size_t i = 0; !path && i < FLIPPER_APPS_COUNT; i++) {
+                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_APPS[i].name)) {
+                        label = FLIPPER_APPS[i].name;
+                        icon = FLIPPER_APPS[i].icon;
+                        path = FLIPPER_APPS[i].name;
+                    }
+                }
+                for(size_t i = 0; !path && i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+                    if(!strcmp(furi_string_get_cstr(line), FLIPPER_EXTERNAL_APPS[i].name)) {
+                        label = FLIPPER_EXTERNAL_APPS[i].name;
+                        icon = FLIPPER_EXTERNAL_APPS[i].icon;
+                        path = FLIPPER_EXTERNAL_APPS[i].name;
+                    }
+                }
+            }
+
+            if(!path && strcmp(furi_string_get_cstr(line), "Applications") == 0) {
+                label = "Applications";
+                icon = &A_Plugins_14;
+                path = "Applications";
+            }
+
+            if(!path && strcmp(furi_string_get_cstr(line), "Settings") == 0) {
+                label = "Settings";
+                icon = &A_Settings_14;
+                path = "Settings";
+            }
+
+            if(label && path && icon) {
+                MainMenuList_push_back(
+                    loader->mainmenu_apps,
+                    (MainMenuApp){.name = label, .path = path, .icon = icon});
+            }
+        }
+
+    } while(false);
+
+    //Manually add CFW Settings to the mainmenu if no other apps are present.
+    if(MainMenuList_size(loader->mainmenu_apps) < 1) {
+        for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
+            if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, "CFW Settings") == 0) {
+                MainMenuList_push_back(
+                    loader->mainmenu_apps,
+                    (MainMenuApp){
+                        .name = FLIPPER_EXTERNAL_APPS[i].name,
+                        .icon = FLIPPER_EXTERNAL_APPS[i].icon,
+                        .path = FLIPPER_EXTERNAL_APPS[i].name});
+            }
         }
     }
+    furi_string_free(name);
+    furi_string_free(line);
     file_stream_close(stream);
     stream_free(stream);
-    furi_string_free(name);
-    furi_string_free(path);
     furi_record_close(RECORD_STORAGE);
-    loader->app.fap = NULL;
     return loader;
-}
-
-size_t loader_get_ext_main_app_list_size(Loader* loader) {
-    furi_assert(loader);
-    size_t ext_size = ExtMainAppList_size(loader->ext_main_apps);
-    return ext_size;
-}
-
-ExtMainApp* loader_get_ext_main_app_item(Loader* loader, size_t x) {
-    furi_assert(loader);
-    ExtMainApp* ext_app = ExtMainAppList_get(loader->ext_main_apps, x);
-    return ext_app;
 }
 
 static FlipperInternalApplication const* loader_find_application_by_name_in_list(

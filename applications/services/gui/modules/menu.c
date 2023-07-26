@@ -93,9 +93,6 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                         furi_string_right(name, trim + 2);
                     }
                 }
-                if(item->label == (char*)"Applications") furi_string_set(name, "Apps");
-                if(item->label == (char*)"125 kHz RFID") furi_string_set(name, "RFID");
-                if(item->label == (char*)"Sub-GHz") furi_string_set(name, "SubGHz");
                 elements_scrollable_text_line(
                     canvas, 20 + x_off, 26 + y_off, 36, name, scroll_counter, false, true);
                 if(item_i == position) {
@@ -154,7 +151,11 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             elements_scrollbar(canvas, position, items_count);
         }
     } else {
-        canvas_draw_str(canvas, 2, 32, "Empty");
+        canvas_set_font(canvas, FontPrimary);
+        canvas_draw_str_aligned(canvas, 64, 5, AlignCenter, AlignTop, "Menu is Empty");
+        canvas_set_font(canvas, FontSecondary);
+        canvas_draw_str_aligned(canvas, 64, 30, AlignCenter, AlignTop, "Use CFW Settings");
+        canvas_draw_str_aligned(canvas, 64, 40, AlignCenter, AlignTop, "to add menu items.");
         elements_scrollbar(canvas, 0, 0);
     }
 }

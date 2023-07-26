@@ -1,10 +1,11 @@
 #include "../cfw_app.h"
 
-enum FileBrowserResult {
-    FileBrowserResultOk,
+enum SubmenuIndex {
+    SubmenuIndexMainApp,
+    SubmenuIndexExternalApp,
 };
 
-static bool cfw_app_scene_interface_mainmenu_add_file_browser_callback(
+static bool fap_selector_item_callback(
     FuriString* file_path,
     void* context,
     uint8_t** icon_ptr,
@@ -16,69 +17,90 @@ static bool cfw_app_scene_interface_mainmenu_add_file_browser_callback(
     return success;
 }
 
+static void cfw_app_scene_interface_mainmenu_add_submenu_callback(void* context, uint32_t index) {
+    CfwApp* app = context;
+    scene_manager_set_scene_state(app->scene_manager, CfwAppSceneInterfaceMainmenuAdd, index);
+
+    switch(index) {
+    case SubmenuIndexMainApp:
+        scene_manager_next_scene(app->scene_manager, CfwAppSceneInterfaceMainmenuAddMain);
+        break;
+    case SubmenuIndexExternalApp: {
+        const DialogsFileBrowserOptions browser_options = {
+            .extension = ".fap",
+            .icon = &I_unknown_10px,
+            .skip_assets = true,
+            .hide_ext = true,
+            .item_loader_callback = fap_selector_item_callback,
+            .item_loader_context = app,
+            .base_path = EXT_PATH("apps"),
+        };
+        FuriString* temp_path = furi_string_alloc_set_str(EXT_PATH("apps"));
+        FuriString* filename = furi_string_alloc();
+        if(dialog_file_browser_show(app->dialogs, temp_path, temp_path, &browser_options)) {
+            Storage* storage = furi_record_open(RECORD_STORAGE);
+            uint8_t* icon_buf = malloc(MENU_ICON_MAX_SIZE);
+
+            if(!flipper_application_load_name_and_icon(temp_path, storage, &icon_buf, filename)) {
+                free(icon_buf);
+            } else {
+                free(icon_buf);
+                CharList_push_back(
+                    app->mainmenu_app_names, strdup(furi_string_get_cstr(filename)));
+                CharList_push_back(
+                    app->mainmenu_app_paths, strdup(furi_string_get_cstr(temp_path)));
+                app->mainmenu_app_index = CharList_size(app->mainmenu_app_names) - 1;
+                app->save_mainmenu_apps = true;
+                app->require_reboot = true;
+            }
+            furi_record_close(RECORD_STORAGE);
+            furi_string_free(temp_path);
+            furi_string_free(filename);
+        }
+        scene_manager_search_and_switch_to_previous_scene(
+            app->scene_manager, CfwAppSceneInterfaceMainmenu);
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 void cfw_app_scene_interface_mainmenu_add_on_enter(void* context) {
     CfwApp* app = context;
-    FuriString* default_path = furi_string_alloc_set_str(EXT_PATH("apps"));
-    FuriString* selected_path = furi_string_alloc();
+    Submenu* submenu = app->submenu;
 
-    const DialogsFileBrowserOptions browser_options = {
-        .extension = ".fap",
-        .skip_assets = true,
-        .hide_ext = true,
-        .item_loader_callback = cfw_app_scene_interface_mainmenu_add_file_browser_callback,
-        .item_loader_context = app,
-        .base_path = EXT_PATH("apps"),
-    };
+    submenu_add_item(
+        submenu,
+        "Main App",
+        SubmenuIndexMainApp,
+        cfw_app_scene_interface_mainmenu_add_submenu_callback,
+        app);
 
-    if(dialog_file_browser_show(app->dialogs, selected_path, default_path, &browser_options)) {
-        Storage* storage = furi_record_open(RECORD_STORAGE);
-        FuriString* filename = NULL;
-        filename = furi_string_alloc();
-        uint8_t* icon_buf = malloc(MENU_ICON_MAX_SIZE);
+    submenu_add_item(
+        submenu,
+        "External App",
+        SubmenuIndexExternalApp,
+        cfw_app_scene_interface_mainmenu_add_submenu_callback,
+        app);
 
-        path_extract_filename(selected_path, filename, true);
-        if(!flipper_application_load_name_and_icon(selected_path, storage, &icon_buf, filename)) {
-            free(icon_buf);
-            icon_buf = NULL;
-            app->save_mainmenu_apps = false;
-            app->require_reboot = false;
-        } else {
-            free(icon_buf);
-            icon_buf = NULL;
-            CharList_push_back(
-                app->mainmenu_app_paths, strdup(furi_string_get_cstr(selected_path)));
-            CharList_push_back(app->mainmenu_app_names, strdup(furi_string_get_cstr(filename)));
-            app->save_mainmenu_apps = true;
-            app->require_reboot = true;
-        }
-        furi_record_close(RECORD_STORAGE);
-        furi_string_free(filename);
-    }
+    submenu_set_header(submenu, "Add Menu App:");
 
-    furi_string_free(default_path);
-    furi_string_free(selected_path);
-
-    view_dispatcher_send_custom_event(app->view_dispatcher, FileBrowserResultOk);
+    view_dispatcher_switch_to_view(app->view_dispatcher, CfwAppViewSubmenu);
 }
 
 bool cfw_app_scene_interface_mainmenu_add_on_event(void* context, SceneManagerEvent event) {
-    CfwApp* app = context;
+    UNUSED(context);
     bool consumed = false;
 
     if(event.type == SceneManagerEventTypeCustom) {
         consumed = true;
-        switch(event.event) {
-        case FileBrowserResultOk:
-            scene_manager_previous_scene(app->scene_manager);
-            break;
-        default:
-            break;
-        }
     }
 
     return consumed;
 }
 
 void cfw_app_scene_interface_mainmenu_add_on_exit(void* context) {
-    UNUSED(context);
+    CfwApp* app = context;
+    submenu_reset(app->submenu);
 }
