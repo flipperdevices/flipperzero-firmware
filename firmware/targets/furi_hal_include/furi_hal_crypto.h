@@ -84,7 +84,7 @@ bool furi_hal_crypto_store_unload_key(uint8_t slot);
  *
  * @return     true on success
  */
-bool furi_hal_crypto_load_key(const uint8_t *key, const uint8_t* iv);
+bool furi_hal_crypto_load_key(const uint8_t* key, const uint8_t* iv);
 
 /** Deinit AES engine
  * Only use this if you previously inited the AES engine using
@@ -126,8 +126,12 @@ bool furi_hal_crypto_decrypt(const uint8_t* input, uint8_t* output, size_t size)
  *
  * @return     true on success
  */
-bool furi_hal_crypto_ctr(const uint8_t *key, const uint8_t *iv, const uint8_t
-        *input, uint8_t *output, size_t length);
+bool furi_hal_crypto_ctr(
+    const uint8_t* key,
+    const uint8_t* iv,
+    const uint8_t* input,
+    uint8_t* output,
+    size_t length);
 
 /** Encrypt/decrypt the input using AES-GCM
  * When decrypting the tag generated needs to be compared to the tag attached
@@ -145,8 +149,14 @@ bool furi_hal_crypto_ctr(const uint8_t *key, const uint8_t *iv, const uint8_t
  *
  * @return     true on success
  */
-bool furi_hal_crypto_gcm(const uint8_t *key, const uint8_t *iv, const uint8_t
-        *input, uint8_t *output, size_t length, uint8_t *tag, bool decrypt);
+bool furi_hal_crypto_gcm(
+    const uint8_t* key,
+    const uint8_t* iv,
+    const uint8_t* input,
+    uint8_t* output,
+    size_t length,
+    uint8_t* tag,
+    bool decrypt);
 
 /** Encrypt the input using AES-GCM and generate a tag
  * Inits and deinits the AES engine internally.
@@ -161,9 +171,13 @@ bool furi_hal_crypto_gcm(const uint8_t *key, const uint8_t *iv, const uint8_t
  * @return     FuriHalCryptoGCMStateOk on success, FuriHalCryptoGCMStateError
  *             on failure
  */
-FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(const uint8_t *key,
-        const uint8_t *iv, const uint8_t *input, uint8_t *output, size_t
-        length, uint8_t *tag);
+FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(
+    const uint8_t* key,
+    const uint8_t* iv,
+    const uint8_t* input,
+    uint8_t* output,
+    size_t length,
+    uint8_t* tag);
 
 /** Decrypt the input using AES-GCM and verify the provided tag
  * Inits and deinits the AES engine internally.
@@ -179,9 +193,13 @@ FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(const uint8_t *key,
  *             on failure, FuriHalCryptoGCMStateAuthFailure if the tag does not
  *             match
  */
-FuriHalCryptoGCMState furi_hal_crypto_gcm_decrypt_and_verify(const uint8_t
-        *key, const uint8_t *iv, const uint8_t *input, uint8_t *output, size_t
-        length, const uint8_t *tag);
+FuriHalCryptoGCMState furi_hal_crypto_gcm_decrypt_and_verify(
+    const uint8_t* key,
+    const uint8_t* iv,
+    const uint8_t* input,
+    uint8_t* output,
+    size_t length,
+    const uint8_t* tag);
 
 #ifdef __cplusplus
 }
