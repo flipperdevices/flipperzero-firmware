@@ -5,9 +5,7 @@
 
 typedef struct {
     PluginState* plugin_state;
-    FuriMessageQueue* event_queue;
 } TotpCliContext;
 
-TotpCliContext*
-    totp_cli_register_command_handler(PluginState* plugin_state, FuriMessageQueue* event_queue);
+TotpCliContext* totp_cli_register_command_handler(PluginState* plugin_state);
 void totp_cli_unregister_command_handler(TotpCliContext* context);

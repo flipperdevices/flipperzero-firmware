@@ -1,10 +1,9 @@
 name: PVS-Studio build analysis
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Auto CLang format"]
-    types:
-      - completed
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ['master']
 jobs:
   build-analyze:
     runs-on: ubuntu-latest

@@ -26,7 +26,10 @@ jobs:
         style: file
         commit: ${{ env.BASE_HEAD_REF }}
 
-    - uses: stefanzweifel/git-auto-commit-action@v4
+    - name: Update Permissions
+      run: sudo chown --recursive $USER .
+
+    - uses: stefanzweifel/git-auto-commit-action@v4.16.0
       with:
         commit_message: CLang format changes
         branch: ${{ github.head_ref }}

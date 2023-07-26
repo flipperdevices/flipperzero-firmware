@@ -39,6 +39,7 @@ enum TotGenerateCodeWorkerEvents {
  * @param code_buffer_sync code buffer synchronization primitive
  * @param timezone_offset timezone offset to be used to generate code
  * @param iv initialization vector (IV) to be used to decrypt token secret
+ * @param crypto_key_slot crypto key slot to be used
  * @return worker context
  */
 TotpGenerateCodeWorkerContext* totp_generate_code_worker_start(
@@ -46,7 +47,9 @@ TotpGenerateCodeWorkerContext* totp_generate_code_worker_start(
     const TokenInfo* token_info,
     FuriMutex* code_buffer_sync,
     float timezone_offset,
-    uint8_t* iv);
+    uint8_t* iv,
+    uint8_t crypto_version,
+    uint8_t crypto_key_slot);
 
 /**
  * @brief Stops generate code worker
