@@ -2,12 +2,27 @@
 
 This Flipper Zero application (FAP) is a companion application to ESP32-Gravity.
 
-ESP32-Gravity is a wireless exploration framework written for the ESP32-C6. It
+ESP32-Gravity is a wireless exploration framework written for the ESP32. It
 supports a variety of wireless exploration, offensive and defensive features.
 
 ESP32-Gravity can be used without a Flipper, but Flipper-Gravity can't be used
 without ESP32-Gravity. You can download it from:
-https://github.com/chris-bc/esp32c6-gravity
+https://github.com/chris-bc/esp32-gravity
+
+## Reduced Support for ESP32-C6
+
+Good news for all the Flipper tinkerers who have a bucket of ESP32s but
+no ESP32-C6s - Espressif's development environment, even trying the
+bleeding edge from GitHub, doesn't yet have full Bluetooth support
+for the ESP32-C6.
+
+Gravity now targets the regular ESP32. I'm using a Wroom during development,
+and hope to verify it working on ESP32-Cam cam at some point, but I think
+this makes ESP32 the only Espressif microcontroller with full-stack Bluetooth
+support. For now, at least.
+
+For more information, including a thorough overview of all features,
+check out the [readme doc over at esp-32-gravity](https://github.com/chris-bc/esp32-gravity/blob/main/README.md)
 
 ## TODO
 * Bug: Console scrolls to top mid-scroll when text is added to it
@@ -38,7 +53,7 @@ https://github.com/chris-bc/esp32c6-gravity
 ## Download fap
 | **FW Official** | **FW Unleashed** |
 | - | - |
-| [![FAP Factory](https://flipc.org/api/v1/cool4uma/UART_Terminal/badge)](https://flipc.org/cool4uma/UART_Terminal) | [![FAP Factory](https://flipc.org/api/v1/cool4uma/UART_Terminal/badge?firmware=unleashed)](https://flipc.org/cool4uma/UART_Terminal?firmware=unleashed) |
+| [![FAP Factory](https://flipc.org/api/v1/cool4uma/UART_Terminal/badge)](https://github.com/chris-bc/Flipper-Gravity) | [![FAP Factory](https://flipc.org/api/v1/cool4uma/UART_Terminal/badge?firmware=unleashed)](https://github.com/chris-bc/Flipper-Gravity) |
 
 
 Info: If possible, do not power your devices from 3V3 (pin 9) Flipper Zero. It does not support hot plugging.
