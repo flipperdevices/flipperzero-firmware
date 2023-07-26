@@ -6,8 +6,8 @@ App(
     fap_category="Games",
     fap_icon="icons/counter_icon.png",
     fap_icon_assets="icons",
-    fap_author="JadePossible",
+    fap_author="JadePossible & Roro",
     fap_weburl="https://github.com/JadePossible/Flipper-Multi-Counter",
     fap_version=(1, 0),
-    fap_description="The app give you access to up to 4 counters to count your scores for tabletop games for example.",
+    fap_description="Counter App with 4 counter for tabletop games",
 )
