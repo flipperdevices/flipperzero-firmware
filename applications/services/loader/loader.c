@@ -12,7 +12,6 @@
 #include <toolbox/stream/file_stream.h>
 #include <core/dangerous_defines.h>
 #include <gui/icon_i.h>
-//#include <gui/modules/file_browser.h>
 #include <assets_icons.h>
 
 #define TAG "Loader"
