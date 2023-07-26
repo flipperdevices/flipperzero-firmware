@@ -29,10 +29,16 @@ enum TotpIteratorUpdateTokenResults {
  * @param storage storage reference
  * @param config_file config file to use
  * @param iv initialization vector (IV) to be used for encryption\decryption
+ * @param crypto_version crypto algorithm version to be used
+ * @param crypto_key_slot crypto key slot to be used
  * @return Token info iterator context
  */
-TokenInfoIteratorContext*
-    totp_token_info_iterator_alloc(Storage* storage, FlipperFormat* config_file, uint8_t* iv);
+TokenInfoIteratorContext* totp_token_info_iterator_alloc(
+    Storage* storage,
+    FlipperFormat* config_file,
+    uint8_t* iv,
+    uint8_t crypto_version,
+    uint8_t crypto_key_slot);
 
 /**
  * @brief Navigates iterator to the token with given index

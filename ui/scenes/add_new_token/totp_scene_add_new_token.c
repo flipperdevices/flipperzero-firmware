@@ -43,6 +43,8 @@ typedef struct {
 struct TotpAddContext {
     SceneState* scene_state;
     uint8_t* iv;
+    uint8_t crypto_version;
+    uint8_t crypto_key_slot;
 };
 
 enum TotpIteratorUpdateTokenResultsEx { TotpIteratorUpdateTokenResultInvalidSecret = 1 };
@@ -58,7 +60,9 @@ static TotpIteratorUpdateTokenResult add_token_handler(TokenInfo* tokenInfo, con
            context_t->scene_state->token_secret,
            context_t->scene_state->token_secret_length,
            PlainTokenSecretEncodingBase32,
-           context_t->iv)) {
+           context_t->iv,
+           context_t->crypto_version,
+           context_t->crypto_key_slot)) {
         return TotpIteratorUpdateTokenResultInvalidSecret;
     }
 
@@ -271,7 +275,10 @@ bool totp_scene_add_new_token_handle_event(
             break;
         case ConfirmButton: {
             struct TotpAddContext add_context = {
-                .iv = plugin_state->iv, .scene_state = scene_state};
+                .iv = plugin_state->iv,
+                .scene_state = scene_state,
+                .crypto_version = plugin_state->crypto_version,
+                .crypto_key_slot = plugin_state->crypto_key_slot};
             TokenInfoIteratorContext* iterator_context =
                 totp_config_get_token_iterator_context(plugin_state);
             TotpIteratorUpdateTokenResult add_result = totp_token_info_iterator_add_new_token(

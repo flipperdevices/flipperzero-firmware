@@ -1,5 +1,9 @@
 # Changelog
 
+## v3.0.0 - 26 Jul 2023
+
+* Implemented better encryption [#167](https://github.com/akopachov/flipper-zero_authenticator/issues/167)
+
 ## v2.3.0 - 18 Jul 2023
 
 * Implemented [#165](https://github.com/akopachov/flipper-zero_authenticator/issues/165)

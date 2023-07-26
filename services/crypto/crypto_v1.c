@@ -1,4 +1,4 @@
-#include "crypto.h"
+#include "crypto_v1.h"
 #include <furi_hal_crypto.h>
 #include <furi_hal_random.h>
 #include <furi_hal_version.h>
@@ -8,10 +8,11 @@
 #define CRYPTO_KEY_SLOT (2)
 #define CRYPTO_VERIFY_KEY_LENGTH (16)
 #define CRYPTO_ALIGNMENT_FACTOR (16)
+#define TOTP_IV_SIZE (16)
 
 static const char* CRYPTO_VERIFY_KEY = "FFF_Crypto_pass";
 
-uint8_t* totp_crypto_encrypt(
+uint8_t* totp_crypto_encrypt_v1(
     const uint8_t* plain_data,
     const size_t plain_data_length,
     const uint8_t* iv,
@@ -48,7 +49,7 @@ uint8_t* totp_crypto_encrypt(
     return encrypted_data;
 }
 
-uint8_t* totp_crypto_decrypt(
+uint8_t* totp_crypto_decrypt_v1(
     const uint8_t* encrypted_data,
     const size_t encrypted_data_length,
     const uint8_t* iv,
@@ -63,7 +64,7 @@ uint8_t* totp_crypto_decrypt(
 }
 
 CryptoSeedIVResult
-    totp_crypto_seed_iv(PluginState* plugin_state, const uint8_t* pin, uint8_t pin_length) {
+    totp_crypto_seed_iv_v1(PluginState* plugin_state, const uint8_t* pin, uint8_t pin_length) {
     CryptoSeedIVResult result;
     if(plugin_state->crypto_verify_data == NULL) {
         FURI_LOG_I(LOGGING_TAG, "Generating new IV");
@@ -104,7 +105,7 @@ CryptoSeedIVResult
         furi_check(plugin_state->crypto_verify_data != NULL);
         plugin_state->crypto_verify_data_length = CRYPTO_VERIFY_KEY_LENGTH;
 
-        plugin_state->crypto_verify_data = totp_crypto_encrypt(
+        plugin_state->crypto_verify_data = totp_crypto_encrypt_v1(
             (const uint8_t*)CRYPTO_VERIFY_KEY,
             CRYPTO_VERIFY_KEY_LENGTH,
             &plugin_state->iv[0],
@@ -118,9 +119,9 @@ CryptoSeedIVResult
     return result;
 }
 
-bool totp_crypto_verify_key(const PluginState* plugin_state) {
+bool totp_crypto_verify_key_v1(const PluginState* plugin_state) {
     size_t decrypted_key_length;
-    uint8_t* decrypted_key = totp_crypto_decrypt(
+    uint8_t* decrypted_key = totp_crypto_decrypt_v1(
         plugin_state->crypto_verify_data,
         plugin_state->crypto_verify_data_length,
         &plugin_state->iv[0],

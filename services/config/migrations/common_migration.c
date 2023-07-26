@@ -17,6 +17,28 @@ bool totp_config_migrate_to_latest(
             break;
         }
 
+        if(flipper_format_read_string(
+               fff_backup_data_file, TOTP_CONFIG_KEY_CRYPTO_VERSION, temp_str)) {
+            flipper_format_write_string(fff_data_file, TOTP_CONFIG_KEY_CRYPTO_VERSION, temp_str);
+        } else {
+            uint32_t old_crypto_version = 1;
+            flipper_format_write_uint32(
+                fff_data_file, TOTP_CONFIG_KEY_CRYPTO_VERSION, &old_crypto_version, 1);
+        }
+
+        flipper_format_rewind(fff_backup_data_file);
+
+        if(flipper_format_read_string(
+               fff_backup_data_file, TOTP_CONFIG_KEY_CRYPTO_KEY_SLOT, temp_str)) {
+            flipper_format_write_string(fff_data_file, TOTP_CONFIG_KEY_CRYPTO_KEY_SLOT, temp_str);
+        } else {
+            uint32_t default_old_key_slot = 2;
+            flipper_format_write_uint32(
+                fff_data_file, TOTP_CONFIG_KEY_CRYPTO_KEY_SLOT, &default_old_key_slot, 1);
+        }
+
+        flipper_format_rewind(fff_backup_data_file);
+
         if(flipper_format_read_string(fff_backup_data_file, TOTP_CONFIG_KEY_BASE_IV, temp_str)) {
             flipper_format_write_string(fff_data_file, TOTP_CONFIG_KEY_BASE_IV, temp_str);
         }
