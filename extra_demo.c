@@ -13,7 +13,7 @@
 #include <gui/gui.h>
 #include <input/input.h>
 
-#define  LOG_LEVEL  6
+#define LOG_LEVEL 6
 #include "logging.h"
 
 // Local headers
@@ -24,201 +24,210 @@
 
 bool run = true;
 
-static void cbInput (InputEvent* event,  FuriMessageQueue* queue){
-	ENTER;
-	furi_assert(queue);
-	furi_assert(event);
+static void cbInput(InputEvent* event, FuriMessageQueue* queue) {
+    ENTER;
+    furi_assert(queue);
+    furi_assert(event);
 
-	// Put an "input" event message on the message queue
-	eventMsg_t  message = {
-		.id    = EVID_KEY,
-		.input = *event
-	};
-	furi_message_queue_put(queue, &message, FuriWaitForever);
+    // Put an "input" event message on the message queue
+    eventMsg_t message = {.id = EVID_KEY, .input = *event};
+    furi_message_queue_put(queue, &message, FuriWaitForever);
 
-	LEAVE;
-	return;
+    LEAVE;
+    return;
 }
-static void cbDraw (Canvas* const canvas,  void* ctx){
-	ENTER;
-	furi_assert(canvas);
-	furi_assert(ctx);
+static void cbDraw(Canvas* const canvas, void* ctx) {
+    ENTER;
+    furi_assert(canvas);
+    furi_assert(ctx);
 
-	// There are several built-in fonts available
-	//   {FontPrimary, FontSecondary, FontKeyboard, FontBigNumbers}
-	// --> applications/gui/canvas.c
-	canvas_set_font(canvas, FontSecondary);
-	if(extra_registered()){
-		canvas_draw_str(canvas, 0, 12, "Registered!");
-	}else{
-		canvas_draw_str(canvas, 0, 12, "Press OK to register");
-		canvas_draw_str(canvas, 0, 24, "extra commands");
-	}
+    // There are several built-in fonts available
+    //   {FontPrimary, FontSecondary, FontKeyboard, FontBigNumbers}
+    // --> applications/gui/canvas.c
+    canvas_set_font(canvas, FontSecondary);
+    if(extra_registered()) {
+        canvas_draw_str(canvas, 0, 12, "Registered!");
+    } else {
+        canvas_draw_str(canvas, 0, 12, "Press OK to register");
+        canvas_draw_str(canvas, 0, 24, "extra commands");
+    }
 
-	LEAVE;
-	return;
+    LEAVE;
+    return;
 }
 
-static void  evTick (){
-	ENTER;
+static void evTick() {
+    ENTER;
 
-	LEAVE;
-	return;
+    LEAVE;
+    return;
 }
 
-static inline
-bool  evKey (eventMsg_t* msg, Gui* gui)
-{
-	ENTER;
-	furi_assert(msg);
-	furi_assert(gui);
+static inline bool evKey(eventMsg_t* msg, Gui* gui) {
+    ENTER;
+    furi_assert(msg);
+    furi_assert(gui);
 
-	if(msg->input.type == InputTypeRelease && msg->input.key == InputKeyBack){
-		run = false;
-		return false;  // Signal the plugin to exit
-	}
-	if(msg->input.type == InputTypeRelease && msg->input.key == InputKeyOk){
-		extra_init_register();
-	}
-	LEAVE;
-	return true;
+    if(msg->input.type == InputTypeRelease && msg->input.key == InputKeyBack) {
+        run = false;
+        return false; // Signal the plugin to exit
+    }
+    if(msg->input.type == InputTypeRelease && msg->input.key == InputKeyOk) {
+        extra_init_register();
+    }
+    LEAVE;
+    return true;
 }
 
-int32_t  extra_demo (void)
-{
-	ENTER;
-	
-	err_t              error   = 0;  // assume success
-	Gui*               gui     = NULL;
-	ViewPort*          vpp     = NULL;
+int32_t extra_demo(void) {
+    ENTER;
 
-	// This plugin will register two callbacks
-	// The key reading ("input") and timer ("tick") callback functions will put keystrokes in a local message queue
-	// --> furi/core/message_queue.h
-	FuriMessageQueue*  queue   = NULL;
-	const uint32_t     queueSz = 8;     // maximum messages in queue
+    err_t error = 0; // assume success
+    Gui* gui = NULL;
+    ViewPort* vpp = NULL;
 
-	// The queue will contain plugin event-messages
-	// --> local
-	eventMsg_t         msg     = {0};
+    // This plugin will register two callbacks
+    // The key reading ("input") and timer ("tick") callback functions will put keystrokes in a local message queue
+    // --> furi/core/message_queue.h
+    FuriMessageQueue* queue = NULL;
+    const uint32_t queueSz = 8; // maximum messages in queue
 
-	INFO("BEGIN");
+    // The queue will contain plugin event-messages
+    // --> local
+    eventMsg_t msg = {0};
 
-	// ===== Message queue =====
+    INFO("BEGIN");
 
-	// 1. Create a message queue (for up to 8 (keyboard) event messages)
-	if ( !(queue = furi_message_queue_alloc(queueSz, sizeof(msg))) ) {
-		ERROR(errs[(error = ERR_MALLOC_QUEUE)]);
-		goto bail;
-	}
+    // ===== Message queue =====
 
-	// ===== Create GUI Interface =====
+    // 1. Create a message queue (for up to 8 (keyboard) event messages)
+    if(!(queue = furi_message_queue_alloc(queueSz, sizeof(msg)))) {
+        ERROR(errs[(error = ERR_MALLOC_QUEUE)]);
+        goto bail;
+    }
 
-	// 2. Create a GUI interface
-	if ( !(gui = furi_record_open("gui")) ) {
-		ERROR(errs[(error = ERR_NO_GUI)]);
-		goto bail;
-	}
+    // ===== Create GUI Interface =====
 
-	// ===== Viewport =====
+    // 2. Create a GUI interface
+    if(!(gui = furi_record_open("gui"))) {
+        ERROR(errs[(error = ERR_NO_GUI)]);
+        goto bail;
+    }
 
-	// 6. Allocate space on the heap for the viewport
-	if ( !(vpp = view_port_alloc()) ) {
-		ERROR(errs[(error = ERR_MALLOC_VIEW)]);
-		goto bail;
-	}
+    // ===== Viewport =====
 
-	// 7a. Register a callback for input events
-	view_port_input_callback_set(vpp, cbInput, queue);
+    // 6. Allocate space on the heap for the viewport
+    if(!(vpp = view_port_alloc())) {
+        ERROR(errs[(error = ERR_MALLOC_VIEW)]);
+        goto bail;
+    }
 
-	// 7b. Register a callback for draw events
-	view_port_draw_callback_set(vpp, cbDraw, queue);
+    // 7a. Register a callback for input events
+    view_port_input_callback_set(vpp, cbInput, queue);
 
-	// ===== Start GUI Interface =====
+    // 7b. Register a callback for draw events
+    view_port_draw_callback_set(vpp, cbDraw, queue);
 
-	// 8. Attach the viewport to the GUI
-	gui_add_view_port(gui, vpp, GuiLayerFullscreen);
+    // ===== Start GUI Interface =====
 
-	INFO("INITIALISED");
+    // 8. Attach the viewport to the GUI
+    gui_add_view_port(gui, vpp, GuiLayerFullscreen);
 
-	// ==================== Main event loop ====================
+    INFO("INITIALISED");
 
-	if (run)  do {
-		// Try to read a message from the queue
-		// Our run-loop does not poll and is not "busy"
-		//   but there is no "do not timeout"/"wait for message"
-		//   so we need to use a large timeout and ignore timeout messages
-		// --> furi/core/base.h
-		FuriStatus  status = FuriStatusErrorTimeout;
-		while ((status = furi_message_queue_get(queue, &msg, 60000)) == FuriStatusErrorTimeout) ;
+    // ==================== Main event loop ====================
 
-		// Read failed
-		if (status != FuriStatusOk) {
-			switch (status) {
-				case FuriStatusErrorTimeout:    DEBUG(errs[       DEBUG_QUEUE_TIMEOUT]);    break ;
-				case FuriStatusError:           ERROR(errs[(error = ERR_QUEUE_RTOS)]);      goto bail ;
-				case FuriStatusErrorResource:   ERROR(errs[(error = ERR_QUEUE_RESOURCE)]);  goto bail ;
-				case FuriStatusErrorParameter:  ERROR(errs[(error = ERR_QUEUE_BADPRM)]);    goto bail ;
-				case FuriStatusErrorNoMemory:   ERROR(errs[(error = ERR_QUEUE_NOMEM)]);     goto bail ;
-				case FuriStatusErrorISR:        ERROR(errs[(error = ERR_QUEUE_ISR)]);       goto bail ;
-				default:                        ERROR(errs[(error = ERR_QUEUE_UNK)]);       goto bail ;
-			}
+    if(run) do {
+            // Try to read a message from the queue
+            // Our run-loop does not poll and is not "busy"
+            //   but there is no "do not timeout"/"wait for message"
+            //   so we need to use a large timeout and ignore timeout messages
+            // --> furi/core/base.h
+            FuriStatus status = FuriStatusErrorTimeout;
+            while((status = furi_message_queue_get(queue, &msg, 60000)) == FuriStatusErrorTimeout)
+                ;
 
-		// Read successful
-		} else {
-			// *** Handle events ***
-			switch (msg.id) {
-				// ------------------------------------------------------------
-				// Timer events
-				case EVID_TICK:
-					evTick();  // Animation runs every "tick"
-					break;
+            // Read failed
+            if(status != FuriStatusOk) {
+                switch(status) {
+                case FuriStatusErrorTimeout:
+                    DEBUG(errs[DEBUG_QUEUE_TIMEOUT]);
+                    break;
+                case FuriStatusError:
+                    ERROR(errs[(error = ERR_QUEUE_RTOS)]);
+                    goto bail;
+                case FuriStatusErrorResource:
+                    ERROR(errs[(error = ERR_QUEUE_RESOURCE)]);
+                    goto bail;
+                case FuriStatusErrorParameter:
+                    ERROR(errs[(error = ERR_QUEUE_BADPRM)]);
+                    goto bail;
+                case FuriStatusErrorNoMemory:
+                    ERROR(errs[(error = ERR_QUEUE_NOMEM)]);
+                    goto bail;
+                case FuriStatusErrorISR:
+                    ERROR(errs[(error = ERR_QUEUE_ISR)]);
+                    goto bail;
+                default:
+                    ERROR(errs[(error = ERR_QUEUE_UNK)]);
+                    goto bail;
+                }
 
-				// ------------------------------------------------------------
-				// Key events
-				case EVID_KEY:
-					run = evKey(&msg, gui);
-					break;
+                // Read successful
+            } else {
+                // *** Handle events ***
+                switch(msg.id) {
+                // ------------------------------------------------------------
+                // Timer events
+                case EVID_TICK:
+                    evTick(); // Animation runs every "tick"
+                    break;
 
-				// ------------------------------------------------------------
-				// Unknown event
-				default:
-					WARN("Unknown message.ID [%d]", msg.id);
-					break;
-			}
+                // ------------------------------------------------------------
+                // Key events
+                case EVID_KEY:
+                    run = evKey(&msg, gui);
+                    break;
 
-			// Update the GUI screen via the viewport
-			view_port_update(vpp);\
-		} // if (ok)
-	} while (run);
-	INFO("USER EXIT");
+                // ------------------------------------------------------------
+                // Unknown event
+                default:
+                    WARN("Unknown message.ID [%d]", msg.id);
+                    break;
+                }
+
+                // Update the GUI screen via the viewport
+                view_port_update(vpp);
+            } // if (ok)
+        } while(run);
+    INFO("USER EXIT");
 
 // Oh no! A horrible scary "goto" label!
 // Quick! Call the Spanish Inquisition! ...Bring the comfy chair!
 bail:
-	// Unregister commands
-	extra_deinit_unregister();
-	
-	// Detach the viewport
-	gui_remove_view_port(gui, vpp);
+    // Unregister commands
+    extra_deinit_unregister();
 
-	// Destroy the viewport
-	if (vpp) {
-		view_port_enabled_set(vpp, false);
-		view_port_free(vpp);
-		vpp = NULL;
-	}
+    // Detach the viewport
+    gui_remove_view_port(gui, vpp);
 
-	// Close the GUI
-	furi_record_close("gui");
+    // Destroy the viewport
+    if(vpp) {
+        view_port_enabled_set(vpp, false);
+        view_port_free(vpp);
+        vpp = NULL;
+    }
 
-	// Destroy the message queue
-	if (queue) {
-		furi_message_queue_free(queue);
-		queue = NULL;
-	}
+    // Close the GUI
+    furi_record_close("gui");
 
-	INFO("CLEAN EXIT ... Exit code: %d", error);
-	LEAVE;
-	return (int32_t)error;
+    // Destroy the message queue
+    if(queue) {
+        furi_message_queue_free(queue);
+        queue = NULL;
+    }
+
+    INFO("CLEAN EXIT ... Exit code: %d", error);
+    LEAVE;
+    return (int32_t)error;
 }
