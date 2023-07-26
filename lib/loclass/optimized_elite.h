@@ -53,6 +53,6 @@ void loclass_permutekey_rev(const uint8_t key[8], uint8_t dest[8]);
  * @param k output
  */
 void loclass_hash1(const uint8_t* csn, uint8_t* k);
-void loclass_hash2(uint8_t* key64, uint8_t* outp_keytable);
+void loclass_hash2(const uint8_t* key64, uint8_t* outp_keytable);
 
 #endif

@@ -3,6 +3,7 @@ enum SubmenuIndex {
     SubmenuIndexRead,
     SubmenuIndexEliteDictAttack,
     SubmenuIndexSaved,
+    SubmenuIndexLoclass,
 };
 
 void picopass_scene_start_submenu_callback(void* context, uint32_t index) {
@@ -23,6 +24,9 @@ void picopass_scene_start_on_enter(void* context) {
         picopass);
     submenu_add_item(
         submenu, "Saved", SubmenuIndexSaved, picopass_scene_start_submenu_callback, picopass);
+
+    submenu_add_item(
+        submenu, "Loclass", SubmenuIndexLoclass, picopass_scene_start_submenu_callback, picopass);
 
     submenu_set_selected_item(
         submenu, scene_manager_get_scene_state(picopass->scene_manager, PicopassSceneStart));
@@ -51,6 +55,11 @@ bool picopass_scene_start_on_event(void* context, SceneManagerEvent event) {
             scene_manager_set_scene_state(
                 picopass->scene_manager, PicopassSceneStart, SubmenuIndexEliteDictAttack);
             scene_manager_next_scene(picopass->scene_manager, PicopassSceneEliteDictAttack);
+            consumed = true;
+        } else if(event.event == SubmenuIndexLoclass) {
+            scene_manager_set_scene_state(
+                picopass->scene_manager, PicopassSceneLoclass, PicopassSceneLoclass);
+            scene_manager_next_scene(picopass->scene_manager, PicopassSceneLoclass);
             consumed = true;
         }
     }
