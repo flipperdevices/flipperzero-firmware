@@ -8,7 +8,6 @@
 
 #include "loader.h"
 #include "loader_menu.h"
-#include "loader_mainmenu.h"
 
 #define TAG "LoaderMenu"
 
