@@ -123,12 +123,11 @@ void cfw_app_scene_interface_mainmenu_on_enter(void* context) {
         var_item_list, "Move App", 3, cfw_app_scene_interface_mainmenu_move_app_changed, app);
     variable_item_set_current_value_text(item, "");
     variable_item_set_current_value_index(item, 1);
-    variable_item_set_locked(item, count < 2, "Can't move\nwith less\nthan 2 apps!");
 
     variable_item_list_add(var_item_list, "Add App", 0, NULL, app);
 
     item = variable_item_list_add(var_item_list, "Remove App", 0, NULL, app);
-    variable_item_set_locked(item, count < 2, "Minimum of\n1 app\nis required!");
+    variable_item_set_locked(item, count < 3, "Minimum of\n2 apps\nare required!");
 
     variable_item_list_set_enter_callback(
         var_item_list, cfw_app_scene_interface_mainmenu_var_item_list_callback, app);

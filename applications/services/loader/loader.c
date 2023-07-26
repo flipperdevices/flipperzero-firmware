@@ -299,8 +299,8 @@ static Loader* loader_alloc() {
 
     } while(false);
 
-    //Manually add CFW Settings to the mainmenu if no other apps are present.
-    if(MainMenuList_size(loader->mainmenu_apps) < 1) {
+    //Manually add CFW Settings and Settings to the mainmenu if under 2 apps are present.
+    if(MainMenuList_size(loader->mainmenu_apps) < 2) {
         for(size_t i = 0; i < FLIPPER_EXTERNAL_APPS_COUNT; i++) {
             if(strcmp(FLIPPER_EXTERNAL_APPS[i].name, "CFW Settings") == 0) {
                 MainMenuList_push_back(
@@ -311,6 +311,9 @@ static Loader* loader_alloc() {
                         .path = FLIPPER_EXTERNAL_APPS[i].name});
             }
         }
+        MainMenuList_push_back(
+            loader->mainmenu_apps,
+            (MainMenuApp){.name = "Settings", .icon = &A_Settings_14, .path = "Settings"});
     }
     furi_string_free(name);
     furi_string_free(line);
