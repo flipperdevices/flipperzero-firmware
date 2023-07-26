@@ -57,6 +57,7 @@ typedef enum {
 } FHalNfcMode;
 
 typedef enum {
+    FHalNfcBitrate26p48,
     FHalNfcBitrate106,
 } FHalNfcBitrate;
 

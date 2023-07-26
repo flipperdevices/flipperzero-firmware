@@ -22,8 +22,7 @@ static void nfc_scene_info_on_enter_iso15693_3(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-static NfcCommand
-    nfc_scene_read_poller_callback_iso15693_3(NfcGenericEvent event, void* context) {
+static NfcCommand nfc_scene_read_poller_callback_iso15693_3(NfcGenericEvent event, void* context) {
     furi_assert(event.protocol == NfcProtocolIso15693_3);
 
     NfcApp* instance = context;
