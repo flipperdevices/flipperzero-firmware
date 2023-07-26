@@ -10,6 +10,11 @@ extern "C" {
 
 #define ISO15693_3_UID_SIZE (8U)
 
+// TODO: Adjust these values
+#define ISO15693_3_GUARD_TIME_US (5000U)
+#define ISO15693_3_FDT_POLL_FC (9000U)
+#define ISO15693_3_POLL_POLL_MIN_US (1500U)
+
 /* true: modulating releases load, false: modulating adds load resistor to field coil */
 #define ISO15693_3_LOAD_MODULATION_POLARITY (false)
 
@@ -29,6 +34,13 @@ extern "C" {
 
 typedef enum {
     Iso15693_3ErrorNone,
+    Iso15693_3ErrorNotPresent,
+    Iso15693_3ErrorColResFailed,
+    Iso15693_3ErrorBufferOverflow,
+    Iso15693_3ErrorCommunication,
+    Iso15693_3ErrorFieldOff,
+    Iso15693_3ErrorWrongCrc,
+    Iso15693_3ErrorTimeout,
 } Iso15693_3Error;
 
 typedef struct {

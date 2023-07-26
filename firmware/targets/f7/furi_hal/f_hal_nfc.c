@@ -322,8 +322,8 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
     FHalNfcError error = FHalNfcErrorNone;
     FuriHalSpiBusHandle* handle = &furi_hal_spi_bus_handle_nfc;
 
-    if(mode == FHalNfcModeIso14443_3aPoller || mode == FHalNfcModeIso14443_3aListener) {
-        if(mode == FHalNfcModeIso14443_3aPoller) {
+    if(mode == FHalNfcModeIso14443aPoller || mode == FHalNfcModeIso14443aListener) {
+        if(mode == FHalNfcModeIso14443aPoller) {
             // Poller configuration
             f_hal_nfc_configure_poller_common(handle);
             // Enable ISO14443A mode, OOK modulation
@@ -384,7 +384,7 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
             st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0x00);
         }
 
-    } else if(mode == FHalNfcModeIso14443_3bPoller /* TODO: Listener support */) {
+    } else if(mode == FHalNfcModeIso14443bPoller /* TODO: Listener support */) {
         f_hal_nfc_configure_poller_common(handle);
         // Enable ISO14443B mode, AM modulation
         st25r3916_change_reg_bits(
@@ -461,6 +461,22 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
                     ST25R3916_REG_CORR_CONF1_corr_s3 | ST25R3916_REG_CORR_CONF1_corr_s4);
             // Sleep mode disable, 424kHz mode off
             st25r3916_write_reg(handle, ST25R3916_REG_CORR_CONF2, 0x00);
+        }
+
+    } else if(mode == FHalNfcModeIso15693Poller || mode == FHalNfcModeIso15693Listener) {
+        if(mode == FHalNfcModeIso15693Poller) {
+            // Poller configuration
+            f_hal_nfc_configure_poller_common(handle);
+            // TODO: Implement poller config
+        } else {
+            // Listener configuration
+            f_hal_nfca_listener_init();
+            // TODO: Implement listener config
+        }
+
+        if(bitrate == FHalNfcBitrate106) {
+            // Bitrate-dependent NFC-V settings
+            // TODO: Implement settings
         }
     }
 

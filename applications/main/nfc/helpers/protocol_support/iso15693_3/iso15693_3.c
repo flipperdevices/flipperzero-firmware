@@ -1,7 +1,7 @@
 #include "iso15693_3.h"
 #include "iso15693_3_render.h"
 
-// #include <nfc/protocols/iso15693_3/iso15693_3_poller.h>
+#include <nfc/protocols/iso15693_3/iso15693_3_poller.h>
 
 #include "nfc/nfc_app_i.h"
 
@@ -22,26 +22,26 @@ static void nfc_scene_info_on_enter_iso15693_3(NfcApp* instance) {
     furi_string_free(temp_str);
 }
 
-// static NfcCommand
-//     nfc_scene_read_poller_callback_iso15693_3(NfcGenericEvent event, void* context) {
-//     furi_assert(event.protocol == NfcProtocolIso15693_3);
-//
-//     NfcApp* instance = context;
-//     const Iso15693_3PollerEvent* iso15693_3_event = event.data;
-//
-//     if(iso15693_3_event->type == Iso15693_3PollerEventTypeReady) {
-//         nfc_device_set_data(
-//             instance->nfc_device, NfcProtocolIso15693_3, nfc_poller_get_data(instance->poller));
-//         view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
-//         return NfcCommandStop;
-//     }
-//
-//     return NfcCommandContinue;
-// }
+static NfcCommand
+    nfc_scene_read_poller_callback_iso15693_3(NfcGenericEvent event, void* context) {
+    furi_assert(event.protocol == NfcProtocolIso15693_3);
+
+    NfcApp* instance = context;
+    const Iso15693_3PollerEvent* iso15693_3_event = event.data;
+
+    if(iso15693_3_event->type == Iso15693_3PollerEventTypeReady) {
+        nfc_device_set_data(
+            instance->nfc_device, NfcProtocolIso15693_3, nfc_poller_get_data(instance->poller));
+        view_dispatcher_send_custom_event(instance->view_dispatcher, NfcCustomEventPollerSuccess);
+        return NfcCommandStop;
+    }
+
+    return NfcCommandContinue;
+}
 
 static void nfc_scene_read_on_enter_iso15693_3(NfcApp* instance) {
     UNUSED(instance);
-    // nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_iso15693_3, instance);
+    nfc_poller_start(instance->poller, nfc_scene_read_poller_callback_iso15693_3, instance);
 }
 
 static void nfc_scene_read_success_on_enter_iso15693_3(NfcApp* instance) {
