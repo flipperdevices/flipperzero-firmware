@@ -15,26 +15,19 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
 App(
     appid="vb_migrate",
     name="VB Migration Assistant",
     apptype=FlipperAppType.EXTERNAL,
     entry_point="vb_migrate_app",
-    requires=["gui", "storage"],
     stack_size=2 * 1024,
-    fap_version=(1, 1),
     fap_libs=[],
-    fap_private_libs=[
-        Lib(
-            name="nfc",
-        ),
-    ],
     fap_icon="vb_migrate_10px.png",
     fap_category="NFC",
-    fap_description="Makes transferring characters with VB Lab less cumbersome",
-    fap_author="cyanic",
-    fap_weburl="https://github.com/GMMan/flipperzero-vb-migrate",
     fap_icon_assets="icons",
     fap_icon_assets_symbol="vb_migrate",
+    fap_author="cyanic",
+    fap_weburl="https://github.com/GMMan/flipperzero-vb-migrate",
+    fap_version=(1,1),
+    fap_description="Makes transferring characters with VB Lab less cumbersome",
 )

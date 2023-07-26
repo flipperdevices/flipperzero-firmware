@@ -43,7 +43,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL PR: [SubGhz Analyzer PRECISE hstep fix #553 (By AKEEF02)](https://github.com/DarkFlippers/unleashed-firmware/pull/553)
 - Updated: [ESP32CAM Morse Flasher (By eried)](https://github.com/eried/flipperzero-mayhem)
 - Updated: [ESP32CAM Evil Portal (By bigbrodude6119 & eried)](https://github.com/eried/flipperzero-mayhem)
-- Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 - Added: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - OFW PR: [BadUSB: Added French Canadian layout #2896 (By francis2054)](https://github.com/flipperdevices/flipperzero-firmware/pull/2896)
 - OFW PR: [Fix about screen #2907 (By andzhr)](https://github.com/flipperdevices/flipperzero-firmware/pull/2907)
@@ -84,6 +83,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Fix Archive folder options to include PIN
 - Updated: [FlipBIP Crypto Wallet v1.11 (By xtruan)](https://github.com/xtruan/FlipBIP)
 - Settings: [CFW Settings for More Customizable Main Menu #721 (By Willy-JL, Ported & Improved By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/721)
+- Updated: [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
+- Updated: [NFC Seader (By bettse)](https://github.com/bettse/seader)
 
 <a name="release">
 
@@ -447,7 +448,7 @@ $ ./fbt dolphin_ext
 - [USB HID Autofire (By pbek)](https://github.com/pbek/usb_hid_autofire)
 - [USB Mass Storage (By Willy-JL)](https://github.com/Flipper-XFW/Xtreme-Firmware/commit/762744eca3ed92794dcd044397faf9af0131a950)
 - [USB Midi (By DrZlo13)](https://github.com/DrZlo13/flipper-zero-usb-midi) [Instructions by ESurge](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/applications/plugins/usb_midi/ReadMe.md)
-- [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate) with fixes for NFC (By RogueMaster)
+- [VB Migration Assistant (By GMMan)](https://github.com/GMMan/flipperzero-vb-migrate)
 - [Video Player (By LTVA1)](https://github.com/LTVA1/flipper-zero-video-player)
 - [WAV Player (By DrZlo13)](https://github.com/flipperdevices/flipperzero-firmware/tree/zlo/wav-player) Updated by Atmanos & RogueMaster To Work.  [Updated by xMasterX](https://github.com/DarkFlippers/unleashed-firmware/commit/76d3f84a5eb069b749e3ad20df6fdbbc785eb253)
 - [WAV Recorder (By scrolltex)](https://github.com/scrolltex/flipper-wav-recorder)
