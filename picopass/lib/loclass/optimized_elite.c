@@ -153,7 +153,7 @@ Definition 14. Define the rotate key function loclass_rk : (F 82 ) 8 × N → (F
 loclass_rk(x [0] . . . x [7] , 0) = x [0] . . . x [7]
 loclass_rk(x [0] . . . x [7] , n + 1) = loclass_rk(loclass_rl(x [0] ) . . . loclass_rl(x [7] ), n)
 **/
-static void loclass_rk(uint8_t* key, uint8_t n, uint8_t* outp_key) {
+static void loclass_rk(const uint8_t* key, uint8_t n, uint8_t* outp_key) {
     memcpy(outp_key, key, 8);
     uint8_t j;
     while(n-- > 0) {
@@ -172,7 +172,7 @@ static void loclass_desdecrypt_iclass(uint8_t* iclass_key, uint8_t* input, uint8
     mbedtls_des_crypt_ecb(&loclass_ctx_dec, input, output);
 }
 
-static void loclass_desencrypt_iclass(uint8_t* iclass_key, uint8_t* input, uint8_t* output) {
+static void loclass_desencrypt_iclass(const uint8_t* iclass_key, uint8_t* input, uint8_t* output) {
     uint8_t key_std_format[8] = {0};
     loclass_permutekey_rev(iclass_key, key_std_format);
     mbedtls_des_setkey_enc(&loclass_ctx_enc, key_std_format);
@@ -185,7 +185,7 @@ static void loclass_desencrypt_iclass(uint8_t* iclass_key, uint8_t* input, uint8
  * @param loclass_hash1 loclass_hash1
  * @param key_sel output key_sel=h[loclass_hash1[i]]
  */
-void loclass_hash2(uint8_t* key64, uint8_t* outp_keytable) {
+void loclass_hash2(const uint8_t* key64, uint8_t* outp_keytable) {
     /**
      *Expected:
      * High Security Key Table
