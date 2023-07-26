@@ -193,7 +193,7 @@ static void loader_make_mainmenu_file(Storage* storage) {
     Stream* new = file_stream_alloc(storage);
     if(!storage_file_exists(storage, CFW_MENU_PATH)) {
         if(file_stream_open(new, CFW_MENU_PATH, FSAM_WRITE, FSOM_CREATE_ALWAYS)) {
-            stream_write_format(new, "MenuAppList Version %u\n", 0);
+            stream_write_format(new, "MainMenuList Version %u\n", 0);
             stream_write_format(new, "Applications\n");
             for(size_t i = 0; i < FLIPPER_APPS_COUNT; i++) {
                 stream_write_format(new, "%s\n", FLIPPER_APPS[i].name);
@@ -237,7 +237,7 @@ static Loader* loader_alloc() {
 
         uint32_t version;
         if(!stream_read_line(stream, line) ||
-           sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
+           sscanf(furi_string_get_cstr(line), "MainMenuList Version %lu", &version) != 1 ||
            version > 0) {
             file_stream_close(stream);
             storage_common_remove(storage, CFW_MENU_PATH);
@@ -245,7 +245,7 @@ static Loader* loader_alloc() {
             if(!file_stream_open(stream, CFW_MENU_PATH, FSAM_READ_WRITE, FSOM_OPEN_EXISTING))
                 break;
             if(!stream_read_line(stream, line) ||
-               sscanf(furi_string_get_cstr(line), "MenuAppList Version %lu", &version) != 1 ||
+               sscanf(furi_string_get_cstr(line), "MainMenuList Version %lu", &version) != 1 ||
                version > 0)
                 break;
         }
