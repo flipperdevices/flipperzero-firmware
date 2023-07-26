@@ -1,4 +1,5 @@
 #pragma once
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -21,6 +22,7 @@ typedef enum{
     KOREA = 6
 }UHFWorkArea;
 
+#define DEFAULT_BAUD_RATE 115200
 #define FRAME_START 0xBB
 #define FRAME_END 0x7E
 #define ERROR 0x15

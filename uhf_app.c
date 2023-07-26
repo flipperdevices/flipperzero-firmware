@@ -1,5 +1,28 @@
 #include "uhf_app_i.h"
 
+char* convertToHexString(const uint8_t* array, size_t length) {
+    if(array == NULL || length == 0) {
+        return NULL;
+    }
+
+    // Each byte takes 3 characters in the hex representation (2 characters + space), plus 1 for the null terminator
+    size_t hexLength = (length * 3) + 1;
+
+    char* hexArray = (char*)malloc(hexLength * sizeof(char));
+    if(hexArray == NULL) {
+        return NULL;
+    }
+
+    size_t index = 0;
+    for(size_t i = 0; i < length; i++) {
+        index += snprintf(&hexArray[index], hexLength - index, "%02x ", array[i]);
+    }
+
+    hexArray[hexLength - 1] = '\0';
+
+    return hexArray;
+}
+
 bool uhf_custom_event_callback(void* ctx, uint32_t event) {
     furi_assert(ctx);
     UHFApp* uhf_app = ctx;

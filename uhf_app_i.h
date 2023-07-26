@@ -4,6 +4,7 @@
 #include <gui/gui.h>
 #include <gui/view_dispatcher.h>
 #include <gui/scene_manager.h>
+#include <gui/canvas_i.h>
 #include <notification/notification_messages.h>
 
 #include <gui/modules/submenu.h>
@@ -90,3 +91,5 @@ void uhf_show_loading_popup(void* context, bool show);
  * @return     True if memory is set to pattern, false otherwise
  */
 bool uhf_is_memset(const uint8_t* data, const uint8_t pattern, size_t size);
+
+char* convertToHexString(const uint8_t* array, size_t length);
