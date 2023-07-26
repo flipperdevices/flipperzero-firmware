@@ -1,6 +1,8 @@
 #include "ac_remote_app_i.h"
 #include "ac_remote.h"
 
+#define TAG "Mitsubishi_AC_Remote"
+
 /***************************************************************************************************
 * Protocol description:
 * https://github.com/r45635/HVAC-IR-Control/blob/4b6b7944b28ce78247f19744c272a36935bbb305/Protocol/Mitsubishi_IR_Packet_Data_v1.1-FULL.pdf
@@ -162,6 +164,8 @@ void send_ac_mitsubishi(ACState* acstate)
     {
         data[17] = data[i] + data[17]; // CRC is a simple bits addition
     }
+
+    FURI_LOG_D(TAG, "Power[%u]; Mode[%u]; Fan[%u]; Vane[%u]; Temp[%u]", acstate->ac_power, acstate->ac_mode, acstate->ac_fanmode, acstate->ac_vanemode, acstate->ac_temp);
 
     uint32_t *timings = malloc(sizeof(uint32_t) * MAX_TIMINGS_AMOUNT);
     uint32_t frequency = 38000;

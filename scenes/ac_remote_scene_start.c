@@ -168,7 +168,7 @@ void ac_remote_scene_start_item_callback(VariableButtonItem *item)
         app->app_state.ac_state.ac_mode = button_items[id].commands[currient_value_index];
         break;
     case ID_BUTTON_FAN:
-        app->app_state.ac_state.ac_mode = button_items[id].commands[currient_value_index];
+        app->app_state.ac_state.ac_fanmode = button_items[id].commands[currient_value_index];
         break;
     case ID_BUTTON_VANE:
         app->app_state.ac_state.ac_vanemode = button_items[id].commands[currient_value_index];
