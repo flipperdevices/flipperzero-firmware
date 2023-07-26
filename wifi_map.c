@@ -18,6 +18,10 @@
 #define MAX_AP_LIST 20
 #define WORKER_EVENTS_MASK (WorkerEventStop | WorkerEventRx)
 
+// Screen is 128x64 px
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
 typedef struct {
     Gui* gui;
     NotificationApp* notification;
@@ -86,13 +90,14 @@ static void retrieve_ap_ssid_distance(const char *data, char *apssid, char *dst)
         for (size_t i = 0; i < 2; i++) {
                 apssid[i] = data[i];
         }
+
         int cntr = 0;
         for (size_t i = 9; i < strlen(data); i++) {
                 if (data[i] == '.')
-                    break;
+                        break;
                 else
-                    dst[cntr] = data[i];
-            cntr++;
+                        dst[cntr] = data[i];
+                cntr++;
         }
 }
 
@@ -103,11 +108,11 @@ static void uart_echo_view_draw_callback(Canvas* canvas, void* _model)
         canvas_set_font(canvas, FontSecondary);
         for (size_t i = 0; i < MAX_AP_LIST; i++) {
             const char *line = furi_string_get_cstr(model->lines[i]->line);
-            char apssid[2], dst[4];
+            char apssid[2], dst[6];
             retrieve_ap_ssid_distance(line, apssid, dst);
             if (strlen(line) > 0) {
-                    uint8_t d = (uint8_t)atoi(dst);
-                    canvas_draw_box(canvas, d < 1 ? d+5 : d , (i+3)*2, 5, 3);
+                    int d = atoi(dst);
+                    canvas_draw_circle(canvas, 0, SCREEN_HEIGHT/2, d); 
                     canvas_draw_str(canvas, d+6, (i+3)*2, dst);
             }
         }
@@ -123,14 +128,14 @@ static void uart_echo_view_draw_callback(Canvas* canvas, void* _model)
 }
 
 static bool uart_echo_view_input_callback(InputEvent* event, void* context) {
-    UNUSED(event);
-    UNUSED(context);
-    return false;
+        UNUSED(event);
+        UNUSED(context);
+        return false;
 }
 
 static uint32_t uart_echo_exit(void* context) {
-    UNUSED(context);
-    return VIEW_NONE;
+        UNUSED(context);
+        return VIEW_NONE;
 }
 
 static void uart_echo_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {

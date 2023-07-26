@@ -12,7 +12,7 @@ Clone this repo at `applications_user/` folder under `flipperzero-firmware`
 
 ### Build and flash
 
-`$ ./fbt launch_app APPSRC=wifi_map`
+`$ ./fbt launch APPSRC=wifi_map`
 
 ### Logs
 
