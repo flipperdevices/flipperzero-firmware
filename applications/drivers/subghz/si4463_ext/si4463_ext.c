@@ -329,19 +329,20 @@ void subghz_device_si4463_ext_reset() {
 }
 
 void subghz_device_si4463_ext_idle() {
-    //ToDo crutch, GO0 should be low at the time of disengagement
-    furi_hal_gpio_init(
-        subghz_device_si4463_ext->g0_pin, GpioModeOutputPushPull, GpioPullDown, GpioSpeedLow);
-    furi_hal_gpio_write(subghz_device_si4463_ext->g0_pin, false); //DOWN
+    // //ToDo crutch, GO0 should be low at the time of disengagement
+    // furi_hal_gpio_init(
+    //     subghz_device_si4463_ext->g0_pin, GpioModeOutputPushPull, GpioPullDown, GpioSpeedLow);
+    // furi_hal_gpio_write(subghz_device_si4463_ext->g0_pin, false); //DOWN
     si446x_switch_to_idle(subghz_device_si4463_ext->spi_bus_handle);
     si446x_clear_interrupt_status(subghz_device_si4463_ext->spi_bus_handle);
     //si446x_write_gpio(subghz_device_si4463_ext->spi_bus_handle, SI446X_GPIO1, SI446X_GPIO_MODE_INPUT);
 }
 
 void subghz_device_si4463_ext_rx() {
-    //si446x_write_gpio(subghz_device_si4463_ext->spi_bus_handle, SI446X_GPIO1, SI446X_GPIO_MODE_RX_DATA);
+    si446x_write_gpio(subghz_device_si4463_ext->spi_bus_handle, SI446X_GPIO1, SI446X_GPIO_MODE_RX_DATA);
     si446x_write_gpio(
-        subghz_device_si4463_ext->spi_bus_handle, SI446X_GPIO1, SI446X_GPIO_MODE_RX_RAW_DATA);
+        subghz_device_si4463_ext->spi_bus_handle, SI446X_NIRQ, SI446X_GPIO_MODE_RX_RAW_DATA);
+    
     si446x_clear_interrupt_status(subghz_device_si4463_ext->spi_bus_handle);
     uint8_t channel = 0;
     si446x_switch_to_start_rx(
@@ -418,12 +419,14 @@ void subghz_device_si4463_ext_set_path(SubGhzDeviceSi4463ExtPath path) {
     //Path_315      sw_0-1 sw_1-0
     //Path_868      sw_0-1 sw_1-1
     //Path_Isolate  sw_0-0 sw_1-0
-    uint8_t pa_mode[1] = {0x88};
-    si446x_set_properties(
-        subghz_device_si4463_ext->spi_bus_handle,
-        SI446X_PROP_PA_MODE,
-        &pa_mode[0],
-        sizeof(pa_mode));
+
+    //set EXT_PA_RAMP ?????
+    // uint8_t pa_mode[1] = {0x88};
+    // si446x_set_properties(
+    //     subghz_device_si4463_ext->spi_bus_handle,
+    //     SI446X_PROP_PA_MODE,
+    //     &pa_mode[0],
+    //     sizeof(pa_mode));
 
     if(path == SubGhzDeviceSi4463ExtPath433) {
         si446x_write_sw(

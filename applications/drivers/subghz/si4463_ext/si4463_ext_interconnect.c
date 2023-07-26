@@ -82,6 +82,21 @@ static bool subghz_device_si4463_ext_io_control(uint32_t io_control_code, void* 
         return subghz_device_si4463_ext_set_properties(
             set_data->prop, set_data->data, set_data->size);
         break;
+    case SubGhzDeviceIOCTL_SI4463SetPath:;
+        SubGhzDeviceIOCTL_SI4463SetPathData* set_path = in_out_data;
+        if(set_path->path == SubGhzDeviceIOCTL_Si4463ExtPath433) {
+            subghz_device_si4463_ext_set_path(SubGhzDeviceSi4463ExtPath433);
+        } else if(set_path->path == SubGhzDeviceIOCTL_Si4463ExtPath315) {
+            subghz_device_si4463_ext_set_path(SubGhzDeviceSi4463ExtPath315);
+        } else if(set_path->path == SubGhzDeviceIOCTL_Si4463ExtPath868) {
+            subghz_device_si4463_ext_set_path(SubGhzDeviceSi4463ExtPath868);
+        } else if(set_path->path == SubGhzDeviceIOCTL_Si4463ExtPathIsolate) {
+            subghz_device_si4463_ext_set_path(SubGhzDeviceSi4463ExtPathIsolate);
+        } else {
+            furi_crash("Si4464_ext. unknown path type");
+        }
+        return true;
+        break;
     default:
         return false;
     }
