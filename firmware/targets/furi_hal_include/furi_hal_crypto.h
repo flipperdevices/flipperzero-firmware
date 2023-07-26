@@ -34,6 +34,13 @@ typedef struct {
     uint8_t* data;
 } FuriHalCryptoKey;
 
+/** FuriHalCryptoGCMState Result of a GCM operation */
+typedef enum {
+    FuriHalCryptoGCMStateOk, /**< operation successful */
+    FuriHalCryptoGCMStateError, /**< error during en-/decryption */
+    FuriHalCryptoGCMStateAuthFailure, /**< tags do not match, auth failed */
+} FuriHalCryptoGCMState;
+
 /** Initialize cryptography layer This includes AES engines, PKA and RNG
  */
 void furi_hal_crypto_init();
@@ -87,36 +94,6 @@ bool furi_hal_crypto_load_key(const uint8_t *key, const uint8_t* iv);
  */
 bool furi_hal_crypto_unload_key(void);
 
-/** Encrypt the input using AES-CTR
- * Decryption can be performed by supplying the ciphertext as input.
- * Inits and deinits the AES engine internally.
- *
- * @param[in]  key     pointer to 32 bytes key data
- * @param[in]  iv      pointer to 12 bytes Initialization Vector data
- * @param[in]  input   pointer to input data
- * @param[out] output  pointer to output data
- * @param      length  length of the input and output in bytes
- */
-bool furi_hal_crypto_ctr(const uint8_t *key, const uint8_t *iv, const uint8_t
-        *input, uint8_t *output, size_t length);
-
-/** Encrypt/decrypt the input using AES-GCM
- * When decrypting the tag generated needs to be compared to the tag attached
- * to the ciphertext in a constant-time fashion. If the tags are not equal, the
- * decryption failed and the plaintext returned needs to be discarded.
- * Inits and deinits the AES engine internally.
- *
- * @param[in]  key     pointer to 32 bytes key data
- * @param[in]  iv      pointer to 12 bytes Initialization Vector data
- * @param[in]  input   pointer to input data
- * @param[out] output  pointer to output data
- * @param      length  length of the input and output in bytes
- * @param[out] tag     pointer to 16 bytes space for the tag
- * @param      decrypt true for decryption, false otherwise
- */
-bool furi_hal_crypto_gcm(const uint8_t *key, const uint8_t *iv, const uint8_t
-        *input, uint8_t *output, size_t length, uint8_t *tag, bool decrypt);
-
 /** Encrypt data
  *
  * @param      input   pointer to input data
@@ -136,6 +113,75 @@ bool furi_hal_crypto_encrypt(const uint8_t* input, uint8_t* output, size_t size)
  * @return     true on success
  */
 bool furi_hal_crypto_decrypt(const uint8_t* input, uint8_t* output, size_t size);
+
+/** Encrypt the input using AES-CTR
+ * Decryption can be performed by supplying the ciphertext as input.
+ * Inits and deinits the AES engine internally.
+ *
+ * @param[in]  key     pointer to 32 bytes key data
+ * @param[in]  iv      pointer to 12 bytes Initialization Vector data
+ * @param[in]  input   pointer to input data
+ * @param[out] output  pointer to output data
+ * @param      length  length of the input and output in bytes
+ *
+ * @return     true on success
+ */
+bool furi_hal_crypto_ctr(const uint8_t *key, const uint8_t *iv, const uint8_t
+        *input, uint8_t *output, size_t length);
+
+/** Encrypt/decrypt the input using AES-GCM
+ * When decrypting the tag generated needs to be compared to the tag attached
+ * to the ciphertext in a constant-time fashion. If the tags are not equal, the
+ * decryption failed and the plaintext returned needs to be discarded.
+ * Inits and deinits the AES engine internally.
+ *
+ * @param[in]  key     pointer to 32 bytes key data
+ * @param[in]  iv      pointer to 12 bytes Initialization Vector data
+ * @param[in]  input   pointer to input data
+ * @param[out] output  pointer to output data
+ * @param      length  length of the input and output in bytes
+ * @param[out] tag     pointer to 16 bytes space for the tag
+ * @param      decrypt true for decryption, false otherwise
+ *
+ * @return     true on success
+ */
+bool furi_hal_crypto_gcm(const uint8_t *key, const uint8_t *iv, const uint8_t
+        *input, uint8_t *output, size_t length, uint8_t *tag, bool decrypt);
+
+/** Encrypt the input using AES-GCM and generate a tag
+ * Inits and deinits the AES engine internally.
+ *
+ * @param[in]  key     pointer to 32 bytes key data
+ * @param[in]  iv      pointer to 12 bytes Initialization Vector data
+ * @param[in]  input   pointer to input data
+ * @param[out] output  pointer to output data
+ * @param      length  length of the input and output in bytes
+ * @param[out] tag     pointer to 16 bytes space for the tag
+ *
+ * @return     FuriHalCryptoGCMStateOk on success, FuriHalCryptoGCMStateError
+ *             on failure
+ */
+FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(const uint8_t *key,
+        const uint8_t *iv, const uint8_t *input, uint8_t *output, size_t
+        length, uint8_t *tag);
+
+/** Decrypt the input using AES-GCM and verify the provided tag
+ * Inits and deinits the AES engine internally.
+ *
+ * @param[in]  key     pointer to 32 bytes key data
+ * @param[in]  iv      pointer to 12 bytes Initialization Vector data
+ * @param[in]  input   pointer to input data
+ * @param[out] output  pointer to output data
+ * @param      length  length of the input and output in bytes
+ * @param[out] tag     pointer to 16 bytes tag
+ *
+ * @return     FuriHalCryptoGCMStateOk on success, FuriHalCryptoGCMStateError
+ *             on failure, FuriHalCryptoGCMStateAuthFailure if the tag does not
+ *             match
+ */
+FuriHalCryptoGCMState furi_hal_crypto_gcm_decrypt_and_verify(const uint8_t
+        *key, const uint8_t *iv, const uint8_t *input, uint8_t *output, size_t
+        length, const uint8_t *tag);
 
 #ifdef __cplusplus
 }

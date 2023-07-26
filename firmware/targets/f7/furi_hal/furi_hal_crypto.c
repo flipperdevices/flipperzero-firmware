@@ -31,6 +31,7 @@
 #define CRYPTO_AES_GCM (AES_CR_CHMOD_1 | AES_CR_CHMOD_0)
 #define CRYPTO_GCM_IV_LEN 12
 #define CRYPTO_GCM_CTR_LEN 4
+#define CRYPTO_GCM_TAG_LEN 16
 #define CRYPTO_GCM_PH_INIT 0U
 #define CRYPTO_GCM_PH_PAYLOAD (AES_CR_GCMPH_1)
 #define CRYPTO_GCM_PH_FINAL (AES_CR_GCMPH_1 | AES_CR_GCMPH_0)
@@ -605,6 +606,18 @@ static bool furi_hal_crypto_gcm_finish(size_t length, uint8_t *tag) {
     return true;
 }
 
+static bool furi_hal_crypto_gcm_compare_tag(const uint8_t *tag1, const uint8_t
+        *tag2) {
+    uint8_t diff = 0;
+
+    size_t i;
+    for (i = 0; i < CRYPTO_GCM_TAG_LEN; i++) {
+        diff |= tag1[i] ^ tag2[i];
+    }
+
+    return (diff == 0);
+}
+
 bool furi_hal_crypto_gcm(const uint8_t *key, const uint8_t *iv, const uint8_t
         *input, uint8_t *output, size_t length, uint8_t *tag, bool decrypt) {
     bool state = false;
@@ -645,4 +658,34 @@ bool furi_hal_crypto_gcm(const uint8_t *key, const uint8_t *iv, const uint8_t
 out_enc_err:
     furi_hal_crypto_unload_key();
     return state;
+}
+
+FuriHalCryptoGCMState furi_hal_crypto_gcm_encrypt_and_tag(const uint8_t *key,
+        const uint8_t *iv, const uint8_t *input, uint8_t *output, size_t
+        length, uint8_t *tag) {
+    if (!furi_hal_crypto_gcm(key, iv, input, output, length, tag, false)) {
+        memset(output, 0, length);
+        memset(tag, 0, CRYPTO_GCM_TAG_LEN);
+        return FuriHalCryptoGCMStateError;
+    }
+
+    return FuriHalCryptoGCMStateOk;
+}
+
+FuriHalCryptoGCMState furi_hal_crypto_gcm_decrypt_and_verify(const uint8_t
+        *key, const uint8_t *iv, const uint8_t *input, uint8_t *output, size_t
+        length, const uint8_t *tag) {
+    uint8_t dtag[CRYPTO_GCM_TAG_LEN];
+
+    if (!furi_hal_crypto_gcm(key, iv, input, output, length, dtag, true)) {
+        memset(output, 0, length);
+        return FuriHalCryptoGCMStateError;
+    }
+
+    if (!furi_hal_crypto_gcm_compare_tag(dtag, tag)) {
+        memset(output, 0, length);
+        return FuriHalCryptoGCMStateAuthFailure;
+    }
+
+    return FuriHalCryptoGCMStateOk;
 }
