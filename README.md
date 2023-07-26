@@ -99,9 +99,9 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 5. Reinsert your MicroSD into your Flipper Zero if you took it out.
 6. Plug in your ESP32-CAM module to your Flipper Zero.
 7. Press the "Power" button on your Flipper Zero to turn it on.
-8. Open the application "[ESP32-CAM] Camera Suite":
+8. Open the application "[ESP32] Camera Suite":
    ```
-   Applications > GPIO > [ESP32-CAM] Camera Suite
+   Applications > GPIO > [ESP32] Camera Suite
    ```
 9. That's it! Follow the on screen instructions to continue.
 
@@ -137,7 +137,7 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 
 ## Attributions <a name="attributions"></a>
 
-This project is based on/forked from the [Fliper Zero Camera Application][flipperzero-camera]
+This project is based on/forked from the [Flipper Zero Camera Application][flipperzero-camera]
 by [Z4urce][github-profile-z4urce] combined with the [Flipper Zero Boilerplate Application][flipper-zero-fap-boilerplate]
 by [Dave Lee][github-profile-leedave].
 
