@@ -129,10 +129,10 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
 
     Loader* loader = furi_record_open(RECORD_LOADER);
     MainMenuList_t* mainmenu_apps = loader_get_mainmenu_apps(loader);
-    size_t APP_COUNT = (MainMenuList_size(*mainmenu_apps) + 3);
+    size_t APP_COUNT = MainMenuList_size(*mainmenu_apps);
     furi_record_close(RECORD_LOADER);
 
-    uint32_t my_start_point = CLAMP(CFW_SETTINGS()->start_point, APP_COUNT - 1, 0);
+    uint32_t my_start_point = CLAMP(CFW_SETTINGS()->start_point, APP_COUNT - 1, 0U);
     app->primary_menu = menu_pos_alloc((size_t)my_start_point);
     app->settings_menu = submenu_alloc();
 
