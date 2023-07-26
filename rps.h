@@ -45,6 +45,8 @@ typedef struct RPSApp {
     HandBoxType_t       user_hand_box;
     char*               click_message;
     char*               middle_message;
+    uint16_t            system_score;
+    uint16_t            user_score;
 } RPSApp_t;
 
 #endif // RPS_H_

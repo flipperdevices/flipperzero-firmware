@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include <furi.h>
 #include <gui/gui.h>
@@ -62,8 +63,10 @@ GameResult_t calculate_game_result(RPSApp_t* app) {
         (app->user_hand == HandTypePaper && app->system_hand == HandTypeRock) ||
         (app->user_hand == HandTypeRock && app->system_hand == HandTypeScissor)
     ) {
+        app->user_score += 1;
         return GameResultWon;
     }
+    app->system_score += 1;
     return GameResultLost;
 }
 
@@ -128,6 +131,11 @@ void render_callback(Canvas* canvas, void* ctx) {
     FURI_LOG_D(LOG_TAG, "Render callback fired!");
     RPSApp_t* app = ctx;
     canvas_clear(canvas);
+
+    char score_str[64];
+    snprintf(score_str, 64, "[%d  |  %d]", app->system_score, app->user_score);
+
+    canvas_draw_str_aligned(canvas, 64, 12, AlignCenter, AlignCenter, score_str);
 
     canvas_draw_str_aligned(canvas, 24, 12, AlignCenter, AlignCenter, "Bot");
     canvas_draw_str_aligned(canvas, 104, 12, AlignCenter, AlignCenter, "You");
