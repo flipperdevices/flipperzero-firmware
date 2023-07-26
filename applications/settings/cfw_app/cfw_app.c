@@ -17,7 +17,7 @@ bool cfw_app_apply(CfwApp* app) {
     if(app->save_mainmenu_apps) {
         Stream* stream = file_stream_alloc(storage);
         if(file_stream_open(stream, CFW_MENU_PATH, FSAM_READ_WRITE, FSOM_CREATE_ALWAYS)) {
-            stream_write_format(stream, "MenuAppList Version %u\n", 0);
+            stream_write_format(stream, "MainMenuList Version %u\n", 0);
             CharList_it_t it;
             CharList_it(it, app->mainmenu_app_paths);
             for(size_t i = 0; i < CharList_size(app->mainmenu_app_paths); i++) {
