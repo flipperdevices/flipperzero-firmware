@@ -90,7 +90,7 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 
 ![Gravity Main Menu](https://github.com/chris-bc/flipper-gravity/blob/main/flip-grav-mainmenu.png)
 
-![Gravity Mana Attack](https://github.com/chris-bc/flipper-gravity/blob/main/flip-grav-mana.png)
+![Gravity Mana Attack](https://github.com/chris-bc/flipper-gravity/blob/main/flip-grav-mana.jpg)
 
 
 ## TODO
