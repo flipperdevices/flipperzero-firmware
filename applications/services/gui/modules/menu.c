@@ -93,6 +93,9 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
                         furi_string_right(name, trim + 2);
                     }
                 }
+                if(item->label == (char*)"Applications") furi_string_set(name, "Apps");
+                if(item->label == (char*)"125 kHz RFID") furi_string_set(name, "RFID");
+                if(item->label == (char*)"Sub-GHz") furi_string_set(name, "SubGHz");
                 elements_scrollable_text_line(
                     canvas, 20 + x_off, 26 + y_off, 36, name, scroll_counter, false, true);
                 if(item_i == position) {
