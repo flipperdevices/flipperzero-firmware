@@ -42,8 +42,9 @@ static void camera_suite_view_camera_draw(Canvas* canvas, UartDumpModel* model) 
         uint8_t x = p % ROW_BUFFER_LENGTH; // 0 .. 15
         uint8_t y = p / ROW_BUFFER_LENGTH; // 0 .. 63
 
-        // Apply rotation
         int16_t rotated_x, rotated_y;
+
+        // Apply rotation
         switch(app->orientation) {
         case 1: // 90 degrees
             rotated_x = y;
@@ -66,26 +67,83 @@ static void camera_suite_view_camera_draw(Canvas* canvas, UartDumpModel* model) 
 
         for(uint8_t i = 0; i < 8; ++i) {
             if((model->pixels[p] & (1 << (7 - i))) != 0) {
-                // Adjust the coordinates based on the new screen dimensions
                 uint16_t screen_x, screen_y;
+                // Adjust the coordinates based on the new screen dimensions
                 switch(app->orientation) {
-                case 1: // 90 degrees
+                /**
+                 * Orientation: 90 degrees
+                 * 
+                 * TODO: Fix bug here, the image has horizontal blocks going
+                 * across the screen. Example below:
+                 *  ___________________________
+                 *  |------------|            |
+                 *  |------------|            |
+                 *  |--PICTURE---|            |
+                 *  |------------|            |
+                 *  |------------|            |
+                 *  ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+                 */
+                case 1: {
                     screen_x = rotated_x;
                     screen_y = FRAME_HEIGHT - 8 + (rotated_y * 8) + i;
                     break;
-                case 2: // 180 degrees
+                }
+
+                /**
+                 * Orientation: 180 degrees
+                 * 
+                 * TODO: Fix bug here, the image has vertial blocks going up
+                 * the screen. Example below:
+                 *  ___________________________
+                 *  | | | | | | | | | | | | | |
+                 *  | | | | | | | | | | | | | |
+                 *  | | | |P|I|C|T|U|R|E| | | |
+                 *  | | | | | | | | | | | | | |
+                 *  | | | | | | | | | | | | | |
+                 *  ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+                 */
+                case 2: {
                     screen_x = FRAME_WIDTH - 8 + (rotated_x * 8) + i;
                     screen_y = FRAME_HEIGHT - 1 - rotated_y;
                     break;
-                case 3: // 270 degrees
+                }
+
+                /**
+                 * Orientation: 270 degrees
+                 * 
+                 * This is working great visually.
+                 * TODO: Fill entire screen. Current:
+                 *  ___________________________
+                 *  |            |            |
+                 *  |            |            |
+                 *  |  Fill Me   |   Picture  |
+                 *  |            |            |
+                 *  |            |            |
+                 *  ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+                 */
+                case 3: {
                     screen_x = FRAME_WIDTH - 1 - rotated_x;
                     screen_y = rotated_y * 8 + i;
                     break;
-                case 0: // 0 degrees
-                default:
+                }
+                /** 
+                 * Orientation: 0 degrees (+default).
+                 * 
+                 * This is working great visually.
+                 *  ___________________________
+                 *  |                         |
+                 *  |                         |
+                 *  |         Picture         |
+                 *  |                         |
+                 *  |                         |
+                 *  ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+                 */
+                case 0:
+                default: {
                     screen_x = rotated_x * 8 + i;
                     screen_y = rotated_y;
                     break;
+                }
                 }
                 canvas_draw_dot(canvas, screen_x, screen_y);
             }
