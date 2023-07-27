@@ -9,7 +9,53 @@ supports a variety of wireless exploration, offensive and defensive features.
 ESP32-Gravity can be used without a Flipper, but Flipper-Gravity can't be used
 without ESP32-Gravity. You can download it from the [esp32-gravity GitHub repo](https://github.com/chris-bc/esp32-gravity).
 
-[![FAP Factory](https://flipc.org/api/v1/cool4uma/UART_Terminal/badge?firmware=unleashed)](https://flipc.org/cool4uma/UART_Terminal?firmware=unleashed)
+## Download Flipper-Gravity
+
+### 1. From Source
+
+1. Clone the RogueMaster repository using a command such as
+    * You may prefer to `checkout` - or even download - a release version of the code. You do you :)
+```c
+gh repo clone RogueMaster/flipperzero-firmware-wPlugins
+```
+2. Change to the RogueMaster directory: `cd flipperzero-firmware-wPlugins`
+3. Install the Flipper compilation toolchain: `./fbt`
+4. Configure your environment variables: `` . `./fbt -s env` `` (note the leading 'dot space')
+5. Change to the applications_user directory: `cd applications_user`
+6. Clone this repository using a command such as 
+```c
+gh repo clone chris-bc/Flipper-Gravity
+```
+7. Change back to the firmware root directory: `cd ..`
+
+Unless you've already flashed the firmware being used you'll need to upgrade the firmware on your Flipper so that it uses the same version as the FAP.
+
+To build and flash the complete firmware bundle make sure your
+Flipper Zero is on the home screen (no applications or menus open),
+connect it to your computer, and run
+```c
+./fbt firmware_all flash_usb_full
+```
+
+However, if you want to install just the application, you have two main options:
+1. `./fbt launch_app APPSRC=esp32_gravity` will build, install and start the application;
+2. `./fbt flash_usb fap_esp32_gravity` will build the application and package it into a firmware update package;
+3. Copy the update directory, which will be reported towards the end of the above command and will be similar to `dist/f7-C/f7-update-RM420FAP`, to the Flipper Zero's SD card;
+4. Open Browser on the Flipper by pressing `Down`, then `Left` repeatedly until you reach a screen labelled **Browser**;
+5. Navigate to the update directory you copied;
+6. Push `OK` on `update.fuf`, then select *Run in App*;
+7. Once the firmware update completes Gravity will be installed under `Apps/GPIO/ESP32/[ESP32] Gravity`
+
+
+### 2. Binaries
+
+Simply download this `FAP` (Flipper Application Package) and copy it to your
+preferred applications folder on your Flipper Zero's SD card.
+
+Now you just need to flash and connect an ESP32 and you'll be ready to go!
+
+[![FAP Factory](https://flipc.org/api/v1/cool4uma/UART_Terminal/badge?firmware=unleashed)](https://flipc.org/chris-bc/Flipper-Gravity?firmware=roguemaster)
+
 
 ## Reduced Support for ESP32-C6
 
