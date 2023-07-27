@@ -48,8 +48,7 @@ void uart_terminal_scene_console_output_on_enter(void* context) {
             app->is_command = false;
             /* Display a basic about screen */
             // TODO: See if the following works:
-            uart_text_input_set_header_text(app->text_input, "About");
-            char aboutStr[] = "            Flipper Gravity\n\nBy Chris BC\n    https://github.com/chris-bc/flipper-gravity\n    https://github.com/esp32c6-gravity\n\n\nMost ideas and code stolen from ESP32 Marauder and UART Terminal.";
+            char aboutStr[] = "              Flipper Gravity\n                    v0.2.0\nBy Chris BC\n    https://github.com/chris-bc/flipper-gravity\n    https://github.com/esp32c6-gravity\n\n\nMost ideas and code stolen from ESP32 Marauder and UART Terminal.";
             furi_string_cat_str(app->text_box_store, aboutStr);
             app->text_box_store_strlen += strlen(aboutStr);
         }
