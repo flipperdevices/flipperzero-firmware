@@ -6,11 +6,11 @@ App(
     requires=["gui"],
     stack_size=1 * 1024,
     order=90,
-    fap_icon="uart_terminal.png",
+    fap_icon="gravity-icon.png",
     fap_category="GPIO/ESP32",
     fap_icon_assets="assets",
     fap_icon_assets_symbol="uart_terminal",
     fap_author="https://github.com/chris-bc",
     # fap_version="1.0",
-    fap_description="App to control ESP32-C6 Gravity wireless exploration platform.",
+    fap_description="App to control ESP32 Gravity wireless exploration platform.",
 )
