@@ -77,7 +77,6 @@ This software is for experimental purposes only and is not meant for any illegal
 - UL: Infrared: Add Play / Pause in universal projector remote
 - UL: Infrared: Update Universal remote assets (By amec0e)
 - Updated:[Chess v1.8 (By xtruan)](https://github.com/xtruan/flipper-chess)
-- Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 - Updated: [ESP32 Evil Portal (By bigbrodude6119, Changes By leedave)](https://github.com/leedave/flipper-zero-evil-portal/tree/93d4887e9c7ea1244913084712399db4e9455b08)
 - Fix Archive folder options to include PIN
 - Updated: [FlipBIP Crypto Wallet v1.11 (By xtruan)](https://github.com/xtruan/FlipBIP)
@@ -93,6 +92,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - [Main Menu for Dummy Mode/Games Mode (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/723)
 - [Change game mode LEFT to go to Jetpack game](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
 - [Change U2F counter file to be stored on SD card](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c34dfdd470c6355fae58d6bcb0d74c6f2bd098ba) & [ReAdd Menu Name Fixes](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/28a1481a082569dd0fde09706fada0292808b9f6)
+- Updated: [ESP32 Camera Suite (By CodyTolene)](https://github.com/CodyTolene/Flipper-Zero-Camera-Suite)
 
 <a name="release">
 

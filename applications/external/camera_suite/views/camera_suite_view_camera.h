@@ -16,7 +16,7 @@
 
 #pragma once
 
-#define FRAME_WIDTH 129
+#define FRAME_WIDTH 128
 #define FRAME_HEIGHT 64
 #define FRAME_BIT_DEPTH 1
 #define FRAME_BUFFER_LENGTH 1024
