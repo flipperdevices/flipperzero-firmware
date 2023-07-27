@@ -28,7 +28,29 @@ void camera_suite_view_camera_set_callback(
     instance->context = context;
 }
 
-static void camera_suite_view_camera_draw(Canvas* canvas, UartDumpModel* model) {
+// Function to draw pixels on the canvas based on camera orientation
+static void draw_pixel_by_orientation(Canvas* canvas, uint8_t x, uint8_t y, uint8_t orientation) {
+    switch(orientation) {
+    case 0: // Camera rotated 0 degrees (right side up, default)
+        canvas_draw_dot(canvas, x, y);
+        break;
+    case 1: // Camera rotated 90 degrees
+        canvas_draw_dot(canvas, y, FRAME_WIDTH - 1 - x);
+        break;
+    case 2: // Camera rotated 180 degrees (upside down)
+        canvas_draw_dot(canvas, FRAME_WIDTH - 1 - x, FRAME_HEIGHT - 1 - y);
+        break;
+    case 3: // Camera rotated 270 degrees
+        canvas_draw_dot(canvas, FRAME_HEIGHT - 1 - y, x);
+        break;
+    default:
+        break;
+    }
+}
+
+static void camera_suite_view_camera_draw(Canvas* canvas, void* _model) {
+    UartDumpModel* model = _model;
+
     // Clear the screen.
     canvas_set_color(canvas, ColorBlack);
 
@@ -37,60 +59,17 @@ static void camera_suite_view_camera_draw(Canvas* canvas, UartDumpModel* model) 
 
     CameraSuite* app = current_instance->context;
 
-    // Draw the pixels with rotation.
     for(size_t p = 0; p < FRAME_BUFFER_LENGTH; ++p) {
         uint8_t x = p % ROW_BUFFER_LENGTH; // 0 .. 15
         uint8_t y = p / ROW_BUFFER_LENGTH; // 0 .. 63
 
-        // Apply rotation
-        int16_t rotated_x, rotated_y;
-        switch(app->orientation) {
-        case 1: // 90 degrees
-            rotated_x = y;
-            rotated_y = FRAME_WIDTH - 1 - x;
-            break;
-        case 2: // 180 degrees
-            rotated_x = FRAME_WIDTH - 1 - x;
-            rotated_y = FRAME_HEIGHT - 1 - y;
-            break;
-        case 3: // 270 degrees
-            rotated_x = FRAME_HEIGHT - 1 - y;
-            rotated_y = x;
-            break;
-        case 0: // 0 degrees
-        default:
-            rotated_x = x;
-            rotated_y = y;
-            break;
-        }
-
         for(uint8_t i = 0; i < 8; ++i) {
             if((model->pixels[p] & (1 << (7 - i))) != 0) {
-                // Adjust the coordinates based on the new screen dimensions
-                uint16_t screen_x, screen_y;
-                switch(app->orientation) {
-                case 1: // 90 degrees
-                    screen_x = rotated_x;
-                    screen_y = FRAME_HEIGHT - 8 + (rotated_y * 8) + i;
-                    break;
-                case 2: // 180 degrees
-                    screen_x = FRAME_WIDTH - 8 + (rotated_x * 8) + i;
-                    screen_y = FRAME_HEIGHT - 1 - rotated_y;
-                    break;
-                case 3: // 270 degrees
-                    screen_x = FRAME_WIDTH - 1 - rotated_x;
-                    screen_y = rotated_y * 8 + i;
-                    break;
-                case 0: // 0 degrees
-                default:
-                    screen_x = rotated_x * 8 + i;
-                    screen_y = rotated_y;
-                    break;
-                }
-                canvas_draw_dot(canvas, screen_x, screen_y);
+                draw_pixel_by_orientation(canvas, (x * 8) + i, y, app->orientation);
             }
         }
     }
+
     // Draw the guide if the camera is not initialized.
     if(!model->initialized) {
         canvas_draw_icon(canvas, 74, 16, &I_DolphinCommon_56x48);
