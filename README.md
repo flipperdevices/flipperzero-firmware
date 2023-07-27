@@ -9,6 +9,7 @@ supports a variety of wireless exploration, offensive and defensive features.
 ESP32-Gravity can be used without a Flipper, but Flipper-Gravity can't be used
 without ESP32-Gravity. You can download it from the [esp32-gravity GitHub repo](https://github.com/chris-bc/esp32-gravity).
 
+[![FAP Factory](https://flipc.org/api/v1/cool4uma/UART_Terminal/badge?firmware=unleashed)](https://flipc.org/cool4uma/UART_Terminal?firmware=unleashed)
 
 ## Reduced Support for ESP32-C6
 
@@ -41,9 +42,9 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 
 ## Gravity In Action
 
-![Gravity Main Menu](https://github.com/chris-bc/flipper-gravity/blob/main/assets/flip-grav-mainmenu.png)
+![Gravity Main Menu](https://github.com/chris-bc/flipper-gravity/blob/main/flip-grav-mainmenu.png)
 
-![Gravity Mana Attack](https://github.com/chris-bc/flipper-gravity/blob/main/assets/flip-grav-mana.png)
+![Gravity Mana Attack](https://github.com/chris-bc/flipper-gravity/blob/main/flip-grav-mana.png)
 
 
 ## TODO
