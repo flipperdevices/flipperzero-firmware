@@ -467,27 +467,20 @@ FHalNfcError f_hal_nfc_set_mode(FHalNfcMode mode, FHalNfcBitrate bitrate) {
         if(mode == FHalNfcModeIso15693Poller) {
             // Poller configuration
             f_hal_nfc_configure_poller_common(handle);
-            // Enable Subcarrier Stream mode, AM modulation
+            // Enable Subcarrier Stream mode, OOK modulation
             st25r3916_change_reg_bits(
                 handle,
                 ST25R3916_REG_MODE,
                 ST25R3916_REG_MODE_om_mask | ST25R3916_REG_MODE_tr_am,
-                ST25R3916_REG_MODE_om_subcarrier_stream | ST25R3916_REG_MODE_tr_am_am);
+                ST25R3916_REG_MODE_om_subcarrier_stream | ST25R3916_REG_MODE_tr_am_ook);
 
             // Subcarrier 424 kHz mode
             // 8 sub-carrier pulses in report period
             st25r3916_write_reg(
                 handle,
                 ST25R3916_REG_STREAM_MODE,
-                ST25R3916_REG_STREAM_MODE_scf_sc424 | ST25R3916_REG_STREAM_MODE_stx_424 |
+                ST25R3916_REG_STREAM_MODE_scf_sc424 | ST25R3916_REG_STREAM_MODE_stx_106 |
                     ST25R3916_REG_STREAM_MODE_scp_8pulses);
-
-            // 10% ASK modulation
-            st25r3916_change_reg_bits(
-                handle,
-                ST25R3916_REG_TX_DRIVER,
-                ST25R3916_REG_TX_DRIVER_am_mod_mask,
-                ST25R3916_REG_TX_DRIVER_am_mod_10percent);
 
             // Use regulator AM, resistive AM disabled
             st25r3916_clear_reg_bits(
