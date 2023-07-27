@@ -14,15 +14,11 @@
 
 #include "esubghz_chat_icons.h"
 
-#include "crypto/gcm.h"
+#include "crypto_wrapper.h"
 
 #define APPLICATION_NAME "ESubGhzChat"
 
 #define DEFAULT_FREQ 433920000
-
-#define KEY_BITS 256
-#define IV_BYTES 12
-#define TAG_BYTES 16
 
 #define RX_TX_BUFFER_SIZE 1024
 
@@ -59,7 +55,7 @@ typedef struct {
 
     // encryption
     bool encrypted;
-    gcm_context gcm_ctx;
+    ESubGhzChatCryptoCtx* crypto_ctx;
 
     // RX and TX buffers
     uint8_t rx_buffer[RX_TX_BUFFER_SIZE];
@@ -95,12 +91,6 @@ typedef enum {
     ESubGhzChatEvent_MsgEntered
 } ESubGhzChatEvent;
 
-/* Function to clear sensitive memory. */
-static void esubghz_chat_explicit_bzero(void* s, size_t len) {
-    memset(s, 0, len);
-    asm volatile("" ::: "memory");
-}
-
 /* Callback for RX events from the Sub-GHz worker. Records the current ticks as
  * the time of the last reception. */
 static void have_read_cb(void* context) {
@@ -112,24 +102,16 @@ static void have_read_cb(void* context) {
 
 /* Decrypts a message for post_rx(). */
 static bool post_rx_decrypt(ESubGhzChatState* state, size_t rx_size) {
-    if(rx_size < IV_BYTES + TAG_BYTES + 1) {
-        return false;
+    bool ret = crypto_ctx_decrypt(
+        state->crypto_ctx, state->rx_buffer, rx_size, (uint8_t*)state->rx_str_buffer);
+
+    if(ret) {
+        state->rx_str_buffer[rx_size - (MSG_OVERHEAD)] = 0;
+    } else {
+        state->rx_str_buffer[0] = 0;
     }
 
-    int ret = gcm_auth_decrypt(
-        &(state->gcm_ctx),
-        state->rx_buffer,
-        IV_BYTES,
-        NULL,
-        0,
-        state->rx_buffer + IV_BYTES,
-        (uint8_t*)state->rx_str_buffer,
-        rx_size - (IV_BYTES + TAG_BYTES),
-        state->rx_buffer + rx_size - TAG_BYTES,
-        TAG_BYTES);
-    state->rx_str_buffer[rx_size - (IV_BYTES + TAG_BYTES)] = 0;
-
-    return (ret == 0);
+    return ret;
 }
 
 /* Post RX handler, decrypts received messages, displays them in the text box
@@ -178,22 +160,14 @@ static void tx_msg_input(ESubGhzChatState* state) {
     size_t msg_len = strlen(furi_string_get_cstr(state->msg_input));
     size_t tx_size = msg_len;
     if(state->encrypted) {
-        tx_size += IV_BYTES + TAG_BYTES;
+        tx_size += MSG_OVERHEAD;
         furi_check(tx_size <= sizeof(state->tx_buffer));
 
-        furi_hal_random_fill_buf(state->tx_buffer, IV_BYTES);
-        gcm_crypt_and_tag(
-            &(state->gcm_ctx),
-            ENCRYPT,
-            state->tx_buffer,
-            IV_BYTES,
-            NULL,
-            0,
-            (unsigned char*)furi_string_get_cstr(state->msg_input),
-            state->tx_buffer + IV_BYTES,
+        crypto_ctx_encrypt(
+            state->crypto_ctx,
+            (uint8_t*)furi_string_get_cstr(state->msg_input),
             msg_len,
-            state->tx_buffer + IV_BYTES + msg_len,
-            TAG_BYTES);
+            state->tx_buffer);
     } else {
         tx_size += 2;
         furi_check(tx_size <= sizeof(state->tx_buffer));
@@ -262,7 +236,7 @@ static void pass_input_cb(void* context) {
         state->chat_box_store, "\nEncrypted: %s", (state->encrypted ? "yes" : "no"));
 
     /* clear the text input buffer to remove the password */
-    esubghz_chat_explicit_bzero(state->text_input_store, sizeof(state->text_input_store));
+    crypto_explicit_bzero(state->text_input_store, sizeof(state->text_input_store));
 
     subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device, state->frequency);
 
@@ -308,14 +282,14 @@ static bool pass_input_validator(const char* text, FuriString* error, void* cont
     /* derive a key from the password */
     sha256((unsigned char*)text, strlen(text), key);
 
-    /* initiate the AES-GCM context */
-    int ret = gcm_setkey(&(state->gcm_ctx), key, KEY_BITS / 8);
+    /* initiate the crypto context */
+    bool ret = crypto_ctx_set_key(state->crypto_ctx, key);
 
     /* cleanup */
-    esubghz_chat_explicit_bzero(key, sizeof(key));
+    crypto_explicit_bzero(key, sizeof(key));
 
-    if(ret != 0) {
-        esubghz_chat_explicit_bzero(&(state->gcm_ctx), sizeof(state->gcm_ctx));
+    if(!ret) {
+        crypto_ctx_clear(state->crypto_ctx);
         furi_string_printf(error, "Failed to\nset key!");
         return false;
     }
@@ -888,8 +862,8 @@ static void chat_box_free(ESubGhzChatState* state) {
 }
 
 int32_t esubghz_chat(void) {
-    /* init the GCM and AES tables */
-    gcm_initialize();
+    /* init the crypto system */
+    crypto_init();
 
     int32_t err = -1;
 
@@ -929,6 +903,11 @@ int32_t esubghz_chat(void) {
     state->subghz_worker = subghz_tx_rx_worker_alloc();
     if(state->subghz_worker == NULL) {
         goto err_alloc_worker;
+    }
+
+    state->crypto_ctx = crypto_ctx_alloc();
+    if(state->crypto_ctx == NULL) {
+        goto err_alloc_crypto;
     }
 
     /* set the have_read callback of the Sub-GHz worker */
@@ -1003,8 +982,8 @@ int32_t esubghz_chat(void) {
     furi_record_close(RECORD_NOTIFICATION);
 
     /* clear the key and potential password */
-    esubghz_chat_explicit_bzero(state->text_input_store, sizeof(state->text_input_store));
-    esubghz_chat_explicit_bzero(&(state->gcm_ctx), sizeof(state->gcm_ctx));
+    crypto_explicit_bzero(state->text_input_store, sizeof(state->text_input_store));
+    crypto_ctx_clear(state->crypto_ctx);
 
     /* deinit devices */
     subghz_devices_deinit();
@@ -1014,6 +993,9 @@ int32_t esubghz_chat(void) {
 
     /* free everything we allocated */
 
+    crypto_ctx_free(state->crypto_ctx);
+
+err_alloc_crypto:
     subghz_tx_rx_worker_free(state->subghz_worker);
 
 err_alloc_worker:
