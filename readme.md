@@ -29,12 +29,12 @@ Or buy it assembled at [Red Team Tools](https://www.redteamtools.com/nard-sam-ex
 
 ## Development
 
-### Update ASN1
+### To Build ASN1
 
  * Install git version of [asnc1](https://github.com/vlm/asn1c) (`brew install asn1c --head` on macos)
  * Run `asn1c -D ./lib/asn1 -no-gen-example -pdu=all seader.asn` in in root to generate asn1c files
 
-### Update App
+### To Build App
 
  * Install [UFBT](https://github.com/flipperdevices/flipperzero-ufbt)
  * `ufbt` to build

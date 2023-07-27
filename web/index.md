@@ -19,18 +19,6 @@ Download release versions via the Flipper App Catalog (when released)
 
 Download builds based off git at [flipc](https://flipc.org/bettse/seader?branch=main)
 
-### Old builds
-
-- [seader](seader-API30.1.zip) (API 30.1, FW 0.85.2)
-- [seader](seader-API28.2.zip) (API 28.2)
-- [seader](seader-API26.3.zip) (API 26.3)
-- [seader](seader-API26.0.zip) (API 26.0)
-- [seader](seader-API23.1.zip) (API 23.1)
-- [seader](seader-API23.0.zip) (API 23.0)
-- [seader](seader-API22.0.zip) (API 22.0)
-- [seader](seader-API21.0.zip) (API 21.0)
-- [seader](seader-API20.0.zip) (API 20.0)
-
 ## Bugs
 
 File issues in [GitHub](https://github.com/bettse/seader/issues).
@@ -56,13 +44,9 @@ Build it yourself from the files in the [NARD repo](https://github.com/killergee
 
 Or buy it assembled at [Red Team Tools](https://www.redteamtools.com/nard-sam-expansion-board-for-flipper-zero-with-hid-seos-iclass-sam/), with or without SAM.
 
-## References
+## Development
 
-- [omnikey_5025_cl_software_developer_guide_mn_en](https://www.virtualsecurity.nl/amfile/file/download/file/18/product/1892/)
-- [omnikey_5326_dfr_softwaredeveloperguide](https://www.hidglobal.com/sites/default/files/documentlibrary/omnikey_5326_dfr_softwaredeveloperguide.pdf)
-- [omnikey_5027_software_developer_guide](https://www.hidglobal.com/sites/default/files/documentlibrary/omnikey_5027_software_developer_guide.pdf)
-- [PLT-03362 A.0 - iCLASS Reader Writer Migration Application Note](http://web.archive.org/web/20230330180023/https://info.hidglobal.com/rs/289-TSC-352/images/PLT-03362%20A.0%20-%20iCLASS%20Reader%20Writer%20Migration%20Application%20Note.pdf)
-- [HID SE reader消息模块的ANS.1 BER学习](https://blog.csdn.net/eyasys/article/details/8501200)
+See repo readme.
 
 <script>
    anchors.add();
