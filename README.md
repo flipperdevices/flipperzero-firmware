@@ -39,6 +39,13 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 * Changes in major verson, such as `1.4.9` to `2.0.0`, represent substantial changes to the application and how it runs. Different major versions *will not* be compatible with each other.
 
 
+## Gravity In Action
+
+![Gravity Main Menu](https://github.com/chris-bc/flipper-gravity/blob/main/assets/flip-grav-mainmenu.png)
+
+![Gravity Mana Attack](https://github.com/chris-bc/flipper-gravity/blob/main/assets/flip-grav-mana.png)
+
+
 ## TODO
 * Bug: Console scrolls to top mid-scroll when text is added to it
     * Replicate: Start scan, Run help and try to read it
@@ -62,12 +69,6 @@ which esp32-Gravity is compatible with which Flipper-Gravity.
 * mana verbose: on, off
 * mana loud: on, off
 * help: commands help info
-
-## Gravity In Action
-
-![Gravity Main Menu](https://github.com/chris-bc/flipper-gravity/blob/main/assets/flip-grav-mainmenu.png)
-
-![Gravity Mana Attack](https://github.com/chris-bc/flipper-gravity/blob/main/assets/flip-grav-mana.png)
 
 
 Info: If possible, do not power your devices from 3V3 (pin 9) Flipper Zero. It does not support hot plugging.
