@@ -71,14 +71,14 @@ static void camera_suite_view_camera_draw(Canvas* canvas, UartDumpModel* model) 
                 // Adjust the coordinates based on the new screen dimensions
                 switch(app->orientation) {
                 /**
-                 * Orientation: 90 degrees
+                 * Orientation: 90 degrees.
                  * 
                  * TODO: Fix bug here, the image has horizontal blocks going
-                 * across the screen. Example below:
+                 * across the screen. Fill entire screen. Example below:
                  *  ___________________________
                  *  |------------|            |
                  *  |------------|            |
-                 *  |--PICTURE---|            |
+                 *  |--PICTURE---|   Fill me  |
                  *  |------------|            |
                  *  |------------|            |
                  *  ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
@@ -88,9 +88,8 @@ static void camera_suite_view_camera_draw(Canvas* canvas, UartDumpModel* model) 
                     screen_y = FRAME_HEIGHT - 8 + (rotated_y * 8) + i;
                     break;
                 }
-
                 /**
-                 * Orientation: 180 degrees
+                 * Orientation: 180 degrees.
                  * 
                  * TODO: Fix bug here, the image has vertial blocks going up
                  * the screen. Example below:
@@ -107,16 +106,15 @@ static void camera_suite_view_camera_draw(Canvas* canvas, UartDumpModel* model) 
                     screen_y = FRAME_HEIGHT - 1 - rotated_y;
                     break;
                 }
-
                 /**
-                 * Orientation: 270 degrees
+                 * Orientation: 270 degrees.
                  * 
                  * This is working great visually.
                  * TODO: Fill entire screen. Current:
                  *  ___________________________
                  *  |            |            |
                  *  |            |            |
-                 *  |  Fill Me   |   Picture  |
+                 *  |  Fill me   |   Picture  |
                  *  |            |            |
                  *  |            |            |
                  *  ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
