@@ -31,8 +31,8 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0726-2142-0.87.1-326dfd4](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-26 21:42 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-26 21:42 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-27 03:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-27 03:00 EST`
 - Added POCSAG modulation to SubGHz modulations
 - Updated: [Evil Portal Assets for Amazon (By jules0835) and Apple (By black28p)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/assets/resources/apps_data/evil_portal/README.md)
 - UL PR: [Hid app kb assets #552 (By gid9798)](https://github.com/DarkFlippers/unleashed-firmware/pull/552)
@@ -91,6 +91,8 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Updated: [SubGHz Setting Added For External High Power (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13b3361cb1b694568f68430a16e27e6f37f40699)
 - [Main Menu for Dummy Mode/Games Mode (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/723)
+- [Change game mode LEFT to go to Jetpack game](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/GAMES_ONLY.md)
+- [Change U2F counter file to be stored on SD card](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/c34dfdd470c6355fae58d6bcb0d74c6f2bd098ba) & [ReAdd Menu Name Fixes](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/28a1481a082569dd0fde09706fada0292808b9f6)
 
 <a name="release">
 

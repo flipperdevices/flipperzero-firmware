@@ -98,7 +98,8 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
                 main_view->callback(
                     DesktopMainEventOpenTetris, main_view->context); // OPENS TETRIS
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(DesktopMainEventOpenJetPack, main_view->context); // OPENS JETPACK
+                main_view->callback(
+                    DesktopMainEventOpenJetPack, main_view->context); // OPENS JETPACK
             }
         } else if(event->type == InputTypeLong) {
             if(event->key == InputKeyOk) {
@@ -125,7 +126,8 @@ bool desktop_main_input_callback(InputEvent* event, void* context) {
                 main_view->callback(
                     DesktopMainEventOpenTetris, main_view->context); // OPENS Tetris
             } else if(event->key == InputKeyLeft) {
-                main_view->callback(DesktopMainEventOpenJetPack, main_view->context); // OPENS JETPACK
+                main_view->callback(
+                    DesktopMainEventOpenJetPack, main_view->context); // OPENS JETPACK
             }
         } else if(event->type == InputTypeLong) {
             if(event->key == InputKeyOk) {

@@ -6,18 +6,18 @@
 
 # KEY MAPS FOR DUMMY MODE
         Short        Long
-OK:     Jetpack Joy  Animation Change
+OK:     Game Menu    Animation Change
 UP:     Menu         Doom
 DOWN:   Tetris       Zombiez
-LEFT:   Dice         Snake
+LEFT:   Jetpack      Snake
 RIGHT:  Passport     2048
 
 # KEY MAPS FOR GAMES ONLY MODE 
         Short        Long
-OK:     Jetpack Joy  Animation Change
+OK:     Game Menu    Animation Change
 UP:     Snake        Doom
 DOWN:   Tetris       Zombiez
-LEFT:   Dice         Clock
+LEFT:   Jetpack      Clock
 RIGHT:  Passport     2048
 
 
