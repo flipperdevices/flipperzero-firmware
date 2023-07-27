@@ -8,7 +8,7 @@ typedef enum {
     DesktopMainEventOpenFavoriteTertiary,
     DesktopMainEventOpenFavoriteQuaternary,
     DesktopMainEventOpenMenu,
-    DesktopMainEventOpenGames,
+    DesktopMainEventOpenGamesMenu,
     DesktopMainEventOpenDebug,
     DesktopMainEventOpenPassport,
     DesktopMainEventOpenPowerOff,

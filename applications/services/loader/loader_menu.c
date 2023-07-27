@@ -18,12 +18,22 @@ struct LoaderMenu {
 };
 
 static int32_t loader_menu_thread(void* p);
+static int32_t loader_gamesmenu_thread(void* p);
 
 LoaderMenu* loader_menu_alloc(void (*closed_cb)(void*), void* context) {
     LoaderMenu* loader_menu = malloc(sizeof(LoaderMenu));
     loader_menu->closed_cb = closed_cb;
     loader_menu->context = context;
     loader_menu->thread = furi_thread_alloc_ex(TAG, 1024, loader_menu_thread, loader_menu);
+    furi_thread_start(loader_menu->thread);
+    return loader_menu;
+}
+
+LoaderMenu* loader_gamesmenu_alloc(void (*closed_cb)(void*), void* context) {
+    LoaderMenu* loader_menu = malloc(sizeof(LoaderMenu));
+    loader_menu->closed_cb = closed_cb;
+    loader_menu->context = context;
+    loader_menu->thread = furi_thread_alloc_ex(TAG, 1024, loader_gamesmenu_thread, loader_menu);
     furi_thread_start(loader_menu->thread);
     return loader_menu;
 }
@@ -111,6 +121,25 @@ static void loader_menu_build_menu(LoaderMenuApp* app, LoaderMenu* menu) {
     }
 }
 
+static void loader_menu_build_gamesmenu(LoaderMenuApp* app, LoaderMenu* menu) {
+    Loader* loader = furi_record_open(RECORD_LOADER);
+    GamesMenuList_t* gamesmenu_apps = loader_get_gamesmenu_apps(loader);
+    furi_record_close(RECORD_LOADER);
+
+    // Game Apps from CFW Settings
+    for(size_t i = 0; i < GamesMenuList_size(*gamesmenu_apps); i++) {
+        const GamesMenuApp* gamesmenu_app = GamesMenuList_get(*gamesmenu_apps, i);
+
+        menu_add_item(
+            app->primary_menu,
+            gamesmenu_app->name,
+            gamesmenu_app->icon,
+            (uint32_t)gamesmenu_app->path,
+            loader_menu_callback,
+            (void*)menu);
+    }
+}
+
 static void loader_menu_build_submenu(LoaderMenuApp* app, LoaderMenu* loader_menu) {
     for(size_t i = 0; i < FLIPPER_SETTINGS_APPS_COUNT; i++) {
         submenu_add_item(
@@ -157,6 +186,26 @@ static LoaderMenuApp* loader_menu_app_alloc(LoaderMenu* loader_menu) {
     return app;
 }
 
+static LoaderMenuApp* loader_gamesmenu_app_alloc(LoaderMenu* loader_menu) {
+    LoaderMenuApp* app = malloc(sizeof(LoaderMenuApp));
+    app->gui = furi_record_open(RECORD_GUI);
+    app->view_dispatcher = view_dispatcher_alloc();
+
+    app->primary_menu = menu_pos_alloc(0);
+    loader_menu_build_gamesmenu(app, loader_menu);
+
+    // Primary menu
+    View* primary_view = menu_get_view(app->primary_menu);
+    view_set_context(primary_view, app->primary_menu);
+    view_set_previous_callback(primary_view, loader_menu_exit);
+    view_dispatcher_add_view(app->view_dispatcher, LoaderMenuViewPrimary, primary_view);
+
+    view_dispatcher_enable_queue(app->view_dispatcher);
+    view_dispatcher_switch_to_view(app->view_dispatcher, LoaderMenuViewPrimary);
+
+    return app;
+}
+
 static void loader_menu_app_free(LoaderMenuApp* app) {
     view_dispatcher_remove_view(app->view_dispatcher, LoaderMenuViewPrimary);
     view_dispatcher_remove_view(app->view_dispatcher, LoaderMenuViewSettings);
@@ -164,6 +213,15 @@ static void loader_menu_app_free(LoaderMenuApp* app) {
 
     menu_free(app->primary_menu);
     submenu_free(app->settings_menu);
+    furi_record_close(RECORD_GUI);
+    free(app);
+}
+
+static void loader_gamesmenu_app_free(LoaderMenuApp* app) {
+    view_dispatcher_remove_view(app->view_dispatcher, LoaderMenuViewPrimary);
+    view_dispatcher_free(app->view_dispatcher);
+
+    menu_free(app->primary_menu);
     furi_record_close(RECORD_GUI);
     free(app);
 }
@@ -182,6 +240,24 @@ static int32_t loader_menu_thread(void* p) {
     }
 
     loader_menu_app_free(app);
+
+    return 0;
+}
+
+static int32_t loader_gamesmenu_thread(void* p) {
+    LoaderMenu* loader_menu = p;
+    furi_assert(loader_menu);
+
+    LoaderMenuApp* app = loader_gamesmenu_app_alloc(loader_menu);
+
+    view_dispatcher_attach_to_gui(app->view_dispatcher, app->gui, ViewDispatcherTypeFullscreen);
+    view_dispatcher_run(app->view_dispatcher);
+
+    if(loader_menu->closed_cb) {
+        loader_menu->closed_cb(loader_menu->context);
+    }
+
+    loader_gamesmenu_app_free(app);
 
     return 0;
 }

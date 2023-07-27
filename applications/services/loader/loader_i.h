@@ -2,6 +2,7 @@
 #include <furi.h>
 #include <toolbox/api_lock.h>
 #include <flipper_application/flipper_application.h>
+#include <m-array.h>
 #include "loader.h"
 #include "loader_menu.h"
 #include "loader_mainmenu.h"
@@ -21,12 +22,14 @@ struct Loader {
     LoaderApplications* loader_applications;
     LoaderAppData app;
     MainMenuList_t mainmenu_apps;
+    GamesMenuList_t gamesmenu_apps;
 };
 
 typedef enum {
     LoaderMessageTypeStartByName,
     LoaderMessageTypeAppClosed,
     LoaderMessageTypeShowMenu,
+    LoaderMessageTypeShowGamesMenu,
     LoaderMessageTypeMenuClosed,
     LoaderMessageTypeApplicationsClosed,
     LoaderMessageTypeLock,

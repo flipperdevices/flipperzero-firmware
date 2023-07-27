@@ -126,6 +126,13 @@ bool desktop_scene_main_on_event(void* context, SceneManagerEvent event) {
             consumed = true;
         } break;
 
+        case DesktopMainEventOpenGamesMenu: {
+            Loader* loader = furi_record_open(RECORD_LOADER);
+            loader_show_gamesmenu(loader);
+            furi_record_close(RECORD_LOADER);
+            consumed = true;
+        } break;
+
         case DesktopMainEventOpenLockMenu:
             scene_manager_next_scene(desktop->scene_manager, DesktopSceneLockMenu);
             consumed = true;

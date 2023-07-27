@@ -77,6 +77,12 @@ bool loader_is_locked(Loader* instance);
 void loader_show_menu(Loader* instance);
 
 /**
+ * @brief Show loader gamesmenu
+ * @param[in] instance loader instance
+ */
+void loader_show_gamesmenu(Loader* instance);
+
+/**
  * @brief Get loader pubsub
  * @param[in] instance loader instance
  * @return FuriPubSub* 
@@ -84,6 +90,8 @@ void loader_show_menu(Loader* instance);
 FuriPubSub* loader_get_pubsub(Loader* instance);
 
 MainMenuList_t* loader_get_mainmenu_apps(Loader* loader);
+
+GamesMenuList_t* loader_get_gamesmenu_apps(Loader* loader);
 
 #ifdef __cplusplus
 }
