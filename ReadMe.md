@@ -90,6 +90,7 @@ This software is for experimental purposes only and is not meant for any illegal
 - Updated: [YRM100 UHF RFID WIP (By frux-c)](https://github.com/frux-c/uhf_rfid) `Req: YRM100`
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
 - Updated: [SubGHz Setting Added For External High Power (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/13b3361cb1b694568f68430a16e27e6f37f40699)
+- [Main Menu for Dummy Mode/Games Mode (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/723)
 
 <a name="release">
 
