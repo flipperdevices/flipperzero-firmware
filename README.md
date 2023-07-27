@@ -30,6 +30,8 @@
 
 <img align="center" src=".github/images/preview_02.png" />
 
+<img align="center" src=".github/images/preview.gif" />
+
 <p align="right">[ <a href="#index">Back to top</a> ]</p>
 
 ## Hardware Requirements <a name="hardware-requirements"></a>
