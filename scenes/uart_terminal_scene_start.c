@@ -28,6 +28,13 @@ typedef struct {
 */
 const UART_TerminalItem items[NUM_MENU_ITEMS] = {
     {"Console", {"View", "Clear"}, 2, {"", "cls"}, NO_ARGS, FOCUS_CONSOLE_END, NO_TIP},
+    {"Bluetooth",
+    {"On", "Off"},
+    2,
+    {"bluetooth on", "bluetooth off"},
+    NO_ARGS,
+    FOCUS_CONSOLE_END,
+    NO_TIP},
     {"Beacon",
     {"Status", "target-ssids", "APs", "RickRoll", "Random", "Infinite", "Off"},
     6,
