@@ -92,12 +92,12 @@ Note the upload may fail a few times, this is normal, try again. If it still fai
 1. Connect your Flipper Zero via USB, or insert your MicroSD.
 2. Navigate to the GitHub actions: https://github.com/CodyTolene/Flipper-Zero-Camera-Suite/actions
 3. Open the most recent action and download the fap zip for either "dev" or "release" build versions of the Flipper Zero firmware.
-4. Move "camerasuite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
+4. Move "camera_suite.fap" into `~\apps\gpio\` on your Flipper Zero MicroSD:
    ```
    .                            # The Flipper Zero MicroSD root.
    ├── apps                     # The Flipper Zero Applications folder.
    |   ├── gpio                 # The Flipper Zero GPIO folder.
-   |   |   ├── camerasuite.fap  # The Camera Suite application.
+   |   |   ├── camera_suite.fap  # The Camera Suite application.
    ```
 5. Reinsert your MicroSD into your Flipper Zero if you took it out.
 6. Plug in your ESP32-CAM module to your Flipper Zero.
