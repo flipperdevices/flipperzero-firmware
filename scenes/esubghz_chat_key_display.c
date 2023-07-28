@@ -28,17 +28,21 @@ void scene_on_enter_key_display(void* context)
 		uint8_t key[KEY_BITS / 8];
 		crypto_ctx_get_key(state->crypto_ctx, key);
 		snprintf(state->key_hex_str, KEY_HEX_STR_SIZE,
-				"%02hX%02hX%02hX%02hX%02hX%02hX"
-				"%02hX%02hX%02hX%02hX%02hX\n"
-				"%02hX%02hX%02hX%02hX%02hX%02hX"
-				"%02hX%02hX%02hX%02hX%02hX\n"
-				"%02hX%02hX%02hX%02hX%02hX%02hX"
+				"%02hX%02hX%02hX%02hX"
+				"%02hX%02hX%02hX%02hX\n"
+				"%02hX%02hX%02hX%02hX"
+				"%02hX%02hX%02hX%02hX\n"
+				"%02hX%02hX%02hX%02hX"
+				"%02hX%02hX%02hX%02hX\n"
+				"%02hX%02hX%02hX%02hX"
 				"%02hX%02hX%02hX%02hX",
-				key[0], key[1], key[2], key[3], key[4], key[5],
-				key[6], key[7], key[8], key[9], key[10],
-				key[11], key[12], key[13], key[14], key[15], key[16],
-				key[17], key[18], key[19], key[20], key[21],
-				key[22], key[23], key[24], key[25], key[26], key[27],
+				key[0], key[1], key[2], key[3],
+				key[4], key[5], key[6], key[7],
+				key[8], key[9], key[10], key[11],
+				key[12], key[13], key[14], key[15],
+				key[16], key[17], key[18], key[19],
+				key[20], key[21], key[22], key[23],
+				key[24], key[25], key[26], key[27],
 				key[28], key[29], key[30], key[31]);
 		crypto_explicit_bzero(key, sizeof(key));
 	} else {
@@ -47,9 +51,7 @@ void scene_on_enter_key_display(void* context)
 
 	dialog_ex_reset(state->key_display);
 
-	dialog_ex_set_header(state->key_display, "KEY (HEX)", 64, 2,
-			AlignCenter, AlignTop);
-	dialog_ex_set_text(state->key_display, state->key_hex_str, 64, 16,
+	dialog_ex_set_text(state->key_display, state->key_hex_str, 64, 2,
 			AlignCenter, AlignTop);
 
 	dialog_ex_set_icon(state->key_display, 0, 0, NULL);

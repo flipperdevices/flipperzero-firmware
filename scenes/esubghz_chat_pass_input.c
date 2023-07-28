@@ -6,6 +6,9 @@ static void pass_input_cb(void *context)
 	furi_assert(context);
 	ESubGhzChatState* state = context;
 
+	crypto_explicit_bzero(state->text_input_store,
+			sizeof(state->text_input_store));
+
 	enter_chat(state);
 
 	scene_manager_handle_custom_event(state->scene_manager,
@@ -118,4 +121,6 @@ void scene_on_exit_pass_input(void* context)
 	ESubGhzChatState* state = context;
 
 	text_input_reset(state->text_input);
+	crypto_explicit_bzero(state->text_input_store,
+			sizeof(state->text_input_store));
 }

@@ -4,6 +4,7 @@
 #include <gui/view_dispatcher_i.h>
 #include <gui/view_port_i.h>
 #include <gui/scene_manager.h>
+#include <gui/modules/byte_input.h>
 #include <gui/modules/dialog_ex.h>
 #include <gui/modules/menu.h>
 #include <gui/modules/text_box.h>
@@ -37,6 +38,8 @@ typedef struct {
 	FuriString *chat_box_store;
 	TextInput *text_input;
 	char text_input_store[TEXT_INPUT_STORE_SIZE + 1];
+	ByteInput *hex_key_input;
+	uint8_t hex_key_input_store[KEY_BITS / 8];
 	DialogEx *key_display;
 	char key_hex_str[KEY_HEX_STR_SIZE + 1];
 
@@ -76,7 +79,9 @@ typedef enum {
 	ESubGhzChatEvent_FreqEntered,
 	ESubGhzChatEvent_KeyMenuNoEncryption,
 	ESubGhzChatEvent_KeyMenuPassword,
+	ESubGhzChatEvent_KeyMenuHexKey,
 	ESubGhzChatEvent_PassEntered,
+	ESubGhzChatEvent_HexKeyEntered,
 	ESubGhzChatEvent_MsgEntered,
 	ESubGhzChatEvent_GotoMsgInput,
 	ESubGhzChatEvent_GotoKeyDisplay,
@@ -86,6 +91,7 @@ typedef enum {
 typedef enum {
 	ESubGhzChatView_Menu,
 	ESubGhzChatView_Input,
+	ESubGhzChatView_HexKeyInput,
 	ESubGhzChatView_ChatBox,
 	ESubGhzChatView_KeyDisplay,
 } ESubGhzChatView;

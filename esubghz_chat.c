@@ -124,10 +124,6 @@ void enter_chat(ESubGhzChatState *state)
 	furi_string_cat_printf(state->chat_box_store, "\nEncrypted: %s",
 			(state->encrypted ? "yes" : "no"));
 
-	/* clear the text input buffer to remove a password or key */
-	crypto_explicit_bzero(state->text_input_store,
-			sizeof(state->text_input_store));
-
 	subghz_tx_rx_worker_start(state->subghz_worker, state->subghz_device,
 			state->frequency);
 
@@ -506,6 +502,11 @@ int32_t esubghz_chat(void)
 		goto err_alloc_ti;
 	}
 
+	state->hex_key_input = byte_input_alloc();
+	if (state->hex_key_input == NULL) {
+		goto err_alloc_hki;
+	}
+
 	if (!chat_box_alloc(state)) {
 		goto err_alloc_cb;
 	}
@@ -572,6 +573,8 @@ int32_t esubghz_chat(void)
 			menu_get_view(state->menu));
 	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_Input,
 			text_input_get_view(state->text_input));
+	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_HexKeyInput,
+			byte_input_get_view(state->hex_key_input));
 	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_ChatBox,
 			text_box_get_view(state->chat_box));
 	view_dispatcher_add_view(state->view_dispatcher, ESubGhzChatView_KeyDisplay,
@@ -607,6 +610,8 @@ int32_t esubghz_chat(void)
 	view_dispatcher_remove_view(state->view_dispatcher,
 			ESubGhzChatView_Input);
 	view_dispatcher_remove_view(state->view_dispatcher,
+			ESubGhzChatView_HexKeyInput);
+	view_dispatcher_remove_view(state->view_dispatcher,
 			ESubGhzChatView_ChatBox);
 	view_dispatcher_remove_view(state->view_dispatcher,
 			ESubGhzChatView_KeyDisplay);
@@ -617,6 +622,8 @@ int32_t esubghz_chat(void)
 	/* clear the key and potential password */
 	crypto_explicit_bzero(state->text_input_store,
 			sizeof(state->text_input_store));
+	crypto_explicit_bzero(state->hex_key_input_store,
+			sizeof(state->hex_key_input_store));
 	crypto_explicit_bzero(state->key_hex_str, sizeof(state->key_hex_str));
 	crypto_ctx_clear(state->crypto_ctx);
 
@@ -640,6 +647,9 @@ err_alloc_kd:
 	chat_box_free(state);
 
 err_alloc_cb:
+	byte_input_free(state->hex_key_input);
+
+err_alloc_hki:
 	text_input_free(state->text_input);
 
 err_alloc_ti:

@@ -3,6 +3,7 @@
 typedef enum {
 	ESubGhzChatKeyMenuItems_NoEncryption,
 	ESubGhzChatKeyMenuItems_Password,
+	ESubGhzChatKeyMenuItems_HexKey,
 } ESubGhzChatKeyMenuItems;
 
 static void key_menu_cb(void* context, uint32_t index)
@@ -22,6 +23,11 @@ static void key_menu_cb(void* context, uint32_t index)
 	case ESubGhzChatKeyMenuItems_Password:
 		scene_manager_handle_custom_event(state->scene_manager,
 				ESubGhzChatEvent_KeyMenuPassword);
+		break;
+
+	case ESubGhzChatKeyMenuItems_HexKey:
+		scene_manager_handle_custom_event(state->scene_manager,
+				ESubGhzChatEvent_KeyMenuHexKey);
 		break;
 
 	default:
@@ -55,6 +61,14 @@ void scene_on_enter_key_menu(void* context)
 		key_menu_cb,
 		state
 	);
+	menu_add_item(
+		state->menu,
+		"Hex Key",
+		NULL,
+		ESubGhzChatKeyMenuItems_HexKey,
+		key_menu_cb,
+		state
+	);
 
 	view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_Menu);
 }
@@ -78,10 +92,18 @@ bool scene_on_event_key_menu(void* context, SceneManagerEvent event)
 					ESubGhzChatScene_ChatInput);
 			consumed = true;
 			break;
+
 		/* switch to password input scene */
 		case ESubGhzChatEvent_KeyMenuPassword:
 			scene_manager_next_scene(state->scene_manager,
 					ESubGhzChatScene_PassInput);
+			consumed = true;
+			break;
+
+		/* switch to hex key input scene */
+		case ESubGhzChatEvent_KeyMenuHexKey:
+			scene_manager_next_scene(state->scene_manager,
+					ESubGhzChatScene_HexKeyInput);
 			consumed = true;
 			break;
 		}
