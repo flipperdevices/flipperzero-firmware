@@ -19,7 +19,7 @@ Users, remember to rename the new portal as `index.html` when you drag it on the
 
 I am not a C developer and I am using this project as a way to learn more about esp32, flipper zero and, C programming.
 
-**Contributors are welcome!** Please feel free to open a PR at any time.
+**Contributors are welcome!** Please feel free to open a PR at any time in the `dev` branch.
 
 This program is for educational purposes only.
 
@@ -194,7 +194,7 @@ Assuming you have the Flipper Zero Wi-Fi Wrover Development Module (**ESP32-S2**
 
 I plan on working on this in my free time. Here is my todo list.
 
-- Support for multiple portals
+- ~~Support for multiple portals~~ Coming in 0.0.3 thanks to [Nycz-lab](https://github.com/Nycz-lab) & [NikIsHere](https://github.com/NikIsHere) 🙏
 - Enter AP name on the Flipper
 - Scan nearby APs and clone their SSID (good idea leedave!)
 - Add a config file for general app settings
