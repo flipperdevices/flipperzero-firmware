@@ -188,8 +188,8 @@ CfwApp* cfw_app_alloc() {
 
     for(size_t i = 0; i < MainMenuList_size(*mainmenu_apps); i++) {
         const MainMenuApp* menu_item = MainMenuList_get(*mainmenu_apps, i);
-        CharList_push_back(app->mainmenu_app_names, (char*)menu_item->name);
-        CharList_push_back(app->mainmenu_app_paths, (char*)menu_item->path);
+        CharList_push_back(app->mainmenu_app_names, strdup(menu_item->name));
+        CharList_push_back(app->mainmenu_app_paths, strdup(menu_item->path));
     }
 
     Storage* storage = furi_record_open(RECORD_STORAGE);
