@@ -10,6 +10,8 @@ extern "C" {
 
 bool iso15693_3_inventory_response_parse(Iso15693_3Data* data, const BitBuffer* buf);
 
+bool iso15693_3_system_info_response_parse(Iso15693_3Data* data, const BitBuffer* buf);
+
 #ifdef __cplusplus
 }
 #endif

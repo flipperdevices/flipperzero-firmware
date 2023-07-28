@@ -23,7 +23,7 @@ void nfc_render_iso15693_3_info(
         furi_string_cat_printf(
             str, "Data (%lu bytes)\n", simple_array_get_count(data->block_data));
 
-        uint16_t block_count = data->block_count;
+        uint8_t block_count = data->block_count;
 
         if(block_count > 32) {
             block_count = 32;

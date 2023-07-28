@@ -178,6 +178,31 @@ Iso15693_3Error
             break;
         }
 
+        bit_buffer_reset(instance->tx_buffer);
+        bit_buffer_reset(instance->rx_buffer);
+
+        // Send GET SYSTEM INFO
+        bit_buffer_append_byte(
+            instance->tx_buffer,
+            ISO15693_3_REQ_FLAG_SUBCARRIER_1 |
+            ISO15693_3_REQ_FLAG_DATA_RATE_HI);
+
+        bit_buffer_append_byte(instance->tx_buffer, ISO15693_3_CMD_GET_SYS_INFO);
+
+        ret = iso15693_3_poller_frame_exchange(
+            instance, instance->tx_buffer, instance->rx_buffer, ISO15693_3_FDT_POLL_FC);
+        if(ret != Iso15693_3ErrorNone) {
+            break;
+        }
+
+        if(iso15693_3_system_info_response_parse(instance->data, instance->rx_buffer)) {
+            // Read blocks n stuff
+            simple_array_init(instance->data->block_data, instance->data->block_count * instance->data->block_size);
+            simple_array_init(instance->data->security_status, instance->data->block_count);
+
+            FURI_LOG_D(TAG, "Reading blocks...");
+        }
+
         instance->state = Iso15693_3PollerStateActivated;
 
         if(data) {

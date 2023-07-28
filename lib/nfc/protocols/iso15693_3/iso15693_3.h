@@ -67,6 +67,11 @@ extern "C" {
 #define ISO15693_3_CMD_GET_SYS_INFO (0x2BU)
 #define ISO15693_3_CMD_GET_BLOCKS_SECURITY (0x2CU)
 
+#define ISO15693_3_SYSINFO_FLAG_DSFID (1U << 0)
+#define ISO15693_3_SYSINFO_FLAG_AFI (1U << 1)
+#define ISO15693_3_SYSINFO_FLAG_MEMORY (1U << 2)
+#define ISO15693_3_SYSINFO_FLAG_IC_REF (1U << 3)
+
 typedef enum {
     Iso15693_3ErrorNone,
     Iso15693_3ErrorNotPresent,
@@ -84,7 +89,7 @@ typedef struct {
     uint8_t dsfid;
     uint8_t afi;
     uint8_t ic_ref;
-    uint16_t block_count;
+    uint8_t block_count;
     uint8_t block_size;
     SimpleArray* block_data;
     SimpleArray* security_status;
