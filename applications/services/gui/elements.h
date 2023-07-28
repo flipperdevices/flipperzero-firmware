@@ -65,6 +65,23 @@ void elements_scrollbar_pos(
     uint16_t pos,
     uint16_t total);
 
+/** Draw horizontal scrollbar on canvas at specific position.
+ *
+ * @param   canvas  Canvas instance
+ * @param   x       scrollbar position on X axis
+ * @param   y       scrollbar position on Y axis
+ * @param   width   scrollbar width
+ * @param   pos     current element
+ * @param   total   total elements
+ */
+void elements_scrollbar_horizontal(
+    Canvas* canvas,
+    uint8_t x,
+    uint8_t y,
+    uint8_t width,
+    uint16_t pos,
+    uint16_t total);
+
 /** Draw scrollbar on canvas.
  * @note    width 3px, height equal to canvas height
  *

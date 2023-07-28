@@ -15,11 +15,16 @@ void cfw_app_scene_interface_mainmenu_var_item_list_callback(void* context, uint
     view_dispatcher_send_custom_event(app->view_dispatcher, index);
 }
 
-static void cfw_app_scene_interface_mainmenu_wii_menu_changed(VariableItem* item) {
+const char* const menu_style_names[MenuStyleCount] = {
+    "List",
+    "Wii",
+    "DSi",
+};
+static void cfw_app_scene_interface_mainmenu_menu_style_changed(VariableItem* item) {
     CfwApp* app = variable_item_get_context(item);
-    bool value = variable_item_get_current_value_index(item);
-    variable_item_set_current_value_text(item, value ? "Wii Grid" : "App List");
-    CFW_SETTINGS()->wii_menu = value;
+    uint8_t index = variable_item_get_current_value_index(item);
+    variable_item_set_current_value_text(item, menu_style_names[index]);
+    CFW_SETTINGS()->menu_style = index;
     app->save_settings = true;
 }
 
@@ -77,9 +82,13 @@ void cfw_app_scene_interface_mainmenu_on_enter(void* context) {
     VariableItem* item;
 
     item = variable_item_list_add(
-        var_item_list, "Style", 2, cfw_app_scene_interface_mainmenu_wii_menu_changed, app);
-    variable_item_set_current_value_index(item, cfw_settings->wii_menu);
-    variable_item_set_current_value_text(item, cfw_settings->wii_menu ? "Wii Grid" : "App List");
+        var_item_list,
+        "Style",
+        MenuStyleCount,
+        cfw_app_scene_interface_mainmenu_menu_style_changed,
+        app);
+    variable_item_set_current_value_index(item, cfw_settings->menu_style);
+    variable_item_set_current_value_text(item, menu_style_names[cfw_settings->menu_style]);
 
     item = variable_item_list_add(
         var_item_list,

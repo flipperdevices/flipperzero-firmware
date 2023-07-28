@@ -48,64 +48,8 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
     if(items_count) {
         MenuItem* item;
         size_t shift_position;
-        if(CFW_SETTINGS()->wii_menu) {
-            FuriString* name = furi_string_alloc();
-            if(items_count > 6 && position >= 4) {
-                if(position >= items_count - 2 + (items_count % 2)) {
-                    shift_position = position - (position % 2) - 4;
-                } else {
-                    shift_position = position - (position % 2) - 2;
-                }
-            } else {
-                shift_position = 0;
-            }
-            canvas_set_font(canvas, FontSecondary);
-            size_t item_i;
-            size_t x_off, y_off;
-            for(int i = 0; i < 6; i++) {
-                item_i = shift_position + i;
-                if(item_i >= items_count) continue;
-                x_off = (i / 2) * 43 + 1;
-                y_off = (i % 2) * 32;
-                size_t scroll_counter = 0;
-                if(item_i == position) {
-                    elements_slightly_rounded_box(canvas, 0 + x_off, 0 + y_off, 40, 30);
-                    canvas_set_color(canvas, ColorWhite);
-                    scroll_counter = model->scroll_counter;
-                    if(scroll_counter < 1) {
-                        scroll_counter = 0;
-                    } else {
-                        scroll_counter -= 1;
-                    }
-                }
-                item = MenuItemArray_get(model->items, item_i);
-                if(item->icon) {
-                    canvas_draw_icon_animation(
-                        canvas,
-                        (40 - item->icon->icon->width) / 2 + x_off,
-                        (20 - item->icon->icon->height) / 2 + y_off,
-                        item->icon);
-                }
-                furi_string_set(name, item->label);
-                if(furi_string_start_with_str(name, "[")) {
-                    size_t trim = furi_string_search_str(name, "] ", 1);
-                    if(trim != STRING_FAILURE) {
-                        furi_string_right(name, trim + 2);
-                    }
-                }
-                if(item->label == (char*)"Applications") furi_string_set(name, "Apps");
-                if(item->label == (char*)"125 kHz RFID") furi_string_set(name, "RFID");
-                if(item->label == (char*)"Sub-GHz") furi_string_set(name, "SubGHz");
-                elements_scrollable_text_line(
-                    canvas, 20 + x_off, 26 + y_off, 36, name, scroll_counter, false, true);
-                if(item_i == position) {
-                    canvas_set_color(canvas, ColorBlack);
-                } else {
-                    elements_frame(canvas, 0 + x_off, 0 + y_off, 40, 30);
-                }
-            }
-            furi_string_free(name);
-        } else {
+        switch(CFW_SETTINGS()->menu_style) {
+        case MenuStyleList: {
             // First line
             canvas_set_font(canvas, FontSecondary);
             shift_position = (0 + position + items_count - 1) % items_count;
@@ -152,6 +96,120 @@ static void menu_draw_callback(Canvas* canvas, void* _model) {
             // Frame and scrollbar
             elements_frame(canvas, 0, 21, 128 - 5, 21);
             elements_scrollbar(canvas, position, items_count);
+            break;
+        }
+        case MenuStyleWii: {
+            FuriString* name = furi_string_alloc();
+            if(items_count > 6 && position >= 4) {
+                if(position >= items_count - 2 + (items_count % 2)) {
+                    shift_position = position - (position % 2) - 4;
+                } else {
+                    shift_position = position - (position % 2) - 2;
+                }
+            } else {
+                shift_position = 0;
+            }
+            canvas_set_font(canvas, FontSecondary);
+            size_t item_i;
+            size_t x_off, y_off;
+            for(uint8_t i = 0; i < 6; i++) {
+                item_i = shift_position + i;
+                if(item_i >= items_count) continue;
+                x_off = (i / 2) * 43 + 1;
+                y_off = (i % 2) * 32;
+                size_t scroll_counter = 0;
+                if(item_i == position) {
+                    elements_slightly_rounded_box(canvas, 0 + x_off, 0 + y_off, 40, 30);
+                    canvas_set_color(canvas, ColorWhite);
+                    scroll_counter = model->scroll_counter;
+                    if(scroll_counter < 1) {
+                        scroll_counter = 0;
+                    } else {
+                        scroll_counter -= 1;
+                    }
+                }
+                item = MenuItemArray_get(model->items, item_i);
+                if(item->icon) {
+                    canvas_draw_icon_animation(
+                        canvas,
+                        (40 - item->icon->icon->width) / 2 + x_off,
+                        (20 - item->icon->icon->height) / 2 + y_off,
+                        item->icon);
+                }
+                furi_string_set(name, item->label);
+                if(furi_string_start_with_str(name, "[")) {
+                    size_t trim = furi_string_search_str(name, "] ", 1);
+                    if(trim != STRING_FAILURE) {
+                        furi_string_right(name, trim + 2);
+                    }
+                }
+                if(item->label == (char*)"Applications") furi_string_set(name, "Apps");
+                if(item->label == (char*)"125 kHz RFID") furi_string_set(name, "RFID");
+                if(item->label == (char*)"Sub-GHz") furi_string_set(name, "SubGHz");
+                elements_scrollable_text_line(
+                    canvas, 20 + x_off, 26 + y_off, 36, name, scroll_counter, false, true);
+                if(item_i == position) {
+                    canvas_set_color(canvas, ColorBlack);
+                } else {
+                    elements_frame(canvas, 0 + x_off, 0 + y_off, 40, 30);
+                }
+            }
+            furi_string_free(name);
+            break;
+        }
+
+        case MenuStyleDsi: {
+            for(int8_t i = -2; i <= 2; i++) {
+                shift_position = (position + items_count + i) % items_count;
+                item = MenuItemArray_get(model->items, shift_position);
+                size_t width = 24;
+                size_t height = 26;
+                size_t pos_x = 64;
+                size_t pos_y = 36;
+                if(i == 0) {
+                    width += 6;
+                    height += 6;
+                    elements_bold_rounded_frame(
+                        canvas, pos_x - width / 2, pos_y - height / 2, width, height + 4);
+                    canvas_set_font(canvas, FontBatteryPercent);
+                    canvas_draw_str_aligned(
+                        canvas, pos_x, pos_y + height / 2 + 1, AlignCenter, AlignBottom, "START");
+
+                    canvas_draw_rframe(canvas, 0, 0, 128, 18, 3);
+                    canvas_draw_line(canvas, 60, 18, 64, 26);
+                    canvas_draw_line(canvas, 64, 26, 68, 18);
+                    canvas_set_color(canvas, ColorWhite);
+                    canvas_draw_line(canvas, 60, 17, 68, 17);
+                    canvas_draw_box(canvas, 62, 20, 5, 2);
+                    canvas_set_color(canvas, ColorBlack);
+
+                    canvas_set_font(canvas, FontPrimary);
+                    canvas_draw_str_aligned(
+                        canvas,
+                        pos_x,
+                        pos_y - height / 2 - 7,
+                        AlignCenter,
+                        AlignBottom,
+                        item->label);
+                } else {
+                    pos_x += (width + 6) * i;
+                    pos_y += 2;
+                    elements_slightly_rounded_frame(
+                        canvas, pos_x - width / 2, pos_y - height / 2, width, height);
+                }
+                if(item->icon) {
+                    canvas_draw_icon_animation(
+                        canvas,
+                        pos_x - item->icon->icon->width / 2,
+                        pos_y - item->icon->icon->height / 2,
+                        item->icon);
+                }
+            }
+            elements_scrollbar_horizontal(canvas, 0, 64, 128, position, items_count);
+            break;
+        }
+        default:
+            break;
         }
     } else {
         canvas_set_font(canvas, FontPrimary);
@@ -349,6 +407,7 @@ void menu_set_selected_item(Menu* menu, uint32_t index) {
 }
 
 static void menu_process_up(Menu* menu) {
+    if(CFW_SETTINGS()->menu_style == MenuStyleDsi) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -359,19 +418,24 @@ static void menu_process_up(Menu* menu) {
                 icon_animation_stop(item->icon);
             }
 
-            if(CFW_SETTINGS()->wii_menu) {
+            switch(CFW_SETTINGS()->menu_style) {
+            case MenuStyleList:
+                if(model->position > 0) {
+                    model->position--;
+                } else {
+                    model->position = count - 1;
+                }
+                break;
+            case MenuStyleWii:
                 if(model->position % 2 || (model->position == count - 1 && count % 2)) {
                     model->position--;
                 } else {
                     model->position++;
                 }
                 model->scroll_counter = 0;
-            } else {
-                if(model->position > 0) {
-                    model->position--;
-                } else {
-                    model->position = count - 1;
-                }
+                break;
+            default:
+                break;
             }
 
             item = MenuItemArray_get(model->items, model->position);
@@ -383,6 +447,7 @@ static void menu_process_up(Menu* menu) {
 }
 
 static void menu_process_down(Menu* menu) {
+    if(CFW_SETTINGS()->menu_style == MenuStyleDsi) return;
     with_view_model(
         menu->view,
         MenuModel * model,
@@ -393,19 +458,24 @@ static void menu_process_down(Menu* menu) {
                 icon_animation_stop(item->icon);
             }
 
-            if(CFW_SETTINGS()->wii_menu) {
+            switch(CFW_SETTINGS()->menu_style) {
+            case MenuStyleList:
+                if(model->position < count - 1) {
+                    model->position++;
+                } else {
+                    model->position = 0;
+                }
+                break;
+            case MenuStyleWii:
                 if(model->position % 2 || (model->position == count - 1 && count % 2)) {
                     model->position--;
                 } else {
                     model->position++;
                 }
                 model->scroll_counter = 0;
-            } else {
-                if(model->position < count - 1) {
-                    model->position++;
-                } else {
-                    model->position = 0;
-                }
+                break;
+            default:
+                break;
             }
 
             item = MenuItemArray_get(model->items, model->position);
@@ -417,27 +487,40 @@ static void menu_process_down(Menu* menu) {
 }
 
 static void menu_process_left(Menu* menu) {
-    if(!CFW_SETTINGS()->wii_menu) return;
+    if(CFW_SETTINGS()->menu_style == MenuStyleList) return;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
+            size_t count = MenuItemArray_size(model->items);
             MenuItem* item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {
                 icon_animation_stop(item->icon);
             }
 
-            size_t count = MenuItemArray_size(model->items);
-            if(model->position < 2) {
-                if(count % 2) {
-                    model->position = count - 1;
+            switch(CFW_SETTINGS()->menu_style) {
+            case MenuStyleWii:
+                if(model->position < 2) {
+                    if(count % 2) {
+                        model->position = count - 1;
+                    } else {
+                        model->position = count - 2 + model->position % 2;
+                    }
                 } else {
-                    model->position = count - 2 + model->position % 2;
+                    model->position -= 2;
                 }
-            } else {
-                model->position -= 2;
+                model->scroll_counter = 0;
+                break;
+            case MenuStyleDsi:
+                if(model->position > 0) {
+                    model->position--;
+                } else {
+                    model->position = count - 1;
+                }
+                break;
+            default:
+                break;
             }
-            model->scroll_counter = 0;
 
             item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {
@@ -448,32 +531,45 @@ static void menu_process_left(Menu* menu) {
 }
 
 static void menu_process_right(Menu* menu) {
-    if(!CFW_SETTINGS()->wii_menu) return;
+    if(CFW_SETTINGS()->menu_style == MenuStyleList) return;
     with_view_model(
         menu->view,
         MenuModel * model,
         {
+            size_t count = MenuItemArray_size(model->items);
             MenuItem* item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {
                 icon_animation_stop(item->icon);
             }
 
-            size_t count = MenuItemArray_size(model->items);
-            if(count % 2) {
-                if(model->position == count - 1) {
-                    model->position = 0;
-                } else if(model->position == count - 2) {
-                    model->position = count - 1;
+            switch(CFW_SETTINGS()->menu_style) {
+            case MenuStyleWii:
+                if(count % 2) {
+                    if(model->position == count - 1) {
+                        model->position = 0;
+                    } else if(model->position == count - 2) {
+                        model->position = count - 1;
+                    } else {
+                        model->position += 2;
+                    }
                 } else {
                     model->position += 2;
+                    if(model->position >= count) {
+                        model->position = model->position % 2;
+                    }
                 }
-            } else {
-                model->position += 2;
-                if(model->position >= count) {
-                    model->position = model->position % 2;
+                model->scroll_counter = 0;
+                break;
+            case MenuStyleDsi:
+                if(model->position < count - 1) {
+                    model->position++;
+                } else {
+                    model->position = 0;
                 }
+                break;
+            default:
+                break;
             }
-            model->scroll_counter = 0;
 
             item = MenuItemArray_get(model->items, model->position);
             if(item && item->icon) {

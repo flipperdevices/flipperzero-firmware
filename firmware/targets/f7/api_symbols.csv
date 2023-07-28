@@ -864,6 +864,7 @@ Function,+,elements_progress_bar_with_text,void,"Canvas*, uint8_t, uint8_t, uint
 Function,+,elements_scrollable_text_line,void,"Canvas*, uint8_t, uint8_t, uint8_t, FuriString*, size_t, _Bool, _Bool"
 Function,+,elements_scrollable_text_line_str,void,"Canvas*, uint8_t, uint8_t, uint8_t, const char*, size_t, _Bool, _Bool"
 Function,+,elements_scrollbar,void,"Canvas*, uint16_t, uint16_t"
+Function,+,elements_scrollbar_horizontal,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint16_t, uint16_t"
 Function,+,elements_scrollbar_pos,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint16_t, uint16_t"
 Function,+,elements_slightly_rounded_box,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
 Function,+,elements_slightly_rounded_frame,void,"Canvas*, uint8_t, uint8_t, uint8_t, uint8_t"
