@@ -31,13 +31,15 @@ This software is for experimental purposes only and is not meant for any illegal
 
 ## Latest Updates - [PATREON: Latest Release RM0728-0240-0.87.1-31c0a6c](https://www.patreon.com/RogueMaster?filters[tag]=Latest%20Release)
 
-- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-28 15:40 EST`
-- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-28 15:40 EST`
+- Last Synced/Checked Unleashed, changes in [changelog](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/blob/420/CHANGELOG.md) and in [commits](https://github.com/DarkFlippers/unleashed-firmware/commits/dev): `2023-07-28 16:00 EST`
+- Last Synced/Checked OFW, changes in [commits](https://github.com/flipperdevices/flipperzero-firmware/commits/dev): `2023-07-28 16:00 EST`
 - [Fixed Memory leak/Pointer issue with CFW Settings app (By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/724)
 - [Configurable SPI & UART Channels (By Sil333033)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/fc4c6bdacd7aac9ba8377fddcb966a9ae17da36a)
 - Updated: [ESP32 Evil Portal v0.2 (By bigbrodude6119)](https://github.com/bigbrodude6119/flipper-zero-evil-portal) [Changes By leedave]( https://github.com/leedave/flipper-zero-evil-portal/tree/leedave/ap_rename/flipper/flipper-evil-portal)
 - [DSi Layout for Main Menu (By WillyJL)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/commit/de5a8d222d138a7d01f82a265b088b37576b7a0b)
 - Updated: [Enhanced Sub-Ghz Chat (By twisted-pear)](https://github.com/twisted-pear/esubghz_chat)
+- Updated: [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- OFW: [Fix fbtenv restore #2924 (By drunkbatya)](https://github.com/flipperdevices/flipperzero-firmware/pull/2924)
 
 <a name="release">
 
@@ -257,7 +259,7 @@ $ ./fbt dolphin_ext
 - [Air Mouse (By ginkage)](https://github.com/ginkage/FlippAirMouse/)
 - [Analog Clock (By scrolltex)](https://github.com/scrolltex/flipper_analog_clock)
 - [APRS Cln Hello World (By NSV47)](https://github.com/NSV47/APRS_hello_world_clean)
-- [Authenticator/TOTP (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
+- [Authenticator/TOTP v3.2 (By akopachov)](https://github.com/akopachov/flipper-zero_authenticator)
 - [AVR Flasher (By Skorpionm)](https://github.com/flipperdevices/flipperzero-firmware/pull/2475)
 - [AZERTY Mouse Jacker (By mothball187)](https://github.com/mothball187/flipperzero-nrf24/tree/main/mousejacker) `Req: NRF24` (Uses AZERTY keyboard - Source Unknown)
 - [Bad BT (By Willy-JL)(Imported By ESurge)](https://github.com/RogueMaster/flipperzero-firmware-wPlugins/pull/620)
