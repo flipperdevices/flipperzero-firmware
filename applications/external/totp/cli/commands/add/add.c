@@ -12,6 +12,8 @@ struct TotpAddContext {
     FuriString* args;
     Cli* cli;
     uint8_t* iv;
+    uint8_t crypto_version;
+    uint8_t crypto_key_slot;
 };
 
 enum TotpIteratorUpdateTokenResultsEx {
@@ -68,7 +70,9 @@ static TotpIteratorUpdateTokenResult
         furi_string_get_cstr(temp_str),
         furi_string_size(temp_str),
         token_secret_encoding,
-        context_t->iv);
+        context_t->iv,
+        context_t->crypto_version,
+        context_t->crypto_key_slot);
 
     furi_string_secure_free(temp_str);
 
@@ -166,7 +170,12 @@ void totp_cli_command_add_handle(PluginState* plugin_state, FuriString* args, Cl
 
     TOTP_CLI_LOCK_UI(plugin_state);
 
-    struct TotpAddContext add_context = {.args = args, .cli = cli, .iv = &plugin_state->iv[0]};
+    struct TotpAddContext add_context = {
+        .args = args,
+        .cli = cli,
+        .iv = &plugin_state->iv[0],
+        .crypto_version = plugin_state->crypto_version,
+        .crypto_key_slot = plugin_state->crypto_key_slot};
     TotpIteratorUpdateTokenResult add_result =
         totp_token_info_iterator_add_new_token(iterator_context, &add_token_handler, &add_context);
 

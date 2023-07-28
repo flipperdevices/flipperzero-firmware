@@ -39,6 +39,7 @@ typedef struct {
     TotpGenerateCodeWorkerContext* generate_code_worker_context;
     UiPrecalculatedDimensions ui_precalculated_dimensions;
     const FONT_INFO* active_font;
+    NotificationApp* notification_app;
 } SceneState;
 
 static const NotificationSequence*
@@ -153,7 +154,7 @@ static void draw_totp_code(Canvas* const canvas, const PluginState* const plugin
 }
 
 static void on_new_token_code_generated(bool time_left, void* context) {
-    const PluginState* plugin_state = context;
+    PluginState* const plugin_state = context;
     const TokenInfoIteratorContext* iterator_context =
         totp_config_get_token_iterator_context(plugin_state);
     if(totp_token_info_iterator_get_total_count(iterator_context) == 0) {
@@ -174,13 +175,16 @@ static void on_new_token_code_generated(bool time_left, void* context) {
 
     if(time_left) {
         notification_message(
-            plugin_state->notification_app,
-            get_notification_sequence_new_token(plugin_state, plugin_state->current_scene_state));
+            scene_state->notification_app,
+            get_notification_sequence_new_token(plugin_state, scene_state));
     }
+
+    totp_scene_director_force_redraw(plugin_state);
 }
 
 static void on_code_lifetime_updated_generated(float code_lifetime_percent, void* context) {
-    SceneState* scene_state = context;
+    PluginState* const plugin_state = context;
+    SceneState* scene_state = plugin_state->current_scene_state;
     scene_state->ui_precalculated_dimensions.progress_bar_width =
         (uint8_t)((float)(SCREEN_WIDTH - (PROGRESS_BAR_MARGIN << 1)) * code_lifetime_percent);
     scene_state->ui_precalculated_dimensions.progress_bar_x =
@@ -188,6 +192,7 @@ static void on_code_lifetime_updated_generated(float code_lifetime_percent, void
           scene_state->ui_precalculated_dimensions.progress_bar_width) >>
          1) +
         PROGRESS_BAR_MARGIN;
+    totp_scene_director_force_redraw(plugin_state);
 }
 
 void totp_scene_generate_token_activate(PluginState* plugin_state) {
@@ -204,6 +209,7 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
     }
 
     scene_state->active_font = available_fonts[plugin_state->active_font_index];
+    scene_state->notification_app = furi_record_open(RECORD_NOTIFICATION);
 
 #ifdef TOTP_BADBT_TYPE_ENABLED
 
@@ -225,7 +231,9 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
         totp_token_info_iterator_get_current_token(iterator_context),
         scene_state->last_code_update_sync,
         plugin_state->timezone_offset,
-        plugin_state->iv);
+        plugin_state->iv,
+        plugin_state->crypto_version,
+        plugin_state->crypto_key_slot);
 
     totp_generate_code_worker_set_code_generated_handler(
         scene_state->generate_code_worker_context, &on_new_token_code_generated, plugin_state);
@@ -233,7 +241,7 @@ void totp_scene_generate_token_activate(PluginState* plugin_state) {
     totp_generate_code_worker_set_lifetime_changed_handler(
         scene_state->generate_code_worker_context,
         &on_code_lifetime_updated_generated,
-        scene_state);
+        plugin_state);
 
     update_totp_params(
         plugin_state, totp_token_info_iterator_get_current_token_index(iterator_context));
@@ -350,7 +358,7 @@ bool totp_scene_generate_token_handle_event(
                 TotpUsbTypeCodeWorkerEventType,
                 totp_token_info_iterator_get_current_token(iterator_context)->automation_features);
             notification_message(
-                plugin_state->notification_app,
+                scene_state->notification_app,
                 get_notification_sequence_automation(plugin_state, scene_state));
             return true;
         }
@@ -366,7 +374,7 @@ bool totp_scene_generate_token_handle_event(
                 TotpBtTypeCodeWorkerEventType,
                 totp_token_info_iterator_get_current_token(iterator_context)->automation_features);
             notification_message(
-                plugin_state->notification_app,
+                scene_state->notification_app,
                 get_notification_sequence_automation(plugin_state, scene_state));
             return true;
         }
@@ -426,6 +434,8 @@ void totp_scene_generate_token_deactivate(PluginState* plugin_state) {
     SceneState* scene_state = (SceneState*)plugin_state->current_scene_state;
 
     totp_generate_code_worker_stop(scene_state->generate_code_worker_context);
+
+    furi_record_close(RECORD_NOTIFICATION);
 
     if(plugin_state->automation_method & AutomationMethodBadUsb) {
         totp_usb_type_code_worker_stop(scene_state->usb_type_code_worker_context);

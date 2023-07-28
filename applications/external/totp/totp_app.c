@@ -15,21 +15,26 @@
 #include "ui/scene_director.h"
 #include "ui/constants.h"
 #include "ui/common_dialogs.h"
-#include "services/crypto/crypto.h"
+#include "services/crypto/crypto_facade.h"
 #include "cli/cli.h"
 
-static void render_callback(Canvas* const canvas, void* ctx) {
+struct TotpRenderCallbackContext {
+    FuriMutex* mutex;
+    PluginState* plugin_state;
+};
+
+static void render_callback(Canvas* const canvas, void* const ctx) {
     furi_assert(ctx);
-    PluginState* plugin_state = ctx;
-    if(furi_mutex_acquire(plugin_state->mutex, 25) == FuriStatusOk) {
-        totp_scene_director_render(canvas, plugin_state);
-        furi_mutex_release(plugin_state->mutex);
+    const struct TotpRenderCallbackContext* context = ctx;
+    if(furi_mutex_acquire(context->mutex, 25) == FuriStatusOk) {
+        totp_scene_director_render(canvas, context->plugin_state);
+        furi_mutex_release(context->mutex);
     }
 }
 
-static void input_callback(InputEvent* input_event, FuriMessageQueue* event_queue) {
-    furi_assert(event_queue);
-
+static void input_callback(InputEvent* const input_event, void* const ctx) {
+    furi_assert(ctx);
+    FuriMessageQueue* event_queue = ctx;
     PluginEvent event = {.type = EventTypeKey, .input = *input_event};
     furi_message_queue_put(event_queue, &event, FuriWaitForever);
 }
@@ -81,6 +86,7 @@ static bool totp_activate_initial_scene(PluginState* const plugin_state) {
         }
 
         if(totp_crypto_verify_key(plugin_state)) {
+            totp_config_file_ensure_latest_encryption(plugin_state, NULL, 0);
             totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
         } else {
             FURI_LOG_E(
@@ -109,6 +115,7 @@ static bool on_user_idle(void* context) {
     if(plugin_state->current_scene != TotpSceneAuthentication &&
        plugin_state->current_scene != TotpSceneStandby) {
         totp_scene_director_activate_scene(plugin_state, TotpSceneAuthentication);
+        totp_scene_director_force_redraw(plugin_state);
         return true;
     }
 
@@ -117,16 +124,15 @@ static bool on_user_idle(void* context) {
 
 static bool totp_plugin_state_init(PluginState* const plugin_state) {
     plugin_state->gui = furi_record_open(RECORD_GUI);
-    plugin_state->notification_app = furi_record_open(RECORD_NOTIFICATION);
     plugin_state->dialogs_app = furi_record_open(RECORD_DIALOGS);
-    memset(&plugin_state->iv[0], 0, TOTP_IV_SIZE);
+    memset(&plugin_state->iv[0], 0, CRYPTO_IV_LENGTH);
 
     if(!totp_config_file_load(plugin_state)) {
         totp_dialogs_config_loading_error(plugin_state);
         return false;
     }
 
-    plugin_state->mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    plugin_state->event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
 
 #ifdef TOTP_BADBT_TYPE_ENABLED
     if(plugin_state->automation_method & AutomationMethodBadBt) {
@@ -154,7 +160,6 @@ static void totp_plugin_state_free(PluginState* plugin_state) {
     }
 
     furi_record_close(RECORD_GUI);
-    furi_record_close(RECORD_NOTIFICATION);
     furi_record_close(RECORD_DIALOGS);
 
     totp_config_file_close(plugin_state);
@@ -170,12 +175,11 @@ static void totp_plugin_state_free(PluginState* plugin_state) {
     }
 #endif
 
-    furi_mutex_free(plugin_state->mutex);
+    furi_message_queue_free(plugin_state->event_queue);
     free(plugin_state);
 }
 
 int32_t totp_app() {
-    FuriMessageQueue* event_queue = furi_message_queue_alloc(8, sizeof(PluginEvent));
     PluginState* plugin_state = malloc(sizeof(PluginState));
     furi_check(plugin_state != NULL);
 
@@ -185,7 +189,7 @@ int32_t totp_app() {
         return 254;
     }
 
-    TotpCliContext* cli_context = totp_cli_register_command_handler(plugin_state, event_queue);
+    TotpCliContext* cli_context = totp_cli_register_command_handler(plugin_state);
 
     if(!totp_activate_initial_scene(plugin_state)) {
         FURI_LOG_E(LOGGING_TAG, "An error ocurred during activating initial scene\r\n");
@@ -194,16 +198,16 @@ int32_t totp_app() {
     }
 
     // Affecting dolphin level
-#if defined(DOLPHIN_DEED)
-    DOLPHIN_DEED(DolphinDeedPluginStart);
-#else
     dolphin_deed(DolphinDeedPluginStart);
-#endif
+
+    FuriMutex* main_loop_mutex = furi_mutex_alloc(FuriMutexTypeNormal);
+    struct TotpRenderCallbackContext render_context = {
+        .plugin_state = plugin_state, .mutex = main_loop_mutex};
 
     // Set system callbacks
     ViewPort* view_port = view_port_alloc();
-    view_port_draw_callback_set(view_port, render_callback, plugin_state);
-    view_port_input_callback_set(view_port, input_callback, event_queue);
+    view_port_draw_callback_set(view_port, render_callback, &render_context);
+    view_port_input_callback_set(view_port, input_callback, plugin_state->event_queue);
 
     // Open GUI and register view_port
     gui_add_view_port(plugin_state->gui, view_port, GuiLayerFullscreen);
@@ -211,24 +215,24 @@ int32_t totp_app() {
     PluginEvent event;
     bool processing = true;
     while(processing) {
-        FuriStatus event_status = furi_message_queue_get(event_queue, &event, 100);
-
-        if(furi_mutex_acquire(plugin_state->mutex, FuriWaitForever) == FuriStatusOk) {
-            if(event_status == FuriStatusOk) {
+        if(furi_message_queue_get(plugin_state->event_queue, &event, FuriWaitForever) ==
+           FuriStatusOk) {
+            if(event.type == EventForceCloseApp) {
+                processing = false;
+            } else if(event.type == EventForceRedraw) {
+                processing = true; //-V1048
+            } else if(furi_mutex_acquire(main_loop_mutex, FuriWaitForever) == FuriStatusOk) {
                 if(event.type == EventTypeKey && plugin_state->idle_timeout_context != NULL) {
                     idle_timeout_report_activity(plugin_state->idle_timeout_context);
                 }
 
-                if(event.type == EventForceCloseApp) {
-                    processing = false;
-                } else {
-                    processing = totp_scene_director_handle_event(&event, plugin_state);
-                }
-            }
+                processing = totp_scene_director_handle_event(&event, plugin_state);
 
-            view_port_update(view_port);
-            furi_mutex_release(plugin_state->mutex);
+                furi_mutex_release(main_loop_mutex);
+            }
         }
+
+        view_port_update(view_port);
     }
 
     totp_cli_unregister_command_handler(cli_context);
@@ -237,7 +241,7 @@ int32_t totp_app() {
     view_port_enabled_set(view_port, false);
     gui_remove_view_port(plugin_state->gui, view_port);
     view_port_free(view_port);
-    furi_message_queue_free(event_queue);
+    furi_mutex_free(main_loop_mutex);
     totp_plugin_state_free(plugin_state);
     return 0;
 }

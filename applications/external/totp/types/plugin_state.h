@@ -12,8 +12,7 @@
 #ifdef TOTP_BADBT_TYPE_ENABLED
 #include "../workers/bt_type_code/bt_type_code.h"
 #endif
-
-#define TOTP_IV_SIZE (16)
+#include "../services/crypto/constants.h"
 
 /**
  * @brief Application state structure
@@ -28,11 +27,6 @@ typedef struct {
      * @brief Application current scene state
      */
     void* current_scene_state;
-
-    /**
-     * @brief Reference to the firmware notification subsystem
-     */
-    NotificationApp* notification_app;
 
     /**
      * @brief Reference to the firmware dialogs subsystem 
@@ -55,12 +49,12 @@ typedef struct {
     ConfigFileContext* config_file_context;
 
     /**
-     * @brief Encrypted well-known string data
+     * @brief Encrypted well-known data
      */
     uint8_t* crypto_verify_data;
 
     /**
-     * @brief Encrypted well-known string data length
+     * @brief Encrypted well-known data length
      */
     size_t crypto_verify_data_length;
 
@@ -72,22 +66,17 @@ typedef struct {
     /**
      * @brief Initialization vector (IV) to be used for encryption\decryption 
      */
-    uint8_t iv[TOTP_IV_SIZE];
+    uint8_t iv[CRYPTO_IV_LENGTH];
 
     /**
      * @brief Basic randomly-generated initialization vector (IV)
      */
-    uint8_t base_iv[TOTP_IV_SIZE];
+    uint8_t base_iv[CRYPTO_IV_LENGTH];
 
     /**
      * @brief Notification method
      */
     NotificationMethod notification_method;
-
-    /**
-     * @brief Main rendering loop mutex
-     */
-    FuriMutex* mutex;
 
     /**
      * @brief Automation method
@@ -110,4 +99,19 @@ typedef struct {
      * @brief Font index to be used to draw TOTP token
      */
     uint8_t active_font_index;
+
+    /**
+     * @brief Crypto key slot to be used
+     */
+    uint8_t crypto_key_slot;
+
+    /**
+     * @brief Crypto algorithms version to be used
+     */
+    uint8_t crypto_version;
+
+    /**
+     * @brief Application even queue
+     */
+    FuriMessageQueue* event_queue;
 } PluginState;

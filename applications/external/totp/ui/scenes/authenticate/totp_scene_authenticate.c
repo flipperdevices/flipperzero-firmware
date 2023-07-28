@@ -6,10 +6,10 @@
 #include "../../../services/config/config.h"
 #include "../../scene_director.h"
 #include "../../totp_scenes_enum.h"
-#include "../../../services/crypto/crypto.h"
+#include "../../../services/crypto/crypto_facade.h"
 #include "../../../types/user_pin_codes.h"
 
-#define MAX_CODE_LENGTH TOTP_IV_SIZE
+#define MAX_CODE_LENGTH CRYPTO_IV_LENGTH
 static const uint8_t PIN_ASTERISK_RADIUS = 3;
 static const uint8_t PIN_ASTERISK_STEP = (PIN_ASTERISK_RADIUS << 1) + 2;
 
@@ -24,7 +24,7 @@ void totp_scene_authenticate_activate(PluginState* plugin_state) {
     scene_state->code_length = 0;
     memset(&scene_state->code_input[0], 0, MAX_CODE_LENGTH);
     plugin_state->current_scene_state = scene_state;
-    memset(&plugin_state->iv[0], 0, TOTP_IV_SIZE);
+    memset(&plugin_state->iv[0], 0, CRYPTO_IV_LENGTH);
 }
 
 void totp_scene_authenticate_render(Canvas* const canvas, PluginState* plugin_state) {
@@ -132,11 +132,13 @@ bool totp_scene_authenticate_handle_event(
 
         if(totp_crypto_verify_key(plugin_state)) {
             FURI_LOG_D(LOGGING_TAG, "PIN is valid");
+            totp_config_file_ensure_latest_encryption(
+                plugin_state, &scene_state->code_input[0], scene_state->code_length);
             totp_scene_director_activate_scene(plugin_state, TotpSceneGenerateToken);
         } else {
             FURI_LOG_D(LOGGING_TAG, "PIN is NOT valid");
             memset(&scene_state->code_input[0], 0, MAX_CODE_LENGTH);
-            memset(&plugin_state->iv[0], 0, TOTP_IV_SIZE);
+            memset(&plugin_state->iv[0], 0, CRYPTO_IV_LENGTH);
             scene_state->code_length = 0;
 
             DialogMessage* message = dialog_message_alloc();
