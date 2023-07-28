@@ -20,9 +20,9 @@ bugs. You have been warned.
 Once opened the plugin will ask for a frequency to operate on which must be
 entered in HZ.
 
-On the next screen the plugin will ask for a password to derive the
-cryptographic key from. If nothing (on Unleashed) or a single space (on OFW) is
-entered, the encryption is disabled.
+On the next screen the plugin will ask for the method of deriving the key. If
+"No encryption" is selected, the encryption is disabled. Otherwise, the plugin
+will ask for the selected method. Currently only a password is supported.
 
 Finally the a message can be input. After the message is confirmed, the plugin
 will switch to the chat view, where sent and received messages are displayed.
@@ -34,8 +34,8 @@ In the chat view the keyboard can be locked by pressing and holding the OK
 button for a few seconds. To unlock the keyboard again quickly press the back
 button three times.
 
-Pressing the back button when entering the frequency, the password or a message
-will terminate the plugin.
+Pressing the back button when entering the frequency, when selecting the method
+for deriving the key or when entering a message will terminate the plugin.
 
 ## Interoperability
 
