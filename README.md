@@ -37,6 +37,8 @@ Flipper Zero application for nRF24L01 external board. Sends batch commands.
 Пример файл [CO2_mini](https://raw.githubusercontent.com/vad7/nRF24-Batch/main/Distr/nrf24batch/CO2_mini.txt)<br>
 Для устройства на Attiny44A, которое отправляет данные с датчика CO2 на контроллеры, управляющие вентиляцией или проветриватели: https://github.com/vad7/CO2-mini<br>
 Управляет вентиляцией на кухне: https://github.com/vad7/Kitchen_Vent<br>
+Еще один контроллер управление вентиляцией, с регулировкой мощности: https://github.com/vad7/Kitchen_Dimmer<br>
+Более подробно тут: https://vad-7.blogspot.com/2023/07/kitchen-vent.html<br>
 <br><br>
 Структура [файла настроек](https://raw.githubusercontent.com/vad7/nRF24-Batch/main/descript.txt):  
 
