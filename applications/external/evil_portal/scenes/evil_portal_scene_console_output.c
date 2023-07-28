@@ -81,7 +81,7 @@ void evil_portal_scene_console_output_on_enter(void* context) {
         if(0 == strncmp(RESET_CMD, app->selected_tx_string, strlen(RESET_CMD))) {
             app->sent_reset = true;
             if(app->show_stopscan_tip) {
-                const char* msg = "Reseting portal\nPress BACK to return\n\n\n\n";
+                const char* msg = "Resetting portal\nPress BACK to return\n\n\n\n";
                 furi_string_cat_str(app->text_box_store, msg);
                 app->text_box_store_strlen += strlen(msg);
             }

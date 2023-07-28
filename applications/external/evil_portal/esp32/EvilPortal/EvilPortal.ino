@@ -192,7 +192,7 @@ void loop() {
     Serial.println(logValue2);
   }
   if(checkForCommand(RESET_CMD)) {
-    Serial.println("reseting");
+    Serial.println("resetting");
     resetFunction();
   }  
 }
