@@ -80,6 +80,7 @@ typedef enum {
 	ESubGhzChatEvent_KeyMenuNoEncryption,
 	ESubGhzChatEvent_KeyMenuPassword,
 	ESubGhzChatEvent_KeyMenuHexKey,
+	ESubGhzChatEvent_KeyMenuGenKey,
 	ESubGhzChatEvent_PassEntered,
 	ESubGhzChatEvent_HexKeyEntered,
 	ESubGhzChatEvent_MsgEntered,
