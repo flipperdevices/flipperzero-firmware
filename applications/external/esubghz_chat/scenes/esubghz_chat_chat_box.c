@@ -14,16 +14,38 @@ void scene_on_enter_chat_box(void* context) {
     view_dispatcher_switch_to_view(state->view_dispatcher, ESubGhzChatView_ChatBox);
 }
 
-/* Handles scene manager events for the text box scene. No events are handled
- * here. */
+/* Handles scene manager events for the text box scene. */
 bool scene_on_event_chat_box(void* context, SceneManagerEvent event) {
-    UNUSED(event);
-
     FURI_LOG_T(APPLICATION_NAME, "scene_on_event_chat_box");
 
     furi_assert(context);
+    ESubGhzChatState* state = context;
 
-    return false;
+    bool consumed = false;
+
+    switch(event.type) {
+    case SceneManagerEventTypeCustom:
+        switch(event.event) {
+        /* switch to message input scene */
+        case ESubGhzChatEvent_GotoMsgInput:
+            if(!scene_manager_previous_scene(state->scene_manager)) {
+                view_dispatcher_stop(state->view_dispatcher);
+            }
+            consumed = true;
+            break;
+        case ESubGhzChatEvent_GotoKeyDisplay:
+            scene_manager_next_scene(state->scene_manager, ESubGhzChatScene_KeyDisplay);
+            consumed = true;
+            break;
+        }
+        break;
+
+    default:
+        consumed = false;
+        break;
+    }
+
+    return consumed;
 }
 
 /* Cleans up the text box scene. */

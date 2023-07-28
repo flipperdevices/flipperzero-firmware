@@ -7,9 +7,8 @@
 #include "crypto_wrapper.h"
 
 struct ESugGhzChatCryptoCtx {
-#ifdef FURI_HAL_CRYPTO_ADVANCED_AVAIL
     uint8_t key[KEY_BITS / 8];
-#else /* FURI_HAL_CRYPTO_ADVANCED_AVAIL */
+#ifndef FURI_HAL_CRYPTO_ADVANCED_AVAIL
     gcm_context gcm_ctx;
 #endif /* FURI_HAL_CRYPTO_ADVANCED_AVAIL */
 };
@@ -46,12 +45,16 @@ void crypto_ctx_clear(ESubGhzChatCryptoCtx* ctx) {
 }
 
 bool crypto_ctx_set_key(ESubGhzChatCryptoCtx* ctx, const uint8_t* key) {
-#ifdef FURI_HAL_CRYPTO_ADVANCED_AVAIL
     memcpy(ctx->key, key, KEY_BITS / 8);
+#ifdef FURI_HAL_CRYPTO_ADVANCED_AVAIL
     return true;
 #else /* FURI_HAL_CRYPTO_ADVANCED_AVAIL */
     return (gcm_setkey(&(ctx->gcm_ctx), key, KEY_BITS / 8) == 0);
 #endif /* FURI_HAL_CRYPTO_ADVANCED_AVAIL */
+}
+
+void crypto_ctx_get_key(ESubGhzChatCryptoCtx* ctx, uint8_t* key) {
+    memcpy(key, ctx->key, KEY_BITS / 8);
 }
 
 bool crypto_ctx_decrypt(ESubGhzChatCryptoCtx* ctx, uint8_t* in, size_t in_len, uint8_t* out) {
