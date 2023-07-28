@@ -20,15 +20,24 @@ static void gps_uart_on_irq_cb(UartIrqEvent ev, uint8_t data, void* context) {
 }
 
 static void gps_uart_serial_init(GpsUart* gps_uart) {
-    furi_hal_console_disable();
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, gps_uart_on_irq_cb, gps_uart);
-    furi_hal_uart_set_br(FuriHalUartIdUSART1, gps_uart->baudrate);
+    if(UART_CH == FuriHalUartIdUSART1) {
+        furi_hal_console_disable();
+    } else if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_init(UART_CH, gps_uart->baudrate);
+    }
+
+    furi_hal_uart_set_irq_cb(UART_CH, gps_uart_on_irq_cb, gps_uart);
+    furi_hal_uart_set_br(UART_CH, gps_uart->baudrate);
 }
 
 static void gps_uart_serial_deinit(GpsUart* gps_uart) {
     UNUSED(gps_uart);
-    furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, NULL, NULL);
-    furi_hal_console_enable();
+    furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
+    if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_deinit(UART_CH);
+    } else {
+        furi_hal_console_enable();
+    }
 }
 
 static void gps_uart_parse_nmea(GpsUart* gps_uart, char* line) {

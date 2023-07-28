@@ -18,7 +18,7 @@
 #define TAG "SubGhz_Device_CC1101_Ext"
 
 #define SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO &gpio_ext_pb2
-#define SUBGHZ_DEVICE_CC1101_EXT_DANGEROUS_RANGE false
+#define SUBGHZ_DEVICE_CC1101_EXT_EXTENDED_RANGE false
 
 /* DMA Channels definition */
 #define SUBGHZ_DEVICE_CC1101_EXT_DMA DMA2
@@ -193,10 +193,24 @@ bool subghz_device_cc1101_ext_alloc() {
     subghz_device_cc1101_ext->state = SubGhzDeviceCC1101ExtStateInit;
     subghz_device_cc1101_ext->regulation = SubGhzDeviceCC1101ExtRegulationTxRx;
     subghz_device_cc1101_ext->async_mirror_pin = NULL;
-    subghz_device_cc1101_ext->spi_bus_handle = &furi_hal_spi_bus_handle_external;
+
     subghz_device_cc1101_ext->g0_pin = SUBGHZ_DEVICE_CC1101_EXT_TX_GPIO;
 
     subghz_device_cc1101_ext->async_rx.capture_delta_duration = 0;
+
+    subghz_device_cc1101_ext->spi_bus_handle =
+        (CFW_SETTINGS()->spi_cc1101_handle == SpiDefault ?
+             &furi_hal_spi_bus_handle_external :
+             &furi_hal_spi_bus_handle_external_extra);
+
+    // this is needed if multiple SPI devices are connected to the same bus but with different CS pins
+    if(CFW_SETTINGS()->spi_cc1101_handle == SpiDefault) {
+        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pc3, true);
+    } else if(CFW_SETTINGS()->spi_cc1101_handle == SpiExtra) {
+        furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pa4, true);
+    }
 
     furi_hal_spi_bus_handle_init(subghz_device_cc1101_ext->spi_bus_handle);
     return subghz_device_cc1101_ext_check_init();
@@ -207,6 +221,13 @@ void subghz_device_cc1101_ext_free() {
     furi_hal_spi_bus_handle_deinit(subghz_device_cc1101_ext->spi_bus_handle);
     free(subghz_device_cc1101_ext);
     subghz_device_cc1101_ext = NULL;
+
+    // resetting the CS pins to floating
+    if(CFW_SETTINGS()->spi_nrf24_handle == SpiDefault) {
+        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
+    } else if(CFW_SETTINGS()->spi_nrf24_handle == SpiExtra) {
+        furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeAnalog);
+    }
 }
 
 void subghz_device_cc1101_ext_set_async_mirror_pin(const GpioPin* pin) {
@@ -432,16 +453,16 @@ bool subghz_device_cc1101_ext_is_frequency_valid(uint32_t value) {
 }
 
 bool subghz_device_cc1101_ext_is_tx_allowed(uint32_t value) {
-    if(!(SUBGHZ_DEVICE_CC1101_EXT_DANGEROUS_RANGE) &&
+    if(!(SUBGHZ_DEVICE_CC1101_EXT_EXTENDED_RANGE) &&
        !(value >= 299999755 && value <= 350000335) && // was increased from 348 to 350
        !(value >= 386999938 && value <= 467750000) && // was increased from 464 to 467.75
        !(value >= 778999847 && value <= 928000000)) {
         FURI_LOG_I(TAG, "Frequency blocked - outside default range");
         return false;
     } else if(
-        (SUBGHZ_DEVICE_CC1101_EXT_DANGEROUS_RANGE) &&
+        (SUBGHZ_DEVICE_CC1101_EXT_EXTENDED_RANGE) &&
         !subghz_device_cc1101_ext_is_frequency_valid(value)) {
-        FURI_LOG_I(TAG, "Frequency blocked - outside dangerous range");
+        FURI_LOG_I(TAG, "Frequency blocked - outside extended range");
         return false;
     }
 
@@ -529,7 +550,7 @@ void subghz_device_cc1101_ext_start_async_rx(
     furi_hal_bus_enable(FuriHalBusTIM17);
 
     // Configure TIM
-    //Set the timer resolution to 2 µs
+    //Set the timer resolution to 2 ï¿½s
     LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
     LL_TIM_SetCounterMode(TIM17, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetAutoReload(TIM17, 0xFFFF);
@@ -710,7 +731,7 @@ bool subghz_device_cc1101_ext_start_async_tx(SubGhzDeviceCC1101ExtCallback callb
     furi_hal_bus_enable(FuriHalBusTIM17);
 
     // Configure TIM
-    // Set the timer resolution to 2 µs
+    // Set the timer resolution to 2 ï¿½s
     LL_TIM_SetPrescaler(TIM17, (64 << 1) - 1);
     LL_TIM_SetCounterMode(TIM17, LL_TIM_COUNTERMODE_UP);
     LL_TIM_SetAutoReload(TIM17, 0xFFFF);

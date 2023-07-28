@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <furi_hal_spi.h>
+#include <cfw.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,14 +48,16 @@ extern "C" {
 #define RX_PW_P3 0x14
 #define RX_PW_P4 0x15
 #define RX_PW_P5 0x16
-#define RX_DR    0x40
-#define TX_DS    0x20
-#define MAX_RT   0x10
+#define RX_DR 0x40
+#define TX_DS 0x20
+#define MAX_RT 0x10
 #define NRF24_EN_DYN_ACK 0x01
 
 #define nrf24_TIMEOUT 500
 #define nrf24_CE_PIN &gpio_ext_pb2
-#define nrf24_HANDLE &furi_hal_spi_bus_handle_external
+#define nrf24_HANDLE                                                                         \
+    (CFW_SETTINGS()->spi_nrf24_handle == SpiDefault ? &furi_hal_spi_bus_handle_external : \
+                                                         &furi_hal_spi_bus_handle_external_extra)
 
 /* Low level API */
 
@@ -278,8 +281,11 @@ uint8_t nrf24_set_dst_mac(FuriHalSpiBusHandle* handle, uint8_t* mac, uint8_t siz
  * 
  * @return     device status
  */
-uint8_t
-    nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* ret_packetsize, uint8_t packet_size_flag);
+uint8_t nrf24_rxpacket(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* packet,
+    uint8_t* ret_packetsize,
+    uint8_t packet_size_flag);
 
 /** Sends TX packet
  *
@@ -315,7 +321,7 @@ void nrf24_configure(
     bool disable_aa);
 
 // Set mac address (MSB first), Return: Status
-uint8_t  nrf24_set_mac(uint8_t mac_addr, uint8_t *mac, uint8_t mlen);
+uint8_t nrf24_set_mac(uint8_t mac_addr, uint8_t* mac, uint8_t mlen);
 
 /** Configures the radio for "promiscuous mode" and primes it for rx
  * This is not an actual mode of the nrf24, but this function exploits a few bugs in the chip that allows it to act as if it were.

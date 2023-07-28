@@ -12,6 +12,11 @@
 #include <gui/modules/text_input.h>
 #include <gui/modules/variable_item_list.h>
 
+#include <cfw.h>
+
+#define UART_CH \
+    (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
+
 #define NUM_MENU_ITEMS (11)
 
 #define WIFI_deauther_TEXT_BOX_STORE_SIZE (4096)

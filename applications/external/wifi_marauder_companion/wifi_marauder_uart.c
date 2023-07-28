@@ -1,8 +1,6 @@
 #include "wifi_marauder_app_i.h"
 #include "wifi_marauder_uart.h"
 
-#define UART_CH (FuriHalUartIdUSART1)
-#define LP_UART_CH (FuriHalUartIdLPUART1)
 #define BAUDRATE (115200)
 
 struct WifiMarauderUart {
@@ -62,10 +60,6 @@ void wifi_marauder_uart_tx(uint8_t* data, size_t len) {
     furi_hal_uart_tx(UART_CH, data, len);
 }
 
-void wifi_marauder_lp_uart_tx(uint8_t* data, size_t len) {
-    furi_hal_uart_tx(LP_UART_CH, data, len);
-}
-
 WifiMarauderUart*
     wifi_marauder_uart_init(WifiMarauderApp* app, FuriHalUartId channel, const char* thread_name) {
     WifiMarauderUart* uart = malloc(sizeof(WifiMarauderUart));
@@ -90,14 +84,6 @@ WifiMarauderUart*
     return uart;
 }
 
-WifiMarauderUart* wifi_marauder_usart_init(WifiMarauderApp* app) {
-    return wifi_marauder_uart_init(app, UART_CH, "WifiMarauderUartRxThread");
-}
-
-WifiMarauderUart* wifi_marauder_lp_uart_init(WifiMarauderApp* app) {
-    return wifi_marauder_uart_init(app, LP_UART_CH, "WifiMarauderLPUartRxThread");
-}
-
 void wifi_marauder_uart_free(WifiMarauderUart* uart) {
     furi_assert(uart);
 
@@ -108,8 +94,9 @@ void wifi_marauder_uart_free(WifiMarauderUart* uart) {
     furi_hal_uart_set_irq_cb(uart->channel, NULL, NULL);
     if(uart->channel == FuriHalUartIdLPUART1) {
         furi_hal_uart_deinit(uart->channel);
+    } else {
+        furi_hal_console_enable();
     }
-    furi_hal_console_enable();
 
     free(uart);
 }

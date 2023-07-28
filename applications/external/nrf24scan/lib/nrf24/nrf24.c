@@ -8,6 +8,15 @@
 #include <string.h>
 
 void nrf24_init() {
+    // this is needed if multiple SPI devices are connected to the same bus but with different CS pins
+    if(CFW_SETTINGS()->spi_nrf24_handle == SpiDefault) {
+        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pc3, true);
+    } else if(CFW_SETTINGS()->spi_nrf24_handle == SpiExtra) {
+        furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeOutputPushPull);
+        furi_hal_gpio_write(&gpio_ext_pa4, true);
+    }
+
     furi_hal_spi_bus_handle_init(nrf24_HANDLE);
     furi_hal_spi_acquire(nrf24_HANDLE);
     furi_hal_gpio_init(nrf24_CE_PIN, GpioModeOutputPushPull, GpioPullUp, GpioSpeedVeryHigh);
@@ -19,6 +28,13 @@ void nrf24_deinit() {
     furi_hal_spi_bus_handle_deinit(nrf24_HANDLE);
     furi_hal_gpio_write(nrf24_CE_PIN, false);
     furi_hal_gpio_init(nrf24_CE_PIN, GpioModeAnalog, GpioPullNo, GpioSpeedLow);
+
+    // resetting the CS pins to floating
+    if(CFW_SETTINGS()->spi_nrf24_handle == SpiDefault) {
+        furi_hal_gpio_init_simple(&gpio_ext_pc3, GpioModeAnalog);
+    } else if(CFW_SETTINGS()->spi_nrf24_handle == SpiExtra) {
+        furi_hal_gpio_init_simple(&gpio_ext_pa4, GpioModeAnalog);
+    }
 }
 
 void nrf24_spi_trx(
@@ -41,7 +57,8 @@ uint8_t nrf24_write_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t data) 
     return rx[0];
 }
 
-uint8_t nrf24_write_buf_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data, uint8_t size) {
+uint8_t
+    nrf24_write_buf_reg(FuriHalSpiBusHandle* handle, uint8_t reg, uint8_t* data, uint8_t size) {
     uint8_t tx[size + 1];
     uint8_t rx[size + 1];
     memset(rx, 0, size + 1);
@@ -190,7 +207,11 @@ uint8_t nrf24_set_packetlen(FuriHalSpiBusHandle* handle, uint8_t len) {
     return status;
 }
 
-uint8_t nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* ret_packetsize, uint8_t packet_size) {
+uint8_t nrf24_rxpacket(
+    FuriHalSpiBusHandle* handle,
+    uint8_t* packet,
+    uint8_t* ret_packetsize,
+    uint8_t packet_size) {
     uint8_t status = 0;
     uint8_t tx_cmd[33] = {0}; // 32 max payload size + 1 for command
     uint8_t tmp_packet[33] = {0};
@@ -204,13 +225,15 @@ uint8_t nrf24_rxpacket(FuriHalSpiBusHandle* handle, uint8_t* packet, uint8_t* re
     if(status & RX_DR) {
         if(packet_size == 1)
             packet_size = nrf24_get_packetlen(handle, (status >> 1) & 7);
-        else if(packet_size == 0){
-            tx_cmd[0] = R_RX_PL_WID; tx_cmd[1] = 0;
+        else if(packet_size == 0) {
+            tx_cmd[0] = R_RX_PL_WID;
+            tx_cmd[1] = 0;
             nrf24_spi_trx(handle, tx_cmd, tmp_packet, 2, nrf24_TIMEOUT);
             packet_size = tmp_packet[1];
         }
         if(packet_size > 32 || packet_size == 0) packet_size = 32;
-        tx_cmd[0] = R_RX_PAYLOAD; tx_cmd[1] = 0;
+        tx_cmd[0] = R_RX_PAYLOAD;
+        tx_cmd[1] = 0;
         nrf24_spi_trx(handle, tx_cmd, tmp_packet, packet_size + 1, nrf24_TIMEOUT);
         memcpy(packet, &tmp_packet[1], packet_size);
         nrf24_write_reg(handle, REG_STATUS, RX_DR); // clear RX_DR
@@ -240,7 +263,8 @@ uint8_t nrf24_txpacket(FuriHalSpiBusHandle* handle, uint8_t* payload, uint8_t si
     nrf24_set_tx_mode(handle);
 
     uint32_t start_time = furi_get_tick();
-    while(!(status & (TX_DS | MAX_RT)) && furi_get_tick() - start_time < 2000UL) status = nrf24_status(handle);
+    while(!(status & (TX_DS | MAX_RT)) && furi_get_tick() - start_time < 2000UL)
+        status = nrf24_status(handle);
 
     if(status & MAX_RT) nrf24_flush_tx(handle);
 
@@ -525,9 +549,8 @@ uint8_t nrf24_find_channel(
     return ch;
 }
 
-uint8_t nrf24_set_mac(uint8_t mac_addr, uint8_t *mac, uint8_t mlen)
-{
+uint8_t nrf24_set_mac(uint8_t mac_addr, uint8_t* mac, uint8_t mlen) {
     uint8_t addr[5];
-	for(int i = 0; i < mlen; i++) addr[i] = mac[mlen - i - 1];
-	return nrf24_write_buf_reg(nrf24_HANDLE, mac_addr, addr, mlen);
+    for(int i = 0; i < mlen; i++) addr[i] = mac[mlen - i - 1];
+    return nrf24_write_buf_reg(nrf24_HANDLE, mac_addr, addr, mlen);
 }

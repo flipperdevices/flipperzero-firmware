@@ -11,8 +11,12 @@
 //#include <notification/notification.h>
 //#include <notification/notification_messages.h>
 //#include <stdlib.h>
+#include <cfw.h>
 
 #include "FlipperZeroWiFiDeauthModuleDefines.h"
+
+#define UART_CH \
+    (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 
 #define DEAUTH_APP_DEBUG 0
 
@@ -392,6 +396,13 @@ int32_t esp8266_deauth_app(void* p) {
 #if DISABLE_CONSOLE
     furi_hal_console_disable();
 #endif
+
+    if(UART_CH == FuriHalUartIdUSART1) {
+        furi_hal_console_disable();
+    } else if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_init(UART_CH, FLIPPERZERO_SERIAL_BAUD);
+    }
+
     furi_hal_uart_set_br(FuriHalUartIdUSART1, FLIPPERZERO_SERIAL_BAUD);
     furi_hal_uart_set_irq_cb(FuriHalUartIdUSART1, uart_on_irq_cb, app);
     DEAUTH_APP_LOG_I("UART Listener created");
@@ -510,6 +521,12 @@ int32_t esp8266_deauth_app(void* p) {
 #if DISABLE_CONSOLE
     furi_hal_console_enable();
 #endif
+
+    if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_deinit(UART_CH);
+    } else {
+        furi_hal_console_enable();
+    }
 
     //*app->m_originalBufferLocation = app->m_originalBuffer;
 

@@ -73,7 +73,12 @@ UART_TerminalUart* uart_terminal_uart_init(UART_TerminalApp* app) {
 
     furi_thread_start(uart->rx_thread);
 
-    furi_hal_console_disable();
+    if(UART_CH == FuriHalUartIdUSART1) {
+        furi_hal_console_disable();
+    } else if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_init(UART_CH, app->BAUDRATE);
+    }
+
     if(app->BAUDRATE == 0) {
         app->BAUDRATE = 115200;
     }
@@ -91,7 +96,11 @@ void uart_terminal_uart_free(UART_TerminalUart* uart) {
     furi_thread_free(uart->rx_thread);
 
     furi_hal_uart_set_irq_cb(UART_CH, NULL, NULL);
-    furi_hal_console_enable();
+    if(UART_CH == FuriHalUartIdLPUART1) {
+        furi_hal_uart_deinit(UART_CH);
+    } else {
+        furi_hal_console_enable();
+    }
 
     free(uart);
 }

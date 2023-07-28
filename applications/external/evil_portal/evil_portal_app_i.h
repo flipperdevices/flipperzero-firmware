@@ -12,10 +12,14 @@
 #include <gui/scene_manager.h>
 #include <gui/view_dispatcher.h>
 
+#include <dialogs/dialogs.h>
+#include <cfw.h>
+
 #define NUM_MENU_ITEMS (5)
 
 #define EVIL_PORTAL_TEXT_BOX_STORE_SIZE (4096)
-#define UART_CH (FuriHalUartIdUSART1)
+#define UART_CH \
+    (CFW_SETTINGS()->uart_esp_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 
 #define SET_HTML_CMD "sethtml"
 #define SET_AP_CMD "setap"

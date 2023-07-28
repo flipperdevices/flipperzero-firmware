@@ -2,6 +2,10 @@
 
 #include <furi_hal.h>
 #include <notification/notification_messages.h>
+#include <cfw.h>
+
+#define UART_CH \
+    (CFW_SETTINGS()->uart_nmea_channel == UARTDefault ? FuriHalUartIdUSART1 : FuriHalUartIdLPUART1)
 
 #define RX_BUF_SIZE 1024
 

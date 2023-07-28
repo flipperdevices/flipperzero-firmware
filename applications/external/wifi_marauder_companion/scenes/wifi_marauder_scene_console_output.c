@@ -104,9 +104,6 @@ void wifi_marauder_scene_console_output_on_enter(void* context) {
     wifi_marauder_uart_set_handle_rx_data_cb(
         app->uart,
         wifi_marauder_console_output_handle_rx_data_cb); // setup callback for general log rx thread
-    wifi_marauder_uart_set_handle_rx_data_cb(
-        app->lp_uart,
-        wifi_marauder_console_output_handle_rx_packets_cb); // setup callback for packets rx thread
 
     // Get ready to send command
     if((app->is_command && app->selected_tx_string) || app->script) {
@@ -185,7 +182,6 @@ void wifi_marauder_scene_console_output_on_exit(void* context) {
 
     // Unregister rx callback
     wifi_marauder_uart_set_handle_rx_data_cb(app->uart, NULL);
-    wifi_marauder_uart_set_handle_rx_data_cb(app->lp_uart, NULL);
 
     wifi_marauder_script_worker_free(app->script_worker);
     app->script_worker = NULL;

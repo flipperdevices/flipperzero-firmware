@@ -47,6 +47,20 @@ extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_nfc;
  */
 extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_external;
 
+/** External on `furi_hal_spi_bus_r`
+ * Preset: `furi_hal_spi_preset_1edge_low_2m`
+ * 
+ * miso: pa6
+ * mosi: pa7
+ * sck: pb3
+ * cs:  pc3 (software controlled)
+ * 
+ * @warning not initialized by default, call `furi_hal_spi_bus_handle_init` to initialize
+ * Bus pins are floating on inactive state, CS high after initialization
+ * 
+ */
+extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_external_extra;
+
 /** ST7567(Display) on `furi_hal_spi_bus_d` */
 extern FuriHalSpiBusHandle furi_hal_spi_bus_handle_display;
 

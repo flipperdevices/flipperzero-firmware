@@ -350,6 +350,15 @@ FuriHalSpiBusHandle furi_hal_spi_bus_handle_external = {
     .cs = &gpio_ext_pa4,
 };
 
+FuriHalSpiBusHandle furi_hal_spi_bus_handle_external_extra = {
+    .bus = &furi_hal_spi_bus_r,
+    .callback = furi_hal_spi_bus_handle_external_event_callback,
+    .miso = &gpio_ext_pa6,
+    .mosi = &gpio_ext_pa7,
+    .sck = &gpio_ext_pb3,
+    .cs = &gpio_ext_pc3,
+};
+
 inline static void furi_hal_spi_bus_d_handle_event_callback(
     FuriHalSpiBusHandle* handle,
     FuriHalSpiBusHandleEvent event,

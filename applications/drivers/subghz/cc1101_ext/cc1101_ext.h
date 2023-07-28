@@ -10,6 +10,7 @@
 #include <stddef.h>
 #include <toolbox/level_duration.h>
 #include <furi_hal_gpio.h>
+#include <cfw.h>
 
 #ifdef __cplusplus
 extern "C" {

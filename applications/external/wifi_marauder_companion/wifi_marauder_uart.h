@@ -14,3 +14,6 @@ void wifi_marauder_lp_uart_tx(uint8_t* data, size_t len);
 WifiMarauderUart* wifi_marauder_usart_init(WifiMarauderApp* app);
 WifiMarauderUart* wifi_marauder_lp_uart_init(WifiMarauderApp* app);
 void wifi_marauder_uart_free(WifiMarauderUart* uart);
+
+WifiMarauderUart*
+    wifi_marauder_uart_init(WifiMarauderApp* app, FuriHalUartId channel, const char* thread_name);

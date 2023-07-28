@@ -17,6 +17,18 @@ extern "C" {
 #define NAMESPOOF_VERSION 1
 #define NAMESPOOF_PATH EXT_PATH("dolphin/name.txt")
 
+typedef enum {
+    SpiDefault, // cs on pa4
+    SpiExtra, // cs on pc3
+    SpiCount,
+} SpiHandle;
+
+typedef enum {
+    UARTDefault, // pin 13,14
+    UARTExtra, // pin 15,16
+    UARTCount,
+} UARTChannel;
+
 typedef struct {
     bool wii_menu;
     uint32_t start_point;
@@ -24,6 +36,11 @@ typedef struct {
     bool sort_dirs_first;
     bool dark_mode;
     uint32_t charge_cap;
+    SpiHandle spi_cc1101_handle;
+    SpiHandle spi_nrf24_handle;
+    UARTChannel uart_esp_channel;
+    UARTChannel uart_nmea_channel;
+    UARTChannel uart_general_channel;
     bool rgb_backlight;
 } CfwSettings;
 
