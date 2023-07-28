@@ -408,7 +408,7 @@ int32_t esubghz_chat(void) {
         goto err_alloc_hs;
     }
 
-    state->menu = menu_alloc();
+    state->menu = menu_pos_alloc(0);
     if(state->menu == NULL) {
         goto err_alloc_menu;
     }
