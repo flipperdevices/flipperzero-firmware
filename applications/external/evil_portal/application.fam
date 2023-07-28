@@ -9,6 +9,7 @@ App(
     order=90,
     fap_icon="icons/evil_portal_10px.png",
     fap_category="GPIO/ESP32",
+    fap_icon_assets="icons",
     fap_icon_assets_symbol="evil_portal",
     fap_author="@bigbrodude6119",
     fap_weburl="https://github.com/bigbrodude6119/flipper-zero-evil-portal",
