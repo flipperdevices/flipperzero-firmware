@@ -5,7 +5,7 @@ feature that is available on the CLI. In addition it allows for basic
 encryption of messages.
 
 The plugin has been tested on the official firmware (version 0.87.0) and on
-Unleashed (version unlshd-057). Due to limitations of the official firmware,
+Unleashed (version unlshd-059). Due to limitations of the official firmware,
 the behavior is slightly different there.
 
 Currently the use of an external antenna is not supported.
