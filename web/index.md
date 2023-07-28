@@ -3,44 +3,39 @@ layout: home
 ---
 <script src="https://cdn.jsdelivr.net/npm/anchor-js/anchor.min.js"></script>
 
-# Seader
+A [Flipper Zero](https://flipperzero.one/) application (aka "fap") to interface with a SAM from the Flipper Zero over UART.
 
-{% responsive_image path: ./fake_screenshot.png %}
+# FAQ
 
-[Flipper Zero](https://flipperzero.one/) application (aka "fap").
+See "Probably Frequently Asked Questions:" on Red Team Tools [NARD SAM expansion board product page](https://www.redteamtools.com/nard-sam-expansion-board-for-flipper-zero-with-hid-seos-iclass-sam/)
 
-## FAQ
+# Download
 
-See "Probably Frequently Asked Questions:" on [Red Team Tools product page](https://www.redteamtools.com/nard-sam-expansion-board-for-flipper-zero-with-hid-seos-iclass-sam/)
+## Release
 
-## Download
+Download release versions via the Flipper App Catalog in the mobile companion apps
 
-### Release
+## Beta/Dev
 
-Download release versions via the Flipper App Catalog (when released)
+Download builds based off of git at [flipc](https://flipc.org/bettse/seader?branch=main)
 
-### Beta/Dev
-
-Download builds based off git at [flipc](https://flipc.org/bettse/seader?branch=main)
-
-## Bugs
+# Bugs
 
 File issues in [GitHub](https://github.com/bettse/seader/issues).
 
-## Hardware
+# Hardware
 
-### Option 1: NARD flipper add-on
+## Option 1: NARD Flipper add-on
 
 Buy it assembled at [Red Team Tools](https://www.redteamtools.com/nard-sam-expansion-board-for-flipper-zero-with-hid-seos-iclass-sam/), with or without SAM.
 
-
 Or build it yourself from the files in the [NARD repo](https://github.com/killergeek/nard).
 
-### Option 2: Smart Card 2 Click
+## Option 2: Smart Card 2 Click
 
 Put **[SAM](https://www.cdw.com/product/hp-sim-for-hid-iclass-for-hip2-reader-security-sim/4854794)** into **[adapter](https://a.co/d/1E9Zk1h)** (because of chip on top) and plug into **[reader](https://www.mikroe.com/smart-card-2-click)**. Connect reader to Flipper Zero (See `Connections` below).
 
-#### Connections
+### Connections
 
 | Smart Card 2 Click | Flipper     |
 | ------------------ | ----------- |
@@ -49,10 +44,16 @@ Put **[SAM](https://www.cdw.com/product/hp-sim-for-hid-iclass-for-hip2-reader-se
 | TX                 | 16          |
 | RX                 | 15          |
 
-## Development
+# Development
 
-See repo readme.
+See [repo readme](https://github.com/bettse/seader#seader).
 
 <script>
    anchors.add();
 </script>
+
+----
+
+
+[Buy Me A Coffee](http://buymeacoffee.com/bettse)
+
