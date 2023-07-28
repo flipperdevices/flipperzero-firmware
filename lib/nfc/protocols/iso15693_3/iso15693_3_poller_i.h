@@ -2,13 +2,15 @@
 
 #include "iso15693_3_poller.h"
 
+#include "iso15693_3_i.h"
+
 #include <nfc/helpers/bit_buffer.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define ISO15693_3_POLLER_MAX_BUFFER_SIZE (256U)
+#define ISO15693_3_POLLER_MAX_BUFFER_SIZE (64U)
 
 typedef enum {
     Iso15693_3PollerStateIdle,
@@ -25,6 +27,8 @@ struct Iso15693_3Poller {
     Iso15693_3Data* data;
     BitBuffer* tx_buffer;
     BitBuffer* rx_buffer;
+    BitBuffer* tx_frame_buffer;
+    BitBuffer* rx_frame_buffer;
 
     NfcGenericEvent general_event;
     Iso15693_3PollerEvent iso15693_3_event;

@@ -9,8 +9,7 @@ void nfc_render_iso15693_3_info(
     }
 
     furi_string_cat_printf(str, "UID:");
-    // Not showing the 0th byte as it is always 0xE0
-    for(size_t i = 1; i < ISO15693_3_UID_SIZE; i++) {
+    for(size_t i = 0; i < ISO15693_3_UID_SIZE; i++) {
         furi_string_cat_printf(str, " %02X", data->uid[i]);
     }
 

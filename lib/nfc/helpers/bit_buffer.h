@@ -203,6 +203,17 @@ size_t bit_buffer_get_size_bytes(const BitBuffer* buf);
 uint8_t bit_buffer_get_byte(const BitBuffer* buf, size_t index);
 
 /**
+ * Get a byte value starting from the specified bit index in a BitBuffer instance.
+ * The resulting byte might correspond to a single byte (if the index is a multiple
+ * of 8), or two overlapping bytes combined.
+ * The index must be valid (i.e. less than the instance's data size in bits).
+ *
+ * @param [in] buf pointer to a BitBuffer instance to be queried
+ * @param [in] index bit index of the byte in question
+ */
+uint8_t bit_buffer_get_byte_from_bit(const BitBuffer* buf, size_t index_bits);
+
+/**
  * Get the pointer to a BitBuffer instance's underlying data.
  *
  * @param [in] buf pointer to a BitBuffer instance to be queried
@@ -299,6 +310,15 @@ void bit_buffer_append_byte(BitBuffer* buf, uint8_t byte);
  * @param [in] size_bytes size of the data to be appended, in bytes
  */
 void bit_buffer_append_bytes(BitBuffer* buf, const uint8_t* data, size_t size_bytes);
+
+/**
+ * Append a bit to a BitBuffer instance.
+ * The destination capacity must be sufficient to accomodate the additional bit.
+ *
+ * @param [in,out] buf pointer to a BitBuffer instance to be appended to
+ * @param [in] bit bit value to be appended
+ */
+void bit_buffer_append_bit(BitBuffer* buf, bool bit);
 
 #ifdef __cplusplus
 }

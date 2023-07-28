@@ -585,6 +585,7 @@ Function,-,bcmp,int,"const void*, const void*, size_t"
 Function,-,bcopy,void,"const void*, void*, size_t"
 Function,+,bit_buffer_alloc,BitBuffer*,size_t
 Function,+,bit_buffer_append,void,"BitBuffer*, const BitBuffer*"
+Function,+,bit_buffer_append_bit,void,"BitBuffer*, _Bool"
 Function,+,bit_buffer_append_byte,void,"BitBuffer*, uint8_t"
 Function,+,bit_buffer_append_bytes,void,"BitBuffer*, const uint8_t*, size_t"
 Function,+,bit_buffer_append_right,void,"BitBuffer*, const BitBuffer*, size_t"
@@ -596,6 +597,7 @@ Function,+,bit_buffer_copy_left,void,"BitBuffer*, const BitBuffer*, size_t"
 Function,+,bit_buffer_copy_right,void,"BitBuffer*, const BitBuffer*, size_t"
 Function,+,bit_buffer_free,void,BitBuffer*
 Function,+,bit_buffer_get_byte,uint8_t,"const BitBuffer*, size_t"
+Function,+,bit_buffer_get_byte_from_bit,uint8_t,"const BitBuffer*, size_t"
 Function,+,bit_buffer_get_capacity_bytes,size_t,const BitBuffer*
 Function,+,bit_buffer_get_data,const uint8_t*,const BitBuffer*
 Function,+,bit_buffer_get_parity,const _Bool*,const BitBuffer*
